@@ -5,8 +5,11 @@
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
+  "build": {
+    "command": "npm run build"
+  },
   "assets": {
-    "directory": "./public",
+    "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application"
   },
