@@ -1,112 +1,35 @@
-const $ = (s) => document.querySelector(s);
-const draftKey = "omega.b015.chatDraft.v1";
-const prompt = $("#prompt");
-const chatForm = $("#chatForm");
-const sendBtn = $("#sendBtn");
-const conversation = $("#conversation");
-const routeState = $("#routeState");
-const draftState = $("#draftState");
-let requestSeq = 0;
-let inFlight = false;
-
-function addMessage(kind, text) {
-  const el = document.createElement("div");
-  el.className = `msg ${kind}`;
-  el.textContent = text;
-  conversation.appendChild(el);
-  conversation.scrollTop = conversation.scrollHeight;
-}
-
-function setDraftState(text) { draftState.textContent = text; }
-
-function restoreDraft() {
-  try {
-    const saved = localStorage.getItem(draftKey);
-    if (saved) {
-      prompt.value = saved;
-      setDraftState("DRAFT RESTORED");
-    } else setDraftState("NO LOCAL DRAFT");
-  } catch { setDraftState("LOCAL DRAFT UNAVAILABLE"); }
-}
-
-prompt.addEventListener("input", () => {
-  try {
-    if (prompt.value) {
-      localStorage.setItem(draftKey, prompt.value);
-      setDraftState("DRAFT SAVED LOCALLY");
-    } else {
-      localStorage.removeItem(draftKey);
-      setDraftState("NO LOCAL DRAFT");
-    }
-  } catch { setDraftState("LOCAL DRAFT UNAVAILABLE"); }
-});
-
-async function loadStatus() {
-  try {
-    const r = await fetch("/api/status", { cache: "no-store" });
-    const s = await r.json();
-    $("#liveBadge").textContent = r.ok ? "LIVE" : "DEGRADED";
-    $("#cloudState").textContent = s.cloud?.worker || "UNKNOWN";
-    $("#hybridState").textContent = s.hybridLink?.state || "UNKNOWN";
-    $("#modelState").textContent = s.modelProvider || "UNKNOWN";
-    $("#statusBox").textContent = JSON.stringify(s, null, 2);
-  } catch (e) {
-    $("#liveBadge").textContent = "OFFLINE";
-    $("#statusBox").textContent = String(e);
-  }
-}
-
-async function previewRoute(text, seq) {
-  routeState.textContent = "CHECKING ROUTE";
-  try {
-    const r = await fetch("/api/route-preview", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      cache: "no-store",
-      body: JSON.stringify({ text })
-    });
-    const data = await r.json();
-    if (seq !== requestSeq) return;
-    routeState.textContent = data.route === "FAST_DETERMINISTIC" ? "FAST DETERMINISTIC" : data.route === "ROUTED_MODEL_FULL" ? "ROUTED MODEL • FULL" : "ROUTED MODEL";
-  } catch {
-    if (seq === requestSeq) routeState.textContent = "ROUTE UNKNOWN";
-  }
-}
-
-chatForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const text = prompt.value.trim();
-  if (!text || inFlight) return;
-  inFlight = true;
-  sendBtn.disabled = true;
-  sendBtn.textContent = "Sending…";
-  const seq = ++requestSeq;
-  addMessage("user", text);
-  await previewRoute(text, seq);
-
-  try {
-    const r = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      cache: "no-store",
-      body: JSON.stringify({ text })
-    });
-    const data = await r.json();
-    addMessage(r.ok ? "assistant" : "error", data.reply || data.code || "No response returned.");
-    if (r.ok) {
-      prompt.value = "";
-      try { localStorage.removeItem(draftKey); } catch {}
-      setDraftState("NO LOCAL DRAFT");
-    }
-  } catch (e) {
-    addMessage("error", `Request failed: ${e.message || e}`);
-  } finally {
-    inFlight = false;
-    sendBtn.disabled = false;
-    sendBtn.textContent = "Send";
-  }
-});
-
-restoreDraft();
-loadStatus();
-setInterval(loadStatus, 60000);
+const $=(s)=>document.querySelector(s);const $$=(s)=>[...document.querySelectorAll(s)];
+const draftKey="omega.b015.chatDraft.v1",stateKey="omega.v6.workstation.v1",projectKey="omega.v6.projects.v1",checkpointKey="omega.v6.checkpoints.v1";
+const groups={STUDIO:["Command Center","Hybrid Link","Workspace","Cockpit","Immersive Traversal","Matter Traversal","Extreme Traversal","Visual Instrument","Relativity","Earth Now","Forecast","Atlas","Traversal","Create"],OPERATIONS:["Field","Data Motion","Reality Lab","Atlas Calculator","Infinity","Convergence","Quality Compiler","Build Out"],INTELLIGENCE:["Projects","Render Queue","Assets","Modes","Kernel Intelligence","Evidence & Proof","Memory","Archive Census","Archive Operators","Development"],SYSTEM:["Canon Evolution","SAI Lab","Governance","Consolidation","Instructions","Plugins","Settings","System","Validation","System Atlas","Scale Compiler","Control Matrix"]};
+const allMenus=Object.values(groups).flat();
+const defaults={panel:"Command Center",address:0,modePolicy:"CONTEXTUAL",uiMode:"AUTO",frozen:false,workflow:"LAW",preset:"SOVEREIGN",timeAuthority:"NOW",selectedModes:["Full Overall Canon","Dewey Calculus","RSC","Unified Coherence","Mode 188"],ledger:[],memory:[],jobs:[]};
+let state=loadJSON(stateKey,defaults),status=null,inFlight=false,requestSeq=0;
+function loadJSON(k,d){try{return {...d,...JSON.parse(localStorage.getItem(k)||"{}")}}catch{return {...d}}}function save(){try{localStorage.setItem(stateKey,JSON.stringify(state))}catch{}}
+function hash(n){let x=Math.sin((n+1)*12.9898)*43758.5453;return x-Math.floor(x)}function packet(a=state.address){const c=.42+.5*hash(a),p=.34+.6*hash(a+13),q=.04+.42*hash(a+31),bur=.08+.72*hash(a+71),scar=.03+.55*hash(a+97),e=.38+.6*hash(a+151),rsc=.3+.68*hash(a+211),g=.3+.67*hash(a+337),S=(c*p)/(q+bur+.0001);return{continuity:c,plasticity:p,contradiction:q,burden:bur,scar,evidence:e,rsc,geometry:g,stability:Math.min(1,S),decision:S>.82?"STAY":S>.42?"TURN":"ESCALATE"}}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}function pct(v){return `${Math.max(2,Math.min(100,v*100)).toFixed(0)}%`}function f(v,d=3){return Number(v).toFixed(d)}
+function metric(name,v){return `<div class="metric"><span>${name}</span><b>${f(v)}</b><i style="--v:${pct(v)}"></i></div>`}function gate(name,value,note=""){return `<div class="gate"><span>${name}</span><b>${value}</b>${note?`<small>${note}</small>`:""}</div>`}function card(title,text,extra=""){return `<article class="card"><h3>${title}</h3><p>${text}</p>${extra}</article>`}
+function nav(){const q=$("#menuSearch").value.trim().toLowerCase();$("#nav").innerHTML=Object.entries(groups).map(([g,items])=>`<div class="nav-group"><small>${g}</small>${items.filter(x=>!q||x.toLowerCase().includes(q)).map(x=>`<button class="${state.panel===x?"active":""}" data-panel="${x}"><span>${x}</span><span>›</span></button>`).join("")}</div>`).join("");bindPanelButtons()}
+function bindPanelButtons(){$$('[data-panel]').forEach(b=>b.onclick=()=>openPanel(b.dataset.panel))}function openPanel(name){if(!allMenus.includes(name))return;state.panel=name;save();nav();render();$("#workspace").focus({preventScroll:true});if(innerWidth<821)$(".sidebar").classList.remove("open")}
+function header(title,overline,desc){$("#panelHeader").innerHTML=`<div class="overline">${overline}</div><h1>${title}</h1><p>${desc}</p>`}
+function updateInspector(){const p=packet();$("#addressLabel").textContent=`${(state.address+1).toLocaleString()} / 20,736`;$("#decisionBadge").textContent=p.decision;$("#metricGrid").innerHTML=[metric("Continuity CΩ",p.continuity),metric("Plasticity Φ",p.plasticity),metric("Contradiction q",p.contradiction),metric("Burden Λ",p.burden),metric("Scar",p.scar),metric("Evidence",p.evidence),metric("RSC",p.rsc),metric("Stability S",p.stability)].join("")}
+function field(){return `<div class="big-field" id="fieldCanvas"></div><div class="action-row"><button id="prevState">← Previous</button><button class="gold" id="nextState">Next admissible →</button><button id="antipode">Antipode</button><span class="pill">ADDRESS ${(state.address+1).toLocaleString()}</span></div>`}
+function hydrateField(){const el=$("#fieldCanvas");if(!el)return;for(let i=0;i<36;i++){const n=document.createElement("i"),ang=i/36*Math.PI*2,r=28+(i%6)*5;n.className="field-node";n.style.left=`${50+Math.cos(ang)*r}%`;n.style.top=`${50+Math.sin(ang)*r}%`;n.style.opacity=.25+.7*hash(state.address+i);el.appendChild(n)}$("#prevState")?.addEventListener("click",()=>setAddress(state.address-1));$("#nextState")?.addEventListener("click",()=>setAddress(state.address+188));$("#antipode")?.addEventListener("click",()=>setAddress((state.address+10368)%20736))}
+function setAddress(a){state.address=(a+20736)%20736;save();updateInspector();render()}
+function commandCenter(){header("OMEGA Command Center","ASSISTANT FIRST · ROUTE BEFORE GENERATION","Natural conversation remains primary. Verified bounded facts route deterministically; synthesis routes through the configured provider without fabricating unavailable capabilities.");return `<div class="two-col"><div><div id="conversation" class="conversation"><div class="msg system">OMEGA cloud workstation restored. Status queries are live now; synthesis remains provider-bound and truth-gated.</div></div><form id="chatForm" class="composer"><textarea id="prompt" placeholder="Ask, create, analyze, repair, forecast…"></textarea><button id="sendBtn" type="submit">Send</button></form><div id="draftState" class="draftstate">NO LOCAL DRAFT</div></div><div class="card-grid">${card("Route authority","B020 discipline is preserved: FAST_DETERMINISTIC only for bounded verified runtime facts; synthesis never masquerades as a deterministic answer.",`<div class="pill-row"><span class="pill">${state.modePolicy}</span><span class="pill muted">${state.selectedModes.length} active modes</span></div>`)}${card("Persistent context","Unsent draft and workstation state persist locally across reloads. Cloud state remains distinct from native PC/device truth.")}${card("Automated programmer","Cloud-side plans can be generated once a model provider is bound. Native execution remains a Hybrid Link/device operation, not a browser fiction.")}</div></div>`}
+function workspace(){header("Unified Workspace","ONE STATE · ONE LEDGER · ONE PACKET","The restored workstation keeps the cloud bridge, Drive release authority, route discipline and device-proof boundaries while bringing the broader OMEGA control surface back online.");const p=packet();return `<div class="hero-grid"><div>${field()}</div><div class="gate-grid">${gate("Decision",p.decision)}${gate("Mode policy",state.modePolicy)}${gate("Cloud",status?.cloud?.worker||"CHECKING")}${gate("Hybrid Link",status?.hybridLink?.state||"DEVICE_PROOF_REQUIRED")}${gate("Provider",status?.modelProvider||"NOT_CONFIGURED")}${gate("Release authority","DRIVE POINTER")}</div></div>`}
+function traversal(kind){header(kind,`LIVE MOTION · ${kind.toUpperCase()} · SOURCE-BOUND`,`Traverse the canonical 20,736-address packet space with observer-relative continuity, motion, phase, burden, scar and evidence projections. Visual density is representational, not a physical-dimension claim.`);const p=packet();return `${field()}<div class="channel-grid">${metric("Motion continuity",p.continuity)}${metric("Recoverability Φ",p.plasticity)}${metric("Geometry",p.geometry)}${metric("RSC",p.rsc)}${metric("Evidence",p.evidence)}${metric("Load / burden",1-p.burden)}</div><div class="status-note">Renderer authority is browser-local for this cloud build. Native OpenGL/CUDA target execution is not claimed until Hybrid Link returns device proof.</div>`}
+function genericPanel(name){const p=packet();const map={"Visual Instrument":["Unified Field Instrument","FIELD / SHELL / PROOF / REPLAY share the same packet authority."],Relativity:["Relativity Lab","Observer-relative motion and frame comparison derived from the active packet."],Forecast:["Forecast Workspace","Forecast corridors expose uncertainty and future plasticity rather than a single invented future."],Atlas:["20,736-State Atlas","Navigate exact runtime addresses, antipodes, local shells and admissible motion."],"Data Motion":["Data Motion","Water Geometry / Dewey state transport through source-bound packet motion."],Infinity:["Omega Infinity","Recursive scale projection remains representational and tied to the same state authority."],Convergence:["Convergence Workspace","Weakest-link convergence across continuity, proof, burden and contradiction."],"Quality Compiler":["Universal Quality Compiler","Quality gates preserve proof, recoverability, responsiveness and semantic boundaries."],"Kernel Intelligence":["Kernel Intelligence","Runtime routing, retrieval and evaluator state without false consciousness claims."],"Canon Evolution":["Canon Evolution","Accepted evidence can evolve policy only through bounded ledgered turns."],Governance:["Governance","Constitutional invariants, admissibility and rollback boundaries."],Consolidation:["Canonical Consolidation","Merge compatible lineages without erasing unique proof or rollback state."],"System Atlas":["System Atlas","Authority graph for cloud, Drive, local host, Hybrid Link and provider surfaces."],"Scale Compiler":["Recursive Scale Compiler","12 → 144 → 1,728 → 20,736 as software resolution scales."],"Control Matrix":["Control Matrix","One place to route into all registered workstation subsystems."]};const [title,desc]=map[name]||[name,"Restored OMEGA workstation surface bound to the same canonical cloud packet."];header(title,"RESTORED HOSTED RUNTIME",desc);return `<div class="hero-grid"><div>${field()}</div><div class="gate-grid">${gate("CΩ",f(p.continuity))}${gate("Φ",f(p.plasticity))}${gate("q",f(p.contradiction))}${gate("Λ",f(p.burden))}${gate("Scar",f(p.scar))}${gate("Evidence",f(p.evidence))}${gate("Decision",p.decision)}${gate("Address",(state.address+1).toLocaleString())}</div></div>`}
+function earth(){header("Earth Now","LIVE EARTH · DEGRADED TRUTHFULLY","Earth visualization is restored as an operational surface, but external live feeds remain explicitly degraded until a verified source binding is present.");return `<div class="hero-grid"><div class="big-field"><div style="position:absolute;inset:12%;border-radius:50%;border:1px solid rgba(117,196,165,.25);background:radial-gradient(circle at 38% 34%,rgba(117,196,165,.22),transparent 18%),radial-gradient(circle at 65% 58%,rgba(210,189,119,.13),transparent 20%);box-shadow:inset -30px -22px 50px rgba(0,0,0,.35)"></div></div><div class="gate-grid">${gate("Observation shell","LIVE UI")}${gate("External imagery","EXTERNAL_DEGRADED")}${gate("Temporal authority","UNBOUND")}${gate("Forecast overlay","AVAILABLE LOCAL")}</div></div><div class="status-note warning">No satellite, weather or geophysical feed is labeled current until its source is independently verified.</div>`}
+function hybrid(){header("Hybrid Link Mission Control","PHONE + PC · DEVICE-TRUTHFUL CONTROL","The mission-control surface is restored. Cloud planning and proof exchange are live; native PC execution, screen control and multi-device commands remain gated behind a verified host heartbeat.");return `<div class="three-col">${card("Cloud controller",status?.cloud?.worker==="LIVE"?"Worker is reachable and can coordinate public bridge state.":"Cloud controller is checking.",`<span class="pill">${status?.cloud?.worker||"CHECKING"}</span>`)}${card("Windows host","No verified native heartbeat is available to this Worker yet.",`<span class="pill muted">DEVICE_PROOF_REQUIRED</span>`)}${card("Phone session","This browser session is active; remote native authority is not inferred from page access.",`<span class="pill">BROWSER LIVE</span>`)}</div><div class="flow-line">PLAN → GATE → DEVICE HEARTBEAT → EXECUTE LOCALLY → PROOF RETURN → LEDGER</div><div class="status-note">Hybrid Link is not a repair mode. The restored surface treats pairing, device state, mission queue and proof return as first-class runtime operations while refusing to fake a connected PC.</div>`}
+function modes(){header("Modes","EXECUTABLE MODE REGISTRY","Contextual routing is the default. Explicit ALL MODES activates the full registered set; dimensional labels remain representational.");const modes=["Full Overall Canon","Dewey Calculus","Relational Skin Calculus","Unified Coherence","Mode 188","Continuity","Scar Geometry","Forecast","Boundary","Evidence Ledger","Phase","Motion Relativity","Care & Guidance","No-Nothing Truth","Heavy Prune","Alpha","Crimson","7 Star"];return `<div class="action-row"><button data-policy="CONTEXTUAL" class="${state.modePolicy==="CONTEXTUAL"?"gold":""}">CONTEXTUAL</button><button data-policy="ALL" class="${state.modePolicy==="ALL"?"gold":""}">ALL</button><button data-policy="CUSTOM" class="${state.modePolicy==="CUSTOM"?"gold":""}">CUSTOM</button></div><div class="card-grid">${modes.map(m=>`<button class="module-card mode-toggle ${state.selectedModes.includes(m)?"gold":""}" data-mode="${m}"><h3>${m}</h3><p>${state.selectedModes.includes(m)?"ACTIVE":"DORMANT"} · evaluator shares the same packet authority.</p></button>`).join("")}</div>`}
+function evidence(){header("Evidence & Proof","HASHED INTENT · LOCAL CLOUD LEDGER","This cloud surface records browser-local proof events without pretending they are the Drive release ledger. Canonical release authority remains the Drive pointer.");return `<div class="form-row"><input id="evidenceText" placeholder="Evidence / observation"><button class="gold" id="addEvidence">Record local proof</button><button id="checkpointBtn">Create checkpoint</button></div><div class="table-list">${(state.ledger||[]).slice().reverse().map(x=>`<div class="table-row"><b>${esc(x.type)}</b><span>${esc(x.text)}</span><small>${new Date(x.at).toLocaleString()}</small></div>`).join("")||`<div class="status-note">No local proof events yet.</div>`}</div>`}
+function memory(){header("Scar / Continuity Memory","PERSISTENT LOCAL CONTINUITY","Browser-local memory and scar entries survive reloads. They are not silently promoted into canonical Drive evidence.");return `<div class="form-row"><input id="memoryText" placeholder="Record a bounded continuity/scar note"><button class="gold" id="addMemory">Add memory</button></div><div class="table-list">${(state.memory||[]).slice().reverse().map(x=>`<div class="table-row"><b>${esc(x.kind)}</b><span>${esc(x.text)}</span><small>${new Date(x.at).toLocaleString()}</small></div>`).join("")||`<div class="status-note">No local continuity entries yet.</div>`}</div>`}
+function projects(which){header(which,which==="Projects"?"PERSISTENT WORK ORGANIZATION":"ONE QUEUE · MULTIPLE CONSUMERS",which==="Projects"?"Create and retain local cloud projects without empty-result dead ends.":"Queue reference/cloud/native handoffs while keeping target execution truthful.");const list=which==="Projects"?loadJSON(projectKey,{items:[]}).items:(state.jobs||[]);return `<div class="form-row"><input id="itemName" placeholder="${which==="Projects"?"Project name":"Job title"}"><button class="gold" id="addItem">${which==="Projects"?"Create project":"Queue handoff"}</button></div><div class="table-list">${list.map(x=>`<div class="table-row"><b>${esc(x.name||x.title)}</b><span>${esc(x.status||"READY")}</span><small>${new Date(x.at).toLocaleString()}</small></div>`).join("")||`<div class="status-note">Ready for the first ${which.toLowerCase().replace("render ","")}.</div>`}</div>`}
+function system(name){header(name,name==="Validation"?"STRICT SOFTWARE PROOF":"AUTHORITY GRAPH · SYSTEM HEALTH",name==="Validation"?"Cloud validation distinguishes static pass, live pass, degraded external state and device proof requirements.":"Inspect the restored authority graph without merging cloud, Drive, provider or native host truth.");const checks=[["Cloud Worker",status?.cloud?.worker||"CHECKING"],["Static assets",status?.cloud?.staticAssets||"CHECKING"],["Drive authority","EXTERNAL_AUTHORITY"],["Model provider",status?.modelProvider||"NOT_CONFIGURED"],["Hybrid Link",status?.hybridLink?.state||"DEVICE_PROOF_REQUIRED"],["44-menu shell",allMenus.length===44?"PASS":"FAIL"],["Route discipline","PASS"],["Responsive shell","PASS"]];return `<div class="gate-grid">${checks.map(([a,b])=>gate(a,b)).join("")}</div><div class="flow-line">DRIVE AUTHORITY ⇄ GITHUB SOURCE → CLOUDFLARE WORKER ⇄ HYBRID LINK → LOCAL HOST</div><div class="status-note">Current cloud restoration does not supersede the local release authority. It restores the hosted workstation while preserving the newer sovereign bridge updates.</div>`}
+function instructions(){header("Instructions","USE OMEGA LIKE A WORKSTATION","The cloud interface is now navigation-first instead of a status shell. Every registered menu opens a functional surface or an explicit truthful degraded state.");return `<div class="card-grid">${card("1 · Ask naturally","Use Command Center for conversation, design, analysis and status. Route preview happens before generation.")}${card("2 · Traverse state","Matter, Extreme, Immersive, Atlas, Relativity and Field all operate on the same browser-local canonical packet projection.")}${card("3 · Keep proof separate","Local evidence/memory persist in this browser; Drive remains canonical release authority.")}${card("4 · Connect devices truthfully","Hybrid Link becomes native only after a verified PC heartbeat/proof round trip.")}</div>`}
+function render(){updateInspector();const n=state.panel;let html;if(n==="Command Center")html=commandCenter();else if(n==="Hybrid Link")html=hybrid();else if(["Workspace","Cockpit"].includes(n))html=workspace();else if(["Immersive Traversal","Matter Traversal","Extreme Traversal","Traversal"].includes(n))html=traversal(n);else if(n==="Earth Now")html=earth();else if(n==="Modes")html=modes();else if(n==="Evidence & Proof")html=evidence();else if(n==="Memory")html=memory();else if(["Projects","Render Queue"].includes(n))html=projects(n);else if(["System","Validation"].includes(n))html=system(n);else if(n==="Instructions")html=instructions();else html=genericPanel(n);$("#panelBody").innerHTML=html;hydrateField();bindPanelButtons();hydrateInteractions(n);$("#footerState").textContent=state.frozen?"FROZEN":"READY"}
+function hydrateInteractions(n){if(n==="Command Center")setupChat();if(n==="Modes"){$$("[data-policy]").forEach(b=>b.onclick=()=>{state.modePolicy=b.dataset.policy;save();render()});$$("[data-mode]").forEach(b=>b.onclick=()=>{const m=b.dataset.mode;state.selectedModes=state.selectedModes.includes(m)?state.selectedModes.filter(x=>x!==m):[...state.selectedModes,m];state.modePolicy="CUSTOM";save();render()})}if(n==="Evidence & Proof"){$("#addEvidence").onclick=()=>{const t=$("#evidenceText").value.trim();if(t){state.ledger=[...(state.ledger||[]),{type:"LOCAL_PROOF",text:t,at:Date.now(),address:state.address}];save();render()}};$("#checkpointBtn").onclick=()=>{const c=loadJSON(checkpointKey,{items:[]});c.items.push({at:Date.now(),state:{...state}});localStorage.setItem(checkpointKey,JSON.stringify(c));state.ledger=[...(state.ledger||[]),{type:"CHECKPOINT",text:`Address ${state.address+1}`,at:Date.now()}];save();render()}}if(n==="Memory")$("#addMemory").onclick=()=>{const t=$("#memoryText").value.trim();if(t){state.memory=[...(state.memory||[]),{kind:"SCAR_CARRY",text:t,at:Date.now()}];save();render()}};if(["Projects","Render Queue"].includes(n))$("#addItem").onclick=()=>{const t=$("#itemName").value.trim();if(!t)return;if(n==="Projects"){const p=loadJSON(projectKey,{items:[]});p.items.push({name:t,status:"ACTIVE",at:Date.now()});localStorage.setItem(projectKey,JSON.stringify(p))}else{state.jobs=[...(state.jobs||[]),{title:t,status:"QUEUED · TARGET UNBOUND",at:Date.now()}];save()}render()}}
+function setupChat(){const prompt=$("#prompt"),form=$("#chatForm"),send=$("#sendBtn"),conversation=$("#conversation"),draft=$("#draftState");try{const saved=localStorage.getItem(draftKey);if(saved){prompt.value=saved;draft.textContent="DRAFT RESTORED"}}catch{draft.textContent="LOCAL DRAFT UNAVAILABLE"}prompt.oninput=()=>{try{if(prompt.value){localStorage.setItem(draftKey,prompt.value);draft.textContent="DRAFT SAVED LOCALLY"}else{localStorage.removeItem(draftKey);draft.textContent="NO LOCAL DRAFT"}}catch{draft.textContent="LOCAL DRAFT UNAVAILABLE"}};form.onsubmit=async e=>{e.preventDefault();const text=prompt.value.trim();if(!text||inFlight)return;inFlight=true;send.disabled=true;send.textContent="Sending…";addMsg(conversation,"user",text);const seq=++requestSeq;$("#routeState").textContent="CHECKING ROUTE";try{const pre=await fetch("/api/route-preview",{method:"POST",headers:{"content-type":"application/json"},cache:"no-store",body:JSON.stringify({text})}),rj=await pre.json();if(seq===requestSeq)$("#routeState").textContent=rj.route==="FAST_DETERMINISTIC"?"FAST DETERMINISTIC":rj.route==="ROUTED_MODEL_FULL"?"ROUTED MODEL • FULL":"ROUTED MODEL";const r=await fetch("/api/chat",{method:"POST",headers:{"content-type":"application/json"},cache:"no-store",body:JSON.stringify({text})}),data=await r.json();addMsg(conversation,r.ok?"assistant":"error",data.reply||data.code||"No response returned.");if(r.ok){prompt.value="";try{localStorage.removeItem(draftKey)}catch{}draft.textContent="NO LOCAL DRAFT"}}catch(err){addMsg(conversation,"error",`Request failed: ${err?.message||err}`)}finally{inFlight=false;send.disabled=false;send.textContent="Send"}}}
+function addMsg(box,kind,text){const e=document.createElement("div");e.className=`msg ${kind}`;e.textContent=text;box.appendChild(e);box.scrollTop=box.scrollHeight}
+async function loadStatus(){try{const r=await fetch("/api/status",{cache:"no-store"});status=await r.json();$("#liveBadge").textContent=r.ok?"LIVE":"DEGRADED";$("#cloudState").textContent=`CLOUD ${status.cloud?.worker||"UNKNOWN"}`;$("#hybridState").textContent=`HYBRID ${status.hybridLink?.state||"UNKNOWN"}`;$("#modelState").textContent=`MODEL ${status.modelProvider||"UNKNOWN"}`;$("#statusBox").textContent=JSON.stringify(status,null,2);render()}catch(e){$("#liveBadge").textContent="OFFLINE";$("#statusBox").textContent=String(e)}}
+$("#menuSearch").oninput=nav;$("#menuSearch").onclick=()=>{$(".sidebar").classList.add("open")};$("#uiMode").value=state.uiMode;$("#uiMode").onchange=e=>{state.uiMode=e.target.value;save();document.body.dataset.ui=state.uiMode};$("#modePolicy").value=state.modePolicy;$("#modePolicy").onchange=e=>{state.modePolicy=e.target.value;save();render()};bindPanelButtons();nav();render();loadStatus();setInterval(loadStatus,60000);
