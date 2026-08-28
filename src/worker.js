@@ -86,6 +86,8 @@ async function api(request, env, url) {
   return json({ ok: false, code: "NOT_FOUND" }, 404);
 }
 
+export { classify };
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
