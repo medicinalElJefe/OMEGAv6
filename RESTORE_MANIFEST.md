@@ -2,11 +2,11 @@
 
 Status: IN PROGRESS — PARALLEL MIGRATION. Do not call FULL RESTORE or SUPERSEDE until the build and inheritance gates pass.
 
-Canonical release authority remains Google Drive `LATEST_OMEGA_UPDATE.json`. `main` remains the runnable rollback/public compatibility surface. `full-restore` is the exact hosted-runtime migration branch.
+Canonical release authority remains Google Drive `LATEST_OMEGA_UPDATE.json` -> B015 R1. `main` remains the runnable rollback/public compatibility surface. `full-restore` is the exact hosted-runtime migration branch.
 
 ## Completion gate
 
-A menu count is not restoration. Completion requires: React/Vite build PASS; Worker syntax PASS; fixed route regression PASS; responsive desktop/mobile PASS; no provider/native/live-feed false claims; actual migrated functionality for donor surfaces; regression-by-omission comparison against B058/V90; preserved newer R7-R11 cloud/route/auth-continuity updates; Cloudflare preview/live verification after merge.
+A menu count is not restoration. Completion requires: React/Vite build PASS; Worker syntax PASS; fixed route regression PASS; responsive desktop/mobile PASS; no provider/native/live-feed false claims; actual migrated functionality for donor surfaces; regression-by-omission comparison against B058/V90; preserved newer R7-R12 cloud/route/auth-continuity updates; Cloudflare preview/live verification after merge.
 
 ## Donor application structure to restore
 
@@ -16,17 +16,36 @@ The donor snapshot is hosted B058 / V90. The migration target includes the real 
 
 Use only: `MIGRATED_EXACT`, `MIGRATED_ADAPTED`, `PARALLEL`, `BLOCKED_BY_EXTERNAL`, `NOT_YET_MIGRATED`.
 
-Current exact/adapted foundation:
+### MIGRATED_EXACT
 
-- `src/main.tsx` — MIGRATED_EXACT
-- `src/App.tsx` — MIGRATED_ADAPTED (deployment wording only)
-- `src/runtimeIdentity.ts` — MIGRATED_ADAPTED (AppDeploy lineage made donor-only; Drive/Cloudflare authority distinction added)
-- `src/index.css` — MIGRATED_EXACT base workstation stylesheet
-- `package.json` — MIGRATED_ADAPTED for sovereign Vite/Wrangler toolchain
-- `vite.config.ts` — MIGRATED_ADAPTED
-- `wrangler.jsonc` — MIGRATED_ADAPTED; custom Vite build -> `dist`, workers.dev retained
+- `src/main.tsx`
+- `src/index.css`
 
-All remaining B058/V90 component/runtime/CSS files remain `NOT_YET_MIGRATED` unless a later commit explicitly records otherwise. Old `@appdeploy/client` assumptions must be replaced by a Cloudflare-compatible adapter; functionality must not be silently deleted.
+### MIGRATED_ADAPTED
+
+- `src/App.tsx` — deployment wording only; still awaits real donor dashboard dependency.
+- `src/runtimeIdentity.ts` — provider lineage made donor-only; Drive/Cloudflare authority distinction retained.
+- `src/platformAdapter.ts` — Cloudflare-compatible HTTP/local-continuity boundary replacing the donor `@appdeploy/client` assumption for future module migration. It includes bounded request timeout, structured provider failure, local storage continuity, and explicit unbound auth/realtime/device states.
+- `src/worker.js` — B020 route-before-generation preserved; `/api/restoration` added; false completed-restore language removed.
+- `package.json` — Vite/Wrangler toolchain plus route and restore-invariant checks.
+- `vite.config.ts`
+- `wrangler.jsonc` — custom Vite build -> `dist`, workers.dev retained.
+- `tests/restore-invariants.mjs` — verifies truth boundaries and adapter independence.
+
+### BLOCKED_BY_EXTERNAL
+
+- Native PC execution / screen control — `DEVICE_PROOF_REQUIRED`.
+- External synthesis provider — `NOT_CONFIGURED` until a provider binding exists.
+- Earth live external feeds — `EXTERNAL_DEGRADED` until verified source binding exists.
+- Cross-client realtime transport — not yet bound on Cloudflare migration branch.
+
+### NOT_YET_MIGRATED
+
+The remaining B058/V90 components and runtime modules, including the real `OmegaDashboard.tsx`, Prompt Orchestrator, Responsive Runtime Shell, Workspace/Cockpit, Immersive/Matter/Extreme Traversal, Visual Instrument, Relativity, Earth Now, Forecast, Atlas/Traversal, Reality Lab, Atlas Calculator, Infinity, Convergence, Quality Compiler, Build Out, Projects/Render Queue/Assets, Modes, Kernel Intelligence, Evidence & Proof, Memory, Archive Census/Operators, Development/Canon Evolution, SAI Lab, Governance/Consolidation, Instructions, Plugins/Settings/System/Validation/System Atlas/Scale Compiler/Control Matrix, corpus/runtime/calculus/render modules, and their supporting CSS/runtime files.
+
+## Current build state
+
+The branch is intentionally **not merge-ready**. The React build remains blocked by missing donor modules beginning with `src/OmegaDashboard.tsx`; a generic replacement is prohibited because it would repeat the shell downgrade. Static Worker/routing/restoration invariants can pass independently, but full `npm run build` must remain FAIL/NOT_READY until the real dependency graph is migrated.
 
 ## Newer accepted behavior that must survive donor restoration
 
