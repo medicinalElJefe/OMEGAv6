@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#09110f" />
+  <title>OMEGAv6 Sovereign Runtime</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">OMEGA • SOVEREIGN CLOUD BRIDGE</div>
+      <h1>OMEGAv6</h1>
+    </div>
+    <div id="liveBadge" class="badge">CHECKING</div>
+  </header>
+
+  <main>
+    <section class="hero panel">
+      <div>
+        <div class="eyebrow">ASSISTANT FIRST</div>
+        <h2>One runtime. Cloud reach. Local authority.</h2>
+        <p>Cloudflare hosts the public bridge. Google Drive remains canonical authority. Hybrid Link stays device-truthful: no native control claim without a verified heartbeat.</p>
+      </div>
+      <div class="metrics">
+        <div><span>Cloud</span><strong id="cloudState">—</strong></div>
+        <div><span>Hybrid Link</span><strong id="hybridState">—</strong></div>
+        <div><span>Model</span><strong id="modelState">—</strong></div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="panel assistant">
+        <div class="panelhead"><span>OMEGA Assistant</span><span id="routeState">READY</span></div>
+        <div id="conversation" class="conversation">
+          <div class="msg system">Cloud runtime shell is ready. Ask for status, health, build state, or use a synthesis request once a model provider is bound.</div>
+        </div>
+        <form id="chatForm" class="composer">
+          <textarea id="prompt" rows="3" placeholder="Ask OMEGA…"></textarea>
+          <button id="sendBtn" type="submit">Send</button>
+        </form>
+        <div id="draftState" class="draftstate">NO LOCAL DRAFT</div>
+      </div>
+
+      <aside class="rail">
+        <section class="panel"><div class="panelhead"><span>Runtime Truth</span></div><pre id="statusBox">Loading…</pre></section>
+        <section class="panel"><div class="panelhead"><span>Context Lens</span></div><div class="lens"><i></i><i></i><i></i></div><p class="small">Representational depth only. No physical-dimension claim.</p></section>
+      </aside>
+    </section>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
