@@ -2,11 +2,12 @@ const JSON_HEADERS = { "content-type": "application/json; charset=utf-8", "cache
 
 const BUILD = Object.freeze({
   product: "OMEGAv6 Sovereign Cloud Runtime",
-  deploymentLineage: "OMEGA B015 sovereign chain",
+  deploymentLineage: "OMEGA B015 sovereign chain + hosted B058/V90 donor merge",
   acceptedDescendant: "R7 contextual continuity",
-  publicAdapter: "R9 bounded route discipline",
+  publicAdapter: "R10 restored workstation shell",
   releaseAuthority: "Google Drive LATEST_OMEGA_UPDATE.json",
   deployBridge: "GitHub -> Cloudflare Workers",
+  hostedRestoration: "44-menu workstation shell restored; provider/native/external adapters remain truth-gated",
   appDeploy: false,
   generatedAt: "2026-08-28"
 });
@@ -39,12 +40,21 @@ async function api(request, env, url) {
     return json({
       ok: true,
       build: BUILD,
-      cloud: { worker: "LIVE", staticAssets: "LIVE" },
+      cloud: { worker: "LIVE", staticAssets: "LIVE", workstationShell: "RESTORED_R10", menuContract: "44/44" },
       canonicalAuthority: { source: "Google Drive", state: "EXTERNAL_AUTHORITY", promotion: "POINTER_CONTROLLED" },
       modelProvider: env.OMEGA_MODEL_ENDPOINT ? "CONFIGURED_EXTERNAL" : "NOT_CONFIGURED",
-      hybridLink: { state: "DEVICE_PROOF_REQUIRED", nativeExecutionClaimed: false },
-      earth: { state: "PUBLIC_SHELL_READY", liveFeeds: "EXTERNAL_DEGRADED_UNTIL_BOUND" },
-      truthBoundary: "No native/device/provider capability is claimed without evidence."
+      hybridLink: { state: "DEVICE_PROOF_REQUIRED", missionControlSurface: "RESTORED", nativeExecutionClaimed: false },
+      earth: { state: "RESTORED_UI", liveFeeds: "EXTERNAL_DEGRADED_UNTIL_BOUND" },
+      restoration: {
+        shell: "LIVE",
+        menus: 44,
+        routeDiscipline: "PRESERVED",
+        localContinuity: "LIVE",
+        stateTraversalProjection: "LIVE",
+        nativeHostAdapter: "DEVICE_PROOF_REQUIRED",
+        externalModelAdapter: env.OMEGA_MODEL_ENDPOINT ? "CONFIGURED_EXTERNAL" : "NOT_CONFIGURED"
+      },
+      truthBoundary: "Cloud restoration does not supersede Drive release authority or claim native/device/provider/live-feed capability without evidence."
     });
   }
 
@@ -60,8 +70,8 @@ async function api(request, env, url) {
     const routing = classify(text);
 
     if (routing.route === "FAST_DETERMINISTIC") {
-      if (/\bhealth\b/i.test(text)) return json({ ok: true, routing, reply: "Cloud runtime is live. Native Hybrid Link still requires a verified device heartbeat." });
-      if (/\b(status|version|build status)\b/i.test(text)) return json({ ok: true, routing, reply: `${BUILD.product}; deployment lineage ${BUILD.deploymentLineage}; accepted descendant ${BUILD.acceptedDescendant}; public adapter ${BUILD.publicAdapter}. Canonical promotion remains controlled by Google Drive.` });
+      if (/\bhealth\b/i.test(text)) return json({ ok: true, routing, reply: "Cloud runtime and restored 44-menu workstation shell are live. Native Hybrid Link still requires a verified device heartbeat." });
+      if (/\b(status|version|build status)\b/i.test(text)) return json({ ok: true, routing, reply: `${BUILD.product}; ${BUILD.publicAdapter}; deployment lineage ${BUILD.deploymentLineage}. Canonical promotion remains controlled by Google Drive.` });
       return json({ ok: true, routing, reply: "Bounded deterministic route completed." });
     }
 
@@ -70,7 +80,7 @@ async function api(request, env, url) {
         ok: false,
         routing,
         code: "MODEL_PROVIDER_NOT_CONFIGURED",
-        reply: "This request requires synthesis. The public runtime will not fabricate a model response until a provider binding is configured."
+        reply: "This request requires synthesis. The restored workstation will not fabricate a model response until a provider binding is configured."
       }, 503);
     }
 
