@@ -1,13 +1,27 @@
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 
+const RESTORATION = Object.freeze({
+  branch: "full-restore",
+  state: "IN_PROGRESS",
+  lineageClassification: "PARALLEL_MIGRATION",
+  donor: "hosted B058/V90",
+  releaseAuthority: "Google Drive LATEST_OMEGA_UPDATE.json -> B015 R1",
+  migratedExact: ["src/main.tsx", "src/index.css"],
+  migratedAdapted: ["src/App.tsx", "src/runtimeIdentity.ts", "package.json", "vite.config.ts", "wrangler.jsonc"],
+  platformAdapter: "MIGRATED_ADAPTED",
+  mergeGate: "BUILD_AND_INHERITANCE_PASS_REQUIRED",
+  fullRestoreClaimed: false
+});
+
 const BUILD = Object.freeze({
   product: "OMEGAv6 Sovereign Cloud Runtime",
-  deploymentLineage: "OMEGA B015 sovereign chain + hosted B058/V90 donor merge",
+  deploymentLineage: "OMEGA B015 sovereign chain + hosted B058/V90 donor migration",
   acceptedDescendant: "R7 contextual continuity",
-  publicAdapter: "R10 restored workstation shell",
+  publicAdapter: "R12 truth-gated full-restore migration",
   releaseAuthority: "Google Drive LATEST_OMEGA_UPDATE.json",
   deployBridge: "GitHub -> Cloudflare Workers",
-  hostedRestoration: "44-menu workstation shell restored; provider/native/external adapters remain truth-gated",
+  restorationBranch: RESTORATION.branch,
+  restorationState: RESTORATION.state,
   appDeploy: false,
   generatedAt: "2026-08-28"
 });
@@ -18,8 +32,8 @@ function json(data, status = 200) {
 
 function isBoundedRuntimeQuery(text) {
   const t = String(text || "").trim();
-  return /^(?:status|health|version|build status|runtime status|provider status|bridge status|hybrid link status|heartbeat status)\??$/i.test(t)
-    || /^(?:what(?:'s| is)|show|check|get)\s+(?:the\s+)?(?:status|health|version|build status|runtime status|provider status|bridge status|hybrid link status|heartbeat status)\??$/i.test(t);
+  return /^(?:status|health|version|build status|runtime status|provider status|bridge status|hybrid link status|heartbeat status|restoration status)\??$/i.test(t)
+    || /^(?:what(?:'s| is)|show|check|get)\s+(?:the\s+)?(?:status|health|version|build status|runtime status|provider status|bridge status|hybrid link status|heartbeat status|restoration status)\??$/i.test(t);
 }
 
 function classify(text) {
@@ -31,31 +45,31 @@ function classify(text) {
   return { route: "ROUTED_MODEL", reason: "conversational-synthesis", modelInvocations: 0 };
 }
 
+function statusPayload(env) {
+  return {
+    ok: true,
+    build: BUILD,
+    cloud: { worker: "LIVE", staticAssets: "BRANCH_BUILD_DEPENDENT", mergeTarget: "main" },
+    canonicalAuthority: { source: "Google Drive", release: "B015 R1", state: "EXTERNAL_AUTHORITY", promotion: "POINTER_CONTROLLED" },
+    modelProvider: env.OMEGA_MODEL_ENDPOINT ? "CONFIGURED_EXTERNAL" : "NOT_CONFIGURED",
+    hybridLink: { state: "DEVICE_PROOF_REQUIRED", nativeExecutionClaimed: false },
+    earth: { state: "DONOR_UI_NOT_YET_MIGRATED", liveFeeds: "EXTERNAL_DEGRADED_UNTIL_BOUND" },
+    restoration: RESTORATION,
+    truthBoundary: "This branch is a parallel migration, not a completed full restore. No native/device/provider/live-feed capability is claimed without evidence."
+  };
+}
+
 async function api(request, env, url) {
   if (url.pathname === "/api/health" && request.method === "GET") {
-    return json({ ok: true, service: BUILD.product, build: BUILD, now: new Date().toISOString() });
+    return json({ ok: true, service: BUILD.product, build: BUILD, restoration: { state: RESTORATION.state, fullRestoreClaimed: false }, now: new Date().toISOString() });
   }
 
   if (url.pathname === "/api/status" && request.method === "GET") {
-    return json({
-      ok: true,
-      build: BUILD,
-      cloud: { worker: "LIVE", staticAssets: "LIVE", workstationShell: "RESTORED_R10", menuContract: "44/44" },
-      canonicalAuthority: { source: "Google Drive", state: "EXTERNAL_AUTHORITY", promotion: "POINTER_CONTROLLED" },
-      modelProvider: env.OMEGA_MODEL_ENDPOINT ? "CONFIGURED_EXTERNAL" : "NOT_CONFIGURED",
-      hybridLink: { state: "DEVICE_PROOF_REQUIRED", missionControlSurface: "RESTORED", nativeExecutionClaimed: false },
-      earth: { state: "RESTORED_UI", liveFeeds: "EXTERNAL_DEGRADED_UNTIL_BOUND" },
-      restoration: {
-        shell: "LIVE",
-        menus: 44,
-        routeDiscipline: "PRESERVED",
-        localContinuity: "LIVE",
-        stateTraversalProjection: "LIVE",
-        nativeHostAdapter: "DEVICE_PROOF_REQUIRED",
-        externalModelAdapter: env.OMEGA_MODEL_ENDPOINT ? "CONFIGURED_EXTERNAL" : "NOT_CONFIGURED"
-      },
-      truthBoundary: "Cloud restoration does not supersede Drive release authority or claim native/device/provider/live-feed capability without evidence."
-    });
+    return json(statusPayload(env));
+  }
+
+  if (url.pathname === "/api/restoration" && request.method === "GET") {
+    return json({ ok: true, ...RESTORATION, build: BUILD.publicAdapter, provider: env.OMEGA_MODEL_ENDPOINT ? "CONFIGURED_EXTERNAL" : "NOT_CONFIGURED", nativeHost: "DEVICE_PROOF_REQUIRED", earthFeeds: "EXTERNAL_DEGRADED_UNTIL_BOUND" });
   }
 
   if (url.pathname === "/api/route-preview" && request.method === "POST") {
@@ -70,8 +84,9 @@ async function api(request, env, url) {
     const routing = classify(text);
 
     if (routing.route === "FAST_DETERMINISTIC") {
-      if (/\bhealth\b/i.test(text)) return json({ ok: true, routing, reply: "Cloud runtime and restored 44-menu workstation shell are live. Native Hybrid Link still requires a verified device heartbeat." });
-      if (/\b(status|version|build status)\b/i.test(text)) return json({ ok: true, routing, reply: `${BUILD.product}; ${BUILD.publicAdapter}; deployment lineage ${BUILD.deploymentLineage}. Canonical promotion remains controlled by Google Drive.` });
+      if (/\brestoration\b/i.test(text)) return json({ ok: true, routing, reply: `Full-restore migration is ${RESTORATION.state} on ${RESTORATION.branch}. It is classified ${RESTORATION.lineageClassification}; merge requires build and inheritance PASS.` });
+      if (/\bhealth\b/i.test(text)) return json({ ok: true, routing, reply: "Cloud Worker health is live. Full hosted-runtime restoration is still in progress. Native Hybrid Link requires verified device proof." });
+      if (/\b(status|version|build status)\b/i.test(text)) return json({ ok: true, routing, reply: `${BUILD.product}; ${BUILD.publicAdapter}; restoration ${RESTORATION.state}; release authority B015 R1. The branch is not claimed as a full restore.` });
       return json({ ok: true, routing, reply: "Bounded deterministic route completed." });
     }
 
@@ -80,7 +95,7 @@ async function api(request, env, url) {
         ok: false,
         routing,
         code: "MODEL_PROVIDER_NOT_CONFIGURED",
-        reply: "This request requires synthesis. The restored workstation will not fabricate a model response until a provider binding is configured."
+        reply: "This request requires synthesis. The migration runtime will not fabricate a model response until a provider binding is configured."
       }, 503);
     }
 
@@ -96,7 +111,7 @@ async function api(request, env, url) {
   return json({ ok: false, code: "NOT_FOUND" }, 404);
 }
 
-export { classify };
+export { classify, RESTORATION };
 
 export default {
   async fetch(request, env) {
