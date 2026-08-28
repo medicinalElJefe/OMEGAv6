@@ -4,6 +4,7 @@ const BUILD = Object.freeze({
   product: "OMEGAv6 Sovereign Cloud Runtime",
   deploymentLineage: "OMEGA B015 sovereign chain",
   acceptedDescendant: "R7 contextual continuity",
+  publicAdapter: "R9 bounded route discipline",
   releaseAuthority: "Google Drive LATEST_OMEGA_UPDATE.json",
   deployBridge: "GitHub -> Cloudflare Workers",
   appDeploy: false,
@@ -14,13 +15,18 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data, null, 2), { status, headers: JSON_HEADERS });
 }
 
+function isBoundedRuntimeQuery(text) {
+  const t = String(text || "").trim();
+  return /^(?:status|health|version|build status|runtime status|provider status|bridge status|hybrid link status|heartbeat status)\??$/i.test(t)
+    || /^(?:what(?:'s| is)|show|check|get)\s+(?:the\s+)?(?:status|health|version|build status|runtime status|provider status|bridge status|hybrid link status|heartbeat status)\??$/i.test(t);
+}
+
 function classify(text) {
   const t = String(text || "").trim();
-  const lower = t.toLowerCase();
   if (!t) return { route: "FAST_DETERMINISTIC", reason: "empty-input", modelInvocations: 0 };
   if (/\b(all modes|full modes|activate all modes)\b/i.test(t)) return { route: "ROUTED_MODEL_FULL", reason: "explicit-all-modes", modelInvocations: 0 };
-  if (/\b(status|health|provider|bridge|heartbeat|version|build)\b/i.test(t) && t.length < 300) return { route: "FAST_DETERMINISTIC", reason: "bounded-runtime-query", modelInvocations: 0 };
-  if (/\b(repair|design|forecast|train|compare|analy[sz]e|deep|full|build|code|program)\b/i.test(t)) return { route: "ROUTED_MODEL", reason: "synthesis-required", modelInvocations: 0 };
+  if (isBoundedRuntimeQuery(t)) return { route: "FAST_DETERMINISTIC", reason: "bounded-runtime-query", modelInvocations: 0 };
+  if (/\b(repair|design|forecast|train|compare|analy[sz]e|deep|full|build|code|program|create|make|implement|upgrade|fix)\b/i.test(t)) return { route: "ROUTED_MODEL", reason: "synthesis-required", modelInvocations: 0 };
   return { route: "ROUTED_MODEL", reason: "conversational-synthesis", modelInvocations: 0 };
 }
 
@@ -55,7 +61,7 @@ async function api(request, env, url) {
 
     if (routing.route === "FAST_DETERMINISTIC") {
       if (/\bhealth\b/i.test(text)) return json({ ok: true, routing, reply: "Cloud runtime is live. Native Hybrid Link still requires a verified device heartbeat." });
-      if (/\b(status|version|build)\b/i.test(text)) return json({ ok: true, routing, reply: `${BUILD.product}; deployment lineage ${BUILD.deploymentLineage}; accepted descendant ${BUILD.acceptedDescendant}. Canonical promotion remains controlled by Google Drive.` });
+      if (/\b(status|version|build status)\b/i.test(text)) return json({ ok: true, routing, reply: `${BUILD.product}; deployment lineage ${BUILD.deploymentLineage}; accepted descendant ${BUILD.acceptedDescendant}; public adapter ${BUILD.publicAdapter}. Canonical promotion remains controlled by Google Drive.` });
       return json({ ok: true, routing, reply: "Bounded deterministic route completed." });
     }
 
