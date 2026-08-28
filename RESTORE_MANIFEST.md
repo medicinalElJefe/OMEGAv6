@@ -20,6 +20,8 @@ Use only: `MIGRATED_EXACT`, `MIGRATED_ADAPTED`, `PARALLEL`, `BLOCKED_BY_EXTERNAL
 
 - `src/main.tsx`
 - `src/index.css`
+- `src/ResponsiveRuntimeShell.tsx` — exact B058/V90 responsive runtime component, including AUTO/DESKTOP/MOBILE mode control, 24-family registry, 6 operational layers, microstructure pipeline, source glyph, canonical packet metrics, mobile runtime tabs, Mode188/proof display, and primary mobile navigation.
+- `src/responsiveShell.css` — exact donor responsive hierarchy, including desktop inspector rail, 1499px intermediate layout, <=760px mobile runtime conversion, explicit MOBILE layout, overflow containment, field/canvas constraints, and reduced-motion behavior.
 
 ### MIGRATED_ADAPTED
 
@@ -30,7 +32,8 @@ Use only: `MIGRATED_EXACT`, `MIGRATED_ADAPTED`, `PARALLEL`, `BLOCKED_BY_EXTERNAL
 - `package.json` — Vite/Wrangler toolchain plus route and restore-invariant checks.
 - `vite.config.ts`
 - `wrangler.jsonc` — custom Vite build -> `dist`, workers.dev retained.
-- `tests/restore-invariants.mjs` — verifies truth boundaries and adapter independence.
+- `.github/workflows/ci.yml` — verifies both `main` and `full-restore` pushes; full-restore failures are evidence and block merge rather than being hidden.
+- `tests/restore-invariants.mjs` — verifies truth boundaries, adapter independence, and exact responsive donor inheritance.
 
 ### BLOCKED_BY_EXTERNAL
 
@@ -41,11 +44,11 @@ Use only: `MIGRATED_EXACT`, `MIGRATED_ADAPTED`, `PARALLEL`, `BLOCKED_BY_EXTERNAL
 
 ### NOT_YET_MIGRATED
 
-The remaining B058/V90 components and runtime modules, including the real `OmegaDashboard.tsx`, Prompt Orchestrator, Responsive Runtime Shell, Workspace/Cockpit, Immersive/Matter/Extreme Traversal, Visual Instrument, Relativity, Earth Now, Forecast, Atlas/Traversal, Reality Lab, Atlas Calculator, Infinity, Convergence, Quality Compiler, Build Out, Projects/Render Queue/Assets, Modes, Kernel Intelligence, Evidence & Proof, Memory, Archive Census/Operators, Development/Canon Evolution, SAI Lab, Governance/Consolidation, Instructions, Plugins/Settings/System/Validation/System Atlas/Scale Compiler/Control Matrix, corpus/runtime/calculus/render modules, and their supporting CSS/runtime files.
+The remaining B058/V90 components and runtime modules, including the real `OmegaDashboard.tsx`, Prompt Orchestrator, Workspace/Cockpit, Immersive/Matter/Extreme Traversal, Visual Instrument, Relativity, Earth Now, Forecast, Atlas/Traversal, Reality Lab, Atlas Calculator, Infinity, Convergence, Quality Compiler, Build Out, Projects/Render Queue/Assets, Modes, Kernel Intelligence, Evidence & Proof, Memory, Archive Census/Operators, Development/Canon Evolution, SAI Lab, Governance/Consolidation, Instructions, Plugins/Settings/System/Validation/System Atlas/Scale Compiler/Control Matrix, corpus/runtime/calculus/render modules, and their supporting CSS/runtime files.
 
 ## Current build state
 
-The branch is intentionally **not merge-ready**. The React build remains blocked by missing donor modules beginning with `src/OmegaDashboard.tsx`; a generic replacement is prohibited because it would repeat the shell downgrade. Static Worker/routing/restoration invariants can pass independently, but full `npm run build` must remain FAIL/NOT_READY until the real dependency graph is migrated.
+The branch is intentionally **not merge-ready**. The React build remains blocked by missing donor modules beginning with `src/OmegaDashboard.tsx`; a generic replacement is prohibited because it would repeat the shell downgrade. The real responsive shell slice is now present and independently guarded by migration invariants, but it is not counted as integrated runtime behavior until the real dashboard imports and renders it. Static Worker/routing/restoration invariants can pass independently, but full `npm run build` must remain FAIL/NOT_READY until the real dependency graph is migrated.
 
 ## Newer accepted behavior that must survive donor restoration
 
