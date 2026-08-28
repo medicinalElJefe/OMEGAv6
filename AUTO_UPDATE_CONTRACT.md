@@ -16,6 +16,12 @@ Every automated development cycle must:
 10. Do not use AppDeploy.
 11. Keep previous verified rollback artifacts and record Git commit SHA, Drive parent, tests, deployment-link verification evidence when available, and rollback target.
 12. Do not claim a public Cloudflare URL is live until it is directly verified.
+13. The production Cloudflare route must stay explicit in `wrangler.jsonc`: Worker name `omegav6`, `workers_dev: true`, and `preview_urls: true`, unless a verified custom-domain replacement is intentionally promoted. Do not rely on dashboard-only routing state because Git deployments may overwrite remote settings.
+14. A Cloudflare build marked successful is not sufficient evidence of public reachability. Require DNS/HTTP verification of the actual production URL and `/api/health`; otherwise classify the link as `LINK_VERIFICATION_FAIL` or `NOT_TESTABLE`.
 
 Current bridge bootstrap: OMEGAv6 Cloudflare Worker + static assets.
 Canonical lineage target at bootstrap: OMEGA B015 sovereign chain / R7 contextual continuity descendant, while Drive remains the release authority.
+
+## 2026-08-28 routing repair
+
+Observed evidence: Cloudflare completed the Git deployment, but the user-facing production URL returned `server can't be found`. The build log also showed `workers_dev`/preview routing warnings. Bounded repair: align the Wrangler Worker name with the deployed Worker (`omegav6`) and explicitly enable `workers_dev` and `preview_urls`. Rollback target is commit immediately preceding `897660b07ea87a0fe4e270302771302c7a0153b3`.
