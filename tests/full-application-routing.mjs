@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 const v2=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const utility=fs.readFileSync('src/OmegaUtilityAuthorityR26.tsx','utf8');
 const authority=fs.readFileSync('src/capabilityAuthority.ts','utf8');
 const shell=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
 const app=fs.readFileSync('src/App.tsx','utf8');
@@ -8,7 +9,9 @@ const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const m=v2.match(/OMEGA_SURFACES=\[(.*?)\] as const;/s);must(m,'missing canonical V2 capability registry');
 const surfaces=[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]);must(surfaces.length===44,`expected 44 registered V2 capabilities, got ${surfaces.length}`);must(new Set(surfaces).size===44,'registered V2 capability names must be unique');
 for(const file of ['OmegaVisualInstrument','OmegaTraversalStudio','OmegaSpecialistSuite','EarthObservatoryR8','ForecastSovereignPanel','IntelligenceFabricPanel','SAISovereignControl','RelativityLab','AtlasCalculatorPanel','OmegaInfinityPanel','RecursiveScalePanel','AppliedRealityLab','WovenBuildOutPanel','MatterTraversal','HybridMissionControlR8'])must(v2.includes(`./${file}`),`missing active specialist import ${file}`);
-for(const panel of ['Hybrid Link','Archive Census','Archive Operators','Governance','Canon Evolution','Projects','Render Queue','Assets','Quality Compiler','Validation','System Atlas','Control Matrix','Settings','Instructions','System','Memory','Evidence & Proof','Convergence','Field','Data Motion','Cockpit','Workspace'])must(suite.includes(`panel==='${panel}'`)||v2.includes(`case '${panel}'`)||v2.includes(`panel==='${panel}'`),`missing operational route ${panel}`);
+must(suite.trim()==="export {default} from './OmegaUtilityAuthorityR26';",'legacy specialist suite must remain a compatibility alias only');
+for(const panel of ['Hybrid Link','Archive Census','Archive Operators','Quality Compiler','Validation','System Atlas','Control Matrix','Cockpit','Workspace'])must(v2.includes(`case '${panel}'`)||v2.includes(`panel==='${panel}'`),`missing dedicated operational route ${panel}`);
+for(const panel of ['Governance','Canon Evolution','Projects','Render Queue','Assets','Settings','Instructions','System','Memory','Evidence & Proof','Convergence','Field','Data Motion'])must(utility.includes(`case '${panel}'`),`missing R26 utility authority route ${panel}`);
 for(const debt of ['Plugins','Consolidation'])must(authority.includes(`'${debt}':'${debt==='Plugins'?'DONOR_ONLY':'RESTORATION_DEBT'}'`),`${debt} truth state missing`);
 const suiteBlock=(v2.match(/const SPECIALIST_SUITE=new Set<Panel>\(\[(.*?)\]\);/s)||[])[1]||'';
 must(!suiteBlock.includes("'Plugins'")&&!suiteBlock.includes("'Consolidation'"),'donor/debt capabilities must not remain in the active specialist-suite router');
@@ -19,4 +22,4 @@ must(v2.includes("modePolicy:'SOURCE_BACKED'"),'downstream state authority must 
 for(const bad of ["modePolicy:'ALL'","Assistant-led work remains route-before-generation and proof-gated."])must(!v2.includes(bad),`legacy/fake runtime collapse returned: ${bad}`);
 must(app.includes("import('./OmegaWorkstationFullV2')"),'App must activate V2 workstation');
 must(v2.includes('<EarthObservatoryR8')&&v2.includes('<HybridMissionControlR8')&&v2.includes('<SAISovereignControl'),'R8 deep specialist bindings must remain active');
-console.log('FULL_APPLICATION_ROUTING PASS · 44 registered capabilities · donor/debt hidden · operational routes truth-labeled');
+console.log('FULL_APPLICATION_ROUTING R26 PASS · 44 registered · dedicated + utility authority routes · donor/debt hidden');
