@@ -14,7 +14,8 @@
     "test:home": "node tests/home-instrument-invariants.mjs && node tests/home-quick-nav-invariants.mjs",
     "test:portability": "node tests/portability-invariants.mjs",
     "test:applications": "node tests/full-application-routing.mjs",
-    "check:static": "node --check src/worker.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications",
+    "test:cloud": "node tests/cloud-bridge-invariants.mjs",
+    "check:static": "node --check src/worker.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud",
     "check": "npm run check:static && npm run build"
   },
   "dependencies": {
