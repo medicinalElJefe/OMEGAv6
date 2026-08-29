@@ -1,0 +1,9 @@
+import fs from 'node:fs';
+const runtime=fs.readFileSync('src/systemAtlasRuntime.ts','utf8'),ui=fs.readFileSync('src/SystemAtlasControl.tsx','utf8'),router=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const must=(x,m)=>{if(!x)throw new Error(m)};
+for(const x of ['61917364224','20736','SUBSYSTEM_COUNT=24','PHASE_COUNT=12','STREAM_COUNT=4','GRID_CELLS=27648','ONE FIELD / ONE PACKET / ONE CONTINUITY LAW'])must(runtime.includes(x),`missing donor invariant ${x}`);
+const families=[...runtime.matchAll(/id:'S(\d\d)'/g)].map(x=>x[1]);must(families.length===24,`expected 24 families, got ${families.length}`);must(new Set(families).size===24,'family IDs must be unique');
+for(const x of ['SOVEREIGN_TRAVERSAL_OS','STATE_TO_FIELD_COMPILER','ONE_PACKET_TYPE','BRIDGE_VERIFY_RETURN','CANON_RECURSION_ENGINE','WGS84_GIS_LIDAR_GATE','STAY_TURN_ESCALATE_OPERATOR','TRUTH_AUDIT_SPINE','LIVE_STATE_TRANSPORT'])must(runtime.includes(x),`missing family invariant ${x}`);
+for(const x of ['Runtime Core','Proof & Governance','Traversal','Render Field','Host Inputs','AI Orchestration','Data / Excel Atlas','Audio / Signal','World / Bio / Forecast','Recovery / Packaging','Archive Merge','Operator Cockpit'])must(runtime.includes(x),`missing master menu ${x}`);
+must(runtime.includes('not a claim of physical dimensions'),'physical-dimension truth boundary missing');must(ui.includes('Donor truth boundary'),'UI donor boundary missing');must(ui.includes('Export atlas receipt'),'receipt export missing');must(router.includes("case 'System Atlas'"),'System Atlas must use direct specialist route');must(router.includes("case 'Control Matrix'"),'Control Matrix must use direct specialist route');must(router.includes('SystemAtlasControl'),'dedicated System Atlas control import missing');
+console.log('SYSTEM_ATLAS_V22_R1 PASS · 24 families · 27,648 grid cells · 12 master menus');
