@@ -6,7 +6,7 @@ const worker=read('src/worker.js'),adapter=read('src/platformAdapter.ts'),manife
 
 assert.match(worker,/\/api\/restoration/);assert.match(worker,/fullRestoreClaimed:\s*false/);assert.match(worker,/DEVICE_PROOF_REQUIRED/);assert.match(worker,/EXTERNAL_DEGRADED_UNTIL_BOUND/);assert.match(worker,/MODEL_PROVIDER_NOT_CONFIGURED/);assert.match(worker,/\/api\/hybrid\/status/);assert.match(worker,/\/api\/orchestrator\/thread/);
 assert.doesNotMatch(adapter,/@appdeploy\/client/);assert.match(adapter,/localStorage/);assert.match(adapter,/AbortController/);
-assert.match(manifest,/FULL WORKSTATION CANDIDATE/);assert.match(manifest,/Do not call the public deployment FULL RESTORE/);
+assert.match(manifest,/PROMOTED WORKSTATION|FULL WORKSTATION CANDIDATE/);assert.match(manifest,/does \*\*not\*\* claim FULL RESTORE|Do not call the public deployment FULL RESTORE/);assert.match(manifest,/Google Drive remains canonical release authority|canonical release authority remains Google Drive/);
 assert.match(responsiveShell,/ALL 24 SOFTWARE FAMILIES/);assert.match(responsiveShell,/MODE188\+ admission/);assert.match(responsiveCss,/@media\(max-width:760px\)/);assert.match(responsiveCss,/prefers-reduced-motion:reduce/);
 assert.match(commandDeck,/Talk to OMEGA\. Build with OMEGA\./);assert.match(commandDeck,/LIVE MODEL FIELD/);assert.match(commandDeck,/Source-derived motion · not an Earth observation/);assert.match(commandCss,/@media\(max-width:760px\)/);
 assert.doesNotMatch(orchestrator,/@appdeploy\/client/);assert.match(orchestrator,/CONVERSE/);assert.match(orchestrator,/ENACT/);assert.match(hybridRuntime,/HYBRID_OPS|validateCommandPlan/);assert.match(hybridRuntime,/Project path must stay relative/);assert.match(hybridRuntime,/REPLAY_MACRO/);
