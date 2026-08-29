@@ -16,6 +16,9 @@ must(hybrid.includes('/api/hybrid/plan')&&hybrid.includes('/api/hybrid/validate'
 must(v2.includes("EarthObservatoryR8")&&v2.includes("HybridMissionControlR8")&&v2.includes("SAISovereignControl"),'active V2 workstation must bind R8 specialist restorations');
 must(v2.includes("case 'SAI Lab':return")&&v2.includes('<SAISovereignControl'),'SAI Lab must restore sovereign B059 control, not fabric-only shell');
 const directR8=wrangler.includes('"main": "src/workerR8.js"');
-const wrappedR8=wrangler.includes('"main": "src/workerR9.js"')&&fs.existsSync('src/workerR9.js')&&fs.readFileSync('src/workerR9.js','utf8').includes("import r8 from './workerR8.js'");
-must(directR8||wrappedR8,'Cloudflare must execute R8 directly or through a proven successor wrapper that imports R8');
-console.log('RESTORE_DEPTH_R8 PASS · Earth evidence + NOAA 9-coverages + V87-V90 typed Hybrid contract + B059 SAI active');
+const r9=fs.existsSync('src/workerR9.js')?fs.readFileSync('src/workerR9.js','utf8'):'';
+const r27=fs.existsSync('src/workerR27.js')?fs.readFileSync('src/workerR27.js','utf8'):'';
+const wrappedR8=wrangler.includes('"main": "src/workerR9.js"')&&r9.includes("import r8 from './workerR8.js'");
+const transitivelyWrappedR8=wrangler.includes('"main": "src/workerR27.js"')&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
+must(directR8||wrappedR8||transitivelyWrappedR8,'Cloudflare must execute R8 directly or through a proven successor wrapper chain that preserves R8');
+console.log('RESTORE_DEPTH_R8 PASS · Earth evidence + NOAA 9-coverages + V87-V90 typed Hybrid contract + B059 SAI active · successor chain proven');

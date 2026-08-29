@@ -11,5 +11,8 @@ must(ground.includes('/api/earth/ground/evidence'),'R9 UI must fetch returned gr
 must(ground.includes('/api/earth/gibs/image'),'R9 UI must bind dated NASA GIBS image');
 must(ground.includes('NO STREET FRAME RETURNED'),'R9 UI must expose missing street evidence instead of generating scenery');
 must(observatory.includes('EarthGroundTraversalR9'),'R9 ground traversal must be mounted under Earth observatory');
-must(wrangler.includes('"main": "src/workerR9.js"'),'Cloudflare must execute R9 wrapper');
-console.log('EARTH_GROUND_R9 PASS · WGS84 Earth→ground + KartaView/USGS/OSM/GIBS returned-source contracts locked');
+const directR9=wrangler.includes('"main": "src/workerR9.js"');
+const r27=fs.existsSync('src/workerR27.js')?fs.readFileSync('src/workerR27.js','utf8'):'';
+const wrappedR9=wrangler.includes('"main": "src/workerR27.js"')&&r27.includes("import r9 from './workerR9.js'")&&r27.includes('return r9.fetch(request,env)');
+must(directR9||wrappedR9,'Cloudflare must execute R9 directly or through a proven successor wrapper that preserves R9');
+console.log('EARTH_GROUND_R9 PASS · WGS84 Earth→ground + KartaView/USGS/OSM/GIBS returned-source contracts locked · successor chain proven');
