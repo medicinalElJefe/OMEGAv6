@@ -1,17 +1,17 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const workstation=read('src/OmegaWorkstationFull.tsx');
+const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const bridge=read('src/ResponsiveRuntimeShell.tsx');
 const shell=read('src/SingleFrameRuntimeShellR27.tsx');
 const home=read('src/OmegaHome.tsx');
 const app=read('src/App.tsx');
-const navBlock=(workstation.match(/const NAV=\[(.*?)\] as const;type Panel/s)||[])[1]||'';
+const workstationBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const registeredBlock=(shell.match(/R27_REGISTERED_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const nav=[...navBlock.matchAll(/\['([^']+)',[A-Za-z0-9_]+\]/g)].map(x=>x[1]);
+const nav=[...workstationBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 const registered=[...registeredBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-assert.equal(nav.length,44,'workstation must retain exactly 44 canonical registered surfaces');
-assert.equal(new Set(nav).size,44,'workstation surface names must be unique');
+assert.equal(nav.length,44,'mounted workstation must retain exactly 44 canonical registered surfaces');
+assert.equal(new Set(nav).size,44,'mounted workstation surface names must be unique');
 assert.equal(registered.length,44,'R27 shell must retain exactly 44 registered surfaces');
 assert.equal(new Set(registered).size,44,'R27 registered surface names must be unique');
 assert.deepEqual(new Set(registered),new Set(nav),'registered shell/workstation surface universes must match exactly');
@@ -30,4 +30,4 @@ assert.match(home,/onKeyDown=.*Enter/s,'home AI field must support keyboard subm
 assert.doesNotMatch(app,/omega-home-launch/,'root must not add a duplicate floating Home control');
 assert.match(shell,/omega-home-request/,'single active shell must provide coherent return-to-home control');
 assert.match(app,/setHome\(false\)/,'home navigation must enter the workstation');
-console.log('navigation coherence R27 PASS: 44 registered surfaces · one operational shell · home AI routing');
+console.log('navigation coherence R27 PASS: mounted 44-surface authority · one operational shell · home AI routing');
