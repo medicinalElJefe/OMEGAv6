@@ -7,7 +7,8 @@ const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const modes=read('src/SourceBackedModesPanelR21.tsx');
 const modeRuntime=read('src/sourceBackedModeRuntimeR21.ts');
 const home=read('src/OmegaHome.tsx');
-const shell=read('src/ResponsiveRuntimeShell.tsx');
+const shell=read('src/SingleFrameRuntimeShellR27.tsx');
+const bridge=read('src/ResponsiveRuntimeShell.tsx');
 const command=read('src/OmegaCommandDeck.tsx');
 const hybrid=read('src/HybridMissionControl.tsx');
 const hybridR8=read('src/HybridMissionControlR8.tsx');
@@ -42,7 +43,8 @@ assert.match(earthR8,/EarthNowInstrument/,'Earth R8 must preserve the prior WGS8
 assert.match(home,/onClick=\{\(\)=>enter\(panel\)\}/,'home journey cards must navigate');
 assert.match(home,/onClick=\{\(\)=>void ask\(\)\}/,'home assistant ask button must execute');
 assert.ok(home.indexOf("'/api/route-preview'")<home.indexOf("'/api/chat'"),'home assistant must preserve route-before-generation');
-assert.match(shell,/onClick=\{\(\)=>onNavigate\(name\)\}/,'runtime menu controls must navigate');
+assert.match(shell,/onClick=\{\(\)=>\{onNavigate\(name\);close\?\.\(\)\}\}/,'single-frame runtime route controls must navigate and close contextual UI');
+assert.match(bridge,/ResponsiveRuntimeShell=SingleFrameRuntimeShellR27/,'legacy shell bridge must resolve to single-frame authority');
 assert.match(command,/onRun=\{onRun\}/,'command orchestrator must receive the executable assistant run callback');
 assert.match(command,/onClick=\{\(\)=>onNavigate\('Matter Traversal'\)\}/,'command deck Matter button must navigate');
 assert.match(command,/onClick=\{\(\)=>onNavigate\('Hybrid Link'\)\}/,'command deck Hybrid button must navigate');
@@ -50,4 +52,4 @@ assert.match(hybrid,/onClick=\{submit\}/,'Hybrid donor compile control must exec
 assert.match(hybridR8,/onClick=\{compile\}/,'R8 Hybrid governed draft control must execute');
 assert.match(hybridR8,/onClick=\{validate\}/,'R8 Hybrid validation control must execute');
 
-console.log('interaction contract invariants PASS · 44 routes + source-backed modes + R8 Earth/Hybrid/SAI + actionable controls');
+console.log('interaction contract invariants R27 PASS · mounted single-frame navigation + source-backed modes + R8 Earth/Hybrid/SAI');
