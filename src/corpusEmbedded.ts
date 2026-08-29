@@ -1,0 +1,2 @@
+import {gunzipSync,strFromU8} from 'fflate';import {S1} from './sparseChunk1';import {S2} from './sparseChunk2';import {S3} from './sparseChunk3';import {S4} from './sparseChunk4';import {S5} from './sparseChunk5';
+let cached:any=null;function bytes(s:string){const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}export function loadModel(){if(cached)return cached;cached=JSON.parse(strFromU8(gunzipSync(bytes(S1+S2+S3+S4+S5))));return cached}
