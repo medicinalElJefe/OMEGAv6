@@ -1,29 +1,34 @@
 # OMEGAv6 Sovereign Cloud Runtime
 
-Cloudflare-compatible public runtime bridge for the OMEGA sovereign lineage.
+Public runtime: https://omegav6.jeffdeweyeljefe.workers.dev/
 
-Canonical authority remains in Google Drive. This repository is the deployable public bridge and must never silently promote itself over Drive release authority.
+This repository is the Cloudflare public runtime bridge for the OMEGA sovereign lineage. Canonical release authority remains in Google Drive through `LATEST_OMEGA_UPDATE.json` -> B015 R1; GitHub/Cloudflare are the deployable public surface and do not silently replace Drive authority.
 
-Current deployment lineage target: OMEGA B015 sovereign chain, with R7 contextual continuity as the latest accepted sovereign descendant available to the deployment pipeline.
+## Current restored workstation
+
+The source-bound restore-and-surpass workstation contains the 44-route shell, embedded 20,736-state corpus, 179-mode evaluator, unified calculus, Atlas/traversal engines, assistant-first Command Center, durable browser-local proof/memory/projects/jobs state, route forecasting, validation, Relativity+, 20,736 Field+, Atlas Calc+, Infinity+, Scale+, Reality Lab+, Hybrid Link truth gates, and Earth external-feed truth gates.
 
 ## Architecture
 
-- Google Drive: canonical source, release pointer, accepted build artifacts, ledgers, rollback evidence.
-- GitHub: deployable Cloudflare source bridge.
-- Cloudflare Worker + static assets: stable public runtime surface.
-- PC/Desktop Link: native/local sovereign execution remains device-side; the public Worker must not claim native execution without device proof.
+- Google Drive: canonical release pointer, accepted build artifacts, ledgers, rollback evidence.
+- GitHub `full-restore`: gated restoration development lineage.
+- GitHub `main`: accepted public deployment branch.
+- Cloudflare Worker + static assets: canonical public runtime at `omegav6.jeffdeweyeljefe.workers.dev`.
+- PC/Desktop Link: native/local sovereign execution remains device-side and requires verified device proof.
 
-## Truth boundaries
+## Runtime truth boundaries
 
-- `/api/health` is public liveness only.
-- `/api/status` reports deployment/runtime truth, including external or device-proof requirements.
-- `/api/route-preview` performs bounded deterministic routing only; it does not invoke a model.
-- `/api/chat` does not fabricate model output when no provider binding is configured.
-- Hybrid Link and native PC control are never reported as live without a verified device heartbeat.
+- `/api/health` reports public liveness and canonical runtime URL.
+- `/api/status` reports deployment/runtime truth and external/device boundaries.
+- `/api/restoration` verifies the canonical workers.dev host from the actual request context.
+- `/api/route-preview` performs bounded deterministic routing without invoking a model.
+- `/api/chat` never fabricates model output when no provider binding is configured.
+- Hybrid Link/native PC control remain `DEVICE_PROOF_REQUIRED` without a verified heartbeat.
+- Earth live external feeds remain degraded until a verified feed binding exists.
 - 12/144/1728/20736 are representational resolution scales, not physical dimensions.
 
-## Cloudflare
+## Promotion
 
-This repository is designed for Cloudflare Workers with static assets. Cloudflare Git integration should deploy `main` automatically after accepted updates.
+Changes are developed on `full-restore`, must pass `npm run check` plus Wrangler dry-run, and are promoted to `main` only after the exact branch head passes the regression/build gate. The previous `main` SHA remains the rollback target for each promotion.
 
 Do not use AppDeploy for this runtime.
