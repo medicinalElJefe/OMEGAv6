@@ -5,8 +5,8 @@ const routes=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Tr
 for(const r of routes)if(!shell.includes(`'${r}'`))throw new Error(`R20 missing route: ${r}`);
 for(const d of ['COMMAND','VISUALIZE','EARTH','INTELLIGENCE','BUILD','EVIDENCE','SYSTEM'])if(!shell.includes(`id:'${d}'`))throw new Error(`R20 missing domain ${d}`);
 if(shell.includes("type UiTab='VIEW'|'MENU'|'MOTION'|'MATH'|'PACKET'|'PROOF'|'LOG'"))throw new Error('legacy seven-tab console still active');
-if(shell.includes('ALL 44 WORKSTATION SURFACES'))throw new Error('legacy details-based 44-surface menu still active');
-for(const token of ['nav20-desktop','nav20-context','nav20-breadcrumb','nav20-mobile-bottom','nav20-mobile-sheet','GlobalSearch','omegaFocus']){}
+for(const legacy of ['responsive-shell-rail','mobile-runtime-console','rr-workstation-menu'])if(shell.includes(legacy))throw new Error(`legacy navigation structure still active: ${legacy}`);
+if(!shell.includes('ALL 44 WORKSTATION SURFACES')||!shell.includes('ALL 24 SOFTWARE FAMILIES'))throw new Error('restore capability access markers missing');
 if(!shell.includes('nav20-desktop')||!shell.includes('nav20-context')||!shell.includes('nav20-breadcrumb')||!shell.includes('nav20-mobile-bottom')||!shell.includes('nav20-mobile-sheet')||!shell.includes('GlobalSearch'))throw new Error('R20 workstation shell incomplete');
 if(!shell.includes("e.ctrlKey||e.metaKey")||!shell.includes("e.key.toLowerCase()==='k'"))throw new Error('global search shortcut missing');
 if(!css.includes("padding-right:max(12px,calc((100vw - 1760px)/2))!important"))throw new Error('legacy 330px content gutter not overridden');
