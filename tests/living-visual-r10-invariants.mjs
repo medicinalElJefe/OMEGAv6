@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const home=fs.readFileSync('src/OmegaHome.tsx','utf8');
+const field=fs.readFileSync('src/OmegaLivingField.tsx','utf8');
+const css=fs.readFileSync('src/omegaLivingField.css','utf8');
+must(home.includes("import OmegaLivingField from './OmegaLivingField'"),'home must mount the restored animated visual');
+must(home.includes('<OmegaLivingField address={address} onSelectAddress={setAddress}/>'),'startup visual must bind and mutate the real canonical phase address');
+for(const x of ['corpusState','decodeAddress','unifiedFromRecord','20,736-state packet','model-space motion · not external sensing'])must(field.includes(x),`living field source/truth contract missing ${x}`);
+for(const x of ['OBSERVER','SHELL','CLOSURE','ROUTING','PROOF','PROJECTION'])must(field.includes(`'${x}'`),`launch sequence missing ${x}`);
+for(const x of ['continuity / carry','uncertainty / inverse pressure','proof / admitted route'])must(field.includes(x),`visual legend missing ${x}`);
+must(field.includes('requestAnimationFrame'),'visual field must actually animate');
+must(field.includes('prefers-reduced-motion'),'visual field must respect reduced-motion preference');
+must(css.includes('.olf-stage canvas')&&css.includes('@media(max-width:680px)'),'visual field must have bounded desktop/mobile canvas presentation');
+must(!field.match(/Math\.random|generated satellite|synthetic street/i),'launch visual must not invent external evidence');
+console.log('LIVING_VISUAL_R10 PASS · source-bound animated launch field + six-stage visual sequence + mobile bounds');
