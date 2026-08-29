@@ -19,7 +19,7 @@ assert.match(panel,/Compile mission/,'Hybrid mission compiler UI missing');
 assert.match(panel,/ARCHITECTURE/,'Hybrid architecture view missing');
 assert.match(panel,/TESTS/,'Hybrid test matrix view missing');
 assert.match(router,/import HybridMissionControl from '\.\/HybridMissionControl'/,'Hybrid specialist router import missing');
-assert.match(router,/case 'Hybrid Link':return <HybridMissionControl/,'Hybrid menu does not bind donor mission application');
+assert.match(router,/case 'Hybrid Link':return withPhase\(<HybridMissionControl[^;]*,'hybrid'\)/,'Hybrid menu does not bind donor mission application through shared phase context');
 assert.ok(css.length>1000,'Hybrid responsive instrumentation CSS unexpectedly absent');
 for(const source of [runtime,panel,router])assert.doesNotMatch(source,/@appdeploy\/client|appdeploy\.ai/i,'AppDeploy runtime contract reintroduced');
 console.log('hybrid mission invariants PASS · 16 modules · 24 components · 12 phases · proof-gated native execution');
