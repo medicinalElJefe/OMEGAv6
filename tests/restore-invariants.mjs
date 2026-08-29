@@ -10,10 +10,14 @@ const commandDeck = fs.readFileSync(new URL('../src/OmegaCommandDeck.tsx', impor
 const commandCss = fs.readFileSync(new URL('../src/commandDeck.css', import.meta.url), 'utf8');
 const orchestrator = fs.readFileSync(new URL('../src/PromptOrchestrator.tsx', import.meta.url), 'utf8');
 const hybridRuntime = fs.readFileSync(new URL('../src/hybridCommandRuntime.ts', import.meta.url), 'utf8');
+const workstation = fs.readFileSync(new URL('../src/OmegaWorkstation.tsx', import.meta.url), 'utf8');
+const corpusRuntime = fs.readFileSync(new URL('../src/corpusRuntime.ts', import.meta.url), 'utf8');
+const unified = fs.readFileSync(new URL('../src/unifiedCalculus.ts', import.meta.url), 'utf8');
 
 assert.match(worker, /\/api\/restoration/, 'worker must expose restoration status');
-assert.match(worker, /fullRestoreClaimed:\s*false/, 'worker must not claim completed restoration');
-assert.match(worker, /PARALLEL_MIGRATION/, 'worker must classify current lineage as parallel migration');
+assert.match(worker, /fullRestoreClaimed:\s*false/, 'worker must not claim completed restoration before live promotion verification');
+assert.match(worker, /MERGE_CANDIDATE_NOT_YET_PROMOTED/, 'worker must classify the current lineage as an unpromoted merge candidate');
+assert.match(worker, /FULL_WORKSTATION_CANDIDATE/, 'worker must expose the current candidate state truthfully');
 assert.match(worker, /DEVICE_PROOF_REQUIRED/, 'native host must remain device-proof gated');
 assert.match(worker, /EXTERNAL_DEGRADED_UNTIL_BOUND/, 'Earth feeds must remain externally degraded until verified');
 assert.match(worker, /MODEL_PROVIDER_NOT_CONFIGURED/, 'provider absence must fail boundedly');
@@ -22,7 +26,8 @@ assert.match(worker, /\/api\/orchestrator\/thread/, 'command-center donor must h
 assert.doesNotMatch(adapter, /@appdeploy\/client/, 'Cloudflare adapter must not depend on AppDeploy client');
 assert.match(adapter, /localStorage/, 'adapter must preserve browser-local continuity');
 assert.match(adapter, /AbortController/, 'adapter must bound network waits');
-assert.match(manifest, /Do not call FULL RESTORE/, 'manifest must retain no-false-completion gate');
+assert.match(manifest, /FULL WORKSTATION CANDIDATE/, 'manifest must identify this as a candidate, not a completed public restore');
+assert.match(manifest, /Do not call the public deployment FULL RESTORE/, 'manifest must retain the no-false-completion gate');
 assert.match(responsiveShell, /ALL 24 SOFTWARE FAMILIES/, 'real donor responsive shell must retain 24-family registry');
 assert.match(responsiveShell, /MODE188\+ admission/, 'real donor responsive shell must retain Mode188 visual semantics');
 assert.match(responsiveShell, /S = \(CΩ · Φ\) \/ \(q \+ Λ \+ ε\)/, 'real donor shell must retain canonical kernel display');
@@ -35,8 +40,13 @@ assert.match(commandCss, /@media\(max-width:760px\)/, 'command deck must retain 
 assert.doesNotMatch(orchestrator, /@appdeploy\/client/, 'migrated orchestrator must use Cloudflare adapter rather than donor provider client');
 assert.match(orchestrator, /CONVERSE/, 'migrated orchestrator must preserve conversation-only mode');
 assert.match(orchestrator, /ENACT/, 'migrated orchestrator must preserve governed action mode');
-assert.match(hybridRuntime, /DEVICE_PROOF_REQUIRED|HYBRID_OPS|validateCommandPlan/, 'hybrid command runtime must preserve bounded command validation surface');
+assert.match(hybridRuntime, /HYBRID_OPS|validateCommandPlan/, 'hybrid command runtime must preserve bounded command validation surface');
 assert.match(hybridRuntime, /Project path must stay relative/, 'hybrid command runtime must preserve relative-root confinement');
 assert.match(hybridRuntime, /REPLAY_MACRO/, 'hybrid command runtime must preserve bounded macro replay semantics');
+assert.match(workstation, /20,736/, 'source-bound workstation must expose the 20,736-state source runtime');
+assert.match(workstation, /Control Matrix/, 'source-bound workstation must retain the full route control surface');
+assert.match(corpusRuntime, /STATE_COUNT=20736/, 'embedded corpus runtime must remain 20,736-state');
+assert.match(corpusRuntime, /m\.count===179/, 'embedded corpus validation must require 179 algebra modes');
+assert.match(unified, /S_full=\(CΩ·W·Φ\)/, 'expanded full-alignment equation must remain explicitly gated in unified calculus');
 
-console.log('restore invariants PASS 27/27');
+console.log('restore invariants PASS 35/35');
