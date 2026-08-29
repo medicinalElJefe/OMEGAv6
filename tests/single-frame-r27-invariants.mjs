@@ -1,0 +1,22 @@
+import fs from 'node:fs';
+const shell=fs.readFileSync('src/SingleFrameRuntimeShellR27.tsx','utf8');
+const bridge=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
+const css=fs.readFileSync('src/singleFrameR27.css','utf8');
+const app=fs.readFileSync('src/App.tsx','utf8');
+const cap=fs.readFileSync('src/capabilityAuthority.ts','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const reg=(shell.match(/R27_REGISTERED_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
+const names=[...reg.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+must(names.length===44,`R27 must retain exactly 44 registered surfaces, got ${names.length}`);
+for(const debt of ['Immersive Traversal','Extreme Traversal','Build Out','Consolidation','Plugins'])must(names.includes(debt),`${debt} must remain registered`);
+for(const debt of ['Immersive Traversal','Extreme Traversal','Build Out','Consolidation','Plugins']){const domainBlock=(shell.match(/const DOMAIN_ROUTES:[\s\S]*?};/)||[''])[0];must(!domainBlock.includes(`'${debt}'`),`${debt} must not be offered as a primary R27 route`)}
+must(shell.includes("window.matchMedia('(max-width: 900px)')"),'AUTO layout must use viewport authority');
+must(shell.includes('return compact?<MobileFrame')&&shell.includes(':<DesktopFrame'),'R27 must render mobile OR desktop frame');
+must(!shell.includes('Focus mode')&&!shell.includes('omegaFocus'),'decorative focus-control state must be absent');
+must(!shell.includes('nav20-context')&&!shell.includes('nav20-breadcrumb'),'legacy popout shell must not mount');
+must(bridge.includes("from './SingleFrameRuntimeShellR27'"),'legacy shell import path must bridge to R27');
+must(!bridge.includes('useState(')&&!bridge.includes('nav20-desktop'),'legacy shell must not retain alternate runtime logic');
+must(!app.includes('omega-home-launch'),'app root must not add duplicate floating Home control');
+must(css.includes('.omega-home-launch')&&css.includes('display:none!important'),'legacy floating controls must be force-retired');
+must(cap.includes("'Immersive Traversal':'RESTORATION_DEBT'")&&cap.includes("'Extreme Traversal':'RESTORATION_DEBT'")&&cap.includes("'Build Out':'RESTORATION_DEBT'")&&cap.includes("'Plugins':'DONOR_ONLY'"),'truth registry must preserve debt/donor status');
+console.log('OMEGA R27 SINGLE FRAME PASS · one active shell · no floating duplicate controls · debt hidden from operation');
