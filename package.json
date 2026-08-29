@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "deploy": "wrangler deploy",
     "test:routes": "node tests/route-cases.mjs",
-    "test:restore": "node tests/restore-invariants.mjs && node tests/restore-depth-r8-invariants.mjs",
+    "test:restore": "node tests/restore-invariants.mjs && node tests/restore-depth-r8-invariants.mjs && node tests/earth-ground-r9-invariants.mjs",
     "test:navigation": "node tests/navigation-coherence.mjs && node tests/interaction-contract-invariants.mjs && node tests/actionable-controls-invariants.mjs",
     "test:home": "node tests/home-instrument-invariants.mjs && node tests/home-quick-nav-invariants.mjs && node tests/startup-experience-invariants.mjs && node tests/ux-surpass-r2-invariants.mjs && node tests/ux-surpass-r3-invariants.mjs && node tests/experience-r4-invariants.mjs",
     "test:portability": "node tests/portability-invariants.mjs",
@@ -28,7 +28,7 @@
     "test:sai": "node tests/sai-b059-invariants.mjs",
     "test:system-atlas": "node tests/system-atlas-invariants.mjs",
     "test:render-portability": "node tests/render-portability-invariants.mjs",
-    "check:static": "node --check src/worker.js && node --check src/workerR8.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud && npm run test:visual && npm run test:depth && npm run test:lineage && npm run test:pc-spine && npm run test:trajectory && npm run test:world && npm run test:admissibility && npm run test:hybrid && npm run test:archive && npm run test:quality && npm run test:sai && npm run test:system-atlas && npm run test:render-portability",
+    "check:static": "node --check src/worker.js && node --check src/workerR8.js && node --check src/workerR9.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud && npm run test:visual && npm run test:depth && npm run test:lineage && npm run test:pc-spine && npm run test:trajectory && npm run test:world && npm run test:admissibility && npm run test:hybrid && npm run test:archive && npm run test:quality && npm run test:sai && npm run test:system-atlas && npm run test:render-portability",
     "check": "npm run check:static && npm run build"
   },
   "dependencies": {
