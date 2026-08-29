@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const app=fs.readFileSync('src/App.tsx','utf8');
+const css=fs.readFileSync('src/navigationButtonPolishR11.css','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+must(app.includes("import './navigationButtonPolishR11.css'"),'R11 navigation polish must load last at app level');
+for(const token of ['.omega-layout-switch button','.rr-layers button','.rr-pipeline button','.rr-registry button','.rr-menu-universe button','.mrc-menu-grid button','.mrc-tabs button','.mobile-bottom-nav button'])must(css.includes(token),`missing navigation selector ${token}`);
+must(css.includes('linear-gradient(145deg,var(--nav-surface2),var(--nav-surface))'),'navigation must use dark sovereign glass surface');
+must(css.includes("button[aria-selected='true']")&&css.includes("button[aria-pressed='true']"),'selected navigation state must remain explicit');
+must(!/background\s*:\s*(?:#fff(?:fff)?|white)(?:\s*!important)?/i.test(css),'R11 may not introduce white navigation backgrounds');
+console.log('NAVIGATION_BUTTON_POLISH_R11 PASS · dark glass navigation + explicit hover/active/mobile states');
