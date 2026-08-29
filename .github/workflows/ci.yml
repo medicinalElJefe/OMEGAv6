@@ -141,6 +141,22 @@ jobs:
           for(const id of ['G19-CONUS','G19-FD','G18-FD','G19-CAR','G19-CAM','G19-TAW','G19-CAN','G18-WUS','G18-TPW']) if(!noaa.coverages.some(x=>x.id===id)) throw new Error(`NOAA coverage missing ${id}`);
           console.log('OMEGA R8 PUBLIC RESTORE PASS · Earth evidence envelope + NOAA 9 coverage identities + Hybrid V90 draft/validation');
           NODE
+      - name: Verify R9 Earth ground traversal contracts
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const r=await fetch(base+'/api/earth/ground/evidence?lat=32.2217&lon=-110.9265&radius=750',{headers:{'cache-control':'no-cache'}});
+          const raw=await r.text();
+          if(!r.ok) throw new Error(`ground evidence HTTP ${r.status}: ${raw.slice(0,600)}`);
+          const g=JSON.parse(raw);
+          if(g.schema!=='OMEGA_EARTH_GROUND_EVIDENCE_V1'||g.target?.crs!=='WGS84 / EPSG:4326'||String(g.evidenceHash||'').length!==64) throw new Error('R9 ground schema/WGS84/hash contract missing');
+          for(const level of ['EARTH','REGION','CITY','STREET','GROUND']) if(!g.levels?.[level]) throw new Error(`R9 hierarchy missing ${level}`);
+          for(const source of ['kartaView','usgsEpqs','osmReverse','osmOverpass']) if(!g.sources?.[source]) throw new Error(`R9 source envelope missing ${source}`);
+          if(g.levels.STREET?.state==='RETURNED_KARTAVIEW_PHOTO'&&!g.levels.STREET?.photo) throw new Error('street evidence claimed without returned photo');
+          if(g.levels.GROUND?.state==='RETURNED_USGS_ELEVATION'&&!Number.isFinite(Number(g.levels.GROUND?.elevationM))) throw new Error('ground elevation claimed without numeric USGS value');
+          console.log('OMEGA R9 PUBLIC GROUND PASS · Earth→Region→City→Street→Ground source envelopes verified; unavailable providers allowed without synthetic substitution');
+          NODE
       - name: Verify live route-before-generation and AI synthesis
         shell: bash
         run: |
@@ -175,5 +191,6 @@ jobs:
             echo "- Deployment job: ${{ job.status }}"
             echo "- Live AI synthesis: required for deployment PASS"
             echo "- R8 Earth/NOAA + Hybrid V90 contracts: required for deployment PASS"
+            echo "- R9 Earth ground source hierarchy: required for deployment PASS"
             echo "- Hybrid native execution: must remain DEVICE_PROOF_REQUIRED until paired-host proof"
           } >> "$GITHUB_STEP_SUMMARY"

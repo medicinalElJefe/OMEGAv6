@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const worker=fs.readFileSync('src/workerR9.js','utf8');
+const ground=fs.readFileSync('src/EarthGroundTraversalR9.tsx','utf8');
+const observatory=fs.readFileSync('src/EarthObservatoryR8.tsx','utf8');
+const wrangler=fs.readFileSync('wrangler.jsonc','utf8');
+for(const token of ['/api/earth/ground/evidence','/api/earth/gibs/image','api.openstreetcam.org','epqs.nationalmap.gov','nominatim.openstreetmap.org','overpass-api.de','gibs.earthdata.nasa.gov','6371008.8','WGS84 / EPSG:4326'])must(worker.includes(token),`R9 ground worker missing ${token}`);
+for(const token of ['RETURNED_KARTAVIEW_PHOTO','RETURNED_USGS_ELEVATION','NO_SYNTHETIC_SUBSTITUTE','Earth→Region→City→Street→Ground'])must(worker.includes(token),`R9 ground truth contract missing ${token}`);
+for(const level of ['EARTH','REGION','CITY','STREET','GROUND'])must(ground.includes(`'${level}'`),`R9 UI missing level ${level}`);
+must(ground.includes('/api/earth/ground/evidence'),'R9 UI must fetch returned ground evidence');
+must(ground.includes('/api/earth/gibs/image'),'R9 UI must bind dated NASA GIBS image');
+must(ground.includes('NO STREET FRAME RETURNED'),'R9 UI must expose missing street evidence instead of generating scenery');
+must(observatory.includes('EarthGroundTraversalR9'),'R9 ground traversal must be mounted under Earth observatory');
+must(wrangler.includes('"main": "src/workerR9.js"'),'Cloudflare must execute R9 wrapper');
+console.log('EARTH_GROUND_R9 PASS · WGS84 Earth→ground + KartaView/USGS/OSM/GIBS returned-source contracts locked');

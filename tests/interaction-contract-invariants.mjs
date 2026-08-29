@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const launcher=read('src/OmegaLauncher.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const home=read('src/OmegaHome.tsx');
 const shell=read('src/ResponsiveRuntimeShell.tsx');
@@ -15,12 +16,13 @@ assert.match(launcher,/className='omega-nexus-card'[^>]*role='button'[^>]*tabInd
 assert.match(launcher,/onClick=\{\(\)=>go\(x\.name\)\}/,'launcher cards must navigate');
 assert.match(launcher,/onKeyDown=\{e=>activate\(x\.name,e\)\}/,'launcher cards must support Enter/Space activation');
 assert.match(launcher,/omega-nexus-fav/,'favorite control must remain independently actionable');
-const launcherNames=[...launcher.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
+assert.match(launcher,/OMEGA_NAVIGATION/,'launcher must consume the shared navigation registry');
+const launcherNames=[...navigation.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 const routeBlock=(workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const;/s)||[])[1]||'';
 const routeNames=[...routeBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-assert.equal(launcherNames.length,44,'launcher must expose exactly 44 routes');
+assert.equal(launcherNames.length,44,'shared navigation registry must expose exactly 44 launcher routes');
 assert.equal(routeNames.length,44,'active workstation must expose exactly 44 routes');
-assert.deepEqual(new Set(launcherNames),new Set(routeNames),'launcher and active workstation routes must match exactly');
+assert.deepEqual(new Set(launcherNames),new Set(routeNames),'shared navigation registry and active workstation routes must match exactly');
 
 assert.match(workstation,/onClick=\{\(\)=>chooseMode\(x\)\}/,'mode result buttons must execute an inspection action');
 assert.match(workstation,/visibleModes/,'mode view policy must change the visible mode result set');
@@ -44,4 +46,4 @@ assert.match(hybrid,/onClick=\{submit\}/,'Hybrid donor compile control must exec
 assert.match(hybridR8,/onClick=\{compile\}/,'R8 Hybrid governed draft control must execute');
 assert.match(hybridR8,/onClick=\{validate\}/,'R8 Hybrid validation control must execute');
 
-console.log('interaction contract invariants PASS · 44 routes + R8 Earth/Hybrid/SAI + actionable launcher/modes/home/command controls');
+console.log('interaction contract invariants PASS · shared 44-route registry + R8 Earth/Hybrid/SAI + actionable launcher/modes/home/command controls');

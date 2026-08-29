@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const registry=fs.readFileSync('src/navigationRegistry.ts','utf8');
+const launcher=fs.readFileSync('src/OmegaLauncher.tsx','utf8');
+const shell=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
+const workstation=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const items=[...registry.matchAll(/id:'(\d+)',group:'([^']+)',name:'([^']+)',hint:'([^']+)',effect:'([^']+)',authority:'([^']+)'/g)].map(m=>({id:m[1],group:m[2],name:m[3],hint:m[4],effect:m[5],authority:m[6]}));
+must(items.length===44,`navigation registry must contain exactly 44 surfaces, got ${items.length}`);
+must(new Set(items.map(x=>x.id)).size===44,'navigation ids must be unique');
+must(new Set(items.map(x=>x.name)).size===44,'navigation names must be unique');
+for(const x of items){must(x.hint.length>=28,`navigation hint is too weak for ${x.name}`);must(['STUDIO','OPERATIONS','WORK','INTELLIGENCE','GOVERNANCE','SYSTEM'].includes(x.group),`invalid group ${x.group}`)}
+must(launcher.includes("OMEGA_NAVIGATION")&&launcher.includes('LAUNCHER_SURFACES=OMEGA_NAVIGATION'),'NEXUS must use the shared navigation authority');
+must(launcher.includes('data-authority={x.authority}')&&launcher.includes('data-effect={x.effect}'),'NEXUS must expose route truth classes');
+const workBlock=(workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const;/s)||[])[1]||'';
+const workNames=[...workBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+must(workNames.length===44,'active workstation must still expose exactly 44 routed surfaces');
+for(const x of items)must(workNames.includes(x.name),`shared navigation route missing from workstation: ${x.name}`);
+const shellBlock=(shell.match(/const SURFACES=\[(.*?)\] as const;/s)||[])[1]||'';
+const shellNames=[...shellBlock.matchAll(/\['[^']+','\d+','([^']+)'\]/g)].map(x=>x[1]);
+must(shellNames.length===44,'responsive shell must expose exactly 44 menu destinations');
+for(const x of items)must(shellNames.includes(x.name),`shared navigation route missing from responsive menu: ${x.name}`);
+for(const name of workNames)must(items.some(x=>x.name===name),`workstation exposes route absent from navigation authority: ${name}`);
+console.log('NAVIGATION_REGISTRY_R10 PASS · one 44-surface menu universe across NEXUS, shell and workstation');
