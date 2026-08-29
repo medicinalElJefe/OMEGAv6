@@ -1,6 +1,8 @@
-import {useEffect,useMemo,useState} from 'react';
-import {ArrowRight,BrainCircuit,Globe2,Home,Orbit,Send,ShieldCheck,Sparkles,Waypoints} from 'lucide-react';
+import {useEffect,useMemo,useState,type CSSProperties} from 'react';
+import {ArrowRight,BrainCircuit,Globe2,Home,Menu,Orbit,Send,ShieldCheck,Sparkles,Waypoints} from 'lucide-react';
 import {api,localState} from './platformAdapter';
+import {corpusState,initCorpusPack} from './corpusRuntime';
+import {unifiedFromRecord} from './unifiedCalculus';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import './omegaHome.css';
 
@@ -13,26 +15,44 @@ const LAUNCH=[
   ['Forecast','FUTURE',BrainCircuit],
   ['SAI Lab','FABRIC',BrainCircuit]
 ] as const;
+const QUICK=['Visual Instrument','Atlas','Evidence & Proof','Build Out','System Atlas','Control Matrix'] as const;
+const clamp=(n:number)=>Math.max(0,Math.min(1,Number.isFinite(n)?n:0));
 
 export default function OmegaHome({onEnter}:Props){
   const[prompt,setPrompt]=useState(()=>localState.read('omega.b015.chatDraft.v1',''));
-  const[busy,setBusy]=useState(false),[reply,setReply]=useState(''),[route,setRoute]=useState('');
-  const state=useMemo(()=>{const n=Number(localStorage.getItem('omega.v6.address')||11498);return Number.isFinite(n)?Math.max(1,Math.min(20736,Math.floor(n)+1)):11499},[]);
+  const[busy,setBusy]=useState(false),[reply,setReply]=useState(''),[route,setRoute]=useState(''),[ready,setReady]=useState(false),[palette,setPalette]=useState(false);
+  const address=useMemo(()=>{const n=Number(localStorage.getItem('omega.v6.address')||11498);return Number.isFinite(n)?Math.max(0,Math.min(20735,Math.floor(n))):11498},[]);
+  useEffect(()=>{void initCorpusPack().then(()=>setReady(true)).catch(()=>setReady(false))},[]);
   useEffect(()=>{localState.write('omega.b015.chatDraft.v1',prompt)},[prompt]);
+  const record=useMemo(()=>ready?corpusState(address):null,[ready,address]);
+  const unified=useMemo(()=>record?unifiedFromRecord(record):null,[record]);
+  const metrics=record?.metrics;
+  const css=useMemo(()=>({
+    '--oh-c':String(clamp(Number(metrics?.continuity??.5))),
+    '--oh-p':String(clamp(Number(metrics?.plasticity??.5))),
+    '--oh-q':String(clamp(Number(metrics?.contradiction??.2))),
+    '--oh-l':String(clamp(Number(metrics?.burden??.2))),
+    '--oh-e':String(clamp(Number(metrics?.evidence??.5))),
+    '--oh-m':String(clamp(Number(record?.math?.normalizedMotionRelativity??.45))),
+    '--oh-water':String(clamp(Number(unified?.water?.conductance??.45))),
+    '--oh-state-angle':`${(address%360)}deg`
+  }) as CSSProperties,[metrics,record,unified,address]);
   const ask=async()=>{if(!prompt.trim()||busy)return;setBusy(true);setReply('');try{const p=await api.post<any>('/api/route-preview',{text:prompt}),r=await api.post<any>('/api/chat',{text:prompt});setRoute(String(p.data?.route||'ROUTED'));setReply(String(r.data?.reply||'No response returned.'))}catch(e:any){setRoute('BOUNDED_FAILURE');setReply(e?.message||'Provider unavailable. Deterministic workstation tools remain available.')}finally{setBusy(false)}};
   const enter=(panel:string)=>{localState.write('omega.v6.panel',panel);onEnter(panel)};
-  return <main className='omega-home'>
+  return <main className='omega-home' style={css}>
     <div className='oh-atmosphere' aria-hidden='true'><i/><i/><i/><i/></div>
-    <header className='oh-top'><div className='oh-brand'><span className='oh-mark'><Home size={15}/></span><div><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild} · SOVEREIGN WORKSTATION</small></div></div><div className='oh-state'><ShieldCheck size={14}/><span>STATE {state.toLocaleString()}</span></div></header>
-    <section className='oh-stage' aria-label='OMEGA visual start field'>
-      <div className='oh-orbit' aria-hidden='true'><span className='ring r1'/><span className='ring r2'/><span className='ring r3'/><span className='ring r4'/><span className='axis a1'/><span className='axis a2'/><span className='core'><Orbit/></span><i className='node n1'/><i className='node n2'/><i className='node n3'/><i className='node n4'/><i className='node n5'/><i className='node n6'/></div>
-      <div className='oh-title'><span>ONE FIELD · MANY LENSES</span><h1>OMEGA</h1></div>
+    <header className='oh-top'><div className='oh-brand'><span className='oh-mark'><Home size={15}/></span><div><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild} · SOVEREIGN WORKSTATION</small></div></div><div className='oh-top-actions'><div className='oh-state'><ShieldCheck size={14}/><span>{record?record.metrics.decision:'LOADING'} · {address+1}</span></div><button className='oh-menu-button' onClick={()=>setPalette(x=>!x)} aria-expanded={palette} aria-label='Open quick navigation'><Menu size={16}/><span>TOOLS</span></button></div></header>
+    {palette&&<nav className='oh-palette' aria-label='Quick OMEGA navigation'>{QUICK.map(name=><button key={name} onClick={()=>enter(name)}>{name}</button>)}<button className='all' onClick={()=>enter('Command Center')}>ALL 44 IN WORKSTATION <ArrowRight size={13}/></button></nav>}
+    <section className='oh-stage' aria-label='OMEGA live canonical state field'>
+      <div className='oh-orbit' aria-hidden='true'><span className='ring r1'/><span className='ring r2'/><span className='ring r3'/><span className='ring r4'/><span className='axis a1'/><span className='axis a2'/><span className='vector v1'/><span className='vector v2'/><span className='core'><Orbit/></span><i className='node n1'/><i className='node n2'/><i className='node n3'/><i className='node n4'/><i className='node n5'/><i className='node n6'/></div>
+      <div className='oh-title'><span>{record?`${record.metrics.decision} · CΩ ${Number(metrics?.continuity).toFixed(3)} · Φ ${Number(metrics?.plasticity).toFixed(3)}`:'MATERIALIZING SOURCE FIELD'}</span><h1>OMEGA</h1><div className='oh-signal' aria-label='Live state metrics'><i title='Continuity'/><i title='Future plasticity'/><i title='Evidence'/><i title='Water conductance'/></div></div>
       <div className='oh-launch-ring'>{LAUNCH.map(([panel,label,Icon],i)=><button key={panel} className={'oh-launch p'+i} onClick={()=>enter(panel)} aria-label={'Open '+panel}><Icon/><span>{label}</span><small>{panel}</small></button>)}</div>
+      <div className='oh-state-key' aria-label='Canonical state key'><span><i className='c'/>CΩ</span><span><i className='p'/>Φ</span><span><i className='q'/>q</span><span><i className='l'/>Λ</span><span><i className='m'/>M</span></div>
     </section>
     <section className='oh-command'>
-      <div className='oh-prompt'><Sparkles size={18}/><textarea rows={1} value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void ask()}}} placeholder='Ask OMEGA anything, inspect a state, build, translate, forecast, or navigate…'/><button onClick={()=>void ask()} disabled={busy||!prompt.trim()} aria-label='Send prompt'>{busy?<Orbit className='spin'/>:<Send/>}</button></div>
-      {reply&&<div className='oh-reply'><span>{route}</span><p>{reply}</p><button onClick={()=>enter('Command Center')}>Continue in Command Center <ArrowRight size={14}/></button></div>}
-      <div className='oh-enter'><button onClick={()=>enter('Command Center')}>ENTER WORKSTATION <ArrowRight size={15}/></button><small>44 coherent surfaces · desktop + mobile adaptive navigation</small></div>
+      <div className='oh-prompt'><Sparkles size={18}/><textarea rows={1} value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void ask()}}} placeholder='Ask OMEGA · build · translate · inspect · forecast · navigate…'/><button onClick={()=>void ask()} disabled={busy||!prompt.trim()} aria-label='Send prompt'>{busy?<Orbit className='spin'/>:<Send/>}</button></div>
+      {reply&&<div className='oh-reply' aria-live='polite'><span>{route}</span><p>{reply}</p><button onClick={()=>enter('Command Center')}>Continue <ArrowRight size={14}/></button></div>}
+      <div className='oh-enter'><button onClick={()=>enter('Command Center')}>ENTER WORKSTATION <ArrowRight size={15}/></button><small>{record?`STATE ${record.stateId.toLocaleString()} · 20,736 FIELD · 179 MODES`:'SOURCE PACK LOADING'}</small></div>
     </section>
   </main>
 }
