@@ -7,8 +7,8 @@ const V=(...x:OmegaViewLens[])=>x;
 export const OMEGA_CAPABILITY_AUTHORITY:readonly CapabilityContract[]=[
 {name:'Command Center',family:'AI Cockpit',implementation:'INLINE',views:V('FIELD','GRAPH','EVIDENCE','CANON'),boundary:'PROVIDER_BOUND',purpose:'orient, route, converse and dispatch from the current packet'},
 {name:'Hybrid Link',family:'Hybrid Link',implementation:'SPECIALIST',views:V('GRAPH','ASSEMBLY','EVIDENCE'),boundary:'DEVICE_PROOF',purpose:'proof-gated host and device operations'},
-{name:'Workspace',family:'Atlas OS',implementation:'SHARED_SUITE',views:V('ASSEMBLY','GRAPH'),boundary:'LOCAL_ARTIFACT',purpose:'persistent working state and project context'},
-{name:'Cockpit',family:'AI Cockpit',implementation:'SHARED_SUITE',views:V('FIELD','GRAPH','EVIDENCE'),boundary:'SOURCE_PACKET',purpose:'operator overview over state, routes and runtime health'},
+{name:'Workspace',family:'Atlas OS',implementation:'SPECIALIST',views:V('ASSEMBLY','GRAPH','EVIDENCE'),boundary:'LOCAL_ARTIFACT',purpose:'persistent packet snapshots, replay points and project continuity'},
+{name:'Cockpit',family:'AI Cockpit',implementation:'SPECIALIST',views:V('FIELD','GRAPH','EVIDENCE','CANON'),boundary:'EVIDENCE_BOUND',purpose:'operator state, runtime proof, capability debt and transaction control'},
 {name:'Immersive Traversal',family:'Traversal / Domain',implementation:'SPECIALIST',views:V('FIELD','SURFACE','SKIN','TRAVERSAL'),boundary:'SOURCE_PACKET',purpose:'observer movement through admitted state geometry'},
 {name:'Matter Traversal',family:'Reality Compiler',implementation:'SPECIALIST',views:V('SURFACE','SKIN','MATERIAL','TRAVERSAL'),boundary:'SOURCE_PACKET',purpose:'packet-derived matter representations across scale'},
 {name:'Extreme Traversal',family:'Traversal / Domain',implementation:'SPECIALIST',views:V('FIELD','GRAPH','TRAVERSAL'),boundary:'SOURCE_PACKET',purpose:'high-depth traversal through one state manifold'},
