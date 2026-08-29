@@ -22,7 +22,9 @@
     "test:trajectory": "node tests/trajectory-steering-invariants.mjs",
     "test:world": "node tests/world-model-learning-invariants.mjs",
     "test:admissibility": "node tests/admissibility-248832-invariants.mjs",
-    "check:static": "node --check src/worker.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud && npm run test:visual && npm run test:depth && npm run test:lineage && npm run test:pc-spine && npm run test:trajectory && npm run test:world && npm run test:admissibility",
+    "test:hybrid": "node tests/hybrid-mission-invariants.mjs",
+    "test:archive": "node tests/archive-governance-invariants.mjs",
+    "check:static": "node --check src/worker.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud && npm run test:visual && npm run test:depth && npm run test:lineage && npm run test:pc-spine && npm run test:trajectory && npm run test:world && npm run test:admissibility && npm run test:hybrid && npm run test:archive",
     "check": "npm run check:static && npm run build"
   },
   "dependencies": {
