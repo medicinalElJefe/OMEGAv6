@@ -4,6 +4,7 @@ import './index.css';
 import './workstation.css';
 import './surpass.css';
 import './surfacePolish.css';
+import './omegaVisualIdentity.css';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import OmegaHome from './OmegaHome';
 const OmegaWorkstation=lazy(()=>import('./OmegaWorkstationFullV2'));
