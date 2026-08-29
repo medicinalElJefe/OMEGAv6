@@ -10,6 +10,9 @@ const sai=read('src/SAISovereignControl.tsx');
 for(const state of ['SOURCE_ACTIVE','LOCAL_ACTIVE','EVIDENCE_GATED','DEVICE_GATED','PROVIDER_GATED','RESTORATION_DEBT','DONOR_ONLY'])assert(authority.includes(`'${state}'`),`missing capability reality ${state}`);
 assert(authority.includes("'Plugins':'DONOR_ONLY'"),'Plugins must remain donor-only until a sovereign adapter is proven');
 assert(authority.includes("'Consolidation':'RESTORATION_DEBT'"),'Consolidation must remain restoration debt until implemented');
+assert(authority.includes("'Build Out':'RESTORATION_DEBT'"),'Build Out must not be operational until source mutation/test/package backend exists');
+assert(authority.includes("'Development':'PROVIDER_GATED'"),'Development must be provider-gated rather than mislabeled local build execution');
+assert(authority.includes('repository mutation and promotion occur only through the governed external build path'),'development execution boundary missing');
 assert(shell.includes('filter(isPrimaryOperationalCapability)'),'primary navigation/search must filter donor-only and restoration-debt entries');
 assert(shell.includes('data-capability-reality'),'every visible route must expose its real boundary');
 assert(shell.includes('NOT ALL EXECUTABLE')&&shell.includes('ONLY OPERATIONAL ROUTES SHOWN'),'registered scope must not be mislabeled as execution');
@@ -20,4 +23,4 @@ assert(!atlas.includes('All-modes algebra')&&!atlas.includes('modeRun.stay')&&!a
 assert(atlas.includes('sourceBackedModeSummary')&&atlas.includes('Catalog membership is not execution.'),'Atlas must expose source-backed calculus counts');
 assert(intelligence.includes('sourceBackedModeSummary')&&!intelligence.includes('evaluateCorpusModes'),'Intelligence Fabric must count applied source-backed modes, not catalog entries');
 assert(sai.includes('sourceBackedModeSummary')&&!sai.includes('evaluateCorpusModes'),'SAI must count applied source-backed modes, not catalog entries');
-console.log('OMEGA R23 PASS · capability reality + operational navigation + source-backed mode counts locked');
+console.log('OMEGA R25 PASS · capability reality + operational navigation + build-backend truth locked');
