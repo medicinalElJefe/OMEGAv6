@@ -5,7 +5,8 @@ const runtime=read('src/sourceBackedModeRuntimeR21.ts');
 const panel=read('src/SourceBackedModesPanelR21.tsx');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const app=read('src/App.tsx');
-const nav=read('src/ResponsiveRuntimeShell.tsx');
+const bridge=read('src/ResponsiveRuntimeShell.tsx');
+const nav=read('src/SingleFrameRuntimeShellR27.tsx');
 const corpus=read('src/corpusRuntime.ts');
 
 for(const formula of ['S=(CΩ·Φ)/(q+Λ+ε)','M188=(CΩ+Scar)/(1+q)','F_t=CΩ_t+Φ_t-q_t-Λ_t','Prune=q+Λ-CΩ','Turb=q/(CΩ+ε)','B=Λ/(CΩ+Φ+ε)','Previous_Scar·0.972'])assert.match(runtime,new RegExp(formula.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
@@ -25,10 +26,12 @@ assert.doesNotMatch(workstation,/179 EXECUTED|ALL MODES REMAIN EXECUTED|ALL \$\{
 assert.doesNotMatch(app,/OmegaModeAuthorityDock/);
 assert.doesNotMatch(app,/OmegaViewAuthorityBar/);
 assert.doesNotMatch(app,/OmegaLauncher/);
-assert.match(nav,/Search registered OMEGA surfaces — operational capabilities only/);
+assert.match(nav,/Search working capabilities/);
 assert.match(nav,/filter\(isPrimaryOperationalCapability\)/);
-assert.match(nav,/const SURFACES=\[/);
+assert.match(nav,/R27_REGISTERED_SURFACES=\[/);
+assert.match(bridge,/ResponsiveRuntimeShell=SingleFrameRuntimeShellR27/);
+assert.doesNotMatch(nav,/nav20-desktop|nav20-context|nav20-mobile-sheet/);
 assert.match(corpus,/function scoreForText/); // legacy affinity catalog still exists, but is no longer execution authority.
 assert.doesNotMatch(runtime,/@appdeploy\/client/);
 assert.doesNotMatch(panel,/@appdeploy\/client/);
-console.log('R25 SOURCE-BACKED RUNTIME PASS · real formulas · gated inputs · operational navigation · canonical traversal');
+console.log('R27 SOURCE-BACKED RUNTIME PASS · real formulas · gated inputs · single-frame operational navigation · canonical traversal');
