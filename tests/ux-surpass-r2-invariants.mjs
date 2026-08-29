@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+const app=fs.readFileSync('src/App.tsx','utf8');
+const css=fs.readFileSync('src/uxSurpassR2.css','utf8');
+const home=fs.readFileSync('src/OmegaHome.tsx','utf8');
+const menu=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+must(app.includes("import './uxSurpassR2.css'"),'R2 override must load at app level');
+for(const token of ['.oh-daily','.oh-daily-art','.oh-launch','.responsive-shell-rail','.rr-menu-universe','.mrc-menu-grid','@media(max-width:420px)'])must(css.includes(token),`missing UX R2 selector ${token}`);
+must(home.includes('dailyBrief'),'daily lesson engine must remain wired');
+must(home.includes("'/api/route-preview'")&&home.indexOf("'/api/route-preview'")<home.indexOf("'/api/chat'"),'route-before-generation must survive visual work');
+for(const route of ['Command Center','Matter Traversal','Relativity','Earth Now','Forecast','SAI Lab'])must(home.includes(route),`startup launch missing real route ${route}`);
+for(const label of ['ALL 44 WORKSTATION SURFACES','MenuUniverse','SURFACES'])must(menu.includes(label),`workstation menu authority missing ${label}`);
+must(!app.includes('@appdeploy/client')&&!home.includes('@appdeploy/client')&&!menu.includes('@appdeploy/client'),'AppDeploy runtime dependency prohibited');
+console.log('UX_SURPASS_R2_INVARIANTS PASS');
