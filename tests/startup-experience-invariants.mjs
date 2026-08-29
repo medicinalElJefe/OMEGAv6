@@ -18,7 +18,8 @@ for(const destination of ['Field','Evidence & Proof','Relativity','Matter Traver
 const surfaceMatches=[...shell.matchAll(/\['(?:STUDIO|OPERATIONS|WORK|INTELLIGENCE|GOVERNANCE|SYSTEM)','\d+','([^']+)'\]/g)];
 if(surfaceMatches.length!==44)fail(`expected 44 workstation menu surfaces, found ${surfaceMatches.length}`);
 if(new Set(surfaceMatches.map(x=>x[1])).size!==44)fail('workstation menu contains duplicate surface names');
-for(const token of ['rr-menu-universe','mrc-menu-group','grid-template-columns','border-radius'])if(!menu.includes(token))fail(`professional menu styling missing ${token}`);
+for(const token of ['nav20-desktop','nav20-context','nav20-breadcrumb','nav20-mobile-bottom','nav20-mobile-sheet','grid-template-columns','border-radius'])if(!(shell+menu).includes(token))fail(`professional navigation styling missing ${token}`);
+if(shell.includes('responsive-shell-rail')||shell.includes('mobile-runtime-console')||shell.includes('rr-workstation-menu'))fail('legacy navigation shell must not remain active');
 for(const token of ['.r4-welcome','.r4-journeys','.r4-conversation','.r4-daily'])if(!experience.includes(token))fail(`R4 startup visual hierarchy missing ${token}`);
 if(home.includes('@appdeploy/client')||daily.includes('@appdeploy/client')||shell.includes('@appdeploy/client'))fail('AppDeploy runtime dependency is forbidden');
-console.log('startup experience invariants: PASS');
+console.log('startup experience invariants: PASS · 44 routes on R20 professional navigation');

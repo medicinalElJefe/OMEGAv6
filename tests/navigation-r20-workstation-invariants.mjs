@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const shell=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
+const css=fs.readFileSync('src/menuUniverse.css','utf8');
+const routes=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'];
+for(const r of routes)if(!shell.includes(`'${r}'`))throw new Error(`R20 missing route: ${r}`);
+for(const d of ['COMMAND','VISUALIZE','EARTH','INTELLIGENCE','BUILD','EVIDENCE','SYSTEM'])if(!shell.includes(`id:'${d}'`))throw new Error(`R20 missing domain ${d}`);
+if(shell.includes("type UiTab='VIEW'|'MENU'|'MOTION'|'MATH'|'PACKET'|'PROOF'|'LOG'"))throw new Error('legacy seven-tab console still active');
+for(const legacy of ['responsive-shell-rail','mobile-runtime-console','rr-workstation-menu'])if(shell.includes(legacy))throw new Error(`legacy navigation structure still active: ${legacy}`);
+if(!shell.includes('ALL 44 WORKSTATION SURFACES')||!shell.includes('ALL 24 SOFTWARE FAMILIES'))throw new Error('restore capability access markers missing');
+if(!shell.includes('nav20-desktop')||!shell.includes('nav20-context')||!shell.includes('nav20-breadcrumb')||!shell.includes('nav20-mobile-bottom')||!shell.includes('nav20-mobile-sheet')||!shell.includes('GlobalSearch'))throw new Error('R20 workstation shell incomplete');
+if(!shell.includes("e.ctrlKey||e.metaKey")||!shell.includes("e.key.toLowerCase()==='k'"))throw new Error('global search shortcut missing');
+if(!css.includes("padding-right:max(12px,calc((100vw - 1760px)/2))!important"))throw new Error('legacy 330px content gutter not overridden');
+if(!css.includes("data-omega-nav='expanded'")||!css.includes("data-omega-focus='true'"))throw new Error('reflow/focus state missing');
+if(!css.includes('@media(max-width:960px)')||!css.includes('.nav20-mobile-bottom')||!css.includes('.nav20-mobile-sheet'))throw new Error('mobile navigation contract missing');
+console.log('R20 navigation PASS · 44 routes · 7 domains · reflowing desktop rail · search · focus · mobile sheet');
