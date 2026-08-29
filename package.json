@@ -19,7 +19,7 @@
     "test:depth": "node tests/depth-traversal-invariants.mjs",
     "test:lineage": "node tests/compiler-lineage-invariants.mjs",
     "test:pc-spine": "node tests/pc-execution-spine-invariants.mjs",
-    "test:trajectory": "node tests/trajectory-steering-invariants.mjs",
+    "test:trajectory": "node tests/trajectory-steering-invariants.mjs && node tests/transition-authority-r23-invariants.mjs",
     "test:world": "node tests/world-model-learning-invariants.mjs",
     "test:admissibility": "node tests/admissibility-248832-invariants.mjs",
     "test:hybrid": "node tests/hybrid-mission-invariants.mjs",
