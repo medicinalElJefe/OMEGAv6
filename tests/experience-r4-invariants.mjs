@@ -16,7 +16,7 @@ if(!home.includes("modePolicy:'ALL'")||!work.includes("useState<'CONTEXTUAL'|'AL
 if(!work.includes("api.post<any>('/api/route-preview'")||!work.includes("api.post<any>('/api/chat'"))throw new Error('route-before-chat sequence missing');
 if(work.indexOf("'/api/route-preview'")>work.indexOf("'/api/chat'"))throw new Error('route preview must occur before chat generation');
 if(!work.includes("experience-phase-bound experience-${kind}"))throw new Error('shared phase context wrapper missing');
-for(const [panel,kind] of [['HybridMissionControl','hybrid'],['MatterTraversal','matter'],['RelativityLab','relativity'],['EarthNowInstrument','earth']])if(!work.includes(`withPhase(<${panel}`)||!work.includes(`>,'${kind}')`))throw new Error('missing shared phase context '+kind);
+for(const [panel,kind] of [['HybridMissionControlR8','hybrid'],['MatterTraversal','matter'],['RelativityLab','relativity'],['EarthObservatoryR8','earth']])if(!work.includes(`withPhase(<${panel}`)||!work.includes(`>,'${kind}')`))throw new Error('missing shared phase context '+kind);
 if(!wrangler.includes('"ai"')||!wrangler.includes('"binding": "AI"'))throw new Error('Workers AI binding missing');
 if(!worker.includes('@cf/google/gemma-4-26b-a4b-it'))throw new Error('approved Workers AI model missing');
 if(!worker.includes('env.AI.run'))throw new Error('Workers AI inference is not wired');
