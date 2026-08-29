@@ -1,0 +1,49 @@
+name: OMEGA Release Evidence Live Verify
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-release-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for exact promoted source and verify release evidence
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const expected=process.env.GITHUB_SHA;
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let last='';
+          for(let attempt=1;attempt<=30;attempt++){
+            try{
+              const [eRes,bRes]=await Promise.all([
+                fetch(base+'/api/release-evidence',{headers:{'cache-control':'no-cache'}}),
+                fetch(base+'/omega-build-receipt.json',{headers:{'cache-control':'no-cache'}})
+              ]);
+              const eText=await eRes.text(),bText=await bRes.text();
+              if(!eRes.ok||!bRes.ok)throw new Error(`HTTP evidence=${eRes.status} receipt=${bRes.status}`);
+              const e=JSON.parse(eText),b=JSON.parse(bText);
+              if(e?.source?.sha!==expected){last=`waiting for source ${expected}; canonical returned ${e?.source?.sha||'NONE'}`;await sleep(5000);continue}
+              if(e.schema!=='OMEGA_RELEASE_EVIDENCE_V1')throw new Error(`wrong schema ${e.schema}`);
+              if(b.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1')throw new Error(`wrong receipt schema ${b.schema}`);
+              if(!b.receiptSha256||e?.packageReceipt?.receiptSha256!==b.receiptSha256)throw new Error('package receipt SHA-256 is not bound to release evidence');
+              if(!String(e?.runtimeVersion?.id||'').trim())throw new Error('Cloudflare runtime Version ID missing');
+              if(e?.runtimeAuthority?.cloudflareVersionMetadata!=='RETURNED')throw new Error('Cloudflare version metadata not returned');
+              if(e?.runtimeAuthority?.publicWorkerMutationAuthority!==false)throw new Error('public Worker mutation authority regressed');
+              if(e?.externalGates?.candidateQa!=='EXTERNAL_GITHUB_EVIDENCE_REQUIRED'||e?.externalGates?.postDeployVerification!=='EXTERNAL_FIRST_HAND_PROBE_REQUIRED'||e?.externalGates?.rollback!=='EXTERNAL_RELEASE_LEDGER_REQUIRED')throw new Error('external governance truth boundary regressed');
+              if(!String(e.evidenceSha256||'').match(/^[a-f0-9]{64}$/))throw new Error('release evidence SHA-256 missing');
+              console.log(`OMEGA RELEASE EVIDENCE LIVE PASS · source ${expected} · worker version ${e.runtimeVersion.id} · receipt ${b.receiptSha256}`);
+              process.exit(0);
+            }catch(error){last=error instanceof Error?error.message:String(error)}
+            await sleep(5000);
+          }
+          throw new Error(`canonical release-evidence verification failed: ${last}`);
+          NODE
