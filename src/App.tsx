@@ -1,5 +1,6 @@
 import {Component,Suspense,lazy,type ErrorInfo,type ReactNode} from 'react';
 import './index.css';
+import './workstation.css';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 const OmegaWorkstation=lazy(()=>import('./OmegaWorkstation'));
 type BoundaryState={error:string};
