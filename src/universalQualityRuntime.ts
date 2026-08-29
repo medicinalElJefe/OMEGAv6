@@ -1,5 +1,6 @@
 export type QualityRoute='FAST_DETERMINISTIC'|'ROUTED_MODEL'|'ROUTED_MODEL_FULL';
 export type QualityGate='STAY'|'TURN'|'HOLD'|'ESCALATE';
+export type EvidenceState='VERIFIED'|'UNVERIFIED'|'FAILED'|'CHECKING';
 export type QualityCase={id:string;domain:string;route:QualityRoute;gate:QualityGate;required:string[];prohibited:string[];uncertainty:string;next:string;latency:'FAST'|'DEEP'|'FULL'};
 export const B020_QUALITY_CASES:QualityCase[]=[
 {id:'S01',domain:'status',route:'FAST_DETERMINISTIC',gate:'HOLD',required:['release authority is pointer-bound','hosted status is scoped','private bridge requires proof'],prohibited:['invent release authority','claim bridge live without round trip'],uncertainty:'Target activation and private round-trip remain unproven without first-hand evidence.',next:'Target activation proof or private Drive round-trip proof.',latency:'FAST'},
@@ -15,13 +16,23 @@ export const B020_QUALITY_CASES:QualityCase[]=[
 {id:'S11',domain:'provider failure',route:'FAST_DETERMINISTIC',gate:'HOLD',required:['verified fallback facts','provider failure cannot authorize invention'],prohibited:['invent bridge state','pretend model call succeeded'],uncertainty:'Synthesis remains provider-bound.',next:'Use deterministic runtime facts.',latency:'FAST'},
 {id:'S12',domain:'explicit ALL_MODES',route:'ROUTED_MODEL_FULL',gate:'TURN',required:['FULL registry retained','care/proof/rollback gates retained','proposal separated from promotion'],prohibited:['silently prune requested modes','claim all modes prove correctness'],uncertainty:'Full scope adds burden but is honored when explicit.',next:'Produce bounded candidate, tests and rollback.',latency:'FULL'}
 ];
-export type RuntimeQualityInput={address:number;modeCount:number;status:any;restoration:any;routeBeforeGeneration:boolean;draftContinuity:boolean;hybridState:string;earthBoundary:boolean;providerBounded:boolean};
+export type RuntimeQualityInput={address:number;appliedModeCount:number;catalogModeCount:number;statusEndpoint:boolean;restorationEndpoint:boolean;routeBeforeGeneration:EvidenceState;hybridBoundary:EvidenceState;earthBoundary:EvidenceState;providerBounded:EvidenceState;semanticSuiteLoaded:boolean};
 export function evaluateUniversalQuality(x:RuntimeQualityInput){
  const checks=[
-  ['20,736 state address',x.address>=0&&x.address<20736],['179-mode floor',x.modeCount>=179],['route-before-generation',x.routeBeforeGeneration],['browser draft continuity',x.draftContinuity],['status endpoint bounded',!x.status?.error],['restoration endpoint bounded',!x.restoration?.error],['Hybrid device proof boundary',x.hybridState==='DEVICE_PROOF_REQUIRED'||x.hybridState==='VERIFIED'],['Earth external boundary',x.earthBoundary],['provider failure bounded',x.providerBounded],['semantic suite loaded',B020_QUALITY_CASES.length===12]
+  ['20,736 state address',x.address>=0&&x.address<20736,`${x.address}`],
+  ['source-backed operators available',x.appliedModeCount>0,`${x.appliedModeCount} applied`],
+  ['179-mode catalog present',x.catalogModeCount>=179,`${x.catalogModeCount} catalog entries`],
+  ['route-before-generation',x.routeBeforeGeneration==='VERIFIED',x.routeBeforeGeneration],
+  ['status endpoint bounded',x.statusEndpoint,x.statusEndpoint?'VERIFIED':'FAILED'],
+  ['restoration endpoint bounded',x.restorationEndpoint,x.restorationEndpoint?'VERIFIED':'FAILED'],
+  ['Hybrid device proof boundary',x.hybridBoundary==='VERIFIED',x.hybridBoundary],
+  ['Earth external boundary',x.earthBoundary==='VERIFIED',x.earthBoundary],
+  ['provider failure bounded',x.providerBounded==='VERIFIED',x.providerBounded],
+  ['semantic suite loaded',x.semanticSuiteLoaded,`${B020_QUALITY_CASES.length}/12`]
  ] as const;
  const pass=checks.filter(([,ok])=>ok).length;
- const critical=checks.filter(([name,ok])=>!ok&&['route-before-generation','Hybrid device proof boundary','semantic suite loaded'].includes(name));
+ const criticalNames=['route-before-generation','Hybrid device proof boundary','semantic suite loaded'];
+ const critical=checks.filter(([name,ok])=>!ok&&criticalNames.includes(name));
  return{checks,pass,total:checks.length,criticalFailures:critical.length,semanticCases:B020_QUALITY_CASES.length,criticalRecall:critical.length?0:1,decision:critical.length?'HOLD':pass===checks.length?'STAY':'TURN'};
 }
-export function qualityReceipt(x:RuntimeQualityInput){const result=evaluateUniversalQuality(x);return{schema:'OMEGA_UNIVERSAL_QUALITY_B020_R1',at:new Date().toISOString(),result,cases:B020_QUALITY_CASES.map(c=>({id:c.id,domain:c.domain,route:c.route,gate:c.gate,latency:c.latency})),truthBoundary:'Runtime checks and fixed semantic requirements are deterministic. This receipt does not prove external deployment, private Drive round-trip, provider synthesis, native-device execution, or release promotion.'};}
+export function qualityReceipt(x:RuntimeQualityInput){const result=evaluateUniversalQuality(x);return{schema:'OMEGA_UNIVERSAL_QUALITY_B020_R2',at:new Date().toISOString(),input:x,result,cases:B020_QUALITY_CASES.map(c=>({id:c.id,domain:c.domain,route:c.route,gate:c.gate,latency:c.latency})),truthBoundary:'Only directly derived or actively probed checks may be VERIFIED. Catalog presence is distinct from applied executable operators. UNVERIFIED is never converted to PASS. This receipt does not prove private Drive round-trip, native-device execution, or release promotion.'};}
