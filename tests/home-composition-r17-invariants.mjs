@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const app=fs.readFileSync('src/App.tsx','utf8');
+const css=fs.readFileSync('src/omegaHomeR17.css','utf8');
+const home=fs.readFileSync('src/OmegaHome.tsx','utf8');
+assert(app.includes("import './omegaHomeR17.css'"),'R17 startup composition must be mounted');
+assert(app.indexOf('omegaHomeR17.css')>app.indexOf('omegaInterfaceR16.css'),'R17 must remain final home composition authority');
+assert(home.includes('OmegaLivingField'),'source-bound living instrument must remain the startup visual authority');
+assert(home.includes("api.post<any>('/api/route-preview'")&&home.indexOf("'/api/route-preview'")<home.indexOf("'/api/chat'"),'startup assistant must preserve route-before-generation');
+assert(css.includes('Journeys are an indexed navigation strip, not four feature cards'),'journey navigation must remain a strip rather than card wall');
+assert(css.includes('.r4-journeys>button{min-height:126px')&&css.includes('border-radius:0!important'),'journey controls must not regress to rounded feature cards');
+assert(css.includes('.r4-ask,.r4-daily{border:0!important;border-radius:0!important'),'conversation and daily lesson must use editorial workbench grammar');
+assert(css.includes('.oh-palette{position:fixed')&&css.includes('grid-template-columns:1fr 1fr'),'startup explore menu must stay organized and compact');
+assert(css.includes('@media(max-width:680px)'),'startup composition must have mobile-specific containment');
+assert(!css.includes('@appdeploy/client')&&!css.includes('appdeploy.ai'),'R17 must stay portable and AppDeploy-free');
+console.log('PASS home-composition-r17-invariants');
