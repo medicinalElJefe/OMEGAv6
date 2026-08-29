@@ -41,11 +41,11 @@ export const OMEGA_CAPABILITY_AUTHORITY:readonly CapabilityContract[]=[
 {name:'Canon Evolution',family:'CanonForge',implementation:'SPECIALIST',views:V('GRAPH','EVIDENCE','CANON'),boundary:'EVIDENCE_BOUND',purpose:'create immutable hashed canon proposals that require separate governance admission'},
 {name:'SAI Lab',family:'AI Cockpit',implementation:'SPECIALIST',views:V('FIELD','GRAPH','EVIDENCE','CANON'),boundary:'PROVIDER_BOUND',purpose:'develop intelligence behavior against packet authority'},
 {name:'Governance',family:'CanonForge',implementation:'SPECIALIST',views:V('GRAPH','EVIDENCE','CANON'),boundary:'EVIDENCE_BOUND',purpose:'evaluate admitted-route gates, record decisions and commit only legal canonical candidates'},
-{name:'Consolidation',family:'Recovery / Packaging',implementation:'SHARED_SUITE',views:V('ASSEMBLY','GRAPH','EVIDENCE'),boundary:'LOCAL_ARTIFACT',purpose:'restoration target for merging compatible capabilities without omission'},
-{name:'Instructions',family:'Universal Language',implementation:'SHARED_SUITE',views:V('GRAPH','CANON'),boundary:'SOURCE_PACKET',purpose:'inspect semantic and operator paths'},
+{name:'Consolidation',family:'Recovery / Packaging',implementation:'SPECIALIST',views:V('ASSEMBLY','GRAPH','EVIDENCE'),boundary:'LOCAL_ARTIFACT',purpose:'compare navigation/capability authority, expose remaining debt and export non-mutating consolidation plans'},
+{name:'Instructions',family:'Universal Language',implementation:'SPECIALIST',views:V('GRAPH','CANON'),boundary:'SOURCE_PACKET',purpose:'search the shared executable route/effect/authority map and launch operational capabilities'},
 {name:'Plugins',family:'Atlas OS',implementation:'SHARED_SUITE',views:V('ASSEMBLY','EVIDENCE'),boundary:'LOCAL_ARTIFACT',purpose:'donor integration registry only; external ChatGPT connectors are not embedded in OMEGA'},
-{name:'Settings',family:'Atlas OS',implementation:'SHARED_SUITE',views:V('ASSEMBLY'),boundary:'LOCAL_ARTIFACT',purpose:'configure local presentation/runtime preferences'},
-{name:'System',family:'Atlas OS',implementation:'SHARED_SUITE',views:V('GRAPH','EVIDENCE'),boundary:'EVIDENCE_BOUND',purpose:'inspect bounded runtime state'},
+{name:'Settings',family:'Atlas OS',implementation:'SPECIALIST',views:V('ASSEMBLY'),boundary:'LOCAL_ARTIFACT',purpose:'configure consumed browser-local layout, density, motion, contrast and text scale'},
+{name:'System',family:'Atlas OS',implementation:'SPECIALIST',views:V('GRAPH','EVIDENCE'),boundary:'EVIDENCE_BOUND',purpose:'inspect live hosted status, release evidence, package receipt, capability debt and browser storage'},
 {name:'Validation',family:'Proof / Governance',implementation:'SPECIALIST',views:V('GRAPH','EVIDENCE','CANON'),boundary:'EVIDENCE_BOUND',purpose:'run and expose validation gates'},
 {name:'System Atlas',family:'Control Planes',implementation:'SPECIALIST',views:V('GRAPH','ASSEMBLY','CANON'),boundary:'SOURCE_PACKET',purpose:'map families, routes and expression capability'},
 {name:'Scale Compiler',family:'Traversal / Domain',implementation:'SPECIALIST',views:V('FIELD','GRAPH','TRAVERSAL'),boundary:'SOURCE_PACKET',purpose:'compile lawful recursive scale relationships'},
@@ -55,8 +55,8 @@ export const CAPABILITY_BY_NAME=new Map(OMEGA_CAPABILITY_AUTHORITY.map(x=>[x.nam
 export const SHARED_SUITE_DEBT=OMEGA_CAPABILITY_AUTHORITY.filter(x=>x.implementation==='SHARED_SUITE');
 const REALITY_OVERRIDES:Record<string,CapabilityReality>={
  'Command Center':'PROVIDER_GATED','Hybrid Link':'DEVICE_GATED','Workspace':'LOCAL_ACTIVE','Cockpit':'EVIDENCE_GATED','Immersive Traversal':'RESTORATION_DEBT','Extreme Traversal':'RESTORATION_DEBT','Earth Now':'EVIDENCE_GATED','Reality Lab':'EVIDENCE_GATED','Quality Compiler':'EVIDENCE_GATED','Evidence & Proof':'EVIDENCE_GATED','Archive Census':'EVIDENCE_GATED','Archive Operators':'EVIDENCE_GATED','Canon Evolution':'EVIDENCE_GATED','Governance':'EVIDENCE_GATED','Validation':'EVIDENCE_GATED','Kernel Intelligence':'PROVIDER_GATED','SAI Lab':'PROVIDER_GATED',
- 'Create':'LOCAL_ACTIVE','Build Out':'RESTORATION_DEBT','Projects':'LOCAL_ACTIVE','Render Queue':'LOCAL_ACTIVE','Assets':'LOCAL_ACTIVE','Memory':'LOCAL_ACTIVE','Development':'PROVIDER_GATED','Settings':'LOCAL_ACTIVE','System':'EVIDENCE_GATED',
- 'Consolidation':'RESTORATION_DEBT','Plugins':'DONOR_ONLY'
+ 'Create':'LOCAL_ACTIVE','Build Out':'RESTORATION_DEBT','Projects':'LOCAL_ACTIVE','Render Queue':'LOCAL_ACTIVE','Assets':'LOCAL_ACTIVE','Memory':'LOCAL_ACTIVE','Development':'PROVIDER_GATED','Settings':'LOCAL_ACTIVE','System':'EVIDENCE_GATED','Consolidation':'LOCAL_ACTIVE',
+ 'Plugins':'DONOR_ONLY'
 };
 export function capabilityReality(name:string):CapabilityReality{const c=CAPABILITY_BY_NAME.get(name);if(!c)return 'RESTORATION_DEBT';if(REALITY_OVERRIDES[name])return REALITY_OVERRIDES[name];return c.boundary==='SOURCE_PACKET'?'SOURCE_ACTIVE':c.boundary==='DEVICE_PROOF'?'DEVICE_GATED':c.boundary==='PROVIDER_BOUND'?'PROVIDER_GATED':c.boundary==='EVIDENCE_BOUND'?'EVIDENCE_GATED':'LOCAL_ACTIVE'}
 export function isPrimaryOperationalCapability(name:string){const r=capabilityReality(name);return r!=='DONOR_ONLY'&&r!=='RESTORATION_DEBT'}
