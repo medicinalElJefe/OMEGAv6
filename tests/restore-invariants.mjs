@@ -6,6 +6,10 @@ const adapter = fs.readFileSync(new URL('../src/platformAdapter.ts', import.meta
 const manifest = fs.readFileSync(new URL('../RESTORE_MANIFEST.md', import.meta.url), 'utf8');
 const responsiveShell = fs.readFileSync(new URL('../src/ResponsiveRuntimeShell.tsx', import.meta.url), 'utf8');
 const responsiveCss = fs.readFileSync(new URL('../src/responsiveShell.css', import.meta.url), 'utf8');
+const commandDeck = fs.readFileSync(new URL('../src/OmegaCommandDeck.tsx', import.meta.url), 'utf8');
+const commandCss = fs.readFileSync(new URL('../src/commandDeck.css', import.meta.url), 'utf8');
+const orchestrator = fs.readFileSync(new URL('../src/PromptOrchestrator.tsx', import.meta.url), 'utf8');
+const hybridRuntime = fs.readFileSync(new URL('../src/hybridCommandRuntime.ts', import.meta.url), 'utf8');
 
 assert.match(worker, /\/api\/restoration/, 'worker must expose restoration status');
 assert.match(worker, /fullRestoreClaimed:\s*false/, 'worker must not claim completed restoration');
@@ -13,6 +17,8 @@ assert.match(worker, /PARALLEL_MIGRATION/, 'worker must classify current lineage
 assert.match(worker, /DEVICE_PROOF_REQUIRED/, 'native host must remain device-proof gated');
 assert.match(worker, /EXTERNAL_DEGRADED_UNTIL_BOUND/, 'Earth feeds must remain externally degraded until verified');
 assert.match(worker, /MODEL_PROVIDER_NOT_CONFIGURED/, 'provider absence must fail boundedly');
+assert.match(worker, /\/api\/hybrid\/status/, 'command-center donor must have truthful Hybrid status adapter');
+assert.match(worker, /\/api\/orchestrator\/thread/, 'command-center donor must have bounded thread adapter');
 assert.doesNotMatch(adapter, /@appdeploy\/client/, 'Cloudflare adapter must not depend on AppDeploy client');
 assert.match(adapter, /localStorage/, 'adapter must preserve browser-local continuity');
 assert.match(adapter, /AbortController/, 'adapter must bound network waits');
@@ -22,5 +28,15 @@ assert.match(responsiveShell, /MODE188\+ admission/, 'real donor responsive shel
 assert.match(responsiveShell, /S = \(CΩ · Φ\) \/ \(q \+ Λ \+ ε\)/, 'real donor shell must retain canonical kernel display');
 assert.match(responsiveCss, /@media\(max-width:760px\)/, 'responsive donor CSS must retain mobile breakpoint');
 assert.match(responsiveCss, /prefers-reduced-motion:reduce/, 'responsive donor CSS must retain reduced-motion boundary');
+assert.match(commandDeck, /Talk to OMEGA\. Build with OMEGA\./, 'real donor command deck must retain assistant-first headline');
+assert.match(commandDeck, /LIVE MODEL FIELD/, 'real donor command deck must retain source-derived field instrument');
+assert.match(commandDeck, /Source-derived motion · not an Earth observation/, 'command deck must preserve source-vs-Earth truth label');
+assert.match(commandCss, /@media\(max-width:760px\)/, 'command deck must retain mobile visual behavior');
+assert.doesNotMatch(orchestrator, /@appdeploy\/client/, 'migrated orchestrator must use Cloudflare adapter rather than donor provider client');
+assert.match(orchestrator, /CONVERSE/, 'migrated orchestrator must preserve conversation-only mode');
+assert.match(orchestrator, /ENACT/, 'migrated orchestrator must preserve governed action mode');
+assert.match(hybridRuntime, /DEVICE_PROOF_REQUIRED|HYBRID_OPS|validateCommandPlan/, 'hybrid command runtime must preserve bounded command validation surface');
+assert.match(hybridRuntime, /Project path must stay relative/, 'hybrid command runtime must preserve relative-root confinement');
+assert.match(hybridRuntime, /REPLAY_MACRO/, 'hybrid command runtime must preserve bounded macro replay semantics');
 
-console.log('restore invariants PASS 15/15');
+console.log('restore invariants PASS 27/27');
