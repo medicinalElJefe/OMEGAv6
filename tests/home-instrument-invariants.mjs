@@ -18,8 +18,9 @@ must(modeRuntime.includes('GATED_MISSING_INPUTS'),'missing inputs must be gated 
 must(!home.includes('ALL MODES ACTIVE')&&!home.includes('evaluateCorpusModes'),'home must not relabel catalog-affinity evaluation as execution');
 for(const phaseName of ['Initiation','Acceleration','Expansion','Momentum','Saturation','Constraint Engagement','Deceleration','Redistribution','Compression','Pre-turn Tension','Turn-Reorientation','Integration'])must(phase.includes(`'${phaseName}'`),`missing living phase ${phaseName}`);
 must(phase.includes('1728*coords.d+144*p+12*coords.r+coords.l'),'phase wheel must mutate actual canonical address');
-for(const route of ['Visual Instrument','Atlas','Evidence & Proof','Build Out','System Atlas','Control Matrix'])must(home.includes(route),`quick navigation missing ${route}`);
+for(const route of ['Visual Instrument','Atlas','Evidence & Proof','Development','System Atlas','Control Matrix'])must(home.includes(route),`operational quick navigation missing ${route}`);
+const quick=home.match(/const QUICK=\[(.*?)\] as const;/s)?.[1]||'';must(!quick.includes('Build Out'),'home must not expose restoration-debt Build Out as operational quick navigation');
 must(home.includes('OPEN FULL WORKSTATION'),'home must hand off to complete workstation navigation');
 must(home.includes("aria-label='OMEGA source-bound visual start field'"),'home instrument needs explicit accessible semantic label');
 for(const selector of ['.r4-welcome','.r4-journeys','.r4-conversation','.r4-truth-strip'])must(css.includes(selector),`R4 home hierarchy missing ${selector}`);
-console.log('HOME_INSTRUMENT_INVARIANTS PASS · source-backed calculus');
+console.log('HOME_INSTRUMENT_INVARIANTS R25 PASS · source-backed calculus + operational quick navigation');
