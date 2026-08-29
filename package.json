@@ -1,6 +1,6 @@
 {
   "name": "omegav6-full-restore",
-  "version": "27.0.0",
+  "version": "27.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,7 +13,7 @@
     "test:navigation": "node tests/navigation-coherence.mjs && node tests/interaction-contract-invariants.mjs && node tests/actionable-controls-invariants.mjs && node tests/navigation-registry-r10-invariants.mjs && node tests/navigation-functional-domains-r12-invariants.mjs && node tests/professional-workspace-r13-invariants.mjs && node tests/interface-hierarchy-r16-invariants.mjs && node tests/capability-view-authority-r17-invariants.mjs && node tests/navigation-r20-workstation-invariants.mjs && node tests/source-backed-runtime-r21-invariants.mjs && node tests/mode-traversal-binding-r22-invariants.mjs && node tests/capability-truth-r23-invariants.mjs && node tests/single-frame-r27-invariants.mjs && node tests/r27-layout-mode-contract.mjs",
     "test:home": "node tests/home-instrument-invariants.mjs && node tests/home-quick-nav-invariants.mjs && node tests/startup-experience-invariants.mjs && node tests/ux-surpass-r2-invariants.mjs && node tests/ux-surpass-r3-invariants.mjs && node tests/experience-r4-invariants.mjs && node tests/home-composition-r17-invariants.mjs",
     "test:portability": "node tests/portability-invariants.mjs",
-    "test:applications": "node tests/full-application-routing.mjs && node tests/workspace-cockpit-r18-invariants.mjs && node tests/utility-authority-r26-invariants.mjs && node tests/governed-build-receipt-r26-1-invariants.mjs",
+    "test:applications": "node tests/full-application-routing.mjs && node tests/workspace-cockpit-r18-invariants.mjs && node tests/utility-authority-r26-invariants.mjs && node tests/governed-build-receipt-r26-1-invariants.mjs && node tests/release-evidence-r27-1-invariants.mjs",
     "test:cloud": "node tests/cloud-bridge-invariants.mjs",
     "test:visual": "node tests/visual-identity-invariants.mjs && node tests/living-visual-r10-invariants.mjs && node tests/navigation-button-polish-r11-invariants.mjs && node tests/all-modes-authority-r12-invariants.mjs && node tests/forecast-motion-r13-invariants.mjs && node tests/trajectory-human-r14-invariants.mjs && node tests/continuous-field-r13-invariants.mjs",
     "test:depth": "node tests/depth-traversal-invariants.mjs",
@@ -29,7 +29,7 @@
     "test:sai": "node tests/sai-b059-invariants.mjs",
     "test:system-atlas": "node tests/system-atlas-invariants.mjs && node tests/multi-expression-capability-r13-invariants.mjs",
     "test:render-portability": "node tests/render-portability-invariants.mjs",
-    "check:static": "node --check src/worker.js && node --check src/workerR8.js && node --check src/workerR9.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud && npm run test:visual && npm run test:depth && npm run test:lineage && npm run test:pc-spine && npm run test:trajectory && npm run test:relativity && npm run test:world && npm run test:admissibility && npm run test:hybrid && npm run test:archive && npm run test:quality && npm run test:sai && npm run test:system-atlas && npm run test:render-portability",
+    "check:static": "node --check src/worker.js && node --check src/workerR8.js && node --check src/workerR9.js && node --check src/workerR27.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud && npm run test:visual && npm run test:depth && npm run test:lineage && npm run test:pc-spine && npm run test:trajectory && npm run test:relativity && npm run test:world && npm run test:admissibility && npm run test:hybrid && npm run test:archive && npm run test:quality && npm run test:sai && npm run test:system-atlas && npm run test:render-portability",
     "check": "npm run check:static && npm run build"
   },
   "dependencies": {"fflate":"^0.8.2","lucide-react":"^0.469.0","react":"^19.0.0","react-dom":"^19.0.0","topojson-client":"^3.1.0","world-atlas":"^2.0.2"},
