@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 
 const authority=fs.readFileSync('src/allModesAuthority.ts','utf8');
 const dock=fs.readFileSync('src/OmegaModeAuthorityDock.tsx','utf8');
-const css=fs.readFileSync('src/omegaModeAuthorityR12.css','utf8');
 const app=fs.readFileSync('src/App.tsx','utf8');
 const corpus=fs.readFileSync('src/corpusRuntime.ts','utf8');
+const runtime=fs.readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
+const panel=fs.readFileSync('src/SourceBackedModesPanelR21.tsx','utf8');
 
 const donorArray=authority.slice(authority.indexOf('const NAMES=['),authority.indexOf('] as const;'));
 const names=[...(donorArray.matchAll(/'([^']+)'/g))].map(x=>x[1]);
@@ -15,12 +16,15 @@ assert(authority.includes('sourceModeEvaluations:179'),'must preserve the 179 so
 assert(authority.includes('canonAuthorities:62'),'must preserve the 62 authority stack as a separate count');
 assert(authority.includes('not additional corpus rows')||authority.includes('NOT additional corpus rows'),'must prohibit false executor double-counting');
 assert(corpus.includes('m.count===179'),'canonical corpus validation must still require exactly 179 source modes');
-assert(dock.includes('179 EXECUTABLE SOURCE MODES'),'R21 must identify the 179 corpus modes as the executable registry');
-assert(dock.includes('62 DERIVED CANON / CALCULUS LENSES'),'R21 must identify the 62 canon entries as derived lenses rather than fake executors');
-for(const field of ['Operator','Algebra','Calculus','Update rule','Proof requirement','Ledger fields'])assert(dock.includes(field),`R21 execution inspector missing ${field}`);
-assert(dock.includes('selectedMode.updateRule')&&dock.includes('selectedMode.proof')&&dock.includes('selectedMode.ledger'),'R21 must expose source operator execution/proof fields');
-assert(dock.includes("onNavigate('Modes')")&&dock.includes("onNavigate('System Atlas')"),'dock must route into real source-mode and system-atlas surfaces');
-assert(app.includes('<OmegaModeAuthorityDock onNavigate={navigate}/>'),'ALL MODES authority dock must remain mounted in the workstation');
-assert(css.includes('.rr-packet>div:nth-child(4)')&&css.includes('.mrc-dl>span:nth-of-type(4)'),'must suppress legacy doubled-count cells');
-assert(!authority.includes('@appdeploy/client')&&!dock.includes('@appdeploy/client'),'must remain sovereign-provider portable');
-console.log('PASS all-modes-authority-r12-invariants');
+assert(dock.includes('179 SOURCE CATALOG RECORDS'),'retained dock donor must identify 179 entries as catalog records, not automatically executed modes');
+assert(dock.includes('legacy metric-affinity score is an inspection aid, not proof that each donor formula executed'),'retained dock must state its heuristic truth boundary');
+assert(dock.includes('62 DERIVED CANON / CALCULUS LENSES'),'62 canon entries must remain derived lenses rather than fake executors');
+for(const field of ['Operator','Algebra','Calculus','Update rule','Proof requirement','Ledger fields'])assert(dock.includes(field),`source contract inspector missing ${field}`);
+assert(dock.includes('selectedMode.updateRule')&&dock.includes('selectedMode.proof')&&dock.includes('selectedMode.ledger'),'source contract metadata must remain inspectable');
+assert(dock.includes("onNavigate('Modes')")&&dock.includes("onNavigate('System Atlas')"),'retained dock donor must route into real source-backed modes and system atlas');
+assert(!app.includes('<OmegaModeAuthorityDock'),'global fixed mode dock must remain unmounted to prevent right-side overlay collisions');
+assert(runtime.includes("state:'EXECUTED_EXACT'")&&runtime.includes('GATED_MISSING_INPUTS'),'active runtime must distinguish exact execution from missing-input gates');
+for(const formula of ['S=(CΩ·Φ)/(q+Λ+ε)','M188=(CΩ+Scar)/(1+q)','Prune=q+Λ-CΩ'])assert(runtime.includes(formula),`source-backed runtime missing donor formula ${formula}`);
+assert(panel.includes('179 catalog entries are loaded as source metadata, not automatically called'),'active Modes surface must explicitly separate catalog membership from execution');
+assert(!authority.includes('@appdeploy/client')&&!dock.includes('@appdeploy/client')&&!runtime.includes('@appdeploy/client'),'must remain sovereign-provider portable');
+console.log('PASS all-modes-authority-r12-invariants · 179 catalog + 62 canon lenses + source-backed execution only');

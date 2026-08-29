@@ -3,6 +3,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const phase=read('src/PhaseWheel.tsx');
 const home=read('src/OmegaHome.tsx');
 const work=read('src/OmegaWorkstationFullV2.tsx');
+const modeRuntime=read('src/sourceBackedModeRuntimeR21.ts');
 const worker=read('src/worker.js');
 const wrangler=read('wrangler.jsonc');
 const css=read('src/experienceR4.css');
@@ -11,8 +12,10 @@ const expected=['Initiation','Acceleration','Expansion','Momentum','Saturation',
 for(const name of expected)if(!phase.includes(`'${name}'`))throw new Error('missing canonical phase '+name);
 if(!phase.includes('1728*coords.d+144*p+12*coords.r+coords.l'))throw new Error('phase selection must map to real canonical D/P/R/L address');
 if(!phase.includes('Selecting a phase changes the real OMEGA address'))throw new Error('phase truth boundary missing');
-if(!home.includes('ALL MODES ACTIVE')||!home.includes('evaluateCorpusModes'))throw new Error('home must expose actual all-mode evaluation');
-if(!home.includes("modePolicy:'ALL'")||!work.includes("useState<'CONTEXTUAL'|'ALL'|'CUSTOM'>('ALL')"))throw new Error('ALL modes must be active by default');
+if(!home.includes('SOURCE-BACKED MODES')||!home.includes('sourceBackedModeSummary'))throw new Error('home must expose source-backed mode evaluation rather than catalog-as-execution');
+if(!home.includes("modePolicy:'SOURCE_BACKED_ALL_AVAILABLE'")||!work.includes("modePolicy:'SOURCE_BACKED_ALL_AVAILABLE'"))throw new Error('every lawful source-backed mode with authoritative inputs must be active by default');
+if(!modeRuntime.includes('GATED_MISSING_INPUTS')||!home.includes('catalog membership is not execution'))throw new Error('missing-input mode gating / truth boundary missing');
+if(home.includes('ALL MODES ACTIVE')||work.includes('ALL MODES REMAIN EXECUTED'))throw new Error('legacy blanket execution claim returned');
 if(!work.includes("api.post<any>('/api/route-preview'")||!work.includes("api.post<any>('/api/chat'"))throw new Error('route-before-chat sequence missing');
 if(work.indexOf("'/api/route-preview'")>work.indexOf("'/api/chat'"))throw new Error('route preview must occur before chat generation');
 if(!work.includes("experience-phase-bound experience-${kind}"))throw new Error('shared phase context wrapper missing');
@@ -24,4 +27,4 @@ if(!worker.includes('FAST_DETERMINISTIC')||!worker.includes('groundedFallback'))
 for(const truth of ['DEVICE_PROOF_REQUIRED','EXTERNAL_DEGRADED','12/144/1728/20736 are representational resolution'])if(!worker.includes(truth))throw new Error('truth boundary regression: '+truth);
 if(!css.includes('.r4-welcome')||!css.includes('.experience-earth')||!css.includes('.experience-hybrid'))throw new Error('R4 visual hierarchy missing');
 if(!app.includes("import './experienceR4.css'"))throw new Error('R4 experience stylesheet not activated');
-console.log('experience-r4-invariants: PASS');
+console.log('experience-r4-invariants: PASS · source-backed all-available mode policy');
