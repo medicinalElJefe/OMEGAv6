@@ -1,0 +1,17 @@
+import {useMemo,useState} from 'react';
+import {CheckCircle2,Download,ShieldCheck,XCircle} from 'lucide-react';
+import {B020_QUALITY_CASES,evaluateUniversalQuality,qualityReceipt} from './universalQualityRuntime';
+import './universalQuality.css';
+function download(name:string,data:any){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+export default function UniversalQualityControl({record,status,restore,modeCount}:{record:any;status:any;restore:any;modeCount:number}){
+ const[filter,setFilter]=useState<'ALL'|'FAST'|'DEEP'|'FULL'>('ALL');
+ const input=useMemo(()=>({address:Number(record?.address)||0,modeCount,status,restoration:restore,routeBeforeGeneration:true,draftContinuity:true,hybridState:String(status?.hybridLink?.state||'DEVICE_PROOF_REQUIRED'),earthBoundary:true,providerBounded:true}),[record,modeCount,status,restore]);
+ const result=useMemo(()=>evaluateUniversalQuality(input),[input]),cases=filter==='ALL'?B020_QUALITY_CASES:B020_QUALITY_CASES.filter(x=>x.latency===filter);
+ return <section className='uq-app'><header className='uq-head'><div><span>B020 FIXED SEMANTIC RESPONSE QUALITY SUITE · RESTORED</span><h2>Universal Quality</h2><p>Deterministic runtime invariants plus the 12 fixed semantic cases. Quality is scoped to evidence, routing, boundaries and rollback—not a generic intelligence score.</p></div><div className={'uq-decision '+result.decision.toLowerCase()}><b>{result.decision}</b><small>{result.pass}/{result.total} runtime gates</small></div></header>
+ <div className='uq-summary'><div><span>SEMANTIC CASES</span><b>{result.semanticCases}</b></div><div><span>CRITICAL RECALL</span><b>{(result.criticalRecall*100).toFixed(0)}%</b></div><div><span>CRITICAL FAILURES</span><b>{result.criticalFailures}</b></div><div><span>STATE</span><b>{record.stateId}</b></div><div><span>MODES</span><b>{modeCount}</b></div></div>
+ <div className='uq-runtime'>{result.checks.map(([name,ok])=><article className={ok?'pass':'hold'} key={name}>{ok?<CheckCircle2/>:<XCircle/>}<b>{name}</b><span>{ok?'PASS':'HOLD'}</span></article>)}</div>
+ <div className='uq-toolbar'><div>{(['ALL','FAST','DEEP','FULL'] as const).map(x=><button key={x} className={filter===x?'active':''} onClick={()=>setFilter(x)}>{x}</button>)}</div><button className='export' onClick={()=>download('OMEGA_UNIVERSAL_QUALITY_B020_R1.json',qualityReceipt(input))}><Download/>Export receipt</button></div>
+ <div className='uq-cases'>{cases.map(c=><article key={c.id}><header><code>{c.id}</code><b>{c.domain}</b><span>{c.route}</span><strong className={c.gate.toLowerCase()}>{c.gate}</strong></header><div className='uq-case-grid'><section><span>REQUIRED</span>{c.required.map(x=><p key={x}>✓ {x}</p>)}</section><section><span>PROHIBITED</span>{c.prohibited.map(x=><p key={x}>× {x}</p>)}</section></div><footer><ShieldCheck/><p>{c.uncertainty}</p><small>NEXT · {c.next}</small></footer></article>)}</div>
+ <div className='uq-boundary'><ShieldCheck/><p><b>Truth boundary:</b> this compiler verifies the hosted packet contract and fixed B020 semantic requirements. It cannot prove the canonical Worker is live, that the private Drive bridge round-tripped, that a provider generated a valid answer, that a native device executed an action, or that release authority advanced.</p></div>
+ </section>;
+}
