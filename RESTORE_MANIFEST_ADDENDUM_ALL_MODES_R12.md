@@ -12,6 +12,7 @@ The existing Cloudflare branch correctly retained a 179-row source-mode registry
 - **62 higher-order canon/calculus authorities** are restored from the repaired aligned ALL MODES donor map as governance lenses over the same read-only canonical packet. They are not extra corpus rows and do not create a second HostState.
 - The visible authority dock reports both registries independently and exposes search, current activation, source-mode gates and direct routes to Modes/System Atlas.
 - Legacy doubled-count cells are suppressed until the older shell source is fully refactored to the same contract.
+- The 44 canonical workstation routes remain unchanged, but the Nexus now organizes them into seven functional domains: Command & Workspace; Visualize & Traverse; Earth, Field & Forecast; Intelligence & Modes; Build & Work; Archive, Evidence & Proof; System & Governance. Each canonical route must occur exactly once in that map.
 
 ## Donor classification reviewed in this slice
 
@@ -44,6 +45,7 @@ The existing Cloudflare branch correctly retained a 179-row source-mode registry
 - `full_overall_canon_real_only_max_detail.svg`.
 - `20736D_Dewey_Calculus_Full_Atlas.svg`.
 - `Eternal_Mandala_20736D_Relational_Calculus_Atlas_Construction_Poster.png`, motion-relativity PNGs and intrinsic-membrane renders as visual-reference donors, not empirical measurements.
+- Quantum visual donor folder includes proof-rational, proof-irrational, constrained, PiFlow, maximum-expanse and inverse maximum-expanse mandala PNG families; these remain visual/mathematical reference donors until their encoded semantics are individually classified.
 
 ### Data / physics / calculus donors identified for continued migration
 - `ALL_MODES_WOVEN_CONTINUITY_MAX_DETAIL_ATLAS.csv`.
@@ -56,16 +58,19 @@ The existing Cloudflare branch correctly retained a 179-row source-mode registry
 ### Prior software donor families identified
 The V77 bin set includes proof/evidence I/O, local evidence tools, source audit, continuity retention, future plasticity, contradiction/burden, 011/01M1, scar-memory carry, awareness frontier, dependency invalidation, relational-skin bridges, spectral/material projection, resolution scheduling and proof/package closure. These remain restoration donors until each executable semantic contract is classified EXACT, ADAPTED or MISSING in the current runtime.
 
-## R12 new modules
+## R12 new / changed modules
 - `src/allModesAuthority.ts`
 - `src/OmegaModeAuthorityDock.tsx`
 - `src/omegaModeAuthorityR12.css`
+- `src/OmegaLauncher.tsx` — same canonical route authority, reorganized into seven functional domains.
+- `src/omegaLauncherR12.css`
 - `tests/all-modes-authority-r12-invariants.mjs`
+- `tests/navigation-functional-domains-r12-invariants.mjs`
 
 ## Truth boundary
 The 62 higher-order authorities are restored as **DONOR_EXACT_NAME_ADAPTED_RUNTIME_LENS** in this slice. That label is deliberate: the donor names and broad roles are preserved, but R12 does not falsely claim exact historical code for every authority where only the artifact semantics have been recovered. Scientific/physics CSV, SVG and PNG material is treated as computational/model-space data unless separately supported by empirical evidence. Representation dimensions are not asserted as physical dimensions.
 
 ## Still missing / next restoration frontier
-This addendum is not an assertion that every Drive object has been exhaustively parsed. The connected Drive contains large folders and multi-hundred-megabyte CSV/ZIP families whose listings exceed one response surface. The next frontier is deterministic donor census and content-hash classification across `1DATA`, `28 zip build`, `4Visual and animated data`, `V77`, `SOFTWARE CRASH FOLDER`, `.OMEGA_HYBRID_HUB/05_SOVEREIGN_BUILDS`, `.OMEGA_HYBRID_HUB/05_UPDATES` and the remaining prior chat/library donors, followed by executable migration slices for the strongest missing semantics.
+This addendum is not an assertion that every Drive object has been exhaustively parsed. The connected Drive contains large folders and multi-hundred-megabyte CSV/ZIP families whose listings exceed one response surface. The next frontier is deterministic donor census and content-hash classification across `1DATA`, `28 zip build`, `4Visual and animated data`, `V77`, `SOFTWARE CRASH FOLDER`, `.OMEGA_HYBRID_HUB/05_SOVEREIGN_BUILDS`, `.OMEGA_HYBRID_HUB/05_UPDATES` and the remaining prior chat/library donors, followed by executable migration slices for the strongest missing semantics. One Library resolution attempt for `/Google Drive/28 zip build` failed in this cycle; that path is recorded unresolved and is not being treated as empty.
 
 No AppDeploy runtime dependency is introduced by R12.
