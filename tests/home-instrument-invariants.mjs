@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const home=fs.readFileSync('src/OmegaHome.tsx','utf8');
+const css=fs.readFileSync('src/homeInstrument.css','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+must(home.includes("corpusState,decodeAddress,initCorpusPack"),'home must bind canonical corpus runtime');
+must(home.includes('initCorpusPack().then'),'home must initialize source model before metric reads');
+for(const token of ['metrics?.continuity','metrics?.plasticity','metrics?.contradiction','metrics?.burden','normalizedMotionRelativity','metrics?.evidence'])must(home.includes(token),`missing source-bound home channel ${token}`);
+must(home.includes('record?.autoPing.dataNext'),'home must expose admitted next-state route');
+must(home.indexOf("'/api/route-preview'")<home.indexOf("'/api/chat'"),'assistant must preserve route-before-generation order');
+for(const v of ['--oh-c','--oh-phi','--oh-q','--oh-burden','--oh-motion','--oh-evidence','--oh-scar'])must(home.includes(v)&&css.includes(v),`missing visual source variable ${v}`);
+must(css.includes('.core.stay')&&css.includes('.core.turn')&&css.includes('.core.escalate'),'decision state must modulate core without text-only dependence');
+must(home.includes("aria-label='OMEGA source-bound visual start field'"),'home instrument needs explicit accessible semantic label');
+console.log('HOME_INSTRUMENT_INVARIANTS PASS');
