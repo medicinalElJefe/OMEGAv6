@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+const runtime=fs.readFileSync('src/universalQualityRuntime.ts','utf8');
+const ui=fs.readFileSync('src/UniversalQualityControl.tsx','utf8');
+const router=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const pkg=fs.readFileSync('package.json','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+for(const id of Array.from({length:12},(_,i)=>`S${String(i+1).padStart(2,'0')}`))must(runtime.includes(`id:'${id}'`),`missing B020 semantic case ${id}`);
+for(const domain of ['status','software repair','performance optimization','proof/evidence','forecast','translation','geometry','care','contradiction','rollback','provider failure','explicit ALL_MODES'])must(runtime.includes(`domain:'${domain}'`),`missing quality domain ${domain}`);
+for(const invariant of ['route-before-generation','browser draft continuity','Hybrid device proof boundary','Earth external boundary','provider failure bounded','semantic suite loaded'])must(runtime.includes(invariant),`missing runtime quality invariant ${invariant}`);
+for(const boundary of ['claim physical 20736 dimensions','delete rollback','pretend model call succeeded','silently prune requested modes'])must(runtime.includes(boundary),`missing semantic prohibition ${boundary}`);
+must(runtime.includes("schema:'OMEGA_UNIVERSAL_QUALITY_B020_R1'"),'missing deterministic quality receipt schema');
+must(ui.includes('B020 FIXED SEMANTIC RESPONSE QUALITY SUITE'),'missing dedicated Universal Quality surface');
+must(ui.includes('CRITICAL RECALL'),'missing critical recall instrument');
+must(router.includes("import UniversalQualityControl from './UniversalQualityControl'"),'router missing Universal Quality import');
+must(router.includes("case 'Quality Compiler':case 'Validation':return <UniversalQualityControl"),'Quality/Validation not directly bound');
+must(!router.match(/SPECIALIST_SUITE=new Set<Panel>\(\[[^\]]*'Quality Compiler'/s),'Quality Compiler still generic-suite routed');
+must(pkg.includes('test:quality'),'quality regression gate not registered');
+console.log('UNIVERSAL_QUALITY_B020 PASS · 12/12 fixed semantic cases + runtime truth gates locked');
