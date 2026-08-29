@@ -7,6 +7,8 @@ const home=read('src/OmegaHome.tsx');
 const shell=read('src/ResponsiveRuntimeShell.tsx');
 const command=read('src/OmegaCommandDeck.tsx');
 const hybrid=read('src/HybridMissionControl.tsx');
+const hybridR8=read('src/HybridMissionControlR8.tsx');
+const earthR8=read('src/EarthObservatoryR8.tsx');
 
 assert.doesNotMatch(launcher,/<button className='omega-nexus-card'/,'launcher cards may not be buttons containing nested favorite buttons');
 assert.match(launcher,/className='omega-nexus-card'[^>]*role='button'[^>]*tabIndex=\{0\}/,'launcher cards must be keyboard-focusable controls');
@@ -24,10 +26,12 @@ assert.match(workstation,/onClick=\{\(\)=>chooseMode\(x\)\}/,'mode result button
 assert.match(workstation,/visibleModes/,'mode view policy must change the visible mode result set');
 assert.match(workstation,/selectedMode/,'selected mode state must be retained');
 assert.match(workstation,/ALL MODES REMAIN EXECUTED/,'mode filtering must not falsely disable computation');
-assert.match(workstation,/case 'Hybrid Link':return withPhase\(<HybridMissionControl/,'Hybrid route must execute its specialist application');
+assert.match(workstation,/case 'Hybrid Link':return withPhase\(<HybridMissionControlR8/,'Hybrid route must execute R8 governed specialist application');
 assert.match(workstation,/case 'Matter Traversal':return withPhase\(<MatterTraversal/,'Matter route must execute its specialist application');
 assert.match(workstation,/case 'Relativity':return withPhase\(<RelativityLab/,'Relativity route must execute its specialist application');
-assert.match(workstation,/case 'Earth Now':return withPhase\(<EarthNowInstrument/,'Earth route must execute its specialist application');
+assert.match(workstation,/case 'Earth Now':return withPhase\(<EarthObservatoryR8/,'Earth route must execute R8 observatory specialist application');
+assert.match(workstation,/case 'SAI Lab':return[\s\S]*?<SAISovereignControl/,'SAI Lab must execute sovereign SAI control');
+assert.match(earthR8,/EarthNowInstrument/,'Earth R8 must preserve the prior WGS84\/UTC instrument under live evidence');
 
 assert.match(home,/onClick=\{\(\)=>enter\(panel\)\}/,'home journey cards must navigate');
 assert.match(home,/onClick=\{\(\)=>void ask\(\)\}/,'home assistant ask button must execute');
@@ -36,6 +40,8 @@ assert.match(shell,/onClick=\{\(\)=>onNavigate\(name\)\}/,'runtime menu controls
 assert.match(command,/onRun=\{onRun\}/,'command orchestrator must receive the executable assistant run callback');
 assert.match(command,/onClick=\{\(\)=>onNavigate\('Matter Traversal'\)\}/,'command deck Matter button must navigate');
 assert.match(command,/onClick=\{\(\)=>onNavigate\('Hybrid Link'\)\}/,'command deck Hybrid button must navigate');
-assert.match(hybrid,/onClick=\{submit\}/,'Hybrid compile control must execute mission compilation');
+assert.match(hybrid,/onClick=\{submit\}/,'Hybrid donor compile control must execute mission compilation');
+assert.match(hybridR8,/onClick=\{compile\}/,'R8 Hybrid governed draft control must execute');
+assert.match(hybridR8,/onClick=\{validate\}/,'R8 Hybrid validation control must execute');
 
-console.log('interaction contract invariants PASS · 44 routes + actionable launcher/modes/home/command/hybrid controls');
+console.log('interaction contract invariants PASS · 44 routes + R8 Earth/Hybrid/SAI + actionable launcher/modes/home/command controls');
