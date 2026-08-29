@@ -14,7 +14,7 @@ const DOMAIN_SECTIONS=[
  {id:'INTELLIGENCE',label:'Intelligence',subtitle:'Modes, SAI, memory, guidance',icon:'intelligence',items:['Modes','Kernel Intelligence','SAI Lab','Memory','Instructions']},
  {id:'BUILD',label:'Build',subtitle:'Develop, render, organize',icon:'build',items:['Development','Build Out','Projects','Render Queue','Assets','Quality Compiler']},
  {id:'PROOF',label:'Evidence',subtitle:'Proof, validation, archive',icon:'proof',items:['Evidence & Proof','Archive Census','Archive Operators','Validation']},
- {id:'SYSTEM',label:'System',subtitle:'Hybrid, governance, configuration',icon:'system',items:['Hybrid Link','Governance','Consolidation','Canon Evolution','Plugins','Settings','System','System Atlas','Control Matrix']}
+ {id:'SYSTEM',label:'System & Control',subtitle:'Hybrid, governance, configuration',icon:'system',items:['Hybrid Link','Governance','Consolidation','Canon Evolution','Plugins','Settings','System','System Atlas','Control Matrix']}
 ] as const;
 function icon(kind:string){return kind==='command'?<Command/>:kind==='visual'?<Sparkles/>:kind==='earth'?<Globe2/>:kind==='intelligence'?<BrainCircuit/>:kind==='build'?<Layers3/>:kind==='proof'?<ShieldCheck/>:<Waypoints/>}
 function readList(key:string){try{const x=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(x)?x.filter(v=>typeof v==='string'):[]}catch{return[]}}
