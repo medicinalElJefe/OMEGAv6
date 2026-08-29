@@ -11,7 +11,8 @@
     "test:routes": "node tests/route-cases.mjs",
     "test:restore": "node tests/restore-invariants.mjs",
     "test:navigation": "node tests/navigation-coherence.mjs",
-    "check:static": "node --check src/worker.js && npm run test:routes && npm run test:restore && npm run test:navigation",
+    "test:home": "node tests/home-instrument.mjs",
+    "check:static": "node --check src/worker.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home",
     "check": "npm run check:static && npm run build"
   },
   "dependencies": {
