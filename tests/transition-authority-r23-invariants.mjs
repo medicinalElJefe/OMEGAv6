@@ -1,0 +1,13 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const runtime=fs.readFileSync('src/transitionAuthorityR23.ts','utf8'),panel=fs.readFileSync('src/TransitionProofPanelR23.tsx','utf8'),traversal=fs.readFileSync('src/OmegaTraversalStudio.tsx','utf8'),modes=fs.readFileSync('src/SourceBackedModesPanelR21.tsx','utf8'),authority=fs.readFileSync('src/capabilityAuthority.ts','utf8');
+for(const x of ['OMEGA_CANONICAL_TRANSITION_R23','beforeHash','afterHash','transitionHash','selectedOperator','rejectedOperators','scarCarry','externalEvidenceAdded:false','sceneRevision:1','returnAddress','SOURCE_TRANSITION_VERIFIED'])assert(runtime.includes(x),`transition authority missing ${x}`);
+for(const op of ['CARRY','CONSTRUCT','PRUNE','TURN','ESCALATE'])assert(runtime.includes(`'${op}'`),`dispatch order missing ${op}`);
+assert(runtime.includes('autoPing.dataNext'),'canonical transition must use exact admitted source next state');
+assert(runtime.includes('sha256Hex'),'transition packet fingerprints must use existing SHA-256 evidence primitive');
+assert(runtime.includes('does not establish an external physical event'),'transition truth boundary missing');
+assert(panel.includes('Ledger receipt')&&panel.includes('appendSaiLedger'),'transition receipt must be ledgerable');
+assert(panel.includes('Apply admitted next')&&panel.includes('Export'),'transition receipt must provide real state action/export controls');
+assert(traversal.includes('TransitionProofPanelR23')&&modes.includes('TransitionProofPanelR23'),'traversal and modes must consume one transition authority');
+assert(!traversal.includes("const CAMERAS=")&&!traversal.includes("const ROUTES="),'decorative duplicate camera/route controls must remain removed');
+assert(authority.includes("'Immersive Traversal':'RESTORATION_DEBT'")&&authority.includes("'Extreme Traversal':'RESTORATION_DEBT'"),'duplicate traversal variants must remain hidden until distinct semantics exist');
+console.log('OMEGA R23 TRANSITION PASS · one source transition authority + SHA-256 proof + no decorative traversal controls');
