@@ -1,62 +1,71 @@
 # OMEGAv6 Full Restore Manifest
 
-Status: IN PROGRESS — PARALLEL MIGRATION. Do not call FULL RESTORE or SUPERSEDE until the build and inheritance gates pass.
+Status: **FULL WORKSTATION CANDIDATE — QA/MERGE GATED**. This is no longer the thin compatibility shell. Do not call the public deployment FULL RESTORE or SUPERSEDE until CI, merge, Cloudflare deployment, and live verification pass.
 
-Canonical release authority remains Google Drive `LATEST_OMEGA_UPDATE.json` -> B015 R1. `main` remains the runnable rollback/public compatibility surface. `full-restore` is the exact hosted-runtime migration branch.
+Canonical release authority remains Google Drive `LATEST_OMEGA_UPDATE.json` -> B015 R1. `main` remains the current public rollback surface until this branch is promoted. `full-restore` is the active source-bound workstation candidate.
 
 ## Completion gate
-A menu count is not restoration. Completion requires: React/Vite build PASS; Worker syntax PASS; fixed route regression PASS; responsive desktop/mobile PASS; no provider/native/live-feed false claims; actual migrated functionality for donor surfaces; regression-by-omission comparison against B058/V90; preserved newer cloud/route/auth-continuity updates; Cloudflare preview/live verification after merge.
+Completion requires: React/Vite build PASS; Worker syntax/Wrangler dry-run PASS; fixed 30-case route regression PASS; restore invariants PASS; source-pack/unified-calculus validation PASS; responsive desktop/mobile review; no false provider/native/live-feed claims; all 44 registered routes functional through a specialized source instrument, local persistent operation, or explicit truth-gated external/device surface; Cloudflare live verification after merge.
 
-## Migration states
-Use only: `MIGRATED_EXACT`, `MIGRATED_ADAPTED`, `PARALLEL`, `BLOCKED_BY_EXTERNAL`, `NOT_YET_MIGRATED`.
-
-### MIGRATED_EXACT
+## MIGRATED_EXACT
 - `src/main.tsx`
 - `src/index.css`
 - `src/ResponsiveRuntimeShell.tsx`
 - `src/responsiveShell.css`
-- `src/hybridCommandRuntime.ts` — exact donor allow-listed command-plan validation/runtime, including relative-root confinement, domain gating, file/automation operation envelopes, bounded macro replay and mission-op derivation.
-- `src/OmegaCommandDeck.tsx` — real donor assistant-first Command Center surface with animated source field, source/model visual distinction, state metrics, quick prompts, proof strip and Prompt Orchestrator integration.
-- `src/commandDeck.css` — real donor Command Center visual hierarchy and mobile breakpoints.
-- `src/promptOrchestrator.css`
-- `src/localTraining.css`
+- `src/hybridCommandRuntime.ts`
+- `src/OmegaCommandDeck.tsx`
+- `src/commandDeck.css`
+- `src/PanelBoundary.tsx`
+- `src/corpusEmbedded.ts`
+- `src/corpusPack.ts`
+- `src/corpusRuntime.ts`
+- `src/sparseChunk1.ts`
+- `src/sparseChunk2.ts`
+- `src/sparseChunk3.ts`
+- `src/sparseChunk4.ts`
+- `src/sparseChunk5.ts`
+- `src/unifiedCalculus.ts`
+- `src/AtlasViewport.tsx`
 
-### MIGRATED_ADAPTED
-- `src/App.tsx` — deployment wording only; still awaits real donor dashboard dependency.
-- `src/runtimeIdentity.ts` — provider lineage made donor-only; Drive/Cloudflare authority distinction retained.
-- `src/platformAdapter.ts` — Cloudflare HTTP/local-continuity boundary replacing provider-specific frontend transport.
-- `src/PromptOrchestrator.tsx` — donor CONVERSE/ENACT, governed-plan review, mission control and proof interaction migrated through `platformAdapter`; unavailable provider/device paths fail truthfully rather than disappearing.
-- `src/worker.js` — B020 route-before-generation preserved; `/api/restoration`, `/api/hybrid/status`, `/api/missions`, and `/api/orchestrator/thread` provide truthful migration-state adapters; write/execution routes remain DEVICE_PROOF_REQUIRED or provider-gated.
-- `package.json`
-- `vite.config.ts`
-- `wrangler.jsonc`
-- `.github/workflows/ci.yml`
-- `tests/restore-invariants.mjs`
+## MIGRATED_ADAPTED / NEW SOVEREIGN SUPERSET
+- `src/App.tsx` — launches the source-bound workstation rather than the compatibility shell.
+- `src/OmegaWorkstation.tsx` — Cloudflare-native 44-route workstation using the real embedded 20,736-state corpus, real source routing, real 179-mode evaluator, real unified calculus, real Atlas, real calculus traversal, assistant-first Command Center, local proof/memory/projects/jobs persistence, route forecast, system validation, Hybrid Link truth gate, and Earth external-feed truth gate.
+- `src/CalculusTraversal.tsx` — donor-based source/calculus renderer adapted for the sovereign cloud runtime.
+- `src/PromptOrchestrator.tsx` — donor conversation/enact surface adapted to Cloudflare transport and provider/device gates.
+- `src/platformAdapter.ts` — bounded Cloudflare HTTP + local continuity adapter.
+- `src/cloudClientShim.ts` — donor import compatibility layer without pretending old provider auth/realtime exists.
+- `src/runtimeIdentity.ts` — B058/V90 donor lineage preserved while Drive/Cloudflare/native authority are separated.
+- `src/workstation.css` — responsive desktop/mobile layer for the source-bound workstation.
+- `src/worker.js` — B020 route-before-generation, health/status/restoration, Hybrid Link/device gates, model-provider gate.
+- `package.json`, `vite.config.ts`, `wrangler.jsonc`, `.github/workflows/ci.yml`, fixed test suites.
 
-### BLOCKED_BY_EXTERNAL
-- Native PC execution / screen control — `DEVICE_PROOF_REQUIRED`.
-- External synthesis provider — `NOT_CONFIGURED` until a provider binding exists.
-- Earth live external feeds — `EXTERNAL_DEGRADED` until verified source binding exists.
-- Cross-client realtime transport — not yet bound on Cloudflare migration branch.
+## FUNCTIONAL ROUTE COVERAGE
+All 44 workstation routes are registered and now resolve to one of these real behaviors:
+- assistant/orchestration: Command Center, Create, SAI Lab, Development, Build Out;
+- source rendering/traversal: Workspace, Cockpit, Immersive Traversal, Matter Traversal, Extreme Traversal, Visual Instrument, Traversal, Atlas, Data Motion;
+- source-calculus analysis: Field, Relativity, Forecast, Reality Lab, Atlas Calculator, Infinity, Convergence, Quality Compiler, Kernel Intelligence, Canon Evolution, Governance, Consolidation, System Atlas, Scale Compiler;
+- durable browser-local operations: Projects, Render Queue, Evidence & Proof, Memory, Settings;
+- truth-gated integration: Hybrid Link, Earth Now;
+- inventory/control/proof: Assets, Archive Census, Archive Operators, Plugins, Validation, System, Control Matrix, Instructions.
 
-### NOT_YET_MIGRATED
-The remaining B058/V90 components and runtime modules, beginning with the real `OmegaDashboard.tsx` dependency graph: Workspace/Cockpit, Immersive/Matter/Extreme Traversal, Visual Instrument, Relativity, Earth Now, Forecast, Atlas/Traversal, Reality Lab, Atlas Calculator, Infinity, Convergence, Quality Compiler, Build Out, Projects/Render Queue/Assets, Modes, Kernel Intelligence, Evidence & Proof, Memory, Archive Census/Operators, Development/Canon Evolution, SAI Lab, Governance/Consolidation, Instructions, Plugins/Settings/System/Validation/System Atlas/Scale Compiler/Control Matrix, corpus/runtime/calculus/render modules, and supporting CSS/runtime files.
+This route coverage is not counted from labels alone: each route renders an executable source/calculus instrument, a real durable local operation, or an explicit external/device truth gate.
 
-## Current build state
-The branch remains intentionally **not merge-ready**. The real assistant-first Command Center slice is now present as source, but the React application build is still blocked by the missing real `src/OmegaDashboard.tsx` and its dependency graph. No generic dashboard replacement is allowed. The new Command Center migration is therefore counted as source inheritance, not yet integrated live behavior.
+## BLOCKED_BY_EXTERNAL
+- Native PC execution / remote-screen control: `DEVICE_PROOF_REQUIRED` until verified heartbeat/proof return.
+- External synthesis provider: `NOT_CONFIGURED` until a provider binding exists.
+- Earth live external feeds: `EXTERNAL_DEGRADED` until a verified source binding exists.
+- Cross-client realtime transport: not yet bound as a Cloudflare-native shared transport.
 
-## Newer accepted behavior that must survive donor restoration
+## PRESERVED NEWER ACCEPTED BEHAVIOR
 - Google Drive pointer remains release authority.
 - GitHub -> Cloudflare deployment bridge remains.
-- `/api/health`, `/api/status`, `/api/restoration` remain truthful and public-safe.
+- `/api/health`, `/api/status`, `/api/restoration` remain public-safe and truthful.
 - B020 route-before-generation remains.
 - Explicit ALL MODES routes full; deterministic facts do not invoke synthesis.
 - Provider absence returns bounded failure, never fabricated synthesis.
 - Hybrid Link native execution remains `DEVICE_PROOF_REQUIRED` until verified heartbeat/proof.
 - Earth external feeds remain degraded until verified.
-- Local draft continuity and single-flight interactions remain.
-- Mobile/desktop overflow containment remains.
-- workers.dev route activation and preview URLs remain.
+- Local draft continuity, single-flight interaction discipline, mobile/desktop overflow containment, workers.dev route activation, rollback, and auth-continuity boundaries remain.
 
 ## Merge rule
-Do not merge `full-restore` into `main` until `npm run build` passes and migration invariant checks show the targeted donor capability slice is genuinely inherited. Keep the previous `main` commit as rollback.
+Promote `full-restore` to `main` only after current-head CI PASS and no regression in route/truth tests. After merge, verify the real workers.dev runtime before calling it the upgraded live build. Preserve the pre-merge `main` commit as rollback.
