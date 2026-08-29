@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const app=fs.readFileSync('src/App.tsx','utf8');
+const css=fs.readFileSync('src/omegaInterfaceR16.css','utf8');
+assert(app.includes("import './omegaInterfaceR16.css'"),'R16 interface authority must be mounted');
+assert(app.indexOf("omegaInterfaceR16.css")>app.indexOf("omegaProfessionalR13.css"),'R16 must load after inherited presentation layers');
+assert(css.includes('.special-app{')&&css.includes('border:0;border-radius:0;background:transparent;box-shadow:none'),'application workspace must stop presenting every screen as one giant rounded card');
+assert(css.includes('Controls have hierarchy instead of every action being the same teal rounded rectangle'),'control hierarchy intent must remain explicit');
+assert(css.includes('.primary-action')&&css.includes('background:#d9e5e2'),'primary actions must be visually distinct from segmented navigation');
+assert(css.includes('.create-paths{display:grid')&&css.includes('min-height:92px'),'creation choices must use task-card grammar distinct from toolbars');
+assert(css.includes('.mode-map{display:grid')&&css.includes('gap:1px'),'mode inspection must use dense analytical matrix grammar');
+assert(css.includes('.omega-nexus-r13{width:min(620px,92vw)')&&css.includes('border-radius:0'),'application switcher must be edge-attached rather than a floating rounded modal');
+assert(css.includes('.omega-r13-app-list .omega-nexus-fav{opacity:0}'),'secondary favorite controls must stay quiet until interaction');
+assert(css.includes('@media(max-width:760px)'),'R16 must have mobile-specific hierarchy');
+assert(!css.includes('@appdeploy/client'),'interface layer must remain provider-portable');
+console.log('PASS interface-hierarchy-r16-invariants');
