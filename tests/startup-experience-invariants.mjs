@@ -5,12 +5,15 @@ const daily=fs.readFileSync('src/dailyBrief.ts','utf8');
 const phase=fs.readFileSync('src/PhaseWheel.tsx','utf8');
 const shell=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
 const menu=fs.readFileSync('src/menuUniverse.css','utf8');
+const modeRuntime=fs.readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
 const experience=fs.readFileSync('src/experienceR4.css','utf8');
 const fail=(m)=>{throw new Error(m)};
 
-for(const token of ['dailyBrief()','OMEGA curated operating lesson','TODAY\'S FIELD LESSON','OPEN FULL WORKSTATION','/api/route-preview','/api/chat','ALL MODES ACTIVE']){
+for(const token of ['dailyBrief()','OMEGA curated operating lesson','TODAY\'S FIELD LESSON','OPEN FULL WORKSTATION','/api/route-preview','/api/chat','SOURCE-BACKED MODES']){
   if(!(home+daily).includes(token))fail(`startup experience missing ${token}`);
 }
+if(home.includes('ALL MODES ACTIVE'))fail('startup may not claim the 179-row catalog is fully executed');
+if(!home.includes('sourceBackedModeSummary')||!home.includes('appliedModeCount')||!home.includes('gatedModeCount')||!modeRuntime.includes('GATED_MISSING_INPUTS'))fail('startup source-backed mode authority incomplete');
 for(const token of ['PHASE AWARENESS · SOURCE-BOUND','Selecting a phase changes the real OMEGA address'])if(!phase.includes(token))fail(`phase experience missing ${token}`);
 for(const destination of ['Field','Evidence & Proof','Relativity','Matter Traversal','Memory','Scale Compiler','Forecast','Extreme Traversal']){
   if(!shell.includes(`'${destination}'`)&&!home.includes(`'${destination}'`))fail(`daily destination not routed: ${destination}`);
@@ -22,4 +25,4 @@ for(const token of ['nav20-desktop','nav20-context','nav20-breadcrumb','nav20-mo
 if(shell.includes('responsive-shell-rail')||shell.includes('mobile-runtime-console')||shell.includes('rr-workstation-menu'))fail('legacy navigation shell must not remain active');
 for(const token of ['.r4-welcome','.r4-journeys','.r4-conversation','.r4-daily'])if(!experience.includes(token))fail(`R4 startup visual hierarchy missing ${token}`);
 if(home.includes('@appdeploy/client')||daily.includes('@appdeploy/client')||shell.includes('@appdeploy/client'))fail('AppDeploy runtime dependency is forbidden');
-console.log('startup experience invariants: PASS · 44 routes on R20 professional navigation');
+console.log('startup experience invariants: PASS · 44 routes + source-backed modes');
