@@ -11,7 +11,7 @@
     "test:routes": "node tests/route-cases.mjs",
     "test:restore": "node tests/restore-invariants.mjs",
     "test:navigation": "node tests/navigation-coherence.mjs",
-    "test:home": "node tests/home-instrument-invariants.mjs && node tests/home-quick-nav-invariants.mjs && node tests/startup-experience-invariants.mjs && node tests/ux-surpass-r2-invariants.mjs && node tests/ux-surpass-r3-invariants.mjs",
+    "test:home": "node tests/home-instrument-invariants.mjs && node tests/home-quick-nav-invariants.mjs && node tests/startup-experience-invariants.mjs && node tests/ux-surpass-r2-invariants.mjs && node tests/ux-surpass-r3-invariants.mjs && node tests/experience-r4-invariants.mjs",
     "test:portability": "node tests/portability-invariants.mjs",
     "test:applications": "node tests/full-application-routing.mjs",
     "test:cloud": "node tests/cloud-bridge-invariants.mjs",
