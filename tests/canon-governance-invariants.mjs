@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+const runtime=fs.readFileSync('src/canonGovernanceRuntime.ts','utf8');
+const ui=fs.readFileSync('src/CanonGovernanceControl.tsx','utf8');
+const router=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+for(const stage of ['OBSERVATION','TRANSLATION','ATLAS_MAPPING','SEMANTIC_STATE','TRANSFORMATION_PROOF','FACE_CONSISTENCY','FACE_REPAIR','STEWARDSHIP','COUNTERFACTUAL_GOVERNANCE','MULTISTATE_ARBITRATION','FEDERATED_CONSENSUS','REPLAY_VALIDATION','GOVERNANCE_CALIBRATION'])must(runtime.includes(`'${stage}'`),`missing Canon stage ${stage}`);
+must(runtime.includes('single CanonicalState'),'single CanonicalState continuity missing');
+must(runtime.includes("status:admitted?'ADMITTED':'HELD'"),'proof-gated candidate state missing');
+must(runtime.includes('explicit admission required'),'explicit admission boundary missing');
+must(runtime.includes('live webcam and Windows EXE behavior remain unverified'),'donor truth boundary missing');
+must(ui.includes('CANONCONSOLE OMEGA v24'),'v24 UI identity missing');
+must(ui.includes('Explicit admit'),'explicit admission control missing');
+must(router.includes("import CanonGovernanceControl from './CanonGovernanceControl'"),'Canon control not imported');
+must(router.includes("case 'Canon Evolution':return <CanonGovernanceControl record={record} evolution/>"),'Canon Evolution not direct-routed');
+must(router.includes("case 'Governance':return <CanonGovernanceControl record={record}/>"),'Governance not direct-routed');
+must(!router.match(/SPECIALIST_SUITE=new Set<Panel>\([^\n]*'Canon Evolution'/),'Canon Evolution fell back to generic suite');
+console.log('CANON_GOVERNANCE PASS · v24 13-stage sovereign CanonicalState governance locked');
