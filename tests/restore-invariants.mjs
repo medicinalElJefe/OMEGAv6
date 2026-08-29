@@ -15,9 +15,9 @@ const corpusRuntime = fs.readFileSync(new URL('../src/corpusRuntime.ts', import.
 const unified = fs.readFileSync(new URL('../src/unifiedCalculus.ts', import.meta.url), 'utf8');
 
 assert.match(worker, /\/api\/restoration/, 'worker must expose restoration status');
-assert.match(worker, /fullRestoreClaimed:\s*false/, 'worker must not claim completed restoration before live promotion verification');
-assert.match(worker, /MERGE_CANDIDATE_NOT_YET_PROMOTED/, 'worker must classify the current lineage as an unpromoted merge candidate');
-assert.match(worker, /FULL_WORKSTATION_CANDIDATE/, 'worker must expose the current candidate state truthfully');
+assert.match(worker, /fullRestoreClaimed:\s*false/, 'worker must not claim completed restoration before live deployment verification');
+assert.match(worker, /PROMOTED_MERGE_NOT_FULL_RESTORE/, 'worker must classify the merged lineage without claiming full restoration');
+assert.match(worker, /PROMOTED_WORKSTATION_AWAITING_LIVE_VERIFICATION/, 'worker must expose the post-merge verification gate truthfully');
 assert.match(worker, /DEVICE_PROOF_REQUIRED/, 'native host must remain device-proof gated');
 assert.match(worker, /EXTERNAL_DEGRADED_UNTIL_BOUND/, 'Earth feeds must remain externally degraded until verified');
 assert.match(worker, /MODEL_PROVIDER_NOT_CONFIGURED/, 'provider absence must fail boundedly');
@@ -26,8 +26,8 @@ assert.match(worker, /\/api\/orchestrator\/thread/, 'command-center donor must h
 assert.doesNotMatch(adapter, /@appdeploy\/client/, 'Cloudflare adapter must not depend on AppDeploy client');
 assert.match(adapter, /localStorage/, 'adapter must preserve browser-local continuity');
 assert.match(adapter, /AbortController/, 'adapter must bound network waits');
-assert.match(manifest, /FULL WORKSTATION CANDIDATE/, 'manifest must identify this as a candidate, not a completed public restore');
-assert.match(manifest, /Do not call the public deployment FULL RESTORE/, 'manifest must retain the no-false-completion gate');
+assert.match(manifest, /PROMOTED WORKSTATION/, 'manifest must identify the post-merge workstation state');
+assert.match(manifest, /does \*\*not\*\* claim FULL RESTORE/, 'manifest must retain the no-false-completion gate after promotion');
 assert.match(responsiveShell, /ALL 24 SOFTWARE FAMILIES/, 'real donor responsive shell must retain 24-family registry');
 assert.match(responsiveShell, /MODE188\+ admission/, 'real donor responsive shell must retain Mode188 visual semantics');
 assert.match(responsiveShell, /S = \(CΩ · Φ\) \/ \(q \+ Λ \+ ε\)/, 'real donor shell must retain canonical kernel display');
