@@ -15,7 +15,7 @@
     "test:portability": "node tests/portability-invariants.mjs",
     "test:applications": "node tests/full-application-routing.mjs",
     "test:cloud": "node tests/cloud-bridge-invariants.mjs",
-    "test:visual": "node tests/visual-identity-invariants.mjs && node tests/living-visual-r10-invariants.mjs && node tests/navigation-button-polish-r11-invariants.mjs && node tests/all-modes-authority-r12-invariants.mjs",
+    "test:visual": "node tests/visual-identity-invariants.mjs && node tests/living-visual-r10-invariants.mjs && node tests/navigation-button-polish-r11-invariants.mjs && node tests/all-modes-authority-r12-invariants.mjs && node tests/forecast-motion-r13-invariants.mjs",
     "test:depth": "node tests/depth-traversal-invariants.mjs",
     "test:lineage": "node tests/compiler-lineage-invariants.mjs",
     "test:pc-spine": "node tests/pc-execution-spine-invariants.mjs",
