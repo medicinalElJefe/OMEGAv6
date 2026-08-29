@@ -20,7 +20,8 @@
     "test:lineage": "node tests/compiler-lineage-invariants.mjs",
     "test:pc-spine": "node tests/pc-execution-spine-invariants.mjs",
     "test:trajectory": "node tests/trajectory-steering-invariants.mjs",
-    "check:static": "node --check src/worker.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud && npm run test:visual && npm run test:depth && npm run test:lineage && npm run test:pc-spine && npm run test:trajectory",
+    "test:world": "node tests/world-model-learning-invariants.mjs",
+    "check:static": "node --check src/worker.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud && npm run test:visual && npm run test:depth && npm run test:lineage && npm run test:pc-spine && npm run test:trajectory && npm run test:world",
     "check": "npm run check:static && npm run build"
   },
   "dependencies": {
