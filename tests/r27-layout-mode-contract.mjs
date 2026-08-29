@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+const shell=fs.readFileSync('src/SingleFrameRuntimeShellR27.tsx','utf8');
+const css=fs.readFileSync('src/singleFrameR27.css','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+for(const mode of ['AUTO','DESKTOP','MOBILE'])must(shell.includes(`'${mode}'`),`missing layout mode ${mode}`);
+must(shell.includes("uiMode==='MOBILE'||(uiMode==='AUTO'&&small)"),'AUTO/MOBILE selection contract missing');
+must(!shell.includes("uiMode==='DESKTOP'&&small"),'DESKTOP must not silently fall back to mobile');
+must(css.includes("html[data-omega-frame='desktop'] .omega-workstation-v2{padding-left:var(--r27-rail)"),'desktop frame must reserve its rail in layout rather than cover content');
+must(css.includes("html[data-omega-frame='mobile'] .omega-workstation-v2 .workstation-main{padding:68px 10px 14px"),'mobile frame must reserve header space');
+must(css.includes("html[data-omega-frame='mobile'] .omega-workstation-v2{padding-left:0")&&css.includes('padding-bottom:66px'),'mobile frame must reserve bottom navigation space');
+console.log('R27 LAYOUT MODE CONTRACT PASS · content reflows instead of being covered');
