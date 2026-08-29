@@ -27,7 +27,7 @@ export const OMEGA_CAPABILITY_AUTHORITY:readonly CapabilityContract[]=[
 {name:'Infinity',family:'Persistent Packet',implementation:'SPECIALIST',views:V('FIELD','GRAPH','CANON'),boundary:'SOURCE_PACKET',purpose:'recursive lawful scale relationships'},
 {name:'Convergence',family:'Living Membrane',implementation:'SHARED_SUITE',views:V('FIELD','GRAPH','EVIDENCE'),boundary:'SOURCE_PACKET',purpose:'compare routes toward coherent closure'},
 {name:'Quality Compiler',family:'Proof / Governance',implementation:'SPECIALIST',views:V('GRAPH','EVIDENCE','CANON'),boundary:'EVIDENCE_BOUND',purpose:'compile invariant and quality evidence'},
-{name:'Build Out',family:'Recovery / Packaging',implementation:'SPECIALIST',views:V('ASSEMBLY','GRAPH','EVIDENCE'),boundary:'LOCAL_ARTIFACT',purpose:'restore, integrate, test and package'},
+{name:'Build Out',family:'Recovery / Packaging',implementation:'SPECIALIST',views:V('ASSEMBLY','GRAPH','EVIDENCE'),boundary:'LOCAL_ARTIFACT',purpose:'historical restoration/build-plan surface; source mutation, tests, packaging and deployment are not embedded in the Worker'},
 {name:'Projects',family:'Atlas OS',implementation:'SHARED_SUITE',views:V('ASSEMBLY','GRAPH'),boundary:'LOCAL_ARTIFACT',purpose:'persist and organize project work'},
 {name:'Render Queue',family:'Rendering / Media',implementation:'SHARED_SUITE',views:V('ASSEMBLY','MATERIAL','EVIDENCE'),boundary:'LOCAL_ARTIFACT',purpose:'queue deterministic packet/proof export artifacts; GPU image/video production is not claimed'},
 {name:'Assets',family:'Control Planes',implementation:'SHARED_SUITE',views:V('ASSEMBLY','EVIDENCE'),boundary:'LOCAL_ARTIFACT',purpose:'ingest browser-local donor metadata before admission'},
@@ -37,7 +37,7 @@ export const OMEGA_CAPABILITY_AUTHORITY:readonly CapabilityContract[]=[
 {name:'Memory',family:'Persistent Packet',implementation:'SHARED_SUITE',views:V('GRAPH','SKIN','EVIDENCE'),boundary:'LOCAL_ARTIFACT',purpose:'retain browser-local packet/project memory and scar continuity'},
 {name:'Archive Census',family:'Artifact Governance',implementation:'SPECIALIST',views:V('GRAPH','EVIDENCE','CANON'),boundary:'EVIDENCE_BOUND',purpose:'inventory and classify donor lineage'},
 {name:'Archive Operators',family:'Artifact Governance',implementation:'SPECIALIST',views:V('GRAPH','ASSEMBLY','EVIDENCE'),boundary:'EVIDENCE_BOUND',purpose:'operate restoration admission decisions'},
-{name:'Development',family:'Recovery / Packaging',implementation:'INLINE',views:V('ASSEMBLY','GRAPH','EVIDENCE'),boundary:'LOCAL_ARTIFACT',purpose:'restore and surpass through tested builds'},
+{name:'Development',family:'Recovery / Packaging',implementation:'INLINE',views:V('ASSEMBLY','GRAPH','EVIDENCE'),boundary:'PROVIDER_BOUND',purpose:'provider-assisted development planning and continuity; repository mutation and promotion occur only through the governed external build path'},
 {name:'Canon Evolution',family:'CanonForge',implementation:'SHARED_SUITE',views:V('GRAPH','EVIDENCE','CANON'),boundary:'EVIDENCE_BOUND',purpose:'record proposals; proposals are not canon until separately admitted'},
 {name:'SAI Lab',family:'AI Cockpit',implementation:'SPECIALIST',views:V('FIELD','GRAPH','EVIDENCE','CANON'),boundary:'PROVIDER_BOUND',purpose:'develop intelligence behavior against packet authority'},
 {name:'Governance',family:'CanonForge',implementation:'SHARED_SUITE',views:V('GRAPH','EVIDENCE','CANON'),boundary:'EVIDENCE_BOUND',purpose:'admit or hold runtime transitions'},
@@ -53,18 +53,12 @@ export const OMEGA_CAPABILITY_AUTHORITY:readonly CapabilityContract[]=[
 ] as const;
 export const CAPABILITY_BY_NAME=new Map(OMEGA_CAPABILITY_AUTHORITY.map(x=>[x.name,x]));
 export const SHARED_SUITE_DEBT=OMEGA_CAPABILITY_AUTHORITY.filter(x=>x.implementation==='SHARED_SUITE');
-
 const REALITY_OVERRIDES:Record<string,CapabilityReality>={
  'Command Center':'PROVIDER_GATED','Hybrid Link':'DEVICE_GATED','Workspace':'LOCAL_ACTIVE','Cockpit':'EVIDENCE_GATED','Immersive Traversal':'RESTORATION_DEBT','Extreme Traversal':'RESTORATION_DEBT','Earth Now':'EVIDENCE_GATED','Reality Lab':'EVIDENCE_GATED','Quality Compiler':'EVIDENCE_GATED','Evidence & Proof':'EVIDENCE_GATED','Archive Census':'EVIDENCE_GATED','Archive Operators':'EVIDENCE_GATED','Canon Evolution':'EVIDENCE_GATED','Governance':'EVIDENCE_GATED','Validation':'EVIDENCE_GATED','Kernel Intelligence':'PROVIDER_GATED','SAI Lab':'PROVIDER_GATED',
- 'Create':'LOCAL_ACTIVE','Build Out':'LOCAL_ACTIVE','Projects':'LOCAL_ACTIVE','Render Queue':'LOCAL_ACTIVE','Assets':'LOCAL_ACTIVE','Memory':'LOCAL_ACTIVE','Development':'LOCAL_ACTIVE','Settings':'LOCAL_ACTIVE','System':'EVIDENCE_GATED',
+ 'Create':'LOCAL_ACTIVE','Build Out':'RESTORATION_DEBT','Projects':'LOCAL_ACTIVE','Render Queue':'LOCAL_ACTIVE','Assets':'LOCAL_ACTIVE','Memory':'LOCAL_ACTIVE','Development':'PROVIDER_GATED','Settings':'LOCAL_ACTIVE','System':'EVIDENCE_GATED',
  'Consolidation':'RESTORATION_DEBT','Plugins':'DONOR_ONLY'
 };
-export function capabilityReality(name:string):CapabilityReality{
- const c=CAPABILITY_BY_NAME.get(name);
- if(!c)return 'RESTORATION_DEBT';
- if(REALITY_OVERRIDES[name])return REALITY_OVERRIDES[name];
- return c.boundary==='SOURCE_PACKET'?'SOURCE_ACTIVE':c.boundary==='DEVICE_PROOF'?'DEVICE_GATED':c.boundary==='PROVIDER_BOUND'?'PROVIDER_GATED':c.boundary==='EVIDENCE_BOUND'?'EVIDENCE_GATED':'LOCAL_ACTIVE';
-}
+export function capabilityReality(name:string):CapabilityReality{const c=CAPABILITY_BY_NAME.get(name);if(!c)return 'RESTORATION_DEBT';if(REALITY_OVERRIDES[name])return REALITY_OVERRIDES[name];return c.boundary==='SOURCE_PACKET'?'SOURCE_ACTIVE':c.boundary==='DEVICE_PROOF'?'DEVICE_GATED':c.boundary==='PROVIDER_BOUND'?'PROVIDER_GATED':c.boundary==='EVIDENCE_BOUND'?'EVIDENCE_GATED':'LOCAL_ACTIVE'}
 export function isPrimaryOperationalCapability(name:string){const r=capabilityReality(name);return r!=='DONOR_ONLY'&&r!=='RESTORATION_DEBT'}
 export const CAPABILITY_REALITY_LABEL:Record<CapabilityReality,string>={RUNTIME_ACTIVE:'LIVE',SOURCE_ACTIVE:'SOURCE',LOCAL_ACTIVE:'LOCAL',EVIDENCE_GATED:'EVIDENCE',DEVICE_GATED:'DEVICE',PROVIDER_GATED:'PROVIDER',RESTORATION_DEBT:'RESTORE',DONOR_ONLY:'DONOR'};
 export const CAPABILITY_BOUNDARY='View lenses are alternate presentations/inspections of the same authoritative packet. A lens does not create new evidence, a new physical dimension, or an independent state authority. Capability names are not proof of execution: primary navigation excludes DONOR_ONLY and RESTORATION_DEBT entries, and gated/local surfaces are labeled by their real boundary.';
