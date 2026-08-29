@@ -1,6 +1,6 @@
 {
   "name": "omegav6-full-restore",
-  "version": "21.0.0",
+  "version": "22.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
     "deploy": "wrangler deploy",
     "test:routes": "node tests/route-cases.mjs",
     "test:restore": "node tests/restore-invariants.mjs && node tests/restore-depth-r8-invariants.mjs && node tests/earth-ground-r9-invariants.mjs",
-    "test:navigation": "node tests/navigation-coherence.mjs && node tests/interaction-contract-invariants.mjs && node tests/actionable-controls-invariants.mjs && node tests/navigation-registry-r10-invariants.mjs && node tests/navigation-functional-domains-r12-invariants.mjs && node tests/professional-workspace-r13-invariants.mjs && node tests/interface-hierarchy-r16-invariants.mjs && node tests/capability-view-authority-r17-invariants.mjs && node tests/navigation-r20-workstation-invariants.mjs && node tests/source-backed-runtime-r21-invariants.mjs",
+    "test:navigation": "node tests/navigation-coherence.mjs && node tests/interaction-contract-invariants.mjs && node tests/actionable-controls-invariants.mjs && node tests/navigation-registry-r10-invariants.mjs && node tests/navigation-functional-domains-r12-invariants.mjs && node tests/professional-workspace-r13-invariants.mjs && node tests/interface-hierarchy-r16-invariants.mjs && node tests/capability-view-authority-r17-invariants.mjs && node tests/navigation-r20-workstation-invariants.mjs && node tests/source-backed-runtime-r21-invariants.mjs && node tests/mode-traversal-binding-r22-invariants.mjs",
     "test:home": "node tests/home-instrument-invariants.mjs && node tests/home-quick-nav-invariants.mjs && node tests/startup-experience-invariants.mjs && node tests/ux-surpass-r2-invariants.mjs && node tests/ux-surpass-r3-invariants.mjs && node tests/experience-r4-invariants.mjs && node tests/home-composition-r17-invariants.mjs",
     "test:portability": "node tests/portability-invariants.mjs",
     "test:applications": "node tests/full-application-routing.mjs && node tests/workspace-cockpit-r18-invariants.mjs",
