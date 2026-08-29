@@ -107,6 +107,40 @@ jobs:
           for(const [name,path] of targets) await probe(name,path);
           console.log(`OMEGA public verification PASS: ${base}`);
           NODE
+      - name: Verify R8 Earth evidence and governed Hybrid contracts
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          async function get(path){
+            const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}});
+            const raw=await r.text();
+            if(!r.ok) throw new Error(`${path} HTTP ${r.status}: ${raw.slice(0,500)}`);
+            return JSON.parse(raw);
+          }
+          async function post(path,body){
+            const r=await fetch(base+path,{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)});
+            const raw=await r.text();
+            if(!r.ok) throw new Error(`${path} HTTP ${r.status}: ${raw.slice(0,500)}`);
+            return JSON.parse(raw);
+          }
+          const caps=await get('/api/hybrid/capabilities');
+          if(!String(caps.state||'').includes('DEVICE_PROOF_REQUIRED')) throw new Error('R8 Hybrid capability truth gate missing');
+          if(!Array.isArray(caps.operations)||!caps.operations.includes('TRAIN_LOCAL')||!caps.operations.includes('BUILD')||!caps.operations.includes('READ_VISIBLE_TEXT')) throw new Error('R8 Hybrid typed operation registry incomplete');
+          if(caps.trainLocal?.foundationWeightsChanged!==false) throw new Error('TRAIN_LOCAL foundation-weight truth boundary regressed');
+          const plan=await post('/api/hybrid/plan',{prompt:'Inspect this project, hash the tree, repair the smallest proven defect, build, test, package, and return proof.',root:'.'});
+          if(plan.draft?.state!=='DRAFT_ONLY_NOT_QUEUED'||plan.draft?.confirmed!==false||plan.draft?.deviceId!==null) throw new Error('Hybrid draft mutated queue/confirmation/device state');
+          if(!Array.isArray(plan.draft?.operations)||plan.draft.operations[0]?.op!=='INDEX'||plan.draft.operations[1]?.op!=='HASH_TREE') throw new Error('broad-root discovery gate missing from Hybrid draft');
+          const validation=await post('/api/hybrid/validate',{plan:plan.draft});
+          if(validation.valid!==true) throw new Error(`Hybrid validation failed: ${JSON.stringify(validation)}`);
+          const earth=await get('/api/earth/evidence?lat=32.2217&lon=-110.9265');
+          if(earth.schema!=='OMEGA_EARTH_EVIDENCE_V1'||earth.target?.crs!=='WGS84 / EPSG:4326'||String(earth.evidenceHash||'').length!==64) throw new Error('R8 Earth evidence schema/hash/WGS84 contract missing');
+          for(const source of ['usgs','eonet','swpc','openMeteo']) if(!earth.sources?.[source]) throw new Error(`Earth source envelope missing ${source}`);
+          const noaa=await get('/api/earth/noaa/catalog');
+          if(noaa.schema!=='OMEGA_EARTH_NOAA_CATALOG_V1'||!Array.isArray(noaa.coverages)||noaa.coverages.length!==9) throw new Error('NOAA nine-coverage catalog missing');
+          for(const id of ['G19-CONUS','G19-FD','G18-FD','G19-CAR','G19-CAM','G19-TAW','G19-CAN','G18-WUS','G18-TPW']) if(!noaa.coverages.some(x=>x.id===id)) throw new Error(`NOAA coverage missing ${id}`);
+          console.log('OMEGA R8 PUBLIC RESTORE PASS · Earth evidence envelope + NOAA 9 coverage identities + Hybrid V90 draft/validation');
+          NODE
       - name: Verify live route-before-generation and AI synthesis
         shell: bash
         run: |
@@ -140,5 +174,6 @@ jobs:
             echo "- Verify job: ${{ needs.verify.result }}"
             echo "- Deployment job: ${{ job.status }}"
             echo "- Live AI synthesis: required for deployment PASS"
+            echo "- R8 Earth/NOAA + Hybrid V90 contracts: required for deployment PASS"
             echo "- Hybrid native execution: must remain DEVICE_PROOF_REQUIRED until paired-host proof"
           } >> "$GITHUB_STEP_SUMMARY"
