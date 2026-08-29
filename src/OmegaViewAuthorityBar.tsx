@@ -1,0 +1,24 @@
+import {useEffect,useMemo,useState} from 'react';
+import {Box,Braces,ChartNetwork,ChevronDown,Eye,Layers3,Map,ScanLine,ShieldCheck,Waypoints} from 'lucide-react';
+import {CAPABILITY_BOUNDARY,OMEGA_VIEW_LENSES,type OmegaViewLens} from './capabilityAuthority';
+import './omegaViewAuthorityR17.css';
+
+const META:Record<OmegaViewLens,{label:string;hint:string;icon:any}>={
+ FIELD:{label:'Field',hint:'continuity, pressure and motion',icon:Eye},
+ SURFACE:{label:'Surface',hint:'continuous boundary and form',icon:Layers3},
+ SKIN:{label:'Skin',hint:'scar, interface and retained deformation',icon:ScanLine},
+ GRAPH:{label:'Graph',hint:'relations, routes and dependencies',icon:ChartNetwork},
+ ASSEMBLY:{label:'Assembly',hint:'systems, components and build topology',icon:Box},
+ MATERIAL:{label:'Material',hint:'render/material expression of packet state',icon:Braces},
+ EVIDENCE:{label:'Evidence',hint:'proof, provenance and confidence',icon:ShieldCheck},
+ CANON:{label:'Canon',hint:'laws, modes and admissibility',icon:Map},
+ TRAVERSAL:{label:'Traversal',hint:'motion through the admitted state manifold',icon:Waypoints}
+};
+function load():OmegaViewLens{try{const v=localStorage.getItem('omega.v6.viewLens') as OmegaViewLens|null;return v&&OMEGA_VIEW_LENSES.includes(v)?v:'FIELD'}catch{return'FIELD'}}
+export default function OmegaViewAuthorityBar(){
+ const[view,setView]=useState<OmegaViewLens>(load),[open,setOpen]=useState(false);
+ const meta=useMemo(()=>META[view],[view]);
+ useEffect(()=>{document.documentElement.dataset.omegaView=view.toLowerCase();localStorage.setItem('omega.v6.viewLens',view);window.dispatchEvent(new CustomEvent('omega-view-change',{detail:{view,boundary:CAPABILITY_BOUNDARY}}))},[view]);
+ const choose=(v:OmegaViewLens)=>{setView(v);setOpen(false)};
+ const Icon=meta.icon;
+ return <div className='omega-view-authority' data-open={open?'true':'false'}><button className='omega-view-current' onClick={()=>setOpen(v=>!v)} aria-expanded={open} aria-haspopup='listbox' title={CAPABILITY_BOUNDARY}><Icon/><span><b>{meta.label}</b><small>{meta.hint}</small></span><ChevronDown/></button>{open&&<div className='omega-view-menu' role='listbox' aria-label='OMEGA same-packet view lenses'>{OMEGA_VIEW_LENSES.map(v=>{const m=META[v],I=m.icon;return <button key={v} role='option' aria-selected={v===view} className={v===view?'active':''} onClick={()=>choose(v)}><I/><span><b>{m.label}</b><small>{m.hint}</small></span></button>})}<p><ShieldCheck/>{CAPABILITY_BOUNDARY}</p></div>}</div>}
