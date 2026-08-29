@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const runtime=read('src/sourceBackedModeRuntimeR21.ts');
+const panel=read('src/SourceBackedModesPanelR21.tsx');
+const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const app=read('src/App.tsx');
+const nav=read('src/ResponsiveRuntimeShell.tsx');
+const corpus=read('src/corpusRuntime.ts');
+
+for(const formula of ['S=(CΩ·Φ)/(q+Λ+ε)','M188=(CΩ+Scar)/(1+q)','F_t=CΩ_t+Φ_t-q_t-Λ_t','Prune=q+Λ-CΩ','Turb=q/(CΩ+ε)','B=Λ/(CΩ+Φ+ε)','Previous_Scar·0.972'])assert.match(runtime,new RegExp(formula.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+assert.match(runtime,/GATED_MISSING_INPUTS/);
+for(const missing of ['Care','Aim','Recovery','Novelty','authoritative layer weights'])assert.match(runtime,new RegExp(missing));
+assert.match(runtime,/autoPing\.dataNext/);
+assert.match(runtime,/No interpolated state is presented as source data/);
+assert.match(panel,/179 catalog entries are loaded as source metadata, not automatically called/);
+assert.match(panel,/ACTUAL ADMITTED TRAVERSAL/);
+assert.match(panel,/FORMULAS HELD FOR MISSING INPUTS/);
+assert.match(panel,/Legacy semantic affinity score\/gate is intentionally not displayed as execution/);
+assert.match(workstation,/SourceBackedModesPanelR21/);
+assert.match(workstation,/SOURCE_BACKED_ALL_AVAILABLE/);
+assert.match(workstation,/modeCatalogCount:catalog\.count/);
+assert.match(workstation,/appliedModeCount:sourceModes\.appliedCount/);
+assert.doesNotMatch(workstation,/179 EXECUTED|ALL MODES REMAIN EXECUTED|ALL \$\{modes\.count\} MODES/);
+assert.doesNotMatch(app,/OmegaModeAuthorityDock/);
+assert.doesNotMatch(app,/OmegaViewAuthorityBar/);
+assert.doesNotMatch(app,/OmegaLauncher/);
+assert.match(nav,/Search all 44 OMEGA surfaces/);
+assert.match(nav,/const SURFACES=\[/);
+assert.match(corpus,/function scoreForText/); // legacy affinity catalog still exists, but is no longer execution authority.
+assert.doesNotMatch(runtime,/@appdeploy\/client/);
+assert.doesNotMatch(panel,/@appdeploy\/client/);
+console.log('R21 SOURCE-BACKED RUNTIME PASS · real formulas · gated missing inputs · canonical traversal · no overlapping right-side controllers');
