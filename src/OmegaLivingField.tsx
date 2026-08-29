@@ -1,0 +1,30 @@
+import {useEffect,useMemo,useRef} from 'react';
+import {corpusState,decodeAddress} from './corpusRuntime';
+import {unifiedFromRecord} from './unifiedCalculus';
+import './omegaLivingField.css';
+
+type Props={address:number;onSelectAddress?:(address:number)=>void};
+const clamp=(x:number)=>Math.max(0,Math.min(1,Number.isFinite(x)?x:0));
+const STAGES=['OBSERVER','SHELL','CLOSURE','ROUTING','PROOF','PROJECTION'] as const;
+
+export default function OmegaLivingField({address,onSelectAddress}:Props){
+ const canvas=useRef<HTMLCanvasElement|null>(null);
+ const record=useMemo(()=>corpusState(address),[address]);
+ const coords=useMemo(()=>decodeAddress(address),[address]);
+ const unified=useMemo(()=>unifiedFromRecord(record),[record]);
+ const route=record.autoPing?.dataNext??address;
+ const next=useMemo(()=>decodeAddress(route),[route]);
+ const phaseStates=useMemo(()=>Array.from({length:12},(_,p)=>{const a=1728*coords.d+144*p+12*coords.r+coords.l;return{address:a,record:corpusState(a)}}),[coords.d,coords.r,coords.l]);
+ useEffect(()=>{const c=canvas.current;if(!c)return;const ctx=c.getContext('2d');if(!ctx)return;let raf=0,alive=true;const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;const draw=(now:number)=>{if(!alive)return;const rect=c.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1),W=Math.max(320,Math.round(rect.width)),H=Math.max(360,Math.round(rect.height));if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr)}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);const cx=W*.5,cy=H*.5,R=Math.min(W,H)*.36,t=reduce?0:now*.00011,continuity=clamp(record.metrics.continuity),plasticity=clamp(record.metrics.plasticity),q=clamp(record.metrics.contradiction),burden=clamp(record.metrics.burden),scar=clamp(record.metrics.scar),proof=clamp(record.metrics.evidence),u=clamp(unified.unifiedCoherence);
+ const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.35);glow.addColorStop(0,`rgba(95,225,205,${.12+.12*u})`);glow.addColorStop(.42,'rgba(24,78,76,.10)');glow.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+ ctx.save();ctx.translate(cx,cy);ctx.rotate(t*.18);for(let i=0;i<12;i++){const rr=R*(.24+i*.055),alpha=.07+.02*i+.08*proof;ctx.beginPath();ctx.arc(0,0,rr,0,Math.PI*2);ctx.strokeStyle=i===coords.p?`rgba(229,187,111,${.55+.3*proof})`:`rgba(91,220,199,${alpha})`;ctx.lineWidth=i===coords.p?2:1;ctx.stroke()}ctx.restore();
+ const anchors:Array<{x:number;y:number;phase:number}>=[];for(let i=0;i<12;i++){const a=-Math.PI/2+i*Math.PI*2/12+t*.08,rad=R*(.76+.14*clamp(phaseStates[i].record.metrics.continuity));anchors.push({x:cx+Math.cos(a)*rad,y:cy+Math.sin(a)*rad,phase:i})}
+ ctx.beginPath();anchors.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.strokeStyle=`rgba(88,219,199,${.26+.38*u})`;ctx.lineWidth=1.3;ctx.stroke();
+ for(let i=0;i<12;i++){const a=anchors[i],b=anchors[(i+4)%12];ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(226,180,103,${.035+.08*(1-q)})`;ctx.lineWidth=.7;ctx.stroke()}
+ anchors.forEach((p,i)=>{const r=i===coords.p?7:3.2+4*clamp(phaseStates[i].record.metrics.evidence);ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fillStyle=i===coords.p?'rgba(248,217,154,.95)':'rgba(93,225,204,.62)';ctx.fill();if(i===next.p){ctx.beginPath();ctx.arc(p.x,p.y,r+8+Math.sin(t*9)*2,0,Math.PI*2);ctx.strokeStyle='rgba(229,186,109,.72)';ctx.lineWidth=1;ctx.stroke()}});
+ const layers=[{r:R*.18,a:continuity,s:1},{r:R*.26,a:plasticity,s:-1},{r:R*.34,a:1-q,s:1},{r:R*.42,a:1-burden,s:-1},{r:R*.50,a:1-scar*.45,s:1}];layers.forEach((L,i)=>{ctx.save();ctx.translate(cx,cy);ctx.rotate(t*(.28+.06*i)*L.s);ctx.setLineDash([5+i*2,9+i]);ctx.beginPath();ctx.arc(0,0,L.r,0,Math.PI*2);ctx.strokeStyle=i%2?`rgba(226,180,103,${.08+.3*L.a})`:`rgba(92,226,205,${.08+.3*L.a})`;ctx.lineWidth=1.2;ctx.stroke();ctx.restore()});
+ ctx.beginPath();ctx.arc(cx,cy,12+10*u,0,Math.PI*2);ctx.fillStyle=`rgba(231,246,241,${.58+.34*u})`;ctx.fill();ctx.beginPath();ctx.arc(cx,cy,30+20*continuity,0,Math.PI*2);ctx.strokeStyle=`rgba(93,226,204,${.18+.38*continuity})`;ctx.stroke();
+ ctx.font='10px ui-monospace,monospace';ctx.fillStyle='rgba(221,237,233,.84)';ctx.fillText(`STATE ${record.stateId.toLocaleString()} · PHASE ${coords.p+1}/12 · ${record.metrics.decision}`,16,H-38);ctx.fillStyle='rgba(126,157,155,.82)';ctx.fillText(`CΩ ${record.metrics.continuity.toFixed(3)} · Φ ${record.metrics.plasticity.toFixed(3)} · q ${record.metrics.contradiction.toFixed(3)} · Λ ${record.metrics.burden.toFixed(3)}`,16,H-20);raf=requestAnimationFrame(draw)};raf=requestAnimationFrame(draw);return()=>{alive=false;cancelAnimationFrame(raf)}},[record,coords.p,next.p,phaseStates,unified.unifiedCoherence]);
+ const pick=(e:React.MouseEvent<HTMLCanvasElement>)=>{if(!onSelectAddress)return;const r=e.currentTarget.getBoundingClientRect(),cx=r.width*.5,cy=r.height*.5,a=Math.atan2(e.clientY-r.top-cy,e.clientX-r.left-cx),norm=(a+Math.PI/2+Math.PI*2)%(Math.PI*2),p=Math.round(norm/(Math.PI*2/12))%12;onSelectAddress(1728*coords.d+144*p+12*coords.r+coords.l)};
+ return <section className='omega-living-field'><div className='olf-stage'><canvas ref={canvas} onClick={pick} aria-label='Source-bound animated OMEGA field. Click around the ring to select a phase.'/><div className='olf-badge'><span>LIVE SOURCE VISUAL</span><b>20,736-state packet</b><small>model-space motion · not external sensing</small></div><div className='olf-legend'><span><i className='carry'/> continuity / carry</span><span><i className='inverse'/> uncertainty / inverse pressure</span><span><i className='proof'/> proof / admitted route</span></div></div><div className='olf-sequence'>{STAGES.map((x,i)=><div key={x} className={i===coords.p%6?'active':''}><span>{String(i+1).padStart(2,'0')}</span><b>{x}</b></div>)}</div><footer><span>Unified coherence <b>{unified.unifiedCoherence.toFixed(3)}</b></span><span>Route <b>{record.stateId.toLocaleString()} → {corpusState(route).stateId.toLocaleString()}</b></span><span>Phase <b>{coords.p+1} → {next.p+1}</b></span></footer></section>
+}
