@@ -11,9 +11,9 @@ import './omegaHome.css';
 import './homeInstrument.css';
 
 type Props={onEnter:(panel:string)=>void};
-const QUICK=['Visual Instrument','Atlas','Evidence & Proof','Build Out','System Atlas','Control Matrix','Forecast','SAI Lab'] as const;
+const QUICK=['Visual Instrument','Atlas','Evidence & Proof','Development','System Atlas','Control Matrix','Forecast','SAI Lab'] as const;
 const JOURNEYS=[
- {panel:'Command Center',eyebrow:'ASK',title:'Talk to OMEGA',copy:'Ask a question, inspect the current state, or continue a governed build.',Icon:Sparkles},
+ {panel:'Command Center',eyebrow:'ASK',title:'Talk to OMEGA',copy:'Ask a question, inspect the current state, or continue governed work.',Icon:Sparkles},
  {panel:'Matter Traversal',eyebrow:'TRAVERSE',title:'Move through matter',copy:'Explore the same canonical field through scale, topology, proof and motion.',Icon:Orbit},
  {panel:'Relativity',eyebrow:'UNDERSTAND',title:'See motion relationally',copy:'Watch phase, observer frame, carry, memory and possible next state interact.',Icon:Waypoints},
  {panel:'Earth Now',eyebrow:'EXPLORE',title:'Enter Earth',copy:'Use real UTC solar geometry and evidence-gated Earth traversal without fake live claims.',Icon:Globe2}

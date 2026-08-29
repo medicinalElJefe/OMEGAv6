@@ -25,9 +25,10 @@ assert.doesNotMatch(workstation,/179 EXECUTED|ALL MODES REMAIN EXECUTED|ALL \$\{
 assert.doesNotMatch(app,/OmegaModeAuthorityDock/);
 assert.doesNotMatch(app,/OmegaViewAuthorityBar/);
 assert.doesNotMatch(app,/OmegaLauncher/);
-assert.match(nav,/Search all 44 OMEGA surfaces/);
+assert.match(nav,/Search registered OMEGA surfaces — operational capabilities only/);
+assert.match(nav,/filter\(isPrimaryOperationalCapability\)/);
 assert.match(nav,/const SURFACES=\[/);
 assert.match(corpus,/function scoreForText/); // legacy affinity catalog still exists, but is no longer execution authority.
 assert.doesNotMatch(runtime,/@appdeploy\/client/);
 assert.doesNotMatch(panel,/@appdeploy\/client/);
-console.log('R21 SOURCE-BACKED RUNTIME PASS · real formulas · gated missing inputs · canonical traversal · no overlapping right-side controllers');
+console.log('R25 SOURCE-BACKED RUNTIME PASS · real formulas · gated inputs · operational navigation · canonical traversal');
