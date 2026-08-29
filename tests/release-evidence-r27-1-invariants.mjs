@@ -5,6 +5,7 @@ const config=fs.readFileSync('wrangler.jsonc','utf8');
 const panel=fs.readFileSync('src/GovernedBuildReceiptPanel.tsx','utf8');
 const vite=fs.readFileSync('vite.config.ts','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+function semverAtLeast(v,min){const a=v.split('.').map(Number),b=min.split('.').map(Number);for(let i=0;i<3;i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return true}
 must(config.includes('"main": "src/workerR27.js"'),'R27 release-evidence wrapper must be the deployed Worker entrypoint');
 must(config.includes('"version_metadata"')&&config.includes('"CF_VERSION_METADATA"'),'Cloudflare version metadata binding must be configured');
 must(worker.includes("'/api/release-evidence'"),'release-evidence endpoint missing');
@@ -17,6 +18,6 @@ must(panel.includes("fetch('/api/release-evidence'"),'Development surface must r
 must(panel.includes('Receipt link')&&panel.includes('Worker version'),'Development surface must expose receipt/version binding');
 must(panel.includes("evidence?.packageReceipt?.receiptSha256===receipt.receiptSha256"),'Development surface must compare exact receipt SHA-256');
 must(vite.includes('OMEGA_GOVERNED_BUILD_RECEIPT_V1'),'R26.1 package receipt must remain inherited');
-must(pkg.version==='27.1.0','R27.1 package version must be exact');
-for(const source of [worker,panel,config])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1 must remain AppDeploy-free');
-console.log('OMEGA R27.1 RELEASE EVIDENCE PASS · build receipt -> Cloudflare version metadata · external QA/rollback truth retained');
+must(semverAtLeast(pkg.version,'27.1.0'),'package version must retain or advance beyond R27.1');
+for(const source of [worker,panel,config])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1+ must remain AppDeploy-free');
+console.log(`OMEGA R27.1+ RELEASE EVIDENCE PASS · package ${pkg.version} · build receipt -> Cloudflare version metadata · external QA/rollback truth retained`);
