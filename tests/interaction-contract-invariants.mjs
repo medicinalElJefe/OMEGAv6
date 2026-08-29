@@ -4,6 +4,8 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const launcher=read('src/OmegaLauncher.tsx');
 const navigation=read('src/navigationRegistry.ts');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const modes=read('src/SourceBackedModesPanelR21.tsx');
+const modeRuntime=read('src/sourceBackedModeRuntimeR21.ts');
 const home=read('src/OmegaHome.tsx');
 const shell=read('src/ResponsiveRuntimeShell.tsx');
 const command=read('src/OmegaCommandDeck.tsx');
@@ -16,18 +18,20 @@ assert.match(launcher,/className='omega-nexus-card'[^>]*role='button'[^>]*tabInd
 assert.match(launcher,/onClick=\{\(\)=>go\(x\.name\)\}/,'launcher cards must navigate');
 assert.match(launcher,/onKeyDown=\{e=>activate\(x\.name,e\)\}/,'launcher cards must support Enter/Space activation');
 assert.match(launcher,/omega-nexus-fav/,'favorite control must remain independently actionable');
-assert.match(launcher,/OMEGA_NAVIGATION/,'launcher must consume the shared navigation registry');
+assert.match(launcher,/OMEGA_NAVIGATION/,'launcher donor must retain the shared navigation registry even though the duplicate global floating mount is retired');
 const launcherNames=[...navigation.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 const routeBlock=(workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const;/s)||[])[1]||'';
 const routeNames=[...routeBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-assert.equal(launcherNames.length,44,'shared navigation registry must expose exactly 44 launcher routes');
+assert.equal(launcherNames.length,44,'shared navigation registry must expose exactly 44 routes');
 assert.equal(routeNames.length,44,'active workstation must expose exactly 44 routes');
 assert.deepEqual(new Set(launcherNames),new Set(routeNames),'shared navigation registry and active workstation routes must match exactly');
 
-assert.match(workstation,/onClick=\{\(\)=>chooseMode\(x\)\}/,'mode result buttons must execute an inspection action');
-assert.match(workstation,/visibleModes/,'mode view policy must change the visible mode result set');
-assert.match(workstation,/selectedMode/,'selected mode state must be retained');
-assert.match(workstation,/ALL MODES REMAIN EXECUTED/,'mode filtering must not falsely disable computation');
+assert.match(workstation,/SourceBackedModesPanelR21/,'Modes route must execute the source-backed calculus inspector');
+assert.match(modes,/onClick=\{\(\)=>onAddress\(record\.autoPing\.dataNext\)\}/,'mode traversal must execute the admitted-next source action');
+assert.match(modes,/onClick=\{\(\)=>onAddress\(record\.autoPing\.previous\)\}/,'mode traversal must execute the previous source action');
+assert.match(modes,/onClick=\{\(\)=>setShowCatalog\(v=>!v\)\}/,'source mode catalog inspection must be actionable');
+assert.match(modeRuntime,/GATED_MISSING_INPUTS/,'missing authoritative mode inputs must gate execution instead of invoking affinity proxies');
+assert.doesNotMatch(workstation,/ALL MODES REMAIN EXECUTED|179 EXECUTED/,'workstation must not claim catalog rows executed');
 assert.match(workstation,/case 'Hybrid Link':return withPhase\(<HybridMissionControlR8/,'Hybrid route must execute R8 governed specialist application');
 assert.match(workstation,/case 'Matter Traversal':return withPhase\(<MatterTraversal/,'Matter route must execute its specialist application');
 assert.match(workstation,/case 'Relativity':return withPhase\(<RelativityLab/,'Relativity route must execute its specialist application');
@@ -46,4 +50,4 @@ assert.match(hybrid,/onClick=\{submit\}/,'Hybrid donor compile control must exec
 assert.match(hybridR8,/onClick=\{compile\}/,'R8 Hybrid governed draft control must execute');
 assert.match(hybridR8,/onClick=\{validate\}/,'R8 Hybrid validation control must execute');
 
-console.log('interaction contract invariants PASS · shared 44-route registry + R8 Earth/Hybrid/SAI + actionable launcher/modes/home/command controls');
+console.log('interaction contract invariants PASS · 44 routes + source-backed modes + R8 Earth/Hybrid/SAI + actionable controls');
