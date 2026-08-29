@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -20,3 +23,68 @@ jobs:
       - run: npm install
       - run: npm run check
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
+
+  deploy-main:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Cloudflare authorization preflight
+        shell: bash
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error title=AUTH REQUIRED::Repository secret CLOUDFLARE_API_TOKEN is not available to the production deployment job."
+            exit 1
+          fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice title=Cloudflare account discovery::CLOUDFLARE_ACCOUNT_ID is not set; Wrangler will attempt account discovery from the API token."
+          fi
+      - name: Deploy canonical OMEGA Worker
+        run: npx wrangler deploy
+      - name: Verify canonical public runtime
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const targets=[['root','/'],['health','/api/health'],['status','/api/status'],['restoration','/api/restoration']];
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function probe(name,path){
+            let last='';
+            for(let attempt=1;attempt<=12;attempt++){
+              try{
+                const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}});
+                const text=await r.text();
+                if(r.ok && text.length){
+                  if(path.startsWith('/api/')) JSON.parse(text);
+                  console.log(`LIVE VERIFY ${name}: HTTP ${r.status} attempt ${attempt}`);
+                  return;
+                }
+                last=`HTTP ${r.status} ${text.slice(0,240)}`;
+              }catch(e){last=String(e)}
+              await sleep(5000);
+            }
+            throw new Error(`${name} verification failed: ${last}`);
+          }
+          for(const [name,path] of targets) await probe(name,path);
+          console.log(`OMEGA public verification PASS: ${base}`);
+          NODE
+      - name: Record deployment receipt
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## OMEGA production deployment"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Runtime: $OMEGA_PUBLIC_URL"
+            echo "- Verify job: ${{ needs.verify.result }}"
+            echo "- Deployment job: ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"
