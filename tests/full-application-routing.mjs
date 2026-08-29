@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const v2=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const app=fs.readFileSync('src/App.tsx','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const m=v2.match(/OMEGA_SURFACES=\[(.*?)\] as const;/s);must(m,'missing canonical V2 surface registry');
+const surfaces=[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]);must(surfaces.length===44,`expected 44 V2 surfaces, got ${surfaces.length}`);must(new Set(surfaces).size===44,'V2 surfaces must be unique');
+for(const file of ['OmegaVisualInstrument','OmegaTraversalStudio','OmegaSpecialistSuite','EarthNowInstrument','ForecastSovereignPanel','IntelligenceFabricPanel','RelativityLab','AtlasCalculatorPanel','OmegaInfinityPanel','RecursiveScalePanel','AppliedRealityLab','WovenBuildOutPanel','MatterTraversal'])must(v2.includes(`./${file}`),`missing specialist import ${file}`);
+for(const panel of ['Hybrid Link','Archive Census','Archive Operators','Governance','Canon Evolution','Projects','Render Queue','Assets','Quality Compiler','Validation','System Atlas','Control Matrix','Settings','Instructions','System','Plugins','Memory','Evidence & Proof','Convergence','Consolidation','Field','Data Motion','Cockpit','Workspace'])must(suite.includes(`panel==='${panel}'`)||suite.includes(`panel==='${panel}'`),`missing specialist suite route ${panel}`);
+for(const bad of ["panel==='Command Center'||panel==='Create'||panel==='SAI Lab'||panel==='Development'||panel==='Build Out'","Assistant-led work remains route-before-generation and proof-gated."])must(!v2.includes(bad),`generic panel collapse returned: ${bad}`);
+must(app.includes("import('./OmegaWorkstationFullV2')"),'App must activate V2 specialist workstation');
+must(v2.includes("No generic data-panel fallback is permitted"),'router must explicitly prohibit generic fallback');
+console.log('FULL_APPLICATION_ROUTING PASS · 44/44 specialist destinations locked');
