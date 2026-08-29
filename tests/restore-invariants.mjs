@@ -13,13 +13,13 @@ assert.doesNotMatch(orchestrator,/@appdeploy\/client/);assert.match(orchestrator
 assert.match(workstation,/20,736/);assert.match(workstation,/Control Matrix/);assert.match(corpusRuntime,/STATE_COUNT=20736/);assert.match(corpusRuntime,/m\.count===179/);assert.match(unified,/S_full=\(CΩ·W·Φ\)/);
 
 // Restore-and-surpass locks: these fail CI if a future edit silently drops the recovered capability slice.
-assert.match(surpass,/Relativity\+/);assert.match(surpass,/20,736 Field\+/);assert.match(surpass,/Atlas Calc\+/);assert.match(surpass,/Infinity\+/);assert.match(surpass,/Scale\+/);
+assert.match(surpass,/Relativity\+/);assert.match(surpass,/20,736 Field\+/);assert.match(surpass,/Atlas Calc\+/);assert.match(surpass,/Infinity\+/);assert.match(surpass,/Scale\+/);assert.match(surpass,/Reality\+/);
 assert.match(visualCal,/CALIBRATION_CHANNELS/);assert.match(visualCal,/STATE_COUNT/);assert.match(visualCal,/buildVisualCalibrationCooperative/);
 assert.match(mandala,/Mandala20736Field/);assert.match(mandala,/motionDrive/);assert.match(mandala,/acceleration/);
-assert.match(relativity,/Violet Transfiguration Canon/);assert.match(relativity,/Future-Coherence/);
+assert.match(relativity,/Violet Transfiguration Canon/);assert.match(relativity,/FUTURE COHERENCE|futureCoherenceProjection/);
 assert.match(atlasCalc,/20,736 bridge/);assert.match(atlasRuntime,/seen\.size===STATE_COUNT/);
 assert.match(infinity,/OmegaInfinity/);assert.match(infinity,/derived live-packet projection/);
 assert.match(scalePanel,/Macro → meso → micro → nano → parent/);assert.match(scaleRuntime,/burdenConserved/);assert.match(scaleRuntime,/futureObservationUsed:false/);
-assert.match(realityRuntime,/analyzeReality/);assert.match(realityRuntime,/backtest/);assert.match(realityRuntime,/STATE_COUNT/);assert.match(realityLab,/Reality Lab\+/);assert.match(realityLab,/20,736-state atlas/);
+assert.match(realityRuntime,/analyzeReality/);assert.match(realityRuntime,/backtest/);assert.match(realityRuntime,/STATE_COUNT/);assert.match(realityLab,/Reality Lab\+/);assert.match(realityLab,/20,736-state atlas/);assert.match(realityLab,/realityLab\.css/);
 
-console.log('restore invariants PASS 58/58');
+console.log('restore invariants PASS');
