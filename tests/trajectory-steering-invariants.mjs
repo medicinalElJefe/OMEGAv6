@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const runtime=fs.readFileSync('src/pcExecutionSpineRuntime.ts','utf8');
+const visual=fs.readFileSync('src/OmegaVisualInstrument.tsx','utf8');
+const overlay=fs.readFileSync('src/TrajectoryFieldOverlay.tsx','utf8');
+const css=fs.readFileSync('src/semanticDepth.css','utf8');
+for(const token of ['compileSourceTrajectory','PC_ROUTE_STEERING_V1','canon_omega_align','canon_phase3_steering','canon_omega_closure','routeNext','closureDelta','computational state-space route'])if(!runtime.includes(token))throw new Error(`trajectory runtime invariant missing: ${token}`);
+for(const token of ['TrajectoryFieldOverlay','compileSourceTrajectory','trajectory-summary','trajectoryDecision'])if(!visual.includes(token))throw new Error(`trajectory visual binding missing: ${token}`);
+for(const token of ['groupForAddress','lineagePoint','trajectory-route','CLOSURE'])if(!overlay.includes(token)&&!css.includes(token))throw new Error(`trajectory projection invariant missing: ${token}`);
+if(runtime.includes('@appdeploy/client')||visual.includes('@appdeploy/client')||overlay.includes('@appdeploy/client'))throw new Error('builder runtime dependency regression');
+console.log('trajectory steering invariants PASS');
