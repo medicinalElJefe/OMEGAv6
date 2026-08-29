@@ -37,7 +37,7 @@ export const DRIVE_CANON_SOURCE=Object.freeze({
   boundary:'Drive-derived canon/runtime metadata is embedded as a source contract. The browser renderer is a representational instrument; physical claims remain measurement-gated.'
 } as const);
 
-export const DRIVE_DOMAINS=['Structure','Motion','Boundary','Coupling','Memory','Constraint','Translation','Scale','Evidence','Prediction','Agency','Closure'] as const;
-export const DRIVE_PHASES=['Initiation','Acceleration','Expansion','Momentum','Saturation','Constraint Engagement','Deceleration','Release','Reorganization','Integration','Stabilization','Return'] as const;
-export const DRIVE_REGULATIONS=['Observe','Measure','Stabilize','Amplify','Dampen','Redistribute','Prune','Translate','Test','Escalate','Integrate','Close'] as const;
-export const DRIVE_SEEDS=['Seed','Bias','Coupling','Propagation','Branching','Load','Contradiction','Prune','Translation','Integration','Proof','Return'] as const;
+export const DRIVE_DOMAINS=['Structure','Motion','Boundary','Coupling','Memory','Constraint','Translation','Recurrence','Variation','Selection','Integration','Continuity'] as const;
+export const DRIVE_PHASES=['Initiation','Acceleration','Expansion','Momentum','Saturation','Constraint Engagement','Deceleration','Redistribution','Compression','Pre-turn Tension','Turn-Reorientation','Integration'] as const;
+export const DRIVE_REGULATIONS=['Observe','Measure','Stabilize','Amplify','Dampen','Redistribute','Prune','Bridge','Turn','Escalate','Integrate','Reseed'] as const;
+export const DRIVE_SEEDS=['Seed','Bias','Coupling','Propagation','Branching','Load','Contradiction','Prune Pressure','Turn Window','Reintegration','Memory Imprint','Reseeding'] as const;
