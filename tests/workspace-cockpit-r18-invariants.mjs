@@ -1,0 +1,9 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';
+const ws=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8'),ui=fs.readFileSync('src/OmegaWorkspaceCockpitR18.tsx','utf8'),cap=fs.readFileSync('src/capabilityAuthority.ts','utf8');
+assert(ws.includes("import OmegaWorkspaceCockpitR18 from './OmegaWorkspaceCockpitR18'"),'R18 specialist must be mounted');
+assert(ws.includes("['Hybrid Link','Workspace','Cockpit','Matter Traversal'"),'Workspace/Cockpit must be specialist-routed');
+assert(!ws.match(/SPECIALIST_SUITE=new Set<Panel>\(\[[^\]]*'Workspace'/),'Workspace may not remain shared-suite debt');assert(!ws.match(/SPECIALIST_SUITE=new Set<Panel>\(\[[^\]]*'Cockpit'/),'Cockpit may not remain shared-suite debt');
+assert(ws.includes("case 'Workspace':case 'Cockpit':return <OmegaWorkspaceCockpitR18"),'specialist switch route missing');
+assert(ui.includes("crypto.subtle.digest('SHA-256'"),'workspace/cockpit transactions must use real SHA-256');assert(ui.includes("omega.r18.workspace.snapshots"),'workspace snapshots must persist');assert(ui.includes("omega.r18.operator.ledger"),'operator ledger must persist');assert(ui.includes("api.get<any>('/api/status')")&&ui.includes("api.get<any>('/api/restoration')"),'cockpit refresh must read actual hosted envelopes');assert(ui.includes('DEVICE_PROOF_REQUIRED'),'missing native proof must remain explicit');assert(ui.includes('A clickable control is never treated as proof of capability.'),'capability truth boundary must remain explicit');
+assert(cap.match(/name:'Workspace'.*implementation:'SPECIALIST'/),'Workspace authority must be promoted');assert(cap.match(/name:'Cockpit'.*implementation:'SPECIALIST'/),'Cockpit authority must be promoted');
+console.log('PASS workspace-cockpit-r18-invariants · persistence + hashes + live proof + specialist routing');
