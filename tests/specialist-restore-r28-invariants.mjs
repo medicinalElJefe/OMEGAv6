@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const suite=read('src/OmegaSpecialistSuite.tsx');
+const field=read('src/OmegaFieldMotionConvergenceR28.tsx');
+const proof=read('src/OmegaEvidenceMemoryR28.tsx');
+const authority=read('src/capabilityAuthority.ts');
+for(const route of ['Field','Data Motion','Convergence'])assert.match(suite,new RegExp(`panel==='${route.replace('&','\\&')}'`));
+for(const route of ['Evidence & Proof','Memory'])assert.match(suite,new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+for(const token of ['OmegaLivingField','DriveVectorField','compileConvergence','validateConvergence','normalized velocity','normalized acceleration','61.9B address','Mode188 ratio','Admissible route candidates'])assert.match(field,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')),`R28 field/motion/convergence missing ${token}`);
+assert.match(field,/not claims of physical velocity or acceleration/);
+assert.match(field,/not a claim of physical destiny or external causation/);
+for(const token of ['/api/release-evidence','/omega-build-receipt.json','SHA-256 proof receipt','crypto.subtle.digest','BROWSER_LOCAL_PACKET_SNAPSHOT','Replay snapshot state','Search state, note, decision, or hash'])assert.match(proof,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')),`R28 evidence/memory missing ${token}`);
+assert.match(proof,/Missing Drive, native-device, provider, or external authority remains HOLD/);
+assert.match(proof,/does not claim model training, Drive synchronization, or cross-device persistence/);
+for(const name of ['Field','Data Motion','Convergence','Evidence & Proof','Memory'])assert.match(authority,new RegExp(`name:'${name.replace('&','&')}'.*implementation:'SPECIALIST'`),`${name} must leave shared-suite debt`);
+console.log('R28 SPECIALIST RESTORE PASS · Field + Data Motion + Convergence + Evidence & Proof + Memory');
