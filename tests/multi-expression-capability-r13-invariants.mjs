@@ -1,0 +1,10 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const runtime=fs.readFileSync('src/systemAtlasRuntime.ts','utf8'),ui=fs.readFileSync('src/SystemAtlasControl.tsx','utf8'),css=fs.readFileSync('src/systemCapabilityR13.css','utf8');
+for(const id of ['VISUAL','ANALYSIS','CONVERSATION','FORECAST','PROOF','CREATIVE','DEVICE','BUILD','ARCHIVE','SIGNAL'])assert(runtime.includes(`id:'${id}'`),`missing expression plane ${id}`);
+for(let i=0;i<24;i++)assert(runtime.includes(`S${String(i).padStart(2,'0')}:`),`missing family expression binding S${String(i).padStart(2,'0')}`);
+assert(runtime.includes("SYSTEM_INVARIANT='ONE FIELD / ONE PACKET / ONE CONTINUITY LAW'"),'single packet/state invariant must remain authoritative');
+assert(ui.includes('ONE STATE · MANY LAWFUL EXPRESSIONS'),'System Atlas must explain the multi-expression architecture');
+assert(ui.includes('expressionPlanesForFamily'),'selected donor family must expose its lawful expression surfaces');
+assert(css.includes('grid-template-columns:repeat(5')&&css.includes('@media(max-width:620px)'),'expression plane needs bounded desktop/mobile layouts');
+assert(!runtime.includes('@appdeploy/client')&&!ui.includes('@appdeploy/client'),'capability plane must remain sovereign/provider portable');
+console.log('PASS multi-expression-capability-r13-invariants');
