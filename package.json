@@ -17,7 +17,8 @@
     "test:cloud": "node tests/cloud-bridge-invariants.mjs",
     "test:visual": "node tests/visual-identity-invariants.mjs",
     "test:depth": "node tests/depth-traversal-invariants.mjs",
-    "check:static": "node --check src/worker.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud && npm run test:visual && npm run test:depth",
+    "test:hybrid": "node tests/hybrid-mission-invariants.mjs",
+    "check:static": "node --check src/worker.js && npm run test:routes && npm run test:restore && npm run test:navigation && npm run test:home && npm run test:portability && npm run test:applications && npm run test:cloud && npm run test:visual && npm run test:depth && npm run test:hybrid",
     "check": "npm run check:static && npm run build"
   },
   "dependencies": {
