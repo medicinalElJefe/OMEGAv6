@@ -1,0 +1,13 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const semantic=fs.readFileSync('src/continuousFieldR13.ts','utf8'),overlay=fs.readFileSync('src/ContinuousFieldOverlayR13.tsx','utf8'),instrument=fs.readFileSync('src/OmegaVisualInstrument.tsx','utf8'),css=fs.readFileSync('src/continuousFieldR13.css','utf8');
+for(const token of ['field.C[i]','field.Phi[i]','field.q[i]','field.Lambda[i]','field.scar[i]','field.evidence[i]','field.phase[i]','field.routeNext[i]','field.velocity[i]','field.acceleration[i]'])assert(semantic.includes(token),`continuous field must bind ${token}`);
+assert(semantic.includes('outverse=')&&semantic.includes('inverse='),'continuous renderer must expose distinct derived outverse/inverse display curvature');
+assert(semantic.includes('not new measured physical variables'),'derived dualverse display channels need explicit truth boundary');
+assert(overlay.includes('compileDomainBands')&&overlay.includes('compileRouteFlow'),'overlay must render aggregate shell bands and source route flow');
+assert(overlay.includes('b.contradiction')&&overlay.includes('b.scar')&&overlay.includes('b.closure'),'contradiction, scar and closure must visibly affect geometry');
+assert(overlay.includes('field.routeNext[address]'),'active admitted route must visibly affect image');
+assert(instrument.includes('ContinuousFieldOverlayR13')&&instrument.includes('continuous-field-primary'),'Visual Instrument must mount continuous field as primary layer');
+assert(instrument.includes('HUMAN TRAJECTORY'),'accepted R14 human trajectory expression must remain visible in the converged instrument');
+assert(css.includes('z-index:2')&&css.includes('pointer-events:none'),'continuous layer must dominate visually without breaking source picking');
+assert(!semantic.includes('@appdeploy/client')&&!overlay.includes('@appdeploy/client'),'renderer must remain sovereign/provider portable');
+console.log('PASS continuous-field-r13-invariants');
