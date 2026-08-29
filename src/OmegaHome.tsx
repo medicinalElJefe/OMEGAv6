@@ -4,6 +4,7 @@ import {api,localState} from './platformAdapter';
 import {corpusState,decodeAddress,initCorpusPack} from './corpusRuntime';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import './omegaHome.css';
+import './homeInstrument.css';
 
 type Props={onEnter:(panel:string)=>void};
 const LAUNCH=[
