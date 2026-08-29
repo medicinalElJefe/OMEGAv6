@@ -84,7 +84,7 @@ jobs:
         run: |
           node <<'NODE'
           const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
-          const targets=[['root','/'],['health','/api/health'],['status','/api/status'],['restoration','/api/restoration']];
+          const targets=[['root','/'],['health','/api/health'],['status','/api/status'],['restoration','/api/restoration'],['hybrid','/api/hybrid/status']];
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
           async function probe(name,path){
             let last='';
@@ -93,7 +93,8 @@ jobs:
                 const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}});
                 const text=await r.text();
                 if(r.ok && text.length){
-                  if(path.startsWith('/api/')) JSON.parse(text);
+                  const data=path.startsWith('/api/')?JSON.parse(text):null;
+                  if(path==='/api/hybrid/status' && (data.state!=='DEVICE_PROOF_REQUIRED'||data.nativeExecutionClaimed!==false)) throw new Error('Hybrid truth gate regression');
                   console.log(`LIVE VERIFY ${name}: HTTP ${r.status} attempt ${attempt}`);
                   return;
                 }
@@ -106,6 +107,28 @@ jobs:
           for(const [name,path] of targets) await probe(name,path);
           console.log(`OMEGA public verification PASS: ${base}`);
           NODE
+      - name: Verify live route-before-generation and AI synthesis
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          async function post(path,body){
+            const r=await fetch(base+path,{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)});
+            const text=await r.text();
+            if(!r.ok) throw new Error(`${path} HTTP ${r.status}: ${text.slice(0,400)}`);
+            return JSON.parse(text);
+          }
+          const text='Explain the current OMEGA continuity relationship in one concise sentence.';
+          const route=await post('/api/route-preview',{text});
+          if(!String(route.route||'').startsWith('ROUTED_MODEL')) throw new Error(`route-before-generation classifier did not select model route: ${JSON.stringify(route)}`);
+          const context={address:11498,stateId:11499,phase:8,decision:'TURN',modePolicy:'ALL',modeCount:179,nextAddress:11499,metrics:{continuity:.5,plasticity:.5,contradiction:.2,burden:.3,scar:.2,evidence:.5}};
+          const chat=await post('/api/chat',{text,context});
+          if(chat.ok!==true) throw new Error(`chat did not return ok: ${JSON.stringify(chat)}`);
+          if(chat.modelInvoked!==true) throw new Error(`Workers AI synthesis did not execute; fallback is not accepted as AI LIVE PASS: ${JSON.stringify(chat)}`);
+          if(!String(chat.provider||'').startsWith('WORKERS_AI:')) throw new Error(`unexpected live synthesis provider: ${chat.provider}`);
+          if(String(chat.reply||'').trim().length<12) throw new Error('live AI returned an empty/insufficient reply');
+          console.log(`OMEGA LIVE AI PASS · ${chat.provider} · route ${route.route}`);
+          NODE
       - name: Record deployment receipt
         if: always()
         shell: bash
@@ -116,4 +139,6 @@ jobs:
             echo "- Runtime: $OMEGA_PUBLIC_URL"
             echo "- Verify job: ${{ needs.verify.result }}"
             echo "- Deployment job: ${{ job.status }}"
+            echo "- Live AI synthesis: required for deployment PASS"
+            echo "- Hybrid native execution: must remain DEVICE_PROOF_REQUIRED until paired-host proof"
           } >> "$GITHUB_STEP_SUMMARY"
