@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 const read=p=>fs.readFileSync(p,'utf8');
 const authority=read('src/capabilityAuthority.ts');
-const shell=read('src/ResponsiveRuntimeShell.tsx');
+const bridge=read('src/ResponsiveRuntimeShell.tsx');
+const shell=read('src/SingleFrameRuntimeShellR27.tsx');
 const ws=read('src/OmegaWorkstationFullV2.tsx');
 const atlas=read('src/AtlasViewport.tsx');
 const intelligence=read('src/IntelligenceFabricPanel.tsx');
@@ -15,7 +16,8 @@ assert(authority.includes("'Development':'PROVIDER_GATED'"),'Development must be
 assert(authority.includes('repository mutation and promotion occur only through the governed external build path'),'development execution boundary missing');
 assert(shell.includes('filter(isPrimaryOperationalCapability)'),'primary navigation/search must filter donor-only and restoration-debt entries');
 assert(shell.includes('data-capability-reality'),'every visible route must expose its real boundary');
-assert(shell.includes('NOT ALL EXECUTABLE')&&shell.includes('ONLY OPERATIONAL ROUTES SHOWN'),'registered scope must not be mislabeled as execution');
+assert(bridge.includes('NOT ALL EXECUTABLE')&&bridge.includes('ONLY OPERATIONAL ROUTES SHOWN'),'registered scope must not be mislabeled as execution');
+assert(bridge.includes('SingleFrameRuntimeShellR27')&&!bridge.includes('nav20-desktop'),'compatibility path must mount only the single-frame truth authority');
 assert(ws.includes("modePolicy:'SOURCE_BACKED'"),'shared downstream state must use source-backed mode authority');
 assert(!ws.includes("modePolicy:'ALL'"),'legacy blanket ALL execution state must be absent');
 assert(ws.includes("isPrimaryOperationalCapability(String(v))?v as Panel:'System Atlas'"),'stale/direct fake routes must resolve to System Atlas');
@@ -23,4 +25,4 @@ assert(!atlas.includes('All-modes algebra')&&!atlas.includes('modeRun.stay')&&!a
 assert(atlas.includes('sourceBackedModeSummary')&&atlas.includes('Catalog membership is not execution.'),'Atlas must expose source-backed calculus counts');
 assert(intelligence.includes('sourceBackedModeSummary')&&!intelligence.includes('evaluateCorpusModes'),'Intelligence Fabric must count applied source-backed modes, not catalog entries');
 assert(sai.includes('sourceBackedModeSummary')&&!sai.includes('evaluateCorpusModes'),'SAI must count applied source-backed modes, not catalog entries');
-console.log('OMEGA R25 PASS · capability reality + operational navigation + build-backend truth locked');
+console.log('OMEGA R27 PASS · capability reality + single-frame operational navigation + build-backend truth locked');
