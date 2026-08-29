@@ -2,7 +2,7 @@ name: OMEGA Cloud Bridge CI
 
 on:
   push:
-    branches: [main, full-restore]
+    branches: [main, full-restore, surpass-restore]
   pull_request:
     branches: [main]
 
