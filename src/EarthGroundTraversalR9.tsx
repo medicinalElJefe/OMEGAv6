@@ -1,12 +1,12 @@
 import {useEffect,useMemo,useState} from 'react';
-import {Building2,ChevronRight,Globe2,Map,MapPin,Mountain,RefreshCw,Road,ShieldCheck} from 'lucide-react';
+import {Building2,ChevronRight,Globe2,Map,MapPin,Mountain,RefreshCw,ShieldCheck,Waypoints} from 'lucide-react';
 import {api} from './platformAdapter';
 import './earthGroundR9.css';
 
 type Props={lat:number;lon:number};
 type Level='EARTH'|'REGION'|'CITY'|'STREET'|'GROUND';
 const LEVELS:Level[]=['EARTH','REGION','CITY','STREET','GROUND'];
-const icon=(x:Level)=>x==='EARTH'?<Globe2/>:x==='REGION'?<Map/>:x==='CITY'?<Building2/>:x==='STREET'?<Road/>:<Mountain/>;
+const icon=(x:Level)=>x==='EARTH'?<Globe2/>:x==='REGION'?<Map/>:x==='CITY'?<Building2/>:x==='STREET'?<Waypoints/>:<Mountain/>;
 export default function EarthGroundTraversalR9({lat,lon}:Props){const[level,setLevel]=useState<Level>('EARTH'),[data,setData]=useState<any>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[date,setDate]=useState(()=>new Date(Date.now()-86400000).toISOString().slice(0,10));
  const load=async()=>{setBusy(true);setError('');try{const r=await api.get<any>(`/api/earth/ground/evidence?lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&radius=750`);setData(r.data)}catch(e:any){setError(e?.message||String(e))}finally{setBusy(false)}};useEffect(()=>{void load()},[lat,lon]);
  const current=useMemo(()=>data?.levels?.[level]||null,[data,level]),photo=data?.levels?.STREET?.photo;
