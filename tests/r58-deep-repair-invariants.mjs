@@ -3,6 +3,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const living=read('src/OmegaR36LivingSurfaces.tsx');
 const modes=read('src/SourceBackedModesPanelR21.tsx');
 const shell=read('src/ResponsiveRuntimeShell.tsx');
+const navCss=read('src/singleFrameR27.css');
 const app=read('src/App.tsx');
 const fail=m=>{throw new Error(m)};
 const expect=(v,m)=>v||fail(m);
@@ -16,6 +17,9 @@ expect(living.includes('one canonical packet'),'display deck must preserve one s
 expect(modes.includes('implementedCount=summary.rows.length'),'mode panel must derive implemented count from real evaluation rows');
 expect(modes.includes('registryOnlyCount'),'mode registry gap must be explicit');
 expect(modes.includes('Catalog membership is never reported as execution.'),'catalog/execution truth boundary missing');
+expect(navCss.includes('grid-template-rows:auto auto auto auto auto minmax(0,1fr)'),'desktop navigation must allocate all six direct shell children explicitly');
+expect(navCss.includes('grid-template-rows:auto auto minmax(0,1fr) auto'),'route pane must allocate header/readout/routes/advanced rows explicitly');
+expect(navCss.includes('grid-template-columns:minmax(0,1fr) 18px'),'route buttons must match actual two-child DOM instead of obsolete three-column code layout');
 expect(!living.includes('@appdeploy/client')&&!modes.includes('@appdeploy/client'),'AppDeploy dependency regression');
 await import('./r58-hourly-builder-contract.mjs');
 console.log('R58 deep repair invariants PASS');
