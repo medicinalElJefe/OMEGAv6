@@ -7,6 +7,7 @@ import {unifiedFromRecord} from './unifiedCalculus';
 import CalculusFieldR37 from './CalculusFieldR37';
 import OmegaMotionSkinMapR35 from './OmegaMotionSkinMapR35';
 import LivingRuntimePulseR33 from './LivingRuntimePulseR33';
+import ExtremeTraversalUnionR60 from './ExtremeTraversalUnionR60';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import {dailyBrief} from './dailyBrief';
 import './omegaHomeR59.css';
@@ -30,7 +31,7 @@ const clamp=(n:number)=>Math.max(0,Math.min(20735,Math.floor(Number(n)||0)));
 const fmt=(n:any)=>Number.isFinite(Number(n))?Number(n).toFixed(3):'—';
 
 export default function OmegaHomeR59({onEnter}:Props){
- const[address,setAddress]=useState(()=>clamp(Number(localState.read('omega.v6.address',11498)))),[ready,setReady]=useState(false),[domain,setDomain]=useState<DomainId>('WORK'),[query,setQuery]=useState(''),[prompt,setPrompt]=useState(()=>localState.read('omega.b015.chatDraft.v1','')),[reply,setReply]=useState(''),[busy,setBusy]=useState(false),[cloud,setCloud]=useState<any>(null),[spine,setSpine]=useState<any>(null);
+ const[address,setAddress]=useState(()=>clamp(Number(localState.read('omega.v6.address',11498)))),[ready,setReady]=useState(false),[domain,setDomain]=useState<DomainId>('WORK'),[query,setQuery]=useState(''),[prompt,setPrompt]=useState(()=>localState.read('omega.b015.chatDraft.v1','')),[reply,setReply]=useState(''),[busy,setBusy]=useState(false),[cloud,setCloud]=useState<any>(null),[spine,setSpine]=useState<any>(null),[showRuntimeFunctions,setShowRuntimeFunctions]=useState(false);
  const daily=useMemo(()=>dailyBrief(),[]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>live&&setReady(true)).catch(()=>live&&setReady(false));return()=>{live=false}},[]);
  useEffect(()=>{localState.write('omega.v6.address',address)},[address]);
@@ -41,6 +42,7 @@ export default function OmegaHomeR59({onEnter}:Props){
  const enter=(panel:string)=>{if(!ALL.includes(panel as any))return;localState.write('omega.v6.panel',panel);localState.write('omega.v6.modePolicy','SOURCE_BACKED');onEnter(panel)};
  const ask=async()=>{if(!record||!modes||!prompt.trim()||busy)return;setBusy(true);setReply('');try{const context={address,stateId:record.stateId,coords,decision:record.metrics.decision,metrics:record.metrics,nextAddress:record.autoPing?.dataNext??address,modePolicy:'SOURCE_BACKED_ALL_AVAILABLE',appliedModeCount:modes.appliedCount,gatedModeCount:modes.gatedCount,unified:{coherence:unified?.unifiedCoherence,motionRelativity:unified?.motionRelativity},responseContract:{plainLanguageFirst:true,showRouteBeforeGeneration:true,doNotInventMissingEvidence:true}};await api.post('/api/route-preview',{text:prompt,context});const r=await api.post<any>('/api/chat',{text:prompt,context});setReply(String(r.data?.reply||'No response returned.'))}catch(e:any){setReply(e?.message||'No answer fabricated; provider/runtime path failed.')}finally{setBusy(false)}};
  const spineCount=Array.isArray(spine?.states)?spine.states.length:Array.isArray(spine?.requiredLiveState)?spine.requiredLiveState.length:0;
+ const runtimeState=record?{atlas:{address},modePolicy:'SOURCE_BACKED',frozen:false,d:coords.d,p:coords.p,r:coords.r,l:coords.l,workflow:'LAW',preset:'SOVEREIGN',timeAuthority:'NOW',viewportMode:'CANON_FIELD',instrumentView:'LIVE',workspace:'LAW',embodimentIndex:4}:null;
  return <main className='r59-home'>
   <aside className='r59-rail' aria-label='OMEGA home navigation'>
    <header><button aria-label='OMEGA home' onClick={()=>{setDomain('WORK');setQuery('')}}><span className='r59-orb'/></button><div><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild}</small></div></header>
@@ -63,6 +65,8 @@ export default function OmegaHomeR59({onEnter}:Props){
    <section className='r59-display-deck'><header><div><b>DISPLAY UNIVERSE</b><small>Every card opens a real state-bound application; none is decorative.</small></div><button onClick={()=>enter('Visual Instrument')}>Open full 8-view deck <ArrowRight/></button></header><div>{DISPLAYS.map(([label,panel,copy])=><button key={label} onClick={()=>enter(panel)}><span>{label}</span><small>{copy}</small><ArrowRight/></button>)}</div></section>
 
    <section className='r59-primary'>{PRIMARY.map(([label,panel,I])=><button key={panel} onClick={()=>enter(panel)}><I/><span><b>{label}</b><small>{panel}</small></span><ArrowRight/></button>)}</section>
+
+   <section className='r60-runtime-functions'><header><div><span>RESTORED EXECUTION STACK</span><h2>Runtime Functions</h2><p>Expose real accepted engines without creating shadow routes: canonical traversal, biological scale, micro build, data/language, cinematic rendering, host observation and proof/state supervision.</p></div><button onClick={()=>setShowRuntimeFunctions(v=>!v)} aria-expanded={showRuntimeFunctions}>{showRuntimeFunctions?'Hide runtime functions':'Open runtime functions'} <ArrowRight/></button></header>{showRuntimeFunctions&&record&&runtimeState&&<ExtremeTraversalUnionR60 record={record} address={address} state={runtimeState} onAddress={setAddress} onNavigate={enter}/>}</section>
 
    <section className='r59-bottom-grid'><article className='r59-motion'><header><Waypoints/><div><b>ROUTE + MOTION</b><small>same canonical packet · admitted transitions</small></div></header>{record&&<OmegaMotionSkinMapR35 address={address} onSelectAddress={setAddress} compact/>}</article><article className='r59-daily'><span>TODAY'S FIELD LESSON</span><h2>{daily.title}</h2><p>{daily.lesson}</p><blockquote>{daily.quote}</blockquote><button onClick={()=>enter(daily.destination)}>Explore lesson <ArrowRight/></button></article></section>
    <footer className='r59-boundary'><ShieldCheck/><span><b>Truth boundary:</b> browser state, Worker state, external evidence, provider output and native-device execution remain separately classified. Representation shells are not claims of physical dimensions.</span></footer>
