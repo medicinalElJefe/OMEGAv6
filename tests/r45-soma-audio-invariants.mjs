@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+const audio=fs.readFileSync('src/SomaAudioEngine.tsx','utf8'),atlas=fs.readFileSync('src/systemAtlasRuntime.ts','utf8'),ui=fs.readFileSync('src/SystemAtlasControl.tsx','utf8'),css=fs.readFileSync('src/somaAudio.css','utf8');
+const must=(x,m)=>{if(!x)throw new Error(m)};
+for(const token of ['Echo-Chamber / SOMA Audio Engine','PHASE_COHERENT_AUDIO','LOCAL_ACTIVE','12 discrete phase lanes','sonification only'])must(atlas.includes(token),`S17 runtime truth missing: ${token}`);
+for(const token of ['window.AudioContext','webkitAudioContext','createDynamicsCompressor','threshold.value=-28','ratio.value=12','createOscillator','createGain','createStereoPanner','1+(lane.k-5.5)*.0025','Math.sin(lane.phi)*.72','phaseGainShape','12 lanes → compressor → master','explicit user gesture','not measured frequencies'])must(audio.includes(token),`SOMA donor behavior missing: ${token}`);
+for(const token of ["['α','Alpha seed']","['Base','Yellow carrier']","['011','+π/2 construct']","['01-1','−π/2 prune']","['Ω','Integrate']"])must(audio.includes(token),`SOMA phase lane missing: ${token}`);
+must(audio.includes('Math.floor((a%1728)/144)%12'),'packet phase must derive from canonical D/P/R/L address');
+must(audio.includes('setSyncPacket(false)'),'manual audio controls must explicitly leave packet-follow mode');
+must(audio.includes('packet drives audible parameters; audio never changes canon state'),'audio authority boundary missing');
+must(ui.includes("cell.family.id==='S17'&&cell.family.status==='LOCAL_ACTIVE'"),'System Atlas must mount executable S17 only when truth registry says LOCAL_ACTIVE');
+must(ui.includes('<SomaAudioEngine record={record}/>'),'S17 engine not mounted in System Atlas');
+must(ui.includes('V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE'),'System Atlas header must expose active V24 lineage');
+must(ui.includes('OMEGA_SYSTEM_ATLAS_V24_TRUTH.json'),'V24 receipt export filename missing');
+must(css.includes('@media(max-width:700px)'),'S17 mobile containment missing');
+must(!audio.includes('@appdeploy/client')&&!ui.includes('@appdeploy/client'),'AppDeploy runtime dependency regression');
+console.log('R45 SOMA AUDIO PASS · 12 packet-bound lanes · local WebAudio · compressor/master safety · no authority mutation');
