@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+const worker=fs.readFileSync('src/worker.js','utf8');
+const spine=fs.readFileSync('src/workerLiveStateR51.js','utf8');
+const ui=fs.readFileSync('src/LiveStateSpineR50.tsx','utf8');
+const required=['UNIVERSE_PULSE.json','PHASE_AWARENESS.json','GEOMETRY_FRAME.json','LEMMA_NET.json','CANON_AWARENESS.json','AWARENESS_STATE.json','PERFORMANCE_STATE.json','PROOF_STATE.json','PROVIDER_STATE.json','PROJECTION_STATE.json','EXECUTION_STATE.json','STATE_SPINE_CHECKPOINT.json','EVERYWHERE_HUB_STATUS.json','SELF_MONITOR_STATUS.json'];
+for(const f of required)if(!spine.includes(f))throw new Error(`R51 Worker missing ${f}`);
+if(!worker.includes("import {workerLiveStateSpine} from './workerLiveStateR51.js'"))throw new Error('Worker must import R51 compiler');
+if(!worker.includes('url.pathname==="/api/live-state-spine"'))throw new Error('Worker must expose /api/live-state-spine');
+if(!spine.includes('SOURCE_CONTEXT_REQUIRED'))throw new Error('Worker must refuse to fabricate browser-only packet state');
+if(!spine.includes('DEVICE_PROOF_REQUIRED'))throw new Error('Worker must preserve device proof gate');
+if(!spine.includes('native B015 crash watchdog is not claimed here'))throw new Error('Worker must not fake native watchdog execution');
+if(!ui.includes("api.get<any>('/api/live-state-spine')"))throw new Error('Browser must cross-check Worker spine');
+if(!ui.includes("Worker {workerFiles.has(r.file)?'REGISTERED':'MISSING'}"))throw new Error('Browser must surface Worker registration gaps');
+console.log('R51 Worker live-state invariants PASS');
