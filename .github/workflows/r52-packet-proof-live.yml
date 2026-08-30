@@ -1,0 +1,40 @@
+name: OMEGA R52 Packet Proof Live Verify
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-packet-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for exact R52 packet proof endpoint
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const packet={address:41,stateId:42,identity:{phase:1,domain:2},metrics:{continuity:.9,plasticity:.8,contradiction:.1,burden:.2,decision:'STAY'},psc:{a:1},predict:null,autoPing:{z:2}};
+          async function proof(body){const r=await fetch(base+'/api/proof/packet',{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)});const raw=await r.text();return{r,raw,data:(()=>{try{return JSON.parse(raw)}catch{return{}}})()}}
+          let last='';
+          for(let attempt=1;attempt<=24;attempt++){
+            try{
+              const a=await proof({packet,projection:{view:'FIELD',frameHash:'abc'}});
+              if(!a.r.ok)throw new Error(`HTTP ${a.r.status}: ${a.raw.slice(0,300)}`);
+              if(a.data.schema!=='OMEGA_PACKET_PROOF_R52'||a.data.validation?.valid!==true)throw new Error(`old/missing R52 schema: ${a.raw.slice(0,300)}`);
+              if(String(a.data.packetHash||'').length!==64||String(a.data.projectionHash||'').length!==64)throw new Error('SHA-256 identities missing');
+              if(a.data.proof?.authority!=='NON_AUTHORITATIVE_PROOF_COMPILER'||a.data.proof?.receivedNotObserved!==true)throw new Error('proof authority boundary regressed');
+              const b=await proof({packet:{...packet,address:20736,stateId:42}});
+              if(b.r.status!==422||b.data.validation?.valid!==false)throw new Error('invalid packet was not rejected');
+              console.log(`R52 LIVE PACKET PROOF PASS · ${a.data.packetHash} · attempt ${attempt}`);
+              process.exit(0);
+            }catch(e){last=String(e);console.log(`R52 wait ${attempt}: ${last}`);await sleep(5000)}
+          }
+          throw new Error(`R52 live packet-proof verification failed: ${last}`);
+          NODE
