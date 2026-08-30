@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""OMEGA R33 local Hybrid Link agent.
+"""OMEGA R34 local Hybrid Link agent.
 
 Stdlib-first, root-confined, allow-listed execution. It never exposes arbitrary shell access.
 Pairing is explicit. Every claimed native action returns bounded proof to the canonical Worker.
-R33 adds an atomic, preimage-hash-bound text patch operation with an automatic local backup.
+R33 added atomic, preimage-hash-bound text patching with an automatic local backup.
+R34 adds explicit canonical reachability, authentication/registration, heartbeat, and transport diagnostics.
 """
 from __future__ import annotations
 import argparse, hashlib, json, os, platform, re, socket, subprocess, sys, time, urllib.error, urllib.request, uuid, zipfile
 from pathlib import Path
 
-VERSION='R33.0'
+VERSION='R34.0'
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
 TEXT_EXT={'.txt','.md','.json','.jsonc','.js','.jsx','.ts','.tsx','.py','.pyw','.css','.html','.yml','.yaml','.toml','.ini','.cfg','.csv','.bat','.ps1','.cs','.csproj','.sln'}
 SKIP_DIRS={'.git','node_modules','dist','build','.venv','venv','__pycache__','.wrangler','.omega_hybrid'}
@@ -31,6 +32,18 @@ def request_json(server,path,payload,bridge_id,secret,timeout=30):
         try: detail=json.loads(raw)
         except Exception: detail={'message':raw}
         raise AgentError(f"HTTP {e.code}: {detail.get('reply') or detail.get('message') or detail.get('code') or raw[:300]}")
+
+def probe_server(server,timeout=15):
+    req=urllib.request.Request(server.rstrip('/')+'/api/health',method='GET',headers={'user-agent':'OMEGA-Hybrid-Agent/'+VERSION})
+    try:
+        with urllib.request.urlopen(req,timeout=timeout) as r:
+            body=r.read().decode('utf-8','replace')
+            if int(getattr(r,'status',200))!=200: raise AgentError(f'Canonical health returned HTTP {getattr(r,"status","unknown")}')
+            try: return json.loads(body)
+            except Exception: return {'ok':True,'raw':body[:300]}
+    except urllib.error.HTTPError as e: raise AgentError(f'Canonical health HTTP {e.code}')
+    except urllib.error.URLError as e: raise AgentError(f'Canonical unreachable: {getattr(e,"reason",e)}')
+    except TimeoutError: raise AgentError('Canonical health timed out')
 
 def parse_pair(value):
     if '.' not in value: raise AgentError('Pairing code must contain bridge ID and secret.')
@@ -218,7 +231,7 @@ def execute_job(job,root:Path):
     return packet
 
 def main():
-    ap=argparse.ArgumentParser(description='OMEGA R33 Hybrid Link local agent')
+    ap=argparse.ArgumentParser(description='OMEGA R34 Hybrid Link local agent')
     ap.add_argument('--server',default=DEFAULT_SERVER);ap.add_argument('--pair',required=True,help='pairing code from OMEGA Hybrid Link')
     ap.add_argument('--root',default='.',help='approved local root; all file/process work stays inside it')
     ap.add_argument('--once',action='store_true',help='poll once, then exit')
@@ -228,17 +241,45 @@ def main():
     id_file.write_text(device_id)
     caps=['TRAIN_LOCAL','INDEX','READ_TEXT','SEARCH_TEXT','HASH_TREE','SAFE_IMPORT','BUILD','TEST','PACKAGE','SUPPORT_BUNDLE','APPLY_PATCH','OPEN_URL','WAIT']
     payload={'bridgeId':bridge_id,'deviceId':device_id,'name':socket.gethostname(),'platform':platform.platform(),'version':VERSION,'capabilities':caps,'rootLabel':root.name}
-    print('OMEGA Hybrid Link agent',VERSION);print('Approved root:',root);print('Registering with',server)
-    request_json(server,'/api/hybrid/agent/register',payload,bridge_id,secret)
+    print('OMEGA Hybrid Link agent',VERSION)
+    print('Approved root:',root)
+    print('[1/4] CANONICAL REACHABILITY:',server)
+    try:
+        probe_server(server)
+        print('      PASS — /api/health reachable')
+    except Exception as e:
+        print('      FAIL —',e,file=sys.stderr)
+        print('      Check internet, DNS, firewall, or canonical runtime availability. No PC ONLINE claim was made.',file=sys.stderr)
+        raise SystemExit(21)
+    print('[2/4] AUTHENTICATING / REGISTERING DEVICE')
+    try:
+        request_json(server,'/api/hybrid/agent/register',payload,bridge_id,secret)
+        print('      PASS — browser credential accepted and device registered')
+    except Exception as e:
+        print('      FAIL —',e,file=sys.stderr)
+        print('      Pairing may be expired/rotated, or the Worker rejected authentication. Rotate pairing and retry.',file=sys.stderr)
+        raise SystemExit(22)
+    print('[3/4] ESTABLISHING AUTHENTICATED HEARTBEAT')
+    failures=0;announced_online=False
     while True:
         try:
             request_json(server,'/api/hybrid/agent/heartbeat',{'bridgeId':bridge_id,'deviceId':device_id,'version':VERSION},bridge_id,secret,15)
+            if not announced_online:
+                print('      PASS — authenticated heartbeat returned. Browser may now truthfully show PC ONLINE.')
+                print('[4/4] GOVERNED JOB POLL ACTIVE — keep this window open')
+                announced_online=True
+            failures=0
             polled=request_json(server,'/api/hybrid/agent/poll',{'bridgeId':bridge_id,'deviceId':device_id},bridge_id,secret,30);job=polled.get('job')
             if job:
                 print('Running approved job',job.get('id'));packet=execute_job(job,root);packet.update({'bridgeId':bridge_id,'deviceId':device_id});request_json(server,'/api/hybrid/agent/result',packet,bridge_id,secret,60);print('Returned proof:',packet['resultFingerprint'])
             if args.once:return
-        except KeyboardInterrupt:return
-        except Exception as e: print('Bridge warning:',e,file=sys.stderr)
+        except KeyboardInterrupt:
+            print('Hybrid Link stopped by user. PC ONLINE will age to HEARTBEAT STALE.');return
+        except Exception as e:
+            failures+=1
+            label='AUTH/HTTP/TRANSPORT ERROR' if failures<3 else 'HEARTBEAT STALE RISK'
+            print(f'[{label}] attempt {failures}: {e}',file=sys.stderr)
+            if failures==3: print('Three consecutive authenticated cycles failed. The browser must not treat this host as currently online.',file=sys.stderr)
         time.sleep(4)
 
 if __name__=='__main__': main()
