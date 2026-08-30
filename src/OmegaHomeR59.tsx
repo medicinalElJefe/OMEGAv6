@@ -8,6 +8,7 @@ import CalculusFieldR37 from './CalculusFieldR37';
 import OmegaMotionSkinMapR35 from './OmegaMotionSkinMapR35';
 import LivingRuntimePulseR33 from './LivingRuntimePulseR33';
 import ExtremeTraversalUnionR60 from './ExtremeTraversalUnionR60';
+import SovereignCapabilityAtlasR61 from './SovereignCapabilityAtlasR61';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import {dailyBrief} from './dailyBrief';
 import './omegaHomeR59.css';
@@ -67,6 +68,8 @@ export default function OmegaHomeR59({onEnter}:Props){
    <section className='r59-primary'>{PRIMARY.map(([label,panel,I])=><button key={panel} onClick={()=>enter(panel)}><I/><span><b>{label}</b><small>{panel}</small></span><ArrowRight/></button>)}</section>
 
    <section className='r60-runtime-functions'><header><div><span>RESTORED EXECUTION STACK</span><h2>Runtime Functions</h2><p>Expose real accepted engines without creating shadow routes: canonical traversal, biological scale, micro build, data/language, cinematic rendering, host observation and proof/state supervision.</p></div><button onClick={()=>setShowRuntimeFunctions(v=>!v)} aria-expanded={showRuntimeFunctions}>{showRuntimeFunctions?'Hide runtime functions':'Open runtime functions'} <ArrowRight/></button></header>{showRuntimeFunctions&&record&&runtimeState&&<ExtremeTraversalUnionR60 record={record} address={address} state={runtimeState} onAddress={setAddress} onNavigate={enter}/>}</section>
+
+   <SovereignCapabilityAtlasR61 onNavigate={enter}/>
 
    <section className='r59-bottom-grid'><article className='r59-motion'><header><Waypoints/><div><b>ROUTE + MOTION</b><small>same canonical packet · admitted transitions</small></div></header>{record&&<OmegaMotionSkinMapR35 address={address} onSelectAddress={setAddress} compact/>}</article><article className='r59-daily'><span>TODAY'S FIELD LESSON</span><h2>{daily.title}</h2><p>{daily.lesson}</p><blockquote>{daily.quote}</blockquote><button onClick={()=>enter(daily.destination)}>Explore lesson <ArrowRight/></button></article></section>
    <footer className='r59-boundary'><ShieldCheck/><span><b>Truth boundary:</b> browser state, Worker state, external evidence, provider output and native-device execution remain separately classified. Representation shells are not claims of physical dimensions.</span></footer>
