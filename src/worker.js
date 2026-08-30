@@ -1,3 +1,4 @@
+import {workerLiveStateSpine} from './workerLiveStateR51.js';
 const JSON_HEADERS={"content-type":"application/json; charset=utf-8","cache-control":"no-store"};
 const PUBLIC_HOST="omegav6.jeffdeweyeljefe.workers.dev";
 const PUBLIC_URL=`https://${PUBLIC_HOST}/`;
@@ -20,6 +21,7 @@ async function api(request,env,url){
  const restoration=restorationPayload(url);
  if(url.pathname==="/api/health"&&request.method==="GET")return json({ok:true,service:BUILD.product,build:BUILD,publicUrl:PUBLIC_URL,restoration:{state:restoration.state,fullRestoreClaimed:restoration.fullRestoreClaimed},ai:{bound:Boolean(env.AI),model:env.AI?WORKERS_AI_MODEL:"NOT_BOUND"},now:new Date().toISOString()});
  if(url.pathname==="/api/status"&&request.method==="GET")return json(statusPayload(env,url));
+ if(url.pathname==="/api/live-state-spine"&&request.method==="GET"){const status=statusPayload(env,url),provider=status.modelProvider;return json(workerLiveStateSpine({status,restoration,provider,publicUrl:PUBLIC_URL}));}
  if(url.pathname==="/api/restoration"&&request.method==="GET")return json({ok:true,...restoration,build:BUILD.publicAdapter,provider:env.AI?`WORKERS_AI:${WORKERS_AI_MODEL}`:(env.OMEGA_MODEL_ENDPOINT?"CONFIGURED_EXTERNAL":"GROUNDED_RUNTIME_ONLY"),nativeHost:"DEVICE_PROOF_REQUIRED",earthFeeds:"EXTERNAL_DEGRADED_UNTIL_BOUND"});
  if(url.pathname==="/api/hybrid/status"&&request.method==="GET")return json({ok:true,state:"DEVICE_PROOF_REQUIRED",controller:"LIVE_PLANNER",devices:[],jobs:[],nativeExecutionClaimed:false,message:"Cloud mission planning is live; no native heartbeat is claimed until a paired host proves itself."});
  if(url.pathname==="/api/hybrid/desktop-update"&&request.method==="GET")return json({ok:true,state:"DEVICE_PROOF_REQUIRED",nativeUpdate:"NOT_TESTABLE_WITHOUT_HOST",message:"A paired Windows host must prove its current version before an update decision can be made."});

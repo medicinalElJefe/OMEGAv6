@@ -1,0 +1,44 @@
+name: OMEGA R51 Live State Spine Verify
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-worker-state-spine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for exact R51 Worker state spine and verify truth boundary
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const required=['UNIVERSE_PULSE.json','PHASE_AWARENESS.json','GEOMETRY_FRAME.json','LEMMA_NET.json','CANON_AWARENESS.json','AWARENESS_STATE.json','PERFORMANCE_STATE.json','PROOF_STATE.json','PROVIDER_STATE.json','PROJECTION_STATE.json','EXECUTION_STATE.json','STATE_SPINE_CHECKPOINT.json','EVERYWHERE_HUB_STATUS.json','SELF_MONITOR_STATUS.json'];
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let last='';
+          for(let attempt=1;attempt<=24;attempt++){
+            try{
+              const r=await fetch(base+'/api/live-state-spine',{headers:{'cache-control':'no-cache'}});
+              const raw=await r.text();
+              if(!r.ok) throw new Error(`HTTP ${r.status}: ${raw.slice(0,300)}`);
+              const x=JSON.parse(raw);
+              if(x.schema!=='OMEGA_WORKER_LIVE_STATE_R51') throw new Error(`old/missing schema: ${x.schema||'none'}`);
+              if(x.complete!==true||x.required!==14||x.present!==14) throw new Error(`incomplete state spine ${x.present}/${x.required}`);
+              for(const f of required) if(!x.rows?.some(row=>row.file===f)) throw new Error(`missing ${f}`);
+              const execution=x.rows.find(row=>row.file==='EXECUTION_STATE.json');
+              if(execution?.reality!=='DEVICE_PROOF_REQUIRED'&&execution?.value!=='VERIFIED') throw new Error('native execution truth gate regressed');
+              const pulse=x.rows.find(row=>row.file==='UNIVERSE_PULSE.json');
+              if(pulse?.reality!=='SOURCE_CONTEXT_REQUIRED') throw new Error('stateless Worker fabricated canonical packet truth');
+              if(!String(x.boundary||'').includes('Windows watchdog')) throw new Error('native watchdog boundary missing');
+              console.log(`R51 LIVE STATE SPINE PASS · ${x.present}/${x.required} · attempt ${attempt}`);
+              process.exit(0);
+            }catch(e){last=String(e);console.log(`R51 wait ${attempt}: ${last}`);await sleep(5000)}
+          }
+          throw new Error(`R51 live state-spine verification failed: ${last}`);
+          NODE
