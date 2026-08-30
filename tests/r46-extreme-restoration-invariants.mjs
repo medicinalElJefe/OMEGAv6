@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8'),must=(x,m)=>{if(!x)throw new Error(`R46 extreme restoration invariant failed: ${m}`)};
+const matrix=read('src/ExtremeRestorationR46.tsx'),bio=read('src/BiologicalTraversalR46.tsx'),micro=read('src/MicroBuildR46.tsx'),data=read('src/OmegaDataLexiconR46.tsx'),cinema=read('src/CinematicFieldRendererR46.tsx'),atlas=read('src/SystemAtlasControl.tsx'),base=read('src/systemAtlasRuntime.ts'),css=read('src/extremeRestorationR46.css');
+for(const id of ['S10','S12','S16','S18','S21'])must(matrix.includes(`id:'${id}'`),`successor overlay missing ${id}`);
+for(const token of ['ORGANISM','ORGAN','TISSUE','CELL','ORGANELLE','MOLECULE','ATOM','Representational biological-scale traversal only'])must(bio.includes(token),`biology contract missing ${token}`);
+for(const token of ['OMEGA_COMPRESSED_SOVEREIGN_SEED_R46','requiresAuthorityAdmission:true','DEVICE_PROOF_REQUIRED','portable state/configuration material only'])must(micro.includes(token),`micro build boundary missing ${token}`);
+for(const token of ['crypto.subtle.digest','SHA-256','parseCsv','XLSX','OMEGA_SEMANTIC_PACKET_LANGUAGE_R46','Deterministic packet↔lexicon routing only','COMMAND_REGISTRY','EVIDENCE_LEDGER'])must(data.includes(token),`data/language runtime missing ${token}`);
+for(const token of ['IMMERSIVE_SNAPSHOT_ENGINE','Export SVG','Browser-local deterministic SVG still rendering is active','Native GPU'])must(cinema.includes(token),`cinematic boundary missing ${token}`);
+must(atlas.includes("import ExtremeRestorationR46 from './ExtremeRestorationR46'"),'System Atlas must mount R46 restoration matrix');
+must(atlas.includes('<ExtremeRestorationR46 record={record} address={activeAddress} onNavigate={onNavigate}/>'),'R46 executor mount missing');
+for(const historical of ["F('S10','Biological Traversal Engine'","F('S12','Omega Micro Build'","F('S16','Workbook / Excel Atlas Runtime'","F('S18','Universal Language System'","F('S21','Cinematic Field Renderer'"])must(base.includes(historical),`V24 historical family evidence missing ${historical}`);
+for(const bad of ['clinical diagnosis','universal translation proof is active','@appdeploy/client'])must(![matrix,bio,micro,data,cinema,atlas,css].join('\n').toLowerCase().includes(bad.toLowerCase()),`unsupported claim/dependency ${bad}`);
+must(css.includes('@media(max-width:520px)')&&css.includes('.r46-family-status'),'responsive restoration containment missing');
+console.log('R46 EXTREME RESTORATION PASS · S10/S12/S16/S18/S21 bounded successor executors · V24 evidence preserved · native/device claims gated');
