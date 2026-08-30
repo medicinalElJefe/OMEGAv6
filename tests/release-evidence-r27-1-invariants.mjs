@@ -1,12 +1,15 @@
 import fs from 'node:fs';
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const worker=fs.readFileSync('src/workerR27.js','utf8');
+const worker32=fs.existsSync('src/workerR32.js')?fs.readFileSync('src/workerR32.js','utf8'):'';
 const config=fs.readFileSync('wrangler.jsonc','utf8');
 const panel=fs.readFileSync('src/GovernedBuildReceiptPanel.tsx','utf8');
 const vite=fs.readFileSync('vite.config.ts','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 function semverAtLeast(v,min){const a=v.split('.').map(Number),b=min.split('.').map(Number);for(let i=0;i<3;i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return true}
-must(config.includes('"main": "src/workerR27.js"'),'R27 release-evidence wrapper must be the deployed Worker entrypoint');
+const directR27=config.includes('"main": "src/workerR27.js"');
+const wrappedR27=config.includes('"main": "src/workerR32.js"')&&worker32.includes("import r27 from './workerR27.js'")&&worker32.includes('return r27.fetch(request,env)');
+must(directR27||wrappedR27,'R27 release-evidence wrapper must be the deployed Worker entrypoint or preserved by a proven successor wrapper');
 must(config.includes('"version_metadata"')&&config.includes('"CF_VERSION_METADATA"'),'Cloudflare version metadata binding must be configured');
 must(worker.includes("'/api/release-evidence'"),'release-evidence endpoint missing');
 must(worker.includes('OMEGA_RELEASE_EVIDENCE_V1'),'release-evidence schema missing');
@@ -21,5 +24,5 @@ must(panel.includes('release-evidence-timeline')&&panel.includes("label:'1 · So
 must(panel.includes('EXTERNAL_GITHUB_EVIDENCE_REQUIRED')&&panel.includes('EXTERNAL_FIRST_HAND_PROBE_REQUIRED')&&panel.includes('EXTERNAL_RELEASE_LEDGER_REQUIRED'),'timeline must preserve external QA, verification, and rollback authority instead of synthesizing proof');
 must(vite.includes('OMEGA_GOVERNED_BUILD_RECEIPT_V1'),'R26.1 package receipt must remain inherited');
 must(semverAtLeast(pkg.version,'27.1.0'),'package version must retain or advance beyond R27.1');
-for(const source of [worker,panel,config])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1+ must remain AppDeploy-free');
+for(const source of [worker,worker32,panel,config])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1+ must remain AppDeploy-free');
 console.log(`OMEGA R27.1+ RELEASE EVIDENCE PASS · package ${pkg.version} · source -> QA -> receipt -> runtime -> canonical verify -> rollback timeline retained`);
