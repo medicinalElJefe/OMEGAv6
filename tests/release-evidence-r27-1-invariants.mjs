@@ -17,7 +17,9 @@ must(worker.includes("candidateQa:'EXTERNAL_GITHUB_EVIDENCE_REQUIRED'")&&worker.
 must(panel.includes("fetch('/api/release-evidence'"),'Development surface must read live release evidence');
 must(panel.includes('Receipt link')&&panel.includes('Worker version'),'Development surface must expose receipt/version binding');
 must(panel.includes("evidence?.packageReceipt?.receiptSha256===receipt.receiptSha256"),'Development surface must compare exact receipt SHA-256');
+must(panel.includes('release-evidence-timeline')&&panel.includes("label:'1 · Source'")&&panel.includes("label:'6 · Rollback'"),'Development surface must expose the complete human-readable release evidence timeline');
+must(panel.includes('EXTERNAL_GITHUB_EVIDENCE_REQUIRED')&&panel.includes('EXTERNAL_FIRST_HAND_PROBE_REQUIRED')&&panel.includes('EXTERNAL_RELEASE_LEDGER_REQUIRED'),'timeline must preserve external QA, verification, and rollback authority instead of synthesizing proof');
 must(vite.includes('OMEGA_GOVERNED_BUILD_RECEIPT_V1'),'R26.1 package receipt must remain inherited');
 must(semverAtLeast(pkg.version,'27.1.0'),'package version must retain or advance beyond R27.1');
 for(const source of [worker,panel,config])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1+ must remain AppDeploy-free');
-console.log(`OMEGA R27.1+ RELEASE EVIDENCE PASS · package ${pkg.version} · build receipt -> Cloudflare version metadata · external QA/rollback truth retained`);
+console.log(`OMEGA R27.1+ RELEASE EVIDENCE PASS · package ${pkg.version} · source -> QA -> receipt -> runtime -> canonical verify -> rollback timeline retained`);
