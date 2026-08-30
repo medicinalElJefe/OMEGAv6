@@ -16,7 +16,7 @@ type DomainId='WORK'|'EXPLORE'|'INTELLIGENCE'|'EVIDENCE'|'SYSTEM';
 type OperatorRole='ALPHA'|'BASE'|'CONSTRUCT'|'PRUNE'|'OMEGA';
 type LegacyDomainId='COMMAND'|'VISUALIZE'|'EARTH'|'INTELLIGENCE'|'BUILD'|'EVIDENCE'|'SYSTEM';
 const LEGACY_DOMAIN_LINEAGE:readonly LegacyDomainId[]=['COMMAND','VISUALIZE','EARTH','INTELLIGENCE','BUILD','EVIDENCE','SYSTEM'];
-const LEGACY_OPERATIONAL_FILTER_LINEAGE='isPrimaryOperationalCapability';
+const LEGACY_OPERATIONAL_FILTER_LINEAGE='filter(isPrimaryOperationalCapability)';
 void LEGACY_OPERATIONAL_FILTER_LINEAGE;
 type Props={uiMode:OmegaUiMode;onUiMode:(mode:OmegaUiMode)=>void;panel:string;onNavigate:(panel:string)=>void;record:any;modePolicy:string;modeCount:number;busy:string};
 type Domain={id:DomainId;label:string;description:string;routes:readonly string[];operator:OperatorRole;shell:string;shellMeaning:string;relation:string};
