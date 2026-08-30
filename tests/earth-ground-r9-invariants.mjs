@@ -14,7 +14,9 @@ must(observatory.includes('EarthGroundTraversalR9'),'R9 ground traversal must be
 const directR9=wrangler.includes('"main": "src/workerR9.js"');
 const r27=fs.existsSync('src/workerR27.js')?fs.readFileSync('src/workerR27.js','utf8'):'';
 const r32=fs.existsSync('src/workerR32.js')?fs.readFileSync('src/workerR32.js','utf8'):'';
+const r33=fs.existsSync('src/workerR33.js')?fs.readFileSync('src/workerR33.js','utf8'):'';
 const wrappedR9=wrangler.includes('"main": "src/workerR27.js"')&&r27.includes("import r9 from './workerR9.js'")&&r27.includes('return r9.fetch(request,env)');
 const r32WrappedR9=wrangler.includes('"main": "src/workerR32.js"')&&r32.includes("import r27 from './workerR27.js'")&&r27.includes("import r9 from './workerR9.js'")&&r27.includes('return r9.fetch(request,env)');
-must(directR9||wrappedR9||r32WrappedR9,'Cloudflare must execute R9 directly or through a proven successor wrapper that preserves R9');
-console.log('EARTH_GROUND_R9 PASS · WGS84 Earth→ground + KartaView/USGS/OSM/GIBS returned-source contracts locked · successor chain proven');
+const r33WrappedR9=wrangler.includes('"main": "src/workerR33.js"')&&r33.includes("from './workerR32.js'")&&r32.includes("import r27 from './workerR27.js'")&&r27.includes("import r9 from './workerR9.js'")&&r27.includes('return r9.fetch(request,env)');
+must(directR9||wrappedR9||r32WrappedR9||r33WrappedR9,'Cloudflare must execute R9 directly or through a proven successor wrapper that preserves R9');
+console.log('EARTH_GROUND_R9 PASS · WGS84 Earth→ground + KartaView/USGS/OSM/GIBS returned-source contracts locked · R33 successor chain proven');
