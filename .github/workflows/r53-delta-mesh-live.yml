@@ -1,0 +1,44 @@
+name: OMEGA R53 Delta Mesh Live Verify
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-delta-mesh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for exact R53 snapshot-delta-checkpoint endpoint
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const packet=(address,c=.7)=>({address,stateId:address+1,identity:{domain:'Structure'},metrics:{continuity:c,plasticity:.6,contradiction:.1,burden:.2,decision:'STAY'},psc:{phase:1},predict:{score:.5},autoPing:{next:address+1}});
+          async function call(body){const r=await fetch(base+'/api/proof/delta',{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)});const raw=await r.text();return{r,raw,data:(()=>{try{return JSON.parse(raw)}catch{return{}}})()}}
+          let last='';
+          for(let attempt=1;attempt<=24;attempt++){
+            try{
+              const first=await call({current:{packet:packet(41),projection:{view:'FIELD',frameHash:'r53-a'}}});
+              if(!first.r.ok)throw new Error(`HTTP ${first.r.status}: ${first.raw.slice(0,300)}`);
+              if(first.data.schema!=='OMEGA_DELTA_MESH_R53'||first.data.mode!=='FULL_SNAPSHOT')throw new Error(`old/missing R53 schema: ${first.raw.slice(0,300)}`);
+              if(String(first.data.snapshotHash||'').length!==64||String(first.data.checkpointHash||'').length!==64)throw new Error('full snapshot/checkpoint hashes missing');
+              const second=await call({previous:{packet:packet(41),projection:{view:'FIELD',frameHash:'r53-a'}},current:{packet:packet(41,.83),projection:{view:'FIELD',frameHash:'r53-b'}},previousCheckpointHash:first.data.checkpointHash});
+              if(!second.r.ok||second.data.mode!=='DELTA')throw new Error(`delta mode failed: ${second.raw.slice(0,300)}`);
+              if(!second.data.changedComponents?.includes('metrics')||!second.data.changedComponents?.includes('projection'))throw new Error('changed-component transport incomplete');
+              if(String(second.data.deltaHash||'').length!==64||String(second.data.checkpointHash||'').length!==64)throw new Error('delta/checkpoint SHA-256 missing');
+              if(second.data.proof?.authority!=='NON_AUTHORITATIVE_DELTA_PROOF_COMPILER'||second.data.proof?.receivedNotObserved!==true)throw new Error('R53 truth boundary regressed');
+              const invalid=await call({current:{packet:{address:9,stateId:999,metrics:{continuity:1,plasticity:1,contradiction:0,burden:0}}}});
+              if(invalid.r.status!==422||invalid.data.code!=='CURRENT_PACKET_INVALID')throw new Error('malformed canonical packet was not rejected');
+              console.log(`R53 LIVE DELTA MESH PASS · snapshot ${first.data.snapshotHash} · delta ${second.data.deltaHash} · checkpoint ${second.data.checkpointHash} · attempt ${attempt}`);
+              process.exit(0);
+            }catch(e){last=String(e);console.log(`R53 wait ${attempt}: ${last}`);await sleep(5000)}
+          }
+          throw new Error(`R53 live delta-mesh verification failed: ${last}`);
+          NODE
