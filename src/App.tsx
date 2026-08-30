@@ -13,6 +13,7 @@ import './navigationButtonPolishR11.css';
 import './omegaProfessionalR13.css';
 import './omegaInterfaceR16.css';
 import './omegaHomeR17.css';
+import './interfaceRepairR34.css';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import OmegaHome from './OmegaHome';
 const OmegaWorkstation=lazy(()=>import('./OmegaWorkstationFullV2'));
