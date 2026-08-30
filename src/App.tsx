@@ -1,24 +1,10 @@
 import {Component,Suspense,lazy,useEffect,useState,type ErrorInfo,type ReactNode} from 'react';
+/* R68 style authority: foundational layout + current product system only.
+   Historical component-specific CSS remains imported by the components that own it. */
 import './index.css';
 import './workstation.css';
-import './surpass.css';
-import './surfacePolish.css';
-import './omegaVisualIdentity.css';
-import './uxSurpassR2.css';
-import './uxSurpassR3.css';
-import './experienceR4.css';
-import './runtimeRailR4.css';
-import './omegaSovereignVisualR10.css';
-import './navigationButtonPolishR11.css';
-import './omegaProfessionalR13.css';
-import './omegaInterfaceR16.css';
-import './omegaHomeR17.css';
-import './interfaceRepairR34.css';
-import './interfaceImproveR34_1.css';
 import './coherenceRepairR35.css';
-import './surfaceRelativityR38_2.css';
 import './specialistDepthR38_3.css';
-import './deepInteractionR39_2.css';
 import './mobileMatterR42.css';
 import './sovereignDesignR59.css';
 import './instrumentOSR62.css';
