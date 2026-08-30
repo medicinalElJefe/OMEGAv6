@@ -7,6 +7,8 @@ const app=fs.readFileSync('src/App.tsx','utf8');
 const corpus=fs.readFileSync('src/corpusRuntime.ts','utf8');
 const runtime=fs.readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
 const panel=fs.readFileSync('src/SourceBackedModesPanelR21.tsx','utf8');
+const visualLaw=fs.readFileSync('src/calculusVisualLawR37.ts','utf8');
+const visualBinding=fs.readFileSync('src/sourceModeVisualBindingR68.ts','utf8');
 
 const donorArray=authority.slice(authority.indexOf('const NAMES=['),authority.indexOf('] as const;'));
 const names=[...(donorArray.matchAll(/'([^']+)'/g))].map(x=>x[1]);
@@ -26,5 +28,10 @@ assert(!app.includes('<OmegaModeAuthorityDock'),'global fixed mode dock must rem
 assert(runtime.includes("state:'EXECUTED_EXACT'")&&runtime.includes('GATED_MISSING_INPUTS'),'active runtime must distinguish exact execution from missing-input gates');
 for(const formula of ['S=(CΩ·Φ)/(q+Λ+ε)','M188=(CΩ+Scar)/(1+q)','Prune=q+Λ-CΩ'])assert(runtime.includes(formula),`source-backed runtime missing donor formula ${formula}`);
 assert(panel.includes('179 catalog entries are loaded as source metadata, not automatically called'),'active Modes surface must explicitly separate catalog membership from execution');
-assert(!authority.includes('@appdeploy/client')&&!dock.includes('@appdeploy/client')&&!runtime.includes('@appdeploy/client'),'must remain sovereign-provider portable');
-console.log('PASS all-modes-authority-r12-invariants · 179 catalog + 62 canon lenses + source-backed execution only');
+assert(visualLaw.includes("from './sourceBackedModeRuntimeR21'"),'living renderer law must consume source-backed mode execution rather than only labels');
+for(const id of ['M001','M002','M004','M005','M006','M007','M008','M009'])assert(visualLaw.includes(`'${id}'`),`renderer law missing executable mode influence ${id}`);
+assert(visualLaw.includes('GATED_MISSING_INPUTS'),'renderer influence must exclude gated formulas');
+assert(visualLaw.includes('sourceModeInfluence'),'renderer law must expose its mode influence receipt');
+assert(visualBinding.includes('representational renderer mapping'),'projection-specific mapping must state its representational boundary');
+assert(!authority.includes('@appdeploy/client')&&!dock.includes('@appdeploy/client')&&!runtime.includes('@appdeploy/client')&&!visualLaw.includes('@appdeploy/client'),'must remain sovereign-provider portable');
+console.log('PASS all-modes-authority-r12-invariants · 179 catalog + 62 canon lenses + source-backed execution + renderer binding');
