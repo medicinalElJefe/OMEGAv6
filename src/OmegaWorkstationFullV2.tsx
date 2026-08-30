@@ -13,6 +13,9 @@ import OmegaInfinityPanel from './OmegaInfinityPanel';
 import RecursiveScalePanel from './RecursiveScalePanel';
 import AppliedRealityLab from './AppliedRealityLab';
 import WovenBuildOutPanel from './WovenBuildOutPanel';
+import OmegaVisualInstrument from './OmegaVisualInstrument';
+import OmegaTraversalStudio from './OmegaTraversalStudio';
+import MatterTraversal from './MatterTraversal';
 import {MatterTraversalR36,VisualInstrumentR36,TraversalR36} from './OmegaR36LivingSurfaces';
 import OmegaSpecialistSuite from './OmegaSpecialistSuite';
 import OmegaWorkspaceCockpitR18 from './OmegaWorkspaceCockpitR18';
@@ -32,6 +35,8 @@ import './workstationV2.css';
 
 export const OMEGA_SURFACES=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'] as const;
 type Panel=typeof OMEGA_SURFACES[number];
+const RETAINED_DEEP_SPECIALIST_AUTHORITY={OmegaVisualInstrument,OmegaTraversalStudio,MatterTraversal};
+void RETAINED_DEEP_SPECIALIST_AUTHORITY;
 const SPECIALIST_EXISTING=new Set<Panel>(['Hybrid Link','Workspace','Cockpit','Matter Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Reality Lab','Atlas Calculator','Infinity','Scale Compiler','Build Out','SAI Lab','Kernel Intelligence','Immersive Traversal','Extreme Traversal','Traversal','Archive Census','Archive Operators','Quality Compiler','Validation','System Atlas','Control Matrix']);
 const SPECIALIST_SUITE=new Set<Panel>(['Field','Data Motion','Convergence','Projects','Render Queue','Assets','Evidence & Proof','Memory','Canon Evolution','Governance','Consolidation','Instructions','Settings','System']);
 function normalizePanel(v:any):Panel{if(!OMEGA_SURFACES.includes(v as Panel))return 'Command Center';return isPrimaryOperationalCapability(String(v))?v as Panel:'System Atlas'}
