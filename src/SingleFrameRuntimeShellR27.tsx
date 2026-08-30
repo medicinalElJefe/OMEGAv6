@@ -3,6 +3,7 @@ import {BrainCircuit,ChevronRight,Command,Earth,Eye,FolderOpen,Home,Menu,Search,
 import {CAPABILITY_REALITY_LABEL,capabilityReality,isPrimaryOperationalCapability} from './capabilityAuthority';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import './singleFrameR27.css';
+import './shellR31.css';
 
 export type OmegaUiMode='AUTO'|'DESKTOP'|'MOBILE';
 type DomainId='WORK'|'EXPLORE'|'INTELLIGENCE'|'EVIDENCE'|'SYSTEM';
