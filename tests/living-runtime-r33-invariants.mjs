@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const worker=read('src/workerR33.js'),worker32=read('src/workerR32.js'),agent=read('public/omega-hybrid-agent.py'),shell=read('src/SingleFrameRuntimeShellR27.tsx'),pulse=read('src/LivingRuntimePulseR33.tsx'),config=read('wrangler.jsonc');
+must(config.includes('"main": "src/workerR33.js"'),'R33 must be the active Cloudflare Worker successor');
+must(worker.includes("import r32,{OmegaRuntime as OmegaRuntimeR32} from './workerR32.js'"),'R33 must preserve R32 enacted-runtime lineage');
+must(worker.includes("persistence:'DURABLE_MESSAGE_MEMORY'")&&worker.includes('LAST_48_DURABLE_TURNS')&&worker.includes('thread?.messages'),'R33 AI must retain bounded durable message memory, not only counters');
+must(worker.includes("history=(thread?.messages||[]).slice(-12)")&&worker.includes('CURRENT REQUEST'),'Workers AI must consume bounded prior durable project turns');
+must(worker.includes("'MISSION_COMPLETE'")&&worker.includes("'MISSION_HELD'")&&worker.includes('lastProof:job.returnPacket'),'mission state must transition from actual returned host proof');
+must(worker.includes('no blind retry was queued'),'failed native proof must hold rather than fabricate autonomous success');
+for(const token of ['APPLY_PATCH','expectedSha256','preimage mismatch','backups','os.replace','beforeSha256','afterSha256'])must(agent.includes(token),`R33 hash-bound patch executor missing ${token}`);
+must(agent.includes('MAX_PATCH_BYTES=512*1024')&&agent.includes('MAX_PATCH_REPLACEMENTS=24'),'patch operation must remain bounded');
+must(agent.includes('shell=False'),'native build/test must retain no-arbitrary-shell boundary');
+must(pulse.includes("'/api/runtime/snapshot'")&&pulse.includes('remembered turns')&&pulse.includes('proved PC'),'menu pulse must consume live runtime state');
+must(shell.includes('LivingRuntimePulseR33')&&shell.includes('What should OMEGA do now?')&&shell.includes("className='r33-all-tools'"),'mobile navigation must lead with enacted state/actions and progressively disclose the catalog');
+must(shell.includes('<span>Now</span>')&&shell.includes('<span>PC</span>')&&shell.includes('<span>Tools</span>'),'mobile primary navigation must remain task-first');
+for(const source of [worker,worker32,agent,shell,pulse,config])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R33 must remain AppDeploy-free');
+console.log('OMEGA R33 LIVING RUNTIME PASS · durable AI memory + proof-driven mission lifecycle + hash-bound PC patching + live action-first menus');
