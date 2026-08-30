@@ -2,6 +2,7 @@ import {workerLiveStateSpine} from './workerLiveStateR51.js';
 import {compilePacketProofR52} from './workerPacketProofR52.js';
 import {compileDeltaMeshR53} from './workerDeltaMeshR53.js';
 import {verifyProofChainR54} from './workerProofChainR54.js';
+import {superviseProofPerformanceR55} from './workerPerformanceProviderR55.js';
 const JSON_HEADERS={"content-type":"application/json; charset=utf-8","cache-control":"no-store"};
 const PUBLIC_HOST="omegav6.jeffdeweyeljefe.workers.dev";
 const PUBLIC_URL=`https://${PUBLIC_HOST}/`;
@@ -28,6 +29,7 @@ async function api(request,env,url){
  if(url.pathname==="/api/proof/packet"&&request.method==="POST"){const body=await request.json().catch(()=>({})),proof=await compilePacketProofR52(body);return json(proof,proof.status||200);}
  if(url.pathname==="/api/proof/delta"&&request.method==="POST"){const body=await request.json().catch(()=>({})),proof=await compileDeltaMeshR53(body);return json(proof,proof.status||200);}
  if(url.pathname==="/api/proof/chain"&&request.method==="POST"){const body=await request.json().catch(()=>({})),proof=await verifyProofChainR54(body);return json(proof,proof.status||200);}
+ if(url.pathname==="/api/proof/performance"&&request.method==="POST"){const body=await request.json().catch(()=>({})),status=statusPayload(env,url),proof=await superviseProofPerformanceR55(body,status.modelProvider);return json(proof,proof.status||200);}
  if(url.pathname==="/api/restoration"&&request.method==="GET")return json({ok:true,...restoration,build:BUILD.publicAdapter,provider:env.AI?`WORKERS_AI:${WORKERS_AI_MODEL}`:(env.OMEGA_MODEL_ENDPOINT?"CONFIGURED_EXTERNAL":"GROUNDED_RUNTIME_ONLY"),nativeHost:"DEVICE_PROOF_REQUIRED",earthFeeds:"EXTERNAL_DEGRADED_UNTIL_BOUND"});
  if(url.pathname==="/api/hybrid/status"&&request.method==="GET")return json({ok:true,state:"DEVICE_PROOF_REQUIRED",controller:"LIVE_PLANNER",devices:[],jobs:[],nativeExecutionClaimed:false,message:"Cloud mission planning is live; no native heartbeat is claimed until a paired host proves itself."});
  if(url.pathname==="/api/hybrid/desktop-update"&&request.method==="GET")return json({ok:true,state:"DEVICE_PROOF_REQUIRED",nativeUpdate:"NOT_TESTABLE_WITHOUT_HOST",message:"A paired Windows host must prove its current version before an update decision can be made."});
