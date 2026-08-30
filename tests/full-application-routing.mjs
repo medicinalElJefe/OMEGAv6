@@ -14,11 +14,12 @@ must(suite.includes("OmegaFieldMotionConvergenceR28")&&suite.includes("OmegaEvid
 for(const panel of ['Hybrid Link','Archive Census','Archive Operators','Quality Compiler','Validation','System Atlas','Control Matrix','Cockpit','Workspace'])must(v2.includes(`case '${panel}'`)||v2.includes(`panel==='${panel}'`),`missing dedicated operational route ${panel}`);
 for(const panel of ['Governance','Canon Evolution','Projects','Render Queue','Assets'])must(utility.includes(`case '${panel}'`),`missing retained R26 utility authority route ${panel}`);
 for(const panel of ['Field','Data Motion','Convergence','Evidence & Proof','Memory','Instructions','Settings','System','Consolidation'])must(suite.includes(panel),`restored specialist route missing ${panel}`);
-must(authority.includes("'Plugins':'DONOR_ONLY'"),'Plugins truth state missing');
+must(authority.includes("'Plugins':'LOCAL_ACTIVE'"),'Plugins local integration truth state missing');
 must(authority.includes("'Consolidation':'LOCAL_ACTIVE'"),'Consolidation must expose LOCAL_ACTIVE only after its bounded specialist implementation exists');
 must(authority.includes("name:'Consolidation',family:'Recovery / Packaging',implementation:'SPECIALIST'"),'Consolidation specialist authority missing');
 const suiteBlock=(v2.match(/const SPECIALIST_SUITE=new Set<Panel>\(\[(.*?)\]\);/s)||[])[1]||'';
-must(!suiteBlock.includes("'Plugins'"),'donor-only Plugins must not enter the active specialist-suite router');
+must(suiteBlock.includes("'Plugins'"),'implemented Plugins integration hub must enter the active specialist-suite router');
+must(suite.includes('OmegaIntegrationHubR44'),'Plugins must route to the sovereign R44 integration hub');
 for(const panel of ['Instructions','Settings','System','Consolidation'])must(suiteBlock.includes(`'${panel}'`),`R30 active specialist-suite route missing ${panel}`);
 must(v2.includes("isPrimaryOperationalCapability(String(v))?v as Panel:'System Atlas'"),'stale donor/debt navigation must resolve to System Atlas instead of fake execution');
 must(shell.includes('filter(isPrimaryOperationalCapability)'),'single-frame primary navigation must filter donor/debt capabilities');
@@ -28,4 +29,4 @@ must(v2.includes("modePolicy:'SOURCE_BACKED'"),'downstream state authority must 
 for(const bad of ["modePolicy:'ALL'","Assistant-led work remains route-before-generation and proof-gated."])must(!v2.includes(bad),`legacy/fake runtime collapse returned: ${bad}`);
 must(app.includes("import('./OmegaWorkstationFullV2')"),'App must activate V2 workstation');
 must(v2.includes('<EarthObservatoryR8')&&v2.includes('<HybridMissionControlR8')&&v2.includes('<SAISovereignControl'),'R8 deep specialist bindings must remain active');
-console.log('FULL_APPLICATION_ROUTING R30 PASS · 44 registered · restored R28-R30 specialists · R26 lineage retained · donor filtering preserved');
+console.log('FULL_APPLICATION_ROUTING R44 PASS · 44 registered and bounded · R28-R43 lineage retained · integrations restored');

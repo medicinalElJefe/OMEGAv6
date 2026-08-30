@@ -17,6 +17,6 @@ assert.match(css,/data-omega-density='comfortable'/);
 assert.match(css,/data-omega-motion='reduced'/);
 assert.match(css,/--omega-user-font-scale/);
 assert.match(authority,/'Consolidation':'LOCAL_ACTIVE'/);
-assert.match(authority,/'Plugins':'DONOR_ONLY'/);
+assert.match(authority,/'Plugins':'LOCAL_ACTIVE'/);
 assert.doesNotMatch(app,/@appdeploy\/client|appdeploy\.ai/i);
 console.log('R30 SYSTEM CONSOLIDATION PASS · shared instructions · consumed settings · live system diagnostics · non-mutating consolidation');

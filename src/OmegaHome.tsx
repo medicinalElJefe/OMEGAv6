@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowRight,BookOpen,BrainCircuit,Globe2,Home,Menu,Orbit,Send,ShieldCheck,Sparkles,Waypoints} from 'lucide-react';
 import {api,localState} from './platformAdapter';
 import {corpusState,decodeAddress,initCorpusPack} from './corpusRuntime';
@@ -6,6 +6,7 @@ import {sourceBackedModeSummary} from './sourceBackedModeRuntimeR21';
 import {unifiedFromRecord} from './unifiedCalculus';
 import {calculusVisualLaw} from './calculusVisualLawR37';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
+import {recordRuntimeMutationR44} from './runtimeAuthorityR44';
 import {dailyBrief} from './dailyBrief';
 import CalculusFieldR37 from './CalculusFieldR37';
 import OmegaLivingField from './OmegaLivingField';
@@ -25,13 +26,13 @@ const JOURNEYS=[
 const f=(n:any,d=3)=>Number.isFinite(Number(n))?Number(n).toFixed(d):'—';
 
 export default function OmegaHome({onEnter}:Props){
- const[prompt,setPrompt]=useState(()=>localState.read('omega.b015.chatDraft.v1','')),[busy,setBusy]=useState(false),[reply,setReply]=useState(''),[route,setRoute]=useState(''),[sourceReady,setSourceReady]=useState(false),[palette,setPalette]=useState(false),[address,setAddress]=useState(()=>{const n=Number(localState.read('omega.v6.address',11498));return Number.isFinite(n)?Math.max(0,Math.min(20735,Math.floor(n))):11498});
+ const[prompt,setPrompt]=useState(()=>localState.read('omega.b015.chatDraft.v1','')),[busy,setBusy]=useState(false),[reply,setReply]=useState(''),[route,setRoute]=useState(''),[sourceReady,setSourceReady]=useState(false),[palette,setPalette]=useState(false),[address,setAddress]=useState(()=>{const n=Number(localState.read('omega.v6.address',11498));return Number.isFinite(n)?Math.max(0,Math.min(20735,Math.floor(n))):11498}),previousAddress=useRef(address);
  const daily=useMemo(()=>dailyBrief(),[]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live)setSourceReady(true)}).catch(()=>{if(live)setSourceReady(false)});return()=>{live=false}},[]);
  useEffect(()=>{localState.write('omega.b015.chatDraft.v1',prompt)},[prompt]);
- useEffect(()=>{localState.write('omega.v6.address',address)},[address]);
+ useEffect(()=>{localState.write('omega.v6.address',address);const from=previousAddress.current;if(from!==address){previousAddress.current=address;void recordRuntimeMutationR44(from,address,'HOME','HOME_FIELD_COMMIT')}},[address]);
  const record=useMemo(()=>sourceReady?corpusState(address):null,[sourceReady,address]),coords=useMemo(()=>decodeAddress(address),[address]),unified=useMemo(()=>record?unifiedFromRecord(record):null,[record]),modes=useMemo(()=>record?sourceBackedModeSummary(record):null,[record]),law=useMemo(()=>record?calculusVisualLaw(record):null,[record]);
- const enter=(panel:string)=>{localState.write('omega.v6.panel',panel);localState.write('omega.v6.modePolicy','SOURCE_BACKED');onEnter(panel)};
+ const enter=(panel:string)=>{localState.write('omega.v6.panel',panel);localState.write('omega.v6.modePolicy.r44','ALL_ACTIVE');onEnter(panel)};
  const ask=async()=>{if(!prompt.trim()||busy||!record||!modes)return;setBusy(true);setReply('');try{const context={address,stateId:record.stateId,coords,decision:record.metrics.decision,metrics:record.metrics,nextAddress:record.autoPing?.dataNext??address,previousAddress:record.autoPing?.previous??address,phase:coords.p+1,modePolicy:'SOURCE_BACKED_ALL_AVAILABLE',modeCatalogCount:modes.catalogCount,appliedModeCount:modes.appliedCount,exactModeCount:modes.exactCount,packetModeCount:modes.packetCount,gatedModeCount:modes.gatedCount,exactModes:modes.executed.map(x=>({id:x.id,name:x.name,formula:x.formula,value:x.value,source:x.source})),gatedModes:modes.gated.map(x=>({id:x.id,name:x.name,formula:x.formula,missing:x.missing,source:x.source})),modeTruthBoundary:modes.boundary,unified:{coherence:unified?.unifiedCoherence,waterConductance:unified?.water?.conductance,motionRelativity:unified?.motionRelativity},responseContract:{plainLanguageFirst:true,separateObservedDerivedProjected:true,showRouteBeforeGeneration:true,includeForwardReverseStateContext:true,doNotInventMissingEvidence:true}};const p=await api.post<any>('/api/route-preview',{text:prompt,context}),r=await api.post<any>('/api/chat',{text:prompt,context});setRoute(String(r.data?.provider||p.data?.route||'ROUTED'));setReply(String(r.data?.reply||'OMEGA returned no text response.'))}catch(e:any){setRoute('BOUNDED_FAILURE');setReply(e?.message||'OMEGA could not complete the request. No answer was fabricated.')}finally{setBusy(false)}};
  return <main className='omega-home omega-home-r4 omega-home-r38'>
   <header className='oh-top r4-top r38-top'><div className='oh-brand'><span className='oh-mark'><Home size={15}/></span><div><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild} · SOVEREIGN COMPUTATIONAL INSTRUMENT</small></div></div><div className='r38-top-center'>{record&&<><span>STATE <b>{record.stateId.toLocaleString()}</b></span><i/><span>PHASE <b>{coords.p+1}</b></span><i/><span>DECISION <b>{record.metrics.decision}</b></span></>}</div><div className='oh-top-actions'>{record&&modes&&<div className='r4-mode-proof'><ShieldCheck/><span>SOURCE-BACKED MODES</span><b>{modes.appliedCount} APPLIED · {modes.gatedCount} GATED</b></div>}<button className='oh-menu-button' onClick={()=>setPalette(x=>!x)} aria-expanded={palette}><Menu/><span>EXPLORE</span></button></div></header>

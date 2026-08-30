@@ -5,6 +5,7 @@ const launcher=read('src/OmegaLauncher.tsx');
 const navigation=read('src/navigationRegistry.ts');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const modes=read('src/SourceBackedModesPanelR21.tsx');
+const allModes=read('src/AllModesOperatorPanelR44.tsx');
 const modeRuntime=read('src/sourceBackedModeRuntimeR21.ts');
 const home=read('src/OmegaHome.tsx');
 const shell=read('src/SingleFrameRuntimeShellR27.tsx');
@@ -27,7 +28,8 @@ assert.equal(launcherNames.length,44,'shared navigation registry must expose exa
 assert.equal(routeNames.length,44,'active workstation must expose exactly 44 routes');
 assert.deepEqual(new Set(launcherNames),new Set(routeNames),'shared navigation registry and active workstation routes must match exactly');
 
-assert.match(workstation,/SourceBackedModesPanelR21/,'Modes route must execute the source-backed calculus inspector');
+assert.match(workstation,/AllModesOperatorPanelR44/,'Modes route must execute the complete R44 mode authority');
+assert.match(allModes,/SourceBackedModesPanelR21/,'complete mode authority must retain the source-backed calculus inspector');
 assert.match(modes,/onClick=\{\(\)=>onAddress\(record\.autoPing\.dataNext\)\}/,'mode traversal must execute the admitted-next source action');
 assert.match(modes,/onClick=\{\(\)=>onAddress\(record\.autoPing\.previous\)\}/,'mode traversal must execute the previous source action');
 assert.match(modes,/onClick=\{\(\)=>setShowCatalog\(v=>!v\)\}/,'source mode catalog inspection must be actionable');

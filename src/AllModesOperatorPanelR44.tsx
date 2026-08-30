@@ -1,0 +1,34 @@
+import {useEffect,useMemo,useState} from 'react';
+import {Activity,Filter,GitBranch,Layers3,Search,ShieldCheck} from 'lucide-react';
+import SourceBackedModesPanelR21 from './SourceBackedModesPanelR21';
+import {corpusState,evaluateCorpusModes} from './corpusRuntime';
+import {evaluateCanonAuthorityStack} from './allModesAuthority';
+import {compileSourceTraversal,sourceBackedModeSummary} from './sourceBackedModeRuntimeR21';
+import './allModesR44.css';
+
+type Tab='FIELD'|'SOURCE'|'CANON'|'GATED';
+type Gate='ALL'|'STAY'|'TURN'|'ESCALATE';
+type Props={record:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;policy:'ALL_ACTIVE'|'SOURCE_ONLY'};
+const pct=(n:number)=>`${Math.round(Math.max(0,Math.min(1,n))*100)}%`;
+
+export default function AllModesOperatorPanelR44({record,address,onAddress,onNavigate,policy}:Props){
+ const[tab,setTab]=useState<Tab>('FIELD'),[query,setQuery]=useState(''),[gate,setGate]=useState<Gate>('ALL'),[selected,setSelected]=useState('');
+ const catalog=useMemo(()=>evaluateCorpusModes(record),[record]),canon=useMemo(()=>evaluateCanonAuthorityStack(record),[record]),source=useMemo(()=>sourceBackedModeSummary(record),[record]),route=useMemo(()=>compileSourceTraversal(address,48),[address]);
+ useEffect(()=>setTab(policy==='SOURCE_ONLY'?'SOURCE':'FIELD'),[policy]);
+ const rows=useMemo(()=>catalog.results.filter((x:any)=>(gate==='ALL'||x.gate===gate)&&`${x.id} ${x.name} ${x.category} ${x.operator} ${x.algebra} ${x.calculus}`.toLowerCase().includes(query.trim().toLowerCase())),[catalog,gate,query]);
+ const active=useMemo(()=>catalog.results.find((x:any)=>String(x.id)===String(selected))||catalog.strongest,[catalog,selected]);
+ const trace=useMemo(()=>route.path.map(step=>{const result=evaluateCorpusModes(corpusState(step.address)).results.find((x:any)=>String(x.id)===String(active?.id));return{...step,score:Number(result?.score||0),gate:String(result?.gate||'ESCALATE')}}),[route,active]);
+ return <section className='special-app r44-modes-app'>
+  <header className='special-head r44-modes-head'><div><span>COMPLETE OPERATOR FIELD · ONE PACKET · ONE MUTATION AUTHORITY</span><h2>All Modes</h2><p>Every catalog operator evaluates the current packet as a live representation. Source-backed calculus governs state mutation; canon lenses govern interpretation; missing inputs stay visible and gated.</p></div><div className='r44-mode-total'><Layers3/><b>{catalog.count}</b><span>ACTIVE PROJECTIONS</span></div></header>
+  <div className='r44-mode-kpis'><article><span>CATALOG FIELD</span><b>{catalog.count}</b><small>{catalog.stay} stay · {catalog.turn} turn · {catalog.escalate} escalate</small></article><article><span>CANON LENSES</span><b>{canon.length}</b><small>{canon.filter(x=>x.state==='ACTIVE').length} active · {canon.filter(x=>x.state==='WATCH').length} watch</small></article><article><span>SOURCE MUTATORS</span><b>{source.appliedCount}</b><small>{source.exactCount} exact · {source.packetCount} packet/derived</small></article><article><span>INPUT CONTRACTS</span><b>{source.gatedCount}</b><small>executable when authority arrives</small></article><article><span>POLICY</span><b>{policy==='ALL_ACTIVE'?'ALL ACTIVE':'SOURCE ONLY'}</b><small>projection scope; mutation boundary unchanged</small></article></div>
+  <nav className='r44-mode-tabs' aria-label='Mode authority layers'>{(['FIELD','SOURCE','CANON','GATED'] as Tab[]).map(x=><button key={x} className={tab===x?'active':''} onClick={()=>setTab(x)}>{x}<span>{x==='FIELD'?catalog.count:x==='SOURCE'?source.appliedCount:x==='CANON'?canon.length:source.gatedCount}</span></button>)}</nav>
+  {tab==='FIELD'&&<div className='r44-mode-field'>
+   <div className='r44-mode-filter'><label><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all operators, algebra, calculus or proof…'/></label><label><Filter/><select value={gate} onChange={e=>setGate(e.target.value as Gate)}><option value='ALL'>ALL DECISIONS</option><option>STAY</option><option>TURN</option><option>ESCALATE</option></select></label><span>{rows.length} visible</span></div>
+   <div className='r44-mode-layout'><div className='r44-mode-grid' role='list' aria-label='179 live mode projections'>{rows.map((m:any)=><button role='listitem' key={m.id} className={`${String(m.gate).toLowerCase()} ${String(active?.id)===String(m.id)?'selected':''}`} title={`${m.id} · ${m.name} · ${m.gate} · ${pct(m.score)}`} onClick={()=>setSelected(String(m.id))}><i/><b>{String(m.id).replace(/^M?/,'')}</b><span>{m.name}</span><strong>{Math.round(m.score*100)}</strong></button>)}</div><aside className='r44-mode-inspector'><header><Activity/><span><small>{active.id} · {active.category}</small><b>{active.name}</b></span><strong className={String(active.gate).toLowerCase()}>{active.gate}</strong></header><div className='r44-mode-score'><i style={{width:pct(active.score)}}/><span>{pct(active.score)} packet affinity</span></div><dl><dt>OPERATOR</dt><dd>{active.operator||'semantic projection'}</dd><dt>ALGEBRA</dt><dd>{active.algebra||'source metadata'}</dd><dt>CALCULUS</dt><dd>{active.calculus||'source metadata'}</dd><dt>UPDATE</dt><dd>{active.updateRule||'read-only packet projection'}</dd><dt>PROOF</dt><dd>{active.proof||'ledger-bound evaluation'}</dd></dl><h3><GitBranch/>48-step admitted-route trace</h3><div className='r44-mode-trace'>{trace.map((x,i)=><button key={`${x.address}-${i}`} className={x.gate.toLowerCase()} onClick={()=>onAddress(x.address)} title={`State ${x.stateId} · ${pct(x.score)} · ${x.gate}`}><i style={{height:pct(x.score)}}/><span>{i+1}</span></button>)}</div><footer>Selected catalog modes do not directly mutate state. Their score and gate recompute over each source-admitted packet in this trace.</footer></aside></div>
+  </div>}
+  {tab==='SOURCE'&&<SourceBackedModesPanelR21 record={record} address={address} onAddress={onAddress} onNavigate={onNavigate}/>}
+  {tab==='CANON'&&<div className='r44-canon-grid'>{canon.map(x=><article key={x.id} className={x.state.toLowerCase()}><header><span>{String(x.id).padStart(2,'0')} · {x.group}</span><strong>{x.state}</strong></header><b>{x.name}</b><div><i style={{width:pct(x.activation)}}/></div><small>{pct(x.activation)} · {x.basis}</small></article>)}</div>}
+  {tab==='GATED'&&<div className='r44-gated-grid'>{source.gated.map(x=><article key={x.id}><header><span>{x.id}</span><strong>AWAITING AUTHORITY</strong></header><h3>{x.name}</h3><code>{x.formula}</code><p>{x.detail}</p><dl><dt>REQUIRED</dt><dd>{x.inputs.join(' · ')}</dd><dt>MISSING</dt><dd>{x.missing.join(' · ')}</dd><dt>SOURCE</dt><dd>{x.source}</dd></dl></article>)}</div>}
+  <footer className='r44-mode-boundary'><ShieldCheck/><span><b>Truth boundary</b>{source.boundary} The 179 entries are an active model-space field, not 179 new physical dimensions; the 62 authorities are higher-order lenses over the same immutable packet.</span></footer>
+ </section>
+}

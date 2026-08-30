@@ -10,6 +10,20 @@ export const RECOVERY_RULES=[
  {artifactClass:'Patch Pack',intent:'delta upgrade',allowed:['KEEP','QUARANTINE'],rule:'checksum + rollback proof',action:'chain after backup'},
  {artifactClass:'Unknown File',intent:'unclassified donor',allowed:['QUARANTINE'],rule:'no authority until inspected',action:'hold'}
 ] as const;
+export const ARCHIVE_CENSUS_R44={
+ schema:'OMEGA_ARCHIVE_CENSUS_R44',
+ censusDate:'2026-08-30',
+ libraryItems:6752,
+ driveDocuments:2390,
+ driveFolders:1502,
+ driveRetainedItems:11597,
+ physicalCsvFiles:403,
+ logicalCsvNames:162,
+ physicalArchiveRecords:2528,
+ logicalArchivePackages:1913,
+ softwareRuntimeMatches:1802,
+ boundary:'Forensic census across the accessible Library and connected Drive at review time. Counts identify artifacts and software/runtime matches; they do not prove that every archive is unique, complete, executable, safe, or admitted into the canonical release.'
+} as const;
 export const ARCHIVE_DONORS:ArchiveDonor[]=[
  {id:'atlas-runtime',name:'atlas_runtime_test_bundle',family:'CANON_RUNTIME',role:'Runtime/API spine candidate: backend, frontend, proof/replay/session services and workbook-derived 20,736 bootstrap.',verification:'VERIFIED_EXECUTION',defaultDisposition:'KEEP',authorityScore:.98,proofScore:.94,portabilityScore:.9,regressionRisk:.08,fileCount:0,lemmas:['L01','L18','L19','L20'],evidence:'pytest boot/transition/basin/replay passed; live health response observed in forensic pass.',boundary:'Primary runtime scaffold; preserve single-source authority.'},
  {id:'mode188-v11',name:'Mode188_Atlas_Camera_Shell_v11',family:'SOVEREIGN_RUNTIME',role:'DB-centered sovereign runtime with multiview camera/shell extension over v10.',verification:'VERIFIED_EXECUTION',defaultDisposition:'DONOR',authorityScore:.92,proofScore:.93,portabilityScore:.83,regressionRisk:.12,lemmas:['L01','L06','L16','L18','L20'],evidence:'verify_runtime passed; required DB tables and 20,736 atlas rows present.',boundary:'Donor under one current runtime authority; do not create a second DB/state authority.'},
@@ -30,5 +44,5 @@ export const ARCHIVE_DONORS:ArchiveDonor[]=[
 const clamp=(n:number)=>Math.max(0,Math.min(1,n));
 export function donorScore(d:ArchiveDonor){return clamp(.34*d.authorityScore+.3*d.proofScore+.22*d.portabilityScore-.14*d.regressionRisk)}
 export function recommendedDisposition(d:ArchiveDonor):ArchiveDisposition{if(d.verification==='INVALID_CONTAINER'||d.regressionRisk>.8)return 'QUARANTINE';if(d.family==='META_ARCHIVE'&&d.verification==='UNVERIFIED')return 'EXPAND';if(d.family==='CANON_RUNTIME'&&d.verification==='VERIFIED_EXECUTION')return 'KEEP';if(d.family==='PROOF_GOVERNANCE'&&d.proofScore>.93)return 'KEEP';return d.defaultDisposition}
-export function archiveSummary(){const total=ARCHIVE_DONORS.length,verified=ARCHIVE_DONORS.filter(x=>x.verification==='VERIFIED_EXECUTION').length,quarantine=ARCHIVE_DONORS.filter(x=>recommendedDisposition(x)==='QUARANTINE').length,expand=ARCHIVE_DONORS.filter(x=>recommendedDisposition(x)==='EXPAND').length,knownFileCount=ARCHIVE_DONORS.reduce((n,x)=>n+(Number(x.fileCount)||0),0);return{total,verified,quarantine,expand,knownFileCount,historicalReportedReviewedFiles:1869,historicalReportedUnclassifiedCarriers:307}}
-export const ARCHIVE_TRUTH_BOUNDARY=`Archive classifications are donor-admission guidance, not release promotion. The hosted registry currently classifies ${ARCHIVE_DONORS.length} donor families and sums only explicit fileCount evidence. Historical 1,869 reviewed / 307 unclassified-carrier counts are retained as prior cumulative-review evidence, not presented as a live Drive census. Exact LATEST_OMEGA_UPDATE.json authority remains unresolved unless separately read and verified.`;
+export function archiveSummary(){const total=ARCHIVE_DONORS.length,verified=ARCHIVE_DONORS.filter(x=>x.verification==='VERIFIED_EXECUTION').length,quarantine=ARCHIVE_DONORS.filter(x=>recommendedDisposition(x)==='QUARANTINE').length,expand=ARCHIVE_DONORS.filter(x=>recommendedDisposition(x)==='EXPAND').length,knownFileCount=ARCHIVE_DONORS.reduce((n,x)=>n+(Number(x.fileCount)||0),0);return{total,verified,quarantine,expand,knownFileCount,historicalReportedReviewedFiles:1869,historicalReportedUnclassifiedCarriers:307,currentCensus:ARCHIVE_CENSUS_R44}}
+export const ARCHIVE_TRUTH_BOUNDARY=`Archive classifications are donor-admission guidance, not release promotion. The R44 census records ${ARCHIVE_CENSUS_R44.libraryItems.toLocaleString()} accessible Library items, ${ARCHIVE_CENSUS_R44.driveRetainedItems.toLocaleString()} retained Drive items, ${ARCHIVE_CENSUS_R44.physicalCsvFiles} physical CSV files / ${ARCHIVE_CENSUS_R44.logicalCsvNames} logical names, and ${ARCHIVE_CENSUS_R44.physicalArchiveRecords.toLocaleString()} archive records / ${ARCHIVE_CENSUS_R44.logicalArchivePackages.toLocaleString()} logical packages. These are forensic counts, not proof every archive is unique or executable. The hosted donor registry classifies ${ARCHIVE_DONORS.length} high-value families; exact release authority still requires separately verified source, tests and promotion evidence.`;

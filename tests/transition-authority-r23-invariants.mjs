@@ -9,5 +9,6 @@ assert(panel.includes('Ledger receipt')&&panel.includes('appendSaiLedger'),'tran
 assert(panel.includes('Apply admitted next')&&panel.includes('Export'),'transition receipt must provide real state action/export controls');
 assert(traversal.includes('TransitionProofPanelR23')&&modes.includes('TransitionProofPanelR23'),'traversal and modes must consume one transition authority');
 assert(!traversal.includes("const CAMERAS=")&&!traversal.includes("const ROUTES="),'decorative duplicate camera/route controls must remain removed');
-assert(authority.includes("'Immersive Traversal':'RESTORATION_DEBT'")&&authority.includes("'Extreme Traversal':'RESTORATION_DEBT'"),'duplicate traversal variants must remain hidden until distinct semantics exist');
-console.log('OMEGA R23 TRANSITION PASS · one source transition authority + SHA-256 proof + no decorative traversal controls');
+assert(authority.includes("'Immersive Traversal':'SOURCE_ACTIVE'")&&authority.includes("'Extreme Traversal':'SOURCE_ACTIVE'"),'restored traversal variants must remain source-bound');
+assert(traversal.includes("variant:'Immersive Traversal'|'Extreme Traversal'|'Traversal'"),'deep traversal studio must preserve explicit variant semantics');
+console.log('OMEGA R44 TRANSITION PASS · one source transition authority + SHA-256 proof + bounded traversal variants');

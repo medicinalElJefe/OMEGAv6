@@ -4,6 +4,7 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const runtime=read('src/sourceBackedModeRuntimeR21.ts');
 const panel=read('src/SourceBackedModesPanelR21.tsx');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const allModes=read('src/AllModesOperatorPanelR44.tsx');
 const app=read('src/App.tsx');
 const bridge=read('src/ResponsiveRuntimeShell.tsx');
 const nav=read('src/SingleFrameRuntimeShellR27.tsx');
@@ -18,7 +19,8 @@ assert.match(panel,/179 catalog entries are loaded as source metadata, not autom
 assert.match(panel,/ACTUAL ADMITTED TRAVERSAL/);
 assert.match(panel,/FORMULAS HELD FOR MISSING INPUTS/);
 assert.match(panel,/Legacy semantic affinity score\/gate is intentionally not displayed as execution/);
-assert.match(workstation,/SourceBackedModesPanelR21/);
+assert.match(workstation,/AllModesOperatorPanelR44/);
+assert.match(allModes,/SourceBackedModesPanelR21/);
 assert.match(workstation,/SOURCE_BACKED_ALL_AVAILABLE/);
 assert.match(workstation,/modeCatalogCount:catalog\.count/);
 assert.match(workstation,/appliedModeCount:sourceModes\.appliedCount/);
