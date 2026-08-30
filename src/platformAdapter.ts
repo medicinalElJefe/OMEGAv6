@@ -22,13 +22,25 @@ export class OmegaApiError extends Error {
   }
 }
 
+const SESSION_KEY='omega.v6.runtime.session.r32';
+const BRIDGE_KEY='omega.v6.hybrid.bridge.r32';
+function randomId(prefix:string){try{return `${prefix}_${crypto.randomUUID()}`}catch{return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`}}
+export function runtimeSessionId(){let id='';try{id=localStorage.getItem(SESSION_KEY)||''}catch{}if(!/^[A-Za-z0-9._:-]{8,128}$/.test(id)){id=randomId('session');try{localStorage.setItem(SESSION_KEY,id)}catch{}}return id}
+export type HybridBridgeCredential={bridgeId:string;secret:string;pairingCode?:string;createdAt:number};
+export function getHybridBridge():HybridBridgeCredential|null{try{const raw=localStorage.getItem(BRIDGE_KEY);if(!raw)return null;const parsed=JSON.parse(raw);return parsed?.bridgeId&&parsed?.secret?parsed:null}catch{return null}}
+export function saveHybridBridge(input:{bridgeId:string;secret:string;pairingCode?:string}){const value={...input,createdAt:Date.now()};try{localStorage.setItem(BRIDGE_KEY,JSON.stringify(value))}catch{}return value}
+export function clearHybridBridge(){try{localStorage.removeItem(BRIDGE_KEY)}catch{}}
+
 async function request<T>(method: string, url: string, body?: unknown): Promise<ApiResult<T>> {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 15000);
+  const timeout = window.setTimeout(() => controller.abort(), 20000);
   try {
+    const bridge=getHybridBridge(),headers:Record<string,string>={'x-omega-session-id':runtimeSessionId()};
+    if(body!==undefined)headers['content-type']='application/json';
+    if(bridge){headers['x-omega-bridge-id']=bridge.bridgeId;headers['x-omega-bridge-secret']=bridge.secret}
     const response = await fetch(url, {
       method,
-      headers: body === undefined ? undefined : { 'content-type': 'application/json' },
+      headers,
       body: body === undefined ? undefined : JSON.stringify(body),
       cache: 'no-store',
       credentials: 'same-origin',
@@ -66,9 +78,11 @@ export const api = {
   delete<T = unknown>(url: string, body?: unknown): Promise<ApiResult<T>> { return request<T>('DELETE', url, body); }
 };
 
+export async function createHybridPair(rotate=false){const r=await api.post<any>('/api/hybrid/pair',{rotate});if(r.data?.bridgeId&&r.data?.secret)saveHybridBridge({bridgeId:r.data.bridgeId,secret:r.data.secret,pairingCode:r.data.pairingCode});return r.data}
+
 export const platformCapabilities = Object.freeze({
   provider: 'NOT_CONFIGURED' as OmegaTruthState,
-  realtime: 'NOT_TESTABLE' as OmegaTruthState,
+  realtime: 'LIVE' as OmegaTruthState,
   nativeHost: 'DEVICE_PROOF_REQUIRED' as OmegaTruthState,
   earthExternalFeeds: 'EXTERNAL_DEGRADED' as OmegaTruthState,
   authentication: 'NOT_TESTABLE' as OmegaTruthState,
@@ -128,6 +142,6 @@ export const auth = Object.freeze({
 });
 
 export const realtime = Object.freeze({
-  state: 'NOT_TESTABLE' as OmegaTruthState,
-  reason: 'Realtime donor transport is not yet bound on the full-restore branch.'
+  state: 'LIVE' as OmegaTruthState,
+  reason: 'R32 durable event/runtime state is bound. Native-device actions remain separately proof-gated.'
 });

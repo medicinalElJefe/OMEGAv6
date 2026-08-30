@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR27.js",
+  "main": "src/workerR32.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
@@ -19,6 +19,14 @@
   "version_metadata": {
     "binding": "CF_VERSION_METADATA"
   },
+  "durable_objects": {
+    "bindings": [
+      {"name":"OMEGA_RUNTIME","class_name":"OmegaRuntime"}
+    ]
+  },
+  "migrations": [
+    {"tag":"r32-enacted-runtime","new_sqlite_classes":["OmegaRuntime"]}
+  ],
   "observability": {
     "enabled": true
   }

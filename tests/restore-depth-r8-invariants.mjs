@@ -18,7 +18,9 @@ must(v2.includes("case 'SAI Lab':return")&&v2.includes('<SAISovereignControl'),'
 const directR8=wrangler.includes('"main": "src/workerR8.js"');
 const r9=fs.existsSync('src/workerR9.js')?fs.readFileSync('src/workerR9.js','utf8'):'';
 const r27=fs.existsSync('src/workerR27.js')?fs.readFileSync('src/workerR27.js','utf8'):'';
+const r32=fs.existsSync('src/workerR32.js')?fs.readFileSync('src/workerR32.js','utf8'):'';
 const wrappedR8=wrangler.includes('"main": "src/workerR9.js"')&&r9.includes("import r8 from './workerR8.js'");
 const transitivelyWrappedR8=wrangler.includes('"main": "src/workerR27.js"')&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
-must(directR8||wrappedR8||transitivelyWrappedR8,'Cloudflare must execute R8 directly or through a proven successor wrapper chain that preserves R8');
+const r32WrappedR8=wrangler.includes('"main": "src/workerR32.js"')&&r32.includes("import r27 from './workerR27.js'")&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
+must(directR8||wrappedR8||transitivelyWrappedR8||r32WrappedR8,'Cloudflare must execute R8 directly or through a proven successor wrapper chain that preserves R8');
 console.log('RESTORE_DEPTH_R8 PASS · Earth evidence + NOAA 9-coverages + V87-V90 typed Hybrid contract + B059 SAI active · successor chain proven');
