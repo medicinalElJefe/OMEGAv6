@@ -27,6 +27,10 @@ The source-bound restore-and-surpass workstation contains the 44-route shell, em
 - Earth live external feeds remain degraded until a verified feed binding exists.
 - 12/144/1728/20736 are representational resolution scales, not physical dimensions.
 
+## Correlated donor lineage
+
+The AppDeploy B023→B037 development line is correlated into this runtime as **donor source only**. Current B058/V90 canonical implementations win every conflict and are not downgraded. Correlated safeguards include renderer-first traversal, signed carry, Water/Light transition execution, HostState/replay coherence, mobile low-power rendering, lazy 20,736-node field materialization, and WebGL→Canvas recovery. The correlation ledger is recorded in `RESTORE_MANIFEST_ADDENDUM_APPDEPLOY_B023_B037_CORRELATION_R1.md` and enforced by a non-regression test.
+
 ## Promotion
 
 Changes are developed on `full-restore`, must pass `npm run check` plus Wrangler dry-run, and are promoted to `main` only after the exact branch head passes the regression/build gate. The previous `main` SHA remains the rollback target for each promotion.
