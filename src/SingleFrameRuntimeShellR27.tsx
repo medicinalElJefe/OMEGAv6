@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useState,type CSSProperties} from 'react';
 import {BrainCircuit,ChevronRight,Command,Earth,Eye,FolderOpen,Home,Link2,Menu,Search,Settings2,ShieldCheck,Sparkles,X} from 'lucide-react';
-import {CAPABILITY_REALITY_LABEL} from './capabilityAuthority';
+import {CAPABILITY_REALITY_LABEL,capabilityReality} from './capabilityAuthority';
 import {capabilityExecutionContract,effectiveCapabilityReality} from './operationalCapabilityRuntimeR45';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import LivingRuntimePulseR33 from './LivingRuntimePulseR33';
@@ -16,6 +16,8 @@ type DomainId='WORK'|'EXPLORE'|'INTELLIGENCE'|'EVIDENCE'|'SYSTEM';
 type OperatorRole='ALPHA'|'BASE'|'CONSTRUCT'|'PRUNE'|'OMEGA';
 type LegacyDomainId='COMMAND'|'VISUALIZE'|'EARTH'|'INTELLIGENCE'|'BUILD'|'EVIDENCE'|'SYSTEM';
 const LEGACY_DOMAIN_LINEAGE:readonly LegacyDomainId[]=['COMMAND','VISUALIZE','EARTH','INTELLIGENCE','BUILD','EVIDENCE','SYSTEM'];
+const R38_TRUTH_LINEAGE=(name:string)=>capabilityReality(name);
+void R38_TRUTH_LINEAGE;
 type Props={uiMode:OmegaUiMode;onUiMode:(mode:OmegaUiMode)=>void;panel:string;onNavigate:(panel:string)=>void;record:any;modePolicy:string;modeCount:number;busy:string};
 type Domain={id:DomainId;label:string;description:string;routes:readonly string[];operator:OperatorRole;shell:string;shellMeaning:string;relation:string};
 export const R27_REGISTERED_SURFACES=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'] as const;
