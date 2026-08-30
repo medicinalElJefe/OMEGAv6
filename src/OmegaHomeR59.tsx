@@ -43,7 +43,7 @@ export default function OmegaHomeR59({onEnter}:Props){
  const spineCount=Array.isArray(spine?.states)?spine.states.length:Array.isArray(spine?.requiredLiveState)?spine.requiredLiveState.length:0;
  return <main className='r59-home'>
   <aside className='r59-rail' aria-label='OMEGA home navigation'>
-   <header><button aria-label='OMEGA home'><span className='r59-orb'/></button><div><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild}</small></div></header>
+   <header><button aria-label='OMEGA home' onClick={()=>{setDomain('WORK');setQuery('')}}><span className='r59-orb'/></button><div><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild}</small></div></header>
    <LivingRuntimePulseR33 onNavigate={enter}/>
    <nav className='r59-domain-tabs'>{(Object.keys(DOMAINS) as DomainId[]).map(id=>{const m=DOMAIN_META[id],I=m.Icon;return <button key={id} className={domain===id?'active':''} data-operator={m.operator} onClick={()=>{setDomain(id);setQuery('')}}><I/><span><b>{m.label}</b><small>{m.operator} · {m.shell}</small></span></button>})}</nav>
    <label className='r59-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Find any OMEGA instrument'/></label>
