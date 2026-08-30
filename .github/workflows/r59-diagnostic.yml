@@ -1,0 +1,27 @@
+name: R59 Visible Diagnostic Gates
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: R59 convergence invariant
+        run: npm run test:r59
+      - name: Startup and home inheritance
+        run: npm run test:home
+      - name: Navigation inheritance
+        run: npm run test:navigation
+      - name: Application routing inheritance
+        run: npm run test:applications
+      - name: Visual inheritance
+        run: npm run test:visual
+      - name: Complete unchanged repository gate
+        run: npm run check
