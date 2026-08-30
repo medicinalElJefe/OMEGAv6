@@ -1,0 +1,152 @@
+/* OMEGA R34 · repair-first interface corrections
+   Additive override over R27/R31/R32/R33 shell layers.
+   Purpose: correct structural layout defects before further visual expansion. */
+
+:root{
+  --r27-rail:228px;
+}
+
+/* The shell has six major vertical blocks. Make that explicit so the route pane
+   receives the remaining height instead of relying on implicit grid rows. */
+.r27-desktop-frame{
+  grid-template-rows:auto auto auto auto auto minmax(0,1fr);
+  gap:7px;
+  padding:9px;
+}
+
+/* Five domains must occupy five columns. R27 was still using repeat(4), causing
+   an asymmetric wrapped fifth tab. */
+.r27-domains{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:4px;
+}
+.r27-domains button{
+  min-width:0;
+  min-height:44px;
+  padding:5px 1px;
+}
+.r27-domains button span{
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Route rendered markup has label + chevron only. Remove the obsolete 28px
+   number-column reservation that indented every destination for a missing node. */
+.r27-route{
+  grid-template-columns:minmax(0,1fr) 15px;
+  gap:7px;
+  min-height:40px;
+  padding:6px 7px 6px 9px;
+}
+.r27-route code{display:none}
+
+/* Navigation is a launcher, not the application itself. Reduce permanent chrome
+   and let the specialist workspace own the visual hierarchy. */
+.r27-route-pane>header{
+  padding:8px 9px;
+}
+.r27-route-pane>div{
+  padding:4px;
+  scrollbar-gutter:stable;
+}
+.r27-desktop-frame .r32-desktop-actions{
+  max-height:116px;
+  overflow:auto;
+  scrollbar-width:thin;
+}
+.r27-desktop-frame .living-runtime-pulse-r33,
+.r27-desktop-frame [class*='runtime-pulse']{
+  max-height:94px;
+  overflow:auto;
+}
+
+/* Search results should float above route content without widening or forcing
+   the rail's layout. */
+.r27-search-results{
+  max-height:min(42vh,330px);
+  overscroll-behavior:contain;
+}
+
+/* The global workstation bar previously tried to carry panel identity, build,
+   state, phase, mode counts and decision at once. Preserve truth data while
+   reducing its visual claim on the workspace. */
+.workstation-topbar{
+  min-height:48px!important;
+}
+.workstation-identity{
+  min-width:0;
+}
+.workstation-identity>b{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.workstation-identity>small{
+  display:block;
+  max-width:min(76vw,980px);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  opacity:.68;
+}
+
+/* Phase is useful in motion/relativity surfaces, but it is redundant global
+   scaffolding in Earth and Hybrid where those specialist runtimes have their own
+   authority/truth context. */
+.experience-earth>.experience-phase-dock,
+.experience-hybrid>.experience-phase-dock{
+  display:none!important;
+}
+.experience-earth,
+.experience-hybrid{
+  grid-template-columns:minmax(0,1fr)!important;
+}
+
+/* Home should remain expressive without turning its intro into a text wall. */
+.r4-intro>p{
+  max-width:72ch;
+  line-height:1.62;
+}
+.r4-intro-actions{
+  flex-wrap:wrap;
+}
+
+/* Mobile: preserve a true application viewport and prevent drawer controls from
+   consuming the entire first screen before tools become reachable. */
+@media(max-width:900px){
+  :root{--r27-rail:0px}
+  .r27-mobile-drawer{
+    grid-template-rows:auto auto auto minmax(0,1fr) auto;
+  }
+  .r27-mobile-drawer .r32-action-shortcuts,
+  .r27-mobile-drawer .r31-drawer-shortcuts{
+    max-height:168px;
+    overflow:auto;
+    overscroll-behavior:contain;
+  }
+  .r27-mobile-drawer>.r27-search{
+    margin:7px 9px;
+  }
+  .r27-mobile-bottom button{
+    min-width:0;
+  }
+  .r27-mobile-bottom button span{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+
+@media(max-width:520px){
+  .r27-mobile-head{height:54px}
+  html[data-omega-frame='mobile'] .omega-workstation-v2 .workstation-main{
+    padding-top:62px!important;
+  }
+  .r27-route{
+    min-height:44px;
+  }
+}
