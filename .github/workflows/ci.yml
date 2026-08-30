@@ -63,9 +63,24 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Bind promoted merge lineage
+        shell: bash
+        run: |
+          parents="$(git show -s --format=%P "$GITHUB_SHA")"
+          set -- $parents
+          if [ "$#" -ne 2 ]; then
+            echo "::error title=LINEAGE REQUIRED::Promoted main commit must be an exact two-parent merge commit before release lineage can be bound."
+            exit 1
+          fi
+          echo "OMEGA_ROLLBACK_SHA=$1" >> "$GITHUB_ENV"
+          echo "OMEGA_CANDIDATE_SHA=$2" >> "$GITHUB_ENV"
+          echo "OMEGA_PROMOTED_SHA=$GITHUB_SHA" >> "$GITHUB_ENV"
+          echo "Bound governed release lineage without exposing credentials."
       - run: npm install
       - name: Cloudflare authorization preflight
         shell: bash
@@ -186,6 +201,8 @@ jobs:
           {
             echo "## OMEGA production deployment"
             echo "- Commit: $GITHUB_SHA"
+            echo "- Candidate: ${OMEGA_CANDIDATE_SHA:-UNAVAILABLE}"
+            echo "- Rollback: ${OMEGA_ROLLBACK_SHA:-UNAVAILABLE}"
             echo "- Runtime: $OMEGA_PUBLIC_URL"
             echo "- Verify job: ${{ needs.verify.result }}"
             echo "- Deployment job: ${{ job.status }}"
