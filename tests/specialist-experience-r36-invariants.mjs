@@ -10,14 +10,18 @@ need(work.includes('<RecursiveScalePanel address={address} onAddress={commit}/>'
 need(forecast.includes('What could happen next — and why'),'Forecast must be human-first');
 need(!forecast.includes("join(' → ')"),'Forecast must not regress to raw arrow-string corridor walls');
 need(forecast.includes('SpecialistMotionFieldR36'),'Forecast must expose motion rather than only text');
+need(forecast.includes('Dominant motion trace · human-readable state traversal'),'Forecast expert trace must survive progressive disclosure');
+need(forecast.includes('Each row is one legal model transition, not an invented minute/hour interval.'),'Forecast must preserve relative-transition time authority');
 need(reality.includes('if(nextConfig.primary)analyze(next,nextConfig,fileName)'),'Reality Lab upload must auto-compute when a numeric observable exists');
 need(reality.includes('Parse + compute pasted data'),'Reality Lab pasted data must visibly execute');
 need(!atlas.includes('ctx.lineTo(p.x,p.y)'), 'Atlas must not draw historical route polylines over the field');
 need(atlas.includes('requestAnimationFrame(draw)'),'Atlas visitation must animate');
+need(atlas.includes('Catalog membership is not execution.'),'Atlas must preserve source-backed execution truth');
 need(rel.includes("useState<Tab>('MOTION')"),'Relativity must open on motion rather than dimensional table');
 need(!rel.includes("stroke='#66e2d0' strokeWidth='5'"),'Relativity must not regress to dominant decorative worldline');
 need(earth.includes('EarthEvidenceMotionR36'),'Earth must expose returned evidence as motion');
 need(conv.includes('SpecialistMotionFieldR36'),'Data Motion and Convergence must use shared packet motion');
+need(conv.includes('Admissible route candidates'),'Convergence must preserve admitted-route authority semantics');
 need(scale.includes('auditRecursiveScaleCompiler(liveRecord)'),'Scale Compiler must compile current packet, not only frozen forensic state');
 need(calc.includes('CALCULATED PACKET MOTION'),'Atlas Calculator must visibly apply calculated coordinates');
 need(inf.includes('OMEGA∞ RECURRENCE FIELD'),'Infinity must place live recurrence field first');
