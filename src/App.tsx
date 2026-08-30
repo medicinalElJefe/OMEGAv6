@@ -15,6 +15,7 @@ import './omegaInterfaceR16.css';
 import './omegaHomeR17.css';
 import './interfaceRepairR34.css';
 import './interfaceImproveR34_1.css';
+import './coherenceRepairR35.css';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import OmegaHome from './OmegaHome';
 const OmegaWorkstation=lazy(()=>import('./OmegaWorkstationFullV2'));
