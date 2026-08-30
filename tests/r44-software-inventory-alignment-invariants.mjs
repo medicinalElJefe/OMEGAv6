@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const atlas=fs.readFileSync('src/systemAtlasRuntime.ts','utf8');
+const authority=fs.readFileSync('src/capabilityAuthority.ts','utf8');
+const workstation=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const expected=[
+['S00','Omega Atlas Desktop / Atlas OS','HOST_DESKTOP_TRAVERSAL'],['S01','Omega Reality Compiler','STATE_TO_FIELD_COMPILER'],['S02','Persistent Packet Substrate','ONE_PACKET_TYPE'],['S03','Hybrid Link Software','BRIDGE_VERIFY_RETURN'],['S04','CanonForge / Genesis Engine','CANON_LAW_RUNTIME'],['S05','VGCL / Vigil Geometry','VERIFIED_GEOMETRIC_LOGIC'],['S06','Executable Atlas Generator','ATLAS_COMPILER'],['S07','Shell / Mandala Engine','LOCAL_1_PLUS_6_SHELL'],['S08','Field Render Engine','CONTINUITY_VISUALIZER'],['S09','Earth Traversal Engine','WGS84_GIS_LIDAR_GATE'],['S10','Biological Traversal Engine','BODY_CELL_ATOM_STACK'],['S11','Omega Patch System','SAFE_DELTA_UPGRADE'],['S12','Omega Micro Build','SOVEREIGN_SEED_RUNTIME'],['S13','Living Coherence Membrane','COHERENCE_FIELD_SUBSTRATE'],['S14','Dewey Calculus Engine','STAY_TURN_ESCALATE'],['S15','Proof / Forensic System','AUTHORITY_DRIFT_AUDIT'],['S16','Workbook / Excel Atlas Runtime','SPREADSHEET_CONTROL_PLANE'],['S17','Echo-Chamber / SOMA Audio Engine','PHASE_COHERENT_AUDIO'],['S18','Universal Language System','SEMANTIC_PACKET_LANGUAGE'],['S19','Observer / Now-Frame Runtime','MOVING_RELATIVE_ANCHOR'],['S20','Recovery Board System','KEEP_DONOR_QUARANTINE'],['S21','Cinematic Field Renderer','IMMERSIVE_SNAPSHOT_ENGINE'],['S22','Operator Dashboard / Control Surface','HUMAN_IN_LOOP_UI'],['S23','One-Click Packaging System','DESKTOP_INSTALLER_RELEASE']];
+for(const row of expected)for(const token of row)if(!atlas.includes(token))throw new Error(`inventory family drift: ${token}`);
+for(const token of ['OMEGA_SYSTEM_ATLAS_V24_INVENTORY_ALIGNED','OMEGA_ALL_SOFTWARE_61917364224D_FULL_BUILD_ATLAS_v22.xlsx / SOFTWARE_MASTER','61917364224','20736','inventoryPurpose'])if(!atlas.includes(token))throw new Error(`inventory authority missing: ${token}`);
+if((atlas.match(/\nF\('S\d\d'/g)||[]).length!==24)throw new Error('expected exact 24-family registry');
+for(const token of ['Operator Dashboard / Control Surface','Cockpit','One-Click Packaging System','Build Out'])if(!atlas.includes(token))throw new Error(`family target missing: ${token}`);
+if(/@appdeploy\/client/i.test(atlas+authority+workstation))throw new Error('builder-only runtime dependency regression');
+if(!authority.includes("name:'Earth Now'")||!authority.includes("boundary:'EVIDENCE_BOUND'"))throw new Error('Earth evidence gate lost');
+if(!authority.includes("name:'Hybrid Link'")||!authority.includes("boundary:'DEVICE_PROOF'"))throw new Error('Hybrid device proof gate lost');
+if(!workstation.includes('SourceBackedModesPanelR21')||!workstation.includes('sourceBackedModeSummary'))throw new Error('source-backed modes runtime lost');
+console.log('R44 SOFTWARE INVENTORY ALIGNMENT PASS · 24/24 families locked');
