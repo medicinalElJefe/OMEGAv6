@@ -1,0 +1,30 @@
+export const DRIVE_AUTHORITY_R48={
+ schema:'OMEGA_DRIVE_AUTHORITY_SNAPSHOT_R48',
+ sourceFile:'LATEST_OMEGA_UPDATE.json',
+ sourceFileId:'1KKJKXeQf-IEZdej0BhiQrhykv2JLv9Nw',
+ verifiedCycle:'2026-08-30 R48 completion convergence',
+ build:'OMEGA SELF MONITORING DELTA MESH HUB B015',
+ releaseRevision:'R1',
+ constitutionalCoreMutation:false,
+ parentMinimum:'B014',
+ preferPrivateGateway:true,
+ status:'READY_FOR_ONE_CLICK_TARGET_ACTIVATION',
+ updateFile:'OMEGA_MATURE_B015_SELF_MONITORING_DELTA_MESH_HUB_R1.zip',
+ updateSha256:'8be50fbe717679d8044714d1c4541f94061ac0c8d5f5d9201d76d8cb7421e379',
+ bootstrapBat:'RUN_OMEGA_LATEST_UPDATE.bat',
+ bootstrapPs1:'RUN_OMEGA_LATEST_UPDATE.ps1',
+ bootstrapProtocol:'OMEGA-DRIVE-BOOTSTRAP/1.1',
+ bootstrapBehavior:[
+  'verify SHA-256 before extraction',
+  'invoke B015 installer',
+  'preflight immutable core',
+  'run B007+B008+B009+B010+B011+B012+B013+B014+B015 gates',
+  'health-check exact B015 process',
+  'register crash watchdog',
+  'rollback changed files on any gate failure',
+  'write BOOTSTRAP_ACTIVATION evidence on success'
+ ],
+ requiredLiveState:['UNIVERSE_PULSE.json','PHASE_AWARENESS.json','GEOMETRY_FRAME.json','LEMMA_NET.json','CANON_AWARENESS.json','AWARENESS_STATE.json','PERFORMANCE_STATE.json','PROOF_STATE.json','PROVIDER_STATE.json','PROJECTION_STATE.json','EXECUTION_STATE.json','STATE_SPINE_CHECKPOINT.json','EVERYWHERE_HUB_STATUS.json','SELF_MONITOR_STATUS.json'],
+ scope:{authority:'local OMEGA only',browserSync:'one full snapshot then long-polled deltas',deltaMesh:'bounded semantic change journal + changed-component transport',geometry:'12/144/1728/20736 representational hierarchy',proofPerformance:'B011 retained',providerRecovery:'B007 preserved',rollback:'transactional changed-file restore',stateSpine:'B013 persistent derived cache/checkpoint retained',supervisedEventMesh:'B012 retained'},
+ boundary:'This is the exact B015 R1 authority snapshot re-read from Google Drive during the R48 build cycle. The deployed browser does not continuously poll Drive, and this snapshot does not grant browser code native installer authority.'
+} as const;
