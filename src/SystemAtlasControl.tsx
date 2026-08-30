@@ -19,7 +19,7 @@ export default function SystemAtlasControl({record,onNavigate,control=false}:Pro
  const activeAddress=Number.isFinite(Number(record?.address))?Number(record.address):Math.max(0,Number(record?.stateId||1)-1);
  void GRID_CELLS;void PHASE_COUNT;void STREAM_COUNT;void SUBSYSTEM_COUNT;
  return <section className='special-app system-atlas-r1 system-atlas-r13 system-atlas-r38'>
-  <header className='special-head'><div><span>V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE · CAPABILITY TRUTH</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{FAMILIES.length} REGISTERED FAMILIES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision}</small></div></header>
+  <header className='special-head'><div><span>V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE · CAPABILITY TRUTH</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{FAMILIES.length} REGISTERED FAMILIES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision} · registration ≠ execution</small></div></header>
   <div className='atlas-r1-invariant'><ShieldCheck/><b>{SYSTEM_INVARIANT}</b><span>One authoritative packet can have multiple lawful expressions, but a donor name, native target, or restoration plan is never displayed as a live executable capability.</span></div>
   <section className='atlas-r38-stage' aria-label='Active packet and System Atlas truth context'>
    <div className='atlas-r38-field'><CalculusFieldR37 address={activeAddress} mode='FIELD' steps={30} label={control?'SYSTEM CONTROL · ACTIVE PACKET':'SYSTEM ATLAS · ACTIVE PACKET'}/></div>
