@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),must=(x,m)=>{if(!x)throw new Error(`R46 extreme restoration invariant failed: ${m}`)};
-const matrix=read('src/ExtremeRestorationR46.tsx'),bio=read('src/BiologicalTraversalR46.tsx'),micro=read('src/MicroBuildR46.tsx'),data=read('src/OmegaDataLexiconR46.tsx'),cinema=read('src/CinematicFieldRendererR46.tsx'),atlas=read('src/SystemAtlasControl.tsx'),base=read('src/systemAtlasRuntime.ts'),css=read('src/extremeRestorationR46.css');
+const matrix=read('src/ExtremeRestorationR46.tsx'),bio=read('src/BiologicalTraversalR46.tsx'),micro=read('src/MicroBuildR46.tsx'),data=read('src/OmegaDataLexiconR46.tsx'),cinema=read('src/CinematicFieldRendererR46.tsx'),atlas=read('src/SystemAtlasControl.tsx'),base=read('src/systemAtlasRuntime.ts'),css=read('src/extremeRestorationR46.css'),union=read('src/ExtremeTraversalUnionR60.tsx'),home=read('src/OmegaHomeR59.tsx'),unionCss=read('src/extremeTraversalUnionR60.css');
 for(const id of ['S10','S12','S16','S18','S21'])must(matrix.includes(`id:'${id}'`),`successor overlay missing ${id}`);
 for(const token of ['ORGANISM','ORGAN','TISSUE','CELL','ORGANELLE','MOLECULE','ATOM','Representational biological-scale traversal only'])must(bio.includes(token),`biology contract missing ${token}`);
 for(const token of ['OMEGA_COMPRESSED_SOVEREIGN_SEED_R46','requiresAuthorityAdmission:true','DEVICE_PROOF_REQUIRED','portable state/configuration material only'])must(micro.includes(token),`micro build boundary missing ${token}`);
@@ -9,6 +9,9 @@ for(const token of ['IMMERSIVE_SNAPSHOT_ENGINE','Export SVG','Browser-local dete
 must(atlas.includes("import ExtremeRestorationR46 from './ExtremeRestorationR46'"),'System Atlas must mount R46 restoration matrix');
 must(atlas.includes('<ExtremeRestorationR46 record={record} address={activeAddress} onNavigate={onNavigate}/>'),'R46 executor mount missing');
 for(const historical of ["F('S10','Biological Traversal Engine'","F('S12','Omega Micro Build'","F('S16','Workbook / Excel Atlas Runtime'","F('S18','Universal Language System'","F('S21','Cinematic Field Renderer'"])must(base.includes(historical),`V24 historical family evidence missing ${historical}`);
-for(const bad of ['clinical diagnosis','universal translation proof is active','@appdeploy/client'])must(![matrix,bio,micro,data,cinema,atlas,css].join('\n').toLowerCase().includes(bad.toLowerCase()),`unsupported claim/dependency ${bad}`);
+for(const bad of ['clinical diagnosis','universal translation proof is active','@appdeploy/client'])must(![matrix,bio,micro,data,cinema,atlas,css,union,home,unionCss].join('\n').toLowerCase().includes(bad.toLowerCase()),`unsupported claim/dependency ${bad}`);
 must(css.includes('@media(max-width:520px)')&&css.includes('.r46-family-status'),'responsive restoration containment missing');
-console.log('R46 EXTREME RESTORATION PASS · S10/S12/S16/S18/S21 bounded successor executors · V24 evidence preserved · native/device claims gated');
+for(const token of ["TraversalR36 variant='Extreme Traversal'",'ExtremeRestorationR46','Canonical traversal','Restored functions','Switching views never creates a second state authority'])must(union.includes(token),`R60 traversal union missing ${token}`);
+for(const token of ["import ExtremeTraversalUnionR60 from './ExtremeTraversalUnionR60'",'RESTORED EXECUTION STACK','Runtime Functions','showRuntimeFunctions','ExtremeTraversalUnionR60 record={record}'])must(home.includes(token),`R60 home runtime-function access missing ${token}`);
+must(unionCss.includes('.r60-runtime-functions')&&unionCss.includes('@media(max-width:720px)'),'R60 runtime-function responsive shell missing');
+console.log('R46/R60 EXTREME RESTORATION PASS · S10/S12/S16/S18/S21 bounded executors surfaced through canonical traversal union · V24 evidence preserved · native/device claims gated');
