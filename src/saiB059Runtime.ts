@@ -7,6 +7,7 @@ export const SAI_B059_TRAVERSAL_STEPS=188;
 export const SAI_B059_MIN_DOCUMENTS=250000;
 export const SAI_B059_DECISIONS=['STAY','TURN','ESCALATE'] as const;
 export const SAI_B059_WORKFLOW=['Sense','Normalize','Score','Gate','Act','Ledger'] as const;
+export const SAI_IMPROVEMENT_WORKFLOW=['Observe','Diagnose','Propose','Gate','Handoff','Verify','Ledger'] as const;
 export const SAI_B059_BOUNDARY='Deterministic source-grounded intelligence donor; not a demonstrated superintelligence, not a foundation model, and no unseen model weights are claimed loaded in the hosted Worker.';
 
 export type SaiAuthority={name:string;role:string;sha256:string;size:number};
@@ -45,6 +46,22 @@ export function saiRoleOrder(query:string){const q=query.toLowerCase();if(/proof
 
 export function compileSaiRetrievalPlan(query:string,address:number){const roles=saiRoleOrder(query);const record=corpusState(Math.max(0,Math.min(20735,address)));return{schema:'OMEGA_SAI_B059_HOSTED_RETRIEVAL_PLAN_V1',query:query.trim(),address:record.address,stateId:record.stateId,roles,workflow:SAI_B059_WORKFLOW,kernel:saiKernel(record),sourceAuthorityCount:SAI_B059_AUTHORITIES.length,boundary:SAI_B059_BOUNDARY,execution:'PLAN_ONLY_UNTIL_CORPUS_DB_OR_PROVIDER_BINDING'};}
 
+export type SaiImprovementProposal={schema:string;proposalId:string;stateId:number;address:number;decision:SaiDecision;priority:'STABILIZE'|'REPAIR'|'ADVANCE';observations:string[];targets:{area:string;reason:string;acceptance:string}[];workflow:readonly string[];executionBoundary:string};
+export function compileSaiImprovementProposal(record:any,modeSummary?:{appliedCount?:number;gatedCount?:number;catalogCount?:number}):SaiImprovementProposal{
+ const k=saiKernel(record),applied=Number(modeSummary?.appliedCount||0),gated=Number(modeSummary?.gatedCount||0),catalog=Number(modeSummary?.catalogCount||0),observations:string[]=[],targets:SaiImprovementProposal['targets']=[];
+ if(k.contradiction>.2)observations.push(`Contradiction load q=${k.contradiction.toFixed(3)} requires prune-before-build.`);
+ if(k.burden>.45)observations.push(`Burden Λ=${k.burden.toFixed(3)} is high enough to prioritize simplification and recoverability.`);
+ if(k.plasticity>.55)observations.push(`Future plasticity Φ=${k.plasticity.toFixed(3)} supports bounded advancement after proof gates.`);
+ if(catalog>0&&applied<catalog)observations.push(`${applied}/${catalog} cataloged modes are source-backed executable in this packet; ${gated} remain explicitly gated.`);
+ if(!observations.length)observations.push('Current packet is stable enough for evidence-led incremental advancement.');
+ targets.push({area:'INTERFACE_COMPOSITION',reason:'Keep computation primary and navigation contextual.',acceptance:'No permanent route wall, no panel-over-canvas collision, no giant dead viewport.'});
+ targets.push({area:'VISUAL_DEPTH',reason:'Multiple projections must reveal different lawful aspects of the same state.',acceptance:'Field, forecast, relativity, motion and scale/proof views remain synchronized to one canonical address.'});
+ if(gated>0)targets.push({area:'MODE_EXECUTION',reason:'Catalog membership must not impersonate executable computation.',acceptance:'Every visible mode is classified applied, packet-derived, or gated with missing inputs.'});
+ targets.push({area:'SELF_IMPROVEMENT',reason:'Improvement claims require an auditable source change and accepted release evidence.',acceptance:'Proposal → governed code change → full QA → deploy → public verification receipt; no silent mutation.'});
+ const priority:'STABILIZE'|'REPAIR'|'ADVANCE'=k.decision==='ESCALATE'?'STABILIZE':k.decision==='TURN'?'REPAIR':'ADVANCE';
+ return{schema:'OMEGA_SAI_GOVERNED_IMPROVEMENT_PROPOSAL_V1',proposalId:`SAI-${record?.stateId??record?.address??0}-${priority}`,stateId:Number(record?.stateId??0),address:Number(record?.address??0),decision:k.decision,priority,observations,targets,workflow:SAI_IMPROVEMENT_WORKFLOW,executionBoundary:'BROWSER_SAI_PROPOSES_AND_LEDGERS_ONLY__GITHUB_RELEASE_PIPELINE_EXECUTES_SOURCE_CHANGES'};
+}
+
 export function buildSaiTraversal(address:number,steps=SAI_B059_TRAVERSAL_STEPS){let cursor=Math.max(0,Math.min(20735,Math.floor(address))),out:number[]=[];for(let i=0;i<Math.max(1,Math.min(188,steps));i++){const r=corpusState(cursor);out.push(r.stateId);const next=Number(r?.autoPing?.dataNext);cursor=Number.isFinite(next)?Math.max(0,Math.min(20735,Math.floor(next))):((cursor+1)%20736)}return out;}
 
 function canonical(value:any):string{if(value===null||typeof value!=='object')return JSON.stringify(value);if(Array.isArray(value))return`[${value.map(canonical).join(',')}]`;return`{${Object.keys(value).sort().map(k=>`${JSON.stringify(k)}:${canonical(value[k])}`).join(',')}}`}
@@ -56,4 +73,4 @@ export function readSaiLedger():SaiLedgerEntry[]{try{const v=JSON.parse(localSto
 export async function appendSaiLedger(event:string,payload:any){const rows=readSaiLedger(),previous=rows.at(-1)?.entry_hash||'0'.repeat(64),body={timestamp_utc:new Date().toISOString(),event,previous_hash:previous,payload},entry_hash=await sha256Hex(previous+canonical(body));const row:SaiLedgerEntry={...body,entry_hash};localStorage.setItem(LEDGER_KEY,JSON.stringify([...rows,row].slice(-500)));return row;}
 export async function verifySaiLedger(rows:SaiLedgerEntry[]){let previous='0'.repeat(64),count=0;for(const row of rows){const body={timestamp_utc:row.timestamp_utc,event:row.event,previous_hash:row.previous_hash,payload:row.payload};const expected=await sha256Hex(previous+canonical(body));if(row.previous_hash!==previous||row.entry_hash!==expected)return{passed:false,entries:count,failure_at:count+1,head:previous};previous=row.entry_hash;count++}return{passed:true,entries:count,head:previous}}
 
-export function saiHostedReceipt(record:any,modeCount:number){const kernel=saiKernel(record);return{schema:'OMEGA_SAI_B059_HOSTED_RECEIPT_V1',release:SAI_B059_RELEASE,stateId:record?.stateId,address:record?.address,modeCount,kernel,authorities:SAI_B059_AUTHORITIES.length,donorDbBytes:SAI_B059_DB_BYTES,donorEdgeCount:SAI_B059_EDGE_COUNT,traversalSteps:SAI_B059_TRAVERSAL_STEPS,workflow:SAI_B059_WORKFLOW,boundary:SAI_B059_BOUNDARY,hostedTruth:{compiledDonorDatabaseLoaded:false,foundationModelLoaded:false,sourceManifestRestored:true,current20736GraphAvailable:true,browserHashLedgerAvailable:true}};}
+export function saiHostedReceipt(record:any,modeCount:number){const kernel=saiKernel(record);return{schema:'OMEGA_SAI_B059_HOSTED_RECEIPT_V1',release:SAI_B059_RELEASE,stateId:record?.stateId,address:record?.address,modeCount,kernel,authorities:SAI_B059_AUTHORITIES.length,donorDbBytes:SAI_B059_DB_BYTES,donorEdgeCount:SAI_B059_EDGE_COUNT,traversalSteps:SAI_B059_TRAVERSAL_STEPS,workflow:SAI_B059_WORKFLOW,boundary:SAI_B059_BOUNDARY,hostedTruth:{compiledDonorDatabaseLoaded:false,foundationModelLoaded:false,sourceManifestRestored:true,current20736GraphAvailable:true,browserHashLedgerAvailable:true,autonomousSourceMutation:false,governedImprovementProposal:true}};}
