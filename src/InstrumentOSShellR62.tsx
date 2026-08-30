@@ -1,4 +1,4 @@
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 import {BrainCircuit,Command,Eye,Home,Layers3,Menu,Search,Settings2,ShieldCheck,Sparkles,X} from 'lucide-react';
 import {CAPABILITY_REALITY_LABEL} from './capabilityAuthority';
 import {effectiveCapabilityReality} from './operationalCapabilityRuntimeR45';
@@ -18,8 +18,15 @@ const WORKSPACES=[
 const ALL=WORKSPACES.flatMap(x=>x.routes);
 const workspaceFor=(panel:string)=>WORKSPACES.find(x=>x.routes.includes(panel as never))||WORKSPACES[0];
 
-export default function InstrumentOSShellR62({panel,onNavigate,record,modeCount,busy}:Props){
+export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,modeCount,busy}:Props){
  const[open,setOpen]=useState(false),[active,setActive]=useState<WorkspaceId>(()=>workspaceFor(panel).id),[query,setQuery]=useState('');
+ useEffect(()=>{
+  const media=window.matchMedia('(max-width: 900px)');
+  const sync=()=>{const frame=uiMode==='MOBILE'?'mobile':uiMode==='DESKTOP'?'desktop':media.matches?'mobile':'desktop';document.documentElement.dataset.omegaFrame=frame};
+  sync();
+  if(uiMode==='AUTO')media.addEventListener('change',sync);
+  return()=>{if(uiMode==='AUTO')media.removeEventListener('change',sync)};
+ },[uiMode]);
  const current=workspaceFor(panel);
  const selected=WORKSPACES.find(x=>x.id===active)||current;
  const routes=useMemo(()=>{const q=query.trim().toLowerCase();return q?ALL.filter(x=>x.toLowerCase().includes(q)):selected.routes},[query,selected]);
