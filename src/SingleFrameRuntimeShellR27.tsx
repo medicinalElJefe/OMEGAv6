@@ -4,35 +4,20 @@ import {CAPABILITY_REALITY_LABEL,capabilityReality,isPrimaryOperationalCapabilit
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import './singleFrameR27.css';
 import './shellR31.css';
+import './shellR32.css';
 
 export type OmegaUiMode='AUTO'|'DESKTOP'|'MOBILE';
 type DomainId='WORK'|'EXPLORE'|'INTELLIGENCE'|'EVIDENCE'|'SYSTEM';
-// R27 lineage aliases remain explicit so historical domain semantics are not erased by the R31/R32 human-facing taxonomy.
 type LegacyDomainId='COMMAND'|'VISUALIZE'|'EARTH'|'INTELLIGENCE'|'BUILD'|'EVIDENCE'|'SYSTEM';
 const LEGACY_DOMAIN_LINEAGE:readonly LegacyDomainId[]=['COMMAND','VISUALIZE','EARTH','INTELLIGENCE','BUILD','EVIDENCE','SYSTEM'];
 type Props={uiMode:OmegaUiMode;onUiMode:(mode:OmegaUiMode)=>void;panel:string;onNavigate:(panel:string)=>void;record:any;modePolicy:string;modeCount:number;busy:string};
 type Domain={id:DomainId;label:string;description:string;routes:readonly string[]};
-
 export const R27_REGISTERED_SURFACES=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'] as const;
 const ROUTE_NO=new Map(R27_REGISTERED_SURFACES.map((name,i)=>[name,String(i+1).padStart(2,'0')]));
-const DOMAIN_ROUTES:Record<DomainId,readonly string[]>={
- WORK:['Command Center','Workspace','Cockpit','Hybrid Link','Create','Projects','Render Queue','Assets','Development'],
- EXPLORE:['Earth Now','Forecast','Reality Lab','Matter Traversal','Visual Instrument','Relativity','Atlas','Traversal','Field','Data Motion','Atlas Calculator','Infinity','Convergence','Scale Compiler'],
- INTELLIGENCE:['Modes','Kernel Intelligence','Memory','Canon Evolution','SAI Lab'],
- EVIDENCE:['Quality Compiler','Evidence & Proof','Archive Census','Archive Operators','Governance','Validation'],
- SYSTEM:['Instructions','Settings','System','System Atlas','Control Matrix']
-};
+const DOMAIN_ROUTES:Record<DomainId,readonly string[]>={WORK:['Command Center','Workspace','Cockpit','Hybrid Link','Create','Projects','Render Queue','Assets','Development'],EXPLORE:['Earth Now','Forecast','Reality Lab','Matter Traversal','Visual Instrument','Relativity','Atlas','Traversal','Field','Data Motion','Atlas Calculator','Infinity','Convergence','Scale Compiler'],INTELLIGENCE:['Modes','Kernel Intelligence','Memory','Canon Evolution','SAI Lab'],EVIDENCE:['Quality Compiler','Evidence & Proof','Archive Census','Archive Operators','Governance','Validation'],SYSTEM:['Instructions','Settings','System','System Atlas','Control Matrix']};
 const operational=(x:readonly string[])=>x.filter(isPrimaryOperationalCapability);
-const DOMAINS:readonly Domain[]=[
- {id:'WORK',label:'Work',description:'Ask · act · continue',routes:operational(DOMAIN_ROUTES.WORK)},
- {id:'EXPLORE',label:'Explore',description:'Earth · matter · motion · scale',routes:operational(DOMAIN_ROUTES.EXPLORE)},
- {id:'INTELLIGENCE',label:'Intelligence',description:'AI · modes · memory · learning',routes:operational(DOMAIN_ROUTES.INTELLIGENCE)},
- {id:'EVIDENCE',label:'Evidence',description:'Proof · archive · validation',routes:operational(DOMAIN_ROUTES.EVIDENCE)},
- {id:'SYSTEM',label:'System',description:'Settings · topology · instructions',routes:operational(DOMAIN_ROUTES.SYSTEM)}
-];
-const ALL_OPERATIONAL=Array.from(new Set(DOMAINS.flatMap(x=>x.routes)));
-const iconFor=(id:DomainId)=>id==='WORK'?Sparkles:id==='EXPLORE'?Eye:id==='INTELLIGENCE'?BrainCircuit:id==='EVIDENCE'?ShieldCheck:Settings2;
-const domainFor=(panel:string)=>DOMAINS.find(d=>d.routes.includes(panel))||DOMAINS[0];
+const DOMAINS:readonly Domain[]=[{id:'WORK',label:'Work',description:'Ask · act · continue',routes:operational(DOMAIN_ROUTES.WORK)},{id:'EXPLORE',label:'Explore',description:'Earth · matter · motion · scale',routes:operational(DOMAIN_ROUTES.EXPLORE)},{id:'INTELLIGENCE',label:'Intelligence',description:'AI · modes · memory · learning',routes:operational(DOMAIN_ROUTES.INTELLIGENCE)},{id:'EVIDENCE',label:'Evidence',description:'Proof · archive · validation',routes:operational(DOMAIN_ROUTES.EVIDENCE)},{id:'SYSTEM',label:'System',description:'Settings · topology · instructions',routes:operational(DOMAIN_ROUTES.SYSTEM)}];
+const ALL_OPERATIONAL=Array.from(new Set(DOMAINS.flatMap(x=>x.routes)));const iconFor=(id:DomainId)=>id==='WORK'?Sparkles:id==='EXPLORE'?Eye:id==='INTELLIGENCE'?BrainCircuit:id==='EVIDENCE'?ShieldCheck:Settings2;const domainFor=(panel:string)=>DOMAINS.find(d=>d.routes.includes(panel))||DOMAINS[0];
 function useCompact(uiMode:OmegaUiMode){const[small,setSmall]=useState(()=>typeof window!=='undefined'?window.matchMedia('(max-width: 900px)').matches:false);useEffect(()=>{const m=window.matchMedia('(max-width: 900px)'),f=()=>setSmall(m.matches);f();m.addEventListener('change',f);return()=>m.removeEventListener('change',f)},[]);return uiMode==='MOBILE'||(uiMode==='AUTO'&&small)}
 export function LayoutModeSwitch({value,onChange,compact=false}:{value:OmegaUiMode;onChange:(mode:OmegaUiMode)=>void;compact?:boolean}){return <div className={'r27-layout-switch '+(compact?'compact':'')} role='group' aria-label='Workspace layout'>{(['AUTO','DESKTOP','MOBILE'] as OmegaUiMode[]).map(m=><button key={m} className={value===m?'active':''} aria-pressed={value===m} onClick={()=>onChange(m)}>{compact?m[0]:m}</button>)}</div>}
 function Route({name,panel,onNavigate,close}:{name:string;panel:string;onNavigate:(p:string)=>void;close?:()=>void}){const reality=capabilityReality(name);return <button className={'r27-route '+(name===panel?'active':'')} data-route-number={ROUTE_NO.get(name)} data-capability-reality={reality} aria-current={name===panel?'page':undefined} onClick={()=>{onNavigate(name);close?.()}}><span><b>{name}</b><small>{CAPABILITY_REALITY_LABEL[reality]}</small></span><ChevronRight size={15}/></button>}
