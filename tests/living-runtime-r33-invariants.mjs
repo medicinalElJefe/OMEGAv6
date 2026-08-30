@@ -8,6 +8,8 @@ must(worker.includes("persistence:'DURABLE_MESSAGE_MEMORY'")&&worker.includes('L
 must(worker.includes("history=(thread?.messages||[]).slice(-12)")&&worker.includes('CURRENT REQUEST'),'Workers AI must consume bounded prior durable project turns');
 must(worker.includes("'MISSION_COMPLETE'")&&worker.includes("'MISSION_HELD'")&&worker.includes('lastProof:job.returnPacket'),'mission state must transition from actual returned host proof');
 must(worker.includes('no blind retry was queued'),'failed native proof must hold rather than fabricate autonomous success');
+must(worker.includes("path==='/api/hybrid/status'")&&worker.includes("state:online.length?'VERIFIED_DEVICE_ONLINE':'DEVICE_PROOF_REQUIRED'")&&worker.includes("truthBoundary:'PUBLIC_DEVICE_PROOF_GATE_R33B'"),'public Hybrid status must preserve DEVICE_PROOF_REQUIRED until a live authenticated host proves native execution');
+must(worker.includes('pairingState:internalState'),'public Hybrid truth gate must preserve the more specific internal pairing state without exposing it as false native proof');
 for(const token of ['APPLY_PATCH','expectedSha256','preimage mismatch','backups','os.replace','beforeSha256','afterSha256'])must(agent.includes(token),`R33 hash-bound patch executor missing ${token}`);
 must(agent.includes('MAX_PATCH_BYTES=512*1024')&&agent.includes('MAX_PATCH_REPLACEMENTS=24'),'patch operation must remain bounded');
 must(agent.includes('shell=False'),'native build/test must retain no-arbitrary-shell boundary');
@@ -15,4 +17,4 @@ must(pulse.includes("'/api/runtime/snapshot'")&&pulse.includes('remembered turns
 must(shell.includes('LivingRuntimePulseR33')&&shell.includes('What should OMEGA do now?')&&shell.includes("className='r33-all-tools'"),'mobile navigation must lead with enacted state/actions and progressively disclose the catalog');
 must(shell.includes('<span>Now</span>')&&shell.includes('<span>PC</span>')&&shell.includes('<span>Tools</span>'),'mobile primary navigation must remain task-first');
 for(const source of [worker,worker32,agent,shell,pulse,config])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R33 must remain AppDeploy-free');
-console.log('OMEGA R33 LIVING RUNTIME PASS · durable AI memory + proof-driven mission lifecycle + hash-bound PC patching + live action-first menus');
+console.log('OMEGA R33b LIVING RUNTIME PASS · durable AI memory + proof-driven mission lifecycle + hash-bound PC patching + live action-first menus + public Hybrid truth gate');
