@@ -11,7 +11,7 @@ function step(address:number,dir:Step['dir'],offset:number):Step{const a=clamp(a
 function changed(a:Step,b:Step,key:'d'|'p'|'r'|'l'){return a.coords[key]!==b.coords[key]}
 
 export default function OmegaMotionSkinMapR35({address,onSelectAddress,compact=false}:Props){
- const path=useMemo(()=>{const past:Step[]=[];let cursor=clamp(address);for(let i=3;i>=1;i--){const prev=corpusState(cursor).autoPing?.previous;cursor=Number.isFinite(prev)?clamp(prev):cursor;past.unshift(step(cursor,'PAST',-i))}const now=step(address,'NOW',0),future:Step[]=[];cursor=clamp(address);for(let i=1;i<=6;i++){const next=corpusState(cursor).autoPing?.dataNext;cursor=Number.isFinite(next)?clamp(next):cursor;future.push(step(cursor,'FUTURE',i))}return[...past,now,...future]},[address]);
+ const path=useMemo(()=>{const reverseChain:number[]=[];let cursor=clamp(address);for(let i=0;i<3;i++){const prev=corpusState(cursor).autoPing?.previous;cursor=Number.isFinite(prev)?clamp(prev):cursor;reverseChain.push(cursor)}const past=reverseChain.reverse().map((a,i)=>step(a,'PAST',i-3)),now=step(address,'NOW',0),future:Step[]=[];cursor=clamp(address);for(let i=1;i<=6;i++){const next=corpusState(cursor).autoPing?.dataNext;cursor=Number.isFinite(next)?clamp(next):cursor;future.push(step(cursor,'FUTURE',i))}return[...past,now,...future]},[address]);
  const currentIndex=path.findIndex(x=>x.dir==='NOW');
  const W=1000,H=compact?250:320,pad=46,usable=W-pad*2,x=(i:number)=>pad+i/(path.length-1)*usable;
  const laneY={d:70,p:125,r:180,l:235};
@@ -26,6 +26,6 @@ export default function OmegaMotionSkinMapR35({address,onSelectAddress,compact=f
    </svg>
   </div>
   <div className='oms-steps'>{path.map((s,i)=>{const prev=i?path[i-1]:s;const skins=i?(['d','p','r','l'] as const).filter(k=>changed(prev,s,k)).map(k=>laneLabel[k]).join(' · '):'ENTRY';return <button key={`${s.dir}-${s.offset}-${s.address}`} className={s.dir==='NOW'?'current':''} onClick={()=>onSelectAddress?.(s.address)}><span>{s.dir==='NOW'?'NOW':s.offset>0?`+${s.offset}`:`${s.offset}`}</span><b>{s.stateId.toLocaleString()}</b><small>{skins||'same skins'} · {s.decision}</small><i>CΩ {s.continuity.toFixed(2)} · Φ {s.plasticity.toFixed(2)} · q {s.contradiction.toFixed(2)} · Λ {s.burden.toFixed(2)} · E {s.evidence.toFixed(2)}</i></button>})}</div>
-  <footer><ShieldCheck/><span>Reverse uses each packet's recorded previous edge; forward uses the admitted dataNext edge. This is computation-space motion across the canonical 12×12×12×12 representation, not a claim of extra physical dimensions.</span></footer>
+  <footer><ShieldCheck/><span>Reverse is displayed in strict chronological order: farther past → immediate previous → NOW. It uses each packet's recorded previous edge; forward uses admitted dataNext. This is computation-space motion across the canonical 12×12×12×12 representation, not a claim of extra physical dimensions.</span></footer>
  </section>
 }
