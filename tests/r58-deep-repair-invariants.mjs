@@ -17,4 +17,5 @@ expect(modes.includes('implementedCount=summary.rows.length'),'mode panel must d
 expect(modes.includes('registryOnlyCount'),'mode registry gap must be explicit');
 expect(modes.includes('Catalog membership is never reported as execution.'),'catalog/execution truth boundary missing');
 expect(!living.includes('@appdeploy/client')&&!modes.includes('@appdeploy/client'),'AppDeploy dependency regression');
+await import('./r58-hourly-builder-contract.mjs');
 console.log('R58 deep repair invariants PASS');
