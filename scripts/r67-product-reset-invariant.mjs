@@ -18,3 +18,4 @@ const req=[
 ];
 const bad=req.filter(([ok])=>!ok);if(bad.length){console.error('R67 invariant FAIL');for(const[,m]of bad)console.error('-',m);process.exit(1)}
 console.log('R67 product reset invariant PASS');for(const[,m]of req)console.log('PASS',m);
+await import('./r68-style-authority-invariant.mjs');

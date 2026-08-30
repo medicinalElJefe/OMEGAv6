@@ -1,20 +1,17 @@
 import fs from 'node:fs';
 const app=fs.readFileSync('src/App.tsx','utf8');
-const css=fs.readFileSync('src/uxSurpassR3.css','utf8');
-const required=[
-  "import './uxSurpassR3.css';",
-  'safe-area-inset-top',
-  'safe-area-inset-bottom',
-  '@media(max-width:620px)',
-  '.responsive-shell-rail{display:none!important}',
-  '.mrc-menu-grid,.rr-menu-universe{grid-template-columns:1fr!important}',
-  'padding-bottom:calc(96px + var(--omega-safe-bottom))',
-  '.omega-nexus{width:100%!important;max-width:100%!important;max-height:100%!important',
-  'touch-action:manipulation'
-];
-for(const needle of required){
-  const hay=needle.startsWith('import ')?app:css;
-  if(!hay.includes(needle)) throw new Error(`UX_SURPASS_R3 missing invariant: ${needle}`);
-}
-if(css.includes('position:fixed!important;z-index:70!important;right:14px!important;top:82px!important;bottom:14px!important;width:296px!important') && !css.includes('@media(max-width:980px)')) throw new Error('UX_SURPASS_R3 mobile rail suppression missing');
-console.log('UX_SURPASS_R3_INVARIANTS PASS · safe-area + mobile containment locked');
+const donor=fs.readFileSync('src/uxSurpassR3.css','utf8');
+const reset=fs.readFileSync('src/productResetR67.css','utf8');
+const mobile=fs.readFileSync('src/mobileMatterR42.css','utf8');
+const shell=fs.readFileSync('src/instrumentOSR62.css','utf8');
+const active=reset+'\n'+mobile+'\n'+shell;
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+must(!app.includes("import './uxSurpassR3.css'"),'superseded R3 global stylesheet must not own current cascade');
+must(donor.includes('safe-area-inset-top')&&donor.includes('safe-area-inset-bottom'),'R3 donor must retain original safe-area lineage');
+for(const token of ['safe-area-inset-top','safe-area-inset-bottom','@media(max-width:900px)','touch-action:manipulation'])must(active.includes(token),`current mobile authority missing ${token}`);
+must(reset.includes('--omega-safe-top')&&reset.includes('--omega-safe-bottom'),'current product must normalize safe-area variables');
+must(reset.includes('calc(78px + var(--omega-safe-bottom))'),'mobile product/workstation must reserve bottom safe-area navigation space');
+must(reset.includes(".r62-route-grid{grid-template-columns:1fr!important}"),'mobile instrument browser must collapse to one readable column');
+must(reset.includes(".r62-overlay{padding-bottom:calc(62px + var(--omega-safe-bottom))!important}"),'mobile drawer must not be covered by the safe-area bottom rail');
+must(mobile.includes('overflow-x:hidden!important')&&mobile.includes('scroll-snap-type:x proximity'),'deep visual controls must remain contained and intentionally horizontally traversable');
+console.log('UX_SURPASS_R3_INVARIANTS PASS · safe-area + touch/mobile containment absorbed into current authority');
