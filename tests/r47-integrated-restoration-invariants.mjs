@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8'),must=(x,m)=>{if(!x)throw new Error(`R47 integrated restoration invariant failed: ${m}`)};
+const build=read('src/WovenBuildOutPanel.tsx'),plugins=read('src/PluginRegistryR45.tsx'),data=read('src/OmegaDataLexiconR46.tsx'),living=read('src/OmegaR36LivingSurfaces.tsx'),pack=read('src/RecoveryPackagingR47.tsx'),css=read('src/extremeRestorationR46.css');
+for(const token of ["import MicroBuildR46 from './MicroBuildR46'","import RecoveryPackagingR47 from './RecoveryPackagingR47'",'<MicroBuildR46 record={r} address={address}/>','<RecoveryPackagingR47 record={r} address={address}/>'])must(build.includes(token),`Build Out integration missing ${token}`);
+for(const token of ["import OmegaDataLexiconR46 from './OmegaDataLexiconR46'","data-lexicon-adapter","<OmegaDataLexiconR46/>"])must(plugins.includes(token),`Plugins data/lexicon integration missing ${token}`);
+for(const token of ["onNavigate?:(p:string)=>void","localState.write('omega.v6.panel',p)","window.location.reload()"] )must(data.includes(token),`integrated lexicon route fallback missing ${token}`);
+for(const token of ["import BiologicalTraversalR46 from './BiologicalTraversalR46'","import CinematicFieldRendererR46 from './CinematicFieldRendererR46'","<BiologicalTraversalR46 address={address} onAddress={onAddress}/>","<CinematicFieldRendererR46 record={r} address={address}/>"])must(living.includes(token),`deep specialist integration missing ${token}`);
+for(const token of ['OMEGA_RECOVERY_PACKAGE_R47','crypto.subtle.digest','SHA-256','safeTarget','OMEGA_BROWSER_RECOVERY_R47','DEVICE_PROOF_REQUIRED','Browser runtime cannot mutate the deployed Worker'])must(pack.includes(token),`recovery/packaging contract missing ${token}`);
+must(pack.includes("x.operation!=='REMOVE'")&&pack.includes('uniqueTargets'),'package validation checks missing');
+for(const bad of ['@appdeploy/client','self-installing executable','browser patches github'])must(![build,plugins,data,living,pack,css].join('\n').toLowerCase().includes(bad.toLowerCase()),`unsupported capability/dependency ${bad}`);
+must(css.includes('.r47-recovery-packaging')&&css.includes('@media(max-width:520px)'),'R47 responsive package controls missing');
+console.log('R47 INTEGRATED RESTORATION PASS · R46 tools bound into Matter/Visual/Plugins/Build Out · S11/S20/S23 patch-recovery-package control restored with native execution gated');
