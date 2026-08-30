@@ -21,11 +21,12 @@ async function releaseEvidence(request,env){
     schema:'OMEGA_RELEASE_EVIDENCE_V1',
     canonicalUrl:CANONICAL_URL,
     source:receipt.ok?receipt.data?.source||null:null,
+    promotionLineage:receipt.ok?receipt.data?.promotion||null:null,
     packageReceipt:receipt.ok?{schema:receipt.data?.schema||null,receiptSha256:receipt.data?.receiptSha256||null,state:receipt.data?.state||null,workflow:receipt.data?.workflow||null}:null,
     runtimeVersion:metadata?{id:String(metadata.id||''),tag:metadata.tag?String(metadata.tag):null,timestamp:metadata.timestamp?String(metadata.timestamp):null}:null,
     runtimeAuthority:{cloudflareVersionMetadata:metadata?'RETURNED':'UNAVAILABLE',publicWorkerMutationAuthority:false},
     externalGates:{candidateQa:'EXTERNAL_GITHUB_EVIDENCE_REQUIRED',postDeployVerification:'EXTERNAL_FIRST_HAND_PROBE_REQUIRED',rollback:'EXTERNAL_RELEASE_LEDGER_REQUIRED'},
-    truthBoundary:'This read-only endpoint binds the packaged source receipt to the Cloudflare version currently executing this response. Candidate QA, post-deploy verification, merge ancestry, and rollback remain external governed evidence and are never invented by the public Worker.'
+    truthBoundary:'This read-only endpoint binds packaged source and verified merge-parent lineage, when present in the governed receipt, to the Cloudflare version currently executing this response. Candidate QA and post-deploy verification remain external governed evidence and are never invented by the public Worker.'
   };
   const evidenceSha256=await sha256(core);
   return json({...core,evidenceSha256,returnedAt:new Date().toISOString()});
