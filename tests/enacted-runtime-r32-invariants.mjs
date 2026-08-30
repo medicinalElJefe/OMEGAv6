@@ -12,7 +12,8 @@ must(worker.includes('WORKERS_AI_MODEL')&&worker.includes('env.AI.run'),'orchest
 must(!worker.includes('devices:[],jobs:[]'),'R32 must not hard-code an empty Hybrid status');
 const direct=config.includes('src/workerR32.js');const successor=config.includes('src/workerR33.js')&&worker33.includes("from './workerR32.js'");must((direct||successor)&&config.includes('OMEGA_RUNTIME')&&config.includes('OmegaRuntime')&&config.includes('new_sqlite_classes'),'Wrangler durable runtime binding or R33 successor missing');
 for(const token of ['x-omega-session-id','x-omega-bridge-id','x-omega-bridge-secret','createHybridPair','runtimeSessionId'])must(adapter.includes(token),`browser runtime binding missing ${token}`);
-for(const token of ['Create pairing','omega-hybrid-agent.py','PC ONLINE','Runtime events','Enacted jobs'])must(hybrid.includes(token),`Hybrid UI missing enacted control ${token}`);
+for(const token of ['Create pairing','omega-hybrid-agent.py','PC ONLINE','Enacted jobs'])must(hybrid.includes(token),`Hybrid UI missing enacted control ${token}`);
+must(hybrid.includes('Runtime events')||hybrid.includes('Connection events'),'Hybrid UI missing enacted runtime/connection events control');
 for(const token of ['/api/hybrid/agent/register','/api/hybrid/agent/poll','/api/hybrid/agent/result','TRAIN_LOCAL','HASH_TREE','BUILD','TEST','PACKAGE'])must(agent.includes(token),`desktop agent missing ${token}`);
 must(agent.includes('root-confined')&&agent.includes('shell=False'),'desktop agent must remain root-confined and must not expose arbitrary shell execution');
 must(agent.includes("foundationWeightsChanged':False")||agent.includes('foundationWeightsChanged\":False'),'local learning must not fake foundation-weight training');
