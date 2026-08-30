@@ -1,0 +1,59 @@
+/* R42 — mobile Matter/Visual Instrument rebuild.
+   The computation must fit the human viewport; mobile is not a cropped desktop poster. */
+@media (max-width: 720px){
+  .visual-instrument-app{min-width:0!important;overflow-x:hidden!important;padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
+  .visual-instrument-app .special-head{padding:12px 14px 9px!important;min-height:0!important}
+  .visual-instrument-app .special-head>div:first-child>span{display:none!important}
+  .visual-instrument-app .special-head h2{font-size:17px!important;letter-spacing:.02em!important;margin:0!important}
+  .visual-instrument-app .special-status{font-size:10px!important}
+
+  /* Advanced compiler controls remain available but stop consuming the initial viewport. */
+  .visual-instrument-app .depth-ribbon,
+  .visual-instrument-app .compiler-lineage-tabs,
+  .visual-instrument-app .spine-view-tabs,
+  .visual-instrument-app .lens-tabs{display:flex!important;overflow-x:auto!important;overscroll-behavior-x:contain;scroll-snap-type:x proximity;gap:6px!important;padding:6px 10px!important;min-height:0!important;scrollbar-width:none}
+  .visual-instrument-app .depth-ribbon::-webkit-scrollbar,
+  .visual-instrument-app .compiler-lineage-tabs::-webkit-scrollbar,
+  .visual-instrument-app .spine-view-tabs::-webkit-scrollbar,
+  .visual-instrument-app .lens-tabs::-webkit-scrollbar{display:none}
+  .visual-instrument-app .depth-ribbon button,
+  .visual-instrument-app .compiler-lineage-tabs button,
+  .visual-instrument-app .spine-view-tabs button,
+  .visual-instrument-app .lens-tabs button{flex:0 0 auto!important;min-width:max-content!important;scroll-snap-align:start;padding:7px 10px!important}
+  .visual-instrument-app .compiler-lineage-tabs button small,
+  .visual-instrument-app .depth-ribbon button small{display:none!important}
+
+  /* The field is the primary instrument. Keep it inside one phone screen and remove desktop poster proportions. */
+  .visual-instrument-app .visual-stage.semantic-depth-stage{height:clamp(330px,52svh,520px)!important;min-height:330px!important;max-height:520px!important;margin:4px 8px 8px!important;border-radius:18px!important;overflow:hidden!important;contain:layout paint}
+  .visual-instrument-app .visual-stage canvas{width:100%!important;height:100%!important;display:block!important;touch-action:manipulation}
+  .visual-instrument-app .depth-hud{top:10px!important;left:10px!important;right:auto!important;max-width:48%!important;padding:7px 9px!important;background:rgba(2,6,9,.72)!important;backdrop-filter:blur(8px)}
+  .visual-instrument-app .depth-hud small{display:none!important}
+  .visual-instrument-app .visual-equation{left:10px!important;right:10px!important;bottom:10px!important;max-width:none!important;padding:7px 9px!important;background:rgba(2,6,9,.78)!important;backdrop-filter:blur(8px)}
+  .visual-instrument-app .visual-equation p,.visual-instrument-app .visual-equation small{display:none!important}
+
+  /* Human route first: NOW → admitted next → closure, with details following below. */
+  .visual-instrument-app .trajectory-summary{margin:0 8px 8px!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;padding:8px!important}
+  .visual-instrument-app .trajectory-summary>div{min-width:0!important;padding:7px!important}
+  .visual-instrument-app .trajectory-summary>small{grid-column:1/-1!important;font-size:9px!important;line-height:1.35!important}
+  .visual-instrument-app .omega-motion-skins{margin:0 8px 8px!important;min-width:0!important;overflow:hidden!important}
+  .visual-instrument-app .omega-motion-skins header{padding:9px 10px!important}
+  .visual-instrument-app .omega-motion-skins header small{display:none!important}
+  .visual-instrument-app .omega-motion-skins .oms-stage{overflow-x:auto!important}
+  .visual-instrument-app .omega-motion-skins .oms-stage svg{min-width:760px!important;height:auto!important}
+  .visual-instrument-app .omega-motion-skins .oms-steps{display:flex!important;overflow-x:auto!important;gap:6px!important;padding:7px!important;scroll-snap-type:x proximity}
+  .visual-instrument-app .omega-motion-skins .oms-steps button{flex:0 0 148px!important;scroll-snap-align:start!important}
+  .visual-instrument-app .omega-motion-skins footer{font-size:9px!important;line-height:1.35!important;padding:8px 10px!important}
+
+  .visual-instrument-app .execution-spine{margin:0 8px 8px!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+  .visual-instrument-app .execution-spine>div{min-width:0!important;padding:8px!important}
+  .visual-instrument-app .instrument-controls.depth-controls{margin:0 8px 8px!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;padding:8px!important}
+  .visual-instrument-app .instrument-controls.depth-controls button,
+  .visual-instrument-app .instrument-controls.depth-controls label{min-width:0!important;width:100%!important;justify-content:center!important}
+  .visual-instrument-app .instrument-controls.depth-controls>span{grid-column:1/-1!important}
+  .visual-instrument-app .depth-boundary{margin:0 8px!important;font-size:9px!important;line-height:1.35!important}
+}
+
+@media (max-width: 420px){
+  .visual-instrument-app .visual-stage.semantic-depth-stage{height:48svh!important;min-height:310px!important}
+  .visual-instrument-app .execution-spine{grid-template-columns:1fr!important}
+}
