@@ -1,0 +1,15 @@
+import {useMemo,useState} from 'react';
+import {Copy,Download,Languages,ShieldCheck} from 'lucide-react';
+import {SEMANTIC_EXPRESSIONS,SEMANTIC_LANGUAGE_BOUNDARY,SEMANTIC_LANGUAGE_LAW,compileSemanticPacket,type SemanticExpression} from './semanticPacketLanguage';
+import './semanticLanguageR46.css';
+
+const copy=async(text:string)=>{try{await navigator.clipboard.writeText(text)}catch{const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}};
+const download=(packet:any)=>{const u=URL.createObjectURL(new Blob([JSON.stringify(packet,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=`OMEGA_SEMANTIC_PACKET_STATE_${packet.facts.stateId}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+export default function SemanticLanguagePanelR46({record}:{record:any}){const[view,setView]=useState<SemanticExpression>('HUMAN'),[copied,setCopied]=useState(false);const packet=useMemo(()=>compileSemanticPacket(record),[record]);const text=packet.expressions[view];return <section className='semantic-language-r46'>
+ <header><div><span>S18 · SEMANTIC_PACKET_LANGUAGE · SOURCE ACTIVE</span><h3>Universal Language / Lexicon Engine</h3></div><Languages/></header>
+ <div className='semantic-law'><ShieldCheck/><div><b>{SEMANTIC_LANGUAGE_LAW}</b><span>{SEMANTIC_LANGUAGE_BOUNDARY}</span></div></div>
+ <div className='semantic-tabs'>{SEMANTIC_EXPRESSIONS.map(x=><button key={x} className={view===x?'active':''} onClick={()=>setView(x)}>{x}</button>)}</div>
+ <div className='semantic-output'><header><div><span>{view} EXPRESSION</span><b>STATE {packet.facts.stateId} · {packet.proofState} EVIDENCE</b></div><div><button onClick={()=>{void copy(text);setCopied(true);setTimeout(()=>setCopied(false),1200)}}><Copy/>{copied?'Copied':'Copy'}</button><button onClick={()=>download(packet)}><Download/>Packet JSON</button></div></header><pre>{text}</pre></div>
+ <div className='semantic-grid'><article><span>Pattern</span><b>{packet.pattern}</b><small>Decoded only from canonical D/P/R/L address labels.</small></article><article><span>Operator family</span><b>{packet.action}</b><small>{packet.facts.decision} remains upstream decision authority.</small></article><article><span>Core packet</span><b>CΩ {packet.facts.continuity===null?'—':packet.facts.continuity.toFixed(3)} · Φ {packet.facts.plasticity===null?'—':packet.facts.plasticity.toFixed(3)}</b><small>q {packet.facts.contradiction===null?'—':packet.facts.contradiction.toFixed(3)} · Λ {packet.facts.burden===null?'—':packet.facts.burden.toFixed(3)}</small></article><article><span>Route relation</span><b>next {packet.facts.sourceNext??'—'}</b><small>Language may describe the route; it cannot execute or rewrite it.</small></article></div>
+ <footer><ShieldCheck/><span>Deterministic browser/source translation. No model provider is required. External AI may elaborate downstream only if it preserves this packet and its unknowns.</span></footer>
+ </section>}
