@@ -22,6 +22,7 @@ import './deepInteractionR39_2.css';
 import './mobileMatterR42.css';
 import './sovereignDesignR59.css';
 import './instrumentOSR62.css';
+import './productResetR67.css';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import OmegaHomeR59 from './OmegaHomeR59';
 const OmegaWorkstation=lazy(()=>import('./OmegaWorkstationFullV2'));
