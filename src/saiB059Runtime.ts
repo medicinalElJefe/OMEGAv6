@@ -58,7 +58,7 @@ export function compileSaiImprovementProposal(record:any,modeSummary?:{appliedCo
  targets.push({area:'VISUAL_DEPTH',reason:'Multiple projections must reveal different lawful aspects of the same state.',acceptance:'Field, forecast, relativity, motion and scale/proof views remain synchronized to one canonical address.'});
  if(gated>0)targets.push({area:'MODE_EXECUTION',reason:'Catalog membership must not impersonate executable computation.',acceptance:'Every visible mode is classified applied, packet-derived, or gated with missing inputs.'});
  targets.push({area:'SELF_IMPROVEMENT',reason:'Improvement claims require an auditable source change and accepted release evidence.',acceptance:'Proposal → governed code change → full QA → deploy → public verification receipt; no silent mutation.'});
- const priority:k['decision'] extends never?never:'STABILIZE'|'REPAIR'|'ADVANCE'=k.decision==='ESCALATE'?'STABILIZE':k.decision==='TURN'?'REPAIR':'ADVANCE';
+ const priority:'STABILIZE'|'REPAIR'|'ADVANCE'=k.decision==='ESCALATE'?'STABILIZE':k.decision==='TURN'?'REPAIR':'ADVANCE';
  return{schema:'OMEGA_SAI_GOVERNED_IMPROVEMENT_PROPOSAL_V1',proposalId:`SAI-${record?.stateId??record?.address??0}-${priority}`,stateId:Number(record?.stateId??0),address:Number(record?.address??0),decision:k.decision,priority,observations,targets,workflow:SAI_IMPROVEMENT_WORKFLOW,executionBoundary:'BROWSER_SAI_PROPOSES_AND_LEDGERS_ONLY__GITHUB_RELEASE_PIPELINE_EXECUTES_SOURCE_CHANGES'};
 }
 
