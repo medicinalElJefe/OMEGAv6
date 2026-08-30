@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
-"""OMEGA R32 local Hybrid Link agent.
+"""OMEGA R33 local Hybrid Link agent.
 
 Stdlib-first, root-confined, allow-listed execution. It never exposes arbitrary shell access.
 Pairing is explicit. Every claimed native action returns bounded proof to the canonical Worker.
+R33 adds an atomic, preimage-hash-bound text patch operation with an automatic local backup.
 """
 from __future__ import annotations
 import argparse, hashlib, json, os, platform, re, socket, subprocess, sys, time, urllib.error, urllib.request, uuid, zipfile
 from pathlib import Path
 
-VERSION='R32.1'
+VERSION='R33.0'
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
 TEXT_EXT={'.txt','.md','.json','.jsonc','.js','.jsx','.ts','.tsx','.py','.pyw','.css','.html','.yml','.yaml','.toml','.ini','.cfg','.csv','.bat','.ps1','.cs','.csproj','.sln'}
 SKIP_DIRS={'.git','node_modules','dist','build','.venv','venv','__pycache__','.wrangler','.omega_hybrid'}
 MAX_FILES=25000
 MAX_FILE_BYTES=8*1024*1024
+MAX_PATCH_BYTES=512*1024
+MAX_PATCH_REPLACEMENTS=24
 
 class AgentError(RuntimeError): pass
 
@@ -71,7 +74,7 @@ def hash_tree(path:Path):
 def read_text(path:Path):
     if not path.is_file(): raise AgentError('READ_TEXT requires a file.')
     if path.stat().st_size>MAX_FILE_BYTES: raise AgentError('File exceeds bounded text-read size.')
-    return {'path':path.name,'text':path.read_text('utf-8','replace')[:120000]}
+    data=path.read_bytes(); return {'path':path.name,'sha256':sha_bytes(data),'bytes':len(data),'text':data.decode('utf-8','replace')[:120000]}
 
 def search_text(path:Path,query:str,max_results=120):
     terms=[x.lower() for x in re.findall(r'[A-Za-z0-9_.-]{2,}',query or '')][:12]
@@ -121,6 +124,43 @@ def package_path(path:Path,root:Path):
         for p in iter_files(path): z.write(p,p.relative_to(path).as_posix())
     return {'path':out.relative_to(root).as_posix(),'sha256':sha_bytes(out.read_bytes()),'bytes':out.stat().st_size}
 
+def apply_patch(path:Path,root:Path,step:dict):
+    if not path.is_file() or path.is_symlink(): raise AgentError('APPLY_PATCH requires a regular text file inside the approved root.')
+    if path.suffix.lower() not in TEXT_EXT: raise AgentError('APPLY_PATCH is limited to allow-listed text/source extensions.')
+    raw=path.read_bytes()
+    if len(raw)>MAX_PATCH_BYTES: raise AgentError('APPLY_PATCH file exceeds the 512 KiB bounded patch limit.')
+    expected=str(step.get('expectedSha256','')).lower()
+    if not re.fullmatch(r'[0-9a-f]{64}',expected): raise AgentError('APPLY_PATCH requires expectedSha256 from a prior READ_TEXT/HASH proof.')
+    before=sha_bytes(raw)
+    if before!=expected: raise AgentError(f'APPLY_PATCH preimage mismatch: expected {expected}, observed {before}.')
+    try: source=raw.decode('utf-8')
+    except UnicodeDecodeError: raise AgentError('APPLY_PATCH requires valid UTF-8 source.')
+    replacements=step.get('replacements')
+    if not isinstance(replacements,list) or not 1<=len(replacements)<=MAX_PATCH_REPLACEMENTS: raise AgentError('APPLY_PATCH requires 1-24 exact replacements.')
+    changed=source; applied=[]
+    for idx,row in enumerate(replacements,1):
+        if not isinstance(row,dict): raise AgentError(f'APPLY_PATCH replacement {idx} is invalid.')
+        find=row.get('find'); replace=row.get('replace'); occurrences=int(row.get('occurrences',1))
+        if not isinstance(find,str) or not find: raise AgentError(f'APPLY_PATCH replacement {idx} requires non-empty find text.')
+        if not isinstance(replace,str): raise AgentError(f'APPLY_PATCH replacement {idx} requires replacement text.')
+        if len(find.encode())+len(replace.encode())>128*1024: raise AgentError(f'APPLY_PATCH replacement {idx} exceeds bounded size.')
+        observed=changed.count(find)
+        if observed!=occurrences: raise AgentError(f'APPLY_PATCH replacement {idx} expected {occurrences} exact match(es), observed {observed}.')
+        changed=changed.replace(find,replace,occurrences); applied.append({'index':idx,'occurrences':occurrences})
+    after_bytes=changed.encode('utf-8')
+    if after_bytes==raw: raise AgentError('APPLY_PATCH produced no change.')
+    rel=path.relative_to(root)
+    backup=root/'.omega_hybrid'/'backups'/(time.strftime('%Y%m%d_%H%M%S')+'_'+uuid.uuid4().hex[:8])/rel
+    backup.parent.mkdir(parents=True,exist_ok=True); backup.write_bytes(raw)
+    tmp=path.with_name(path.name+'.omega_patch_'+uuid.uuid4().hex+'.tmp')
+    try:
+        tmp.write_bytes(after_bytes); os.replace(tmp,path)
+    finally:
+        try:
+            if tmp.exists(): tmp.unlink()
+        except OSError: pass
+    return {'path':rel.as_posix(),'beforeSha256':before,'afterSha256':sha_bytes(after_bytes),'backupPath':backup.relative_to(root).as_posix(),'replacementsApplied':applied,'atomic':True}
+
 def train_local(path:Path,root:Path):
     docs=[];freq={}
     for p in iter_files(path):
@@ -132,9 +172,9 @@ def train_local(path:Path,root:Path):
         digest=sha_bytes(txt.encode());docs.append({'path':p.relative_to(path).as_posix(),'sha256':digest,'tokens':len(words)})
         for w in set(words):freq[w]=freq.get(w,0)+1
     terms=sorted(freq.items(),key=lambda x:(-x[1],x[0]))[:3000]
-    payload={'schema':'OMEGA_SAI_LOCAL_RETRIEVAL_INDEX_R32','createdAt':time.time(),'root':path.relative_to(root).as_posix() if path!=root else '.', 'documents':docs[:25000],'documentCount':len(docs),'termDocumentFrequency':terms,'foundationWeightsChanged':False}
+    payload={'schema':'OMEGA_SAI_LOCAL_RETRIEVAL_INDEX_R33','createdAt':time.time(),'root':path.relative_to(root).as_posix() if path!=root else '.', 'documents':docs[:25000],'documentCount':len(docs),'termDocumentFrequency':terms,'foundationWeightsChanged':False}
     payload['indexSha256']=sha_json(payload)
-    d=root/'.omega_hybrid';d.mkdir(parents=True,exist_ok=True);out=d/'sai_index_r32.json';out.write_text(json.dumps(payload,indent=2),'utf-8')
+    d=root/'.omega_hybrid';d.mkdir(parents=True,exist_ok=True);out=d/'sai_index_r33.json';out.write_text(json.dumps(payload,indent=2),'utf-8')
     eval_status='PASS' if len(docs)>0 else 'HOLD_NO_DOCUMENTS'
     return {'indexPath':out.relative_to(root).as_posix(),'indexSha256':payload['indexSha256'],'documents':len(docs),'evaluation':{'status':eval_status},'promotion':{'status':'ACTIVE_LOCAL_RETRIEVAL_INDEX' if eval_status=='PASS' else 'HELD'},'foundationWeightsChanged':False}
 
@@ -144,6 +184,7 @@ def execute_step(step,root:Path):
     if op=='HASH_TREE': return hash_tree(path)
     if op=='READ_TEXT': return read_text(path)
     if op=='SEARCH_TEXT': return search_text(path,str(step.get('query','')),int(step.get('maxResults',120)))
+    if op=='APPLY_PATCH': return apply_patch(path,root,step)
     if op in {'BUILD','TEST'}: return run_declared(path,op,str(step.get('profile','AUTO_BUILD')))
     if op=='PACKAGE': return package_path(path,root)
     if op=='TRAIN_LOCAL': return train_local(path,root)
@@ -153,11 +194,11 @@ def execute_step(step,root:Path):
     if op=='WAIT': time.sleep(max(.1,min(30,float(step.get('milliseconds',1000))/1000)));return {'waitedMs':step.get('milliseconds',1000)}
     if op=='OPEN_URL':
         import webbrowser
-        url=str(step.get('url','')); 
+        url=str(step.get('url',''))
         if not url.startswith('https://'): raise AgentError('Only HTTPS URLs are allowed.')
         return {'opened':bool(webbrowser.open(url)),'url':url}
-    if op in {'CLICK','KEY','TYPE_TEXT','SCROLL','ASSERT_WINDOW','READ_VISIBLE_TEXT','RECORD_MACRO','REPLAY_MACRO','APPLY_PATCH'}:
-        raise AgentError(f'{op} requires the optional signed desktop automation/patch adapter; this stdlib agent will not pretend it executed it.')
+    if op in {'CLICK','KEY','TYPE_TEXT','SCROLL','ASSERT_WINDOW','READ_VISIBLE_TEXT','RECORD_MACRO','REPLAY_MACRO'}:
+        raise AgentError(f'{op} requires the optional signed desktop automation adapter; this stdlib agent will not pretend it executed it.')
     raise AgentError('Unsupported operation '+op)
 
 def execute_job(job,root:Path):
@@ -167,6 +208,7 @@ def execute_job(job,root:Path):
         try:
             result=execute_step(step,root);proof.update({'ok':True,'result':result,'completedAt':time.time()})
             if isinstance(result,dict) and result.get('path'):outputs.append(result['path'])
+            if isinstance(result,dict) and result.get('backupPath'):outputs.append(result['backupPath'])
             if step.get('op')=='TRAIN_LOCAL':evaluation=result.get('evaluation');promotion=result.get('promotion');outputs.append(result.get('indexPath'))
         except Exception as e:
             ok=False;proof.update({'ok':False,'error':str(e)[:12000],'completedAt':time.time()});logs.append(str(e));proofs.append(proof);break
@@ -176,7 +218,7 @@ def execute_job(job,root:Path):
     return packet
 
 def main():
-    ap=argparse.ArgumentParser(description='OMEGA R32 Hybrid Link local agent')
+    ap=argparse.ArgumentParser(description='OMEGA R33 Hybrid Link local agent')
     ap.add_argument('--server',default=DEFAULT_SERVER);ap.add_argument('--pair',required=True,help='pairing code from OMEGA Hybrid Link')
     ap.add_argument('--root',default='.',help='approved local root; all file/process work stays inside it')
     ap.add_argument('--once',action='store_true',help='poll once, then exit')
@@ -184,7 +226,7 @@ def main():
     state_dir=root/'.omega_hybrid';state_dir.mkdir(exist_ok=True);id_file=state_dir/'device_id.txt'
     device_id=id_file.read_text().strip() if id_file.exists() else 'device_'+uuid.uuid4().hex
     id_file.write_text(device_id)
-    caps=['TRAIN_LOCAL','INDEX','READ_TEXT','SEARCH_TEXT','HASH_TREE','SAFE_IMPORT','BUILD','TEST','PACKAGE','SUPPORT_BUNDLE','OPEN_URL','WAIT']
+    caps=['TRAIN_LOCAL','INDEX','READ_TEXT','SEARCH_TEXT','HASH_TREE','SAFE_IMPORT','BUILD','TEST','PACKAGE','SUPPORT_BUNDLE','APPLY_PATCH','OPEN_URL','WAIT']
     payload={'bridgeId':bridge_id,'deviceId':device_id,'name':socket.gethostname(),'platform':platform.platform(),'version':VERSION,'capabilities':caps,'rootLabel':root.name}
     print('OMEGA Hybrid Link agent',VERSION);print('Approved root:',root);print('Registering with',server)
     request_json(server,'/api/hybrid/agent/register',payload,bridge_id,secret)

@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR32.js",
+  "main": "src/workerR33.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
