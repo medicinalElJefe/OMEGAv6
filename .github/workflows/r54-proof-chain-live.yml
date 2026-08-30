@@ -1,0 +1,48 @@
+name: OMEGA R54 Proof Chain Live Verify
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-proof-chain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for exact R54 chain verifier and prove tamper detection
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const packet=(address,c=.7)=>({address,stateId:address+1,identity:{domain:'Structure'},metrics:{continuity:c,plasticity:.6,contradiction:.1,burden:.2,decision:'STAY'},psc:{phase:1},predict:{score:.5},autoPing:{next:address+1}});
+          async function post(path,body){const r=await fetch(base+path,{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)});const raw=await r.text();let data={};try{data=JSON.parse(raw)}catch{}return{r,raw,data}}
+          let last='';
+          for(let attempt=1;attempt<=24;attempt++){
+            try{
+              const a=await post('/api/proof/delta',{current:{packet:packet(21),projection:{view:'FIELD',frameHash:'r54-a'}}});
+              if(!a.r.ok||a.data.schema!=='OMEGA_DELTA_MESH_R53')throw new Error(`R53 prerequisite unavailable: ${a.raw.slice(0,220)}`);
+              const b=await post('/api/proof/delta',{previous:{packet:packet(21),projection:{view:'FIELD',frameHash:'r54-a'}},current:{packet:packet(21,.84),projection:{view:'FIELD',frameHash:'r54-b'}},previousCheckpointHash:a.data.checkpointHash});
+              if(!b.r.ok||b.data.mode!=='DELTA')throw new Error('R53 delta prerequisite failed');
+              const segment=[
+                {mode:a.data.mode,baseHash:a.data.baseHash,currentHash:a.data.currentHash,deltaHash:a.data.deltaHash,snapshotHash:a.data.snapshotHash,checkpointHash:a.data.checkpointHash,changedComponents:a.data.changedComponents,patchCount:a.data.patches?.length||0,resynced:false},
+                {mode:b.data.mode,baseHash:b.data.baseHash,currentHash:b.data.currentHash,deltaHash:b.data.deltaHash,snapshotHash:b.data.snapshotHash,checkpointHash:b.data.checkpointHash,changedComponents:b.data.changedComponents,patchCount:b.data.patches?.length||0,resynced:false}
+              ];
+              const good=await post('/api/proof/chain',{segment});
+              if(!good.r.ok||good.data.schema!=='OMEGA_SUPERVISED_PROOF_CHAIN_R54'||good.data.health!=='COHERENT')throw new Error(`R54 old/missing or chain rejected: ${good.raw.slice(0,300)}`);
+              if(String(good.data.segmentHash||'').length!==64||good.data.recomputed?.some(x=>x.match!==true))throw new Error('R54 deterministic checkpoint recomputation incomplete');
+              const tampered=JSON.parse(JSON.stringify(segment));tampered[1].checkpointHash='0'.repeat(64);
+              const bad=await post('/api/proof/chain',{segment:tampered});
+              if(bad.r.status!==422||bad.data.health!=='REGRESSION_DETECTED'||!bad.data.errors?.some(x=>String(x).includes('failed deterministic recomputation')))throw new Error('R54 public endpoint failed tamper detection');
+              if(good.data.proof?.authority!=='NON_AUTHORITATIVE_CHAIN_VERIFIER'||good.data.proof?.receivedNotObserved!==true||good.data.proof?.checkpointRecomputation!==true)throw new Error('R54 truth boundary regressed');
+              console.log(`R54 LIVE PROOF CHAIN PASS · segment ${good.data.segmentHash} · ${good.data.receiptCount} receipts · attempt ${attempt}`);
+              process.exit(0);
+            }catch(e){last=String(e);console.log(`R54 wait ${attempt}: ${last}`);await sleep(5000)}
+          }
+          throw new Error(`R54 public proof-chain verification failed: ${last}`);
+          NODE
