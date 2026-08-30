@@ -3,6 +3,8 @@ const home=fs.readFileSync('src/OmegaHome.tsx','utf8');
 const phase=fs.readFileSync('src/PhaseWheel.tsx','utf8');
 const modeRuntime=fs.readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
 const css=fs.readFileSync('src/experienceR4.css','utf8');
+const r56=fs.readFileSync('src/omegaLaunchR56.css','utf8');
+const shell=fs.readFileSync('src/SingleFrameRuntimeShellR27.tsx','utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 must(home.includes('corpusState,decodeAddress,initCorpusPack'),'home must bind canonical corpus runtime');
 must(home.includes('sourceBackedModeSummary'),'home must bind source-backed calculus mode evaluation');
@@ -23,4 +25,13 @@ const quick=home.match(/const QUICK=\[(.*?)\] as const;/s)?.[1]||'';must(!quick.
 must(home.includes('OPEN FULL WORKSTATION'),'home must hand off to complete workstation navigation');
 must(home.includes("aria-label='OMEGA source-bound visual start field'"),'home instrument needs explicit accessible semantic label');
 for(const selector of ['.r4-welcome','.r4-journeys','.r4-conversation','.r4-truth-strip'])must(css.includes(selector),`R4 home hierarchy missing ${selector}`);
-console.log('HOME_INSTRUMENT_INVARIANTS R25 PASS · source-backed calculus + operational quick navigation');
+// R56 product-level acceptance: the stale startup is retired and all registered surfaces are reachable from the real launcher.
+must(home.includes("import './omegaLaunchR56.css'"),'R56 launch authority stylesheet must be mounted by OmegaHome');
+must(!home.includes('Don’t open a dashboard.')&&!home.includes("Don't open a dashboard."),'obsolete R38 dashboard slogan must not remain in the startup product');
+for(const token of ['One sovereign environment.','OMEGA SYSTEM LAUNCHER','ALL SYSTEMS','B015 live-state spine','/api/live-state-spine'])must(home.includes(token),`R56 launch environment missing ${token}`);
+const registered=(shell.match(/R27_REGISTERED_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
+const routes=[...registered.matchAll(/'([^']+)'/g)].map(x=>x[1]);must(routes.length===44,'R56 expects the authoritative 44-route workstation registry');
+for(const route of routes)must(home.includes(`'${route}'`),`R56 startup launcher does not expose registered route ${route}`);
+for(const token of ['.r56-hero','.r56-primary','.r56-launcher','.r56-route-grid','@media(max-width:760px)','prefers-reduced-motion'])must(r56.includes(token),`R56 responsive launch styling missing ${token}`);
+must(!r56.includes('@appdeploy/client')&&!r56.includes('appdeploy.ai'),'R56 startup must remain portable and AppDeploy-free');
+console.log('HOME_INSTRUMENT_INVARIANTS R56 PASS · sovereign launch + source-backed calculus + 44-route access');

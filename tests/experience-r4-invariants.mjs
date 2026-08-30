@@ -14,7 +14,7 @@ if(!phase.includes('1728*coords.d+144*p+12*coords.r+coords.l'))throw new Error('
 if(!phase.includes('Selecting a phase changes the real OMEGA address'))throw new Error('phase truth boundary missing');
 if(!home.includes('SOURCE-BACKED MODES')||!home.includes('sourceBackedModeSummary'))throw new Error('home must expose source-backed mode evaluation rather than catalog-as-execution');
 if(!home.includes("modePolicy:'SOURCE_BACKED_ALL_AVAILABLE'")||!work.includes("modePolicy:'SOURCE_BACKED_ALL_AVAILABLE'"))throw new Error('every lawful source-backed mode with authoritative inputs must be active by default');
-if(!modeRuntime.includes('GATED_MISSING_INPUTS')||!home.includes('catalog membership is not execution'))throw new Error('missing-input mode gating / truth boundary missing');
+if(!modeRuntime.includes('GATED_MISSING_INPUTS')||!home.includes('modes.appliedCount')||!home.includes('modes.gatedCount'))throw new Error('missing-input mode gating / applied-versus-gated truth boundary missing');
 if(home.includes('ALL MODES ACTIVE')||work.includes('ALL MODES REMAIN EXECUTED'))throw new Error('legacy blanket execution claim returned');
 if(!work.includes("api.post<any>('/api/route-preview'")||!work.includes("api.post<any>('/api/chat'"))throw new Error('route-before-chat sequence missing');
 if(work.indexOf("'/api/route-preview'")>work.indexOf("'/api/chat'"))throw new Error('route preview must occur before chat generation');
