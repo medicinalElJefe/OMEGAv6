@@ -29,7 +29,7 @@ export default function SomaAudioEngine({record}:Props){
  useEffect(()=>()=>{stopTimer();for(const lane of lanes.current){try{lane.osc.stop()}catch{}}lanes.current=[];void audio.current?.close();audio.current=null},[]);
  return <section className='soma-audio-r45' aria-label='Echo Chamber SOMA Audio Engine'>
   <header><div><span>S17 · PHASE_COHERENT_AUDIO · LOCAL WEB AUDIO</span><h3>Echo-Chamber / SOMA Audio Engine</h3></div><strong>{running?'LOCAL ACTIVE':'READY'}</strong></header>
-  <div className='soma-boundary'><ShieldCheck/><span><b>Sonification boundary.</b> The authoritative packet drives audible parameters; audio never changes canon state, evidence, route admission, or physical claims. Frequencies are an audible mapping, not measured frequencies of the represented system.</span></div>
+  <div className='soma-boundary'><ShieldCheck/><span><b>Sonification boundary.</b> The authoritative packet drives audible parameters; audio never changes canon state, evidence, route admission, or physical claims. Frequencies are an audible mapping, not measured frequencies of the represented system. Explicit user gesture is required before WebAudio starts.</span></div>
   <div className='soma-actions'><button className='primary' onClick={start}><Play/>Start audio</button><button onClick={toggleSequence}>{sequencing?<Pause/>:<Volume2/>}{sequencing?'Pause sequence':'Sequence 12 phases'}</button><button onClick={stop}><Square/>Stop</button><button onClick={syncFromPacket}><RotateCcw/>Sync source packet</button><label><input type='checkbox' checked={syncPacket} onChange={e=>setSyncPacket(e.target.checked)}/>follow packet</label></div>
   <div className='soma-lanes'>{LANE_META.map(([code,label],k)=><button key={code} className={activePhase===k?'active':''} onClick={()=>{setSyncPacket(false);setActivePhase(k)}}><code>{String(k+1).padStart(2,'0')}</code><span><b>{code}</b><small>{label}</small></span><em>{k*30}°</em></button>)}</div>
   <div className='soma-controls'>
@@ -39,6 +39,6 @@ export default function SomaAudioEngine({record}:Props){
    <label><span>Phase clock</span><input type='range' min='.5' max='12' step='.1' value={clockSeconds} onChange={e=>{setSyncPacket(false);setClockSeconds(+e.target.value)}}/><b>{clockSeconds.toFixed(1)} s</b></label>
   </div>
   <div className='soma-readout'><article><span>Source state</span><b>{record.stateId}</b><small>packet phase {packetP+1}/12</small></article><article><span>Active lane</span><b>{activePhase+1}/12 · {LANE_META[activePhase][0]}</b><small>{LANE_META[activePhase][1]}</small></article><article><span>CΩ / Φ</span><b>{packet.C.toFixed(3)} / {packet.Phi.toFixed(3)}</b><small>q {packet.q.toFixed(3)} · Λ {packet.L.toFixed(3)}</small></article><article><span>Signal chain</span><b>12 lanes → compressor → master</b><small>stereo pan = sin(φ) · gain = discrete lane halo</small></article></div>
-  <footer><span>{message}</span><small>Donor lineage: electric_bio_phase_engine_v1.html · software inventory S17. Browser user gesture is required by WebAudio policy.</small></footer>
+  <footer><span>{message}</span><small>Donor lineage: electric_bio_phase_engine_v1.html · software inventory S17. Explicit user gesture required by WebAudio policy.</small></footer>
  </section>
 }
