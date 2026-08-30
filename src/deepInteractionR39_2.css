@@ -1,0 +1,24 @@
+/* R39.2 material navigation repair: the computation owns the screen; the browser appears on intent. */
+@media (min-width:901px){
+  .r27-desktop-frame.r38-instrument-rail{width:112px!important;overflow:visible!important;padding:12px 8px!important;gap:10px!important;background:rgba(2,9,12,.97)!important;border-right:1px solid rgba(93,139,140,.24)!important}
+  .r27-desktop-frame.r38-instrument-rail .r27-domains{display:grid!important;gap:6px!important}
+  .r27-desktop-frame.r38-instrument-rail .r27-domains button{min-height:54px!important;padding:8px 6px!important;display:grid!important;grid-template-columns:24px 1fr!important;grid-template-rows:auto auto!important;align-items:center!important;text-align:left!important;border-radius:10px!important}
+  .r27-desktop-frame.r38-instrument-rail .r27-domains button>span{display:block!important;font-size:10px!important;font-weight:700!important;letter-spacing:.02em!important;white-space:nowrap!important}
+  .r27-desktop-frame.r38-instrument-rail .r27-domains button>i{display:block!important;grid-column:2!important;font:700 7px ui-monospace,monospace!important;opacity:.62!important}
+  .r27-desktop-frame.r38-instrument-rail .r32-desktop-actions{grid-template-columns:1fr!important}
+  .r27-desktop-frame.r38-instrument-rail .r32-desktop-actions button{min-height:40px!important;padding:8px!important}
+  .r27-desktop-frame.r38-instrument-rail .r32-desktop-actions button span small{display:none!important}
+  .r27-desktop-frame.r38-instrument-rail .r32-desktop-actions button span b{font-size:8px!important}
+  .r27-desktop-frame.r38-instrument-rail .r27-search{width:100%!important}
+  .r27-desktop-frame.r38-instrument-rail .r27-search label input{font-size:9px!important}
+  .r27-desktop-frame.r38-instrument-rail .r38-route-flyout{position:fixed!important;z-index:90!important;left:112px!important;top:94px!important;width:min(590px,calc(100vw - 132px))!important;max-height:calc(100vh - 116px)!important;overflow:auto!important;padding:16px!important;border:1px solid rgba(102,164,164,.34)!important;border-radius:0 16px 16px 0!important;background:rgba(3,12,16,.985)!important;box-shadow:24px 20px 70px rgba(0,0,0,.54)!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;transform:translateX(-14px)!important;transition:opacity .16s ease,transform .16s ease,visibility .16s!important}
+  .r27-desktop-frame.r38-instrument-rail:hover .r38-route-flyout,.r27-desktop-frame.r38-instrument-rail:focus-within .r38-route-flyout{opacity:1!important;visibility:visible!important;pointer-events:auto!important;transform:none!important}
+  .r38-route-flyout>div:last-child{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+  .r38-route-flyout .r27-route{min-height:58px!important;padding:10px 12px!important;border-radius:10px!important}
+  .r38-route-flyout .r27-route b{font-size:11px!important}
+  .r38-route-flyout .r27-route small{font-size:8px!important}
+  .r38-route-flyout>header b{font-size:16px!important;line-height:1.2!important}
+  .r38-route-flyout>header small{font-size:8px!important}
+  .omega-workstation-v2{padding-left:112px!important}
+}
+@media(max-width:900px){.r38-mobile-drawer{font-size:14px!important}.r38-mobile-drawer .r27-route b{font-size:13px!important}.r38-mobile-drawer .r27-route small{font-size:10px!important}.r33-all-tools[open] section>section{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}}
