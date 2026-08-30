@@ -11,3 +11,4 @@ assert(instrument.includes('HUMAN TRAJECTORY'),'accepted R14 human trajectory ex
 assert(css.includes('z-index:2')&&css.includes('pointer-events:none'),'continuous layer must dominate visually without breaking source picking');
 assert(!semantic.includes('@appdeploy/client')&&!overlay.includes('@appdeploy/client'),'renderer must remain sovereign/provider portable');
 console.log('PASS continuous-field-r13-invariants');
+await import('./calculus-visual-r37-invariants.mjs');
