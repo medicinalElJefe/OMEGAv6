@@ -1,0 +1,11 @@
+.system-atlas-r38{--sys-field-min:clamp(440px,62vh,760px)}
+.system-atlas-r38 .atlas-r38-stage{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(250px,.55fr);gap:12px;align-items:stretch;margin:2px 0 6px}
+.system-atlas-r38 .atlas-r38-field{min-width:0;min-height:var(--sys-field-min);border:1px solid rgba(116,190,180,.14);border-radius:16px;overflow:hidden;background:#020709;box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.system-atlas-r38 .atlas-r38-field .calculus-field-r37{min-height:var(--sys-field-min);height:100%}
+.system-atlas-r38 .atlas-r38-context{display:grid;align-content:start;gap:1px;border-left:1px solid rgba(126,183,177,.12);padding-left:12px}
+.system-atlas-r38 .atlas-r38-context article{display:grid;gap:4px;padding:12px 6px;border-bottom:1px solid rgba(130,178,174,.08);background:transparent}
+.system-atlas-r38 .atlas-r38-context article span{font:7px ui-monospace,monospace;letter-spacing:.12em;color:#71898b;text-transform:uppercase}.system-atlas-r38 .atlas-r38-context article b{font-size:12px;font-weight:560;color:#d7e4e1}.system-atlas-r38 .atlas-r38-context article small{font:8px/1.45 ui-monospace,monospace;color:#829598}
+.system-atlas-r38 .atlas-r1-kpis{grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;border:1px solid rgba(132,184,179,.1);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.015)}.system-atlas-r38 .atlas-r1-kpis article{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.system-atlas-r38 .capability-expression-r13,.system-atlas-r38 .atlas-r1-layout,.system-atlas-r38 .atlas-r1-menus{border-radius:14px}.system-atlas-r38 .atlas-r1-layout{margin-top:3px}
+@media(max-width:1050px){.system-atlas-r38 .atlas-r38-stage{grid-template-columns:1fr}.system-atlas-r38 .atlas-r38-context{grid-template-columns:repeat(3,minmax(0,1fr));border-left:0;border-top:1px solid rgba(126,183,177,.12);padding:8px 0 0}.system-atlas-r38 .atlas-r1-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){.system-atlas-r38{--sys-field-min:430px}.system-atlas-r38 .atlas-r38-context{grid-template-columns:1fr}.system-atlas-r38 .atlas-r1-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
