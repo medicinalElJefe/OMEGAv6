@@ -1,4 +1,11 @@
+import fs from 'node:fs';
 import {compileDeltaMeshR53} from '../src/workerDeltaMeshR53.js';
+const worker=fs.readFileSync('src/worker.js','utf8'),ui=fs.readFileSync('src/LiveStateSpineR50.tsx','utf8');
+if(!worker.includes("import {compileDeltaMeshR53} from './workerDeltaMeshR53.js'"))throw new Error('R53 Worker import missing');
+if(!worker.includes('url.pathname==="/api/proof/delta"'))throw new Error('R53 /api/proof/delta route missing');
+if(!ui.includes("omega.r53.delta.mesh.journal")||!ui.includes("slice(-188)"))throw new Error('R53 bounded 188-entry browser journal missing');
+if(!ui.includes("PREVIOUS_PACKET_INVALID")||!ui.includes("CHECKPOINT_HASH_INVALID")||!ui.includes("automatic stale-checkpoint resynchronization"))throw new Error('R53 stale checkpoint full-snapshot recovery missing');
+if(ui.includes('@appdeploy/client')||worker.includes('@appdeploy/client'))throw new Error('R53 reintroduced AppDeploy dependency');
 const packet=(address,continuity=.7)=>({address,stateId:address+1,identity:{domain:'Structure'},metrics:{continuity,plasticity:.6,contradiction:.1,burden:.2,decision:'STAY'},psc:{phase:1},predict:{score:.5},autoPing:{next:address+1}});
 const projection={view:'FIELD',frameHash:'abc'};
 const first=await compileDeltaMeshR53({current:{packet:packet(10),projection}});
@@ -14,6 +21,8 @@ for(const key of ['deltaHash','checkpointHash','baseHash','currentHash'])if(!/^[
 if(second.checkpointHash===first.checkpointHash)throw new Error('Checkpoint must advance after a delta');
 const reordered=await compileDeltaMeshR53({previousCheckpointHash:first.checkpointHash,current:{projection:{frameHash:'def',view:'FIELD'},packet:{metrics:{burden:.2,decision:'STAY',plasticity:.6,continuity:.82,contradiction:.1},stateId:11,address:10,autoPing:{next:11},predict:{score:.5},psc:{phase:1},identity:{domain:'Structure'}}},previous:{projection:{frameHash:'abc',view:'FIELD'},packet:packet(10)}});
 if(reordered.deltaHash!==second.deltaHash||reordered.checkpointHash!==second.checkpointHash)throw new Error('R53 canonical delta/checkpoint hashes must be key-order deterministic');
+const noChange=await compileDeltaMeshR53({previous:{packet:packet(10),projection},current:{packet:packet(10),projection},previousCheckpointHash:first.checkpointHash});
+if(noChange.ok!==true||noChange.mode!=='DELTA'||noChange.patches.length!==0||noChange.changedComponents.length!==0)throw new Error('R53 unchanged packet must produce an empty semantic delta');
 const bad=await compileDeltaMeshR53({current:{packet:{address:5,stateId:99,metrics:{continuity:1,plasticity:1,contradiction:0,burden:0}}}});
 if(bad.ok!==false||bad.code!=='CURRENT_PACKET_INVALID')throw new Error('R53 must reject malformed canonical state identity');
 const badCheckpoint=await compileDeltaMeshR53({current:{packet:packet(1)},previousCheckpointHash:'not-a-hash'});
