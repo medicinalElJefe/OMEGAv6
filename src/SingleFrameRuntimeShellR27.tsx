@@ -16,11 +16,11 @@ type Domain={id:DomainId;label:string;description:string;routes:readonly string[
 export const R27_REGISTERED_SURFACES=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'] as const;
 const ROUTE_NO=new Map(R27_REGISTERED_SURFACES.map((name,i)=>[name,String(i+1).padStart(2,'0')]));
 const DOMAIN_ROUTES:Record<DomainId,readonly string[]>={
- WORK:['Command Center','Workspace','Cockpit','Hybrid Link','Create','Projects','Render Queue','Assets','Development','Build Out'],
- EXPLORE:['Earth Now','Forecast','Reality Lab','Matter Traversal','Visual Instrument','Relativity','Atlas','Traversal','Immersive Traversal','Extreme Traversal','Field','Data Motion','Atlas Calculator','Infinity','Convergence','Scale Compiler'],
+ WORK:['Command Center','Workspace','Cockpit','Hybrid Link','Create','Projects','Render Queue','Assets','Development'],
+ EXPLORE:['Earth Now','Forecast','Reality Lab','Matter Traversal','Visual Instrument','Relativity','Atlas','Traversal','Field','Data Motion','Atlas Calculator','Infinity','Convergence','Scale Compiler'],
  INTELLIGENCE:['Modes','Kernel Intelligence','Memory','Canon Evolution','SAI Lab'],
- EVIDENCE:['Quality Compiler','Evidence & Proof','Archive Census','Archive Operators','Governance','Validation','Consolidation'],
- SYSTEM:['Instructions','Plugins','Settings','System','System Atlas','Control Matrix']
+ EVIDENCE:['Quality Compiler','Evidence & Proof','Archive Census','Archive Operators','Governance','Validation'],
+ SYSTEM:['Instructions','Settings','System','System Atlas','Control Matrix']
 };
 const operational=(x:readonly string[])=>x.filter(isPrimaryOperationalCapability);
 const DOMAINS:readonly Domain[]=[
