@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const atlas=read('src/SystemAtlasControl.tsx'),css=read('src/systemAtlasDepthR38_4.css'),pkg=read('package.json');
+must(atlas.includes("import CalculusFieldR37 from './CalculusFieldR37'"),'System Atlas must bind the active packet to the shared calculus field');
+must(atlas.includes("mode='FIELD'")&&atlas.includes("atlas-r38-stage"),'System Atlas must lead with field-first packet composition');
+for(const token of ['registration ≠ execution','Registered capability never implies executable capability','No fake OPEN button','DONOR_ONLY','NATIVE_TARGET','RESTORATION_DEBT'])must(atlas.includes(token),`System Atlas truth boundary missing ${token}`);
+for(const token of ['continuity','plasticity','contradiction','burden'])must(atlas.includes(token),`active packet context missing ${token}`);
+must(css.includes('.atlas-r38-stage')&&css.includes('.atlas-r38-field')&&css.includes('@media(max-width:640px)'),'System Atlas field-first responsive containment missing');
+must(pkg.includes('r38-system-atlas-depth-invariants.mjs'),'R38.4 System Atlas regression must be wired into full QA');
+must(!atlas.includes('@appdeploy/client')&&!css.includes('appdeploy.ai'),'R38.4 must remain AppDeploy-free');
+console.log('R38.4 SYSTEM ATLAS DEPTH PASS · active packet field first · capability truth and responsive containment retained');
