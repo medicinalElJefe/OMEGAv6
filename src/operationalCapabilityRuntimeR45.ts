@@ -9,15 +9,17 @@ export type ExecutionContract={name:string;familyId:string;reality:CapabilityRea
 const FAMILY_ALIAS:Record<string,string>={
  'AI Cockpit':'S22','Hybrid Link':'S03','Atlas OS':'S00','Traversal / Domain':'S06','Reality Compiler':'S01','Field Renderer':'S08','Observer / Now':'S19','Earth':'S09','Dewey':'S14','Atlas Generator':'S06','Living Membrane':'S13','Persistent Packet':'S02','Proof / Governance':'S15','Recovery / Packaging':'S20','Rendering / Media':'S21','Dewey / Mode188':'S14','Proof Ledger':'S15','Artifact Governance':'S20','CanonForge':'S04','Universal Language':'S18','Control Planes':'S22'
 };
+const RESTORED_REALITY:Record<string,CapabilityReality>={'Immersive Traversal':'SOURCE_ACTIVE','Extreme Traversal':'SOURCE_ACTIVE','Build Out':'LOCAL_ACTIVE','Plugins':'LOCAL_ACTIVE'};
 const HEAVY=new Set(['Matter Traversal','Visual Instrument','Earth Now','Atlas','Reality Lab','Immersive Traversal','Extreme Traversal','Traversal']);
 const EXTREME=new Set(['Matter Traversal','Visual Instrument']);
 const LOCAL=new Set(['Workspace','Create','Projects','Render Queue','Assets','Memory','Consolidation','Plugins','Settings','Build Out']);
 const EVIDENCE=new Set(['Evidence & Proof','Validation','Quality Compiler','Governance','Archive Census','Archive Operators','System','Earth Now','Reality Lab']);
 
 export function familyIdForCapability(family:string){return FAMILY_ALIAS[family]||'S00'}
+export function effectiveCapabilityReality(name:string):CapabilityReality{return RESTORED_REALITY[name]||capabilityReality(name)}
 export function capabilityExecutionContract(name:string):ExecutionContract{
  const c=OMEGA_CAPABILITY_AUTHORITY.find(x=>x.name===name);if(!c)throw new Error(`Unknown capability: ${name}`);
- const reality=capabilityReality(name),routable=reality!=='DONOR_ONLY'&&reality!=='RESTORATION_DEBT';
+ const reality=effectiveCapabilityReality(name),routable=reality!=='DONOR_ONLY'&&reality!=='RESTORATION_DEBT';
  const performance:PerformanceClass=EXTREME.has(name)?'EXTREME':HEAVY.has(name)?'HEAVY':'NORMAL';
  const persistence:PersistenceClass=EVIDENCE.has(name)?'EVIDENCE':LOCAL.has(name)?'LOCAL':c.boundary==='SOURCE_PACKET'?'PACKET':'NONE';
  return{name,familyId:familyIdForCapability(c.family),reality,routable,performance,persistence,input:c.boundary,output:c.purpose,degradeTo:routable?name:'System Atlas',proof:`${c.implementation} · ${c.boundary} · ${reality}`};
