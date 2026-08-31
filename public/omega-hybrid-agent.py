@@ -5,12 +5,13 @@ Stdlib-first, root-confined, allow-listed execution. It never exposes arbitrary 
 Pairing is explicit. Every claimed native action returns bounded proof to the canonical Worker.
 R33 added atomic, preimage-hash-bound text patching with an automatic local backup.
 R34 adds explicit canonical reachability, authentication/registration, heartbeat, and transport diagnostics.
+R34.1 hardens Windows approved-root parsing for drive-root launcher execution.
 """
 from __future__ import annotations
 import argparse, hashlib, json, os, platform, re, socket, subprocess, sys, time, urllib.error, urllib.request, uuid, zipfile
 from pathlib import Path
 
-VERSION='R34.0'
+VERSION='R34.1'
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
 TEXT_EXT={'.txt','.md','.json','.jsonc','.js','.jsx','.ts','.tsx','.py','.pyw','.css','.html','.yml','.yaml','.toml','.ini','.cfg','.csv','.bat','.ps1','.cs','.csproj','.sln'}
 SKIP_DIRS={'.git','node_modules','dist','build','.venv','venv','__pycache__','.wrangler','.omega_hybrid'}
@@ -50,6 +51,15 @@ def parse_pair(value):
     bid,secret=value.split('.',1)
     if not re.fullmatch(r'[A-Za-z0-9._:-]{8,128}',bid) or len(secret)<24: raise AgentError('Invalid pairing code.')
     return bid,secret
+
+def normalize_root_arg(value):
+    raw=str(value or '.').strip().strip('"').strip()
+    if not raw: return '.'
+    # Windows command-line parsing can turn a quoted drive root such as "J:\\" into J:\\".
+    # Quotes are not valid Windows path characters, so removing an accidental edge quote is safe.
+    raw=raw.rstrip('"').strip()
+    if os.name=='nt' and re.fullmatch(r'[A-Za-z]:\\',raw): return raw+'.'
+    return raw
 
 def secure_path(root:Path,rel='.'):
     rel=str(rel or '.').replace('\\','/').strip()
@@ -235,12 +245,12 @@ def main():
     ap.add_argument('--server',default=DEFAULT_SERVER);ap.add_argument('--pair',required=True,help='pairing code from OMEGA Hybrid Link')
     ap.add_argument('--root',default='.',help='approved local root; all file/process work stays inside it')
     ap.add_argument('--once',action='store_true',help='poll once, then exit')
-    args=ap.parse_args();server=args.server.rstrip('/');bridge_id,secret=parse_pair(args.pair);root=Path(args.root).expanduser().resolve();root.mkdir(parents=True,exist_ok=True)
+    args=ap.parse_args();server=args.server.rstrip('/');bridge_id,secret=parse_pair(args.pair);root=Path(normalize_root_arg(args.root)).expanduser().resolve();root.mkdir(parents=True,exist_ok=True)
     state_dir=root/'.omega_hybrid';state_dir.mkdir(exist_ok=True);id_file=state_dir/'device_id.txt'
     device_id=id_file.read_text().strip() if id_file.exists() else 'device_'+uuid.uuid4().hex
     id_file.write_text(device_id)
     caps=['TRAIN_LOCAL','INDEX','READ_TEXT','SEARCH_TEXT','HASH_TREE','SAFE_IMPORT','BUILD','TEST','PACKAGE','SUPPORT_BUNDLE','APPLY_PATCH','OPEN_URL','WAIT']
-    payload={'bridgeId':bridge_id,'deviceId':device_id,'name':socket.gethostname(),'platform':platform.platform(),'version':VERSION,'capabilities':caps,'rootLabel':root.name}
+    payload={'bridgeId':bridge_id,'deviceId':device_id,'name':socket.gethostname(),'platform':platform.platform(),'version':VERSION,'capabilities':caps,'rootLabel':root.name or root.anchor}
     print('OMEGA Hybrid Link agent',VERSION)
     print('Approved root:',root)
     print('[1/4] CANONICAL REACHABILITY:',server)
