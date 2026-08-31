@@ -32,19 +32,20 @@ export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,mod
  const routes=useMemo(()=>{const q=query.trim().toLowerCase();return q?ALL.filter(x=>x.toLowerCase().includes(q)):selected.routes},[query,selected]);
  const go=(name:string)=>{onNavigate(name);setOpen(false);setQuery('')};
  return <>
-  <aside className='r62-rail' aria-label='OMEGA instrument navigation'>
-   <button className='r62-home' onClick={()=>window.dispatchEvent(new CustomEvent('omega-home-request'))} aria-label='OMEGA home'><Home/></button>
-   <button className='r62-menu' onClick={()=>{setActive(current.id);setOpen(true)}} aria-label='Open instruments'><Menu/></button>
+  <aside className='r62-rail' aria-label='OMEGA application navigation'>
+   <div className='r62-brand'><b>OMEGA V6</b><span>APPLICATIONS</span><small>{current.label} · {panel}</small></div>
+   <button className='r62-home' onClick={()=>window.dispatchEvent(new CustomEvent('omega-home-request'))} aria-label='OMEGA home'><Home/><span>Home</span></button>
+   <button className='r62-menu' onClick={()=>{setActive(current.id);setOpen(true)}} aria-label='Browse all applications'><Menu/><span>All applications</span></button>
    <nav>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} className={current.id===w.id?'active':''} title={`${w.label} — ${w.copy}`} onClick={()=>{setActive(w.id);setOpen(true)}}><I/><span>{w.label}</span></button>})}</nav>
-   <div className='r62-rail-state'><span>{busy?'RUN':'LIVE'}</span><b>{record?.metrics?.decision||'—'}</b><small>{modeCount} modes</small></div>
+   <div className='r62-rail-state'><span>{busy?'RUNNING':'LIVE'}</span><b>{record?.metrics?.decision||'—'}</b><small>{modeCount} modes · {panel}</small></div>
   </aside>
   {open&&<div className='r62-overlay' role='presentation' onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false)}}>
-   <section className='r62-drawer' role='dialog' aria-modal='true' aria-label='OMEGA instrument browser'>
-    <header><div><span>OMEGA INSTRUMENT OS</span><h2>{selected.label}</h2><p>{selected.copy}</p></div><button onClick={()=>setOpen(false)} aria-label='Close instruments'><X/></button></header>
-    <nav className='r62-workspaces'>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} className={selected.id===w.id?'active':''} onClick={()=>{setActive(w.id);setQuery('')}}><I/><span><b>{w.label}</b><small>{w.routes.length} instruments</small></span></button>})}</nav>
-    <label className='r62-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search every OMEGA instrument…'/></label>
+   <section className='r62-drawer' role='dialog' aria-modal='true' aria-label='OMEGA application browser'>
+    <header><div><span>OMEGA APPLICATIONS</span><h2>{selected.label}</h2><p>{selected.copy}</p></div><button onClick={()=>setOpen(false)} aria-label='Close applications'><X/></button></header>
+    <nav className='r62-workspaces'>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} className={selected.id===w.id?'active':''} onClick={()=>{setActive(w.id);setQuery('')}}><I/><span><b>{w.label}</b><small>{w.routes.length} applications</small></span></button>})}</nav>
+    <label className='r62-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search every OMEGA application…'/></label>
     <div className='r62-route-grid'>{routes.map(name=>{const reality=effectiveCapabilityReality(name);return <button key={name} className={panel===name?'active':''} onClick={()=>go(name)}><span><b>{name}</b><small>{CAPABILITY_REALITY_LABEL[reality]}</small></span><Layers3/></button>})}</div>
-    <footer><span>44 historical routes remain reachable.</span><b>Navigation no longer owns the viewport.</b></footer>
+    <footer><span>Historical routes remain reachable through progressive disclosure.</span><b>The active application owns the viewport.</b></footer>
    </section>
   </div>}
  </>;
