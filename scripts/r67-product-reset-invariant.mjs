@@ -10,11 +10,11 @@ const req=[
  [css.includes('.r59-display-deck,.r59-primary{display:none!important}'),'duplicate home card inventories demoted'],
  [css.includes('min-height:calc(100dvh - 72px)'),'first viewport is command + living field'],
  [css.includes('.workstation-identity small{display:none!important}'),'workstation telemetry wall demoted'],
- [css.includes('.hybrid-r32-install{grid-template-columns:repeat(3'),'Hybrid 3-step connection path remains visible'],
+ [css.includes('.hybrid-r32-install{grid-template-columns:repeat(3'),'Hybrid 3-step connection path remains available'],
  [css.includes('@media(max-width:900px)'),'mobile containment exists'],
  [home.includes('SovereignRuntimeConstellationR62'),'living runtime remains on Home'],
  [home.includes('ExtremeTraversalUnionR60'),'restored execution stack remains reachable'],
- [shell.includes('44 historical routes remain reachable'),'all historical routes remain reachable through governed navigation']
+ [shell.includes('Historical routes remain reachable through progressive disclosure'),'all historical routes remain reachable through governed progressive navigation']
 ];
 const bad=req.filter(([ok])=>!ok);if(bad.length){console.error('R67 invariant FAIL');for(const[,m]of bad)console.error('-',m);process.exit(1)}
 console.log('R67 product reset invariant PASS');for(const[,m]of req)console.log('PASS',m);
