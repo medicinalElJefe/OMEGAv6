@@ -8,11 +8,12 @@ import {calculusVisualLaw,operatorColor,type OperatorColorRole} from './calculus
 import CalculusFieldR37 from './CalculusFieldR37';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import {compileFullOverallModePlanR79,compactModePlanR79} from './fullOverallModeOrchestratorR79';
+import {OMEGA_ALL_ROUTES_R82,OMEGA_FIELD_PROJECTIONS_R82,OMEGA_WORKSPACES_R82,projectionForR82,type OmegaFieldProjectionR82,type OmegaWorkspaceIdR82} from './omegaExperienceRegistryR82';
 import './omegaHomeR71.css';
 
 type Props={onEnter:(panel:string)=>void};
-type DomainId='WORK'|'EXPLORE'|'INTELLIGENCE'|'EVIDENCE'|'SYSTEM';
-type FieldMode='FIELD'|'MATTER'|'TRAVERSAL'|'FORECAST'|'RELATIVITY'|'CONVERGENCE';
+type DomainId=OmegaWorkspaceIdR82;
+type FieldMode=OmegaFieldProjectionR82;
 const ROLES:OperatorColorRole[]=['ALPHA','BASE','CONSTRUCT','PRUNE','OMEGA'];
 const ROLE_COPY:Record<OperatorColorRole,string>={
  ALPHA:'seed possibility / phase opening',
@@ -20,13 +21,6 @@ const ROLE_COPY:Record<OperatorColorRole,string>={
  CONSTRUCT:'expansion / admitted growth',
  PRUNE:'inversion / contradiction reduction',
  OMEGA:'integration / coherent closure'
-};
-const DOMAINS:Record<DomainId,{label:string;role:OperatorColorRole;routes:string[]}>= {
- WORK:{label:'Work',role:'ALPHA',routes:['Command Center','Workspace','Cockpit','Hybrid Link','Create','Projects','Development','Build Out']},
- EXPLORE:{label:'Explore',role:'CONSTRUCT',routes:['Earth Now','Forecast','Reality Lab','Matter Traversal','Immersive Traversal','Extreme Traversal','Visual Instrument','Relativity','Atlas','Traversal','Field','Data Motion','Atlas Calculator','Infinity','Convergence','Scale Compiler']},
- INTELLIGENCE:{label:'Intelligence',role:'PRUNE',routes:['Modes','Kernel Intelligence','Memory','Canon Evolution','SAI Lab']},
- EVIDENCE:{label:'Evidence',role:'BASE',routes:['Quality Compiler','Evidence & Proof','Archive Census','Archive Operators','Governance','Validation']},
- SYSTEM:{label:'System',role:'OMEGA',routes:['Instructions','Plugins','Settings','System','System Atlas','Control Matrix','Consolidation']}
 };
 const QUICK=[['Earth','Earth Now',Earth],['Hybrid','Hybrid Link',Link2],['SAI','SAI Lab',BrainCircuit],['Proof','Evidence & Proof',ShieldCheck],['Visual','Visual Instrument',Eye],['Command','Command Center',Command]] as const;
 const clamp=(n:number)=>Math.max(0,Math.min(20735,Math.floor(Number(n)||0)));
@@ -47,12 +41,12 @@ export default function OmegaHomeR71({onEnter}:Props){
  const modes=useMemo(()=>record?sourceBackedModeSummary(record):null,[record]);
  const unified=useMemo(()=>record?unifiedFromRecord(record):null,[record]);
  const law=useMemo(()=>record?calculusVisualLaw(record):null,[record]);
- const modePanel=mode==='FIELD'?'Field':mode==='MATTER'?'Matter Traversal':mode==='TRAVERSAL'?'Traversal':mode==='FORECAST'?'Forecast':mode==='RELATIVITY'?'Relativity':'Convergence';
+ const projection=projectionForR82(mode),modePanel=projection.panel;
  const modePlan=useMemo(()=>record?compileFullOverallModePlanR79(record,modePanel,prompt):null,[record,modePanel,prompt]);
  const route=useMemo(()=>ready?forwardRoute(address,24):[],[ready,address]);
  const nextAddress=record?clamp(Number(record.autoPing?.dataNext??address)):address;
- const allRoutes=useMemo(()=>Object.values(DOMAINS).flatMap(x=>x.routes),[]);
- const visibleRoutes=useMemo(()=>{const q=query.trim().toLowerCase();if(q)return allRoutes.filter(x=>x.toLowerCase().includes(q)).slice(0,18);return DOMAINS[domain].routes.slice(0,10)},[query,domain,allRoutes]);
+ const allRoutes=useMemo(()=>[...OMEGA_ALL_ROUTES_R82],[]),activeWorkspace=OMEGA_WORKSPACES_R82.find(x=>x.id===domain)||OMEGA_WORKSPACES_R82[0];
+ const visibleRoutes=useMemo(()=>{const q=query.trim().toLowerCase();if(q)return allRoutes.filter(x=>x.toLowerCase().includes(q));return [...activeWorkspace.routes]},[query,activeWorkspace,allRoutes]);
  const enter=(panel:string)=>{if(!allRoutes.includes(panel))return;localState.write('omega.v6.panel',panel);localState.write('omega.v6.modePolicy','SOURCE_BACKED');onEnter(panel)};
  const targetRole=(role:OperatorColorRole)=>{if(!ready||!route.length)return;let best=address,bestWeight=-1;for(const a of route){const candidate=corpusState(a);const w=calculusVisualLaw(candidate).operatorWeights[role];if(w>bestWeight){bestWeight=w;best=a}}setSelectedRole(role);setAddress(best)};
  const ask=async()=>{if(!record||!modes||!modePlan||!prompt.trim()||busy)return;setBusy(true);setReply('');try{const context={address,stateId:record.stateId,coords,decision:record.metrics.decision,metrics:record.metrics,nextAddress,modePolicy:'SOURCE_BACKED_ALL_AVAILABLE',appliedModeCount:modes.appliedCount,gatedModeCount:modes.gatedCount,fullOverallModePlan:compactModePlanR79(modePlan),unified:{coherence:unified?.unifiedCoherence,motionRelativity:unified?.motionRelativity},responseContract:{plainLanguageFirst:true,showRouteBeforeGeneration:true,doNotInventMissingEvidence:true,preserveTruthBoundary:true}};await api.post('/api/route-preview',{text:prompt,context});const r=await api.post<any>('/api/chat',{text:prompt,context});setReply(String(r.data?.reply||'No response returned.'))}catch(e:any){setReply(e?.message||'No answer fabricated; provider/runtime path failed.')}finally{setBusy(false)}};
@@ -61,12 +55,13 @@ export default function OmegaHomeR71({onEnter}:Props){
  return <main className='r71-home' data-color-authority='ALPHA BASE CONSTRUCT PRUNE OMEGA'>
   <header className='r71-topbar'>
    <button className='r71-brand' onClick={()=>{setDomain('EXPLORE');setShowApps(false)}}><span className='r71-mark'/><span><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild}</small></span></button>
-   <nav className='r71-domains' aria-label='Application domains'>{(Object.keys(DOMAINS) as DomainId[]).map(id=><button key={id} className={domain===id?'active':''} data-role={DOMAINS[id].role} onClick={()=>{setDomain(id);setQuery('');setShowApps(true)}}><i style={{background:law?operatorColor(law,DOMAINS[id].role,.95):undefined}}/><span>{DOMAINS[id].label}</span></button>)}</nav>
+   <nav className='r71-domains' aria-label='Application workspaces'>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} data-role={w.role} onClick={()=>{setDomain(w.id);setQuery('');setShowApps(true)}}><i style={{background:law?operatorColor(law,w.role,.95):undefined}}/><span>{w.label}</span></button>)}</nav>
    <button className='r71-apps-toggle' onClick={()=>setShowApps(v=>!v)} aria-expanded={showApps}><Search/><span>Applications</span></button>
   </header>
 
   {showApps&&<section className='r71-app-drawer' aria-label='OMEGA applications'>
-   <div className='r71-drawer-head'><label><Search/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all OMEGA applications'/></label><button onClick={()=>setShowApps(false)}>Close</button></div>
+   <div className='r71-drawer-head'><label><Search/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all 44 OMEGA applications'/></label><button onClick={()=>setShowApps(false)}>Close</button></div>
+   <div className='r71-drawer-context'><b>{query?'ALL OMEGA':activeWorkspace.label}</b><span>{query?`${visibleRoutes.length} matching applications`:`${activeWorkspace.copy} · ${activeWorkspace.routes.length} applications`}</span></div>
    <div className='r71-route-grid'>{visibleRoutes.map(panel=><button key={panel} onClick={()=>enter(panel)}><span>{panel}</span><ArrowRight/></button>)}</div>
   </section>}
 
@@ -74,8 +69,9 @@ export default function OmegaHomeR71({onEnter}:Props){
    <section className='r71-field-panel'>
     <div className='r71-field-toolbar'>
      <div><span>ACTIVE COMPUTATION</span><b>{record?`State ${record.stateId.toLocaleString()}`:'Materializing corpus…'}</b><small>{record?`${record.metrics.decision} · D${coords.d+1} P${coords.p+1} R${coords.r+1} L${coords.l+1}`:'source-backed canonical packet'}</small></div>
-     <div className='r71-modes'>{(['FIELD','MATTER','TRAVERSAL','FORECAST','RELATIVITY','CONVERGENCE'] as FieldMode[]).map(m=><button key={m} className={mode===m?'active':''} onClick={()=>setMode(m)}>{m}</button>)}</div>
+     <div className='r71-modes'>{OMEGA_FIELD_PROJECTIONS_R82.map(m=><button key={m.id} className={mode===m.id?'active':''} data-signature={m.signature} title={`${m.label} · ${m.intent}`} onClick={()=>setMode(m.id)}><b>{m.label}</b><small>{m.signature}</small></button>)}</div>
     </div>
+    <div className='r71-projection-note'><b>{projection.label}</b><span>{projection.intent}</span><small>{projection.signature} · same canonical packet, different lawful expression</small></div>
     <div className='r71-field'>{record?<CalculusFieldR37 address={address} mode={mode} steps={36} onAddress={setAddress} label={`OMEGA · ${mode} · DIRECT MANIPULATION`}/>:<div className='r71-loading'><Activity/><b>Loading source-backed field</b></div>}</div>
     <div className='r71-traverse'>
      <button onClick={()=>setAddress(clamp(address-1))}>− STATE</button>
