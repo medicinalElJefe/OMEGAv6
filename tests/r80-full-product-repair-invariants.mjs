@@ -19,7 +19,7 @@ must(homeCss.includes('.r71-field .cfr37-stage{height:clamp(500px,62dvh,760px);m
 must(homeCss.includes('max-height:calc(100dvh - 94px);overflow:auto'),'application drawer must remain viewport-contained');
 must(homeCss.includes('env(safe-area-inset-top,0px)')&&homeCss.includes('env(safe-area-inset-bottom,0px)'),'Home must respect mobile safe areas');
 must(reset.includes(".omega-workstation-v2 .cfr37-stage{min-height:clamp(480px,64vh,820px)!important}"),'workstation field sizing must be scoped away from Home');
-must(reset.includes(".r62-rail button{width:48px!important;min-height:46px!important"),'mobile rail buttons must fit narrow viewports');
+must(reset.includes(".r62-rail button{width:46px!important;min-height:46px!important")&&reset.includes('overflow-x:auto!important'),'mobile rail buttons must fit narrow viewports without hiding later workspaces');
 must(reset.includes("padding-left:var(--r62-rail)!important"),'desktop workstation must consume the shared rail width variable instead of a competing hard-coded offset');
 must(shellCss.includes(':root{--r62-rail:156px;')&&shellCss.includes("@media(max-width:1180px){:root{--r62-rail:132px}"),'instrument shell geometry must use one readable adaptive rail width authority');
 must(shellCss.includes(".workstation-topbar{left:0!important;width:100%!important"),'topbar must fill the padded workstation rather than subtracting the rail twice');
