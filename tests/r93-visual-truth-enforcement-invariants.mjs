@@ -14,6 +14,7 @@ const scale=read('src/RecursiveScalePanel.tsx');
 const field=read('src/OmegaFieldMotionConvergenceR28.tsx');
 const truth=read('src/TruthVisualsR93.tsx');
 const legacyMode=read('src/ModeExpressionCanvasR82.tsx');
+const living=read('src/OmegaR36LivingSurfaces.tsx');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
@@ -54,6 +55,9 @@ must(scale.indexOf('<ScaleTruthPlotR93 nodes={audit.compiler.nodes}/>')>=0&&scal
 must(field.includes("<CanonicalPacketTruthPlotR93 record={record} title='Vector / Relational Field packet'"),'Field must use canonical packet plot as primary');
 must((field.match(/<TransitionTruthPlotR93/g)||[]).length>=2,'Data Motion and Convergence must use direct transition plots');
 must(!field.includes("<div className='r28-field-stage r77-field-host'><WovenContinuityFieldR77"),'Field must not mount woven renderer as primary');
+must(living.includes('LIVE DATA')&&living.includes("title='Matter Traversal canonical packet'"),'Matter Traversal LIVE view must be direct canonical data');
+must(living.includes('title={`${variant} · admitted transition`}'),'Traversal LIVE view must be direct admitted-transition data');
+for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),'deep donor must remain optional and reachable: '+token);
 
 must(legacyMode.includes('switch(expression.family)'),'legacy R82 renderer may remain as preserved donor source');
 must(truth.includes('No generated geometry · no random seed · no external-observation claim'),'packet truth plot must state its visual contract');
