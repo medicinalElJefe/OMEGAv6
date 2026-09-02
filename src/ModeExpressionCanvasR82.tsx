@@ -4,7 +4,7 @@ import './modeExpressionR82.css';
 
 type Props={expression:ModeExpressionR82;address:number;value?:unknown};
 
-const TAU=Math.PI*2;
+const TAU=Math.PI*2,R82_SKEW=.12;
 const hash=(s:string)=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0};
 const rng=(seed:number,n:number)=>{const x=Math.sin((seed+n*374761393)*.000001)*43758.5453;return Math.abs(x-Math.floor(x))};
 const rgba=(hex:string,a:number)=>{const h=hex.replace('#','');const n=parseInt(h.length===3?h.split('').map(x=>x+x).join(''):h,16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`};
@@ -15,7 +15,7 @@ export default function ModeExpressionCanvasR82({expression,address,value}:Props
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const seed=hash(expression.id+'|'+expression.name);
   const draw=(now:number)=>{if(!alive)return;const box=canvas.getBoundingClientRect(),dpr=Math.min(1.6,window.devicePixelRatio||1),W=Math.max(300,Math.round(box.width)),H=Math.max(280,Math.round(box.height));if(canvas.width!==Math.round(W*dpr)||canvas.height!==Math.round(H*dpr)){canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr)}ctx.setTransform(dpr,0,0,dpr,0,0);
-   const t=reduced?0:now*.001*(.22+.62*expression.intensity),cx=W*.5,cy=H*.5,R=Math.min(W,H)*.34,I=expression.intensity;
+   const modePhase=rng(seed,1)*TAU,variant=.88+.24*rng(seed,2),skew=(rng(seed,3)-.5)*R82_SKEW;const t=(reduced?0:now*.001*(.22+.62*expression.intensity))+modePhase,cx=W*(.5+skew),cy=H*(.5-skew*.55),R=Math.min(W,H)*.34*variant,I=expression.intensity;
    ctx.fillStyle='#02070a';ctx.fillRect(0,0,W,H);
    const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.7);bg.addColorStop(0,rgba(expression.accent,.12+.08*I));bg.addColorStop(.55,'rgba(6,15,19,.4)');bg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
    ctx.lineCap='round';ctx.lineJoin='round';
