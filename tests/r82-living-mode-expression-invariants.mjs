@@ -31,14 +31,16 @@ must(modeRuntime.includes("metadataOnly?'Visual expression is derived only from 
 must(modeCanvas.includes('switch(expression.family)'),'individual mode visuals must use family-specific geometry rather than one repeated renderer');
 for(const sig of ["case'FORECAST'","case'PRUNE'","case'RELATIVITY'","case'FLOW'","case'MEMORY'","case'PROOF'","case'TOPOLOGY'","case'COMPRESSION'","case'TRAVERSAL'","case'RECURSION'","case'GOVERNANCE'","case'SCALE'","case'LIGHT'"])must(modeCanvas.includes(sig),`visual expression renderer missing ${sig}`);
 
-must(modes.includes('<ModeExpressionCanvasR82')&&modes.includes('Express this catalog mode visually'),'Modes application must show and select visual expression for catalog modes');
+must(modes.includes('<ModeTruthTraceR93')&&modes.includes('Inspect catalog mode'),'Modes application must show actual evaluated traces and still allow catalog inspection');
+must(!modes.includes('<ModeExpressionCanvasR82'),'Modes production surface must not mount semantic/procedural mode artwork as truth');
 must(modes.includes("aria-label='Select any OMEGA mode'")&&modes.includes('(catalog.results as any[]).map'),'all 179 catalog modes must be directly selectable beside the visual expression instead of buried below');
-must(modes.includes('Express gated mode'),'gated modes must remain visually inspectable without claiming execution');
-must(modes.includes('Express visually + Trace this mode'),'executed modes must bind visual identity and actual trace action');
+must(modes.includes('Inspect gated mode'),'gated modes must remain inspectable without fabricated numeric traces');
+must(modes.includes('Trace actual mode output'),'executed modes must bind selection to actual evaluated trace output');
 must(modes.includes("localStorage.setItem('omega.r82.selectedModeId'"),'selected mode must persist across OMEGA applications');
 must(modes.includes("localStorage.setItem('omega.r65.visual.lens','MODE')"),'Modes → Visual Instrument handoff must open the selected mode expression');
 
-must(visual.includes("type Lens='SYNTHESIS'|'MODE'")&&visual.includes("<ModeExpressionCanvasR82 expression={modeExpression}"),'Visual Instrument must expose the selected individual mode as a first-class lens');
+must(visual.includes("type Lens='SYNTHESIS'|'MODE'")&&visual.includes('<ModeTruthTraceR93 address={address} modeId={selectedModeId}/>'),'Visual Instrument must expose the selected mode as an evaluated trace lens');
+must(!visual.includes('<ModeExpressionCanvasR82'),'Visual Instrument must not mount seeded semantic mode artwork as production truth');
 must(field.includes('function drawProjectionSignatureR82'),'high-level projection buttons must change geometry, not only labels/gains');
 for(const mode of ["mode==='MATTER'","mode==='TRAVERSAL'","mode==='FORECAST'","mode==='RELATIVITY'","mode==='INFINITY'","mode==='SCALE'","mode==='CONVERGENCE'"])must(field.includes(mode),`distinct projection geometry missing ${mode}`);
 

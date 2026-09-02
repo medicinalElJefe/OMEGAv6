@@ -5,7 +5,7 @@ import {corpusState,decodeAddress,initCorpusPack} from './corpusRuntime';
 import {sourceBackedModeSummary} from './sourceBackedModeRuntimeR21';
 import {unifiedFromRecord} from './unifiedCalculus';
 import {calculusVisualLaw,operatorColor,type OperatorColorRole} from './calculusVisualLawR37';
-import CalculusFieldR37 from './CalculusFieldR37';
+import {CanonicalPacketTruthPlotR93} from './TruthVisualsR93';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import {compileFullOverallModePlanR79,compactModePlanR79} from './fullOverallModeOrchestratorR79';
 import {OMEGA_ALL_ROUTES_R82,OMEGA_FIELD_PROJECTIONS_R82,OMEGA_WORKSPACES_R82,projectionForR82,type OmegaFieldProjectionR82,type OmegaWorkspaceIdR82} from './omegaExperienceRegistryR82';
@@ -94,8 +94,8 @@ export default function OmegaHomeR71({onEnter}:Props){
      <div><span>ACTIVE COMPUTATION</span><b>{record?`State ${record.stateId.toLocaleString()}`:'Materializing corpus…'}</b><small>{record?`${record.metrics.decision} · D${coords.d+1} P${coords.p+1} R${coords.r+1} L${coords.l+1}`:'source-backed canonical packet'}</small></div>
      <div className='r71-modes'>{OMEGA_FIELD_PROJECTIONS_R82.map(m=><button key={m.id} className={mode===m.id?'active':''} data-signature={m.signature} title={`${m.label} · ${m.intent}`} onClick={()=>setMode(m.id)}><b>{m.label}</b><small>{m.signature}</small></button>)}</div>
     </div>
-    <div className='r71-projection-note'><b>{projection.label}</b><span>{projection.intent}</span><small>{projection.signature} · same canonical packet, different lawful expression</small></div>
-    <div className='r71-field'>{record?<CalculusFieldR37 address={address} mode={mode} steps={36} onAddress={setAddress} label={`OMEGA · ${mode} · DIRECT MANIPULATION`}/>:<div className='r71-loading'><Activity/><b>Loading source-backed field</b></div>}</div>
+    <div className='r71-projection-note'><b>{projection.label}</b><span>{projection.intent}</span><small>{projection.signature} · selected analysis lens · primary Home display remains direct canonical data</small><button onClick={()=>enter(projection.panel)}>Open {projection.panel}</button></div>
+    <div className='r71-field'>{record?<CanonicalPacketTruthPlotR93 record={record} title={`Home canonical packet · ${projection.label} selected`}/>:<div className='r71-loading'><Activity/><b>Loading canonical packet</b></div>}</div>
     <div className='r71-traverse'>
      <button onClick={()=>setAddress(clamp(address-1))}>− STATE</button>
      <input aria-label='Canonical atlas address' type='range' min='0' max='20735' value={address} onChange={e=>setAddress(clamp(Number(e.target.value)))}/>

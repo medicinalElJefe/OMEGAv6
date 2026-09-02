@@ -25,13 +25,11 @@ must(workstation.includes("'Reality Lab','Field','Data Motion','Convergence'"),'
 for(const panel of ['Forecast','Relativity','Infinity','Atlas','Scale Compiler','Reality Lab','Field','Data Motion','Convergence','Archive Census','Archive Operators'])
  must(css.includes("data-panel='"+panel+"'"),'missing specialist clarity coverage for '+panel);
 
-must(css.includes(".inf36-stage{\n display:grid!important;\n grid-template-columns:minmax(0,1fr) minmax(238px,300px)!important"),'Infinity desktop telemetry must leave canvas overlay');
-must(css.includes(".inf36-stage aside{\n position:static!important"),'Infinity telemetry must be statically laid out');
-must(css.includes(".inf36-stage canvas{\n  height:70dvh!important"),'Infinity mobile canvas must own the visual viewport');
+must(infinity.includes('<InfinityTruthPlotR93 record={record} index={index}/>')&&!infinity.includes('<canvas ref={canvas}/>'),'Infinity must use recovered-source truth plot instead of mounted torus canvas');
 must(css.includes(".atlas-r36-stage canvas{\n  height:72dvh!important"),'Atlas mobile canvas must own the visual viewport');
-must(css.includes(".fr36-summary{\n  display:flex!important")&&css.includes(".fr36-scenarios{\n  display:flex!important"),'Forecast interpretation must compact into swipe evidence');
-must(css.includes(".rel-tabs{\n  position:sticky!important")&&css.includes(".rel36-observer{\n  display:flex!important"),'Relativity controls must be compact and reachable');
-must(css.includes("[data-panel='Scale Compiler'] .panel:first-child .calculus-field-r37")&&css.includes("min-height:72dvh!important"),'Scale Compiler nested field must be primary');
+must(forecast.indexOf('<ForecastMap plan={plan}')>=0&&forecast.indexOf('<ForecastMap plan={plan}')<forecast.indexOf("<CalculusFieldR37 address={address} mode='FORECAST'"),'Forecast computed corridor map must be primary');
+must(css.includes(".rel-tabs{\n  position:sticky!important")&&css.includes(".rel36-observer{\n  display:flex!important")&&relativity.indexOf('<DimensionalRelativityPanelR24 record={record}/>')<relativity.indexOf("<CalculusFieldR37 address={record.address} mode='RELATIVITY'"),'Relativity exact formula instrument must lead optional renderer');
+must(scale.indexOf('<ScaleTruthPlotR93 nodes={audit.compiler.nodes}/>')>=0&&scale.indexOf('<ScaleTruthPlotR93 nodes={audit.compiler.nodes}/>')<scale.indexOf("<CalculusFieldR37 address={address}"),'Scale Compiler evaluated node outputs must be primary');
 must(reality.includes("data-analysis={analysis?'ready':'empty'}"),'Reality Lab must expose analysis readiness');
 must(css.includes(".rl36[data-analysis='empty'] .rl36-input{order:0!important}")&&css.includes(".rl36[data-analysis='ready'] .rl36-stage{order:0!important"),'Reality Lab must switch mobile priority only after analysis exists');
 must(css.includes(".r28-field-readout,")&&css.includes(".r28-convergence-summary{\n  display:flex!important"),'Field/Motion/Convergence telemetry must remain reachable without a card wall');
