@@ -21,7 +21,7 @@ must(homeCss.includes('.r71-field .cfr37-stage{height:clamp(500px,62dvh,760px);m
 must(homeCss.includes('max-height:calc(100dvh - 94px);overflow:auto'),'application drawer must remain viewport-contained');
 must(homeCss.includes('env(safe-area-inset-top,0px)')&&homeCss.includes('env(safe-area-inset-bottom,0px)'),'Home must respect mobile safe areas');
 must(reset.includes(".omega-workstation-v2 .cfr37-stage{min-height:clamp(480px,64vh,820px)!important}"),'workstation field sizing must be scoped away from Home');
-must(navCss.includes('width:min(92vw,390px)')&&navCss.includes('.r88-route-scroll{min-height:0;overflow:auto'),'mobile side menu must fit narrow viewports while keeping every route scroll-reachable');
+must(navCss.includes('width:min(88vw,354px)!important')&&navCss.includes('.r89-flat-scroll{min-height:0;overflow:auto'),'mobile side menu must fit narrow viewports while keeping every route directly scroll-reachable');
 must(polish.includes("html[data-omega-frame='desktop'] .omega-workstation-v2{padding-left:0!important}"),'desktop workstation must recover full viewport width when the overlay menu is closed');
 must(navCss.includes('--r88-nav-width:420px')&&navCss.includes('.r88-navigator{position:absolute;inset:0 auto 0 0'),'instrument navigation geometry must use one edge-attached pop-out authority');
 must(shellCss.includes(".workstation-topbar{left:0!important;width:100%!important"),'topbar must fill the padded workstation rather than subtracting the rail twice');
