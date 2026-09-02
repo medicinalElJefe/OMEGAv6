@@ -118,18 +118,41 @@ export function InfinityTruthPlotR93({record,index}:{record:any;index:number}){
 }
 
 export function TransitionTruthPlotR93({record,nextRecord,title='Canonical transition'}:{record:any;nextRecord:any;title?:string}){
- return <section className='r93-truth-plot r93-transition'>
-  <header><div><span>PACKET → ADMITTED PACKET</span><b>{title}</b></div><code>STATE {record.stateId} → {nextRecord.stateId}</code></header>
-  <div className='r93-transition-grid'>{METRICS.map(([label,key])=>{const a=Number(record.metrics[key]),b=Number(nextRecord.metrics[key]),d=b-a;return <article key={key}><span>{label}</span><b>{fmt(a,4)} → {fmt(b,4)}</b><strong data-sign={d>0?'positive':d<0?'negative':'neutral'}>{d>=0?'+':''}{fmt(d,5)}</strong><div><i style={{width:`${cl(a)*100}%`}}/><em style={{width:`${cl(b)*100}%`}}/></div></article>})}</div>
-  <footer><span>All values are read from the two canonical packets.</span><b>No interpolation is presented as observation.</b></footer>
+ const deltas=METRICS.map(([label,key])=>({label,key,a:Number(record.metrics[key]),b:Number(nextRecord.metrics[key]),d:Number(nextRecord.metrics[key])-Number(record.metrics[key])}));
+ return <section className='r93-truth-plot r93-transition r95-transition-manifold'>
+  <header><div><span>EXACT STATE TRANSITION</span><b>{title}</b></div><code>STATE {record.stateId} → {nextRecord.stateId}</code></header>
+  <svg viewBox='0 0 1000 680' role='img' aria-label='Current and admitted-next canonical state manifolds with exact metric deltas'>
+   <CanonicalStateMandala record={record} previous={record} next={nextRecord}/>
+   <g className='r95-delta-ledger'>
+    {deltas.map((x,i)=><g key={x.key} transform={\`translate(\${720},\${110+i*70})\`}>
+      <text x='0' y='0' className='r95-delta-label'>{x.label}</text>
+      <text x='0' y='22' className='r95-delta-values'>{fmt(x.a,4)} → {fmt(x.b,4)}</text>
+      <text x='0' y='43' className={x.d>0?'r95-delta-positive':x.d<0?'r95-delta-negative':'r95-delta-neutral'}>{x.d>=0?'+':''}{fmt(x.d,5)}</text>
+     </g>)}
+   </g>
+  </svg>
+  <footer><span>Current and admitted-next packets share the same six named axes.</span><b>Delta values are exact packet subtraction · no interpolation or chart bars.</b></footer>
  </section>
 }
 
 export function ScaleTruthPlotR93({nodes}:{nodes:any[]}){
- const maxWeight=Math.max(1e-9,...nodes.map(n=>Number(n.weight)||0));
- return <section className='r93-truth-plot r93-scale'>
-  <header><div><span>COMPILER NODE OUTPUTS</span><b>Recursive scale hierarchy</b></div><code>{nodes.length} evaluated nodes</code></header>
-  <div className='r93-scale-chain'>{nodes.map((n,i)=><article key={n.scale}><code>{String(i+1).padStart(2,'0')}</code><div><b>{n.scale} · {n.name}</b><span>CΩ {fmt(n.C,3)} · Φ {fmt(n.Phi,3)} · q {fmt(n.q,3)} · Λ-share {fmt(n.burdenAllocation,3)}</span><small>{n.provenance}</small></div><strong>{fmt(n.weight,3)}</strong><i style={{width:`${cl((Number(n.weight)||0)/maxWeight)*100}%`}}/></article>)}</div>
-  <footer><span>bar = compiler node weight</span><b>Derived compiler outputs only · measured-scale binding remains separately gated</b></footer>
+ const count=Math.max(1,nodes.length),cx=500,cy=330,ringStep=210/Math.max(1,count-1);
+ return <section className='r93-truth-plot r93-scale r95-scale-manifold'>
+  <header><div><span>COMPILER NODE MANIFOLD</span><b>Recursive scale hierarchy</b></div><code>{nodes.length} evaluated nodes</code></header>
+  <svg viewBox='0 0 1000 680' role='img' aria-label='Recursive compiler nodes mapped as concentric evaluated scale states'>
+   {nodes.map((n,i)=>{const r=70+i*ringStep,a=-Math.PI/2+Number(n.Phi||0)*Math.PI*2,p=polar(cx,cy,r,a),weight=cl(Number(n.weight)||0),C=cl(Number(n.C)||0),q=cl(Number(n.q)||0);return <g key={n.scale} className='r95-scale-node'>
+    <circle cx={cx} cy={cy} r={r} className='r95-scale-ring'/>
+    <line x1={cx} y1={cy} x2={p.x} y2={p.y} className='r95-scale-spoke'/>
+    <circle cx={p.x} cy={p.y} r={6+10*weight} className='r95-scale-point'/>
+    <circle cx={p.x} cy={p.y} r={12+18*C} className='r95-scale-coherence'/>
+    <text x={p.x} y={p.y-22} textAnchor='middle' className='r95-scale-label'>{n.scale}</text>
+    <text x={p.x} y={p.y+30} textAnchor='middle' className='r95-scale-value'>w {fmt(weight,3)} · CΩ {fmt(C,3)} · q {fmt(q,3)}</text>
+   </g>})}
+   <circle cx={cx} cy={cy} r='48' className='r95-core'/>
+   <text x={cx} y={cy-4} textAnchor='middle' className='r95-core-state'>SCALE</text>
+   <text x={cx} y={cy+14} textAnchor='middle' className='r95-core-address'>{nodes.length} NODES</text>
+  </svg>
+  <div className='r95-scale-ledger'>{nodes.map((n,i)=><article key={n.scale}><code>{String(i+1).padStart(2,'0')}</code><div><b>{n.scale} · {n.name}</b><span>CΩ {fmt(n.C,3)} · Φ {fmt(n.Phi,3)} · q {fmt(n.q,3)} · Λ-share {fmt(n.burdenAllocation,3)} · weight {fmt(n.weight,3)}</span><small>{n.provenance}</small></div></article>)}</div>
+  <footer><span>radius = hierarchy order · angle = Φ · point radius = evaluated weight · halo radius = CΩ</span><b>Derived compiler outputs only · measured-scale binding remains separately gated</b></footer>
  </section>
 }
