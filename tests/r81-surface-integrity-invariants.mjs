@@ -36,7 +36,7 @@ must(surfaces.every(x=>navNames.includes(x))&&navNames.every(x=>surfaces.include
 must(workstation.includes("<SurfaceIntegrityR81 panel={panel} onRecover={()=>go('System')}>{content}</SurfaceIntegrityR81>"),'every active surface must mount inside R81 containment');
 must(integrity.includes('<PanelBoundary panel={panel}'),'surface failure must be isolated without crashing the whole build');
 must(integrity.includes("className='omega-surface-r81'"),'R81 surface wrapper missing');
-must(integrityCss.includes('overflow-x:auto')&&integrityCss.includes('max-width:100%'),'surface content must stay viewable rather than overlap the viewport');
+must(integrityCss.includes('overflow-x:clip')&&integrityCss.includes("table){\n display:block")&&integrityCss.includes('overflow-x:auto'),'surface content must stay contained while wide tables/tabs remain viewable');
 must(integrityCss.includes('.r43-workspace-tabs')&&integrityCss.includes('overflow-x:auto'),'deep-workspace tabs must remain reachable on narrow screens');
 must(integrityCss.includes('@media(max-width:900px)'),'R81 mobile containment missing');
 
