@@ -4,10 +4,12 @@ import {CAPABILITY_REALITY_LABEL} from './capabilityAuthority';
 import {effectiveCapabilityReality} from './operationalCapabilityRuntimeR45';
 import type {OmegaUiMode} from './SingleFrameRuntimeShellR27';
 import {OMEGA_ALL_ROUTES_R82,OMEGA_WORKSPACES_R82,validateExperienceRegistryR82} from './omegaExperienceRegistryR82';
+import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import './instrumentOSR62.css';
 
 type Props={uiMode:OmegaUiMode;onUiMode:(mode:OmegaUiMode)=>void;panel:string;onNavigate:(panel:string)=>void;record:any;modePolicy:string;modeCount:number;busy:string};
 type WorkspaceId='COMMAND'|'EXPLORE'|'INTELLIGENCE'|'EVIDENCE'|'BUILD'|'SYSTEM';
+type BrowserLayer='APPLICATIONS'|'SOFTWARE';
 const WORKSPACES=[
  {id:'COMMAND' as const,label:'Command',copy:'ask · work · connect',Icon:Command,routes:['Command Center','Workspace','Cockpit','Hybrid Link']},
  {id:'EXPLORE' as const,label:'Explore',copy:'matter · earth · motion · scale',Icon:Eye,routes:['Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Scale Compiler']},
@@ -21,7 +23,7 @@ const ALL=OMEGA_ALL_ROUTES_R82;
 const workspaceFor=(panel:string)=>WORKSPACES.find(x=>x.routes.includes(panel as never))||WORKSPACES[0];
 
 export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,modeCount,busy}:Props){
- const[open,setOpen]=useState(false),[active,setActive]=useState<WorkspaceId>(()=>workspaceFor(panel).id),[query,setQuery]=useState(''),navRef=useRef<HTMLElement|null>(null);
+ const[open,setOpen]=useState(false),[active,setActive]=useState<WorkspaceId>(()=>workspaceFor(panel).id),[query,setQuery]=useState(''),[browserLayer,setBrowserLayer]=useState<BrowserLayer>('APPLICATIONS'),navRef=useRef<HTMLElement|null>(null);
  useEffect(()=>{
   const media=window.matchMedia('(max-width: 900px)');
   const sync=()=>{const frame=uiMode==='MOBILE'?'mobile':uiMode==='DESKTOP'?'desktop':media.matches?'mobile':'desktop';document.documentElement.dataset.omegaFrame=frame};
@@ -39,17 +41,19 @@ export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,mod
   <aside className='r62-rail' aria-label='OMEGA application navigation'>
    <div className='r62-brand'><b>OMEGA V6</b><span>APPLICATIONS</span><small>{current.label} · {panel}</small></div>
    <button className='r62-home' onClick={()=>window.dispatchEvent(new CustomEvent('omega-home-request'))} aria-label='OMEGA home'><Home/><span>Home</span></button>
-   <button className='r62-menu' onClick={()=>{setActive(current.id);setOpen(true)}} aria-label='Browse all applications'><Menu/><span>All applications</span></button>
-   <nav ref={navRef}>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} data-workspace={w.id} className={current.id===w.id?'active':''} aria-pressed={current.id===w.id} title={`${w.label} — ${w.copy}`} onClick={()=>{setActive(w.id);setOpen(true)}}><I/><span>{w.label}</span></button>})}</nav>
+   <button className='r62-menu' onClick={()=>{setActive(current.id);setBrowserLayer('APPLICATIONS');setOpen(true)}} aria-label='Browse all applications and software systems'><Menu/><span>All applications</span></button>
+   <nav ref={navRef}>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} data-workspace={w.id} className={current.id===w.id?'active':''} aria-pressed={current.id===w.id} title={`${w.label} — ${w.copy}`} onClick={()=>{setActive(w.id);setBrowserLayer('APPLICATIONS');setOpen(true)}}><I/><span>{w.label}</span></button>})}</nav>
    <div className='r62-rail-state'><span>{busy?'RUNNING':'LIVE'}</span><b>{record?.metrics?.decision||'—'}</b><small>{modeCount} modes · {panel}</small></div>
   </aside>
   {open&&<div className='r62-overlay' role='presentation' onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false)}}>
    <section className='r62-drawer' role='dialog' aria-modal='true' aria-label='OMEGA application browser'>
-    <header><div><span>OMEGA APPLICATIONS</span><h2>{selected.label}</h2><p>{selected.copy}</p></div><button onClick={()=>setOpen(false)} aria-label='Close applications'><X/></button></header>
-    <nav className='r62-workspaces'>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} className={selected.id===w.id?'active':''} aria-pressed={selected.id===w.id} onClick={()=>{setActive(w.id);setQuery('')}}><I/><span><b>{w.label}</b><small>{w.routes.length} applications</small></span></button>})}</nav>
-    <label className='r62-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search every OMEGA application…'/></label>
-    <div className='r62-route-grid'>{routes.map(name=>{const reality=effectiveCapabilityReality(name);return <button key={name} className={panel===name?'active':''} aria-current={panel===name?'page':undefined} onClick={()=>go(name)}><span><b>{name}</b><small>{CAPABILITY_REALITY_LABEL[reality]}</small></span><Layers3/></button>})}</div>
-    <footer><span>Historical routes remain reachable through progressive disclosure · shared organization {MENU_ALIGNMENT_R82.routeCount}/44.</span><b>The active application owns the viewport.</b></footer>
+    <header><div><span>OMEGA SYSTEM BROWSER</span><h2>{browserLayer==='APPLICATIONS'?selected.label:'Complete Software'}</h2><p>{browserLayer==='APPLICATIONS'?selected.copy:'100 systems · 24 runtime families · 36 menu options · 18 capabilities · 24 V77 bins'}</p></div><button onClick={()=>setOpen(false)} aria-label='Close system browser'><X/></button></header><nav className='r83-browser-layer'><button className={browserLayer==='APPLICATIONS'?'active':''} onClick={()=>setBrowserLayer('APPLICATIONS')}>APPLICATIONS · 44</button><button className={browserLayer==='SOFTWARE'?'active':''} onClick={()=>setBrowserLayer('SOFTWARE')}>SOFTWARE SYSTEM · 100+</button></nav>
+    {browserLayer==='APPLICATIONS'?<>
+     <nav className='r62-workspaces'>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} className={selected.id===w.id?'active':''} aria-pressed={selected.id===w.id} onClick={()=>{setActive(w.id);setQuery('')}}><I/><span><b>{w.label}</b><small>{w.routes.length} applications</small></span></button>})}</nav>
+     <label className='r62-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search every OMEGA application…'/></label>
+     <div className='r62-route-grid'>{routes.map(name=>{const reality=effectiveCapabilityReality(name);return <button key={name} className={panel===name?'active':''} aria-current={panel===name?'page':undefined} onClick={()=>go(name)}><span><b>{name}</b><small>{CAPABILITY_REALITY_LABEL[reality]}</small></span><Layers3/></button>})}</div>
+     <footer><span>Historical routes remain reachable through progressive disclosure · shared organization {MENU_ALIGNMENT_R82.routeCount}/44.</span><b>The active application owns the viewport.</b></footer>
+    </>:<OmegaSystemInventoryR83 compact onNavigate={go}/>} 
    </section>
   </div>}
  </>;
