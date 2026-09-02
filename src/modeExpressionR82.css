@@ -1,0 +1,10 @@
+.mode-expression-r82{display:grid;gap:8px;border:1px solid rgba(145,190,183,.18);border-radius:14px;background:#050d11;overflow:hidden}
+.mer82-stage{position:relative;min-height:clamp(360px,52dvh,620px);background:#02070a}
+.mer82-stage canvas{display:block;width:100%;height:100%;min-height:inherit}
+.mer82-badge{position:absolute;left:12px;right:12px;bottom:12px;display:grid;gap:3px;padding:10px 12px;border:1px solid rgba(208,181,111,.22);border-radius:10px;background:rgba(3,10,13,.78);backdrop-filter:blur(10px);pointer-events:none}
+.mer82-badge span{font:700 7px ui-monospace,monospace;letter-spacing:.13em;color:#d8b66c}
+.mer82-badge b{font-size:14px;font-weight:620}.mer82-badge small{font:8px/1.4 ui-monospace,monospace;color:#8da5a1}
+.mode-expression-r82>footer{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:7px;padding:8px 10px;border-top:1px solid rgba(145,190,183,.12);font:7px/1.45 ui-monospace,monospace;color:#7d9490}
+.mode-expression-r82>footer span{padding:6px 8px;border:1px solid rgba(145,190,183,.11);border-radius:8px;background:rgba(255,255,255,.015)}
+.mode-expression-r82>footer b{color:#c6d6d2}.mode-expression-r82>footer .boundary{color:#9caeaa}
+@media(max-width:720px){.mer82-stage{min-height:clamp(320px,48dvh,470px)}.mode-expression-r82>footer{grid-template-columns:1fr}.mer82-badge{left:8px;right:8px;bottom:8px}}
