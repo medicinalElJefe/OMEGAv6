@@ -106,8 +106,10 @@ export default function WovenContinuityFieldR77({address,record,onAddress}:Props
  const [renderer,setRenderer]=useState<'WEBGL2'|'CANVAS2D'|'UNAVAILABLE'>('WEBGL2');
  const [budget,setBudget]=useState(()=>wovenBudgetR77());
  const snapshot=useMemo(()=>compileWovenContinuityR77(record),[record]);
+ const snapshotRef=useRef(snapshot);
  const virtualAddress=composeVirtualAddressR77(shell,address);
  useEffect(()=>{liveRef.current={address,record}},[address,record]);
+ useEffect(()=>{snapshotRef.current=snapshot},[snapshot]);
  useEffect(()=>{shellRef.current=shell},[shell]);
  useEffect(()=>{const sync=()=>setBudget(wovenBudgetR77());window.addEventListener('resize',sync,{passive:true});return()=>window.removeEventListener('resize',sync)},[]);
 
@@ -177,7 +179,7 @@ export default function WovenContinuityFieldR77({address,record,onAddress}:Props
     refineCursor+=batch;
     if(refineCursor>=WOVEN_CANONICAL_COUNT)setRefined(true);
    }
-   const current=liveRef.current,s=compileWovenContinuityR77(current.record),c=decodeAddress(current.address);
+   const current=liveRef.current,s=snapshotRef.current,c=decodeAddress(current.address);
    gl.useProgram(p);gl.clear(gl.COLOR_BUFFER_BIT);
    gl.uniform1f(U.time,(now-started)/1000);
    gl.uniform1f(U.aspect,canvas.width/Math.max(1,canvas.height));
