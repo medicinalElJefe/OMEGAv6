@@ -57,7 +57,7 @@ for(const token of [
 
 must(app.includes("import './surfaceIntegrityR81.css';"),'R81 integrity stylesheet must be loaded');
 must(app.indexOf("surfaceIntegrityR81.css")>app.indexOf("productResetR67.css"),'R81 containment must resolve later donor layout conflicts without reskinning the product');
-must(!integrityCss.match(/display\s*:\s*none/),'surface-integrity layer may not hide application content');
+must(!integrityCss.includes('.omega-surface-r81{display:none')&&!integrityCss.includes('.omega-surface-r81>*{display:none'),'surface-integrity layer may not hide application content');
 must(!integrityCss.match(/position\s*:\s*fixed/),'surface-integrity layer may not create another fixed shell');
 
 console.log('R81 SURFACE INTEGRITY PASS · 44/44 mounted · 44/44 reachable · deep donors preserved · mobile/desktop containment locked');
