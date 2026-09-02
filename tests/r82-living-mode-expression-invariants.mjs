@@ -5,6 +5,7 @@ const registry=read('src/omegaExperienceRegistryR82.ts');
 const home=read('src/OmegaHomeR71.tsx');
 const homeCss=read('src/omegaHomeR71.css');
 const shell=read('src/InstrumentOSShellR62.tsx');
+const nav=read('src/OmegaSideNavigatorR88.tsx');
 const modes=read('src/SourceBackedModesPanelR21.tsx');
 const modeRuntime=read('src/modeExpressionRuntimeR82.ts');
 const modeCanvas=read('src/ModeExpressionCanvasR82.tsx');
@@ -22,8 +23,8 @@ must(!home.includes('.slice(0,18)')&&!home.includes('.slice(0,10)'),'Home may no
 must(home.includes('projection.signature')&&home.includes('projection.intent'),'Home must explain the visual law selected by each projection button');
 must(homeCss.includes('.r71-modes')&&homeCss.includes('overflow-x:auto'),'all projection buttons must remain reachable without overlap');
 
-must(shell.includes('OMEGA_WORKSPACES_R82')&&shell.includes('R82 menu registry mismatch'),'workstation menu must be locked against the same shared organization as Home');
-must(shell.includes('Historical routes remain reachable through progressive disclosure'),'deep historical route reachability must remain explicit');
+must(shell.includes('OmegaSideNavigatorR88')&&nav.includes('OMEGA_WORKSPACES_R82')&&nav.includes('OMEGA_ALL_ROUTES_R82'),'workstation menu must be locked to the same shared organization as Home');
+must(nav.includes('One scroll owner')&&nav.includes('44 canonical routes'),'deep historical route reachability must remain explicit');
 
 for(const family of ['COHERENCE','FORECAST','PRUNE','RELATIVITY','FLOW','MEMORY','PROOF','TOPOLOGY','COMPRESSION','TRAVERSAL','RECURSION','GOVERNANCE','SCALE','LIGHT','GENERIC'])must(modeRuntime.includes(`'${family}'`),`mode expression family missing ${family}`);
 must(modeRuntime.includes("metadataOnly?'Visual expression is derived only from catalog metadata."),'registry-only mode visuals must remain explicitly non-executed');

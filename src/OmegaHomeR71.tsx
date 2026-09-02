@@ -10,6 +10,7 @@ import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import {compileFullOverallModePlanR79,compactModePlanR79} from './fullOverallModeOrchestratorR79';
 import {OMEGA_ALL_ROUTES_R82,OMEGA_FIELD_PROJECTIONS_R82,OMEGA_WORKSPACES_R82,projectionForR82,type OmegaFieldProjectionR82,type OmegaWorkspaceIdR82} from './omegaExperienceRegistryR82';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
+import OmegaSideNavigatorR88 from './OmegaSideNavigatorR88';
 import {CANON_AUTHORITY_COUNT} from './allModesAuthority';
 import OmegaIntentWorkbenchR85 from './OmegaIntentWorkbenchR85';
 import './omegaHomeR71.css';
@@ -35,13 +36,13 @@ export default function OmegaHomeR71({onEnter}:Props){
  const[ready,setReady]=useState(false),[domain,setDomain]=useState<DomainId>(()=>{try{const x=localStorage.getItem('omega.r82.workspace') as DomainId|null;return x&&OMEGA_WORKSPACES_R82.some(w=>w.id===x)?x:'EXPLORE'}catch{return'EXPLORE'}}),[query,setQuery]=useState(''),[showApps,setShowApps]=useState(false),[browserLayer,setBrowserLayer]=useState<'APPLICATIONS'|'SOFTWARE'>('APPLICATIONS');
  const[mode,setMode]=useState<FieldMode>(()=>{try{const x=localStorage.getItem('omega.r82.homeProjection') as FieldMode|null;return x&&OMEGA_FIELD_PROJECTIONS_R82.some(m=>m.id===x)?x:'FIELD'}catch{return'FIELD'}}),[selectedRole,setSelectedRole]=useState<OperatorColorRole>('OMEGA');
  const[prompt,setPrompt]=useState(()=>localState.read('omega.b015.chatDraft.v1','')),[reply,setReply]=useState(''),[busy,setBusy]=useState(false),[status,setStatus]=useState<any>(null),[hybrid,setHybrid]=useState<any>(null);
- const[showSystemMap,setShowSystemMap]=useState(()=>{try{const saved=localStorage.getItem('omega.r83.systemMapOpen');if(saved!==null)return saved==='true';return !window.matchMedia('(max-width: 820px)').matches}catch{return true}});
+ const[showSystemMap,setShowSystemMap]=useState(()=>{try{const saved=localStorage.getItem('omega.r88.systemMapOpen');if(saved!==null)return saved==='true';return false}catch{return true}});
  useEffect(()=>{let live=true;initCorpusPack().then(()=>live&&setReady(true)).catch(()=>live&&setReady(false));return()=>{live=false}},[]);
  useEffect(()=>{localState.write('omega.v6.address',address)},[address]);
  useEffect(()=>{try{localStorage.setItem('omega.r82.workspace',domain)}catch{}},[domain]);
  useEffect(()=>{try{localStorage.setItem('omega.r82.homeProjection',mode)}catch{}},[mode]);
  useEffect(()=>{localState.write('omega.b015.chatDraft.v1',prompt)},[prompt]);
- useEffect(()=>{try{localStorage.setItem('omega.r83.systemMapOpen',String(showSystemMap))}catch{}},[showSystemMap]);
+ useEffect(()=>{try{localStorage.setItem('omega.r88.systemMapOpen',String(showSystemMap))}catch{}},[showSystemMap]);
  useEffect(()=>{if(!showApps)return;const prior=document.body.style.overflow;document.body.style.overflow='hidden';const key=(e:KeyboardEvent)=>{if(e.key==='Escape')setShowApps(false)};window.addEventListener('keydown',key);return()=>{document.body.style.overflow=prior;window.removeEventListener('keydown',key)}},[showApps]);
  useEffect(()=>{let live=true;const load=async()=>{try{const[s,h]=await Promise.all([api.get<any>('/api/status'),api.get<any>('/api/hybrid/status')]);if(live){setStatus(s.data||null);setHybrid(h.data||null)}}catch{if(live){setStatus(null);setHybrid(null)}}};void load();const id=window.setInterval(load,30000);return()=>{live=false;window.clearInterval(id)}},[]);
  const record=useMemo(()=>ready?corpusState(address):null,[ready,address]);
@@ -56,13 +57,14 @@ export default function OmegaHomeR71({onEnter}:Props){
  const allRoutes=useMemo(()=>[...OMEGA_ALL_ROUTES_R82],[]),activeWorkspace=OMEGA_WORKSPACES_R82.find(x=>x.id===domain)||OMEGA_WORKSPACES_R82[0];
  const visibleRoutes=useMemo(()=>{const q=query.trim().toLowerCase();if(q)return allRoutes.filter(x=>x.toLowerCase().includes(q));return [...activeWorkspace.routes]},[query,activeWorkspace,allRoutes]);
  const enter=(panel:string)=>{if(!allRoutes.includes(panel))return;setShowApps(false);localState.write('omega.v6.panel',panel);localState.write('omega.v6.modePolicy','SOURCE_BACKED');onEnter(panel)};
- const openApplications=(workspace:DomainId=domain)=>{setDomain(workspace);setQuery('');setBrowserLayer('APPLICATIONS');setShowApps(true)};
- const openSoftware=()=>{setQuery('');setBrowserLayer('SOFTWARE');setShowApps(true)};
+ const openApplications=(workspace:DomainId=domain)=>{setDomain(workspace);setQuery('');setBrowserLayer('APPLICATIONS');window.dispatchEvent(new CustomEvent('omega-r88-open-navigator',{detail:{layer:'APPLICATIONS'}}))};
+ const openSoftware=()=>{setQuery('');setBrowserLayer('SOFTWARE');window.dispatchEvent(new CustomEvent('omega-r88-open-navigator',{detail:{layer:'SOFTWARE'}}))};
  const targetRole=(role:OperatorColorRole)=>{if(!ready||!route.length)return;let best=address,bestWeight=-1;for(const a of route){const candidate=corpusState(a);const w=calculusVisualLaw(candidate).operatorWeights[role];if(w>bestWeight){bestWeight=w;best=a}}setSelectedRole(role);setAddress(best)};
  const ask=async()=>{if(!record||!modes||!modePlan||!prompt.trim()||busy)return;setBusy(true);setReply('');try{const context={address,stateId:record.stateId,coords,decision:record.metrics.decision,metrics:record.metrics,nextAddress,modePolicy:'SOURCE_BACKED_ALL_AVAILABLE',appliedModeCount:modes.appliedCount,gatedModeCount:modes.gatedCount,fullOverallModePlan:compactModePlanR79(modePlan),unified:{coherence:unified?.unifiedCoherence,motionRelativity:unified?.motionRelativity},responseContract:{plainLanguageFirst:true,showRouteBeforeGeneration:true,doNotInventMissingEvidence:true,preserveTruthBoundary:true}};await api.post('/api/route-preview',{text:prompt,context});const r=await api.post<any>('/api/chat',{text:prompt,context});setReply(String(r.data?.reply||'No response returned.'))}catch(e:any){setReply(e?.message||'No answer fabricated; provider/runtime path failed.')}finally{setBusy(false)}};
  const nativeOnline=Boolean(hybrid?.nativeExecutionClaimed===true&&(hybrid?.authenticatedHeartbeat===true||hybrid?.heartbeatAuthenticated===true||String(hybrid?.connectionState||hybrid?.state||'').toUpperCase()==='PC ONLINE'));
  const hybridLabel=nativeOnline?'PC ONLINE':hybrid?.browserCredentialReady||hybrid?.paired?'BROWSER CREDENTIAL READY · PC UNPROVEN':'PC NOT PROVEN ONLINE';
  return <main className='r71-home' data-color-authority='ALPHA BASE CONSTRUCT PRUNE OMEGA'>
+  <OmegaSideNavigatorR88 onNavigate={enter}/>
   <header className='r71-topbar'>
    <button className='r71-brand' onClick={()=>{setDomain('EXPLORE');setShowApps(false)}}><span className='r71-mark'/><span><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild}</small></span></button>
    <nav className='r71-domains' aria-label='Application workspaces'>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} data-role={w.role} onClick={()=>openApplications(w.id)}><i style={{background:law?operatorColor(law,w.role,.95):undefined}}/><span>{w.label}</span></button>)}</nav>
