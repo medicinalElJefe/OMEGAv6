@@ -43,6 +43,7 @@ import './workstationV2.css';
 import './responsivePolishR88.css';
 import './mobileVisualFirstR89.css';
 import './surfaceHierarchyR90.css';
+import './operationalSurfaceRefinementR91.css';
 
 export const OMEGA_SURFACES=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'] as const;
 type Panel=typeof OMEGA_SURFACES[number];
