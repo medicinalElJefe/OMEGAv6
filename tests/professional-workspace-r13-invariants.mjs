@@ -20,6 +20,6 @@ assert(shellCss.includes('.r62-overlay{position:fixed')&&shellCss.includes('.r62
 assert(shellCss.includes('@media(max-width:900px)')&&resetCss.includes('@media(max-width:900px)'),'navigator and product must have mobile-specific containment');
 assert(resetCss.includes('.r58-display-stage{min-height:calc(100dvh - 230px)'),'visual instruments must receive dominant viewport space');
 assert(resetCss.includes('.workstation-identity small{display:none!important}'),'legacy telemetry pressure must not dominate the workstation header');
-assert(workstation.includes('padding-right:330px'),'historical donor pressure point remains detectable until the legacy stylesheet itself is retired');
+assert(!workstation.includes('padding-right:330px'),'obsolete donor right-padding must stay retired so the active application owns the full viewport');
 assert(!app.includes('@appdeploy/client')&&!shell.includes('@appdeploy/client')&&!resetCss.includes('@appdeploy/client'),'navigator must remain sovereign-provider portable');
 console.log('PASS professional-workspace invariant · readable application navigation + viewport-first authority accepted');
