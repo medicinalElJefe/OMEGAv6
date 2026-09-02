@@ -15,7 +15,7 @@ export default function SurfaceProvenanceR94({surface}:{surface:string}){
    <section><span>ACTION AUTHORITY</span><p>{p.actionAuthority}</p></section>
    <section><span>PROOF</span><p>{p.proof}</p></section>
    <section><span>FORBIDDEN CLAIM</span><p>{p.forbidden}</p></section>
-   {p.optionalRepresentations?.length>0&&<section className='r94-representations'><span>OPTIONAL REPRESENTATIONS</span><div>{p.optionalRepresentations.map(x=><code key={x}>{x}</code>)}</div><p>These may visualize or explain bounded source data. They never become observations or independent state authority.</p></section>}
+   {(p.optionalRepresentations?.length??0)>0&&<section className='r94-representations'><span>OPTIONAL REPRESENTATIONS</span><div>{p.optionalRepresentations.map(x=><code key={x}>{x}</code>)}</div><p>These may visualize or explain bounded source data. They never become observations or independent state authority.</p></section>}
   </div>
  </details>
 }
