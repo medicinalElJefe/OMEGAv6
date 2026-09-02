@@ -11,6 +11,7 @@ import {compileFullOverallModePlanR79,compactModePlanR79} from './fullOverallMod
 import {OMEGA_ALL_ROUTES_R82,OMEGA_FIELD_PROJECTIONS_R82,OMEGA_WORKSPACES_R82,projectionForR82,type OmegaFieldProjectionR82,type OmegaWorkspaceIdR82} from './omegaExperienceRegistryR82';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import {CANON_AUTHORITY_COUNT} from './allModesAuthority';
+import OmegaIntentWorkbenchR85 from './OmegaIntentWorkbenchR85';
 import './omegaHomeR71.css';
 
 type Props={onEnter:(panel:string)=>void};
@@ -83,6 +84,8 @@ export default function OmegaHomeR71({onEnter}:Props){
    <header><div><span>MAIN NAVIGATION</span><b>Everything stays reachable from here.</b></div><div><button onClick={()=>openApplications()}><Search/>All 44 applications</button><button onClick={openSoftware}><Blocks/>Complete software system</button></div></header>
    <div>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} onClick={()=>openApplications(w.id)} style={{'--workspace-color':law?operatorColor(law,w.role,.95):undefined} as React.CSSProperties}><i/><span><b>{w.label}</b><small>{w.copy}</small></span><strong>{w.routes.length}<small>apps</small></strong></button>)}</div>
   </section>
+  {record&&<OmegaIntentWorkbenchR85 record={record} address={address} currentPanel='Home' onAddress={setAddress} onNavigate={enter}/>} 
+
   <section className='r71-workspace'>
    <section className='r71-field-panel'>
     <div className='r71-field-toolbar'>
