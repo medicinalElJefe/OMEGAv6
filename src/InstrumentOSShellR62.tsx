@@ -31,7 +31,7 @@ export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,mod
   if(uiMode==='AUTO')media.addEventListener('change',sync);
   return()=>{if(uiMode==='AUTO')media.removeEventListener('change',sync)};
  },[uiMode]);
- useEffect(()=>{if(!open)return;const prior=document.body.style.overflow;document.body.style.overflow='hidden';const key=(e:KeyboardEvent)=>{if(e.key==='Escape')setOpen(false)};window.addEventListener('keydown',key);return()=>{document.body.style.overflow=prior;window.removeEventListener('keydown',key)}},[open]);
+ useEffect(()=>{if(!open){delete document.documentElement.dataset.omegaBrowserOpen;return}const prior=document.body.style.overflow;document.body.style.overflow='hidden';document.documentElement.dataset.omegaBrowserOpen='true';const key=(e:KeyboardEvent)=>{if(e.key==='Escape')setOpen(false)};window.addEventListener('keydown',key);return()=>{document.body.style.overflow=prior;delete document.documentElement.dataset.omegaBrowserOpen;window.removeEventListener('keydown',key)}},[open]);
  const current=workspaceFor(panel);
  useEffect(()=>{navRef.current?.querySelector<HTMLElement>(`[data-workspace="${current.id}"]`)?.scrollIntoView({block:'nearest',inline:'nearest'})},[current.id]);
  const selected=WORKSPACES.find(x=>x.id===active)||current;
@@ -41,13 +41,13 @@ export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,mod
   <aside className='r62-rail' aria-label='OMEGA application navigation'>
    <div className='r62-brand'><b>OMEGA V6</b><span>APPLICATIONS</span><small>{current.label} · {panel}</small></div>
    <button className='r62-home' onClick={()=>window.dispatchEvent(new CustomEvent('omega-home-request'))} aria-label='OMEGA home'><Home/><span>Home</span></button>
-   <button className='r62-menu' onClick={()=>{setActive(current.id);setBrowserLayer('APPLICATIONS');setOpen(true)}} aria-label='Browse all applications and software systems'><Menu/><span>All applications</span></button>
+   <button className='r62-menu' onClick={()=>{setActive(current.id);setBrowserLayer('APPLICATIONS');setOpen(true)}} aria-label='Browse all applications and software systems'><Menu/><span>Browse</span></button>
    <nav ref={navRef}>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} data-workspace={w.id} className={current.id===w.id?'active':''} aria-pressed={current.id===w.id} title={`${w.label} — ${w.copy}`} onClick={()=>{setActive(w.id);setBrowserLayer('APPLICATIONS');setOpen(true)}}><I/><span>{w.label}</span></button>})}</nav>
    <div className='r62-rail-state'><span>{busy?'RUNNING':'LIVE'}</span><b>{record?.metrics?.decision||'—'}</b><small>{modeCount} modes · {panel}</small></div>
   </aside>
   {open&&<div className='r62-overlay' role='presentation' onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false)}}>
    <section className='r62-drawer' role='dialog' aria-modal='true' aria-label='OMEGA application browser'>
-    <header><div><span>OMEGA SYSTEM BROWSER</span><h2>{browserLayer==='APPLICATIONS'?selected.label:'Complete Software'}</h2><p>{browserLayer==='APPLICATIONS'?selected.copy:'100 systems · 24 runtime families · 36 menu options · 18 capabilities · 24 V77 bins'}</p></div><button onClick={()=>setOpen(false)} aria-label='Close system browser'><X/></button></header><nav className='r83-browser-layer'><button className={browserLayer==='APPLICATIONS'?'active':''} onClick={()=>setBrowserLayer('APPLICATIONS')}>APPLICATIONS · 44</button><button className={browserLayer==='SOFTWARE'?'active':''} onClick={()=>setBrowserLayer('SOFTWARE')}>SOFTWARE SYSTEM · 100+</button></nav>
+    <header><div><span>OMEGA SYSTEM BROWSER</span><h2>{browserLayer==='APPLICATIONS'?selected.label:'Complete Software'}</h2><p>{browserLayer==='APPLICATIONS'?selected.copy:'100 systems · 24 runtime families · 57 local-host rows · 36 menu options · 18 capabilities · archives · 24 V77 bins'}</p></div><button onClick={()=>setOpen(false)} aria-label='Close system browser'><X/></button></header><nav className='r83-browser-layer'><button className={browserLayer==='APPLICATIONS'?'active':''} onClick={()=>setBrowserLayer('APPLICATIONS')}>APPLICATIONS · 44</button><button className={browserLayer==='SOFTWARE'?'active':''} onClick={()=>setBrowserLayer('SOFTWARE')}>SOFTWARE SYSTEM · 100+</button></nav>
     {browserLayer==='APPLICATIONS'?<>
      <nav className='r62-workspaces'>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} className={selected.id===w.id?'active':''} aria-pressed={selected.id===w.id} onClick={()=>{setActive(w.id);setQuery('')}}><I/><span><b>{w.label}</b><small>{w.routes.length} applications</small></span></button>})}</nav>
      <label className='r62-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search every OMEGA application…'/></label>
