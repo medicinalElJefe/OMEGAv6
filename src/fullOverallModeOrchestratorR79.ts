@@ -150,13 +150,13 @@ export function compileFullOverallModePlanR79(record:any,panel:string,text=''):F
  const intents=inferIntents(panel,text);
  const intent=intents[0];
  const explicitAllModes=intents.includes('ALL_MODES');
- const patternPool=explicitAllModes?[]:intents.flatMap(x=>x==='GENERAL'?[/Unified/i,/Continuity/i,/Guidance/i,/Comprehension/i,/Truth/i]:(x==='ALL_MODES'?[]:(PACKS[x as Exclude<OmegaIntentR79,'GENERAL'|'ALL_MODES'>]||[])));
- const seen=new Set<string>(),patterns=patternPool.filter(re=>{const key=re.source+'/'+re.flags;if(seen.has(key))return false;seen.add(key);return true});
+ const patternGroups=explicitAllModes?[]:intents.map(x=>x==='GENERAL'?[/Unified/i,/Continuity/i,/Guidance/i,/Comprehension/i,/Truth/i]:(x==='ALL_MODES'?[]:(PACKS[x as Exclude<OmegaIntentR79,'GENERAL'|'ALL_MODES'>]||[]))).filter(x=>x.length);
 
  const ranked=catalog.results.map((row:any)=>{
   const hay=`${row.name} ${row.category} ${row.operator} ${row.algebra} ${row.calculus} ${row.purpose||''} ${row.dimensionFrame||''} ${row.notes||''}`;
   const core=CORE_PATTERNS.some(re=>re.test(hay));
-  const intentMatch=explicitAllModes?1:regexScore(hay,patterns);
+  const groupScores=patternGroups.map(group=>regexScore(hay,group)),matchedGroups=groupScores.filter(x=>x>0).length;
+  const intentMatch=explicitAllModes?1:clamp01(Math.max(0,...groupScores)+Math.max(0,matchedGroups-1)*.04);
   const priorityBoost=row.priority==='kernel'?.24:row.priority==='core'?.18:row.priority==='support'?.08:0;
   const relevance=clamp01(.34*Number(row.score||0)+.46*intentMatch+priorityBoost);
   return{row,core,intentMatch,relevance};
