@@ -1,7 +1,7 @@
 import {useMemo,useState} from 'react';
 import {Archive,Blocks,ChevronRight,Grid3X3,Search,Settings2,ShieldCheck} from 'lucide-react';
 import {FAMILIES} from './systemAtlasRuntime';
-import {MASTER_CAPABILITIES_R83,MASTER_MENU_OPTIONS_R83,MASTER_MENUS_R83,MASTER_SYSTEMS_R83,routeForMasterMenuR83,routeForSystemR83} from './softwareMasterLedgerR83';
+import {MASTER_CAPABILITIES_R83,MASTER_MENU_OPTIONS_R83,MASTER_SYSTEMS_R83,routeForCapabilityR83,routeForMenuOptionR83,routeForSystemR83} from './softwareMasterLedgerR83';
 import {V77_BINS_R83} from './v77BinLedgerR83';
 import './systemInventoryR83.css';
 
@@ -36,8 +36,8 @@ export default function OmegaSystemInventoryR83({onNavigate,compact=false,initia
   <div className='r83-inventory-grid' data-tab={tab}>
    {tab==='SYSTEMS'&&systems.map(x=>{const route=routeForSystemR83(x);return <button key={x.id} onClick={()=>go(route,'omega.r83.systemFocus',x.id)}><code>{x.id}</code><span><b>{x.artifact}</b><small>{x.family} · {x.role}</small><em>{x.capability}</em></span><strong>{x.disposition}<small>{route}</small></strong><ChevronRight/></button>})}
    {tab==='FAMILIES'&&families.map(x=><button key={x.id} onClick={()=>go(x.target||'System Atlas','omega.r83.familyFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.invariant} · {x.role}</small><em>{x.inventoryPurpose}</em></span><strong>{x.status}<small>{x.target}</small></strong><ChevronRight/></button>)}
-   {tab==='MENUS'&&options.map(x=>{const route=routeForMasterMenuR83(x.topMenu);return <button key={x.optionId} onClick={()=>go(route,'omega.r83.menuOptionFocus',x.optionId)}><code>{x.optionId}</code><span><b>{x.label}</b><small>{x.topMenu} · default {x.default}</small><em>{x.output}</em></span><strong>{x.risk||'—'}<small>{route}</small></strong><ChevronRight/></button>})}
-   {tab==='CAPABILITIES'&&capabilities.map(x=>{const route=routeForMasterMenuR83(x.menu);return <button key={x.id} onClick={()=>go(route,'omega.r83.capabilityFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.menu} · {x.stateTier}</small><em>{x.output}</em></span><strong>{x.upgradeLevel||'—'}<small>{route}</small></strong><ChevronRight/></button>})}
+   {tab==='MENUS'&&options.map(x=>{const route=routeForMenuOptionR83(x);return <button key={x.optionId} onClick={()=>go(route,'omega.r83.menuOptionFocus',x.optionId)}><code>{x.optionId}</code><span><b>{x.label}</b><small>{x.topMenu} · default {x.default}</small><em>{x.output}</em></span><strong>{x.risk||'—'}<small>{route}</small></strong><ChevronRight/></button>})}
+   {tab==='CAPABILITIES'&&capabilities.map(x=>{const route=routeForCapabilityR83(x);return <button key={x.id} onClick={()=>go(route,'omega.r83.capabilityFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.menu} · {x.stateTier}</small><em>{x.output}</em></span><strong>{x.upgradeLevel||'—'}<small>{route}</small></strong><ChevronRight/></button>})}
    {tab==='V77'&&bins.map(x=>{const route=BIN_ROUTE[x.bin]||'System Atlas';return <button key={x.id} onClick={()=>go(route,'omega.r83.binFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.direction} · V77 donor lineage</small><em>{x.sourceTitle}</em></span><strong>DONOR<small>{route}</small></strong><ChevronRight/></button>})}
   </div>
   <footer><ShieldCheck/><span><b>Truth boundary:</b> application routing, current runtime execution, historical donor presence and design-ledger intent remain separate statuses. Nothing here promotes an archive donor merely because it is visible.</span><div><Blocks/>100-system ledger<Archive/>24 V77 bins<Grid3X3/>24 runtime families<Settings2/>36 control options</div></footer>
