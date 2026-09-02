@@ -14,7 +14,7 @@ must(orchestrator.includes("'ALL_MODES'"),'explicit ALL MODES intent missing');
 must(orchestrator.includes('RESIDENT_KERNEL_INTENT_DEEP_BACKGROUND_CATALOG'),'resource strategy missing');
 must(orchestrator.includes('does not alter UI ownership'),'R79 non-visual truth boundary missing');
 must(corpus.includes('dimensionFrame:spec.dimension_frame'),'complete mode metadata missing');
-must(workstation.includes('compileFullOverallModePlanR79(record,panel,prompt)'),'workstation orchestration missing');
+must(workstation.includes('compileFullOverallModePlanR79(record,panel,prompt)')||workstation.includes('compileFullOverallModePlanR79(record,panel,prompt+workflowContext)'),'workstation orchestration missing');
 must(workstation.includes('fullOverallModePlan:modePlan?compactModePlanR79(modePlan):null'),'runtime state plan missing');
 must(workstation.includes('fullOverallModePlan:compactModePlanR79(modePlan)'),'assistant context plan missing');
 must(home.includes('compileFullOverallModePlanR79(record,modePanel,prompt)'),'home orchestration missing');
