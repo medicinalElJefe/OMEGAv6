@@ -6,9 +6,11 @@ for(const token of ['observerBeta?:number','observerProjection','gamma','doppler
 assert.match(field,/mode==='RELATIVITY'/);
 assert.match(field,/projection, not canonical state/);
 assert.match(rel,/observerBeta=\{observerBeta\}/g);
-assert.equal((rel.match(/observerBeta=\{observerBeta\}/g)||[]).length,2,'both primary Relativity fields must consume beta');
+assert.equal((rel.match(/observerBeta=\{observerBeta\}/g)||[]).length,1,'R93 keeps one optional observer-field renderer; production primary views are workbook/packet truth');
+assert.match(rel,/DimensionalRelativityPanelR24/);
+assert.match(rel,/TransitionTruthPlotR93/);
 assert.match(rel,/do not rewrite the canonical packet/);
 assert.match(rel,/does not create new physical dimensions|do not create new physical dimensions/);
 assert.doesNotMatch(rel,/setAddress\(observerBeta|onAddress\(observerBeta/);
 assert.doesNotMatch(field,/corpusState\(observerBeta/);
-console.log('R41 relativity renderer causality invariants PASS');
+console.log('R41/R93 relativity causality PASS · beta still governs optional projection while workbook and packet truth own primary displays');
