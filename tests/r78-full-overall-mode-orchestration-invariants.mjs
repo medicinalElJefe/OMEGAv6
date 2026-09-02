@@ -1,0 +1,47 @@
+import fs from 'node:fs';
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const orchestrator=fs.readFileSync('src/fullOverallModeOrchestratorR78.ts','utf8');
+const corpus=fs.readFileSync('src/corpusRuntime.ts','utf8');
+const workstation=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const home=fs.readFileSync('src/OmegaHomeR71.tsx','utf8');
+const modes=fs.readFileSync('src/SourceBackedModesPanelR21.tsx','utf8');
+const deck=fs.readFileSync('src/OmegaCommandDeck.tsx','utf8');
+const app=fs.readFileSync('src/App.tsx','utf8');
+const css=fs.readFileSync('src/truthCourageR78.css','utf8');
+
+must(orchestrator.includes("schema:'OMEGA_FULL_OVERALL_MODE_PLAN_R78'"),'R78 plan schema missing');
+must(orchestrator.includes("'ALL_MODES'"),'explicit ALL MODES intent missing');
+must(orchestrator.includes('Full Overall Canon'),'Full Overall Canon must be in resident core patterns');
+must(orchestrator.includes('Mode 188'),'Mode 188 must be in resident core patterns');
+must(orchestrator.includes('Dewey Calculus'),'Dewey Calculus must be in resident core patterns');
+must(orchestrator.includes('Relational Skin Calculus'),'RSC must be in resident core patterns');
+must(orchestrator.includes('Truth-Only Orientation'),'truth orientation must be in resident core patterns');
+must(orchestrator.includes('RESIDENT_KERNEL_INTENT_DEEP_BACKGROUND_CATALOG'),'resource-aware scheduling strategy missing');
+must(orchestrator.includes('Mode selection is orchestration, not proof.'),'truth boundary missing');
+must(orchestrator.includes("sourceBackedGated:summary.gatedCount"),'gated source-backed formulas must remain explicit');
+must(orchestrator.includes("catalogCount:catalog.count"),'full 179 registry must remain evaluated');
+must(corpus.includes('dimensionFrame:spec.dimension_frame'),'mode dimension frame metadata must be exposed');
+must(corpus.includes('purpose:spec.primary_purpose'),'mode purpose metadata must be exposed');
+must(corpus.includes('implementation:spec.implementation_mapping'),'mode implementation mapping must be exposed');
+must(corpus.includes('notes:spec.notes'),'mode source notes must survive');
+must(workstation.includes('compileFullOverallModePlanR78(record,panel,prompt)'),'workstation must derive modes from current panel + current prompt');
+must(workstation.includes('fullOverallModePlan:compactModePlanR78(modePlan)'),'assistant context must carry full-overall plan');
+must(workstation.includes('data-mode-intent={modePlan.intent.toLowerCase()}'),'interface must expose active intent semantically');
+must(workstation.includes('modePlan={modePlan}'),'Modes application must receive the active plan');
+must(home.includes('compileFullOverallModePlanR78(record,modePanel,prompt)'),'home must derive modes from current design/intent context');
+must(home.includes('fullOverallModePlan:compactModePlanR78(modePlan)'),'home assistant context must carry the plan');
+must(modes.includes('FULL OVERALL MODE ORCHESTRATION'),'Modes application must explain orchestration');
+must(modes.includes('Catalog membership is never reported as execution.'),'registry/execution truth boundary regressed');
+must(deck.includes("plan=state?.fullOverallModePlan"),'command deck must consume the active plan');
+must(app.includes("import './truthCourageR78.css';"),'R78 design authority must be loaded');
+must(app.indexOf("truthCourageR78.css")>app.indexOf("productResetR67.css"),'R78 design authority must load after R67');
+must(css.includes('--r78-truth:#69d5bd'),'truth semantic design token missing');
+must(css.includes('--r78-courage:#d9b35f'),'courage semantic design token missing');
+must(css.includes('button:focus-visible'),'keyboard focus truth/accessibility treatment missing');
+must(css.includes('@media(max-width:900px)'),'mobile R78 treatment missing');
+must(!orchestrator.includes('physical dimension is proven'),'must not introduce physical-dimensionality claims');
+
+const packNames=['TRUTH','BUILD','REPAIR','PERFORMANCE','FORECAST','DESIGN','VISUAL','TRAVERSAL','RELATIVITY','EARTH','BIOLOGY','MEMORY','GOVERNANCE','PROOF','TRANSLATE','CREATE','RECURSION','SYSTEM'];
+for(const name of packNames)must(orchestrator.includes(name+':[')||orchestrator.includes("'"+name+"'"),'intent pack missing: '+name);
+
+console.log('R78 Full Overall intent/design orchestration invariants PASS');
