@@ -42,7 +42,7 @@ export function compileModeExpressionR82(catalogRow:any,executionRow:any,record:
  const primary=[name,row.category,row.operator,row.purpose].filter(Boolean).join(' '),secondary=[row.algebra,row.calculus,row.dimensionFrame,row.notes,executionRow?.detail,executionRow?.formula].filter(Boolean).join(' ');
  let f=family(primary);if(f==='GENERIC')f=family(secondary);const p=PALETTE[f],numeric=typeof executionRow?.value==='number'&&Number.isFinite(executionRow.value);
  const authorityLens=Boolean(row?.classification==='DONOR_EXACT_NAME_ADAPTED_RUNTIME_LENS'||executionRow?.authorityLens===true);
- const executed=Boolean(executionRow&&executionRow.state!=='GATED_MISSING_INPUTS'),gated=Boolean(executionRow?.state==='GATED_MISSING_INPUTS'),metadataOnly=!executionRow;
+ const executed=Boolean(!authorityLens&&executionRow&&executionRow.state!=='GATED_MISSING_INPUTS'),gated=Boolean(!authorityLens&&executionRow?.state==='GATED_MISSING_INPUTS'),metadataOnly=Boolean(!authorityLens&&!executionRow);
  const base=numeric ? .3+.7*sat(executionRow.value) : executed ? .7 : gated ? .36 : .5;
  const statePulse=.08*(Number(record?.metrics?.plasticity)||0)+.06*(Number(record?.metrics?.continuity)||0);
  const boundary=authorityLens?'Visual intensity uses the derived canon/calculus authority activation over the same canonical packet. This is a governance lens, not an additional corpus executor or external observation.':metadataOnly?'Visual expression is derived only from catalog metadata. No missing formula is treated as executed.':gated?'Formula is visually identified but remains execution-gated because authoritative inputs are missing.':'Visual intensity may use this source-backed mode output; geometry remains representational and does not create evidence.';
