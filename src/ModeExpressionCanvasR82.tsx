@@ -83,13 +83,13 @@ export default function ModeExpressionCanvasR82({expression,address,value}:Props
     }
    }
    ctx.font='700 10px ui-monospace,monospace';ctx.fillStyle='rgba(236,242,240,.92)';ctx.fillText(`${expression.id} · ${expression.family} · ${expression.signature.toUpperCase()}`,14,22);
-   ctx.font='8px ui-monospace,monospace';ctx.fillStyle='rgba(157,178,176,.72)';ctx.fillText(`STATE ${address+1} · ${expression.executed?'SOURCE-BACKED OUTPUT':expression.gated?'GATED FORMULA':'METADATA EXPRESSION'} · value ${String(value??'—')}`,14,39);
+   ctx.font='8px ui-monospace,monospace';ctx.fillStyle='rgba(157,178,176,.72)';ctx.fillText(`STATE ${address+1} · ${expression.authorityLens?'CANON / CALCULUS LENS':expression.executed?'SOURCE-BACKED OUTPUT':expression.gated?'GATED FORMULA':'METADATA EXPRESSION'} · value ${String(value??'—')}`,14,39);
    raf=requestAnimationFrame(draw);
   };
   raf=requestAnimationFrame(draw);return()=>{alive=false;cancelAnimationFrame(raf)}
- },[expression.id,expression.name,expression.family,expression.signature,expression.motion,expression.accent,expression.secondary,expression.intensity,expression.executed,expression.gated,address,value]);
+ },[expression.id,expression.name,expression.family,expression.signature,expression.motion,expression.accent,expression.secondary,expression.intensity,expression.executed,expression.gated,expression.authorityLens,address,value]);
  return <section className='mode-expression-r82' data-family={expression.family} data-mode-id={expression.id}>
-  <div className='mer82-stage'><canvas ref={ref} aria-label={`Visual expression of ${expression.id} ${expression.name}`}/><div className='mer82-badge'><span>{expression.executed?'EXECUTED / SOURCE-BOUND':expression.gated?'GATED / INPUTS MISSING':'CATALOG / METADATA ONLY'}</span><b>{expression.name}</b><small>{expression.detail}</small></div></div>
+  <div className='mer82-stage'><canvas ref={ref} aria-label={`Visual expression of ${expression.id} ${expression.name}`}/><div className='mer82-badge'><span>{expression.authorityLens?'CANON / CALCULUS GOVERNANCE LENS':expression.executed?'EXECUTED / SOURCE-BOUND':expression.gated?'GATED / INPUTS MISSING':'CATALOG / METADATA ONLY'}</span><b>{expression.name}</b><small>{expression.detail}</small></div></div>
   <footer><span><b>VISUAL LAW</b> {expression.signature}</span><span><b>MOTION</b> {expression.motion}</span><span className='boundary'>{expression.boundary}</span></footer>
  </section>;
 }

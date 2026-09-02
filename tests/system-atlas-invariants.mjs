@@ -12,7 +12,7 @@ must(predecessor.includes("S10','Biological Traversal Engine','BIO_SCALE_TRAVERS
 must(predecessor.includes("S17','Echo-Chamber / SOMA Audio Engine','PHASE_COHERENT_AUDIO_FIELD','DOMAIN','DONOR_ONLY'"),'V23 SOMA lineage missing');
 must(predecessor.includes("S21','Cinematic Field Renderer','IMAGE_SNAPSHOT_OF_SUBSTRATE','DOMAIN','NATIVE_TARGET'"),'V23 cinematic lineage missing');
 must(predecessor.includes("S22','Omega Installer / One-Click Shell','DESKTOP_STARTUP_PACKAGER','SUPPORT','NATIVE_TARGET'"),'V23 installer lineage missing');
-must(runtime.includes("S22','Operator Dashboard / Control Surface','HUMAN_IN_LOOP_UI'"),'active S22 inventory authority must be operator dashboard');
-must(runtime.includes("S23','One-Click Packaging System','DESKTOP_INSTALLER_RELEASE'"),'active S23 inventory authority must be one-click packaging');
+must(runtime.includes("S22','Omega Installer / One-Click Shell','DESKTOP_STARTUP_PACKAGER'"),'active S22 must match authoritative v22 installer family');
+must(runtime.includes("S23','Runtime API / WebSocket Service','LIVE_STATE_TRANSPORT'"),'active S23 must match authoritative v22 runtime transport family');
 must(runtime.includes('not a claim of physical dimensions'),'physical-dimension truth boundary missing');must(ui.includes('Execution truth boundary'),'UI execution boundary missing');must(ui.includes('No fake OPEN button'),'non-executable family must not expose a fake Open action');must(ui.includes('Export truth receipt'),'truth receipt export missing');must(router.includes("case 'System Atlas'")&&router.includes("case 'Control Matrix'"),'System Atlas direct routes must remain');must(router.includes('SystemAtlasControl'),'dedicated System Atlas control import missing');
 console.log('SYSTEM_ATLAS V23→V24 LINEAGE PASS · 24 active inventory families · predecessor evidence retained · execution reality classified');

@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
-import {Activity,ArrowRight,BrainCircuit,Command,Earth,Eye,Link2,Search,Send,ShieldCheck,Sparkles,Waypoints} from 'lucide-react';
+import {Activity,ArrowRight,Blocks,BrainCircuit,Command,Earth,Eye,Link2,Search,Send,ShieldCheck,Sparkles,Waypoints} from 'lucide-react';
 import {api,localState} from './platformAdapter';
 import {corpusState,decodeAddress,initCorpusPack} from './corpusRuntime';
 import {sourceBackedModeSummary} from './sourceBackedModeRuntimeR21';
@@ -9,6 +9,8 @@ import CalculusFieldR37 from './CalculusFieldR37';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import {compileFullOverallModePlanR79,compactModePlanR79} from './fullOverallModeOrchestratorR79';
 import {OMEGA_ALL_ROUTES_R82,OMEGA_FIELD_PROJECTIONS_R82,OMEGA_WORKSPACES_R82,projectionForR82,type OmegaFieldProjectionR82,type OmegaWorkspaceIdR82} from './omegaExperienceRegistryR82';
+import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
+import {CANON_AUTHORITY_COUNT} from './allModesAuthority';
 import './omegaHomeR71.css';
 
 type Props={onEnter:(panel:string)=>void};
@@ -32,11 +34,13 @@ export default function OmegaHomeR71({onEnter}:Props){
  const[ready,setReady]=useState(false),[domain,setDomain]=useState<DomainId>(()=>{try{const x=localStorage.getItem('omega.r82.workspace') as DomainId|null;return x&&OMEGA_WORKSPACES_R82.some(w=>w.id===x)?x:'EXPLORE'}catch{return'EXPLORE'}}),[query,setQuery]=useState(''),[showApps,setShowApps]=useState(false);
  const[mode,setMode]=useState<FieldMode>(()=>{try{const x=localStorage.getItem('omega.r82.homeProjection') as FieldMode|null;return x&&OMEGA_FIELD_PROJECTIONS_R82.some(m=>m.id===x)?x:'FIELD'}catch{return'FIELD'}}),[selectedRole,setSelectedRole]=useState<OperatorColorRole>('OMEGA');
  const[prompt,setPrompt]=useState(()=>localState.read('omega.b015.chatDraft.v1','')),[reply,setReply]=useState(''),[busy,setBusy]=useState(false),[status,setStatus]=useState<any>(null),[hybrid,setHybrid]=useState<any>(null);
+ const[showSystemMap,setShowSystemMap]=useState(()=>{try{return localStorage.getItem('omega.r83.systemMapOpen')!=='false'}catch{return true}});
  useEffect(()=>{let live=true;initCorpusPack().then(()=>live&&setReady(true)).catch(()=>live&&setReady(false));return()=>{live=false}},[]);
  useEffect(()=>{localState.write('omega.v6.address',address)},[address]);
  useEffect(()=>{try{localStorage.setItem('omega.r82.workspace',domain)}catch{}},[domain]);
  useEffect(()=>{try{localStorage.setItem('omega.r82.homeProjection',mode)}catch{}},[mode]);
  useEffect(()=>{localState.write('omega.b015.chatDraft.v1',prompt)},[prompt]);
+ useEffect(()=>{try{localStorage.setItem('omega.r83.systemMapOpen',String(showSystemMap))}catch{}},[showSystemMap]);
  useEffect(()=>{let live=true;const load=async()=>{try{const[s,h]=await Promise.all([api.get<any>('/api/status'),api.get<any>('/api/hybrid/status')]);if(live){setStatus(s.data||null);setHybrid(h.data||null)}}catch{if(live){setStatus(null);setHybrid(null)}}};void load();const id=window.setInterval(load,30000);return()=>{live=false;window.clearInterval(id)}},[]);
  const record=useMemo(()=>ready?corpusState(address):null,[ready,address]);
  const coords=useMemo(()=>decodeAddress(address),[address]);
@@ -93,6 +97,11 @@ export default function OmegaHomeR71({onEnter}:Props){
 
     <section className='r71-actions'><header><span>DIRECT APPLICATIONS</span><small>No icon-only ambiguity.</small></header><div>{QUICK.map(([label,panel,I])=><button key={panel} onClick={()=>enter(panel)}><I/><span><b>{label}</b><small>{panel}</small></span><ArrowRight/></button>)}</div></section>
    </aside>
+  </section>
+
+  <section className='r83-home-system-map'>
+   <header><div><Blocks/><span><b>COMPLETE SOFTWARE SYSTEM MAP</b><small>44 application routes · 100 system rows · 24 runtime families · 179 source modes · 57 local-host rows · 1,728 auto-ping cells · {CANON_AUTHORITY_COUNT} canon lenses · 24 V77 bins</small></span></div><div><button onClick={()=>enter('System Atlas')}>Open System Atlas <ArrowRight/></button><button onClick={()=>setShowSystemMap(v=>!v)} aria-expanded={showSystemMap}>{showSystemMap?'Hide index':'Show full index'}</button></div></header>
+   {showSystemMap&&<OmegaSystemInventoryR83 compact onNavigate={enter}/>}
   </section>
 
   <section className='r71-command'>

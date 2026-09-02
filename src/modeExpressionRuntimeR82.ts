@@ -1,5 +1,5 @@
 export type ModeExpressionFamilyR82='COHERENCE'|'FORECAST'|'PRUNE'|'RELATIVITY'|'FLOW'|'MEMORY'|'PROOF'|'TOPOLOGY'|'COMPRESSION'|'TRAVERSAL'|'RECURSION'|'GOVERNANCE'|'SCALE'|'LIGHT'|'GENERIC';
-export type ModeExpressionR82={id:string;name:string;family:ModeExpressionFamilyR82;signature:string;motion:string;accent:string;secondary:string;intensity:number;executed:boolean;gated:boolean;metadataOnly:boolean;detail:string;boundary:string};
+export type ModeExpressionR82={id:string;name:string;family:ModeExpressionFamilyR82;signature:string;motion:string;accent:string;secondary:string;intensity:number;executed:boolean;gated:boolean;metadataOnly:boolean;authorityLens:boolean;detail:string;boundary:string};
 
 const family=(text:string):ModeExpressionFamilyR82=>{
  const t=text.toLowerCase();
@@ -41,8 +41,10 @@ export function compileModeExpressionR82(catalogRow:any,executionRow:any,record:
  const row=catalogRow||executionRow||{},id=String(row.id||executionRow?.id||'MODE'),name=String(row.name||executionRow?.name||'Mode');
  const primary=[name,row.category,row.operator,row.purpose].filter(Boolean).join(' '),secondary=[row.algebra,row.calculus,row.dimensionFrame,row.notes,executionRow?.detail,executionRow?.formula].filter(Boolean).join(' ');
  let f=family(primary);if(f==='GENERIC')f=family(secondary);const p=PALETTE[f],numeric=typeof executionRow?.value==='number'&&Number.isFinite(executionRow.value);
- const executed=Boolean(executionRow&&executionRow.state!=='GATED_MISSING_INPUTS'),gated=Boolean(executionRow?.state==='GATED_MISSING_INPUTS'),metadataOnly=!executionRow;
+ const authorityLens=Boolean(row?.classification==='DONOR_EXACT_NAME_ADAPTED_RUNTIME_LENS'||executionRow?.authorityLens===true);
+ const executed=Boolean(!authorityLens&&executionRow&&executionRow.state!=='GATED_MISSING_INPUTS'),gated=Boolean(!authorityLens&&executionRow?.state==='GATED_MISSING_INPUTS'),metadataOnly=Boolean(!authorityLens&&!executionRow);
  const base=numeric ? .3+.7*sat(executionRow.value) : executed ? .7 : gated ? .36 : .5;
  const statePulse=.08*(Number(record?.metrics?.plasticity)||0)+.06*(Number(record?.metrics?.continuity)||0);
- return{id,name,family:f,signature:p[2],motion:p[3],accent:p[0],secondary:p[1],intensity:Math.max(.24,Math.min(1,base+statePulse)),executed,gated,metadataOnly,detail:`${f} expression · ${p[2]} · ${p[3]}`,boundary:metadataOnly?'Visual expression is derived only from catalog metadata. No missing formula is treated as executed.':gated?'Formula is visually identified but remains execution-gated because authoritative inputs are missing.':'Visual intensity may use this source-backed mode output; geometry remains representational and does not create evidence.'};
+ const boundary=authorityLens?'Visual intensity uses the derived canon/calculus authority activation over the same canonical packet. This is a governance lens, not an additional corpus executor or external observation.':metadataOnly?'Visual expression is derived only from catalog metadata. No missing formula is treated as executed.':gated?'Formula is visually identified but remains execution-gated because authoritative inputs are missing.':'Visual intensity may use this source-backed mode output; geometry remains representational and does not create evidence.';
+ return{id,name,family:f,signature:p[2],motion:p[3],accent:p[0],secondary:p[1],intensity:Math.max(.24,Math.min(1,base+statePulse)),executed,gated,metadataOnly,authorityLens,detail:`${f} expression · ${p[2]} · ${p[3]}`,boundary};
 }
