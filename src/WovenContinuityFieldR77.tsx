@@ -217,7 +217,7 @@ export default function WovenContinuityFieldR77({address,record,onAddress}:Props
     <div><span>virtual field</span><b>61.917B</b><small>12⁶ shells × 12⁴ anchors</small></div>
     <div><span>source refinement</span><b>{refined?'FULL':'STREAMING'}</b><small>{budget.refinementBatch} anchors / frame budget</small></div>
    </div>
-   <div className='r77-proof'><ShieldCheck/><span><b>Computational boundary.</b> The resident 20,736 lattice is rendered as one live field. Exact 12¹⁰ addressing is virtualized by shell+anchor decomposition; source refinement is time-sliced. This does not manufacture external observations or claim 20,736 physical dimensions.</span><Braces/></div>
+   <div className='r77-proof'><ShieldCheck/><span><b>Computational boundary.</b> The resident 20,736 lattice is rendered as one live field. Exact 12¹⁰ addressing is virtualized by shell+anchor decomposition; source refinement is time-sliced. This is a computational representation. It does not manufacture external observations or claim 20,736 physical dimensions.</span><Braces/></div>
   </details>
  </section>;
 }
