@@ -1,5 +1,5 @@
 export type V77BinR83={bin:number;id:string;direction:'OUTVERSE'|'INVERSE';name:string;sourceTitle:string};
-export const V77_BIN_SOURCE_R83={name:'V77',reviewedUniqueBins:24,boundary:'V77 archive bin presence is donor evidence, not automatic hosted execution. R83 exposes these bins so they cannot disappear from the interface while preserving proof-gated admission.'} as const;
+export const V77_BIN_SOURCE_R83={name:'V77',reviewedUniqueBins:24,boundary:'V77 archive bin presence is donor evidence, not hosted execution. Visibility does not imply automatic promotion; R83 exposes these bins so they cannot disappear from the interface while preserving proof-gated admission.'} as const;
 export const V77_BINS_R83:readonly V77BinR83[]=[
   {
     "bin": 1,
