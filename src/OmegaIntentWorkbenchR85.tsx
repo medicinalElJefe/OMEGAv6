@@ -6,6 +6,7 @@ import {
  readWorkflowR85,skipWorkflowStepR85,startWorkflowR85,workflowProgressR85,type WorkflowIntentR85,type WorkflowSessionR85
 } from './omegaWorkflowRuntimeR85';
 import {applyWorkflowVisualIntentR86,emitOperationR86,readOperationLedgerR86,type OmegaOperationR86} from './omegaOperationBusR86';
+import {activeProjectIdR87,attachWorkflowToProjectR87,createProjectR87,getProjectR87,readProjectsR87,recordProjectOperationR87,updateProjectWorkflowR87} from './omegaProjectContinuityR87';
 import './omegaIntentWorkbenchR85.css';
 
 type Props={record:any;address:number;currentPanel:string;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;variant?:'HOME'|'STRIP'};
@@ -22,17 +23,21 @@ export default function OmegaIntentWorkbenchR85({record,address,currentPanel,onA
  const[goal,setGoal]=useState('');
  const[working,setWorking]=useState(false);
  const[operations,setOperations]=useState<OmegaOperationR86[]>(()=>readOperationLedgerR86());
+ const[projects,setProjects]=useState(()=>readProjectsR87());
+ const[projectChoice,setProjectChoice]=useState(()=>{const id=activeProjectIdR87();return id&&readProjectsR87().some(x=>x.id===id)?id:'NEW'});
  useEffect(()=>{const sync=(e:Event)=>setSession((e as CustomEvent).detail??readWorkflowR85());window.addEventListener('omega-r85-workflow-changed',sync as EventListener);return()=>window.removeEventListener('omega-r85-workflow-changed',sync as EventListener)},[]);
- useEffect(()=>{const apply=(e:Event)=>{const event=(e as CustomEvent<OmegaOperationR86>).detail;if(!event)return;setOperations(rows=>[...rows,event].slice(-188));setSession(prev=>{if(!prev)return prev;const next=applyOperationToWorkflowR86(prev,event);return next.status==='COMPLETE'?null:next})};window.addEventListener('omega-r86-operation',apply as EventListener);return()=>window.removeEventListener('omega-r86-operation',apply as EventListener)},[]);
+ useEffect(()=>{const sync=(e:Event)=>{const rows=(e as CustomEvent).detail;setProjects(Array.isArray(rows)?rows:readProjectsR87())};window.addEventListener('omega-r87-projects-changed',sync as EventListener);return()=>window.removeEventListener('omega-r87-projects-changed',sync as EventListener)},[]);
+ useEffect(()=>{const apply=(e:Event)=>{const event=(e as CustomEvent<OmegaOperationR86>).detail;if(!event)return;setOperations(rows=>[...rows,event].slice(-188));setSession(prev=>{if(!prev)return prev;void recordProjectOperationR87(prev.projectId,event);const next=applyOperationToWorkflowR86(prev,event);if(next.status==='COMPLETE')void updateProjectWorkflowR87(next.projectId,next,'COMPLETE');return next.status==='COMPLETE'?null:next})};window.addEventListener('omega-r86-operation',apply as EventListener);return()=>window.removeEventListener('omega-r86-operation',apply as EventListener)},[]);
  const step=activeWorkflowStepR85(session),progress=workflowProgressR85(session),nextAddress=admittedNextR85(record);
  const selected=WORKFLOW_INTENTS_R85.find(x=>x.id===intent)||WORKFLOW_INTENTS_R85[0];
  const modeSummary=useMemo(()=>session?{intent:session.modePlan?.intent||session.intent,policy:session.modePlan?.policy||'INTENT_ADAPTIVE',applied:Number(session.modePlan?.sourceBackedApplied)||0,gated:Number(session.modePlan?.sourceBackedGated)||0,deep:Number(session.modePlan?.performance?.activeDeepCount)||0}:null,[session]);
+ const activeProject=useMemo(()=>getProjectR87(session?.projectId),[session?.projectId,projects]);
 
- const start=()=>{const s=startWorkflowR85(intent,goal,record);setSession(s);setGoal('')};
- const finish=(s:WorkflowSessionR85)=>setSession(s.status==='COMPLETE'?null:s);
+ const start=async()=>{if(working)return;setWorking(true);try{let project=projectChoice==='NEW'?null:getProjectR87(projectChoice);if(!project)project=await createProjectR87(goal,intent,record);const s=startWorkflowR85(intent,goal,record,project.id);await attachWorkflowToProjectR87(project.id,s);setProjects(readProjectsR87());setProjectChoice(project.id);setSession(s);setGoal('')}finally{setWorking(false)}};
+ const finish=(s:WorkflowSessionR85)=>{void updateProjectWorkflowR87(s.projectId,s,s.status);setSession(s.status==='COMPLETE'?null:s)};
  const complete=()=>{if(!session)return;finish(completeWorkflowStepR85(session,{beforeAddress:address,afterAddress:address,note:`Completed in ${currentPanel}`}))};
  const skip=()=>{if(!session)return;finish(skipWorkflowStepR85(session))};
- const cancel=()=>{if(!session)return;cancelWorkflowR85(session);setSession(null)};
+ const cancel=()=>{if(!session)return;const cancelled=cancelWorkflowR85(session);void updateProjectWorkflowR87(cancelled.projectId,cancelled,'CANCELLED');setSession(null)};
  const capture=async()=>{if(!session||!step||working)return;setWorking(true);try{
    const core=packetCore(record),packetHash=await hashJson(core),rows=localState.read<any[]>('omega.r18.workspace.snapshots',[]);
    const snap={id:crypto.randomUUID(),at:Date.now(),name:`${session.intent} · ${session.goal.slice(0,48)}`,address,stateId:record.stateId,decision:String(record.metrics?.decision||'—'),phase:phase(address),view:currentPanel.toUpperCase(),metrics:{continuity:record.metrics?.continuity,plasticity:record.metrics?.plasticity,contradiction:record.metrics?.contradiction,burden:record.metrics?.burden,scar:record.metrics?.scar,evidence:record.metrics?.evidence},packetHash,note:`R85 workflow ${session.id} · ${step.label}`};
@@ -62,9 +67,9 @@ export default function OmegaIntentWorkbenchR85({record,address,currentPanel,onA
   <header><div><span>INTENT → MODES → TOOLS → ACTION → PROOF</span><h3>Operational workflow engine</h3><p>This is not another inventory. Start a goal and OMEGA carries one persistent, state-bound workflow through the actual tools already in the application.</p></div><div className='r85-head-state'><Sparkles/><b>{session?'ACTIVE WORKFLOW':'READY'}</b><small>{session?session.intent:'select an intent'}</small></div></header>
   {!session?<>
    <div className='r85-intents'>{WORKFLOW_INTENTS_R85.map(x=><button key={x.id} className={intent===x.id?'active':''} onClick={()=>setIntent(x.id)}><b>{x.label}</b><small>{x.purpose}</small></button>)}</div>
-   <div className='r85-compose'><div><b>{selected.label}</b><small>{selected.purpose}</small></div><textarea value={goal} onChange={e=>setGoal(e.target.value)} placeholder={`Describe the ${selected.label.toLowerCase()} goal. The workflow will use existing OMEGA tools and preserve the current canonical state.`}/><button className='r85-primary' onClick={start}><Flag/>Start workflow</button></div>
+   <div className='r85-compose'><div><b>{selected.label}</b><small>{selected.purpose}</small><label className='r87-project-choice'><span>Project continuity</span><select value={projectChoice} onChange={e=>setProjectChoice(e.target.value)}><option value='NEW'>New project from this goal</option>{projects.filter(x=>x.status==='ACTIVE_LOCAL').map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label></div><textarea value={goal} onChange={e=>setGoal(e.target.value)} placeholder={`Describe the ${selected.label.toLowerCase()} goal. The workflow will use existing OMEGA tools and preserve the current canonical state.`}/><button className='r85-primary' onClick={()=>void start()} disabled={working}><Flag/>{working?'Binding project…':'Start workflow'}</button></div>
   </>:<>
-   <div className='r85-active-head'><div><span>{session.intent} WORKFLOW</span><h4>{session.goal}</h4><small>Started at state {session.startStateId} · current state {record.stateId} · {modeSummary?.policy} · {modeSummary?.applied} source-backed applied · {modeSummary?.gated} gated · {modeSummary?.deep} intent-deep lenses</small></div><div><button onClick={()=>downloadJson(`omega-workflow-${session.id}.json`,session)}><Download/>Export</button><button className='danger' onClick={cancel}><X/>Cancel</button></div></div>
+   <div className='r85-active-head'><div><span>{session.intent} WORKFLOW · PROJECT {activeProject?.name||'UNBOUND'}</span><h4>{session.goal}</h4><small>Started at state {session.startStateId} · current state {record.stateId} · {modeSummary?.policy} · {modeSummary?.applied} source-backed applied · {modeSummary?.gated} gated · {modeSummary?.deep} intent-deep lenses · {activeProject?.operationRefs?.length||0} project operations</small></div><div><button onClick={()=>downloadJson(`omega-workflow-${session.id}.json`,session)}><Download/>Export</button><button className='danger' onClick={cancel}><X/>Cancel</button></div></div>
    <div className='r85-progress'><i style={{transform:`scaleX(${progress.pct})`}}/><span>{progress.done} / {progress.total} complete</span></div>
    <div className='r85-active-grid'>
     <main>{session.steps.map((s,i)=><article key={s.id} className={s.state.toLowerCase()} data-current={i===session.currentStep?'true':'false'}><code>{String(i+1).padStart(2,'0')}</code><div><b>{s.label}</b><small>{s.reason}</small>{s.receiptHash&&<em>{s.receiptHash.slice(0,20)}…</em>}</div><strong>{s.state}</strong></article>)}</main>
