@@ -1,0 +1,75 @@
+/* R90: presentation-only hierarchy. Runtime/proof/state semantics unchanged. */
+.omega-workstation-v2{--r90-line:rgba(126,185,177,.14)}
+.omega-workstation-v2 :where(.r62-rail,.r62-overlay,.r62-drawer,.r27-mobile-bottom,.mobile-bottom-nav){pointer-events:none!important;visibility:hidden!important}
+.omega-workstation-v2 :where(.r83-inventory,.r45-capability-audit,.capability-expression-r13,.atlas-r1-layout,.atlas-r1-menus,.r28-evidence-grid,.r85-evidence-workflow,.sai-source-grid,.sai-ledger-list,.hybrid-r32-livegrid){content-visibility:auto;contain-intrinsic-size:500px}
+
+@media(max-width:900px){
+ /* Earth: globe owns viewport; legend/data become non-overlapping swipe rows. */
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-now-plus{padding:4px!important;gap:6px!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-now-head{padding:5px 6px!important;align-items:center!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-now-head span,.omega-workstation-v2[data-panel='Earth Now'] .earth-now-head small{display:none!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-now-head b{font-size:16px!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-now-grid{grid-template-columns:1fr!important;gap:5px!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-now-stage{display:grid!important;grid-template-rows:minmax(66dvh,1fr) auto!important;min-height:0!important;border-radius:10px!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-now-stage canvas{height:66dvh!important;min-height:520px!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-legend{position:static!important;display:flex!important;flex-wrap:nowrap!important;gap:12px!important;overflow-x:auto!important;padding:7px 8px!important;border:0!important;border-top:1px solid var(--r90-line)!important;border-radius:0!important;background:#041015!important;backdrop-filter:none!important;scrollbar-width:none!important;font-size:7px!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-legend span{flex:0 0 auto!important;white-space:nowrap!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-now-grid>aside{display:flex!important;gap:5px!important;overflow-x:auto!important;scroll-snap-type:x proximity!important;scrollbar-width:none!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-kpi{flex:0 0 min(72vw,300px)!important;scroll-snap-align:start!important;padding:8px 9px!important;border-radius:9px!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-kpi span{font-size:6px!important}.omega-workstation-v2[data-panel='Earth Now'] .earth-kpi b{font-size:13px!important}.omega-workstation-v2[data-panel='Earth Now'] .earth-kpi small{font-size:7px!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-controls{flex:0 0 min(88vw,390px)!important;padding:7px!important;border-radius:9px!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-track-buttons{display:flex!important;gap:3px!important;overflow-x:auto!important;scrollbar-width:none!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-track-buttons button{flex:0 0 auto!important;min-height:34px!important;font-size:7px!important}
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-proof{padding:7px 8px!important;font-size:7px!important;line-height:1.45!important}
+
+ /* Hybrid: connection/pairing first; devices/jobs/events remain swipe-reachable. */
+ .omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32{max-width:none!important;padding:4px!important;gap:6px!important}
+ .omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-hero{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:6px!important;padding:7px 8px!important;border-radius:10px!important}
+ .omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-hero span,.omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-hero p{display:none!important}
+ .omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-hero h2{margin:0!important;font-size:17px!important}
+ .omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-state{width:auto!important;min-width:122px!important;padding:6px 7px!important;border-radius:8px!important}.omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-state b{font-size:8px!important}.omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-state small{font-size:6px!important}
+ .omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-flow{display:flex!important;gap:4px!important;overflow-x:auto!important;scrollbar-width:none!important}
+ .omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-flow article,.omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-flow>div{flex:0 0 min(58vw,220px)!important;min-height:62px!important;padding:6px 8px!important;border-radius:9px!important}
+ .omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-install{display:flex!important;overflow-x:auto!important;scroll-snap-type:x proximity!important;scrollbar-width:none!important}.omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-install>div{flex:0 0 min(88vw,390px)!important;scroll-snap-align:start!important;padding:10px!important}
+ .omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-livegrid{display:flex!important;gap:5px!important;overflow-x:auto!important;scroll-snap-type:x proximity!important;scrollbar-width:none!important}.omega-workstation-v2[data-panel='Hybrid Link'] .hybrid-r32-livegrid>section{flex:0 0 min(86vw,380px)!important;scroll-snap-align:start!important;max-height:260px!important;overflow:auto!important}
+
+ /* Modes: selected visual expression first; truth/registries remain below. */
+ .omega-workstation-v2[data-panel='Modes'] .sbm21-app{gap:5px!important}
+ .omega-workstation-v2[data-panel='Modes'] .sbm21-app>.special-head{order:0}.omega-workstation-v2[data-panel='Modes'] .sbm21-expression{order:1}.omega-workstation-v2[data-panel='Modes'] .sbm21-truth{order:2}.omega-workstation-v2[data-panel='Modes'] .sbm21-kpis{order:3}.omega-workstation-v2[data-panel='Modes'] .sbm21-route{order:4}.omega-workstation-v2[data-panel='Modes'] .sbm21-mode-columns{order:5}.omega-workstation-v2[data-panel='Modes'] .sbm21-catalog{order:6}.omega-workstation-v2[data-panel='Modes'] .sbm21-authorities{order:7}
+ .omega-workstation-v2[data-panel='Modes'] .sbm21-truth{padding:6px 7px!important}.omega-workstation-v2[data-panel='Modes'] .sbm21-truth span{display:none!important}.omega-workstation-v2[data-panel='Modes'] .sbm21-truth b{font-size:7px!important}
+ .omega-workstation-v2[data-panel='Modes'] .sbm21-kpis{display:flex!important;gap:4px!important;overflow-x:auto!important;scrollbar-width:none!important}.omega-workstation-v2[data-panel='Modes'] .sbm21-kpis>div{flex:0 0 min(45vw,180px)!important;padding:6px 7px!important}.omega-workstation-v2[data-panel='Modes'] .sbm21-kpis b{font-size:13px!important}
+ .omega-workstation-v2[data-panel='Modes'] .sbm21-expression>header{padding:6px!important}.omega-workstation-v2[data-panel='Modes'] .sbm21-expression>header>div:first-child small{display:none!important}
+ .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls{flex-wrap:nowrap!important;overflow-x:auto!important;scrollbar-width:none!important}.omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>label{flex:1 0 min(72vw,340px)!important;width:auto!important;min-width:min(72vw,340px)!important;grid-template-columns:1fr!important}.omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>label>span{display:none!important}.omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>button{flex:0 0 auto!important;width:auto!important;min-height:36px!important}
+ .omega-workstation-v2[data-panel='Modes'] .sbm21-expression .mer82-stage{min-height:68dvh!important}
+ .omega-workstation-v2[data-panel='Modes'] .sbm21-route-actions{flex-wrap:nowrap!important;overflow-x:auto!important;scrollbar-width:none!important}.omega-workstation-v2[data-panel='Modes'] .sbm21-route-actions button{flex:0 0 auto!important;min-height:36px!important}
+
+ /* Evidence: proof cards stay complete but become swipe-scannable. */
+ .omega-workstation-v2[data-panel='Evidence & Proof'] .r28-evidence{gap:6px!important}
+ .omega-workstation-v2[data-panel='Evidence & Proof'] .r28-evidence-grid{display:flex!important;gap:4px!important;overflow-x:auto!important;scroll-snap-type:x proximity!important;scrollbar-width:none!important}.omega-workstation-v2[data-panel='Evidence & Proof'] .r28-evidence-grid>article{flex:0 0 min(72vw,280px)!important;scroll-snap-align:start!important}
+ .omega-workstation-v2[data-panel='Evidence & Proof'] .r85-evidence-workflow>div{display:flex!important;overflow-x:auto!important;gap:4px!important;scrollbar-width:none!important}.omega-workstation-v2[data-panel='Evidence & Proof'] .r85-evidence-workflow article{flex:0 0 min(70vw,280px)!important}
+ .omega-workstation-v2[data-panel='Evidence & Proof'] .r28-proof-summary{display:flex!important;overflow-x:auto!important;gap:4px!important;scrollbar-width:none!important}.omega-workstation-v2[data-panel='Evidence & Proof'] .r28-proof-summary>div{flex:0 0 110px!important}
+
+ /* SAI: active tab is primary, status summary becomes a compact ribbon. */
+ .omega-workstation-v2:is([data-panel='SAI Lab'],[data-panel='Kernel Intelligence']) .sai-sovereign{gap:6px!important}
+ .omega-workstation-v2:is([data-panel='SAI Lab'],[data-panel='Kernel Intelligence']) .sai-sovereign .special-head p{display:none!important}
+ .omega-workstation-v2:is([data-panel='SAI Lab'],[data-panel='Kernel Intelligence']) .sai-summary{display:flex!important;gap:4px!important;overflow-x:auto!important;scrollbar-width:none!important}.omega-workstation-v2:is([data-panel='SAI Lab'],[data-panel='Kernel Intelligence']) .sai-summary>div{flex:0 0 min(42vw,160px)!important;padding:6px!important}
+ .omega-workstation-v2:is([data-panel='SAI Lab'],[data-panel='Kernel Intelligence']) .sai-tabs{position:sticky!important;top:calc(44px + env(safe-area-inset-top,0px))!important;z-index:35!important;padding:3px!important;border:1px solid var(--r90-line)!important;border-radius:8px!important;background:rgba(4,12,15,.96)!important;backdrop-filter:blur(10px)!important;scrollbar-width:none!important}
+ .omega-workstation-v2:is([data-panel='SAI Lab'],[data-panel='Kernel Intelligence']) .sai-tabs button{min-height:34px!important;padding:5px 7px!important}
+ .omega-workstation-v2:is([data-panel='SAI Lab'],[data-panel='Kernel Intelligence']) .sai-improvement-flow{display:flex!important;overflow-x:auto!important;gap:4px!important;scrollbar-width:none!important}.omega-workstation-v2:is([data-panel='SAI Lab'],[data-panel='Kernel Intelligence']) .sai-improvement-flow>span{flex:0 0 112px!important}
+
+ /* System Atlas: active packet field first; truth context/inventories compact, not deleted. */
+ .omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .system-atlas-r38{gap:6px!important;--sys-field-min:66dvh!important}
+ .omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r1-invariant{grid-template-columns:auto 1fr!important;gap:5px!important;padding:6px 7px!important}.omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r1-invariant span{grid-column:1/-1!important;font-size:6px!important}
+ .omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r38-stage{gap:4px!important}.omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r38-field{min-height:66dvh!important;border-radius:10px!important}
+ .omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r38-context{display:flex!important;gap:1px!important;overflow-x:auto!important;border-top:0!important;padding:0!important;scrollbar-width:none!important}.omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r38-context article{flex:0 0 min(64vw,260px)!important;padding:7px!important;border:1px solid var(--r90-line)!important;border-radius:8px!important}
+ .omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r1-kpis,.omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .r45-capability-audit{display:flex!important;overflow-x:auto!important;gap:1px!important;scrollbar-width:none!important}.omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r1-kpis article,.omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .r45-capability-audit article{flex:0 0 112px!important}
+ .omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .r83-inventory{max-height:72dvh!important;overflow:hidden!important}.omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r1-families{max-height:48dvh!important}
+ .omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .capability-expression-r13>div,.omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r1-menus>div{display:flex!important;overflow-x:auto!important;gap:4px!important;scrollbar-width:none!important}.omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .capability-expression-r13 button,.omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .atlas-r1-menus button{flex:0 0 min(72vw,300px)!important;min-height:74px!important}
+
+ .omega-workstation-v2 :where(.earth-legend,.earth-now-grid>aside,.earth-track-buttons,.hybrid-r32-flow,.hybrid-r32-install,.hybrid-r32-livegrid,.sbm21-kpis,.sbm21-expression-controls,.sbm21-route-actions,.r28-evidence-grid,.r85-evidence-workflow>div,.r28-proof-summary,.sai-summary,.sai-tabs,.sai-improvement-flow,.atlas-r38-context,.atlas-r1-kpis,.r45-capability-audit,.capability-expression-r13>div,.atlas-r1-menus>div)::-webkit-scrollbar{display:none}
+}
+@media(max-width:520px){
+ .omega-workstation-v2[data-panel='Earth Now'] .earth-now-stage{grid-template-rows:minmax(69dvh,1fr) auto!important}.omega-workstation-v2[data-panel='Earth Now'] .earth-now-stage canvas{height:69dvh!important;min-height:500px!important}
+ .omega-workstation-v2[data-panel='Modes'] .sbm21-expression .mer82-stage{min-height:70dvh!important}
+ .omega-workstation-v2:is([data-panel='System Atlas'],[data-panel='Control Matrix']) .system-atlas-r38{--sys-field-min:69dvh!important}
+}
