@@ -104,11 +104,12 @@ export default function WovenContinuityFieldR77({address,record,onAddress}:Props
  const [shell,setShell]=useState(0);
  const [refined,setRefined]=useState(false);
  const [renderer,setRenderer]=useState<'WEBGL2'|'CANVAS2D'|'UNAVAILABLE'>('WEBGL2');
- const budget=useMemo(()=>wovenBudgetR77(),[]);
+ const [budget,setBudget]=useState(()=>wovenBudgetR77());
  const snapshot=useMemo(()=>compileWovenContinuityR77(record),[record]);
  const virtualAddress=composeVirtualAddressR77(shell,address);
  useEffect(()=>{liveRef.current={address,record}},[address,record]);
  useEffect(()=>{shellRef.current=shell},[shell]);
+ useEffect(()=>{const sync=()=>setBudget(wovenBudgetR77());window.addEventListener('resize',sync,{passive:true});return()=>window.removeEventListener('resize',sync)},[]);
 
  useEffect(()=>{
   const canvas=canvasRef.current;if(!canvas)return;
