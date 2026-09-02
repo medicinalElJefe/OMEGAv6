@@ -41,7 +41,7 @@ export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,mod
   <aside className='r62-rail' aria-label='OMEGA application navigation'>
    <div className='r62-brand'><b>OMEGA V6</b><span>APPLICATIONS</span><small>{current.label} · {panel}</small></div>
    <button className='r62-home' onClick={()=>window.dispatchEvent(new CustomEvent('omega-home-request'))} aria-label='OMEGA home'><Home/><span>Home</span></button>
-   <button className='r62-menu' onClick={()=>{setActive(current.id);setBrowserLayer('APPLICATIONS');setOpen(true)}} aria-label='Browse all applications and software systems'><Menu/><span>Browse</span></button>
+   <button className='r62-menu' onClick={()=>{setActive(current.id);setBrowserLayer('APPLICATIONS');setOpen(true)}} aria-label='Browse all applications and software systems'><Menu/><span>All applications</span></button>
    <nav ref={navRef}>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} data-workspace={w.id} className={current.id===w.id?'active':''} aria-pressed={current.id===w.id} title={`${w.label} — ${w.copy}`} onClick={()=>{setActive(w.id);setBrowserLayer('APPLICATIONS');setOpen(true)}}><I/><span>{w.label}</span></button>})}</nav>
    <div className='r62-rail-state'><span>{busy?'RUNNING':'LIVE'}</span><b>{record?.metrics?.decision||'—'}</b><small>{modeCount} modes · {panel}</small></div>
   </aside>
