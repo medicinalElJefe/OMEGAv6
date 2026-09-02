@@ -6,6 +6,7 @@ import CalculusFieldR37 from './CalculusFieldR37';
 import SomaAudioEngine from './SomaAudioEngine';
 import ExtremeRestorationR46 from './ExtremeRestorationR46';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
+import {MASTER_SYSTEMS_R83} from './softwareMasterLedgerR83';
 import './systemAtlas.css';
 import './systemCapabilityR13.css';
 import './systemAtlasDepthR38_4.css';
@@ -16,11 +17,12 @@ const dl=(name:string,x:any)=>{const u=URL.createObjectURL(new Blob([JSON.string
 const nonExecutable=new Set(['DONOR_ONLY','NATIVE_TARGET','RESTORATION_DEBT']);
 
 export default function SystemAtlasControl({record,onNavigate,control=false}:Props){
- const[q,setQ]=useState(''),[family,setFamily]=useState(0),[subsystem,setSubsystem]=useState(0),[phase,setPhase]=useState(0),[stream,setStream]=useState(0);
+ const[q,setQ]=useState(''),[family,setFamily]=useState(()=>{try{const id=localStorage.getItem('omega.r83.familyFocus');const i=FAMILIES.findIndex(x=>x.id===id);return i>=0?i:0}catch{return 0}}),[subsystem,setSubsystem]=useState(0),[phase,setPhase]=useState(0),[stream,setStream]=useState(0);
  const rows=useMemo(()=>FAMILIES.filter(x=>(x.id+' '+x.name+' '+x.invariant+' '+x.role+' '+x.status+' '+x.statusNote+' '+x.inventoryPurpose).toLowerCase().includes(q.toLowerCase())),[q]);
  const cell=atlasCell(family,subsystem,phase,stream),receipt=systemAtlasReceipt(record.stateId),expressions=expressionPlanesForFamily(cell.family.id),inlineLocal=cell.family.id==='S17'&&cell.family.status==='LOCAL_ACTIVE',canOpen=!nonExecutable.has(cell.family.status)&&cell.family.target!=='System Atlas';
  const counts=useMemo(()=>Object.fromEntries([...new Set(FAMILIES.map(x=>x.status))].map(s=>[s,FAMILIES.filter(x=>x.status===s).length])),[]),audit=useMemo(()=>operationalCapabilityAudit(),[]);
  const activeAddress=Number.isFinite(Number(record?.address))?Number(record.address):Math.max(0,Number(record?.stateId||1)-1);
+ const restoreFocus=(()=>{try{const familyId=localStorage.getItem('omega.r83.familyFocus')||'';const systemId=localStorage.getItem('omega.r83.systemFocus')||'';const row=MASTER_SYSTEMS_R83.find(x=>x.id===systemId);return [familyId,row?.id,row?.artifact,row?.family,row?.role].filter(Boolean).join(' ')}catch{return''}})();
  void GRID_CELLS;void PHASE_COUNT;void STREAM_COUNT;void SUBSYSTEM_COUNT;
  return <section className='special-app system-atlas-r1 system-atlas-r13 system-atlas-r38'>
   <header className='special-head'><div><span>V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE · R45 EXECUTION + CAPABILITY TRUTH · R46 RESTORATION OVERLAY</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{FAMILIES.length} INVENTORY FAMILIES · {audit.total} APPLICATION SURFACES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision} · registration ≠ execution</small></div></header>
@@ -37,7 +39,7 @@ export default function SystemAtlasControl({record,onNavigate,control=false}:Pro
   <div className='atlas-r1-kpis'><article><b>{counts.WEB_ACTIVE||0}</b><span>WEB ACTIVE</span></article><article><b>{counts.SOURCE_ACTIVE||0}</b><span>SOURCE ACTIVE</span></article><article><b>{counts.LOCAL_ACTIVE||0}</b><span>LOCAL ACTIVE</span></article><article><b>{counts.EVIDENCE_GATED||0}</b><span>EVIDENCE GATED</span></article><article><b>{counts.DEVICE_GATED||0}</b><span>DEVICE GATED</span></article><article><b>{(counts.DONOR_ONLY||0)+(counts.NATIVE_TARGET||0)+(counts.RESTORATION_DEBT||0)}</b><span>HISTORICAL V24 DEBT/TARGET</span></article></div>
   <OmegaSystemInventoryR83 onNavigate={onNavigate}/>
     <section className='r45-capability-audit' aria-label='R45 operational capability audit'><article><b>{audit.total}</b><span>APPLICATION SURFACES</span></article><article><b>{audit.routable}</b><span>ROUTABLE</span></article><article><b>{audit.source}</b><span>SOURCE / RUNTIME</span></article><article><b>{audit.local}</b><span>LOCAL ACTIVE</span></article><article><b>{audit.gated}</b><span>TRUTH GATED</span></article><article><b>{audit.pass?'PASS':'CHECK'}</b><span>ROUTE CONTRACT</span></article></section>
-  <ExtremeRestorationR46 record={record} address={activeAddress} onNavigate={onNavigate}/>
+  <ExtremeRestorationR46 record={record} address={activeAddress} onNavigate={onNavigate} focus={restoreFocus}/>
   {inlineLocal&&<SomaAudioEngine record={record}/>} 
   <section className='capability-expression-r13' aria-label='OMEGA expression planes'><header><div><span>ONE STATE · MANY LAWFUL EXPRESSIONS</span><b>Expression targets inherit their own execution boundary</b></div><small>No expression plane creates a missing backend.</small></header><div>{EXPRESSION_PLANES.map(p=><button key={p.id} onClick={()=>onNavigate(p.target)} title={p.boundary}><code>{p.id}</code><span><b>{p.label}</b><small>{p.purpose}</small></span><em>{p.target}</em></button>)}</div></section>
   <section className='atlas-r1-menus'><header><Waypoints/><div><span>R45 EXECUTION CONTRACT</span><b>Every application surface has route, family, performance, persistence and truth-boundary authority</b></div></header><div className='r45-capability-table'>{OPERATIONAL_CAPABILITIES.map(c=><button key={c.name} data-routable={c.routable?'true':'false'} data-reality={effectiveCapabilityReality(c.name)} onClick={()=>onNavigate(c.routable?c.name:c.degradeTo)} title={`${c.input} · ${c.proof}`}><b>{c.name}</b><small>{c.familyId} · {c.performance} · {c.persistence} · {effectiveCapabilityReality(c.name)}</small></button>)}</div><div className='r45-boundary'><ShieldCheck/><span>{audit.boundary} Unroutable surfaces: {audit.unroutable.length?audit.unroutable.join(', '):'none'}.</span></div></section>
