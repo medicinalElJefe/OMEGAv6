@@ -148,7 +148,7 @@ export function compileFullOverallModePlanR78(record:any,panel:string,text=''):F
  const patterns=explicitAllModes?[]:(intent==='GENERAL'?[/Unified/i,/Continuity/i,/Guidance/i,/Comprehension/i,/Truth/i]:(PACKS[intent as Exclude<OmegaIntentR78,'GENERAL'|'ALL_MODES'>]||[]));
 
  const ranked=catalog.results.map((row:any)=>{
-  const hay=\`\${row.name} \${row.category} \${row.operator} \${row.algebra} \${row.calculus} \${row.purpose||''} \${row.dimensionFrame||''} \${row.notes||''}\`;
+  const hay=`${row.name} ${row.category} ${row.operator} ${row.algebra} ${row.calculus} ${row.purpose||''} ${row.dimensionFrame||''} ${row.notes||''}`;
   const core=CORE_PATTERNS.some(re=>re.test(hay));
   const intentMatch=explicitAllModes?1:regexScore(hay,patterns);
   const priorityBoost=row.priority==='kernel'?.24:row.priority==='core'?.18:row.priority==='support'?.08:0;
