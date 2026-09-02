@@ -2521,11 +2521,52 @@ export function routeForSystemR83(row:MasterSystemR83){
  if(/cinematic|renderer|gpu field|volumetric|mandala|skin/.test(n))return'Visual Instrument';
  if(/crimson|alpha–crimson|mode188|admissibility/.test(n))return'Modes';
  if(/earth/.test(n))return'Earth Now';
- if(/forecast|reality compiler|world/.test(n))return'Forecast';
- if(/hybrid/.test(n))return'Hybrid Link';
- if(/micro build|workbook|excel|sound atlas|soma|echo-chamber|oscillator/.test(n))return'System Atlas';
+ if(/forecast/.test(n))return'Forecast';
+ if(/reality compiler/.test(n))return'Reality Lab';
+ if(/world/.test(n))return'Earth Now';
+ if(/hybrid|camera shell|browser observation host/.test(n))return'Hybrid Link';
+ if(/micro build/.test(n))return'Build Out';
+ if(/workbook|excel|sound atlas|soma|echo-chamber|oscillator/.test(n))return'System Atlas';
  if(/installer|one-click|patch|package/.test(n))return'Build Out';
  if(/recovery board|archive/.test(n))return'Archive Operators';
+ return routeForMasterMenuR83(row.menu);
+}
+export function routeForMenuOptionR83(row:MasterMenuOptionR83){
+ const n=(row.label+' '+row.output+' '+row.roles).toLowerCase();
+ if(/heavy bio|bio continuity/.test(n))return'Matter Traversal';
+ if(/forecast/.test(n))return'Forecast';
+ if(/world mode/.test(n))return'Earth Now';
+ if(/camera host|camera pressure|host input/.test(n))return'Hybrid Link';
+ if(/text prompt/.test(n))return'Command Center';
+ if(/workbook seed|excel|xlsx|round trip export|lens matrix|capacity ledger/.test(n))return'System Atlas';
+ if(/state sonification|carrier layer|soma|echo/.test(n))return'System Atlas';
+ if(/one-click|patch chain/.test(n))return'Build Out';
+ if(/health check|replay verifier|shadow state|188 admission/.test(n))return'Validation';
+ if(/donor import|recovery board|conflict resolver/.test(n))return'Archive Operators';
+ if(/export case|proof/.test(n))return'Evidence & Proof';
+ if(/adaptive ui|cockpit layout/.test(n))return'Cockpit';
+ if(/media compiler/.test(n))return'Create';
+ if(/build planner|ai assist/.test(n))return'SAI Lab';
+ return routeForMasterMenuR83(row.topMenu);
+}
+export function routeForCapabilityR83(row:MasterCapabilityR83){
+ const n=(row.name+' '+row.roles+' '+row.output).toLowerCase();
+ if(/host-centered runtime/.test(n))return'System';
+ if(/188 admissibility/.test(n))return'Modes';
+ if(/stay\/turn\/escalate/.test(n))return'Traversal';
+ if(/reversible trajectory/.test(n))return'Atlas';
+ if(/living visual membrane|gpu.*3d|rendering/.test(n))return'Visual Instrument';
+ if(/camera/.test(n))return'Hybrid Link';
+ if(/excel|workbook/.test(n))return'System Atlas';
+ if(/forecast/.test(n))return'Forecast';
+ if(/bio atlas/.test(n))return'Matter Traversal';
+ if(/audio/.test(n))return'System Atlas';
+ if(/one-click packaging|patch and repair/.test(n))return'Build Out';
+ if(/archive donor merge/.test(n))return'Archive Operators';
+ if(/operator cockpit/.test(n))return'Cockpit';
+ if(/ai-assisted build/.test(n))return'SAI Lab';
+ if(/reality compiler/.test(n))return'Reality Lab';
+ if(/media compiler/.test(n))return'Create';
  return routeForMasterMenuR83(row.menu);
 }
 export function validateMasterLedgerR83(){const ids=new Set(MASTER_SYSTEMS_R83.map(x=>x.id)),opts=new Set(MASTER_MENU_OPTIONS_R83.map(x=>x.optionId)),caps=new Set(MASTER_CAPABILITIES_R83.map(x=>x.id));return{systems:MASTER_SYSTEMS_R83.length,uniqueSystems:ids.size,options:MASTER_MENU_OPTIONS_R83.length,uniqueOptions:opts.size,capabilities:MASTER_CAPABILITIES_R83.length,uniqueCapabilities:caps.size,pass:MASTER_SYSTEMS_R83.length===100&&ids.size===100&&MASTER_MENU_OPTIONS_R83.length===36&&opts.size===36&&MASTER_CAPABILITIES_R83.length===18&&caps.size===18,boundary:MASTER_SYSTEM_SOURCE_R83.boundary}}
