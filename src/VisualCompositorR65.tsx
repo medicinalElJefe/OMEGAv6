@@ -25,7 +25,7 @@ const fmt=(v:unknown)=>Number.isFinite(Number(v))?Number(v).toFixed(3):'—';
 const authorityRef=(id:number)=>`A${String(id).padStart(3,'0')}`;
 function CalculusLens({address,onAddress,mode,label}:{address:number;onAddress:(n:number)=>void;mode:'FIELD'|'FORECAST'|'RELATIVITY';label:string}){return <CalculusFieldR37 address={address} mode={mode} steps={mode==='FORECAST'?42:30} observerBeta={mode==='RELATIVITY'?.58:0} onAddress={onAddress} label={label}/>}
 export default function VisualCompositorR65({address,onAddress}:{address:number;onAddress:(n:number)=>void}){
- const[lens,setLens]=useState<Lens>(()=>{const x=localStorage.getItem('omega.r65.visual.lens') as Lens|null;return x&&LENSES.some(v=>v.id===x)?x:'SYNTHESIS'});
+ const[lens,setLens]=useState<Lens>(()=>{const x=localStorage.getItem('omega.r65.visual.lens') as Lens|null;return x&&['SYNTHESIS','MODE','MOTION'].includes(x)?x:'SYNTHESIS'});
  const record=useMemo(()=>corpusState(address),[address]);
  const coords=useMemo(()=>decodeAddress(address),[address]);
  const modes=useMemo(()=>sourceBackedModeSummary(record),[record]);
