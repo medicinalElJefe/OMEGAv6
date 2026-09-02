@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {BrainCircuit,Command,Eye,Home,Layers3,Menu,Search,Settings2,ShieldCheck,Sparkles,X} from 'lucide-react';
 import {CAPABILITY_REALITY_LABEL} from './capabilityAuthority';
 import {effectiveCapabilityReality} from './operationalCapabilityRuntimeR45';
@@ -19,7 +19,7 @@ const ALL=WORKSPACES.flatMap(x=>x.routes);
 const workspaceFor=(panel:string)=>WORKSPACES.find(x=>x.routes.includes(panel as never))||WORKSPACES[0];
 
 export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,modeCount,busy}:Props){
- const[open,setOpen]=useState(false),[active,setActive]=useState<WorkspaceId>(()=>workspaceFor(panel).id),[query,setQuery]=useState('');
+ const[open,setOpen]=useState(false),[active,setActive]=useState<WorkspaceId>(()=>workspaceFor(panel).id),[query,setQuery]=useState(''),navRef=useRef<HTMLElement|null>(null);
  useEffect(()=>{
   const media=window.matchMedia('(max-width: 900px)');
   const sync=()=>{const frame=uiMode==='MOBILE'?'mobile':uiMode==='DESKTOP'?'desktop':media.matches?'mobile':'desktop';document.documentElement.dataset.omegaFrame=frame};
@@ -29,6 +29,7 @@ export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,mod
  },[uiMode]);
  useEffect(()=>{if(!open)return;const prior=document.body.style.overflow;document.body.style.overflow='hidden';const key=(e:KeyboardEvent)=>{if(e.key==='Escape')setOpen(false)};window.addEventListener('keydown',key);return()=>{document.body.style.overflow=prior;window.removeEventListener('keydown',key)}},[open]);
  const current=workspaceFor(panel);
+ useEffect(()=>{navRef.current?.querySelector<HTMLElement>(`[data-workspace="${current.id}"]`)?.scrollIntoView({block:'nearest',inline:'nearest'})},[current.id]);
  const selected=WORKSPACES.find(x=>x.id===active)||current;
  const routes=useMemo(()=>{const q=query.trim().toLowerCase();return q?ALL.filter(x=>x.toLowerCase().includes(q)):selected.routes},[query,selected]);
  const go=(name:string)=>{onNavigate(name);setOpen(false);setQuery('')};
@@ -37,7 +38,7 @@ export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,mod
    <div className='r62-brand'><b>OMEGA V6</b><span>APPLICATIONS</span><small>{current.label} · {panel}</small></div>
    <button className='r62-home' onClick={()=>window.dispatchEvent(new CustomEvent('omega-home-request'))} aria-label='OMEGA home'><Home/><span>Home</span></button>
    <button className='r62-menu' onClick={()=>{setActive(current.id);setOpen(true)}} aria-label='Browse all applications'><Menu/><span>All applications</span></button>
-   <nav>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} className={current.id===w.id?'active':''} aria-pressed={current.id===w.id} title={`${w.label} — ${w.copy}`} onClick={()=>{setActive(w.id);setOpen(true)}}><I/><span>{w.label}</span></button>})}</nav>
+   <nav ref={navRef}>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} data-workspace={w.id} className={current.id===w.id?'active':''} aria-pressed={current.id===w.id} title={`${w.label} — ${w.copy}`} onClick={()=>{setActive(w.id);setOpen(true)}}><I/><span>{w.label}</span></button>})}</nav>
    <div className='r62-rail-state'><span>{busy?'RUNNING':'LIVE'}</span><b>{record?.metrics?.decision||'—'}</b><small>{modeCount} modes · {panel}</small></div>
   </aside>
   {open&&<div className='r62-overlay' role='presentation' onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false)}}>
