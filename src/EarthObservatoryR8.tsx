@@ -57,10 +57,10 @@ export default function EarthObservatoryR8({address}:Props){
   </section>
   <div className='earth-r72-disclosure'>
    <button className={showGround?'active':''} onClick={()=>setShowGround(v=>!v)}>Ground / street evidence</button>
-   <button className={showCalculus?'active':''} onClick={()=>setShowCalculus(v=>!v)}>Calculus-conditioned comparison</button>
+   <button className={showCalculus?'active':''} onClick={()=>setShowCalculus(v=>!v)}>Representational calculus comparison</button>
   </div>
   {showGround&&<section className='earth-r72-expanded'><EarthGroundTraversalR9 lat={lat} lon={lon}/></section>}
-  {showCalculus&&<section className='earth-r72-expanded'><EarthLivingFieldR36 address={address} lat={lat} lon={lon} evidence={evidence}/><p>The comparison field uses returned measurements for event magnitude and OMEGA calculus only for relational rendering; it is not a second Earth sensor.</p></section>}
+  {showCalculus&&<section className='earth-r72-expanded' data-provenance='REPRESENTATIONAL'><EarthLivingFieldR36 address={address} lat={lat} lon={lon} evidence={evidence}/><p>REPRESENTATIONAL ONLY · Returned measurements determine event magnitude; OMEGA calculus controls relational rendering. This is not a second Earth sensor or additional observation source.</p></section>}
   <footer className='earth-r72-proof'><ShieldCheck/><div><b>Evidence hash</b><code>{evidence?.evidenceHash||'not available'}</code></div><p>Earth → Region → City → Street → Ground remains source-backed. Unavailable providers remain unavailable.</p></footer>
  </section>
 }
