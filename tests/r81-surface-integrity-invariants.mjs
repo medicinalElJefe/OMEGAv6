@@ -33,7 +33,7 @@ const navNames=[...navigation.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(navNames.length===44&&new Set(navNames).size===44,'shared navigation registry must retain 44 unique entries');
 must(surfaces.every(x=>navNames.includes(x))&&navNames.every(x=>surfaces.includes(x)),'workstation and shared navigation must remain the same set');
 
-must(workstation.includes("<SurfaceIntegrityR81 panel={panel} onRecover={()=>go('System')}>{content}</SurfaceIntegrityR81>"),'every active surface must mount inside R81 containment');
+must(workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}>{content}</SurfaceIntegrityR81>"),'every active surface must mount inside R81 containment with canonical state context');
 must(integrity.includes('<PanelBoundary panel={panel}'),'surface failure must be isolated without crashing the whole build');
 must(integrity.includes("className='omega-surface-r81'"),'R81 surface wrapper missing');
 must(integrityCss.includes('overflow-x:clip')&&integrityCss.includes("table){\n display:block")&&integrityCss.includes('overflow-x:auto'),'surface content must stay contained while wide tables/tabs remain viewable');
