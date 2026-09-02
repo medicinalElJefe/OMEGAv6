@@ -69,15 +69,15 @@ const TEMPLATES:Record<WorkflowIntentR85,Array<Omit<WorkflowStepR85,'id'|'state'
   {kind:'CHECKPOINT',label:'Save forecast checkpoint',route:'Workspace',reason:'Preserve the pre/post route history.',expects:['CHECKPOINT_CAPTURED']}
  ],
  BUILD:[
-  {kind:'OPEN',label:'Open governed development',route:'Development',reason:'Work inside the existing application rather than a detached replacement.'},
-  {kind:'OPEN',label:'Assemble the build output',route:'Build Out',reason:'Bind build/restore operations to the current product and packet.'},
+  {kind:'OPEN',label:'Open governed development',route:'Development',reason:'Work inside the existing application rather than a detached replacement.',expects:['HOST_JOB_QUEUED','BUILD_MISSION_STARTED']},
+  {kind:'OPEN',label:'Assemble the build output',route:'Build Out',reason:'Bind build/restore operations to the current product and packet.',expects:['HOST_JOB_PROOF_SELECTED']},
   {kind:'VERIFY',label:'Run validation surface',route:'Validation',reason:'Do not promote a change that is only visually plausible.'},
   {kind:'VERIFY',label:'Review evidence and proof',route:'Evidence & Proof',reason:'Keep execution, source and release evidence explicit.',expects:['PROOF_REFRESHED','PROOF_RECEIPT_EXPORTED']},
   {kind:'CHECKPOINT',label:'Capture build checkpoint',route:'Workspace',reason:'Save a reproducible local continuity point.',expects:['CHECKPOINT_CAPTURED']}
  ],
  REPAIR:[
   {kind:'OPEN',label:'Inspect system and restoration state',route:'System Atlas',reason:'Find the actual broken boundary before changing code or state.'},
-  {kind:'OPEN',label:'Repair the existing build',route:'Development',reason:'Preserve working descendants while repairing the scoped fault.'},
+  {kind:'OPEN',label:'Repair the existing build',route:'Development',reason:'Preserve working descendants while repairing the scoped fault.',expects:['HOST_JOB_QUEUED','BUILD_MISSION_STARTED']},
   {kind:'VERIFY',label:'Validate repaired behavior',route:'Validation',reason:'Require the repaired route/surface to pass its bounded checks.'},
   {kind:'VERIFY',label:'Check governance boundary',route:'Governance',reason:'Do not convert missing authority or proof into a fake PASS.'},
   {kind:'CHECKPOINT',label:'Capture repair checkpoint',route:'Workspace',reason:'Retain the repaired state and workflow history.',expects:['CHECKPOINT_CAPTURED']}
