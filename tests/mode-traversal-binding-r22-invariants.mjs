@@ -10,7 +10,7 @@ must("sourceBackedModeSummary(corpusState(x.address))",'R22 must re-evaluate the
 must("x.state!=='GATED_MISSING_INPUTS'",'R22 must prevent missing-input formulas from being selected as executed traversal traces');
 must("route = exact autoPing.dataNext sequence",'R22 must preserve canonical route-before-visualization truth');
 must("data-active-mode={activeMode.id}",'R22 must expose active mode identity in the rendered proof surface');
-must("Trace this mode",'R22 must make source-bound mode-to-traversal selection user actionable');
+must("Trace actual mode output",'R22 must make source-bound mode-to-traversal selection user actionable without procedural visual fiction');
 if(!runtime.includes("Only operators whose required inputs are present in the canonical packet are executed"))throw new Error('R22 must retain source-backed execution truth boundary');
 if(src.includes('@appdeploy/client')||src.includes('appdeploy.ai'))throw new Error('R22 reintroduced AppDeploy dependency');
 
