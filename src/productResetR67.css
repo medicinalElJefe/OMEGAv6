@@ -1,6 +1,7 @@
 /* R67 PRODUCT RESET — final cascade authority. Fix the product, not another decorative skin. */
 :root{--r67-bg:#05090c;--r67-panel:#0a1115;--r67-line:rgba(226,236,233,.13);--r67-text:#f2f6f5;--r67-muted:#9baaa7;--r67-accent:#d7b66a;--r67-live:#69cbb8;--omega-safe-top:env(safe-area-inset-top,0px);--omega-safe-bottom:env(safe-area-inset-bottom,0px)}
 html,body,#root{min-width:0;max-width:100%;overflow-x:hidden;background:var(--r67-bg)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--r67-accent)!important;outline-offset:2px!important}
 /* HOME: one command + one living field owns the first viewport. */
 .r59-home{display:block!important;min-height:100dvh;background:radial-gradient(ellipse at 72% 18%,rgba(42,101,94,.12),transparent 38%),var(--r67-bg)!important}
 .r59-home>.r59-rail{display:none!important}
