@@ -27,6 +27,7 @@ export type WorkflowSessionR85={
  updatedAt:number;
  startAddress:number;
  startStateId:number;
+ projectId?:string;
  status:'ACTIVE'|'COMPLETE'|'CANCELLED';
  currentStep:number;
  steps:WorkflowStepR85[];
@@ -121,14 +122,14 @@ export function writeWorkflowR85(session:WorkflowSessionR85|null){
 export function archiveWorkflowR85(session:WorkflowSessionR85){
  try{const raw=localStorage.getItem(ARCHIVE),rows=raw?JSON.parse(raw):[];localStorage.setItem(ARCHIVE,JSON.stringify([...(Array.isArray(rows)?rows:[]),session].slice(-40)))}catch{}
 }
-export function startWorkflowR85(intent:WorkflowIntentR85,goal:string,record:any):WorkflowSessionR85{
+export function startWorkflowR85(intent:WorkflowIntentR85,goal:string,record:any,projectId?:string):WorkflowSessionR85{
  const meta=WORKFLOW_INTENTS_R85.find(x=>x.id===intent)||WORKFLOW_INTENTS_R85[0];
  const plan=compactModePlanR79(compileFullOverallModePlanR79(record,meta.anchorPanel,`${intent} ${goal}`));
  const now=Date.now();
  const session:WorkflowSessionR85={
   schema:'OMEGA_INTENT_WORKFLOW_R85',
   id:uid(),intent,goal:goal.trim()||meta.purpose,createdAt:now,updatedAt:now,
-  startAddress:Number(record?.address)||0,startStateId:Number(record?.stateId)||1,status:'ACTIVE',currentStep:0,
+  startAddress:Number(record?.address)||0,startStateId:Number(record?.stateId)||1,projectId,status:'ACTIVE',currentStep:0,
   steps:cloneSteps(intent),modePlan:plan,history:[{at:now,event:'WORKFLOW_STARTED',address:Number(record?.address)||0,detail:`${intent} · ${plan.policy} · ${plan.sourceBackedApplied} source-backed applied`}],
   truthBoundary:'Workflow execution coordinates existing OMEGA tools and explicit canonical transitions. Opening a surface is not proof that its external/native backend exists; gated inputs, device proof and release authority remain gated.'
  };
