@@ -36,13 +36,13 @@ export default function OmegaHomeR71({onEnter}:Props){
  const[ready,setReady]=useState(false),[domain,setDomain]=useState<DomainId>(()=>{try{const x=localStorage.getItem('omega.r82.workspace') as DomainId|null;return x&&OMEGA_WORKSPACES_R82.some(w=>w.id===x)?x:'EXPLORE'}catch{return'EXPLORE'}}),[query,setQuery]=useState(''),[showApps,setShowApps]=useState(false),[browserLayer,setBrowserLayer]=useState<'APPLICATIONS'|'SOFTWARE'>('APPLICATIONS');
  const[mode,setMode]=useState<FieldMode>(()=>{try{const x=localStorage.getItem('omega.r82.homeProjection') as FieldMode|null;return x&&OMEGA_FIELD_PROJECTIONS_R82.some(m=>m.id===x)?x:'FIELD'}catch{return'FIELD'}}),[selectedRole,setSelectedRole]=useState<OperatorColorRole>('OMEGA');
  const[prompt,setPrompt]=useState(()=>localState.read('omega.b015.chatDraft.v1','')),[reply,setReply]=useState(''),[busy,setBusy]=useState(false),[status,setStatus]=useState<any>(null),[hybrid,setHybrid]=useState<any>(null);
- const[showSystemMap,setShowSystemMap]=useState(()=>{try{const saved=localStorage.getItem('omega.r83.systemMapOpen');if(saved!==null)return saved==='true';return false}catch{return true}});
+ const[showSystemMap,setShowSystemMap]=useState(()=>{try{const saved=localStorage.getItem('omega.r88.systemMapOpen');if(saved!==null)return saved==='true';return false}catch{return true}});
  useEffect(()=>{let live=true;initCorpusPack().then(()=>live&&setReady(true)).catch(()=>live&&setReady(false));return()=>{live=false}},[]);
  useEffect(()=>{localState.write('omega.v6.address',address)},[address]);
  useEffect(()=>{try{localStorage.setItem('omega.r82.workspace',domain)}catch{}},[domain]);
  useEffect(()=>{try{localStorage.setItem('omega.r82.homeProjection',mode)}catch{}},[mode]);
  useEffect(()=>{localState.write('omega.b015.chatDraft.v1',prompt)},[prompt]);
- useEffect(()=>{try{localStorage.setItem('omega.r83.systemMapOpen',String(showSystemMap))}catch{}},[showSystemMap]);
+ useEffect(()=>{try{localStorage.setItem('omega.r88.systemMapOpen',String(showSystemMap))}catch{}},[showSystemMap]);
  useEffect(()=>{if(!showApps)return;const prior=document.body.style.overflow;document.body.style.overflow='hidden';const key=(e:KeyboardEvent)=>{if(e.key==='Escape')setShowApps(false)};window.addEventListener('keydown',key);return()=>{document.body.style.overflow=prior;window.removeEventListener('keydown',key)}},[showApps]);
  useEffect(()=>{let live=true;const load=async()=>{try{const[s,h]=await Promise.all([api.get<any>('/api/status'),api.get<any>('/api/hybrid/status')]);if(live){setStatus(s.data||null);setHybrid(h.data||null)}}catch{if(live){setStatus(null);setHybrid(null)}}};void load();const id=window.setInterval(load,30000);return()=>{live=false;window.clearInterval(id)}},[]);
  const record=useMemo(()=>ready?corpusState(address):null,[ready,address]);
