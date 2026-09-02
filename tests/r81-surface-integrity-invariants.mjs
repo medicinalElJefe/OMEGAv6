@@ -4,6 +4,9 @@ const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const shell=read('src/InstrumentOSShellR62.tsx');
 const shellCss=read('src/instrumentOSR62.css');
+const navigator=read('src/OmegaSideNavigatorR88.tsx');
+const navigatorCss=read('src/omegaSideNavigatorR88.css');
+const experience=read('src/omegaExperienceRegistryR82.ts');
 const reset=read('src/productResetR67.css');
 const integrity=read('src/SurfaceIntegrityR81.tsx');
 const integrityCss=read('src/surfaceIntegrityR81.css');
@@ -24,8 +27,7 @@ const mounted=[...existing,...suite,...inline];
 must(mounted.length===44&&new Set(mounted).size===44,'every canonical surface must have one and only one mount owner');
 for(const s of surfaces)must(mounted.includes(s),`surface has no explicit mount owner: ${s}`);
 
-const workspaceBlock=(shell.match(/const WORKSPACES=\[(.*?)\] as const;/s)||[])[1]||'';
-const workspaceRoutes=[...workspaceBlock.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+const workspaceRoutes=[...experience.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
 must(workspaceRoutes.length===44&&new Set(workspaceRoutes).size===44,'application browser must expose all 44 surfaces exactly once');
 for(const s of surfaces)must(workspaceRoutes.includes(s),`application browser omitted ${s}`);
 
@@ -40,14 +42,14 @@ must(integrityCss.includes('overflow-x:clip')&&integrityCss.includes("table){\n 
 must(integrityCss.includes('.r43-workspace-tabs')&&integrityCss.includes('overflow-x:auto'),'deep-workspace tabs must remain reachable on narrow screens');
 must(integrityCss.includes('@media(max-width:900px)'),'R81 mobile containment missing');
 
-must(shellCss.includes('overflow-x:auto')&&shellCss.includes('.r62-rail nav::-webkit-scrollbar{display:none}'),'mobile workspace rail must scroll instead of overlap');
-must(!reset.includes('.r62-rail nav button:nth-child(n+5){display:none!important}'),'mobile navigation must not hide Build/System workspace access');
+must(navigatorCss.includes('.r88-route-scroll{min-height:0;overflow:auto'),'global application banner must have one deliberate scroll owner');
+must(!navigator.includes('.slice('),'global application banner must not hide later routes behind slicing');
 must(reset.includes('.workstation-identity{min-width:0!important;overflow:hidden!important}'),'long route identity must not cover topbar controls');
-must(shellCss.includes('env(safe-area-inset-bottom,0px)'),'mobile navigation must respect bottom safe area');
-must(shell.includes("if(e.key==='Escape')setOpen(false)"),'application drawer must support deterministic Escape close');
-must(shell.includes("document.body.style.overflow='hidden'"),'open application drawer must not scroll the surface underneath');
-must(shell.includes("aria-current={panel===name?'page':undefined}"),'active route must be exposed accessibly');
-must(shell.includes('navRef.current?.querySelector'),'active mobile workspace must be brought into view');
+must(navigatorCss.includes('env(safe-area-inset-bottom,0px)'),'mobile side navigation must respect safe areas');
+must(navigator.includes("if(e.key==='Escape')setOpen(false)"),'application drawer must support deterministic Escape close');
+must(navigator.includes("document.body.style.overflow='hidden'"),'open application drawer must not scroll the surface underneath');
+must(navigator.includes("aria-current={currentPanel===route?'page':undefined}"),'active route must be exposed accessibly');
+must(shell.includes('OmegaSideNavigatorR88'),'R81 containment must mount under the shared R88 navigator authority');
 
 for(const token of [
  "view==='DEEP'&&<MatterTraversal",
