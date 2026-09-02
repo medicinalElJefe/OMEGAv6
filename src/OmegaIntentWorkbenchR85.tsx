@@ -58,7 +58,7 @@ export default function OmegaIntentWorkbenchR85({record,address,currentPanel,onA
   if(!session||!step)return null;
   return <section className='r85-workflow-strip' data-intent={session.intent}>
    <div className='r85-strip-progress'><i style={{transform:`scaleX(${progress.pct})`}}/></div>
-   <div className='r85-strip-copy'><span><Route/><b>{session.intent}</b><small>{progress.done}/{progress.total}</small></span><div><b>{step.label}</b><small>{step.reason}</small></div></div>
+   <div className='r85-strip-copy'><span><Route/><b>{session.intent}</b><small>{progress.done}/{progress.total}</small></span><div><b>{step.label}</b><small>{activeProject?.name||'unbound project'} · {step.reason}</small></div></div>
    <div className='r85-strip-actions'>{primary()}<button onClick={skip} title='Skip current step'><SkipForward/></button><button onClick={()=>downloadJson(`omega-workflow-${session.id}.json`,session)} title='Export workflow receipt'><Download/></button></div>
   </section>;
  }
