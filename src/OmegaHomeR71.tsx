@@ -100,7 +100,7 @@ export default function OmegaHomeR71({onEnter}:Props){
   </section>
 
   <section className='r83-home-system-map'>
-   <header><div><Blocks/><span><b>COMPLETE SOFTWARE SYSTEM MAP</b><small>44 application routes · 100 system rows · 24 source families · 57 local-host rows · 1,728 auto-ping cells · 179 source modes · {CANON_AUTHORITY_COUNT} canon lenses · 24 V77 bins</small></span></div><div><button onClick={()=>enter('System Atlas')}>Open System Atlas <ArrowRight/></button><button onClick={()=>setShowSystemMap(v=>!v)} aria-expanded={showSystemMap}>{showSystemMap?'Hide index':'Show full index'}</button></div></header>
+   <header><div><Blocks/><span><b>COMPLETE SOFTWARE SYSTEM MAP</b><small>44 application routes · 100 system rows · 24 runtime families · 179 source modes · 57 local-host rows · 1,728 auto-ping cells · {CANON_AUTHORITY_COUNT} canon lenses · 24 V77 bins</small></span></div><div><button onClick={()=>enter('System Atlas')}>Open System Atlas <ArrowRight/></button><button onClick={()=>setShowSystemMap(v=>!v)} aria-expanded={showSystemMap}>{showSystemMap?'Hide index':'Show full index'}</button></div></header>
    {showSystemMap&&<OmegaSystemInventoryR83 compact onNavigate={enter}/>}
   </section>
 
