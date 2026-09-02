@@ -49,7 +49,7 @@ export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,mod
     <nav className='r62-workspaces'>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} className={selected.id===w.id?'active':''} aria-pressed={selected.id===w.id} onClick={()=>{setActive(w.id);setQuery('')}}><I/><span><b>{w.label}</b><small>{w.routes.length} applications</small></span></button>})}</nav>
     <label className='r62-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search every OMEGA application…'/></label>
     <div className='r62-route-grid'>{routes.map(name=>{const reality=effectiveCapabilityReality(name);return <button key={name} className={panel===name?'active':''} aria-current={panel===name?'page':undefined} onClick={()=>go(name)}><span><b>{name}</b><small>{CAPABILITY_REALITY_LABEL[reality]}</small></span><Layers3/></button>})}</div>
-    <footer><span>Shared organization · {MENU_ALIGNMENT_R82.routeCount}/44 applications · historical depth remains reachable.</span><b>The active application owns the viewport.</b></footer>
+    <footer><span>Historical routes remain reachable through progressive disclosure · shared organization {MENU_ALIGNMENT_R82.routeCount}/44.</span><b>The active application owns the viewport.</b></footer>
    </section>
   </div>}
  </>;
