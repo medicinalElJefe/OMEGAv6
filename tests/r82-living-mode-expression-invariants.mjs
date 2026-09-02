@@ -31,6 +31,7 @@ must(modeCanvas.includes('switch(expression.family)'),'individual mode visuals m
 for(const sig of ["case'FORECAST'","case'PRUNE'","case'RELATIVITY'","case'FLOW'","case'MEMORY'","case'PROOF'","case'TOPOLOGY'","case'COMPRESSION'","case'TRAVERSAL'","case'RECURSION'","case'GOVERNANCE'","case'SCALE'","case'LIGHT'"])must(modeCanvas.includes(sig),`visual expression renderer missing ${sig}`);
 
 must(modes.includes('<ModeExpressionCanvasR82')&&modes.includes('Express this catalog mode visually'),'Modes application must show and select visual expression for catalog modes');
+must(modes.includes("aria-label='Select any OMEGA mode'")&&modes.includes('(catalog.results as any[]).map'),'all 179 catalog modes must be directly selectable beside the visual expression instead of buried below');
 must(modes.includes('Express gated mode'),'gated modes must remain visually inspectable without claiming execution');
 must(modes.includes('Express visually + Trace this mode'),'executed modes must bind visual identity and actual trace action');
 must(modes.includes("localStorage.setItem('omega.r82.selectedModeId'"),'selected mode must persist across OMEGA applications');
