@@ -7,6 +7,7 @@ import {unifiedFromRecord} from './unifiedCalculus';
 import {calculusVisualLaw,operatorColor,type OperatorColorRole} from './calculusVisualLawR37';
 import CalculusFieldR37 from './CalculusFieldR37';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
+import {compileFullOverallModePlanR79,compactModePlanR79} from './fullOverallModeOrchestratorR79';
 import './omegaHomeR71.css';
 
 type Props={onEnter:(panel:string)=>void};
@@ -46,13 +47,15 @@ export default function OmegaHomeR71({onEnter}:Props){
  const modes=useMemo(()=>record?sourceBackedModeSummary(record):null,[record]);
  const unified=useMemo(()=>record?unifiedFromRecord(record):null,[record]);
  const law=useMemo(()=>record?calculusVisualLaw(record):null,[record]);
+ const modePanel=mode==='FIELD'?'Field':mode==='MATTER'?'Matter Traversal':mode==='TRAVERSAL'?'Traversal':mode==='FORECAST'?'Forecast':mode==='RELATIVITY'?'Relativity':'Convergence';
+ const modePlan=useMemo(()=>record?compileFullOverallModePlanR79(record,modePanel,prompt):null,[record,modePanel,prompt]);
  const route=useMemo(()=>ready?forwardRoute(address,24):[],[ready,address]);
  const nextAddress=record?clamp(Number(record.autoPing?.dataNext??address)):address;
  const allRoutes=useMemo(()=>Object.values(DOMAINS).flatMap(x=>x.routes),[]);
  const visibleRoutes=useMemo(()=>{const q=query.trim().toLowerCase();if(q)return allRoutes.filter(x=>x.toLowerCase().includes(q)).slice(0,18);return DOMAINS[domain].routes.slice(0,10)},[query,domain,allRoutes]);
  const enter=(panel:string)=>{if(!allRoutes.includes(panel))return;localState.write('omega.v6.panel',panel);localState.write('omega.v6.modePolicy','SOURCE_BACKED');onEnter(panel)};
  const targetRole=(role:OperatorColorRole)=>{if(!ready||!route.length)return;let best=address,bestWeight=-1;for(const a of route){const candidate=corpusState(a);const w=calculusVisualLaw(candidate).operatorWeights[role];if(w>bestWeight){bestWeight=w;best=a}}setSelectedRole(role);setAddress(best)};
- const ask=async()=>{if(!record||!modes||!prompt.trim()||busy)return;setBusy(true);setReply('');try{const context={address,stateId:record.stateId,coords,decision:record.metrics.decision,metrics:record.metrics,nextAddress,modePolicy:'SOURCE_BACKED_ALL_AVAILABLE',appliedModeCount:modes.appliedCount,gatedModeCount:modes.gatedCount,unified:{coherence:unified?.unifiedCoherence,motionRelativity:unified?.motionRelativity},responseContract:{plainLanguageFirst:true,showRouteBeforeGeneration:true,doNotInventMissingEvidence:true}};await api.post('/api/route-preview',{text:prompt,context});const r=await api.post<any>('/api/chat',{text:prompt,context});setReply(String(r.data?.reply||'No response returned.'))}catch(e:any){setReply(e?.message||'No answer fabricated; provider/runtime path failed.')}finally{setBusy(false)}};
+ const ask=async()=>{if(!record||!modes||!modePlan||!prompt.trim()||busy)return;setBusy(true);setReply('');try{const context={address,stateId:record.stateId,coords,decision:record.metrics.decision,metrics:record.metrics,nextAddress,modePolicy:'SOURCE_BACKED_ALL_AVAILABLE',appliedModeCount:modes.appliedCount,gatedModeCount:modes.gatedCount,fullOverallModePlan:compactModePlanR79(modePlan),unified:{coherence:unified?.unifiedCoherence,motionRelativity:unified?.motionRelativity},responseContract:{plainLanguageFirst:true,showRouteBeforeGeneration:true,doNotInventMissingEvidence:true,preserveTruthBoundary:true}};await api.post('/api/route-preview',{text:prompt,context});const r=await api.post<any>('/api/chat',{text:prompt,context});setReply(String(r.data?.reply||'No response returned.'))}catch(e:any){setReply(e?.message||'No answer fabricated; provider/runtime path failed.')}finally{setBusy(false)}};
  const nativeOnline=Boolean(hybrid?.nativeExecutionClaimed===true&&(hybrid?.authenticatedHeartbeat===true||hybrid?.heartbeatAuthenticated===true||String(hybrid?.connectionState||hybrid?.state||'').toUpperCase()==='PC ONLINE'));
  const hybridLabel=nativeOnline?'PC ONLINE':hybrid?.browserCredentialReady||hybrid?.paired?'BROWSER CREDENTIAL READY · PC UNPROVEN':'PC NOT PROVEN ONLINE';
  return <main className='r71-home' data-color-authority='ALPHA BASE CONSTRUCT PRUNE OMEGA'>
