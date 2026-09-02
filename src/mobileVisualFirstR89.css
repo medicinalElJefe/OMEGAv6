@@ -1,0 +1,115 @@
+/* R89 MOBILE VISUAL-FIRST AUTHORITY — visual applications own the phone viewport; telemetry moves out of the way. */
+.mt-mobile-bar{display:none}
+
+@media(max-width:900px){
+ .omega-workstation-v2[data-visual-first='true'] .workstation-topbar{min-height:44px!important;height:44px!important;padding:calc(env(safe-area-inset-top,0px) + 3px) 6px 3px!important}
+ .omega-workstation-v2[data-visual-first='true'] .workstation-main{padding:4px 4px calc(10px + env(safe-area-inset-bottom,0px))!important}
+ .omega-workstation-v2[data-visual-first='true'] .r85-workflow-strip{margin:0 0 4px!important;padding:4px 6px!important;min-height:34px!important;border-radius:8px!important;grid-template-columns:minmax(0,1fr) auto!important}
+ .omega-workstation-v2[data-visual-first='true'] .r85-strip-copy{grid-template-columns:auto minmax(0,1fr)!important;gap:6px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r85-strip-copy>span{padding-right:6px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r85-strip-copy>div small{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r85-strip-actions>button:not(.r85-primary){display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r85-strip-actions .r85-primary{min-height:30px!important;padding:5px 7px!important;font-size:7px!important}
+
+ .omega-workstation-v2[data-visual-first='true'] .r36-living-surface{gap:5px!important;padding:4px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r36-surface-head{padding:4px 5px 6px!important;gap:4px!important;border-bottom:0!important}
+ .omega-workstation-v2[data-visual-first='true'] .r36-surface-head>div>span,
+ .omega-workstation-v2[data-visual-first='true'] .r36-surface-head p{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r36-surface-head h2{font-size:17px!important;margin:0!important}
+ .omega-workstation-v2[data-visual-first='true'] .r36-truth{display:none!important}
+
+ .omega-workstation-v2[data-visual-first='true'] .r43-workspace-tabs{position:relative!important;top:auto!important;display:flex!important;gap:3px!important;padding:3px!important;margin:0!important;background:#040b0e!important;border:1px solid rgba(115,173,166,.12)!important;border-radius:9px!important;overflow-x:auto!important}
+ .omega-workstation-v2[data-visual-first='true'] .r43-workspace-tabs button{flex:0 0 auto!important;min-width:88px!important;min-height:34px!important;padding:5px 7px!important;border-radius:7px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r43-workspace-tabs button span{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r43-workspace-stage{min-height:0!important}
+
+ .omega-workstation-v2[data-visual-first='true'] .r58-visual-deck{gap:4px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r58-visual-deck>header{min-height:34px!important;padding:5px 7px!important;border-radius:8px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r58-visual-deck>header span{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r58-visual-deck>nav{display:flex!important;grid-template-columns:none!important;gap:3px!important;padding:2px!important;overflow-x:auto!important;scrollbar-width:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r58-visual-deck>nav::-webkit-scrollbar{display:none}
+ .omega-workstation-v2[data-visual-first='true'] .r58-visual-deck>nav button{flex:0 0 auto!important;min-width:94px!important;min-height:36px!important;padding:5px 7px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r58-visual-deck>nav button small{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r58-display-stage,
+ .omega-workstation-v2[data-visual-first='true'] .r58-display-stage>*{min-height:68dvh!important}
+ .omega-workstation-v2[data-visual-first='true'] .r58-visual-deck>footer{display:none!important}
+
+ .omega-workstation-v2[data-visual-first='true'] .r65-compositor{gap:5px!important;padding:5px!important;border-radius:10px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-compositor-head{padding:2px!important;gap:5px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-compositor-head h3{font-size:17px!important;margin:2px 0!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-compositor-head p{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-live{min-width:0!important;width:auto!important;padding:5px 7px!important;border-radius:8px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-live small{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-state-ribbon{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-lens-nav{display:flex!important;grid-template-columns:none!important;gap:3px!important;overflow-x:auto!important;scrollbar-width:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-lens-nav::-webkit-scrollbar{display:none}
+ .omega-workstation-v2[data-visual-first='true'] .r65-lens-nav button{flex:0 0 auto!important;min-width:104px!important;min-height:36px!important;padding:5px 7px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-lens-nav button small{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-focus-stage{min-height:70dvh!important;border-radius:10px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-focus-stage .cfr37-stage{min-height:66dvh!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-synthesis-grid{grid-auto-rows:minmax(58dvh,1fr)!important;gap:4px!important}
+ .omega-workstation-v2[data-visual-first='true'] .r65-truth{display:none!important}
+
+ .omega-workstation-v2[data-visual-first='true'] .mer82-badge{left:6px!important;right:auto!important;bottom:6px!important;max-width:72%!important;padding:5px 7px!important;border-radius:7px!important}
+ .omega-workstation-v2[data-visual-first='true'] .mer82-badge small{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .mer82-badge b{font-size:10px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+ .omega-workstation-v2[data-visual-first='true'] .mer82-badge span{font-size:5.5px!important}
+ .omega-workstation-v2[data-visual-first='true'] .mode-expression-r82>footer{padding:5px!important;gap:3px!important}
+ .omega-workstation-v2[data-visual-first='true'] .mode-expression-r82>footer .boundary{display:none!important}
+
+ .omega-workstation-v2[data-visual-first='true'] .omega-motion-skins>header small,
+ .omega-workstation-v2[data-visual-first='true'] .omega-motion-skins>footer{display:none!important}
+ .omega-workstation-v2[data-visual-first='true'] .omega-motion-skins{padding:6px!important;gap:5px!important}
+ .omega-workstation-v2[data-visual-first='true'] .oms-stage svg{min-width:620px!important}
+
+ /* Deep Matter: the live field is primary. Data is user-invoked. */
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-native-menu,
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-toolbar,
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-modes,
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .motion-scale-bar,
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-replay,
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-info,
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-coherence{display:none!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-mobile-bar{display:flex!important;gap:3px!important;overflow-x:auto!important;scrollbar-width:none!important;padding:3px!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-mobile-bar::-webkit-scrollbar{display:none}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-mobile-bar button{flex:0 0 auto!important;min-height:36px!important;display:flex!important;align-items:center!important;gap:4px!important;padding:6px 8px!important;border:1px solid #293b45!important;border-radius:8px!important;background:#081319!important;color:#b8c8cf!important;font-size:8px!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-mobile-bar button.gold{background:#d2a765!important;color:#101519!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-mobile-bar svg{width:13px!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-stage{height:76dvh!important;min-height:520px!important;border-radius:10px!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-hud,
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .motion-readout{display:none!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-motion{right:6px!important;top:6px!important;padding:5px 7px!important;border-radius:7px!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-motion span,
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-motion small{display:none!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .b037 .mt-inspector{left:4px!important;right:4px!important;bottom:calc(4px + env(safe-area-inset-bottom,0px))!important;max-height:58dvh!important;border-radius:14px 14px 9px 9px!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .mt-head{padding:5px 7px!important;grid-template-columns:minmax(0,1fr) auto!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .mt-head small{display:none!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .mt-head h2{font-size:13px!important}
+ .omega-workstation-v2[data-panel='Matter Traversal'] .mt-head>button{display:none!important}
+
+ /* Restored deep Visual compiler: tabs become one compact scroll ribbon, HUD loses the full-width equation overlay. */
+ .omega-workstation-v2[data-panel='Visual Instrument'] .visual-instrument-app .depth-ribbon,
+ .omega-workstation-v2[data-panel='Visual Instrument'] .visual-instrument-app .compiler-lineage-tabs,
+ .omega-workstation-v2[data-panel='Visual Instrument'] .visual-instrument-app .spine-view-tabs,
+ .omega-workstation-v2[data-panel='Visual Instrument'] .visual-instrument-app .lens-tabs{display:flex!important;gap:3px!important;overflow-x:auto!important;scrollbar-width:none!important;max-width:100%!important}
+ .omega-workstation-v2[data-panel='Visual Instrument'] .visual-instrument-app :where(.depth-ribbon,.compiler-lineage-tabs,.spine-view-tabs,.lens-tabs)::-webkit-scrollbar{display:none}
+ .omega-workstation-v2[data-panel='Visual Instrument'] .visual-instrument-app :where(.depth-ribbon,.compiler-lineage-tabs,.spine-view-tabs,.lens-tabs) button{flex:0 0 auto!important;min-width:88px!important;min-height:34px!important;padding:5px 7px!important}
+ .omega-workstation-v2[data-panel='Visual Instrument'] .visual-instrument-app :where(.depth-ribbon,.compiler-lineage-tabs) button small{display:none!important}
+ .omega-workstation-v2[data-panel='Visual Instrument'] .visual-stage{min-height:74dvh!important}
+ .omega-workstation-v2[data-panel='Visual Instrument'] .visual-equation{display:none!important}
+ .omega-workstation-v2[data-panel='Visual Instrument'] .depth-hud{left:6px!important;top:6px!important;max-width:58%!important;padding:5px 6px!important}
+ .omega-workstation-v2[data-panel='Visual Instrument'] .depth-hud p,
+ .omega-workstation-v2[data-panel='Visual Instrument'] .depth-hud small{display:none!important}
+ .omega-workstation-v2[data-panel='Visual Instrument'] .trajectory-summary,
+ .omega-workstation-v2[data-panel='Visual Instrument'] .execution-spine,
+ .omega-workstation-v2[data-panel='Visual Instrument'] .depth-boundary{display:none!important}
+ .omega-workstation-v2[data-panel='Visual Instrument'] .instrument-controls.depth-controls{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;scrollbar-width:none!important}
+ .omega-workstation-v2[data-panel='Visual Instrument'] .instrument-controls.depth-controls>*{flex:0 0 auto!important}
+}
+
+@media(max-width:520px){
+ .omega-workstation-v2[data-visual-first='true'] .r65-focus-stage{min-height:72dvh!important}
+ .omega-workstation-v2[data-visual-first='true'] .r58-display-stage,
+ .omega-workstation-v2[data-visual-first='true'] .r58-display-stage>*{min-height:70dvh!important}
+ .omega-workstation-v2[data-visual-first='true'] .mode-expression-r82>footer span{font-size:6px!important;padding:4px 5px!important}
+}
