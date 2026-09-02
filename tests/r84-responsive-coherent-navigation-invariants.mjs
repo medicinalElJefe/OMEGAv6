@@ -18,13 +18,13 @@ for(const id of ['COMMAND','EXPLORE','INTELLIGENCE','EVIDENCE','BUILD','SYSTEM']
 must(home.includes('OmegaSideNavigatorR88'),'Home must mount the same global navigator as the workstation');
 must(home.includes("omega-r88-open-navigator")&&home.includes('All 44 applications')&&home.includes('Complete software system'),'Home must open the shared navigator for applications and software');
 must(home.includes("omega.r88.systemMapOpen")&&home.includes('return false'),'Home embedded software map must default collapsed under R88');
-must(nav.includes('OMEGA_ALL_ROUTES_R82')&&nav.includes('r88-route-scroll'),'navigator must render the shared 44-route authority through one scroll owner');
+must(nav.includes('OMEGA_ALL_ROUTES_R82')&&nav.includes("className='r89-flat-scroll'")&&nav.includes('rows.map(route=>'),'navigator must render all 44 routes in one continuous scroll owner');
 must(nav.includes("layer==='SOFTWARE'")&&nav.includes('<OmegaSystemInventoryR83 compact'),'navigator must preserve the complete software inventory layer');
 must(nav.includes("if(e.key==='Escape')setOpen(false)")&&nav.includes("document.body.style.overflow='hidden'"),'side navigator must close deterministically and lock the page beneath it');
 must(navCss.includes('.r88-navigator{position:absolute;inset:0 auto 0 0'),'navigation must remain an edge pop-out rather than a page section');
-must(navCss.includes('.r88-route-scroll{min-height:0;overflow:auto'),'all routes must share one deliberate scrolling banner');
-must(navCss.includes(".r71-topbar .r71-domains{display:none!important}")&&navCss.includes(".r84-home-launchpad>div{display:none!important}"),'Home must not repeat workspace compartments outside the global navigator');
-must(navCss.includes("@media(max-width:900px)")&&navCss.includes("width:min(92vw,390px)"),'mobile navigator must remain side-owned and viewport-contained');
+must(navCss.includes('.r89-flat-scroll{min-height:0;overflow:auto'),'all routes must share one deliberate flat scrolling banner');
+must(navCss.includes(".r71-topbar .r71-domains{display:none!important}")&&navCss.includes(".r84-home-launchpad{display:none!important}"),'Home must not repeat workspace compartments or basic launch panels outside the global navigator');
+must(navCss.includes("@media(max-width:900px)")&&navCss.includes("width:min(88vw,354px)!important"),'mobile navigator must remain a compact side-owned banner');
 
 must(shell.includes('OmegaSideNavigatorR88')&&!shell.includes("className='r62-rail'"),'workstation must retire the permanent desktop/mobile route rail');
 must(shell.includes("document.documentElement.dataset.omegaFrame=frame"),'workstation must preserve AUTO/DESKTOP/MOBILE frame authority');
@@ -40,4 +40,4 @@ const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'responsive navigation must not remove or duplicate application surfaces');
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),`deep donor surface lost: ${token}`);
 
-console.log('R84 RESPONSIVE COHERENT NAVIGATION PASS · R88 side banner · desktop/mobile viewport authority · 44/44 routes · no buried workspace hierarchy');
+console.log('R84 RESPONSIVE COHERENT NAVIGATION PASS · R89 flat side banner · desktop/mobile viewport authority · 44/44 routes · no buried workspace hierarchy');
