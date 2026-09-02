@@ -5,6 +5,7 @@ import {OPERATIONAL_CAPABILITIES,effectiveCapabilityReality,operationalCapabilit
 import CalculusFieldR37 from './CalculusFieldR37';
 import SomaAudioEngine from './SomaAudioEngine';
 import ExtremeRestorationR46 from './ExtremeRestorationR46';
+import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import './systemAtlas.css';
 import './systemCapabilityR13.css';
 import './systemAtlasDepthR38_4.css';
@@ -34,7 +35,8 @@ export default function SystemAtlasControl({record,onNavigate,control=false}:Pro
    </aside>
   </section>
   <div className='atlas-r1-kpis'><article><b>{counts.WEB_ACTIVE||0}</b><span>WEB ACTIVE</span></article><article><b>{counts.SOURCE_ACTIVE||0}</b><span>SOURCE ACTIVE</span></article><article><b>{counts.LOCAL_ACTIVE||0}</b><span>LOCAL ACTIVE</span></article><article><b>{counts.EVIDENCE_GATED||0}</b><span>EVIDENCE GATED</span></article><article><b>{counts.DEVICE_GATED||0}</b><span>DEVICE GATED</span></article><article><b>{(counts.DONOR_ONLY||0)+(counts.NATIVE_TARGET||0)+(counts.RESTORATION_DEBT||0)}</b><span>HISTORICAL V24 DEBT/TARGET</span></article></div>
-  <section className='r45-capability-audit' aria-label='R45 operational capability audit'><article><b>{audit.total}</b><span>APPLICATION SURFACES</span></article><article><b>{audit.routable}</b><span>ROUTABLE</span></article><article><b>{audit.source}</b><span>SOURCE / RUNTIME</span></article><article><b>{audit.local}</b><span>LOCAL ACTIVE</span></article><article><b>{audit.gated}</b><span>TRUTH GATED</span></article><article><b>{audit.pass?'PASS':'CHECK'}</b><span>ROUTE CONTRACT</span></article></section>
+  <OmegaSystemInventoryR83 onNavigate={onNavigate}/>
+    <section className='r45-capability-audit' aria-label='R45 operational capability audit'><article><b>{audit.total}</b><span>APPLICATION SURFACES</span></article><article><b>{audit.routable}</b><span>ROUTABLE</span></article><article><b>{audit.source}</b><span>SOURCE / RUNTIME</span></article><article><b>{audit.local}</b><span>LOCAL ACTIVE</span></article><article><b>{audit.gated}</b><span>TRUTH GATED</span></article><article><b>{audit.pass?'PASS':'CHECK'}</b><span>ROUTE CONTRACT</span></article></section>
   <ExtremeRestorationR46 record={record} address={activeAddress} onNavigate={onNavigate}/>
   {inlineLocal&&<SomaAudioEngine record={record}/>} 
   <section className='capability-expression-r13' aria-label='OMEGA expression planes'><header><div><span>ONE STATE · MANY LAWFUL EXPRESSIONS</span><b>Expression targets inherit their own execution boundary</b></div><small>No expression plane creates a missing backend.</small></header><div>{EXPRESSION_PLANES.map(p=><button key={p.id} onClick={()=>onNavigate(p.target)} title={p.boundary}><code>{p.id}</code><span><b>{p.label}</b><small>{p.purpose}</small></span><em>{p.target}</em></button>)}</div></section>
