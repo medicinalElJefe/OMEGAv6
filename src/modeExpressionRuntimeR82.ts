@@ -5,16 +5,16 @@ const family=(text:string):ModeExpressionFamilyR82=>{
  const t=text.toLowerCase();
  if(/forecast|future|plasticity|predict/.test(t))return'FORECAST';
  if(/prune|contradiction|reject|burden reduction/.test(t))return'PRUNE';
- if(/relativ|observer|frame|doppler|phase/.test(t))return'RELATIVITY';
- if(/water|flow|conduct|current|fluid/.test(t))return'FLOW';
+ if(/relativ|observer|reference frame|frame transform|doppler/.test(t))return'RELATIVITY';
+ if(/water|flow|conduct|fluid|hydro|stream/.test(t))return'FLOW';
  if(/scar|memory|carry|history|continuity ledger/.test(t))return'MEMORY';
  if(/proof|evidence|verify|admiss|truth/.test(t))return'PROOF';
  if(/topolog|graph|relation|network|junction/.test(t))return'TOPOLOGY';
  if(/compress|burden|density|compact/.test(t))return'COMPRESSION';
  if(/travers|route|guidance|path|motion/.test(t))return'TRAVERSAL';
  if(/recurr|recursive|mode188|188|loop|infinity/.test(t))return'RECURSION';
- if(/govern|canon|gate|authority|law/.test(t))return'GOVERNANCE';
- if(/scale|host|shell|hierarch|domain/.test(t))return'SCALE';
+ if(/govern|canon|gate|authority|policy/.test(t))return'GOVERNANCE';
+ if(/scale|host|shell|hierarch/.test(t))return'SCALE';
  if(/light|wave|amplitude|interference/.test(t))return'LIGHT';
  if(/coher|unified|omega|integration|closure/.test(t))return'COHERENCE';
  return'GENERIC';
@@ -39,8 +39,8 @@ const PALETTE:Record<ModeExpressionFamilyR82,[string,string,string,string]>={
 const sat=(v:number)=>{const a=Math.abs(Number(v)||0);return a/(1+a)};
 export function compileModeExpressionR82(catalogRow:any,executionRow:any,record:any):ModeExpressionR82{
  const row=catalogRow||executionRow||{},id=String(row.id||executionRow?.id||'MODE'),name=String(row.name||executionRow?.name||'Mode');
- const text=[name,row.category,row.operator,row.algebra,row.calculus,row.purpose,row.dimensionFrame,row.notes,executionRow?.detail,executionRow?.formula].filter(Boolean).join(' ');
- const f=family(text),p=PALETTE[f],numeric=typeof executionRow?.value==='number'&&Number.isFinite(executionRow.value);
+ const primary=[name,row.category,row.operator,row.purpose].filter(Boolean).join(' '),secondary=[row.algebra,row.calculus,row.dimensionFrame,row.notes,executionRow?.detail,executionRow?.formula].filter(Boolean).join(' ');
+ let f=family(primary);if(f==='GENERIC')f=family(secondary);const p=PALETTE[f],numeric=typeof executionRow?.value==='number'&&Number.isFinite(executionRow.value);
  const executed=Boolean(executionRow&&executionRow.state!=='GATED_MISSING_INPUTS'),gated=Boolean(executionRow?.state==='GATED_MISSING_INPUTS'),metadataOnly=!executionRow;
  const base=numeric ? .3+.7*sat(executionRow.value) : executed ? .7 : gated ? .36 : .5;
  const statePulse=.08*(Number(record?.metrics?.plasticity)||0)+.06*(Number(record?.metrics?.continuity)||0);
