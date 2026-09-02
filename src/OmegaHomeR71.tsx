@@ -31,16 +31,17 @@ function forwardRoute(start:number,steps=20){const out:number[]=[];let a=clamp(s
 
 export default function OmegaHomeR71({onEnter}:Props){
  const[address,setAddress]=useState(()=>clamp(Number(localState.read('omega.v6.address',11498))));
- const[ready,setReady]=useState(false),[domain,setDomain]=useState<DomainId>(()=>{try{const x=localStorage.getItem('omega.r82.workspace') as DomainId|null;return x&&OMEGA_WORKSPACES_R82.some(w=>w.id===x)?x:'EXPLORE'}catch{return'EXPLORE'}}),[query,setQuery]=useState(''),[showApps,setShowApps]=useState(false);
+ const[ready,setReady]=useState(false),[domain,setDomain]=useState<DomainId>(()=>{try{const x=localStorage.getItem('omega.r82.workspace') as DomainId|null;return x&&OMEGA_WORKSPACES_R82.some(w=>w.id===x)?x:'EXPLORE'}catch{return'EXPLORE'}}),[query,setQuery]=useState(''),[showApps,setShowApps]=useState(false),[browserLayer,setBrowserLayer]=useState<'APPLICATIONS'|'SOFTWARE'>('APPLICATIONS');
  const[mode,setMode]=useState<FieldMode>(()=>{try{const x=localStorage.getItem('omega.r82.homeProjection') as FieldMode|null;return x&&OMEGA_FIELD_PROJECTIONS_R82.some(m=>m.id===x)?x:'FIELD'}catch{return'FIELD'}}),[selectedRole,setSelectedRole]=useState<OperatorColorRole>('OMEGA');
  const[prompt,setPrompt]=useState(()=>localState.read('omega.b015.chatDraft.v1','')),[reply,setReply]=useState(''),[busy,setBusy]=useState(false),[status,setStatus]=useState<any>(null),[hybrid,setHybrid]=useState<any>(null);
- const[showSystemMap,setShowSystemMap]=useState(()=>{try{return localStorage.getItem('omega.r83.systemMapOpen')!=='false'}catch{return true}});
+ const[showSystemMap,setShowSystemMap]=useState(()=>{try{const saved=localStorage.getItem('omega.r83.systemMapOpen');if(saved!==null)return saved==='true';return !window.matchMedia('(max-width: 820px)').matches}catch{return true}});
  useEffect(()=>{let live=true;initCorpusPack().then(()=>live&&setReady(true)).catch(()=>live&&setReady(false));return()=>{live=false}},[]);
  useEffect(()=>{localState.write('omega.v6.address',address)},[address]);
  useEffect(()=>{try{localStorage.setItem('omega.r82.workspace',domain)}catch{}},[domain]);
  useEffect(()=>{try{localStorage.setItem('omega.r82.homeProjection',mode)}catch{}},[mode]);
  useEffect(()=>{localState.write('omega.b015.chatDraft.v1',prompt)},[prompt]);
  useEffect(()=>{try{localStorage.setItem('omega.r83.systemMapOpen',String(showSystemMap))}catch{}},[showSystemMap]);
+ useEffect(()=>{if(!showApps)return;const prior=document.body.style.overflow;document.body.style.overflow='hidden';const key=(e:KeyboardEvent)=>{if(e.key==='Escape')setShowApps(false)};window.addEventListener('keydown',key);return()=>{document.body.style.overflow=prior;window.removeEventListener('keydown',key)}},[showApps]);
  useEffect(()=>{let live=true;const load=async()=>{try{const[s,h]=await Promise.all([api.get<any>('/api/status'),api.get<any>('/api/hybrid/status')]);if(live){setStatus(s.data||null);setHybrid(h.data||null)}}catch{if(live){setStatus(null);setHybrid(null)}}};void load();const id=window.setInterval(load,30000);return()=>{live=false;window.clearInterval(id)}},[]);
  const record=useMemo(()=>ready?corpusState(address):null,[ready,address]);
  const coords=useMemo(()=>decodeAddress(address),[address]);
@@ -53,7 +54,9 @@ export default function OmegaHomeR71({onEnter}:Props){
  const nextAddress=record?clamp(Number(record.autoPing?.dataNext??address)):address;
  const allRoutes=useMemo(()=>[...OMEGA_ALL_ROUTES_R82],[]),activeWorkspace=OMEGA_WORKSPACES_R82.find(x=>x.id===domain)||OMEGA_WORKSPACES_R82[0];
  const visibleRoutes=useMemo(()=>{const q=query.trim().toLowerCase();if(q)return allRoutes.filter(x=>x.toLowerCase().includes(q));return [...activeWorkspace.routes]},[query,activeWorkspace,allRoutes]);
- const enter=(panel:string)=>{if(!allRoutes.includes(panel))return;localState.write('omega.v6.panel',panel);localState.write('omega.v6.modePolicy','SOURCE_BACKED');onEnter(panel)};
+ const enter=(panel:string)=>{if(!allRoutes.includes(panel))return;setShowApps(false);localState.write('omega.v6.panel',panel);localState.write('omega.v6.modePolicy','SOURCE_BACKED');onEnter(panel)};
+ const openApplications=(workspace:DomainId=domain)=>{setDomain(workspace);setQuery('');setBrowserLayer('APPLICATIONS');setShowApps(true)};
+ const openSoftware=()=>{setQuery('');setBrowserLayer('SOFTWARE');setShowApps(true)};
  const targetRole=(role:OperatorColorRole)=>{if(!ready||!route.length)return;let best=address,bestWeight=-1;for(const a of route){const candidate=corpusState(a);const w=calculusVisualLaw(candidate).operatorWeights[role];if(w>bestWeight){bestWeight=w;best=a}}setSelectedRole(role);setAddress(best)};
  const ask=async()=>{if(!record||!modes||!modePlan||!prompt.trim()||busy)return;setBusy(true);setReply('');try{const context={address,stateId:record.stateId,coords,decision:record.metrics.decision,metrics:record.metrics,nextAddress,modePolicy:'SOURCE_BACKED_ALL_AVAILABLE',appliedModeCount:modes.appliedCount,gatedModeCount:modes.gatedCount,fullOverallModePlan:compactModePlanR79(modePlan),unified:{coherence:unified?.unifiedCoherence,motionRelativity:unified?.motionRelativity},responseContract:{plainLanguageFirst:true,showRouteBeforeGeneration:true,doNotInventMissingEvidence:true,preserveTruthBoundary:true}};await api.post('/api/route-preview',{text:prompt,context});const r=await api.post<any>('/api/chat',{text:prompt,context});setReply(String(r.data?.reply||'No response returned.'))}catch(e:any){setReply(e?.message||'No answer fabricated; provider/runtime path failed.')}finally{setBusy(false)}};
  const nativeOnline=Boolean(hybrid?.nativeExecutionClaimed===true&&(hybrid?.authenticatedHeartbeat===true||hybrid?.heartbeatAuthenticated===true||String(hybrid?.connectionState||hybrid?.state||'').toUpperCase()==='PC ONLINE'));
@@ -61,16 +64,25 @@ export default function OmegaHomeR71({onEnter}:Props){
  return <main className='r71-home' data-color-authority='ALPHA BASE CONSTRUCT PRUNE OMEGA'>
   <header className='r71-topbar'>
    <button className='r71-brand' onClick={()=>{setDomain('EXPLORE');setShowApps(false)}}><span className='r71-mark'/><span><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild}</small></span></button>
-   <nav className='r71-domains' aria-label='Application workspaces'>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} data-role={w.role} onClick={()=>{setDomain(w.id);setQuery('');setShowApps(true)}}><i style={{background:law?operatorColor(law,w.role,.95):undefined}}/><span>{w.label}</span></button>)}</nav>
-   <button className='r71-apps-toggle' onClick={()=>setShowApps(v=>!v)} aria-expanded={showApps}><Search/><span>Applications</span></button>
+   <nav className='r71-domains' aria-label='Application workspaces'>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} data-role={w.role} onClick={()=>openApplications(w.id)}><i style={{background:law?operatorColor(law,w.role,.95):undefined}}/><span>{w.label}</span></button>)}</nav>
+   <button className='r71-apps-toggle' onClick={()=>showApps?setShowApps(false):openApplications()} aria-expanded={showApps}><Search/><span>Browse OMEGA</span></button>
   </header>
 
-  {showApps&&<section className='r71-app-drawer' aria-label='OMEGA applications'>
-   <div className='r71-drawer-head'><label><Search/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all 44 OMEGA applications'/></label><button onClick={()=>setShowApps(false)}>Close</button></div>
-   <div className='r71-drawer-context'><b>{query?'ALL OMEGA':activeWorkspace.label}</b><span>{query?`${visibleRoutes.length} matching applications`:`${activeWorkspace.copy} · ${activeWorkspace.routes.length} applications`}</span></div>
-   <div className='r71-route-grid'>{visibleRoutes.map(panel=><button key={panel} onClick={()=>enter(panel)}><span>{panel}</span><ArrowRight/></button>)}</div>
+  {showApps&&<section className='r71-app-drawer' role='dialog' aria-modal='true' aria-label='OMEGA system browser'>
+   <div className='r71-drawer-head'><div><span>OMEGA SYSTEM BROWSER</span><b>{browserLayer==='APPLICATIONS'?activeWorkspace.label:'Complete Software System'}</b><small>{browserLayer==='APPLICATIONS'?'44 organized application routes':'systems · runtime families · host lineage · menus · capabilities · archives · V77'}</small></div><button onClick={()=>setShowApps(false)}>Close</button></div>
+   <nav className='r84-home-browser-layers'><button className={browserLayer==='APPLICATIONS'?'active':''} onClick={()=>setBrowserLayer('APPLICATIONS')}>APPLICATIONS <b>44</b></button><button className={browserLayer==='SOFTWARE'?'active':''} onClick={()=>setBrowserLayer('SOFTWARE')}>SOFTWARE SYSTEM <b>100+</b></button></nav>
+   {browserLayer==='APPLICATIONS'?<>
+    <nav className='r84-home-browser-workspaces' aria-label='Browse application workspaces'>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} onClick={()=>{setDomain(w.id);setQuery('')}}><span>{w.label}</span><small>{w.routes.length} apps</small></button>)}</nav>
+    <label className='r84-home-browser-search'><Search/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all 44 OMEGA applications'/></label>
+    <div className='r71-drawer-context'><b>{query?'ALL OMEGA':activeWorkspace.label}</b><span>{query?`${visibleRoutes.length} matching applications`:`${activeWorkspace.copy} · ${activeWorkspace.routes.length} applications`}</span></div>
+    <div className='r71-route-grid'>{visibleRoutes.map(panel=><button key={panel} onClick={()=>enter(panel)}><span>{panel}</span><ArrowRight/></button>)}</div>
+   </>:<OmegaSystemInventoryR83 compact onNavigate={enter}/>} 
   </section>}
 
+  <section className='r84-home-launchpad' aria-label='OMEGA main navigation'>
+   <header><div><span>MAIN NAVIGATION</span><b>Everything stays reachable from here.</b></div><div><button onClick={()=>openApplications()}><Search/>All 44 applications</button><button onClick={openSoftware}><Blocks/>Complete software system</button></div></header>
+   <div>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} onClick={()=>openApplications(w.id)} style={{'--workspace-color':law?operatorColor(law,w.role,.95):undefined} as React.CSSProperties}><i/><span><b>{w.label}</b><small>{w.copy}</small></span><strong>{w.routes.length}<small>apps</small></strong></button>)}</div>
+  </section>
   <section className='r71-workspace'>
    <section className='r71-field-panel'>
     <div className='r71-field-toolbar'>
@@ -100,7 +112,7 @@ export default function OmegaHomeR71({onEnter}:Props){
   </section>
 
   <section className='r83-home-system-map'>
-   <header><div><Blocks/><span><b>COMPLETE SOFTWARE SYSTEM MAP</b><small>44 application routes · 100 system rows · 24 runtime families · 179 source modes · 57 local-host rows · 1,728 auto-ping cells · {CANON_AUTHORITY_COUNT} canon lenses · 24 V77 bins</small></span></div><div><button onClick={()=>enter('System Atlas')}>Open System Atlas <ArrowRight/></button><button onClick={()=>setShowSystemMap(v=>!v)} aria-expanded={showSystemMap}>{showSystemMap?'Hide index':'Show full index'}</button></div></header>
+   <header><div><Blocks/><span><b>COMPLETE SOFTWARE SYSTEM MAP</b><small>44 application routes · 100 system rows · 24 runtime families · 179 source modes · 57 local-host rows · 1,728 auto-ping cells · {CANON_AUTHORITY_COUNT} canon lenses · 24 V77 bins</small></span></div><div><button onClick={openSoftware}>Browse software <ArrowRight/></button><button onClick={()=>enter('System Atlas')}>System Atlas <ArrowRight/></button><button onClick={()=>setShowSystemMap(v=>!v)} aria-expanded={showSystemMap}>{showSystemMap?'Hide embedded index':'Show embedded index'}</button></div></header>
    {showSystemMap&&<OmegaSystemInventoryR83 compact onNavigate={enter}/>}
   </section>
 
