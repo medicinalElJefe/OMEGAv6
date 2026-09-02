@@ -4,6 +4,7 @@ const must=(ok,msg)=>{if(!ok)throw new Error('R83 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const home=read('src/OmegaHomeR71.tsx');
 const shell=read('src/InstrumentOSShellR62.tsx');
+const navigator=read('src/OmegaSideNavigatorR88.tsx');
 const atlas=read('src/SystemAtlasControl.tsx');
 const inventory=read('src/OmegaSystemInventoryR83.tsx');
 const inventoryCss=read('src/systemInventoryR83.css');
@@ -47,7 +48,7 @@ must(canonNames.length===62,'62 canon/calculus authorities must remain intact');
 must(authorities.includes('sourceModeEvaluations:179')&&authorities.includes('canonAuthorities:62'),'179 source modes and 62 canon lenses must remain separate counting layers');
 
 must(home.includes('<OmegaSystemInventoryR83 compact')&&home.includes('44 application routes · 100 system rows · 24 runtime families · 179 source modes'),'Home must expose the complete software system map instead of presenting 44 routes as the whole product');
-must(shell.includes("browserLayer==='SOFTWARE'")&&shell.includes('<OmegaSystemInventoryR83 compact'),'workstation browser must expose applications and software-system layers together');
+must(shell.includes('OmegaSideNavigatorR88')&&navigator.includes("layer==='SOFTWARE'")&&navigator.includes('<OmegaSystemInventoryR83 compact'),'workstation browser must expose applications and software-system layers together');
 must(atlas.includes('<OmegaSystemInventoryR83 onNavigate={onNavigate}/>'),'System Atlas must expose the complete software inventory directly');
 must(inventory.includes("id:'SYSTEMS'")&&inventory.includes("id:'FAMILIES'")&&inventory.includes("id:'HOST_BUILD'")&&inventory.includes("id:'MENUS'")&&inventory.includes("id:'CAPABILITIES'")&&inventory.includes("id:'ARCHIVES'")&&inventory.includes("id:'V77'"),'software navigator must expose all inventory layers');
 must(hostBuild.includes('softwareRows:57')&&hostBuild.includes('autoPingCells:1728')&&hostBuild.includes('12 Domains × 12 Phases × 12 Regulation states'),'57-row local-host lineage and 1,728 auto-ping design must remain visible');
