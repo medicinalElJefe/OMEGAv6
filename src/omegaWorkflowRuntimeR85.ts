@@ -1,4 +1,5 @@
 import {compileFullOverallModePlanR79,compactModePlanR79,type OmegaIntentR79} from './fullOverallModeOrchestratorR79';
+import {operationMatchesR86,type OmegaOperationR86,type OmegaOperationTypeR86} from './omegaOperationBusR86';
 
 export type WorkflowIntentR85='EXPLORE'|'ANALYZE'|'FORECAST'|'BUILD'|'REPAIR'|'PROVE'|'CREATE'|'CONNECT';
 export type WorkflowStepKindR85='OPEN'|'ADVANCE'|'CHECKPOINT'|'VERIFY';
@@ -15,6 +16,7 @@ export type WorkflowStepR85={
  beforeAddress?:number;
  afterAddress?:number;
  receiptHash?:string;
+ expects?:OmegaOperationTypeR86[];
 };
 export type WorkflowSessionR85={
  schema:'OMEGA_INTENT_WORKFLOW_R85';
@@ -48,40 +50,40 @@ const TEMPLATES:Record<WorkflowIntentR85,Array<Omit<WorkflowStepR85,'id'|'state'
  EXPLORE:[
   {kind:'OPEN',label:'Inspect the living visual field',route:'Visual Instrument',reason:'See the active packet through a state-bound visual instrument before changing it.'},
   {kind:'OPEN',label:'Inspect matter structure',route:'Matter Traversal',reason:'Compare the same state through matter/compression/scar structure.'},
-  {kind:'ADVANCE',label:'Commit one admitted transition',route:'Traversal',reason:'Move only through the currently admitted AutoPing candidate.'},
-  {kind:'VERIFY',label:'Review proof after traversal',route:'Evidence & Proof',reason:'Check what changed and preserve the evidence boundary.'},
-  {kind:'CHECKPOINT',label:'Capture a replay checkpoint',route:'Workspace',reason:'Preserve the resulting canonical state and workflow receipt.'}
+  {kind:'ADVANCE',label:'Commit one admitted transition',route:'Traversal',reason:'Move only through the currently admitted AutoPing candidate.',expects:['CANONICAL_TRANSITION_COMMITTED']},
+  {kind:'VERIFY',label:'Review proof after traversal',route:'Evidence & Proof',reason:'Check what changed and preserve the evidence boundary.',expects:['PROOF_REFRESHED','PROOF_RECEIPT_EXPORTED']},
+  {kind:'CHECKPOINT',label:'Capture a replay checkpoint',route:'Workspace',reason:'Preserve the resulting canonical state and workflow receipt.',expects:['CHECKPOINT_CAPTURED']}
  ],
  ANALYZE:[
-  {kind:'OPEN',label:'Analyze observations or current packet',route:'Reality Lab',reason:'Use measured-data mapping when available, otherwise inspect the active state honestly.'},
+  {kind:'OPEN',label:'Analyze observations or current packet',route:'Reality Lab',reason:'Use measured-data mapping when available, otherwise inspect the active state honestly.',expects:['ANALYSIS_COMPLETED']},
   {kind:'OPEN',label:'Inspect canonical atlas position',route:'Atlas',reason:'Locate the result inside the 20,736-state execution lattice.'},
   {kind:'OPEN',label:'Inspect relevant mode interpretation',route:'Modes',reason:'See source-backed modes and canon lenses without promoting gated formulas.'},
-  {kind:'VERIFY',label:'Review evidence and proof',route:'Evidence & Proof',reason:'Separate observations, derived structure and uncertainty.'},
-  {kind:'CHECKPOINT',label:'Save analysis checkpoint',route:'Workspace',reason:'Retain the analyzed state and workflow history.'}
+  {kind:'VERIFY',label:'Review evidence and proof',route:'Evidence & Proof',reason:'Separate observations, derived structure and uncertainty.',expects:['PROOF_REFRESHED','PROOF_RECEIPT_EXPORTED']},
+  {kind:'CHECKPOINT',label:'Save analysis checkpoint',route:'Workspace',reason:'Retain the analyzed state and workflow history.',expects:['CHECKPOINT_CAPTURED']}
  ],
  FORECAST:[
   {kind:'OPEN',label:'Inspect future topology',route:'Forecast',reason:'Start from the current packet and its future-plasticity channels.'},
   {kind:'OPEN',label:'Compare observer frames',route:'Relativity',reason:'Check whether the forecast changes under reference-frame interpretation.'},
-  {kind:'ADVANCE',label:'Test one admitted future step',route:'Traversal',reason:'Commit only the current canonical candidate, not an invented branch.'},
+  {kind:'ADVANCE',label:'Test one admitted future step',route:'Traversal',reason:'Commit only the current canonical candidate, not an invented branch.',expects:['CANONICAL_TRANSITION_COMMITTED']},
   {kind:'VERIFY',label:'Validate forecast transition',route:'Validation',reason:'Check the transition after enactment.'},
-  {kind:'CHECKPOINT',label:'Save forecast checkpoint',route:'Workspace',reason:'Preserve the pre/post route history.'}
+  {kind:'CHECKPOINT',label:'Save forecast checkpoint',route:'Workspace',reason:'Preserve the pre/post route history.',expects:['CHECKPOINT_CAPTURED']}
  ],
  BUILD:[
   {kind:'OPEN',label:'Open governed development',route:'Development',reason:'Work inside the existing application rather than a detached replacement.'},
   {kind:'OPEN',label:'Assemble the build output',route:'Build Out',reason:'Bind build/restore operations to the current product and packet.'},
   {kind:'VERIFY',label:'Run validation surface',route:'Validation',reason:'Do not promote a change that is only visually plausible.'},
-  {kind:'VERIFY',label:'Review evidence and proof',route:'Evidence & Proof',reason:'Keep execution, source and release evidence explicit.'},
-  {kind:'CHECKPOINT',label:'Capture build checkpoint',route:'Workspace',reason:'Save a reproducible local continuity point.'}
+  {kind:'VERIFY',label:'Review evidence and proof',route:'Evidence & Proof',reason:'Keep execution, source and release evidence explicit.',expects:['PROOF_REFRESHED','PROOF_RECEIPT_EXPORTED']},
+  {kind:'CHECKPOINT',label:'Capture build checkpoint',route:'Workspace',reason:'Save a reproducible local continuity point.',expects:['CHECKPOINT_CAPTURED']}
  ],
  REPAIR:[
   {kind:'OPEN',label:'Inspect system and restoration state',route:'System Atlas',reason:'Find the actual broken boundary before changing code or state.'},
   {kind:'OPEN',label:'Repair the existing build',route:'Development',reason:'Preserve working descendants while repairing the scoped fault.'},
   {kind:'VERIFY',label:'Validate repaired behavior',route:'Validation',reason:'Require the repaired route/surface to pass its bounded checks.'},
   {kind:'VERIFY',label:'Check governance boundary',route:'Governance',reason:'Do not convert missing authority or proof into a fake PASS.'},
-  {kind:'CHECKPOINT',label:'Capture repair checkpoint',route:'Workspace',reason:'Retain the repaired state and workflow history.'}
+  {kind:'CHECKPOINT',label:'Capture repair checkpoint',route:'Workspace',reason:'Retain the repaired state and workflow history.',expects:['CHECKPOINT_CAPTURED']}
  ],
  PROVE:[
-  {kind:'OPEN',label:'Inspect evidence ledger',route:'Evidence & Proof',reason:'Start with the current source/runtime evidence.'},
+  {kind:'OPEN',label:'Inspect evidence ledger',route:'Evidence & Proof',reason:'Start with the current source/runtime evidence.',expects:['PROOF_REFRESHED','PROOF_RECEIPT_EXPORTED']},
   {kind:'VERIFY',label:'Run validation',route:'Validation',reason:'Test the current state against explicit acceptance gates.'},
   {kind:'OPEN',label:'Inspect governance decision',route:'Governance',reason:'Separate admissibility from evidence and release authority.'},
   {kind:'OPEN',label:'Inspect quality compiler',route:'Quality Compiler',reason:'Check route and capability quality without relabeling donor presence as execution.'},
@@ -90,16 +92,16 @@ const TEMPLATES:Record<WorkflowIntentR85,Array<Omit<WorkflowStepR85,'id'|'state'
  CREATE:[
   {kind:'OPEN',label:'Open the creation workspace',route:'Create',reason:'Start from the active canonical state and selected intent.'},
   {kind:'OPEN',label:'Inspect the created visual expression',route:'Visual Instrument',reason:'Verify that the result changes the actual visual grammar, not only labels.'},
-  {kind:'OPEN',label:'Bring in or inspect assets',route:'Assets',reason:'Use actual browser-local hashed asset intake when needed.'},
-  {kind:'OPEN',label:'Generate an artifact',route:'Render Queue',reason:'Produce a real client-side SVG/PNG/packet artifact from the current state.'},
-  {kind:'VERIFY',label:'Review proof boundary',route:'Evidence & Proof',reason:'Keep created representation separate from external empirical proof.'}
+  {kind:'OPEN',label:'Bring in or inspect assets',route:'Assets',reason:'Use actual browser-local hashed asset intake when needed.',expects:['ASSET_HASHED']},
+  {kind:'OPEN',label:'Generate an artifact',route:'Render Queue',reason:'Produce a real client-side SVG/PNG/packet artifact from the current state.',expects:['ARTIFACT_EXPORTED']},
+  {kind:'VERIFY',label:'Review proof boundary',route:'Evidence & Proof',reason:'Keep created representation separate from external empirical proof.',expects:['PROOF_REFRESHED','PROOF_RECEIPT_EXPORTED']}
  ],
  CONNECT:[
   {kind:'OPEN',label:'Inspect Hybrid Link',route:'Hybrid Link',reason:'Check authenticated/device proof instead of assuming the PC is online.'},
   {kind:'OPEN',label:'Inspect hosted system state',route:'System',reason:'Compare hosted runtime truth with device/native claims.'},
-  {kind:'VERIFY',label:'Review connection evidence',route:'Evidence & Proof',reason:'Keep browser credential readiness, heartbeat proof and native execution distinct.'},
+  {kind:'VERIFY',label:'Review connection evidence',route:'Evidence & Proof',reason:'Keep browser credential readiness, heartbeat proof and native execution distinct.',expects:['PROOF_REFRESHED','PROOF_RECEIPT_EXPORTED']},
   {kind:'OPEN',label:'Inspect control surface',route:'Control Matrix',reason:'See what is actually routable versus gated.'},
-  {kind:'CHECKPOINT',label:'Capture connection checkpoint',route:'Workspace',reason:'Preserve the observed connection/proof state.'}
+  {kind:'CHECKPOINT',label:'Capture connection checkpoint',route:'Workspace',reason:'Preserve the observed connection/proof state.',expects:['CHECKPOINT_CAPTURED']}
  ]
 };
 
@@ -156,6 +158,12 @@ export function skipWorkflowStepR85(session:WorkflowSessionR85){
  const next={...session,steps,currentStep:Math.min(nextIdx,steps.length-1),status,updatedAt:now,history:[...session.history,{at:now,event:'STEP_SKIPPED',stepId:steps[idx].id}]};
  if(status==='COMPLETE'){archiveWorkflowR85(next as WorkflowSessionR85);writeWorkflowR85(null);return next as WorkflowSessionR85}
  return writeWorkflowR85(next as WorkflowSessionR85)!;
+}
+export function applyOperationToWorkflowR86(session:WorkflowSessionR85,event:OmegaOperationR86){
+ if(session.status!=='ACTIVE'||event.workflowId&&event.workflowId!==session.id)return session;
+ const step=activeWorkflowStepR85(session);
+ if(!step||!operationMatchesR86(step.expects,event))return session;
+ return completeWorkflowStepR85(session,{beforeAddress:event.address,afterAddress:event.nextAddress??event.address,receiptHash:event.sha256,note:`${event.type} · ${event.detail}`});
 }
 export function activeWorkflowStepR85(session:WorkflowSessionR85|null){return session?.status==='ACTIVE'?session.steps[session.currentStep]||null:null}
 export function workflowProgressR85(session:WorkflowSessionR85|null){
