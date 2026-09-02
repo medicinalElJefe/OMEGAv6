@@ -9,6 +9,7 @@ const inventory=read('src/OmegaSystemInventoryR83.tsx');
 const inventoryCss=read('src/systemInventoryR83.css');
 const master=read('src/softwareMasterLedgerR83.ts');
 const archive=read('src/archiveDonorIndexR83.ts');
+const hostBuild=read('src/hostBuildLedgerR83.ts');
 const bins=read('src/v77BinLedgerR83.ts');
 const families=read('src/systemAtlasRuntime.ts');
 const authorities=read('src/allModesAuthority.ts');
@@ -48,7 +49,9 @@ must(authorities.includes('sourceModeEvaluations:179')&&authorities.includes('ca
 must(home.includes('<OmegaSystemInventoryR83 compact')&&home.includes('44 application routes · 100 system rows · 24 runtime families · 179 source modes'),'Home must expose the complete software system map instead of presenting 44 routes as the whole product');
 must(shell.includes("browserLayer==='SOFTWARE'")&&shell.includes('<OmegaSystemInventoryR83 compact'),'workstation browser must expose applications and software-system layers together');
 must(atlas.includes('<OmegaSystemInventoryR83 onNavigate={onNavigate}/>'),'System Atlas must expose the complete software inventory directly');
-must(inventory.includes("id:'SYSTEMS'")&&inventory.includes("id:'FAMILIES'")&&inventory.includes("id:'MENUS'")&&inventory.includes("id:'CAPABILITIES'")&&inventory.includes("id:'ARCHIVES'")&&inventory.includes("id:'V77'"),'software navigator must expose all inventory layers');
+must(inventory.includes("id:'SYSTEMS'")&&inventory.includes("id:'FAMILIES'")&&inventory.includes("id:'HOST_BUILD'")&&inventory.includes("id:'MENUS'")&&inventory.includes("id:'CAPABILITIES'")&&inventory.includes("id:'ARCHIVES'")&&inventory.includes("id:'V77'"),'software navigator must expose all inventory layers');
+must(hostBuild.includes('softwareRows:57')&&hostBuild.includes('autoPingCells:1728')&&hostBuild.includes('12 Domains × 12 Phases × 12 Regulation states'),'57-row local-host lineage and 1,728 auto-ping design must remain visible');
+must((hostBuild.match(/"id":\s*"(?:OS|CC|TCS|M188|HYB|RND|TRV|FOR|AI|PKG|DAT|AUD|HOST|SPEC)-/g)||[]).length===57,'local-host lineage must retain all 57 unique implementation rows');
 must(!inventoryCss.includes('.r83-inventory{position:fixed')&&!inventoryCss.includes('.r83-home-system-map{position:fixed'),'inventory may not create a global fixed overlay');
 
 must(archive.includes('software2VisibleItems:100')&&archive.includes('software2ListingComplete:false'),'2Software visible donor index must be exposed without falsely claiming a complete folder crawl');
@@ -66,4 +69,4 @@ must(modeRuntime.includes('authorityLens')&&modeRuntime.includes('not an additio
 must(modeCanvas.includes('CANON / CALCULUS GOVERNANCE LENS')&&modeCanvas.includes('CANON / CALCULUS LENS'),'canon lens visual labels must not say source-backed execution');
 must(visual.includes("omega.r83.selectedModeRef")&&visual.includes('canon authority lens'),'Visual Instrument must carry selected source-mode/canon-lens identity across applications');
 
-console.log('R83 FULL SYSTEM INVENTORY RESTORATION PASS · 44 routes + 100 systems + 24 families + 36 options + 18 capabilities + 179 source modes + 62 canon lenses + 24 V77 bins + reviewed archive builds preserved');
+console.log('R83 FULL SYSTEM INVENTORY RESTORATION PASS · 44 routes + 100 systems + 24 source families + 57 local-host rows + 1,728 auto-ping cells + 36 options + 18 capabilities + 179 source modes + 62 canon lenses + 24 V77 bins + reviewed archive builds preserved');
