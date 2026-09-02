@@ -24,7 +24,7 @@ requireText(matrix,'onAddress(cell.address)','Capability matrix no longer commit
 requireText(matrix,"localStorage.setItem('omega.b015.chatDraft.v1',text)",'Proof questions no longer feed OMEGA command context');
 requireText(matrix,'planckRadiance','Relativity physics calculation missing');
 requireText(matrix,'record.autoPing.dataNext','Carry workspace must retain admitted-next authority');
-for(const x of ['LIVE FIELD','CAPABILITY MATRIX','DEEP MATTER','DEEP COMPILER','DEEP STUDIO','ROUTE + PROOF'])requireText(living,x,`First-class specialist workspace missing: ${x}`);
+for(const x of ['LIVE DATA','CAPABILITY MATRIX','DEEP MATTER','DEEP COMPILER','DEEP STUDIO','ROUTE + PROOF'])requireText(living,x,`First-class specialist workspace missing: ${x}`);
 requireText(living,'<MatterTraversal state={state}','Deep Matter engine is no longer first-class');
 requireText(living,'<OmegaVisualInstrument address={address}','Deep Visual engine is no longer first-class');
 requireText(living,'<OmegaTraversalStudio variant={variant}','Deep Traversal engine is no longer first-class');
