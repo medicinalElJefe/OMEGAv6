@@ -44,6 +44,7 @@ import './responsivePolishR88.css';
 import './mobileVisualFirstR89.css';
 import './surfaceHierarchyR90.css';
 import './operationalSurfaceRefinementR91.css';
+import './specialistSurfaceClarityR92.css';
 
 export const OMEGA_SURFACES=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'] as const;
 type Panel=typeof OMEGA_SURFACES[number];
@@ -53,7 +54,7 @@ const LEGACY_R23_STALE_ROUTE_FALLBACK="isPrimaryOperationalCapability(String(v))
 void LEGACY_R23_STALE_ROUTE_FALLBACK;
 const SPECIALIST_EXISTING=new Set<Panel>(['Hybrid Link','Workspace','Cockpit','Matter Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Reality Lab','Atlas Calculator','Infinity','Scale Compiler','Build Out','SAI Lab','Kernel Intelligence','Immersive Traversal','Extreme Traversal','Traversal','Archive Census','Archive Operators','Quality Compiler','Validation','System Atlas','Control Matrix']);
 const SPECIALIST_SUITE=new Set<Panel>(['Field','Data Motion','Convergence','Projects','Render Queue','Assets','Evidence & Proof','Memory','Canon Evolution','Governance','Consolidation','Instructions','Settings','System']);
-const VISUAL_FIRST_SURFACES=new Set<Panel>(['Matter Traversal','Visual Instrument','Immersive Traversal','Extreme Traversal','Traversal','Forecast','Relativity','Earth Now','Atlas','Infinity','Scale Compiler','Field','Data Motion','Convergence']);
+const VISUAL_FIRST_SURFACES=new Set<Panel>(['Matter Traversal','Visual Instrument','Immersive Traversal','Extreme Traversal','Traversal','Forecast','Relativity','Earth Now','Atlas','Infinity','Scale Compiler','Reality Lab','Field','Data Motion','Convergence']);
 function normalizePanel(v:any):Panel{if(!OMEGA_SURFACES.includes(v as Panel))return 'System Atlas';return capabilityExecutionContract(String(v)).routable?v as Panel:'System Atlas'}
 
 export default function OmegaWorkstationFullV2(){
