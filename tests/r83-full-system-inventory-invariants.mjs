@@ -35,6 +35,7 @@ must(bins.includes('archive bin presence is donor evidence, not hosted execution
 
 const familyIds=[...families.matchAll(/F\('(S\d{2})'/g)].map(x=>x[1]);
 must(familyIds.length===24&&new Set(familyIds).size===24,'24-family runtime inventory must remain intact');
+must(families.includes("S22','Omega Installer / One-Click Shell','DESKTOP_STARTUP_PACKAGER'")&&families.includes("S23','Runtime API / WebSocket Service','LIVE_STATE_TRANSPORT'"),'authoritative v22 S22 installer and S23 runtime transport families must not be overwritten by UI/package aliases');
 const surfBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical application route layer must remain exactly 44 unique routes');
