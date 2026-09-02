@@ -3,6 +3,7 @@ import {BrainCircuit,Command,Eye,Home,Layers3,Menu,Search,Settings2,ShieldCheck,
 import {CAPABILITY_REALITY_LABEL} from './capabilityAuthority';
 import {effectiveCapabilityReality} from './operationalCapabilityRuntimeR45';
 import type {OmegaUiMode} from './SingleFrameRuntimeShellR27';
+import {OMEGA_ALL_ROUTES_R82,OMEGA_WORKSPACES_R82,validateExperienceRegistryR82} from './omegaExperienceRegistryR82';
 import './instrumentOSR62.css';
 
 type Props={uiMode:OmegaUiMode;onUiMode:(mode:OmegaUiMode)=>void;panel:string;onNavigate:(panel:string)=>void;record:any;modePolicy:string;modeCount:number;busy:string};
@@ -15,7 +16,8 @@ const WORKSPACES=[
  {id:'BUILD' as const,label:'Build',copy:'create · develop · assets',Icon:Sparkles,routes:['Create','Projects','Render Queue','Assets','Development','Build Out']},
  {id:'SYSTEM' as const,label:'System',copy:'atlas · settings · plugins',Icon:Settings2,routes:['Instructions','Plugins','Settings','System','System Atlas','Control Matrix','Consolidation']}
 ] as const;
-const ALL=WORKSPACES.flatMap(x=>x.routes);
+const MENU_ALIGNMENT_R82=(()=>{const shared=validateExperienceRegistryR82(),local=WORKSPACES.flatMap(x=>x.routes),sameGroups=WORKSPACES.length===OMEGA_WORKSPACES_R82.length&&WORKSPACES.every((w,i)=>w.id===OMEGA_WORKSPACES_R82[i].id&&w.label===OMEGA_WORKSPACES_R82[i].label&&w.routes.length===OMEGA_WORKSPACES_R82[i].routes.length&&w.routes.every((r,j)=>r===OMEGA_WORKSPACES_R82[i].routes[j]));if(!shared.pass||!sameGroups||local.length!==OMEGA_ALL_ROUTES_R82.length)throw new Error('R82 menu registry mismatch: Home and workstation organization diverged');return shared})();
+const ALL=OMEGA_ALL_ROUTES_R82;
 const workspaceFor=(panel:string)=>WORKSPACES.find(x=>x.routes.includes(panel as never))||WORKSPACES[0];
 
 export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,modeCount,busy}:Props){
@@ -47,7 +49,7 @@ export default function InstrumentOSShellR62({uiMode,panel,onNavigate,record,mod
     <nav className='r62-workspaces'>{WORKSPACES.map(w=>{const I=w.Icon;return <button key={w.id} className={selected.id===w.id?'active':''} aria-pressed={selected.id===w.id} onClick={()=>{setActive(w.id);setQuery('')}}><I/><span><b>{w.label}</b><small>{w.routes.length} applications</small></span></button>})}</nav>
     <label className='r62-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search every OMEGA application…'/></label>
     <div className='r62-route-grid'>{routes.map(name=>{const reality=effectiveCapabilityReality(name);return <button key={name} className={panel===name?'active':''} aria-current={panel===name?'page':undefined} onClick={()=>go(name)}><span><b>{name}</b><small>{CAPABILITY_REALITY_LABEL[reality]}</small></span><Layers3/></button>})}</div>
-    <footer><span>Historical routes remain reachable through progressive disclosure.</span><b>The active application owns the viewport.</b></footer>
+    <footer><span>Shared organization · {MENU_ALIGNMENT_R82.routeCount}/44 applications · historical depth remains reachable.</span><b>The active application owns the viewport.</b></footer>
    </section>
   </div>}
  </>;
