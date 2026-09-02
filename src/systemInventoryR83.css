@@ -9,3 +9,16 @@
 .r83-inventory.compact .r83-inventory-head h3{font-size:17px}.r83-inventory.compact .r83-inventory-grid{max-height:min(470px,52dvh);grid-template-columns:1fr}.r83-inventory.compact .r83-inventory-head p{max-width:680px}
 @media(max-width:1000px){.r83-inventory-head{display:grid}.r83-inventory-kpis{grid-template-columns:repeat(5,auto auto);width:max-content;max-width:100%;overflow-x:auto}.r83-inventory-grid{grid-template-columns:1fr}}
 @media(max-width:680px){.r83-inventory{border-radius:12px}.r83-inventory-head{padding:10px 9px 2px}.r83-inventory-kpis{grid-template-columns:repeat(3,auto auto);width:100%}.r83-inventory-tabs{padding:0 8px;scrollbar-width:none}.r83-inventory-tabs::-webkit-scrollbar{display:none}.r83-inventory-tabs button{min-width:116px}.r83-inventory-search{margin:0 8px}.r83-inventory-grid{padding:0 8px 9px;max-height:58dvh}.r83-inventory-grid>button{grid-template-columns:46px minmax(0,1fr) 14px}.r83-inventory-grid strong{grid-column:2;grid-row:2;justify-items:start}.r83-inventory-grid>button>svg{grid-column:3;grid-row:1}.r83-inventory>footer{display:grid;padding:8px}.r83-inventory>footer>div{justify-content:flex-start}}
+
+/* R84 compact inventory behavior inside Home/workstation browsers. */
+.r83-inventory.compact{grid-template-rows:auto auto auto minmax(0,1fr) auto;min-height:0}
+.r83-inventory.compact .r83-inventory-grid{min-height:0}
+@media(max-width:680px){
+ .r83-inventory.compact .r83-inventory-head p{display:none}
+ .r83-inventory.compact .r83-inventory-head h3{font-size:15px;margin-bottom:0}
+ .r83-inventory.compact .r83-inventory-kpis{display:flex;gap:5px;width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+ .r83-inventory.compact .r83-inventory-kpis::-webkit-scrollbar{display:none}
+ .r83-inventory.compact .r83-inventory-kpis b,.r83-inventory.compact .r83-inventory-kpis small{flex:0 0 auto}
+ .r83-inventory.compact .r83-inventory-tabs{padding-top:1px}
+ .r83-inventory.compact .r83-inventory-grid{max-height:none}
+}
