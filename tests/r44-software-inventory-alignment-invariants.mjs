@@ -7,7 +7,7 @@ const expected=[
 for(const row of expected)for(const token of row)if(!atlas.includes(token))throw new Error(`inventory family drift: ${token}`);
 for(const token of ['OMEGA_SYSTEM_ATLAS_V24_INVENTORY_ALIGNED','OMEGA_ALL_SOFTWARE_61917364224D_FULL_BUILD_ATLAS_v22.xlsx / SOFTWARE_MASTER','61917364224','20736','inventoryPurpose'])if(!atlas.includes(token))throw new Error(`inventory authority missing: ${token}`);
 if((atlas.match(/\nF\('S\d\d'/g)||[]).length!==24)throw new Error('expected exact 24-family registry');
-for(const token of ['Operator Dashboard / Control Surface','Cockpit','One-Click Packaging System','Build Out'])if(!atlas.includes(token))throw new Error(`family target missing: ${token}`);
+for(const token of ['Omega Installer / One-Click Shell','Build Out','Runtime API / WebSocket Service','LIVE_STATE_TRANSPORT'])if(!atlas.includes(token))throw new Error(`family target missing: ${token}`);
 if(/@appdeploy\/client/i.test(atlas+authority+workstation))throw new Error('builder-only runtime dependency regression');
 if(!authority.includes("name:'Earth Now'")||!authority.includes("boundary:'EVIDENCE_BOUND'"))throw new Error('Earth evidence gate lost');
 if(!authority.includes("name:'Hybrid Link'")||!authority.includes("boundary:'DEVICE_PROOF'"))throw new Error('Hybrid device proof gate lost');
