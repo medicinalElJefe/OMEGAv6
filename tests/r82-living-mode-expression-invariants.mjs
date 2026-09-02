@@ -23,8 +23,8 @@ must(!home.includes('.slice(0,18)')&&!home.includes('.slice(0,10)'),'Home may no
 must(home.includes('projection.signature')&&home.includes('projection.intent'),'Home must explain the visual law selected by each projection button');
 must(homeCss.includes('.r71-modes')&&homeCss.includes('overflow-x:auto'),'all projection buttons must remain reachable without overlap');
 
-must(shell.includes('OmegaSideNavigatorR88')&&nav.includes('OMEGA_WORKSPACES_R82')&&nav.includes('OMEGA_ALL_ROUTES_R82'),'workstation menu must be locked to the same shared organization as Home');
-must(nav.includes('One scroll owner')&&nav.includes('44 canonical routes'),'deep historical route reachability must remain explicit');
+must(shell.includes('OmegaSideNavigatorR88')&&nav.includes('workspaceForRouteR82')&&nav.includes('OMEGA_ALL_ROUTES_R82'),'workstation menu must preserve shared route organization as metadata without forcing workspace compartments');
+must(nav.includes('One banner')&&nav.includes('every route directly reachable'),'deep historical route reachability must remain explicit without grouped navigation');
 
 for(const family of ['COHERENCE','FORECAST','PRUNE','RELATIVITY','FLOW','MEMORY','PROOF','TOPOLOGY','COMPRESSION','TRAVERSAL','RECURSION','GOVERNANCE','SCALE','LIGHT','GENERIC'])must(modeRuntime.includes(`'${family}'`),`mode expression family missing ${family}`);
 must(modeRuntime.includes("metadataOnly?'Visual expression is derived only from catalog metadata."),'registry-only mode visuals must remain explicitly non-executed');

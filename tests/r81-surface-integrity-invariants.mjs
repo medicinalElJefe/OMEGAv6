@@ -42,7 +42,7 @@ must(integrityCss.includes('overflow-x:clip')&&integrityCss.includes("table){\n 
 must(integrityCss.includes('.r43-workspace-tabs')&&integrityCss.includes('overflow-x:auto'),'deep-workspace tabs must remain reachable on narrow screens');
 must(integrityCss.includes('@media(max-width:900px)'),'R81 mobile containment missing');
 
-must(navigatorCss.includes('.r88-route-scroll{min-height:0;overflow:auto'),'global application banner must have one deliberate scroll owner');
+must(navigatorCss.includes('.r89-flat-scroll{min-height:0;overflow:auto'),'global application banner must have one deliberate flat scroll owner');
 must(!navigator.includes('.slice('),'global application banner must not hide later routes behind slicing');
 must(reset.includes('.workstation-identity{min-width:0!important;overflow:hidden!important}'),'long route identity must not cover topbar controls');
 must(navigatorCss.includes('env(safe-area-inset-bottom,0px)'),'mobile side navigation must respect safe areas');
