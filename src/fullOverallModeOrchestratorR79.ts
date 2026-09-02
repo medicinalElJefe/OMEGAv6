@@ -24,6 +24,7 @@ export type PlannedModeR79={
 export type FullOverallPlanR79={
  schema:'OMEGA_FULL_OVERALL_MODE_PLAN_R79';
  intent:OmegaIntentR79;
+ intents:OmegaIntentR79[];
  explicitAllModes:boolean;
  policy:'FULL_REQUESTED'|'INTENT_ADAPTIVE';
  kernel:PlannedModeR79[];
@@ -108,10 +109,13 @@ const INTENT_PATTERNS:Array<[OmegaIntentR79,RegExp]>= [
 
 const clamp01=(n:number)=>Math.max(0,Math.min(1,Number.isFinite(n)?n:0));
 
-function inferIntent(panel:string,text:string):OmegaIntentR79{
- const t=String(text||'');
- for(const [intent,re] of INTENT_PATTERNS)if(re.test(t))return intent;
- return PANEL_INTENT[panel]||'GENERAL';
+function inferIntents(panel:string,text:string):OmegaIntentR79[]{
+ const t=String(text||''),found:OmegaIntentR79[]=[];
+ for(const [intent,re] of INTENT_PATTERNS)if(re.test(t)&&!found.includes(intent))found.push(intent);
+ if(found.includes('ALL_MODES'))return['ALL_MODES'];
+ const panelIntent=PANEL_INTENT[panel]||'GENERAL';
+ if(panelIntent!=='GENERAL'&&!found.includes(panelIntent))found.push(panelIntent);
+ return(found.length?found:['GENERAL']).slice(0,5);
 }
 
 function regexScore(text:string,patterns:RegExp[]){
@@ -143,14 +147,16 @@ function planRow(row:any,summary:ReturnType<typeof sourceBackedModeSummary>,rele
 export function compileFullOverallModePlanR79(record:any,panel:string,text=''):FullOverallPlanR79{
  const catalog=evaluateCorpusModes(record);
  const summary=sourceBackedModeSummary(record);
- const intent=inferIntent(panel,text);
- const explicitAllModes=intent==='ALL_MODES';
- const patterns=explicitAllModes?[]:(intent==='GENERAL'?[/Unified/i,/Continuity/i,/Guidance/i,/Comprehension/i,/Truth/i]:(PACKS[intent as Exclude<OmegaIntentR79,'GENERAL'|'ALL_MODES'>]||[]));
+ const intents=inferIntents(panel,text);
+ const intent=intents[0];
+ const explicitAllModes=intents.includes('ALL_MODES');
+ const patternGroups=explicitAllModes?[]:intents.map(x=>x==='GENERAL'?[/Unified/i,/Continuity/i,/Guidance/i,/Comprehension/i,/Truth/i]:(x==='ALL_MODES'?[]:(PACKS[x as Exclude<OmegaIntentR79,'GENERAL'|'ALL_MODES'>]||[]))).filter(x=>x.length);
 
  const ranked=catalog.results.map((row:any)=>{
   const hay=`${row.name} ${row.category} ${row.operator} ${row.algebra} ${row.calculus} ${row.purpose||''} ${row.dimensionFrame||''} ${row.notes||''}`;
   const core=CORE_PATTERNS.some(re=>re.test(hay));
-  const intentMatch=explicitAllModes?1:regexScore(hay,patterns);
+  const groupScores=patternGroups.map(group=>regexScore(hay,group)),matchedGroups=groupScores.filter(x=>x>0).length;
+  const intentMatch=explicitAllModes?1:clamp01(Math.max(0,...groupScores)+Math.max(0,matchedGroups-1)*.04);
   const priorityBoost=row.priority==='kernel'?.24:row.priority==='core'?.18:row.priority==='support'?.08:0;
   const relevance=clamp01(.34*Number(row.score||0)+.46*intentMatch+priorityBoost);
   return{row,core,intentMatch,relevance};
@@ -169,6 +175,7 @@ export function compileFullOverallModePlanR79(record:any,panel:string,text=''):F
  return{
   schema:'OMEGA_FULL_OVERALL_MODE_PLAN_R79',
   intent,
+  intents,
   explicitAllModes,
   policy:explicitAllModes?'FULL_REQUESTED':'INTENT_ADAPTIVE',
   kernel,intentModes,supportModes,
@@ -191,6 +198,7 @@ export function compactModePlanR79(plan:FullOverallPlanR79){
  return{
   schema:plan.schema,
   intent:plan.intent,
+  intents:plan.intents,
   policy:plan.policy,
   explicitAllModes:plan.explicitAllModes,
   catalogCount:plan.catalogCount,

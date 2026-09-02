@@ -15,11 +15,11 @@ assert(shell.includes("const[open,setOpen]=useState(false)")&&shell.includes("se
 assert(shell.includes("Search every OMEGA application"),'professional navigator must provide global application search');
 assert(shell.includes('Historical routes remain reachable through progressive disclosure'),'historical route reachability must remain governed and explicit');
 assert(shell.includes('OMEGA V6')&&shell.includes('APPLICATIONS')&&shell.includes('All applications'),'desktop navigation must expose readable product and application labels');
-assert(shellCss.includes('--r62-rail:198px')&&shellCss.includes('.r62-rail button span{font-size:11px'),'desktop navigation must be readable at normal scale rather than an icon-only tiny-text rail');
+assert(shellCss.includes('--r62-rail:156px')&&shellCss.includes("@media(max-width:1180px){:root{--r62-rail:132px}")&&resetCss.includes("padding-left:var(--r62-rail)!important")&&resetCss.includes(".r62-rail button span{font-size:10px!important"),'desktop navigation must be readable, adaptive, and governed by one shared rail width rather than conflicting hard-coded widths');
 assert(shellCss.includes('.r62-overlay{position:fixed')&&shellCss.includes('.r62-drawer'),'application browser must be an intentional overlay/drawer');
 assert(shellCss.includes('@media(max-width:900px)')&&resetCss.includes('@media(max-width:900px)'),'navigator and product must have mobile-specific containment');
 assert(resetCss.includes('.r58-display-stage{min-height:calc(100dvh - 230px)'),'visual instruments must receive dominant viewport space');
 assert(resetCss.includes('.workstation-identity small{display:none!important}'),'legacy telemetry pressure must not dominate the workstation header');
-assert(workstation.includes('padding-right:330px'),'historical donor pressure point remains detectable until the legacy stylesheet itself is retired');
+assert(!workstation.includes('padding-right:330px'),'obsolete donor right-padding must stay retired so the active application owns the full viewport');
 assert(!app.includes('@appdeploy/client')&&!shell.includes('@appdeploy/client')&&!resetCss.includes('@appdeploy/client'),'navigator must remain sovereign-provider portable');
 console.log('PASS professional-workspace invariant · readable application navigation + viewport-first authority accepted');
