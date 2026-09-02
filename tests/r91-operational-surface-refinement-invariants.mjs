@@ -35,7 +35,7 @@ must(css.includes(".special-boundary,.earth-proof,.sai-footer,.sbm21-expression-
 must(command.includes('Forecast, hosted execution, device proof and external observations remain separately labeled'),'Command truth separation must remain');
 must(workspace.includes('A clickable control is never treated as proof of capability'),'Cockpit capability/proof separation must remain');
 must(governance.includes('It cannot create missing Drive, native-device, or external evidence authority'),'Governance evidence authority boundary must remain');
-must(system.includes('They do not change canon, provider credentials, deployment state, or native host configuration'),'Settings mutation boundary must remain');
+must(system.includes('Settings alters browser-local presentation and layout only. It does not mutate canonical packets, evidence, modes, source data, or release configuration.'),'Settings mutation boundary must remain');
 must(evidence.includes('Missing Drive, native-device, provider, or external authority remains HOLD'),'Evidence HOLD boundary must remain');
 must(r90.includes('presentation-only hierarchy'),'R90 integrity layer must remain mounted beneath R91');
 must(!css.includes('@appdeploy/client'),'R91 must remain provider portable');
