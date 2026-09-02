@@ -2,7 +2,7 @@ import {useMemo,useState} from 'react';
 import {Box,Download,Grid3X3,Layers3,Search,ShieldCheck,Waypoints} from 'lucide-react';
 import {EXPRESSION_PLANES,FAMILIES,GRID_CELLS,MASTER_MENUS,PHASE_COUNT,STREAM_COUNT,SUBSYSTEM_COUNT,SYSTEM_ATLAS_ID,SYSTEM_INVARIANT,atlasCell,expressionPlanesForFamily,systemAtlasReceipt} from './systemAtlasRuntime';
 import {OPERATIONAL_CAPABILITIES,effectiveCapabilityReality,operationalCapabilityAudit} from './operationalCapabilityRuntimeR45';
-import CalculusFieldR37 from './CalculusFieldR37';
+import {CanonicalPacketTruthPlotR93} from './TruthVisualsR93';
 import SomaAudioEngine from './SomaAudioEngine';
 import ExtremeRestorationR46 from './ExtremeRestorationR46';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
@@ -28,7 +28,7 @@ export default function SystemAtlasControl({record,onNavigate,control=false}:Pro
   <header className='special-head'><div><span>V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE · R45 EXECUTION + CAPABILITY TRUTH · R46 RESTORATION OVERLAY</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{FAMILIES.length} INVENTORY FAMILIES · {audit.total} APPLICATION SURFACES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision} · registration ≠ execution</small></div></header>
   <div className='atlas-r1-invariant'><ShieldCheck/><b>{SYSTEM_INVARIANT}</b><span>One authoritative packet can have multiple lawful expressions, but a donor name, native target, or restoration plan is never displayed as a live executable capability.</span></div>
   <section className='atlas-r38-stage' aria-label='Active packet and System Atlas truth context'>
-   <div className='atlas-r38-field'><CalculusFieldR37 address={activeAddress} mode='FIELD' steps={30} label={control?'SYSTEM CONTROL · ACTIVE PACKET':'SYSTEM ATLAS · ACTIVE PACKET'}/></div>
+   <div className='atlas-r38-field'><CanonicalPacketTruthPlotR93 record={record} title={control?'System Control · canonical packet':'System Atlas · canonical packet'}/></div>
    <aside className='atlas-r38-context'>
     <article><span>Active packet</span><b>STATE {record.stateId}</b><small>CΩ {Number(record.metrics.continuity).toFixed(3)} · Φ {Number(record.metrics.plasticity).toFixed(3)} · q {Number(record.metrics.contradiction).toFixed(3)} · Λ {Number(record.metrics.burden).toFixed(3)}</small></article>
     <article><span>Selected family</span><b>{cell.family.name}</b><small>{cell.family.status} · {cell.family.statusNote}</small></article>
