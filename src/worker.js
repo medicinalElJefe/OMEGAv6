@@ -34,7 +34,7 @@ function cleanContext(value){
   metrics:clip(value.metrics,1),identity:clip(value.identity,1),psc:clip(value.psc,1),predict:clip(value.predict,1),unified:clip(value.unified,1),
   modePolicy:value.modePolicy,modeCatalogCount:value.modeCatalogCount??plan.catalogCount??value.modeCount,
   appliedModeCount:value.appliedModeCount,exactModeCount:value.exactModeCount,packetModeCount:value.packetModeCount,gatedModeCount:value.gatedModeCount,
-  fullOverallModePlan:{schema:plan.schema,intent:plan.intent,policy:plan.policy,explicitAllModes:plan.explicitAllModes,catalogCount:plan.catalogCount,backgroundCount:plan.backgroundCount,sourceBackedApplied:plan.sourceBackedApplied,sourceBackedGated:plan.sourceBackedGated,kernel:names(plan.kernel),intentModes:names(plan.intentModes),supportModes:names(plan.supportModes),truthBoundary:clip(plan.truthBoundary,1),performance:clip(plan.performance,1)},
+  fullOverallModePlan:{schema:plan.schema,intent:plan.intent,intents:plan.intents,policy:plan.policy,explicitAllModes:plan.explicitAllModes,catalogCount:plan.catalogCount,backgroundCount:plan.backgroundCount,sourceBackedApplied:plan.sourceBackedApplied,sourceBackedGated:plan.sourceBackedGated,kernel:names(plan.kernel),intentModes:names(plan.intentModes),supportModes:names(plan.supportModes),truthBoundary:clip(plan.truthBoundary,1),performance:clip(plan.performance,1)},
   modeTruthBoundary:clip(value.modeTruthBoundary,1),
   contextCompaction:"OMEGA_BOUNDED_CONTEXT_V2"
  }
