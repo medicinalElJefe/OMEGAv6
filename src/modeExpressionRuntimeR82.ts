@@ -42,7 +42,7 @@ export function compileModeExpressionR82(catalogRow:any,executionRow:any,record:
  const text=[name,row.category,row.operator,row.algebra,row.calculus,row.purpose,row.dimensionFrame,row.notes,executionRow?.detail,executionRow?.formula].filter(Boolean).join(' ');
  const f=family(text),p=PALETTE[f],numeric=typeof executionRow?.value==='number'&&Number.isFinite(executionRow.value);
  const executed=Boolean(executionRow&&executionRow.state!=='GATED_MISSING_INPUTS'),gated=Boolean(executionRow?.state==='GATED_MISSING_INPUTS'),metadataOnly=!executionRow;
- const base=numeric?.3+.7*sat(executionRow.value):executed?.7:gated?.36:.5;
+ const base=numeric ? .3+.7*sat(executionRow.value) : executed ? .7 : gated ? .36 : .5;
  const statePulse=.08*(Number(record?.metrics?.plasticity)||0)+.06*(Number(record?.metrics?.continuity)||0);
  return{id,name,family:f,signature:p[2],motion:p[3],accent:p[0],secondary:p[1],intensity:Math.max(.24,Math.min(1,base+statePulse)),executed,gated,metadataOnly,detail:`${f} expression · ${p[2]} · ${p[3]}`,boundary:metadataOnly?'Visual expression is derived only from catalog metadata. No missing formula is treated as executed.':gated?'Formula is visually identified but remains execution-gated because authoritative inputs are missing.':'Visual intensity may use this source-backed mode output; geometry remains representational and does not create evidence.'};
 }
