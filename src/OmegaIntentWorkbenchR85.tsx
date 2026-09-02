@@ -5,7 +5,7 @@ import {
  WORKFLOW_INTENTS_R85,activeWorkflowStepR85,admittedNextR85,applyOperationToWorkflowR86,cancelWorkflowR85,completeWorkflowStepR85,
  readWorkflowR85,skipWorkflowStepR85,startWorkflowR85,workflowProgressR85,type WorkflowIntentR85,type WorkflowSessionR85
 } from './omegaWorkflowRuntimeR85';
-import {applyWorkflowVisualIntentR86,emitOperationR86,type OmegaOperationR86} from './omegaOperationBusR86';
+import {applyWorkflowVisualIntentR86,emitOperationR86,readOperationLedgerR86,type OmegaOperationR86} from './omegaOperationBusR86';
 import './omegaIntentWorkbenchR85.css';
 
 type Props={record:any;address:number;currentPanel:string;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;variant?:'HOME'|'STRIP'};
@@ -21,8 +21,9 @@ export default function OmegaIntentWorkbenchR85({record,address,currentPanel,onA
  const[intent,setIntent]=useState<WorkflowIntentR85>('REPAIR');
  const[goal,setGoal]=useState('');
  const[working,setWorking]=useState(false);
+ const[operations,setOperations]=useState<OmegaOperationR86[]>(()=>readOperationLedgerR86());
  useEffect(()=>{const sync=(e:Event)=>setSession((e as CustomEvent).detail??readWorkflowR85());window.addEventListener('omega-r85-workflow-changed',sync as EventListener);return()=>window.removeEventListener('omega-r85-workflow-changed',sync as EventListener)},[]);
- useEffect(()=>{const apply=(e:Event)=>{const event=(e as CustomEvent<OmegaOperationR86>).detail;if(!event)return;setSession(prev=>{if(!prev)return prev;const next=applyOperationToWorkflowR86(prev,event);return next.status==='COMPLETE'?null:next})};window.addEventListener('omega-r86-operation',apply as EventListener);return()=>window.removeEventListener('omega-r86-operation',apply as EventListener)},[]);
+ useEffect(()=>{const apply=(e:Event)=>{const event=(e as CustomEvent<OmegaOperationR86>).detail;if(!event)return;setOperations(rows=>[...rows,event].slice(-188));setSession(prev=>{if(!prev)return prev;const next=applyOperationToWorkflowR86(prev,event);return next.status==='COMPLETE'?null:next})};window.addEventListener('omega-r86-operation',apply as EventListener);return()=>window.removeEventListener('omega-r86-operation',apply as EventListener)},[]);
  const step=activeWorkflowStepR85(session),progress=workflowProgressR85(session),nextAddress=admittedNextR85(record);
  const selected=WORKFLOW_INTENTS_R85.find(x=>x.id===intent)||WORKFLOW_INTENTS_R85[0];
  const modeSummary=useMemo(()=>session?{intent:session.modePlan?.intent||session.intent,policy:session.modePlan?.policy||'INTENT_ADAPTIVE',applied:Number(session.modePlan?.sourceBackedApplied)||0,gated:Number(session.modePlan?.sourceBackedGated)||0,deep:Number(session.modePlan?.performance?.activeDeepCount)||0}:null,[session]);
@@ -69,6 +70,7 @@ export default function OmegaIntentWorkbenchR85({record,address,currentPanel,onA
     <main>{session.steps.map((s,i)=><article key={s.id} className={s.state.toLowerCase()} data-current={i===session.currentStep?'true':'false'}><code>{String(i+1).padStart(2,'0')}</code><div><b>{s.label}</b><small>{s.reason}</small>{s.receiptHash&&<em>{s.receiptHash.slice(0,20)}…</em>}</div><strong>{s.state}</strong></article>)}</main>
     <aside>{step&&<><span>NEXT ACTION</span><h4>{step.label}</h4><p>{step.reason}</p>{step.route&&<small>Target · {step.route}</small>}{step.kind==='ADVANCE'&&<small>Admitted candidate · {nextAddress===null?'none':`STATE ${nextAddress+1}`}</small>}<div>{primary()}<button onClick={skip}><SkipForward/>Skip</button></div></>}</aside>
    </div>
+   <section className='r86-operation-ledger'><header><div><span>LIVE OPERATION RECEIPTS</span><b>{operations.filter(x=>x.workflowId===session.id).length} workflow-bound · {operations.length} retained</b></div><small>actual browser/runtime actions only</small></header><div>{operations.filter(x=>x.workflowId===session.id).slice(-6).reverse().map(x=><article key={x.id} data-status={x.status}><code>{x.type}</code><span><b>{x.detail}</b><small>{x.surface} · ${new Date(x.at).toLocaleTimeString()} · STATE {x.stateId||'—'}</small></span><strong>{x.status}<small>{x.sha256.slice(0,12)}…</small></strong></article>)}</div>{!operations.some(x=>x.workflowId===session.id)&&<p>No workflow-bound operation receipt yet. Navigation alone is not counted as execution.</p>}</section>
    <div className='r85-boundary'><ShieldCheck/><span>{session.truthBoundary}</span></div>
   </>}
  </section>;
