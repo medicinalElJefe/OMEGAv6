@@ -1,6 +1,6 @@
 :root{--r62-rail:84px;--r62-line:rgba(135,191,184,.16);--r62-bg:#03080b;--r62-panel:#071116;--r62-text:#edf5f3;--r62-soft:#89a09d;--r62-gold:#d8b667;--r62-teal:#59d2c1}
 html[data-omega-frame='desktop'] .omega-workstation-v2{padding-left:var(--r62-rail)!important;padding-bottom:0!important;min-width:0!important}
-html[data-omega-frame='desktop'] .omega-workstation-v2 .workstation-topbar{left:var(--r62-rail)!important;width:calc(100% - var(--r62-rail))!important;position:sticky!important;top:0!important;z-index:120!important}
+html[data-omega-frame='desktop'] .omega-workstation-v2 .workstation-topbar{left:0!important;width:100%!important;position:sticky!important;top:0!important;z-index:120!important}
 html[data-omega-frame='desktop'] .omega-workstation-v2 .workstation-main{width:100%!important;max-width:none!important;padding:18px 24px 32px!important;overflow:visible!important;min-width:0!important}
 html[data-omega-frame='desktop'] .omega-workstation-v2 .workstation-main>*{width:100%!important;max-width:none!important;min-width:0!important}
 .r27-desktop-frame,.r27-mobile-head,.r27-mobile-bottom,.r27-mobile-drawer{display:none!important}
