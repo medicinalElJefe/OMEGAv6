@@ -20,15 +20,15 @@ must(home.includes("omega-r88-open-navigator")&&home.includes('All 44 applicatio
 must(home.includes("omega.r88.systemMapOpen")&&home.includes('return false'),'Home embedded software map must default collapsed under R88');
 must(nav.includes('OMEGA_ALL_ROUTES_R82')&&nav.includes("className='r89-flat-scroll'")&&nav.includes('rows.map(route=>'),'navigator must render all 44 routes in one continuous scroll owner');
 must(nav.includes("layer==='SOFTWARE'")&&nav.includes('<OmegaSystemInventoryR83 compact'),'navigator must preserve the complete software inventory layer');
-must(nav.includes("if(e.key==='Escape')setOpen(false)")&&nav.includes("document.body.style.overflow='hidden'"),'side navigator must close deterministically and lock the page beneath it');
-must(navCss.includes('.r88-navigator{position:absolute;inset:0 auto 0 0'),'navigation must remain an edge pop-out rather than a page section');
+must(nav.includes("if(e.key==='Escape')setExpanded(false)")&&nav.includes("dataset.omegaNavExpanded=expanded?'true':'false'"),'side navigator must close deterministically and expose layout-reservation state without locking the page beneath it');
+must(navCss.includes('.r94-side-toolbar{')&&navCss.includes('.r94-nav-panel.r88-navigator{'),'navigation must remain one persistent edge toolbar with a collapsible panel');
 must(navCss.includes('.r89-flat-scroll{min-height:0;overflow:auto'),'all routes must share one deliberate flat scrolling banner');
 must(navCss.includes(".r71-topbar .r71-domains{display:none!important}")&&navCss.includes(".r84-home-launchpad{display:none!important}"),'Home must not repeat workspace compartments or basic launch panels outside the global navigator');
-must(navCss.includes("@media(max-width:900px)")&&navCss.includes("width:min(88vw,354px)!important"),'mobile navigator must remain a compact side-owned banner');
+must(navCss.includes("@media(max-width:900px)")&&navCss.includes('--r94-nav-panel:min(42vw,220px)'),'mobile navigator must stay narrow enough to leave active content visible');
 
-must(shell.includes('OmegaSideNavigatorR88')&&!shell.includes("className='r62-rail'"),'workstation must retire the permanent desktop/mobile route rail');
+must(shell.includes('OmegaSideNavigatorR88')&&!shell.includes("className='r62-rail'"),'workstation must retire the legacy R62 route rail in favor of the shared R94 toolbar');
 must(shell.includes("document.documentElement.dataset.omegaFrame=frame"),'workstation must preserve AUTO/DESKTOP/MOBILE frame authority');
-must(polish.includes("html[data-omega-frame='desktop'] .omega-workstation-v2{padding-left:0!important}"),'desktop application must recover the width formerly reserved by the rail');
+must(navCss.includes("html[data-omega-nav-present='true'] :where(.omega-workstation-v2,.r71-home)")&&navCss.includes("html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home)"),'desktop/mobile application must reserve exactly the collapsed/expanded R94 toolbar width');
 must(polish.includes("grid-template-columns:auto minmax(0,1fr) auto"),'mobile topbar must keep identity and controls contained');
 must(polish.includes('grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr))'),'specialist grids must reflow responsively');
 
@@ -40,4 +40,4 @@ const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'responsive navigation must not remove or duplicate application surfaces');
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),`deep donor surface lost: ${token}`);
 
-console.log('R84 RESPONSIVE COHERENT NAVIGATION PASS · R89 flat side banner · desktop/mobile viewport authority · 44/44 routes · no buried workspace hierarchy');
+console.log('R84/R94 RESPONSIVE COHERENT NAVIGATION PASS · persistent side toolbar · desktop/mobile non-covering authority · 44/44 routes');

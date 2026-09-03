@@ -13,10 +13,10 @@ assert(design.includes('.special-app')&&design.includes('background-color:transp
 assert(reset.includes('.workstation-topbar')&&reset.includes('height:50px!important'),'top bar must remain a quiet application frame');
 assert(design.includes('.r43-workspace-tabs')&&reset.includes('.r43-workspace-tabs'),'segmented specialist navigation must retain compact internal hierarchy');
 assert(reset.includes('.r58-display-stage')&&reset.includes('min-height:calc(100dvh - 230px)'),'visual stage must dominate the viewport');
-assert(shell.includes('OmegaSideNavigatorR88')&&navCss.includes('.r88-navigator{position:absolute;inset:0 auto 0 0'),'application switcher must be the intentional R88 edge-attached drawer');
+assert(shell.includes('OmegaSideNavigatorR88')&&navCss.includes('.r94-side-toolbar{')&&navCss.includes('.r94-nav-panel.r88-navigator{'),'application switcher must be the intentional R94 edge toolbar + collapsible panel');
 assert(nav.includes("className='r89-flat-scroll'")&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'all 44 routes must stay directly scroll-reachable without route slicing');
 assert(navCss.includes('@media(max-width:900px)')&&polish.includes('@media(max-width:900px)'),'mobile must use a distinct contained hierarchy');
 assert(capCss.includes(".r43-workspace-stage[data-view='CAPABILITY']"),'dense analytical capability workspace styling must remain available');
 assert(reset.includes('.r60-runtime-functions')&&reset.includes('.r63-tool-drawer'),'secondary inventories must remain progressively disclosed rather than dominate the canvas');
 assert(!app.includes('@appdeploy/client')&&!design.includes('@appdeploy/client')&&!nav.includes('@appdeploy/client'),'interface must remain provider-portable');
-console.log('PASS interface hierarchy invariant · R89 flat side navigation preserves viewport-first product behavior');
+console.log('PASS interface hierarchy invariant · R94 persistent side navigation preserves viewport-first product behavior');
