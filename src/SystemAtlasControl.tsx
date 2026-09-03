@@ -7,6 +7,7 @@ import SomaAudioEngine from './SomaAudioEngine';
 import ExtremeRestorationR46 from './ExtremeRestorationR46';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import {MASTER_SYSTEMS_R83} from './softwareMasterLedgerR83';
+import FullSystemConvergencePanelR95 from './FullSystemConvergencePanelR95';
 import './systemAtlas.css';
 import './systemCapabilityR13.css';
 import './systemAtlasDepthR38_4.css';
@@ -27,6 +28,7 @@ export default function SystemAtlasControl({record,onNavigate,control=false}:Pro
  return <section className='special-app system-atlas-r1 system-atlas-r13 system-atlas-r38'>
   <header className='special-head'><div><span>V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE · R45 EXECUTION + CAPABILITY TRUTH · R46 RESTORATION OVERLAY</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{FAMILIES.length} INVENTORY FAMILIES · {audit.total} APPLICATION SURFACES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision} · registration ≠ execution</small></div></header>
   <div className='atlas-r1-invariant'><ShieldCheck/><b>{SYSTEM_INVARIANT}</b><span>One authoritative packet can have multiple lawful expressions, but a donor name, native target, or restoration plan is never displayed as a live executable capability.</span></div>
+  <FullSystemConvergencePanelR95 onNavigate={onNavigate}/>
   <section className='atlas-r38-stage' aria-label='Active packet and System Atlas truth context'>
    <div className='atlas-r38-field'><CanonicalPacketTruthPlotR93 record={record} title={control?'System Control · canonical packet':'System Atlas · canonical packet'}/></div>
    <aside className='atlas-r38-context'>
