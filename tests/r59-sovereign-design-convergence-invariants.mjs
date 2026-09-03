@@ -40,7 +40,7 @@ assert(home.includes("showCapabilityAtlas&&<SovereignCapabilityAtlasR61 onNaviga
 assert(home.includes('showRuntimeFunctions&&record&&runtimeState&&<ExtremeTraversalUnionR60'),'R60 restored runtime functions must remain available');
 for(const token of ['.r63-living-runtime','.r63-tool-drawer','@media(max-width:620px)'])assert(livingCss.includes(token),`R63 progressive responsive CSS missing ${token}`);
 for(const role of ['ALPHA','BASE','CONSTRUCT','PRUNE','OMEGA'])assert(homeR71.includes(role),`R71 functional operator ${role} missing`);
-for(const token of ['targetRole','forwardRoute','CanonicalPacketTruthPlotR93','ADMITTED NEXT','/api/route-preview','/api/chat','BROWSER CREDENTIAL READY · PC UNPROVEN','Representation shells are model/interface coordinates'])assert(homeR71.includes(token),`R71 direct-workspace contract missing ${token}`);
+for(const token of ['targetRole','forwardRoute','CanonicalMembraneR95','ADMITTED NEXT','/api/route-preview','/api/chat','BROWSER CREDENTIAL READY · PC UNPROVEN','Representation shells are model/interface coordinates'])assert(homeR71.includes(token),`R71 direct-workspace contract missing ${token}`);
 for(const route of ['Earth Now','Hybrid Link','SAI Lab','Evidence & Proof','Visual Instrument','Command Center'])assert(homeR71.includes(route),`R71 direct application ${route} missing`);
 const combined=[app,home,homeR71,css,design,livingCss,constellation,shell,mountedShell,visual].join('\n').toLowerCase();
 assert(!combined.includes('@appdeploy/client'),'AppDeploy runtime dependency forbidden');
