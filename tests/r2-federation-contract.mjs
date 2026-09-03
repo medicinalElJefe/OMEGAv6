@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const caps=JSON.parse(fs.readFileSync(new URL('../public/omega-capabilities.json',import.meta.url)));
+const fed=JSON.parse(fs.readFileSync(new URL('../public/omega-federation.json',import.meta.url)));
+const fail=(m)=>{throw new Error(`OMEGA federation invariant failed: ${m}`)};
+if(caps.schema!=='OMEGA_CAPABILITIES_v1')fail('capability schema');
+if(!caps.compatibility.packet.includes('OMEGA_PACKET_v1'))fail('packet compatibility');
+if(fed.schema!=='OMEGA_FEDERATION_v1')fail('federation schema');
+if(fed.atlas?.capacity!==20736||fed.atlas?.radix!==12)fail('12^4 atlas');
+const nodes=new Map(fed.nodes.map(n=>[n.id,n]));
+for(const id of ['omega-v6','omega-genesis','omega-optical','omega-sovereign'])if(!nodes.has(id))fail(`missing ${id}`);
+if(nodes.get('omega-v6').mayMutateCanonicalState!==true)fail('canonical authority');
+for(const id of ['omega-genesis','omega-optical','omega-sovereign'])if(nodes.get(id).mayMutateCanonicalState!==false)fail(`${id} shadow-state risk`);
+console.log('OMEGA federation R2 contract PASS');
