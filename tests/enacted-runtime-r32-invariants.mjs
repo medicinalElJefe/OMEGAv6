@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const worker=read('src/workerR32.js'),worker33=read('src/workerR33.js'),config=read('wrangler.jsonc'),adapter=read('src/platformAdapter.ts'),hybrid=read('src/HybridMissionControlR8.tsx'),agent=read('public/omega-hybrid-agent.py'),shell=read('src/SingleFrameRuntimeShellR27.tsx');
+const worker=read('src/workerR32.js'),worker33=read('src/workerR33.js'),worker34=fs.existsSync('src/workerR34.js')?read('src/workerR34.js'):'',config=read('wrangler.jsonc'),adapter=read('src/platformAdapter.ts'),hybrid=read('src/HybridMissionControlR8.tsx'),agent=read('public/omega-hybrid-agent.py'),shell=read('src/SingleFrameRuntimeShellR27.tsx');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 for(const route of ['/api/runtime/snapshot','/api/runtime/events','/api/hybrid/pair','/api/orchestrator/thread','/api/orchestrator/turn','/api/hybrid/jobs','/api/missions'])must(worker.includes(route),`R32 missing enacted public route ${route}`);
 must(worker.includes("path.startsWith('/api/hybrid/agent/')"),'R32 public agent relay router missing');
@@ -10,12 +10,15 @@ must(worker.includes('bridgeSecretHash')&&worker.includes('PAIR_AUTH_FAILED'),'p
 must(worker.includes("status:'QUEUED'")&&worker.includes("status:'RUNNING'")&&worker.includes("'JOB_RETURNED'"),'native job lifecycle is not enacted');
 must(worker.includes('WORKERS_AI_MODEL')&&worker.includes('env.AI.run'),'orchestrator synthesis is not bound to Workers AI');
 must(!worker.includes('devices:[],jobs:[]'),'R32 must not hard-code an empty Hybrid status');
-const direct=config.includes('src/workerR32.js');const successor=config.includes('src/workerR33.js')&&worker33.includes("from './workerR32.js'");must((direct||successor)&&config.includes('OMEGA_RUNTIME')&&config.includes('OmegaRuntime')&&config.includes('new_sqlite_classes'),'Wrangler durable runtime binding or R33 successor missing');
+const direct=config.includes('src/workerR32.js');
+const successor33=config.includes('src/workerR33.js')&&worker33.includes("from './workerR32.js'");
+const successor34=config.includes('src/workerR34.js')&&worker34.includes("from './workerR33.js'")&&worker33.includes("from './workerR32.js'");
+must((direct||successor33||successor34)&&config.includes('OMEGA_RUNTIME')&&config.includes('OmegaRuntime')&&config.includes('new_sqlite_classes'),'Wrangler durable runtime binding or R33/R34 successor missing');
 for(const token of ['x-omega-session-id','x-omega-bridge-id','x-omega-bridge-secret','createHybridPair','runtimeSessionId'])must(adapter.includes(token),`browser runtime binding missing ${token}`);
 for(const token of ['Create pairing','omega-hybrid-agent.py','PC ONLINE','Enacted jobs'])must(hybrid.includes(token),`Hybrid UI missing enacted control ${token}`);
 must(hybrid.includes('Runtime events')||hybrid.includes('Connection events'),'Hybrid UI missing enacted runtime/connection events control');
 for(const token of ['/api/hybrid/agent/register','/api/hybrid/agent/poll','/api/hybrid/agent/result','TRAIN_LOCAL','HASH_TREE','BUILD','TEST','PACKAGE'])must(agent.includes(token),`desktop agent missing ${token}`);
 must(agent.includes('root-confined')&&agent.includes('shell=False'),'desktop agent must remain root-confined and must not expose arbitrary shell execution');
 must(agent.includes("foundationWeightsChanged':False")||agent.includes('foundationWeightsChanged\":False'),'local learning must not fake foundation-weight training');
-must(shell.includes("'WORK'|'EXPLORE'|'INTELLIGENCE'|'EVIDENCE'|'SYSTEM'"),'R31 human navigation hierarchy must survive R32/R33');
-console.log('OMEGA R32 ENACTED RUNTIME PASS · durable event/action bus + governed AI + authenticated Hybrid proof transport preserved under R33');
+must(shell.includes("'WORK'|'EXPLORE'|'INTELLIGENCE'|'EVIDENCE'|'SYSTEM'"),'R31 human navigation hierarchy must survive R32/R33/R34');
+console.log('OMEGA R32 ENACTED RUNTIME PASS · durable event/action bus + governed AI + authenticated Hybrid proof transport preserved under R34');

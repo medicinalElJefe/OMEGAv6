@@ -1,0 +1,65 @@
+name: OMEGA Sovereign RCWA CI
+
+on:
+  pull_request:
+    paths:
+      - 'sovereign/**'
+      - 'public/omega-rcwa-*.py'
+      - 'src/workerR34.js'
+      - 'wrangler.jsonc'
+      - '.github/workflows/rcwa-worker-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  rcwa-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install real RCWA backend
+        run: python -m pip install --upgrade pip && python -m pip install -r sovereign/requirements-rcwa.txt
+      - name: Syntax-check transport and solver
+        run: |
+          python -m py_compile sovereign/omega_rcwa_worker.py
+          python -m py_compile public/omega-rcwa-worker.py
+          python -m py_compile public/omega-rcwa-agent.py
+          node --check src/workerR34.js
+      - name: Create bounded RCWA smoke job
+        run: |
+          cat > /tmp/omega_rcwa_smoke.json <<'JSON'
+          {
+            "schema":"OMEGA_FULLWAVE_QUEUE_v1",
+            "job_id":"ci_rcwa_smoke",
+            "source_packet_id":"ci_packet_0001",
+            "solver":"rcwa",
+            "geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":15},
+            "wavelength_nm":532,
+            "polarization":"s",
+            "material_model":{"n_incident":1.0,"n_feature":2.4,"n_background":1.0,"n_substrate":1.46},
+            "numerics":{"nx":24,"ny":24,"harmonics_low":9,"harmonics_high":13,"convergence_tolerance":0.20,"energy_tolerance":0.20},
+            "proof":{"gate":"STAY","mode188_score":1.10,"continuity":0.90,"burden":0.20,"contradiction":0.10,"scar":0.05},
+            "lineage":["ci:bounded-fixture"],
+            "priority":0.5
+          }
+          JSON
+      - name: Execute grcwa solver
+        shell: bash
+        run: |
+          set +e
+          python sovereign/omega_rcwa_worker.py --input /tmp/omega_rcwa_smoke.json --output /tmp/omega_rcwa_result.json
+          code=$?
+          set -e
+          if [ "$code" -ne 0 ] && [ "$code" -ne 3 ]; then exit "$code"; fi
+          python - <<'PY'
+          import json, math
+          r=json.load(open('/tmp/omega_rcwa_result.json'))
+          assert r['schema']=='OMEGA_RESULT_v1'
+          assert r['solver']=='rcwa'
+          assert r['worker']=='omega-sovereign'
+          assert 'grcwa:' in r['solver_version']
+          assert all(math.isfinite(float(r['observables'][k])) for k in ('R','T'))
+          assert r['source_packet_id']=='ci_packet_0001'
+          print('RCWA EXECUTION PASS', {'R':r['observables']['R'],'T':r['observables']['T'],'converged':r['converged'],'delta':r['convergence_metrics']['delta_RT']})
+          PY
