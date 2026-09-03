@@ -122,6 +122,33 @@ jobs:
           for(const [name,path] of targets) await probe(name,path);
           console.log(`OMEGA public verification PASS: ${base}`);
           NODE
+      - name: Verify canonical Hybrid agent download
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let last='';
+          for(let attempt=1;attempt<=12;attempt++){
+            try{
+              const r=await fetch(base+'/api/hybrid/agent-download',{headers:{'cache-control':'no-cache'}});
+              const text=await r.text();
+              if(!r.ok) throw new Error(`HTTP ${r.status}: ${text.slice(0,240)}`);
+              if(text.length<1000) throw new Error(`agent too small: ${text.length} bytes`);
+              if(!text.startsWith('#!/usr/bin/env python3')) throw new Error('agent is not Python source');
+              if(!text.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")) throw new Error('agent canonical server binding missing');
+              if(!text.includes('OMEGA Hybrid Link agent')) throw new Error('agent signature missing');
+              const origin=r.headers.get('x-omega-canonical-origin');
+              if(origin!==base) throw new Error(`canonical origin header mismatch: ${origin}`);
+              const version=r.headers.get('x-omega-agent-version');
+              if(!version) throw new Error('agent version header missing');
+              console.log(`OMEGA HYBRID AGENT LIVE PASS · ${version} · ${text.length} bytes · ${origin}`);
+              process.exit(0);
+            }catch(error){last=error instanceof Error?error.message:String(error)}
+            await sleep(5000);
+          }
+          throw new Error(`canonical Hybrid agent verification failed: ${last}`);
+          NODE
       - name: Verify R8 Earth evidence and governed Hybrid contracts
         shell: bash
         run: |

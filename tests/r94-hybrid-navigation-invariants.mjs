@@ -8,6 +8,7 @@ const agent=read('public/omega-hybrid-agent.py');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const css=read('src/omegaSideNavigatorR88.css');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const ci=read('.github/workflows/ci.yml');
 
 const canonical='https://omegav6.jeffdeweyeljefe.workers.dev';
 
@@ -51,6 +52,8 @@ for(const selector of ['.r43-workspace-tabs','.r65-lens-nav','.rel-tabs','.r46-t
 must(css.includes('--r94-control-bg:#071217')&&css.includes('--r94-control-line-active:rgba(101,208,191,.52)'),'unified control design tokens missing');
 must(css.includes("button:is(.active,[aria-pressed='true'])"),'active navigation state must share one design grammar');
 must(css.includes("button.primary-action,.primary-action"),'primary action hierarchy must remain visually distinct');
+must(ci.includes('Verify canonical Hybrid agent download'),'production workflow must directly probe the Hybrid agent endpoint after deploy');
+must(ci.includes("fetch(base+'/api/hybrid/agent-download'")&&ci.includes("OMEGA HYBRID AGENT LIVE PASS"),'live Hybrid agent probe must fetch and validate the canonical endpoint');
 must(!css.includes('@appdeploy/client')&&!nav.includes('@appdeploy/client'),'R94 navigation must remain provider portable');
 
 console.log('R94 HYBRID + NAVIGATION PASS · canonical agent route repaired · stale origin inheritance removed · persistent non-covering side toolbar · unified destination controls · 44 routes preserved');
