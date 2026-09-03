@@ -46,8 +46,8 @@ must(navigatorCss.includes('.r89-flat-scroll{min-height:0;overflow:auto'),'globa
 must(!navigator.includes('.slice('),'global application banner must not hide later routes behind slicing');
 must(reset.includes('.workstation-identity{min-width:0!important;overflow:hidden!important}'),'long route identity must not cover topbar controls');
 must(navigatorCss.includes('env(safe-area-inset-bottom,0px)'),'mobile side navigation must respect safe areas');
-must(navigator.includes("if(e.key==='Escape')setOpen(false)"),'application drawer must support deterministic Escape close');
-must(navigator.includes("document.body.style.overflow='hidden'"),'open application drawer must not scroll the surface underneath');
+must(navigator.includes("if(e.key==='Escape')setExpanded(false)"),'application toolbar panel must support deterministic Escape collapse');
+must(!navigator.includes("document.body.style.overflow='hidden'")&&navigator.includes("dataset.omegaNavExpanded=expanded?'true':'false'"),'expanded application toolbar must reserve layout width instead of locking/covering the surface');
 must(navigator.includes("aria-current={currentPanel===route?'page':undefined}"),'active route must be exposed accessibly');
 must(shell.includes('OmegaSideNavigatorR88'),'R81 containment must mount under the shared R88 navigator authority');
 
