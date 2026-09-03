@@ -3,6 +3,7 @@ const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const worker=fs.readFileSync('src/workerR27.js','utf8');
 const worker32=fs.existsSync('src/workerR32.js')?fs.readFileSync('src/workerR32.js','utf8'):'';
 const worker33=fs.existsSync('src/workerR33.js')?fs.readFileSync('src/workerR33.js','utf8'):'';
+const worker34=fs.existsSync('src/workerR34.js')?fs.readFileSync('src/workerR34.js','utf8'):'';
 const config=fs.readFileSync('wrangler.jsonc','utf8');
 const panel=fs.readFileSync('src/GovernedBuildReceiptPanel.tsx','utf8');
 const vite=fs.readFileSync('vite.config.ts','utf8');
@@ -12,7 +13,8 @@ function semverAtLeast(v,min){const a=v.split('.').map(Number),b=min.split('.').
 const directR27=config.includes('"main": "src/workerR27.js"');
 const wrappedR27=config.includes('"main": "src/workerR32.js"')&&worker32.includes("import r27 from './workerR27.js'")&&worker32.includes('return r27.fetch(request,env)');
 const wrappedR33=config.includes('"main": "src/workerR33.js"')&&worker33.includes("import r32,{OmegaRuntime as OmegaRuntimeR32} from './workerR32.js'")&&worker33.includes('return r32.fetch(request,env)')&&worker32.includes("import r27 from './workerR27.js'");
-must(directR27||wrappedR27||wrappedR33,'R27 release-evidence wrapper must be deployed directly or preserved through the proven R32/R33 successor chain');
+const wrappedR34=config.includes('"main": "src/workerR34.js"')&&worker34.includes("from './workerR33.js'")&&worker34.includes('return r33.fetch(request,env)')&&worker33.includes("from './workerR32.js'")&&worker32.includes("import r27 from './workerR27.js'");
+must(directR27||wrappedR27||wrappedR33||wrappedR34,'R27 release-evidence wrapper must be deployed directly or preserved through the proven R32/R33/R34 successor chain');
 must(config.includes('"version_metadata"')&&config.includes('"CF_VERSION_METADATA"'),'Cloudflare version metadata binding must be configured');
 must(worker.includes("'/api/release-evidence'"),'release-evidence endpoint missing');
 must(worker.includes('OMEGA_RELEASE_EVIDENCE_V1'),'release-evidence schema missing');
@@ -31,5 +33,5 @@ must(vite.includes('OMEGA_GOVERNED_BUILD_RECEIPT_V1'),'R26.1 package receipt mus
 must(vite.includes("role:'PACKAGED_SOURCE_SHA'")&&vite.includes("authority:candidateSha&&promotedMergeSha&&rollbackSha?'GITHUB_MERGE_PARENTS':'EXTERNAL_RELEASE_LEDGER_REQUIRED'"),'build receipt must distinguish packaged source from governed candidate/promoted/rollback lineage');
 must(ci.includes('Bind promoted merge lineage')&&ci.includes('OMEGA_CANDIDATE_SHA')&&ci.includes('OMEGA_PROMOTED_SHA')&&ci.includes('OMEGA_ROLLBACK_SHA'),'production workflow must bind receipt lineage from exact Git merge parents before deployment');
 must(semverAtLeast(pkg.version,'27.1.0'),'package version must retain or advance beyond R27.1');
-for(const source of [worker,worker32,worker33,panel,config,vite,ci])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1+ must remain AppDeploy-free');
-console.log(`OMEGA R33 RELEASE EVIDENCE PASS · package ${pkg.version} · R31.2 merge-parent lineage preserved through R32/R33 successor chain`);
+for(const source of [worker,worker32,worker33,worker34,panel,config,vite,ci])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1+ must remain AppDeploy-free');
+console.log(`OMEGA R34 RELEASE EVIDENCE PASS · package ${pkg.version} · R31.2 merge-parent lineage preserved through R32/R33/R34 successor chain`);
