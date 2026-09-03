@@ -23,7 +23,7 @@ must(hybrid.includes("%OMEGA_ORIGIN%/api/hybrid/agent-download?r94=1"),'launcher
 must(hybrid.includes('--server "%OMEGA_ORIGIN%" --pair'),'launcher must explicitly bind Python agent back to canonical runtime');
 must(hybrid.includes("$src.StartsWith('#!/usr/bin/env python3')")&&hybrid.includes("$src.Contains('OMEGA Hybrid Link agent')"),'launcher must validate downloaded Python before execution');
 must(hybrid.includes('Check HTTP/firewall access to %OMEGA_ORIGIN%/api/hybrid/agent-download.'),'launcher error must point to the repaired canonical endpoint');
-must(hybridLink.includes(`${CANONICAL_OMEGA_ORIGIN}/api/hybrid/agent-download?r94=1`),'manual agent download must use same canonical validated endpoint');
+must(hybridLink.includes('${CANONICAL_OMEGA_ORIGIN}/api/hybrid/agent-download?r94=1'),'manual agent download must use same canonical validated endpoint');
 must(hybridLink.includes('--server "${CANONICAL_OMEGA_ORIGIN}"'),'manual command must explicitly bind canonical runtime');
 must(agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"),'agent default server must remain canonical');
 must(agent.includes('probe_server(server)')&&agent.includes('/api/hybrid/agent/register'),'agent must still require canonical reachability and authenticated registration');
