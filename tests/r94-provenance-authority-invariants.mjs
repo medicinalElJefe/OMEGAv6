@@ -41,7 +41,7 @@ must(earth.includes('Representational calculus comparison'),'Earth derived calcu
 must(earth.includes("data-provenance='REPRESENTATIONAL'"),'Earth derived calculus comparison must be machine-labeled representational');
 must(earth.includes('This is not a second Earth sensor or additional observation source.'),'Earth returned-evidence boundary must remain explicit');
 
-must(r93.includes('direct/evaluated data owns production displays'),'R93 visual-truth gate must remain beneath R94');
+must(r93.includes('CanonicalMembraneR95')&&r93.includes('ModeTruthTraceR93')&&r93.includes('TransitionTruthPlotR93'),'R93/R95 visual-truth gate must remain beneath R94');
 must(visual.includes('<ModeTruthTraceR93 address={address} modeId={selectedModeId}/>'),'Visual Instrument actual mode trace must remain');
 must(!visual.includes('<ModeExpressionCanvasR82'),'Visual Instrument must not remount seeded mode artwork');
 must(modes.includes('<ModeTruthTraceR93 address={address} modeId={selectedModeId}/>'),'Modes must retain evaluated trace display');
