@@ -25,3 +25,17 @@ Canonical lineage target at bootstrap: OMEGA B015 sovereign chain / R7 contextua
 ## 2026-08-28 routing repair
 
 Observed evidence: Cloudflare completed the Git deployment, but the user-facing production URL returned `server can't be found`. The build log also showed `workers_dev`/preview routing warnings. Bounded repair: align the Wrangler Worker name with the deployed Worker (`omegav6`) and explicitly enable `workers_dev` and `preview_urls`. Rollback target is commit immediately preceding `897660b07ea87a0fe4e270302771302c7a0153b3`.
+
+
+## R95 persistent accepted-production non-regression authority
+
+Context rollover does not reset accepted product requirements. Before any broad UI, renderer, navigation, capability, or architecture replacement, recover and enforce `src/acceptedProductionContractR95.ts` together with the software ledger, restore manifests, current accepted `main`, regression gates, and release receipts.
+
+Additional mandatory rules:
+- Preserve accepted production behavior by default. Improve by extension, refinement, repair, or verified supersession.
+- Never solve truth/provenance by flattening an OMEGA-native instrument into a generic dashboard, business bar chart, decorative placeholder, or one repeated renderer for every mode.
+- Primary visual geometry must have an explicit source/canonical/evaluated variable-to-geometry mapping.
+- Do not remove a working accepted capability, renderer, control, donor-backed function, mobile path, or desktop path until a replacement has passed functional parity, visual acceptance, responsive parity, truth-boundary, and non-regression tests.
+- Keep the previous accepted implementation recoverable as donor/optional lineage until verified supersession.
+- Previously accepted behavior remains a requirement across chats/sessions unless explicitly superseded by the user.
+- No-regression-by-omission applies across State + Intelligence + Memory + Relation + Computation + Action + Observation + Proof.
