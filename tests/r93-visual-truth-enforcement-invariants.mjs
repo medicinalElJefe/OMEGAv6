@@ -60,7 +60,8 @@ must(living.includes('title={`${variant} · admitted transition`}'),'Traversal L
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),'deep donor must remain optional and reachable: '+token);
 
 must(legacyMode.includes('switch(expression.family)'),'legacy R82 renderer may remain as preserved donor source');
-must(truth.includes('No generated geometry · no random seed · no external-observation claim'),'packet truth plot must state its visual contract');
+must(truth.includes('Ring sectors are exact D/P/R/L coordinates · contour radii are exact normalized packet channels'),'packet truth geometry must declare its exact variable mapping');
+must(!truth.includes('<rect')&&!truth.includes('Math.random'),'packet truth geometry must not regress to bars or random filler');
 must(truth.includes('The application will not fabricate a visual pattern'),'gated/nonnumeric modes must render no fake series');
 
 for(const boundary of [
