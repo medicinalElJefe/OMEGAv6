@@ -1,0 +1,22 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"OMEGA_FULLWAVE_QUEUE_v1",
+  "title":"OMEGA Full-Wave Validation Job v1",
+  "type":"object",
+  "required":["schema","job_id","source_packet_id","solver","geometry","wavelength_nm","proof","lineage"],
+  "properties":{
+    "schema":{"const":"OMEGA_FULLWAVE_QUEUE_v1"},
+    "job_id":{"type":"string","minLength":1},
+    "source_packet_id":{"type":"string","minLength":1},
+    "solver":{"enum":["rcwa","fdtd","fem"]},
+    "geometry":{"type":"object","required":["pitch_nm","width_nm","length_nm","height_nm"],"properties":{"pitch_nm":{"type":"number","exclusiveMinimum":0},"width_nm":{"type":"number","exclusiveMinimum":0},"length_nm":{"type":"number","exclusiveMinimum":0},"height_nm":{"type":"number","exclusiveMinimum":0},"material":{"type":"string"}}},
+    "wavelength_nm":{"type":"number","exclusiveMinimum":0},
+    "polarization":{"type":"string"},
+    "material_model":{"type":"string"},
+    "numerics":{"type":"object"},
+    "proof":{"type":"object","required":["gate","mode188_score","scar"]},
+    "lineage":{"type":"array","items":{"type":"string"}},
+    "priority":{"type":"number","minimum":0,"maximum":1}
+  },
+  "additionalProperties":true
+}
