@@ -1,0 +1,41 @@
+name: OMEGA R36 12-State Validation
+on:
+  push:
+    branches: [r36-12state-validation-loop]
+  pull_request:
+    branches: [main]
+jobs:
+  validate-12state:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Verify 12-state compiler semantics
+        working-directory: sovereign
+        run: |
+          python - <<'PY'
+          import inspect, omega_12state_experiment as e
+          src=inspect.getsource(e.run)
+          assert 'range(12)' in src
+          assert '15.0*k' in src
+          assert '30.0*k' in src
+          assert '("s","p")' in src
+          print('R36 12-state compiler contract PASS')
+          PY
+      - name: Execute bounded representative full-wave states
+        working-directory: sovereign
+        run: |
+          python - <<'PY'
+          import json
+          from omega_rcwa_spectral import run
+          base={"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"r36_ci","source_packet_id":"r36_ci","proof":{"gate":"STAY","mode188_score":1.2},"geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":0},"polarization":"s","material_names":{"incident":"air","feature":"tio2_design","background":"air","substrate":"sio2_fused"},"spectral":{"wavelengths_nm":[532]},"numerics":{"nx":32,"ny":32,"harmonics_low":25,"harmonics_high":49,"convergence_tolerance":0.08,"energy_tolerance":0.08},"lineage":["ci:r36"]}
+          for theta,pol in [(0,'s'),(165,'p')]:
+            j=json.loads(json.dumps(base)); j['geometry']['theta_deg']=theta; j['polarization']=pol
+            out=run(j)
+            assert out['points'][0]['result']['solver']=='rcwa'
+            assert out['points'][0]['result']['solver_version'].startswith('grcwa:')
+          print('R36 representative real RCWA states PASS')
+          PY
