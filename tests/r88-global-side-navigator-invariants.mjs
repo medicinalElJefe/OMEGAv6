@@ -13,9 +13,9 @@ must(nav.includes('OMEGA_ALL_ROUTES_R82')&&nav.includes("className='r89-flat-scr
 must(!nav.includes('r88-route-band')&&!nav.includes('sections.map(workspace'),'R89 must not regress to compartmentalized workspace sections');
 must(nav.includes("layer==='SOFTWARE'")&&nav.includes('OmegaSystemInventoryR83'),'software inventory must remain directly reachable from the same side navigator');
 must(nav.includes("omega-r88-open-navigator"),'shared event entry point must remain compatible across Home and workstation');
-must(css.includes('.r88-navigator{position:absolute;inset:0 auto 0 0')&&css.includes('.r89-flat-scroll{min-height:0;overflow:auto'),'navigator must remain an edge pop-out with one internal flat scroll owner');
-must(css.includes("@media(max-width:900px)")&&css.includes("width:min(88vw,354px)!important"),'mobile navigator must remain compact and side-owned');
-must(shell.includes('OmegaSideNavigatorR88')&&!shell.includes("className='r62-rail'"),'workstation must keep the shared overlay navigator and no permanent/bottom rail');
+must(nav.includes("className={'r94-side-toolbar '")&&css.includes('.r94-side-toolbar{')&&css.includes('.r89-flat-scroll{min-height:0;overflow:auto'),'navigator must remain one persistent side toolbar with one internal flat scroll owner');
+must(css.includes("@media(max-width:900px)")&&css.includes('--r94-nav-panel:min(42vw,220px)'),'mobile navigator must remain compact and side-owned without covering the active application');
+must(shell.includes('OmegaSideNavigatorR88')&&!shell.includes("className='r62-rail'"),'workstation must keep the shared R94 collapsible toolbar and no legacy R62/bottom rail');
 must(home.includes('OmegaSideNavigatorR88')&&home.includes("omega-r88-open-navigator"),'Home must open the exact same global navigator');
-must(polish.includes("html[data-omega-frame='desktop'] .omega-workstation-v2{padding-left:0!important}"),'desktop application viewport must retain recovered width');
-console.log('R88/R89 GLOBAL NAVIGATOR PASS · one flat side banner · 44 routes · mobile/desktop viewport authority');
+must(css.includes("html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home)")&&css.includes('width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important'),'expanded desktop navigation must reserve layout width instead of covering the application');
+console.log('R88/R89/R94 GLOBAL NAVIGATOR PASS · persistent collapsible side toolbar · 44 routes · non-covering mobile/desktop authority');
