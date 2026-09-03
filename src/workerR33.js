@@ -27,7 +27,26 @@ export class OmegaRuntime extends OmegaRuntimeR32 {
  }
 }
 
-async function fetchR33(request,env){const url=new URL(request.url),path=url.pathname;if(!env.OMEGA_RUNTIME)return r32.fetch(request,env);const sid=sessionId(request);
+const CANONICAL_ORIGIN_R94='https://omegav6.jeffdeweyeljefe.workers.dev';
+async function hybridAgentDownloadR94(request,env){
+ if(!env?.ASSETS?.fetch)return json({ok:false,code:'HYBRID_AGENT_ASSET_BINDING_UNAVAILABLE'},503);
+ const assetUrl=new URL('/omega-hybrid-agent.py',CANONICAL_ORIGIN_R94);
+ const asset=await env.ASSETS.fetch(new Request(assetUrl,{headers:{'cache-control':'no-cache'}}));
+ if(!asset.ok)return json({ok:false,code:'HYBRID_AGENT_ASSET_NOT_FOUND',status:asset.status},503);
+ const source=await asset.text();
+ const valid=source.length>1000&&source.startsWith('#!/usr/bin/env python3')&&source.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")&&source.includes("OMEGA Hybrid Link agent");
+ if(!valid)return json({ok:false,code:'HYBRID_AGENT_ASSET_INVALID'},503);
+ const version=(source.match(/VERSION='([^']+)'/)||[])[1]||'UNKNOWN';
+ return new Response(source,{status:200,headers:{
+  'content-type':'text/x-python; charset=utf-8',
+  'content-disposition':'attachment; filename="omega-hybrid-agent.py"',
+  'cache-control':'no-store, max-age=0',
+  'x-omega-agent-version':version,
+  'x-omega-canonical-origin':CANONICAL_ORIGIN_R94
+ }});
+}
+
+async function fetchR33(request,env){const url=new URL(request.url),path=url.pathname;if(path==='/api/hybrid/agent-download'&&request.method==='GET')return hybridAgentDownloadR94(request,env);if(!env.OMEGA_RUNTIME)return r32.fetch(request,env);const sid=sessionId(request);
  if(path==='/api/orchestrator/turn'&&request.method==='POST'){const b=await request.json().catch(()=>({})),prompt=text(b.prompt).slice(0,16000),execution=intent(prompt).execution,plan=safePlan(prompt),priorResponse=await runtimeFetch(env,sid,'/thread','GET',undefined,request.headers),prior=await priorResponse.json().catch(()=>({})),assistantMessage=await aiReply(env,prompt,b.stateContext,execution,prior.thread),turnResponse=await runtimeFetch(env,sid,'/turn','POST',{...b,prompt,assistantMessage,execution,plan},request.headers),data=await turnResponse.json();return json(data,turnResponse.status)}
  if(path==='/api/hybrid/status'&&request.method==='GET'){const statusResponse=await runtimeFetch(env,sid,'/status','GET',undefined,request.headers),data=await statusResponse.json().catch(()=>({})),online=Array.isArray(data.devices)?data.devices.filter(x=>x?.online&&!x?.revoked):[],internalState=data.state||'PAIRING_REQUIRED';return json({...data,state:online.length?'VERIFIED_DEVICE_ONLINE':'DEVICE_PROOF_REQUIRED',pairingState:internalState,nativeExecutionClaimed:online.length>0,truthBoundary:'PUBLIC_DEVICE_PROOF_GATE_R33B'},statusResponse.status)}
  if(path==='/api/status'&&request.method==='GET'){const base=await r32.fetch(request.clone(),env),ct=base.headers.get('content-type')||'';if(!ct.includes('application/json'))return base;const data=await base.json().catch(()=>null);if(!data)return base;const snapshot=await runtimeFetch(env,sid,'/snapshot','GET',undefined,request.headers),rt=await snapshot.json().catch(()=>({}));return json({...data,enactedRuntime:{...(data.enactedRuntime||{}),state:'LIVING_DURABLE_R33',durableMemoryTurns:rt.thread?.memoryTurns||0,activeJobs:rt.activeJobs||0,lastEvent:rt.lastEvent||null}})}
