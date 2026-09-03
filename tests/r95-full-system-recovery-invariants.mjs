@@ -70,7 +70,7 @@ must(!field.includes('Math.min(100,Math.abs(Number(v))*500)'),'Data Motion deriv
 must(forecast.indexOf('<ForecastMap plan={plan}')>=0&&forecast.indexOf('<ForecastMap plan={plan}')<forecast.indexOf("<CalculusFieldR37 address={address} mode='FORECAST'"),'Forecast must keep its own computed corridor visual identity');
 must(relativity.indexOf('<DimensionalRelativityPanelR24 record={record}/>')>=0&&relativity.indexOf('<DimensionalRelativityPanelR24 record={record}/>')<relativity.indexOf("<CalculusFieldR37 address={record.address} mode='RELATIVITY'"),'Relativity must keep its own exact evaluator identity');
 must(infinity.includes('<InfinityTruthPlotR93 record={record} index={index}/>')&&!infinity.includes('<canvas ref={canvas}/>'),'Infinity must keep recovered-source identity and not restore torus as truth');
-must(earth.includes('returned measurements')||earth.includes('returned observation'),'Earth must remain returned-evidence grounded');
+must(earth.includes("'/api/earth/noaa/catalog'")&&earth.includes('/api/earth/evidence?lat=')&&earth.includes('RETURNED EVIDENCE BOUND')&&earth.includes('evidenceHash'),'Earth must remain grounded in returned provider evidence and evidence hashes');
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])
  must(living.includes(token),'deep historical donor must remain reachable: '+token);
 
