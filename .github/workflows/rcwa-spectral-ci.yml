@@ -1,0 +1,37 @@
+name: OMEGA R35 Spectral RCWA
+on:
+  push:
+    branches: [r35-rcwa-dispersion-spectral]
+  pull_request:
+    branches: [main]
+jobs:
+  spectral-rcwa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Build bounded spectral job
+        run: |
+          cat > /tmp/omega_spectral.json <<'JSON'
+          {"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"ci_r35_spectral","source_packet_id":"ci_r35","proof":{"gate":"STAY","mode188_score":1.2},"geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":30},"polarization":"s","material_names":{"incident":"air","feature":"tio2_design","background":"air","substrate":"sio2_fused"},"spectral":{"wavelengths_nm":[470,532,650]},"numerics":{"nx":32,"ny":32,"harmonics_low":25,"harmonics_high":49,"convergence_tolerance":0.08,"energy_tolerance":0.08},"lineage":["ci:r35"]}
+          JSON
+      - name: Execute three real grcwa solves with wavelength-dependent materials
+        working-directory: sovereign
+        run: python omega_rcwa_spectral.py --input /tmp/omega_spectral.json --output /tmp/omega_spectral_result.json
+      - name: Verify traceability and numerical outputs
+        run: |
+          python - <<'PY'
+          import json, math
+          d=json.load(open('/tmp/omega_spectral_result.json'))
+          assert d['schema']=='OMEGA_SPECTRAL_RESULT_v1'
+          assert len(d['points'])==3
+          assert d['material_library_version'].startswith('R35')
+          for p in d['points']:
+            r=p['result']; assert r['solver']=='rcwa'; assert r['solver_version'].startswith('grcwa:')
+            assert math.isfinite(r['observables']['R']) and math.isfinite(r['observables']['T'])
+            assert p['materials']['n_feature']['source']
+          print('R35 spectral RCWA proof:', d['result_sha256'])
+          PY
