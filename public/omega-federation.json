@@ -1,0 +1,58 @@
+{
+  "schema": "OMEGA_FEDERATION_v1",
+  "canonicalAuthority": "OMEGAv6",
+  "stateLaw": "partition -> transform -> invariant carry -> scar carry -> re-contextualize",
+  "atlas": {
+    "axes": ["domain", "phase", "regulation", "seed"],
+    "radix": 12,
+    "capacity": 20736,
+    "note": "Address-resolution lattice, not literal physical dimensions"
+  },
+  "nodes": [
+    {
+      "id": "omega-v6",
+      "role": "canonical-state-proof-operator",
+      "url": "https://omegav6.jeffdeweyeljefe.workers.dev",
+      "mayMutateCanonicalState": true
+    },
+    {
+      "id": "omega-genesis",
+      "role": "proposal-generation-exploration",
+      "url": "https://omega-genesis-v1.jeffdeweyeljefe.workers.dev",
+      "mayMutateCanonicalState": false
+    },
+    {
+      "id": "omega-optical",
+      "role": "optical-compiler-tier1-screen-tier2-queue",
+      "url": "https://omega-optical-cloud-woven2.vercel.app",
+      "mayMutateCanonicalState": false
+    },
+    {
+      "id": "omega-sovereign",
+      "role": "high-compute-full-wave-executor",
+      "url": "https://omega-sovereign-convergence.foundasound.chatgpt.site",
+      "mayMutateCanonicalState": false
+    }
+  ],
+  "solver": {
+    "tier1": {
+      "engine": "scalar-wave-screen",
+      "purpose": "screen thousands of candidates cheaply",
+      "outputs": ["scalar_focus", "phase_error_deg", "estimated_efficiency", "crosstalk", "mode188_score", "scar"]
+    },
+    "tier2": {
+      "queue": "OMEGA_FULLWAVE_QUEUE_v1",
+      "preferredOrder": ["RCWA", "FDTD"],
+      "purpose": "validate only highest-ranked structures with full-wave electromagnetic solvers"
+    }
+  },
+  "packet": {
+    "required": ["state_id", "atlas_address", "source_node", "source_sha", "geometry", "wavelength_nm", "sigma", "target_phase_deg", "scalar_metrics", "proof", "scar", "requested_solver", "lineage"]
+  },
+  "governance": {
+    "noShadowState": true,
+    "workersReturnPacketsOnly": true,
+    "canonicalAdmissionNode": "omega-v6",
+    "duplicateCorpusViewsAreIndependentEvidence": false
+  }
+}
