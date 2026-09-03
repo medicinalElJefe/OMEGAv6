@@ -6,14 +6,15 @@ import CinematicFieldRendererR46 from './CinematicFieldRendererR46';
 import {corpusState,decodeAddress,evaluateCorpusModes} from './corpusRuntime';
 import {sourceBackedModeSummary} from './sourceBackedModeRuntimeR21';
 import {unifiedFromRecord} from './unifiedCalculus';
-import {CanonicalPacketTruthPlotR93,ModeTruthTraceR93,TransitionTruthPlotR93} from './TruthVisualsR93';
+import {ModeTruthTraceR93,TransitionTruthPlotR93} from './TruthVisualsR93';
+import CanonicalMembraneR95 from './CanonicalMembraneR95';
 import {compileModeExpressionR82} from './modeExpressionRuntimeR82';
 import {evaluateCanonAuthorityStack} from './allModesAuthority';
 import './visualCompositorR65.css';
 
 type Lens='SYNTHESIS'|'MODE'|'FIELD'|'FORECAST'|'RELATIVITY'|'MOTION'|'CINEMATIC';
 const LENSES:readonly {id:Lens;label:string;meaning:string}[]=[
- {id:'SYNTHESIS',label:'Truth synthesis',meaning:'canonical packet + evaluated mode + admitted transition'},
+ {id:'SYNTHESIS',label:'Living membrane',meaning:'20,736 source-bound cells + route + inspectors'},
  {id:'MODE',label:'Mode trace',meaning:'actual evaluated selected-mode route'},
  {id:'FIELD',label:'Derived field',meaning:'optional representational calculus rendering'},
  {id:'FORECAST',label:'Derived forecast',meaning:'optional representational projection'},
@@ -40,18 +41,17 @@ export default function VisualCompositorR65({address,onAddress}:{address:number;
   <div className='r65-state-ribbon'><span><i>ADDRESS</i><b>{address}</b><small>D{coords.d+1} · P{coords.p+1} · R{coords.r+1} · L{coords.l+1}</small></span><span><i>CΩ</i><b>{fmt(record.metrics.continuity)}</b><small>continuity</small></span><span><i>Φ</i><b>{fmt(record.metrics.plasticity)}</b><small>plasticity</small></span><span><i>q</i><b>{fmt(record.metrics.contradiction)}</b><small>contradiction</small></span><span><i>Λ</i><b>{fmt(record.metrics.burden)}</b><small>burden</small></span><span><i>COHERENCE</i><b>{fmt(unified?.unifiedCoherence)}</b><small>unified packet</small></span><span><i>MODES</i><b>{modes.appliedCount}</b><small>{modes.gatedCount} gated · {modes.catalogCount} catalog</small></span><span><i>SELECTED</i><b>{selectedModeId}</b><small>{modeExpression.family} · {modeExpression.authorityLens?'canon authority lens':modeExpression.executed?'source-backed':modeExpression.gated?'gated':'metadata'}</small></span></div>
   <nav className='r65-lens-nav' aria-label='Synchronized visual lenses'>{LENSES.map(v=><button key={v.id} className={lens===v.id?'active':''} onClick={()=>choose(v.id)} aria-pressed={lens===v.id}>{v.id==='SYNTHESIS'?<Layers3/>:v.id==='MODE'?<Orbit/>:v.id==='MOTION'?<Waypoints/>:v.id==='CINEMATIC'?<Clapperboard/>:v.id==='RELATIVITY'?<Eye/>:<Orbit/>}<span><b>{v.label}</b><small>{v.meaning}</small></span></button>)}</nav>
   {lens==='SYNTHESIS'&&<div className='r93-primary-truth'>
-   <CanonicalPacketTruthPlotR93 record={record} title='Visual Instrument canonical packet'/>
-   <ModeTruthTraceR93 address={address} modeId={selectedModeId}/>
-   <TransitionTruthPlotR93 record={record} nextRecord={corpusState(record.autoPing.dataNext)} title='Admitted transition'/>
+   <CanonicalMembraneR95 address={address} onAddress={onAddress} label='OMEGA LIVING STATE MEMBRANE'/>
+   <details className='r95-secondary-inspector'><summary>Evaluated mode + admitted transition inspectors</summary><ModeTruthTraceR93 address={address} modeId={selectedModeId}/><TransitionTruthPlotR93 record={record} nextRecord={corpusState(record.autoPing.dataNext)} title='Admitted transition'/></details>
   </div>}
   {lens!=='SYNTHESIS'&&<div className='r65-focus-stage'>
    {lens==='MODE'&&<ModeTruthTraceR93 address={address} modeId={selectedModeId}/>}  
-   {lens==='FIELD'&&<CalculusLens address={address} onAddress={onAddress} mode='FIELD' label='UNIFIED FIELD · FIVE-ROLE CALCULUS'/>}
+   {lens==='FIELD'&&<CanonicalMembraneR95 address={address} onAddress={onAddress} initialProjection='MANDALA' initialView='CONTINUITY' label='CONTINUITY FIELD · SAME 20,736-CELL SUBSTRATE'/>}
    {lens==='FORECAST'&&<CalculusLens address={address} onAddress={onAddress} mode='FORECAST' label='FORECAST · FUTURE-PLASTICITY CORRIDOR'/>}
    {lens==='RELATIVITY'&&<CalculusLens address={address} onAddress={onAddress} mode='RELATIVITY' label='RELATIVITY · OBSERVER FRAME'/>}
    {lens==='MOTION'&&<TransitionTruthPlotR93 record={record} nextRecord={corpusState(record.autoPing.dataNext)} title='Admitted transition'/>}  
    {lens==='CINEMATIC'&&<CinematicFieldRendererR46 record={record} address={address}/>} 
   </div>}
-  <footer className='r65-truth'><ShieldCheck/><span><b>Visual truth:</b> the default synthesis, mode trace, and transition views contain direct/evaluated packet data only. Derived Field/Forecast/Relativity/Cinematic lenses are optional representational renderers bound to canonical state {record.stateId}. Source-backed mode count is execution evidence only for implemented operators; catalog membership is not execution. Canon/calculus authority lenses are derived governance views over that packet, not additional executors. Native GPU/video and device observations remain separately gated.</span></footer>
+  <footer className='r65-truth'><ShieldCheck/><span><b>Visual truth:</b> the default synthesis is the state-bound 20,736-cell membrane. Each cell is a canonical address; position and color come from declared corpus projections/skins. Mode trace and transition inspectors remain evaluated data. Forecast/Relativity/Cinematic lenses are optional representational renderers bound to canonical state {record.stateId}. Source-backed mode count is execution evidence only for implemented operators; catalog membership is not execution. Canon/calculus authority lenses are derived governance views over that packet, not additional executors. Native GPU/video and device observations remain separately gated.</span></footer>
  </section>
 }
