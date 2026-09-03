@@ -23,10 +23,10 @@ const polar=(cx:number,cy:number,r:number,a:number)=>({x:cx+Math.cos(a)*r,y:cy+M
 const contourPoints=(r:any,cx:number,cy:number,inner:number,outer:number)=>METRICS.map(([,key],i)=>{
  const a=-Math.PI/2+i*Math.PI*2/METRICS.length,rad=inner+(outer-inner)*metricValue(r,key),p=polar(cx,cy,rad,a);return{x:p.x,y:p.y,key,value:metricValue(r,key),a,rad};
 });
-const contourString=(pts:any[])=>pts.map(p=>\`\${p.x.toFixed(2)},\${p.y.toFixed(2)}\`).join(' ');
+const contourString=(pts:any[])=>pts.map(p=>`${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
 const ringSectorPath=(cx:number,cy:number,r0:number,r1:number,start:number,end:number)=>{
  const a0=polar(cx,cy,r1,start),a1=polar(cx,cy,r1,end),b1=polar(cx,cy,r0,end),b0=polar(cx,cy,r0,start),large=end-start>Math.PI?1:0;
- return \`M \${a0.x} \${a0.y} A \${r1} \${r1} 0 \${large} 1 \${a1.x} \${a1.y} L \${b1.x} \${b1.y} A \${r0} \${r0} 0 \${large} 0 \${b0.x} \${b0.y} Z\`;
+ return `M ${a0.x} ${a0.y} A ${r1} ${r1} 0 ${large} 1 ${a1.x} ${a1.y} L ${b1.x} ${b1.y} A ${r0} ${r0} 0 ${large} 0 ${b0.x} ${b0.y} Z`;
 };
 const COORD_RINGS=[['D','d'],['P','p'],['R','r'],['L','l']] as const;
 
@@ -56,7 +56,7 @@ function CanonicalStateMandala({record,previous,next,cx=500,cy=310,scale=1}:{rec
 export function CanonicalPacketTruthPlotR93({record,title='Canonical packet'}:{record:any;title?:string}){
  const previous=useMemo(()=>corpusState(Number(record?.autoPing?.previous??record?.address??0)),[record]);
  const next=useMemo(()=>corpusState(Number(record?.autoPing?.dataNext??record?.address??0)),[record]);
- const tuple=(r:any)=>\`D\${r.coordinates.d}/P\${r.coordinates.p}/R\${r.coordinates.r}/L\${r.coordinates.l}\`;
+ const tuple=(r:any)=>`D${r.coordinates.d}/P${r.coordinates.p}/R${r.coordinates.r}/L${r.coordinates.l}`;
  return <section className='r93-truth-plot r93-packet r95-canonical-manifold' aria-label={title}>
   <header><div><span>CANONICAL STATE MANIFOLD</span><b>{title}</b></div><code>{previous.stateId} ← {record.stateId} → {next.stateId}</code></header>
   <svg viewBox='0 0 1000 680' role='img' aria-label='Exact canonical packet state manifold with 12-sector D P R L address rings and six metric axes'>
@@ -124,7 +124,7 @@ export function TransitionTruthPlotR93({record,nextRecord,title='Canonical trans
   <svg viewBox='0 0 1000 680' role='img' aria-label='Current and admitted-next canonical state manifolds with exact metric deltas'>
    <CanonicalStateMandala record={record} previous={record} next={nextRecord}/>
    <g className='r95-delta-ledger'>
-    {deltas.map((x,i)=><g key={x.key} transform={\`translate(\${720},\${110+i*70})\`}>
+    {deltas.map((x,i)=><g key={x.key} transform={`translate(${720},${110+i*70})`}>
       <text x='0' y='0' className='r95-delta-label'>{x.label}</text>
       <text x='0' y='22' className='r95-delta-values'>{fmt(x.a,4)} → {fmt(x.b,4)}</text>
       <text x='0' y='43' className={x.d>0?'r95-delta-positive':x.d<0?'r95-delta-negative':'r95-delta-neutral'}>{x.d>=0?'+':''}{fmt(x.d,5)}</text>
