@@ -1,18 +1,29 @@
 {
   "schema": "OMEGA_CAPABILITIES_v1",
-  "compatibility": {"packet": ["OMEGA_PACKET_v1"], "result": ["OMEGA_RESULT_v1"], "queue": ["OMEGA_FULLWAVE_QUEUE_v1"]},
+  "runtimeRevision": "R34/R3-RCWA",
+  "compatibility": {"packet": ["OMEGA_PACKET_v1"], "result": ["OMEGA_RESULT_v1"], "queue": ["OMEGA_FULLWAVE_QUEUE_v1"], "health": ["OMEGA_NODE_HEALTH_v1"]},
   "upgradePolicy": "independent-node-evolution",
   "rules": [
     "Nodes may upgrade UI, renderer, solver, storage and deployment independently.",
     "Breaking protocol changes require a new schema version and overlap window.",
     "Workers never silently mutate CanonState.",
     "Unknown capabilities degrade gracefully instead of blocking unrelated nodes.",
-    "Every result preserves packet lineage and solver identity."
+    "Every result preserves packet lineage and solver identity.",
+    "A solver is active only when a real backend returns its identified result packet."
   ],
   "nodes": {
-    "omega-v6": {"authority": "canonical", "capabilities": ["canon-state","proof-admission","hybrid-link","operator-cockpit","result-ledger"]},
+    "omega-v6": {"authority": "canonical", "capabilities": ["canon-state","proof-admission","hybrid-link","operator-cockpit","result-ledger","fullwave-queue-r34"]},
     "omega-genesis": {"authority": "proposal", "capabilities": ["proposal-generation","exploration","candidate-families"]},
     "omega-optical": {"authority": "worker", "capabilities": ["optical-compile","scalar-screen","rank","tier2-queue","visualize"]},
-    "omega-sovereign": {"authority": "worker", "capabilities": ["rcwa","fdtd","fem","gpu-batch","measurement-ingest"]}
+    "omega-sovereign": {
+      "authority": "worker",
+      "capabilities": ["rcwa-grcwa-worker-r3","rcwa-authenticated-queue-transport-r3"],
+      "planned": ["fdtd","fem","gpu-batch","measurement-ingest"],
+      "requirements": ["Python 3","NumPy","grcwa 0.1.2"],
+      "agentDownload": "/api/federation/rcwa/agent-download",
+      "workerDownload": "/api/federation/rcwa/worker-download",
+      "queueEndpoint": "/api/federation/rcwa/queue",
+      "statusEndpoint": "/api/federation/rcwa/status"
+    }
   }
 }
