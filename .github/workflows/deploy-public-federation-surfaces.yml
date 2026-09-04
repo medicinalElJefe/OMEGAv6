@@ -15,12 +15,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
       - name: Verify Cloudflare authorization
-        run: npx wrangler whoami
+        run: npx --yes wrangler@4.129.0 whoami
       - name: Deploy public Optical surface
-        run: npx wrangler deploy --config wrangler.optical-public.jsonc
+        run: npx --yes wrangler@4.129.0 deploy --config wrangler.optical-public.jsonc
       - name: Deploy public Sovereign surface
-        run: npx wrangler deploy --config wrangler.sovereign-public.jsonc
+        run: npx --yes wrangler@4.129.0 deploy --config wrangler.sovereign-public.jsonc
       - name: Verify all four public surfaces
         run: python scripts/verify_four_links.py
