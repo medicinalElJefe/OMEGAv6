@@ -38,6 +38,7 @@ import {compileFullOverallModePlanR79,compactModePlanR79} from './fullOverallMod
 import SurfaceIntegrityR81 from './SurfaceIntegrityR81';
 import OmegaIntentWorkbenchR85 from './OmegaIntentWorkbenchR85';
 import {readWorkflowR85,type WorkflowSessionR85} from './omegaWorkflowRuntimeR85';
+import {syncProjectContinuityR97} from './omegaProjectContinuityR87';
 import {applyWorkflowVisualIntentR86,emitOperationR86} from './omegaOperationBusR86';
 import './workstationV2.css';
 import './responsivePolishR88.css';
@@ -67,6 +68,7 @@ export default function OmegaWorkstationFullV2(){
  const[prompt,setPrompt]=useState(()=>localState.read('omega.b015.chatDraft.v1','Use every source-backed executable OMEGA operator that has authoritative inputs, preserve missing-input formulas as gated, and continue without losing continuity or inventing execution.'));
  const[response,setResponse]=useState<any>(null),[busy,setBusy]=useState(''),[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null);const seq=useRef(0);
  useEffect(()=>{initCorpusPack().then(()=>setReady(true)).catch(e=>setBootError(e instanceof Error?e.message:String(e)))},[]);
+ useEffect(()=>{void syncProjectContinuityR97()},[]);
  useEffect(()=>{localState.write('omega.v6.panel',panel)},[panel]);useEffect(()=>{localState.write('omega.v6.address',address)},[address]);useEffect(()=>{localState.write('omega.v6.modePolicy',modePolicy)},[modePolicy]);
  useEffect(()=>{const sync=(e:Event)=>setWorkflow((e as CustomEvent).detail??readWorkflowR85());window.addEventListener('omega-r85-workflow-changed',sync as EventListener);return()=>window.removeEventListener('omega-r85-workflow-changed',sync as EventListener)},[]);
  const refresh=async()=>{try{const[s,r]=await Promise.all([api.get<any>('/api/status'),api.get<any>('/api/restoration')]);setStatus(s.data);setRestore(r.data)}catch(e:any){setStatus({error:e?.message||String(e)});setRestore({error:e?.message||String(e)})}};useEffect(()=>{let live=true;const poll=()=>{if(live)void refresh()};poll();const id=window.setInterval(poll,30000);return()=>{live=false;window.clearInterval(id)}},[]);
