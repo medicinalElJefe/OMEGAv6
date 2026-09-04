@@ -1,0 +1,44 @@
+name: Verify four live OMEGA surfaces
+on:
+  push:
+    branches: [verify-four-live-links]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe all four public surfaces
+        shell: bash
+        run: |
+          set -u
+          urls=(
+            "https://omegav6.jeffdeweyeljefe.workers.dev/"
+            "https://omega-genesis-v1.jeffdeweyeljefe.workers.dev/"
+            "https://omega-optical-cloud-woven2.vercel.app/"
+            "https://omega-sovereign-convergence.foundasound.chatgpt.site/"
+          )
+          fail=0
+          for u in "${urls[@]}"; do
+            echo "=== $u ==="
+            code=$(curl -L -sS -o /tmp/body -D /tmp/headers --max-time 30 -w '%{http_code}' "$u" || true)
+            final=$(curl -L -sS -o /dev/null --max-time 30 -w '%{url_effective}' "$u" || true)
+            ctype=$(grep -i '^content-type:' /tmp/headers | tail -1 | tr -d '\r' || true)
+            bytes=$(wc -c < /tmp/body 2>/dev/null || echo 0)
+            title=$(python - <<'PY'
+from pathlib import Path
+import re
+p=Path('/tmp/body')
+s=p.read_text(errors='ignore') if p.exists() else ''
+m=re.search(r'<title[^>]*>(.*?)</title>',s,re.I|re.S)
+print(re.sub(r'\s+',' ',m.group(1)).strip()[:180] if m else '')
+PY
+)
+            echo "HTTP=$code"
+            echo "FINAL=$final"
+            echo "CONTENT_TYPE=$ctype"
+            echo "BYTES=$bytes"
+            echo "TITLE=$title"
+            if [[ ! "$code" =~ ^2|3 ]]; then fail=1; fi
+            if [[ "$bytes" -lt 100 ]]; then fail=1; fi
+          done
+          exit $fail
