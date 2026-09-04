@@ -1,0 +1,56 @@
+name: OMEGA R38 PB Phase Gate
+on:
+  push:
+    branches: [r38-circular-pb-phase-gate]
+  pull_request:
+    branches: [main]
+jobs:
+  pb-phase:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Verify circular-basis convention analytically
+        working-directory: sovereign
+        run: |
+          python - <<'PY'
+          import math, numpy as np
+          from omega_pb_phase import linear_to_circular, wrap_deg
+          for th in range(0,180,15):
+              a=math.radians(th)
+              R=np.array([[math.cos(a),-math.sin(a)],[math.sin(a),math.cos(a)]],complex)
+              J=R@np.diag([1,-1])@R.T
+              C=linear_to_circular(J)
+              lr=math.degrees(np.angle(C[1,0])); rl=math.degrees(np.angle(C[0,1]))
+              assert abs(wrap_deg(lr-(-2*th))) < 1e-8
+              assert abs(wrap_deg(rl-(+2*th))) < 1e-8
+          print('R38 analytic circular/PB convention verified')
+          PY
+      - name: Build bounded real RCWA job
+        run: |
+          cat > /tmp/r38_job.json <<'JSON'
+          {"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"ci_r38","source_packet_id":"ci_r38","proof":{"gate":"STAY","mode188_score":1.2},"geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":0},"material_names":{"incident":"air","feature":"tio2_design","background":"air","substrate":"sio2_fused"},"numerics":{"nx":32,"ny":32,"harmonics_high":49},"lineage":["ci:r38"]}
+          JSON
+      - name: Execute real complex-field states
+        working-directory: sovereign
+        run: |
+          python - <<'PY'
+          import json, math
+          from omega_pb_phase import circular_state
+          job=json.load(open('/tmp/r38_job.json'))
+          for th in (0,15,90):
+              s=circular_state(job,532.0,th)
+              m=s['circular_basis']['matrix']
+              for k in ('t_RR','t_RL','t_LR','t_LL'):
+                  assert math.isfinite(m[k]['re']) and math.isfinite(m[k]['im']) and math.isfinite(m[k]['phase_deg'])
+              assert 0 <= s['conversion']['R_to_L'] <= 1.0000001
+              assert 0 <= s['conversion']['L_to_R'] <= 1.0000001
+          print('R38 real grcwa complex states verified')
+          PY
+      - name: Preserve truth boundary
+        run: |
+          grep -q 'Low-conversion states are disqualified' sovereign/omega_pb_phase.py
+          grep -q 'pb_phase_verified' sovereign/omega_pb_phase.py
