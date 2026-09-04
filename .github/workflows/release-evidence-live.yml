@@ -22,7 +22,7 @@ jobs:
           const expected=process.env.GITHUB_SHA;
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
           let last='';
-          for(let attempt=1;attempt<=30;attempt++){
+          for(let attempt=1;attempt<=180;attempt++){
             try{
               const [eRes,bRes]=await Promise.all([
                 fetch(base+'/api/release-evidence',{headers:{'cache-control':'no-cache'}}),

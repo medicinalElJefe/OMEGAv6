@@ -17,6 +17,7 @@ must(worker.includes("source.length>1000")&&worker.includes("source.startsWith('
 must(worker.includes("source.includes(\"DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'\")"),'Worker must reject agent assets that do not target canonical runtime');
 must(worker.includes("'cache-control':'no-store, max-age=0'"),'agent download must not be served from stale cache');
 must(worker.includes("'x-omega-canonical-origin':CANONICAL_ORIGIN_R94"),'agent response must expose canonical origin receipt');
+must(worker.includes("'x-omega-agent-sha256':digest")&&worker.includes('sha256TextR96(source)'),'agent response must expose a SHA-256 receipt for exact source bytes');
 
 must(hybrid.includes("const CANONICAL_OMEGA_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'Windows launcher must hard-bind canonical origin');
 must(!hybrid.includes('const origin=window.location.origin'),'Windows launcher must never inherit browser/preview origin');
@@ -54,6 +55,7 @@ must(css.includes("button:is(.active,[aria-pressed='true'])"),'active navigation
 must(css.includes("button.primary-action,.primary-action"),'primary action hierarchy must remain visually distinct');
 must(ci.includes('Verify canonical Hybrid agent download'),'production workflow must directly probe the Hybrid agent endpoint after deploy');
 must(ci.includes("fetch(base+'/api/hybrid/agent-download'")&&ci.includes("OMEGA HYBRID AGENT LIVE PASS"),'live Hybrid agent probe must fetch and validate the canonical endpoint');
+must(ci.includes("readFileSync('public/omega-hybrid-agent.py')")&&ci.includes('servedSha256!==expectedSha256')&&ci.includes('receiptSha256!==expectedSha256'),'live Hybrid probe must compare the response body and receipt to the repository source SHA-256');
 must(!css.includes('@appdeploy/client')&&!nav.includes('@appdeploy/client'),'R94 navigation must remain provider portable');
 
 console.log('R94 HYBRID + NAVIGATION PASS · canonical agent route repaired · stale origin inheritance removed · persistent non-covering side toolbar · unified destination controls · 44 routes preserved');

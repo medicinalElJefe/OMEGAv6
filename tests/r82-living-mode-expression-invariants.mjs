@@ -18,7 +18,7 @@ for(const id of ['COMMAND','EXPLORE','INTELLIGENCE','EVIDENCE','BUILD','SYSTEM']
 for(const mode of ['FIELD','MATTER','TRAVERSAL','FORECAST','RELATIVITY','INFINITY','SCALE','CONVERGENCE'])must(registry.includes(`id:'${mode}'`),`projection registry missing ${mode}`);
 must(registry.includes('routes.length===44')&&registry.includes('new Set(routes).size===44'),'shared experience registry must assert 44 unique routes');
 must(home.includes('OMEGA_WORKSPACES_R82.map')&&home.includes('OMEGA_FIELD_PROJECTIONS_R82.map'),'Home must consume shared workspace and projection registries');
-must(home.includes("placeholder='Search all 44 OMEGA applications'"),'Home must expose the complete application search');
+must(home.includes('omega-r88-open-navigator')&&nav.includes("placeholder='Search all 44 OMEGA applications'"),'Home must delegate complete application search to the one shared navigator');
 must(!home.includes('.slice(0,18)')&&!home.includes('.slice(0,10)'),'Home may not bury applications behind arbitrary result slicing');
 must(home.includes('projection.signature')&&home.includes('projection.intent'),'Home must explain the visual law selected by each projection button');
 must(homeCss.includes('.r71-modes')&&homeCss.includes('overflow-x:auto'),'all projection buttons must remain reachable without overlap');

@@ -37,7 +37,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
    </header>
    <nav className='r89-nav-mode' aria-label='Navigator mode'><button className={layer==='EVERYWHERE'?'active':''} onClick={()=>setLayer('EVERYWHERE')}><Menu/>Everywhere <b>44</b></button><button className={layer==='SOFTWARE'?'active':''} onClick={()=>setLayer('SOFTWARE')}><Layers3/>Software</button></nav>
    {layer==='EVERYWHERE'?<>
-    <label className='r88-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Find anywhere in OMEGA'/><kbd>⌘K</kbd></label>
+    <label className='r88-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all 44 OMEGA applications'/><kbd>⌘K</kbd></label>
     <div className='r89-flat-scroll' aria-label='All 44 OMEGA applications'>
      {rows.map(route=>{const index=OMEGA_ALL_ROUTES_R82.indexOf(route)+1,workspace=workspaceForRouteR82(route),reality=effectiveCapabilityReality(route);return <button key={route} className={'r89-flat-route '+(currentPanel===route?'active':'')} aria-current={currentPanel===route?'page':undefined} onClick={()=>go(route)}>
       <i>{String(index).padStart(2,'0')}</i><span><b>{route}</b><small>{workspace.label} · {CAPABILITY_REALITY_LABEL[reality]}</small></span><ChevronRight/>

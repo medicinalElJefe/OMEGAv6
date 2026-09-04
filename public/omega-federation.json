@@ -19,18 +19,23 @@
       "id": "omega-genesis",
       "role": "proposal-generation-exploration",
       "url": "https://omega-genesis-v1.jeffdeweyeljefe.workers.dev",
+      "availability": "REGISTERED · EXTERNAL GATE",
       "mayMutateCanonicalState": false
     },
     {
       "id": "omega-optical",
       "role": "optical-compiler-tier1-screen-tier2-queue",
       "url": "https://omega-optical-cloud-woven2.vercel.app",
+      "availability": "REGISTERED · ACCESS GATED",
       "mayMutateCanonicalState": false
     },
     {
       "id": "omega-sovereign",
       "role": "high-compute-full-wave-executor",
-      "url": "https://omega-sovereign-convergence.foundasound.chatgpt.site",
+      "url": null,
+      "endpoint": "/api/federation/rcwa/status",
+      "transport": "canonical-worker-queue-to-authenticated-hybrid-agent",
+      "stateGate": "DEVICE_PROOF_REQUIRED",
       "mayMutateCanonicalState": false
     }
   ],

@@ -15,7 +15,7 @@ assert(!app.includes("import './omegaProfessionalR13.css'"),'superseded R13 glob
 assert(shell.includes('OmegaSideNavigatorR88'),'mounted shell must delegate navigation to the shared R88 side navigator');
 assert(nav.includes('workspaceForRouteR82')&&nav.includes('OMEGA_ALL_ROUTES_R82'),'navigator must consume the shared 44-route experience registry without rendering workspace compartments');
 assert(nav.includes("const[expanded,setExpanded]=useState(false)")&&nav.includes('setExpanded(true)'),'application browser must be collapsible while leaving a slim persistent toolbar visible');
-assert(nav.includes('Find anywhere in OMEGA'),'professional navigator must provide global flat application search');
+assert(nav.includes('Search all 44 OMEGA applications'),'professional navigator must provide global flat application search');
 assert(nav.includes('Persistent rail')&&nav.includes('active application remains visible'),'historical route reachability must remain governed, explicit, and non-covering');
 assert(nav.includes('OMEGA V6')&&nav.includes('Everywhere')&&nav.includes('Software map'),'navigation must expose readable product/everywhere/software labels');
 assert(!nav.includes('r88-navigator-backdrop')&&navCss.includes('.r94-side-toolbar{')&&navCss.includes('.r94-nav-panel.r88-navigator{'),'application browser must be a persistent edge toolbar, not a modal overlay');
