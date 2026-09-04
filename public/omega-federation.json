@@ -24,13 +24,13 @@
     {
       "id": "omega-optical",
       "role": "optical-compiler-tier1-screen-tier2-queue",
-      "url": "https://omega-optical-cloud-woven2.vercel.app",
+      "url": "https://omega-optical-cloud-woven2.jeffdeweyeljefe.workers.dev",
       "mayMutateCanonicalState": false
     },
     {
       "id": "omega-sovereign",
       "role": "high-compute-full-wave-executor",
-      "url": "https://omega-sovereign-convergence.foundasound.chatgpt.site",
+      "url": "https://omega-sovereign-convergence.jeffdeweyeljefe.workers.dev",
       "mayMutateCanonicalState": false
     }
   ],
