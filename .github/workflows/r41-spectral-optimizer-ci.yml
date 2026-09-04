@@ -1,0 +1,57 @@
+name: OMEGA R41 Spectral Conversion Optimizer
+on:
+  push:
+    branches: [r41-spectral-conversion-optimizer]
+  pull_request:
+    branches: [main]
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Build convergence-qualified baseline
+        run: |
+          cat > /tmp/r41.json <<'JSON'
+          {"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"ci_r41","source_packet_id":"ci_r41_optimizer","geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":0},"polarization":"s","material_names":{"incident":"air","feature":"tio2_design","background":"air","substrate":"sio2_fused"},"numerics":{"nx":96,"ny":96,"harmonics_low":25,"harmonics_high":49,"convergence_tolerance":0.08,"energy_tolerance":0.08},"proof":{"gate":"STAY","mode188_score":1.2}}
+          JSON
+      - name: Screen 81-neighborhood lattice and fully validate promoted candidates
+        working-directory: sovereign
+        run: |
+          python omega_spectral_optimizer_r41.py \
+            --input /tmp/r41.json --output /tmp/r41-optimization.json --csv /tmp/r41-finalists.csv \
+            --pitches 320,330,340 --widths 80,90,100 --lengths 240,260,280 --heights 500,550,600 \
+            --wavelengths 470,532,650 --screen-grid 64 --validation-grid 96 --top-k 4
+      - name: Report optimization result
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r41-optimization.json'))
+          print('SCREENED:',d['screened_candidates'],'VALIDATED:',d['validated_candidates'])
+          print('BASELINE:',d['baseline']['geometry'],d['baseline']['full'])
+          print('WINNER:',d['winner']['geometry'] if d['winner'] else None)
+          print('WINNER FULL:',d['winner']['full'] if d['winner'] else None)
+          print('DELTA:',d['improvement_vs_baseline'])
+          print('SHA:',d['proof_sha256'])
+          PY
+      - name: Verify hard PB admission boundary
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r41-optimization.json'))
+          assert d['schema']=='OMEGA_SPECTRAL_OPTIMIZATION_v1'
+          assert d['screened_candidates'] >= 40
+          assert d['baseline'] is not None and d['baseline']['full']['admitted'] is True
+          assert d['winner'] is not None and d['winner']['full']['admitted'] is True
+          assert len(d['winner']['proofs'])==3
+          assert all(p['pb_phase_verified'] for p in d['winner']['proofs'])
+          assert d['winner']['full']['max_rms_phase_error_deg'] <= 12.0
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r41-spectral-optimization
+          path: |
+            /tmp/r41-optimization.json
+            /tmp/r41-finalists.csv
