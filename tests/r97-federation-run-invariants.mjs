@@ -1,13 +1,14 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R97 '+msg)};
-const r32=read('src/workerR32.js'),r34=read('src/workerR34.js'),surface=read('src/FederationRunR97.tsx'),hybrid=read('src/HybridMissionControlR8.tsx'),continuity=read('src/omegaProjectContinuityR87.ts'),workstation=read('src/OmegaWorkstationFullV2.tsx');
+const r32=read('src/workerR32.js'),r34=read('src/workerR34.js'),wrangler=read('wrangler.jsonc'),surface=read('src/FederationRunR97.tsx'),hybrid=read('src/HybridMissionControlR8.tsx'),continuity=read('src/omegaProjectContinuityR87.ts'),workstation=read('src/OmegaWorkstationFullV2.tsx');
 must(r32.includes("const sid=sessionId(request),bid=bridgeId(request,{})")&&r32.includes("proxy(env,bid,'/status',request)"),'Hybrid status must follow the saved bridge namespace, not only a replaceable session id');
 must(r34.includes("path==='/api/federation/run/status'")&&r34.includes('OMEGA_FEDERATION_RUN_STATUS_R97'),'one live federation status contract is required');
 must(r34.includes("'PREVIOUSLY_PAIRED_OFFLINE'")&&r34.includes('historicalProofPresent'),'historical pairing proof must remain distinct from current heartbeat state');
 must(r34.includes('OMEGA_OPTICAL_SERVICE_TOKEN')&&r34.includes('OMEGA_OPTICAL_BYPASS_TOKEN')&&r34.includes("state:'ACCESS_GATED'"),'Optical health must support server-held credentials and report the protection gate truthfully');
 must(r34.includes('response.status===401||response.status===403')&&r34.includes('probeGenesis(env)')&&r34.includes('recoveredFromConfiguredEndpoint'),'401/403 must classify as access gates and Genesis must recover from a stale configured health URL');
 must(r34.includes("cache:'no-store'")&&r34.includes("'cache-control':'no-cache'")&&r34.includes('omega_federation_probe=r97')&&!r34.includes("cf:{cacheTtl:0}"),'Worker-to-Worker probes must bypass stale responses without incompatible Cloudflare cache controls');
+must(wrangler.includes('"binding":"OMEGA_GENESIS"')&&wrangler.includes('"service":"omega-genesis-v1"')&&r34.includes("transport:'CLOUDFLARE_SERVICE_BINDING'"),'Genesis health must prefer a private Cloudflare service binding over unreliable public Worker-to-Worker routing');
 must(r34.includes("path==='/continuity'")&&r34.includes('DURABLE_RUNTIME_PROJECT_CONTINUITY_R97')&&r34.includes('CONTINUITY_SNAPSHOT_SAVED'),'project identity and receipts must persist in the authenticated Durable Object');
 must(continuity.includes("api.put<any>('/api/federation/continuity'")&&continuity.includes("api.get<any>('/api/federation/continuity'")&&workstation.includes('syncProjectContinuityR97'),'browser projects must restore and save through durable continuity with local cache fallback');
 must(surface.includes('Genesis → Optical → Sovereign RCWA → OMEGAv6 admission')&&surface.includes('Last authenticated proof'),'Federation Run must expose every handoff and historical proof timestamp');
