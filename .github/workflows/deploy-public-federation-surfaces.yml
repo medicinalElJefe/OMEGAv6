@@ -19,8 +19,8 @@ jobs:
       - name: Verify Cloudflare authorization
         run: npx wrangler whoami
       - name: Deploy public Optical surface
-        run: npx wrangler deploy src/opticalPublicWorker.js --name omega-optical-cloud-woven2 --compatibility-date 2026-08-29
+        run: npx wrangler deploy --config wrangler.optical-public.jsonc
       - name: Deploy public Sovereign surface
-        run: npx wrangler deploy src/sovereignPublicWorker.js --name omega-sovereign-convergence --compatibility-date 2026-08-29
+        run: npx wrangler deploy --config wrangler.sovereign-public.jsonc
       - name: Verify all four public surfaces
         run: python scripts/verify_four_links.py
