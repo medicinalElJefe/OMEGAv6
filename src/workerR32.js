@@ -61,20 +61,20 @@ async function aiReply(env,prompt,stateContext,execution){if(!env.AI)return exec
 
 async function fetchR32(request,env){const url=new URL(request.url),path=url.pathname;
  if(!env.OMEGA_RUNTIME){if(path.startsWith('/api/runtime/')||path.startsWith('/api/hybrid/pair')||path.startsWith('/api/hybrid/agent/'))return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE'},503);return r27.fetch(request,env)}
- const sid=sessionId(request);
+ const sid=sessionId(request),bid=bridgeId(request,{});
  if(path==='/api/runtime/snapshot'&&request.method==='GET')return proxy(env,sid,'/snapshot',request);
  if(path==='/api/runtime/events'&&request.method==='GET')return proxy(env,sid,'/events',request);
  if(path==='/api/hybrid/pair'&&request.method==='POST'){const b=await request.json().catch(()=>({}));const r=await proxy(env,sid,'/pair',request,b);const data=await r.clone().json().catch(()=>({}));if(data.secret)return json({...data,bridgeId:sid,pairingCode:`${sid}.${data.secret}`,agentPath:'/api/hybrid/agent-download'});return r}
  if(path.startsWith('/api/hybrid/agent/')){const b=request.method==='POST'?await request.json().catch(()=>({})):{};const bid=bridgeId(request,b),suffix=path.replace('/api/hybrid','');return proxy(env,bid,suffix,request,b)}
- if(path==='/api/hybrid/status'&&request.method==='GET')return proxy(env,sid,'/status',request);
- if(path==='/api/hybrid/jobs'&&request.method==='POST'){const b=await request.json().catch(()=>({}));return proxy(env,sid,'/jobs',request,b)}
- if(path.startsWith('/api/hybrid/jobs/')&&path.endsWith('/analyze')&&request.method==='POST'){const b=await request.json().catch(()=>({}));return proxy(env,sid,path.replace('/api/hybrid',''),request,b)}
- if(path==='/api/missions'&&request.method==='GET')return proxy(env,sid,'/missions',request);
- if(path==='/api/missions'&&request.method==='POST'){const b=await request.json().catch(()=>({}));return proxy(env,sid,'/missions',request,b)}
- if(path.startsWith('/api/missions/')&&request.method==='POST'){const b=await request.json().catch(()=>({}));return proxy(env,sid,path.replace('/api',''),request,b)}
+ if(path==='/api/hybrid/status'&&request.method==='GET')return proxy(env,bid,'/status',request);
+ if(path==='/api/hybrid/jobs'&&request.method==='POST'){const b=await request.json().catch(()=>({}));return proxy(env,bid,'/jobs',request,b)}
+ if(path.startsWith('/api/hybrid/jobs/')&&path.endsWith('/analyze')&&request.method==='POST'){const b=await request.json().catch(()=>({}));return proxy(env,bid,path.replace('/api/hybrid',''),request,b)}
+ if(path==='/api/missions'&&request.method==='GET')return proxy(env,bid,'/missions',request);
+ if(path==='/api/missions'&&request.method==='POST'){const b=await request.json().catch(()=>({}));return proxy(env,bid,'/missions',request,b)}
+ if(path.startsWith('/api/missions/')&&request.method==='POST'){const b=await request.json().catch(()=>({}));return proxy(env,bid,path.replace('/api',''),request,b)}
  if(path==='/api/orchestrator/thread'&&request.method==='GET')return proxy(env,sid,'/thread',request);
  if(path==='/api/orchestrator/turn'&&request.method==='POST'){const b=await request.json().catch(()=>({})),prompt=text(b.prompt).slice(0,16000),execution=intent(prompt).execution,plan=safePlan(prompt),assistantMessage=await aiReply(env,prompt,b.stateContext,execution),r=await proxy(env,sid,'/turn',request,b),data=await r.json();data.turn.assistantMessage=assistantMessage;data.draft=execution?{schema:'OMEGA_GOVERNED_ACTION_DRAFT_R32',state:'DRAFT_NOT_QUEUED',projectPath:plan.projectPath,allowedDomains:plan.allowedDomains,steps:plan.steps}:null;return json(data)}
- if(path==='/api/status'&&request.method==='GET'){const base=await baseJson(request,env);if(!base.data)return base.response;const rt=await (await proxy(env,sid,'/status',request)).json();return json({...base.data,hybridLink:{state:rt.state,missionControlSurface:'ENACTED_RUNTIME',nativeExecutionClaimed:rt.nativeExecutionClaimed,paired:rt.paired,onlineDevices:rt.devices?.filter(x=>x.online).length||0},enactedRuntime:{state:'LIVE_DURABLE',activeJobs:rt.activeJobs,lastEvent:rt.lastEvent||null,threadPersistence:'DURABLE_RUNTIME'}})}
+ if(path==='/api/status'&&request.method==='GET'){const base=await baseJson(request,env);if(!base.data)return base.response;const rt=await (await proxy(env,bid,'/status',request)).json();return json({...base.data,hybridLink:{state:rt.state,missionControlSurface:'ENACTED_RUNTIME',nativeExecutionClaimed:rt.nativeExecutionClaimed,paired:rt.paired,onlineDevices:rt.devices?.filter(x=>x.online).length||0},enactedRuntime:{state:'LIVE_DURABLE',activeJobs:rt.activeJobs,lastEvent:rt.lastEvent||null,threadPersistence:'DURABLE_RUNTIME'}})}
  return r27.fetch(request,env)
 }
 export default{fetch:fetchR32};
