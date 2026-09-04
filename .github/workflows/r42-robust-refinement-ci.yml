@@ -1,0 +1,55 @@
+name: OMEGA R42 Robust Spectral Refinement
+on:
+  push:
+    branches: [r42-robust-spectral-refinement]
+  pull_request:
+    branches: [main]
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Build original validated baseline
+        run: |
+          cat > /tmp/r42.json <<'JSON'
+          {"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"ci_r42","source_packet_id":"ci_r42_refine","geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":0},"polarization":"s","material_names":{"incident":"air","feature":"tio2_design","background":"air","substrate":"sio2_fused"},"numerics":{"nx":96,"ny":96,"harmonics_low":25,"harmonics_high":49,"convergence_tolerance":0.08,"energy_tolerance":0.08},"proof":{"gate":"STAY","mode188_score":1.2}}
+          JSON
+      - name: Fine-screen 81 candidates and validate top 12 with 6-degree margin
+        working-directory: sovereign
+        run: |
+          python omega_spectral_refine_r42.py \
+            --input /tmp/r42.json --output /tmp/r42-refinement.json \
+            --pitches 315,320,325 --widths 95,100,105 --lengths 270,280,290 --heights 525,550,575 \
+            --wavelengths 470,532,650 --screen-grid 64 --validation-grid 96 --top-k 12 --phase-margin 6
+      - name: Report robust winner
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r42-refinement.json'))
+          print('ROBUST COUNT:',len(d['robust_candidates']))
+          print('ORIGINAL BASELINE:',d['baseline']['geometry'],d['baseline']['full'])
+          print('R41 ANCHOR:',d['r41_anchor']['geometry'],d['r41_anchor']['full'])
+          print('R42 WINNER:',d['winner']['geometry'] if d['winner'] else None)
+          print('R42 FULL:',d['winner']['full'] if d['winner'] else None)
+          print('DELTA:',d['improvement_vs_original_baseline'])
+          print('SHA:',d['proof_sha256'])
+          PY
+      - name: Enforce robustness truth boundary
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r42-refinement.json'))
+          assert d['schema']=='OMEGA_SPECTRAL_REFINEMENT_v1'
+          assert d['baseline']['full']['admitted'] is True
+          assert d['winner'] is not None
+          assert d['winner']['full']['admitted'] is True
+          assert d['winner']['full']['max_rms_phase_error_deg'] <= d['phase_margin_deg']
+          assert all(p['pb_phase_verified'] for p in d['winner']['proofs'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r42-robust-refinement
+          path: /tmp/r42-refinement.json
