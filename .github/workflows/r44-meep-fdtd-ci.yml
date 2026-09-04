@@ -21,9 +21,13 @@ jobs:
         run: conda install -y --override-channels -c conda-forge pymeep numpy
       - name: Verify backend identity
         shell: bash -el {0}
-        run: python - <<'PY'
+        run: |
+          python - <<'PY'
           import meep as mp
           print('MEEP VERSION:',getattr(mp,'__version__','unknown'))
+          print('Simulation:',hasattr(mp,'Simulation'),'PML:',hasattr(mp,'PML'),'GaussianSource:',hasattr(mp,'GaussianSource'))
+          print('add_dft_fields:',hasattr(mp.Simulation,'add_dft_fields'),'get_dft_array:',hasattr(mp.Simulation,'get_dft_array'))
+          print('stop_when_dft_decayed:',hasattr(mp,'stop_when_dft_decayed'))
           assert hasattr(mp,'Simulation') and hasattr(mp,'PML')
           assert hasattr(mp.Simulation,'add_dft_fields') and hasattr(mp.Simulation,'get_dft_array')
           assert hasattr(mp,'GaussianSource') and hasattr(mp,'stop_when_dft_decayed')
