@@ -1,0 +1,81 @@
+{
+  "schema": "OMEGA_OPTICAL_DESIGN_CANDIDATE_v1",
+  "version": "R44.0",
+  "status": "RECOMMENDED_NUMERICAL_CANDIDATE",
+  "selection_policy": {
+    "pareto_phase_margin_deg": 10.0,
+    "rationale": "Best validated conversion objective found by the R43 local Pareto search while retaining sub-10-degree worst-wavelength RMS PB phase error.",
+    "not_a_physical_constant": true
+  },
+  "geometry_nm": {
+    "pitch": 330.0,
+    "width": 105.0,
+    "length": 290.0,
+    "height": 575.0
+  },
+  "orientation_alphabet": {
+    "states": 12,
+    "theta_rule_deg": "theta_k = 15*k, k=0..11",
+    "pb_target": "R->L: -2*theta; L->R: +2*theta"
+  },
+  "materials": {
+    "incident": "air",
+    "feature": "tio2_design",
+    "background": "air",
+    "substrate": "sio2_fused"
+  },
+  "solver": {
+    "backend": "grcwa",
+    "method": "RCWA",
+    "validation_grid": [96, 96],
+    "wavelengths_nm": [470.0, 532.0, 650.0],
+    "helicity_channels": ["LR", "RL"]
+  },
+  "aggregate": {
+    "admitted": true,
+    "minimum_conversion_fraction": 0.4537431336165322,
+    "mean_conversion_fraction": 0.8274948914535335,
+    "red_mean_conversion_fraction": 0.5639015603564489,
+    "worst_wavelength_rms_phase_error_deg": 8.961216766705734,
+    "r43_objective": 0.5879003463156159
+  },
+  "wavelength_evidence": [
+    {
+      "wavelength_nm": 470.0,
+      "qualified_states": {"LR": 12, "RL": 12},
+      "pb_verified": true,
+      "rms_phase_error_deg": {"LR": 8.728983217715443, "RL": 8.72898321771519},
+      "max_abs_phase_error_deg": 11.597843339338198,
+      "conversion_fraction": {"min": 0.9204566751592488, "mean": 0.9651163683652566, "max": 0.985915821687728}
+    },
+    {
+      "wavelength_nm": 532.0,
+      "qualified_states": {"LR": 12, "RL": 12},
+      "pb_verified": true,
+      "rms_phase_error_deg": {"LR": 6.2998048241642755, "RL": 6.299804824164683},
+      "max_abs_phase_error_deg": 8.97647041182205,
+      "conversion_fraction": {"min": 0.9162946055399425, "mean": 0.9534667456388949, "max": 0.9981590971772498}
+    },
+    {
+      "wavelength_nm": 650.0,
+      "qualified_states": {"LR": 12, "RL": 12},
+      "pb_verified": true,
+      "rms_phase_error_deg": {"LR": 8.961216766705734, "RL": 8.961216766705705},
+      "max_abs_phase_error_deg": 12.248140017145829,
+      "conversion_fraction": {"min": 0.4537431336165322, "mean": 0.5639015603564489, "max": 0.7324086124805085}
+    }
+  ],
+  "provenance": {
+    "r43_source_commit": "181b2b71753fe615f03667b0b814fa70fc5137bc",
+    "main_merge_commit": "02015a5f51cb31dbf748b41d96bcda36ac3d4f1b",
+    "r43_proof_sha256": "c49c18d9f0b79f1ad7a05daafb3a303adf81acedff360dcae58cf73092f6bfea",
+    "r43_artifact_sha256": "0249c3e74fb91be894c4bad3cd97fe0bdc4d2198a63b0555817bc6f711a36837"
+  },
+  "next_required_gates": [
+    "independent full-wave cross-check on selected cases using a non-RCWA backend",
+    "process-specific material dispersion / ellipsometry inputs",
+    "fabrication tolerance analysis",
+    "physical optical measurement and residual/scar ingest"
+  ],
+  "truth_boundary": "This is a recommended numerical metasurface design candidate derived from RCWA simulations and PB phase tests. It is not fabrication validation, a measured device result, or evidence of a new physical law."
+}
