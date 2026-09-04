@@ -126,8 +126,8 @@ jobs:
         shell: bash
         run: |
           node <<'NODE'
-          const {createHash}=require('node:crypto');
-          const {readFileSync}=require('node:fs');
+          import {createHash} from 'node:crypto';
+          import {readFileSync} from 'node:fs';
           const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
           const expectedSha256=createHash('sha256').update(readFileSync('public/omega-hybrid-agent.py')).digest('hex');
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
