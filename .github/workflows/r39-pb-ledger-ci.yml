@@ -20,6 +20,25 @@ jobs:
       - name: Execute complete 12-state real-RCWA PB ledger at 532 nm
         working-directory: sovereign
         run: python omega_pb_ledger_r39.py --input /tmp/r39.json --output /tmp/r39-ledger.json --csv /tmp/r39-ledger.csv --wavelengths 532
+      - name: Report exact optical verdict and failure metrics
+        run: |
+          python - <<'PY'
+          import json, statistics
+          d=json.load(open('/tmp/r39-ledger.json'))
+          p=d['proofs'][0]
+          print('R39 RESULT:', d['all_wavelengths_verified'])
+          print('BASIS VERIFIED:', p['basis_verified'])
+          print('QUALIFIED STATES:', p['qualified_states'])
+          print('RMS PHASE ERROR DEG:', p['rms_phase_error_deg'])
+          for ch in ('LR','RL'):
+              rows=[r for r in d['rows'] if r['channel']==ch]
+              qs=[r for r in rows if r['qualified']]
+              conv=[r['conversion'] for r in rows]
+              errs=[abs(r['error_deg']) for r in qs]
+              print(ch,'conversion min/mean/max=',min(conv),statistics.fmean(conv),max(conv))
+              print(ch,'qualified error abs mean/max=',statistics.fmean(errs) if errs else None,max(errs) if errs else None)
+          print('R39 SHA:', d['ledger_sha256'])
+          PY
       - name: Verify ledger completeness without forcing optical success
         run: |
           python - <<'PY'
@@ -31,6 +50,10 @@ jobs:
           assert {r['theta_deg'] for r in d['rows']}=={15.0*k for k in range(12)}
           assert {r['channel'] for r in d['rows']}=={'LR','RL'}
           assert isinstance(d['all_wavelengths_verified'],bool)
-          print('R39 RESULT (truth, not forced pass):', d['all_wavelengths_verified'])
-          print('R39 SHA:', d['ledger_sha256'])
           PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r39-pb-ledger
+          path: |
+            /tmp/r39-ledger.json
+            /tmp/r39-ledger.csv
