@@ -1,0 +1,54 @@
+name: OMEGA R43 Spectral Pareto Frontier
+on:
+  push:
+    branches: [r43-pareto-spectral-frontier]
+  pull_request:
+    branches: [main]
+jobs:
+  pareto:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Build original validated baseline
+        run: |
+          cat > /tmp/r43.json <<'JSON'
+          {"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"ci_r43","source_packet_id":"ci_r43_pareto","geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":0},"polarization":"s","material_names":{"incident":"air","feature":"tio2_design","background":"air","substrate":"sio2_fused"},"numerics":{"nx":96,"ny":96,"harmonics_low":25,"harmonics_high":49,"convergence_tolerance":0.08,"energy_tolerance":0.08},"proof":{"gate":"STAY","mode188_score":1.2}}
+          JSON
+      - name: Screen broad local lattice and fully validate top 24
+        working-directory: sovereign
+        run: |
+          python omega_spectral_pareto_r43.py \
+            --input /tmp/r43.json --output /tmp/r43-pareto.json \
+            --pitches 315,320,325,330,335 --widths 90,95,100,105 --lengths 260,270,280,290 --heights 525,550,575 \
+            --wavelengths 470,532,650 --screen-grid 64 --validation-grid 96 --top-k 24 --margins 6,8,10,12
+      - name: Report Pareto choices
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r43-pareto.json'))
+          print('SCREENED:',d['screened_candidates'],'VALIDATED:',d['validated_candidates'],'FRONTIER:',len(d['pareto_frontier']))
+          for m,c in d['choices_by_phase_margin'].items():
+              print('MARGIN',m,'=>',None if c is None else (c['geometry'],c['full']))
+          print('SHA:',d['proof_sha256'])
+          PY
+      - name: Verify frontier truth
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r43-pareto.json'))
+          assert d['schema']=='OMEGA_SPECTRAL_PARETO_v1'
+          assert d['baseline'] is not None and d['baseline']['full']['admitted'] is True
+          assert d['r41_anchor'] is not None and d['r41_anchor']['full']['admitted'] is True
+          assert len(d['pareto_frontier']) >= 1
+          for m,c in d['choices_by_phase_margin'].items():
+              if c is not None:
+                  assert c['full']['admitted'] is True
+                  assert c['full']['max_rms_phase_error_deg'] <= float(m)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r43-pareto-frontier
+          path: /tmp/r43-pareto.json
