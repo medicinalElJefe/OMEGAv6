@@ -3,14 +3,15 @@ import {corpusState,projectionPoint,sourceRGB,PROJECTIONS,VIEW_MODES,type Projec
 import {compileSourceTraversal} from './sourceBackedModeRuntimeR21';
 import './canonicalMembraneR95.css';
 
-type Props={address:number;onAddress?:(address:number)=>void;initialProjection?:Projection;initialView?:ViewMode;compact?:boolean;label?:string};
+type Props={address:number;onAddress?:(address:number)=>void;initialProjection?:Projection;initialView?:ViewMode;projection?:Projection;view?:ViewMode;showControls?:boolean;compact?:boolean;label?:string};
 
 const clamp=(n:number,a:number,b:number)=>Math.max(a,Math.min(b,n));
 const DPR=()=>Math.min(2,typeof window==='undefined'?1:window.devicePixelRatio||1);
 
-export default function CanonicalMembraneR95({address,onAddress,initialProjection='MANDALA',initialView='SOURCE_COLOR',compact=false,label='20,736-CELL CANONICAL MEMBRANE'}:Props){
+export default function CanonicalMembraneR95({address,onAddress,initialProjection='MANDALA',initialView='SOURCE_COLOR',projection:controlledProjection,view:controlledView,showControls=true,compact=false,label='20,736-CELL CANONICAL MEMBRANE'}:Props){
  const canvas=useRef<HTMLCanvasElement|null>(null);
- const [projection,setProjection]=useState<Projection>(initialProjection),[view,setView]=useState<ViewMode>(initialView),[routeDepth,setRouteDepth]=useState(compact?18:42);
+ const [projectionState,setProjection]=useState<Projection>(initialProjection),[viewState,setView]=useState<ViewMode>(initialView),[routeDepth,setRouteDepth]=useState(compact?18:42);
+ const projection=controlledProjection??projectionState,view=controlledView??viewState;
  const record=useMemo(()=>corpusState(address),[address]);
  const route=useMemo(()=>compileSourceTraversal(address,routeDepth),[address,routeDepth]);
  const coordinates=record.coordinates;
@@ -20,36 +21,37 @@ export default function CanonicalMembraneR95({address,onAddress,initialProjectio
 
  useEffect(()=>{
   const el=canvas.current;if(!el)return;
-  const rect=el.getBoundingClientRect(),dpr=DPR(),w=Math.max(320,Math.floor(rect.width*dpr)),h=Math.max(320,Math.floor(rect.height*dpr));
-  if(el.width!==w||el.height!==h){el.width=w;el.height=h}
   const ctx=el.getContext('2d');if(!ctx)return;
-  ctx.setTransform(w/1000,0,0,h/1000,0,0);
-  ctx.clearRect(0,0,1000,1000);
-  ctx.fillStyle='#02080b';ctx.fillRect(0,0,1000,1000);
-
+  const base=document.createElement('canvas');base.width=1000;base.height=1000;
+  const baseCtx=base.getContext('2d');if(!baseCtx)return;
+  baseCtx.fillStyle='#02080b';baseCtx.fillRect(0,0,1000,1000);
   if(projection==='LATTICE'){
    const cell=1000/144;
-   for(let i=0;i<STATE_COUNT;i++){
-    const [r,g,b]=colors[i],x=(i%144)*cell,y=Math.floor(i/144)*cell;
-    ctx.fillStyle=`rgb(${r},${g},${b})`;ctx.fillRect(x,y,cell+.45,cell+.45);
-   }
+   for(let i=0;i<STATE_COUNT;i++){const [r,g,b]=colors[i],x=(i%144)*cell,y=Math.floor(i/144)*cell;baseCtx.fillStyle=`rgb(${r},${g},${b})`;baseCtx.fillRect(x,y,cell+.45,cell+.45)}
   }else{
-   for(let i=0;i<STATE_COUNT;i++){
-    const [r,g,b]=colors[i],p=points[i],radius=projection==='THREAD'?1.45:1.8;
-    ctx.fillStyle=`rgba(${r},${g},${b},.72)`;ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.fill();
+   for(let i=0;i<STATE_COUNT;i++){const [r,g,b]=colors[i],p=points[i],radius=projection==='THREAD'?1.45:1.8;baseCtx.fillStyle=`rgba(${r},${g},${b},.72)`;baseCtx.beginPath();baseCtx.arc(p.x,p.y,radius,0,Math.PI*2);baseCtx.fill()}
+  }
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let raf=0,lastFrame=0,w=320,h=320;
+  const resize=()=>{const rect=el.getBoundingClientRect(),dpr=DPR();w=Math.max(320,Math.floor(rect.width*dpr));h=Math.max(320,Math.floor(rect.height*dpr));if(el.width!==w||el.height!==h){el.width=w;el.height=h}};
+  const draw=(time=0)=>{
+   if(!reduced&&time-lastFrame<34){raf=requestAnimationFrame(draw);return}lastFrame=time;
+   resize();ctx.setTransform(w/1000,0,0,h/1000,0,0);ctx.clearRect(0,0,1000,1000);ctx.drawImage(base,0,0,1000,1000);
+   if(routePoints.length>1){
+    ctx.save();ctx.strokeStyle='rgba(222,186,111,.78)';ctx.lineWidth=2.1;ctx.setLineDash([8,10]);ctx.lineDashOffset=-(time/32)%18;ctx.beginPath();routePoints.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();ctx.restore();
+    routePoints.forEach((p,i)=>{if(i%Math.max(1,Math.floor(routePoints.length/9))===0){ctx.fillStyle='rgba(222,186,111,.9)';ctx.beginPath();ctx.arc(p.x,p.y,3.4,0,Math.PI*2);ctx.fill()}});
+    const phase=(time/950)%(routePoints.length-1),index=Math.floor(phase),mix=phase-index,a=routePoints[index],b=routePoints[index+1],x=a.x+(b.x-a.x)*mix,y=a.y+(b.y-a.y)*mix;
+    ctx.shadowColor='rgba(222,186,111,.9)';ctx.shadowBlur=14;ctx.fillStyle='rgba(244,213,145,.98)';ctx.beginPath();ctx.arc(x,y,4.4,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
    }
-  }
-
-  if(routePoints.length>1){
-   ctx.strokeStyle='rgba(222,186,111,.72)';ctx.lineWidth=2.1;ctx.beginPath();routePoints.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
-   routePoints.forEach((p,i)=>{if(i%Math.max(1,Math.floor(routePoints.length/9))===0){ctx.fillStyle='rgba(222,186,111,.9)';ctx.beginPath();ctx.arc(p.x,p.y,3.4,0,Math.PI*2);ctx.fill()}});
-  }
-
-  const mark=(a:number,stroke:string,r:number)=>{const p=projectionPoint(a,projection,1000);ctx.strokeStyle=stroke;ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.stroke();return p};
-  mark(record.autoPing.previous,'rgba(133,151,155,.92)',8);
-  const cur=mark(address,'rgba(102,225,206,1)',13);
-  mark(record.autoPing.dataNext,'rgba(226,188,111,1)',10);
-  ctx.fillStyle='rgba(102,225,206,.95)';ctx.beginPath();ctx.arc(cur.x,cur.y,4.5,0,Math.PI*2);ctx.fill();
+   const mark=(a:number,stroke:string,r:number)=>{const p=projectionPoint(a,projection,1000);ctx.strokeStyle=stroke;ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.stroke();return p};
+   mark(record.autoPing.previous,'rgba(133,151,155,.92)',8);
+   const cur=mark(address,'rgba(102,225,206,1)',13+(reduced?0:Math.sin(time/420)*1.5));
+   mark(record.autoPing.dataNext,'rgba(226,188,111,1)',10);
+   ctx.fillStyle='rgba(102,225,206,.95)';ctx.beginPath();ctx.arc(cur.x,cur.y,4.5,0,Math.PI*2);ctx.fill();
+   if(!reduced)raf=requestAnimationFrame(draw);
+  };
+  const observer=new ResizeObserver(()=>{resize();if(reduced)draw(performance.now())});observer.observe(el);draw(performance.now());
+  return()=>{observer.disconnect();if(raf)cancelAnimationFrame(raf)};
  },[address,record,projection,view,points,colors,routePoints]);
 
  const choose=(e:React.PointerEvent<HTMLCanvasElement>)=>{
@@ -63,13 +65,13 @@ export default function CanonicalMembraneR95({address,onAddress,initialProjectio
   onAddress(best);
  };
 
- return <section className={'r95-membrane '+(compact?'compact':'full')} data-projection={projection} data-view={view}>
+ return <section className={'r95-membrane '+(compact?'compact':'full')} data-projection={projection} data-view={view} data-motion='admitted-route-time-sync'>
   <header><div><span>RENDER AUTHORITY · SOURCE-BOUND</span><b>{label}</b><small>Every rendered cell is one canonical address. No generated filler cells.</small></div><code>STATE {record.stateId} · D{coordinates.d} P{coordinates.p} R{coordinates.r} L{coordinates.l}</code></header>
-  <div className='r95-membrane-controls'>
+  {showControls&&<div className='r95-membrane-controls'>
    <nav aria-label='Membrane projection'>{PROJECTIONS.map(x=><button key={x} className={projection===x?'active':''} onClick={()=>setProjection(x)}>{x}</button>)}</nav>
    <nav aria-label='Membrane data skin'>{VIEW_MODES.map(x=><button key={x} className={view===x?'active':''} onClick={()=>setView(x)}>{x.replaceAll('_',' ')}</button>)}</nav>
    <label>ROUTE <input type='range' min='6' max='72' value={routeDepth} onChange={e=>setRouteDepth(Number(e.target.value))}/><b>{routeDepth}</b></label>
-  </div>
+  </div>}
   <div className='r95-membrane-stage'>
    <canvas ref={canvas} onPointerDown={choose} aria-label='Interactive 20,736-cell canonical membrane'/>
    <aside>

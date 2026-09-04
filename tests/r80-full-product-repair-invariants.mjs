@@ -16,9 +16,9 @@ const worker=fs.readFileSync('src/worker.js','utf8');
 const orchestrator=fs.readFileSync('src/fullOverallModeOrchestratorR79.ts','utf8');
 
 must(!app.includes('truthCourageR78.css'),'failed R78 global visual override must stay absent');
-must(homeCss.includes('.r71-field .calculus-field-r37{height:auto;min-height:0'),'Home field container must not force stage + telemetry beyond its own height');
-must(homeCss.includes('.r71-field .cfr37-stage{height:clamp(500px,62dvh,760px);min-height:0}'),'desktop Home field must receive a deliberate visible stage');
-must(homeCss.includes('max-height:calc(100dvh - 94px);overflow:auto'),'application drawer must remain viewport-contained');
+must(homeCss.includes('.r71-field .r95-membrane.compact .r95-membrane-stage'),'Home must size the canonical membrane rather than a retired procedural field');
+must(homeCss.includes('min-height:clamp(500px,61dvh,760px)'),'desktop Home membrane must receive a deliberate dominant stage');
+must(homeCss.includes('.r96-inspector{')&&homeCss.includes('max-height:calc(100dvh - 88px);overflow:auto'),'context inspector must remain viewport-contained');
 must(homeCss.includes('env(safe-area-inset-top,0px)')&&homeCss.includes('env(safe-area-inset-bottom,0px)'),'Home must respect mobile safe areas');
 must(reset.includes(".omega-workstation-v2 .cfr37-stage{min-height:clamp(480px,64vh,820px)!important}"),'workstation field sizing must be scoped away from Home');
 must(navCss.includes('--r94-nav-panel:min(42vw,220px)')&&navCss.includes('.r89-flat-scroll{min-height:0;overflow:auto'),'mobile side toolbar must fit narrow viewports while keeping every route directly scroll-reachable');

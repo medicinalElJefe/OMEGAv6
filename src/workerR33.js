@@ -28,6 +28,7 @@ export class OmegaRuntime extends OmegaRuntimeR32 {
 }
 
 const CANONICAL_ORIGIN_R94='https://omegav6.jeffdeweyeljefe.workers.dev';
+async function sha256TextR96(source){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source));return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function hybridAgentDownloadR94(request,env){
  if(!env?.ASSETS?.fetch)return json({ok:false,code:'HYBRID_AGENT_ASSET_BINDING_UNAVAILABLE'},503);
  const assetUrl=new URL('/omega-hybrid-agent.py',CANONICAL_ORIGIN_R94);
@@ -36,12 +37,13 @@ async function hybridAgentDownloadR94(request,env){
  const source=await asset.text();
  const valid=source.length>1000&&source.startsWith('#!/usr/bin/env python3')&&source.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")&&source.includes("OMEGA Hybrid Link agent");
  if(!valid)return json({ok:false,code:'HYBRID_AGENT_ASSET_INVALID'},503);
- const version=(source.match(/VERSION='([^']+)'/)||[])[1]||'UNKNOWN';
+ const version=(source.match(/VERSION='([^']+)'/)||[])[1]||'UNKNOWN',digest=await sha256TextR96(source);
  return new Response(source,{status:200,headers:{
   'content-type':'text/x-python; charset=utf-8',
   'content-disposition':'attachment; filename="omega-hybrid-agent.py"',
   'cache-control':'no-store, max-age=0',
   'x-omega-agent-version':version,
+  'x-omega-agent-sha256':digest,
   'x-omega-canonical-origin':CANONICAL_ORIGIN_R94
  }});
 }

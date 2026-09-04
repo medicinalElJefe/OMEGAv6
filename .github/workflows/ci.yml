@@ -126,7 +126,10 @@ jobs:
         shell: bash
         run: |
           node <<'NODE'
+          const {createHash}=require('node:crypto');
+          const {readFileSync}=require('node:fs');
           const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const expectedSha256=createHash('sha256').update(readFileSync('public/omega-hybrid-agent.py')).digest('hex');
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
           let last='';
           for(let attempt=1;attempt<=12;attempt++){
@@ -142,7 +145,11 @@ jobs:
               if(origin!==base) throw new Error(`canonical origin header mismatch: ${origin}`);
               const version=r.headers.get('x-omega-agent-version');
               if(!version) throw new Error('agent version header missing');
-              console.log(`OMEGA HYBRID AGENT LIVE PASS · ${version} · ${text.length} bytes · ${origin}`);
+              const servedSha256=createHash('sha256').update(text).digest('hex');
+              const receiptSha256=r.headers.get('x-omega-agent-sha256');
+              if(servedSha256!==expectedSha256) throw new Error(`agent source SHA-256 mismatch: expected ${expectedSha256}, received ${servedSha256}`);
+              if(receiptSha256!==expectedSha256) throw new Error(`agent receipt SHA-256 mismatch: ${receiptSha256}`);
+              console.log(`OMEGA HYBRID AGENT LIVE PASS · ${version} · ${text.length} bytes · sha256 ${servedSha256} · ${origin}`);
               process.exit(0);
             }catch(error){last=error instanceof Error?error.message:String(error)}
             await sleep(5000);

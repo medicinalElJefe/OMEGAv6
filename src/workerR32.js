@@ -64,7 +64,7 @@ async function fetchR32(request,env){const url=new URL(request.url),path=url.pat
  const sid=sessionId(request);
  if(path==='/api/runtime/snapshot'&&request.method==='GET')return proxy(env,sid,'/snapshot',request);
  if(path==='/api/runtime/events'&&request.method==='GET')return proxy(env,sid,'/events',request);
- if(path==='/api/hybrid/pair'&&request.method==='POST'){const b=await request.json().catch(()=>({}));const r=await proxy(env,sid,'/pair',request,b);const data=await r.clone().json().catch(()=>({}));if(data.secret)return json({...data,bridgeId:sid,pairingCode:`${sid}.${data.secret}`,agentPath:'/omega-hybrid-agent.py'});return r}
+ if(path==='/api/hybrid/pair'&&request.method==='POST'){const b=await request.json().catch(()=>({}));const r=await proxy(env,sid,'/pair',request,b);const data=await r.clone().json().catch(()=>({}));if(data.secret)return json({...data,bridgeId:sid,pairingCode:`${sid}.${data.secret}`,agentPath:'/api/hybrid/agent-download'});return r}
  if(path.startsWith('/api/hybrid/agent/')){const b=request.method==='POST'?await request.json().catch(()=>({})):{};const bid=bridgeId(request,b),suffix=path.replace('/api/hybrid','');return proxy(env,bid,suffix,request,b)}
  if(path==='/api/hybrid/status'&&request.method==='GET')return proxy(env,sid,'/status',request);
  if(path==='/api/hybrid/jobs'&&request.method==='POST'){const b=await request.json().catch(()=>({}));return proxy(env,sid,'/jobs',request,b)}
