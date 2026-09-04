@@ -8,8 +8,8 @@ import urllib.request
 URLS = [
     "https://omegav6.jeffdeweyeljefe.workers.dev/",
     "https://omega-genesis-v1.jeffdeweyeljefe.workers.dev/",
-    "https://omega-optical-cloud-woven2.vercel.app/",
-    "https://omega-sovereign-convergence.foundasound.chatgpt.site/",
+    "https://omega-optical-cloud-woven2.jeffdeweyeljefe.workers.dev/",
+    "https://omega-sovereign-convergence.jeffdeweyeljefe.workers.dev/",
 ]
 
 failures = 0
