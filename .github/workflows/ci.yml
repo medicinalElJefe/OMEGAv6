@@ -167,6 +167,7 @@ jobs:
           for(const [path,file,marker,header] of files){const response=await fetch(base+path,{headers:{'cache-control':'no-cache'}}),source=await response.text(),expected=createHash('sha256').update(readFileSync(file)).digest('hex'),actual=createHash('sha256').update(source).digest('hex');if(!response.ok||!source.startsWith('#!/usr/bin/env python3')||!source.includes(marker)||actual!==expected||response.headers.get(header)!==expected)throw new Error(`${path} canonical Python/hash verification failed`);}
           const statusResponse=await fetch(base+'/api/federation/run/status',{headers:{'cache-control':'no-cache','x-omega-session-id':'ci_federation_probe_r97'}}),status=await statusResponse.json();
           if(!statusResponse.ok||status.schema!=='OMEGA_FEDERATION_RUN_STATUS_R97'||status.nodes?.omegaV6?.state!=='LIVE')throw new Error(`Federation Run status failed: ${JSON.stringify(status).slice(0,800)}`);
+          if(status.nodes?.genesis?.state!=='LIVE'||status.nodes?.genesis?.jsonVerified!==true)throw new Error(`Genesis machine health failed: ${JSON.stringify(status.nodes?.genesis)}`);
           if(!['LIVE','ACCESS_GATED','DEGRADED','UNREACHABLE'].includes(status.nodes?.optical?.state))throw new Error('Optical truth state missing');
           console.log(`OMEGA FEDERATION LIVE PASS · Genesis ${status.nodes.genesis.state} · Optical ${status.nodes.optical.state} · Sovereign ${status.nodes.sovereign.state}`);
           NODE
