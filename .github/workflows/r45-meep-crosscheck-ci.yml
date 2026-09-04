@@ -1,0 +1,94 @@
+name: OMEGA R45 Independent Meep Cross-Check
+on:
+  push:
+    branches: [r45-meep-independent-crosscheck]
+  pull_request:
+    branches: [main]
+
+jobs:
+  meep-crosscheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          activate-environment: meep
+          python-version: '3.11'
+          channels: conda-forge
+          channel-priority: strict
+          auto-activate-base: false
+      - name: Install independent Meep backend and RCWA comparison dependency
+        shell: bash -el {0}
+        run: |
+          conda install -y -c conda-forge pymeep numpy pip
+          python -m pip install grcwa==0.1.2 autograd
+          python - <<'PY'
+          import meep as mp
+          print('MEEP VERSION', mp.__version__)
+          PY
+      - name: Build selected-state job from R44 candidate record
+        shell: bash -el {0}
+        run: |
+          python - <<'PY'
+          import json
+          c=json.load(open('public/omega-optical-design-candidate.json'))
+          g=c['geometry_nm']
+          job={
+            'schema':'OMEGA_FULLWAVE_QUEUE_v1','solver':'rcwa','job_id':'ci_r45',
+            'source_packet_id':'ci_r45_independent_crosscheck',
+            'geometry':{'pitch_nm':g['pitch'],'width_nm':g['width'],'length_nm':g['length'],'height_nm':g['height'],'theta_deg':0},
+            'polarization':'s','material_names':c['materials'],
+            'numerics':{'nx':96,'ny':96,'harmonics_low':25,'harmonics_high':49,'convergence_tolerance':0.08,'energy_tolerance':0.08},
+            'proof':{'gate':'STAY','mode188_score':1.2}
+          }
+          json.dump(job,open('/tmp/r45.json','w'))
+          PY
+      - name: Execute Meep FDTD and RCWA selected-state comparison
+        shell: bash -el {0}
+        working-directory: sovereign
+        run: |
+          python omega_meep_crosscheck_r45.py \
+            --input /tmp/r45.json --output /tmp/r45-result.json \
+            --wavelength 532 --angles 0,45,90 --resolution 100 --phase-tol 20
+      - name: Report exact independent-solver verdict
+        shell: bash -el {0}
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r45-result.json'))
+          print('R45 CROSSCHECK PASSED:',d['crosscheck_passed'])
+          print('MEEP:',d['solver'])
+          print('BASIS:',d['basis'])
+          print('MIN CONVERSION:',d['minimum_meep_conversion_fraction'])
+          for s in d['states']:
+              print('THETA',s['theta_deg'],'MEEP CONV',s['meep']['conversion'],'COMPARE',s['comparison'])
+          print('R45 SHA:',d['proof_sha256'])
+          PY
+      - name: Verify truth completeness without forcing agreement
+        shell: bash -el {0}
+        run: |
+          python - <<'PY'
+          import json,math,re
+          d=json.load(open('/tmp/r45-result.json'))
+          assert d['schema']=='OMEGA_MEEP_CROSSCHECK_v1'
+          assert d['solver']['primary']=='meep-fdtd'
+          assert d['solver']['independent_of_rcwa'] is True
+          assert d['solver']['meep_version']!='unknown'
+          assert d['angles_deg']==[0.0,45.0,90.0]
+          assert len(d['states'])==3
+          assert isinstance(d['crosscheck_passed'],bool)
+          assert math.isfinite(d['basis']['rotation_swap_error'])
+          assert math.isfinite(d['basis']['cross_coupling_ratio'])
+          assert 0 <= d['minimum_meep_conversion_fraction'] <= 1
+          for s in d['states']:
+              for ch in ('LR','RL'):
+                  assert math.isfinite(s['comparison']['meep_pb_error_deg'][ch])
+                  assert math.isfinite(s['comparison']['meep_minus_rcwa_deg'][ch])
+          assert re.fullmatch(r'[a-f0-9]{64}',d['proof_sha256'])
+          assert 'not fabrication validation' in d['truth_boundary'].lower()
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r45-meep-crosscheck
+          path: /tmp/r45-result.json
