@@ -1,0 +1,36 @@
+name: OMEGA R39 Full PB Ledger
+on:
+  push:
+    branches: [r39-full-12-state-pb-ledger]
+  pull_request:
+    branches: [main]
+jobs:
+  full-ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Build bounded canonical primitive
+        run: |
+          cat > /tmp/r39.json <<'JSON'
+          {"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"ci_r39","source_packet_id":"ci_r39_primitive","geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":0},"polarization":"s","material_model":{"n_incident":"1.0","n_feature":"2.43","n_background":"1.0","n_substrate":"1.46"},"numerics":{"nx":32,"ny":32,"harmonics_low":25,"harmonics_high":49,"convergence_tolerance":0.08,"energy_tolerance":0.08},"proof":{"gate":"STAY","mode188_score":1.2}}
+          JSON
+      - name: Execute complete 12-state real-RCWA PB ledger at 532 nm
+        working-directory: sovereign
+        run: python omega_pb_ledger_r39.py --input /tmp/r39.json --output /tmp/r39-ledger.json --csv /tmp/r39-ledger.csv --wavelengths 532
+      - name: Verify ledger completeness without forcing optical success
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r39-ledger.json'))
+          assert d['schema']=='OMEGA_PB_LEDGER_v1'
+          assert len(d['proofs'])==1 and len(d['proofs'][0]['states'])==12
+          assert len(d['rows'])==24
+          assert {r['theta_deg'] for r in d['rows']}=={15.0*k for k in range(12)}
+          assert {r['channel'] for r in d['rows']}=={'LR','RL'}
+          assert isinstance(d['all_wavelengths_verified'],bool)
+          print('R39 RESULT (truth, not forced pass):', d['all_wavelengths_verified'])
+          print('R39 SHA:', d['ledger_sha256'])
+          PY
