@@ -1,0 +1,59 @@
+name: OMEGA R44 Independent Meep FDTD
+on:
+  push:
+    branches: [r44-independent-meep-fdtd-crosscheck]
+  pull_request:
+    branches: [main]
+jobs:
+  fdtd-crosscheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: '3.11'
+          activate-environment: omega-fdtd
+          channels: conda-forge
+          channel-priority: strict
+          auto-activate-base: false
+      - name: Install genuine Meep FDTD backend
+        shell: bash -el {0}
+        run: conda install -y --override-channels -c conda-forge pymeep numpy
+      - name: Verify backend identity
+        shell: bash -el {0}
+        run: python - <<'PY'
+          import meep as mp
+          print('MEEP VERSION:',getattr(mp,'__version__','unknown'))
+          assert hasattr(mp,'Simulation') and hasattr(mp,'PML') and hasattr(mp,'add_flux')
+          PY
+      - name: Build independent cross-check packet
+        run: |
+          cat > /tmp/r44.json <<'JSON'
+          {"wavelength_nm":532,"resolution_px_per_um":60,"angles_deg":[0,45,90],"input_helicity":"R","phase_tolerance_deg":25,"conversion_floor":0.05,"dft_tol":1e-5,"max_run_time":250,"material_names":{"incident":"air","feature":"tio2_design","background":"air","substrate":"sio2_fused"},"geometries":{"baseline":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550},"candidate_10deg":{"pitch_nm":330,"width_nm":105,"length_nm":290,"height_nm":575}}}
+          JSON
+      - name: Execute real 3D time-domain FDTD states
+        shell: bash -el {0}
+        working-directory: sovereign
+        run: python omega_meep_fdtd_r44.py --input /tmp/r44.json --output /tmp/r44-fdtd.json
+      - name: Report independent result without forcing agreement
+        shell: bash -el {0}
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r44-fdtd.json'))
+          print('BACKEND:',d['backend'],d['backend_version'])
+          for name,r in d['results'].items():
+              print(name,'geometry=',r['geometry'])
+              print(name,'phase_test=',r['phase_test'])
+              print(name,'conversion=',[(s['theta_deg'],s['converted_fraction']) for s in r['states']])
+          print('SHA:',d['proof_sha256'])
+          assert d['schema']=='OMEGA_FDTD_PB_CROSSCHECK_v1'
+          assert d['backend']=='Meep FDTD'
+          assert set(d['results'])=={'baseline','candidate_10deg'}
+          assert all(len(r['states'])==3 for r in d['results'].values())
+          assert all(s['resolution_px_per_um']==60 for r in d['results'].values() for s in r['states'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r44-meep-fdtd-crosscheck
+          path: /tmp/r44-fdtd.json
