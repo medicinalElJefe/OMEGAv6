@@ -24,7 +24,9 @@ jobs:
         run: python - <<'PY'
           import meep as mp
           print('MEEP VERSION:',getattr(mp,'__version__','unknown'))
-          assert hasattr(mp,'Simulation') and hasattr(mp,'PML') and hasattr(mp,'add_flux')
+          assert hasattr(mp,'Simulation') and hasattr(mp,'PML')
+          assert hasattr(mp.Simulation,'add_dft_fields') and hasattr(mp.Simulation,'get_dft_array')
+          assert hasattr(mp,'GaussianSource') and hasattr(mp,'stop_when_dft_decayed')
           PY
       - name: Build independent cross-check packet
         run: |
