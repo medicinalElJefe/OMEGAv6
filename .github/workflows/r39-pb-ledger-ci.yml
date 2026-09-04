@@ -12,43 +12,49 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.11'}
       - run: python -m pip install --upgrade pip numpy grcwa
-      - name: Build bounded canonical primitive
+      - name: Build convergence-qualified canonical primitive
         run: |
           cat > /tmp/r39.json <<'JSON'
-          {"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"ci_r39","source_packet_id":"ci_r39_primitive","geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":0},"polarization":"s","material_model":{"n_incident":"1.0","n_feature":"2.43","n_background":"1.0","n_substrate":"1.46"},"numerics":{"nx":32,"ny":32,"harmonics_low":25,"harmonics_high":49,"convergence_tolerance":0.08,"energy_tolerance":0.08},"proof":{"gate":"STAY","mode188_score":1.2}}
+          {"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"ci_r39","source_packet_id":"ci_r39_primitive","geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":0},"polarization":"s","material_names":{"incident":"air","feature":"tio2_design","background":"air","substrate":"sio2_fused"},"numerics":{"nx":96,"ny":96,"harmonics_low":25,"harmonics_high":49,"convergence_tolerance":0.08,"energy_tolerance":0.08},"proof":{"gate":"STAY","mode188_score":1.2}}
           JSON
-      - name: Execute complete 12-state real-RCWA PB ledger at 532 nm
+      - name: Execute complete 12-state real-RCWA PB ledger at 470/532/650 nm
         working-directory: sovereign
-        run: python omega_pb_ledger_r39.py --input /tmp/r39.json --output /tmp/r39-ledger.json --csv /tmp/r39-ledger.csv --wavelengths 532
-      - name: Report exact optical verdict and failure metrics
+        run: python omega_pb_ledger_r39.py --input /tmp/r39.json --output /tmp/r39-ledger.json --csv /tmp/r39-ledger.csv --wavelengths 470,532,650
+      - name: Report exact wavelength-by-wavelength optical verdict
         run: |
           python - <<'PY'
           import json, statistics
           d=json.load(open('/tmp/r39-ledger.json'))
-          p=d['proofs'][0]
-          print('R39 RESULT:', d['all_wavelengths_verified'])
-          print('BASIS VERIFIED:', p['basis_verified'])
-          print('QUALIFIED STATES:', p['qualified_states'])
-          print('RMS PHASE ERROR DEG:', p['rms_phase_error_deg'])
-          for ch in ('LR','RL'):
-              rows=[r for r in d['rows'] if r['channel']==ch]
-              qs=[r for r in rows if r['qualified']]
-              conv=[r['conversion'] for r in rows]
-              errs=[abs(r['error_deg']) for r in qs]
-              print(ch,'conversion min/mean/max=',min(conv),statistics.fmean(conv),max(conv))
-              print(ch,'qualified error abs mean/max=',statistics.fmean(errs) if errs else None,max(errs) if errs else None)
-          print('R39 SHA:', d['ledger_sha256'])
+          print('R39 ALL WAVELENGTHS VERIFIED:', d['all_wavelengths_verified'])
+          for p in d['proofs']:
+              wl=p['wavelength_nm']
+              print('\nWAVELENGTH',wl)
+              print('BASIS VERIFIED:', p['basis_verified'])
+              print('PB VERIFIED:', p['pb_phase_verified'])
+              print('QUALIFIED STATES:', p['qualified_states'])
+              print('RMS PHASE ERROR DEG:', p['rms_phase_error_deg'])
+              rows=[r for r in d['rows'] if r['wavelength_nm']==wl]
+              for ch in ('LR','RL'):
+                  cr=[r for r in rows if r['channel']==ch]
+                  qs=[r for r in cr if r['qualified']]
+                  conv=[r['conversion'] for r in cr]
+                  errs=[abs(r['error_deg']) for r in qs]
+                  print(ch,'conversion min/mean/max=',min(conv),statistics.fmean(conv),max(conv))
+                  print(ch,'qualified error abs mean/max=',statistics.fmean(errs) if errs else None,max(errs) if errs else None)
+          print('\nR39 SHA:', d['ledger_sha256'])
           PY
-      - name: Verify ledger completeness without forcing optical success
+      - name: Verify complete 72-row evidence ledger
         run: |
           python - <<'PY'
           import json
           d=json.load(open('/tmp/r39-ledger.json'))
           assert d['schema']=='OMEGA_PB_LEDGER_v1'
-          assert len(d['proofs'])==1 and len(d['proofs'][0]['states'])==12
-          assert len(d['rows'])==24
+          assert len(d['proofs'])==3
+          assert all(len(p['states'])==12 for p in d['proofs'])
+          assert len(d['rows'])==72
           assert {r['theta_deg'] for r in d['rows']}=={15.0*k for k in range(12)}
           assert {r['channel'] for r in d['rows']}=={'LR','RL'}
+          assert {r['wavelength_nm'] for r in d['rows']}=={470.0,532.0,650.0}
           assert isinstance(d['all_wavelengths_verified'],bool)
           PY
       - uses: actions/upload-artifact@v4
