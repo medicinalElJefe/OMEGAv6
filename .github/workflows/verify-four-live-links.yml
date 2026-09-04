@@ -1,0 +1,12 @@
+name: Verify four live OMEGA surfaces
+on:
+  push:
+    branches:
+      - verify-four-live-links
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe all four public surfaces
+        run: python scripts/verify_four_links.py
