@@ -13,7 +13,7 @@ const registry=read('src/omegaExperienceRegistryR82.ts');
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
 
 must(routes.length===44&&new Set(routes).size===44,'canonical route universe must stay 44/44');
-must(nav.includes("className='r89-flat-scroll'")&&nav.includes("rows.map(route=>"),'global menu must be one continuous flat route list');
+must(nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'global menu must be one continuous flat route list');
 must(!nav.includes("r88-route-band")&&!nav.includes("sections.map(workspace"),'route menu must not render workspace compartments');
 must(nav.includes("workspaceForRouteR82(route)"),'workspace identity may remain metadata without becoming navigation hierarchy');
 must(navCss.includes('.r89-flat-scroll{min-height:0;overflow:auto')&&navCss.includes('.r89-flat-route{width:100%'),'flat side banner must have one scroll owner');
@@ -27,4 +27,4 @@ must(mobile.includes(".mt-hud,")&&mobile.includes(".motion-readout{display:none!
 must(matter.includes("className='mt-mobile-bar'")&&matter.includes("openDock('VIEW')"),'Deep Matter must retain compact phone controls without the menu wall');
 must(mobile.includes(".visual-equation{display:none!important}")&&mobile.includes(".visual-stage{min-height:74dvh!important}"),'deep Visual compiler must remove equation overlay and prioritize stage');
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),'deep donor lost: '+token);
-console.log('R89 MOBILE VISUAL-FIRST + FLAT NAVIGATION PASS · 44 flat routes · unobstructed phone visuals · deep donors preserved');
+console.log('R89/R104 MOBILE VISUAL-FIRST + FLAT NAVIGATION PASS · 44 flat routes · unobstructed phone visuals · deep donors preserved');
