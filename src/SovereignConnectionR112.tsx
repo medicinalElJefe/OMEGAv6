@@ -13,7 +13,10 @@ export default function SovereignConnectionR112({compact=false,onState}:Props){
  const[bridge,setBridge]=useState<HybridBridgeCredential|null>(()=>getHybridBridge());
  const[live,setLive]=useState<any>(null),[fabric,setFabric]=useState<any>(null),[busy,setBusy]=useState(false),[advanced,setAdvanced]=useState(false),[message,setMessage]=useState('');
  const[launcherUrl,setLauncherUrl]=useState('');
- const code=bridge?.pairingCode||'';
+ // Older accepted browser credentials did not always persist pairingCode separately.
+ // The durable bridge credential already contains the exact two fields used by the agent pairing code,
+ // so recover the launcher deterministically instead of trapping the user behind a dead download state.
+ const code=bridge?.pairingCode||(bridge?.bridgeId&&bridge?.secret?`${bridge.bridgeId}.${bridge.secret}`:'');
  const refresh=async()=>{try{const[h,f]=await Promise.all([api.get<any>('/api/hybrid/status'),api.get<any>('/api/federation/run/status').catch(()=>null)]);setLive(h.data||{});setFabric(f?.data||null);setMessage(m=>m.startsWith('Connection error:')?'':m)}catch(e:any){setMessage(`Connection error: ${e?.message||String(e)}`)}};
  useEffect(()=>{void refresh();const id=window.setInterval(()=>void refresh(),2500);return()=>window.clearInterval(id)},[]);
  useEffect(()=>{if(!code){setLauncherUrl('');return}const url=launcherBlobUrlR112(code);setLauncherUrl(url);return()=>URL.revokeObjectURL(url)},[code]);
@@ -45,7 +48,7 @@ export default function SovereignConnectionR112({compact=false,onState}:Props){
    <div className='r112-sovereign-primary'>
     {!online&&!bridge&&<button className='r112-big-action' onClick={()=>void prepare()} disabled={busy}>{busy?<RefreshCw className='spin'/>:<ShieldCheck/>}{busy?'Preparing…':'Prepare connection'}</button>}
     {!online&&bridge&&launcherUrl&&<a className='r112-big-action' href={launcherUrl} download={SOVEREIGN_LAUNCHER_FILENAME_R112} onClick={()=>setMessage('Windows connector downloaded. Open it once; this screen will detect the heartbeat automatically.')}><Download/>Download Windows connector</a>}
-    {!online&&bridge&&!launcherUrl&&<button className='r112-big-action' onClick={()=>void prepare()} disabled={busy}><RefreshCw/>Recover connector</button>}
+    {!online&&bridge&&!launcherUrl&&<button className='r112-big-action' onClick={()=>void rotate()} disabled={busy}><RefreshCw/>Create fresh connector</button>}
     {online&&<div className='r112-online-badge'><CheckCircle2/><div><b>PC ONLINE</b><small>{current.length} current authenticated heartbeat{current.length===1?'':'s'}</small></div></div>}
     <button className='r112-advanced-toggle' onClick={()=>setAdvanced(v=>!v)}>{advanced?<ChevronUp/>:<ChevronDown/>}{advanced?'Hide details':'Connection details'}</button>
    </div>
