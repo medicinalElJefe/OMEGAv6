@@ -65,3 +65,4 @@ must(![worker,adapter,hybrid,sovereign,launcher,weave,stage].join('\n').includes
 
 console.log('R101 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · Field/Weave/Projection strata · bridge-ID reconnect/repair · authenticated-heartbeat truth preserved through R112');
 await import('./r102-federated-instrument-experience-invariants.mjs');
+await import('./r112-sovereign-living-fabric-invariants.mjs');
