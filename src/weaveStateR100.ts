@@ -2,18 +2,25 @@ import {decodeAddress} from './corpusRuntime';
 import type {UnifiedMath} from './unifiedCalculus';
 
 export const ATLAS_RESOLUTION_LEVELS_R100=[12,144,1728,20736] as const;
+export const ATLAS_RESOLUTION_LEVELS_R101=[12,144,1728,20736,248832] as const;
 export const WOVEN_CONTINUITY_OPERATOR_R100='partition → exchange/transform → invariant carry → scar/residual carry → re-contextualize/repartition' as const;
 export const WOVEN_CONTINUITY_BOUNDARY_R100='12→144→1728→20,736 are nested atlas/address resolution levels, not literal physical dimensions.' as const;
+export const WEAVE_EFFECTIVE_RESOLUTION_BOUNDARY_R101='R101 effective resolution is a quantized representational/address demand derived from the weave state. 248,832 is an expansion level, not a claim that physical spacetime has 248,832 dimensions.' as const;
 
 const TAU=Math.PI*2;
 const clamp=(n:number,a=0,b=1)=>Math.max(a,Math.min(b,Number.isFinite(n)?n:a));
 const wrap=(n:number)=>((n%TAU)+TAU)%TAU;
+const resolutionIndexR101=(demand:number)=>demand<.28?0:demand<.44?1:demand<.60?2:demand<.76?3:4;
 
 export type WeaveStateR100={
  address:number;
  stateAddress:number;
  hierarchy:{level12:number;level144:number;level1728:number;level20736:number};
  atlasPath:string;
+ resolutionPath:string;
+ resolutionDemand:number;
+ resolutionIndex:number;
+ effectiveResolution:(typeof ATLAS_RESOLUTION_LEVELS_R101)[number];
  orientation:-1|0|1;
  phase:number;
  phaseBand:number;
@@ -31,8 +38,10 @@ export type WeaveStateR100={
  branch:number;
  symmetry:number;
  asymmetry:number;
+ strata:{field:number;weave:number;projection:number};
  operator:typeof WOVEN_CONTINUITY_OPERATOR_R100;
  boundary:typeof WOVEN_CONTINUITY_BOUNDARY_R100;
+ resolutionBoundary:typeof WEAVE_EFFECTIVE_RESOLUTION_BOUNDARY_R101;
  weaveId:string;
 };
 
@@ -55,9 +64,13 @@ export function deriveWeaveStateR100(address:number,u:UnifiedMath,timeSeconds=0,
  const torsion=(orientation||1)*(.08+.54*u.shape.anisotropy+.28*residualCarry);
  const depth=clamp(.26+.44*u.shape.outverse+.30*u.shape.inverse);
  const branch=clamp(.15+.52*u.Phi+.18*u.curvature+.15*(1-u.q));
+ const resolutionDemand=clamp(.17*continuityFlux+.16*invariantCarry+.13*recoverability+.12*branch+.10*residualCarry+.08*threadTension+.08*Math.abs(torsion)+.07*u.shape.asymmetry+.05*u.curvature+.04*u.motionRelativity);
+ const resolutionIndex=resolutionIndexR101(resolutionDemand),effectiveResolution=ATLAS_RESOLUTION_LEVELS_R101[resolutionIndex];
+ const field=clamp((u.C+u.Phi+(1-u.q)+u.curvature)/4),weave=clamp((continuityFlux+invariantCarry+recoverability+(1-threadTension))/4),projection=clamp((u.geometry+u.light.coherence+u.evidence+u.motionRelativity)/4);
  const atlasPath=`${level12} / ${level144} / ${level1728} / ${level20736}`;
+ const resolutionPath=`12 → 144 → 1,728 → 20,736 → 248,832 · ACTIVE ${effectiveResolution.toLocaleString('en-US')}`;
  return{
-  address:a,stateAddress:a+1,hierarchy:{level12,level144,level1728,level20736},atlasPath,orientation,phase,phaseBand,pulse,continuityFlux,recoverability,invariantCarry,residualCarry,threadTension,aperture,ringCount,lobeCount,torsion,depth,branch,symmetry:u.shape.symmetry,asymmetry:u.shape.asymmetry,operator:WOVEN_CONTINUITY_OPERATOR_R100,boundary:WOVEN_CONTINUITY_BOUNDARY_R100,weaveId:`W${level12.toString(12).toUpperCase()}-${level144.toString(12).toUpperCase()}-${level1728.toString(12).toUpperCase()}-${level20736.toString(12).toUpperCase()}-S${orientation}`
+  address:a,stateAddress:a+1,hierarchy:{level12,level144,level1728,level20736},atlasPath,resolutionPath,resolutionDemand,resolutionIndex,effectiveResolution,orientation,phase,phaseBand,pulse,continuityFlux,recoverability,invariantCarry,residualCarry,threadTension,aperture,ringCount,lobeCount,torsion,depth,branch,symmetry:u.shape.symmetry,asymmetry:u.shape.asymmetry,strata:{field,weave,projection},operator:WOVEN_CONTINUITY_OPERATOR_R100,boundary:WOVEN_CONTINUITY_BOUNDARY_R100,resolutionBoundary:WEAVE_EFFECTIVE_RESOLUTION_BOUNDARY_R101,weaveId:`W${level12.toString(12).toUpperCase()}-${level144.toString(12).toUpperCase()}-${level1728.toString(12).toUpperCase()}-${level20736.toString(12).toUpperCase()}-R${resolutionIndex+1}-S${orientation}`
  };
 }
 

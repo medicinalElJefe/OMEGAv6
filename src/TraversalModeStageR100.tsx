@@ -4,7 +4,7 @@ import {corpusState,projectionPoint} from './corpusRuntime';
 import {compileSourceTraversal} from './sourceBackedModeRuntimeR21';
 import {unifiedFromRecord,visualFieldPoint} from './unifiedCalculus';
 import {TRAVERSAL_MODE_DESIGN_R99,traversalVisualProfileR99,warpTraversalPointR99,type TraversalDesignModeR99} from './traversalModeDesignR99';
-import {ATLAS_RESOLUTION_LEVELS_R100,WOVEN_CONTINUITY_OPERATOR_R100,applyWovenContinuityR100,deriveWeaveStateR100,weaveChannelR100} from './weaveStateR100';
+import {ATLAS_RESOLUTION_LEVELS_R101,WOVEN_CONTINUITY_OPERATOR_R100,applyWovenContinuityR100,deriveWeaveStateR100,weaveChannelR100} from './weaveStateR100';
 import './weaveGeometryR100.css';
 
 const MODES:TraversalDesignModeR99[]=['UNIFIED','SHELL','WATER','LIGHT','SCAR','RELATIVITY','FORECAST','PROOF'];
@@ -58,7 +58,7 @@ export default function TraversalModeStageR100({variant,address,onAddress}:Props
     for(let j=0;j<=180;j++){const a=j/180*Math.PI*2,r=scale*(.22+.61*(.5+.5*Math.sin(a*weave.lobeCount+offset+weave.phase))*(.38+.62*weave.aperture)),tw=a+offset+weave.torsion*Math.sin(a+weave.phase)*.18,x=Math.cos(tw)*r,y=Math.sin(tw)*r*(.78+.16*weave.depth);j?ctx.lineTo(x,y):ctx.moveTo(x,y)}
     const ch=weaveChannelR100(l,weave,u);ctx.strokeStyle=`rgba(${ch.r},${ch.g},${ch.b},${.018+.075*ch.strength})`;ctx.lineWidth=.45+.5*weave.invariantCarry;ctx.stroke();
    }
-   ATLAS_RESOLUTION_LEVELS_R100.forEach((_,i)=>{const r=scale*(.19+i*.225);ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.setLineDash([2+i*2,8+i*2]);ctx.strokeStyle=`rgba(220,190,128,${.018+.018*i+.025*weave.invariantCarry})`;ctx.lineWidth=.6;ctx.stroke()});ctx.setLineDash([]);
+   ATLAS_RESOLUTION_LEVELS_R101.forEach((_,i)=>{const active=i===weave.resolutionIndex,r=scale*(.16+i*.18);ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.setLineDash(active?[]:[2+i*2,8+i*2]);ctx.strokeStyle=active?`rgba(226,190,112,${.23+.24*weave.resolutionDemand})`:`rgba(220,190,128,${.018+.014*i+.02*weave.invariantCarry})`;ctx.lineWidth=active?1.7:.55;ctx.stroke()});ctx.setLineDash([]);
 
    if(mode==='SHELL'||mode==='UNIFIED'){for(let i=1;i<=12;i++){ctx.beginPath();ctx.ellipse(0,0,scale*(.16+i*.055),scale*(.13+i*.049),0,0,Math.PI*2);ctx.strokeStyle=`rgba(91,194,180,${.018+.045*u.C})`;ctx.lineWidth=i%3===0?1.1:.45;ctx.stroke()}}
    if(mode==='WATER'){for(let k=-7;k<=7;k++){ctx.beginPath();for(let x=-scale*1.5;x<=scale*1.5;x+=12){const y=k*25+Math.sin(x*.012+t*.75+k+weave.phase)*24*(.3+.7*u.Phi);x===-scale*1.5?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.strokeStyle=`rgba(65,207,194,${.06+.08*weave.continuityFlux})`;ctx.lineWidth=.7;ctx.stroke()}}
@@ -68,7 +68,8 @@ export default function TraversalModeStageR100({variant,address,onAddress}:Props
    if(mode==='SCAR'){ctx.beginPath();for(let i=0;i<120;i++){const a=i/119*Math.PI*4,r=scale*(.12+i/119*.78),x=Math.cos(a)*r,y=Math.sin(a)*r*.6+Math.sin(a*3+t*.08)*scale*.06*u.scar;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.strokeStyle=`rgba(205,77,96,${.12+.25*u.scar})`;ctx.lineWidth=1.2+2.2*u.scar;ctx.stroke()}
    ctx.restore();
 
-   const count=Math.max(700,Math.round((1500+1200*detail)*profile.density));ctx.save();ctx.globalCompositeOperation='lighter';
+   const resolutionDensity=.82+.28*(weave.resolutionIndex/Math.max(1,ATLAS_RESOLUTION_LEVELS_R101.length-1));
+   const count=Math.max(700,Math.round((1500+1200*detail)*profile.density*resolutionDensity));ctx.save();ctx.globalCompositeOperation='lighter';
    for(let i=0;i<count;i++){
     const base=visualFieldPoint(i,count,u,t),modePoint=warpTraversalPointR99(mode,base,i,count,u,t,profile),p=applyWovenContinuityR100(modePoint,i,count,u,weave,t);
     const rot=t*(.015+.035*u.motionRelativity)*(weave.orientation||1),cr=Math.cos(rot),sr=Math.sin(rot),x=(p.x*cr-p.z*sr)*scale+cx,y=(p.y*.76+p.z*.1)*scale+cy,z=p.x*sr+p.z*cr,depth=clamp((z+1.4)/2.8),proof=mode==='PROOF'?(.08+.92*u.evidence)*(1-.55*u.q):1,alpha=(.021+.22*p.weight)*profile.alpha*proof*(.46+.54*depth),rad=.42+2.35*profile.particleScale*(.3+.7*depth),channel=weaveChannelR100(i,weave,u);
@@ -86,19 +87,20 @@ export default function TraversalModeStageR100({variant,address,onAddress}:Props
  },[address,animated,detail,mode,profile,route,routeWeaves,timeScale,u]);
 
  const choose=(e:React.PointerEvent<HTMLCanvasElement>)=>{const r=e.currentTarget.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let best:{d:number;address:number}|null=null;for(const p of routeHit.current){const d=Math.hypot(x-p.x,y-p.y);if(!best||d<best.d)best={d,address:p.address}}if(best&&best.d<28)onAddress(best.address)};
- return <section className='r99-mode-stage r100-weave-stage' data-mode={mode} data-orientation={weaveStatic.orientation}>
-  <header><div><span>R100 WOVEN CONTINUITY · SOURCE-DRIVEN DESIGN MODE</span><b>{variant} · {LABEL[mode]}</b><small>{profile.geometryMap} · weave {weaveStatic.weaveId}</small></div><code>STATE {record.stateId} · {record.metrics.decision}</code></header>
+ return <section className='r99-mode-stage r100-weave-stage' data-mode={mode} data-orientation={weaveStatic.orientation} data-resolution={weaveStatic.effectiveResolution}>
+  <header><div><span>R101 WOVEN CONTINUITY · WEAVE-DERIVED RESOLUTION</span><b>{variant} · {LABEL[mode]}</b><small>{profile.geometryMap} · weave {weaveStatic.weaveId}</small></div><code>STATE {record.stateId} · {record.metrics.decision}</code></header>
   <nav className='r99-mode-nav r100-mode-nav' aria-label='Traversal depiction mode'>{MODES.map(x=><button key={x} className={mode===x?'active':''} aria-pressed={mode===x} onClick={()=>setMode(x)}><b>{LABEL[x]}</b><small>{TRAVERSAL_MODE_DESIGN_R99[x].id}</small></button>)}</nav>
   <div className='r99-stage r100-weave-canvas'><canvas ref={canvas} onPointerDown={choose} aria-label={`${variant} ${mode} source-driven woven continuity traversal depiction`}/></div>
   <div className='r100-weave-output' aria-label='Woven continuity dimensional output'>
    <div><span>WEAVE STATE</span><b>{weaveStatic.weaveId}</b><small>derived from canonical state {record.stateId}</small></div>
-   <div><span>ATLAS RESOLUTION</span><b>{weaveStatic.atlasPath}</b><small>12 → 144 → 1,728 → 20,736</small></div>
+   <div><span>EFFECTIVE RESOLUTION</span><b>{weaveStatic.effectiveResolution.toLocaleString('en-US')}</b><small>demand {fmt(weaveStatic.resolutionDemand)} · address {weaveStatic.atlasPath}</small></div>
    <div><span>ORIENTATION σ</span><b>{weaveStatic.orientation>0?'+1 OUTVERSE':weaveStatic.orientation<0?'−1 INVERSE':'0 NEUTRAL'}</b><small>phase band {weaveReadout.phaseBand+1}/12 · pulse {fmt(weaveReadout.pulse)}</small></div>
    <div><span>CONTINUITY FLUX</span><b>{fmt(weaveStatic.continuityFlux)}</b><small>recoverability {fmt(weaveStatic.recoverability)}</small></div>
    <div><span>INVARIANT CARRY</span><b>{fmt(weaveStatic.invariantCarry)}</b><small>residual/scar {fmt(weaveStatic.residualCarry)}</small></div>
    <div><span>WEAVE FORM</span><b>{weaveStatic.ringCount}R · {weaveStatic.lobeCount}L</b><small>torsion {fmt(weaveStatic.torsion)} · aperture {fmt(weaveStatic.aperture)}</small></div>
+   <div><span>FIELD / WEAVE / PROJECTION</span><b>{fmt(weaveStatic.strata.field)} · {fmt(weaveStatic.strata.weave)} · {fmt(weaveStatic.strata.projection)}</b><small>three computational visual strata · one canonical packet</small></div>
   </div>
   <div className='r99-stage-actions r100-stage-actions'><button onClick={()=>onAddress(record.autoPing.previous)}><StepBack/>Previous</button><button className='primary-action' onClick={()=>setAnimated(v=>!v)}>{animated?<Pause/>:<Play/>}{animated?'Pause motion':'Animate'}</button><button onClick={()=>onAddress(record.autoPing.dataNext)}><StepForward/>Admitted next</button><label>DETAIL<input type='range' min='.5' max='1.75' step='.25' value={detail} onChange={e=>setDetail(Number(e.target.value))}/><b>{detail.toFixed(2)}×</b></label><label>ROUTE<input type='range' min='12' max='72' step='6' value={routeDepth} onChange={e=>setRouteDepth(Number(e.target.value))}/><b>{routeDepth}</b></label><label>TIME<input type='range' min='.25' max='2' step='.25' value={timeScale} onChange={e=>setTimeScale(Number(e.target.value))}/><b>{timeScale.toFixed(2)}×</b></label></div>
-  <details className='r99-mode-data r100-mode-data'><summary>MODE + WEAVE MAP · {LABEL[mode]} · source/geometry correlation</summary><div><span>SOURCE</span><b>{profile.sourceMap}</b></div><div><span>GEOMETRY</span><b>{profile.geometryMap}</b></div><div><span>WEAVE</span><b>{WOVEN_CONTINUITY_OPERATOR_R100}</b></div><div><span>ATLAS</span><b>{weaveStatic.boundary}</b></div><div><span>BOUNDARY</span><b>Representational geometry is derived from the canonical packet and admitted route. It is not an external physical observation.</b></div></details>
+  <details className='r99-mode-data r100-mode-data'><summary>MODE + WEAVE MAP · {LABEL[mode]} · source/geometry correlation</summary><div><span>SOURCE</span><b>{profile.sourceMap}</b></div><div><span>GEOMETRY</span><b>{profile.geometryMap}</b></div><div><span>WEAVE</span><b>{WOVEN_CONTINUITY_OPERATOR_R100}</b></div><div><span>ATLAS ADDRESS</span><b>{weaveStatic.boundary}</b></div><div><span>RESOLUTION OUTPUT</span><b>{weaveStatic.resolutionPath}</b></div><div><span>RESOLUTION BOUNDARY</span><b>{weaveStatic.resolutionBoundary}</b></div><div><span>BOUNDARY</span><b>Representational geometry is derived from the canonical packet and admitted route. It is not an external physical observation.</b></div></details>
  </section>;
 }

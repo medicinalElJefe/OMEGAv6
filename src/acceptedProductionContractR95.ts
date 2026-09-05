@@ -7,6 +7,8 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   {id:'NO_GENERIC_SUBSTITUTION',text:'OMEGA-native visual instruments may not be replaced by generic dashboard widgets, business bar charts, decorative placeholder graphics, or one repeated renderer used as every mode.'},
   {id:'TRACEABLE_VISUAL_GEOMETRY',text:'Primary OMEGA state geometry must map declared source/canonical/evaluated variables to declared geometry parameters. Every visible deformation must have a traceable variable mapping.'},
   {id:'WOVEN_CONTINUITY_GEOMETRY',text:'Movement geometry follows partition → exchange/transform → invariant carry → scar/residual carry → re-contextualize/repartition. Signed orientation remains factored from magnitude, time may evolve depiction without changing canonical state ownership, and 12/144/1728/20,736 remain atlas/address resolution levels unless independently validated as physical dimensions.'},
+  {id:'WEAVE_DERIVED_RESOLUTION',text:'Where R101 resolution selection is active, the representational atlas level is derived from bounded weave-state resolution demand rather than treated as literal physical dimensionality. 248,832 is an optional computational expansion level; the canonical 20,736 address packet remains authoritative unless explicitly superseded by a separately validated state model.'},
+  {id:'HYBRID_BRIDGE_ID_CONTINUITY',text:'Hybrid reconnect/status must follow the persisted bridge identity before browser session fallback. Repair may issue a new credential, but PC ONLINE requires a current authenticated device heartbeat and is never inferred from a browser credential alone.'},
   {id:'DISTINCT_APPLICATION_IDENTITY',text:'Forecast, Relativity, Atlas, Infinity, Field, Motion, Convergence, Matter, Traversal, Scale, Earth, Modes and other specialist surfaces keep distinct interaction and visual semantics.'},
   {id:'MODE_VISUAL_FUNCTION_CORRELATION',text:'A selectable design/mode layer must change a declared source-driven visual or functional mapping. Mode labels may not merely rename the same depiction; the active depiction must remain bound to canonical/evaluated inputs and its declared truth boundary.'},
   {id:'TRUTH_WITHOUT_FLATTENING',text:'Truth enforcement must not flatten advanced visualization into generic charts. Measured/imported/evaluated/derived/forecast/representational status is separated while retaining the richest lawful visualization.'},
@@ -32,26 +34,27 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   'R98 unobstructed visual-stage authority',
   'R99 source-driven design-mode correlation authority',
   'R100 woven continuity geometry/time + professional instrument rail authority',
+  'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority',
   'deep Matter/Visual/Traversal donor implementations',
   'Hybrid Link device-proof boundary',
   'Earth returned-evidence boundary',
   'route-before-generation',
   'canonical state / admitted transition authority'
  ] as const,
- visualRule:'Do not solve visual truth by reducing OMEGA to generic charts. Build source-driven OMEGA-native geometry with an explicit variable-to-geometry map; where Woven Continuity is active, geometry must express exchange/transform, invariant carry, residual/scar carry, signed orientation and time coherently. Keep the primary visual stage unobstructed by default and require selectable modes to produce declared functional/visual differences.',
+ visualRule:'Do not solve visual truth by reducing OMEGA to generic charts. Build source-driven OMEGA-native geometry with an explicit variable-to-geometry map; where Woven Continuity is active, geometry must express exchange/transform, invariant carry, residual/scar carry, signed orientation, time and bounded resolution demand coherently. Keep the primary visual stage unobstructed by default and require selectable modes to produce declared functional/visual differences.',
  replacementRule:'If a replacement is proposed, the prior accepted implementation stays available until the new version demonstrates functional parity, stronger truth, responsive parity, and a verified non-regression pass.',
  rolloverRule:'A new chat/session must recover this contract from repository state before making broad UI, renderer, navigation, capability, or architecture replacements.'
 } as const;
 
 export function acceptedProductionAuditR95(){
  const ids=ACCEPTED_PRODUCTION_CONTRACT_R95.rules.map(x=>x.id),unique=new Set(ids).size===ids.length;
- const required=['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','WOVEN_CONTINUITY_GEOMETRY','MODE_VISUAL_FUNCTION_CORRELATION','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'];
+ const required=['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','WOVEN_CONTINUITY_GEOMETRY','WEAVE_DERIVED_RESOLUTION','HYBRID_BRIDGE_ID_CONTINUITY','MODE_VISUAL_FUNCTION_CORRELATION','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'];
  return{
   total:ids.length,
   unique,
   requiredPresent:required.every(x=>ids.includes(x as any)),
   pass:unique&&required.every(x=>ids.includes(x as any)),
   authority:ACCEPTED_PRODUCTION_CONTRACT_R95.authority,
-  boundary:'This contract prevents regression-by-omission, replacement-by-simplification, uncorrelated mode labels, default visual-stage occlusion, and unbounded interpretation of Woven Continuity geometry. It does not by itself prove runtime execution; normal execution/proof gates still apply.'
+  boundary:'This contract prevents regression-by-omission, replacement-by-simplification, uncorrelated mode labels, default visual-stage occlusion, unbounded interpretation of Woven Continuity geometry, and session/bridge identity confusion. It does not by itself prove runtime execution; normal execution/proof gates still apply.'
  };
 }
