@@ -1,13 +1,16 @@
 export const OMEGA_PACKET_SCHEMA='OMEGA_PACKET_v1' as const;
 export const OMEGA_RESULT_SCHEMA='OMEGA_RESULT_v1' as const;
 export const OMEGA_QUEUE_SCHEMA='OMEGA_FULLWAVE_QUEUE_v1' as const;
+export const OMEGA_CEREMONY_SCHEMA='OMEGA_FEDERATION_CEREMONY_R114' as const;
 
 export type OmegaNodeId='omega-v6'|'omega-genesis'|'omega-optical'|'omega-sovereign';
 export type OmegaSolver='scalar'|'rcwa'|'fdtd'|'fem';
 export type OmegaGate='STAY'|'TURN'|'ESCALATE'|'PRUNE';
+export type CeremonyStage='PROPOSE'|'SCREEN'|'SOLVE'|'ADMIT';
 
 export interface AtlasAddress { domain:number; phase:number; regulation:number; seed:number }
-export interface Geometry { pitch_nm:number; width_nm:number; length_nm:number; height_nm:number; material?:string }
+export interface Geometry { pitch_nm:number; width_nm:number; length_nm:number; height_nm:number; theta_deg?:number; material?:string }
+export interface NumericMaterialModel { n_incident:number; n_feature:number; n_background:number; n_substrate:number; [key:string]:number }
 export interface ProofState { gate:OmegaGate; mode188_score:number; continuity:number; burden:number; contradiction:number; scar:number }
 
 export interface OmegaPacketV1 {
@@ -22,10 +25,30 @@ export interface OmegaPacketV1 {
   sigma:-1|0|1;
   target_phase_deg:number;
   scalar_metrics?:Record<string,number>;
+  material_model?:NumericMaterialModel;
+  polarization?:string;
+  numerics?:Record<string,number|string|boolean>;
   proof:ProofState;
   requested_solver:OmegaSolver;
   lineage:string[];
   created_at:string;
+  [key:string]:unknown;
+}
+
+export interface OmegaFullwaveQueueV1 {
+  schema:typeof OMEGA_QUEUE_SCHEMA;
+  job_id:string;
+  source_packet_id:string;
+  solver:'rcwa'|'fdtd'|'fem';
+  geometry:Geometry;
+  wavelength_nm:number;
+  polarization?:string;
+  material_model:NumericMaterialModel;
+  numerics?:Record<string,unknown>;
+  proof:ProofState;
+  lineage:string[];
+  priority?:number;
+  [key:string]:unknown;
 }
 
 export interface OmegaResultV1 {
@@ -44,6 +67,15 @@ export interface OmegaResultV1 {
   completed_at:string;
 }
 
+export interface OmegaFederationReceiptR114 {
+  schema:'OMEGA_FEDERATION_RECEIPT_R114';
+  stage:CeremonyStage|'INTENT'|'QUEUE';
+  previousReceiptSha256:string|null;
+  receiptSha256:string;
+  at:number;
+  [key:string]:unknown;
+}
+
 const inAxis=(n:number)=>Number.isInteger(n)&&n>=0&&n<12;
 export function validateAtlasAddress(a:AtlasAddress){return inAxis(a.domain)&&inAxis(a.phase)&&inAxis(a.regulation)&&inAxis(a.seed)}
 export function atlasIndex(a:AtlasAddress){if(!validateAtlasAddress(a))throw new Error('Invalid OMEGA 12^4 atlas address');return (((a.domain*12+a.phase)*12+a.regulation)*12+a.seed)}
@@ -55,4 +87,5 @@ export function routeTier2(p:OmegaPacketV1):OmegaSolver|null{
   if(coupling>0.16||phaseError>12||p.proof.scar>0.22) return 'fdtd';
   return 'rcwa';
 }
+export function validNumericMaterialModel(model:unknown):model is NumericMaterialModel{const m=model as Record<string,unknown>|null;return Boolean(m&&['n_incident','n_feature','n_background','n_substrate'].every(k=>Number.isFinite(Number(m[k]))&&Number(m[k])>0))}
 export function appendLineage<T extends {lineage:string[]}>(packet:T,event:string):T{return {...packet,lineage:[...packet.lineage,event]}}
