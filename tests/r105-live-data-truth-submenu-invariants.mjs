@@ -21,7 +21,7 @@ must(nav.includes('OMEGA_WORKSPACES_R82')&&nav.includes("type WorkspaceFilter='A
 must(nav.includes("localStorage.getItem('omega.r82.workspace')")&&nav.includes("detail?.layer==='APPLICATIONS'?storedWorkspace()"),'Home contextual All tools handoff must retain active workspace');
 must(nav.includes("className='r105-workspace-filter'")&&nav.includes('OMEGA_WORKSPACES_R82.map(workspace=>'),'six workspace submenu controls must be rendered');
 must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'submenu filtering must preserve flat registered route inventory and direct reachability');
-must(nav.includes("setWorkspaceFilter('ALL');open('EVERYWHERE')")&&nav.includes('Everywhere <b>{OMEGA_ALL_ROUTES_R82.length}</b>'),'global Everywhere path must restore the complete registered route inventory dynamically');
+must(nav.includes('routeCount=OMEGA_ROUTE_INVENTORY_R107.currentCount')&&nav.includes("setWorkspaceFilter('ALL');open('EVERYWHERE')")&&nav.includes('Everywhere <b>{routeCount}</b>'),'global Everywhere path must restore the complete registered route inventory dynamically');
 must(nav.includes('OmegaSystemInventoryR83 compact onNavigate={go}'),'software-system submenu must remain functional');
 
 // Archived 2025 workbook SAMPLE data stays preserved but cannot own the primary NOW graph.
