@@ -9,6 +9,9 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   {id:'WOVEN_CONTINUITY_GEOMETRY',text:'Movement geometry follows partition → exchange/transform → invariant carry → scar/residual carry → re-contextualize/repartition. Signed orientation remains factored from magnitude, time may evolve depiction without changing canonical state ownership, and 12/144/1728/20,736 remain atlas/address resolution levels unless independently validated as physical dimensions.'},
   {id:'WEAVE_DERIVED_RESOLUTION',text:'Where R101 resolution selection is active, the representational atlas level is derived from bounded weave-state resolution demand rather than treated as literal physical dimensionality. 248,832 is an optional computational expansion level; the canonical 20,736 address packet remains authoritative unless explicitly superseded by a separately validated state model.'},
   {id:'HYBRID_BRIDGE_ID_CONTINUITY',text:'Hybrid reconnect/status must follow the persisted bridge identity before browser session fallback. Repair may issue a new credential, but PC ONLINE requires a current authenticated device heartbeat and is never inferred from a browser credential alone.'},
+  {id:'FEDERATION_SINGLE_GLOBAL_AUTHORITY',text:'Across OMEGAv6, Genesis, Optical and Sovereign Compute, OMEGAv6 is the global federation CanonState/proof-admission authority unless an explicit governed migration changes it. Node-local working state may exist but may not be presented as competing global CanonState.'},
+  {id:'TASK_FIRST_CAPABILITY_ROUTING',text:'Ordinary use begins with an intent, project, object or outcome. OMEGA should select the required specialist nodes and expose their handoffs as a visible trace instead of forcing the user to understand infrastructure before using the capability.'},
+  {id:'SHARED_CONTEXT_ACROSS_NODES',text:'Federated handoffs preserve project, packet, state/address, observer frame, evidence class, proof gate, scar/history, signed orientation and lineage so moving between specialist surfaces never feels like entering unrelated applications.'},
   {id:'DISTINCT_APPLICATION_IDENTITY',text:'Forecast, Relativity, Atlas, Infinity, Field, Motion, Convergence, Matter, Traversal, Scale, Earth, Modes and other specialist surfaces keep distinct interaction and visual semantics.'},
   {id:'MODE_VISUAL_FUNCTION_CORRELATION',text:'A selectable design/mode layer must change a declared source-driven visual or functional mapping. Mode labels may not merely rename the same depiction; the active depiction must remain bound to canonical/evaluated inputs and its declared truth boundary.'},
   {id:'TRUTH_WITHOUT_FLATTENING',text:'Truth enforcement must not flatten advanced visualization into generic charts. Measured/imported/evaluated/derived/forecast/representational status is separated while retaining the richest lawful visualization.'},
@@ -35,6 +38,7 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   'R99 source-driven design-mode correlation authority',
   'R100 woven continuity geometry/time + professional instrument rail authority',
   'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority',
+  'R102 four-node capability fabric + task-first federation authority',
   'deep Matter/Visual/Traversal donor implementations',
   'Hybrid Link device-proof boundary',
   'Earth returned-evidence boundary',
@@ -43,18 +47,18 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
  ] as const,
  visualRule:'Do not solve visual truth by reducing OMEGA to generic charts. Build source-driven OMEGA-native geometry with an explicit variable-to-geometry map; where Woven Continuity is active, geometry must express exchange/transform, invariant carry, residual/scar carry, signed orientation, time and bounded resolution demand coherently. Keep the primary visual stage unobstructed by default and require selectable modes to produce declared functional/visual differences.',
  replacementRule:'If a replacement is proposed, the prior accepted implementation stays available until the new version demonstrates functional parity, stronger truth, responsive parity, and a verified non-regression pass.',
- rolloverRule:'A new chat/session must recover this contract from repository state before making broad UI, renderer, navigation, capability, or architecture replacements.'
+ rolloverRule:'A new chat/session must recover this contract from repository state before making broad UI, renderer, navigation, capability, federation, or architecture replacements.'
 } as const;
 
 export function acceptedProductionAuditR95(){
  const ids=ACCEPTED_PRODUCTION_CONTRACT_R95.rules.map(x=>x.id),unique=new Set(ids).size===ids.length;
- const required=['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','WOVEN_CONTINUITY_GEOMETRY','WEAVE_DERIVED_RESOLUTION','HYBRID_BRIDGE_ID_CONTINUITY','MODE_VISUAL_FUNCTION_CORRELATION','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'];
+ const required=['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','WOVEN_CONTINUITY_GEOMETRY','WEAVE_DERIVED_RESOLUTION','HYBRID_BRIDGE_ID_CONTINUITY','FEDERATION_SINGLE_GLOBAL_AUTHORITY','TASK_FIRST_CAPABILITY_ROUTING','SHARED_CONTEXT_ACROSS_NODES','MODE_VISUAL_FUNCTION_CORRELATION','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'];
  return{
   total:ids.length,
   unique,
   requiredPresent:required.every(x=>ids.includes(x as any)),
   pass:unique&&required.every(x=>ids.includes(x as any)),
   authority:ACCEPTED_PRODUCTION_CONTRACT_R95.authority,
-  boundary:'This contract prevents regression-by-omission, replacement-by-simplification, uncorrelated mode labels, default visual-stage occlusion, unbounded interpretation of Woven Continuity geometry, and session/bridge identity confusion. It does not by itself prove runtime execution; normal execution/proof gates still apply.'
+  boundary:'This contract prevents regression-by-omission, replacement-by-simplification, uncorrelated mode labels, default visual-stage occlusion, unbounded interpretation of Woven Continuity geometry, session/bridge identity confusion, competing global state authority and infrastructure-first federation UX. It does not by itself prove runtime execution; normal execution/proof gates still apply.'
  };
 }
