@@ -74,15 +74,18 @@ export default function CanonicalMembraneR95({address,onAddress,initialProjectio
   </div>}
   <div className='r95-membrane-stage'>
    <canvas ref={canvas} onPointerDown={choose} aria-label='Interactive 20,736-cell canonical membrane'/>
-   <aside>
+  </div>
+  <details className='r98-membrane-data'>
+   <summary>DATA · STATE {record.stateId} · {record.metrics.decision}</summary>
+   <div className='r98-membrane-data-grid'>
     <div><span>PREVIOUS</span><b>{record.autoPing.previous+1}</b></div>
     <div><span>CURRENT</span><b>{record.stateId}</b></div>
     <div><span>ADMITTED NEXT</span><b>{record.autoPing.dataNext+1}</b></div>
     <div><span>DECISION</span><b>{record.metrics.decision}</b></div>
     <div><span>CΩ / Φ</span><b>{Number(record.metrics.continuity).toFixed(3)} / {Number(record.metrics.plasticity).toFixed(3)}</b></div>
     <div><span>q / Λ</span><b>{Number(record.metrics.contradiction).toFixed(3)} / {Number(record.metrics.burden).toFixed(3)}</b></div>
-   </aside>
-  </div>
+   </div>
+  </details>
   <footer><span><i className='previous'/>previous packet</span><span><i className='current'/>current packet</span><span><i className='next'/>admitted route</span><b>{projection} position + {view} color are deterministic functions of the canonical corpus</b></footer>
  </section>
 }
