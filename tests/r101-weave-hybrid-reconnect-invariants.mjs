@@ -8,6 +8,8 @@ const worker34=read('src/workerR34.js');
 const worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'';
 const adapter=read('src/platformAdapter.ts');
 const hybrid=read('src/HybridLinkR32.tsx');
+const sovereign=fs.existsSync('src/SovereignConnectionR112.tsx')?read('src/SovereignConnectionR112.tsx'):hybrid;
+const launcher=fs.existsSync('src/sovereignLauncherR112.ts')?read('src/sovereignLauncherR112.ts'):hybrid;
 const agent=read('public/omega-hybrid-agent.py');
 const weave=read('src/weaveStateR100.ts');
 const stage=read('src/TraversalModeStageR100.tsx');
@@ -33,9 +35,10 @@ must(worker.includes("state:online.length?'VERIFIED_DEVICE_ONLINE'")&&worker.inc
 must(worker34.includes('return r33.fetch(request,env)'),'R101 must sit above the accepted R34 federation fallback rather than deleting it');
 
 must(adapter.includes('reconnectHybridBridge')&&adapter.includes("'/api/hybrid/reconnect'"),'browser adapter must expose reconnect/repair transport');
-must(hybrid.includes('Reconnect')&&hybrid.includes('Repair link'),'Hybrid surface must expose explicit reconnect and repair controls');
-must(hybrid.includes('stored credential rejected')&&hybrid.includes('authenticated heartbeat'),'Hybrid UI must distinguish credential failure from device heartbeat truth');
-must(hybrid.includes('/api/hybrid/agent-download?r94=1')&&hybrid.includes('/omega-hybrid-agent.py'),'Hybrid UI must retain the canonical validated R94 download endpoint while explaining direct-route compatibility');
+must(hybrid.includes("import SovereignConnectionR112 from './SovereignConnectionR112'")&&hybrid.includes('<SovereignConnectionR112/>'),'Hybrid route must use the shared R112 connection successor');
+must(sovereign.includes('reconnectHybridBridge(false)')&&sovereign.includes('reconnectHybridBridge(true)'),'R112 connection surface must retain explicit verify-then-repair transport');
+must(sovereign.includes('authenticated heartbeat')&&sovereign.includes("live?.nativeExecutionClaimed===true"),'Hybrid UI must distinguish browser credential state from current device heartbeat truth');
+must(launcher.includes('/api/hybrid/agent-download?r112=1')&&launcher.includes("OMEGA_ORIGIN=${ORIGIN}"),'R112 launcher must use the canonical validated endpoint and hard-bind canonical origin');
 must(agent.includes("VERSION='R34.1'")&&agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"),'sovereign agent canonical transport/version must remain intact');
 must(agent.includes('/api/hybrid/agent/register')&&agent.includes('/api/hybrid/agent/heartbeat')&&agent.includes('/api/hybrid/agent/poll'),'agent register/heartbeat/poll loop must remain present');
 
@@ -58,7 +61,7 @@ must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>
 must(css.includes(".mt-stage .mt-hud")&&css.includes(".visual-stage .visual-equation")&&css.includes('display:none!important'),'Matter/Visual overlay suppression must remain intact');
 must(accepted.includes("id:'WEAVE_DERIVED_RESOLUTION'")&&accepted.includes("id:'HYBRID_BRIDGE_ID_CONTINUITY'"),'R101 non-regression authorities must be persisted');
 must(accepted.includes("'R100 woven continuity geometry/time + professional instrument rail authority'")&&accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority'"),'R101 must extend R100 rather than flatten it');
-must(![worker,adapter,hybrid,weave,stage].join('\n').includes('@appdeploy/client'),'R101 must remain provider portable');
+must(![worker,adapter,hybrid,sovereign,launcher,weave,stage].join('\n').includes('@appdeploy/client'),'R101 must remain provider portable');
 
-console.log('R101 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · Field/Weave/Projection strata · bridge-ID reconnect/repair · authenticated-heartbeat truth preserved through R111');
+console.log('R101 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · Field/Weave/Projection strata · bridge-ID reconnect/repair · authenticated-heartbeat truth preserved through R112');
 await import('./r102-federated-instrument-experience-invariants.mjs');
