@@ -6,6 +6,7 @@ const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const worker=read('src/workerR101.js');
 const worker34=read('src/workerR34.js');
 const worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'';
+const worker114=fs.existsSync('src/workerR114.js')?read('src/workerR114.js'):'';
 const adapter=read('src/platformAdapter.ts');
 const hybrid=read('src/HybridLinkR32.tsx');
 const sovereign=fs.existsSync('src/SovereignConnectionR112.tsx')?read('src/SovereignConnectionR112.tsx'):hybrid;
@@ -24,7 +25,7 @@ const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical 44-route universe must remain intact');
 for(const route of ['Extreme Traversal','Matter Traversal','Forecast','Relativity','Evidence & Proof','Visual Instrument','Hybrid Link'])must(surfaces.includes(route),'critical specialist route missing: '+route);
 
-must(wrangler.includes('"main": "src/workerR101.js"')||wrangler.includes('"main": "src/workerR102.js"')||(wrangler.includes('"main": "src/workerR111.js"')&&worker111.includes("from './workerR102.js'")),'Cloudflare entry must retain R101 directly or through a validated R102/R111 successor wrapper');
+must(wrangler.includes('"main": "src/workerR101.js"')||wrangler.includes('"main": "src/workerR102.js"')||(wrangler.includes('"main": "src/workerR111.js"')&&worker111.includes("from './workerR102.js'"))||(wrangler.includes('"main": "src/workerR114.js"')&&worker114.includes("from './workerR111.js'")&&worker111.includes("from './workerR102.js'")),'Cloudflare entry must retain R101 directly or through a validated R102/R111/R114 successor wrapper');
 must(worker.includes("import r34,{OmegaRuntime as OmegaRuntimeR34} from './workerR34.js'"),'R101 must extend rather than replace R34 federation/runtime behavior');
 must(worker.includes('export class OmegaRuntime extends OmegaRuntimeR34'),'Durable Object class lineage must remain compatible');
 must(worker.includes("path==='/api/hybrid/status'")&&worker.includes('bridgeId(request)'),'Hybrid status must resolve persisted bridge identity before session fallback');
@@ -61,8 +62,8 @@ must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>
 must(css.includes(".mt-stage .mt-hud")&&css.includes(".visual-stage .visual-equation")&&css.includes('display:none!important'),'Matter/Visual overlay suppression must remain intact');
 must(accepted.includes("id:'WEAVE_DERIVED_RESOLUTION'")&&accepted.includes("id:'HYBRID_BRIDGE_ID_CONTINUITY'"),'R101 non-regression authorities must be persisted');
 must(accepted.includes("'R100 woven continuity geometry/time + professional instrument rail authority'")&&accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority'"),'R101 must extend R100 rather than flatten it');
-must(![worker,adapter,hybrid,sovereign,launcher,weave,stage].join('\n').includes('@appdeploy/client'),'R101 must remain provider portable');
+must(![worker,worker114,adapter,hybrid,sovereign,launcher,weave,stage].join('\n').includes('@appdeploy/client'),'R101 must remain provider portable');
 
-console.log('R101 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · Field/Weave/Projection strata · bridge-ID reconnect/repair · authenticated-heartbeat truth preserved through R112');
+console.log('R101 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · Field/Weave/Projection strata · bridge-ID reconnect/repair · authenticated-heartbeat truth preserved through R114→R112');
 await import('./r102-federated-instrument-experience-invariants.mjs');
 await import('./r112-sovereign-living-fabric-invariants.mjs');
