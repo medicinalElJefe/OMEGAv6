@@ -25,7 +25,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
  const rows=useMemo(()=>{const q=query.trim().toLowerCase();return OMEGA_ALL_ROUTES_R82.filter(route=>{if(!q)return true;const workspace=workspaceForRouteR82(route);return (route+' '+workspace.label+' '+workspace.copy).toLowerCase().includes(q)})},[query]);
  const go=(panel:string)=>{onNavigate(panel);setExpanded(false);setQuery('')};
  const open=(next:BrowserLayer)=>{setLayer(next);setExpanded(true)};
- return <aside className={'r94-side-toolbar r100-professional-nav '+(expanded?'expanded':'collapsed')} aria-label='OMEGA global navigation toolbar'>
+ return <aside className={'r94-side-toolbar '+(expanded?'expanded':'collapsed')+' r100-professional-nav'} aria-label='OMEGA global navigation toolbar'>
   <div className='r94-nav-rail'>
    <button className='r88-navigator-trigger r100-rail-cap' onClick={()=>{setLayer('EVERYWHERE');setExpanded(v=>!v)}} aria-label={expanded?'Collapse OMEGA navigator':'Expand OMEGA navigator'} aria-expanded={expanded}>
     <span className='r100-omega-mark'>Ω</span><small>MENU</small><b>44</b>
