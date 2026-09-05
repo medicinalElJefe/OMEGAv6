@@ -1,0 +1,38 @@
+name: OMEGA R110 Runtime-Aware Working Set
+
+on:
+  pull_request:
+    paths:
+      - 'src/specialistLoaderR109.tsx'
+      - 'src/specialistWorkingSetPolicyR110.js'
+      - 'src/acceptedProductionContractR95.ts'
+      - 'tests/r110-runtime-aware-working-set-invariants.mjs'
+      - 'package.json'
+      - '.github/workflows/r110-runtime-aware-working-set.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/specialistLoaderR109.tsx'
+      - 'src/specialistWorkingSetPolicyR110.js'
+      - 'src/acceptedProductionContractR95.ts'
+      - 'tests/r110-runtime-aware-working-set-invariants.mjs'
+      - 'package.json'
+      - '.github/workflows/r110-runtime-aware-working-set.yml'
+
+jobs:
+  working-set:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Verify R110 deterministic working-set policy
+        run: npm run test:r110
+      - name: Verify inherited R109 deferred topology
+        run: npm run test:r109
+      - name: Production build
+        run: npm run build
+      - name: Wrangler dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r110-dry-run
