@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const runtime=read('src/hybridMissionRuntime.ts'),panel=read('src/HybridMissionControl.tsx'),r8=read('src/HybridMissionControlR8.tsx'),router=read('src/OmegaWorkstationFullV2.tsx'),css=read('src/hybridMission.css');
+const runtime=read('src/hybridMissionRuntime.ts'),panel=read('src/HybridMissionControl.tsx'),r8=read('src/HybridMissionControlR8.tsx'),router=read('src/OmegaWorkstationFullV2.tsx'),loader=fs.existsSync(new URL('../src/specialistLoaderR109.tsx',import.meta.url))?read('src/specialistLoaderR109.tsx'):'',css=read('src/hybridMission.css');
 assert.match(runtime,/addressSpace:61917364224/,'Hybrid donor 61,917,364,224 address space missing');
 assert.match(runtime,/packetSpace:20736/,'20,736 packet space missing');
 assert.match(runtime,/moduleCount:16/,'16 Hybrid modules missing');
@@ -22,8 +22,9 @@ assert.match(r8,/import HybridMissionControl from '\.\/HybridMissionControl'/,'R
 assert.match(r8,/\/api\/hybrid\/plan/,'R8 governed prompt-to-plan endpoint missing');
 assert.match(r8,/\/api\/hybrid\/validate/,'R8 governed validation endpoint missing');
 assert.match(r8,/DEVICE_PROOF_REQUIRED/,'R8 wrapper must retain native proof boundary');
-assert.match(router,/import HybridMissionControlR8 from '\.\/HybridMissionControlR8'/,'Hybrid R8 specialist router import missing');
-assert.match(router,/case 'Hybrid Link':return withPhase\(<HybridMissionControlR8[^;]*,'hybrid'\)/,'Hybrid menu does not bind R8 mission application through shared phase context');
+const eagerHybrid=/import HybridMissionControlR8 from '\.\/HybridMissionControlR8'/.test(router)&&/case 'Hybrid Link':return withPhase\(<HybridMissionControlR8[^;]*,'hybrid'\)/.test(router);
+const deferredHybrid=/HybridMissionControlR109/.test(router)&&/case 'Hybrid Link':return withPhase\(<HybridMissionControlR109[^;]*,'hybrid'\)/.test(router)&&/HybridMissionControlR8:\(\)=>import\('\.\/HybridMissionControlR8'\)/.test(loader)&&/HybridMissionControlR109=lazy\(LOADERS\.HybridMissionControlR8\)/.test(loader);
+assert.ok(eagerHybrid||deferredHybrid,'Hybrid R8 specialist must remain bound through the eager route or verified R109 deferred loader');
 assert.ok(css.length>1000,'Hybrid responsive instrumentation CSS unexpectedly absent');
-for(const source of [runtime,panel,r8,router])assert.doesNotMatch(source,/@appdeploy\/client|appdeploy\.ai/i,'AppDeploy runtime contract reintroduced');
-console.log('hybrid mission invariants PASS · donor 16/24/12 retained + R8 governed cloud wrapper + proof-gated native execution');
+for(const source of [runtime,panel,r8,router,loader])assert.doesNotMatch(source,/@appdeploy\/client|appdeploy\.ai/i,'AppDeploy runtime contract reintroduced');
+console.log('hybrid mission invariants R109 PASS · donor 16/24/12 retained + R8 governed cloud wrapper + proof-gated native execution + deferred route preservation');
