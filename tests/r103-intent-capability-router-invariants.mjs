@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import {planIntentR103,classifyIntentR103} from '../src/federation/federationIntentRouterR103.js';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R103 '+msg)};
-const worker=read('src/workerR102.js'),worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'',worker114=fs.existsSync('src/workerR114.js')?read('src/workerR114.js'):'',ui=read('src/FederationRunR97.tsx'),css=read('src/federationRunR97.css'),css112=fs.existsSync('src/federationRunR112.css')?read('src/federationRunR112.css'):'',vite=read('vite.config.ts'),wrangler=read('wrangler.jsonc'),router=read('src/federation/federationIntentRouterR103.js');
+const worker=read('src/workerR102.js'),worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'',worker114=fs.existsSync('src/workerR114.js')?read('src/workerR114.js'):'',worker115=fs.existsSync('src/workerR115.js')?read('src/workerR115.js'):'',ui=read('src/FederationRunR97.tsx'),css=read('src/federationRunR97.css'),css112=fs.existsSync('src/federationRunR112.css')?read('src/federationRunR112.css'):'',vite=read('vite.config.ts'),wrangler=read('wrangler.jsonc'),router=read('src/federation/federationIntentRouterR103.js');
 const healthy={nodes:{genesis:{state:'LIVE'},optical:{state:'LIVE'},sovereign:{state:'PC_ONLINE'},omegaV6:{state:'LIVE'}}};
 const gated={nodes:{genesis:{state:'LIVE'},optical:{state:'ACCESS_GATED'},sovereign:{state:'PAIRING_REQUIRED'},omegaV6:{state:'LIVE'}}};
 
@@ -29,7 +29,8 @@ must(worker.includes("schema:'OMEGA_FEDERATION_RUN_STATUS_R97'")&&worker.include
 const r102Direct=wrangler.includes('"main": "src/workerR102.js"');
 const r111PreservesR103=wrangler.includes('"main": "src/workerR111.js"')&&worker111.includes("from './workerR102.js'");
 const r114PreservesR103=wrangler.includes('"main": "src/workerR114.js"')&&worker114.includes("from './workerR111.js'")&&worker111.includes("from './workerR102.js'");
-must(r102Direct||r111PreservesR103||r114PreservesR103,'R103 task-first routing must remain active directly through R102 or through an additive R111/R114 successor');
+const r115PreservesR103=wrangler.includes('"main": "src/workerR115.js"')&&worker115.includes("from './workerR114.js'")&&worker114.includes("from './workerR111.js'")&&worker111.includes("from './workerR102.js'");
+must(r102Direct||r111PreservesR103||r114PreservesR103||r115PreservesR103,'R103 task-first routing must remain active directly through R102 or through an additive R111/R114/R115 successor');
 const legacyIntentCopy=ui.includes('WHAT DO YOU WANT OMEGA TO DO?')&&ui.includes('MINIMAL USEFUL PATH');
 const r112IntentCopy=ui.includes('WHAT DO YOU WANT TO DO?')&&ui.includes('Run capability plan')&&ui.includes('OMEGA WILL USE');
 must(ui.includes('/api/federation/route-intent')&&(legacyIntentCopy||r112IntentCopy),'Federation Instrument must expose outcome-first routing through either the accepted R103 or simplified R112 user grammar');
@@ -40,4 +41,4 @@ must((css.includes('.r103-intent-router')&&css.includes('.r103-route-steps')&&cs
 must(vite.includes('manualChunks:vendorChunkR109')&&vite.includes("partition:'R109_ROUTE_DEFERRED_SPECIALISTS'"),'R109 must supersede cache-only application grouping with route-deferred specialist packaging while retaining vendor partitions');
 must(vite.includes('dynamic imports to defer heavy specialist UI modules')&&vite.includes('Prefetch means module bytes are prepared'),'performance truth boundary must distinguish module-byte prefetch from capability execution');
 
-console.log('R103/R112 TASK-FIRST ROUTER PASS · minimal capability graph · optional-stage preservation · truthful live gate · stable R102 contract preserved through additive R111/R114 mesh · simplified responsive outcome-first successor · route-deferred specialists');
+console.log('R103/R112/R115 TASK-FIRST ROUTER PASS · minimal capability graph · optional-stage preservation · truthful live gate · stable R102 contract preserved through additive R111/R114/R115 mesh · simplified responsive outcome-first successor · route-deferred specialists');
