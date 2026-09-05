@@ -78,7 +78,7 @@ export function globalModeInfluenceR107(record:any):FullModeInfluenceR107{
   const lensWeights=authority.filter(x=>x.family===family).map(x=>x.weight).filter(x=>x>0);
   // Executed/source-bound outputs dominate; authority lenses remain bounded secondary governance influence.
   const sourceMean=mean(sourceWeights),lensMean=mean(lensWeights),hasSource=sourceWeights.length>0;
-  channels[family]=cl(hasSource?.78*sourceMean+.22*lensMean:lensMean);
+  channels[family]=cl(hasSource ? .78*sourceMean+.22*lensMean : lensMean);
  }
  const exact=source.filter(x=>x.state==='EXECUTED_EXACT'&&x.weight>0).length,packet=source.filter(x=>(x.state==='SOURCE_PACKET'||x.state==='DERIVED_RUNTIME')&&x.weight>0).length,gated=source.filter(x=>x.state==='GATED_MISSING_INPUTS').length,catalogOnly=source.filter(x=>x.state==='CATALOG_ONLY').length,lenses=authority.filter(x=>x.weight>0).length;
  return{channels,sourceExactContributors:exact,sourcePacketContributors:packet,gatedSourceModes:gated,catalogOnly,authorityLensContributors:lenses,catalogCount:ALL_MODES_BOUNDARY.sourceModeEvaluations,authorityCount:ALL_MODES_BOUNDARY.canonAuthorities,boundary:'R107 keeps the complete source-mode catalog available globally while applying only source-bound executable/packet outputs and bounded canon-lens activation. Catalog affinity alone never becomes execution. Gated formulas contribute zero until authoritative inputs exist.'};
