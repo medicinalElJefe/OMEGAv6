@@ -1,10 +1,11 @@
 import {ShieldCheck} from 'lucide-react';
 import {PROVENANCE_LABEL_R94,provenanceForSurfaceR94} from './surfaceProvenanceR94';
+import {surfaceLayerBindingR104} from './surfaceLayerContractR104';
 import './surfaceProvenanceR94.css';
 
 export default function SurfaceProvenanceR94({surface}:{surface:string}){
- const p=provenanceForSurfaceR94(surface);
- return <details className='r94-provenance' data-primary={p.primary}>
+ const p=provenanceForSurfaceR94(surface),layer=surfaceLayerBindingR104(surface);
+ return <details className='r94-provenance' data-primary={p.primary} data-layer-primary={layer.primary}>
   <summary>
    <ShieldCheck/>
    <span><b>{PROVENANCE_LABEL_R94[p.primary]}</b><small>{p.display}</small></span>
@@ -15,6 +16,7 @@ export default function SurfaceProvenanceR94({surface}:{surface:string}){
    <section><span>ACTION AUTHORITY</span><p>{p.actionAuthority}</p></section>
    <section><span>PROOF</span><p>{p.proof}</p></section>
    <section><span>FORBIDDEN CLAIM</span><p>{p.forbidden}</p></section>
+   <section className='r104-layer-contract'><span>OMEGA LAYER CONTRACT · PRIMARY {layer.primary}</span><div>{layer.layers.map(x=><code key={x}>{x}</code>)}</div><p><b>Interaction:</b> {layer.interaction}</p><p><b>Correctness:</b> {layer.correctness}</p></section>
    {(p.optionalRepresentations?.length??0)>0&&<section className='r94-representations'><span>OPTIONAL REPRESENTATIONS</span><div>{p.optionalRepresentations.map(x=><code key={x}>{x}</code>)}</div><p>These may visualize or explain bounded source data. They never become observations or independent state authority.</p></section>}
   </div>
  </details>
