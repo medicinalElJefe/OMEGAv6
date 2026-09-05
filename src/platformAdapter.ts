@@ -79,6 +79,7 @@ export const api = {
 };
 
 export async function createHybridPair(rotate=false){const r=await api.post<any>('/api/hybrid/pair',{rotate});if(r.data?.bridgeId&&r.data?.secret)saveHybridBridge({bridgeId:r.data.bridgeId,secret:r.data.secret,pairingCode:r.data.pairingCode});return r.data}
+export async function reconnectHybridBridge(repair=false){const r=await api.post<any>('/api/hybrid/reconnect',{repair});if(r.data?.bridgeId&&r.data?.secret)saveHybridBridge({bridgeId:r.data.bridgeId,secret:r.data.secret,pairingCode:r.data.pairingCode});return r.data}
 
 export const platformCapabilities = Object.freeze({
   provider: 'NOT_CONFIGURED' as OmegaTruthState,
