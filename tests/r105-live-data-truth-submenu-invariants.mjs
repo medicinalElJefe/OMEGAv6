@@ -10,7 +10,7 @@ const infinityRuntime=read('src/omegaInfinityRuntime.ts');
 const performance=read('src/ProofPerformanceProviderR55.tsx');
 const freshness=read('src/dataFreshnessR105.ts');
 const accepted=read('src/acceptedProductionContractR95.ts');
-const r104=read('tests/r104-extreme-layer-integrity-invariants.mjs');
+const r55=read('tests/r55-proof-performance-provider-invariants.mjs');
 
 // Contextual submenus must filter one canonical 44-route registry, never create parallel route authority.
 for(const id of ['COMMAND','EXPLORE','INTELLIGENCE','EVIDENCE','BUILD','SYSTEM'])must(registry.includes(`id:'${id}'`),'workspace registry missing '+id);
@@ -42,6 +42,6 @@ must(performance.includes("omega.r55.performance.journal")&&performance.includes
 // Persist temporal truth and preserve every earlier architecture layer.
 must(accepted.includes("id:'NO_STALE_NOW_GRAPH'")&&accepted.includes("'R105 live-data freshness + contextual workspace submenu authority'"),'R105 accepted production law missing');
 for(const prior of ['R100 woven continuity geometry/time','R101 weave-derived effective resolution','R102 four-node capability fabric','R103 task-first capability router','R104 eight-layer functional correlation'])must(accepted.includes(prior),'prior accepted layer lost: '+prior);
-must(r104.includes("await import('./r105-live-data-truth-submenu-invariants.mjs')")||r104.includes("import './r105-live-data-truth-submenu-invariants.mjs'"),'R105 gate must execute inside full R104/static release path');
+must(r55.includes("await import('./r105-live-data-truth-submenu-invariants.mjs')")||r55.includes("import './r105-live-data-truth-submenu-invariants.mjs'"),'R105 gate must execute inside full R55/static release path');
 
 console.log('R105 LIVE DATA TRUTH + SUBMENU PASS · 44 routes preserved · 6 contextual submenus · current canonical recurrence separated from 2025 donor samples · current-session performance truth enforced');
