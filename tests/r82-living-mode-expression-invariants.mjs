@@ -16,9 +16,11 @@ const surfaceCss=read('src/surfaceIntegrityR81.css');
 
 for(const id of ['COMMAND','EXPLORE','INTELLIGENCE','EVIDENCE','BUILD','SYSTEM'])must(registry.includes(`id:'${id}'`),`shared workspace missing ${id}`);
 for(const mode of ['FIELD','MATTER','TRAVERSAL','FORECAST','RELATIVITY','INFINITY','SCALE','CONVERGENCE'])must(registry.includes(`id:'${mode}'`),`projection registry missing ${mode}`);
-must(registry.includes('routes.length===44')&&registry.includes('new Set(routes).size===44'),'shared experience registry must assert 44 unique routes');
+const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(routes.length>0&&new Set(routes).size===routes.length,'shared experience registry must retain unique registered destinations');
+must(registry.includes('INVENTORY_TELEMETRY_NOT_ARCHITECTURE')&&!registry.includes('routes.length===44'),'route count must be telemetry, not an R82 architectural constant');
 must(home.includes('OMEGA_WORKSPACES_R82.map')&&home.includes('OMEGA_FIELD_PROJECTIONS_R82.map'),'Home must consume shared workspace and projection registries');
-must(home.includes('omega-r88-open-navigator')&&nav.includes("placeholder='Search all 44 OMEGA applications'"),'Home must delegate complete application search to the one shared navigator');
+must(home.includes('omega-r88-open-navigator')&&nav.includes("placeholder='Search registered OMEGA destinations'"),'Home must delegate complete application search to the one shared navigator');
 must(!home.includes('.slice(0,18)')&&!home.includes('.slice(0,10)'),'Home may not bury applications behind arbitrary result slicing');
 must(home.includes('projection.signature')&&home.includes('projection.intent'),'Home must explain the visual law selected by each projection button');
 must(homeCss.includes('.r71-modes')&&homeCss.includes('overflow-x:auto'),'all projection buttons must remain reachable without overlap');
@@ -48,4 +50,4 @@ must(surface.includes("record?:any")&&surface.includes("className='r82-surface-v
 must(surfaceCss.includes('.r82-surface-vital')&&!surfaceCss.includes('.r82-surface-vital{position:fixed'),'surface vitality must stay non-overlapping and inside the active panel');
 must(!modeRuntime.match(/physical dimension.*executed/i),'visual mode mapping must not convert representation into physical/execution claims');
 
-console.log('R82 LIVING MODE EXPRESSION PASS · 44 routes aligned · 8 projection grammars · individual mode expressions · no buried menu slicing · state-bound surfaces preserved');
+console.log(`R82 LIVING MODE EXPRESSION PASS · ${routes.length} current registered destinations · 8 projection grammars · individual mode expressions · no buried menu slicing · state-bound surfaces preserved`);
