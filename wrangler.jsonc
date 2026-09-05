@@ -1,8 +1,8 @@
-// OMEGA R111: R102/R101 lineage preserved with additive federated capability mesh.
+// OMEGA R114: R113/R112/R111/R102/R101 lineage preserved with durable federation closure ceremony.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR111.js",
+  "main": "src/workerR114.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
