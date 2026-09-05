@@ -19,8 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - name: Verify R113 vector carry convergence
         run: node tests/r113-vector-carry-convergence-invariants.mjs
       - name: Verify inherited continuous field
