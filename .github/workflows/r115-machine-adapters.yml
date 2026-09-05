@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+env:
+  GENESIS_MACHINE_URL: https://omega-genesis-machine-r115.jeffdeweyeljefe.workers.dev
+  OPTICAL_MACHINE_URL: https://omega-optical-machine-r115.jeffdeweyeljefe.workers.dev
+
 jobs:
   verify-r115:
     runs-on: ubuntu-latest
@@ -35,3 +39,43 @@ jobs:
         run: npx wrangler deploy --config wrangler.optical-machine-r115.jsonc --dry-run --outdir .wrangler-r115-optical
       - name: Dry-run canonical R115 Worker
         run: npx wrangler deploy --dry-run --outdir .wrangler-r115-canonical
+
+  deploy-machine-adapters:
+    if: github.event_name == 'push'
+    needs: verify-r115
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Cloudflare authorization preflight
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error title=AUTH REQUIRED::OMEGA_CLOUDFLARE_TOKEN unavailable"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error title=ACCOUNT REQUIRED::CLOUDFLARE_ACCOUNT_ID unavailable"; exit 1; }
+      - name: Deploy Genesis PROPOSE machine Worker
+        run: npx wrangler deploy --config wrangler.genesis-machine-r115.jsonc
+      - name: Deploy Optical SCREEN machine Worker
+        run: npx wrangler deploy --config wrangler.optical-machine-r115.jsonc
+      - name: Live-probe PROPOSE → SCREEN machine path
+        shell: bash
+        run: |
+          node <<'NODE'
+          const genesis=process.env.GENESIS_MACHINE_URL.replace(/\/$/,'');
+          const optical=process.env.OPTICAL_MACHINE_URL.replace(/\/$/,'');
+          const gh=await fetch(genesis+'/api/health',{headers:{'cache-control':'no-cache'}}),gHealth=await gh.json();
+          if(!gh.ok||gHealth.ok!==true||gHealth.authority!=='PROPOSE_ONLY')throw new Error(`Genesis machine health failed: ${JSON.stringify(gHealth)}`);
+          const gp=await fetch(genesis+'/api/federation/propose',{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify({ceremony_id:'r115_live_probe',intent:'Design a bounded dielectric metasurface candidate at 550 nm with target phase 180 degrees.'})}),g=await gp.json();
+          if(!gp.ok||g.packet?.schema!=='OMEGA_PACKET_v1'||g.packet?.source_node!=='omega-genesis')throw new Error(`Genesis machine proposal failed: ${JSON.stringify(g)}`);
+          const oh=await fetch(optical+'/api/health',{headers:{'cache-control':'no-cache'}}),oHealth=await oh.json();
+          if(!oh.ok||oHealth.ok!==true||oHealth.authority!=='SCREEN_ONLY')throw new Error(`Optical machine health failed: ${JSON.stringify(oHealth)}`);
+          const os=await fetch(optical+'/api/federation/screen',{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify({ceremony_id:'r115_live_probe',proposal:g.packet})}),o=await os.json();
+          if(!os.ok||o.packet?.schema!=='OMEGA_PACKET_v1'||o.packet?.source_node!=='omega-optical'||o.packet?.proof?.gate!=='STAY'||o.tier2_job?.schema!=='OMEGA_FULLWAVE_QUEUE_v1'||o.tier2_job?.solver!=='rcwa')throw new Error(`Optical machine screen failed: ${JSON.stringify(o)}`);
+          console.log(`R115 MACHINE LIVE PASS · ${gHealth.service} → ${oHealth.service} · Mode188 ${o.packet.proof.mode188_score} · RCWA request ready`);
+          NODE
