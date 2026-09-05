@@ -43,20 +43,20 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
   </div>
   <section className='r88-navigator r89-flat-navigator r94-nav-panel r100-nav-panel' aria-hidden={!expanded}>
    <header className='r88-navigator-head r100-navigator-head'>
-    <div><span>OMEGA V6 · INSTRUMENT OS</span><b>{layer==='EVERYWHERE'?'Application navigator':'Software system map'}</b><small>{layer==='EVERYWHERE'?(rows.length+'/44 routes · canonical state remains continuous'):'Full software inventory, lineage and capability truth'}</small></div>
+    <div><span>OMEGA V6 · INSTRUMENT OS</span><b>{layer==='EVERYWHERE'?'Everywhere':'Software map'}</b><small>{layer==='EVERYWHERE'?(rows.length+'/44 routes · canonical state remains continuous'):'Full software inventory, lineage and capability truth'}</small></div>
     <div className='r88-head-actions'><button onClick={()=>setExpanded(false)} aria-label='Collapse navigator'><ChevronLeft/></button></div>
    </header>
-   <nav className='r89-nav-mode r100-nav-mode' aria-label='Navigator mode'><button className={layer==='EVERYWHERE'?'active':''} onClick={()=>setLayer('EVERYWHERE')}><Menu/>Applications <b>44</b></button><button className={layer==='SOFTWARE'?'active':''} onClick={()=>setLayer('SOFTWARE')}><Layers3/>System</button></nav>
+   <nav className='r89-nav-mode r100-nav-mode' aria-label='Navigator mode'><button className={layer==='EVERYWHERE'?'active':''} onClick={()=>setLayer('EVERYWHERE')}><Menu/>Everywhere <b>44</b></button><button className={layer==='SOFTWARE'?'active':''} onClick={()=>setLayer('SOFTWARE')}><Layers3/>Software map</button></nav>
    {currentPanel&&<div className='r100-active-route'><span>ACTIVE INSTRUMENT</span><b>{currentPanel}</b><i>{workspaceForRouteR82(currentPanel as any).label}</i></div>}
    {layer==='EVERYWHERE'?<>
-    <label className='r88-search r100-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all 44 applications'/><kbd>⌘K</kbd></label>
+    <label className='r88-search r100-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all 44 OMEGA applications'/><kbd>⌘K</kbd></label>
     <div className='r89-flat-scroll r100-route-scroll' aria-label='All 44 OMEGA applications'>
      {rows.map(route=>{const index=OMEGA_ALL_ROUTES_R82.indexOf(route)+1,workspace=workspaceForRouteR82(route),reality=effectiveCapabilityReality(route);return <button key={route} className={'r89-flat-route '+(currentPanel===route?'active':'')} aria-current={currentPanel===route?'page':undefined} onClick={()=>go(route)}>
       <i>{String(index).padStart(2,'0')}</i><span><b>{route}</b><small>{workspace.label} · {CAPABILITY_REALITY_LABEL[reality]}</small></span><ChevronRight/>
      </button>})}
      {rows.length===0&&<div className='r88-empty'>No route matches that search.</div>}
     </div>
-    <footer className='r88-navigator-foot r100-navigator-foot'><ShieldCheck/><span>Persistent non-covering rail · one canonical packet · 44 preserved destinations.</span></footer>
+    <footer className='r88-navigator-foot r100-navigator-foot'><ShieldCheck/><span>Persistent rail · active application remains visible · one canonical packet · 44 preserved destinations.</span></footer>
    </>:<div className='r88-software-layer'><OmegaSystemInventoryR83 compact onNavigate={go}/></div>}
   </section>
  </aside>;
