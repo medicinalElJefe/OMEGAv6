@@ -19,7 +19,7 @@ const plainGate=(gate:string,flow:any)=>{
  return{title:String(flow?.summary||'Capability path is waiting on a dependency.'),copy:String(flow?.action||'OMEGA will expose the exact dependency when the task requires it.')};
 };
 
-export default function FederationRunR97({_onDownloadLauncher,onDownloadLauncher:legacyDownload,paired:_paired}:Props & {_onDownloadLauncher?:()=>void}){
+export default function FederationRunR97({onDownloadLauncher:legacyDownload,paired:_paired}:Props){
  void legacyDownload;void _paired;
  const[data,setData]=useState<any>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const[intent,setIntent]=useState(''),[routePlan,setRoutePlan]=useState<any>(null),[routeBusy,setRouteBusy]=useState(false);
@@ -32,7 +32,7 @@ export default function FederationRunR97({_onDownloadLauncher,onDownloadLauncher
  const lastRcwaProof=workers.reduce((m:number,x:any)=>Math.max(m,Number(x?.lastSeen||0)),0)||null,lastHostProof=runtime?.pairing?.lastAuthenticatedProof||null;
  const plannedSteps=routePlan?.ok?(routePlan.steps||[]):[];
  return <section className='r97-federation r112-federation'>
-  <header className='r112-fabric-head'><div><span>OMEGA CAPABILITY FABRIC · R112</span><h3>Tell OMEGA the outcome. The machinery stays underneath.</h3><p>Genesis explores, Optical screens, Sovereign computes, and OMEGAv6 admits proof. You should not need to understand that topology before using the system.</p></div><button className='r112-fabric-refresh' onClick={()=>void load()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Checking…':'Refresh status'}</button></header>
+  <header className='r112-fabric-head'><div><span>OMEGA CAPABILITY FABRIC · R112</span><h3>Tell OMEGA the outcome. The machinery stays underneath.</h3><p>Across four specialized runtimes, Genesis proposes, Optical screens, Sovereign computes, and OMEGAv6 admits proof. You should not need to understand that topology before using the system.</p></div><button className='r112-fabric-refresh' onClick={()=>void load()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Checking…':'Refresh status'}</button></header>
   {error&&<div className='r97-federation-error'><TriangleAlert/>{error}</div>}
 
   <section className='r112-intent' aria-label='Ask OMEGA for an outcome'>
