@@ -5,6 +5,7 @@ import TransitionProofPanelR23 from './TransitionProofPanelR23';
 import OmegaMotionSkinMapR35 from './OmegaMotionSkinMapR35';
 import TraversalModeStageR99 from './TraversalModeStageR99';
 import {corpusState,decodeAddress} from './corpusRuntime';
+import './designModesR99.css';
 
 type Props={variant:'Immersive Traversal'|'Extreme Traversal'|'Traversal';address:number;state:any;onAddress:(n:number)=>void};
 export default function OmegaTraversalStudio({variant,address,state,onAddress}:Props){
