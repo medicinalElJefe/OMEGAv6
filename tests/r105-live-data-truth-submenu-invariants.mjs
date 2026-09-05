@@ -45,3 +45,4 @@ for(const prior of ['R100 woven continuity geometry/time','R101 weave-derived ef
 must(r55.includes("await import('./r105-live-data-truth-submenu-invariants.mjs')")||r55.includes("import './r105-live-data-truth-submenu-invariants.mjs'"),'R105 gate must execute inside full R55/static release path');
 
 console.log('R105 LIVE DATA TRUTH + SUBMENU PASS · 44 routes preserved · 6 contextual submenus · current canonical recurrence separated from 2025 donor samples · current-session performance truth enforced');
+await import('./r106-temporal-ledger-truth-invariants.mjs');
