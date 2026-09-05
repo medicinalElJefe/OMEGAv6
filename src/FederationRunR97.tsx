@@ -3,6 +3,7 @@ import {CheckCircle2,ChevronRight,ExternalLink,RefreshCw,ShieldCheck,TriangleAle
 import {api} from './platformAdapter';
 import {FEDERATION_NODE_ORDER_R102,FEDERATION_NODES_R102,federationFlowR102,federationNodeStateR102,federationToneR102,type FederationNodeKey} from './federation/federationExperienceR102';
 import FederationLivingFieldR112 from './FederationLivingFieldR112';
+import FederationCeremonyR114 from './FederationCeremonyR114';
 import './federationRunR97.css';
 import './federationRunR112.css';
 
@@ -20,7 +21,7 @@ const plainGate=(gate:string,flow:any)=>{
 };
 
 export default function FederationRunR97({onDownloadLauncher:legacyDownload,paired:_paired}:Props){
- void legacyDownload;void _paired;
+ void _paired;
  const[data,setData]=useState<any>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const[intent,setIntent]=useState(''),[routePlan,setRoutePlan]=useState<any>(null),[routeBusy,setRouteBusy]=useState(false);
  const load=async()=>{setBusy(true);try{const r=await api.get<any>('/api/federation/run/status');setData(r.data);setError('')}catch(e:any){setError(e?.message||String(e))}finally{setBusy(false)}};
@@ -32,7 +33,7 @@ export default function FederationRunR97({onDownloadLauncher:legacyDownload,pair
  const lastRcwaProof=workers.reduce((m:number,x:any)=>Math.max(m,Number(x?.lastSeen||0)),0)||null,lastHostProof=runtime?.pairing?.lastAuthenticatedProof||null;
  const plannedSteps=routePlan?.ok?(routePlan.steps||[]):[];
  return <section className='r97-federation r112-federation'>
-  <header className='r112-fabric-head'><div><span>OMEGA CAPABILITY FABRIC · R112</span><h3>Tell OMEGA the outcome. The machinery stays underneath.</h3><p>Across four specialized runtimes, Genesis proposes, Optical screens, Sovereign computes, and OMEGAv6 admits proof. You should not need to understand that topology before using the system.</p></div><button className='r112-fabric-refresh' onClick={()=>void load()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Checking…':'Refresh status'}</button></header>
+  <header className='r112-fabric-head'><div><span>OMEGA CAPABILITY FABRIC · R114</span><h3>Tell OMEGA the outcome. The machinery stays underneath.</h3><p>Across four specialized runtimes, Genesis proposes, Optical screens, Sovereign computes, and OMEGAv6 admits proof. R114 can now bind those handoffs into one durable receipt chain instead of treating topology as execution proof.</p></div><button className='r112-fabric-refresh' onClick={()=>void load()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Checking…':'Refresh status'}</button></header>
   {error&&<div className='r97-federation-error'><TriangleAlert/>{error}</div>}
 
   <section className='r112-intent' aria-label='Ask OMEGA for an outcome'>
@@ -41,6 +42,7 @@ export default function FederationRunR97({onDownloadLauncher:legacyDownload,pair
   </section>
 
   <FederationLivingFieldR112 nodes={nodes} runtime={runtime}/>
+  <FederationCeremonyR114 intent={intent} onDownloadLauncher={legacyDownload}/>
 
   <section className='r112-node-strip' aria-label='Federation node status'>{rows.map(row=><article key={row.key} className={row.tone}><div>{row.tone==='ready'?<CheckCircle2/>:<TriangleAlert/>}<span><b>{row.spec.label}</b><small>{row.spec.verb}</small></span></div><strong>{row.state.replaceAll('_',' ')}</strong></article>)}</section>
 
@@ -53,6 +55,6 @@ export default function FederationRunR97({onDownloadLauncher:legacyDownload,pair
    <div className='r97-federation-ledger r102-ledger'><section><b>Durable project continuity</b><strong>{runtime?.continuity?.state||'CHECKING'}</strong><small>{runtime?.continuity?.projectCount||0} project record(s) · {runtime?.continuity?.receiptSha256?`receipt ${runtime.continuity.receiptSha256.slice(0,18)}…`:'receipt pending'}</small></section><section><b>Full-wave execution</b><strong>{Number(counts.running||0)} RUNNING · {Number(counts.queued||0)} QUEUED</strong><small>{receipts.length?receipts.map((x:any)=>`${x.status}:${String(x.resultSha256||x.id).slice(0,10)}`).join(' · '):'No returned full-wave receipt yet.'}</small></section><section><b>Authority boundary</b><strong>ONE GLOBAL CANONSTATE</strong><small>Genesis may keep node-local working state; Optical and Sovereign return packets. OMEGAv6 remains global admission authority.</small></section></div>
   </details>
 
-  <footer className='r102-federation-truth'><ShieldCheck/>R112 uses specialization without turning the interface into infrastructure. The living field is driven by current OMEGA calculus/address state and observed node truth; detailed machinery remains inspectable without becoming the ordinary workflow.</footer>
+  <footer className='r102-federation-truth'><ShieldCheck/>R114 keeps the R112 living capability fabric intact and adds a durable closure ceremony. Current PC execution, service-observed upstream receipts, solver returns and admission hashes stay separately visible so no historical or simulated state can masquerade as completed federation proof.</footer>
  </section>;
 }
