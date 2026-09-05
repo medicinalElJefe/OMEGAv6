@@ -47,7 +47,7 @@ must(layerRegistry.includes('surfaceLayerAuditR104')&&layerRegistry.includes('mi
 must(!layerRegistry.includes('pass:names.length===44'),'layer architecture may not be frozen to the historical route count');
 must(integrity.includes('surfaceLayerBindingR104(panel)')&&integrity.includes('data-layer-primary={layer.primary}')&&integrity.includes("data-layer-contract='R104/R107'"),'active routed wrapper must carry R104/R107 layer contract');
 const legacyIntegrity=workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}>{content}</SurfaceIntegrityR81>");
-const r109Integrity=workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}>")&&workstation.includes('<Suspense fallback={<SpecialistLoadingR109')&&workstation.includes('{content}</Suspense></SurfaceIntegrityR81>');
+const r109Integrity=workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}>")&&workstation.includes("const specialistFallback=<section className='r109-specialist-loading'")&&workstation.includes('<Suspense fallback={specialistFallback}>{content}</Suspense></SurfaceIntegrityR81>');
 must(legacyIntegrity||r109Integrity,'all routed content must stay inside integrity wrapper; R109 Suspense may be nested inside but never outside it');
 
 // Surface provenance and user-inspectable layer correctness, progressive rather than blocking.
