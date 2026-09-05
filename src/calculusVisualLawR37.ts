@@ -11,7 +11,7 @@ export type OperatorColorRole='ALPHA'|'BASE'|'CONSTRUCT'|'PRUNE'|'OMEGA';
 export const OPERATOR_COLOR_HUE:Record<OperatorColorRole,number>={ALPHA:286,BASE:43,CONSTRUCT:4,PRUNE:218,OMEGA:148};
 export type SourceModeInfluenceR68={
  ids:string[];coherence:number;mode188:number;forecast:number;prune:number;host:number;turbulence:number;compression:number;scarCarry:number;
- relation:number;proof:number;governance:number;traversal:number;flow:number;light:number;topology:number;scale:number;
+ relation:number;memory:number;proof:number;governance:number;traversal:number;flow:number;light:number;topology:number;scale:number;
  catalogCount:number;authorityCount:number;exactContributors:number;packetContributors:number;lensContributors:number;boundary:string;
 };
 export type CalculusVisualLaw={u:UnifiedMath;phase01:number;phaseAngle:number;phaseSpeed:number;pulseRate:number;shellCount:number;shellOpacity:number;shellEccentricity:number;shellPrecession:number;density:number;pointRadius:number;depthGain:number;perspectiveGain:number;curvature:number;fold:number;branchSpread:number;trailPersistence:number;scarMemory:number;routeStrength:number;routeWidth:number;proofGlow:number;contradictionPressure:number;hue:number;hueInverse:number;saturation:number;luminance:number;alpha:number;modeDecision:string;operatorWeights:Record<OperatorColorRole,number>;sourceModeInfluence:SourceModeInfluenceR68};
@@ -31,6 +31,7 @@ export function calculusVisualLaw(record:any):CalculusVisualLaw{
   compression:cl(.72*sat(executableModeValue(record,'M008'))+.18*fm.COMPRESSION+.10*fm.SCALE),
   scarCarry:cl(.72*sat(executableModeValue(record,'M009'))+.18*fm.MEMORY+.10*fm.RECURSION),
   relation:cl(.55*fm.RELATIVITY+.45*fm.TOPOLOGY),
+  memory:fm.MEMORY,
   proof:fm.PROOF,
   governance:fm.GOVERNANCE,
   traversal:fm.TRAVERSAL,
