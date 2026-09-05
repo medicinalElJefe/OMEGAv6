@@ -1,4 +1,4 @@
-import {warpWovenPointR100,wovenStateR100} from './wovenContinuityGeometryR100';
+import {warpWovenPointR100,wovenStateR100,type WovenStateR100} from './wovenContinuityGeometryR100';
 
 export type TraversalDesignModeR99='UNIFIED'|'WEAVE'|'SHELL'|'WATER'|'LIGHT'|'SCAR'|'RELATIVITY'|'FORECAST'|'PROOF';
 
@@ -51,11 +51,10 @@ export function traversalVisualProfileR99(mode:TraversalDesignModeR99,u:any):Tra
  };
 }
 
-export function warpTraversalPointR99(mode:TraversalDesignModeR99,p:{x:number;y:number;z:number;weight:number},index:number,total:number,u:any,t:number,profile:TraversalVisualProfileR99,address=0){
+export function warpTraversalPointR99(mode:TraversalDesignModeR99,p:{x:number;y:number;z:number;weight:number},index:number,total:number,u:any,t:number,profile:TraversalVisualProfileR99,address=0,weaveState?:WovenStateR100){
  let{x,y,z,weight}=p;const q=clamp(Number(u?.q)),C=clamp(Number(u?.C)),Phi=clamp(Number(u?.Phi)),scar=clamp(Number(u?.scar)),ev=clamp(Number(u?.evidence));const phase=index/Math.max(1,total-1)*Math.PI*2;
- const weave=wovenStateR100(u,address,t);
  if(mode==='WEAVE'){
-  const wp=warpWovenPointR100({x,y,z,weight},index,total,weave,t);x=wp.x;y=wp.y;z=wp.z;weight=wp.weight;
+  const weave=weaveState||wovenStateR100(u,address,t),wp=warpWovenPointR100({x,y,z,weight},index,total,weave,t);x=wp.x;y=wp.y;z=wp.z;weight=wp.weight;
  }else if(mode==='WATER'){
   const w=(.055+.16*Phi)*profile.flow;x+=Math.sin(y*5.2+t*.52+phase*.18)*w;y+=Math.sin(z*4.1-t*.39+phase*.11)*w*.72;z+=Math.cos(x*3.4+t*.31)*w*.5;
  }else if(mode==='LIGHT'){
