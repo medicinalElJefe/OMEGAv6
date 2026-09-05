@@ -5,6 +5,7 @@ const must=(ok,msg)=>{if(!ok)throw new Error('R102 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const worker=read('src/workerR102.js');
 const worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'';
+const worker114=fs.existsSync('src/workerR114.js')?read('src/workerR114.js'):'';
 const worker101=read('src/workerR101.js');
 const federation=read('src/FederationRunR97.tsx');
 const experience=read('src/federation/federationExperienceR102.ts');
@@ -21,7 +22,8 @@ for(const route of ['Hybrid Link','Forecast','Relativity','Matter Traversal','Ev
 
 const r102Direct=wrangler.includes('"main": "src/workerR102.js"');
 const r111PreservesR102=wrangler.includes('"main": "src/workerR111.js"')&&worker111.includes("from './workerR102.js'");
-must(r102Direct||r111PreservesR102,'Cloudflare entry must promote R102 directly or through a proven additive R111 successor');
+const r114PreservesR102=wrangler.includes('"main": "src/workerR114.js"')&&worker114.includes("from './workerR111.js'")&&worker111.includes("from './workerR102.js'");
+must(r102Direct||r111PreservesR102||r114PreservesR102,'Cloudflare entry must promote R102 directly or through a proven additive R111/R114 successor');
 must(worker.includes("import r101,{OmegaRuntime as OmegaRuntimeR101} from './workerR101.js'"),'R102 must extend R101 rather than replace Hybrid/weave repairs');
 must(worker.includes('export class OmegaRuntime extends OmegaRuntimeR101'),'Durable Object class lineage must remain compatible');
 must(worker101.includes("import r34,{OmegaRuntime as OmegaRuntimeR34} from './workerR34.js'"),'R101 must still preserve R34 federation/RCWA behavior');
@@ -41,22 +43,22 @@ must(federation.includes("['PROPOSE','SCREEN','SOLVE','ADMIT']"),'visible handof
 must(federation.includes('CURRENT HANDOFF')&&federation.includes('NEXT USEFUL ACTION'),'task-first operational guidance missing');
 must(css.includes('.r102-flow')&&css.includes('.r102-four-nodes')&&css.includes('@media(max-width:760px)'),'desktop/mobile federation instrument containment missing');
 
-must(['R102','R111'].includes(manifest.experienceRevision)&&manifest.canonicalAuthority==='OMEGAv6','federation manifest authority/revision mismatch');
+must(['R102','R111','R114'].includes(manifest.experienceRevision)&&manifest.canonicalAuthority==='OMEGAv6','federation manifest authority/revision mismatch');
 must(manifest.nodes.length===4,'federation manifest must define exactly four specialized nodes');
 must(manifest.nodes.find(x=>x.id==='omega-genesis')?.canonicalScope==='NODE_LOCAL_PROPOSAL_STATE_ONLY','Genesis must not compete for global CanonState');
 must(manifest.nodes.find(x=>x.id==='omega-optical')?.url==='https://omega-living-light-etching-private-woven2.vercel.app','latest Optical surface must be preferred');
 must(manifest.governance?.nodeLocalStateDoesNotEqualGlobalCanonState===true,'node-local/global-state distinction must be machine-readable');
 must(Array.isArray(manifest.experienceContract?.sharedContext)&&manifest.experienceContract.sharedContext.includes('lineage')&&manifest.experienceContract.sharedContext.includes('scar_history'),'shared federation context must preserve lineage + history');
 
-must(['R102','R111'].includes(caps.experienceRevision)&&caps.interactionModel.includes('intent'),'capability manifest must remain task-first under additive R111');
+must(['R102','R111'].includes(caps.experienceRevision)&&caps.interactionModel.includes('intent'),'capability manifest must remain task-first under additive R111/R114');
 must(caps.nodes['omega-v6'].authority==='global-canonical','capability manifest global authority mismatch');
 must(caps.nodes['omega-genesis'].scope==='NODE_LOCAL_PROPOSAL_STATE_ONLY','capability manifest Genesis scope mismatch');
 must(caps.nodes['omega-sovereign'].planned.includes('fdtd')&&caps.nodes['omega-sovereign'].planned.includes('fem'),'future full-wave expansion must remain declared without being falsely active');
 
 for(const rule of ['FEDERATION_SINGLE_GLOBAL_AUTHORITY','TASK_FIRST_CAPABILITY_ROUTING','SHARED_CONTEXT_ACROSS_NODES'])must(accepted.includes("id:'"+rule+"'"),'persistent production contract missing '+rule);
 must(accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority'")&&accepted.includes("'R102 four-node capability fabric + task-first federation authority'"),'R102 must extend R101 preservation lineage');
-if(r111PreservesR102)must(accepted.includes('R111')&&worker111.includes("path==='/api/fabric/status'")&&worker111.includes('FABRIC_MESH_LAW_R111'),'R111 successor must preserve R102 while adding bounded fabric authority');
-must(![worker,experience,federation].join('\n').includes('Math.random'),'federation experience must not depend on fake/random state');
+if(r111PreservesR102||r114PreservesR102)must(accepted.includes('R111')&&worker111.includes("path==='/api/fabric/status'")&&worker111.includes('FABRIC_MESH_LAW_R111'),'R111 successor must preserve R102 while adding bounded fabric authority');
+must(![worker,worker114,experience,federation].join('\n').includes('Math.random'),'federation experience must not depend on fake/random state');
 
-console.log('R102 FEDERATED INSTRUMENT EXPERIENCE PASS · four specialized runtimes · task-first handoff trace · stable schema + additive R102/R111 revision · single global CanonState authority · Optical endpoint continuity · R101/R34/44-route preservation');
+console.log('R102 FEDERATED INSTRUMENT EXPERIENCE PASS · four specialized runtimes · task-first handoff trace · stable schema + additive R102/R111/R114 revision · single global CanonState authority · Optical endpoint continuity · R101/R34/44-route preservation');
 await import('./r103-intent-capability-router-invariants.mjs');

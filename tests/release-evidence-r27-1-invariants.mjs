@@ -7,6 +7,7 @@ const worker34=fs.existsSync('src/workerR34.js')?fs.readFileSync('src/workerR34.
 const worker101=fs.existsSync('src/workerR101.js')?fs.readFileSync('src/workerR101.js','utf8'):'';
 const worker102=fs.existsSync('src/workerR102.js')?fs.readFileSync('src/workerR102.js','utf8'):'';
 const worker111=fs.existsSync('src/workerR111.js')?fs.readFileSync('src/workerR111.js','utf8'):'';
+const worker114=fs.existsSync('src/workerR114.js')?fs.readFileSync('src/workerR114.js','utf8'):'';
 const config=fs.readFileSync('wrangler.jsonc','utf8');
 const panel=fs.readFileSync('src/GovernedBuildReceiptPanel.tsx','utf8');
 const vite=fs.readFileSync('vite.config.ts','utf8');
@@ -20,7 +21,8 @@ const wrappedR34=config.includes('"main": "src/workerR34.js"')&&worker34.include
 const wrappedR101=config.includes('"main": "src/workerR101.js"')&&worker101.includes("from './workerR34.js'")&&worker101.includes('return r34.fetch(request,env)')&&worker34.includes("from './workerR33.js'")&&worker34.includes('return r33.fetch(request,env)')&&worker33.includes("from './workerR32.js'")&&worker32.includes("import r27 from './workerR27.js'");
 const wrappedR102=config.includes('"main": "src/workerR102.js"')&&worker102.includes("from './workerR101.js'")&&worker101.includes("from './workerR34.js'")&&worker34.includes("from './workerR33.js'")&&worker33.includes("from './workerR32.js'")&&worker32.includes("import r27 from './workerR27.js'");
 const wrappedR111=config.includes('"main": "src/workerR111.js"')&&worker111.includes("from './workerR102.js'")&&worker102.includes("from './workerR101.js'")&&worker101.includes("from './workerR34.js'")&&worker34.includes("from './workerR33.js'")&&worker33.includes("from './workerR32.js'")&&worker32.includes("import r27 from './workerR27.js'");
-must(directR27||wrappedR27||wrappedR33||wrappedR34||wrappedR101||wrappedR102||wrappedR111,'R27 release-evidence wrapper must be deployed directly or preserved through the proven R32/R33/R34/R101/R102/R111 successor chain');
+const wrappedR114=config.includes('"main": "src/workerR114.js"')&&worker114.includes("from './workerR111.js'")&&worker111.includes("from './workerR102.js'")&&worker102.includes("from './workerR101.js'")&&worker101.includes("from './workerR34.js'")&&worker34.includes("from './workerR33.js'")&&worker33.includes("from './workerR32.js'")&&worker32.includes("import r27 from './workerR27.js'");
+must(directR27||wrappedR27||wrappedR33||wrappedR34||wrappedR101||wrappedR102||wrappedR111||wrappedR114,'R27 release-evidence wrapper must be deployed directly or preserved through the proven R32/R33/R34/R101/R102/R111/R114 successor chain');
 must(config.includes('"version_metadata"')&&config.includes('"CF_VERSION_METADATA"'),'Cloudflare version metadata binding must be configured');
 must(worker.includes("'/api/release-evidence'"),'release-evidence endpoint missing');
 must(worker.includes('OMEGA_RELEASE_EVIDENCE_V1'),'release-evidence schema missing');
@@ -39,5 +41,5 @@ must(vite.includes('OMEGA_GOVERNED_BUILD_RECEIPT_V1'),'R26.1 package receipt mus
 must(vite.includes("role:'PACKAGED_SOURCE_SHA'")&&vite.includes("authority:candidateSha&&promotedMergeSha&&rollbackSha?'GITHUB_MERGE_PARENTS':'EXTERNAL_RELEASE_LEDGER_REQUIRED'"),'build receipt must distinguish packaged source from governed candidate/promoted/rollback lineage');
 must(ci.includes('Bind promoted merge lineage')&&ci.includes('OMEGA_CANDIDATE_SHA')&&ci.includes('OMEGA_PROMOTED_SHA')&&ci.includes('OMEGA_ROLLBACK_SHA'),'production workflow must bind receipt lineage from exact Git merge parents before deployment');
 must(semverAtLeast(pkg.version,'27.1.0'),'package version must retain or advance beyond R27.1');
-for(const source of [worker,worker32,worker33,worker34,worker101,worker102,worker111,panel,config,vite,ci])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1+ must remain AppDeploy-free');
-console.log(`OMEGA R111 RELEASE EVIDENCE PASS · package ${pkg.version} · R31.2 merge-parent lineage preserved through R32/R33/R34/R101/R102/R111 successor chain`);
+for(const source of [worker,worker32,worker33,worker34,worker101,worker102,worker111,worker114,panel,config,vite,ci])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1+ must remain AppDeploy-free');
+console.log(`OMEGA R114 RELEASE EVIDENCE PASS · package ${pkg.version} · R31.2 merge-parent lineage preserved through R32/R33/R34/R101/R102/R111/R114 successor chain`);
