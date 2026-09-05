@@ -65,7 +65,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
      </button>})}
      {rows.length===0&&<div className='r88-empty'>No route matches that workspace/search combination.</div>}
     </div>
-    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>Persistent rail · six contextual submenus filter the same 44-route registry · selecting a destination collapses the panel · no capability is removed.</span></footer>
+    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>Persistent rail · active application remains visible · six contextual submenus filter the same 44-route registry · selecting a destination collapses the panel · no capability is removed.</span></footer>
    </>:<div className='r88-software-layer'><OmegaSystemInventoryR83 compact onNavigate={go}/></div>}
   </section>
  </aside>;
