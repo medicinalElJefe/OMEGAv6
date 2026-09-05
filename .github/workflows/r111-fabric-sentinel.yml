@@ -23,6 +23,7 @@ permissions:
 
 env:
   SENTINEL_URL: https://omega-fabric-sentinel.jeffdeweyeljefe.workers.dev
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
 
 jobs:
   verify:
@@ -35,6 +36,18 @@ jobs:
       - run: npm install
       - run: node --check cloud/fabric-sentinel/src/index.js
       - run: npx wrangler deploy --dry-run --config wrangler.fabric-sentinel.jsonc --outdir .wrangler-r111-sentinel-dry-run
+      - name: Diagnose current canonical fabric surface
+        continue-on-error: true
+        shell: bash
+        run: |
+          node <<'NODE'
+          const url=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'')+'/api/fabric/status';
+          const r=await fetch(url,{headers:{accept:'application/json','cache-control':'no-cache'}});
+          const text=await r.text();
+          console.log(`CANONICAL FABRIC DIAGNOSTIC · HTTP ${r.status} · content-type ${r.headers.get('content-type')||''}`);
+          console.log(text.slice(0,2400));
+          if(!r.ok)process.exitCode=1;
+          NODE
 
   deploy-main:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
