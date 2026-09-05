@@ -41,7 +41,7 @@ jobs:
         run: npx wrangler deploy --dry-run --outdir .wrangler-r115-canonical
 
   deploy-machine-adapters:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: verify-r115
     runs-on: ubuntu-latest
     environment: production
