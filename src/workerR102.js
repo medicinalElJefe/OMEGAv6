@@ -44,7 +44,7 @@ async function probeOpticalR102(env){
 function experienceR102(data){
  const n=data?.nodes||{},r=data?.runtime||{},genesis=n.genesis?.state==='LIVE',optical=n.optical?.state==='LIVE',host=n.sovereign?.state==='PC_ONLINE',solver=n.sovereign?.rcwaState==='RCWA_ONLINE';
  let stage='ADMIT',gate='READY';
- if(!genesis){stage='PROPOSE';gate='GENESIS'}else if(!optical){stage='SCREEN';gate='OPTICAL'}else if(!host){stage='SOLVE';gate:'SOVEREIGN_LINK'}else if(!solver){stage='SOLVE';gate='FULL_WAVE'}else if(Number(r?.rcwa?.counts?.running||0)>0){stage='SOLVE';gate='RUNNING'}else if(Number(r?.rcwa?.counts?.queued||0)>0){stage='SOLVE';gate='QUEUED'}
+ if(!genesis){stage='PROPOSE';gate='GENESIS'}else if(!optical){stage='SCREEN';gate='OPTICAL'}else if(!host){stage='SOLVE';gate='SOVEREIGN_LINK'}else if(!solver){stage='SOLVE';gate='FULL_WAVE'}else if(Number(r?.rcwa?.counts?.running||0)>0){stage='SOLVE';gate='RUNNING'}else if(Number(r?.rcwa?.counts?.queued||0)>0){stage='SOLVE';gate='QUEUED'}
  return{revision:'R102',stage,gate,nodeOrder:['omega-genesis','omega-optical','omega-sovereign','omega-v6'],verbs:['PROPOSE','SCREEN','SOLVE','ADMIT'],authorityModel:{globalCanonical:'omega-v6',genesis:'node-local proposal state only',optical:'worker packet return',sovereign:'worker result return'},userModel:'one project + one packet lineage + four specialized runtimes',intentRouterRevision:'R103'};
 }
 
