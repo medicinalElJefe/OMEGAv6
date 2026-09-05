@@ -17,6 +17,7 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   {id:'DISTINCT_APPLICATION_IDENTITY',text:'Forecast, Relativity, Atlas, Infinity, Field, Motion, Convergence, Matter, Traversal, Scale, Earth, Modes and other specialist surfaces keep distinct interaction and visual semantics.'},
   {id:'MODE_VISUAL_FUNCTION_CORRELATION',text:'A selectable design/mode layer must change a declared source-driven visual or functional mapping. Mode labels may not merely rename the same depiction; the active depiction must remain bound to canonical/evaluated inputs and its declared truth boundary.'},
   {id:'TRUTH_WITHOUT_FLATTENING',text:'Truth enforcement must not flatten advanced visualization into generic charts. Measured/imported/evaluated/derived/forecast/representational status is separated while retaining the richest lawful visualization.'},
+  {id:'NO_STALE_NOW_GRAPH',text:'Any graph or numeric readout presented as NOW, live, current, or present-session must derive from the current canonical packet, a returned runtime observation with explicit freshness, or measurements collected during the current browser session. Archived, recovered, workbook SAMPLE, donor, and retained browser-history rows remain inspectable only when visibly labeled as historical/snapshot/reference and may never silently populate current readouts.'},
   {id:'NO_VISUAL_STAGE_OCCLUSION',text:'Primary visual stages must be unobstructed by default. Telemetry, inspectors, legends, assistant panes, proof summaries, and supporting controls belong outside the stage or in explicit user-opened progressive disclosures; they may not cover the active visualization.'},
   {id:'KEEP_DONOR_UNTIL_VERIFIED',text:'When superseding an accepted renderer or subsystem, retain the prior implementation as recoverable donor/optional lineage until the replacement passes functional and visual acceptance.'},
   {id:'MOBILE_DESKTOP_PARITY',text:'Mobile and desktop must expose the same core capability and truth state through device-appropriate interaction, without overlays hiding the primary instrument.'},
@@ -43,26 +44,27 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   'R102 four-node capability fabric + task-first federation authority',
   'R103 task-first capability router + truthful performance partition authority',
   'R104 eight-layer functional correlation + readable non-covering navigation authority',
+  'R105 live-data freshness + contextual workspace submenu authority',
   'deep Matter/Visual/Traversal donor implementations',
   'Hybrid Link device-proof boundary',
   'Earth returned-evidence boundary',
   'route-before-generation',
   'canonical state / admitted transition authority'
  ] as const,
- visualRule:'Do not solve visual truth by reducing OMEGA to generic charts. Build source-driven OMEGA-native geometry with an explicit variable-to-geometry map; where Woven Continuity is active, geometry must express exchange/transform, invariant carry, residual/scar carry, signed orientation, time and bounded resolution demand coherently. Keep the primary visual stage unobstructed by default, require selectable modes to produce declared functional/visual differences, and keep expanded navigation readable without covering the active instrument.',
+ visualRule:'Do not solve visual truth by reducing OMEGA to generic charts. Build source-driven OMEGA-native geometry with an explicit variable-to-geometry map; where Woven Continuity is active, geometry must express exchange/transform, invariant carry, residual/scar carry, signed orientation, time and bounded resolution demand coherently. A NOW/live/current graph must also carry temporal truth: current canonical state, returned fresh observation, or current-session measurement. Archived/sample/donor/history data remains available only as explicitly labeled history. Keep the primary visual stage unobstructed by default, require selectable modes to produce declared functional/visual differences, and keep expanded navigation readable without covering the active instrument.',
  replacementRule:'If a replacement is proposed, the prior accepted implementation stays available until the new version demonstrates functional parity, stronger truth, responsive parity, and a verified non-regression pass.',
- rolloverRule:'A new chat/session must recover this contract from repository state before making broad UI, renderer, navigation, capability, federation, layer-binding, or architecture replacements.'
+ rolloverRule:'A new chat/session must recover this contract from repository state before making broad UI, renderer, navigation, capability, federation, layer-binding, data-freshness, or architecture replacements.'
 } as const;
 
 export function acceptedProductionAuditR95(){
  const ids=ACCEPTED_PRODUCTION_CONTRACT_R95.rules.map(x=>x.id),unique=new Set(ids).size===ids.length;
- const required=['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','WOVEN_CONTINUITY_GEOMETRY','WEAVE_DERIVED_RESOLUTION','HYBRID_BRIDGE_ID_CONTINUITY','FEDERATION_SINGLE_GLOBAL_AUTHORITY','TASK_FIRST_CAPABILITY_ROUTING','SHARED_CONTEXT_ACROSS_NODES','FULL_LAYER_FUNCTIONAL_CORRELATION','READABLE_NON_COVERING_NAVIGATION','MODE_VISUAL_FUNCTION_CORRELATION','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'];
+ const required=['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','WOVEN_CONTINUITY_GEOMETRY','WEAVE_DERIVED_RESOLUTION','HYBRID_BRIDGE_ID_CONTINUITY','FEDERATION_SINGLE_GLOBAL_AUTHORITY','TASK_FIRST_CAPABILITY_ROUTING','SHARED_CONTEXT_ACROSS_NODES','FULL_LAYER_FUNCTIONAL_CORRELATION','READABLE_NON_COVERING_NAVIGATION','MODE_VISUAL_FUNCTION_CORRELATION','NO_STALE_NOW_GRAPH','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'];
  return{
   total:ids.length,
   unique,
   requiredPresent:required.every(x=>ids.includes(x as any)),
   pass:unique&&required.every(x=>ids.includes(x as any)),
   authority:ACCEPTED_PRODUCTION_CONTRACT_R95.authority,
-  boundary:'This contract prevents regression-by-omission, replacement-by-simplification, uncorrelated mode labels, default visual-stage occlusion, unreadable covering navigation, cross-layer semantic drift, unbounded interpretation of Woven Continuity geometry, session/bridge identity confusion, competing global state authority and infrastructure-first federation UX. It does not by itself prove runtime execution; normal execution/proof gates still apply.'
+  boundary:'This contract prevents regression-by-omission, replacement-by-simplification, uncorrelated mode labels, stale history masquerading as NOW, default visual-stage occlusion, unreadable covering navigation, cross-layer semantic drift, unbounded interpretation of Woven Continuity geometry, session/bridge identity confusion, competing global state authority and infrastructure-first federation UX. It does not by itself prove runtime execution; normal execution/proof gates still apply.'
  };
 }
