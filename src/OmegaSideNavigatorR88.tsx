@@ -5,6 +5,7 @@ import {effectiveCapabilityReality} from './operationalCapabilityRuntimeR45';
 import {OMEGA_ALL_ROUTES_R82,workspaceForRouteR82} from './omegaExperienceRegistryR82';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import './omegaSideNavigatorR88.css';
+import './omegaSideNavigatorR100.css';
 
 type BrowserLayer='EVERYWHERE'|'SOFTWARE';
 type Props={currentPanel?:string;onNavigate:(panel:string)=>void;onHome?:()=>void};
@@ -21,6 +22,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
  },[]);
  useEffect(()=>{document.documentElement.dataset.omegaNavPresent='true';document.documentElement.dataset.omegaNavExpanded=expanded?'true':'false';return()=>{delete document.documentElement.dataset.omegaNavPresent;delete document.documentElement.dataset.omegaNavExpanded}},[expanded]);
  const rows=useMemo(()=>{const q=query.trim().toLowerCase();return OMEGA_ALL_ROUTES_R82.filter(route=>{if(!q)return true;const workspace=workspaceForRouteR82(route);return (route+' '+workspace.label+' '+workspace.copy).toLowerCase().includes(q)})},[query]);
+ const activeWorkspace=useMemo(()=>currentPanel?workspaceForRouteR82(currentPanel):null,[currentPanel]);
  const go=(panel:string)=>{onNavigate(panel);setExpanded(false);setQuery('')};
  return <aside className={'r94-side-toolbar '+(expanded?'expanded':'collapsed')} aria-label='OMEGA global navigation toolbar'>
   <div className='r94-nav-rail'>
@@ -32,19 +34,19 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
   </div>
   <section className='r88-navigator r89-flat-navigator r94-nav-panel' aria-hidden={!expanded}>
    <header className='r88-navigator-head'>
-    <div><span>OMEGA V6</span><b>{layer==='EVERYWHERE'?'Everywhere':'Software map'}</b><small>{layer==='EVERYWHERE'?(rows.length+'/44 directly reachable · one continuous list'):'Full system inventory and lineage'}</small></div>
+    <div><span>OMEGA V6 · COMMAND NAVIGATOR</span><b>{layer==='EVERYWHERE'?'Everywhere':'Software map'}</b><small>{layer==='EVERYWHERE'?(activeWorkspace?`${activeWorkspace.label} active · ${rows.length}/44 directly reachable`:`${rows.length}/44 directly reachable · one continuous list`):'Full system inventory and lineage'}</small></div>
     <div className='r88-head-actions'><button onClick={()=>setExpanded(false)} aria-label='Collapse navigator'><ChevronLeft/></button></div>
    </header>
    <nav className='r89-nav-mode' aria-label='Navigator mode'><button className={layer==='EVERYWHERE'?'active':''} onClick={()=>setLayer('EVERYWHERE')}><Menu/>Everywhere <b>44</b></button><button className={layer==='SOFTWARE'?'active':''} onClick={()=>setLayer('SOFTWARE')}><Layers3/>Software</button></nav>
    {layer==='EVERYWHERE'?<>
-    <label className='r88-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all 44 OMEGA applications'/><kbd>⌘K</kbd></label>
+    <label className='r88-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search applications, workspaces, capabilities' aria-label='Search all OMEGA applications'/><kbd>⌘K</kbd></label>
     <div className='r89-flat-scroll' aria-label='All 44 OMEGA applications'>
      {rows.map(route=>{const index=OMEGA_ALL_ROUTES_R82.indexOf(route)+1,workspace=workspaceForRouteR82(route),reality=effectiveCapabilityReality(route);return <button key={route} className={'r89-flat-route '+(currentPanel===route?'active':'')} aria-current={currentPanel===route?'page':undefined} onClick={()=>go(route)}>
       <i>{String(index).padStart(2,'0')}</i><span><b>{route}</b><small>{workspace.label} · {CAPABILITY_REALITY_LABEL[reality]}</small></span><ChevronRight/>
      </button>})}
      {rows.length===0&&<div className='r88-empty'>No route matches that search.</div>}
     </div>
-    <footer className='r88-navigator-foot'><ShieldCheck/><span>Persistent rail · expandable list · active application remains visible.</span></footer>
+    <footer className='r88-navigator-foot'><ShieldCheck/><span>Persistent rail · flat 44-route authority · active application remains visible.</span></footer>
    </>:<div className='r88-software-layer'><OmegaSystemInventoryR83 compact onNavigate={go}/></div>}
   </section>
  </aside>;

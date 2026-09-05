@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import './r100-woven-geometry-professional-navigation-invariants.mjs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R99 '+msg)};
 
@@ -45,4 +46,4 @@ must(hybrid.includes('PC ONLINE is never claimed')||hybrid.includes('authenticat
 must(earth.includes('RETURNED EVIDENCE BOUND')&&earth.includes('evidenceHash'),'Earth returned-evidence authority must remain intact');
 must(![stage,modes,studio,css].join('\n').includes('@appdeploy/client'),'R99 must remain provider portable');
 
-console.log('R99 DESIGN MODES PASS · 8 source-driven traversal depictions · unobstructed high-detail stage · proof/motion/donor layers preserved outside canvas · 44 routes intact');
+console.log('R99 DESIGN MODES PASS · 8 source-driven traversal depictions preserved + R100 woven extension · unobstructed high-detail stage · proof/motion/donor layers preserved outside canvas · 44 routes intact');

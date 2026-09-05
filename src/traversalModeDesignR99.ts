@@ -1,4 +1,6 @@
-export type TraversalDesignModeR99='UNIFIED'|'SHELL'|'WATER'|'LIGHT'|'SCAR'|'RELATIVITY'|'FORECAST'|'PROOF';
+import {warpWovenPointR100,wovenStateR100,type WovenStateR100} from './wovenContinuityGeometryR100';
+
+export type TraversalDesignModeR99='UNIFIED'|'WEAVE'|'SHELL'|'WATER'|'LIGHT'|'SCAR'|'RELATIVITY'|'FORECAST'|'PROOF';
 
 export type TraversalVisualProfileR99={
  id:TraversalDesignModeR99;
@@ -22,6 +24,7 @@ export type TraversalVisualProfileR99={
 
 export const TRAVERSAL_MODE_DESIGN_R99:Record<TraversalDesignModeR99,Omit<TraversalVisualProfileR99,'sourceMap'|'geometryMap'>>={
  UNIFIED:{id:'UNIFIED',bands:12,petals:5,density:1,radial:1,polyScale:1,particleScale:1,alpha:1,flow:.18,branch:.08,scar:.08,relativity:.18,proofGate:.06,shellQuantize:0,satelliteCount:6},
+ WEAVE:{id:'WEAVE',bands:12,petals:12,density:1.08,radial:1.02,polyScale:1.02,particleScale:.94,alpha:1.05,flow:.64,branch:.12,scar:.42,relativity:.48,proofGate:.12,shellQuantize:.24,satelliteCount:12},
  SHELL:{id:'SHELL',bands:18,petals:6,density:.86,radial:1.08,polyScale:1.16,particleScale:.92,alpha:.92,flow:.06,branch:.02,scar:.04,relativity:.06,proofGate:.04,shellQuantize:.92,satelliteCount:12},
  WATER:{id:'WATER',bands:10,petals:3,density:1.12,radial:1.02,polyScale:.84,particleScale:.82,alpha:.82,flow:1,branch:.05,scar:.04,relativity:.12,proofGate:.02,shellQuantize:0,satelliteCount:6},
  LIGHT:{id:'LIGHT',bands:8,petals:12,density:.72,radial:1.16,polyScale:1.05,particleScale:1.24,alpha:1.18,flow:.08,branch:.16,scar:.02,relativity:.08,proofGate:.62,shellQuantize:0,satelliteCount:8},
@@ -44,13 +47,15 @@ export function traversalVisualProfileR99(mode:TraversalDesignModeR99,u:any):Tra
   particleScale:base.particleScale*(.86+.26*evidence),
   alpha:base.alpha*(.78+.34*evidence)*(1-.18*q),
   sourceMap:`CΩ ${C.toFixed(3)} · Φ ${Phi.toFixed(3)} · q ${q.toFixed(3)} · Λ ${Lambda.toFixed(3)} · scar ${scar.toFixed(3)} · evidence ${evidence.toFixed(3)}`,
-  geometryMap:mode==='WATER'?'continuity/plasticity → streamline curl + wave spacing':mode==='LIGHT'?'evidence/coherence → surviving emitters + beam clarity':mode==='SCAR'?'scar/contradiction → path displacement + persistence':mode==='RELATIVITY'?'observer relativity/anisotropy → frame shear + depth compression':mode==='FORECAST'?'plasticity/route branch → split corridor ghosts':mode==='PROOF'?'evidence/contradiction → visibility gate + luminance':mode==='SHELL'?'shell pressure/continuity → quantized radial bands':'all declared channels → balanced membrane geometry'
+  geometryMap:mode==='WEAVE'?'partition → exchange → invariant carry → scar/history carry → frame re-contextualization':mode==='WATER'?'continuity/plasticity → streamline curl + wave spacing':mode==='LIGHT'?'evidence/coherence → surviving emitters + beam clarity':mode==='SCAR'?'scar/contradiction → path displacement + persistence':mode==='RELATIVITY'?'observer relativity/anisotropy → frame shear + depth compression':mode==='FORECAST'?'plasticity/route branch → split corridor ghosts':mode==='PROOF'?'evidence/contradiction → visibility gate + luminance':mode==='SHELL'?'shell pressure/continuity → quantized radial bands':'all declared channels → balanced membrane geometry'
  };
 }
 
-export function warpTraversalPointR99(mode:TraversalDesignModeR99,p:{x:number;y:number;z:number;weight:number},index:number,total:number,u:any,t:number,profile:TraversalVisualProfileR99){
- let{x,y,z}=p;const q=clamp(Number(u?.q)),C=clamp(Number(u?.C)),Phi=clamp(Number(u?.Phi)),scar=clamp(Number(u?.scar)),ev=clamp(Number(u?.evidence));const phase=index/Math.max(1,total-1)*Math.PI*2;
- if(mode==='WATER'){
+export function warpTraversalPointR99(mode:TraversalDesignModeR99,p:{x:number;y:number;z:number;weight:number},index:number,total:number,u:any,t:number,profile:TraversalVisualProfileR99,address=0,weaveState?:WovenStateR100){
+ let{x,y,z,weight}=p;const q=clamp(Number(u?.q)),C=clamp(Number(u?.C)),Phi=clamp(Number(u?.Phi)),scar=clamp(Number(u?.scar)),ev=clamp(Number(u?.evidence));const phase=index/Math.max(1,total-1)*Math.PI*2;
+ if(mode==='WEAVE'){
+  const weave=weaveState||wovenStateR100(u,address,t),wp=warpWovenPointR100({x,y,z,weight},index,total,weave,t);x=wp.x;y=wp.y;z=wp.z;weight=wp.weight;
+ }else if(mode==='WATER'){
   const w=(.055+.16*Phi)*profile.flow;x+=Math.sin(y*5.2+t*.52+phase*.18)*w;y+=Math.sin(z*4.1-t*.39+phase*.11)*w*.72;z+=Math.cos(x*3.4+t*.31)*w*.5;
  }else if(mode==='LIGHT'){
   const beam=.78+1.18*ev;x*=beam;y*=.38+.44*C;z*=.5+.48*ev;
@@ -65,5 +70,5 @@ export function warpTraversalPointR99(mode:TraversalDesignModeR99,p:{x:number;y:
  }else if(mode==='SHELL'){
   const r=Math.hypot(x,y)+1e-6,a=Math.atan2(y,x),bands=12,step=.055,qr=.12+Math.round(r/step)%bands*step;x=Math.cos(a)*qr;y=Math.sin(a)*qr;z*=.52+.3*C;
  }
- return{x,y,z,weight:p.weight};
+ return{x,y,z,weight};
 }

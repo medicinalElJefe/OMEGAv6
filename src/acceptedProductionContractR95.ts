@@ -6,6 +6,7 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   {id:'NO_REGRESSION_BY_OMISSION',text:'A change may not silently drop a route, capability, control, proof path, data channel, donor-backed function, mobile behavior, desktop behavior, or accepted visual interaction.'},
   {id:'NO_GENERIC_SUBSTITUTION',text:'OMEGA-native visual instruments may not be replaced by generic dashboard widgets, business bar charts, decorative placeholder graphics, or one repeated renderer used as every mode.'},
   {id:'TRACEABLE_VISUAL_GEOMETRY',text:'Primary OMEGA state geometry must map declared source/canonical/evaluated variables to declared geometry parameters. Every visible deformation must have a traceable variable mapping.'},
+  {id:'WOVEN_CONTINUITY_GEOMETRY_AUTHORITY',text:'Woven Continuity geometry is an ordered source-driven transform: partition → exchange/transform → invariant carry → scar/history carry → re-contextualize/repartition. Motion is synchronized to declared time/state; σ orientation remains factored from structure; symmetry/asymmetry remain transform-relative; 37/73 remains a reference bias unless independently validated; 12→144→1728→20,736→248,832 are atlas/address resolution levels rather than claims of literal physical dimensions.'},
   {id:'DISTINCT_APPLICATION_IDENTITY',text:'Forecast, Relativity, Atlas, Infinity, Field, Motion, Convergence, Matter, Traversal, Scale, Earth, Modes and other specialist surfaces keep distinct interaction and visual semantics.'},
   {id:'MODE_VISUAL_FUNCTION_CORRELATION',text:'A selectable design/mode layer must change a declared source-driven visual or functional mapping. Mode labels may not merely rename the same depiction; the active depiction must remain bound to canonical/evaluated inputs and its declared truth boundary.'},
   {id:'TRUTH_WITHOUT_FLATTENING',text:'Truth enforcement must not flatten advanced visualization into generic charts. Measured/imported/evaluated/derived/forecast/representational status is separated while retaining the richest lawful visualization.'},
@@ -30,6 +31,7 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   'R94 44-surface provenance authority',
   'R98 unobstructed visual-stage authority',
   'R99 source-driven design-mode correlation authority',
+  'R100 woven-continuity geometry + professional navigation authority',
   'deep Matter/Visual/Traversal donor implementations',
   'Hybrid Link device-proof boundary',
   'Earth returned-evidence boundary',
@@ -43,13 +45,13 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
 
 export function acceptedProductionAuditR95(){
  const ids=ACCEPTED_PRODUCTION_CONTRACT_R95.rules.map(x=>x.id),unique=new Set(ids).size===ids.length;
- const required=['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','MODE_VISUAL_FUNCTION_CORRELATION','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'];
+ const required=['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','WOVEN_CONTINUITY_GEOMETRY_AUTHORITY','MODE_VISUAL_FUNCTION_CORRELATION','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'];
  return{
   total:ids.length,
   unique,
   requiredPresent:required.every(x=>ids.includes(x as any)),
   pass:unique&&required.every(x=>ids.includes(x as any)),
   authority:ACCEPTED_PRODUCTION_CONTRACT_R95.authority,
-  boundary:'This contract prevents regression-by-omission, replacement-by-simplification, uncorrelated mode labels, and default visual-stage occlusion. It does not by itself prove runtime execution; normal execution/proof gates still apply.'
+  boundary:'This contract prevents regression-by-omission, replacement-by-simplification, uncorrelated mode labels, default visual-stage occlusion, and loss of the declared Woven Continuity geometry law. It does not by itself prove runtime execution; normal execution/proof gates still apply.'
  };
 }
