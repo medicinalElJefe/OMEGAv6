@@ -55,7 +55,7 @@ must(caps.nodes['omega-sovereign'].planned.includes('fdtd')&&caps.nodes['omega-s
 
 for(const rule of ['FEDERATION_SINGLE_GLOBAL_AUTHORITY','TASK_FIRST_CAPABILITY_ROUTING','SHARED_CONTEXT_ACROSS_NODES'])must(accepted.includes("id:'"+rule+"'"),'persistent production contract missing '+rule);
 must(accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority'")&&accepted.includes("'R102 four-node capability fabric + task-first federation authority'"),'R102 must extend R101 preservation lineage');
-if(r111PreservesR102)must(accepted.includes('R111')&&worker111.includes('OMEGA_FABRIC_STATUS_R111'),'R111 successor must preserve R102 while adding bounded fabric authority');
+if(r111PreservesR102)must(accepted.includes('R111')&&worker111.includes("path==='/api/fabric/status'")&&worker111.includes('FABRIC_MESH_LAW_R111'),'R111 successor must preserve R102 while adding bounded fabric authority');
 must(![worker,experience,federation].join('\n').includes('Math.random'),'federation experience must not depend on fake/random state');
 
 console.log('R102 FEDERATED INSTRUMENT EXPERIENCE PASS · four specialized runtimes · task-first handoff trace · stable schema + additive R102/R111 revision · single global CanonState authority · Optical endpoint continuity · R101/R34/44-route preservation');
