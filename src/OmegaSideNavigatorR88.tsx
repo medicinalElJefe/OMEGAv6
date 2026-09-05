@@ -6,6 +6,7 @@ import {OMEGA_ALL_ROUTES_R82,workspaceForRouteR82} from './omegaExperienceRegist
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import './omegaSideNavigatorR88.css';
 import './omegaSideNavigatorR100.css';
+import './extremeLayerIntegrityR104.css';
 
 type BrowserLayer='EVERYWHERE'|'SOFTWARE';
 type Props={currentPanel?:string;onNavigate:(panel:string)=>void;onHome?:()=>void};
