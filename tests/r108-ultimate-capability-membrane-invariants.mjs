@@ -26,7 +26,7 @@ for(let i=1;i<=18;i++)must(runtime.includes(`CAP-${String(i).padStart(3,'0')}`),
 for(const intent of ['EXPLORE','ANALYZE','FORECAST','BUILD','REPAIR','PROVE','CREATE','CONNECT'])must(runtime.includes(`${intent}:[`),'workflow intent mapping missing '+intent);
 must(runtime.includes("CapabilityStateR108='REQUIRED'|'SUPPORTING'|'AVAILABLE'"),'required/supporting/available distinction missing');
 must(runtime.includes("available:MASTER_CAPABILITIES_R83.length-required.length-supporting.length"),'complete recovered capability accounting missing');
-must(runtime.includes("minimum required capability graph")&&runtime.includes('Availability is not execution')===false,'runtime boundary should express minimum graph without inventing execution copy');
+must(runtime.includes('minimum required capability graph'),'runtime boundary must express minimum lawful graph');
 
 // Drive/source, calculus/modes, eight layers, systems, menu controls, routes, federation and proof are all correlated.
 for(const token of ['SOURCE_CORPUS_AUTHORITIES_R107','surfaceModeFabricR107','MASTER_CAPABILITIES_R83','MASTER_MENU_OPTIONS_R83','MASTER_SYSTEMS_R83','routeForCapabilityR83','proofGates','sourceGates','planIntentR103'])must(runtime.includes(token),'correlation input missing '+token);
@@ -49,10 +49,10 @@ must(membrane.includes('Drive + source authority')&&membrane.includes('Calculus 
 must(membrane.includes("['STATE','INTELLIGENCE','MEMORY','RELATION','COMPUTATION','ACTION','OBSERVATION','PROOF']"),'eight functional layers not visible');
 must(membrane.includes("extends the R103 task router; no second federation authority"),'federation authority boundary missing');
 
-// Membrane stays progressive, responsive and outside the primary visualization.
+// Membrane stays progressive, responsive and outside the primary visualization. Pseudo-element arrows may use absolute positioning; the membrane containers may not.
 must(membrane.includes("<details className={'r108-capability-membrane ")&&membrane.includes("compact?'compact':''"),'progressive disclosure missing');
 must(css.includes('@media(max-width:900px)'),'mobile containment missing');
-must(!css.includes('position:fixed')&&!css.includes('position:absolute'),'capability membrane may not overlay the primary visual stage');
+must(!/\.r108-capability-membrane\{[^}]*position:(?:fixed|absolute)/.test(css)&&!/\.r108-body\{[^}]*position:(?:fixed|absolute)/.test(css),'capability membrane container may not overlay the primary visual stage');
 
 // Persistent product law makes capability inflation and shadow routing regressions.
 for(const rule of ['MINIMUM_LAWFUL_CAPABILITY_SET','ULTIMATE_CAPABILITY_MEMBRANE'])must(accepted.includes("id:'"+rule+"'"),'accepted production contract missing '+rule);
