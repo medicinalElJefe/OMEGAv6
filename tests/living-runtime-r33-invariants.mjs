@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
-const worker=read('src/workerR33.js'),worker32=read('src/workerR32.js'),worker34=fs.existsSync('src/workerR34.js')?read('src/workerR34.js'):'',agent=read('public/omega-hybrid-agent.py'),shell=read('src/SingleFrameRuntimeShellR27.tsx'),pulse=read('src/LivingRuntimePulseR33.tsx'),config=read('wrangler.jsonc');
+const worker=read('src/workerR33.js'),worker32=read('src/workerR32.js'),worker34=fs.existsSync('src/workerR34.js')?read('src/workerR34.js'):'',worker101=fs.existsSync('src/workerR101.js')?read('src/workerR101.js'):'',agent=read('public/omega-hybrid-agent.py'),shell=read('src/SingleFrameRuntimeShellR27.tsx'),pulse=read('src/LivingRuntimePulseR33.tsx'),config=read('wrangler.jsonc');
 const directR33=config.includes('"main": "src/workerR33.js"');
 const r34PreservesR33=config.includes('"main": "src/workerR34.js"')&&worker34.includes("from './workerR33.js'")&&worker34.includes('return r33.fetch(request,env)');
-must(directR33||r34PreservesR33,'R33 living runtime must remain active directly or through the proven R34 successor');
+const r101PreservesR33=config.includes('"main": "src/workerR101.js"')&&worker101.includes("from './workerR34.js'")&&worker101.includes('return r34.fetch(request,env)')&&worker34.includes("from './workerR33.js'")&&worker34.includes('return r33.fetch(request,env)');
+must(directR33||r34PreservesR33||r101PreservesR33,'R33 living runtime must remain active directly or through the proven R34/R101 successor chain');
 must(worker.includes("import r32,{OmegaRuntime as OmegaRuntimeR32} from './workerR32.js'"),'R33 must preserve R32 enacted-runtime lineage');
 must(worker.includes("persistence:'DURABLE_MESSAGE_MEMORY'")&&worker.includes('LAST_48_DURABLE_TURNS')&&worker.includes('thread?.messages'),'R33 AI must retain bounded durable message memory, not only counters');
 must(worker.includes("history=(thread?.messages||[]).slice(-12)")&&worker.includes('CURRENT REQUEST'),'Workers AI must consume bounded prior durable project turns');
@@ -18,5 +19,5 @@ must(agent.includes('shell=False'),'native build/test must retain no-arbitrary-s
 must(pulse.includes("'/api/runtime/snapshot'")&&pulse.includes('remembered turns')&&pulse.includes('proved PC'),'menu pulse must consume live runtime state');
 must(shell.includes('LivingRuntimePulseR33')&&shell.includes('What should OMEGA do now?')&&shell.includes("className='r33-all-tools'"),'mobile navigation must lead with enacted state/actions and progressively disclose the catalog');
 must(shell.includes('<span>Now</span>')&&shell.includes('<span>PC</span>')&&shell.includes('<span>Tools</span>'),'mobile primary navigation must remain task-first');
-for(const source of [worker,worker32,worker34,agent,shell,pulse,config])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'living runtime must remain AppDeploy-free');
-console.log('OMEGA R33b LIVING RUNTIME PASS · preserved through R34 federation successor');
+for(const source of [worker,worker32,worker34,worker101,agent,shell,pulse,config])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'living runtime must remain AppDeploy-free');
+console.log('OMEGA R33b LIVING RUNTIME PASS · preserved through R34/R101 federation + reconnect successor');
