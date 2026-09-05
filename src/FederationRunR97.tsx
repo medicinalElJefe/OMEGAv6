@@ -29,7 +29,7 @@ export default function FederationRunR97({onDownloadLauncher,paired}:Props){
  const lastRcwaProof=workers.reduce((m:number,x:any)=>Math.max(m,Number(x?.lastSeen||0)),0)||null;
  const lastHostProof=runtime?.pairing?.lastAuthenticatedProof||null;
  return <section className='r97-federation r102-federation-instrument r103-task-first'>
-  <header><div><span>FEDERATION INSTRUMENT · R103 TASK-FIRST CAPABILITY FABRIC</span><h3>Ask for an outcome · OMEGA chooses the machinery</h3><p>One project, one packet lineage, one proof language. Infrastructure remains inspectable, but ordinary use starts with intent rather than asking you to choose a cloud, solver or worker first.</p></div><div><button onClick={()=>void load()} disabled={busy}><RefreshCw/>{busy?'Checking…':'Refresh fabric'}</button><button className='primary-action' onClick={onDownloadLauncher} disabled={!paired}><Download/>Sovereign launcher</button></div></header>
+  <header><div><span>FEDERATION INSTRUMENT · R103 TASK-FIRST CAPABILITY FABRIC</span><h3>Ask for an outcome · OMEGA chooses the machinery</h3><p>One project, one packet lineage, one proof language across four specialized runtimes. Genesis proposes, Optical screens, Sovereign computes, and OMEGAv6 admits. Infrastructure remains inspectable, but ordinary use starts with intent rather than asking you to choose a cloud, solver or worker first.</p></div><div><button onClick={()=>void load()} disabled={busy}><RefreshCw/>{busy?'Checking…':'Refresh fabric'}</button><button className='primary-action' onClick={onDownloadLauncher} disabled={!paired}><Download/>Sovereign launcher</button></div></header>
   {error&&<div className='r97-federation-error'><TriangleAlert/>{error}</div>}
 
   <section className='r103-intent-router' aria-label='Task-first capability router'>
@@ -40,7 +40,7 @@ export default function FederationRunR97({onDownloadLauncher,paired}:Props){
   <div className='r102-flow' aria-label='Federation handoff sequence'>{['PROPOSE','SCREEN','SOLVE','ADMIT'].map((stage,index)=><div key={stage} className={flow.stage===stage?'active':''}><span>0{index+1}</span><b>{stage}</b></div>)}</div>
   <div className='r102-handoff-caption'><span>FULL FEDERATION CAPABILITY</span><b>Genesis → Optical → Sovereign Compute → OMEGAv6 admission</b><small>That full path is available when needed; R103 does not force unused stages into every task.</small></div>
 
-  <section className='r102-current-gate'><div><span>CURRENT FABRIC GATE</span><strong>{flow.gate.replaceAll('_',' ')}</strong><p>{flow.summary}</p></div><div><span>NEXT USEFUL ACTION</span><p>{flow.action}</p></div></section>
+  <section className='r102-current-gate'><div><span>CURRENT HANDOFF / FABRIC GATE</span><strong>{flow.gate.replaceAll('_',' ')}</strong><p>{flow.summary}</p></div><div><span>NEXT USEFUL ACTION</span><p>{flow.action}</p></div></section>
 
   <div className='r97-federation-nodes r102-four-nodes'>{rows.map((row,index)=><article key={row.key} className={row.tone}>
    <div className='r102-node-head'><span>0{index+1}</span><i>{row.spec.verb}</i>{row.tone==='ready'?<CheckCircle2/>:<TriangleAlert/>}</div>
