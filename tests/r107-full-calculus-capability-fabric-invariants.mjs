@@ -9,6 +9,7 @@ const visual=read('src/calculusVisualLawR37.ts');
 const surface=read('src/SurfaceIntegrityR81.tsx');
 const fabricUi=read('src/FullCalculusFabricR107.tsx');
 const fabricCss=read('src/fullCalculusFabricR107.css');
+const sourceCorrelation=read('src/sourceCorpusCorrelationR107.ts');
 const sourceRuntime=read('src/sourceBackedModeRuntimeR21.ts');
 const canon=read('src/allModesAuthority.ts');
 const modes=read('src/modeExpressionRuntimeR82.ts');
@@ -50,12 +51,18 @@ must(surface.includes("import FullCalculusFabricR107 from './FullCalculusFabricR
 must(surface.includes("data-calculus-fabric='R107'")&&surface.includes("data-layer-contract='R104/R107'"),'surface DOM must expose combined layer/calculus contract');
 must(fabricUi.includes("<details className='r107-calculus-fabric'")&&fabricUi.includes('FULL CALCULUS FABRIC'),'fabric inspector must use progressive disclosure');
 must(fabricUi.includes('Highest lawful contributors for this surface')&&fabricUi.includes('applicable formulas remain gated'),'operator must be able to inspect contributors and gates');
+must(fabricUi.includes('Drive corpus + cloud correlation')&&fabricUi.includes('SOURCE_CORPUS_AUTHORITIES_R107'),'source/corpus/cloud correlation must be visible inside the global calculus inspector');
 must(fabricCss.includes('.r107-calculus-fabric')&&!fabricCss.includes('position:fixed')&&!fabricCss.includes('position:absolute'),'calculus fabric must remain in document flow and not cover visual stages');
 
+// Ultimate source/capability correlation includes 20,736 resident, 248,832 scale expansion and 61,917,364,224 virtual address capacity without physical-dimension overclaim.
+must(sourceCorrelation.includes("schema:'OMEGA_ULTIMATE_DEVELOPMENT_FABRIC_R107'")&&sourceCorrelation.includes("id:'DEWEY_248832_SCALE_ATLAS'"),'source/capability correlation authority missing');
+must(sourceCorrelation.includes('resident:20736')&&sourceCorrelation.includes('expanded:248832')&&sourceCorrelation.includes('virtualAddressCapacity:61917364224')&&sourceCorrelation.includes('physicalDimensionClaim:false'),'scale-address hierarchy must remain computational/representational');
+must(sourceCorrelation.includes("correlationOrder:['SOURCE','STATE','CALCULUS','MODES','LAYERS','CAPABILITY','RUNTIME','OBSERVATION','ACTION','PROOF','ADMISSION']"),'ultimate development correlation order missing');
+
 // Persist architecture correction as product law.
-for(const rule of ['FULL_CALCULUS_MODE_FABRIC','ROUTE_COUNT_TELEMETRY_ONLY','CONTROL_ACTION_TRUTH'])must(accepted.includes("id:'"+rule+"'"),'accepted production contract missing '+rule);
-must(accepted.includes("'R107 full calculus/mode execution fabric + dynamic capability inventory authority'"),'R107 preservation lineage missing');
+for(const rule of ['FULL_CALCULUS_MODE_FABRIC','SOURCE_CORPUS_CORRELATION','EMPIRICAL_VALIDATION_REQUIRED','ROUTE_COUNT_TELEMETRY_ONLY','CONTROL_ACTION_TRUTH'])must(accepted.includes("id:'"+rule+"'"),'accepted production contract missing '+rule);
+must(accepted.includes("'R107 full calculus/mode execution fabric + dynamic capability inventory authority'")&&accepted.includes("'R107 Drive corpus + cloud/validation correlation authority'"),'R107 preservation lineage missing');
 for(const prior of ['R100 woven continuity geometry/time','R101 weave-derived effective resolution','R102 four-node capability fabric','R103 task-first capability router','R104 eight-layer functional correlation','R105 live-data freshness','R106 temporal proof-ledger separation'])must(accepted.includes(prior),'prior accepted layer lost: '+prior);
 
-console.log('R107 FULL CALCULUS CAPABILITY FABRIC PASS · route count demoted to telemetry · 179 catalog + source-backed runtime + 62 lenses globally composed · 8-layer applicability · global visual law wired · per-surface contribution trace');
+console.log('R107 FULL CALCULUS CAPABILITY FABRIC PASS · route count demoted to telemetry · 179 catalog + source-backed runtime + 62 lenses globally composed · 8-layer applicability · Drive/cloud/248832 correlation · global visual law wired · per-surface contribution trace');
 await import('./r107-control-action-truth-invariants.mjs');
