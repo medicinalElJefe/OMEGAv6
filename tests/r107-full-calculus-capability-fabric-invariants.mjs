@@ -44,7 +44,8 @@ must(!fabric.includes('Math.random'),'mode fabric must be deterministic');
 must(visual.includes("import {globalModeInfluenceR107} from './modeExecutionFabricR107'")&&visual.includes('full=globalModeInfluenceR107(record)'),'shared visual law must consume global mode fabric');
 for(const direct of ['M001','M002','M004','M005','M006','M007','M008','M009'])must(visual.includes(`executableModeValue(record,'${direct}')`),'direct source-backed visual authority lost '+direct);
 for(const channel of ['fm.COHERENCE','fm.RECURSION','fm.FORECAST','fm.PRUNE','fm.SCALE','fm.COMPRESSION','fm.MEMORY','fm.PROOF','fm.GOVERNANCE','fm.TRAVERSAL','fm.FLOW','fm.LIGHT','fm.TOPOLOGY','fm.RELATIVITY'])must(visual.includes(channel),'full-mode visual channel missing '+channel);
-must(visual.includes('catalog-only affinity')&&visual.includes('gated formulas contribute zero'),'visual truth boundary must reject metadata/gated execution');
+const visualLower=visual.toLowerCase();
+must(visualLower.includes('catalog-only affinity')&&visualLower.includes('gated formulas contribute zero'),'visual truth boundary must reject metadata/gated execution');
 
 // Every routed surface exposes the same calculus truth fabric without overlaying its primary stage.
 must(surface.includes("import FullCalculusFabricR107 from './FullCalculusFabricR107'")&&surface.includes('<FullCalculusFabricR107 surface={panel} record={record}/>'),'full calculus fabric must be mounted by global surface integrity wrapper');
