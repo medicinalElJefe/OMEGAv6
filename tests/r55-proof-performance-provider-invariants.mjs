@@ -23,3 +23,4 @@ if(!String(result.boundary).includes('does not measure native-PC performance')||
 const bad=await superviseProofPerformanceR55({packet:{address:2,stateId:999,metrics:{continuity:1,plasticity:1,contradiction:0,burden:0}}},'GROUNDED_RUNTIME_ONLY');
 if(bad.ok!==false||bad.proofHealth!=='BOUNDED_OR_REGRESSION')throw new Error('R55 malformed proof must not report coherent');
 console.log('R55 proof/performance/provider invariants PASS');
+await import('./r105-live-data-truth-submenu-invariants.mjs');
