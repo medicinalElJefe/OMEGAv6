@@ -30,7 +30,7 @@ must(wrangler.includes('"main": "src/workerR102.js"'),'R103 must not force a new
 must(ui.includes('/api/federation/route-intent')&&ui.includes('WHAT DO YOU WANT OMEGA TO DO?')&&ui.includes('MINIMAL USEFUL PATH'),'Federation Instrument must expose outcome-first routing');
 must(ui.includes('Optional nodes remain optional')&&ui.includes('does not force unused stages into every task'),'UI must explicitly preserve minimal routing instead of infrastructure-first behavior');
 must(css.includes('.r103-intent-router')&&css.includes('.r103-route-steps')&&css.includes('@media(max-width:760px)'),'task router must retain responsive containment');
-must(vite.includes('manualChunks:capabilityChunkR103')&&vite.includes("return'omega-explore'")&&vite.includes("return'omega-earth-forecast'")&&vite.includes("return'omega-runtime-intelligence'"),'cache-oriented capability chunk partition missing');
-must(vite.includes('does not falsely claim that all statically imported specialist code is route-deferred'),'performance truth boundary must distinguish chunk partitioning from true deferred imports');
+must(vite.includes('manualChunks:vendorChunkR109')&&vite.includes("partition:'R109_ROUTE_DEFERRED_SPECIALISTS'"),'R109 must supersede cache-only application grouping with route-deferred specialist packaging while retaining vendor partitions');
+must(vite.includes('dynamic imports to defer heavy specialist UI modules')&&vite.includes('Prefetch means module bytes are prepared'),'performance truth boundary must distinguish module-byte prefetch from capability execution');
 
-console.log('R103 TASK-FIRST ROUTER PASS · minimal capability graph · optional-stage preservation · truthful live gate · stable R102 worker/status contract · responsive intent surface · cache-oriented chunk partition');
+console.log('R103/R109 TASK-FIRST ROUTER PASS · minimal capability graph · optional-stage preservation · truthful live gate · stable R102 worker/status contract · responsive intent surface · route-deferred specialist successor');

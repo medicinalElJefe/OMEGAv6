@@ -4,6 +4,7 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const runtime=read('src/sourceBackedModeRuntimeR21.ts');
 const panel=read('src/SourceBackedModesPanelR21.tsx');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const loader=fs.existsSync(new URL('../src/specialistLoaderR109.tsx',import.meta.url))?read('src/specialistLoaderR109.tsx'):'';
 const app=read('src/App.tsx');
 const bridge=read('src/ResponsiveRuntimeShell.tsx');
 const nav=read('src/SingleFrameRuntimeShellR27.tsx');
@@ -18,7 +19,9 @@ assert.match(panel,/179 catalog entries are loaded as source metadata, not autom
 assert.match(panel,/ACTUAL ADMITTED TRAVERSAL/);
 assert.match(panel,/FORMULAS HELD FOR MISSING INPUTS/);
 assert.match(panel,/Legacy semantic affinity score\/gate is intentionally not displayed as execution/);
-assert.match(workstation,/SourceBackedModesPanelR21/);
+const modesBoundEager=/SourceBackedModesPanelR21/.test(workstation);
+const modesBoundDeferred=/SourceBackedModesR109/.test(workstation)&&/SourceBackedModesPanelR21:\(\)=>import\('\.\/SourceBackedModesPanelR21'\)/.test(loader)&&/Modes:\[LOADERS\.SourceBackedModesPanelR21\]/.test(loader);
+assert.ok(modesBoundEager||modesBoundDeferred,'Modes route must retain SourceBackedModesPanelR21 through eager or R109 deferred binding');
 assert.match(workstation,/SOURCE_BACKED_ALL_AVAILABLE/);
 assert.match(workstation,/modeCatalogCount:catalog\.count/);
 assert.match(workstation,/appliedModeCount:sourceModes\.appliedCount/);
@@ -34,4 +37,4 @@ assert.doesNotMatch(nav,/nav20-desktop|nav20-context|nav20-mobile-sheet/);
 assert.match(corpus,/function scoreForText/); // legacy affinity catalog still exists, but is no longer execution authority.
 assert.doesNotMatch(runtime,/@appdeploy\/client/);
 assert.doesNotMatch(panel,/@appdeploy\/client/);
-console.log('R27 SOURCE-BACKED RUNTIME PASS · real formulas · gated inputs · single-frame operational navigation · canonical traversal');
+console.log('R27/R109 SOURCE-BACKED RUNTIME PASS · real formulas · gated inputs · single-frame operational navigation · canonical traversal · deferred Modes binding preserved');
