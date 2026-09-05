@@ -43,7 +43,7 @@ must(convergence.includes('totals:{systems:100,families:24,menuOptions:36,capabi
 must(convergence.includes('44 application routes are operator entry points only'),'44 routes may not become the product-completion definition');
 must(convergencePanel.includes('ONE-SYSTEM CONVERGENCE AUTHORITY')&&systemAtlas.includes('<FullSystemConvergencePanelR95'),'System Atlas must expose the accumulated completion authority');
 
-for(const rule of ['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','DISTINCT_APPLICATION_IDENTITY','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'])
+for(const rule of ['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','DISTINCT_APPLICATION_IDENTITY','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'])
  must(accepted.includes("id:'"+rule+"'"),'persistent non-regression rule missing '+rule);
 must(autoUpdate.includes('Context rollover does not reset accepted product requirements'),'auto-update contract must survive chat/context rollover');
 must(autoUpdate.includes('generic dashboard, business bar chart'),'auto-update contract must forbid generic visual substitution');
@@ -56,6 +56,9 @@ must(membrane.includes("if(projection==='LATTICE')")&&membrane.includes('row*144
 must(membrane.includes('compileSourceTraversal(address,routeDepth)'),'membrane route overlay must come from canonical traversal');
 must(membrane.includes('record.autoPing.previous')&&membrane.includes('record.autoPing.dataNext'),'membrane must distinguish previous/current/admitted-next');
 must(membraneCss.includes('.r95-membrane-stage canvas')&&membraneCss.includes('@media(max-width:900px)'),'membrane must have desktop/mobile containment');
+must(!membrane.includes("<aside>\n    <div><span>PREVIOUS"),'canonical membrane telemetry may not be mounted inside the visual stage');
+must(membrane.includes("<details className='r98-membrane-data'>")&&membraneCss.includes('.r98-membrane-data-grid'),'membrane telemetry must remain reachable as progressive data outside the visual stage');
+must(!membraneCss.includes('.r95-membrane-stage aside{'),'membrane CSS may not restore a blocking stage overlay');
 
 must(home.includes('<CanonicalMembraneR95 address={address} onAddress={setAddress}'),'Home must expose the canonical membrane, not a generic plot');
 must(visual.includes('<CanonicalMembraneR95 address={address} onAddress={onAddress}'),'Visual Instrument default must be the canonical membrane');
@@ -75,4 +78,4 @@ for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisu
  must(living.includes(token),'deep historical donor must remain reachable: '+token);
 
 must(![membrane,visual,home,field,convergencePanel].join('\n').includes('@appdeploy/client'),'R95 recovery must remain provider portable');
-console.log('R95 FULL SYSTEM RECOVERY PASS · 100-system ledger + 24 families + 12 menus preserved · canonical 20,736-cell membrane restored · generic bar substitution forbidden · 44 routes remain entry points only');
+console.log('R95/R98 FULL SYSTEM RECOVERY PASS · canonical membrane preserved · visual stage unobstructed · telemetry progressive · persistent no-occlusion contract locked');
