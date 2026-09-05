@@ -36,6 +36,12 @@ export const SOURCE_CORPUS_AUTHORITIES_R107:readonly CorpusAuthorityR107[]=[
   truthBoundary:'User-defined canon terms are repeatable formal/model variables layered over declared source data. Representational dimensions and calculus outputs are not new physical law or empirical observation by themselves.'
  },
  {
+  id:'DEWEY_248832_SCALE_ATLAS',title:'Dewey_248832D_MASTER_INDEX_CHARTS.xlsx',kind:'DRIVE_CALCULUS_LATTICE',authority:'12-part 248,832 representational scale-atlas index',
+  observed:['248,832 = 12 × 20,736 source-defined lattice rows across 12 scale workbooks','12 seed scales: Nuclear, Atomic, Chemical, Biological, Human-scale materials, Planetary, Stellar, Galactic, Ecological, Social, Cognitive, Technological','34 populated concept columns per row','AutoPing is internal deterministic state routing, not a live network/API ping','empirical proof status remains OPEN; external proof required'],
+  productionBinding:['R101 weave-derived resolution','Scale Compiler','Atlas','Matter Traversal','representational scale selection','empirical proof boundary'],
+  truthBoundary:'248,832 is a source-defined computational/representational scale atlas. Its workbook explicitly distinguishes internal deterministic AutoPing from network/API activity and states that model exactness still requires external empirical proof.'
+ },
+ {
   id:'SCIENTIFIC_VALIDATION_BRIDGE',title:'dewey_science_bridge_validation_workbook.xlsx',kind:'DRIVE_VALIDATION_BRIDGE',authority:'falsification/benchmark boundary for external scientific claims',
   observed:['framework is formalized for falsification, benchmarking and improvement','external dataset required for host validation','out-of-sample performance must beat simple baselines by preset margins','outcome cannot be used to construct predictors','fail condition must be frozen before testing'],
   productionBinding:['Evidence & Proof','Validation','Forecast','Reality Lab','empirical evidence admission'],
@@ -61,6 +67,7 @@ export const ULTIMATE_DEVELOPMENT_FABRIC_R107={
  capabilities:MASTER_CAPABILITIES_R83.length,
  localHostRows:HOST_BUILD_ROWS_R83.length,
  applicationInventory:OMEGA_ROUTE_INVENTORY_R107.currentCount,
+ scaleAtlas:{resident:20736,expanded:248832,virtualAddressCapacity:61917364224,physicalDimensionClaim:false},
  correlationOrder:['SOURCE','STATE','CALCULUS','MODES','LAYERS','CAPABILITY','RUNTIME','OBSERVATION','ACTION','PROOF','ADMISSION'] as const,
  boundary:'Maximum capability means every available source/lens/system can be routed into the correct layer when relevant; it never means every catalog row executes, every donor is promoted, every cloud is online, or every formal relation is empirical fact.'
 } as const;
@@ -68,6 +75,7 @@ export const ULTIMATE_DEVELOPMENT_FABRIC_R107={
 export function sourceCorpusCorrelationAuditR107(){
  const topMenus=new Set(MASTER_MENU_OPTIONS_R83.map(x=>x.topMenu));
  const authorityIds=SOURCE_CORPUS_AUTHORITIES_R107.map(x=>x.id);
- const pass=MASTER_SYSTEMS_R83.length===MASTER_SYSTEM_SOURCE_R83.reviewedSystemRows&&MASTER_MENU_OPTIONS_R83.length===MASTER_SYSTEM_SOURCE_R83.reviewedMenuOptions&&MASTER_CAPABILITIES_R83.length===MASTER_SYSTEM_SOURCE_R83.reviewedCapabilities&&HOST_BUILD_ROWS_R83.length===HOST_BUILD_SOURCE_R83.softwareRows&&HOST_BUILD_SOURCE_R83.autoPingCells===1728&&FAMILIES.length===24&&R21_MODE_AUTHORITY.catalogCount===179&&ALL_MODES_BOUNDARY.canonAuthorities===62&&OMEGA_ROUTE_INVENTORY_R107.currentCount>0&&new Set(authorityIds).size===authorityIds.length&&topMenus.size>0;
- return{pass,sourceAuthorityCount:authorityIds.length,topMenuCount:topMenus.size,applicationInventory:OMEGA_ROUTE_INVENTORY_R107.currentCount,boundary:ULTIMATE_DEVELOPMENT_FABRIC_R107.boundary};
+ const scaleAuthority=SOURCE_CORPUS_AUTHORITIES_R107.find(x=>x.id==='DEWEY_248832_SCALE_ATLAS');
+ const pass=MASTER_SYSTEMS_R83.length===MASTER_SYSTEM_SOURCE_R83.reviewedSystemRows&&MASTER_MENU_OPTIONS_R83.length===MASTER_SYSTEM_SOURCE_R83.reviewedMenuOptions&&MASTER_CAPABILITIES_R83.length===MASTER_SYSTEM_SOURCE_R83.reviewedCapabilities&&HOST_BUILD_ROWS_R83.length===HOST_BUILD_SOURCE_R83.softwareRows&&HOST_BUILD_SOURCE_R83.autoPingCells===1728&&FAMILIES.length===24&&R21_MODE_AUTHORITY.catalogCount===179&&ALL_MODES_BOUNDARY.canonAuthorities===62&&OMEGA_ROUTE_INVENTORY_R107.currentCount>0&&new Set(authorityIds).size===authorityIds.length&&topMenus.size>0&&Boolean(scaleAuthority)&&ULTIMATE_DEVELOPMENT_FABRIC_R107.scaleAtlas.expanded===248832&&!ULTIMATE_DEVELOPMENT_FABRIC_R107.scaleAtlas.physicalDimensionClaim;
+ return{pass,sourceAuthorityCount:authorityIds.length,topMenuCount:topMenus.size,applicationInventory:OMEGA_ROUTE_INVENTORY_R107.currentCount,scaleAtlas:ULTIMATE_DEVELOPMENT_FABRIC_R107.scaleAtlas,boundary:ULTIMATE_DEVELOPMENT_FABRIC_R107.boundary};
 }
