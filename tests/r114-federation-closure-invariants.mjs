@@ -1,9 +1,9 @@
 import fs from 'node:fs';import assert from 'node:assert/strict';
 const read=p=>fs.readFileSync(p,'utf8');
-const worker=read('src/workerR114.js'),wrangler=read('wrangler.jsonc'),ui=read('src/FederationCeremonyR114.tsx'),surface=read('src/FederationRunR97.tsx'),contract=read('src/acceptedProductionR114.ts'),federation=JSON.parse(read('public/omega-federation.json')),queue=JSON.parse(read('public/omega-fullwave-queue.schema.json')),r34=read('src/workerR34.js');
+const worker=read('src/workerR114.js'),latest=fs.existsSync('src/workerR115.js')?read('src/workerR115.js'):'',wrangler=read('wrangler.jsonc'),ui=read('src/FederationCeremonyR114.tsx'),surface=read('src/FederationRunR97.tsx'),contract=read('src/acceptedProductionR114.ts'),federation=JSON.parse(read('public/omega-federation.json')),queue=JSON.parse(read('public/omega-fullwave-queue.schema.json')),r34=read('src/workerR34.js');
 assert(worker.includes("import r111,{OmegaRuntime as OmegaRuntimeR111} from './workerR111.js'"),'R114 must inherit the complete accepted R111 runtime');
 assert(worker.includes('export class OmegaRuntime extends OmegaRuntimeR111'),'R114 Durable Object must extend R111 rather than fork state authority');
-assert(wrangler.includes('"main": "src/workerR114.js"'),'Wrangler must promote the R114 successor');
+assert(wrangler.includes('"main": "src/workerR114.js"')||(wrangler.includes('"main": "src/workerR115.js"')&&latest.includes("import r114,{OmegaRuntime as OmegaRuntimeR114} from './workerR114.js'")),'Wrangler must promote R114 directly or through an explicit R115 successor that inherits R114');
 for(const route of ['/api/federation/ceremony/law','/api/federation/ceremony/status','/api/federation/ceremony/ledger','/api/federation/ceremony/start','/api/federation/ceremony/reconcile','/api/federation/ceremony/host-proof'])assert(worker.includes(route),`R114 route missing ${route}`);
 for(const stage of ['INTENT','PROPOSE','SCREEN','QUEUE','SOLVE','ADMIT'])assert(worker.includes(`'${stage}'`)||worker.includes(`\"${stage}\"`),`receipt chain stage missing ${stage}`);
 assert(worker.includes('previousReceiptSha256')&&worker.includes('receiptSha256'),'R114 receipts must be predecessor-hash chained');
