@@ -46,3 +46,4 @@ must(earth.includes('RETURNED EVIDENCE BOUND')&&earth.includes('evidenceHash'),'
 must(![stage,modes,studio,css].join('\n').includes('@appdeploy/client'),'R99 must remain provider portable');
 
 console.log('R99 DESIGN MODES PASS · 8 source-driven traversal depictions · unobstructed high-detail stage · proof/motion/donor layers preserved outside canvas · 44 routes intact');
+await import('./r100-weave-instrument-invariants.mjs');
