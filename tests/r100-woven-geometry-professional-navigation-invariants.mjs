@@ -44,4 +44,5 @@ must(navCss.includes("html[data-omega-nav-expanded='true'] :where(.omega-worksta
 must(navCss.includes('@media(max-width:900px)')&&navCss.includes('--r100-nav-panel:min(54vw,240px)')&&navCss.includes('--r100-nav-panel:min(58vw,220px)'),'mobile navigator must remain compact and side-owned while leaving stage area visible');
 
 must(accepted.includes("id:'MODE_VISUAL_FUNCTION_CORRELATION'"),'R100 must preserve R99 mode/function correlation governance');
+must(accepted.includes("id:'WOVEN_CONTINUITY_GEOMETRY_AUTHORITY'")&&accepted.includes("'R100 woven-continuity geometry + professional navigation authority'"),'woven geometry law and professional navigation must be durable non-regression production authority');
 console.log('R100 PASS · professional non-covering navigator · time-synchronized woven continuity geometry · weave state atlas output · 44 routes and R99 modes preserved');
