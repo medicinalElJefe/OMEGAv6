@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 const v2=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const deferred=fs.existsSync('src/specialistLoaderR109.tsx')?fs.readFileSync('src/specialistLoaderR109.tsx','utf8'):'';
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 const utility=fs.readFileSync('src/OmegaUtilityAuthorityR26.tsx','utf8');
 const authority=fs.readFileSync('src/capabilityAuthority.ts','utf8');
@@ -9,7 +10,7 @@ const app=fs.readFileSync('src/App.tsx','utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const m=v2.match(/OMEGA_SURFACES=\[(.*?)\] as const;/s);must(m,'missing canonical V2 capability registry');
 const surfaces=[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]);must(surfaces.length===44,`expected 44 registered V2 capabilities, got ${surfaces.length}`);must(new Set(surfaces).size===44,'registered V2 capability names must be unique');
-for(const file of ['OmegaVisualInstrument','OmegaTraversalStudio','OmegaSpecialistSuite','EarthObservatoryR8','ForecastSovereignPanel','IntelligenceFabricPanel','SAISovereignControl','RelativityLab','AtlasCalculatorPanel','OmegaInfinityPanel','RecursiveScalePanel','AppliedRealityLab','WovenBuildOutPanel','MatterTraversal','HybridMissionControlR8'])must(v2.includes(`./${file}`),`missing active specialist import ${file}`);
+for(const file of ['OmegaVisualInstrument','OmegaTraversalStudio','OmegaSpecialistSuite','EarthObservatoryR8','ForecastSovereignPanel','IntelligenceFabricPanel','SAISovereignControl','RelativityLab','AtlasCalculatorPanel','OmegaInfinityPanel','RecursiveScalePanel','AppliedRealityLab','WovenBuildOutPanel','MatterTraversal','HybridMissionControlR8'])must(v2.includes(`./${file}`)||deferred.includes(`./${file}`),`missing active/deferred specialist binding ${file}`);
 must(suite.includes("OmegaFieldMotionConvergenceR28")&&suite.includes("OmegaEvidenceMemoryR28")&&suite.includes("OmegaUtilityAuthorityR26")&&suite.includes("OmegaSystemConsolidationR30"),'specialist suite must preserve R28/R29 utility lineage and promote R30 system/consolidation specialists');
 for(const panel of ['Hybrid Link','Archive Census','Archive Operators','Quality Compiler','Validation','System Atlas','Control Matrix','Cockpit','Workspace'])must(v2.includes(`case '${panel}'`)||v2.includes(`panel==='${panel}'`),`missing dedicated operational route ${panel}`);
 for(const panel of ['Governance','Canon Evolution','Projects','Render Queue','Assets'])must(utility.includes(`case '${panel}'`),`missing retained R26 utility authority route ${panel}`);
@@ -27,5 +28,7 @@ must(bridge.includes('ResponsiveRuntimeShell=SingleFrameRuntimeShellR27'),'compa
 must(v2.includes("modePolicy:'SOURCE_BACKED'"),'downstream state authority must be source-backed, not legacy ALL execution');
 for(const bad of ["modePolicy:'ALL'","Assistant-led work remains route-before-generation and proof-gated."])must(!v2.includes(bad),`legacy/fake runtime collapse returned: ${bad}`);
 must(app.includes("import('./OmegaWorkstationFullV2')"),'App must activate V2 workstation');
-must(v2.includes('<EarthObservatoryR8')&&v2.includes('<HybridMissionControlR8')&&v2.includes('<SAISovereignControl'),'R8 deep specialist bindings must remain active');
-console.log('FULL_APPLICATION_ROUTING R30 PASS · 44 registered · restored R28-R30 specialists · R26 lineage retained · donor filtering preserved');
+const eagerR8=v2.includes('<EarthObservatoryR8')&&v2.includes('<HybridMissionControlR8')&&v2.includes('<SAISovereignControl');
+const deferredR109=v2.includes('<EarthNowR109')&&v2.includes('<HybridMissionControlR109')&&v2.includes('<SAIControlR109')&&deferred.includes("EarthObservatoryR8:()=>import('./EarthObservatoryR8')")&&deferred.includes("HybridMissionControlR8:()=>import('./HybridMissionControlR8')")&&deferred.includes("SAISovereignControl:()=>import('./SAISovereignControl')");
+must(eagerR8||deferredR109,'R8 deep specialist bindings must remain active through eager or R109 deferred mounts');
+console.log('FULL_APPLICATION_ROUTING R30/R109 PASS · 44 registered · restored R28-R30 specialists · R26 lineage retained · donor filtering preserved · deferred specialist bindings accepted');

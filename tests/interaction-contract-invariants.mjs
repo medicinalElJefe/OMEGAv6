@@ -4,6 +4,7 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const launcher=read('src/OmegaLauncher.tsx');
 const navigation=read('src/navigationRegistry.ts');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const deferred=fs.existsSync(new URL('../src/specialistLoaderR109.tsx',import.meta.url))?read('src/specialistLoaderR109.tsx'):'';
 const modes=read('src/SourceBackedModesPanelR21.tsx');
 const modeRuntime=read('src/sourceBackedModeRuntimeR21.ts');
 const home=read('src/OmegaHome.tsx');
@@ -27,17 +28,18 @@ assert.equal(launcherNames.length,44,'shared navigation registry must expose exa
 assert.equal(routeNames.length,44,'active workstation must expose exactly 44 routes');
 assert.deepEqual(new Set(launcherNames),new Set(routeNames),'shared navigation registry and active workstation routes must match exactly');
 
-assert.match(workstation,/SourceBackedModesPanelR21/,'Modes route must execute the source-backed calculus inspector');
+assert.ok(/SourceBackedModesPanelR21/.test(workstation)||(/SourceBackedModesR109/.test(workstation)&&/SourceBackedModesPanelR21:.*import\('\.\/SourceBackedModesPanelR21'\)/.test(deferred)),'Modes route must execute the source-backed calculus inspector eagerly or through R109 deferred binding');
 assert.match(modes,/onClick=\{\(\)=>onAddress\(record\.autoPing\.dataNext\)\}/,'mode traversal must execute the admitted-next source action');
 assert.match(modes,/onClick=\{\(\)=>onAddress\(record\.autoPing\.previous\)\}/,'mode traversal must execute the previous source action');
 assert.match(modes,/onClick=\{\(\)=>setShowCatalog\(v=>!v\)\}/,'source mode catalog inspection must be actionable');
 assert.match(modeRuntime,/GATED_MISSING_INPUTS/,'missing authoritative mode inputs must gate execution instead of invoking affinity proxies');
 assert.doesNotMatch(workstation,/ALL MODES REMAIN EXECUTED|179 EXECUTED/,'workstation must not claim catalog rows executed');
-assert.match(workstation,/case 'Hybrid Link':return withPhase\(<HybridMissionControlR8/,'Hybrid route must execute R8 governed specialist application');
-assert.match(workstation,/case 'Matter Traversal':return withPhase\(<MatterTraversal/,'Matter route must execute its specialist application');
-assert.match(workstation,/case 'Relativity':return withPhase\(<RelativityLab/,'Relativity route must execute its specialist application');
-assert.match(workstation,/case 'Earth Now':return withPhase\(<EarthObservatoryR8/,'Earth route must execute R8 observatory specialist application');
-assert.match(workstation,/case 'SAI Lab':return[\s\S]*?<SAISovereignControl/,'SAI Lab must execute sovereign SAI control');
+const routeMount=(oldPattern,newPattern,sourceName,label)=>{assert.ok(oldPattern.test(workstation)||newPattern.test(workstation),label);if(newPattern.test(workstation))assert.ok(deferred.includes(sourceName),label+' must retain source module binding')};
+routeMount(/case 'Hybrid Link':return withPhase\(<HybridMissionControlR8/,/case 'Hybrid Link':return withPhase\(<HybridMissionControlR109/,'HybridMissionControlR8','Hybrid route must execute R8 governed specialist application');
+routeMount(/case 'Matter Traversal':return withPhase\(<MatterTraversal/,/case 'Matter Traversal':return withPhase\(<MatterTraversalR109/,'OmegaR36LivingSurfaces','Matter route must execute its specialist application');
+routeMount(/case 'Relativity':return withPhase\(<RelativityLab/,/case 'Relativity':return withPhase\(<RelativityR109/,'RelativityLab','Relativity route must execute its specialist application');
+routeMount(/case 'Earth Now':return withPhase\(<EarthObservatoryR8/,/case 'Earth Now':return withPhase\(<EarthNowR109/,'EarthObservatoryR8','Earth route must execute R8 observatory specialist application');
+assert.ok(/case 'SAI Lab':return[\s\S]*?<SAISovereignControl/.test(workstation)||(/case 'SAI Lab':return[\s\S]*?<SAIControlR109/.test(workstation)&&deferred.includes('SAISovereignControl')),'SAI Lab must execute sovereign SAI control');
 assert.match(earthR8,/EarthNowInstrument/,'Earth R8 must preserve the prior WGS84\/UTC instrument under live evidence');
 
 assert.match(home,/onClick=\{\(\)=>enter\(panel\)\}/,'home journey cards must navigate');
@@ -52,4 +54,4 @@ assert.match(hybrid,/onClick=\{submit\}/,'Hybrid donor compile control must exec
 assert.match(hybridR8,/onClick=\{compile\}/,'R8 Hybrid governed draft control must execute');
 assert.match(hybridR8,/onClick=\{validate\}/,'R8 Hybrid validation control must execute');
 
-console.log('interaction contract invariants R27 PASS · mounted single-frame navigation + source-backed modes + R8 Earth/Hybrid/SAI');
+console.log('interaction contract invariants R27/R109 PASS · mounted single-frame navigation + source-backed modes + R8 Earth/Hybrid/SAI through eager or deferred bindings');

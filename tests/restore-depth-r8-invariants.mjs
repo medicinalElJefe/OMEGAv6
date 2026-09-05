@@ -4,6 +4,7 @@ const worker=fs.readFileSync('src/workerR8.js','utf8');
 const earth=fs.readFileSync('src/EarthObservatoryR8.tsx','utf8');
 const hybrid=fs.readFileSync('src/HybridMissionControlR8.tsx','utf8');
 const v2=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const deferred=fs.existsSync('src/specialistLoaderR109.tsx')?fs.readFileSync('src/specialistLoaderR109.tsx','utf8'):'';
 const wrangler=fs.readFileSync('wrangler.jsonc','utf8');
 for(const x of ['/api/earth/evidence','/api/earth/noaa/catalog','/api/earth/noaa/image','USGS','EONET','swpc','open-meteo','evidenceHash'])must(worker.toLowerCase().includes(x.toLowerCase()),`Earth R8 worker contract missing ${x}`);
 for(const x of ['G19-CONUS','G19-FD','G18-FD','G19-CAR','G19-CAM','G19-TAW','G19-CAN','G18-WUS','G18-TPW'])must(worker.includes(x),`NOAA coverage missing ${x}`);
@@ -13,8 +14,10 @@ must(worker.includes("if(broadRoot&&operations.some(x=>x.op==='BUILD'||x.op==='T
 must(earth.includes('EarthNowInstrument'),'R8 Earth must preserve real offline WGS84/UTC instrument');
 must(earth.includes('/api/earth/evidence')&&earth.includes('/api/earth/noaa/catalog'),'R8 Earth UI must bind live evidence gateway');
 must(hybrid.includes('/api/hybrid/plan')&&hybrid.includes('/api/hybrid/validate'),'R8 Hybrid UI must bind typed cloud plan/validation');
-must(v2.includes("EarthObservatoryR8")&&v2.includes("HybridMissionControlR8")&&v2.includes("SAISovereignControl"),'active V2 workstation must bind R8 specialist restorations');
-must(v2.includes("case 'SAI Lab':return")&&v2.includes('<SAISovereignControl'),'SAI Lab must restore sovereign B059 control, not fabric-only shell');
+const eagerR8=v2.includes("EarthObservatoryR8")&&v2.includes("HybridMissionControlR8")&&v2.includes("SAISovereignControl");
+const deferredR109=v2.includes('EarthNowR109')&&v2.includes('HybridMissionControlR109')&&v2.includes('SAIControlR109')&&deferred.includes("EarthObservatoryR8:()=>import('./EarthObservatoryR8')")&&deferred.includes("HybridMissionControlR8:()=>import('./HybridMissionControlR8')")&&deferred.includes("SAISovereignControl:()=>import('./SAISovereignControl')");
+must(eagerR8||deferredR109,'active V2 workstation must bind R8 specialist restorations eagerly or through verified R109 deferred loaders');
+must(v2.includes("case 'SAI Lab':return")&&(v2.includes('<SAISovereignControl')||v2.includes('<SAIControlR109')),'SAI Lab must restore sovereign B059 control, not fabric-only shell');
 const directR8=wrangler.includes('"main": "src/workerR8.js"');
 const r9=fs.existsSync('src/workerR9.js')?fs.readFileSync('src/workerR9.js','utf8'):'';
 const r27=fs.existsSync('src/workerR27.js')?fs.readFileSync('src/workerR27.js','utf8'):'';
@@ -31,4 +34,4 @@ const r34WrappedR8=wrangler.includes('"main": "src/workerR34.js"')&&r34.includes
 const r101WrappedR8=wrangler.includes('"main": "src/workerR101.js"')&&r101.includes("from './workerR34.js'")&&r34.includes("from './workerR33.js'")&&r33.includes("from './workerR32.js'")&&r32.includes("import r27 from './workerR27.js'")&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
 const r102WrappedR8=wrangler.includes('"main": "src/workerR102.js"')&&r102.includes("from './workerR101.js'")&&r101.includes("from './workerR34.js'")&&r34.includes("from './workerR33.js'")&&r33.includes("from './workerR32.js'")&&r32.includes("import r27 from './workerR27.js'")&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
 must(directR8||wrappedR8||transitivelyWrappedR8||r32WrappedR8||r33WrappedR8||r34WrappedR8||r101WrappedR8||r102WrappedR8,'Cloudflare must execute R8 directly or through a proven successor wrapper chain that preserves R8');
-console.log('RESTORE_DEPTH_R8 PASS · Earth evidence + NOAA 9-coverages + V87-V90 typed Hybrid contract + B059 SAI active · successor chain proven through R102');
+console.log('RESTORE_DEPTH_R8 PASS · Earth evidence + NOAA 9-coverages + V87-V90 typed Hybrid contract + B059 SAI active · R109 deferred UI binding allowed · successor chain proven through R102');
