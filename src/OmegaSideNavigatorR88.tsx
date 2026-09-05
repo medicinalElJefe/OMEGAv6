@@ -11,7 +11,7 @@ type BrowserLayer='EVERYWHERE'|'SOFTWARE';
 type Props={currentPanel?:string;onNavigate:(panel:string)=>void;onHome?:()=>void};
 
 export const R88_ALL_ROUTES=OMEGA_ALL_ROUTES_R82;
-const routeMark=(name:string)=>name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'Ω';
+const routeMark=(name:string)=>{const words=name.split(/\s+/).filter(Boolean);return words.map((x,i)=>i<2?x[0]:'').join('').toUpperCase()||'Ω'};
 
 export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome}:Props){
  const[expanded,setExpanded]=useState(false),[layer,setLayer]=useState<BrowserLayer>('EVERYWHERE'),[query,setQuery]=useState('');
