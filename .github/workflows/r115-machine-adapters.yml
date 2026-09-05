@@ -1,0 +1,37 @@
+name: OMEGA R115 Machine Adapters
+
+on:
+  push:
+    branches: [main, r115-machine-adapters]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify-r115:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Syntax-check R115 workers
+        run: |
+          node --check src/workerR115.js
+          node --check services/genesisMachineR115.js
+          node --check services/opticalMachineR115.js
+      - name: Execute R115 adapter invariants
+        run: node tests/r115-machine-adapters-invariants.mjs
+      - name: Verify inherited R114 closure
+        run: node tests/r114-federation-closure-invariants.mjs
+      - name: Production build
+        run: npm run build
+      - name: Dry-run Genesis machine Worker
+        run: npx wrangler deploy --config wrangler.genesis-machine-r115.jsonc --dry-run --outdir .wrangler-r115-genesis
+      - name: Dry-run Optical machine Worker
+        run: npx wrangler deploy --config wrangler.optical-machine-r115.jsonc --dry-run --outdir .wrangler-r115-optical
+      - name: Dry-run canonical R115 Worker
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r115-canonical
