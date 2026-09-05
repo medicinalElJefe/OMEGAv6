@@ -18,6 +18,10 @@ assert(worker.includes('FULL_FEDERATION_PROVED')&&worker.includes("run.proposal?
 assert(worker.includes('HOST_EXECUTION_PROVED_ONLY')&&worker.includes('SOVEREIGN_ONLY_NOT_FULL_FEDERATION'),'bounded host proof must never masquerade as full federation closure');
 assert(worker.includes('CURRENT_RCWA_WORKER_REQUIRED')&&worker.includes('x-omega-bridge-secret')===false,'R114 ceremony code may depend on inherited bridge authentication but must not embed or manufacture a bridge secret');
 assert(worker.includes("canonicalMutation:'PROOF_LEDGER_ADMISSION_ONLY'"),'automatic ADMIT must remain proof-ledger admission rather than silent CanonState rewrite');
+assert(worker.includes('HISTORICAL_FULLWAVE_RESULT_NOT_CURRENT')&&worker.includes('HOST_PROOF_DEDUPLICATED_NOT_CURRENT')&&worker.includes('q.deduplicated===true'),'a historical deduplicated solver result must never satisfy a current strict or host proof');
+assert(worker.includes('fixtureNonce')&&worker.includes('fixtureTheta=15+(fixtureNonce%1000)/100000'),'bounded host proof must perturb a harmless fingerprinted fixture parameter so each proof requests new work');
+assert(worker.includes("['ADMITTED','HOST_PROVED','HELD','FAILED'].includes(run.status)&&run.admission?.receiptSha256"),'finalized ceremony receipts must be immutable under later status reconciliation');
+assert(worker.includes('sameSolve=JSON.stringify(run.solve||null)===JSON.stringify(solve)'),'unchanged queued/running state must not churn durable timestamps on every status poll');
 assert(r34.includes("['n_incident','n_feature','n_background','n_substrate']")||r34.includes('n_incident'),'inherited R34 admission must still require numeric material indices');
 assert.equal(queue.properties.material_model.type,'object','public full-wave schema must match the live material object gate');
 assert.deepEqual(queue.properties.material_model.required,['n_incident','n_feature','n_background','n_substrate'],'public queue schema must require all four R3 refractive-index inputs');
@@ -31,5 +35,5 @@ assert(surface.includes("import FederationCeremonyR114 from './FederationCeremon
 for(const text of ['Run strict federation','Prove current PC with RCWA','Inspect receipt chain and durable replay','Truth boundary:'])assert(ui.includes(text),`R114 user surface missing ${text}`);
 assert(ui.includes('Get Federation launcher'),'host proof dependency must reuse the existing Federation launcher path');
 for(const law of ['FEDERATION_CLOSURE_IS_RECEIPT_CHAIN','NO_SYNTHETIC_UPSTREAM_RECEIPTS','CURRENT_SOVEREIGN_PROOF_REQUIRED','HOST_FIXTURE_SCOPE_IS_BOUNDED','QUEUE_SCHEMA_MATCHES_RUNTIME_ADMISSION','FOUR_AUTHORITIES_REMAIN_FOUR'])assert(contract.includes(law),`R114 production law missing ${law}`);
-console.log('R114 FEDERATION CLOSURE PASS · strict receipt chain · current-host RCWA proof · durable replay · queue schema/runtime alignment · no shadow authority');
+console.log('R114 FEDERATION CLOSURE PASS · strict receipt chain · fresh current-host RCWA proof · immutable durable replay · queue schema/runtime alignment · no shadow authority');
 await import('./r113-vector-carry-convergence-invariants.mjs');
