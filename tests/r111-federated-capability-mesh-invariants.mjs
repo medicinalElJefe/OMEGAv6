@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import {authorityNodesR111,fabricIntentR111,fabricSummaryR111,FABRIC_MESH_LAW_R111} from '../src/federation/fabricMeshR111.js';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R111 '+msg)};
-const workstation=read('src/OmegaWorkstationFullV2.tsx'),wrangler=read('wrangler.jsonc'),worker=read('src/workerR111.js'),r102=read('src/workerR102.js'),mesh=read('src/federation/fabricMeshR111.js'),routes=read('src/capability/routeLayerOutputRegistryR111.ts'),navigator=read('src/OmegaSideNavigatorR88.tsx'),ribbon=read('src/RouteOutputRibbonR111.tsx'),hybrid=read('src/HybridConnectBarR111.tsx'),hybridMission=read('src/HybridMissionControl.tsx'),sentinel=read('cloud/fabric-sentinel/src/index.js'),sentinelConfig=read('wrangler.fabric-sentinel.jsonc'),sentinelWorkflow=read('.github/workflows/r111-fabric-sentinel.yml');
+const workstation=read('src/OmegaWorkstationFullV2.tsx'),wrangler=read('wrangler.jsonc'),worker=read('src/workerR111.js'),r102=read('src/workerR102.js'),mesh=read('src/federation/fabricMeshR111.js'),routes=read('src/capability/routeLayerOutputRegistryR111.ts'),navigator=read('src/OmegaSideNavigatorR88.tsx'),ribbon=read('src/RouteOutputRibbonR111.tsx'),hybrid=read('src/HybridConnectBarR111.tsx'),sovereign=fs.existsSync('src/SovereignConnectionR112.tsx')?read('src/SovereignConnectionR112.tsx'):hybrid,launcher=fs.existsSync('src/sovereignLauncherR112.ts')?read('src/sovereignLauncherR112.ts'):hybrid,hybridMission=read('src/HybridMissionControl.tsx'),sentinel=read('cloud/fabric-sentinel/src/index.js'),sentinelConfig=read('wrangler.fabric-sentinel.jsonc'),sentinelWorkflow=read('.github/workflows/r111-fabric-sentinel.yml');
 
 // One successor worker; all established API/runtime authority remains inherited.
 must(wrangler.includes('"main": "src/workerR111.js"'),'Wrangler must promote the additive R111 successor');
@@ -41,11 +41,12 @@ must(ribbon.includes('INPUT')&&ribbon.includes('OPERATION')&&ribbon.includes('OU
 
 // Hybrid gets one obvious connection path without weakening device proof or removing advanced recovery.
 must(hybridMission.includes("import HybridConnectBarR111 from './HybridConnectBarR111'")&&hybridMission.includes('<HybridConnectBarR111/>'),'one-touch Hybrid connection surface must be mounted');
-must(hybrid.includes("await reconnectHybridBridge(false)")&&hybrid.includes("await reconnectHybridBridge(true)"),'primary connection path must verify persisted bridge then repair only on auth failure');
-must(hybrid.includes("live?.nativeExecutionClaimed===true")&&hybrid.includes("'PC ONLINE'"),'PC ONLINE must require current native proof');
-must(hybrid.includes('START_OMEGA_FEDERATION_R111.cmd')&&hybrid.includes('/api/hybrid/agent-download?r111=1')&&hybrid.includes('/api/federation/rcwa/agent-download?r111=1'),'one launcher must bind general Hybrid plus RCWA transport');
-must(hybrid.includes('pip install numpy grcwa')&&hybrid.includes('General Hybrid will still start'),'missing RCWA dependency must degrade gracefully without silently installing software');
-must(hybrid.includes('Rotate pairing')&&hybrid.includes('Forget browser credential'),'advanced repair controls must remain available');
+must(hybrid.includes("import SovereignConnectionR112 from './SovereignConnectionR112'")&&hybrid.includes('<SovereignConnectionR112 compact/>'),'R112 must preserve the accepted R111 mount while converging it on the shared successor connection flow');
+must(sovereign.includes("await reconnectHybridBridge(false)")&&sovereign.includes("await reconnectHybridBridge(true)"),'primary connection path must verify persisted bridge then repair only on auth failure');
+must(sovereign.includes("live?.nativeExecutionClaimed===true")&&sovereign.includes("'PC ONLINE'"),'PC ONLINE must require current native proof');
+must(launcher.includes('OMEGA_CONNECT_THIS_PC_R112.cmd')&&launcher.includes('/api/hybrid/agent-download?r112=1')&&launcher.includes('/api/federation/rcwa/agent-download?r112=1'),'one launcher must bind general Hybrid plus optional RCWA transport');
+must(launcher.includes('pip install numpy grcwa')&&launcher.includes('General PC connection will still work'),'missing RCWA dependency must degrade gracefully without silently installing software');
+must(sovereign.includes('New connection key')&&sovereign.includes('Forget browser key'),'advanced repair controls must remain available');
 
 // New cloud capacity is an observer, never a shadow authority.
 must(sentinelConfig.includes('"name":"omega-fabric-sentinel"')&&sentinelConfig.includes('cloud/fabric-sentinel/src/index.js'),'sentinel worker config missing');
@@ -56,4 +57,4 @@ must(sentinelWorkflow.includes('wrangler.fabric-sentinel.jsonc')&&sentinelWorkfl
 
 // No pseudo-random truth generation in federation or sentinel health.
 must(!mesh.includes('Math.random')&&!worker.includes('Math.random')&&!sentinel.includes('Math.random'),'fabric truth must be deterministic/probe-derived');
-console.log('R111.1 FEDERATED CAPABILITY MESH PASS · neutral observer identity preserves four authority observations · scalable services · 44 route/output contracts · one-touch Hybrid proof flow · independent advisory sentinel');
+console.log('R111.1 FEDERATED CAPABILITY MESH PASS · neutral observer identity preserves four authority observations · scalable services · 44 route/output contracts · R112 shared one-touch Hybrid proof flow · independent advisory sentinel');
