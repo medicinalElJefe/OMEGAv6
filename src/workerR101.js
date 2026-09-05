@@ -20,7 +20,7 @@ async function hybridStatusR101(request,env,id){
  const devices=Array.isArray(data.devices)?data.devices:[],online=devices.filter(x=>x?.online&&!x?.revoked);
  const pairingState=data.state||'PAIRING_REQUIRED';
  return json({...data,
-  state:online.length?'VERIFIED_DEVICE_ONLINE':data.paired?'DEVICE_PROOF_REQUIRED':'PAIRING_REQUIRED',
+  state:online.length?'VERIFIED_DEVICE_ONLINE':'DEVICE_PROOF_REQUIRED',
   pairingState,
   bridgeId:id,
   nativeExecutionClaimed:online.length>0,
