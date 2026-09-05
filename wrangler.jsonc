@@ -1,3 +1,4 @@
+// OMEGA R103: stable R102 Worker entry with additive task-first routing.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
@@ -20,16 +21,16 @@
     "binding": "CF_VERSION_METADATA"
   },
   "services": [
-    {"binding":"OMEGA_GENESIS","service":"omega-genesis-v1"}
+    {"binding": "OMEGA_GENESIS", "service": "omega-genesis-v1"}
   ],
   "durable_objects": {
     "bindings": [
-      {"name":"OMEGA_RUNTIME","class_name":"OmegaRuntime"}
+      {"name": "OMEGA_RUNTIME", "class_name": "OmegaRuntime"}
     ]
   },
   "migrations": [
-    {"tag":"r32-enacted-runtime","new_sqlite_classes":["OmegaRuntime"]}
-  },
+    {"tag": "r32-enacted-runtime", "new_sqlite_classes": ["OmegaRuntime"]}
+  ],
   "observability": {
     "enabled": true
   }
