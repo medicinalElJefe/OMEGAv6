@@ -8,6 +8,10 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   {id:'TRACEABLE_VISUAL_GEOMETRY',text:'Primary OMEGA state geometry must map declared source/canonical/evaluated variables to declared geometry parameters. Every visible deformation must have a traceable variable mapping.'},
   {id:'WOVEN_CONTINUITY_GEOMETRY',text:'Movement geometry follows partition → exchange/transform → invariant carry → scar/residual carry → re-contextualize/repartition. Signed orientation remains factored from magnitude, time may evolve depiction without changing canonical state ownership, and 12/144/1728/20,736 remain atlas/address resolution levels unless independently validated as physical dimensions.'},
   {id:'WEAVE_DERIVED_RESOLUTION',text:'Where R101 resolution selection is active, the representational atlas level is derived from bounded weave-state resolution demand rather than treated as literal physical dimensionality. 248,832 is an optional computational expansion level; the canonical 20,736 address packet remains authoritative unless explicitly superseded by a separately validated state model.'},
+  {id:'FULL_CALCULUS_MODE_FABRIC',text:'The full source-mode catalog and canon/calculus authority stack are globally available to the application. Context selects applicable mode families, but only source-bound executable/packet outputs and explicitly bounded derived authority lenses may influence computation or visualization. Catalog affinity alone is metadata and gated formulas contribute zero until authoritative inputs exist.'},
+  {id:'SOURCE_CORPUS_CORRELATION',text:'Connected Drive design ledgers, calculus workbooks, validation workbooks, repository registries, cloud runtimes and native-host lineage are correlated through stable source contracts rather than copied into competing state authorities. Source titles and public contracts may be retained for provenance; private Drive identifiers and credentials may not be published into the public runtime.'},
+  {id:'EMPIRICAL_VALIDATION_REQUIRED',text:'Formal calculus repeatability, source-lattice completeness, simulation output and internal proof do not establish new physical law or external empirical truth. External scientific claims require independently measured inputs, frozen formulas/gates, held-out or out-of-sample evaluation, declared baselines and falsifiable pass/fail criteria before admission as empirical evidence.'},
+  {id:'ROUTE_COUNT_TELEMETRY_ONLY',text:'The number of registered UI destinations is inventory and non-regression telemetry only. It is not a calculus primitive, mode count, capability ceiling, physical dimension, architectural constant, or reason to prevent lawful addition/consolidation of interfaces. Every registered route must remain unique, reachable, truth-bounded and layer-bound.'},
   {id:'HYBRID_BRIDGE_ID_CONTINUITY',text:'Hybrid reconnect/status must follow the persisted bridge identity before browser session fallback. Repair may issue a new credential, but PC ONLINE requires a current authenticated device heartbeat and is never inferred from a browser credential alone.'},
   {id:'FEDERATION_SINGLE_GLOBAL_AUTHORITY',text:'Across OMEGAv6, Genesis, Optical and Sovereign Compute, OMEGAv6 is the global federation CanonState/proof-admission authority unless an explicit governed migration changes it. Node-local working state may exist but may not be presented as competing global CanonState.'},
   {id:'TASK_FIRST_CAPABILITY_ROUTING',text:'Ordinary use begins with an intent, project, object or outcome. OMEGA should select the required specialist nodes and expose their handoffs as a visible trace instead of forcing the user to understand infrastructure before using the capability.'},
@@ -19,6 +23,7 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   {id:'TRUTH_WITHOUT_FLATTENING',text:'Truth enforcement must not flatten advanced visualization into generic charts. Measured/imported/evaluated/derived/forecast/representational status is separated while retaining the richest lawful visualization.'},
   {id:'NO_STALE_NOW_GRAPH',text:'Any graph or numeric readout presented as NOW, live, current, or present-session must derive from the current canonical packet, a returned runtime observation with explicit freshness, or measurements collected during the current browser session. Archived, recovered, workbook SAMPLE, donor, and retained browser-history rows remain inspectable only when visibly labeled as historical/snapshot/reference and may never silently populate current readouts.'},
   {id:'CURRENT_VS_RETAINED_LEDGER',text:'Persistent proof, delta, provider, and self-monitor journals remain valid continuity/evidence inputs across sessions. Current reconciliation, current-session transitions, current performance statistics, and current provider/runtime state must be reported separately from retained evidence history. A current chain-verification result may verify retained receipts without converting those receipts into current observations.'},
+  {id:'CONTROL_ACTION_TRUTH',text:'Every visible control must enact a bounded route/state/runtime/file/action path, submit through a real handler, or expose an explicit disabled/gated/unavailable state. Empty callbacks, decorative buttons, mislabeled route targets, and controls whose label overstates their effect are regressions.'},
   {id:'NO_VISUAL_STAGE_OCCLUSION',text:'Primary visual stages must be unobstructed by default. Telemetry, inspectors, legends, assistant panes, proof summaries, and supporting controls belong outside the stage or in explicit user-opened progressive disclosures; they may not cover the active visualization.'},
   {id:'KEEP_DONOR_UNTIL_VERIFIED',text:'When superseding an accepted renderer or subsystem, retain the prior implementation as recoverable donor/optional lineage until the replacement passes functional and visual acceptance.'},
   {id:'MOBILE_DESKTOP_PARITY',text:'Mobile and desktop must expose the same core capability and truth state through device-appropriate interaction, without overlays hiding the primary instrument.'},
@@ -32,12 +37,12 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   'R85 intent/workflow engine',
   'R86 operation proof bus',
   'R87 project continuity',
-  'R89 flat 44-route navigator',
+  'R89 flat registered-destination navigator lineage',
   'R90 integrity/truth boundaries',
   'R91 operational hierarchy',
   'R92 specialist surface hierarchy',
   'R93 visual-truth enforcement',
-  'R94 44-surface provenance authority',
+  'R94 surface provenance authority across the registered application inventory',
   'R98 unobstructed visual-stage authority',
   'R99 source-driven design-mode correlation authority',
   'R100 woven continuity geometry/time + professional instrument rail authority',
@@ -47,26 +52,28 @@ export const ACCEPTED_PRODUCTION_CONTRACT_R95={
   'R104 eight-layer functional correlation + readable non-covering navigation authority',
   'R105 live-data freshness + contextual workspace submenu authority',
   'R106 temporal proof-ledger separation + retained evidence continuity authority',
+  'R107 full calculus/mode execution fabric + dynamic capability inventory authority',
+  'R107 Drive corpus + cloud/validation correlation authority',
   'deep Matter/Visual/Traversal donor implementations',
   'Hybrid Link device-proof boundary',
   'Earth returned-evidence boundary',
   'route-before-generation',
   'canonical state / admitted transition authority'
  ] as const,
- visualRule:'Do not solve visual truth by reducing OMEGA to generic charts. Build source-driven OMEGA-native geometry with an explicit variable-to-geometry map; where Woven Continuity is active, geometry must express exchange/transform, invariant carry, residual/scar carry, signed orientation, time and bounded resolution demand coherently. A NOW/live/current graph must also carry temporal truth: current canonical state, returned fresh observation, or current-session measurement. Persistent proof/delta history remains valid evidence but must be visually and semantically distinct from current-session observation. Archived/sample/donor/history data remains available only as explicitly labeled history. Keep the primary visual stage unobstructed by default, require selectable modes to produce declared functional/visual differences, and keep expanded navigation readable without covering the active instrument.',
+ visualRule:'Do not solve visual truth by reducing OMEGA to generic charts. Build source-driven OMEGA-native geometry with an explicit variable-to-geometry map; where Woven Continuity is active, geometry must express exchange/transform, invariant carry, residual/scar carry, signed orientation, time and bounded resolution demand coherently. Full-mode visual influence must be composed from source-bound executable/packet outputs plus bounded canon/calculus lenses; catalog-only affinity and gated formulas may not act as executed inputs. Drive/corpus-derived values remain source/model evidence until separately promoted by the correct evidence class; empirical claims require independent measurements and validation. A NOW/live/current graph must also carry temporal truth: current canonical state, returned fresh observation, or current-session measurement. Persistent proof/delta history remains valid evidence but must be visually and semantically distinct from current-session observation. Archived/sample/donor/history data remains available only as explicitly labeled history. Keep the primary visual stage unobstructed by default, require selectable modes to produce declared functional/visual differences, and keep expanded navigation readable without covering the active instrument.',
  replacementRule:'If a replacement is proposed, the prior accepted implementation stays available until the new version demonstrates functional parity, stronger truth, responsive parity, and a verified non-regression pass.',
- rolloverRule:'A new chat/session must recover this contract from repository state before making broad UI, renderer, navigation, capability, federation, layer-binding, data-freshness, proof-ledger, or architecture replacements.'
+ rolloverRule:'A new chat/session must recover this contract from repository state before making broad UI, renderer, navigation, capability, federation, layer-binding, data-freshness, proof-ledger, mode/calculus-fabric, corpus-source, empirical-validation, or architecture replacements.'
 } as const;
 
 export function acceptedProductionAuditR95(){
  const ids=ACCEPTED_PRODUCTION_CONTRACT_R95.rules.map(x=>x.id),unique=new Set(ids).size===ids.length;
- const required=['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','WOVEN_CONTINUITY_GEOMETRY','WEAVE_DERIVED_RESOLUTION','HYBRID_BRIDGE_ID_CONTINUITY','FEDERATION_SINGLE_GLOBAL_AUTHORITY','TASK_FIRST_CAPABILITY_ROUTING','SHARED_CONTEXT_ACROSS_NODES','FULL_LAYER_FUNCTIONAL_CORRELATION','READABLE_NON_COVERING_NAVIGATION','MODE_VISUAL_FUNCTION_CORRELATION','NO_STALE_NOW_GRAPH','CURRENT_VS_RETAINED_LEDGER','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'];
+ const required=['PRESERVE_ACCEPTED','NO_REGRESSION_BY_OMISSION','NO_GENERIC_SUBSTITUTION','TRACEABLE_VISUAL_GEOMETRY','WOVEN_CONTINUITY_GEOMETRY','WEAVE_DERIVED_RESOLUTION','FULL_CALCULUS_MODE_FABRIC','SOURCE_CORPUS_CORRELATION','EMPIRICAL_VALIDATION_REQUIRED','ROUTE_COUNT_TELEMETRY_ONLY','HYBRID_BRIDGE_ID_CONTINUITY','FEDERATION_SINGLE_GLOBAL_AUTHORITY','TASK_FIRST_CAPABILITY_ROUTING','SHARED_CONTEXT_ACROSS_NODES','FULL_LAYER_FUNCTIONAL_CORRELATION','READABLE_NON_COVERING_NAVIGATION','MODE_VISUAL_FUNCTION_CORRELATION','NO_STALE_NOW_GRAPH','CURRENT_VS_RETAINED_LEDGER','CONTROL_ACTION_TRUTH','NO_VISUAL_STAGE_OCCLUSION','KEEP_DONOR_UNTIL_VERIFIED','USER_ACCEPTANCE_PRIORITY'];
  return{
   total:ids.length,
   unique,
   requiredPresent:required.every(x=>ids.includes(x as any)),
   pass:unique&&required.every(x=>ids.includes(x as any)),
   authority:ACCEPTED_PRODUCTION_CONTRACT_R95.authority,
-  boundary:'This contract prevents regression-by-omission, replacement-by-simplification, uncorrelated mode labels, stale history masquerading as NOW, retained evidence silently becoming current-session data, default visual-stage occlusion, unreadable covering navigation, cross-layer semantic drift, unbounded interpretation of Woven Continuity geometry, session/bridge identity confusion, competing global state authority and infrastructure-first federation UX. It does not by itself prove runtime execution; normal execution/proof gates still apply.'
+  boundary:'This contract prevents regression-by-omission, replacement-by-simplification, fixed-route-count architecture drift, catalog-affinity-as-execution, gated formula substitution, source-corpus duplication, empirical overclaim, fake controls, stale history masquerading as NOW, retained evidence silently becoming current-session data, default visual-stage occlusion, unreadable covering navigation, cross-layer semantic drift, unbounded interpretation of Woven Continuity geometry, session/bridge identity confusion, competing global state authority and infrastructure-first federation UX. It does not by itself prove runtime execution or scientific validity; normal execution, source, evidence and empirical validation gates still apply.'
  };
 }

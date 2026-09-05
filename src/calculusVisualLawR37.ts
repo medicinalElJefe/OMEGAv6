@@ -1,5 +1,6 @@
 import {unifiedFromRecord,type UnifiedMath} from './unifiedCalculus';
 import {evaluateSourceBackedModes} from './sourceBackedModeRuntimeR21';
+import {globalModeInfluenceR107} from './modeExecutionFabricR107';
 
 const cl=(x:number)=>Math.max(0,Math.min(1,Number.isFinite(x)?x:0));
 const mix=(a:number,b:number,t:number)=>a+(b-a)*cl(t);
@@ -8,56 +9,74 @@ const signed=(x:number)=>Math.tanh(Number(x)||0);
 const TAU=Math.PI*2;
 export type OperatorColorRole='ALPHA'|'BASE'|'CONSTRUCT'|'PRUNE'|'OMEGA';
 export const OPERATOR_COLOR_HUE:Record<OperatorColorRole,number>={ALPHA:286,BASE:43,CONSTRUCT:4,PRUNE:218,OMEGA:148};
-export type SourceModeInfluenceR68={ids:string[];coherence:number;mode188:number;forecast:number;prune:number;host:number;turbulence:number;compression:number;scarCarry:number;boundary:string};
+export type SourceModeInfluenceR68={
+ ids:string[];coherence:number;mode188:number;forecast:number;prune:number;host:number;turbulence:number;compression:number;scarCarry:number;
+ relation:number;memory:number;proof:number;governance:number;traversal:number;flow:number;light:number;topology:number;scale:number;
+ catalogCount:number;authorityCount:number;exactContributors:number;packetContributors:number;lensContributors:number;boundary:string;
+};
 export type CalculusVisualLaw={u:UnifiedMath;phase01:number;phaseAngle:number;phaseSpeed:number;pulseRate:number;shellCount:number;shellOpacity:number;shellEccentricity:number;shellPrecession:number;density:number;pointRadius:number;depthGain:number;perspectiveGain:number;curvature:number;fold:number;branchSpread:number;trailPersistence:number;scarMemory:number;routeStrength:number;routeWidth:number;proofGlow:number;contradictionPressure:number;hue:number;hueInverse:number;saturation:number;luminance:number;alpha:number;modeDecision:string;operatorWeights:Record<OperatorColorRole,number>;sourceModeInfluence:SourceModeInfluenceR68};
 
 function executableModeValue(record:any,id:string){const row=evaluateSourceBackedModes(record).find(x=>x.id===id&&x.state!=='GATED_MISSING_INPUTS');return typeof row?.value==='number'&&Number.isFinite(row.value)?row.value:0}
 
 export function calculusVisualLaw(record:any):CalculusVisualLaw{
- const u=unifiedFromRecord(record),phase01=((u.phase/TAU)%1+1)%1;
+ const u=unifiedFromRecord(record),phase01=((u.phase/TAU)%1+1)%1,full=globalModeInfluenceR107(record),fm=full.channels;
  const sourceModeInfluence:SourceModeInfluenceR68={
   ids:['M001','M002','M004','M005','M006','M007','M008','M009'],
-  coherence:sat(executableModeValue(record,'M001')),
-  mode188:sat(executableModeValue(record,'M002')),
-  forecast:signed(executableModeValue(record,'M004')),
-  prune:signed(executableModeValue(record,'M005')),
-  host:sat(executableModeValue(record,'M006')),
-  turbulence:sat(executableModeValue(record,'M007')),
-  compression:sat(executableModeValue(record,'M008')),
-  scarCarry:sat(executableModeValue(record,'M009')),
-  boundary:'Bounded renderer influence from already executed source-backed mode outputs M001/M002/M004-M009; no gated formula is substituted and no visual parameter is empirical proof.'
+  coherence:cl(.72*sat(executableModeValue(record,'M001'))+.28*fm.COHERENCE),
+  mode188:cl(.72*sat(executableModeValue(record,'M002'))+.28*fm.RECURSION),
+  forecast:cl(.5+.36*signed(executableModeValue(record,'M004'))+.14*(fm.FORECAST-.5))*2-1,
+  prune:cl(.5+.36*signed(executableModeValue(record,'M005'))+.14*(fm.PRUNE-.5))*2-1,
+  host:cl(.72*sat(executableModeValue(record,'M006'))+.18*fm.SCALE+.10*fm.COHERENCE),
+  turbulence:cl(.72*sat(executableModeValue(record,'M007'))+.18*fm.PRUNE+.10*fm.COMPRESSION),
+  compression:cl(.72*sat(executableModeValue(record,'M008'))+.18*fm.COMPRESSION+.10*fm.SCALE),
+  scarCarry:cl(.72*sat(executableModeValue(record,'M009'))+.18*fm.MEMORY+.10*fm.RECURSION),
+  relation:cl(.55*fm.RELATIVITY+.45*fm.TOPOLOGY),
+  memory:fm.MEMORY,
+  proof:fm.PROOF,
+  governance:fm.GOVERNANCE,
+  traversal:fm.TRAVERSAL,
+  flow:fm.FLOW,
+  light:fm.LIGHT,
+  topology:fm.TOPOLOGY,
+  scale:fm.SCALE,
+  catalogCount:full.catalogCount,
+  authorityCount:full.authorityCount,
+  exactContributors:full.sourceExactContributors,
+  packetContributors:full.sourcePacketContributors,
+  lensContributors:full.authorityLensContributors,
+  boundary:'R107 full-mode visual fabric: direct source-backed M001/M002/M004-M009 outputs remain primary where exact, while all applicable executable mode families and all 62 bounded canon/calculus lenses contribute secondary governance/visual influence. Catalog-only affinity and gated formulas contribute zero; no visual parameter is empirical proof.'
  };
  const mi=sourceModeInfluence;
- const contradictionPressure=cl(.40*u.q+.28*u.Lambda+.16*u.scar+.10*mi.turbulence+.06*Math.max(0,mi.prune));
- const routeStrength=cl(.21*u.C+.19*u.Phi+.16*u.evidence+.14*u.water.conductance+.10*u.motionRelativity+.08*(1-contradictionPressure)+.07*mi.coherence+.05*mi.host);
- const phaseSpeed=.05+.36*u.motionRelativity+.22*u.water.speed+.14*u.carry.magnitude+.09*u.light.coherence+.06*mi.turbulence+.05*mi.mode188;
- const pulseRate=.42+2.25*cl(.29*u.Phi+.20*u.light.coherence+.18*u.motionRelativity+.16*u.water.conductance+.10*mi.forecast+.07*mi.mode188);
- const shellCount=Math.round(6+12*cl(.24*u.C+.17*u.Phi+.15*u.shape.triangulation+.15*u.shape.toroid+.13*u.geometry+.09*mi.coherence+.07*mi.mode188));
- const shellOpacity=.045+.24*cl(.32*u.C+.21*u.evidence+.18*u.light.coherence+.14*u.shape.symmetry+.09*mi.coherence+.06*mi.host);
- const shellEccentricity=cl(.15+.56*u.shape.anisotropy+.18*u.motionRelativity+.11*mi.turbulence);
- const shellPrecession=.025+.26*cl(.29*u.shape.toroid+.24*u.motionRelativity+.19*u.water.curvature+.14*u.carry.magnitude+.08*mi.mode188+.06*mi.scarCarry);
- const density=Math.round(520+2480*cl(.21*u.C+.17*u.Phi+.16*u.evidence+.12*u.geometry+.10*u.shape.triangulation+.10*u.water.conductance+.08*mi.coherence+.06*mi.mode188));
- const pointRadius=.45+2.35*cl(.28*u.evidence+.21*u.light.intensity+.16*u.C+.12*u.geometry+.10*u.shape.symmetry+.07*mi.coherence+.06*mi.host);
- const depthGain=.22+.78*cl(.22*u.Phi+.19*u.motionRelativity+.17*u.shape.toroid+.15*u.geometry+.11*u.water.conductance+.08*mi.turbulence+.08*mi.host);
- const perspectiveGain=.32+.68*cl(.26*u.geometry+.20*u.shape.outverse+.17*u.C+.12*u.light.coherence+.10*u.motionRelativity+.08*mi.coherence+.07*mi.host);
- const curvature=cl(.30*u.curvature+.20*u.water.curvature+.17*u.shape.anisotropy+.16*u.shape.toroid+.09*mi.turbulence+.08*mi.scarCarry);
- const fold=cl(.24*u.shape.compression+.20*u.shape.inverse+.16*u.scar+.13*u.q+.10*u.water.boundary+.10*mi.compression+.07*Math.max(0,mi.prune));
- const branchSpread=cl(.25*u.Phi+.20*u.shape.outverse+.17*u.motionRelativity+.12*u.water.conductance+.10*(1-u.Lambda)+.09*cl((mi.forecast+1)/2)+.07*mi.coherence);
- const trailPersistence=cl(.28*u.C+.23*u.scar+.14*u.evidence+.10*u.shape.compression+.08*u.rsc+.09*mi.scarCarry+.08*mi.mode188);
- const scarMemory=cl(.39*u.scar+.18*u.shape.compression+.15*u.Lambda+.11*(1-u.Phi)+.10*mi.scarCarry+.07*Math.max(0,mi.prune));
+ const contradictionPressure=cl(.35*u.q+.24*u.Lambda+.14*u.scar+.09*mi.turbulence+.06*Math.max(0,mi.prune)+.05*mi.compression+.04*mi.governance+.03*(1-mi.proof));
+ const routeStrength=cl(.18*u.C+.15*u.Phi+.13*u.evidence+.11*u.water.conductance+.09*u.motionRelativity+.08*(1-contradictionPressure)+.07*mi.coherence+.05*mi.host+.05*mi.traversal+.04*mi.relation+.03*mi.topology+.02*mi.flow);
+ const phaseSpeed=.04+.31*u.motionRelativity+.18*u.water.speed+.12*u.carry.magnitude+.08*u.light.coherence+.06*mi.turbulence+.05*mi.mode188+.05*mi.traversal+.04*mi.flow+.03*mi.relation;
+ const pulseRate=.40+2.25*cl(.25*u.Phi+.17*u.light.coherence+.15*u.motionRelativity+.13*u.water.conductance+.08*cl((mi.forecast+1)/2)+.06*mi.mode188+.06*mi.light+.05*mi.proof+.05*mi.governance);
+ const shellCount=Math.round(6+12*cl(.20*u.C+.14*u.Phi+.13*u.shape.triangulation+.12*u.shape.toroid+.10*u.geometry+.08*mi.coherence+.06*mi.mode188+.06*mi.scale+.05*mi.topology+.03*mi.relation+.03*mi.proof));
+ const shellOpacity=.045+.24*cl(.28*u.C+.18*u.evidence+.15*u.light.coherence+.12*u.shape.symmetry+.08*mi.coherence+.06*mi.host+.06*mi.proof+.04*mi.light+.03*mi.governance);
+ const shellEccentricity=cl(.15+.50*u.shape.anisotropy+.15*u.motionRelativity+.09*mi.turbulence+.06*mi.relation+.05*mi.scale);
+ const shellPrecession=.025+.26*cl(.25*u.shape.toroid+.20*u.motionRelativity+.16*u.water.curvature+.12*u.carry.magnitude+.07*mi.mode188+.06*mi.scarCarry+.05*mi.relation+.05*mi.flow+.04*mi.topology);
+ const density=Math.round(520+2480*cl(.18*u.C+.14*u.Phi+.13*u.evidence+.10*u.geometry+.09*u.shape.triangulation+.08*u.water.conductance+.07*mi.coherence+.05*mi.mode188+.05*mi.topology+.04*mi.scale+.04*mi.light+.03*mi.proof));
+ const pointRadius=.45+2.35*cl(.24*u.evidence+.18*u.light.intensity+.14*u.C+.10*u.geometry+.08*u.shape.symmetry+.06*mi.coherence+.05*mi.host+.05*mi.proof+.05*mi.light+.05*mi.governance);
+ const depthGain=.22+.78*cl(.19*u.Phi+.16*u.motionRelativity+.14*u.shape.toroid+.12*u.geometry+.09*u.water.conductance+.07*mi.turbulence+.07*mi.host+.06*mi.scale+.05*mi.traversal+.05*mi.relation);
+ const perspectiveGain=.32+.68*cl(.22*u.geometry+.17*u.shape.outverse+.14*u.C+.10*u.light.coherence+.08*u.motionRelativity+.07*mi.coherence+.06*mi.host+.06*mi.relation+.05*mi.scale+.05*mi.topology);
+ const curvature=cl(.25*u.curvature+.17*u.water.curvature+.14*u.shape.anisotropy+.13*u.shape.toroid+.07*mi.turbulence+.07*mi.scarCarry+.06*mi.relation+.06*mi.flow+.05*mi.topology);
+ const fold=cl(.20*u.shape.compression+.17*u.shape.inverse+.13*u.scar+.10*u.q+.08*u.water.boundary+.08*mi.compression+.06*Math.max(0,mi.prune)+.06*mi.governance+.06*mi.scale+.06*mi.relation);
+ const branchSpread=cl(.21*u.Phi+.16*u.shape.outverse+.14*u.motionRelativity+.10*u.water.conductance+.08*(1-u.Lambda)+.08*cl((mi.forecast+1)/2)+.06*mi.coherence+.06*mi.traversal+.05*mi.flow+.04*mi.relation+.02*mi.governance);
+ const trailPersistence=cl(.23*u.C+.19*u.scar+.12*u.evidence+.09*u.shape.compression+.07*u.rsc+.08*mi.scarCarry+.06*mi.mode188+.06*mi.memory+.04*mi.traversal+.03*mi.proof+.03*mi.topology);
+ const scarMemory=cl(.33*u.scar+.15*u.shape.compression+.12*u.Lambda+.09*(1-u.Phi)+.09*mi.scarCarry+.06*Math.max(0,mi.prune)+.06*mi.memory+.04*mi.governance+.03*mi.compression+.03*mi.proof);
  const routeWidth=.8+5.2*routeStrength;
- const proofGlow=cl(.44*u.evidence+.19*u.light.intensity+.14*u.light.coherence+.10*u.geometry+.07*mi.coherence+.06*mi.host);
- const hue=(188+phase01*112+34*u.shape.outverse-42*contradictionPressure+18*u.carry.signed+8*mi.mode188-6*mi.turbulence+360)%360;
- const hueInverse=(hue+148+64*u.shape.inverse)%360;
- const saturation=42+48*cl(.26*u.light.coherence+.20*u.geometry+.17*u.C+.12*u.Phi+.10*u.water.conductance+.08*mi.coherence+.07*mi.mode188);
- const luminance=31+39*cl(.26*u.evidence+.19*u.light.intensity+.17*u.C+.13*u.shape.outverse+.10*(1-u.Lambda)+.08*mi.host+.07*mi.coherence);
- const alpha=.20+.72*cl(.31*u.evidence+.21*u.C+.16*u.light.coherence+.11*u.geometry+.09*u.rsc+.07*mi.coherence+.05*mi.host);
+ const proofGlow=cl(.36*u.evidence+.16*u.light.intensity+.11*u.light.coherence+.08*u.geometry+.06*mi.coherence+.05*mi.host+.08*mi.proof+.05*mi.light+.03*mi.governance+.02*mi.topology);
+ const hue=(188+phase01*112+30*u.shape.outverse-38*contradictionPressure+16*u.carry.signed+7*mi.mode188-5*mi.turbulence+8*mi.relation+6*mi.flow+4*mi.light+360)%360;
+ const hueInverse=(hue+148+64*u.shape.inverse+8*mi.relation)%360;
+ const saturation=42+48*cl(.22*u.light.coherence+.17*u.geometry+.14*u.C+.10*u.Phi+.08*u.water.conductance+.07*mi.coherence+.06*mi.mode188+.06*mi.light+.05*mi.proof+.05*mi.relation);
+ const luminance=31+39*cl(.22*u.evidence+.16*u.light.intensity+.14*u.C+.10*u.shape.outverse+.08*(1-u.Lambda)+.06*mi.host+.06*mi.coherence+.06*mi.proof+.05*mi.light+.04*mi.governance+.03*mi.scale);
+ const alpha=.20+.72*cl(.27*u.evidence+.18*u.C+.14*u.light.coherence+.09*u.geometry+.07*u.rsc+.06*mi.coherence+.05*mi.host+.05*mi.proof+.04*mi.light+.03*mi.relation+.02*mi.governance);
  const operatorWeights={
-  ALPHA:cl(.18+.39*u.Phi+.16*u.carry.magnitude+.10*(1-u.Lambda)+.10*cl((mi.forecast+1)/2)+.07*mi.mode188),
-  BASE:cl(.17+.31*u.evidence+.22*u.C+.13*u.geometry+.10*mi.coherence+.07*mi.host),
-  CONSTRUCT:cl(.13+.34*u.shape.outverse+.19*u.Phi+.16*u.motionRelativity+.10*cl((mi.forecast+1)/2)+.08*mi.coherence),
-  PRUNE:cl(.11+.34*u.q+.20*u.shape.inverse+.14*u.scar+.11*mi.turbulence+.10*cl((mi.prune+1)/2)),
-  OMEGA:cl(.17+.31*u.C+.19*u.rsc+.16*u.light.coherence+.10*mi.coherence+.07*mi.mode188)
+  ALPHA:cl(.16+.31*u.Phi+.13*u.carry.magnitude+.08*(1-u.Lambda)+.08*cl((mi.forecast+1)/2)+.06*mi.mode188+.06*mi.traversal+.05*mi.flow+.04*mi.light+.03*mi.governance),
+  BASE:cl(.15+.25*u.evidence+.18*u.C+.10*u.geometry+.08*mi.coherence+.06*mi.host+.07*mi.proof+.05*mi.topology+.04*mi.light+.02*mi.governance),
+  CONSTRUCT:cl(.12+.28*u.shape.outverse+.16*u.Phi+.13*u.motionRelativity+.08*cl((mi.forecast+1)/2)+.07*mi.coherence+.06*mi.traversal+.04*mi.topology+.03*mi.flow+.03*mi.scale),
+  PRUNE:cl(.10+.28*u.q+.17*u.shape.inverse+.12*u.scar+.09*mi.turbulence+.08*cl((mi.prune+1)/2)+.06*mi.compression+.05*mi.governance+.03*mi.proof+.02*mi.scale),
+  OMEGA:cl(.15+.25*u.C+.15*u.rsc+.13*u.light.coherence+.08*mi.coherence+.06*mi.mode188+.06*mi.relation+.05*mi.proof+.04*mi.governance+.03*mi.topology)
  };
  return{u,phase01,phaseAngle:u.phase,phaseSpeed,pulseRate,shellCount,shellOpacity,shellEccentricity,shellPrecession,density,pointRadius,depthGain,perspectiveGain,curvature,fold,branchSpread,trailPersistence,scarMemory,routeStrength,routeWidth,proofGlow,contradictionPressure,hue,hueInverse,saturation,luminance,alpha,modeDecision:String(record?.metrics?.decision||u.sourceDecision||'TURN'),operatorWeights,sourceModeInfluence};
 }

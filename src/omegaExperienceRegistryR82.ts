@@ -36,16 +36,24 @@ export const OMEGA_FIELD_PROJECTIONS_R82:readonly {
 ] as const;
 
 export const OMEGA_ALL_ROUTES_R82=OMEGA_WORKSPACES_R82.flatMap(x=>x.routes);
+export const OMEGA_ROUTE_INVENTORY_R107={
+ currentCount:OMEGA_ALL_ROUTES_R82.length,
+ historicalR82Baseline:44,
+ authority:'INVENTORY_TELEMETRY_NOT_ARCHITECTURE',
+ boundary:'The historical R82 build happened to expose 44 registered destinations. Route count is a non-regression/inventory signal only; it is not a calculus primitive, capability ceiling, mode count, or fixed architectural law.'
+} as const;
 export function workspaceForRouteR82(route:string){return OMEGA_WORKSPACES_R82.find(x=>x.routes.includes(route))||OMEGA_WORKSPACES_R82[0]}
 export function projectionForR82(id:OmegaFieldProjectionR82){return OMEGA_FIELD_PROJECTIONS_R82.find(x=>x.id===id)||OMEGA_FIELD_PROJECTIONS_R82[0]}
 export function validateExperienceRegistryR82(){
- const routes=OMEGA_ALL_ROUTES_R82;
+ const routes=OMEGA_ALL_ROUTES_R82,unique=new Set(routes),workspaceIds=new Set(OMEGA_WORKSPACES_R82.map(x=>x.id)),projectionIds=new Set(OMEGA_FIELD_PROJECTIONS_R82.map(x=>x.id)),emptyWorkspaces=OMEGA_WORKSPACES_R82.filter(x=>x.routes.length===0).map(x=>x.id);
  return{
   workspaceCount:OMEGA_WORKSPACES_R82.length,
   routeCount:routes.length,
-  uniqueRouteCount:new Set(routes).size,
+  uniqueRouteCount:unique.size,
   projectionCount:OMEGA_FIELD_PROJECTIONS_R82.length,
-  pass:OMEGA_WORKSPACES_R82.length===6&&routes.length===44&&new Set(routes).size===44&&OMEGA_FIELD_PROJECTIONS_R82.length===8,
-  boundary:'R82 organizes existing OMEGA applications and visual projections. It does not create, delete, promote, or relabel execution authority.'
+  historicalRouteBaseline:OMEGA_ROUTE_INVENTORY_R107.historicalR82Baseline,
+  emptyWorkspaces,
+  pass:routes.length>0&&unique.size===routes.length&&workspaceIds.size===OMEGA_WORKSPACES_R82.length&&emptyWorkspaces.length===0&&projectionIds.size===OMEGA_FIELD_PROJECTIONS_R82.length,
+  boundary:'R107 validates reachability/uniqueness dynamically. The current destination count is telemetry, not architecture. OMEGA capability is governed by canonical state, calculus/mode authority, layer contracts, runtime execution, evidence and proof—not by a frozen route number.'
  };
 }

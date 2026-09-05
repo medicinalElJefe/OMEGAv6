@@ -12,13 +12,14 @@ const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const living=read('src/OmegaR36LivingSurfaces.tsx');
 
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
-must(routes.length===44&&new Set(routes).size===44,'shared route registry must remain 44/44 unique');
+must(routes.length>0&&new Set(routes).size===routes.length,'shared route registry must remain unique and non-empty');
+must(registry.includes('INVENTORY_TELEMETRY_NOT_ARCHITECTURE'),'route count must be classified as inventory telemetry');
 for(const id of ['COMMAND','EXPLORE','INTELLIGENCE','EVIDENCE','BUILD','SYSTEM'])must(registry.includes(`id:'${id}'`),`workspace missing ${id}`);
 
 must(home.includes('OmegaSideNavigatorR88'),'Home must mount the same global navigator as the workstation');
-must(home.includes("omega-r88-open-navigator")&&home.includes('All 44 applications')&&home.includes('Complete software system'),'Home must open the shared navigator for applications and software');
+must(home.includes("omega-r88-open-navigator")&&home.includes('Complete software system'),'Home must open the shared navigator for applications and software');
 must(home.includes("omega.r88.systemMapOpen")&&home.includes('return false'),'Home embedded software map must default collapsed under R88');
-must(nav.includes('OMEGA_ALL_ROUTES_R82')&&nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'navigator must render all 44 routes in one continuous scroll owner');
+must(nav.includes('OMEGA_ALL_ROUTES_R82')&&nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'navigator must render all registered routes in one continuous scroll owner');
 must(nav.includes("layer==='SOFTWARE'")&&nav.includes('<OmegaSystemInventoryR83 compact'),'navigator must preserve the complete software inventory layer');
 must(nav.includes("if(e.key==='Escape')setExpanded(false)")&&nav.includes("dataset.omegaNavExpanded=expanded?'true':'false'"),'side navigator must close deterministically and expose layout-reservation state without locking the page beneath it');
 must(navCss.includes('.r94-side-toolbar{')&&navCss.includes('.r94-nav-panel.r88-navigator{'),'navigation must remain one persistent edge toolbar with a collapsible panel');
@@ -37,7 +38,8 @@ must(inventoryCss.includes('.r83-inventory.compact .r83-inventory-kpis{display:f
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'responsive navigation must not remove or duplicate application surfaces');
+must(surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length,'responsive navigation must not remove or duplicate application surfaces');
+for(const route of routes)must(surfaces.includes(route),`workstation missing registered destination ${route}`);
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),`deep donor surface lost: ${token}`);
 
-console.log('R84/R104 RESPONSIVE COHERENT NAVIGATION PASS · persistent readable side toolbar · desktop/mobile non-covering authority · 44/44 routes');
+console.log(`R84/R104 RESPONSIVE COHERENT NAVIGATION PASS · persistent readable side toolbar · desktop/mobile non-covering authority · ${routes.length} current registered destinations`);

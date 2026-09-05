@@ -3,6 +3,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R104 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const integrity=read('src/SurfaceIntegrityR81.tsx');
 const layerRegistry=read('src/surfaceLayerContractR104.ts');
 const provenanceRegistry=read('src/surfaceProvenanceR94.ts');
@@ -31,27 +32,32 @@ const packageJson=JSON.parse(read('package.json'));
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'44 canonical application routes must remain unique and reachable');
+const routeBlocks=[...registry.matchAll(/routes:\[([^\]]*)\]/g)].map(x=>x[1]);
+const registeredRoutes=routeBlocks.flatMap(block=>[...block.matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(surfaces.length>0&&new Set(surfaces).size===surfaces.length,'canonical application routes must remain unique and reachable');
+must(new Set(registeredRoutes).size===registeredRoutes.length&&registeredRoutes.length===surfaces.length,'workstation mounts and dynamic experience registry must cover the same route inventory');
+for(const route of surfaces)must(registeredRoutes.includes(route),'experience registry missing mounted route '+route);
 
 // STATE + INTELLIGENCE + MEMORY + RELATION + COMPUTATION + ACTION + OBSERVATION + PROOF.
 const layerSurfaces=[...layerRegistry.matchAll(/B\('([^']+)'/g)].map(x=>x[1]);
-must(layerSurfaces.length===44&&new Set(layerSurfaces).size===44,'layer contract must contain exactly 44 unique surfaces');
+must(layerSurfaces.length===surfaces.length&&new Set(layerSurfaces).size===surfaces.length,'layer contract must contain exactly one binding for each registered surface');
 for(const surface of surfaces)must(layerSurfaces.includes(surface),'layer contract missing '+surface);
 for(const layer of ['STATE','INTELLIGENCE','MEMORY','RELATION','COMPUTATION','ACTION','OBSERVATION','PROOF'])must(layerRegistry.includes(`'${layer}'`),'architecture missing '+layer);
-must(layerRegistry.includes('surfaceLayerAuditR104')&&layerRegistry.includes('pass:names.length===44'),'layer registry must expose deterministic audit');
-must(integrity.includes('surfaceLayerBindingR104(panel)')&&integrity.includes('data-layer-primary={layer.primary}')&&integrity.includes("data-layer-contract='R104'"),'active routed wrapper must carry R104 layer contract');
+must(layerRegistry.includes('surfaceLayerAuditR104')&&layerRegistry.includes('missingBindings')&&layerRegistry.includes('orphanBindings')&&layerRegistry.includes('registeredRoutes:registered.length'),'layer registry must expose deterministic dynamic coverage audit');
+must(!layerRegistry.includes('pass:names.length===44'),'layer architecture may not be frozen to the historical route count');
+must(integrity.includes('surfaceLayerBindingR104(panel)')&&integrity.includes('data-layer-primary={layer.primary}')&&integrity.includes("data-layer-contract='R104/R107'"),'active routed wrapper must carry R104/R107 layer contract');
 must(workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}>{content}</SurfaceIntegrityR81>"),'all routed content must stay inside integrity wrapper');
 
-// 44-surface provenance and user-inspectable layer correctness, progressive rather than blocking.
+// Surface provenance and user-inspectable layer correctness, progressive rather than blocking.
 const provenanceNames=[...provenanceRegistry.matchAll(/P\('([^']+)'/g)].map(x=>x[1]).filter(x=>surfaces.includes(x));
-must(new Set(provenanceNames).size===44,'R94 provenance must cover all 44 routed surfaces');
+must(new Set(provenanceNames).size===surfaces.length,'R94 provenance must cover every routed surface');
 must(provenanceRegistry.includes('representationalPrimary.length===0')&&provenanceRegistry.includes('missingProof.length===0'),'provenance audit must reject representational truth owners and missing proof');
 must(provenanceUi.includes('surfaceLayerBindingR104(surface)')&&provenanceUi.includes("className='r104-layer-contract'"),'opened provenance must expose the actual R104 layer contract');
-must(provenanceCss.includes(".r104-layer-contract")&&provenanceCss.includes(".r94-provenance:not([open])>summary{min-height:30px"),'layer/provenance audit must stay progressive and compact while closed');
+must(provenanceCss.includes('.r104-layer-contract')&&provenanceCss.includes(".r94-provenance:not([open])>summary{min-height:30px"),'layer/provenance audit must stay progressive and compact while closed');
 
 // Readable, flat, reserved-space global navigation.
 must(nav.includes('r100-professional-nav r104-readable-nav')&&nav.includes('r104-nav-panel'),'R104 readable navigator classes must be active');
-must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'all 44 routes must remain one flat searchable list');
+must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'all registered routes must remain one flat searchable list');
 must(nav.includes('<em>{workspace.copy}</em>')&&nav.includes('<small>{currentWorkspace.copy}</small>'),'expanded navigator must explain destination and active instrument');
 must(nav.includes("setExpanded(false);setQuery('')"),'destination selection must collapse back to slim rail');
 must(!nav.includes('r88-navigator-backdrop')&&!nav.includes("document.body.style.overflow='hidden'"),'navigator must not regress to covering modal/body lock');
@@ -108,4 +114,4 @@ must(packageJson.scripts['test:r104']==='node tests/r104-extreme-layer-integrity
 must(packageJson.scripts['check:static'].includes('npm run test:r104'),'R104 must run inside full static release check');
 must(![layerRegistry,integrity,nav,css,stage,hybrid,worker101,worker102,router].join('\n').includes('@appdeploy/client'),'R104 must remain provider portable');
 
-console.log('R104 EXTREME LAYER INTEGRITY PASS · 44 routes · 8-layer correlation · 44 provenance contracts · 8 distinct source-driven modes · R98 no-occlusion · readable reserved-space navigator · Hybrid/Earth/project/operation/federation truth preserved');
+console.log(`R104 EXTREME LAYER INTEGRITY PASS · ${surfaces.length} current registered destinations · 8-layer correlation · full provenance coverage · 8 distinct source-driven modes · R98 no-occlusion · readable reserved-space navigator · Hybrid/Earth/project/operation/federation truth preserved`);

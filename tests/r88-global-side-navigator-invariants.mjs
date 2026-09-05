@@ -8,8 +8,9 @@ const home=read('src/OmegaHomeR71.tsx');
 const polish=read('src/responsivePolishR88.css');
 const registry=read('src/omegaExperienceRegistryR82.ts');
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
-must(routes.length===44&&new Set(routes).size===44,'canonical route universe must remain 44/44 unique');
-must(nav.includes('OMEGA_ALL_ROUTES_R82')&&nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'global navigator must render all 44 routes through one flat scroll owner');
+must(routes.length>0&&new Set(routes).size===routes.length,'registered route inventory must remain unique and non-empty');
+must(registry.includes('INVENTORY_TELEMETRY_NOT_ARCHITECTURE'),'route count must be classified as inventory telemetry');
+must(nav.includes('OMEGA_ALL_ROUTES_R82')&&nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'global navigator must render every registered route through one flat scroll owner');
 must(!nav.includes('r88-route-band')&&!nav.includes('sections.map(workspace'),'R89 must not regress to compartmentalized workspace sections');
 must(nav.includes("layer==='SOFTWARE'")&&nav.includes('OmegaSystemInventoryR83'),'software inventory must remain directly reachable from the same side navigator');
 must(nav.includes("omega-r88-open-navigator"),'shared event entry point must remain compatible across Home and workstation');
@@ -18,4 +19,4 @@ must(css.includes("@media(max-width:900px)")&&css.includes('--r94-nav-panel:min(
 must(shell.includes('OmegaSideNavigatorR88')&&!shell.includes("className='r62-rail'"),'workstation must keep the shared R94 collapsible toolbar and no legacy R62/bottom rail');
 must(home.includes('OmegaSideNavigatorR88')&&home.includes("omega-r88-open-navigator"),'Home must open the exact same global navigator');
 must(css.includes("html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home)")&&css.includes('width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important'),'expanded desktop navigation must reserve layout width instead of covering the application');
-console.log('R88/R89/R104 GLOBAL NAVIGATOR PASS · persistent readable collapsible side toolbar · 44 routes · non-covering mobile/desktop authority');
+console.log(`R88/R89/R104 GLOBAL NAVIGATOR PASS · persistent readable collapsible side toolbar · ${routes.length} current destinations · dynamic inventory · non-covering mobile/desktop authority`);
