@@ -1,0 +1,9 @@
+{
+  "$schema":"node_modules/wrangler/config-schema.json",
+  "name":"omega-fabric-sentinel",
+  "main":"cloud/fabric-sentinel/src/index.js",
+  "compatibility_date":"2026-08-28",
+  "workers_dev":true,
+  "preview_urls":true,
+  "observability":{"enabled":true}
+}

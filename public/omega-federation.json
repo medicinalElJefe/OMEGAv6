@@ -1,9 +1,9 @@
 {
   "schema": "OMEGA_FEDERATION_v1",
-  "experienceRevision": "R102",
+  "experienceRevision": "R111",
   "canonicalAuthority": "OMEGAv6",
   "stateLaw": "partition -> transform -> invariant carry -> scar carry -> re-contextualize",
-  "userModel": "one project + one packet lineage + four specialized runtimes",
+  "userModel": "one project + one packet lineage + four specialized runtimes + scalable non-authoritative service capacity",
   "handoff": ["PROPOSE", "SCREEN", "SOLVE", "ADMIT"],
   "atlas": {
     "axes": ["domain", "phase", "regulation", "seed"],
@@ -63,12 +63,28 @@
       "mayMutateCanonicalState": false
     }
   ],
+  "fabric": {
+    "revision": "R111",
+    "statusEndpoint": "/api/fabric/status",
+    "intentEndpoint": "/api/fabric/route",
+    "lawEndpoint": "/api/fabric/law",
+    "authorityNodeCount": 4,
+    "scalingLaw": "Add service capacity without adding competing CanonState authority.",
+    "serviceCapabilities": ["hybrid-transport", "rcwa", "workers-ai", "earth-evidence", "route-deferred-specialists"],
+    "sentinel": {
+      "url": "https://omega-fabric-sentinel.jeffdeweyeljefe.workers.dev",
+      "role": "independent advisory current-probe observer",
+      "mayMutateCanonicalState": false,
+      "mayExecuteNativeActions": false
+    }
+  },
   "experienceContract": {
     "sharedContext": ["project_id", "packet_id", "state_id", "atlas_address", "observer_frame", "evidence_class", "proof_gate", "scar_history", "orientation_sigma", "lineage"],
     "sharedStatusLanguage": ["LIVE", "WORKING", "ACCESS_GATED", "HOLD", "OFFLINE", "HISTORICAL_PROOF"],
     "interaction": "Task-first routing; node selection is normally automatic and visible as a trace, not a prerequisite the user must understand.",
     "visual": "Common instrument grammar and truth/status language; each node keeps role-specific primary visualization rather than cloning one renderer.",
-    "mobileDesktop": "Same capability and proof state, device-appropriate layout, no primary-stage occlusion."
+    "mobileDesktop": "Same capability and proof state, device-appropriate layout, no primary-stage occlusion.",
+    "outputContract": "Every registered OMEGA route declares input -> operation -> output -> proof and its eight-layer responsibilities."
   },
   "solver": {
     "tier1": {
@@ -91,6 +107,8 @@
     "canonicalAdmissionNode": "omega-v6",
     "duplicateCorpusViewsAreIndependentEvidence": false,
     "nodeLocalStateDoesNotEqualGlobalCanonState": true,
-    "machineCredentialsNeverShipToBrowser": true
+    "machineCredentialsNeverShipToBrowser": true,
+    "auxiliaryCloudsDoNotBecomeCanonicalAuthorities": true,
+    "failedSolverResultsReturnAsScarredEvidence": true
   }
 }

@@ -2,6 +2,7 @@ import {useMemo,useState} from 'react';
 import {CheckCircle2,Link2,Monitor,ShieldCheck,Smartphone,TerminalSquare} from 'lucide-react';
 import {localState} from './platformAdapter';
 import {compileHybridMission,HYBRID_ADAPTERS,HYBRID_COMPONENTS,HYBRID_DONOR,HYBRID_MODULES,HYBRID_TESTS,type HybridMission} from './hybridMissionRuntime';
+import HybridConnectBarR111 from './HybridConnectBarR111';
 import './hybridMission.css';
 
 type Props={status:any;record:any};
@@ -14,6 +15,7 @@ export default function HybridMissionControl({status,record}:Props){
  const metrics=useMemo(()=>({continuity:Number(record?.metrics?.continuity)||0,burden:Number(record?.metrics?.burden)||0,contradiction:Number(record?.metrics?.contradiction)||0,evidence:Number(record?.metrics?.evidence)||0,scar:Number(record?.metrics?.scar)||0}),[record]);
  const submit=()=>{const text=command.trim();if(!text)return;const mission=compileHybridMission(text,metrics,deviceProof),next=[...missions,mission].slice(-40);setMissions(next);localState.write('omega.v6.hybrid.missions',next);setCommand('')};
  return <section className='special-app hybrid-mission-app'><header className='special-head'><div><span>HYBRID LINK v21 DONOR · 61,917,364,224 ADDRESS SPACE</span><h2>Hybrid Mission Control</h2></div><span className='truth-pill'>{deviceProof}</span></header>
+ <HybridConnectBarR111/>
  <div className='hybrid-contract-strip'><div><span>CORE INTENT</span><b>{HYBRID_DONOR.coreIntent}</b></div><div><span>MODULES</span><b>{HYBRID_DONOR.moduleCount}</b></div><div><span>COMPONENTS</span><b>{HYBRID_DONOR.componentCount}</b></div><div><span>PHASES</span><b>{HYBRID_DONOR.phaseCount}</b></div><div><span>GRID</span><b>{HYBRID_DONOR.gridRows.toLocaleString()}</b></div><div><span>PACKET SPACE</span><b>{HYBRID_DONOR.packetSpace.toLocaleString()}</b></div></div>
  <div className='hybrid-peer-stage'><article><Monitor/><b>DESKTOP HOST</b><span>{deviceProof==='VERIFIED'?'AUTHENTICATED HEARTBEAT':'NATIVE ACTIONS HELD FOR PROOF'}</span></article><div><Link2/><b>REQUEST → PROOF → RESPONSE → CORRECTION → RETURN</b><span>EVIDENCE_BOUND · NO_SHADOW_STATE</span></div><article><Smartphone/><b>MOBILE / BROWSER PEER</b><span>PLAN · INSPECT · ROUTE · VERIFY</span></article></div>
  <div className='hybrid-mission-input'><TerminalSquare/><input value={command} onChange={e=>setCommand(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder='Describe a link, donor, runtime, repair, render, workbook, stream, or native-device mission…'/><button onClick={submit} disabled={!command.trim()}>Compile mission</button></div>

@@ -1,8 +1,8 @@
-// OMEGA R103: stable R102 Worker entry with additive task-first routing.
+// OMEGA R111: R102/R101 lineage preserved with additive federated capability mesh.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR102.js",
+  "main": "src/workerR111.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import {planIntentR103,classifyIntentR103} from '../src/federation/federationIntentRouterR103.js';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R103 '+msg)};
-const worker=read('src/workerR102.js'),ui=read('src/FederationRunR97.tsx'),css=read('src/federationRunR97.css'),vite=read('vite.config.ts'),wrangler=read('wrangler.jsonc'),router=read('src/federation/federationIntentRouterR103.js');
+const worker=read('src/workerR102.js'),worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'',ui=read('src/FederationRunR97.tsx'),css=read('src/federationRunR97.css'),vite=read('vite.config.ts'),wrangler=read('wrangler.jsonc'),router=read('src/federation/federationIntentRouterR103.js');
 const healthy={nodes:{genesis:{state:'LIVE'},optical:{state:'LIVE'},sovereign:{state:'PC_ONLINE'},omegaV6:{state:'LIVE'}}};
 const gated={nodes:{genesis:{state:'LIVE'},optical:{state:'ACCESS_GATED'},sovereign:{state:'PAIRING_REQUIRED'},omegaV6:{state:'LIVE'}}};
 
@@ -26,11 +26,13 @@ must(!router.includes('Math.random'),'intent routing may not depend on random/fa
 
 must(worker.includes("path==='/api/federation/route-intent'")&&worker.includes('planIntentR103')&&worker.includes("'x-omega-intent-router-revision':'R103'"),'stable production worker must expose the R103 task-first API with a revision receipt');
 must(worker.includes("schema:'OMEGA_FEDERATION_RUN_STATUS_R97'")&&worker.includes("federationRevision:'R102'"),'R103 routing must remain additive and preserve the stable federation status contract');
-must(wrangler.includes('"main": "src/workerR102.js"'),'R103 must not force a new production worker entry merely to add task-first routing');
+const r102Direct=wrangler.includes('"main": "src/workerR102.js"');
+const r111PreservesR103=wrangler.includes('"main": "src/workerR111.js"')&&worker111.includes("from './workerR102.js'");
+must(r102Direct||r111PreservesR103,'R103 task-first routing must remain active directly through R102 or through an additive R111 successor');
 must(ui.includes('/api/federation/route-intent')&&ui.includes('WHAT DO YOU WANT OMEGA TO DO?')&&ui.includes('MINIMAL USEFUL PATH'),'Federation Instrument must expose outcome-first routing');
 must(ui.includes('Optional nodes remain optional')&&ui.includes('does not force unused stages into every task'),'UI must explicitly preserve minimal routing instead of infrastructure-first behavior');
 must(css.includes('.r103-intent-router')&&css.includes('.r103-route-steps')&&css.includes('@media(max-width:760px)'),'task router must retain responsive containment');
 must(vite.includes('manualChunks:vendorChunkR109')&&vite.includes("partition:'R109_ROUTE_DEFERRED_SPECIALISTS'"),'R109 must supersede cache-only application grouping with route-deferred specialist packaging while retaining vendor partitions');
 must(vite.includes('dynamic imports to defer heavy specialist UI modules')&&vite.includes('Prefetch means module bytes are prepared'),'performance truth boundary must distinguish module-byte prefetch from capability execution');
 
-console.log('R103/R109 TASK-FIRST ROUTER PASS · minimal capability graph · optional-stage preservation · truthful live gate · stable R102 worker/status contract · responsive intent surface · route-deferred specialist successor');
+console.log('R103/R111 TASK-FIRST ROUTER PASS · minimal capability graph · optional-stage preservation · truthful live gate · stable R102 contract preserved through additive R111 mesh · responsive intent surface · route-deferred specialist successor');
