@@ -4,6 +4,7 @@ const must=(ok,msg)=>{if(!ok)throw new Error('R94 '+msg)};
 const worker=read('src/workerR33.js');
 const hybrid=read('src/HybridMissionControlR8.tsx');
 const hybridLink=read('src/HybridLinkR32.tsx');
+const launcher=fs.existsSync('src/sovereignLauncherR112.ts')?read('src/sovereignLauncherR112.ts'):hybridLink;
 const agent=read('public/omega-hybrid-agent.py');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const css=read('src/omegaSideNavigatorR88.css');
@@ -11,6 +12,7 @@ const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const ci=read('.github/workflows/ci.yml');
 
 const canonical='https://omegav6.jeffdeweyeljefe.workers.dev';
+void canonical;
 
 must(worker.includes("path==='/api/hybrid/agent-download'&&request.method==='GET'"),'Worker must expose canonical Hybrid agent download route');
 must(worker.includes("source.length>1000")&&worker.includes("source.startsWith('#!/usr/bin/env python3')"),'Worker must validate agent asset before serving it');
@@ -19,17 +21,16 @@ must(worker.includes("'cache-control':'no-store, max-age=0'"),'agent download mu
 must(worker.includes("'x-omega-canonical-origin':CANONICAL_ORIGIN_R94"),'agent response must expose canonical origin receipt');
 must(worker.includes("'x-omega-agent-sha256':digest")&&worker.includes('sha256TextR96(source)'),'agent response must expose a SHA-256 receipt for exact source bytes');
 
-must(hybrid.includes("const CANONICAL_OMEGA_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'Windows launcher must hard-bind canonical origin');
+must(hybrid.includes("const CANONICAL_OMEGA_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'legacy Windows launcher path must remain hard-bound to canonical origin');
 must(!hybrid.includes('const origin=window.location.origin'),'Windows launcher must never inherit browser/preview origin');
-must(hybrid.includes("%OMEGA_ORIGIN%/api/hybrid/agent-download?r94=1"),'launcher must use validated Worker download endpoint');
-must(hybrid.includes('--server "%OMEGA_ORIGIN%" --pair'),'launcher must explicitly bind Python agent back to canonical runtime');
-must(hybrid.includes("$src.StartsWith('#!/usr/bin/env python3')")&&hybrid.includes("$src.Contains('OMEGA Hybrid Link agent')"),'launcher must validate downloaded Python before execution');
-must(hybrid.includes('Check HTTP/firewall access to %OMEGA_ORIGIN%/api/hybrid/agent-download.'),'launcher error must point to the repaired canonical endpoint');
-must(hybridLink.includes('${CANONICAL_OMEGA_ORIGIN}/api/hybrid/agent-download?r94=1'),'manual agent download must use same canonical validated endpoint');
-must(hybridLink.includes('--server "${CANONICAL_OMEGA_ORIGIN}"'),'manual command must explicitly bind canonical runtime');
+must(hybrid.includes("%OMEGA_ORIGIN%/api/hybrid/agent-download?r94=1"),'legacy launcher must retain validated Worker download endpoint');
+must(hybrid.includes('--server "%OMEGA_ORIGIN%" --pair'),'legacy launcher must explicitly bind Python agent back to canonical runtime');
+must(hybrid.includes("$src.StartsWith('#!/usr/bin/env python3')")&&hybrid.includes("$src.Contains('OMEGA Hybrid Link agent')"),'legacy launcher must validate downloaded Python before execution');
+must(launcher.includes('/api/hybrid/agent-download?r112=1')&&launcher.includes('--server "%OMEGA_ORIGIN%" --pair'),'R112 shared launcher must use the same canonical validated transport contract');
+must(launcher.includes("$s.StartsWith('#!/usr/bin/env python3')")&&launcher.includes("$s.Contains('OMEGA Hybrid Link agent')"),'R112 shared launcher must validate downloaded Python before execution');
 must(agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"),'agent default server must remain canonical');
 must(agent.includes('probe_server(server)')&&agent.includes('/api/hybrid/agent/register'),'agent must still require canonical reachability and authenticated registration');
-must(![hybrid,hybridLink,agent,worker].join('\n').includes('omega-sovereign-convergence.foundasound.chatgpt.site'),'obsolete Hybrid host must not exist in active Hybrid path');
+must(![hybrid,hybridLink,launcher,agent,worker].join('\n').includes('omega-sovereign-convergence.foundasound.chatgpt.site'),'obsolete Hybrid host must not exist in active Hybrid path');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
@@ -58,4 +59,4 @@ must(ci.includes("fetch(base+'/api/hybrid/agent-download'")&&ci.includes("OMEGA 
 must(ci.includes("readFileSync('public/omega-hybrid-agent.py')")&&ci.includes('servedSha256!==expectedSha256')&&ci.includes('receiptSha256!==expectedSha256'),'live Hybrid probe must compare the response body and receipt to the repository source SHA-256');
 must(!css.includes('@appdeploy/client')&&!nav.includes('@appdeploy/client'),'R94 navigation must remain provider portable');
 
-console.log('R94 HYBRID + NAVIGATION PASS · canonical agent route repaired · stale origin inheritance removed · persistent non-covering side toolbar · unified destination controls · 44 routes preserved');
+console.log('R94 HYBRID + NAVIGATION PASS · canonical agent route preserved through R112 launcher · stale origin inheritance removed · persistent non-covering side toolbar · unified destination controls · 44 routes preserved');

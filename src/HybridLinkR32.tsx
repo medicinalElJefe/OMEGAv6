@@ -1,32 +1,32 @@
-import {useEffect,useMemo,useState} from 'react';
-import {CheckCircle2,Clipboard,Download,Link2,Monitor,RefreshCw,RotateCcw,ShieldCheck,Smartphone,TriangleAlert,Wrench} from 'lucide-react';
+import {Cpu,FolderOpen,Gauge,GraduationCap,ShieldCheck,TerminalSquare} from 'lucide-react';
 import HybridMissionControlR8 from './HybridMissionControlR8';
-import {api,clearHybridBridge,createHybridPair,getHybridBridge,reconnectHybridBridge} from './platformAdapter';
+import SovereignConnectionR112 from './SovereignConnectionR112';
 import './hybridLinkR32.css';
+import './hybridLinkR112.css';
 
 type Props={status:any;record:any};
-const CANONICAL_OMEGA_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev';
-const age=(n:number)=>{if(!n)return'never';const s=Math.max(0,Math.round((Date.now()-n)/1000));return s<60?`${s}s ago`:s<3600?`${Math.floor(s/60)}m ago`:`${Math.floor(s/3600)}h ago`};
+
 export default function HybridLinkR32({status,record}:Props){
- const[bridge,setBridge]=useState(()=>getHybridBridge()),[live,setLive]=useState<any>(null),[pairing,setPairing]=useState(''),[busy,setBusy]=useState(''),[message,setMessage]=useState(''),[repairNeeded,setRepairNeeded]=useState(false);
- const refresh=async()=>{try{const r=await api.get<any>('/api/hybrid/status');setLive(r.data)}catch(e:any){setMessage(e?.message||String(e))}};
- useEffect(()=>{void refresh();const id=window.setInterval(()=>void refresh(),4000);return()=>clearInterval(id)},[]);
- const pair=async(rotate=false)=>{setBusy('pair');setMessage('');setRepairNeeded(false);try{const r=await createHybridPair(rotate);const b=getHybridBridge();setBridge(b);setPairing(r.pairingCode||b?.pairingCode||'');setMessage(r.secretReturned?'Pairing credential created locally in this browser. Start the PC agent to prove the native link.':'A pairing already exists. Rotate it only if the local credential was lost.');await refresh()}catch(e:any){setMessage(e?.message||String(e))}finally{setBusy('')}};
- const reconnect=async(repair=false)=>{setBusy(repair?'repair':'reconnect');setMessage('');try{const r=await reconnectHybridBridge(repair),b=getHybridBridge();setBridge(b);if(r?.pairingCode)setPairing(r.pairingCode);setRepairNeeded(false);setMessage(r?.agentRestartRequired?'Fresh Hybrid credential issued. Restart the PC agent with the updated command below; PC ONLINE will remain held until its authenticated heartbeat returns.':'Bridge credential verified against the durable runtime. Waiting for or reading the current PC heartbeat.');await refresh()}catch(e:any){const auth=e?.code==='PAIR_AUTH_FAILED'||e?.status===401;setRepairNeeded(auth);setMessage(auth?'The stored browser credential no longer authenticates the durable bridge. Use Repair link to issue a fresh pairing, then restart the PC agent with the new command.':(e?.message||String(e)))}finally{setBusy('')}};
- const forget=()=>{clearHybridBridge();setBridge(null);setPairing('');setRepairNeeded(false);setMessage('Browser credential removed. The server-side pairing remains inert until rotated or an authenticated agent returns.');void refresh()};
- const devices=useMemo(()=>live?.devices||[],[live]),online=devices.filter((x:any)=>x.online&&!x.revoked),jobs=useMemo(()=>[...(live?.jobs||[])].reverse().slice(0,12),[live]),events=useMemo(()=>[...(live?.events||[])].reverse().slice(0,12),[live]);
- const code=pairing||bridge?.pairingCode||'';
- const command=code?`python omega-hybrid-agent.py --server "${CANONICAL_OMEGA_ORIGIN}" --pair "${code}" --root "."`:'';
- const copy=async(v:string)=>{try{await navigator.clipboard.writeText(v);setMessage('Copied.')}catch{setMessage('Clipboard access was blocked; select and copy the text manually.')}};
- return <section className='hybrid-r32 special-app'>
-  <header className='hybrid-r32-hero'><div><span>OMEGA HYBRID LINK · R101 DURABLE BRIDGE</span><h2>Connect the browser to the real PC.</h2><p>The browser plans and governs. The paired agent executes only approved, root-confined operations and returns proof. Reconnect now follows the persisted bridge identity instead of assuming the current browser session is the bridge.</p></div><div className={online.length?'hybrid-r32-state live':'hybrid-r32-state'}><i/><b>{online.length?'PC ONLINE':repairNeeded?'REPAIR REQUIRED':live?.state||'PAIRING REQUIRED'}</b><small>{online.length?`${online.length} proved device${online.length===1?'':'s'}`:repairNeeded?'stored credential rejected':'native execution remains held'}</small></div></header>
-  <div className='hybrid-r32-flow'><article className='browser'><Smartphone/><b>BROWSER</b><span>intent · approval · live proof</span></article><div><span>ENCRYPTED PAIR CREDENTIAL</span><i/><b>REQUEST → HOST → RETURN</b></div><article className={online.length?'host live':'host'}><Monitor/><b>PC AGENT</b><span>{online.length?'authenticated heartbeat':'not yet proved'}</span></article></div>
-  <section className='hybrid-r32-pair'><header><div><Link2/><span><b>{bridge?'Browser pairing configured':'Pair this browser'}</b><small>{bridge?'Credential is stored only in this browser local state and is checked against its own durable bridge ID.':'Create a one-time bridge credential, then run the sovereign agent on the PC.'}</small></span></div><div className='hybrid-r32-buttons'>{!bridge?<button onClick={()=>void pair(false)} disabled={!!busy}><Link2/>{busy?'Creating…':'Create pairing'}</button>:<><button onClick={()=>void reconnect(false)} disabled={!!busy}><RefreshCw/>{busy==='reconnect'?'Checking…':'Reconnect'}</button><button className='quiet' onClick={()=>void reconnect(true)} disabled={!!busy}><Wrench/>{busy==='repair'?'Repairing…':'Repair link'}</button><button className='quiet' onClick={()=>void pair(true)} disabled={!!busy}><RotateCcw/>Rotate</button><button className='quiet' onClick={forget} disabled={!!busy}>Forget browser key</button></>}</div></header>
-   {bridge&&<div className='hybrid-r32-install'><div><b>1 · Download the agent</b><p>Download the validated agent from the canonical Worker. R101 also restores the direct `/omega-hybrid-agent.py` compatibility route used by older launchers.</p><a href={`${CANONICAL_OMEGA_ORIGIN}/api/hybrid/agent-download?r94=1`} download><Download/>Download canonical omega-hybrid-agent.py</a></div><div><b>2 · Start it inside the folder OMEGA may operate</b><p>The `--root` folder becomes the hard filesystem/process boundary. After Repair or Rotate, the old agent credential is intentionally invalid and this new command must be used.</p>{code?<><code>{command}</code><button onClick={()=>void copy(command)}><Clipboard/>Copy command</button></>:<button onClick={()=>void pair(true)}><RotateCcw/>Issue a fresh visible pairing code</button>}</div><div><b>3 · Leave it online</b><p>Only a current authenticated heartbeat changes this screen to PC ONLINE. A valid browser credential by itself never claims native execution.</p></div></div>}
+ return <section className='hybrid-r32 special-app r112-hybrid-link'>
+  <header className='r112-hybrid-hero'>
+   <div><span>SOVEREIGN COMPUTE · HYBRID LINK</span><h2>Your PC is an OMEGA compute node.</h2><p>This page has one ordinary job: connect the Windows machine, prove the heartbeat, then expose local capabilities. Pairing mechanics, federation topology and recovery controls stay available, but they are not the main interface.</p></div>
+   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat. Native execution is claimed only while an authenticated agent heartbeat is current.</small></div>
+  </header>
+
+  <SovereignConnectionR112/>
+
+  <section className='r112-host-uses' aria-label='What Sovereign Compute adds'>
+   <article><FolderOpen/><div><b>Work with the approved local root</b><span>Read, index, hash, patch, build, test and package only inside the bounded machine root.</span></div></article>
+   <article><Cpu/><div><b>Run high-compute workers</b><span>RCWA is active when its dependency and heartbeat are proved; future FDTD/FEM/GPU workers remain separately truth-gated.</span></div></article>
+   <article><GraduationCap/><div><b>Learn from your local corpus</b><span>TRAIN_LOCAL builds bounded local indexes and learning receipts from approved files. It does not claim silent foundation-model weight training.</span></div></article>
+   <article><Gauge/><div><b>Return proof, not mystery actions</b><span>Every enacted job returns status, output identity and evidence/receipt information to the canonical OMEGA runtime.</span></div></article>
   </section>
-  {message&&<div className='hybrid-r32-message'>{message}</div>}
-  <div className='hybrid-r32-livegrid'><section><header><b>Devices</b><span>{devices.length}</span></header>{devices.length?devices.map((d:any)=><article key={d.id} className={d.online?'live':''}>{d.online?<CheckCircle2/>:<TriangleAlert/>}<div><b>{d.name}</b><span>{d.platform}</span><small>{d.online?'ONLINE':'OFFLINE'} · last proof {age(d.lastSeen)} · {d.rootLabel}</small></div></article>):<div className='hybrid-r32-empty'>No authenticated device proof has returned yet.</div>}</section><section><header><b>Enacted jobs</b><span>{jobs.length}</span></header>{jobs.length?jobs.map((j:any)=><article key={j.id}><ShieldCheck/><div><b>{j.action||'PLAN'} · {j.status}</b><span>{j.id}</span><small>{j.steps?.length||0} approved steps · {j.returnPacket?.resultFingerprint?`proof ${String(j.returnPacket.resultFingerprint).slice(0,16)}`:'proof pending'}</small></div></article>):<div className='hybrid-r32-empty'>No native job has been approved in this browser session.</div>}</section><section><header><b>Live bridge events</b><span>{events.length}</span></header>{events.length?events.map((e:any)=><article key={e.id}><i className='event-dot'/><div><b>{e.type}</b><span>{e.message}</span><small>{age(e.at)}</small></div></article>):<div className='hybrid-r32-empty'>Events appear as the runtime, AI and paired host act.</div>}</section></div>
-  <details className='hybrid-r32-advanced'><summary>Advanced planning, V87→V90 operation registry and donor architecture</summary><HybridMissionControlR8 status={{...status,hybridLink:{...(status?.hybridLink||{}),state:live?.state||status?.hybridLink?.state}}} record={record}/></details>
-  <footer className='special-boundary'><ShieldCheck/>Native execution is claimed only while an authenticated agent heartbeat is current. R101 preserves the R32 allow-listed execution queue and proof return while repairing bridge-identity reconnect; credential repair never substitutes for device proof.</footer>
- </section>
+
+  <details className='r112-hybrid-deep'>
+   <summary><TerminalSquare/><span><b>Advanced federation, mission planning and diagnostics</b><small>Not required to connect the PC. Open this only when inspecting routes, queues, solver details, recovery or donor architecture.</small></span></summary>
+   <HybridMissionControlR8 status={status} record={record}/>
+  </details>
+
+  <footer className='special-boundary'><ShieldCheck/>R112 preserves the R101 durable bridge and the R32 allow-listed execution/proof queue, but the ordinary experience is now connection → heartbeat → capability. Advanced transport controls remain progressive rather than dominating the screen.</footer>
+ </section>;
 }
