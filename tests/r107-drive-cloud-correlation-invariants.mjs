@@ -12,9 +12,9 @@ const accepted=read('src/acceptedProductionContractR95.ts');
 const federation=read('public/omega-federation.json');
 
 // Connected Drive corpus is represented by stable titles/contracts, never private file locators or credentials.
+must(systemLedger.includes("name:'OMEGA_ONE_SYSTEM_FULL_SOFTWARE_MENU_LEDGER.xlsx'")&&source.includes('title:MASTER_SYSTEM_SOURCE_R83.name'),'one-system Drive source contract must flow through the recovered ledger authority');
+must(hostLedger.includes("name:'OMEGA_ONE_SYSTEM_J_DRIVE_1728D_AUTOPING_LEDGER.xlsx'")&&source.includes('title:HOST_BUILD_SOURCE_R83.name'),'J-drive source contract must flow through the recovered host-build authority');
 for(const title of [
- 'OMEGA_ONE_SYSTEM_FULL_SOFTWARE_MENU_LEDGER.xlsx',
- 'OMEGA_ONE_SYSTEM_J_DRIVE_1728D_AUTOPING_LEDGER.xlsx',
  'OMEGA_ALL_SOFTWARE_61917364224D_FULL_BUILD_v22.xlsx',
  'Dewey_Calculus_20736D_ENTIRE_Full_Canon_Trig_Water_Scar_Mode188_Atlas.xlsx',
  'Dewey_248832D_MASTER_INDEX_CHARTS.xlsx',
