@@ -56,17 +56,25 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN" || { echo '::error::OMEGA_CLOUDFLARE_TOKEN missing'; exit 1; }
       - name: Deploy independent advisory sentinel
         run: npx wrangler deploy --config wrangler.fabric-sentinel.jsonc
-      - name: Verify sentinel and current fabric
+      - name: Verify sentinel and wait for canonical R111 fabric
         shell: bash
         run: |
           node <<'NODE'
           const base=process.env.SENTINEL_URL.replace(/\/$/,'');
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-          async function get(path){let last='';for(let i=1;i<=12;i++){try{const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}}),t=await r.text();if(r.ok){return JSON.parse(t)}last=`HTTP ${r.status}: ${t.slice(0,300)}`}catch(e){last=String(e)}await sleep(5000)}throw new Error(`${path} failed: ${last}`)}
-          const health=await get('/health');
-          if(health.service!=='omega-fabric-sentinel'||health.authority!=='ADVISORY_ONLY')throw new Error('sentinel authority boundary failed');
-          const fabric=await get('/fabric');
-          if(fabric.schema!=='OMEGA_FABRIC_SENTINEL_R111'||fabric.canonicalAuthority!=='omega-v6')throw new Error('sentinel fabric contract failed');
-          if(!Array.isArray(fabric.authorities)||fabric.authorities.length!==4)throw new Error(`expected four authority observations, got ${fabric.authorities?.length}`);
-          console.log(`R111 SENTINEL LIVE PASS · ${base} · authorities ${fabric.authorities.map(x=>`${x.id}:${x.state}`).join(' | ')}`);
+          async function get(path){const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}}),t=await r.text();if(!r.ok)throw new Error(`HTTP ${r.status}: ${t.slice(0,300)}`);return JSON.parse(t)}
+          let last='';
+          for(let attempt=1;attempt<=18;attempt++){
+            try{
+              const health=await get('/health');
+              if(health.service!=='omega-fabric-sentinel'||health.authority!=='ADVISORY_ONLY')throw new Error('sentinel authority boundary failed');
+              const fabric=await get('/fabric');
+              if(fabric.schema!=='OMEGA_FABRIC_SENTINEL_R111'||fabric.canonicalAuthority!=='omega-v6')throw new Error('sentinel fabric contract failed');
+              if(!Array.isArray(fabric.authorities)||fabric.authorities.length!==4)throw new Error(`canonical R111 fabric not promoted yet; authority observations ${fabric.authorities?.length||0}`);
+              console.log(`R111 SENTINEL LIVE PASS · ${base} · attempt ${attempt} · authorities ${fabric.authorities.map(x=>`${x.id}:${x.state}`).join(' | ')}`);
+              process.exit(0);
+            }catch(e){last=String(e)}
+            await sleep(5000);
+          }
+          throw new Error(`sentinel/fabric verification failed after promotion window: ${last}`);
           NODE
