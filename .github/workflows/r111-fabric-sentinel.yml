@@ -23,6 +23,7 @@ permissions:
 
 env:
   SENTINEL_URL: https://omega-fabric-sentinel.jeffdeweyeljefe.workers.dev
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
 
 jobs:
   verify:
@@ -35,6 +36,19 @@ jobs:
       - run: npm install
       - run: node --check cloud/fabric-sentinel/src/index.js
       - run: npx wrangler deploy --dry-run --config wrangler.fabric-sentinel.jsonc --outdir .wrangler-r111-sentinel-dry-run
+      - name: Diagnose current canonical fabric inputs
+        continue-on-error: true
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          async function get(path){const r=await fetch(base+path,{headers:{accept:'application/json','cache-control':'no-cache'}}),text=await r.text();let body=null;try{body=JSON.parse(text)}catch{};return{path,status:r.status,contentType:r.headers.get('content-type')||'',body,text}}
+          const [fabric,federation,hybrid]=await Promise.all([get('/api/fabric/status'),get('/api/federation/run/status'),get('/api/hybrid/status')]);
+          console.log('CANONICAL FABRIC DIAGNOSTIC',JSON.stringify({http:fabric.status,schema:fabric.body?.schema,authorityNodes:fabric.body?.authorityNodes?.map(x=>({id:x.id,state:x.state,ready:x.ready}))},null,2));
+          console.log('FEDERATION INPUT DIAGNOSTIC',JSON.stringify({http:federation.status,schema:federation.body?.schema,nodes:federation.body?.nodes&&Object.fromEntries(Object.entries(federation.body.nodes).map(([k,v])=>[k,{state:v?.state,jsonVerified:v?.jsonVerified}]))},null,2));
+          console.log('HYBRID INPUT DIAGNOSTIC',JSON.stringify({http:hybrid.status,state:hybrid.body?.state,nativeExecutionClaimed:hybrid.body?.nativeExecutionClaimed,pairingState:hybrid.body?.pairingState},null,2));
+          if(!fabric.status||!federation.status||!hybrid.status)process.exitCode=1;
+          NODE
 
   deploy-main:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
