@@ -1,0 +1,29 @@
+name: OMEGA R113 Vector Carry Convergence
+
+on:
+  push:
+    branches: [main, r113-vector-carry-convergence]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-vector-carry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify R113 vector carry convergence
+        run: node tests/r113-vector-carry-convergence-invariants.mjs
+      - name: Verify inherited continuous field
+        run: node tests/continuous-field-r13-invariants.mjs
+      - name: Production build
+        run: npm run build
