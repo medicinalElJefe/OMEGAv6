@@ -15,7 +15,7 @@ const req=[
  [css.includes('@media(max-width:900px)'),'mobile containment exists'],
  [home.includes('SovereignRuntimeConstellationR62'),'living runtime remains on Home'],
  [home.includes('ExtremeTraversalUnionR60'),'restored execution stack remains reachable'],
- [shell.includes('OmegaSideNavigatorR88')&&navigator.includes("className='r89-flat-scroll'")&&navigator.includes('rows.map(route=>'),'all historical routes remain directly reachable through the governed flat side navigator']
+ [shell.includes('OmegaSideNavigatorR88')&&navigator.includes('r89-flat-scroll')&&navigator.includes('rows.map(route=>')&&!navigator.includes('rows.slice('),'all historical routes remain directly reachable through the governed readable flat side navigator']
 ];
 const bad=req.filter(([ok])=>!ok);if(bad.length){console.error('R67 invariant FAIL');for(const[,m]of bad)console.error('-',m);process.exit(1)}
 console.log('R67 product reset invariant PASS');for(const[,m]of req)console.log('PASS',m);

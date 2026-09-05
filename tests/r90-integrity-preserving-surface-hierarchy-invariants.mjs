@@ -18,7 +18,7 @@ must(surfaces.length===44&&new Set(surfaces).size===44,'canonical surface univer
 must(workstation.includes("import './surfaceHierarchyR90.css';"),'R90 hierarchy authority must load after R89');
 must(workstation.indexOf("surfaceHierarchyR90.css")>workstation.indexOf("mobileVisualFirstR89.css"),'R90 must be final workstation presentation authority');
 must(shell.includes('OmegaSideNavigatorR88')&&!shell.includes("className='r62-rail'"),'active shell must remain the shared flat navigator, not a legacy rail');
-must(nav.includes("className='r89-flat-scroll'")&&nav.includes('rows.map(route=>'),'flat 44-route navigation must remain intact');
+must(nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'flat 44-route navigation must remain intact');
 
 for(const p of ['Earth Now','Hybrid Link','Modes','Evidence & Proof','SAI Lab','Kernel Intelligence','System Atlas','Control Matrix'])
  must(css.includes("data-panel='"+p+"'")||css.includes("data-panel='"+p+"']"),'missing R90 hierarchy coverage for '+p);
@@ -37,4 +37,4 @@ must(sai.includes('It cannot silently edit GitHub or promote production from the
 must(atlas.includes('registration ≠ execution')&&atlas.includes('Registered capability never implies executable capability'),'System Atlas registration/execution separation must remain explicit');
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),'deep donor lost: '+token);
 must(!css.includes('@appdeploy/client'),'R90 hierarchy must remain provider portable');
-console.log('R90 INTEGRITY-PRESERVING SURFACE HIERARCHY PASS · 44 routes · truth gates intact · dense mobile surfaces promoted without capability deletion');
+console.log('R90/R104 INTEGRITY-PRESERVING SURFACE HIERARCHY PASS · 44 routes · truth gates intact · readable flat navigation retained');
