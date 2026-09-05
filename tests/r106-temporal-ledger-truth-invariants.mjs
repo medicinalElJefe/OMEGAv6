@@ -20,7 +20,7 @@ must(spine.includes('retainedRowsR106(deltas)')&&spine.includes('retainedRowsR10
 must(spine.includes('Self-monitor delta ledger · CURRENT SESSION')&&spine.includes('Self-monitor delta ledger · RETAINED EVIDENCE HISTORY'),'delta current/history labels missing');
 must(spine.includes('Checkpoint chain · CURRENT SESSION')&&spine.includes('Checkpoint chain · RETAINED EVIDENCE HISTORY'),'mesh current/history labels missing');
 must(spine.includes('No reality-boundary changes observed during this browser session.')&&spine.includes('sessionDeltas.length?'),'empty-session truth must use current-session rows, not retained rows');
-must(spine.includes('new Date(d.at).toLocaleString() · retained evidence')&&spine.includes('new Date(m.at).toLocaleString() · retained evidence'),'retained rows need full date plus evidence label');
+must(spine.includes('new Date(d.at).toLocaleString()} · retained evidence')&&spine.includes('new Date(m.at).toLocaleString()} · retained evidence'),'retained rows need full date plus evidence label');
 must(spine.includes("schema:'OMEGA_R56_B015_TEMPORAL_PROOF_LEDGER_RECEIPT'")&&spine.includes('retainedEvidence:{meshJournal,deltas'),'download receipt must preserve full retained evidence lineage');
 
 // R54 current verification may span retained evidence, but must not relabel old receipts as current.
