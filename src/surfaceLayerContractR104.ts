@@ -1,3 +1,5 @@
+import {OMEGA_ALL_ROUTES_R82} from './omegaExperienceRegistryR82';
+
 export type OmegaLayerR104='STATE'|'INTELLIGENCE'|'MEMORY'|'RELATION'|'COMPUTATION'|'ACTION'|'OBSERVATION'|'PROOF';
 
 export type SurfaceLayerBindingR104={
@@ -64,7 +66,7 @@ export function surfaceLayerBindingR104(surface:string){
 }
 
 export function surfaceLayerAuditR104(){
- const names=OMEGA_SURFACE_LAYER_BINDINGS_R104.map(x=>x.surface),layers=OMEGA_SURFACE_LAYER_BINDINGS_R104.flatMap(x=>x.layers),required:OmegaLayerR104[]=['STATE','INTELLIGENCE','MEMORY','RELATION','COMPUTATION','ACTION','OBSERVATION','PROOF'];
- const duplicates=names.filter((x,i)=>names.indexOf(x)!==i),missingLayers=required.filter(x=>!layers.includes(x)),invalid=OMEGA_SURFACE_LAYER_BINDINGS_R104.filter(x=>!x.layers.includes(x.primary)||!x.interaction||!x.correctness).map(x=>x.surface);
- return{total:names.length,unique:new Set(names).size,duplicates,missingLayers,invalid,pass:names.length===44&&new Set(names).size===44&&duplicates.length===0&&missingLayers.length===0&&invalid.length===0,boundary:'R104 layer bindings define product responsibility and handoff correctness. They do not manufacture execution, observation, evidence, or canonical authority.'};
+ const names=OMEGA_SURFACE_LAYER_BINDINGS_R104.map(x=>x.surface),registered=[...OMEGA_ALL_ROUTES_R82],layers=OMEGA_SURFACE_LAYER_BINDINGS_R104.flatMap(x=>x.layers),required:OmegaLayerR104[]=['STATE','INTELLIGENCE','MEMORY','RELATION','COMPUTATION','ACTION','OBSERVATION','PROOF'];
+ const duplicates=names.filter((x,i)=>names.indexOf(x)!==i),missingLayers=required.filter(x=>!layers.includes(x)),invalid=OMEGA_SURFACE_LAYER_BINDINGS_R104.filter(x=>!x.layers.includes(x.primary)||!x.interaction||!x.correctness).map(x=>x.surface),missingBindings=registered.filter(x=>!SURFACE_LAYER_BY_NAME_R104.has(x)),orphanBindings=names.filter(x=>!registered.includes(x));
+ return{total:names.length,registeredRoutes:registered.length,unique:new Set(names).size,duplicates,missingLayers,invalid,missingBindings,orphanBindings,pass:new Set(names).size===names.length&&new Set(registered).size===registered.length&&duplicates.length===0&&missingLayers.length===0&&invalid.length===0&&missingBindings.length===0&&orphanBindings.length===0,boundary:'R107 extends the R104 layer contract by validating coverage against the dynamic registered application inventory. Route count is telemetry, not architecture; every registered destination must still have exactly one valid State/Intelligence/Memory/Relation/Computation/Action/Observation/Proof responsibility contract.'};
 }
