@@ -25,7 +25,8 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
  const rows=useMemo(()=>{const q=query.trim().toLowerCase();return OMEGA_ALL_ROUTES_R82.filter(route=>{if(!q)return true;const workspace=workspaceForRouteR82(route);return (route+' '+workspace.label+' '+workspace.copy).toLowerCase().includes(q)})},[query]);
  const go=(panel:string)=>{onNavigate(panel);setExpanded(false);setQuery('')};
  const open=(next:BrowserLayer)=>{setLayer(next);setExpanded(true)};
- return <aside className={'r94-side-toolbar '+(expanded?'expanded':'collapsed')+' r100-professional-nav'} aria-label='OMEGA global navigation toolbar'>
+ const currentWorkspace=currentPanel?workspaceForRouteR82(currentPanel as any):null;
+ return <aside className={'r94-side-toolbar '+(expanded?'expanded':'collapsed')+' r100-professional-nav r104-readable-nav'} aria-label='OMEGA global navigation toolbar'>
   <div className='r94-nav-rail'>
    <button className='r88-navigator-trigger r100-rail-cap' onClick={()=>{setLayer('EVERYWHERE');setExpanded(v=>!v)}} aria-label={expanded?'Collapse OMEGA navigator':'Expand OMEGA navigator'} aria-expanded={expanded}>
     <span className='r100-omega-mark'>Ω</span><small>MENU</small><b>44</b>
@@ -41,22 +42,22 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
    <button className={'r94-rail-action '+(layer==='SOFTWARE'&&expanded?'active':'')} onClick={()=>open('SOFTWARE')} aria-label='Browse software system map' title='Software'><Layers3/><span>SYS</span></button>
    <div className='r94-rail-current r100-rail-current' title={currentPanel||'OMEGA'}><i/><small>ACTIVE</small><b>{routeMark(currentPanel||'OMEGA')}</b></div>
   </div>
-  <section className='r88-navigator r89-flat-navigator r94-nav-panel r100-nav-panel' aria-hidden={!expanded}>
-   <header className='r88-navigator-head r100-navigator-head'>
-    <div><span>OMEGA V6 · INSTRUMENT OS</span><b>{layer==='EVERYWHERE'?'Everywhere':'Software map'}</b><small>{layer==='EVERYWHERE'?(rows.length+'/44 routes · canonical state remains continuous'):'Full software inventory, lineage and capability truth'}</small></div>
+  <section className='r88-navigator r89-flat-navigator r94-nav-panel r100-nav-panel r104-nav-panel' aria-hidden={!expanded}>
+   <header className='r88-navigator-head r100-navigator-head r104-navigator-head'>
+    <div><span>OMEGA V6 · INSTRUMENT OS</span><b>{layer==='EVERYWHERE'?'Everywhere':'Software map'}</b><small>{layer==='EVERYWHERE'?(rows.length+'/44 destinations · one canonical state · no route compartments'):'Full software inventory, lineage and capability truth'}</small></div>
     <div className='r88-head-actions'><button onClick={()=>setExpanded(false)} aria-label='Collapse navigator'><ChevronLeft/></button></div>
    </header>
-   <nav className='r89-nav-mode r100-nav-mode' aria-label='Navigator mode'><button className={layer==='EVERYWHERE'?'active':''} onClick={()=>setLayer('EVERYWHERE')}><Menu/>Everywhere <b>44</b></button><button className={layer==='SOFTWARE'?'active':''} onClick={()=>setLayer('SOFTWARE')}><Layers3/>Software map</button></nav>
-   {currentPanel&&<div className='r100-active-route'><span>ACTIVE INSTRUMENT</span><b>{currentPanel}</b><i>{workspaceForRouteR82(currentPanel as any).label}</i></div>}
+   <nav className='r89-nav-mode r100-nav-mode r104-nav-mode' aria-label='Navigator mode'><button className={layer==='EVERYWHERE'?'active':''} onClick={()=>setLayer('EVERYWHERE')}><Menu/>Everywhere <b>44</b></button><button className={layer==='SOFTWARE'?'active':''} onClick={()=>setLayer('SOFTWARE')}><Layers3/>Software map</button></nav>
+   {currentPanel&&currentWorkspace&&<div className='r100-active-route r104-active-route'><span>ACTIVE INSTRUMENT</span><b>{currentPanel}</b><i>{currentWorkspace.label}</i><small>{currentWorkspace.copy}</small></div>}
    {layer==='EVERYWHERE'?<>
-    <label className='r88-search r100-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all 44 OMEGA applications'/><kbd>⌘K</kbd></label>
-    <div className='r89-flat-scroll' aria-label='All 44 OMEGA applications'>
-     {rows.map(route=>{const index=OMEGA_ALL_ROUTES_R82.indexOf(route)+1,workspace=workspaceForRouteR82(route),reality=effectiveCapabilityReality(route);return <button key={route} className={'r89-flat-route '+(currentPanel===route?'active':'')} aria-current={currentPanel===route?'page':undefined} onClick={()=>go(route)}>
-      <i>{String(index).padStart(2,'0')}</i><span><b>{route}</b><small>{workspace.label} · {CAPABILITY_REALITY_LABEL[reality]}</small></span><ChevronRight/>
+    <label className='r88-search r100-search r104-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all 44 OMEGA applications'/><kbd>⌘K</kbd></label>
+    <div className='r89-flat-scroll r104-route-scroll' aria-label='All 44 OMEGA applications'>
+     {rows.map(route=>{const index=OMEGA_ALL_ROUTES_R82.indexOf(route)+1,workspace=workspaceForRouteR82(route),reality=effectiveCapabilityReality(route);return <button key={route} title={workspace.copy} className={'r89-flat-route r104-route '+(currentPanel===route?'active':'')} aria-current={currentPanel===route?'page':undefined} onClick={()=>go(route)}>
+      <i>{String(index).padStart(2,'0')}</i><span><b>{route}</b><small>{workspace.label} · {CAPABILITY_REALITY_LABEL[reality]}</small><em>{workspace.copy}</em></span><ChevronRight/>
      </button>})}
      {rows.length===0&&<div className='r88-empty'>No route matches that search.</div>}
     </div>
-    <footer className='r88-navigator-foot r100-navigator-foot'><ShieldCheck/><span>Persistent rail · active application remains visible · one canonical packet · 44 preserved destinations.</span></footer>
+    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>Persistent rail · expanded panel reserves layout space · selecting a destination collapses it · active application remains visible.</span></footer>
    </>:<div className='r88-software-layer'><OmegaSystemInventoryR83 compact onNavigate={go}/></div>}
   </section>
  </aside>;
