@@ -2,6 +2,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R83 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const loader=fs.existsSync('src/specialistLoaderR109.tsx')?read('src/specialistLoaderR109.tsx'):'';
 const home=read('src/OmegaHomeR71.tsx');
 const shell=read('src/InstrumentOSShellR62.tsx');
 const navigator=read('src/OmegaSideNavigatorR88.tsx');
@@ -64,7 +65,9 @@ must(archive.includes('software2VisibleItems:100')&&archive.includes('software2L
 must((archive.match(/OMEGA_B043_FULL_SYSTEM_PART_/g)||[]).length===29&&archive.includes('OMEGA_B043_RECONSTRUCTION_KIT.zip'),'B043 29-part full-system archive and reconstruction kit must remain visible');
 must(archive.includes('presence ≠ execution')||archive.includes('do not mean those binaries are mounted, executing, promoted'),'archive-build presence must not be reported as runtime execution');
 
-must(workstation.includes("case 'Extreme Traversal':return <ExtremeTraversalUnionR60"),'Extreme Traversal route must restore canonical + restored-function union');
+const eagerExtreme=workstation.includes("case 'Extreme Traversal':return <ExtremeTraversalUnionR60");
+const deferredExtreme=workstation.includes("case 'Extreme Traversal':return <ExtremeTraversalR109")&&loader.includes("ExtremeTraversalUnionR60:()=>import('./ExtremeTraversalUnionR60')")&&loader.includes('ExtremeTraversalR109=lazy(LOADERS.ExtremeTraversalUnionR60)');
+must(eagerExtreme||deferredExtreme,'Extreme Traversal route must restore canonical + restored-function union through eager or R109 deferred mount');
 must(extreme.includes('Canonical traversal')&&extreme.includes('Restored functions')&&extreme.includes('<ExtremeRestorationR46'),'Extreme Traversal union must keep both canonical and restored executor views');
 for(const x of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(x),`deep donor view lost: ${x}`);
 for(const x of ["id:'S10'","id:'S12'","id:'S16'","id:'S18'","id:'S21'"])must(restoration.includes(x),`R46 restored family lost: ${x}`);
@@ -75,4 +78,4 @@ must(modeRuntime.includes('authorityLens')&&modeRuntime.includes('not an additio
 must(modeCanvas.includes('CANON / CALCULUS GOVERNANCE LENS')&&modeCanvas.includes('CANON / CALCULUS LENS'),'canon lens visual labels must not say source-backed execution');
 must(visual.includes("omega.r83.selectedModeRef")&&visual.includes('canon authority lens'),'Visual Instrument must carry selected source-mode/canon-lens identity across applications');
 
-console.log(`R83 FULL SYSTEM INVENTORY RESTORATION PASS · ${surfaces.length} current destinations + 100 systems + 24 source families + 57 local-host rows + 1,728 auto-ping cells + 36 options + 18 capabilities + 179 source modes + 62 canon lenses + 24 V77 bins + reviewed archive builds preserved`);
+console.log(`R83/R109 FULL SYSTEM INVENTORY RESTORATION PASS · ${surfaces.length} current destinations + 100 systems + 24 source families + 57 local-host rows + 1,728 auto-ping cells + 36 options + 18 capabilities + 179 source modes + 62 canon lenses + 24 V77 bins + reviewed archive builds preserved · Extreme Traversal deferred union accepted`);
