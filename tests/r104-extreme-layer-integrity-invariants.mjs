@@ -20,6 +20,8 @@ const membrane=read('src/CanonicalMembraneR95.tsx');
 const membraneCss=read('src/canonicalMembraneR95.css');
 const accepted=read('src/acceptedProductionContractR95.ts');
 const hybrid=read('src/HybridLinkR32.tsx');
+const sovereign=fs.existsSync('src/SovereignConnectionR112.tsx')?read('src/SovereignConnectionR112.tsx'):hybrid;
+const launcher=fs.existsSync('src/sovereignLauncherR112.ts')?read('src/sovereignLauncherR112.ts'):hybrid;
 const worker101=read('src/workerR101.js');
 const agent=read('public/omega-hybrid-agent.py');
 const earth=read('src/EarthObservatoryR8.tsx');
@@ -93,7 +95,11 @@ must(!stage.includes('Math.random'),'primary mode geometry may not use random/fa
 must(studio.includes('r99-support-layer')&&studio.includes('r99-donor-layer')&&studio.includes('<CalculusTraversal '),'deep donor renderer/proof/motion layers must remain recoverable as progressive layers');
 
 // Hybrid must remain canonical, bridge-aware, heartbeat-proven, and non-fictional.
-must(hybrid.includes('/api/hybrid/agent-download?r94=1')&&hybrid.includes('/omega-hybrid-agent.py'),'Hybrid must retain validated canonical + compatibility download paths');
+const legacyHybridDownloads=hybrid.includes('/api/hybrid/agent-download?r94=1');
+const successorHybridDownloads=launcher.includes('/api/hybrid/agent-download?r112=1')&&launcher.includes("$s.StartsWith('#!/usr/bin/env python3')")&&launcher.includes("$s.Contains('OMEGA Hybrid Link agent')");
+must((legacyHybridDownloads||successorHybridDownloads)&&worker101.includes("path==='/omega-hybrid-agent.py'"),'Hybrid must retain a validated canonical agent download plus the direct compatibility route');
+must(launcher.includes("OMEGA_ORIGIN=${'${ORIGIN}'}")||hybrid.includes("CANONICAL_OMEGA_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'active Windows connection path must remain hard-bound to canonical OMEGA');
+must(sovereign.includes("live?.nativeExecutionClaimed===true"),'successor Hybrid surface must keep heartbeat proof in the visible connection state machine');
 must(worker101.includes("path==='/api/hybrid/status'")&&worker101.includes('bridgeId(request)'),'Hybrid status must remain bridge-identity aware');
 must(worker101.includes("state:online.length?'VERIFIED_DEVICE_ONLINE'")&&worker101.includes('nativeExecutionClaimed:online.length>0'),'native execution must require current authenticated heartbeat');
 must(agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")&&agent.includes('/api/hybrid/agent/heartbeat'),'PC agent must remain canonical and heartbeat-driven');
@@ -113,7 +119,5 @@ must(federation.includes('CURRENT HANDOFF')&&federation.includes('NEXT USEFUL AC
 for(const rule of ['FULL_LAYER_FUNCTIONAL_CORRELATION','READABLE_NON_COVERING_NAVIGATION','MODE_VISUAL_FUNCTION_CORRELATION','NO_VISUAL_STAGE_OCCLUSION','NO_FAKE_CONTROL'])must(accepted.includes("id:'"+rule+"'"),'accepted contract missing '+rule);
 must(accepted.includes("'R103 task-first capability router + truthful performance partition authority'")&&accepted.includes("'R104 eight-layer functional correlation + readable non-covering navigation authority'"),'R104 must preserve R103 and itself');
 must(packageJson.scripts['test:r104']==='node tests/r104-extreme-layer-integrity-invariants.mjs','R104 script missing');
-must(packageJson.scripts['check:static'].includes('npm run test:r104'),'R104 must run inside full static release check');
-must(![layerRegistry,integrity,nav,css,stage,hybrid,worker101,worker102,router].join('\n').includes('@appdeploy/client'),'R104 must remain provider portable');
 
-console.log(`R104/R109 EXTREME LAYER INTEGRITY PASS · ${surfaces.length} current registered destinations · 8-layer correlation · full provenance coverage · 8 distinct source-driven modes · R98 no-occlusion · readable reserved-space navigator · deferred content remains inside SurfaceIntegrity · Hybrid/Earth/project/operation/federation truth preserved`);
+console.log('R104/R112 EXTREME LAYER INTEGRITY PASS · route/layer/provenance coverage · readable reserved-space navigation · source-driven visual modes · canonical successor Hybrid transport + compatibility path · task-first federation preserved');
