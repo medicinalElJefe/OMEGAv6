@@ -1,8 +1,8 @@
-// OMEGA R114: R113/R112/R111/R102/R101 lineage preserved with durable federation closure ceremony.
+// OMEGA R115: R114/R113/R112/R111 lineage preserved with machine-grade PROPOSE + SCREEN adapters.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR114.js",
+  "main": "src/workerR115.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
@@ -21,7 +21,9 @@
     "binding": "CF_VERSION_METADATA"
   },
   "services": [
-    {"binding":"OMEGA_GENESIS","service":"omega-genesis-v1"}
+    {"binding":"OMEGA_GENESIS","service":"omega-genesis-v1"},
+    {"binding":"OMEGA_GENESIS_MACHINE","service":"omega-genesis-machine-r115"},
+    {"binding":"OMEGA_OPTICAL_MACHINE","service":"omega-optical-machine-r115"}
   ],
   "durable_objects": {
     "bindings": [

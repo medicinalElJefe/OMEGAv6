@@ -42,11 +42,11 @@ const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length>0&&new Set(surfaces).size===surfaces.length,'R110 must preserve the complete non-empty unique registered destination inventory');
 must(workstation.includes('function normalizePanel(v:any):Panel')&&workstation.includes('const go=(name:string)=>'),'R110 must preserve one workstation route authority');
 must(workstation.includes('prefetchSpecialistPanelsR109([next,...capabilityRoutes])'),'existing workflow/capability continuity hook must remain the R110 integration point');
-const r109TopologyReceipt=['R109 ROUTE-DEFERRED SPECIALIST FABRIC PASS','R109/R111 ROUTE-DEFERRED SPECIALIST FABRIC PASS','R109/R112 ROUTE-DEFERRED SPECIALIST FABRIC PASS'].some(token=>r109.includes(token));
+const r109TopologyReceipt=['R109 ROUTE-DEFERRED SPECIALIST FABRIC PASS','R109/R111 ROUTE-DEFERRED SPECIALIST FABRIC PASS','R109/R112 ROUTE-DEFERRED SPECIALIST FABRIC PASS','R109/R115 ROUTE-DEFERRED SPECIALIST FABRIC PASS'].some(token=>r109.includes(token));
 must(r109TopologyReceipt,'R109 deferred topology gate must remain intact beneath R110 and any verified additive successor');
 for(const rule of ['ROUTE_DEFERRED_SPECIALIST_LOADING','PREFETCH_IS_NOT_EXECUTION','CORE_AUTHORITY_EAGER','ADAPTIVE_WORKING_SET_BUDGET'])must(accepted.includes("id:'"+rule+"'"),'accepted production contract missing '+rule);
 must(accepted.includes('R110 runtime-aware working-set budget + current-session module telemetry authority'),'R110 preservation lineage missing');
 must(pkg.scripts['test:r110']==='node tests/r110-runtime-aware-working-set-invariants.mjs','R110 release script missing');
 must(pkg.scripts['check:static'].includes('npm run test:r109')&&pkg.scripts['check:static'].includes('npm run test:r110'),'full release gate must run R109 then R110');
 
-console.log(`R110/R112 RUNTIME-AWARE WORKING SET PASS · ${surfaces.length} registered destinations preserved dynamically · hidden/Save-Data/2G suppression · low-power/3G budget reduction · direct route demand preserved · current-session module telemetry only · R109 deferred topology retained · one route/state/proof authority retained`);
+console.log(`R110/R115 RUNTIME-AWARE WORKING SET PASS · ${surfaces.length} registered destinations preserved dynamically · hidden/Save-Data/2G suppression · low-power/3G budget reduction · direct route demand preserved · current-session module telemetry only · R109 deferred topology retained · one route/state/proof authority retained`);
