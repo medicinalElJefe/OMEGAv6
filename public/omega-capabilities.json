@@ -1,10 +1,10 @@
 {
   "schema": "OMEGA_CAPABILITIES_v1",
-  "runtimeRevision": "R102/R34/R3-RCWA",
-  "experienceRevision": "R102",
-  "compatibility": {"packet": ["OMEGA_PACKET_v1"], "result": ["OMEGA_RESULT_v1"], "queue": ["OMEGA_FULLWAVE_QUEUE_v1"], "health": ["OMEGA_NODE_HEALTH_v1"]},
-  "upgradePolicy": "independent-node-evolution",
-  "interactionModel": "intent -> capability routing -> visible handoff trace -> proof/admission",
+  "runtimeRevision": "R111/R102/R34/R3-RCWA",
+  "experienceRevision": "R111",
+  "compatibility": {"packet": ["OMEGA_PACKET_v1"], "result": ["OMEGA_RESULT_v1"], "queue": ["OMEGA_FULLWAVE_QUEUE_v1"], "health": ["OMEGA_NODE_HEALTH_v1"], "fabric": ["OMEGA_FEDERATED_CAPABILITY_MESH_R111"]},
+  "upgradePolicy": "independent-node-and-service-evolution-under-one-global-canonical-authority",
+  "interactionModel": "intent -> minimum lawful capability path -> visible handoff -> output -> proof/admission",
   "rules": [
     "Nodes may upgrade UI, renderer, solver, storage and deployment independently.",
     "Breaking protocol changes require a new schema version and overlap window.",
@@ -14,15 +14,28 @@
     "Every result preserves project, packet lineage, solver identity and evidence boundary.",
     "A solver is active only when a real backend returns its identified result packet.",
     "The ordinary user should choose an intent or outcome; OMEGA should choose and expose the required nodes automatically.",
-    "A common instrument grammar must not erase specialist visual or functional identity."
+    "A common instrument grammar must not erase specialist visual or functional identity.",
+    "Auxiliary clouds, caches, sentinels, solvers and observers may scale without becoming CanonState authorities.",
+    "Every registered route declares input, operation, output, proof and eight-layer responsibility.",
+    "Failed solver results return as structured scarred evidence; successful results return as evidence candidates for OMEGAv6 admission."
   ],
   "sharedContext": ["project_id","packet_id","state_id","atlas_address","observer_frame","evidence_class","proof_gate","scar_history","orientation_sigma","lineage"],
+  "layers": ["STATE","INTELLIGENCE","MEMORY","RELATION","COMPUTATION","ACTION","OBSERVATION","PROOF"],
+  "fabric": {
+    "statusEndpoint": "/api/fabric/status",
+    "intentEndpoint": "/api/fabric/route",
+    "lawEndpoint": "/api/fabric/law",
+    "authorityCount": 4,
+    "serviceCapacity": ["hybrid-transport","rcwa","workers-ai","earth-evidence","route-deferred-specialists","omega-fabric-sentinel"],
+    "sentinel": "https://omega-fabric-sentinel.jeffdeweyeljefe.workers.dev",
+    "sentinelAuthority": "ADVISORY_ONLY"
+  },
   "nodes": {
     "omega-v6": {
       "verb": "ADMIT",
       "authority": "global-canonical",
       "scope": "GLOBAL_FEDERATION_CANONSTATE",
-      "capabilities": ["canon-state","proof-admission","hybrid-link","operator-cockpit","result-ledger","fullwave-queue-r34","federation-experience-r102"],
+      "capabilities": ["canon-state","proof-admission","hybrid-link","operator-cockpit","result-ledger","fullwave-queue-r34","federation-experience-r102","federated-capability-mesh-r111","route-layer-output-registry-r111"],
       "input": ["intent","proposal packets","screening packets","solver receipts","evidence"],
       "output": ["admit/HOLD","CanonState","proof chain","durable project continuity"]
     },
@@ -48,7 +61,7 @@
       "verb": "SOLVE",
       "authority": "worker",
       "scope": "WORKER_RESULT_RETURN_ONLY",
-      "capabilities": ["rcwa-grcwa-worker-r3","rcwa-authenticated-queue-transport-r3"],
+      "capabilities": ["rcwa-grcwa-worker-r3","rcwa-authenticated-queue-transport-r3","one-touch-hybrid-continuity-r111"],
       "planned": ["fdtd","fem","gpu-batch","measurement-ingest"],
       "requirements": ["Python 3","NumPy","grcwa 0.1.2"],
       "agentDownload": "/api/federation/rcwa/agent-download",
