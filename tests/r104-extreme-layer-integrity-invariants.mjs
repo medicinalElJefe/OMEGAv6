@@ -97,8 +97,9 @@ must(studio.includes('r99-support-layer')&&studio.includes('r99-donor-layer')&&s
 // Hybrid must remain canonical, bridge-aware, heartbeat-proven, and non-fictional.
 const legacyHybridDownloads=hybrid.includes('/api/hybrid/agent-download?r94=1');
 const successorHybridDownloads=launcher.includes('/api/hybrid/agent-download?r112=1')&&launcher.includes("$s.StartsWith('#!/usr/bin/env python3')")&&launcher.includes("$s.Contains('OMEGA Hybrid Link agent')");
+const canonicalSuccessorOrigin=launcher.includes("const ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'")&&launcher.includes('set "OMEGA_ORIGIN=${ORIGIN}"');
 must((legacyHybridDownloads||successorHybridDownloads)&&worker101.includes("path==='/omega-hybrid-agent.py'"),'Hybrid must retain a validated canonical agent download plus the direct compatibility route');
-must(launcher.includes("OMEGA_ORIGIN=${'${ORIGIN}'}")||hybrid.includes("CANONICAL_OMEGA_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'active Windows connection path must remain hard-bound to canonical OMEGA');
+must(canonicalSuccessorOrigin||hybrid.includes("CANONICAL_OMEGA_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'active Windows connection path must remain hard-bound to canonical OMEGA');
 must(sovereign.includes("live?.nativeExecutionClaimed===true"),'successor Hybrid surface must keep heartbeat proof in the visible connection state machine');
 must(worker101.includes("path==='/api/hybrid/status'")&&worker101.includes('bridgeId(request)'),'Hybrid status must remain bridge-identity aware');
 must(worker101.includes("state:online.length?'VERIFIED_DEVICE_ONLINE'")&&worker101.includes('nativeExecutionClaimed:online.length>0'),'native execution must require current authenticated heartbeat');
