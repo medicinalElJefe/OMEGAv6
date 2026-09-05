@@ -16,7 +16,7 @@ const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical surface universe must remain 44/44');
 must(workstation.includes("import './operationalSurfaceRefinementR91.css';"),'R91 stylesheet must be mounted');
 must(workstation.indexOf('operationalSurfaceRefinementR91.css')>workstation.indexOf('surfaceHierarchyR90.css'),'R91 presentation authority must load after R90');
-must(nav.includes("className='r89-flat-scroll'")&&nav.includes('rows.map(route=>'),'flat global navigator must remain intact');
+must(nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'flat global navigator must remain intact');
 
 for(const panel of ['Command Center','Workspace','Cockpit','Projects','Governance','Assets','Render Queue','Canon Evolution','Instructions','Settings','System','Consolidation','Memory','Create','Development'])
  must(css.includes("data-panel='"+panel+"'"),'missing operational refinement for '+panel);
@@ -39,4 +39,4 @@ must(system.includes('Settings alters browser-local presentation and layout only
 must(evidence.includes('Missing Drive, native-device, provider, or external authority remains HOLD'),'Evidence HOLD boundary must remain');
 must(r90.includes('presentation-only hierarchy'),'R90 integrity layer must remain mounted beneath R91');
 must(!css.includes('@appdeploy/client'),'R91 must remain provider portable');
-console.log('R91 OPERATIONAL SURFACE REFINEMENT PASS · 44 routes · operational hierarchy aligned · proof and truth boundaries preserved');
+console.log('R91/R104 OPERATIONAL SURFACE REFINEMENT PASS · 44 routes · operational hierarchy aligned · readable flat navigation · proof and truth boundaries preserved');
