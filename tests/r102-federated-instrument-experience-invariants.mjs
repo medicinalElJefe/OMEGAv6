@@ -24,7 +24,7 @@ must(worker.includes('export class OmegaRuntime extends OmegaRuntimeR101'),'Dura
 must(worker101.includes("import r34,{OmegaRuntime as OmegaRuntimeR34} from './workerR34.js'"),'R101 must still preserve R34 federation/RCWA behavior');
 must(worker.includes('omega-living-light-etching-private-woven2.vercel.app')&&worker.includes('omega-optical-cloud-woven2.vercel.app'),'Optical preferred + legacy endpoint continuity missing');
 must(worker.includes('probeOpticalR102')&&worker.includes('recoveredFromPreferred'),'Optical health must support bounded preferred/legacy recovery');
-must(worker.includes('OMEGA_FEDERATION_RUN_STATUS_R102')&&worker.includes("'x-omega-federation-revision','R102'"),'live federation status/revision receipt missing');
+must(worker.includes("schema:'OMEGA_FEDERATION_RUN_STATUS_R97'")&&worker.includes("federationRevision:'R102'")&&worker.includes("'x-omega-federation-revision','R102'"),'R102 must extend the stable federation status schema additively instead of breaking existing clients');
 must(worker.includes('omega-genesis-v1.jeffdeweyeljefe.workers.dev')&&worker.includes('omega-living-light-etching-private-woven2.vercel.app'),'current federation origins must be accepted by CORS');
 
 must(experience.includes("FEDERATION_NODE_ORDER_R102:FederationNodeKey[]=['genesis','optical','sovereign','omegaV6']"),'four-role user handoff order must be explicit');
@@ -54,4 +54,4 @@ for(const rule of ['FEDERATION_SINGLE_GLOBAL_AUTHORITY','TASK_FIRST_CAPABILITY_R
 must(accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority'")&&accepted.includes("'R102 four-node capability fabric + task-first federation authority'"),'R102 must extend R101 preservation lineage');
 must(![worker,experience,federation].join('\n').includes('Math.random'),'federation experience must not depend on fake/random state');
 
-console.log('R102 FEDERATED INSTRUMENT EXPERIENCE PASS · four specialized runtimes · task-first handoff trace · single global CanonState authority · Optical endpoint continuity · R101/R34/44-route preservation');
+console.log('R102 FEDERATED INSTRUMENT EXPERIENCE PASS · four specialized runtimes · task-first handoff trace · stable schema + additive R102 revision · single global CanonState authority · Optical endpoint continuity · R101/R34/44-route preservation');
