@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R97 '+msg)};
-const r32=read('src/workerR32.js'),r34=read('src/workerR34.js'),wrangler=read('wrangler.jsonc'),surface=read('src/FederationRunR97.tsx'),hybrid=read('src/HybridMissionControlR8.tsx'),continuity=read('src/omegaProjectContinuityR87.ts'),workstation=read('src/OmegaWorkstationFullV2.tsx');
+const r32=read('src/workerR32.js'),r34=read('src/workerR34.js'),r102=fs.existsSync('src/workerR102.js')?read('src/workerR102.js'):'',wrangler=read('wrangler.jsonc'),surface=read('src/FederationRunR97.tsx'),hybrid=read('src/HybridMissionControlR8.tsx'),continuity=read('src/omegaProjectContinuityR87.ts'),workstation=read('src/OmegaWorkstationFullV2.tsx');
 must(r32.includes("const sid=sessionId(request),bid=bridgeId(request,{})")&&r32.includes("proxy(env,bid,'/status',request)"),'Hybrid status must follow the saved bridge namespace, not only a replaceable session id');
 must(r34.includes("path==='/api/federation/run/status'")&&r34.includes('OMEGA_FEDERATION_RUN_STATUS_R97'),'one live federation status contract is required');
 must(r34.includes("'PREVIOUSLY_PAIRED_OFFLINE'")&&r34.includes('historicalProofPresent'),'historical pairing proof must remain distinct from current heartbeat state');
@@ -11,7 +11,10 @@ must(r34.includes("cache:'no-store'")&&r34.includes("'cache-control':'no-cache'"
 must(wrangler.includes('"binding":"OMEGA_GENESIS"')&&wrangler.includes('"service":"omega-genesis-v1"')&&r34.includes("transport:'CLOUDFLARE_SERVICE_BINDING'"),'Genesis health must prefer a private Cloudflare service binding over unreliable public Worker-to-Worker routing');
 must(r34.includes("path==='/continuity'")&&r34.includes('DURABLE_RUNTIME_PROJECT_CONTINUITY_R97')&&r34.includes('CONTINUITY_SNAPSHOT_SAVED'),'project identity and receipts must persist in the authenticated Durable Object');
 must(continuity.includes("api.put<any>('/api/federation/continuity'")&&continuity.includes("api.get<any>('/api/federation/continuity'")&&workstation.includes('syncProjectContinuityR97'),'browser projects must restore and save through durable continuity with local cache fallback');
-must(surface.includes('Genesis → Optical → Sovereign RCWA → OMEGAv6 admission')&&surface.includes('Last authenticated proof'),'Federation Run must expose every handoff and historical proof timestamp');
+must(surface.includes('Genesis → Optical → Sovereign Compute → OMEGAv6 admission')&&surface.includes('LAST AUTHENTICATED PROOF')&&surface.includes('LAST FULL-WAVE HEARTBEAT')&&surface.includes('BRIDGE CREATED'),'Federation Run must expose the complete four-role handoff and historical proof timestamps without turning RCWA into a fifth authority');
+must(surface.includes("runtime?.pairing?.historicalProofPresent")&&surface.includes('current ONLINE state still requires freshness, not history alone'),'historical proof must remain visible but explicitly separate from current online truth');
+must(!surface.includes('Genesis → Optical → Sovereign RCWA → OMEGAv6 admission'),'R102 must not present the RCWA worker as an independent federation authority');
+must(!r102||(r102.includes("schema:'OMEGA_FEDERATION_RUN_STATUS_R97'")&&r102.includes("federationRevision:'R102'")),'R102 successor status must preserve the stable R97 schema and add the R102 experience revision');
 must(hybrid.includes('START_OMEGA_FEDERATION.cmd')&&hybrid.includes('import numpy, grcwa')&&hybrid.includes('/api/federation/rcwa/agent-download?r97=1'),'one launcher must validate and start both canonical agents with an explicit RCWA dependency gate');
-must(![surface,hybrid,r34].join('\n').includes('omega-sovereign-convergence.foundasound.chatgpt.site'),'no stale Sovereign preview host may return');
-console.log('R97 FEDERATION RUN PASS · bridge namespace recovery · historical proof · Optical service gate · RCWA launcher · durable continuity');
+must(![surface,hybrid,r34,r102].join('\n').includes('omega-sovereign-convergence.foundasound.chatgpt.site'),'no stale Sovereign preview host may return');
+console.log('R97/R102 FEDERATION RUN PASS · four-role handoff · bridge namespace recovery · visible historical proof · Optical service gate · RCWA Sovereign sublayer · durable continuity');

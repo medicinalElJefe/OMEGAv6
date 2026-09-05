@@ -21,7 +21,7 @@ const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical 44-route universe must remain intact');
 for(const route of ['Extreme Traversal','Matter Traversal','Forecast','Relativity','Evidence & Proof','Visual Instrument','Hybrid Link'])must(surfaces.includes(route),'critical specialist route missing: '+route);
 
-must(wrangler.includes('"main": "src/workerR101.js"'),'Cloudflare entry must promote R101 wrapper');
+must(wrangler.includes('"main": "src/workerR101.js"')||wrangler.includes('"main": "src/workerR102.js"'),'Cloudflare entry must retain R101 directly or through a validated successor wrapper');
 must(worker.includes("import r34,{OmegaRuntime as OmegaRuntimeR34} from './workerR34.js'"),'R101 must extend rather than replace R34 federation/runtime behavior');
 must(worker.includes('export class OmegaRuntime extends OmegaRuntimeR34'),'Durable Object class lineage must remain compatible');
 must(worker.includes("path==='/api/hybrid/status'")&&worker.includes('bridgeId(request)'),'Hybrid status must resolve persisted bridge identity before session fallback');
@@ -60,3 +60,4 @@ must(accepted.includes("'R100 woven continuity geometry/time + professional inst
 must(![worker,adapter,hybrid,weave,stage].join('\n').includes('@appdeploy/client'),'R101 must remain provider portable');
 
 console.log('R101 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · Field/Weave/Projection strata · bridge-ID reconnect/repair · authenticated-heartbeat truth preserved');
+await import('./r102-federated-instrument-experience-invariants.mjs');

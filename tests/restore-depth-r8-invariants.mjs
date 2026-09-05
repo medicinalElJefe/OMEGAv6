@@ -22,11 +22,13 @@ const r32=fs.existsSync('src/workerR32.js')?fs.readFileSync('src/workerR32.js','
 const r33=fs.existsSync('src/workerR33.js')?fs.readFileSync('src/workerR33.js','utf8'):'';
 const r34=fs.existsSync('src/workerR34.js')?fs.readFileSync('src/workerR34.js','utf8'):'';
 const r101=fs.existsSync('src/workerR101.js')?fs.readFileSync('src/workerR101.js','utf8'):'';
+const r102=fs.existsSync('src/workerR102.js')?fs.readFileSync('src/workerR102.js','utf8'):'';
 const wrappedR8=wrangler.includes('"main": "src/workerR9.js"')&&r9.includes("import r8 from './workerR8.js'");
 const transitivelyWrappedR8=wrangler.includes('"main": "src/workerR27.js"')&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
 const r32WrappedR8=wrangler.includes('"main": "src/workerR32.js"')&&r32.includes("import r27 from './workerR27.js'")&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
 const r33WrappedR8=wrangler.includes('"main": "src/workerR33.js"')&&r33.includes("from './workerR32.js'")&&r32.includes("import r27 from './workerR27.js'")&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
 const r34WrappedR8=wrangler.includes('"main": "src/workerR34.js"')&&r34.includes("from './workerR33.js'")&&r33.includes("from './workerR32.js'")&&r32.includes("import r27 from './workerR27.js'")&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
 const r101WrappedR8=wrangler.includes('"main": "src/workerR101.js"')&&r101.includes("from './workerR34.js'")&&r34.includes("from './workerR33.js'")&&r33.includes("from './workerR32.js'")&&r32.includes("import r27 from './workerR27.js'")&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
-must(directR8||wrappedR8||transitivelyWrappedR8||r32WrappedR8||r33WrappedR8||r34WrappedR8||r101WrappedR8,'Cloudflare must execute R8 directly or through a proven successor wrapper chain that preserves R8');
-console.log('RESTORE_DEPTH_R8 PASS · Earth evidence + NOAA 9-coverages + V87-V90 typed Hybrid contract + B059 SAI active · successor chain proven through R101');
+const r102WrappedR8=wrangler.includes('"main": "src/workerR102.js"')&&r102.includes("from './workerR101.js'")&&r101.includes("from './workerR34.js'")&&r34.includes("from './workerR33.js'")&&r33.includes("from './workerR32.js'")&&r32.includes("import r27 from './workerR27.js'")&&r27.includes("import r9 from './workerR9.js'")&&r9.includes("import r8 from './workerR8.js'");
+must(directR8||wrappedR8||transitivelyWrappedR8||r32WrappedR8||r33WrappedR8||r34WrappedR8||r101WrappedR8||r102WrappedR8,'Cloudflare must execute R8 directly or through a proven successor wrapper chain that preserves R8');
+console.log('RESTORE_DEPTH_R8 PASS · Earth evidence + NOAA 9-coverages + V87-V90 typed Hybrid contract + B059 SAI active · successor chain proven through R102');

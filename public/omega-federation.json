@@ -1,7 +1,10 @@
 {
   "schema": "OMEGA_FEDERATION_v1",
+  "experienceRevision": "R102",
   "canonicalAuthority": "OMEGAv6",
   "stateLaw": "partition -> transform -> invariant carry -> scar carry -> re-contextualize",
+  "userModel": "one project + one packet lineage + four specialized runtimes",
+  "handoff": ["PROPOSE", "SCREEN", "SOLVE", "ADMIT"],
   "atlas": {
     "axes": ["domain", "phase", "regulation", "seed"],
     "radix": 12,
@@ -11,34 +14,62 @@
   "nodes": [
     {
       "id": "omega-v6",
+      "verb": "ADMIT",
       "role": "canonical-state-proof-operator",
       "url": "https://omegav6.jeffdeweyeljefe.workers.dev",
+      "canonicalScope": "GLOBAL_FEDERATION_CANONSTATE",
+      "input": ["intent", "proposal packets", "screening packets", "solver receipts", "evidence"],
+      "output": ["admit/HOLD", "CanonState", "proof chain", "durable project continuity"],
+      "userValue": "Correlates distributed work into one accepted state and one inspectable proof history.",
       "mayMutateCanonicalState": true
     },
     {
       "id": "omega-genesis",
+      "verb": "PROPOSE",
       "role": "proposal-generation-exploration",
       "url": "https://omega-genesis-v1.jeffdeweyeljefe.workers.dev",
-      "availability": "REGISTERED · EXTERNAL GATE",
+      "availability": "REGISTERED",
+      "canonicalScope": "NODE_LOCAL_PROPOSAL_STATE_ONLY",
+      "input": ["intent", "project context", "canonical snapshot"],
+      "output": ["proposals", "candidate families", "alternatives"],
+      "userValue": "Expands the search space without silently rewriting the accepted federation state.",
       "mayMutateCanonicalState": false
     },
     {
       "id": "omega-optical",
+      "verb": "SCREEN",
       "role": "optical-compiler-tier1-screen-tier2-queue",
-      "url": "https://omega-optical-cloud-woven2.vercel.app",
-      "availability": "REGISTERED · ACCESS GATED",
+      "url": "https://omega-living-light-etching-private-woven2.vercel.app",
+      "legacyUrls": ["https://omega-optical-cloud-woven2.vercel.app"],
+      "availability": "REGISTERED · PROTECTED MACHINE ACCESS MAY BE GATED",
+      "canonicalScope": "WORKER_RETURN_PACKET_ONLY",
+      "input": ["candidate packets", "geometry", "wavelength", "target phase"],
+      "output": ["ranked candidates", "scalar metrics", "Tier-2 requests"],
+      "userValue": "Screens large candidate spaces cheaply before scarce full-wave compute is spent.",
       "mayMutateCanonicalState": false
     },
     {
       "id": "omega-sovereign",
+      "verb": "SOLVE",
       "role": "high-compute-full-wave-executor",
       "url": null,
       "endpoint": "/api/federation/rcwa/status",
       "transport": "canonical-worker-queue-to-authenticated-hybrid-agent",
       "stateGate": "DEVICE_PROOF_REQUIRED",
+      "canonicalScope": "WORKER_RESULT_RETURN_ONLY",
+      "input": ["approved Tier-2 jobs", "solver settings", "material model", "numerics"],
+      "output": ["full-wave result packets", "convergence metadata", "result hashes"],
+      "userValue": "Uses bounded local compute for expensive validation while returning reproducible proof to the cloud.",
       "mayMutateCanonicalState": false
     }
   ],
+  "experienceContract": {
+    "sharedContext": ["project_id", "packet_id", "state_id", "atlas_address", "observer_frame", "evidence_class", "proof_gate", "scar_history", "orientation_sigma", "lineage"],
+    "sharedStatusLanguage": ["LIVE", "WORKING", "ACCESS_GATED", "HOLD", "OFFLINE", "HISTORICAL_PROOF"],
+    "interaction": "Task-first routing; node selection is normally automatic and visible as a trace, not a prerequisite the user must understand.",
+    "visual": "Common instrument grammar and truth/status language; each node keeps role-specific primary visualization rather than cloning one renderer.",
+    "mobileDesktop": "Same capability and proof state, device-appropriate layout, no primary-stage occlusion."
+  },
   "solver": {
     "tier1": {
       "engine": "scalar-wave-screen",
@@ -58,6 +89,8 @@
     "noShadowState": true,
     "workersReturnPacketsOnly": true,
     "canonicalAdmissionNode": "omega-v6",
-    "duplicateCorpusViewsAreIndependentEvidence": false
+    "duplicateCorpusViewsAreIndependentEvidence": false,
+    "nodeLocalStateDoesNotEqualGlobalCanonState": true,
+    "machineCredentialsNeverShipToBrowser": true
   }
 }

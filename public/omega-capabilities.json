@@ -1,29 +1,62 @@
 {
   "schema": "OMEGA_CAPABILITIES_v1",
-  "runtimeRevision": "R34/R3-RCWA",
+  "runtimeRevision": "R102/R34/R3-RCWA",
+  "experienceRevision": "R102",
   "compatibility": {"packet": ["OMEGA_PACKET_v1"], "result": ["OMEGA_RESULT_v1"], "queue": ["OMEGA_FULLWAVE_QUEUE_v1"], "health": ["OMEGA_NODE_HEALTH_v1"]},
   "upgradePolicy": "independent-node-evolution",
+  "interactionModel": "intent -> capability routing -> visible handoff trace -> proof/admission",
   "rules": [
     "Nodes may upgrade UI, renderer, solver, storage and deployment independently.",
     "Breaking protocol changes require a new schema version and overlap window.",
-    "Workers never silently mutate CanonState.",
+    "Workers never silently mutate global CanonState.",
+    "Node-local working state never becomes global CanonState by implication.",
     "Unknown capabilities degrade gracefully instead of blocking unrelated nodes.",
-    "Every result preserves packet lineage and solver identity.",
-    "A solver is active only when a real backend returns its identified result packet."
+    "Every result preserves project, packet lineage, solver identity and evidence boundary.",
+    "A solver is active only when a real backend returns its identified result packet.",
+    "The ordinary user should choose an intent or outcome; OMEGA should choose and expose the required nodes automatically.",
+    "A common instrument grammar must not erase specialist visual or functional identity."
   ],
+  "sharedContext": ["project_id","packet_id","state_id","atlas_address","observer_frame","evidence_class","proof_gate","scar_history","orientation_sigma","lineage"],
   "nodes": {
-    "omega-v6": {"authority": "canonical", "capabilities": ["canon-state","proof-admission","hybrid-link","operator-cockpit","result-ledger","fullwave-queue-r34"]},
-    "omega-genesis": {"authority": "proposal", "capabilities": ["proposal-generation","exploration","candidate-families"]},
-    "omega-optical": {"authority": "worker", "capabilities": ["optical-compile","scalar-screen","rank","tier2-queue","visualize"]},
-    "omega-sovereign": {
+    "omega-v6": {
+      "verb": "ADMIT",
+      "authority": "global-canonical",
+      "scope": "GLOBAL_FEDERATION_CANONSTATE",
+      "capabilities": ["canon-state","proof-admission","hybrid-link","operator-cockpit","result-ledger","fullwave-queue-r34","federation-experience-r102"],
+      "input": ["intent","proposal packets","screening packets","solver receipts","evidence"],
+      "output": ["admit/HOLD","CanonState","proof chain","durable project continuity"]
+    },
+    "omega-genesis": {
+      "verb": "PROPOSE",
+      "authority": "proposal",
+      "scope": "NODE_LOCAL_PROPOSAL_STATE_ONLY",
+      "capabilities": ["proposal-generation","exploration","candidate-families"],
+      "input": ["intent","project context","canonical snapshot"],
+      "output": ["proposals","candidate families","alternatives"]
+    },
+    "omega-optical": {
+      "verb": "SCREEN",
       "authority": "worker",
+      "scope": "WORKER_RETURN_PACKET_ONLY",
+      "capabilities": ["optical-compile","scalar-screen","rank","tier2-queue","visualize"],
+      "preferredOrigin": "https://omega-living-light-etching-private-woven2.vercel.app",
+      "legacyOrigins": ["https://omega-optical-cloud-woven2.vercel.app"],
+      "input": ["candidate packets","geometry","wavelength","target phase"],
+      "output": ["ranked candidates","scalar metrics","Tier-2 requests"]
+    },
+    "omega-sovereign": {
+      "verb": "SOLVE",
+      "authority": "worker",
+      "scope": "WORKER_RESULT_RETURN_ONLY",
       "capabilities": ["rcwa-grcwa-worker-r3","rcwa-authenticated-queue-transport-r3"],
       "planned": ["fdtd","fem","gpu-batch","measurement-ingest"],
       "requirements": ["Python 3","NumPy","grcwa 0.1.2"],
       "agentDownload": "/api/federation/rcwa/agent-download",
       "workerDownload": "/api/federation/rcwa/worker-download",
       "queueEndpoint": "/api/federation/rcwa/queue",
-      "statusEndpoint": "/api/federation/rcwa/status"
+      "statusEndpoint": "/api/federation/rcwa/status",
+      "input": ["approved Tier-2 jobs","solver/material/numerical settings"],
+      "output": ["full-wave result packets","convergence metadata","result hashes"]
     }
   }
 }
