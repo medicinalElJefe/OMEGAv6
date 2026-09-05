@@ -1,4 +1,5 @@
 import {lazy} from 'react';
+import {deriveSpecialistPrefetchPolicyR110,selectWorkingSetPanelsR110} from './specialistWorkingSetPolicyR110.js';
 
 const LOADERS={
  HybridMissionControlR8:()=>import('./HybridMissionControlR8'),
@@ -82,15 +83,8 @@ export function specialistWorkingSetSnapshotR110(){return [...WORKING_SET_R110.v
 export function specialistPrefetchPolicyR110(input:{lowPower?:boolean;visible?:boolean}={}):SpecialistPrefetchPolicyR110{
  const nav=typeof navigator==='undefined'?null:navigator as Navigator&{connection?:{saveData?:boolean;effectiveType?:string}};
  const connection=nav?.connection;
- const saveData=Boolean(connection?.saveData);
- const effectiveType=String(connection?.effectiveType||'unknown').toLowerCase();
  const hidden=input.visible===false||(input.visible===undefined&&typeof document!=='undefined'&&document.visibilityState==='hidden');
- const lowPower=Boolean(input.lowPower);
- if(hidden)return{mode:'SUPPRESSED',budget:0,reason:'DOCUMENT_HIDDEN',saveData,effectiveType,hidden,lowPower};
- if(saveData)return{mode:'SUPPRESSED',budget:0,reason:'SAVE_DATA',saveData,effectiveType,hidden,lowPower};
- if(effectiveType==='slow-2g'||effectiveType==='2g')return{mode:'SUPPRESSED',budget:0,reason:'CONSTRAINED_NETWORK',saveData,effectiveType,hidden,lowPower};
- if(lowPower||effectiveType==='3g')return{mode:'LIMITED',budget:1,reason:lowPower?'LOW_POWER':'LIMITED_NETWORK',saveData,effectiveType,hidden,lowPower};
- return{mode:'STANDARD',budget:2,reason:'RUNTIME_READY',saveData,effectiveType,hidden,lowPower};
+ return deriveSpecialistPrefetchPolicyR110({saveData:Boolean(connection?.saveData),effectiveType:String(connection?.effectiveType||'unknown'),hidden,lowPower:Boolean(input.lowPower)}) as SpecialistPrefetchPolicyR110;
 }
 
 function idleTurnR110(){return new Promise<void>(resolve=>{
@@ -117,7 +111,7 @@ export async function prefetchSpecialistPanelsR110(panels:readonly string[],inpu
   return{schema:'OMEGA_SPECIALIST_WORKING_SET_R110' as const,authority:'MODULE_BYTES_ONLY' as const,policy,receipts:specialistWorkingSetSnapshotR110()};
  }
  await idleTurnR110();
- const selected=candidates.slice(0,policy.budget),results=[] as any[];
+ const selected=selectWorkingSetPanelsR110(candidates,policy.budget),results=[] as any[];
  for(const panel of selected)results.push(await prefetchSpecialistPanelR109(panel,reason));
  return{schema:'OMEGA_SPECIALIST_WORKING_SET_R110' as const,authority:'MODULE_BYTES_ONLY' as const,policy,results,receipts:specialistWorkingSetSnapshotR110()};
 }
