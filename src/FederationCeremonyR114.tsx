@@ -7,7 +7,13 @@ type Props={intent:string;onDownloadLauncher:()=>void};
 const fmt=(n:any)=>Number(n)?new Date(Number(n)).toLocaleString():'—';
 const short=(v:any)=>String(v||'').slice(0,14)+(String(v||'').length>14?'…':'');
 const tone=(state:string)=>/PROVED|ADMITTED|RETURNED|COMPLETE|SERVICE_OBSERVED/.test(state)?'ready':/HELD|FAILED|GATED|REQUIRED|WAITING/.test(state)?'hold':/QUEUED|RUNNING|OPEN/.test(state)?'working':'idle';
-function stageState(run:any,stage:string){if(!run)return'NOT STARTED';if(stage==='PROPOSE')return run.proposal?.state||run.block?.stage==='PROPOSE'?run.block?.code||'WAITING':'WAITING';if(stage==='SCREEN')return run.screen?.state||run.block?.stage==='SCREEN'?run.block?.code||'WAITING':run.proposal?'WAITING':'PENDING';if(stage==='SOLVE')return run.solve?.state||run.queue?.state||run.block?.stage==='SOLVE'?run.block?.code||'WAITING':run.screen?'WAITING':'PENDING';return run.admission?.state||run.closure||'PENDING'}
+function stageState(run:any,stage:string){
+ if(!run)return'NOT STARTED';
+ if(stage==='PROPOSE'){if(run.proposal?.state)return run.proposal.state;if(run.block?.stage==='PROPOSE')return run.block.code||'WAITING';return'WAITING'}
+ if(stage==='SCREEN'){if(run.screen?.state)return run.screen.state;if(run.block?.stage==='SCREEN')return run.block.code||'WAITING';return run.proposal?'WAITING':'PENDING'}
+ if(stage==='SOLVE'){if(run.solve?.state)return run.solve.state;if(run.queue?.state)return run.queue.state;if(run.block?.stage==='SOLVE')return run.block.code||'WAITING';return run.screen?'WAITING':'PENDING'}
+ return run.admission?.state||run.closure||'PENDING';
+}
 function receiptFor(run:any,stage:string){return stage==='PROPOSE'?run?.proposal?.receiptSha256:stage==='SCREEN'?run?.screen?.receiptSha256:stage==='SOLVE'?(run?.solve?.receiptSha256||run?.queue?.receiptSha256):run?.admission?.receiptSha256}
 
 export default function FederationCeremonyR114({intent,onDownloadLauncher}:Props){
