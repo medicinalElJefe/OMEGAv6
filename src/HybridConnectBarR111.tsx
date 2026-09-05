@@ -1,35 +1,9 @@
-import {useEffect,useMemo,useState} from 'react';
-import {ChevronDown,ChevronUp,Cpu,Download,RefreshCw,RotateCcw,ShieldCheck,Trash2} from 'lucide-react';
-import {api,clearHybridBridge,createHybridPair,getHybridBridge,reconnectHybridBridge,type HybridBridgeCredential} from './platformAdapter';
-import './hybridConnectR111.css';
+import SovereignConnectionR112 from './SovereignConnectionR112';
 
-const ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev';
-const age=(n:number)=>{if(!n)return'never';const s=Math.max(0,Math.round((Date.now()-n)/1000));return s<60?`${s}s ago`:s<3600?`${Math.floor(s/60)}m ago`:`${Math.floor(s/3600)}h ago`};
-function makeLauncher(pairingCode:string){
- const code=String(pairingCode||'').replace(/"/g,'');
- return `@echo off\r\nsetlocal EnableExtensions EnableDelayedExpansion\r\nset "OMEGA_ORIGIN=${ORIGIN}"\r\nset "OMEGA_PAIR=${code}"\r\nset "OMEGA_ROOT=%CD%"\r\nset "OMEGA_AGENT=%TEMP%\\omega-hybrid-agent.py"\r\nset "OMEGA_RCWA_AGENT=%TEMP%\\omega-rcwa-agent.py"\r\ntitle OMEGA Sovereign Federation Link\r\ncls\r\necho ============================================================\r\necho OMEGA SOVEREIGN FEDERATION LINK R111\r\necho Approved root: %OMEGA_ROOT%\r\necho ============================================================\r\nwhere py >nul 2>nul\r\nif %errorlevel%==0 (set "OMEGA_PY=py -3") else (where python >nul 2>nul && set "OMEGA_PY=python")\r\nif not defined OMEGA_PY goto :python_fail\r\necho [1/5] Verifying canonical OMEGA...\r\npowershell -NoProfile -ExecutionPolicy Bypass -Command "try{$r=Invoke-WebRequest -UseBasicParsing '%OMEGA_ORIGIN%/api/health' -TimeoutSec 15;if($r.StatusCode-ne 200){exit 2}}catch{Write-Host $_;exit 1}"\r\nif errorlevel 1 goto :network_fail\r\necho [2/5] Downloading canonical signed-source agents...\r\npowershell -NoProfile -ExecutionPolicy Bypass -Command "try{Invoke-WebRequest -UseBasicParsing '%OMEGA_ORIGIN%/api/hybrid/agent-download?r111=1' -OutFile '%OMEGA_AGENT%' -TimeoutSec 30;Invoke-WebRequest -UseBasicParsing '%OMEGA_ORIGIN%/api/federation/rcwa/agent-download?r111=1' -OutFile '%OMEGA_RCWA_AGENT%' -TimeoutSec 30;$a=Get-Content -Raw '%OMEGA_AGENT%';$r=Get-Content -Raw '%OMEGA_RCWA_AGENT%';if(-not $a.StartsWith('#!/usr/bin/env python3')-or-not $a.Contains('OMEGA Hybrid Link agent')){exit 3};if(-not $r.StartsWith('#!/usr/bin/env python3')-or-not $r.Contains('OMEGA Sovereign RCWA transport agent')){exit 4}}catch{Write-Host $_;exit 1}"\r\nif errorlevel 1 goto :download_fail\r\necho [3/5] Checking optional full-wave dependency...\r\n!OMEGA_PY! -c "import numpy,grcwa" >nul 2>nul\r\nif errorlevel 1 (echo RCWA dependency is not installed. General Hybrid will still start.& echo To enable RCWA later run: !OMEGA_PY! -m pip install numpy grcwa) else (echo [4/5] Starting Sovereign RCWA worker...& start "OMEGA Sovereign RCWA" cmd /k !OMEGA_PY! "%OMEGA_RCWA_AGENT%" --server "%OMEGA_ORIGIN%" --pair "%OMEGA_PAIR%" --root "%OMEGA_ROOT%\\.")\r\necho [5/5] Starting authenticated heartbeat. Keep this window open.\r\n!OMEGA_PY! "%OMEGA_AGENT%" --server "%OMEGA_ORIGIN%" --pair "%OMEGA_PAIR%" --root "%OMEGA_ROOT%\\."\r\nset "OMEGA_EXIT=%ERRORLEVEL%"\r\nif not "%OMEGA_EXIT%"=="0" goto :agent_fail\r\ngoto :end\r\n:network_fail\r\necho ERROR: canonical OMEGA is unreachable. Check DNS/firewall/VPN/proxy.\r\ngoto :hold\r\n:python_fail\r\necho ERROR: Python 3 was not found. Install Python 3 and rerun this launcher.\r\ngoto :hold\r\n:download_fail\r\necho ERROR: canonical agent download/validation failed. No downloaded HTML was executed.\r\ngoto :hold\r\n:agent_fail\r\necho ERROR: Hybrid agent exited with code %OMEGA_EXIT%. If pairing was rotated, download a fresh launcher.\r\n:hold\r\npause\r\n:end\r\nendlocal\r\n`;
-}
-function downloadLauncher(code:string){const src=makeLauncher(code),url=URL.createObjectURL(new Blob([src],{type:'application/octet-stream'})),a=document.createElement('a');a.href=url;a.download='START_OMEGA_FEDERATION_R111.cmd';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-
-export default function HybridConnectBarR111(){
- const[bridge,setBridge]=useState<HybridBridgeCredential|null>(()=>getHybridBridge()),[live,setLive]=useState<any>(null),[busy,setBusy]=useState(false),[advanced,setAdvanced]=useState(false),[message,setMessage]=useState('');
- const refresh=async()=>{try{const r=await api.get<any>('/api/hybrid/status');setLive(r.data||{})}catch(e:any){setMessage(e?.message||String(e))}};
- useEffect(()=>{void refresh();const id=window.setInterval(()=>void refresh(),4000);return()=>window.clearInterval(id)},[]);
- const devices=Array.isArray(live?.devices)?live.devices:[],online=devices.filter((d:any)=>d?.online&&!d?.revoked),proved=devices.filter((d:any)=>Number(d?.lastSeen)>0&&!d?.revoked),lastSeen=proved.length?Math.max(...proved.map((d:any)=>Number(d.lastSeen)||0)):0;
- const onlineNow=online.length>0&&live?.nativeExecutionClaimed===true;
- const state=onlineNow?'PC ONLINE':lastSeen?'HEARTBEAT STALE':bridge?'READY FOR LAUNCHER':'PAIRING REQUIRED';
- const code=bridge?.pairingCode||'';
- const prepare=async()=>{if(busy||onlineNow)return;setBusy(true);setMessage('');try{
-  if(!bridge){const r=await createHybridPair(false);setBridge(getHybridBridge());setMessage(r?.secretReturned?'Pairing prepared. Download and run the federation launcher from the approved folder.':'Pairing is ready. Download and run the federation launcher.');}
-  else{try{await reconnectHybridBridge(false);setBridge(getHybridBridge());setMessage('Persisted bridge credential verified. Start or restart the federation launcher and wait for a fresh heartbeat.');}catch(e:any){if(e?.code==='PAIR_AUTH_FAILED'||e?.status===401){await reconnectHybridBridge(true);setBridge(getHybridBridge());setMessage('The stale browser credential was repaired. Download a fresh launcher; PC ONLINE still requires a new authenticated heartbeat.');}else throw e}}
-  await refresh();
- }catch(e:any){setMessage(e?.message||String(e))}finally{setBusy(false)}};
- const rotate=async()=>{if(busy)return;setBusy(true);try{await createHybridPair(true);setBridge(getHybridBridge());setMessage('Pairing rotated. Any older launcher is now obsolete; download a fresh federation launcher.');await refresh()}catch(e:any){setMessage(e?.message||String(e))}finally{setBusy(false)}};
- const forget=()=>{clearHybridBridge();setBridge(null);setLive(null);setMessage('Local browser credential removed. Native execution remains held.');void refresh()};
- const primary=useMemo(()=>onlineNow?'PC connected':bridge?'Reconnect PC':'Connect PC',[onlineNow,bridge]);
- return <section className={'r111-hybrid-connect '+(onlineNow?'live':lastSeen?'stale':'held')} aria-label='Sovereign PC connection'>
-  <div className='r111-hybrid-primary'><div className='r111-hybrid-state'><Cpu/><span>SOVEREIGN COMPUTE</span><b>{state}</b><small>{onlineNow?`${online.length} authenticated heartbeat${online.length===1?'':'s'} current`:lastSeen?`Last authenticated device proof ${age(lastSeen)} · native actions held`:'Browser/cloud transport can prepare the link, but only the running PC agent can prove native execution.'}</small></div><div className='r111-hybrid-actions'><button className='r111-connect' onClick={prepare} disabled={busy||onlineNow}>{busy?<RefreshCw className='spin'/>:<ShieldCheck/>}{primary}</button>{code&& !onlineNow&&<button onClick={()=>downloadLauncher(code)}><Download/>Federation launcher</button>}<button className='r111-advanced' onClick={()=>setAdvanced(v=>!v)}>{advanced?<ChevronUp/>:<ChevronDown/>}Advanced</button></div></div>
-  {message&&<div className='r111-hybrid-message'>{message}</div>}
-  {advanced&&<div className='r111-hybrid-advanced'><div><span>BRIDGE</span><b>{bridge?.bridgeId||'none'}</b></div><div><span>SERVER STATE</span><b>{String(live?.state||'DEVICE_PROOF_REQUIRED')}</b></div><div><span>NATIVE CLAIM</span><b>{live?.nativeExecutionClaimed===true?'CURRENT PROOF':'HELD'}</b></div><div className='r111-hybrid-advanced-actions'><button onClick={()=>void refresh()}><RefreshCw/>Refresh</button><button onClick={rotate} disabled={busy}><RotateCcw/>Rotate pairing</button><button onClick={forget}><Trash2/>Forget browser credential</button></div><p>Advanced pairing controls repair transport credentials only. They never make the PC online by themselves.</p></div>}
- </section>;
-}
+/**
+ * R112 compatibility mount.
+ * R111 introduced the one-touch connection surface; R112 keeps the mount point
+ * while moving pairing, reconnect/repair, launcher generation, heartbeat truth,
+ * solver state and progressive disclosure into one shared connection component.
+ */
+export default function HybridConnectBarR111(){return <SovereignConnectionR112 compact/>}
