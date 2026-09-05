@@ -47,7 +47,8 @@ for(const old of ["return'omega-explore'","return'omega-earth-forecast'","return
  must(!vite.includes(old),'cross-import application manual chunk remains: '+old);
 must(vite.includes("partition:'R109_ROUTE_DEFERRED_SPECIALISTS'")&&vite.includes('dynamic imports to defer heavy specialist UI modules'),'governed build receipt must identify true deferred topology');
 must(vite.includes('Prefetch means module bytes are prepared')&&vite.includes('not capability execution'),'build receipt must keep prefetch/execution truth separate');
-must(r103.includes('R103/R109 TASK-FIRST ROUTER PASS')&&r103.includes('manualChunks:vendorChunkR109'),'R103 performance invariant must recognize the verified R109 successor');
+const r103PerformanceReceipt=r103.includes('R103/R109 TASK-FIRST ROUTER PASS')||r103.includes('R103/R111 TASK-FIRST ROUTER PASS');
+must(r103PerformanceReceipt&&r103.includes('manualChunks:vendorChunkR109'),'R103 performance invariant must recognize R109 directly or through its verified R111 successor');
 
 // Current presentation/routing ownership remains intact around the deferred component boundary.
 for(const token of ['SPECIALIST_EXISTING=new Set<Panel>','SPECIALIST_SUITE=new Set<Panel>','VISUAL_FIRST_SURFACES=new Set<Panel>',"<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}","<OmegaIntentWorkbenchR85 variant='STRIP'"])
@@ -60,4 +61,4 @@ for(const rule of ['ROUTE_DEFERRED_SPECIALIST_LOADING','PREFETCH_IS_NOT_EXECUTIO
 must(accepted.includes('R109 route-deferred specialist loading + byte-prefetch truth authority'),'R109 preservation lineage missing');
 must(pkg.includes('test:r109')&&pkg.includes('r109-route-deferred-specialist-fabric-invariants.mjs'),'R109 release gate missing');
 
-console.log('R109 ROUTE-DEFERRED SPECIALIST FABRIC PASS · single route/state authority preserved · heavy specialist modules dynamic-imported · workflow/capability prefetch is bytes-only · vendor-only manual chunks · non-occluding Suspense containment');
+console.log('R109/R111 ROUTE-DEFERRED SPECIALIST FABRIC PASS · single route/state authority preserved · heavy specialist modules dynamic-imported · workflow/capability prefetch is bytes-only · vendor-only manual chunks · non-occluding Suspense containment');
