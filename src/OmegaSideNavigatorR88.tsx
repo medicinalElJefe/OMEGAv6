@@ -50,7 +50,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
    {currentPanel&&<div className='r100-active-route'><span>ACTIVE INSTRUMENT</span><b>{currentPanel}</b><i>{workspaceForRouteR82(currentPanel as any).label}</i></div>}
    {layer==='EVERYWHERE'?<>
     <label className='r88-search r100-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search all 44 OMEGA applications'/><kbd>⌘K</kbd></label>
-    <div className='r89-flat-scroll r100-route-scroll' aria-label='All 44 OMEGA applications'>
+    <div className='r89-flat-scroll' aria-label='All 44 OMEGA applications'>
      {rows.map(route=>{const index=OMEGA_ALL_ROUTES_R82.indexOf(route)+1,workspace=workspaceForRouteR82(route),reality=effectiveCapabilityReality(route);return <button key={route} className={'r89-flat-route '+(currentPanel===route?'active':'')} aria-current={currentPanel===route?'page':undefined} onClick={()=>go(route)}>
       <i>{String(index).padStart(2,'0')}</i><span><b>{route}</b><small>{workspace.label} · {CAPABILITY_REALITY_LABEL[reality]}</small></span><ChevronRight/>
      </button>})}
