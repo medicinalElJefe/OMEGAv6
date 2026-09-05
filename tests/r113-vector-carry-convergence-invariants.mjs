@@ -1,0 +1,17 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const carry=fs.readFileSync('src/vectorCarryR113.ts','utf8'),overlay=fs.readFileSync('src/ContinuousFieldOverlayR13.tsx','utf8'),contract=fs.readFileSync('src/acceptedProductionR113.ts','utf8'),field=fs.readFileSync('src/continuousFieldR13.ts','utf8'),mandala=fs.readFileSync('src/mandala20736Runtime.ts','utf8');
+for(const token of ['ingress','egress','blocked','residue','transmitted','balanceError'])assert(carry.includes(token),`R113 carry primitive missing ${token}`);
+assert(carry.includes('egress-ingress-blocked'),'R113 must expose exact constrained redistribution balance error');
+assert(carry.includes('contradictionGradient')&&carry.includes('turnPressure')&&carry.includes('field.q[to]-field.q[from]'),'TURN must derive from a current contradiction gradient rather than decorative motion');
+assert(carry.includes('indegree')&&carry.includes('field.routeNext')&&carry.includes('recirculationDepth'),'basins must emerge from current route topology and bounded recirculation');
+assert(carry.includes("CarryOrientation=-1|0|1")&&carry.includes('orientation(field.velocity[from])'),'signed orientation must be factored from carry structure');
+assert(carry.includes('not new physical primitives')&&carry.includes('not new physical')||carry.includes('not new physical primitives or measured physical dimensions'),'R113 must retain the computational/physical truth boundary');
+assert(!carry.includes('CanonState=')&&!carry.includes('localState.write'),'derived carry must not become a shadow state authority');
+assert(overlay.includes('compileVectorCarryR113')&&overlay.includes('carry.segments')&&overlay.includes('carry.basins'),'continuous field must visibly consume vector carry and emergent basins');
+assert(overlay.includes('INGRESS / EGRESS / BLOCKED / RESIDUE')&&overlay.includes('TURN / BASIN'),'visible instrument labeling must expose the upgraded carry semantics');
+assert(field.includes('compileDomainBands')&&field.includes('compileRouteFlow'),'R113 must preserve the established continuous-field substrate');
+assert(mandala.includes('count:STATE_COUNT')&&mandala.includes('routeNext')&&mandala.includes('continuityGate'),'R113 must remain derived from the resident canonical packet and route field');
+for(const law of ['CONSTRAINED_REDISTRIBUTION_BALANCE','DIRECTIONAL_RESIDUE_HISTORY','TURN_IS_GRADIENT_REORIENTATION','BASINS_EMERGE_FROM_ROUTE_TOPOLOGY','REFERENCE_KERNEL_NOT_SYMMETRY_LABEL','SINGLE_AUTHORITY_CARRY_DERIVATION'])assert(contract.includes(law),`R113 production law missing ${law}`);
+assert(contract.includes('37/73')&&contract.includes('neither value is hard-coded as universal asymmetry or symmetry'),'37/73 must remain a bounded reference kernel, not universal symmetry labels');
+console.log('R113 VECTOR CARRY CONVERGENCE PASS · constrained redistribution · directional residue · contradiction-gradient TURN · emergent basins · single CanonState authority');
+await import('./r112-sovereign-living-fabric-invariants.mjs');
