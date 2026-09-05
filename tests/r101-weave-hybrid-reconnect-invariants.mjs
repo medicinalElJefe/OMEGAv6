@@ -34,7 +34,7 @@ must(worker34.includes('return r33.fetch(request,env)'),'R101 must sit above the
 must(adapter.includes('reconnectHybridBridge')&&adapter.includes("'/api/hybrid/reconnect'"),'browser adapter must expose reconnect/repair transport');
 must(hybrid.includes('Reconnect')&&hybrid.includes('Repair link'),'Hybrid surface must expose explicit reconnect and repair controls');
 must(hybrid.includes('stored credential rejected')&&hybrid.includes('authenticated heartbeat'),'Hybrid UI must distinguish credential failure from device heartbeat truth');
-must(hybrid.includes('/api/hybrid/agent-download?r101=1')&&hybrid.includes('/omega-hybrid-agent.py'),'Hybrid UI must retain canonical download and explain direct-route compatibility');
+must(hybrid.includes('/api/hybrid/agent-download?r94=1')&&hybrid.includes('/omega-hybrid-agent.py'),'Hybrid UI must retain the canonical validated R94 download endpoint while explaining direct-route compatibility');
 must(agent.includes("VERSION='R34.1'")&&agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"),'sovereign agent canonical transport/version must remain intact');
 must(agent.includes('/api/hybrid/agent/register')&&agent.includes('/api/hybrid/agent/heartbeat')&&agent.includes('/api/hybrid/agent/poll'),'agent register/heartbeat/poll loop must remain present');
 
