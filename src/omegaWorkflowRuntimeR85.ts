@@ -1,5 +1,6 @@
 import {compileFullOverallModePlanR79,compactModePlanR79,type OmegaIntentR79} from './fullOverallModeOrchestratorR79';
 import {operationMatchesR86,type OmegaOperationR86,type OmegaOperationTypeR86} from './omegaOperationBusR86';
+import {compileUltimateCapabilityPlanR108} from './ultimateCapabilityRuntimeR108';
 
 export type WorkflowIntentR85='EXPLORE'|'ANALYZE'|'FORECAST'|'BUILD'|'REPAIR'|'PROVE'|'CREATE'|'CONNECT';
 export type WorkflowStepKindR85='OPEN'|'ADVANCE'|'CHECKPOINT'|'VERIFY';
@@ -32,6 +33,7 @@ export type WorkflowSessionR85={
  currentStep:number;
  steps:WorkflowStepR85[];
  modePlan:any;
+ capabilityPlan?:any;
  history:Array<{at:number;event:string;stepId?:string;address?:number;detail?:string}>;
  truthBoundary:string;
 };
@@ -125,13 +127,14 @@ export function archiveWorkflowR85(session:WorkflowSessionR85){
 export function startWorkflowR85(intent:WorkflowIntentR85,goal:string,record:any,projectId?:string):WorkflowSessionR85{
  const meta=WORKFLOW_INTENTS_R85.find(x=>x.id===intent)||WORKFLOW_INTENTS_R85[0];
  const plan=compactModePlanR79(compileFullOverallModePlanR79(record,meta.anchorPanel,`${intent} ${goal}`));
+ const capabilityPlan=compileUltimateCapabilityPlanR108({intent,goal,surface:meta.anchorPanel,record});
  const now=Date.now();
  const session:WorkflowSessionR85={
   schema:'OMEGA_INTENT_WORKFLOW_R85',
   id:uid(),intent,goal:goal.trim()||meta.purpose,createdAt:now,updatedAt:now,
   startAddress:Number(record?.address)||0,startStateId:Number(record?.stateId)||1,projectId,status:'ACTIVE',currentStep:0,
-  steps:cloneSteps(intent),modePlan:plan,history:[{at:now,event:'WORKFLOW_STARTED',address:Number(record?.address)||0,detail:`${intent} · ${plan.policy} · ${plan.sourceBackedApplied} source-backed applied`}],
-  truthBoundary:'Workflow execution coordinates existing OMEGA tools and explicit canonical transitions. Opening a surface is not proof that its external/native backend exists; gated inputs, device proof and release authority remain gated.'
+  steps:cloneSteps(intent),modePlan:plan,capabilityPlan,history:[{at:now,event:'WORKFLOW_STARTED',address:Number(record?.address)||0,detail:`${intent} · ${plan.policy} · ${plan.sourceBackedApplied} source-backed applied · R108 ${capabilityPlan.capabilityCounts.required}/${capabilityPlan.capabilityCounts.total} capabilities required`}],
+  truthBoundary:'Workflow execution coordinates existing OMEGA tools, R108 minimum-lawful capability correlation and explicit canonical transitions. Opening a surface or selecting a recovered capability is not proof that its external/native backend exists; catalog-only modes, gated inputs, device proof, empirical claims and release authority remain gated.'
  };
  session.steps[0].state='ACTIVE';session.steps[0].startedAt=now;
  return writeWorkflowR85(session)!;
