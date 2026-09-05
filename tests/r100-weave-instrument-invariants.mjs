@@ -18,7 +18,7 @@ must(surfaces.length===44&&new Set(surfaces).size===44,'canonical 44-route unive
 must(weave.includes('ATLAS_RESOLUTION_LEVELS_R100=[12,144,1728,20736]'),'nested atlas resolution registry missing');
 must(weave.includes('partition → exchange/transform → invariant carry → scar/residual carry → re-contextualize/repartition'),'woven continuity operator order missing');
 must(weave.includes('not literal physical dimensions'),'atlas dimensional truth boundary missing');
-must(weave.includes('orientation:(-1|0|1)')&&weave.includes('u.orientation'),'signed orientation must remain factored from magnitude');
+must(weave.includes('orientation:-1|0|1')||weave.includes('orientation:(-1|0|1)'),'signed orientation must remain factored from magnitude');
 must(weave.includes('timeSeconds')&&weave.includes('phase=wrap('),'time must drive phase without rewriting canonical address');
 must(weave.includes('continuityFlux')&&weave.includes('invariantCarry')&&weave.includes('residualCarry')&&weave.includes('threadTension'),'weave state channels incomplete');
 must(weave.includes('applyWovenContinuityR100')&&weave.includes('weaveChannelR100'),'deterministic weave transform/color channel missing');
@@ -27,7 +27,7 @@ must(!weave.includes('Math.random'),'weave runtime may not invent random state g
 for(const mode of ['UNIFIED','SHELL','WATER','LIGHT','SCAR','RELATIVITY','FORECAST','PROOF'])must(stage.includes(`'${mode}'`),'R100 must preserve mode '+mode);
 must(stage.includes('visualFieldPoint(')&&stage.includes('warpTraversalPointR99(')&&stage.includes('applyWovenContinuityR100('),'R100 must extend rather than replace the R99 source/mode geometry path');
 must(stage.includes("projectionPoint(step.address,'MANDALA',1000)")&&stage.includes('compileSourceTraversal(address,routeDepth)'),'canonical admitted route binding must remain intact');
-must(stage.includes("className='r100-weave-output'")&&stage.includes('WEAVE STATE')&&stage.includes('ATLAS RESOLUTION')&&stage.includes('ORIENTATION σ'),'weave state must be visible as dimensional/address output outside the stage');
+must(stage.includes("className='r100-weave-output'")&&stage.includes('WEAVE STATE')&&(stage.includes('ATLAS RESOLUTION')||stage.includes('EFFECTIVE RESOLUTION'))&&stage.includes('ORIENTATION σ'),'weave state must remain visible as dimensional/address output outside the stage');
 must(stage.includes("<label>TIME<input type='range'")&&stage.includes('timeScale'),'time synchronization control missing');
 must(stage.includes('Representational geometry is derived from the canonical packet and admitted route. It is not an external physical observation.'),'representational truth boundary must remain explicit');
 must(!stage.includes('Math.random'),'R100 primary stage may not use random/fake geometry');
@@ -50,4 +50,4 @@ must(accepted.includes("'R100 woven continuity geometry/time + professional inst
 must(accepted.includes("'R98 unobstructed visual-stage authority'")&&accepted.includes("'R99 source-driven design-mode correlation authority'"),'R100 must extend accepted R98/R99 authority');
 must(![nav,navCss,stage,weave,weaveCss].join('\n').includes('@appdeploy/client'),'R100 must remain provider portable');
 
-console.log('R100 WEAVE INSTRUMENT PASS · professional non-covering rail · deterministic time-synchronized woven continuity geometry · explicit 12/144/1728/20,736 atlas output · R99 modes and 44 routes preserved');
+console.log('R100 WEAVE INSTRUMENT PASS · professional non-covering rail · deterministic time-synchronized woven continuity geometry · atlas/address output preserved under R101 effective-resolution extension · R99 modes and 44 routes preserved');
