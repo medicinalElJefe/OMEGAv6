@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA_FEDERATION_v1",
-  "experienceRevision": "R111",
+  "experienceRevision": "R114",
   "canonicalAuthority": "OMEGAv6",
-  "stateLaw": "partition -> transform -> invariant carry -> scar carry -> re-contextualize",
+  "stateLaw": "partition -> exchange/transform -> invariant carry -> scar/residual carry -> re-contextualize/repartition",
   "userModel": "one project + one packet lineage + four specialized runtimes + scalable non-authoritative service capacity",
   "handoff": ["PROPOSE", "SCREEN", "SOLVE", "ADMIT"],
   "atlas": {
@@ -57,26 +57,40 @@
       "transport": "canonical-worker-queue-to-authenticated-hybrid-agent",
       "stateGate": "DEVICE_PROOF_REQUIRED",
       "canonicalScope": "WORKER_RESULT_RETURN_ONLY",
-      "input": ["approved Tier-2 jobs", "solver settings", "material model", "numerics"],
+      "input": ["approved Tier-2 jobs", "solver settings", "numeric material model", "numerics"],
       "output": ["full-wave result packets", "convergence metadata", "result hashes"],
       "userValue": "Uses bounded local compute for expensive validation while returning reproducible proof to the cloud.",
       "mayMutateCanonicalState": false
     }
   ],
   "fabric": {
-    "revision": "R111",
+    "revision": "R114",
     "statusEndpoint": "/api/fabric/status",
     "intentEndpoint": "/api/fabric/route",
     "lawEndpoint": "/api/fabric/law",
     "authorityNodeCount": 4,
     "scalingLaw": "Add service capacity without adding competing CanonState authority.",
-    "serviceCapabilities": ["hybrid-transport", "rcwa", "workers-ai", "earth-evidence", "route-deferred-specialists"],
+    "serviceCapabilities": ["hybrid-transport", "rcwa", "workers-ai", "earth-evidence", "route-deferred-specialists", "federation-closure-ceremony"],
     "sentinel": {
       "url": "https://omega-fabric-sentinel.jeffdeweyeljefe.workers.dev",
       "role": "independent advisory current-probe observer",
       "mayMutateCanonicalState": false,
       "mayExecuteNativeActions": false
     }
+  },
+  "ceremony": {
+    "schema": "OMEGA_FEDERATION_CEREMONY_R114",
+    "statusEndpoint": "/api/federation/ceremony/status",
+    "startEndpoint": "/api/federation/ceremony/start",
+    "hostProofEndpoint": "/api/federation/ceremony/host-proof",
+    "reconcileEndpoint": "/api/federation/ceremony/reconcile",
+    "ledgerEndpoint": "/api/federation/ceremony/ledger",
+    "lawEndpoint": "/api/federation/ceremony/law",
+    "receiptSchema": "OMEGA_FEDERATION_RECEIPT_R114",
+    "receiptChain": ["INTENT", "PROPOSE", "SCREEN", "QUEUE", "SOLVE", "ADMIT"],
+    "strictClosure": "Service-observed Genesis and Optical receipts + current authenticated Sovereign result return + OMEGAv6 admission receipt",
+    "hostProofBoundary": "Bounded RCWA host fixture proves current Sovereign execution only and never substitutes for Genesis/Optical.",
+    "durability": "OMEGA_RUNTIME Durable Object hash-chain ledger"
   },
   "experienceContract": {
     "sharedContext": ["project_id", "packet_id", "state_id", "atlas_address", "observer_frame", "evidence_class", "proof_gate", "scar_history", "orientation_sigma", "lineage"],
@@ -95,7 +109,8 @@
     "tier2": {
       "queue": "OMEGA_FULLWAVE_QUEUE_v1",
       "preferredOrder": ["RCWA", "FDTD"],
-      "purpose": "validate only highest-ranked structures with full-wave electromagnetic solvers"
+      "purpose": "validate only highest-ranked structures with full-wave electromagnetic solvers",
+      "rcwaMaterialRequirement": ["n_incident", "n_feature", "n_background", "n_substrate"]
     }
   },
   "packet": {
@@ -109,6 +124,9 @@
     "nodeLocalStateDoesNotEqualGlobalCanonState": true,
     "machineCredentialsNeverShipToBrowser": true,
     "auxiliaryCloudsDoNotBecomeCanonicalAuthorities": true,
-    "failedSolverResultsReturnAsScarredEvidence": true
+    "failedSolverResultsReturnAsScarredEvidence": true,
+    "manualUpstreamPacketsCannotCloseStrictFederationProof": true,
+    "historicalPairingCannotSatisfyCurrentSovereignProof": true,
+    "hostFixtureCannotMasqueradeAsFullFederationClosure": true
   }
 }
