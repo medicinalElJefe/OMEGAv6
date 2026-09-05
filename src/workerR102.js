@@ -53,7 +53,8 @@ async function fetchR102(request,env){
  if(path==='/api/federation/run/status'&&request.method==='GET'){
   const [base,optical]=await Promise.all([r101.fetch(request,env),probeOpticalR102(env)]),data=await base.clone().json().catch(()=>null);
   if(!data||typeof data!=='object')return withCorsR102(base,request);
-  const next={...data,schema:'OMEGA_FEDERATION_RUN_STATUS_R102',nodes:{...(data.nodes||{}),optical},federationRevision:'R102',preferredOpticalOrigin:OPTICAL_PRIMARY_R102,experience:null};next.experience=experienceR102(next);
+  // Keep the stable R97 status schema for existing clients and release probes; R102 is an additive experience revision.
+  const next={...data,schema:'OMEGA_FEDERATION_RUN_STATUS_R97',nodes:{...(data.nodes||{}),optical},federationRevision:'R102',preferredOpticalOrigin:OPTICAL_PRIMARY_R102,experience:null};next.experience=experienceR102(next);
   return withCorsR102(json(next,base.status),request);
  }
  const response=await r101.fetch(request,env);
