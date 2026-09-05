@@ -4,6 +4,7 @@ import {CAPABILITY_REALITY_LABEL} from './capabilityAuthority';
 import {effectiveCapabilityReality} from './operationalCapabilityRuntimeR45';
 import {OMEGA_ALL_ROUTES_R82,OMEGA_ROUTE_INVENTORY_R107,OMEGA_WORKSPACES_R82,workspaceForRouteR82,type OmegaWorkspaceIdR82} from './omegaExperienceRegistryR82';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
+import RouteOutputRibbonR111 from './RouteOutputRibbonR111';
 import './omegaSideNavigatorR88.css';
 import './omegaSideNavigatorR100.css';
 import './extremeLayerIntegrityR104.css';
@@ -55,6 +56,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
    </header>
    <nav className='r89-nav-mode r100-nav-mode r104-nav-mode' aria-label='Navigator mode'><button className={layer==='EVERYWHERE'?'active':''} onClick={()=>{setLayer('EVERYWHERE');setWorkspaceFilter('ALL')}}><Menu/>Everywhere <b>{routeCount}</b></button><button className={layer==='SOFTWARE'?'active':''} onClick={()=>{setLayer('SOFTWARE');setWorkspaceFilter('ALL')}}><Layers3/>Software map</button></nav>
    {currentPanel&&currentWorkspace&&<div className='r100-active-route r104-active-route'><span>ACTIVE INSTRUMENT</span><b>{currentPanel}</b><i>{currentWorkspace.label}</i><small>{currentWorkspace.copy}</small></div>}
+   {currentPanel&&<RouteOutputRibbonR111 route={currentPanel}/>}
    {layer==='EVERYWHERE'?<>
     <nav className='r105-workspace-filter' aria-label='Application workspace submenu'><button className={workspaceFilter==='ALL'?'active':''} onClick={()=>setWorkspaceFilter('ALL')}>ALL <b>{routeCount}</b></button>{OMEGA_WORKSPACES_R82.map(workspace=><button key={workspace.id} className={workspaceFilter===workspace.id?'active':''} onClick={()=>setWorkspaceFilter(workspace.id)} title={workspace.copy}>{workspace.label} <b>{workspace.routes.length}</b></button>)}</nav>
     <div className='r105-context-note'><span>SUBMENU</span><b>{activeWorkspace?`${activeWorkspace.label} · ${activeWorkspace.copy}`:'All working contexts · route count is inventory telemetry, not capability architecture'}</b></div>
