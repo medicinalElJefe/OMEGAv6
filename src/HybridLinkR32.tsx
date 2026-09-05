@@ -10,7 +10,7 @@ export default function HybridLinkR32({status,record}:Props){
  return <section className='hybrid-r32 special-app r112-hybrid-link'>
   <header className='r112-hybrid-hero'>
    <div><span>SOVEREIGN COMPUTE · HYBRID LINK</span><h2>Your PC is an OMEGA compute node.</h2><p>This page has one ordinary job: connect the Windows machine, prove the heartbeat, then expose local capabilities. Pairing mechanics, federation topology and recovery controls stay available, but they are not the main interface.</p></div>
-   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat.</small></div>
+   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat. Native execution is claimed only while an authenticated agent heartbeat is current.</small></div>
   </header>
 
   <SovereignConnectionR112/>
