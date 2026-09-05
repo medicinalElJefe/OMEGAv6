@@ -46,7 +46,9 @@ for(const layer of ['STATE','INTELLIGENCE','MEMORY','RELATION','COMPUTATION','AC
 must(layerRegistry.includes('surfaceLayerAuditR104')&&layerRegistry.includes('missingBindings')&&layerRegistry.includes('orphanBindings')&&layerRegistry.includes('registeredRoutes:registered.length'),'layer registry must expose deterministic dynamic coverage audit');
 must(!layerRegistry.includes('pass:names.length===44'),'layer architecture may not be frozen to the historical route count');
 must(integrity.includes('surfaceLayerBindingR104(panel)')&&integrity.includes('data-layer-primary={layer.primary}')&&integrity.includes("data-layer-contract='R104/R107'"),'active routed wrapper must carry R104/R107 layer contract');
-must(workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}>{content}</SurfaceIntegrityR81>"),'all routed content must stay inside integrity wrapper');
+const legacyIntegrity=workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}>{content}</SurfaceIntegrityR81>");
+const r109Integrity=workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}>")&&workstation.includes('<Suspense fallback={<SpecialistLoadingR109')&&workstation.includes('{content}</Suspense></SurfaceIntegrityR81>');
+must(legacyIntegrity||r109Integrity,'all routed content must stay inside integrity wrapper; R109 Suspense may be nested inside but never outside it');
 
 // Surface provenance and user-inspectable layer correctness, progressive rather than blocking.
 const provenanceNames=[...provenanceRegistry.matchAll(/P\('([^']+)'/g)].map(x=>x[1]).filter(x=>surfaces.includes(x));
@@ -114,4 +116,4 @@ must(packageJson.scripts['test:r104']==='node tests/r104-extreme-layer-integrity
 must(packageJson.scripts['check:static'].includes('npm run test:r104'),'R104 must run inside full static release check');
 must(![layerRegistry,integrity,nav,css,stage,hybrid,worker101,worker102,router].join('\n').includes('@appdeploy/client'),'R104 must remain provider portable');
 
-console.log(`R104 EXTREME LAYER INTEGRITY PASS · ${surfaces.length} current registered destinations · 8-layer correlation · full provenance coverage · 8 distinct source-driven modes · R98 no-occlusion · readable reserved-space navigator · Hybrid/Earth/project/operation/federation truth preserved`);
+console.log(`R104/R109 EXTREME LAYER INTEGRITY PASS · ${surfaces.length} current registered destinations · 8-layer correlation · full provenance coverage · 8 distinct source-driven modes · R98 no-occlusion · readable reserved-space navigator · deferred content remains inside SurfaceIntegrity · Hybrid/Earth/project/operation/federation truth preserved`);
