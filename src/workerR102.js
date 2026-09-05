@@ -1,4 +1,5 @@
 import r101,{OmegaRuntime as OmegaRuntimeR101} from './workerR101.js';
+import {planIntentR103} from './federation/federationIntentRouterR103.js';
 
 const OPTICAL_PRIMARY_R102='https://omega-living-light-etching-private-woven2.vercel.app';
 const OPTICAL_LEGACY_R102='https://omega-optical-cloud-woven2.vercel.app';
@@ -44,7 +45,7 @@ function experienceR102(data){
  const n=data?.nodes||{},r=data?.runtime||{},genesis=n.genesis?.state==='LIVE',optical=n.optical?.state==='LIVE',host=n.sovereign?.state==='PC_ONLINE',solver=n.sovereign?.rcwaState==='RCWA_ONLINE';
  let stage='ADMIT',gate='READY';
  if(!genesis){stage='PROPOSE';gate='GENESIS'}else if(!optical){stage='SCREEN';gate='OPTICAL'}else if(!host){stage='SOLVE';gate='SOVEREIGN_LINK'}else if(!solver){stage='SOLVE';gate='FULL_WAVE'}else if(Number(r?.rcwa?.counts?.running||0)>0){stage='SOLVE';gate='RUNNING'}else if(Number(r?.rcwa?.counts?.queued||0)>0){stage='SOLVE';gate='QUEUED'}
- return{revision:'R102',stage,gate,nodeOrder:['omega-genesis','omega-optical','omega-sovereign','omega-v6'],verbs:['PROPOSE','SCREEN','SOLVE','ADMIT'],authorityModel:{globalCanonical:'omega-v6',genesis:'node-local proposal state only',optical:'worker packet return',sovereign:'worker result return'},userModel:'one project + one packet lineage + four specialized runtimes'};
+ return{revision:'R102',stage,gate,nodeOrder:['omega-genesis','omega-optical','omega-sovereign','omega-v6'],verbs:['PROPOSE','SCREEN','SOLVE','ADMIT'],authorityModel:{globalCanonical:'omega-v6',genesis:'node-local proposal state only',optical:'worker packet return',sovereign:'worker result return'},userModel:'one project + one packet lineage + four specialized runtimes',intentRouterRevision:'R103'};
 }
 
 async function fetchR102(request,env){
@@ -56,6 +57,12 @@ async function fetchR102(request,env){
   // Keep the stable R97 status schema for existing clients and release probes; R102 is an additive experience revision.
   const next={...data,schema:'OMEGA_FEDERATION_RUN_STATUS_R97',nodes:{...(data.nodes||{}),optical},federationRevision:'R102',preferredOpticalOrigin:OPTICAL_PRIMARY_R102,experience:null};next.experience=experienceR102(next);
   return withCorsR102(json(next,base.status),request);
+ }
+ if(path==='/api/federation/route-intent'&&request.method==='POST'){
+  const body=await request.json().catch(()=>({})),intent=text(body?.intent||body?.text).slice(0,2000);
+  const statusUrl=new URL('/api/federation/run/status',request.url),statusRequest=new Request(statusUrl,{method:'GET',headers:request.headers}),statusResponse=await fetchR102(statusRequest,env),status=await statusResponse.clone().json().catch(()=>({}));
+  const plan=planIntentR103(intent,status||{});
+  return withCorsR102(json({...plan,federationRevision:'R102',intentRouterRevision:'R103',generatedAt:new Date().toISOString()},plan.ok?200:400,{'x-omega-intent-router-revision':'R103'}),request);
  }
  const response=await r101.fetch(request,env);
  return path.startsWith('/api/federation/')?withCorsR102(response,request):response;

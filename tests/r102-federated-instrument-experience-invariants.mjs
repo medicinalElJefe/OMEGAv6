@@ -55,3 +55,4 @@ must(accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge
 must(![worker,experience,federation].join('\n').includes('Math.random'),'federation experience must not depend on fake/random state');
 
 console.log('R102 FEDERATED INSTRUMENT EXPERIENCE PASS · four specialized runtimes · task-first handoff trace · stable schema + additive R102 revision · single global CanonState authority · Optical endpoint continuity · R101/R34/44-route preservation');
+await import('./r103-intent-capability-router-invariants.mjs');

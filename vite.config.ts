@@ -19,10 +19,10 @@ function governedBuildReceipt(){
         source:{repository:'medicinalElJefe/OMEGAv6',sha:String(process.env.GITHUB_SHA||'UNAVAILABLE'),branch:String(process.env.GITHUB_REF_NAME||'UNKNOWN'),role:'PACKAGED_SOURCE_SHA'},
         promotion:{candidateSha,promotedMergeSha,rollbackSha,authority:candidateSha&&promotedMergeSha&&rollbackSha?'GITHUB_MERGE_PARENTS':'EXTERNAL_RELEASE_LEDGER_REQUIRED'},
         qa:{required:'npm install + npm run check + Vite production build + Wrangler dry-run',upstreamGate:process.env.GITHUB_ACTIONS==='true'?'WORKFLOW_VERIFY_REQUIRED':'LOCAL_BUILD_UNVERIFIED'},
-        package:{builder:'Vite',output:'dist',portable:true,appDeploy:false},
+        package:{builder:'Vite',output:'dist',portable:true,appDeploy:false,partition:'R103_CACHE_ORIENTED_CAPABILITY_CHUNKS'},
         deployment:{authority:'GitHub Actions + Cloudflare Wrangler',canonicalUrl,publicWorkerMutationAuthority:false},
         workflow:{runId:String(process.env.GITHUB_RUN_ID||'LOCAL'),runNumber:String(process.env.GITHUB_RUN_NUMBER||'LOCAL'),name:String(process.env.GITHUB_WORKFLOW||'local build')},
-        truthBoundary:'This package receipt records the exact packaged source and, only when supplied from verified Git merge ancestry, candidate/promoted/rollback lineage. It does not by itself prove later deployment or live verification and does not grant the public Worker repository mutation authority.'
+        truthBoundary:'This package receipt records the exact packaged source and, only when supplied from verified Git merge ancestry, candidate/promoted/rollback lineage. R103 chunk partitioning improves cache/parallelization boundaries but does not falsely claim that all statically imported specialist code is route-deferred; true deferred specialist loading remains a separately testable optimization lane.'
       };
       const receipt={...payload,receiptSha256:createHash('sha256').update(JSON.stringify(payload)).digest('hex')};
       await writeFile('dist/omega-build-receipt.json',JSON.stringify(receipt,null,2)+'\n','utf8');
@@ -30,11 +30,25 @@ function governedBuildReceipt(){
   };
 }
 
+function capabilityChunkR103(id:string){
+  const p=id.replace(/\\/g,'/');
+  if(p.includes('/node_modules/react/')||p.includes('/node_modules/react-dom/')||p.includes('/node_modules/scheduler/'))return'vendor-react';
+  if(p.includes('/node_modules/lucide-react/'))return'vendor-icons';
+  if(p.includes('/node_modules/'))return'vendor-runtime';
+  if(/EarthObservatory|EarthGround|ForecastSovereign/.test(p))return'omega-earth-forecast';
+  if(/MatterTraversal|OmegaR36LivingSurfaces|ExtremeTraversal|OmegaTraversalStudio|OmegaVisualInstrument|RelativityLab|AtlasViewport|AtlasCalculatorPanel|OmegaInfinityPanel|RecursiveScalePanel|AppliedRealityLab/.test(p))return'omega-explore';
+  if(/HybridMission|FederationRun|federationExperience|SAISovereign|IntelligenceFabric|OmegaCommandDeck|OmegaIntentWorkbench/.test(p))return'omega-runtime-intelligence';
+  if(/ArchiveGovernance|UniversalQuality|SystemAtlas|PluginRegistry|SurfaceIntegrity|OmegaSystem|Governance/.test(p))return'omega-evidence-system';
+  if(/OmegaSpecialistSuite|SourceBackedModes|WovenBuildOut|PhaseWheel/.test(p))return'omega-specialists';
+  return undefined;
+}
+
 export default defineConfig({
   plugins: [react(),governedBuildReceipt()],
   build: {
     outDir: 'dist',
     sourcemap: true,
-    target: 'es2022'
+    target: 'es2022',
+    rollupOptions:{output:{manualChunks:capabilityChunkR103}}
   }
 });
