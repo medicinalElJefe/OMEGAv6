@@ -10,6 +10,8 @@ must(worker.includes("import r102,{OmegaRuntime as OmegaRuntimeR102} from './wor
 must(worker.includes("path==='/api/fabric/status'")&&worker.includes("path==='/api/fabric/route'")&&worker.includes("path==='/api/fabric/law'"),'fabric API surface incomplete');
 must(worker.includes('return r102.fetch')||worker.includes('const response=await r102.fetch'),'legacy paths must delegate to R102 rather than clone runtime behavior');
 must(r102.includes("from './workerR101.js'")&&r102.includes("path==='/api/federation/run/status'"),'R102 federation authority must remain inherited');
+must(worker.includes("FABRIC_OBSERVER_SESSION_R111='r111_fabric_observer'")&&worker.includes("headers.set('x-omega-session-id',FABRIC_OBSERVER_SESSION_R111)"),'generic fabric observers must receive a bounded read-only namespace so R34 status cannot collapse to BRIDGE_ID_REQUIRED');
+must(worker.includes("'CALLER_BRIDGE_OR_SESSION_CONTEXT':'NEUTRAL_READ_ONLY_OBSERVER_NAMESPACE'")&&worker.includes('sourceStatus:{federationHttpStatus'),'fabric status must expose whether readiness came from caller bridge context or the neutral observer namespace');
 
 // Federation stays four authorities while service capacity may scale independently.
 const liveStatus={nodes:{genesis:{state:'LIVE',latencyMs:2},optical:{state:'LIVE',latencyMs:4},sovereign:{state:'PC_ONLINE',rcwaState:'RCWA_ONLINE'},omegaV6:{state:'LIVE'}},runtime:{rcwa:{state:'RCWA_ONLINE'}}};
@@ -54,4 +56,4 @@ must(sentinelWorkflow.includes('wrangler.fabric-sentinel.jsonc')&&sentinelWorkfl
 
 // No pseudo-random truth generation in federation or sentinel health.
 must(!mesh.includes('Math.random')&&!worker.includes('Math.random')&&!sentinel.includes('Math.random'),'fabric truth must be deterministic/probe-derived');
-console.log('R111 FEDERATED CAPABILITY MESH PASS · four authorities / scalable services · all 44 routes mapped across eight layers and outputs · one-touch Hybrid proof flow · independent advisory sentinel');
+console.log('R111.1 FEDERATED CAPABILITY MESH PASS · neutral observer identity preserves four authority observations · scalable services · 44 route/output contracts · one-touch Hybrid proof flow · independent advisory sentinel');
