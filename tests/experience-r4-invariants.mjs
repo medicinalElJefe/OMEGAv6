@@ -3,6 +3,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const phase=read('src/PhaseWheel.tsx');
 const home=read('src/OmegaHomeR59.tsx');
 const work=read('src/OmegaWorkstationFullV2.tsx');
+const deferred=fs.existsSync('src/specialistLoaderR109.tsx')?read('src/specialistLoaderR109.tsx'):'';
 const modeRuntime=read('src/sourceBackedModeRuntimeR21.ts');
 const worker=read('src/worker.js');
 const wrangler=read('wrangler.jsonc');
@@ -20,7 +21,12 @@ if(home.includes('ALL MODES ACTIVE')||work.includes('ALL MODES REMAIN EXECUTED')
 if(!work.includes("api.post<any>('/api/route-preview'")||!work.includes("api.post<any>('/api/chat'"))throw new Error('route-before-chat sequence missing');
 if(work.indexOf("'/api/route-preview'")>work.indexOf("'/api/chat'"))throw new Error('route preview must occur before chat generation');
 if(!work.includes("experience-phase-bound experience-${kind}"))throw new Error('shared phase context wrapper missing');
-for(const [panel,kind] of [['HybridMissionControlR8','hybrid'],['MatterTraversalR36','matter'],['RelativityLab','relativity'],['EarthObservatoryR8','earth']]){if(!work.includes(`withPhase(<${panel}`)||!work.includes(`>,'${kind}')`))throw new Error('missing shared phase context '+kind);}
+const phaseBindings=[['HybridMissionControlR8','HybridMissionControlR109','hybrid'],['MatterTraversalR36','MatterTraversalR109','matter'],['RelativityLab','RelativityR109','relativity'],['EarthObservatoryR8','EarthNowR109','earth']];
+for(const [sourceName,mountName,kind] of phaseBindings){
+ const eager=work.includes(`withPhase(<${sourceName}`),deferredMount=work.includes(`withPhase(<${mountName}`);
+ if(!(eager||deferredMount)||!work.includes(`>,'${kind}')`))throw new Error('missing shared phase context '+kind);
+ if(deferredMount&&!deferred.includes(sourceName))throw new Error('R109 deferred phase mount lost source specialist '+sourceName);
+}
 if(!wrangler.includes('"ai"')||!wrangler.includes('"binding": "AI"'))throw new Error('Workers AI binding missing');
 if(!worker.includes('@cf/google/gemma-4-26b-a4b-it'))throw new Error('approved Workers AI model missing');
 if(!worker.includes('env.AI.run'))throw new Error('Workers AI inference is not wired');
@@ -30,4 +36,4 @@ if(!donorCss.includes('.experience-earth')||!donorCss.includes('.experience-hybr
 if(!currentCss.includes('.experience-phase-bound')||!currentCss.includes('.special-app'))throw new Error('current product must preserve shared phase-bound application hierarchy');
 if(app.includes("import './experienceR4.css'"))throw new Error('superseded R4 global stylesheet must not override current product authority');
 if(app.includes('@appdeploy/client')||currentCss.includes('@appdeploy/client'))throw new Error('current experience authority must remain provider portable');
-console.log('experience-r4-invariants: PASS · phase/mode/AI/truth behavior preserved under current product authority');
+console.log('experience-r4-invariants: PASS · phase/mode/AI/truth behavior preserved under current product authority · R109 deferred specialist mounts accepted');
