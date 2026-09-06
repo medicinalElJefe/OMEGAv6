@@ -2,6 +2,7 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import {corpusState,projectionPoint,sourceRGB,PROJECTIONS,VIEW_MODES,type Projection,type ViewMode,STATE_COUNT} from './corpusRuntime';
 import {compileSourceTraversal} from './sourceBackedModeRuntimeR21';
 import {applyCanvasResolutionR119,R119_RESOLUTION_BOUNDARY} from './renderResolutionR119';
+import OmegaEarthRelativitySphereR121 from './OmegaEarthRelativitySphereR121';
 import './canonicalMembraneR95.css';
 
 type Props={address:number;onAddress?:(address:number)=>void;initialProjection?:Projection;initialView?:ViewMode;projection?:Projection;view?:ViewMode;showControls?:boolean;compact?:boolean;label?:string};
@@ -18,6 +19,7 @@ export default function CanonicalMembraneR95({address,onAddress,initialProjectio
  const points=useMemo(()=>Array.from({length:STATE_COUNT},(_,i)=>projectionPoint(i,projection,1000)),[projection]);
  const colors=useMemo(()=>Array.from({length:STATE_COUNT},(_,i)=>sourceRGB(i,view)),[view]);
  const routePoints=useMemo(()=>route.path.map(x=>({address:x.address,...projectionPoint(x.address,projection,1000)})),[route,projection]);
+ const homeComposite=compact&&label.startsWith('HOME ·');
 
  useEffect(()=>{
   const el=canvas.current;if(!el)return;
@@ -68,16 +70,19 @@ export default function CanonicalMembraneR95({address,onAddress,initialProjectio
   onAddress(best);
  };
 
- return <section className={'r95-membrane '+(compact?'compact':'full')} data-projection={projection} data-view={view} data-motion='admitted-route-time-sync' data-resolution-authority='R119'>
+ const membraneStage=<div className='r95-membrane-stage'>
+  <canvas ref={canvas} onPointerDown={choose} aria-label='Interactive 20,736-cell canonical membrane'/>
+ </div>;
+
+ return <section className={'r95-membrane '+(compact?'compact':'full')+(homeComposite?' r121-home-composite':'')} data-projection={projection} data-view={view} data-motion='admitted-route-time-sync' data-resolution-authority='R119'>
   <header><div><span>RENDER AUTHORITY · SOURCE-BOUND · R119 FULL RESOLUTION</span><b>{label}</b><small>Every rendered cell is one canonical address. No generated filler cells.</small></div><code>STATE {record.stateId} · D{coordinates.d} P{coordinates.p} R{coordinates.r} L{coordinates.l}</code></header>
   {showControls&&<div className='r95-membrane-controls'>
    <nav aria-label='Membrane projection'>{PROJECTIONS.map(x=><button key={x} className={projection===x?'active':''} onClick={()=>setProjection(x)}>{x}</button>)}</nav>
    <nav aria-label='Membrane data skin'>{VIEW_MODES.map(x=><button key={x} className={view===x?'active':''} onClick={()=>setView(x)}>{x.replaceAll('_',' ')}</button>)}</nav>
    <label>ROUTE <input type='range' min='6' max='72' value={routeDepth} onChange={e=>setRouteDepth(Number(e.target.value))}/><b>{routeDepth}</b></label>
   </div>}
-  <div className='r95-membrane-stage'>
-   <canvas ref={canvas} onPointerDown={choose} aria-label='Interactive 20,736-cell canonical membrane'/>
-  </div>
+  {homeComposite&&<OmegaEarthRelativitySphereR121 address={address} onAddress={onAddress}/>} 
+  {homeComposite?<details className='r121-home-membrane'><summary>CANONICAL SOURCE MEMBRANE · OPEN 20,736-CELL INSPECTION SURFACE</summary>{membraneStage}</details>:membraneStage}
   <details className='r98-membrane-data'>
    <summary>DATA · STATE {record.stateId} · {record.metrics.decision}</summary>
    <div className='r98-membrane-data-grid'>
