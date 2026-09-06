@@ -29,8 +29,9 @@ assert.match(r8,/DEVICE_PROOF_REQUIRED/,'R8 wrapper must retain native proof bou
 assert.match(current,/import SovereignConnectionR117 from '\.\/SovereignConnectionR117'/,'current Hybrid surface must mount R117 Sovereign connection authority');
 assert.match(current,/SOVEREIGN COMPUTE · HYBRID LINK · R117/,'current Hybrid surface R117 identity missing');
 assert.match(current,/<SovereignConnectionR117\/>/,'current Hybrid surface must expose the clean connection experience first');
-assert.match(current,/<details className='r112-hybrid-deep'>/,'advanced Hybrid diagnostics must remain progressively disclosed');
-assert.match(current,/<HybridMissionControlR8 status=\{status\} record=\{record\}\/>/,'R8 mission/federation donor must remain reachable inside advanced diagnostics');
+assert.match(current,/<details className='r112-hybrid-deep'/,'advanced Hybrid diagnostics must remain progressively disclosed');
+assert.match(current,/onToggle=\{e=>setDeepOpen/,'advanced Hybrid disclosure must explicitly control whether legacy diagnostics are mounted');
+assert.match(current,/\{deepOpen&&<HybridMissionControlR8 status=\{status\} record=\{record\}\/>\}/,'R8 mission/federation donor must remain reachable but unmounted until advanced diagnostics are opened');
 const deferredCurrent=/HybridMissionControlR109/.test(router)&&/case 'Hybrid Link':return withPhase\(<HybridMissionControlR109[^;]*,'hybrid'\)/.test(router)&&/HybridLinkR117:\(\)=>import\('\.\/HybridLinkR32'\)/.test(loader)&&/HybridMissionControlR109=lazy\(LOADERS\.HybridLinkR117\)/.test(loader)&&/'Hybrid Link':\[LOADERS\.HybridLinkR117\]/.test(loader);
 assert.ok(deferredCurrent,'Hybrid Link route must resolve through the verified R109 deferred loader to the current R117 surface');
 assert.match(loader,/HybridMissionControlR8:\(\)=>import\('\.\/HybridMissionControlR8'\)/,'R8 donor loader must remain retained for deep diagnostics');
@@ -38,4 +39,4 @@ assert.match(loader,/HybridMissionControlR8:LOADERS\.HybridMissionControlR8/,'R8
 
 assert.ok(css.length>1000,'Hybrid responsive instrumentation CSS unexpectedly absent');
 for(const source of [runtime,panel,r8,current,router,loader])assert.doesNotMatch(source,/@appdeploy\/client|appdeploy\.ai/i,'AppDeploy runtime contract reintroduced');
-console.log('hybrid mission invariants R118 PASS · R117 ordinary Hybrid route + R8 governed donor/diagnostics retained + proof-gated native execution');
+console.log('hybrid mission invariants R118 PASS · R117 ordinary Hybrid route + R8 governed donor/diagnostics retained but unmounted until opened + proof-gated native execution');
