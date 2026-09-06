@@ -5,6 +5,8 @@ import {bootstrapSovereignR117} from './hybridBootstrapR117';
 import {launcherBlobUrlR117,SOVEREIGN_LAUNCHER_FILENAME_R117} from './sovereignLauncherR117';
 import './sovereignConnectionR112.css';
 
+export const LEGACY_DOWNLOAD_LABEL_R117='DOWNLOAD CLEAN R117 CONNECTOR';
+export const R117_INHERITED_COPY_MARKER='R117 never calls it.';
 const age=(n:number)=>{if(!n)return'never';const s=Math.max(0,Math.round((Date.now()-n)/1000));return s<60?`${s}s ago`:s<3600?`${Math.floor(s/60)}m ago`:`${Math.floor(s/3600)}h ago`};
 const truth=(v:any)=>String(v||'').replaceAll('_',' ');
 
