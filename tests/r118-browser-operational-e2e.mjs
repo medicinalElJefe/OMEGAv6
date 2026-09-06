@@ -8,6 +8,8 @@ const routes=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 if(routes.length!==44||new Set(routes).size!==44)throw new Error(`R118 expected 44 unique routes, found ${routes.length}`);
 
 const criticalVisual=new Set(['Matter Traversal','Visual Instrument','Immersive Traversal','Extreme Traversal','Traversal','Forecast','Relativity','Earth Now','Atlas','Infinity','Scale Compiler','Reality Lab','Field','Data Motion','Convergence']);
+const sovereignSurfacePattern=/OMEGA SOVEREIGN LINK · R(?:117|120(?: ROOT SAFE)?)/;
+const sovereignActionPattern=/FIX CONNECTION NOW|PC ONLINE|DOWNLOAD CLEAN R117 CONNECTOR|DOWNLOAD ROOT-SAFE R120 CONNECTOR/;
 
 async function routeDiagnostics(page){
  return page.evaluate(()=>({
@@ -46,8 +48,8 @@ async function openRoute(page,route,viewportName){
  },route,{timeout:20000})}
  catch{throw new Error(`${viewportName} ${route}: specialist did not settle · ${JSON.stringify(await routeDiagnostics(page))}`)}
  if(route==='Hybrid Link'){
-  try{await page.waitForFunction(()=>/OMEGA SOVEREIGN LINK · R117/.test(document.querySelector('.omega-surface-r81')?.textContent||''),{timeout:12000})}
-  catch{throw new Error(`${viewportName} Hybrid Link: current R117 surface never materialized · ${JSON.stringify(await routeDiagnostics(page))}`)}
+  try{await page.waitForFunction(()=>/OMEGA SOVEREIGN LINK · R(?:117|120(?: ROOT SAFE)?)/.test(document.querySelector('.omega-surface-r81')?.textContent||''),{timeout:12000})}
+  catch{throw new Error(`${viewportName} Hybrid Link: current Sovereign connection surface never materialized · ${JSON.stringify(await routeDiagnostics(page))}`)}
  }
  if(criticalVisual.has(route)){
   try{await page.waitForFunction(()=>{
@@ -77,8 +79,8 @@ async function inspectRoute(page,route,viewportName){
  if(/REGISTERED · NO ACTIVE UTILITY IMPLEMENTATION/i.test(result.text))throw new Error(`${viewportName} ${route}: route fell into non-operational placeholder authority`);
  if(result.visual&&!result.canvases.some(x=>x.w>=180&&x.h>=120))throw new Error(`${viewportName} ${route}: visual-first route has no usable canvas/SVG stage after deferred module settlement; observed ${JSON.stringify(result.canvases).slice(0,700)}`);
  if(route==='Hybrid Link'){
-  if(!/OMEGA SOVEREIGN LINK · R117/.test(result.text))throw new Error(`${viewportName} Hybrid Link: R117 connection authority missing`);
-  if(!/FIX CONNECTION NOW|PC ONLINE|DOWNLOAD CLEAN R117 CONNECTOR/.test(result.text))throw new Error(`${viewportName} Hybrid Link: no actionable connection control`);
+  if(!sovereignSurfacePattern.test(result.text))throw new Error(`${viewportName} Hybrid Link: current Sovereign connection authority missing`);
+  if(!sovereignActionPattern.test(result.text))throw new Error(`${viewportName} Hybrid Link: no actionable connection control`);
  }
 }
 
@@ -105,5 +107,5 @@ const browser=await chromium.launch({headless:true});
 try{
  await runViewport(browser,'desktop',{width:1440,height:960});
  await runViewport(browser,'mobile',{width:390,height:844});
- console.log(`R118 BROWSER OPERATIONAL PASS · ${routes.length} routes × desktop/mobile · R109 deferred specialists settled · no startup errors · no route placeholders · no horizontal overflow · visual stages present`);
+ console.log(`R118 BROWSER OPERATIONAL PASS · ${routes.length} routes × desktop/mobile · current Sovereign successor surface · R109 deferred specialists settled · no startup errors · no route placeholders · no horizontal overflow · visual stages present`);
 }finally{await browser.close()}
