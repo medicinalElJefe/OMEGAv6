@@ -35,7 +35,7 @@ jobs:
         run: node tests/r122-computed-reality-invariants.mjs
       - name: Preserve R121 swarm and Earth source boundary
         run: |
-          node tests/r121-sovereign-swarm-invariants.mjs
+          node tests/r121-swarm-runtime-invariants.mjs
           node tests/r121-spherical-earth-connector-invariants.mjs
       - name: Verify runtime syntax
         run: |
