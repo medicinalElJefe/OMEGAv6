@@ -1,0 +1,93 @@
+name: OMEGA R127 Sealed Hybrid Link
+
+on:
+  push:
+    branches: [main, r127-sealed-hybrid-pc-link]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: R127 sealed Hybrid invariants
+        run: node tests/r127-sealed-hybrid-link-invariants.mjs
+      - name: Full inherited product gate
+        run: npm run check
+      - name: Cloudflare Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r127-dry-run
+
+  live-protocol-proof:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for canonical R127 deployment and prove isolated Hybrid protocol
+        shell: bash
+        env:
+          CI_SESSION: ci_r127_${{ github.run_id }}_${{ github.run_attempt }}
+        run: |
+          node <<'NODE'
+          import {createHash} from 'node:crypto';
+          import {readFileSync} from 'node:fs';
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const protocol='OMEGA_HYBRID_PROTOCOL_R127';
+          const expectedAgentSha=createHash('sha256').update(readFileSync('public/omega-hybrid-agent.py')).digest('hex');
+          const session=process.env.CI_SESSION;
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function json(path,init={}){
+            const r=await fetch(base+path,{cache:'no-store',...init,headers:{'cache-control':'no-cache',...(init.headers||{})}});
+            const raw=await r.text();
+            let body={};try{body=JSON.parse(raw)}catch{}
+            return{r,body,raw};
+          }
+          let manifest=null,last='';
+          for(let attempt=1;attempt<=36;attempt++){
+            try{
+              const out=await json('/api/hybrid/agent-manifest');
+              if(!out.r.ok)throw new Error(`manifest HTTP ${out.r.status}`);
+              if(out.body?.protocol!==protocol)throw new Error(`protocol ${out.body?.protocol||'missing'}`);
+              if(out.body?.sha256!==expectedAgentSha)throw new Error(`agent sha ${out.body?.sha256||'missing'}`);
+              manifest=out.body;console.log(`R127 canonical manifest LIVE on attempt ${attempt} · ${manifest.version} · ${manifest.sha256}`);break;
+            }catch(e){last=e instanceof Error?e.message:String(e);await sleep(5000)}
+          }
+          if(!manifest)throw new Error(`R127 canonical deployment did not become visible: ${last}`);
+          const bootstrap=await json('/api/hybrid/bootstrap',{method:'POST',headers:{'content-type':'application/json','x-omega-session-id':session},body:JSON.stringify({rotate:true,ciEphemeral:true})});
+          if(!bootstrap.r.ok||!bootstrap.body?.bridgeId||!bootstrap.body?.secret)throw new Error(`bootstrap failed: HTTP ${bootstrap.r.status} ${bootstrap.raw.slice(0,500)}`);
+          if(bootstrap.body?.agent?.sha256!==expectedAgentSha||bootstrap.body?.hybridProtocol!==protocol)throw new Error('bootstrap receipt does not match canonical manifest');
+          const bridgeId=bootstrap.body.bridgeId,secret=bootstrap.body.secret,deviceId=`device_ci_r127_${process.env.GITHUB_RUN_ID||'run'}`,bootId=`boot_ci_r127_${process.env.GITHUB_RUN_ATTEMPT||'1'}`;
+          const rootIdentity=createHash('sha256').update(`CI_EPHEMERAL_ROOT:${session}`).digest('hex');
+          const auth={'content-type':'application/json','x-omega-bridge-id':bridgeId,'x-omega-bridge-secret':secret,'x-omega-hybrid-protocol':protocol};
+          const register=await json('/api/hybrid/agent/register',{method:'POST',headers:auth,body:JSON.stringify({bridgeId,deviceId,bootId,protocol,version:'R127-CI-PROBE',agentSha256:expectedAgentSha,rootIdentity,name:'R127 CI isolated protocol probe',platform:'github-actions',rootLabel:'CI_EPHEMERAL',capabilities:[]})});
+          if(!register.r.ok)throw new Error(`register failed: HTTP ${register.r.status} ${register.raw.slice(0,500)}`);
+          if(register.body?.nativeExecutionClaimed!==false||Number(register.body?.device?.lastSeen||0)!==0)throw new Error('registration incorrectly manufactured online proof');
+          console.log('R127 registration PASS · online remains false before heartbeat');
+          const hbBody={bridgeId,deviceId,bootId,protocol,version:'R127-CI-PROBE',agentSha256:expectedAgentSha,heartbeatSeq:1};
+          const heartbeat=await json('/api/hybrid/agent/heartbeat',{method:'POST',headers:auth,body:JSON.stringify(hbBody)});
+          if(!heartbeat.r.ok||heartbeat.body?.nativeExecutionClaimed!==true||heartbeat.body?.heartbeatSeq!==1)throw new Error(`heartbeat failed: ${heartbeat.raw.slice(0,500)}`);
+          const status=await json('/api/hybrid/status',{headers:{'x-omega-session-id':session,'x-omega-bridge-id':bridgeId,'x-omega-bridge-secret':secret}});
+          if(!status.r.ok||status.body?.sealedNativeExecutionClaimed!==true||status.body?.sealedOnlineDevices<1)throw new Error(`sealed status failed: ${status.raw.slice(0,900)}`);
+          const device=(status.body?.devices||[]).find(x=>x.id===deviceId);
+          if(device?.integrityState!=='CURRENT_AGENT'||device?.protocol!==protocol||device?.bootId!==bootId)throw new Error('sealed device identity not preserved in public status');
+          console.log('R127 sealed heartbeat PASS · public status sees exact current-agent proof');
+          const replay=await json('/api/hybrid/agent/heartbeat',{method:'POST',headers:auth,body:JSON.stringify(hbBody)});
+          if(replay.r.status!==409||replay.body?.code!=='HEARTBEAT_REPLAY')throw new Error(`heartbeat replay was not rejected: HTTP ${replay.r.status} ${replay.raw.slice(0,500)}`);
+          const stale=await json('/api/hybrid/agent/poll',{method:'POST',headers:auth,body:JSON.stringify({bridgeId,deviceId,bootId:'boot_wrong_session',protocol,agentSha256:expectedAgentSha})});
+          if(stale.r.status!==409||stale.body?.code!=='DEVICE_SESSION_SUPERSEDED')throw new Error(`superseded session was not rejected: HTTP ${stale.r.status} ${stale.raw.slice(0,500)}`);
+          console.log('R127 LIVE PROTOCOL PASS · manifest hash pin · registration≠online · heartbeat proof · replay rejection · superseded-session rejection');
+          NODE
