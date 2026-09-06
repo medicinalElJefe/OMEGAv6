@@ -9,6 +9,7 @@ const surface=read('src/SovereignConnectionR117.tsx');
 const hybrid=read('src/HybridLinkR32.tsx');
 const compact=read('src/HybridConnectBarR111.tsx');
 const accepted=read('src/acceptedProductionR117.ts');
+const agent=read('public/omega-hybrid-agent.py');
 
 must(config.includes('"main": "src/workerR116.js"'),'Wrangler must retain the already-proven R116 runtime spine');
 must(worker.includes("path==='/api/hybrid/bootstrap'")&&worker.includes("idFromName(sid)")&&worker.includes('omega-runtime.internal/pair'),'bootstrap must mint a fresh pair directly in durable runtime state');
@@ -20,8 +21,12 @@ must(launcher.includes('OMEGA_ORIGIN=${ORIGIN}')&&launcher.includes("const ORIGI
 must(launcher.includes('START_OMEGA_PC_LINK_R117_CLEAN.cmd'),'launcher filename must be unmistakably current');
 must(!launcher.includes("print('PASS — browser credential accepted and device registered')"),'R117 wrapper must execute the canonical agent instead of impersonating agent proof output');
 must(launcher.includes('!OMEGA_PY!')&&launcher.includes('%OMEGA_AGENT%')&&launcher.includes('--server')&&launcher.includes('%OMEGA_ORIGIN%')&&launcher.includes('--pair')&&launcher.includes('%OMEGA_PAIR%'),'launcher must run the real canonical Hybrid agent with the fresh pair');
+must(agent.startsWith('#!/usr/bin/env python3')&&agent.includes('OMEGA R34 local Hybrid Link agent')&&agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"),'served Hybrid asset must expose the exact canonical identity contract');
+must(launcher.includes('OMEGA R34 local Hybrid Link agent')&&launcher.includes("DEFAULT_SERVER=''https://omegav6.jeffdeweyeljefe.workers.dev''")&&launcher.includes('Pairing is explicit.'),'launcher validation must match the actual served canonical Hybrid asset rather than a stale marker');
+must(!launcher.includes("$s.Contains('OMEGA Hybrid Link agent')"),'launcher must not reject the canonical R34 asset through the obsolete generic marker');
+must(launcher.includes('--retry 3 --retry-delay 1')&&launcher.includes('Downloaded bytes: %%~zF'),'launcher must tolerate transient download failures and expose bounded diagnostics without executing rejected source');
 must(surface.includes('FIX CONNECTION NOW')&&surface.includes('bootstrapSovereignR117')&&surface.includes('launcherBlobUrlR117'),'ordinary UI must expose one fresh repair/download action');
 must(!surface.includes('R112 fallback'),'R117 ordinary surface must not offer the old fallback launcher');
 must(hybrid.includes('SovereignConnectionR117')&&compact.includes('SovereignConnectionR117'),'full and compact Hybrid mounts must use the R117 successor surface');
 for(const law of ['FRESH_PAIR_BOOTSTRAP_BYPASSES_STALE_BROWSER_HEADERS','ONE_CLEAN_CONNECTOR_IS_CANONICAL','BOOTSTRAP_IS_NOT_DEVICE_PROOF','R116_AND_ALL_PRIOR_ACCEPTED_PRODUCTION_PRESERVED'])must(accepted.includes(law),`accepted production missing ${law}`);
-console.log('R117 real Sovereign bootstrap invariants PASS · additive on proven R116 runtime spine');
+console.log('R117 real Sovereign bootstrap invariants PASS · canonical launcher/agent identity contract aligned · additive on proven R116 runtime spine');
