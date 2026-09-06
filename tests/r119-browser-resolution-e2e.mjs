@@ -1,7 +1,6 @@
 import {chromium} from 'playwright';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
-const ROUTES=['Matter Traversal','Traversal','Convergence','System Atlas'];
 
 async function routeDiagnostics(page){
  return page.evaluate(()=>({
@@ -48,6 +47,20 @@ async function assertR119Canvas(page,scope='body'){
  return r119;
 }
 
+async function openCalculusMicroscope(page){
+ const opened=await page.evaluate(()=>{
+  const details=[...document.querySelectorAll('.omega-surface-r81 details.r361-secondary')];
+  const d=details.find(x=>/Calculus route microscope/i.test(x.querySelector('summary')?.textContent||''));
+  if(!d)return false;d.setAttribute('open','');d.scrollIntoView({block:'center'});return true;
+ });
+ if(!opened)throw new Error(`Field calculus microscope missing · ${JSON.stringify(await routeDiagnostics(page))}`);
+ await page.waitForFunction(()=>{
+  const details=[...document.querySelectorAll('.omega-surface-r81 details.r361-secondary[open]')];
+  const d=details.find(x=>/Calculus route microscope/i.test(x.querySelector('summary')?.textContent||''));
+  return Boolean(d?.querySelector('canvas[data-omega-resolution="R119"]'));
+ },{timeout:10000});
+}
+
 async function runViewport(browser,name,viewport,deviceScaleFactor){
  const context=await browser.newContext({viewport,deviceScaleFactor});
  const page=await context.newPage();
@@ -56,19 +69,21 @@ async function runViewport(browser,name,viewport,deviceScaleFactor){
  await page.waitForSelector('main.r71-home',{timeout:30000});
  const home=await assertR119Canvas(page,'.r71-home');
  console.log(`R119 ${name} HOME · ${home.profile} · ${home.w}x${home.h} backing · ${home.backing} pixels`);
- for(const route of ROUTES){
-  await openRoute(page,route);
-  if(route==='System Atlas'){
-   await page.waitForFunction(()=>/R119 CORPUS \+ SITES \+ MODES \+ RESOLUTION/.test(document.querySelector('.omega-surface-r81')?.textContent||''),{timeout:12000});
-   await page.evaluate(()=>{const d=document.querySelector('.r119-ultra-mount');if(d)d.setAttribute('open','')});
-   await page.waitForFunction(()=>/One machine from the complete corpus/.test(document.querySelector('.r119-ultra-fabric')?.textContent||''),{timeout:8000});
-   const txt=await page.locator('.r119-ultra-fabric').innerText();
-   for(const token of ['100','24','179','62','Four-role federation','Truth class travels with every output'])if(!txt.includes(token))throw new Error(`${name} System Atlas missing R119 corpus token ${token}`);
-  }else{
-   const canvas=await assertR119Canvas(page,'.omega-surface-r81');
-   console.log(`R119 ${name} ${route} · ${canvas.profile} · ${canvas.w}x${canvas.h} backing · ${canvas.backing} pixels`);
-  }
- }
+
+ await openRoute(page,'Field');
+ const field=await assertR119Canvas(page,'.omega-surface-r81');
+ console.log(`R119 ${name} FIELD MEMBRANE · ${field.profile} · ${field.w}x${field.h} backing · ${field.backing} pixels`);
+ await openCalculusMicroscope(page);
+ const calculus=await assertR119Canvas(page,'.omega-surface-r81 details.r361-secondary[open]');
+ console.log(`R119 ${name} CALCULUS · ${calculus.profile} · ${calculus.w}x${calculus.h} backing · ${calculus.backing} pixels`);
+
+ await openRoute(page,'System Atlas');
+ await page.waitForFunction(()=>/R119 CORPUS \+ SITES \+ MODES \+ RESOLUTION/.test(document.querySelector('.omega-surface-r81')?.textContent||''),{timeout:12000});
+ await page.evaluate(()=>{const d=document.querySelector('.r119-ultra-mount');if(d)d.setAttribute('open','')});
+ await page.waitForFunction(()=>/One machine from the complete corpus/.test(document.querySelector('.r119-ultra-fabric')?.textContent||''),{timeout:8000});
+ const txt=await page.locator('.r119-ultra-fabric').innerText();
+ for(const token of ['100','24','179','62','Four-role federation','Truth class travels with every output'])if(!txt.includes(token))throw new Error(`${name} System Atlas missing R119 corpus token ${token}`);
+
  const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-window.innerWidth);
  if(overflow>8)throw new Error(`${name} horizontal overflow ${overflow}px`);
  if(errors.length)throw new Error(`${name} browser errors: ${errors.join(' | ').slice(0,2200)}`);
@@ -79,5 +94,5 @@ const browser=await chromium.launch({headless:true});
 try{
  await runViewport(browser,'desktop-hiDPI',{width:1440,height:960},3);
  await runViewport(browser,'mobile-hiDPI',{width:390,height:844},3);
- console.log('R119 BROWSER RESOLUTION PASS · Home + Matter + Traversal + Convergence + System Atlas · desktop/mobile high-DPI · bounded backing pixels · 20,736 logical anchors preserved');
+ console.log('R119 BROWSER RESOLUTION PASS · Home canonical membrane + Field canonical membrane + Calculus microscope + System Atlas ultra convergence · desktop/mobile high-DPI · bounded backing pixels · 20,736 logical anchors preserved');
 }finally{await browser.close()}
