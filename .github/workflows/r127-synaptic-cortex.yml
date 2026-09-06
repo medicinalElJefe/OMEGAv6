@@ -1,0 +1,105 @@
+name: OMEGA R127 Synaptic Organism Cortex
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r127-synaptic-organism-cortex]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r127-cortex-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r127:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R127 synaptic cortex invariants
+        run: node tests/r127-synaptic-cortex-invariants.mjs
+      - name: Preserve R126 maximum runtime convergence
+        run: node tests/r126-total-maximum-build-invariants.mjs
+      - name: Preserve R126 causal evidence time frame motion fabric
+        run: |
+          node --experimental-strip-types tests/r126-causal-interaction-relativity.mjs
+          node tests/r126-causal-interaction-invariants.mjs
+      - name: Preserve autonomic detach checkpoint rejoin
+        run: node tests/r125-autonomic-swarm-invariants.mjs
+      - name: Preserve accuracy-first mutation authority
+        run: node tests/r125-accuracy-engine-invariants.mjs
+      - name: Preserve self-build organism living reality Earth continuity relativity federation SAI gates
+        run: |
+          node tests/r124-self-contained-build-invariants.mjs
+          node tests/r123-organism-swarm-invariants.mjs
+          node tests/r123-living-total-experience-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r121-swarm-runtime-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r77-woven-continuity-invariants.mjs
+          node tests/dimensional-relativity-r24-invariants.mjs
+          node tests/r97-federation-run-invariants.mjs
+          node tests/sai-b059-invariants.mjs
+      - name: Verify successor runtime syntax
+        run: |
+          node --check src/swarm/swarmCortexR127.js
+          node --check src/swarm/swarmCortexApiR127.js
+          node --check src/workerR127.js
+          node --check src/swarm/swarmAutonomicR125.js
+          node --check src/workerR116.js
+      - name: Execute complete inherited OMEGA regression and production build
+        run: npm run check
+      - name: Verify R127 Durable Object migration and Worker bundle
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r127-dry-run
+      - name: Assert R127 public artifacts emitted
+        shell: bash
+        run: |
+          test -f dist/omega-r127-synaptic-cortex.json
+          grep -q 'OMEGA_R127_SYNAPTIC_ORGANISM_CORTEX' dist/omega-r127-synaptic-cortex.json
+          echo 'R127 SYNAPTIC CORTEX BUILD: PROVED'
+
+  live-r127:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: prove-r127
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for governed deploy and prove live cortex
+        env:
+          OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function get(path){const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}}),j=await r.json();if(!r.ok)throw new Error(`${path} ${r.status} ${JSON.stringify(j).slice(0,500)}`);return j}
+          async function post(path,body={}){const r=await fetch(base+path,{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)}),j=await r.json();if(!r.ok)throw new Error(`${path} ${r.status} ${JSON.stringify(j).slice(0,500)}`);return j}
+          let manifest,last='';
+          for(let i=0;i<48;i++){
+            try{const j=await get('/api/swarm/cortex/manifest');if(j.runtime==='OMEGA_R127_SYNAPTIC_ORGANISM_CORTEX'&&j.hierarchy?.cells===1728){manifest=j;break}last=JSON.stringify(j).slice(0,400)}catch(e){last=String(e)}
+            await sleep(10000);
+          }
+          if(!manifest)throw new Error('R127 cortex not live after governed deployment: '+last);
+          const plan=await post('/api/swarm/cortex/plan',{intent:'R127 live deterministic proof bounded cortex verification',mode:'SOLO',providerBudget:0,projection:'PROOF'});
+          if(plan.plan?.selectedCellCount!==1||plan.plan?.totalTaskCount!==5||plan.plan?.authority!=='CORTEX_EXECUTION_FABRIC_NOT_CANON')throw new Error('R127 live plan contract failed');
+          const created=await post('/api/swarm/cortex/missions',{intent:'R127 live deterministic proof bounded cortex verification',mode:'SOLO',providerBudget:0,projection:'PROOF'});
+          const id=created.mission?.id;if(!id)throw new Error('R127 live mission id missing');
+          let mission;
+          for(let i=0;i<24;i++){mission=(await get(`/api/swarm/cortex/missions/${encodeURIComponent(id)}`)).mission;if(mission?.status==='COMPLETE')break;await post(`/api/swarm/cortex/missions/${encodeURIComponent(id)}/advance`,{batchSize:8});await sleep(800)}
+          if(mission?.status!=='COMPLETE'||mission?.completedTasks<1||mission?.canonicalMutation!==false)throw new Error('R127 live mission failed truth/execution contract: '+JSON.stringify(mission).slice(0,700));
+          const returned=await post(`/api/swarm/cortex/missions/${encodeURIComponent(id)}/rejoin`,{});
+          if(returned.authority!=='CORTEX_RECEIPT_RETURNED_NOT_ADMITTED'||returned.canonicalMutation!==false)throw new Error('R127 rejoin authority drifted');
+          console.log(`R127 LIVE PASS · ${manifest.hierarchy.cells} cells · mission ${id} · ${mission.completedTasks}/${mission.totalTaskCount} tasks · ${returned.authority}`);
+          NODE
