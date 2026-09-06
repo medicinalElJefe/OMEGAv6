@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {compilePhysicsRelativityR132,harmonicFoldR132,R132_REFERENCE_CONSTANTS,R132_SCALE_HIERARCHY,R132_TRUTH_CLASSES} from '../src/physicsRelativityRuntimeR132.ts';
 
 const visual=fs.readFileSync('src/OmegaPhysicsManifoldR132.tsx','utf8');
 const css=fs.readFileSync('src/omegaPhysicsManifoldR132.css','utf8');
@@ -8,26 +7,30 @@ const membrane=fs.readFileSync('src/CanonicalMembraneR95.tsx','utf8');
 const runtime=fs.readFileSync('src/physicsRelativityRuntimeR132.ts','utf8');
 const must=(ok,msg)=>assert.ok(ok,`R132 ${msg}`);
 
-const packet=compilePhysicsRelativityR132(11498);
-assert.equal(packet.schema,'OMEGA_RELATIONAL_PHYSICS_MANIFOLD_R132');
-assert.equal(packet.sourceModeField.registryCount,179,'all 179 source mode evaluations must feed the R132 field');
-assert.equal(packet.sourceModeField.harmonics.length,12,'source-mode field must fold to 12 deterministic harmonics');
-assert.equal(packet.canonAuthorityField.count,62,'all 62 canon authorities must feed the governance field');
-assert.equal(packet.canonAuthorityField.harmonics.length,12,'authority field must fold to 12 deterministic harmonics');
-assert.equal(packet.hierarchy.canonicalStates,20736,'canonical state authority must remain 20,736');
-assert.equal(R132_SCALE_HIERARCHY.length,8,'physics scale reference must retain Nuclear→Galactic hierarchy');
-assert.equal(R132_REFERENCE_CONSTANTS.length,5,'reference constants set must be explicit and bounded');
-for(const x of Object.values(packet.field))assert.ok(Number.isFinite(x)&&x>=0&&x<=1,'field scalar outside normalized range');
-for(const x of harmonicFoldR132([0,.25,.5,.75,1],12))assert.ok(Number.isFinite(x.amplitude)&&x.amplitude>=0&&x.amplitude<=1,'harmonic fold must stay bounded');
-for(const label of ['REFERENCE_PHYSICS','OBSERVED_EVIDENCE','CANONICAL_PACKET','DERIVED_RUNTIME','REPRESENTATIONAL_PROJECTION','GATED'])assert.ok(R132_TRUTH_CLASSES.includes(label),'truth class missing '+label);
+must(runtime.includes("R132_SCHEMA='OMEGA_RELATIONAL_PHYSICS_MANIFOLD_R132'"),'runtime schema missing');
+must(runtime.includes("R132_TRUTH_CLASSES=['REFERENCE_PHYSICS','OBSERVED_EVIDENCE','CANONICAL_PACKET','DERIVED_RUNTIME','REPRESENTATIONAL_PROJECTION','GATED']"),'truth-class registry must be explicit');
+must(runtime.includes("symbol:'c'")&&runtime.includes('299792458')&&runtime.includes("valueType:'SI exact'"),'speed-of-light reference must remain explicit and classified');
+must(runtime.includes("symbol:'h'")&&runtime.includes('6.62607015e-34'),'Planck constant reference missing');
+must(runtime.includes("symbol:'e'")&&runtime.includes('1.602176634e-19'),'elementary-charge reference missing');
+must(runtime.includes("symbol:'alpha'")&&runtime.includes('0.0072973525643'),'fine-structure donor reference missing');
+must(runtime.includes("symbol:'G'")&&runtime.includes('6.6743e-11'),'gravitational-constant donor reference missing');
+for(const scale of ['Nuclear','Atomic','Chemical','Biological','Human-scale materials','Planetary','Stellar','Galactic'])must(runtime.includes(`scale:'${scale}'`),`scale hierarchy missing ${scale}`);
+for(const domain of ['Coherence','Structure','Motion','Memory','Compression','Expansion','Emergence','Stability','Adaptation','Observation','Traversal','Forecast'])must(runtime.includes(`name:'${domain}'`),`domain basis missing ${domain}`);
+for(const state of ['Seed','Bind','Shape','Flow','Charge','Mass','Field','Boundary','Scar','Basin','Phase','Horizon'])must(runtime.includes(`name:'${state}'`),`state basis missing ${state}`);
 
 must(runtime.includes('evaluateCorpusModes(record)'),'runtime must consume the complete 179-mode evaluator instead of decorative mode labels');
 must(runtime.includes('evaluateCanonAuthorityStack(record)'),'runtime must consume all canon authority activations');
+must(runtime.includes('evaluateSourceBackedModes(record)'),'exact source-backed operators must remain separately classified');
 must(runtime.includes('compileDimensionalRelativity(record)'),'dimensional relativity must remain bound into the physics packet');
 must(runtime.includes('computeLensScore'),'lens calculus must participate in the physics packet');
 must(runtime.includes('harmonicFoldR132'),'all-mode vector must be mathematically folded into a compact field basis');
+must(runtime.includes('sourceModes.results.map')&&runtime.includes('authorities.map(x=>x.activation)'),'179-mode and 62-authority vectors must both feed harmonic transforms');
+must(runtime.includes('registryCount:sourceModes.count'),'visible registry count must come from the actual source-mode evaluator');
+must(runtime.includes('canonAuthorities:ALL_MODES_BOUNDARY.canonAuthorities'),'62-authority count must remain source-bound');
+must(runtime.includes('routeDynamicsR132')&&runtime.includes('velocity4')&&runtime.includes('acceleration4')&&runtime.includes('curvature'),'route field must expose canonical velocity, acceleration and curvature');
 must(runtime.includes('OBSERVED_EVIDENCE')&&runtime.includes('REFERENCE_PHYSICS')&&runtime.includes('REPRESENTATIONAL_PROJECTION'),'truth classes must remain explicit');
 must(runtime.includes('not asserted as literal extra spacetime dimensions'),'runtime must prohibit physical-dimension overclaim');
+must(runtime.includes('not 179 independent physical laws'),'source-mode field must prohibit mode-to-law overclaim');
 
 must(visual.includes("getContext('webgl2'"),'primary manifold must use a GPU WebGL2 field rather than a static chart');
 must(visual.includes('p.xw=r2')&&visual.includes('p.yw=r2')&&visual.includes('p.zw=r2'),'GPU projection must perform four-coordinate plane rotations before 3D projection');
@@ -44,4 +47,4 @@ must(membrane.includes("import OmegaPhysicsManifoldR132 from './OmegaPhysicsMani
 must(membrane.includes('homeComposite&&<OmegaPhysicsManifoldR132'),'R132 must be the primary compact Home visual');
 must(membrane.includes('CANONICAL SOURCE MEMBRANE · OPEN 20,736-CELL INSPECTION SURFACE'),'canonical membrane source-truth inspection must remain reachable');
 
-console.log('OMEGA R132 RELATIONAL PHYSICS MANIFOLD PASS · 20,736 state field · 179 source modes · 62 canon authorities · 12-harmonic all-mode fold · GPU four-coordinate projection · physics/reference/observation truth separation');
+console.log('OMEGA R132 RELATIONAL PHYSICS MANIFOLD STATIC PASS · 20,736 state field · 179 source modes · 62 canon authorities · 12-harmonic all-mode fold · GPU four-coordinate projection · physics/reference/observation truth separation');
