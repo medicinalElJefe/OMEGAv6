@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 const runtime=fs.readFileSync('src/accuracyResidualEngineR125.ts','utf8');
 const engine=fs.readFileSync('scripts/r125-accuracy-engine.mjs','utf8');
+const workflow=fs.readFileSync('.github/workflows/r125-accuracy-first-engine.yml','utf8');
 const r124=JSON.parse(fs.readFileSync('public/omega-r124-selfbuild-state.json','utf8'));
 
 assert.match(runtime,/NO_PROPOSAL_WITHOUT_EXPLICIT_EVIDENCE/);
@@ -15,7 +16,18 @@ assert.match(engine,/QUEUE_FOR_REVIEW/);
 assert.match(engine,/OBSERVE_ONLY/);
 assert.match(engine,/Refuse index generation: missing admitted target/);
 assert.match(engine,/githubRunsObserved/);
+assert.match(engine,/evidence\('SOURCE'/);
+assert.match(engine,/evidence\('TEST'/);
+assert.match(engine,/evidence\('PROOF'/);
+assert.match(engine,/semanticFingerprint/);
+assert.match(engine,/observationOnlyNeverMutatesMain:true/);
+assert.match(workflow,/Observation only; no canonical mutation\./);
+assert.match(workflow,/if \[ -e src\/generated\/selfbuild\/index\.ts \]/);
+assert.match(workflow,/repairApplied===true/);
+assert.doesNotMatch(workflow,/git add src\/generated\/selfbuild\/index\.ts public/);
 assert.equal(r124.generation,8);
 assert.deepEqual(r124.admitted,['SB001','SB002','SB003','SB004','SB005','SB006','SB007','SB008']);
 for(const c of r124.roadmap)assert.equal(fs.existsSync(c.target),true,`admitted target missing: ${c.target}`);
-console.log('R125 accuracy-first residual engine invariants: PASS');
+const receipts=new Map();for(const r of r124.receipts||[])receipts.set(r.capsuleId,r);
+for(const id of r124.admitted){const r=receipts.get(id);assert.ok(r,`receipt missing: ${id}`);assert.equal(r.status,'ADMIT');assert.equal(r.tests?.r124,true);assert.equal(r.tests?.r123,true);assert.equal(r.tests?.r122,true);assert.equal(r.tests?.r121,true);assert.equal(r.tests?.build,true);assert.ok(r.rollbackRef);}
+console.log('R125.2 accuracy-first residual engine invariants: PASS');

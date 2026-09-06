@@ -66,12 +66,13 @@ jobs:
           node tests/r122-computed-reality-invariants.mjs
           node tests/r121-spherical-earth-connector-invariants.mjs
           npm run build
-      - name: Admit only if repository changed
+      - name: Admit only an actual proved repair
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
-          if [ -z "$(git status --porcelain -- src/generated/selfbuild/index.ts public/omega-r125-accuracy-state.json public/omega-r125-proposal.json)" ]; then
-            echo 'No proven bounded repair required. Engine remains observing.'
+          REPAIR=$(node -e "const fs=require('fs');const p='public/omega-r125-proposal.json';const x=JSON.parse(fs.readFileSync(p,'utf8'));process.stdout.write(x.repairApplied===true?'1':'0')")
+          if [ "$REPAIR" != "1" ]; then
+            echo 'Observation only; no canonical mutation.'
             exit 0
           fi
           START=$(git rev-parse HEAD)
@@ -83,6 +84,11 @@ jobs:
           fi
           git config user.name 'OMEGA R125 Accuracy Engine'
           git config user.email 'actions@users.noreply.github.com'
-          git add src/generated/selfbuild/index.ts public/omega-r125-accuracy-state.json public/omega-r125-proposal.json
+          if [ -e src/generated/selfbuild/index.ts ]; then git add -- src/generated/selfbuild/index.ts; fi
+          git add -- public/omega-r125-accuracy-state.json public/omega-r125-proposal.json
+          if git diff --cached --quiet; then
+            echo 'Repair produced no canonical delta; refusing empty admission.'
+            exit 0
+          fi
           git commit -m 'R125 accuracy engine: admit proved bounded repair'
           git push origin HEAD:main
