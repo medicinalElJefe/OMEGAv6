@@ -49,9 +49,13 @@ must(worker34.includes('return r33.fetch(request,env)'),'R101 must sit above the
 must(adapter.includes('reconnectHybridBridge')&&adapter.includes("'/api/hybrid/reconnect'"),'browser adapter must retain reconnect/repair transport for inherited clients');
 must(hybrid.includes("import SovereignConnectionR117 from './SovereignConnectionR117'")&&hybrid.includes('<SovereignConnectionR117/>'),'Hybrid route must use the R117 clean connection successor');
 must(bootstrap117.includes("fetch('/api/hybrid/bootstrap'")&&bootstrap117.includes("'x-omega-session-id':runtimeSessionId()")&&bootstrap117.includes('saveHybridBridge'),'R117 must bypass stale bridge headers during fresh bootstrap and persist the exact returned bridge');
-must(sovereign117.includes("live?.nativeExecutionClaimed===true")&&sovereign117.includes('current.length>0'),'R117 Hybrid UI must distinguish fresh credential state from current device heartbeat truth');
-must(sovereign117.includes('DOWNLOAD CLEAN R117 CONNECTOR')&&sovereign117.includes('download={SOVEREIGN_LAUNCHER_FILENAME_R117}'),'R117 clean connector must remain an explicit user-clickable download after server bootstrap');
-must(launcher117.includes('/api/hybrid/agent-download?r117=1')&&launcher117.includes("OMEGA_ORIGIN=${ORIGIN}"),'R117 launcher must use the canonical validated endpoint and hard-bind canonical origin');
+must(sovereign117.includes("live?.nativeExecutionClaimed===true")&&sovereign117.includes('current.length>0'),'Hybrid UI must distinguish fresh credential state from current device heartbeat truth');
+const r117Download=sovereign117.includes('DOWNLOAD CLEAN R117 CONNECTOR')&&sovereign117.includes('download={SOVEREIGN_LAUNCHER_FILENAME_R117}');
+const r127Download=sovereign117.includes('DOWNLOAD R127 ZERO-DRIFT CONNECTOR')&&sovereign117.includes('download={SOVEREIGN_LAUNCHER_FILENAME_R127}');
+must(r117Download||r127Download,'Hybrid connector must remain an explicit user-clickable download after server bootstrap');
+const r117Launcher=launcher117.includes('/api/hybrid/agent-download?r117=1');
+const r127Launcher=launcher117.includes('/api/hybrid/agent-download?r127=1')&&launcher117.includes('R127_ZERO_DRIFT_SHA256')&&launcher117.includes('x-omega-agent-sha256');
+must((r117Launcher||r127Launcher)&&launcher117.includes("OMEGA_ORIGIN=${ORIGIN}"),'launcher must use a canonical validated agent endpoint and hard-bind canonical origin');
 // Retain the R112 donor/recovery path as inherited evidence, but it is no longer the active ordinary mount.
 must(sovereign112.includes('reconnectHybridBridge(false)')&&sovereign112.includes('reconnectHybridBridge(true)'),'R112 donor connection surface must retain explicit verify-then-repair transport');
 must(launcher112.includes('/api/hybrid/agent-download?r112=1')&&launcher112.includes("OMEGA_ORIGIN=${ORIGIN}"),'R112 donor launcher must remain internally coherent for rollback evidence');
@@ -79,6 +83,6 @@ must(accepted.includes("id:'WEAVE_DERIVED_RESOLUTION'")&&accepted.includes("id:'
 must(accepted.includes("'R100 woven continuity geometry/time + professional instrument rail authority'")&&accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority'"),'R101 must extend R100 rather than flatten it');
 must(![worker,worker114,worker115,worker116,adapter,hybrid,sovereign117,launcher117,weave,stage].join('\n').includes('@appdeploy/client'),'R101 must remain provider portable');
 
-console.log('R101 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · R117 fresh durable bridge bootstrap · authenticated-heartbeat truth preserved through R116→R115→R114→R101');
+console.log('R101 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · fresh durable bridge bootstrap · authenticated-heartbeat truth preserved · R127 zero-drift connector successor accepted');
 await import('./r102-federated-instrument-experience-invariants.mjs');
 await import('./r112-sovereign-living-fabric-invariants.mjs');
