@@ -45,7 +45,7 @@ must(canon.includes('globalModeInfluenceR107')&&canon.includes('surfaceModeFabri
 must(canon.includes('invariantCarry')&&canon.includes('residualCarry')&&canon.includes('transformCapacity')&&canon.includes('computeReadiness')&&canon.includes('proofReadiness'),'Full Canon must expose computational carry/readiness, not only descriptive metadata');
 must(fabric.includes("Catalog affinity alone never becomes execution")&&fabric.includes("Gated formulas contribute zero"),'existing executable-mode truth boundary must remain intact');
 must(visual.includes('globalModeInfluenceR107')&&visual.includes('phaseSpeed')&&visual.includes('depthGain')&&visual.includes('branchSpread')&&visual.includes('trailPersistence'),'actual visual law must remain driven by executable calculus/mode influence');
-must(surface.includes('compileFullCanonContextR120')&&surface.includes('canonSurfaceStyleR120')&&surface.includes("data-calculus-fabric='R107+R120'"),'record-backed surfaces must receive one shared Full Canon context');
+must(surface.includes('compileFullCanonContextR120')&&surface.includes('canonSurfaceStyleR120')&&surface.includes("data-calculus-fabric='R107'")&&surface.includes("data-layer-contract='R104/R107'")&&surface.includes("data-canon-contract='R120'"),'record-backed surfaces must preserve R107 contract while receiving one shared R120 Full Canon successor context');
 must(surfaceCss.includes('pointer-events:none')&&!surfaceCss.includes('backdrop-filter'),'Canon visual telemetry may add depth but must not cover or seize the active instrument');
 
 // SAI: Full Canon coordination + bounded local learning, still truth-governed.
