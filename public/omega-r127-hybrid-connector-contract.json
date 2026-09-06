@@ -1,0 +1,38 @@
+{
+  "schema": "OMEGA_HYBRID_CONNECTOR_CONTRACT_R127",
+  "revision": "R127_ZERO_DRIFT_SHA256",
+  "canonicalControlOrigin": "https://omegav6.jeffdeweyeljefe.workers.dev",
+  "ordinaryApprovedRoot": "J:\\",
+  "systemDriveRuntimeFallback": false,
+  "controlHostFallback": false,
+  "download": {
+    "quarantineSuffix": ".part",
+    "serverDigestHeader": "x-omega-agent-sha256",
+    "algorithm": "SHA-256",
+    "exactDigestEqualityRequired": true,
+    "pythonParsePreflightRequired": true,
+    "atomicPromotionRequired": true,
+    "staleLocalSubstitutionOnFailure": false
+  },
+  "authentication": {
+    "freshDurablePairing": true,
+    "registerRequired": true,
+    "heartbeatRequired": true,
+    "heartbeatFreshnessWindowMs": 30000,
+    "authenticationFailureBlindRetry": false,
+    "canonicalReachabilityRetry": "BOUNDED"
+  },
+  "truth": {
+    "pairingIsPcOnlineProof": false,
+    "downloadIsPcOnlineProof": false,
+    "agentValidationIsPcOnlineProof": false,
+    "currentAuthenticatedHeartbeatRequiredForPcOnline": true,
+    "solverReadinessIndependent": true
+  },
+  "nativeExecution": {
+    "approvedRootConfined": true,
+    "allowListed": true,
+    "arbitraryShellFabrication": false,
+    "desktopAutomationRequiresSignedAdapter": true
+  }
+}
