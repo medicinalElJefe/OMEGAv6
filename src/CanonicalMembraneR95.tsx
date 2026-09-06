@@ -81,7 +81,7 @@ export default function CanonicalMembraneR95({address,onAddress,initialProjectio
    <nav aria-label='Membrane data skin'>{VIEW_MODES.map(x=><button key={x} className={view===x?'active':''} onClick={()=>setView(x)}>{x.replaceAll('_',' ')}</button>)}</nav>
    <label>ROUTE <input type='range' min='6' max='72' value={routeDepth} onChange={e=>setRouteDepth(Number(e.target.value))}/><b>{routeDepth}</b></label>
   </div>}
-  {homeComposite&&<OmegaEarthRelativitySphereR121 address={address} onAddress={onAddress}/>} 
+  {homeComposite&&<OmegaEarthRelativitySphereR121 address={address} onAddress={onAddress} projection={projection} view={view}/>} 
   {homeComposite?<details className='r121-home-membrane'><summary>CANONICAL SOURCE MEMBRANE · OPEN 20,736-CELL INSPECTION SURFACE</summary>{membraneStage}</details>:membraneStage}
   <details className='r98-membrane-data'>
    <summary>DATA · STATE {record.stateId} · {record.metrics.decision}</summary>
