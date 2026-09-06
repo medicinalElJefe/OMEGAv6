@@ -1,0 +1,20 @@
+{
+  "schema":"omega.synaptic-organism.r127.v1",
+  "runtime":"OMEGA_R127_SYNAPTIC_ORGANISM_CORTEX",
+  "canonicalAuthority":"OMEGAV6",
+  "hierarchy":{"seed":1,"organs":12,"branches":144,"cells":1728,"lanes":20736},
+  "waves":["FRAME","PARALLEL_CELL_WORK","BRANCH_CROSSCHECK","ORGAN_SYNTHESIS","PROOF_RETURN"],
+  "modes":["ADAPTIVE","SOLO","ORGAN","BRANCH","FLOCK","BODY","FULL"],
+  "interactionFabric":{
+    "taskGraph":"durable mission DAG",
+    "sharedMemory":"candidate blackboard memory",
+    "synapses":"local branch + adjacent phase + adjacent organ + proof + coordination links",
+    "crossCheck":"branch-level contradiction and evidence correction",
+    "synthesis":"organ-level bounded synthesis",
+    "return":"proof-bounded whole-body return receipt"
+  },
+  "memory":{"authority":"SWARM_CANDIDATE_MEMORY_NOT_CANON","scarCarry":true,"lineage":true,"checkpointHash":true,"eventStream":true},
+  "capacityPolicy":{"explicitFullCells":1728,"adaptiveFullAutoCapCells":288,"fullBodyRequiresExplicitModeOrExplicitFullAuto":true,"providerHardMaxPerMission":12},
+  "authorityBoundaries":["CORTEX_EXECUTION_FABRIC_NOT_CANON","SWARM_CANDIDATE_MEMORY_NOT_CANON","EXECUTION_QUORUM_NOT_TRUTH","CORTEX_RECEIPT_RETURNED_NOT_ADMITTED"],
+  "truthBoundary":"R127 makes the distributed OMEGA body causally interactive. It does not promote task completion, model output, candidate memory, execution quorum, machine output, or swarm agreement into empirical truth or CanonState. OMEGAv6 proof/admission remains canonical authority."
+}
