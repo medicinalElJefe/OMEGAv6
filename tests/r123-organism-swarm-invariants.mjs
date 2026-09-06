@@ -43,7 +43,8 @@ for(const klass of ['OmegaSwarmBranch','OmegaSwarmOrgan','OmegaSwarmOrganismCoor
 assert.ok(worker.includes("path.startsWith('/api/swarm/')"));
 for(const binding of ['OMEGA_SWARM_BRANCH','OMEGA_SWARM_ORGAN','OMEGA_SWARM_ORGANISM'])assert.ok(wrangler.includes(binding),`wrangler binding missing ${binding}`);
 assert.ok(wrangler.includes('"main": "src/workerR116.js"'),'R116 deployment spine must remain canonical entrypoint');
-assert.ok(wrangler.includes('r123-organism-swarm'));
+assert.ok(organism.includes('OMEGA_BRANCH_RECEIPT_R123')&&organism.includes('OMEGA_ORGANISM_RECEIPT_R123'),'R123 organism provenance must remain explicit in runtime receipts');
+for(const klass of ['OmegaSwarmBranch','OmegaSwarmOrgan','OmegaSwarmOrganismCoordinator'])assert.ok(wrangler.includes(`"${klass}": {"type": "durable-object", "storage": "sqlite"}`),`R123 ${klass} namespace must remain live on SQLite under declarative exports`);
 for(const control of ["parts[2]==='pause'","parts[2]==='resume'","parts[2]==='cancel'","parts[2]==='replay'"])assert.ok(organism.includes(control),`organism mission control missing ${control}`);
 for(const proof of ['OMEGA_BRANCH_RECEIPT_R123','OMEGA_ORGANISM_RECEIPT_R123','merkleRoot','RESULT_RECEIPT_NOT_CANON','RETURNED_NOT_ADMITTED'])assert.ok(organism.includes(proof),`proof boundary missing ${proof}`);
 assert.ok(organism.includes("this.env.OMEGA_SWARM_ORGAN"));
@@ -58,4 +59,4 @@ assert.ok(ui.includes('Seed → 12 Organs → 144 Branches → 1,728 Cells'));
 assert.ok(ui.includes('LAUNCH ORGANISM'));
 assert.ok(ui.includes('PAUSE')&&ui.includes('RESUME')&&ui.includes('CANCEL')&&ui.includes('REPLAY'));
 assert.ok(suite.includes('OmegaOrganismR123'));
-console.log('R123 organism swarm invariants PASS');
+console.log('R123 organism swarm invariants PASS · R123 provenance preserved · three SQLite declarative exports live');
