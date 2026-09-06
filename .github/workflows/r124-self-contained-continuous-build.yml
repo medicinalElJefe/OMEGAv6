@@ -1,0 +1,145 @@
+name: OMEGA R124 Self-Contained Continuous Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      continue:
+        description: Continue the governed autonomous roadmap
+        required: false
+        default: 'true'
+  push:
+    branches: [main]
+    paths:
+      - 'src/selfBuildRuntimeR124.ts'
+      - 'scripts/r124-selfbuild-engine.mjs'
+      - 'public/omega-r124-selfbuild-state.json'
+      - 'tests/r124-self-contained-build-invariants.mjs'
+      - '.github/workflows/r124-self-contained-continuous-build.yml'
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: omega-r124-selfbuild
+  cancel-in-progress: false
+
+jobs:
+  advance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Verify R124 base invariants
+        run: node tests/r124-self-contained-build-invariants.mjs
+      - name: Select next capsule
+        id: select
+        shell: bash
+        run: |
+          node scripts/r124-selfbuild-engine.mjs | tee /tmp/r124-proposal.json
+          STATUS=$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/r124-proposal.json','utf8'));process.stdout.write(x.status||'UNKNOWN')")
+          CAPSULE=$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/r124-proposal.json','utf8'));process.stdout.write(x.capsuleId||'')")
+          GENERATION=$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/r124-proposal.json','utf8'));process.stdout.write(String(x.generation||0))")
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "capsule=$CAPSULE" >> "$GITHUB_OUTPUT"
+          echo "generation=$GENERATION" >> "$GITHUB_OUTPUT"
+      - name: Stop cleanly when no capsule is ready
+        if: steps.select.outputs.status != 'PROPOSE'
+        run: |
+          echo "R124 self-build is in ${{ steps.select.outputs.status }}; no repository mutation performed."
+      - name: Generate sandbox candidate
+        if: steps.select.outputs.status == 'PROPOSE'
+        env:
+          OMEGA_SELF_BUILD_APPLY: '1'
+        run: node scripts/r124-selfbuild-engine.mjs
+      - name: Run focused and inherited proof gates
+        if: steps.select.outputs.status == 'PROPOSE'
+        run: |
+          node tests/r124-self-contained-build-invariants.mjs
+          node tests/r123-living-total-experience-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          npm run build
+      - name: Finalize admitted receipt
+        if: steps.select.outputs.status == 'PROPOSE'
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='public/omega-r124-selfbuild-state.json';
+          const s=JSON.parse(fs.readFileSync(p,'utf8'));
+          const id=s.currentCapsuleId;
+          if(!id)throw new Error('No current capsule');
+          const receipt=[...s.receipts].reverse().find(r=>r.capsuleId===id&&r.generation===s.generation);
+          if(!receipt)throw new Error('Receipt not found');
+          receipt.status='ADMIT';
+          receipt.completedAt=new Date().toISOString();
+          receipt.tests={r124:true,r123:true,r122:true,r121:true,build:true};
+          receipt.residualAfter=Math.max(0,Number(receipt.residualBefore||1)-0.1);
+          receipt.notes=[...(receipt.notes||[]),'Focused and inherited gates passed before admission.'];
+          s.admitted=[...new Set([...(s.admitted||[]),id])];
+          s.currentCapsuleId=null;
+          fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
+          const candidatePath='public/omega-r124-selfbuild-candidate.json';
+          if(fs.existsSync(candidatePath)){
+            const c=JSON.parse(fs.readFileSync(candidatePath,'utf8'));
+            c.receipt=receipt;c.admission='ADMITTED_PENDING_MERGE';
+            fs.writeFileSync(candidatePath,JSON.stringify(c,null,2)+'\n');
+          }
+          NODE
+      - name: Abort if main moved during proof run
+        if: steps.select.outputs.status == 'PROPOSE'
+        shell: bash
+        run: |
+          START=$(git rev-parse HEAD)
+          git fetch origin main
+          CURRENT=$(git rev-parse origin/main)
+          if [ "$START" != "$CURRENT" ]; then
+            echo "main moved from $START to $CURRENT; refusing stale admission"
+            exit 42
+          fi
+      - name: Commit candidate branch
+        if: steps.select.outputs.status == 'PROPOSE'
+        id: commit
+        shell: bash
+        run: |
+          GEN='${{ steps.select.outputs.generation }}'
+          CAPSULE='${{ steps.select.outputs.capsule }}'
+          BRANCH="selfbuild/r124-g${GEN}-${CAPSULE,,}"
+          git config user.name 'OMEGA R124 Self Builder'
+          git config user.email 'actions@users.noreply.github.com'
+          git checkout -b "$BRANCH"
+          git add src/generated/selfbuild public/omega-r124-selfbuild-state.json public/omega-r124-selfbuild-candidate.json
+          git commit -m "R124 self-build generation ${GEN}: ${CAPSULE}"
+          git push origin "$BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Open and merge proved candidate
+        if: steps.select.outputs.status == 'PROPOSE'
+        id: merge
+        shell: bash
+        run: |
+          BRANCH='${{ steps.commit.outputs.branch }}'
+          CAPSULE='${{ steps.select.outputs.capsule }}'
+          GEN='${{ steps.select.outputs.generation }}'
+          PR_URL=$(gh pr create --base main --head "$BRANCH" --title "R124 self-build G${GEN} ${CAPSULE}" --body "Repository-native R124 governed self-build capsule. Generated from a versioned deterministic capsule, passed R124 + R123 + R122 + R121 invariants and the production build before admission. No truth boundary, PC proof rule, computed-reality gate, or stronger current layer is relaxed. Rollback is the pre-candidate main SHA recorded in the receipt.")
+          echo "pr=$PR_URL" >> "$GITHUB_OUTPUT"
+          gh pr merge "$PR_URL" --squash --delete-branch
+          echo "merged=true" >> "$GITHUB_OUTPUT"
+      - name: Continue next generation without chat scheduling
+        if: steps.select.outputs.status == 'PROPOSE' && steps.merge.outputs.merged == 'true' && github.event.inputs.continue != 'false'
+        shell: bash
+        run: |
+          sleep 5
+          gh workflow run r124-self-contained-continuous-build.yml --ref main -f continue=true

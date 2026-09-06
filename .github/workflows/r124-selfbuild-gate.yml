@@ -1,0 +1,31 @@
+name: OMEGA R124 Self Build Gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r124-self-contained-continuous-build]
+
+permissions:
+  contents: read
+
+jobs:
+  r124-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: R124 self-contained build invariants
+        run: node tests/r124-self-contained-build-invariants.mjs
+      - name: Preserve R123 living runtime
+        run: node tests/r123-living-total-experience-invariants.mjs
+      - name: Preserve R122 computed reality
+        run: node tests/r122-computed-reality-invariants.mjs
+      - name: Preserve R121 Earth and Hybrid
+        run: node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: Production build
+        run: npm run build
