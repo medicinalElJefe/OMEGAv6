@@ -16,6 +16,10 @@ must(field.includes('.24*')&&field.includes('.18*')&&field.includes('.14*')&&fie
 must(!field.includes("label:i===0?'Admitted next'"),'projected address must not masquerade as canonical admission');
 must(!field.includes('commit the highest-ranked admitted candidate'),'capability selection must not claim CanonState mutation');
 
+for(const token of ["role='group'","role='button'",'tabIndex={0}','onClick={()=>runAction(n)}','onKeyDown={e=>runKey(e,n)}','const runAction=','const runKey='])must(field.includes(token),'spatial topology must be a directly operable keyboard/click control fabric: '+token);
+must(!field.includes("<button className='r138-live-stage'"),'whole topology must not collapse to one decorative catch-all button');
+must(field.includes('Spatial nodes are live controls'),'operator must be told that spatial nodes are actionable');
+
 must(living.includes("view==='LIVE'&&<><OmegaTraversalStudio"),'woven traversal studio must own primary LIVE traversal');
 must(living.includes("view==='ROUTE'&&<><TransitionTruthPlotR93"),'exact transition evidence must remain in ROUTE + PROOF');
 must(living.includes('Selecting an address does not itself admit CanonState'),'traversal footer must preserve admission separation');
@@ -26,4 +30,4 @@ must(r136.includes("'ONE_CANONICAL_WORLD_MANY_LAWFUL_PROJECTIONS'"),'R136 one-wo
 must(r136.includes("canonicalAdmissionAuthority:'R125'"),'R125 admission authority must remain intact');
 must(r137.includes('CURRENT_OPERATIONAL_PROOF_NEVER_AUTO_PROMOTES_CANONSTATE'),'R137 operational proof separation must remain intact');
 
-console.log('R139 CAPABILITY TRUTH + LIVE TRAVERSAL PASS · full-metric projection ranking · woven live instrument · route proof retained · projection/address selection separated from R125 CanonState admission');
+console.log('R139 CAPABILITY TRUTH + LIVE TRAVERSAL PASS · full-metric projection ranking · directly operable spatial nodes · woven live instrument · route proof retained · projection/address selection separated from R125 CanonState admission');
