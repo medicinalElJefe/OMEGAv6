@@ -35,7 +35,7 @@ must(loader.includes('HybridMissionControlR109=lazy(LOADERS.HybridLinkR117)'),'r
 must(loader.includes("'Hybrid Link':[LOADERS.HybridLinkR117]"),'route-demand prefetch must resolve the same R117 Hybrid surface');
 must(loader.includes("HybridMissionControlR8:()=>import('./HybridMissionControlR8')")&&loader.includes('HybridMissionControlR8:LOADERS.HybridMissionControlR8'),'R8 mission donor must stay recoverable as an advanced layer');
 must(hybridRoute.includes("import SovereignConnectionR117 from './SovereignConnectionR117'")&&hybridRoute.includes('<SovereignConnectionR117/>'),'current Hybrid route must put R117 connection authority first');
-must(hybridRoute.includes("<details className='r112-hybrid-deep'>")&&hybridRoute.includes('<HybridMissionControlR8'),'old mission/federation controls must remain available only under progressive advanced disclosure');
+must(hybridRoute.includes("<details className='r112-hybrid-deep'")&&hybridRoute.includes('onToggle={e=>setDeepOpen')&&hybridRoute.includes('{deepOpen&&<HybridMissionControlR8'),'old mission/federation controls must remain progressively disclosed and unmounted until explicitly opened');
 
 // R117 intentionally repairs connector issuance on the already-proven R116 runtime spine.
 must(wrangler.includes('"main": "src/workerR116.js"'),'Cloudflare must execute the proven R116 runtime spine');
@@ -58,4 +58,4 @@ must(launcher.includes('This connector will never call the retired preview host.
 must(!launcher.includes('set "OMEGA_ORIGIN=https://omega-sovereign-convergence.foundasound.chatgpt.site')&&!launcher.includes('curl.exe --fail --silent --show-error --location --max-time 20 "https://omega-sovereign-convergence.foundasound.chatgpt.site'),'retired host must never be executable launcher target');
 must(worker116.includes('nativeExecutionClaimed:false')||worker116.includes('nativeExecutionClaimed: false'),'fresh pairing must never claim PC ONLINE before a real host heartbeat');
 
-console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · ordinary Hybrid route promoted to R117 clean surface · proven R116 runtime spine + R117 connector repair · dedicated stale-header-safe bootstrap · explicit browser-safe connector download');
+console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · ordinary Hybrid route promoted to R117 clean surface · advanced R8 diagnostics unmounted until opened · proven R116 runtime spine + R117 connector repair · dedicated stale-header-safe bootstrap · explicit browser-safe connector download');
