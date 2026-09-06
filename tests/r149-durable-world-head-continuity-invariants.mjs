@@ -25,7 +25,7 @@ must(adapter.includes("canonicalAdmissionAuthority:'R125'"),'must preserve R125 
 must(!adapter.includes('DurableObjectNamespace')&&!adapter.includes('WORLD_ADMISSION_SECRET'),'must not create a parallel durable or admission authority');
 for(const token of ['worldRefs?:ProjectWorldRefR149[]','recordProjectWorldRefR149','worldRefs:p.worldRefs||[]','DURABLE_CONTINUITY_REFERENCE_NOT_CANON','OMEGA_CANONICAL_WORLD'])must(project.includes(token),`project continuity missing ${token}`);
 must(project.includes("if(!getHybridBridge())return{ok:false,state:'PAIRING_REQUIRED'}"),'R97 durable sync must remain authenticated Hybrid gated');
-must(app.includes('installLivingWorldOperationBridgeR140();installDurableWorldHeadContinuityR149();installRuntimeAttestationWorldScarR145()'),'R149 must install after R140 and before R145 can emit operations');
+must(app.includes('installLivingWorldOperationBridgeR140();installRuntimeAttestationWorldScarR145();installDurableWorldHeadContinuityR149()'),'R149 must install additively while preserving inherited R140→R145 ordering');
 must(bridge.includes("window.dispatchEvent(new CustomEvent('omega-r140-world-frame'"),'R140 must remain world-frame producer');
 must(world.includes("authority:'DURABLE_CONTINUITY_REFERENCE_NOT_CANON'"),'R134 ref must remain non-canonical continuity evidence');
 must(world.includes("existingTransport:'OMEGA_CONTINUITY_SNAPSHOT_R97.operationRefs'"),'R134 must still declare existing R97 transport');
