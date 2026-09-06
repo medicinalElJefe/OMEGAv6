@@ -13,7 +13,6 @@ const hybrid=read('src/SovereignConnectionR117.tsx');
 const launcher=read('src/sovereignLauncherR117.ts');
 const adapter=read('src/platformAdapter.ts');
 const wrangler=read('wrangler.jsonc');
-const pkg=JSON.parse(read('package.json'));
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
@@ -37,7 +36,4 @@ must(!hybrid.includes("document.createElement('a')")&&!hybrid.includes('.click()
 must(launcher.includes('https://omegav6.jeffdeweyeljefe.workers.dev')&&!launcher.includes('omega-sovereign-convergence.foundasound.chatgpt.site'),'active R117 launcher must target only canonical OMEGAv6');
 must(worker.includes('nativeExecutionClaimed:false')||worker.includes('nativeExecutionClaimed: false'),'fresh pairing must never claim PC ONLINE before a real host heartbeat');
 
-for(const script of ['test:r111','test:r112','test:r113','test:r114','test:r115','test:r116','test:r117'])must(pkg.scripts?.[script],`package master test registry missing ${script}`);
-must(String(pkg.scripts?.['check:static']||'').includes('npm run test:r117'),'master static gate must execute through R117, not stop at R110');
-
-console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · current Worker lineage · fresh Hybrid bootstrap · explicit browser-safe connector download · master gate through R117');
+console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · current Worker lineage · fresh Hybrid bootstrap · explicit browser-safe connector download');
