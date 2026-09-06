@@ -17,12 +17,17 @@ must(sphere.includes('onDoubleClick={choose}')&&sphere.includes('atlasAddress(d,
 must(sphereCss.includes('.r121-sphere-body')&&sphereCss.includes('@media(max-width:820px)')&&sphereCss.includes('@media(max-width:620px)'),'whole-sphere UI must have desktop and mobile layout authority');
 must(sphereCss.includes('Whole-sphere integrative view is primary; the canonical 20,736-cell membrane remains the source-truth inspection surface.'),'Home projection copy must communicate sphere/membrane authority correctly');
 
-const cmdSafe="s.startswith(chr(35)+chr(33)+'/usr/bin/env python3') and 'OMEGA R34 local Hybrid Link agent' in s and 'https://omegav6.jeffdeweyeljefe.workers.dev' in s and 'Pairing is explicit.' in s";
-must(launcher.includes(cmdSafe),'Hybrid agent validator must construct the shebang without a literal ! under CMD delayed expansion');
+const legacyCmdSafe="s.startswith(chr(35)+chr(33)+'/usr/bin/env python3') and 'OMEGA R34 local Hybrid Link agent' in s and 'https://omegav6.jeffdeweyeljefe.workers.dev' in s and 'Pairing is explicit.' in s";
+const r127CmdSafe=launcher.includes("s.startswith(chr(35)+chr(33)+'/usr/bin/env python3')")&&launcher.includes("'OMEGA R34 local Hybrid Link agent' in s")&&launcher.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")&&launcher.includes("'Pairing is explicit.' in s")&&launcher.includes('hashlib.sha256(b).hexdigest()')&&launcher.includes('server==local');
+must(launcher.includes(legacyCmdSafe)||r127CmdSafe,'Hybrid agent validator must construct the shebang without a literal ! under CMD delayed expansion and retain canonical identity validation');
 must(launcher.includes("'OMEGA Sovereign RCWA transport agent' in s")&&launcher.includes("s.startswith(chr(35)+chr(33)+'/usr/bin/env python3')"),'RCWA validator must use the same CMD-safe shebang construction');
-must(launcher.includes('R120.3_CMD_SAFE')&&launcher.includes('no literal exclamation mark is permitted inside this inline Python'),'launcher must expose the CMD-safe validator build and its shell invariant');
+const legacyValidator=launcher.includes('R120.3_CMD_SAFE')&&launcher.includes('no literal exclamation mark is permitted inside this inline Python');
+const r127Validator=launcher.includes('R127_ZERO_DRIFT_SHA256')&&launcher.includes('server-declared SHA256')&&launcher.includes('-m py_compile');
+must(legacyValidator||r127Validator,'launcher must preserve CMD-safe construction and expose an equal-or-stronger validator boundary');
 must(!launcher.includes("s.startswith('#//omegav6.jeffdeweyeljefe.workers.dev' in s")&&!launcher.includes("s.startswith('#!/usr/bin/env python3' in s"),'malformed R120 screenshot validator pattern must never regress');
 must(launcher.includes("replace(/[\\r\\n\"!%&|<>^]/g,''"),'pairing code sanitizer must neutralize CMD delayed and percent expansion metacharacters');
-must(launcher.includes('The connector did not execute unvalidated source.'),'fail-closed Hybrid execution boundary must remain');
+const legacyFailClosed=launcher.includes('The connector did not execute unvalidated source.');
+const r127FailClosed=launcher.includes('No downloaded bytes were executed.')&&launcher.includes('failed Python parse validation. It will not execute.');
+must(legacyFailClosed||r127FailClosed,'fail-closed Hybrid execution boundary must remain');
 
-console.log('R121 PASS · whole-sphere Earth relativity home instrument · full canonical field · source-backed Earth/satellite evidence · CMD-safe connector validator regression sealed');
+console.log('R121/R127 PASS · whole-sphere Earth relativity home instrument · full canonical field · source-backed Earth/satellite evidence · CMD-safe + SHA-256 zero-drift connector validator regression sealed');
