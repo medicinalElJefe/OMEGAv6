@@ -1,5 +1,6 @@
 name: OMEGA R151 Sovereign Build Execution Spine
 
+# R151 synchronization marker: PR validation must run on the current main merge tree, not a stale pre-R149 base.
 on:
   workflow_dispatch:
   pull_request:
