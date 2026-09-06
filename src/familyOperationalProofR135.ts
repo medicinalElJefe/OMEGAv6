@@ -10,6 +10,7 @@ export const FAMILY_OPERATIONAL_PROOF_LAWS_R135=Object.freeze({
  reachability:'HTTP_OR_CONTROL_PLANE_REACHABILITY_IS_SERVICE_OBSERVATION_NOT_NATIVE_EXECUTION',
  evidence:'GENERIC_HEALTH_CANNOT_SATISFY_DOMAIN_SPECIFIC_EVIDENCE_GATES',
  worldContinuity:'R134_CANONICAL_WORLD_SCAR_PROOF_CHAIN_REMAINS_APPEND_ONLY_AUTHORITY_CONTEXT',
+ nextAction:'CURRENT_PROOF_MAY_ADVANCE_NEXT_ACTION_WITHOUT_REWRITING_DECLARED_STATUS',
  canon:'CURRENT_OPERATIONAL_PROOF_NEVER_AUTO_PROMOTES_CANONSTATE',
  unknown:'MISSING_OR_STALE_RUNTIME_EVIDENCE_REMAINS_UNKNOWN_OR_HELD'
 });
@@ -34,6 +35,13 @@ export function familyOperationalProofR135(family:SystemFamily,operational:any,h
  if(family.status==='EVIDENCE_GATED'||family.status==='DEVICE_GATED')return{familyId:family.id,state:'GATE_CURRENTLY_HELD',current:false,label:family.status==='EVIDENCE_GATED'?'DOMAIN EVIDENCE GATE NOT SATISFIED HERE':'DEVICE GATE NOT SATISFIED HERE',detail:'Generic runtime health cannot satisfy this family’s declared proof gate. Use its specialist validation/host evidence path.',source:'declared family boundary',observedAt:at};
  if(family.status==='RESTORATION_DEBT'||family.status==='DONOR_ONLY'||family.status==='NATIVE_TARGET')return{familyId:family.id,state:'STATIC_LINEAGE_ONLY',current:false,label:'NO CURRENT EXECUTION CLAIM',detail:'Known lineage/target value is preserved, but this operational overlay does not claim a live implementation.',source:'authoritative family registry',observedAt:at};
  return{familyId:family.id,state:'DECLARED_BOUNDARY_ONLY',current:false,label:'DECLARED OPERATING BOUNDARY',detail:'This family is registered as operating within its declared hosted/local/source boundary. No stronger per-family live proof is inferred from generic health.',source:'authoritative family registry',observedAt:at};
+}
+
+export function currentNextActionR135(family:SystemFamily,proof:FamilyOperationalProofR135,declaredAction:string){
+ if(family.id==='S03'&&proof.state==='CURRENT_EXECUTION_PROOF')return'Run a bounded authenticated PC workload, return its execution receipt into the R134 append-only world/scar chain, replay it, and verify the receipt before expanding machine authority.';
+ if(family.id==='S00'&&proof.state==='CURRENT_SERVICE_OBSERVATION')return'Harden the observed canonical runtime path, preserve deployment/replay receipts, and keep native desktop breadth separately proof-gated.';
+ if(family.id==='S23'&&proof.state==='CURRENT_SERVICE_OBSERVATION')return'Exercise typed runtime transport requests with replay identity and failure receipts; do not infer historical WebSocket breadth from HTTP health.';
+ return declaredAction;
 }
 
 export function familyOperationalProofSummaryR135(operational:any,hybrid:any){
