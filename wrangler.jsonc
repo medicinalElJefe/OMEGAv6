@@ -1,9 +1,9 @@
-// OMEGA R146 durable operation execution runtime: preserves all provisioned SQLite Durable Object namespaces while adding persistent execution history.
+// OMEGA R146 mounts durable operation execution additively inside the proven R116 Worker spine.
 // Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes. R125 remains canonical admission authority.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR146.js",
+  "main": "src/workerR116.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
