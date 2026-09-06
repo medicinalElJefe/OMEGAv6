@@ -32,9 +32,10 @@ export async function wholeOperationApiR143(request,env,legacyFetch){
   const body=await request.json().catch(()=>({}));if(body.confirmedGraph!==true)return json({ok:false,code:'R143_EXPLICIT_GRAPH_CONFIRMATION_REQUIRED',reply:'Planning is non-executing. Persisting an executable whole-operation graph requires explicit confirmation.'},400);
   const snapshot=await executionSnapshotR143(request,env,legacyFetch),graph=compileWholeOperationWeaveR143({...body,snapshot});return internal(stub,'/operation-weave/runs',request,'POST',{...body,graph});
  }
- const m=path.match(/^\/api\/operation-weave\/r143\/runs\/([A-Za-z0-9._:-]+)(?:\/(tick|join))?$/);if(!m)return json({ok:false,code:'R143_ROUTE_NOT_FOUND'},404);const id=m[1],action=m[2];
+ const m=path.match(/^\/api\/operation-weave\/r143\/runs\/([A-Za-z0-9._:-]+)(?:\/(tick|join|host-plan))?$/);if(!m)return json({ok:false,code:'R143_ROUTE_NOT_FOUND'},404);const id=m[1],action=m[2];
  if(!action&&request.method==='GET')return internal(stub,`/operation-weave/runs/${encodeURIComponent(id)}`,request);
  if(action==='join'&&request.method==='POST')return internal(stub,`/operation-weave/runs/${encodeURIComponent(id)}/join`,request,'POST',{});
+ if(action==='host-plan'&&request.method==='POST'){const body=await request.json().catch(()=>({}));if(body.confirmedHostPlan!==true||!body.hostPlan)return json({ok:false,code:'R143_EXPLICIT_HOST_PLAN_CONFIRMATION_REQUIRED',reply:'Attaching a native host plan requires explicit confirmation and does not itself queue execution.'},400);return internal(stub,`/operation-weave/runs/${encodeURIComponent(id)}/host-plan`,request,'POST',body)}
  if(action==='tick'&&request.method==='POST'){const get=await internal(stub,`/operation-weave/runs/${encodeURIComponent(id)}`,request),body=await read(get),run=body?.run;if(!get.ok||!run)return get;const result=await tickWholeOperationRunR143({request,env,run,stub,legacyFetch});return json({ok:!result?.error,...result},result?.error?409:200)}
  return json({ok:false,code:'R143_METHOD_NOT_ALLOWED'},405);
 }
