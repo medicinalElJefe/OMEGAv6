@@ -1,0 +1,80 @@
+name: OMEGA R140 Hybrid Proof Scar Replay
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  prove-r140:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prove R140 exact-payload closure, scar continuity and deterministic replay
+        run: node tests/r140-hybrid-proof-scar-replay-invariants.mjs
+      - name: Preserve R139 unified capability engine and repaired R138 visual authority
+        shell: bash
+        run: |
+          node tests/r139-unified-capability-engine-invariants.mjs
+          node tests/r138-capability-first-visual-runtime.mjs
+      - name: Preserve living proof and world continuity authorities
+        shell: bash
+        run: |
+          node tests/r137-live-family-proof-fusion-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r134-woven-relativity-continuum-invariants.mjs
+          node tests/r134-1-cloudflare-do-exports-reconciliation.mjs
+      - name: Preserve enacted Hybrid transport and execution truth
+        shell: bash
+        run: |
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/enacted-runtime-r32-invariants.mjs
+          node tests/r117-real-sovereign-bootstrap-invariants.mjs
+          node tests/r118-full-system-operational-convergence-invariants.mjs
+      - name: Preserve capacity, control and canonical admission
+        shell: bash
+        run: |
+          node tests/r131-capacity-governor.mjs
+          node tests/r130-operational-control-plane.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Install Chromium for real route sweep
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start built application locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r140-preview.log 2>&1 &
+          echo $! >/tmp/omega-r140-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r140-preview.log
+          exit 1
+      - name: Exercise all registered routes in desktop and mobile browsers
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r118-browser-operational-e2e.mjs
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r140-preview.log || true
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r140
