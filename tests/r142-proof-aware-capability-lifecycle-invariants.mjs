@@ -17,7 +17,8 @@ must(receipts.includes("closure?.state==='VERIFIED_EXECUTION_RETURN'")&&receipts
 must(receipts.includes("admissionAuthority:'R125'")&&receipts.includes('canonicalMutation:false'),'receipt fabric must preserve R125 admission and no mutation');
 must(r140.includes("'HYBRID_EXECUTION_REQUIRES_CURRENT_DEVICE_PROOF'")&&r140.includes("action.kind==='EXECUTE'?'DEVICE_PROOF_REQUIRED':'ROUTE_READY'"),'R140 device proof boundary must remain intact');
 
-for(const token of ["data-execution-lifecycle='R142'",'operationRouteReceiptR142','summarizeCapabilityReceiptsR142','ROUTE ≠ EXECUTION ≠ ADMISSION','route verified'])must(field.includes(token),'capability topology missing '+token);
+for(const token of ["data-execution-lifecycle='R142'",'operationRouteReceiptR142','summarizeCapabilityReceiptsR142','route verified'])must(field.includes(token),'capability topology missing '+token);
+must(field.includes('PROJECTION ≠ ADMISSION')&&field.includes('ROUTE ≠ EXECUTION'),'capability topology must keep projection/admission and route/execution truth boundaries distinct');
 must(field.includes('data-execution-state={n.executionState')&&field.includes('data-execution-state={action.executionState'),'spatial and detailed controls must expose lifecycle state');
 
 for(const token of ['pluginManifestReceiptR142','summarizeCapabilityReceiptsR142',"a.download='OMEGA_PLUGIN_REGISTRY_R45.json'",'does not embed external ChatGPT connectors','enabled or configured never means executed or verified'])must(plugins.includes(token),'plugin execution truth/compatibility missing '+token);
