@@ -40,6 +40,8 @@ must(agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev
 must(agent.includes('Path escapes approved root.'),'agent must retain root confinement');
 must(agent.includes("'/api/hybrid/agent/heartbeat'"),'agent must retain authenticated heartbeat route');
 must(agent.includes('Browser may now truthfully show PC ONLINE'),'agent must not claim online before accepted heartbeat');
-must(agent.includes("if op in {'CLICK','KEY','TYPE_TEXT','SCROLL','ASSERT_WINDOW','READ_VISIBLE_TEXT','RECORD_MACRO','REPLAY_MACRO'}"),'unsigned desktop automation must remain non-fabricated');
+must(agent.includes("CAPABILITY_REVISION='R132'")&&!agent.includes('requires the optional signed desktop automation adapter'),'R132 successor must replace the former deliberate automation refusal without weakening transport identity');
+for(const fn of ['assert_window','click_mouse','send_key','type_text','scroll_mouse','read_visible_text','record_macro','replay_macro'])must(agent.includes('def '+fn+'('),`R132 real desktop execution missing ${fn}`);
+must(agent.includes('shell=False')&&agent.includes('assert_window(title)'),'desktop execution must remain non-shell and foreground-window locked');
 
-console.log('R127 HYBRID ZERO-DRIFT PASS · one canonical host · approved-root confinement · quarantined download · server/local SHA-256 equality · parser preflight · bounded reachability retry · terminal auth rejection · heartbeat-only PC ONLINE · no silent fallback');
+console.log('R127/R132 HYBRID ZERO-DRIFT PASS · one canonical host · approved-root confinement · quarantined SHA-256 download · parser preflight · heartbeat-only PC ONLINE · real proof-bound desktop execution · no silent fallback');
