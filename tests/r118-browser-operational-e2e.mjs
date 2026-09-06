@@ -34,9 +34,6 @@ async function openRoute(page,route,viewportName){
  if(!found)throw new Error(`${viewportName} ${route}: route button missing · ${JSON.stringify(await routeDiagnostics(page))}`);
  try{await page.waitForFunction(route=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===route,route,{timeout:20000})}
  catch{throw new Error(`${viewportName} ${route}: route click did not become active panel · ${JSON.stringify(await routeDiagnostics(page))}`)}
- // The current product deliberately defers heavy specialist modules. Provenance/calculus scaffolding is
- // rendered immediately inside R81, so it cannot be used as proof that the specialist itself has arrived.
- // Wait specifically for the bounded R109 Suspense fallback to disappear before judging operation.
  try{await page.waitForFunction(route=>{
   const root=document.querySelector('.omega-workstation-v2');
   if(!root||root.getAttribute('data-panel')!==route)return false;
@@ -69,20 +66,9 @@ async function inspectRoute(page,route,viewportName){
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
   const errors=[...(surface?.querySelectorAll('.boot')||[])].filter(visible).map(x=>x.textContent||'').filter(x=>/ERROR|FAILED/i.test(x));
   const canvases=[...(surface?.querySelectorAll('canvas,svg')||[])].filter(visible).map(el=>{const r=el.getBoundingClientRect();return{w:r.width,h:r.height,tag:el.tagName,label:el.getAttribute('aria-label')||''}});
-  const headings=[...(surface?.querySelectorAll('h1,h2,h3')||[])].filter(visible).map(x=>(x.textContent||'').trim()).filter(Boolean);
   const viewportOverflow=Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-window.innerWidth;
   const mainRect=main?.getBoundingClientRect();
-  return{
-   panel:root?.getAttribute('data-panel')||'',
-   errors,
-   headings,
-   canvases,
-   viewportOverflow,
-   mainWidth:mainRect?.width||0,
-   mainLeft:mainRect?.left||0,
-   visual,
-   text:(surface?.textContent||'').slice(0,30000)
-  };
+  return{panel:root?.getAttribute('data-panel')||'',errors,canvases,viewportOverflow,mainWidth:mainRect?.width||0,visual,text:(surface?.textContent||'').slice(0,30000)};
  },{route,visual:criticalVisual.has(route)});
  if(result.panel!==route)throw new Error(`${viewportName} ${route}: active panel mismatch ${result.panel}`);
  if(result.errors.length)throw new Error(`${viewportName} ${route}: visible runtime error ${result.errors.join(' | ').slice(0,700)}`);
@@ -99,15 +85,19 @@ async function inspectRoute(page,route,viewportName){
 async function runViewport(browser,name,viewport){
  const context=await browser.newContext({viewport,deviceScaleFactor:1});
  const page=await context.newPage();
+ let activeRoute='BOOT';
  const pageErrors=[];
- page.on('pageerror',e=>pageErrors.push(String(e)));
+ const badResponses=[];
+ page.on('pageerror',e=>pageErrors.push(`${activeRoute} :: ${String(e)}`));
+ page.on('response',response=>{if(response.status()>=400)badResponses.push(`${activeRoute} :: HTTP ${response.status()} ${new URL(response.url()).pathname}`)});
  await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});
  await page.waitForSelector('main.r71-home, .omega-workstation-v2',{timeout:30000});
  for(const route of routes){
+  activeRoute=route;
   await openRoute(page,route,name);
   await inspectRoute(page,route,name);
  }
- if(pageErrors.length)throw new Error(`${name}: uncaught browser errors: ${pageErrors.join(' | ').slice(0,1800)}`);
+ if(pageErrors.length)throw new Error(`${name}: uncaught browser errors: ${pageErrors.join(' | ').slice(0,2600)} · network=${badResponses.join(' | ').slice(0,1800)}`);
  await context.close();
 }
 
