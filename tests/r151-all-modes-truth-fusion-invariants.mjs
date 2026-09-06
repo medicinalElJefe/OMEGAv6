@@ -3,6 +3,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>assert.ok(ok,'R151 '+msg);
 const fusion=read('src/allModesTruthFusionR151.ts');
+const swarm=read('src/allModesSwarmPartitionR151.ts');
 const operation=read('src/unifiedOperationFabricR140.ts');
 const field=read('src/OmegaCapabilityFieldR138.tsx');
 const allModes=read('src/allModesAuthority.ts');
@@ -20,6 +21,14 @@ must(fusion.includes('fullAtlasModeStateEvaluations:STATE_COUNT*R151_CHANNEL_COU
 must(fusion.includes('advisoryOperator')&&fusion.includes('canonicalOperator')&&fusion.includes("authority:'ADVISORY_ONLY_CANONICAL_DISPATCH_UNCHANGED'"),'fusion may not replace canonical dispatch');
 must(fusion.includes('Correlated mode agreement is internal coherence, not 241 independent empirical replications'),'independence truth boundary missing');
 
+must(swarm.includes('seed:1,organs:12,branches:144,cells:1728,lanes:20736'),'swarm hierarchy must exactly preserve 1→12→144→1728→20736');
+must(swarm.includes('statesPerCell:12')&&swarm.includes('readingsPerCell:12*R151_CHANNEL_COUNT'),'each logical cell must own exactly 12 layer states and 2,892 mode readings');
+for(const law of ['ONE_CELL_EQUALS_ONE_DOMAIN_PHASE_REGULATION_WITH_ALL_12_LAYERS','ALL_20736_CANONICAL_STATES_OCCUR_EXACTLY_ONCE','CELL_RESULTS_RECONVERGE_1728_TO_144_TO_12_TO_1','SWARM_PARTITION_IS_EXECUTION_PLANNING_NOT_INVOCATION_PROOF','CELL_CONSENSUS_IS_NOT_INDEPENDENT_EMPIRICAL_REPLICATION'])must(swarm.includes(`'${law}'`),`swarm law missing ${law}`);
+must(swarm.includes('compileAllModesSwarmCellPlanR151')&&swarm.includes('compileAllModesSwarmPlanR151')&&swarm.includes('evaluateAllModesSwarmCellR151')&&swarm.includes('foldAllModesSwarmR151'),'swarm plan/evaluate/reconverge functions missing');
+must(swarm.includes('encodeAddress(c.domain,c.phase,c.regulation,layer)'),'cell shard must use exact canonical D/P/R/L addressing');
+must(swarm.includes("authority:'EXECUTION_PLAN_ONLY'"),'swarm partition must not claim invocation');
+must(swarm.includes('It does not prove 1,728 physical clouds, agents or executions are online.'),'logical-vs-physical swarm truth boundary missing');
+
 must(operation.includes("import {compileAllModesTruthFusionR151}"),'R140 must consume R151 fusion');
 must(operation.includes("'ALL_MODE_FUSION_INFORMS_PRIORITY_WITHOUT_TRUTH_PROMOTION'"),'R140 fusion law missing');
 for(const legacy of ['.24*route','.16*continuity','.12*plasticity','.16*evidence','.12*contradictionBound','.08*burdenBound','.06*modeCoverage','.06*kind'])must(operation.includes(legacy),`legacy R140 bounded signal lost ${legacy}`);
@@ -35,4 +44,4 @@ must(sourceModes.includes('catalogCount:179')&&sourceModes.includes('Only operat
 must(transition.includes("const ORDER=['CARRY','CONSTRUCT','PRUNE','TURN','ESCALATE']"),'canonical Dewey dispatch order must remain external to R151 advisory fusion');
 must(transition.includes('SOURCE_TRANSITION_VERIFIED'),'source transition proof authority regressed');
 
-console.log('R151 ALL-MODES TRUTH FUSION INVARIANTS PASS · 179 source evaluations + 62 canon lenses provenance-separated · R140 priority refined · canonical dispatch and R125 admission preserved');
+console.log('R151 ALL-MODES TRUTH FUSION INVARIANTS PASS · 179 source + 62 canon channels · exact 1728-cell/20736-lane partition · R140 priority refined · canonical dispatch and R125 admission preserved');
