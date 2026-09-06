@@ -18,13 +18,13 @@ must(!worker.includes("request.headers.get('x-omega-bridge-secret')"),'fresh-pai
 must(worker.includes("CONNECTOR_REVISION='R117'")&&worker.includes('nativeExecutionClaimed:false'),'runtime must identify the R117 connector repair without claiming PC ONLINE');
 must(bootstrap.includes("fetch('/api/hybrid/bootstrap'")&&bootstrap.includes('saveHybridBridge'),'browser must call fresh bootstrap and persist returned bridge identity');
 must(launcher.includes('OMEGA_ORIGIN=${ORIGIN}')&&launcher.includes("const ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'launcher must hard-bind canonical OMEGAv6');
-must(launcher.includes('START_OMEGA_PC_LINK_R117_CLEAN.cmd'),'launcher filename must be unmistakably current');
+must(launcher.includes('START_OMEGA_PC_LINK_R117_CLEAN.cmd'),'launcher filename must preserve the clean-connector compatibility identity');
 must(!launcher.includes("print('PASS — browser credential accepted and device registered')"),'R117 wrapper must execute the canonical agent instead of impersonating agent proof output');
 must(launcher.includes('!OMEGA_PY!')&&launcher.includes('%OMEGA_AGENT%')&&launcher.includes('--server')&&launcher.includes('%OMEGA_ORIGIN%')&&launcher.includes('--pair')&&launcher.includes('%OMEGA_PAIR%'),'launcher must run the real canonical Hybrid agent with the fresh pair');
 must(agent.startsWith('#!/usr/bin/env python3')&&agent.includes('OMEGA R34 local Hybrid Link agent')&&agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"),'served Hybrid asset must expose the exact canonical identity contract');
 must(launcher.includes('OMEGA R34 local Hybrid Link agent')&&launcher.includes("DEFAULT_SERVER=''https://omegav6.jeffdeweyeljefe.workers.dev''")&&launcher.includes('Pairing is explicit.'),'launcher validation must match the actual served canonical Hybrid asset rather than a stale marker');
 must(!launcher.includes("$s.Contains('OMEGA Hybrid Link agent')"),'launcher must not reject the canonical R34 asset through the obsolete generic marker');
-must(launcher.includes('--retry 3 --retry-delay 1')&&launcher.includes('Downloaded bytes: %%~zF'),'launcher must tolerate transient download failures and expose bounded diagnostics without executing rejected source');
+must(launcher.includes('--retry 3 --retry-delay 1')&&(launcher.includes('Downloaded bytes: %%~zF')||(launcher.includes('server sha256:')&&launcher.includes('local  sha256:')&&launcher.includes('identity+digest:'))),'launcher must tolerate transient download failures and expose bounded byte/digest diagnostics without executing rejected source');
 must(surface.includes('FIX CONNECTION NOW')&&surface.includes('bootstrapSovereignR117')&&surface.includes('launcherBlobUrlR117'),'ordinary UI must expose one fresh repair/download action');
 must(!surface.includes('R112 fallback'),'R117 ordinary surface must not offer the old fallback launcher');
 must(hybrid.includes('SovereignConnectionR117')&&compact.includes('SovereignConnectionR117'),'full and compact Hybrid mounts must use the R117 successor surface');
