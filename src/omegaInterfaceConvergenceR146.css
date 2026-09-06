@@ -67,13 +67,13 @@
 .r146-nav-backdrop{display:none}
 
 /* Promote the workstation as a coherent instrument without erasing specialist-specific design. */
-.omega-workstation-v2[data-interface-convergence='R146'] .workstation-main{isolation:isolate}
-.omega-workstation-v2[data-interface-convergence='R146'] .omega-surface-r81{min-width:0;max-width:100%}
-.omega-workstation-v2[data-interface-convergence='R146'] .omega-surface-r81 :where(button,[role='button'],input,select,textarea){scroll-margin:88px}
-.omega-workstation-v2[data-interface-convergence='R146'] :where(.special-app,.command-experience-r4,.experience-phase-bound){min-width:0;max-width:100%}
-.omega-workstation-v2[data-interface-convergence='R146'] :where(.special-head,.r112-fabric-head,.r71-home-head){border-color:rgba(114,208,191,.14)}
-.omega-workstation-v2[data-interface-convergence='R146'] button:not(:disabled){cursor:pointer}
-.omega-workstation-v2[data-interface-convergence='R146'] button:disabled{cursor:not-allowed}
+html[data-omega-interface-convergence='R146'] .omega-workstation-v2 .workstation-main{isolation:isolate}
+html[data-omega-interface-convergence='R146'] .omega-workstation-v2 .omega-surface-r81{min-width:0;max-width:100%}
+html[data-omega-interface-convergence='R146'] .omega-workstation-v2 .omega-surface-r81 :where(button,[role='button'],input,select,textarea){scroll-margin:88px}
+html[data-omega-interface-convergence='R146'] .omega-workstation-v2 :where(.special-app,.command-experience-r4,.experience-phase-bound){min-width:0;max-width:100%}
+html[data-omega-interface-convergence='R146'] .omega-workstation-v2 :where(.special-head,.r112-fabric-head,.r71-home-head){border-color:rgba(114,208,191,.14)}
+html[data-omega-interface-convergence='R146'] .omega-workstation-v2 button:not(:disabled){cursor:pointer}
+html[data-omega-interface-convergence='R146'] .omega-workstation-v2 button:disabled{cursor:not-allowed}
 
 @media(min-width:901px){
  .r146-interface-convergence.expanded .r94-nav-panel{animation:r146-panel-in .18s ease-out both}
