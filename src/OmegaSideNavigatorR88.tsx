@@ -75,7 +75,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
      </button>})}
      {rows.length===0&&<div className='r88-empty'>No route matches that workspace/search combination.</div>}
     </div>
-    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>R143 authoritative operation chain {operationAudit.pass?'PASS':'HOLD'} · {operationAudit.mappedRoutes}/{operationAudit.totalRoutes} registered routes carry route ID → capability ID → execution domain → R142 receipt authority · navigation never claims execution proof or R125 admission.</span></footer>
+    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>Persistent rail · active application remains visible · R143 authoritative operation chain {operationAudit.pass?'PASS':'HOLD'} · {operationAudit.mappedRoutes}/{operationAudit.totalRoutes} registered routes carry route ID → capability ID → execution domain → R142 receipt authority · navigation never claims execution proof or R125 admission.</span></footer>
    </>:<div className='r88-software-layer'><OmegaSystemInventoryR83 compact onNavigate={go}/></div>}
   </section>
  </aside>;
