@@ -12,8 +12,9 @@ const r136=read('src/world/livingWorldFrameR136.js');
 const r137=read('src/familyOperationalProofR137.ts');
 
 must(app.includes("import './capabilityFirstR138.css'"),'capability-first visual policy must load globally');
-for(const klass of ['r93-mode-trace','r93-infinity-source','r93-transition','r93-scale'])must(css.includes(`.r93-truth-plot.${klass}`),'stale plot class must be retired from active visual hierarchy: '+klass);
-must(css.includes('.r93-packet,.r95-canonical-manifold,.r95-state-mandala{display:block}'),'canonical state manifold must remain visible');
+for(const klass of ['r93-mode-trace','r93-infinity-source','r93-scale'])must(css.includes(`.r93-truth-plot.${klass}`),'stale plot class must be retired from active visual hierarchy: '+klass);
+must(!css.includes('.r93-truth-plot.r93-transition{display:none'),'canonical transition proof visual must never be retired as a stale chart');
+must(css.includes('.r93-packet,.r93-transition,.r95-canonical-manifold,.r95-transition-manifold,.r95-state-mandala{display:block}'),'canonical packet, transition and state manifolds must remain visible');
 must(!css.includes('.r95-canonical-manifold{display:none'),'canonical manifold must never be retired as a stale chart');
 
 for(const token of ['corpusState','calculusVisualLaw','sourceBackedModeSummary','onAddress','onNavigate','Admitted next','Hybrid Link','Build Out','Evidence & Proof','CAPABILITY_FIRST_NO_STALE_CHART_PRIMARY'])must(field.includes(token),'active capability field missing '+token);
@@ -32,4 +33,4 @@ must(r136.includes("'ONE_CANONICAL_WORLD_MANY_LAWFUL_PROJECTIONS'"),'R136 one-wo
 must(r136.includes("canonicalAdmissionAuthority:'R125'"),'R125 canonical admission authority must remain unchanged');
 must(r137.includes('CURRENT_OPERATIONAL_PROOF_NEVER_AUTO_PROMOTES_CANONSTATE'),'R137 live proof separation must remain intact');
 
-console.log('R138 CAPABILITY-FIRST VISUAL RUNTIME PASS · stale plot-first surfaces retired · canonical manifold retained · actionable living topology mounted · route/state/build/proof execution preserved · R137/R136/R125 authorities unchanged');
+console.log('R138 CAPABILITY-FIRST VISUAL RUNTIME PASS · stale plot-first surfaces retired · canonical transition/manifold retained · actionable living topology mounted · route/state/build/proof execution preserved · R137/R136/R125 authorities unchanged');
