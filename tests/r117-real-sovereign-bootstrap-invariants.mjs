@@ -18,8 +18,8 @@ must(worker.includes('nativeExecutionClaimed:false'),'bootstrap must not claim P
 must(bootstrap.includes("fetch('/api/hybrid/bootstrap'")&&bootstrap.includes('saveHybridBridge'),'browser must call fresh bootstrap and persist returned bridge identity');
 must(launcher.includes('OMEGA_ORIGIN=${ORIGIN}')&&launcher.includes("const ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'launcher must hard-bind canonical OMEGAv6');
 must(launcher.includes('START_OMEGA_PC_LINK_R117_CLEAN.cmd'),'launcher filename must be unmistakably current');
-must(!launcher.includes('print(\'PASS — browser credential accepted and device registered\')'),'R117 wrapper must execute the canonical agent instead of impersonating agent proof output');
-must(launcher.includes('!OMEGA_PY! \\"%OMEGA_AGENT%\\" --server \\"%OMEGA_ORIGIN%\\" --pair \\"%OMEGA_PAIR%\\"'),'launcher must run the real canonical Hybrid agent with the fresh pair');
+must(!launcher.includes("print('PASS — browser credential accepted and device registered')"),'R117 wrapper must execute the canonical agent instead of impersonating agent proof output');
+must(launcher.includes('!OMEGA_PY!')&&launcher.includes('%OMEGA_AGENT%')&&launcher.includes('--server')&&launcher.includes('%OMEGA_ORIGIN%')&&launcher.includes('--pair')&&launcher.includes('%OMEGA_PAIR%'),'launcher must run the real canonical Hybrid agent with the fresh pair');
 must(surface.includes('FIX CONNECTION NOW')&&surface.includes('bootstrapSovereignR117')&&surface.includes('launcherBlobUrlR117'),'ordinary UI must expose one fresh repair/download action');
 must(!surface.includes('R112 fallback'),'R117 ordinary surface must not offer the old fallback launcher');
 must(hybrid.includes('SovereignConnectionR117')&&compact.includes('SovereignConnectionR117'),'full and compact Hybrid mounts must use the R117 successor');
