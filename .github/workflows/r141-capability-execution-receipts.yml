@@ -1,0 +1,35 @@
+name: OMEGA R141 Capability Execution Receipts
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prove-r141:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove capability execution lifecycle
+        run: node tests/r141-capability-execution-receipts-invariants.mjs
+      - name: Preserve R140 and R139 authorities
+        run: |
+          node tests/r140-mode-completion-fabric-invariants.mjs
+          node tests/r139-unified-capability-engine-invariants.mjs
+      - name: Preserve current runtime proof chain
+        run: |
+          node tests/r138-capability-first-visual-runtime.mjs
+          node tests/r137-live-family-proof-fusion-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Cloudflare Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r141-dry-run
