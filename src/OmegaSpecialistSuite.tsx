@@ -8,6 +8,7 @@ import OmegaOrganismR123 from './OmegaOrganismR123';
 import OmegaAutonomicR125 from './OmegaAutonomicR125';
 import OmegaMaximumCockpitR126 from './OmegaMaximumCockpitR126';
 import OmegaCapabilityFieldR138 from './OmegaCapabilityFieldR138';
+import AdvancedComputationR145 from './AdvancedComputationR145';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -22,6 +23,7 @@ export default function OmegaSpecialistSuite(props:Props){
   <details className='r121-legacy-convergence'><summary>R121 direct swarm body · compatibility / independent-cell control</summary><OmegaSwarmR121 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
   <details className='r121-legacy-convergence'><summary>Retained continuity / convergence field instrument</summary><OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
  </div>);
+ if(panel==='Validation')return wrap(<div><AdvancedComputationR145 record={record} onNavigate={onNavigate}/><details className='r121-legacy-convergence'><summary>Retained validation utility authority</summary><OmegaUtilityAuthorityR26 {...props}/></details></div>);
  if(panel==='Field'||panel==='Data Motion')return wrap(<OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>);
  if(panel==='Evidence & Proof'||panel==='Memory')return wrap(<OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/>);
  if(panel==='Canon Evolution'||panel==='Governance'||panel==='Projects'||panel==='Assets'||panel==='Render Queue')return wrap(<OmegaGovernanceProjectMediaR29 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>);
