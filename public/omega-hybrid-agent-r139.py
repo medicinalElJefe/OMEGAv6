@@ -32,7 +32,7 @@ def canonical_base_source(server):
     observed=sha_bytes(source)
     if declared and declared!=observed:raise RuntimeError('R139 base agent SHA-256 mismatch.')
     text=source.decode('utf-8')
-    for token in ("VERSION='R34.1'","CAPABILITY_REVISION='R132'","root-confined","shell=False","'/api/hybrid/agent/poll'","'/api/hybrid/agent/result'"):
+    for token in ("VERSION='R34.1'","CAPABILITY_REVISION='R132'",'root-confined','shell=False',"'/api/hybrid/agent/poll'","'/api/hybrid/agent/result'"):
         if token not in text:raise RuntimeError('R139 base agent contract missing '+token)
     return text,observed
 
