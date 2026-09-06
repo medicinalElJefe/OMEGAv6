@@ -51,7 +51,8 @@ const ui=fs.readFileSync('src/OmegaAutonomicR125.tsx','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 assert.ok(worker.includes('OmegaSwarmAutonomicCoordinator'));
 assert.ok(wrangler.includes('OMEGA_SWARM_AUTONOMIC'));
-assert.ok(wrangler.includes('r125-autonomic-swarm'),'the Durable Object class was introduced in R125, so its migration identity must remain R125 under later R126 convergence');
+assert.ok(auto.includes("AUTONOMIC_REVISION='R125'"),'autonomic runtime provenance must remain R125 after Cloudflare lifecycle reconciliation');
+assert.ok(wrangler.includes('"OmegaSwarmAutonomicCoordinator": {"type": "durable-object", "storage": "sqlite"}'),'the R125 autonomic Durable Object namespace must remain live on its existing SQLite backend under declarative exports');
 assert.ok(wrangler.includes('"main": "src/workerR116.js"'));
 for(const route of ['/api/swarm/autonomic/manifest','/api/swarm/autonomic/status','/api/swarm/autonomic/plan','/api/swarm/autonomic/missions'])assert.ok(api.includes(route),`missing autonomic route ${route}`);
 for(const term of ['rejoin','checkpoint','pause','resume','cancel'])assert.ok(auto.includes(`parts[2]==='${term}'`)||auto.includes(`parts[2]===\'${term}\'`),`missing autonomic ${term}`);
@@ -61,4 +62,4 @@ assert.ok(auto.includes('allowFullAuto===true'),'full-auto must require explicit
 assert.ok(ui.includes('Route the body. Detach a limb. Rejoin with receipts.'));
 assert.ok(ui.includes('PREVIEW ROUTE')&&ui.includes('EXECUTE ROUTE')&&ui.includes('CHECKPOINT')&&ui.includes('REJOIN BODY'));
 assert.ok(suite.includes('OmegaAutonomicR125'));
-console.log('R125 autonomic swarm invariants PASS · preserved under R126 convergence');
+console.log('R125 autonomic swarm invariants PASS · R125 provenance preserved under declarative SQLite lifecycle exports');
