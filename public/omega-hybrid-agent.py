@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
 """OMEGA R34 local Hybrid Link agent.
 
-Stdlib-first, root-confined, allow-listed execution. It never exposes arbitrary shell access.
-Pairing is explicit. Every claimed native action returns bounded proof to the canonical Worker.
+R129 sealed successor. Stdlib-first, root-confined, allow-listed execution.
+It never exposes arbitrary shell access. Pairing is explicit. Registration is
+identity only; PC ONLINE is not claimable until a current authenticated
+heartbeat succeeds. Every claimed native action returns bounded proof to the
+canonical Worker.
+
 R33 added atomic, preimage-hash-bound text patching with an automatic local backup.
-R34 adds explicit canonical reachability, authentication/registration, heartbeat, and transport diagnostics.
-R34.1 hardens Windows approved-root parsing for drive-root launcher execution.
+R34 added explicit canonical reachability, authentication/registration, heartbeat,
+and transport diagnostics. R34.1 hardened Windows approved-root parsing.
+R129 pins the exact served agent SHA-256, binds a process boot session, rejects
+heartbeat replay, refuses silent root mutation, and keeps duplicate connector
+windows from competing for the same local runtime.
 """
 from __future__ import annotations
 import argparse, hashlib, json, os, platform, re, socket, subprocess, sys, time, urllib.error, urllib.request, uuid, zipfile
 from pathlib import Path
 
-VERSION='R34.1'
+VERSION='R129.0'
+HYBRID_PROTOCOL='OMEGA_HYBRID_PROTOCOL_R129'
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
+HEARTBEAT_INTERVAL_SECONDS=4
+MAX_BACKOFF_SECONDS=30
 TEXT_EXT={'.txt','.md','.json','.jsonc','.js','.jsx','.ts','.tsx','.py','.pyw','.css','.html','.yml','.yaml','.toml','.ini','.cfg','.csv','.bat','.ps1','.cs','.csproj','.sln'}
 SKIP_DIRS={'.git','node_modules','dist','build','.venv','venv','__pycache__','.wrangler','.omega_hybrid'}
 MAX_FILES=25000
@@ -21,21 +31,37 @@ MAX_PATCH_BYTES=512*1024
 MAX_PATCH_REPLACEMENTS=24
 
 class AgentError(RuntimeError): pass
+class AgentHttpError(AgentError):
+    def __init__(self,status,code,message,payload=None):
+        super().__init__(message); self.status=int(status); self.code=str(code or 'HTTP_ERROR'); self.payload=payload or {}
 
 def sha_bytes(data:bytes): return hashlib.sha256(data).hexdigest()
 def sha_json(obj): return sha_bytes(json.dumps(obj,sort_keys=True,separators=(',',':')).encode())
+def normalized_root_identity(root:Path):
+    value=str(root.resolve()).replace('\\','/').rstrip('/') or '/'
+    if os.name=='nt': value=value.casefold()
+    return sha_bytes(value.encode('utf-8'))
+def atomic_json(path:Path,payload):
+    tmp=path.with_name(path.name+'.tmp_'+uuid.uuid4().hex[:8]);tmp.write_text(json.dumps(payload,indent=2,sort_keys=True),'utf-8');os.replace(tmp,path)
+
 def request_json(server,path,payload,bridge_id,secret,timeout=30):
-    data=json.dumps(payload).encode(); req=urllib.request.Request(server.rstrip('/')+path,data=data,method='POST',headers={'content-type':'application/json','x-omega-bridge-id':bridge_id,'x-omega-bridge-secret':secret,'user-agent':'OMEGA-Hybrid-Agent/'+VERSION})
+    data=json.dumps(payload).encode(); req=urllib.request.Request(server.rstrip('/')+path,data=data,method='POST',headers={'content-type':'application/json','x-omega-bridge-id':bridge_id,'x-omega-bridge-secret':secret,'x-omega-hybrid-protocol':HYBRID_PROTOCOL,'user-agent':'OMEGA-Hybrid-Agent/'+VERSION})
     try:
-        with urllib.request.urlopen(req,timeout=timeout) as r: return json.loads(r.read().decode('utf-8'))
+        with urllib.request.urlopen(req,timeout=timeout) as r:
+            raw=r.read().decode('utf-8','replace')
+            try: return json.loads(raw)
+            except Exception: raise AgentError('Canonical endpoint returned non-JSON data.')
     except urllib.error.HTTPError as e:
         raw=e.read().decode('utf-8','replace')
         try: detail=json.loads(raw)
         except Exception: detail={'message':raw}
-        raise AgentError(f"HTTP {e.code}: {detail.get('reply') or detail.get('message') or detail.get('code') or raw[:300]}")
+        code=detail.get('code') or 'HTTP_'+str(e.code); message=detail.get('reply') or detail.get('message') or code or raw[:300]
+        raise AgentHttpError(e.code,code,f"HTTP {e.code}: {message}",detail)
+    except urllib.error.URLError as e: raise AgentError(f'Canonical transport unavailable: {getattr(e,"reason",e)}')
+    except TimeoutError: raise AgentError('Canonical request timed out')
 
 def probe_server(server,timeout=15):
-    req=urllib.request.Request(server.rstrip('/')+'/api/health',method='GET',headers={'user-agent':'OMEGA-Hybrid-Agent/'+VERSION})
+    req=urllib.request.Request(server.rstrip('/')+'/api/health',method='GET',headers={'cache-control':'no-cache','x-omega-hybrid-protocol':HYBRID_PROTOCOL,'user-agent':'OMEGA-Hybrid-Agent/'+VERSION})
     try:
         with urllib.request.urlopen(req,timeout=timeout) as r:
             body=r.read().decode('utf-8','replace')
@@ -55,11 +81,28 @@ def parse_pair(value):
 def normalize_root_arg(value):
     raw=str(value or '.').strip().strip('"').strip()
     if not raw: return '.'
-    # Windows command-line parsing can turn a quoted drive root such as "J:\\" into J:\\".
-    # Quotes are not valid Windows path characters, so removing an accidental edge quote is safe.
     raw=raw.rstrip('"').strip()
     if os.name=='nt' and re.fullmatch(r'[A-Za-z]:\\',raw): return raw+'.'
     return raw
+
+def validate_root(value):
+    root=Path(normalize_root_arg(value)).expanduser().resolve()
+    if not root.exists() or not root.is_dir(): raise AgentError(f'Approved root does not exist as a directory: {root}')
+    if os.name=='nt' and root.drive.upper()=='C:': raise AgentError('R129 refuses C: as the OMEGA approved runtime root.')
+    return root
+
+def acquire_instance_lock(state_dir:Path):
+    lock_path=state_dir/'agent.lock'; handle=open(lock_path,'a+b');handle.seek(0);handle.write(b'1');handle.flush();handle.seek(0)
+    try:
+        if os.name=='nt':
+            import msvcrt
+            msvcrt.locking(handle.fileno(),msvcrt.LK_NBLCK,1)
+        else:
+            import fcntl
+            fcntl.flock(handle.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB)
+    except (OSError,IOError):
+        handle.close();raise AgentError('Another OMEGA Hybrid connector is already active for this approved root. Close the old window before starting a new one.')
+    return handle
 
 def secure_path(root:Path,rel='.'):
     rel=str(rel or '.').replace('\\','/').strip()
@@ -241,55 +284,91 @@ def execute_job(job,root:Path):
     return packet
 
 def main():
-    ap=argparse.ArgumentParser(description='OMEGA R34 Hybrid Link local agent')
+    ap=argparse.ArgumentParser(description='OMEGA R129 sealed Hybrid Link local agent')
     ap.add_argument('--server',default=DEFAULT_SERVER);ap.add_argument('--pair',required=True,help='pairing code from OMEGA Hybrid Link')
-    ap.add_argument('--root',default='.',help='approved local root; all file/process work stays inside it')
-    ap.add_argument('--once',action='store_true',help='poll once, then exit')
-    args=ap.parse_args();server=args.server.rstrip('/');bridge_id,secret=parse_pair(args.pair);root=Path(normalize_root_arg(args.root)).expanduser().resolve();root.mkdir(parents=True,exist_ok=True)
-    state_dir=root/'.omega_hybrid';state_dir.mkdir(exist_ok=True);id_file=state_dir/'device_id.txt'
-    device_id=id_file.read_text().strip() if id_file.exists() else 'device_'+uuid.uuid4().hex
-    id_file.write_text(device_id)
+    ap.add_argument('--root',default='.',help='existing approved local root; all file/process work stays inside it')
+    ap.add_argument('--once',action='store_true',help='establish one heartbeat/poll cycle, then exit')
+    ap.add_argument('--diagnose',action='store_true',help='authenticate, register, prove one heartbeat, then exit without polling work')
+    args=ap.parse_args();server=args.server.rstrip('/');bridge_id,secret=parse_pair(args.pair)
+    try: root=validate_root(args.root)
+    except AgentError as e: print('ROOT FAIL —',e,file=sys.stderr);raise SystemExit(20)
+    state_dir=root/'.omega_hybrid';state_dir.mkdir(exist_ok=True)
+    try: instance_lock=acquire_instance_lock(state_dir)
+    except AgentError as e: print('INSTANCE FAIL —',e,file=sys.stderr);raise SystemExit(24)
+    _=instance_lock
+    id_file=state_dir/'device_id.txt';device_id=id_file.read_text('utf-8').strip() if id_file.exists() else 'device_'+uuid.uuid4().hex
+    if not re.fullmatch(r'[A-Za-z0-9._:-]{8,128}',device_id): device_id='device_'+uuid.uuid4().hex
+    id_file.write_text(device_id,'utf-8')
+    boot_id='boot_'+uuid.uuid4().hex;agent_sha256=sha_bytes(Path(__file__).read_bytes());root_identity=normalized_root_identity(root)
     caps=['TRAIN_LOCAL','INDEX','READ_TEXT','SEARCH_TEXT','HASH_TREE','SAFE_IMPORT','BUILD','TEST','PACKAGE','SUPPORT_BUNDLE','APPLY_PATCH','OPEN_URL','WAIT']
-    payload={'bridgeId':bridge_id,'deviceId':device_id,'name':socket.gethostname(),'platform':platform.platform(),'version':VERSION,'capabilities':caps,'rootLabel':root.name or root.anchor}
+    state_file=state_dir/'connection_state.json';heartbeat_seq=0;announced_online=False
+    def write_state(stage,**extra):
+        atomic_json(state_file,{'schema':'OMEGA_HYBRID_LOCAL_STATE_R129','stage':stage,'updatedAt':time.time(),'server':server,'deviceId':device_id,'bootId':boot_id,'protocol':HYBRID_PROTOCOL,'version':VERSION,'agentSha256':agent_sha256,'rootIdentity':root_identity,'rootLabel':root.name or root.anchor,'heartbeatSeq':heartbeat_seq,'secretStored':False,**extra})
+    def registration_payload():
+        return {'bridgeId':bridge_id,'deviceId':device_id,'bootId':boot_id,'name':socket.gethostname(),'platform':platform.platform(),'version':VERSION,'protocol':HYBRID_PROTOCOL,'agentSha256':agent_sha256,'rootIdentity':root_identity,'capabilities':caps,'rootLabel':root.name or root.anchor}
+    def register():
+        nonlocal heartbeat_seq
+        out=request_json(server,'/api/hybrid/agent/register',registration_payload(),bridge_id,secret,20);heartbeat_seq=0;write_state('REGISTERED_HEARTBEAT_REQUIRED',registered=True,online=False);return out
+    def heartbeat():
+        nonlocal heartbeat_seq
+        heartbeat_seq+=1
+        out=request_json(server,'/api/hybrid/agent/heartbeat',{'bridgeId':bridge_id,'deviceId':device_id,'bootId':boot_id,'protocol':HYBRID_PROTOCOL,'version':VERSION,'agentSha256':agent_sha256,'heartbeatSeq':heartbeat_seq},bridge_id,secret,15)
+        write_state('ONLINE_HEARTBEAT_PROVEN',online=True,lastHeartbeatAt=time.time());return out
     print('OMEGA Hybrid Link agent',VERSION)
+    print('Protocol:',HYBRID_PROTOCOL)
     print('Approved root:',root)
+    print('Agent SHA-256:',agent_sha256)
+    print('Root identity:',root_identity)
     print('[1/4] CANONICAL REACHABILITY:',server)
     try:
         probe_server(server)
         print('      PASS — /api/health reachable')
     except Exception as e:
-        print('      FAIL —',e,file=sys.stderr)
-        print('      Check internet, DNS, firewall, or canonical runtime availability. No PC ONLINE claim was made.',file=sys.stderr)
-        raise SystemExit(21)
-    print('[2/4] AUTHENTICATING / REGISTERING DEVICE')
+        write_state('CANONICAL_UNREACHABLE',online=False,error=str(e)[:500]);print('      FAIL —',e,file=sys.stderr);print('      Check internet, DNS, firewall, or canonical runtime availability. No PC ONLINE claim was made.',file=sys.stderr);raise SystemExit(21)
+    print('[2/4] AUTHENTICATING / REGISTERING SEALED DEVICE IDENTITY')
     try:
-        request_json(server,'/api/hybrid/agent/register',payload,bridge_id,secret)
-        print('      PASS — browser credential accepted and device registered')
-    except Exception as e:
-        print('      FAIL —',e,file=sys.stderr)
-        print('      Pairing may be expired/rotated, or the Worker rejected authentication. Rotate pairing and retry.',file=sys.stderr)
+        register();print('      PASS — identity registered; PC ONLINE is still false until heartbeat proof')
+    except AgentHttpError as e:
+        write_state('REGISTER_REJECTED',online=False,errorCode=e.code,error=str(e)[:500]);print('      FAIL —',e,file=sys.stderr)
+        if e.code=='PAIR_AUTH_FAILED': print('      Pairing credential is rejected. Use OMEGA to prepare the current R129 connector; this agent will not retry a dead credential.',file=sys.stderr)
         raise SystemExit(22)
-    print('[3/4] ESTABLISHING AUTHENTICATED HEARTBEAT')
-    failures=0;announced_online=False
+    except Exception as e:
+        write_state('REGISTER_FAILED',online=False,error=str(e)[:500]);print('      FAIL —',e,file=sys.stderr);raise SystemExit(22)
+    print('[3/4] ESTABLISHING AUTHENTICATED MONOTONIC HEARTBEAT')
+    try:
+        heartbeat();announced_online=True;print('      PASS — authenticated heartbeat returned. Browser may now truthfully show PC ONLINE / SEALED.')
+    except Exception as e:
+        write_state('HEARTBEAT_FAILED',online=False,error=str(e)[:500]);print('      FAIL —',e,file=sys.stderr);print('      Registration alone is not PC ONLINE.',file=sys.stderr);raise SystemExit(23)
+    if args.diagnose:
+        print('[4/4] DIAGNOSTIC COMPLETE — no work was polled. Heartbeat will age stale after this process exits.');return
+    print('[4/4] GOVERNED JOB POLL ACTIVE — keep this single window open')
+    failures=0;backoff=HEARTBEAT_INTERVAL_SECONDS
     while True:
         try:
-            request_json(server,'/api/hybrid/agent/heartbeat',{'bridgeId':bridge_id,'deviceId':device_id,'version':VERSION},bridge_id,secret,15)
-            if not announced_online:
-                print('      PASS — authenticated heartbeat returned. Browser may now truthfully show PC ONLINE.')
-                print('[4/4] GOVERNED JOB POLL ACTIVE — keep this window open')
-                announced_online=True
-            failures=0
-            polled=request_json(server,'/api/hybrid/agent/poll',{'bridgeId':bridge_id,'deviceId':device_id},bridge_id,secret,30);job=polled.get('job')
+            if not announced_online: heartbeat();announced_online=True
+            polled=request_json(server,'/api/hybrid/agent/poll',{'bridgeId':bridge_id,'deviceId':device_id,'bootId':boot_id,'protocol':HYBRID_PROTOCOL,'agentSha256':agent_sha256},bridge_id,secret,30);job=polled.get('job')
             if job:
-                print('Running approved job',job.get('id'));packet=execute_job(job,root);packet.update({'bridgeId':bridge_id,'deviceId':device_id});request_json(server,'/api/hybrid/agent/result',packet,bridge_id,secret,60);print('Returned proof:',packet['resultFingerprint'])
+                print('Running approved job',job.get('id'));packet=execute_job(job,root);packet.update({'bridgeId':bridge_id,'deviceId':device_id,'bootId':boot_id,'protocol':HYBRID_PROTOCOL,'agentSha256':agent_sha256});request_json(server,'/api/hybrid/agent/result',packet,bridge_id,secret,60);print('Returned proof:',packet['resultFingerprint'])
             if args.once:return
+            time.sleep(HEARTBEAT_INTERVAL_SECONDS);heartbeat();failures=0;backoff=HEARTBEAT_INTERVAL_SECONDS
         except KeyboardInterrupt:
-            print('Hybrid Link stopped by user. PC ONLINE will age to HEARTBEAT STALE.');return
+            write_state('STOPPED_BY_USER',online=False);print('Hybrid Link stopped by user. PC ONLINE will age to HEARTBEAT STALE.');return
+        except AgentHttpError as e:
+            write_state('HTTP_ERROR',online=False,errorCode=e.code,error=str(e)[:500]);announced_online=False
+            if e.code=='DEVICE_NOT_REGISTERED':
+                print('[RE-REGISTER] server requested sealed registration refresh.',file=sys.stderr)
+                try: register();continue
+                except Exception as inner: print('Re-registration failed:',inner,file=sys.stderr);raise SystemExit(22)
+            if e.code=='HEARTBEAT_REPLAY':
+                expected=int(e.payload.get('expectedGreaterThan') or heartbeat_seq);heartbeat_seq=max(heartbeat_seq,expected);print('[HEARTBEAT RESYNC] replay was rejected; sequence advanced without claiming a new proof.',file=sys.stderr);continue
+            if e.code=='PAIR_AUTH_FAILED':
+                print('[AUTH REJECTED] pairing is no longer valid. This process stops instead of hammering or silently rotating credentials.',file=sys.stderr);raise SystemExit(22)
+            if e.code=='DEVICE_SESSION_SUPERSEDED':
+                print('[SESSION SUPERSEDED] a newer sealed connector owns this device. Close this stale window and keep only the newest connector.',file=sys.stderr);raise SystemExit(25)
+            failures+=1;print(f'[HTTP ERROR] attempt {failures}: {e}',file=sys.stderr)
         except Exception as e:
-            failures+=1
-            label='AUTH/HTTP/TRANSPORT ERROR' if failures<3 else 'HEARTBEAT STALE RISK'
-            print(f'[{label}] attempt {failures}: {e}',file=sys.stderr)
-            if failures==3: print('Three consecutive authenticated cycles failed. The browser must not treat this host as currently online.',file=sys.stderr)
-        time.sleep(4)
+            failures+=1;announced_online=False;write_state('TRANSPORT_DEGRADED',online=False,error=str(e)[:500]);print(f'[TRANSPORT ERROR] attempt {failures}: {e}',file=sys.stderr)
+        if failures>=3: print('Three consecutive cycles failed. Browser must not treat this host as currently online.',file=sys.stderr)
+        time.sleep(backoff);backoff=min(MAX_BACKOFF_SECONDS,max(HEARTBEAT_INTERVAL_SECONDS,backoff*2))
 
 if __name__=='__main__': main()
