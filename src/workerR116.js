@@ -4,8 +4,9 @@ import {swarmApiR121,withSwarmCorsR121} from './swarm/swarmApiR121.js';
 import {OmegaSwarmCell} from './swarm/swarmCellR121.js';
 import {OmegaSwarmCoordinator} from './swarm/swarmCoordinatorR121.js';
 import {OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator} from './swarm/swarmOrganismR123.js';
+import {OmegaSwarmAutonomicCoordinator} from './swarm/swarmAutonomicR125.js';
 
-export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator};
+export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator,OmegaSwarmAutonomicCoordinator};
 
 const REVISION='R116';
 const CONNECTOR_REVISION='R117';
