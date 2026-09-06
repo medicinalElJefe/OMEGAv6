@@ -38,7 +38,7 @@ jobs:
         run: |
           node tests/r140-living-world-operation-bridge-invariants.mjs
           node tests/r136-living-world-frame-invariants.mjs
-          node tests/r134-canonical-world-continuity-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
           node tests/r125-accuracy-engine-invariants.mjs
           node tests/r124-self-contained-build-invariants.mjs
       - name: Full inherited regression and production build
