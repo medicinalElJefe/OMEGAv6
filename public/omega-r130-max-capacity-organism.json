@@ -1,0 +1,16 @@
+{
+  "schema":"omega.max-capacity-organism.r130.v1",
+  "runtime":"OMEGA_R130_MAX_CAPACITY_ORGANISM",
+  "canonicalAuthority":"OMEGAV6_R125_ADMISSION",
+  "hierarchy":{"seed":1,"organs":12,"branches":144,"cells":1728,"lanes":20736},
+  "fullBody":{"statefulCells":1728,"branchCrosschecks":144,"organSyntheses":12,"interorganExchanges":12,"totalExecutionTasksIncludingFrameAndBarrier":1899,"maxConcurrentDispatch":48},
+  "waves":["FRAME","PARALLEL_CELL_WORK","MESH_BARRIER","BRANCH_CROSSCHECK","ORGAN_SYNTHESIS","INTERORGAN_EXCHANGE","PROOF_RETURN"],
+  "modes":["ADAPTIVE","SOLO","BRANCH","ORGAN","FLOCK","BODY","FULL"],
+  "scopes":["BODY","ORGAN","BRANCH","CELL"],
+  "interactionFabric":{"cellExecution":"real stateful OMEGA_SWARM_CELL Durable Objects","synchronization":"whole selected cell wave barrier","synapticReads":"semantic neighbor memory after barrier","branchCorrection":"contradiction/evidence/scar cross-check","organCoordination":"branch synthesis per represented organ","interorganExchange":"each represented organ compares against all represented organ syntheses","return":"proof-bounded whole-body receipt"},
+  "memory":{"candidateBlackboard":true,"cellMemoryIndex":true,"scarCarry":true,"eventStream":true,"checkpointSha256":true,"merkleReceipts":true,"executionSemanticHash":true},
+  "budgets":{"workersAiHardMaxPerMission":12,"concurrentDispatchHardMax":48,"adaptiveCellCapWithoutFullAuto":288,"explicitFullBodyCells":1728},
+  "proofIntegration":{"r127ExecutionReceiptAdapter":true,"r128ExternalValidationCredit":0,"r129ReplayUpstreamHash":true,"canonicalMutation":false},
+  "authorityBoundaries":["CORTEX_EXECUTION_FABRIC_NOT_CANON","CORTEX_CANDIDATE_MEMORY_NOT_CANON","EXECUTION_QUORUM_NOT_TRUTH","R130_EXECUTION_RECEIPT_NOT_CANON","CORTEX_RECEIPT_RETURNED_NOT_ADMITTED"],
+  "truthBoundary":"R130 coordinates and executes the OMEGA organism at bounded maximum capacity. Cell completion, model synthesis, internal receipt verification, candidate memory, quorum and replay identity remain execution/proof artifacts. They are not external empirical validation, independent reproduction, universal truth or CanonState admission."
+}
