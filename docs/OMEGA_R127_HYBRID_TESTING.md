@@ -1,0 +1,3 @@
+# R127 Hybrid verification layers
+
+Static source invariants verify the zero-drift policy, root confinement, server/local digest equality, parser preflight, current-heartbeat truth, and no silent fallback. Inherited Hybrid, navigation, Earth and full product regressions verify that the successor does not flatten earlier authorities. Wrangler dry-run proves the Cloudflare bundle can be constructed with the active configuration. Production endpoint verification after merge must then prove that the deployed Worker actually serves the R127 manifest/digest headers. The final physical-machine proof is a real authenticated heartbeat from the paired Windows agent.
