@@ -8,13 +8,16 @@ import OmegaOrganismR123 from './OmegaOrganismR123';
 import OmegaAutonomicR125 from './OmegaAutonomicR125';
 import OmegaMaximumCockpitR126 from './OmegaMaximumCockpitR126';
 import OmegaCapabilityFieldR138 from './OmegaCapabilityFieldR138';
+import OmegaOperationGraphR148 from './OmegaOperationGraphR148';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
+const GRAPH_SURFACES=new Set(['Convergence','Development','Build Out','Control Matrix','SAI Lab','Validation','Evidence & Proof']);
 export default function OmegaSpecialistSuite(props:Props){
  const {panel,record,state,address,onAddress,onNavigate,status,restore}=props;
  const capability=<OmegaCapabilityFieldR138 panel={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>;
- const wrap=(content:any)=><div className='r138-capability-first'>{capability}{content}</div>;
+ const operationGraph=GRAPH_SURFACES.has(panel)?<OmegaOperationGraphR148 panel={panel} address={address} record={record}/>:null;
+ const wrap=(content:any)=><div className='r138-capability-first'>{capability}{operationGraph}{content}</div>;
  if(panel==='Convergence')return wrap(<div>
   <OmegaMaximumCockpitR126 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>
   <details className='r121-legacy-convergence' open><summary>R126 autonomic execution · scope / detach / checkpoint / rejoin</summary><OmegaAutonomicR125/></details>
