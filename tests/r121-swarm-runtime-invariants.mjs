@@ -24,13 +24,14 @@ assert.equal(planMissionR121({intent:'mirror',mode:'MIRROR'}).selected.length,2)
 assert.ok(SWARM_MODES.includes('PIPELINE')&&SWARM_MODES.includes('CONSENSUS'));
 
 const root=path.resolve(import.meta.dirname,'..');
-const worker=fs.readFileSync(path.join(root,'src/workerR121.js'),'utf8');
+const worker=fs.readFileSync(path.join(root,'src/workerR116.js'),'utf8');
 const api=fs.readFileSync(path.join(root,'src/swarm/swarmApiR121.js'),'utf8');
 const cell=fs.readFileSync(path.join(root,'src/swarm/swarmCellR121.js'),'utf8');
 const coordinator=fs.readFileSync(path.join(root,'src/swarm/swarmCoordinatorR121.js'),'utf8');
 const wrangler=fs.readFileSync(path.join(root,'wrangler.jsonc'),'utf8');
 const ui=fs.readFileSync(path.join(root,'src/OmegaSwarmR121.tsx'),'utf8');
 const suite=fs.readFileSync(path.join(root,'src/OmegaSpecialistSuite.tsx'),'utf8');
+assert.match(worker,/swarmApiR121/);
 assert.match(worker,/OmegaSwarmCell/);
 assert.match(worker,/OmegaSwarmCoordinator/);
 assert.match(worker,/startsWith\('\/api\/swarm\/'\)/);
@@ -39,7 +40,7 @@ assert.match(coordinator,/RETURNED_NOT_ADMITTED/);
 assert.match(coordinator,/canonicalMutation:false/);
 assert.match(cell,/canonicalMutation:false/);
 assert.match(cell,/OMEGA_SWARM_CELL_RECEIPT_R121/);
-assert.match(wrangler,/"main": "src\/workerR121\.js"/);
+assert.match(wrangler,/"main": "src\/workerR116\.js"/);
 assert.match(wrangler,/OMEGA_SWARM_CELL/);
 assert.match(wrangler,/OMEGA_SWARM_COORDINATOR/);
 assert.match(wrangler,/r121-sovereign-swarm/);
