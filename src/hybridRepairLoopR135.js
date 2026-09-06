@@ -1,0 +1,22 @@
+export const R135_REVISION='R135';
+export const R135_LAWS=Object.freeze([
+ 'HOST_PROOF_PRECEDES_EVERY_REPAIR_DELTA',
+ 'REPAIR_NEVER_ESCAPES_THE_APPROVED_MISSION_ENVELOPE',
+ 'SEARCH_PRECEDES_READ_AND_READ_PRECEDES_MUTATION',
+ 'EVERY_MUTATION_IS_PREIMAGE_HASH_BOUND',
+ 'PATCH_SUCCESS_REQUIRES_BUILD_AND_TEST_PROOF',
+ 'MISSION_CYCLES_ARE_BOUNDED_AND_FAIL_CLOSED',
+ 'AI_MAY_PROPOSE_EXACT_REPLACEMENTS_BUT_CANNOT_BYPASS_HOST_PROOF',
+ 'R125_CANONICAL_ADMISSION_AUTHORITY_IS_UNCHANGED'
+]);
+const text=v=>String(v??'').trim();
+const safePath=v=>{const s=text(v).replace(/\\/g,'/');if(!s||s==='.'||s.startsWith('/')||/^[A-Za-z]:/.test(s)||s.split('/').includes('..')||s.includes('\0'))return null;return s.split('/').filter(Boolean).join('/')};
+const failedProofs=job=>(job?.returnPacket?.stepProofs||[]).filter(x=>x?.ok===false);
+const successfulProof=(job,op)=>(job?.returnPacket?.stepProofs||[]).find(x=>x?.op===op&&x?.ok===true);
+const stepFor=(job,op)=>(job?.steps||[]).find(x=>x?.op===op);
+export function errorQueryR135(job){const raw=[job?.log,job?.returnPacket?.log,...failedProofs(job).map(x=>x?.error)].filter(Boolean).join(' ');const stop=new Set(['error','failed','failure','build','test','step','process','completed','exit','code','with','from','that','this','into','file','line','omega']);const words=(raw.match(/[A-Za-z_][A-Za-z0-9_.:-]{2,}/g)||[]).map(x=>x.toLowerCase()).filter(x=>!stop.has(x));return [...new Set(words)].slice(0,8).join(' ')||'error failed exception todo fixme'}
+export function nextRepairPhaseR135(job){if(!job||job.status!=='FAILED')return{kind:'COMPLETE_OR_NOT_FAILED'};const search=successfulProof(job,'SEARCH_TEXT'),read=successfulProof(job,'READ_TEXT');if(read)return{kind:'PROPOSE_PATCH',proof:read,step:stepFor(job,'READ_TEXT')};if(search){const matches=Array.isArray(search?.result?.matches)?search.result.matches:[];const path=safePath(matches.find(x=>safePath(x?.path))?.path);return path?{kind:'READ_TARGET',path}:{kind:'HOLD',reason:'SEARCH_RETURNED_NO_SAFE_TEXT_TARGET'}}return{kind:'SEARCH_FAILURE',query:errorQueryR135(job)}}
+export function evidenceStepsR135(job){const phase=nextRepairPhaseR135(job),path=text(job?.projectPath||'.');if(phase.kind==='SEARCH_FAILURE')return[{id:'S01',op:'HASH_TREE',label:'Re-fingerprint the approved project before repair discovery',path,maxResults:5000},{id:'S02',op:'SEARCH_TEXT',label:'Locate source evidence matching returned host failure',path,query:phase.query,maxResults:160}];if(phase.kind==='READ_TARGET')return[{id:'S01',op:'READ_TEXT',label:'Read the smallest evidenced repair target and capture its preimage hash',path:phase.path}];return[]}
+export function repairContextR135(job){const phase=nextRepairPhaseR135(job);if(phase.kind!=='PROPOSE_PATCH')return null;const path=safePath(phase.step?.path),result=phase.proof?.result||{},source=String(result.text||'').slice(0,30000),sha=text(result.sha256).toLowerCase();if(!path||!/^[0-9a-f]{64}$/.test(sha)||!source)return null;return{path,expectedSha256:sha,source,failure:[job?.log,job?.returnPacket?.log,...failedProofs(job).map(x=>x?.error)].filter(Boolean).join('\n').slice(-12000)}}
+export function validateRepairCandidateR135(candidate,context){if(!candidate||!context)return{ok:false,error:'NO_CANDIDATE_OR_CONTEXT'};if(safePath(candidate.path)!==context.path)return{ok:false,error:'PATH_MISMATCH'};if(text(candidate.expectedSha256).toLowerCase()!==context.expectedSha256)return{ok:false,error:'PREIMAGE_MISMATCH'};const rows=Array.isArray(candidate.replacements)?candidate.replacements:[];if(rows.length<1||rows.length>12)return{ok:false,error:'REPLACEMENT_COUNT'};const replacements=[];for(const [index,row] of rows.entries()){const find=String(row?.find??''),replace=String(row?.replace??''),occurrences=Math.max(1,Math.min(12,Math.round(Number(row?.occurrences)||1)));if(!find||find.length>12000||replace.length>12000)return{ok:false,error:'REPLACEMENT_SIZE_'+index};const observed=context.source.split(find).length-1;if(observed!==occurrences)return{ok:false,error:'OCCURRENCE_MISMATCH_'+index};replacements.push({find,replace,occurrences})}return{ok:true,step:{id:'S01',op:'APPLY_PATCH',label:'Apply AI-proposed exact replacement against proved preimage',path:context.path,expectedSha256:context.expectedSha256,replacements}}}
+export function verificationStepsR135(projectPath,profile='AUTO_BUILD'){return[{id:'S02',op:'BUILD',label:'Build after bounded repair delta',path:projectPath,profile},{id:'S03',op:'TEST',label:'Verify repaired behavior after build',path:projectPath,profile}]}
