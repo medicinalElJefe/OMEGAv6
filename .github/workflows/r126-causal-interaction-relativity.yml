@@ -6,34 +6,54 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_run:
+    workflows:
+      - OMEGA R125 Accuracy First Engine
+    types: [completed]
 
 permissions:
   contents: read
 
 concurrency:
-  group: omega-r126-causal-${{ github.event.pull_request.number || github.sha }}
+  group: omega-r126-causal-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   causal-proof:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Install dependencies
         run: npm install
-      - name: Execute causal interaction invariants
+      - name: Prove causal evidence graph
         run: node --experimental-strip-types tests/r126-causal-interaction-relativity.mjs
+      - name: Prove causal time, frame transform and motion rebase fabric
+        run: node tests/r126-causal-interaction-invariants.mjs
       - name: Preserve R125 accuracy gate
         run: node tests/r125-accuracy-engine-invariants.mjs
-      - name: Preserve inherited R124-R121 gates
+      - name: Preserve inherited continuity, relativity, federation and SAI gates
         run: |
           node tests/r124-self-contained-build-invariants.mjs
           node tests/r123-living-total-experience-invariants.mjs
           node tests/r122-computed-reality-invariants.mjs
           node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r77-woven-continuity-invariants.mjs
+          node tests/dimensional-relativity-r24-invariants.mjs
+          node tests/r97-federation-run-invariants.mjs
+          node tests/sai-b059-invariants.mjs
       - name: Production build
         run: npm run build
+      - name: Assert R126 public federation artifacts emitted
+        shell: bash
+        run: |
+          test -f dist/omega-r126-causal-fabric.json
+          test -f dist/r126-causal-fabric.html
+          grep -q 'OMEGA_R126_CAUSAL_INTERACTION_RELATIVITY_FABRIC' dist/omega-r126-causal-fabric.json
+          echo 'R126 causal interaction relativity fabric: PROVED'
