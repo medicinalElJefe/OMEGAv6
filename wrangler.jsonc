@@ -1,9 +1,10 @@
-// OMEGA R126 total maximum build extends the proven R116 runtime spine without replacing inherited execution or canonical authority.
-// Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes, with bounded BODY/ORGAN/BRANCH/CELL autonomic execution.
+// OMEGA R127 successor runtime preserves the complete R126/R125/R123/R121 stack and adds a durable synaptic cortex above it.
+// Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes.
+// R127 adds a mission causal graph, candidate blackboard memory, synaptic routing, scars, checkpoints and proof-bounded reconvergence without changing CanonState authority.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR116.js",
+  "main": "src/workerR127.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
@@ -34,14 +35,16 @@
       {"name": "OMEGA_SWARM_BRANCH", "class_name": "OmegaSwarmBranch"},
       {"name": "OMEGA_SWARM_ORGAN", "class_name": "OmegaSwarmOrgan"},
       {"name": "OMEGA_SWARM_ORGANISM", "class_name": "OmegaSwarmOrganismCoordinator"},
-      {"name": "OMEGA_SWARM_AUTONOMIC", "class_name": "OmegaSwarmAutonomicCoordinator"}
+      {"name": "OMEGA_SWARM_AUTONOMIC", "class_name": "OmegaSwarmAutonomicCoordinator"},
+      {"name": "OMEGA_SWARM_CORTEX", "class_name": "OmegaSwarmCortex"}
     ]
   },
   "migrations": [
     {"tag": "r32-enacted-runtime", "new_sqlite_classes": ["OmegaRuntime"]},
     {"tag": "r121-sovereign-swarm", "new_sqlite_classes": ["OmegaSwarmCell", "OmegaSwarmCoordinator"]},
     {"tag": "r123-organism-swarm", "new_sqlite_classes": ["OmegaSwarmBranch", "OmegaSwarmOrgan", "OmegaSwarmOrganismCoordinator"]},
-    {"tag": "r125-autonomic-swarm", "new_sqlite_classes": ["OmegaSwarmAutonomicCoordinator"]}
+    {"tag": "r125-autonomic-swarm", "new_sqlite_classes": ["OmegaSwarmAutonomicCoordinator"]},
+    {"tag": "r127-synaptic-cortex", "new_sqlite_classes": ["OmegaSwarmCortex"]}
   ],
   "observability": {
     "enabled": true
