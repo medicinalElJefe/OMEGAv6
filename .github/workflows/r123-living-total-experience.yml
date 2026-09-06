@@ -1,0 +1,26 @@
+name: OMEGA R123 Living Total Experience
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r123-living-total-experience-runtime]
+permissions:
+  contents: read
+jobs:
+  r123-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: R123 living experience invariants
+        run: node tests/r123-living-total-experience-invariants.mjs
+      - name: Preserve R122 computed-reality invariants
+        run: node tests/r122-computed-reality-invariants.mjs
+      - name: Preserve R121 spherical Earth connector invariants
+        run: node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: TypeScript/Vite production build
+        run: npm run build
