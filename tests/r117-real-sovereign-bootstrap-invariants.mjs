@@ -1,0 +1,27 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error('R117 '+msg)};
+const worker=read('src/workerR116.js');
+const config=read('wrangler.jsonc');
+const bootstrap=read('src/hybridBootstrapR117.ts');
+const launcher=read('src/sovereignLauncherR117.ts');
+const surface=read('src/SovereignConnectionR117.tsx');
+const hybrid=read('src/HybridLinkR32.tsx');
+const compact=read('src/HybridConnectBarR111.tsx');
+const accepted=read('src/acceptedProductionR117.ts');
+
+must(config.includes('"main": "src/workerR116.js"'),'Wrangler must retain the already-proven R116 runtime spine');
+must(worker.includes("path==='/api/hybrid/bootstrap'")&&worker.includes("idFromName(sid)")&&worker.includes('omega-runtime.internal/pair'),'bootstrap must mint a fresh pair directly in durable runtime state');
+must(worker.includes("new Headers({'content-type':'application/json','x-omega-session-id':sid})"),'bootstrap must construct clean durable-pair headers from session identity only');
+must(!worker.includes("request.headers.get('x-omega-bridge-secret')"),'fresh-pair bootstrap must not trust stale browser bridge secret');
+must(worker.includes("CONNECTOR_REVISION='R117'")&&worker.includes('nativeExecutionClaimed:false'),'runtime must identify the R117 connector repair without claiming PC ONLINE');
+must(bootstrap.includes("fetch('/api/hybrid/bootstrap'")&&bootstrap.includes('saveHybridBridge'),'browser must call fresh bootstrap and persist returned bridge identity');
+must(launcher.includes('OMEGA_ORIGIN=${ORIGIN}')&&launcher.includes("const ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'launcher must hard-bind canonical OMEGAv6');
+must(launcher.includes('START_OMEGA_PC_LINK_R117_CLEAN.cmd'),'launcher filename must be unmistakably current');
+must(!launcher.includes("print('PASS — browser credential accepted and device registered')"),'R117 wrapper must execute the canonical agent instead of impersonating agent proof output');
+must(launcher.includes('!OMEGA_PY!')&&launcher.includes('%OMEGA_AGENT%')&&launcher.includes('--server')&&launcher.includes('%OMEGA_ORIGIN%')&&launcher.includes('--pair')&&launcher.includes('%OMEGA_PAIR%'),'launcher must run the real canonical Hybrid agent with the fresh pair');
+must(surface.includes('FIX CONNECTION NOW')&&surface.includes('bootstrapSovereignR117')&&surface.includes('launcherBlobUrlR117'),'ordinary UI must expose one fresh repair/download action');
+must(!surface.includes('R112 fallback'),'R117 ordinary surface must not offer the old fallback launcher');
+must(hybrid.includes('SovereignConnectionR117')&&compact.includes('SovereignConnectionR117'),'full and compact Hybrid mounts must use the R117 successor surface');
+for(const law of ['FRESH_PAIR_BOOTSTRAP_BYPASSES_STALE_BROWSER_HEADERS','ONE_CLEAN_CONNECTOR_IS_CANONICAL','BOOTSTRAP_IS_NOT_DEVICE_PROOF','R116_AND_ALL_PRIOR_ACCEPTED_PRODUCTION_PRESERVED'])must(accepted.includes(law),`accepted production missing ${law}`);
+console.log('R117 real Sovereign bootstrap invariants PASS · additive on proven R116 runtime spine');

@@ -1,9 +1,8 @@
-import SovereignConnectionR112 from './SovereignConnectionR112';
+import SovereignConnectionR117 from './SovereignConnectionR117';
 
 /**
- * R112 compatibility mount.
- * R111 introduced the one-touch connection surface; R112 keeps the mount point
- * while moving pairing, reconnect/repair, launcher generation, heartbeat truth,
- * solver state and progressive disclosure into one shared connection component.
+ * Compatibility mount for the one-touch connection surface.
+ * R117 keeps the existing mount point while moving connection repair to a
+ * server-backed fresh-pair bootstrap and one clean canonical Windows connector.
  */
-export default function HybridConnectBarR111(){return <SovereignConnectionR112 compact/>}
+export default function HybridConnectBarR111(){return <SovereignConnectionR117 compact/>}
