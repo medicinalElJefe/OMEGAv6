@@ -2,6 +2,7 @@ import {useState} from 'react';
 import {Cpu,FolderOpen,Gauge,GraduationCap,ShieldCheck,TerminalSquare} from 'lucide-react';
 import HybridMissionControlR8 from './HybridMissionControlR8';
 import SovereignConnectionR117 from './SovereignConnectionR117';
+import HybridProofClosureR140 from './HybridProofClosureR140';
 import './hybridLinkR32.css';
 import './hybridLinkR112.css';
 
@@ -11,17 +12,18 @@ export default function HybridLinkR32({status,record}:Props){
  const[deepOpen,setDeepOpen]=useState(false);
  return <section className='hybrid-r32 special-app r112-hybrid-link'>
   <header className='r112-hybrid-hero'>
-   <div><span>SOVEREIGN COMPUTE · HYBRID LINK · R117</span><h2>Your PC is an OMEGA compute node.</h2><p>The ordinary path is intentionally narrow: rotate one fresh durable credential, download one clean Windows connector, prove one current heartbeat, then expose local capabilities. Old preview-host launchers are not part of the user path.</p></div>
-   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat. Native execution is claimed only while an authenticated agent heartbeat is current.</small></div>
+   <div><span>SOVEREIGN COMPUTE · HYBRID LINK · R117 CONNECTION + R140 PROOF CLOSURE</span><h2>Your PC is an OMEGA compute node.</h2><p>The ordinary path stays narrow: rotate one fresh durable credential, download one clean Windows connector, prove one current heartbeat, execute only confirmed bounded work, then close every returned host packet into exact-payload fingerprint-verified continuity/scar evidence with deterministic replay. R139 unified capability routing remains a separate preserved layer.</p></div>
+   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat. Native execution is claimed only while an authenticated agent heartbeat is current. A returned workload is not accepted as execution proof until R140 verifies its exact payload fingerprint and semantic equality. Neither heartbeat nor replay promotes CanonState.</small></div>
   </header>
 
   <SovereignConnectionR117/>
+  <HybridProofClosureR140/>
 
   <section className='r112-host-uses' aria-label='What Sovereign Compute adds'>
    <article><FolderOpen/><div><b>Work with the approved local root</b><span>Read, index, hash, patch, build, test and package only inside the bounded machine root.</span></div></article>
    <article><Cpu/><div><b>Run high-compute workers</b><span>RCWA is active when its dependency and heartbeat are proved; future FDTD/FEM/GPU workers remain separately truth-gated.</span></div></article>
    <article><GraduationCap/><div><b>Learn from your local corpus</b><span>TRAIN_LOCAL builds bounded local indexes and learning receipts from approved files. It does not claim silent foundation-model weight training.</span></div></article>
-   <article><Gauge/><div><b>Return proof, not mystery actions</b><span>Every enacted job returns status, output identity and evidence/receipt information to the canonical OMEGA runtime.</span></div></article>
+   <article><Gauge/><div><b>Return proof, not mystery actions</b><span>Every enacted job returns step proofs and a deterministic exact-payload fingerprint; R140 closes that packet into R134 scar/proof continuity and an R136 evidence frame, then exposes replay verification.</span></div></article>
   </section>
 
   <details className='r112-hybrid-deep' onToggle={e=>setDeepOpen((e.currentTarget as HTMLDetailsElement).open)}>
@@ -29,6 +31,6 @@ export default function HybridLinkR32({status,record}:Props){
    {deepOpen&&<HybridMissionControlR8 status={status} record={record}/>}
   </details>
 
-  <footer className='special-boundary'><ShieldCheck/>R117 preserves the durable R101 bridge model, R32 allow-listed execution/proof queue, R113 vector carry, R114 federation closure, R115 machine adapters and R116 truth separation. The connection path itself is fresh-bootstrap → clean connector → authenticated heartbeat → capability. Legacy mission diagnostics are not mounted until explicitly opened.</footer>
+  <footer className='special-boundary'><ShieldCheck/>R140 preserves the durable R101/R32 bridge and allow-listed job queue, the R117 clean bootstrap, R113 vector carry, R114 federation closure, R115 machine adapters, R116 truth separation, R125 admission authority, R134 world/scar continuity, R136 living evidence framing, R138 capability-first visuals and the separate R139 unified capability engine. Host return closure and deterministic replay remain evidence only.</footer>
  </section>;
 }
