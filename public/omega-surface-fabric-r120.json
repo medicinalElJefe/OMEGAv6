@@ -1,0 +1,91 @@
+{
+  "schema": "OMEGA_SURFACE_FABRIC_R120",
+  "revision": "R120",
+  "canonicalAuthority": "OMEGAv6",
+  "lineage": {
+    "strictFederationClosure": "R114",
+    "machineAdapters": "R115",
+    "cloudRuntimeSpine": "R116",
+    "cleanSovereignBootstrap": "R117",
+    "fullSystemOperationalConvergence": "R118",
+    "fullResolutionUltraConvergence": "R119",
+    "rootSafeHybridNavigationCanon": "R120"
+  },
+  "stateLaw": "partition -> exchange/transform -> invariant carry -> scar/residual carry -> re-contextualize/repartition",
+  "rsc": ["Parent", "Interaction", "Scar", "Continuity", "Compression", "Skin", "Interpretation", "Behavior"],
+  "atlasResolution": [12, 144, 1728, 20736, 248832, 61917364224],
+  "atlasTruthBoundary": "Atlas values are representational/address resolution levels, not literal physical dimensions.",
+  "orientation": {
+    "sigma": [-1, 0, 1],
+    "law": "Structure and orientation remain factored; sign reversal does not by itself change structural invariants."
+  },
+  "referenceKernel": {
+    "values": [37, 73],
+    "truthBoundary": "37/73 remain reference-kernel or bias parameters unless independently validated; contextual symmetry/asymmetry remains frame-dependent."
+  },
+  "surfaces": [
+    {
+      "id": "omega-v6",
+      "verb": "ADMIT",
+      "class": "CANONICAL_CONTROL",
+      "url": "https://omegav6.jeffdeweyeljefe.workers.dev/",
+      "currentHumanSurface": true,
+      "mayMutateGlobalCanonState": true,
+      "truth": "Reachability does not prove native PC execution."
+    },
+    {
+      "id": "omega-genesis",
+      "verb": "PROPOSE",
+      "class": "HUMAN_PROPOSAL_SURFACE",
+      "url": "https://omega-genesis-v1.jeffdeweyeljefe.workers.dev/",
+      "currentHumanSurface": true,
+      "machineService": "omega-genesis-machine-r115",
+      "mayMutateGlobalCanonState": false,
+      "truth": "Proposal output is candidate state, not proof or admission."
+    },
+    {
+      "id": "omega-optical",
+      "verb": "SCREEN",
+      "class": "PROTECTED_DESIGN_SURFACE",
+      "url": "https://omega-living-light-etching-private-woven2.vercel.app/",
+      "aliases": [
+        "https://omega-living-light-etching-private-woven2.vercel.app/?utm_source=chatgpt.com",
+        "https://omega-optical-cloud-woven2.vercel.app/"
+      ],
+      "currentHumanSurface": true,
+      "machineService": "omega-optical-machine-r115",
+      "mayMutateGlobalCanonState": false,
+      "truth": "Scalar/reduced-order screening is not RCWA/FDTD/FEM or fabrication validation."
+    },
+    {
+      "id": "omega-sovereign",
+      "verb": "SOLVE",
+      "class": "AUTHENTICATED_NATIVE_TRANSPORT",
+      "currentHumanSurface": false,
+      "currentTransport": "https://omegav6.jeffdeweyeljefe.workers.dev/ -> authenticated Hybrid/Sovereign transport",
+      "historicalHumanSurface": "https://omega-sovereign-convergence.foundasound.chatgpt.site/",
+      "historicalSurfacePolicy": "Historical/donor reference only. Never pairing, heartbeat, launcher, solver or native-execution authority.",
+      "mayMutateGlobalCanonState": false,
+      "truth": "PC ONLINE requires a current authenticated heartbeat from the actual host; fresh solver proof requires a returned current result receipt."
+    }
+  ],
+  "hybrid": {
+    "canonicalOrigin": "https://omegav6.jeffdeweyeljefe.workers.dev",
+    "connectorFilename": "START_OMEGA_PC_LINK_R120_ROOT_SAFE.cmd",
+    "approvedRootPolicy": "J:\\ or another explicitly approved non-system root",
+    "systemDrivePolicy": "OMEGA runtime state MUST NOT fall back to C:",
+    "generatedStateRoot": "<approved-root>\\OMEGA_SOVEREIGN\\R120",
+    "validation": "Canonical Python agent identity is validated with bounded Python source inspection; the broken inline PowerShell parser is not used.",
+    "truth": "Credential issuance is not host proof; file/process existence is not host proof; CI is not host proof."
+  },
+  "navigation": {
+    "desktopStates": ["compact rail", "wide labeled rail", "full searchable navigator"],
+    "mobile": "compact, non-covering, same capability universe",
+    "layoutLaw": "Navigation reserves space instead of occluding the active visual/instrument surface."
+  },
+  "calculusApplication": {
+    "policy": "Full Overall Canon is a cross-route computational/visual contract, not a decorative theme.",
+    "layers": ["STATE", "INTELLIGENCE", "MEMORY", "RELATION", "COMPUTATION", "ACTION", "OBSERVATION", "PROOF"],
+    "truth": "Model-derived or representational calculus output must not be relabeled as external physical measurement or validation."
+  }
+}

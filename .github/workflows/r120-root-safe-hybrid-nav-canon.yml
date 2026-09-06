@@ -1,0 +1,55 @@
+name: OMEGA R120 Root Safe Hybrid Nav Canon
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  verify-r120:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Verify R120 invariants
+        run: node tests/r120-root-safe-hybrid-nav-canon-invariants.mjs
+      - name: Full inherited regression and production build gate
+        run: npm run check
+      - name: Canonical Wrangler dry-run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r120-dry-run
+
+  live-r120:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-r120
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for canonical production deployment
+        run: sleep 45
+      - name: Verify R120 public shell and canonical Hybrid agent
+        env:
+          OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+        run: |
+          node <<'NODE'
+          import {createHash} from 'node:crypto';
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let observed=false,last='';
+          for(let i=1;i<=24;i++){
+            try{
+              const h=await fetch(base+'/api/health',{headers:{'cache-control':'no-cache'}});
+              const html=await fetch(base+'/?r120='+Date.now(),{headers:{'cache-control':'no-cache'}}).then(r=>r.text());
+              if(h.ok&&html.includes('root')){observed=true;break}
+              last=`health ${h.status} html ${html.length}`;
+            }catch(e){last=String(e)}
+            await sleep(10000);
+          }
+          if(!observed)throw new Error('R120 public shell not observed: '+last);
+          const r=await fetch(base+'/api/hybrid/agent-download?r117=1&r120=1',{headers:{'cache-control':'no-cache'}});
+          const source=await r.text();
+          if(!r.ok||!source.startsWith('#!/usr/bin/env python3')||!source.includes('OMEGA R34 local Hybrid Link agent')||!source.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"))throw new Error('canonical Hybrid agent contract failed');
+          console.log('R120 LIVE AGENT PASS · bytes '+source.length+' · sha256 '+createHash('sha256').update(source).digest('hex'));
+          NODE
