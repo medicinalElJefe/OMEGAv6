@@ -80,18 +80,18 @@ html[data-omega-interface-convergence='R146'] .omega-workstation-v2 button:disab
  @keyframes r146-panel-in{from{opacity:.78;transform:translateX(-8px)}to{opacity:1;transform:none}}
 }
 @media(max-width:900px){
- .r146-interface-convergence .r94-nav-panel{width:min(91vw,440px)!important;max-width:calc(100vw - var(--r94-nav-rail,52px))!important}
+ :root{--r146-mobile-panel:min(82vw,440px,calc(100vw - var(--r94-nav-rail,52px) - 44px))}
+ .r146-interface-convergence .r94-nav-panel{width:var(--r146-mobile-panel)!important;max-width:var(--r146-mobile-panel)!important}
  .r146-interface-convergence .r94-rail-action{min-height:46px!important}
  .r146-interface-convergence .r89-flat-route{min-height:52px!important;padding-top:8px!important;padding-bottom:8px!important}
  .r146-interface-convergence .r105-workspace-filter button,.r146-interface-convergence .r89-nav-mode button{min-height:38px!important}
  .r146-interface-convergence .r88-search{min-height:42px!important}
- .r146-nav-backdrop{display:block;position:fixed;inset:0;z-index:418;border:0;background:rgba(0,0,0,.46);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .16s ease}
+ .r146-nav-backdrop{display:block;position:fixed;top:0;right:0;bottom:0;left:calc(var(--r94-nav-rail,52px) + var(--r146-mobile-panel));z-index:418;border:0;background:rgba(0,0,0,.46);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .16s ease}
  .r146-interface-convergence.expanded .r146-nav-backdrop{opacity:1;pointer-events:auto}
  .r146-interface-convergence .r94-nav-rail{z-index:432}.r146-interface-convergence .r94-nav-panel{z-index:431}
  .r146-interface-convergence .r146-nav-close{min-height:38px!important}
 }
 @media(max-width:520px){
- .r146-interface-convergence .r94-nav-panel{width:calc(100vw - var(--r94-nav-rail,52px))!important;max-width:calc(100vw - var(--r94-nav-rail,52px))!important}
  .r146-interface-convergence .r100-navigator-head{padding:10px 9px!important}
  .r146-interface-convergence .r146-nav-close span{display:none!important}
  .r146-interface-convergence .r105-context-note b{white-space:normal!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
