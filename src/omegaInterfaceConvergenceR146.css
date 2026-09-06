@@ -1,0 +1,100 @@
+/* R146 — preservation-first interface convergence.
+   This file is intentionally additive and loaded after R88/R100/R104/R105/R120/R132.
+   It promotes navigation, focus, touch and surface hierarchy without removing any prior layer. */
+:root{
+ --r146-glass:rgba(5,15,19,.92);
+ --r146-glass-strong:rgba(5,13,17,.985);
+ --r146-line:rgba(113,204,187,.19);
+ --r146-line-hot:rgba(113,220,199,.48);
+ --r146-text:#e7f2ef;
+ --r146-muted:#809690;
+ --r146-teal:#72d0bf;
+ --r146-gold:#d2b46d;
+ --r146-shadow:0 18px 52px rgba(0,0,0,.36);
+}
+.r146-interface-convergence :where(button,input,textarea,select,a):focus-visible,
+:where(.omega-workstation-v2,.r71-home) :where(button,input,textarea,select,a):focus-visible{
+ outline:2px solid rgba(114,208,191,.78)!important;outline-offset:2px!important;
+ box-shadow:0 0 0 4px rgba(114,208,191,.10)!important;
+}
+.r146-interface-convergence .r94-nav-rail{
+ background:linear-gradient(180deg,rgba(4,12,16,.995),rgba(3,9,12,.995));
+ border-right-color:var(--r146-line)!important;
+ box-shadow:10px 0 34px rgba(0,0,0,.22);
+}
+.r146-interface-convergence .r94-rail-action,
+.r146-interface-convergence .r120-rail-width-toggle,
+.r146-interface-convergence .r88-navigator-trigger{
+ position:relative;overflow:hidden;transition:border-color .16s ease,background .16s ease,color .16s ease,transform .16s ease!important;
+}
+.r146-interface-convergence .r94-rail-action:before,
+.r146-interface-convergence .r120-rail-width-toggle:before,
+.r146-interface-convergence .r88-navigator-trigger:before{
+ content:"";position:absolute;inset:0 auto 0 0;width:2px;background:transparent;transition:background .16s ease;
+}
+.r146-interface-convergence .r94-rail-action:hover,
+.r146-interface-convergence .r120-rail-width-toggle:hover,
+.r146-interface-convergence .r88-navigator-trigger:hover{background:rgba(15,39,43,.76)!important;color:var(--r146-text)!important;border-color:rgba(114,208,191,.34)!important}
+.r146-interface-convergence .r94-rail-action:hover:before,
+.r146-interface-convergence .r94-rail-action.active:before{background:var(--r146-teal)}
+.r146-interface-convergence .r94-rail-action.active{background:linear-gradient(90deg,rgba(24,75,69,.24),rgba(7,19,22,.84))!important;color:#e8f8f4!important;border-color:rgba(114,208,191,.36)!important}
+.r146-interface-convergence .r94-nav-panel{
+ background:linear-gradient(155deg,var(--r146-glass-strong),rgba(4,11,14,.985))!important;
+ border-right:1px solid rgba(114,208,191,.22)!important;
+ box-shadow:var(--r146-shadow)!important;
+ backdrop-filter:blur(20px) saturate(1.08);
+}
+.r146-interface-convergence .r100-navigator-head{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,rgba(5,15,19,.995),rgba(5,15,19,.94))!important;border-bottom-color:rgba(114,208,191,.16)!important}
+.r146-interface-convergence .r146-nav-health{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.r146-interface-convergence .r146-nav-health i{font-style:normal;padding:3px 6px;border:1px solid rgba(114,208,191,.15);border-radius:999px;background:rgba(11,31,33,.6);color:#7fa59c;font:750 5.5px/1 ui-monospace,monospace;letter-spacing:.05em}
+.r146-interface-convergence .r146-nav-health i.pass{border-color:rgba(114,208,191,.28);color:#a7d9ce;background:rgba(16,65,57,.16)}
+.r146-interface-convergence .r146-nav-close{display:flex!important;align-items:center;gap:5px;min-width:max-content!important;padding:7px 9px!important;border:1px solid rgba(114,208,191,.18)!important;border-radius:8px!important;background:#071217!important;color:#91aaa4!important;font:800 6px/1 ui-monospace,monospace!important;letter-spacing:.08em!important}
+.r146-interface-convergence .r146-nav-close span{display:inline!important}.r146-interface-convergence .r146-nav-close svg{width:13px;height:13px}
+.r146-interface-convergence .r89-nav-mode button,.r146-interface-convergence .r105-workspace-filter button{transition:background .14s ease,border-color .14s ease,color .14s ease,transform .14s ease!important}
+.r146-interface-convergence .r89-nav-mode button:hover,.r146-interface-convergence .r105-workspace-filter button:hover{border-color:rgba(114,208,191,.34)!important;color:#e3f0ec!important;background:rgba(16,42,44,.62)!important}
+.r146-interface-convergence .r89-nav-mode button.active,.r146-interface-convergence .r105-workspace-filter button.active{box-shadow:inset 0 -2px rgba(114,208,191,.58)}
+.r146-interface-convergence .r88-search{background:rgba(4,13,17,.92)!important;border-color:rgba(114,208,191,.18)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.01)}
+.r146-interface-convergence .r88-search:focus-within{border-color:rgba(114,208,191,.45)!important;background:rgba(6,19,23,.98)!important}
+.r146-interface-convergence .r88-search kbd{white-space:nowrap;color:#77918a!important}
+.r146-interface-convergence .r89-flat-scroll{padding-bottom:18px!important}
+.r146-interface-convergence .r89-flat-route{position:relative;border-left:2px solid transparent!important;transition:background .14s ease,border-color .14s ease,transform .14s ease!important}
+.r146-interface-convergence .r89-flat-route:hover{background:linear-gradient(90deg,rgba(19,57,55,.23),rgba(7,18,21,.78))!important;border-left-color:rgba(114,208,191,.38)!important}
+.r146-interface-convergence .r89-flat-route.active{background:linear-gradient(90deg,rgba(29,80,72,.30),rgba(8,23,25,.86))!important;border-left-color:var(--r146-teal)!important;box-shadow:inset 0 0 28px rgba(114,208,191,.035)}
+.r146-interface-convergence .r89-flat-route.active>i{color:var(--r146-gold)!important}.r146-interface-convergence .r89-flat-route.active b{color:#f0f7f5!important}
+.r146-interface-convergence .r132-route-meta{line-height:1.35!important}.r146-interface-convergence .r132-route-tier{border-radius:999px!important}
+.r146-interface-convergence .r100-active-route{border-color:rgba(114,208,191,.20)!important;background:linear-gradient(135deg,rgba(13,39,40,.40),rgba(7,17,20,.74))!important}
+.r146-interface-convergence .r88-navigator-foot{position:sticky;bottom:0;z-index:4;background:linear-gradient(0deg,rgba(5,14,18,.995),rgba(5,14,18,.94))!important;border-top:1px solid rgba(114,208,191,.14)!important}
+.r146-nav-backdrop{display:none}
+
+/* Promote the workstation as a coherent instrument without erasing specialist-specific design. */
+.omega-workstation-v2[data-interface-convergence='R146'] .workstation-main{isolation:isolate}
+.omega-workstation-v2[data-interface-convergence='R146'] .omega-surface-r81{min-width:0;max-width:100%}
+.omega-workstation-v2[data-interface-convergence='R146'] .omega-surface-r81 :where(button,[role='button'],input,select,textarea){scroll-margin:88px}
+.omega-workstation-v2[data-interface-convergence='R146'] :where(.special-app,.command-experience-r4,.experience-phase-bound){min-width:0;max-width:100%}
+.omega-workstation-v2[data-interface-convergence='R146'] :where(.special-head,.r112-fabric-head,.r71-home-head){border-color:rgba(114,208,191,.14)}
+.omega-workstation-v2[data-interface-convergence='R146'] button:not(:disabled){cursor:pointer}
+.omega-workstation-v2[data-interface-convergence='R146'] button:disabled{cursor:not-allowed}
+
+@media(min-width:901px){
+ .r146-interface-convergence.expanded .r94-nav-panel{animation:r146-panel-in .18s ease-out both}
+ @keyframes r146-panel-in{from{opacity:.78;transform:translateX(-8px)}to{opacity:1;transform:none}}
+}
+@media(max-width:900px){
+ .r146-interface-convergence .r94-nav-panel{width:min(91vw,440px)!important;max-width:calc(100vw - var(--r94-nav-rail,52px))!important}
+ .r146-interface-convergence .r94-rail-action{min-height:46px!important}
+ .r146-interface-convergence .r89-flat-route{min-height:52px!important;padding-top:8px!important;padding-bottom:8px!important}
+ .r146-interface-convergence .r105-workspace-filter button,.r146-interface-convergence .r89-nav-mode button{min-height:38px!important}
+ .r146-interface-convergence .r88-search{min-height:42px!important}
+ .r146-nav-backdrop{display:block;position:fixed;inset:0;z-index:418;border:0;background:rgba(0,0,0,.46);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .16s ease}
+ .r146-interface-convergence.expanded .r146-nav-backdrop{opacity:1;pointer-events:auto}
+ .r146-interface-convergence .r94-nav-rail{z-index:432}.r146-interface-convergence .r94-nav-panel{z-index:431}
+ .r146-interface-convergence .r146-nav-close{min-height:38px!important}
+}
+@media(max-width:520px){
+ .r146-interface-convergence .r94-nav-panel{width:calc(100vw - var(--r94-nav-rail,52px))!important;max-width:calc(100vw - var(--r94-nav-rail,52px))!important}
+ .r146-interface-convergence .r100-navigator-head{padding:10px 9px!important}
+ .r146-interface-convergence .r146-nav-close span{display:none!important}
+ .r146-interface-convergence .r105-context-note b{white-space:normal!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+ .r146-interface-convergence .r89-flat-route em{display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+}
+@media(prefers-reduced-motion:reduce){.r146-interface-convergence *{scroll-behavior:auto!important;animation:none!important;transition-duration:.001ms!important}}
