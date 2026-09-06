@@ -1,6 +1,8 @@
 import r34,{OmegaRuntime as OmegaRuntimeR34} from './workerR34.js';
 
 const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store'};
+const AGENT_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev';
+const HEARTBEAT_FRESH_MS=30000;
 const json=(data,status=200)=>new Response(JSON.stringify(data,null,2),{status,headers:JSON_HEADERS});
 const text=v=>String(v??'').trim();
 const safeId=(v,fallback='')=>{const s=text(v).slice(0,160);return /^[A-Za-z0-9._:-]+$/.test(s)?s:fallback};
@@ -17,14 +19,20 @@ async function sha256(source){const digest=await crypto.subtle.digest('SHA-256',
 async function hybridStatusR101(request,env,id){
  const response=await runtimeFetch(env,id,'/status',request,'GET');
  const data=await response.clone().json().catch(()=>({}));
- const devices=Array.isArray(data.devices)?data.devices:[],online=devices.filter(x=>x?.online&&!x?.revoked);
- const pairingState=data.state||'PAIRING_REQUIRED';
+ const devices=Array.isArray(data.devices)?data.devices:[],online=devices.filter(x=>x?.online&&!x?.revoked),proved=devices.filter(x=>Number(x?.lastSeen)>0&&!x?.revoked);
+ const pairingState=data.state||'PAIRING_REQUIRED',lastAuthenticatedHeartbeat=proved.length?Math.max(...proved.map(x=>Number(x.lastSeen)||0)):null;
  return json({...data,
   state:online.length?'VERIFIED_DEVICE_ONLINE':'DEVICE_PROOF_REQUIRED',
   pairingState,
   bridgeId:id,
   nativeExecutionClaimed:online.length>0,
-  truthBoundary:'HYBRID_BRIDGE_ID_TRUTH_R101'
+  currentDeviceCount:online.length,
+  lastAuthenticatedHeartbeat,
+  heartbeatFreshnessWindowMs:HEARTBEAT_FRESH_MS,
+  canonicalControlOrigin:AGENT_ORIGIN,
+  connectorProtocol:'R127_ZERO_DRIFT_SHA256',
+  connectorPolicy:{singleCanonicalControlHost:true,controlHostFallback:false,systemDriveRuntimeFallback:false,agentDigestRequired:true,partialDownloadExecution:false,staleAgentSubstitution:false},
+  truthBoundary:'HYBRID_BRIDGE_ID_TRUTH_R127_CURRENT_HEARTBEAT_ONLY'
  },response.status);
 }
 
@@ -42,24 +50,36 @@ async function reconnectHybridR101(request,env){
  }
  const pairResponse=await runtimeFetch(env,sid,'/pair',request,'POST',{rotate:true}),pair=await pairResponse.json().catch(()=>({}));
  if(!pairResponse.ok||!pair.secret)return json({ok:false,code:pair.code||'PAIR_REPAIR_FAILED',reply:pair.reply||'OMEGA could not issue a fresh Hybrid pairing credential.'},pairResponse.status||503);
- return json({...pair,ok:true,repaired:true,bridgeId:sid,pairingCode:`${sid}.${pair.secret}`,credentialState:'REISSUED',agentRestartRequired:true,agentPath:'/api/hybrid/agent-download',truthBoundary:'NEW_PAIR_REQUIRES_NEW_AUTHENTICATED_HEARTBEAT_R101'});
+ return json({...pair,ok:true,repaired:true,bridgeId:sid,pairingCode:`${sid}.${pair.secret}`,credentialState:'REISSUED',agentRestartRequired:true,agentPath:'/api/hybrid/agent-download',connectorProtocol:'R127_ZERO_DRIFT_SHA256',truthBoundary:'NEW_PAIR_REQUIRES_NEW_AUTHENTICATED_HEARTBEAT_R127'});
+}
+
+async function canonicalAgentSource(request,env){
+ if(!env?.ASSETS?.fetch)return{ok:false,response:json({ok:false,code:'HYBRID_AGENT_ASSET_BINDING_UNAVAILABLE'},503)};
+ const asset=await env.ASSETS.fetch(new Request(new URL('/omega-hybrid-agent.py',request.url),{headers:{'cache-control':'no-cache'}}));
+ if(!asset.ok)return{ok:false,response:json({ok:false,code:'HYBRID_AGENT_ASSET_NOT_FOUND',status:asset.status},503)};
+ const source=await asset.text();
+ const valid=source.length>1000&&source.startsWith('#!/usr/bin/env python3')&&source.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")&&source.includes('OMEGA R34 local Hybrid Link agent')&&source.includes('Pairing is explicit.');
+ if(!valid)return{ok:false,response:json({ok:false,code:'HYBRID_AGENT_ASSET_INVALID'},503)};
+ const version=(source.match(/VERSION='([^']+)'/)||[])[1]||'UNKNOWN',digest=await sha256(source);
+ return{ok:true,source,version,digest,bytes:new TextEncoder().encode(source).byteLength};
+}
+
+async function connectorManifestR127(request,env){
+ const a=await canonicalAgentSource(request,env);if(!a.ok)return a.response;
+ return json({ok:true,schema:'OMEGA_HYBRID_CONNECTOR_MANIFEST_R127',canonicalControlOrigin:AGENT_ORIGIN,agent:{path:'/api/hybrid/agent-download',version:a.version,sha256:a.digest,bytes:a.bytes,identity:'OMEGA R34 local Hybrid Link agent'},heartbeatFreshnessWindowMs:HEARTBEAT_FRESH_MS,rootPolicy:{defaultApprovedRoot:'J:\\',systemDriveRuntimeFallback:false,explicitAlternateNonSystemRootAllowed:true},transportPolicy:{singleCanonicalControlHost:true,controlHostFallback:false,downloadQuarantineRequired:true,serverDeclaredSha256Required:true,pythonParsePreflightRequired:true,blindRestart:false,transientReachabilityRetry:'BOUNDED'},truthBoundary:'MANIFEST_DESCRIBES_CONNECTOR_BYTES_AND_POLICY; IT IS NOT PC ONLINE PROOF'});
 }
 
 async function serveCanonicalHybridAgentR101(request,env){
- if(!env?.ASSETS?.fetch)return json({ok:false,code:'HYBRID_AGENT_ASSET_BINDING_UNAVAILABLE'},503);
- const asset=await env.ASSETS.fetch(new Request(new URL('/omega-hybrid-agent.py',request.url),{headers:{'cache-control':'no-cache'}}));
- if(!asset.ok)return json({ok:false,code:'HYBRID_AGENT_ASSET_NOT_FOUND',status:asset.status},503);
- const source=await asset.text();
- const valid=source.length>1000&&source.startsWith('#!/usr/bin/env python3')&&source.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")&&source.includes('OMEGA R34 local Hybrid Link agent');
- if(!valid)return json({ok:false,code:'HYBRID_AGENT_ASSET_INVALID'},503);
- const version=(source.match(/VERSION='([^']+)'/)||[])[1]||'UNKNOWN',digest=await sha256(source);
- return new Response(source,{status:200,headers:{
+ const a=await canonicalAgentSource(request,env);if(!a.ok)return a.response;
+ return new Response(a.source,{status:200,headers:{
   'content-type':'text/x-python; charset=utf-8',
   'content-disposition':'attachment; filename="omega-hybrid-agent.py"',
   'cache-control':'no-store, max-age=0',
-  'x-omega-agent-version':version,
-  'x-omega-agent-sha256':digest,
-  'x-omega-canonical-origin':'https://omegav6.jeffdeweyeljefe.workers.dev',
+  'x-omega-agent-version':a.version,
+  'x-omega-agent-sha256':a.digest,
+  'x-omega-agent-bytes':String(a.bytes),
+  'x-omega-canonical-origin':AGENT_ORIGIN,
+  'x-omega-hybrid-protocol':'R127_ZERO_DRIFT_SHA256',
   'x-omega-compat-route':'R101_DIRECT_AND_API_AGENT_DOWNLOAD'
  }});
 }
@@ -67,6 +87,7 @@ async function serveCanonicalHybridAgentR101(request,env){
 async function fetchR101(request,env){
  const path=new URL(request.url).pathname;
  if(path==='/omega-hybrid-agent.py'&&request.method==='GET')return serveCanonicalHybridAgentR101(request,env);
+ if(path==='/api/hybrid/connector-manifest'&&request.method==='GET')return connectorManifestR127(request,env);
  if(path==='/api/hybrid/status'&&request.method==='GET'){
   if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE'},503);
   return hybridStatusR101(request,env,bridgeId(request));
