@@ -39,7 +39,7 @@ assert.equal(fullAuto.totalCells,1728);
 assert.ok(worker.includes('OmegaSwarmAutonomicCoordinator'));
 for(const route of ['/api/swarm/autonomic/manifest','/api/swarm/autonomic/status','/api/swarm/autonomic/plan','/api/swarm/autonomic/missions'])assert.ok(api.includes(route),`runtime route missing ${route}`);
 assert.ok(wrangler.includes('OMEGA_SWARM_AUTONOMIC'));
-assert.ok(wrangler.includes('r126-autonomic-swarm'));
+assert.ok(wrangler.includes('r125-autonomic-swarm'),'R126 must preserve the historical R125 Durable Object migration tag instead of renaming an already-introduced class');
 assert.ok(wrangler.includes('"main": "src/workerR116.js"'));
 
 for(const layer of ['OmegaMaximumCockpitR126','OmegaAutonomicR125','OmegaOrganismR123','OmegaSwarmR121','OmegaFieldMotionConvergenceR28'])assert.ok(suite.includes(layer),`convergence layer missing ${layer}`);
