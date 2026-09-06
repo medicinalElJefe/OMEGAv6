@@ -2,6 +2,8 @@ name: OMEGA R125 Accuracy First Engine
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_run:
@@ -20,7 +22,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: omega-r125-accuracy-engine
+  group: omega-r125-accuracy-engine-${{ github.event.pull_request.number || 'main' }}
   cancel-in-progress: false
 
 jobs:
@@ -32,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -65,6 +67,7 @@ jobs:
           node tests/r121-spherical-earth-connector-invariants.mjs
           npm run build
       - name: Admit only if repository changed
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           if git diff --quiet; then
