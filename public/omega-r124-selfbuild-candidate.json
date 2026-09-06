@@ -1,13 +1,15 @@
 {
   "schema": "omega.selfbuild.candidate.r124.v1",
-  "generation": 1,
+  "generation": 2,
   "capsule": {
-    "id": "SB001",
-    "title": "Persistent mission continuity",
-    "objective": "Persist intent, mission plan, observer projection, proof references and recovery state across navigation and restart.",
-    "target": "src/generated/selfbuild/persistentMissionContinuityR124.ts",
+    "id": "SB002",
+    "title": "Contextual capability surface",
+    "objective": "Resolve relevant capabilities from current world state and intent so tools appear by context instead of menu overload.",
+    "target": "src/generated/selfbuild/contextualCapabilitySurfaceR124.ts",
     "risk": "LOW",
-    "prerequisites": [],
+    "prerequisites": [
+      "SB001"
+    ],
     "preserves": [
       "r123",
       "r122",
@@ -17,17 +19,17 @@
       "r124",
       "build"
     ],
-    "expectedGain": 0.96,
-    "complexity": 0.25,
-    "contradictionRisk": 0.08,
+    "expectedGain": 0.92,
+    "complexity": 0.28,
+    "contradictionRisk": 0.09,
     "operation": "GENERATE_MODULE"
   },
-  "score": 2.9090909090909087,
-  "generatedTarget": "src/generated/selfbuild/persistentMissionContinuityR124.ts",
+  "score": 2.4864864864864864,
+  "generatedTarget": "src/generated/selfbuild/contextualCapabilitySurfaceR124.ts",
   "receipt": {
-    "generation": 1,
-    "capsuleId": "SB001",
-    "startedAt": "2026-09-06T18:03:11.975Z",
+    "generation": 2,
+    "capsuleId": "SB002",
+    "startedAt": "2026-09-06T18:03:51.093Z",
     "status": "ADMIT",
     "tests": {
       "r124": true,
@@ -42,14 +44,14 @@
       "r121"
     ],
     "residualBefore": 1,
-    "rollbackRef": "f9c3cce4f8eed37655dad6ecd48b6d89d07efca4",
+    "rollbackRef": "6354b3a48cd26178104a265e2a0d0244dcf8ea40",
     "notes": [
       "Generated deterministically from versioned R124 capsule.",
       "Not authoritative until test and merge admission.",
       "Focused and inherited gates passed before admission.",
       "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
     ],
-    "completedAt": "2026-09-06T18:03:15.898Z",
+    "completedAt": "2026-09-06T18:03:56.900Z",
     "residualAfter": 0.9
   },
   "admission": "ADMITTED_PENDING_FAST_FORWARD"
