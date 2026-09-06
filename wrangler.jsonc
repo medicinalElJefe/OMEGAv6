@@ -41,7 +41,7 @@
     {"tag": "r32-enacted-runtime", "new_sqlite_classes": ["OmegaRuntime"]},
     {"tag": "r121-sovereign-swarm", "new_sqlite_classes": ["OmegaSwarmCell", "OmegaSwarmCoordinator"]},
     {"tag": "r123-organism-swarm", "new_sqlite_classes": ["OmegaSwarmBranch", "OmegaSwarmOrgan", "OmegaSwarmOrganismCoordinator"]},
-    {"tag": "r126-autonomic-swarm", "new_sqlite_classes": ["OmegaSwarmAutonomicCoordinator"]}
+    {"tag": "r125-autonomic-swarm", "new_sqlite_classes": ["OmegaSwarmAutonomicCoordinator"]}
   ],
   "observability": {
     "enabled": true
