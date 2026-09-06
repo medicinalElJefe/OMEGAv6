@@ -24,10 +24,12 @@ jobs:
         run: npm install
       - name: Prove R141 exact-payload closure scar replay and R140 world handoff
         run: node tests/r141-hybrid-proof-scar-replay-invariants.mjs
-      - name: Preserve R140 living-world bridge, R139 capability engine and repaired R138 visuals
+      - name: Preserve complete R140 living operation and mode fabrics plus R139 capability engine
         shell: bash
         run: |
           node tests/r140-living-world-operation-bridge-invariants.mjs
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r140-mode-completion-fabric-invariants.mjs
           node tests/r139-unified-capability-engine-invariants.mjs
           node tests/r138-capability-first-visual-runtime.mjs
       - name: Preserve living proof and world continuity authorities
