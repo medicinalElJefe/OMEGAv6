@@ -1,0 +1,49 @@
+name: OMEGA R139 Hybrid Proof Scar Replay
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r139:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prove R139 fingerprint closure, scar continuity and deterministic replay
+        run: node tests/r139-hybrid-proof-scar-replay-invariants.mjs
+      - name: Prove R138 canonical transition visual repair
+        run: node tests/r138-capability-first-visual-runtime.mjs
+      - name: Preserve R137 live proof and R136/R134 world continuity authorities
+        shell: bash
+        run: |
+          node tests/r137-live-family-proof-fusion-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r134-woven-relativity-continuum-invariants.mjs
+      - name: Preserve enacted Hybrid transport and current relational execution truth
+        shell: bash
+        run: |
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/enacted-runtime-r32-invariants.mjs
+          node tests/r117-real-sovereign-bootstrap-invariants.mjs
+          node tests/r118-full-system-operational-convergence-invariants.mjs
+      - name: Preserve canonical admission and operational capacity gates
+        shell: bash
+        run: |
+          node tests/r131-capacity-governor-invariants.mjs
+          node tests/r130-operational-control-plane-invariants.mjs
+          node tests/r125-accuracy-first-engine-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r139
