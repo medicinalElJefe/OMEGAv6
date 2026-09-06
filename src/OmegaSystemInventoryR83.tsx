@@ -7,12 +7,14 @@ import {ARCHIVE_COLLECTIONS_R83,B043_ARCHIVE_R83,SOFTWARE2_VISIBLE_R83,routeForA
 import {HOST_BUILD_ROWS_R83,HOST_BUILD_SOURCE_R83,routeForHostBuildR83} from './hostBuildLedgerR83';
 import {ALL_MODES_BOUNDARY} from './allModesAuthority';
 import {OMEGA_ROUTE_INVENTORY_R107,OMEGA_WORKSPACES_R82} from './omegaExperienceRegistryR82';
+import OmegaBuildPotentialR133 from './OmegaBuildPotentialR133';
 import './systemInventoryR83.css';
 
-type Tab='FABRIC'|'SYSTEMS'|'FAMILIES'|'HOST_BUILD'|'MENUS'|'CAPABILITIES'|'ARCHIVES'|'V77';
+type Tab='FABRIC'|'POTENTIAL'|'SYSTEMS'|'FAMILIES'|'HOST_BUILD'|'MENUS'|'CAPABILITIES'|'ARCHIVES'|'V77';
 type Props={onNavigate:(panel:string)=>void;compact?:boolean;initialTab?:Tab};
 const TABS:readonly {id:Tab;label:string;count:number}[]=[
  {id:'FABRIC',label:'Full fabric',count:8},
+ {id:'POTENTIAL',label:'Build potential',count:FAMILIES.length},
  {id:'SYSTEMS',label:'Software systems',count:MASTER_SYSTEMS_R83.length},
  {id:'FAMILIES',label:'Runtime families',count:FAMILIES.length},
  {id:'HOST_BUILD',label:'Local-host lineage',count:HOST_BUILD_ROWS_R83.length},
@@ -50,10 +52,10 @@ export default function OmegaSystemInventoryR83({onNavigate,compact=false,initia
  const fabric=useMemo(()=>FABRIC.filter(x=>match(q,x.id,x.name,x.detail,x.route)),[q]);
  const go=(route:string,key:string,value:string)=>{try{localStorage.setItem(key,value)}catch{}onNavigate(route)};
  return <section className={'r83-inventory '+(compact?'compact':'full')}>
-  <header className='r83-inventory-head'><div><span>OMEGA COMPLETE SOFTWARE + CALCULUS INDEX · PRESERVE BEFORE PRUNE</span><h3>Integrated capability fabric navigator</h3><p>Application destinations are an interface inventory only. The full machine is canonical state + calculus/modes + eight functional layers + software/runtime families + controls + federation + proof.</p></div><div className='r83-inventory-kpis'><b>{MASTER_SYSTEMS_R83.length}</b><small>systems</small><b>{FAMILIES.length}</b><small>families</small><b>{ALL_MODES_BOUNDARY.sourceModeEvaluations}</b><small>source modes</small><b>{ALL_MODES_BOUNDARY.canonAuthorities}</b><small>canon lenses</small><b>{MASTER_CAPABILITIES_R83.length}</b><small>capabilities</small></div></header>
+  <header className='r83-inventory-head'><div><span>OMEGA COMPLETE SOFTWARE + CALCULUS INDEX · PRESERVE BEFORE PRUNE</span><h3>Integrated capability fabric navigator</h3><p>Application destinations are an interface inventory only. The full machine is canonical state + calculus/modes + eight functional layers + software/runtime families + controls + federation + proof. R133 adds a status-derived build-potential layer so unfinished value becomes actionable without being mislabeled as live.</p></div><div className='r83-inventory-kpis'><b>{MASTER_SYSTEMS_R83.length}</b><small>systems</small><b>{FAMILIES.length}</b><small>families</small><b>{ALL_MODES_BOUNDARY.sourceModeEvaluations}</b><small>source modes</small><b>{ALL_MODES_BOUNDARY.canonAuthorities}</b><small>canon lenses</small><b>{MASTER_CAPABILITIES_R83.length}</b><small>capabilities</small></div></header>
   <nav className='r83-inventory-tabs' aria-label='Software inventory layers'>{TABS.map(x=><button key={x.id} className={tab===x.id?'active':''} onClick={()=>setTab(x.id)} aria-pressed={tab===x.id}><span>{x.label}</span><b>{x.count}</b></button>)}</nav>
-  <label className='r83-inventory-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search full fabric, systems, families, local-host lineage, menus, capabilities, archive builds or V77 bins…'/></label>
-  <div className='r83-inventory-grid' data-tab={tab}>
+  {tab!=='POTENTIAL'&&<label className='r83-inventory-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search full fabric, systems, families, local-host lineage, menus, capabilities, archive builds or V77 bins…'/></label>}
+  {tab==='POTENTIAL'?<OmegaBuildPotentialR133 compact={compact} onNavigate={onNavigate}/>:<div className='r83-inventory-grid' data-tab={tab}>
    {tab==='FABRIC'&&fabric.map(x=><button key={x.id} onClick={()=>go(x.route,'omega.r107.fabricFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>R107 full-build authority</small><em>{x.detail}</em></span><strong>OPEN<small>{x.route}</small></strong><ChevronRight/></button>)}
    {tab==='SYSTEMS'&&systems.map(x=>{const route=routeForSystemR83(x);return <button key={x.id} onClick={()=>go(route,'omega.r83.systemFocus',x.id)}><code>{x.id}</code><span><b>{x.artifact}</b><small>{x.family} · {x.role}</small><em>{x.capability}</em></span><strong>{x.disposition}<small>{route}</small></strong><ChevronRight/></button>})}
    {tab==='FAMILIES'&&families.map(x=><button key={x.id} onClick={()=>go(x.target||'System Atlas','omega.r83.familyFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.invariant} · {x.role}</small><em>{x.inventoryPurpose}</em></span><strong>{x.status}<small>{x.target}</small></strong><ChevronRight/></button>)}
@@ -62,7 +64,7 @@ export default function OmegaSystemInventoryR83({onNavigate,compact=false,initia
    {tab==='CAPABILITIES'&&capabilities.map(x=>{const route=routeForCapabilityR83(x);return <button key={x.id} onClick={()=>go(route,'omega.r83.capabilityFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.menu} · {x.stateTier}</small><em>{x.output}</em></span><strong>{x.upgradeLevel||'—'}<small>{route}</small></strong><ChevronRight/></button>})}
    {tab==='ARCHIVES'&&archives.map((x,i)=>{const route=routeForArchiveArtifactR83(x.title);return <button key={x.collection+'-'+x.title+'-'+i} onClick={()=>go(route,'omega.r83.archiveFocus',x.title)}><code>{x.collection==='B043'?'B043':'ARC'}</code><span><b>{x.title}</b><small>{x.collection} · {x.kind} · {x.size||'size —'}</small><em>Reviewed archive donor/build artifact · presence ≠ execution</em></span><strong>ARCHIVE<small>{route}</small></strong><ChevronRight/></button>})}
    {tab==='V77'&&bins.map(x=>{const route=BIN_ROUTE[x.bin]||'System Atlas';return <button key={x.id} onClick={()=>go(route,'omega.r83.binFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.direction} · V77 donor lineage</small><em>{x.sourceTitle}</em></span><strong>DONOR<small>{route}</small></strong><ChevronRight/></button>})}
-  </div>
+  </div>}
   <footer><ShieldCheck/><span><b>Truth boundary:</b> route inventory, mode availability, source-backed execution, current runtime execution, historical donor presence and design-ledger intent remain separate statuses. Nothing here promotes a catalog mode, archive donor or registered control merely because it is visible.</span><div><BrainCircuit/>{ALL_MODES_BOUNDARY.sourceModeEvaluations}+{ALL_MODES_BOUNDARY.canonAuthorities} mode/lens authority<Blocks/>{MASTER_SYSTEMS_R83.length}-system ledger<Archive/>{ARCHIVE_COLLECTIONS_R83.map(x=>x.count).reduce((a,b)=>a+b,0)} indexed archive items<Grid3X3/>{FAMILIES.length} source families<Settings2/>{HOST_BUILD_ROWS_R83.length} local-host rows · {HOST_BUILD_SOURCE_R83.autoPingCells} auto-ping cells</div></footer>
  </section>;
 }
