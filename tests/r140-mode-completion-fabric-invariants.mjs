@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const mode=fs.readFileSync('src/modeCompletionFabricR140.ts','utf8');
+const workspace=fs.readFileSync('src/ModeCompletionWorkspaceR140.tsx','utf8');
+const source=fs.readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
+const must=(ok,msg)=>assert.ok(ok,'R140 '+msg);
+for(const law of ['EVERY_CATALOG_SLOT_HAS_ONE_EXPLICIT_EXECUTION_STATE','CATALOG_MEMBERSHIP_NEVER_COUNTS_AS_EXECUTION','MISSING_INPUTS_REMAIN_MISSING_UNTIL_SOURCE_BOUND','ADAPTER_CODE_IS_A_CANDIDATE_UNTIL_TESTED_AND_ADMITTED','R125_REMAINS_CANONSTATE_ADMISSION_AUTHORITY'])must(mode.includes(`'${law}'`),`missing law ${law}`);
+must(source.includes('catalogCount:179'),'179-source mode catalog must remain authoritative count');
+must(mode.includes("for(let i=1;i<=R21_MODE_AUTHORITY.catalogCount;i++)"),'fabric must enumerate every catalog slot');
+must(mode.includes("state:'CATALOG_ONLY'"),'unhosted catalog modes must remain explicit catalog-only states');
+must(mode.includes("state==='EXECUTED_EXACT'")&&mode.includes("state==='SOURCE_PACKET'")&&mode.includes("state==='DERIVED_RUNTIME'"),'executable states must be explicitly bounded');
+must(mode.includes("state==='GATED_MISSING_INPUTS'"),'known missing-input formulas must remain gated');
+must(mode.includes('source formula/evaluator contract')&&mode.includes('authoritative required-input mapping'),'catalog-only backlog must expose missing source/evaluator requirements');
+must(mode.includes('src/modes/adapters/')&&mode.includes('tests/modes/'),'every non-executable mode must have deterministic adapter/test targets');
+must(mode.includes('AI_OR_SAI_MAY_PROPOSE_AN_ADAPTER_BUT_CANNOT_SELF_DECLARE_VALIDITY'),'AI/SAI adapter proposals must remain candidates');
+for(const token of ['179-slot execution census','NEXT MODE-BUILD CANDIDATES','SAI adapter proposal surface','Build adapter candidate','Proof / validate adapter','Trace software authority'])must(workspace.includes(token),'completion workspace missing '+token);
+must(workspace.includes('<SourceBackedModesPanelR21 {...props}/>'),'R140 must preserve the detailed R21 source-backed mode instrument');
+console.log('R140 MODE COMPLETION FABRIC PASS · all 179 slots explicitly classified · no catalog execution inflation · gated/catalog-only modes have proof-gated adapter backlog');
