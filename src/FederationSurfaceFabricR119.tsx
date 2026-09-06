@@ -13,6 +13,7 @@ type Surface={
  role:string;
  contributes:string[];
  truth:string;
+ historical?:boolean;
 };
 
 export const OMEGA_SURFACES_R119:Surface[]=[
@@ -29,10 +30,10 @@ export const OMEGA_SURFACES_R119:Surface[]=[
   truth:'Proposal output is candidate state, not proof and not admission.'
  },
  {
-  id:'sovereign',label:'Sovereign Convergence',url:'https://omega-sovereign-convergence.foundasound.chatgpt.site/',className:'HOST_CONTROL_SURFACE',verb:'SOLVE / CONTROL',
-  role:'Human-facing Sovereign bootstrap/control surface for pairing, launcher delivery and native-host workflows. Current authenticated PC heartbeat remains the execution truth.',
-  contributes:['Windows bootstrap','pairing/control','native task handoff','RCWA worker bootstrap','local compute continuity'],
-  truth:'The web surface is not itself native execution proof; a fresh authenticated host heartbeat and returned receipt are required.'
+  id:'sovereign',label:'Sovereign Convergence · historical',url:'https://omega-sovereign-convergence.foundasound.chatgpt.site/',className:'HISTORICAL_SOVEREIGN_SURFACE',verb:'SOLVE HISTORY',historical:true,
+  role:'Retained historical human-surface and design-lineage reference. It is not a current pairing endpoint, launcher authority, heartbeat origin or native execution transport.',
+  contributes:['historical UI lineage','prior pairing design evidence','native-host design donor','rollback/reference evidence'],
+  truth:'Current Sovereign execution exists only through the authenticated OMEGAv6 Hybrid/Sovereign transport. A fresh authenticated host heartbeat and returned receipt are required; this retired surface cannot satisfy either gate.'
  },
  {
   id:'optical',label:'Living Light / Optical',url:'https://omega-living-light-etching-private-woven2.vercel.app/',className:'PROTECTED_DESIGN_SURFACE',verb:'SCREEN',
@@ -45,7 +46,7 @@ export const OMEGA_SURFACES_R119:Surface[]=[
 const stateFor=(id:string,nodes:any,machine:any,runtime:any)=>{
  if(id==='genesis')return String(machine?.genesis?.state||nodes?.genesis?.state||'UNVERIFIED');
  if(id==='optical')return String(machine?.optical?.state||nodes?.optical?.state||'UNVERIFIED');
- if(id==='sovereign')return String(runtime?.sovereign?.state||runtime?.pairing?.state||nodes?.sovereign?.state||'CURRENT_PROOF_REQUIRED');
+ if(id==='sovereign')return `HISTORICAL_SURFACE · MACHINE ${String(runtime?.sovereign?.state||runtime?.pairing?.state||nodes?.sovereign?.state||'CURRENT_PROOF_REQUIRED')}`;
  if(id==='omegav6')return String(nodes?.v6?.state||nodes?.omegaV6?.state||'CANONICAL');
  return'UNVERIFIED';
 };
@@ -53,13 +54,13 @@ const stateFor=(id:string,nodes:any,machine:any,runtime:any)=>{
 export default function FederationSurfaceFabricR119({nodes,machine,runtime}:Props){
  const convergence=fullSystemConvergenceR95();
  return <section className='r119-surface-fabric' aria-label='OMEGA unified surface fabric'>
-  <header><div><span>R119 · FULL CONCEPTION SURFACE FABRIC</span><h3>Four experiences. One canonical instrument.</h3><p>The separate sites are retained for the jobs they do best, but they no longer imply separate products or competing state engines. Their outputs converge through the same packet, proof, route and admission laws already recovered from the software universe.</p></div><div className='r119-surface-authority'><Network/><span><b>ONE PRODUCT</b><small>distributed execution · single admission authority</small></span></div></header>
-  <div className='r119-surface-grid'>{OMEGA_SURFACES_R119.map(surface=>{const state=stateFor(surface.id,nodes,machine,runtime);return <article key={surface.id} data-surface={surface.id}>
+  <header><div><span>R119 · FULL CONCEPTION SURFACE FABRIC</span><h3>Four roles. Three current human surfaces. One canonical instrument.</h3><p>Current sites are retained for the jobs they do best, while the retired Sovereign preview is kept only as historical design evidence. Their outputs converge through the same packet, proof, route and admission laws recovered from the software universe.</p></div><div className='r119-surface-authority'><Network/><span><b>ONE PRODUCT</b><small>distributed execution · single admission authority</small></span></div></header>
+  <div className='r119-surface-grid'>{OMEGA_SURFACES_R119.map(surface=>{const state=stateFor(surface.id,nodes,machine,runtime);return <article key={surface.id} data-surface={surface.id} data-historical={surface.historical?'true':'false'}>
    <div className='r119-surface-head'><span>{surface.id==='omegav6'?<ShieldCheck/>:surface.id==='sovereign'?<MonitorCog/>:surface.id==='optical'?<Layers3/>:<Sparkles/>}<i><b>{surface.label}</b><small>{surface.className}</small></i></span><strong>{surface.verb}</strong></div>
    <p>{surface.role}</p>
-   <div className='r119-surface-state'><span>OBSERVED FABRIC STATE</span><b>{state.replaceAll('_',' ')}</b></div>
+   <div className='r119-surface-state'><span>{surface.historical?'HISTORICAL / CURRENT MACHINE BOUNDARY':'OBSERVED FABRIC STATE'}</span><b>{state.replaceAll('_',' ')}</b></div>
    <div className='r119-surface-contrib'>{surface.contributes.map(x=><i key={x}>{x}</i>)}</div>
-   <footer><small>{surface.truth}</small><a href={surface.url} target='_blank' rel='noreferrer'>Open surface<ExternalLink/></a></footer>
+   <footer><small>{surface.truth}</small><a href={surface.url} target='_blank' rel='noreferrer'>{surface.historical?'Inspect historical surface':'Open surface'}<ExternalLink/></a></footer>
   </article>})}</div>
   <section className='r119-universe-strip'>
    <div><span>SOFTWARE UNIVERSE</span><b>{convergence.authority.totals.systems}</b><small>charted systems</small></div>
