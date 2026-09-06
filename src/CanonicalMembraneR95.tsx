@@ -4,6 +4,7 @@ import {compileSourceTraversal} from './sourceBackedModeRuntimeR21';
 import {applyCanvasResolutionR119,R119_RESOLUTION_BOUNDARY} from './renderResolutionR119';
 import OmegaPhysicsManifoldR132 from './OmegaPhysicsManifoldR132';
 import './canonicalMembraneR95.css';
+import './physicsManifoldHomeAuthorityR132.css';
 
 type Props={address:number;onAddress?:(address:number)=>void;initialProjection?:Projection;initialView?:ViewMode;projection?:Projection;view?:ViewMode;showControls?:boolean;compact?:boolean;label?:string};
 
