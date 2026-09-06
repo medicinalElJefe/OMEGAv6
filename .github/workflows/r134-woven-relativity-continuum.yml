@@ -1,0 +1,49 @@
+name: OMEGA R134 Woven Relativity Continuum
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r134-woven-relativity-continuum]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r134-woven-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r134:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R134 woven topology, observer relativity and adaptive resolution
+        run: node tests/r134-woven-relativity-continuum-invariants.mjs
+      - name: Preserve R132 relational physics and R121 Earth/source truth
+        run: |
+          node tests/r132-relational-physics-manifold-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: Preserve real Hybrid execution and root-safe transport
+        run: |
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r120-root-safe-hybrid-nav-canon-invariants.mjs
+      - name: Preserve simultaneous build organization, control, capacity and admission authority
+        run: |
+          node tests/r133-build-potential-map-invariants.mjs
+          node tests/r132-whole-system-experience-invariants.mjs
+          node tests/r131-capacity-governor.mjs
+          node tests/r130-operational-control-plane.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Cloudflare Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r134-dry-run
