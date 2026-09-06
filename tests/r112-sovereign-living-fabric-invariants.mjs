@@ -17,22 +17,28 @@ const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'44-route capability universe must remain intact');
 
-must(hybridRoute.includes('<SovereignConnectionR117/>'),'Hybrid Link must put the R117 clean PC connection successor on the ordinary surface');
+must(hybridRoute.includes('<SovereignConnectionR117/>'),'Hybrid Link must put the clean PC connection successor on the ordinary surface');
 must(hybridRoute.includes("<details className='r112-hybrid-deep'")&&hybridRoute.includes("onToggle={e=>setDeepOpen((e.currentTarget as HTMLDetailsElement).open)}")&&hybridRoute.includes('{deepOpen&&<HybridMissionControlR8'),'deep mission/federation diagnostics must remain available by progressive disclosure and stay unmounted until explicitly opened');
-must(hybridMount.includes('<SovereignConnectionR117 compact/>'),'legacy one-touch mount must converge on the same R117 clean connection state machine');
+must(hybridMount.includes('<SovereignConnectionR117 compact/>'),'legacy one-touch mount must converge on the same clean connection state machine');
 
-must(bootstrap117.includes("fetch('/api/hybrid/bootstrap'")&&bootstrap117.includes('saveHybridBridge'),'R117 connection state machine must mint and persist one exact fresh durable bridge');
+must(bootstrap117.includes("fetch('/api/hybrid/bootstrap'")&&bootstrap117.includes('saveHybridBridge'),'connection state machine must mint and persist one exact fresh durable bridge');
 must(sovereign117.includes("live?.nativeExecutionClaimed===true")&&sovereign117.includes('current.length>0'),'PC ONLINE must require both current device heartbeat and native proof claim');
-must(sovereign117.includes('DOWNLOAD CLEAN R117 CONNECTOR')&&sovereign117.includes('download={SOVEREIGN_LAUNCHER_FILENAME_R117}'),'clean launcher download must be an explicit user-clickable file action after fresh pairing');
-must(!sovereign117.includes("document.createElement('a')")&&!sovereign117.includes('.click()'),'R117 must not depend on a browser-blockable synthetic async download click');
+const r117Download=sovereign117.includes('DOWNLOAD CLEAN R117 CONNECTOR')&&sovereign117.includes('download={SOVEREIGN_LAUNCHER_FILENAME_R117}');
+const r127Download=sovereign117.includes('DOWNLOAD R127 ZERO-DRIFT CONNECTOR')&&sovereign117.includes('download={SOVEREIGN_LAUNCHER_FILENAME_R127}');
+must(r117Download||r127Download,'clean launcher download must be an explicit user-clickable file action after fresh pairing');
+must(!sovereign117.includes("document.createElement('a')")&&!sovereign117.includes('.click()'),'connection flow must not depend on a browser-blockable synthetic async download click');
 must(sovereign117.includes('Local learning')&&sovereign117.includes('Full-wave RCWA'),'connection surface must expose meaningful post-connection capability, including bounded learning and solver state');
 
-must(launcher117.includes("OMEGA_ORIGIN=${ORIGIN}")&&launcher117.includes('/api/hybrid/agent-download?r117=1'),'R117 launcher must hard-bind canonical OMEGA and canonical agent endpoint');
-must(launcher117.includes('if exist J:\\\\')&&launcher117.includes('OMEGA_APPROVED_ROOT'),'R117 launcher must honor explicit root override and prefer the established J:\\ root when present');
-must(launcher117.includes("$s.StartsWith('#!/usr/bin/env python3')")&&launcher117.includes("$s.Contains('OMEGA R34 local Hybrid Link agent')")&&launcher117.includes("DEFAULT_SERVER=''https://omegav6.jeffdeweyeljefe.workers.dev''"),'R117 launcher must validate the exact canonical Python agent identity before execution');
-must(launcher117.includes('import numpy,grcwa')&&launcher117.includes('General Hybrid connection will still run'),'optional RCWA must never block the general Hybrid heartbeat');
-must(launcher117.includes('pip install numpy grcwa')&&!launcher117.includes('winget install'),'launcher may explain missing solver dependency but must not silently install it');
-must(launcher117.includes('OMEGA_CONNECT_PC_R117.log'),'R117 launcher must leave a local diagnostic log for failed connection runs');
+const r117Endpoint=launcher117.includes('/api/hybrid/agent-download?r117=1');
+const r127Endpoint=launcher117.includes('/api/hybrid/agent-download?r127=1')&&launcher117.includes('x-omega-agent-sha256')&&launcher117.includes('server==local');
+must(launcher117.includes("OMEGA_ORIGIN=${ORIGIN}")&&(r117Endpoint||r127Endpoint),'launcher must hard-bind canonical OMEGA and a validated canonical agent endpoint');
+must(launcher117.includes('if exist J:\\\\')&&launcher117.includes('OMEGA_APPROVED_ROOT'),'launcher must honor explicit root override and prefer the established J:\\ root when present');
+const legacyIdentity=launcher117.includes("$s.StartsWith('#!/usr/bin/env python3')")&&launcher117.includes("$s.Contains('OMEGA R34 local Hybrid Link agent')")&&launcher117.includes("DEFAULT_SERVER=''https://omegav6.jeffdeweyeljefe.workers.dev''");
+const r127Identity=launcher117.includes("s.startswith(chr(35)+chr(33)+'/usr/bin/env python3')")&&launcher117.includes("'OMEGA R34 local Hybrid Link agent' in s")&&launcher117.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")&&launcher117.includes('hashlib.sha256(b).hexdigest()');
+must(legacyIdentity||r127Identity,'launcher must validate canonical Python agent identity before execution');
+must(launcher117.includes('import numpy,grcwa')&&launcher117.includes('General Hybrid link continues normally'),'optional RCWA must never block the general Hybrid heartbeat');
+must(launcher117.includes('pip install numpy grcwa')&&!launcher117.includes('winget install'),'launcher may retain solver guidance but must not silently install it');
+must(launcher117.includes('OMEGA_CONNECT_PC_R117.log')||launcher117.includes('OMEGA_CONNECT_PC_R127.log'),'launcher must leave a local diagnostic log for failed connection runs');
 must(launcher117.includes('omega-sovereign-convergence.foundasound.chatgpt.site')&&!launcher117.includes('https://omega-sovereign-convergence.foundasound.chatgpt.site/'),'retired origin may be identified for diagnostics but must not appear as an executable fallback URL');
 
 // R112 remains retained donor/rollback evidence rather than the active user path.
@@ -45,6 +51,6 @@ must(field.includes('requestAnimationFrame')&&field.includes('calculusVisualLaw(
 must(field.includes('nodes?.genesis?.state')&&field.includes('nodes?.optical?.state')&&field.includes('nodes?.sovereign?.state')&&field.includes('nodes?.omegaV6?.state'),'living field must incorporate actual four-node truth states');
 must(field.includes('instrument projection, not an external physical measurement'),'motion visual must preserve representation-vs-measurement truth boundary');
 must(!field.includes('Math.random')&&!launcher117.includes('Math.random'),'living/connection paths may not fabricate state with randomness');
-must(law.includes('globalModeInfluenceR107')&&law.includes('sourceModeInfluence'),'R117/R118 must consume the established full calculus/mode fabric rather than inventing a parallel decorative motion system');
+must(law.includes('globalModeInfluenceR107')&&law.includes('sourceModeInfluence'),'Hybrid successor must consume the established full calculus/mode fabric rather than inventing a parallel decorative motion system');
 
-console.log('R112/R118 SOVEREIGN + LIVING FABRIC PASS · fresh durable bootstrap · explicit browser-safe clean connector · current-heartbeat truth · retained local learning/RCWA · task-first federation · calculus-driven living motion · advanced donor diagnostics lazy-mounted · R112 donor preserved');
+console.log('R112/R118/R127 SOVEREIGN + LIVING FABRIC PASS · fresh durable bootstrap · explicit browser-safe connector · server/local agent digest proof · current-heartbeat truth · retained local learning/RCWA · task-first federation · calculus-driven living motion · advanced donor diagnostics lazy-mounted · R112 donor preserved');
