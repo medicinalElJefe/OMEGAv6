@@ -1,13 +1,14 @@
 {
   "schema": "omega.selfbuild.candidate.r124.v1",
-  "generation": 5,
+  "generation": 6,
   "capsule": {
-    "id": "SB005",
-    "title": "Archive donor memory graph",
-    "objective": "Rank donor capabilities at symbol/module granularity while prohibiting whole-archive replacement.",
-    "target": "src/generated/selfbuild/archiveDonorMemoryR124.ts",
+    "id": "SB006",
+    "title": "Swarm mission planner",
+    "objective": "Partition one mission 1→12→144→1728 and reconcile 1728→144→12→1 while retaining dissent, evidence and branch lineage.",
+    "target": "src/generated/selfbuild/swarmMissionPlannerR124.ts",
     "risk": "MEDIUM",
     "prerequisites": [
+      "SB001",
       "SB002"
     ],
     "preserves": [
@@ -17,19 +18,20 @@
     ],
     "tests": [
       "r124",
+      "r123",
       "build"
     ],
-    "expectedGain": 0.86,
-    "complexity": 0.41,
-    "contradictionRisk": 0.16,
+    "expectedGain": 0.94,
+    "complexity": 0.55,
+    "contradictionRisk": 0.18,
     "operation": "GENERATE_MODULE"
   },
-  "score": 1.0863157894736841,
-  "generatedTarget": "src/generated/selfbuild/archiveDonorMemoryR124.ts",
+  "score": 0.9271232876712329,
+  "generatedTarget": "src/generated/selfbuild/swarmMissionPlannerR124.ts",
   "receipt": {
-    "generation": 5,
-    "capsuleId": "SB005",
-    "startedAt": "2026-09-06T18:05:48.505Z",
+    "generation": 6,
+    "capsuleId": "SB006",
+    "startedAt": "2026-09-06T18:06:32.337Z",
     "status": "ADMIT",
     "tests": {
       "r124": true,
@@ -44,14 +46,14 @@
       "r121"
     ],
     "residualBefore": 1,
-    "rollbackRef": "275963f68d8d0d9c8a0545844686dc44debc9343",
+    "rollbackRef": "06327fdfb6abb39076bf763d3166900a8be06bef",
     "notes": [
       "Generated deterministically from versioned R124 capsule.",
       "Not authoritative until test and merge admission.",
       "Focused and inherited gates passed before admission.",
       "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
     ],
-    "completedAt": "2026-09-06T18:05:54.035Z",
+    "completedAt": "2026-09-06T18:06:36.337Z",
     "residualAfter": 0.9
   },
   "admission": "ADMITTED_PENDING_FAST_FORWARD"

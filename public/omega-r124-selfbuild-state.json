@@ -1,7 +1,7 @@
 {
   "schema": "omega.selfbuild.r124.v1",
   "authority": "OMEGAV6",
-  "generation": 5,
+  "generation": 6,
   "maxAutonomousGenerations": 8,
   "active": true,
   "currentCapsuleId": null,
@@ -10,7 +10,8 @@
     "SB002",
     "SB003",
     "SB004",
-    "SB005"
+    "SB005",
+    "SB006"
   ],
   "rejected": [],
   "blocked": [],
@@ -153,6 +154,34 @@
         "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
       ],
       "completedAt": "2026-09-06T18:05:54.035Z",
+      "residualAfter": 0.9
+    },
+    {
+      "generation": 6,
+      "capsuleId": "SB006",
+      "startedAt": "2026-09-06T18:06:32.337Z",
+      "status": "ADMIT",
+      "tests": {
+        "r124": true,
+        "r123": true,
+        "r122": true,
+        "r121": true,
+        "build": true
+      },
+      "preserved": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "residualBefore": 1,
+      "rollbackRef": "06327fdfb6abb39076bf763d3166900a8be06bef",
+      "notes": [
+        "Generated deterministically from versioned R124 capsule.",
+        "Not authoritative until test and merge admission.",
+        "Focused and inherited gates passed before admission.",
+        "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
+      ],
+      "completedAt": "2026-09-06T18:06:36.337Z",
       "residualAfter": 0.9
     }
   ],
