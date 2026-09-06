@@ -1,0 +1,46 @@
+name: OMEGA R135 Live Family Proof Fusion
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r135-family-proof-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r135:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R135 declared-status/current-proof separation
+        run: node tests/r135-live-family-proof-fusion-invariants.mjs
+      - name: Preserve R134 canonical world scar/proof continuity
+        run: node tests/r134-canonical-world-continuity.mjs
+      - name: Preserve R133 build potential and R132 whole-system organization
+        run: |
+          node tests/r133-build-potential-map-invariants.mjs
+          node tests/r132-whole-system-experience-invariants.mjs
+      - name: Preserve complete R83 system inventory
+        run: node tests/r83-full-system-inventory-invariants.mjs
+      - name: Preserve R131-R125 capacity, operations and canonical admission
+        run: |
+          node tests/r131-capacity-governor.mjs
+          node tests/r130-operational-control-plane.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Cloudflare Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r135-dry-run
