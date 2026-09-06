@@ -1,6 +1,7 @@
 const ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev';
 export const SOVEREIGN_LAUNCHER_LEGACY_FILENAME_R117='START_OMEGA_PC_LINK_R117_CLEAN.cmd';
 export const SOVEREIGN_AGENT_LEGACY_VALIDATION_LITERAL_R1191="DEFAULT_SERVER=''https://omegav6.jeffdeweyeljefe.workers.dev''";
+export const SOVEREIGN_LAUNCHER_R117_PERCENT_EXPANSION_MARKERS='%OMEGA_AGENT% %OMEGA_ORIGIN% %OMEGA_PAIR%';
 
 function sanitizePairingCode(value:string){return String(value||'').replace(/[\r\n"&|<>^]/g,'').slice(0,512)}
 
