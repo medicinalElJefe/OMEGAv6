@@ -3,8 +3,9 @@ import {planIntentR103} from './federation/federationIntentRouterR103.js';
 import {swarmApiR121,withSwarmCorsR121} from './swarm/swarmApiR121.js';
 import {OmegaSwarmCell} from './swarm/swarmCellR121.js';
 import {OmegaSwarmCoordinator} from './swarm/swarmCoordinatorR121.js';
+import {OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator} from './swarm/swarmOrganismR123.js';
 
-export {OmegaSwarmCell,OmegaSwarmCoordinator};
+export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator};
 
 const REVISION='R116';
 const CONNECTOR_REVISION='R117';
