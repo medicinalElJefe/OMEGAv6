@@ -1,0 +1,45 @@
+name: OMEGA R140 Living World Operation Bridge
+
+on:
+  push:
+    branches:
+      - r140-living-world-operation-bridge
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: omega-r140-world-bridge-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - name: Prove R140 operation to one-world continuity bridge
+        run: node tests/r140-living-world-operation-bridge-invariants.mjs
+      - name: Preserve current R139/R138 capability and visual truth
+        run: |
+          node tests/r139-unified-capability-engine-invariants.mjs
+          node tests/r138-capability-first-visual-runtime.mjs
+      - name: Preserve R137/R136/R134 world and proof boundaries
+        run: |
+          node tests/r137-live-family-proof-fusion-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r134-woven-relativity-continuum-invariants.mjs
+      - name: Preserve physics, Hybrid and whole-system organization
+        run: |
+          node tests/r132-relational-physics-manifold-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r132-whole-system-experience-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Cloudflare Worker dry run only
+        run: npx wrangler deploy --dry-run
