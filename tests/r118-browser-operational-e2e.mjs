@@ -22,23 +22,27 @@ async function openRoute(page,route){
  },route);
  if(!found)throw new Error(`route button missing: ${route}`);
  await page.waitForFunction(route=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===route,route,{timeout:20000});
- // Heavy specialists are intentionally route-deferred. A panel switch happens before its dynamic import
- // necessarily paints; wait for the route to own substantive DOM before evaluating its operation.
+ // The current product deliberately defers heavy specialist modules. Provenance/calculus scaffolding is
+ // rendered immediately inside R81, so it cannot be used as proof that the specialist itself has arrived.
+ // Wait specifically for the bounded R109 Suspense fallback to disappear before judging operation.
  await page.waitForFunction(route=>{
   const root=document.querySelector('.omega-workstation-v2');
   if(!root||root.getAttribute('data-panel')!==route)return false;
-  const surface=root.querySelector('.omega-surface-r81');
+  const surface=root.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(route)}"]`)||root.querySelector('.omega-surface-r81');
   if(!surface)return false;
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
-  const pending=[...surface.querySelectorAll('.boot')].filter(visible).some(x=>/LOADING|PREPARING|BOOT/i.test(x.textContent||''));
-  const substantive=[...surface.querySelectorAll('canvas,svg,h1,h2,h3,button,input,textarea,article,section')].filter(visible).length;
-  return !pending&&substantive>0;
- },route,{timeout:15000}).catch(()=>{});
+  const deferred=[...surface.querySelectorAll('.r109-specialist-loading')].some(visible);
+  const bootPending=[...surface.querySelectorAll('.boot')].filter(visible).some(x=>/LOADING|PREPARING|BOOT|MATERIALIZING/i.test(x.textContent||''));
+  return !deferred&&!bootPending;
+ },route,{timeout:20000});
+ if(route==='Hybrid Link'){
+  await page.waitForFunction(()=>/OMEGA SOVEREIGN LINK · R117/.test(document.querySelector('.omega-surface-r81')?.textContent||''),{timeout:12000});
+ }
  if(criticalVisual.has(route)){
   await page.waitForFunction(()=>{
    const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>=180&&r.height>=120};
    return [...document.querySelectorAll('.omega-surface-r81 canvas,.omega-surface-r81 svg')].some(visible);
-  },{timeout:12000}).catch(()=>{});
+  },{timeout:12000});
  }
 }
 
@@ -46,7 +50,7 @@ async function inspectRoute(page,route,viewportName){
  const result=await page.evaluate(({route,visual})=>{
   const root=document.querySelector('.omega-workstation-v2');
   const main=document.querySelector('.workstation-main');
-  const surface=root?.querySelector('.omega-surface-r81');
+  const surface=root?.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(route)}"]`)||root?.querySelector('.omega-surface-r81');
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
   const errors=[...(surface?.querySelectorAll('.boot')||[])].filter(visible).map(x=>x.textContent||'').filter(x=>/ERROR|FAILED/i.test(x));
   const canvases=[...(surface?.querySelectorAll('canvas,svg')||[])].filter(visible).map(el=>{const r=el.getBoundingClientRect();return{w:r.width,h:r.height,tag:el.tagName,label:el.getAttribute('aria-label')||''}});
@@ -62,7 +66,7 @@ async function inspectRoute(page,route,viewportName){
    mainWidth:mainRect?.width||0,
    mainLeft:mainRect?.left||0,
    visual,
-   text:(surface?.textContent||'').slice(0,20000)
+   text:(surface?.textContent||'').slice(0,30000)
   };
  },{route,visual:criticalVisual.has(route)});
  if(result.panel!==route)throw new Error(`${viewportName} ${route}: active panel mismatch ${result.panel}`);
@@ -96,5 +100,5 @@ const browser=await chromium.launch({headless:true});
 try{
  await runViewport(browser,'desktop',{width:1440,height:960});
  await runViewport(browser,'mobile',{width:390,height:844});
- console.log(`R118 BROWSER OPERATIONAL PASS · ${routes.length} routes × desktop/mobile · deferred specialists settled · no startup errors · no route placeholders · no horizontal overflow · visual stages present`);
+ console.log(`R118 BROWSER OPERATIONAL PASS · ${routes.length} routes × desktop/mobile · R109 deferred specialists settled · no startup errors · no route placeholders · no horizontal overflow · visual stages present`);
 }finally{await browser.close()}
