@@ -40,9 +40,10 @@ jobs:
       - name: Preserve canonical admission and operational capacity gates
         shell: bash
         run: |
-          node tests/r131-capacity-governor-invariants.mjs
-          node tests/r130-operational-control-plane-invariants.mjs
-          node tests/r125-accuracy-first-engine-invariants.mjs
+          node tests/r131-capacity-governor.mjs
+          node tests/r130-operational-control-plane.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
       - name: Full inherited regression and production build
         run: npm run check
       - name: Canonical Worker dry run
