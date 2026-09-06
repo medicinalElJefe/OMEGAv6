@@ -1,0 +1,29 @@
+name: OMEGA R135 Hybrid Autorepair
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  prove-r135:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prove R135 bounded autorepair
+        run: node tests/r135-hybrid-autorepair-loop.mjs
+      - name: Preserve R132 execution plane
+        run: node tests/r132-hybrid-execution-plane-invariants.mjs
+      - name: Preserve current control and truth gates
+        run: |
+          node tests/r131-capacity-governor.mjs
+          node tests/r130-operational-control-plane.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Full regression and production build
+        run: npm run check
+      - name: Worker bundle dry run
+        run: npx wrangler deploy --dry-run
