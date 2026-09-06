@@ -1,14 +1,14 @@
 {
   "schema": "omega.selfbuild.candidate.r124.v1",
-  "generation": 4,
+  "generation": 5,
   "capsule": {
-    "id": "SB004",
-    "title": "Adaptive working-set scheduler",
-    "objective": "Allocate computation from observer relevance, causal relevance, uncertainty, motion, proof urgency and resource budget without mutating canonical state.",
-    "target": "src/generated/selfbuild/adaptiveWorkingSetR124.ts",
+    "id": "SB005",
+    "title": "Archive donor memory graph",
+    "objective": "Rank donor capabilities at symbol/module granularity while prohibiting whole-archive replacement.",
+    "target": "src/generated/selfbuild/archiveDonorMemoryR124.ts",
     "risk": "MEDIUM",
     "prerequisites": [
-      "SB001"
+      "SB002"
     ],
     "preserves": [
       "r123",
@@ -17,20 +17,19 @@
     ],
     "tests": [
       "r124",
-      "r123",
       "build"
     ],
-    "expectedGain": 0.95,
-    "complexity": 0.46,
-    "contradictionRisk": 0.14,
+    "expectedGain": 0.86,
+    "complexity": 0.41,
+    "contradictionRisk": 0.16,
     "operation": "GENERATE_MODULE"
   },
-  "score": 1.1399999999999997,
-  "generatedTarget": "src/generated/selfbuild/adaptiveWorkingSetR124.ts",
+  "score": 1.0863157894736841,
+  "generatedTarget": "src/generated/selfbuild/archiveDonorMemoryR124.ts",
   "receipt": {
-    "generation": 4,
-    "capsuleId": "SB004",
-    "startedAt": "2026-09-06T18:05:10.666Z",
+    "generation": 5,
+    "capsuleId": "SB005",
+    "startedAt": "2026-09-06T18:05:48.505Z",
     "status": "ADMIT",
     "tests": {
       "r124": true,
@@ -45,14 +44,14 @@
       "r121"
     ],
     "residualBefore": 1,
-    "rollbackRef": "79dad069373bb50caced622126fb8899d6070a67",
+    "rollbackRef": "275963f68d8d0d9c8a0545844686dc44debc9343",
     "notes": [
       "Generated deterministically from versioned R124 capsule.",
       "Not authoritative until test and merge admission.",
       "Focused and inherited gates passed before admission.",
       "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
     ],
-    "completedAt": "2026-09-06T18:05:15.505Z",
+    "completedAt": "2026-09-06T18:05:54.035Z",
     "residualAfter": 0.9
   },
   "admission": "ADMITTED_PENDING_FAST_FORWARD"
