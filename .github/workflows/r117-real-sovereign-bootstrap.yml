@@ -54,6 +54,30 @@ jobs:
           }
           throw new Error(`R117 connector promotion not observed: ${last}`);
           NODE
+      - name: Prove canonical Hybrid agent matches current launcher identity contract
+        shell: bash
+        run: |
+          node <<'NODE'
+          import {createHash} from 'node:crypto';
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const r=await fetch(base+'/api/hybrid/agent-download?r117=1',{headers:{'cache-control':'no-cache'}});
+          const source=await r.text();
+          if(!r.ok)throw new Error(`agent download failed: HTTP ${r.status} ${source.slice(0,240)}`);
+          for(const marker of [
+            '#!/usr/bin/env python3',
+            'OMEGA R34 local Hybrid Link agent',
+            "DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'",
+            'Pairing is explicit.'
+          ]) if(!source.includes(marker)) throw new Error(`canonical agent missing launcher marker: ${marker}`);
+          if(!source.startsWith('#!/usr/bin/env python3'))throw new Error('canonical agent shebang is not first bytes');
+          if(source.length<1000)throw new Error(`canonical agent unexpectedly small: ${source.length}`);
+          const sha=createHash('sha256').update(source).digest('hex');
+          const receipt=r.headers.get('x-omega-agent-sha256');
+          const origin=r.headers.get('x-omega-canonical-origin');
+          if(receipt&&receipt!==sha)throw new Error(`agent SHA receipt mismatch: ${receipt} != ${sha}`);
+          if(origin&&origin!==base)throw new Error(`canonical origin receipt mismatch: ${origin}`);
+          console.log(`R117 AGENT COMPAT LIVE PASS · bytes ${source.length} · sha256 ${sha}`);
+          NODE
       - name: Prove fresh durable pairing bootstrap end-to-end
         shell: bash
         run: |
