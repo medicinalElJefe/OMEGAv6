@@ -47,19 +47,21 @@ export default function OmegaCapabilityFieldR138({panel,record,address,onAddress
  const rings=[law.u.C,law.u.Phi,1-law.u.q,1-law.u.Lambda,law.u.evidence,1-uncertainty].map((v,i)=>({v:n01(v),r:70+i*24}));
  const nodes=actions.slice(0,8).map((a,i)=>{const angle=-Math.PI/2+i*Math.PI*2/Math.max(1,Math.min(8,actions.length)),radius=150+(i%2)*42;return{...a,x:320+Math.cos(angle)*radius,y:230+Math.sin(angle)*radius}});
  const runtimeObserved=Boolean(status&&!status.error),continuityObserved=Boolean(restore&&!restore.error);
+ const runAction=(action:Action)=>{if(action.route)onNavigate(action.route);else if(action.address!==undefined)onAddress(action.address)};
+ const runKey=(e:any,action:Action)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();runAction(action)}};
  return <section className='r138-capability-field' data-panel={panel} data-visual-policy='CAPABILITY_FIRST_NO_STALE_CHART_PRIMARY' data-candidate-authority={CANDIDATE_AUTHORITY} data-canonical-mutation='false'>
   <header className='r138-capability-head'><div><span>R139 TRUTH UPGRADE · R138 ACTIVE CAPABILITY FIELD</span><h2>{panel}</h2><p>Operate from the current source state. Choose a capability route, select a projected address, open bounded Hybrid execution, prove a result, or build a governed candidate. Address selection changes the local projection only; R125 canonical admission remains a separate proof-gated operation.</p></div><div className='r138-health'><b>{runtimeObserved?'RUNTIME OBSERVATION PRESENT':'RUNTIME UNVERIFIED'}</b><small>{continuityObserved?'continuity observation present':'continuity observation unverified'}</small></div></header>
   <div className='r138-capability-layout'>
-   <button className='r138-live-stage' onClick={()=>candidates[0]&&onAddress(candidates[0].address)} aria-label='Capability field; select highest-ranked projected source state'>
+   <div className='r138-live-stage' role='group' aria-label='Interactive capability topology; select a spatial node to operate that capability or projected state'>
     <svg viewBox='0 0 640 460' role='img' aria-label='Interactive capability topology around the current source state'>
      <defs><radialGradient id='r138-core'><stop offset='0%' stopColor={operatorColor(law,'OMEGA',.7)}/><stop offset='100%' stopColor='transparent'/></radialGradient></defs>
      {rings.map((x,i)=><circle key={i} cx='320' cy='230' r={x.r} className='r138-shell' style={{opacity:.15+.45*x.v}}/>)}
-     {nodes.map(n=><g key={n.id} className='r138-node'><line x1='320' y1='230' x2={n.x} y2={n.y}/><circle cx={n.x} cy={n.y} r={n.kind===ACTION_KIND.STATE?13:18}/><text x={n.x} y={n.y+32} textAnchor='middle'>{n.label.slice(0,19)}</text><text x={n.x} y={n.y+45} textAnchor='middle' className='r138-node-sub'>{n.kind}</text></g>)}
+     {nodes.map(n=><g key={n.id} className='r138-node' data-kind={n.kind} role='button' tabIndex={0} aria-label={`${n.kind}: ${n.label}. ${n.detail}`} onClick={()=>runAction(n)} onKeyDown={e=>runKey(e,n)}><line x1='320' y1='230' x2={n.x} y2={n.y}/><circle cx={n.x} cy={n.y} r={n.kind===ACTION_KIND.STATE?13:18}/><text x={n.x} y={n.y+32} textAnchor='middle'>{n.label.slice(0,19)}</text><text x={n.x} y={n.y+45} textAnchor='middle' className='r138-node-sub'>{n.kind}</text></g>)}
      <circle cx='320' cy='230' r='66' fill='url(#r138-core)' className='r138-core-halo'/><circle cx='320' cy='230' r='42' className='r138-core'/><text x='320' y='218' textAnchor='middle' className='r138-core-label'>STATE {record.stateId}</text><text x='320' y='238' textAnchor='middle' className='r138-core-value'>D{coords.d+1} P{coords.p+1} R{coords.r+1} L{coords.l+1}</text><text x='320' y='256' textAnchor='middle' className='r138-core-sub'>{String(record.metrics?.decision||'—')}</text>
     </svg>
-    <span className='r138-stage-hint'>Select highest-ranked projected source state · local address only · R125 admission remains separate</span>
-   </button>
-   <aside className='r138-action-stack'>{actions.map(action=>{const Icon=action.route?ICONS[action.route]||ArrowRight:Waypoints;return <button key={action.id} data-kind={action.kind} onClick={()=>action.route?onNavigate(action.route):action.address!==undefined?onAddress(action.address):undefined}><Icon/><span><b>{action.label}</b><small>{action.detail}</small></span><ArrowRight/></button>})}</aside>
+    <span className='r138-stage-hint'>Spatial nodes are live controls · STATE selects a local projection · EXECUTE/PROVE/BUILD/EXPLORE open their bounded capability surfaces</span>
+   </div>
+   <aside className='r138-action-stack'>{actions.map(action=>{const Icon=action.route?ICONS[action.route]||ArrowRight:Waypoints;return <button key={action.id} data-kind={action.kind} onClick={()=>runAction(action)}><Icon/><span><b>{action.label}</b><small>{action.detail}</small></span><ArrowRight/></button>})}</aside>
   </div>
   <footer className='r138-capability-ledger'><span>CΩ <b>{fmt(law.u.C)}</b></span><span>Φ <b>{fmt(law.u.Phi)}</b></span><span>q <b>{fmt(law.u.q)}</b></span><span>Λ <b>{fmt(law.u.Lambda)}</b></span><span>evidence <b>{fmt(law.u.evidence)}</b></span><span>source-backed modes <b>{modes.appliedCount}</b></span><span>gated <b>{modes.gatedCount}</b></span><span>authority <b>PROJECTION ≠ ADMISSION</b></span></footer>
  </section>
