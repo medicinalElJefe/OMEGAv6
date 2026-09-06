@@ -8,7 +8,6 @@ const routes=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 if(routes.length!==44||new Set(routes).size!==44)throw new Error(`R118 expected 44 unique routes, found ${routes.length}`);
 
 const criticalVisual=new Set(['Matter Traversal','Visual Instrument','Immersive Traversal','Extreme Traversal','Traversal','Forecast','Relativity','Earth Now','Atlas','Infinity','Scale Compiler','Reality Lab','Field','Data Motion','Convergence']);
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 async function openRoute(page,route){
  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
@@ -23,17 +22,35 @@ async function openRoute(page,route){
  },route);
  if(!found)throw new Error(`route button missing: ${route}`);
  await page.waitForFunction(route=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===route,route,{timeout:20000});
- await sleep(90);
+ // Heavy specialists are intentionally route-deferred. A panel switch happens before its dynamic import
+ // necessarily paints; wait for the route to own substantive DOM before evaluating its operation.
+ await page.waitForFunction(route=>{
+  const root=document.querySelector('.omega-workstation-v2');
+  if(!root||root.getAttribute('data-panel')!==route)return false;
+  const surface=root.querySelector('.omega-surface-r81');
+  if(!surface)return false;
+  const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
+  const pending=[...surface.querySelectorAll('.boot')].filter(visible).some(x=>/LOADING|PREPARING|BOOT/i.test(x.textContent||''));
+  const substantive=[...surface.querySelectorAll('canvas,svg,h1,h2,h3,button,input,textarea,article,section')].filter(visible).length;
+  return !pending&&substantive>0;
+ },route,{timeout:15000}).catch(()=>{});
+ if(criticalVisual.has(route)){
+  await page.waitForFunction(()=>{
+   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>=180&&r.height>=120};
+   return [...document.querySelectorAll('.omega-surface-r81 canvas,.omega-surface-r81 svg')].some(visible);
+  },{timeout:12000}).catch(()=>{});
+ }
 }
 
 async function inspectRoute(page,route,viewportName){
  const result=await page.evaluate(({route,visual})=>{
   const root=document.querySelector('.omega-workstation-v2');
   const main=document.querySelector('.workstation-main');
+  const surface=root?.querySelector('.omega-surface-r81');
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
-  const errors=[...document.querySelectorAll('.boot')].filter(visible).map(x=>x.textContent||'').filter(x=>/ERROR|FAILED/i.test(x));
-  const canvases=[...document.querySelectorAll('canvas,svg')].filter(visible).map(el=>{const r=el.getBoundingClientRect();return{w:r.width,h:r.height}});
-  const headings=[...document.querySelectorAll('h1,h2,h3')].filter(visible).map(x=>(x.textContent||'').trim()).filter(Boolean);
+  const errors=[...(surface?.querySelectorAll('.boot')||[])].filter(visible).map(x=>x.textContent||'').filter(x=>/ERROR|FAILED/i.test(x));
+  const canvases=[...(surface?.querySelectorAll('canvas,svg')||[])].filter(visible).map(el=>{const r=el.getBoundingClientRect();return{w:r.width,h:r.height,tag:el.tagName,label:el.getAttribute('aria-label')||''}});
+  const headings=[...(surface?.querySelectorAll('h1,h2,h3')||[])].filter(visible).map(x=>(x.textContent||'').trim()).filter(Boolean);
   const viewportOverflow=Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-window.innerWidth;
   const mainRect=main?.getBoundingClientRect();
   return{
@@ -45,7 +62,7 @@ async function inspectRoute(page,route,viewportName){
    mainWidth:mainRect?.width||0,
    mainLeft:mainRect?.left||0,
    visual,
-   text:(root?.textContent||'').slice(0,20000)
+   text:(surface?.textContent||'').slice(0,20000)
   };
  },{route,visual:criticalVisual.has(route)});
  if(result.panel!==route)throw new Error(`${viewportName} ${route}: active panel mismatch ${result.panel}`);
@@ -53,7 +70,7 @@ async function inspectRoute(page,route,viewportName){
  if(result.viewportOverflow>8)throw new Error(`${viewportName} ${route}: viewport horizontal overflow ${result.viewportOverflow}px`);
  if(result.mainWidth<220)throw new Error(`${viewportName} ${route}: working surface collapsed to ${result.mainWidth}px`);
  if(/REGISTERED · NO ACTIVE UTILITY IMPLEMENTATION/i.test(result.text))throw new Error(`${viewportName} ${route}: route fell into non-operational placeholder authority`);
- if(result.visual&&!result.canvases.some(x=>x.w>=180&&x.h>=120))throw new Error(`${viewportName} ${route}: visual-first route has no usable canvas/SVG stage`);
+ if(result.visual&&!result.canvases.some(x=>x.w>=180&&x.h>=120))throw new Error(`${viewportName} ${route}: visual-first route has no usable canvas/SVG stage after deferred module settlement; observed ${JSON.stringify(result.canvases).slice(0,700)}`);
  if(route==='Hybrid Link'){
   if(!/OMEGA SOVEREIGN LINK · R117/.test(result.text))throw new Error(`${viewportName} Hybrid Link: R117 connection authority missing`);
   if(!/FIX CONNECTION NOW|PC ONLINE|DOWNLOAD CLEAN R117 CONNECTOR/.test(result.text))throw new Error(`${viewportName} Hybrid Link: no actionable connection control`);
@@ -79,5 +96,5 @@ const browser=await chromium.launch({headless:true});
 try{
  await runViewport(browser,'desktop',{width:1440,height:960});
  await runViewport(browser,'mobile',{width:390,height:844});
- console.log(`R118 BROWSER OPERATIONAL PASS · ${routes.length} routes × desktop/mobile · no startup errors · no route placeholders · no horizontal overflow · visual stages present`);
+ console.log(`R118 BROWSER OPERATIONAL PASS · ${routes.length} routes × desktop/mobile · deferred specialists settled · no startup errors · no route placeholders · no horizontal overflow · visual stages present`);
 }finally{await browser.close()}
