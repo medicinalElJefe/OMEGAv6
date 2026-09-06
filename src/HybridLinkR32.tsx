@@ -1,6 +1,6 @@
 import {Cpu,FolderOpen,Gauge,GraduationCap,ShieldCheck,TerminalSquare} from 'lucide-react';
 import HybridMissionControlR8 from './HybridMissionControlR8';
-import SovereignConnectionR112 from './SovereignConnectionR112';
+import SovereignConnectionR117 from './SovereignConnectionR117';
 import './hybridLinkR32.css';
 import './hybridLinkR112.css';
 
@@ -9,11 +9,11 @@ type Props={status:any;record:any};
 export default function HybridLinkR32({status,record}:Props){
  return <section className='hybrid-r32 special-app r112-hybrid-link'>
   <header className='r112-hybrid-hero'>
-   <div><span>SOVEREIGN COMPUTE · HYBRID LINK</span><h2>Your PC is an OMEGA compute node.</h2><p>This page has one ordinary job: connect the Windows machine, prove the heartbeat, then expose local capabilities. Pairing mechanics, federation topology and recovery controls stay available, but they are not the main interface.</p></div>
+   <div><span>SOVEREIGN COMPUTE · HYBRID LINK · R117</span><h2>Your PC is an OMEGA compute node.</h2><p>The ordinary path is now intentionally narrow: rotate one fresh durable credential, download one clean Windows connector, prove one current heartbeat, then expose local capabilities. Old preview-host launchers are no longer part of the user path.</p></div>
    <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat. Native execution is claimed only while an authenticated agent heartbeat is current.</small></div>
   </header>
 
-  <SovereignConnectionR112/>
+  <SovereignConnectionR117/>
 
   <section className='r112-host-uses' aria-label='What Sovereign Compute adds'>
    <article><FolderOpen/><div><b>Work with the approved local root</b><span>Read, index, hash, patch, build, test and package only inside the bounded machine root.</span></div></article>
@@ -27,6 +27,6 @@ export default function HybridLinkR32({status,record}:Props){
    <HybridMissionControlR8 status={status} record={record}/>
   </details>
 
-  <footer className='special-boundary'><ShieldCheck/>R112 preserves the R101 durable bridge and the R32 allow-listed execution/proof queue, but the ordinary experience is now connection → heartbeat → capability. Advanced transport controls remain progressive rather than dominating the screen.</footer>
+  <footer className='special-boundary'><ShieldCheck/>R117 preserves the durable R101 bridge model, R32 allow-listed execution/proof queue, R113 vector carry, R114 federation closure, R115 machine adapters and R116 truth separation. The connection path itself is now fresh-bootstrap → clean connector → authenticated heartbeat → capability.</footer>
  </section>;
 }
