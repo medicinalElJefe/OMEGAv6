@@ -13,7 +13,7 @@ export default function HybridLinkR32({status,record}:Props){
  return <section className='hybrid-r32 special-app r112-hybrid-link'>
   <header className='r112-hybrid-hero'>
    <div><span>SOVEREIGN COMPUTE · HYBRID LINK · R117 CONNECTION + R139 PROOF CLOSURE</span><h2>Your PC is an OMEGA compute node.</h2><p>The ordinary path stays narrow: rotate one fresh durable credential, download one clean Windows connector, prove one current heartbeat, execute only confirmed bounded work, then close every returned host packet into fingerprint-verified continuity/scar evidence with deterministic replay.</p></div>
-   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat. A returned workload is not accepted as execution proof until R139 recomputes its agent fingerprint. Neither heartbeat nor replay promotes CanonState.</small></div>
+   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat. Native execution is claimed only while an authenticated agent heartbeat is current. A returned workload is not accepted as execution proof until R139 verifies its exact payload fingerprint and semantic equality. Neither heartbeat nor replay promotes CanonState.</small></div>
   </header>
 
   <SovereignConnectionR117/>
