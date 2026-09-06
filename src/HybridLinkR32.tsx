@@ -11,24 +11,24 @@ export default function HybridLinkR32({status,record}:Props){
  const[deepOpen,setDeepOpen]=useState(false);
  return <section className='hybrid-r32 special-app r112-hybrid-link'>
   <header className='r112-hybrid-hero'>
-   <div><span>SOVEREIGN COMPUTE · HYBRID LINK · R117</span><h2>Your PC is an OMEGA compute node.</h2><p>The ordinary path is intentionally narrow: rotate one fresh durable credential, download one clean Windows connector, prove one current heartbeat, then expose local capabilities. Old preview-host launchers are not part of the user path.</p></div>
-   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat. Native execution is claimed only while an authenticated agent heartbeat is current.</small></div>
+   <div><span>SOVEREIGN COMPUTE · HYBRID LINK · R127 ZERO DRIFT</span><h2>One canonical cloud ↔ one proved PC node.</h2><p>The ordinary path is deliberately singular: mint one fresh durable pairing, download one SHA-256-verified root-safe Windows connector, prove one current authenticated heartbeat, then expose only the capabilities that heartbeat actually supports. No preview-host fallback, no C: runtime fallback, no partial-agent execution, no stale-agent substitution, and no browser-only PC ONLINE claim.</p></div>
+   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Pairing, download, agent validation and heartbeat are separate states. Native execution is claimed only while the paired device heartbeat is current.</small></div>
   </header>
 
   <SovereignConnectionR117/>
 
   <section className='r112-host-uses' aria-label='What Sovereign Compute adds'>
-   <article><FolderOpen/><div><b>Work with the approved local root</b><span>Read, index, hash, patch, build, test and package only inside the bounded machine root.</span></div></article>
-   <article><Cpu/><div><b>Run high-compute workers</b><span>RCWA is active when its dependency and heartbeat are proved; future FDTD/FEM/GPU workers remain separately truth-gated.</span></div></article>
-   <article><GraduationCap/><div><b>Learn from your local corpus</b><span>TRAIN_LOCAL builds bounded local indexes and learning receipts from approved files. It does not claim silent foundation-model weight training.</span></div></article>
-   <article><Gauge/><div><b>Return proof, not mystery actions</b><span>Every enacted job returns status, output identity and evidence/receipt information to the canonical OMEGA runtime.</span></div></article>
+   <article><FolderOpen/><div><b>Bounded local root</b><span>Read, index, hash, patch, build, test and package only inside the explicitly approved machine root.</span></div></article>
+   <article><Cpu/><div><b>Proved compute workers</b><span>RCWA becomes active only when dependency, transport source and worker heartbeat are proved; other machine workers remain independently gated.</span></div></article>
+   <article><GraduationCap/><div><b>Local corpus learning</b><span>TRAIN_LOCAL produces bounded indexes and receipts from approved files. It does not silently mutate foundation-model weights.</span></div></article>
+   <article><Gauge/><div><b>Receipts instead of mystery actions</b><span>Every enacted Hybrid job is allow-listed, root-confined and expected to return bounded result/proof information to canonical OMEGAv6.</span></div></article>
   </section>
 
   <details className='r112-hybrid-deep' onToggle={e=>setDeepOpen((e.currentTarget as HTMLDetailsElement).open)}>
-   <summary><TerminalSquare/><span><b>Advanced federation, mission planning and diagnostics</b><small>Not required to connect the PC. Open this only when inspecting routes, queues, solver details, recovery or donor architecture.</small></span></summary>
+   <summary><TerminalSquare/><span><b>Advanced federation, queues and diagnostics</b><small>Not required to connect the PC. Open only when inspecting solver state, mission routing, recovery, proof or donor architecture.</small></span></summary>
    {deepOpen&&<HybridMissionControlR8 status={status} record={record}/>}
   </details>
 
-  <footer className='special-boundary'><ShieldCheck/>R117 preserves the durable R101 bridge model, R32 allow-listed execution/proof queue, R113 vector carry, R114 federation closure, R115 machine adapters and R116 truth separation. The connection path itself is fresh-bootstrap → clean connector → authenticated heartbeat → capability. Legacy mission diagnostics are not mounted until explicitly opened.</footer>
+  <footer className='special-boundary'><ShieldCheck/>R127 preserves the durable R101 bridge model, R32 allow-listed execution/proof queue, R113 vector carry, R114 federation closure, R115 machine adapters, R116 truth separation, R121–R126 swarm/organism/autonomic runtime, and the R125 accuracy authority. The connection itself is now constrained to canonical bootstrap → quarantined download → server/local SHA-256 equality → parser preflight → authenticated register → current heartbeat → governed poll.</footer>
  </section>;
 }
