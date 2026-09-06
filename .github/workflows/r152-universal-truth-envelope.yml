@@ -1,0 +1,49 @@
+name: OMEGA R152 Universal Truth Envelope
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r152-universal-truth-envelope]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r152-universal-truth-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r152:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove universal truth precedence and scar carry
+        run: npx --yes tsx tests/r152-universal-truth-envelope.mts
+      - name: Preserve R151 all-modes truth and swarm partition
+        shell: bash
+        run: |
+          node tests/r151-all-modes-truth-fusion-invariants.mjs
+          npx --yes tsx scripts/r151-full-atlas-scan.ts
+      - name: Preserve causal evidence and computed reality truth boundaries
+        shell: bash
+        run: |
+          node tests/r126-causal-interaction-relativity.mjs
+          node tests/r122-computed-reality-convergence.mjs
+      - name: Preserve operation execution and admission authorities
+        shell: bash
+        run: |
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r152-dry-run
