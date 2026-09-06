@@ -218,7 +218,7 @@ export default function WovenContinuityFieldR77({address,record,onAddress}:Props
     <div><span>virtual field</span><b>61.917B</b><small>12⁶ shells × 12⁴ anchors</small></div>
     <div><span>source refinement</span><b>{refined?'FULL':'STREAMING'}</b><small>{budget.refinementBatch} anchors / frame budget</small></div>
    </div>
-   <div className='r77-proof'><ShieldCheck/><span><b>Computational boundary.</b> The resident 20,736 lattice is rendered without logical-anchor omission in WebGL2 and Canvas2D fallback. Exact 12¹⁰ addressing is virtualized by shell+anchor decomposition; source refinement is time-sliced. {R119_RESOLUTION_BOUNDARY}</span><Braces/></div>
+   <div className='r77-proof'><ShieldCheck/><span><b>Computational boundary.</b> This is a computational representation of the resident Woven Continuity lattice, not a claim of literal physical dimensionality or a measured external field. The resident 20,736 lattice is rendered without logical-anchor omission in WebGL2 and Canvas2D fallback. Exact 12¹⁰ addressing is virtualized by shell+anchor decomposition; source refinement is time-sliced. {R119_RESOLUTION_BOUNDARY}</span><Braces/></div>
   </details>
  </section>;
 }
