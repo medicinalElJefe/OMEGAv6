@@ -45,8 +45,10 @@ jobs:
         shell: bash
         run: |
           gh run list --branch main --limit 40 --json databaseId,workflowName,status,conclusion,headSha,url,createdAt > /tmp/omega-r125-runs.json
-      - name: Verify inherited accuracy boundaries
+      - name: Verify inherited accuracy and operation-chain boundaries
         run: |
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
           node tests/r125-accuracy-engine-invariants.mjs
           node tests/r124-self-contained-build-invariants.mjs
           node tests/r123-living-total-experience-invariants.mjs
@@ -60,6 +62,8 @@ jobs:
         run: node scripts/r125-accuracy-engine.mjs
       - name: Prove repaired tree
         run: |
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
           node tests/r125-accuracy-engine-invariants.mjs
           node tests/r124-self-contained-build-invariants.mjs
           node tests/r123-living-total-experience-invariants.mjs
