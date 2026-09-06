@@ -1,0 +1,44 @@
+name: OMEGA R139 Capability Truth Live Traversal
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r139-capability-truth-live-traversal]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r139-capability-truth-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r139:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R139 projection authority and live woven traversal
+        run: node tests/r139-capability-truth-live-traversal.mjs
+      - name: Preserve R138 capability-first visual contract
+        run: node tests/r138-capability-first-visual-runtime.mjs
+      - name: Preserve R137 live operational proof and R136 living world
+        run: |
+          node tests/r135-live-family-proof-fusion-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+      - name: Preserve R134 continuity and R132 Hybrid execution truth
+        run: |
+          node tests/r134-woven-relativity-continuum-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Cloudflare Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r139-dry-run
