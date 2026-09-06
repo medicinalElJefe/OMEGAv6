@@ -1,0 +1,51 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {SWARM_AXIS,SWARM_CELL_COUNT,SWARM_LANE_COUNT,SWARM_MODES,cellId,cellIndex,decodeCell,laneIndex,parseCellId,planMissionR121,selectCellIndices} from '../src/swarm/swarmCoreR121.js';
+
+assert.equal(SWARM_AXIS,12);
+assert.equal(SWARM_CELL_COUNT,1728);
+assert.equal(SWARM_LANE_COUNT,20736);
+assert.equal(SWARM_AXIS**3,SWARM_CELL_COUNT);
+assert.equal(SWARM_AXIS**4,SWARM_LANE_COUNT);
+for(let i=0;i<SWARM_CELL_COUNT;i++){
+ const a=decodeCell(i);
+ assert.equal(cellIndex(a.domain,a.phase,a.regulation),i);
+ const id=cellId(a),parsed=parseCellId(id);
+ assert.equal(parsed?.index,i);
+ for(let s=0;s<12;s++)assert.equal(laneIndex(a,s),i*12+s);
+}
+assert.equal(new Set(selectCellIndices('FULL',1728,123)).size,1728);
+assert.equal(planMissionR121({intent:'test tree mission',mode:'TREE'}).selected.length,144);
+assert.equal(planMissionR121({intent:'test full mission',mode:'FULL',providerBudget:99}).selected.length,1728);
+assert.equal(planMissionR121({intent:'test full mission',mode:'FULL',providerBudget:99}).providerBudget,12);
+assert.equal(planMissionR121({intent:'solo',mode:'SOLO'}).selected.length,1);
+assert.equal(planMissionR121({intent:'mirror',mode:'MIRROR'}).selected.length,2);
+assert.ok(SWARM_MODES.includes('PIPELINE')&&SWARM_MODES.includes('CONSENSUS'));
+
+const root=path.resolve(import.meta.dirname,'..');
+const worker=fs.readFileSync(path.join(root,'src/workerR121.js'),'utf8');
+const api=fs.readFileSync(path.join(root,'src/swarm/swarmApiR121.js'),'utf8');
+const cell=fs.readFileSync(path.join(root,'src/swarm/swarmCellR121.js'),'utf8');
+const coordinator=fs.readFileSync(path.join(root,'src/swarm/swarmCoordinatorR121.js'),'utf8');
+const wrangler=fs.readFileSync(path.join(root,'wrangler.jsonc'),'utf8');
+const ui=fs.readFileSync(path.join(root,'src/OmegaSwarmR121.tsx'),'utf8');
+const suite=fs.readFileSync(path.join(root,'src/OmegaSpecialistSuite.tsx'),'utf8');
+assert.match(worker,/OmegaSwarmCell/);
+assert.match(worker,/OmegaSwarmCoordinator/);
+assert.match(worker,/startsWith\('\/api\/swarm\/'\)/);
+for(const route of ['/api/swarm/manifest','/api/swarm/cells','/api/swarm/status','/api/swarm/missions'])assert.ok(api.includes(route),route);
+assert.match(coordinator,/RETURNED_NOT_ADMITTED/);
+assert.match(coordinator,/canonicalMutation:false/);
+assert.match(cell,/canonicalMutation:false/);
+assert.match(cell,/OMEGA_SWARM_CELL_RECEIPT_R121/);
+assert.match(wrangler,/"main": "src\/workerR121\.js"/);
+assert.match(wrangler,/OMEGA_SWARM_CELL/);
+assert.match(wrangler,/OMEGA_SWARM_COORDINATOR/);
+assert.match(wrangler,/r121-sovereign-swarm/);
+assert.match(ui,/1,728/);
+assert.match(ui,/20,736/);
+assert.match(ui,/CAPACITY GOVERNOR/);
+assert.match(suite,/OmegaSwarmR121/);
+assert.match(suite,/Retained continuity \/ convergence field instrument/);
+console.log('R121 swarm runtime invariants PASS');
