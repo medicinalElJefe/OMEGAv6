@@ -1,10 +1,10 @@
-import {useCallback,useEffect,useMemo,useState} from 'react';
+import {lazy,Suspense,useCallback,useEffect,useMemo,useState} from 'react';
 import {CheckCircle2,Download,RefreshCw,ShieldCheck,XCircle} from 'lucide-react';
 import {B020_QUALITY_CASES,evaluateUniversalQuality,qualityReceipt,type EvidenceState} from './universalQualityRuntime';
 import {evaluateCorpusModes} from './corpusRuntime';
 import {api} from './platformAdapter';
-import AdvancedComputationR145 from './AdvancedComputationR145';
 import './universalQuality.css';
+const AdvancedComputationR145=lazy(()=>import('./AdvancedComputationR145'));
 function download(name:string,data:any){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 type ProbeState={routeBeforeGeneration:EvidenceState;hybridBoundary:EvidenceState;earthBoundary:EvidenceState;providerBounded:EvidenceState;details:string[]};
 const INITIAL:ProbeState={routeBeforeGeneration:'UNVERIFIED',hybridBoundary:'UNVERIFIED',earthBoundary:'UNVERIFIED',providerBounded:'UNVERIFIED',details:['Live probes have not run in this browser session.']};
@@ -15,12 +15,12 @@ export default function UniversalQualityControl({record,status,restore,modeCount
  useEffect(()=>{void runProbes()},[]);
  const input=useMemo(()=>({address:Number(record?.address)||0,appliedModeCount:modeCount,catalogModeCount:resolvedCatalogCount,statusEndpoint:!status?.error,restorationEndpoint:!restore?.error,routeBeforeGeneration:probes.routeBeforeGeneration,hybridBoundary:probes.hybridBoundary,earthBoundary:probes.earthBoundary,providerBounded:probes.providerBounded,semanticSuiteLoaded:B020_QUALITY_CASES.length===12}),[record,modeCount,resolvedCatalogCount,status,restore,probes]);
  const result=useMemo(()=>evaluateUniversalQuality(input),[input]),cases=filter==='ALL'?B020_QUALITY_CASES:B020_QUALITY_CASES.filter(x=>x.latency===filter);
- return <><AdvancedComputationR145 record={record} onNavigate={openExecutionNavigator}/><section className='uq-app'><header className='uq-head'><div><span>B020 FIXED SEMANTIC RESPONSE QUALITY SUITE · EVIDENCE-BOUND</span><h2>Universal Quality</h2><p>Runtime checks are derived from current packet state or live browser probes. Unknown evidence remains UNVERIFIED; catalog presence is not execution.</p></div><div className={'uq-decision '+result.decision.toLowerCase()}><b>{result.decision}</b><small>{result.pass}/{result.total} verified gates</small></div></header>
+ return <><section className='uq-app'><header className='uq-head'><div><span>B020 FIXED SEMANTIC RESPONSE QUALITY SUITE · EVIDENCE-BOUND</span><h2>Universal Quality</h2><p>Runtime checks are derived from current packet state or live browser probes. Unknown evidence remains UNVERIFIED; catalog presence is not execution.</p></div><div className={'uq-decision '+result.decision.toLowerCase()}><b>{result.decision}</b><small>{result.pass}/{result.total} verified gates</small></div></header>
  <div className='uq-summary'><div><span>SEMANTIC CASES</span><b>{result.semanticCases}</b></div><div><span>CRITICAL RECALL</span><b>{(result.criticalRecall*100).toFixed(0)}%</b></div><div><span>CRITICAL FAILURES</span><b>{result.criticalFailures}</b></div><div><span>STATE</span><b>{record.stateId}</b></div><div><span>APPLIED</span><b>{modeCount}</b></div><div><span>CATALOG</span><b>{resolvedCatalogCount}</b></div></div>
  <div className='uq-runtime'>{result.checks.map(([name,ok,detail])=><article className={ok?'pass':'hold'} key={name}>{ok?<CheckCircle2/>:<XCircle/>}<b>{name}</b><span>{ok?'PASS':'HOLD'} · {detail}</span></article>)}</div>
  <div className='uq-toolbar'><div>{(['ALL','FAST','DEEP','FULL'] as const).map(x=><button key={x} className={filter===x?'active':''} onClick={()=>setFilter(x)}>{x}</button>)}</div><div><button onClick={()=>void runProbes()} disabled={probing}><RefreshCw/>{probing?'Probing…':'Run live probes'}</button><button className='export' onClick={()=>download('OMEGA_UNIVERSAL_QUALITY_B020_R2.json',qualityReceipt(input))}><Download/>Export receipt</button></div></div>
  <div className='uq-probe-details'>{probes.details.map(x=><small key={x}><ShieldCheck/>{x}</small>)}</div>
  <div className='uq-cases'>{cases.map(c=><article key={c.id}><header><code>{c.id}</code><b>{c.domain}</b><span>{c.route}</span><strong className={c.gate.toLowerCase()}>{c.gate}</strong></header><div className='uq-case-grid'><section><span>REQUIRED</span>{c.required.map(x=><p key={x}>✓ {x}</p>)}</section><section><span>PROHIBITED</span>{c.prohibited.map(x=><p key={x}>× {x}</p>)}</section></div><footer><ShieldCheck/><p>{c.uncertainty}</p><small>NEXT · {c.next}</small></footer></article>)}</div>
  <div className='uq-boundary'><ShieldCheck/><p><b>Truth boundary:</b> this surface only marks a gate PASS when current packet data or an explicit live probe supports it. It does not infer private Drive round-trip, native-device execution, provider-failure containment or release promotion from labels.</p></div>
- </section></>;
+ </section><Suspense fallback={<section className='uq-advanced-loading' aria-live='polite'><ShieldCheck/><b>R145 computation layer loading</b><small>Universal Quality is already operational; advanced reduced-order computation is materializing as an additive sublayer.</small></section>}><AdvancedComputationR145 record={record} onNavigate={openExecutionNavigator}/></Suspense></>;
 }
