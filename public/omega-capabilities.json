@@ -1,10 +1,10 @@
 {
   "schema": "OMEGA_CAPABILITIES_v1",
-  "runtimeRevision": "R111/R102/R34/R3-RCWA",
-  "experienceRevision": "R111",
-  "compatibility": {"packet": ["OMEGA_PACKET_v1"], "result": ["OMEGA_RESULT_v1"], "queue": ["OMEGA_FULLWAVE_QUEUE_v1"], "health": ["OMEGA_NODE_HEALTH_v1"], "fabric": ["OMEGA_FEDERATED_CAPABILITY_MESH_R111"]},
+  "runtimeRevision": "R146/R145/R111/R102/R34/R3-RCWA",
+  "experienceRevision": "R145",
+  "compatibility": {"packet": ["OMEGA_PACKET_v1"], "result": ["OMEGA_RESULT_v1","OMEGA_SPECTRAL_RESULT_v1"], "queue": ["OMEGA_FULLWAVE_QUEUE_v1"], "promotion": ["OMEGA_FULLWAVE_PROMOTION_R146"], "health": ["OMEGA_NODE_HEALTH_v1"], "fabric": ["OMEGA_FEDERATED_CAPABILITY_MESH_R111"]},
   "upgradePolicy": "independent-node-and-service-evolution-under-one-global-canonical-authority",
-  "interactionModel": "intent -> minimum lawful capability path -> visible handoff -> output -> proof/admission",
+  "interactionModel": "intent -> R145 bounded search -> proof-admissible R146 promotion -> authenticated Sovereign execution -> returned convergence evidence -> proof/admission",
   "rules": [
     "Nodes may upgrade UI, renderer, solver, storage and deployment independently.",
     "Breaking protocol changes require a new schema version and overlap window.",
@@ -13,20 +13,25 @@
     "Unknown capabilities degrade gracefully instead of blocking unrelated nodes.",
     "Every result preserves project, packet lineage, solver identity and evidence boundary.",
     "A solver is active only when a real backend returns its identified result packet.",
+    "Reduced-order R145 ranking never counts as full-wave execution.",
+    "R146 promotion never counts as a returned spectral RCWA result.",
+    "A spectral RCWA job requires explicit material identities and a Sovereign worker advertising spectral_rcwa.",
+    "Nonconverged full-wave or spectral results remain held evidence and do not self-admit.",
+    "Fabrication claims require process-specific measured material data and independent physical validation.",
     "The ordinary user should choose an intent or outcome; OMEGA should choose and expose the required nodes automatically.",
     "A common instrument grammar must not erase specialist visual or functional identity.",
     "Auxiliary clouds, caches, sentinels, solvers and observers may scale without becoming CanonState authorities.",
     "Every registered route declares input, operation, output, proof and eight-layer responsibility.",
     "Failed solver results return as structured scarred evidence; successful results return as evidence candidates for OMEGAv6 admission."
   ],
-  "sharedContext": ["project_id","packet_id","state_id","atlas_address","observer_frame","evidence_class","proof_gate","scar_history","orientation_sigma","lineage"],
+  "sharedContext": ["project_id","packet_id","state_id","atlas_address","observer_frame","evidence_class","proof_gate","scar_history","orientation_sigma","lineage","r145_receipt","r146_promotion_sha256"],
   "layers": ["STATE","INTELLIGENCE","MEMORY","RELATION","COMPUTATION","ACTION","OBSERVATION","PROOF"],
   "fabric": {
     "statusEndpoint": "/api/fabric/status",
     "intentEndpoint": "/api/fabric/route",
     "lawEndpoint": "/api/fabric/law",
     "authorityCount": 4,
-    "serviceCapacity": ["hybrid-transport","rcwa","workers-ai","earth-evidence","route-deferred-specialists","omega-fabric-sentinel"],
+    "serviceCapacity": ["hybrid-transport","r145-reduced-order-search","r146-spectral-promotion","rcwa","spectral-rcwa","workers-ai","earth-evidence","route-deferred-specialists","omega-fabric-sentinel"],
     "sentinel": "https://omega-fabric-sentinel.jeffdeweyeljefe.workers.dev",
     "sentinelAuthority": "ADVISORY_ONLY"
   },
@@ -35,8 +40,8 @@
       "verb": "ADMIT",
       "authority": "global-canonical",
       "scope": "GLOBAL_FEDERATION_CANONSTATE",
-      "capabilities": ["canon-state","proof-admission","hybrid-link","operator-cockpit","result-ledger","fullwave-queue-r34","federation-experience-r102","federated-capability-mesh-r111","route-layer-output-registry-r111"],
-      "input": ["intent","proposal packets","screening packets","solver receipts","evidence"],
+      "capabilities": ["canon-state","proof-admission","hybrid-link","operator-cockpit","result-ledger","fullwave-queue-r34-r146","spectral-result-validation-r146","federation-experience-r102","federated-capability-mesh-r111","route-layer-output-registry-r111"],
+      "input": ["intent","proposal packets","R145 screening receipts","R146 promotion receipts","solver receipts","evidence"],
       "output": ["admit/HOLD","CanonState","proof chain","durable project continuity"]
     },
     "omega-genesis": {
@@ -51,25 +56,25 @@
       "verb": "SCREEN",
       "authority": "worker",
       "scope": "WORKER_RETURN_PACKET_ONLY",
-      "capabilities": ["optical-compile","scalar-screen","rank","tier2-queue","visualize"],
+      "capabilities": ["optical-compile","r145-physics-informed-reduced-order","r145-adaptive-pareto-search","rank","tier2-queue","visualize"],
       "preferredOrigin": "https://omega-living-light-etching-private-woven2.vercel.app",
       "legacyOrigins": ["https://omega-optical-cloud-woven2.vercel.app"],
-      "input": ["candidate packets","geometry","wavelength","target phase"],
-      "output": ["ranked candidates","scalar metrics","Tier-2 requests"]
+      "input": ["candidate packets","geometry","wavelength","target phase","fabrication tolerance"],
+      "output": ["ranked candidates","spectral/polarization screening metrics","R145 compute receipts","Tier-2 requests"]
     },
     "omega-sovereign": {
       "verb": "SOLVE",
       "authority": "worker",
       "scope": "WORKER_RESULT_RETURN_ONLY",
-      "capabilities": ["rcwa-grcwa-worker-r3","rcwa-authenticated-queue-transport-r3","one-touch-hybrid-continuity-r111"],
+      "capabilities": ["rcwa-grcwa-worker-r3","rcwa-authenticated-queue-transport-r3","r146-spectral-rcwa-transport","r35-compatible-dispersion-resolution","wavelength-resolved-child-receipts","one-touch-hybrid-continuity-r111"],
       "planned": ["fdtd","fem","gpu-batch","measurement-ingest"],
       "requirements": ["Python 3","NumPy","grcwa 0.1.2"],
       "agentDownload": "/api/federation/rcwa/agent-download",
       "workerDownload": "/api/federation/rcwa/worker-download",
       "queueEndpoint": "/api/federation/rcwa/queue",
       "statusEndpoint": "/api/federation/rcwa/status",
-      "input": ["approved Tier-2 jobs","solver/material/numerical settings"],
-      "output": ["full-wave result packets","convergence metadata","result hashes"]
+      "input": ["approved Tier-2 jobs","R146 spectral jobs","explicit material identities","solver/material/numerical settings"],
+      "output": ["OMEGA_RESULT_v1","OMEGA_SPECTRAL_RESULT_v1","convergence metadata","material provenance","result hashes"]
     }
   }
 }
