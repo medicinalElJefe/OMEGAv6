@@ -35,7 +35,7 @@ function corsHeadersR116(request){
   'vary':'Origin',
   'access-control-allow-methods':'GET,POST,PUT,DELETE,OPTIONS',
   'access-control-allow-headers':'content-type,authorization,x-omega-federation-token,x-vercel-protection-bypass,x-omega-bridge-id,x-omega-bridge-secret,x-omega-session-id,cache-control',
-  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-proof-closure,x-omega-control-plane,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
+  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-proof-closure,x-omega-control-plane,x-omega-agent-version,x-omega-agent-sha256,x-omega-agent-base-path,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
   'access-control-max-age':'600'
  };
 }
@@ -45,6 +45,16 @@ function withCorsR116(response,request){
 }
 function preflightR116(request){const headers=corsHeadersR116(request);return headers?new Response(null,{status:204,headers:{...headers,'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R139_REVISION}}):new Response(null,{status:403,headers:{'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R139_REVISION}})}
 async function readJsonResponse(response){return response.clone().json().catch(()=>null)}
+async function sha256TextR139(source){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source));return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function serveProofAgentR139(request,env){
+ if(!env?.ASSETS?.fetch)return json({ok:false,code:'R139_PROOF_AGENT_ASSET_BINDING_UNAVAILABLE'},503);
+ const asset=await env.ASSETS.fetch(new Request(new URL('/omega-hybrid-agent-r139.py',request.url),{headers:{'cache-control':'no-cache'}}));
+ if(!asset.ok)return json({ok:false,code:'R139_PROOF_AGENT_ASSET_NOT_FOUND',status:asset.status},503);
+ const source=await asset.text(),valid=source.length>1000&&source.startsWith('#!/usr/bin/env python3')&&source.includes("PROOF_CLOSURE_REVISION='R139'")&&source.includes("BASE_PATH='/omega-hybrid-agent.py'")&&source.includes('exact_payload')&&source.includes('base.execute_job=execute_job_r139');
+ if(!valid)return json({ok:false,code:'R139_PROOF_AGENT_ASSET_INVALID'},503);
+ const digest=await sha256TextR139(source),bytes=new TextEncoder().encode(source).byteLength;
+ return new Response(source,{status:200,headers:{'content-type':'text/x-python; charset=utf-8','content-disposition':'attachment; filename="omega-hybrid-agent.py"','cache-control':'no-store, max-age=0','x-omega-agent-version':'R34.1+R139','x-omega-agent-sha256':digest,'x-omega-agent-base-path':'/omega-hybrid-agent.py','x-omega-canonical-origin':'https://omegav6.jeffdeweyeljefe.workers.dev','x-omega-hybrid-protocol':'R139_EXACT_PAYLOAD_SHA256_OVER_R127_TRANSPORT','x-omega-proof-closure':R139_REVISION,'x-omega-agent-bytes':String(bytes)}});
+}
 async function inheritedStatusR116(request,env){
  const url=new URL('/api/federation/run/status',request.url),response=await r115.fetch(new Request(url,{method:'GET',headers:request.headers}),env),body=await readJsonResponse(response);return{response,body};
 }
@@ -76,7 +86,7 @@ async function convergenceR116(request,env){
   proposal:{surfaceState:nodes.genesis?.state||'UNKNOWN',machineState:services.genesis?.state||'UNKNOWN',effectiveState:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN'},
   optical:{surfaceState:nodes.optical?.state||'UNKNOWN',machineState:services.optical?.state||'UNKNOWN',effectiveScreenState:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN'},
   sovereign:{state:nodes.sovereign?.state||'UNKNOWN',rcwaState:nodes.sovereign?.rcwaState||status?.runtime?.rcwa?.state||'UNKNOWN',currentAuthenticatedHeartbeat:currentHeartbeat,nativeExecutionClaimed:hybrid?.nativeExecutionClaimed===true},
-  connectorPolicy:{canonicalOrigin:'https://omegav6.jeffdeweyeljefe.workers.dev',currentRevision:CONNECTOR_REVISION,runtimeRevision:REVISION,proofClosureRevision:R139_REVISION,retiredOrigin:'omega-sovereign-convergence.foundasound.chatgpt.site',retiredLaunchersMustNotBeUsed:true,reason:'The retired preview host can return 401 and is not the canonical Hybrid authority.'},
+  connectorPolicy:{canonicalOrigin:'https://omegav6.jeffdeweyeljefe.workers.dev',currentRevision:CONNECTOR_REVISION,runtimeRevision:REVISION,proofClosureRevision:R139_REVISION,cleanAgentPath:'/api/hybrid/agent-download?r117=1',cleanAgentProtocol:'R139_EXACT_PAYLOAD_SHA256_OVER_R127_TRANSPORT',legacyBaseAgentPath:'/omega-hybrid-agent.py',retiredOrigin:'omega-sovereign-convergence.foundasound.chatgpt.site',retiredLaunchersMustNotBeUsed:true,reason:'The retired preview host can return 401 and is not the canonical Hybrid authority.'},
   truthBoundary:'Surface availability, machine-service availability, browser pairing, current host heartbeat, returned execution proof, deterministic replay, solver freshness, and canonical admission are distinct states. R116/R117/R139 never promotes one into another.'
  };
 }
@@ -110,10 +120,12 @@ async function durablePairR117(request,env){
   canonicalOrigin:'https://omegav6.jeffdeweyeljefe.workers.dev',
   retiredOrigin:'omega-sovereign-convergence.foundasound.chatgpt.site',
   agentPath:'/api/hybrid/agent-download?r117=1',
+  agentProtocol:'R139_EXACT_PAYLOAD_SHA256_OVER_R127_TRANSPORT',
+  baseAgentPath:'/omega-hybrid-agent.py',
   rcwaAgentPath:'/api/federation/rcwa/agent-download?r117=1',
   agentRestartRequired:true,
   nativeExecutionClaimed:false,
-  truthBoundary:'This endpoint rotates a fresh bridge credential directly in durable runtime state using only the canonical browser session. Stale browser bridge headers are ignored. PC ONLINE remains false until a real authenticated host heartbeat arrives.'
+  truthBoundary:'This endpoint rotates a fresh bridge credential directly in durable runtime state using only the canonical browser session. Stale browser bridge headers are ignored. PC ONLINE remains false until a real authenticated host heartbeat arrives. The clean R117 connector adds R139 exact-payload return proof while preserving the byte-identical R34.1 base agent as rollback evidence.'
  });
 }
 
@@ -121,6 +133,10 @@ function hybridRuntimeIdR139(request){return safeId(request.headers.get('x-omega
 async function hybridRuntimeProxyR139(request,env,internalPath){
  const id=hybridRuntimeIdR139(request);if(!id)return json({ok:false,code:'HYBRID_RUNTIME_ID_REQUIRED',reply:'Pair this browser to a Hybrid runtime before reading execution proof closure.'},400);if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE'},503);
  const stub=env.OMEGA_RUNTIME.get(env.OMEGA_RUNTIME.idFromName(id)),headers=new Headers(request.headers),init={method:request.method,headers};if(request.method!=='GET'&&request.method!=='HEAD')init.body=await request.clone().text();return stub.fetch(new Request('https://omega-runtime.internal'+internalPath,init));
+}
+async function reconnectR139(request,env){
+ const response=await r115.fetch(request,env);if(!response.ok)return response;const data=await response.clone().json().catch(()=>null);if(!data||typeof data!=='object')return response;
+ return json({...data,agentPath:'/api/hybrid/agent-download?r117=1',agentRestartRequired:data.repaired===true||data.agentRestartRequired===true,proofClosureRevision:R139_REVISION,agentProtocol:'R139_EXACT_PAYLOAD_SHA256_OVER_R127_TRANSPORT',baseAgentPath:'/omega-hybrid-agent.py',truthBoundary:`${text(data.truthBoundary)} R139 reconnect always returns the current clean connector path; PC ONLINE still requires a new authenticated heartbeat after any credential rotation.`},response.status);
 }
 
 async function probeFetchR130(request,env){
@@ -137,7 +153,9 @@ async function fetchR116(request,env){
  const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
  if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
+ if(path==='/api/hybrid/agent-download'&&request.method==='GET'&&url.searchParams.get('r117')==='1')return withCorsR116(await serveProofAgentR139(request,env),request);
  if(path==='/api/hybrid/bootstrap'&&request.method==='POST')return withCorsR116(await durablePairR117(request,env),request);
+ if(path==='/api/hybrid/reconnect'&&request.method==='POST')return withCorsR116(await reconnectR139(request,env),request);
  if(path==='/api/hybrid/proof-closure/r139'&&request.method==='GET')return withCorsR116(json(manifestR139()),request);
  const closureRoute=path.match(/^\/api\/hybrid\/jobs\/([A-Za-z0-9._:-]+)\/(closure|replay)$/);
  if(closureRoute&&((closureRoute[2]==='closure'&&request.method==='GET')||(closureRoute[2]==='replay'&&request.method==='POST')))return withCorsR116(await hybridRuntimeProxyR139(request,env,`/jobs/${closureRoute[1]}/${closureRoute[2]}`),request);
