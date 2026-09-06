@@ -1,9 +1,9 @@
-// OMEGA R134.1 Cloudflare lifecycle repair: declarative Durable Object exports mirror every already-provisioned SQLite namespace.
+// OMEGA R143 durable execution runtime: declarative Durable Object exports mirror every already-provisioned SQLite namespace.
 // Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes. R125 remains canonical admission authority.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR116.js",
+  "main": "src/workerR143.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
