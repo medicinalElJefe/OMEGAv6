@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """OMEGA R140 proof-closure wrapper over the proven R34.1/R132 Hybrid agent.
 
+Launcher compatibility identity: OMEGA R34 local Hybrid Link agent.
+Pairing is explicit.
+
 The base agent remains byte-identical rollback/transport authority. This wrapper loads that
 canonical source in memory, preserves its root-confined allow-listed execution, and adds an
 exact canonical payload envelope so the Cloudflare Worker can verify the same bytes the PC
@@ -12,6 +15,8 @@ import hashlib,json,sys,types,urllib.request
 
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
 BASE_PATH='/omega-hybrid-agent.py'
+BASE_IDENTITY_MARKER='OMEGA R34 local Hybrid Link agent'
+PAIRING_IDENTITY_MARKER='Pairing is explicit.'
 PROOF_CLOSURE_REVISION='R140'
 FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R140'
 MAX_BASE_BYTES=512*1024
@@ -33,7 +38,7 @@ def canonical_base_source(server):
     observed=sha_bytes(source)
     if declared and declared!=observed:raise RuntimeError('R140 base agent SHA-256 mismatch.')
     text=source.decode('utf-8')
-    for token in ("VERSION='R34.1'","CAPABILITY_REVISION='R132'",'root-confined','shell=False',"'/api/hybrid/agent/poll'","'/api/hybrid/agent/result'"):
+    for token in ("VERSION='R34.1'","CAPABILITY_REVISION='R132'",BASE_IDENTITY_MARKER,PAIRING_IDENTITY_MARKER,'root-confined','shell=False',"'/api/hybrid/agent/poll'","'/api/hybrid/agent/result'"):
         if token not in text:raise RuntimeError('R140 base agent contract missing '+token)
     return text,observed
 
