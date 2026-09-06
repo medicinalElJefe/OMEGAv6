@@ -1,0 +1,23 @@
+name: OMEGA R121 Spherical Earth Connector Gate
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r121-spherical-earth-connector-hardening]
+permissions:
+  contents: read
+jobs:
+  r121-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: R121 source and connector invariants
+        run: node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: TypeScript/Vite production build
+        run: npm run build
