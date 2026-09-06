@@ -117,6 +117,6 @@ export default function OmegaHomeR71({onEnter}:Props){
    <details open={showSystemMap} onToggle={e=>setShowSystemMap(e.currentTarget.open)}><summary><span><Blocks/><b>System lineage</b><small>44 application routes · 100 system rows · 24 runtime families · 179 source modes · {CANON_AUTHORITY_COUNT} canon lenses</small></span><strong>{showSystemMap?'Close':'Open'}</strong></summary>{showSystemMap&&<OmegaSystemInventoryR83 compact onNavigate={enter}/>}</details>
   </section>
 
-  <footer className='r71-truthbar'><span className={status?'ok':'warn'}><Activity/>WORKER {status?'RESPONDING':'UNVERIFIED'}</span><span className={nativeOnline?'ok':'warn'}><Link2/>{hybridLabel}</span><span><ShieldCheck/>{OMEGA_EXPERIENCE_LAWS_R132.boundary}</span></footer>
+  <footer className='r71-truthbar'><span className={status?'ok':'warn'}><Activity/>WORKER {status?'RESPONDING':'UNVERIFIED'}</span><span className={nativeOnline?'ok':'warn'}><Link2/>{hybridLabel}</span><span><ShieldCheck/>Representation shells are model/interface coordinates, not claims of physical dimensions. {OMEGA_EXPERIENCE_LAWS_R132.boundary}</span></footer>
  </main>
 }
