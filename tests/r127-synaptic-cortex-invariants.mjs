@@ -1,0 +1,71 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {CORTEX_LAWS,CORTEX_RUNTIME,planCortexMissionR127,publicCortexPlanR127,synapticNeighborsR127} from '../src/swarm/swarmCortexR127.js';
+
+const high={novelty:1,uncertainty:1,contradiction:1,proofUrgency:1,motion:1,observerRelevance:1,expectedInformationGain:1,cost:0};
+const full=planCortexMissionR127({intent:'exercise the entire proof-bounded living OMEGA body',mode:'FULL',providerBudget:99,metrics:high});
+assert.equal(CORTEX_RUNTIME,'OMEGA_R127_SYNAPTIC_ORGANISM_CORTEX');
+assert.equal(full.selectedCellCount,1728);
+assert.equal(full.totalBranchChecks,144);
+assert.equal(full.totalOrganSyntheses,12);
+assert.equal(full.totalTaskCount,1886);
+assert.equal(full.budgets.providerTotal,12);
+assert.equal(full.budgets.providerReconvergence,1);
+assert.equal(full.budgets.providerOrgan,11);
+assert.equal(full.tasks.filter(x=>x.kind==='CELL').length,1728);
+assert.equal(new Set(full.tasks.filter(x=>x.kind==='CELL').map(x=>x.cellId)).size,1728);
+assert.equal(full.tasks.filter(x=>x.kind==='BRANCH_CHECK').every(x=>x.dependencies.length===12),true);
+assert.equal(full.tasks.find(x=>x.id==='proof:return')?.dependencies.length,12);
+assert.equal(full.tasks.find(x=>x.id==='seed:frame')?.status,'READY');
+assert.equal(full.tasks.filter(x=>x.kind==='ORGAN_SYNTHESIS'&&x.executor==='WORKERS_AI').length,11);
+assert.equal(full.tasks.find(x=>x.id==='proof:return')?.executor,'WORKERS_AI');
+
+const adaptive=planCortexMissionR127({intent:'adaptive whole body pressure',mode:'ADAPTIVE',providerBudget:12,metrics:high});
+assert.equal(adaptive.selectedCellCount,288,'adaptive high pressure must remain bounded without explicit full-auto');
+const adaptiveFull=planCortexMissionR127({intent:'explicit adaptive full body pressure',mode:'ADAPTIVE',allowFullAuto:true,providerBudget:0,metrics:high});
+assert.equal(adaptiveFull.selectedCellCount,1728);
+const solo=planCortexMissionR127({intent:'one exact cell reflex',mode:'SOLO',providerBudget:0});
+assert.equal(solo.selectedCellCount,1);
+assert.equal(solo.totalTaskCount,5,'solo still frames, cross-checks, synthesizes and returns');
+const branch=planCortexMissionR127({intent:'one branch-scale distributed review',mode:'BRANCH',providerBudget:0});
+assert.equal(branch.selectedCellCount,144);
+assert.ok(branch.totalTaskCount>144);
+
+const optical=planCortexMissionR127({intent:'screen optical structures',mode:'FULL',projection:'OPTICAL',providerBudget:0,opticalBudget:1});
+assert.equal(optical.tasks.filter(x=>x.executor==='OPTICAL_CHAIN').length,1);
+const build=planCortexMissionR127({intent:'build software repair',mode:'FULL',projection:'BUILD',providerBudget:0,genesisBudget:1});
+assert.equal(build.tasks.filter(x=>x.executor==='GENESIS').length,1);
+
+const neighbors=synapticNeighborsR127(0);
+assert.equal(neighbors.length,8);
+assert.equal(new Set(neighbors.map(x=>x.id)).size,8);
+assert.ok(neighbors.some(x=>x.address.domain===10),'every cell mesh must have a proof-side synapse');
+assert.ok(neighbors.some(x=>x.address.domain===11),'every cell mesh must have a coordination-side synapse');
+
+const pub=publicCortexPlanR127(full);
+assert.equal(pub.tasks,undefined);
+assert.equal(pub.taskSample.length,24);
+assert.equal(pub.selectedCellCount,1728);
+
+for(const law of ['ONE_BODY_MANY_SPECIALISTS','FAILURES_BECOME_SCARS_NOT_SILENT_DELETIONS','QUORUM_IS_EXECUTION_AGREEMENT_NOT_TRUTH','RETURNED_CORTEX_WORK_IS_NOT_CANONICAL_ADMISSION'])assert.ok(CORTEX_LAWS.includes(law));
+const core=fs.readFileSync('src/swarm/swarmCortexR127.js','utf8');
+const api=fs.readFileSync('src/swarm/swarmCortexApiR127.js','utf8');
+const worker=fs.readFileSync('src/workerR127.js','utf8');
+const wrangler=fs.readFileSync('wrangler.jsonc','utf8');
+const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const ui=fs.readFileSync('src/OmegaCortexR127.tsx','utf8');
+const css=fs.readFileSync('src/omegaCortexR127.css','utf8');
+for(const term of ['SWARM_CANDIDATE_MEMORY_NOT_CANON','EXECUTION_QUORUM_NOT_TRUTH','CORTEX_RECEIPT_RETURNED_NOT_ADMITTED','canonicalMutation:false'])assert.ok(core.includes(term),`missing authority boundary ${term}`);
+for(const route of ['/api/swarm/cortex/manifest','/api/swarm/cortex/plan','/api/swarm/cortex/status','/api/swarm/cortex/missions'])assert.ok(api.includes(route),`missing cortex route ${route}`);
+for(const action of ['advance','pause','resume','cancel','checkpoint','memory','events','rejoin'])assert.ok(api.includes(action),`missing cortex action ${action}`);
+assert.ok(worker.includes('OmegaSwarmCortex')&&worker.includes("startsWith('/api/swarm/cortex/')"));
+assert.ok(wrangler.includes('"main": "src/workerR127.js"'));
+assert.ok(wrangler.includes('OMEGA_SWARM_CORTEX'));
+assert.ok(wrangler.includes('r127-synaptic-cortex'));
+assert.ok(suite.includes('OmegaCortexR127'));
+assert.ok(ui.includes('1,728 independent cells that can behave as one causal body.'));
+assert.ok(ui.includes('SHARED CANDIDATE BLACKBOARD')&&ui.includes('CAUSAL EVENT STREAM'));
+assert.ok(css.includes('@media(max-width:720px)')&&css.includes('@media(max-width:440px)'));
+assert.ok(core.includes("this.storage.setAlarm(Date.now()+120)"),'cortex must be able to continue advancing through alarms');
+assert.ok(core.includes("this.env.OMEGA_SWARM_CELL"),'cortex must execute through real stateful cell Durable Objects');
+console.log('R127 SYNAPTIC ORGANISM CORTEX invariants PASS · 1 seed · 12 organs · 144 branches · 1,728 interacting cells · 20,736 execution lanes · bounded model use · shared candidate memory · scars · proof-bounded return');
