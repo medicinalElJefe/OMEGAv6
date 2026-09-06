@@ -21,7 +21,8 @@ must(!css.includes('.r95-canonical-manifold{display:none'),'canonical manifold m
 for(const token of ['corpusState','calculusVisualLaw','sourceBackedModeSummary','onAddress','onNavigate','Ranked projected next','Hybrid Link','Build Out','Evidence & Proof','CAPABILITY_FIRST_NO_STALE_CHART_PRIMARY','PROJECTION_NOT_CANON_ADMISSION',"data-canonical-mutation='false'"])must(field.includes(token),'active capability field missing '+token);
 must(field.includes('<svg')&&field.includes('r138-node')&&field.includes('r138-shell'),'capability field must remain an advanced interactive topology visual, not a generic business chart');
 for(const kind of ['STATE','EXECUTE','PROVE','BUILD','EXPLORE'])must(field.includes(`${kind}:'${kind}'`),'capability field missing action semantic '+kind);
-must(field.includes('onClick={()=>action.route?onNavigate(action.route):action.address!==undefined?onAddress(action.address):undefined}'),'capability cards must execute navigation/state actions');
+must(field.includes('const runAction=')&&field.includes('onClick={()=>runAction(action)}'),'capability cards must execute through the shared navigation/state dispatcher');
+must(field.includes("role='button'")&&field.includes('onClick={()=>runAction(n)}'),'spatial topology nodes must execute the same capability actions directly');
 must(!field.includes("label:i===0?'Admitted next'"),'projected candidate must not be mislabeled as canonically admitted');
 
 must(living.includes("view==='LIVE'&&<><OmegaTraversalStudio"),'primary live traversal must use the source-driven woven studio');
@@ -39,4 +40,4 @@ must(r136.includes("'ONE_CANONICAL_WORLD_MANY_LAWFUL_PROJECTIONS'"),'R136 one-wo
 must(r136.includes("canonicalAdmissionAuthority:'R125'"),'R125 canonical admission authority must remain unchanged');
 must(r137.includes('CURRENT_OPERATIONAL_PROOF_NEVER_AUTO_PROMOTES_CANONSTATE'),'R137 live proof separation must remain intact');
 
-console.log('R138/R139 CAPABILITY-FIRST VISUAL RUNTIME PASS · live woven traversal promoted · projected state selection separated from CanonState admission · exact route proof retained · R137/R136/R125 authorities unchanged');
+console.log('R138/R139 CAPABILITY-FIRST VISUAL RUNTIME PASS · live woven traversal promoted · directly operable topology retained · projected state selection separated from CanonState admission · exact route proof retained · R137/R136/R125 authorities unchanged');
