@@ -17,8 +17,8 @@ jobs:
       - run: npm install
       - name: Verify R121 pure swarm invariants
         run: node tests/r121-swarm-runtime-invariants.mjs
-      - name: Verify R121 Worker syntax
-        run: node --check src/workerR121.js
+      - name: Verify established R116 Worker syntax with mounted swarm routes
+        run: node --check src/workerR116.js
       - name: Run complete inherited OMEGA regression/build gate
         run: npm run check
       - name: Verify canonical Wrangler bundle with new Durable Object classes
