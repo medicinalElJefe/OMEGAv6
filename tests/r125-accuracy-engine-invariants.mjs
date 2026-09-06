@@ -21,13 +21,19 @@ assert.match(engine,/evidence\('TEST'/);
 assert.match(engine,/evidence\('PROOF'/);
 assert.match(engine,/semanticFingerprint/);
 assert.match(engine,/observationOnlyNeverMutatesMain:true/);
+assert.match(engine,/ADVANCED_COMPUTATION_FAILURE/);
 assert.match(engine,/UI_OPERATION_CHAIN_FAILURE/);
 assert.match(engine,/EXECUTION_LIFECYCLE_FAILURE/);
 assert.match(engine,/DEPLOYMENT_ATTESTATION_FAILURE/);
+assert.match(engine,/R-R145-ADVANCED-COMPUTATION-MISSING/);
 assert.match(engine,/R-R143-OPERATION-CHAIN-MISSING/);
 assert.match(engine,/R-R144-DEPLOYMENT-ATTESTATION-MISSING/);
+assert.match(engine,/r145ComputationComplete/);
 assert.match(engine,/r143AuthorityComplete/);
 assert.match(engine,/r144AttestationComplete/);
+assert.match(workflow,/OMEGA R145 Advanced Computation Fabric/);
+assert.match(workflow,/OMEGA R145 Computation Live Verify/);
+assert.match(workflow,/r145-advanced-computation-fabric-invariants\.mjs/);
 assert.match(workflow,/r144-runtime-deployment-attestation-invariants\.mjs/);
 assert.match(workflow,/r143-authoritative-ui-operation-chain-invariants\.mjs/);
 assert.match(workflow,/r142-proof-aware-capability-lifecycle-invariants\.mjs/);
@@ -40,4 +46,4 @@ assert.deepEqual(r124.admitted,['SB001','SB002','SB003','SB004','SB005','SB006',
 for(const c of r124.roadmap)assert.equal(fs.existsSync(c.target),true,`admitted target missing: ${c.target}`);
 const receipts=new Map();for(const r of r124.receipts||[])receipts.set(r.capsuleId,r);
 for(const id of r124.admitted){const r=receipts.get(id);assert.ok(r,`receipt missing: ${id}`);assert.equal(r.status,'ADMIT');assert.equal(r.tests?.r124,true);assert.equal(r.tests?.r123,true);assert.equal(r.tests?.r122,true);assert.equal(r.tests?.r121,true);assert.equal(r.tests?.build,true);assert.ok(r.rollbackRef);}
-console.log('R125.4 accuracy-first residual engine + R144/R143/R142 sensor invariants: PASS');
+console.log('R125.5 accuracy-first residual engine + R145/R144/R143/R142 sensor invariants: PASS');
