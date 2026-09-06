@@ -1,0 +1,25 @@
+/* R120 — shared Full Overall Canon surface drive.
+   This is deliberately restrained: it enriches depth/proof telemetry without putting a decorative layer over instruments. */
+.r120-canon-driven-surface{
+ position:relative;
+ isolation:isolate;
+ --r120-canon-depth-px:calc(8px + (var(--omega-canon-depth,0) * 24px));
+ --r120-canon-line-alpha:calc(.015 + (var(--omega-canon-proof,0) * .055));
+}
+.r120-canon-driven-surface::after{
+ content:'';
+ position:absolute;
+ inset:0;
+ z-index:20;
+ pointer-events:none;
+ border:1px solid rgba(101,208,191,var(--r120-canon-line-alpha));
+ box-shadow:inset 0 0 var(--r120-canon-depth-px) rgba(101,208,191,.028);
+ opacity:calc(.28 + (var(--omega-canon-compute,0) * .42));
+}
+.r120-canon-driven-surface>.r82-surface-vital{
+ --r120-route-alpha:calc(.42 + (var(--omega-canon-route,0) * .5));
+ opacity:var(--r120-route-alpha);
+}
+.r120-canon-driven-surface[data-canon-orientation='-1']>.r82-surface-vital{transform:scaleX(-1)}
+.r120-canon-driven-surface[data-canon-orientation='0']>.r82-surface-vital{filter:saturate(.82)}
+@media(prefers-reduced-motion:reduce){.r120-canon-driven-surface::after{transition:none!important}}
