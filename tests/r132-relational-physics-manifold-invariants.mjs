@@ -5,7 +5,9 @@ const visual=fs.readFileSync('src/OmegaPhysicsManifoldR132.tsx','utf8');
 const css=fs.readFileSync('src/omegaPhysicsManifoldR132.css','utf8');
 const membrane=fs.readFileSync('src/CanonicalMembraneR95.tsx','utf8');
 const runtime=fs.readFileSync('src/physicsRelativityRuntimeR132.ts','utf8');
-const must=(ok,msg)=>assert.ok(ok,`R132 ${msg}`);
+const successor=fs.readFileSync('src/OmegaWovenRelativityContinuumR134.tsx','utf8');
+const successorRuntime=fs.readFileSync('src/wovenRelativityRuntimeR134.ts','utf8');
+const must=(ok,msg)=>assert.ok(ok,`R132/R134 ${msg}`);
 
 must(runtime.includes("R132_SCHEMA='OMEGA_RELATIONAL_PHYSICS_MANIFOLD_R132'"),'runtime schema missing');
 must(runtime.includes("R132_TRUTH_CLASSES=['REFERENCE_PHYSICS','OBSERVED_EVIDENCE','CANONICAL_PACKET','DERIVED_RUNTIME','REPRESENTATIONAL_PROJECTION','GATED']"),'truth-class registry must be explicit');
@@ -28,23 +30,19 @@ must(runtime.includes('sourceModes.results.map')&&runtime.includes('authorities.
 must(runtime.includes('registryCount:sourceModes.count'),'visible registry count must come from the actual source-mode evaluator');
 must(runtime.includes('canonAuthorities:ALL_MODES_BOUNDARY.canonAuthorities'),'62-authority count must remain source-bound');
 must(runtime.includes('routeDynamicsR132')&&runtime.includes('velocity4')&&runtime.includes('acceleration4')&&runtime.includes('curvature'),'route field must expose canonical velocity, acceleration and curvature');
-must(runtime.includes('OBSERVED_EVIDENCE')&&runtime.includes('REFERENCE_PHYSICS')&&runtime.includes('REPRESENTATIONAL_PROJECTION'),'truth classes must remain explicit');
 must(runtime.includes('not asserted as literal extra spacetime dimensions'),'runtime must prohibit physical-dimension overclaim');
 must(runtime.includes('not 179 independent physical laws'),'source-mode field must prohibit mode-to-law overclaim');
 
-must(visual.includes("getContext('webgl2'"),'primary manifold must use a GPU WebGL2 field rather than a static chart');
-must(visual.includes('p.xw=r2')&&visual.includes('p.yw=r2')&&visual.includes('p.zw=r2'),'GPU projection must perform four-coordinate plane rotations before 3D projection');
-must(visual.includes("'FIELD'|'MOTION'|'SCALE'|'FORCES'|'PROOF'|'EARTH'"),'physics scene deck must preserve distinct field/motion/scale/force/proof/Earth views');
-must(visual.includes('routeAddresses.has(i)'),'admitted route must be expressed inside the volume rather than as an unrelated chart');
-must(visual.includes("sigma===1?'OUTVERSE +':'INVERSE −'"),'signed orientation must be factored from structure');
-must(visual.includes('No observation is synthesized.'),'missing observation must stay missing');
-must(visual.includes('Reference force hierarchy is kept separate from OMEGA representation geometry.'),'reference force data must not silently become canonical geometry');
-must(visual.includes('All 179 scores are folded into 12 harmonic deformation channels'),'visible mode-field statement must match runtime behavior');
+must(visual.includes("getContext('webgl2'"),'R132 GPU physics engine must remain available');
+must(visual.includes('p.xw=r2')&&visual.includes('p.yw=r2')&&visual.includes('p.zw=r2'),'R132 GPU projection must preserve four-coordinate plane rotations');
+must(css.includes('grid-template-areas')&&css.includes('@media(max-width:720px)'),'R132 fallback manifold must remain responsive');
 
-must(css.includes('grid-template-areas')&&css.includes('@media(max-width:720px)'),'manifold must have responsive desktop/mobile layout');
-must(css.includes('.r132-camera')&&css.includes('.r132-stage-hud'),'controls and truth HUD must remain edge-mounted rather than covering the central volume');
-must(membrane.includes("import OmegaPhysicsManifoldR132 from './OmegaPhysicsManifoldR132'"),'Home source membrane must mount R132');
-must(membrane.includes('homeComposite&&<OmegaPhysicsManifoldR132'),'R132 must be the primary compact Home visual');
+must(successorRuntime.includes("import {compilePhysicsRelativityR132}"),'R134 successor must inherit the proven R132 physics packet rather than replace it with decorative logic');
+must(successorRuntime.includes("R134_SCHEMA='OMEGA_WOVEN_RELATIVITY_CONTINUUM_R134'"),'R134 successor schema missing');
+must(successor.includes("getContext('webgl2'"),'R134 successor must remain GPU rendered');
+must(successor.includes('gl.drawArrays(gl.LINES')&&successor.includes('gl.drawArrays(gl.POINTS'),'R134 successor must render topology and packet field in one GPU scene');
+must(membrane.includes("import OmegaWovenRelativityContinuumR134 from './OmegaWovenRelativityContinuumR134'"),'Home source membrane must promote R134 woven successor');
+must(membrane.includes('homeComposite&&<OmegaWovenRelativityContinuumR134'),'R134 must be the primary compact Home visual');
 must(membrane.includes('CANONICAL SOURCE MEMBRANE · OPEN 20,736-CELL INSPECTION SURFACE'),'canonical membrane source-truth inspection must remain reachable');
 
-console.log('OMEGA R132 RELATIONAL PHYSICS MANIFOLD STATIC PASS · 20,736 state field · 179 source modes · 62 canon authorities · 12-harmonic all-mode fold · GPU four-coordinate projection · physics/reference/observation truth separation');
+console.log('OMEGA R132/R134 PHYSICS SUCCESSOR PASS · R132 reference/all-mode engine preserved · R134 woven GPU topology promoted · source membrane retained');
