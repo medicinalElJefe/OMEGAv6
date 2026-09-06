@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R112/R117 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R112/R118 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const hybridRoute=read('src/HybridLinkR32.tsx');
 const hybridMount=read('src/HybridConnectBarR111.tsx');
@@ -18,7 +18,7 @@ const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'44-route capability universe must remain intact');
 
 must(hybridRoute.includes('<SovereignConnectionR117/>'),'Hybrid Link must put the R117 clean PC connection successor on the ordinary surface');
-must(hybridRoute.includes("<details className='r112-hybrid-deep'>")&&hybridRoute.includes('<HybridMissionControlR8'),'deep mission/federation diagnostics must remain available by progressive disclosure rather than being deleted');
+must(hybridRoute.includes("<details className='r112-hybrid-deep'")&&hybridRoute.includes("onToggle={e=>setDeepOpen((e.currentTarget as HTMLDetailsElement).open)}")&&hybridRoute.includes('{deepOpen&&<HybridMissionControlR8'),'deep mission/federation diagnostics must remain available by progressive disclosure and stay unmounted until explicitly opened');
 must(hybridMount.includes('<SovereignConnectionR117 compact/>'),'legacy one-touch mount must converge on the same R117 clean connection state machine');
 
 must(bootstrap117.includes("fetch('/api/hybrid/bootstrap'")&&bootstrap117.includes('saveHybridBridge'),'R117 connection state machine must mint and persist one exact fresh durable bridge');
@@ -45,6 +45,6 @@ must(field.includes('requestAnimationFrame')&&field.includes('calculusVisualLaw(
 must(field.includes('nodes?.genesis?.state')&&field.includes('nodes?.optical?.state')&&field.includes('nodes?.sovereign?.state')&&field.includes('nodes?.omegaV6?.state'),'living field must incorporate actual four-node truth states');
 must(field.includes('instrument projection, not an external physical measurement'),'motion visual must preserve representation-vs-measurement truth boundary');
 must(!field.includes('Math.random')&&!launcher117.includes('Math.random'),'living/connection paths may not fabricate state with randomness');
-must(law.includes('globalModeInfluenceR107')&&law.includes('sourceModeInfluence'),'R117 must consume the established full calculus/mode fabric rather than inventing a parallel decorative motion system');
+must(law.includes('globalModeInfluenceR107')&&law.includes('sourceModeInfluence'),'R117/R118 must consume the established full calculus/mode fabric rather than inventing a parallel decorative motion system');
 
-console.log('R112/R117 SOVEREIGN + LIVING FABRIC PASS · fresh durable bootstrap · explicit browser-safe clean connector · current-heartbeat truth · retained local learning/RCWA · task-first federation · calculus-driven living motion · R112 donor preserved');
+console.log('R112/R118 SOVEREIGN + LIVING FABRIC PASS · fresh durable bootstrap · explicit browser-safe clean connector · current-heartbeat truth · retained local learning/RCWA · task-first federation · calculus-driven living motion · advanced donor diagnostics lazy-mounted · R112 donor preserved');
