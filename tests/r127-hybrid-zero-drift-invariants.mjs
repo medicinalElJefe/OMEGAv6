@@ -1,4 +1,8 @@
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(`R127 invariant failed: ${msg}`)};
@@ -15,13 +19,46 @@ must(launcher.includes('if /I "!OMEGA_ROOT:~0,2!"=="C:" goto :root_fail'),'C: ru
 must(launcher.includes('OMEGA_AGENT_PART')&&launcher.includes('.part'),'agent download must be quarantined before promotion');
 must(launcher.includes('--dump-header')&&launcher.includes('x-omega-agent-sha256'),'connector must consume server-declared agent digest');
 must(launcher.includes('hashlib.sha256(b).hexdigest()')&&launcher.includes('server==local'),'local bytes must exactly match the server SHA-256');
+must(launcher.includes("needle='DEFAULT_SERVER='+chr(39)+'https://omegav6.jeffdeweyeljefe.workers.dev'+chr(39)"),'canonical agent identity needle must avoid nested cmd double quotes');
+must(!launcher.includes('\\"DEFAULT_SERVER=\'https://omegav6.jeffdeweyeljefe.workers.dev\'\\" in s'),'known cmd quote-stripping validator defect must never return');
+must(launcher.includes('-m py_compile "!OMEGA_AGENT_PART!"'),'quarantined exact download must pass parser preflight before promotion');
 must(launcher.includes('move /y "!OMEGA_AGENT_PART!" "!OMEGA_AGENT!"'),'validated agent must be promoted atomically after verification');
-must(launcher.includes('-m py_compile "!OMEGA_AGENT!"'),'exact downloaded source must pass parser preflight');
+const compileIndex=launcher.indexOf('-m py_compile "!OMEGA_AGENT_PART!"');
+const promoteIndex=launcher.indexOf('move /y "!OMEGA_AGENT_PART!" "!OMEGA_AGENT!"');
+must(compileIndex>=0&&promoteIndex>compileIndex,'parser preflight must occur before replacing the previous validated agent');
+must(launcher.includes('Existing validated agent was not replaced.'),'compile failure must explicitly preserve the prior validated agent');
 must(launcher.includes('if "!OMEGA_EXIT!"=="22" goto :auth_stop'),'auth failure must be terminal rather than blindly retried');
 must(launcher.includes('if "!OMEGA_EXIT!"=="21" goto :transient_retry'),'only canonical reachability may use bounded retry');
 must(launcher.includes('if !OMEGA_RETRY! GTR 4 goto :retry_exhausted'),'transient retry must be bounded');
 must(launcher.includes('No fallback host was attempted'),'failure path must not mutate onto another control host');
 must(launcher.includes('No downloaded bytes were executed'),'failed download must remain non-executable');
+
+const commandPrefix='!OMEGA_PY! -B -c "';
+const validatorAnchor=commandPrefix+'import hashlib,re,sys;';
+const validatorEnd='" "!OMEGA_AGENT_PART!" "!OMEGA_AGENT_HEADERS!"';
+const validatorOffset=launcher.indexOf(validatorAnchor);
+must(validatorOffset>=0,'generated SHA validator command must be discoverable');
+const payloadStart=validatorOffset+commandPrefix.length;
+const payloadEnd=launcher.indexOf(validatorEnd,payloadStart);
+must(payloadEnd>payloadStart,'generated SHA validator payload boundary must remain stable');
+const sourcePayload=launcher.slice(payloadStart,payloadEnd);
+must(sourcePayload.startsWith('import hashlib,re,sys;'),'proof extractor must target the SHA validator rather than another inline Python command');
+must(!sourcePayload.includes('\\"'),'inline validator payload must contain no nested double quote that cmd.exe can strip');
+const pythonPayload=sourcePayload.replaceAll('\\\\','\\');
+const fixtureDir=fs.mkdtempSync(path.join(os.tmpdir(),'omega-r127-validator-'));
+try{
+ const fixtureAgent=path.join(fixtureDir,'omega-hybrid-agent.py');
+ const fixtureHeaders=path.join(fixtureDir,'headers.txt');
+ const fixture="#!/usr/bin/env python3\n# OMEGA R34 local Hybrid Link agent\nDEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'\n# Pairing is explicit.\n"+'# validator fixture padding\n'.repeat(60);
+ fs.writeFileSync(fixtureAgent,fixture,'utf8');
+ const digest=createHash('sha256').update(fs.readFileSync(fixtureAgent)).digest('hex');
+ fs.writeFileSync(fixtureHeaders,`HTTP/1.1 200 OK\r\nx-omega-agent-sha256: ${digest}\r\n`,'utf8');
+ const proof=spawnSync('python3',['-B','-c',pythonPayload,fixtureAgent,fixtureHeaders],{encoding:'utf8'});
+ must(proof.status===0,`generated SHA validator must execute successfully under Python: ${(proof.stderr||proof.stdout||'NO_OUTPUT').trim()}`);
+ must((proof.stdout||'').includes('identity+digest: PASS'),'generated SHA validator must prove identity and exact digest');
+ const compileProof=spawnSync('python3',['-B','-m','py_compile',fixtureAgent],{encoding:'utf8',env:{...process.env,PYTHONDONTWRITEBYTECODE:'1',PYTHONPYCACHEPREFIX:path.join(fixtureDir,'pycache')}});
+ must(compileProof.status===0,`quarantine parser preflight must accept known-good agent bytes: ${(compileProof.stderr||compileProof.stdout||'NO_OUTPUT').trim()}`);
+}finally{fs.rmSync(fixtureDir,{recursive:true,force:true})}
 
 must(surface.includes('R127 ZERO DRIFT'),'operator surface must name the active connector law');
 must(surface.includes('DOWNLOAD R127 ZERO-DRIFT CONNECTOR'),'operator path must expose the hardened connector');
@@ -44,4 +81,4 @@ must(agent.includes("CAPABILITY_REVISION='R132'")&&!agent.includes('requires the
 for(const fn of ['assert_window','click_mouse','send_key','type_text','scroll_mouse','read_visible_text','record_macro','replay_macro'])must(agent.includes('def '+fn+'('),`R132 real desktop execution missing ${fn}`);
 must(agent.includes('shell=False')&&agent.includes('assert_window(title)'),'desktop execution must remain non-shell and foreground-window locked');
 
-console.log('R127/R132 HYBRID ZERO-DRIFT PASS · one canonical host · approved-root confinement · quarantined SHA-256 download · parser preflight · heartbeat-only PC ONLINE · real proof-bound desktop execution · no silent fallback');
+console.log('R127/R148 HYBRID ZERO-DRIFT PASS · one canonical host · approved-root confinement · quarantined SHA-256 download · generated validator execution proof · quarantine parser preflight before atomic promotion · heartbeat-only PC ONLINE · real proof-bound desktop execution · no silent fallback');
