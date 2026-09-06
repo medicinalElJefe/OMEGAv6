@@ -30,7 +30,7 @@ jobs:
         run: node tests/r138-capability-first-visual-runtime.mjs
       - name: Preserve R137 live operational proof and R136 living world
         run: |
-          node tests/r135-live-family-proof-fusion-invariants.mjs
+          node tests/r137-live-family-proof-fusion-invariants.mjs
           node tests/r136-living-world-frame-invariants.mjs
       - name: Preserve R134 continuity and R132 Hybrid execution truth
         run: |
