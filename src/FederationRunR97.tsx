@@ -5,6 +5,7 @@ import {FEDERATION_NODE_ORDER_R102,FEDERATION_NODES_R102,federationFlowR102,fede
 import FederationLivingFieldR112 from './FederationLivingFieldR112';
 import FederationCeremonyR114 from './FederationCeremonyR114';
 import FederationSurfaceFabricR119 from './FederationSurfaceFabricR119';
+import WholeOperationWeaveR143 from './WholeOperationWeaveR143';
 import './federationRunR97.css';
 import './federationRunR112.css';
 
@@ -31,24 +32,22 @@ export default function FederationRunR97({onDownloadLauncher:legacyDownload,pair
  const routeIntent=async()=>{const q=intent.trim();if(!q||routeBusy)return;setRouteBusy(true);try{const r=await api.post<any>('/api/federation/route-intent',{intent:q});setRoutePlan(r.data);setError('')}catch(e:any){setRoutePlan(null);setError(e?.message||String(e))}finally{setRouteBusy(false)}};
  useEffect(()=>{void load();const id=window.setInterval(()=>void load(),10000);return()=>window.clearInterval(id)},[]);
  const nodes=data?.nodes||{},runtime=data?.runtime||{},machine=data?.machineServices||{};
- const flowNodes=useMemo(()=>({...nodes,
-  genesis:String(machine?.genesis?.state||'').toUpperCase()==='LIVE'?{...(nodes.genesis||{}),state:'LIVE',surfaceState:nodes.genesis?.state||'UNKNOWN'}:nodes.genesis,
-  optical:String(machine?.optical?.state||'').toUpperCase()==='LIVE'?{...(nodes.optical||{}),state:'LIVE',surfaceState:nodes.optical?.state||'UNKNOWN'}:nodes.optical
- }),[nodes,machine]);
+ const flowNodes=useMemo(()=>({...nodes,genesis:String(machine?.genesis?.state||'').toUpperCase()==='LIVE'?{...(nodes.genesis||{}),state:'LIVE',surfaceState:nodes.genesis?.state||'UNKNOWN'}:nodes.genesis,optical:String(machine?.optical?.state||'').toUpperCase()==='LIVE'?{...(nodes.optical||{}),state:'LIVE',surfaceState:nodes.optical?.state||'UNKNOWN'}:nodes.optical}),[nodes,machine]);
  const flow=useMemo(()=>federationFlowR102(flowNodes,runtime),[flowNodes,runtime]),gateCopy=plainGate(flow.gate,flow,machine);
  const rows=useMemo(()=>FEDERATION_NODE_ORDER_R102.map((key:FederationNodeKey)=>{const spec=FEDERATION_NODES_R102[key],state=federationNodeStateR102(key,nodes),tone=federationToneR102(state),serviceState=key==='genesis'?machine?.genesis?.state:key==='optical'?machine?.optical?.state:null;return{key,spec,state,tone,serviceState}}),[nodes,machine]);
  const receipts=[...(runtime?.rcwa?.lastJobs||[])].reverse().slice(0,5),counts=runtime?.rcwa?.counts||{},workers=runtime?.rcwa?.workers||[];
  const lastRcwaProof=workers.reduce((m:number,x:any)=>Math.max(m,Number(x?.lastSeen||0)),0)||null,lastHostProof=runtime?.pairing?.lastAuthenticatedProof||null;
  const plannedSteps=routePlan?.ok?(routePlan.steps||[]):[];
  return <section className='r97-federation r112-federation'>
-  <header className='r112-fabric-head'><div><span>OMEGA CAPABILITY FABRIC · R119</span><h3>Tell OMEGA the outcome. The machinery stays underneath.</h3><p>R119 keeps the four authority roles intact while converging every developed human surface into one product fabric: Genesis proposes, Optical screens, Sovereign controls native-host work, and OMEGAv6 remains the only global ADMIT authority. Machine services remain bounded transports rather than shadow products.</p></div><button className='r112-fabric-refresh' onClick={()=>void load()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Checking…':'Refresh status'}</button></header>
+  <header className='r112-fabric-head'><div><span>OMEGA CAPABILITY FABRIC · R143 WHOLE OPERATION</span><h3>Tell OMEGA the outcome. The machinery stays underneath.</h3><p>R143 preserves the four federation authority roles while adding a dependency-bound execution weave across the already-built swarm, machine services, authenticated PC and solver transports. OMEGAv6 still does not treat a returned result as CanonState until R125 admission.</p></div><button className='r112-fabric-refresh' onClick={()=>void load()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Checking…':'Refresh status'}</button></header>
   {error&&<div className='r97-federation-error'><TriangleAlert/>{error}</div>}
 
   <section className='r112-intent' aria-label='Ask OMEGA for an outcome'>
-   <div className='r112-intent-entry'><label htmlFor='r112-intent'>WHAT DO YOU WANT TO DO?</label><div><input id='r112-intent' value={intent} onChange={e=>setIntent(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void routeIntent()}} placeholder='Describe the result you want — build it, analyze it, compare it, validate it, visualize it…'/><button onClick={()=>void routeIntent()} disabled={!intent.trim()||routeBusy}>{routeBusy?'Resolving…':'Run capability plan'}<ChevronRight/></button></div><small>OMEGA resolves the minimum required path from current machine-service and authority truth. Unneeded clouds and solvers stay idle.</small></div>
+   <div className='r112-intent-entry'><label htmlFor='r112-intent'>WHAT DO YOU WANT TO DO?</label><div><input id='r112-intent' value={intent} onChange={e=>setIntent(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void routeIntent()}} placeholder='Describe the result you want — build it, analyze it, compare it, validate it, visualize it…'/><button onClick={()=>void routeIntent()} disabled={!intent.trim()||routeBusy}>{routeBusy?'Resolving…':'Run capability plan'}<ChevronRight/></button></div><small>The lightweight capability router shows the minimum role path. The R143 whole-operation weave below can expand the same objective into an evidence-bound multi-executor graph when the work actually requires it.</small></div>
    <div className='r112-intent-result'>{routePlan?.ok?<><span>OMEGA WILL USE</span><b>{routePlan.path}</b><div>{plannedSteps.map((step:any)=><i key={`${step.node}-${step.verb}`} className={step.ready?'ready':'blocked'}>{step.verb} · {nodeLabel(step.node)}</i>)}</div><p>{routePlan.summary}</p><small>{routePlan.nextAction}</small></>:<><span>CURRENT FABRIC</span><b>{gateCopy.title}</b><p>{gateCopy.copy}</p><small>Ask for an outcome above and this becomes a concrete execution path instead of infrastructure status.</small></>}</div>
   </section>
 
+  <WholeOperationWeaveR143 seedIntent={intent}/>
   <FederationSurfaceFabricR119 nodes={nodes} machine={machine} runtime={runtime}/>
 
   <section className='r112-node-strip' aria-label='R119 machine service status'>
@@ -70,6 +69,6 @@ export default function FederationRunR97({onDownloadLauncher:legacyDownload,pair
    <div className='r97-federation-ledger r102-ledger'><section><b>Durable project continuity</b><strong>{runtime?.continuity?.state||'CHECKING'}</strong><small>{runtime?.continuity?.projectCount||0} project record(s) · {runtime?.continuity?.receiptSha256?`receipt ${runtime.continuity.receiptSha256.slice(0,18)}…`:'receipt pending'}</small></section><section><b>Full-wave execution</b><strong>{Number(counts.running||0)} RUNNING · {Number(counts.queued||0)} QUEUED</strong><small>{receipts.length?receipts.map((x:any)=>`${x.status}:${String(x.resultSha256||x.id).slice(0,10)}`).join(' · '):'No returned full-wave receipt yet.'}</small></section><section><b>Authority boundary</b><strong>ONE GLOBAL CANONSTATE</strong><small>Genesis and Optical machine services return bounded packets for their existing roles; Sovereign returns native solver results; OMEGAv6 remains global admission authority.</small></section></div>
   </details>
 
-  <footer className='r102-federation-truth'><ShieldCheck/>R119 preserves the R114 durable closure ceremony, R115 machine adapters, R116 recovery law and R117 fresh bootstrap while converging the developed human surfaces into one product fabric. Human reachability, machine transport, browser pairing, fresh host heartbeat, solver freshness and canonical admission remain distinct proof states. No historical, simulated or merely reachable state can masquerade as completed federation proof.</footer>
+  <footer className='r102-federation-truth'><ShieldCheck/>R143 keeps R114 durable federation closure, R115 machine adapters, R121/R123/R125 swarm execution, R132 Hybrid execution, R141 exact host proof, R142 lifecycle truth, and R134/R136 continuity underneath one whole-operation graph. Executor availability, invocation, return, verification, residual join and R125 canonical admission remain distinct states.</footer>
  </section>;
 }
