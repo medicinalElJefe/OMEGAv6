@@ -16,9 +16,12 @@ must(sphere.includes('onDoubleClick={choose}')&&sphere.includes('atlasAddress(d,
 must(sphereCss.includes('.r121-sphere-body')&&sphereCss.includes('@media(max-width:820px)')&&sphereCss.includes('@media(max-width:620px)'),'whole-sphere UI must have desktop and mobile layout authority');
 must(sphereCss.includes('Whole-sphere integrative view is primary; the canonical 20,736-cell membrane remains the source-truth inspection surface.'),'Home projection copy must communicate sphere/membrane authority correctly');
 
-const valid="s.startswith('#!/usr/bin/env python3') and 'OMEGA R34 local Hybrid Link agent' in s and 'https://omegav6.jeffdeweyeljefe.workers.dev' in s and 'Pairing is explicit.' in s";
-must(launcher.includes(valid),'Hybrid agent validator must contain the complete syntactically valid identity expression');
+const cmdSafe="s.startswith(chr(35)+chr(33)+'/usr/bin/env python3') and 'OMEGA R34 local Hybrid Link agent' in s and 'https://omegav6.jeffdeweyeljefe.workers.dev' in s and 'Pairing is explicit.' in s";
+must(launcher.includes(cmdSafe),'Hybrid agent validator must construct the shebang without a literal ! under CMD delayed expansion');
+must(launcher.includes("'OMEGA Sovereign RCWA transport agent' in s")&&launcher.includes("s.startswith(chr(35)+chr(33)+'/usr/bin/env python3')"),'RCWA validator must use the same CMD-safe shebang construction');
+must(launcher.includes('R120.3_CMD_SAFE')&&launcher.includes('no literal exclamation mark is permitted inside this inline Python'),'launcher must expose the CMD-safe validator build and its shell invariant');
 must(!launcher.includes("s.startswith('#//omegav6.jeffdeweyeljefe.workers.dev' in s")&&!launcher.includes("s.startswith('#!/usr/bin/env python3' in s"),'malformed R120 screenshot validator pattern must never regress');
+must(launcher.includes("replace(/[\\r\\n\"!%&|<>^]/g,''")||launcher.includes("replace(/[\\r\\n\"!%&|<>^]/g,''"),'pairing code sanitizer must neutralize CMD delayed and percent expansion metacharacters');
 must(launcher.includes('The connector did not execute unvalidated source.'),'fail-closed Hybrid execution boundary must remain');
 
-console.log('R121 PASS · whole-sphere Earth relativity home instrument · full canonical field · source-backed Earth/satellite evidence · connector validator regression sealed');
+console.log('R121 PASS · whole-sphere Earth relativity home instrument · full canonical field · source-backed Earth/satellite evidence · CMD-safe connector validator regression sealed');
