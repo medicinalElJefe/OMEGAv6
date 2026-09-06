@@ -1,0 +1,116 @@
+name: OMEGA R119 Full Resolution Ultra Convergence
+
+on:
+  push:
+    branches: [main, r119-full-resolution-render-fabric]
+  pull_request:
+    branches: [main]
+  workflow_run:
+    workflows: ["OMEGA Cloud Bridge CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-r119:
+    if: github.event_name != 'workflow_run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Execute R119 full-resolution + ultra convergence invariants
+        run: node tests/r119-full-resolution-ultra-convergence-invariants.mjs
+      - name: Execute inherited corpus / capability / federation gates
+        shell: bash
+        run: |
+          node tests/r107-drive-cloud-correlation-invariants.mjs
+          node tests/r107-full-calculus-capability-fabric-invariants.mjs
+          node tests/r108-ultimate-capability-membrane-invariants.mjs
+          node tests/r109-route-deferred-specialist-fabric-invariants.mjs
+          node tests/r113-vector-carry-convergence-invariants.mjs
+          node tests/r114-federation-closure-invariants.mjs
+          node tests/r115-machine-adapters-invariants.mjs
+          node tests/r116-sovereign-recovery-unified-truth-invariants.mjs
+          node tests/r117-real-sovereign-bootstrap-invariants.mjs
+          node tests/r118-full-system-operational-convergence-invariants.mjs
+      - name: Execute complete static + production build gate
+        run: npm run check
+      - name: Install Chromium for operational resolution proof
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start production build locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r119-preview.log 2>&1 &
+          echo $! >/tmp/omega-r119-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r119-preview.log
+          exit 1
+      - name: Re-run every R118 route on desktop and mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r118-browser-operational-e2e.mjs
+      - name: Prove R119 high-DPI resolution + ultra System Atlas surface
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r119-browser-resolution-e2e.mjs
+      - name: Preview diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r119-preview.log || true
+      - name: Canonical Wrangler dry-run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r119-canonical
+
+  live-r119:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Verify deployed R119 public contract + canonical truth spine
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const session='r119_live_observer';
+          const gets=['/','/omega-ultra-convergence-r119.json','/api/health','/api/status','/api/restoration','/api/hybrid/status','/api/system/convergence','/api/federation/run/status'];
+          for(const path of gets){
+            const r=await fetch(base+path,{headers:{'cache-control':'no-cache','x-omega-session-id':session}});
+            const text=await r.text();
+            if(!r.ok||!text.length)throw new Error(`${path} failed HTTP ${r.status}: ${text.slice(0,500)}`);
+          }
+          const manifest=await fetch(base+'/omega-ultra-convergence-r119.json',{cache:'no-store'}).then(r=>r.json());
+          if(manifest.schema!=='OMEGA_ULTRA_CONVERGENCE_R119'||manifest.canonicalAuthority!=='OMEGAv6')throw new Error('deployed R119 convergence contract mismatch');
+          if(manifest.corpus.reviewedSystems!==100||manifest.corpus.sourceModeEvaluations!==179||manifest.corpus.canonCalculusLenses!==62)throw new Error('deployed R119 corpus counts mismatch');
+          if(manifest.resolution.residentCanonicalAnchors!==20736||manifest.resolution.expandedRepresentationalRows!==248832||manifest.resolution.virtualAddressCapacity!==61917364224)throw new Error('deployed R119 resolution hierarchy mismatch');
+          const hybrid=await fetch(base+'/api/hybrid/status',{headers:{'cache-control':'no-cache','x-omega-session-id':session}}).then(r=>r.json());
+          if(hybrid.nativeExecutionClaimed===true&&!Array.isArray(hybrid.devices))throw new Error('Hybrid claimed native execution without device evidence array');
+          console.log(`R119 PUBLIC CONTRACT PASS · corpus ${manifest.corpus.reviewedSystems}/${manifest.corpus.softwareFamilies}/${manifest.corpus.sourceModeEvaluations}/${manifest.corpus.canonCalculusLenses} · Hybrid ${hybrid.state||'UNKNOWN'}`);
+          NODE
+      - name: Install Chromium for deployed high-DPI proof
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Exercise deployed R119 high-DPI surfaces
+        env:
+          OMEGA_E2E_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+        run: node tests/r119-browser-resolution-e2e.mjs

@@ -1,6 +1,8 @@
 import {ShieldCheck,Waypoints} from 'lucide-react';
 import {COMPLETION_SEQUENCE_R95,fullSystemConvergenceR95,ONE_SYSTEM_LEDGER_AUTHORITY_R95} from './fullSystemConvergenceR95';
+import UltraSystemFabricR119 from './UltraSystemFabricR119';
 import './fullSystemConvergenceR95.css';
+import './ultraMountR119.css';
 
 export default function FullSystemConvergencePanelR95({onNavigate}:{onNavigate:(name:string)=>void}){
  const c=fullSystemConvergenceR95();
@@ -20,6 +22,10 @@ export default function FullSystemConvergencePanelR95({onNavigate}:{onNavigate:(
     <section><header><span>GATED</span><b>{c.gated.length}</b></header>{c.gated.map(x=><button key={x.id} onClick={()=>onNavigate(x.target)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.status}</small></span></button>)}</section>
     <section><header><span>RESTORE</span><b>{c.restore.length}</b></header>{c.restore.map(x=><button key={x.id} onClick={()=>onNavigate(x.target)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.status} · {x.reason}</small></span></button>)}</section>
    </div>
+   <details className='r119-ultra-mount'>
+    <summary><div><span>R119 CORPUS + SITES + MODES + RESOLUTION</span><b>Open the full convergence fabric</b><small>Drive authorities · 100 systems · 24 families · 179 source modes · 62 canon lenses · 4 federation roles · 20,736/248,832/61.9B address hierarchy</small></div><strong>ULTRA SYSTEM</strong></summary>
+    <UltraSystemFabricR119 onNavigate={onNavigate}/>
+   </details>
    <footer><ShieldCheck/><span>{c.boundary}</span></footer>
   </div>
  </details>
