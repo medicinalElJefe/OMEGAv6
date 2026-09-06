@@ -1,0 +1,74 @@
+name: OMEGA R143 Authoritative UI Operation Chain
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r143-authoritative-ui-operation-chain]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r143-operation-chain-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r143:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R143 authoritative UI operation chain
+        run: node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+      - name: Preserve R142 execution truth and R141 exact Hybrid closure
+        shell: bash
+        run: |
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+      - name: Preserve R140 operation fabric and R139 unified capability engine
+        shell: bash
+        run: |
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r140-living-world-operation-bridge-invariants.mjs
+          node tests/r140-mode-completion-fabric-invariants.mjs
+          node tests/r139-unified-capability-engine-invariants.mjs
+          node tests/r138-capability-first-visual-runtime.mjs
+      - name: Preserve canonical admission and self-build authority
+        shell: bash
+        run: |
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Install Chromium for route-to-control operational proof
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start built application locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r143-preview.log 2>&1 &
+          echo $! >/tmp/omega-r143-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r143-preview.log
+          exit 1
+      - name: Exercise every registered route in desktop and mobile Chromium
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r118-browser-operational-e2e.mjs
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r143-preview.log || true
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r143-dry-run
