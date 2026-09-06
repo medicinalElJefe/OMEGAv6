@@ -1,0 +1,98 @@
+name: OMEGA R146 Spectral Fullwave Fabric
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [r146-spectral-fullwave-fabric]
+  pull_request:
+    branches: [r145-advanced-computation-fabric, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r146-spectral-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r146:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install application and real RCWA backend
+        run: |
+          npm install
+          python -m pip install --upgrade pip
+          python -m pip install -r sovereign/requirements-rcwa.txt
+      - name: Syntax check R146 cloud and Sovereign code
+        run: |
+          node --check src/computation/fullwavePromotionR146.js
+          node --check src/workerR34.js
+          python -m py_compile public/omega-rcwa-agent.py
+          python -m py_compile sovereign/omega_rcwa_worker.py
+      - name: Prove deterministic R145 to R146 promotion
+        run: node tests/r146-spectral-fullwave-fabric-invariants.mjs
+      - name: Prove bounded material dispersion resolver
+        run: python tests/r146-agent-dispersion-smoke.py
+      - name: Execute real three wavelength R146 grcwa spectral job
+        shell: bash
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+          import importlib.util, json, math, tempfile
+          from pathlib import Path
+          root=Path.cwd().resolve()
+          spec=importlib.util.spec_from_file_location('omega_rcwa_agent_r146',root/'public'/'omega-rcwa-agent.py')
+          agent=importlib.util.module_from_spec(spec); spec.loader.exec_module(agent)
+          job={
+            'schema':'OMEGA_FULLWAVE_QUEUE_v1','job_id':'ci_r146_spectral','source_packet_id':'ci_r146_packet','solver':'rcwa','execution_mode':'DISPERSION_SPECTRAL_R146',
+            'geometry':{'pitch_nm':330,'width_nm':90,'length_nm':260,'height_nm':550,'theta_deg':30,'material':'TIO2_DESIGN'},
+            'wavelength_nm':532,'polarization':'s','material_model':{'n_incident':1.0,'n_feature':2.43,'n_background':1.0,'n_substrate':1.46},
+            'material_names':{'incident':'air','feature':'tio2_design','background':'air','substrate':'sio2_fused'},
+            'spectral':{'wavelengths_nm':[470,532,650]},
+            'numerics':{'nx':32,'ny':32,'harmonics_low':25,'harmonics_high':49,'convergence_tolerance':0.08,'energy_tolerance':0.08,'incidence_theta_deg':0,'incidence_phi_deg':0},
+            'proof':{'gate':'STAY','mode188_score':1.2,'continuity':0.9,'burden':0.2,'contradiction':0.1,'scar':0.05},
+            'lineage':['ci:r146','r145:receipt:'+'a'*64,'r146:promotion:fixture']
+          }
+          with tempfile.TemporaryDirectory(prefix='omega-r146-') as tmp:
+            run=agent.execute(job,(root/'sovereign'/'omega_rcwa_worker.py').resolve(),Path(tmp).resolve())
+          result=run['result']
+          assert result['schema']=='OMEGA_SPECTRAL_RESULT_v1'
+          assert result['version']=='R146.0'
+          assert result['worker']=='omega-sovereign' and result['solver']=='rcwa'
+          assert result['source_packet_id']=='ci_r146_packet'
+          assert len(result['points'])==3
+          assert len(result['result_sha256'])==64
+          feature=[]
+          for point,expected in zip(result['points'],[470,532,650]):
+            assert point['wavelength_nm']==expected
+            child=point['result']
+            assert child['schema']=='OMEGA_RESULT_v1' and child['solver']=='rcwa' and child['worker']=='omega-sovereign'
+            assert child['source_packet_id']=='ci_r146_packet'
+            assert child['solver_version'].startswith('grcwa:')
+            assert math.isfinite(float(child['observables']['R'])) and math.isfinite(float(child['observables']['T']))
+            assert math.isfinite(float(child['convergence_metrics']['delta_RT']))
+            assert point['materials']['n_feature']['source']
+            feature.append(float(complex(point['materials']['n_feature']['n']).real))
+          assert feature[0]>feature[1]>feature[2]
+          print('R146 REAL SPECTRAL RCWA PASS',{'points':len(result['points']),'converged_all':result['converged_all'],'feature_n':feature,'result_sha256':result['result_sha256']})
+          PY
+      - name: Preserve R145 R144 R142 R35 R3 proof boundaries
+        shell: bash
+        run: |
+          node tests/r145-advanced-computation-fabric-invariants.mjs
+          node tests/r144-runtime-deployment-attestation-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r115-machine-adapters-invariants.mjs
+          python -m py_compile sovereign/omega_rcwa_spectral.py
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Dry-run canonical Worker with R146 runtime
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r146-canonical
