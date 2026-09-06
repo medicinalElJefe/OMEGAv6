@@ -1,0 +1,87 @@
+name: OMEGA R149 Generalization Coverage Closure
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [r149-generalization-coverage-closure]
+  pull_request:
+    branches: [r148-active-fullwave-learning, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r149-coverage-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r149:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install application and real RCWA backend
+        run: |
+          npm install
+          python -m pip install -r sovereign/requirements-rcwa.txt
+      - name: Prove coverage closure policy
+        run: |
+          node --check src/computation/generalizationCoverageR149.js
+          node tests/r149-generalization-coverage-closure-invariants.mjs
+      - name: Generate real R146 evidence for coverage audit
+        shell: bash
+        run: |
+          mkdir -p .omega-r149-ci
+          python - <<'PY'
+          from __future__ import annotations
+          import importlib.util,json,tempfile
+          from pathlib import Path
+          root=Path.cwd().resolve();spec=importlib.util.spec_from_file_location('agent',root/'public'/'omega-rcwa-agent.py');agent=importlib.util.module_from_spec(spec);spec.loader.exec_module(agent)
+          geometries=[
+            (320,82,238,500,0),(325,88,246,515,12),(330,94,254,530,24),(335,100,262,545,36),
+            (340,106,270,560,48),(345,92,242,575,60),(350,98,250,590,72),(338,86,266,535,84)
+          ]
+          records=[]
+          for i,(pitch,width,length,height,theta) in enumerate(geometries):
+            cid=f'r149_real_{i:02d}';job={'schema':'OMEGA_FULLWAVE_QUEUE_v1','job_id':'ci_'+cid,'source_packet_id':'packet_'+cid,'solver':'rcwa','execution_mode':'DISPERSION_SPECTRAL_R146','geometry':{'pitch_nm':pitch,'width_nm':width,'length_nm':length,'height_nm':height,'theta_deg':theta,'material':'TIO2_DESIGN'},'wavelength_nm':532,'polarization':'s','material_model':{'n_incident':1.0,'n_feature':2.43,'n_background':1.0,'n_substrate':1.4607},'material_names':{'incident':'air','feature':'tio2_design','background':'air','substrate':'sio2_fused'},'spectral':{'wavelengths_nm':[470,532,650]},'numerics':{'nx':32,'ny':32,'harmonics_low':25,'harmonics_high':49,'convergence_tolerance':0.12,'energy_tolerance':0.10,'incidence_theta_deg':0,'incidence_phi_deg':0},'proof':{'gate':'STAY','mode188_score':1.2,'continuity':.9,'burden':.2,'contradiction':.1,'scar':.05},'lineage':['ci:r149:coverage-pilot']}
+            with tempfile.TemporaryDirectory(prefix='omega-r149-') as tmp: run=agent.execute(job,(root/'sovereign'/'omega_rcwa_worker.py').resolve(),Path(tmp).resolve())
+            records.append({'candidate':{'candidate_id':cid,'source_packet_id':'packet_'+cid,'geometry':job['geometry'],'wavelength_nm':532,'target_phase_deg':180,'sigma':1,'material_model':job['material_model'],'lineage':['ci:r149:candidate']},'result':run['result']})
+          Path('.omega-r149-ci/fullwave.json').write_text(json.dumps(records,indent=2),'utf-8')
+          converged=sum(1 for x in records if x['result'].get('converged_all'))
+          points=sum(len(x['result'].get('points',[])) for x in records)
+          print('R149 REAL COVERAGE EVIDENCE',{'jobs':len(records),'converged':converged,'points':points})
+          if converged<7: raise SystemExit('R149 real coverage pilot needs at least seven converged spectral jobs')
+          PY
+      - name: Audit real evidence breadth without relaxing R147 gate
+        shell: bash
+        run: |
+          node <<'NODE'
+          import fs from 'node:fs';
+          import {screenCandidateR145} from './src/computation/advancedComputationKernelR145.js';
+          import {observationsFromR145R146R147} from './src/computation/fullwaveCalibrationR147.js';
+          import {analyzeGeneralizationCoverageR149} from './src/computation/generalizationCoverageR149.js';
+          const records=JSON.parse(fs.readFileSync('.omega-r149-ci/fullwave.json','utf8')),observations=[];
+          for(const record of records){if(record.result?.converged_all!==true)continue;const row=screenCandidateR145(record.candidate,{wavelengths_nm:[470,532,650],polarizations:['s'],fabrication_tolerance_nm:5});observations.push(...observationsFromR145R146R147(row,record.result,'f'.repeat(64)))}
+          const report=await analyzeGeneralizationCoverageR149(observations);
+          if(observations.length!==24)throw new Error(`expected 24 real paired observations, got ${observations.length}`);
+          if(report.state!=='HOLD_INSUFFICIENT_OBSERVATIONS')throw new Error(`R149 must not declare 24-observation pilot ready; got ${report.state}`);
+          if(report.required_observations!==32||report.calibration_model_admitted!==false||report.canonical_mutation!==false||report.physical_validation!==false)throw new Error('R149 real coverage truth boundary regressed');
+          fs.writeFileSync('.omega-r149-ci/coverage.json',JSON.stringify(report,null,2));
+          console.log(`R149 REAL COVERAGE HOLD PASS · ${report.observations}/${report.required_observations} observations · ${report.occupied_regions}/${report.total_regions} regions · p90 NN ${report.p90_nearest_neighbor_distance} · ${report.coverage_sha256}`);
+          NODE
+      - name: Preserve R148 R147 R146 R145 chain
+        run: |
+          node tests/r148-active-fullwave-learning-invariants.mjs
+          node tests/r147-fullwave-calibration-feedback-invariants.mjs
+          node tests/r146-spectral-fullwave-fabric-invariants.mjs
+          node tests/r145-advanced-computation-fabric-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Dry-run canonical Worker
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r149-canonical
