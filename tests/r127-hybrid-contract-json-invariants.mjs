@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const c=JSON.parse(fs.readFileSync('public/omega-r127-hybrid-connector-contract.json','utf8'));
+const must=(ok,msg)=>{if(!ok)throw new Error(`R127 contract invariant failed: ${msg}`)};
+must(c.schema==='OMEGA_HYBRID_CONNECTOR_CONTRACT_R127','schema');
+must(c.canonicalControlOrigin==='https://omegav6.jeffdeweyeljefe.workers.dev','canonical control origin');
+must(c.systemDriveRuntimeFallback===false&&c.controlHostFallback===false,'fallback prohibition');
+must(c.download?.algorithm==='SHA-256'&&c.download?.exactDigestEqualityRequired===true,'digest equality');
+must(c.download?.pythonParsePreflightRequired===true&&c.download?.atomicPromotionRequired===true,'preflight and promotion');
+must(c.download?.staleLocalSubstitutionOnFailure===false,'stale substitution prohibition');
+must(c.authentication?.freshDurablePairing===true&&c.authentication?.heartbeatRequired===true,'pair and heartbeat requirements');
+must(c.authentication?.authenticationFailureBlindRetry===false,'auth no-blind-retry');
+must(c.truth?.pairingIsPcOnlineProof===false&&c.truth?.downloadIsPcOnlineProof===false&&c.truth?.agentValidationIsPcOnlineProof===false,'intermediate state truth separation');
+must(c.truth?.currentAuthenticatedHeartbeatRequiredForPcOnline===true,'heartbeat-only PC online');
+must(c.nativeExecution?.approvedRootConfined===true&&c.nativeExecution?.arbitraryShellFabrication===false,'native boundary');
+console.log('R127 HYBRID CONTRACT JSON PASS');
