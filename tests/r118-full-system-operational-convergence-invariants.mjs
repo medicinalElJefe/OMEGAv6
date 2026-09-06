@@ -7,7 +7,7 @@ const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const navigator=read('src/OmegaSideNavigatorR88.tsx');
 const loader=read('src/specialistLoaderR109.tsx');
 const suite=read('src/OmegaSpecialistSuite.tsx');
-const worker=read('src/workerR117.js');
+const worker117=read('src/workerR117.js');
 const worker116=read('src/workerR116.js');
 const hybrid=read('src/SovereignConnectionR117.tsx');
 const launcher=read('src/sovereignLauncherR117.ts');
@@ -27,13 +27,18 @@ must(app.includes("lazy(()=>import('./OmegaWorkstationFullV2'))")&&app.includes(
 must(navigator.includes("rows.map(route=>")&&navigator.includes("onClick={()=>go(route)}"),'all destination buttons must share one deterministic navigation handler');
 must(navigator.includes("aria-current={currentPanel===route?'page':undefined}"),'active route must remain exposed accessibly');
 
-must(wrangler.includes('"main": "src/workerR117.js"'),'Cloudflare must execute the current R117 Worker wrapper');
-must(worker.includes("from './workerR116.js'")&&worker116.includes("from './workerR115.js'"),'R117 must extend the accepted runtime chain instead of replacing it');
-must(worker.includes("path==='/api/hybrid/bootstrap'")&&worker.includes('OMEGA_SOVEREIGN_BOOTSTRAP_R117'),'fresh server-backed Hybrid bootstrap endpoint missing');
+// R117 intentionally repairs connector issuance on the already-proven R116 runtime spine.
+// The deployed entry remains workerR116.js so federation/runtime authority does not fork;
+// workerR116 must itself expose the R117 connector revision and bootstrap behavior.
+must(wrangler.includes('"main": "src/workerR116.js"'),'Cloudflare must execute the proven R116 runtime spine');
+must(worker116.includes("from './workerR115.js'")&&worker116.includes("const CONNECTOR_REVISION='R117'"),'deployed R116 spine must retain R115 lineage and promote the R117 connector revision');
+must(worker116.includes("path==='/api/hybrid/bootstrap'")&&worker116.includes('OMEGA_SOVEREIGN_BOOTSTRAP_R117'),'deployed runtime must expose the fresh server-backed R117 Hybrid bootstrap');
+must(worker116.includes('bootstrapOriginAllowedR117')&&worker116.includes("omegav6.jeffdeweyeljefe.workers.dev"),'fresh pairing must be origin-bounded to canonical OMEGAv6');
+must(worker117.includes("from './workerR116.js'"),'standalone R117 wrapper must remain an additive compatibility successor rather than a fork');
 must(adapter.includes('bootstrapHybridBridgeR117')&&adapter.includes("'/api/hybrid/bootstrap'"),'browser transport must expose the server-backed R117 bootstrap');
 must(hybrid.includes('bootstrapSovereignR117')&&hybrid.includes('DOWNLOAD CLEAN R117 CONNECTOR'),'ordinary Hybrid surface must expose fresh credential rotation plus explicit download');
 must(!hybrid.includes("document.createElement('a')")&&!hybrid.includes('.click()'),'R117 connection UI must not use a synthetic async download click');
 must(launcher.includes('https://omegav6.jeffdeweyeljefe.workers.dev')&&!launcher.includes('omega-sovereign-convergence.foundasound.chatgpt.site'),'active R117 launcher must target only canonical OMEGAv6');
-must(worker.includes('nativeExecutionClaimed:false')||worker.includes('nativeExecutionClaimed: false'),'fresh pairing must never claim PC ONLINE before a real host heartbeat');
+must(worker116.includes('nativeExecutionClaimed:false')||worker116.includes('nativeExecutionClaimed: false'),'fresh pairing must never claim PC ONLINE before a real host heartbeat');
 
-console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · current Worker lineage · fresh Hybrid bootstrap · explicit browser-safe connector download');
+console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · proven R116 runtime spine + R117 connector repair · explicit browser-safe connector download');
