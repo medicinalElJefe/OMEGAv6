@@ -25,7 +25,8 @@ const LOADERS={
  ExtremeTraversalUnionR60:()=>import('./ExtremeTraversalUnionR60'),
  OmegaSpecialistSuite:()=>import('./OmegaSpecialistSuite'),
  PluginRegistryR45:()=>import('./PluginRegistryR45'),
- SourceBackedModesPanelR21:()=>import('./SourceBackedModesPanelR21')
+ SourceBackedModesPanelR21:()=>import('./SourceBackedModesPanelR21'),
+ ModeCompletionWorkspaceR140:()=>import('./ModeCompletionWorkspaceR140')
 } as const;
 
 export const HybridMissionControlR109=lazy(LOADERS.HybridLinkR117);
@@ -50,7 +51,9 @@ export const IntelligenceFabricR109=lazy(LOADERS.IntelligenceFabricPanel);
 export const ExtremeTraversalR109=lazy(LOADERS.ExtremeTraversalUnionR60);
 export const SpecialistSuiteR109=lazy(LOADERS.OmegaSpecialistSuite);
 export const PluginRegistryR109=lazy(LOADERS.PluginRegistryR45);
-export const SourceBackedModesR109=lazy(LOADERS.SourceBackedModesPanelR21);
+// R140 preserves the R109 export name so the workstation router stays single-authority,
+// while the Modes route now opens the completion workspace which embeds the R21 instrument.
+export const SourceBackedModesR109=lazy(LOADERS.ModeCompletionWorkspaceR140);
 
 export const RETAINED_DEEP_SPECIALIST_LOADERS_R109={
  OmegaVisualInstrument:()=>import('./OmegaVisualInstrument'),
@@ -70,7 +73,7 @@ const ROUTE_LOADERS:Record<string,readonly (()=>Promise<any>)[]>={
  'Reality Lab':[LOADERS.AppliedRealityLab],'Atlas Calculator':[LOADERS.AtlasCalculatorPanel],Infinity:[LOADERS.OmegaInfinityPanel],'Scale Compiler':[LOADERS.RecursiveScalePanel],
  'Build Out':[LOADERS.WovenBuildOutPanel],Development:[LOADERS.WovenBuildOutPanel],
  'SAI Lab':[LOADERS.SAISovereignControl,LOADERS.IntelligenceFabricPanel],'Kernel Intelligence':[LOADERS.SAISovereignControl],
- 'Extreme Traversal':[LOADERS.ExtremeTraversalUnionR60],Modes:[LOADERS.SourceBackedModesPanelR21],Plugins:[LOADERS.PluginRegistryR45]
+ 'Extreme Traversal':[LOADERS.ExtremeTraversalUnionR60],Modes:[LOADERS.ModeCompletionWorkspaceR140],Plugins:[LOADERS.PluginRegistryR45]
 };
 const SUITE_ROUTES=new Set(['Field','Data Motion','Convergence','Projects','Render Queue','Assets','Evidence & Proof','Memory','Canon Evolution','Governance','Consolidation','Instructions','Settings','System']);
 
