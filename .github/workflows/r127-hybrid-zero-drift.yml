@@ -23,7 +23,9 @@ jobs:
           node-version: 22
       - run: npm install
       - name: R127 Hybrid zero-drift invariants
-        run: node tests/r127-hybrid-zero-drift-invariants.mjs
+        run: |
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r127-hybrid-contract-json-invariants.mjs
       - name: Preserve R120/R121/R117 Hybrid invariants
         run: |
           node tests/r94-hybrid-navigation-invariants.mjs
