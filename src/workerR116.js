@@ -7,12 +7,13 @@ import {OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator} from './
 import {OmegaSwarmAutonomicCoordinator} from './swarm/swarmAutonomicR125.js';
 import {manifestR130,operationalR130,R130_REVISION} from './system/operationalControlPlaneR130.js';
 import {closeHybridReturnR141,readHybridClosureR141,replayHybridClosureR141,manifestR141,R141_REVISION} from './hybridProofClosureR141.js';
+import {createRunR146,listRunsR146,manifestR146,readRunR146,replayRunR146,transitionRunR146,R146_REVISION} from './execution/durableOperationExecutionR146.js';
 
 export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator,OmegaSwarmAutonomicCoordinator};
 
 const REVISION='R116';
 const CONNECTOR_REVISION='R117';
-const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION};
+const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION};
 const json=(data,status=200,headers={})=>new Response(JSON.stringify(data,null,2),{status,headers:{...JSON_HEADERS,...headers}});
 const text=v=>String(v??'').trim();
 const safeId=(v,fallback='')=>{const s=text(v).slice(0,160);return /^[A-Za-z0-9._:-]+$/.test(s)?s:fallback};
@@ -35,15 +36,15 @@ function corsHeadersR116(request){
   'vary':'Origin',
   'access-control-allow-methods':'GET,POST,PUT,DELETE,OPTIONS',
   'access-control-allow-headers':'content-type,authorization,x-omega-federation-token,x-vercel-protection-bypass,x-omega-bridge-id,x-omega-bridge-secret,x-omega-session-id,cache-control',
-  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-proof-closure,x-omega-control-plane,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
+  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-proof-closure,x-omega-durable-execution,x-omega-control-plane,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
   'access-control-max-age':'600'
  };
 }
 function withCorsR116(response,request){
- const headers=new Headers(response.headers);headers.set('x-omega-runtime-successor',REVISION);headers.set('x-omega-connector-revision',CONNECTOR_REVISION);headers.set('x-omega-proof-closure',R141_REVISION);const cors=corsHeadersR116(request);if(cors)for(const[k,v]of Object.entries(cors))headers.set(k,v);
+ const headers=new Headers(response.headers);headers.set('x-omega-runtime-successor',REVISION);headers.set('x-omega-connector-revision',CONNECTOR_REVISION);headers.set('x-omega-proof-closure',R141_REVISION);headers.set('x-omega-durable-execution',R146_REVISION);const cors=corsHeadersR116(request);if(cors)for(const[k,v]of Object.entries(cors))headers.set(k,v);
  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }
-function preflightR116(request){const headers=corsHeadersR116(request);return headers?new Response(null,{status:204,headers:{...headers,'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION}}):new Response(null,{status:403,headers:{'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION}})}
+function preflightR116(request){const headers=corsHeadersR116(request);return headers?new Response(null,{status:204,headers:{...headers,'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION}}):new Response(null,{status:403,headers:{'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION}})}
 async function readJsonResponse(response){return response.clone().json().catch(()=>null)}
 async function sha256TextR141(source){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source));return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function inheritedStatusR116(request,env){
@@ -62,7 +63,7 @@ function routingStatusR116(status,machine){
 }
 function enrichStatusR116(status,machine){
  const nodes=status?.nodes||{},services=machine?.nodes||{};
- return{...status,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,machineServices:{schema:machine?.schema||'OMEGA_FEDERATION_MACHINE_STATUS_R115',canonicalAuthority:'omega-v6',genesis:services.genesis||null,optical:services.optical||null,truthBoundary:'Machine service readiness is execution transport truth for PROPOSE/SCREEN. Human surface reachability remains separately visible and does not become CanonState authority.'},executionReadiness:{genesis:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN',optical:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN',sovereign:nodes.sovereign?.state||'UNKNOWN',omegaV6:nodes.omegaV6?.state||'UNKNOWN'}};
+ return{...status,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,machineServices:{schema:machine?.schema||'OMEGA_FEDERATION_MACHINE_STATUS_R115',canonicalAuthority:'omega-v6',genesis:services.genesis||null,optical:services.optical||null,truthBoundary:'Machine service readiness is execution transport truth for PROPOSE/SCREEN. Human surface reachability remains separately visible and does not become CanonState authority.'},executionReadiness:{genesis:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN',optical:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN',sovereign:nodes.sovereign?.state||'UNKNOWN',omegaV6:nodes.omegaV6?.state||'UNKNOWN'}};
 }
 async function convergenceR116(request,env){
  const [{body:status},machine,hybridResponse]=await Promise.all([
@@ -72,13 +73,13 @@ async function convergenceR116(request,env){
  ]),hybrid=await readJsonResponse(hybridResponse),nodes=status?.nodes||{},services=machine?.nodes||{};
  const currentHeartbeat=Boolean(hybrid?.nativeExecutionClaimed===true&&Array.isArray(hybrid?.devices)&&hybrid.devices.some(d=>d?.online&&!d?.revoked));
  return{
-  ok:Boolean(status&&machine),schema:'OMEGA_SYSTEM_CONVERGENCE_R116',runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,canonicalAuthority:'omega-v6',
+  ok:Boolean(status&&machine),schema:'OMEGA_SYSTEM_CONVERGENCE_R116',runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,canonicalAuthority:'omega-v6',
   canonical:{state:nodes.omegaV6?.state||'UNKNOWN'},
   proposal:{surfaceState:nodes.genesis?.state||'UNKNOWN',machineState:services.genesis?.state||'UNKNOWN',effectiveState:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN'},
   optical:{surfaceState:nodes.optical?.state||'UNKNOWN',machineState:services.optical?.state||'UNKNOWN',effectiveScreenState:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN'},
   sovereign:{state:nodes.sovereign?.state||'UNKNOWN',rcwaState:nodes.sovereign?.rcwaState||status?.runtime?.rcwa?.state||'UNKNOWN',currentAuthenticatedHeartbeat:currentHeartbeat,nativeExecutionClaimed:hybrid?.nativeExecutionClaimed===true},
   connectorPolicy:{canonicalOrigin:'https://omegav6.jeffdeweyeljefe.workers.dev',currentRevision:CONNECTOR_REVISION,runtimeRevision:REVISION,proofClosureRevision:R141_REVISION,retiredOrigin:'omega-sovereign-convergence.foundasound.chatgpt.site',retiredLaunchersMustNotBeUsed:true,reason:'The retired preview host can return 401 and is not the canonical Hybrid authority.'},
-  truthBoundary:'Surface availability, R139 unified capability routing, R140 browser operation-world projection, machine-service availability, browser pairing, current host heartbeat, returned execution proof, deterministic replay, solver freshness, and canonical admission are distinct states. R116/R117/R141 never promotes one into another.'
+  truthBoundary:'Surface availability, R139 unified capability routing, R140 browser operation-world projection, machine-service availability, browser pairing, current host heartbeat, R146 durable operation history, returned execution proof, deterministic replay, solver freshness, and canonical admission are distinct states. R116/R117/R141/R146 never promotes one into another.'
  };
 }
 
@@ -129,6 +130,10 @@ async function hybridRuntimeProxyR141(request,env,internalPath){
  const id=hybridRuntimeIdR141(request);if(!id)return json({ok:false,code:'HYBRID_RUNTIME_ID_REQUIRED',reply:'Pair this browser to a Hybrid runtime before reading execution proof closure.'},400);if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE'},503);
  const stub=env.OMEGA_RUNTIME.get(env.OMEGA_RUNTIME.idFromName(id)),headers=new Headers(request.headers),init={method:request.method,headers};if(request.method!=='GET'&&request.method!=='HEAD')init.body=await request.clone().text();return stub.fetch(new Request('https://omega-runtime.internal'+internalPath,init));
 }
+async function executionRuntimeProxyR146(request,env,internalPath){
+ const id=hybridRuntimeIdR141(request);if(!id)return json({ok:false,code:'R146_RUNTIME_ID_REQUIRED',reply:'A runtime session or paired bridge is required for durable execution history.'},400);if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'R146_RUNTIME_BINDING_UNAVAILABLE'},503);
+ const stub=env.OMEGA_RUNTIME.get(env.OMEGA_RUNTIME.idFromName(id)),headers=new Headers(request.headers),init={method:request.method,headers};if(request.method!=='GET'&&request.method!=='HEAD')init.body=await request.clone().text();return stub.fetch(new Request('https://omega-runtime.internal'+internalPath,init));
+}
 
 async function probeFetchR130(request,env){
  const url=new URL(request.url),path=url.pathname;
@@ -141,7 +146,7 @@ async function probeFetchR130(request,env){
 }
 
 async function fetchR116(request,env){
- const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
+ const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
  if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
  if(path==='/api/hybrid/agent-download'&&request.method==='GET'&&url.searchParams.get('r117')==='1')return withCorsR116(await serveProofAgentR141(request,env),request);
@@ -152,15 +157,19 @@ async function fetchR116(request,env){
  if(path==='/api/hybrid/proof-closure/r141'&&request.method==='GET')return withCorsR116(json(manifestR141()),request);
  const closureRoute=path.match(/^\/api\/hybrid\/jobs\/([A-Za-z0-9._:-]+)\/(closure|replay)$/);
  if(closureRoute&&((closureRoute[2]==='closure'&&request.method==='GET')||(closureRoute[2]==='replay'&&request.method==='POST')))return withCorsR116(await hybridRuntimeProxyR141(request,env,`/jobs/${closureRoute[1]}/${closureRoute[2]}`),request);
+ if(path==='/api/execution/r146/manifest'&&request.method==='GET')return withCorsR116(json(manifestR146()),request);
+ if(path==='/api/execution/runs'&&(request.method==='GET'||request.method==='POST'))return withCorsR116(await executionRuntimeProxyR146(request,env,'/execution/runs'),request);
+ const executionRoute=path.match(/^\/api\/execution\/runs\/([A-Za-z0-9._:-]+)(?:\/(transition|replay))?$/);
+ if(executionRoute){const id=executionRoute[1],action=executionRoute[2]||'';if(!action&&request.method==='GET')return withCorsR116(await executionRuntimeProxyR146(request,env,`/execution/runs/${id}`),request);if(action==='transition'&&request.method==='POST')return withCorsR116(await executionRuntimeProxyR146(request,env,`/execution/runs/${id}/transition`),request);if(action==='replay'&&request.method==='POST')return withCorsR116(await executionRuntimeProxyR146(request,env,`/execution/runs/${id}/replay`),request)}
  if(path==='/api/federation/run/status'&&request.method==='GET'){
   const [{response,body},machine]=await Promise.all([inheritedStatusR116(request,env),machineStatusR116(request,env)]);if(!body||typeof body!=='object')return withCorsR116(response,request);return withCorsR116(json(enrichStatusR116(body,machine),response.status),request);
  }
  if(path==='/api/federation/route-intent'&&request.method==='POST'){
   const body=await request.json().catch(()=>({})),intent=text(body?.intent||body?.text).slice(0,4000),[{body:status},machine]=await Promise.all([inheritedStatusR116(request,env),machineStatusR116(request,env)]),plan=planIntentR103(intent,routingStatusR116(status||{},machine));
-  return withCorsR116(json({...plan,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,machineAwareRouting:true,machineServices:{genesis:machine?.nodes?.genesis?.state||'UNKNOWN',optical:machine?.nodes?.optical?.state||'UNKNOWN'},truthBoundary:`${plan.truthBoundary} R116 treats live R115 machine adapters as execution readiness for their existing PROPOSE/SCREEN roles while preserving protected human-surface state separately.`},plan.ok?200:400),request);
+  return withCorsR116(json({...plan,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,machineAwareRouting:true,machineServices:{genesis:machine?.nodes?.genesis?.state||'UNKNOWN',optical:machine?.nodes?.optical?.state||'UNKNOWN'},truthBoundary:`${plan.truthBoundary} R116 treats live R115 machine adapters as execution readiness for their existing PROPOSE/SCREEN roles while preserving protected human-surface state separately.`},plan.ok?200:400),request);
  }
  if(path==='/api/system/convergence'&&request.method==='GET')return withCorsR116(json(await convergenceR116(request,env)),request);
- if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141()},200,{'x-omega-control-plane':R130_REVISION}),request);
+ if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141(),durableExecution:manifestR146()},200,{'x-omega-control-plane':R130_REVISION}),request);
  if(path==='/api/system/operational'&&request.method==='GET')return withCorsR116(json(await operationalR130(request,env,probeFetchR130),200,{'x-omega-control-plane':R130_REVISION}),request);
  const response=await r115.fetch(request,env);return withCorsR116(response,request);
 }
@@ -174,6 +183,11 @@ export class OmegaRuntime extends OmegaRuntimeR115 {
   }
   const closureRoute=path.match(/^\/jobs\/([A-Za-z0-9._:-]+)\/(closure|replay)$/);
   if(closureRoute){if(!await this.authorized(request))return json({ok:false,code:'PAIR_AUTH_FAILED'},401);const id=closureRoute[1];if(closureRoute[2]==='closure'&&request.method==='GET'){const closure=await readHybridClosureR141(this,id);return closure?json({ok:true,closure}):json({ok:false,code:'R141_CLOSURE_NOT_FOUND'},404)}if(closureRoute[2]==='replay'&&request.method==='POST'){const receipt=await replayHybridClosureR141(this,id);return receipt?json({ok:receipt.ok,receipt},receipt.ok?200:409):json({ok:false,code:'R141_CLOSURE_NOT_FOUND'},404)}}
+  if(path.startsWith('/execution/')){if(!await this.authorized(request))return json({ok:false,code:'PAIR_AUTH_FAILED',reply:'Durable execution history requires the authenticated OMEGA runtime bridge.'},401);
+   if(path==='/execution/runs'&&request.method==='POST'){const body=await request.json().catch(()=>({})),result=await createRunR146(this,body);return json(result,result.status||200)}
+   if(path==='/execution/runs'&&request.method==='GET'){const runs=await listRunsR146(this);return json({ok:true,schema:'OMEGA_EXECUTION_RUN_LIST_R146',runs,canonicalMutation:false,canonicalAdmissionAuthority:'R125'})}
+   const executionRoute=path.match(/^\/execution\/runs\/([A-Za-z0-9._:-]+)(?:\/(transition|replay))?$/);if(executionRoute){const id=executionRoute[1],action=executionRoute[2]||'';if(!action&&request.method==='GET'){const run=await readRunR146(this,id);return run?json({ok:true,run}):json({ok:false,code:'R146_RUN_NOT_FOUND'},404)}if(action==='transition'&&request.method==='POST'){const body=await request.json().catch(()=>({})),result=await transitionRunR146(this,id,body);return json(result,result.status||200)}if(action==='replay'&&request.method==='POST'){const receipt=await replayRunR146(this,id);return receipt?json({ok:receipt.ok,receipt},receipt.ok?200:409):json({ok:false,code:'R146_RUN_NOT_FOUND'},404)}}
+  }
   return super.fetch(request);
  }
 }
