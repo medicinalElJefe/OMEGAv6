@@ -27,7 +27,7 @@ export default function HybridProofClosureR141(){
   <header><div><span>R142 EXECUTION TRUTH · R141 PC WORKLOAD → PROOF → SCAR → REPLAY → R140 WORLD FRAME</span><h3>Execution proof closure</h3><p>R141 remains the exact-payload Hybrid proof authority. R142 translates that durable evidence into the shared execution lifecycle without weakening it: RETURNED is not VERIFIED, and only digest + semantic proof can produce VERIFIED.</p></div><button onClick={()=>void refresh()} disabled={busy==='refresh'}><RefreshCw className={busy==='refresh'?'spin':''}/>Refresh</button></header>
   <div className='r141-proof-summary'>
    <div className={online?'proved':'held'}>{online?<CheckCircle2/>:<ShieldAlert/>}<span><small>CURRENT PC HEARTBEAT</small><b>{online?'PROVED NOW':'NOT CURRENTLY PROVED'}</b><em>{status?.executionPlane||'execution plane unknown'}</em></span></div>
-   <div><ShieldCheck/><span><small>EXECUTION LIFECYCLE</small><b>{executionReceipt?.state||'NO RETURN SELECTED'}</b><em>R142 truth state · R141 remains proof source</em></span></div>
+   <div><ShieldCheck/><span><small>EXECUTION LIFECYCLE</small><b>{executionReceipt?.state||'NO RETURN SELECTED'}</b><em>HOST EVIDENCE · NOT CANONSTATE · R142 truth state · R141 remains proof source</em></span></div>
    <div><Waypoints/><span><small>WORLD PROJECTION</small><b>R140 OPERATION BRIDGE PRESERVED</b><em>Selected closure → R86 receipt → R140/R136/R134 projection</em></span></div>
   </div>
   {error&&<div className='r141-proof-error'><ShieldAlert/>{error}</div>}
