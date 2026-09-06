@@ -4,12 +4,14 @@ import {swarmApiR121,withSwarmCorsR121} from './swarm/swarmApiR121.js';
 import {OmegaSwarmCell} from './swarm/swarmCellR121.js';
 import {OmegaSwarmCoordinator} from './swarm/swarmCoordinatorR121.js';
 import {OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator} from './swarm/swarmOrganismR123.js';
+import {OmegaWorldState,worldApiR125,withWorldCorsR125} from './world/persistentWorldR125.js';
 
-export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator};
+export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator,OmegaWorldState};
 
 const REVISION='R116';
 const CONNECTOR_REVISION='R117';
-const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION};
+const WORLD_REVISION='R125';
+const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-world-runtime':WORLD_REVISION};
 const json=(data,status=200,headers={})=>new Response(JSON.stringify(data,null,2),{status,headers:{...JSON_HEADERS,...headers}});
 const text=v=>String(v??'').trim();
 const safeId=(v,fallback='')=>{const s=text(v).slice(0,160);return /^[A-Za-z0-9._:-]+$/.test(s)?s:fallback};
@@ -32,15 +34,15 @@ function corsHeadersR116(request){
   'vary':'Origin',
   'access-control-allow-methods':'GET,POST,PUT,DELETE,OPTIONS',
   'access-control-allow-headers':'content-type,authorization,x-omega-federation-token,x-vercel-protection-bypass,x-omega-bridge-id,x-omega-bridge-secret,x-omega-session-id,cache-control',
-  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
+  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-world-runtime,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
   'access-control-max-age':'600'
  };
 }
 function withCorsR116(response,request){
- const headers=new Headers(response.headers);headers.set('x-omega-runtime-successor',REVISION);headers.set('x-omega-connector-revision',CONNECTOR_REVISION);const cors=corsHeadersR116(request);if(cors)for(const[k,v]of Object.entries(cors))headers.set(k,v);
+ const headers=new Headers(response.headers);headers.set('x-omega-runtime-successor',REVISION);headers.set('x-omega-connector-revision',CONNECTOR_REVISION);headers.set('x-omega-world-runtime',WORLD_REVISION);const cors=corsHeadersR116(request);if(cors)for(const[k,v]of Object.entries(cors))headers.set(k,v);
  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }
-function preflightR116(request){const headers=corsHeadersR116(request);return headers?new Response(null,{status:204,headers:{...headers,'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION}}):new Response(null,{status:403,headers:{'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION}})}
+function preflightR116(request){const headers=corsHeadersR116(request);return headers?new Response(null,{status:204,headers:{...headers,'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-world-runtime':WORLD_REVISION}}):new Response(null,{status:403,headers:{'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-world-runtime':WORLD_REVISION}})}
 async function readJsonResponse(response){return response.clone().json().catch(()=>null)}
 async function inheritedStatusR116(request,env){
  const url=new URL('/api/federation/run/status',request.url),response=await r115.fetch(new Request(url,{method:'GET',headers:request.headers}),env),body=await readJsonResponse(response);return{response,body};
@@ -58,7 +60,7 @@ function routingStatusR116(status,machine){
 }
 function enrichStatusR116(status,machine){
  const nodes=status?.nodes||{},services=machine?.nodes||{};
- return{...status,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,machineServices:{schema:machine?.schema||'OMEGA_FEDERATION_MACHINE_STATUS_R115',canonicalAuthority:'omega-v6',genesis:services.genesis||null,optical:services.optical||null,truthBoundary:'Machine service readiness is execution transport truth for PROPOSE/SCREEN. Human surface reachability remains separately visible and does not become CanonState authority.'},executionReadiness:{genesis:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN',optical:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN',sovereign:nodes.sovereign?.state||'UNKNOWN',omegaV6:nodes.omegaV6?.state||'UNKNOWN'}};
+ return{...status,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,worldRevision:WORLD_REVISION,machineServices:{schema:machine?.schema||'OMEGA_FEDERATION_MACHINE_STATUS_R115',canonicalAuthority:'omega-v6',genesis:services.genesis||null,optical:services.optical||null,truthBoundary:'Machine service readiness is execution transport truth for PROPOSE/SCREEN. Human surface reachability remains separately visible and does not become CanonState authority.'},executionReadiness:{genesis:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN',optical:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN',sovereign:nodes.sovereign?.state||'UNKNOWN',omegaV6:nodes.omegaV6?.state||'UNKNOWN'}};
 }
 async function convergenceR116(request,env){
  const [{body:status},machine,hybridResponse]=await Promise.all([
@@ -68,13 +70,13 @@ async function convergenceR116(request,env){
  ]),hybrid=await readJsonResponse(hybridResponse),nodes=status?.nodes||{},services=machine?.nodes||{};
  const currentHeartbeat=Boolean(hybrid?.nativeExecutionClaimed===true&&Array.isArray(hybrid?.devices)&&hybrid.devices.some(d=>d?.online&&!d?.revoked));
  return{
-  ok:Boolean(status&&machine),schema:'OMEGA_SYSTEM_CONVERGENCE_R116',runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,canonicalAuthority:'omega-v6',
+  ok:Boolean(status&&machine),schema:'OMEGA_SYSTEM_CONVERGENCE_R116',runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,worldRevision:WORLD_REVISION,canonicalAuthority:'omega-v6',
   canonical:{state:nodes.omegaV6?.state||'UNKNOWN'},
   proposal:{surfaceState:nodes.genesis?.state||'UNKNOWN',machineState:services.genesis?.state||'UNKNOWN',effectiveState:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN'},
   optical:{surfaceState:nodes.optical?.state||'UNKNOWN',machineState:services.optical?.state||'UNKNOWN',effectiveScreenState:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN'},
   sovereign:{state:nodes.sovereign?.state||'UNKNOWN',rcwaState:nodes.sovereign?.rcwaState||status?.runtime?.rcwa?.state||'UNKNOWN',currentAuthenticatedHeartbeat:currentHeartbeat,nativeExecutionClaimed:hybrid?.nativeExecutionClaimed===true},
   connectorPolicy:{canonicalOrigin:'https://omegav6.jeffdeweyeljefe.workers.dev',currentRevision:CONNECTOR_REVISION,runtimeRevision:REVISION,retiredOrigin:'omega-sovereign-convergence.foundasound.chatgpt.site',retiredLaunchersMustNotBeUsed:true,reason:'The retired preview host can return 401 and is not the canonical Hybrid authority.'},
-  truthBoundary:'Surface availability, machine-service availability, browser pairing, current host heartbeat, solver freshness, and canonical admission are distinct states. R116 with the R117 connector repair never promotes one into another.'
+  truthBoundary:'Surface availability, machine-service availability, browser pairing, current host heartbeat, solver freshness, persistent-world lineage and canonical admission are distinct states. R125 never promotes one into another.'
  };
 }
 
@@ -114,7 +116,8 @@ async function durablePairR117(request,env){
 }
 
 async function fetchR116(request,env){
- const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path==='/api/system/convergence';
+ const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/world/')||path==='/api/system/convergence';
+ if(path.startsWith('/api/world/'))return withWorldCorsR125(await worldApiR125(request,env,(r,e)=>r115.fetch(r,e)),request);
  if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
  if(path==='/api/hybrid/bootstrap'&&request.method==='POST')return withCorsR116(await durablePairR117(request,env),request);
@@ -123,7 +126,7 @@ async function fetchR116(request,env){
  }
  if(path==='/api/federation/route-intent'&&request.method==='POST'){
   const body=await request.json().catch(()=>({})),intent=text(body?.intent||body?.text).slice(0,4000),[{body:status},machine]=await Promise.all([inheritedStatusR116(request,env),machineStatusR116(request,env)]),plan=planIntentR103(intent,routingStatusR116(status||{},machine));
-  return withCorsR116(json({...plan,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,machineAwareRouting:true,machineServices:{genesis:machine?.nodes?.genesis?.state||'UNKNOWN',optical:machine?.nodes?.optical?.state||'UNKNOWN'},truthBoundary:`${plan.truthBoundary} R116 treats live R115 machine adapters as execution readiness for their existing PROPOSE/SCREEN roles while preserving protected human-surface state separately.`},plan.ok?200:400),request);
+  return withCorsR116(json({...plan,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,worldRevision:WORLD_REVISION,machineAwareRouting:true,machineServices:{genesis:machine?.nodes?.genesis?.state||'UNKNOWN',optical:machine?.nodes?.optical?.state||'UNKNOWN'},truthBoundary:`${plan.truthBoundary} R125 treats live R115 machine adapters as execution readiness for their existing PROPOSE/SCREEN roles while preserving protected human-surface state and persistent-world admission separately.`},plan.ok?200:400),request);
  }
  if(path==='/api/system/convergence'&&request.method==='GET')return withCorsR116(json(await convergenceR116(request,env)),request);
  const response=await r115.fetch(request,env);return corsPath?withCorsR116(response,request):withCorsR116(response,request);

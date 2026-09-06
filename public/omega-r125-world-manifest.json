@@ -1,0 +1,48 @@
+{
+  "schema": "omega.persistent-world.r125.v1",
+  "runtime": "R125",
+  "canonicalAuthority": "OMEGAv6",
+  "worldLaw": "ONE CANONICAL WORLD / MANY LAWFUL PROJECTIONS / PERSISTENT CAUSAL PATH",
+  "addressTopology": {
+    "root": 12,
+    "bands": 144,
+    "cells": 1728,
+    "states": 20736,
+    "meaning": "recursive address and execution resolution, not literal physical dimensions"
+  },
+  "worldPacket": {
+    "fields": ["geometry", "material", "radiance", "velocity", "metrics", "evidenceRefs", "sourceRefs", "proofRefs", "scarHead", "authoritativeTime"],
+    "metrics": ["continuity", "plasticity", "contradiction", "burden", "evidence", "uncertainty", "scar"],
+    "hostTyped": true
+  },
+  "continuity": {
+    "law": ["partition", "transform/exchange", "invariant carry", "scar carry", "recontextualize", "proof-gated admit"],
+    "eventLedger": "SHA-256 previous-hash chain",
+    "observerProjectionMutatesCanon": false,
+    "returnedEvidenceSelfAdmits": false,
+    "swarmResultsSelfAdmit": false
+  },
+  "organism": {
+    "hierarchy": "1 seed -> 12 organs -> 144 branches -> 1,728 cells -> 20,736 lanes",
+    "swarmReturnTarget": "persistent world proposal/observation ledger",
+    "canonicalMutation": false
+  },
+  "sourceBackedEarth": {
+    "route": "POST /api/world/observe/earth",
+    "inherits": "OMEGA_EARTH_EVIDENCE_V1",
+    "expectedSources": ["USGS", "NASA EONET", "NOAA SWPC", "Open-Meteo"],
+    "authority": "SOURCE_RETURNED_NOT_ADMITTED"
+  },
+  "publicRoutes": [
+    "GET /api/world/manifest",
+    "GET /api/world/snapshot",
+    "GET /api/world/events",
+    "GET /api/world/project",
+    "GET /api/world/organism",
+    "POST /api/world/propose",
+    "POST /api/world/observe/earth",
+    "POST /api/world/sync/swarm"
+  ],
+  "forbiddenPublicRoute": "POST /api/world/admit",
+  "truthBoundary": "Persistent state and provenance do not convert model output, returned evidence, display geometry, atlas addresses or solver candidates into validated physical truth. Admission remains a separate proof-gated authority operation."
+}
