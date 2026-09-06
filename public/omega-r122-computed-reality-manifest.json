@@ -1,0 +1,91 @@
+{
+  "schema": "omega.computed-reality.r122.v1",
+  "release": "R122",
+  "title": "OMEGA Computed Reality Convergence",
+  "canonicalAuthority": "https://omegav6.jeffdeweyeljefe.workers.dev/",
+  "addressSpace": {
+    "cardinality": 20736,
+    "basis": "12 domain × 12 phase × 12 regulation × 12 lens",
+    "claimBoundary": "Address topology and source-backed computation membrane; not a literal claim of 20,736 physical spacetime dimensions."
+  },
+  "continuityLaw": {
+    "chain": ["parent", "expression", "skin", "constraint", "integration", "compression", "state", "inheritance", "burden", "new-parent"],
+    "scar": "Sigma(t+1)=rho_H*Sigma(t)+I_H(t)",
+    "projectionRule": "same projected value does not imply same internal state",
+    "temporalRule": ["observe", "time-bind", "status", "resolve", "validate", "forecast", "admit-or-quarantine", "update-scar", "expand-frontier", "schedule-next"]
+  },
+  "computedRealityPipeline": [
+    "satellite-packet-ingest",
+    "authoritative-time-binding",
+    "radiometric-and-geometric-calibration",
+    "orbit-and-attitude-propagation",
+    "world-ray-construction",
+    "atmospheric-correction",
+    "multiview-association",
+    "depth-and-topology",
+    "motion-and-trajectory-field",
+    "lemma-packet-compile",
+    "omega-admission-gate",
+    "scar-update",
+    "persistent-world-fusion",
+    "structured-residual-frontier",
+    "observer-relative-projection",
+    "lod-and-resource-governance",
+    "density-sdf-meshlet-splat-compile",
+    "physically-based-shading",
+    "temporal-reprojection",
+    "frame-proof-ledger",
+    "low-latency-video-encode"
+  ],
+  "hardInvariants": [
+    "single-authoritative-runtime",
+    "no-decorative-geometry",
+    "time-before-meaning",
+    "units-and-reference-frames-mandatory",
+    "completion-is-not-admission",
+    "scar-survives-recovery",
+    "lens-weights-are-host-calibrated",
+    "deterministic-replay",
+    "no-hidden-generated-scene-substitution",
+    "no-untyped-atlas-claim",
+    "observer-changes-projection-not-canonical-existence",
+    "schema-expansion-is-proof-gated"
+  ],
+  "surfaces": [
+    {
+      "id": "omega-v6",
+      "role": "canonical admit/prove/replay authority",
+      "url": "https://omegav6.jeffdeweyeljefe.workers.dev/",
+      "authority": "CANONICAL"
+    },
+    {
+      "id": "omega-genesis",
+      "role": "proposal/exploration surface",
+      "url": "https://omega-genesis-v1.jeffdeweyeljefe.workers.dev/",
+      "authority": "FEDERATED_EXTERNAL"
+    },
+    {
+      "id": "omega-sovereign",
+      "role": "human-facing sovereign convergence surface; native machine execution remains heartbeat/proof gated",
+      "url": "https://omega-sovereign-convergence.foundasound.chatgpt.site/",
+      "authority": "FEDERATED_EXTERNAL"
+    },
+    {
+      "id": "omega-optical",
+      "role": "living-light etching / optical design surface",
+      "url": "https://omega-living-light-etching-private-woven2.vercel.app/",
+      "authority": "FEDERATED_EXTERNAL"
+    }
+  ],
+  "truthBoundary": {
+    "computedPhotorealSatelliteRendererOperational": false,
+    "reason": "The architecture, atlas, proof spine, Earth instrument, Hybrid path, and computation specifications exist, but the full numerical satellite-to-world-to-photoreal first-person renderer must still pass end-to-end executable and benchmark proof gates before it may be claimed operational.",
+    "prohibitedClaims": [
+      "generated concept art is a computed frame",
+      "browser visualization equals full-wave or physical validation",
+      "PC online without authenticated heartbeat",
+      "external surface live without direct verification",
+      "lens weighting is universally superior without held-out benchmarks"
+    ]
+  }
+}

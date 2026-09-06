@@ -1,0 +1,24 @@
+name: OMEGA R122 Computed Reality Convergence
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r122-computed-reality-convergence]
+permissions:
+  contents: read
+jobs:
+  r122-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: R122 computed reality invariants
+        run: node tests/r122-computed-reality-invariants.mjs
+      - name: Existing R121 spherical Earth connector invariants
+        run: node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: TypeScript/Vite production build
+        run: npm run build
