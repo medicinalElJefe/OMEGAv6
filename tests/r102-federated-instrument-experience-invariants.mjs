@@ -7,6 +7,7 @@ const worker=read('src/workerR102.js');
 const worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'';
 const worker114=fs.existsSync('src/workerR114.js')?read('src/workerR114.js'):'';
 const worker115=fs.existsSync('src/workerR115.js')?read('src/workerR115.js'):'';
+const worker116=fs.existsSync('src/workerR116.js')?read('src/workerR116.js'):'';
 const worker101=read('src/workerR101.js');
 const federation=read('src/FederationRunR97.tsx');
 const experience=read('src/federation/federationExperienceR102.ts');
@@ -25,7 +26,8 @@ const r102Direct=wrangler.includes('"main": "src/workerR102.js"');
 const r111PreservesR102=wrangler.includes('"main": "src/workerR111.js"')&&worker111.includes("from './workerR102.js'");
 const r114PreservesR102=wrangler.includes('"main": "src/workerR114.js"')&&worker114.includes("from './workerR111.js'")&&worker111.includes("from './workerR102.js'");
 const r115PreservesR102=wrangler.includes('"main": "src/workerR115.js"')&&worker115.includes("from './workerR114.js'")&&worker114.includes("from './workerR111.js'")&&worker111.includes("from './workerR102.js'");
-must(r102Direct||r111PreservesR102||r114PreservesR102||r115PreservesR102,'Cloudflare entry must promote R102 directly or through a proven additive R111/R114/R115 successor');
+const r116PreservesR102=wrangler.includes('"main": "src/workerR116.js"')&&worker116.includes("from './workerR115.js'")&&worker115.includes("from './workerR114.js'")&&worker114.includes("from './workerR111.js'")&&worker111.includes("from './workerR102.js'");
+must(r102Direct||r111PreservesR102||r114PreservesR102||r115PreservesR102||r116PreservesR102,'Cloudflare entry must promote R102 directly or through a proven additive R111/R114/R115/R116 successor');
 must(worker.includes("import r101,{OmegaRuntime as OmegaRuntimeR101} from './workerR101.js'"),'R102 must extend R101 rather than replace Hybrid/weave repairs');
 must(worker.includes('export class OmegaRuntime extends OmegaRuntimeR101'),'Durable Object class lineage must remain compatible');
 must(worker101.includes("import r34,{OmegaRuntime as OmegaRuntimeR34} from './workerR34.js'"),'R101 must still preserve R34 federation/RCWA behavior');
@@ -38,7 +40,7 @@ must(experience.includes("FEDERATION_NODE_ORDER_R102:FederationNodeKey[]=['genes
 for(const verb of ['PROPOSE','SCREEN','SOLVE','ADMIT'])must(experience.includes(`verb:'${verb}'`),'missing federation verb '+verb);
 must(experience.includes('NODE_LOCAL')||experience.includes('node-local'),'Genesis local/global authority boundary missing');
 must(experience.includes('global federation CanonState mutation authority'),'OMEGAv6 global authority boundary missing');
-must(federation.includes('four specialized runtimes')&&federation.includes('Genesis proposes, Optical screens, Sovereign computes, and OMEGAv6 admits'),'Federation UI must explain the role system in user terms');
+must(federation.includes('four authority roles')&&federation.includes('PROPOSE')&&federation.includes('SCREEN')&&federation.includes('Sovereign')&&federation.includes('ADMIT'),'Federation UI must explain the four-role system in user terms');
 must(federation.includes('FEDERATION_NODE_ORDER_R102.map'),'Federation UI must render the canonical four-node model');
 must(!federation.includes("{label:'RCWA worker'"),'RCWA may not appear as a fake fifth federation node; it is a Sovereign compute sublayer');
 must(federation.includes("['PROPOSE','SCREEN','SOLVE','ADMIT']"),'visible handoff trace missing');
@@ -52,15 +54,15 @@ must(manifest.nodes.find(x=>x.id==='omega-optical')?.url==='https://omega-living
 must(manifest.governance?.nodeLocalStateDoesNotEqualGlobalCanonState===true,'node-local/global-state distinction must be machine-readable');
 must(Array.isArray(manifest.experienceContract?.sharedContext)&&manifest.experienceContract.sharedContext.includes('lineage')&&manifest.experienceContract.sharedContext.includes('scar_history'),'shared federation context must preserve lineage + history');
 
-must(['R102','R111','R115'].includes(caps.experienceRevision)&&caps.interactionModel.includes('intent'),'capability manifest must remain task-first under additive R111/R114/R115');
+must(['R102','R111','R115'].includes(caps.experienceRevision)&&caps.interactionModel.includes('intent'),'capability manifest must remain task-first under additive successors');
 must(caps.nodes['omega-v6'].authority==='global-canonical','capability manifest global authority mismatch');
 must(caps.nodes['omega-genesis'].scope==='NODE_LOCAL_PROPOSAL_STATE_ONLY','capability manifest Genesis scope mismatch');
 must(caps.nodes['omega-sovereign'].planned.includes('fdtd')&&caps.nodes['omega-sovereign'].planned.includes('fem'),'future full-wave expansion must remain declared without being falsely active');
 
 for(const rule of ['FEDERATION_SINGLE_GLOBAL_AUTHORITY','TASK_FIRST_CAPABILITY_ROUTING','SHARED_CONTEXT_ACROSS_NODES'])must(accepted.includes("id:'"+rule+"'"),'persistent production contract missing '+rule);
 must(accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority'")&&accepted.includes("'R102 four-node capability fabric + task-first federation authority'"),'R102 must extend R101 preservation lineage');
-if(r111PreservesR102||r114PreservesR102||r115PreservesR102)must(accepted.includes('R111')&&worker111.includes("path==='/api/fabric/status'")&&worker111.includes('FABRIC_MESH_LAW_R111'),'R111 successor must preserve R102 while adding bounded fabric authority');
-must(![worker,worker114,worker115,experience,federation].join('\n').includes('Math.random'),'federation experience must not depend on fake/random state');
+if(r111PreservesR102||r114PreservesR102||r115PreservesR102||r116PreservesR102)must(accepted.includes('R111')&&worker111.includes("path==='/api/fabric/status'")&&worker111.includes('FABRIC_MESH_LAW_R111'),'successor must preserve R102 while adding bounded R111 fabric authority');
+must(![worker,worker114,worker115,worker116,experience,federation].join('\n').includes('Math.random'),'federation experience must not depend on fake/random state');
 
-console.log('R102 FEDERATED INSTRUMENT EXPERIENCE PASS · four specialized runtimes · task-first handoff trace · stable schema + additive R102/R111/R114/R115 revision · single global CanonState authority · Optical endpoint continuity · R101/R34/44-route preservation');
+console.log('R102 FEDERATED INSTRUMENT EXPERIENCE PASS · four specialized runtimes · task-first handoff trace · stable schema + additive R102/R111/R114/R115/R116 revision · single global CanonState authority · Optical endpoint continuity · R101/R34/44-route preservation');
 await import('./r103-intent-capability-router-invariants.mjs');
