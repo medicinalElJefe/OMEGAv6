@@ -71,7 +71,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
      </button>})}
      {rows.length===0&&<div className='r88-empty'>No route matches that workspace/search combination.</div>}
     </div>
-    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>Persistent adaptive rail · compact, wide-label and full navigator states share one route registry · active application remains visible · no capability is defined by a fixed route count.</span></footer>
+    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>Persistent rail · adaptive compact, wide-label and full navigator states share one route registry · active application remains visible · no capability is defined by a fixed route count.</span></footer>
    </>:<div className='r88-software-layer'><OmegaSystemInventoryR83 compact onNavigate={go}/></div>}
   </section>
  </aside>;
