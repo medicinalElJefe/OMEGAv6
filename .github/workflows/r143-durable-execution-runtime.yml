@@ -1,0 +1,33 @@
+name: OMEGA R143 Durable Execution Runtime
+on:
+  push:
+    branches: [r143-durable-execution-runtime, main]
+  pull_request:
+    branches: [main]
+jobs:
+  prove-r143:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R143 durable execution ledger
+        run: node tests/r143-durable-execution-runtime-invariants.mjs
+      - name: Preserve R142 through R139 execution and operation truth
+        run: |
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r139-unified-capability-engine-invariants.mjs
+      - name: Preserve root safety, Hybrid plane, swarm and admission
+        run: |
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+          node tests/r125-accuracy-first-engine-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r143-dry-run
