@@ -1,12 +1,12 @@
 {
   "schema": "omega.selfbuild.candidate.r124.v1",
-  "generation": 3,
+  "generation": 4,
   "capsule": {
-    "id": "SB003",
-    "title": "Source trace inspector",
-    "objective": "Represent pixel/primitive to canonical state to proof/source lineage as a typed traversable structure.",
-    "target": "src/generated/selfbuild/sourceTraceInspectorR124.ts",
-    "risk": "LOW",
+    "id": "SB004",
+    "title": "Adaptive working-set scheduler",
+    "objective": "Allocate computation from observer relevance, causal relevance, uncertainty, motion, proof urgency and resource budget without mutating canonical state.",
+    "target": "src/generated/selfbuild/adaptiveWorkingSetR124.ts",
+    "risk": "MEDIUM",
     "prerequisites": [
       "SB001"
     ],
@@ -17,20 +17,20 @@
     ],
     "tests": [
       "r124",
-      "r122",
+      "r123",
       "build"
     ],
-    "expectedGain": 0.91,
-    "complexity": 0.31,
-    "contradictionRisk": 0.07,
+    "expectedGain": 0.95,
+    "complexity": 0.46,
+    "contradictionRisk": 0.14,
     "operation": "GENERATE_MODULE"
   },
-  "score": 2.3947368421052633,
-  "generatedTarget": "src/generated/selfbuild/sourceTraceInspectorR124.ts",
+  "score": 1.1399999999999997,
+  "generatedTarget": "src/generated/selfbuild/adaptiveWorkingSetR124.ts",
   "receipt": {
-    "generation": 3,
-    "capsuleId": "SB003",
-    "startedAt": "2026-09-06T18:04:28.993Z",
+    "generation": 4,
+    "capsuleId": "SB004",
+    "startedAt": "2026-09-06T18:05:10.666Z",
     "status": "ADMIT",
     "tests": {
       "r124": true,
@@ -45,14 +45,14 @@
       "r121"
     ],
     "residualBefore": 1,
-    "rollbackRef": "0b244da684ec732dd0f2492b43f23c17af3c2e1e",
+    "rollbackRef": "79dad069373bb50caced622126fb8899d6070a67",
     "notes": [
       "Generated deterministically from versioned R124 capsule.",
       "Not authoritative until test and merge admission.",
       "Focused and inherited gates passed before admission.",
       "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
     ],
-    "completedAt": "2026-09-06T18:04:33.734Z",
+    "completedAt": "2026-09-06T18:05:15.505Z",
     "residualAfter": 0.9
   },
   "admission": "ADMITTED_PENDING_FAST_FORWARD"
