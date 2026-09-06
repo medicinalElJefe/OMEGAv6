@@ -1,0 +1,59 @@
+name: OMEGA R145 Runtime Attestation World Scar
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r145-runtime-attestation-world-scar]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r145-runtime-attestation-world-scar-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r145:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R145 attestation-to-world-scar bridge
+        run: node tests/r145-runtime-attestation-world-scar-invariants.mjs
+      - name: Preserve R144/R143/R142/R141 authority chain
+        shell: bash
+        run: |
+          node tests/r144-runtime-deployment-attestation-invariants.mjs
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+      - name: Preserve living world and canonical admission boundaries
+        shell: bash
+        run: |
+          node tests/r140-living-world-operation-bridge-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Prove packaged source binds the exact workflow SHA
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='dist/omega-build-receipt.json';
+          if(!fs.existsSync(p))throw new Error('dist build receipt missing');
+          const r=JSON.parse(fs.readFileSync(p,'utf8'));
+          if(r?.source?.sha!==process.env.GITHUB_SHA)throw new Error(`packaged source ${r?.source?.sha||'NONE'} != workflow ${process.env.GITHUB_SHA}`);
+          if(r?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'||!String(r?.receiptSha256||'').match(/^[a-f0-9]{64}$/))throw new Error('governed build receipt binding invalid');
+          console.log(`R145 packaged source bound to ${process.env.GITHUB_SHA} · ${r.receiptSha256}`);
+          NODE
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r145-dry-run
