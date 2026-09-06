@@ -10,6 +10,7 @@ const traversal=read('src/TraversalModeStageR99.tsx');
 const calculus=read('src/CalculusFieldR37.tsx');
 const ultra=read('src/UltraSystemFabricR119.tsx');
 const ultraCss=read('src/ultraSystemFabricR119.css');
+const surfaceFabric=read('src/FederationSurfaceFabricR119.tsx');
 const mount=read('src/FullSystemConvergencePanelR95.tsx');
 const source=read('src/sourceCorpusCorrelationR107.ts');
 const federation=read('src/federation/federationExperienceR102.ts');
@@ -28,6 +29,10 @@ for(const token of ['{MASTER_SYSTEMS_R83.length}','{FAMILIES.length}','{MASTER_M
 must(mount.includes("import UltraSystemFabricR119 from './UltraSystemFabricR119'")&&mount.includes('<UltraSystemFabricR119 onNavigate={onNavigate}/>'),'System Atlas convergence authority must mount R119 ultra fabric');
 must(!ultraCss.includes('position:fixed')&&!ultraCss.includes('position:absolute'),'ultra fabric must remain in document flow and never cover the instrument');
 
+for(const token of ['HISTORICAL_SOVEREIGN_SURFACE','not a current pairing endpoint','authenticated OMEGAv6 Hybrid/Sovereign transport','Inspect historical surface'])must(surfaceFabric.includes(token),'Sovereign historical-surface boundary missing '+token);
+must(!surfaceFabric.includes("className:'HOST_CONTROL_SURFACE'"),'retired Foundasound surface must not be relabeled as current host control');
+must(!surfaceFabric.includes('Human-facing Sovereign bootstrap/control surface for pairing'),'retired Foundasound surface must not advertise current pairing/bootstrap authority');
+
 for(const token of ['DEWEY_248832_SCALE_ATLAS','FOUR_NODE_CLOUD_FABRIC','sourceModeCatalog:R21_MODE_AUTHORITY.catalogCount','canonLensCount:ALL_MODES_BOUNDARY.canonAuthorities','physicalDimensionClaim:false'])must(source.includes(token),'existing corpus correlation authority missing '+token);
 for(const token of ["['genesis','optical','sovereign','omegaV6']",'PROPOSE','SCREEN','SOLVE','ADMIT','historical pairing never substitutes for live proof'])must(federation.includes(token),'federation authority missing '+token);
 
@@ -44,4 +49,4 @@ const optical=manifest.sites.find(x=>x.id==='omega-optical');
 must(optical&&String(optical.truthBoundary).includes('not full-wave'),'Optical Tier-1 truth boundary missing');
 must(String(manifest.modeLaw).includes('not be implemented as a theme/color-only switch'),'mode semantics must not collapse into color themes');
 
-console.log('R119 FULL RESOLUTION + ULTRA CONVERGENCE PASS · 20,736 resident fidelity · 248,832 representation · 61.917B virtual addressing · 100 systems / 24 families / 36 controls / 18 capabilities · 179 source modes + 62 lenses · four-role federation · no shadow authority');
+console.log('R119 FULL RESOLUTION + ULTRA CONVERGENCE PASS · 20,736 resident fidelity · 248,832 representation · 61.917B virtual addressing · 100 systems / 24 families / 36 controls / 18 capabilities · 179 source modes + 62 lenses · four-role federation · retired Sovereign preview bounded · no shadow authority');
