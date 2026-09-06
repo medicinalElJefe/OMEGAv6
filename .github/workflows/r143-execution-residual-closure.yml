@@ -1,0 +1,87 @@
+name: OMEGA R143 Execution Residual Closure
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_run:
+    workflows:
+      - OMEGA Cloud Bridge CI
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+concurrency:
+  group: omega-r143-execution-residual-${{ github.event.pull_request.number || github.event.workflow_run.id || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prove-r143:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prove R143 execution residual closure
+        run: node tests/r143-execution-residual-closure-invariants.mjs
+      - name: Preserve R142 through R124 authorities
+        run: |
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r140-living-world-operation-bridge-invariants.mjs
+          node tests/r139-unified-capability-engine-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r143-dry-run
+      - name: Observe deployed execution contracts after successful Cloud Bridge release
+        if: github.event_name == 'workflow_run'
+        env:
+          OMEGA_R143_OUT: /tmp/omega-r143-live-execution-evidence.json
+        run: node scripts/r143-live-execution-evidence.mjs
+      - name: Feed live execution evidence into R125 policy without mutation
+        if: github.event_name == 'workflow_run'
+        env:
+          OMEGA_R143_EXECUTION_EVIDENCE_PATH: /tmp/omega-r143-live-execution-evidence.json
+          OMEGA_R125_RUNS_PATH: /tmp/omega-r143-empty-runs.json
+        shell: bash
+        run: |
+          printf '[]\n' > /tmp/omega-r143-empty-runs.json
+          node scripts/r125-accuracy-engine.mjs
+          node - <<'NODE'
+          const fs=require('fs');
+          const evidence=JSON.parse(fs.readFileSync('/tmp/omega-r143-live-execution-evidence.json','utf8'));
+          const state=JSON.parse(fs.readFileSync('public/omega-r125-accuracy-state.json','utf8'));
+          if(state.sourceState?.executionEvidenceSchema!=='omega.execution.evidence.r143.v1')throw new Error('R125 did not ingest R143 evidence schema');
+          if(state.sourceState?.executionEvidenceObserved!==evidence.probes.length)throw new Error('R125 execution evidence count mismatch');
+          if(state.repair)throw new Error('R143 observation workflow must never apply a repair');
+          console.log(`R143 LIVE OBSERVE PASS · ${evidence.summary.passed}/${evidence.summary.total} probes · ${state.residuals.length} total R125 residuals · no mutation`);
+          NODE
+      - name: Upload R143 execution evidence receipt
+        if: github.event_name == 'workflow_run'
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-r143-execution-evidence-${{ github.event.workflow_run.head_sha }}
+          path: |
+            /tmp/omega-r143-live-execution-evidence.json
+            public/omega-r125-accuracy-state.json
+            public/omega-r125-proposal.json
+          retention-days: 30
