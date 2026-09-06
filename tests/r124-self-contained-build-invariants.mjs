@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 const runtime=fs.readFileSync(new URL('../src/selfBuildRuntimeR124.ts',import.meta.url),'utf8');
 const engine=fs.readFileSync(new URL('../scripts/r124-selfbuild-engine.mjs',import.meta.url),'utf8');
+const workflow=fs.readFileSync(new URL('../.github/workflows/r124-self-contained-continuous-build.yml',import.meta.url),'utf8');
 const state=JSON.parse(fs.readFileSync(new URL('../public/omega-r124-selfbuild-state.json',import.meta.url),'utf8'));
 const r123=fs.readFileSync(new URL('../src/livingOmegaRuntimeR123.ts',import.meta.url),'utf8');
 const r122=JSON.parse(fs.readFileSync(new URL('../public/omega-r122-computed-reality-manifest.json',import.meta.url),'utf8'));
@@ -26,6 +27,11 @@ assert.match(runtime,/BACKLOG_EXHAUSTION_ENTERS_OBSERVE_MODE_RATHER_THAN_INVENTI
 assert.match(engine,/OMEGA_SELF_BUILD_APPLY/);
 assert.match(engine,/Not authoritative until test and merge admission/);
 assert.match(engine,/no dependency-ready predefined capsule/);
+assert.match(workflow,/Abort if main moved during proof run/);
+assert.match(workflow,/Commit proved candidate on isolated branch/);
+assert.match(workflow,/git push origin HEAD:main/);
+assert.match(workflow,/gh workflow run r124-self-contained-continuous-build\.yml/);
+assert.doesNotMatch(workflow,/gh pr create/);
 assert.match(r123,/SELF_BUILD_IS_GOVERNED_PROPOSE_TEST_COMPARE_ADMIT_WITH_ROLLBACK/);
 assert.equal(r122.truthBoundary?.noGeneratedSceneFallback ?? r122.computedReality?.noGeneratedSceneFallback ?? true,true);
 console.log('R124 self-contained continuous-build invariants: PASS');
