@@ -1,0 +1,425 @@
+{
+  "schema": "omega.accuracy.r125.v2",
+  "authority": "OMEGAV6",
+  "observedAt": "2026-09-06T18:19:16.584Z",
+  "mode": "REPAIRED",
+  "accuracyPolicy": {
+    "mutationRequiresVerifiedEvidence": true,
+    "autoRepairMinConfidence": 0.92,
+    "autoRepairRisk": "LOW_ONLY",
+    "criticalResidualBlocks": true,
+    "unreproducibleResidualAutoRepair": false,
+    "observationOnlyNeverMutatesMain": true
+  },
+  "residuals": [
+    {
+      "id": "R-CI-34051314115",
+      "kind": "TEST_FAILURE",
+      "severity": "MEDIUM",
+      "summary": "Workflow OMEGA R125 Accuracy First Engine concluded cancelled.",
+      "evidence": [
+        {
+          "id": "c0cb9834a090582a46f4",
+          "kind": "TEST",
+          "source": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34051314115",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "workflow conclusion is cancelled",
+          "verified": true,
+          "value": "cancelled"
+        },
+        {
+          "id": "7d96a96f0bf454298a6c",
+          "kind": "SOURCE",
+          "source": "df33a038b0905ddc3f6693fd68868d1e48d1d974",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "observed head SHA",
+          "verified": true,
+          "value": "df33a038b0905ddc3f6693fd68868d1e48d1d974"
+        }
+      ],
+      "affected": [
+        "OMEGA R125 Accuracy First Engine"
+      ],
+      "reproducible": false,
+      "confidence": 0.8733333333333333,
+      "mode": "OBSERVE_ONLY"
+    },
+    {
+      "id": "R-CI-34051308460",
+      "kind": "TEST_FAILURE",
+      "severity": "MEDIUM",
+      "summary": "Workflow OMEGA R125 Accuracy First Engine concluded cancelled.",
+      "evidence": [
+        {
+          "id": "37a43f43e46ed0cf0f14",
+          "kind": "TEST",
+          "source": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34051308460",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "workflow conclusion is cancelled",
+          "verified": true,
+          "value": "cancelled"
+        },
+        {
+          "id": "98cf679fa94bd9b8bdce",
+          "kind": "SOURCE",
+          "source": "0c66ed22e103e06688bfc7d1ae907f56010b7243",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "observed head SHA",
+          "verified": true,
+          "value": "0c66ed22e103e06688bfc7d1ae907f56010b7243"
+        }
+      ],
+      "affected": [
+        "OMEGA R125 Accuracy First Engine"
+      ],
+      "reproducible": false,
+      "confidence": 0.8733333333333333,
+      "mode": "OBSERVE_ONLY"
+    },
+    {
+      "id": "R-CI-34051305010",
+      "kind": "TEST_FAILURE",
+      "severity": "MEDIUM",
+      "summary": "Workflow OMEGA R125 Accuracy First Engine concluded cancelled.",
+      "evidence": [
+        {
+          "id": "e1576d09b27963499a54",
+          "kind": "TEST",
+          "source": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34051305010",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "workflow conclusion is cancelled",
+          "verified": true,
+          "value": "cancelled"
+        },
+        {
+          "id": "98cf679fa94bd9b8bdce",
+          "kind": "SOURCE",
+          "source": "0c66ed22e103e06688bfc7d1ae907f56010b7243",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "observed head SHA",
+          "verified": true,
+          "value": "0c66ed22e103e06688bfc7d1ae907f56010b7243"
+        }
+      ],
+      "affected": [
+        "OMEGA R125 Accuracy First Engine"
+      ],
+      "reproducible": false,
+      "confidence": 0.8733333333333333,
+      "mode": "OBSERVE_ONLY"
+    },
+    {
+      "id": "R-CI-34051288354",
+      "kind": "TEST_FAILURE",
+      "severity": "MEDIUM",
+      "summary": "Workflow OMEGA R125 Accuracy First Engine concluded cancelled.",
+      "evidence": [
+        {
+          "id": "71c96d977e9f71aa32a4",
+          "kind": "TEST",
+          "source": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34051288354",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "workflow conclusion is cancelled",
+          "verified": true,
+          "value": "cancelled"
+        },
+        {
+          "id": "98cf679fa94bd9b8bdce",
+          "kind": "SOURCE",
+          "source": "0c66ed22e103e06688bfc7d1ae907f56010b7243",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "observed head SHA",
+          "verified": true,
+          "value": "0c66ed22e103e06688bfc7d1ae907f56010b7243"
+        }
+      ],
+      "affected": [
+        "OMEGA R125 Accuracy First Engine"
+      ],
+      "reproducible": false,
+      "confidence": 0.8733333333333333,
+      "mode": "OBSERVE_ONLY"
+    },
+    {
+      "id": "R-CI-34051287167",
+      "kind": "TEST_FAILURE",
+      "severity": "MEDIUM",
+      "summary": "Workflow OMEGA R125 Accuracy First Engine concluded cancelled.",
+      "evidence": [
+        {
+          "id": "1860e18a376dfc8aaf01",
+          "kind": "TEST",
+          "source": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34051287167",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "workflow conclusion is cancelled",
+          "verified": true,
+          "value": "cancelled"
+        },
+        {
+          "id": "98cf679fa94bd9b8bdce",
+          "kind": "SOURCE",
+          "source": "0c66ed22e103e06688bfc7d1ae907f56010b7243",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "observed head SHA",
+          "verified": true,
+          "value": "0c66ed22e103e06688bfc7d1ae907f56010b7243"
+        }
+      ],
+      "affected": [
+        "OMEGA R125 Accuracy First Engine"
+      ],
+      "reproducible": false,
+      "confidence": 0.8733333333333333,
+      "mode": "OBSERVE_ONLY"
+    },
+    {
+      "id": "R-CI-34051286953",
+      "kind": "TEST_FAILURE",
+      "severity": "MEDIUM",
+      "summary": "Workflow OMEGA R125 Accuracy First Engine concluded failure.",
+      "evidence": [
+        {
+          "id": "70145478b6a56272d3e0",
+          "kind": "TEST",
+          "source": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34051286953",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "workflow conclusion is failure",
+          "verified": true,
+          "value": "failure"
+        },
+        {
+          "id": "98cf679fa94bd9b8bdce",
+          "kind": "SOURCE",
+          "source": "0c66ed22e103e06688bfc7d1ae907f56010b7243",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "observed head SHA",
+          "verified": true,
+          "value": "0c66ed22e103e06688bfc7d1ae907f56010b7243"
+        }
+      ],
+      "affected": [
+        "OMEGA R125 Accuracy First Engine"
+      ],
+      "reproducible": false,
+      "confidence": 0.8733333333333333,
+      "mode": "OBSERVE_ONLY"
+    },
+    {
+      "id": "R-CI-34051137311",
+      "kind": "TEST_FAILURE",
+      "severity": "MEDIUM",
+      "summary": "Workflow OMEGA R125 Accuracy First Engine concluded failure.",
+      "evidence": [
+        {
+          "id": "65f725c3c572a249d41b",
+          "kind": "TEST",
+          "source": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34051137311",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "workflow conclusion is failure",
+          "verified": true,
+          "value": "failure"
+        },
+        {
+          "id": "98cf679fa94bd9b8bdce",
+          "kind": "SOURCE",
+          "source": "0c66ed22e103e06688bfc7d1ae907f56010b7243",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "observed head SHA",
+          "verified": true,
+          "value": "0c66ed22e103e06688bfc7d1ae907f56010b7243"
+        }
+      ],
+      "affected": [
+        "OMEGA R125 Accuracy First Engine"
+      ],
+      "reproducible": false,
+      "confidence": 0.8733333333333333,
+      "mode": "OBSERVE_ONLY"
+    },
+    {
+      "id": "R-CI-34051110556",
+      "kind": "TEST_FAILURE",
+      "severity": "MEDIUM",
+      "summary": "Workflow OMEGA R125 Accuracy First Engine concluded failure.",
+      "evidence": [
+        {
+          "id": "a9e4d63e4997d35cda43",
+          "kind": "TEST",
+          "source": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34051110556",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "workflow conclusion is failure",
+          "verified": true,
+          "value": "failure"
+        },
+        {
+          "id": "98cf679fa94bd9b8bdce",
+          "kind": "SOURCE",
+          "source": "0c66ed22e103e06688bfc7d1ae907f56010b7243",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "observed head SHA",
+          "verified": true,
+          "value": "0c66ed22e103e06688bfc7d1ae907f56010b7243"
+        }
+      ],
+      "affected": [
+        "OMEGA R125 Accuracy First Engine"
+      ],
+      "reproducible": false,
+      "confidence": 0.8733333333333333,
+      "mode": "OBSERVE_ONLY"
+    },
+    {
+      "id": "R-CI-34051110063",
+      "kind": "TEST_FAILURE",
+      "severity": "MEDIUM",
+      "summary": "Workflow OMEGA R125 Accuracy First Engine concluded cancelled.",
+      "evidence": [
+        {
+          "id": "5dc78e3e05d41e5eea47",
+          "kind": "TEST",
+          "source": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34051110063",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "workflow conclusion is cancelled",
+          "verified": true,
+          "value": "cancelled"
+        },
+        {
+          "id": "98cf679fa94bd9b8bdce",
+          "kind": "SOURCE",
+          "source": "0c66ed22e103e06688bfc7d1ae907f56010b7243",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "observed head SHA",
+          "verified": true,
+          "value": "0c66ed22e103e06688bfc7d1ae907f56010b7243"
+        }
+      ],
+      "affected": [
+        "OMEGA R125 Accuracy First Engine"
+      ],
+      "reproducible": false,
+      "confidence": 0.8733333333333333,
+      "mode": "OBSERVE_ONLY"
+    },
+    {
+      "id": "R-CI-34051109188",
+      "kind": "TEST_FAILURE",
+      "severity": "MEDIUM",
+      "summary": "Workflow OMEGA R125 Accuracy First Engine concluded cancelled.",
+      "evidence": [
+        {
+          "id": "90d858d9d5237fb3aaf1",
+          "kind": "TEST",
+          "source": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34051109188",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "workflow conclusion is cancelled",
+          "verified": true,
+          "value": "cancelled"
+        },
+        {
+          "id": "98cf679fa94bd9b8bdce",
+          "kind": "SOURCE",
+          "source": "0c66ed22e103e06688bfc7d1ae907f56010b7243",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "observed head SHA",
+          "verified": true,
+          "value": "0c66ed22e103e06688bfc7d1ae907f56010b7243"
+        }
+      ],
+      "affected": [
+        "OMEGA R125 Accuracy First Engine"
+      ],
+      "reproducible": false,
+      "confidence": 0.8733333333333333,
+      "mode": "OBSERVE_ONLY"
+    },
+    {
+      "id": "R-CAPABILITY-INDEX-MISSING",
+      "kind": "CAPABILITY_UNWIRED",
+      "severity": "LOW",
+      "summary": "All R124 capsules are admitted and physically present but no generated capability export index exists.",
+      "evidence": [
+        {
+          "id": "0b978e3a18ddb43608f8",
+          "kind": "SOURCE",
+          "source": "public/omega-r124-selfbuild-state.json",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "all admitted module targets exist on disk",
+          "verified": true,
+          "value": true
+        },
+        {
+          "id": "3928b311e451e059aba5",
+          "kind": "TEST",
+          "source": "public/omega-r124-selfbuild-state.json",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "all admitted capsule receipts passed R124/R123/R122/R121/build gates",
+          "verified": true,
+          "value": true
+        },
+        {
+          "id": "0302edea3e660d2aebe8",
+          "kind": "PROOF",
+          "source": "public/omega-r124-selfbuild-state.json",
+          "observedAt": "2026-09-06T18:19:16.584Z",
+          "claim": "all admitted capsule receipts contain ADMIT status, completion time, and rollback lineage",
+          "verified": true,
+          "value": true
+        }
+      ],
+      "affected": [
+        "src/generated/selfbuild/index.ts"
+      ],
+      "reproducible": true,
+      "confidence": 1,
+      "mode": "AUTO_REPAIR"
+    }
+  ],
+  "selected": "R-CAPABILITY-INDEX-MISSING",
+  "repair": {
+    "changed": [
+      "src/generated/selfbuild/index.ts"
+    ],
+    "proof": {
+      "admittedIds": [
+        "SB001",
+        "SB002",
+        "SB003",
+        "SB004",
+        "SB005",
+        "SB006",
+        "SB007",
+        "SB008"
+      ],
+      "targets": [
+        "src/generated/selfbuild/persistentMissionContinuityR124.ts",
+        "src/generated/selfbuild/contextualCapabilitySurfaceR124.ts",
+        "src/generated/selfbuild/sourceTraceInspectorR124.ts",
+        "src/generated/selfbuild/adaptiveWorkingSetR124.ts",
+        "src/generated/selfbuild/archiveDonorMemoryR124.ts",
+        "src/generated/selfbuild/swarmMissionPlannerR124.ts",
+        "src/generated/selfbuild/computedWorldBridgeR124.ts",
+        "src/generated/selfbuild/selfBuildCapabilityRegistryR124.ts"
+      ],
+      "contentSha256": "fb166bf55c2480b63b9b8cd3c1a53fbdaa6789440f888a6d0e9488166229f370"
+    }
+  },
+  "sourceState": {
+    "r124Generation": 8,
+    "r124Admitted": [
+      "SB001",
+      "SB002",
+      "SB003",
+      "SB004",
+      "SB005",
+      "SB006",
+      "SB007",
+      "SB008"
+    ],
+    "githubRunsObserved": 40
+  },
+  "lineage": {
+    "baseSha": "df33a038b0905ddc3f6693fd68868d1e48d1d974",
+    "semanticFingerprint": "f43d8b56ce77709c000ab09318db88f1e14286a3bb5cf3b6c9b8527dc20a8826",
+    "stateSha256": "7dd100637bc3f41d062f10499928f583e88506f9babf85d50eef86e98a7a720c"
+  }
+}
