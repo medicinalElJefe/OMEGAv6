@@ -1,0 +1,36 @@
+name: OMEGA R146 Durable Operation Execution
+on:
+  push:
+    branches: [r146-durable-operation-execution, main]
+  pull_request:
+    branches: [main]
+jobs:
+  prove-r146:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R146 durable operation execution
+        run: node tests/r146-durable-operation-execution-invariants.mjs
+      - name: Preserve R145 through R141 authority and evidence chain
+        run: |
+          node tests/r145-runtime-attestation-world-scar-invariants.mjs
+          node tests/r144-runtime-deployment-attestation-invariants.mjs
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+      - name: Preserve operation, capability, Hybrid, swarm and admission layers
+        run: |
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r139-unified-capability-engine-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+          node tests/r125-accuracy-first-engine-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r146-dry-run
