@@ -35,6 +35,8 @@ must(realityLab.includes("const emptyDataset=():ParsedDataset=>({headers:[],rows
 must(realityLab.includes('useState<ParsedDataset>(emptyDataset)'),'Reality Lab must boot from the explicit empty dataset without invoking the CSV parser');
 must(!/useState<ParsedDataset>\(\(\)=>parseDelimited\(/.test(realityLab),'Reality Lab may not parse a header-only or synthetic seed during first render');
 must(realityLab.includes('No synthetic dataset is inserted to make the surface look active.'),'Reality Lab empty-state truth boundary missing');
+must(realityLab.includes("label='REALITY LAB · CANONICAL REFERENCE · NO OBSERVATION LOADED'")&&realityLab.includes('Current canonical model reference only · no observation loaded'),'Reality Lab must remain visual-first by rendering the current canonical model state while explicitly separating it from measurement');
+must(realityLab.includes("<CalculusFieldR37 address={canonicalAddress} mode='FIELD' steps={18}"),'Reality Lab zero-observation reference must be source-backed by the current canonical address, not fabricated observations');
 
 // The actual registered Hybrid destination must point at the current R117 human connection surface.
 must(loader.includes("HybridLinkR117:()=>import('./HybridLinkR32')"),'current deferred HybridLinkR117 loader missing');
@@ -65,4 +67,4 @@ must(launcher.includes('This connector will never call the retired preview host.
 must(!launcher.includes('set "OMEGA_ORIGIN=https://omega-sovereign-convergence.foundasound.chatgpt.site')&&!launcher.includes('curl.exe --fail --silent --show-error --location --max-time 20 "https://omega-sovereign-convergence.foundasound.chatgpt.site'),'retired host must never be executable launcher target');
 must(worker116.includes('nativeExecutionClaimed:false')||worker116.includes('nativeExecutionClaimed: false'),'fresh pairing must never claim PC ONLINE before a real host heartbeat');
 
-console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · Reality Lab true empty state · ordinary Hybrid route promoted to R117 clean surface · advanced R8 diagnostics unmounted until opened · proven R116 runtime spine + R117 connector repair · dedicated stale-header-safe bootstrap · explicit browser-safe connector download');
+console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · Reality Lab true empty state + canonical no-observation visual · ordinary Hybrid route promoted to R117 clean surface · advanced R8 diagnostics unmounted until opened · proven R116 runtime spine + R117 connector repair · dedicated stale-header-safe bootstrap · explicit browser-safe connector download');
