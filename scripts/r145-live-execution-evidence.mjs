@@ -49,8 +49,9 @@ try{
 try{
  const r=await request('/api/hybrid/agent-download');
  const local=fs.readFileSync('public/omega-hybrid-agent.py','utf8'),expected=sha(local),actual=sha(r.text),header=r.headers.get('x-omega-agent-sha256');
- const valid=Boolean(r.ok&&r.text.startsWith('#!/usr/bin/env python3')&&r.text.includes('OMEGA Hybrid Link agent')&&actual===expected&&header===expected);
- record('hybrid-agent-source-lineage','hybrid-agent','/api/hybrid/agent-download',valid,valid?`body/header/local sha256 ${actual}`:`Hybrid agent lineage mismatch expected=${expected} actual=${actual} header=${header}`,'SOURCE_LINEAGE_GAP','CRITICAL',{httpStatus:r.status,sourceSha256:actual,expectedSha256:expected,receiptSha256:header});
+ const identity=r.text.includes('OMEGA R34 local Hybrid Link agent')&&r.text.includes('Pairing is explicit.');
+ const valid=Boolean(r.ok&&r.text.startsWith('#!/usr/bin/env python3')&&identity&&actual===expected&&header===expected);
+ record('hybrid-agent-source-lineage','hybrid-agent','/api/hybrid/agent-download',valid,valid?`identity + body/header/local sha256 ${actual}`:`Hybrid agent lineage mismatch identity=${identity} expected=${expected} actual=${actual} header=${header}`,'SOURCE_LINEAGE_GAP','CRITICAL',{httpStatus:r.status,sourceSha256:actual,expectedSha256:expected,receiptSha256:header,identity});
 }catch(error){record('hybrid-agent-source-lineage','hybrid-agent','/api/hybrid/agent-download',false,String(error),'SOURCE_LINEAGE_GAP','CRITICAL')}
 
 try{
