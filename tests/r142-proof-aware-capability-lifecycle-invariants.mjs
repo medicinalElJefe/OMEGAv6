@@ -23,7 +23,7 @@ must(field.includes('data-execution-state={n.executionState')&&field.includes('d
 for(const token of ['pluginManifestReceiptR142','summarizeCapabilityReceiptsR142',"a.download='OMEGA_PLUGIN_REGISTRY_R45.json'",'does not embed external ChatGPT connectors','enabled or configured never means executed or verified'])must(plugins.includes(token),'plugin execution truth/compatibility missing '+token);
 must(plugins.includes("data-execution-receipts='R142'")&&plugins.includes('data-execution-state={receipt.state}'),'plugin registry must display lifecycle receipts');
 
-for(const token of ['hybridClosureReceiptR142',"data-execution-lifecycle='R142'",'R141 remains the exact-payload Hybrid proof authority','RETURNED is not VERIFIED',"data-r142-state={executionReceipt?.state")must(hybrid.includes(token),'Hybrid closure UI missing '+token);
+for(const token of ['hybridClosureReceiptR142',"data-execution-lifecycle='R142'",'R141 remains the exact-payload Hybrid proof authority','RETURNED is not VERIFIED','data-r142-state={executionReceipt?.state'])must(hybrid.includes(token),'Hybrid closure UI missing '+token);
 must(r141.includes('VERIFIED_EXECUTION_RETURN')&&r141.includes('FINGERPRINT_MISMATCH'),'R141 proof closure semantics must remain the source authority');
 
 console.log('R142 PROOF-AWARE CAPABILITY LIFECYCLE PASS · route/plugin/Hybrid truth separated · R141 exact proof retained · R140 priority retained · R125 admission unchanged');
