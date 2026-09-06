@@ -1,0 +1,104 @@
+name: OMEGA R118 Full System Operational Convergence
+
+on:
+  push:
+    branches: [main, r118-full-system-operational-convergence]
+  pull_request:
+    branches: [main]
+  workflow_run:
+    workflows: ["OMEGA Cloud Bridge CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-r118:
+    if: github.event_name != 'workflow_run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Execute R118 full-system source invariants
+        run: node tests/r118-full-system-operational-convergence-invariants.mjs
+      - name: Execute late accepted-production regression chain
+        shell: bash
+        run: |
+          node tests/r111-federated-capability-mesh-invariants.mjs
+          node tests/r112-sovereign-living-fabric-invariants.mjs
+          node tests/r113-vector-carry-convergence-invariants.mjs
+          node tests/r114-federation-closure-invariants.mjs
+          node tests/r115-machine-adapters-invariants.mjs
+          node tests/r116-sovereign-recovery-unified-truth-invariants.mjs
+          node tests/r117-real-sovereign-bootstrap-invariants.mjs
+      - name: Execute complete inherited static + production build gate
+        run: npm run check
+      - name: Install Chromium runtime for real browser interaction tests
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start production build locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r118-preview.log 2>&1 &
+          echo $! >/tmp/omega-r118-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r118-preview.log
+          exit 1
+      - name: Exercise every registered route in desktop and mobile browsers
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r118-browser-operational-e2e.mjs
+      - name: Browser preview diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r118-preview.log || true
+      - name: Canonical Wrangler dry-run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r118-canonical
+
+  live-r118:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Install Chromium runtime for production browser proof
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify complete public API spine before UI traversal
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const gets=['/','/api/health','/api/status','/api/restoration','/api/hybrid/status','/api/system/convergence','/api/federation/run/status','/api/earth/noaa/catalog'];
+          for(const path of gets){
+            const r=await fetch(base+path,{headers:{'cache-control':'no-cache','x-omega-session-id':'r118_live_observer'}});
+            const text=await r.text();
+            if(!r.ok||!text.length)throw new Error(`${path} failed HTTP ${r.status}: ${text.slice(0,400)}`);
+          }
+          const h=await fetch(base+'/api/hybrid/status',{headers:{'cache-control':'no-cache','x-omega-session-id':'r118_live_observer'}}).then(r=>r.json());
+          if(h.nativeExecutionClaimed===true&&!Array.isArray(h.devices))throw new Error('Hybrid claimed native execution without device evidence array');
+          console.log(`R118 PUBLIC API SPINE PASS · ${gets.length} GET contracts reachable · Hybrid ${h.state||'UNKNOWN'}`);
+          NODE
+      - name: Exercise all 44 deployed routes in desktop and mobile browsers
+        env:
+          OMEGA_E2E_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+        run: node tests/r118-browser-operational-e2e.mjs
