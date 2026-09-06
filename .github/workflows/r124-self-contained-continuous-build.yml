@@ -18,7 +18,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
   actions: write
 
 concurrency:
@@ -56,8 +55,7 @@ jobs:
           echo "generation=$GENERATION" >> "$GITHUB_OUTPUT"
       - name: Stop cleanly when no capsule is ready
         if: steps.select.outputs.status != 'PROPOSE'
-        run: |
-          echo "R124 self-build is in ${{ steps.select.outputs.status }}; no repository mutation performed."
+        run: echo "R124 self-build is in ${{ steps.select.outputs.status }}; no repository mutation performed."
       - name: Generate sandbox candidate
         if: steps.select.outputs.status == 'PROPOSE'
         env:
@@ -87,19 +85,20 @@ jobs:
           receipt.completedAt=new Date().toISOString();
           receipt.tests={r124:true,r123:true,r122:true,r121:true,build:true};
           receipt.residualAfter=Math.max(0,Number(receipt.residualBefore||1)-0.1);
-          receipt.notes=[...(receipt.notes||[]),'Focused and inherited gates passed before admission.'];
+          receipt.notes=[...(receipt.notes||[]),'Focused and inherited gates passed before admission.','Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit.'];
           s.admitted=[...new Set([...(s.admitted||[]),id])];
           s.currentCapsuleId=null;
           fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
           const candidatePath='public/omega-r124-selfbuild-candidate.json';
           if(fs.existsSync(candidatePath)){
             const c=JSON.parse(fs.readFileSync(candidatePath,'utf8'));
-            c.receipt=receipt;c.admission='ADMITTED_PENDING_MERGE';
+            c.receipt=receipt;c.admission='ADMITTED_PENDING_FAST_FORWARD';
             fs.writeFileSync(candidatePath,JSON.stringify(c,null,2)+'\n');
           }
           NODE
       - name: Abort if main moved during proof run
         if: steps.select.outputs.status == 'PROPOSE'
+        id: freshness
         shell: bash
         run: |
           START=$(git rev-parse HEAD)
@@ -109,14 +108,15 @@ jobs:
             echo "main moved from $START to $CURRENT; refusing stale admission"
             exit 42
           fi
-      - name: Commit candidate branch
+          echo "rollback=$START" >> "$GITHUB_OUTPUT"
+      - name: Commit proved candidate on isolated branch
         if: steps.select.outputs.status == 'PROPOSE'
         id: commit
         shell: bash
         run: |
           GEN='${{ steps.select.outputs.generation }}'
           CAPSULE='${{ steps.select.outputs.capsule }}'
-          BRANCH="selfbuild/r124-g${GEN}-${CAPSULE,,}"
+          BRANCH="selfbuild/r124-g${GEN}-${CAPSULE,,}-${GITHUB_RUN_ID}"
           git config user.name 'OMEGA R124 Self Builder'
           git config user.email 'actions@users.noreply.github.com'
           git checkout -b "$BRANCH"
@@ -125,20 +125,23 @@ jobs:
           git push origin "$BRANCH"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Open and merge proved candidate
+      - name: Explicitly admit proved candidate to main
         if: steps.select.outputs.status == 'PROPOSE'
-        id: merge
+        id: admit
         shell: bash
         run: |
-          BRANCH='${{ steps.commit.outputs.branch }}'
-          CAPSULE='${{ steps.select.outputs.capsule }}'
-          GEN='${{ steps.select.outputs.generation }}'
-          PR_URL=$(gh pr create --base main --head "$BRANCH" --title "R124 self-build G${GEN} ${CAPSULE}" --body "Repository-native R124 governed self-build capsule. Generated from a versioned deterministic capsule, passed R124 + R123 + R122 + R121 invariants and the production build before admission. No truth boundary, PC proof rule, computed-reality gate, or stronger current layer is relaxed. Rollback is the pre-candidate main SHA recorded in the receipt.")
-          echo "pr=$PR_URL" >> "$GITHUB_OUTPUT"
-          gh pr merge "$PR_URL" --squash --delete-branch
-          echo "merged=true" >> "$GITHUB_OUTPUT"
+          git fetch origin main
+          CURRENT=$(git rev-parse origin/main)
+          ROLLBACK='${{ steps.freshness.outputs.rollback }}'
+          if [ "$CURRENT" != "$ROLLBACK" ]; then
+            echo "main changed after proof: $ROLLBACK -> $CURRENT; preserving candidate branch but refusing admission"
+            exit 43
+          fi
+          git push origin HEAD:main
+          echo "admitted=true" >> "$GITHUB_OUTPUT"
+          echo "admitted_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Continue next generation without chat scheduling
-        if: steps.select.outputs.status == 'PROPOSE' && steps.merge.outputs.merged == 'true' && github.event.inputs.continue != 'false'
+        if: steps.select.outputs.status == 'PROPOSE' && steps.admit.outputs.admitted == 'true' && github.event.inputs.continue != 'false'
         shell: bash
         run: |
           sleep 5
