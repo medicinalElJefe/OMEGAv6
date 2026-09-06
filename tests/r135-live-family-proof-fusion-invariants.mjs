@@ -17,7 +17,8 @@ must(proof.includes("operational?.proofBoundaries?.pcOnlineProved===true")&&proo
 must(proof.includes("family.status==='EVIDENCE_GATED'||family.status==='DEVICE_GATED'")&&proof.includes('Generic runtime health cannot satisfy this family'),'generic health must not unlock domain evidence/device gates');
 must(proof.includes("family.id==='S00'")&&proof.includes("family.id==='S23'"),'canonical runtime and HTTP transport families must expose service observation without being called native execution');
 must(proof.includes('currentNextActionR135')&&proof.includes("family.id==='S03'&&proof.state==='CURRENT_EXECUTION_PROOF'")&&proof.includes('bounded authenticated PC workload')&&proof.includes('R134 append-only world/scar chain'),'satisfied Hybrid proof must advance the next action into bounded workload + receipt/replay proof');
-must(!proof.includes('family.status=')&&!proof.includes('family.status ='),'proof overlay must never mutate declared family status');
+const statusAssignments=[...proof.matchAll(/family\.status\s*=(?!=)/g)];
+must(statusAssignments.length===0,'proof overlay must never mutate declared family status');
 
 must(surface.includes("api.get<any>('/api/system/operational')")&&surface.includes("api.get<any>('/api/hybrid/status')"),'surface must retrieve current operational and Hybrid evidence');
 must(surface.includes('window.setInterval(()=>void loadProof(),15000)'),'current proof must refresh instead of becoming stale UI state');
