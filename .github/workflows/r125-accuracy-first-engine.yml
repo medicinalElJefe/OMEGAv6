@@ -1,0 +1,85 @@
+name: OMEGA R125 Accuracy First Engine
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows:
+      - OMEGA R124 Self-Contained Continuous Build
+      - OMEGA R123 Living Total Experience
+      - OMEGA R122 Computed Reality Convergence
+      - OMEGA R121 Spherical Earth Connector Gate
+      - OMEGA Cloud Bridge CI
+    types: [completed]
+  schedule:
+    - cron: '*/30 * * * *'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: omega-r125-accuracy-engine
+  cancel-in-progress: false
+
+jobs:
+  observe-and-repair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Collect objective workflow evidence
+        shell: bash
+        run: |
+          gh run list --branch main --limit 40 --json databaseId,workflowName,status,conclusion,headSha,url,createdAt > /tmp/omega-r125-runs.json
+      - name: Verify inherited accuracy boundaries
+        run: |
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+          node tests/r123-living-total-experience-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: Observe measured residuals
+        run: node scripts/r125-accuracy-engine.mjs
+      - name: Apply only registered low-risk high-confidence repair
+        env:
+          OMEGA_R125_APPLY: '1'
+        run: node scripts/r125-accuracy-engine.mjs
+      - name: Prove repaired tree
+        run: |
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+          node tests/r123-living-total-experience-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          npm run build
+      - name: Admit only if repository changed
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No proven bounded repair required. Engine remains observing.'
+            exit 0
+          fi
+          START=$(git rev-parse HEAD)
+          git fetch origin main
+          CURRENT=$(git rev-parse origin/main)
+          if [ "$START" != "$CURRENT" ]; then
+            echo "main moved from $START to $CURRENT; refusing stale mutation"
+            exit 42
+          fi
+          git config user.name 'OMEGA R125 Accuracy Engine'
+          git config user.email 'actions@users.noreply.github.com'
+          git add src/generated/selfbuild/index.ts public/omega-r125-accuracy-state.json public/omega-r125-proposal.json
+          git commit -m 'R125 accuracy engine: admit proved bounded repair'
+          git push origin HEAD:main
