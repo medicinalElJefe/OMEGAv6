@@ -27,8 +27,9 @@ jobs:
       - name: Syntax-check computation and Optical transport
         run: |
           node --check src/computation/advancedComputationKernelR145.js
+          node --check src/computation/adaptiveComputationCampaignR145.js
           node --check services/opticalMachineR115.js
-      - name: Prove R145 physics-informed computation fabric
+      - name: Prove R145 physics-informed and adaptive computation fabric
         run: node tests/r145-advanced-computation-fabric-invariants.mjs
       - name: Prove maximum bounded design sweep
         shell: bash
@@ -41,6 +42,19 @@ jobs:
           if(result?.receipt?.fullwave_validation!==false||result?.receipt?.canonical_mutation!==false)throw new Error('R145 truth boundary regressed');
           if(!result?.summary?.pareto_front_size)throw new Error('maximum sweep produced no Pareto front');
           console.log(`R145 MAX SWEEP PASS · 256 candidates × 13 wavelengths × 2 polarizations + fabrication ensemble · Pareto ${result.summary.pareto_front_size} · RCWA-ready ${result.summary.rcwa_ready} · FDTD ${result.summary.fdtd_escalations} · kernel runtime ${result.receipt.runtime_ms}ms · ${result.receipt.result_sha256}`);
+          NODE
+      - name: Prove maximum bounded adaptive campaign depth
+        shell: bash
+        run: |
+          node <<'NODE'
+          import {runAdaptiveCampaignR145} from './src/computation/adaptiveComputationCampaignR145.js';
+          const result=await runAdaptiveCampaignR145({design_space:{count:256,wavelength_nm:550,target_phase_deg:180,material_model:{n_incident:1,n_feature:2.25,n_background:1,n_substrate:1.46}},generations:4,population:256,elite_count:12,spectral_points:7,fractional_bandwidth:.16,fabrication_tolerance_nm:7,polarizations:['s','p']});
+          if(result?.summary?.generations!==4||result?.history?.length!==4)throw new Error('maximum campaign did not complete four generations');
+          if(result?.receipt?.evaluations<768||result?.receipt?.evaluations>1024)throw new Error(`unexpected bounded evaluation count ${result?.receipt?.evaluations}`);
+          if(!/^[a-f0-9]{64}$/.test(result?.receipt?.campaign_sha256||''))throw new Error('campaign receipt hash missing');
+          if(result?.receipt?.stage_result_sha256?.length!==4||result.receipt.stage_result_sha256.some(x=>!/^[a-f0-9]{64}$/.test(x)))throw new Error('campaign stage hashes invalid');
+          if(result?.receipt?.fullwave_validation!==false||result?.receipt?.canonical_mutation!==false)throw new Error('adaptive truth boundary regressed');
+          console.log(`R145 MAX ADAPTIVE PASS · ${result.receipt.evaluations} total evaluations · 4 generations · initial ${result.summary.initial_best} → final ${result.summary.final_best} · Pareto ${result.summary.pareto_front_size} · ${result.receipt.campaign_sha256}`);
           NODE
       - name: Preserve R144 through R141 and R115 execution boundaries
         shell: bash
