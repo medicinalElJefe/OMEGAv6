@@ -5,6 +5,7 @@ const must=(v,m)=>assert.ok(v,'R139 '+m);
 const field=read('src/OmegaCapabilityFieldR138.tsx');
 const living=read('src/OmegaR36LivingSurfaces.tsx');
 const css=read('src/capabilityFirstR138.css');
+const livingCss=read('src/livingSurfaceR36.css');
 const weave=read('src/TraversalModeStageR100.tsx');
 const r136=read('src/world/livingWorldFrameR136.js');
 const r137=read('src/familyOperationalProofR137.ts');
@@ -21,13 +22,16 @@ must(!field.includes("<button className='r138-live-stage'"),'whole topology must
 must(field.includes('Spatial nodes are live controls'),'operator must be told that spatial nodes are actionable');
 
 must(living.includes("view==='LIVE'&&<><OmegaTraversalStudio"),'woven traversal studio must own primary LIVE traversal');
+must(living.includes("className='r139-live-truth-bridge'")&&living.includes('title={`${variant} · admitted transition`}'),'LIVE traversal must retain directly inspectable exact admitted-transition truth without making the chart primary');
 must(living.includes("view==='ROUTE'&&<><TransitionTruthPlotR93"),'exact transition evidence must remain in ROUTE + PROOF');
 must(living.includes('Selecting an address does not itself admit CanonState'),'traversal footer must preserve admission separation');
 must(css.includes(".r43-workspace-stage[data-view='ROUTE'] .r93-truth-plot.r93-transition{display:grid!important}"),'route/proof transition evidence must override global plot retirement only in the explicit evidence workspace');
+must(livingCss.includes(".r139-live-truth-bridge[open]>.r93-truth-plot.r93-transition{display:grid!important}"),'LIVE truth bridge must reveal exact transition geometry only when explicitly opened');
+must(livingCss.includes(".r139-live-truth-bridge:not([open])>.r93-truth-plot{display:none!important}"),'LIVE truth bridge must remain visually subordinate while closed');
 for(const token of ['WOVEN_CONTINUITY_OPERATOR_R100','applyWovenContinuityR100','ATLAS_RESOLUTION_LEVELS_R101','CONTINUITY FLUX','INVARIANT CARRY','ORIENTATION σ'])must(weave.includes(token),'primary woven instrument missing '+token);
 
 must(r136.includes("'ONE_CANONICAL_WORLD_MANY_LAWFUL_PROJECTIONS'"),'R136 one-world/many-projection law must remain intact');
 must(r136.includes("canonicalAdmissionAuthority:'R125'"),'R125 admission authority must remain intact');
 must(r137.includes('CURRENT_OPERATIONAL_PROOF_NEVER_AUTO_PROMOTES_CANONSTATE'),'R137 operational proof separation must remain intact');
 
-console.log('R139 CAPABILITY TRUTH + LIVE TRAVERSAL PASS · full-metric projection ranking · directly operable spatial nodes · woven live instrument · route proof retained · projection/address selection separated from R125 CanonState admission');
+console.log('R139 CAPABILITY TRUTH + LIVE TRAVERSAL PASS · full-metric projection ranking · directly operable spatial nodes · woven live instrument · inspectable exact transition truth · route proof retained · projection/address selection separated from R125 CanonState admission');
