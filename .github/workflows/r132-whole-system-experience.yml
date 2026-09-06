@@ -1,0 +1,45 @@
+name: OMEGA R132 Whole-System Experience
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r132-experience-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r132:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R132 whole-system organization and responsive presentation
+        run: node tests/r132-whole-system-experience-invariants.mjs
+      - name: Preserve current Home/navigation/visual truth contracts
+        run: |
+          node tests/r96-unified-canonical-home-invariants.mjs
+          node tests/r89-mobile-visual-first-flat-navigation-invariants.mjs
+          node tests/r84-responsive-coherent-navigation-invariants.mjs
+          node tests/r82-living-mode-expression-invariants.mjs
+          node tests/r81-surface-integrity-invariants.mjs
+      - name: Preserve R131-R125 capacity and admission authority
+        run: |
+          node tests/r131-capacity-governor.mjs
+          node tests/r130-operational-control-plane.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Cloudflare Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r132-dry-run
