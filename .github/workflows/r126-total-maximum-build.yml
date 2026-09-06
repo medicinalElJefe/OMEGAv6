@@ -1,0 +1,79 @@
+name: OMEGA R126 Total Maximum Build
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r126-total-maximum-full-build]
+
+permissions:
+  contents: read
+
+jobs:
+  verify-r126:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R126 total maximum convergence invariants
+        run: node tests/r126-total-maximum-build-invariants.mjs
+      - name: Prove recovered autonomic routing and rejoin
+        run: node tests/r125-autonomic-swarm-invariants.mjs
+      - name: Preserve accuracy-first mutation boundaries
+        run: node tests/r125-accuracy-engine-invariants.mjs
+      - name: Preserve continuous self-build governance
+        run: node tests/r124-self-contained-build-invariants.mjs
+      - name: Preserve organism hierarchy
+        run: node tests/r123-organism-swarm-invariants.mjs
+      - name: Preserve living total-experience runtime
+        run: node tests/r123-living-total-experience-invariants.mjs
+      - name: Preserve computed-reality truth boundary
+        run: node tests/r122-computed-reality-invariants.mjs
+      - name: Preserve R121 swarm and Earth source boundary
+        run: |
+          node tests/r121-swarm-runtime-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: Verify runtime syntax
+        run: |
+          node --check src/swarm/swarmAutonomicR125.js
+          node --check src/swarm/swarmApiR121.js
+          node --check src/workerR116.js
+      - name: Execute complete inherited OMEGA regression and production build
+        run: npm run check
+      - name: Verify R126 Durable Object migration and production Worker bundle
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r126-dry-run
+
+  live-r126:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-r126
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for governed deployment and prove maximum runtime surfaces
+        env:
+          OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function get(path){const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}}),j=await r.json();if(!r.ok)throw new Error(`${path} ${r.status} ${JSON.stringify(j).slice(0,400)}`);return j}
+          async function post(path,body){const r=await fetch(base+path,{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)}),j=await r.json();if(!r.ok)throw new Error(`${path} ${r.status} ${JSON.stringify(j).slice(0,400)}`);return j}
+          let manifest,last='';
+          for(let i=0;i<42;i++){
+            try{const j=await get('/api/swarm/autonomic/manifest');if(j.hierarchy?.cells===1728&&j.hierarchy?.lanes===20736&&j.executionFabrics?.autonomicR125){manifest=j;break}last=JSON.stringify(j).slice(0,300)}catch(e){last=String(e)}
+            await sleep(10000);
+          }
+          if(!manifest)throw new Error('R126 autonomic fabric not deployed through canonical Worker: '+last);
+          const plan=await post('/api/swarm/autonomic/plan',{intent:'R126 live proof bounded maximum surface verification',scope:{type:'CELL',domain:10,phase:11,regulation:3},providerBudget:0});
+          if(plan.plan?.totalCells!==1||plan.plan?.scope?.type!=='CELL'||plan.plan?.authority!=='AUTONOMIC_RESULT_FABRIC_NOT_CANON')throw new Error('R126 live plan truth contract failed');
+          const convergence=await get('/api/system/convergence');
+          if(convergence.canonicalAuthority!=='omega-v6')throw new Error('canonical authority drifted');
+          console.log(`R126 LIVE SURFACE PASS · ${manifest.hierarchy.cells} cells · ${manifest.hierarchy.lanes} lanes · canonical ${convergence.canonicalAuthority}`);
+          NODE
