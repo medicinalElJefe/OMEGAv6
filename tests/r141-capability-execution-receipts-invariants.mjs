@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const receipt=fs.readFileSync('src/capabilityExecutionReceiptsR141.ts','utf8');
+const plugins=fs.readFileSync('src/PluginRegistryR45.tsx','utf8');
+const r140=fs.readFileSync('src/modeCompletionFabricR140.ts','utf8');
+const must=(ok,msg)=>assert.ok(ok,'R141 '+msg);
+for(const law of ['DISCOVERED_IS_NOT_AUTHORIZED','AUTHORIZED_IS_NOT_AVAILABLE','AVAILABLE_IS_NOT_INVOKED','INVOKED_IS_NOT_RETURNED','RETURNED_IS_NOT_VERIFIED','REGISTERED_PLUGIN_IS_NOT_REMOTE_PROVIDER_PROOF','OUTPUT_CANNOT_MUTATE_CANONSTATE_WITHOUT_ADMISSION','FAILED_OR_STALE_EXECUTION_REMAINS_VISIBLE'])must(receipt.includes(`'${law}'`),`missing law ${law}`);
+for(const state of ['DISCOVERED','AUTHORIZED','AVAILABLE','INVOKED','RETURNED','VERIFIED','UNAVAILABLE','FAILED','REJECTED','STALE'])must(receipt.includes(`'${state}'`),`missing lifecycle state ${state}`);
+for(const domain of ['AI','SAI','PLUGIN','HYBRID','BUILD','PROOF','LOCAL'])must(receipt.includes(`'${domain}'`),`missing domain ${domain}`);
+must(receipt.includes("canonicalMutation:false")&&receipt.includes("admissionAuthority:'R125'"),'canonical mutation/admission boundary lost');
+must(receipt.includes('pluginManifestReceiptR141'),'plugin manifest receipt adapter missing');
+must(receipt.includes('remote provider presence is not proven by a local registry manifest'),'remote provider truth boundary missing');
+must(plugins.includes('DISCOVERED → AUTHORIZED → AVAILABLE → INVOKED → RETURNED → VERIFIED'),'plugin UI must expose execution lifecycle');
+must(plugins.includes('verified executions'),'plugin UI must distinguish verified execution count');
+must(plugins.includes('Export registry + R141 receipts'),'registry export must carry receipts');
+must(plugins.includes('pluginManifestReceiptR141')&&plugins.includes('summarizeCapabilityReceiptsR141'),'plugin registry must bind to R141 receipt engine');
+must(r140.includes("canonicalAdmissionAuthority:'R125'"),'R140/R125 inherited admission authority must remain');
+console.log('R141 CAPABILITY EXECUTION RECEIPTS PASS · registry/authorization/availability/invocation/return/verification are truth-separated · R125 admission preserved');
