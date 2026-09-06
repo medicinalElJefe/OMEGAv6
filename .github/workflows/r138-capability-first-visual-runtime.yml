@@ -1,0 +1,44 @@
+name: OMEGA R138 Capability First Visual Runtime
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prove-r138:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prove R138 capability-first visuals
+        run: node tests/r138-capability-first-visual-runtime.mjs
+      - name: Preserve R137 live family proof fusion
+        run: node tests/r137-live-family-proof-fusion-invariants.mjs
+      - name: Preserve R136 living world and both R134 continuity layers
+        run: |
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r134-woven-relativity-continuum-invariants.mjs
+      - name: Preserve R133 and R132 runtime/physics/Hybrid truth
+        run: |
+          node tests/r133-build-potential-map-invariants.mjs
+          node tests/r132-whole-system-experience-invariants.mjs
+          node tests/r132-relational-physics-manifold-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+      - name: Preserve inventory, capacity and admission authority
+        run: |
+          node tests/r83-full-system-inventory-invariants.mjs
+          node tests/r131-capacity-governor.mjs
+          node tests/r130-operational-control-plane.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Cloudflare Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r138-dry-run

@@ -10,6 +10,7 @@ import './sovereignDesignR59.css';
 import './instrumentOSR62.css';
 import './productResetR67.css';
 import './surfaceIntegrityR81.css';
+import './capabilityFirstR138.css';
 import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import OmegaHomeR71 from './OmegaHomeR71';
 const OmegaWorkstation=lazy(()=>import('./OmegaWorkstationFullV2'));
