@@ -1,0 +1,55 @@
+name: OMEGA R116 Current Host Recovery
+
+on:
+  push:
+    branches: [main, r116-current-host-recovery-convergence]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify-r116:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Syntax-check R116 worker
+        run: node --check src/workerR116.js
+      - name: Execute R116 recovery invariants
+        run: node tests/r116-current-host-recovery-invariants.mjs
+      - name: Verify inherited R115 machine adapters
+        run: node tests/r115-machine-adapters-invariants.mjs
+      - name: Verify inherited R114 durable closure
+        run: node tests/r114-federation-closure-invariants.mjs
+      - name: Production build
+        run: npm run build
+      - name: Dry-run canonical R116 Worker
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r116-dry-run
+
+  live-r116:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-r116
+    runs-on: ubuntu-latest
+    env:
+      OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify R116 public recovery + machine truth
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL;
+          const get=async path=>{const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}}),raw=await r.text();if(!r.ok)throw new Error(`${path} HTTP ${r.status}: ${raw.slice(0,300)}`);return JSON.parse(raw)};
+          const link=await get('/api/hybrid/current-link');
+          if(link.schema!=='OMEGA_CURRENT_HOST_LINK_R116'||link.canonicalOrigin!==base||link.freshLauncherRequired!==true)throw new Error('R116 current-link contract failed');
+          const machine=await get('/api/federation/machine/status');
+          if(machine.runtimeRevision!=='R116'||machine.nodes?.genesis?.state!=='LIVE'||machine.nodes?.optical?.state!=='LIVE')throw new Error(`R116 machine services not live: ${JSON.stringify(machine)}`);
+          const run=await get('/api/federation/run/status');
+          if(run.runtimeRevision!=='R116'||run.nodes?.optical?.machineState!=='LIVE')throw new Error(`R116 federation normalization failed: ${JSON.stringify(run.nodes?.optical)}`);
+          console.log('OMEGA R116 LIVE PASS · canonical recovery authority + Genesis PROPOSE + Optical SCREEN + normalized federation truth');
+          NODE
