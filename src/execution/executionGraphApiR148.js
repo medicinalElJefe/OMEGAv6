@@ -1,4 +1,5 @@
 import {authorizeGraphR148,cancelGraphR148,confirmGraphNodeR148,createGraphR148,listGraphsR148,manifestR148,readGraphR148,replayGraphR148,resumeGraphNodeR148,tickGraphR148,R148_REVISION} from './durableOperationGraphR148.js';
+export {R148_REVISION};
 
 const json=(data,status=200)=>new Response(JSON.stringify(data,null,2),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-operation-graph':R148_REVISION}});
 const safe=v=>{const s=String(v??'').trim().slice(0,180);return /^[A-Za-z0-9._:-]+$/.test(s)?s:''};
