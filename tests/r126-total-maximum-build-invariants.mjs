@@ -11,6 +11,7 @@ const canon=fs.readFileSync('src/allModesAuthority.ts','utf8');
 const worker=fs.readFileSync('src/workerR116.js','utf8');
 const api=fs.readFileSync('src/swarm/swarmApiR121.js','utf8');
 const wrangler=fs.readFileSync('wrangler.jsonc','utf8');
+const r130=fs.existsSync('src/workerR130.js')?fs.readFileSync('src/workerR130.js','utf8'):'';
 const selfBuild=fs.readFileSync('src/selfBuildRuntimeR124.ts','utf8');
 const accuracy=fs.readFileSync('src/accuracyResidualEngineR125.ts','utf8');
 
@@ -40,7 +41,9 @@ assert.ok(worker.includes('OmegaSwarmAutonomicCoordinator'));
 for(const route of ['/api/swarm/autonomic/manifest','/api/swarm/autonomic/status','/api/swarm/autonomic/plan','/api/swarm/autonomic/missions'])assert.ok(api.includes(route),`runtime route missing ${route}`);
 assert.ok(wrangler.includes('OMEGA_SWARM_AUTONOMIC'));
 assert.ok(wrangler.includes('r125-autonomic-swarm'),'R126 must preserve the historical R125 Durable Object migration tag instead of renaming an already-introduced class');
-assert.ok(wrangler.includes('"main": "src/workerR116.js"'));
+const directR116=wrangler.includes('"main": "src/workerR116.js"');
+const additiveR130=wrangler.includes('"main": "src/workerR130.js"')&&r130.includes("from './workerR116.js'")&&r130.includes('OmegaSwarmAutonomicCoordinator');
+assert.ok(directR116||additiveR130,'production entrypoint must be the proven R116 spine directly or an additive successor that imports and re-exports it');
 
 for(const layer of ['OmegaMaximumCockpitR126','OmegaAutonomicR125','OmegaOrganismR123','OmegaSwarmR121','OmegaFieldMotionConvergenceR28'])assert.ok(suite.includes(layer),`convergence layer missing ${layer}`);
 assert.ok(suite.indexOf('OmegaMaximumCockpitR126')<suite.indexOf("<details className='r121-legacy-convergence' open"),'maximum cockpit must remain top-level before lower execution layers');

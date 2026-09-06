@@ -5,6 +5,7 @@ import {OmegaSwarmCell} from './swarm/swarmCellR121.js';
 import {OmegaSwarmCoordinator} from './swarm/swarmCoordinatorR121.js';
 import {OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator} from './swarm/swarmOrganismR123.js';
 import {OmegaSwarmAutonomicCoordinator} from './swarm/swarmAutonomicR125.js';
+import {manifestR130,operationalR130,R130_REVISION} from './system/operationalControlPlaneR130.js';
 
 export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator,OmegaSwarmAutonomicCoordinator};
 
@@ -33,7 +34,7 @@ function corsHeadersR116(request){
   'vary':'Origin',
   'access-control-allow-methods':'GET,POST,PUT,DELETE,OPTIONS',
   'access-control-allow-headers':'content-type,authorization,x-omega-federation-token,x-vercel-protection-bypass,x-omega-bridge-id,x-omega-bridge-secret,x-omega-session-id,cache-control',
-  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
+  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-control-plane,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
   'access-control-max-age':'600'
  };
 }
@@ -114,8 +115,18 @@ async function durablePairR117(request,env){
  });
 }
 
+async function probeFetchR130(request,env){
+ const url=new URL(request.url),path=url.pathname;
+ if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
+ if(path==='/api/system/convergence')return json(await convergenceR116(request,env));
+ if(path==='/api/federation/run/status'){
+  const [{response,body},machine]=await Promise.all([inheritedStatusR116(request,env),machineStatusR116(request,env)]);if(!body||typeof body!=='object')return response;return json(enrichStatusR116(body,machine),response.status);
+ }
+ return r115.fetch(request,env);
+}
+
 async function fetchR116(request,env){
- const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path==='/api/system/convergence';
+ const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
  if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
  if(path==='/api/hybrid/bootstrap'&&request.method==='POST')return withCorsR116(await durablePairR117(request,env),request);
@@ -127,6 +138,8 @@ async function fetchR116(request,env){
   return withCorsR116(json({...plan,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,machineAwareRouting:true,machineServices:{genesis:machine?.nodes?.genesis?.state||'UNKNOWN',optical:machine?.nodes?.optical?.state||'UNKNOWN'},truthBoundary:`${plan.truthBoundary} R116 treats live R115 machine adapters as execution readiness for their existing PROPOSE/SCREEN roles while preserving protected human-surface state separately.`},plan.ok?200:400),request);
  }
  if(path==='/api/system/convergence'&&request.method==='GET')return withCorsR116(json(await convergenceR116(request,env)),request);
+ if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json(manifestR130(),200,{'x-omega-control-plane':R130_REVISION}),request);
+ if(path==='/api/system/operational'&&request.method==='GET')return withCorsR116(json(await operationalR130(request,env,probeFetchR130),200,{'x-omega-control-plane':R130_REVISION}),request);
  const response=await r115.fetch(request,env);return corsPath?withCorsR116(response,request):withCorsR116(response,request);
 }
 
