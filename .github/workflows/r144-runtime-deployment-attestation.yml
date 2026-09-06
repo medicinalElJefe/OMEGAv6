@@ -1,0 +1,55 @@
+name: OMEGA R144 Runtime Deployment Attestation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, r143-authoritative-ui-operation-chain]
+  push:
+    branches: [main, r144-runtime-deployment-attestation]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r144-runtime-attestation-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r144:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R144 deployment-attestation truth separation
+        run: node tests/r144-runtime-deployment-attestation-invariants.mjs
+      - name: Preserve R143 UI chain, R142 lifecycle and R141 Hybrid proof authority
+        shell: bash
+        run: |
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+      - name: Preserve R125 canonical admission and autonomous build boundary
+        shell: bash
+        run: |
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Prove packaged source binds the exact workflow SHA
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='dist/omega-build-receipt.json';
+          if(!fs.existsSync(p))throw new Error('dist build receipt missing');
+          const r=JSON.parse(fs.readFileSync(p,'utf8'));
+          if(r?.source?.sha!==process.env.GITHUB_SHA)throw new Error(`packaged source ${r?.source?.sha||'NONE'} != workflow ${process.env.GITHUB_SHA}`);
+          if(r?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'||!String(r?.receiptSha256||'').match(/^[a-f0-9]{64}$/))throw new Error('governed build receipt binding invalid');
+          console.log(`R144 packaged source bound to ${process.env.GITHUB_SHA} · ${r.receiptSha256}`);
+          NODE
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r144-dry-run
