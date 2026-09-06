@@ -1,0 +1,36 @@
+name: OMEGA R125 Persistent World Organism
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r125-persistent-world-organism-spine]
+permissions:
+  contents: read
+jobs:
+  r125-world-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: R125 persistent world organism invariants
+        run: node tests/r125-persistent-world-organism-invariants.mjs
+      - name: Preserve R124 governed self-build invariants
+        run: node tests/r124-self-contained-build-invariants.mjs
+      - name: Preserve R123 living experience and organism swarm
+        run: |
+          node tests/r123-living-total-experience-invariants.mjs
+          node tests/r123-organism-swarm-invariants.mjs
+      - name: Preserve R122 computed reality and full-potential convergence
+        run: |
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r122-full-potential-convergence-invariants.mjs
+      - name: Preserve R121 Earth/Hybrid truth boundary
+        run: node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: Full inherited static and production build gate
+        run: npm run check
+      - name: Cloudflare Worker dry run including R125 Durable Object migration
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r125-dry-run
