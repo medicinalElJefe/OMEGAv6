@@ -38,15 +38,15 @@ export default function SovereignConnectionR117({compact=false,onState}:Props){
  };
  const forget=()=>{clearHybridBridge();setBridge(null);setLive(null);setConnectorUrl(old=>{if(old)URL.revokeObjectURL(old);return null});setMessage('Browser bridge credential removed. Use FIX CONNECTION NOW to mint a completely new one.');void refresh()};
  const capabilitySummary=useMemo(()=>[
-  {label:'Local files & projects',ready:online,detail:online?'Available inside the approved root':'Current authenticated PC heartbeat required'},
+  {label:'Local files & projects',ready:online,detail:online?'Available only inside the approved non-C root':'Current authenticated PC heartbeat required'},
   {label:'Build / test / package',ready:online,detail:online?'Native execution available through governed jobs':'Current authenticated PC heartbeat required'},
-  {label:'Local learning',ready:online,detail:online?'TRAIN_LOCAL available inside the approved corpus':'Current authenticated PC heartbeat required'},
+  {label:'Local learning',ready:online,detail:online?'TRAIN_LOCAL available inside the approved corpus/root':'Current authenticated PC heartbeat required'},
   {label:'Full-wave RCWA',ready:online&&rcwaOnline,detail:online?(rcwaOnline?'Solver heartbeat current':'PC connected; RCWA dependency/worker not current'):'Connect PC first'}
  ],[online,rcwaOnline]);
 
  return <section className={'r112-sovereign '+(compact?'compact ':'')+(online?'live':bridge?'prepared':'idle')} aria-label='Connect this PC to OMEGA'>
   <div className='r112-sovereign-main'>
-   <div className='r112-sovereign-copy'><span>OMEGA SOVEREIGN LINK · R117</span><h3>{online?'This PC is genuinely connected':'Repair the PC connection from a clean credential'}</h3><p>{online?'OMEGA is receiving a current authenticated Windows-host heartbeat.':'FIX CONNECTION NOW rotates a fresh durable server credential without trusting the stale bridge stored in this browser. The clean connector is then exposed as a normal user-clickable download, avoiding blocked async downloads.'}</p></div>
+   <div className='r112-sovereign-copy'><span>OMEGA SOVEREIGN LINK · R117 · J-ROOT SAFE</span><h3>{online?'This PC is genuinely connected':'Repair the PC connection from a clean credential'}</h3><p>{online?'OMEGA is receiving a current authenticated Windows-host heartbeat.':'FIX CONNECTION NOW rotates a fresh durable server credential. The connector uses J:\\ by default and keeps OMEGA agent files, logs, temp state and caches on the approved non-C root. It does not silently fall back to C:.'}</p></div>
    <div className='r112-sovereign-primary'>
     {!online&&!connectorUrl&&<button className='r112-big-action' onClick={()=>void forceFresh()} disabled={busy}>{busy?<RefreshCw className='spin'/>:<ShieldCheck/>}{busy?'Rotating clean credential…':'FIX CONNECTION NOW'}</button>}
     {!online&&connectorUrl&&<a className='r112-big-action' href={connectorUrl} download={SOVEREIGN_LAUNCHER_FILENAME_R117}><Download/>DOWNLOAD CLEAN R117 CONNECTOR</a>}
@@ -58,10 +58,11 @@ export default function SovereignConnectionR117({compact=false,onState}:Props){
 
   {!online&&<div className='r112-three-steps'>
    <article className={!connectorUrl?'active':''}><b>1</b><div><strong>Click FIX CONNECTION NOW</strong><span>OMEGAv6 rotates a brand-new pairing directly in durable runtime state. Stale browser bridge headers are deliberately excluded from this bootstrap request.</span></div><ShieldCheck/></article>
-   <article className={connectorUrl?'active':''}><b>2</b><div><strong>Download and open only <code>{SOVEREIGN_LAUNCHER_FILENAME_R117}</code></strong><span>The explicit download button is browser-safe. The connector calls only <code>omegav6.jeffdeweyeljefe.workers.dev</code>, fetches the current canonical agent, validates it, and runs it visibly in the Windows console.</span></div><Download/></article>
+   <article className={connectorUrl?'active':''}><b>2</b><div><strong>Download and open only <code>{SOVEREIGN_LAUNCHER_FILENAME_R117}</code></strong><span>The connector calls only <code>omegav6.jeffdeweyeljefe.workers.dev</code>, validates the current canonical agent with CMD-safe checks, and writes OMEGA runtime state only under the approved non-C root.</span></div><Download/></article>
    <article><b>3</b><div><strong>Watch for real authentication + heartbeat</strong><span>The Windows console must show the actual agent register/heartbeat/poll path. This page polls the same freshly issued bridge. PC ONLINE appears only after that heartbeat is current.</span></div><Cpu/></article>
   </div>}
 
+  {!online&&<div className='r112-sovereign-message'><TriangleAlert/>Storage boundary: OMEGA connector files, logs, temp files and caches stay on J:\\ (or another explicitly approved non-C root). Python itself may already be installed on C:\\ and can be executed from there, but the connector does not use C:\\ for OMEGA writable state.</div>}
   {!online&&<div className='r112-sovereign-message'><TriangleAlert/>Delete or ignore every old launcher that mentions <code>{retiredOrigin}</code>. R117 never calls it.</div>}
   {message&&<div className='r112-sovereign-message'>{message}</div>}
 
@@ -69,7 +70,7 @@ export default function SovereignConnectionR117({compact=false,onState}:Props){
 
   {advanced&&<div className='r112-sovereign-advanced'>
    <div className='r112-facts'><div><span>BROWSER BRIDGE</span><b>{bridge?'FRESH/AVAILABLE':'NONE'}</b></div><div><span>SERVER STATE</span><b>{truth(live?.state||'DEVICE_PROOF_REQUIRED')}</b></div><div><span>LAST PC PROOF</span><b>{lastSeen?age(lastSeen):'none'}</b></div><div><span>RCWA</span><b>{truth(rcwa)}</b></div></div>
-   <p><TriangleAlert/>R117 separates credential issuance from host proof. A fresh credential is not PC ONLINE; a current authenticated heartbeat is.</p>
+   <p><TriangleAlert/>A fresh credential is not PC ONLINE; a current authenticated heartbeat is. The storage-safe launcher also refuses to create its OMEGA runtime home on C:.</p>
    <div className='r112-advanced-actions'><button onClick={()=>void refresh()}><RefreshCw/>Refresh proof</button><button onClick={()=>void forceFresh()} disabled={busy}><RotateCcw/>Rotate credential</button><button onClick={forget}><Trash2/>Forget browser bridge</button></div>
    {bridge?.bridgeId&&<code className='r112-bridge-id'>Bridge {bridge.bridgeId}</code>}
   </div>}
