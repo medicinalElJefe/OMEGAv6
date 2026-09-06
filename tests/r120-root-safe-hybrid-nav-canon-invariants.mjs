@@ -8,6 +8,8 @@ const navCss=read('src/omegaSideNavigatorR120.css');
 const canon=read('src/capability/canonContinuityRuntimeR120.ts');
 const ribbon=read('src/RouteOutputRibbonR111.tsx');
 const agent=read('public/omega-hybrid-agent.py');
+const federationSurface=read('src/FederationSurfaceFabricR119.tsx');
+const surfaceRegistry=JSON.parse(read('public/omega-surface-fabric-r120.json'));
 
 must(launcher.includes("OMEGA_VERSION=R120"),'root-safe successor version missing');
 must(launcher.includes('else if exist J:')&&launcher.includes('goto :root_fail'),'launcher must prefer J and refuse silent system-drive fallback');
@@ -35,4 +37,20 @@ must(canon.includes('37/73 remain reference-kernel parameters unless independent
 must(canon.includes('not literal physical dimensions'),'atlas physical-dimension truth boundary missing');
 must(ribbon.includes('routeCanonTraceR120')&&ribbon.includes('FULL OVERALL CANON')&&ribbon.includes('RSC ·'),'shared canon computation must be surfaced across route output contracts');
 
-console.log('R120 PASS · C-write-safe OMEGA runtime · Hybrid validator repaired · compact/wide/full navigation · Full Overall Canon continuity runtime promoted');
+for(const url of ['https://omegav6.jeffdeweyeljefe.workers.dev/','https://omega-genesis-v1.jeffdeweyeljefe.workers.dev/','https://omega-sovereign-convergence.foundasound.chatgpt.site/','https://omega-living-light-etching-private-woven2.vercel.app/'])must(federationSurface.includes(url),'surface fabric missing requested URL '+url);
+must(federationSurface.includes('R120 · FULL OVERALL CANON SURFACE FABRIC'),'surface fabric must expose the current correlated successor');
+must(federationSurface.includes('HISTORICAL_SOVEREIGN_SURFACE')&&federationSurface.includes('not a current pairing endpoint'),'Foundasound must remain historical and never regain launcher/heartbeat authority');
+must(federationSurface.includes('R115 Genesis machine adapter')&&federationSurface.includes('R115 Optical machine adapter'),'human surfaces and bounded machine services must remain explicitly separated');
+
+must(surfaceRegistry.schema==='OMEGA_SURFACE_FABRIC_R120'&&surfaceRegistry.revision==='R120','surface registry revision mismatch');
+must(surfaceRegistry.canonicalAuthority==='OMEGAv6','OMEGAv6 must remain sole global admission authority');
+must(Array.isArray(surfaceRegistry.surfaces)&&surfaceRegistry.surfaces.length===4,'surface registry must preserve exactly four authority roles');
+const v6=surfaceRegistry.surfaces.find(x=>x.id==='omega-v6'),genesis=surfaceRegistry.surfaces.find(x=>x.id==='omega-genesis'),optical=surfaceRegistry.surfaces.find(x=>x.id==='omega-optical'),sovereign=surfaceRegistry.surfaces.find(x=>x.id==='omega-sovereign');
+must(v6?.mayMutateGlobalCanonState===true&&[genesis,optical,sovereign].every(x=>x?.mayMutateGlobalCanonState===false),'surface authority mutation boundary regressed');
+must(genesis?.url==='https://omega-genesis-v1.jeffdeweyeljefe.workers.dev/','Genesis human surface mismatch');
+must(optical?.url==='https://omega-living-light-etching-private-woven2.vercel.app/'&&optical.aliases.includes('https://omega-living-light-etching-private-woven2.vercel.app/?utm_source=chatgpt.com'),'Optical clean URL/alias normalization missing');
+must(sovereign?.historicalHumanSurface==='https://omega-sovereign-convergence.foundasound.chatgpt.site/'&&String(sovereign.historicalSurfacePolicy).includes('Never pairing'),'retired Sovereign boundary missing');
+must(surfaceRegistry.hybrid.connectorFilename==='START_OMEGA_PC_LINK_R120_ROOT_SAFE.cmd'&&String(surfaceRegistry.hybrid.systemDrivePolicy).includes('MUST NOT fall back to C:'),'root-safe connector registry mismatch');
+must(String(surfaceRegistry.referenceKernel.truthBoundary).includes('37/73 remain reference-kernel')&&String(surfaceRegistry.atlasTruthBoundary).includes('not literal physical dimensions'),'canon truth boundaries missing from shared surface registry');
+
+console.log('R120 PASS · C-write-safe OMEGA runtime · Hybrid validator repaired · compact/wide/full navigation · Full Overall Canon continuity runtime promoted · all requested surfaces correlated under one authority registry');
