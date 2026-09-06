@@ -1,8 +1,8 @@
-// OMEGA R117: R116 truth separation + direct durable fresh-pair bootstrap + one clean canonical Sovereign connector; all inherited runtime/federation/archive/mode behavior preserved.
+// OMEGA R117 connector repair on the proven R116 runtime spine: fresh durable pairing + one clean canonical Sovereign connector; all inherited runtime/federation/archive/mode behavior preserved.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR117.js",
+  "main": "src/workerR116.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
