@@ -26,8 +26,8 @@ must(living.includes("className='r139-live-truth-bridge'")&&living.includes('tit
 must(living.includes("view==='ROUTE'&&<><TransitionTruthPlotR93"),'exact transition evidence must remain in ROUTE + PROOF');
 must(living.includes('Selecting an address does not itself admit CanonState'),'traversal footer must preserve admission separation');
 must(css.includes(".r43-workspace-stage[data-view='ROUTE'] .r93-truth-plot.r93-transition{display:grid!important}"),'route/proof transition evidence must override global plot retirement only in the explicit evidence workspace');
-must(livingCss.includes(".r139-live-truth-bridge[open]>.r93-truth-plot.r93-transition{display:grid!important}"),'LIVE truth bridge must reveal exact transition geometry only when explicitly opened');
-must(livingCss.includes(".r139-live-truth-bridge:not([open])>.r93-truth-plot{display:none!important}"),'LIVE truth bridge must remain visually subordinate while closed');
+must(livingCss.includes(".r139-live-truth-bridge[open]>.r93-truth-plot.r93-transition{display:grid!important"),'LIVE truth bridge must reveal exact transition geometry only when explicitly opened');
+must(livingCss.includes(".r139-live-truth-bridge:not([open])>.r93-truth-plot{display:none!important"),'LIVE truth bridge must remain visually subordinate while closed');
 for(const token of ['WOVEN_CONTINUITY_OPERATOR_R100','applyWovenContinuityR100','ATLAS_RESOLUTION_LEVELS_R101','CONTINUITY FLUX','INVARIANT CARRY','ORIENTATION σ'])must(weave.includes(token),'primary woven instrument missing '+token);
 
 must(r136.includes("'ONE_CANONICAL_WORLD_MANY_LAWFUL_PROJECTIONS'"),'R136 one-world/many-projection law must remain intact');
