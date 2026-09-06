@@ -1,0 +1,56 @@
+name: OMEGA R148 Durable Operation Graph
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, r147-unified-executor-fabric]
+  push:
+    branches: [main, r148-durable-operation-graph]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r148-graph-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r148:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove durable multi-operation graph
+        run: node tests/r148-durable-operation-graph-invariants.mjs
+      - name: Preserve executor and durable-run layers
+        run: |
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+      - name: Preserve attestation, route, lifecycle and Hybrid proof chain
+        run: |
+          node tests/r145-runtime-attestation-world-scar-invariants.mjs
+          node tests/r144-runtime-deployment-attestation-invariants.mjs
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+      - name: Preserve operation fabric, Hybrid root confinement, swarm and admission
+        run: |
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r139-unified-capability-engine-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Syntax-check proven production spine and graph engines
+        run: |
+          node --check src/workerR116.js
+          node --check src/execution/durableOperationGraphR148.js
+          node --check src/execution/executionGraphApiR148.js
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r148-dry-run
