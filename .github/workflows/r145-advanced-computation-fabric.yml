@@ -1,0 +1,80 @@
+name: OMEGA R145 Advanced Computation Fabric
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r145-advanced-computation-fabric]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r145-compute-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r145:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Syntax-check computation and Optical transport
+        run: |
+          node --check src/computation/advancedComputationKernelR145.js
+          node --check services/opticalMachineR115.js
+      - name: Prove R145 physics-informed computation fabric
+        run: node tests/r145-advanced-computation-fabric-invariants.mjs
+      - name: Prove maximum bounded design sweep
+        shell: bash
+        run: |
+          node <<'NODE'
+          import {screenBatchR145} from './src/computation/advancedComputationKernelR145.js';
+          const result=await screenBatchR145({design_space:{count:256,wavelength_nm:550,target_phase_deg:180,material_model:{n_incident:1,n_feature:2.25,n_background:1,n_substrate:1.46}},spectral_points:13,fractional_bandwidth:.2,fabrication_tolerance_nm:7,polarizations:['s','p']});
+          if(result?.summary?.candidate_count!==256)throw new Error('maximum sweep did not evaluate 256 candidates');
+          if(!/^[a-f0-9]{64}$/.test(result?.receipt?.source_sha256||'')||!/^[a-f0-9]{64}$/.test(result?.receipt?.result_sha256||''))throw new Error('maximum sweep receipt hashes missing');
+          if(result?.receipt?.fullwave_validation!==false||result?.receipt?.canonical_mutation!==false)throw new Error('R145 truth boundary regressed');
+          if(!result?.summary?.pareto_front_size)throw new Error('maximum sweep produced no Pareto front');
+          console.log(`R145 MAX SWEEP PASS · 256 candidates × 13 wavelengths × 2 polarizations + fabrication ensemble · Pareto ${result.summary.pareto_front_size} · RCWA-ready ${result.summary.rcwa_ready} · FDTD ${result.summary.fdtd_escalations} · kernel runtime ${result.receipt.runtime_ms}ms · ${result.receipt.result_sha256}`);
+          NODE
+      - name: Preserve R144 through R141 and R115 execution boundaries
+        shell: bash
+        run: |
+          node tests/r144-runtime-deployment-attestation-invariants.mjs
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r115-machine-adapters-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Dry-run upgraded Optical machine
+        run: npx wrangler deploy --config wrangler.optical-machine-r115.jsonc --dry-run --outdir .wrangler-r145-optical
+      - name: Dry-run canonical Worker
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r145-canonical
+      - name: Install Chromium
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start built application locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r145-preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r145-preview.log
+          exit 1
+      - name: Execute R145 computation in desktop and mobile browser
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r145-browser-computation-e2e.mjs
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r145-preview.log || true
