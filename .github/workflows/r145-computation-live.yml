@@ -1,0 +1,35 @@
+name: OMEGA R145 Computation Live Verify
+
+on:
+  workflow_run:
+    workflows: [OMEGA R115 Machine Adapters]
+    types: [completed]
+
+permissions:
+  contents: read
+
+env:
+  OPTICAL_MACHINE_URL: https://omega-optical-machine-r115.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-live-r145:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Verify deployed R145 computation engine first-hand
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OPTICAL_MACHINE_URL.replace(/\/$/,'');
+          const headers={'cache-control':'no-cache'};
+          const healthResponse=await fetch(base+'/api/health',{headers}),health=await healthResponse.json();
+          if(!healthResponse.ok||health?.ok!==true||health?.advancedComputation!=='AVAILABLE'||health?.advancedEngine!=='R145_PHYSICS_INFORMED_REDUCED_ORDER_V1')throw new Error(`R145 health not deployed: ${JSON.stringify(health)}`);
+          const manifestResponse=await fetch(base+'/api/computation/r145/manifest',{headers}),manifest=await manifestResponse.json();
+          if(!manifestResponse.ok||manifest?.schema!=='OMEGA_ADVANCED_COMPUTATION_R145'||manifest?.revision!=='R145'||manifest?.authority?.fullwave!=='SOVEREIGN_EXECUTOR_REQUIRED')throw new Error(`R145 manifest invalid: ${JSON.stringify(manifest)}`);
+          const response=await fetch(base+'/api/computation/r145/screen-batch',{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify({design_space:{count:64,wavelength_nm:550,target_phase_deg:180,material_model:{n_incident:1,n_feature:2.25,n_background:1,n_substrate:1.46}},spectral_points:5,fractional_bandwidth:.12,fabrication_tolerance_nm:5,polarizations:['s','p']})}),result=await response.json();
+          if(!response.ok||result?.schema!=='OMEGA_COMPUTE_BATCH_RESULT_R145'||result?.summary?.candidate_count!==64)throw new Error(`R145 live batch failed: ${JSON.stringify(result).slice(0,1600)}`);
+          if(!/^[a-f0-9]{64}$/.test(result?.receipt?.source_sha256||'')||!/^[a-f0-9]{64}$/.test(result?.receipt?.result_sha256||''))throw new Error('R145 live compute hashes missing');
+          if(result?.receipt?.fullwave_validation!==false||result?.receipt?.canonical_mutation!==false||result?.receipt?.downstream_execution_receipt_authority!=='R142'||result?.receipt?.deployment_attestation_authority!=='R144'||result?.receipt?.canonical_admission_authority!=='R125')throw new Error('R145 live truth boundary regressed');
+          console.log(`OMEGA R145 LIVE COMPUTE PASS · ${result.summary.candidate_count} candidates · Pareto ${result.summary.pareto_front_size} · RCWA-ready ${result.summary.rcwa_ready} · FDTD ${result.summary.fdtd_escalations} · ${result.receipt.result_sha256}`);
+          NODE
