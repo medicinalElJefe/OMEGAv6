@@ -8,6 +8,7 @@ const safeId=v=>{const s=String(v??'').trim().slice(0,160);return /^[A-Za-z0-9._
 const iso=()=>new Date().toISOString();
 async function receiptHash(x){return sha256R134(x)}
 function nextNode(run){return run.graph.nodes.find(n=>!['N00_FRAME','N90_ADMISSION'].includes(n.id)&&!terminal.has(n.state)&&n.state!=='VERIFIED'&&dependencyStateR143(run.graph,n.id).ready)||null}
+function blockedDescendant(run){return run.graph.nodes.find(n=>!['N00_FRAME','N80_JOIN','N90_ADMISSION'].includes(n.id)&&!terminal.has(n.state)&&n.state!=='VERIFIED'&&dependencyStateR143(run.graph,n.id).reason.startsWith('DEPENDENCY_'))||null}
 async function internal(stub,path,request,method='GET',body){const headers=new Headers(request.headers);headers.set('content-type','application/json');return stub.fetch(new Request('https://omega-runtime.internal'+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body)}))}
 async function setInvocation(stub,run,node,request,invocation){const r=await internal(stub,`/operation-weave/runs/${encodeURIComponent(run.id)}/invocation`,request,'POST',{nodeId:node.id,invocation});return jsonBody(r)}
 async function applyReceipt(stub,run,node,request,receipt,frames={}){const r=await internal(stub,`/operation-weave/runs/${encodeURIComponent(run.id)}/receipt`,request,'POST',{nodeId:node.id,receipt,frames});return jsonBody(r)}
@@ -48,6 +49,7 @@ async function hostTick(stub,run,node,request){
 }
 
 export async function tickWholeOperationRunR143({request,env,run,stub,legacyFetch}){
+ const blocked=blockedDescendant(run);if(blocked){const dep=dependencyStateR143(run.graph,blocked.id);return applyReceipt(stub,run,blocked,request,{state:'STALE',verified:false,source:'R143_CAUSAL_DEPENDENCY_GATE',failureReason:dep.reason,scarIds:[`${blocked.id}:${dep.reason}`],sourceIds:blocked.dependsOn,proofIds:[]},{departureFrame:run.departureFrame,returnFrame:{schema:'OMEGA_CAUSAL_RETURN_FRAME_R143',at:run.graph.joinEventTime+run.graph.nodes.indexOf(blocked),stateGeneration:'DEPENDENCY_FAILED',canonicalMutation:false}})}
  const node=nextNode(run);if(!node){const join=run.graph.nodes.find(x=>x.id==='N80_JOIN');if(join?.state==='VERIFIED'||run.joinReceipt)return{run,action:'COMPLETE_OR_HELD_FOR_R125'};const dep=dependencyStateR143(run.graph,'N80_JOIN');if(dep.ready){const r=await internal(stub,`/operation-weave/runs/${encodeURIComponent(run.id)}/join`,request,'POST',{});return{...(await jsonBody(r)),action:'JOIN'}}return{run,action:'WAITING_DEPENDENCIES',dependency:dep}}
  if(node.id==='N80_JOIN'){const r=await internal(stub,`/operation-weave/runs/${encodeURIComponent(run.id)}/join`,request,'POST',{});return{...(await jsonBody(r)),action:'JOIN'}}
  if(node.executor==='SWARM')return swarmTick(env,stub,run,node,request);
