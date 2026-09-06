@@ -38,6 +38,9 @@ must(visual.includes('operational status is not execution proof or physics evide
 must(visual.includes("sigma===1?'OUTVERSE +':'INVERSE −'"),'signed orientation must remain independent from structure');
 must(visual.includes('selectAdaptiveLodR134'),'renderer must adapt LOD instead of forcing full load on every device');
 must(visual.includes('<OmegaEarthRelativitySphereR121'),'Earth evidence must remain a bounded lens');
+must(!visual.includes('powl(')&&visual.includes('pow(max(.01,M),.5)'),'WebGL2 shader must use GLSL ES 3 pow rather than an invalid C/C++ powl symbol');
+must(visual.includes('uniform vec4 uScale')&&visual.includes("scale.dominantForce==='Strong interaction'")&&visual.includes("scale.dominantForce==='Electromagnetic interaction'"),'FORCES scene must bind selected reference-scale context into the GPU field');
+must(visual.includes("reference hierarchy lens, not a claim that OMEGA geometry is a measured physical field"),'force visualization must preserve reference-vs-measurement truth boundary');
 must(css.includes('@media(max-width:820px)')&&css.includes('@media(max-width:560px)'),'desktop/mobile responsive authority missing');
 must(css.includes('.r134-truth-hud')&&css.includes('.r134-camera'),'truth/camera controls must remain edge-mounted');
 must(membrane.includes("import OmegaWovenRelativityContinuumR134 from './OmegaWovenRelativityContinuumR134'"),'Home must import R134 successor');
@@ -46,4 +49,4 @@ must(membrane.includes('CANONICAL SOURCE MEMBRANE · OPEN 20,736-CELL INSPECTION
 must(r132.includes('not asserted as literal extra spacetime dimensions'),'R132 physics truth boundary must remain intact');
 must(control.includes('R125_REMAINS_CANONICAL_ADMISSION_AUTHORITY'),'R125 admission authority must remain unchanged');
 
-console.log('OMEGA R134 WOVEN RELATIVITY CONTINUUM PASS · canonical adjacency topology · adaptive 144/1728/20736 LOD · observer frames · continuity/scar transport · causal candidate separation · R132 all-mode inheritance · Hybrid/R133 context truth · R125 admission preserved');
+console.log('OMEGA R134 WOVEN RELATIVITY CONTINUUM PASS · canonical adjacency topology · adaptive 144/1728/20736 LOD · observer frames · continuity/scar transport · causal candidate separation · R132 all-mode inheritance · GPU reference-scale force lens · Hybrid/R133 context truth · R125 admission preserved');
