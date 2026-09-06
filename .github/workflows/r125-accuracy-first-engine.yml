@@ -8,6 +8,9 @@ on:
     branches: [main]
   workflow_run:
     workflows:
+      - OMEGA R144 Runtime Deployment Attestation
+      - OMEGA Release Evidence Live Verify
+      - OMEGA R143 Authoritative UI Operation Chain
       - OMEGA R124 Self-Contained Continuous Build
       - OMEGA R123 Living Total Experience
       - OMEGA R122 Computed Reality Convergence
@@ -45,8 +48,9 @@ jobs:
         shell: bash
         run: |
           gh run list --branch main --limit 40 --json databaseId,workflowName,status,conclusion,headSha,url,createdAt > /tmp/omega-r125-runs.json
-      - name: Verify inherited accuracy and operation-chain boundaries
+      - name: Verify inherited accuracy operation-chain lifecycle and deployment boundaries
         run: |
+          node tests/r144-runtime-deployment-attestation-invariants.mjs
           node tests/r143-authoritative-ui-operation-chain-invariants.mjs
           node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
           node tests/r125-accuracy-engine-invariants.mjs
@@ -62,6 +66,7 @@ jobs:
         run: node scripts/r125-accuracy-engine.mjs
       - name: Prove repaired tree
         run: |
+          node tests/r144-runtime-deployment-attestation-invariants.mjs
           node tests/r143-authoritative-ui-operation-chain-invariants.mjs
           node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
           node tests/r125-accuracy-engine-invariants.mjs
