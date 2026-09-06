@@ -1,0 +1,120 @@
+{
+  "schema": "omega.r126.causal-interaction.v1",
+  "runtime": "OMEGA_R126_CAUSAL_INTERACTION_RELATIVITY_FABRIC",
+  "canonicalAuthority": "OMEGAv6",
+  "inherits": ["R125", "R124", "R123", "R122", "R121"],
+  "continuityLaw": "partition -> transform/exchange -> invariant carry -> scar carry -> recontextualize/rebase -> accuracy gate -> admit",
+  "principles": {
+    "canonicalWorld": "one canonical world, many lawful projections",
+    "canonicalPhase": "one canonical phase, many relative projections",
+    "interactionRelativity": "AI/tool/service handoff is a frame transform, not a context reset",
+    "motionRelativity": "returned work is reconciled against current canonical state, not blindly merged against departure state",
+    "computeRelativity": "working-set topology is relative to novelty, uncertainty, contradiction, proof urgency, motion, observer relevance, expected information gain and cost"
+  },
+  "topology": {
+    "levels": [1, 12, 144, 1728, 20736],
+    "roles": ["seed", "organs", "branches", "cells", "execution-lanes"],
+    "physicalDimensionClaim": false
+  },
+  "causalTimeEnvelope": [
+    "utcTime",
+    "monotonicMs",
+    "sourceObservationTime",
+    "missionTick",
+    "stateGeneration",
+    "agentTurn",
+    "modelGeneration",
+    "causalDepth",
+    "parentReceiptHash"
+  ],
+  "federationHeader": [
+    "serviceIdentity",
+    "serviceRole",
+    "runtimeRevision",
+    "gitSha",
+    "modelGeneration",
+    "canonicalSchemaVersion",
+    "hostIdentity",
+    "observerFrame",
+    "missionId",
+    "missionTick",
+    "causalParent",
+    "sourceObservationTime",
+    "utcTime",
+    "monotonicMs",
+    "capabilities",
+    "currentStateAddress",
+    "proofState",
+    "truthBoundary",
+    "lastReceiptHash",
+    "nativeExecutionStatus"
+  ],
+  "invariantCarry": [
+    "missionId",
+    "evidenceRefs",
+    "canonicalStateHash",
+    "inputHash",
+    "proofState",
+    "truthBoundary",
+    "scarHistory"
+  ],
+  "lineageEnvelope": {
+    "fields": ["packetId", "parentPacketId", "parentReceiptHash", "causalDepth"],
+    "rule": "handoffs append a child packet identity while retaining an explicit parent chain"
+  },
+  "transformableByReceiver": [
+    "localRepresentation",
+    "searchRoute",
+    "modelEmbedding",
+    "computeBudget",
+    "intermediateHypothesis",
+    "observerProjection"
+  ],
+  "returnDecisions": ["ADMIT", "REBASE", "TURN", "BLOCK"],
+  "accuracyGate": {
+    "authority": "R125",
+    "mutationWithoutVerifiedEvidence": false,
+    "truthBoundaryRiskAutonomousMutation": false,
+    "unprovenDeploymentOrNativeExecutionMayBeSimulated": false
+  },
+  "serviceRoles": {
+    "OMEGAv6": "canonical state, admission, proof, replay and final operator surface",
+    "Genesis": "variation, proposal, exploration and branch generation",
+    "SAI": "learned cognition, memory, semantic interpretation, training and adaptation",
+    "Optical": "scalar screening, RCWA/FDTD/full-wave promotion and optical evidence",
+    "Sovereign": "private/native heavy execution, local tools, training and hardware receipts",
+    "Earth": "source-bound observation, trajectory, motion and world-state evidence",
+    "Federation": "typed exchange, routing, proof transport and continuity carry",
+    "DriveArchive": "donor genome and episodic history; never silent current authority"
+  },
+  "configuredSurfaces": [
+    {"id":"OMEGAV6","url":"https://omegav6.jeffdeweyeljefe.workers.dev/","role":"canonical-root","liveClaim":"RUNTIME_PROOF_REQUIRED"},
+    {"id":"GENESIS","url":"https://omega-genesis-v1.jeffdeweyeljefe.workers.dev/","role":"proposal-exploration","liveClaim":"RUNTIME_PROOF_REQUIRED"},
+    {"id":"SOVEREIGN","url":"https://omega-sovereign-convergence.foundasound.chatgpt.site/","role":"private-heavy-execution","liveClaim":"AUTH_OR_DEVICE_PROOF_REQUIRED"},
+    {"id":"OPTICAL","url":"https://omega-living-light-etching-private-woven2.vercel.app/","role":"optical-specialization","liveClaim":"AUTH_OR_DEPLOYMENT_PROOF_REQUIRED"}
+  ],
+  "saiComputeHierarchy": [
+    "EXACT_OPERATOR",
+    "STRUCTURED_REFLEX",
+    "LEARNED_REFLEX",
+    "NEURAL_COGNITION",
+    "LOCAL_SWARM",
+    "FEDERATED_SWARM",
+    "SOVEREIGN_HEAVY_COMPUTE"
+  ],
+  "laws": [
+    "NO_RESULT_WITHOUT_FRAME",
+    "NO_FRAME_WITHOUT_TIME",
+    "NO_TIME_WITHOUT_LINEAGE",
+    "NO_LINEAGE_WITHOUT_EVIDENCE",
+    "NO_MUTATION_WITHOUT_PROOF",
+    "SAME_CLOCK_TIME_DOES_NOT_IMPLY_SAME_CAUSAL_STATE",
+    "LATER_TIMESTAMP_DOES_NOT_IMPLY_DESCENDANT_COMPUTATION",
+    "ONE_CANONICAL_PHASE_MANY_RELATIVE_PROJECTIONS",
+    "INVARIANT_CARRY_SURVIVES_FRAME_TRANSFORM",
+    "RETURNED_WORK_RECONCILES_AGAINST_CURRENT_STATE",
+    "REPRESENTATION_MAY_TRANSFORM_EVIDENCE_IDENTITY_MAY_NOT",
+    "R125_ACCURACY_GATE_PRECEDES_CANONICAL_MUTATION"
+  ],
+  "truthBoundary": "R126 defines causal interaction, synchronization, frame transformation and reconciliation contracts. It does not by itself prove that any external site, PC, solver, sensor, model provider or deployment is live; those claims require first-hand runtime evidence."
+}
