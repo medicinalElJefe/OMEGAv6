@@ -15,7 +15,7 @@ permissions:
 jobs:
   canonical-world-continuity:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,20 +24,33 @@ jobs:
       - run: npm install
       - name: R134 canonical world scar/proof lineage
         run: node tests/r134-canonical-world-continuity.mjs
-      - name: Preserve R132 relational physics manifold
-        run: node tests/r132-relational-physics-manifold-invariants.mjs
-      - name: Preserve R131 capacity governor
-        run: node tests/r131-capacity-governor.mjs
+      - name: Preserve current R132 and R131 runtime layers
+        run: |
+          node tests/r132-relational-physics-manifold-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r131-capacity-governor.mjs
       - name: Preserve R130 operational control plane
         run: node tests/r130-operational-control-plane.mjs
-      - name: Preserve R129-R125 proof, replay and canonical admission chain
+      - name: Preserve R129-R127 proof and empirical chain
         run: |
-          node tests/r129-empirical-experiment-runtime.mjs
-          node tests/r128-empirical-validation-invariants.mjs
-          node tests/r127-evidence-execution-proof-invariants.mjs
-          node tests/r126-causal-interaction-relativity.mjs
+          node --experimental-strip-types tests/r129-empirical-experiment-runtime.mjs
+          node --experimental-strip-types tests/r128-empirical-calibration-replay.mjs
+          node --experimental-strip-types tests/r127-evidence-execution-proof-fabric.mjs
+      - name: Preserve R126 causal and maximum-runtime contracts
+        run: |
+          node --experimental-strip-types tests/r126-causal-interaction-relativity.mjs
+          node tests/r126-causal-interaction-invariants.mjs
+          node tests/r126-total-maximum-build-invariants.mjs
+      - name: Preserve R125-R121 execution and truth boundaries
+        run: |
           node tests/r125-accuracy-engine-invariants.mjs
           node tests/r125-autonomic-swarm-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+          node tests/r123-organism-swarm-invariants.mjs
+          node tests/r123-living-total-experience-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r121-swarm-runtime-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
       - name: Full inherited regression and production build
         run: npm run check
       - name: Cloudflare Worker dry run only
