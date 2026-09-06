@@ -1,16 +1,17 @@
 import {chromium} from 'playwright';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
-async function openValidation(page){
+function instrument(page,name){const errors=[];page.on('pageerror',error=>{errors.push(`pageerror:${error.message}`);console.error(`R145 ${name} PAGEERROR`,error.message)});page.on('console',message=>{if(['error','warning'].includes(message.type())){const line=`console:${message.type()}:${message.text()}`;errors.push(line);console.error(`R145 ${name} CONSOLE`,line)}});page.on('requestfailed',request=>{const url=request.url();if(/AdvancedComputation|UniversalQuality|assets\//.test(url)){const line=`requestfailed:${url}:${request.failure()?.errorText||'unknown'}`;errors.push(line);console.error(`R145 ${name} REQUEST`,line)}});return errors}
+async function openValidation(page,errors){
  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');if(await expand.count())await expand.first().click();
  await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:12000});
  const clicked=await page.evaluate(()=>{const button=[...document.querySelectorAll('.r89-flat-route')].find(x=>x.querySelector('b')?.textContent?.trim()==='Validation');if(!button)return false;button.click();return true});
  if(!clicked)throw new Error('Validation route button missing');
  await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Validation',{timeout:20000});
- await page.waitForSelector('.r145-compute',{timeout:20000});
+ try{await page.waitForSelector('.r145-compute',{state:'attached',timeout:15000});await page.locator('.r145-compute').waitFor({state:'visible',timeout:8000})}catch(error){const diagnostic=await page.evaluate(()=>{const main=document.querySelector('.workstation-main'),uq=document.querySelector('.uq-app'),r145=document.querySelector('.r145-compute'),fallback=[...document.querySelectorAll('*')].find(x=>/Loading specialist|Materializing specialist/i.test(x.textContent||''));const resources=(performance.getEntriesByType('resource')).map(x=>x.name).filter(x=>/AdvancedComputation|UniversalQuality|assets\//.test(x)).slice(-30);return{panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel'),uqAttached:Boolean(uq),r145Attached:Boolean(r145),r145Display:r145?getComputedStyle(r145).display:null,r145Visibility:r145?getComputedStyle(r145).visibility:null,mainText:(main?.textContent||'').replace(/\s+/g,' ').slice(0,2200),fallbackText:(fallback?.textContent||'').replace(/\s+/g,' ').slice(0,600),resources}});throw new Error(`R145 Validation mount failed · ${JSON.stringify(diagnostic)} · browserErrors=${JSON.stringify(errors.slice(-12))} · ${error instanceof Error?error.message:String(error)}`)}
 }
 async function exercise(page,name){
- await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForSelector('main.r71-home, .omega-workstation-v2',{timeout:30000});await openValidation(page);
+ const errors=instrument(page,name);await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForSelector('main.r71-home, .omega-workstation-v2',{timeout:30000});await openValidation(page,errors);
  const inputs=page.locator('.r145-controls input');if(await inputs.count()<10)throw new Error(`${name}: R145 controls incomplete`);
  await inputs.nth(0).fill('24');await inputs.nth(3).fill('3');await inputs.nth(4).fill('0.08');await inputs.nth(5).fill('4');
  await page.getByRole('button',{name:/Run 24-candidate sweep/}).click();
@@ -33,6 +34,7 @@ async function exercise(page,name){
   const evals=Number(state.score.find(x=>x.label==='Evaluations')?.value||0);if(evals<16||evals>32)throw new Error(`desktop: adaptive evaluations invalid ${evals}`);
   if(!/GEN 1/.test(state.text)||!/GEN 2/.test(state.text))throw new Error('desktop: adaptive generation labels missing');
  }
+ if(errors.some(x=>x.startsWith('pageerror:')))throw new Error(`${name}: browser runtime error observed ${JSON.stringify(errors)}`);
  console.log(`R145 BROWSER ${name} PASS · ${state.transport} · rows ${state.rows??'adaptive'}`);
 }
 const browser=await chromium.launch({headless:true});
