@@ -4,6 +4,7 @@ import {api,getHybridBridge} from './platformAdapter';
 
 export type ProjectOperationRefR87={id:string;at:number;type:string;sha256:string;stateId?:number;address?:number;status:string};
 export type ProjectWorkflowRefR87={id:string;intent:string;goal:string;startedAt:number;updatedAt:number;status:string};
+export type ProjectWorldRefR149={schema:'OMEGA_CONTINUITY_OPERATION_REF_R134';worldId:'OMEGA_CANONICAL_WORLD';headSha256:string;count:number;scarCount:number;proofCount:number;at:number;eventId?:string;eventSha256?:string;authority:'DURABLE_CONTINUITY_REFERENCE_NOT_CANON';canonicalMutation:false};
 export type ContinuityProjectR87={
  id:string;
  name:string;
@@ -18,6 +19,7 @@ export type ContinuityProjectR87={
  sha256:string;
  workflowRefs?:ProjectWorkflowRefR87[];
  operationRefs?:ProjectOperationRefR87[];
+ worldRefs?:ProjectWorldRefR149[];
  continuityHash?:string;
  lastIntent?:string;
  lastWorkflowStatus?:string;
@@ -34,7 +36,7 @@ async function sha(v:any){const d=await crypto.subtle.digest('SHA-256',enc.encod
 function loadRaw():ContinuityProjectR87[]{try{const x=JSON.parse(localStorage.getItem(PROJECT_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return[]}}
 function markLocalChange(){try{localStorage.setItem(DURABLE_META_KEY,String(Date.now()))}catch{}if(applyingRemote||typeof window==='undefined')return;window.clearTimeout(syncTimer);syncTimer=window.setTimeout(()=>void syncProjectContinuityR97(),600)}
 function saveRaw(rows:ContinuityProjectR87[]){try{localStorage.setItem(PROJECT_KEY,JSON.stringify(rows));window.dispatchEvent(new CustomEvent('omega-r87-projects-changed',{detail:rows}));markLocalChange()}catch{}return rows}
-function projectCore(p:ContinuityProjectR87){return{id:p.id,name:p.name,created:p.created,updated:p.updated,address:p.address,stateId:p.stateId,status:p.status,note:p.note,memoryRefs:p.memoryRefs,evidenceRefs:p.evidenceRefs,workflowRefs:p.workflowRefs||[],operationRefs:p.operationRefs||[],lastIntent:p.lastIntent||null,lastWorkflowStatus:p.lastWorkflowStatus||null,authority:p.authority||'BROWSER_LOCAL_PROJECT_CONTINUITY_R87'}}
+function projectCore(p:ContinuityProjectR87){return{id:p.id,name:p.name,created:p.created,updated:p.updated,address:p.address,stateId:p.stateId,status:p.status,note:p.note,memoryRefs:p.memoryRefs,evidenceRefs:p.evidenceRefs,workflowRefs:p.workflowRefs||[],operationRefs:p.operationRefs||[],worldRefs:p.worldRefs||[],lastIntent:p.lastIntent||null,lastWorkflowStatus:p.lastWorkflowStatus||null,authority:p.authority||'BROWSER_LOCAL_PROJECT_CONTINUITY_R87'}}
 
 export function readProjectsR87(){return loadRaw()}
 export function activeProjectIdR87(){try{return localStorage.getItem(ACTIVE_KEY)||''}catch{return''}}
@@ -49,7 +51,7 @@ export function syncProjectContinuityR97(){
 export async function createProjectR87(goal:string,intent:string,record:any){
  const now=Date.now(),memory=(()=>{try{return JSON.parse(localStorage.getItem('omega.v6.memory.r28')||'[]')}catch{return[]}})();
  const name=(goal.trim()||`${intent} workflow · STATE ${record?.stateId||1}`).slice(0,72);
- const core={name,created:now,updated:now,address:Number(record?.address)||0,stateId:Number(record?.stateId)||1,status:'ACTIVE_LOCAL' as const,note:`R87 project continuity · ${intent}`,memoryRefs:(Array.isArray(memory)?memory:[]).filter((x:any)=>x.stateId===record?.stateId).map((x:any)=>x.id).slice(-24),evidenceRefs:[],workflowRefs:[],operationRefs:[],lastIntent:intent,lastWorkflowStatus:'CREATED',authority:'BROWSER_LOCAL_PROJECT_CONTINUITY_R87'};
+ const core={name,created:now,updated:now,address:Number(record?.address)||0,stateId:Number(record?.stateId)||1,status:'ACTIVE_LOCAL' as const,note:`R87 project continuity · ${intent}`,memoryRefs:(Array.isArray(memory)?memory:[]).filter((x:any)=>x.stateId===record?.stateId).map((x:any)=>x.id).slice(-24),evidenceRefs:[],workflowRefs:[],operationRefs:[],worldRefs:[],lastIntent:intent,lastWorkflowStatus:'CREATED',authority:'BROWSER_LOCAL_PROJECT_CONTINUITY_R87'};
  const id=typeof crypto!=='undefined'&&'randomUUID'in crypto?crypto.randomUUID():`project-${now}`,creationSha=await sha(core);
  const row:ContinuityProjectR87={id,...core,sha256:creationSha,continuityHash:creationSha};
  saveRaw([...loadRaw(),row]);setActiveProjectR87(id);return row;
@@ -73,6 +75,13 @@ export async function recordProjectOperationR87(projectId:string|undefined,event
  p.continuityHash=await sha(projectCore(p));rows[i]=p;saveRaw(rows);return p;
 }
 
+export async function recordProjectWorldRefR149(projectId:string|undefined,input:any){
+ if(!projectId)return null;const ref=input?.frame?.operationRef||input?.operationRef;if(!ref||ref.schema!=='OMEGA_CONTINUITY_OPERATION_REF_R134'||ref.worldId!=='OMEGA_CANONICAL_WORLD'||!String(ref.headSha256||'').match(/^[a-f0-9]{64}$/)||ref.authority!=='DURABLE_CONTINUITY_REFERENCE_NOT_CANON'||ref.canonicalMutation!==false)return null;
+ const rows=loadRaw(),i=rows.findIndex(x=>x.id===projectId);if(i<0)return null;const p={...rows[i]},refs=[...(p.worldRefs||[])];
+ const row:ProjectWorldRefR149={schema:'OMEGA_CONTINUITY_OPERATION_REF_R134',worldId:'OMEGA_CANONICAL_WORLD',headSha256:String(ref.headSha256),count:Number(ref.count)||0,scarCount:Number(ref.scarCount)||0,proofCount:Number(ref.proofCount)||0,at:Date.now(),eventId:input?.eventId?String(input.eventId):undefined,eventSha256:input?.eventSha256?String(input.eventSha256):undefined,authority:'DURABLE_CONTINUITY_REFERENCE_NOT_CANON',canonicalMutation:false};
+ if(!refs.some(x=>x.headSha256===row.headSha256))refs.push(row);p.worldRefs=refs.slice(-188);p.updated=Date.now();p.continuityHash=await sha(projectCore(p));rows[i]=p;saveRaw(rows);return p;
+}
+
 export async function updateProjectWorkflowR87(projectId:string|undefined,workflow:WorkflowSessionR85,status=workflow.status){
  if(!projectId)return null;const rows=loadRaw(),i=rows.findIndex(x=>x.id===projectId);if(i<0)return null;
  const p={...rows[i]},refs=[...(p.workflowRefs||[])],idx=refs.findIndex(x=>x.id===workflow.id),ref={id:workflow.id,intent:workflow.intent,goal:workflow.goal,startedAt:workflow.createdAt,updatedAt:Date.now(),status};
@@ -85,5 +94,5 @@ export async function updateProjectWorkflowR87(projectId:string|undefined,workfl
 
 export function projectContinuitySummaryR87(project:ContinuityProjectR87|null){
  if(!project)return null;
- return{id:project.id,name:project.name,stateId:project.stateId,address:project.address,workflows:project.workflowRefs?.length||0,operations:project.operationRefs?.length||0,lastIntent:project.lastIntent||'—',lastWorkflowStatus:project.lastWorkflowStatus||'—',continuityHash:project.continuityHash||project.sha256,boundary:'Project continuity is browser-local organization while unpaired. With an authenticated Hybrid bridge it is durably synchronized and browser storage becomes a recoverable offline cache. It is not a GitHub repository, Drive folder, or native filesystem project.'};
+ return{id:project.id,name:project.name,stateId:project.stateId,address:project.address,workflows:project.workflowRefs?.length||0,operations:project.operationRefs?.length||0,worldRefs:project.worldRefs?.length||0,lastWorldHead:project.worldRefs?.at(-1)?.headSha256||null,lastIntent:project.lastIntent||'—',lastWorkflowStatus:project.lastWorkflowStatus||'—',continuityHash:project.continuityHash||project.sha256,boundary:'Project continuity is browser-local organization while unpaired. With an authenticated Hybrid bridge it is durably synchronized and browser storage becomes a recoverable offline cache. R149 includes bounded R134 canonical-world operation references in that existing snapshot, but those references are continuity evidence and never CanonState admission, public deployment, native PC execution, solver validity, or photoreal validation.'};
 }
