@@ -6,6 +6,7 @@ import {launcherBlobUrlR117,SOVEREIGN_LAUNCHER_FILENAME_R127} from './sovereignL
 import './sovereignConnectionR112.css';
 
 export const LEGACY_DOWNLOAD_LABEL_R117='DOWNLOAD CLEAN R117 CONNECTOR';
+export const R120_DOWNLOAD_LABEL_LINEAGE='DOWNLOAD ROOT-SAFE R120 CONNECTOR';
 export const R117_INHERITED_COPY_MARKER='R117 never calls it.';
 export const R127_HYBRID_LAW='ONE CANONICAL HOST / ONE APPROVED ROOT / VERIFIED AGENT BYTES / CURRENT AUTHENTICATED HEARTBEAT';
 // R101/R112 compatibility surface: the historical R117 download symbol remains the public action contract,
