@@ -1,0 +1,78 @@
+name: OMEGA R117 Real Sovereign Bootstrap
+
+on:
+  push:
+    branches: [main, r117-real-sovereign-bootstrap]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-r117:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Syntax-check R117 worker
+        run: node --check src/workerR117.js
+      - name: Execute R117 real bootstrap invariants
+        run: node tests/r117-real-sovereign-bootstrap-invariants.mjs
+      - name: Execute inherited R116 recovery invariants
+        run: node tests/r116-sovereign-recovery-unified-truth-invariants.mjs
+      - name: Production build
+        run: npm run build
+      - name: Canonical R117 Wrangler dry-run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r117-canonical
+
+  live-r117:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-r117
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for R117 canonical Worker promotion
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let last='';
+          for(let attempt=1;attempt<=36;attempt++){
+            try{
+              const r=await fetch(base+'/api/health',{headers:{'cache-control':'no-cache'}});
+              const rev=r.headers.get('x-omega-runtime-successor');
+              if(r.ok&&rev==='R117'){console.log(`R117 canonical promotion observed on attempt ${attempt}`);process.exit(0)}
+              last=`HTTP ${r.status} successor ${rev}`;
+            }catch(e){last=String(e)}
+            await sleep(10000);
+          }
+          throw new Error(`R117 canonical promotion not observed: ${last}`);
+          NODE
+      - name: Prove fresh durable pairing bootstrap end-to-end
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const session='r117_ci_bootstrap_probe';
+          const bRes=await fetch(base+'/api/hybrid/bootstrap',{
+            method:'POST',
+            headers:{'content-type':'application/json','x-omega-session-id':session,'cache-control':'no-cache'},
+            body:JSON.stringify({rotate:true})
+          });
+          const b=await bRes.json();
+          if(!bRes.ok||b.schema!=='OMEGA_SOVEREIGN_BOOTSTRAP_R117'||!b.bridgeId||!b.secret||!b.pairingCode)throw new Error(`bootstrap failed: HTTP ${bRes.status} ${JSON.stringify({...b,secret:b.secret?'[redacted]':null,pairingCode:b.pairingCode?'[redacted]':null})}`);
+          if(b.nativeExecutionClaimed!==false)throw new Error('bootstrap falsely claimed native execution');
+          if(b.canonicalOrigin!==base)throw new Error(`wrong canonical origin ${b.canonicalOrigin}`);
+          const sRes=await fetch(base+'/api/hybrid/status',{headers:{'x-omega-session-id':session,'x-omega-bridge-id':b.bridgeId,'x-omega-bridge-secret':b.secret,'cache-control':'no-cache'}});
+          const s=await sRes.json();
+          if(!sRes.ok)throw new Error(`fresh credential did not authenticate status: HTTP ${sRes.status}`);
+          if(s.nativeExecutionClaimed===true)throw new Error('CI bootstrap bridge claimed PC ONLINE without a real heartbeat');
+          console.log(`R117 BOOTSTRAP LIVE PASS · bridge authenticated · state ${s.state} · nativeExecutionClaimed false`);
+          NODE
