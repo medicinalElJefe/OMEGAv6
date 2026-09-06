@@ -22,7 +22,7 @@ jobs:
           node tests/r131-capacity-governor.mjs
           node tests/r130-operational-control-plane.mjs
           node tests/r127-hybrid-zero-drift-invariants.mjs
-          node tests/r125-accuracy-first-engine.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
       - name: Full regression and production build
         run: npm run check
       - name: Worker bundle dry run
