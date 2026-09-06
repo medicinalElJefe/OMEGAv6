@@ -42,7 +42,11 @@ must(bootstrap.includes('saveHybridBridge({bridgeId:payload.bridgeId,secret:payl
 must(adapter.includes('saveHybridBridge')&&adapter.includes('getHybridBridge'),'shared bridge storage adapter must remain available to the dedicated bootstrap transport');
 must(hybrid.includes('bootstrapSovereignR117')&&hybrid.includes('DOWNLOAD CLEAN R117 CONNECTOR'),'ordinary Hybrid surface must expose fresh credential rotation plus explicit download');
 must(!hybrid.includes("document.createElement('a')")&&!hybrid.includes('.click()'),'R117 connection UI must not use a synthetic async download click');
-must(launcher.includes('https://omegav6.jeffdeweyeljefe.workers.dev')&&!launcher.includes('omega-sovereign-convergence.foundasound.chatgpt.site'),'active R117 launcher must target only canonical OMEGAv6');
+
+// The retired host is intentionally printed as a warning; it must never be assigned as OMEGA_ORIGIN or used by curl/Invoke-WebRequest.
+must(launcher.includes("const ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'R117 launcher canonical origin constant missing');
+must(launcher.includes('This connector will never call the retired preview host.')&&launcher.includes('No fallback host was attempted.'),'launcher must explicitly prohibit fallback execution');
+must(!launcher.includes('set "OMEGA_ORIGIN=https://omega-sovereign-convergence.foundasound.chatgpt.site')&&!launcher.includes('curl.exe --fail --silent --show-error --location --max-time 20 "https://omega-sovereign-convergence.foundasound.chatgpt.site'),'retired host must never be executable launcher target');
 must(worker116.includes('nativeExecutionClaimed:false')||worker116.includes('nativeExecutionClaimed: false'),'fresh pairing must never claim PC ONLINE before a real host heartbeat');
 
 console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · proven R116 runtime spine + R117 connector repair · dedicated stale-header-safe bootstrap · explicit browser-safe connector download');
