@@ -31,10 +31,12 @@ must(css.includes(".system-atlas-r38{gap:6px!important;--sys-field-min:66dvh!imp
 
 must(!css.includes(".earth-proof{display:none")&&!css.includes(".special-boundary{display:none")&&!css.includes(".sbm21-expression{display:none")&&!css.includes(".sai-footer{display:none"),'R90 may not hide truth/proof boundaries or primary expression');
 must(earth.includes('Truth boundary:')&&earth.includes('not a physical geolocation'),'Earth truth boundary must remain explicit');
-must(hybrid.includes('Native execution is claimed only while an authenticated agent heartbeat is current'),'Hybrid native-execution truth gate must remain explicit');
+const legacyHybridTruth=hybrid.includes('Native execution is claimed only while an authenticated agent heartbeat is current');
+const zeroDriftHybridTruth=hybrid.includes('Native execution is claimed only while the paired device heartbeat is current')&&hybrid.includes('browser-only PC ONLINE claim');
+must(legacyHybridTruth||zeroDriftHybridTruth,'Hybrid native-execution truth gate must remain explicit');
 must(modes.includes('Catalog membership is never reported as execution'),'Modes catalog/execution separation must remain explicit');
 must(sai.includes('It cannot silently edit GitHub or promote production from the browser'),'SAI production mutation boundary must remain explicit');
 must(atlas.includes('registration ≠ execution')&&atlas.includes('Registered capability never implies executable capability'),'System Atlas registration/execution separation must remain explicit');
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),'deep donor lost: '+token);
 must(!css.includes('@appdeploy/client'),'R90 hierarchy must remain provider portable');
-console.log('R90/R104 INTEGRITY-PRESERVING SURFACE HIERARCHY PASS · 44 routes · truth gates intact · readable flat navigation retained');
+console.log('R90/R104/R127 INTEGRITY-PRESERVING SURFACE HIERARCHY PASS · 44 routes · heartbeat truth gates intact · readable flat navigation retained');
