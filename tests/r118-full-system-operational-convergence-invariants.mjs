@@ -8,6 +8,7 @@ const navigator=read('src/OmegaSideNavigatorR88.tsx');
 const loader=read('src/specialistLoaderR109.tsx');
 const suite=read('src/OmegaSpecialistSuite.tsx');
 const hybridRoute=read('src/HybridLinkR32.tsx');
+const realityLab=read('src/AppliedRealityLab.tsx');
 const worker117=read('src/workerR117.js');
 const worker116=read('src/workerR116.js');
 const hybrid=read('src/SovereignConnectionR117.tsx');
@@ -28,6 +29,12 @@ must(!workstation.includes('REGISTERED · NO ACTIVE UTILITY IMPLEMENTATION'),'wo
 must(app.includes("lazy(()=>import('./OmegaWorkstationFullV2'))")&&app.includes('omega-home-request'),'home/workstation transition authority must remain wired');
 must(navigator.includes("rows.map(route=>")&&navigator.includes("onClick={()=>go(route)}"),'all destination buttons must share one deterministic navigation handler');
 must(navigator.includes("aria-current={currentPanel===route?'page':undefined}"),'active route must remain exposed accessibly');
+
+// Reality Lab must have a real empty state. It may not crash while trying to parse a fabricated/header-only seed merely to look populated.
+must(realityLab.includes("const emptyDataset=():ParsedDataset=>({headers:[],rows:[],delimiter:','})"),'Reality Lab requires an explicit zero-observation empty dataset');
+must(realityLab.includes('useState<ParsedDataset>(emptyDataset)'),'Reality Lab must boot from the explicit empty dataset without invoking the CSV parser');
+must(!/useState<ParsedDataset>\(\(\)=>parseDelimited\(/.test(realityLab),'Reality Lab may not parse a header-only or synthetic seed during first render');
+must(realityLab.includes('No synthetic dataset is inserted to make the surface look active.'),'Reality Lab empty-state truth boundary missing');
 
 // The actual registered Hybrid destination must point at the current R117 human connection surface.
 must(loader.includes("HybridLinkR117:()=>import('./HybridLinkR32')"),'current deferred HybridLinkR117 loader missing');
@@ -58,4 +65,4 @@ must(launcher.includes('This connector will never call the retired preview host.
 must(!launcher.includes('set "OMEGA_ORIGIN=https://omega-sovereign-convergence.foundasound.chatgpt.site')&&!launcher.includes('curl.exe --fail --silent --show-error --location --max-time 20 "https://omega-sovereign-convergence.foundasound.chatgpt.site'),'retired host must never be executable launcher target');
 must(worker116.includes('nativeExecutionClaimed:false')||worker116.includes('nativeExecutionClaimed: false'),'fresh pairing must never claim PC ONLINE before a real host heartbeat');
 
-console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · ordinary Hybrid route promoted to R117 clean surface · advanced R8 diagnostics unmounted until opened · proven R116 runtime spine + R117 connector repair · dedicated stale-header-safe bootstrap · explicit browser-safe connector download');
+console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · Reality Lab true empty state · ordinary Hybrid route promoted to R117 clean surface · advanced R8 diagnostics unmounted until opened · proven R116 runtime spine + R117 connector repair · dedicated stale-header-safe bootstrap · explicit browser-safe connector download');
