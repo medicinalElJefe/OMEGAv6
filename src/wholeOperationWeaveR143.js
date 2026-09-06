@@ -24,7 +24,6 @@ const text=(v,n=4000)=>String(v??'').trim().slice(0,n);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number.isFinite(Number(v))?Number(v):a));
 const safeId=(v,f='')=>{const s=text(v,160);return /^[A-Za-z0-9._:-]+$/.test(s)?s:f};
 const uniq=a=>[...new Set(a.filter(Boolean))];
-const bool=v=>v===true;
 const nowIso=()=>new Date().toISOString();
 
 function flags(intent){
@@ -71,6 +70,7 @@ function node(id,kind,executor,dependsOn,purpose,ready,extra={}){
 
 export function compileWholeOperationWeaveR143(input={}){
  const intent=text(input.intent||input.text),f=flags(intent),scale=computeRelativityScaleR143(intent,input.hints||{}),r=readiness(input.snapshot||{}),nodes=[];
+ const createdAt=typeof input.createdAt==='string'&&Number.isFinite(Date.parse(input.createdAt))?input.createdAt:nowIso(),joinEventTime=clamp(input.joinEventTime??Date.parse(createdAt),0,Number.MAX_SAFE_INTEGER);
  nodes.push(node('N00_FRAME','FRAME','OMEGA_LOCAL',[],'Freeze objective, execution truth snapshot, causal departure frame and adaptive logical scale.',r.OMEGA_LOCAL,{requiredEvidence:['current capability snapshot','intent identity','departure state']}));
  const complex=scale.logicalScale>=144||f.research||f.uncertain||f.training;
  if(complex)nodes.push(node('N10_SWARM','DECOMPOSE','SWARM',['N00_FRAME'],'Partition the objective across bounded logical cells and preserve dissent before reconvergence.',r.SWARM,{requestedCells:scale.swarmCells,logicalScale:scale.logicalScale,requiredEvidence:['swarm mission receipt']}));
@@ -79,23 +79,18 @@ export function compileWholeOperationWeaveR143(input={}){
  if(f.optical)nodes.push(node('N30_SCREEN','SCREEN','OPTICAL_MACHINE',[f.generative||f.optical?'N20_PROPOSE':frameDep],'Screen optical candidates with the specialized machine adapter and preserve rejection evidence.',r.OPTICAL_MACHINE,{requiredEvidence:['screen packet','screen proof']}));
  if(f.optical&&/\b(rcwa|fdtd|full[- ]?wave|fabrication|solver|validate)\b/i.test(intent))nodes.push(node('N35_FULLWAVE','SOLVE','RCWA_FEDERATION',['N30_SCREEN'],'Advance only an admissible screened candidate into full-wave solver validation.',r.RCWA_FEDERATION,{requiredEvidence:['solver receipt','validation receipt']}));
  if(f.native||f.training)nodes.push(node('N40_HOST','EXECUTE','SOVEREIGN_PC',[f.optical?(nodes.some(x=>x.id==='N35_FULLWAVE')?'N35_FULLWAVE':'N30_SCREEN'):frameDep],'Execute bounded native/local work only through the authenticated Hybrid host envelope.',r.SOVEREIGN_PC,{requiredEvidence:['R141 exact-payload closure','R142 VERIFIED lifecycle'],requiresExplicitConfirmation:true}));
- const workNodes=nodes.filter(x=>!['N00_FRAME'].includes(x.id));
- const joinDeps=workNodes.length?workNodes.map(x=>x.id):['N00_FRAME'];
+ const workNodes=nodes.filter(x=>x.id!=='N00_FRAME'),joinDeps=workNodes.length?workNodes.map(x=>x.id):['N00_FRAME'];
  nodes.push(node('N80_JOIN','JOIN','OMEGA_LOCAL',joinDeps,'Re-contextualize all returned evidence into one deterministic continuity-preserving operation receipt.',r.OMEGA_LOCAL,{requiredEvidence:['dependency receipts','scar carry','proof carry','departure/return frame comparison']}));
  nodes.push(node('N90_ADMISSION','ADMISSION_CANDIDATE','R125_ADMISSION',['N80_JOIN'],'Expose a candidate to R125 only after the whole-operation join; R143 never performs admission itself.',r.R125_ADMISSION,{requiredEvidence:['R143 joined receipt'],state:'HELD_FOR_R125'}));
- const unavailable=nodes.filter(x=>x.state==='UNAVAILABLE').map(x=>({id:x.id,executor:x.executor,proof:x.availabilityProof}));
- const graphCore={revision:R143_REVISION,intent,scale,nodes:nodes.map(({returnReceipt,invocation,...x})=>x)};
- return{schema:R143_SCHEMA,revision:R143_REVISION,intentId:safeId(input.intentId)||`intent-${Date.now().toString(36)}`,intent,createdAt:nowIso(),scale,nodes,edges:nodes.flatMap(n=>n.dependsOn.map(from=>({from,to:n.id,carry:['invariant','scar','proof','source','causal-frame']}))),unavailable,executionPolicy:unavailable.length?'PARTIALLY_GATED':'READY_BY_DEPENDENCY',graphIdentitySeed:JSON.stringify(graphCore),canonicalMutation:false,canonicalAdmissionAuthority:'R125',truthBoundary:'R143 compiles one objective into a dependency-bound execution graph over existing OMEGA executors. Availability is current execution evidence, not success. A node return is not verified merely because transport returned, the join is not CanonState, and R125 remains the only admission authority.'};
+ const unavailable=nodes.filter(x=>x.state==='UNAVAILABLE').map(x=>({id:x.id,executor:x.executor,proof:x.availabilityProof})),graphCore={revision:R143_REVISION,intent,scale,nodes:nodes.map(({returnReceipt,invocation,...x})=>x)};
+ return{schema:R143_SCHEMA,revision:R143_REVISION,intentId:safeId(input.intentId)||`intent-${joinEventTime.toString(36)}`,intent,createdAt,joinEventTime,scale,nodes,edges:nodes.flatMap(n=>n.dependsOn.map(from=>({from,to:n.id,carry:['invariant','scar','proof','source','causal-frame']}))),unavailable,executionPolicy:unavailable.length?'PARTIALLY_GATED':'READY_BY_DEPENDENCY',graphIdentitySeed:JSON.stringify(graphCore),canonicalMutation:false,canonicalAdmissionAuthority:'R125',truthBoundary:'R143 compiles one objective into a dependency-bound execution graph over existing OMEGA executors. Availability is current execution evidence, not success. A node return is not verified merely because transport returned, the join is not CanonState, and R125 remains the only admission authority.'};
 }
 
 export function dependencyStateR143(graph,nodeId){
  const n=graph?.nodes?.find(x=>x.id===nodeId);if(!n)return{ready:false,reason:'NODE_NOT_FOUND'};
- const parents=n.dependsOn.map(id=>graph.nodes.find(x=>x.id===id)).filter(Boolean);
- const terminal=new Set(['VERIFIED','COMPLETE','RETURNED_VERIFIED','HELD_FOR_R125']);
- const failed=parents.find(x=>['FAILED','REJECTED','STALE','UNAVAILABLE','FINGERPRINT_MISMATCH'].includes(x.state));
- if(failed)return{ready:false,reason:`DEPENDENCY_${failed.id}_${failed.state}`};
- const pending=parents.find(x=>!terminal.has(x.state));
- return pending?{ready:false,reason:`WAITING_${pending.id}_${pending.state}`}:{ready:n.state!=='UNAVAILABLE',reason:n.state==='UNAVAILABLE'?'EXECUTOR_UNAVAILABLE':'DEPENDENCIES_SATISFIED'};
+ const parents=n.dependsOn.map(id=>graph.nodes.find(x=>x.id===id)).filter(Boolean),terminal=new Set(['VERIFIED','COMPLETE','RETURNED_VERIFIED','HELD_FOR_R125']);
+ const failed=parents.find(x=>['FAILED','REJECTED','STALE','UNAVAILABLE','FINGERPRINT_MISMATCH'].includes(x.state));if(failed)return{ready:false,reason:`DEPENDENCY_${failed.id}_${failed.state}`};
+ const pending=parents.find(x=>!terminal.has(x.state));return pending?{ready:false,reason:`WAITING_${pending.id}_${pending.state}`}:{ready:n.state!=='UNAVAILABLE',reason:n.state==='UNAVAILABLE'?'EXECUTOR_UNAVAILABLE':'DEPENDENCIES_SATISFIED'};
 }
 
 export function applyNodeReceiptR143(graph,nodeId,receipt={},frames={}){
@@ -111,11 +106,10 @@ function nodeMetrics(n){const verified=n.state==='VERIFIED',failed=['FAILED','RE
 
 export async function joinWholeOperationWeaveR143(graph,previousHead=null){
  let head=previousHead&&previousHead.schema==='OMEGA_CANONICAL_WORLD_CONTINUITY_R134'?previousHead:null;
- const ordered=[...(graph?.nodes||[])].filter(x=>x.id!=='N90_ADMISSION').sort((a,b)=>a.id.localeCompare(b.id)),receipts=[];
+ const ordered=[...(graph?.nodes||[])].filter(x=>x.id!=='N90_ADMISSION').sort((a,b)=>a.id.localeCompare(b.id)),receipts=[],baseEventTime=clamp(graph?.joinEventTime??Date.parse(graph?.createdAt||'')||0,0,Number.MAX_SAFE_INTEGER);
  for(let i=0;i<ordered.length;i++){
   const n=ordered[i],digest=await sha256R134({graphIntentId:graph.intentId,nodeId:n.id,state:n.state,returnReceipt:n.returnReceipt||null,departureFrame:n.departureFrame||null,returnFrame:n.returnFrame||null});
-  head=await appendWorldEventR134(head,{eventId:`${safeId(graph.intentId,'intent')}:${n.id}`,kind:n.id==='N00_FRAME'?'MISSION':n.id==='N80_JOIN'?'PROOF':n.state==='VERIFIED'?'FEDERATION_RETURN':'SCAR',sequence:(head?.count||0)+1,eventTime:Date.now()+i,observerId:'omega-r143',projection:'WHOLE_OPERATION_WEAVE',intentId:graph.intentId,missionId:graph.intentId,federationNode:n.executor,sourceIds:uniq([n.executor,...n.sourceIds]),proofIds:uniq(n.proofIds),scarIds:uniq(n.scarIds),address:0,metrics:nodeMetrics(n),payloadDigest:digest,claim:{publicDeploymentProved:false,pcOnlineProved:false,solverValidityProved:false,computedPhotorealRealityProved:false}});
-  receipts.push(head.lastEvent);
+  head=await appendWorldEventR134(head,{eventId:`${safeId(graph.intentId,'intent')}:${n.id}`,kind:n.id==='N00_FRAME'?'MISSION':n.id==='N80_JOIN'?'PROOF':n.state==='VERIFIED'?'FEDERATION_RETURN':'SCAR',sequence:(head?.count||0)+1,eventTime:baseEventTime+i,observerId:'omega-r143',projection:'WHOLE_OPERATION_WEAVE',intentId:graph.intentId,missionId:graph.intentId,federationNode:n.executor,sourceIds:uniq([n.executor,...n.sourceIds]),proofIds:uniq(n.proofIds),scarIds:uniq(n.scarIds),address:0,metrics:nodeMetrics(n),payloadDigest:digest,claim:{publicDeploymentProved:false,pcOnlineProved:false,solverValidityProved:false,computedPhotorealRealityProved:false}});receipts.push(head.lastEvent);
  }
  const executionNodes=ordered.filter(x=>!['N00_FRAME','N80_JOIN'].includes(x.id)),verified=executionNodes.filter(x=>x.state==='VERIFIED'),held=executionNodes.filter(x=>x.state!=='VERIFIED'),finalState=held.length?'HELD_WITH_RESIDUALS':'VERIFIED_EVIDENCE_SET',joinDigest=await sha256R134({schema:R143_JOIN_SCHEMA,intentId:graph.intentId,finalState,nodeStates:ordered.map(x=>[x.id,x.state]),headSha256:head?.headSha256||null});
  return{ok:true,schema:R143_JOIN_SCHEMA,revision:R143_REVISION,intentId:graph.intentId,state:finalState,logicalScale:graph.scale?.logicalScale||1,verifiedNodeCount:verified.length,heldNodeCount:held.length,nodeStates:Object.fromEntries(ordered.map(x=>[x.id,x.state])),proofIds:uniq(ordered.flatMap(x=>x.proofIds||[])),scarIds:uniq(ordered.flatMap(x=>x.scarIds||[])),sourceIds:uniq(ordered.flatMap(x=>x.sourceIds||[])),continuity:continuityOperationRefR134(head),finalHeadSha256:head?.headSha256||null,joinDigest,receipts,canonicalMutation:false,canonicalAdmissionAuthority:'R125',admissionState:'CANDIDATE_ONLY_NOT_ADMITTED',truthBoundary:'R143 join deterministically reconverges execution evidence while carrying failed/unavailable/stale nodes as residual scars. It is an evidence set, not a vote, not truth-by-majority, and not CanonState admission.'};
