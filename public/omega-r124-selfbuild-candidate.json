@@ -1,11 +1,11 @@
 {
   "schema": "omega.selfbuild.candidate.r124.v1",
-  "generation": 2,
+  "generation": 3,
   "capsule": {
-    "id": "SB002",
-    "title": "Contextual capability surface",
-    "objective": "Resolve relevant capabilities from current world state and intent so tools appear by context instead of menu overload.",
-    "target": "src/generated/selfbuild/contextualCapabilitySurfaceR124.ts",
+    "id": "SB003",
+    "title": "Source trace inspector",
+    "objective": "Represent pixel/primitive to canonical state to proof/source lineage as a typed traversable structure.",
+    "target": "src/generated/selfbuild/sourceTraceInspectorR124.ts",
     "risk": "LOW",
     "prerequisites": [
       "SB001"
@@ -17,19 +17,20 @@
     ],
     "tests": [
       "r124",
+      "r122",
       "build"
     ],
-    "expectedGain": 0.92,
-    "complexity": 0.28,
-    "contradictionRisk": 0.09,
+    "expectedGain": 0.91,
+    "complexity": 0.31,
+    "contradictionRisk": 0.07,
     "operation": "GENERATE_MODULE"
   },
-  "score": 2.4864864864864864,
-  "generatedTarget": "src/generated/selfbuild/contextualCapabilitySurfaceR124.ts",
+  "score": 2.3947368421052633,
+  "generatedTarget": "src/generated/selfbuild/sourceTraceInspectorR124.ts",
   "receipt": {
-    "generation": 2,
-    "capsuleId": "SB002",
-    "startedAt": "2026-09-06T18:03:51.093Z",
+    "generation": 3,
+    "capsuleId": "SB003",
+    "startedAt": "2026-09-06T18:04:28.993Z",
     "status": "ADMIT",
     "tests": {
       "r124": true,
@@ -44,14 +45,14 @@
       "r121"
     ],
     "residualBefore": 1,
-    "rollbackRef": "6354b3a48cd26178104a265e2a0d0244dcf8ea40",
+    "rollbackRef": "0b244da684ec732dd0f2492b43f23c17af3c2e1e",
     "notes": [
       "Generated deterministically from versioned R124 capsule.",
       "Not authoritative until test and merge admission.",
       "Focused and inherited gates passed before admission.",
       "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
     ],
-    "completedAt": "2026-09-06T18:03:56.900Z",
+    "completedAt": "2026-09-06T18:04:33.734Z",
     "residualAfter": 0.9
   },
   "admission": "ADMITTED_PENDING_FAST_FORWARD"
