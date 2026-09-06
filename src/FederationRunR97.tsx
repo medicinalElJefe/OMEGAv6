@@ -4,6 +4,7 @@ import {api} from './platformAdapter';
 import {FEDERATION_NODE_ORDER_R102,FEDERATION_NODES_R102,federationFlowR102,federationNodeStateR102,federationToneR102,type FederationNodeKey} from './federation/federationExperienceR102';
 import FederationLivingFieldR112 from './FederationLivingFieldR112';
 import FederationCeremonyR114 from './FederationCeremonyR114';
+import FederationSurfaceFabricR119 from './FederationSurfaceFabricR119';
 import './federationRunR97.css';
 import './federationRunR112.css';
 
@@ -40,7 +41,7 @@ export default function FederationRunR97({onDownloadLauncher:legacyDownload,pair
  const lastRcwaProof=workers.reduce((m:number,x:any)=>Math.max(m,Number(x?.lastSeen||0)),0)||null,lastHostProof=runtime?.pairing?.lastAuthenticatedProof||null;
  const plannedSteps=routePlan?.ok?(routePlan.steps||[]):[];
  return <section className='r97-federation r112-federation'>
-  <header className='r112-fabric-head'><div><span>OMEGA CAPABILITY FABRIC · R116</span><h3>Tell OMEGA the outcome. The machinery stays underneath.</h3><p>R116 keeps the four authority roles intact while separating human-surface reachability from the R115 machine services that actually perform bounded PROPOSE and SCREEN work. Sovereign native execution still requires current device proof; OMEGAv6 remains the only global ADMIT authority.</p></div><button className='r112-fabric-refresh' onClick={()=>void load()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Checking…':'Refresh status'}</button></header>
+  <header className='r112-fabric-head'><div><span>OMEGA CAPABILITY FABRIC · R119</span><h3>Tell OMEGA the outcome. The machinery stays underneath.</h3><p>R119 keeps the four authority roles intact while converging every developed human surface into one product fabric: Genesis proposes, Optical screens, Sovereign controls native-host work, and OMEGAv6 remains the only global ADMIT authority. Machine services remain bounded transports rather than shadow products.</p></div><button className='r112-fabric-refresh' onClick={()=>void load()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Checking…':'Refresh status'}</button></header>
   {error&&<div className='r97-federation-error'><TriangleAlert/>{error}</div>}
 
   <section className='r112-intent' aria-label='Ask OMEGA for an outcome'>
@@ -48,7 +49,9 @@ export default function FederationRunR97({onDownloadLauncher:legacyDownload,pair
    <div className='r112-intent-result'>{routePlan?.ok?<><span>OMEGA WILL USE</span><b>{routePlan.path}</b><div>{plannedSteps.map((step:any)=><i key={`${step.node}-${step.verb}`} className={step.ready?'ready':'blocked'}>{step.verb} · {nodeLabel(step.node)}</i>)}</div><p>{routePlan.summary}</p><small>{routePlan.nextAction}</small></>:<><span>CURRENT FABRIC</span><b>{gateCopy.title}</b><p>{gateCopy.copy}</p><small>Ask for an outcome above and this becomes a concrete execution path instead of infrastructure status.</small></>}</div>
   </section>
 
-  <section className='r112-node-strip' aria-label='R116 machine service status'>
+  <FederationSurfaceFabricR119 nodes={nodes} machine={machine} runtime={runtime}/>
+
+  <section className='r112-node-strip' aria-label='R119 machine service status'>
    <article className={String(machine?.genesis?.state||'').toUpperCase()==='LIVE'?'ready':'blocked'}><div>{String(machine?.genesis?.state||'').toUpperCase()==='LIVE'?<CheckCircle2/>:<TriangleAlert/>}<span><b>Genesis machine</b><small>PROPOSE service · human surface remains separately reported</small></span></div><strong>{String(machine?.genesis?.state||'UNKNOWN').replaceAll('_',' ')}</strong></article>
    <article className={String(machine?.optical?.state||'').toUpperCase()==='LIVE'?'ready':'blocked'}><div>{String(machine?.optical?.state||'').toUpperCase()==='LIVE'?<CheckCircle2/>:<TriangleAlert/>}<span><b>Optical machine</b><small>SCREEN service · protected human surface is not the execution gate</small></span></div><strong>{String(machine?.optical?.state||'UNKNOWN').replaceAll('_',' ')}</strong></article>
   </section>
@@ -67,6 +70,6 @@ export default function FederationRunR97({onDownloadLauncher:legacyDownload,pair
    <div className='r97-federation-ledger r102-ledger'><section><b>Durable project continuity</b><strong>{runtime?.continuity?.state||'CHECKING'}</strong><small>{runtime?.continuity?.projectCount||0} project record(s) · {runtime?.continuity?.receiptSha256?`receipt ${runtime.continuity.receiptSha256.slice(0,18)}…`:'receipt pending'}</small></section><section><b>Full-wave execution</b><strong>{Number(counts.running||0)} RUNNING · {Number(counts.queued||0)} QUEUED</strong><small>{receipts.length?receipts.map((x:any)=>`${x.status}:${String(x.resultSha256||x.id).slice(0,10)}`).join(' · '):'No returned full-wave receipt yet.'}</small></section><section><b>Authority boundary</b><strong>ONE GLOBAL CANONSTATE</strong><small>Genesis and Optical machine services return bounded packets for their existing roles; Sovereign returns native solver results; OMEGAv6 remains global admission authority.</small></section></div>
   </details>
 
-  <footer className='r102-federation-truth'><ShieldCheck/>R116 preserves the R114 durable closure ceremony and R115 machine adapters while separating human-surface access, machine transport, browser pairing, fresh host heartbeat, solver freshness and canonical admission. No historical, simulated or merely reachable state can masquerade as completed federation proof.</footer>
+  <footer className='r102-federation-truth'><ShieldCheck/>R119 preserves the R114 durable closure ceremony, R115 machine adapters, R116 recovery law and R117 fresh bootstrap while converging the developed human surfaces into one product fabric. Human reachability, machine transport, browser pairing, fresh host heartbeat, solver freshness and canonical admission remain distinct proof states. No historical, simulated or merely reachable state can masquerade as completed federation proof.</footer>
  </section>;
 }
