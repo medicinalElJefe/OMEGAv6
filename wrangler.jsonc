@@ -1,8 +1,8 @@
-// OMEGA R116: R115 machine adapters + R114 durable ceremony + R113/R112/R111 lineage preserved; trusted cross-surface transport and current Sovereign recovery added.
+// OMEGA R117: R116 truth separation + direct durable fresh-pair bootstrap + one clean canonical Sovereign connector; all inherited runtime/federation/archive/mode behavior preserved.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR116.js",
+  "main": "src/workerR117.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
