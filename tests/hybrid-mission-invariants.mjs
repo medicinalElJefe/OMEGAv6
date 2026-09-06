@@ -25,18 +25,18 @@ assert.match(r8,/\/api\/hybrid\/plan/,'R8 governed prompt-to-plan endpoint missi
 assert.match(r8,/\/api\/hybrid\/validate/,'R8 governed validation endpoint missing');
 assert.match(r8,/DEVICE_PROOF_REQUIRED/,'R8 wrapper must retain native proof boundary');
 
-// The ordinary 44-route Hybrid destination must now be the current R117 connection surface, not the old R8 wrapper.
-assert.match(current,/import SovereignConnectionR117 from '\.\/SovereignConnectionR117'/,'current Hybrid surface must mount R117 Sovereign connection authority');
-assert.match(current,/SOVEREIGN COMPUTE · HYBRID LINK · R117/,'current Hybrid surface R117 identity missing');
+// The ordinary 44-route Hybrid destination must be the current clean Sovereign connection successor, not the old R8 wrapper.
+assert.match(current,/import SovereignConnectionR117 from '\.\/SovereignConnectionR117'/,'current Hybrid surface must mount Sovereign connection authority');
+assert.ok(/SOVEREIGN COMPUTE · HYBRID LINK · R117/.test(current)||/SOVEREIGN COMPUTE · HYBRID LINK · R127 ZERO DRIFT/.test(current),'current Hybrid surface clean successor identity missing');
 assert.match(current,/<SovereignConnectionR117\/>/,'current Hybrid surface must expose the clean connection experience first');
 assert.match(current,/<details className='r112-hybrid-deep'/,'advanced Hybrid diagnostics must remain progressively disclosed');
 assert.match(current,/onToggle=\{e=>setDeepOpen/,'advanced Hybrid disclosure must explicitly control whether legacy diagnostics are mounted');
 assert.match(current,/\{deepOpen&&<HybridMissionControlR8 status=\{status\} record=\{record\}\/>\}/,'R8 mission/federation donor must remain reachable but unmounted until advanced diagnostics are opened');
 const deferredCurrent=/HybridMissionControlR109/.test(router)&&/case 'Hybrid Link':return withPhase\(<HybridMissionControlR109[^;]*,'hybrid'\)/.test(router)&&/HybridLinkR117:\(\)=>import\('\.\/HybridLinkR32'\)/.test(loader)&&/HybridMissionControlR109=lazy\(LOADERS\.HybridLinkR117\)/.test(loader)&&/'Hybrid Link':\[LOADERS\.HybridLinkR117\]/.test(loader);
-assert.ok(deferredCurrent,'Hybrid Link route must resolve through the verified R109 deferred loader to the current R117 surface');
+assert.ok(deferredCurrent,'Hybrid Link route must resolve through the verified R109 deferred loader to the current clean Sovereign surface');
 assert.match(loader,/HybridMissionControlR8:\(\)=>import\('\.\/HybridMissionControlR8'\)/,'R8 donor loader must remain retained for deep diagnostics');
 assert.match(loader,/HybridMissionControlR8:LOADERS\.HybridMissionControlR8/,'R8 donor must remain explicitly recoverable in retained deep specialist authority');
 
 assert.ok(css.length>1000,'Hybrid responsive instrumentation CSS unexpectedly absent');
 for(const source of [runtime,panel,r8,current,router,loader])assert.doesNotMatch(source,/@appdeploy\/client|appdeploy\.ai/i,'AppDeploy runtime contract reintroduced');
-console.log('hybrid mission invariants R118 PASS · R117 ordinary Hybrid route + R8 governed donor/diagnostics retained but unmounted until opened + proof-gated native execution');
+console.log('hybrid mission invariants R118/R127 PASS · zero-drift ordinary Hybrid route + R8 governed donor/diagnostics retained but unmounted until opened + proof-gated native execution');
