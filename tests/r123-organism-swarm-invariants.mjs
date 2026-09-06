@@ -49,7 +49,9 @@ for(const proof of ['OMEGA_BRANCH_RECEIPT_R123','OMEGA_ORGANISM_RECEIPT_R123','m
 assert.ok(organism.includes("this.env.OMEGA_SWARM_ORGAN"));
 assert.ok(organism.includes("this.env.OMEGA_SWARM_BRANCH"));
 assert.ok(organism.includes("this.env.OMEGA_SWARM_CELL"));
-for(const route of ['/api/swarm/organism/manifest','/api/swarm/organism/status','/api/swarm/organism/missions','/api/swarm/organism/organs','/api/swarm/organism/branches'])assert.ok(api.includes(route),`organism API missing ${route}`);
+for(const route of ['/api/swarm/organism/manifest','/api/swarm/organism/status','/api/swarm/organism/missions'])assert.ok(api.includes(route),`organism API missing ${route}`);
+assert.ok(api.includes('organism\\/organs\\/')||api.includes('organism\/organs\/')||api.includes('organism/organs'),'organ API regex route missing');
+assert.ok(api.includes('organism\\/branches\\/')||api.includes('organism\/branches\/')||api.includes('organism/branches'),'branch API regex route missing');
 assert.ok(cell.includes('OPERATOR_SUPPLIED_NOT_INDEPENDENTLY_VERIFIED'));
 assert.ok(cell.includes('evidencePackets'));
 assert.ok(ui.includes('Seed → 12 Organs → 144 Branches → 1,728 Cells'));
