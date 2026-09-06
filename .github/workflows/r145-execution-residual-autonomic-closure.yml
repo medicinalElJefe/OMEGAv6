@@ -1,0 +1,98 @@
+name: OMEGA R145 Execution Residual Autonomic Closure
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_run:
+    workflows:
+      - OMEGA Cloud Bridge CI
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+concurrency:
+  group: omega-r145-execution-residual-${{ github.event.pull_request.number || github.event.workflow_run.id || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prove-r145:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prove R145 operation execution deployment residual closure
+        run: node tests/r145-execution-residual-autonomic-closure-invariants.mjs
+      - name: Preserve R144 R143 R142 R141 authority chain
+        shell: bash
+        run: |
+          node tests/r144-runtime-deployment-attestation-invariants.mjs
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+      - name: Preserve R140 R139 operation capability fabrics
+        shell: bash
+        run: |
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r140-living-world-operation-bridge-invariants.mjs
+          node tests/r139-unified-capability-engine-invariants.mjs
+      - name: Preserve R125 R124 repair admission and self-build boundaries
+        shell: bash
+        run: |
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r145-dry-run
+      - name: Observe deployed R144 R143 R142 R141 contracts first hand
+        if: github.event_name == 'workflow_run'
+        env:
+          OMEGA_R145_OUT: /tmp/omega-r145-live-execution-evidence.json
+        run: node scripts/r145-live-execution-evidence.mjs
+      - name: Feed live R145 evidence into R125 policy without applying mutation
+        if: github.event_name == 'workflow_run'
+        env:
+          OMEGA_R145_EXECUTION_EVIDENCE_PATH: /tmp/omega-r145-live-execution-evidence.json
+          OMEGA_R125_RUNS_PATH: /tmp/omega-r145-empty-runs.json
+        shell: bash
+        run: |
+          printf '[]\n' > /tmp/omega-r145-empty-runs.json
+          node scripts/r125-accuracy-engine.mjs
+          node - <<'NODE'
+          const fs=require('fs');
+          const evidence=JSON.parse(fs.readFileSync('/tmp/omega-r145-live-execution-evidence.json','utf8'));
+          const state=JSON.parse(fs.readFileSync('public/omega-r125-accuracy-state.json','utf8'));
+          if(state.sourceState?.executionEvidenceSchema!=='omega.execution.evidence.r145.v1')throw new Error('R125 did not ingest R145 evidence schema');
+          if(state.sourceState?.executionEvidenceObserved!==evidence.probes.length)throw new Error(`R125 execution evidence count mismatch ${state.sourceState?.executionEvidenceObserved} != ${evidence.probes.length}`);
+          if(state.repair)throw new Error('R145 observation workflow must never apply a repair');
+          const truthRisk=state.residuals.filter(x=>x.kind==='TRUTH_BOUNDARY_RISK');
+          if(truthRisk.some(x=>x.mode!=='BLOCK'))throw new Error('R145 truth-boundary residual escaped R125 BLOCK policy');
+          console.log(`R145 LIVE OBSERVE PASS · ${evidence.summary.passed}/${evidence.summary.total} probes · ${state.residuals.length} R125 residuals · no mutation`);
+          NODE
+      - name: Upload R145 execution evidence receipt
+        if: github.event_name == 'workflow_run'
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-r145-execution-evidence-${{ github.event.workflow_run.head_sha }}
+          path: |
+            /tmp/omega-r145-live-execution-evidence.json
+            public/omega-r125-accuracy-state.json
+            public/omega-r125-proposal.json
+          retention-days: 30
