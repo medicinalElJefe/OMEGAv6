@@ -1,0 +1,44 @@
+name: OMEGA R134 Canonical World Continuity
+
+on:
+  push:
+    branches:
+      - r134-canonical-world-scar-ledger
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-world-continuity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: R134 canonical world scar/proof lineage
+        run: node tests/r134-canonical-world-continuity.mjs
+      - name: Preserve R132 relational physics manifold
+        run: node tests/r132-relational-physics-manifold-invariants.mjs
+      - name: Preserve R131 capacity governor
+        run: node tests/r131-capacity-governor.mjs
+      - name: Preserve R130 operational control plane
+        run: node tests/r130-operational-control-plane.mjs
+      - name: Preserve R129-R125 proof, replay and canonical admission chain
+        run: |
+          node tests/r129-empirical-experiment-runtime.mjs
+          node tests/r128-empirical-validation-invariants.mjs
+          node tests/r127-evidence-execution-proof-invariants.mjs
+          node tests/r126-causal-interaction-relativity.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Cloudflare Worker dry run only
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r134-dry-run
