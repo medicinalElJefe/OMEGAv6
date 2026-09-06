@@ -1,7 +1,7 @@
 {
   "schema": "OMEGA_CAPABILITIES_v1",
   "runtimeRevision": "R146/R145/R111/R102/R34/R3-RCWA",
-  "experienceRevision": "R145",
+  "experienceRevision": "R111",
   "compatibility": {"packet": ["OMEGA_PACKET_v1"], "result": ["OMEGA_RESULT_v1","OMEGA_SPECTRAL_RESULT_v1"], "queue": ["OMEGA_FULLWAVE_QUEUE_v1"], "promotion": ["OMEGA_FULLWAVE_PROMOTION_R146"], "health": ["OMEGA_NODE_HEALTH_v1"], "fabric": ["OMEGA_FEDERATED_CAPABILITY_MESH_R111"]},
   "upgradePolicy": "independent-node-and-service-evolution-under-one-global-canonical-authority",
   "interactionModel": "intent -> R145 bounded search -> proof-admissible R146 promotion -> authenticated Sovereign execution -> returned convergence evidence -> proof/admission",
