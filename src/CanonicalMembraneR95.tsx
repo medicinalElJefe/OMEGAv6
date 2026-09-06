@@ -2,8 +2,9 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import {corpusState,projectionPoint,sourceRGB,PROJECTIONS,VIEW_MODES,type Projection,type ViewMode,STATE_COUNT} from './corpusRuntime';
 import {compileSourceTraversal} from './sourceBackedModeRuntimeR21';
 import {applyCanvasResolutionR119,R119_RESOLUTION_BOUNDARY} from './renderResolutionR119';
-import OmegaEarthRelativitySphereR121 from './OmegaEarthRelativitySphereR121';
+import OmegaPhysicsManifoldR132 from './OmegaPhysicsManifoldR132';
 import './canonicalMembraneR95.css';
+import './physicsManifoldHomeAuthorityR132.css';
 
 type Props={address:number;onAddress?:(address:number)=>void;initialProjection?:Projection;initialView?:ViewMode;projection?:Projection;view?:ViewMode;showControls?:boolean;compact?:boolean;label?:string};
 
@@ -81,7 +82,7 @@ export default function CanonicalMembraneR95({address,onAddress,initialProjectio
    <nav aria-label='Membrane data skin'>{VIEW_MODES.map(x=><button key={x} className={view===x?'active':''} onClick={()=>setView(x)}>{x.replaceAll('_',' ')}</button>)}</nav>
    <label>ROUTE <input type='range' min='6' max='72' value={routeDepth} onChange={e=>setRouteDepth(Number(e.target.value))}/><b>{routeDepth}</b></label>
   </div>}
-  {homeComposite&&<OmegaEarthRelativitySphereR121 address={address} onAddress={onAddress} projection={projection} view={view}/>} 
+  {homeComposite&&<OmegaPhysicsManifoldR132 address={address} onAddress={onAddress} projection={projection} view={view}/>} 
   {homeComposite?<details className='r121-home-membrane'><summary>CANONICAL SOURCE MEMBRANE · OPEN 20,736-CELL INSPECTION SURFACE</summary>{membraneStage}</details>:membraneStage}
   <details className='r98-membrane-data'>
    <summary>DATA · STATE {record.stateId} · {record.metrics.decision}</summary>
