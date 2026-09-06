@@ -7,6 +7,7 @@ const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const navigator=read('src/OmegaSideNavigatorR88.tsx');
 const loader=read('src/specialistLoaderR109.tsx');
 const suite=read('src/OmegaSpecialistSuite.tsx');
+const hybridRoute=read('src/HybridLinkR32.tsx');
 const worker117=read('src/workerR117.js');
 const worker116=read('src/workerR116.js');
 const hybrid=read('src/SovereignConnectionR117.tsx');
@@ -27,6 +28,14 @@ must(!workstation.includes('REGISTERED · NO ACTIVE UTILITY IMPLEMENTATION'),'wo
 must(app.includes("lazy(()=>import('./OmegaWorkstationFullV2'))")&&app.includes('omega-home-request'),'home/workstation transition authority must remain wired');
 must(navigator.includes("rows.map(route=>")&&navigator.includes("onClick={()=>go(route)}"),'all destination buttons must share one deterministic navigation handler');
 must(navigator.includes("aria-current={currentPanel===route?'page':undefined}"),'active route must remain exposed accessibly');
+
+// The actual registered Hybrid destination must point at the current R117 human connection surface.
+must(loader.includes("HybridLinkR117:()=>import('./HybridLinkR32')"),'current deferred HybridLinkR117 loader missing');
+must(loader.includes('HybridMissionControlR109=lazy(LOADERS.HybridLinkR117)'),'registered Hybrid mount must resolve to current R117 surface rather than old R8 wrapper');
+must(loader.includes("'Hybrid Link':[LOADERS.HybridLinkR117]"),'route-demand prefetch must resolve the same R117 Hybrid surface');
+must(loader.includes("HybridMissionControlR8:()=>import('./HybridMissionControlR8')")&&loader.includes('HybridMissionControlR8:LOADERS.HybridMissionControlR8'),'R8 mission donor must stay recoverable as an advanced layer');
+must(hybridRoute.includes("import SovereignConnectionR117 from './SovereignConnectionR117'")&&hybridRoute.includes('<SovereignConnectionR117/>'),'current Hybrid route must put R117 connection authority first');
+must(hybridRoute.includes("<details className='r112-hybrid-deep'>")&&hybridRoute.includes('<HybridMissionControlR8'),'old mission/federation controls must remain available only under progressive advanced disclosure');
 
 // R117 intentionally repairs connector issuance on the already-proven R116 runtime spine.
 must(wrangler.includes('"main": "src/workerR116.js"'),'Cloudflare must execute the proven R116 runtime spine');
@@ -49,4 +58,4 @@ must(launcher.includes('This connector will never call the retired preview host.
 must(!launcher.includes('set "OMEGA_ORIGIN=https://omega-sovereign-convergence.foundasound.chatgpt.site')&&!launcher.includes('curl.exe --fail --silent --show-error --location --max-time 20 "https://omega-sovereign-convergence.foundasound.chatgpt.site'),'retired host must never be executable launcher target');
 must(worker116.includes('nativeExecutionClaimed:false')||worker116.includes('nativeExecutionClaimed: false'),'fresh pairing must never claim PC ONLINE before a real host heartbeat');
 
-console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · proven R116 runtime spine + R117 connector repair · dedicated stale-header-safe bootstrap · explicit browser-safe connector download');
+console.log('R118 FULL SYSTEM STATIC PASS · 44 route authority · concrete specialist ownership · ordinary Hybrid route promoted to R117 clean surface · proven R116 runtime spine + R117 connector repair · dedicated stale-header-safe bootstrap · explicit browser-safe connector download');
