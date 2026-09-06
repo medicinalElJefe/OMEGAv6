@@ -1,0 +1,29 @@
+name: OMEGA R136 Living World Frame
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  prove-r136:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prove R136 living world frame
+        run: node tests/r136-living-world-frame-invariants.mjs
+      - name: Preserve both R134 continuity layers
+        run: |
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r134-woven-relativity-continuum-invariants.mjs
+      - name: Preserve current physics and Hybrid truth gates
+        run: |
+          node tests/r132-relational-physics-manifold-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Worker bundle dry run
+        run: npx wrangler deploy --dry-run
