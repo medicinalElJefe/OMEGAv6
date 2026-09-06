@@ -16,7 +16,7 @@ must(world.includes('previousHash')&&world.includes("crypto.subtle.digest('SHA-2
 must(world.includes("authority='RETURNED_NOT_ADMITTED'")&&world.includes("'SOURCE_RETURNED_NOT_ADMITTED'")&&world.includes("'CANONICAL_ADMISSION'"),'observation/proposal/admission roles must remain distinct');
 must(world.includes('WORLD_ADMISSION_SECRET')&&world.includes('PROVEN_SHA256_PROOF_REQUIRED'),'internal canonical admission must require both authority secret and proven SHA-256 proof');
 must(world.includes("u.pathname==='/api/world/admit'")&&world.includes('PUBLIC_ADMISSION_FORBIDDEN'),'public admission endpoint must fail closed');
-must(world.includes("'/api/earth/evidence")&&world.includes('EARTH_EVIDENCE_UNAVAILABLE')&&world.includes('evidence.evidenceHash'),'Earth world ingress must inherit returned-source evidence rather than fabricate a scene');
+must(world.includes('/api/earth/evidence')&&world.includes('EARTH_EVIDENCE_UNAVAILABLE')&&world.includes('evidence.evidenceHash'),'Earth world ingress must inherit returned-source evidence rather than fabricate a scene');
 must(world.includes('syncSwarm')&&world.includes("kind:'SWARM_RETURN'")&&world.includes('Swarm output and Merkle receipts are durable returned computation, not CanonState admission.'),'swarm reconvergence must carry into world lineage without self-admission');
 for(const route of ['/api/world/manifest','/api/world/snapshot','/api/world/events','/api/world/project','/api/world/organism','/api/world/propose','/api/world/observe/earth','/api/world/sync/swarm'])must(world.includes(route),'missing public world route '+route);
 
