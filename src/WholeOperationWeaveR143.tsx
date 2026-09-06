@@ -1,0 +1,47 @@
+import {useEffect,useMemo,useState} from 'react';
+import {Activity,AlertTriangle,CheckCircle2,CircleDotDashed,GitBranch,Network,Play,RefreshCw,ShieldCheck,Waypoints} from 'lucide-react';
+import {api} from './platformAdapter';
+import './wholeOperationWeaveR143.css';
+
+type Props={seedIntent?:string};
+const terminal=new Set(['VERIFIED','FAILED','REJECTED','STALE','UNAVAILABLE','FINGERPRINT_MISMATCH','RETURNED']);
+const tone=(s:string)=>s==='VERIFIED'?'verified':['FAILED','REJECTED','STALE','UNAVAILABLE','FINGERPRINT_MISMATCH'].includes(s)?'held':s==='INVOKED'?'running':s==='HELD_FOR_R125'?'candidate':'ready';
+const Icon=({state}:{state:string})=>state==='VERIFIED'?<CheckCircle2/>:['FAILED','REJECTED','STALE','UNAVAILABLE','FINGERPRINT_MISMATCH'].includes(state)?<AlertTriangle/>:state==='INVOKED'?<Activity/>:<CircleDotDashed/>;
+
+export default function WholeOperationWeaveR143({seedIntent=''}:Props){
+ const[intent,setIntent]=useState(seedIntent),[plan,setPlan]=useState<any>(null),[run,setRun]=useState<any>(null),[runs,setRuns]=useState<any[]>([]),[busy,setBusy]=useState(''),[error,setError]=useState(''),[hostJson,setHostJson]=useState(''),[hostConfirmed,setHostConfirmed]=useState(false);
+ useEffect(()=>{if(seedIntent.trim()&&!intent.trim())setIntent(seedIntent)},[seedIntent]);
+ const graph=run?.graph||plan?.graph||null,nodes=graph?.nodes||[],scale=graph?.scale;
+ const counts=useMemo(()=>({verified:nodes.filter((x:any)=>x.state==='VERIFIED').length,held:nodes.filter((x:any)=>['FAILED','REJECTED','STALE','UNAVAILABLE','FINGERPRINT_MISMATCH'].includes(x.state)).length,running:nodes.filter((x:any)=>x.state==='INVOKED').length,pending:nodes.filter((x:any)=>!terminal.has(x.state)&&x.state!=='HELD_FOR_R125').length}),[nodes]);
+ const loadRuns=async()=>{try{const r=await api.get<any>('/api/operation-weave/r143/runs');setRuns(r.data?.runs||[])}catch{}};
+ useEffect(()=>{void loadRuns()},[]);
+ const doPlan=async()=>{const q=intent.trim();if(!q)return;setBusy('plan');setError('');try{const r=await api.post<any>('/api/operation-weave/r143/plan',{intent:q});setPlan(r.data);setRun(null)}catch(e:any){setError(e?.message||'Whole-operation plan failed safely.');setPlan(null)}finally{setBusy('')}};
+ const create=async()=>{if(!plan?.graph)return;setBusy('create');setError('');try{const r=await api.post<any>('/api/operation-weave/r143/runs',{intent:plan.graph.intent,intentId:plan.graph.intentId,createdAt:plan.graph.createdAt,joinEventTime:plan.graph.joinEventTime,hints:{requestedScale:plan.graph.scale?.logicalScale},confirmedGraph:true});setRun(r.data?.run);await loadRuns()}catch(e:any){setError(e?.message||'Run creation was rejected.')}finally{setBusy('')}};
+ const reload=async()=>{if(!run?.id)return;try{const r=await api.get<any>(`/api/operation-weave/r143/runs/${encodeURIComponent(run.id)}`);setRun(r.data?.run)}catch(e:any){setError(e?.message||'Run status unavailable.')}};
+ const tick=async()=>{if(!run?.id)return;setBusy('tick');setError('');try{const r=await api.post<any>(`/api/operation-weave/r143/runs/${encodeURIComponent(run.id)}/tick`,{});setRun(r.data?.run||r.data?.run?.run||run);await reload();await loadRuns()}catch(e:any){setError(e?.message||'The next lawful graph step did not execute.')}finally{setBusy('')}};
+ const join=async()=>{if(!run?.id)return;setBusy('join');setError('');try{const r=await api.post<any>(`/api/operation-weave/r143/runs/${encodeURIComponent(run.id)}/join`,{});setRun(r.data?.run);await loadRuns()}catch(e:any){setError(e?.message||'Join remains held until graph dependencies are terminal.')}finally{setBusy('')}};
+ const attachHost=async()=>{if(!run?.id||!hostConfirmed)return;let hostPlan:any;try{hostPlan=JSON.parse(hostJson)}catch{setError('Native host plan must be valid JSON from a reviewed Hybrid plan.');return}setBusy('host');setError('');try{const r=await api.post<any>(`/api/operation-weave/r143/runs/${encodeURIComponent(run.id)}/host-plan`,{confirmedHostPlan:true,hostPlan});setRun(r.data?.run);setHostConfirmed(false)}catch(e:any){setError(e?.message||'Native plan attachment was rejected.')}finally{setBusy('')}};
+ const selected=(id:string)=>{const x=runs.find(y=>y.id===id);if(x)setRun(x)};
+ return <section className='r143-weave' aria-label='R143 whole operation execution weave'>
+  <header><div><span>R143 · WHOLE-OPERATION WEAVE</span><h3>One objective → adaptive distributed execution → deterministic evidence join</h3><p>This is the operational layer above the separate tools. It expands work only as far as current complexity/evidence requires, routes only to proved executors, preserves failed branches as scars, and returns one evidence set to the R125 admission boundary.</p></div><Network/></header>
+  <div className='r143-entry'><textarea value={intent} onChange={e=>setIntent(e.target.value)} placeholder='Describe the complete outcome — research, generate, screen, solve, build, test, prove…'/><button onClick={()=>void doPlan()} disabled={!intent.trim()||!!busy}><GitBranch/>{busy==='plan'?'Compiling…':'Compile whole operation'}</button></div>
+  {error&&<div className='r143-error'><AlertTriangle/>{error}</div>}
+  {graph&&<>
+   <section className='r143-scale'><article><span>LOGICAL SCALE</span><b>{Number(scale?.logicalScale||1).toLocaleString()}</b><small>adaptive execution/address resolution</small></article><article><span>SWARM CELLS</span><b>{Number(scale?.swarmCells||1).toLocaleString()}</b><small>logical cells selected</small></article><article><span>LANES / CELL</span><b>{Number(scale?.lanesPerCell||1)}</b><small>work resolution</small></article><article><span>RELATIVITY SCORE</span><b>{Number(scale?.score||0).toFixed(3)}</b><small>novelty · uncertainty · proof · motion</small></article></section>
+   <div className='r143-scale-law'><ShieldCheck/><span>{scale?.truthBoundary}</span></div>
+   <div className='r143-graph'>{nodes.map((n:any,index:number)=><article key={n.id} className={tone(n.state)}>
+    <header><code>{n.id}</code><span><b>{n.kind}</b><small>{n.executor}</small></span><Icon state={n.state}/></header>
+    <p>{n.purpose}</p><dl><div><dt>STATE</dt><dd>{String(n.state).replaceAll('_',' ')}</dd></div><div><dt>DEPENDS</dt><dd>{n.dependsOn?.join(' · ')||'root'}</dd></div><div><dt>PROOF</dt><dd>{String(n.availabilityProof||'—').replaceAll('_',' ')}</dd></div></dl>
+    {n.requiredEvidence?.length>0&&<footer>{n.requiredEvidence.map((x:string)=><i key={x}>{x}</i>)}</footer>}
+    {index<nodes.length-1&&<span className='r143-edge'>↓ invariant · scar · proof · source · causal frame</span>}
+   </article>)}</div>
+   {!run?<div className='r143-confirm'><div><b>PLAN ONLY · NOTHING EXECUTED</b><small>Persisting the graph is a separate explicit step. Native PC work still requires its own confirmed Hybrid plan.</small></div><button onClick={()=>void create()} disabled={!!busy}><Play/>Confirm graph & create run</button></div>:<>
+    <section className='r143-runbar'><div><span>RUN</span><b>{run.id}</b><small>{run.status} · {counts.verified} verified · {counts.held} held/scar · {counts.running} running · {counts.pending} pending</small></div><button onClick={()=>void reload()}><RefreshCw/>Refresh</button><button onClick={()=>void tick()} disabled={!!busy}><Waypoints/>{busy==='tick'?'Advancing…':'Advance next lawful node'}</button><button onClick={()=>void join()} disabled={!!busy}>Join evidence</button></section>
+    {nodes.some((x:any)=>x.id==='N40_HOST')&&<details className='r143-native'><summary>Attach a reviewed native Hybrid plan</summary><p>R143 never converts the objective into arbitrary PC commands. Paste an already-reviewed Hybrid job plan here only when you intend to authorize that bounded native step. Attaching does not itself queue the job; the next graph tick does.</p><textarea value={hostJson} onChange={e=>{setHostJson(e.target.value);setHostConfirmed(false)}} placeholder='{"projectPath":".","targetDeviceId":"…","steps":[…],"allowedDomains":[]}'/><label><input type='checkbox' checked={hostConfirmed} onChange={e=>setHostConfirmed(e.target.checked)}/> I explicitly confirm this exact bounded native plan.</label><button disabled={!hostConfirmed||!hostJson.trim()||!!busy} onClick={()=>void attachHost()}>{busy==='host'?'Attaching…':'Attach confirmed plan'}</button></details>}
+    {run.joinReceipt&&<section className={'r143-join '+(run.joinReceipt.state==='VERIFIED_EVIDENCE_SET'?'verified':'held')}><header><CheckCircle2/><div><span>DETERMINISTIC JOIN</span><b>{run.joinReceipt.state.replaceAll('_',' ')}</b></div></header><div><span>HEAD <code>{String(run.joinReceipt.finalHeadSha256||'').slice(0,28)}…</code></span><span>JOIN <code>{String(run.joinReceipt.joinDigest||'').slice(0,28)}…</code></span><span>{run.joinReceipt.verifiedNodeCount} verified · {run.joinReceipt.heldNodeCount} residual</span></div><small>Candidate evidence only · canonicalMutation=false · R125 admission authority</small></section>}
+   </>}
+  </>}
+  {runs.length>0&&<details className='r143-history'><summary>Recent whole-operation runs · {runs.length}</summary><div>{runs.map(x=><button key={x.id} onClick={()=>selected(x.id)}><span><b>{x.id}</b><small>{x.status}</small></span><strong>{Number(x.graph?.scale?.logicalScale||1).toLocaleString()}</strong></button>)}</div></details>}
+  <footer className='r143-truth'><ShieldCheck/>R143 is an execution graph over existing OMEGA runtimes, not a new authority. Availability ≠ invocation, return ≠ verification, graph join ≠ CanonState, and logical 20,736-scale execution ≠ 20,736 physical dimensions or servers.</footer>
+ </section>;
+}
