@@ -2,6 +2,9 @@ import {lazy} from 'react';
 import {deriveSpecialistPrefetchPolicyR110,selectWorkingSetPanelsR110} from './specialistWorkingSetPolicyR110.js';
 
 const LOADERS={
+ // R118: the ordinary Hybrid route now opens the current R117 connection experience.
+ // The older R8 mission surface remains available only as a deferred advanced/donor layer inside HybridLinkR32.
+ HybridLinkR117:()=>import('./HybridLinkR32'),
  HybridMissionControlR8:()=>import('./HybridMissionControlR8'),
  OmegaWorkspaceCockpitR18:()=>import('./OmegaWorkspaceCockpitR18'),
  ArchiveGovernanceControl:()=>import('./ArchiveGovernanceControl'),
@@ -25,7 +28,7 @@ const LOADERS={
  SourceBackedModesPanelR21:()=>import('./SourceBackedModesPanelR21')
 } as const;
 
-export const HybridMissionControlR109=lazy(LOADERS.HybridMissionControlR8);
+export const HybridMissionControlR109=lazy(LOADERS.HybridLinkR117);
 export const OmegaWorkspaceCockpitR109=lazy(LOADERS.OmegaWorkspaceCockpitR18);
 export const ArchiveGovernanceR109=lazy(LOADERS.ArchiveGovernanceControl);
 export const UniversalQualityR109=lazy(LOADERS.UniversalQualityControl);
@@ -52,11 +55,12 @@ export const SourceBackedModesR109=lazy(LOADERS.SourceBackedModesPanelR21);
 export const RETAINED_DEEP_SPECIALIST_LOADERS_R109={
  OmegaVisualInstrument:()=>import('./OmegaVisualInstrument'),
  OmegaTraversalStudio:()=>import('./OmegaTraversalStudio'),
- MatterTraversal:()=>import('./MatterTraversal')
+ MatterTraversal:()=>import('./MatterTraversal'),
+ HybridMissionControlR8:LOADERS.HybridMissionControlR8
 } as const;
 
 const ROUTE_LOADERS:Record<string,readonly (()=>Promise<any>)[]>={
- 'Hybrid Link':[LOADERS.HybridMissionControlR8],
+ 'Hybrid Link':[LOADERS.HybridLinkR117],
  Workspace:[LOADERS.OmegaWorkspaceCockpitR18],Cockpit:[LOADERS.OmegaWorkspaceCockpitR18],
  'Archive Census':[LOADERS.ArchiveGovernanceControl],'Archive Operators':[LOADERS.ArchiveGovernanceControl],
  'Quality Compiler':[LOADERS.UniversalQualityControl],Validation:[LOADERS.UniversalQualityControl],
