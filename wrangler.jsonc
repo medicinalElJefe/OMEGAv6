@@ -1,8 +1,8 @@
-// OMEGA R115: R114/R113/R112/R111 lineage preserved with machine-grade PROPOSE + SCREEN adapters.
+// OMEGA R116: R115 machine adapters + R114 durable ceremony + R113/R112/R111 lineage preserved; trusted cross-surface transport and current Sovereign recovery added.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR115.js",
+  "main": "src/workerR116.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,

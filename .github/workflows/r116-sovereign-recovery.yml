@@ -1,0 +1,85 @@
+name: OMEGA R116 Sovereign Recovery
+
+on:
+  push:
+    branches: [main, r116-sovereign-recovery-unified-truth]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-r116:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Syntax-check R116 successor
+        run: node --check src/workerR116.js
+      - name: Execute R116 recovery invariants
+        run: node tests/r116-sovereign-recovery-unified-truth-invariants.mjs
+      - name: Execute inherited R115 machine adapter invariants
+        run: node tests/r115-machine-adapters-invariants.mjs
+      - name: Execute inherited R114 federation closure invariants
+        run: node tests/r114-federation-closure-invariants.mjs
+      - name: Production build
+        run: npm run build
+      - name: Canonical R116 Wrangler dry-run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r116-canonical
+
+  live-r116:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-r116
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for canonical Cloud Bridge promotion
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let last='';
+          for(let attempt=1;attempt<=36;attempt++){
+            try{
+              const r=await fetch(base+'/api/system/convergence',{headers:{'cache-control':'no-cache'}}),raw=await r.text();
+              if(r.ok){const data=JSON.parse(raw);if(data.runtimeRevision==='R116'){console.log(`R116 canonical promotion observed on attempt ${attempt}`);process.exit(0)}last=`revision ${data.runtimeRevision||'missing'}`}
+              else last=`HTTP ${r.status}`;
+            }catch(e){last=String(e)}
+            await sleep(10000);
+          }
+          throw new Error(`R116 canonical promotion not observed: ${last}`);
+          NODE
+      - name: Verify trusted Optical Hybrid CORS
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const origin='https://omega-living-light-etching-private-woven2.vercel.app';
+          const r=await fetch(base+'/api/hybrid/status',{method:'OPTIONS',headers:{origin,'access-control-request-method':'GET','access-control-request-headers':'x-omega-session-id'}});
+          if(r.status!==204)throw new Error(`Hybrid CORS preflight HTTP ${r.status}`);
+          if(r.headers.get('access-control-allow-origin')!==origin)throw new Error(`Hybrid CORS origin mismatch: ${r.headers.get('access-control-allow-origin')}`);
+          console.log('R116 OPTICAL HYBRID CORS PASS');
+          NODE
+      - name: Verify unified convergence truth and machine-aware routing
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const cRes=await fetch(base+'/api/system/convergence',{headers:{'cache-control':'no-cache'}}),c=await cRes.json();
+          if(!cRes.ok||c.schema!=='OMEGA_SYSTEM_CONVERGENCE_R116'||c.runtimeRevision!=='R116')throw new Error(`convergence endpoint failed: ${JSON.stringify(c)}`);
+          if(c.proposal?.machineState!=='LIVE'||c.optical?.machineState!=='LIVE')throw new Error(`machine services not live: ${JSON.stringify(c)}`);
+          if(c.connectorPolicy?.canonicalOrigin!==base||c.connectorPolicy?.retiredLaunchersMustNotBeUsed!==true)throw new Error('connector retirement policy missing');
+          if(c.sovereign?.nativeExecutionClaimed===true&&c.sovereign?.currentAuthenticatedHeartbeat!==true)throw new Error('native execution claimed without current authenticated heartbeat');
+          const sRes=await fetch(base+'/api/federation/run/status',{headers:{'cache-control':'no-cache'}}),s=await sRes.json();
+          if(!sRes.ok||s.runtimeRevision!=='R116'||s.machineServices?.optical?.state!=='LIVE'||s.machineServices?.genesis?.state!=='LIVE')throw new Error(`federation machine truth missing: ${JSON.stringify(s).slice(0,1200)}`);
+          const pRes=await fetch(base+'/api/federation/route-intent',{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify({intent:'Screen an optical metasurface candidate at 550 nm.'})}),p=await pRes.json();
+          if(!pRes.ok||p.machineAwareRouting!==true||p.machineServices?.optical!=='LIVE'||p.steps?.some(x=>x.node==='omega-optical'&&!x.ready))throw new Error(`machine-aware routing failed: ${JSON.stringify(p)}`);
+          console.log(`R116 LIVE PASS · PROPOSE ${c.proposal.machineState} · SCREEN ${c.optical.machineState} · Sovereign ${c.sovereign.state} · route ${p.path}`);
+          NODE
