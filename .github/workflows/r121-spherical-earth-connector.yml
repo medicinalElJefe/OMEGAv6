@@ -15,8 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - name: R121 source and connector invariants
         run: node tests/r121-spherical-earth-connector-invariants.mjs
       - name: TypeScript/Vite production build
