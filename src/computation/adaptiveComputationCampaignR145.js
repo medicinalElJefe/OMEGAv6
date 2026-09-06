@@ -44,7 +44,12 @@ function nextPopulation(previous,generation,population,eliteCount){
 function stageSummary(stage,index){return{generation:index,candidate_count:stage.summary.candidate_count,pareto_front_size:stage.summary.pareto_front_size,best_candidate_id:stage.summary.best_candidate_id,best_objective:stage.summary.best_objective,rcwa_ready:stage.summary.rcwa_ready,fdtd_escalations:stage.summary.fdtd_escalations,result_sha256:stage.receipt.result_sha256,runtime_ms:stage.receipt.runtime_ms}}
 
 export async function runAdaptiveCampaignR145(request={}){
- const started=Date.now(),generations=Math.max(1,Math.min(R145_MAX_GENERATIONS,Math.floor(Number(request.generations)||3))),population=Math.max(16,Math.min(R145_MAX_POPULATION,Math.floor(Number(request.population)||Math.floor(Number(request?.design_space?.count)||128))),eliteCount=Math.max(2,Math.min(24,Math.floor(Number(request.elite_count)||8))),convergenceTolerance=clamp(finite(request.convergence_tolerance)?request.convergence_tolerance:.0025,0,.1);
+ const started=Date.now();
+ const generations=Math.max(1,Math.min(R145_MAX_GENERATIONS,Math.floor(Number(request.generations)||3)));
+ const requestedPopulation=Math.floor(Number(request.population)||Math.floor(Number(request?.design_space?.count)||128));
+ const population=Math.max(16,Math.min(R145_MAX_POPULATION,requestedPopulation));
+ const eliteCount=Math.max(2,Math.min(24,Math.floor(Number(request.elite_count)||8)));
+ const convergenceTolerance=clamp(finite(request.convergence_tolerance)?request.convergence_tolerance:.0025,0,.1);
  const baseDesign={...(request.design_space||request),count:population};
  let candidates=Array.isArray(request.candidates)&&request.candidates.length?request.candidates.slice(0,population):generateDesignSpaceR145(baseDesign),last=null;
  const stages=[],history=[];
