@@ -72,14 +72,15 @@ jobs:
         run: |
           node <<'NODE'
           const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
-          const cRes=await fetch(base+'/api/system/convergence',{headers:{'cache-control':'no-cache'}}),c=await cRes.json();
+          const observerHeaders={'cache-control':'no-cache','x-omega-session-id':'r116_live_observer'};
+          const cRes=await fetch(base+'/api/system/convergence',{headers:observerHeaders}),c=await cRes.json();
           if(!cRes.ok||c.schema!=='OMEGA_SYSTEM_CONVERGENCE_R116'||c.runtimeRevision!=='R116')throw new Error(`convergence endpoint failed: ${JSON.stringify(c)}`);
           if(c.proposal?.machineState!=='LIVE'||c.optical?.machineState!=='LIVE')throw new Error(`machine services not live: ${JSON.stringify(c)}`);
           if(c.connectorPolicy?.canonicalOrigin!==base||c.connectorPolicy?.retiredLaunchersMustNotBeUsed!==true)throw new Error('connector retirement policy missing');
           if(c.sovereign?.nativeExecutionClaimed===true&&c.sovereign?.currentAuthenticatedHeartbeat!==true)throw new Error('native execution claimed without current authenticated heartbeat');
-          const sRes=await fetch(base+'/api/federation/run/status',{headers:{'cache-control':'no-cache'}}),s=await sRes.json();
+          const sRes=await fetch(base+'/api/federation/run/status',{headers:observerHeaders}),s=await sRes.json();
           if(!sRes.ok||s.runtimeRevision!=='R116'||s.machineServices?.optical?.state!=='LIVE'||s.machineServices?.genesis?.state!=='LIVE')throw new Error(`federation machine truth missing: ${JSON.stringify(s).slice(0,1200)}`);
-          const pRes=await fetch(base+'/api/federation/route-intent',{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify({intent:'Screen an optical metasurface candidate at 550 nm.'})}),p=await pRes.json();
+          const pRes=await fetch(base+'/api/federation/route-intent',{method:'POST',headers:{...observerHeaders,'content-type':'application/json'},body:JSON.stringify({intent:'Screen an optical metasurface candidate at 550 nm.'})}),p=await pRes.json();
           if(!pRes.ok||p.machineAwareRouting!==true||p.machineServices?.optical!=='LIVE'||p.steps?.some(x=>x.node==='omega-optical'&&!x.ready))throw new Error(`machine-aware routing failed: ${JSON.stringify(p)}`);
           console.log(`R116 LIVE PASS · PROPOSE ${c.proposal.machineState} · SCREEN ${c.optical.machineState} · Sovereign ${c.sovereign.state} · route ${p.path}`);
           NODE
