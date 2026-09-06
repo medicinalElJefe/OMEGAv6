@@ -7,7 +7,7 @@ const membrane=read('src/CanonicalMembraneR95.tsx');
 const launcher=read('src/sovereignLauncherR117.ts');
 
 must(membrane.includes("import OmegaEarthRelativitySphereR121 from './OmegaEarthRelativitySphereR121'"),'whole-sphere instrument must be shared through canonical membrane authority');
-must(membrane.includes("const homeComposite=compact&&label.startsWith('HOME ·')")&&membrane.includes('<OmegaEarthRelativitySphereR121 address={address} onAddress={onAddress}/>'),'Home compact membrane must promote whole-sphere integration without removing canonical source truth');
+must(membrane.includes("const homeComposite=compact&&label.startsWith('HOME ·')")&&membrane.includes('<OmegaEarthRelativitySphereR121 address={address} onAddress={onAddress} projection={projection} view={view}/>'),'Home compact membrane must promote whole-sphere integration and bind the selected deterministic projection/data skin without removing canonical source truth');
 must(membrane.includes("className='r121-home-membrane'")&&membrane.includes('CANONICAL SOURCE MEMBRANE · OPEN 20,736-CELL INSPECTION SURFACE'),'20,736-cell membrane must remain directly reachable as source-truth inspection');
 for(const token of ['EARTH_RADIUS_KM=6371','EARTH_ROTATION_RAD_S=7.292115e-5','SURFACE_G=9.80665','INNER CORE','OUTER CORE','LOWER MANTLE','TRANSITION 410 km','TROPOSPHERE','THERMOSPHERE REF'])must(sphere.includes(token),'Earth reference layer missing '+token);
 for(const token of ["SphereLens='WHOLE'|'CUTAWAY'|'EVIDENCE'|'CANON'|'SPACE'",'/api/earth/evidence','/api/earth/noaa/catalog','/api/earth/noaa/image','STATE_COUNT','compileSourceTraversal','CANONICAL RADIAL LAYERS ARE REPRESENTATIONAL','atlas address resolution · not physical dimensions','REFERENCE = published Earth constants','No satellite coverage returned; nothing synthetic substituted'])must(sphere.includes(token),'whole-sphere truth/source contract missing '+token);
@@ -21,7 +21,7 @@ must(launcher.includes(cmdSafe),'Hybrid agent validator must construct the sheba
 must(launcher.includes("'OMEGA Sovereign RCWA transport agent' in s")&&launcher.includes("s.startswith(chr(35)+chr(33)+'/usr/bin/env python3')"),'RCWA validator must use the same CMD-safe shebang construction');
 must(launcher.includes('R120.3_CMD_SAFE')&&launcher.includes('no literal exclamation mark is permitted inside this inline Python'),'launcher must expose the CMD-safe validator build and its shell invariant');
 must(!launcher.includes("s.startswith('#//omegav6.jeffdeweyeljefe.workers.dev' in s")&&!launcher.includes("s.startswith('#!/usr/bin/env python3' in s"),'malformed R120 screenshot validator pattern must never regress');
-must(launcher.includes("replace(/[\\r\\n\"!%&|<>^]/g,''")||launcher.includes("replace(/[\\r\\n\"!%&|<>^]/g,''"),'pairing code sanitizer must neutralize CMD delayed and percent expansion metacharacters');
+must(launcher.includes("replace(/[\\r\\n\"!%&|<>^]/g,''"),'pairing code sanitizer must neutralize CMD delayed and percent expansion metacharacters');
 must(launcher.includes('The connector did not execute unvalidated source.'),'fail-closed Hybrid execution boundary must remain');
 
 console.log('R121 PASS · whole-sphere Earth relativity home instrument · full canonical field · source-backed Earth/satellite evidence · CMD-safe connector validator regression sealed');
