@@ -29,7 +29,7 @@ must(sovereign117.includes('Local learning')&&sovereign117.includes('Full-wave R
 
 must(launcher117.includes("OMEGA_ORIGIN=${ORIGIN}")&&launcher117.includes('/api/hybrid/agent-download?r117=1'),'R117 launcher must hard-bind canonical OMEGA and canonical agent endpoint');
 must(launcher117.includes('if exist J:\\\\')&&launcher117.includes('OMEGA_APPROVED_ROOT'),'R117 launcher must honor explicit root override and prefer the established J:\\ root when present');
-must(launcher117.includes("$s.StartsWith('#!/usr/bin/env python3')")&&launcher117.includes("$s.Contains('OMEGA Hybrid Link agent')"),'R117 launcher must validate Python source before execution');
+must(launcher117.includes("$s.StartsWith('#!/usr/bin/env python3')")&&launcher117.includes("$s.Contains('OMEGA R34 local Hybrid Link agent')")&&launcher117.includes("DEFAULT_SERVER=''https://omegav6.jeffdeweyeljefe.workers.dev''"),'R117 launcher must validate the exact canonical Python agent identity before execution');
 must(launcher117.includes('import numpy,grcwa')&&launcher117.includes('General Hybrid connection will still run'),'optional RCWA must never block the general Hybrid heartbeat');
 must(launcher117.includes('pip install numpy grcwa')&&!launcher117.includes('winget install'),'launcher may explain missing solver dependency but must not silently install it');
 must(launcher117.includes('OMEGA_CONNECT_PC_R117.log'),'R117 launcher must leave a local diagnostic log for failed connection runs');
