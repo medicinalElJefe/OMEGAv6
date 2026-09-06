@@ -25,10 +25,8 @@ jobs:
         run: node --check src/workerR117.js
       - name: Execute R117 real bootstrap invariants
         run: node tests/r117-real-sovereign-bootstrap-invariants.mjs
-      - name: Execute inherited R116 recovery invariants
-        run: node tests/r116-sovereign-recovery-unified-truth-invariants.mjs
-      - name: Production build
-        run: npm run build
+      - name: Execute full inherited regression and production build gate
+        run: npm run check
       - name: Canonical R117 Wrangler dry-run
         run: npx wrangler deploy --dry-run --outdir .wrangler-r117-canonical
 
