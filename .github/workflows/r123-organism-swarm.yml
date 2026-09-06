@@ -1,0 +1,67 @@
+name: OMEGA R123 Organism Swarm
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  verify-r123:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Verify organism hierarchy and authority invariants
+        run: node tests/r123-organism-swarm-invariants.mjs
+      - name: Verify organism runtime syntax
+        run: |
+          node --check src/swarm/swarmOrganismR123.js
+          node --check src/swarm/swarmCellR121.js
+          node --check src/swarm/swarmApiR121.js
+          node --check src/workerR116.js
+      - name: Complete inherited OMEGA regression and production build
+        run: npm run check
+      - name: Verify R123 Durable Object bundle
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r123-dry-run
+
+  live-r123:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-r123
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for governed main deployment and prove hierarchical mission closure
+        env:
+          OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let manifest,last='';
+          for(let i=0;i<36;i++){
+            try{
+              const r=await fetch(base+'/api/swarm/organism/manifest',{headers:{'cache-control':'no-cache'}}),j=await r.json();
+              if(r.ok&&j.runtimeRevision==='R123'&&j.hierarchy?.organs===12&&j.hierarchy?.branches===144&&j.hierarchy?.cells===1728&&j.hierarchy?.lanes===20736){manifest=j;break}
+              last=`${r.status} ${JSON.stringify(j).slice(0,400)}`;
+            }catch(e){last=String(e)}
+            await sleep(10000);
+          }
+          if(!manifest)throw new Error('R123 organism manifest not live: '+last);
+          const launch=await fetch(base+'/api/swarm/organism/missions',{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify({intent:'R123 deterministic hierarchical live proof',mode:'SOLO',requestedCells:1,providerBudget:0,genesisBudget:0,opticalBudget:0,branchConcurrency:1,deadlineMs:120000})}),created=await launch.json();
+          if(!launch.ok||!created.mission?.id)throw new Error('organism mission create failed: '+JSON.stringify(created).slice(0,500));
+          let final;
+          for(let i=0;i<40;i++){
+            const r=await fetch(base+'/api/swarm/organism/missions/'+created.mission.id,{headers:{'cache-control':'no-cache'}}),j=await r.json();
+            if(['COMPLETE','FAILED','TIMED_OUT'].includes(j.mission?.status)){final=j.mission;break}
+            await sleep(1500);
+          }
+          if(!final||final.status!=='COMPLETE'||final.completedCells!==1||final.proofState!=='RETURNED_NOT_ADMITTED'||!/^[a-f0-9]{64}$/i.test(String(final.merkleRoot||'')))throw new Error('hierarchical mission closure failed: '+JSON.stringify(final).slice(0,700));
+          const organ=await fetch(base+'/api/swarm/organism/organs/'+(final.branchReceipts?.[0]?.domain??0),{headers:{'cache-control':'no-cache'}}).then(r=>r.json()).catch(()=>null);
+          console.log('R123 LIVE PASS · seed→organ→branch→cell · '+created.mission.id+' · Merkle '+final.merkleRoot+' · organState '+String(organ?.state?.status||'observed'));
+          NODE
