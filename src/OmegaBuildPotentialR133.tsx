@@ -4,6 +4,7 @@ import {api} from './platformAdapter';
 import {BUILD_POTENTIAL_LANES_R133,BUILD_POTENTIAL_ROWS_R133,BUILD_POTENTIAL_LAWS_R133,type BuildPotentialLaneR133} from './buildPotentialRuntimeR133';
 import {currentNextActionR137,familyOperationalProofR137,familyOperationalProofSummaryR137,FAMILY_OPERATIONAL_PROOF_LAWS_R137} from './familyOperationalProofR137';
 import './buildPotentialR133.css';
+import './liveFamilyProofR137.css';
 
 type Props={onNavigate:(panel:string)=>void;compact?:boolean};
 type LaneFilter='ALL'|BuildPotentialLaneR133;
