@@ -27,7 +27,7 @@ must(nav.includes('railWide')&&nav.includes("omega.r120.navWide")&&nav.includes(
 must(nav.includes('WIDE MENU')&&nav.includes('Ctrl⇧M'),'wide-label rail must be directly discoverable');
 must(navCss.includes("data-omega-nav-wide='true'")&&navCss.includes('--r120-nav-wide:166px'),'desktop wide rail must reserve deterministic width');
 must(navCss.includes("data-omega-nav-expanded='true'")&&navCss.includes('margin-left:calc(var(--r120-nav-wide) + var(--r94-nav-panel))'),'full navigator must reserve rail + panel width rather than cover the active app');
-must(navCss.includes('@media(max-width:900px){.r120-rail-width-toggle{display:none}}'),'mobile must retain compact navigation behavior');
+must(navCss.includes('@media(max-width:900px)')&&navCss.includes('.r120-rail-width-toggle{display:none}'),'mobile must retain compact navigation behavior regardless of media-block formatting');
 
 for(const phase of ['PARTITION','EXCHANGE_TRANSFORM','INVARIANT_CARRY','SCAR_RESIDUAL_CARRY','RECONTEXTUALIZE_REPARTITION'])must(canon.includes(`'${phase}'`),'missing Woven Continuity phase '+phase);
 for(const primitive of ['PARENT','INTERACTION','SCAR','CONTINUITY','COMPRESSION','SKIN','INTERPRETATION','BEHAVIOR'])must(canon.includes(`'${primitive}'`),'missing RSC loop primitive '+primitive);
