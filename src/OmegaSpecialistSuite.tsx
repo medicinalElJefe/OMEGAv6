@@ -7,6 +7,7 @@ import OmegaSwarmR121 from './OmegaSwarmR121';
 import OmegaOrganismR123 from './OmegaOrganismR123';
 import OmegaAutonomicR125 from './OmegaAutonomicR125';
 import OmegaMaximumCockpitR126 from './OmegaMaximumCockpitR126';
+import OmegaCortexR127 from './OmegaCortexR127';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -14,7 +15,8 @@ export default function OmegaSpecialistSuite(props:Props){
  const {panel,record,state,address,onAddress,onNavigate,status,restore}=props;
  if(panel==='Convergence')return <div>
   <OmegaMaximumCockpitR126 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>
-  <details className='r121-legacy-convergence' open><summary>R126 autonomic execution · scope / detach / checkpoint / rejoin</summary><OmegaAutonomicR125/></details>
+  <details className='r121-legacy-convergence' open><summary>R127 living cortex · causal body graph / shared candidate memory / branch cross-check / organ synthesis</summary><OmegaCortexR127 record={record} state={state}/></details>
+  <details className='r121-legacy-convergence'><summary>R126 autonomic execution · scope / detach / checkpoint / rejoin</summary><OmegaAutonomicR125/></details>
   <details className='r121-legacy-convergence'><summary>R123 organism body · seed / organ / branch / cell hierarchy</summary><OmegaOrganismR123/></details>
   <details className='r121-legacy-convergence'><summary>R121 direct swarm body · compatibility / independent-cell control</summary><OmegaSwarmR121 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
   <details className='r121-legacy-convergence'><summary>Retained continuity / convergence field instrument</summary><OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
