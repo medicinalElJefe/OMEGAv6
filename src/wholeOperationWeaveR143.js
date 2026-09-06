@@ -14,6 +14,7 @@ export const R143_LAWS=Object.freeze([
  'EVERY_RETURN_PRESERVES_PROOF_SCAR_AND_LINEAGE',
  'CONTRADICTION_IS_CARRIED_INTO_JOIN_NOT_AVERAGED_AWAY',
  'FAILED_STALE_OR_UNAVAILABLE_NODES_REMAIN_VISIBLE',
+ 'FAILED_WORK_BLOCKS_CHILD_EXECUTION_BUT_NOT_FINAL_RESIDUAL_JOIN',
  'JOIN_IS_DETERMINISTIC_EVIDENCE_RECONVERGENCE_NOT_CANONSTATE',
  'R141_REMAINS_EXACT_HYBRID_RETURN_PROOF_AUTHORITY',
  'R142_REMAINS_CAPABILITY_EXECUTION_LIFECYCLE_AUTHORITY',
@@ -25,6 +26,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number.isFinite(Number(v))?Number(v):
 const safeId=(v,f='')=>{const s=text(v,160);return /^[A-Za-z0-9._:-]+$/.test(s)?s:f};
 const uniq=a=>[...new Set(a.filter(Boolean))];
 const nowIso=()=>new Date().toISOString();
+const FAILURE_STATES=new Set(['FAILED','REJECTED','STALE','UNAVAILABLE','FINGERPRINT_MISMATCH']);
 
 function flags(intent){
  const p=text(intent).toLowerCase();
@@ -88,21 +90,23 @@ export function compileWholeOperationWeaveR143(input={}){
 
 export function dependencyStateR143(graph,nodeId){
  const n=graph?.nodes?.find(x=>x.id===nodeId);if(!n)return{ready:false,reason:'NODE_NOT_FOUND'};
- const parents=n.dependsOn.map(id=>graph.nodes.find(x=>x.id===id)).filter(Boolean),terminal=new Set(['VERIFIED','COMPLETE','RETURNED_VERIFIED','HELD_FOR_R125']);
- const failed=parents.find(x=>['FAILED','REJECTED','STALE','UNAVAILABLE','FINGERPRINT_MISMATCH'].includes(x.state));if(failed)return{ready:false,reason:`DEPENDENCY_${failed.id}_${failed.state}`};
- const pending=parents.find(x=>!terminal.has(x.state));return pending?{ready:false,reason:`WAITING_${pending.id}_${pending.state}`}:{ready:n.state!=='UNAVAILABLE',reason:n.state==='UNAVAILABLE'?'EXECUTOR_UNAVAILABLE':'DEPENDENCIES_SATISFIED'};
+ const parents=n.dependsOn.map(id=>graph.nodes.find(x=>x.id===id)).filter(Boolean),successTerminal=new Set(['VERIFIED','COMPLETE','RETURNED_VERIFIED','HELD_FOR_R125']);
+ if(n.id==='N80_JOIN'){
+  const joinTerminal=new Set([...successTerminal,...FAILURE_STATES,'RETURNED']);const pending=parents.find(x=>!joinTerminal.has(x.state));
+  return pending?{ready:false,reason:`WAITING_${pending.id}_${pending.state}`}:{ready:n.state!=='UNAVAILABLE',reason:n.state==='UNAVAILABLE'?'EXECUTOR_UNAVAILABLE':'JOIN_TERMINAL_DEPENDENCIES_SATISFIED_WITH_RESIDUAL_CARRY'};
+ }
+ const failed=parents.find(x=>FAILURE_STATES.has(x.state));if(failed)return{ready:false,reason:`DEPENDENCY_${failed.id}_${failed.state}`};
+ const pending=parents.find(x=>!successTerminal.has(x.state));return pending?{ready:false,reason:`WAITING_${pending.id}_${pending.state}`}:{ready:n.state!=='UNAVAILABLE',reason:n.state==='UNAVAILABLE'?'EXECUTOR_UNAVAILABLE':'DEPENDENCIES_SATISFIED'};
 }
 
 export function applyNodeReceiptR143(graph,nodeId,receipt={},frames={}){
  const nodes=(graph?.nodes||[]).map(n=>({...n,dependsOn:[...(n.dependsOn||[])],scarIds:[...(n.scarIds||[])],proofIds:[...(n.proofIds||[])],sourceIds:[...(n.sourceIds||[])]})),n=nodes.find(x=>x.id===nodeId);if(!n)return graph;
  const state=text(receipt.state,48).toUpperCase()||'RETURNED',verified=receipt.verified===true||state==='VERIFIED'||state==='RETURNED_VERIFIED';
- n.state=verified?'VERIFIED':['FAILED','REJECTED','STALE','UNAVAILABLE','FINGERPRINT_MISMATCH'].includes(state)?state:'RETURNED';
- n.returnReceipt={...receipt,canonicalMutation:false};n.departureFrame=frames.departureFrame||n.departureFrame||null;n.returnFrame=frames.returnFrame||null;
- n.proofIds=uniq([...(receipt.proofIds||[]),receipt.proofRef,receipt.responseHash]);n.scarIds=uniq([...(receipt.scarIds||[]),...(verified?[]:[`${n.id}:${n.state}`])]);n.sourceIds=uniq([...(receipt.sourceIds||[]),receipt.capabilityId,receipt.source]);
- return{...graph,nodes,updatedAt:nowIso(),canonicalMutation:false};
+ n.state=verified?'VERIFIED':FAILURE_STATES.has(state)?state:'RETURNED';n.returnReceipt={...receipt,canonicalMutation:false};n.departureFrame=frames.departureFrame||n.departureFrame||null;n.returnFrame=frames.returnFrame||null;
+ n.proofIds=uniq([...(receipt.proofIds||[]),receipt.proofRef,receipt.responseHash]);n.scarIds=uniq([...(receipt.scarIds||[]),...(verified?[]:[`${n.id}:${n.state}`])]);n.sourceIds=uniq([...(receipt.sourceIds||[]),receipt.capabilityId,receipt.source]);return{...graph,nodes,updatedAt:nowIso(),canonicalMutation:false};
 }
 
-function nodeMetrics(n){const verified=n.state==='VERIFIED',failed=['FAILED','REJECTED','STALE','UNAVAILABLE','FINGERPRINT_MISMATCH'].includes(n.state);return{continuity:verified?1:failed?.15:.45,plasticity:verified?.45:failed?.2:.3,contradiction:failed?1:verified?0:.5,burden:clamp((n.dependsOn.length+1)/8,0,1),evidence:verified?1:n.state==='RETURNED'?.5:0,uncertainty:verified?.05:failed?.9:.6,scar:failed?.9:verified?.12:.4}}
+function nodeMetrics(n){const verified=n.state==='VERIFIED',failed=FAILURE_STATES.has(n.state);return{continuity:verified?1:failed?.15:.45,plasticity:verified?.45:failed?.2:.3,contradiction:failed?1:verified?0:.5,burden:clamp((n.dependsOn.length+1)/8,0,1),evidence:verified?1:n.state==='RETURNED'?.5:0,uncertainty:verified?.05:failed?.9:.6,scar:failed?.9:verified?.12:.4}}
 
 export async function joinWholeOperationWeaveR143(graph,previousHead=null){
  let head=previousHead&&previousHead.schema==='OMEGA_CANONICAL_WORLD_CONTINUITY_R134'?previousHead:null;
