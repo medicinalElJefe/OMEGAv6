@@ -7,7 +7,7 @@ import './capabilityFirstR138.css';
 
 type Props={panel:string;record:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status?:any;restore?:any};
 type Action={id:string;label:string;detail:string;route?:string;address?:number;kind:'STATE'|'ROUTE'|'EXECUTE'|'PROVE'|'BUILD'|'EXPLORE'};
-const clamp=(n:number)=>Math.max(0,Math.min(20735,Math.floor(Number(n)||0));
+const clamp=(n:number)=>Math.max(0,Math.min(20735,Math.floor(Number(n)||0)));
 const fmt=(n:any)=>Number.isFinite(Number(n))?Number(n).toFixed(3):'—';
 const ROUTE_BY_PANEL:Record<string,string[]>= {
  'Field':['Matter Traversal','Traversal','Visual Instrument','Evidence & Proof'],
@@ -38,7 +38,8 @@ export default function OmegaCapabilityFieldR138({panel,record,address,onAddress
  const candidates=useMemo(()=>nextCandidates(record).map(x=>{const r=corpusState(x.address),l=calculusVisualLaw(r);return{...x,record:r,law:l,score:.38*l.routeStrength+.24*l.u.unifiedCoherence+.18*l.u.evidence+.12*(1-l.contradictionPressure)+.08*l.u.Phi}}).sort((a,b)=>b.score-a.score),[record]);
  const routes=(ROUTE_BY_PANEL[panel]||['Command Center','Visual Instrument','Evidence & Proof','Build Out']).filter(Boolean);
  const actions:Action[]=[...routes.map(route=>({id:'route:'+route,label:route,detail:route==='Hybrid Link'?'paired-host execution and returned proof':route==='Evidence & Proof'?'inspect proof, source and lineage':route==='Build Out'?'assemble and verify working output':'open active capability',route,kind:actionKind(route)})),...candidates.slice(0,4).map((x,i)=>({id:'state:'+x.address,label:i===0?'Admitted next':'Candidate '+(i+1),detail:`STATE ${x.record.stateId} · U ${fmt(x.law.u.unifiedCoherence)} · proof ${fmt(x.law.u.evidence)}`,address:x.address,kind:'STATE' as const}))];
- const rings=[law.u.C,law.u.Phi,1-law.u.q,1-law.u.Lambda,law.u.evidence,1-law.u.uncertainty].map((v,i)=>({v:Number(v)||0,r:70+i*24}));
+ const uncertainty=Math.max(0,Math.min(1,Number(record?.metrics?.uncertainty)||0));
+ const rings=[law.u.C,law.u.Phi,1-law.u.q,1-law.u.Lambda,law.u.evidence,1-uncertainty].map((v,i)=>({v:Number(v)||0,r:70+i*24}));
  const nodes=actions.slice(0,8).map((a,i)=>{const angle=-Math.PI/2+i*Math.PI*2/Math.max(1,Math.min(8,actions.length)),radius=150+(i%2)*42;return{...a,x:320+Math.cos(angle)*radius,y:230+Math.sin(angle)*radius}});
  const runtimeHealthy=Boolean(status&&!status.error),restoreHealthy=Boolean(restore&&!restore.error);
  return <section className='r138-capability-field' data-panel={panel} data-visual-policy='CAPABILITY_FIRST_NO_STALE_CHART_PRIMARY'>
