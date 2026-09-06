@@ -1,5 +1,10 @@
 import r115,{OmegaRuntime as OmegaRuntimeR115} from './workerR115.js';
 import {planIntentR103} from './federation/federationIntentRouterR103.js';
+import {swarmApiR121,withSwarmCorsR121} from './swarm/swarmApiR121.js';
+import {OmegaSwarmCell} from './swarm/swarmCellR121.js';
+import {OmegaSwarmCoordinator} from './swarm/swarmCoordinatorR121.js';
+
+export {OmegaSwarmCell,OmegaSwarmCoordinator};
 
 const REVISION='R116';
 const CONNECTOR_REVISION='R117';
@@ -109,6 +114,7 @@ async function durablePairR117(request,env){
 
 async function fetchR116(request,env){
  const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path==='/api/system/convergence';
+ if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
  if(path==='/api/hybrid/bootstrap'&&request.method==='POST')return withCorsR116(await durablePairR117(request,env),request);
  if(path==='/api/federation/run/status'&&request.method==='GET'){
