@@ -33,14 +33,16 @@ must(launcher.includes('if !OMEGA_RETRY! GTR 4 goto :retry_exhausted'),'transien
 must(launcher.includes('No fallback host was attempted'),'failure path must not mutate onto another control host');
 must(launcher.includes('No downloaded bytes were executed'),'failed download must remain non-executable');
 
-const validatorStart='!OMEGA_PY! -B -c "';
+const commandPrefix='!OMEGA_PY! -B -c "';
+const validatorAnchor=commandPrefix+'import hashlib,re,sys;';
 const validatorEnd='" "!OMEGA_AGENT_PART!" "!OMEGA_AGENT_HEADERS!"';
-const validatorOffset=launcher.indexOf(validatorStart);
+const validatorOffset=launcher.indexOf(validatorAnchor);
 must(validatorOffset>=0,'generated SHA validator command must be discoverable');
-const payloadStart=validatorOffset+validatorStart.length;
+const payloadStart=validatorOffset+commandPrefix.length;
 const payloadEnd=launcher.indexOf(validatorEnd,payloadStart);
 must(payloadEnd>payloadStart,'generated SHA validator payload boundary must remain stable');
 const sourcePayload=launcher.slice(payloadStart,payloadEnd);
+must(sourcePayload.startsWith('import hashlib,re,sys;'),'proof extractor must target the SHA validator rather than another inline Python command');
 must(!sourcePayload.includes('\\"'),'inline validator payload must contain no nested double quote that cmd.exe can strip');
 const pythonPayload=sourcePayload.replaceAll('\\\\','\\');
 const fixtureDir=fs.mkdtempSync(path.join(os.tmpdir(),'omega-r127-validator-'));
