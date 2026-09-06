@@ -148,11 +148,20 @@ function deviceIntegrityR127(device){
 
 export class OmegaRuntime extends OmegaRuntimeR115 {
  async state(){
-  const base=await super.state(),devices=Array.isArray(base?.devices)?base.devices.map(d=>({...d,integrityState:deviceIntegrityR127(d)})):[],sealedOnline=devices.filter(d=>d?.online&&!d?.revoked&&deviceIntegrityR127(d)==='CURRENT_AGENT');
-  return{...base,schema:'OMEGA_HYBRID_RUNTIME_R127',hybridProtocol:HYBRID_PROTOCOL_R127,heartbeatTtlMs:HEARTBEAT_TTL_R127,pollIntervalMs:POLL_INTERVAL_R127,devices,sealedOnlineDevices:sealedOnline.length,sealedNativeExecutionClaimed:sealedOnline.length>0,truthBoundary:'R127 registration records identity but does not set lastSeen. Only a monotonic authenticated heartbeat can make a sealed device online.'};
+  const base=await super.state(),devices=Array.isArray(base?.devices)?base.devices.map(d=>({...d,integrityState:deviceIntegrityR127(d)})):[],sealedOnline=devices.filter(d=>d?.online&&!d?.revoked&&deviceIntegrityR127(d)==='CURRENT_AGENT'),protocolMode=await this.get('hybridProtocolMode','LEGACY_COMPATIBLE');
+  return{...base,schema:'OMEGA_HYBRID_RUNTIME_R127',hybridProtocol:HYBRID_PROTOCOL_R127,hybridProtocolMode:protocolMode,heartbeatTtlMs:HEARTBEAT_TTL_R127,pollIntervalMs:POLL_INTERVAL_R127,devices,sealedOnlineDevices:sealedOnline.length,sealedNativeExecutionClaimed:sealedOnline.length>0,truthBoundary:'R127 registration records identity but does not set lastSeen. Only a monotonic authenticated heartbeat can make a sealed device online. After sealed takeover, stale legacy connectors cannot claim new work.'};
  }
  async fetch(request){
   const u=new URL(request.url),path=u.pathname;
+  if(path.startsWith('/agent/')&&request.method==='POST'){
+   const legacyProbe=request.clone(),legacyBody=await legacyProbe.json().catch(()=>({})),protocolMode=await this.get('hybridProtocolMode','LEGACY_COMPATIBLE');
+   if(protocolMode===HYBRID_PROTOCOL_R127&&legacyBody?.protocol!==HYBRID_PROTOCOL_R127){
+    if(path==='/agent/heartbeat')return json({ok:true,deprecated:true,code:'R127_SEALED_TAKEOVER',nativeExecutionClaimed:false,reply:'A sealed R127 session owns this bridge; legacy heartbeat was acknowledged without refreshing online proof.'});
+    if(path==='/agent/poll')return json({ok:true,deprecated:true,code:'R127_SEALED_TAKEOVER',job:null,reply:'A sealed R127 session owns this bridge; no new work is exposed to the legacy connector.'});
+    if(path==='/agent/result')return super.fetch(request);
+    return json({ok:false,code:'CONNECTOR_UPGRADE_REQUIRED',reply:'This bridge has been sealed by R127. Close stale connector windows and use the current SHA-256-pinned connector.'},426);
+   }
+  }
   if(path==='/agent/register'&&request.method==='POST'){
    const replay=request.clone(),b=await request.json().catch(()=>({}));
    if(b?.protocol!==HYBRID_PROTOCOL_R127)return super.fetch(replay);
@@ -165,7 +174,7 @@ export class OmegaRuntime extends OmegaRuntimeR115 {
    let rows=await this.get('devices',[]);const existing=rows.find(x=>x.id===id);
    if(existing?.rootIdentity&&existing.rootIdentity!==rootIdentity)return json({ok:false,code:'DEVICE_ROOT_IDENTITY_MISMATCH',reply:'This device identity is already bound to a different approved root. No silent root mutation was accepted.'},409);
    const row={id,name:text(b.name||'OMEGA PC').slice(0,120),platform:text(b.platform||'unknown').slice(0,160),version:text(b.version||'R127-agent').slice(0,80),protocol:HYBRID_PROTOCOL_R127,capabilities:Array.isArray(b.capabilities)?b.capabilities.filter(x=>HYBRID_OPS_R127.includes(x)).slice(0,40):[],rootLabel:text(b.rootLabel||'approved root').slice(0,160),rootIdentity,agentSha256,integrityState:'CURRENT_AGENT',bootId,heartbeatSeq:0,registeredAt:Date.now(),lastHeartbeatAt:0,lastSeen:0,revoked:false};
-   rows=[...rows.filter(x=>x.id!==id),row].slice(-20);await this.put('devices',rows);await this.event('DEVICE_REGISTERED_R127',`${row.name} registered sealed identity; heartbeat proof is still required.`,{deviceId:id,protocol:HYBRID_PROTOCOL_R127,agentSha256,rootIdentity});
+   rows=[...rows.filter(x=>x.id!==id),row].slice(-20);await this.put('devices',rows);await this.put('hybridProtocolMode',HYBRID_PROTOCOL_R127);await this.event('DEVICE_REGISTERED_R127',`${row.name} registered sealed identity; heartbeat proof is still required.`,{deviceId:id,protocol:HYBRID_PROTOCOL_R127,agentSha256,rootIdentity});
    return json({ok:true,device:{...row,online:false},protocol:HYBRID_PROTOCOL_R127,heartbeatTtlMs:HEARTBEAT_TTL_R127,pollIntervalMs:POLL_INTERVAL_R127,nativeExecutionClaimed:false});
   }
   if(['/agent/heartbeat','/agent/poll','/agent/result'].includes(path)&&request.method==='POST'){
