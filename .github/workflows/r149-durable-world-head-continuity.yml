@@ -45,7 +45,8 @@ jobs:
         run: |
           node tests/archive-governance-invariants.mjs
           node tests/appdeploy-b023-b037-correlation-invariants.mjs
-          node tests/r121-earth-computed-reality-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
       - name: Full inherited regression and production build
         run: npm run check
       - name: Prove packaged source binds the exact workflow SHA
