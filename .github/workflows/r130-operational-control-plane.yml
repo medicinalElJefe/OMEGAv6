@@ -47,10 +47,12 @@ jobs:
           node tests/r122-computed-reality-invariants.mjs
           node tests/r121-swarm-runtime-invariants.mjs
           node tests/r121-spherical-earth-connector-invariants.mjs
-      - name: Verify entrypoint syntax and runtime export contract
+      - name: Verify additive mount and proven production entrypoint
         run: |
-          node --check src/workerR130.js
-          grep -q '"main": "src/workerR130.js"' wrangler.jsonc
+          node --check src/workerR116.js
+          node --check src/system/operationalControlPlaneR130.js
+          grep -q '"main": "src/workerR116.js"' wrangler.jsonc
+          grep -q 'operationalControlPlaneR130' src/workerR116.js
       - name: Full inherited regression and production build
         run: npm run check
       - name: Worker bundle dry run
