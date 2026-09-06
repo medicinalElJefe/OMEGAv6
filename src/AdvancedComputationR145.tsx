@@ -1,0 +1,37 @@
+import {useMemo,useState} from 'react';
+import {Activity,Atom,Braces,ChevronRight,Cpu,Network,Play,ShieldCheck,Waypoints} from 'lucide-react';
+import {computationManifestR145,screenBatchR145} from './computation/advancedComputationKernelR145.js';
+import './advancedComputationR145.css';
+
+type Props={record?:any;onNavigate:(panel:string)=>void};
+const REMOTE='https://omega-optical-machine-r115.jeffdeweyeljefe.workers.dev';
+const n=(v:any,d=3)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'—';
+
+export default function AdvancedComputationR145({record,onNavigate}:Props){
+ const manifest=useMemo(()=>computationManifestR145(),[]);
+ const[count,setCount]=useState(128),[wavelength,setWavelength]=useState(550),[phase,setPhase]=useState(180),[tol,setTol]=useState(5),[spectral,setSpectral]=useState(7),[bandwidth,setBandwidth]=useState(.12),[featureIndex,setFeatureIndex]=useState(2.25),[substrateIndex,setSubstrateIndex]=useState(1.46),[busy,setBusy]=useState(false),[result,setResult]=useState<any>(null),[error,setError]=useState(''),[transport,setTransport]=useState('NOT_RUN');
+ const run=async()=>{setBusy(true);setError('');const payload={schema:'OMEGA_ADVANCED_COMPUTATION_REQUEST_R145',design_space:{count,wavelength_nm:wavelength,target_phase_deg:phase,sigma:Number(record?.metrics?.polarity??0)>=0?1:-1,material_model:{n_incident:1,n_feature:featureIndex,n_background:1,n_substrate:substrateIndex}},spectral_points:spectral,fractional_bandwidth:bandwidth,fabrication_tolerance_nm:tol,polarizations:['s','p']};try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),4500);try{const response=await fetch(REMOTE+'/api/computation/r145/screen-batch',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});clearTimeout(timer);if(!response.ok)throw new Error(`remote compute HTTP ${response.status}`);const body=await response.json();if(!body?.ok)throw new Error(body?.error||body?.code||'remote compute rejected');setResult(body);setTransport('CLOUDFLARE_MACHINE_R145');return}catch(remoteError){clearTimeout(timer);const local=await screenBatchR145(payload);setResult({...local,localFallbackReason:remoteError instanceof Error?remoteError.message:String(remoteError)});setTransport('LOCAL_BROWSER_SAME_KERNEL')}}catch(err:any){setError(err?.message||String(err))}finally{setBusy(false)}};
+ const top=result?.top_candidates||[],queue=result?.fullwave_queue||[];
+ return <section className='panel r145-compute' data-r145-computation='true' data-transport={transport}>
+  <div className='section-head r145-head'><div><p className='overline'>R145 · ADVANCED COMPUTATION FABRIC</p><h2>Screen broadly. Escalate selectively. Prove every expensive result.</h2><p>Physics-informed reduced-order computation now searches a bounded geometry population across wavelength, polarization and fabrication perturbations, ranks the Pareto frontier, and emits RCWA-ready jobs only when the screening gate passes. FDTD recommendations remain capability requests until a real executor returns them.</p></div><div className='r145-engine-state'><Cpu/><b>{manifest.engine}</b><small>{transport.replaceAll('_',' ')}</small></div></div>
+  <div className='r145-controls'>
+   <label>Candidates<input type='number' min='8' max='256' step='8' value={count} onChange={e=>setCount(Math.max(8,Math.min(256,Number(e.target.value)||8)))}/></label>
+   <label>Center λ · nm<input type='number' min='200' max='2500' value={wavelength} onChange={e=>setWavelength(Number(e.target.value)||550)}/></label>
+   <label>Target phase · °<input type='number' min='0' max='359' value={phase} onChange={e=>setPhase(Number(e.target.value)||0)}/></label>
+   <label>Spectral points<input type='number' min='1' max='13' value={spectral} onChange={e=>setSpectral(Math.max(1,Math.min(13,Number(e.target.value)||1)))}/></label>
+   <label>Fractional bandwidth<input type='number' min='0' max='.8' step='.01' value={bandwidth} onChange={e=>setBandwidth(Math.max(0,Math.min(.8,Number(e.target.value)||0)))}/></label>
+   <label>Fab tolerance · nm<input type='number' min='0' max='100' value={tol} onChange={e=>setTol(Math.max(0,Number(e.target.value)||0))}/></label>
+   <label>Feature index<input type='number' min='1.01' max='6' step='.01' value={featureIndex} onChange={e=>setFeatureIndex(Math.max(1.01,Number(e.target.value)||2))}/></label>
+   <label>Substrate index<input type='number' min='1' max='4' step='.01' value={substrateIndex} onChange={e=>setSubstrateIndex(Math.max(1,Number(e.target.value)||1.46))}/></label>
+  </div>
+  <div className='r145-runbar'><button onClick={()=>void run()} disabled={busy}><Play/>{busy?'Computing…':`Run ${count}-candidate sweep`}</button><button className='secondary' onClick={()=>{setCount(256);setSpectral(13);setBandwidth(.2);setTol(7)}}><Network/>Maximum bounded sweep</button><span><ShieldCheck/>Reduced-order only · full-wave truth remains external</span></div>
+  {error&&<div className='boundary'><ShieldCheck/>{error}</div>}
+  {result&&<>
+   <div className='buildout-score r145-summary'><div><span>Candidates</span><b>{result.summary?.candidate_count}</b></div><div><span>Pareto front</span><b>{result.summary?.pareto_front_size}</b></div><div><span>RCWA ready</span><b>{result.summary?.rcwa_ready}</b></div><div><span>FDTD escalation</span><b>{result.summary?.fdtd_escalations}</b></div><div><span>Best objective</span><b>{n(result.summary?.best_objective)}</b></div><div><span>Receipt</span><b title={result.receipt?.result_sha256}>{String(result.receipt?.result_sha256||'').slice(0,12)||'—'}</b></div></div>
+   <div className='r145-result-grid'><article><Atom/><b>Physics screen</b><p>Effective-medium anisotropy + thin-film transfer + phase + diffraction margin + evanescent coupling.</p></article><article><Activity/><b>Robustness ensemble</b><p>Nine nominal/process-variation samples plus spectral and s/p polarization sweeps.</p></article><article><Waypoints/><b>Adaptive fidelity</b><p>Pareto rank → screening proof → RCWA queue or FDTD capability escalation.</p></article><article><Braces/><b>Proof boundary</b><p>R145 receipt → R142 execution receipt → R144 deployment attestation → R125 admission.</p></article></div>
+   <div className='r145-table-wrap'><table><thead><tr><th>#</th><th>Candidate</th><th>Pareto</th><th>Objective</th><th>η mean/min</th><th>Phase RMS</th><th>Robust</th><th>Rayleigh</th><th>Coupling</th><th>Gate</th><th>Next</th></tr></thead><tbody>{top.slice(0,16).map((row:any,i:number)=><tr key={row.candidate?.candidate_id||i}><td>{i+1}</td><td>{row.candidate?.candidate_id}</td><td>{row.pareto_rank}</td><td>{n(row.metrics?.objective_score)}</td><td>{n(row.metrics?.mean_useful_efficiency)} / {n(row.metrics?.min_useful_efficiency)}</td><td>{n(row.metrics?.phase_rms_deg,1)}°</td><td>{n(row.metrics?.robustness_score)}</td><td>{n(row.metrics?.rayleigh_margin_min)}</td><td>{n(row.metrics?.coupling_proxy_max)}</td><td>{row.proof_projection?.gate}</td><td>{String(row.requested_solver||'—').toUpperCase()}</td></tr>)}</tbody></table></div>
+   <div className='r145-runbar r145-bottom'><span><ShieldCheck/>{result.truth_boundary}</span>{queue.length>0&&<button onClick={()=>onNavigate('Hybrid Link')}>Open Sovereign execution <ChevronRight/></button>}</div>
+  </>}
+  {!result&&<div className='r145-capability-list'>{manifest.capabilities.map((x:string)=><span key={x}>{x.replaceAll('_',' ')}</span>)}</div>}
+ </section>
+}
