@@ -70,7 +70,7 @@ jobs:
         if: github.event_name != 'pull_request'
         shell: bash
         run: |
-          if git diff --quiet; then
+          if [ -z "$(git status --porcelain -- src/generated/selfbuild/index.ts public/omega-r125-accuracy-state.json public/omega-r125-proposal.json)" ]; then
             echo 'No proven bounded repair required. Engine remains observing.'
             exit 0
           fi
