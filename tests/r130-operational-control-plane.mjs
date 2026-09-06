@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import worker,{manifestR130,R130_HIERARCHY,R130_LAWS} from '../src/workerR130.js';
+import worker from '../src/workerR116.js';
+import {manifestR130,R130_HIERARCHY,R130_LAWS} from '../src/system/operationalControlPlaneR130.js';
 
 const manifest=manifestR130();
 assert.equal(manifest.ok,true);
 assert.equal(manifest.revision,'R130');
 assert.deepEqual(R130_HIERARCHY,{seed:1,organs:12,branches:144,cells:1728,lanes:20736});
-assert.equal(manifest.entrypoint,'src/workerR130.js');
+assert.equal(manifest.entrypoint,'src/workerR116.js');
 assert.equal(manifest.organization.canonicalAdmission,'R125');
 assert.ok(manifest.modules.some(x=>x.revision==='R129'&&x.id==='EXPERIMENT_RUNTIME'));
 assert.ok(manifest.modules.some(x=>x.revision==='R128'&&x.id==='EMPIRICAL_VALIDATION'));
