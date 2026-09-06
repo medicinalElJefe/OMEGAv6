@@ -24,7 +24,7 @@ must(woven.includes('for(let a=0;a<WOVEN_CANONICAL_COUNT;a++)'),'Woven full-fide
 must(!woven.includes('a+=step'),'Woven fallback must not logically subsample canonical anchors');
 
 for(const token of ['SOURCE_CORPUS_AUTHORITIES_R107','ULTIMATE_DEVELOPMENT_FABRIC_R107','MASTER_SYSTEMS_R83','MASTER_MENU_OPTIONS_R83','MASTER_CAPABILITIES_R83','ALL_MODES_BOUNDARY','FEDERATION_NODE_ORDER_R102','R119_RENDER_RESOLUTION_AUTHORITY'])must(ultra.includes(token),'ultra convergence fabric missing '+token);
-for(const token of ['100','24','36','18','179','62','20,736','248,832','61.9B','Four-role federation','Truth class travels with every output'])must(ultra.includes(token),'ultra convergence UI missing visible corpus contract '+token);
+for(const token of ['{MASTER_SYSTEMS_R83.length}','{FAMILIES.length}','{MASTER_MENU_OPTIONS_R83.length}','{MASTER_CAPABILITIES_R83.length}','{ALL_MODES_BOUNDARY.sourceModeEvaluations}','{ALL_MODES_BOUNDARY.canonAuthorities}','Four-role federation','Truth class travels with every output','SCALE_LEVELS'])must(ultra.includes(token),'ultra convergence UI missing live corpus binding '+token);
 must(mount.includes("import UltraSystemFabricR119 from './UltraSystemFabricR119'")&&mount.includes('<UltraSystemFabricR119 onNavigate={onNavigate}/>'),'System Atlas convergence authority must mount R119 ultra fabric');
 must(!ultraCss.includes('position:fixed')&&!ultraCss.includes('position:absolute'),'ultra fabric must remain in document flow and never cover the instrument');
 
@@ -36,7 +36,7 @@ must(manifest.canonicalAuthority==='OMEGAv6'&&manifest.authorityNodeCount===4,'m
 must(manifest.corpus.reviewedSystems===100&&manifest.corpus.softwareFamilies===24&&manifest.corpus.menuOptions===36&&manifest.corpus.masterCapabilities===18,'manifest corpus counts regressed');
 must(manifest.corpus.sourceModeEvaluations===179&&manifest.corpus.canonCalculusLenses===62,'mode/lens counts regressed');
 must(manifest.resolution.residentCanonicalAnchors===20736&&manifest.resolution.expandedRepresentationalRows===248832&&manifest.resolution.virtualAddressCapacity===61917364224,'resolution hierarchy mismatch');
-must(manifest.resolution.truthBoundary.includes('not')||manifest.resolution.truthBoundary.includes('None'),'resolution truth boundary must reject literal physical-dimension interpretation');
+must(manifest.resolution.truthBoundary.includes('None of these values is a claim of literal physical dimensions'),'resolution truth boundary must reject literal physical-dimension interpretation');
 must(manifest.governance.oneGlobalCanonState===true&&manifest.governance.hybridIsBridgeNotAuthority===true&&manifest.governance.physicalDimensionClaim===false,'governance boundary regressed');
 const sov=manifest.sites.find(x=>x.id==='omega-sovereign');
 must(sov&&sov.historicalSurfacePolicy.includes('retired as a machine origin')&&sov.humanSurface===null,'historical Sovereign site must never be promoted back to machine authority');
