@@ -43,7 +43,7 @@ jobs:
           node tests/r81-surface-integrity-invariants.mjs
           node tests/r94-hybrid-navigation-invariants.mjs
           node scripts/r67-product-reset-invariant.mjs
-          node scripts/actionable-controls-invariants.mjs
+          node tests/actionable-controls-invariants.mjs
       - name: Full static regression and production build
         run: npm run check
       - name: Canonical Worker dry-run
