@@ -4,7 +4,9 @@ R130 turns the accumulated R121→R129 stack into one machine-readable operation
 
 ## Public runtime spine
 
-`wrangler.jsonc` now points to `src/workerR130.js`. R130 wraps the proven R116 execution spine rather than replacing it, re-exports all Durable Object classes, and passes unknown routes through unchanged.
+`wrangler.jsonc` deliberately remains on `src/workerR116.js`, the already-proven production execution spine. R130 is mounted additively inside that entrypoint through `src/system/operationalControlPlaneR130.js`.
+
+This avoids a shallow successor that would force older invariants to reinterpret the production entrypoint. The established Durable Object exports, Hybrid/Federation routing, swarm routing, convergence logic, and R116/R117 truth boundaries remain intact while R130 adds two system-observability endpoints.
 
 ## Hierarchy
 
@@ -27,11 +29,11 @@ This remains logical execution/address resolution. It is not a claim of literal 
 
 ### `GET /api/system/manifest`
 
-Returns the canonical operational registry, hierarchy, authority levels, stage order, public entrypoint and truth boundaries.
+Returns the operational registry, hierarchy, authority levels, stage order, production entrypoint and truth boundaries.
 
 ### `GET /api/system/operational`
 
-Probes inherited health/status/restoration/Hybrid/convergence/federation/autonomic endpoints through the inherited worker spine and reports one normalized matrix.
+Probes inherited health/status/restoration/Hybrid/convergence/federation/autonomic endpoints through the existing runtime spine and reports one normalized matrix.
 
 The matrix distinguishes:
 
@@ -54,4 +56,4 @@ Every stage remains separately typed and separately auditable.
 
 Maximum useful capacity is not maximum simultaneous mutation. It is maximum addressable capability under bounded cost, explicit provenance, deterministic replay, recovery, proof receipts, uncertainty carry, scar/history carry and narrow canonical authority.
 
-R130 therefore makes the system easier to operate as it becomes larger: one public entrypoint, one machine-readable registry, one health matrix, preserved subsystem routes, and no reduction in inherited proof requirements.
+R130 therefore makes the system easier to operate as it becomes larger: one proven public entrypoint, one machine-readable registry, one health matrix, preserved subsystem routes, and no reduction in inherited proof requirements.
