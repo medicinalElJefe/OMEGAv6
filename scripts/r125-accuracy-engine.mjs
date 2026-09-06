@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 
 const APPLY=process.env.OMEGA_R125_APPLY==='1';
 const RUNS_PATH=process.env.OMEGA_R125_RUNS_PATH||'/tmp/omega-r125-runs.json';
+const EXECUTION_EVIDENCE_PATH=process.env.OMEGA_R143_EXECUTION_EVIDENCE_PATH||'';
 const R124='public/omega-r124-selfbuild-state.json';
 const OUT='public/omega-r125-accuracy-state.json';
 const PROPOSAL='public/omega-r125-proposal.json';
@@ -11,7 +12,7 @@ const now=new Date().toISOString();
 const hash=x=>crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const exists=p=>fs.existsSync(p);
 const readJson=p=>JSON.parse(fs.readFileSync(p,'utf8'));
-const evidence=(kind,source,claim,value=true,verified=true)=>({id:hash({kind,source,claim,value}).slice(0,20),kind,source,observedAt:now,claim,verified,value});
+const evidence=(kind,source,claim,value=true,verified=true,observedAt=now)=>({id:hash({kind,source,claim,value,observedAt}).slice(0,20),kind,source,observedAt,claim,verified,value});
 const residuals=[];
 
 const s124=exists(R124)?readJson(R124):null;
@@ -50,6 +51,22 @@ for(const run of Array.isArray(runs)?runs:[]){
  }
 }
 
+let executionEvidence=null;
+if(EXECUTION_EVIDENCE_PATH&&exists(EXECUTION_EVIDENCE_PATH)){try{executionEvidence=readJson(EXECUTION_EVIDENCE_PATH)}catch{executionEvidence=null}}
+if(executionEvidence?.schema==='omega.execution.evidence.r143.v1'){
+ for(const probe of Array.isArray(executionEvidence.probes)?executionEvidence.probes:[]){
+  if(probe?.ok===true)continue;
+  const observedAt=probe?.observedAt||executionEvidence.observedAt||now;
+  const source=`${executionEvidence.canonicalUrl||'canonical-runtime'}${probe?.path||''}`;
+  const refs=[
+   evidence('DEPLOYMENT',source,`R143 bounded live probe ${probe?.id||'unknown'} failed`,probe?.detail||false,true,observedAt),
+   evidence('SOURCE',probe?.capabilityId||'unknown-capability','R143 execution evidence identifies the affected registered capability',probe?.capabilityId||'unknown-capability',true,observedAt)
+  ];
+  if(probe?.sourceSha256||probe?.expectedSha256)refs.push(evidence('PROOF',probe?.path||source,'R143 source-lineage hash comparison was observed',`actual=${probe?.sourceSha256||'none'} expected=${probe?.expectedSha256||'none'}`,true,observedAt));
+  residuals.push({id:`R143-${probe?.id||hash(probe).slice(0,10)}`,kind:probe?.residualKind||'DEPLOYMENT_UNPROVEN',severity:probe?.severity||'HIGH',summary:`R143 live execution residual: ${probe?.capabilityId||probe?.id||'unknown'} · ${probe?.detail||'probe failed'}`,evidence:refs,affected:[probe?.capabilityId||'unknown-capability',probe?.path||'unknown-path'],reproducible:true});
+ }
+}
+
 function conf(r){const v=r.evidence.filter(x=>x.verified);if(!v.length)return 0;const d=new Set(v.map(x=>x.kind)).size;return Math.min(1,.62*(v.length/r.evidence.length)+.38*Math.min(1,d/3));}
 for(const r of residuals)r.confidence=conf(r);
 
@@ -71,9 +88,10 @@ function generateCapabilityIndex(){
 
 let repair=null;
 if(APPLY&&selected){if(selected.id==='R-CAPABILITY-INDEX-MISSING')repair=generateCapabilityIndex();else throw new Error('No registered deterministic repair for '+selected.id)}
-const semantic={residuals:ranked.map(r=>({id:r.id,kind:r.kind,severity:r.severity,mode:r.mode,confidence:r.confidence,affected:r.affected,evidence:r.evidence.map(e=>({kind:e.kind,source:e.source,claim:e.claim,verified:e.verified,value:e.value}))})),selected:selected?.id??null,repair:repair?{changed:repair.changed,proof:repair.proof}:null,r124Generation:s124?.generation??null,r124Admitted:s124?.admitted??[],githubRunsObserved:runs.length};
-const state={schema:'omega.accuracy.r125.v2',authority:'OMEGAV6',observedAt:now,mode:repair?'REPAIRED':selected?'PROPOSE':ranked.length?'OBSERVE':'HEALTHY',accuracyPolicy:{mutationRequiresVerifiedEvidence:true,autoRepairMinConfidence:.92,autoRepairRisk:'LOW_ONLY',criticalResidualBlocks:true,unreproducibleResidualAutoRepair:false,observationOnlyNeverMutatesMain:true},residuals:ranked,selected:selected?selected.id:null,repair,sourceState:{r124Generation:s124?.generation??null,r124Admitted:s124?.admitted??[],githubRunsObserved:runs.length},lineage:{baseSha:process.env.GITHUB_SHA||'UNKNOWN',semanticFingerprint:hash(semantic),stateSha256:''}};
+const executionEvidenceObserved=Array.isArray(executionEvidence?.probes)?executionEvidence.probes.length:0;
+const semantic={residuals:ranked.map(r=>({id:r.id,kind:r.kind,severity:r.severity,mode:r.mode,confidence:r.confidence,affected:r.affected,evidence:r.evidence.map(e=>({kind:e.kind,source:e.source,claim:e.claim,verified:e.verified,value:e.value}))})),selected:selected?.id??null,repair:repair?{changed:repair.changed,proof:repair.proof}:null,r124Generation:s124?.generation??null,r124Admitted:s124?.admitted??[],githubRunsObserved:runs.length,executionEvidenceObserved};
+const state={schema:'omega.accuracy.r125.v2',authority:'OMEGAV6',observedAt:now,mode:repair?'REPAIRED':selected?'PROPOSE':ranked.length?'OBSERVE':'HEALTHY',accuracyPolicy:{mutationRequiresVerifiedEvidence:true,autoRepairMinConfidence:.92,autoRepairRisk:'LOW_ONLY',criticalResidualBlocks:true,unreproducibleResidualAutoRepair:false,observationOnlyNeverMutatesMain:true},residuals:ranked,selected:selected?selected.id:null,repair,sourceState:{r124Generation:s124?.generation??null,r124Admitted:s124?.admitted??[],githubRunsObserved:runs.length,executionEvidenceObserved,executionEvidenceSchema:executionEvidence?.schema||null},lineage:{baseSha:process.env.GITHUB_SHA||'UNKNOWN',semanticFingerprint:hash(semantic),stateSha256:''}};
 state.lineage.stateSha256=hash({...state,lineage:{...state.lineage,stateSha256:''}});
 fs.writeFileSync(OUT,JSON.stringify(state,null,2)+'\n');
 fs.writeFileSync(PROPOSAL,JSON.stringify({schema:'omega.accuracy.proposal.r125.v2',observedAt:now,semanticFingerprint:state.lineage.semanticFingerprint,selected:selected?{id:selected.id,kind:selected.kind,mode:selected.mode,confidence:selected.confidence,summary:selected.summary}:null,repairApplied:!!repair,repair},null,2)+'\n');
-console.log(JSON.stringify({status:repair?'REPAIRED':selected?'PROPOSE':ranked.length?'OBSERVE':'HEALTHY',residualCount:ranked.length,selected:selected?.id??null,selectedConfidence:selected?.confidence??null,repairApplied:!!repair,semanticFingerprint:state.lineage.semanticFingerprint},null,2));
+console.log(JSON.stringify({status:repair?'REPAIRED':selected?'PROPOSE':ranked.length?'OBSERVE':'HEALTHY',residualCount:ranked.length,selected:selected?.id??null,selectedConfidence:selected?.confidence??null,repairApplied:!!repair,executionEvidenceObserved,semanticFingerprint:state.lineage.semanticFingerprint},null,2));
