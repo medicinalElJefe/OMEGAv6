@@ -45,7 +45,7 @@ assert.match(sovereign,/Do not reuse a launcher that shows/);assert.match(sovere
 assert.match(sovereign,/live\?\.nativeExecutionClaimed===true/);assert.match(sovereign,/current\.length>0/,'PC ONLINE must still require a current authenticated device heartbeat');
 assert.match(sovereign,/download=\{SOVEREIGN_LAUNCHER_FILENAME_R112\}/,'R112 canonical fallback remains available under progressive disclosure');
 
-assert.match(federation,/OMEGA CAPABILITY FABRIC · R116/);assert.match(federation,/machineServices/);assert.match(federation,/Optical machine/);assert.match(federation,/protected human surface is not the execution gate/,'UI must separate human Optical protection from machine SCREEN readiness');
+assert.match(federation,/OMEGA CAPABILITY FABRIC · R11(?:6|9)/,'R116 capability-fabric contract may be displayed by a governed successor revision but cannot disappear');assert.match(federation,/machineServices/);assert.match(federation,/Optical machine/);assert.match(federation,/protected human surface is not the execution gate/,'UI must separate human Optical protection from machine SCREEN readiness');
 assert.match(federation,/flowNodes/,'operational capability flow must use machine service truth');
 assert.match(federation,/human-surface access, machine transport, browser pairing, fresh host heartbeat, solver freshness and canonical admission/,'UI must expose the full truth partition');
 
