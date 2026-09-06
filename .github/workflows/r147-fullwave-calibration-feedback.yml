@@ -1,0 +1,84 @@
+name: OMEGA R147 Fullwave Calibration Feedback
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [r147-fullwave-calibration-feedback]
+  pull_request:
+    branches: [r146-spectral-fullwave-fabric, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r147-calibration-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r147:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install application and real RCWA backend
+        run: |
+          npm install
+          python -m pip install -r sovereign/requirements-rcwa.txt
+      - name: Prove R147 cross-validation policy
+        run: |
+          node --check src/computation/fullwaveCalibrationR147.js
+          node tests/r147-fullwave-calibration-feedback-invariants.mjs
+      - name: Generate real R146 spectral RCWA calibration evidence
+        shell: bash
+        run: |
+          mkdir -p .omega-r147-ci
+          python - <<'PY'
+          from __future__ import annotations
+          import importlib.util,json,tempfile
+          from pathlib import Path
+          root=Path.cwd().resolve();spec=importlib.util.spec_from_file_location('agent',root/'public'/'omega-rcwa-agent.py');agent=importlib.util.module_from_spec(spec);spec.loader.exec_module(agent)
+          geometries=[
+            (320,82,238,500,0),(325,88,246,515,12),(330,94,254,530,24),(335,100,262,545,36),
+            (340,106,270,560,48),(345,92,242,575,60),(350,98,250,590,72),(338,86,266,535,84)
+          ]
+          records=[]
+          for i,(pitch,width,length,height,theta) in enumerate(geometries):
+            cid=f'r147_real_{i:02d}';job={'schema':'OMEGA_FULLWAVE_QUEUE_v1','job_id':'ci_'+cid,'source_packet_id':'packet_'+cid,'solver':'rcwa','execution_mode':'DISPERSION_SPECTRAL_R146','geometry':{'pitch_nm':pitch,'width_nm':width,'length_nm':length,'height_nm':height,'theta_deg':theta,'material':'TIO2_DESIGN'},'wavelength_nm':532,'polarization':'s','material_model':{'n_incident':1.0,'n_feature':2.43,'n_background':1.0,'n_substrate':1.4607},'material_names':{'incident':'air','feature':'tio2_design','background':'air','substrate':'sio2_fused'},'spectral':{'wavelengths_nm':[470,532,650]},'numerics':{'nx':32,'ny':32,'harmonics_low':25,'harmonics_high':49,'convergence_tolerance':0.12,'energy_tolerance':0.10,'incidence_theta_deg':0,'incidence_phi_deg':0},'proof':{'gate':'STAY','mode188_score':1.2,'continuity':.9,'burden':.2,'contradiction':.1,'scar':.05},'lineage':['ci:r147:real-pilot']}
+            with tempfile.TemporaryDirectory(prefix='omega-r147-') as tmp: run=agent.execute(job,(root/'sovereign'/'omega_rcwa_worker.py').resolve(),Path(tmp).resolve())
+            records.append({'candidate':{'candidate_id':cid,'source_packet_id':'packet_'+cid,'geometry':job['geometry'],'wavelength_nm':532,'target_phase_deg':180,'sigma':1,'material_model':job['material_model'],'lineage':['ci:r147:candidate']},'result':run['result']})
+          Path('.omega-r147-ci/fullwave.json').write_text(json.dumps(records,indent=2),'utf-8')
+          converged=sum(1 for x in records if x['result'].get('converged_all'))
+          print('R147 REAL FULLWAVE EVIDENCE',{'jobs':len(records),'converged':converged,'points':sum(len(x['result'].get('points',[])) for x in records)})
+          if converged<7: raise SystemExit('fewer than seven real spectral jobs converged; calibration evidence too small')
+          PY
+      - name: Close R145 prediction to R146 observation calibration loop
+        shell: bash
+        run: |
+          node <<'NODE'
+          import fs from 'node:fs';
+          import {screenCandidateR145} from './src/computation/advancedComputationKernelR145.js';
+          import {fitFullwaveCalibrationR147,observationsFromR145R146R147} from './src/computation/fullwaveCalibrationR147.js';
+          const records=JSON.parse(fs.readFileSync('.omega-r147-ci/fullwave.json','utf8')),observations=[];
+          for(const record of records){if(record.result?.converged_all!==true)continue;const row=screenCandidateR145(record.candidate,{wavelengths_nm:[470,532,650],polarizations:['s'],fabrication_tolerance_nm:5});observations.push(...observationsFromR145R146R147(row,record.result,'e'.repeat(64)))}
+          if(observations.length<20)throw new Error(`R147 real pilot has only ${observations.length} converged paired observations`);
+          const fit=await fitFullwaveCalibrationR147(observations,{lambda:.05,required_improvement:.01});
+          if(!['CALIBRATION_GATE_PASS','HOLD_NO_GENERALIZATION_PROOF'].includes(fit.state))throw new Error(`unexpected real calibration state ${fit.state}`);
+          if(fit.canonical_mutation!==false||fit.screen_engine_mutation!==false||fit.physical_validation!==false)throw new Error('R147 real pilot truth boundary regressed');
+          if(!Number.isFinite(fit.cross_validation?.baseline_rmse)||!Number.isFinite(fit.cross_validation?.calibrated_rmse))throw new Error('R147 real pilot cross-validation metrics missing');
+          fs.writeFileSync('.omega-r147-ci/calibration.json',JSON.stringify(fit,null,2));
+          console.log(`R147 REAL CLOSED LOOP PASS · ${observations.length} paired full-wave observations · ${fit.state} · OOF RMSE ${fit.cross_validation.baseline_rmse} → ${fit.cross_validation.calibrated_rmse} · improvement ${(100*fit.cross_validation.relative_rmse_improvement).toFixed(2)}%`);
+          NODE
+      - name: Preserve R146 R145 and inherited production contracts
+        run: |
+          node tests/r146-spectral-fullwave-fabric-invariants.mjs
+          python tests/r146-agent-dispersion-smoke.py
+          node tests/r145-advanced-computation-fabric-invariants.mjs
+          npm run check
+      - name: Dry-run canonical Worker
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r147-canonical
