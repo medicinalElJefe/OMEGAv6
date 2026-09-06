@@ -1,0 +1,40 @@
+name: OMEGA R148 Active Fullwave Learning
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [r148-active-fullwave-learning]
+  pull_request:
+    branches: [r147-fullwave-calibration-feedback, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r148-active-learning-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r148:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install application
+        run: npm install
+      - name: Prove active full-wave acquisition policy
+        run: |
+          node --check src/computation/activeFullwaveLearningR148.js
+          node tests/r148-active-fullwave-learning-invariants.mjs
+      - name: Preserve R147 R146 R145 authority chain
+        run: |
+          node tests/r147-fullwave-calibration-feedback-invariants.mjs
+          node tests/r146-spectral-fullwave-fabric-invariants.mjs
+          node tests/r145-advanced-computation-fabric-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Dry-run canonical Worker
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r148-canonical
