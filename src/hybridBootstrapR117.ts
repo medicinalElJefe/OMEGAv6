@@ -8,6 +8,9 @@ export type SovereignBootstrapR117={
  connectorFilename:string;
  canonicalOrigin:string;
  createdAt:number;
+ connectorRevision?:string;
+ hybridProtocol?:string;
+ agent?:{version?:string;sha256?:string;bytes?:number;protocol?:string};
 };
 
 export async function bootstrapSovereignR117():Promise<SovereignBootstrapR117>{
