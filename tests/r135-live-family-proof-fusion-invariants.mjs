@@ -23,7 +23,7 @@ must(statusAssignments.length===0,'proof overlay must never mutate declared fami
 must(surface.includes("api.get<any>('/api/system/operational')")&&surface.includes("api.get<any>('/api/hybrid/status')"),'surface must retrieve current operational and Hybrid evidence');
 must(surface.includes('window.setInterval(()=>void loadProof(),15000)'),'current proof must refresh instead of becoming stale UI state');
 must(surface.includes('DECLARED FAMILY STATUS')&&surface.includes('CURRENT OPERATIONAL PROOF'),'surface must display declared status and current proof as separate axes');
-must(surface.includes('PC EXECUTION GATE CURRENTLY SATISFIED')&&surface.includes('CURRENT AUTHENTICATED HEARTBEAT'),'operator surface must explicitly identify authenticated PC proof');
+must(proof.includes('PC EXECUTION GATE CURRENTLY SATISFIED')&&surface.includes('proof.label')&&surface.includes('CURRENT AUTHENTICATED HEARTBEAT'),'shared resolver and live surface must jointly identify authenticated PC proof');
 must(surface.includes('missing runtime evidence remains unknown; declared family status is unchanged.'),'runtime errors must fail unknown instead of fabricating proof');
 must(surface.includes('familyOperationalProofR135(row.family,operational,hybrid)')&&surface.includes('currentNextActionR135(row.family,proof,row.action)'),'each family card must use the shared proof resolver and proof-aware next action');
 must(surface.includes('CURRENT NEXT DEVELOPMENT ACTION'),'operator UI must distinguish dynamic current action from static design lane');
