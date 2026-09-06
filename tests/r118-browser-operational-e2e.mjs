@@ -9,10 +9,21 @@ if(routes.length!==44||new Set(routes).size!==44)throw new Error(`R118 expected 
 
 const criticalVisual=new Set(['Matter Traversal','Visual Instrument','Immersive Traversal','Extreme Traversal','Traversal','Forecast','Relativity','Earth Now','Atlas','Infinity','Scale Compiler','Reality Lab','Field','Data Motion','Convergence']);
 
-async function openRoute(page,route){
+async function routeDiagnostics(page){
+ return page.evaluate(()=>({
+  panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||'',
+  expanded:document.documentElement.dataset.omegaNavExpanded||'',
+  visibleRoutes:[...document.querySelectorAll('.r89-flat-route')].map(x=>x.querySelector('b')?.textContent?.trim()).filter(Boolean).slice(0,60),
+  boot:[...document.querySelectorAll('.boot')].map(x=>(x.textContent||'').trim()).filter(Boolean).slice(0,6)
+ }));
+}
+
+async function openRoute(page,route,viewportName){
+ console.log(`R118 E2E ${viewportName} → ${route}`);
  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
  if(await expand.count())await expand.first().click();
- await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
+ try{await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000})}
+ catch{throw new Error(`${viewportName} ${route}: navigator failed to expand · ${JSON.stringify(await routeDiagnostics(page))}`)}
  const found=await page.evaluate(route=>{
   const buttons=[...document.querySelectorAll('.r89-flat-route')];
   const button=buttons.find(x=>x.querySelector('b')?.textContent?.trim()===route);
@@ -20,12 +31,13 @@ async function openRoute(page,route){
   button.click();
   return true;
  },route);
- if(!found)throw new Error(`route button missing: ${route}`);
- await page.waitForFunction(route=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===route,route,{timeout:20000});
+ if(!found)throw new Error(`${viewportName} ${route}: route button missing · ${JSON.stringify(await routeDiagnostics(page))}`);
+ try{await page.waitForFunction(route=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===route,route,{timeout:20000})}
+ catch{throw new Error(`${viewportName} ${route}: route click did not become active panel · ${JSON.stringify(await routeDiagnostics(page))}`)}
  // The current product deliberately defers heavy specialist modules. Provenance/calculus scaffolding is
  // rendered immediately inside R81, so it cannot be used as proof that the specialist itself has arrived.
  // Wait specifically for the bounded R109 Suspense fallback to disappear before judging operation.
- await page.waitForFunction(route=>{
+ try{await page.waitForFunction(route=>{
   const root=document.querySelector('.omega-workstation-v2');
   if(!root||root.getAttribute('data-panel')!==route)return false;
   const surface=root.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(route)}"]`)||root.querySelector('.omega-surface-r81');
@@ -34,15 +46,18 @@ async function openRoute(page,route){
   const deferred=[...surface.querySelectorAll('.r109-specialist-loading')].some(visible);
   const bootPending=[...surface.querySelectorAll('.boot')].filter(visible).some(x=>/LOADING|PREPARING|BOOT|MATERIALIZING/i.test(x.textContent||''));
   return !deferred&&!bootPending;
- },route,{timeout:20000});
+ },route,{timeout:20000})}
+ catch{throw new Error(`${viewportName} ${route}: specialist did not settle · ${JSON.stringify(await routeDiagnostics(page))}`)}
  if(route==='Hybrid Link'){
-  await page.waitForFunction(()=>/OMEGA SOVEREIGN LINK · R117/.test(document.querySelector('.omega-surface-r81')?.textContent||''),{timeout:12000});
+  try{await page.waitForFunction(()=>/OMEGA SOVEREIGN LINK · R117/.test(document.querySelector('.omega-surface-r81')?.textContent||''),{timeout:12000})}
+  catch{throw new Error(`${viewportName} Hybrid Link: current R117 surface never materialized · ${JSON.stringify(await routeDiagnostics(page))}`)}
  }
  if(criticalVisual.has(route)){
-  await page.waitForFunction(()=>{
+  try{await page.waitForFunction(()=>{
    const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>=180&&r.height>=120};
    return [...document.querySelectorAll('.omega-surface-r81 canvas,.omega-surface-r81 svg')].some(visible);
-  },{timeout:12000});
+  },{timeout:12000})}
+  catch{throw new Error(`${viewportName} ${route}: visual stage never materialized · ${JSON.stringify(await routeDiagnostics(page))}`)}
  }
 }
 
@@ -89,7 +104,7 @@ async function runViewport(browser,name,viewport){
  await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});
  await page.waitForSelector('main.r71-home, .omega-workstation-v2',{timeout:30000});
  for(const route of routes){
-  await openRoute(page,route);
+  await openRoute(page,route,name);
   await inspectRoute(page,route,name);
  }
  if(pageErrors.length)throw new Error(`${name}: uncaught browser errors: ${pageErrors.join(' | ').slice(0,1800)}`);
