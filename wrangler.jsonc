@@ -1,9 +1,9 @@
-// OMEGA R121 sovereign swarm successor on the proven R116/R117 runtime spine.
-// Adds 1,728 independently addressable swarm cells + one coordinator while preserving every inherited runtime/federation/archive/mode behavior.
+// OMEGA R121 sovereign swarm is mounted inside the proven R116 runtime spine.
+// Adds 1,728 independently addressable swarm cells + one coordinator while preserving the established Worker entrypoint and inherited runtime/federation/archive/mode behavior.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR121.js",
+  "main": "src/workerR116.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
