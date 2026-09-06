@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R93 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R93/R140 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const home=read('src/OmegaHomeR71.tsx');
 const command=read('src/OmegaCommandDeck.tsx');
@@ -15,6 +15,8 @@ const field=read('src/OmegaFieldMotionConvergenceR28.tsx');
 const truth=read('src/TruthVisualsR93.tsx');
 const legacyMode=read('src/ModeExpressionCanvasR82.tsx');
 const living=read('src/OmegaR36LivingSurfaces.tsx');
+const livingCss=read('src/livingSurfaceR36.css');
+const capabilityCss=read('src/capabilityFirstR138.css');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
@@ -56,7 +58,12 @@ must(field.includes('<CanonicalMembraneR95 address={address} onAddress={onAddres
 must((field.match(/<TransitionTruthPlotR93/g)||[]).length>=2,'Data Motion and Convergence must use direct transition plots');
 must(!field.includes("<div className='r28-field-stage r77-field-host'><WovenContinuityFieldR77"),'Field must not mount woven renderer as primary');
 must(living.includes('LIVE DATA')&&living.includes("title='Matter Traversal canonical packet'"),'Matter Traversal LIVE view must be direct canonical data');
-must(living.includes('title={`${variant} · admitted transition`}'),'Traversal LIVE view must be direct admitted-transition data');
+must(living.includes("view==='LIVE'&&<><OmegaTraversalStudio"),'Traversal LIVE must use the source-driven woven instrument rather than a hidden plot as the primary stage');
+must(living.includes("className='r140-live-truth-bridge'")&&living.includes('title={`${variant} · admitted transition`}'),'Traversal must preserve exact admitted-transition truth behind an explicit proof bridge');
+must(living.includes("view==='ROUTE'&&<><TransitionTruthPlotR93"),'Traversal ROUTE + PROOF must expose exact transition data directly');
+must(livingCss.includes(".r140-live-truth-bridge[open]>.r93-truth-plot.r93-transition{display:grid!important"),'explicitly opened LIVE proof bridge must reveal exact transition geometry');
+must(livingCss.includes(".r140-live-truth-bridge:not([open])>.r93-truth-plot{display:none!important"),'closed LIVE proof bridge must not restore chart-first hierarchy');
+must(capabilityCss.includes(".r43-workspace-stage[data-view='ROUTE'] .r93-truth-plot.r93-transition{display:grid!important}"),'ROUTE + PROOF must override global plot retirement');
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),'deep donor must remain optional and reachable: '+token);
 
 must(legacyMode.includes('switch(expression.family)'),'legacy R82 renderer may remain as preserved donor source');
@@ -72,4 +79,4 @@ for(const boundary of [
  'not a claim of physical destiny or external causation'
 ])must([forecast,relativity,reality,field].join('\n').includes(boundary),'truth boundary lost: '+boundary);
 
-console.log('R93/R95 VISUAL TRUTH PASS · canonical membrane + evaluated data own production displays · procedural renderers remain secondary · no synthetic default data');
+console.log('R93/R95/R140 VISUAL TRUTH PASS · canonical manifold + evaluated data preserved · woven traversal promoted without hiding exact proof · no synthetic default data');
