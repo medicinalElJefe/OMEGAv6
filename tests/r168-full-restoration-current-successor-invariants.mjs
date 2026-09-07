@@ -17,8 +17,9 @@ must(completion.includes("S22:{successor:'LOCAL_ACTIVE'")&&completion.includes('
 
 must(potential.includes("import {R48_COMPLETION_FAMILIES}")&&potential.includes('effectiveStatus=(current?.successor||family.status)'),'Build Potential must derive current execution from the same R48/R153 successor ledger');
 must(potential.includes('historicalStatusCounts')&&potential.includes('effectiveStatusCounts'),'Build Potential must retain historical and current status axes separately');
+must(potential.includes("const primaryRoute=(surface:string,fallback:string)=>String(surface||fallback||'System Atlas').split('/')[0].trim()"),'composite successor surfaces must normalize to a registered primary route');
 must(potentialUi.includes('CURRENT SUCCESSOR EXECUTION · R48/R153/R168')&&potentialUi.includes('HISTORICAL V24 STATUS · PRESERVED LINEAGE'),'operator must see current execution separately from predecessor lineage');
-must(potentialUi.includes('row.effectiveSurface'),'Build Potential must route through the current successor surface rather than stale predecessor target');
+must(potentialUi.includes('row.effectiveRoute'),'Build Potential must navigate through a normalized current successor route rather than a stale predecessor or composite display label');
 
 must(suite.includes("import FullRestorationConvergenceR168 from './FullRestorationConvergenceR168'"),'Convergence must import the restoration surface');
 must(suite.includes('<FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/>'),'Convergence must visibly mount the restoration surface');
@@ -33,4 +34,4 @@ must(systemUi.includes('No fake OPEN button'),'System Atlas compatibility/truth 
 must(systemUi.includes("currentExecutable=new Set(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE'])"),'System Atlas Open action must stay limited to current executable successor states');
 const menuCount=[...atlas.matchAll(/\['\d\d','[^']+','[^']+','[^']+'\]/g)].length;
 must(menuCount===12,`expected 12 master menus, found ${menuCount}`);
-console.log('R168 FULL RESTORATION CURRENT-SUCCESSOR PASS · one R48/R153 execution ledger · Build Potential converged · R166 operator-visible · 12 intents direct · no fake Open · R125/device/scientific boundaries preserved');
+console.log('R168 FULL RESTORATION CURRENT-SUCCESSOR PASS · one R48/R153 execution ledger · Build Potential normalized routing · R166 operator-visible · 12 intents direct · no fake Open · R125/device/scientific boundaries preserved');
