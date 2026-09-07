@@ -1,6 +1,7 @@
 import {readRunR146,replayRunR146,transitionRunR146} from './durableOperationExecutionR146.js';
 import {runtimeStorageR168} from './runtimeStorageR168.js';
 import {manifestR185,planTemporalPerformanceR185,readTemporalPerformanceR185,recordTemporalPerformanceR185} from './temporalRelativityPerformanceR185.js';
+import {lookupVerifiedReuseR194,manifestR194,publishVerifiedReuseR194} from './verifiedContentReuseR194.js';
 
 export const R147_REVISION='R147';
 export const R147_SCHEMA='OMEGA_UNIFIED_EXECUTOR_FABRIC_R147';
@@ -11,6 +12,7 @@ export const R147_EXECUTORS=Object.freeze([
  {id:'FEDERATION_CHAIN',domains:['AI','SAI','PROOF','LOCAL'],mode:'SYNCHRONOUS_SPECIALIST_CHAIN',authority:'R115_PROPOSE_SCREEN_RETURN_NOT_CANON'},
  {id:'LOCAL_PROOF',domains:['PROOF'],mode:'SYNCHRONOUS_DETERMINISTIC',authority:'R146_REPLAY_INTEGRITY_ONLY'},
  {id:'LOCAL_RUNTIME',domains:['LOCAL'],mode:'SYNCHRONOUS_DETERMINISTIC',authority:'LOCAL_RUNTIME_RETURN_NOT_CANON'},
+ {id:'CONTENT_CACHE',domains:['AI','SAI','PROOF','LOCAL'],mode:'SYNCHRONOUS_DETERMINISTIC_REUSE',authority:'R194_EXACT_VERIFIED_CONTENT_RETRIEVAL_NOT_FRESH_EXECUTION'},
  {id:'PLUGIN_CONNECTOR',domains:['PLUGIN'],mode:'EXTERNAL_CONNECTOR',authority:'PROVIDER_RECEIPT_REQUIRED'}
 ]);
 export const R147_LAWS=Object.freeze([
@@ -26,6 +28,8 @@ export const R147_LAWS=Object.freeze([
  'WORKERS_AI_RETURN_HASH_PROVES_RETURN_INTEGRITY_NOT_FACTUAL_TRUTH',
  'SWARM_EXECUTION_QUORUM_IS_NOT_TRUTH_CONSENSUS',
  'FEDERATION_PROPOSE_AND_SCREEN_ARE_SPECIALIST_RETURNS_NOT_CANON',
+ 'R194_CACHE_HIT_REQUIRES_EXACT_VERIFIED_CONTENT_KEY',
+ 'CACHE_RETRIEVAL_IS_NOT_FRESH_ORIGINAL_WORKLOAD_EXECUTION',
  'PLUGIN_REGISTRY_PRESENCE_IS_NOT_PROVIDER_EXECUTION',
  'R144_RUNTIME_ATTESTATION_AND_R145_WORLD_SCAR_REMAIN_EVIDENCE_ONLY',
  'R125_REMAINS_THE_ONLY_CANONSTATE_ADMISSION_AUTHORITY'
@@ -71,18 +75,19 @@ export async function executorDirectoryR147(runtime,env=runtime?.env||{}){
    FEDERATION_CHAIN:{state:env?.OMEGA_GENESIS_MACHINE?.fetch&&env?.OMEGA_OPTICAL_MACHINE?.fetch?'AVAILABLE':'UNAVAILABLE',domains:['AI','SAI','PROOF','LOCAL'],roles:['PROPOSE','SCREEN']},
    LOCAL_PROOF:{state:'AVAILABLE',domains:['PROOF']},
    LOCAL_RUNTIME:{state:'AVAILABLE',domains:['LOCAL']},
+   CONTENT_CACHE:{state:'AVAILABLE',domains:['AI','SAI','PROOF','LOCAL'],requires:'R194_EXACT_VERIFIED_CONTENT_HIT',freshExecution:false},
    PLUGIN_CONNECTOR:{state:'DISCOVERED',domains:['PLUGIN'],providerExecutionRequiresConcreteAdapter:true}
   },
-  performance:{revision:'R185',loop:'PREDICT_CARRY_CORRECT_REALLOCATE',adaptiveSelection:'TERMINAL_HISTORY_MATURED_ONLY'},
+  performance:{revision:'R185',loop:'PREDICT_CARRY_CORRECT_REALLOCATE',adaptiveSelection:'TERMINAL_HISTORY_MATURED_ONLY',verifiedReuse:'R194_EXACT_CONTENT_ONLY'},
   runtimeStorageCompatibility:'R168',
   canonicalMutation:false,canonicalAdmissionAuthority:'R125',
-  truthBoundary:'Executor availability means a concrete transport/binding is presently available. It is not invocation, return, verification, factual truth, solver validity, PC heartbeat proof, or CanonState admission.'
+  truthBoundary:'Executor availability means a concrete transport/binding is presently available. CONTENT_CACHE additionally requires an exact R194 verified-content hit before selection. Availability is not invocation, return, verification, factual truth, solver validity, PC heartbeat proof, or CanonState admission.'
  };
 }
 
 export async function selectExecutorR147(runtime,run,input={}){
  const directory=await executorDirectoryR147(runtime),domain=executionDomain(run),requested=txt(input.executorId,64).toUpperCase(),strategy=txt(input.strategy,32).toUpperCase();
- const eligible=R147_EXECUTORS.filter(x=>x.domains.includes(domain)).map(x=>x.id);
+ const eligible=R147_EXECUTORS.filter(x=>x.id!=='CONTENT_CACHE'&&x.domains.includes(domain)).map(x=>x.id);
  let executorId=requested&&eligible.includes(requested)?requested:null;
  if(!executorId){
   if(domain==='HYBRID'||domain==='BUILD')executorId='HYBRID_HOST';
@@ -97,8 +102,11 @@ export async function selectExecutorR147(runtime,run,input={}){
  }
  const temporalPerformance=await planTemporalPerformanceR185(runtime,{run,directory,eligible,defaultExecutorId:executorId,input}),recommended=temporalPerformance?.selection?.recommendedExecutorId;
  if(recommended&&eligible.includes(recommended)&&directory.executors[recommended]?.state==='AVAILABLE')executorId=recommended;
- const state=executorId?directory.executors[executorId]?.state||'UNAVAILABLE':'UNAVAILABLE';
- return{schema:'OMEGA_EXECUTOR_PLAN_R147',runId:run.id,domain,executorId,eligible,state,strategy:strategy||'AUTO',temporalPerformance,canonicalMutation:false,truthBoundary:'Selection binds an eligible executor to a durable run. R185 may reorder only eligible AVAILABLE executors after measured terminal history matures; selection itself is not invocation or execution proof.'};
+ const explicitSelection=Boolean(requested||(strategy&&strategy!=='AUTO'));
+ const reuse=explicitSelection?{hit:false,reason:'EXPLICIT_EXECUTOR_OR_STRATEGY_BYPASSES_CACHE'}:await lookupVerifiedReuseR194(runtime,{run,multiAxis:temporalPerformance?.multiAxis});
+ if(reuse?.hit===true)executorId='CONTENT_CACHE';
+ const planEligible=reuse?.hit===true?[...eligible,'CONTENT_CACHE']:eligible,state=executorId?directory.executors[executorId]?.state||'UNAVAILABLE':'UNAVAILABLE';
+ return{schema:'OMEGA_EXECUTOR_PLAN_R147',runId:run.id,domain,executorId,eligible:planEligible,state,strategy:strategy||'AUTO',temporalPerformance,reuse,canonicalMutation:false,truthBoundary:'Selection binds an eligible executor to a durable run. R185 may reorder only eligible AVAILABLE executors after measured terminal history matures. R194 may substitute CONTENT_CACHE only after an exact verified-content hit and only when the operator did not explicitly choose an executor or strategy. Selection itself is not invocation or execution proof.'};
 }
 
 async function runWorkersAI(runtime,run,input,env){
@@ -117,6 +125,13 @@ async function runLocalProof(runtime,run,input){
 
 async function runLocalRuntime(runtime,run,input){
  run=await ensureAvailable(runtime,run,'LOCAL_RUNTIME','Bounded canonical runtime inspection executor is present');const inv=await invoke(runtime,run,'LOCAL_RUNTIME');if(!inv.ok)return inv;const operation=txt(input.localOperation||'READ_RUN',40).toUpperCase();let payload;if(operation==='READ_RUN')payload={operation,run:await readRunR146(runtime,sid(input.targetRunId)||run.id)};else if(operation==='REPLAY')payload={operation,replay:await replayRunR146(runtime,sid(input.targetRunId)||run.id)};else payload={operation:'MANIFEST',revision:R147_REVISION,laws:R147_LAWS,executors:R147_EXECUTORS};const saved=await persistResult(runtime,run.id,'LOCAL_RUNTIME',payload,'DETERMINISTIC_RUNTIME_RETURN_ONLY');await returned(runtime,run.id,'LOCAL_RUNTIME',saved.resultFingerprint,'R147 bounded local runtime');const verified=await verifyNormal(runtime,run.id,'LOCAL_RUNTIME',saved.resultFingerprint,'R147 bounded local runtime');return{ok:verified.ok,status:verified.status||200,run:verified.run,result:saved};
+}
+
+async function runContentCache(runtime,run,reuse){
+ if(!reuse?.hit||!reuse?.sourceResult)return{ok:false,status:409,code:'R194_EXACT_REUSE_HIT_REQUIRED'};
+ run=await ensureAvailable(runtime,run,'CONTENT_CACHE','R194 exact verified-content key matched a stored R146 VERIFIED source result');const inv=await invoke(runtime,run,'CONTENT_CACHE');if(!inv.ok)return inv;
+ const sourcePayload=stable(reuse.sourceResult.payload),meta={schema:'OMEGA_R194_REUSE_RECEIPT',revision:'R194',keySha256:reuse.keySha256,sourceRunId:reuse.entry.sourceRunId,sourceExecutorId:reuse.entry.sourceExecutorId,sourceResultFingerprint:reuse.entry.sourceResultFingerprint,freshOriginalExecution:false,freshObservation:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125'},payload=sourcePayload&&typeof sourcePayload==='object'&&!Array.isArray(sourcePayload)?{...sourcePayload,r194Reuse:meta}:{value:sourcePayload,r194Reuse:meta};
+ const saved=await persistResult(runtime,run.id,'CONTENT_CACHE',payload,'EXACT_VERIFIED_CONTENT_REUSE_NOT_FRESH_ORIGINAL_EXECUTION');await returned(runtime,run.id,'CONTENT_CACHE',saved.resultFingerprint,`R194 exact content key ${reuse.keySha256}`);const verified=await verifyNormal(runtime,run.id,'CONTENT_CACHE',saved.resultFingerprint,`R194 exact content key ${reuse.keySha256}`);return{ok:verified.ok,status:verified.status||200,run:verified.run,result:saved,reuse:meta,truthBoundary:'CONTENT_CACHE was invoked and verified as a deterministic retrieval executor. The original workload, model, provider, solver or device was not invoked again, and the reused bytes are not a fresh observation or new factual verification.'};
 }
 
 async function runFederation(runtime,run,input,env){
@@ -147,13 +162,15 @@ export async function dispatchRunR147(runtime,id,input={},callbacks={}){
  if(plan.executorId==='WORKERS_AI')out=await runWorkersAI(runtime,run,input,runtime.env||{});
  else if(plan.executorId==='LOCAL_PROOF')out=await runLocalProof(runtime,run,input);
  else if(plan.executorId==='LOCAL_RUNTIME')out=await runLocalRuntime(runtime,run,input);
+ else if(plan.executorId==='CONTENT_CACHE')out=await runContentCache(runtime,run,plan.reuse);
  else if(plan.executorId==='FEDERATION_CHAIN')out=await runFederation(runtime,run,input,runtime.env||{});
  else if(plan.executorId==='AUTONOMIC_SWARM')out=await runSwarm(runtime,run,input,runtime.env||{});
  else if(plan.executorId==='HYBRID_HOST')out=await queueHybrid(runtime,run,input,callbacks);
  else if(plan.executorId==='PLUGIN_CONNECTOR')out={ok:false,status:409,code:'R147_PLUGIN_CONCRETE_ADAPTER_REQUIRED',plan,run,truthBoundary:'A registered plugin/provider name is not execution. R147 refuses to invoke without a concrete provider transport adapter and returned provider receipt.'};
  else out={ok:false,status:409,code:'R147_EXECUTOR_NOT_IMPLEMENTED',plan,run};
  const terminal=out?.status!==202;let sample=null;try{sample=await recordTemporalPerformanceR185(runtime,{run:out?.run||run,executorId:plan.executorId,ok:terminal&&out?.ok===true,status:out?.status||0,latencyMs:Date.now()-started,phase:terminal?'RETURN_OR_TERMINAL':'DISPATCH_ACCEPTED',verified:terminal&&out?.run?.state==='VERIFIED',terminal,input})}catch{}
- return{...out,temporalPerformance:{plan:plan.temporalPerformance,sample}};
+ let reusePublication=null;if(terminal&&out?.ok===true&&out?.run?.state==='VERIFIED'&&plan.executorId!=='CONTENT_CACHE'&&out?.result){try{reusePublication=await publishVerifiedReuseR194(runtime,{run:out.run,executorId:plan.executorId,result:out.result,multiAxis:plan.temporalPerformance?.multiAxis})}catch{}}
+ return{...out,temporalPerformance:{plan:plan.temporalPerformance,sample},contentReuse:{lookup:plan.reuse||null,publication:reusePublication}};
 }
 
 export async function syncHybridClaimR147(runtime,job){const link=job?.id?await artifactLink(runtime,'HYBRID_JOB',job.id):null;if(!link?.runId)return null;const run=await readRunR146(runtime,link.runId);if(!run)return null;if(run.state==='AVAILABLE'){const moved=await transitionRunR146(runtime,run.id,{state:'INVOKED',reason:`Authenticated Hybrid agent claimed linked job ${job.id}`,evidence:{proofRef:'R147_AUTHENTICATED_HYBRID_AGENT_CLAIM',resultFingerprint:job.inputFingerprint||null}});return moved.run||run}return run}
@@ -169,4 +186,4 @@ export async function syncHybridReturnR147(runtime,job,closure){
 
 export async function pollRunR147(runtime,id){let run=await readRunR146(runtime,id);if(!run)return{ok:false,status:404,code:'R147_RUN_NOT_FOUND'};const bind=await binding(runtime,id);if(!bind)return{ok:true,status:200,run,binding:null,result:await result(runtime,id),temporalHistory:await readTemporalPerformanceR185(runtime,run)};if(bind.kind==='SWARM_MISSION'&&run.state==='INVOKED'&&runtime.env?.OMEGA_SWARM_AUTONOMIC){const root=runtime.env.OMEGA_SWARM_AUTONOMIC.get(runtime.env.OMEGA_SWARM_AUTONOMIC.idFromName('omega-autonomic-root-r125')),response=await root.fetch(new Request(`https://autonomic.internal/missions/${encodeURIComponent(bind.artifactId)}`)),mission=await jsonBody(response);if(response.ok&&['COMPLETE','FAILED','CANCELLED'].includes(mission?.status)){if(mission.status==='COMPLETE'){const payload={mission,authority:'AUTONOMIC_RECEIPT_NOT_CANON'},saved=await persistResult(runtime,id,'AUTONOMIC_SWARM',payload,'SWARM_EXECUTION_RECEIPT_INTEGRITY_NOT_TRUTH_CONSENSUS'),fingerprint=mission?.checkpointSha256||mission?.receipt?.merkleRoot||saved.resultFingerprint;const ret=await returned(runtime,id,'AUTONOMIC_SWARM',fingerprint,saved.resultFingerprint);run=ret.run||run;if(run.state==='RETURNED'){const ver=await verifyNormal(runtime,id,'AUTONOMIC_SWARM',fingerprint,saved.resultFingerprint);run=ver.run||run}}else{const failed=await transitionRunR146(runtime,id,{state:'FAILED',reason:`Autonomic swarm mission ${mission.status}`,evidence:{proofRef:'R147_SWARM_TERMINAL_RETURN',providerReceipt:mission?.checkpointSha256||null}});run=failed.run||run}try{await recordTemporalPerformanceR185(runtime,{run,executorId:'AUTONOMIC_SWARM',ok:mission.status==='COMPLETE',status:response.status||200,latencyMs:bind?.createdAt?Date.now()-Number(bind.createdAt):0,phase:'ASYNC_SWARM_TERMINAL',verified:run.state==='VERIFIED',terminal:true})}catch{}}return{ok:true,status:200,run,binding:bind,mission,result:await result(runtime,id),temporalHistory:await readTemporalPerformanceR185(runtime,run)}}return{ok:true,status:200,run,binding:bind,result:await result(runtime,id),temporalHistory:await readTemporalPerformanceR185(runtime,run)}}
 export async function readResultR147(runtime,id){const run=await readRunR146(runtime,id);if(!run)return null;return{schema:'OMEGA_EXECUTOR_RESULT_VIEW_R147',revision:R147_REVISION,runId:id,state:run.state,binding:await binding(runtime,id),result:await result(runtime,id),temporalHistory:await readTemporalPerformanceR185(runtime,run),runtimeStorageCompatibility:'R168',canonicalMutation:false,canonicalAdmissionAuthority:'R125'}}
-export function manifestR147(){return{ok:true,schema:'OMEGA_UNIFIED_EXECUTOR_FABRIC_MANIFEST_R147',revision:R147_REVISION,executors:R147_EXECUTORS,laws:R147_LAWS,performance:manifestR185(),runtimeStorageCompatibility:'R168',upstream:{operationContract:'R143',lifecycle:'R142',hybridProof:'R141',durableRun:'R146',runtimeAttestation:'R144',worldScar:'R145',swarm:'R125',federation:'R115',temporalPerformance:'R185'},canonicalMutation:false,canonicalAdmissionAuthority:'R125',truthBoundary:'R147 unifies concrete execution transports around one R146 durable run. R168 keeps executor artifacts on the real Durable Object storage shape. R185 may optimize eligible executor priority from measured terminal history, but dispatch acceptance never counts as execution success. R147 still distinguishes selection, availability, dispatch, invocation, return, return-integrity verification, evidence/world-scar carry, and CanonState admission. No executor, model, plugin, swarm quorum, federation packet, host return, performance trend or deployment attestation automatically mutates CanonState.'}}
+export function manifestR147(){return{ok:true,schema:'OMEGA_UNIFIED_EXECUTOR_FABRIC_MANIFEST_R147',revision:R147_REVISION,executors:R147_EXECUTORS,laws:R147_LAWS,performance:manifestR185(),contentReuse:manifestR194(),runtimeStorageCompatibility:'R168',upstream:{operationContract:'R143',lifecycle:'R142',hybridProof:'R141',durableRun:'R146',runtimeAttestation:'R144',worldScar:'R145',swarm:'R125',federation:'R115',temporalPerformance:'R185',multiAxis:'R193',verifiedContentReuse:'R194'},canonicalMutation:false,canonicalAdmissionAuthority:'R125',truthBoundary:'R147 unifies concrete execution transports around one R146 durable run. R168 keeps executor artifacts on the real Durable Object storage shape. R185 may optimize eligible executor priority from measured terminal history, R193 supplies independent refinement targets, and R194 may eliminate repeat computation only after an exact verified-content hit. Dispatch acceptance never counts as execution success, and cache retrieval never claims fresh original-workload execution. R147 still distinguishes selection, availability, dispatch, invocation, return, return-integrity verification, evidence/world-scar carry, and CanonState admission. No executor, model, plugin, swarm quorum, federation packet, cached result, host return, performance trend or deployment attestation automatically mutates CanonState.'}}
