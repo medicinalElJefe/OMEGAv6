@@ -1,0 +1,58 @@
+name: OMEGA R152 Hybrid RCWA Convergence
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r152:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Parse canonical Hybrid agent
+        run: python -m py_compile public/omega-hybrid-agent.py
+
+      - name: Prove R127 and R148 zero-drift connector
+        run: node tests/r127-hybrid-zero-drift-invariants.mjs
+
+      - name: Prove R94 navigation and current connector contract
+        run: node tests/r94-hybrid-navigation-invariants.mjs
+
+      - name: Prove R97 federation and shared RCWA launcher
+        run: node tests/r97-federation-run-invariants.mjs
+
+      - name: Prove R104 whole-layer Hybrid integrity
+        run: node tests/r104-extreme-layer-integrity-invariants.mjs
+
+      - name: Prove R101 inherited Hybrid reconnect chain
+        run: node tests/r101-weave-hybrid-reconnect-invariants.mjs
+
+      - name: Full inherited static regression
+        run: npm run check:static
+
+      - name: Production build
+        run: npm run build
+
+      - name: Worker bundle dry run
+        run: npx wrangler deploy --dry-run
