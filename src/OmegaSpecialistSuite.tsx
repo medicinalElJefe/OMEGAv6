@@ -9,6 +9,8 @@ import OmegaAutonomicR125 from './OmegaAutonomicR125';
 import OmegaMaximumCockpitR126 from './OmegaMaximumCockpitR126';
 import OmegaCapabilityFieldR138 from './OmegaCapabilityFieldR138';
 import ReflexAutonomicR164 from './ReflexAutonomicR164';
+import AppliedCalculusR168 from './AppliedCalculusR168';
+import FullRestorationConvergenceR168 from './FullRestorationConvergenceR168';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -17,6 +19,8 @@ export default function OmegaSpecialistSuite(props:Props){
  const capability=<OmegaCapabilityFieldR138 panel={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>;
  const wrap=(content:any)=><div className='r138-capability-first'>{capability}{content}</div>;
  if(panel==='Convergence')return wrap(<div>
+  <AppliedCalculusR168/>
+  <FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/>
   <OmegaMaximumCockpitR126 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>
   <details className='r121-legacy-convergence' open><summary>R164 returned reflex → autonomic swarm · replay / residual carry / governed recruitment</summary><ReflexAutonomicR164/></details>
   <details className='r121-legacy-convergence' open><summary>R126 autonomic execution · scope / detach / checkpoint / rejoin</summary><OmegaAutonomicR125/></details>

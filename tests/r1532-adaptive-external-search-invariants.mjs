@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import machine from '../services/opticalMachineR1532.js';
+import machine,{R1532_MACHINE_SERVICE,R1532_MACHINE_VERSION,R1532_INHERITED_SCREEN_SERVICE} from '../services/opticalMachineR1532.js';
 
 const call=async(path,{method='GET',body=null}={})=>{
  const response=await machine.fetch(new Request('https://r1532.test'+path,{method,headers:body?{'content-type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined}));
@@ -8,17 +8,37 @@ const call=async(path,{method='GET',body=null}={})=>{
  return{response,text,json};
 };
 
+assert.equal(R1532_MACHINE_SERVICE,'omega-optical-machine-r1532');
+assert.equal(R1532_MACHINE_VERSION,'R153.2');
+assert.equal(R1532_INHERITED_SCREEN_SERVICE,'omega-optical-machine-r152');
+
 const health=await call('/api/health');
 assert.equal(health.response.status,200);
 assert.equal(health.json.ok,true);
+assert.equal(health.json.service,'omega-optical-machine-r1532');
+assert.equal(health.json.version,'R153.2');
 assert.equal(health.json.authority,'SCREEN_ONLY');
 assert.equal(health.json.machineVersion,'R153.2');
+assert.equal(health.json.inheritedScreenService,'omega-optical-machine-r152');
+assert.equal(health.json.inheritedEngine,'R152_BOUNDED_OPTICAL_ATLAS_SCREEN');
+assert.equal(health.response.headers.get('x-omega-machine-service'),'omega-optical-machine-r1532');
+assert.equal(health.response.headers.get('x-omega-machine-version'),'R153.2');
+assert.equal(health.response.headers.get('x-omega-inherited-screen-service'),'omega-optical-machine-r152');
 assert.equal(health.json.externalTool?.version,'R153.2');
 assert.equal(health.json.externalTool?.adaptiveCycle,true);
 assert.equal(health.json.externalTool?.canonicalMutation,false);
 
+const manifest=(await call('/api/optical/manifest')).json;
+assert.equal(manifest.service,'omega-optical-machine-r1532');
+assert.equal(manifest.version,'R153.2');
+assert.equal(manifest.machineVersion,'R153.2');
+assert.equal(manifest.inheritedScreenService,'omega-optical-machine-r152');
+assert.equal(manifest.baseManifestSchema,'OMEGA_OPTICAL_OPERATIONAL_CONVERGENCE_R152');
+assert.equal(manifest.externalTool?.version,'R153.2');
+
 const descriptor=(await call('/api/tool/descriptor')).json;
 assert.equal(descriptor.version,'R153.2');
+assert.equal(descriptor.service,'omega-optical-machine-r1532');
 assert.equal(descriptor.authority,'SCREEN_ONLY');
 assert.equal(descriptor.side_effects,'none');
 assert.equal(descriptor.canonical_mutation,false);
@@ -75,6 +95,17 @@ assert.ok(finalGeometry.length_nm<=finalGeometry.pitch_nm);
 assert.equal(cycle.result.ai_context?.schema,'OMEGA_AI_REASONING_PACKET_v1');
 if(cycle.result?.fullwave_handoff?.prepared)assert.equal(cycle.result.fullwave_handoff.job?.state,'PREPARED_NOT_SOLVED');
 
+const proposal={schema:'OMEGA_PACKET_v1',packet_id:'r1532_identity_probe',source_node:'omega-genesis',source_sha:'r1532_identity_probe',state_id:'r1532_identity_probe',wavelength_nm:532,target_phase_deg:0,geometry:{pitch_nm:330,width_nm:105,length_nm:290,height_nm:575},lineage:['r1532-identity-test']};
+const screened=await call('/api/federation/screen',{method:'POST',body:{proposal}});
+assert.equal(screened.response.status,200);
+assert.equal(screened.json.service,'omega-optical-machine-r1532');
+assert.equal(screened.json.version,'R153.2');
+assert.equal(screened.json.machineVersion,'R153.2');
+assert.equal(screened.json.screeningService,'omega-optical-machine-r152');
+assert.equal(screened.json.screeningVersion,'R152.0');
+assert.equal(screened.json.authority,'SCREEN_ONLY');
+assert.equal(screened.json.canonical_mutation,false);
+
 const rank=(await call('/api/tool/invoke',{method:'POST',body:{schema:'OMEGA_EXTERNAL_TOOL_CALL_v1',caller:{id:'r1532-regression',kind:'test'},request_id:'rank-regression',operation:'rank_addresses',payload:{offset:0,limit:24,wavelength_nm:532}}})).json;
 assert.equal(rank.ok,true);
 assert.equal(rank.result?.count,24);
@@ -82,4 +113,4 @@ assert.equal(rank.receipt?.tool_version,'R153.2');
 assert.equal(rank.receipt?.base_tool_version,'R153.1');
 assert.equal(rank.tool_upgrade?.adaptive_cycle_available,true);
 
-console.log('R153.2 ADAPTIVE EXTERNAL SEARCH PASS',JSON.stringify({seed:1698,pressure:insight.result.boundary_pressure.map(x=>`${x.axis}:${x.side}`),best:cycle.result.cycle.final,rounds:cycle.result.cycle.rounds_completed,evaluations:cycle.result.cycle.evaluations,next:cycle.result.ai_context.next_action,receipt:cycle.receipt.receipt_id}));
+console.log('R153.2 ADAPTIVE EXTERNAL SEARCH + MACHINE IDENTITY PASS',JSON.stringify({service:R1532_MACHINE_SERVICE,version:R1532_MACHINE_VERSION,inheritedScreen:R1532_INHERITED_SCREEN_SERVICE,seed:1698,pressure:insight.result.boundary_pressure.map(x=>`${x.axis}:${x.side}`),best:cycle.result.cycle.final,rounds:cycle.result.cycle.rounds_completed,evaluations:cycle.result.cycle.evaluations,next:cycle.result.ai_context.next_action,receipt:cycle.receipt.receipt_id}));

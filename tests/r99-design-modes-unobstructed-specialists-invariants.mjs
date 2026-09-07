@@ -30,7 +30,9 @@ must(stage.includes("Representational geometry is derived from the canonical pac
 
 must(studio.includes('<TraversalModeStageR99 variant={variant} address={address} onAddress={onAddress}/>'),'new source-driven mode stage must own the Deep Traversal primary view');
 must(!studio.includes("<aside className='traversal-hud'>"),'blocking traversal HUD must be removed from stage');
-must(studio.includes("<details className='r99-support-layer'><summary>MOTION SKIN")&&studio.includes("<details className='r99-support-layer'><summary>PROOF"),'motion/proof layers must remain reachable without default stage obstruction');
+const stageAt=studio.indexOf('<TraversalModeStageR99'),motionAt=studio.indexOf("className='r99-support-layer'"),motionSummaryAt=studio.indexOf('<summary>MOTION SKIN'),proofSummaryAt=studio.indexOf('<summary>PROOF');
+must(stageAt>=0&&motionAt>stageAt&&motionSummaryAt>motionAt&&proofSummaryAt>motionSummaryAt,'motion/proof layers must remain reachable after the primary stage without default stage obstruction');
+must(studio.includes("open={variant==='Extreme Traversal'}")&&studio.includes('MOTION SKIN · route / scar / continuity layer'),'Extreme Traversal must expose its motion skin by default without overlaying the primary canvas');
 must(studio.includes("r99-donor-layer")&&studio.includes('<CalculusTraversal '),'historical calculus renderer must remain preserved as optional donor/advanced comparison');
 must(css.includes('.r99-stage{')&&css.includes('height:clamp(620px,72dvh,900px)'),'desktop traversal stage must own a large high-detail viewport');
 must(css.includes(".traversal-stage .traversal-hud")&&css.includes(".calculus-stage .calculus-hud")&&css.includes(".mt-stage .mt-hud")&&css.includes(".visual-stage .visual-equation")&&css.includes('display:none!important'),'known default visual-stage overlay panels must be suppressed across visual-first routes');
@@ -45,5 +47,5 @@ must(hybrid.includes('PC ONLINE is never claimed')||hybrid.includes('authenticat
 must(earth.includes('RETURNED EVIDENCE BOUND')&&earth.includes('evidenceHash'),'Earth returned-evidence authority must remain intact');
 must(![stage,modes,studio,css].join('\n').includes('@appdeploy/client'),'R99 must remain provider portable');
 
-console.log('R99 DESIGN MODES PASS · 8 source-driven traversal depictions · unobstructed high-detail stage · proof/motion/donor layers preserved outside canvas · 44 routes intact');
+console.log('R99/R168 DESIGN MODES PASS · 8 source-driven traversal depictions · unobstructed high-detail stage · Extreme motion skin defaults open below canvas · proof/motion/donor layers preserved · 44 routes intact');
 await import('./r100-weave-instrument-invariants.mjs');

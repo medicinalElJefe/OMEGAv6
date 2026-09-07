@@ -7,10 +7,11 @@ for(const token of ["['α','Alpha seed']","['Base','Yellow carrier']","['011','+
 must(audio.includes('Math.floor((a%1728)/144)%12'),'packet phase must derive from canonical D/P/R/L address');
 must(audio.includes('setSyncPacket(false)'),'manual audio controls must explicitly leave packet-follow mode');
 must(audio.includes('packet drives audible parameters; audio never changes canon state'),'audio authority boundary missing');
-must(ui.includes("cell.family.id==='S17'&&cell.family.status==='LOCAL_ACTIVE'"),'System Atlas must mount executable S17 only when truth registry says LOCAL_ACTIVE');
+must(ui.includes("cell.family.id==='S17'&&current?.successor==='LOCAL_ACTIVE'"),'System Atlas must mount executable S17 only when the current successor ledger says LOCAL_ACTIVE');
+must(ui.includes("const currentExecutable=new Set(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE'])"),'System Atlas must preserve the shared current-successor execution whitelist');
 must(ui.includes('<SomaAudioEngine record={record}/>'),'S17 engine not mounted in System Atlas');
-must(ui.includes('V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE'),'System Atlas header must expose active V24 lineage');
-must(ui.includes('OMEGA_SYSTEM_ATLAS_V24_TRUTH.json'),'V24 receipt export filename missing');
+must(ui.includes('V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE'),'System Atlas must retain V24 lineage markers as predecessor evidence');
+must(ui.includes('OMEGA_SYSTEM_ATLAS_V24_TRUTH.json'),'V24 predecessor receipt marker missing');
 must(css.includes('@media(max-width:700px)'),'S17 mobile containment missing');
 must(!audio.includes('@appdeploy/client')&&!ui.includes('@appdeploy/client'),'AppDeploy runtime dependency regression');
-console.log('R45 SOMA AUDIO PASS · 12 packet-bound lanes · local WebAudio · compressor/master safety · no authority mutation');
+console.log('R45/R168 SOMA AUDIO PASS · 12 packet-bound lanes · current LOCAL_ACTIVE successor gate · local WebAudio · compressor/master safety · predecessor evidence retained · no authority mutation');

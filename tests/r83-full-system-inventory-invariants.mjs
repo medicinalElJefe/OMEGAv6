@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R83 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R83/R168 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const loader=fs.existsSync('src/specialistLoaderR109.tsx')?read('src/specialistLoaderR109.tsx'):'';
 const home=read('src/OmegaHomeR71.tsx');
@@ -14,6 +14,7 @@ const archive=read('src/archiveDonorIndexR83.ts');
 const hostBuild=read('src/hostBuildLedgerR83.ts');
 const bins=read('src/v77BinLedgerR83.ts');
 const families=read('src/systemAtlasRuntime.ts');
+const completion=read('src/completionRuntimeR48.ts');
 const authorities=read('src/allModesAuthority.ts');
 const modes=read('src/SourceBackedModesPanelR21.tsx');
 const modeRuntime=read('src/modeExpressionRuntimeR82.ts');
@@ -40,6 +41,7 @@ must(bins.includes('archive bin presence is donor evidence, not hosted execution
 const familyIds=[...families.matchAll(/F\('(S\d{2})'/g)].map(x=>x[1]);
 must(familyIds.length===24&&new Set(familyIds).size===24,'24-family runtime inventory must remain intact');
 must(families.includes("S22','Omega Installer / One-Click Shell','DESKTOP_STARTUP_PACKAGER'")&&families.includes("S23','Runtime API / WebSocket Service','LIVE_STATE_TRANSPORT'"),'authoritative v22 S22 installer and S23 runtime transport families must not be overwritten by UI/package aliases');
+must(completion.includes('R48_COMPLETION_FAMILIES')&&completion.includes("S10:{successor:'SOURCE_ACTIVE',surface:'Matter Traversal'")&&completion.includes("S12:{successor:'LOCAL_ACTIVE',surface:'Build Out'")&&completion.includes("S21:{successor:'LOCAL_ACTIVE',surface:'Visual Instrument'"),'R48/R153 current successor family surfaces must remain explicit');
 const surfBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 const routeBlocks=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
@@ -54,8 +56,11 @@ must(authorities.includes('sourceModeEvaluations:179')&&authorities.includes('ca
 must(home.includes('<OmegaSystemInventoryR83 compact'),'Home must expose the complete software system map instead of presenting application routes as the whole product');
 must(shell.includes('OmegaSideNavigatorR88')&&navigator.includes("layer==='SOFTWARE'")&&navigator.includes('<OmegaSystemInventoryR83 compact'),'workstation browser must expose applications and software-system layers together');
 must(atlas.includes('<OmegaSystemInventoryR83 onNavigate={onNavigate}/>'),'System Atlas must expose the complete software inventory directly');
-for(const id of ['FABRIC','SYSTEMS','FAMILIES','HOST_BUILD','MENUS','CAPABILITIES','ARCHIVES','V77'])must(inventory.includes(`id:'${id}'`),`software navigator missing ${id} inventory layer`);
+for(const id of ['FABRIC','POTENTIAL','SYSTEMS','FAMILIES','HOST_BUILD','MENUS','CAPABILITIES','ARCHIVES','V77'])must(inventory.includes(`id:'${id}'`),`software navigator missing ${id} inventory layer`);
 must(inventory.includes('Application destinations are an interface inventory only.')&&inventory.includes('All-mode authority fabric')&&inventory.includes('Eight functional layers'),'full software navigator must lead with capability/calculus/layer architecture');
+must(inventory.includes('R48_COMPLETION_FAMILIES')&&inventory.includes("const currentRouteOf=(surface:string|undefined,fallback:string)=>String(surface||fallback||'System Atlas').split('/')[0].trim()"),'Runtime families tab must consume current R48/R153 successor surfaces and normalize them to operator routes');
+must(inventory.includes("tab==='FAMILIES'&&families.map(x=>{const now=currentByFamily.get(x.id),route=currentRouteOf(now?.surface,x.target)")&&inventory.includes("go(route,'omega.r83.familyFocus',x.id)"),'Runtime families tab must launch current successor routes instead of historical x.target');
+must(inventory.includes('V24 {x.status}')&&inventory.includes('current successor status/surface, operator route'),'Runtime families tab must preserve predecessor status while exposing current route truth');
 must(inventory.includes('OMEGA_ROUTE_INVENTORY_R107.currentCount')&&inventory.includes('count is telemetry, not architecture'),'route count must remain dynamic inventory telemetry in System map');
 must(hostBuild.includes('softwareRows:57')&&hostBuild.includes('autoPingCells:1728')&&hostBuild.includes('12 Domains × 12 Phases × 12 Regulation states'),'57-row local-host lineage and 1,728 auto-ping design must remain visible');
 must((hostBuild.match(/"id":\s*"(?:OS|CC|TCS|M188|HYB|RND|TRV|FOR|AI|PKG|DAT|AUD|HOST|SPEC)-/g)||[]).length===57,'local-host lineage must retain all 57 unique implementation rows');
@@ -78,4 +83,4 @@ must(modeRuntime.includes('authorityLens')&&modeRuntime.includes('not an additio
 must(modeCanvas.includes('CANON / CALCULUS GOVERNANCE LENS')&&modeCanvas.includes('CANON / CALCULUS LENS'),'canon lens visual labels must not say source-backed execution');
 must(visual.includes("omega.r83.selectedModeRef")&&visual.includes('canon authority lens'),'Visual Instrument must carry selected source-mode/canon-lens identity across applications');
 
-console.log(`R83/R109 FULL SYSTEM INVENTORY RESTORATION PASS · ${surfaces.length} current destinations + 100 systems + 24 source families + 57 local-host rows + 1,728 auto-ping cells + 36 options + 18 capabilities + 179 source modes + 62 canon lenses + 24 V77 bins + reviewed archive builds preserved · Extreme Traversal deferred union accepted`);
+console.log(`R83/R168 FULL SYSTEM INVENTORY RESTORATION PASS · ${surfaces.length} current destinations + 100 systems + 24 source families with current successor routing + 57 local-host rows + 1,728 auto-ping cells + 36 options + 18 capabilities + 179 source modes + 62 canon lenses + 24 V77 bins + reviewed archive builds preserved`);
