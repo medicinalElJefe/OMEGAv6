@@ -1,0 +1,54 @@
+{
+  "schema": "OMEGA_ACTIVE_FEDERATION_R165",
+  "revision": "R165",
+  "status": "CANDIDATE_UNTIL_CANONICAL_EXACT_SHA_DEPLOY_PROOF",
+  "canonicalRuntime": {
+    "service": "omegav6",
+    "workerSpine": "src/workerR116.js",
+    "authority": "OMEGA_V6_CANONICAL_OPERATIONAL_RUNTIME",
+    "mutationAuthority": "R125_CANON_INTAKE_ONLY"
+  },
+  "activePeers": {
+    "genesis": {
+      "service": "omega-genesis-v1",
+      "verb": "PROPOSE",
+      "authority": "NODE_LOCAL_PROPOSAL_STATE_ONLY",
+      "promotionState": "PENDING_SERVICE_BOUND_R1532_LIVE_PROOF"
+    },
+    "optical": {
+      "service": "omega-optical-machine-r1532",
+      "publicUrl": "https://omega-optical-machine-r1532.jeffdeweyeljefe.workers.dev/",
+      "generation": "R153.2",
+      "verb": "SCREEN",
+      "authority": "SCREEN_ONLY",
+      "adaptiveCycle": true,
+      "canonicalMutation": false,
+      "fullwaveExecution": false,
+      "fabricationValidation": false,
+      "liveProof": "R153.2 isolated deploy + closed-loop adaptive search passed on current main before R165 promotion"
+    },
+    "sovereign": {
+      "humanSurface": "https://omega-sovereign-convergence.foundasound.chatgpt.site/",
+      "verb": "SOLVE",
+      "authority": "AUTHENTICATED_RESULT_RECEIPTS_ONLY",
+      "pcOnlineClaimWithoutHeartbeat": false,
+      "fullwaveClaimWithoutSolverReceipt": false
+    }
+  },
+  "humanTargets": {
+    "livingLightVercel": {
+      "url": "https://omega-living-light-etching-private-woven2.vercel.app/",
+      "status": "PROTECTED_EXTERNAL_TARGET",
+      "sameUrlPromotionAuthorized": false,
+      "reason": "Writable Vercel project authority has not been proven in the connected control plane."
+    }
+  },
+  "handoffLaw": ["PROPOSE", "SCREEN", "SOLVE", "ADMIT"],
+  "truthLaw": "reachable != writable != executed != verified != promoted",
+  "lineage": {
+    "retain": ["R115 machine-adapter proof", "R152 operational optical convergence", "R153.1 external push", "R153.2 adaptive external search", "R164 canonical runtime"],
+    "replacementPolicy": "Active routing may advance to the strongest proven compatible generation without deleting predecessor evidence or changing predecessor historical claims."
+  },
+  "dimensionalBoundary": "12, 144, 1728, 20736, 248832 and larger 12^n values are atlas/address/composition resolution levels, not literal physical dimensions.",
+  "opticalBoundary": "R153.2 is deterministic reduced-order SCREEN_ONLY decision support. RCWA/FDTD/FEM, fabrication validation, physical measurement and Canon admission require separate authenticated evidence."
+}
