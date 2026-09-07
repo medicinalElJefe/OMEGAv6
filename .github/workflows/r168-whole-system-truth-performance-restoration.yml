@@ -40,6 +40,11 @@ jobs:
           node tests/r153-full-system-completion-invariants.mjs
           node tests/r155-whole-system-convergence-invariants.mjs
           node tests/r167-active-optical-r1532-convergence-invariants.mjs
+      - name: Preserve current federation attestation world-scar continuity
+        run: |
+          node tests/r168-genesis-r192-attestation-invariants.mjs
+          node tests/r169-federation-attestation-world-lens-invariants.mjs
+          node tests/r166-development-residual-world-lens-invariants.mjs
       - name: Preserve durable execution, reflex swarm and admission boundaries
         run: |
           node tests/r146-durable-operation-execution-invariants.mjs
