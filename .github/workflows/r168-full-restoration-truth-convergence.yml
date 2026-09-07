@@ -36,13 +36,14 @@ jobs:
           node tests/r167-active-optical-r1532-convergence-invariants.mjs
           node tests/r166-development-residual-world-lens-invariants.mjs
           node tests/r164-development-residual-graph-invariants.mjs
-      - name: Preserve restored executor evidence and system inventory
+      - name: Preserve restored executor evidence and historical build-potential lineage
         run: |
           node tests/r46-extreme-restoration-invariants.mjs
           node tests/r47-integrated-restoration-invariants.mjs
           node tests/r48-completion-convergence-invariants.mjs
           node tests/r50-live-state-spine-invariants.mjs
           node tests/r83-full-system-inventory-invariants.mjs
+          node tests/r133-build-potential-map-invariants.mjs
           node tests/r137-live-family-proof-fusion-invariants.mjs
       - name: Preserve execution proof and admission spine
         run: |
