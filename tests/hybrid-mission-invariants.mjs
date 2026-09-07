@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const runtime=read('src/hybridMissionRuntime.ts'),panel=read('src/HybridMissionControl.tsx'),r8=read('src/HybridMissionControlR8.tsx'),current=read('src/HybridLinkR32.tsx'),router=read('src/OmegaWorkstationFullV2.tsx'),loader=fs.existsSync(new URL('../src/specialistLoaderR109.tsx',import.meta.url))?read('src/specialistLoaderR109.tsx'):'',css=read('src/hybridMission.css');
+const runtime=read('src/hybridMissionRuntime.ts'),panel=read('src/HybridMissionControl.tsx'),r8=read('src/HybridMissionControlR8.tsx'),current=read('src/HybridLinkR32.tsx'),router=read('src/OmegaWorkstationFullV2.tsx'),loader=fs.existsSync(new URL('../src/specialistLoaderR109.tsx',import.meta.url))?read('src/specialistLoaderR109.tsx'):'',css=read('src/hybridMission.css'),continuity=read('src/missionContinuityR204.ts'),continuityPanel=read('src/MissionContinuityR204.tsx'),continuityCss=read('src/missionContinuityR204.css');
 assert.match(runtime,/addressSpace:61917364224/,'Hybrid donor 61,917,364,224 address space missing');
 assert.match(runtime,/packetSpace:20736/,'20,736 packet space missing');
 assert.match(runtime,/moduleCount:16/,'16 Hybrid modules missing');
@@ -15,6 +15,17 @@ assert.match(runtime,/bridgeLoad\+contradiction\+bridgeLoad\*contradiction/,'exa
 assert.match(runtime,/DEVICE_PROOF_REQUIRED/,'native device proof gate missing');
 assert.match(runtime,/native action planned but not executed/,'native execution must remain truth-gated');
 assert.match(runtime,/returnPacket/,'return packet compiler missing');
+
+// R204 additive mission continuity: deterministic scar/proof carry over already-compiled packets only.
+assert.match(continuity,/buildMissionContinuity/,'R204 mission continuity compiler missing');
+assert.match(continuity,/previousMissionId/,'R204 previous mission linkage missing');
+assert.match(continuity,/carryHash/,'R204 deterministic carry hash missing');
+assert.match(continuity,/HELD_FOR_PROOF/,'R204 proof-held continuity state missing');
+assert.match(continuity,/does not admit|without creating a new/i,'R204 authority boundary comment missing');
+assert.match(continuityPanel,/Intent → return → scar\/proof carry → next intent/,'R204 visual continuity chain missing');
+assert.match(continuityPanel,/does not admit CanonState/,'R204 visual truth boundary missing');
+assert.match(panel,/MissionContinuityR204 missions=\{missions\}/,'Hybrid mission control must expose R204 continuity projection');
+assert.ok(continuityCss.length>700,'R204 responsive continuity styling unexpectedly absent');
 
 // Retained R8 mission architecture remains available as an advanced/donor layer.
 assert.match(panel,/Compile mission/,'Hybrid donor mission compiler UI missing');
@@ -38,5 +49,5 @@ assert.match(loader,/HybridMissionControlR8:\(\)=>import\('\.\/HybridMissionCont
 assert.match(loader,/HybridMissionControlR8:LOADERS\.HybridMissionControlR8/,'R8 donor must remain explicitly recoverable in retained deep specialist authority');
 
 assert.ok(css.length>1000,'Hybrid responsive instrumentation CSS unexpectedly absent');
-for(const source of [runtime,panel,r8,current,router,loader])assert.doesNotMatch(source,/@appdeploy\/client|appdeploy\.ai/i,'AppDeploy runtime contract reintroduced');
-console.log('hybrid mission invariants R118 PASS · R117 ordinary Hybrid route + R8 governed donor/diagnostics retained but unmounted until opened + proof-gated native execution');
+for(const source of [runtime,panel,r8,current,router,loader,continuity,continuityPanel])assert.doesNotMatch(source,/@appdeploy\/client|appdeploy\.ai/i,'AppDeploy runtime contract reintroduced');
+console.log('hybrid mission invariants R204 PASS · R117 ordinary Hybrid route + R8 governed donor retained + deterministic read-only scar/proof continuity projection + proof-gated native execution');
