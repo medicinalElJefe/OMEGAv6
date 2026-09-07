@@ -5,6 +5,7 @@ const panel=read('src/FullRestorationConvergenceR168.tsx');
 const suite=read('src/OmegaSpecialistSuite.tsx');
 const potential=read('src/buildPotentialRuntimeR133.ts');
 const potentialUi=read('src/OmegaBuildPotentialR133.tsx');
+const proof137=read('src/familyOperationalProofR137.ts');
 const completion=read('src/completionRuntimeR48.ts');
 const r166=read('src/world/developmentResidualWorldLensR166.js');
 const r169=read('src/world/federationAttestationWorldLensR169.js');
@@ -21,6 +22,10 @@ must(potential.includes('historicalStatusCounts')&&potential.includes('effective
 must(potential.includes("const primaryRoute=(surface:string,fallback:string)=>String(surface||fallback||'System Atlas').split('/')[0].trim()"),'composite successor surfaces must normalize to a registered primary route');
 must(potentialUi.includes('CURRENT SUCCESSOR EXECUTION · R48/R153/R168')&&potentialUi.includes('HISTORICAL V24 STATUS · PRESERVED LINEAGE'),'operator must see current execution separately from predecessor lineage');
 must(potentialUi.includes('row.effectiveRoute'),'Build Potential must navigate through a normalized current successor route rather than a stale predecessor or composite display label');
+must(proof137.includes('currentStatus?:SystemFamilyStatus')&&proof137.includes("status=currentStatus||family.status"),'R137 operational proof must be able to classify current successor status instead of historical status only');
+must(proof137.includes('R48_R153_CURRENT_SUCCESSOR_STATUS_MAY_CLASSIFY_THE_PRESENT_BOUNDARY_WITHOUT_REWRITING_V24_LINEAGE'),'R137 must preserve successor/lineage separation law');
+must(potentialUi.includes('familyOperationalProofR137(x.family,operational,hybrid,x.effectiveStatus)')&&potentialUi.includes('familyOperationalProofR137(row.family,operational,hybrid,row.effectiveStatus)'),'Build Potential proof counts and row proof must use effective successor status');
+must(potentialUi.includes("PROVE_NEXT:'REVIEW'")&&potentialUi.includes('button opens the operator route only'),'gated Build Potential routes must be labeled as review navigation rather than implied execution');
 
 must(suite.includes("import FullRestorationConvergenceR168 from './FullRestorationConvergenceR168'"),'Convergence must import the restoration surface');
 must(suite.includes('<FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/>'),'Convergence must visibly mount the restoration surface');
@@ -38,4 +43,4 @@ must(systemUi.includes('No fake OPEN button'),'System Atlas compatibility/truth 
 must(systemUi.includes("currentExecutable=new Set(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE'])"),'System Atlas Open action must stay limited to current executable successor states');
 const menuCount=[...atlas.matchAll(/\['\d\d','[^']+','[^']+','[^']+'\]/g)].length;
 must(menuCount===12,`expected 12 master menus, found ${menuCount}`);
-console.log('R168 FULL RESTORATION CURRENT-SUCCESSOR PASS · one R48/R153 execution ledger · Build Potential normalized routing · R166 residual world + R169 federation world scar operator-visible · 12 intents direct · no fake Open · R125/device/scientific boundaries preserved');
+console.log('R168 FULL RESTORATION CURRENT-SUCCESSOR PASS · one R48/R153 execution ledger · R137 proof + Build Potential use effective successor truth · normalized routing · R166 residual world + R169 federation world scar operator-visible · 12 intents direct · no fake Open · R125/device/scientific boundaries preserved');
