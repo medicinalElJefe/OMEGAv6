@@ -1,0 +1,32 @@
+import {corpusState,evaluateCorpusModes} from './corpusRuntime';
+import {evaluateCanonAuthorityStack} from './allModesAuthority';
+import {compilePhysicsRelativityR132} from './physicsRelativityRuntimeR132';
+import {compileDimensionalRelativityEvolutionR156,R156_RESOLUTION_LADDER} from './dimensionalRelativityEvolutionR156';
+import {R48_COMPLETION_FAMILIES} from './completionRuntimeR48';
+import {R157_FULL_SYSTEM_CONTRACT} from './fullSystemCompletionR157.js';
+
+export const R157_CAPABILITY_SCHEMA='OMEGA_CAPABILITY_MANIFOLD_R157' as const;
+export const R157_CAPABILITY_BOUNDARY='Every node in the R157 capability manifold is bound to a current source-mode evaluation, canon-authority evaluation, successor-family record, completion-stage record or dimensional-resolution frame. Position, orbit, membrane and animation are representational projections only; they do not create execution proof, empirical physics, extra dimensions or CanonState mutation.' as const;
+const clamp=(n:number,a=0,b=1)=>Math.max(a,Math.min(b,Number.isFinite(n)?n:a));
+const num=(x:any,f=0)=>Number.isFinite(Number(x))?Number(x):f;
+const str=(...xs:any[])=>xs.find(x=>typeof x==='string'&&x.trim())?.trim()||'';
+
+export type CapabilityModeNode={index:number;id:string;name:string;category:string;score:number;gate:string;angle:number;radius:number;x:number;y:number};
+export type CapabilityAuthorityNode={index:number;id:string;name:string;group:string;activation:number;state:string;angle:number;radius:number;x:number;y:number};
+export type CapabilityFamilyNode={index:number;id:string;name:string;surface:string;status:string;proof:string;remaining:string;angle:number;radius:number;x:number;y:number};
+export type CapabilityStageNode={index:number;order:number;id:string;menu:string;route:string;goal:string;proof:string;angle:number;radius:number;x:number;y:number};
+const polar=(angle:number,radius:number)=>({x:320+Math.cos(angle)*radius,y:320+Math.sin(angle)*radius});
+
+export function compileCapabilityManifoldR157(address:number,selectedPower=4,orientation?:number){
+ const a=Math.max(0,Math.min(20735,Math.floor(num(address)))),record=corpusState(a),catalog=evaluateCorpusModes(record),authorities=evaluateCanonAuthorityStack(record),physics=compilePhysicsRelativityR132(a),evolution=compileDimensionalRelativityEvolutionR156(a,selectedPower,orientation),sigma=evolution.orientation||1;
+ const sourceRows=Array.isArray(catalog?.results)?catalog.results:[];
+ const modes:CapabilityModeNode[]=sourceRows.map((row:any,index:number)=>{const score=clamp(num(row?.score)),angle=sigma*(index/Math.max(1,sourceRows.length))*Math.PI*2-Math.PI/2,radius=92+score*58+(index%3)*2,p=polar(angle,radius);return{index,id:str(row?.id,`M${String(index+1).padStart(3,'0')}`),name:str(row?.mode,row?.name,row?.label,`Mode ${index+1}`),category:str(row?.category,row?.family,'SOURCE MODE'),score,gate:str(row?.gate,row?.decision,'TURN').toUpperCase(),angle,radius,x:p.x,y:p.y}});
+ const authorityRows=Array.isArray(authorities)?authorities:[];
+ const authorityNodes:CapabilityAuthorityNode[]=authorityRows.map((row:any,index:number)=>{const activation=clamp(num(row?.activation)),angle=-sigma*(index/Math.max(1,authorityRows.length))*Math.PI*2-Math.PI/2,radius=172+activation*36+(index%2)*2,p=polar(angle,radius);return{index,id:str(row?.id,`A${String(index+1).padStart(3,'0')}`),name:str(row?.name,row?.label,row?.authority,`Authority ${index+1}`),group:str(row?.group,row?.category,'CANON AUTHORITY'),activation,state:str(row?.state,'QUIET').toUpperCase(),angle,radius,x:p.x,y:p.y}});
+ const families:CapabilityFamilyNode[]=R48_COMPLETION_FAMILIES.map((row,index)=>{const angle=sigma*(index/Math.max(1,R48_COMPLETION_FAMILIES.length))*Math.PI*2-Math.PI/2,radius=236,p=polar(angle,radius);return{index,id:row.id,name:row.name,surface:row.surface,status:row.successor,proof:row.proof,remaining:row.remaining,angle,radius,x:p.x,y:p.y}});
+ const stages:CapabilityStageNode[]=R157_FULL_SYSTEM_CONTRACT.stages.map((row:any,index:number)=>{const angle=-sigma*(index/Math.max(1,R157_FULL_SYSTEM_CONTRACT.stages.length))*Math.PI*2-Math.PI/2,radius=282,p=polar(angle,radius);return{index,order:Number(row.order),id:String(row.id),menu:String(row.menu),route:String(row.route),goal:String(row.goal),proof:String(row.proof),angle,radius,x:p.x,y:p.y}});
+ const harmonics=physics.sourceModeField.harmonics.map((h:any,index:number)=>({index,amplitude:clamp(num(h.amplitude)),phase:num(h.phase),re:num(h.re),im:num(h.im)})),authorityHarmonics=physics.canonAuthorityField.harmonics.map((h:any,index:number)=>({index,amplitude:clamp(num(h.amplitude)),phase:num(h.phase),re:num(h.re),im:num(h.im)}));
+ const invariantPath=harmonics.map((h:any,index:number)=>{const ang=index/harmonics.length*Math.PI*2-Math.PI/2,r=52+44*h.amplitude+26*evolution.carry.invariant;return polar(ang,r)}),residualPath=authorityHarmonics.map((h:any,index:number)=>{const ang=index/authorityHarmonics.length*Math.PI*2-Math.PI/2,r=42+36*h.amplitude+28*evolution.carry.residual;return polar(ang,r)});
+ const sourceGateCounts=sourceRows.reduce((acc:Record<string,number>,row:any)=>{const k=str(row?.gate,row?.decision,'TURN').toUpperCase();acc[k]=(acc[k]||0)+1;return acc},{}),authorityStateCounts=authorityRows.reduce((acc:Record<string,number>,row:any)=>{const k=str(row?.state,'QUIET').toUpperCase();acc[k]=(acc[k]||0)+1;return acc},{}),familyStateCounts=R48_COMPLETION_FAMILIES.reduce((acc:Record<string,number>,row)=>{acc[row.successor]=(acc[row.successor]||0)+1;return acc},{});
+ return{schema:R157_CAPABILITY_SCHEMA,address:a,stateId:record.stateId,nextStateId:evolution.canonicalNextStateId,orientation:evolution.orientation,record,physics,evolution,modes,authorities:authorityNodes,families,stages,resolution:R156_RESOLUTION_LADDER,harmonics,authorityHarmonics,invariantPath,residualPath,counts:{sourceModes:modes.length,canonAuthorities:authorityNodes.length,families:families.length,stages:stages.length,resolutionFrames:R156_RESOLUTION_LADDER.length,routes:R157_FULL_SYSTEM_CONTRACT.inventory.routes,systems:R157_FULL_SYSTEM_CONTRACT.inventory.systems,capabilities:R157_FULL_SYSTEM_CONTRACT.inventory.capabilities,menuOptions:R157_FULL_SYSTEM_CONTRACT.inventory.menuOptions,exactExecuted:physics.exactModeField.executedExact,exactSourcePacket:physics.exactModeField.sourcePacket,exactGated:physics.exactModeField.gated},sourceGateCounts,authorityStateCounts,familyStateCounts,boundary:R157_CAPABILITY_BOUNDARY};
+}
