@@ -1,0 +1,62 @@
+name: OMEGA R156 Organism Reflex Fabric
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r156-organism-reflex-fabric]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r156-organism-reflex-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r156:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Syntax-check reflex and control-plane integration
+        run: |
+          node --check src/system/organismReflexR156.js
+          node --check src/system/operationalControlPlaneR130.js
+      - name: Prove R156 universal cross-family reflex invariants
+        run: node tests/r156-organism-reflex-fabric-invariants.mjs
+      - name: Preserve R155 whole-system capability ownership
+        run: node tests/r155-whole-system-convergence-invariants.mjs
+      - name: Preserve R130 single control-plane ownership
+        run: node tests/r130-operational-control-plane.mjs
+      - name: Preserve proof, Hybrid, durable execution and admission boundaries
+        shell: bash
+        run: |
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Prove optical mismatch generalizes through the organism reflex
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {compileOrganismReflexR156} from './src/system/organismReflexR156.js';
+          const r=compileOrganismReflexR156({source_family:'OPTICAL_OPERATION',canonical_address:1698,returned_state:'RETURNED',residuals:[{id:'live-r1532-fullwave-domain',kind:'DOMAIN_MISMATCH',severity:'HIGH',summary:'R153.2 reduced-order geometry is outside the stronger full-wave domain'}]});
+          assert.equal(r.action,'TURN');
+          assert.equal(r.bounded_route.canonical_mutation,false);
+          assert.deepEqual(r.bounded_route.targets.slice(0,2),['FULLWAVE_COMPUTATION','UNIVERSAL_EVIDENCE']);
+          assert.equal(r.scar.authority,'HISTORY_CARRY_NOT_CANONSTATE');
+          console.log(JSON.stringify({schema:r.schema,action:r.action,targets:r.bounded_route.targets,scar:r.scar.scar_id,canonicalMutation:r.bounded_route.canonical_mutation},null,2));
+          NODE
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r156-dry-run
