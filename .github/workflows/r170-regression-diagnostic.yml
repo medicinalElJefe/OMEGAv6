@@ -105,3 +105,9 @@ jobs:
       - name: Build
         continue-on-error: true
         run: npm run build
+      - name: Package check static wrapper
+        continue-on-error: true
+        run: npm run check:static
+      - name: Package full check wrapper
+        continue-on-error: true
+        run: npm run check
