@@ -24,6 +24,8 @@ jobs:
         run: npm audit --audit-level=high
       - name: Prove R168 whole-system restoration and real runtime storage
         run: node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
+      - name: Prove R168 current-successor restoration convergence
+        run: node tests/r168-full-restoration-current-successor-invariants.mjs
       - name: Prove updated capability and transition truth
         run: |
           node tests/capability-truth-r23-invariants.mjs
@@ -72,6 +74,8 @@ jobs:
         run: node tests/r118-browser-operational-e2e.mjs
       - name: Exercise R164 reflex swarm UI after R168 restoration
         run: node tests/r164-reflex-autonomic-browser-e2e.mjs
+      - name: Exercise R168 full restoration convergence on desktop and mobile
+        run: node tests/r168-full-restoration-browser-e2e.mjs
       - name: Browser diagnostics on failure
         if: failure()
         run: cat /tmp/omega-r168-preview.log || true
