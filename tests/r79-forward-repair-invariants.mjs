@@ -12,7 +12,8 @@ must(orchestrator.includes('Dewey Calculus'),'Dewey kernel missing');
 must(orchestrator.includes('Relational Skin Calculus'),'RSC kernel missing');
 must(orchestrator.includes("'ALL_MODES'"),'explicit ALL MODES intent missing');
 must(orchestrator.includes('RESIDENT_KERNEL_INTENT_DEEP_BACKGROUND_CATALOG'),'resource strategy missing');
-must(orchestrator.includes('does not alter UI ownership'),'R79 non-visual truth boundary missing');
+must(orchestrator.includes('does not alter UI ownership')||orchestrator.includes('Relevance and routing never manufacture proof'),'R79 non-visual truth boundary missing');
+must(orchestrator.includes("String(x.id||'').toUpperCase()===stableId"),'R79 stable source-mode identity binding missing');
 must(corpus.includes('dimensionFrame:spec.dimension_frame'),'complete mode metadata missing');
 must(workstation.includes('compileFullOverallModePlanR79(record,panel,prompt)')||workstation.includes('compileFullOverallModePlanR79(record,panel,prompt+workflowContext)'),'workstation orchestration missing');
 must(workstation.includes('fullOverallModePlan:modePlan?compactModePlanR79(modePlan):null'),'runtime state plan missing');
@@ -25,4 +26,4 @@ must(!workstation.includes('r78-mode-intent'),'R78 topbar clutter must stay remo
 must(!workstation.includes('data-mode-intent'),'mode routing must not seize layout/style authority');
 must(!home.includes('FULL OVERALL MODES ·'),'Home copy must not be rewritten by orchestration');
 must(!home.includes('r78-home-intent'),'Home telemetry clutter must stay removed');
-console.log('R79 forward-repair invariants PASS · orchestration restored without UI regression');
+console.log('R79/R183 forward-repair invariants PASS · orchestration restored with stable source identity and no UI regression');
