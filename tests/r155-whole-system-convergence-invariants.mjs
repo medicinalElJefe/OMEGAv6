@@ -10,18 +10,22 @@ const manifest=wholeSystemConvergenceManifestR155();
 const families=Object.values(R155_CAPABILITY_FAMILIES);
 
 assert.equal(manifest.schema,R155_SCHEMA);
-assert.equal(families.length,11,'R155 must name the complete current capability-family union');
-assert.equal(manifest.stateCounts.ADMITTED_MAIN,3);
+assert.equal(families.length,15,'R155 must name the complete current capability-family union');
+assert.equal(manifest.stateCounts.ADMITTED_MAIN,7);
 assert.equal(manifest.stateCounts.INTEGRATED_CANDIDATE,5);
 assert.equal(manifest.stateCounts.INTEGRATION_TARGET,3);
 assert.equal(manifest.canonicalAdmission,'R125');
 assert.equal(manifest.publicEntrypoint,'src/workerR116.js');
 assert.equal(assertFamilyDependenciesR155().ok,true,'complete R155 family set must close all declared dependencies');
-for(const law of ['REVISION_NUMBER_ALONE_NEVER_DETERMINES_AUTHORITY','CAPABILITY_FAMILY_PLUS_PROOF_PLUS_DEPENDENCY_DETERMINES_SUCCESSOR_AUTHORITY','CURRENT_MAIN_WINS_FOR_ALREADY_ADMITTED_EXECUTION_PATHS','OVERLAPPING_FILES_MUST_BE_RECONCILED_BY_OWNER_NOT_BLINDLY_COPIED','ONE_CANONSTATE_AUTHORITY_R125','ONE_PUBLIC_RUNTIME_ENTRYPOINT_WORKER_R116','RETURNED_IS_NOT_VERIFIED','ROUTE_IS_NOT_EXECUTION','PROJECTION_IS_NOT_ADMISSION','MODE_CONSENSUS_IS_NOT_EMPIRICAL_TRUTH','CAPACITY_PLAN_IS_NOT_EXECUTION','LOGICAL_FANOUT_IS_NOT_PHYSICAL_WORKER_PROOF','ATLAS_RESOLUTION_IS_NOT_LITERAL_PHYSICAL_DIMENSION','NUMERICAL_SOLVER_CONVERGENCE_IS_NOT_FABRICATION_VALIDATION','RUNTIME_CLOCK_IS_NOT_INDEPENDENT_METROLOGY'])must(R155_LAWS.includes(law),`law missing ${law}`);
+for(const law of ['REVISION_NUMBER_ALONE_NEVER_DETERMINES_AUTHORITY','CAPABILITY_FAMILY_PLUS_PROOF_PLUS_DEPENDENCY_DETERMINES_SUCCESSOR_AUTHORITY','CURRENT_MAIN_WINS_FOR_ALREADY_ADMITTED_EXECUTION_PATHS','OVERLAPPING_FILES_MUST_BE_RECONCILED_BY_OWNER_NOT_BLINDLY_COPIED','ONE_CANONSTATE_AUTHORITY_R125','ONE_PUBLIC_RUNTIME_ENTRYPOINT_WORKER_R116','SELF_DEVELOPMENT_MAY_REPAIR_SOFTWARE_BUT_NOT_REWRITE_TRUTH_LAW','FEDERATION_REQUIRES_AUTHENTICATED_RETURNED_PROOF','SWARM_HIERARCHY_IS_LOGICAL_ORGANIZATION_UNTIL_PHYSICAL_EXECUTION_IS_PROVEN','LIVING_VISUAL_MOTION_IS_A_PROJECTION_OF_SOURCE_STATE_NOT_A_SECOND_REALITY','RETURNED_IS_NOT_VERIFIED','ROUTE_IS_NOT_EXECUTION','PROJECTION_IS_NOT_ADMISSION','MODE_CONSENSUS_IS_NOT_EMPIRICAL_TRUTH','CAPACITY_PLAN_IS_NOT_EXECUTION','LOGICAL_FANOUT_IS_NOT_PHYSICAL_WORKER_PROOF','ATLAS_RESOLUTION_IS_NOT_LITERAL_PHYSICAL_DIMENSION','NUMERICAL_SOLVER_CONVERGENCE_IS_NOT_FABRICATION_VALIDATION','RUNTIME_CLOCK_IS_NOT_INDEPENDENT_METROLOGY'])must(R155_LAWS.includes(law),`law missing ${law}`);
 
-for(const id of ['CANONICAL_RUNTIME','SOVEREIGN_BUILD','OPTICAL_OPERATION'])assert.equal(R155_CAPABILITY_FAMILIES[id].state,'ADMITTED_MAIN',`${id} must remain current-main owned`);
+for(const id of ['CANONICAL_RUNTIME','SELF_DEVELOPMENT','FEDERATION_MACHINE','SWARM_ORGANISM','LIVING_VISUAL_MOTION','SOVEREIGN_BUILD','OPTICAL_OPERATION'])assert.equal(R155_CAPABILITY_FAMILIES[id].state,'ADMITTED_MAIN',`${id} must remain current-main owned`);
 for(const id of ['ALL_MODES_TRUTH','UNIVERSAL_EVIDENCE','CAUSAL_NOW','RELATIVE_CAPACITY','SYSTEM_COMPLETION'])assert.equal(R155_CAPABILITY_FAMILIES[id].state,'INTEGRATED_CANDIDATE',`${id} must remain proof-gated candidate`);
 for(const id of ['DURABLE_MISSION_GRAPH','FULLWAVE_COMPUTATION','INTERFACE_PRESERVATION'])assert.equal(R155_CAPABILITY_FAMILIES[id].state,'INTEGRATION_TARGET',`${id} may not be claimed integrated before its union proof exists`);
+
+for(const id of ['SELF_DEVELOPMENT','FEDERATION_MACHINE','SWARM_ORGANISM','LIVING_VISUAL_MOTION'])must(manifest.familyOrder.includes(id),`whole-system order missing structural family ${id}`);
+must(manifest.organization.includes('SEED')&&manifest.organization.includes('SWARM')&&manifest.organization.includes('PROOF')&&manifest.organization.includes('SCAR'),'organism/federation development cycle missing');
+must(manifest.computationalContinuity.includes('PARTITION')&&manifest.computationalContinuity.includes('INVARIANT CARRY')&&manifest.computationalContinuity.includes('RECONTEXTUALIZE'),'Woven Continuity master transform missing');
 
 const r130=manifestR130();
 assert.equal(r130.entrypoint,'src/workerR116.js');
@@ -52,6 +56,9 @@ const operation=read('src/unifiedOperationFabricR140.ts');
 const field=read('src/OmegaCapabilityFieldR138.tsx');
 const worker27=read('src/workerR27.js');
 const worker116=read('src/workerR116.js');
+const r125=read('scripts/r125-accuracy-engine.mjs');
+const r121=read('src/OmegaSwarmR121.tsx');
+const r123=read('src/OmegaOrganismR123.tsx');
 
 must(fusion.includes('R151_CHANNEL_COUNT=179+CANON_AUTHORITY_COUNT'),'241-channel fusion implementation missing');
 must(swarm.includes('cells:1728,lanes:20736')&&swarm.includes('totalReadings:STATE_COUNT*R151_CHANNEL_COUNT'),'exact 1,728-cell / 20,736-state partition missing');
@@ -64,8 +71,11 @@ for(const boundary of ['MODE CONSENSUS ≠ EMPIRICAL TRUTH','PROJECTION ≠ ADMI
 for(const endpoint of ['/api/runtime-now-r154','/api/relative-capacity-r154'])must(worker27.includes(endpoint),`read-only runtime endpoint missing ${endpoint}`);
 must(worker27.includes('not claimed to be an independently calibrated UTC metrology source'),'runtime-clock metrology boundary missing');
 must(worker116.includes("from './workerR115.js'")||worker116.includes('workerR115'),'R116 must remain the public successor Worker chain rather than a new R155 Worker');
+must(r125.includes('RELATIVE_CAPACITY')&&r125.includes('CAUSAL_NOW')&&r125.includes('UNIVERSAL_TRUTH'),'R125 residual observer must see new truth/NOW/capacity layers');
+must(r121.includes('1728')||r123.includes('1728'),'swarm/organism implementation must retain the 1,728-cell hierarchy');
 
 must(manifest.truthBoundary.includes('does not make candidate families canonical'),'candidate/canonical non-promotion boundary must remain explicit');
+must(manifest.truthBoundary.includes('Logical hierarchy')&&manifest.truthBoundary.includes('visual projection')&&manifest.truthBoundary.includes('numerical convergence'),'whole-system truth separation must cover swarm, visual and solver layers');
 must(manifest.truthBoundary.includes('Every family remains subject to its own focused proof'),'family promotion must remain proof-gated');
 
-console.log('R155 WHOLE-SYSTEM CONVERGENCE PASS · 11 capability families · 3 admitted-main + 5 integrated-candidate + 3 integration-target · one R116 Worker · one R125 CanonState authority · R153 completion inventory + R151/R152/R153-NOW/R154 semantics reconciled without revision-number authority');
+console.log('R155 WHOLE-SYSTEM CONVERGENCE PASS · 15 capability families · 7 admitted-main + 5 integrated-candidate + 3 integration-target · self-development + federation + swarm/organism + living visual/motion explicitly preserved · one R116 Worker · one R125 CanonState authority · R153 completion inventory + R151/R152/R153-NOW/R154 semantics reconciled without revision-number authority');
