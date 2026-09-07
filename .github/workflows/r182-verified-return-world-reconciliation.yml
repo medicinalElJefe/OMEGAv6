@@ -1,0 +1,58 @@
+name: R182 Verified Return World Reconciliation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/world/verifiedExecutionWorldReconcilerR182.js'
+      - 'tests/r182-verified-execution-world-reconciliation-invariants.mjs'
+      - '.github/workflows/r182-verified-return-world-reconciliation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: r182-verified-return-world-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  prove-r182-verified-return-world:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-fund
+      - name: Prove focused R182 verified-return reconciliation
+        run: |
+          node --check src/world/verifiedExecutionWorldReconcilerR182.js
+          node tests/r182-verified-execution-world-reconciliation-invariants.mjs
+      - name: Preserve R180 through R175 living-world execution chain
+        run: |
+          node tests/r180-living-world-execution-dispatch-invariants.mjs
+          node tests/r179-living-world-durable-authorization-invariants.mjs
+          node tests/r178-living-world-contract-resolution-invariants.mjs
+          node tests/r177-living-world-mission-composer-invariants.mjs
+          node tests/r176-living-world-intent-proposal-invariants.mjs
+          node tests/r175-multidomain-living-world-truth-invariants.mjs
+      - name: Preserve durable execution and one-world continuity authorities
+        run: |
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity-invariants.mjs
+      - name: Preserve federation Hybrid Earth computed-reality and Canon truth gates
+        run: |
+          node tests/r173-federation-ledger-world-observer-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Preserve current successor topology and donor guardrails
+        run: |
+          node tests/r170-self-build-governor-invariants.mjs
+          node tests/r180-current-authority-convergence-invariants.mjs
+          node scripts/verify_workflow_topology_r170.mjs
+      - name: Run full inherited production regression and build
+        run: npm run check
+      - name: Prove canonical Worker package remains deployable without deploying
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r182-dry-run
