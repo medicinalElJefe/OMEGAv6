@@ -12,6 +12,7 @@ const worker115=fs.existsSync('src/workerR115.js')?fs.readFileSync('src/workerR1
 const worker116=fs.existsSync('src/workerR116.js')?fs.readFileSync('src/workerR116.js','utf8'):'';
 const config=fs.readFileSync('wrangler.jsonc','utf8');
 const panel=fs.readFileSync('src/GovernedBuildReceiptPanel.tsx','utf8');
+const adapter=fs.readFileSync('src/platformAdapter.ts','utf8');
 const vite=fs.readFileSync('vite.config.ts','utf8');
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
@@ -35,7 +36,7 @@ must(worker.includes("env?.ASSETS?.fetch"),'runtime must bind evidence to packag
 must(worker.includes('publicWorkerMutationAuthority:false'),'public Worker must remain non-mutating');
 must(worker.includes('promotionLineage'),'release evidence must expose governed promotion lineage from the packaged receipt');
 must(worker.includes("candidateQa:'EXTERNAL_GITHUB_EVIDENCE_REQUIRED'")&&worker.includes("postDeployVerification:'EXTERNAL_FIRST_HAND_PROBE_REQUIRED'")&&worker.includes("rollback:'EXTERNAL_RELEASE_LEDGER_REQUIRED'"),'external governance boundaries missing');
-must(panel.includes("fetch('/api/release-evidence'"),'Development surface must read live release evidence');
+must(panel.includes("probeJson<ReleaseEvidence>('/api/release-evidence')")&&panel.includes('runtimeFetch(')&&adapter.includes('export function runtimeFetch'),'Development surface must read live release evidence through the canonical distributed runtime resolver');
 must(panel.includes('Receipt link')&&panel.includes('Worker version'),'Development surface must expose receipt/version binding');
 must(panel.includes("evidence?.packageReceipt?.receiptSha256===receipt.receiptSha256"),'Development surface must compare exact receipt SHA-256');
 for(const label of ['1 · Packaged source','2 · Candidate head','3 · Candidate QA','4 · Package receipt','5 · Promoted merge','6 · Runtime version','7 · Canonical verify','8 · Rollback']) must(panel.includes(label),`Development release timeline missing ${label}`);
