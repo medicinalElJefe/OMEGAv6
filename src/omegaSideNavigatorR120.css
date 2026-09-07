@@ -59,11 +59,16 @@
 }
 
 @media(max-width:900px){
- :root{--r94-nav-panel:min(84vw,420px)}
+ /* R153.1: preserve the compact R94 mobile geometry. The prior R120 84vw override
+    briefly crushed the active instrument to nearly zero width while a route change
+    collapsed the navigator. Mobile route selection now snaps the reserved workspace
+    width instead of animating the instrument through an unusable intermediate state. */
+ :root{--r94-nav-panel:min(42vw,220px)}
+ html[data-omega-nav-present='true'] :where(.omega-workstation-v2,.r71-home){transition:none!important}
  .r120-rail-width-toggle{display:none}
  .r120-adaptive-nav .r105-workspace-filter{padding-inline:7px!important}
  .r120-adaptive-nav .r105-context-note{margin-inline:7px!important}
  .r120-adaptive-nav .r111-output-ribbon{margin-left:7px!important;margin-right:7px!important}
 }
-@media(max-width:520px){:root{--r94-nav-panel:min(88vw,390px)}}
+@media(max-width:520px){:root{--r94-nav-panel:min(42vw,190px)}}
 @media(prefers-reduced-motion:reduce){.r120-adaptive-nav .r94-nav-rail,.r120-adaptive-nav .r94-rail-action{transition:none!important}}
