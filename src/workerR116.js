@@ -9,12 +9,13 @@ import {manifestR130,operationalR130,R130_REVISION} from './system/operationalCo
 import {closeHybridReturnR141,readHybridClosureR141,replayHybridClosureR141,manifestR141,R141_REVISION} from './hybridProofClosureR141.js';
 import {createRunR146,listRunsR146,manifestR146,readRunR146,replayRunR146,transitionRunR146,R146_REVISION} from './execution/durableOperationExecutionR146.js';
 import {dispatchRunR147,executorDirectoryR147,manifestR147,pollRunR147,readResultR147,syncHybridClaimR147,syncHybridReturnR147,R147_REVISION} from './execution/unifiedExecutorFabricR147.js';
+import {advanceSovereignMissionR152,hydrateSovereignMissionsR152,manifestR152,resumeSovereignMissionR152,tagSovereignMissionR152,R152_MISSION_SCHEMA,R152_REVISION,R152_SOURCE_SCHEMA} from './execution/adaptiveSovereignMissionR152.js';
 
 export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator,OmegaSwarmAutonomicCoordinator};
 
 const REVISION='R116';
 const CONNECTOR_REVISION='R117';
-const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION,'x-omega-executor-fabric':R147_REVISION};
+const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION,'x-omega-executor-fabric':R147_REVISION,'x-omega-sovereign-mission':R152_REVISION};
 const json=(data,status=200,headers={})=>new Response(JSON.stringify(data,null,2),{status,headers:{...JSON_HEADERS,...headers}});
 const text=v=>String(v??'').trim();
 const safeId=(v,fallback='')=>{const s=text(v).slice(0,160);return /^[A-Za-z0-9._:-]+$/.test(s)?s:fallback};
@@ -37,15 +38,15 @@ function corsHeadersR116(request){
   'vary':'Origin',
   'access-control-allow-methods':'GET,POST,PUT,DELETE,OPTIONS',
   'access-control-allow-headers':'content-type,authorization,x-omega-federation-token,x-vercel-protection-bypass,x-omega-bridge-id,x-omega-bridge-secret,x-omega-session-id,cache-control',
-  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-proof-closure,x-omega-durable-execution,x-omega-executor-fabric,x-omega-control-plane,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
+  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-proof-closure,x-omega-durable-execution,x-omega-executor-fabric,x-omega-sovereign-mission,x-omega-control-plane,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
   'access-control-max-age':'600'
  };
 }
 function withCorsR116(response,request){
- const headers=new Headers(response.headers);headers.set('x-omega-runtime-successor',REVISION);headers.set('x-omega-connector-revision',CONNECTOR_REVISION);headers.set('x-omega-proof-closure',R141_REVISION);headers.set('x-omega-durable-execution',R146_REVISION);headers.set('x-omega-executor-fabric',R147_REVISION);const cors=corsHeadersR116(request);if(cors)for(const[k,v]of Object.entries(cors))headers.set(k,v);
+ const headers=new Headers(response.headers);headers.set('x-omega-runtime-successor',REVISION);headers.set('x-omega-connector-revision',CONNECTOR_REVISION);headers.set('x-omega-proof-closure',R141_REVISION);headers.set('x-omega-durable-execution',R146_REVISION);headers.set('x-omega-executor-fabric',R147_REVISION);headers.set('x-omega-sovereign-mission',R152_REVISION);const cors=corsHeadersR116(request);if(cors)for(const[k,v]of Object.entries(cors))headers.set(k,v);
  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }
-function preflightR116(request){const headers=corsHeadersR116(request);return headers?new Response(null,{status:204,headers:{...headers,'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION,'x-omega-executor-fabric':R147_REVISION}}):new Response(null,{status:403,headers:{'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION,'x-omega-executor-fabric':R147_REVISION}})}
+function preflightR116(request){const headers=corsHeadersR116(request);return headers?new Response(null,{status:204,headers:{...headers,'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION,'x-omega-executor-fabric':R147_REVISION,'x-omega-sovereign-mission':R152_REVISION}}):new Response(null,{status:403,headers:{'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION,'x-omega-executor-fabric':R147_REVISION,'x-omega-sovereign-mission':R152_REVISION}})}
 async function readJsonResponse(response){return response.clone().json().catch(()=>null)}
 async function sha256TextR141(source){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source));return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function inheritedStatusR116(request,env){
@@ -64,7 +65,7 @@ function routingStatusR116(status,machine){
 }
 function enrichStatusR116(status,machine){
  const nodes=status?.nodes||{},services=machine?.nodes||{};
- return{...status,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,executorFabricRevision:R147_REVISION,machineServices:{schema:machine?.schema||'OMEGA_FEDERATION_MACHINE_STATUS_R115',canonicalAuthority:'omega-v6',genesis:services.genesis||null,optical:services.optical||null,truthBoundary:'Machine service readiness is execution transport truth for PROPOSE/SCREEN. Human surface reachability remains separately visible and does not become CanonState authority.'},executionReadiness:{genesis:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN',optical:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN',sovereign:nodes.sovereign?.state||'UNKNOWN',omegaV6:nodes.omegaV6?.state||'UNKNOWN'}};
+ return{...status,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,executorFabricRevision:R147_REVISION,sovereignMissionRevision:R152_REVISION,machineServices:{schema:machine?.schema||'OMEGA_FEDERATION_MACHINE_STATUS_R115',canonicalAuthority:'omega-v6',genesis:services.genesis||null,optical:services.optical||null,truthBoundary:'Machine service readiness is execution transport truth for PROPOSE/SCREEN. Human surface reachability remains separately visible and does not become CanonState authority.'},executionReadiness:{genesis:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN',optical:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN',sovereign:nodes.sovereign?.state||'UNKNOWN',omegaV6:nodes.omegaV6?.state||'UNKNOWN'}};
 }
 async function convergenceR116(request,env){
  const [{body:status},machine,hybridResponse]=await Promise.all([
@@ -74,13 +75,13 @@ async function convergenceR116(request,env){
  ]),hybrid=await readJsonResponse(hybridResponse),nodes=status?.nodes||{},services=machine?.nodes||{};
  const currentHeartbeat=Boolean(hybrid?.nativeExecutionClaimed===true&&Array.isArray(hybrid?.devices)&&hybrid.devices.some(d=>d?.online&&!d?.revoked));
  return{
-  ok:Boolean(status&&machine),schema:'OMEGA_SYSTEM_CONVERGENCE_R116',runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,executorFabricRevision:R147_REVISION,canonicalAuthority:'omega-v6',
+  ok:Boolean(status&&machine),schema:'OMEGA_SYSTEM_CONVERGENCE_R116',runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,executorFabricRevision:R147_REVISION,sovereignMissionRevision:R152_REVISION,canonicalAuthority:'omega-v6',
   canonical:{state:nodes.omegaV6?.state||'UNKNOWN'},
   proposal:{surfaceState:nodes.genesis?.state||'UNKNOWN',machineState:services.genesis?.state||'UNKNOWN',effectiveState:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN'},
   optical:{surfaceState:nodes.optical?.state||'UNKNOWN',machineState:services.optical?.state||'UNKNOWN',effectiveScreenState:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN'},
   sovereign:{state:nodes.sovereign?.state||'UNKNOWN',rcwaState:nodes.sovereign?.rcwaState||status?.runtime?.rcwa?.state||'UNKNOWN',currentAuthenticatedHeartbeat:currentHeartbeat,nativeExecutionClaimed:hybrid?.nativeExecutionClaimed===true},
   connectorPolicy:{canonicalOrigin:'https://omegav6.jeffdeweyeljefe.workers.dev',currentRevision:CONNECTOR_REVISION,runtimeRevision:REVISION,proofClosureRevision:R141_REVISION,retiredOrigin:'omega-sovereign-convergence.foundasound.chatgpt.site',retiredLaunchersMustNotBeUsed:true,reason:'The retired preview host can return 401 and is not the canonical Hybrid authority.'},
-  truthBoundary:'Surface availability, R139 unified capability routing, R140 browser operation-world projection, machine-service availability, browser pairing, current host heartbeat, R146 durable operation history, R147 executor binding/dispatch, returned execution proof, deterministic replay, solver freshness, and canonical admission are distinct states. R116/R117/R141/R146/R147 never promotes one into another.'
+  truthBoundary:'Surface availability, R139 unified capability routing, R140 browser operation-world projection, machine-service availability, browser pairing, current host heartbeat, R146 durable operation history, R147 executor binding/dispatch, R152 adaptive mission continuation, returned execution proof, deterministic replay, solver freshness, and canonical admission are distinct states. R116/R117/R141/R146/R147/R152 never promotes one into another.'
  };
 }
 
@@ -169,10 +170,10 @@ async function fetchR116(request,env){
  }
  if(path==='/api/federation/route-intent'&&request.method==='POST'){
   const body=await request.json().catch(()=>({})),intent=text(body?.intent||body?.text).slice(0,4000),[{body:status},machine]=await Promise.all([inheritedStatusR116(request,env),machineStatusR116(request,env)]),plan=planIntentR103(intent,routingStatusR116(status||{},machine));
-  return withCorsR116(json({...plan,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,executorFabricRevision:R147_REVISION,machineAwareRouting:true,machineServices:{genesis:machine?.nodes?.genesis?.state||'UNKNOWN',optical:machine?.nodes?.optical?.state||'UNKNOWN'},truthBoundary:`${plan.truthBoundary} R116 treats live R115 machine adapters as execution readiness for their existing PROPOSE/SCREEN roles while preserving protected human-surface state separately.`},plan.ok?200:400),request);
+  return withCorsR116(json({...plan,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,executorFabricRevision:R147_REVISION,sovereignMissionRevision:R152_REVISION,machineAwareRouting:true,machineServices:{genesis:machine?.nodes?.genesis?.state||'UNKNOWN',optical:machine?.nodes?.optical?.state||'UNKNOWN'},truthBoundary:`${plan.truthBoundary} R116 treats live R115 machine adapters as execution readiness for their existing PROPOSE/SCREEN roles while preserving protected human-surface state separately.`},plan.ok?200:400),request);
  }
  if(path==='/api/system/convergence'&&request.method==='GET')return withCorsR116(json(await convergenceR116(request,env)),request);
- if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141(),durableExecution:manifestR146(),executorFabric:manifestR147()},200,{'x-omega-control-plane':R130_REVISION}),request);
+ if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141(),durableExecution:manifestR146(),executorFabric:manifestR147(),adaptiveSovereignMission:manifestR152()},200,{'x-omega-control-plane':R130_REVISION}),request);
  if(path==='/api/system/operational'&&request.method==='GET')return withCorsR116(json(await operationalR130(request,env,probeFetchR130),200,{'x-omega-control-plane':R130_REVISION}),request);
  const response=await r115.fetch(request,env);return withCorsR116(response,request);
 }
@@ -180,12 +181,22 @@ async function fetchR116(request,env){
 export class OmegaRuntime extends OmegaRuntimeR115 {
  async fetch(request){
   const url=new URL(request.url),path=url.pathname;
+  if(path==='/missions'&&request.method==='POST'){
+   const body=await request.clone().json().catch(()=>({})),response=await super.fetch(request);if(!response.ok||body?.draft?.schema!==R152_SOURCE_SCHEMA)return response;const data=await response.clone().json().catch(()=>({})),mission=await tagSovereignMissionR152(this,body,data?.mission);return json({...data,mission,adaptiveRevision:R152_REVISION,adaptiveSchema:R152_MISSION_SCHEMA},response.status);
+  }
+  if(path==='/missions'&&request.method==='GET'){
+   const response=await super.fetch(request);if(!response.ok)return response;const data=await response.clone().json().catch(()=>({}));return json(await hydrateSovereignMissionsR152(this,data),response.status);
+  }
+  const missionControl=path.match(/^\/missions\/([A-Za-z0-9._:-]+)\/(pause|resume)$/);
+  if(missionControl&&request.method==='POST'){
+   const response=await super.fetch(request);if(!response.ok)return response;const data=await response.clone().json().catch(()=>({}));let mission=data?.mission;if(missionControl[2]==='resume'&&mission?.schema===R152_MISSION_SCHEMA)mission=await resumeSovereignMissionR152(this,mission);return json({...data,mission,adaptiveRevision:R152_REVISION},response.status);
+  }
   if(path==='/agent/poll'&&request.method==='POST'){
    const response=await super.fetch(request);if(!response.ok)return response;const data=await response.clone().json().catch(()=>({})),job=data?.job;if(!job?.id)return response;let executionRun=null;try{executionRun=await syncHybridClaimR147(this,job)}catch{}return executionRun?json({...data,executionRun:{id:executionRun.id,state:executionRun.state,canonicalMutation:false}},response.status):response;
   }
   if(path==='/agent/result'&&request.method==='POST'){
    const body=await request.clone().json().catch(()=>({})),response=await super.fetch(request);if(!response.ok)return response;const data=await response.clone().json().catch(()=>({})),job=data?.job;if(!job?.returnPacket||!safeId(job.id))return response;
-   const closure=await closeHybridReturnR141(this,job,body),proofClosure={schema:closure.schema,state:closure.state,fingerprintVerified:closure.fingerprint.verified,finalHeadSha256:closure.finalHeadSha256,continuity:closure.continuity,canonicalMutation:false};let executionRun=null;try{executionRun=await syncHybridReturnR147(this,job,closure)}catch{}return json({...data,job:{...job,proofClosure},proofClosure:closure,executionRun:executionRun?{id:executionRun.id,state:executionRun.state,headSha256:executionRun.headSha256,canonicalMutation:false}:null},response.status);
+   const closure=await closeHybridReturnR141(this,job,body),proofClosure={schema:closure.schema,state:closure.state,fingerprintVerified:closure.fingerprint.verified,finalHeadSha256:closure.finalHeadSha256,continuity:closure.continuity,canonicalMutation:false};let executionRun=null;try{executionRun=await syncHybridReturnR147(this,job,closure)}catch{}let adaptiveMission=null;try{adaptiveMission=await advanceSovereignMissionR152(this,job)}catch(error){await this.event('R152_MISSION_ADVANCE_ERROR','Adaptive sovereign mission continuation failed closed.',{jobId:job.id,error:error instanceof Error?error.message:String(error)})}return json({...data,job:{...job,proofClosure},proofClosure:closure,executionRun:executionRun?{id:executionRun.id,state:executionRun.state,headSha256:executionRun.headSha256,canonicalMutation:false}:null,adaptiveMission:adaptiveMission?{id:adaptiveMission.id,status:adaptiveMission.status,stage:adaptiveMission.stage,cycle:adaptiveMission.cycle,currentJobId:adaptiveMission.currentJobId,projectPath:adaptiveMission.projectPath||'.',canonicalMutation:false}:null},response.status);
   }
   const closureRoute=path.match(/^\/jobs\/([A-Za-z0-9._:-]+)\/(closure|replay)$/);
   if(closureRoute){if(!await this.authorized(request))return json({ok:false,code:'PAIR_AUTH_FAILED'},401);const id=closureRoute[1];if(closureRoute[2]==='closure'&&request.method==='GET'){const closure=await readHybridClosureR141(this,id);return closure?json({ok:true,closure}):json({ok:false,code:'R141_CLOSURE_NOT_FOUND'},404)}if(closureRoute[2]==='replay'&&request.method==='POST'){const receipt=await replayHybridClosureR141(this,id);return receipt?json({ok:receipt.ok,receipt},receipt.ok?200:409):json({ok:false,code:'R141_CLOSURE_NOT_FOUND'},404)}}
