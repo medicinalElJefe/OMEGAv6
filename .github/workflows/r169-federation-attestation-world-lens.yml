@@ -1,0 +1,40 @@
+name: R169 Federation Attestation World Lens
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/world/federationAttestationWorldLensR169.js'
+      - 'tests/r169-federation-attestation-world-lens-invariants.mjs'
+      - '.github/workflows/r169-federation-attestation-world-lens.yml'
+  push:
+    branches: [main, r169-federation-attestation-world-scar]
+    paths:
+      - 'src/world/federationAttestationWorldLensR169.js'
+      - 'tests/r169-federation-attestation-world-lens-invariants.mjs'
+      - '.github/workflows/r169-federation-attestation-world-lens.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r169-world-attestation-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R169 federation attestation world lens
+        run: node tests/r169-federation-attestation-world-lens-invariants.mjs
+      - name: Preserve R168 Genesis exact-version attestation membrane
+        run: node tests/r168-genesis-r192-attestation-invariants.mjs
+      - name: Preserve R166 living residual world lens
+        run: node tests/r166-development-residual-world-lens-invariants.mjs
+      - name: Syntax-check R169
+        run: node --check src/world/federationAttestationWorldLensR169.js
+      - name: Run inherited regression and production build
+        run: npm run check
+      - name: Prove canonical Worker package remains deployable
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r169-dry-run
