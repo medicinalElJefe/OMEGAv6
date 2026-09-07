@@ -4,7 +4,7 @@ const spine=fs.readFileSync('src/workerLiveStateR51.js','utf8');
 const ui=fs.readFileSync('src/LiveStateSpineR50.tsx','utf8');
 const workflowPath=fs.existsSync('.github/workflows/r51-live-state.yml')?'.github/workflows/r51-live-state.yml':'.github/workflows-archive/r51-live-state.yml';
 const workflow=fs.readFileSync(workflowPath,'utf8');
-const required=['UNIVERSE_PULSE.json','PHASE_AWARNESS.json','GEOMETRY_FRAME.json','LEMMA_NET.json','CANON_AWARENESS.json','AWARENESS_STATE.json','PERFORMANCE_STATE.json','PROOF_STATE.json','PROVIDER_STATE.json','PROJECTION_STATE.json','EXECUTION_STATE.json','STATE_SPINE_CHECKPOINT.json','EVERYWHERE_HUB_STATUS.json','SELF_MONITOR_STATUS.json'];
+const required=['UNIVERSE_PULSE.json','PHASE_AWARENESS.json','GEOMETRY_FRAME.json','LEMMA_NET.json','CANON_AWARENESS.json','AWARENESS_STATE.json','PERFORMANCE_STATE.json','PROOF_STATE.json','PROVIDER_STATE.json','PROJECTION_STATE.json','EXECUTION_STATE.json','STATE_SPINE_CHECKPOINT.json','EVERYWHERE_HUB_STATUS.json','SELF_MONITOR_STATUS.json'];
 for(const f of required)if(!spine.includes(f))throw new Error(`R51 Worker missing ${f}`);
 if(!worker.includes("import {workerLiveStateSpine} from './workerLiveStateR51.js'"))throw new Error('Worker must import R51 compiler');
 if(!worker.includes('url.pathname==="/api/live-state-spine"'))throw new Error('Worker must expose /api/live-state-spine');
