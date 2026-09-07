@@ -12,7 +12,7 @@ must(runtime.includes("R155_CONTINUITY_OPERATOR='partition -> exchange/transform
 must(runtime.includes('Array.from({length:10}')&&runtime.includes('12**power'),'12^1 through 12^10 resolution ladder missing');
 for(const token of ['R155_RESIDENT_POWER=4','R155_RESIDENT_COUNT=20736','OUTER_COARSE_FRAME','RESIDENT_CANONICAL_FRAME','INNER_VIRTUAL_REFINEMENT','VIRTUAL_UNBOUND','unboundDigits'])must(runtime.includes(token),'nested frame truth contract missing '+token);
 must(runtime.includes('descendantStart=a*descendantSpan')&&runtime.includes('bound:false'),'higher resolution must remain an unbound virtual refinement rather than fabricated child state');
-must(runtime.includes('61,917,364,224')&&runtime.includes('not asserted as literal physical dimensions'),'12^10 boundary must remain computational/representational');
+must(runtime.includes('12^1 through 12^10')&&runtime.includes('not asserted as literal physical dimensions')&&completion.includes('61917364224'),'12^10 / 61,917,364,224 boundary must remain computational/representational');
 
 must(runtime.includes('independentRelativityFieldsR155'),'independent symmetry/asymmetry compiler missing');
 must(runtime.includes('sourceSymmetry')&&runtime.includes('invariantSymmetry')&&runtime.includes('contextualAsymmetry'),'independent field outputs missing');
