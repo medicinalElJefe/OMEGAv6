@@ -13,8 +13,6 @@ on:
       - 'tests/r180-current-authority-convergence-invariants.mjs'
       - '.github/workflows/r170-current-convergence.yml'
       - '.github/workflows/r180-living-world-execution-dispatch.yml'
-  push:
-    branches: [r180-live-dispatch-current-main]
 permissions:
   contents: read
 concurrency:
