@@ -15,10 +15,27 @@ export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,Om
 
 const REVISION='R116';
 const CONNECTOR_REVISION='R117';
+const CORE_HEALTH_REVISION='R163';
+const CORE_HEALTH_SCHEMA='OMEGA_CANONICAL_CORE_HEALTH_R163';
+const CANONICAL_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev';
 const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION,'x-omega-executor-fabric':R147_REVISION,'x-omega-sovereign-mission':R152_REVISION};
 const json=(data,status=200,headers={})=>new Response(JSON.stringify(data,null,2),{status,headers:{...JSON_HEADERS,...headers}});
 const text=v=>String(v??'').trim();
 const safeId=(v,fallback='')=>{const s=text(v).slice(0,160);return /^[A-Za-z0-9._:-]+$/.test(s)?s:fallback};
+function coreHealthR163(request,env){
+ const requiredBindings={assets:Boolean(env?.ASSETS?.fetch),durableRuntime:Boolean(env?.OMEGA_RUNTIME)},ready=requiredBindings.assets&&requiredBindings.durableRuntime,metadata=env?.CF_VERSION_METADATA||null,host=new URL(request.url).hostname.toLowerCase(),canonicalRequest=host==='omegav6.jeffdeweyeljefe.workers.dev';
+ const payload={
+  ok:ready,schema:CORE_HEALTH_SCHEMA,revision:CORE_HEALTH_REVISION,state:ready?'LIVE':'DEGRADED_REQUIRED_CORE_BINDING_MISSING',checkedAt:new Date().toISOString(),canonicalOrigin:CANONICAL_ORIGIN,canonicalRequest,
+  runtimeVersion:metadata?{id:String(metadata.id||''),tag:metadata.tag?String(metadata.tag):null,timestamp:metadata.timestamp?String(metadata.timestamp):null}:null,
+  requiredBindings,
+  optionalCapabilities:{workersAI:Boolean(env?.AI),genesisService:Boolean(env?.OMEGA_GENESIS?.fetch),genesisMachine:Boolean(env?.OMEGA_GENESIS_MACHINE?.fetch),opticalMachine:Boolean(env?.OMEGA_OPTICAL_MACHINE?.fetch),versionMetadata:Boolean(metadata)},
+  executionPlanes:{sovereignGateway:{requiredForCoreHealth:false,state:'SEPARATE_PROOF_GATED_EXECUTION_PLANE'},hybrid:{authority:'CURRENT_AUTHENTICATED_HEARTBEAT_ONLY',proofClosure:'R141',executionConvergence:'R159'},canonicalAdmission:{authority:'R125'}},
+  evidence:{releaseEvidence:'/api/release-evidence',runtimeAttestation:'/api/runtime-attestation',systemOperational:'/api/system/operational'},
+  preserves:{runtimeSpine:'R116',connector:'R117',proofClosure:'R141',durableExecution:'R146',executorFabric:'R147',sovereignMission:'R152',executionConvergence:'R159',canonicalAdmission:'R125'},
+  truthBoundary:'R163 core health is first-hand liveness for the canonical Cloudflare Worker substrate only. Optional model, federation, Hybrid/Sovereign, RCWA and external gateway readiness remain separate evidence states. A missing optional execution plane cannot erase core Worker liveness, and core liveness cannot be promoted into PC-online, solver-valid, returned-execution, federation-closure or CanonState proof.'
+ };
+ return json(payload,ready?200:503,{'x-omega-core-health':'R163-FIRST-HAND','x-omega-canonical-origin':CANONICAL_ORIGIN,'x-omega-core-health-state':payload.state});
+}
 const approvedHosts=new Set([
  'omegav6.jeffdeweyeljefe.workers.dev',
  'omega-genesis-v1.jeffdeweyeljefe.workers.dev',
@@ -38,7 +55,7 @@ function corsHeadersR116(request){
   'vary':'Origin',
   'access-control-allow-methods':'GET,POST,PUT,DELETE,OPTIONS',
   'access-control-allow-headers':'content-type,authorization,x-omega-federation-token,x-vercel-protection-bypass,x-omega-bridge-id,x-omega-bridge-secret,x-omega-session-id,cache-control',
-  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-proof-closure,x-omega-durable-execution,x-omega-executor-fabric,x-omega-sovereign-mission,x-omega-control-plane,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
+  'access-control-expose-headers':'x-omega-runtime-successor,x-omega-connector-revision,x-omega-proof-closure,x-omega-durable-execution,x-omega-executor-fabric,x-omega-sovereign-mission,x-omega-control-plane,x-omega-agent-version,x-omega-agent-sha256,x-omega-canonical-origin,x-omega-core-health,x-omega-core-health-state,x-omega-rcwa-agent-sha256,x-omega-rcwa-worker-sha256',
   'access-control-max-age':'600'
  };
 }
@@ -80,7 +97,7 @@ async function convergenceR116(request,env){
   proposal:{surfaceState:nodes.genesis?.state||'UNKNOWN',machineState:services.genesis?.state||'UNKNOWN',effectiveState:services.genesis?.state==='LIVE'?'LIVE':nodes.genesis?.state||'UNKNOWN'},
   optical:{surfaceState:nodes.optical?.state||'UNKNOWN',machineState:services.optical?.state||'UNKNOWN',effectiveScreenState:services.optical?.state==='LIVE'?'LIVE':nodes.optical?.state||'UNKNOWN'},
   sovereign:{state:nodes.sovereign?.state||'UNKNOWN',rcwaState:nodes.sovereign?.rcwaState||status?.runtime?.rcwa?.state||'UNKNOWN',currentAuthenticatedHeartbeat:currentHeartbeat,nativeExecutionClaimed:hybrid?.nativeExecutionClaimed===true},
-  connectorPolicy:{canonicalOrigin:'https://omegav6.jeffdeweyeljefe.workers.dev',currentRevision:CONNECTOR_REVISION,runtimeRevision:REVISION,proofClosureRevision:R141_REVISION,retiredOrigin:'omega-sovereign-convergence.foundasound.chatgpt.site',retiredLaunchersMustNotBeUsed:true,reason:'The retired preview host can return 401 and is not the canonical Hybrid authority.'},
+  connectorPolicy:{canonicalOrigin:CANONICAL_ORIGIN,currentRevision:CONNECTOR_REVISION,runtimeRevision:REVISION,proofClosureRevision:R141_REVISION,retiredOrigin:'omega-sovereign-convergence.foundasound.chatgpt.site',retiredLaunchersMustNotBeUsed:true,reason:'The retired preview host can return 401 and is not the canonical Hybrid authority.'},
   truthBoundary:'Surface availability, R139 unified capability routing, R140 browser operation-world projection, machine-service availability, browser pairing, current host heartbeat, R146 durable operation history, R147 executor binding/dispatch, R152 adaptive mission continuation, returned execution proof, deterministic replay, solver freshness, and canonical admission are distinct states. R116/R117/R141/R146/R147/R152 never promotes one into another.'
  };
 }
@@ -111,7 +128,7 @@ async function durablePairR117(request,env){
   pairingCode,
   createdAt:Date.now(),
   connectorFilename:'START_OMEGA_PC_LINK_R117_CLEAN.cmd',
-  canonicalOrigin:'https://omegav6.jeffdeweyeljefe.workers.dev',
+  canonicalOrigin:CANONICAL_ORIGIN,
   retiredOrigin:'omega-sovereign-convergence.foundasound.chatgpt.site',
   agentPath:'/api/hybrid/agent-download?r117=1',
   rcwaAgentPath:'/api/federation/rcwa/agent-download?r117=1',
@@ -125,7 +142,7 @@ async function serveProofAgentR141(request,env){
  if(!env?.ASSETS?.fetch)return json({ok:false,code:'R141_PROOF_AGENT_ASSET_BINDING_UNAVAILABLE'},503);
  const asset=await env.ASSETS.fetch(new Request(new URL('/omega-hybrid-agent-r141.py',request.url),{headers:{'cache-control':'no-cache'}}));if(!asset.ok)return json({ok:false,code:'R141_PROOF_AGENT_ASSET_NOT_FOUND',status:asset.status},503);
  const source=await asset.text(),valid=source.length>1000&&source.startsWith('#!/usr/bin/env python3')&&source.includes("PROOF_CLOSURE_REVISION='R141'")&&source.includes("FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'")&&source.includes("BASE_PATH='/omega-hybrid-agent.py'")&&source.includes('OMEGA R34 local Hybrid Link agent')&&source.includes('Pairing is explicit.');if(!valid)return json({ok:false,code:'R141_PROOF_AGENT_ASSET_INVALID'},503);
- const digest=await sha256TextR141(source);return new Response(source,{status:200,headers:{'content-type':'text/x-python; charset=utf-8','content-disposition':'attachment; filename="omega-hybrid-agent-r141.py"','cache-control':'no-store, max-age=0','x-omega-agent-version':'R141-wrapper','x-omega-agent-sha256':digest,'x-omega-proof-closure':R141_REVISION,'x-omega-canonical-origin':'https://omegav6.jeffdeweyeljefe.workers.dev'}});
+ const digest=await sha256TextR141(source);return new Response(source,{status:200,headers:{'content-type':'text/x-python; charset=utf-8','content-disposition':'attachment; filename="omega-hybrid-agent-r141.py"','cache-control':'no-store, max-age=0','x-omega-agent-version':'R141-wrapper','x-omega-agent-sha256':digest,'x-omega-proof-closure':R141_REVISION,'x-omega-canonical-origin':CANONICAL_ORIGIN}});
 }
 function hybridRuntimeIdR141(request){return safeId(request.headers.get('x-omega-bridge-id'))||safeId(request.headers.get('x-omega-session-id'))}
 async function hybridRuntimeProxyR141(request,env,internalPath){
@@ -139,6 +156,7 @@ async function executionRuntimeProxyR146(request,env,internalPath){
 
 async function probeFetchR130(request,env){
  const url=new URL(request.url),path=url.pathname;
+ if(path==='/api/health'||path==='/api/core-health')return coreHealthR163(request,env);
  if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
  if(path==='/api/system/convergence')return json(await convergenceR116(request,env));
  if(path==='/api/federation/run/status'){
@@ -148,9 +166,11 @@ async function probeFetchR130(request,env){
 }
 
 async function fetchR116(request,env){
- const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
- if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
+ const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path==='/api/health'||path==='/api/core-health'||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
+ if((path==='/api/health'||path==='/api/core-health')&&request.method==='GET')return withCorsR116(coreHealthR163(request,env),request);
+ if((path==='/api/health'||path==='/api/core-health')&&request.method!=='GET')return withCorsR116(json({ok:false,schema:CORE_HEALTH_SCHEMA,revision:CORE_HEALTH_REVISION,state:'METHOD_NOT_ALLOWED',method:request.method,canonicalMutation:false,truthBoundary:'R163 canonical core-health endpoints are read-only.'},405,{allow:'GET','x-omega-core-health':'R163-FIRST-HAND'}),request);
+ if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
  if(path==='/api/hybrid/agent-download'&&request.method==='GET'&&url.searchParams.get('r117')==='1')return withCorsR116(await serveProofAgentR141(request,env),request);
  if(path==='/api/hybrid/bootstrap'&&request.method==='POST')return withCorsR116(await durablePairR117(request,env),request);
  if(path==='/api/hybrid/reconnect'&&request.method==='POST'){
@@ -173,7 +193,7 @@ async function fetchR116(request,env){
   return withCorsR116(json({...plan,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,executorFabricRevision:R147_REVISION,sovereignMissionRevision:R152_REVISION,machineAwareRouting:true,machineServices:{genesis:machine?.nodes?.genesis?.state||'UNKNOWN',optical:machine?.nodes?.optical?.state||'UNKNOWN'},truthBoundary:`${plan.truthBoundary} R116 treats live R115 machine adapters as execution readiness for their existing PROPOSE/SCREEN roles while preserving protected human-surface state separately.`},plan.ok?200:400),request);
  }
  if(path==='/api/system/convergence'&&request.method==='GET')return withCorsR116(json(await convergenceR116(request,env)),request);
- if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141(),durableExecution:manifestR146(),executorFabric:manifestR147(),adaptiveSovereignMission:manifestR152()},200,{'x-omega-control-plane':R130_REVISION}),request);
+ if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141(),durableExecution:manifestR146(),executorFabric:manifestR147(),adaptiveSovereignMission:manifestR152(),coreHealth:{revision:CORE_HEALTH_REVISION,schema:CORE_HEALTH_SCHEMA,path:'/api/core-health'}},200,{'x-omega-control-plane':R130_REVISION}),request);
  if(path==='/api/system/operational'&&request.method==='GET')return withCorsR116(json(await operationalR130(request,env,probeFetchR130),200,{'x-omega-control-plane':R130_REVISION}),request);
  const response=await r115.fetch(request,env);return withCorsR116(response,request);
 }
