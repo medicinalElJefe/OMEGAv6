@@ -6,6 +6,7 @@ const worker=fs.readFileSync('src/workerR116.js','utf8');
 const r147Source=fs.readFileSync('src/execution/unifiedExecutorFabricR147.js','utf8');
 const r197Source=fs.readFileSync('src/execution/adaptivePartitionBackpressureR197.js','utf8');
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+const postDeploy=fs.readFileSync('scripts/verify_federation_live_r1681.mjs','utf8');
 const probe=fs.readFileSync('scripts/verify_live_execution_control_r199.mjs','utf8');
 
 assert.ok(worker.includes("path==='/api/execution/r147/manifest'&&request.method==='GET'"),'R199 requires the existing public read-only R147 manifest route');
@@ -44,12 +45,15 @@ assert.equal(manifest.canonicalAdmissionAuthority,'R125');
 assert.equal(fs.existsSync('.github/workflows/r199-live-execution-control-proof.yml'),false,'R199 must not create a second workflow authority or workflow_run fanout');
 assert.ok(ci.includes("if: github.event_name == 'push' && github.ref == 'refs/heads/main'"),'R199 proof must remain inside canonical main deployment authority');
 assert.ok(ci.includes('Promoted main commit must be an exact two-parent merge commit'),'R199 must preserve exact governed merge lineage');
-assert.ok(ci.includes('Verify live R199 execution-control manifest'),'canonical deploy job must run the R199 live proof');
-assert.ok(ci.includes('node scripts/verify_live_execution_control_r199.mjs'),'canonical deploy job must invoke the R199 proof script');
+assert.ok(ci.includes('node scripts/verify_federation_live_r1681.mjs'),'canonical deploy job must retain the propagation-safe live verifier');
 assert.ok(!ci.includes('workflow_run:'),'canonical CI must not reintroduce workflow_run fanout');
+assert.ok(postDeploy.includes("process.env.OMEGA_PROMOTED_SHA"),'R199 must activate only inside an exact promoted deployment context');
+assert.ok(postDeploy.includes("await import('./verify_live_execution_control_r199.mjs')"),'existing canonical post-deploy verifier must chain the R199 proof');
+assert.ok(!postDeploy.includes('workflow_run'),'post-deploy chaining must not create recursive workflow authority');
 
 for(const token of [
   'GITHUB_SHA',
+  'OMEGA_PROMOTED_SHA',
   '/api/release-evidence',
   '/api/runtime-attestation',
   '/api/core-health',
@@ -75,4 +79,4 @@ assert.ok(!probe.includes('/api/hybrid/pair'),'R199 live proof must not create o
 assert.ok(!probe.includes("method:'POST'"),'R199 live proof must remain GET-only/read-only');
 assert.ok(!probe.includes('canonicalMutation:true'),'R199 proof may not claim or perform Canon mutation');
 
-console.log('R199 LIVE EXECUTION CONTROL PROOF PASS · canonical deploy-main now binds exact promoted SHA + Worker Version ID to a GET-only first-hand R147 manifest proving deployed R185→R193→R194→R195→R196→R197 composition, max-12 bounded scheduling, AIMD feedback states, and R125-only admission without a second workflow authority');
+console.log('R199 LIVE EXECUTION CONTROL PROOF PASS · the existing canonical post-deploy Federation/RCWA verifier now conditionally chains exact promoted SHA + Worker Version ID to a GET-only first-hand R147 manifest proving deployed R185→R193→R194→R195→R196→R197 composition, max-12 bounded scheduling, AIMD feedback states, and R125-only admission without a second workflow authority');
