@@ -1,4 +1,4 @@
-// OMEGA R146 mounts durable operation execution additively inside the proven R116 Worker spine.
+// OMEGA R167 preserves the proven R116 Worker spine and all durable state while promoting the active Optical SCREEN coprocessor to live-proven R153.2.
 // Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes. R125 remains canonical admission authority.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
@@ -24,7 +24,7 @@
   "services": [
     {"binding":"OMEGA_GENESIS","service":"omega-genesis-v1"},
     {"binding":"OMEGA_GENESIS_MACHINE","service":"omega-genesis-machine-r115"},
-    {"binding":"OMEGA_OPTICAL_MACHINE","service":"omega-optical-machine-r115"}
+    {"binding":"OMEGA_OPTICAL_MACHINE","service":"omega-optical-machine-r1532"}
   ],
   "durable_objects": {
     "bindings": [
