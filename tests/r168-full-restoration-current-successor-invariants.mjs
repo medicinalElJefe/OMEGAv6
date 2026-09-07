@@ -41,6 +41,10 @@ for(const law of ['FEDERATION_ATTESTATION_IS_EVIDENCE_NOT_EXECUTION','LIVE_VERIF
 
 must(systemUi.includes('No fake OPEN button'),'System Atlas compatibility/truth boundary must explicitly prohibit fake Open actions');
 must(systemUi.includes("currentExecutable=new Set(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE'])"),'System Atlas Open action must stay limited to current executable successor states');
+must(systemUi.includes("const currentRouteOf=(surface:string|undefined,fallback:string)=>String(surface||fallback||'System Atlas').split('/')[0].trim()"),'System Atlas must normalize current successor surfaces into primary operator routes');
+must(systemUi.includes('currentRoute=currentRouteOf(current?.surface,cell.family.target)')&&systemUi.includes('onClick={()=>onNavigate(currentRoute)}'),'System Atlas family launch must use current successor route, not the historical V24 target');
+must(systemUi.includes('Current operator route')&&systemUi.includes('V24 predecessor target'),'System Atlas must make route authority and predecessor target simultaneously inspectable');
+for(const mapping of ["S10:{successor:'SOURCE_ACTIVE',surface:'Matter Traversal'","S12:{successor:'LOCAL_ACTIVE',surface:'Build Out'","S21:{successor:'LOCAL_ACTIVE',surface:'Visual Instrument'"])must(completion.includes(mapping),`restored successor mapping missing ${mapping}`);
 const menuCount=[...atlas.matchAll(/\['\d\d','[^']+','[^']+','[^']+'\]/g)].length;
 must(menuCount===12,`expected 12 master menus, found ${menuCount}`);
-console.log('R168 FULL RESTORATION CURRENT-SUCCESSOR PASS · one R48/R153 execution ledger · R137 proof + Build Potential use effective successor truth · normalized routing · R166 residual world + R169 federation world scar operator-visible · 12 intents direct · no fake Open · R125/device/scientific boundaries preserved');
+console.log('R168 FULL RESTORATION CURRENT-SUCCESSOR PASS · one R48/R153 execution ledger · R137 proof + Build Potential + System Atlas route from effective successor truth · R166 residual world + R169 federation world scar operator-visible · 12 intents direct · no fake Open · R125/device/scientific boundaries preserved');
