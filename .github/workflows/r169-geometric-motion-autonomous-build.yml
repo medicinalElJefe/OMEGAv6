@@ -1,0 +1,40 @@
+name: OMEGA R169 Geometric Motion Autonomous Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [r169-geometric-motion-autonomous-build]
+  pull_request:
+    branches: [main, r168-whole-system-truth-performance-restoration]
+
+jobs:
+  prove-r169:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-fund
+      - name: Prove geometric motion autonomous continuation
+        run: node tests/r169-geometric-motion-autonomous-build-invariants.mjs
+      - name: Preserve original self-build admission law
+        run: node tests/r124-self-contained-build-invariants.mjs
+      - name: Preserve current whole-system restoration
+        run: |
+          node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
+          node tests/r168-full-restoration-current-successor-invariants.mjs
+          node tests/r168-buildout-adaptive-mission-spine-invariants.mjs
+          node tests/r168-adaptive-traversal-performance-invariants.mjs
+      - name: Preserve build, proof and optical execution authorities
+        run: |
+          node tests/r153-full-system-completion-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r167-active-optical-r1532-convergence-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Full inherited production regression
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r169
