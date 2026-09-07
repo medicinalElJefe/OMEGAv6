@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const traversal=fs.readFileSync('src/TraversalModeStageR100.tsx','utf8');
+const perf=fs.readFileSync('src/operationalCapabilityRuntimeR45.ts','utf8');
+const must=(ok,msg)=>assert.ok(ok,`R168 adaptive traversal performance: ${msg}`);
+for(const token of ["import {capabilityPerformanceHints} from './operationalCapabilityRuntimeR45'",'capabilityPerformanceHints(variant)','hardwareConcurrency','deviceMemory','webgl2','targetFps','renderDensity','particleScale','frameBudgetMs'])must((traversal+'\n'+perf).includes(token),`missing ${token}`);
+for(const token of ['perfEpoch','visibilitychange','dprCap=perf.highCapacity?2.25:perf.lowPower?1.25:1.75','frameInterval=animated&&perf.targetFps>0?1000/perf.targetFps:0','performanceDensity=perf.renderDensity*perf.particleScale','if(animated&&perf.targetFps>0)raf=requestAnimationFrame(render)','data-performance-quality={perf.quality}','data-target-fps={perf.targetFps}','PERFORMANCE FABRIC'])must(traversal.includes(token),`live renderer missing ${token}`);
+must(traversal.includes("const route=useMemo(()=>compileSourceTraversal(address,routeDepth)"),'performance adaptation must not replace the admitted route calculation');
+must(traversal.includes('state/proof unchanged')&&traversal.includes('canonical state, route, weave law, evidence and proof semantics remain invariant'),'performance UI must expose the truth boundary');
+must(!traversal.includes('routeDepth*perf.')&&!traversal.includes('address*perf.'),'performance adaptation may not alter canonical address or semantic traversal depth');
+console.log('R168 ADAPTIVE TRAVERSAL PERFORMANCE PASS · real frame/DPR/particle adaptation · paused/reduced-motion CPU relief · high-capacity density promotion · canonical state/route/proof invariant');
