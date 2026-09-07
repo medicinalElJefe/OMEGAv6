@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {canonicalCoreHealthR1591,R1591_REVISION,R1591_SCHEMA} from '../src/workerR1591.js';
+
+const must=(v,m)=>assert.ok(v,'R159.1 '+m);
+const receipt={schema:'OMEGA_GOVERNED_BUILD_RECEIPT_V1',source:{sha:'a'.repeat(40)},receiptSha256:'b'.repeat(64),promotion:{authority:'GITHUB_MERGE_PARENTS'}};
+const assets={fetch:async()=>new Response(JSON.stringify(receipt),{status:200,headers:{'content-type':'application/json'}})};
+const env={ASSETS:assets,OMEGA_RUNTIME:{idFromName:()=>({}),get:()=>({})},AI:{},CF_VERSION_METADATA:{id:'worker-version-r1591',tag:'live',timestamp:'2026-09-07T00:00:00Z'}};
+const response=await canonicalCoreHealthR1591(new Request('https://omegav6.jeffdeweyeljefe.workers.dev/api/health'),env),body=await response.json();
+must(response.status===200&&body.ok===true,'core health must return 200 only when required first-hand bindings are present');
+must(body.schema===R1591_SCHEMA&&body.revision===R1591_REVISION,'schema/revision mismatch');
+must(response.headers.get('x-omega-core-health')==='R159.1-FIRST-HAND','first-hand proof header missing');
+must(body.core.workerRequestHandling==='RETURNED_FIRST_HAND','Worker request handling must be first-hand');
+must(body.core.assetsBinding==='BOUND'&&body.core.durableRuntimeBinding==='BOUND','required bindings not proved');
+must(body.runtimeVersion.id==='worker-version-r1591','Cloudflare version metadata must remain first-hand');
+must(body.buildReceipt.state==='RETURNED'&&body.buildReceipt.source.sha==='a'.repeat(40),'governed build receipt must remain separately visible');
+must(body.sovereignGateway.state==='SEPARATE_OPTIONAL_BOUNDARY'&&body.sovereignGateway.requiredForCanonicalCoreHealth===false,'optional gateway must never erase canonical core health');
+must(body.executionAuthority.exactReturnProof==='R141'&&body.executionAuthority.sovereignConvergence==='R159'&&body.executionAuthority.canonicalAdmission==='R125','execution/admission authority chain regressed');
+must(body.executionAuthority.canonicalMutation===false,'health may not mutate canon');
+const degraded=await canonicalCoreHealthR1591(new Request('https://omegav6.jeffdeweyeljefe.workers.dev/api/health'),{ASSETS:assets,CF_VERSION_METADATA:{id:'x'}}),degradedBody=await degraded.json();
+must(degraded.status===503&&degradedBody.ok===false&&degradedBody.core.durableRuntimeBinding==='MISSING','missing required durable runtime binding must remain a real degraded core-health failure');
+const wrangler=fs.readFileSync('wrangler.jsonc','utf8');must(wrangler.includes('"main": "src/workerR1591.js"'),'Wrangler must enter through R159.1 first-hand wrapper');
+const worker=fs.readFileSync('src/workerR1591.js','utf8');for(const token of ["url.pathname==='/api/health'","url.pathname==='/api/core-health'",'requiredForCanonicalCoreHealth:false',"return r116.fetch(request,env)"])must(worker.includes(token),'worker boundary missing '+token);
+console.log('R159.1 LIVE CORE HEALTH TRUTH PASS · canonical Worker health is first-hand · optional sovereign gateway separated · R159/R141/R125 authority preserved · missing required core bindings still fail closed');
