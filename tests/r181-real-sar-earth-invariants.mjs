@@ -11,7 +11,7 @@ const wrangler=read('wrangler.jsonc');
 // New sensor surface must be additive and source-bound.
 for(const token of [
  "REVISION='R181'","/api/earth/sar/providers","/api/earth/sar/search","stac.dataspace.copernicus.eu/v1/search",
- "api.daac.asf.alaska.edu/services/search/param","dataset','NISAR","dataset','SENTINEL-1","OBSERVED_METADATA",
+ "api.daac.asf.alaska.edu/services/search/param","queryAsf('NISAR'","queryAsf('SENTINEL-1'","OBSERVED_METADATA",
  'DERIVED_RELATIVE_FRAME_SCORE_ONLY','UNOBSERVED_RETURNED_SEARCH','evidenceHash','sourceAgreement','continuity'
 ])must(sar.includes(token),`R181 SAR engine missing ${token}`);
 for(const token of ['CDSE_SENTINEL1','ASF_SENTINEL1','ASF_NISAR','UMBRA_OPEN','CAPELLA_OPEN','ICEYE_OPEN'])must(sar.includes(token),`R181 provider registry missing ${token}`);
