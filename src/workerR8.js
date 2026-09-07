@@ -1,4 +1,6 @@
 import baseWorker from './worker.js';
+import {earthSarApiR181} from './earthSarR181.js';
+import {calibrationGatewayR181} from './calibration/calibrationGatewayR181.js';
 
 const JSON_HEADERS={"content-type":"application/json; charset=utf-8","cache-control":"no-store"};
 const json=(data,status=200)=>new Response(JSON.stringify(data,null,2),{status,headers:JSON_HEADERS});
@@ -42,6 +44,8 @@ async function hybridDraft(body){const prompt=text(body?.prompt||body?.text),roo
 function validateHybridPlan(body){const plan=body?.plan||body,errors=[];if(!Array.isArray(plan?.operations)||plan.operations.length<1||plan.operations.length>24)errors.push('operations must contain 1-24 steps');for(const [i,row] of (plan?.operations||[]).entries()){if(!HYBRID_OPERATIONS.includes(row?.op))errors.push(`step ${i+1}: unsupported operation ${row?.op}`);if(row?.profile&&!HYBRID_PROFILES.includes(row.profile))errors.push(`step ${i+1}: unsupported build/test profile`);if(row?.path&&(String(row.path).startsWith('/')||/^[A-Za-z]:[\\/]/.test(String(row.path))||String(row.path).includes('..')))errors.push(`step ${i+1}: path must remain root-relative`);if(row?.url&&!String(row.url).startsWith('https://'))errors.push(`step ${i+1}: URL must use HTTPS`)}return{schema:'OMEGA_HYBRID_PLAN_VALIDATION_V1',valid:errors.length===0,errors,operationRegistry:HYBRID_OPERATIONS,profiles:HYBRID_PROFILES,execution:'DEVICE_PROOF_REQUIRED'}}
 
 async function omegaR8(request,env){const url=new URL(request.url);
+ const calibration=await calibrationGatewayR181(request,env,url);if(calibration)return calibration;
+ const sar=await earthSarApiR181(request,url);if(sar)return sar;
  if(url.pathname==='/api/earth/evidence'&&request.method==='GET')return json(await earthEvidence(url));
  if(url.pathname==='/api/earth/noaa/catalog'&&request.method==='GET')return json(await noaaCatalog());
  if(url.pathname==='/api/earth/noaa/image'&&request.method==='GET'){const id=text(url.searchParams.get('coverage')),c=NOAA_COVERAGES[id];if(!c)return json({ok:false,code:'UNKNOWN_COVERAGE'},404);try{const r=await fetch(c.url,{cf:{cacheTtl:60,cacheEverything:false}});const ct=r.headers.get('content-type')||'';if(!r.ok||!ct.startsWith('image/'))return json({ok:false,code:'NOAA_IMAGE_UNAVAILABLE',coverage:id,status:r.status},502);return new Response(r.body,{status:200,headers:{'content-type':ct,'cache-control':'public, max-age=60','x-omega-source':'NOAA-STAR-LATEST-ALIAS','x-omega-last-modified':r.headers.get('last-modified')||''}})}catch(e){return json({ok:false,code:'NOAA_IMAGE_FETCH_FAILED',error:e instanceof Error?e.message:String(e)},502)}}
