@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {authorizeLivingWorldMissionR179} from '../src/execution/livingWorldExecutionAuthorizationR179.js';
 import {dispatchAuthorizedLivingWorldMissionR180,manifestR180,R180_LAWS} from '../src/execution/livingWorldExecutionDispatchR180.js';
 import {readRunR146,replayRunR146,transitionRunR146} from '../src/execution/durableOperationExecutionR146.js';
@@ -26,6 +27,12 @@ const stale=await dispatchAuthorizedLivingWorldMissionR180(staleRuntime,staleAut
 
 const hybridRuntime=new Runtime([{id:'pc-test',name:'PC test',online:true,revoked:false,lastSeen:Date.now(),capabilities:['BUILD','TEST']}]),hybridAuth=await authorizeLivingWorldMissionR179(hybridRuntime,resolution('HYBRID','Hybrid Link','mission-r180-hybrid'),{authorized:true,confirmation:'AUTHORIZE_SELECTED_R143_CONTRACTS',authorizedStepIndexes:[0]});
 const hybridId=hybridAuth.runs[0].runId,held=await dispatchAuthorizedLivingWorldMissionR180(hybridRuntime,hybridAuth,{dispatch:true,confirmation:'DISPATCH_AUTHORIZED_R179_RUNS',runIds:[hybridId]});assert.equal(held.ok,true);assert.equal(held.state,'DISPATCH_HELD');assert.equal(held.executionInvoked,false);assert.equal(held.results[0].status,'HELD_HOST_EXECUTION_CONFIRMATION_REQUIRED');assert.equal((await readRunR146(hybridRuntime,hybridId)).state,'AUTHORIZED');
+
+const client=fs.readFileSync('src/livingWorldExecutionClientR180.ts','utf8'),surface=fs.readFileSync('src/LivingWorldPulseR174.tsx','utf8'),css=fs.readFileSync('src/livingWorldPulseR174.css','utf8');
+for(const token of ["'/api/execution/runs'",'/transition','dispatchExecutionRunR147','sourceRevision:\'R179\'','HELD_HOST_EXECUTION_CONFIRMATION_REQUIRED','canonicalAdmissionAuthority:\'R125\''])assert.ok(client.includes(token),`R180 live client missing ${token}`);
+for(const token of ['resolveStagedLivingWorldMissionR180','authorizeResolvedLivingWorldMissionR180','dispatchAuthorizedLivingWorldMissionClientR180','Stage mission','Authorize ','Dispatch authorized','HOST EXECUTION','Open Hybrid'])assert.ok(surface.includes(token),`R180 living-world surface missing ${token}`);
+assert.ok(surface.indexOf('authorizeReady')<surface.indexOf('dispatchAuthorized'),'R180 surface must preserve authorization before dispatch');
+for(const token of ['.r180-controls','.r180-host-hold','@media(max-width:760px)','overflow-wrap:anywhere','grid-template-columns:1fr'])assert.ok(css.includes(token),`R180 mobile containment missing ${token}`);
 
 for(const law of ['R179_AUTHORIZED_NOT_DISPATCHED_RECEIPT_REQUIRED','EXPLICIT_SEPARATE_DISPATCH_CONFIRMATION_REQUIRED','R147_REMAINS_EXECUTOR_SELECTION_AND_DISPATCH_AUTHORITY','HYBRID_AND_BUILD_REQUIRE_SEPARATE_HOST_EXECUTION_CONFIRMATION','EVERY_DISPATCHED_RUN_MUST_REMAIN_R146_REPLAYABLE','R125_REMAINS_THE_ONLY_CANONSTATE_ADMISSION_AUTHORITY'])assert.ok(R180_LAWS.includes(law));
 const manifest=manifestR180();assert.equal(manifest.revision,'R180');assert.equal(manifest.dispatchAuthority,'R147');assert.equal(manifest.durableLifecycleAuthority,'R146');assert.deepEqual(manifest.hostExecutionConfirmationRequired,['HYBRID','BUILD']);assert.equal(manifest.canonicalAdmissionAuthority,'R125');
