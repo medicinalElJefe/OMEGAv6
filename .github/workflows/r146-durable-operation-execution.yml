@@ -29,7 +29,7 @@ jobs:
           node tests/r132-hybrid-execution-plane-invariants.mjs
           node tests/r127-hybrid-zero-drift-invariants.mjs
           node tests/r125-autonomic-swarm-invariants.mjs
-          node tests/r125-accuracy-first-engine-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
       - name: Full inherited regression and production build
         run: npm run check
       - name: Canonical Worker dry run

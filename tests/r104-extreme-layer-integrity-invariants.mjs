@@ -20,8 +20,9 @@ const membrane=read('src/CanonicalMembraneR95.tsx');
 const membraneCss=read('src/canonicalMembraneR95.css');
 const accepted=read('src/acceptedProductionContractR95.ts');
 const hybrid=read('src/HybridLinkR32.tsx');
-const sovereign=fs.existsSync('src/SovereignConnectionR112.tsx')?read('src/SovereignConnectionR112.tsx'):hybrid;
-const launcher=fs.existsSync('src/sovereignLauncherR112.ts')?read('src/sovereignLauncherR112.ts'):hybrid;
+const mission=read('src/HybridMissionControlR8.tsx');
+const sovereign=fs.existsSync('src/SovereignConnectionR117.tsx')?read('src/SovereignConnectionR117.tsx'):hybrid;
+const launcher=fs.existsSync('src/sovereignLauncherR117.ts')?read('src/sovereignLauncherR117.ts'):hybrid;
 const worker101=read('src/workerR101.js');
 const agent=read('public/omega-hybrid-agent.py');
 const earth=read('src/EarthObservatoryR8.tsx');
@@ -95,11 +96,11 @@ must(!stage.includes('Math.random'),'primary mode geometry may not use random/fa
 must(studio.includes('r99-support-layer')&&studio.includes('r99-donor-layer')&&studio.includes('<CalculusTraversal '),'deep donor renderer/proof/motion layers must remain recoverable as progressive layers');
 
 // Hybrid must remain canonical, bridge-aware, heartbeat-proven, and non-fictional.
-const legacyHybridDownloads=hybrid.includes('/api/hybrid/agent-download?r94=1');
-const successorHybridDownloads=launcher.includes('/api/hybrid/agent-download?r112=1')&&launcher.includes("$s.StartsWith('#!/usr/bin/env python3')")&&launcher.includes("$s.Contains('OMEGA Hybrid Link agent')");
+const legacyHybridDownloads=mission.includes('/api/hybrid/agent-download?r94=1')||mission.includes('START_OMEGA_FEDERATION.cmd');
+const successorHybridDownloads=mission.includes('buildSovereignLauncherR117')&&launcher.includes('/api/hybrid/agent-download?r117=1&r120=1&r127=1&validator=zero-drift')&&launcher.includes('x-omega-agent-sha256')&&launcher.includes('-m py_compile "!OMEGA_AGENT_PART!"');
 const canonicalSuccessorOrigin=launcher.includes("const ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'")&&launcher.includes('set "OMEGA_ORIGIN=${ORIGIN}"');
-must((legacyHybridDownloads||successorHybridDownloads)&&worker101.includes("path==='/omega-hybrid-agent.py'"),'Hybrid must retain a validated canonical agent download plus the direct compatibility route');
-must(canonicalSuccessorOrigin||hybrid.includes("CANONICAL_OMEGA_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev'"),'active Windows connection path must remain hard-bound to canonical OMEGA');
+must(!legacyHybridDownloads&&successorHybridDownloads&&worker101.includes("path==='/omega-hybrid-agent.py'"),'Hybrid must use the current validated canonical connector while retaining the direct compatibility route');
+must(canonicalSuccessorOrigin,'active Windows connection path must remain hard-bound to canonical OMEGA');
 must(sovereign.includes("live?.nativeExecutionClaimed===true"),'successor Hybrid surface must keep heartbeat proof in the visible connection state machine');
 must(worker101.includes("path==='/api/hybrid/status'")&&worker101.includes('bridgeId(request)'),'Hybrid status must remain bridge-identity aware');
 must(worker101.includes("state:online.length?'VERIFIED_DEVICE_ONLINE'")&&worker101.includes('nativeExecutionClaimed:online.length>0'),'native execution must require current authenticated heartbeat');
@@ -121,4 +122,4 @@ for(const rule of ['FULL_LAYER_FUNCTIONAL_CORRELATION','READABLE_NON_COVERING_NA
 must(accepted.includes("'R103 task-first capability router + truthful performance partition authority'")&&accepted.includes("'R104 eight-layer functional correlation + readable non-covering navigation authority'"),'R104 must preserve R103 and itself');
 must(packageJson.scripts['test:r104']==='node tests/r104-extreme-layer-integrity-invariants.mjs','R104 script missing');
 
-console.log('R104/R112 EXTREME LAYER INTEGRITY PASS · route/layer/provenance coverage · readable reserved-space navigation · source-driven visual modes · canonical successor Hybrid transport + compatibility path · task-first federation preserved');
+console.log('R104/R152 EXTREME LAYER INTEGRITY PASS · route/layer/provenance coverage · readable reserved-space navigation · source-driven visual modes · current zero-drift Hybrid transport + compatibility path · task-first federation preserved');
