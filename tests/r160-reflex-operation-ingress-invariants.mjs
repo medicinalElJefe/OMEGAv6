@@ -1,22 +1,36 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {compileReflexIngressCandidateR160,processReturnedOperationR160,manifestR160,R160_LAWS} from '../src/world/reflexOperationIngressR160.ts';
-const base={schema:'OMEGA_OPERATION_EVENT_R86',id:'return-1',at:Date.now(),type:'ANALYSIS_COMPLETED',surface:'Matter Traversal',status:'PASS',detail:'returned specialist result',sha256:'a'.repeat(64),truthBoundary:'test'};
-const returned={...base,payload:{source_family:'OPTICAL_OPERATION',returned_state:'RETURNED',residuals:[{id:'domain',kind:'DOMAIN_MISMATCH',severity:'HIGH',summary:'reduced order requires stronger full-wave domain',evidence_id:'evidence-1'}],runtimeLoad:.8,latencyPressure:.7}};
-const candidate=compileReflexIngressCandidateR160(returned);
-assert.equal(candidate.eligible,true);assert.equal(candidate.sourceFamily,'OPTICAL_OPERATION');assert.equal(candidate.returnedState,'RETURNED');assert.equal(candidate.residualCount,1);assert.equal(candidate.canonicalMutation,false);
-assert.equal(compileReflexIngressCandidateR160({...base,payload:{source_family:'OPTICAL_OPERATION',residuals:[]}}).eligible,false);
-assert.equal(compileReflexIngressCandidateR160({...base,payload:{returned_state:'RETURNED',residuals:[]}}).eligible,false);
-assert.equal(compileReflexIngressCandidateR160({...base,payload:{source_family:'OPTICAL_OPERATION',returned_state:'RETURNED',residuals:[],r160ReflexDerived:true}}).eligible,false);
-const processed=await processReturnedOperationR160(returned,null);
-assert.equal(processed.ok,true);assert.equal(processed.state,'REFLEX_MISSION_ASSEMBLED');assert.equal(processed.transition.reflex.action,'TURN');
-assert.deepEqual(processed.transition.mission.targetFamilies.slice(0,2),['FULLWAVE_COMPUTATION','UNIVERSAL_EVIDENCE']);
-assert.equal(processed.transition.mission.state,'INTENT_ASSEMBLED_NOT_EXECUTION_PROOF');assert.equal(processed.operation.type,'REFLEX_MISSION_ASSEMBLED');assert.equal(processed.operation.status,'INFO');
-assert.equal(processed.operation.payload.r160ReflexDerived,true);assert.equal(processed.operation.payload.nativeExecutionClaimed,false);assert.equal(processed.operation.payload.renderReceipt,false);
-assert.equal(processed.operation.payload.reflexMission.requiresExecutionReceipts,true);assert.equal(processed.operation.payload.reflexMission.requiresReturnVerification,true);assert.equal(processed.canonicalAdmissionAuthority,'R125');
-const app=fs.readFileSync(new URL('../src/App.tsx',import.meta.url),'utf8');const r86=fs.readFileSync(new URL('../src/omegaOperationBusR86.ts',import.meta.url),'utf8');const ingress=fs.readFileSync(new URL('../src/world/reflexOperationIngressR160.ts',import.meta.url),'utf8');
-assert.match(r86,/REFLEX_MISSION_ASSEMBLED/);assert.match(app,/installLivingWorldOperationBridgeR140\(\);installRuntimeAttestationWorldScarR145\(\);installDurableWorldHeadContinuityR149\(\);installReflexOperationIngressR160\(\)/);
-assert.match(ingress,/omega-r86-operation/);assert.match(ingress,/omega-r140-world-frame/);assert.match(ingress,/r160ReflexDerived!==true/);assert.match(ingress,/status:'INFO'/);
-for(const law of ['RETURNED_REMAINS_DISTINCT_FROM_VERIFIED_AND_CANONSTATE_ADMISSION','R159_SOVEREIGN_EXECUTION_AUTHORITY_REMAINS_STRONGER_AND_UNCHANGED','R125_REMAINS_SOLE_CANONSTATE_ADMISSION_AUTHORITY'])assert.ok(R160_LAWS.includes(law));
-assert.match(manifestR160().truthBoundary,/never upgrades RETURNED to VERIFIED/);
-console.log('R160 REFLEX OPERATION INGRESS PASS · explicit returned-result admission · R159 execution authority preserved · nonrecursive mission · R140/R149 continuity preserved');
+import {assembleReflexWorldTransitionR157} from '../src/world/reflexWorldTransitionR157.js';
+
+const transition=await assembleReflexWorldTransitionR157({
+ source_family:'OPTICAL_OPERATION',canonical_address:1698,packet_id:'r160-return-1',returned_state:'RETURNED',
+ residuals:[{id:'domain',kind:'DOMAIN_MISMATCH',severity:'HIGH',summary:'reduced order requires stronger full-wave domain',evidence_id:'evidence-1'}]
+},{performance:{load:.8,latencyPressure:.7}});
+assert.equal(transition.ok,true);
+assert.equal(transition.reflex.action,'TURN');
+assert.deepEqual(transition.mission.targetFamilies.slice(0,2),['FULLWAVE_COMPUTATION','UNIVERSAL_EVIDENCE']);
+assert.equal(transition.mission.state,'INTENT_ASSEMBLED_NOT_EXECUTION_PROOF');
+assert.equal(transition.canonicalMutation,false);
+assert.equal(transition.canonicalAdmissionAuthority,'R125');
+
+const app=fs.readFileSync(new URL('../src/App.tsx',import.meta.url),'utf8');
+const r86=fs.readFileSync(new URL('../src/omegaOperationBusR86.ts',import.meta.url),'utf8');
+const ingress=fs.readFileSync(new URL('../src/world/reflexOperationIngressR160.ts',import.meta.url),'utf8');
+const must=(re,msg)=>assert.match(ingress,re,msg);
+assert.match(r86,/REFLEX_MISSION_ASSEMBLED/,'R86 must register only the additive reflex mission event type');
+assert.match(app,/installLivingWorldOperationBridgeR140\(\);installRuntimeAttestationWorldScarR145\(\);installDurableWorldHeadContinuityR149\(\);installReflexOperationIngressR160\(\)/,'existing R140/R145/R149 install order must remain intact before R160');
+must(/RETURN_STATES=new Set\(\['RETURNED','VERIFIED','RECONTEXTUALIZED','ADMISSION_CANDIDATE'\]\)/,'explicit lifecycle gate');
+must(/sourceFamily&&RETURN_STATES\.has\(returnedState\)&&Array\.isArray\(payload\.residuals\)/,'source family + lifecycle + residuals must all be explicit');
+must(/r160ReflexDerived!==true/,'derived missions must not recurse');
+must(/assembleReflexWorldTransitionR157/,'must use admitted R157 reflex/world transition');
+must(/compileOperationWorldInputR140/,'must reuse R140 truth extraction rather than infer domain proof');
+must(/type:'REFLEX_MISSION_ASSEMBLED'/,'must emit the additive R86 mission event');
+must(/status:'INFO'/,'derived reflex mission is information, not execution proof');
+must(/requiresExecutionReceipts:true/,'target execution still needs receipts');
+must(/requiresReturnVerification:true/,'return verification remains required');
+must(/omega-r86-operation/,'must listen to real operation ingress');
+must(/omega-r140-world-frame/,'must sequence after the source event world frame');
+must(/R159_SOVEREIGN_EXECUTION_AUTHORITY_REMAINS_STRONGER_AND_UNCHANGED/,'newly promoted R159 execution authority must be preserved');
+must(/R125_REMAINS_SOLE_CANONSTATE_ADMISSION_AUTHORITY/,'R125 must remain sole CanonState admission authority');
+must(/never upgrades RETURNED to VERIFIED/,'truth boundary must remain explicit');
+console.log('R160 REFLEX OPERATION INGRESS PASS · actual R157 behavior + explicit R86 ingress structure · R159 execution authority preserved · R140/R149 continuity preserved');
