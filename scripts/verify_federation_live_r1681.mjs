@@ -72,3 +72,7 @@ async function verifyFederation(){
 for(const target of files)await verifyArtifact(target);
 await verifyFederation();
 console.log('R168.1 FEDERATION + RCWA PROPAGATION ATTESTATION PASS');
+
+if(String(process.env.OMEGA_PROMOTED_SHA||'').trim()){
+  await import('./verify_live_execution_control_r199.mjs');
+}
