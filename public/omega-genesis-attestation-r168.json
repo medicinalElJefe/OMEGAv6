@@ -1,0 +1,28 @@
+{
+  "schema": "OMEGA_GENESIS_ATTESTATION_R168",
+  "revision": "R168",
+  "canonicalAuthority": "OMEGAv6",
+  "canonicalAdmissionAuthority": "R125",
+  "state": "READY_TO_ATTEST_NOT_LIVE_CLAIM",
+  "dependsOn": ["R167", "Genesis R192 runtime evidence"],
+  "expected": {
+    "contract": "R192_SERVICE_BOUND_R1532_ATTESTED",
+    "genesisSurfaceService": "omega-genesis-v1",
+    "omegaV6Service": "omegav6",
+    "opticalService": "omega-optical-machine-r1532",
+    "opticalVersion": "R153.2",
+    "opticalAuthority": "SCREEN_ONLY",
+    "genesisRole": "PROPOSE"
+  },
+  "acceptanceLaw": [
+    "published Worker version ID must equal runtime Worker version ID",
+    "OMEGA_V6 must resolve to omegav6",
+    "OMEGA_OPTICAL must resolve to omega-optical-machine-r1532",
+    "Optical must report R153.2, adaptiveCycle=true, authority=SCREEN_ONLY, canonicalMutation=false",
+    "Genesis must remain role=PROPOSE and mayMutateGlobalCanonState=false",
+    "LIVE_VERIFIED is accepted only after all preceding predicates pass"
+  ],
+  "truthLaw": "reachable != writable != executed != verified != promoted",
+  "promotionLaw": "LIVE_VERIFIED does not grant global Canon admission; R125 remains the only canonical admission authority.",
+  "truthBoundary": "R168 does not claim Genesis R192 is deployed, does not replace the current omega-genesis-machine-r115 binding, does not mutate the R116 Worker spine or seven Durable Objects, and does not authorize the protected Optical Vercel surface."
+}
