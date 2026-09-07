@@ -1,0 +1,49 @@
+name: R173 Federation Ledger World Observer
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/world/federationLedgerWorldObserverR173.js'
+      - 'src/App.tsx'
+      - 'tests/r173-federation-ledger-world-observer-invariants.mjs'
+      - '.github/workflows/r173-federation-ledger-world-observer.yml'
+  push:
+    branches: [r173-live-federation-ledger-world-observer]
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r173-live-ledger-world-observer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove focused R173 live ledger observer
+        run: node tests/r173-federation-ledger-world-observer-invariants.mjs
+      - name: Preserve R172 trusted ledger world binding
+        run: node tests/r172-federation-ledger-world-binding-invariants.mjs
+      - name: Preserve R171 federation receipt world reconciliation
+        run: node tests/r171-federation-receipt-world-reconciler-invariants.mjs
+      - name: Preserve R114 durable federation closure law
+        run: node tests/r114-federation-closure-invariants.mjs
+      - name: Preserve R169 federation attestation world lens
+        run: node tests/r169-federation-attestation-world-lens-invariants.mjs
+      - name: Preserve R166 living residual world lens
+        run: node tests/r166-development-residual-world-lens-invariants.mjs
+      - name: Preserve Earth and computed-reality truth gates
+        run: |
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+      - name: Preserve R125 admission authority
+        run: node tests/r125-accuracy-engine-invariants.mjs
+      - name: Syntax-check R173
+        run: node --check src/world/federationLedgerWorldObserverR173.js
+      - name: Run inherited regression and production build
+        run: npm run check
+      - name: Prove canonical Worker package remains deployable
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r173-dry-run
