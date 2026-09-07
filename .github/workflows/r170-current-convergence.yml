@@ -28,10 +28,11 @@ jobs:
         run: |
           node --check src/world/verifiedExecutionWorldReconcilerR182.js
           node tests/r182-verified-execution-world-reconciliation-invariants.mjs
-      - name: Prove R182/R183 visual coherence and recovered charting atlas
+      - name: Prove R182-R185 visual, atlas, interference and reconstruction chain
         run: |
           node tests/r182-visual-coherence-restoration-invariants.mjs
           node tests/r183-visual-atlas-invariants.mjs
+          node tests/r184-r185-interference-reconstruction-invariants.mjs
       - name: Prove R180 current-authority convergence contract
         run: node tests/r180-current-authority-convergence-invariants.mjs
       - name: Prove bounded active workflow topology and R170.3 self-build governance
@@ -91,8 +92,9 @@ jobs:
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
       - name: Summarize current convergence boundary
         run: |
-          echo 'R183 VISUAL ATLAS + R182 VERIFIED-RETURN RECONCILIATION PASS over preserved R170.3 / R180 dispatch authority.'
-          echo 'R183 recompiles the recovered charting canon into the live Visual Instrument without replacing R180 execution or R182 world-return truth.'
+          echo 'R185 MULTIPATH RECONSTRUCTION + R184 INTERFERENCE + R183 VISUAL ATLAS + R182 VERIFIED-RETURN PASS over preserved R170.3 / R180 dispatch authority.'
+          echo 'R183 recompiles the recovered charting canon into the live Visual Instrument; R184 resolves local interference over actual states; R185 compares bounded competing reconstruction chains on a Pareto frontier.'
+          echo 'R185 may retain bounded temporary local worsening only when evidence, scar, reversibility, motion-consistency and final residual gates remain satisfied; it never invents corrected packet values or mutates CanonState.'
           echo 'R175 world truth → R176 intent → R177 mission composition → R178 contract resolution → R179 durable authorization → R180 separately confirmed dispatch → R182 verified-return proof/scar continuity remains explicitly proved.'
           echo 'R147 remains dispatch authority; R146 remains durable lifecycle authority; R134 remains world proof/scar continuity authority.'
           echo 'Hybrid/Build host execution remains separately confirmed and proof-gated.'
