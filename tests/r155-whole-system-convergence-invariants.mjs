@@ -65,7 +65,7 @@ for(const endpoint of ['/api/runtime-now-r154','/api/relative-capacity-r154'])mu
 must(worker27.includes('not claimed to be an independently calibrated UTC metrology source'),'runtime-clock metrology boundary missing');
 must(worker116.includes("from './workerR115.js'")||worker116.includes('workerR115'),'R116 must remain the public successor Worker chain rather than a new R155 Worker');
 
-must(!manifest.truthBoundary.match(/candidate families canonical/i),'candidate family listing may not imply canonical promotion');
-must(manifest.truthBoundary.includes('does not make candidate families canonical'),'candidate/canonical boundary must remain explicit');
+must(manifest.truthBoundary.includes('does not make candidate families canonical'),'candidate/canonical non-promotion boundary must remain explicit');
+must(manifest.truthBoundary.includes('Every family remains subject to its own focused proof'),'family promotion must remain proof-gated');
 
 console.log('R155 WHOLE-SYSTEM CONVERGENCE PASS · 11 capability families · 3 admitted-main + 5 integrated-candidate + 3 integration-target · one R116 Worker · one R125 CanonState authority · R153 completion inventory + R151/R152/R153-NOW/R154 semantics reconciled without revision-number authority');
