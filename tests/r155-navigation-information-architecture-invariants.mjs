@@ -20,7 +20,6 @@ for(const token of [
  "item?.hint",
  "effectLabel(item?.effect)",
  "authorityLabel(item?.authority)",
- "className='r155-current-route'",
  "className='r155-context-details'",
  "className='r155-route-list'",
  "Search by goal: build, proof, motion, PC…",
@@ -35,6 +34,7 @@ for(const token of [
  'Connect PC'
 ])assert(shell.includes(token),`R155 shell missing ${token}`);
 
+assert.match(shell,/className='[^']*\br155-current-route\b[^']*'/,'R155 current-instrument class must remain present even when additive successor classes are layered beside it');
 assert.match(shell,/routeSearchText=\(name:string\)=>\{const item=omegaNavItem\(name\);return `\$\{name\} \$\{item\?\.hint\|\|''\} \$\{item\?\.group\|\|''\} \$\{item\?\.effect\|\|''\} \$\{item\?\.authority\|\|''\}`\.toLowerCase\(\)\}/,'R155 search must discover routes by purpose and truth metadata, not only route names');
 assert.match(shell,/onClick=\{\(\)=>\{onNavigate\(name\);close\?\.\(\)\}\}/,'R155 route controls must retain direct navigation');
 assert.match(shell,/r155-context-details[^>]*><summary>/,'R155 diagnostic packet must be progressively disclosed');
