@@ -8,9 +8,13 @@ on:
       - 'src/LivingWorldPulseR174.tsx'
       - 'src/livingWorldPulseR174.css'
       - 'src/interfacePolishR203.css'
+      - 'src/MissionWorldContinuityR206.tsx'
+      - 'src/missionWorldContinuityR206.css'
+      - 'src/HybridMissionControl.tsx'
       - 'src/App.tsx'
       - 'tests/r174-living-world-pulse-invariants.mjs'
       - 'tests/r203-interface-navigation-polish-invariants.mjs'
+      - 'tests/r206-world-mission-continuity-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -27,6 +31,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R206 world mission continuity bridge
+        run: node tests/r206-world-mission-continuity-invariants.mjs
       - name: Prove R203 interface and navigation polish
         run: node tests/r203-interface-navigation-polish-invariants.mjs
       - name: Prove focused R174 living-world pulse
