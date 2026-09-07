@@ -1,6 +1,6 @@
 {
   "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
-  "revision": "R170.2",
+  "revision": "R170.3",
   "authority": "OMEGAV6",
   "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
   "currentCapabilityFloor": "R175",
@@ -35,7 +35,10 @@
     "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and remains independently addressable at the recorded pre-R170 source commit/tree, but is no longer an automatic GitHub Actions execution authority."
   },
   "selfBuild": {
-    "schedule": "17 */6 * * *",
+    "schedule": "17 * * * *",
+    "cadence": "HOURLY_OBSERVATION",
+    "idlePulseCostPolicy": "NO_DEPENDENCY_INSTALL_OR_FULL_REGRESSION_UNLESS_STATUS_PROPOSE",
+    "candidateProofCost": "ON_PROPOSAL_ONLY",
     "maxAutonomousGenerations": 5,
     "candidatePolicy": "ONE_CAPSULE_ONE_BRANCH_ONE_PROOF_RECEIPT_ONE_PR",
     "exactProductionHeadRequired": true,
@@ -47,6 +50,8 @@
     "highOrCriticalAutoRepair": false,
     "residualAuthority": "R164",
     "successorContinuityProof": "scripts/prove_successor_workflow_invariants_r175.mjs",
+    "successorProofBeforeGeneration": true,
+    "successorProofAfterGeneration": true,
     "canonicalAdmissionAuthority": "R125"
   },
   "preservedRuntime": {
@@ -59,5 +64,5 @@
     "livingWorldTruthSurface": "R175_READ_ONLY_MULTI_DOMAIN"
   },
   "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
-  "truthBoundary": "R170.2/R175.1 may autonomously observe and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run and all current read-only successor invariants pass. R175 living-world truth remains a read-only projection. Otherwise self-build remains OBSERVE_ONLY or fails closed. It cannot directly mutate main, auto-merge, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
+  "truthBoundary": "R170.3/R175 observes current production and residual state hourly, but may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run and all current read-only successor invariants pass before generation. Dependency installation, full inherited regression and Worker package proofs are proposal-only so idle observation remains cheap. Every generated candidate is re-proved before an isolated PR is opened. It cannot directly mutate main, auto-merge, recursively trigger workflows, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
 }
