@@ -7,6 +7,9 @@ const earth=read('src/EarthObservatoryR8.tsx');
 const r8=read('src/workerR8.js');
 const r116=read('src/workerR116.js');
 const wrangler=read('wrangler.jsonc');
+const governor=JSON.parse(read('public/omega-r170-self-build-governor.json'));
+const convergence=read('.github/workflows/r170-current-convergence.yml');
+const selfbuild=read('.github/workflows/r170-governed-selfbuild.yml');
 
 // New sensor surface must be additive and source-bound.
 for(const token of [
@@ -37,4 +40,13 @@ must(r116.includes("import r115,{OmegaRuntime as OmegaRuntimeR115} from './worke
 must(r116.includes('export class OmegaRuntime extends OmegaRuntimeR115'),'R181 must preserve durable OmegaRuntime lineage');
 for(const token of ['R125','R141','R146','R147','R152','R163'])must(r116.includes(token),`R181 must preserve current authority/proof layer ${token}`);
 
-console.log('OMEGA R181 REAL SAR EARTH PASS · additive Sentinel-1/NISAR source discovery + relative-frame metadata calculus + footprint/continuity view · R8 Earth/Hybrid preserved · R116 authority unchanged');
+// R181 is the current capability floor, not a promotion of execution or Canon authority.
+must(governor.currentCapabilityFloor==='R181','Governed current capability floor must advance to R181');
+must(governor.preservedRuntime?.livingWorldExecutionAuthorization==='R179_AUTHORIZED_NOT_DISPATCHED','R181 must not promote the durable execution boundary past R179');
+must(governor.preservedRuntime?.earthSarAuthority==='OBSERVATION_AND_DERIVATION_ONLY_NOT_CANON_ADMISSION','R181 SAR must remain observation/derivation-only authority');
+must(governor.selfBuild?.canonicalAdmissionAuthority==='R125','R125 must remain sole Canon admission authority');
+must(convergence.includes('node tests/r181-real-sar-earth-invariants.mjs'),'Current convergence must explicitly prove R181');
+must(convergence.includes('R179 stops AUTHORIZED_NOT_DISPATCHED'),'Current convergence must preserve R179 execution stop');
+must(selfbuild.includes('node tests/r181-real-sar-earth-invariants.mjs'),'Governed self-build must re-prove R181 before/after candidate generation');
+
+console.log('OMEGA R181 REAL SAR EARTH PASS · additive Sentinel-1/NISAR source discovery + relative-frame metadata calculus + footprint/continuity view · R8 Earth/Hybrid preserved · R181 capability floor + R179 execution stop + R125 Canon admission preserved');
