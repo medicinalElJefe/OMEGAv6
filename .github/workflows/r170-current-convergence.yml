@@ -26,6 +26,8 @@ jobs:
       - run: npm install --no-fund
       - name: Prove R180 current-authority convergence contract
         run: node tests/r180-current-authority-convergence-invariants.mjs
+      - name: Prove R181 source-backed SAR Earth successor
+        run: node tests/r181-real-sar-earth-invariants.mjs
       - name: Prove bounded active workflow topology and R170.3 self-build governance
         run: |
           node scripts/verify_workflow_topology_r170.mjs
@@ -82,8 +84,9 @@ jobs:
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
       - name: Summarize current convergence boundary
         run: |
-          echo 'R180 CURRENT CONVERGENCE PASS over R170.3 / deployed R179 authority.'
-          echo 'R175 world truth → R176 intent → R177 mission composition → R178 contract resolution → R179 durable authorization is explicitly proved.'
+          echo 'R181 CURRENT CAPABILITY CONVERGENCE PASS over R170.3 / deployed R179 execution authority.'
+          echo 'R175 world truth → R176 intent → R177 mission composition → R178 contract resolution → R179 durable authorization remains explicitly proved.'
+          echo 'R181 adds source-backed Sentinel-1/NISAR Earth observation and derived metadata diagnostics without gaining dispatch or Canon authority.'
           echo 'The deployed R164 mobile-containment repair is retained in the same current chain.'
           echo 'R170.3 remains hourly low-cost OBSERVE/PROPOSE control; expensive proof remains PROPOSE-only.'
           echo 'Post-R170 successor workflows remain dynamically proof-tested and read-only.'
