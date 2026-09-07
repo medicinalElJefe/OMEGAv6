@@ -45,7 +45,7 @@ export default function EarthObservatoryR8({address}:Props){
     <button className='earth-r72-reset' onClick={()=>{setLat(initial.lat);setLon(initial.lon);void loadAt(initial.lat,initial.lon)}}>Return to model-mapped target</button>
     <div className='earth-r72-focus-head'><b>Evidence layers</b><button className={focus==='ALL'?'active':''} onClick={()=>setFocus('ALL')}>Show all</button></div>
     <div className='earth-r72-focus'>{focusRows.map(row=><button key={row.id} className={focus===row.id?'active':''} onClick={()=>setFocus(v=>v===row.id?'ALL':row.id)}>{row.icon}<span><b>{row.label}</b><strong>{row.value}</strong><small>{row.detail}</small></span></button>)}</div>
-    <div className='earth-r72-truth'><ShieldCheck/><span><b>{boundEvidence?.evidenceHash?'RETURNED EVIDENCE BOUND':evidence&&!evidenceMatches?'TARGET CHANGED · REFRESH REQUIRED':'EVIDENCE NOT YET BOUND'}</b><small>{boundEvidence?.verifiedAt||evidenceTarget&&evidence&&!evidenceMatches?`Last evidence belongs to ${evidenceTarget.lat.toFixed(5)}, ${evidenceTarget.lon.toFixed(5)} and is withheld from this target.`:'No verification timestamp returned.'}</small></span></div>
+    <div className='earth-r72-truth'><ShieldCheck/><span><b>{boundEvidence?.evidenceHash?'RETURNED EVIDENCE BOUND':evidence&&!evidenceMatches?'TARGET CHANGED · REFRESH REQUIRED':'EVIDENCE NOT YET BOUND'}</b><small>{boundEvidence?.verifiedAt||(evidenceTarget&&evidence&&!evidenceMatches?`Last evidence belongs to ${evidenceTarget.lat.toFixed(5)}, ${evidenceTarget.lon.toFixed(5)} and is withheld from this target.`:'No verification timestamp returned.')}</small></span></div>
    </aside>
   </div>
   {error&&<div className='earth-r8-error'>{error}</div>}
