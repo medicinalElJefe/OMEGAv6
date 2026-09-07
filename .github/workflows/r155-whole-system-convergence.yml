@@ -23,9 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - name: Install exact dependency lock
-        run: npm ci
+      - name: Install repository dependencies
+        run: npm install --no-fund
       - name: Reject high-severity dependency regressions
         run: npm audit --audit-level=high
       - name: Prove R155 family authority and one-system convergence
