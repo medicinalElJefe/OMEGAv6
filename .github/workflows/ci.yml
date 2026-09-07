@@ -254,6 +254,12 @@ jobs:
           if(String(chat.reply||'').trim().length<12) throw new Error('live AI returned an empty/insufficient reply');
           console.log(`OMEGA LIVE AI PASS · ${chat.provider} · route ${route.route}`);
           NODE
+      - name: Verify deployed R190 browser computation
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+          OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r191-live-r190-browser-e2e.mjs
       - name: Record deployment receipt
         if: always()
         shell: bash
@@ -270,5 +276,6 @@ jobs:
             echo "- Live AI synthesis: required for deployment PASS"
             echo "- R8 Earth/NOAA + Hybrid V90 contracts: required for deployment PASS"
             echo "- R9 Earth ground source hierarchy: required for deployment PASS"
+            echo "- R191 deployed desktop/mobile R190 browser + operator-invoked 20,736-state scan: required for deployment PASS"
             echo "- Hybrid native execution: VERIFIED_DEVICE_ONLINE requires a current authenticated non-revoked heartbeat; otherwise DEVICE_PROOF_REQUIRED"
           } >> "$GITHUB_STEP_SUMMARY"
