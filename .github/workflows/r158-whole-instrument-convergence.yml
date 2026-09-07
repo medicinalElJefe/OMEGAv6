@@ -1,0 +1,49 @@
+name: OMEGA R158 Whole Instrument Convergence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r158-whole-instrument-convergence]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r158-whole-instrument-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r158:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Prove R158 whole-instrument convergence
+        run: node tests/r158-whole-instrument-convergence-invariants.mjs
+      - name: Preserve R157, R156 and R155 behavioral/runtime convergence
+        run: |
+          node tests/r157-reflex-living-world-transition-invariants.mjs
+          node tests/r156-organism-reflex-fabric-invariants.mjs
+          node tests/r155-whole-system-convergence-invariants.mjs
+      - name: Preserve global navigation, calculus fabric and route inventory
+        run: |
+          node tests/r88-global-side-navigator-invariants.mjs
+          node tests/r107-full-calculus-capability-fabric-invariants.mjs
+          node tests/r110-runtime-aware-working-set-invariants.mjs
+      - name: Preserve proof, Hybrid, world and admission authorities
+        run: |
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r158-dry-run
