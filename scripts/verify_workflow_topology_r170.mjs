@@ -1,19 +1,73 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+
 const activeDir='.github/workflows';
 const archiveDir='.github/workflows-archive';
-const expectedActive=['ci.yml','r168-1-rcwa-byte-diagnostic.yml','r168-genesis-r192-attestation.yml','r169-federation-attestation-world-lens.yml','r170-current-convergence.yml','r170-governed-selfbuild.yml'].sort();
+const coreRequired=[
+  'ci.yml',
+  'r168-1-rcwa-byte-diagnostic.yml',
+  'r168-genesis-r192-attestation.yml',
+  'r169-federation-attestation-world-lens.yml',
+  'r170-current-convergence.yml',
+  'r170-governed-selfbuild.yml'
+].sort();
 const active=fs.readdirSync(activeDir).filter(x=>/\.ya?ml$/i.test(x)).sort();
-assert.deepEqual(active,expectedActive,`active workflow set drifted: ${JSON.stringify(active)}`);
+const governor=JSON.parse(fs.readFileSync('public/omega-r170-self-build-governor.json','utf8'));
+const successorPolicy=governor.successorWorkflowPolicy||{};
+const maxActive=Number(successorPolicy.maxActiveWorkflowAuthorities||24);
+const minimumSuccessorRevision=Number(successorPolicy.minimumSuccessorRevision||171);
+
+for(const required of coreRequired)assert.ok(active.includes(required),`required current workflow missing: ${required}`);
+assert.ok(active.length<=maxActive,`active workflow authority count ${active.length} exceeds governed bound ${maxActive}`);
 assert.equal(fs.existsSync(archiveDir),true,'historical workflow archive missing');
 const archived=fs.readdirSync(archiveDir).filter(x=>/\.ya?ml$/i.test(x));
 assert.ok(archived.length>=40,`historical archive unexpectedly small: ${archived.length}`);
 for(const required of ['r124-self-contained-continuous-build.yml','r124-selfbuild-gate.yml'])assert.ok(archived.includes(required),`dangerous historical self-build workflow not archived: ${required}`);
+
 const contents=new Map(active.map(name=>[name,fs.readFileSync(path.join(activeDir,name),'utf8')]));
-for(const [name,text] of contents){assert.ok(!/^\s*workflow_run\s*:/m.test(text),`${name} reintroduced workflow_run`);assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(text),`${name} directly mutates main`);assert.ok(!/gh\s+pr\s+merge/i.test(text),`${name} auto-merges`);if(name!=='r170-governed-selfbuild.yml')assert.ok(!/contents:\s*write/i.test(text),`${name} has unexpected write authority`)}
-const selfbuild=contents.get('r170-governed-selfbuild.yml');assert.match(selfbuild,/schedule:/);assert.match(selfbuild,/workflow_dispatch:/);assert.ok(!/^\s*push\s*:/m.test(selfbuild));assert.ok(!/^\s*pull_request\s*:/m.test(selfbuild));assert.match(selfbuild,/gh\s+pr\s+create/);assert.match(selfbuild,/gh run list/);assert.match(selfbuild,/production_ready/);assert.match(selfbuild,/OBSERVE_ONLY/);
+function triggerBlock(text,trigger){
+  const lines=text.split(/\r?\n/);
+  for(let i=0;i<lines.length;i++){
+    const m=lines[i].match(/^(\s*)([A-Za-z0-9_-]+):(?:\s*(.*))?$/);
+    if(!m||m[1].length!==2||m[2]!==trigger)continue;
+    const block=[lines[i]];
+    for(let j=i+1;j<lines.length;j++){
+      if(!lines[j].trim()){block.push(lines[j]);continue}
+      const indent=(lines[j].match(/^\s*/)?.[0].length)||0;
+      if(indent<=2)break;
+      block.push(lines[j]);
+    }
+    return block.join('\n');
+  }
+  return '';
+}
+
+const successors=[];
+for(const [name,text] of contents){
+  assert.ok(!/^\s*workflow_run\s*:/m.test(text),`${name} reintroduced workflow_run`);
+  assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(text),`${name} directly mutates main`);
+  assert.ok(!/gh\s+pr\s+merge/i.test(text),`${name} auto-merges`);
+  assert.ok(!/gh\s+workflow\s+run/i.test(text),`${name} recursively dispatches workflows`);
+  if(name==='r170-governed-selfbuild.yml')continue;
+  assert.ok(!/contents:\s*write/i.test(text),`${name} has unexpected contents write authority`);
+  if(coreRequired.includes(name))continue;
+
+  const match=name.match(/^r(\d+)(?:[-.].*)?\.ya?ml$/i);
+  assert.ok(match,`unregistered non-successor workflow authority: ${name}`);
+  const revision=Number(match[1]);
+  assert.ok(revision>=minimumSuccessorRevision,`${name} is not a post-R170 successor workflow`);
+  assert.match(text,/permissions:\s*\n\s+contents:\s*read/i,`${name} must declare read-only contents authority`);
+  assert.ok(!/\b(contents|pull-requests|actions|deployments|checks|statuses|issues|packages|id-token|security-events):\s*write\b/i.test(text),`${name} successor workflow has write authority`);
+  const push=triggerBlock(text,'push');
+  if(push)assert.ok(!/\bmain\b/i.test(push),`${name} successor workflow may not push-trigger on main`);
+  assert.equal(triggerBlock(text,'schedule'),' ',`${name} successor workflow may not schedule recurring execution`);
+  successors.push({name,revision});
+}
+
+const selfbuild=contents.get('r170-governed-selfbuild.yml');
+assert.match(selfbuild,/schedule:/);assert.match(selfbuild,/workflow_dispatch:/);assert.ok(!/^\s*push\s*:/m.test(selfbuild));assert.ok(!/^\s*pull_request\s*:/m.test(selfbuild));assert.match(selfbuild,/gh\s+pr\s+create/);assert.match(selfbuild,/gh run list/);assert.match(selfbuild,/production_ready/);assert.match(selfbuild,/OBSERVE_ONLY/);assert.match(selfbuild,/prove_successor_workflow_invariants_r175\.mjs/);
 const ci=contents.get('ci.yml');assert.match(ci,/Promoted main commit must be an exact two-parent merge commit/);assert.match(ci,/verify_federation_live_r1681\.mjs/,'canonical CI must delegate live Federation/Optical identity proof to the propagation-safe verifier');
-const convergence=contents.get('r170-current-convergence.yml');for(const needle of ['r167-active-optical-r1532-convergence-invariants.mjs','r1532-adaptive-external-search-invariants.mjs','wrangler.optical-machine-r1532.jsonc'])assert.ok(convergence.includes(needle),`current convergence missing explicit Optical R153.2 proof: ${needle}`);
-const governor=JSON.parse(fs.readFileSync('public/omega-r170-self-build-governor.json','utf8'));assert.equal(governor.historicalWorkflowArchive.historicalExecutionAuthority,false);assert.equal(governor.selfBuild.exactProductionHeadRequired,true);assert.equal(governor.selfBuild.autoMerge,false);assert.equal(governor.selfBuild.directMainMutation,false);
-console.log(JSON.stringify({schema:'OMEGA_WORKFLOW_TOPOLOGY_R170_1',activeCount:active.length,active,archivedCount:archived.length,directMainCandidateMutation:false,recursiveWorkflowRunFanout:false,productionProofRequired:true,opticalProofDelegation:'ci->verify_federation_live_r1681 + current-convergence->R153.2 suites',canonicalAdmissionAuthority:'R125',result:'PASS'},null,2));
+const convergence=contents.get('r170-current-convergence.yml');for(const needle of ['prove_successor_workflow_invariants_r175.mjs','r167-active-optical-r1532-convergence-invariants.mjs','r1532-adaptive-external-search-invariants.mjs','wrangler.optical-machine-r1532.jsonc'])assert.ok(convergence.includes(needle),`current convergence missing proof: ${needle}`);
+assert.equal(governor.historicalWorkflowArchive.historicalExecutionAuthority,false);assert.equal(governor.selfBuild.exactProductionHeadRequired,true);assert.equal(governor.selfBuild.autoMerge,false);assert.equal(governor.selfBuild.directMainMutation,false);assert.equal(successorPolicy.readOnly,true);assert.equal(successorPolicy.mainPushAllowed,false);assert.equal(successorPolicy.recurringScheduleAllowed,false);
+console.log(JSON.stringify({schema:'OMEGA_WORKFLOW_TOPOLOGY_R170_2',activeCount:active.length,coreCount:coreRequired.length,successorCount:successors.length,successors,archivedCount:archived.length,maxActive,directMainCandidateMutation:false,recursiveWorkflowRunFanout:false,productionProofRequired:true,successorPolicy:'READ_ONLY_BRANCH_OR_PR_PROOF_AUTHORITIES',canonicalAdmissionAuthority:'R125',result:'PASS'},null,2));
