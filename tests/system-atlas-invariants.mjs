@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-const runtime=fs.readFileSync('src/systemAtlasRuntime.ts','utf8'),predecessor=fs.readFileSync('src/systemAtlasPredecessor.ts','utf8'),ui=fs.readFileSync('src/SystemAtlasControl.tsx','utf8'),router=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8'),loader=fs.existsSync('src/specialistLoaderR109.tsx')?fs.readFileSync('src/specialistLoaderR109.tsx','utf8'):'';
+const runtime=fs.readFileSync('src/systemAtlasRuntime.ts','utf8'),predecessor=fs.readFileSync('src/systemAtlasPredecessor.ts','utf8'),completion=fs.readFileSync('src/completionRuntimeR48.ts','utf8'),ui=fs.readFileSync('src/SystemAtlasControl.tsx','utf8'),router=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8'),loader=fs.existsSync('src/specialistLoaderR109.tsx')?fs.readFileSync('src/specialistLoaderR109.tsx','utf8'):'';
 const must=(x,m)=>{if(!x)throw new Error(m)};
 for(const x of ['61917364224','20736','SUBSYSTEM_COUNT=24','PHASE_COUNT=12','STREAM_COUNT=4','GRID_CELLS=27648','ONE FIELD / ONE PACKET / ONE CONTINUITY LAW'])must(runtime.includes(x),`missing donor invariant ${x}`);
 const families=[...runtime.matchAll(/F\('S(\d\d)'/g)].map(x=>x[1]);must(families.length===24,`expected 24 families, got ${families.length}`);must(new Set(families).size===24,'family IDs must be unique');
@@ -14,8 +14,17 @@ must(predecessor.includes("S21','Cinematic Field Renderer','IMAGE_SNAPSHOT_OF_SU
 must(predecessor.includes("S22','Omega Installer / One-Click Shell','DESKTOP_STARTUP_PACKAGER','SUPPORT','NATIVE_TARGET'"),'V23 installer lineage missing');
 must(runtime.includes("S22','Omega Installer / One-Click Shell','DESKTOP_STARTUP_PACKAGER'"),'active S22 must match authoritative v22 installer family');
 must(runtime.includes("S23','Runtime API / WebSocket Service','LIVE_STATE_TRANSPORT'"),'active S23 must match authoritative v22 runtime transport family');
-must(runtime.includes('not a claim of physical dimensions'),'physical-dimension truth boundary missing');must(ui.includes('Execution truth boundary'),'UI execution boundary missing');must(ui.includes('No fake OPEN button'),'non-executable family must not expose a fake Open action');must(ui.includes('Export truth receipt'),'truth receipt export missing');must(router.includes("case 'System Atlas'")&&router.includes("case 'Control Matrix'"),'System Atlas direct routes must remain');
+must(completion.includes("S10:{successor:'SOURCE_ACTIVE',surface:'Matter Traversal'")&&completion.includes("S12:{successor:'LOCAL_ACTIVE',surface:'Build Out'")&&completion.includes("S21:{successor:'LOCAL_ACTIVE',surface:'Visual Instrument'"),'restored family successor surfaces must remain explicit');
+must(runtime.includes('not a claim of physical dimensions'),'physical-dimension truth boundary missing');
+must(ui.includes('Execution truth boundary'),'UI execution boundary missing');
+must(ui.includes('No fake OPEN button'),'non-executable family must not expose a fake Open action');
+must(ui.includes("const currentRouteOf=(surface:string|undefined,fallback:string)=>String(surface||fallback||'System Atlas').split('/')[0].trim()"),'current successor surface must normalize to a registered primary route');
+must(ui.includes('currentRoute=currentRouteOf(current?.surface,cell.family.target)'),'selected family launch must derive from current successor surface');
+must(ui.includes("canOpen=Boolean(current&&currentExecutable.has(current.successor)&&currentRoute!=='System Atlas')"),'Open eligibility must use current successor status and route');
+must(ui.includes('onClick={()=>onNavigate(currentRoute)}')&&ui.includes('OPEN {currentRoute.toUpperCase()}'),'Open action must launch current successor route rather than predecessor target');
+must(ui.includes('V24 predecessor target')&&ui.includes('Current operator route'),'UI must show predecessor target and current route separately');
+must(ui.includes('Export truth receipt'),'truth receipt export missing');must(router.includes("case 'System Atlas'")&&router.includes("case 'Control Matrix'"),'System Atlas direct routes must remain');
 const eagerSystem=router.includes("import SystemAtlasControl from './SystemAtlasControl'")&&router.includes('<SystemAtlasControl record={record} onNavigate={go}');
 const deferredSystem=loader.includes("SystemAtlasControl:()=>import('./SystemAtlasControl')")&&loader.includes('export const SystemAtlasR109=lazy(LOADERS.SystemAtlasControl)')&&router.includes('<SystemAtlasR109 record={record} onNavigate={go}');
 must(eagerSystem||deferredSystem,'dedicated System Atlas control must remain mounted through eager or R109 deferred binding');
-console.log('SYSTEM_ATLAS V23→V24/R109 LINEAGE PASS · 24 active inventory families · predecessor evidence retained · execution reality classified · deferred System Atlas routes preserved');
+console.log('SYSTEM_ATLAS R168 PASS · 24-family V23/V24 lineage preserved · current R48/R153 successor status and operator route separated from predecessor target · no fake Open · deferred routes preserved');
