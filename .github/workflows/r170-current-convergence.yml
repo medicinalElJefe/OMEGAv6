@@ -24,6 +24,10 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-fund
+      - name: Prove focused R182 verified-return world reconciliation
+        run: |
+          node --check src/world/verifiedExecutionWorldReconcilerR182.js
+          node tests/r182-verified-execution-world-reconciliation-invariants.mjs
       - name: Prove R180 current-authority convergence contract
         run: node tests/r180-current-authority-convergence-invariants.mjs
       - name: Prove bounded active workflow topology and R170.3 self-build governance
@@ -83,9 +87,10 @@ jobs:
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
       - name: Summarize current convergence boundary
         run: |
-          echo 'R180 CURRENT CONVERGENCE PASS over R170.3 / living-world dispatch successor authority.'
-          echo 'R175 world truth → R176 intent → R177 mission composition → R178 contract resolution → R179 durable authorization → R180 separately confirmed dispatch is explicitly proved.'
-          echo 'R147 remains dispatch authority; Hybrid/Build host execution remains separately confirmed and proof-gated.'
+          echo 'R182 VERIFIED-RETURN RECONCILIATION PASS over preserved R170.3 / R180 dispatch authority.'
+          echo 'R175 world truth → R176 intent → R177 mission composition → R178 contract resolution → R179 durable authorization → R180 separately confirmed dispatch → R182 verified-return proof/scar continuity is explicitly proved.'
+          echo 'R147 remains dispatch authority; R146 remains durable lifecycle authority; R134 remains world proof/scar continuity authority.'
+          echo 'Hybrid/Build host execution remains separately confirmed and proof-gated.'
           echo 'The deployed R164 mobile-containment repair is retained in the same current chain.'
           echo 'R170.3 remains hourly low-cost OBSERVE/PROPOSE control; expensive proof remains PROPOSE-only.'
           echo 'Post-R170 successor workflows remain dynamically proof-tested and read-only.'
