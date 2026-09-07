@@ -1,0 +1,33 @@
+name: R204 Forensic Continuity Ledger
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r204:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install --no-fund
+      - name: Audit locked dependency tree
+        run: npm audit --audit-level=high
+      - name: Prove R204 source and Drive forensic boundaries
+        run: |
+          node --check scripts/forensicContinuityR204.mjs
+          node tests/r204-forensic-continuity-invariants.mjs
+      - name: Build and prove emitted forensic ledger
+        run: |
+          npm run build
+          node tests/r204-forensic-continuity-invariants.mjs
+      - name: Preserve inherited system and packaging proofs
+        run: |
+          npm run check
+          npx wrangler deploy --dry-run --outdir .wrangler-r204
