@@ -1,4 +1,4 @@
-name: OMEGA R124/R169 Geometric Motion Continuous Build
+name: OMEGA R124 Self-Contained Continuous Build
 
 on:
   workflow_dispatch:
