@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 const APPLY=process.env.OMEGA_R125_APPLY==='1';
 const RUNS_PATH=process.env.OMEGA_R125_RUNS_PATH||'/tmp/omega-r125-runs.json';
 const R124='public/omega-r124-selfbuild-state.json';
+const R164_MANIFEST='public/omega-r164-development-residual-graph.json';
 const OUT='public/omega-r125-accuracy-state.json';
 const PROPOSAL='public/omega-r125-proposal.json';
 const now=new Date().toISOString();
@@ -54,6 +55,20 @@ if(!r144Worker.includes('OMEGA_RUNTIME_DEPLOYMENT_ATTESTATION_R144'))r144Missing
 if(!r144Panel.includes('data-r144-runtime-attestation'))r144Missing.push('src/GovernedBuildReceiptPanel.tsx#data-r144-runtime-attestation');
 if(r144Missing.length)residuals.push({id:'R-R144-DEPLOYMENT-ATTESTATION-MISSING',kind:'DEPLOYMENT_ATTESTATION_FAILURE',severity:'HIGH',summary:'R144 runtime deployment-attestation authority is incomplete on disk.',evidence:r144Missing.map(x=>evidence('SOURCE',x,'required R144 deployment-attestation authority exists',false,true)),affected:r144Missing,reproducible:true});
 
+const r164Required=['src/system/developmentResidualGraphR164.js','tests/r164-development-residual-graph-invariants.mjs','.github/workflows/r164-development-residual-graph.yml',R164_MANIFEST];
+const r164Missing=r164Required.filter(x=>!exists(x));
+let r164Manifest=null;
+if(exists(R164_MANIFEST)){
+ try{r164Manifest=readJson(R164_MANIFEST)}catch{r164Missing.push(`${R164_MANIFEST}#VALID_JSON`)}
+}
+if(r164Manifest){
+ if(r164Manifest.schema!=='OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164'||r164Manifest.revision!=='R164')r164Missing.push(`${R164_MANIFEST}#SCHEMA_REVISION`);
+ if(r164Manifest.canonicalMutation!==false)r164Missing.push(`${R164_MANIFEST}#CANONICAL_MUTATION_FALSE`);
+ if(r164Manifest.autonomousMutationAuthority!==false)r164Missing.push(`${R164_MANIFEST}#AUTONOMOUS_MUTATION_AUTHORITY_FALSE`);
+ if(r164Manifest.canonicalAdmissionAuthority!=='R125')r164Missing.push(`${R164_MANIFEST}#R125_ADMISSION_AUTHORITY`);
+}
+if(r164Missing.length)residuals.push({id:'R-R164-DEVELOPMENT-RESIDUAL-GRAPH-MISSING',kind:'DEVELOPMENT_RESIDUAL_GRAPH_FAILURE',severity:'HIGH',summary:'R164 development residual/evidence graph authority is incomplete or violates its read-only R125 admission boundary.',evidence:r164Missing.map(x=>evidence('SOURCE',x,'required R164 residual-graph sensor authority is intact',false,true)),affected:r164Missing,reproducible:true});
+
 const advancedAuthorities=[
  {revision:'R151',id:'R-R151-ALL-MODES-FUSION-MISSING',kind:'ALL_MODES_FUSION_FAILURE',summary:'R151 provenance-weighted all-modes truth fusion or exact swarm census authority is incomplete.',required:['src/allModesTruthFusionR151.ts','src/allModesSwarmPartitionR151.ts','tests/r151-all-modes-truth-fusion-invariants.mjs','scripts/r151-full-atlas-scan.ts','.github/workflows/r151-all-modes-truth-fusion.yml']},
  {revision:'R152',id:'R-R152-UNIVERSAL-TRUTH-MISSING',kind:'UNIVERSAL_TRUTH_FAILURE',summary:'R152 universal evidence-to-all-modes truth envelope authority is incomplete.',required:['src/universalTruthEnvelopeR152.ts','tests/r152-universal-truth-envelope.mts','.github/workflows/r152-universal-truth-envelope.yml']},
@@ -77,8 +92,8 @@ if(exists(RUNS_PATH)){try{runs=readJson(RUNS_PATH)}catch{runs=[]}}
 for(const run of Array.isArray(runs)?runs:[]){
  if(run.status==='completed'&&run.conclusion&&run.conclusion!=='success'&&run.conclusion!=='skipped'){
   const workflowName=String(run.workflowName||'unknown');
-  const kind=/R154 Relative Capacity Fabric/i.test(workflowName)?'RELATIVE_CAPACITY_FAILURE':/R153 Lemma Motion NOW Continuity/i.test(workflowName)?'CAUSAL_NOW_LEMMA_FAILURE':/R152 Universal Truth Envelope/i.test(workflowName)?'UNIVERSAL_TRUTH_FAILURE':/R151 All Modes Truth Fusion/i.test(workflowName)?'ALL_MODES_FUSION_FAILURE':/R144 Runtime Deployment Attestation|Release Evidence Live Verify/i.test(workflowName)?'DEPLOYMENT_ATTESTATION_FAILURE':/R143 Authoritative UI Operation Chain/i.test(workflowName)?'UI_OPERATION_CHAIN_FAILURE':/R142 Proof Aware Capability Lifecycle/i.test(workflowName)?'EXECUTION_LIFECYCLE_FAILURE':'TEST_FAILURE';
-  const severity=['RELATIVE_CAPACITY_FAILURE','CAUSAL_NOW_LEMMA_FAILURE','UNIVERSAL_TRUTH_FAILURE','ALL_MODES_FUSION_FAILURE','DEPLOYMENT_ATTESTATION_FAILURE','UI_OPERATION_CHAIN_FAILURE','EXECUTION_LIFECYCLE_FAILURE'].includes(kind)?'HIGH':'MEDIUM';
+  const kind=/R164 Development Residual Graph/i.test(workflowName)?'DEVELOPMENT_RESIDUAL_GRAPH_FAILURE':/R154 Relative Capacity Fabric/i.test(workflowName)?'RELATIVE_CAPACITY_FAILURE':/R153 Lemma Motion NOW Continuity/i.test(workflowName)?'CAUSAL_NOW_LEMMA_FAILURE':/R152 Universal Truth Envelope/i.test(workflowName)?'UNIVERSAL_TRUTH_FAILURE':/R151 All Modes Truth Fusion/i.test(workflowName)?'ALL_MODES_FUSION_FAILURE':/R144 Runtime Deployment Attestation|Release Evidence Live Verify/i.test(workflowName)?'DEPLOYMENT_ATTESTATION_FAILURE':/R143 Authoritative UI Operation Chain/i.test(workflowName)?'UI_OPERATION_CHAIN_FAILURE':/R142 Proof Aware Capability Lifecycle/i.test(workflowName)?'EXECUTION_LIFECYCLE_FAILURE':'TEST_FAILURE';
+  const severity=['DEVELOPMENT_RESIDUAL_GRAPH_FAILURE','RELATIVE_CAPACITY_FAILURE','CAUSAL_NOW_LEMMA_FAILURE','UNIVERSAL_TRUTH_FAILURE','ALL_MODES_FUSION_FAILURE','DEPLOYMENT_ATTESTATION_FAILURE','UI_OPERATION_CHAIN_FAILURE','EXECUTION_LIFECYCLE_FAILURE'].includes(kind)?'HIGH':'MEDIUM';
   residuals.push({id:`R-CI-${run.databaseId||hash(run).slice(0,8)}`,kind,severity,summary:`Workflow ${workflowName} concluded ${run.conclusion}.`,evidence:[evidence('TEST',run.url||'github-actions',`workflow conclusion is ${run.conclusion}`,run.conclusion,true),evidence('SOURCE',run.headSha||'unknown','observed head SHA',run.headSha||'unknown',true)],affected:[workflowName],reproducible:false});
  }
 }
@@ -104,9 +119,9 @@ function generateCapabilityIndex(){
 
 let repair=null;
 if(APPLY&&selected){if(selected.id==='R-CAPABILITY-INDEX-MISSING')repair=generateCapabilityIndex();else throw new Error('No registered deterministic repair for '+selected.id)}
-const semantic={residuals:ranked.map(r=>({id:r.id,kind:r.kind,severity:r.severity,mode:r.mode,confidence:r.confidence,affected:r.affected,evidence:r.evidence.map(e=>({kind:e.kind,source:e.source,claim:e.claim,verified:e.verified,value:e.value}))})),selected:selected?.id??null,repair:repair?{changed:repair.changed,proof:repair.proof}:null,r124Generation:s124?.generation??null,r124Admitted:s124?.admitted??[],r143AuthorityComplete:r143Missing.length===0,r144AttestationComplete:r144Missing.length===0,advancedAuthorityState,githubRunsObserved:runs.length};
-const state={schema:'omega.accuracy.r125.v3',authority:'OMEGAV6',observedAt:now,mode:repair?'REPAIRED':selected?'PROPOSE':ranked.length?'OBSERVE':'HEALTHY',accuracyPolicy:{mutationRequiresVerifiedEvidence:true,autoRepairMinConfidence:.92,autoRepairRisk:'LOW_ONLY',criticalResidualBlocks:true,unreproducibleResidualAutoRepair:false,observationOnlyNeverMutatesMain:true,advancedTruthCapacityFailuresNeverAutoRepair:true},residuals:ranked,selected:selected?selected.id:null,repair,sourceState:{r124Generation:s124?.generation??null,r124Admitted:s124?.admitted??[],r143AuthorityComplete:r143Missing.length===0,r144AttestationComplete:r144Missing.length===0,advancedAuthorityState,githubRunsObserved:runs.length},lineage:{baseSha:process.env.GITHUB_SHA||'UNKNOWN',semanticFingerprint:hash(semantic),stateSha256:''}};
+const semantic={residuals:ranked.map(r=>({id:r.id,kind:r.kind,severity:r.severity,mode:r.mode,confidence:r.confidence,affected:r.affected,evidence:r.evidence.map(e=>({kind:e.kind,source:e.source,claim:e.claim,verified:e.verified,value:e.value}))})),selected:selected?.id??null,repair:repair?{changed:repair.changed,proof:repair.proof}:null,r124Generation:s124?.generation??null,r124Admitted:s124?.admitted??[],r143AuthorityComplete:r143Missing.length===0,r144AttestationComplete:r144Missing.length===0,r164ResidualGraphComplete:r164Missing.length===0,advancedAuthorityState,githubRunsObserved:runs.length};
+const state={schema:'omega.accuracy.r125.v4',authority:'OMEGAV6',observedAt:now,mode:repair?'REPAIRED':selected?'PROPOSE':ranked.length?'OBSERVE':'HEALTHY',accuracyPolicy:{mutationRequiresVerifiedEvidence:true,autoRepairMinConfidence:.92,autoRepairRisk:'LOW_ONLY',criticalResidualBlocks:true,unreproducibleResidualAutoRepair:false,observationOnlyNeverMutatesMain:true,advancedTruthCapacityFailuresNeverAutoRepair:true,developmentResidualGraphNeverAuthorizesRepair:true},residuals:ranked,selected:selected?selected.id:null,repair,sourceState:{r124Generation:s124?.generation??null,r124Admitted:s124?.admitted??[],r143AuthorityComplete:r143Missing.length===0,r144AttestationComplete:r144Missing.length===0,r164ResidualGraphComplete:r164Missing.length===0,advancedAuthorityState,githubRunsObserved:runs.length},lineage:{baseSha:process.env.GITHUB_SHA||'UNKNOWN',semanticFingerprint:hash(semantic),stateSha256:''}};
 state.lineage.stateSha256=hash({...state,lineage:{...state.lineage,stateSha256:''}});
 fs.writeFileSync(OUT,JSON.stringify(state,null,2)+'\n');
-fs.writeFileSync(PROPOSAL,JSON.stringify({schema:'omega.accuracy.proposal.r125.v3',observedAt:now,semanticFingerprint:state.lineage.semanticFingerprint,selected:selected?{id:selected.id,kind:selected.kind,mode:selected.mode,confidence:selected.confidence,summary:selected.summary}:null,repairApplied:!!repair,repair},null,2)+'\n');
-console.log(JSON.stringify({status:repair?'REPAIRED':selected?'PROPOSE':ranked.length?'OBSERVE':'HEALTHY',residualCount:ranked.length,selected:selected?.id??null,selectedConfidence:selected?.confidence??null,repairApplied:!!repair,r143AuthorityComplete:r143Missing.length===0,r144AttestationComplete:r144Missing.length===0,advancedAuthorityState,semanticFingerprint:state.lineage.semanticFingerprint},null,2));
+fs.writeFileSync(PROPOSAL,JSON.stringify({schema:'omega.accuracy.proposal.r125.v4',observedAt:now,semanticFingerprint:state.lineage.semanticFingerprint,selected:selected?{id:selected.id,kind:selected.kind,mode:selected.mode,confidence:selected.confidence,summary:selected.summary}:null,repairApplied:!!repair,repair},null,2)+'\n');
+console.log(JSON.stringify({status:repair?'REPAIRED':selected?'PROPOSE':ranked.length?'OBSERVE':'HEALTHY',residualCount:ranked.length,selected:selected?.id??null,selectedConfidence:selected?.confidence??null,repairApplied:!!repair,r143AuthorityComplete:r143Missing.length===0,r144AttestationComplete:r144Missing.length===0,r164ResidualGraphComplete:r164Missing.length===0,advancedAuthorityState,semanticFingerprint:state.lineage.semanticFingerprint},null,2));
