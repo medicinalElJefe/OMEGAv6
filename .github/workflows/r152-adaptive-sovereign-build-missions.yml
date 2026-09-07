@@ -1,0 +1,48 @@
+name: OMEGA R152 Adaptive Sovereign Build Missions
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r152-adaptive-sovereign-build-missions]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r152-adaptive-sovereign-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r152:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove returned-proof adaptive sovereign mission lifecycle
+        run: node tests/r152-adaptive-sovereign-build-missions-invariants.mjs
+      - name: Verify R152 and production Worker syntax
+        run: |
+          node --check src/execution/adaptiveSovereignMissionR152.js
+          node --check src/workerR116.js
+      - name: Preserve R151 authenticated execution surface
+        run: node tests/r151-sovereign-build-execution-spine-invariants.mjs
+      - name: Preserve executor fabric and exact Hybrid proof closure
+        run: |
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+      - name: Preserve zero-drift connector and admission authority
+        run: |
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r152-dry-run
