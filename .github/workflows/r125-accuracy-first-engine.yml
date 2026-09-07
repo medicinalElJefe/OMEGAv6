@@ -8,6 +8,10 @@ on:
     branches: [main]
   workflow_run:
     workflows:
+      - OMEGA R154 Relative Capacity Fabric
+      - OMEGA R153 Lemma Motion NOW Continuity
+      - OMEGA R152 Universal Truth Envelope
+      - OMEGA R151 All Modes Truth Fusion
       - OMEGA R144 Runtime Deployment Attestation
       - OMEGA Release Evidence Live Verify
       - OMEGA R143 Authoritative UI Operation Chain
@@ -31,7 +35,7 @@ concurrency:
 jobs:
   observe-and-repair:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -47,7 +51,14 @@ jobs:
       - name: Collect objective workflow evidence
         shell: bash
         run: |
-          gh run list --branch main --limit 40 --json databaseId,workflowName,status,conclusion,headSha,url,createdAt > /tmp/omega-r125-runs.json
+          gh run list --branch main --limit 60 --json databaseId,workflowName,status,conclusion,headSha,url,createdAt > /tmp/omega-r125-runs.json
+      - name: Verify advanced truth motion capacity authorities
+        shell: bash
+        run: |
+          npx --yes tsx tests/r154-relative-capacity-fabric.mts
+          npx --yes tsx tests/r153-lemma-motion-now-continuity.mts
+          npx --yes tsx tests/r152-universal-truth-envelope.mts
+          node tests/r151-all-modes-truth-fusion-invariants.mjs
       - name: Verify inherited accuracy operation-chain lifecycle and deployment boundaries
         run: |
           node tests/r144-runtime-deployment-attestation-invariants.mjs
@@ -65,7 +76,12 @@ jobs:
           OMEGA_R125_APPLY: '1'
         run: node scripts/r125-accuracy-engine.mjs
       - name: Prove repaired tree
+        shell: bash
         run: |
+          npx --yes tsx tests/r154-relative-capacity-fabric.mts
+          npx --yes tsx tests/r153-lemma-motion-now-continuity.mts
+          npx --yes tsx tests/r152-universal-truth-envelope.mts
+          node tests/r151-all-modes-truth-fusion-invariants.mjs
           node tests/r144-runtime-deployment-attestation-invariants.mjs
           node tests/r143-authoritative-ui-operation-chain-invariants.mjs
           node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
