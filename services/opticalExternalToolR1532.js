@@ -122,7 +122,7 @@ export function createOpticalExternalToolR1532({addressCandidate,screenCandidate
    {...g,length_nm:Number(g.length_nm)-lengthStep},{...g,length_nm:Number(g.length_nm)+lengthStep},
    {...g,height_nm:Number(g.height_nm)-heightStep},{...g,height_nm:Number(g.height_nm)+heightStep}
   ];
-  if(Number(phase)>45)raw.push({...g,height_nm:Number(g.height_nm)+(Number(phase)>90?2:-2)*heightStep});
+  if(Number(phase)>45)raw.push({...g,height_nm:Number(g.height_nm)-2*heightStep},{...g,height_nm:Number(g.height_nm)+2*heightStep});
   if(Number(fill)>0.55)raw.push({...g,width_nm:Number(g.width_nm)-widthStep,length_nm:Number(g.length_nm)-lengthStep});
   else raw.push({...g,width_nm:Number(g.width_nm)+widthStep,length_nm:Number(g.length_nm)+lengthStep});
   return uniqueBy(raw.map(normalizeGeometry).filter(validGeometry),geometryKey);
@@ -130,9 +130,12 @@ export function createOpticalExternalToolR1532({addressCandidate,screenCandidate
  async function adaptiveCycle(call,callerId){
   const payload=call.payload&&typeof call.payload==='object'?call.payload:{};
   const rounds=clampInt(payload.rounds,1,6,4),beamWidth=clampInt(payload.beam_width,1,8,4),maxEvaluations=clampInt(payload.max_evaluations,32,384,256);
-  const first=await adaptiveRefine({...call,payload:{...payload,radius:clampInt(payload.radius,1,3,1),budget:clampInt(payload.budget,8,256,128)}},callerId);
-  let evaluations=first.expanded_geometry_probes.length+(first.best.kind==='boundary_extrapolation'?0:1),best=await screenProposal(first.best.proposal);
-  if(!best.ok)return{...first,cycle:{state:'SEED_SCREEN_FAILED',rounds_completed:0,evaluations,trace:[]}};
+  const requestedBudget=clampInt(payload.budget,8,256,128),refineBudget=Math.min(requestedBudget,Math.max(8,maxEvaluations-16));
+  const first=await adaptiveRefine({...call,payload:{...payload,radius:clampInt(payload.radius,1,3,1),budget:refineBudget}},callerId);
+  let evaluations=first.neighbors_count+first.expanded_geometry_probes.length,best=null;
+  if(first.best.kind==='boundary_extrapolation')best=first.expanded_geometry_probes.find(x=>x.ok&&geometryKey(x.proposal?.geometry)===geometryKey(first.best.proposal?.geometry))||null;
+  else{best=await screenProposal(first.best.proposal);evaluations++}
+  if(!best?.ok)return{...first,cycle:{state:'SEED_SCREEN_FAILED',rounds_completed:0,evaluations,max_evaluations:maxEvaluations,trace:[]}};
   let beam=[best],trace=[{round:0,source:first.best.kind,score:round(best.score),utility:round(best.utility),gate:best.gate,geometry:best.proposal.geometry}],stagnant=0;
   for(let roundIndex=1;roundIndex<=rounds&&evaluations<maxEvaluations;roundIndex++){
    const candidates=[];
@@ -154,7 +157,7 @@ export function createOpticalExternalToolR1532({addressCandidate,screenCandidate
   }
   const convergence=trace.length>1&&Math.abs(trace.at(-1).utility-trace.at(-2).utility)<1e-5?'CONVERGED':'BOUNDED_STOP';
   const handoff=best.tier2_job?{prepared:true,job:best.tier2_job}:{prepared:false,job:null};
-  return{...first,best:{...first.best,kind:first.best.kind==='seed'?'geometry_cycle':first.best.kind,score:round(best.score),utility:round(best.utility),address:first.best.address,proposal:best.proposal,geometry:best.proposal.geometry},cycle:{schema:'OMEGA_ADAPTIVE_CYCLE_R1532',state:convergence,rounds_requested:rounds,rounds_completed:trace.length-1,evaluations,max_evaluations:maxEvaluations,beam_width:beamWidth,trace,final:{score:round(best.score),utility:round(best.utility),gate:best.gate,continuity:round(best.continuity),contradiction:round(best.contradiction),burden:round(best.burden),geometry:best.proposal.geometry},next_action:handoff.prepared?'validate_final_candidate_with_authenticated_fullwave_solver':convergence==='CONVERGED'?'shift_wavelength_or_expand_design_family':'continue_bounded_cycle_with_new_budget'},ai_context:{...first.ai_context,observation:`Closed-loop search completed ${trace.length-1} geometry rounds after atlas/boundary refinement; final scalar score ${round(best.score)} and utility ${round(best.utility)}.`,convergence:{...first.ai_context.convergence,cycle_state:convergence,rounds_completed:trace.length-1,evaluations,final_score:round(best.score),final_utility:round(best.utility)},next_action:handoff.prepared?'validate_final_candidate_with_authenticated_fullwave_solver':convergence==='CONVERGED'?'shift_wavelength_or_expand_design_family':'continue_bounded_cycle_with_new_budget'},fullwave_handoff:{prepared:handoff.prepared,job:handoff.job,truth:'PREPARED_NOT_SOLVED remains required until an authenticated Sovereign full-wave result receipt returns.'}};
+  return{...first,best:{...first.best,kind:'adaptive_cycle',origin:first.best.kind,score:round(best.score),utility:round(best.utility),address:first.best.address,proposal:best.proposal,geometry:best.proposal.geometry},cycle:{schema:'OMEGA_ADAPTIVE_CYCLE_R1532',state:convergence,rounds_requested:rounds,rounds_completed:trace.length-1,evaluations,max_evaluations:maxEvaluations,beam_width:beamWidth,trace,final:{score:round(best.score),utility:round(best.utility),gate:best.gate,continuity:round(best.continuity),contradiction:round(best.contradiction),burden:round(best.burden),geometry:best.proposal.geometry},next_action:handoff.prepared?'validate_final_candidate_with_authenticated_fullwave_solver':convergence==='CONVERGED'?'shift_wavelength_or_expand_design_family':'continue_bounded_cycle_with_new_budget'},ai_context:{...first.ai_context,observation:`Closed-loop search completed ${trace.length-1} geometry rounds after atlas/boundary refinement; final scalar score ${round(best.score)} and utility ${round(best.utility)}.`,convergence:{...first.ai_context.convergence,cycle_state:convergence,rounds_completed:trace.length-1,evaluations,final_score:round(best.score),final_utility:round(best.utility)},next_action:handoff.prepared?'validate_final_candidate_with_authenticated_fullwave_solver':convergence==='CONVERGED'?'shift_wavelength_or_expand_design_family':'continue_bounded_cycle_with_new_budget'},fullwave_handoff:{prepared:handoff.prepared,job:handoff.job,truth:'PREPARED_NOT_SOLVED remains required until an authenticated Sovereign full-wave result receipt returns.'}};
  }
  async function makeReceipt(call,callerId,operation){
   const requestSha=await sha256({schema:call.schema,caller:{id:callerId,kind:String(call.caller?.kind||'ai-agent')},operation,payload:call.payload||{},request_id:call.request_id||null,goal:String(call.goal||'').slice(0,600),tool_version:R1532_TOOL_VERSION});
