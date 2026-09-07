@@ -1,0 +1,36 @@
+name: R182 One-Shot Visual Coherence Patch
+
+on:
+  push:
+    branches: [r182-visual-coherence-calibration]
+    paths:
+      - '.github/workflows/r182-one-shot-visual-coherence-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-prove-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: r182-visual-coherence-calibration
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Apply exact Matter Traversal visual-coherence repair
+        run: node scripts/apply_visual_coherence_r182.mjs
+      - name: Prove focused R182 restoration before commit
+        run: node tests/r182-visual-coherence-restoration-invariants.mjs
+      - name: Prove complete inherited system and build
+        run: npm run check
+      - name: Commit only the proved Matter Traversal repair
+        run: |
+          git config user.name 'OMEGA governed visual repair'
+          git config user.email 'noreply@github.com'
+          git add src/MatterTraversal.tsx
+          git diff --cached --check
+          git commit -m 'R182 bind Matter Traversal animation to governed route phase'
+          git push origin HEAD:r182-visual-coherence-calibration
