@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {compileMultiAxisRelativityR193,manifestR193,R193_AXES,R193_LAWS} from '../src/execution/multiAxisRelativityCompilerR193.js';
+import {compileMultiAxisRelativityR193,manifestR193,R193_AI_SYSTEM_PROMPT,R193_AXES,R193_LAWS,R193_SAI_SYSTEM_PROMPT,R193_WORKERS_AI_MODEL} from '../src/execution/multiAxisRelativityCompilerR193.js';
 import {manifestR185,planTemporalPerformanceR185} from '../src/execution/temporalRelativityPerformanceR185.js';
 
 class MemoryStorage{constructor(){this.m=new Map()}async get(k){return this.m.get(k)}async put(k,v){this.m.set(k,structuredClone(v))}}
@@ -9,8 +9,8 @@ const directory={executors:{WORKERS_AI:{state:'AVAILABLE'},FEDERATION_CHAIN:{sta
 const baseContract={routeId:'route:multi-axis-lab',capabilityId:'capability:multi-axis-lab',route:'AI Lab',executionDomain:'AI'};
 const stableR154={relativePriority:.5,capacity:{viewResolution:12,temporalHz:1,logicalLanes:1,solverFidelity:'NONE'},pressures:{motion:.02,residual:.03,truthGap:.04,coherenceGap:.03,temporalError:.02,observer:.10,combined:.04},relativity:{observer:'FRAME_STABLE'},lineage:{routeContract:'route:multi-axis-lab|capability:multi-axis-lab|AI|AVAILABLE'}};
 const volatileR154={relativePriority:.9,capacity:{viewResolution:1728,temporalHz:12,logicalLanes:144,solverFidelity:'SPECTRAL_FULL_MODE'},pressures:{motion:.95,residual:.92,truthGap:.85,coherenceGap:.80,temporalError:.90,observer:.85,combined:.90},relativity:{observer:'FRAME_MOVING'},lineage:{routeContract:'route:multi-axis-lab|capability:multi-axis-lab|AI|AVAILABLE'}};
-const stableRun={id:'run_r193_stable',contract:baseContract,metadata:{relativeCapacityR154:stableR154}};
-const volatileRun={id:'run_r193_volatile',contract:baseContract,metadata:{relativeCapacityR154:volatileR154}};
+const stableRun={id:'run_r193_stable',intent:'same exact computation',contract:baseContract,metadata:{relativeCapacityR154:stableR154}};
+const volatileRun={id:'run_r193_volatile',intent:'volatile computation',contract:baseContract,metadata:{relativeCapacityR154:volatileR154}};
 
 const stable=compileMultiAxisRelativityR193({run:stableRun,hint:{...stableR154.pressures,priority:.5},currentPressure:.04,predictedPressure:.04});
 const volatile=compileMultiAxisRelativityR193({run:volatileRun,hint:{...volatileR154.pressures,priority:.9},currentPressure:.90,predictedPressure:.90});
@@ -42,9 +42,12 @@ assert.ok(floored.axes.time.targetHz>=30,'R193 may refine R154 but must not sile
 assert.ok(floored.axes.compute.logicalLanes>=1728,'R193 may refine R154 but must not silently lower its compute floor');
 assert.equal(floored.axes.fidelity.solverTarget,'SPECTRAL_RCWA','domain solver target from R154 must survive universal fidelity compilation');
 
-const reusable=compileMultiAxisRelativityR193({run:stableRun,hint:{...stableR154.pressures,priority:.5},currentPressure:.04,predictedPressure:.04,input:{inputFingerprint:'a'.repeat(64),operatorFingerprint:'b'.repeat(64),frameFingerprint:'c'.repeat(64)}});
-assert.equal(reusable.reuse.eligible,true);assert.equal(reusable.reuse.reused,false);assert.equal(reusable.reuse.requiresExactKeyMatch,true);assert.equal(reusable.reuse.requiresSha256Binding,true);
-const changed=compileMultiAxisRelativityR193({run:volatileRun,hint:{...volatileR154.pressures,priority:.9},currentPressure:.9,predictedPressure:.9,input:{inputFingerprint:'a'.repeat(64),operatorFingerprint:'b'.repeat(64)}});
+const reusable=compileMultiAxisRelativityR193({run:stableRun,hint:{...stableR154.pressures,priority:.5},currentPressure:.04,predictedPressure:.04,input:{inputFingerprint:'a'.repeat(64),operatorFingerprint:'b'.repeat(64),frameFingerprint:'c'.repeat(64),prompt:'same exact computation',temperature:.2}});
+assert.equal(reusable.reuse.eligible,true);assert.equal(reusable.reuse.reused,false);assert.equal(reusable.reuse.requiresExactKeyMatch,true);assert.equal(reusable.reuse.requiresSha256Binding,true);assert.equal(reusable.reuse.keyBasis.executionRequestBasis.model,R193_WORKERS_AI_MODEL);assert.equal(reusable.reuse.keyBasis.executionRequestBasis.systemPrompt,R193_AI_SYSTEM_PROMPT);assert.equal(reusable.reuse.keyBasis.executionRequestBasis.userPrompt,'same exact computation');assert.equal(reusable.reuse.keyBasis.executionRequestBasis.temperature,.2);assert.equal(reusable.lineage.executionRequestBound,true);
+const promptOverride=compileMultiAxisRelativityR193({run:stableRun,hint:{...stableR154.pressures,priority:.5},currentPressure:.04,predictedPressure:.04,input:{inputFingerprint:'a'.repeat(64),operatorFingerprint:'b'.repeat(64),prompt:'not the durable intent',temperature:.2}});assert.equal(promptOverride.reuse.eligible,false);assert.equal(promptOverride.reuse.state,'EXPLICIT_PROMPT_OVERRIDE_NOT_REUSABLE');
+const implicitTemperature=compileMultiAxisRelativityR193({run:stableRun,hint:{...stableR154.pressures,priority:.5},currentPressure:.04,predictedPressure:.04,input:{inputFingerprint:'a'.repeat(64),operatorFingerprint:'b'.repeat(64)}});assert.equal(implicitTemperature.reuse.eligible,false);assert.equal(implicitTemperature.reuse.state,'EXPLICIT_TEMPERATURE_REQUIRED_FOR_REUSE');
+const sai=compileMultiAxisRelativityR193({run:{...stableRun,id:'run_sai',contract:{...baseContract,executionDomain:'SAI'}},hint:{...stableR154.pressures,priority:.5},currentPressure:.04,predictedPressure:.04,input:{inputFingerprint:'a'.repeat(64),operatorFingerprint:'b'.repeat(64),temperature:.2}});assert.equal(sai.reuse.eligible,true);assert.equal(sai.reuse.keyBasis.executionRequestBasis.systemPrompt,R193_SAI_SYSTEM_PROMPT);
+const changed=compileMultiAxisRelativityR193({run:volatileRun,hint:{...volatileR154.pressures,priority:.9},currentPressure:.9,predictedPressure:.9,input:{inputFingerprint:'a'.repeat(64),operatorFingerprint:'b'.repeat(64),temperature:.2}});
 assert.equal(changed.reuse.eligible,false,'high-change state must not be treated as a reusable stable result merely because fingerprints exist');
 
 const r185Plan=await planTemporalPerformanceR185(runtime,{run:stableRun,directory,eligible:['WORKERS_AI','FEDERATION_CHAIN','AUTONOMIC_SWARM'],defaultExecutorId:'WORKERS_AI'});
@@ -54,11 +57,11 @@ assert.ok(r185Plan.temporal.targetTemporalHz>=r185Plan.multiAxis.axes.time.targe
 assert.equal(r185Plan.multiAxis.authority.executorDispatch,'R147');assert.equal(r185Plan.multiAxis.authority.durableHistory,'R146');assert.equal(r185Plan.multiAxis.authority.hybridReturnProof,'R141');assert.equal(r185Plan.multiAxis.authority.canonicalAdmission,'R125');
 
 for(const axis of ['ADDRESS_SCALE','TIME','MODEL_FIDELITY','REFERENCE_FRAME','COMPUTE','PROOF_DEPTH','MODE_COVERAGE'])assert.ok(R193_AXES.includes(axis),`missing R193 axis ${axis}`);
-for(const law of ['MULTIPLE_REFINEMENT_AXES_MAY_ADVANCE_CONCURRENTLY_OVER_ONE_CANONICAL_PACKET_LINEAGE','HIGHER_RESOLUTION_OR_COMPUTE_NEVER_INCREASES_TRUTH_AUTHORITY','CONTENT_ADDRESSABLE_REUSE_REQUIRES_EXPLICIT_INPUT_AND_OPERATOR_FINGERPRINTS','R147_REMAINS_EXECUTOR_AND_DISPATCH_AUTHORITY','R125_REMAINS_THE_ONLY_CANONSTATE_ADMISSION_AUTHORITY'])assert.ok(R193_LAWS.includes(law),`missing R193 law ${law}`);
+for(const law of ['MULTIPLE_REFINEMENT_AXES_MAY_ADVANCE_CONCURRENTLY_OVER_ONE_CANONICAL_PACKET_LINEAGE','HIGHER_RESOLUTION_OR_COMPUTE_NEVER_INCREASES_TRUTH_AUTHORITY','CONTENT_ADDRESSABLE_REUSE_REQUIRES_EXPLICIT_INPUT_AND_OPERATOR_FINGERPRINTS','REUSE_KEY_BINDS_CANONICAL_EXECUTION_REQUEST_NOT_CALLER_FINGERPRINTS_ALONE','AI_SAI_REUSE_REQUIRES_EXPLICIT_TEMPERATURE_AND_NO_HIDDEN_PROMPT_OVERRIDE','R147_REMAINS_EXECUTOR_AND_DISPATCH_AUTHORITY','R125_REMAINS_THE_ONLY_CANONSTATE_ADMISSION_AUTHORITY'])assert.ok(R193_LAWS.includes(law),`missing R193 law ${law}`);
 const manifest=manifestR193();assert.equal(manifest.revision,'R193');assert.equal(manifest.authority.capacity,'R154');assert.equal(manifest.authority.temporalPerformance,'R185');assert.equal(manifest.authority.dispatch,'R147');assert.equal(manifest.authority.admission,'R125');assert.equal(manifest.canonicalMutation,false);
 const temporalManifest=manifestR185();assert.equal(temporalManifest.multiAxis.revision,'R193');assert.equal(temporalManifest.authority.multiAxisRefinement,'R193');
 
-const r185Source=fs.readFileSync('src/execution/temporalRelativityPerformanceR185.js','utf8');
-for(const token of ['multiAxisRelativityCompilerR193','compileMultiAxisRelativityR193','multiAxis','R193_MULTI_AXIS_REFINEMENT'])assert.ok(r185Source.includes(token),`R185 missing R193 integration token ${token}`);
+const r185Source=fs.readFileSync('src/execution/temporalRelativityPerformanceR185.js','utf8'),r147Source=fs.readFileSync('src/execution/unifiedExecutorFabricR147.js','utf8');
+for(const token of ['multiAxisRelativityCompilerR193','compileMultiAxisRelativityR193','multiAxis','R193_MULTI_AXIS_REFINEMENT'])assert.ok(r185Source.includes(token),`R185 missing R193 integration token ${token}`);assert.ok(r147Source.includes(`const MODEL='${R193_WORKERS_AI_MODEL}'`),'R193 request contract must stay synchronized to the exact R147 Workers AI model');assert.ok(r147Source.includes(R193_AI_SYSTEM_PROMPT),'R193 AI request contract must stay synchronized to the exact R147 AI system prompt');assert.ok(r147Source.includes(R193_SAI_SYSTEM_PROMPT),'R193 SAI request contract must stay synchronized to the exact R147 SAI system prompt');
 assert.ok(!fs.readFileSync('src/execution/multiAxisRelativityCompilerR193.js','utf8').includes('canonicalMutation:true'),'R193 must never claim CanonState mutation');
-console.log('R193 MULTI-AXIS RELATIVITY COMPILER PASS · scale + time + fidelity + frame + compute + proof + lawful mode coverage advance independently/concurrently without changing R147/R146/R141/R125 authority');
+console.log('R193 MULTI-AXIS RELATIVITY COMPILER PASS · scale + time + fidelity + frame + compute + proof + lawful mode coverage advance independently/concurrently, and verified-reuse candidates bind the actual R147 AI/SAI request contract rather than caller fingerprints alone');
