@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {webcrypto} from 'node:crypto';
+if(!globalThis.crypto)globalThis.crypto=webcrypto;
+const store=new Map();
+globalThis.localStorage={getItem:k=>store.has(k)?store.get(k):null,setItem:(k,v)=>store.set(k,String(v)),removeItem:k=>store.delete(k)};
+const events=[];globalThis.window={dispatchEvent:e=>{events.push(e);return true}};globalThis.CustomEvent=class CustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}};
+const {emitVerifiedReturnWorldIngressR186,manifestR186}=await import('../src/world/verifiedReturnWorldIngressR186.ts');
+const base={ok:true,schema:'OMEGA_LIVING_WORLD_EXECUTION_DISPATCH_R180',revision:'R180',worldId:'OMEGA_CANONICAL_WORLD',sourceMissionId:'mission-r186',canonicalMutation:false,canonicalAdmissionAuthority:'R125',results:[{runId:'run-verified',state:'VERIFIED',executionInvoked:true,returned:true,verified:true,headSha256:'a'.repeat(64)},{runId:'run-returned-only',state:'RETURNED',executionInvoked:true,returned:true,verified:false,headSha256:'b'.repeat(64)}]};
+const first=await emitVerifiedReturnWorldIngressR186(base);assert.equal(first.ok,true);assert.equal(first.emitted,1);assert.equal(first.rejected,1);assert.equal(first.duplicates,0);assert.equal(first.events[0].type,'PROOF_REFRESHED');assert.equal(first.events[0].status,'PASS');assert.deepEqual(first.events[0].payload.proofIds,[`r146-head:${'a'.repeat(64)}`]);assert.deepEqual(first.events[0].payload.scarIds,['verified-run:run-verified']);assert.equal(first.claims.pcOnlineProved,false);assert.equal(first.claims.solverValidityProved,false);assert.equal(first.claims.computedPhotorealRealityProved,false);assert.equal(events.filter(e=>e.type==='omega-r86-operation').length,1);
+const second=await emitVerifiedReturnWorldIngressR186(base);assert.equal(second.emitted,0);assert.equal(second.duplicates,1);assert.equal(second.rejected,1);assert.equal(events.filter(e=>e.type==='omega-r86-operation').length,1);
+const bad=await emitVerifiedReturnWorldIngressR186({...base,canonicalAdmissionAuthority:'R186'});assert.equal(bad.ok,false);assert.equal(bad.emitted,0);
+const manifest=manifestR186();assert.equal(manifest.ingressAuthority,'R86');assert.equal(manifest.worldBridge,'R140');assert.equal(manifest.visualWorldAuthority,'R136/R134');assert.equal(manifest.canonicalAdmissionAuthority,'R125');assert.equal(manifest.canonicalMutation,false);
+console.log('R186 verified-return live-world ingress invariants PASS');
