@@ -23,6 +23,7 @@ assert.equal(unverified.claims.solverValidityProved,false);
 assert.equal(unverified.claims.computedPhotorealRealityProved,false);
 assert.equal(unverified.claims.federationClosedProved,false);
 assert.equal(unverified.visualOverlay.action,'PROOF_REQUIRED');
+assert.equal(unverified.frame.visualState.truthBands.federation,'NONE');
 
 const verified=await assembleFederationAttestationWorldLensR169({evidence:{...baseline,liveVerified:true},context:{eventTime:2,performance:{load:0.1}}});
 assert.equal(verified.ok,true);
@@ -31,13 +32,15 @@ assert.equal(verified.visualOverlay.action,'REVIEW_RETURNED_FEDERATION_EVIDENCE'
 assert.equal(verified.routingIntent.dispatchAuthorized,false);
 assert.equal(verified.routingIntent.federationClosed,false);
 assert.equal(verified.canonicalMutation,false);
-assert.equal(verified.frame.federationState?.state,'ATTESTED_NOT_PROMOTED');
-assert.ok(verified.frame.continuityOperationRef || verified.frame.operationRef || verified.frame.worldHead || verified.frame.worldId);
+assert.equal(verified.frame.visualState.truthBands.federation,'RETURNED_EVIDENCE_NOT_CANON');
+assert.ok(verified.frame.events.some(event=>event.kind==='FEDERATION_RETURN'));
+assert.ok(verified.frame.operationRef);
 
 const mismatch=await assembleFederationAttestationWorldLensR169({evidence:{...baseline,runtimeWorkerVersion:'wrong'},context:{eventTime:3}});
 assert.equal(mismatch.ok,false);
 assert.equal(mismatch.attestation.state,'VERSION_MISMATCH');
 assert.equal(mismatch.visualOverlay.action,'PROOF_REQUIRED');
+assert.equal(mismatch.frame.visualState.truthBands.federation,'NONE');
 
 const manifest=manifestR169();
 assert.equal(manifest.attestationAuthority,'R168');
