@@ -124,8 +124,10 @@ function regexScore(text:string,patterns:RegExp[]){
  return patterns.length?hits/patterns.length:0;
 }
 
-function sourceState(summary:ReturnType<typeof sourceBackedModeSummary>,name:string):ModeExecutionStateR79{
- const row=summary.rows.find(x=>x.name.toLowerCase()===name.toLowerCase());
+function normalizedModeName(value:string){return String(value||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+function sourceState(summary:ReturnType<typeof sourceBackedModeSummary>,id:string,name:string):ModeExecutionStateR79{
+ const stableId=String(id||'').toUpperCase(),normalized=normalizedModeName(name);
+ const row=summary.rows.find(x=>String(x.id||'').toUpperCase()===stableId)||summary.rows.find(x=>normalizedModeName(x.name)===normalized);
  return row?.state||'CATALOG_LENS';
 }
 
@@ -138,7 +140,7 @@ function planRow(row:any,summary:ReturnType<typeof sourceBackedModeSummary>,rele
   relevance:clamp01(relevance),
   gate:String(row.gate||'TURN'),
   operator:String(row.operator||''),
-  state:sourceState(summary,String(row.name)),
+  state:sourceState(summary,String(row.id),String(row.name)),
   reason,
   proof:String(row.proof||'')
  };
@@ -183,7 +185,7 @@ export function compileFullOverallModePlanR79(record:any,panel:string,text=''):F
   catalogCount:catalog.count,
   sourceBackedApplied:summary.appliedCount,
   sourceBackedGated:summary.gatedCount,
-  truthBoundary:'Mode orchestration changes relevance and routing only. It does not alter UI ownership, manufacture proof, promote gated formulas, or change capability reality.',
+  truthBoundary:'Mode orchestration binds executable/source/gated state by stable mode identity before display labels. Relevance and routing never manufacture proof, promote gated formulas, or change capability reality.',
   performance:{
    strategy:'RESIDENT_KERNEL_INTENT_DEEP_BACKGROUND_CATALOG',
    residentKernelCount:kernel.length,
