@@ -1,0 +1,93 @@
+name: OMEGA R157 Full System + Capability Manifold
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_E2E_URL: http://127.0.0.1:4173
+
+jobs:
+  prove-r157:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prove R156 dimensional relativity and R157 visual/system convergence
+        run: |
+          node tests/r156-dimensional-relativity-evolution-invariants.mjs
+          node tests/r157-capability-manifold-invariants.mjs
+          node tests/r157-full-one-system-convergence-invariants.mjs
+          node tests/r48-completion-convergence-invariants.mjs
+          node tests/r95-full-system-recovery-invariants.mjs
+
+      - name: Preserve relativity and all-mode ancestry
+        run: |
+          node tests/dimensional-relativity-r24-invariants.mjs
+          node tests/r77-woven-continuity-invariants.mjs
+          node tests/r132-relational-physics-manifold-invariants.mjs
+          node tests/r134-woven-relativity-continuum-invariants.mjs
+
+      - name: Preserve latest R155 navigation information architecture
+        run: node tests/r155-navigation-information-architecture-invariants.mjs
+
+      - name: Preserve native PC RCWA and adaptive returned-proof execution chain
+        run: |
+          python -m py_compile public/omega-hybrid-agent.py
+          python -m py_compile public/omega-rcwa-agent.py
+          python -m py_compile public/omega-rcwa-worker.py
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r151-sovereign-build-execution-spine-invariants.mjs
+          node tests/r153-adaptive-sovereign-build-missions-invariants.mjs
+
+      - name: Full inherited static regression and production build
+        run: npm run check
+
+      - name: Install Chromium for all-route desktop and mobile proof
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start exact production build locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r157-preview.log 2>&1 &
+          echo $! >/tmp/omega-r157-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r157-preview.log
+          exit 1
+
+      - name: Exercise all 44 routes on desktop and mobile
+        run: node tests/r118-browser-operational-e2e.mjs
+
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r157-preview.log || true
+
+      - name: Canonical Worker bundle dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r157-dry-run
