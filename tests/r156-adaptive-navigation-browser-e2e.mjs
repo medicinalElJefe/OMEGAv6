@@ -34,10 +34,10 @@ async function mobile(browser){
  const live=page.locator('.r156-global-live-grid');if(!await live.count())throw new Error('mobile live operation fabric missing');const liveText=await live.innerText();if(!liveText.includes('PC ONLINE')||!liveText.includes('RCWA LIVE'))throw new Error(`mobile live fabric missing current truth: ${liveText}`);
  const search=page.locator('.r156-semantic-search input');await search.fill('connected PC');await page.waitForTimeout(100);const results=await page.locator('.r156-route-scroll').innerText();if(!results.includes('Hybrid Link'))throw new Error('mobile semantic command deck did not rank Hybrid Link for connected PC');
  await search.fill('');const routeCount=await page.locator('.r89-flat-route').count();if(routeCount!==44)throw new Error(`mobile full registry expected 44 visible routes, got ${routeCount}`);
- const navRect=await page.locator('.r156-nav-panel').boundingBox();if(!navRect||navRect.width<140)throw new Error(`mobile navigator collapsed: ${JSON.stringify(navRect)}`);
+ const navRect=await page.locator('.r156-nav-panel').boundingBox(),railRect=await page.locator('.r94-nav-rail').boundingBox();if(!navRect||!railRect||navRect.width<120||navRect.height<800||Math.abs(navRect.x-railRect.width)>8)throw new Error(`mobile navigator reserved-space contract failed: ${JSON.stringify({navRect,railRect})}`);
  const viewportOverflow=await page.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-window.innerWidth);if(viewportOverflow>8)throw new Error(`mobile adaptive navigator introduced ${viewportOverflow}px horizontal overflow`);
  await context.close();
 }
 
 const browser=await chromium.launch({headless:true});
-try{await desktop(browser);await mobile(browser);console.log('PASS R156 adaptive global navigation browser · home-first shell + live execution truth + semantic task workspaces + all 44 routes + desktop/mobile containment')}finally{await browser.close()}
+try{await desktop(browser);await mobile(browser);console.log('PASS R156 adaptive global navigation browser · home-first shell + live execution truth + semantic task workspaces + all 44 routes + reserved-space desktop/mobile containment')}finally{await browser.close()}
