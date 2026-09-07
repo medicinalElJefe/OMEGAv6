@@ -1,6 +1,9 @@
 export const R193_REVISION='R193';
 export const R193_SCHEMA='OMEGA_MULTI_AXIS_RELATIVITY_COMPILER_R193';
 export const R193_AXES=Object.freeze(['ADDRESS_SCALE','TIME','MODEL_FIDELITY','REFERENCE_FRAME','COMPUTE','PROOF_DEPTH','MODE_COVERAGE']);
+export const R193_WORKERS_AI_MODEL='@cf/google/gemma-4-26b-a4b-it';
+export const R193_AI_SYSTEM_PROMPT='Operate as the OMEGA bounded AI execution adapter. Return the requested synthesis while preserving evidence authority, uncertainty, and execution truth. Model output is not observation or CanonState.';
+export const R193_SAI_SYSTEM_PROMPT='Operate as the OMEGA SAI synthesis executor. Preserve source/evidence uncertainty, capability boundaries, disagreements, and missing proof. Model output is not observation, native execution, solver validity, or CanonState.';
 export const R193_LAWS=Object.freeze([
  'MULTIPLE_REFINEMENT_AXES_MAY_ADVANCE_CONCURRENTLY_OVER_ONE_CANONICAL_PACKET_LINEAGE',
  'ADDRESS_TIME_FIDELITY_FRAME_COMPUTE_PROOF_AND_MODE_COVERAGE_REMAIN_SEPARATE_BUDGETS',
@@ -11,6 +14,8 @@ export const R193_LAWS=Object.freeze([
  'MISSING_MODE_INPUTS_REMAIN_GATED_AND_CONTRIBUTE_NO_FABRICATED_EVIDENCE',
  'REFERENCE_FRAME_TRANSFORM_NEVER_CONVERTS_PREDICTION_INTO_OBSERVATION',
  'CONTENT_ADDRESSABLE_REUSE_REQUIRES_EXPLICIT_INPUT_AND_OPERATOR_FINGERPRINTS',
+ 'REUSE_KEY_BINDS_CANONICAL_EXECUTION_REQUEST_NOT_CALLER_FINGERPRINTS_ALONE',
+ 'AI_SAI_REUSE_REQUIRES_EXPLICIT_TEMPERATURE_AND_NO_HIDDEN_PROMPT_OVERRIDE',
  'REUSE_IS_LOOKUP_ONLY_UNTIL_EXACT_KEY_MATCH_AND_NEVER_PROOF_BY_ITSELF',
  'R147_REMAINS_EXECUTOR_AND_DISPATCH_AUTHORITY',
  'R146_REMAINS_DURABLE_EXECUTION_HISTORY_AUTHORITY',
@@ -74,6 +79,17 @@ function activeAxes(axes){
  if(axes.modes.score>=.34)out.push('MODE_COVERAGE');
  return out;
 }
+function executionRequestBasis(run,input={}){
+ const domain=txt(run?.contract?.executionDomain,32).toUpperCase(),durableIntent=txt(run?.intent||run?.contract?.route||run?.contract?.routeId,12000),explicitPrompt=Object.prototype.hasOwnProperty.call(input,'prompt')?txt(input.prompt,12000):'',prompt=explicitPrompt||durableIntent;
+ if((domain==='AI'||domain==='SAI')&&explicitPrompt&&durableIntent&&explicitPrompt!==durableIntent)return{safe:false,reason:'EXPLICIT_PROMPT_OVERRIDE_NOT_REUSABLE',basis:null};
+ if(domain==='AI'||domain==='SAI'){
+  const rawTemperature=Number(input.temperature);if(!Number.isFinite(rawTemperature))return{safe:false,reason:'EXPLICIT_TEMPERATURE_REQUIRED_FOR_REUSE',basis:null};
+  return{safe:true,reason:'CANONICAL_AI_REQUEST_BOUND',basis:{schema:'OMEGA_R193_EXECUTION_REQUEST_BASIS',domain,provider:'CLOUDFLARE_WORKERS_AI',model:R193_WORKERS_AI_MODEL,systemPrompt:domain==='SAI'?R193_SAI_SYSTEM_PROMPT:R193_AI_SYSTEM_PROMPT,userPrompt:prompt,maxTokens:Math.max(128,Math.min(1600,Number(input.maxTokens)||900)),temperature:cl(rawTemperature),thinking:false}};
+ }
+ if(domain==='PROOF')return{safe:Boolean(input.deterministicReuse===true||run?.metadata?.deterministicReuse===true),reason:'PROOF_REUSE_REQUIRES_EXPLICIT_DETERMINISM',basis:{schema:'OMEGA_R193_EXECUTION_REQUEST_BASIS',domain,targetRunId:txt(input.targetRunId||run?.id,180),operation:'R146_REPLAY'}};
+ if(domain==='LOCAL')return{safe:Boolean(input.deterministicReuse===true||run?.metadata?.deterministicReuse===true),reason:'LOCAL_REUSE_REQUIRES_EXPLICIT_DETERMINISM',basis:{schema:'OMEGA_R193_EXECUTION_REQUEST_BASIS',domain,localOperation:txt(input.localOperation||'READ_RUN',40).toUpperCase(),targetRunId:txt(input.targetRunId||run?.id,180)}};
+ return{safe:false,reason:'DOMAIN_NOT_REUSABLE',basis:null};
+}
 
 export function compileMultiAxisRelativityR193({run={},hint={},currentPressure=0,predictedPressure=0,relativeCapacity=null,input={},history={}}={}){
  const r154=relativeCapacity&&typeof relativeCapacity==='object'?relativeCapacity:relativeCapacityFromRun(run)||{};
@@ -100,17 +116,17 @@ export function compileMultiAxisRelativityR193({run={},hint={},currentPressure=0
   proof:{score:proofScore,required:proofRequired,depthRank:rank(PROOF_LEVELS,proofRequired),levels:PROOF_LEVELS},
   modes:{score:modeScore,sourceModeBudget,sourceCatalogCount:179,canonLensBudget,canonLensCount:62,activationPolicy:'LAWFUL_INPUT_GATED_ONLY'}
  };
- const active=activeAxes(axes),inputFingerprint=txt(input.inputFingerprint||run?.metadata?.inputFingerprint,256),operatorFingerprint=txt(input.operatorFingerprint||run?.metadata?.operatorFingerprint,256),frameFingerprint=txt(input.frameFingerprint||run?.metadata?.frameFingerprint,256),reuseStable=predicted<.28&&residual<.24&&motion<.28,hasFingerprints=Boolean(inputFingerprint&&operatorFingerprint),reuse={eligible:reuseStable&&hasFingerprints,reused:false,requiresExactKeyMatch:true,requiresSha256Binding:true,state:reuseStable&&hasFingerprints?'LOOKUP_CANDIDATE_NOT_REUSED':hasFingerprints?'CHANGE_PRESSURE_REQUIRES_RECOMPUTE':'FINGERPRINTS_REQUIRED',keyBasis:hasFingerprints?{inputFingerprint,operatorFingerprint,frameFingerprint:frameFingerprint||null,addressResolution:targetAddress,solverTarget:axes.fidelity.solverTarget,observerFrame:axes.frame.declaredObserverFrame}:null};
+ const active=activeAxes(axes),inputFingerprint=txt(input.inputFingerprint||run?.metadata?.inputFingerprint,256),operatorFingerprint=txt(input.operatorFingerprint||run?.metadata?.operatorFingerprint,256),frameFingerprint=txt(input.frameFingerprint||run?.metadata?.frameFingerprint,256),request=executionRequestBasis(run,input),reuseStable=predicted<.28&&residual<.24&&motion<.28,hasFingerprints=Boolean(inputFingerprint&&operatorFingerprint),eligible=reuseStable&&hasFingerprints&&request.safe,reuse={eligible,reused:false,requiresExactKeyMatch:true,requiresSha256Binding:true,state:eligible?'LOOKUP_CANDIDATE_NOT_REUSED':!hasFingerprints?'FINGERPRINTS_REQUIRED':!reuseStable?'CHANGE_PRESSURE_REQUIRES_RECOMPUTE':request.reason,keyBasis:eligible?{inputFingerprint,operatorFingerprint,frameFingerprint:frameFingerprint||null,executionRequestBasis:request.basis,addressResolution:targetAddress,solverTarget:axes.fidelity.solverTarget,observerFrame:axes.frame.declaredObserverFrame}:null};
  return{
   ok:true,schema:R193_SCHEMA,revision:R193_REVISION,runId:run?.id||null,routeId:txt(run?.contract?.routeId||run?.contract?.capabilityId||run?.contract?.route,160)||null,
   axes,
   simultaneous:{activeAxes:active,activeAxisCount:active.length,canAdvanceConcurrently:true,law:'INDEPENDENT_AXIS_BUDGETS_COMPILE_TO_ONE_OPERATION_PLAN'},
   reuse,
-  lineage:{relativeCapacitySource:Object.keys(r154).length?'R154_OR_ADAPTIVE_CONTEXT':'R185_PRESSURE_ONLY',routeContract:txt(r154?.lineage?.routeContract,300)||null,inputFingerprint:inputFingerprint||null,operatorFingerprint:operatorFingerprint||null},
+  lineage:{relativeCapacitySource:Object.keys(r154).length?'R154_OR_ADAPTIVE_CONTEXT':'R185_PRESSURE_ONLY',routeContract:txt(r154?.lineage?.routeContract,300)||null,inputFingerprint:inputFingerprint||null,operatorFingerprint:operatorFingerprint||null,executionRequestBound:request.safe,executionRequestReason:request.reason},
   authority:{capacityPlanning:'R154',temporalPerformance:'R185',executorDispatch:'R147',durableHistory:'R146',hybridReturnProof:'R141',canonicalAdmission:'R125'},
   canonicalMutation:false,canonicalAdmissionAuthority:'R125',
-  truthBoundary:'R193 compiles independent scale, time, fidelity, frame, compute, proof-depth and mode-coverage budgets that may advance concurrently. These are scheduling and computation requirements over one packet lineage. Higher resolution, more modes, more compute, frame transforms, predictions, cache candidates and solver escalation do not create observations, prove scientific validity, prove invocation, or admit CanonState.'
+  truthBoundary:'R193 compiles independent scale, time, fidelity, frame, compute, proof-depth and mode-coverage budgets that may advance concurrently. Reuse additionally requires a canonical actual-request basis, not caller fingerprints alone. These are scheduling and computation requirements over one packet lineage. Higher resolution, more modes, more compute, frame transforms, predictions, cache candidates and solver escalation do not create observations, prove scientific validity, prove invocation, or admit CanonState.'
  };
 }
 
-export function manifestR193(){return{ok:true,schema:'OMEGA_MULTI_AXIS_RELATIVITY_MANIFEST_R193',revision:R193_REVISION,axes:R193_AXES,laws:R193_LAWS,levels:{address:ADDRESS_LEVELS,timeHz:TEMPORAL_LEVELS,computeLanes:COMPUTE_LEVELS,fidelity:FIDELITY_LEVELS,proof:PROOF_LEVELS,frame:FRAME_LEVELS,sourceModeBudgets:SOURCE_MODE_LEVELS,canonLensBudgets:CANON_LENS_LEVELS},inputs:['R154 relative capacity floor','R185 temporal pressure and history','R146 route/run metadata','explicit content fingerprints when reuse is requested'],outputs:['independent axis scores','simultaneous refinement targets','content-addressable reuse candidate','mode/lens evaluator budgets','proof requirement floor'],authority:{capacity:'R154',temporalPerformance:'R185',dispatch:'R147',history:'R146',hybridProof:'R141',admission:'R125'},canonicalMutation:false,canonicalAdmissionAuthority:'R125',boundary:'R193 is an executable planning compiler, not a new truth or execution authority. It coordinates independent computational refinement dimensions while preserving the existing OMEGA authority chain.'}}
+export function manifestR193(){return{ok:true,schema:'OMEGA_MULTI_AXIS_RELATIVITY_MANIFEST_R193',revision:R193_REVISION,axes:R193_AXES,laws:R193_LAWS,levels:{address:ADDRESS_LEVELS,timeHz:TEMPORAL_LEVELS,computeLanes:COMPUTE_LEVELS,fidelity:FIDELITY_LEVELS,proof:PROOF_LEVELS,frame:FRAME_LEVELS,sourceModeBudgets:SOURCE_MODE_LEVELS,canonLensBudgets:CANON_LENS_LEVELS},inputs:['R154 relative capacity floor','R185 temporal pressure and history','R146 route/run metadata','explicit content fingerprints when reuse is requested','canonical execution request semantics for verified reuse'],outputs:['independent axis scores','simultaneous refinement targets','content-addressable reuse candidate bound to actual request semantics','mode/lens evaluator budgets','proof requirement floor'],authority:{capacity:'R154',temporalPerformance:'R185',dispatch:'R147',history:'R146',hybridProof:'R141',admission:'R125'},canonicalMutation:false,canonicalAdmissionAuthority:'R125',boundary:'R193 is an executable planning compiler, not a new truth or execution authority. It coordinates independent computational refinement dimensions while preserving the existing OMEGA authority chain.'}}
