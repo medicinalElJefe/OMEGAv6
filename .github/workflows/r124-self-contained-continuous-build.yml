@@ -14,10 +14,10 @@ on:
     paths:
       - 'src/selfBuildRuntimeR124.ts'
       - 'scripts/r124-selfbuild-engine.mjs'
-      - 'scripts/r169-geometric-motion-selfbuild.mjs'
+      - 'scripts/r170-geometric-motion-selfbuild.mjs'
       - 'public/omega-r124-selfbuild-state.json'
       - 'tests/r124-self-contained-build-invariants.mjs'
-      - 'tests/r169-geometric-motion-autonomous-build-invariants.mjs'
+      - 'tests/r170-geometric-motion-autonomous-build-invariants.mjs'
       - '.github/workflows/r124-self-contained-continuous-build.yml'
 
 permissions:
@@ -25,7 +25,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: omega-r124-r169-selfbuild
+  group: omega-r124-r170-selfbuild
   cancel-in-progress: false
 
 jobs:
@@ -44,10 +44,10 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-fund
-      - name: Verify R124 + R169 autonomous-build invariants
+      - name: Verify R124 + R170 autonomous-build invariants
         run: |
           node tests/r124-self-contained-build-invariants.mjs
-          node tests/r169-geometric-motion-autonomous-build-invariants.mjs
+          node tests/r170-geometric-motion-autonomous-build-invariants.mjs
       - name: Select next capsule through geometric motion relativity
         id: select
         shell: bash
@@ -64,7 +64,7 @@ jobs:
       - name: Observe cleanly when no declared capsule is ready
         if: steps.select.outputs.status != 'PROPOSE'
         run: |
-          echo "R124/R169 self-build is in ${{ steps.select.outputs.status }}; no repository mutation performed."
+          echo "R124/R170 self-build is in ${{ steps.select.outputs.status }}; no repository mutation performed."
           echo "Geometric motion frame: ${{ steps.select.outputs.motion }}"
       - name: Generate branch-isolated sandbox candidate
         if: steps.select.outputs.status == 'PROPOSE'
@@ -75,7 +75,7 @@ jobs:
         if: steps.select.outputs.status == 'PROPOSE'
         run: |
           node tests/r124-self-contained-build-invariants.mjs
-          node tests/r169-geometric-motion-autonomous-build-invariants.mjs
+          node tests/r170-geometric-motion-autonomous-build-invariants.mjs
           node tests/r123-living-total-experience-invariants.mjs
           node tests/r122-computed-reality-invariants.mjs
           node tests/r121-spherical-earth-connector-invariants.mjs
@@ -94,10 +94,10 @@ jobs:
           if(!receipt)throw new Error('Receipt not found');
           receipt.status='ADMIT';
           receipt.completedAt=new Date().toISOString();
-          receipt.tests={r124:true,r169:true,r123:true,r122:true,r121:true,build:true};
+          receipt.tests={r124:true,r170:true,r123:true,r122:true,r121:true,build:true};
           const total=Math.max(1,(s.roadmap||[]).length),complete=new Set([...(s.admitted||[]),...(s.rejected||[]),...(s.blocked||[]),id]).size;
           receipt.residualAfter=Math.max(0,(total-complete)/total);
-          receipt.notes=[...(receipt.notes||[]),'R169 geometric motion priority selected the candidate only inside the declared roadmap.','Focused and inherited gates passed before admission.','Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit.'];
+          receipt.notes=[...(receipt.notes||[]),'R170 geometric motion priority selected the candidate only inside the declared roadmap.','Focused and inherited gates passed before admission.','Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit.'];
           s.admitted=[...new Set([...(s.admitted||[]),id])];
           s.currentCapsuleId=null;
           fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
@@ -128,12 +128,12 @@ jobs:
         run: |
           GEN='${{ steps.select.outputs.generation }}'
           CAPSULE='${{ steps.select.outputs.capsule }}'
-          BRANCH="selfbuild/r169-g${GEN}-${CAPSULE,,}-${GITHUB_RUN_ID}"
-          git config user.name 'OMEGA R124/R169 Self Builder'
+          BRANCH="selfbuild/r170-g${GEN}-${CAPSULE,,}-${GITHUB_RUN_ID}"
+          git config user.name 'OMEGA R124/R170 Self Builder'
           git config user.email 'actions@users.noreply.github.com'
           git checkout -b "$BRANCH"
           git add src/generated/selfbuild public/omega-r124-selfbuild-state.json public/omega-r124-selfbuild-candidate.json
-          git commit -m "R169 geometric-motion self-build generation ${GEN}: ${CAPSULE}"
+          git commit -m "R170 geometric-motion self-build generation ${GEN}: ${CAPSULE}"
           git push origin "$BRANCH"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
