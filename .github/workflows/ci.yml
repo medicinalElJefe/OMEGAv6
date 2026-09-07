@@ -23,6 +23,8 @@ jobs:
       - run: npm install
       - name: Prove R163 canonical core-health boundary
         run: node tests/r163-canonical-core-health-truth-invariants.mjs
+      - name: Prove R200.1 deployed total-experience proof boundaries
+        run: node tests/r2001-deployed-total-experience-proof-invariants.mjs
       - run: npm run check
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
 
@@ -254,6 +256,12 @@ jobs:
           if(String(chat.reply||'').trim().length<12) throw new Error('live AI returned an empty/insufficient reply');
           console.log(`OMEGA LIVE AI PASS · ${chat.provider} · route ${route.route}`);
           NODE
+      - name: Verify deployed R200 total-experience browser on exact promoted SHA
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+          OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r200-current-browser-proof-e2e.mjs
       - name: Record deployment receipt
         if: always()
         shell: bash
@@ -270,6 +278,7 @@ jobs:
             echo "- Live AI synthesis: required for deployment PASS"
             echo "- R8 Earth/NOAA + Hybrid V90 contracts: required for deployment PASS"
             echo "- R9 Earth ground source hierarchy: required for deployment PASS"
+            echo "- R200.1 exact promoted-SHA desktop/mobile browser total-experience proof: required for deployment PASS"
             echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"
             echo "- Hybrid native execution: VERIFIED_DEVICE_ONLINE requires a current authenticated non-revoked heartbeat; otherwise DEVICE_PROOF_REQUIRED"
           } >> "$GITHUB_STEP_SUMMARY"
