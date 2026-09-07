@@ -47,6 +47,9 @@ jobs:
       - name: Prove R158 capability universe and interaction/view contract
         run: node tests/r158-capability-universe-invariants.mjs
 
+      - name: Prove live PC heartbeat, invocation, return and verification remain distinct
+        run: node tests/r158-live-hybrid-execution-truth-invariants.mjs
+
       - name: Preserve admitted R157 reflex living-world transition
         shell: bash
         run: |
