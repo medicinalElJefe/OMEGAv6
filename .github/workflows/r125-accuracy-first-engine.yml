@@ -9,6 +9,7 @@ on:
   workflow_run:
     workflows:
       - R169 Federation Attestation World Lens
+      - R168.1 RCWA Propagation Acceptance
       - OMEGA R168 Whole-System Truth Performance Restoration
       - OMEGA R167 Active Optical R153.2 Convergence
       - OMEGA R166 Development Residual World Lens
@@ -64,8 +65,10 @@ jobs:
           npx --yes tsx tests/r153-lemma-motion-now-continuity.mts
           npx --yes tsx tests/r152-universal-truth-envelope.mts
           node tests/r151-all-modes-truth-fusion-invariants.mjs
-      - name: Verify current restoration federation reflex residual and optical authorities
+      - name: Verify current restoration propagation federation reflex residual and optical authorities
         run: |
+          node --check scripts/diagnose_rcwa_live_r1681.mjs
+          node --check scripts/verify_federation_live_r1681.mjs
           node tests/r169-federation-attestation-world-lens-invariants.mjs
           node tests/r168-genesis-r192-attestation-invariants.mjs
           node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
@@ -92,6 +95,8 @@ jobs:
       - name: Prove repaired tree
         shell: bash
         run: |
+          node --check scripts/diagnose_rcwa_live_r1681.mjs
+          node --check scripts/verify_federation_live_r1681.mjs
           node tests/r169-federation-attestation-world-lens-invariants.mjs
           node tests/r168-genesis-r192-attestation-invariants.mjs
           node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
