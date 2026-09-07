@@ -56,7 +56,26 @@ for(const needle of ['OMEGA_FULLWAVE_MANIFOLD_R1533','R41_CELL_RATIO = 0.95','pr
 
 const workflow=fs.readFileSync('.github/workflows/r180-optical-fullwave-admissibility.yml','utf8');
 assert.match(workflow,/permissions:\s*\n\s+contents:\s*read/);
-assert.ok(!/branches:\s*\[[^\]]*main[^\]]*\]/i.test((workflow.match(/push:\s*\n(?:\s+.*\n)*/)?.[0]||'')),'R180 successor must not push-trigger on main');
+function topLevelTriggerBlock(text,trigger){
+ const lines=text.split(/\r?\n/);
+ for(let i=0;i<lines.length;i++){
+  if(lines[i].trim()!==trigger+':'||lines[i].match(/^\s*/)?.[0].length!==2)continue;
+  const out=[lines[i]];
+  for(let j=i+1;j<lines.length;j++){
+   const line=lines[j];if(!line.trim()){out.push(line);continue}
+   const indent=line.match(/^\s*/)?.[0].length||0;if(indent<=2)break;out.push(line);
+  }
+  return out.join('\n');
+ }
+ return '';
+}
+const pushBlock=topLevelTriggerBlock(workflow,'push');
+assert.ok(pushBlock,'R180 workflow must expose isolated feature-branch push proof');
+const branchMatch=pushBlock.match(/branches:\s*\[([^\]]+)\]/);
+assert.ok(branchMatch,'R180 push proof branch list missing');
+const pushBranches=branchMatch[1].split(',').map(x=>x.trim().replace(/^['"]|['"]$/g,''));
+assert.ok(!pushBranches.includes('main'),'R180 successor must not push-trigger on literal main');
+assert.deepEqual(pushBranches,['r180-optical-fullwave-admissibility-current-main']);
 assert.ok(!/^\s*schedule\s*:/m.test(workflow));
 assert.ok(!/contents:\s*write/i.test(workflow));
 assert.ok(!/gh\s+pr\s+merge/i.test(workflow));
