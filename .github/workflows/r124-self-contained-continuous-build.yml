@@ -7,13 +7,17 @@ on:
         description: Continue the governed autonomous roadmap
         required: false
         default: 'true'
+  schedule:
+    - cron: '17 * * * *'
   push:
     branches: [main]
     paths:
       - 'src/selfBuildRuntimeR124.ts'
       - 'scripts/r124-selfbuild-engine.mjs'
+      - 'scripts/r170-geometric-motion-selfbuild.mjs'
       - 'public/omega-r124-selfbuild-state.json'
       - 'tests/r124-self-contained-build-invariants.mjs'
+      - 'tests/r170-geometric-motion-autonomous-build-invariants.mjs'
       - '.github/workflows/r124-self-contained-continuous-build.yml'
 
 permissions:
@@ -21,13 +25,13 @@ permissions:
   actions: write
 
 concurrency:
-  group: omega-r124-selfbuild
+  group: omega-r124-r170-selfbuild
   cancel-in-progress: false
 
 jobs:
   advance:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -39,10 +43,12 @@ jobs:
         with:
           node-version: 22
       - name: Install dependencies
-        run: npm install
-      - name: Verify R124 base invariants
-        run: node tests/r124-self-contained-build-invariants.mjs
-      - name: Select next capsule
+        run: npm install --no-fund
+      - name: Verify R124 + R170 autonomous-build invariants
+        run: |
+          node tests/r124-self-contained-build-invariants.mjs
+          node tests/r170-geometric-motion-autonomous-build-invariants.mjs
+      - name: Select next capsule through geometric motion relativity
         id: select
         shell: bash
         run: |
@@ -50,13 +56,17 @@ jobs:
           STATUS=$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/r124-proposal.json','utf8'));process.stdout.write(x.status||'UNKNOWN')")
           CAPSULE=$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/r124-proposal.json','utf8'));process.stdout.write(x.capsuleId||'')")
           GENERATION=$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/r124-proposal.json','utf8'));process.stdout.write(String(x.generation||0))")
+          MOTION=$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/r124-proposal.json','utf8'));const f=x.geometricMotionFrame||{};process.stdout.write('phase='+String(f.phaseBand??'-')+' orientation='+String(f.orientation??'-')+' resolution='+String(f.effectiveResolution??'-')+' residual='+String(f.residual??'-'))")
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           echo "capsule=$CAPSULE" >> "$GITHUB_OUTPUT"
           echo "generation=$GENERATION" >> "$GITHUB_OUTPUT"
-      - name: Stop cleanly when no capsule is ready
+          echo "motion=$MOTION" >> "$GITHUB_OUTPUT"
+      - name: Observe cleanly when no declared capsule is ready
         if: steps.select.outputs.status != 'PROPOSE'
-        run: echo "R124 self-build is in ${{ steps.select.outputs.status }}; no repository mutation performed."
-      - name: Generate sandbox candidate
+        run: |
+          echo "R124/R170 self-build is in ${{ steps.select.outputs.status }}; no repository mutation performed."
+          echo "Geometric motion frame: ${{ steps.select.outputs.motion }}"
+      - name: Generate branch-isolated sandbox candidate
         if: steps.select.outputs.status == 'PROPOSE'
         env:
           OMEGA_SELF_BUILD_APPLY: '1'
@@ -65,6 +75,7 @@ jobs:
         if: steps.select.outputs.status == 'PROPOSE'
         run: |
           node tests/r124-self-contained-build-invariants.mjs
+          node tests/r170-geometric-motion-autonomous-build-invariants.mjs
           node tests/r123-living-total-experience-invariants.mjs
           node tests/r122-computed-reality-invariants.mjs
           node tests/r121-spherical-earth-connector-invariants.mjs
@@ -83,9 +94,10 @@ jobs:
           if(!receipt)throw new Error('Receipt not found');
           receipt.status='ADMIT';
           receipt.completedAt=new Date().toISOString();
-          receipt.tests={r124:true,r123:true,r122:true,r121:true,build:true};
-          receipt.residualAfter=Math.max(0,Number(receipt.residualBefore||1)-0.1);
-          receipt.notes=[...(receipt.notes||[]),'Focused and inherited gates passed before admission.','Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit.'];
+          receipt.tests={r124:true,r170:true,r123:true,r122:true,r121:true,build:true};
+          const total=Math.max(1,(s.roadmap||[]).length),complete=new Set([...(s.admitted||[]),...(s.rejected||[]),...(s.blocked||[]),id]).size;
+          receipt.residualAfter=Math.max(0,(total-complete)/total);
+          receipt.notes=[...(receipt.notes||[]),'R170 geometric motion priority selected the candidate only inside the declared roadmap.','Focused and inherited gates passed before admission.','Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit.'];
           s.admitted=[...new Set([...(s.admitted||[]),id])];
           s.currentCapsuleId=null;
           fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
@@ -116,12 +128,12 @@ jobs:
         run: |
           GEN='${{ steps.select.outputs.generation }}'
           CAPSULE='${{ steps.select.outputs.capsule }}'
-          BRANCH="selfbuild/r124-g${GEN}-${CAPSULE,,}-${GITHUB_RUN_ID}"
-          git config user.name 'OMEGA R124 Self Builder'
+          BRANCH="selfbuild/r170-g${GEN}-${CAPSULE,,}-${GITHUB_RUN_ID}"
+          git config user.name 'OMEGA R124/R170 Self Builder'
           git config user.email 'actions@users.noreply.github.com'
           git checkout -b "$BRANCH"
           git add src/generated/selfbuild public/omega-r124-selfbuild-state.json public/omega-r124-selfbuild-candidate.json
-          git commit -m "R124 self-build generation ${GEN}: ${CAPSULE}"
+          git commit -m "R170 geometric-motion self-build generation ${GEN}: ${CAPSULE}"
           git push origin "$BRANCH"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -140,7 +152,7 @@ jobs:
           git push origin HEAD:main
           echo "admitted=true" >> "$GITHUB_OUTPUT"
           echo "admitted_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Continue next generation without chat scheduling
+      - name: Continue next geometric generation without chat scheduling
         if: steps.select.outputs.status == 'PROPOSE' && steps.admit.outputs.admitted == 'true' && github.event.inputs.continue != 'false'
         shell: bash
         run: |
