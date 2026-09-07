@@ -1,0 +1,74 @@
+name: R181 Correlated Convergence Workstation
+
+on:
+  push:
+    branches:
+      - r181-continuous-calibration-fusion-current
+    paths:
+      - 'src/R181ConvergenceWorkstation.tsx'
+      - 'src/r181ConvergenceWorkstation.css'
+      - 'src/r181RetainedTools.css'
+      - 'src/OmegaSpecialistSuite.tsx'
+      - 'src/calibration/**'
+      - 'src/earthSarR181.js'
+      - 'src/EarthSarPanelR181.tsx'
+      - 'src/EarthObservatoryR8.tsx'
+      - 'src/workerR8.js'
+      - 'src/swarm/swarmAutonomicR125.js'
+      - 'tests/r181-*.mjs'
+      - '.github/workflows/r181-correlated-convergence-workstation.yml'
+  pull_request:
+    paths:
+      - 'src/R181ConvergenceWorkstation.tsx'
+      - 'src/r181ConvergenceWorkstation.css'
+      - 'src/r181RetainedTools.css'
+      - 'src/OmegaSpecialistSuite.tsx'
+      - 'src/calibration/**'
+      - 'src/earthSarR181.js'
+      - 'src/EarthSarPanelR181.tsx'
+      - 'src/EarthObservatoryR8.tsx'
+      - 'src/workerR8.js'
+      - 'src/swarm/swarmAutonomicR125.js'
+      - 'tests/r181-*.mjs'
+      - '.github/workflows/r181-correlated-convergence-workstation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r181-workstation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-audit --no-fund
+      - name: Static-check R181 runtime modules
+        run: |
+          node --check src/calibration/continuousCalibrationFusionR181.js
+          node --check src/calibration/calibrationGatewayR181.js
+          node --check src/earthSarR181.js
+          node --check src/workerR8.js
+      - name: Prove continuous calibration numerics
+        run: node tests/r181-continuous-calibration-fusion-invariants.mjs
+      - name: Prove correlated workstation contract
+        run: node tests/r181-convergence-workstation-invariants.mjs
+      - name: Preserve current R180.1 Hybrid discovery repair
+        run: node tests/r1801-hybrid-buildout-discovery-invariants.mjs
+      - name: Preserve inherited Earth restoration gates
+        run: npm run test:restore
+      - name: Build complete workstation
+        run: npm run build
+      - name: Prove canonical Worker bundle without deployment
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r181
+      - name: Summarize R181 boundary
+        run: |
+          echo 'R181 CORRELATED CONVERGENCE WORKSTATION PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Real fused metric matrix and packet proof lineage' >> "$GITHUB_STEP_SUMMARY"
+          echo '- 12 organ × 12 phase R125 topology with bounded selected-cell detail' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Explicit authenticated calibrated mission creation only' >> "$GITHUB_STEP_SUMMARY"
+          echo '- R147 device dispatch remains separate' >> "$GITHUB_STEP_SUMMARY"
+          echo '- R125 remains CanonState admission authority' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Retained convergence tools mount one-at-a-time instead of all simultaneously' >> "$GITHUB_STEP_SUMMARY"
