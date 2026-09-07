@@ -12,8 +12,10 @@ for(const live of ['OmegaRuntime','OmegaSwarmCell','OmegaSwarmCoordinator','Omeg
 for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){
  assert.ok(!source.includes(`export class ${retired}`),`retired namespace must not be silently restored as executable authority ${retired}`);
  assert.ok(!config.includes(`"class_name": "${retired}"`),`retired namespace must not have a live binding ${retired}`);
- assert.ok(!config.includes(`"${retired}": {"type": "durable-object"`),`R199.1 must remove Cloudflare-confirmed inert tombstone ${retired}`);
+ assert.ok(config.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`Cloudflare-provisioned retired namespace must retain its deleted export tombstone ${retired}`);
+ assert.ok(!config.includes(`"${retired}": {"type": "durable-object", "storage": "sqlite"}`),`retired namespace must never become a live sqlite export ${retired}`);
 }
-assert.ok(config.includes('R199.1 preserves the proven R116 Worker spine'),'R199.1 deployment reconciliation provenance missing');
+assert.ok(config.includes('R199.1.1 preserves the proven R116 Worker spine'),'R199.1.1 deployment reconciliation provenance missing');
+assert.ok(config.includes('Cloudflare-provisioned namespaces require permanent deleted export tombstones'),'Cloudflare provisioned-namespace retirement law missing');
 assert.ok(config.includes('R125 remains canonical admission authority'),'R125 admission authority guardrail missing');
-console.log('R193.1/R199.1 CLOUDFLARE DURABLE OBJECT RECONCILIATION PASS · historical R201/R203 namespaces absent from source, bindings and exports while all seven live R116 durable authorities remain intact');
+console.log('R193.1/R199.1.1 CLOUDFLARE DURABLE OBJECT RECONCILIATION PASS · R201/R203 executable classes and live bindings remain absent, required deleted retirement tombstones retained, all seven live R116 durable authorities intact');

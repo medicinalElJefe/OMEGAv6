@@ -56,6 +56,9 @@ must(app.includes("const OmegaHomeR71=lazy(()=>import('./OmegaHomeR71'))")&&!app
 must(app.includes('<Suspense fallback={fallback}>{home?<OmegaHomeR71')&&app.includes(':<OmegaWorkstation/>}</Suspense>'),'R199.1 must preserve one branded suspense boundary across Home and workstation route demand');
 must(vite.includes('R1991_ENTRY_BUDGET_BYTES=500*1024')&&vite.includes('initialEntryBudgetR1991')&&vite.includes('Defer specialist/home dependencies instead of raising the budget.'),'R199.1 must fail builds that regress the initial-entry byte budget');
 for(const live of ['OmegaRuntime','OmegaSwarmCell','OmegaSwarmCoordinator','OmegaSwarmBranch','OmegaSwarmOrgan','OmegaSwarmOrganismCoordinator','OmegaSwarmAutonomicCoordinator'])must(wrangler.includes(`"${live}": {"type": "durable-object", "storage": "sqlite"}`),`R199.1 must retain live durable authority ${live}`);
-for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203'])must(!wrangler.includes(`"${retired}": {"type": "durable-object"`),`R199.1 must remove Cloudflare-confirmed inert tombstone ${retired}`);
+for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){
+ must(wrangler.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`R199.1.1 must retain the required Cloudflare retirement tombstone ${retired}`);
+ must(!wrangler.includes(`"${retired}": {"type": "durable-object", "storage": "sqlite"}`),`R199.1.1 must not restore retired namespace ${retired} as live storage`);
+}
 
-console.log(`R110/R199.1 RUNTIME-AWARE WORKING SET PASS · ${surfaces.length} registered destinations preserved dynamically · hidden/Save-Data/2G suppression · low-power/3G budget reduction · direct route demand preserved · Home deferred · 500 KiB initial-entry budget enforced · inert R201/R203 tombstones absent · one route/state/proof authority retained`);
+console.log(`R110/R199.1.1 RUNTIME-AWARE WORKING SET PASS · ${surfaces.length} registered destinations preserved dynamically · hidden/Save-Data/2G suppression · low-power/3G budget reduction · direct route demand preserved · Home deferred · 500 KiB initial-entry budget enforced · R201/R203 retirement tombstones retained without live bindings · one route/state/proof authority retained`);
