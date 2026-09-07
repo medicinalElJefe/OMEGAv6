@@ -1,0 +1,34 @@
+{
+  "schema": "OMEGA_R125_RESIDUAL_SENSOR_BINDING_R165",
+  "revision": "R165",
+  "authority": "OMEGAV6",
+  "state": "SENSOR_BINDING_PUBLISHED",
+  "inputs": [
+    "R164 development residual graph",
+    "R164 returned-reflex autonomic swarm convergence",
+    "GitHub workflow evidence",
+    "R124 admitted self-build state"
+  ],
+  "consumer": "R125 Accuracy First Engine",
+  "sensorOnly": true,
+  "canonicalMutation": false,
+  "autonomousMutationAuthority": false,
+  "addsRepairRecipes": false,
+  "canonicalAdmissionAuthority": "R125",
+  "policies": [
+    "R164 graph failure is HIGH review evidence",
+    "R164 reflex/autonomic failure is HIGH review evidence",
+    "R164 sensor failures never receive an autonomous repair recipe",
+    "R125 existing LOW-risk deterministic recipe registry remains the only autonomous repair surface",
+    "Every existing repair is bracketed by both R164 authority invariant suites",
+    "Mainline drift still refuses stale mutation"
+  ],
+  "evidence": {
+    "developmentGraph": "/omega-r164-development-residual-graph.json",
+    "accuracyState": "/omega-r125-accuracy-state.json",
+    "accuracyProposal": "/omega-r125-proposal.json",
+    "coreHealth": "/api/core-health",
+    "releaseEvidence": "/api/release-evidence"
+  },
+  "truthBoundary": "R165 connects R164 evidence into R125 observation and ranking only. It does not create a new self-builder, new repair recipe, machine-dispatch authority, PC-online proof, return-proof authority, deployment authority, or alternate CanonState admission path."
+}
