@@ -1,0 +1,50 @@
+name: OMEGA R159.1 Live Core Health Truth Repair
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [r159-1-live-core-health-truth-repair]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r1591-core-health-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r1591:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Reject high-severity dependency regressions
+        run: npm audit --audit-level=high
+      - name: Prove R159.1 first-hand canonical core health
+        run: node tests/r1591-live-core-health-truth-invariants.mjs
+      - name: Preserve R159 sovereign execution convergence
+        run: node tests/r159-sovereign-execution-convergence-invariants.mjs
+      - name: Preserve R158 live Hybrid truth and capability universe
+        shell: bash
+        run: |
+          node tests/r158-live-hybrid-execution-truth-invariants.mjs
+          node tests/r158-capability-universe-invariants.mjs
+      - name: Preserve R141 exact return proof and R127 zero drift
+        shell: bash
+        run: |
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run from R159.1 entrypoint
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r1591-dry-run
