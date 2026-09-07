@@ -28,7 +28,7 @@ export async function assembleReflexWorldTransitionR157(event={},context={}){
   eventTime:context.eventTime??Date.now(),observerId:context.observerId||'omega-reflex',projection:context.projection||'WOVEN',address:event.canonical_address??context.address??0,
   previousHead:context.previousHead||null,
   intent:{id:intentId,sourceIds:[event.packet_id,...evidenceIds(reflex.residuals)].filter(Boolean)},
-  mission:{id:missionId,planDigest,scarIds:[reflex.scar.scar_id,...(event.prior_scars||[]).map(s=>text(s?.scar_id||s,160)).filter(Boolean)},
+  mission:{id:missionId,planDigest,scarIds:[reflex.scar.scar_id,...(event.prior_scars||[]).map(s=>text(s?.scar_id||s,160)).filter(Boolean)]},
   earth:context.earth||{},federation:context.federation||{},hybrid:context.hybrid||{},render:context.render||{},performance:context.performance||{},
   metrics:{continuity:context.metrics?.continuity??0.5,plasticity:context.metrics?.plasticity??0.5,contradiction:context.metrics?.contradiction??Math.min(1,reflex.residual_pressure/4),burden:context.metrics?.burden??Math.min(1,reflex.residual_pressure/4),evidence:context.metrics?.evidence??0,uncertainty:context.metrics?.uncertainty??1,scar:context.metrics?.scar??Math.min(1,reflex.residual_pressure/4)}
  });
