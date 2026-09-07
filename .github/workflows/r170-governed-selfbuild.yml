@@ -3,7 +3,7 @@ name: R170 Governed Self-Build
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '17 * * * *'
 
 permissions:
   contents: write
@@ -30,13 +30,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-fund
-      - name: Prove self-build control-plane topology and current successor chain
+      - name: Prove cheap self-build control-plane topology
         run: |
           node scripts/verify_workflow_topology_r170.mjs
           node tests/r170-self-build-governor-invariants.mjs
-          node scripts/prove_successor_workflow_invariants_r175.mjs
-          node tests/r175-multidomain-living-world-truth-invariants.mjs
       - name: Require successful canonical production proof for this exact main SHA
         id: production
         env:
@@ -80,6 +77,14 @@ jobs:
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           echo "capsule=$CAPSULE" >> "$GITHUB_OUTPUT"
           echo "generation=$GENERATION" >> "$GITHUB_OUTPUT"
+      - name: Install proof dependencies only for a real proposal
+        if: steps.select.outputs.status == 'PROPOSE'
+        run: npm install --no-fund
+      - name: Prove current successor chain before generation
+        if: steps.select.outputs.status == 'PROPOSE'
+        run: |
+          node scripts/prove_successor_workflow_invariants_r175.mjs
+          node tests/r175-multidomain-living-world-truth-invariants.mjs
       - name: Generate exactly one sandbox candidate
         if: steps.select.outputs.status == 'PROPOSE'
         env:
@@ -99,6 +104,7 @@ jobs:
           node tests/r164-development-residual-graph-invariants.mjs
           node tests/r163-canonical-core-health-truth-invariants.mjs
           node tests/r1532-adaptive-external-search-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
           npm run check
           npx wrangler deploy --config wrangler.jsonc --dry-run --outdir .wrangler-r170-selfbuild
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-selfbuild-optical
@@ -120,7 +126,7 @@ jobs:
           CAPSULE='${{ steps.select.outputs.capsule }}'; GEN='${{ steps.select.outputs.generation }}'; BRANCH="selfbuild/r170-g${GEN}-${CAPSULE,,}-${GITHUB_RUN_ID}"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           BRANCH="$BRANCH" BASE='${{ steps.freshness.outputs.base }}' PRODUCTION_RUN='${{ steps.production.outputs.production_run_id }}' node <<'NODE'
-          const fs=require('fs'); const p='public/omega-r170-selfbuild-state.json'; const c='public/omega-r170-selfbuild-candidate.json'; const state=JSON.parse(fs.readFileSync(p)); const receipt=[...(state.receipts||[])].reverse().find(r=>r.capsuleId===state.currentCapsuleId&&r.status==='SANDBOX'); if(!receipt)throw new Error('sandbox receipt missing'); receipt.status='PROVED_PENDING_PR'; receipt.provedAt=new Date().toISOString(); receipt.branch=process.env.BRANCH; receipt.baseSha=process.env.BASE; receipt.productionRunId=process.env.PRODUCTION_RUN; receipt.canonicalAdmission=false; receipt.tests={r170:true,r175:true,successorChain:true,r169:true,r168:true,r167:true,r166:true,r164:true,r163:true,r1532:true,inherited:true,build:true,canonicalDryRun:true,opticalDryRun:true}; fs.writeFileSync(p,JSON.stringify(state,null,2)+'\n'); const candidate=JSON.parse(fs.readFileSync(c)); candidate.receipt=receipt; candidate.status='PROVED_PENDING_PR'; fs.writeFileSync(c,JSON.stringify(candidate,null,2)+'\n');
+          const fs=require('fs'); const p='public/omega-r170-selfbuild-state.json'; const c='public/omega-r170-selfbuild-candidate.json'; const state=JSON.parse(fs.readFileSync(p)); const receipt=[...(state.receipts||[])].reverse().find(r=>r.capsuleId===state.currentCapsuleId&&r.status==='SANDBOX'); if(!receipt)throw new Error('sandbox receipt missing'); receipt.status='PROVED_PENDING_PR'; receipt.provedAt=new Date().toISOString(); receipt.branch=process.env.BRANCH; receipt.baseSha=process.env.BASE; receipt.productionRunId=process.env.PRODUCTION_RUN; receipt.canonicalAdmission=false; receipt.tests={r170:true,r175:true,successorChain:true,r169:true,r168:true,r167:true,r166:true,r164:true,r163:true,r1532:true,r125:true,inherited:true,build:true,canonicalDryRun:true,opticalDryRun:true}; fs.writeFileSync(p,JSON.stringify(state,null,2)+'\n'); const candidate=JSON.parse(fs.readFileSync(c)); candidate.receipt=receipt; candidate.status='PROVED_PENDING_PR'; fs.writeFileSync(c,JSON.stringify(candidate,null,2)+'\n');
           NODE
       - name: Commit proved candidate on isolated branch
         if: steps.select.outputs.status == 'PROPOSE'
@@ -141,16 +147,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head '${{ steps.candidate.outputs.branch }}' --title "R170 self-build g${{ steps.select.outputs.generation }} — ${{ steps.select.outputs.capsule }}" --body "Bounded autonomous source proposal. Exact production proof run: ${{ steps.production.outputs.production_run_id }}. Base: ${{ steps.freshness.outputs.base }}. Candidate: ${{ steps.commit.outputs.sha }}. R175 living-world truth and current read-only successor workflow invariants were proved. This PR cannot auto-merge and is not Canon admission; R125 remains sole CanonState admission authority."
+          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head '${{ steps.candidate.outputs.branch }}' --title "R170 self-build g${{ steps.select.outputs.generation }} — ${{ steps.select.outputs.capsule }}" --body "Bounded autonomous source proposal. Exact production proof run: ${{ steps.production.outputs.production_run_id }}. Base: ${{ steps.freshness.outputs.base }}. Candidate: ${{ steps.commit.outputs.sha }}. R175 living-world truth and current read-only successor workflow invariants were proved before generation and after generation. This PR cannot auto-merge and is not Canon admission; R125 remains sole CanonState admission authority."
       - name: Record autonomous pulse receipt
         if: always()
         run: |
-          echo "## R170.2 / R175.1 governed self-build pulse" >> "$GITHUB_STEP_SUMMARY"
+          echo "## R170.3 / R175 governed self-build pulse" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Cadence: hourly observation at minute 17" >> "$GITHUB_STEP_SUMMARY"
           echo "- Exact production head ready: ${{ steps.production.outputs.production_ready || 'false' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Production run: ${{ steps.production.outputs.production_run_id || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Existing candidate count: ${{ steps.open_pr.outputs.count || 'not-checked' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Selection: ${{ steps.select.outputs.status || 'OBSERVE_ONLY' }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- R175 living-world + current successor proof: required before candidate generation and proof" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Dependency installation/full proof: proposal-only" >> "$GITHUB_STEP_SUMMARY"
+          echo "- R175 living-world + current successor proof: required before and after candidate generation" >> "$GITHUB_STEP_SUMMARY"
           echo "- Direct main mutation: forbidden" >> "$GITHUB_STEP_SUMMARY"
           echo "- Auto merge: forbidden" >> "$GITHUB_STEP_SUMMARY"
           echo "- CanonState admission authority: R125" >> "$GITHUB_STEP_SUMMARY"
