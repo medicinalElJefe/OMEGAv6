@@ -1,0 +1,64 @@
+import {readRunR146,replayRunR146} from './durableOperationExecutionR146.js';
+import {dispatchRunR147,pollRunR147} from './unifiedExecutorFabricR147.js';
+
+export const R180_REVISION='R180';
+export const R180_SCHEMA='OMEGA_LIVING_WORLD_EXECUTION_DISPATCH_R180';
+export const R180_LAWS=Object.freeze([
+ 'R179_AUTHORIZED_NOT_DISPATCHED_RECEIPT_REQUIRED',
+ 'EXPLICIT_SEPARATE_DISPATCH_CONFIRMATION_REQUIRED',
+ 'R146_AUTHORIZED_HEAD_MUST_MATCH_R179_RECEIPT_BEFORE_DISPATCH',
+ 'R147_REMAINS_EXECUTOR_SELECTION_AND_DISPATCH_AUTHORITY',
+ 'HYBRID_AND_BUILD_REQUIRE_SEPARATE_HOST_EXECUTION_CONFIRMATION',
+ 'AUTHORIZED_IS_NOT_INVOKED',
+ 'QUEUED_IS_NOT_INVOKED',
+ 'INVOKED_IS_NOT_RETURNED',
+ 'RETURNED_IS_NOT_VERIFIED',
+ 'EVERY_DISPATCHED_RUN_MUST_REMAIN_R146_REPLAYABLE',
+ 'R162_REMAINS_REFLEX_SPECIFIC_AUTHORIZATION_DISPATCH_AUTHORITY',
+ 'R125_REMAINS_THE_ONLY_CANONSTATE_ADMISSION_AUTHORITY'
+]);
+
+const text=(v,n=1000)=>String(v??'').trim().slice(0,n);
+const stable=v=>{if(Array.isArray(v))return v.map(stable);if(v&&typeof v==='object'){const o={};for(const k of Object.keys(v).sort())o[k]=stable(v[k]);return o}return v};
+const validAuthorization=a=>Boolean(a?.ok===true&&a?.schema==='OMEGA_LIVING_WORLD_DURABLE_AUTHORIZATION_R179'&&a?.revision==='R179'&&a?.state==='AUTHORIZED_NOT_DISPATCHED'&&Array.isArray(a?.runs)&&a.runs.length>0&&a?.dispatchAuthorized===false&&a?.executionInvoked===false&&a?.canonicalMutation===false&&a?.canonicalAdmissionAuthority==='R125');
+const needsHostConfirmation=run=>['HYBRID','BUILD'].includes(String(run?.contract?.executionDomain||'').toUpperCase());
+
+export async function dispatchAuthorizedLivingWorldMissionR180(runtime,authorization={},input={},callbacks={}){
+ if(!validAuthorization(authorization))return{ok:false,status:400,code:'R180_R179_AUTHORIZATION_REQUIRED',dispatchAuthorized:false,executionInvoked:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125'};
+ const selected=Array.isArray(input.runIds)?[...new Set(input.runIds.map(x=>text(x,180)).filter(Boolean))]:[];
+ const receiptById=new Map(authorization.runs.map(x=>[x.runId,x]));
+ const preview=selected.map(runId=>({runId,receipt:receiptById.get(runId)||null}));
+ if(input.dispatch!==true||input.confirmation!=='DISPATCH_AUTHORIZED_R179_RUNS')return{ok:false,status:409,code:'R180_EXPLICIT_DISPATCH_CONFIRMATION_REQUIRED',preview,dispatchAuthorized:false,executionInvoked:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125',truthBoundary:'R180 performs no R147 dispatch until a separate explicit dispatch action and exact confirmation token are supplied.'};
+ if(selected.length===0)return{ok:false,status:400,code:'R180_RUN_SELECTION_REQUIRED',preview,dispatchAuthorized:false,executionInvoked:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125'};
+ if(selected.some(id=>!receiptById.has(id)))return{ok:false,status:409,code:'R180_RUN_NOT_IN_R179_AUTHORIZATION',unknownRunIds:selected.filter(id=>!receiptById.has(id)),dispatchAuthorized:false,executionInvoked:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125'};
+
+ const preflight=[];
+ for(const runId of selected){
+  const receipt=receiptById.get(runId),run=await readRunR146(runtime,runId);
+  if(!run)return{ok:false,status:404,code:'R180_R146_RUN_NOT_FOUND',runId,dispatchAuthorized:false,executionInvoked:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125'};
+  const lineageOk=run.state==='AUTHORIZED'&&run.headSha256===receipt.headSha256&&run.metadata?.sourceRevision==='R179'&&run.metadata?.sourceMissionId===authorization.sourceMissionId&&run.metadata?.worldId===(authorization.worldId||'OMEGA_CANONICAL_WORLD');
+  if(!lineageOk)return{ok:false,status:409,code:'R180_AUTHORIZED_RUN_LINEAGE_OR_HEAD_STALE',runId,currentState:run.state,currentHeadSha256:run.headSha256,authorizedHeadSha256:receipt.headSha256,dispatchAuthorized:false,executionInvoked:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125'};
+  preflight.push({runId,run,receipt,hostConfirmationRequired:needsHostConfirmation(run)});
+ }
+
+ const results=[];
+ for(const item of preflight){
+  if(item.hostConfirmationRequired&&input.confirmHostExecution!==true){
+   results.push({runId:item.runId,state:item.run.state,status:'HELD_HOST_EXECUTION_CONFIRMATION_REQUIRED',executionInvoked:false,returned:false,verified:false,canonicalMutation:false});
+   continue;
+  }
+  const stepInput=(input.dispatchByRun&&typeof input.dispatchByRun==='object'&&input.dispatchByRun[item.runId])||{};
+  const dispatchInput={...stable(stepInput)};
+  if(item.hostConfirmationRequired)dispatchInput.confirmed=true;
+  const dispatched=await dispatchRunR147(runtime,item.runId,dispatchInput,callbacks);
+  const current=dispatched?.run||await readRunR146(runtime,item.runId);
+  const replay=current?await replayRunR146(runtime,item.runId):null;
+  const poll=current&&['INVOKED','RETURNED'].includes(current.state)?await pollRunR147(runtime,item.runId).catch(()=>null):null;
+  const finalRun=poll?.run||current;
+  results.push({runId:item.runId,ok:dispatched?.ok===true,statusCode:dispatched?.status||500,code:dispatched?.code||null,executorId:dispatched?.binding?.executorId||dispatched?.result?.executorId||null,state:finalRun?.state||item.run.state,executionInvoked:['INVOKED','RETURNED','VERIFIED'].includes(finalRun?.state),returned:['RETURNED','VERIFIED'].includes(finalRun?.state),verified:finalRun?.state==='VERIFIED',replayOk:replay?.ok===true,headSha256:finalRun?.headSha256||null,canonicalMutation:false});
+ }
+ const executionInvoked=results.some(x=>x.executionInvoked===true),returned=results.some(x=>x.returned===true),verified=results.some(x=>x.verified===true),allReplayable=results.filter(x=>x.status!=='HELD_HOST_EXECUTION_CONFIRMATION_REQUIRED').every(x=>x.replayOk===true);
+ return{ok:results.every(x=>x.status==='HELD_HOST_EXECUTION_CONFIRMATION_REQUIRED'||x.ok===true)&&allReplayable,status:200,schema:R180_SCHEMA,revision:R180_REVISION,state:verified?'DISPATCHED_WITH_VERIFIED_RETURN':executionInvoked?'DISPATCHED_EXECUTION_IN_PROGRESS':'DISPATCH_HELD',worldId:authorization.worldId||'OMEGA_CANONICAL_WORLD',sourceMissionId:authorization.sourceMissionId||null,runIds:selected,results,dispatchAuthorized:true,executionInvoked,returned,verified,canonicalMutation:false,canonicalAdmissionAuthority:'R125',claims:{publicDeploymentProved:false,pcOnlineProved:false,solverValidityProved:false,computedPhotorealRealityProved:false,federationClosedProved:false},truthBoundary:'R180 is the separate explicit R179 AUTHORIZED -> existing R147 dispatch bridge. R146 remains durable lifecycle authority and every dispatched run must replay cleanly. Hybrid/Build stays held without separate host execution confirmation. Dispatch, invocation, returned payload integrity, verification, scientific validity, PC-online state, federation closure and CanonState admission remain distinct proofs.'};
+}
+
+export function manifestR180(){return{ok:true,schema:'OMEGA_LIVING_WORLD_EXECUTION_DISPATCH_MANIFEST_R180',revision:R180_REVISION,inherits:['R179 explicit durable authorization','R147 unified executor dispatch','R146 durable replayable execution history','R136/R134 living canonical world','R125 canonical admission'],laws:R180_LAWS,dispatchAuthority:'R147',durableLifecycleAuthority:'R146',reflexAuthority:'R162',hostExecutionConfirmationRequired:['HYBRID','BUILD'],canonicalMutation:false,canonicalAdmissionAuthority:'R125'};}
