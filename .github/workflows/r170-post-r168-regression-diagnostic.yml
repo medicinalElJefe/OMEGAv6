@@ -1,0 +1,153 @@
+name: OMEGA R170 Post-R168 Regression Convergence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r170-post-r168-regression-convergence]
+
+concurrency:
+  group: r170-post-r168-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  diagnose-and-prove:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Prove merged R168 authority before inherited diagnostics
+        run: |
+          node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
+          node tests/r168-full-restoration-current-successor-invariants.mjs
+          node tests/r168-buildout-adaptive-mission-spine-invariants.mjs
+          node tests/r168-adaptive-traversal-performance-invariants.mjs
+          node tests/capability-truth-r23-invariants.mjs
+          node tests/transition-authority-r23-invariants.mjs
+          node tests/single-frame-r27-invariants.mjs
+      - name: Inherited band A · syntax routes restore home portability cloud visual
+        id: band_a
+        continue-on-error: true
+        run: |
+          node --check src/worker.js
+          node --check src/workerR34.js
+          node --check src/workerR101.js
+          node --check src/workerLiveStateR51.js
+          node --check src/workerPacketProofR52.js
+          node --check src/workerDeltaMeshR53.js
+          node --check src/workerProofChainR54.js
+          node --check src/workerPerformanceProviderR55.js
+          node --check src/workerR8.js
+          node --check src/workerR9.js
+          node --check src/workerR27.js
+          node --check src/workerR32.js
+          node --check src/workerR33.js
+          npm run test:routes
+          npm run test:restore
+          npm run test:home
+          npm run test:portability
+          npm run test:cloud
+          npm run test:visual
+      - name: Inherited band B · depth lineage PC trajectory relativity world governance atlas
+        id: band_b
+        continue-on-error: true
+        run: |
+          npm run test:depth
+          npm run test:lineage
+          npm run test:pc-spine
+          npm run test:trajectory
+          npm run test:relativity
+          npm run test:world
+          npm run test:admissibility
+          npm run test:hybrid
+          npm run test:archive
+          npm run test:quality
+          npm run test:sai
+          npm run test:system-atlas
+          npm run test:render-portability
+      - name: Inherited band C · R38 through R67 convergence lineage
+        id: band_c
+        continue-on-error: true
+        run: |
+          npm run test:r38
+          npm run test:correlation
+          npm run test:r39
+          npm run test:r40
+          npm run test:r41
+          npm run test:r43
+          npm run test:r44
+          npm run test:r45
+          npm run test:r45-convergence
+          npm run test:r46
+          npm run test:r47
+          npm run test:r48
+          npm run test:r49
+          npm run test:r50
+          npm run test:r51
+          npm run test:r52
+          npm run test:r53
+          npm run test:r54
+          npm run test:r55
+          npm run test:r58
+          npm run test:r59
+          npm run test:r67
+      - name: Inherited band D · R77 through R110 advanced recovery lineage
+        id: band_d
+        continue-on-error: true
+        run: |
+          npm run test:r77
+          npm run test:r79
+          npm run test:r80
+          npm run test:r81
+          npm run test:r82
+          npm run test:r83
+          npm run test:r84
+          npm run test:r85
+          npm run test:r86
+          npm run test:r87
+          npm run test:r88
+          npm run test:r89
+          npm run test:r90
+          npm run test:r91
+          npm run test:r92
+          npm run test:r93
+          npm run test:r94
+          npm run test:r95
+          npm run test:r97
+          npm run test:r99
+          npm run test:r101
+          npm run test:r104
+          npm run test:r107
+          npm run test:r108
+          npm run test:r109
+          npm run test:r110
+      - name: Production build
+        id: production_build
+        continue-on-error: true
+        run: npm run build
+      - name: Diagnostic summary
+        if: always()
+        run: |
+          echo "R170 diagnostic outcomes"
+          echo "A=${{ steps.band_a.outcome }}"
+          echo "B=${{ steps.band_b.outcome }}"
+          echo "C=${{ steps.band_c.outcome }}"
+          echo "D=${{ steps.band_d.outcome }}"
+          echo "BUILD=${{ steps.production_build.outcome }}"
+      - name: Strict aggregate admission
+        if: always()
+        env:
+          BAND_A: ${{ steps.band_a.outcome }}
+          BAND_B: ${{ steps.band_b.outcome }}
+          BAND_C: ${{ steps.band_c.outcome }}
+          BAND_D: ${{ steps.band_d.outcome }}
+          BUILD: ${{ steps.production_build.outcome }}
+        run: node -e "const x=process.env; const bad=['BAND_A','BAND_B','BAND_C','BAND_D','BUILD'].filter(k=>x[k]!=='success'); if(bad.length){console.error('R170 inherited regression bands failed:',bad.map(k=>k+'='+x[k]).join(', ')); process.exit(1)} console.log('R170 inherited regression bands PASS')"
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r170
