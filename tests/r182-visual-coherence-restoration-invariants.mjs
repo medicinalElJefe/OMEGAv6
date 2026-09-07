@@ -13,7 +13,7 @@ for(const token of ["VISUAL_MOTION_DEFAULT='PACKET_LOCKED'","mode:playing?'ROUTE
 
 assert.ok(!visual.includes('now*.000035'),'Visual Instrument must not auto-rotate from wall clock');
 assert.ok(!visual.includes('requestAnimationFrame(draw)'),'Visual Instrument base field must redraw from state/observer changes rather than endless ambient RAF');
-for(const token of ['ContinuousFieldOverlayR13','TrajectoryFieldOverlay','OmegaMotionSkinMapR35','COMPILER_LINEAGES','SPINE_VIEWS','LENSES','Admitted next','Previous','Zoom in level','Zoom out level','Yaw','Pitch','OrientationFrameR182View','PACKET LOCKED'])assert.ok(visual.includes(token),`Visual Instrument lost retained function ${token}`);
+for(const token of ['PC-LINEAGE DEPTH CAMERA','ContinuousFieldOverlayR13','TrajectoryFieldOverlay','OmegaMotionSkinMapR35','COMPILER_LINEAGES','SPINE_VIEWS','LENSES','Admitted next','Previous','Zoom in level','Zoom out level','Camera −','Camera +','Yaw','Pitch','OrientationFrameR182View','PACKET LOCKED'])assert.ok(visual.includes(token),`Visual Instrument lost retained function ${token}`);
 assert.ok(!overlay.includes('Math.sin(t*8'),'Vector basins must not pulse from ambient clock');
 assert.ok(!overlay.includes('now*.00015'),'Continuous overlay must not advance geometry from wall clock');
 for(const token of ['compileDomainBands','compileRouteFlow','compileVectorCarryR113','INGRESS / EGRESS / BLOCKED / RESIDUE','field.routeNext[address]'])assert.ok(overlay.includes(token),`Continuous overlay lost semantic layer ${token}`);
@@ -27,4 +27,4 @@ for(const token of ["'MATTER','CORRIDOR','PROOF','TOPOLOGY','REPLAY'","'HOST_FOL
 for(const token of ['sourceState','targetState','tangent','turn','sigma','phaseDelta','observer','referenceAxis','OBSERVER_ONLY'])assert.ok(orientation.includes(token),`Orientation contract missing ${token}`);
 for(const token of ['Forward tangent','Signed turn','Motion / v / a','Observer camera','+X'])assert.ok(orientationView.includes(token),`Orientation view missing ${token}`);
 assert.ok(css.includes('@media(max-width:600px)'),'R182 mobile containment missing');
-console.log('R182 VISUAL COHERENCE RESTORATION PASS · packet-locked motion, persistent orientation, retained functions, progressive disclosure');
+console.log('R182 VISUAL COHERENCE RESTORATION PASS · packet-locked motion, persistent orientation, retained functions, inherited depth identity, progressive disclosure');
