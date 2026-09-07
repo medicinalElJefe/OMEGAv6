@@ -7,6 +7,10 @@ on:
   push:
     branches: [r168-whole-system-truth-performance-restoration]
 
+concurrency:
+  group: r168-whole-system-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   prove-r168:
     runs-on: ubuntu-24.04
@@ -68,8 +72,124 @@ jobs:
           node tests/r155-navigation-information-architecture-invariants.mjs
           npm run test:navigation
           npm run test:applications
-      - name: Full inherited production regression and build
-        run: npm run check
+
+      # The inherited gate is intentionally split into named proof bands. Each band
+      # still executes its original contracts; continue-on-error only lets this one
+      # diagnostic run identify every broken band before the aggregate gate fails.
+      - name: Inherited band A · syntax, routes, restore, home, portability, cloud and visual
+        id: inherited_a
+        continue-on-error: true
+        run: |
+          node --check src/worker.js
+          node --check src/workerR34.js
+          node --check src/workerR101.js
+          node --check src/workerLiveStateR51.js
+          node --check src/workerPacketProofR52.js
+          node --check src/workerDeltaMeshR53.js
+          node --check src/workerProofChainR54.js
+          node --check src/workerPerformanceProviderR55.js
+          node --check src/workerR8.js
+          node --check src/workerR9.js
+          node --check src/workerR27.js
+          node --check src/workerR32.js
+          node --check src/workerR33.js
+          npm run test:routes
+          npm run test:restore
+          npm run test:home
+          npm run test:portability
+          npm run test:cloud
+          npm run test:visual
+      - name: Inherited band B · depth, lineage, PC, trajectory, relativity, world and governance
+        id: inherited_b
+        continue-on-error: true
+        run: |
+          npm run test:depth
+          npm run test:lineage
+          npm run test:pc-spine
+          npm run test:trajectory
+          npm run test:relativity
+          npm run test:world
+          npm run test:admissibility
+          npm run test:hybrid
+          npm run test:archive
+          npm run test:quality
+          npm run test:sai
+          npm run test:system-atlas
+          npm run test:render-portability
+      - name: Inherited band C · R38 through R67 convergence lineage
+        id: inherited_c
+        continue-on-error: true
+        run: |
+          npm run test:r38
+          npm run test:correlation
+          npm run test:r39
+          npm run test:r40
+          npm run test:r41
+          npm run test:r43
+          npm run test:r44
+          npm run test:r45
+          npm run test:r45-convergence
+          npm run test:r46
+          npm run test:r47
+          npm run test:r48
+          npm run test:r49
+          npm run test:r50
+          npm run test:r51
+          npm run test:r52
+          npm run test:r53
+          npm run test:r54
+          npm run test:r55
+          npm run test:r58
+          npm run test:r59
+          npm run test:r67
+      - name: Inherited band D · R77 through R110 advanced recovery lineage
+        id: inherited_d
+        continue-on-error: true
+        run: |
+          npm run test:r77
+          npm run test:r79
+          npm run test:r80
+          npm run test:r81
+          npm run test:r82
+          npm run test:r83
+          npm run test:r84
+          npm run test:r85
+          npm run test:r86
+          npm run test:r87
+          npm run test:r88
+          npm run test:r89
+          npm run test:r90
+          npm run test:r91
+          npm run test:r92
+          npm run test:r93
+          npm run test:r94
+          npm run test:r95
+          npm run test:r97
+          npm run test:r99
+          npm run test:r101
+          npm run test:r104
+          npm run test:r107
+          npm run test:r108
+          npm run test:r109
+          npm run test:r110
+      - name: Production build after inherited contracts
+        id: inherited_build
+        continue-on-error: true
+        run: npm run build
+      - name: Aggregate inherited production gate
+        if: always()
+        shell: bash
+        run: |
+          echo "band_a=${{ steps.inherited_a.outcome }}"
+          echo "band_b=${{ steps.inherited_b.outcome }}"
+          echo "band_c=${{ steps.inherited_c.outcome }}"
+          echo "band_d=${{ steps.inherited_d.outcome }}"
+          echo "build=${{ steps.inherited_build.outcome }}"
+          test "${{ steps.inherited_a.outcome }}" = success
+          test "${{ steps.inherited_b.outcome }}" = success
+          test "${{ steps.inherited_c.outcome }}" = success
+          test "${{ steps.inherited_d.outcome }}" = success
+          test "${{ steps.inherited_build.outcome }}" = success
       - name: Canonical Worker dry run
         run: npx wrangler deploy --dry-run --outdir .wrangler-r168
       - name: Install Chromium
