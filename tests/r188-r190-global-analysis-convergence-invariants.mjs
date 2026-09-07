@@ -9,16 +9,18 @@ const temporal=fs.readFileSync('src/execution/temporalRelativityPerformanceR185.
 const ingress=fs.readFileSync('src/world/verifiedReturnWorldIngressR186.ts','utf8');
 const apiTransport=fs.readFileSync('src/canonicalApiTransportR183.ts','utf8');
 
-assert.ok(visual.includes("import {createAnalysisCacheR189} from './analysisCacheR189'"),'R190 must import the one shared analysis cache authority');
+assert.ok(visual.includes("import {createAnalysisCacheR189} from './analysisCacheR189'"),'R190/R191 must import the one shared analysis cache authority');
 assert.ok(visual.includes("import GlobalInterferenceWorkbenchR188 from './GlobalInterferenceWorkbenchR188'"),'R188 workbench must be live in the Visual Instrument');
+assert.ok(visual.includes("compileWholeOrganismContextR191"),'R191 compute-envelope compiler must be live in the Visual Instrument');
 assert.equal((visual.match(/createAnalysisCacheR189\(field\)/g)||[]).length,1,'Visual Instrument must instantiate exactly one R189 cache per loaded field');
 for(const token of [
- 'resolveInterferenceR184(field,address,12,.004,analysisCache)',
- 'reconstructMultipathR185(field,address,12,8,analysisCache)',
+ 'resolveInterferenceR184(field,address,organismPolicy.analysis.localSteps,.004,analysisCache)',
+ 'reconstructMultipathR185(field,address,organismPolicy.analysis.beamWidth,organismPolicy.analysis.pathDepth,analysisCache)',
  'compileDifferentialRelativityR186(field,address,analysisCache)',
  'compileChainedFormulaCalibrationR187(field,address,analysisCache)',
- '<GlobalInterferenceWorkbenchR188 field={field} cache={analysisCache} onSelectAddress={onCommit}/>'
-])assert.ok(visual.includes(token),`R190 shared analysis integration missing: ${token}`);
+ 'chunkSize={organism.analysis.globalChunkSize}',
+ '<WholeOrganismConvergenceR191 context={organism}'
+])assert.ok(visual.includes(token),`R191 shared adaptive analysis integration missing: ${token}`);
 
 for(const token of ['stateCache=new Map','neighborCache=new Map','stateHits','stateMisses','cachedStates','cachedNeighborhoods','memoization authority only'])assert.ok(cache.includes(token),`R189 cache invariant missing: ${token}`);
 assert.ok(cache.includes("import {INTERFERENCE_CALIBRATION_R184} from './interferenceResolutionR184'"),'R189 must use the exact R184 residual calibration');
@@ -26,8 +28,8 @@ assert.ok(cache.includes('cannot change any score, route, evidence, CanonState, 
 
 assert.ok(workbench.includes("const run=async()=>"),'R188 full-field scan must be explicit operator work, not render-time work');
 assert.ok(workbench.includes('AbortController'),'R188 scan must be cancellable');
-assert.ok(workbench.includes("Compile full field"),'R188 operator control missing');
-assert.ok(workbench.includes('does not replace or override the promoted R185 execution scheduler'),'R188 must remain subordinate to R185 execution performance authority');
+assert.ok(workbench.includes('Compile full field'),'R188 operator control missing');
+assert.ok(workbench.includes('R191 may bound chunk cost but cannot auto-run'),'R188 must remain subordinate to R191 bounded analysis and operator invocation');
 assert.ok(!workbench.includes("useEffect(()=>{run()"),'R188 must never auto-run the 20,736 scan');
 assert.ok(!workbench.includes('temporalRelativityPerformanceR185'),'Browser analysis must not import the durable execution scheduler directly');
 for(const token of ['setTimeout(resolve,0)','field.count','cache=sharedCache||createAnalysisCacheR189(field)','quantiles','hotspots','basins','clusters'])assert.ok(globalAtlas.includes(token),`R188 bounded global analysis invariant missing: ${token}`);
@@ -36,6 +38,6 @@ for(const token of ['PREDICT_CARRY_CORRECT_REALLOCATE','workingSetResolution','t
 for(const token of ['PROOF_REFRESHED','verified','R146','canonicalMutation:false'])assert.ok(ingress.includes(token),`Promoted R186 verified-return world ingress missing: ${token}`);
 for(const token of ['OMEGA_CANONICAL_ORIGIN','/api/'])assert.ok(apiTransport.includes(token),`Promoted canonical API routing missing: ${token}`);
 
-for(const retained of ['PC-LINEAGE DEPTH CAMERA','OmegaMotionSkinMapR35','OrientationFrameR182View','VisualAtlasR183','InterferenceResolutionR184','MultipathReconstructionR185','DifferentialRelativityR186','ChainedFormulaCalibrationR187','Admitted next','Previous','Yaw','Pitch'])assert.ok(visual.includes(retained),`R190 degraded inherited Visual Instrument capability: ${retained}`);
+for(const retained of ['PC-LINEAGE DEPTH CAMERA','OmegaMotionSkinMapR35','OrientationFrameR182View','VisualAtlasR183','InterferenceResolutionR184','MultipathReconstructionR185','DifferentialRelativityR186','ChainedFormulaCalibrationR187','Admitted next','Previous','Yaw','Pitch'])assert.ok(visual.includes(retained),`R191 degraded inherited Visual Instrument capability: ${retained}`);
 
-console.log('R188-R190 GLOBAL ANALYSIS CONVERGENCE PASS · one shared R189 cache powers local/deep/differential/chained/global analysis while promoted R185 execution performance, R186 verified-return ingress, canonical API authority and inherited visual controls remain preserved');
+console.log('R188-R191 GLOBAL ANALYSIS CONVERGENCE PASS · one shared R189 cache powers adaptive local/deep/differential/chained/global analysis while R191 bounds compute, R185 keeps execution performance authority, R186 keeps verified-return ingress, and inherited visual controls remain preserved');
