@@ -1,0 +1,44 @@
+name: R171 Federation Receipt World Reconciler
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/world/federationReceiptWorldReconcilerR171.js'
+      - 'tests/r171-federation-receipt-world-reconciler-invariants.mjs'
+      - '.github/workflows/r171-federation-receipt-world-reconciler.yml'
+  push:
+    branches: [r171-federation-receipt-world-reconciler]
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r171-receipt-world-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R171 federation receipt world reconciliation
+        run: node tests/r171-federation-receipt-world-reconciler-invariants.mjs
+      - name: Preserve R169 federation attestation world lens
+        run: node tests/r169-federation-attestation-world-lens-invariants.mjs
+      - name: Preserve R168 whole-system successor authority
+        run: node tests/r168-full-restoration-current-successor-invariants.mjs
+      - name: Preserve R166 living residual world lens
+        run: node tests/r166-development-residual-world-lens-invariants.mjs
+      - name: Preserve Earth and computed-reality truth gates
+        run: |
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+      - name: Preserve R125 admission authority
+        run: node tests/r125-accuracy-engine-invariants.mjs
+      - name: Syntax-check R171
+        run: node --check src/world/federationReceiptWorldReconcilerR171.js
+      - name: Run inherited regression and production build
+        run: npm run check
+      - name: Prove canonical Worker package remains deployable
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r171-dry-run
