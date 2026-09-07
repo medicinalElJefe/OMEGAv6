@@ -23,9 +23,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+          cache: npm
+      - name: Install exact dependency lock
+        run: npm ci
+      - name: Reject high-severity dependency regressions
+        run: npm audit --audit-level=high
       - name: Prove R155 family authority and one-system convergence
         run: node tests/r155-whole-system-convergence-invariants.mjs
+      - name: Preserve R48 predecessor lineage and corrected successor ownership
+        run: node tests/r48-completion-convergence-invariants.mjs
+      - name: Preserve R130 control-plane endpoint ownership
+        run: node tests/r130-operational-control-plane.mjs
       - name: Preserve R153 full-system completion authority
         run: node tests/r153-full-system-completion-invariants.mjs
       - name: Prove R154 relative capacity
@@ -50,6 +58,12 @@ jobs:
           node tests/r126-causal-interaction-invariants.mjs
           node tests/r125-accuracy-engine-invariants.mjs
           node tests/r124-self-contained-build-invariants.mjs
+      - name: Preserve navigation and interface information architecture
+        shell: bash
+        run: |
+          node tests/r155-navigation-information-architecture-invariants.mjs
+          npm run test:navigation
+          npm run test:applications
       - name: Full inherited regression and production build
         run: npm run check
       - name: Canonical Worker dry run
