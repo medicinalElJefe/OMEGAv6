@@ -1,0 +1,32 @@
+name: OMEGA R155 Navigation Information Architecture
+
+on:
+  push:
+    branches:
+      - r155-navigation-information-architecture-polish
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  prove-r155-navigation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prove R155 navigation information architecture
+        run: node tests/r155-navigation-information-architecture-invariants.mjs
+      - name: Preserve inherited navigation contracts
+        run: npm run test:navigation
+      - name: Preserve full application and interaction contracts
+        run: npm run test:applications
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r155-dry-run
