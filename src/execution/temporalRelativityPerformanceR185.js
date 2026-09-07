@@ -51,7 +51,7 @@ function executorChangeFit(id,p){
  if(p<=.32){if(id==='LOCAL_RUNTIME'||id==='LOCAL_PROOF')return 1;if(id==='WORKERS_AI')return .94;if(id==='HYBRID_HOST')return .80;if(id==='FEDERATION_CHAIN')return .62;if(id==='AUTONOMIC_SWARM')return .55}
  return .76;
 }
-function executorMetric(state,id){const row=state?.executors?.[id]||{};return{count:finite(row.count),successEwma:cl(row.successEwma,.70,1),verifiedEwma:cl(row.verifiedEwma,.50,1),latencyEwmaMs:Math.max(0,finite(row.latencyEwmaMs,1000)),latencyVelocityMs:finite(row.latencyVelocityMs),latencyAccelerationMs:finite(row.latencyAccelerationMs),lastAt:finite(row.lastAt)}}
+function executorMetric(state,id){const row=state?.executors?.[id]||{};return{count:finite(row.count),successEwma:Number.isFinite(Number(row.successEwma))?cl(row.successEwma):.70,verifiedEwma:Number.isFinite(Number(row.verifiedEwma))?cl(row.verifiedEwma):.50,latencyEwmaMs:Math.max(0,finite(row.latencyEwmaMs,1000)),latencyVelocityMs:finite(row.latencyVelocityMs),latencyAccelerationMs:finite(row.latencyAccelerationMs),lastAt:finite(row.lastAt)}}
 
 export async function readTemporalPerformanceR185(runtime,runOrRoute){
  const storage=runtimeStorageR168(runtime),key=typeof runOrRoute==='string'?ROUTE_PREFIX+safe(runOrRoute):routeKey(runOrRoute);return await storage.get(key)||null;
