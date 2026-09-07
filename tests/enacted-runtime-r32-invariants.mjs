@@ -37,6 +37,7 @@ await import('./r194-verified-content-reuse-invariants.mjs');
 await import('./r195-differential-partition-execution-invariants.mjs');
 await import('./r196-bounded-partition-parallelism-invariants.mjs');
 await import('./r197-adaptive-partition-backpressure-invariants.mjs');
+await import('./r199-live-execution-control-proof-invariants.mjs');
 await import('./r1931-cloudflare-durable-object-reconciliation-invariants.mjs');
 await import('./r186-verified-return-live-world-ingress-invariants.mjs');
 await import('./r1901-living-world-proof-membrane-invariants.mjs');
