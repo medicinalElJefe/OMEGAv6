@@ -24,6 +24,10 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-fund
+      - name: Prove focused R198 living-world intelligence visual projection
+        run: |
+          node --check src/world/livingWorldIntelligenceVisualR198.js
+          node tests/r198-living-world-intelligence-visual-invariants.mjs
       - name: Prove focused R196.2 living-world intelligence proof projection
         run: |
           node --check src/world/livingWorldIntelligenceProofR196.js
@@ -103,8 +107,9 @@ jobs:
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
       - name: Summarize current convergence boundary
         run: |
-          echo 'R196.2 CURRENT-AUTHORITY CONVERGENCE PASS: R195.1 authenticated intelligence status is projected into the existing R190.1 current-proof membrane while preserving the promoted R196.1 governed SAI-to-Hybrid held-draft handoff.'
-          echo 'No second world, executor, queue, probe authority, or Canon path is introduced; R196.1 remains draft-only and R196.2 remains read-only.'
+          echo 'R198 CURRENT-AUTHORITY CONVERGENCE PASS: accepted R196.2 intelligence proof is rendered inside the existing R175/R174 living-world visual surface as an intent-only intelligence band.'
+          echo 'R197 adaptive backpressure remains execution scheduling authority; R196.1 remains held-draft only and R196.2 remains proof projection authority.'
+          echo 'No second world, executor, queue, probe authority, or Canon path is introduced; R198 is read-only visual projection and navigation intent only.'
           echo 'R147 remains dispatch authority; R146 remains durable lifecycle and execution-history authority; R141 remains exact-return proof authority; R125 remains sole CanonState admission authority.'
           echo 'R175 world truth → R176 intent → R177 mission → R178 contract → R179 authorization → R180 dispatch → R182/R186 verified-return continuity remains proved.'
           echo 'Hybrid/Build native execution, trained weights, factual truth, Earth truth, federation closure, solver validity, deployment and computed-photoreal reality remain separately proof-gated.'
