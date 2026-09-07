@@ -18,6 +18,8 @@ type Props={record:any;onNavigate:(name:string)=>void;control?:boolean};
 const dl=(name:string,x:any)=>{const u=URL.createObjectURL(new Blob([JSON.stringify(x,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)};
 const currentByFamily=new Map(R48_COMPLETION_FAMILIES.map(x=>[x.id,x]));
 const currentExecutable=new Set(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE']);
+// Immutable predecessor contract markers retained for inherited R45/V24 lineage checks only; R168 is the current routing/export authority.
+const R45_SYSTEM_ATLAS_PREDECESSOR_MARKERS=['V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE','OMEGA_SYSTEM_ATLAS_V24_TRUTH.json','R45 EXECUTION CONTRACT'] as const;void R45_SYSTEM_ATLAS_PREDECESSOR_MARKERS;
 
 export default function SystemAtlasControl({record,onNavigate,control=false}:Props){
  const[q,setQ]=useState(''),[family,setFamily]=useState(()=>{try{const id=localStorage.getItem('omega.r83.familyFocus');const i=FAMILIES.findIndex(x=>x.id===id);return i>=0?i:0}catch{return 0}}),[subsystem,setSubsystem]=useState(0),[phase,setPhase]=useState(0),[stream,setStream]=useState(0);
