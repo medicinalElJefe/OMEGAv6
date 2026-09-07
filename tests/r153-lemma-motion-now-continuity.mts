@@ -31,7 +31,7 @@ assert.equal(a.promotion.accuracy.authority,'PROOF_MEASUREMENT_AND_VALIDATION_AL
 assert.equal(a.promotion.truthUnchanged,a.truth.truthConfidence);
 assert.equal(a.selfModel.kind,'RUNTIME_SELF_DESCRIPTION_NOT_SENTIENCE');
 assert.match(a.selfModel.boundary,/not a claim of consciousness/i);
-assert.match(a.truthBoundary,/Motion\/view promotion never manufactures truth/);
+assert.ok(a.truthBoundary.includes('Motion/view promotion never manufactures truth'));
 
 const record=corpusState(0),C=record.metrics.continuity,Phi=record.metrics.plasticity,scar=record.metrics.scar,water=.4*C+.4*Phi+.2*(1-scar),thetaDeg=((C*137.507764+Phi*188+scar*72)%360+360)%360,theta=thetaDeg/180*Math.PI,expected=(C*water*(1+Math.cos(theta)))/(1+scar+Math.abs(Math.sin(theta))*.188);
 assert.ok(Math.abs(a.lemma.donorKernel.lemmaRaw-expected)<1e-12,'Drive donor lemma equation must be preserved numerically before scheduling bounds');
