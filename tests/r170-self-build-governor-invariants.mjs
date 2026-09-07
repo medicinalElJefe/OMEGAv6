@@ -27,7 +27,7 @@ for(const law of ['EXACT_CURRENT_MAIN_REQUIRES_SUCCESSFUL_PRODUCTION_CLOUD_BRIDG
 for(const capsule of state.roadmap){assert.match(capsule.id,/^SG00[1-5]$/);assert.match(capsule.target,/^src\/generated\/selfbuildR170\//);assert.ok(['LOW','MEDIUM'].includes(capsule.risk))}
 assert.match(engine,/BLOCKED_BY_RESIDUAL_GATE/);assert.match(engine,/PROVED_PENDING_PR/);assert.match(engine,/canonicalAdmission:false/);assert.match(engine,/revision:'R170\.2'/);assert.ok(!/git\s+push/i.test(engine));assert.ok(!/Math\.random|crypto\.random/i.test(engine));
 for(const needle of ['api/core-health','api/release-evidence','api/runtime-attestation','api/hybrid/status','UNREACHABLE'])assert.ok(collector.includes(needle));
-for(const needle of ['gh run list','headSha','production_ready','OBSERVE_ONLY','prove_successor_workflow_invariants_r175.mjs','r179-living-world-durable-authorization-invariants.mjs'])assert.ok(workflow.includes(needle),`self-build workflow missing ${needle}`);
+for(const needle of ['gh run list','headSha','production_ready','OBSERVE_ONLY','prove_successor_workflow_invariants_r175.mjs','r181-real-sar-earth-invariants.mjs','r179-living-world-durable-authorization-invariants.mjs'])assert.ok(workflow.includes(needle),`self-build workflow missing ${needle}`);
 assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(workflow));assert.ok(!/gh\s+pr\s+merge/i.test(workflow));assert.ok(!/gh\s+workflow\s+run/i.test(workflow));assert.ok(!/^\s*workflow_run\s*:/m.test(workflow));
 assert.match(workflow,/cron: '17 \* \* \* \*'/,'governed self-build must observe hourly at minute 17');
 const selectIndex=workflow.indexOf('name: Select next bounded capsule');
@@ -40,12 +40,15 @@ const installBlock=workflow.slice(installIndex,preGenerationProofIndex);
 assert.match(installBlock,/if: steps\.select\.outputs\.status == 'PROPOSE'/,'dependency install must be PROPOSE-only');
 const preGenerationBlock=workflow.slice(preGenerationProofIndex,generateIndex);
 assert.match(preGenerationBlock,/if: steps\.select\.outputs\.status == 'PROPOSE'/,'successor proof must be PROPOSE-only');
+assert.ok(preGenerationBlock.includes('r181-real-sar-earth-invariants.mjs'),'R181 SAR successor must be re-proved before autonomous generation');
 assert.equal(governor.revision,'R170.3');assert.equal(governor.engineRevision,'R170.2');
 assert.equal(governor.successorWorkflowPolicy.readOnly,true);assert.equal(governor.successorWorkflowPolicy.mainPushAllowed,false);assert.equal(governor.successorWorkflowPolicy.recurringScheduleAllowed,false);assert.equal(governor.successorWorkflowPolicy.dynamicProofRunner,'scripts/prove_successor_workflow_invariants_r175.mjs');
-assert.equal(governor.currentCapabilityFloor,'R179');assert.deepEqual(governor.promotedSuccessorContinuity,['R175','R176','R177','R178','R179']);
-assert.equal(governor.selfBuild.schedule,'17 * * * *');assert.equal(governor.selfBuild.observationCadence,'HOURLY');assert.equal(governor.selfBuild.expensiveProofMode,'PROPOSE_ONLY');assert.equal(governor.selfBuild.latestExplicitSuccessorProof,'tests/r179-living-world-durable-authorization-invariants.mjs');
+assert.equal(governor.currentCapabilityFloor,'R181');assert.deepEqual(governor.promotedSuccessorContinuity,['R175','R176','R177','R178','R179','R181']);
+assert.equal(governor.selfBuild.schedule,'17 * * * *');assert.equal(governor.selfBuild.observationCadence,'HOURLY');assert.equal(governor.selfBuild.expensiveProofMode,'PROPOSE_ONLY');assert.equal(governor.selfBuild.latestExplicitSuccessorProof,'tests/r181-real-sar-earth-invariants.mjs');
 assert.equal(governor.selfBuild.directMainMutation,false);assert.equal(governor.selfBuild.autoMerge,false);assert.equal(governor.selfBuild.recursiveTriggerChain,false);assert.equal(governor.selfBuild.highOrCriticalAutoRepair,false);assert.equal(governor.selfBuild.canonicalAdmissionAuthority,'R125');
 assert.equal(governor.preservedRuntime.livingWorldExecutionAuthorization,'R179_AUTHORIZED_NOT_DISPATCHED');
+assert.equal(governor.preservedRuntime.earthSarObservationSurface,'R181_SOURCE_BACKED_SENTINEL1_NISAR_METADATA');
+assert.equal(governor.preservedRuntime.earthSarAuthority,'OBSERVATION_AND_DERIVATION_ONLY_NOT_CANON_ADMISSION');
 
 function baseSimulationState(){
  const copy=JSON.parse(JSON.stringify(state));
@@ -85,4 +88,4 @@ try{
  const blockedState=JSON.parse(fs.readFileSync(path.join(critical.root,'public/omega-r170-selfbuild-state.json'),'utf8'));assert.equal(blockedState.generation,0);assert.equal(blockedState.currentCapsuleId,null);assert.equal(blockedState.receipts.length,0);
 }finally{fs.rmSync(critical.root,{recursive:true,force:true})}
 
-console.log(`R170.3/R179 GOVERNED SELF-BUILD INVARIANTS PASS · hourly low-cost observation · generation ${state.generation}/${state.maxAutonomousGenerations} · admitted ${admitted.length} · generation-1 simulation PASS · critical-residual fail-close PASS`);
+console.log(`R170.3/R181 GOVERNED SELF-BUILD INVARIANTS PASS · capability floor R181 · R179 execution boundary preserved · hourly low-cost observation · generation ${state.generation}/${state.maxAutonomousGenerations} · admitted ${admitted.length} · generation-1 simulation PASS · critical-residual fail-close PASS`);
