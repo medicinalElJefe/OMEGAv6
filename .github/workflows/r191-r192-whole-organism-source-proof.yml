@@ -1,0 +1,41 @@
+name: R191-R192 Whole Organism Source + Proof
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r191-whole-organism-convergence]
+
+permissions:
+  contents: read
+
+jobs:
+  organism-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Parse new runtime modules
+        run: |
+          node --check src/workerR8.js
+          node --check src/sourceFabricR192.js
+          node --check src/empiricalBenchmarkR192.js
+      - name: Recovered SAR and calibration invariants
+        run: node tests/r181-continuous-calibration-fusion-invariants.mjs
+      - name: Distributed runtime convergence invariants
+        run: node tests/r183-full-system-runtime-convergence-invariants.mjs
+      - name: Adaptive visual/global analysis invariants
+        run: node tests/r188-r190-global-analysis-convergence-invariants.mjs
+      - name: Whole organism invariants
+        run: node tests/r191-whole-organism-convergence-invariants.mjs
+      - name: Source fabric and external benchmark invariants
+        run: node tests/r192-source-fabric-empirical-benchmark-invariants.mjs
+      - name: Production build
+        run: npm run build
+      - name: Cloudflare dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r192
