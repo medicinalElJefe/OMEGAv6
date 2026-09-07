@@ -101,6 +101,16 @@ jobs:
           const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
           const targets=[['root','/'],['health','/api/health'],['status','/api/status'],['restoration','/api/restoration'],['hybrid','/api/hybrid/status']];
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          function proveHybridTruth(data){
+            const devices=Array.isArray(data?.devices)?data.devices:[];
+            const online=devices.filter(d=>d?.online===true&&d?.revoked!==true);
+            if(data?.nativeExecutionClaimed===true){
+              if(data?.state!=='VERIFIED_DEVICE_ONLINE'||online.length<1)throw new Error(`Hybrid online truth mismatch: ${JSON.stringify({state:data?.state,nativeExecutionClaimed:data?.nativeExecutionClaimed,onlineDevices:online.length})}`);
+              return 'VERIFIED_DEVICE_ONLINE';
+            }
+            if(data?.nativeExecutionClaimed!==false||data?.state!=='DEVICE_PROOF_REQUIRED'||online.length!==0)throw new Error(`Hybrid offline truth mismatch: ${JSON.stringify({state:data?.state,nativeExecutionClaimed:data?.nativeExecutionClaimed,onlineDevices:online.length})}`);
+            return 'DEVICE_PROOF_REQUIRED';
+          }
           async function probe(name,path){
             let last='';
             for(let attempt=1;attempt<=12;attempt++){
@@ -109,7 +119,12 @@ jobs:
                 const text=await r.text();
                 if(r.ok && text.length){
                   const data=path.startsWith('/api/')?JSON.parse(text):null;
-                  if(path==='/api/hybrid/status' && (data.state!=='DEVICE_PROOF_REQUIRED'||data.nativeExecutionClaimed!==false)) throw new Error('Hybrid truth gate regression');
+                  if(path==='/api/health'){
+                    if(data?.schema!=='OMEGA_CANONICAL_CORE_HEALTH_R159_1'||data?.revision!=='R159.1'||data?.core?.workerRequestHandling!=='RETURNED_FIRST_HAND')throw new Error(`R159.1 first-hand core health missing: ${text.slice(0,400)}`);
+                    if(r.headers.get('x-omega-core-health')!=='R159.1-FIRST-HAND')throw new Error('R159.1 first-hand core-health response header missing');
+                    if(data?.sovereignGateway?.requiredForCanonicalCoreHealth!==false)throw new Error('optional sovereign gateway was promoted into core-health authority');
+                  }
+                  if(path==='/api/hybrid/status')console.log(`HYBRID LIVE TRUTH ${proveHybridTruth(data)}`);
                   console.log(`LIVE VERIFY ${name}: HTTP ${r.status} attempt ${attempt}`);
                   return;
                 }
@@ -255,8 +270,9 @@ jobs:
             echo "- Runtime: $OMEGA_PUBLIC_URL"
             echo "- Verify job: ${{ needs.verify.result }}"
             echo "- Deployment job: ${{ job.status }}"
+            echo "- R159.1 first-hand canonical core health: required for deployment PASS"
             echo "- Live AI synthesis: required for deployment PASS"
             echo "- R8 Earth/NOAA + Hybrid V90 contracts: required for deployment PASS"
             echo "- R9 Earth ground source hierarchy: required for deployment PASS"
-            echo "- Hybrid native execution: must remain DEVICE_PROOF_REQUIRED until paired-host proof"
+            echo "- Hybrid native execution: VERIFIED_DEVICE_ONLINE requires a current non-revoked heartbeat; otherwise DEVICE_PROOF_REQUIRED"
           } >> "$GITHUB_STEP_SUMMARY"
