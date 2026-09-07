@@ -39,7 +39,7 @@ jobs:
           node tests/r146-durable-operation-execution-invariants.mjs
           node tests/r140-unified-living-operation-fabric.mjs
           node tests/r136-living-world-frame-invariants.mjs
-          node tests/r134-canonical-world-continuity-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
       - name: Preserve federation Hybrid Earth computed-reality and Canon truth gates
         run: |
           node tests/r173-federation-ledger-world-observer-invariants.mjs
