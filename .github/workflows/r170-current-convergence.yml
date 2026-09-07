@@ -30,8 +30,9 @@ jobs:
         run: |
           node scripts/verify_workflow_topology_r170.mjs
           node tests/r170-self-build-governor-invariants.mjs
-      - name: Prove current R179 durable living-world execution chain
+      - name: Prove current R180 living-world execution chain
         run: |
+          node tests/r180-living-world-execution-dispatch-invariants.mjs
           node tests/r179-living-world-durable-authorization-invariants.mjs
           node tests/r178-living-world-contract-resolution-invariants.mjs
           node tests/r177-living-world-mission-composer-invariants.mjs
@@ -82,10 +83,11 @@ jobs:
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
       - name: Summarize current convergence boundary
         run: |
-          echo 'R180 CURRENT CONVERGENCE PASS over R170.3 / deployed R179 authority.'
-          echo 'R175 world truth → R176 intent → R177 mission composition → R178 contract resolution → R179 durable authorization is explicitly proved.'
+          echo 'R180 CURRENT CONVERGENCE PASS over R170.3 / living-world dispatch successor authority.'
+          echo 'R175 world truth → R176 intent → R177 mission composition → R178 contract resolution → R179 durable authorization → R180 separately confirmed dispatch is explicitly proved.'
+          echo 'R147 remains dispatch authority; Hybrid/Build host execution remains separately confirmed and proof-gated.'
           echo 'The deployed R164 mobile-containment repair is retained in the same current chain.'
           echo 'R170.3 remains hourly low-cost OBSERVE/PROPOSE control; expensive proof remains PROPOSE-only.'
           echo 'Post-R170 successor workflows remain dynamically proof-tested and read-only.'
           echo 'Canonical production deployment remains exclusively owned by ci.yml two-parent merge law.'
-          echo 'R179 stops AUTHORIZED_NOT_DISPATCHED; R147/R162 execution authorities are preserved; R125 remains sole CanonState admission authority; R153.2 remains SCREEN_ONLY.'
+          echo 'R125 remains sole CanonState admission authority; R153.2 remains SCREEN_ONLY.'
