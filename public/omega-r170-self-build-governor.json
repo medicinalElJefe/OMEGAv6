@@ -1,0 +1,42 @@
+{
+  "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
+  "revision": "R170",
+  "authority": "OMEGAV6",
+  "state": "GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
+  "activeWorkflowAuthority": {
+    "productionDeploy": ".github/workflows/ci.yml",
+    "currentConvergence": ".github/workflows/r170-current-convergence.yml",
+    "autonomousProposal": ".github/workflows/r170-governed-selfbuild.yml",
+    "specialized": [
+      ".github/workflows/r168-1-rcwa-byte-diagnostic.yml",
+      ".github/workflows/r168-genesis-r192-attestation.yml",
+      ".github/workflows/r169-federation-attestation-world-lens.yml"
+    ]
+  },
+  "historicalWorkflowArchive": {
+    "path": ".github/workflow-archive",
+    "sourceTreeSha": "af88dd7c2713700a4961ce0d54c44422094c4188",
+    "policy": "Historical workflows remain byte-preserved Git lineage but are not automatic current execution authorities."
+  },
+  "selfBuild": {
+    "schedule": "17 */6 * * *",
+    "maxAutonomousGenerations": 5,
+    "candidatePolicy": "ONE_CAPSULE_ONE_BRANCH_ONE_PROOF_RECEIPT_ONE_PR",
+    "directMainMutation": false,
+    "autoMerge": false,
+    "recursiveTriggerChain": false,
+    "highOrCriticalAutoRepair": false,
+    "residualAuthority": "R164",
+    "canonicalAdmissionAuthority": "R125"
+  },
+  "preservedRuntime": {
+    "canonicalWorkerSpine": "R116",
+    "durableObjects": 7,
+    "opticalMachine": "omega-optical-machine-r1532",
+    "opticalVersion": "R153.2",
+    "opticalAuthority": "SCREEN_ONLY",
+    "genesisR192AttestationContract": "R192_SERVICE_BOUND_R1532_ATTESTED"
+  },
+  "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
+  "truthBoundary": "R170 may autonomously observe, select a predefined low/medium-risk implementation capsule, generate one additive candidate, run the current proof chain, push an isolated branch, and open a PR. R170 cannot directly mutate main, cannot auto-merge, cannot repair HIGH/CRITICAL truth gaps autonomously, cannot claim a PC online without current device proof, cannot elevate R153.2 beyond SCREEN_ONLY, cannot claim the protected Living Light Vercel surface writable, and cannot admit CanonState outside R125."
+}
