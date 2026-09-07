@@ -44,7 +44,7 @@ jobs:
       - name: Prove R156 dimensional-relativity evolution
         run: node tests/r156-dimensional-relativity-evolution-invariants.mjs
 
-      - name: Prove R158 capability-universe visual and runtime binding
+      - name: Prove R158 capability universe and interaction/view contract
         run: node tests/r158-capability-universe-invariants.mjs
 
       - name: Preserve R155 whole-system capability-family authority
@@ -101,7 +101,7 @@ jobs:
       - name: Canonical Worker bundle dry run
         run: npx wrangler deploy --dry-run --outdir .wrangler-r158-dry-run
 
-      - name: Install Chromium for all-route desktop and mobile proof
+      - name: Install Chromium for interaction and all-route desktop/mobile proof
         shell: bash
         run: |
           npm install --no-save playwright@1.55.0
@@ -118,6 +118,9 @@ jobs:
           done
           cat /tmp/omega-r158-preview.log
           exit 1
+
+      - name: Prove visual output is never covered or interaction-trapped
+        run: node tests/r158-visual-interaction-e2e.mjs
 
       - name: Exercise all 44 routes on desktop and mobile
         run: node tests/r118-browser-operational-e2e.mjs
