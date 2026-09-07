@@ -14,9 +14,11 @@
     ]
   },
   "historicalWorkflowArchive": {
-    "path": ".github/workflow-archive",
+    "sourceCommitSha": "459028e8cf7795a75f1f2acd6f00a579819d04cc",
     "sourceTreeSha": "af88dd7c2713700a4961ce0d54c44422094c4188",
-    "policy": "Historical workflows remain byte-preserved Git lineage but are not automatic current execution authorities."
+    "preservation": "IMMUTABLE_GIT_TREE",
+    "historicalExecutionAuthority": false,
+    "policy": "The complete pre-R170 workflow directory remains byte-addressable in immutable Git history at the recorded commit/tree. Superseded YAMLs are removed only from the active Actions directory; their source and lineage are not erased."
   },
   "selfBuild": {
     "schedule": "17 */6 * * *",
