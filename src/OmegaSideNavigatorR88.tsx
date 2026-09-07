@@ -56,7 +56,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
  const go=(panel:string)=>{onNavigate(panel);setExpanded(false);setQuery('')};
  const open=(next:BrowserLayer)=>{setLayer(next);setExpanded(true)};
  const currentWorkspace=currentPanel?workspaceForRouteR82(currentPanel as any):null,currentOrganization=currentPanel?organizationForRouteR132(currentPanel):null,routeCount=OMEGA_ROUTE_INVENTORY_R107.currentCount;
- const missionRunning=['ACTIVE','PAUSED'].includes(live.missionStatus)||['RUNNING','QUEUED','CLAIMED'].includes(live.jobStatus),proofReturned=/RETURN|VERIFIED|COMPLETE/.test(live.proofState.toUpperCase());
+ const missionRunning=['ACTIVE','PAUSED'].includes(live.missionStatus)||['RUNNING','QUEUED','CLAIMED'].includes(live.jobStatus),proofState=String(live.proofState||'').toUpperCase(),proofReturned=/(^|_)(RETURNED|VERIFIED|COMPLETE)($|_)/.test(proofState);
  return <aside className={'r94-side-toolbar '+(expanded?'expanded':'collapsed')+' '+(railWide?'rail-wide':'rail-compact')+' r100-professional-nav r104-readable-nav r105-context-nav r120-adaptive-nav r132-organized-nav r156-global-nav'} aria-label='OMEGA global navigation toolbar' data-operation-chain='R143' data-operation-chain-pass={operationAudit.pass?'true':'false'} data-pc-online={live.pcOnline?'true':'false'} data-mission-state={live.missionStatus}>
   <div className='r94-nav-rail'>
    <button className='r88-navigator-trigger r100-rail-cap' onClick={()=>{setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setExpanded(v=>!v)}} aria-label={expanded?'Collapse OMEGA navigator':'Expand OMEGA navigator'} aria-expanded={expanded}>
