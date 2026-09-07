@@ -5,7 +5,8 @@ import {manifestR147} from '../src/execution/unifiedExecutorFabricR147.js';
 const worker=fs.readFileSync('src/workerR116.js','utf8');
 const r147Source=fs.readFileSync('src/execution/unifiedExecutorFabricR147.js','utf8');
 const r197Source=fs.readFileSync('src/execution/adaptivePartitionBackpressureR197.js','utf8');
-const workflow=fs.readFileSync('.github/workflows/r199-live-execution-control-proof.yml','utf8');
+const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+const probe=fs.readFileSync('scripts/verify_live_execution_control_r199.mjs','utf8');
 
 assert.ok(worker.includes("path==='/api/execution/r147/manifest'&&request.method==='GET'"),'R199 requires the existing public read-only R147 manifest route');
 assert.ok(worker.includes('json(manifestR147())'),'R199 public route must return the enacted R147 manifest rather than a parallel projection');
@@ -40,14 +41,15 @@ assert.equal(manifest.upstream.adaptivePartitionBackpressure,'R197');
 assert.equal(manifest.canonicalMutation,false);
 assert.equal(manifest.canonicalAdmissionAuthority,'R125');
 
+assert.equal(fs.existsSync('.github/workflows/r199-live-execution-control-proof.yml'),false,'R199 must not create a second workflow authority or workflow_run fanout');
+assert.ok(ci.includes("if: github.event_name == 'push' && github.ref == 'refs/heads/main'"),'R199 proof must remain inside canonical main deployment authority');
+assert.ok(ci.includes('Promoted main commit must be an exact two-parent merge commit'),'R199 must preserve exact governed merge lineage');
+assert.ok(ci.includes('Verify live R199 execution-control manifest'),'canonical deploy job must run the R199 live proof');
+assert.ok(ci.includes('node scripts/verify_live_execution_control_r199.mjs'),'canonical deploy job must invoke the R199 proof script');
+assert.ok(!ci.includes('workflow_run:'),'canonical CI must not reintroduce workflow_run fanout');
+
 for(const token of [
-  'workflow_run:',
-  'OMEGA Cloud Bridge CI',
-  "github.event.workflow_run.conclusion == 'success'",
-  "github.event.workflow_run.event == 'push'",
-  "github.event.workflow_run.head_branch == 'main'",
-  'EXPECTED_PROMOTED_SHA',
-  'github.event.workflow_run.head_sha',
+  'GITHUB_SHA',
   '/api/release-evidence',
   '/api/runtime-attestation',
   '/api/core-health',
@@ -66,11 +68,11 @@ for(const token of [
   "['NONE','DOWN','UP','CLAMP']",
   "manifest.canonicalAdmissionAuthority!=='R125'",
   'OMEGA R199 LIVE EXECUTION CONTROL PASS'
-]) assert.ok(workflow.includes(token),`R199 live workflow missing ${token}`);
+]) assert.ok(probe.includes(token),`R199 live probe missing ${token}`);
 
-assert.ok(!workflow.includes('/api/execution/runs'),'R199 live proof must not create, transition, dispatch, poll, or read private durable execution runs');
-assert.ok(!workflow.includes('/api/hybrid/pair'),'R199 live proof must not create or rotate Hybrid pairing credentials');
-assert.ok(!workflow.includes("method:'POST'"),'R199 live proof must remain GET-only/read-only');
-assert.ok(!workflow.includes('canonicalMutation:true'),'R199 proof may not claim or perform Canon mutation');
+assert.ok(!probe.includes('/api/execution/runs'),'R199 live proof must not create, transition, dispatch, poll, or read private durable execution runs');
+assert.ok(!probe.includes('/api/hybrid/pair'),'R199 live proof must not create or rotate Hybrid pairing credentials');
+assert.ok(!probe.includes("method:'POST'"),'R199 live proof must remain GET-only/read-only');
+assert.ok(!probe.includes('canonicalMutation:true'),'R199 proof may not claim or perform Canon mutation');
 
-console.log('R199 LIVE EXECUTION CONTROL PROOF PASS · exact promoted release evidence gates a read-only first-hand R147 manifest check proving deployed R185→R193→R194→R195→R196→R197 composition, max-12 bounded scheduling, AIMD feedback states, and R125-only admission without dispatching work or pairing a device');
+console.log('R199 LIVE EXECUTION CONTROL PROOF PASS · canonical deploy-main now binds exact promoted SHA + Worker Version ID to a GET-only first-hand R147 manifest proving deployed R185→R193→R194→R195→R196→R197 composition, max-12 bounded scheduling, AIMD feedback states, and R125-only admission without a second workflow authority');
