@@ -1,5 +1,5 @@
 export const R124_SELF_BUILD='OMEGA_R124_SELF_CONTAINED_CONTINUOUS_BUILD' as const;
-export const R169_GEOMETRIC_MOTION_BUILD='OMEGA_R169_GEOMETRIC_MOTION_AUTONOMOUS_BUILD' as const;
+export const R170_GEOMETRIC_MOTION_BUILD='OMEGA_R170_GEOMETRIC_MOTION_AUTONOMOUS_BUILD' as const;
 
 export type SelfBuildStatus='IDLE'|'OBSERVE'|'PROPOSE'|'SANDBOX'|'TEST'|'COMPARE'|'ADMIT'|'REJECT'|'BLOCKED'|'COMPLETE';
 export type SelfBuildRisk='LOW'|'MEDIUM'|'HIGH';
@@ -47,7 +47,7 @@ export type SelfBuildState={
  receipts:SelfBuildReceipt[];
  laws:readonly string[];
 };
-export type GeometricMotionFrameR169={
+export type GeometricMotionFrameR170={
  phase:number;
  phaseBand:number;
  orientation:-1|0|1;
@@ -75,11 +75,11 @@ export const R124_SELF_BUILD_LAWS=[
  'NO_GENERATED_SCENE_FALLBACK_FOR_COMPUTED_REALITY',
  'NO_FALSE_PC_ONLINE_OR_SOLVER_VALIDITY_CLAIMS',
  'BACKLOG_EXHAUSTION_ENTERS_OBSERVE_MODE_RATHER_THAN_INVENTING_UNPROVEN_CAPABILITY',
- 'R169_GEOMETRIC_MOTION_RELATIVITY_PRIORITIZES_WITHIN_PROVEN_BACKLOG_ONLY',
- 'R169_PARTITION_EXCHANGE_INVARIANT_SCAR_REPARTITION_DRIVES_BUILD_ORDER_NOT_TRUTH',
- 'R169_AUTONOMOUS_PULSE_NEVER_BYPASSES_SANDBOX_TEST_FRESHNESS_ADMISSION',
- 'R169_SCHEDULED_OBSERVATION_MAY_WAKE_BUILD_BUT_MAY_NOT_INVENT_CAPABILITY',
- 'R169_RELATIVE_FRAME_MOTION_MAY_CHANGE_PRIORITY_BUT_NEVER_CANONSTATE'
+ 'R170_GEOMETRIC_MOTION_RELATIVITY_PRIORITIZES_WITHIN_PROVEN_BACKLOG_ONLY',
+ 'R170_PARTITION_EXCHANGE_INVARIANT_SCAR_REPARTITION_DRIVES_BUILD_ORDER_NOT_TRUTH',
+ 'R170_AUTONOMOUS_PULSE_NEVER_BYPASSES_SANDBOX_TEST_FRESHNESS_ADMISSION',
+ 'R170_SCHEDULED_OBSERVATION_MAY_WAKE_BUILD_BUT_MAY_NOT_INVENT_CAPABILITY',
+ 'R170_RELATIVE_FRAME_MOTION_MAY_CHANGE_PRIORITY_BUT_NEVER_CANONSTATE'
 ] as const;
 
 const TAU=Math.PI*2;
@@ -94,19 +94,19 @@ export function capsulePriority(c:SelfBuildCapsule,dependencyReady=true){
  return gain/cost*risk;
 }
 
-export function deriveGeometricMotionFrameR169(state:SelfBuildState,capsules:SelfBuildCapsule[]):GeometricMotionFrameR169{
+export function deriveGeometricMotionFrameR170(state:SelfBuildState,capsules:SelfBuildCapsule[]):GeometricMotionFrameR170{
  const total=Math.max(1,capsules.length),complete=new Set([...state.admitted,...state.rejected,...state.blocked]).size;
  const continuity=clamp01(state.admitted.length/total),residual=clamp01((total-complete)/total),scarCarry=clamp01((state.rejected.length+state.blocked.length)/total);
  const phaseBand=((Math.max(0,state.generation)%12)+12)%12,phase=phaseBand/12*TAU,s=Math.sin(phase),orientation:(-1|0|1)=Math.abs(s)<1e-9?0:s>0?1:-1;
  const invariantCarry=clamp01(.58*continuity+.26*(1-residual)+.16*(1-scarCarry));
  const angularVelocity=.08+.42*residual+.18*scarCarry,radialPosition=clamp01(.18+.68*continuity+.14*invariantCarry),repartitionDemand=clamp01(.52*residual+.28*scarCarry+.20*(1-invariantCarry));
  const demand=clamp01(.38*continuity+.34*repartitionDemand+.18*invariantCarry+.10*angularVelocity),index=demand<.22?0:demand<.4?1:demand<.58?2:demand<.78?3:4;
- return{phase,phaseBand,orientation,continuity,residual,invariantCarry,scarCarry,angularVelocity,radialPosition,repartitionDemand,effectiveResolution:RESOLUTION[index],boundary:'R169 geometric motion is a software scheduling frame derived from self-build state. It changes relative priority and representational resolution only; it is not physical motion, empirical measurement, execution proof, or CanonState.'};
+ return{phase,phaseBand,orientation,continuity,residual,invariantCarry,scarCarry,angularVelocity,radialPosition,repartitionDemand,effectiveResolution:RESOLUTION[index],boundary:'R170 geometric motion is a software scheduling frame derived from self-build state. It changes relative priority and representational resolution only; it is not physical motion, empirical measurement, execution proof, or CanonState.'};
 }
 
-export function geometricMotionPriorityR169(c:SelfBuildCapsule,state:SelfBuildState,capsules:SelfBuildCapsule[]){
+export function geometricMotionPriorityR170(c:SelfBuildCapsule,state:SelfBuildState,capsules:SelfBuildCapsule[]){
  const base=capsulePriority(c,true);if(base<0)return base;
- const frame=deriveGeometricMotionFrameR169(state,capsules),index=Math.max(0,capsules.findIndex(x=>x.id===c.id)),targetPhase=index/Math.max(1,capsules.length)*TAU;
+ const frame=deriveGeometricMotionFrameR170(state,capsules),index=Math.max(0,capsules.findIndex(x=>x.id===c.id)),targetPhase=index/Math.max(1,capsules.length)*TAU;
  const phaseAlignment=.5+.5*Math.cos(targetPhase-frame.phase),invariantCarry=clamp01(c.expectedGain*(1-c.contradictionRisk)),scar=clamp01(c.complexity*c.contradictionRisk),exchange=clamp01(.5*phaseAlignment+.3*frame.repartitionDemand+.2*(1-scar));
  const relativeMotion=clamp01(.34*exchange+.31*invariantCarry+.20*(1-scar)+.15*(1-Math.abs(frame.radialPosition-(index+1)/Math.max(1,capsules.length))));
  return base*(.72+.56*relativeMotion);
@@ -116,7 +116,7 @@ export function selectNextCapsule(capsules:SelfBuildCapsule[],state:SelfBuildSta
  const complete=new Set([...state.admitted,...state.rejected,...state.blocked]);
  return capsules
   .filter(c=>!complete.has(c.id)&&c.prerequisites.every(p=>available.has(p)||state.admitted.includes(p)))
-  .map(c=>({c,score:geometricMotionPriorityR169(c,state,capsules)}))
+  .map(c=>({c,score:geometricMotionPriorityR170(c,state,capsules)}))
   .sort((a,b)=>b.score-a.score||a.c.id.localeCompare(b.c.id))[0]?.c??null;
 }
 
