@@ -28,9 +28,9 @@ const MODULES=[
  {revision:'R127',id:'PROOF_FABRIC',layer:'PROOF',state:'ADMITTED',authority:'CANDIDATE_NOT_CANON',purpose:'source → causal → plan → receipt → independent verification'},
  {revision:'R128',id:'EMPIRICAL_VALIDATION',layer:'VALIDATION',state:'ADMITTED',authority:'VALIDATION_EVIDENCE_NOT_CANON',purpose:'external calibration/holdout/reproduction with deterministic replay identity'},
  {revision:'R129',id:'EXPERIMENT_RUNTIME',layer:'VALIDATION',state:'ADMITTED',authority:'EXPERIMENT_LEDGER_NOT_CANON',purpose:'reproducible experiment CLI, artifact hashes and replay manifests'},
- {revision:'R130',id:'CONTROL_PLANE',layer:'OPERATIONS',state:'ADMITTED',authority:'OBSERVABILITY_NOT_CANON',purpose:'single operational registry and health matrix'},
  {revision:R153_REVISION,id:'FULL_SYSTEM_COMPLETION',layer:'COMPLETION',state:'CANDIDATE',authority:'SUCCESSOR_IMPLEMENTATION_AND_GATE_AUTHORITY_NOT_CANON',purpose:'24-family / 100-system / 44-route one-system completion contract over the existing R48/R95/R143/R142/R141/R125 chain'},
- {revision:R155_REVISION,id:'WHOLE_SYSTEM_CONVERGENCE',layer:'GOVERNANCE',state:'CANDIDATE',authority:'CAPABILITY_FAMILY_OWNERSHIP_AND_PROMOTION_MAP_NOT_CANON',purpose:'resolve parallel successor families by capability authority, dependencies and proof rather than overloaded revision numbers'}
+ {revision:R155_REVISION,id:'WHOLE_SYSTEM_CONVERGENCE',layer:'GOVERNANCE',state:'CANDIDATE',authority:'CAPABILITY_FAMILY_OWNERSHIP_AND_PROMOTION_MAP_NOT_CANON',purpose:'resolve parallel successor families by capability authority, dependencies and proof rather than overloaded revision numbers'},
+ {revision:'R130',id:'CONTROL_PLANE',layer:'OPERATIONS',state:'ADMITTED',authority:'OBSERVABILITY_NOT_CANON',purpose:'single operational registry and health matrix; R153/R155 are nested completion/convergence payloads and do not replace R130 endpoint ownership'}
 ];
 
 export const R130_PROBES=[
@@ -51,7 +51,7 @@ export function manifestR130(){
   organization:{execution:['R121','R123','R125','R126 maximum runtime'],reasoning:['R126 causal'],proof:['R127'],validation:['R128','R129'],operations:['R130'],completion:[R153_REVISION],convergence:[R155_REVISION],canonicalAdmission:'R125'},
   fullSystemCompletion:R153_FULL_SYSTEM_CONTRACT,
   wholeSystemConvergence:wholeSystem,
-  truthBoundary:'R130 organizes and observes inherited capabilities. R153 exposes current successor implementation/gate status. R155 additionally resolves parallel capability-family ownership so revision-number collisions cannot silently overwrite stronger implementations. Registry membership, candidate integration or endpoint reachability still does not prove native machine execution, scientific correctness, external validation, deployment freshness, or CanonState.'
+  truthBoundary:'R130 remains the owner of the operational-control-plane endpoint and organizes/observes inherited capabilities. R153 is a nested current-successor completion payload; R155 is a nested capability-family ownership/promotion payload. Neither replaces R130 endpoint identity. Registry membership, candidate integration or endpoint reachability still does not prove native machine execution, scientific correctness, external validation, deployment freshness, or CanonState.'
  };
 }
 
