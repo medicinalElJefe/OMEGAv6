@@ -112,7 +112,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
      </button>})}
      {rows.length===0&&<div className='r88-empty'>No route matches that workspace/search combination.</div>}
     </div>
-    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>Persistent rail · all 44 destinations remain reachable · R158 whole-instrument audit {convergenceAudit.pass?'PASS':'HOLD'} · R156 ranks context but never auto-executes · R143 operation chain {operationAudit.pass?'PASS':'HOLD'} · R142 receipts remain execution proof · R125 alone admits CanonState · atlas shell labels are address/model resolution, not literal physical dimensions.</span></footer>
+    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>Persistent rail · active application remains visible · all 44 destinations remain reachable · R158 whole-instrument audit {convergenceAudit.pass?'PASS':'HOLD'} · R156 ranks context but never auto-executes · R143 operation chain {operationAudit.pass?'PASS':'HOLD'} · R142 receipts remain execution proof · R125 alone admits CanonState · atlas shell labels are address/model resolution, not literal physical dimensions.</span></footer>
    </>:<div className='r88-software-layer'><OmegaSystemInventoryR83 compact onNavigate={go}/></div>}
   </section>
  </aside>;
