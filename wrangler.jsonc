@@ -1,4 +1,4 @@
-// OMEGA R193.1 preserves the proven R116 Worker spine and all current durable state while explicitly retiring two historical Durable Object namespaces that no longer have code/bindings.
+// OMEGA R199.1 preserves the proven R116 Worker spine and all current durable state after Cloudflare confirmed the historical R201/R203 deleted exports no longer map to any namespace and are safe to remove.
 // Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes. R125 remains canonical admission authority.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
@@ -44,9 +44,7 @@
     "OmegaSwarmBranch": {"type": "durable-object", "storage": "sqlite"},
     "OmegaSwarmOrgan": {"type": "durable-object", "storage": "sqlite"},
     "OmegaSwarmOrganismCoordinator": {"type": "durable-object", "storage": "sqlite"},
-    "OmegaSwarmAutonomicCoordinator": {"type": "durable-object", "storage": "sqlite"},
-    "OmegaMissionLedgerR201": {"type": "durable-object", "state": "deleted"},
-    "OmegaHybridMissionLedgerR203": {"type": "durable-object", "state": "deleted"}
+    "OmegaSwarmAutonomicCoordinator": {"type": "durable-object", "storage": "sqlite"}
   },
   "observability": {
     "enabled": true
