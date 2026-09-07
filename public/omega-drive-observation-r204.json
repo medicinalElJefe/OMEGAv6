@@ -1,0 +1,49 @@
+{
+  "schema": "OMEGA_DRIVE_OBSERVATION_R204",
+  "revision": "R204",
+  "state": "PARTIAL_BYTE_BOUND_CONNECTED_DRIVE_OBSERVATION",
+  "observedOn": "2026-09-07",
+  "queryScope": "OMEGA",
+  "exhaustive": false,
+  "repositorySnapshotAuthority": "R48",
+  "liveDriveAuthority": false,
+  "externalFilesIncludedInRuntime": false,
+  "byteHashScope": "ONLY_RAW_BOUND_FILES",
+  "rawByteBound": [
+    {
+      "title": "OMEGA_ONE_SYSTEM_FULL_SOFTWARE_MENU_LEDGER.xlsx",
+      "bytes": 89860,
+      "modifiedTime": "2026-05-27T20:08:51.000Z",
+      "sha256": "32bd230a02040d3d283e561bc44a136ab0a0738c96206a866ea41ecba84275b4",
+      "retrieval": "GOOGLE_DRIVE_RAW_STORED_XLSX"
+    },
+    {
+      "title": "OMEGA_ONE_SYSTEM_J_DRIVE_1728D_AUTOPING_LEDGER.xlsx",
+      "bytes": 251241,
+      "modifiedTime": "2026-05-27T20:13:37.000Z",
+      "sha256": "6cf5ca001a962f98f8f97aa4e772716518dde473722d36bfd80706e6e4d95ea6",
+      "retrieval": "GOOGLE_DRIVE_RAW_STORED_XLSX"
+    },
+    {
+      "title": "OMEGA_ALL_SOFTWARE_61917364224D_FULL_BUILD_v22.xlsx",
+      "bytes": 4808795,
+      "modifiedTime": "2026-05-26T01:59:17.000Z",
+      "sha256": "688f85cc8f64cc8cf6cc9effd694d0bb46342e05f04598868e20de0dad4afe97",
+      "retrieval": "GOOGLE_DRIVE_RAW_STORED_XLSX"
+    }
+  ],
+  "metadataObserved": [
+    {"title":"omega_cube_engine_v9.xlsx","bytes":751141,"modifiedTime":"2025-12-17T23:56:37.000Z"},
+    {"title":"omega_cube_engine_v8.xlsx","bytes":507153,"modifiedTime":"2025-12-17T23:56:29.000Z"},
+    {"title":"omega_cube_engine_v5.xlsx","bytes":191401,"modifiedTime":"2025-12-17T23:56:18.000Z"},
+    {"title":"omega_cube_engine_v5_bound_I8.xlsx","bytes":205003,"modifiedTime":"2025-12-17T23:56:22.000Z"},
+    {"title":"ATOMS_1728D_Omega_Atlas_MOTION_12power_20736_UPDATED.xlsx","bytes":10721391,"modifiedTime":"2026-05-10T23:09:36.000Z"},
+    {"title":"ATOMS_1728D_Omega_Atlas.xlsx","bytes":9451434,"modifiedTime":"2025-12-17T23:51:04.000Z"},
+    {"title":"Omega_Kernel_Integrated_20736D_PATCHED.xlsx","bytes":43858,"modifiedTime":"2026-02-01T18:51:15.000Z"},
+    {"title":"Omega_Kernel_Integrated.xlsx","bytes":40579,"modifiedTime":"2025-12-17T23:50:34.000Z"}
+  ],
+  "dimensionalLabelSemantics": "Historical filenames are preserved as source identities; numeric D labels are atlas/address labels and are not asserted here as literal physical dimensions.",
+  "canonicalMutation": false,
+  "canonicalAdmissionAuthority": "R125",
+  "truthBoundary": "This is a bounded connected-Drive observation. Exactly three stored XLSX files were fetched as raw bytes and SHA-256 bound. Other listed files are metadata observations only. The observation is neither an exhaustive Drive inventory nor live runtime authority, and it does not make workbook content empirical truth or CanonState."
+}
