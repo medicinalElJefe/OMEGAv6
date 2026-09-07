@@ -28,6 +28,8 @@ jobs:
         run: node tests/r168-full-restoration-current-successor-invariants.mjs
       - name: Prove Build Out uses the admitted adaptive mission spine
         run: node tests/r168-buildout-adaptive-mission-spine-invariants.mjs
+      - name: Prove live woven rendering uses adaptive performance
+        run: node tests/r168-adaptive-traversal-performance-invariants.mjs
       - name: Prove updated capability and transition truth
         run: |
           node tests/capability-truth-r23-invariants.mjs
