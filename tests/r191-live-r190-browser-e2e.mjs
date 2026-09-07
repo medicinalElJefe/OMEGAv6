@@ -41,10 +41,7 @@ async function openVisualInstrument(page,pageErrors,failed,name){
  await deep.waitFor({state:'visible',timeout:10000});
  await deep.click();
  await page.waitForFunction(()=>document.querySelector('.r36-visual .r43-workspace-stage')?.getAttribute('data-view')==='DEEP',{timeout:10000});
- await Promise.race([
-  page.waitForSelector('.visual-instrument-app',{state:'visible',timeout:30000}),
-  new Promise((_,reject)=>{const id=setInterval(()=>{if(pageErrors.length){clearInterval(id);reject(new Error(`${name}: deep compiler browser error ${pageErrors.join(' | ').slice(0,2400)}`))}},100)})
- ]);
+ try{await page.waitForSelector('.visual-instrument-app',{state:'visible',timeout:30000})}catch(error){await failOnBrowserErrors(pageErrors,failed,`${name} DEEP COMPILER load`);throw error}
  await page.waitForSelector('.r182-motion-truth',{state:'visible',timeout:30000});
  await page.waitForSelector('.global-workbench-r188',{state:'visible',timeout:30000});
  await failOnBrowserErrors(pageErrors,failed,`${name} R190 deep compiler mount`);
