@@ -34,7 +34,8 @@ must(earth.includes('Truth boundary:')&&earth.includes('not a physical geolocati
 must(hybrid.includes('Native execution is claimed only while an authenticated agent heartbeat is current'),'Hybrid native-execution truth gate must remain explicit');
 must(modes.includes('Catalog membership is never reported as execution'),'Modes catalog/execution separation must remain explicit');
 must(sai.includes('It cannot silently edit GitHub or promote production from the browser'),'SAI production mutation boundary must remain explicit');
-must(atlas.includes('registration ≠ execution')&&atlas.includes('Registered capability never implies executable capability'),'System Atlas registration/execution separation must remain explicit');
+must(atlas.includes('current reality ≠ historical registration')&&atlas.includes('No fake OPEN button')&&atlas.includes('current successor state, and current successor route separate'),'System Atlas predecessor-registration/current-successor execution separation must remain explicit');
+must(atlas.includes("const currentExecutable=new Set(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE'])"),'System Atlas executable-successor whitelist must remain explicit');
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),'deep donor lost: '+token);
 must(!css.includes('@appdeploy/client'),'R90 hierarchy must remain provider portable');
-console.log('R90/R104 INTEGRITY-PRESERVING SURFACE HIERARCHY PASS · 44 routes · truth gates intact · readable flat navigation retained');
+console.log('R90/R168 INTEGRITY-PRESERVING SURFACE HIERARCHY PASS · 44 routes · current successor truth gates intact · readable flat navigation retained');
