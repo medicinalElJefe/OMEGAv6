@@ -1,0 +1,48 @@
+{
+  "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
+  "revision": "R170.1",
+  "authority": "OMEGAV6",
+  "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
+  "activeWorkflowAuthority": {
+    "productionDeploy": ".github/workflows/ci.yml",
+    "currentConvergence": ".github/workflows/r170-current-convergence.yml",
+    "autonomousProposal": ".github/workflows/r170-governed-selfbuild.yml",
+    "specialized": [
+      ".github/workflows/r168-1-rcwa-byte-diagnostic.yml",
+      ".github/workflows/r168-genesis-r192-attestation.yml",
+      ".github/workflows/r169-federation-attestation-world-lens.yml"
+    ]
+  },
+  "historicalWorkflowArchive": {
+    "sourceCommitSha": "b4b939552085f3f63297d33d51878c97e3c43c0d",
+    "sourceTreeSha": "dd4c894f06a73e205e2349aa5c537b63de1102f3",
+    "archivePath": ".github/workflows-archive",
+    "preservation": "BYTE_PRESERVED_GIT_ARCHIVE_PLUS_IMMUTABLE_SOURCE_TREE",
+    "historicalExecutionAuthority": false,
+    "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and remains independently addressable at the recorded pre-R170 source commit/tree, but is no longer an automatic GitHub Actions execution authority."
+  },
+  "selfBuild": {
+    "schedule": "17 */6 * * *",
+    "maxAutonomousGenerations": 5,
+    "candidatePolicy": "ONE_CAPSULE_ONE_BRANCH_ONE_PROOF_RECEIPT_ONE_PR",
+    "exactProductionHeadRequired": true,
+    "productionProofWorkflow": ".github/workflows/ci.yml",
+    "productionFailureMode": "OBSERVE_ONLY",
+    "directMainMutation": false,
+    "autoMerge": false,
+    "recursiveTriggerChain": false,
+    "highOrCriticalAutoRepair": false,
+    "residualAuthority": "R164",
+    "canonicalAdmissionAuthority": "R125"
+  },
+  "preservedRuntime": {
+    "canonicalWorkerSpine": "R116",
+    "durableObjects": 7,
+    "opticalMachine": "omega-optical-machine-r1532",
+    "opticalVersion": "R153.2",
+    "opticalAuthority": "SCREEN_ONLY",
+    "genesisR192AttestationContract": "R192_SERVICE_BOUND_R1532_ATTESTED"
+  },
+  "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
+  "truthBoundary": "R170.1 may autonomously observe and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run. Otherwise it remains OBSERVE_ONLY. It cannot directly mutate main, auto-merge, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
+}
