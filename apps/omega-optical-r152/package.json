@@ -1,0 +1,7 @@
+{
+  "name":"omega-optical-r152-surface",
+  "version":"152.0.0",
+  "private":true,
+  "type":"module",
+  "scripts":{"build":"node build.mjs"}
+}
