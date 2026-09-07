@@ -47,8 +47,8 @@
 @media(max-width:520px){
  /* R157 readability floor. R120's visual-preservation formula resolves to 126px at the
     canonical 390px phone viewport, which is too narrow for current route/state copy.
-    Keep reserved-space behavior, but never collapse the navigator below 140px. */
- :root{--r94-nav-panel:max(140px,min(42vw,max(72px,calc(100vw - 264px))))}
+    Keep reserved-space behavior, but leave a sub-pixel-safe 142px minimum. */
+ :root{--r94-nav-panel:max(142px,min(42vw,max(72px,calc(100vw - 264px))))}
  .r156-global-live-grid{grid-template-columns:1fr}.r156-global-path{display:none}.r156-continuity-strip{display:none}.r156-global-context{gap:4px}.r156-global-live-grid>button{min-height:44px}.r156-route-meta>span:nth-child(5){display:none}
 }
 @media(prefers-reduced-motion:reduce){.r156-global-nav .r94-rail-action,.r156-global-nav .r94-nav-panel,.r156-global-context button{transition:none!important}}
