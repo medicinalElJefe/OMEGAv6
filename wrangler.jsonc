@@ -1,4 +1,4 @@
-// OMEGA R167 preserves the proven R116 Worker spine and all durable state while promoting the active Optical SCREEN coprocessor to live-proven R153.2.
+// OMEGA R193.1 preserves the proven R116 Worker spine and all current durable state while explicitly retiring two historical Durable Object namespaces that no longer have code/bindings.
 // Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes. R125 remains canonical admission authority.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
@@ -44,7 +44,9 @@
     "OmegaSwarmBranch": {"type": "durable-object", "storage": "sqlite"},
     "OmegaSwarmOrgan": {"type": "durable-object", "storage": "sqlite"},
     "OmegaSwarmOrganismCoordinator": {"type": "durable-object", "storage": "sqlite"},
-    "OmegaSwarmAutonomicCoordinator": {"type": "durable-object", "storage": "sqlite"}
+    "OmegaSwarmAutonomicCoordinator": {"type": "durable-object", "storage": "sqlite"},
+    "OmegaMissionLedgerR201": {"type": "durable-object", "state": "deleted"},
+    "OmegaHybridMissionLedgerR203": {"type": "durable-object", "state": "deleted"}
   },
   "observability": {
     "enabled": true
