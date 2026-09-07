@@ -56,11 +56,23 @@ async function runtimeAttestationR144(request,env){
   const attestationSha256=await sha256(core);
   return json({...core,attestationSha256,returnedAt:new Date().toISOString()});
 }
+async function runtimeNowR154(env){
+  const metadata=env?.CF_VERSION_METADATA||null;
+  const core={schema:'OMEGA_RUNTIME_NOW_R154',utcTime:new Date().toISOString(),runtimeVersionId:metadata?.id?String(metadata.id):null,authority:'CLOUDFLARE_RUNTIME_CLOCK',canonicalMutation:false,admissionAuthority:'R125',truthBoundary:'This endpoint returns the wall clock observed by the Cloudflare Worker executing this response for OMEGA runtime scheduling and continuity anchoring. It is not claimed to be an independently calibrated UTC metrology source, a source-observation timestamp, physical validation, or CanonState authority.'};
+  return json({...core,packetSha256:await sha256(core)});
+}
+async function relativeCapacityR154(env){
+  const metadata=env?.CF_VERSION_METADATA||null;
+  const core={schema:'OMEGA_RELATIVE_CAPACITY_FABRIC_R154',revision:'R154',implemented:true,canonicalUrl:CANONICAL_URL,runtimeVersionId:metadata?.id?String(metadata.id):null,runtimeTimeEndpoint:'/api/runtime-now-r154',inputs:['canonical packet','R153 causal NOW','R152 truth envelope','R151 all-mode fusion','R140 registered operation ranking','R143 route/capability/execution-domain authority'],outputs:['relative operation priority','logical compute lanes','logical swarm fanout','temporal sampling','history/scar depth','view resolution','solver fidelity','readiness gate','lineage receipt context'],topology:{addressLevels:[12,144,1728,20736,248832],logicalExecutionLevels:[1,12,144,1728,20736]},authority:{routeIdentity:'R143',executionReceipts:'R142/R146/R147',truth:'R152 external-evidence precedence',canonicalAdmission:'R125',publicWorkerMutationAuthority:false,canonicalMutation:false},lifecycle:{implemented:'IMPLEMENTED',tested:'EXTERNAL_GITHUB_EVIDENCE_REQUIRED',merged:'EXTERNAL_RELEASE_LEDGER_REQUIRED',deployed:metadata?'CLOUDFLARE_VERSION_RETURNED':'UNVERIFIED',live:'CURRENT_RUNTIME_RESPONSE_RETURNED',verified:'EXTERNAL_FIRST_HAND_PROBE_REQUIRED'},truthBoundary:'R154 is a relative capacity planning fabric. The public Worker may attest that this source/runtime manifest exists and which Worker version returned it. Logical lanes, fanout, solver fidelity, view resolution and sampling are plans until their respective executor receipts prove invocation/return/verification. Higher capacity or coherence never promotes empirical truth or CanonState.'};
+  return json({...core,manifestSha256:await sha256(core),returnedAt:new Date().toISOString()});
+}
 
 async function fetchR27(request,env){
   const url=new URL(request.url);
   if(url.pathname==='/api/release-evidence'&&request.method==='GET')return releaseEvidence(request,env);
   if(url.pathname==='/api/runtime-attestation'&&request.method==='GET')return runtimeAttestationR144(request,env);
+  if(url.pathname==='/api/runtime-now-r154'&&request.method==='GET')return runtimeNowR154(env);
+  if(url.pathname==='/api/relative-capacity-r154'&&request.method==='GET')return relativeCapacityR154(env);
   return r9.fetch(request,env);
 }
 
