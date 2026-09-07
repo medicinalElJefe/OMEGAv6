@@ -97,10 +97,25 @@ jobs:
           npm run check
           npx wrangler deploy --config wrangler.jsonc --dry-run --outdir .wrangler-r170-current
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
+      - name: Prove R191 browser execution on exact production build
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r191-vite.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            if [ "$attempt" = 30 ]; then cat /tmp/omega-r191-vite.log; exit 1; fi
+            sleep 1
+          done
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r191-live-r190-browser-e2e.mjs
       - name: Summarize current convergence boundary
         run: |
-          echo 'R190 CURRENT-AUTHORITY CONVERGENCE PASS: R189 SHARED ANALYSIS CACHE + R188 GLOBAL INTERFERENCE ATLAS + R187 CHAINED CALIBRATION + R186 DIFFERENTIAL + R185 MULTIPATH + R184 INTERFERENCE + R183 VISUAL ATLAS + R182 VISUAL COHERENCE, over promoted runtime R185/R186 authority.'
-          echo 'One R189 cache now powers R184 local resolution, R185 multipath reconstruction, R186 differential relativity, R187 formula calibration and operator-invoked R188 full-field aggregation; memoization cannot change scores, routes, evidence or CanonState.'
+          echo 'R191 CURRENT-AUTHORITY CONVERGENCE PASS: real desktop/mobile browser proof now sits above the R190 visual/computational stack and the promoted R185/R186 runtime authority.'
+          echo 'R191 requires R188 to remain inert until explicit operator invocation, then completes all 20,736 address states and 144 D×P projection cells on desktop without mutating network requests.'
+          echo 'One R189 cache powers R184 local resolution, R185 multipath reconstruction, R186 differential relativity, R187 formula calibration and operator-invoked R188 full-field aggregation; memoization cannot change scores, routes, evidence or CanonState.'
           echo 'R188 remains browser-local and operator-invoked; it does not override promoted runtime R185 PREDICT → CARRY → CORRECT → REALLOCATE performance scheduling.'
           echo 'R147 remains dispatch authority; R146 remains durable lifecycle and execution-history authority; R125 remains sole CanonState admission authority.'
           echo 'Promoted R186 verified-return ingress remains the live-world execution-return path through existing R86 → R140 → R136 → R134 proof/scar continuity.'
