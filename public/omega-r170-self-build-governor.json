@@ -1,9 +1,11 @@
 {
   "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
-  "revision": "R170.2",
+  "revision": "R170.3",
   "authority": "OMEGAV6",
   "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
-  "currentCapabilityFloor": "R175",
+  "engineRevision": "R170.2",
+  "currentCapabilityFloor": "R179",
+  "promotedSuccessorContinuity": ["R175", "R176", "R177", "R178", "R179"],
   "activeWorkflowAuthority": {
     "productionDeploy": ".github/workflows/ci.yml",
     "currentConvergence": ".github/workflows/r170-current-convergence.yml",
@@ -35,7 +37,9 @@
     "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and remains independently addressable at the recorded pre-R170 source commit/tree, but is no longer an automatic GitHub Actions execution authority."
   },
   "selfBuild": {
-    "schedule": "17 */6 * * *",
+    "schedule": "17 * * * *",
+    "observationCadence": "HOURLY",
+    "expensiveProofMode": "PROPOSE_ONLY",
     "maxAutonomousGenerations": 5,
     "candidatePolicy": "ONE_CAPSULE_ONE_BRANCH_ONE_PROOF_RECEIPT_ONE_PR",
     "exactProductionHeadRequired": true,
@@ -47,6 +51,7 @@
     "highOrCriticalAutoRepair": false,
     "residualAuthority": "R164",
     "successorContinuityProof": "scripts/prove_successor_workflow_invariants_r175.mjs",
+    "latestExplicitSuccessorProof": "tests/r179-living-world-durable-authorization-invariants.mjs",
     "canonicalAdmissionAuthority": "R125"
   },
   "preservedRuntime": {
@@ -56,8 +61,12 @@
     "opticalVersion": "R153.2",
     "opticalAuthority": "SCREEN_ONLY",
     "genesisR192AttestationContract": "R192_SERVICE_BOUND_R1532_ATTESTED",
-    "livingWorldTruthSurface": "R175_READ_ONLY_MULTI_DOMAIN"
+    "livingWorldTruthSurface": "R175_READ_ONLY_MULTI_DOMAIN",
+    "livingWorldIntentProposal": "R176_INTENT_ONLY",
+    "livingWorldMissionComposer": "R177_STAGED_NOT_DISPATCHED",
+    "livingWorldContractResolution": "R178_RESOLVED_NOT_AUTHORIZED",
+    "livingWorldExecutionAuthorization": "R179_AUTHORIZED_NOT_DISPATCHED"
   },
   "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
-  "truthBoundary": "R170.2/R175.1 may autonomously observe and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run and all current read-only successor invariants pass. R175 living-world truth remains a read-only projection. Otherwise self-build remains OBSERVE_ONLY or fails closed. It cannot directly mutate main, auto-merge, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
+  "truthBoundary": "R170.3 uses an hourly low-cost observation pulse and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run, no parallel self-build candidate is open, current residual evidence is non-blocking, and the current read-only successor chain through R179 proves before generation. Expensive dependency installation, inherited regression, and Worker dry-runs run only for a PROPOSE candidate, which is then re-proved before an isolated PR is opened. R179 stops at R146 AUTHORIZED and does not dispatch R147. R170.3 cannot directly mutate main, auto-merge, recursively dispatch workflows, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
 }
