@@ -14,6 +14,9 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-fund
+      - name: Prove R202.2 evidence-bound living-world ingress
+        run: |
+          node tests/r2022-evidence-bound-living-world-ingress-invariants.mjs
       - name: Prove R202.1 evidence-bound reality readiness
         run: |
           node --check public/omega-operational-source-authority-r202-core.js
