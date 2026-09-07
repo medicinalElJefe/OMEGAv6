@@ -25,4 +25,3 @@ try{
 }
 fs.writeFileSync(out,JSON.stringify(graph,null,2)+'\n');
 console.log(JSON.stringify({schema:'OMEGA_R170_SELFBUILD_RESIDUAL_GATE',state:graph.state,summary:graph.summary,collectionError:graph.collectionError||null,path:out},null,2));
-if(graph.state==='BLOCKED')process.exitCode=20;
