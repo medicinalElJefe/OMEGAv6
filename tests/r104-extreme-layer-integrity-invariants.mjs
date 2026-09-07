@@ -63,8 +63,9 @@ must(provenanceCss.includes('.r104-layer-contract')&&provenanceCss.includes(".r9
 // Readable, flat, reserved-space global navigation.
 must(nav.includes('r100-professional-nav r104-readable-nav')&&nav.includes('r104-nav-panel'),'R104 readable navigator classes must be active');
 must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'all registered routes must remain one flat searchable list');
-const activeInstrumentExplanation=nav.includes('<small>{currentWorkspace.copy}</small>')||nav.includes("<small>{omegaNavItem(currentPanel)?.hint||currentWorkspace.copy}</small>");
-must(nav.includes('<em>{workspace.copy}</em>')&&activeInstrumentExplanation,'expanded navigator must explain each destination and the active instrument; adaptive successor may prefer a richer route hint with workspace copy as fallback');
+const destinationExplanation=nav.includes('<em>{workspace.copy}</em>')||nav.includes('<em>{nav?.hint||workspace.copy}</em>');
+const activeInstrumentExplanation=nav.includes('<small>{currentWorkspace.copy}</small>')||nav.includes('<small>{omegaNavItem(currentPanel)?.hint||currentWorkspace.copy}</small>');
+must(destinationExplanation&&activeInstrumentExplanation,'expanded navigator must explain each destination and the active instrument; adaptive successor may prefer richer route hints only when workspace copy remains the fallback');
 must(nav.includes("setExpanded(false);setQuery('')"),'destination selection must collapse back to slim rail');
 must(!nav.includes('r88-navigator-backdrop')&&!nav.includes("document.body.style.overflow='hidden'"),'navigator must not regress to covering modal/body lock');
 const i100=nav.indexOf("import './omegaSideNavigatorR100.css';"),i104=nav.indexOf("import './extremeLayerIntegrityR104.css';");
