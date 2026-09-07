@@ -3,6 +3,8 @@ import {ChevronLeft,ChevronRight,CloudSun,Globe2,Pause,Play,RefreshCw,ShieldChec
 import EarthNowInstrument from './EarthNowInstrument';
 import EarthLivingFieldR36 from './EarthLivingFieldR36';
 import EarthGroundTraversalR9 from './EarthGroundTraversalR9';
+import EarthSarPanelR181 from './EarthSarPanelR181';
+import CalibrationFusionPanelR181 from './CalibrationFusionPanelR181';
 import {api} from './platformAdapter';
 import {decodeAddress} from './corpusRuntime';
 import './earthObservatoryR8.css';
@@ -55,12 +57,14 @@ export default function EarthObservatoryR8({address}:Props){
    <div className='earth-r72-noaa-stage'>{current&&<img src={`/api/earth/noaa/image?coverage=${encodeURIComponent(current.id)}`} alt={`${current.label} NOAA GeoColor latest alias`}/>}<nav>{catalog.map(x=><button key={x.id} onClick={()=>setSelected(x.id)} className={x.id===current?.id?'active':''}><span>{x.label}</span><small>{x.state}</small></button>)}</nav></div>
    <p><CloudSun/> GeoColor is a NOAA/CIRA derived sensor composite. Missing or unavailable source material is not synthetically replaced.</p>
   </section>
+  <EarthSarPanelR181 lat={lat} lon={lon}/>
+  <CalibrationFusionPanelR181 lat={lat} lon={lon}/>
   <div className='earth-r72-disclosure'>
    <button className={showGround?'active':''} onClick={()=>setShowGround(v=>!v)}>Ground / street evidence</button>
    <button className={showCalculus?'active':''} onClick={()=>setShowCalculus(v=>!v)}>Representational calculus comparison</button>
   </div>
   {showGround&&<section className='earth-r72-expanded'><EarthGroundTraversalR9 lat={lat} lon={lon}/></section>}
   {showCalculus&&<section className='earth-r72-expanded' data-provenance='REPRESENTATIONAL'><EarthLivingFieldR36 address={address} lat={lat} lon={lon} evidence={evidence}/><p>REPRESENTATIONAL ONLY · Returned measurements determine event magnitude; OMEGA calculus controls relational rendering. This is not a second Earth sensor or additional observation source.</p></section>}
-  <footer className='earth-r72-proof'><ShieldCheck/><div><b>Evidence hash</b><code>{evidence?.evidenceHash||'not available'}</code></div><p>Earth → Region → City → Street → Ground remains source-backed. Unavailable providers remain unavailable.</p></footer>
+  <footer className='earth-r72-proof'><ShieldCheck/><div><b>Evidence hash</b><code>{evidence?.evidenceHash||'not available'}</code></div><p>Earth → Region → City → Street → Ground remains source-backed. SAR and continuous calibration are additive evidence/estimate planes; unavailable providers remain unavailable and calibration never becomes execution authority.</p></footer>
  </section>
 }
