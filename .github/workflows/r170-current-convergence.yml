@@ -48,6 +48,7 @@ jobs:
           node tests/r141-hybrid-proof-scar-replay-invariants.mjs
           node tests/r121-spherical-earth-connector-invariants.mjs
           node tests/r122-computed-reality-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
       - name: Preserve active Optical R153.2 convergence
         run: |
           node tests/r167-active-optical-r1532-convergence-invariants.mjs
@@ -78,6 +79,6 @@ jobs:
         run: |
           echo 'R174.1 + R175 CURRENT CONVERGENCE PASS.'
           echo 'R171-R174 remain promoted current successors; R175 adds a read-only multi-domain living-world projection.'
-          echo 'Superseded historical workflows remain byte-preserved outside the active Actions directory.'
+          echo 'R125 proof remains byte-preserved in the governed workflow archive and executable as an invariant.'
           echo 'Canonical production deployment remains exclusively owned by ci.yml two-parent merge law.'
           echo 'R125 remains sole CanonState admission authority; R153.2 remains SCREEN_ONLY.'
