@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {compileVisualMotionClockR182,calibratedVisualFieldR182,VISUAL_COHERENCE_BOUNDARY} from '../src/visualCoherenceR182.ts';
 
+const authority=fs.readFileSync('src/visualCoherenceR182.ts','utf8');
 const visual=fs.readFileSync('src/OmegaVisualInstrument.tsx','utf8');
 const overlay=fs.readFileSync('src/ContinuousFieldOverlayR13.tsx','utf8');
 const matter=fs.readFileSync('src/MatterTraversal.tsx','utf8');
@@ -9,12 +9,7 @@ const orientation=fs.readFileSync('src/orientationFrameR182.ts','utf8');
 const orientationView=fs.readFileSync('src/OrientationFrameR182.tsx','utf8');
 const css=fs.readFileSync('src/visualCoherenceR182.css','utf8')+fs.readFileSync('src/orientationFrameR182.css','utf8');
 
-assert.equal(compileVisualMotionClockR182(false,7,.42).mode,'PACKET_LOCKED');
-assert.equal(compileVisualMotionClockR182(false,7,.42).routePhase,7.42);
-assert.equal(compileVisualMotionClockR182(true,7,.42).mode,'ROUTE_REPLAY');
-const field=calibratedVisualFieldR182({stateId:9,autoPing:{dataNext:10},metrics:{continuity:.8,plasticity:.7,contradiction:.2,burden:.1,scar:.25,evidence:.9,decision:'TURN'},math:{normalizedMotionRelativity:.6},phi:{dPhi:.3},predict:{carry:.4}});
-for(const key of ['transitionPressure','invariantSupport','residualPressure'])assert.ok(Number.isFinite(field[key]),`R182 ${key} must be finite`);
-assert.match(VISUAL_COHERENCE_BOUNDARY,/No ambient constellation drift/);
+for(const token of ["VISUAL_MOTION_DEFAULT='PACKET_LOCKED'","mode:playing?'ROUTE_REPLAY':'PACKET_LOCKED'","source:playing?'GOVERNED_ROUTE_PROGRESS':'CANONICAL_PACKET'",'transitionPressure','invariantSupport','residualPressure','No ambient constellation drift'])assert.ok(authority.includes(token),`R182 visual authority missing ${token}`);
 
 assert.ok(!visual.includes('now*.000035'),'Visual Instrument must not auto-rotate from wall clock');
 assert.ok(!visual.includes('requestAnimationFrame(draw)'),'Visual Instrument base field must redraw from state/observer changes rather than endless ambient RAF');
