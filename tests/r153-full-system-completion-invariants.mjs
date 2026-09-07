@@ -15,7 +15,11 @@ must(!familyEntries.some(([,v])=>['DONOR_ONLY','NATIVE_TARGET','RESTORATION_DEBT
 must(R153_COMPLETION_STAGES.length===12&&new Set(R153_COMPLETION_STAGES.map(x=>x.menu)).size===12,'must bind exactly 12 one-system completion stages/master menus');
 for(const [key,value] of Object.entries({systems:100,families:24,masterMenus:12,menuOptions:36,capabilities:18,routes:44,sourceModes:179,canonLenses:62,packetStates:20736,logicalCells:1728,logicalLanes:20736,addressCapacity:61917364224}))must(R153_FULL_SYSTEM_CONTRACT.inventory[key]===value,`inventory ${key} must equal ${value}`);
 must(R153_FULL_SYSTEM_CONTRACT.successor.implemented===19&&R153_FULL_SYSTEM_CONTRACT.successor.truthGated===5&&R153_FULL_SYSTEM_CONTRACT.successor.restorationDebt===0,'completion totals must be 19 implemented / 5 truth-gated / 0 successor debt');
-for(const token of ['J:\\ is the preferred established root','Never silently fall back to C:\\','Inventory and hash before mutation','No silent delete/move/rename/flattening','R141/R142','R125-only'])must(JSON.stringify(R153_FULL_SYSTEM_CONTRACT).includes(token),'contract missing '+token);
+must(R153_FULL_SYSTEM_CONTRACT.nativeRootPolicy.includes('J:\\ is the preferred established root'),'contract missing preferred established J:\\ root');
+must(R153_FULL_SYSTEM_CONTRACT.nativeRootPolicy.includes('Never silently fall back to C:\\'),'contract missing no-C:\\ fallback');
+for(const token of ['Inventory and hash before mutation','No silent delete/move/rename/flattening'])must(R153_FULL_SYSTEM_CONTRACT.mutationPolicy.includes(token),'contract missing '+token);
+must(R153_FULL_SYSTEM_CONTRACT.completionDefinition.includes('R141/R142'),'contract missing R141/R142 execution-proof boundary');
+must(R153_FULL_SYSTEM_CONTRACT.completionDefinition.includes('R125-only'),'contract missing R125-only CanonState admission boundary');
 
 const objective=buildFullSystemMissionObjectiveR153('.');
 for(const token of ['100-system / 24-family / 12-master-menu / 36-control / 18-capability / 44-route','179 source-mode + 62 canon-lens','First inventory the approved root','hash candidate trees before any mutation','R127 zero-drift connector','R34.1/R132 execution plane','RETURNED is not VERIFIED','KEEP/MERGE/DONOR/QUARANTINE','No no-op controls','overlapping mobile/desktop navigation','Run the declared static regression','Return an exact machine-readable proof packet'])must(objective.includes(token),'whole-system mission objective missing '+token);
