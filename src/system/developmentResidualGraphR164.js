@@ -30,7 +30,7 @@ export const R164_AUTHORITY_NODES=Object.freeze([
  {id:'R146_DURABLE_EXECUTION',revision:'R146',role:'DURABLE_OPERATION_HISTORY',source:'src/execution/durableOperationExecutionR146.js'},
  {id:'R144_DEPLOYMENT_ATTESTATION',revision:'R144',role:'DEPLOYMENT_AND_RUNTIME_VERSION_ATTESTATION',source:'src/workerR27.js'},
  {id:'R143_OPERATION_CHAIN',revision:'R143',role:'ROUTE_TO_CAPABILITY_AUTHORITY',source:'src/authoritativeOperationChainR143.ts'},
- {id:'R142_CAPABILITY_LIFECYCLE',revision:'R142',role:'EXECUTION_LIFECYCLE_RECEIPT_AUTHORITY',source:'src/capabilityExecutionLifecycleR142.ts'},
+ {id:'R142_CAPABILITY_LIFECYCLE',revision:'R142',role:'EXECUTION_LIFECYCLE_RECEIPT_AUTHORITY',source:'src/capabilityExecutionReceiptsR142.ts'},
  {id:'R141_HYBRID_PROOF',revision:'R141',role:'EXACT_HYBRID_RETURN_PROOF',source:'src/hybridProofClosureR141.js'},
  {id:'R125_ACCURACY_ADMISSION',revision:'R125',role:'BOUNDED_REPAIR_AND_CANONSTATE_ADMISSION',source:'src/accuracyResidualEngineR125.ts'},
  {id:'R124_SELF_BUILD',revision:'R124',role:'PROOF_GATED_SELF_BUILD_CAPSULE_AUTHORITY',source:'public/omega-r124-selfbuild-state.json'}
