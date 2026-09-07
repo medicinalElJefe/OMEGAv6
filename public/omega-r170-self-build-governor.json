@@ -1,6 +1,6 @@
 {
   "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
-  "revision": "R174.1",
+  "revision": "R175.1",
   "authority": "OMEGAV6",
   "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
   "currentSuccessorFloor": "R174",
@@ -19,13 +19,25 @@
       ".github/workflows/r174-living-world-pulse.yml"
     ]
   },
+  "successorWorkflowPolicy": {
+    "minimumSuccessorRevision": 171,
+    "maxActiveWorkflowAuthorities": 24,
+    "readOnly": true,
+    "mainPushAllowed": false,
+    "recurringScheduleAllowed": false,
+    "recursiveWorkflowRunAllowed": false,
+    "autoMergeAllowed": false,
+    "focusedInvariantRequired": true,
+    "dynamicProofRunner": "scripts/prove_successor_workflow_invariants_r175.mjs",
+    "policy": "Promoted and future post-R170 successor proof workflows may remain active only as read-only PR or isolated feature-branch authorities. Each must expose and pass a focused revision invariant. They may not schedule themselves, push-trigger on main, gain write permissions, recursively dispatch workflows, merge PRs, or directly mutate main."
+  },
   "historicalWorkflowArchive": {
     "sourceCommitSha": "b4b939552085f3f63297d33d51878c97e3c43c0d",
     "sourceTreeSha": "dd4c894f06a73e205e2349aa5c537b63de1102f3",
     "archivePath": ".github/workflows-archive",
     "preservation": "BYTE_PRESERVED_GIT_ARCHIVE_PLUS_IMMUTABLE_SOURCE_TREE",
     "historicalExecutionAuthority": false,
-    "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and remains independently addressable at the recorded pre-R170 source commit/tree, but is no longer an automatic GitHub Actions execution authority. R171-R174 are not historical: they are promoted current successors and remain active proof authorities."
+    "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and remains independently addressable at the recorded pre-R170 source commit/tree, but is no longer an automatic GitHub Actions execution authority. R171-R174 are not historical: they are promoted current successors and remain active bounded proof authorities."
   },
   "selfBuild": {
     "schedule": "17 */6 * * *",
@@ -39,6 +51,7 @@
     "recursiveTriggerChain": false,
     "highOrCriticalAutoRepair": false,
     "residualAuthority": "R164",
+    "successorContinuityProof": "scripts/prove_successor_workflow_invariants_r175.mjs",
     "canonicalAdmissionAuthority": "R125"
   },
   "preservedRuntime": {
@@ -50,5 +63,5 @@
     "genesisR192AttestationContract": "R192_SERVICE_BOUND_R1532_ATTESTED"
   },
   "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
-  "truthBoundary": "R174.1 preserves the promoted R171-R174 federation/world successor chain while retaining the R170 governed autonomous proposal law. It may autonomously observe and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run. Otherwise it remains OBSERVE_ONLY. It cannot directly mutate main, auto-merge, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
+  "truthBoundary": "R175.1 preserves the promoted R171-R174 federation/world successor chain while making successor continuity dynamic and future-safe. Autonomous source proposal requires the exact current main SHA to have a completed successful canonical Cloud Bridge push proof and all active read-only successor invariants to pass. Otherwise it remains OBSERVE_ONLY or fails closed. It cannot directly mutate main, auto-merge, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
 }
