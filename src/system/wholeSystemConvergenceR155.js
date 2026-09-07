@@ -9,6 +9,10 @@ export const R155_LAWS=Object.freeze([
  'OVERLAPPING_FILES_MUST_BE_RECONCILED_BY_OWNER_NOT_BLINDLY_COPIED',
  'ONE_CANONSTATE_AUTHORITY_R125',
  'ONE_PUBLIC_RUNTIME_ENTRYPOINT_WORKER_R116',
+ 'SELF_DEVELOPMENT_MAY_REPAIR_SOFTWARE_BUT_NOT_REWRITE_TRUTH_LAW',
+ 'FEDERATION_REQUIRES_AUTHENTICATED_RETURNED_PROOF',
+ 'SWARM_HIERARCHY_IS_LOGICAL_ORGANIZATION_UNTIL_PHYSICAL_EXECUTION_IS_PROVEN',
+ 'LIVING_VISUAL_MOTION_IS_A_PROJECTION_OF_SOURCE_STATE_NOT_A_SECOND_REALITY',
  'RETURNED_IS_NOT_VERIFIED',
  'ROUTE_IS_NOT_EXECUTION',
  'PROJECTION_IS_NOT_ADMISSION',
@@ -25,11 +29,23 @@ export const R155_CAPABILITY_FAMILIES=Object.freeze({
  CANONICAL_RUNTIME:Object.freeze({
   family:'CANONICAL_RUNTIME',state:'ADMITTED_MAIN',authority:'R116 public Worker + current main',revisionLine:['R116','R127','R132','R141','R142','R143','R146','R147'],purpose:'one public runtime, route contracts, durable runs, executor lifecycle and exact Hybrid closure',dependencies:['R125'],boundary:'runtime/execution proof does not itself admit CanonState'
  }),
+ SELF_DEVELOPMENT:Object.freeze({
+  family:'SELF_DEVELOPMENT',state:'ADMITTED_MAIN',authority:'R124 self-build gate + R125 accuracy-first/autonomic residual engine',revisionLine:['R124','R125'],purpose:'observe residuals, classify defects, perform bounded deterministic repair, preserve rollback/proof lineage and escalate truth/scientific failures',dependencies:['CANONICAL_RUNTIME'],boundary:'autonomous software repair may not rewrite evidence semantics, causal-time law, physical claims, scientific thresholds or CanonState admission rules'
+ }),
+ FEDERATION_MACHINE:Object.freeze({
+  family:'FEDERATION_MACHINE',state:'ADMITTED_MAIN',authority:'R114→R117 federation/sovereign bootstrap + R127 zero-drift Hybrid + R132 machine execution + R141 proof closure',revisionLine:['R114','R115','R116','R117','R127','R132','R141'],purpose:'one bounded PC/cloud/device federation path with approved-root confinement, authenticated heartbeat truth, execution return and replayable proof',dependencies:['CANONICAL_RUNTIME'],boundary:'download, pairing intent, queueing or browser state never proves the PC, cloud executor, RCWA solver or native action actually ran'
+ }),
+ SWARM_ORGANISM:Object.freeze({
+  family:'SWARM_ORGANISM',state:'ADMITTED_MAIN',authority:'R121 sovereign swarm + R123 organism + R125 autonomic swarm',revisionLine:['R121','R123','R125'],purpose:'seed → 12 organs → 144 branches → 1,728 cells → 20,736 logical lanes with detach/checkpoint/rejoin and bounded task decomposition',dependencies:['CANONICAL_RUNTIME','SELF_DEVELOPMENT'],boundary:'logical cells, lanes and fanout are scheduling/organizational structures; they are not proof of 1,728 physical clouds, agents or concurrent workers'
+ }),
+ LIVING_VISUAL_MOTION:Object.freeze({
+  family:'LIVING_VISUAL_MOTION',state:'ADMITTED_MAIN',authority:'current source-backed visual/motion/traversal/relativity surface lineage',revisionLine:['R37','R77','R80','R93','R95','R99','R100','R107','R118'],purpose:'source-bound living field, motion, traversal, dimensional relativity, multi-view projection and unobstructed desktop/mobile operator instrumentation over the same canonical packet',dependencies:['CANONICAL_RUNTIME'],boundary:'visual motion, color, geometry, atlas depth and observer projection are representational computations unless independently measured as physical phenomena'
+ }),
  SOVEREIGN_BUILD:Object.freeze({
-  family:'SOVEREIGN_BUILD',state:'ADMITTED_MAIN',authority:'R151 build spine + R153 adaptive sovereign build mission',revisionLine:['R151-BUILD','R153-BUILD'],purpose:'current-heartbeat-gated inventory → hash → bounded proof-driven repair → build/test/package',dependencies:['CANONICAL_RUNTIME'],boundary:'browser intent is not native execution; host return still requires R141/R142 closure'
+  family:'SOVEREIGN_BUILD',state:'ADMITTED_MAIN',authority:'R151 build spine + R153 adaptive sovereign build mission',revisionLine:['R151-BUILD','R153-BUILD'],purpose:'current-heartbeat-gated inventory → hash → bounded proof-driven repair → build/test/package',dependencies:['CANONICAL_RUNTIME','SELF_DEVELOPMENT','FEDERATION_MACHINE'],boundary:'browser intent is not native execution; host return still requires R141/R142 closure'
  }),
  OPTICAL_OPERATION:Object.freeze({
-  family:'OPTICAL_OPERATION',state:'ADMITTED_MAIN',authority:'R152 optical operational convergence + hardened post-deploy proof',revisionLine:['R152-OPTICAL'],purpose:'20,736-address screening surface, Tier-2 prepared packets, current solver status and live proof diagnostics',dependencies:['CANONICAL_RUNTIME'],boundary:'screening and PREPARED_NOT_SOLVED packets are not RCWA/FDTD execution or fabrication evidence'
+  family:'OPTICAL_OPERATION',state:'ADMITTED_MAIN',authority:'R152 optical operational convergence + hardened post-deploy proof',revisionLine:['R152-OPTICAL'],purpose:'20,736-address screening surface, Tier-2 prepared packets, current solver status and live proof diagnostics',dependencies:['CANONICAL_RUNTIME','FEDERATION_MACHINE'],boundary:'screening and PREPARED_NOT_SOLVED packets are not RCWA/FDTD execution or fabrication evidence'
  }),
  ALL_MODES_TRUTH:Object.freeze({
   family:'ALL_MODES_TRUTH',state:'INTEGRATED_CANDIDATE',authority:'R151 provenance-weighted all-modes truth fusion',revisionLine:['R151-ALL_MODES'],purpose:'179 source modes + 62 canon/calculus lenses over one packet with provenance-separated 241-channel fusion',dependencies:['CANONICAL_RUNTIME'],boundary:'mode agreement is internal coherence, not independent empirical replication'
@@ -38,26 +54,26 @@ export const R155_CAPABILITY_FAMILIES=Object.freeze({
   family:'UNIVERSAL_EVIDENCE',state:'INTEGRATED_CANDIDATE',authority:'R152 universal evidence-to-all-modes truth envelope',revisionLine:['R152-EVIDENCE'],purpose:'source-family-aware evidence precedence, uncertainty, contradiction and missing-data acquisition routing',dependencies:['ALL_MODES_TRUTH'],boundary:'maximum-available evidence envelope is not omniscient or absolute truth'
  }),
  CAUSAL_NOW:Object.freeze({
-  family:'CAUSAL_NOW',state:'INTEGRATED_CANDIDATE',authority:'R153 lemma motion NOW continuity',revisionLine:['R153-NOW'],purpose:'canonical address + causal NOW + motion + lemma exchange + scar/history + observer projection in one replayable packet',dependencies:['UNIVERSAL_EVIDENCE'],boundary:'projection/time-sector mappings do not manufacture external observations or physical law'
+  family:'CAUSAL_NOW',state:'INTEGRATED_CANDIDATE',authority:'R153 lemma motion NOW continuity',revisionLine:['R153-NOW'],purpose:'canonical address + causal NOW + motion + lemma exchange + scar/history + observer projection in one replayable packet',dependencies:['UNIVERSAL_EVIDENCE','LIVING_VISUAL_MOTION'],boundary:'projection/time-sector mappings do not manufacture external observations or physical law'
  }),
  RELATIVE_CAPACITY:Object.freeze({
-  family:'RELATIVE_CAPACITY',state:'INTEGRATED_CANDIDATE',authority:'R154 motion-relative dimensional capacity fabric',revisionLine:['R154-CAPACITY'],purpose:'operation-relative compute lanes, temporal rate, history depth, view resolution, swarm fanout and solver fidelity',dependencies:['CAUSAL_NOW','CANONICAL_RUNTIME'],boundary:'capacity planning is not invocation, execution proof, empirical truth or CanonState admission'
+  family:'RELATIVE_CAPACITY',state:'INTEGRATED_CANDIDATE',authority:'R154 motion-relative dimensional capacity fabric',revisionLine:['R154-CAPACITY'],purpose:'operation-relative compute lanes, temporal rate, history depth, view resolution, swarm fanout and solver fidelity',dependencies:['CAUSAL_NOW','CANONICAL_RUNTIME','SWARM_ORGANISM'],boundary:'capacity planning is not invocation, execution proof, empirical truth or CanonState admission'
  }),
  DURABLE_MISSION_GRAPH:Object.freeze({
-  family:'DURABLE_MISSION_GRAPH',state:'INTEGRATION_TARGET',authority:'R148 durable multi-operation execution graph',revisionLine:['R148-MISSION'],purpose:'dependency-governed 1–64 node durable mission DAG over R146 runs and R147 executors',dependencies:['CANONICAL_RUNTIME','RELATIVE_CAPACITY'],boundary:'verified execution graph proves node execution receipts only, not factual truth or CanonState'
+  family:'DURABLE_MISSION_GRAPH',state:'INTEGRATION_TARGET',authority:'R148 durable multi-operation execution graph',revisionLine:['R148-MISSION'],purpose:'dependency-governed 1–64 node durable mission DAG over R146 runs and R147 executors',dependencies:['CANONICAL_RUNTIME','RELATIVE_CAPACITY','FEDERATION_MACHINE'],boundary:'verified execution graph proves node execution receipts only, not factual truth or CanonState'
  }),
  FULLWAVE_COMPUTATION:Object.freeze({
-  family:'FULLWAVE_COMPUTATION',state:'INTEGRATION_TARGET',authority:'R145→R149 advanced computation/full-wave/calibration/active-learning line',revisionLine:['R145-SCREEN','R146-SPECTRAL','R147-CALIBRATION','R148-ACTIVE','R149-COVERAGE'],purpose:'reduced-order screening → bounded spectral RCWA promotion → cross-validated feedback → active evidence acquisition → coverage closure',dependencies:['CANONICAL_RUNTIME','UNIVERSAL_EVIDENCE','RELATIVE_CAPACITY'],boundary:'numerical full-wave convergence and calibration are not measured material properties, fabrication validity or independent experimental evidence'
+  family:'FULLWAVE_COMPUTATION',state:'INTEGRATION_TARGET',authority:'R145→R149 advanced computation/full-wave/calibration/active-learning line',revisionLine:['R145-SCREEN','R146-SPECTRAL','R147-CALIBRATION','R148-ACTIVE','R149-COVERAGE'],purpose:'reduced-order screening → bounded spectral RCWA promotion → cross-validated feedback → active evidence acquisition → coverage closure',dependencies:['CANONICAL_RUNTIME','UNIVERSAL_EVIDENCE','RELATIVE_CAPACITY','OPTICAL_OPERATION','FEDERATION_MACHINE'],boundary:'numerical full-wave convergence and calibration are not measured material properties, fabrication validity or independent experimental evidence'
  }),
  INTERFACE_PRESERVATION:Object.freeze({
-  family:'INTERFACE_PRESERVATION',state:'INTEGRATION_TARGET',authority:'preservation-first interface convergence',revisionLine:['R146-INTERFACE'],purpose:'44-route desktop/mobile reachability, non-covering navigation, accessibility and specialist-layer preservation',dependencies:['SYSTEM_COMPLETION'],boundary:'reachability and polish do not prove execution'
+  family:'INTERFACE_PRESERVATION',state:'INTEGRATION_TARGET',authority:'preservation-first interface convergence',revisionLine:['R146-INTERFACE','R155-NAV'],purpose:'44-route desktop/mobile reachability, non-covering navigation, accessibility, visual-first workspace integrity and specialist-layer preservation',dependencies:['SYSTEM_COMPLETION','LIVING_VISUAL_MOTION'],boundary:'reachability, visual fidelity and polish do not prove execution'
  }),
  SYSTEM_COMPLETION:Object.freeze({
-  family:'SYSTEM_COMPLETION',state:'INTEGRATED_CANDIDATE',authority:'R153 full one-system completion authority',revisionLine:['R153-COMPLETION'],purpose:'100 systems / 24 families / 12 menus / 36 controls / 18 capabilities / 44 routes reconciled against current successor reality',dependencies:['CANONICAL_RUNTIME','SOVEREIGN_BUILD','OPTICAL_OPERATION'],boundary:'successor implementation coverage does not convert evidence/device gates into fictional success'
+  family:'SYSTEM_COMPLETION',state:'INTEGRATED_CANDIDATE',authority:'R153 full one-system completion authority',revisionLine:['R153-COMPLETION'],purpose:'100 systems / 24 families / 12 menus / 36 controls / 18 capabilities / 44 routes reconciled against current successor reality',dependencies:['CANONICAL_RUNTIME','SELF_DEVELOPMENT','FEDERATION_MACHINE','SWARM_ORGANISM','LIVING_VISUAL_MOTION','SOVEREIGN_BUILD','OPTICAL_OPERATION'],boundary:'successor implementation coverage does not convert evidence/device gates into fictional success'
  })
 });
 
-const ORDER=Object.freeze(['CANONICAL_RUNTIME','SOVEREIGN_BUILD','OPTICAL_OPERATION','ALL_MODES_TRUTH','UNIVERSAL_EVIDENCE','CAUSAL_NOW','RELATIVE_CAPACITY','DURABLE_MISSION_GRAPH','FULLWAVE_COMPUTATION','SYSTEM_COMPLETION','INTERFACE_PRESERVATION']);
+const ORDER=Object.freeze(['CANONICAL_RUNTIME','SELF_DEVELOPMENT','FEDERATION_MACHINE','SWARM_ORGANISM','LIVING_VISUAL_MOTION','SOVEREIGN_BUILD','OPTICAL_OPERATION','ALL_MODES_TRUTH','UNIVERSAL_EVIDENCE','CAUSAL_NOW','RELATIVE_CAPACITY','DURABLE_MISSION_GRAPH','FULLWAVE_COMPUTATION','SYSTEM_COMPLETION','INTERFACE_PRESERVATION']);
 
 export function wholeSystemConvergenceManifestR155(){
  const families=ORDER.map(id=>R155_CAPABILITY_FAMILIES[id]);
@@ -66,15 +82,17 @@ export function wholeSystemConvergenceManifestR155(){
   ok:true,
   schema:R155_SCHEMA,
   revision:R155_REVISION,
-  invariant:'ONE CANONICAL PRODUCT / MANY CAPABILITY FAMILIES / EXPLICIT AUTHORITY AND PROOF',
+  invariant:'ONE CANONICAL PRODUCT / MANY CAPABILITY FAMILIES / ONE SOURCE-TRUTH CHAIN / EXPLICIT AUTHORITY AND PROOF',
   canonicalAdmission:'R125',
   publicEntrypoint:'src/workerR116.js',
+  organization:'SEED → ORGANISM → SWARM → CAPABILITY FAMILY → DURABLE MISSION → PROOF → SCAR → RECONTEXTUALIZED NEXT STATE',
+  computationalContinuity:'PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RECONTEXTUALIZE/REPARTITION',
   familyOrder:ORDER,
   families,
   stateCounts,
   collisionPolicy:{revisionNumbers:'NON_AUTHORITATIVE_LABELS',winner:'CURRENT_ADMITTED_OWNER_OR_STRONGER_PROVEN_SUCCESSOR',overlap:'RECONCILE_BY_CAPABILITY_OWNER_AND_INHERITED_GATES',history:'PRESERVE_PREDECESSOR_PROVENANCE'},
-  promotionOrder:['repair focused SYSTEM_COMPLETION proof','import non-overlapping proven truth/NOW/capacity modules','reconcile operation/capability-field overlaps','integrate durable mission graph','integrate full-wave computation family','run desktop/mobile interface preservation','run whole inherited matrix + Worker dry-run + live evidence gates','only then promote to main'],
-  truthBoundary:'R155 is a convergence and ownership authority. It does not make candidate families canonical merely by listing or importing them. Every family remains subject to its own focused proof, inherited proof chain, runtime/device evidence and R125 CanonState admission boundary.'
+  promotionOrder:['repair focused SYSTEM_COMPLETION proof','preserve self-development/federation/swarm/living-visual admitted owners','import non-overlapping proven truth/NOW/capacity modules','reconcile operation/capability-field overlaps','integrate durable mission graph with relative-capacity scheduling','integrate full-wave computation with evidence/federation gates','run desktop/mobile interface preservation','run whole inherited matrix + Worker dry-run + live evidence gates','only then promote to main'],
+  truthBoundary:'R155 is a convergence and ownership authority. It does not make candidate families canonical merely by listing or importing them. Logical hierarchy, visual projection, software coherence, runtime return and numerical convergence remain distinct from physical execution, independent empirical evidence, fabrication validation and R125 CanonState admission. Every family remains subject to its own focused proof, inherited proof chain, runtime/device evidence and admission boundary.'
  };
 }
 
