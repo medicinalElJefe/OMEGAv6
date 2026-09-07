@@ -47,6 +47,13 @@ jobs:
       - name: Prove R158 capability universe and interaction/view contract
         run: node tests/r158-capability-universe-invariants.mjs
 
+      - name: Preserve admitted R157 reflex living-world transition
+        shell: bash
+        run: |
+          node --check src/world/reflexWorldTransitionR157.js
+          node tests/r157-reflex-living-world-transition-invariants.mjs
+          node tests/r156-organism-reflex-fabric-invariants.mjs
+
       - name: Preserve R155 whole-system capability-family authority
         run: node tests/r155-whole-system-convergence-invariants.mjs
 
