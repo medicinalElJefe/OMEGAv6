@@ -1,8 +1,10 @@
 {
   "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
-  "revision": "R170.1",
+  "revision": "R174.1",
   "authority": "OMEGAV6",
   "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
+  "currentSuccessorFloor": "R174",
+  "promotedSuccessorContinuity": ["R171", "R172", "R173", "R174"],
   "activeWorkflowAuthority": {
     "productionDeploy": ".github/workflows/ci.yml",
     "currentConvergence": ".github/workflows/r170-current-convergence.yml",
@@ -10,7 +12,11 @@
     "specialized": [
       ".github/workflows/r168-1-rcwa-byte-diagnostic.yml",
       ".github/workflows/r168-genesis-r192-attestation.yml",
-      ".github/workflows/r169-federation-attestation-world-lens.yml"
+      ".github/workflows/r169-federation-attestation-world-lens.yml",
+      ".github/workflows/r171-federation-receipt-world-reconciler.yml",
+      ".github/workflows/r172-federation-ledger-world-binding.yml",
+      ".github/workflows/r173-federation-ledger-world-observer.yml",
+      ".github/workflows/r174-living-world-pulse.yml"
     ]
   },
   "historicalWorkflowArchive": {
@@ -19,7 +25,7 @@
     "archivePath": ".github/workflows-archive",
     "preservation": "BYTE_PRESERVED_GIT_ARCHIVE_PLUS_IMMUTABLE_SOURCE_TREE",
     "historicalExecutionAuthority": false,
-    "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and remains independently addressable at the recorded pre-R170 source commit/tree, but is no longer an automatic GitHub Actions execution authority."
+    "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and remains independently addressable at the recorded pre-R170 source commit/tree, but is no longer an automatic GitHub Actions execution authority. R171-R174 are not historical: they are promoted current successors and remain active proof authorities."
   },
   "selfBuild": {
     "schedule": "17 */6 * * *",
@@ -44,5 +50,5 @@
     "genesisR192AttestationContract": "R192_SERVICE_BOUND_R1532_ATTESTED"
   },
   "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
-  "truthBoundary": "R170.1 may autonomously observe and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run. Otherwise it remains OBSERVE_ONLY. It cannot directly mutate main, auto-merge, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
+  "truthBoundary": "R174.1 preserves the promoted R171-R174 federation/world successor chain while retaining the R170 governed autonomous proposal law. It may autonomously observe and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run. Otherwise it remains OBSERVE_ONLY. It cannot directly mutate main, auto-merge, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
 }
