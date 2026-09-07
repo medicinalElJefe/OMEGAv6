@@ -1,0 +1,66 @@
+name: R170 Current Convergence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '29 9 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r170-current-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prove-current-authority-chain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-fund
+      - name: Prove bounded active workflow topology and self-build governance
+        run: |
+          node scripts/verify_workflow_topology_r170.mjs
+          node tests/r170-self-build-governor-invariants.mjs
+      - name: Prove current federation and Genesis attestation layers
+        run: |
+          node tests/r169-federation-attestation-world-lens-invariants.mjs
+          node tests/r168-genesis-r192-attestation-invariants.mjs
+      - name: Preserve active Optical R153.2 convergence
+        run: |
+          node tests/r167-active-optical-r1532-convergence-invariants.mjs
+          node tests/r1532-adaptive-external-search-invariants.mjs
+          node tests/r1531-external-ai-tool-push-invariants.mjs
+          node tests/r152-optical-operational-convergence-invariants.mjs
+          node tests/r115-machine-adapters-invariants.mjs
+      - name: Preserve residual and runtime truth chain
+        run: |
+          node tests/r166-development-residual-world-lens-invariants.mjs
+          node tests/r164-development-residual-graph-invariants.mjs
+          node tests/r163-canonical-core-health-truth-invariants.mjs
+      - name: Preserve governed execution chain
+        run: |
+          node tests/r162-governed-reflex-execution-invariants.mjs
+          node tests/r161-reflex-mission-durable-handoff-invariants.mjs
+          node tests/r160-reflex-operation-ingress-invariants.mjs
+          node tests/r159-sovereign-execution-convergence-invariants.mjs
+          node tests/r156-organism-reflex-fabric-invariants.mjs
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+      - name: Run full inherited production regression and package proofs
+        run: |
+          npm run check
+          npx wrangler deploy --config wrangler.jsonc --dry-run --outdir .wrangler-r170-current
+          npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
+      - name: Summarize current convergence boundary
+        run: |
+          echo 'R170.1 CURRENT CONVERGENCE PASS.'
+          echo 'Historical workflows are byte-preserved outside the active Actions directory.'
+          echo 'Canonical production deployment remains exclusively owned by ci.yml two-parent merge law.'
+          echo 'R125 remains sole CanonState admission authority; R153.2 remains SCREEN_ONLY.'
