@@ -21,8 +21,8 @@ for(const name of expected)assert.ok(workstationVisual.includes(`'${name}'`),`wo
 const r118Visual=(r118.match(/criticalVisual=new Set\(\[([^\]]+)\]\)/)||[])[1]||'';
 for(const name of expected)assert.ok(r118Visual.includes(`'${name}'`),`browser visual gate does not cover ${name}`);
 
-// Returned Earth observations stay distinct from model address mapping and representational calculus.
-for(const token of ['WGS84 target','/api/earth/evidence?lat=','/api/earth/noaa/catalog','evidenceHash','RETURNED EVIDENCE BOUND','Missing or unavailable source material is not synthetically replaced','REPRESENTATIONAL ONLY'])assert.ok(earth.includes(token),`Earth visual truth regression: ${token}`);
+// Returned Earth observations are exact-coordinate bound. A target change must withhold old evidence until a new source response returns.
+for(const token of ['WGS84 target','/api/earth/evidence?lat=','/api/earth/noaa/catalog','evidenceHash','RETURNED EVIDENCE BOUND','Missing or unavailable source material is not synthetically replaced','REPRESENTATIONAL ONLY','requestSeq=useRef(0)','evidenceTarget','sameTarget','boundEvidence=evidenceMatches?evidence:null',"data-evidence-target-match={evidenceMatches?'true':'false'}",'TARGET CHANGED · REFRESH REQUIRED','evidence={boundEvidence}','if(seq!==requestSeq.current)return'])assert.ok(earth.includes(token),`Earth visual truth regression: ${token}`);
 assert.ok(provenance.includes("P('Earth Now','RETURNED_EVIDENCE'"),'Earth provenance must remain returned evidence');
 
 // Forecast geometry must come from actual forecast-plan points and never claim future observation.
@@ -37,8 +37,9 @@ assert.ok(provenance.includes("P('Relativity','EXACT_EVALUATION'"),'Relativity p
 for(const token of ['VIEW_CONTRACT','PROJECTION_CONTRACT','Matter = complete occupancy/decision field','Proof = evidence-gated reduction','Proof rescales and weights geometry by evidence; it never creates evidence.','aCore.x','aCore.y','aCore.z','aCore.w','aMore.x','aMore.y'])assert.ok(matter.includes(token),`Matter visual truth regression: ${token}`);
 assert.ok(provenance.includes("P('Matter Traversal','CANONICAL_PACKET'"),'Matter provenance must remain canonical packet');
 
-// Visual Instrument must render the actual 20,736 field arrays/calibration rather than a generic animation.
-for(const token of ['getMandala20736Field()','getVisualCalibration()','field.count','field.C[i]','field.Phi[i]','field.q[i]','mandalaLensWeight(field,i,lens)','SOURCE ${address+1} / 20,736','calibration'])assert.ok(instrument.includes(token),`Visual Instrument source binding regression: ${token}`);
+// Visual Instrument must render actual 20,736 field arrays/calibration and click-test the same rotation that was actually rendered.
+for(const token of ['getMandala20736Field()','getVisualCalibration()','field.count','field.C[i]','field.Phi[i]','field.q[i]','mandalaLensWeight(field,i,lens)','SOURCE ${address+1} / 20,736','calibration','renderRotation=useRef(0)','renderRotation.current=t','t=spin?renderRotation.current:yaw'])assert.ok(instrument.includes(token),`Visual Instrument source/interaction binding regression: ${token}`);
+assert.ok(!instrument.includes('mx=e.clientX-rect.left,my=e.clientY-rect.top,t=yaw'),'Visual Instrument picking must not ignore active rendered spin rotation');
 assert.ok(provenance.includes("P('Visual Instrument','CANONICAL_PACKET'"),'Visual Instrument provenance must remain canonical packet');
 
 for(const token of [
@@ -51,4 +52,4 @@ for(const token of [
  "V('Visual Instrument','CANONICAL_STATE','OMEGA_ADDRESS_SPACE'"
 ])assert.ok(visual.includes(token),`R157 visual-space classification missing ${token}`);
 
-console.log('PASS R157 visual truth convergence · 15/15 visual-first surfaces classified · Earth returned evidence separated · forecast non-observational · relativity projection-only · Matter/Visual Instrument source-bound · 20,736 remains logical/address resolution');
+console.log('PASS R157 visual truth convergence · 15/15 visual-first surfaces classified · Earth evidence exact-target bound · forecast non-observational · relativity projection-only · Matter/Visual Instrument source-bound · spin/pick synchronized · 20,736 remains logical/address resolution');
