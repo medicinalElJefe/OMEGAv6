@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#080b10" />
+  <title>OMEGA R200 · Operational Lifecycle Console</title>
+  <link rel="stylesheet" href="/omega-operational-lifecycle-r200.css" />
+</head>
+<body>
+  <div class="shell" data-r200-console="OMEGA_OPERATIONAL_LIFECYCLE_R200">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">OMEGA · R200 · CANONICAL EXECUTION CONTROL</div>
+        <h1>Operational Lifecycle Console</h1>
+        <p>One visible chain from registered capability to verified execution and the separate R159 → R125 admission boundary.</p>
+      </div>
+      <div class="top-actions">
+        <button id="refreshBtn" class="button primary" type="button">Refresh evidence</button>
+        <a class="button" href="/" aria-label="Return to the canonical OMEGA application">Open OMEGA</a>
+      </div>
+    </header>
+
+    <section class="truth-banner" aria-label="R200 truth boundary">
+      <b>Truth boundary</b>
+      <span>REGISTERED ≠ EXECUTED · DISPATCHED ≠ RUNNING · RUNNING ≠ RETURNED · RETURNED ≠ VERIFIED · VERIFIED ≠ CANONSTATE · R125 remains sole admission authority.</span>
+    </section>
+
+    <section class="metric-grid" id="metricGrid" aria-live="polite">
+      <article class="metric"><span>Canonical core</span><b id="coreState">LOADING</b><small id="coreDetail">Awaiting first-hand R163 response</small></article>
+      <article class="metric"><span>Worker version</span><b id="workerVersion">—</b><small>Cloudflare Version Metadata when returned</small></article>
+      <article class="metric"><span>Operational spine</span><b id="spineState">LOADING</b><small id="spineDetail">R130 route/service observation</small></article>
+      <article class="metric"><span>Hybrid</span><b id="hybridState">LOADING</b><small id="hybridDetail">Heartbeat proof remains separate</small></article>
+      <article class="metric"><span>Executors</span><b id="executorState">LOADING</b><small id="executorDetail">Authenticated R147 directory when available</small></article>
+      <article class="metric"><span>Durable runs</span><b id="runCount">—</b><small id="runDetail">Authenticated R146 history when available</small></article>
+    </section>
+
+    <main class="workspace">
+      <section class="panel runs-panel">
+        <div class="panel-head">
+          <div><span class="eyebrow">R146 SESSION HISTORY</span><h2>Durable runs</h2></div>
+          <span class="pill" id="privateProofState">CHECKING</span>
+        </div>
+        <p class="muted" id="privateProofMessage">Reading authenticated executor and run evidence. If this browser is not paired, private execution history remains unknown rather than being shown as empty.</p>
+        <div id="runList" class="run-list" role="listbox" aria-label="Durable operation runs"></div>
+      </section>
+
+      <section class="panel lifecycle-panel">
+        <div class="panel-head">
+          <div><span class="eyebrow">R139 → R125</span><h2>Selected run lifecycle</h2></div>
+          <span class="pill" id="selectedRunState">NO RUN</span>
+        </div>
+        <div id="selectedRunMeta" class="selected-meta">Select a durable run to inspect every proof boundary.</div>
+        <div id="lifecycle" class="lifecycle" aria-live="polite"></div>
+
+        <div class="control-deck" id="controlDeck">
+          <div class="control-copy">
+            <span class="eyebrow">EXPLICIT OPERATOR CONTROL</span>
+            <h3>Advance only the selected durable run</h3>
+            <p id="nextAction">No run selected. R200 never dispatches automatically.</p>
+          </div>
+          <label class="path-field">Approved relative project path
+            <input id="projectPath" value="." autocomplete="off" spellcheck="false" aria-label="Approved relative project path" />
+          </label>
+          <label class="confirm-row">
+            <input id="confirmExecution" type="checkbox" />
+            <span>I authorize dispatch of this selected R146 run under its existing R143 contract. For Hybrid/Build, this is explicit native-PC execution confirmation.</span>
+          </label>
+          <div class="control-actions">
+            <button id="dispatchBtn" class="button primary" type="button" disabled>Dispatch authorized run</button>
+            <button id="pollBtn" class="button" type="button" disabled>Poll invoked run</button>
+            <button id="replayBtn" class="button" type="button" disabled>Replay R146 chain</button>
+          </div>
+          <div id="actionMessage" class="action-message" role="status"></div>
+        </div>
+      </section>
+    </main>
+
+    <section class="panel manifest-panel">
+      <div class="panel-head">
+        <div><span class="eyebrow">DEPLOYED EXECUTION FABRIC</span><h2>Live scheduler + authority composition</h2></div>
+        <span class="pill" id="r147ManifestState">LOADING</span>
+      </div>
+      <div class="fabric-chain" id="fabricChain">
+        <span>R185 temporal performance</span><i>→</i><span>R193 multi-axis refinement</span><i>→</i><span>R194 verified reuse</span><i>→</i><span>R195 differential carry</span><i>→</i><span>R196 bounded parallelism</span><i>→</i><span>R197 AIMD backpressure</span>
+      </div>
+      <p class="muted" id="fabricDetail">Waiting for the first-hand public R147 manifest.</p>
+    </section>
+
+    <footer>
+      <span>R200 adds no executor, queue, shadow state authority or automatic Canon admission.</span>
+      <span id="lastObserved">Not observed yet</span>
+    </footer>
+  </div>
+  <script type="module" src="/omega-operational-lifecycle-r200.js"></script>
+</body>
+</html>
