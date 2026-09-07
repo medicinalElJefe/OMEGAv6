@@ -1,0 +1,45 @@
+name: R181 Real SAR Earth
+
+on:
+  pull_request:
+    paths:
+      - 'src/earthSarR181.js'
+      - 'src/EarthSarPanelR181.tsx'
+      - 'src/earthSarR181.css'
+      - 'src/EarthObservatoryR8.tsx'
+      - 'src/workerR8.js'
+      - 'tests/r181-real-sar-earth-invariants.mjs'
+      - '.github/workflows/r181-real-sar-earth.yml'
+  push:
+    branches:
+      - r181-real-sar-earth
+    paths:
+      - 'src/earthSarR181.js'
+      - 'src/EarthSarPanelR181.tsx'
+      - 'src/earthSarR181.css'
+      - 'src/EarthObservatoryR8.tsx'
+      - 'src/workerR8.js'
+      - 'tests/r181-real-sar-earth-invariants.mjs'
+      - '.github/workflows/r181-real-sar-earth.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r181:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Static-check SAR gateway
+        run: node --check src/earthSarR181.js && node --check src/workerR8.js
+      - name: Prove additive R181 invariants
+        run: node tests/r181-real-sar-earth-invariants.mjs
+      - name: Preserve inherited Earth restoration gates
+        run: npm run test:restore
+      - name: Build complete workstation
+        run: npm run build
