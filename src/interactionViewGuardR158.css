@@ -1,0 +1,59 @@
+/* R158 INTERACTION / VIEW INTEGRITY
+   OUTPUT_PLANE_FIRST · CONTROLS_RESERVE_LAYOUT · INSPECTORS_DOCK_OUTSIDE_OUTPUT.
+   This layer is additive over R155 navigation geometry. It must never turn a visual
+   output into a background for navigation, controls, legends, inspectors or focus chrome. */
+:root{--r158-min-operational-surface:224px;--r158-touch-target:36px}
+
+.omega-workstation-v2 :where([data-omega-view-guard='R158'],[data-omega-visual-output='true'],.capu158,.dr156){min-width:0;max-width:100%;box-sizing:border-box}
+.omega-workstation-v2 [data-omega-visual-output='true']{position:relative;isolation:isolate;overflow:hidden;contain:layout paint;min-width:var(--r158-min-operational-surface)}
+.omega-workstation-v2 [data-omega-control-plane='reserved']{position:relative!important;inset:auto!important;transform:none;max-width:100%;min-width:0}
+
+/* R158 focus is document-flow expansion, never a fixed modal that covers other output. */
+.capu158.immersive{position:relative!important;inset:auto!important;z-index:auto!important;margin-top:10px!important;max-height:none!important;overflow:visible!important;box-shadow:0 14px 44px rgba(0,0,0,.32)!important;width:100%!important}
+.capu158.immersive .capu158-body{min-height:0!important}
+.capu158.immersive .capu158-stage{min-height:min(82vh,900px)!important}
+
+/* The old stage label sat on top of the actual rendered universe. Its information is
+   already represented by the scene/LOD/frame controls, so the overlay is suppressed. */
+.capu158-stage-label{display:none!important}
+
+/* Controls remain outside the output plane and preserve hit targets / keyboard access. */
+.capu158>header,.capu158-scenes,.capu158-controls,.capu158-kpis,.capu158-inspector,.capu158-resolution-strip,.capu158>footer,
+.dr156>header,.dr156-controls,.dr156-kpis,.dr156-fields,.dr156-dual,.dr156-reference,.dr156-mode-field,.dr156-candidate,.dr156>footer{position:relative;z-index:1}
+.capu158 :where(button,select,input),.dr156 :where(button,select,input){max-width:100%}
+.capu158 :where(button,select),.dr156 :where(button,select){min-height:var(--r158-touch-target)}
+.capu158-scenes,.capu158-resolution-strip,.dr156-ladder,.dr156-sequence{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+
+/* Output surfaces stay visually primary and never inherit an arbitrary minimum width
+   from inspector/control columns. */
+.capu158-body,.dr156-main{min-width:0;align-items:stretch}
+.capu158-stage,.dr156-frame-map{min-width:var(--r158-min-operational-surface);width:100%;max-width:100%}
+.capu158-stage canvas,.capu158-stage svg,.dr156-frame-map svg{max-width:100%}
+.capu158-inspector{min-width:0;max-width:100%;overflow:auto;overscroll-behavior:contain}
+
+/* The global navigator may reserve width, but R155/R158 forbid overlap with the active
+   workstation. Keep the proof floor explicit so later navigation edits cannot silently
+   shrink the instrument below the browser operational contract. */
+html[data-omega-nav-present='true'] .omega-workstation-v2 .workstation-main{min-width:var(--r158-min-operational-surface)}
+
+@media(max-width:1050px){
+ .capu158-body{grid-template-columns:minmax(0,1fr)!important}
+ .capu158-inspector{max-height:none!important}
+ .capu158.immersive .capu158-stage{min-height:min(72vh,760px)!important}
+}
+@media(max-width:580px){
+ :root{--r158-min-operational-surface:220px;--r158-touch-target:40px}
+ .capu158-controls{grid-template-columns:minmax(0,1fr)!important}
+ .capu158-controls button{grid-column:auto!important}
+ .capu158-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .capu158-stage{min-height:470px!important}
+ .capu158.immersive .capu158-stage{min-height:62vh!important}
+ .dr156-main,.dr156-controls{grid-template-columns:minmax(0,1fr)!important}
+}
+@media(max-width:344px){
+ :root{--r158-min-operational-surface:216px}
+ .capu158-kpis{grid-template-columns:minmax(0,1fr)!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .capu158,.capu158 *,.dr156,.dr156 *{scroll-behavior:auto!important}
+}
