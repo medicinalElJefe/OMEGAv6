@@ -99,19 +99,24 @@ export function createOpticalExternalToolR1532({addressCandidate,screenCandidate
   return{schema:R1532_RECEIPT_SCHEMA,receipt_id:`omega_tool_${requestSha.slice(0,24)}`,request_sha256:requestSha,tool:R1532_TOOL_NAME,tool_version:R1532_TOOL_VERSION,service,authority:R1532_TOOL_AUTHORITY,operation,caller:{id:callerId,kind:String(call.caller?.kind||'ai-agent')},request_id:String(call.request_id||'').slice(0,160)||null,returned_at:new Date().toISOString(),canonical_mutation:false,side_effects:'none',truth_boundary:truthBoundary};
  }
  function descriptor(origin=''){
-  const d=base.descriptor(origin);return{...d,version:R1532_TOOL_VERSION,operations:{...d.operations,adaptive_refine:adaptiveDef},transport:{...d.transport,insight:`${origin}/api/tool/insight`},interpretation:'R153.2 extends an AI session with deterministic optical search, boundary-aware refinement, compact reasoning packets, and proof-gated full-wave handoff planning. It does not modify model weights, expose hidden reasoning, execute arbitrary code, or grant canonical authority.'};
+  const d=base.descriptor(origin),operationEnum=[...new Set([...(d.call_schema?.properties?.operation?.enum||[]),'adaptive_refine'])];
+  return{...d,version:R1532_TOOL_VERSION,operations:{...d.operations,adaptive_refine:adaptiveDef},transport:{...d.transport,insight:`${origin}/api/tool/insight`},call_schema:{...d.call_schema,properties:{...d.call_schema.properties,operation:{...d.call_schema.properties.operation,enum:operationEnum}}},interpretation:'R153.2 extends an AI session with deterministic optical search, boundary-aware refinement, compact reasoning packets, and proof-gated full-wave handoff planning. It does not modify model weights, expose hidden reasoning, execute arbitrary code, or grant canonical authority.'};
  }
  function probe(origin=''){
   const p=base.probe(origin);return{...p,version:R1532_TOOL_VERSION,ready:{...p.ready,adaptive_refine:true},insight:`${origin}/api/tool/insight`,live_evidence_basis:{r1531_rank_top:{address:1698,gate:'STAY',scalar_focus:0.795603,continuity:0.863307,contradiction:0.075669},interpretation:'R153.2 adaptive refinement was added because the live R153.1 winner landed on d:low and p:high atlas boundaries.'}};
  }
  function openapi(origin=''){
-  const o=base.openapi(origin);o.info={...o.info,version:R1532_TOOL_VERSION,description:'Bounded external deterministic optical computation with adaptive boundary-aware refinement, AI reasoning packets, hashed receipts and explicit SCREEN_ONLY truth boundaries.'};o.paths['/api/tool/insight']={get:{summary:'Run one bounded adaptive refinement step from query parameters',parameters:[{name:'seed_address',in:'query',schema:{type:'integer',minimum:0,maximum:20735}},{name:'wavelength_nm',in:'query',schema:{type:'integer',minimum:380,maximum:780}},{name:'radius',in:'query',schema:{type:'integer',minimum:1,maximum:3}},{name:'budget',in:'query',schema:{type:'integer',minimum:8,maximum:256}}],responses:{'200':{description:'Adaptive reasoning packet and proof-gated handoff plan'}}}};o['x-omega-tool-version']=R1532_TOOL_VERSION;return o;
+  const o=base.openapi(origin),schema=descriptor('').call_schema;
+  o.info={...o.info,version:R1532_TOOL_VERSION,description:'Bounded external deterministic optical computation with adaptive boundary-aware refinement, AI reasoning packets, hashed receipts and explicit SCREEN_ONLY truth boundaries.'};
+  o.paths['/api/tool/invoke'].post.requestBody.content['application/json'].schema=schema;
+  o.components.schemas.ExternalToolCall=schema;
+  o.paths['/api/tool/insight']={get:{summary:'Run one bounded adaptive refinement step from query parameters',parameters:[{name:'seed_address',in:'query',schema:{type:'integer',minimum:0,maximum:20735}},{name:'wavelength_nm',in:'query',schema:{type:'integer',minimum:380,maximum:780}},{name:'radius',in:'query',schema:{type:'integer',minimum:1,maximum:3}},{name:'budget',in:'query',schema:{type:'integer',minimum:8,maximum:256}}],responses:{'200':{description:'Adaptive reasoning packet and proof-gated handoff plan'}}}};
+  o['x-omega-tool-version']=R1532_TOOL_VERSION;return o;
  }
  async function invoke(call){
   if(call?.operation!=='adaptive_refine'){
    const delegated=await base.invoke(call);
    if(!delegated.ok)return delegated;
-   const callerId=String(call?.caller?.id||'').slice(0,120);
    delegated.body.receipt={...(delegated.body.receipt||{}),tool_version:R1532_TOOL_VERSION,base_tool_version:'R153.1'};
    delegated.body.tool_upgrade={version:R1532_TOOL_VERSION,adaptive_refine_available:true};
    return delegated;
