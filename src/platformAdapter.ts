@@ -23,11 +23,15 @@ export class OmegaApiError extends Error {
 }
 
 export const OMEGA_CANONICAL_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev';
+export const OMEGA_CANONICAL_RUNTIME_ORIGIN=OMEGA_CANONICAL_ORIGIN;
 const CANONICAL_HOST='omegav6.jeffdeweyeljefe.workers.dev';
-const OMEGA_MIRROR_HOSTS=new Set([
+export const OMEGA_DISTRIBUTED_RUNTIME_HOSTS=Object.freeze([
+  'omega-genesis-v1.jeffdeweyeljefe.workers.dev',
   'omega-living-light-etching-private-woven2.vercel.app',
   'omega-optical-cloud-woven2.vercel.app'
 ]);
+const OMEGA_MIRROR_HOSTS=new Set<string>(OMEGA_DISTRIBUTED_RUNTIME_HOSTS);
+const LOCAL_HOSTS=new Set(['localhost','127.0.0.1','::1']);
 const SESSION_KEY='omega.v6.runtime.session.r32';
 const BRIDGE_KEY='omega.v6.hybrid.bridge.r32';
 function randomId(prefix:string){try{return `${prefix}_${crypto.randomUUID()}`}catch{return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`}}
@@ -38,15 +42,26 @@ export function saveHybridBridge(input:{bridgeId:string;secret:string;pairingCod
 export function clearHybridBridge(){try{localStorage.removeItem(BRIDGE_KEY)}catch{}}
 
 function runtimeHost(){try{return typeof window!=='undefined'?window.location.hostname.toLowerCase():''}catch{return''}}
-function localDevelopmentHost(host:string){return host==='localhost'||host==='127.0.0.1'||host==='::1'}
+function localDevelopmentHost(host:string){return LOCAL_HOSTS.has(host)}
 export function shouldUseCanonicalApiAuthority(url:string,host=runtimeHost()){
   if(!url.startsWith('/api/'))return false;
   if(!host||host===CANONICAL_HOST||localDevelopmentHost(host))return false;
   return OMEGA_MIRROR_HOSTS.has(host);
 }
+/** Resolve any shared runtime-relative resource (API or proof asset) to canonical OMEGAv6 on approved distributed surfaces. */
+export function runtimeUrl(url:string,host=runtimeHost()){
+  const value=String(url||'');
+  if(/^https?:\/\//i.test(value)||!value.startsWith('/'))return value;
+  if(!host||host===CANONICAL_HOST||localDevelopmentHost(host))return value;
+  return OMEGA_MIRROR_HOSTS.has(host)?`${OMEGA_CANONICAL_ORIGIN}${value}`:value;
+}
 export function resolveOmegaApiUrl(url:string,host=runtimeHost()){
   if(/^https?:\/\//i.test(url))return url;
   return shouldUseCanonicalApiAuthority(url,host)?`${OMEGA_CANONICAL_ORIGIN}${url}`:url;
+}
+export function runtimeFetch(input:string,init:RequestInit={}){
+  const target=runtimeUrl(input),crossOrigin=/^https?:\/\//i.test(target)&&typeof window!=='undefined'&&!target.startsWith(window.location.origin);
+  return fetch(target,{cache:'no-store',...init,credentials:init.credentials??(crossOrigin?'omit':'same-origin')});
 }
 
 async function request<T>(method: string, url: string, body?: unknown): Promise<ApiResult<T>> {
@@ -56,13 +71,13 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
     const bridge=getHybridBridge(),headers:Record<string,string>={'x-omega-session-id':runtimeSessionId()};
     if(body!==undefined)headers['content-type']='application/json';
     if(bridge){headers['x-omega-bridge-id']=bridge.bridgeId;headers['x-omega-bridge-secret']=bridge.secret}
-    const target=resolveOmegaApiUrl(url);
+    const target=resolveOmegaApiUrl(url),crossOrigin=target.startsWith(OMEGA_CANONICAL_ORIGIN)&&typeof window!=='undefined'&&!target.startsWith(window.location.origin);
     const response = await fetch(target, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
       cache: 'no-store',
-      credentials: target.startsWith(OMEGA_CANONICAL_ORIGIN)?'omit':'same-origin',
+      credentials: crossOrigin?'omit':'same-origin',
       signal: controller.signal
     });
     const contentType = response.headers.get('content-type') || '';
@@ -111,57 +126,25 @@ export const platformCapabilities = Object.freeze({
 
 export const localState = {
   read<T>(key: string, fallback: T): T {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw === null ? fallback : JSON.parse(raw) as T;
-    } catch {
-      return fallback;
-    }
+    try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw) as T; } catch { return fallback; }
   },
   write<T>(key: string, value: T): boolean {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch {
-      return false;
-    }
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
   },
   remove(key: string): boolean {
-    try {
-      localStorage.removeItem(key);
-      return true;
-    } catch {
-      return false;
-    }
+    try { localStorage.removeItem(key); return true; } catch { return false; }
   }
 };
 
-export async function getRuntimeStatus<T = unknown>(): Promise<T> {
-  return (await api.get<T>('/api/status')).data;
-}
-
-export async function getRestorationStatus<T = unknown>(): Promise<T> {
-  return (await api.get<T>('/api/restoration')).data;
-}
-
-export async function previewRoute<T = unknown>(text: string): Promise<T> {
-  return (await api.post<T>('/api/route-preview', { text })).data;
-}
-
-export async function sendChat<T = unknown>(text: string): Promise<T> {
-  return (await api.post<T>('/api/chat', { text })).data;
-}
+export async function getRuntimeStatus<T = unknown>(): Promise<T> { return (await api.get<T>('/api/status')).data; }
+export async function getRestorationStatus<T = unknown>(): Promise<T> { return (await api.get<T>('/api/restoration')).data; }
+export async function previewRoute<T = unknown>(text: string): Promise<T> { return (await api.post<T>('/api/route-preview', { text })).data; }
+export async function sendChat<T = unknown>(text: string): Promise<T> { return (await api.post<T>('/api/chat', { text })).data; }
 
 export const auth = Object.freeze({
   isSignedIn: () => false,
   async getUser(): Promise<null> { return null; },
-  async signIn(): Promise<never> {
-    throw new OmegaApiError('Cloudflare sovereign migration does not have an identity provider bound.', 503, 'AUTH_NOT_BOUND');
-  },
+  async signIn(): Promise<never> { throw new OmegaApiError('Cloudflare sovereign migration does not have an identity provider bound.', 503, 'AUTH_NOT_BOUND'); },
   async signOut(): Promise<void> { return; }
 });
-
-export const realtime = Object.freeze({
-  state: 'LIVE' as OmegaTruthState,
-  reason: 'R32 durable event/runtime state is bound. Native-device actions remain separately proof-gated.'
-});
+export const realtime = Object.freeze({state:'LIVE' as OmegaTruthState,reason:'R32 durable event/runtime state is bound. Native-device actions remain separately proof-gated.'});
