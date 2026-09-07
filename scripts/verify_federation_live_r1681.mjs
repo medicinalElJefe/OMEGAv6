@@ -75,4 +75,5 @@ console.log('R168.1 FEDERATION + RCWA PROPAGATION ATTESTATION PASS');
 
 if(String(process.env.OMEGA_PROMOTED_SHA||'').trim()){
   await import('./verify_live_execution_control_r199.mjs');
+  await import('./verify_live_operational_lifecycle_r200.mjs');
 }
