@@ -28,6 +28,19 @@ assert.match(engine,/R-R143-OPERATION-CHAIN-MISSING/);
 assert.match(engine,/R-R144-DEPLOYMENT-ATTESTATION-MISSING/);
 assert.match(engine,/r143AuthorityComplete/);
 assert.match(engine,/r144AttestationComplete/);
+for(const token of ['ALL_MODES_FUSION_FAILURE','UNIVERSAL_TRUTH_FAILURE','CAUSAL_NOW_LEMMA_FAILURE','RELATIVE_CAPACITY_FAILURE','R-R151-ALL-MODES-FUSION-MISSING','R-R152-UNIVERSAL-TRUTH-MISSING','R-R153-LEMMA-NOW-MISSING','R-R154-RELATIVE-CAPACITY-MISSING','advancedAuthorityState','advancedTruthCapacityFailuresNeverAutoRepair:true'])assert.match(engine,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+assert.match(engine,/\/api\/runtime-now-r154/);
+assert.match(engine,/\/api\/relative-capacity-r154/);
+const recipeBlock=engine.slice(engine.indexOf('const recipes=['),engine.indexOf('function mode('));
+for(const forbidden of ['ALL_MODES_FUSION_FAILURE','UNIVERSAL_TRUTH_FAILURE','CAUSAL_NOW_LEMMA_FAILURE','RELATIVE_CAPACITY_FAILURE'])assert.equal(recipeBlock.includes(forbidden),false,`${forbidden} must not receive an autonomous repair recipe`);
+assert.match(workflow,/OMEGA R154 Relative Capacity Fabric/);
+assert.match(workflow,/OMEGA R153 Lemma Motion NOW Continuity/);
+assert.match(workflow,/OMEGA R152 Universal Truth Envelope/);
+assert.match(workflow,/OMEGA R151 All Modes Truth Fusion/);
+assert.match(workflow,/r154-relative-capacity-fabric\.mts/);
+assert.match(workflow,/r153-lemma-motion-now-continuity\.mts/);
+assert.match(workflow,/r152-universal-truth-envelope\.mts/);
+assert.match(workflow,/r151-all-modes-truth-fusion-invariants\.mjs/);
 assert.match(workflow,/r144-runtime-deployment-attestation-invariants\.mjs/);
 assert.match(workflow,/r143-authoritative-ui-operation-chain-invariants\.mjs/);
 assert.match(workflow,/r142-proof-aware-capability-lifecycle-invariants\.mjs/);
@@ -40,4 +53,4 @@ assert.deepEqual(r124.admitted,['SB001','SB002','SB003','SB004','SB005','SB006',
 for(const c of r124.roadmap)assert.equal(fs.existsSync(c.target),true,`admitted target missing: ${c.target}`);
 const receipts=new Map();for(const r of r124.receipts||[])receipts.set(r.capsuleId,r);
 for(const id of r124.admitted){const r=receipts.get(id);assert.ok(r,`receipt missing: ${id}`);assert.equal(r.status,'ADMIT');assert.equal(r.tests?.r124,true);assert.equal(r.tests?.r123,true);assert.equal(r.tests?.r122,true);assert.equal(r.tests?.r121,true);assert.equal(r.tests?.build,true);assert.ok(r.rollbackRef);}
-console.log('R125.4 accuracy-first residual engine + R144/R143/R142 sensor invariants: PASS');
+console.log('R125.5 accuracy-first residual engine + R151-R154/R144/R143/R142 sensors PASS · advanced truth/capacity failures review-gated and never auto-repaired');
