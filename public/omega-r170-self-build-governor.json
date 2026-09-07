@@ -1,10 +1,10 @@
 {
   "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
-  "revision": "R174.1",
+  "revision": "R175.2",
   "authority": "OMEGAV6",
   "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
-  "currentSuccessorFloor": "R174",
-  "promotedSuccessorContinuity": ["R171", "R172", "R173", "R174"],
+  "currentSuccessorFloor": "R175",
+  "promotedSuccessorContinuity": ["R171", "R172", "R173", "R174", "R175"],
   "activeWorkflowAuthority": {
     "productionDeploy": ".github/workflows/ci.yml",
     "currentConvergence": ".github/workflows/r170-current-convergence.yml",
@@ -25,10 +25,12 @@
     "archivePath": ".github/workflows-archive",
     "preservation": "BYTE_PRESERVED_GIT_ARCHIVE_PLUS_IMMUTABLE_SOURCE_TREE",
     "historicalExecutionAuthority": false,
-    "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and remains independently addressable at the recorded pre-R170 source commit/tree, but is no longer an automatic GitHub Actions execution authority. R171-R174 are not historical: they are promoted current successors and remain active proof authorities."
+    "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and remains independently addressable at the recorded pre-R170 source commit/tree, but is no longer an automatic GitHub Actions execution authority. R171-R175 are promoted current successors and remain preserved by current convergence proof."
   },
   "selfBuild": {
-    "schedule": "17 */6 * * *",
+    "schedule": "17 * * * *",
+    "cadence": "HOURLY_OBSERVATION",
+    "candidateProofCost": "ON_PROPOSAL_ONLY",
     "maxAutonomousGenerations": 5,
     "candidatePolicy": "ONE_CAPSULE_ONE_BRANCH_ONE_PROOF_RECEIPT_ONE_PR",
     "exactProductionHeadRequired": true,
@@ -50,5 +52,5 @@
     "genesisR192AttestationContract": "R192_SERVICE_BOUND_R1532_ATTESTED"
   },
   "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
-  "truthBoundary": "R174.1 preserves the promoted R171-R174 federation/world successor chain while retaining the R170 governed autonomous proposal law. It may autonomously observe and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run. Otherwise it remains OBSERVE_ONLY. It cannot directly mutate main, auto-merge, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
+  "truthBoundary": "R175.2 preserves the promoted R171-R175 successor chain while accelerating the R170 governed autonomous proposal law to an hourly observation pulse. Cheap topology/production/residual checks run every pulse; dependency installation, full inherited regression and Worker package proofs run only when a predefined bounded candidate is actually proposed. The governor cannot directly mutate main, auto-merge, recursively trigger workflows, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
 }
