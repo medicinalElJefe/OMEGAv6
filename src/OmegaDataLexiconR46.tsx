@@ -1,6 +1,7 @@
 import {useMemo,useState} from 'react';
-import {FileJson,FileSpreadsheet,Search,ShieldCheck,Upload,Waypoints} from 'lucide-react';
+import {Download,FileJson,FileSpreadsheet,Search,ShieldCheck,Upload,Waypoints} from 'lucide-react';
 import {localState} from './platformAdapter';
+import {downloadXlsxLite,readXlsxLite} from './xlsxLiteR153';
 import './extremeRestorationR46.css';
 
 type Imported={
@@ -13,6 +14,10 @@ type Imported={
  columns?:number;
  keys?:string[];
  preview?:string[][];
+ data?:string[][];
+ sheetName?:string;
+ sheetCount?:number;
+ formulas?:number;
  boundary:string;
 };
 
@@ -35,23 +40,16 @@ const hex=(b:ArrayBuffer)=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).p
 function parseCsv(text:string){
  const rows:string[][]=[];
  let row:string[]=[],cell='',quote=false;
- for(let i=0;i<text.length&&rows.length<101;i++){
+ for(let i=0;i<text.length&&rows.length<1001;i++){
   const c=text[i];
   if(c==='"'){
    if(quote&&text[i+1]==='"'){cell+='"';i++}
    else quote=!quote;
-  }else if(c===','&&!quote){
-   row.push(cell);cell='';
-  }else if((c==='\n'||c==='\r')&&!quote){
-   if(c==='\r'&&text[i+1]==='\n')i++;
-   row.push(cell);
-   if(row.some(Boolean))rows.push(row);
-   row=[];cell='';
-  }else{
-   cell+=c;
-  }
+  }else if(c===','&&!quote){row.push(cell);cell=''}
+  else if((c==='\n'||c==='\r')&&!quote){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(Boolean))rows.push(row);row=[];cell=''}
+  else cell+=c;
  }
- if((cell||row.length)&&rows.length<101){row.push(cell);rows.push(row)}
+ if((cell||row.length)&&rows.length<1001){row.push(cell);rows.push(row)}
  return rows;
 }
 
@@ -59,58 +57,38 @@ function compile(text:string){
  const tokens=text.toLowerCase().match(/[a-z0-9]+/g)||[];
  const routes=[...new Set(tokens.map(x=>NAV[x]).filter(Boolean))];
  const operators=[...new Set(tokens.map(x=>OPS[x]).filter(Boolean))];
- return {
-  schema:'OMEGA_SEMANTIC_PACKET_LANGUAGE_R46',
-  tokens,
-  route:routes[0]||'Command Center',
-  candidateRoutes:routes,
-  operators:operators.length?operators:['CARRY','CONSTRUCT','PROVE','LEDGER'],
-  chain:['COMMAND_REGISTRY','PRESSURE_PACKET','SCENE_AUTHORITY','IMMUTABLE_STATE_PACKET','DEWEY_TRANSITION_KERNEL','UNIFIED_RENDERER','FRAME_PACKET','EVIDENCE_LEDGER'],
-  boundary:'Deterministic packet↔lexicon routing only. It is not universal translation proof, inferred intent authority, or an external language model.'
- };
+ return {schema:'OMEGA_SEMANTIC_PACKET_LANGUAGE_R46',tokens,route:routes[0]||'Command Center',candidateRoutes:routes,operators:operators.length?operators:['CARRY','CONSTRUCT','PROVE','LEDGER'],chain:['COMMAND_REGISTRY','PRESSURE_PACKET','SCENE_AUTHORITY','IMMUTABLE_STATE_PACKET','DEWEY_TRANSITION_KERNEL','UNIFIED_RENDERER','FRAME_PACKET','EVIDENCE_LEDGER'],boundary:'Deterministic packet↔lexicon routing only. It is not universal translation proof, inferred intent authority, or an external language model.'};
 }
+const toStrings=(rows:(string|number|boolean)[][])=>rows.map(r=>r.map(v=>String(v??'')));
 
 export default function OmegaDataLexiconR46({onNavigate}:{onNavigate?:(p:string)=>void}){
  const[imports,setImports]=useState<Imported[]>(()=>localState.read(STORE,[]));
- const[prompt,setPrompt]=useState('translate this CSV into a visual field then prove and ledger the route');
+ const[prompt,setPrompt]=useState('translate this XLSX into a visual field then prove and ledger the route');
  const language=useMemo(()=>compile(prompt),[prompt]);
- const route=(p:string)=>{
-  if(onNavigate){onNavigate(p);return}
-  localState.write('omega.v6.panel',p);
-  window.location.reload();
- };
+ const route=(p:string)=>{if(onNavigate){onNavigate(p);return}localState.write('omega.v6.panel',p);window.location.reload()};
  const ingest=async(file:File)=>{
-  const buffer=await file.arrayBuffer();
-  const sha256=hex(await crypto.subtle.digest('SHA-256',buffer));
-  const n=file.name.toLowerCase();
+  const buffer=await file.arrayBuffer(),sha256=hex(await crypto.subtle.digest('SHA-256',buffer)),n=file.name.toLowerCase();
   const kind:Imported['kind']=n.endsWith('.csv')?'CSV':n.endsWith('.json')?'JSON':n.endsWith('.xlsx')||n.endsWith('.xls')?'XLSX':'OTHER';
-  let x:Imported={
-   id:sha256.slice(0,16),name:file.name,size:file.size,kind,sha256,
-   boundary:'Browser-local SHA-256 intake only; imported data does not become source authority automatically.'
-  };
+  let x:Imported={id:sha256.slice(0,16),name:file.name,size:file.size,kind,sha256,boundary:'Browser-local SHA-256 intake only; imported data does not become source authority automatically.'};
   if(kind==='CSV'){
-   const p=parseCsv(new TextDecoder().decode(buffer).slice(0,1_500_000));
-   x={...x,rows:Math.max(0,p.length-1),columns:p.reduce((m,r)=>Math.max(m,r.length),0),preview:p.slice(0,8)};
+   const p=parseCsv(new TextDecoder().decode(buffer).slice(0,4_000_000)),data=p.slice(0,250).map(r=>r.slice(0,64));
+   x={...x,rows:Math.max(0,p.length-1),columns:p.reduce((m,r)=>Math.max(m,r.length),0),preview:data.slice(0,8),data,boundary:'CSV parsed locally from exact fingerprinted bytes. A bounded 250-row working copy may be round-tripped to XLSX; source authority remains the imported file hash.'};
   }else if(kind==='JSON'){
-   try{
-    const j=JSON.parse(new TextDecoder().decode(buffer));
-    x={...x,rows:Array.isArray(j)?j.length:1,keys:j&&typeof j==='object'&&!Array.isArray(j)?Object.keys(j).slice(0,64):[],preview:[[JSON.stringify(j).slice(0,800)]]};
-   }catch{
-    x={...x,boundary:'SHA-256 identity verified locally; JSON parsing failed, so no semantic admission occurred.'};
-   }
+   try{const j=JSON.parse(new TextDecoder().decode(buffer)),rows=Array.isArray(j)?j.slice(0,250).map(v=>Array.isArray(v)?v:Object.values(v&&typeof v==='object'?v:{value:v})):Object.entries(j&&typeof j==='object'?j:{value:j});const data=toStrings(rows as any).map(r=>r.slice(0,64));x={...x,rows:Array.isArray(j)?j.length:1,columns:data.reduce((m,r)=>Math.max(m,r.length),0),keys:j&&typeof j==='object'&&!Array.isArray(j)?Object.keys(j).slice(0,64):[],preview:data.slice(0,8),data,boundary:'JSON parsed locally from exact fingerprinted bytes. Bounded table material can be exported to XLSX without becoming canonical state.'}}
+   catch{x={...x,boundary:'SHA-256 identity verified locally; JSON parsing failed, so no semantic admission occurred.'}}
   }else if(kind==='XLSX'){
-   x={...x,boundary:'Workbook bytes are SHA-256 fingerprinted locally. Formula recalculation, macros and Excel execution remain outside the browser runtime.'};
+   try{const wb=readXlsxLite(buffer,1000,128),data=toStrings(wb.rows.slice(0,250).map(r=>r.slice(0,64)));x={...x,rows:Math.max(0,wb.rows.length-1),columns:wb.rows.reduce((m,r)=>Math.max(m,r.length),0),sheetName:wb.sheetName,sheetCount:wb.sheetCount,formulas:wb.formulas.length,preview:data.slice(0,8),data,boundary:`R153 parsed the first worksheet from exact fingerprinted XLSX bytes (${wb.sheetCount} sheet${wb.sheetCount===1?'':'s'} detected; ${wb.formulas.length} formula cell${wb.formulas.length===1?'':'s'} observed). Stored formula values are readable, but Excel recalculation/macros are not executed. Bounded working rows can be round-tripped to a new XLSX.`}}
+   catch(e:any){x={...x,boundary:`SHA-256 identity verified locally; XLSX structure could not be parsed safely: ${e?.message||String(e)}`}}
   }
-  const next=[x,...imports.filter(i=>i.sha256!==sha256)].slice(0,24);
-  setImports(next);
-  localState.write(STORE,next);
+  const next=[x,...imports.filter(i=>i.sha256!==sha256)].slice(0,24);setImports(next);localState.write(STORE,next);
  };
+ const exportWorkbook=(x:Imported)=>{if(!x.data?.length)return;downloadXlsxLite(`OMEGA_ROUNDTRIP_${x.id}.xlsx`,x.data,x.sheetName||'OMEGA_DATA')};
  return <section className='r46-data-language'>
-  <header><div><span>S16 + S18 · LOCAL DATA / LANGUAGE EXECUTION</span><h3>Data & Semantic Packet Bridge</h3></div><ShieldCheck/></header>
+  <header><div><span>S16 + S18 · R153 LOCAL DATA / LANGUAGE EXECUTION</span><h3>Workbook, Data & Semantic Packet Bridge</h3><small>CSV/JSON/XLSX read · SHA-256 identity · bounded XLSX round-trip · deterministic packet lexicon</small></div><ShieldCheck/></header>
   <div className='r46-two'>
    <section>
-    <label className='r46-drop'><Upload/><b>Fingerprint + inspect data</b><span>CSV/JSON preview · XLS/XLSX identity only</span><input type='file' accept='.csv,.json,.xls,.xlsx' onChange={e=>{const f=e.target.files?.[0];if(f)void ingest(f);e.currentTarget.value=''}}/></label>
-    <div className='r46-imports'>{imports.map(x=><article key={x.sha256}>{x.kind==='JSON'?<FileJson/>:<FileSpreadsheet/>}<div><b>{x.name}</b><small>{x.kind} · {x.size.toLocaleString()} bytes</small><code>{x.sha256}</code>{x.preview&&<pre>{x.preview.map(r=>r.slice(0,6).join(' | ')).join('\n')}</pre>}<span>{x.boundary}</span></div></article>)}</div>
+    <label className='r46-drop'><Upload/><b>Fingerprint + inspect data</b><span>CSV/JSON/XLSX local parsing · no macro execution</span><input type='file' accept='.csv,.json,.xls,.xlsx' onChange={e=>{const f=e.target.files?.[0];if(f)void ingest(f);e.currentTarget.value=''}}/></label>
+    <div className='r46-imports'>{imports.map(x=><article key={x.sha256}>{x.kind==='JSON'?<FileJson/>:<FileSpreadsheet/>}<div><b>{x.name}</b><small>{x.kind} · {x.size.toLocaleString()} bytes{x.sheetName?` · ${x.sheetName}`:''}{Number.isFinite(x.formulas)?` · ${x.formulas} formulas`:''}</small><code>{x.sha256}</code>{x.preview&&<pre>{x.preview.map(r=>r.slice(0,6).join(' | ')).join('\n')}</pre>}<span>{x.boundary}</span>{x.data?.length&&<button className='r153-xlsx-export' onClick={()=>exportWorkbook(x)}><Download/>Round-trip bounded data to XLSX</button>}</div></article>)}</div>
    </section>
    <section className='r46-lexicon'>
     <label><Search/><textarea value={prompt} onChange={e=>setPrompt(e.target.value)}/></label>
