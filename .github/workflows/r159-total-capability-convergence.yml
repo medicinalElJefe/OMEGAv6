@@ -1,0 +1,161 @@
+name: OMEGA R159 Total Capability Convergence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [r159-total-capability-convergence]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r159-total-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  OMEGA_E2E_URL: http://127.0.0.1:4173
+
+jobs:
+  prove-r159:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install application and full-wave proof dependencies
+        run: |
+          npm install --no-fund
+          python -m pip install --upgrade pip numpy grcwa
+
+      - name: Reject high-severity dependency regressions before browser tooling
+        run: npm audit --audit-level=high
+
+      - name: Prove R159 capability preservation and convergence map
+        run: npx --yes tsx tests/r159-total-capability-convergence.mts
+
+      - name: Prove restored adaptive operating surface against current tree
+        run: |
+          node tests/r156-adaptive-instrument-surface-invariants.mjs
+          node tests/r156-global-navigator-invariants.mjs
+          node tests/r155-navigation-information-architecture-invariants.mjs
+          npm run test:navigation
+          npm run test:applications
+
+      - name: Prove R153.3 full-wave geometry authority on current tree
+        run: |
+          node --check services/opticalExternalToolR1533.js
+          node --check services/opticalMachineR1533.js
+          python -m py_compile sovereign/omega_fullwave_manifold_r1533.py
+          node tests/r1533-fullwave-manifold-invariants.mjs
+          node tests/r1532-adaptive-external-search-invariants.mjs
+          node tests/r1531-external-ai-tool-push-invariants.mjs
+          node tests/r152-optical-operational-convergence-invariants.mjs
+
+      - name: Execute bounded real-grcwa manifold bridge from current R153.2 winner
+        shell: bash
+        run: |
+          node <<'NODE'
+          import fs from 'node:fs';
+          import machine from './services/opticalMachineR1532.js';
+          async function invoke(body){
+            const response=await machine.fetch(new Request('https://r159-local.test/api/tool/invoke',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}));
+            const json=await response.json();
+            if(!response.ok||!json.ok)throw new Error(JSON.stringify(json).slice(0,1200));
+            return json;
+          }
+          const base={schema:'OMEGA_EXTERNAL_TOOL_CALL_v1',caller:{id:'r159-current-tree-proof',kind:'test'},goal:'Derive current reduced-order optical evidence before full-wave manifold validation.'};
+          const rank=await invoke({...base,request_id:'r159-rank',operation:'rank_addresses',payload:{offset:0,limit:1728,wavelength_nm:532}});
+          const winner=rank.result.top[0];
+          const cycle=await invoke({...base,request_id:'r159-cycle',operation:'adaptive_cycle',payload:{seed_address:winner.address,wavelength_nm:532,radius:1,budget:128,rounds:4,beam_width:4,max_evaluations:192}});
+          fs.writeFileSync('/tmp/r159-adaptive.json',JSON.stringify(cycle,null,2));
+          console.log('R159 R153.2 SOURCE',JSON.stringify({winner:winner.address,geometry:cycle.result.cycle.final.geometry,receipt:cycle.receipt.receipt_id}));
+          NODE
+          python sovereign/omega_fullwave_manifold_r1533.py \
+            --input /tmp/r159-adaptive.json \
+            --output /tmp/r159-fullwave.json \
+            --wavelengths 470,532,650 \
+            --screen-grid 64 \
+            --validation-grid 96 \
+            --top-k 8 \
+            --phase-margin 6 \
+            --tolerance-nm 5 \
+            --engineering-ratio 0.93 \
+            --max-candidates 96 \
+            --stress-top-k 2
+          python - <<'PY'
+          import json,math
+          d=json.load(open('/tmp/r159-fullwave.json'))
+          assert d['schema']=='OMEGA_FULLWAVE_MANIFOLD_R1533'
+          assert d['screened_candidates']>0 and d['validated_candidates']>0
+          assert all(p['manifold']['valid_r41'] for p in d['projections'])
+          assert all(math.hypot(p['geometry']['width_nm'],p['geometry']['length_nm']) <= .95*p['geometry']['pitch_nm']+1e-8 for p in d['projections'])
+          assert 'fabrication validation' in d['truth_boundary'].lower()
+          print('R159 FULLWAVE CURRENT-TREE PASS',json.dumps({'status':d['status'],'screened':d['screened_candidates'],'validated':d['validated_candidates'],'admitted':d['admitted_candidates'],'proof_sha256':d['proof_sha256']}))
+          PY
+
+      - name: Preserve R158 visual, dimensional and live Hybrid truth
+        run: |
+          node tests/r156-dimensional-relativity-evolution-invariants.mjs
+          node tests/r158-capability-universe-invariants.mjs
+          node tests/r158-live-hybrid-execution-truth-invariants.mjs
+          node tests/r157-reflex-living-world-transition-invariants.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+
+      - name: Full inherited regression and production build
+        run: npm run check
+
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r159-canonical
+
+      - name: R153.3 isolated optical Worker dry run
+        run: npx wrangler deploy --config wrangler.optical-machine-r1533.jsonc --dry-run --outdir .wrangler-r159-optical
+
+      - name: Install Chromium for adaptive and visual coexistence proof
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start exact production build locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r159-preview.log 2>&1 &
+          echo $! >/tmp/omega-r159-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r159-preview.log
+          exit 1
+
+      - name: Exercise adaptive global navigation on desktop and mobile
+        run: node tests/r156-adaptive-navigation-browser-e2e.mjs
+
+      - name: Exercise protected R158 visual interaction on desktop and mobile
+        run: node tests/r158-visual-interaction-e2e.mjs
+
+      - name: Exercise every registered route on desktop and mobile
+        run: node tests/r118-browser-operational-e2e.mjs
+
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r159-preview.log || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r159-current-tree-proof
+          path: |
+            /tmp/r159-adaptive.json
+            /tmp/r159-fullwave.json
+          if-no-files-found: error
