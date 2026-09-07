@@ -1,0 +1,65 @@
+name: R178 Living World Contract Resolution
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/world/livingWorldMissionContractResolverR178.js'
+      - 'src/world/livingWorldMissionContractBridgeR178.ts'
+      - 'tests/r178-living-world-contract-resolution-invariants.mjs'
+      - '.github/workflows/r178-living-world-contract-resolution.yml'
+  push:
+    branches: [r178-living-world-contract-resolution]
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r178-contract-resolution:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove focused R178 contract resolution
+        run: |
+          node --check src/world/livingWorldMissionContractResolverR178.js
+          node tests/r178-living-world-contract-resolution-invariants.mjs
+      - name: Preserve R177 visual mission and R176 intent truth
+        run: |
+          node tests/r177-living-world-mission-composer-invariants.mjs
+          node tests/r176-living-world-intent-proposal-invariants.mjs
+          node tests/r175-multidomain-living-world-truth-invariants.mjs
+          node tests/r174-living-world-pulse-invariants.mjs
+      - name: Preserve authoritative operation and governed execution layers
+        run: |
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r162-governed-reflex-execution-invariants.mjs
+          node tests/r161-reflex-mission-durable-handoff-invariants.mjs
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+      - name: Preserve federation one-world and scar continuity
+        run: |
+          node tests/r173-federation-ledger-world-observer-invariants.mjs
+          node tests/r172-federation-ledger-world-binding-invariants.mjs
+          node tests/r171-federation-receipt-world-reconciler-invariants.mjs
+          node tests/r114-federation-closure-invariants.mjs
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+      - name: Preserve Hybrid Earth computed-reality admission and donor truth gates
+        run: |
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/archive-governance-invariants.mjs
+          node tests/appdeploy-b023-b037-correlation-invariants.mjs
+      - name: Preserve governed self-build fail-close
+        run: node tests/r170-self-build-governor-invariants.mjs
+      - name: Run inherited regression and production build
+        run: npm run check
+      - name: Prove canonical Worker package remains deployable
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r178-dry-run
