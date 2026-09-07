@@ -20,7 +20,7 @@ export function compileChainedFormulaCalibrationR187(field:Mandala20736Field,add
  const edges:FormulaEdgeR187[]=[];
  for(let i=0;i<path.length-1;i++){
   const from=path[i],to=path[i+1],d=displacement(from,to),diff=compileDifferentialRelativityR186(field,from,cache),toDiff=compileDifferentialRelativityR186(field,to,cache),g=diff.gradient,vec=[d.D,d.P,d.R,d.L],linear=g.D*d.D+g.P*d.P+g.R*d.R+g.L*d.L;
-  let quad=0;for(let r=0;r<4;r++)for(let c=0;c<4;c++)quad+=.5*vec[r]*diff.hessian[r][c]*vec[c];
+  let quad=0;for(let r=0;r<4;r++)for(let c=0;c<4;c++)quad+=0.5*vec[r]*diff.hessian[r][c]*vec[c];
   const predicted=linear+quad,actual=toDiff.residual-diff.residual,error=actual-predicted,absoluteError=Math.abs(error),scale=Math.abs(actual)+Math.abs(predicted)+.03,fit=Math.exp(-absoluteError/scale),locality=1/(1+.35*Math.max(0,d.norm-1)),confidence=Math.max(0,Math.min(1,fit*locality*(.55+.45*Math.max(0,diff.route.alignment)))),axisContributions={D:g.D*d.D+.5*d.D*d.D*diff.hessian[0][0],P:g.P*d.P+.5*d.P*d.P*diff.hessian[1][1],R:g.R*d.R+.5*d.R*d.R*diff.hessian[2][2],L:g.L*d.L+.5*d.L*d.L*diff.hessian[3][3]},mixedContribution=quad-.5*(d.D*d.D*diff.hessian[0][0]+d.P*d.P*diff.hessian[1][1]+d.R*d.R*diff.hessian[2][2]+d.L*d.L*diff.hessian[3][3]);
   edges.push({fromState:from+1,toState:to+1,displacement:d,actualDelta:actual,linearDelta:linear,quadraticDelta:quad,predictedDelta:predicted,error,absoluteError,fit,locality,confidence,axisContributions,mixedContribution,topology:diff.topology,routeAlignment:diff.route.alignment})
  }
