@@ -33,8 +33,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+      - name: Install repository dependencies
+        run: npm install --no-audit --no-fund
       - name: Static-check SAR gateway
         run: node --check src/earthSarR181.js && node --check src/workerR8.js
       - name: Prove additive R181 invariants
