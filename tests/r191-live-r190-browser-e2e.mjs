@@ -14,7 +14,13 @@ if(expectedSha){
  if(receipt?.promotion?.authority!=='GITHUB_MERGE_PARENTS')throw new Error(`R191 live receipt lacks governed two-parent authority: ${receipt?.promotion?.authority}`);
 }
 
-async function openVisualInstrument(page){
+async function failOnBrowserErrors(pageErrors,failed,stage){
+ if(pageErrors.length)throw new Error(`${stage}: browser errors ${pageErrors.join(' | ').slice(0,2400)}`);
+ const relevantFailures=failed.filter(x=>!x.includes('ERR_ABORTED'));
+ if(relevantFailures.length)throw new Error(`${stage}: browser request failures ${relevantFailures.join(' | ').slice(0,2400)}`);
+}
+
+async function openVisualInstrument(page,pageErrors,failed,name){
  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
  if(await expand.count()&&await expand.first().isVisible())await expand.first().click();
  await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000}).catch(()=>{});
@@ -25,9 +31,23 @@ async function openVisualInstrument(page){
  });
  if(!opened)throw new Error('R191 Visual Instrument route control missing');
  await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Visual Instrument',{timeout:30000});
- await page.waitForSelector('.visual-instrument-app',{state:'visible',timeout:30000});
+ await page.waitForSelector('.r36-visual .r43-workspace-tabs',{state:'visible',timeout:30000});
+ await failOnBrowserErrors(pageErrors,failed,`${name} Visual Instrument route mount`);
+ const stage=page.locator('.r36-visual .r43-workspace-stage');
+ const defaultView=await stage.getAttribute('data-view');
+ if(defaultView!=='LIVE')throw new Error(`${name}: Visual Instrument must open in governed LIVE DATA view; received ${defaultView}`);
+ if(await page.locator('.visual-instrument-app').count())throw new Error(`${name}: deep compiler mounted before explicit DEEP COMPILER selection`);
+ const deep=page.locator('.r36-visual .r43-workspace-tabs button').filter({hasText:'DEEP COMPILER'});
+ await deep.waitFor({state:'visible',timeout:10000});
+ await deep.click();
+ await page.waitForFunction(()=>document.querySelector('.r36-visual .r43-workspace-stage')?.getAttribute('data-view')==='DEEP',{timeout:10000});
+ await Promise.race([
+  page.waitForSelector('.visual-instrument-app',{state:'visible',timeout:30000}),
+  new Promise((_,reject)=>{const id=setInterval(()=>{if(pageErrors.length){clearInterval(id);reject(new Error(`${name}: deep compiler browser error ${pageErrors.join(' | ').slice(0,2400)}`))}},100)})
+ ]);
  await page.waitForSelector('.r182-motion-truth',{state:'visible',timeout:30000});
  await page.waitForSelector('.global-workbench-r188',{state:'visible',timeout:30000});
+ await failOnBrowserErrors(pageErrors,failed,`${name} R190 deep compiler mount`);
 }
 
 function assertNoViewportOverflow(result,name){
@@ -45,7 +65,7 @@ try{
   const failed=[];page.on('requestfailed',r=>failed.push(`${r.method()} ${r.url()} :: ${r.failure()?.errorText||'failed'}`));
   await page.goto(`${base}/?r191=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
-  await openVisualInstrument(page);
+  await openVisualInstrument(page,pageErrors,failed,name);
 
   const compile=page.getByRole('button',{name:'Compile full field'});
   await compile.scrollIntoViewIfNeeded();
@@ -80,10 +100,8 @@ try{
    if(mutatingRequests.length)throw new Error(`desktop: browser-local R188 scan emitted mutating network requests: ${mutatingRequests.join(' | ')}`);
   }
 
-  if(pageErrors.length)throw new Error(`${name}: browser errors ${pageErrors.join(' | ').slice(0,2400)}`);
-  const relevantFailures=failed.filter(x=>!x.includes('ERR_ABORTED'));
-  if(relevantFailures.length)throw new Error(`${name}: browser request failures ${relevantFailures.join(' | ').slice(0,2400)}`);
+  await failOnBrowserErrors(pageErrors,failed,name);
   await context.close();
  }
- console.log(`R191 LIVE R190 BROWSER PASS · ${live?'deployed HTTPS runtime':'exact local build'}${expectedSha?` · promoted SHA ${expectedSha}`:''} · desktop/mobile Visual Instrument rendered · R188 remained inert until explicit operator click · desktop completed all 20,736 states + 144 D×P cells · no mutating scan requests · no page errors`);
+ console.log(`R191 LIVE R190 BROWSER PASS · ${live?'deployed HTTPS runtime':'exact local build'}${expectedSha?` · promoted SHA ${expectedSha}`:''} · desktop/mobile Visual Instrument LIVE default proved · DEEP COMPILER explicitly selected · R188 remained inert until explicit operator click · desktop completed all 20,736 states + 144 D×P cells · no mutating scan requests · no page errors`);
 }finally{await browser.close()}
