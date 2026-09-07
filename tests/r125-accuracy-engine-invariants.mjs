@@ -3,7 +3,16 @@ import assert from 'node:assert/strict';
 
 const runtime=fs.readFileSync('src/accuracyResidualEngineR125.ts','utf8');
 const engine=fs.readFileSync('scripts/r125-accuracy-engine.mjs','utf8');
-const workflow=fs.readFileSync('.github/workflows/r125-accuracy-first-engine.yml','utf8');
+const activeWorkflowPath='.github/workflows/r125-accuracy-first-engine.yml';
+const archivedWorkflowPath='.github/workflows-archive/r125-accuracy-first-engine.yml';
+const workflowPath=fs.existsSync(activeWorkflowPath)?activeWorkflowPath:archivedWorkflowPath;
+assert.equal(fs.existsSync(workflowPath),true,'R125 workflow evidence missing from active or archived topology');
+const workflow=fs.readFileSync(workflowPath,'utf8');
+const governor=JSON.parse(fs.readFileSync('public/omega-r170-self-build-governor.json','utf8'));
+if(workflowPath===archivedWorkflowPath){
+  assert.equal(fs.existsSync(activeWorkflowPath),false,'superseded R125 workflow must not be reactivated');
+  assert.equal(governor?.historicalWorkflowArchive?.historicalExecutionAuthority,false,'archived workflow history must remain non-executing evidence');
+}
 const r124=JSON.parse(fs.readFileSync('public/omega-r124-selfbuild-state.json','utf8'));
 
 assert.match(runtime,/NO_PROPOSAL_WITHOUT_EXPLICIT_EVIDENCE/);
@@ -47,4 +56,4 @@ assert.deepEqual(r124.admitted,['SB001','SB002','SB003','SB004','SB005','SB006',
 for(const c of r124.roadmap)assert.equal(fs.existsSync(c.target),true,`admitted target missing: ${c.target}`);
 const receipts=new Map();for(const r of r124.receipts||[])receipts.set(r.capsuleId,r);
 for(const id of r124.admitted){const r=receipts.get(id);assert.ok(r,`receipt missing: ${id}`);assert.equal(r.status,'ADMIT');assert.equal(r.tests?.r124,true);assert.equal(r.tests?.r123,true);assert.equal(r.tests?.r122,true);assert.equal(r.tests?.r121,true);assert.equal(r.tests?.build,true);assert.ok(r.rollbackRef);}
-console.log('R125.5 accuracy-first residual engine + R151-R154/R164/R166/R167/R168/R168.1/R169 + R144/R143/R142 sensors PASS · propagation/federation/restoration/advanced failures review-gated and never auto-repaired');
+console.log(`R125.5 accuracy-first residual engine + R151-R154/R164/R166/R167/R168/R168.1/R169 + R144/R143/R142 sensors PASS · workflow evidence=${workflowPath} · propagation/federation/restoration/advanced failures review-gated and never auto-repaired`);
