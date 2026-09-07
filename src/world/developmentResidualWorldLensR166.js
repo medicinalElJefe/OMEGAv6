@@ -20,14 +20,14 @@ const severityWeight={LOW:.2,MEDIUM:.45,HIGH:.75,CRITICAL:1};
 
 function routeFamily(residual={}){
  const authority=text(residual.sourceAuthority).toUpperCase(),kind=text(residual.kind).toUpperCase();
- if(authority.includes('R141')||kind.includes('HYBRID'))return'HYBRID_PROOF';
- if(authority.includes('R144')||kind.includes('DEPLOYMENT'))return'DEPLOYMENT_ATTESTATION';
- if(authority.includes('R163')||kind.includes('CORE_RUNTIME'))return'CANONICAL_RUNTIME_HEALTH';
- if(authority.includes('GITHUB')||kind.includes('WORKFLOW'))return'VALIDATION_PROOF';
- if(authority.includes('R125'))return'ACCURACY_ADMISSION_REVIEW';
  if(kind.includes('FEDERATION'))return'FEDERATION_EVIDENCE';
  if(kind.includes('EARTH'))return'EARTH_EVIDENCE';
- if(kind.includes('RENDER'))return'COMPUTED_REALITY_EVIDENCE';
+ if(kind.includes('RENDER')||kind.includes('COMPUTED_REALITY'))return'COMPUTED_REALITY_EVIDENCE';
+ if(kind.includes('HYBRID')||authority.includes('R141'))return'HYBRID_PROOF';
+ if(kind.includes('DEPLOYMENT')||authority.includes('R144'))return'DEPLOYMENT_ATTESTATION';
+ if(kind.includes('CORE_RUNTIME')||authority.includes('R163'))return'CANONICAL_RUNTIME_HEALTH';
+ if(kind.includes('WORKFLOW')||authority.includes('GITHUB'))return'VALIDATION_PROOF';
+ if(authority.includes('R125'))return'ACCURACY_ADMISSION_REVIEW';
  return'SYSTEM_REVIEW';
 }
 
