@@ -61,7 +61,7 @@ for(const [name,text] of contents){
   assert.ok(!/\b(contents|pull-requests|actions|deployments|checks|statuses|issues|packages|id-token|security-events):\s*write\b/i.test(text),`${name} successor workflow has write authority`);
   const push=triggerBlock(text,'push');
   if(push)assert.ok(!/\bmain\b/i.test(push),`${name} successor workflow may not push-trigger on main`);
-  assert.equal(triggerBlock(text,'schedule'),' ',`${name} successor workflow may not schedule recurring execution`);
+  assert.equal(triggerBlock(text,'schedule'),'',`${name} successor workflow may not schedule recurring execution`);
   successors.push({name,revision});
 }
 
