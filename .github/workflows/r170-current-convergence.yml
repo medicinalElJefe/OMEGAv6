@@ -38,6 +38,16 @@ jobs:
           node tests/r172-federation-ledger-world-binding-invariants.mjs
           node tests/r173-federation-ledger-world-observer-invariants.mjs
           node tests/r174-living-world-pulse-invariants.mjs
+      - name: Prove R175 multi-domain living-world truth convergence
+        run: |
+          node --check src/world/multiDomainLivingWorldTruthR175.js
+          node tests/r175-multidomain-living-world-truth-invariants.mjs
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
       - name: Preserve active Optical R153.2 convergence
         run: |
           node tests/r167-active-optical-r1532-convergence-invariants.mjs
@@ -66,8 +76,8 @@ jobs:
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
       - name: Summarize current convergence boundary
         run: |
-          echo 'R174.1 CURRENT CONVERGENCE PASS.'
-          echo 'R171-R174 are promoted current successors and are explicitly preserved by the convergence gate.'
+          echo 'R174.1 + R175 CURRENT CONVERGENCE PASS.'
+          echo 'R171-R174 remain promoted current successors; R175 adds a read-only multi-domain living-world projection.'
           echo 'Superseded historical workflows remain byte-preserved outside the active Actions directory.'
           echo 'Canonical production deployment remains exclusively owned by ci.yml two-parent merge law.'
           echo 'R125 remains sole CanonState admission authority; R153.2 remains SCREEN_ONLY.'
