@@ -3,16 +3,17 @@ import {ChevronLeft,ChevronRight,CloudSun,Globe2,Pause,Play,RefreshCw,ShieldChec
 import EarthNowInstrument from './EarthNowInstrument';
 import EarthLivingFieldR36 from './EarthLivingFieldR36';
 import EarthGroundTraversalR9 from './EarthGroundTraversalR9';
+import EarthCorrelationWorkstationR184 from './EarthCorrelationWorkstationR184';
 import {api} from './platformAdapter';
 import {decodeAddress} from './corpusRuntime';
 import './earthObservatoryR8.css';
 
-type Props={address:number};
+type Props={address:number;record?:any;onNavigate?:(panel:string)=>void};
 type Coverage={id:string;label:string;state:string;lastModified?:string|null;truth:string};
 type Focus='ALL'|'WEATHER'|'SEISMIC'|'EVENTS'|'SPACE';
 const fmt=(v:any,d=1)=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(d):'—';
 
-export default function EarthObservatoryR8({address}:Props){
+export default function EarthObservatoryR8({address,record,onNavigate}:Props){
  const coords=useMemo(()=>decodeAddress(address),[address]);
  const initial=useMemo(()=>({lat:-90+(coords.d+.5)/12*180,lon:-180+(coords.p*12+coords.r+.5)/144*360}),[coords]);
  const[lat,setLat]=useState(initial.lat),[lon,setLon]=useState(initial.lon),[evidence,setEvidence]=useState<any>(null),[catalog,setCatalog]=useState<Coverage[]>([]),[selected,setSelected]=useState('G19-CONUS'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[playing,setPlaying]=useState(false),[focus,setFocus]=useState<Focus>('ALL'),[showGround,setShowGround]=useState(false),[showCalculus,setShowCalculus]=useState(false);
@@ -46,6 +47,7 @@ export default function EarthObservatoryR8({address}:Props){
    </aside>
   </div>
   {error&&<div className='earth-r8-error'>{error}</div>}
+  <EarthCorrelationWorkstationR184 lat={lat} lon={lon} evidence={evidence} record={record} address={address} onNavigate={onNavigate}/>
   <div className={`earth-r72-strip focus-${focus.toLowerCase()}`}>
    {focusRows.filter(x=>focus==='ALL'||focus===x.id).map(row=><article key={row.id}>{row.icon}<span>{row.label}</span><b>{row.value}</b><small>{row.detail}</small></article>)}
    <article className='derived'><Mountain/><span>Derived context</span><b>{fmt(evidence?.derivedContext?.index,4)}</b><small>display summary only · not physical proof</small></article>
