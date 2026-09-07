@@ -14,6 +14,11 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-fund
+      - name: Prove R202.1 evidence-bound reality readiness
+        run: |
+          node --check public/omega-operational-source-authority-r202-core.js
+          node --check public/omega-operational-source-authority-r202.js
+          node tests/r2021-evidence-bound-reality-readiness-invariants.mjs
       - name: Prove R202 focused convergence
         run: |
           node --check public/omega-operational-source-authority-r202-core.js
