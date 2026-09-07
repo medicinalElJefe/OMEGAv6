@@ -10,6 +10,9 @@ const engine=read('scripts/r124-selfbuild-engine.mjs');
 const helper=read('scripts/r169-geometric-motion-selfbuild.mjs');
 const workflow=read('.github/workflows/r124-self-contained-continuous-build.yml');
 const woven=read('src/weaveStateR100.ts');
+const buildout=read('src/WovenBuildOutPanel.tsx');
+const continuum=read('src/AutonomousBuildContinuumR169.tsx');
+const calculus=read('src/system/appliedCalculusAuthorityR168.ts');
 const must=(ok,msg)=>assert.ok(ok,`R169 geometric-motion autonomous build invariant failed: ${msg}`);
 
 must(R169_MAX_AUTONOMOUS_GENERATIONS===12,'autonomous roadmap must remain bounded to twelve declared generations');
@@ -32,15 +35,19 @@ for(const token of ['R169_GEOMETRIC_MOTION_RELATIVITY_PRIORITIZES_WITHIN_PROVEN_
 for(const token of ["from './r169-geometric-motion-selfbuild.mjs'",'ensureR169State','geometricMotionFrameR169','geometricMotionScoreR169','R169_MODULES','updateGeneratedIndex','reevaluate on the next geometric motion pulse'])must(engine.includes(token),`engine missing ${token}`);
 for(const token of ['Geometric motion relativity field','Development motion scheduler','Autonomous build pulse governor','Proof-carry promotion gate','Software scheduling geometry only','MAIN_NOT_FRESH','canonicalAdmissionAuthority:\'R125\''])must(helper.includes(token),`R169 continuation fabric missing ${token}`);
 
+must(workflow.startsWith('name: OMEGA R124 Self-Contained Continuous Build'),'R169 must preserve the exact workflow identity consumed by the R125 accuracy workflow-run sensor');
 must(workflow.includes("cron: '17 */3 * * *'"),'continuous self-build must wake on a bounded three-hour observation pulse');
 for(const token of ['Select next capsule through geometric motion relativity','Observe cleanly when no declared capsule is ready','Abort if main moved during proof run','Commit proved candidate on isolated branch','git push origin HEAD:main','Continue next geometric generation without chat scheduling'])must(workflow.includes(token),`workflow missing ${token}`);
 must(workflow.includes('node tests/r169-geometric-motion-autonomous-build-invariants.mjs'),'R169 proof gate must run before and after candidate generation');
 must(!workflow.includes('cancel-in-progress: true'),'self-build pulses may not cancel an in-flight proof/admission chain');
 
 for(const token of ['partition → exchange/transform → invariant carry → scar/residual carry → re-contextualize/repartition','motionRelativity','orientation','torsion','resolutionDemand'])must(woven.includes(token),`established woven motion calculus missing ${token}`);
+for(const token of ["import AutonomousBuildContinuumR169 from './AutonomousBuildContinuumR169'",'<AutonomousBuildContinuumR169 onNavigate={onNavigate}/>','R169 geometric-motion self-build continuum','sandbox + inherited tests + exact main freshness + rollback lineage'])must(buildout.includes(token),`Build Out integration missing ${token}`);
+for(const token of ['R169 · GEOMETRIC MOTION AUTONOMOUS BUILD','generation 12','recurring three-hour observation pulses','SB009','SB010','SB011','SB012','Geometric motion changes build priority only inside the declared backlog','R125 remains the only CanonState admission authority'])must(continuum.includes(token),`operator continuum missing ${token}`);
+for(const token of ["id:'DEVELOPMENT_MOTION'",'R124 governed self-build → R169 geometric motion continuation','scheduledObservation:\'every 3 hours after promotion\'','geometric motion scheduling to bypass proof-gated repository or CanonState admission'])must(calculus.includes(token),`applied calculus authority missing ${token}`);
 
 const proposal=JSON.parse(execFileSync(process.execPath,['scripts/r124-selfbuild-engine.mjs'],{encoding:'utf8'}));
 if(Number(state.generation||0)<12){must(['PROPOSE','OBSERVE'].includes(proposal.status),'self-build engine must either propose a declared continuation capsule or observe safely');if(Number(state.generation||0)===8){must(proposal.status==='PROPOSE'&&proposal.capsuleId==='SB009','generation-8 legacy state must advance first into SB009 rather than remain falsely complete');}}
 must(proposal.geometricMotionFrame?.boundary?.includes('no physical-motion')||proposal.geometricMotionFrame?.boundary?.includes('Software/build scheduling geometry only'),'proposal must carry the non-physical scheduling boundary');
 
-console.log('R169 GEOMETRIC MOTION AUTONOMOUS BUILD PASS · generation 8→12 continuation restored · declared-only geometric scheduler · recurring observation pulse · sandbox/test/freshness admission preserved · no fake physical motion or CanonState authority');
+console.log('R169 GEOMETRIC MOTION AUTONOMOUS BUILD PASS · generation 8→12 continuation restored · declared-only geometric scheduler · recurring observation pulse · Build Out + applied-calculus authority integrated · sandbox/test/freshness admission preserved · no fake physical motion or CanonState authority');
