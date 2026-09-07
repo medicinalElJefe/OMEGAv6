@@ -26,7 +26,7 @@ jobs:
       - name: Install repository dependencies
         run: npm install --no-fund
       - name: Prove R160 explicit returned-operation reflex ingress
-        run: node --experimental-strip-types tests/r160-reflex-operation-ingress-invariants.mjs
+        run: node tests/r160-reflex-operation-ingress-invariants.mjs
       - name: Preserve R158 capability universe and live Hybrid truth separation
         run: |
           node tests/r158-capability-universe-invariants.mjs
