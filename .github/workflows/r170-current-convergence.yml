@@ -101,11 +101,11 @@ jobs:
         run: |
           echo 'R190 CURRENT-AUTHORITY CONVERGENCE PASS: R189 SHARED ANALYSIS CACHE + R188 GLOBAL INTERFERENCE ATLAS + R187 CHAINED CALIBRATION + R186 DIFFERENTIAL + R185 MULTIPATH + R184 INTERFERENCE + R183 VISUAL ATLAS + R182 VISUAL COHERENCE, over promoted runtime R185/R186 authority.'
           echo 'One R189 cache now powers R184 local resolution, R185 multipath reconstruction, R186 differential relativity, R187 formula calibration and operator-invoked R188 full-field aggregation; memoization cannot change scores, routes, evidence or CanonState.'
-          echo 'R188 remains browser-local and operator-invoked; it does not override promoted runtime R185 PREDICT → CARRY → CORRECT → REALLOCATE performance scheduling, R147 dispatch, R146 durable execution history, or R125 CanonState admission.'
+          echo 'R188 remains browser-local and operator-invoked; it does not override promoted runtime R185 PREDICT → CARRY → CORRECT → REALLOCATE performance scheduling.'
+          echo 'R147 remains dispatch authority; R146 remains durable lifecycle and execution-history authority; R125 remains sole CanonState admission authority.'
           echo 'Promoted R186 verified-return ingress remains the live-world execution-return path through existing R86 → R140 → R136 → R134 proof/scar continuity.'
           echo 'Canonical mirror /api transport remains bound to OMEGAv6 runtime authority; local static artifacts remain local.'
           echo 'R183-R190 computations remain internal relational diagnostics unless independently validated; no chart, derivative, residual basin, formula fit or reconstruction path becomes empirical physical truth by internal coherence alone.'
           echo 'R175 world truth → R176 intent → R177 mission composition → R178 contract resolution → R179 durable authorization → R180 dispatch → R182/R186 verified-return continuity remains explicitly proved.'
           echo 'Hybrid/Build host execution remains separately confirmed and proof-gated. R153.2 remains SCREEN_ONLY.'
           echo 'R170.3 remains hourly low-cost OBSERVE/PROPOSE control; expensive proof remains PROPOSE-only; canonical production deployment remains exclusively owned by ci.yml two-parent merge law.'
-          echo 'R125 remains sole CanonState admission authority.'
