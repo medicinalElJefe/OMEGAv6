@@ -19,7 +19,7 @@ export default function TraversalModeStageR100({variant,address,onAddress}:Props
  const routeHit=useRef<{x:number;y:number;address:number}[]>([]);
  const clock=useRef({last:0,elapsed:0});
  const[mode,setMode]=useState<TraversalDesignModeR99>('UNIFIED');
- const[animated,setAnimated]=useState(true);
+ const[animated,setAnimated]=useState(false);
  const[detail,setDetail]=useState(1);
  const[routeDepth,setRouteDepth]=useState(36);
  const[timeScale,setTimeScale]=useState(1);
