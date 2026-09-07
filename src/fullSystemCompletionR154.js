@@ -17,7 +17,7 @@ export const R154_COMPLETION_STAGES=Object.freeze([
  {order:6,id:'AI',menu:'06 AI Orchestration',route:'SAI Lab',goal:'Route AI/SAI/plugin/Hybrid work through capability contracts and explicit execution lifecycle receipts.',proof:'DISCOVERED→AUTHORIZED→AVAILABLE→INVOKED→RETURNED→VERIFIED'},
  {order:7,id:'DATA',menu:'07 Data / Excel Atlas',route:'System Atlas',goal:'Keep workbook/CSV/JSON/atlas controls on the same packet, checksum and round-trip data authority.',proof:'fingerprint + formula/source boundary + round-trip receipt'},
  {order:8,id:'SIGNAL',menu:'08 Audio / Signal',route:'System Atlas',goal:'Keep optional packet sonification synchronized to state without becoming physical-frequency truth.',proof:'explicit local start + packet identity'},
- {order:9,id:'WORLD',menu:'09 World / Bio / Forecast',route:'Forecast',goal:'Run Earth, biological-scale, relativity and forecast projections as bounded domain plugins over the same packet.',proof:'source/evidence boundary per domain'},
+ {order:9,id:'WORLD',menu:'09 World / Bio / Forecast',route:'Relativity',goal:'Compose Earth, biological-scale, forecast and R155 dimensional-relativity evolution over the same packet: 179 source modes + 62 authorities + Woven Continuity + independent symmetry/asymmetry + 01-1→011 + signed σ across nested 12^1→12^10 address frames.',proof:'R24 exact donor + R132 all-mode packet + R100 carry + R155 derived candidate boundaries + source/evidence boundary per domain'},
  {order:10,id:'PACKAGE',menu:'10 Recovery / Packaging',route:'Build Out',goal:'Build, test, package, repair and rollback from one approved non-system root using the current zero-drift connector.',proof:'hash tree + tests + package/support receipt'},
  {order:11,id:'ARCHIVE',menu:'11 Archive Merge',route:'Archive Operators',goal:'Fingerprint and classify KEEP/MERGE/DONOR/QUARANTINE before extraction; never let a stale donor seize authority.',proof:'diff + provenance + preimage-bound change'},
  {order:12,id:'COCKPIT',menu:'12 Operator Cockpit',route:'Cockpit',goal:'Expose every registered destination and action through one professional desktop/mobile control surface without covering the primary instrument.',proof:'44-route desktop/mobile operational pass + actionable-control audit'}
@@ -27,22 +27,25 @@ export const R154_FULL_SYSTEM_CONTRACT=Object.freeze({
  schema:R154_SCHEMA,
  revision:R154_REVISION,
  inheritedAdaptiveMissionRevision:'R153',
- authority:'R48 successor reality + R95 one-system ledger + R153 adaptive sovereign missions + R143 route operation contracts + R142 execution receipts + R141 exact Hybrid closure + R125 CanonState admission',
+ relativityEvolutionRevision:'R155',
+ authority:'R48 successor reality + R95 one-system ledger + R155 dimensional relativity evolution + R153 adaptive sovereign missions + R143 route operation contracts + R142 execution receipts + R141 exact Hybrid closure + R125 CanonState admission',
  sources:Object.freeze([
   'OMEGA_ONE_SYSTEM_FULL_SOFTWARE_MENU_LEDGER.xlsx',
   'OMEGA_ALL_SOFTWARE_61917364224D_FULL_BUILD_v22.xlsx',
   'OMEGA_ONE_SYSTEM_J_DRIVE_1728D_AUTOPING_LEDGER.xlsx',
+  '20736D_ALL_FULL_DIMENSION_RELATIVITY_ATLAS(2).xlsx',
   'current OMEGAv6 main source + admitted regression receipts'
  ]),
  invariant:'ONE FIELD / ONE PACKET / ONE CONTINUITY LAW',
  inventory:Object.freeze({systems:100,families:24,masterMenus:12,menuOptions:36,capabilities:18,routes:44,sourceModes:179,canonLenses:62,packetStates:20736,logicalCells:1728,logicalLanes:20736,addressCapacity:61917364224}),
+ dimensionalRelativity:Object.freeze({resident:20736,ladder:[12,144,1728,20736,248832,2985984,35831808,429981696,5159780352,61917364224],operator:['PRUNE_01-1','CONSTRUCT_011','CARRY','RECONTEXTUALIZE','PROVE'],orientation:[-1,0,1],referenceKernel:[37,73],symmetryAsymmetry:'INDEPENDENT_CONTEXTUAL_FIELDS',physicalDimensionClaim:false}),
  successor:Object.freeze({implemented:19,truthGated:5,restorationDebt:0,states:R154_FAMILY_SUCCESSOR}),
  nativeRootPolicy:'Use only the user-approved non-system root. J:\\ is the preferred established root. Never silently fall back to C:\\ for OMEGA runtime state.',
  rendererPolicy:'One scene/state authority; renderer consumes state-bound packets and never creates truth. Backend fallback must preserve the same scene rather than substitute unrelated visuals.',
  mutationPolicy:'Inventory and hash before mutation. Preserve working capability layers. Repair only proven defects. Use preimage-bound changes. No silent delete/move/rename/flattening. Every material change must return proof.',
- completionDefinition:'All 24 software families have a current successor implementation or an explicit evidence/device gate; all 44 routes remain reachable; every executable action is capability-mapped; native work is admitted only with current device proof; returned work is not VERIFIED until R141/R142 proof closes; adaptive repair continuation inherits R153; CanonState mutation remains R125-only.',
+ completionDefinition:'All 24 software families have a current successor implementation or an explicit evidence/device gate; all 44 routes remain reachable; every executable action is capability-mapped; R155 dimensional relativity evolves observer/frame/resolution projections without mutating CanonState; native work is admitted only with current device proof; returned work is not VERIFIED until R141/R142 proof closes; adaptive repair continuation inherits R153; CanonState mutation remains R125-only.',
  stages:R154_COMPLETION_STAGES,
- truthBoundary:'R154 removes stale restoration labels where stronger successor implementations already exist and composes the already-admitted R153 adaptive mission engine rather than replacing it. It does not convert evidence gates, device gates, external provider availability, native execution, solver freshness, empirical validation or CanonState admission into fictional success.'
+ truthBoundary:'R154 removes stale restoration labels where stronger successor implementations already exist, composes the admitted R153 adaptive mission engine, and admits R155 as a derived dimensional-relativity evolution layer rather than a new physical ontology. It does not convert representation levels, evidence gates, device gates, external provider availability, native execution, solver freshness, empirical validation or CanonState admission into fictional success.'
 });
 
 export function buildFullSystemMissionObjectiveR154(root='.'){
@@ -51,6 +54,7 @@ export function buildFullSystemMissionObjectiveR154(root='.'){
   'Complete the current OMEGA one-system build from the existing source instead of redesigning or flattening it.',
   broad?'First inventory the approved root, locate the current OMEGAv6 project boundary from returned filesystem evidence, and hash candidate trees before any mutation.':'Treat the selected project path as the candidate boundary, inventory it and hash it before any mutation.',
   'Preserve the existing 100-system / 24-family / 12-master-menu / 36-control / 18-capability / 44-route architecture and the current 179 source-mode + 62 canon-lens fabric.',
+  'Preserve and verify R155 dimensional relativity evolution: R24 exact workbook truth + R132 all-mode/authority field + R100 Woven Continuity; independent symmetry/asymmetry; 01-1 prune before 011 construct; σ ∈ {-1,0,+1}; 37/73 reference-bias only; 12^1 through 12^10 as address/resolution frames with higher-than-20,736 child coordinates remaining unbound until proven.',
   'Use R48 successor reality as current implementation truth: 19 families are web/source/local active, 5 remain evidence/device gated, and zero current successor families are restoration debt. Do not regress a successor to an older donor status.',
   'Compose the admitted R153 adaptive sovereign mission lifecycle for returned-proof continuation instead of creating another competing mission engine.',
   'Converge exactly one HostState/CanonState authority, one route/capability registry path, one proof/ledger spine, one scene/render authority, one project continuity path, one update/release path and one current Hybrid connector. Remove only proven duplicate/shadow execution paths after their stronger successor is verified.',
@@ -60,10 +64,10 @@ export function buildFullSystemMissionObjectiveR154(root='.'){
   'For AI/SAI/plugins/Hybrid, preserve the R142 lifecycle: DISCOVERED, AUTHORIZED, AVAILABLE, INVOKED, RETURNED, VERIFIED; RETURNED is not VERIFIED. R141 exact payload closure remains Hybrid proof authority and R125 alone admits CanonState mutation.',
   'For archive/Drive donors, fingerprint and compare before extraction. KEEP/MERGE/DONOR/QUARANTINE classification must remain visible. Never overwrite current authority merely because an older artifact contains more files.',
   'Run the declared static regression, production build, route/mobile browser tests when available, worker dry-run, package/support generation and deterministic replay checks. If proof exposes a defect, let the inherited R153 adaptive mission engine prepare the smallest justified next repair and rerun the affected plus inherited gates.',
-  'Return an exact machine-readable proof packet listing inspected roots, pre/post hashes, changed files, tests, build/package outputs, failures/holds, current family successor states, remaining evidence/device gates and the final execution fingerprint. Never claim completion from intent or generated text alone.'
+  'Return an exact machine-readable proof packet listing inspected roots, pre/post hashes, changed files, tests, build/package outputs, failures/holds, current family successor states, R155 dimensional-relativity invariants, remaining evidence/device gates and the final execution fingerprint. Never claim completion from intent or generated text alone.'
  ].join(' ');
 }
 
 export function fullSystemStateContextR154(){
- return {schema:R154_SCHEMA,revision:R154_REVISION,inheritedAdaptiveMissionRevision:'R153',invariant:R154_FULL_SYSTEM_CONTRACT.invariant,inventory:R154_FULL_SYSTEM_CONTRACT.inventory,successor:R154_FULL_SYSTEM_CONTRACT.successor,stages:R154_COMPLETION_STAGES.map(x=>({order:x.order,id:x.id,menu:x.menu,route:x.route,proof:x.proof})),rootPolicy:R154_FULL_SYSTEM_CONTRACT.nativeRootPolicy,mutationPolicy:R154_FULL_SYSTEM_CONTRACT.mutationPolicy,completionDefinition:R154_FULL_SYSTEM_CONTRACT.completionDefinition,canonicalAdmission:'R125',executionReceiptAuthority:'R142',hybridClosureAuthority:'R141'};
+ return {schema:R154_SCHEMA,revision:R154_REVISION,inheritedAdaptiveMissionRevision:'R153',relativityEvolutionRevision:'R155',invariant:R154_FULL_SYSTEM_CONTRACT.invariant,inventory:R154_FULL_SYSTEM_CONTRACT.inventory,dimensionalRelativity:R154_FULL_SYSTEM_CONTRACT.dimensionalRelativity,successor:R154_FULL_SYSTEM_CONTRACT.successor,stages:R154_COMPLETION_STAGES.map(x=>({order:x.order,id:x.id,menu:x.menu,route:x.route,proof:x.proof})),rootPolicy:R154_FULL_SYSTEM_CONTRACT.nativeRootPolicy,mutationPolicy:R154_FULL_SYSTEM_CONTRACT.mutationPolicy,completionDefinition:R154_FULL_SYSTEM_CONTRACT.completionDefinition,canonicalAdmission:'R125',executionReceiptAuthority:'R142',hybridClosureAuthority:'R141'};
 }
