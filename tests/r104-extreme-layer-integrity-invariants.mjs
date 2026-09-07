@@ -63,7 +63,9 @@ must(provenanceCss.includes('.r104-layer-contract')&&provenanceCss.includes(".r9
 // Readable, flat, reserved-space global navigation.
 must(nav.includes('r100-professional-nav r104-readable-nav')&&nav.includes('r104-nav-panel'),'R104 readable navigator classes must be active');
 must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'all registered routes must remain one flat searchable list');
-must(nav.includes('<em>{workspace.copy}</em>')&&nav.includes('<small>{currentWorkspace.copy}</small>'),'expanded navigator must explain destination and active instrument');
+const explainsDestination=nav.includes('<em>{workspace.copy}</em>')||nav.includes('<em>{nav?.hint||workspace.copy}</em>');
+const explainsActive=nav.includes('<small>{currentWorkspace.copy}</small>')||nav.includes('<small>{omegaNavItem(currentPanel)?.hint||currentWorkspace.copy}</small>');
+must(explainsDestination&&explainsActive&&nav.includes('ACTIVE INSTRUMENT'),'expanded navigator must explain destination and active instrument under the current purpose-aware successor');
 must(nav.includes("setExpanded(false);setQuery('')"),'destination selection must collapse back to slim rail');
 must(!nav.includes('r88-navigator-backdrop')&&!nav.includes("document.body.style.overflow='hidden'"),'navigator must not regress to covering modal/body lock');
 const i100=nav.indexOf("import './omegaSideNavigatorR100.css';"),i104=nav.indexOf("import './extremeLayerIntegrityR104.css';");
@@ -122,4 +124,4 @@ for(const rule of ['FULL_LAYER_FUNCTIONAL_CORRELATION','READABLE_NON_COVERING_NA
 must(accepted.includes("'R103 task-first capability router + truthful performance partition authority'")&&accepted.includes("'R104 eight-layer functional correlation + readable non-covering navigation authority'"),'R104 must preserve R103 and itself');
 must(packageJson.scripts['test:r104']==='node tests/r104-extreme-layer-integrity-invariants.mjs','R104 script missing');
 
-console.log('R104/R152 EXTREME LAYER INTEGRITY PASS · route/layer/provenance coverage · readable reserved-space navigation · source-driven visual modes · current zero-drift Hybrid transport + compatibility path · task-first federation preserved');
+console.log('R104/R157 EXTREME LAYER INTEGRITY PASS · route/layer/provenance coverage · current purpose-aware reserved-space navigation · source-driven visual modes · current zero-drift Hybrid transport + compatibility path · task-first federation preserved');
