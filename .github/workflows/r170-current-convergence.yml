@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - run: npm install --no-fund
@@ -109,6 +109,7 @@ jobs:
         run: |
           echo 'R198 CURRENT-AUTHORITY CONVERGENCE PASS: accepted R196.2 intelligence proof is rendered inside the existing R175/R174 living-world visual surface as an intent-only intelligence band.'
           echo 'R197 adaptive backpressure remains execution scheduling authority; R196.1 remains held-draft only and R196.2 remains proof projection authority.'
+          echo 'R199.1 production hygiene changes packaging/deployment maintenance only; it creates no execution, evidence, proof, workflow-dispatch, or Canon authority.'
           echo 'No second world, executor, queue, probe authority, or Canon path is introduced; R198 is read-only visual projection and navigation intent only.'
           echo 'R147 remains dispatch authority; R146 remains durable lifecycle and execution-history authority; R141 remains exact-return proof authority; R125 remains sole CanonState admission authority.'
           echo 'R175 world truth → R176 intent → R177 mission → R178 contract → R179 authorization → R180 dispatch → R182/R186 verified-return continuity remains proved.'

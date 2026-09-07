@@ -16,8 +16,8 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - run: npm install
@@ -35,8 +35,8 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - run: npm install
@@ -64,10 +64,10 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Bind promoted merge lineage
@@ -270,5 +270,6 @@ jobs:
             echo "- Live AI synthesis: required for deployment PASS"
             echo "- R8 Earth/NOAA + Hybrid V90 contracts: required for deployment PASS"
             echo "- R9 Earth ground source hierarchy: required for deployment PASS"
+            echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"
             echo "- Hybrid native execution: VERIFIED_DEVICE_ONLINE requires a current authenticated non-revoked heartbeat; otherwise DEVICE_PROOF_REQUIRED"
           } >> "$GITHUB_STEP_SUMMARY"

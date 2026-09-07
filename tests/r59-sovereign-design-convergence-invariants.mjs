@@ -12,7 +12,8 @@ const mountedShell=read('src/InstrumentOSShellR62.tsx');
 const visual=read('src/OmegaR36LivingSurfaces.tsx');
 const pkg=JSON.parse(read('package.json'));
 const assert=(ok,msg)=>{if(!ok)throw new Error(`R59/R71 invariant failed: ${msg}`)};
-assert(app.includes("import OmegaHomeR71 from './OmegaHomeR71'"),'R71 direct workspace successor must be mounted');
+const r71Mounted=app.includes("import OmegaHomeR71 from './OmegaHomeR71'")||app.includes("lazy(()=>import('./OmegaHomeR71'))");
+assert(r71Mounted,'R71 direct workspace successor must be mounted eagerly or through an explicit React lazy boundary');
 assert(!app.includes("import OmegaHome from './OmegaHome'"),'R56 home must not remain mounted beside current authority');
 assert(app.includes("import './sovereignDesignR59.css'"),'shared R59 design lineage must remain mounted');
 assert(app.includes("import './instrumentOSR62.css'"),'viewport repair CSS must be globally mounted before lazy workstation load');
@@ -46,4 +47,4 @@ const combined=[app,home,homeR71,css,design,livingCss,constellation,shell,mounte
 assert(!combined.includes('@appdeploy/client'),'AppDeploy runtime dependency forbidden');
 assert(pkg.scripts['test:r59']?.includes('r59-sovereign-design-convergence-invariants.mjs'),'R59/R71 test must be wired');
 assert(pkg.scripts['check:static']?.includes('npm run test:r59'),'full check must execute R59/R71 gate');
-console.log('R59/R71 sovereign design convergence PASS · retained lineage + direct operator workspace successor + mounted frame authority');
+console.log('R59/R71/R199.1 sovereign design convergence PASS · retained lineage + deferred direct operator workspace successor + mounted frame authority');
