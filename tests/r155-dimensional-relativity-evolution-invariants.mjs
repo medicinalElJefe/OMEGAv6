@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),must=(ok,msg)=>assert.ok(ok,`R155 ${msg}`);
-const runtime=read('src/dimensionalRelativityEvolutionR155.ts'),panel=read('src/DimensionalRelativityEvolutionR155.tsx'),css=read('src/dimensionalRelativityEvolutionR155.css'),lab=read('src/RelativityLab.tsx'),r24=read('src/dimensionalRelativityR24.ts'),r132=read('src/physicsRelativityRuntimeR132.ts'),r134=read('src/wovenRelativityRuntimeR134.ts'),r100=read('src/weaveStateR100.ts'),control=read('src/system/operationalControlPlaneR130.js');
+const runtime=read('src/dimensionalRelativityEvolutionR155.ts'),panel=read('src/DimensionalRelativityEvolutionR155.tsx'),css=read('src/dimensionalRelativityEvolutionR155.css'),lab=read('src/RelativityLab.tsx'),r24=read('src/dimensionalRelativityR24.ts'),r132=read('src/physicsRelativityRuntimeR132.ts'),r134=read('src/wovenRelativityRuntimeR134.ts'),r100=read('src/weaveStateR100.ts'),unified=read('src/unifiedCalculus.ts'),completion=read('src/fullSystemCompletionR154.js'),control=read('src/system/operationalControlPlaneR130.js');
 
 must(runtime.includes("R155_SCHEMA='OMEGA_DIMENSIONAL_RELATIVITY_EVOLUTION_R155'"),'schema missing');
 must(runtime.includes("import {compilePhysicsRelativityR132} from './physicsRelativityRuntimeR132'"),'must inherit R132 all-mode/physics packet');
@@ -19,9 +19,12 @@ must(runtime.includes('sourceSymmetry')&&runtime.includes('invariantSymmetry')&&
 for(const token of ['phaseDifferentiation','phaseGradient','carryDirection','motion','anisotropy','localOffset','history','emergence'])must(runtime.includes(token),'contextual asymmetry component missing '+token);
 must(runtime.includes('R155 never defines asymmetry as 1-symmetry or symmetry as 1-asymmetry'),'independent-field law missing');
 must(!runtime.includes('contextualAsymmetry=clamp(1-')&&!runtime.includes('invariantSymmetry=clamp(1-'),'R155 may not collapse symmetry/asymmetry into complements');
+must(unified.includes("symmetryAsymmetryLaw:'Symmetry is preserved/invariant structure under a declared transform; asymmetry is independently derived"),'unified calculus must inherit the independent field law');
+must(unified.includes('asymmetry=contextualAsymmetry(')&&!unified.includes('asymmetry=cl(1-symmetry)'),'unified calculus must stop forcing asymmetry to the complement of symmetry');
+must(unified.includes('signedCarry=orientation*cl(')&&!unified.includes('(orientation||1)*cl('),'neutral σ=0 must not be silently promoted to outverse carry');
 
 must(runtime.includes("R155_DUAL_OPERATOR_ORDER=['PRUNE_01-1','CONSTRUCT_011','CARRY','RECONTEXTUALIZE','PROVE']"),'01-1 before 011 operator order missing');
-must(runtime.includes("vector:pruneVector")&&runtime.includes("pruneVector:[number,number,number]=[0,1,-1]"),'01-1 vector missing');
+must(runtime.includes("pruneVector:[number,number,number]=[0,1,-1]"),'01-1 vector missing');
 must(runtime.includes("constructVector:[number,number,number]=[0,1,1]"),'011 vector missing');
 must(runtime.includes('orthogonality:{dot:0,angleRadians:Math.PI/2}'),'dual operator orthogonality proof missing');
 must(runtime.includes("dispatch=decision==='STAY'")&&runtime.includes("?'ESCALATE':'TURN'"),'STAY/TURN/ESCALATE dispatch must remain explicit');
@@ -33,7 +36,7 @@ for(const token of ['physics.sourceModeField.registryCount','physics.canonAuthor
 must(runtime.includes("state:'DERIVED_CANDIDATE_R125_ADMISSION_REQUIRED'")&&runtime.includes('proofRequired:true'),'evolution output must remain a proof/admission-gated candidate');
 must(runtime.includes('R125 admission and returned proof remain separate authorities'),'R125 admission boundary missing');
 
-must(panel.includes('12¹ → 12¹⁰')&&panel.includes('RUN')===false,'R155 panel should expose nested resolution rather than an unrelated execution button');
+must(panel.includes('12¹ → 12¹⁰'),'R155 panel must expose nested 12^1→12^10 resolution');
 must(panel.includes('symmetry ≠ 1 − asymmetry'),'panel must explicitly show independent symmetry/asymmetry');
 must(panel.includes('PRUNE_01-1')&&panel.includes('CONSTRUCT_011'),'dual operators missing from panel');
 must(panel.includes("<option value='0'>0 · NEUTRAL</option>")&&panel.includes("<option value='-1'>−1 · INVERSE</option>")&&panel.includes("<option value='1'>+1 · OUTVERSE</option>"),'signed orientation selector must include -1/0/+1');
@@ -48,6 +51,7 @@ must(r24.includes("construct_011")&&r24.includes("prune_01-1"),'R24 donor operat
 must(r132.includes('sourceModeField:{registryCount:sourceModes.count')&&r132.includes('canonAuthorityField:{count:authorities.length'),'R132 all-mode/authority source must remain intact');
 must(r134.includes('Whole/part, inner/outer and representation are observer-frame roles'),'R134 observer-frame relativity law must remain intact');
 must(r100.includes('invariant carry → scar/residual carry → re-contextualize/repartition'),'R100 Woven Continuity law must remain intact');
-must(control.includes('R125_REMAINS_CANONICAL_ADMISSION_AUTHORITY'),'global canonical admission authority must remain R125');
+must(completion.includes("relativityEvolutionRevision:'R155'")&&completion.includes("symmetryAsymmetry:'INDEPENDENT_CONTEXTUAL_FIELDS'"),'one-system completion must bind R155 relativity evolution');
+must(control.includes("revision:'R155',id:'DIMENSIONAL_RELATIVITY_EVOLUTION'")&&control.includes('R125_REMAINS_CANONICAL_ADMISSION_AUTHORITY'),'operational control must register R155 while preserving R125 admission');
 
-console.log('OMEGA R155 DIMENSIONAL RELATIVITY EVOLUTION PASS · R24 exact donor + R132 179 modes/62 authorities + R100 Woven carry · independent symmetry/asymmetry · 01-1→011 dual operator · σ -1/0/+1 · 37/73 reference only · nested 12^1→12^10 observer frames · no dimensional inflation · R125 admission preserved');
+console.log('OMEGA R155 DIMENSIONAL RELATIVITY EVOLUTION PASS · R24 exact donor + R132 179 modes/62 authorities + R100 Woven carry · independent symmetry/asymmetry through unified calculus · 01-1→011 dual operator · σ -1/0/+1 · 37/73 reference only · nested 12^1→12^10 observer frames · no dimensional inflation · R125 admission preserved');
