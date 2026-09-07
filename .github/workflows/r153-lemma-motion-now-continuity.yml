@@ -42,7 +42,7 @@ jobs:
       - name: Preserve development execution and canonical admission boundaries
         shell: bash
         run: |
-          node tests/r124-selfbuild-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
           node tests/r147-unified-executor-fabric-invariants.mjs
           node tests/r146-durable-operation-execution-invariants.mjs
           node tests/r125-accuracy-engine-invariants.mjs
