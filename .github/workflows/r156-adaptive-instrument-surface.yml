@@ -1,0 +1,65 @@
+name: OMEGA R156 Adaptive Instrument Surface
+
+on:
+  push:
+    branches:
+      - r156-adaptive-instrument-surface
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  prove-r156-adaptive-navigation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prove R156 adaptive navigation
+        run: node tests/r156-adaptive-instrument-surface-invariants.mjs
+      - name: Prove R156 primary global navigator
+        run: node tests/r156-global-navigator-invariants.mjs
+      - name: Preserve R155 information architecture
+        run: node tests/r155-navigation-information-architecture-invariants.mjs
+      - name: Preserve inherited navigation contracts
+        shell: bash
+        run: |
+          node tests/r38-experience-depth.mjs
+          node tests/r33-living-runtime-invariants.mjs
+          node tests/r89-mobile-visual-first-flat-navigation-invariants.mjs
+          node tests/r100-weave-instrument-invariants.mjs
+          node tests/r120-root-safe-hybrid-navigation-invariants.mjs
+          node tests/r132-whole-system-experience-invariants.mjs
+      - name: Full application regression
+        run: npm run check
+      - name: Production build
+        run: npm run build
+      - name: Install Chromium
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start production preview
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r156-preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r156-preview.log
+          exit 1
+      - name: Exercise adaptive menu in desktop and mobile Chromium
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r156-adaptive-navigation-browser-e2e.mjs
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r156-preview.log || true
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r156-dry-run
