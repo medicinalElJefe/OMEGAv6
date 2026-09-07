@@ -1,0 +1,127 @@
+name: OMEGA R158 Capability Universe Convergence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [r158-capability-universe-convergence]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r158-capability-universe-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  OMEGA_E2E_URL: http://127.0.0.1:4173
+
+jobs:
+  prove-r158:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install repository dependencies
+        run: npm install --no-fund
+
+      - name: Reject high-severity dependency regressions
+        run: npm audit --audit-level=high
+
+      - name: Prove R156 dimensional-relativity evolution
+        run: node tests/r156-dimensional-relativity-evolution-invariants.mjs
+
+      - name: Prove R158 capability-universe visual and runtime binding
+        run: node tests/r158-capability-universe-invariants.mjs
+
+      - name: Preserve R155 whole-system capability-family authority
+        run: node tests/r155-whole-system-convergence-invariants.mjs
+
+      - name: Preserve R154 relative capacity
+        run: npx --yes tsx tests/r154-relative-capacity-fabric.mts
+
+      - name: Preserve R153 causal NOW and lemma motion continuity
+        run: npx --yes tsx tests/r153-lemma-motion-now-continuity.mts
+
+      - name: Preserve R152 empirical evidence precedence
+        run: npx --yes tsx tests/r152-universal-truth-envelope.mts
+
+      - name: Preserve R151 provenance fusion and full atlas census
+        shell: bash
+        run: |
+          node tests/r151-all-modes-truth-fusion-invariants.mjs
+          npx --yes tsx scripts/r151-full-atlas-scan.ts
+
+      - name: Preserve dimensional, Woven and relational ancestry
+        shell: bash
+        run: |
+          node tests/dimensional-relativity-r24-invariants.mjs
+          node tests/r77-woven-continuity-invariants.mjs
+          node tests/r132-relational-physics-manifold-invariants.mjs
+          node tests/r134-woven-relativity-continuum-invariants.mjs
+
+      - name: Preserve execution, Hybrid and admission truth chain
+        shell: bash
+        run: |
+          python -m py_compile public/omega-hybrid-agent.py
+          python -m py_compile public/omega-rcwa-agent.py
+          python -m py_compile public/omega-rcwa-worker.py
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r151-sovereign-build-execution-spine-invariants.mjs
+          node tests/r153-adaptive-sovereign-build-missions-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+
+      - name: Preserve R155 navigation information architecture
+        shell: bash
+        run: |
+          node tests/r155-navigation-information-architecture-invariants.mjs
+          npm run test:navigation
+          npm run test:applications
+
+      - name: Full inherited regression and production build
+        run: npm run check
+
+      - name: Canonical Worker bundle dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r158-dry-run
+
+      - name: Install Chromium for all-route desktop and mobile proof
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start exact production build locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r158-preview.log 2>&1 &
+          echo $! >/tmp/omega-r158-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r158-preview.log
+          exit 1
+
+      - name: Exercise all 44 routes on desktop and mobile
+        run: node tests/r118-browser-operational-e2e.mjs
+
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r158-preview.log || true
