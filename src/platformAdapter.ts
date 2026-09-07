@@ -22,6 +22,35 @@ export class OmegaApiError extends Error {
   }
 }
 
+export const OMEGA_CANONICAL_RUNTIME_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev';
+export const OMEGA_DISTRIBUTED_RUNTIME_HOSTS=Object.freeze([
+  'omega-genesis-v1.jeffdeweyeljefe.workers.dev',
+  'omega-living-light-etching-private-woven2.vercel.app',
+  'omega-optical-cloud-woven2.vercel.app'
+]);
+const DISTRIBUTED_HOSTS=new Set<string>(OMEGA_DISTRIBUTED_RUNTIME_HOSTS);
+const LOCAL_HOSTS=new Set(['localhost','127.0.0.1','::1']);
+
+/**
+ * Resolve shared OMEGA runtime calls to the canonical Cloudflare authority when
+ * the workstation is rendered from an approved distributed human surface.
+ * Canonical and localhost development remain same-origin. Arbitrary foreign
+ * origins are never silently trusted or promoted into the federation.
+ */
+export function runtimeUrl(url:string){
+  const value=String(url||'');
+  if(!value.startsWith('/'))return value;
+  if(typeof window==='undefined')return value;
+  const host=String(window.location?.hostname||'').toLowerCase();
+  if(!host||LOCAL_HOSTS.has(host)||host==='omegav6.jeffdeweyeljefe.workers.dev')return value;
+  return DISTRIBUTED_HOSTS.has(host)?`${OMEGA_CANONICAL_RUNTIME_ORIGIN}${value}`:value;
+}
+
+export function runtimeFetch(input:string,init:RequestInit={}){
+  const target=runtimeUrl(input),crossOrigin=target.startsWith('http')&&typeof window!=='undefined'&&!target.startsWith(window.location.origin);
+  return fetch(target,{cache:'no-store',...init,credentials:init.credentials??(crossOrigin?'omit':'same-origin')});
+}
+
 const SESSION_KEY='omega.v6.runtime.session.r32';
 const BRIDGE_KEY='omega.v6.hybrid.bridge.r32';
 function randomId(prefix:string){try{return `${prefix}_${crypto.randomUUID()}`}catch{return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`}}
@@ -38,12 +67,13 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
     const bridge=getHybridBridge(),headers:Record<string,string>={'x-omega-session-id':runtimeSessionId()};
     if(body!==undefined)headers['content-type']='application/json';
     if(bridge){headers['x-omega-bridge-id']=bridge.bridgeId;headers['x-omega-bridge-secret']=bridge.secret}
-    const response = await fetch(url, {
+    const target=runtimeUrl(url),crossOrigin=target.startsWith('http')&&!target.startsWith(window.location.origin);
+    const response = await fetch(target, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
       cache: 'no-store',
-      credentials: 'same-origin',
+      credentials: crossOrigin?'omit':'same-origin',
       signal: controller.signal
     });
     const contentType = response.headers.get('content-type') || '';
