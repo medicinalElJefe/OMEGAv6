@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import machine from '../services/opticalMachineR1532.js';
+import machine,{R1532_MACHINE_SERVICE,R1532_MACHINE_VERSION,R1532_BASE_SCREENING_SERVICE,R1532_BASE_SCREENING_VERSION} from '../services/opticalMachineR1532.js';
 
 const call=async(path,{method='GET',body=null}={})=>{
  const response=await machine.fetch(new Request('https://r1532.test'+path,{method,headers:body?{'content-type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined}));
@@ -8,14 +8,25 @@ const call=async(path,{method='GET',body=null}={})=>{
  return{response,text,json};
 };
 
+assert.equal(R1532_MACHINE_SERVICE,'omega-optical-machine-r1532');
+assert.equal(R1532_MACHINE_VERSION,'R153.2');
+assert.equal(R1532_BASE_SCREENING_SERVICE,'omega-optical-machine-r152');
+assert.equal(R1532_BASE_SCREENING_VERSION,'R152.0');
+
 const health=await call('/api/health');
 assert.equal(health.response.status,200);
 assert.equal(health.json.ok,true);
+assert.equal(health.json.service,'omega-optical-machine-r1532');
+assert.equal(health.json.version,'R153.2');
 assert.equal(health.json.authority,'SCREEN_ONLY');
 assert.equal(health.json.machineVersion,'R153.2');
+assert.equal(health.json.baseScreening?.service,'omega-optical-machine-r152');
+assert.equal(health.json.baseScreening?.version,'R152.0');
 assert.equal(health.json.externalTool?.version,'R153.2');
 assert.equal(health.json.externalTool?.adaptiveCycle,true);
 assert.equal(health.json.externalTool?.canonicalMutation,false);
+assert.equal(health.response.headers.get('x-omega-machine-service'),'omega-optical-machine-r1532');
+assert.equal(health.response.headers.get('x-omega-machine-version'),'R153.2');
 
 const descriptor=(await call('/api/tool/descriptor')).json;
 assert.equal(descriptor.version,'R153.2');
@@ -82,4 +93,4 @@ assert.equal(rank.receipt?.tool_version,'R153.2');
 assert.equal(rank.receipt?.base_tool_version,'R153.1');
 assert.equal(rank.tool_upgrade?.adaptive_cycle_available,true);
 
-console.log('R153.2 ADAPTIVE EXTERNAL SEARCH PASS',JSON.stringify({seed:1698,pressure:insight.result.boundary_pressure.map(x=>`${x.axis}:${x.side}`),best:cycle.result.cycle.final,rounds:cycle.result.cycle.rounds_completed,evaluations:cycle.result.cycle.evaluations,next:cycle.result.ai_context.next_action,receipt:cycle.receipt.receipt_id}));
+console.log('R153.2 ADAPTIVE EXTERNAL SEARCH PASS',JSON.stringify({service:health.json.service,version:health.json.version,base:health.json.baseScreening,seed:1698,pressure:insight.result.boundary_pressure.map(x=>`${x.axis}:${x.side}`),best:cycle.result.cycle.final,rounds:cycle.result.cycle.rounds_completed,evaluations:cycle.result.cycle.evaluations,next:cycle.result.ai_context.next_action,receipt:cycle.receipt.receipt_id}));
