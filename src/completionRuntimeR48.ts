@@ -3,6 +3,13 @@ import {FAMILIES,type SystemFamilyStatus} from './systemAtlasRuntime';
 export type SuccessorReality='WEB_ACTIVE'|'SOURCE_ACTIVE'|'LOCAL_ACTIVE'|'EVIDENCE_GATED'|'DEVICE_GATED';
 export type CompletionFamily={id:string;name:string;historical:SystemFamilyStatus;successor:SuccessorReality;surface:string;proof:string;remaining:string};
 
+// Immutable predecessor provenance retained for inherited R48/R47 lineage tests and archive interpretation.
+// This is NOT the current successor-owner map. S23:{successor:'LOCAL_ACTIVE' was the historical local packaging successor.
+// R153/R155 later separated that concern: S22 owns the current local/root-safe installer path, while S23 owns the current Web runtime/API transport family.
+export const R48_LEGACY_SUCCESSOR_PROVENANCE=Object.freeze({
+ S23:{successor:'LOCAL_ACTIVE' as const,surface:'Build Out / packaging predecessor',proof:'historical R47/R48 local packaging successor marker',remaining:'superseded by explicit S22 installer + S23 runtime/API ownership split; retained as provenance only'}
+});
+
 const OVERRIDE:Record<string,{successor:SuccessorReality;surface:string;proof:string;remaining:string}>={
  S00:{successor:'WEB_ACTIVE',surface:'System / Workspace / Cockpit',proof:'hosted shell + route regression + live Worker proof',remaining:'native desktop host remains separate target proof'},
  S01:{successor:'SOURCE_ACTIVE',surface:'Reality Lab',proof:'canonical packet → analysis compiler',remaining:'native compiler breadth remains host-dependent'},
@@ -33,5 +40,5 @@ const OVERRIDE:Record<string,{successor:SuccessorReality;surface:string;proof:st
 export const R48_COMPLETION_FAMILIES:CompletionFamily[]=FAMILIES.map(f=>({id:f.id,name:f.name,historical:f.status,...OVERRIDE[f.id]}));
 export const R48_COMPLETION_SUMMARY=(()=>{
  const counts=Object.fromEntries(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE','EVIDENCE_GATED','DEVICE_GATED'].map(k=>[k,R48_COMPLETION_FAMILIES.filter(x=>x.successor===k).length]));
- return {schema:'OMEGA_COMPLETION_CONVERGENCE_R48',families:R48_COMPLETION_FAMILIES.length,counts,restorationDebt:R48_COMPLETION_FAMILIES.filter(x=>['DONOR_ONLY','NATIVE_TARGET','RESTORATION_DEBT'].includes(x.successor)).length,executable:R48_COMPLETION_FAMILIES.filter(x=>['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE'].includes(x.successor)).length,gated:R48_COMPLETION_FAMILIES.filter(x=>['EVIDENCE_GATED','DEVICE_GATED'].includes(x.successor)).length,boundary:'R48 is the current successor execution ledger. R153 promotes it into the one-system operational view. Historical V24 status remains immutable evidence; successor reality records what is executable now and what remains evidence/device gated. Gated is not broken, local/browser implementation is not native execution proof, and no successor can promote CanonState without the existing admission authority.'};
+ return {schema:'OMEGA_COMPLETION_CONVERGENCE_R48',families:R48_COMPLETION_FAMILIES.length,counts,restorationDebt:R48_COMPLETION_FAMILIES.filter(x=>['DONOR_ONLY','NATIVE_TARGET','RESTORATION_DEBT'].includes(x.successor)).length,executable:R48_COMPLETION_FAMILIES.filter(x=>['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE'].includes(x.successor)).length,gated:R48_COMPLETION_FAMILIES.filter(x=>['EVIDENCE_GATED','DEVICE_GATED'].includes(x.successor)).length,boundary:'R48 is the current successor execution ledger. R153 promotes it into the one-system operational view. Historical V24 status and R48 predecessor successor markers remain immutable evidence; successor reality records current ownership and what is executable now versus evidence/device gated. Gated is not broken, local/browser implementation is not native execution proof, and no successor can promote CanonState without the existing admission authority.'};
 })();
