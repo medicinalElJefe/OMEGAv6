@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { createHash } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
+import {forensicContinuityPluginR204} from './scripts/forensicContinuityR204.mjs';
 
 function governedBuildReceipt(){
   return {
@@ -55,7 +56,7 @@ function vendorChunkR109(id:string){
 }
 
 export default defineConfig({
-  plugins: [react(),governedBuildReceipt(),initialEntryBudgetR1991()],
+  plugins: [react(),governedBuildReceipt(),forensicContinuityPluginR204(),initialEntryBudgetR1991()],
   build: {
     outDir: 'dist',
     sourcemap: true,
