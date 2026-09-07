@@ -5,7 +5,11 @@ const must=(v,m)=>assert.ok(v,'R158 '+m);
 const runtime=read('src/capabilityUniverseRuntimeR158.ts');
 const visual=read('src/CapabilityUniverseR158.tsx');
 const css=read('src/capabilityUniverseR158.css');
+const guard=read('src/interactionViewGuardR158.css');
 const relativity=read('src/RelativityLab.tsx');
+const evolution=read('src/dimensionalRelativityEvolutionR156.ts');
+const evolutionVisual=read('src/DimensionalRelativityEvolutionR156.tsx');
+const r155=read('src/system/wholeSystemConvergenceR155.js');
 
 for(const token of [
  "R158_SCHEMA='OMEGA_CAPABILITY_UNIVERSE_R158'",
@@ -50,15 +54,26 @@ for(const token of [
  "12¹ → 12¹⁰"
 ])must(visual.includes(token),`visual missing ${token}`);
 
-must(css.includes('.capu158-stage canvas')&&css.includes('.capu158-overlay'),'WebGL + inspectable overlay composition missing');
+must(css.includes('.capu158-stage canvas')&&css.includes('.capu158-overlay'),'WebGL + inspectable data overlay composition missing');
 must(css.includes('@media(max-width:1050px)')&&css.includes('@media(max-width:580px)'),'desktop/mobile containment missing');
 must(css.includes('@media(prefers-reduced-motion:reduce)'),'reduced-motion accessibility boundary missing');
 
+for(const token of ['OUTPUT_PLANE_FIRST','CONTROLS_RESERVE_LAYOUT','INSPECTORS_DOCK_OUTSIDE_OUTPUT','--r158-min-operational-surface:224px','.capu158.immersive{position:relative!important','.capu158-stage-label{display:none!important','[data-omega-visual-output='])must(guard.includes(token),`interaction guard missing ${token}`);
+must(!guard.includes('.capu158.immersive{position:fixed'),'R158 focus mode may not become a fixed overlay');
+must(guard.includes("html[data-omega-nav-present='true'] .omega-workstation-v2 .workstation-main{min-width:var(--r158-min-operational-surface)"),'global navigator must preserve the operational surface floor');
+
 must(relativity.includes("import CapabilityUniverseR158 from './CapabilityUniverseR158'"),'Relativity must import R158 universe');
 must(relativity.includes("import DimensionalRelativityEvolutionR156 from './DimensionalRelativityEvolutionR156'"),'Relativity must import R156 evolution');
+must(relativity.includes("import './interactionViewGuardR158.css'"),'Relativity must load the R158 output-protection layer after its base CSS');
+must(relativity.includes("data-omega-view-guard='R158'"),'Relativity root must declare the R158 interaction contract');
 must(relativity.includes('<CapabilityUniverseR158 record={record} onNavigate={onNavigate}/>'),'R158 universe must be mounted as the primary Relativity instrument');
 must(relativity.includes('<DimensionalRelativityEvolutionR156 record={record}/><DimensionalRelativityPanelR24 record={record}/>'),'R156 must extend rather than replace the exact R24 donor instrument');
-must(relativity.indexOf('<CapabilityUniverseR158')<relativity.indexOf("<div className='rel36-observer'>"),'capability universe must be visible before secondary observer controls');
+must(relativity.indexOf('<CapabilityUniverseR158')<relativity.indexOf("className='rel36-observer'"),'capability universe must be visible before secondary observer controls');
 must(relativity.indexOf('<DimensionalRelativityPanelR24')<relativity.indexOf("<CalculusFieldR37 address={record.address} mode='RELATIVITY'"),'R24 authority must remain ahead of optional derived observer rendering');
 
-console.log('R158 CAPABILITY UNIVERSE PASS · WebGL2 resident atlas + 241 provenance channels + 15 R155 families + R154 capacity + causal NOW + swarm + Woven truth membranes + R156 signed dimensional relativity · desktop/mobile/proof boundaries preserved');
+for(const token of ['REFERENCE_BIAS_ONLY','VIRTUAL_UNBOUND','R156_DIMENSION_BOUNDARY','contextualAsymmetry','orientation*R156_REFERENCE_KERNEL.a'])must(evolution.includes(token),`R156 truth boundary missing ${token}`);
+must(evolutionVisual.includes("data-omega-visual-output='true'")&&evolutionVisual.includes("data-omega-control-plane='reserved'"),'R156 must explicitly separate output and controls');
+must(evolutionVisual.includes('symmetry ≠ 1 − asymmetry'),'R156 visual must preserve independent symmetry/asymmetry');
+must(r155.includes('INTERFACE_PRESERVATION')&&r155.includes('non-covering navigation'),'R155 interface-preservation owner must remain present');
+
+console.log('R158 CAPABILITY UNIVERSE PASS · WebGL2 resident atlas + 241 provenance channels + 15 R155 families + R154 capacity + causal NOW + swarm + Woven truth membranes + R156 signed dimensional relativity · output plane protected from controls/navigation · desktop/mobile/proof boundaries preserved');
