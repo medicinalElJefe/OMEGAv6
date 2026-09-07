@@ -26,16 +26,17 @@ jobs:
       - run: npm install
       - name: Prove universal truth precedence and scar carry
         run: npx --yes tsx tests/r152-universal-truth-envelope.mts
-      - name: Preserve R151 all-modes truth and swarm partition
+      - name: Preserve R151 all-modes truth and exact swarm partition
         shell: bash
         run: |
           node tests/r151-all-modes-truth-fusion-invariants.mjs
           npx --yes tsx scripts/r151-full-atlas-scan.ts
-      - name: Preserve causal evidence and computed reality truth boundaries
+      - name: Preserve causal evidence motion/time and computed-reality boundaries
         shell: bash
         run: |
-          node tests/r126-causal-interaction-relativity.mjs
-          node tests/r122-computed-reality-convergence.mjs
+          node --experimental-strip-types tests/r126-causal-interaction-relativity.mjs
+          node tests/r126-causal-interaction-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
       - name: Preserve operation execution and admission authorities
         shell: bash
         run: |
