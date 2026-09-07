@@ -1,0 +1,72 @@
+name: OMEGA R180 R164 Mobile Containment Proof
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/reflexAutonomicR164.css'
+      - 'tests/r164-reflex-autonomic-browser-e2e.mjs'
+      - 'tests/r180-r164-mobile-containment-invariants.mjs'
+      - '.github/workflows/r180-r164-mobile-containment-proof.yml'
+  push:
+    branches: [r180-r164-mobile-containment-current]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r180-r164-mobile-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  OMEGA_E2E_URL: http://127.0.0.1:4173
+
+jobs:
+  prove-r180:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Prove R180 focused mobile containment contract
+        run: node tests/r180-r164-mobile-containment-invariants.mjs
+      - name: Preserve current R179 durable living-world authorization
+        run: node tests/r179-living-world-durable-authorization-invariants.mjs
+      - name: Preserve R164 governed returned-reflex autonomic execution
+        run: node tests/r164-reflex-autonomic-swarm-convergence-invariants.mjs
+      - name: Preserve dynamic successor workflow governance
+        run: |
+          node scripts/verify_workflow_topology_r170.mjs
+          node scripts/prove_successor_workflow_invariants_r175.mjs
+          node tests/r170-self-build-governor-invariants.mjs
+      - name: Full inherited production regression and build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r180
+      - name: Install Chromium for exact desktop/mobile proof
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start exact production build locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r180-preview.log 2>&1 &
+          echo $! >/tmp/omega-r180-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r180-preview.log
+          exit 1
+      - name: Exercise all 44 routes on desktop and mobile
+        run: node tests/r118-browser-operational-e2e.mjs
+      - name: Prove R164 actual mobile edges and governed execution
+        run: node tests/r164-reflex-autonomic-browser-e2e.mjs
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r180-preview.log || true
