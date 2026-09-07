@@ -3,6 +3,7 @@ import {ChevronLeft,ChevronRight,CloudSun,Globe2,Pause,Play,RefreshCw,ShieldChec
 import EarthNowInstrument from './EarthNowInstrument';
 import EarthLivingFieldR36 from './EarthLivingFieldR36';
 import EarthGroundTraversalR9 from './EarthGroundTraversalR9';
+import EarthSarPanelR181 from './EarthSarPanelR181';
 import {api} from './platformAdapter';
 import {decodeAddress} from './corpusRuntime';
 import './earthObservatoryR8.css';
@@ -55,6 +56,7 @@ export default function EarthObservatoryR8({address}:Props){
    <div className='earth-r72-noaa-stage'>{current&&<img src={`/api/earth/noaa/image?coverage=${encodeURIComponent(current.id)}`} alt={`${current.label} NOAA GeoColor latest alias`}/>}<nav>{catalog.map(x=><button key={x.id} onClick={()=>setSelected(x.id)} className={x.id===current?.id?'active':''}><span>{x.label}</span><small>{x.state}</small></button>)}</nav></div>
    <p><CloudSun/> GeoColor is a NOAA/CIRA derived sensor composite. Missing or unavailable source material is not synthetically replaced.</p>
   </section>
+  <EarthSarPanelR181 lat={lat} lon={lon}/>
   <div className='earth-r72-disclosure'>
    <button className={showGround?'active':''} onClick={()=>setShowGround(v=>!v)}>Ground / street evidence</button>
    <button className={showCalculus?'active':''} onClick={()=>setShowCalculus(v=>!v)}>Representational calculus comparison</button>

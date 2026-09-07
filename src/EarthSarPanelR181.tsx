@@ -1,0 +1,95 @@
+import {useEffect,useMemo,useState} from 'react';
+import {Activity,Layers3,Radio,RefreshCw,ShieldCheck} from 'lucide-react';
+import {api} from './platformAdapter';
+import './earthSarR181.css';
+
+type Sensor='ALL'|'SENTINEL1'|'NISAR';
+type Props={lat:number;lon:number};
+type Point=[number,number];
+type Scene={
+ id:string;provider:string;family:string;truthClass:string;platform?:string|null;band?:string|null;datetime?:string|null;
+ geometry?:any;center?:{lat:number;lon:number}|null;productType?:string|null;instrumentMode?:string|null;polarizations?:string[];
+ orbitState?:string|null;lookDirection?:string|null;incidenceAngle?:number|null;resolutionM?:number|null;dataMaturity?:string|null;
+ thumbnail?:string|null;download?:string|null;calibration?:{frameResidual?:number|null;relativeCoherence?:number|null;components?:Record<string,number>;truth?:string};
+};
+type SarPayload={
+ ok:boolean;schema:string;revision:string;state:string;verifiedAt:string;evidenceHash?:string;target?:any;window?:any;referenceScene?:any;
+ scenes?:Scene[];continuity?:any;sourceAgreement?:any;sources?:any[];publicPrograms?:any[];truthBoundary?:string;
+};
+
+const fmt=(v:any,d=2)=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(d):'—';
+const when=(v?:string|null)=>{if(!v)return'unknown time';const d=new Date(v);return Number.isFinite(d.getTime())?d.toLocaleString():'unknown time'};
+const sceneKey=(s:Scene)=>`${s.provider}:${s.id}`;
+function ringOf(g:any):Point[]{
+ const valid=(row:any)=>Array.isArray(row)&&row.length>=2&&Number.isFinite(Number(row[0]))&&Number.isFinite(Number(row[1]));
+ if(g?.type==='Polygon'&&Array.isArray(g.coordinates?.[0]))return g.coordinates[0].filter(valid).map((x:any)=>[Number(x[0]),Number(x[1])]);
+ if(g?.type==='MultiPolygon'&&Array.isArray(g.coordinates?.[0]?.[0]))return g.coordinates[0][0].filter(valid).map((x:any)=>[Number(x[0]),Number(x[1])]);
+ return[];
+}
+function httpsUrl(v?:string|null){return typeof v==='string'&&v.startsWith('https://')?v:null}
+
+export default function EarthSarPanelR181({lat,lon}:Props){
+ const[sensor,setSensor]=useState<Sensor>('ALL'),[days,setDays]=useState(45),[busy,setBusy]=useState(false),[error,setError]=useState(''),[data,setData]=useState<SarPayload|null>(null),[selected,setSelected]=useState('');
+ const load=async()=>{setBusy(true);setError('');try{const r=await api.get<any>(`/api/earth/sar/search?lat=${lat.toFixed(5)}&lon=${lon.toFixed(5)}&sensor=${sensor}&days=${days}&max=8`),next=r.data as SarPayload;setData(next);const scenes=next?.scenes||[];setSelected(v=>scenes.some(s=>sceneKey(s)===v)?v:(scenes[0]?sceneKey(scenes[0]):''))}catch(e:any){setError(e?.message||'SAR source query unavailable.');setData(null)}finally{setBusy(false)}};
+ useEffect(()=>{void load()},[lat,lon,sensor,days]);
+ const scenes=data?.scenes||[],chosen=scenes.find(s=>sceneKey(s)===selected)||scenes[0]||null;
+ const map=useMemo(()=>{
+  const rings=scenes.map(s=>({key:sceneKey(s),scene:s,ring:ringOf(s.geometry)})).filter(x=>x.ring.length>=3),pts:Point[]=[[lon,lat],...rings.flatMap(x=>x.ring)];
+  let minX=Math.min(...pts.map(p=>p[0])),maxX=Math.max(...pts.map(p=>p[0])),minY=Math.min(...pts.map(p=>p[1])),maxY=Math.max(...pts.map(p=>p[1]));
+  if(!Number.isFinite(minX)||!Number.isFinite(maxX)||maxX-minX<.02){minX=lon-.15;maxX=lon+.15}if(!Number.isFinite(minY)||!Number.isFinite(maxY)||maxY-minY<.02){minY=lat-.15;maxY=lat+.15}
+  const padX=(maxX-minX)*.08,padY=(maxY-minY)*.08;minX-=padX;maxX+=padX;minY-=padY;maxY+=padY;
+  const project=(p:Point):Point=>[16+(p[0]-minX)/(maxX-minX)*608,304-(p[1]-minY)/(maxY-minY)*288];
+  return{rings:rings.map(x=>({...x,points:x.ring.map(project).map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')})),target:project([lon,lat]),bounds:{minX,maxX,minY,maxY}};
+ },[scenes,lat,lon]);
+ const activePrograms=(data?.publicPrograms||[]).filter((p:any)=>String(p.access||'').includes('QUERY_ACTIVE')),externalPrograms=(data?.publicPrograms||[]).filter((p:any)=>!String(p.access||'').includes('QUERY_ACTIVE'));
+ return <section className='earth-sar-r181'>
+  <header className='earth-sar-head'>
+   <div><span>RADAR STRUCTURAL EARTH · SOURCE-BACKED SAR · R181</span><h3>Returned acquisition geometry, continuity and relative-frame diagnostics.</h3><small>Sentinel-1 C-band and NISAR L-band remain observations; OMEGA comparison scores remain derived metadata diagnostics.</small></div>
+   <button onClick={load} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Querying public SAR…':'Refresh SAR evidence'}</button>
+  </header>
+  <div className='earth-sar-controls'>
+   <div className='earth-sar-segments' aria-label='SAR sensor family'>
+    <button className={sensor==='ALL'?'active':''} onClick={()=>setSensor('ALL')}>All returned SAR</button>
+    <button className={sensor==='SENTINEL1'?'active':''} onClick={()=>setSensor('SENTINEL1')}>Sentinel-1 · C-band</button>
+    <button className={sensor==='NISAR'?'active':''} onClick={()=>setSensor('NISAR')}>NISAR · L-band</button>
+   </div>
+   <div className='earth-sar-segments' aria-label='SAR acquisition window'>{[14,45,90].map(d=><button key={d} className={days===d?'active':''} onClick={()=>setDays(d)}>{d} days</button>)}</div>
+  </div>
+  {error&&<div className='earth-sar-error'>{error}</div>}
+  <div className='earth-sar-metrics'>
+   <article><Radio/><span>Returned scenes</span><b>{scenes.length}</b><small>{data?.state||'not queried'}</small></article>
+   <article><Activity/><span>Continuity</span><b>{data?.continuity?.acquisitions??'—'} epochs</b><small>mean gap {fmt(data?.continuity?.meanGapDays,1)} d</small></article>
+   <article><Layers3/><span>Catalog agreement</span><b>{data?.sourceAgreement?.state||'—'}</b><small>{data?.sourceAgreement?.deltaDays==null?'independent comparison unavailable':`${fmt(data.sourceAgreement.deltaDays,2)} d latest-scene delta`}</small></article>
+   <article><ShieldCheck/><span>Truth state</span><b>{data?.evidenceHash?'HASH BOUND':'UNBOUND'}</b><small>{data?.verifiedAt?when(data.verifiedAt):'no verification timestamp'}</small></article>
+  </div>
+  <div className='earth-sar-workspace'>
+   <div className='earth-sar-map-wrap'>
+    <div className='earth-sar-map-title'><div><b>Returned scene footprints</b><small>WGS84 geometry from catalog metadata · target crosshair is the current Earth workspace coordinate.</small></div><code>{lat.toFixed(5)}, {lon.toFixed(5)}</code></div>
+    <svg className='earth-sar-map' viewBox='0 0 640 320' role='img' aria-label='Returned SAR scene footprint geometry around the current WGS84 target'>
+     <defs><pattern id='sarGrid181' width='32' height='32' patternUnits='userSpaceOnUse'><path d='M32 0H0V32' fill='none'/></pattern></defs>
+     <rect x='0' y='0' width='640' height='320' className='earth-sar-map-bg'/><rect x='0' y='0' width='640' height='320' fill='url(#sarGrid181)' className='earth-sar-grid'/>
+     {map.rings.map((x,i)=><polygon key={x.key} points={x.points} className={`earth-sar-footprint band-${String(x.scene.band||'unknown').toLowerCase()} ${x.key===selected?'selected':''}`} onClick={()=>setSelected(x.key)}><title>{`${x.scene.family} ${x.scene.datetime||''}`}</title></polygon>)}
+     <circle cx={map.target[0]} cy={map.target[1]} r='5' className='earth-sar-target'/><path d={`M${map.target[0]-13} ${map.target[1]}h26M${map.target[0]} ${map.target[1]-13}v26`} className='earth-sar-crosshair'/>
+    </svg>
+    <div className='earth-sar-map-legend'><span><i className='band-c'/>C-band returned footprint</span><span><i className='band-l'/>L-band returned footprint</span><span><i className='target'/>query target</span></div>
+   </div>
+   <aside className='earth-sar-scenes'>
+    <header><b>Acquisition ledger</b><small>{data?.window?.start?`${new Date(data.window.start).toLocaleDateString()} → now`:'No returned window yet'}</small></header>
+    <div className='earth-sar-scene-list'>{scenes.length?scenes.map(s=><button key={sceneKey(s)} className={sceneKey(s)===sceneKey(chosen as Scene)?'active':''} onClick={()=>setSelected(sceneKey(s))}>
+     <span className={`earth-sar-band band-${String(s.band||'unknown').toLowerCase()}`}>{s.band||'?'}</span><span className='earth-sar-scene-copy'><b>{s.family} · {s.provider}</b><strong>{when(s.datetime)}</strong><small>{[s.orbitState,s.instrumentMode,(s.polarizations||[]).join('/')].filter(Boolean).join(' · ')||'returned metadata only'}</small></span><em>{s.calibration?.relativeCoherence==null?'OBSERVED':`REL ${fmt(s.calibration.relativeCoherence,3)}`}</em>
+    </button>):<div className='earth-sar-empty'>No matching returned scene in this window. OMEGA leaves the target unobserved rather than filling it with synthetic radar pixels.</div>}</div>
+   </aside>
+  </div>
+  {chosen&&<section className='earth-sar-detail'>
+   <div className='earth-sar-detail-copy'><span>SELECTED OBSERVATION</span><h4>{chosen.family} · {chosen.platform||chosen.provider}</h4><p>{when(chosen.datetime)} · {chosen.band||'unknown'}-band · {chosen.productType||'product type not returned'}</p><div className='earth-sar-detail-grid'><b>Polarization <strong>{(chosen.polarizations||[]).join(' / ')||'—'}</strong></b><b>Orbit <strong>{chosen.orbitState||'—'}</strong></b><b>Incidence <strong>{chosen.incidenceAngle==null?'—':`${fmt(chosen.incidenceAngle,2)}°`}</strong></b><b>Resolution metadata <strong>{chosen.resolutionM==null?'—':`${fmt(chosen.resolutionM,2)} m`}</strong></b></div></div>
+   <div className='earth-sar-derived'><span>DERIVED RELATIVE FRAME</span><b>Residual {fmt(chosen.calibration?.frameResidual,4)}</b><strong>Relative coherence {fmt(chosen.calibration?.relativeCoherence,4)}</strong><small>Comparison of returned time / geometry / band / polarization metadata only. This is not interferometric coherence or a physical deformation measurement.</small></div>
+   {httpsUrl(chosen.thumbnail)&&<img src={httpsUrl(chosen.thumbnail)!} alt='Returned SAR source preview for selected acquisition'/>}
+  </section>}
+  <section className='earth-sar-sources'>
+   <header><b>Provider evidence plane</b><small>A provider is not promoted to target coverage unless its query actually returned a scene.</small></header>
+   <div>{(data?.sources||[]).map((s:any)=><article key={s.provider} className={s.ok?'ok':'unavailable'}><span>{s.provider}</span><b>{s.ok?'RETURNED':'UNAVAILABLE'}</b><small>{s.returnedScenes??0} scene(s) · {s.latencyMs??'—'} ms</small></article>)}</div>
+   <div className='earth-sar-programs'>{activePrograms.map((p:any)=><span key={p.id}><b>{p.label}</b><small>{p.band}-band · active target query</small></span>)}{externalPrograms.map((p:any)=><span key={p.id} className='external'><b>{p.label}</b><small>{p.band}-band · public external index · target coverage not claimed</small></span>)}</div>
+  </section>
+  <footer className='earth-sar-proof'><ShieldCheck/><div><b>R181 SAR evidence hash</b><code>{data?.evidenceHash||'not available'}</code></div><p>{data?.truthBoundary||'No SAR evidence payload returned yet.'}</p></footer>
+ </section>
+}
