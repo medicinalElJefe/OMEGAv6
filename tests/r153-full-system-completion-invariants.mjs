@@ -55,14 +55,30 @@ for(const token of [
  "defaultCommandPlan('BUILD','AUTO_BUILD',root)",
  'validateCommandPlan(initial,root,[])',
  "api.post<any>('/api/missions'",
+ "R153_SOURCE_SCHEMA='OMEGA_SOVEREIGN_FULL_BUILD_R151'",
+ 'draft:{schema:R153_SOURCE_SCHEMA',
  'targetDeviceId:device.id',
  'confirmedMission:true',
- 'maxCycles:18',
+ 'R153_MAX_CYCLES=12',
+ 'maxCycles:R153_MAX_CYCLES',
  "'INDEX','READ_TEXT','SEARCH_TEXT','HASH_TREE','BUILD','TEST','PACKAGE','SUPPORT_BUNDLE','APPLY_PATCH','WRITE_TEXT'",
  'RUN COMPLETE 24-FAMILY BUILD',
  'R141/R142 return fingerprint pending'
 ])must(executor.includes(token),'whole-system executor missing '+token);
 for(const forbidden of ['TRAIN_LOCAL','OPEN_URL','CLICK','TYPE_TEXT','REPLAY_MACRO'])must(!executor.match(new RegExp(`ALLOWED=.*${forbidden}`)),'whole-system build allow-list must not include '+forbidden);
+
+const adaptive=read('src/execution/adaptiveSovereignMissionR153.js');
+for(const token of [
+ "R153_SOURCE_SCHEMA='OMEGA_SOVEREIGN_FULL_BUILD_R151'",
+ 'R153_MAX_CYCLES=12',
+ 'RETURNED HOST PROOF ADVANCES THE MISSION',
+ 'DISCOVERY PRECEDES MUTATION',
+ 'REPAIR IS READ-PROOF + PREIMAGE-SHA BOUND',
+ 'COMPLETE IS NEVER INFERRED FROM QUEUE STATE',
+ 'requestBody?.draft?.schema!==R153_SOURCE_SCHEMA'
+])must(adaptive.includes(token),'adaptive R153 mission compatibility missing '+token);
+must(!executor.includes("schema:'OMEGA_FULL_SYSTEM_BUILD_R153'"),'whole-system executor must not bypass R153 by inventing an unrecognized draft schema');
+must(!executor.includes('maxCycles:18'),'whole-system executor must not advertise a cycle budget above the admitted R153 maximum');
 
 const control=read('src/system/operationalControlPlaneR130.js');
 must(control.includes("import {R153_FULL_SYSTEM_CONTRACT,R153_REVISION} from '../fullSystemCompletionR153.js'"),'operational control plane must import R153 authority');
@@ -79,4 +95,4 @@ must(r127.includes('R127_ZERO_DRIFT_SHA256')&&r127.includes('x-omega-agent-sha25
 must(r151.includes("R151_EXECUTION_SPINE='CURRENT HEARTBEAT -> INDEX -> HASH_TREE -> PROOF-CONDITIONED REPAIR -> BUILD -> TEST -> PACKAGE -> R141 CLOSURE'"),'R151 proven native build spine must remain intact');
 for(const token of ['DISCOVERED_IS_NOT_AUTHORIZED','AVAILABLE_IS_NOT_INVOKED','RETURNED_IS_NOT_VERIFIED','OUTPUT_CANNOT_MUTATE_CANONSTATE_WITHOUT_R125_ADMISSION'])must(r142.includes(token),'R142 execution truth law missing '+token);
 
-console.log('R153 FULL SYSTEM COMPLETION PASS · 24/24 current successors accounted · 19 implemented + 5 explicit gates + 0 successor restoration debt · 100 systems / 12 menus / 36 controls / 18 capabilities / 44 routes preserved · direct proof-gated PC whole-build mission · real bounded XLSX read/write bridge · R127/R151/R142/R125 truth chain intact');
+console.log('R153 FULL SYSTEM COMPLETION PASS · 24/24 current successors accounted · 19 implemented + 5 explicit gates + 0 successor restoration debt · 100 systems / 12 menus / 36 controls / 18 capabilities / 44 routes preserved · R151 schema enters the existing bounded R153 adaptive engine · real bounded XLSX read/write bridge · R127/R151/R142/R125 truth chain intact');
