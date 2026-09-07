@@ -51,7 +51,7 @@ export default function VisualAtlasR183({packet,onSelectAddress}:{packet:VisualA
     </>}
     {tab==='SCALE'&&<>
      <div className='va183-title'><Boxes/><span><b>Recursive scale / address resolution</b><small>These are atlas and render resolution roles. They do not claim literal physical dimensions.</small></span></div>
-     <div className='va183-scale-ladder'>{R183_SCALE_HORIZONS.map((s,i)=><article key={s.id} className={s.count===20736?'active':''}><span>{i+1}</span><div><b>{s.label}</b><small>{s.role}</small></div><em style={{width:`${18+82*(Math.log12(s.count)/Math.log12(35831808))}%`}}/></article>)}</div>
+     <div className='va183-scale-ladder'>{R183_SCALE_HORIZONS.map((s,i)=><article key={s.id} className={s.count===20736?'active':''}><span>{i+1}</span><div><b>{s.label}</b><small>{s.role}</small></div><em style={{width:`${18+82*(Math.log(s.count)/Math.log(35831808))}%`}}/></article>)}</div>
      <div className='va183-scale-address'><div><span>D</span><b>{packet.coordinates.d+1}</b></div><div><span>P</span><b>{packet.coordinates.p+1}</b></div><div><span>R</span><b>{packet.coordinates.r+1}</b></div><div><span>L</span><b>{packet.coordinates.l+1}</b></div><ArrowRight/><strong>S{packet.stateId}</strong></div>
     </>}
     {tab==='PROOF'&&<>
