@@ -22,6 +22,12 @@ export class OmegaApiError extends Error {
   }
 }
 
+export const OMEGA_CANONICAL_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev';
+const CANONICAL_HOST='omegav6.jeffdeweyeljefe.workers.dev';
+const OMEGA_MIRROR_HOSTS=new Set([
+  'omega-living-light-etching-private-woven2.vercel.app',
+  'omega-optical-cloud-woven2.vercel.app'
+]);
 const SESSION_KEY='omega.v6.runtime.session.r32';
 const BRIDGE_KEY='omega.v6.hybrid.bridge.r32';
 function randomId(prefix:string){try{return `${prefix}_${crypto.randomUUID()}`}catch{return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`}}
@@ -31,6 +37,18 @@ export function getHybridBridge():HybridBridgeCredential|null{try{const raw=loca
 export function saveHybridBridge(input:{bridgeId:string;secret:string;pairingCode?:string}){const value={...input,createdAt:Date.now()};try{localStorage.setItem(BRIDGE_KEY,JSON.stringify(value))}catch{}return value}
 export function clearHybridBridge(){try{localStorage.removeItem(BRIDGE_KEY)}catch{}}
 
+function runtimeHost(){try{return typeof window!=='undefined'?window.location.hostname.toLowerCase():''}catch{return''}}
+function localDevelopmentHost(host:string){return host==='localhost'||host==='127.0.0.1'||host==='::1'}
+export function shouldUseCanonicalApiAuthority(url:string,host=runtimeHost()){
+  if(!url.startsWith('/api/'))return false;
+  if(!host||host===CANONICAL_HOST||localDevelopmentHost(host))return false;
+  return OMEGA_MIRROR_HOSTS.has(host);
+}
+export function resolveOmegaApiUrl(url:string,host=runtimeHost()){
+  if(/^https?:\/\//i.test(url))return url;
+  return shouldUseCanonicalApiAuthority(url,host)?`${OMEGA_CANONICAL_ORIGIN}${url}`:url;
+}
+
 async function request<T>(method: string, url: string, body?: unknown): Promise<ApiResult<T>> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 20000);
@@ -38,12 +56,13 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
     const bridge=getHybridBridge(),headers:Record<string,string>={'x-omega-session-id':runtimeSessionId()};
     if(body!==undefined)headers['content-type']='application/json';
     if(bridge){headers['x-omega-bridge-id']=bridge.bridgeId;headers['x-omega-bridge-secret']=bridge.secret}
-    const response = await fetch(url, {
+    const target=resolveOmegaApiUrl(url);
+    const response = await fetch(target, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
       cache: 'no-store',
-      credentials: 'same-origin',
+      credentials: target.startsWith(OMEGA_CANONICAL_ORIGIN)?'omit':'same-origin',
       signal: controller.signal
     });
     const contentType = response.headers.get('content-type') || '';
