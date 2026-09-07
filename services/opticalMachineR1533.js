@@ -12,13 +12,20 @@ const json=(body,status=200)=>new Response(JSON.stringify(body,null,2),{status,h
 async function augment(response,patch){const body=await response.json();const h=new Headers(response.headers);h.set('x-omega-tool-version',R1533_TOOL_VERSION);h.set('x-omega-truth-boundary','SCREEN_ONLY_WITH_FULLWAVE_ADMISSIBILITY_GATE');h.set('cache-control','no-store');return new Response(JSON.stringify({...body,...patch},null,2),{status:response.status,headers:h})}
 const makeCall=(operation,payload,caller='omega-http-r1533')=>({schema:R1533_TOOL_SCHEMA,caller:{id:caller,kind:'human-tool'},request_id:`http_${operation}_${Date.now()}`,goal:'Apply the R41/R43 full-wave geometry authority gate before robust RCWA promotion.',operation,payload});
 const fullwaveGeometryGate={schema:'OMEGA_FULLWAVE_GEOMETRY_GATE_R1533',version:R1533_TOOL_VERSION,authority:'R41_R43_RCWA_MANIFOLD',rule:'hypot(width_nm,length_nm) <= 0.95 * pitch_nm AND width_nm < length_nm',cell_ratio:0.95,robust_bridge:'sovereign/omega_fullwave_manifold_r1533.py',truth:'This gate mirrors the inherited R41/R43 RCWA unit-cell admissibility filter. It is a numerical geometry-domain rule for this solver stack, not fabrication validation or a universal physical constant.'};
+const openapiFor=origin=>{
+ const o=tool.openapi(origin);
+ const geometryPayload={type:'object',properties:{geometry:{type:'object',required:['pitch_nm','width_nm','length_nm','height_nm'],properties:{pitch_nm:{type:'number'},width_nm:{type:'number'},length_nm:{type:'number'},height_nm:{type:'number'},orientation_deg:{type:'number'}}},engineering_ratio:{type:'number',minimum:0.8,maximum:0.949},tolerance_nm:{type:'number',minimum:0,maximum:50},phase_margin_deg:{type:'number',minimum:0.5,maximum:12},wavelengths_nm:{type:'array',maxItems:9,items:{type:'number'}}}};
+ o.paths['/api/tool/admissibility']={post:{summary:'Check one geometry against the inherited R41/R43 RCWA manifold',requestBody:{required:true,content:{'application/json':{schema:geometryPayload}}},responses:{'200':{description:'Deterministic geometry admissibility and projection families'}}}};
+ o.paths['/api/tool/robust-queue']={post:{summary:'Prepare a bounded robust grcwa validation queue without executing full-wave work in the edge Worker',requestBody:{required:true,content:{'application/json':{schema:geometryPayload}}},responses:{'200':{description:'PREPARED_NOT_SOLVED robust full-wave queue contract'}}}};
+ return o;
+};
 
 async function route(request){
  const u=new URL(request.url),origin=u.origin;
  if(request.method==='OPTIONS'&&u.pathname.startsWith('/api/tool/'))return new Response(null,{status:204,headers});
  if(request.method==='GET'&&u.pathname==='/api/tool/descriptor')return json(tool.descriptor(origin));
  if(request.method==='GET'&&u.pathname==='/api/tool/probe')return json(tool.probe(origin));
- if(request.method==='GET'&&u.pathname==='/openapi.json')return json(tool.openapi(origin));
+ if(request.method==='GET'&&u.pathname==='/openapi.json')return json(openapiFor(origin));
  if(request.method==='POST'&&u.pathname==='/api/tool/invoke'){
   const call=await request.json().catch(()=>null),result=await tool.invoke(call);return json(result.body,result.status);
  }
