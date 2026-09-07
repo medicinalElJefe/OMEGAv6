@@ -16,21 +16,20 @@ const replacements=[
  ["return <div className='matter-traversal b037'>", "return <div className='matter-traversal b037' data-r182-motion={uiMotionClock.mode}>"],
  ["<h2>State traversal first. Dashboard second.</h2>", "<h2>Navigate one proven state transition at a time.</h2>"],
  ["</header><nav className='mt-native-menu'>", "</header><div className='r182-motion-truth'><ShieldCheck/><div><b>{uiMotionClock.mode} · route phase {uiMotionClock.routePhase.toFixed(3)}</b><small>{uiMotionClock.truthBoundary}</small></div></div><nav className='mt-native-menu'>"],
- ["{playing?'Pause':'Play'}</button>", "{playing?'Pause route':'Play route'}</button>"],
  ["<span>time {host.timeAuthority} · tick {tick}</span>", "<span>route phase {uiMotionClock.routePhase.toFixed(3)} · tick {tick}</span>"],
  ["<p>{host.boundary}</p></section></div>", "<p>{host.boundary} {VISUAL_COHERENCE_BOUNDARY}</p></section></div>"]
 ];
 for(const [from,to] of replacements){
   const count=text.split(from).length-1;
   if(count<1)throw new Error(`R182 patch anchor missing: ${from.slice(0,120)}`);
-  text=text.replace(from,to);
+  text=text.split(from).join(to);
 }
-const wallClockMatches=(text.match(/now\*\.00(?:1|0015)|Math\.sin\(now\*\.005\)/g)||[]);
-if(wallClockMatches.length)throw new Error(`R182 wall-clock geometry anchors remain: ${wallClockMatches.join(', ')}`);
 text=text.replaceAll('now*.001','motionTime');
+if(/now\*\.000015|Math\.sin\(now\*\.005\)|now\*\.001/.test(text))throw new Error('R182 wall-clock geometry motion remains');
 if(!text.includes("uni('uTime',motionTime)"))throw new Error('R182 shader motion clock was not rebound');
 if(!text.includes("[playing,setPlaying]=useState(false)"))throw new Error('R182 explicit route-play default missing');
 if(!text.includes("[drawer,setDrawer]=useState(false)"))throw new Error('R182 progressive-disclosure default missing');
 if(!text.includes("data-r182-motion={uiMotionClock.mode}"))throw new Error('R182 motion-state surface marker missing');
+for(const retained of ["'MATTER','CORRIDOR','PROOF','TOPOLOGY','REPLAY'","'HOST_FOLLOW','SHELL_FOLLOW','PROOF_FOLLOW','FREE'","'NODE','SHELL','HEATMAP','HOST','PROOF'",'downloadReplay','downloadSupportBundle','proofPlate','bookmark','sonify','Commit','Live Immersive','Extreme Traversal'])if(!text.includes(retained))throw new Error(`R182 retained Matter function missing: ${retained}`);
 fs.writeFileSync(path,text);
 console.log('R182 MATTER TRAVERSAL COHERENCE PATCH PASS');
