@@ -42,6 +42,25 @@ function triggerBlock(text,trigger){
   }
   return '';
 }
+function branchTokens(block){
+  if(!block)return[];
+  const clean=x=>String(x).trim().replace(/^['"]|['"]$/g,'');
+  const inline=block.match(/\bbranches\s*:\s*\[([^\]]*)\]/i);
+  if(inline)return inline[1].split(',').map(clean).filter(Boolean);
+  const lines=block.split(/\r?\n/);
+  const out=[];
+  let branchIndent=null;
+  for(let i=0;i<lines.length;i++){
+    const m=lines[i].match(/^(\s*)branches\s*:\s*$/i);
+    if(m){branchIndent=m[1].length;continue}
+    if(branchIndent===null)continue;
+    const indent=(lines[i].match(/^\s*/)?.[0].length)||0;
+    if(lines[i].trim()&&indent<=branchIndent)break;
+    const item=lines[i].match(/^\s*-\s*(.+?)\s*$/);
+    if(item)out.push(clean(item[1]));
+  }
+  return out;
+}
 
 const successors=[];
 for(const [name,text] of contents){
@@ -60,7 +79,10 @@ for(const [name,text] of contents){
   assert.match(text,/permissions:\s*\n\s+contents:\s*read/i,`${name} must declare read-only contents authority`);
   assert.ok(!/\b(contents|pull-requests|actions|deployments|checks|statuses|issues|packages|id-token|security-events):\s*write\b/i.test(text),`${name} successor workflow has write authority`);
   const push=triggerBlock(text,'push');
-  if(push)assert.ok(!/\bmain\b/i.test(push),`${name} successor workflow may not push-trigger on main`);
+  if(push){
+    const branches=branchTokens(push);
+    assert.ok(!branches.includes('main'),`${name} successor workflow may not push-trigger on literal main`);
+  }
   assert.equal(triggerBlock(text,'schedule'),'',`${name} successor workflow may not schedule recurring execution`);
   successors.push({name,revision});
 }
@@ -70,4 +92,4 @@ assert.match(selfbuild,/schedule:/);assert.match(selfbuild,/workflow_dispatch:/)
 const ci=contents.get('ci.yml');assert.match(ci,/Promoted main commit must be an exact two-parent merge commit/);assert.match(ci,/verify_federation_live_r1681\.mjs/,'canonical CI must delegate live Federation/Optical identity proof to the propagation-safe verifier');
 const convergence=contents.get('r170-current-convergence.yml');for(const needle of ['prove_successor_workflow_invariants_r175.mjs','r175-multidomain-living-world-truth-invariants.mjs','r167-active-optical-r1532-convergence-invariants.mjs','r1532-adaptive-external-search-invariants.mjs','wrangler.optical-machine-r1532.jsonc'])assert.ok(convergence.includes(needle),`current convergence missing proof: ${needle}`);
 assert.equal(governor.historicalWorkflowArchive.historicalExecutionAuthority,false);assert.equal(governor.selfBuild.exactProductionHeadRequired,true);assert.equal(governor.selfBuild.autoMerge,false);assert.equal(governor.selfBuild.directMainMutation,false);assert.equal(successorPolicy.readOnly,true);assert.equal(successorPolicy.mainPushAllowed,false);assert.equal(successorPolicy.recurringScheduleAllowed,false);assert.equal(governor.currentCapabilityFloor,'R175');
-console.log(JSON.stringify({schema:'OMEGA_WORKFLOW_TOPOLOGY_R175_1',activeCount:active.length,coreCount:coreRequired.length,successorCount:successors.length,successors,archivedCount:archived.length,maxActive,currentCapabilityFloor:governor.currentCapabilityFloor,directMainCandidateMutation:false,recursiveWorkflowRunFanout:false,productionProofRequired:true,successorPolicy:'READ_ONLY_BRANCH_OR_PR_PROOF_AUTHORITIES',canonicalAdmissionAuthority:'R125',result:'PASS'},null,2));
+console.log(JSON.stringify({schema:'OMEGA_WORKFLOW_TOPOLOGY_R175_2',activeCount:active.length,coreCount:coreRequired.length,successorCount:successors.length,successors,archivedCount:archived.length,maxActive,currentCapabilityFloor:governor.currentCapabilityFloor,directMainCandidateMutation:false,recursiveWorkflowRunFanout:false,productionProofRequired:true,successorPolicy:'READ_ONLY_BRANCH_OR_PR_PROOF_AUTHORITIES',canonicalAdmissionAuthority:'R125',result:'PASS'},null,2));
