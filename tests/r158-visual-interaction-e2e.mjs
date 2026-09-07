@@ -3,7 +3,6 @@ import {chromium} from 'playwright';
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const viewports=[['desktop',{width:1440,height:960}],['mobile',{width:390,height:844}]];
 const visualRoutes=['Relativity','Data Motion','Field','Visual Instrument','Convergence','Matter Traversal','Atlas','Reality Lab'];
-const visible=async locator=>locator.count()&&locator.first().isVisible();
 
 async function openRoute(page,route){
  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
@@ -48,18 +47,33 @@ async function globalVisualIntegrity(page,route,viewportName){
 async function r158RelativityIntegrity(page,viewportName){
  await openRoute(page,'Relativity');
  await page.waitForSelector('.capu158-stage canvas',{state:'visible',timeout:30000});
+ await page.waitForSelector('.oref158-visual svg',{state:'visible',timeout:30000});
  const geometry=await page.evaluate(()=>{
-  const stage=document.querySelector('.capu158-stage');
   const rect=el=>{const r=el.getBoundingClientRect();return{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
-  const isVisible=el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return r.width>1&&r.height>1&&s.display!=='none'&&s.visibility!=='hidden'};
+  const isVisible=el=>{if(!el)return false;const r=el.getBoundingClientRect(),s=getComputedStyle(el);return r.width>1&&r.height>1&&s.display!=='none'&&s.visibility!=='hidden'};
+  const stage=document.querySelector('.capu158-stage');
   const stageRect=rect(stage);
   const selectors=['.capu158>header','.capu158-scenes','.capu158-controls','.capu158-kpis','.capu158-inspector','.capu158-resolution-strip','.capu158>footer'];
   const controls=selectors.flatMap(sel=>[...document.querySelectorAll(sel)]).filter(isVisible).map(el=>({sel:el.className||el.tagName,rect:rect(el)}));
-  return{stage:stageRect,controls,focusPosition:getComputedStyle(document.querySelector('.capu158')).position,labelVisible:isVisible(document.querySelector('.capu158-stage-label'))};
+  const reflex=document.querySelector('.oref158-visual');
+  const reflexControls=[...document.querySelectorAll('.oref158>header,.oref158>footer,.oref158 aside')].filter(isVisible).map(el=>({sel:el.className||el.tagName,rect:rect(el)}));
+  return{
+   stage:stageRect,
+   controls,
+   focusPosition:getComputedStyle(document.querySelector('.capu158')).position,
+   labelVisible:isVisible(document.querySelector('.capu158-stage-label')),
+   reflex:reflex?rect(reflex):null,
+   reflexControls,
+   reflexOutputMarked:reflex?.getAttribute('data-omega-visual-output')==='true',
+   reflexReserved:[...document.querySelectorAll('.oref158 [data-omega-control-plane="reserved"]')].length
+  };
  });
  if(geometry.stage.width<220||geometry.stage.height<360)throw new Error(`${viewportName}: R158 stage unusable ${JSON.stringify(geometry.stage)}`);
  for(const c of geometry.controls){const area=intersection(geometry.stage,c.rect);if(area>1)throw new Error(`${viewportName}: R158 control ${c.sel} covers ${area.toFixed(1)}px² of protected output`)}
  if(geometry.labelVisible)throw new Error(`${viewportName}: legacy stage label still covers the output plane`);
+ if(!geometry.reflex||geometry.reflex.width<220||geometry.reflex.height<260)throw new Error(`${viewportName}: organism reflex output unusable ${JSON.stringify(geometry.reflex)}`);
+ if(!geometry.reflexOutputMarked||geometry.reflexReserved<3)throw new Error(`${viewportName}: organism reflex output/control plane contract missing`);
+ for(const c of geometry.reflexControls){const area=intersection(geometry.reflex,c.rect);if(area>1)throw new Error(`${viewportName}: organism reflex context/control ${c.sel} covers ${area.toFixed(1)}px² of protected reflex output`)}
 
  const immersive=page.getByRole('button',{name:/Immersive/});
  if(await immersive.count()){await immersive.first().click();await page.waitForTimeout(150);const position=await page.locator('.capu158').evaluate(el=>getComputedStyle(el).position);if(position==='fixed')throw new Error(`${viewportName}: focus/immersive mode became a fixed covering overlay`)}
@@ -99,5 +113,5 @@ try{
   if(pageErrors.length)throw new Error(`${name}: browser errors ${pageErrors.join(' | ').slice(0,2400)}`);
   await context.close();
  }
- console.log('R158 VISUAL INTERACTION PASS · protected output planes · controls and global navigation non-overlapping · desktop/mobile operational floor retained · document wheel scroll preserved · deliberate modified-wheel zoom retained');
+ console.log('R158 VISUAL INTERACTION PASS · protected capability-universe + organism-reflex output planes · global and local controls non-overlapping · desktop/mobile operational floor retained · document wheel scroll preserved · deliberate modified-wheel zoom retained');
 }finally{await browser.close()}
