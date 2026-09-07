@@ -1,6 +1,7 @@
 import {Cpu,ShieldCheck,Waypoints,Wrench} from 'lucide-react';
 import {COMPLETION_SEQUENCE_R95,fullSystemConvergenceR95,ONE_SYSTEM_LEDGER_AUTHORITY_R95} from './fullSystemConvergenceR95';
 import {R153_FULL_SYSTEM_CONTRACT} from './fullSystemCompletionR153.js';
+import FullSystemCompletionR153 from './FullSystemCompletionR153';
 import UltraSystemFabricR119 from './UltraSystemFabricR119';
 import './fullSystemConvergenceR95.css';
 import './ultraMountR119.css';
@@ -17,8 +18,9 @@ export default function FullSystemConvergencePanelR95({onNavigate}:{onNavigate:(
    </section>
    <section className='r153-completion-banner'>
     <div><span>CURRENT SUCCESSOR REALITY</span><b>{implemented} implemented · {truthGated} truth-gated · {c.restore.length} restoration debt</b><small>R48 already restored implementations that the older V24 family labels still described as donor/debt/target. R153 makes the stronger successor ledger the global operational view while preserving the historical labels as provenance.</small></div>
-    <div><button onClick={()=>onNavigate('Hybrid Link')}><Cpu/>Complete / verify on paired PC</button><button onClick={()=>onNavigate('Build Out')}><Wrench/>Build, test, package & proof</button></div>
+    <div><button onClick={()=>onNavigate('Hybrid Link')}><Cpu/>Connect / verify PC + RCWA</button><button onClick={()=>onNavigate('Build Out')}><Wrench/>Inspect build/package proof</button></div>
    </section>
+   <FullSystemCompletionR153 onNavigate={onNavigate}/>
    <nav className='r95-build-sequence' aria-label='One-system completion sequence'>
     {COMPLETION_SEQUENCE_R95.map(x=><button key={x.order} onClick={()=>onNavigate(x.route)}><code>{String(x.order).padStart(2,'0')}</code><span><b>{x.menu}</b><small>{x.goal}</small></span><Waypoints/></button>)}
    </nav>
