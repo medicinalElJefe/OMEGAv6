@@ -4,7 +4,8 @@ export type FamilyOperationalProofStateR137='CURRENT_EXECUTION_PROOF'|'CURRENT_S
 export type FamilyOperationalProofR137={familyId:string;state:FamilyOperationalProofStateR137;current:boolean;label:string;detail:string;source:string;observedAt:string|null};
 
 export const FAMILY_OPERATIONAL_PROOF_LAWS_R137=Object.freeze({
- revision:'R137/R168',
+ revision:'R137',
+ successorClassificationRevision:'R168',
  separation:'HISTORICAL_FAMILY_STATUS_CURRENT_SUCCESSOR_EXECUTION_AND_CURRENT_OPERATIONAL_PROOF_ARE_SEPARATE_AXES',
  heartbeat:'HYBRID_DEVICE_GATE_OPENS_ONLY_FROM_CURRENT_AUTHENTICATED_HEARTBEAT',
  reachability:'HTTP_OR_CONTROL_PLANE_REACHABILITY_IS_SERVICE_OBSERVATION_NOT_NATIVE_EXECUTION',
@@ -48,5 +49,5 @@ export function currentNextActionR137(family:SystemFamily,proof:FamilyOperationa
 }
 
 export function familyOperationalProofSummaryR137(operational:any,hybrid:any){
- const devices=onlineDevices(hybrid);return{revision:'R137/R168',operationalObserved:Boolean(operational),observedAt:observedAt(operational),reachableCount:Number(operational?.summary?.reachableCount||0),requiredCount:Number(operational?.summary?.requiredCount||0),canonicalRuntime:String(operational?.summary?.canonicalRuntime||'UNKNOWN'),pcOnlineProved:pcProved(operational,hybrid),onlineDeviceCount:devices.length,authority:'OPERATIONAL_OBSERVATION_NOT_CANON',successorAuthority:'R48_R153_CURRENT_SUCCESSOR_LEDGER',worldContinuityAuthority:'R134_APPEND_ONLY_SCAR_PROOF_CHAIN',wovenContinuumAuthority:'R134_STRUCTURAL_REFERENCE_ROUTE_CONTEXT',livingWorldAuthority:'R136_CURRENT_EVIDENCE_MISSION_PROJECTION_CONTEXT',laws:FAMILY_OPERATIONAL_PROOF_LAWS_R137};
+ const devices=onlineDevices(hybrid);return{revision:'R137',successorClassificationRevision:'R168',operationalObserved:Boolean(operational),observedAt:observedAt(operational),reachableCount:Number(operational?.summary?.reachableCount||0),requiredCount:Number(operational?.summary?.requiredCount||0),canonicalRuntime:String(operational?.summary?.canonicalRuntime||'UNKNOWN'),pcOnlineProved:pcProved(operational,hybrid),onlineDeviceCount:devices.length,authority:'OPERATIONAL_OBSERVATION_NOT_CANON',successorAuthority:'R48_R153_CURRENT_SUCCESSOR_LEDGER',worldContinuityAuthority:'R134_APPEND_ONLY_SCAR_PROOF_CHAIN',wovenContinuumAuthority:'R134_STRUCTURAL_REFERENCE_ROUTE_CONTEXT',livingWorldAuthority:'R136_CURRENT_EVIDENCE_MISSION_PROJECTION_CONTEXT',laws:FAMILY_OPERATIONAL_PROOF_LAWS_R137};
 }
