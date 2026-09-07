@@ -37,7 +37,7 @@ jobs:
         run: node tests/r114-federation-closure-invariants.mjs
       - name: Preserve living-world continuity authorities
         run: |
-          node tests/r140-unified-living-operation-fabric-invariants.mjs
+          node tests/r140-unified-living-operation-fabric.mjs
           node tests/r136-living-world-frame-invariants.mjs
           node tests/r134-canonical-world-continuity.mjs
       - name: Preserve Hybrid, Earth and computed-reality truth gates
