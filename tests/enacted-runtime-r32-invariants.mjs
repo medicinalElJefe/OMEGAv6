@@ -32,3 +32,4 @@ console.log('OMEGA R32 ENACTED RUNTIME PASS · durable event/action bus + govern
 await import('./r1801-hybrid-buildout-discovery-invariants.mjs');
 await import('./r183-canonical-api-runtime-routing-invariants.mjs');
 await import('./r185-temporal-relativity-performance-invariants.mjs');
+await import('./r186-verified-return-live-world-ingress-invariants.mjs');
