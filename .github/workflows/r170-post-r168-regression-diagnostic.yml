@@ -7,14 +7,20 @@ on:
   push:
     branches: [r170-post-r168-regression-convergence]
 
+permissions:
+  contents: read
+
 concurrency:
   group: r170-post-r168-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  OMEGA_E2E_URL: http://127.0.0.1:4173
+
 jobs:
   diagnose-and-prove:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,6 +28,10 @@ jobs:
           node-version: 22
       - name: Install repository dependencies
         run: npm install --no-fund
+      - name: Prove bounded active workflow topology and self-build governance
+        run: |
+          node scripts/verify_workflow_topology_r170.mjs
+          node tests/r170-self-build-governor-invariants.mjs
       - name: Prove merged R168 authority before inherited diagnostics
         run: |
           node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
@@ -31,6 +41,12 @@ jobs:
           node tests/capability-truth-r23-invariants.mjs
           node tests/transition-authority-r23-invariants.mjs
           node tests/single-frame-r27-invariants.mjs
+      - name: Preserve current R171-R174 living federation-world successor chain
+        run: |
+          node tests/r171-federation-receipt-world-reconciler-invariants.mjs
+          node tests/r172-federation-ledger-world-binding-invariants.mjs
+          node tests/r173-federation-ledger-world-observer-invariants.mjs
+          node tests/r174-living-world-pulse-invariants.mjs
       - name: Inherited band A · syntax routes restore home portability cloud visual
         id: band_a
         continue-on-error: true
@@ -151,3 +167,25 @@ jobs:
         run: node -e "const x=process.env; const bad=['BAND_A','BAND_B','BAND_C','BAND_D','BUILD'].filter(k=>x[k]!=='success'); if(bad.length){console.error('R170 inherited regression bands failed:',bad.map(k=>k+'='+x[k]).join(', ')); process.exit(1)} console.log('R170 inherited regression bands PASS')"
       - name: Canonical Worker dry run
         run: npx wrangler deploy --dry-run --outdir .wrangler-r170
+      - name: Install Chromium for full desktop/mobile proof
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start exact production build locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r170-preview.log 2>&1 &
+          echo $! >/tmp/omega-r170-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r170-preview.log
+          exit 1
+      - name: Exercise all 44 routes on desktop and mobile
+        run: node tests/r118-browser-operational-e2e.mjs
+      - name: Prove R164 reflex swarm containment on desktop and mobile
+        run: node tests/r164-reflex-autonomic-browser-e2e.mjs
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r170-preview.log || true
