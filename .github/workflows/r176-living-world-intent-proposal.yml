@@ -1,0 +1,53 @@
+name: R176 Living World Intent Proposal
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/world/livingWorldIntentProposalR176.js'
+      - 'tests/r176-living-world-intent-proposal-invariants.mjs'
+      - '.github/workflows/r176-living-world-intent-proposal.yml'
+  push:
+    branches: [r176-living-world-intent-proposal]
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r176-living-world-intent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove focused R176 bounded intent assembly
+        run: |
+          node --check src/world/livingWorldIntentProposalR176.js
+          node tests/r176-living-world-intent-proposal-invariants.mjs
+      - name: Preserve R175 multi-domain world truth and R174 visual surface
+        run: |
+          node tests/r175-multidomain-living-world-truth-invariants.mjs
+          node tests/r174-living-world-pulse-invariants.mjs
+      - name: Preserve federation ledger and closure chain
+        run: |
+          node tests/r173-federation-ledger-world-observer-invariants.mjs
+          node tests/r172-federation-ledger-world-binding-invariants.mjs
+          node tests/r171-federation-receipt-world-reconciler-invariants.mjs
+          node tests/r114-federation-closure-invariants.mjs
+      - name: Preserve one-world visual and scar continuity
+        run: |
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+      - name: Preserve Hybrid Earth computed-reality and admission truth gates
+        run: |
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Run inherited regression and production build
+        run: npm run check
+      - name: Prove canonical Worker package remains deployable
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r176-dry-run
