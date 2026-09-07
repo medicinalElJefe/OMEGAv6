@@ -7,12 +7,12 @@ export type BuildPotentialPriorityR133='P0'|'P1'|'P2'|'P3';
 export const BUILD_POTENTIAL_LAWS_R133=Object.freeze({
  revision:'R133/R168',
  source:'systemAtlasRuntime.FAMILIES + FAMILY_EXPRESSION + R168 successor execution authority',
- statusTruth:'Historical family registration and current effective successor execution are separate axes. R168 changes prioritization only when a bounded successor executor already exists.',
+ statusTruth:'Family registration is not execution. Historical family registration and current effective successor execution are separate axes. R168 changes prioritization only when a bounded successor executor already exists.',
  operating:'WEB_ACTIVE / SOURCE_ACTIVE / LOCAL_ACTIVE effective states are operating within their declared boundaries.',
  prove:'DEVICE_GATED / EVIDENCE_GATED require the missing device/evidence proof; they are not treated as broken or live.',
  restore:'RESTORATION_DEBT means no bounded successor executor is currently proved for that family.',
  productize:'DONOR_ONLY / NATIVE_TARGET remain donor/native targets unless a bounded successor executor is explicitly mapped by R168.',
- authority:'Build priority and successor execution cannot promote CanonState, scientific evidence, device execution, or native capability. R125 and existing proof/admission authorities remain unchanged.'
+ authority:'Build priority cannot promote CanonState, evidence, execution, native capability, or archive donors. R168 successor execution accounting also cannot promote scientific evidence, device execution, or native capability. R125 and existing proof/admission authorities remain unchanged.'
 });
 
 export function laneForFamilyStatusR133(status:SystemFamilyStatus):BuildPotentialLaneR133{
