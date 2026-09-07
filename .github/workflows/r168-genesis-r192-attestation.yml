@@ -1,0 +1,44 @@
+name: R168 Genesis R192 Attestation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/federation/genesisAttestationR168.js'
+      - 'public/omega-genesis-attestation-r168.json'
+      - 'tests/r168-genesis-r192-attestation-invariants.mjs'
+      - 'wrangler.jsonc'
+      - '.github/workflows/r168-genesis-r192-attestation.yml'
+  push:
+    branches: [main, r168-genesis-r192-attestation-membrane]
+    paths:
+      - 'src/federation/genesisAttestationR168.js'
+      - 'public/omega-genesis-attestation-r168.json'
+      - 'tests/r168-genesis-r192-attestation-invariants.mjs'
+      - 'wrangler.jsonc'
+      - '.github/workflows/r168-genesis-r192-attestation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove-attestation-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Preserve R167 Optical and federation truth
+        run: node tests/r167-active-optical-r1532-convergence-invariants.mjs
+      - name: Prove R168 Genesis exact-version attestation membrane
+        run: node tests/r168-genesis-r192-attestation-invariants.mjs
+      - name: Syntax-check R168 executable contracts
+        run: |
+          node --check src/federation/genesisAttestationR168.js
+          node --check tests/r168-genesis-r192-attestation-invariants.mjs
+      - name: Build without changing production bindings
+        run: npm run build
+      - name: Prove Wrangler package remains deployable
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r168-dry-run
