@@ -27,7 +27,7 @@ assert.equal(trusted.predecessorChainValid,true);
 assert.equal(trusted.acceptedReceiptCount,6);
 assert.equal(trusted.world.lastVerifiedStage,'ADMIT');
 assert.equal(trusted.federationClosed,true);
-assert.equal(trusted.world.frame.visualState.truthBands.federation.state,'RETURNED_EVIDENCE_NOT_CANON');
+assert.equal(trusted.world.frame.visualState.truthBands.federation,'RETURNED_EVIDENCE_NOT_CANON');
 assert.equal(trusted.canonicalMutation,false);
 assert.equal(trusted.canonicalAdmissionAuthority,'R125');
 for(const value of [trusted.claims.publicDeploymentProved,trusted.claims.pcOnlineProved,trusted.claims.solverValidityProved,trusted.claims.computedPhotorealRealityProved,trusted.claims.currentNetworkReachabilityProved])assert.equal(value,false);
