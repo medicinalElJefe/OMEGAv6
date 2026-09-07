@@ -22,5 +22,21 @@ const config=fs.readFileSync('wrangler.jsonc','utf8');
 assert.match(worker,/import r114/);assert.match(worker,/OMEGA_GENESIS_MACHINE/);assert.match(worker,/OMEGA_OPTICAL_MACHINE/);assert.match(worker,/ceremony\/proposal\/service/);assert.match(worker,/ceremony\/screen\/service/);assert.match(worker,/ceremony\/queue/);assert.match(worker,/CURRENT_RCWA_WORKER_REQUIRED|runtimeFetch/);
 const direct115=/"main": "src\/workerR115\.js"/.test(config),successor116=/"main": "src\/workerR116\.js"/.test(config)&&/import r115/.test(worker116);
 assert.ok(direct115||successor116,'canonical entrypoint must be R115 or a strict R116 successor importing R115');
-assert.match(config,/omega-genesis-machine-r115/);assert.match(config,/omega-optical-machine-r115/);
-console.log('R115 machine adapters PASS · PROPOSE → SCREEN → admissible RCWA request · authority boundaries preserved through current successor');
+assert.match(config,/omega-genesis-machine-r115/,'R115 Genesis machine remains the active proposed-generation binding until independently superseded');
+const activeR115=/"binding"\s*:\s*"OMEGA_OPTICAL_MACHINE"\s*,\s*"service"\s*:\s*"omega-optical-machine-r115"/.test(config);
+const activeR1532=/"binding"\s*:\s*"OMEGA_OPTICAL_MACHINE"\s*,\s*"service"\s*:\s*"omega-optical-machine-r1532"/.test(config);
+assert.ok(activeR115||activeR1532,'active Optical binding must preserve R115 or use its admitted R153.2 successor');
+if(activeR1532){
+ assert.equal(fs.existsSync('services/opticalMachineR115.js'),true,'R115 Optical implementation must remain as lineage evidence after successor promotion');
+ assert.equal(fs.existsSync('services/opticalMachineR152.js'),true,'R152 Optical successor lineage must remain present');
+ assert.equal(fs.existsSync('services/opticalMachineR1531.js'),true,'R153.1 Optical successor lineage must remain present');
+ assert.equal(fs.existsSync('services/opticalMachineR1532.js'),true,'R153.2 active Optical implementation must exist');
+ assert.equal(fs.existsSync('public/omega-active-federation-r167.json'),true,'R167 active-generation truth manifest is required for R153.2 binding');
+ const active=JSON.parse(fs.readFileSync('public/omega-active-federation-r167.json','utf8'));
+ assert.equal(active.revision,'R167');
+ assert.equal(active.active?.optical?.machineVersion,'R153.2');
+ assert.equal(active.active?.optical?.authority,'SCREEN_ONLY');
+ assert.equal(active.active?.optical?.canonicalMutation,false);
+ assert.equal(active.active?.optical?.fullwaveExecutionClaimed,false);
+}
+console.log(`R115 machine adapters PASS · historical PROPOSE → SCREEN → admissible RCWA request preserved · active Optical ${activeR1532?'R153.2 successor':'R115'} · authority boundaries unchanged`);
