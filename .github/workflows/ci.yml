@@ -21,6 +21,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R163 canonical core-health boundary
+        run: node tests/r163-canonical-core-health-truth-invariants.mjs
       - run: npm run check
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
 
@@ -99,8 +101,29 @@ jobs:
         run: |
           node <<'NODE'
           const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
-          const targets=[['root','/'],['health','/api/health'],['status','/api/status'],['restoration','/api/restoration'],['hybrid','/api/hybrid/status']];
+          const targets=[['root','/'],['health','/api/health'],['core-health','/api/core-health'],['status','/api/status'],['restoration','/api/restoration'],['hybrid','/api/hybrid/status']];
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          function verifyCoreHealth(response,data,path){
+            if(data.schema!=='OMEGA_CANONICAL_CORE_HEALTH_R163'||data.revision!=='R163'||data.state!=='LIVE'||data.ok!==true)throw new Error(`R163 core health schema/state mismatch on ${path}`);
+            if(data.canonicalRequest!==true)throw new Error(`R163 canonical request identity missing on ${path}`);
+            if(data.requiredBindings?.assets!==true||data.requiredBindings?.durableRuntime!==true)throw new Error(`R163 required core binding proof missing on ${path}`);
+            if(data.executionPlanes?.sovereignGateway?.requiredForCoreHealth!==false)throw new Error(`R163 optional sovereign gateway boundary regressed on ${path}`);
+            if(data.executionPlanes?.canonicalAdmission?.authority!=='R125')throw new Error(`R163 canonical admission authority regressed on ${path}`);
+            if(response.headers.get('x-omega-core-health')!=='R163-FIRST-HAND')throw new Error(`R163 first-hand health header missing on ${path}`);
+            if(response.headers.get('x-omega-canonical-origin')!==base)throw new Error(`R163 canonical origin header mismatch on ${path}`);
+          }
+          function verifyHybrid(data){
+            const current=Array.isArray(data.devices)?data.devices.filter(d=>d?.online&&!d?.revoked):[];
+            if(data.state==='VERIFIED_DEVICE_ONLINE'){
+              if(data.nativeExecutionClaimed!==true||current.length<1)throw new Error('Hybrid claims PC online without a current authenticated device heartbeat');
+              return;
+            }
+            if(data.state==='DEVICE_PROOF_REQUIRED'){
+              if(data.nativeExecutionClaimed!==false||current.length!==0)throw new Error('Hybrid claims device-proof-required while current online proof exists');
+              return;
+            }
+            throw new Error(`Hybrid returned unsupported truth state ${data.state}`);
+          }
           async function probe(name,path){
             let last='';
             for(let attempt=1;attempt<=12;attempt++){
@@ -109,18 +132,19 @@ jobs:
                 const text=await r.text();
                 if(r.ok && text.length){
                   const data=path.startsWith('/api/')?JSON.parse(text):null;
-                  if(path==='/api/hybrid/status' && (data.state!=='DEVICE_PROOF_REQUIRED'||data.nativeExecutionClaimed!==false)) throw new Error('Hybrid truth gate regression');
+                  if(path==='/api/health'||path==='/api/core-health')verifyCoreHealth(r,data,path);
+                  if(path==='/api/hybrid/status')verifyHybrid(data);
                   console.log(`LIVE VERIFY ${name}: HTTP ${r.status} attempt ${attempt}`);
                   return;
                 }
                 last=`HTTP ${r.status} ${text.slice(0,240)}`;
-              }catch(e){last=String(e)}
+              }catch(e){last=e instanceof Error?e.message:String(e)}
               await sleep(5000);
             }
             throw new Error(`${name} verification failed: ${last}`);
           }
           for(const [name,path] of targets) await probe(name,path);
-          console.log(`OMEGA public verification PASS: ${base}`);
+          console.log(`OMEGA R163 public verification PASS: ${base}`);
           NODE
       - name: Verify canonical Hybrid agent download
         shell: bash
@@ -255,8 +279,9 @@ jobs:
             echo "- Runtime: $OMEGA_PUBLIC_URL"
             echo "- Verify job: ${{ needs.verify.result }}"
             echo "- Deployment job: ${{ job.status }}"
+            echo "- R163 first-hand canonical core health: required for deployment PASS"
             echo "- Live AI synthesis: required for deployment PASS"
             echo "- R8 Earth/NOAA + Hybrid V90 contracts: required for deployment PASS"
             echo "- R9 Earth ground source hierarchy: required for deployment PASS"
-            echo "- Hybrid native execution: must remain DEVICE_PROOF_REQUIRED until paired-host proof"
+            echo "- Hybrid native execution: VERIFIED_DEVICE_ONLINE requires a current authenticated non-revoked heartbeat; otherwise DEVICE_PROOF_REQUIRED"
           } >> "$GITHUB_STEP_SUMMARY"
