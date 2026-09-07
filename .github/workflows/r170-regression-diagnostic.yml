@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [r170-continuous-geometric-selfbuild-main]
+  pull_request:
+    branches: [main]
 
 jobs:
   diagnose:
