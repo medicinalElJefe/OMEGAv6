@@ -29,3 +29,4 @@ must(agent.includes('root-confined')&&agent.includes('shell=False'),'desktop age
 must(agent.includes("foundationWeightsChanged':False")||agent.includes('foundationWeightsChanged\":False'),'local learning must not fake foundation-weight training');
 must(shell.includes("'WORK'|'EXPLORE'|'INTELLIGENCE'|'EVIDENCE'|'SYSTEM'"),'R31 human navigation hierarchy must survive R32/R33/R34/R101/R102/R111/R114/R115/R116');
 console.log('OMEGA R32 ENACTED RUNTIME PASS · durable event/action bus + governed AI + authenticated Hybrid proof transport preserved under R116→R115→R114→R111→R102 · declarative SQLite lifecycle export present');
+await import('./r1801-hybrid-buildout-discovery-invariants.mjs');
