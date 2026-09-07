@@ -18,6 +18,8 @@ type Imported={
  sheetName?:string;
  sheetCount?:number;
  formulas?:number;
+ formulaValues?:{ref:string;formula:string;value:string|number|boolean}[];
+ formulaValuePolicy?:'CACHED_STORED_VALUE_ONLY_NO_RECALCULATION';
  boundary:string;
 };
 
@@ -77,8 +79,10 @@ export default function OmegaDataLexiconR46({onNavigate}:{onNavigate?:(p:string)
    try{const j=JSON.parse(new TextDecoder().decode(buffer)),rows=Array.isArray(j)?j.slice(0,250).map(v=>Array.isArray(v)?v:Object.values(v&&typeof v==='object'?v:{value:v})):Object.entries(j&&typeof j==='object'?j:{value:j});const data=toStrings(rows as any).map(r=>r.slice(0,64));x={...x,rows:Array.isArray(j)?j.length:1,columns:data.reduce((m,r)=>Math.max(m,r.length),0),keys:j&&typeof j==='object'&&!Array.isArray(j)?Object.keys(j).slice(0,64):[],preview:data.slice(0,8),data,boundary:'JSON parsed locally from exact fingerprinted bytes. Bounded table material can be exported to XLSX without becoming canonical state.'}}
    catch{x={...x,boundary:'SHA-256 identity verified locally; JSON parsing failed, so no semantic admission occurred.'}}
   }else if(kind==='XLSX'){
-   try{const wb=readXlsxLite(buffer,1000,128),data=toStrings(wb.rows.slice(0,250).map(r=>r.slice(0,64)));x={...x,rows:Math.max(0,wb.rows.length-1),columns:wb.rows.reduce((m,r)=>Math.max(m,r.length),0),sheetName:wb.sheetName,sheetCount:wb.sheetCount,formulas:wb.formulas.length,preview:data.slice(0,8),data,boundary:`R153 parsed the first worksheet from exact fingerprinted XLSX bytes (${wb.sheetCount} sheet${wb.sheetCount===1?'':'s'} detected; ${wb.formulas.length} formula cell${wb.formulas.length===1?'':'s'} observed). Stored formula values are readable, but Excel recalculation/macros are not executed. Bounded working rows can be round-tripped to a new XLSX.`}}
-   catch(e:any){x={...x,boundary:`SHA-256 identity verified locally; XLSX structure could not be parsed safely: ${e?.message||String(e)}`}}
+   try{
+    const wb=readXlsxLite(buffer,1000,128),data=toStrings(wb.rows.slice(0,250).map(r=>r.slice(0,64))),formulaValues=wb.formulas.slice(0,64).map(f=>({ref:f.ref,formula:f.formula,value:f.value}));
+    x={...x,rows:Math.max(0,wb.rows.length-1),columns:wb.rows.reduce((m,r)=>Math.max(m,r.length),0),sheetName:wb.sheetName,sheetCount:wb.sheetCount,formulas:wb.formulas.length,formulaValues,formulaValuePolicy:'CACHED_STORED_VALUE_ONLY_NO_RECALCULATION',preview:data.slice(0,8),data,boundary:`R153 parsed the first worksheet from exact fingerprinted XLSX bytes (${wb.sheetCount} sheet${wb.sheetCount===1?'':'s'} detected; ${wb.formulas.length} formula cell${wb.formulas.length===1?'':'s'} observed). stored formula values are preserved only as cached workbook values with cell/formula provenance; Excel recalculation/macros are not executed. Bounded working rows can be round-tripped to a new XLSX without claiming formula recomputation.`};
+   }catch(e:any){x={...x,boundary:`SHA-256 identity verified locally; XLSX structure could not be parsed safely: ${e?.message||String(e)}`}}
   }
   const next=[x,...imports.filter(i=>i.sha256!==sha256)].slice(0,24);setImports(next);localState.write(STORE,next);
  };
@@ -88,7 +92,7 @@ export default function OmegaDataLexiconR46({onNavigate}:{onNavigate?:(p:string)
   <div className='r46-two'>
    <section>
     <label className='r46-drop'><Upload/><b>Fingerprint + inspect data</b><span>CSV/JSON/XLSX local parsing · no macro execution</span><input type='file' accept='.csv,.json,.xls,.xlsx' onChange={e=>{const f=e.target.files?.[0];if(f)void ingest(f);e.currentTarget.value=''}}/></label>
-    <div className='r46-imports'>{imports.map(x=><article key={x.sha256}>{x.kind==='JSON'?<FileJson/>:<FileSpreadsheet/>}<div><b>{x.name}</b><small>{x.kind} · {x.size.toLocaleString()} bytes{x.sheetName?` · ${x.sheetName}`:''}{Number.isFinite(x.formulas)?` · ${x.formulas} formulas`:''}</small><code>{x.sha256}</code>{x.preview&&<pre>{x.preview.map(r=>r.slice(0,6).join(' | ')).join('\n')}</pre>}<span>{x.boundary}</span>{x.data?.length&&<button className='r153-xlsx-export' onClick={()=>exportWorkbook(x)}><Download/>Round-trip bounded data to XLSX</button>}</div></article>)}</div>
+    <div className='r46-imports'>{imports.map(x=><article key={x.sha256}>{x.kind==='JSON'?<FileJson/>:<FileSpreadsheet/>}<div><b>{x.name}</b><small>{x.kind} · {x.size.toLocaleString()} bytes{x.sheetName?` · ${x.sheetName}`:''}{Number.isFinite(x.formulas)?` · ${x.formulas} formulas`:''}{x.formulaValuePolicy?' · cached values retained':''}</small><code>{x.sha256}</code>{x.preview&&<pre>{x.preview.map(r=>r.slice(0,6).join(' | ')).join('\n')}</pre>}<span>{x.boundary}</span>{x.data?.length&&<button className='r153-xlsx-export' onClick={()=>exportWorkbook(x)}><Download/>Round-trip bounded data to XLSX</button>}</div></article>)}</div>
    </section>
    <section className='r46-lexicon'>
     <label><Search/><textarea value={prompt} onChange={e=>setPrompt(e.target.value)}/></label>
