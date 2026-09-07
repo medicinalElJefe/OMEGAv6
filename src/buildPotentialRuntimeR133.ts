@@ -12,6 +12,7 @@ export const BUILD_POTENTIAL_LAWS_R133=Object.freeze({
  prove:'DEVICE_GATED / EVIDENCE_GATED require current device/evidence proof; they are not treated as broken or live.',
  restore:'RESTORATION_DEBT means no bounded current successor is proved for that family.',
  productize:'DONOR_ONLY / NATIVE_TARGET remain donor/native targets unless a bounded successor is already present in the current completion ledger.',
+ routing:'Composite successor surface labels are normalized to a registered primary workstation route before navigation.',
  authority:'Build priority cannot promote CanonState, evidence, execution, native capability, archive donors, or physical truth. R125 and the existing proof/admission authorities remain unchanged.'
 });
 
@@ -30,11 +31,12 @@ const ACTION:Record<BuildPotentialLaneR133,string>={
  PRODUCTIZE_NEXT:'Promote only a bounded donor/native slice after artifact, host and rollback proof exist.'
 };
 const CURRENT_BY_FAMILY=new Map(R48_COMPLETION_FAMILIES.map(x=>[x.id,x]));
+const primaryRoute=(surface:string,fallback:string)=>String(surface||fallback||'System Atlas').split('/')[0].trim()||fallback||'System Atlas';
 
-export type BuildPotentialRowR133={family:SystemFamily;effectiveStatus:SystemFamilyStatus;effectiveSurface:string;effectiveProof:string;effectiveRemaining:string;statusSource:string;lane:BuildPotentialLaneR133;priority:BuildPotentialPriorityR133;action:string;planes:ExpressionPlaneId[];planeLabels:string[];breadth:number};
+export type BuildPotentialRowR133={family:SystemFamily;effectiveStatus:SystemFamilyStatus;effectiveSurface:string;effectiveRoute:string;effectiveProof:string;effectiveRemaining:string;statusSource:string;lane:BuildPotentialLaneR133;priority:BuildPotentialPriorityR133;action:string;planes:ExpressionPlaneId[];planeLabels:string[];breadth:number};
 export const BUILD_POTENTIAL_ROWS_R133:BuildPotentialRowR133[]=FAMILIES.map(family=>{
- const planes=expressionPlanesForFamily(family.id),current=CURRENT_BY_FAMILY.get(family.id),effectiveStatus=(current?.successor||family.status) as SystemFamilyStatus,lane=laneForFamilyStatusR133(effectiveStatus);
- return{family,effectiveStatus,effectiveSurface:current?.surface||family.target,effectiveProof:current?.proof||family.statusNote,effectiveRemaining:current?.remaining||family.statusNote,statusSource:current?`R48/R153 successor · ${current.successor}`:'V24 family registry',lane,priority:PRIORITY[lane],action:ACTION[lane],planes:planes.map(x=>x.id),planeLabels:planes.map(x=>x.label),breadth:planes.length};
+ const planes=expressionPlanesForFamily(family.id),current=CURRENT_BY_FAMILY.get(family.id),effectiveStatus=(current?.successor||family.status) as SystemFamilyStatus,lane=laneForFamilyStatusR133(effectiveStatus),effectiveSurface=current?.surface||family.target;
+ return{family,effectiveStatus,effectiveSurface,effectiveRoute:primaryRoute(effectiveSurface,family.target),effectiveProof:current?.proof||family.statusNote,effectiveRemaining:current?.remaining||family.statusNote,statusSource:current?`R48/R153 successor · ${current.successor}`:'V24 family registry',lane,priority:PRIORITY[lane],action:ACTION[lane],planes:planes.map(x=>x.id),planeLabels:planes.map(x=>x.label),breadth:planes.length};
 });
 
 export const BUILD_POTENTIAL_LANES_R133=(['OPERATING','PROVE_NEXT','RESTORE_NEXT','PRODUCTIZE_NEXT'] as const).map(lane=>{
