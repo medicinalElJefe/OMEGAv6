@@ -1,0 +1,46 @@
+name: R172 Federation Ledger World Binding
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/world/federationLedgerWorldBindingR172.js'
+      - 'tests/r172-federation-ledger-world-binding-invariants.mjs'
+      - '.github/workflows/r172-federation-ledger-world-binding.yml'
+  push:
+    branches: [r172-r114-ledger-world-binding]
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r172-ledger-world-binding:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove focused R172 ledger-world binding
+        run: node tests/r172-federation-ledger-world-binding-invariants.mjs
+      - name: Preserve R171 federation receipt world reconciliation
+        run: node tests/r171-federation-receipt-world-reconciler-invariants.mjs
+      - name: Preserve R114 durable federation closure law
+        run: node tests/r114-federation-closure-invariants.mjs
+      - name: Preserve R169 federation attestation world lens
+        run: node tests/r169-federation-attestation-world-lens-invariants.mjs
+      - name: Preserve R166 living residual world lens
+        run: node tests/r166-development-residual-world-lens-invariants.mjs
+      - name: Preserve Earth and computed-reality truth gates
+        run: |
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+      - name: Preserve R125 admission authority
+        run: node tests/r125-accuracy-engine-invariants.mjs
+      - name: Syntax-check R172
+        run: node --check src/world/federationLedgerWorldBindingR172.js
+      - name: Run inherited regression and production build
+        run: npm run check
+      - name: Prove canonical Worker package remains deployable
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r172-dry-run
