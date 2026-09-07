@@ -13,6 +13,7 @@ import ReflexAutonomicR164 from './ReflexAutonomicR164';
 import AppliedCalculusR168 from './AppliedCalculusR168';
 import FullRestorationConvergenceR168 from './FullRestorationConvergenceR168';
 import R181ConvergenceWorkstation from './R181ConvergenceWorkstation';
+import './r181RetainedTools.css';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 type RetainedTool='NONE'|'CALCULUS'|'RESTORATION'|'MAXIMUM'|'REFLEX'|'AUTONOMIC'|'ORGANISM'|'SWARM'|'FIELD'|'CAPABILITY';
