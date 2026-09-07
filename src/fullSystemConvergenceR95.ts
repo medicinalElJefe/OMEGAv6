@@ -1,5 +1,7 @@
 import {FAMILIES,MASTER_MENUS,SYSTEM_INVARIANT} from './systemAtlasRuntime';
 import {MASTER_SYSTEMS_R83,MASTER_MENU_OPTIONS_R83,MASTER_CAPABILITIES_R83,validateMasterLedgerR83} from './softwareMasterLedgerR83';
+import {R48_COMPLETION_FAMILIES,R48_COMPLETION_SUMMARY} from './completionRuntimeR48';
+import {R153_FULL_SYSTEM_CONTRACT,R153_REVISION} from './fullSystemCompletionR153.js';
 
 export const ONE_SYSTEM_LEDGER_AUTHORITY_R95={
  source:'OMEGA_ONE_SYSTEM_FULL_SOFTWARE_MENU_LEDGER.xlsx',
@@ -11,6 +13,7 @@ export const ONE_SYSTEM_LEDGER_AUTHORITY_R95={
  packageStandard:'One-click EXE + repair + patch',
  invariant:SYSTEM_INVARIANT,
  totals:{systems:100,families:24,menuOptions:36,capabilities:18,masterMenus:12,keep:63,merge:26,donor:11},
+ currentSuccessorAuthority:'R48 completion reality promoted globally by R153',
  acceptance:[
   'No orphan feature',
   'No duplicate semantic engines',
@@ -47,10 +50,11 @@ const activeStatus=new Set(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE']);
 const gatedStatus=new Set(['EVIDENCE_GATED','DEVICE_GATED']);
 export function fullSystemConvergenceR95(){
  const ledger=validateMasterLedgerR83();
- const familyRows=FAMILIES.map(f=>({
-  id:f.id,name:f.name,status:f.status,target:f.target,
-  completion:activeStatus.has(f.status)?'ACTIVE':gatedStatus.has(f.status)?'GATED':'RESTORE',
-  reason:f.statusNote
+ const historical=Object.fromEntries(FAMILIES.map(f=>[f.id,f]));
+ const familyRows=R48_COMPLETION_FAMILIES.map(f=>({
+  id:f.id,name:f.name,historicalStatus:f.historical,status:f.successor,target:f.surface.split(' / ')[0],surface:f.surface,
+  completion:activeStatus.has(f.successor)?'ACTIVE':gatedStatus.has(f.successor)?'GATED':'RESTORE',
+  reason:f.remaining,proof:f.proof
  }));
  const restore=familyRows.filter(x=>x.completion==='RESTORE');
  const gated=familyRows.filter(x=>x.completion==='GATED');
@@ -61,16 +65,21 @@ export function fullSystemConvergenceR95(){
   const capabilities=MASTER_CAPABILITIES_R83.filter(x=>String(x.menu).startsWith(id));
   return{id,name,target,purpose,systems:systems.length,options:options.length,capabilities:capabilities.length};
  });
+ const successorPass=R48_COMPLETION_SUMMARY.families===24&&R48_COMPLETION_SUMMARY.restorationDebt===0&&familyRows.every(x=>historical[x.id]);
  return{
-  pass:ledger.pass&&FAMILIES.length===24&&MASTER_SYSTEMS_R83.length===100&&MASTER_MENU_OPTIONS_R83.length===36&&MASTER_CAPABILITIES_R83.length===18,
+  schema:'OMEGA_FULL_SYSTEM_CONVERGENCE_R153',revision:R153_REVISION,
+  pass:ledger.pass&&FAMILIES.length===24&&MASTER_SYSTEMS_R83.length===100&&MASTER_MENU_OPTIONS_R83.length===36&&MASTER_CAPABILITIES_R83.length===18&&successorPass,
   invariant:SYSTEM_INVARIANT,
   authority:ONE_SYSTEM_LEDGER_AUTHORITY_R95,
+  contract:R153_FULL_SYSTEM_CONTRACT,
   ledger,
   active,
   gated,
   restore,
+  successorSummary:R48_COMPLETION_SUMMARY,
   menuRows,
   nextRestore:restore.map(x=>x.id),
-  boundary:'44 application routes are operator entry points only. Full-system completion is judged against the 100-system / 24-family / 36-option / 18-capability / 12-menu authority and its acceptance checks.'
+  nextProof:gated.map(x=>x.id),
+  boundary:'44 application routes are operator entry points only. Full-system completion is judged against the 100-system / 24-family / 36-option / 18-capability / 12-menu authority and its acceptance checks. R153 uses R48 successor reality for current implementation status while preserving V24 family labels as historical evidence: implemented successors are not mislabeled as restoration debt, and evidence/device gates are not fictionalized as execution.'
  };
 }
