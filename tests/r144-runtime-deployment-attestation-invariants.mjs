@@ -5,6 +5,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>assert.ok(ok,'R144 '+msg);
 const worker=read('src/workerR27.js');
 const panel=read('src/GovernedBuildReceiptPanel.tsx');
+const adapter=read('src/platformAdapter.ts');
 const liveWorkflow=read('.github/workflows/release-evidence-live.yml');
 const r143=read('src/authoritativeOperationChainR143.ts');
 const r142=read('src/capabilityExecutionReceiptsR142.ts');
@@ -18,7 +19,8 @@ must(worker.includes('publicWorkerMutationAuthority:false'),'public Worker mutat
 must(worker.includes('canonicalMutation:false'),'runtime attestation must remain read-only');
 must(worker.includes("schema:'OMEGA_RELEASE_EVIDENCE_V1'"),'R27 release-evidence compatibility must remain intact');
 
-must(panel.includes("fetch('/api/runtime-attestation'"),'governed build panel must read R144 runtime attestation');
+must(panel.includes("probeJson<RuntimeAttestationR144>('/api/runtime-attestation')"),'governed build panel must read R144 runtime attestation through the shared runtime resolver');
+must(panel.includes('runtimeFetch(')&&adapter.includes('export function runtimeFetch'),'R144 panel must use canonical distributed runtime fetch');
 must(panel.includes("data-r144-runtime-attestation"),'panel must expose attestation binding state');
 must(panel.includes('Implemented ≠ tested ≠ merged ≠ deployed ≠ live ≠ verified'),'six-stage deployment truth boundary must be visible');
 must(panel.includes('R143 UI operation chain → R142 capability lifecycle → R141 Hybrid exact return proof → R125 CanonState admission'),'authority chain must be operator-visible');
