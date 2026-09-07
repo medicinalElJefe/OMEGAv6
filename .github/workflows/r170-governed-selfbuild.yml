@@ -1,0 +1,169 @@
+name: R170 Governed Self-Build
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: omega-r170-governed-selfbuild
+  cancel-in-progress: false
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+  OMEGA_R170_RESIDUAL_EVIDENCE_PATH: /tmp/omega-r170-residual-evidence.json
+
+jobs:
+  propose-one-governed-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Prove self-build control-plane topology
+        run: |
+          node scripts/verify_workflow_topology_r170.mjs
+          node tests/r170-self-build-governor-invariants.mjs
+      - name: Refuse parallel autonomous candidate PRs
+        id: open_pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          COUNT=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --search 'head:selfbuild/r170-' --json number --jq 'length')
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          if [ "$COUNT" -gt 0 ]; then
+            echo "An R170 self-build candidate PR is already open; this pulse remains OBSERVE_ONLY."
+          fi
+      - name: Collect current fail-closed residual evidence
+        if: steps.open_pr.outputs.count == '0'
+        run: node scripts/collect_selfbuild_residual_gate_r170.mjs
+      - name: Select next bounded capsule
+        if: steps.open_pr.outputs.count == '0'
+        id: select
+        shell: bash
+        run: |
+          node scripts/r170-selfbuild-engine.mjs | tee /tmp/r170-proposal.json
+          STATUS=$(node -e "const x=require('/tmp/r170-proposal.json');process.stdout.write(x.status||'UNKNOWN')")
+          CAPSULE=$(node -e "const x=require('/tmp/r170-proposal.json');process.stdout.write(x.capsuleId||'')")
+          GENERATION=$(node -e "const x=require('/tmp/r170-proposal.json');process.stdout.write(String(x.generation||0))")
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "capsule=$CAPSULE" >> "$GITHUB_OUTPUT"
+          echo "generation=$GENERATION" >> "$GITHUB_OUTPUT"
+      - name: Stop cleanly when no autonomous proposal is admissible
+        if: steps.open_pr.outputs.count == '0' && steps.select.outputs.status != 'PROPOSE'
+        run: echo "R170 self-build pulse ended in ${{ steps.select.outputs.status }}; no source mutation or PR was produced."
+      - name: Generate exactly one sandbox candidate
+        if: steps.select.outputs.status == 'PROPOSE'
+        env:
+          OMEGA_R170_SELFBUILD_APPLY: '1'
+        run: node scripts/r170-selfbuild-engine.mjs
+      - name: Prove focused R170 governance
+        if: steps.select.outputs.status == 'PROPOSE'
+        run: |
+          node tests/r170-self-build-governor-invariants.mjs
+          node scripts/verify_workflow_topology_r170.mjs
+      - name: Prove current federation, Optical, residual and runtime authority
+        if: steps.select.outputs.status == 'PROPOSE'
+        run: |
+          node tests/r169-federation-attestation-world-lens-invariants.mjs
+          node tests/r168-genesis-r192-attestation-invariants.mjs
+          node tests/r167-active-optical-r1532-convergence-invariants.mjs
+          node tests/r166-development-residual-world-lens-invariants.mjs
+          node tests/r164-development-residual-graph-invariants.mjs
+          node tests/r163-canonical-core-health-truth-invariants.mjs
+          node tests/r1532-adaptive-external-search-invariants.mjs
+      - name: Run full inherited production regression and package dry-runs
+        if: steps.select.outputs.status == 'PROPOSE'
+        run: |
+          npm run check
+          npx wrangler deploy --config wrangler.jsonc --dry-run --outdir .wrangler-r170-selfbuild
+          npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-selfbuild-optical
+      - name: Refuse stale source admission proposal
+        if: steps.select.outputs.status == 'PROPOSE'
+        id: freshness
+        shell: bash
+        run: |
+          START=$(git rev-parse HEAD)
+          git fetch origin main
+          CURRENT=$(git rev-parse origin/main)
+          if [ "$START" != "$CURRENT" ]; then
+            echo "main moved from $START to $CURRENT; preserving no stale proposal"
+            exit 42
+          fi
+          echo "base=$START" >> "$GITHUB_OUTPUT"
+      - name: Bind candidate branch and proof receipt
+        if: steps.select.outputs.status == 'PROPOSE'
+        id: candidate
+        shell: bash
+        run: |
+          CAPSULE='${{ steps.select.outputs.capsule }}'
+          GEN='${{ steps.select.outputs.generation }}'
+          BRANCH="selfbuild/r170-g${GEN}-${CAPSULE,,}-${GITHUB_RUN_ID}"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          BRANCH="$BRANCH" BASE='${{ steps.freshness.outputs.base }}' node <<'NODE'
+          const fs=require('fs');
+          const statePath='public/omega-r170-selfbuild-state.json';
+          const candidatePath='public/omega-r170-selfbuild-candidate.json';
+          const state=JSON.parse(fs.readFileSync(statePath,'utf8'));
+          const receipt=[...(state.receipts||[])].reverse().find(r=>r.capsuleId===state.currentCapsuleId&&r.status==='SANDBOX');
+          if(!receipt)throw new Error('R170 sandbox receipt not found');
+          receipt.status='PROVED_PENDING_PR';
+          receipt.provedAt=new Date().toISOString();
+          receipt.branch=process.env.BRANCH;
+          receipt.baseSha=process.env.BASE;
+          receipt.canonicalAdmission=false;
+          receipt.tests={r170:true,r169:true,r168:true,r167:true,r166:true,r164:true,r163:true,r1532:true,inherited:true,build:true,canonicalDryRun:true,opticalDryRun:true};
+          receipt.notes=[...(receipt.notes||[]),'Current authority chain and full inherited regression passed.','Candidate is proved for PR only; no direct main mutation or CanonState admission occurred.'];
+          fs.writeFileSync(statePath,JSON.stringify(state,null,2)+'\n');
+          const candidate=JSON.parse(fs.readFileSync(candidatePath,'utf8'));
+          candidate.receipt=receipt;
+          candidate.status='PROVED_PENDING_PR';
+          fs.writeFileSync(candidatePath,JSON.stringify(candidate,null,2)+'\n');
+          NODE
+      - name: Commit proved candidate on isolated branch
+        if: steps.select.outputs.status == 'PROPOSE'
+        id: commit
+        shell: bash
+        run: |
+          git config user.name 'OMEGA R170 Governed Self Builder'
+          git config user.email 'actions@users.noreply.github.com'
+          git checkout -b '${{ steps.candidate.outputs.branch }}'
+          git add src/generated/selfbuildR170 public/omega-r170-selfbuild-state.json public/omega-r170-selfbuild-candidate.json
+          git diff --cached --check
+          git commit -m "R170 self-build generation ${{ steps.select.outputs.generation }}: ${{ steps.select.outputs.capsule }}"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          git push origin HEAD:'${{ steps.candidate.outputs.branch }}'
+      - name: Open governed candidate PR without auto-admission
+        if: steps.select.outputs.status == 'PROPOSE'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head '${{ steps.candidate.outputs.branch }}' \
+            --title "R170 self-build g${{ steps.select.outputs.generation }} — ${{ steps.select.outputs.capsule }}" \
+            --body "Autonomously generated bounded R170 source candidate.\n\nProofed before PR: R170 topology/self-build, R169 federation, R168 Genesis attestation, R167 Optical R153.2, R166/R164 residual truth, R163 core-health contract, R153.2 adaptive contract, full inherited npm check, canonical Wrangler dry-run, and isolated Optical R153.2 dry-run.\n\nBase: ${{ steps.freshness.outputs.base }}\nCandidate: ${{ steps.commit.outputs.sha }}\n\nThis PR is not Canon admission. It cannot mutate main directly, cannot auto-merge, and preserves R125 as sole CanonState admission authority."
+      - name: Record autonomous pulse receipt
+        if: always()
+        run: |
+          echo "## R170 governed self-build pulse" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Existing candidate PR count: ${{ steps.open_pr.outputs.count || 'unknown' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Selection state: ${{ steps.select.outputs.status || 'not-selected' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Capsule: ${{ steps.select.outputs.capsule || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Direct main mutation: forbidden" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Auto merge: forbidden" >> "$GITHUB_STEP_SUMMARY"
+          echo "- CanonState admission authority: R125" >> "$GITHUB_STEP_SUMMARY"
