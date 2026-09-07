@@ -64,8 +64,9 @@ const view=await readResultR147(liveShape,created.run.id);assert.equal(view.stat
 for(const law of ['PREDICT_CARRY_CORRECT_REALLOCATE','DISPATCH_ACCEPTANCE_IS_NOT_EXECUTION_SUCCESS','ONLY_TERMINAL_OUTCOMES_MATURE_EXECUTOR_RELIABILITY_HISTORY','IMMATURE_HISTORY_PRESERVES_EXISTING_R147_DEFAULT_SELECTION','R147_REMAINS_EXECUTOR_AND_DISPATCH_AUTHORITY','R146_REMAINS_DURABLE_EXECUTION_HISTORY_AUTHORITY','R125_REMAINS_THE_ONLY_CANONSTATE_ADMISSION_AUTHORITY'])assert.ok(R185_LAWS.includes(law),`missing R185 law ${law}`);
 const manifest=manifestR185();assert.equal(manifest.revision,'R185');assert.deepEqual(manifest.loop,['PREDICT','CARRY','CORRECT','REALLOCATE']);assert.equal(manifest.historyPolicy.dispatchAcceptance,'TRACKED_SEPARATELY_NOT_SUCCESS');assert.equal(manifest.authority.executorDispatch,'R147');assert.equal(manifest.authority.canonicalAdmission,'R125');assert.equal(manifest.canonicalMutation,false);
 
-const r147=fs.readFileSync('src/execution/unifiedExecutorFabricR147.js','utf8');
-for(const token of ['runtimeStorageR168','planTemporalPerformanceR185','readTemporalPerformanceR185','recordTemporalPerformanceR185','DISPATCH_ACCEPTED_NOT_TERMINAL','R147_HYBRID_FAILED_RETURN','runtimeStorageCompatibility'])assert.ok(r147.includes(token),`R147 missing R186 integration token ${token}`);
+const r147=fs.readFileSync('src/execution/unifiedExecutorFabricR147.js','utf8'),r185=fs.readFileSync('src/execution/temporalRelativityPerformanceR185.js','utf8');
+for(const token of ['runtimeStorageR168','planTemporalPerformanceR185','readTemporalPerformanceR185','recordTemporalPerformanceR185','DISPATCH_ACCEPTED','R147_HYBRID_FAILED_RETURN','runtimeStorageCompatibility'])assert.ok(r147.includes(token),`R147 missing R186 integration token ${token}`);
+assert.ok(r185.includes('DISPATCH_ACCEPTED_NOT_TERMINAL'),'R185 must own the dispatch-not-terminal history state');
 assert.ok(!r147.includes('runtime.state.storage'),'R147 must use R168 rather than the legacy-only state.storage shape');
 assert.ok(r147.includes("canonicalAdmissionAuthority:'R125'"),'R147 must preserve R125 admission authority');
 console.log('R186 RUNTIME PERFORMANCE CLOSURE PASS · real ctx.storage + terminal-only learning + failed Hybrid truth + R154 adaptive carry preserve R147/R146/R141/R125 authority');
