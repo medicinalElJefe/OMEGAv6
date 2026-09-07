@@ -23,6 +23,8 @@ must(agent.includes('MAX_PATCH_BYTES=512*1024')&&agent.includes('MAX_PATCH_REPLA
 must(agent.includes('shell=False'),'native build/test must retain no-arbitrary-shell boundary');
 must(pulse.includes("'/api/runtime/snapshot'")&&pulse.includes('remembered turns')&&pulse.includes('proved PC'),'menu pulse must consume live runtime state');
 must(shell.includes('LivingRuntimePulseR33')&&shell.includes('What should OMEGA do now?')&&shell.includes("className='r33-all-tools'"),'mobile navigation must lead with enacted state/actions and progressively disclose the catalog');
-must(shell.includes('<span>Now</span>')&&shell.includes('<span>PC</span>')&&shell.includes('<span>Tools</span>'),'mobile primary navigation must remain task-first');
+const stableTaskFirst=shell.includes('<span>Now</span>')&&shell.includes('<span>PC</span>')&&shell.includes('<span>Tools</span>');
+const liveTaskFirst=shell.includes('<span>Now</span>')&&shell.includes("<span>{live.pcOnline?'PC ✓':'PC'}</span>")&&shell.includes('<span>Tools</span>');
+must(stableTaskFirst||liveTaskFirst,'mobile primary navigation must remain task-first; live authenticated PC state may refine only the PC label');
 for(const source of [worker,worker32,worker34,worker101,worker102,worker111,worker114,worker115,worker116,agent,shell,pulse,config])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'living runtime must remain AppDeploy-free');
-console.log('OMEGA R33b LIVING RUNTIME PASS · preserved through R116→R115→R114→R111→R102→R101→R34 federation + reconnect successor');
+console.log('OMEGA R33b/R156 LIVING RUNTIME PASS · task-first mobile semantics + live authenticated PC state · preserved through R116→R115→R114→R111→R102→R101→R34 federation + reconnect successor');
