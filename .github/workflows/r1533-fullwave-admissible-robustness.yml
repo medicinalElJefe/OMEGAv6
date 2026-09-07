@@ -1,0 +1,253 @@
+name: OMEGA R153.3 Full-wave Admissible Robustness
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r153-3-fullwave-admissible-robustness]
+
+permissions:
+  contents: read
+
+env:
+  OPTICAL_R1532_URL: https://omega-optical-machine-r1532.jeffdeweyeljefe.workers.dev
+  OPTICAL_R1533_URL: https://omega-optical-machine-r1533.jeffdeweyeljefe.workers.dev
+
+concurrency:
+  group: omega-r1533-fullwave-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  verify-r1533:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm install
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Syntax-check R153.3 bridge and machine contract
+        run: |
+          node --check services/opticalExternalToolR1533.js
+          node --check services/opticalMachineR1533.js
+          python -m py_compile sovereign/omega_fullwave_manifold_r1533.py
+      - name: Prove R153.3 full-wave geometry authority invariants
+        run: node tests/r1533-fullwave-manifold-invariants.mjs
+      - name: Preserve inherited external coprocessor and optical truth gates
+        run: |
+          node tests/r1532-adaptive-external-search-invariants.mjs
+          node tests/r1531-external-ai-tool-push-invariants.mjs
+          node tests/r152-optical-operational-convergence-invariants.mjs
+          node tests/r115-machine-adapters-invariants.mjs
+          node tests/r151-sovereign-build-execution-spine-invariants.mjs
+          node tests/r153-adaptive-sovereign-build-missions-invariants.mjs
+      - name: Generate current R153.2 evidence-derived winner locally
+        shell: bash
+        run: |
+          node <<'NODE'
+          import fs from 'node:fs';
+          import machine from './services/opticalMachineR1532.js';
+          async function invoke(body){
+            const response=await machine.fetch(new Request('https://r1533-local.test/api/tool/invoke',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}));
+            const json=await response.json();
+            if(!response.ok||!json.ok)throw new Error(JSON.stringify(json).slice(0,1200));
+            return json;
+          }
+          const base={schema:'OMEGA_EXTERNAL_TOOL_CALL_v1',caller:{id:'r1533-local-proof',kind:'test'},goal:'Derive the R153.3 full-wave input from the current R153.2 winner rather than a hard-coded geometry.'};
+          const rank=await invoke({...base,request_id:'r1533-rank',operation:'rank_addresses',payload:{offset:0,limit:1728,wavelength_nm:532}});
+          const winner=rank.result.top[0];
+          const cycle=await invoke({...base,request_id:'r1533-cycle',operation:'adaptive_cycle',payload:{seed_address:winner.address,wavelength_nm:532,radius:1,budget:128,rounds:4,beam_width:4,max_evaluations:192}});
+          fs.writeFileSync('/tmp/r1533-adaptive.json',JSON.stringify(cycle,null,2));
+          console.log('R153.3 SOURCE',JSON.stringify({winner:winner.address,rank_score:winner.scalar_focus,cycle_final:cycle.result.cycle.final,rounds:cycle.result.cycle.rounds_completed,evaluations:cycle.result.cycle.evaluations,receipt:cycle.receipt.receipt_id}));
+          NODE
+      - name: Run real grcwa manifold projection, spectral validation and tolerance stress
+        working-directory: sovereign
+        run: |
+          python omega_fullwave_manifold_r1533.py \
+            --input /tmp/r1533-adaptive.json \
+            --output /tmp/r1533-fullwave.json \
+            --wavelengths 470,532,650 \
+            --screen-grid 64 \
+            --validation-grid 96 \
+            --top-k 8 \
+            --phase-margin 6 \
+            --tolerance-nm 5 \
+            --engineering-ratio 0.93 \
+            --max-candidates 96 \
+            --stress-top-k 2
+      - name: Enforce R153.3 cross-layer truth boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, math
+          d=json.load(open('/tmp/r1533-fullwave.json'))
+          assert d['schema']=='OMEGA_FULLWAVE_MANIFOLD_R1533'
+          assert d['version']=='R153.3'
+          # Current live/local R153.2 optimum is deliberately proven outside
+          # the inherited R41/R43 RCWA geometry domain. If a future R153.2
+          # winner becomes admissible, this regression must be consciously
+          # updated rather than silently changing the authority relationship.
+          assert d['scalar_seed_fullwave_admissible'] is False
+          sm=d['source_scalar_manifold']
+          assert sm['diagonal_nm'] > sm['r41_limit_nm']
+          assert d['screened_candidates'] > 0
+          assert d['validated_candidates'] > 0
+          for p in d['projections']:
+              m=p['manifold']; g=p['geometry']
+              assert m['valid_r41'] is True
+              assert math.hypot(g['width_nm'],g['length_nm']) <= 0.95*g['pitch_nm'] + 1e-8
+              assert g['width_nm'] < g['length_nm']
+          for c in d['robust_candidates']:
+              assert c['manifold']['valid_r41'] is True
+              assert c['nominal_full']['admitted'] is True
+              for s in c['stress_cases']:
+                  if s['valid']:
+                      assert s['manifold']['valid_r41'] is True
+          if d['winner'] and d['winner']['bounded_robust']:
+              assert d['status']=='ROBUST_FULLWAVE_CANDIDATE'
+              assert d['next_action']=='submit_winner_to_independent_sovereign_rcwa_crosscheck'
+          else:
+              assert d['status']=='FULLWAVE_EVIDENCE_NEEDS_REFINEMENT'
+              assert d['next_action']=='refine_fullwave_admissible_manifold'
+          print('R153.3 FULLWAVE RESULT',json.dumps({
+              'source':d['source_scalar_geometry'],
+              'source_ratio':sm['diagonal_to_limit_ratio'],
+              'projections':[(p['family'],p['geometry'],p['manifold']['r41_slack_nm']) for p in d['projections']],
+              'screened':d['screened_candidates'],
+              'validated':d['validated_candidates'],
+              'admitted':d['admitted_candidates'],
+              'status':d['status'],
+              'winner_geometry':d['winner']['geometry'] if d['winner'] else None,
+              'winner_full':d['winner']['nominal_full'] if d['winner'] else None,
+              'stress_min':d['winner']['stress_min_screen_score'] if d['winner'] else None,
+              'corner_phase':d['winner']['max_corner_rms_phase_error_deg'] if d['winner'] else None,
+              'proof_sha256':d['proof_sha256'],
+          }))
+          PY
+      - name: Full inherited production regression
+        run: npm run check
+      - name: R153.3 isolated Worker dry run
+        run: npx wrangler deploy --config wrangler.optical-machine-r1533.jsonc --dry-run --outdir .wrangler-r1533-fullwave
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r1533-fullwave-manifold-proof
+          path: |
+            /tmp/r1533-adaptive.json
+            /tmp/r1533-fullwave.json
+          if-no-files-found: error
+
+  deploy-r1533:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-r1533
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm install
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Cloudflare authorization preflight
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error title=AUTH REQUIRED::OMEGA_CLOUDFLARE_TOKEN unavailable"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error title=ACCOUNT REQUIRED::CLOUDFLARE_ACCOUNT_ID unavailable"; exit 1; }
+      - name: Deploy isolated R153.3 manifold-aware external coprocessor
+        run: npx wrangler deploy --config wrangler.optical-machine-r1533.jsonc
+      - name: Derive live R153.2 source and verify R153.3 edge authority gate
+        shell: bash
+        run: |
+          node <<'NODE'
+          import fs from 'node:fs';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function request(base,path,{method='GET',body=null,predicate=null,attempts=20}={}){
+            let last=null;
+            for(let attempt=1;attempt<=attempts;attempt++){
+              const sep=path.includes('?')?'&':'?';
+              const url=base.replace(/\/$/,'')+path+sep+'omega_probe='+Date.now()+'_'+attempt;
+              try{
+                const r=await fetch(url,{method,headers:{'cache-control':'no-cache','x-omega-probe':'r1533-live-proof',...(body?{'content-type':'application/json'}:{})},body:body?JSON.stringify(body):null});
+                const text=await r.text();let j=null;try{j=JSON.parse(text)}catch{}
+                last={attempt,status:r.status,ok:r.ok,url,bodyPrefix:text.slice(0,180).replace(/\s+/g,' ')};
+                if(r.ok&&j&&(!predicate||predicate(j)))return j;
+              }catch(error){last={attempt,error:error?.message||String(error),url};}
+              console.log('R153.3 live retry',JSON.stringify(last));if(attempt<attempts)await sleep(2000);
+            }
+            throw new Error('R153.3 live probe exhausted '+JSON.stringify(last));
+          }
+          const r1532=process.env.OPTICAL_R1532_URL;
+          const r1533=process.env.OPTICAL_R1533_URL;
+          await request(r1533,'/api/health',{predicate:j=>j.machineVersion==='R153.3'&&j.externalTool?.version==='R153.3'&&j.externalTool?.fullwaveExecution===false});
+          const baseCall={schema:'OMEGA_EXTERNAL_TOOL_CALL_v1',caller:{id:'github-r1533-live-proof',kind:'test'},goal:'Use the live R153.2 winner as the source for the R153.3 full-wave geometry authority and robustness bridge.'};
+          const invoke1532=body=>request(r1532,'/api/tool/invoke',{method:'POST',body});
+          const rank=await invoke1532({...baseCall,request_id:'r1533-live-rank',operation:'rank_addresses',payload:{offset:0,limit:1728,wavelength_nm:532}});
+          const winner=rank.result.top[0];
+          const cycle=await invoke1532({...baseCall,request_id:'r1533-live-cycle',operation:'adaptive_cycle',payload:{seed_address:winner.address,wavelength_nm:532,radius:1,budget:128,rounds:4,beam_width:4,max_evaluations:192}});
+          fs.writeFileSync('/tmp/r1533-live-source.json',JSON.stringify(cycle,null,2));
+          const geometry=cycle.result.cycle.final.geometry;
+          const gate=await request(r1533,'/api/tool/admissibility',{method:'POST',body:{geometry,engineering_ratio:0.93}});
+          if(gate.receipt?.tool_version!=='R153.3'||gate.receipt?.canonical_mutation!==false)throw new Error('R153.3 live receipt boundary failed');
+          if(gate.result?.admissibility?.r41?.valid)throw new Error('Current live R153.2 source unexpectedly became R41-admissible; inspect before changing promotion policy');
+          const queue=await request(r1533,'/api/tool/robust-queue',{method:'POST',body:{geometry,engineering_ratio:0.93,tolerance_nm:5,phase_margin_deg:6,wavelengths_nm:[470,532,650],screen_grid:64,validation_grid:96,top_k:8}});
+          if(queue.result?.robust_job?.state!=='MANIFOLD_REFINEMENT_PREPARED_NOT_SOLVED'||queue.result?.robust_job?.authority!=='PREPARED_NOT_SOLVED')throw new Error('R153.3 robust queue authority failed');
+          console.log('R153.3 EDGE GATE PASS',JSON.stringify({winner:winner.address,geometry,admissibility:gate.result.admissibility.r41,projections:gate.result.admissibility.projections,queue:queue.result.robust_job.state,receipt:queue.receipt.receipt_id}));
+          NODE
+      - name: Execute live-source grcwa manifold robustness bridge
+        working-directory: sovereign
+        run: |
+          python omega_fullwave_manifold_r1533.py \
+            --input /tmp/r1533-live-source.json \
+            --output /tmp/r1533-live-fullwave.json \
+            --wavelengths 470,532,650 \
+            --screen-grid 64 \
+            --validation-grid 96 \
+            --top-k 8 \
+            --phase-margin 6 \
+            --tolerance-nm 5 \
+            --engineering-ratio 0.93 \
+            --max-candidates 96 \
+            --stress-top-k 2
+      - name: Prove live full-wave result remains non-canonical and report next evidence
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,math
+          d=json.load(open('/tmp/r1533-live-fullwave.json'))
+          assert d['schema']=='OMEGA_FULLWAVE_MANIFOLD_R1533'
+          assert d['scalar_seed_fullwave_admissible'] is False
+          assert all(p['manifold']['valid_r41'] for p in d['projections'])
+          assert all(c['manifold']['valid_r41'] and c['nominal_full']['admitted'] for c in d['robust_candidates'])
+          assert 'fabrication validation' in d['truth_boundary'].lower()
+          print('R153.3 LIVE FULLWAVE PASS',json.dumps({
+              'status':d['status'],
+              'source':d['source_scalar_geometry'],
+              'source_ratio':d['source_scalar_manifold']['diagonal_to_limit_ratio'],
+              'winner_geometry':d['winner']['geometry'] if d['winner'] else None,
+              'winner_full':d['winner']['nominal_full'] if d['winner'] else None,
+              'stress_min':d['winner']['stress_min_screen_score'] if d['winner'] else None,
+              'corner_phase':d['winner']['max_corner_rms_phase_error_deg'] if d['winner'] else None,
+              'next':d['next_action'],
+              'proof_sha256':d['proof_sha256'],
+          }))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r1533-live-fullwave-proof
+          path: |
+            /tmp/r1533-live-source.json
+            /tmp/r1533-live-fullwave.json
+          if-no-files-found: error
