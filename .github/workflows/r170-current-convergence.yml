@@ -28,6 +28,8 @@ jobs:
         run: |
           node scripts/verify_workflow_topology_r170.mjs
           node tests/r170-self-build-governor-invariants.mjs
+      - name: Prove current promoted and future-safe read-only successor workflow chain
+        run: node scripts/prove_successor_workflow_invariants_r175.mjs
       - name: Prove focused R175 multi-domain living-world truth surface
         run: |
           node --check src/world/multiDomainLivingWorldTruthR175.js
@@ -80,8 +82,10 @@ jobs:
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
       - name: Summarize current convergence boundary
         run: |
-          echo 'R175 CURRENT CONVERGENCE PASS.'
-          echo 'R171-R174 remain promoted current successors and R175 adds read-only multi-domain living-world truth convergence.'
+          echo 'R175.2 CURRENT CONVERGENCE PASS.'
+          echo 'R175 multi-domain living-world truth remains read-only and fully preserved.'
+          echo 'R171-R174 remain promoted current workflow successors and are explicitly plus dynamically proved.'
+          echo 'Future post-R175 proof workflows are accepted only under bounded read-only successor policy and focused invariant proof.'
           echo 'Superseded historical workflows remain byte-preserved outside the active Actions directory.'
           echo 'Canonical production deployment remains exclusively owned by ci.yml two-parent merge law.'
           echo 'R125 remains sole CanonState admission authority; R153.2 remains SCREEN_ONLY.'
