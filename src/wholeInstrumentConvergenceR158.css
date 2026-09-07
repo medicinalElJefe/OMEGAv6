@@ -1,0 +1,27 @@
+/* R158 whole-instrument convergence: additive, non-covering, route-aware skin context. */
+:root{--r158-accent:rgba(111,172,164,.24);--r158-accent-soft:rgba(111,172,164,.055);--r158-accent-text:#88aaa5}
+:root[data-omega-r158-skin='FIELD']{--r158-accent:rgba(90,183,170,.30);--r158-accent-soft:rgba(63,160,150,.065);--r158-accent-text:#8bc7bd}
+:root[data-omega-r158-skin='WORKBENCH']{--r158-accent:rgba(122,155,179,.28);--r158-accent-soft:rgba(88,124,151,.06);--r158-accent-text:#9bb3c4}
+:root[data-omega-r158-skin='FLOW']{--r158-accent:rgba(202,167,98,.28);--r158-accent-soft:rgba(185,143,74,.06);--r158-accent-text:#c8b17a}
+:root[data-omega-r158-skin='LEDGER']{--r158-accent:rgba(164,139,194,.25);--r158-accent-soft:rgba(139,111,171,.055);--r158-accent-text:#b7a3cb}
+:root[data-omega-r158-skin='CONTROL']{--r158-accent:rgba(190,119,102,.24);--r158-accent-soft:rgba(164,92,77,.052);--r158-accent-text:#c49a90}
+:root[data-omega-r158-skin='OPERATE']{--r158-accent:rgba(212,179,103,.27);--r158-accent-soft:rgba(187,148,72,.06);--r158-accent-text:#cbb47b}
+
+.r158-whole-instrument{border-color:var(--r158-accent)!important}
+.r158-whole-instrument .r100-navigator-head{box-shadow:inset 3px 0 0 var(--r158-accent)}
+.r158-whole-instrument .r100-navigator-head>div:first-child>span{color:var(--r158-accent-text)!important}
+.r158-whole-instrument .r156-global-context{border-color:var(--r158-accent)!important;background:linear-gradient(145deg,var(--r158-accent-soft),rgba(0,0,0,.09))!important}
+.r158-whole-instrument .r156-active-instrument{box-shadow:inset 2px 0 0 var(--r158-accent)}
+.r158-contract-strip{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:0 10px 6px;padding:5px 7px;border:1px solid var(--r158-accent);border-radius:8px;background:var(--r158-accent-soft);min-width:0}
+.r158-contract-strip>span{color:#526666;font:650 5px/1 ui-monospace,monospace;letter-spacing:.08em}
+.r158-contract-strip>b{color:var(--r158-accent-text);font:720 5.7px/1 ui-monospace,monospace}
+.r158-contract-strip>i{padding:2px 4px;border:1px solid rgba(126,151,150,.09);border-radius:4px;color:#75898a;font:600 5px/1 ui-monospace,monospace;font-style:normal;white-space:nowrap}
+.r158-route[data-r158-skin='FIELD']{box-shadow:inset 2px 0 0 rgba(90,183,170,.18)}
+.r158-route[data-r158-skin='FLOW']{box-shadow:inset 2px 0 0 rgba(202,167,98,.16)}
+.r158-route[data-r158-skin='LEDGER']{box-shadow:inset 2px 0 0 rgba(164,139,194,.15)}
+.r158-route[data-r158-skin='CONTROL']{box-shadow:inset 2px 0 0 rgba(190,119,102,.14)}
+.r158-route[data-r158-skin='WORKBENCH']{box-shadow:inset 2px 0 0 rgba(122,155,179,.15)}
+.r158-route[data-r158-skin='OPERATE']{box-shadow:inset 2px 0 0 rgba(212,179,103,.16)}
+@media(max-width:900px){.r158-contract-strip{margin-inline:7px;gap:3px}.r158-contract-strip>span{display:none}.r158-contract-strip>i:nth-of-type(n+5){display:none}}
+@media(max-width:520px){.r158-contract-strip>i:nth-of-type(n+4){display:none}}
+@media(prefers-reduced-motion:reduce){.r158-whole-instrument *{scroll-behavior:auto!important}}
