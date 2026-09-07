@@ -40,6 +40,14 @@ jobs:
           node tests/r153-full-system-completion-invariants.mjs
           node tests/r155-whole-system-convergence-invariants.mjs
           node tests/r167-active-optical-r1532-convergence-invariants.mjs
+      - name: Preserve R168.1 byte-exact RCWA and federation propagation acceptance
+        env:
+          OMEGA_RCWA_PROPAGATION_ATTEMPTS: '3'
+          OMEGA_FEDERATION_PROPAGATION_ATTEMPTS: '3'
+        run: |
+          node --check scripts/diagnose_rcwa_live_r1681.mjs
+          node --check scripts/verify_federation_live_r1681.mjs
+          node scripts/verify_federation_live_r1681.mjs
       - name: Preserve current federation attestation world-scar continuity
         run: |
           node tests/r168-genesis-r192-attestation-invariants.mjs
