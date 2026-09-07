@@ -1,17 +1,10 @@
+import {R154_FULL_SYSTEM_CONTRACT,R154_REVISION} from '../fullSystemCompletionR154.js';
+
 export const R130_REVISION='R130';
 export const R130_SCHEMA='OMEGA_OPERATIONAL_CONTROL_PLANE_R130';
 export const R130_HIERARCHY={seed:1,organs:12,branches:144,cells:1728,lanes:20736};
 export const R130_LAWS=[
- 'ONE_PUBLIC_RUNTIME_ENTRYPOINT',
- 'CAPABILITY_REGISTRY_IS_MACHINE_READABLE',
- 'REACHABILITY_IS_NOT_EXECUTION_PROOF',
- 'EXECUTION_PROOF_IS_NOT_EMPIRICAL_VALIDATION',
- 'EMPIRICAL_VALIDATION_IS_NOT_CANONSTATE',
- 'MISSING_OR_STALE_STATUS_REMAINS_UNKNOWN',
- 'PC_ONLINE_REQUIRES_AUTHENTICATED_HEARTBEAT',
- 'SYNTHETIC_DATA_HAS_ZERO_EXTERNAL_VALIDATION_CREDIT',
- 'EVERY_HIGH_AUTHORITY_RESULT_RETAINS_PROVENANCE_AND_REPLAY_IDENTITY',
- 'R125_REMAINS_CANONICAL_ADMISSION_AUTHORITY'
+ 'ONE_PUBLIC_RUNTIME_ENTRYPOINT','CAPABILITY_REGISTRY_IS_MACHINE_READABLE','REACHABILITY_IS_NOT_EXECUTION_PROOF','EXECUTION_PROOF_IS_NOT_EMPIRICAL_VALIDATION','EMPIRICAL_VALIDATION_IS_NOT_CANONSTATE','MISSING_OR_STALE_STATUS_REMAINS_UNKNOWN','PC_ONLINE_REQUIRES_AUTHENTICATED_HEARTBEAT','SYNTHETIC_DATA_HAS_ZERO_EXTERNAL_VALIDATION_CREDIT','EVERY_HIGH_AUTHORITY_RESULT_RETAINS_PROVENANCE_AND_REPLAY_IDENTITY','CURRENT_SUCCESSOR_REALITY_OVERRIDES_STALE_RESTORATION_LABELS_WITHOUT_ERASING_HISTORY','R125_REMAINS_CANONICAL_ADMISSION_AUTHORITY'
 ];
 
 const MODULES=[
@@ -23,35 +16,15 @@ const MODULES=[
  {revision:'R127',id:'PROOF_FABRIC',layer:'PROOF',state:'ADMITTED',authority:'CANDIDATE_NOT_CANON',purpose:'source → causal → plan → receipt → independent verification'},
  {revision:'R128',id:'EMPIRICAL_VALIDATION',layer:'VALIDATION',state:'ADMITTED',authority:'VALIDATION_EVIDENCE_NOT_CANON',purpose:'external calibration/holdout/reproduction with deterministic replay identity'},
  {revision:'R129',id:'EXPERIMENT_RUNTIME',layer:'VALIDATION',state:'ADMITTED',authority:'EXPERIMENT_LEDGER_NOT_CANON',purpose:'reproducible experiment CLI, artifact hashes and replay manifests'},
- {revision:'R130',id:'CONTROL_PLANE',layer:'OPERATIONS',state:'CANDIDATE',authority:'OBSERVABILITY_NOT_CANON',purpose:'single operational registry and health matrix'}
+ {revision:'R130',id:'CONTROL_PLANE',layer:'OPERATIONS',state:'ADMITTED',authority:'OBSERVABILITY_NOT_CANON',purpose:'single operational registry and health matrix'},
+ {revision:'R153',id:'ADAPTIVE_SOVEREIGN_MISSIONS',layer:'EXECUTION',state:'ADMITTED',authority:'RETURNED_PROOF_CONTINUATION_NOT_CANON',purpose:'bounded returned-proof project discovery, build/test, repair, package and completion lifecycle'},
+ {revision:R154_REVISION,id:'FULL_SYSTEM_COMPLETION',layer:'COMPLETION',state:'ADMITTED',authority:'SUCCESSOR_IMPLEMENTATION_AND_GATE_AUTHORITY_NOT_CANON',purpose:'24-family / 100-system / 44-route one-system completion contract over the existing successor, adaptive mission, execution, proof and admission chain'}
 ];
 
-export const R130_PROBES=[
- {id:'health',path:'/api/health'},
- {id:'status',path:'/api/status'},
- {id:'restoration',path:'/api/restoration'},
- {id:'hybrid',path:'/api/hybrid/status'},
- {id:'convergence',path:'/api/system/convergence'},
- {id:'federation',path:'/api/federation/run/status'},
- {id:'autonomic',path:'/api/swarm/autonomic/manifest'}
-];
+export const R130_PROBES=[{id:'health',path:'/api/health'},{id:'status',path:'/api/status'},{id:'restoration',path:'/api/restoration'},{id:'hybrid',path:'/api/hybrid/status'},{id:'convergence',path:'/api/system/convergence'},{id:'federation',path:'/api/federation/run/status'},{id:'autonomic',path:'/api/swarm/autonomic/manifest'}];
 
-export function manifestR130(){return{
- ok:true,schema:R130_SCHEMA,revision:R130_REVISION,canonicalOrigin:'https://omegav6.jeffdeweyeljefe.workers.dev',hierarchy:R130_HIERARCHY,entrypoint:'src/workerR116.js',modules:MODULES,
- stageOrder:['SOURCE','PROVENANCE','CAUSAL','PLAN','EXECUTION','RECEIPT','VERIFY','EMPIRICAL_HOLDOUT','REPLAY_LEDGER','R125_ADMISSION'],laws:R130_LAWS,
- organization:{execution:['R121','R123','R125','R126 maximum runtime'],reasoning:['R126 causal'],proof:['R127'],validation:['R128','R129'],operations:['R130'],canonicalAdmission:'R125'},
- truthBoundary:'R130 organizes and observes inherited capabilities. Registry membership or endpoint reachability does not prove native machine execution, scientific correctness, external validation, or CanonState.'
-};}
+export function manifestR130(){return{ok:true,schema:R130_SCHEMA,revision:R130_REVISION,canonicalOrigin:'https://omegav6.jeffdeweyeljefe.workers.dev',hierarchy:R130_HIERARCHY,entrypoint:'src/workerR116.js',modules:MODULES,stageOrder:['SOURCE','PROVENANCE','CAUSAL','PLAN','EXECUTION','RECEIPT','VERIFY','EMPIRICAL_HOLDOUT','REPLAY_LEDGER','R125_ADMISSION'],laws:R130_LAWS,organization:{execution:['R121','R123','R125','R126 maximum runtime','R153 adaptive sovereign missions'],reasoning:['R126 causal'],proof:['R127'],validation:['R128','R129'],operations:['R130'],completion:[R154_REVISION],canonicalAdmission:'R125'},fullSystemCompletion:R154_FULL_SYSTEM_CONTRACT,truthBoundary:'R130 organizes and observes inherited capabilities. R154 exposes current successor implementation/gate status and composes the admitted R153 adaptive mission engine so restored systems are not mislabeled as debt. Registry membership or endpoint reachability still does not prove native machine execution, scientific correctness, external validation, solver freshness or CanonState.'};}
 
-function normalize(probes){
- const byId=Object.fromEntries(probes.map(p=>[p.id,p])),hybrid=byId.hybrid?.body||{},convergence=byId.convergence?.body||{},autonomic=byId.autonomic?.body||{};
- const authenticatedPc=Boolean(hybrid?.nativeExecutionClaimed===true&&Array.isArray(hybrid?.devices)&&hybrid.devices.some(d=>d?.online===true&&d?.revoked!==true));
- const missing=probes.filter(p=>!p.reachable).map(p=>p.id),hierarchyOk=autonomic?.hierarchy?.cells===1728&&autonomic?.hierarchy?.lanes===20736;
- return{state:missing.length?'DEGRADED':'REACHABLE',reachableCount:probes.length-missing.length,requiredCount:probes.length,missing,canonicalRuntime:convergence?.canonical?.state||'UNKNOWN',sovereign:{authenticatedHeartbeat:authenticatedPc,nativeExecutionClaimed:hybrid?.nativeExecutionClaimed===true},swarm:{hierarchyVerifiedFromManifest:Boolean(hierarchyOk),cells:autonomic?.hierarchy?.cells??null,lanes:autonomic?.hierarchy?.lanes??null},authority:'OPERATIONAL_OBSERVATION_NOT_CANON'};
-}
+function normalize(probes){const byId=Object.fromEntries(probes.map(p=>[p.id,p])),hybrid=byId.hybrid?.body||{},convergence=byId.convergence?.body||{},autonomic=byId.autonomic?.body||{};const authenticatedPc=Boolean(hybrid?.nativeExecutionClaimed===true&&Array.isArray(hybrid?.devices)&&hybrid.devices.some(d=>d?.online===true&&d?.revoked!==true));const missing=probes.filter(p=>!p.reachable).map(p=>p.id),hierarchyOk=autonomic?.hierarchy?.cells===1728&&autonomic?.hierarchy?.lanes===20736;return{state:missing.length?'DEGRADED':'REACHABLE',reachableCount:probes.length-missing.length,requiredCount:probes.length,missing,canonicalRuntime:convergence?.canonical?.state||'UNKNOWN',sovereign:{authenticatedHeartbeat:authenticatedPc,nativeExecutionClaimed:hybrid?.nativeExecutionClaimed===true},swarm:{hierarchyVerifiedFromManifest:Boolean(hierarchyOk),cells:autonomic?.hierarchy?.cells??null,lanes:autonomic?.hierarchy?.lanes??null},fullSystem:{revision:R154_REVISION,inheritedAdaptiveMissionRevision:'R153',families:R154_FULL_SYSTEM_CONTRACT.inventory.families,systems:R154_FULL_SYSTEM_CONTRACT.inventory.systems,routes:R154_FULL_SYSTEM_CONTRACT.inventory.routes,implemented:R154_FULL_SYSTEM_CONTRACT.successor.implemented,truthGated:R154_FULL_SYSTEM_CONTRACT.successor.truthGated,restorationDebt:R154_FULL_SYSTEM_CONTRACT.successor.restorationDebt},authority:'OPERATIONAL_OBSERVATION_NOT_CANON'};}
 
-export async function operationalR130(request,env,inheritedFetch){
- const probes=await Promise.all(R130_PROBES.map(async probe=>{try{const target=new URL(probe.path,request.url),response=await inheritedFetch(new Request(target,{method:'GET',headers:request.headers}),env),body=await response.clone().json().catch(()=>null);return{id:probe.id,path:probe.path,httpStatus:response.status,reachable:response.ok,body};}catch(error){return{id:probe.id,path:probe.path,httpStatus:0,reachable:false,error:String(error instanceof Error?error.message:error)}}}));
- const summary=normalize(probes);
- return{ok:summary.missing.length===0,schema:'OMEGA_OPERATIONAL_HEALTH_MATRIX_R130',revision:R130_REVISION,observedAt:new Date().toISOString(),hierarchy:R130_HIERARCHY,summary,probes:probes.map(p=>({id:p.id,path:p.path,httpStatus:p.httpStatus,reachable:p.reachable,error:p.error||null})),proofBoundaries:{allRoutesReachable:summary.missing.length===0,pcOnlineProved:summary.sovereign.authenticatedHeartbeat,logicalSwarmHierarchyObserved:summary.swarm.hierarchyVerifiedFromManifest,live1728IndependentCloudDeploymentsProved:false,externalScientificValidationProved:false,canonicalMutation:false},nextAction:summary.missing.length?'Repair unreachable inherited routes before expanding capability.':summary.sovereign.authenticatedHeartbeat?'Operational spine reachable; continue proof-bounded external experiments and workload execution.':'Operational spine reachable; PC remains offline until a current authenticated heartbeat is observed.',truthBoundary:'HTTP reachability is service-health evidence only. It cannot be promoted into execution proof, empirical validation, scientific truth, or canonical admission.'};
-}
+export async function operationalR130(request,env,inheritedFetch){const probes=await Promise.all(R130_PROBES.map(async probe=>{try{const target=new URL(probe.path,request.url),response=await inheritedFetch(new Request(target,{method:'GET',headers:request.headers}),env),body=await response.clone().json().catch(()=>null);return{id:probe.id,path:probe.path,httpStatus:response.status,reachable:response.ok,body};}catch(error){return{id:probe.id,path:probe.path,httpStatus:0,reachable:false,error:String(error instanceof Error?error.message:error)}}}));const summary=normalize(probes);return{ok:summary.missing.length===0,schema:'OMEGA_OPERATIONAL_HEALTH_MATRIX_R130',revision:R130_REVISION,completionRevision:R154_REVISION,observedAt:new Date().toISOString(),hierarchy:R130_HIERARCHY,summary,probes:probes.map(p=>({id:p.id,path:p.path,httpStatus:p.httpStatus,reachable:p.reachable,error:p.error||null})),proofBoundaries:{allRoutesReachable:summary.missing.length===0,pcOnlineProved:summary.sovereign.authenticatedHeartbeat,logicalSwarmHierarchyObserved:summary.swarm.hierarchyVerifiedFromManifest,fullSystemSuccessorDebtCleared:R154_FULL_SYSTEM_CONTRACT.successor.restorationDebt===0,adaptiveMissionEnginePreserved:true,live1728IndependentCloudDeploymentsProved:false,externalScientificValidationProved:false,canonicalMutation:false},nextAction:summary.missing.length?'Repair unreachable inherited routes before expanding capability.':summary.sovereign.authenticatedHeartbeat?'Operational spine reachable; R154 whole-system objective may execute through the paired host using inherited R153 adaptive returned-proof continuation while evidence gates remain explicit.':'Operational spine reachable and R154 successor implementation coverage is complete; native PC/RCWA verification remains held until a current authenticated heartbeat is observed.',truthBoundary:'HTTP reachability and successor implementation coverage are service/runtime evidence only. They cannot be promoted into native execution proof, empirical validation, scientific truth, solver freshness, or canonical admission.'};}
