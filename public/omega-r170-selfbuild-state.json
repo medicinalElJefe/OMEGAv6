@@ -1,0 +1,80 @@
+{
+  "schema": "OMEGA_GOVERNED_SELFBUILD_STATE_R170",
+  "revision": "R170",
+  "authority": "OMEGAV6",
+  "active": true,
+  "generation": 0,
+  "maxAutonomousGenerations": 5,
+  "currentCapsuleId": null,
+  "admittedSourceCapsules": [],
+  "rejected": [],
+  "blocked": [],
+  "receipts": [],
+  "laws": [
+    "AUTONOMOUS_BUILD_MAY_PROPOSE_SOURCE_BUT_MAY_NOT_MUTATE_MAIN_DIRECTLY",
+    "R125_REMAINS_SOLE_CANONSTATE_ADMISSION_AUTHORITY",
+    "ONE_CAPSULE_ONE_BRANCH_ONE_PROOF_RECEIPT_ONE_PR",
+    "HIGH_OR_CRITICAL_RESIDUALS_BLOCK_AUTONOMOUS_CANDIDATE_GENERATION",
+    "NO_OPEN_SELFBUILD_PR_MEANS_AT_MOST_ONE_NEW_CANDIDATE_PER_PULSE",
+    "NO_RECURSIVE_PUSH_OR_WORKFLOW_RUN_TRIGGER_CHAIN",
+    "BACKLOG_EXHAUSTION_ENTERS_OBSERVE_MODE",
+    "EVERY_CANDIDATE_PRESERVES_R116_SEVEN_DURABLE_OBJECTS_R1532_SCREEN_ONLY_AND_R168_R192_TRUTH_BOUNDARIES"
+  ],
+  "roadmap": [
+    {
+      "id": "SG001",
+      "title": "Workflow capacity model",
+      "objective": "Represent bounded active workflow capacity, archived proof lineage, and scheduler pressure as a typed read-only control-plane model.",
+      "target": "src/generated/selfbuildR170/workflowCapacityModelR170.ts",
+      "risk": "LOW",
+      "prerequisites": [],
+      "expectedGain": 0.97,
+      "complexity": 0.22,
+      "contradictionRisk": 0.05
+    },
+    {
+      "id": "SG002",
+      "title": "Deployment convergence receipt",
+      "objective": "Represent published source, runtime source, asset propagation and acceptance as distinct states without treating reachability as promotion.",
+      "target": "src/generated/selfbuildR170/deploymentConvergenceReceiptR170.ts",
+      "risk": "LOW",
+      "prerequisites": ["SG001"],
+      "expectedGain": 0.95,
+      "complexity": 0.28,
+      "contradictionRisk": 0.06
+    },
+    {
+      "id": "SG003",
+      "title": "Residual read-only projection",
+      "objective": "Project R164 residual evidence into operator-facing categories while preserving observation versus mutation authority.",
+      "target": "src/generated/selfbuildR170/residualReadOnlyProjectionR170.ts",
+      "risk": "LOW",
+      "prerequisites": ["SG001"],
+      "expectedGain": 0.91,
+      "complexity": 0.3,
+      "contradictionRisk": 0.07
+    },
+    {
+      "id": "SG004",
+      "title": "Candidate proof receipt",
+      "objective": "Encode candidate branch, base SHA, proof gates, residual gate and PR state without Canon admission leakage.",
+      "target": "src/generated/selfbuildR170/candidateProofReceiptR170.ts",
+      "risk": "LOW",
+      "prerequisites": ["SG002"],
+      "expectedGain": 0.94,
+      "complexity": 0.31,
+      "contradictionRisk": 0.05
+    },
+    {
+      "id": "SG005",
+      "title": "Current capability projection",
+      "objective": "Project admitted source capabilities by authority, liveness and proof class without promoting availability into execution or Canon truth.",
+      "target": "src/generated/selfbuildR170/currentCapabilityProjectionR170.ts",
+      "risk": "MEDIUM",
+      "prerequisites": ["SG003", "SG004"],
+      "expectedGain": 0.93,
+      "complexity": 0.4,
+      "contradictionRisk": 0.1
+    }
+  ]
+}
