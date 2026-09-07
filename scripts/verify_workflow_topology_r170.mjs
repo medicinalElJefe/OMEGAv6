@@ -42,6 +42,22 @@ function triggerBlock(text,trigger){
   }
   return '';
 }
+function branchTokens(block){
+  if(!block)return[];
+  const clean=x=>String(x).trim().replace(/^['"]|['"]$/g,'');
+  const inline=block.match(/\bbranches\s*:\s*\[([^\]]*)\]/i);
+  if(inline)return inline[1].split(',').map(clean).filter(Boolean);
+  const lines=block.split(/\r?\n/),out=[];let branchIndent=null;
+  for(const line of lines){
+    const m=line.match(/^(\s*)branches\s*:\s*$/i);
+    if(m){branchIndent=m[1].length;continue}
+    if(branchIndent===null)continue;
+    const indent=(line.match(/^\s*/)?.[0].length)||0;
+    if(line.trim()&&indent<=branchIndent)break;
+    const item=line.match(/^\s*-\s*(.+?)\s*$/);if(item)out.push(clean(item[1]));
+  }
+  return out;
+}
 
 const successors=[];
 for(const [name,text] of contents){
@@ -60,7 +76,7 @@ for(const [name,text] of contents){
   assert.match(text,/permissions:\s*\n\s+contents:\s*read/i,`${name} must declare read-only contents authority`);
   assert.ok(!/\b(contents|pull-requests|actions|deployments|checks|statuses|issues|packages|id-token|security-events):\s*write\b/i.test(text),`${name} successor workflow has write authority`);
   const push=triggerBlock(text,'push');
-  if(push)assert.ok(!/\bmain\b/i.test(push),`${name} successor workflow may not push-trigger on main`);
+  if(push)assert.ok(!branchTokens(push).includes('main'),`${name} successor workflow may not push-trigger on literal main`);
   assert.equal(triggerBlock(text,'schedule'),'',`${name} successor workflow may not schedule recurring execution`);
   successors.push({name,revision});
 }
@@ -75,4 +91,4 @@ assert.ok(floorMatch,'currentCapabilityFloor must be an R-number');
 const floorRevision=Number(floorMatch[1]);
 const highestSuccessorRevision=successors.reduce((max,x)=>Math.max(max,x.revision),170);
 assert.equal(floorRevision,highestSuccessorRevision,`currentCapabilityFloor R${floorRevision} must match highest active promoted successor R${highestSuccessorRevision}`);
-console.log(JSON.stringify({schema:'OMEGA_WORKFLOW_TOPOLOGY_R170_3',activeCount:active.length,coreCount:coreRequired.length,successorCount:successors.length,successors,archivedCount:archived.length,maxActive,currentCapabilityFloor:governor.currentCapabilityFloor,observationCadence:governor.selfBuild.observationCadence,expensiveProofMode:governor.selfBuild.expensiveProofMode,directMainCandidateMutation:false,recursiveWorkflowRunFanout:false,productionProofRequired:true,successorPolicy:'READ_ONLY_BRANCH_OR_PR_PROOF_AUTHORITIES',canonicalAdmissionAuthority:'R125',result:'PASS'},null,2));
+console.log(JSON.stringify({schema:'OMEGA_WORKFLOW_TOPOLOGY_R170_3_EXACT_BRANCH',activeCount:active.length,coreCount:coreRequired.length,successorCount:successors.length,successors,archivedCount:archived.length,maxActive,currentCapabilityFloor:governor.currentCapabilityFloor,observationCadence:governor.selfBuild.observationCadence,expensiveProofMode:governor.selfBuild.expensiveProofMode,directMainCandidateMutation:false,recursiveWorkflowRunFanout:false,productionProofRequired:true,successorPolicy:'READ_ONLY_BRANCH_OR_PR_PROOF_AUTHORITIES',canonicalAdmissionAuthority:'R125',result:'PASS'},null,2));

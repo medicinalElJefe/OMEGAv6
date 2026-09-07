@@ -1,0 +1,118 @@
+name: R180 Optical Full-wave Admissibility Integration
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/opticalExternalToolR1533.js'
+      - 'services/opticalMachineR1533.js'
+      - 'sovereign/omega_fullwave_manifold_r1533.py'
+      - 'tests/r1533-fullwave-manifold-invariants.mjs'
+      - 'tests/r180-optical-fullwave-admissibility-invariants.mjs'
+      - 'wrangler.optical-machine-r1533.jsonc'
+      - 'scripts/verify_workflow_topology_r170.mjs'
+      - 'public/omega-r170-self-build-governor.json'
+      - '.github/workflows/r180-optical-fullwave-admissibility.yml'
+  push:
+    branches: [r180-optical-fullwave-current-r1703]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r180-optical-fullwave-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r180:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm install --no-fund
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Prove focused R180 integration and corrected R153.3 identity
+        run: |
+          node --check services/opticalExternalToolR1533.js
+          node --check services/opticalMachineR1533.js
+          node tests/r180-optical-fullwave-admissibility-invariants.mjs
+          node tests/r1533-fullwave-manifold-invariants.mjs
+          python -m py_compile sovereign/omega_fullwave_manifold_r1533.py
+      - name: Preserve current R179 through R174 living-world and execution authority chain
+        run: |
+          node tests/r179-living-world-durable-authorization-invariants.mjs
+          node tests/r178-living-world-contract-resolution-invariants.mjs
+          node tests/r177-living-world-mission-composer-invariants.mjs
+          node tests/r176-living-world-intent-proposal-invariants.mjs
+          node tests/r175-multidomain-living-world-truth-invariants.mjs
+          node tests/r174-living-world-pulse-invariants.mjs
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r162-governed-reflex-execution-invariants.mjs
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+      - name: Preserve R170.3 hourly governed build and dynamic successor authority
+        run: |
+          node scripts/verify_workflow_topology_r170.mjs
+          node scripts/prove_successor_workflow_invariants_r175.mjs
+          node tests/r170-self-build-governor-invariants.mjs
+      - name: Preserve active Optical R153.2 and solver truth boundaries
+        run: |
+          node tests/r167-active-optical-r1532-convergence-invariants.mjs
+          node tests/r1532-adaptive-external-search-invariants.mjs
+          node tests/r1531-external-ai-tool-push-invariants.mjs
+          node tests/r152-optical-operational-convergence-invariants.mjs
+          node tests/r115-machine-adapters-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Execute bounded real grcwa R153.3 manifold smoke proof
+        working-directory: sovereign
+        shell: bash
+        run: |
+          cat > /tmp/r180-r1533-seed.json <<'JSON'
+          {"geometry":{"pitch_nm":304,"width_nm":137,"length_nm":304,"height_nm":572}}
+          JSON
+          python omega_fullwave_manifold_r1533.py \
+            --input /tmp/r180-r1533-seed.json \
+            --output /tmp/r180-r1533-fullwave.json \
+            --wavelengths 470,532,650 \
+            --screen-grid 48 \
+            --validation-grid 64 \
+            --top-k 4 \
+            --phase-margin 8 \
+            --tolerance-nm 5 \
+            --engineering-ratio 0.93 \
+            --max-candidates 48 \
+            --stress-top-k 1
+          python - <<'PY'
+          import json,math
+          d=json.load(open('/tmp/r180-r1533-fullwave.json'))
+          assert d['schema']=='OMEGA_FULLWAVE_MANIFOLD_R1533'
+          assert d['version']=='R153.3'
+          assert d['scalar_seed_fullwave_admissible'] is False
+          assert len(d['projections'])>=2
+          assert d['screened_candidates']>0
+          assert d['validated_candidates']>0
+          for p in d['projections']:
+              g=p['geometry'];m=p['manifold']
+              assert m['valid_r41'] is True
+              assert g['width_nm'] < g['length_nm']
+              assert math.hypot(g['width_nm'],g['length_nm']) <= 0.95*g['pitch_nm'] + 1e-8
+          assert 'fabrication validation' in d['truth_boundary'].lower()
+          print('R180 REAL GRCWA MANIFOLD PASS',json.dumps({'screened':d['screened_candidates'],'validated':d['validated_candidates'],'admitted':d['admitted_candidates'],'status':d['status'],'proof':d['proof_sha256']}))
+          PY
+      - name: Full inherited production regression and canonical package proof
+        run: |
+          npm run check
+          npx wrangler deploy --dry-run --outdir .wrangler-r180-canonical
+          npx wrangler deploy --config wrangler.optical-machine-r1533.jsonc --dry-run --outdir .wrangler-r180-r1533
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r180-r1533-fullwave-proof
+          path: /tmp/r180-r1533-fullwave.json
+          if-no-files-found: error
