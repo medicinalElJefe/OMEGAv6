@@ -17,6 +17,12 @@
    already represented by the scene/LOD/frame controls, so the overlay is suppressed. */
 .capu158-stage-label{display:none!important}
 
+/* The SVG is a data overlay, not a full-stage input shield. Only genuinely clickable
+   marks take pointer events. Empty overlay space and the canonical core remain transparent
+   so canvas orbit/modified-wheel zoom still work anywhere that is not an interactive mark. */
+.capu158-overlay,.capu158-overlay g,.capu158-overlay circle{pointer-events:none!important}
+.capu158-overlay :where(.capu158-resolution circle,.capu158-modes circle,.capu158-families circle,.capu158-capacity circle){pointer-events:auto!important}
+
 /* Controls remain outside the output plane and preserve hit targets / keyboard access. */
 .capu158>header,.capu158-scenes,.capu158-controls,.capu158-kpis,.capu158-inspector,.capu158-resolution-strip,.capu158>footer,
 .dr156>header,.dr156-controls,.dr156-kpis,.dr156-fields,.dr156-dual,.dr156-reference,.dr156-mode-field,.dr156-candidate,.dr156>footer{position:relative;z-index:1}
