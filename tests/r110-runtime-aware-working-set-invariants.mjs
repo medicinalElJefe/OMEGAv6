@@ -7,6 +7,9 @@ const policySource=read('src/specialistWorkingSetPolicyR110.js');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const accepted=read('src/acceptedProductionContractR95.ts');
 const r109=read('tests/r109-route-deferred-specialist-fabric-invariants.mjs');
+const app=read('src/App.tsx');
+const vite=read('vite.config.ts');
+const wrangler=read('wrangler.jsonc');
 const pkg=JSON.parse(read('package.json'));
 
 const standard=deriveSpecialistPrefetchPolicyR110({effectiveType:'4g'});
@@ -49,4 +52,10 @@ must(accepted.includes('R110 runtime-aware working-set budget + current-session 
 must(pkg.scripts['test:r110']==='node tests/r110-runtime-aware-working-set-invariants.mjs','R110 release script missing');
 must(pkg.scripts['check:static'].includes('npm run test:r109')&&pkg.scripts['check:static'].includes('npm run test:r110'),'full release gate must run R109 then R110');
 
-console.log(`R110/R116 RUNTIME-AWARE WORKING SET PASS · ${surfaces.length} registered destinations preserved dynamically · hidden/Save-Data/2G suppression · low-power/3G budget reduction · direct route demand preserved · current-session module telemetry only · R109 deferred topology retained · one route/state/proof authority retained`);
+must(app.includes("const OmegaHomeR71=lazy(()=>import('./OmegaHomeR71'))")&&!app.includes("import OmegaHomeR71 from './OmegaHomeR71'"),'R199.1 must defer the heavyweight Home dependency graph from the initial entry');
+must(app.includes('<Suspense fallback={fallback}>{home?<OmegaHomeR71')&&app.includes(':<OmegaWorkstation/>}</Suspense>'),'R199.1 must preserve one branded suspense boundary across Home and workstation route demand');
+must(vite.includes('R1991_ENTRY_BUDGET_BYTES=500*1024')&&vite.includes('initialEntryBudgetR1991')&&vite.includes('Defer specialist/home dependencies instead of raising the budget.'),'R199.1 must fail builds that regress the initial-entry byte budget');
+for(const live of ['OmegaRuntime','OmegaSwarmCell','OmegaSwarmCoordinator','OmegaSwarmBranch','OmegaSwarmOrgan','OmegaSwarmOrganismCoordinator','OmegaSwarmAutonomicCoordinator'])must(wrangler.includes(`"${live}": {"type": "durable-object", "storage": "sqlite"}`),`R199.1 must retain live durable authority ${live}`);
+for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203'])must(!wrangler.includes(`"${retired}": {"type": "durable-object"`),`R199.1 must remove Cloudflare-confirmed inert tombstone ${retired}`);
+
+console.log(`R110/R199.1 RUNTIME-AWARE WORKING SET PASS · ${surfaces.length} registered destinations preserved dynamically · hidden/Save-Data/2G suppression · low-power/3G budget reduction · direct route demand preserved · Home deferred · 500 KiB initial-entry budget enforced · inert R201/R203 tombstones absent · one route/state/proof authority retained`);
