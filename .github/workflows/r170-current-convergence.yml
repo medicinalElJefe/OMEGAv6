@@ -28,11 +28,13 @@ jobs:
         run: |
           node scripts/verify_workflow_topology_r170.mjs
           node tests/r170-self-build-governor-invariants.mjs
+      - name: Prove current promoted and future-safe read-only successor chain
+        run: node scripts/prove_successor_workflow_invariants_r175.mjs
       - name: Prove current federation and Genesis attestation layers
         run: |
           node tests/r169-federation-attestation-world-lens-invariants.mjs
           node tests/r168-genesis-r192-attestation-invariants.mjs
-      - name: Preserve promoted federation-world successors R171 through R174
+      - name: Preserve promoted federation-world successors R171 through R174 explicitly
         run: |
           node tests/r171-federation-receipt-world-reconciler-invariants.mjs
           node tests/r172-federation-ledger-world-binding-invariants.mjs
@@ -66,8 +68,9 @@ jobs:
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
       - name: Summarize current convergence boundary
         run: |
-          echo 'R174.1 CURRENT CONVERGENCE PASS.'
-          echo 'R171-R174 are promoted current successors and are explicitly preserved by the convergence gate.'
+          echo 'R175.1 CURRENT CONVERGENCE PASS.'
+          echo 'R171-R174 remain promoted current successors and are explicitly plus dynamically preserved.'
+          echo 'Future post-R174 proof workflows are accepted only under bounded read-only successor policy and focused invariant proof.'
           echo 'Superseded historical workflows remain byte-preserved outside the active Actions directory.'
           echo 'Canonical production deployment remains exclusively owned by ci.yml two-parent merge law.'
           echo 'R125 remains sole CanonState admission authority; R153.2 remains SCREEN_ONLY.'
