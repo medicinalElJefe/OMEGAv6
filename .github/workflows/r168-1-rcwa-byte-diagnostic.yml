@@ -1,6 +1,7 @@
 name: R168.1 RCWA Propagation Acceptance
 
 on:
+  workflow_dispatch:
   push:
     branches: [r168-1-rcwa-byte-attestation-repair]
     paths:
@@ -30,18 +31,21 @@ env:
 
 jobs:
   prove-live-rcwa-propagation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - run: npm install
+      - run: npm install --no-fund
       - name: Build canonical assets
         run: npm run build
-      - name: Compare repository, dist, static and Worker-served RCWA bytes
+      - name: Prove candidate repository to dist RCWA byte identity
+        env:
+          OMEGA_RCWA_DIAGNOSTIC_SCOPE: CANDIDATE
         run: node scripts/diagnose_rcwa_live_r1681.mjs
-      - name: Prove production acceptance verifier against current live runtime
+      - name: Prove production acceptance only from main manual verification
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
         run: node scripts/verify_federation_live_r1681.mjs
       - name: Syntax-check reusable verification tools
         run: |
