@@ -4,8 +4,8 @@
   "authority": "OMEGAV6",
   "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
   "engineRevision": "R170.2",
-  "currentCapabilityFloor": "R179",
-  "promotedSuccessorContinuity": ["R175", "R176", "R177", "R178", "R179"],
+  "currentCapabilityFloor": "R180",
+  "promotedSuccessorContinuity": ["R175", "R176", "R177", "R178", "R179", "R180"],
   "activeWorkflowAuthority": {
     "productionDeploy": ".github/workflows/ci.yml",
     "currentConvergence": ".github/workflows/r170-current-convergence.yml",
@@ -51,7 +51,7 @@
     "highOrCriticalAutoRepair": false,
     "residualAuthority": "R164",
     "successorContinuityProof": "scripts/prove_successor_workflow_invariants_r175.mjs",
-    "latestExplicitSuccessorProof": "tests/r179-living-world-durable-authorization-invariants.mjs",
+    "latestExplicitSuccessorProof": "tests/r180-living-world-execution-dispatch-invariants.mjs",
     "canonicalAdmissionAuthority": "R125"
   },
   "preservedRuntime": {
@@ -65,8 +65,9 @@
     "livingWorldIntentProposal": "R176_INTENT_ONLY",
     "livingWorldMissionComposer": "R177_STAGED_NOT_DISPATCHED",
     "livingWorldContractResolution": "R178_RESOLVED_NOT_AUTHORIZED",
-    "livingWorldExecutionAuthorization": "R179_AUTHORIZED_NOT_DISPATCHED"
+    "livingWorldExecutionAuthorization": "R179_AUTHORIZED_NOT_DISPATCHED",
+    "livingWorldExecutionDispatch": "R180_EXPLICIT_GOVERNED_R147_DISPATCH"
   },
   "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
-  "truthBoundary": "R170.3 uses an hourly low-cost observation pulse and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run, no parallel self-build candidate is open, current residual evidence is non-blocking, and the current read-only successor chain through R179 proves before generation. Expensive dependency installation, inherited regression, and Worker dry-runs run only for a PROPOSE candidate, which is then re-proved before an isolated PR is opened. R179 stops at R146 AUTHORIZED and does not dispatch R147. R170.3 cannot directly mutate main, auto-merge, recursively dispatch workflows, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
+  "truthBoundary": "R170.3 uses an hourly low-cost observation pulse and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run, no parallel self-build candidate is open, current residual evidence is non-blocking, and the current read-only successor chain through R180 proves before generation. Expensive dependency installation, inherited regression, and Worker dry-runs run only for a PROPOSE candidate, which is then re-proved before an isolated PR is opened. R179 creates explicit R146 AUTHORIZED durable runs; R180 is a separate explicit governed action that may dispatch those exact non-stale runs through existing R147 authority. Hybrid/Build remains held without separate host execution confirmation, and queued or authorized work is never promoted into host invocation. R170.3/R180 cannot directly mutate main, auto-merge, recursively dispatch workflows, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
 }
