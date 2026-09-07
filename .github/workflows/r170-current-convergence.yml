@@ -24,13 +24,19 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-fund
-      - name: Prove bounded active workflow topology and self-build governance
+      - name: Prove R180 current-authority convergence contract
+        run: node tests/r180-current-authority-convergence-invariants.mjs
+      - name: Prove bounded active workflow topology and R170.3 self-build governance
         run: |
           node scripts/verify_workflow_topology_r170.mjs
           node tests/r170-self-build-governor-invariants.mjs
-      - name: Prove focused R175 multi-domain living-world truth surface
+      - name: Prove current R179 durable living-world execution chain
         run: |
-          node --check src/world/multiDomainLivingWorldTruthR175.js
+          node tests/r179-living-world-durable-authorization-invariants.mjs
+          node tests/r178-living-world-contract-resolution-invariants.mjs
+          node tests/r177-living-world-mission-composer-invariants.mjs
+          node tests/r176-living-world-intent-proposal-invariants.mjs
+          node tests/r176-r164-mobile-containment-invariants.mjs
           node tests/r175-multidomain-living-world-truth-invariants.mjs
           node tests/r174-living-world-pulse-invariants.mjs
           node tests/r173-federation-ledger-world-observer-invariants.mjs
@@ -60,7 +66,7 @@ jobs:
           node tests/r166-development-residual-world-lens-invariants.mjs
           node tests/r164-development-residual-graph-invariants.mjs
           node tests/r163-canonical-core-health-truth-invariants.mjs
-      - name: Preserve governed execution chain
+      - name: Preserve governed execution authority chain
         run: |
           node tests/r162-governed-reflex-execution-invariants.mjs
           node tests/r161-reflex-mission-durable-handoff-invariants.mjs
@@ -76,8 +82,10 @@ jobs:
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
       - name: Summarize current convergence boundary
         run: |
-          echo 'R175.1 CURRENT CONVERGENCE PASS.'
-          echo 'R175 multi-domain living-world truth is preserved and post-R170 successor workflows are dynamically proof-tested.'
-          echo 'Superseded historical workflows remain byte-preserved outside the active Actions directory.'
+          echo 'R180 CURRENT CONVERGENCE PASS over R170.3 / deployed R179 authority.'
+          echo 'R175 world truth → R176 intent → R177 mission composition → R178 contract resolution → R179 durable authorization is explicitly proved.'
+          echo 'The deployed R164 mobile-containment repair is retained in the same current chain.'
+          echo 'R170.3 remains hourly low-cost OBSERVE/PROPOSE control; expensive proof remains PROPOSE-only.'
+          echo 'Post-R170 successor workflows remain dynamically proof-tested and read-only.'
           echo 'Canonical production deployment remains exclusively owned by ci.yml two-parent merge law.'
-          echo 'R125 remains sole CanonState admission authority; R153.2 remains SCREEN_ONLY.'
+          echo 'R179 stops AUTHORIZED_NOT_DISPATCHED; R147/R162 execution authorities are preserved; R125 remains sole CanonState admission authority; R153.2 remains SCREEN_ONLY.'
