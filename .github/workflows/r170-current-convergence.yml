@@ -105,12 +105,28 @@ jobs:
           npm run check
           npx wrangler deploy --config wrangler.jsonc --dry-run --outdir .wrangler-r170-current
           npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-optical
+      - name: Prove R200 convergence invariant
+        run: node tests/r200-full-system-convergence-invariants.mjs
+      - name: Prove R200 browser execution on exact candidate build
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r200-vite.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            if [ "$attempt" = 30 ]; then cat /tmp/omega-r200-vite.log; exit 1; fi
+            sleep 1
+          done
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r200-current-browser-proof-e2e.mjs
       - name: Summarize current convergence boundary
         run: |
-          echo 'R198 CURRENT-AUTHORITY CONVERGENCE PASS: accepted R196.2 intelligence proof is rendered inside the existing R175/R174 living-world visual surface as an intent-only intelligence band.'
-          echo 'R197 adaptive backpressure remains execution scheduling authority; R196.1 remains held-draft only and R196.2 remains proof projection authority.'
-          echo 'R199.1 production hygiene changes packaging/deployment maintenance only; it creates no execution, evidence, proof, workflow-dispatch, or Canon authority.'
-          echo 'No second world, executor, queue, probe authority, or Canon path is introduced; R198 is read-only visual projection and navigation intent only.'
+          echo 'R200 CURRENT-AUTHORITY CONVERGENCE PASS: exact-build desktop/mobile browser proof now sits above promoted R199.1.1 deployment repair and the R199/R198 living-world and execution-control stack.'
+          echo 'R200 requires Visual Instrument LIVE default, explicit DEEP COMPILER selection, inert R188 until operator invocation, then a complete 20,736-state scan and 144 D×P projection cells without mutating network requests.'
+          echo 'R199.1.1 remains Cloudflare retirement authority for historical R201/R203 tombstones; R199.1 lazy Home and 500 KiB entry budget remain intact.'
+          echo 'R197 adaptive backpressure remains execution scheduling authority; R196.2 remains proof projection authority; R198 remains read-only living-world intelligence projection.'
           echo 'R147 remains dispatch authority; R146 remains durable lifecycle and execution-history authority; R141 remains exact-return proof authority; R125 remains sole CanonState admission authority.'
           echo 'R175 world truth → R176 intent → R177 mission → R178 contract → R179 authorization → R180 dispatch → R182/R186 verified-return continuity remains proved.'
           echo 'Hybrid/Build native execution, trained weights, factual truth, Earth truth, federation closure, solver validity, deployment and computed-photoreal reality remain separately proof-gated.'
