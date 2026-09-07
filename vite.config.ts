@@ -30,6 +30,22 @@ function governedBuildReceipt(){
   };
 }
 
+const R1991_ENTRY_BUDGET_BYTES=500*1024;
+function initialEntryBudgetR1991(){
+  return {
+    name:'omega-r1991-initial-entry-budget',
+    apply:'build' as const,
+    generateBundle(_options:any,bundle:Record<string,any>){
+      const entries=Object.values(bundle).filter((item:any)=>item?.type==='chunk'&&item?.isEntry);
+      if(entries.length!==1)throw new Error(`R199.1 expected one application entry chunk, found ${entries.length}`);
+      const entry:any=entries[0];
+      const bytes=Buffer.byteLength(String(entry.code||''),'utf8');
+      if(bytes>R1991_ENTRY_BUDGET_BYTES)throw new Error(`R199.1 initial entry budget exceeded: ${entry.fileName} ${bytes} > ${R1991_ENTRY_BUDGET_BYTES} bytes. Defer specialist/home dependencies instead of raising the budget.`);
+      console.log(`R199.1 INITIAL ENTRY BUDGET PASS · ${entry.fileName} · ${bytes}/${R1991_ENTRY_BUDGET_BYTES} bytes`);
+    }
+  };
+}
+
 function vendorChunkR109(id:string){
   const p=id.replace(/\\/g,'/');
   if(p.includes('/node_modules/react/')||p.includes('/node_modules/react-dom/')||p.includes('/node_modules/scheduler/'))return'vendor-react';
@@ -39,7 +55,7 @@ function vendorChunkR109(id:string){
 }
 
 export default defineConfig({
-  plugins: [react(),governedBuildReceipt()],
+  plugins: [react(),governedBuildReceipt(),initialEntryBudgetR1991()],
   build: {
     outDir: 'dist',
     sourcemap: true,
