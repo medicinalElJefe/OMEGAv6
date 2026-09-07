@@ -1,8 +1,18 @@
 import {chromium} from 'playwright';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
-const live=/^https:\/\//i.test(base);
+const live=/^https:\/\//i.test(base),expectedSha=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
 const viewports=[['desktop',{width:1440,height:960}],['mobile',{width:390,height:844}]];
+
+if(expectedSha){
+ const r=await fetch(`${base}/omega-build-receipt.json?r191=${Date.now()}`,{headers:{'cache-control':'no-cache'}}),raw=await r.text();
+ if(!r.ok)throw new Error(`R191 promoted build receipt HTTP ${r.status}: ${raw.slice(0,400)}`);
+ const receipt=JSON.parse(raw);
+ if(receipt?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1')throw new Error(`R191 unexpected live build receipt schema ${receipt?.schema}`);
+ if(receipt?.source?.sha!==expectedSha)throw new Error(`R191 live source SHA mismatch: expected ${expectedSha}, received ${receipt?.source?.sha}`);
+ if(receipt?.promotion?.promotedMergeSha!==expectedSha)throw new Error(`R191 promoted merge SHA mismatch: expected ${expectedSha}, received ${receipt?.promotion?.promotedMergeSha}`);
+ if(receipt?.promotion?.authority!=='GITHUB_MERGE_PARENTS')throw new Error(`R191 live receipt lacks governed two-parent authority: ${receipt?.promotion?.authority}`);
+}
 
 async function openVisualInstrument(page){
  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
@@ -60,7 +70,7 @@ try{
    await compile.click();
    await page.locator('.global-r188').waitFor({state:'visible',timeout:120000});
    const atlasText=await page.locator('.global-r188').innerText();
-   if(!atlasText.includes('20,736 actual states scanned'))throw new Error(`desktop: R188 did not prove the complete 20,736-state scan`);
+   if(!atlasText.includes('20,736 actual states scanned'))throw new Error('desktop: R188 did not prove the complete 20,736-state scan');
    if(!atlasText.includes('GLOBAL INTERFERENCE ATLAS · R188'))throw new Error('desktop: R188 global atlas identity missing');
    const matrixCells=await page.locator('.global-r188-matrix > div > div').count();
    if(matrixCells!==144)throw new Error(`desktop: expected 144 D×P projection cells, received ${matrixCells}`);
@@ -75,5 +85,5 @@ try{
   if(relevantFailures.length)throw new Error(`${name}: browser request failures ${relevantFailures.join(' | ').slice(0,2400)}`);
   await context.close();
  }
- console.log(`R191 LIVE R190 BROWSER PASS · ${live?'deployed HTTPS runtime':'exact local build'} · desktop/mobile Visual Instrument rendered · R188 remained inert until explicit operator click · desktop completed all 20,736 states + 144 D×P cells · no mutating scan requests · no page errors`);
+ console.log(`R191 LIVE R190 BROWSER PASS · ${live?'deployed HTTPS runtime':'exact local build'}${expectedSha?` · promoted SHA ${expectedSha}`:''} · desktop/mobile Visual Instrument rendered · R188 remained inert until explicit operator click · desktop completed all 20,736 states + 144 D×P cells · no mutating scan requests · no page errors`);
 }finally{await browser.close()}
