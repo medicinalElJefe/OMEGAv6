@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import worker from '../src/workerR116.js';
+import {manifestR130} from '../src/system/operationalControlPlaneR130.js';
 import {R156_SCHEMA,R156_SCAR_SCHEMA,R156_LAWS,compileOrganismReflexR156,organismReflexManifestR156} from '../src/system/organismReflexR156.js';
 
 const manifest=organismReflexManifestR156();
@@ -8,6 +10,21 @@ assert.equal(manifest.inherits.capability_families,15);
 assert.equal(manifest.inherits.canonical_admission,'R125');
 assert.ok(R156_LAWS.includes('CONTRADICTION_BECOMES_SCAR_AND_FUTURE_ROUTING_INPUT'));
 assert.ok(R156_LAWS.includes('R125_REMAINS_SOLE_CANONSTATE_ADMISSION_AUTHORITY'));
+
+const control=manifestR130();
+assert.equal(control.entrypoint,'src/workerR116.js');
+assert.equal(control.organization.canonicalAdmission,'R125');
+assert.deepEqual(control.organization.reflex,['R156']);
+assert.equal(control.organismReflex.schema,R156_SCHEMA);
+assert.equal(control.modules.at(-1).id,'CONTROL_PLANE');
+assert.ok(control.modules.some(x=>x.id==='ORGANISM_REFLEX'&&x.revision==='R156'&&x.authority==='CROSS_FAMILY_ROUTING_AND_SCAR_CARRY_NOT_EXECUTION_NOT_CANON'));
+
+const publicManifestResponse=await worker.fetch(new Request('https://omegav6.jeffdeweyeljefe.workers.dev/api/system/manifest'),{});
+assert.equal(publicManifestResponse.status,200);
+const publicManifest=await publicManifestResponse.json();
+assert.equal(publicManifest.entrypoint,'src/workerR116.js');
+assert.equal(publicManifest.organismReflex.schema,R156_SCHEMA);
+assert.equal(publicManifest.organismReflex.inherits.canonical_admission,'R125');
 
 const optical=compileOrganismReflexR156({
  source_family:'OPTICAL_OPERATION',
@@ -67,4 +84,4 @@ const noResidual=compileOrganismReflexR156({source_family:'CANONICAL_RUNTIME',re
 assert.equal(noResidual.action,'STAY');
 assert.equal(noResidual.next,'NO_CROSS_FAMILY_ACTION');
 
-console.log(JSON.stringify({schema:R156_SCHEMA,status:'PASS',optical:{action:optical.action,targets:optical.bounded_route.targets,scar:optical.scar.scar_id},pc:{action:pc.action,targets:pc.bounded_route.targets},capacity:{action:capacity.action,targets:capacity.bounded_route.targets},cycle:{state:cycle.next,hits:cycle.bounded_route.cycle_hits},boundary:manifest.truth_boundary},null,2));
+console.log(JSON.stringify({schema:R156_SCHEMA,status:'PASS',publicManifest:{entrypoint:publicManifest.entrypoint,reflex:publicManifest.organismReflex.revision,canonicalAdmission:publicManifest.organization.canonicalAdmission},optical:{action:optical.action,targets:optical.bounded_route.targets,scar:optical.scar.scar_id},pc:{action:pc.action,targets:pc.bounded_route.targets},capacity:{action:capacity.action,targets:capacity.bounded_route.targets},cycle:{state:cycle.next,hits:cycle.bounded_route.cycle_hits},boundary:manifest.truth_boundary},null,2));
