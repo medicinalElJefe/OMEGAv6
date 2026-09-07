@@ -1,0 +1,77 @@
+name: OMEGA R168 Whole-System Truth Performance Restoration
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r168-whole-system-truth-performance-restoration]
+
+jobs:
+  prove-r168:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      OMEGA_E2E_URL: http://127.0.0.1:4173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Reject high-severity dependency regressions
+        run: npm audit --audit-level=high
+      - name: Prove R168 whole-system restoration and real runtime storage
+        run: node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
+      - name: Prove updated capability and transition truth
+        run: |
+          node tests/capability-truth-r23-invariants.mjs
+          node tests/transition-authority-r23-invariants.mjs
+          node tests/single-frame-r27-invariants.mjs
+      - name: Preserve family completion, whole-system and current Optical authority
+        run: |
+          node tests/r153-full-system-completion-invariants.mjs
+          node tests/r155-whole-system-convergence-invariants.mjs
+          node tests/r167-active-optical-r1532-convergence-invariants.mjs
+      - name: Preserve durable execution, reflex swarm and admission boundaries
+        run: |
+          node tests/r146-durable-operation-execution-invariants.mjs
+          node tests/r164-reflex-autonomic-swarm-convergence-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+      - name: Preserve current advanced calculus and capacity authorities
+        run: |
+          npx tsx tests/r154-relative-capacity-fabric.mts
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Navigation and application integrity
+        run: |
+          node tests/r155-navigation-information-architecture-invariants.mjs
+          npm run test:navigation
+          npm run test:applications
+      - name: Full inherited production regression and build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r168
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start exact production build locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r168-preview.log 2>&1 &
+          echo $! >/tmp/omega-r168-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r168-preview.log
+          exit 1
+      - name: Exercise all 44 routes on desktop and mobile
+        run: node tests/r118-browser-operational-e2e.mjs
+      - name: Exercise R164 reflex swarm UI after R168 restoration
+        run: node tests/r164-reflex-autonomic-browser-e2e.mjs
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r168-preview.log || true
