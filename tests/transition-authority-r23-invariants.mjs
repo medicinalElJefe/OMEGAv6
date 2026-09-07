@@ -9,5 +9,7 @@ assert(panel.includes('Ledger receipt')&&panel.includes('appendSaiLedger'),'tran
 assert(panel.includes('Apply admitted next')&&panel.includes('Export'),'transition receipt must provide real state action/export controls');
 assert(traversal.includes('TransitionProofPanelR23')&&modes.includes('TransitionProofPanelR23'),'traversal and modes must consume one transition authority');
 assert(!traversal.includes("const CAMERAS=")&&!traversal.includes("const ROUTES="),'decorative duplicate camera/route controls must remain removed');
-assert(authority.includes("'Immersive Traversal':'RESTORATION_DEBT'")&&authority.includes("'Extreme Traversal':'RESTORATION_DEBT'"),'duplicate traversal variants must remain hidden until distinct semantics exist');
-console.log('OMEGA R23 TRANSITION PASS · one source transition authority + SHA-256 proof + no decorative traversal controls');
+assert(authority.includes("'Immersive Traversal':'SOURCE_ACTIVE'")&&authority.includes("'Extreme Traversal':'SOURCE_ACTIVE'"),'R168 current reality must restore source-backed traversal variants');
+assert(authority.includes('CAPABILITY_PREDECESSOR_REALITY_R23')&&authority.includes("'Immersive Traversal':'RESTORATION_DEBT'"),'old debt must survive as predecessor evidence only');
+for(const token of ["'Traversal':{depth:12","'Immersive Traversal':{depth:48","'Extreme Traversal':{depth:144",'canonical state, transition law and proof authority remain shared'])assert(traversal.includes(token),`R168 traversal variant semantics missing ${token}`);
+console.log('OMEGA R168 TRANSITION PASS · one R23 transition authority · distinct 12/48/144 source-backed traversal lenses · predecessor debt retained only as evidence');
