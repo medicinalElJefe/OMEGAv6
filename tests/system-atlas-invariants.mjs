@@ -23,8 +23,10 @@ must(ui.includes('currentRoute=currentRouteOf(current?.surface,cell.family.targe
 must(ui.includes("canOpen=Boolean(current&&currentExecutable.has(current.successor)&&currentRoute!=='System Atlas')"),'Open eligibility must use current successor status and route');
 must(ui.includes('onClick={()=>onNavigate(currentRoute)}')&&ui.includes('OPEN {currentRoute.toUpperCase()}'),'Open action must launch current successor route rather than predecessor target');
 must(ui.includes('V24 predecessor target')&&ui.includes('Current operator route'),'UI must show predecessor target and current route separately');
-must(ui.includes('Export truth receipt'),'truth receipt export missing');must(router.includes("case 'System Atlas'")&&router.includes("case 'Control Matrix'"),'System Atlas direct routes must remain');
+must(ui.includes('Export current truth receipt'),'current truth receipt export missing');
+must(ui.includes("OMEGA_SYSTEM_ATLAS_R168_CURRENT_TRUTH.json"),'R168 current-truth receipt filename missing');
+must(router.includes("case 'System Atlas'")&&router.includes("case 'Control Matrix'"),'System Atlas direct routes must remain');
 const eagerSystem=router.includes("import SystemAtlasControl from './SystemAtlasControl'")&&router.includes('<SystemAtlasControl record={record} onNavigate={go}');
 const deferredSystem=loader.includes("SystemAtlasControl:()=>import('./SystemAtlasControl')")&&loader.includes('export const SystemAtlasR109=lazy(LOADERS.SystemAtlasControl)')&&router.includes('<SystemAtlasR109 record={record} onNavigate={go}');
 must(eagerSystem||deferredSystem,'dedicated System Atlas control must remain mounted through eager or R109 deferred binding');
-console.log('SYSTEM_ATLAS R168 PASS · 24-family V23/V24 lineage preserved · current R48/R153 successor status and operator route separated from predecessor target · no fake Open · deferred routes preserved');
+console.log('SYSTEM_ATLAS R168 PASS · 24-family V23/V24 lineage preserved · current R48/R153 successor status and operator route separated from predecessor target · current truth receipt locked · no fake Open · deferred routes preserved');
