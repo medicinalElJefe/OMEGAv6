@@ -1,0 +1,97 @@
+name: OMEGA R165 Residual Graph Sensor Binding
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r165-residual-graph-sensor-binding]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r165-residual-graph-sensor-binding-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r165:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Reject high-severity dependency regressions
+        run: npm audit --audit-level=high
+      - name: Prove R165 R164-to-R125 sensor binding
+        run: node tests/r165-residual-graph-sensor-binding-invariants.mjs
+      - name: Prove R125 accuracy engine sensor boundaries
+        run: node tests/r125-accuracy-engine-invariants.mjs
+      - name: Preserve both R164 authorities
+        run: |
+          node tests/r164-development-residual-graph-invariants.mjs
+          node tests/r164-reflex-autonomic-swarm-convergence-invariants.mjs
+      - name: Preserve R163 through R159 governed execution truth
+        run: |
+          node tests/r163-canonical-core-health-truth-invariants.mjs
+          node tests/r162-governed-reflex-execution-invariants.mjs
+          node tests/r161-reflex-mission-durable-handoff-invariants.mjs
+          node tests/r160-reflex-operation-ingress-invariants.mjs
+          node tests/r159-sovereign-execution-convergence-invariants.mjs
+      - name: Preserve reflex executor lifecycle Hybrid and admission authorities
+        run: |
+          node tests/r156-organism-reflex-fabric-invariants.mjs
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run from preserved R116 entrypoint
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r165-dry-run
+
+  verify-live-r165:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: prove-r165
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+    steps:
+      - name: Bind exact promoted source to R165 sensor manifest and R163 first-hand health
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const expected=process.env.GITHUB_SHA;
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let last='';
+          for(let attempt=1;attempt<=180;attempt++){
+            try{
+              const [sRes,gRes,eRes,hRes]=await Promise.all([
+                fetch(base+'/omega-r165-residual-sensor-binding.json',{headers:{'cache-control':'no-cache'}}),
+                fetch(base+'/omega-r164-development-residual-graph.json',{headers:{'cache-control':'no-cache'}}),
+                fetch(base+'/api/release-evidence',{headers:{'cache-control':'no-cache'}}),
+                fetch(base+'/api/core-health',{headers:{'cache-control':'no-cache'}})
+              ]);
+              if(!sRes.ok||!gRes.ok||!eRes.ok||!hRes.ok)throw new Error(`HTTP sensor=${sRes.status} graph=${gRes.status} evidence=${eRes.status} core=${hRes.status}`);
+              const [s,g,e,h]=await Promise.all([sRes.json(),gRes.json(),eRes.json(),hRes.json()]);
+              if(e?.source?.sha!==expected){last=`waiting for exact promoted source ${expected}; release=${e?.source?.sha||'NONE'}`;await sleep(5000);continue}
+              if(s?.schema!=='OMEGA_R125_RESIDUAL_SENSOR_BINDING_R165'||s?.revision!=='R165')throw new Error(`wrong R165 sensor manifest ${s?.schema}/${s?.revision}`);
+              if(s?.sensorOnly!==true||s?.canonicalMutation!==false||s?.autonomousMutationAuthority!==false||s?.addsRepairRecipes!==false||s?.canonicalAdmissionAuthority!=='R125')throw new Error('R165 sensor/admission boundary regressed');
+              if(g?.schema!=='OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164'||g?.canonicalMutation!==false||g?.canonicalAdmissionAuthority!=='R125')throw new Error('R164 development graph boundary regressed');
+              if(h?.schema!=='OMEGA_CANONICAL_CORE_HEALTH_R163'||h?.revision!=='R163'||h?.state!=='LIVE'||h?.ok!==true)throw new Error(`R163 core health not live ${h?.schema}/${h?.revision}/${h?.state}`);
+              if(hRes.headers.get('x-omega-core-health')!=='R163-FIRST-HAND')throw new Error('R163 first-hand core-health header missing');
+              console.log(`OMEGA R165 LIVE VERIFIED · source ${expected} · sensor ${s.schema} · graph ${g.schema} · core ${h.state} · admission ${s.canonicalAdmissionAuthority}`);
+              process.exit(0);
+            }catch(error){last=error instanceof Error?error.message:String(error)}
+            await sleep(5000);
+          }
+          throw new Error(`canonical R165 live verification failed: ${last}`);
+          NODE
