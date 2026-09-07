@@ -5,7 +5,7 @@ const expected=String(process.env.OMEGA_PROMOTED_SHA||process.env.GITHUB_SHA||''
 if(!/^https:\/\//.test(base))throw new Error(`R200 canonical runtime URL unavailable: ${base}`);
 if(!/^[a-f0-9]{40}$/i.test(expected))throw new Error(`R200 exact promoted SHA unavailable: ${expected}`);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-async function get(path){const response=await fetch(base+path,{headers:{'cache-control':'no-cache'}}),text=await response.text();if(!response.ok)throw new Error(`${path} HTTP ${response.status}: ${text.slice(0,300)}`);return{response,text,json:()=>JSON.parse(text)}}
+async function get(path){const response=await fetch(base+path,{headers:{'cache-control':'no-cache','x-omega-session-id':'ci_r200_live_observer'}}),text=await response.text();if(!response.ok)throw new Error(`${path} HTTP ${response.status}: ${text.slice(0,300)}`);return{response,text,json:()=>JSON.parse(text)}}
 let last='';
 for(let attempt=1;attempt<=40;attempt++){
   try{
