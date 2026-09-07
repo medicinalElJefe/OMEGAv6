@@ -26,6 +26,8 @@ jobs:
         run: node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
       - name: Prove R168 current-successor restoration convergence
         run: node tests/r168-full-restoration-current-successor-invariants.mjs
+      - name: Prove Build Out uses the admitted adaptive mission spine
+        run: node tests/r168-buildout-adaptive-mission-spine-invariants.mjs
       - name: Prove updated capability and transition truth
         run: |
           node tests/capability-truth-r23-invariants.mjs
