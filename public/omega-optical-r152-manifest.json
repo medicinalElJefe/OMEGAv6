@@ -1,0 +1,55 @@
+{
+  "schema":"OMEGA_OPTICAL_OPERATIONAL_CONVERGENCE_R152",
+  "revision":"R152",
+  "status":"CANDIDATE_UNTIL_LIVE_PROBE",
+  "authority":"SCREEN_ONLY",
+  "canonicalAuthority":"https://omegav6.jeffdeweyeljefe.workers.dev/",
+  "humanSurfaceTarget":"https://omega-living-light-etching-private-woven2.vercel.app/",
+  "successorMachineOrigin":"https://omega-optical-machine-r152.jeffdeweyeljefe.workers.dev/",
+  "inheritedMachineOrigin":"https://omega-optical-machine-r115.jeffdeweyeljefe.workers.dev/",
+  "atlas":{
+    "radix":12,
+    "addressCount":20736,
+    "levels":[12,144,1728,20736,248832,61917364224],
+    "truth":"These are atlas/address-composition resolution levels, not literal physical dimensions."
+  },
+  "r44RecommendedCandidate":{
+    "status":"RECOMMENDED_NUMERICAL_CANDIDATE",
+    "geometry_nm":{"pitch":330,"width":105,"length":290,"height":575},
+    "orientationStates":12,
+    "orientationLaw":"theta_k = 15 deg * k, k=0..11",
+    "recordedEvidence":{"minimumConvertedHelicityFraction":0.453743,"meanConvertedHelicityFraction":0.827495,"redMeanConversion":0.563902,"worstTestedRmsPbPhaseErrorDeg":8.961217,"r43Objective":0.5879},
+    "truth":"Inherited numerical evidence only; not fabricated or physically measured."
+  },
+  "surfaceCapabilities":[
+    "volumetric-field-ui",
+    "20736-address-atlas",
+    "wavelength-conditioned-screening",
+    "bounded-batch-screen",
+    "candidate-lab",
+    "tier2-rcwa-request-preparation",
+    "canonical-solver-status-check",
+    "proof-truth-ledger",
+    "responsive-mobile-desktop-navigation"
+  ],
+  "executionLaw":"PROPOSE -> SCREEN -> PREPARE_TIER2 -> authenticated SOLVE -> returned receipt -> ADMIT",
+  "solverTruth":"A prepared Tier-2 packet never proves RCWA execution. RCWA is solved only after a fresh identified OMEGA_RESULT_v1 is returned by the authenticated Sovereign solver.",
+  "referenceKernel":{"values":[37,73],"truth":"Reference-kernel/bias parameters unless independently validated; contextual symmetry/asymmetry remains frame-dependent."},
+  "orientation":{"sigma":[-1,0,1],"truth":"Structure and orientation are factored; sign reversal does not by itself alter structural invariants."},
+  "promotionGates":[
+    "R152 invariant suite passes",
+    "inherited R151 and R115 truth gates pass",
+    "production build passes",
+    "Wrangler dry-run passes",
+    "R152 machine worker deploys from main using existing production Cloudflare authorization",
+    "R152 machine health, atlas, UI and screen live probes pass",
+    "Vercel target project is independently reachable/writable before same-URL promotion is claimed"
+  ],
+  "remainingPhysicalValidation":[
+    "independent non-RCWA full-wave cross-check",
+    "process-specific material dispersion or ellipsometry",
+    "fabrication-tolerance sensitivity analysis",
+    "physical fabrication and measurement",
+    "measurement residual return to scar/history ledger"
+  ]
+}
