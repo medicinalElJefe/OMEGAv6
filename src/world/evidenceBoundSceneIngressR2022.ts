@@ -1,29 +1,16 @@
 import {emitOperationR86} from '../omegaOperationBusR86';
+import {validateEvidenceBoundSceneSnapshotR2022,R2022_SCHEMA,R2022_REVISION} from './evidenceBoundSceneIngressR2022Core.js';
+export {validateEvidenceBoundSceneSnapshotR2022,R2022_SCHEMA,R2022_REVISION} from './evidenceBoundSceneIngressR2022Core.js';
 
-export const R2022_REVISION='R202.2';
-export const R2022_SCHEMA='OMEGA_EVIDENCE_BOUND_SCENE_INGRESS_R202_2';
 export const R2022_EVENT='omega-r2021-reality-readiness';
 export const R2022_SNAPSHOT_KEY='omega.r2021.reality.readiness';
 const DEDUPE_KEY='omega.r2022.scene.ingress.digests';
-const HEX64=/^[a-f0-9]{64}$/i;
 
 type RealitySnapshotR2022={
  schema?:string;revision?:string;state?:string;renderInputReady?:boolean;observedAt?:number;
  earthHash?:string|null;groundHash?:string|null;target?:{lat?:number;lon?:number;crs?:string}|null;
  computedPhotorealRealityProved?:boolean;solverValidityProved?:boolean;canonicalMutation?:boolean;
 };
-
-const text=(v:unknown,n=160)=>String(v??'').trim().slice(0,n);
-const numberOr=(v:unknown,fallback:number)=>Number.isFinite(Number(v))?Number(v):fallback;
-
-export function validateEvidenceBoundSceneSnapshotR2022(snapshot:RealitySnapshotR2022|null|undefined){
- const earthHash=text(snapshot?.earthHash,64),groundHash=text(snapshot?.groundHash,64);
- const ready=snapshot?.schema==='OMEGA_EVIDENCE_BOUND_REALITY_SNAPSHOT_R202_1'&&
-  snapshot?.revision==='R202.1'&&snapshot?.state==='SOURCE_EVIDENCE_READY_FOR_EXISTING_RENDERER'&&
-  snapshot?.renderInputReady===true&&HEX64.test(earthHash)&&HEX64.test(groundHash)&&
-  snapshot?.computedPhotorealRealityProved===false&&snapshot?.solverValidityProved===false&&snapshot?.canonicalMutation===false;
- return{ok:ready,earthHash:ready?earthHash:null,groundHash:ready?groundHash:null,target:ready?{lat:numberOr(snapshot?.target?.lat,0),lon:numberOr(snapshot?.target?.lon,0),crs:text(snapshot?.target?.crs,64)||'WGS84 / EPSG:4326'}:null,digest:ready?`${earthHash}.${groundHash}`:null};
-}
 
 function readSeen(){if(typeof localStorage==='undefined')return new Set<string>();try{const x=JSON.parse(localStorage.getItem(DEDUPE_KEY)||'[]');return new Set<string>(Array.isArray(x)?x.filter(v=>typeof v==='string').slice(-128):[])}catch{return new Set<string>()}}
 function saveSeen(rows:Set<string>){if(typeof localStorage==='undefined')return;try{localStorage.setItem(DEDUPE_KEY,JSON.stringify([...rows].slice(-128)))}catch{}}
