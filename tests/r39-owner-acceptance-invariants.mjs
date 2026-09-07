@@ -8,6 +8,11 @@ for(const state of ['PAIRING REQUIRED','HEARTBEAT STALE','PC ONLINE','BRIDGE ERR
 assert.match(hybrid,/AGENT NOT CONNECTED|AGENT NOT RUNNING \/ UNREACHABLE/);
 assert.match(hybrid,/SOVEREIGN_LAUNCHER_FILENAME_R127/);assert.match(launcher,/START_OMEGA_PC_LINK_R127_ZERO_DRIFT\.cmd/);assert.match(hybrid,/DEVICE_PROOF_REQUIRED/);assert.match(hybrid,/authenticated heartbeat/i);
 assert.match(deck,/OmegaRichText/);assert.doesNotMatch(deck,/<p>\{response\.answer\}<\/p>/);
-assert.match(earth,/EXTERNAL_DEGRADED/);assert.match(earth,/drawEvidence/);assert.match(earth,/windKph/);assert.match(earth,/cloudPct/);assert.match(earth,/spaceWeather/);assert.match(earth,/seismic/);assert.match(observatory,/<EarthNowInstrument address=\{address\} evidence=\{evidence\}/);
+assert.match(earth,/EXTERNAL_DEGRADED/);assert.match(earth,/drawEvidence/);assert.match(earth,/windKph/);assert.match(earth,/cloudPct/);assert.match(earth,/spaceWeather/);assert.match(earth,/seismic/);
+// R157 successor law: observations are rendered only when they belong to the current WGS84 target.
+assert.match(observatory,/boundEvidence=evidenceMatches\?evidence:null/);
+assert.match(observatory,/<EarthNowInstrument address=\{address\} evidence=\{boundEvidence\}/);
+assert.match(observatory,/TARGET CHANGED · REFRESH REQUIRED/);
+assert.match(observatory,/data-evidence-target-match=\{evidenceMatches\?'true':'false'\}/);
 assert.match(nav,/visibility:hidden/);assert.match(nav,/grid-template-columns:repeat\(2/);assert.match(nav,/font-size:11px/);
-console.log('R39/R152 owner acceptance invariants PASS · current zero-drift PC launcher bound');
+console.log('R39/R157 owner acceptance invariants PASS · zero-drift PC launcher + exact-target Earth evidence bound');
