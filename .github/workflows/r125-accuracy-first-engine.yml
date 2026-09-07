@@ -8,6 +8,10 @@ on:
     branches: [main]
   workflow_run:
     workflows:
+      - OMEGA R168 Whole-System Truth Performance Restoration
+      - OMEGA R167 Active Optical R153.2 Convergence
+      - OMEGA R166 Development Residual World Lens
+      - OMEGA R164 Reflex Autonomic Swarm Convergence
       - OMEGA R154 Relative Capacity Fabric
       - OMEGA R153 Lemma Motion NOW Continuity
       - OMEGA R152 Universal Truth Envelope
@@ -51,7 +55,7 @@ jobs:
       - name: Collect objective workflow evidence
         shell: bash
         run: |
-          gh run list --branch main --limit 60 --json databaseId,workflowName,status,conclusion,headSha,url,createdAt > /tmp/omega-r125-runs.json
+          gh run list --branch main --limit 80 --json databaseId,workflowName,status,conclusion,headSha,url,createdAt > /tmp/omega-r125-runs.json
       - name: Verify advanced truth motion capacity authorities
         shell: bash
         run: |
@@ -59,6 +63,13 @@ jobs:
           npx --yes tsx tests/r153-lemma-motion-now-continuity.mts
           npx --yes tsx tests/r152-universal-truth-envelope.mts
           node tests/r151-all-modes-truth-fusion-invariants.mjs
+      - name: Verify current restoration reflex residual and optical authorities
+        run: |
+          node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
+          node tests/r168-full-restoration-current-successor-invariants.mjs
+          node tests/r167-active-optical-r1532-convergence-invariants.mjs
+          node tests/r166-development-residual-world-lens-invariants.mjs
+          node tests/r164-reflex-autonomic-swarm-convergence-invariants.mjs
       - name: Verify inherited accuracy operation-chain lifecycle and deployment boundaries
         run: |
           node tests/r144-runtime-deployment-attestation-invariants.mjs
@@ -78,6 +89,11 @@ jobs:
       - name: Prove repaired tree
         shell: bash
         run: |
+          node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
+          node tests/r168-full-restoration-current-successor-invariants.mjs
+          node tests/r167-active-optical-r1532-convergence-invariants.mjs
+          node tests/r166-development-residual-world-lens-invariants.mjs
+          node tests/r164-reflex-autonomic-swarm-convergence-invariants.mjs
           npx --yes tsx tests/r154-relative-capacity-fabric.mts
           npx --yes tsx tests/r153-lemma-motion-now-continuity.mts
           npx --yes tsx tests/r152-universal-truth-envelope.mts
