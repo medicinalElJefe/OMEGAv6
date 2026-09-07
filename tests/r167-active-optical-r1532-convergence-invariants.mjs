@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {R1532_MACHINE_VERSION,R1532_MACHINE_AUTHORITY} from '../services/opticalMachineR1532.js';
+import {R1532_MACHINE_VERSION,R1532_MACHINE_SERVICE,R1532_MACHINE_AUTHORITY,R1532_BASE_SCREENING_SERVICE,R1532_BASE_SCREENING_VERSION} from '../services/opticalMachineR1532.js';
 import {R1532_TOOL_VERSION,R1532_TOOL_AUTHORITY} from '../services/opticalExternalToolR1532.js';
 
 const read=p=>fs.readFileSync(p,'utf8');
@@ -33,13 +33,17 @@ for(const path of [
 ]) assert.equal(exists(path),true,`R167 must preserve optical lineage evidence: ${path}`);
 
 assert.equal(R1532_MACHINE_VERSION,'R153.2');
+assert.equal(R1532_MACHINE_SERVICE,'omega-optical-machine-r1532');
 assert.equal(R1532_MACHINE_AUTHORITY,'SCREEN_ONLY');
+assert.equal(R1532_BASE_SCREENING_SERVICE,'omega-optical-machine-r152');
+assert.equal(R1532_BASE_SCREENING_VERSION,'R152.0');
 assert.equal(R1532_TOOL_VERSION,'R153.2');
 assert.equal(R1532_TOOL_AUTHORITY,'SCREEN_ONLY');
 const r1532Machine=read('services/opticalMachineR1532.js');
 const r1532Tool=read('services/opticalExternalToolR1532.js');
 assert.match(r1532Machine,/adaptiveCycle:true/,'R153.2 health must expose adaptive cycle support');
 assert.match(r1532Machine,/canonicalMutation:false/,'R153.2 health must deny canonical mutation');
+assert.match(r1532Machine,/service:R1532_MACHINE_SERVICE,version:R1532_MACHINE_VERSION/,'R153.2 health/manifest must override inherited R152 runtime identity');
 assert.match(r1532Tool,/full_wave_result_not_implied/,'R153.2 must preserve full-wave truth boundary');
 assert.match(r1532Tool,/fabrication_not_implied/,'R153.2 must preserve fabrication truth boundary');
 assert.match(r1532Tool,/physical_measurement_not_implied/,'R153.2 must preserve measurement truth boundary');
