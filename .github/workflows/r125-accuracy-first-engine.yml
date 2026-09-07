@@ -8,6 +8,7 @@ on:
     branches: [main]
   workflow_run:
     workflows:
+      - R169 Federation Attestation World Lens
       - OMEGA R168 Whole-System Truth Performance Restoration
       - OMEGA R167 Active Optical R153.2 Convergence
       - OMEGA R166 Development Residual World Lens
@@ -55,7 +56,7 @@ jobs:
       - name: Collect objective workflow evidence
         shell: bash
         run: |
-          gh run list --branch main --limit 80 --json databaseId,workflowName,status,conclusion,headSha,url,createdAt > /tmp/omega-r125-runs.json
+          gh run list --branch main --limit 100 --json databaseId,workflowName,status,conclusion,headSha,url,createdAt > /tmp/omega-r125-runs.json
       - name: Verify advanced truth motion capacity authorities
         shell: bash
         run: |
@@ -63,8 +64,10 @@ jobs:
           npx --yes tsx tests/r153-lemma-motion-now-continuity.mts
           npx --yes tsx tests/r152-universal-truth-envelope.mts
           node tests/r151-all-modes-truth-fusion-invariants.mjs
-      - name: Verify current restoration reflex residual and optical authorities
+      - name: Verify current restoration federation reflex residual and optical authorities
         run: |
+          node tests/r169-federation-attestation-world-lens-invariants.mjs
+          node tests/r168-genesis-r192-attestation-invariants.mjs
           node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
           node tests/r168-full-restoration-current-successor-invariants.mjs
           node tests/r167-active-optical-r1532-convergence-invariants.mjs
@@ -89,6 +92,8 @@ jobs:
       - name: Prove repaired tree
         shell: bash
         run: |
+          node tests/r169-federation-attestation-world-lens-invariants.mjs
+          node tests/r168-genesis-r192-attestation-invariants.mjs
           node tests/r168-whole-system-truth-performance-restoration-invariants.mjs
           node tests/r168-full-restoration-current-successor-invariants.mjs
           node tests/r167-active-optical-r1532-convergence-invariants.mjs
