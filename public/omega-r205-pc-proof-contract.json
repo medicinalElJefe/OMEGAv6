@@ -1,0 +1,27 @@
+{
+  "schema": "OMEGA_PC_PROOF_CLOSURE_R205",
+  "revision": "R205",
+  "transportVersion": "R34.1",
+  "capabilityRevision": "R132",
+  "proofExtension": "R205",
+  "archiveResiduals": {
+    "AT09": {
+      "name": "Desktop health check",
+      "operation": "DESKTOP_HEALTH",
+      "pass": "returned OMEGA_DESKTOP_HEALTH_R205 state PASS with 64-hex healthSha256"
+    },
+    "AT10": {
+      "name": "Forensic hash ledger",
+      "operation": "FORENSIC_HASH_LEDGER",
+      "pass": "returned OMEGA_FORENSIC_HASH_LEDGER_RECEIPT_R205 state PASS, complete true, ledger/tree SHA-256 and local ledger path"
+    }
+  },
+  "authority": {
+    "heartbeatRequired": true,
+    "explicitConfirmationRequired": true,
+    "deviceCapabilityAdvertisementRequired": true,
+    "canonicalAdmissionAuthority": "R125",
+    "canonicalMutation": false
+  },
+  "truthBoundary": "R205 does not infer PC health from browser pairing, infer a complete file manifest from a tree hash/sample, validate RCWA, close Federation, deploy source, change foundation model weights, or admit CanonState. AT09 and AT10 close only from exact returned host proof."
+}
