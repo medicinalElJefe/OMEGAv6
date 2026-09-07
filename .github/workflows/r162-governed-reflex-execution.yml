@@ -1,0 +1,65 @@
+name: OMEGA R162 Governed Reflex Execution
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r162-governed-reflex-execution-dispatch]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r162-governed-reflex-execution-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r162:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Prove R162 governed authorization and dispatch seam
+        run: node tests/r162-governed-reflex-execution-invariants.mjs
+      - name: Preserve R161 R160 R159 mission/reflex/post-return truth
+        run: |
+          node tests/r161-reflex-mission-durable-handoff-invariants.mjs
+          node tests/r160-reflex-operation-ingress-invariants.mjs
+          node tests/r159-sovereign-execution-convergence-invariants.mjs
+      - name: Preserve current durable execution and executor authorities
+        run: |
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+      - name: Preserve capability universe reflex and ownership truth
+        run: |
+          node tests/r158-capability-universe-invariants.mjs
+          node tests/r158-live-hybrid-execution-truth-invariants.mjs
+          node tests/r157-reflex-living-world-transition-invariants.mjs
+          node tests/r156-organism-reflex-fabric-invariants.mjs
+          node tests/r155-whole-system-convergence-invariants.mjs
+      - name: Preserve one-world visual scar and durable continuity
+        run: |
+          node tests/r140-living-world-operation-bridge-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r149-durable-world-head-continuity-invariants.mjs
+      - name: Preserve Hybrid Earth computed-reality admission and donor boundaries
+        run: |
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+          node tests/archive-governance-invariants.mjs
+          node tests/appdeploy-b023-b037-correlation-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run only
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r162-dry-run
