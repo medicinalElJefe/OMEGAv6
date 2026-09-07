@@ -9,7 +9,8 @@
     "cleanSovereignBootstrap": "R117",
     "fullSystemOperationalConvergence": "R118",
     "fullResolutionUltraConvergence": "R119",
-    "rootSafeHybridNavigationCanon": "R120"
+    "rootSafeHybridNavigationCanon": "R120",
+    "activeOpticalPromotion": "R167"
   },
   "stateLaw": "partition -> exchange/transform -> invariant carry -> scar/residual carry -> re-contextualize/repartition",
   "rsc": ["Parent", "Interaction", "Scar", "Continuity", "Compression", "Skin", "Interpretation", "Behavior"],
@@ -53,9 +54,14 @@
         "https://omega-optical-cloud-woven2.vercel.app/"
       ],
       "currentHumanSurface": true,
-      "machineService": "omega-optical-machine-r115",
+      "machineService": "omega-optical-machine-r1532",
+      "machineGeneration": "R153.2",
+      "machineAuthority": "SCREEN_ONLY",
+      "adaptiveCycle": true,
+      "canonicalMutation": false,
+      "sameUrlPromotionAuthorized": false,
       "mayMutateGlobalCanonState": false,
-      "truth": "Scalar/reduced-order screening is not RCWA/FDTD/FEM or fabrication validation."
+      "truth": "R153.2 is the active deterministic adaptive SCREEN coprocessor. Screening is not RCWA/FDTD/FEM, fabrication validation, physical measurement, PC-online proof, returned full-wave proof, or Canon admission. The protected Vercel URL is a human target and is not claimed writable or promoted without independent Vercel authority."
     },
     {
       "id": "omega-sovereign",
