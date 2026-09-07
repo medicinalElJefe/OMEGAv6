@@ -4,24 +4,28 @@
   "transportVersion": "R34.1",
   "capabilityRevision": "R132",
   "proofExtension": "R205",
+  "proofClosureRevision": "R141",
   "archiveResiduals": {
     "AT09": {
       "name": "Desktop health check",
       "operation": "DESKTOP_HEALTH",
-      "pass": "returned OMEGA_DESKTOP_HEALTH_R205 state PASS with 64-hex healthSha256"
+      "pass": "returned OMEGA_DESKTOP_HEALTH_R205 state PASS with 64-hex healthSha256 inside an exact R141 fingerprint-verified closure"
     },
     "AT10": {
       "name": "Forensic hash ledger",
       "operation": "FORENSIC_HASH_LEDGER",
-      "pass": "returned OMEGA_FORENSIC_HASH_LEDGER_RECEIPT_R205 state PASS, complete true, ledger/tree SHA-256 and local ledger path"
+      "pass": "returned OMEGA_FORENSIC_HASH_LEDGER_RECEIPT_R205 state PASS, complete true, ledger/tree SHA-256 and local ledger path inside an exact R141 fingerprint-verified closure"
     }
   },
   "authority": {
-    "heartbeatRequired": true,
+    "heartbeatRequiredForNewExecution": true,
+    "historicalVerifiedEvidenceMayPersistOffline": true,
+    "historicalEvidenceProvesCurrentPcOnline": false,
     "explicitConfirmationRequired": true,
     "deviceCapabilityAdvertisementRequired": true,
+    "r141FingerprintVerificationRequired": true,
     "canonicalAdmissionAuthority": "R125",
     "canonicalMutation": false
   },
-  "truthBoundary": "R205 does not infer PC health from browser pairing, infer a complete file manifest from a tree hash/sample, validate RCWA, close Federation, deploy source, change foundation model weights, or admit CanonState. AT09 and AT10 close only from exact returned host proof."
+  "truthBoundary": "R205 does not infer PC health from browser pairing, infer a complete file manifest from a tree hash/sample, validate RCWA, close Federation, deploy source, change foundation model weights, or admit CanonState. AT09 and AT10 verified PASS require exact R141 payload SHA plus semantic equality. Historical R141-verified host evidence may persist after a device goes offline, but only a current authenticated non-revoked heartbeat proves PC ONLINE now."
 }
