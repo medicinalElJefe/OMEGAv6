@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """OMEGA R34 local Hybrid Link agent.
 R132 execution successor: real governed Windows desktop/file execution on the proven R34.1 transport.
+R205 proof extension: authenticated desktop-health smoke proof and complete bounded forensic hash ledger.
 Stdlib-first, root-confined, allow-listed execution. It never exposes arbitrary shell access.
 Pairing is explicit. Every claimed native action returns bounded proof to the canonical Worker.
 """
 from __future__ import annotations
-import argparse,ctypes,hashlib,json,os,platform,re,socket,subprocess,sys,time,urllib.error,urllib.request,uuid,zipfile
+import argparse,ctypes,hashlib,json,os,platform,re,shutil,socket,subprocess,sys,time,urllib.error,urllib.request,uuid,zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
 VERSION='R34.1'
 CAPABILITY_REVISION='R132'
+R205_PROOF_EXTENSION='R205'
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
 TEXT_EXT={'.txt','.md','.json','.jsonc','.js','.jsx','.ts','.tsx','.py','.pyw','.css','.html','.yml','.yaml','.toml','.ini','.cfg','.csv','.bat','.ps1','.cs','.csproj','.sln','.xml'}
 SKIP_DIRS={'.git','node_modules','dist','build','.venv','venv','__pycache__','.wrangler','.omega_hybrid'}
@@ -19,6 +21,11 @@ class AgentError(RuntimeError):pass
 
 def sha_bytes(b:bytes):return hashlib.sha256(b).hexdigest()
 def sha_json(o):return sha_bytes(json.dumps(o,sort_keys=True,separators=(',',':')).encode())
+def sha_file(path:Path):
+    h=hashlib.sha256()
+    with path.open('rb') as f:
+        for chunk in iter(lambda:f.read(1024*1024),b''):h.update(chunk)
+    return h.hexdigest()
 def request_json(server,path,payload,bridge_id,secret,timeout=30):
     req=urllib.request.Request(server.rstrip('/')+path,data=json.dumps(payload).encode(),method='POST',headers={'content-type':'application/json','x-omega-bridge-id':bridge_id,'x-omega-bridge-secret':secret,'user-agent':'OMEGA-Hybrid-Agent/'+VERSION})
     try:
@@ -71,6 +78,38 @@ def hash_tree(path):
     for p in sorted(iter_files(path),key=lambda x:x.as_posix().lower()):
         rel=p.relative_to(path).as_posix();d=sha_bytes(p.read_bytes());h.update(rel.encode());h.update(d.encode());rows.append({'path':rel,'sha256':d,'bytes':p.stat().st_size})
     return {'treeSha256':h.hexdigest(),'files':len(rows),'sample':rows[:120]}
+def desktop_health(path,root):
+    checked=time.time();resolved=path.resolve();is_windows=os.name=='nt';system_root=is_windows and resolved.drive.upper()=='C:'
+    canonical_ok=False;canonical_error=None
+    try:canonical_ok=bool(probe_server(DEFAULT_SERVER,15))
+    except Exception as e:canonical_error=str(e)[:500]
+    write_ok=False;write_sha=None;write_error=None
+    try:
+        d=root/'.omega_hybrid'/'health';d.mkdir(parents=True,exist_ok=True);p=d/('r205_smoke_'+uuid.uuid4().hex+'.tmp');data=('OMEGA_R205_HEALTH|'+socket.gethostname()+'|'+str(time.time_ns())).encode();p.write_bytes(data);write_sha=sha_file(p);p.unlink();write_ok=True
+    except Exception as e:write_error=str(e)[:500]
+    try:usage=shutil.disk_usage(resolved);disk={'totalBytes':usage.total,'usedBytes':usage.used,'freeBytes':usage.free}
+    except Exception as e:disk={'error':str(e)[:500]}
+    checks={'windowsHost':is_windows,'approvedRootExists':resolved.exists(),'approvedRootDirectory':resolved.is_dir(),'approvedRootReadable':os.access(resolved,os.R_OK),'approvedRootWriteSmoke':write_ok,'nonSystemRoot':not system_root,'canonicalHealthReachable':canonical_ok,'agentProcessAlive':os.getpid()>0}
+    state='PASS' if all(checks.values()) else 'HOLD_DESKTOP_HEALTH'
+    payload={'schema':'OMEGA_DESKTOP_HEALTH_R205','proofRevision':R205_PROOF_EXTENSION,'transportVersion':VERSION,'capabilityRevision':CAPABILITY_REVISION,'state':state,'checkedAt':checked,'hostName':socket.gethostname(),'platform':platform.platform(),'pythonVersion':platform.python_version(),'pythonExecutable':Path(sys.executable).name,'processId':os.getpid(),'rootLabel':root.name or root.anchor,'targetLabel':resolved.name or resolved.anchor,'rootAnchor':resolved.anchor,'checks':checks,'disk':disk,'smokeSha256':write_sha,'canonicalHealthError':canonical_error,'writeSmokeError':write_error,'truthBoundary':'PASS proves this authenticated agent process reached canonical /api/health and completed a bounded local runtime-store write/read/hash/delete smoke inside the approved root. It does not itself create PC-online state, solver validity, federation closure, or CanonState.'}
+    payload['healthSha256']=sha_json(payload);return payload
+def forensic_hash_ledger(path,root):
+    entries=[];errors=[];capped=False;total=0;tree=hashlib.sha256();resolved=path.resolve()
+    for base,dirs,files in os.walk(resolved):
+        dirs[:]=sorted([d for d in dirs if d not in SKIP_DIRS],key=str.lower)
+        for name in sorted(files,key=str.lower):
+            p=Path(base)/name
+            try:
+                if p.is_symlink():continue
+                rel=p.relative_to(resolved).as_posix();size=p.stat().st_size
+                if len(entries)>=MAX_FILES:capped=True;break
+                digest=sha_file(p);row={'path':rel,'sha256':digest,'bytes':size};entries.append(row);total+=size;tree.update(rel.encode());tree.update(digest.encode());tree.update(str(size).encode())
+            except Exception as e:
+                errors.append({'path':str(p.relative_to(resolved)) if p.is_absolute() else str(p),'error':str(e)[:500]})
+                if len(errors)>=100:break
+        if capped or len(errors)>=100:break
+    complete=not capped and not errors;state='PASS' if complete else 'HOLD_FILE_LIMIT' if capped else 'HOLD_READ_ERROR';tree_sha=tree.hexdigest();manifest={'schema':'OMEGA_FORENSIC_HASH_LEDGER_R205','proofRevision':R205_PROOF_EXTENSION,'state':state,'complete':complete,'scopePolicy':'REGULAR_NON_SYMLINK_FILES_EXCLUDING_GIT_DEPENDENCY_BUILD_CACHE_AND_OMEGA_RUNTIME_DIRS','rootLabel':root.name or root.anchor,'targetLabel':resolved.name or resolved.anchor,'treeSha256':tree_sha,'files':len(entries),'totalBytes':total,'maxFiles':MAX_FILES,'entries':entries,'errors':errors,'generatedAt':time.time()};outd=root/'.omega_hybrid'/'forensics';outd.mkdir(parents=True,exist_ok=True);out=outd/('r205_forensic_'+time.strftime('%Y%m%d_%H%M%S')+'_'+tree_sha[:12]+'.json');raw=json.dumps(manifest,sort_keys=True,separators=(',',':')).encode();out.write_bytes(raw)
+    return {'schema':'OMEGA_FORENSIC_HASH_LEDGER_RECEIPT_R205','proofRevision':R205_PROOF_EXTENSION,'state':state,'complete':complete,'ledgerPath':out.relative_to(root).as_posix(),'ledgerSha256':sha_bytes(raw),'treeSha256':tree_sha,'files':len(entries),'totalBytes':total,'errors':errors[:20],'sample':entries[:60],'scopePolicy':manifest['scopePolicy'],'truthBoundary':'PASS means the local ledger contains every eligible regular non-symlink file under the approved target according to the declared exclusion policy and MAX_FILES was not exceeded. Any cap or read error is HOLD, never a complete-manifest claim.'}
 def read_text(path):
     if not path.is_file():raise AgentError('READ_TEXT requires a file.')
     b=path.read_bytes()
@@ -272,6 +311,8 @@ def execute_step(step,root):
     op=str(step.get('op','')).upper();path=secure_path(root,step.get('path','.'))
     if op=='INDEX':return index_tree(path)
     if op=='HASH_TREE':return hash_tree(path)
+    if op=='DESKTOP_HEALTH':return desktop_health(path,root)
+    if op=='FORENSIC_HASH_LEDGER':return forensic_hash_ledger(path,root)
     if op=='READ_TEXT':return read_text(path)
     if op=='SEARCH_TEXT':return search_text(path,str(step.get('query','')),step.get('maxResults',120))
     if op=='APPLY_PATCH':return apply_patch(path,root,step)
@@ -307,19 +348,19 @@ def execute_job(job,root):
         pr={'id':step.get('id'),'op':step.get('op'),'startedAt':time.time()}
         try:
             r=execute_step(step,root);pr.update({'ok':True,'result':r,'completedAt':time.time()})
-            for k in ('path','backupPath','macroPath'):
+            for k in ('path','backupPath','macroPath','ledgerPath'):
                 if isinstance(r,dict) and r.get(k):outputs.append(r[k])
             if step.get('op')=='TRAIN_LOCAL':evaluation=r.get('evaluation');promotion=r.get('promotion');outputs.append(r.get('indexPath'))
         except Exception as e:ok=False;pr.update({'ok':False,'error':str(e)[:12000],'completedAt':time.time()});logs.append(str(e));proofs.append(pr);break
         proofs.append(pr)
-    packet={'jobId':job.get('id'),'ok':ok,'stepProofs':proofs,'outputPaths':[x for x in outputs if x],'log':'\n'.join(logs)[-12000:],'evaluation':evaluation,'promotion':promotion,'capabilityRevision':CAPABILITY_REVISION};packet['resultFingerprint']=sha_json(packet);return packet
+    packet={'jobId':job.get('id'),'ok':ok,'stepProofs':proofs,'outputPaths':[x for x in outputs if x],'log':'\n'.join(logs)[-12000:],'evaluation':evaluation,'promotion':promotion,'capabilityRevision':CAPABILITY_REVISION,'proofExtensions':[R205_PROOF_EXTENSION]};packet['resultFingerprint']=sha_json(packet);return packet
 def capabilities():
-    c=['TRAIN_LOCAL','INDEX','READ_TEXT','SEARCH_TEXT','HASH_TREE','SAFE_IMPORT','WORKBOOK_AUDIT','BUILD','TEST','PACKAGE','SUPPORT_BUNDLE','APPLY_PATCH','WRITE_TEXT','OPEN_URL','WAIT']
+    c=['TRAIN_LOCAL','INDEX','READ_TEXT','SEARCH_TEXT','HASH_TREE','DESKTOP_HEALTH','FORENSIC_HASH_LEDGER','SAFE_IMPORT','WORKBOOK_AUDIT','BUILD','TEST','PACKAGE','SUPPORT_BUNDLE','APPLY_PATCH','WRITE_TEXT','OPEN_URL','WAIT']
     if os.name=='nt':c+=['LIST_WINDOWS','FOCUS_WINDOW','SCREEN_CAPTURE','MOUSE_MOVE','CLICK','KEY','TYPE_TEXT','SCROLL','ASSERT_WINDOW','READ_VISIBLE_TEXT','RECORD_MACRO','REPLAY_MACRO']
     return c
 def main():
-    ap=argparse.ArgumentParser(description='OMEGA R34 Hybrid Link local agent');ap.add_argument('--server',default=DEFAULT_SERVER);ap.add_argument('--pair',required=True);ap.add_argument('--root',default='.');ap.add_argument('--once',action='store_true');a=ap.parse_args();server=a.server.rstrip('/');bridge_id,secret=parse_pair(a.pair);root=Path(normalize_root_arg(a.root)).expanduser().resolve();root.mkdir(parents=True,exist_ok=True);d=root/'.omega_hybrid';d.mkdir(exist_ok=True);f=d/'device_id.txt';device_id=f.read_text().strip() if f.exists() else 'device_'+uuid.uuid4().hex;f.write_text(device_id);caps=capabilities();payload={'bridgeId':bridge_id,'deviceId':device_id,'name':socket.gethostname(),'platform':platform.platform(),'version':VERSION,'capabilityRevision':CAPABILITY_REVISION,'capabilities':caps,'rootLabel':root.name or root.anchor}
-    print('OMEGA Hybrid Link agent',VERSION,'execution',CAPABILITY_REVISION);print('Approved root:',root);print('[1/4] CANONICAL REACHABILITY:',server)
+    ap=argparse.ArgumentParser(description='OMEGA R34 Hybrid Link local agent + R205 PC proof extension');ap.add_argument('--server',default=DEFAULT_SERVER);ap.add_argument('--pair',required=True);ap.add_argument('--root',default='.');ap.add_argument('--once',action='store_true');a=ap.parse_args();server=a.server.rstrip('/');bridge_id,secret=parse_pair(a.pair);root=Path(normalize_root_arg(a.root)).expanduser().resolve();root.mkdir(parents=True,exist_ok=True);d=root/'.omega_hybrid';d.mkdir(exist_ok=True);f=d/'device_id.txt';device_id=f.read_text().strip() if f.exists() else 'device_'+uuid.uuid4().hex;f.write_text(device_id);caps=capabilities();payload={'bridgeId':bridge_id,'deviceId':device_id,'name':socket.gethostname(),'platform':platform.platform(),'version':VERSION,'capabilityRevision':CAPABILITY_REVISION,'proofExtensions':[R205_PROOF_EXTENSION],'capabilities':caps,'rootLabel':root.name or root.anchor}
+    print('OMEGA Hybrid Link agent',VERSION,'execution',CAPABILITY_REVISION,'proof',R205_PROOF_EXTENSION);print('Approved root:',root);print('[1/4] CANONICAL REACHABILITY:',server)
     try:probe_server(server);print('      PASS — /api/health reachable')
     except Exception as e:print('      FAIL —',e,file=sys.stderr);raise SystemExit(21)
     print('[2/4] AUTHENTICATING / REGISTERING DEVICE')
@@ -328,7 +369,7 @@ def main():
     print('[3/4] ESTABLISHING AUTHENTICATED HEARTBEAT');failures=0;announced=False
     while True:
         try:
-            request_json(server,'/api/hybrid/agent/heartbeat',{'bridgeId':bridge_id,'deviceId':device_id,'version':VERSION,'capabilityRevision':CAPABILITY_REVISION},bridge_id,secret,15)
+            request_json(server,'/api/hybrid/agent/heartbeat',{'bridgeId':bridge_id,'deviceId':device_id,'version':VERSION,'capabilityRevision':CAPABILITY_REVISION,'proofExtensions':[R205_PROOF_EXTENSION]},bridge_id,secret,15)
             if not announced:print('      PASS — authenticated heartbeat returned. Browser may now truthfully show PC ONLINE.');print('[4/4] GOVERNED JOB POLL ACTIVE — keep this window open');announced=True
             failures=0;job=request_json(server,'/api/hybrid/agent/poll',{'bridgeId':bridge_id,'deviceId':device_id},bridge_id,secret,30).get('job')
             if job:
