@@ -14,6 +14,10 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-fund
+      - name: Prove R202.3 living-scene visual proof
+        run: |
+          node --check src/world/livingSceneVisualR2023.js
+          node tests/r2023-living-scene-visual-invariants.mjs
       - name: Prove R202.2 evidence-bound living-world ingress
         run: |
           node tests/r2022-evidence-bound-living-world-ingress-invariants.mjs
