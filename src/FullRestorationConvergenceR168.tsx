@@ -23,7 +23,7 @@ export default function FullRestorationConvergenceR168({record,address,onNavigat
    safeJson(api.get<any>('/api/hybrid/status'))
   ]);
   const coreLive=core?.ok===true&&core?.state==='LIVE';
-  const world=await assembleDevelopmentResidualWorldLensR166({accuracyState:accuracy||{},runtimeEvidence:{coreHealth:core,releaseEvidence:release,runtimeAttestation:attestation,hybrid},workflowEvidence:[],context:{observerId:'omega-r168-restoration-convergence',address,eventTime:Date.now(),projection:'WOVEN',metrics:{continuity:Number(record?.metrics?.continuity||0),plasticity:Number(record?.metrics?.plasticity||0),evidence:coreLive?.9:.35,uncertainty:coreLive?.18:.55}}});
+  const world=await assembleDevelopmentResidualWorldLensR166({accuracyState:accuracy||{},runtimeEvidence:{coreHealth:core,releaseEvidence:release,runtimeAttestation:attestation,hybrid},workflowEvidence:[],context:{observerId:'omega-r168-restoration-convergence',address,eventTime:Date.now(),projection:'WOVEN',metrics:{continuity:Number(record?.metrics?.continuity||0),plasticity:Number(record?.metrics?.plasticity||0),evidence:coreLive?0.9:0.35,uncertainty:coreLive?0.18:0.55}}});
   setLens(world);
  }catch(e:any){setError(e?.message||String(e));setLens(null)}finally{setBusy(false)}};
  useEffect(()=>{void load();const id=window.setInterval(()=>void load(),30000);return()=>window.clearInterval(id)},[address,record?.stateId]);
