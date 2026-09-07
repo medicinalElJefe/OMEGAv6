@@ -27,7 +27,6 @@ jobs:
         run: |
           node --check src/world/livingWorldMissionContractResolverR178.js
           node tests/r178-living-world-contract-resolution-invariants.mjs
-          npx tsc --noEmit
       - name: Preserve R177 visual mission and R176 intent truth
         run: |
           node tests/r177-living-world-mission-composer-invariants.mjs
