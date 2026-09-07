@@ -21,7 +21,19 @@ must(nav.includes('OMEGA_WORKSPACES_R82')&&nav.includes("type WorkspaceFilter='A
 must(nav.includes("localStorage.getItem('omega.r82.workspace')")&&nav.includes("detail?.layer==='APPLICATIONS'?storedWorkspace()"),'Home contextual All tools handoff must retain active workspace');
 must(nav.includes("className='r105-workspace-filter'")&&nav.includes('OMEGA_WORKSPACES_R82.map(workspace=>'),'six workspace submenu controls must be rendered');
 must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'submenu filtering must preserve flat registered route inventory and direct reachability');
-const completeEverywhere=nav.includes('routeCount=OMEGA_ROUTE_INVENTORY_R107.currentCount')&&nav.includes("setWorkspaceFilter('ALL');open('EVERYWHERE')")&&(nav.includes('Everywhere <b>{routeCount}</b>')||nav.includes('Operate <b>{routeCount}</b>'))&&nav.includes('OMEGA_ALL_ROUTES_R82.filter');
+
+// Successor-robust complete inventory law: the global path must derive its count from the canonical inventory,
+// explicitly reset the workspace filter to ALL, enter EVERYWHERE, expose that dynamic count in the operator UI,
+// and source rows from the complete registered route set. Additive R156/R157 wrappers/classes must not invalidate it.
+const hasDynamicCount=/routeCount\s*=\s*OMEGA_ROUTE_INVENTORY_R107\.currentCount/.test(nav);
+const hasGlobalReset=/setWorkspaceFilter\('ALL'\)\s*;\s*(?:open\('EVERYWHERE'\)|setLayer\('EVERYWHERE'\))/.test(nav);
+const exposesDynamicCount=/(?:Everywhere|Operate)[^\n<]*\s*<b>\{routeCount\}<\/b>/.test(nav)||nav.includes('<b>{routeCount}</b>');
+const sourcesCompleteRoutes=/OMEGA_ALL_ROUTES_R82\.filter\s*\(/.test(nav);
+must(hasDynamicCount,'global path must derive route count from OMEGA_ROUTE_INVENTORY_R107.currentCount');
+must(hasGlobalReset,'global Everywhere/Operate path must reset workspace filter and enter EVERYWHERE');
+must(exposesDynamicCount,'global Everywhere/Operate UI must expose the dynamic route count');
+must(sourcesCompleteRoutes,'global Everywhere/Operate path must source rows from OMEGA_ALL_ROUTES_R82');
+const completeEverywhere=hasDynamicCount&&hasGlobalReset&&exposesDynamicCount&&sourcesCompleteRoutes;
 must(completeEverywhere,'global Everywhere/Operate path must restore the complete registered route inventory dynamically');
 must(nav.includes('OmegaSystemInventoryR83 compact onNavigate={go}'),'software-system submenu must remain functional');
 
@@ -48,5 +60,5 @@ must(accepted.includes("id:'NO_STALE_NOW_GRAPH'")&&accepted.includes("'R105 live
 for(const prior of ['R100 woven continuity geometry/time','R101 weave-derived effective resolution','R102 four-node capability fabric','R103 task-first capability router','R104 eight-layer functional correlation'])must(accepted.includes(prior),'prior accepted layer lost: '+prior);
 must(r55.includes("await import('./r105-live-data-truth-submenu-invariants.mjs')")||r55.includes("import './r105-live-data-truth-submenu-invariants.mjs'"),'R105 gate must execute inside full R55/static release path');
 
-console.log(`R105/R156 LIVE DATA TRUTH + SUBMENU PASS · ${registeredRoutes.length} registered routes preserved · 6 contextual submenus · complete Everywhere/Operate inventory · current canonical recurrence separated from 2025 donor samples · current-session performance truth enforced`);
+console.log(`R105/R156/R157 LIVE DATA TRUTH + SUBMENU PASS · ${registeredRoutes.length} registered routes preserved · 6 contextual submenus · complete Everywhere/Operate inventory · current canonical recurrence separated from 2025 donor samples · current-session performance truth enforced`);
 await import('./r106-temporal-ledger-truth-invariants.mjs');
