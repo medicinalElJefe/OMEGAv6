@@ -82,15 +82,44 @@ jobs:
         run: |
           node <<'NODE'
           const base=process.env.OPTICAL_R152_URL.replace(/\/$/,'');
-          const healthResponse=await fetch(base+'/api/health',{headers:{'cache-control':'no-cache'}}),health=await healthResponse.json();
-          if(!healthResponse.ok||health.ok!==true||health.version!=='R152.0'||health.authority!=='SCREEN_ONLY'||health.atlasSize!==20736)throw new Error(`R152 health failed: ${JSON.stringify(health)}`);
-          const atlasResponse=await fetch(base+'/api/optical/atlas?offset=0&limit=12&wavelength_nm=532',{headers:{'cache-control':'no-cache'}}),atlas=await atlasResponse.json();
-          if(!atlasResponse.ok||atlas.items?.length!==12||atlas.total!==20736)throw new Error(`R152 atlas failed: ${JSON.stringify(atlas)}`);
-          const uiResponse=await fetch(base+'/',{headers:{'cache-control':'no-cache'}}),ui=await uiResponse.text();
-          if(!uiResponse.ok||!ui.includes('VOLUMETRIC ADDRESS FIELD')||!ui.includes('PREPARED_NOT_SOLVED'))throw new Error('R152 UI live probe failed');
+          const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+          const describe=(response,text)=>({status:response.status,ok:response.ok,url:response.url,contentType:response.headers.get('content-type')||'',bodyPrefix:text.slice(0,240).replace(/\s+/g,' ')});
+          async function probe(path,{method='GET',headers={},body=null,expect='json',attempts=15,delayMs=2000}={}){
+            let last=null;
+            for(let attempt=1;attempt<=attempts;attempt++){
+              const separator=path.includes('?')?'&':'?';
+              const url=base+path+separator+'omega_probe='+Date.now()+'_'+attempt;
+              try{
+                const response=await fetch(url,{method,headers:{...headers,'cache-control':'no-cache','x-omega-probe':'r152-live-proof'},body,redirect:'follow'});
+                const text=await response.text();
+                const meta=describe(response,text);
+                if(response.ok){
+                  if(expect==='text')return{response,text,meta};
+                  try{return{response,text,json:JSON.parse(text),meta}}catch(error){last={attempt,error:'NON_JSON_SUCCESS_RESPONSE',...meta}}
+                }else last={attempt,error:'HTTP_ERROR',...meta};
+              }catch(error){last={attempt,error:error?.message||String(error),url};}
+              console.log('R152 probe retry',JSON.stringify(last));
+              if(attempt<attempts)await sleep(delayMs);
+            }
+            throw new Error(`R152 probe exhausted: ${JSON.stringify(last)}`);
+          }
+
+          const healthProbe=await probe('/api/health');
+          const health=healthProbe.json;
+          if(health.ok!==true||health.version!=='R152.0'||health.authority!=='SCREEN_ONLY'||health.atlasSize!==20736)throw new Error(`R152 health contract failed: ${JSON.stringify({health,meta:healthProbe.meta})}`);
+
+          const atlasProbe=await probe('/api/optical/atlas?offset=0&limit=12&wavelength_nm=532');
+          const atlas=atlasProbe.json;
+          if(atlas.items?.length!==12||atlas.total!==20736)throw new Error(`R152 atlas contract failed: ${JSON.stringify({atlas,meta:atlasProbe.meta})}`);
+
+          const uiProbe=await probe('/',{expect:'text'});
+          const ui=uiProbe.text;
+          if(!ui.includes('VOLUMETRIC ADDRESS FIELD')||!ui.includes('PREPARED_NOT_SOLVED'))throw new Error(`R152 UI contract failed: ${JSON.stringify(uiProbe.meta)}`);
+
           const proposal={schema:'OMEGA_PACKET_v1',packet_id:'r152_live_probe',source_node:'omega-genesis',source_sha:'r152_live_probe',wavelength_nm:532,target_phase_deg:150,geometry:{pitch_nm:330,width_nm:105,length_nm:290,height_nm:575,orientation_deg:75,material:'TIO2_DESIGN_NOMINAL_ON_SIO2_FUSED'},polarization:'circular',lineage:['r152-live-probe']};
-          const screenResponse=await fetch(base+'/api/federation/screen',{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify({proposal})}),screen=await screenResponse.json();
-          if(!screenResponse.ok||screen.authority!=='SCREEN_ONLY'||screen.packet?.source_node!=='omega-optical'||screen.canonical_mutation!==false)throw new Error(`R152 screen failed: ${JSON.stringify(screen)}`);
+          const screenProbe=await probe('/api/federation/screen',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({proposal})});
+          const screen=screenProbe.json;
+          if(screen.authority!=='SCREEN_ONLY'||screen.packet?.source_node!=='omega-optical'||screen.canonical_mutation!==false)throw new Error(`R152 screen contract failed: ${JSON.stringify({screen,meta:screenProbe.meta})}`);
           if(screen.tier2_job&&screen.tier2_job.state!=='PREPARED_NOT_SOLVED')throw new Error('R152 Tier-2 truth boundary failed');
-          console.log(`R152 LIVE PASS · ${health.service} · atlas ${atlas.total} · ${screen.packet.proof.gate} · UI served`);
+          console.log(`R152 LIVE PASS · ${health.service} · atlas ${atlas.total} · ${screen.packet.proof.gate} · UI served · ${healthProbe.meta.url}`);
           NODE
