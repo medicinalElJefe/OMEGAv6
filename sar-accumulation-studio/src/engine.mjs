@@ -59,6 +59,20 @@ export function revisitStats(records, lon, lat, throughIndex = records.length - 
   };
 }
 
+export function knownMissionWarnings({ dataset, start, end } = {}) {
+  const warnings = [];
+  if (String(dataset || '').toUpperCase() === 'NISAR' && start && end) {
+    const q0 = new Date(start).getTime();
+    const q1 = new Date(end).getTime();
+    const gap0 = new Date('2026-07-27T22:03:25Z').getTime();
+    const gap1 = new Date('2026-08-10T00:55:27Z').getTime();
+    if (Number.isFinite(q0) && Number.isFinite(q1) && q0 <= gap1 && q1 >= gap0) {
+      warnings.push('Known NISAR instrument data gap: 2026-07-27T22:03:25Z through 2026-08-10T00:55:27Z. Missing observations in this interval must not be interpreted as surface stability.');
+    }
+  }
+  return warnings;
+}
+
 export function acquisitionSpacing(records) {
   const sorted = dedupeAndSort(records);
   const gaps = [];
