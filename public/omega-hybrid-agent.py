@@ -48,7 +48,7 @@ def canonical_base_source(server):
     digest=sha_bytes(source)
     if digest!=EXPECTED_BASE_SHA256:raise RuntimeError('R207 immutable R205 base SHA-256 mismatch.')
     text=source.decode('utf-8')
-    for token in ("VERSION='R34.1'","CAPABILITY_REVISION='R132'","R205_PROOF_EXTENSION='R205'",BASE_IDENTITY_MARKER,PAIRING_IDENTITY_MARKER,'root-confined','shell=False',"'/api/hybrid/agent/poll'","'/api/hybrid/agent/result'",'DESKTOP_HEALTH','FORENSIC_HASH_LEDGER'):
+    for token in ("VERSION='R34.1'","CAPABILITY_REVISION='R132'","R205_PROOF_EXTENSION='R205'",BASE_IDENTITY_MARKER,PAIRING_IDENTITY_MARKER,'root-confined','shell=False',"'/api/hybrid/agent/heartbeat'","'/api/hybrid/agent/poll'","'/api/hybrid/agent/result'",'DESKTOP_HEALTH','FORENSIC_HASH_LEDGER'):
         if token not in text:raise RuntimeError('R207 base agent contract missing '+token)
     return text,digest
 
