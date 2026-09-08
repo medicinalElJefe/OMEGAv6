@@ -3,6 +3,7 @@ import {Mountain,ShieldCheck} from 'lucide-react';
 import {readGeospatialSceneFieldR218,R218_EVENT} from './world/geospatialSceneFieldR218.js';
 import {assembleLivingTerrainExperienceR224,readLivingTerrainExperienceR224,R224_EVENT} from './world/livingTerrainExperienceR224.js';
 import {compileSpatialReconstructionEvidenceRequestR226,persistSpatialReconstructionEvidenceRequestR226,readSpatialReconstructionEvidenceRequestR226,R226_EVENT} from './world/spatialReconstructionEvidenceR226.js';
+import SourceSpatialEvidenceIntakeR227 from './SourceSpatialEvidenceIntakeR227';
 import {emitOperationR86} from './omegaOperationBusR86';
 import {activeProjectIdR87,recordProjectOperationR87} from './omegaProjectContinuityR87';
 
@@ -24,13 +25,13 @@ export default function LivingTerrainSurfaceR225(){
  const ready=terrain?.state==='LIVING_SOURCE_BACKED_TERRAIN_READY'&&terrain?.experienceReady===true;
  const spatialReady=spatialRequest?.state==='SPATIAL_RECONSTRUCTION_EVIDENCE_REQUEST_READY';
  const visual=ready?terrain.visual:null;
- return <section className='r206-world-mission' data-state={ready?'BOUND':field?.fieldComputed?'ASSEMBLED':'HELD'} aria-label='Living world source-backed terrain'>
+ return <><section className='r206-world-mission' data-state={ready?'BOUND':field?.fieldComputed?'ASSEMBLED':'HELD'} aria-label='Living world source-backed terrain'>
   <div className='r206-world-mission-icon'><Mountain/></div>
-  <div className='r206-world-mission-copy'><small>R218 → R221 → R219 → R222 → R224 → R225 → R226 · SOURCE-BACKED TERRAIN · 3-D EVIDENCE GATE</small><b>{ready?'SOURCE-BACKED TERRAIN MATERIALIZED':field?.fieldComputed?'TERRAIN READY FOR OPERATOR INTENT':'TERRAIN HELD FOR R218 FIELD'}</b><span>{ready?`${terrain.vertexCount} vertices · ${terrain.triangleCount} triangles · relief ${Number(terrain.reliefM||0).toFixed(2)}m · ${terrain.verticalDatum||'datum unspecified'}`:'Materialize only after the current mission has an evidence-bound R218 WGS84 field.'}</span><em>{error||(spatialReady?`R226 ${String(spatialRequest.requestSha256).slice(0,12)} staged · camera + depth source evidence still required`:R225_BOUNDARY)}</em>
+  <div className='r206-world-mission-copy'><small>R218 → R221 → R219 → R222 → R224 → R225 → R226 → R227 · SOURCE-BACKED TERRAIN · 3-D EVIDENCE GATE</small><b>{ready?'SOURCE-BACKED TERRAIN MATERIALIZED':field?.fieldComputed?'TERRAIN READY FOR OPERATOR INTENT':'TERRAIN HELD FOR R218 FIELD'}</b><span>{ready?`${terrain.vertexCount} vertices · ${terrain.triangleCount} triangles · relief ${Number(terrain.reliefM||0).toFixed(2)}m · ${terrain.verticalDatum||'datum unspecified'}`:'Materialize only after the current mission has an evidence-bound R218 WGS84 field.'}</span><em>{error||(spatialReady?`R226 ${String(spatialRequest.requestSha256).slice(0,12)} staged · bind actual source camera + depth evidence below`:R225_BOUNDARY)}</em>
    {visual&&<svg viewBox={visual.viewBox} role='img' aria-label='R225 source-backed terrain projection; not empirical imagery' style={{width:'100%',maxWidth:520,minHeight:180,marginTop:8,borderRadius:10,background:'rgba(4,8,18,.72)'}}>{visual.segments.map((s:any,i:number)=><line key={`s${i}`} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke='currentColor' strokeOpacity='.42' strokeWidth='.35'/>)}{visual.points.map((p:any)=><circle key={`p${p.i}`} cx={p.x} cy={p.y} r='.65' fill='currentColor'/>)}</svg>}
   </div>
   <div className='r206-world-mission-proof'><ShieldCheck/><span>{ready?'R224 BYTE/HASH BOUND':'SOURCE PROOF REQUIRED'}</span><span>{spatialReady?'R226 3-D EVIDENCE REQUEST BOUND':'CAMERA/DEPTH NOT STAGED'}</span><span>R86/R87 scar continuity</span><span>R125 Canon only</span><span>Photoreal unproven</span></div>
   <button onClick={materialize} disabled={busy||!field?.fieldComputed}>{busy?'Working…':ready?'Refresh terrain':'Materialize terrain'}</button>
   <button onClick={stageSpatialEvidence} disabled={busy||!ready}>{spatialReady?'Refresh 3-D evidence request':'Stage 3-D evidence request'}</button>
- </section>;
+ </section><SourceSpatialEvidenceIntakeR227/></>;
 }
