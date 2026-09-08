@@ -4,9 +4,9 @@
   "authority": "OMEGAV6",
   "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
   "engineRevision": "R170.2",
-  "currentCapabilityFloor": "R202",
+  "currentCapabilityFloor": "R210",
   "promotedSuccessorContinuity": ["R175", "R176", "R177", "R178", "R179", "R180"],
-  "postR180ProofContinuity": ["R200", "R200.1", "R202"],
+  "postR180ProofContinuity": ["R200", "R200.1", "R202", "R210"],
   "activeWorkflowAuthority": {
     "productionDeploy": ".github/workflows/ci.yml",
     "currentConvergence": ".github/workflows/r170-current-convergence.yml",
@@ -52,7 +52,7 @@
     "highOrCriticalAutoRepair": false,
     "residualAuthority": "R164",
     "successorContinuityProof": "scripts/prove_successor_workflow_invariants_r175.mjs",
-    "latestExplicitSuccessorProof": "tests/r202-operational-source-authority-invariants.mjs",
+    "latestExplicitSuccessorProof": "tests/r210-forward-live-truth-invariants.mjs",
     "canonicalAdmissionAuthority": "R125"
   },
   "preservedRuntime": {
@@ -69,8 +69,9 @@
     "livingWorldExecutionAuthorization": "R179_AUTHORIZED_NOT_DISPATCHED",
     "livingWorldExecutionDispatch": "R180_EXPLICIT_DISPATCH_R147_AUTHORITY",
     "deployedBrowserProof": "R200.1_EXACT_PROMOTED_SHA",
-    "operationalSourceAuthority": "R202_READ_ONLY_PROVENANCE_AND_LIFECYCLE_PROJECTION"
+    "operationalSourceAuthority": "R202_READ_ONLY_PROVENANCE_AND_LIFECYCLE_PROJECTION",
+    "liveTruthRecovery": "R210_FORWARD_ONLY_REFRESH_AND_RUNTIME_VERSION_REANCHOR"
   },
   "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
-  "truthBoundary": "R170.3 uses an hourly low-cost observation pulse and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run, no parallel self-build candidate is open, current residual evidence is non-blocking, and the current read-only successor proof chain through R202 proves before generation. R175→R180 remains the living-world intent/mission/contract/authorization/dispatch chain, with R180 dispatching only separately confirmed R179 AUTHORIZED runs through existing R147 authority. R200/R200.1 add exact rendered browser proof and R202 adds read-only operational/source-authority convergence; neither creates execution or Canon authority. Expensive dependency installation, inherited regression, and Worker dry-runs run only for a PROPOSE candidate, which is then re-proved before an isolated PR is opened. Hybrid/Build remains held without separate host execution confirmation. R170.3 cannot directly mutate main, auto-merge, recursively dispatch workflows, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
+  "truthBoundary": "R170.3 uses an hourly low-cost observation pulse and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run, no parallel self-build candidate is open, current residual evidence is non-blocking, and the current read-only successor proof chain through R210 proves before generation. R175→R180 remains the living-world intent/mission/contract/authorization/dispatch chain, with R180 dispatching only separately confirmed R179 AUTHORIZED runs through existing R147 authority. R200/R200.1 add exact rendered browser proof, R202 adds read-only operational/source-authority convergence, and R210 adds forward-only live-truth refresh/recovery; none creates execution or Canon authority. R211 pre-render lineage is an application proof layer carried by current main and remains separately bounded from renderer execution. Expensive dependency installation, inherited regression, and Worker dry-runs run only for a PROPOSE candidate, which is then re-proved before an isolated PR is opened. Hybrid/Build remains held without separate host execution confirmation. R170.3 cannot directly mutate main, auto-merge, recursively dispatch workflows, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
 }
