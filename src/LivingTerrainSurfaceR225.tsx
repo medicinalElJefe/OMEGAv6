@@ -1,0 +1,30 @@
+import {useEffect,useState} from 'react';
+import {Mountain,ShieldCheck} from 'lucide-react';
+import {readGeospatialSceneFieldR218,R218_EVENT} from './world/geospatialSceneFieldR218.js';
+import {assembleLivingTerrainExperienceR224,readLivingTerrainExperienceR224,R224_EVENT} from './world/livingTerrainExperienceR224.js';
+import {emitOperationR86} from './omegaOperationBusR86';
+import {activeProjectIdR87,recordProjectOperationR87} from './omegaProjectContinuityR87';
+
+export const R225_REVISION='R225';
+export const R225_BOUNDARY='R225 places the existing R224 source-backed terrain packet into the canonical Living World as an explicit operator-invoked visual interaction. It does not create new terrain truth, infer missing elevation/depth/material/radiometry/camera data, claim solver validity, native execution, federation closure, PC online state, Canon mutation, or computed photoreal reality.';
+
+type Terrain=ReturnType<typeof readLivingTerrainExperienceR224>;
+
+export default function LivingTerrainSurfaceR225(){
+ const[field,setField]=useState<any>(()=>readGeospatialSceneFieldR218());
+ const[terrain,setTerrain]=useState<Terrain>(()=>readLivingTerrainExperienceR224());
+ const[busy,setBusy]=useState(false);
+ const[error,setError]=useState('');
+ useEffect(()=>{const refreshField=()=>setField(readGeospatialSceneFieldR218());const refreshTerrain=()=>setTerrain(readLivingTerrainExperienceR224());window.addEventListener(R218_EVENT,refreshField as EventListener);window.addEventListener(R224_EVENT,refreshTerrain as EventListener);window.addEventListener('storage',refreshField);window.addEventListener('storage',refreshTerrain);return()=>{window.removeEventListener(R218_EVENT,refreshField as EventListener);window.removeEventListener(R224_EVENT,refreshTerrain as EventListener);window.removeEventListener('storage',refreshField);window.removeEventListener('storage',refreshTerrain)}},[]);
+ const materialize=async()=>{if(busy)return;setBusy(true);setError('');try{const current=readGeospatialSceneFieldR218();if(current?.state!=='GEOSPATIAL_SCENE_FIELD_COMPUTED')throw new Error('R218 proof-ready geospatial field required');const receipt=await assembleLivingTerrainExperienceR224({field:current,origin:window.location.origin,persist:true});if(receipt?.state!=='LIVING_SOURCE_BACKED_TERRAIN_READY')throw new Error(receipt?.reason||'R224 terrain held for source evidence');setTerrain(receipt);const projectId=activeProjectIdR87();const event=await emitOperationR86({type:'LIVING_SOURCE_BACKED_TERRAIN_MATERIALIZED',surface:'Living World',status:'PASS',detail:`Materialized R224 source-backed terrain ${String(receipt.receiptSha256).slice(0,12)} into the canonical visual world`,payload:{revision:R225_REVISION,r224ReceiptSha256:receipt.receiptSha256,r224VisualSha256:receipt.visualSha256,r222GeometrySha256:receipt.r222GeometrySha256,r219MeshSha256:receipt.r219MeshSha256,r218FieldSha256:receipt.r218FieldSha256,missionId:receipt.missionId,projectId,visualProjectionOnly:true,computedPhotorealRealityProved:false,solverValidityProved:false,nativeExecutionClaimed:false,federationClosureProved:false,canonicalMutation:false}});await recordProjectOperationR87(projectId,event)}catch(err){setError(err instanceof Error?err.message:String(err))}finally{setBusy(false)}};
+ const ready=terrain?.state==='LIVING_SOURCE_BACKED_TERRAIN_READY'&&terrain?.experienceReady===true;
+ const visual=ready?terrain.visual:null;
+ return <section className='r206-world-mission' data-state={ready?'BOUND':field?.fieldComputed?'ASSEMBLED':'HELD'} aria-label='Living world source-backed terrain'>
+  <div className='r206-world-mission-icon'><Mountain/></div>
+  <div className='r206-world-mission-copy'><small>R218 → R221 → R219 → R222 → R224 → R225 · SOURCE-BACKED TERRAIN · ONE WORLD VISUAL INTERACTION</small><b>{ready?'SOURCE-BACKED TERRAIN MATERIALIZED':field?.fieldComputed?'TERRAIN READY FOR OPERATOR INTENT':'TERRAIN HELD FOR R218 FIELD'}</b><span>{ready?`${terrain.vertexCount} vertices · ${terrain.triangleCount} triangles · relief ${Number(terrain.reliefM||0).toFixed(2)}m · ${terrain.verticalDatum||'datum unspecified'}`:'Materialize only after the current mission has an evidence-bound R218 WGS84 field.'}</span><em>{error||R225_BOUNDARY}</em>
+   {visual&&<svg viewBox={visual.viewBox} role='img' aria-label='R225 source-backed terrain projection; not empirical imagery' style={{width:'100%',maxWidth:520,minHeight:180,marginTop:8,borderRadius:10,background:'rgba(4,8,18,.72)'}}>{visual.segments.map((s:any,i:number)=><line key={`s${i}`} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke='currentColor' strokeOpacity='.42' strokeWidth='.35'/>)}{visual.points.map((p:any)=><circle key={`p${p.i}`} cx={p.x} cy={p.y} r='.65' fill='currentColor'/>)}</svg>}
+  </div>
+  <div className='r206-world-mission-proof'><ShieldCheck/><span>{ready?'R224 BYTE/HASH BOUND':'SOURCE PROOF REQUIRED'}</span><span>R86/R87 scar continuity</span><span>R125 Canon only</span><span>Photoreal unproven</span></div>
+  <button onClick={materialize} disabled={busy||!field?.fieldComputed}>{busy?'Materializing…':ready?'Refresh terrain':'Materialize terrain'}</button>
+ </section>;
+}
