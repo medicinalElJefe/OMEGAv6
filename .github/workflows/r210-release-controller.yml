@@ -3,8 +3,6 @@ name: R210 Release Controller
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
 
 permissions:
   contents: read
@@ -12,8 +10,8 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: omega-r210-release-controller
-  cancel-in-progress: false
+  group: omega-r210-release-controller-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   candidate-fence:
@@ -32,20 +30,4 @@ jobs:
           OMEGA_RELEASE_GUARD_MODE: PR
           OMEGA_PR_NUMBER: ${{ github.event.pull_request.number }}
           OMEGA_EXPECTED_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node scripts/releaseCandidateGuardR210.mjs
-
-  promoted-merge-fence:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-      - name: Prove exact merged PR head and required green candidate workflows
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          OMEGA_RELEASE_GUARD_MODE: PUSH
         run: node scripts/releaseCandidateGuardR210.mjs
