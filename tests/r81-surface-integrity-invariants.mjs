@@ -6,6 +6,7 @@ const shell=read('src/InstrumentOSShellR62.tsx');
 const shellCss=read('src/instrumentOSR62.css');
 const navigator=read('src/OmegaSideNavigatorR88.tsx');
 const navigatorCss=read('src/omegaSideNavigatorR88.css');
+const navigatorCss210=read('src/omegaSideNavigatorR210.css');
 const experience=read('src/omegaExperienceRegistryR82.ts');
 const reset=read('src/productResetR67.css');
 const integrity=read('src/SurfaceIntegrityR81.tsx');
@@ -45,9 +46,11 @@ must(navigatorCss.includes('.r89-flat-scroll{min-height:0;overflow:auto'),'globa
 must(!navigator.includes('.slice('),'global application banner must not hide later routes behind slicing');
 must(reset.includes('.workstation-identity{min-width:0!important;overflow:hidden!important}'),'long route identity must not cover topbar controls');
 must(navigatorCss.includes('env(safe-area-inset-bottom,0px)'),'mobile side navigation must respect safe areas');
-must(navigator.includes("if(e.key==='Escape')setExpanded(false)"),'application toolbar panel must support deterministic Escape collapse');
-must(!navigator.includes("document.body.style.overflow='hidden'")&&navigator.includes("dataset.omegaNavExpanded=expanded?'true':'false'"),'expanded application toolbar must reserve layout width instead of locking/covering the surface');
+must(/if\(e\.key==='Escape'\)\s*\{?\s*setExpanded\(false\)/.test(navigator),'application toolbar panel must support deterministic Escape collapse');
+must(!navigator.includes("document.body.style.overflow='hidden'")&&navigator.includes("dataset.omegaNavExpanded=expanded?'true':'false'"),'expanded application toolbar must retain explicit shared layout state without locking document scrolling');
+must(navigatorCss210.includes('.r210-converged-nav.expanded .r94-nav-panel')&&navigatorCss210.includes('width:calc(100% - var(--r94-nav-rail))!important'),'R210.1 mobile navigator may visually overlay temporarily but must preserve the live instrument width and persistent rail');
 must(navigator.includes("aria-current={currentPanel===route?'page':undefined}"),'active route must be exposed accessibly');
+must(navigator.includes("aria-controls='omega-global-navigator'")&&navigator.includes("aria-live='polite'"),'R210.1 navigator must preserve accessible panel ownership and live route-search feedback');
 must(shell.includes('OmegaSideNavigatorR88'),'R81 containment must mount under the shared R88 navigator authority');
 
 for(const token of [
@@ -61,4 +64,4 @@ must(app.indexOf("surfaceIntegrityR81.css")>app.indexOf("productResetR67.css"),'
 must(!integrityCss.includes('.omega-surface-r81{display:none')&&!integrityCss.includes('.omega-surface-r81>*{display:none'),'surface-integrity layer may not hide application content');
 must(!integrityCss.match(/position\s*:\s*fixed/),'surface-integrity layer may not create another fixed shell');
 
-console.log('R81/R109 SURFACE INTEGRITY PASS · 44/44 mounted · 44/44 reachable · deep donors preserved · deferred specialist containment + mobile/desktop containment locked');
+console.log('R81/R109/R210.1 SURFACE INTEGRITY PASS · 44/44 mounted · 44/44 reachable · semantic Escape + readable mobile overlay + deferred specialist containment locked');

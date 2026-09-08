@@ -1,0 +1,35 @@
+name: R210 Release Controller
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: omega-r210-release-controller-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  candidate-fence:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Prove focused R210 release-controller contract
+        run: node tests/r210-release-controller-invariants.mjs
+      - name: Prove collision-free exact-base candidate identity
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          OMEGA_RELEASE_GUARD_MODE: PR
+          OMEGA_PR_NUMBER: ${{ github.event.pull_request.number }}
+          OMEGA_EXPECTED_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/releaseCandidateGuardR210.mjs

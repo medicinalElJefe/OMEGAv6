@@ -21,7 +21,8 @@ must(home.includes("omega-r88-open-navigator")&&home.includes('Complete software
 must(home.includes("omega.r88.systemMapOpen")&&home.includes('return false'),'Home embedded software map must default collapsed under R88');
 must(nav.includes('OMEGA_ALL_ROUTES_R82')&&nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'navigator must render all registered routes in one continuous scroll owner');
 must(nav.includes("layer==='SOFTWARE'")&&nav.includes('<OmegaSystemInventoryR83 compact'),'navigator must preserve the complete software inventory layer');
-must(nav.includes("if(e.key==='Escape')setExpanded(false)")&&nav.includes("dataset.omegaNavExpanded=expanded?'true':'false'"),'side navigator must close deterministically and expose layout-reservation state without locking the page beneath it');
+must(nav.includes("if(e.key==='Escape')")&&nav.includes('setExpanded(false)')&&nav.includes("dataset.omegaNavExpanded=expanded?'true':'false'")&&!nav.includes("document.body.style.overflow='hidden'"),'side navigator must close deterministically on Escape, expose layout-reservation state, and avoid locking the page beneath it');
+must(nav.includes("document.addEventListener('pointerdown',outside)")&&nav.includes('shellRef.current?.contains(target)'),'expanded navigator must also close on an outside pointer interaction without owning page scroll');
 must(navCss.includes('.r94-side-toolbar{')&&navCss.includes('.r94-nav-panel.r88-navigator{'),'navigation must remain one persistent edge toolbar with a collapsible panel');
 must(navCss.includes('.r89-flat-scroll{min-height:0;overflow:auto'),'all routes must share one deliberate flat scrolling banner');
 must(navCss.includes(".r71-topbar .r71-domains{display:none!important}")&&navCss.includes(".r84-home-launchpad{display:none!important}"),'Home must not repeat workspace compartments or basic launch panels outside the global navigator');
@@ -42,4 +43,4 @@ must(surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length,'
 for(const route of routes)must(surfaces.includes(route),`workstation missing registered destination ${route}`);
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),`deep donor surface lost: ${token}`);
 
-console.log(`R84/R104 RESPONSIVE COHERENT NAVIGATION PASS · persistent readable side toolbar · desktop/mobile non-covering authority · ${routes.length} current registered destinations`);
+console.log(`R84/R210.1 RESPONSIVE COHERENT NAVIGATION PASS · semantic Escape/outside close · persistent readable side toolbar · desktop/mobile containment · ${routes.length} current registered destinations`);
