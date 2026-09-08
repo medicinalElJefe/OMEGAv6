@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const worker=read('src/workerR32.js'),worker33=read('src/workerR33.js'),worker34=fs.existsSync('src/workerR34.js')?read('src/workerR34.js'):'',worker101=fs.existsSync('src/workerR101.js')?read('src/workerR101.js'):'',worker102=fs.existsSync('src/workerR102.js')?read('src/workerR102.js'):'',worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'',worker114=fs.existsSync('src/workerR114.js')?read('src/workerR114.js'):'',worker115=fs.existsSync('src/workerR115.js')?read('src/workerR115.js'):'',worker116=fs.existsSync('src/workerR116.js')?read('src/workerR116.js'):'',config=read('wrangler.jsonc'),adapter=read('src/platformAdapter.ts'),hybrid=read('src/HybridMissionControlR8.tsx'),agent=read('public/omega-hybrid-agent.py'),shell=read('src/SingleFrameRuntimeShellR27.tsx');
+const worker=read('src/workerR32.js'),worker33=read('src/workerR33.js'),worker34=fs.existsSync('src/workerR34.js')?read('src/workerR34.js'):'',worker101=fs.existsSync('src/workerR101.js')?read('src/workerR101.js'):'',worker102=fs.existsSync('src/workerR102.js')?read('src/workerR102.js'):'',worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'',worker114=fs.existsSync('src/workerR114.js')?read('src/workerR114.js'):'',worker115=fs.existsSync('src/workerR115.js')?read('src/workerR115.js'):'',worker116=fs.existsSync('src/workerR116.js')?read('src/workerR116.js'):'',config=read('wrangler.jsonc'),adapter=read('src/platformAdapter.ts'),hybrid=read('src/HybridMissionControlR8.tsx'),agent=read('public/omega-hybrid-agent-base-r205.py'),canonicalAgent=read('public/omega-hybrid-agent.py'),shell=read('src/SingleFrameRuntimeShellR27.tsx');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 for(const route of ['/api/runtime/snapshot','/api/runtime/events','/api/hybrid/pair','/api/orchestrator/thread','/api/orchestrator/turn','/api/hybrid/jobs','/api/missions'])must(worker.includes(route),`R32 missing enacted public route ${route}`);
 must(worker.includes("path.startsWith('/api/hybrid/agent/')"),'R32 public agent relay router missing');
@@ -27,8 +27,9 @@ must(hybrid.includes('Runtime events')||hybrid.includes('Connection events'),'Hy
 for(const token of ['/api/hybrid/agent/register','/api/hybrid/agent/poll','/api/hybrid/agent/result','TRAIN_LOCAL','HASH_TREE','BUILD','TEST','PACKAGE'])must(agent.includes(token),`desktop agent missing ${token}`);
 must(agent.includes('root-confined')&&agent.includes('shell=False'),'desktop agent must remain root-confined and must not expose arbitrary shell execution');
 must(agent.includes("foundationWeightsChanged':False")||agent.includes('foundationWeightsChanged\":False'),'local learning must not fake foundation-weight training');
+for(const token of ["VERSION='R207'","BASE_PATH='/omega-hybrid-agent-base-r205.py'","FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'"])must(canonicalAgent.includes(token),`canonical R207 wrapper missing ${token}`);
 must(shell.includes("'WORK'|'EXPLORE'|'INTELLIGENCE'|'EVIDENCE'|'SYSTEM'"),'R31 human navigation hierarchy must survive R32/R33/R34/R101/R102/R111/R114/R115/R116');
-console.log('OMEGA R32 ENACTED RUNTIME PASS · durable event/action bus + governed AI + authenticated Hybrid proof transport preserved under R116→R115→R114→R111→R102 · declarative SQLite lifecycle export present');
+console.log('OMEGA R32 ENACTED RUNTIME PASS · durable event/action bus + governed AI + authenticated Hybrid proof transport preserved under R116→R115→R114→R111→R102 · R207 canonical wrapper over frozen R205 executor · declarative SQLite lifecycle export present');
 await import('./r1801-hybrid-buildout-discovery-invariants.mjs');
 await import('./r183-canonical-api-runtime-routing-invariants.mjs');
 await import('./r185-temporal-relativity-performance-invariants.mjs');
@@ -42,3 +43,4 @@ await import('./r1931-cloudflare-durable-object-reconciliation-invariants.mjs');
 await import('./r186-verified-return-live-world-ingress-invariants.mjs');
 await import('./r1901-living-world-proof-membrane-invariants.mjs');
 await import('./r205-pc-proof-closure-invariants.mjs');
+await import('./r207-r141-native-host-evidence-invariants.mjs');
