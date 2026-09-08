@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R88/R89/R233 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R88/R89/R235 '+msg)};
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const css=read('src/omegaSideNavigatorR88.css');
 const css210=read('src/omegaSideNavigatorR210.css');
@@ -31,5 +31,5 @@ for(const token of ['/commits/${sha}/pulls','/actions/runs?head_sha=${candidate}
 for(const token of ['pull_request:','actions: read','pull-requests: read','contents: read','group: omega-r210-release-controller','cancel-in-progress: false','collision-free exact-base candidate identity','OMEGA_RELEASE_GUARD_MODE: PR'])must(releaseWorkflow.includes(token),`R210 PR-only release-controller workflow missing ${token}`);
 must(!/^\s*push\s*:/m.test(releaseWorkflow),'R210 successor release controller must remain PR-only; canonical ci.yml owns main-push deployment/correlation authority');
 must(!releaseWorkflow.includes('OMEGA_RELEASE_GUARD_MODE: PUSH')&&!releaseWorkflow.includes('contents: write')&&!releaseWorkflow.includes('deploy')&&!releaseWorkflow.includes('wrangler'),'R210 controller is proof-only/PR-only and must not gain main-push deployment/source mutation authority');
-for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){must(!wrangler.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`R233 completed retired Durable Object must not retain stale tombstone: ${retired}`);must(!wrangler.includes(`"class_name": "${retired}"`),`R233 retired Durable Object regained live binding: ${retired}`);}
-console.log(`R88/R89/R104/R233 CONVERGENCE PASS · persistent readable side toolbar · ${routes.length} destinations · focus/outside-close/live-count accessibility · readable mobile overlay · PR-only exact-head candidate fence + separate exact-merge guard logic · R201/R203 fully retired without stale tombstones/live authority · no new navigation/deploy/Canon authority`);
+for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){must(wrangler.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`R235 provider-required deleted tombstone missing: ${retired}`);must(!wrangler.includes(`"class_name": "${retired}"`),`R235 retired Durable Object regained live binding: ${retired}`);}
+console.log(`R88/R89/R104/R235 CONVERGENCE PASS · persistent readable side toolbar · ${routes.length} destinations · focus/outside-close/live-count accessibility · readable mobile overlay · PR-only exact-head candidate fence + separate exact-merge guard logic · R201/R203 remain retired with reconciliation-only tombstones and no live authority · no new navigation/deploy/Canon authority`);
