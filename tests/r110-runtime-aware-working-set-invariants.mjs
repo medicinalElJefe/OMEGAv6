@@ -57,8 +57,9 @@ must(app.includes('<Suspense fallback={fallback}>{home?<OmegaHomeR71')&&app.incl
 must(vite.includes('R1991_ENTRY_BUDGET_BYTES=500*1024')&&vite.includes('initialEntryBudgetR1991')&&vite.includes('Defer specialist/home dependencies instead of raising the budget.'),'R199.1 must fail builds that regress the initial-entry byte budget');
 for(const live of ['OmegaRuntime','OmegaSwarmCell','OmegaSwarmCoordinator','OmegaSwarmBranch','OmegaSwarmOrgan','OmegaSwarmOrganismCoordinator','OmegaSwarmAutonomicCoordinator'])must(wrangler.includes(`"${live}": {"type": "durable-object", "storage": "sqlite"}`),`R199.1 must retain live durable authority ${live}`);
 for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){
- must(!wrangler.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`R210 must remove stale Cloudflare retirement tombstone ${retired}`);
- must(!wrangler.includes(`"${retired}": {"type": "durable-object", "storage": "sqlite"}`),`R210 must not restore retired namespace ${retired} as live storage`);
+ must(wrangler.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`R229 must retain Cloudflare retirement tombstone ${retired} while the provider namespace remains provisioned`);
+ must(!wrangler.includes(`"${retired}": {"type": "durable-object", "storage": "sqlite"}`),`R229 must not restore retired namespace ${retired} as live storage`);
+ must(!wrangler.includes(`"class_name": "${retired}"`),`R229 must not restore retired namespace ${retired} as a live binding`);
 }
 
-console.log(`R110/R210 RUNTIME-AWARE WORKING SET PASS · ${surfaces.length} registered destinations preserved dynamically · hidden/Save-Data/2G suppression · low-power/3G budget reduction · direct route demand preserved · Home deferred · 500 KiB initial-entry budget enforced · R201/R203 fully absent from live/export config · one route/state/proof authority retained`);
+console.log(`R110/R229 RUNTIME-AWARE WORKING SET PASS · ${surfaces.length} registered destinations preserved dynamically · hidden/Save-Data/2G suppression · low-power/3G budget reduction · direct route demand preserved · Home deferred · 500 KiB initial-entry budget enforced · R201/R203 deleted tombstones retained without live bindings · one route/state/proof authority retained`);
