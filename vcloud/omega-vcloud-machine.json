@@ -1,0 +1,35 @@
+{
+  "schema": "OMEGA_VCLOUD_MACHINE_R223",
+  "revision": "R223",
+  "id": "VCLOUD-01",
+  "name": "OMEGA Evolution Machine",
+  "role": "SINGLE_AUTONOMOUS_EVOLUTION_WORKER",
+  "active": true,
+  "singleton": true,
+  "githubPortal": "medicinalElJefe/OMEGAv6",
+  "cyclePath": "/api/evolution-cycle",
+  "schedule": "17 * * * *",
+  "sourceMutationScope": "ISOLATED_SUCCESSOR_BRANCH_AND_PR_ONLY",
+  "promotion": {
+    "requiresExactBaseReceipt": true,
+    "requiresExactHeadProofs": true,
+    "requiresMainDriftRecheck": true,
+    "expectedHeadLock": true
+  },
+  "authority": {
+    "canonStateAdmission": "R125",
+    "dispatch": "R147",
+    "durableExecutionHistory": "R146",
+    "hybridExactReturnProof": "R141",
+    "productionDeployment": "ci.yml"
+  },
+  "retiredDurableObjectTombstones": ["R201", "R203"],
+  "forbiddenClaims": [
+    "FABRICATED_PC_ONLINE",
+    "FABRICATED_SOLVER_VALIDITY",
+    "FABRICATED_RENDERER_VALIDITY",
+    "FABRICATED_EMPIRICAL_PROOF",
+    "FABRICATED_CANON_ADMISSION"
+  ],
+  "truthBoundary": "VCLOUD-01 may inspect, generate bounded source proposals, open GitHub PRs, and merge only exact-head fully green candidates on an unchanged exact base. It is not CanonState admission authority and it is not a production deployment authority."
+}
