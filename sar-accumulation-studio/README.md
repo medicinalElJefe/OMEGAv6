@@ -13,6 +13,7 @@ Standalone measured-first SAR acquisition chronology and accumulation instrument
 - Grades evidence: **A** only when precise-orbit evidence is declared in source metadata, **B** for authoritative ASF geometry/time without separately bound precise ephemeris, **C** for unverified imports/missing authority.
 - Exports a deterministic proof manifest with a SHA-256 digest over canonicalized acquisition content.
 - Warns when NISAR BETA and PROVISIONAL maturity are mixed.
+- Detects queries that overlap the documented permanent NISAR instrument gap (2026-07-27T22:03:25Z to 2026-08-10T00:55:27Z).
 
 ## Scientific semantics
 
