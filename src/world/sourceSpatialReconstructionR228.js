@@ -2,7 +2,7 @@ export const R228_REVISION='R228';
 export const R228_SCHEMA='OMEGA_SOURCE_SPATIAL_RECONSTRUCTION_R228';
 export const R228_SNAPSHOT_KEY='omega.r228.sourceSpatialReconstruction';
 export const R228_EVENT='omega-r228-source-spatial-reconstruction';
-export const R228_BOUNDARY='R228 deterministically back-projects only exact R227-bound numeric depth samples through the operator-supplied camera intrinsics and declared pose, producing bounded source-derived 3-D geometry with cryptographic lineage. It applies declared calibration parameters but does not independently prove camera calibration, infer missing depth, synthesize pixels, validate a physical solver, invoke native/GPU/remote execution, prove PC online state, close federation, mutate CanonState, or prove computed photoreal reality.';
+export const R228_BOUNDARY='R228 deterministically back-projects only exact R227-bound numeric depth samples through the operator-supplied camera intrinsics and declared pose, producing bounded source-derived 3-D geometry with cryptographic lineage. It applies declared calibration parameters but does not independently prove camera calibration, infer missing depth, resample an unregistered depth grid, synthesize pixels, validate a physical solver, invoke native/GPU/remote execution, prove PC online state, close federation, mutate CanonState, or prove computed photoreal reality.';
 
 const stable=v=>Array.isArray(v)?v.map(stable):(v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v);
 const sha256=async v=>{const bytes=new TextEncoder().encode(JSON.stringify(stable(v)));const hash=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('')};
@@ -71,8 +71,13 @@ export async function reconstructSourceSpatialGeometryR228({bundle,camera,depth,
  if(depthEvidenceSha256!==String(bundle?.depthEvidenceSha256||''))missing.push('R227_DEPTH_HASH_MISMATCH');
  const width=Number(camera?.imageWidthPx),height=Number(camera?.imageHeightPx),fx=Number(camera?.intrinsics?.fx),fy=Number(camera?.intrinsics?.fy),cx=Number(camera?.intrinsics?.cx),cy=Number(camera?.intrinsics?.cy);
  if(!Number.isInteger(width)||width<=0||!Number.isInteger(height)||height<=0||!finite(fx)||fx<=0||!finite(fy)||fy<=0||!finite(cx)||!finite(cy))missing.push('camera.intrinsics');
- if(finite(cx)&&(cx<0||cx>width))missing.push('camera.intrinsics.cxBounds');
- if(finite(cy)&&(cy<0||cy>height))missing.push('camera.intrinsics.cyBounds');
+ if(finite(cx)&&(cx<0||cx>=width))missing.push('camera.intrinsics.cxBounds');
+ if(finite(cy)&&(cy<0||cy>=height))missing.push('camera.intrinsics.cyBounds');
+ const depthPayload=depth?.samplesOrDepthMap;
+ if(depthPayload&&typeof depthPayload==='object'&&!Array.isArray(depthPayload)&&Array.isArray(depthPayload.values)){
+  const dw=Number(depthPayload.width),dh=Number(depthPayload.height);
+  if(!Number.isInteger(dw)||!Number.isInteger(dh)||dw!==width||dh!==height)missing.push('depth.gridCameraResolutionMatch');
+ }
  const pos=camera?.pose?.position;
  if(!pos||!['x','y','z'].every(k=>finite(pos[k])))missing.push('camera.pose.position');
  const qd=quaternionDiagnostics(camera?.pose?.orientation);if(!qd.ok)missing.push('camera.pose.orientation.unitQuaternion');
@@ -96,4 +101,4 @@ export async function reconstructSourceSpatialGeometryR228({bundle,camera,depth,
 
 export function persistSourceSpatialReconstructionR228(receipt){if(receipt?.state!=='SOURCE_SPATIAL_RECONSTRUCTION_COMPUTED'||!hash64(receipt?.geometrySha256)||!hash64(receipt?.receiptSha256)||!Array.isArray(receipt?.points))return false;try{localStorage.setItem(R228_SNAPSHOT_KEY,JSON.stringify(receipt));window.dispatchEvent(new CustomEvent(R228_EVENT,{detail:receipt}));return true}catch{return false}}
 export function readSourceSpatialReconstructionR228(){try{const value=JSON.parse(localStorage.getItem(R228_SNAPSHOT_KEY)||'null');return value?.schema===R228_SCHEMA?value:null}catch{return null}}
-export function manifestR228(){return{schema:'OMEGA_SOURCE_SPATIAL_RECONSTRUCTION_MANIFEST_R228',revision:R228_REVISION,chain:['R226 source evidence request','R227 exact camera/depth evidence hashes','R228 exact-hash evidence rebind','bounded numeric depth decoding','declared camera intrinsics back-projection','declared pose quaternion transform','source-frame 3-D point geometry SHA-256','candidate for existing R122 computed-reality authority'],authority:{computedReality:'R122 existing authority',adaptivePerformance:'R185',operationContinuity:'R86/R87/R97 when available',canonicalAdmission:'R125',execution:'R228 browser-local bounded numerical only'},truthBoundary:R228_BOUNDARY};}
+export function manifestR228(){return{schema:'OMEGA_SOURCE_SPATIAL_RECONSTRUCTION_MANIFEST_R228',revision:R228_REVISION,chain:['R226 source evidence request','R227 exact camera/depth evidence hashes','R228 exact-hash evidence rebind','bounded numeric depth decoding','same-resolution depth/camera grid gate when a dense grid is supplied','declared camera intrinsics back-projection','declared pose quaternion transform','source-frame 3-D point geometry SHA-256','candidate for existing R122 computed-reality authority'],authority:{computedReality:'R122 existing authority',adaptivePerformance:'R185',operationContinuity:'R86/R87/R97 when available',canonicalAdmission:'R125',execution:'R228 browser-local bounded numerical only'},truthBoundary:R228_BOUNDARY};}
