@@ -2,6 +2,7 @@ export const R208_REVISION='R208';
 export const R208_SCHEMA='OMEGA_END_TO_END_MISSION_LINEAGE_R208';
 export const R208_EVENT='omega-r208-lineage-ready';
 export const R208_STORAGE_KEY='omega.r208.pendingLineage';
+export const R208_ACCEPTED_STORAGE_KEY='omega.r208.acceptedLineage';
 export const R208_BOUNDARY='R208 correlates existing evidence, proposal, held-plan, authorization, executor, return-proof, durable-history and residual identities. It creates no queue, dispatch, device, persistence-owner, scientific-truth or CanonState authority.';
 export const R208_INDEPENDENCE_LAW='DERIVED_OR_DESCENDANT_NODES_MAY_NOT_BE_COUNTED_AS_INDEPENDENT_EMPIRICAL_CONFIRMATION_OF_THEIR_ANCESTORS';
 
@@ -35,6 +36,7 @@ export type R208LineageEnvelope={
  ancestrySha256:string;
  heldDraft:any;
 };
+export type R208AcceptedImport={schema:'OMEGA_R208_OPERATOR_IMPORT_RECEIPT';revision:'R208';lineageId:string;proposalId:string;draftFingerprint:string;state:'OPERATOR_IMPORTED_HELD_DRAFT';operatorConfirmationStillRequired:true;deviceBindingRequired:true;queueMutation:false;dispatchMutation:false;executionClaimed:false;canonicalMutation:false;canonicalAdmissionAuthority:'R125';acceptedAt:string};
 
 const stable=(value:any):any=>Array.isArray(value)?value.map(stable):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(k=>[k,stable(value[k])])):value;
 const canonical=(value:any)=>JSON.stringify(stable(value));
@@ -70,6 +72,7 @@ export async function compileSaiHybridLineageR208(input:{proposalId:string;state
 }
 
 export function readPendingLineageR208():R208LineageEnvelope|null{try{const raw=localStorage.getItem(R208_STORAGE_KEY);if(!raw)return null;const value=JSON.parse(raw);return value?.schema===R208_SCHEMA&&value?.revision===R208_REVISION?value:null}catch{return null}}
+export function readAcceptedLineageR208():R208AcceptedImport|null{try{const raw=localStorage.getItem(R208_ACCEPTED_STORAGE_KEY);if(!raw)return null;const value=JSON.parse(raw);return value?.schema==='OMEGA_R208_OPERATOR_IMPORT_RECEIPT'&&value?.revision===R208_REVISION?value:null}catch{return null}}
 export function publishPendingLineageR208(lineage:R208LineageEnvelope){
  if(lineage.operatorAccepted!==false||lineage.queueMutation!==false||lineage.dispatchMutation!==false||lineage.executionClaimed!==false)throw new Error('R208 pending lineage may not carry execution authority');
  try{localStorage.setItem(R208_STORAGE_KEY,JSON.stringify(lineage));window.dispatchEvent(new CustomEvent(R208_EVENT,{detail:{lineageId:lineage.lineageId,proposalId:lineage.proposalId,draftFingerprint:lineage.draftFingerprint}}))}catch{}
@@ -81,5 +84,7 @@ export function acceptPendingLineageR208(lineage:R208LineageEnvelope|null){
  if(!lineage||lineage.schema!==R208_SCHEMA||lineage.revision!==R208_REVISION)return{ok:false as const,code:'R208_LINEAGE_MISSING'};
  const held=verifyHeldDraftR208(lineage.heldDraft,{valid:lineage.validationState==='VALIDATED_HELD'});if(!held.ok)return{ok:false as const,code:'R208_LINEAGE_DRAFT_INVALID',errors:held.errors};
  if(lineage.operatorAccepted!==false||lineage.deviceId!==null||lineage.queueMutation!==false||lineage.dispatchMutation!==false||lineage.executionClaimed!==false)return{ok:false as const,code:'R208_LINEAGE_AUTHORITY_VIOLATION'};
- return{ok:true as const,lineageId:lineage.lineageId,proposalId:lineage.proposalId,draftFingerprint:lineage.draftFingerprint,draft:stable(lineage.heldDraft),acceptance:{state:'OPERATOR_IMPORTED_HELD_DRAFT' as const,operatorConfirmationStillRequired:true,deviceBindingRequired:true,queueMutation:false as const,dispatchMutation:false as const,executionClaimed:false as const,canonicalMutation:false as const,canonicalAdmissionAuthority:'R125' as const}};
+ const acceptance:R208AcceptedImport={schema:'OMEGA_R208_OPERATOR_IMPORT_RECEIPT',revision:R208_REVISION,lineageId:lineage.lineageId,proposalId:lineage.proposalId,draftFingerprint:lineage.draftFingerprint,state:'OPERATOR_IMPORTED_HELD_DRAFT',operatorConfirmationStillRequired:true,deviceBindingRequired:true,queueMutation:false,dispatchMutation:false,executionClaimed:false,canonicalMutation:false,canonicalAdmissionAuthority:'R125',acceptedAt:new Date().toISOString()};
+ try{localStorage.setItem(R208_ACCEPTED_STORAGE_KEY,JSON.stringify(acceptance))}catch{}
+ return{ok:true as const,lineageId:lineage.lineageId,proposalId:lineage.proposalId,draftFingerprint:lineage.draftFingerprint,draft:stable(lineage.heldDraft),acceptance};
 }
