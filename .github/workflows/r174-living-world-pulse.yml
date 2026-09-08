@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'wrangler.jsonc'
       - 'src/world/livingWorldPulseR174.js'
       - 'src/LivingWorldPulseR174.tsx'
       - 'src/livingWorldPulseR174.css'
@@ -55,6 +56,7 @@ on:
       - 'tests/r227-living-world-spatial-evidence-intake-invariants.mjs'
       - 'tests/r228-source-spatial-reconstruction-invariants.mjs'
       - 'tests/r228-living-world-source-spatial-reconstruction-invariants.mjs'
+      - 'tests/r2281-cloudflare-do-tombstone-reconciliation-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -71,6 +73,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R228.1 live Cloudflare Durable Object reconciliation
+        run: node tests/r2281-cloudflare-do-tombstone-reconciliation-invariants.mjs
       - name: Prove R228 exact-bound source spatial reconstruction
         run: node tests/r228-source-spatial-reconstruction-invariants.mjs
       - name: Prove R228 Living World reconstruction surface and truth boundary
