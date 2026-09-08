@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SAR Accumulation Studio</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header>
+  <div><b>OMEGA · SAR ACCUMULATION STUDIO</b><span class="tag">MEASURED-FIRST</span></div>
+  <div class="sub">Acquisition chronology · accumulated footprint evidence · revisit analysis · deterministic provenance</div>
+</header>
+<main>
+  <aside class="controls">
+    <section><h2>Authoritative search</h2>
+      <label>Dataset<select id="dataset"><option>SENTINEL-1</option><option>NISAR</option></select></label>
+      <div class="two"><label>Start<input id="start" type="date"></label><label>End<input id="end" type="date"></label></div>
+      <label>Processing level<input id="level" placeholder="e.g. SLC, GRD, GCOV, GSLC"></label>
+      <label>Data maturity<select id="maturity"><option value="">Any</option><option>PROVISIONAL</option><option>BETA</option></select></label>
+      <label>Flight direction<select id="direction"><option value="">Any</option><option>ASCENDING</option><option>DESCENDING</option></select></label>
+      <div class="two"><label>Polarization<input id="polarization" placeholder="VV+VH"></label><label>Relative orbit<input id="relativeOrbit" placeholder="track"></label></div>
+      <label>AOI WKT<input id="aoi" placeholder="point(-110.92 32.22) or polygon((...))"></label>
+      <label>Max results<input id="maxResults" type="number" min="1" max="10000" value="3000"></label>
+      <div class="buttons"><button id="load">Load ASF</button><button id="preview" class="quiet">Preview URL</button></div>
+      <label class="file">Or import ASF/GeoJSON<input id="file" type="file" accept=".json,.geojson,application/geo+json,application/json"></label>
+      <div id="status">Ready. No observations loaded.</div>
+    </section>
+    <section><h2>Semantics</h2>
+      <p><b>Footprint ≠ radar pixel.</b> Accumulated geometry indicates catalog/product coverage only.</p>
+      <p><b>Animation ≠ new observation.</b> Only acquisition timestamps advance the evidence ledger.</p>
+      <ul id="warnings"></ul>
+    </section>
+  </aside>
+
+  <section class="workbench">
+    <div class="toolbar">
+      <button id="prev">◀</button><button id="play">Play</button><button id="next">▶</button>
+      <input id="timeline" type="range" min="0" max="0" value="0">
+      <span id="frameIndex">0 / 0</span>
+      <label>Playback<select id="mode"><option value="accumulate">Accumulate</option><option value="single">Single acquisition</option></select></label>
+      <label>Layer<select id="visual"><option value="footprints">Footprints</option><option value="density">Overlap emphasis</option></select></label>
+      <label>Speed<input id="speed" type="range" min="50" max="1000" value="750"></label>
+      <button id="export">Export proof manifest</button>
+    </div>
+    <div class="map-wrap"><canvas id="map"></canvas><div class="map-note">WGS84 lon/lat evidence view · drag to pan · wheel to zoom · click a point for revisit statistics</div></div>
+    <div class="stats">
+      <div><span>Visible observations</span><b id="obsCount">0</b></div>
+      <div><span>Current UTC</span><b id="currentTime">—</b></div>
+      <div><span>Evidence grade</span><b id="grade">—</b><small id="gradeReason">No acquisition selected</small></div>
+      <div><span>Platform/product</span><b id="platform">—</b></div>
+      <div><span>Orbit</span><b id="orbit">—</b></div>
+      <div><span>Scene/product</span><b id="currentScene">—</b></div>
+    </div>
+    <div class="lower">
+      <section><h2>Point revisit probe</h2><div class="probe"><span>Point <b id="point">click map</b></span><span>Hits <b id="pointHits">0</b></span><span>First <b id="pointFirst">—</b></span><span>Last <b id="pointLast">—</b></span><span>Mean interval <b id="pointMean">—</b></span></div></section>
+      <section><h2>Acquisition ledger</h2><div class="table-wrap"><table><thead><tr><th>#</th><th>UTC</th><th>Platform</th><th>Level</th><th>Pass</th><th>Rel orbit</th><th>Grade</th><th>Product</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+      <details><summary>Exact ASF query</summary><code id="queryPreview"></code></details>
+    </div>
+  </section>
+</main>
+<script type="module" src="src/app.mjs"></script>
+</body>
+</html>
