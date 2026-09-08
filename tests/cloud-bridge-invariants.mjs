@@ -19,4 +19,4 @@ for(const activeClass of ['OmegaRuntime','OmegaSwarmCell','OmegaSwarmCoordinator
   assert.match(wrangler,new RegExp(`"${activeClass}"\\s*:\\s*\\{`),`active Durable Object export missing: ${activeClass}`);
 }
 assert.doesNotMatch(wrangler,/OmegaMissionLedgerR201|OmegaHybridMissionLedgerR203/,'retired R201/R203 Durable Object classes must remain absent after completed Cloudflare namespace retirement');
-console.log('cloud bridge invariants PASS · R231 retired R201/R203 exports absent');
+console.log('cloud bridge invariants PASS · R230.1 retired R201/R203 exports absent');
