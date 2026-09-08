@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R88/R89 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R88/R89/R210 '+msg)};
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const css=read('src/omegaSideNavigatorR88.css');
+const css210=read('src/omegaSideNavigatorR210.css');
 const shell=read('src/InstrumentOSShellR62.tsx');
 const home=read('src/OmegaHomeR71.tsx');
 const polish=read('src/responsivePolishR88.css');
@@ -19,4 +20,8 @@ must(css.includes("@media(max-width:900px)")&&css.includes('--r94-nav-panel:min(
 must(shell.includes('OmegaSideNavigatorR88')&&!shell.includes("className='r62-rail'"),'workstation must keep the shared R94 collapsible toolbar and no legacy R62/bottom rail');
 must(home.includes('OmegaSideNavigatorR88')&&home.includes("omega-r88-open-navigator"),'Home must open the exact same global navigator');
 must(css.includes("html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home)")&&css.includes('width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important'),'expanded desktop navigation must reserve layout width instead of covering the application');
-console.log(`R88/R89/R104 GLOBAL NAVIGATOR PASS · persistent readable collapsible side toolbar · ${routes.length} current destinations · dynamic inventory · non-covering mobile/desktop authority`);
+for(const token of ["R210_NAV_REVISION='R210'","aria-controls='omega-global-navigator'","id='omega-global-navigator'",'searchRef.current?.focus','document.addEventListener(\'pointerdown\',outside)',"role='status'","aria-live='polite'",'omegaSideNavigatorR210.css'])must(nav.includes(token),`R210 accessibility/convergence token missing ${token}`);
+must(!nav.includes('/api/')&&!nav.includes('fetch('),'R210 navigation must remain non-mutating and backend-independent');
+for(const token of ['.r210-converged-nav.expanded .r94-nav-panel','width:min(86vw,360px)','html[data-omega-nav-expanded=\'true\'] :where(.omega-workstation-v2,.r71-home)','focus-visible','prefers-reduced-motion'])must(css210.includes(token),`R210 polish CSS missing ${token}`);
+must(css210.includes('width:calc(100% - var(--r94-nav-rail))!important'),'R210 mobile overlay must preserve underlying instrument width instead of compressing it by panel width');
+console.log(`R88/R89/R104/R210 GLOBAL NAVIGATOR PASS · persistent readable collapsible side toolbar · ${routes.length} current destinations · focus/outside-close/live-count accessibility · readable mobile overlay · navigation remains non-mutating`);
