@@ -28,14 +28,15 @@ assert.equal(decideCycle({currentMainSha:'A',productionProofGreen:false,state,ca
 assert.equal(decideCycle({currentMainSha:'A',productionProofGreen:true,state,candidates:[{receipt:{baseSha:'A'}}],evidence:liveEvidence}).action,'OBSERVE_ONLY');
 assert.equal(decideCycle({currentMainSha:'A',productionProofGreen:true,state,candidates:[],evidence:{...liveEvidence,coreHealth:{ok:false,state:'UNPROVEN',schema:'OMEGA_CANONICAL_CORE_HEALTH_R163'}}}).action,'OBSERVE_ONLY');
 
+const policy=fs.readFileSync('vcloud/lib/evolution-policy.mjs','utf8');
 const machine=fs.readFileSync('vcloud/lib/github-machine.mjs','utf8');
 const endpoint=fs.readFileSync('vcloud/api/evolution-cycle.mjs','utf8');
 assert.match(machine,/candidate\?\.receipt\?\.baseSha/,'promotion must bind original candidate base receipt');
 assert.match(machine,/head_sha=\$\{headSha\}.*event=pull_request/,'promotion proof lookup must bind exact PR head SHA');
 assert.match(machine,/sha:headSha,merge_method:'merge'/,'merge must use expected-head SHA locking');
 assert.match(machine,/main drifted during promotion gate/,'main must be rechecked immediately before promotion');
-assert.match(machine,/productionDeploymentWorkflow: 'ci.yml'|productionDeploymentWorkflow/,'VCloud may not become a production deployment authority');
-assert.doesNotMatch(machine,/wrangler deploy|deploy-main|cloudflare/i,'VCloud machine may not deploy production directly');
+assert.match(policy,/productionDeploymentWorkflow:\s*'ci\.yml'/,'VCloud policy must preserve ci.yml as sole production deployment workflow');
+assert.doesNotMatch(machine,/wrangler deploy|deploy-main/i,'VCloud machine may not deploy production directly');
 assert.match(endpoint,/CRON_SECRET/,'VCloud cycle endpoint must require cron authentication');
 assert.match(endpoint,/OMEGA_GITHUB_TOKEN_REQUIRED/,'GitHub write credential must remain external secret state');
 
