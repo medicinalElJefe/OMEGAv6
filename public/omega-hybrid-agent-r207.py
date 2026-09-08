@@ -26,6 +26,21 @@ PAIRING_IDENTITY_MARKER='Pairing is explicit.'
 MAX_BASE_BYTES=512*1024
 MAX_FINGERPRINT_PAYLOAD_BYTES=512*1024
 
+# R207 does not reimplement these capabilities. It verifies that the immutable
+# executor it loads still contains every inherited safety/capability contract.
+REQUIRED_BASE_CONTRACT_TOKENS=(
+ "VERSION='R34.1'","CAPABILITY_REVISION='R132'","R205_PROOF_EXTENSION='R205'",
+ BASE_IDENTITY_MARKER,PAIRING_IDENTITY_MARKER,'root-confined','secure_path(root','Path escapes approved root.','shell=False',
+ "'/api/hybrid/agent/register'","'/api/hybrid/agent/heartbeat'","'/api/hybrid/agent/poll'","'/api/hybrid/agent/result'",
+ 'Browser may now truthfully show PC ONLINE','DESKTOP_HEALTH','FORENSIC_HASH_LEDGER',
+ 'def list_windows(','def focus_window(','def assert_window(','def screen_capture(','def read_visible_text(',
+ 'def mouse_move(','def click_mouse(','def send_key(','def type_text(','def scroll_mouse(','def record_macro(','def replay_macro(',
+ "op=='CLICK'","op=='KEY'","op=='TYPE_TEXT'","op=='SCROLL'","op=='ASSERT_WINDOW'","op=='READ_VISIBLE_TEXT'","op=='RECORD_MACRO'","op=='REPLAY_MACRO'",
+ "root/'.omega_hybrid'/'screens'","root/'.omega_hybrid'/'macros'",'WINDOWS_UI_AUTOMATION','assert_window(title)','MAX_MACRO_EVENTS=5000','max_runtime',
+ 'APPLY_PATCH requires expectedSha256',"replacements=step.get('replacements')",'def write_text(','WRITE_TEXT replacement requires expectedSha256',
+ 'def workbook_audit(',"executedMacros':False",'OMEGA_SAI_LOCAL_RETRIEVAL_INDEX_R132',"foundationWeightsChanged':False","learningType':'LOCAL_RETRIEVAL_AND_PROOF_PRIOR_INDEX'"
+)
+
 def sha_bytes(b:bytes):return hashlib.sha256(b).hexdigest()
 def arg_value(name,default):
     try:
@@ -48,7 +63,7 @@ def canonical_base_source(server):
     digest=sha_bytes(source)
     if digest!=EXPECTED_BASE_SHA256:raise RuntimeError('R207 immutable R205 base SHA-256 mismatch.')
     text=source.decode('utf-8')
-    for token in ("VERSION='R34.1'","CAPABILITY_REVISION='R132'","R205_PROOF_EXTENSION='R205'",BASE_IDENTITY_MARKER,PAIRING_IDENTITY_MARKER,'root-confined','shell=False',"'/api/hybrid/agent/heartbeat'","'/api/hybrid/agent/poll'","'/api/hybrid/agent/result'",'DESKTOP_HEALTH','FORENSIC_HASH_LEDGER'):
+    for token in REQUIRED_BASE_CONTRACT_TOKENS:
         if token not in text:raise RuntimeError('R207 base agent contract missing '+token)
     return text,digest
 
