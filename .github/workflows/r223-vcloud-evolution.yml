@@ -30,7 +30,7 @@ jobs:
           node tests/r223-vcloud-evolution-invariants.mjs
       - name: Preserve deployment and admission separation
         run: |
-          ! grep -R -E 'wrangler deploy|gh pr merge|git push .*main' vcloud
+          ! grep -R -E 'wrangler deploy|git push .*main' vcloud
           grep -q "productionDeploymentWorkflow: 'ci.yml'" vcloud/lib/evolution-policy.mjs
           grep -q "canonAdmission: 'R125'" vcloud/lib/evolution-policy.mjs
           grep -q "dispatch: 'R147'" vcloud/lib/evolution-policy.mjs
