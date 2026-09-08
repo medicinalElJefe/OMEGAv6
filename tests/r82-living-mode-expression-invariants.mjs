@@ -26,7 +26,9 @@ must(home.includes('projection.signature')&&home.includes('projection.intent'),'
 must(homeCss.includes('.r71-modes')&&homeCss.includes('overflow-x:auto'),'all projection buttons must remain reachable without overlap');
 
 must(shell.includes('OmegaSideNavigatorR88')&&nav.includes('workspaceForRouteR82')&&nav.includes('OMEGA_ALL_ROUTES_R82'),'workstation menu must preserve shared route organization as metadata without forcing workspace compartments');
-must(nav.includes('Persistent rail')&&nav.includes('active application remains visible'),'deep historical route reachability must remain explicit without grouped navigation or a covering modal');
+must(nav.toLowerCase().includes('persistent rail')&&nav.includes('active application remains visible'),'deep historical route reachability must remain explicit in the persistent rail/browser');
+must(nav.includes('rows.map(route=>')&&!nav.includes('rows.slice(')&&nav.includes("setWorkspaceFilter('ALL')"),'all filtered registered routes must remain structurally renderable with an explicit ALL view; navigation polish may not bury the deep route universe behind slicing');
+must(nav.includes("aria-label='Browse all registered OMEGA applications'")&&nav.includes("aria-label={activeWorkspace?`${activeWorkspace.label} OMEGA applications`:'All registered OMEGA applications'}"),'complete application reachability must remain exposed to assistive/browser navigation');
 
 for(const family of ['COHERENCE','FORECAST','PRUNE','RELATIVITY','FLOW','MEMORY','PROOF','TOPOLOGY','COMPRESSION','TRAVERSAL','RECURSION','GOVERNANCE','SCALE','LIGHT','GENERIC'])must(modeRuntime.includes(`'${family}'`),`mode expression family missing ${family}`);
 must(modeRuntime.includes("metadataOnly?'Visual expression is derived only from catalog metadata."),'registry-only mode visuals must remain explicitly non-executed');
@@ -50,4 +52,4 @@ must(surface.includes("record?:any")&&surface.includes("className='r82-surface-v
 must(surfaceCss.includes('.r82-surface-vital')&&!surfaceCss.includes('.r82-surface-vital{position:fixed'),'surface vitality must stay non-overlapping and inside the active panel');
 must(!modeRuntime.match(/physical dimension.*executed/i),'visual mode mapping must not convert representation into physical/execution claims');
 
-console.log(`R82 LIVING MODE EXPRESSION PASS · ${routes.length} current registered destinations · 8 projection grammars · individual mode expressions · no buried menu slicing · state-bound surfaces preserved`);
+console.log(`R82/R210.1 LIVING MODE EXPRESSION PASS · ${routes.length} current registered destinations · complete unsliced persistent navigation reachability · 8 projection grammars · individual mode expressions · state-bound surfaces preserved`);
