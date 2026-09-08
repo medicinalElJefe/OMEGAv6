@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """OMEGA R207 canonical Hybrid Link proof wrapper.
 
+OMEGA Hybrid Link agent compatibility signature.
 R207 preserves the proven R34.1/R132/R205 executor as an immutable downloaded base
 and adds the exact R141 return-payload fingerprint envelope required by the canonical
 Worker proof-closure path. The wrapper does not widen the operation allow-list, root
@@ -19,6 +20,7 @@ R207_PROOF_EXTENSION='R207'
 FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
 BASE_PATH='/omega-hybrid-agent-base-r205.py'
+EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'
 BASE_IDENTITY_MARKER='OMEGA R34 local Hybrid Link agent'
 PAIRING_IDENTITY_MARKER='Pairing is explicit.'
 MAX_BASE_BYTES=512*1024
@@ -43,10 +45,12 @@ def canonical_base_source(server):
     with urllib.request.urlopen(req,timeout=30) as r:
         source=r.read(MAX_BASE_BYTES+1)
     if len(source)<1000 or len(source)>MAX_BASE_BYTES:raise RuntimeError('R207 base agent size proof failed.')
+    digest=sha_bytes(source)
+    if digest!=EXPECTED_BASE_SHA256:raise RuntimeError('R207 immutable R205 base SHA-256 mismatch.')
     text=source.decode('utf-8')
     for token in ("VERSION='R34.1'","CAPABILITY_REVISION='R132'","R205_PROOF_EXTENSION='R205'",BASE_IDENTITY_MARKER,PAIRING_IDENTITY_MARKER,'root-confined','shell=False',"'/api/hybrid/agent/poll'","'/api/hybrid/agent/result'",'DESKTOP_HEALTH','FORENSIC_HASH_LEDGER'):
         if token not in text:raise RuntimeError('R207 base agent contract missing '+token)
-    return text,sha_bytes(source)
+    return text,digest
 
 def load_base(server):
     source,digest=canonical_base_source(server)
