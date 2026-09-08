@@ -15,6 +15,7 @@ on:
       - 'src/world/adaptiveRenderAttemptR213.js'
       - 'src/world/renderAttemptContinuityR214.js'
       - 'src/world/evidenceReconstructionIntentR216.js'
+      - 'src/world/evidenceReconstructionFrameR217.js'
       - 'src/OmegaGovernanceProjectMediaR29.tsx'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
@@ -29,6 +30,7 @@ on:
       - 'tests/r214-render-attempt-continuity-invariants.mjs'
       - 'tests/r215-render-artifact-continuity-invariants.mjs'
       - 'tests/r216-evidence-reconstruction-intent-invariants.mjs'
+      - 'tests/r217-evidence-reconstruction-frame-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -45,6 +47,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R217 exact-byte evidence reconstruction frame receipt
+        run: node tests/r217-evidence-reconstruction-frame-invariants.mjs
       - name: Prove R216 evidence-bound reconstruction intent
         run: node tests/r216-evidence-reconstruction-intent-invariants.mjs
       - name: Prove R215 byte-hashed representational artifact continuity
