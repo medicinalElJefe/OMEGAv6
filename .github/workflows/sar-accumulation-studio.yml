@@ -1,0 +1,39 @@
+name: SAR Accumulation Studio
+
+on:
+  push:
+    branches:
+      - feature/sar-accumulation-studio
+    paths:
+      - 'sar-accumulation-studio/**'
+      - '.github/workflows/sar-accumulation-studio.yml'
+  pull_request:
+    paths:
+      - 'sar-accumulation-studio/**'
+      - '.github/workflows/sar-accumulation-studio.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: sar-accumulation-studio
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check
+        run: npm run check
+      - name: Evidence invariant tests
+        run: npm test
+      - name: Assert standalone authority boundary
+        run: |
+          test ! -f wrangler.toml
+          test ! -f worker.ts
+          test ! -f worker.js
+          ! grep -R -n -E 'wrangler deploy|vercel --prod|cloudflare.*deploy' . --exclude-dir=node_modules
