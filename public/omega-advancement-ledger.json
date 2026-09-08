@@ -1,0 +1,70 @@
+{
+  "schema": "OMEGA_ADVANCEMENT_LEDGER_V1",
+  "revision": "R207.2",
+  "state": "CANDIDATE_IN_PROGRESS",
+  "releaseClean": false,
+  "canonicalLedger": "https://github.com/medicinalElJefe/OMEGAv6/issues/435",
+  "repositoryLedger": "https://github.com/medicinalElJefe/OMEGAv6/blob/main/docs/OMEGA_ADVANCEMENT_LEDGER.md",
+  "canonicalRuntime": "https://omegav6.jeffdeweyeljefe.workers.dev/",
+  "proofLinks": {
+    "coreHealth": "https://omegav6.jeffdeweyeljefe.workers.dev/api/core-health",
+    "hybridStatus": "https://omegav6.jeffdeweyeljefe.workers.dev/api/hybrid/status",
+    "operationalSourceAuthority": "https://omegav6.jeffdeweyeljefe.workers.dev/omega-operational-source-authority-r202.html",
+    "buildReceipt": "https://omegav6.jeffdeweyeljefe.workers.dev/omega-build-receipt.json"
+  },
+  "entries": [
+    {
+      "revision": "R207",
+      "state": "SUPERSEDED_FORWARD",
+      "releaseClean": false,
+      "pr": "https://github.com/medicinalElJefe/OMEGAv6/pull/432",
+      "mergeSha": "c5a66091f444c039dcbb9e0c5fa5334735fbde86",
+      "workflow": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34173701625",
+      "summary": "Canonical R141-native proof wrapper over immutable R205 executor with exact base SHA binding and no second executor implementation.",
+      "residual": "Inherited R116 validator rejected the R117/R141 compatibility asset after the active base path moved to the immutable R205 asset."
+    },
+    {
+      "revision": "R207.1",
+      "state": "DEPLOYED_VERIFIER_RESIDUAL",
+      "releaseClean": false,
+      "pr": "https://github.com/medicinalElJefe/OMEGAv6/pull/433",
+      "mergeSha": "12b325980fc1f4cf0240143e9ea79cb837564adf",
+      "workflow": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34174451810",
+      "workerVersion": "de3389b2-3c50-4438-8973-8d78bffeb38e",
+      "canonicalAgentSha256": "0afd227389bcbebdb8c1aac6601c366064fcd87ba8ffe46df3427ef886a44b54",
+      "immutableBaseSha256": "49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046",
+      "summary": "Restored R117/R141 compatibility while keeping the active direct immutable-base path and added independent live base verification.",
+      "residual": "Live base SHA matched exactly, but the verifier compared a fetched string directly to a Node Buffer."
+    },
+    {
+      "revision": "R207.2",
+      "state": "CANDIDATE_IN_PROGRESS",
+      "releaseClean": false,
+      "branch": "https://github.com/medicinalElJefe/OMEGAv6/tree/r207-2-live-byte-verifier-repair",
+      "summary": "Compare wrapper and immutable-base assets as raw bytes with Buffer.equals while retaining independent SHA-256 equality.",
+      "requiredBeforeCompletion": [
+        "R170_CURRENT_CONVERGENCE_PASS",
+        "R202_SOURCE_AUTHORITY_PASS",
+        "FULL_CLOUD_BRIDGE_PASS",
+        "WRANGLER_DRY_RUN_PASS",
+        "CLOUDFLARE_AUTH_PASS",
+        "EXACT_CANDIDATE_BROWSER_PASS",
+        "GUARDED_TWO_PARENT_MERGE",
+        "PRODUCTION_DEPLOYMENT_PASS",
+        "LIVE_R202_BYTE_PROOF_PASS",
+        "LEDGER_FINAL_ENTRY"
+      ]
+    }
+  ],
+  "truthBoundaries": [
+    "CURRENT_PC_ONLINE_REQUIRES_CURRENT_AUTHENTICATED_NON_REVOKED_HEARTBEAT",
+    "SAI_PROPOSAL_IS_NOT_EXECUTION",
+    "HYBRID_HELD_DRAFT_IS_NOT_QUEUE_OR_DISPATCH",
+    "RETURNED_IS_NOT_R141_VERIFIED",
+    "R146_IS_DURABLE_EXECUTION_HISTORY",
+    "R147_IS_EXECUTOR_SELECTION_AND_DISPATCH_AUTHORITY",
+    "EXECUTION_SUCCESS_IS_NOT_AUTOMATIC_FACTUAL_OR_SCIENTIFIC_TRUTH",
+    "R125_REMAINS_SOLE_CANONSTATE_ADMISSION_AUTHORITY",
+    "DERIVED_EVIDENCE_MAY_NOT_SELF_CONFIRM_INDEPENDENT_EMPIRICAL_EVIDENCE"
+  ]
+}
