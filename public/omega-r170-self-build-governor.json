@@ -1,16 +1,17 @@
 {
   "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
-  "revision": "R170.3",
+  "revision": "R170.4",
   "authority": "OMEGAV6",
   "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
   "engineRevision": "R170.2",
-  "currentCapabilityFloor": "R210",
+  "currentCapabilityFloor": "R223",
   "promotedSuccessorContinuity": ["R175", "R176", "R177", "R178", "R179", "R180"],
-  "postR180ProofContinuity": ["R200", "R200.1", "R202", "R210"],
+  "postR180ProofContinuity": ["R200", "R200.1", "R202", "R210", "R223"],
   "activeWorkflowAuthority": {
     "productionDeploy": ".github/workflows/ci.yml",
     "currentConvergence": ".github/workflows/r170-current-convergence.yml",
     "autonomousProposal": ".github/workflows/r170-governed-selfbuild.yml",
+    "cloudEvolutionProofAndProvisioning": ".github/workflows/r223-cloudflare-evolution.yml",
     "specializedCore": [
       ".github/workflows/r168-1-rcwa-byte-diagnostic.yml",
       ".github/workflows/r168-genesis-r192-attestation.yml",
@@ -27,7 +28,7 @@
     "autoMergeAllowed": false,
     "focusedInvariantRequired": true,
     "dynamicProofRunner": "scripts/prove_successor_workflow_invariants_r175.mjs",
-    "policy": "Post-R170 successor proof workflows may remain active only as read-only PR or isolated feature-branch authorities. Each must expose and pass a focused revision invariant. They may not schedule themselves, push-trigger on main, gain write permissions, recursively dispatch workflows, merge PRs, or directly mutate main."
+    "policy": "Post-R170 successor GitHub workflows may remain active only as read-only proof or explicit workflow_dispatch infrastructure authorities. They may not schedule themselves, push-trigger on main, gain repository write permissions, recursively dispatch workflows, merge PRs, or directly mutate main. R223 CLOUD-01 recurring execution lives in Cloudflare, not GitHub Actions."
   },
   "historicalWorkflowArchive": {
     "sourceCommitSha": "b4b939552085f3f63297d33d51878c97e3c43c0d",
@@ -52,8 +53,10 @@
     "highOrCriticalAutoRepair": false,
     "residualAuthority": "R164",
     "successorContinuityProof": "scripts/prove_successor_workflow_invariants_r175.mjs",
-    "latestExplicitSuccessorProof": "tests/r210-forward-live-truth-invariants.mjs",
-    "canonicalAdmissionAuthority": "R125"
+    "latestExplicitSuccessorProof": "tests/r223-cloudflare-evolution-invariants.mjs",
+    "canonicalAdmissionAuthority": "R125",
+    "cloudEvolutionMachine": "CLOUD-01",
+    "cloudEvolutionHost": "CLOUDFLARE_WORKER"
   },
   "preservedRuntime": {
     "canonicalWorkerSpine": "R116",
@@ -70,8 +73,9 @@
     "livingWorldExecutionDispatch": "R180_EXPLICIT_DISPATCH_R147_AUTHORITY",
     "deployedBrowserProof": "R200.1_EXACT_PROMOTED_SHA",
     "operationalSourceAuthority": "R202_READ_ONLY_PROVENANCE_AND_LIFECYCLE_PROJECTION",
-    "liveTruthRecovery": "R210_FORWARD_ONLY_REFRESH_AND_RUNTIME_VERSION_REANCHOR"
+    "liveTruthRecovery": "R210_FORWARD_ONLY_REFRESH_AND_RUNTIME_VERSION_REANCHOR",
+    "autonomousEvolution": "R223_CLOUD_01_CLOUDFLARE_GITHUB_PORTAL"
   },
   "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
-  "truthBoundary": "R170.3 uses an hourly low-cost observation pulse and may propose exactly one predefined low/medium-risk source candidate only when the exact current main SHA has a completed successful canonical production Cloud Bridge push run, no parallel self-build candidate is open, current residual evidence is non-blocking, and the current read-only successor proof chain through R210 proves before generation. R175→R180 remains the living-world intent/mission/contract/authorization/dispatch chain, with R180 dispatching only separately confirmed R179 AUTHORIZED runs through existing R147 authority. R200/R200.1 add exact rendered browser proof, R202 adds read-only operational/source-authority convergence, and R210 adds forward-only live-truth refresh/recovery; none creates execution or Canon authority. R211 pre-render lineage is an application proof layer carried by current main and remains separately bounded from renderer execution. Expensive dependency installation, inherited regression, and Worker dry-runs run only for a PROPOSE candidate, which is then re-proved before an isolated PR is opened. Hybrid/Build remains held without separate host execution confirmation. R170.3 cannot directly mutate main, auto-merge, recursively dispatch workflows, repair HIGH/CRITICAL truth gaps autonomously, claim a PC online without current proof, elevate R153.2 beyond SCREEN_ONLY, claim the protected Living Light Vercel surface writable, or admit CanonState outside R125."
+  "truthBoundary": "R170.4 preserves the bounded R170 source-capsule law while R223 moves recurring autonomous evolution execution off GitHub Actions and into singleton Cloudflare Worker CLOUD-01. CLOUD-01 may inspect exact-current-main production proof and live residual evidence, reconcile already-merged capsule targets, generate one dependency-ready low/medium-risk source candidate on an isolated cloud/evolution branch, open a GitHub PR, and merge only an exact-head candidate whose required GitHub proof stack is fully green on an unchanged exact base. GitHub remains the development/proof portal. The R223 GitHub workflow is read-only except for explicit workflow_dispatch infrastructure provisioning and has no main push trigger. Canonical OMEGA production deployment remains exclusively ci.yml. R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable execution-history authority, R141 exact Hybrid return-proof authority, and R201/R203 remain retired tombstones. No PC-online, solver-validity, renderer-validity, federation-closure, empirical, or Canon claim may be synthesized."
 }

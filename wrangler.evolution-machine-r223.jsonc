@@ -1,0 +1,19 @@
+// CLOUD-01 is an ancillary autonomous source-evolution Worker. It may create governed GitHub source candidates but it is not OMEGA production deployment authority. Canonical production remains ci.yml -> wrangler.jsonc.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "omega-evolution-machine-r223",
+  "main": "cloudflare/workerR223.js",
+  "compatibility_date": "2026-08-28",
+  "workers_dev": true,
+  "preview_urls": true,
+  "triggers": {
+    "crons": ["17 * * * *"]
+  },
+  "vars": {
+    "OMEGA_GITHUB_REPO": "medicinalElJefe/OMEGAv6",
+    "OMEGA_PUBLIC_URL": "https://omegav6.jeffdeweyeljefe.workers.dev"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
