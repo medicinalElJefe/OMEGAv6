@@ -1,0 +1,52 @@
+{
+  "schema": "OMEGA_ADVANCEMENT_LEDGER_INDEX_V1",
+  "policyRevision": "R207.3",
+  "recordType": "LIVE_LEDGER_INDEX_AND_COMPLETION_POLICY",
+  "canonicalHumanLedger": "https://github.com/medicinalElJefe/OMEGAv6/issues/435",
+  "repositoryPolicy": "https://github.com/medicinalElJefe/OMEGAv6/blob/main/docs/OMEGA_ADVANCEMENT_LEDGER.md",
+  "canonicalRuntime": "https://omegav6.jeffdeweyeljefe.workers.dev/",
+  "proofLinks": {
+    "coreHealth": "https://omegav6.jeffdeweyeljefe.workers.dev/api/core-health",
+    "hybridStatus": "https://omegav6.jeffdeweyeljefe.workers.dev/api/hybrid/status",
+    "operationalSourceAuthority": "https://omegav6.jeffdeweyeljefe.workers.dev/omega-operational-source-authority-r202.html",
+    "buildReceipt": "https://omegav6.jeffdeweyeljefe.workers.dev/omega-build-receipt.json"
+  },
+  "completionFields": [
+    "REVISION_AND_PURPOSE",
+    "CANDIDATE_SHA",
+    "CANONICAL_MERGE_SHA",
+    "PULL_REQUEST_LINK",
+    "CI_AND_PRODUCTION_WORKFLOW_LINK",
+    "WORKER_VERSION_WHEN_DEPLOYED",
+    "LIVE_RUNTIME_AND_PROOF_LINKS",
+    "WHAT_CHANGED",
+    "WHAT_WAS_PROVEN",
+    "RESIDUALS_OR_FAILED_POST_CHECKS",
+    "NEXT_GOVERNED_BOUNDARY"
+  ],
+  "stateLaw": "DEPLOYED_IS_NOT_RELEASE_CLEAN_UNLESS_ALL_REQUIRED_POST_DEPLOYMENT_PROOFS_PASS",
+  "concurrencyLaw": "SUPERSEDED_OR_DIVERGED_CANDIDATES_ARE_RECORDED_AND_CLOSED_NOT_SILENTLY_OVERWRITTEN",
+  "updateLaw": "THE_GITHUB_LEDGER_IS_UPDATED_AFTER_PRODUCTION_PROOF_WITHOUT_REQUIRING_A_SECOND_DEPLOYMENT",
+  "productionBaselineAtPolicyCreation": {
+    "revision": "R207.2",
+    "state": "RELEASE_CLEAN_PRODUCTION_PROVEN",
+    "pr": "https://github.com/medicinalElJefe/OMEGAv6/pull/434",
+    "mergeSha": "3935eacd40297af8b365b6c8a371164da4ed21c3",
+    "workflow": "https://github.com/medicinalElJefe/OMEGAv6/actions/runs/34177695039",
+    "workerVersion": "a5a7fda4-376f-4749-9ad2-383a213b88e4",
+    "canonicalAgentSha256": "0afd227389bcbebdb8c1aac6601c366064fcd87ba8ffe46df3427ef886a44b54",
+    "r141WrapperSha256": "5f48b5ef6c51a0dd4c92bffe1d5ca0ecd639d0794f05f7fd5ca3082093ab6f86",
+    "immutableR205BaseSha256": "49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046"
+  },
+  "truthBoundaries": [
+    "CURRENT_PC_ONLINE_REQUIRES_CURRENT_AUTHENTICATED_NON_REVOKED_HEARTBEAT",
+    "SAI_PROPOSAL_IS_NOT_EXECUTION",
+    "HYBRID_HELD_DRAFT_IS_NOT_QUEUE_OR_DISPATCH",
+    "RETURNED_IS_NOT_R141_VERIFIED",
+    "R146_IS_DURABLE_EXECUTION_HISTORY",
+    "R147_IS_EXECUTOR_SELECTION_AND_DISPATCH_AUTHORITY",
+    "EXECUTION_SUCCESS_IS_NOT_AUTOMATIC_FACTUAL_OR_SCIENTIFIC_TRUTH",
+    "R125_REMAINS_SOLE_CANONSTATE_ADMISSION_AUTHORITY",
+    "DERIVED_EVIDENCE_MAY_NOT_SELF_CONFIRM_INDEPENDENT_EMPIRICAL_EVIDENCE"
+  ]
+}
