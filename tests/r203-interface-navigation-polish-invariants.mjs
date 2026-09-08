@@ -17,7 +17,7 @@ assert.ok(!css.includes('display:none!important}.r94-rail-action'),'R203 must no
 assert.ok(nav.includes('OMEGA_ALL_ROUTES_R82'),'R203 must retain the complete authoritative route registry');
 assert.ok(nav.includes('onNavigate(panel)'),'R203 must retain the existing navigation dispatch path');
 assert.ok(nav.includes("if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')"),'R203 must retain command-search navigation shortcut');
-assert.ok(nav.includes("if(e.key==='Escape')setExpanded(false)"),'R203 must retain navigator escape behavior');
+assert.ok(/if\(e\.key==='Escape'\)\s*\{?\s*setExpanded\(false\)/.test(nav),'R203 must retain navigator escape behavior across later accessibility/navigation convergence');
 assert.ok(nav.includes("onClick={()=>go(route)}"),'R203 must keep every registered route directly navigable');
 
 assert.ok(workstation.includes("export const OMEGA_SURFACES=['Command Center'"),'R203 must preserve complete workstation surface authority');
