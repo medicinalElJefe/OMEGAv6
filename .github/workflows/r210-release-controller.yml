@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: omega-r210-release-controller-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   candidate-fence:
