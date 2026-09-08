@@ -9,6 +9,7 @@ on:
       - 'src/livingWorldPulseR174.css'
       - 'src/interfacePolishR203.css'
       - 'src/MissionWorldContinuityR206.tsx'
+      - 'src/LivingTerrainSurfaceR225.tsx'
       - 'src/missionWorldContinuityR206.css'
       - 'src/world/missionWorldHeadBindingR208.ts'
       - 'src/world/renderIntentLineageR211.js'
@@ -43,6 +44,7 @@ on:
       - 'tests/r221-canonical-elevation-runtime-bridge-invariants.mjs'
       - 'tests/r222-source-backed-terrain-visual-invariants.mjs'
       - 'tests/r224-living-source-terrain-experience-invariants.mjs'
+      - 'tests/r225-living-world-terrain-surface-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -59,6 +61,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R225 canonical Living World terrain interaction
+        run: node tests/r225-living-world-terrain-surface-invariants.mjs
       - name: Prove R224 operator-invokable Living World source terrain experience
         run: node tests/r224-living-source-terrain-experience-invariants.mjs
       - name: Prove R222 source-backed terrain visual projection
