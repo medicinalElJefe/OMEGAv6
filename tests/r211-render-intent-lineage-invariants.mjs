@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {compileRenderIntentLineageR211,manifestR211} from '../src/world/renderIntentLineageR211.js';
+
+const hash='a'.repeat(64),ground='b'.repeat(64),op='c'.repeat(64),carry='d'.repeat(64),world='e'.repeat(64);
+const input={mission:{id:'m-1',returnPacket:{proof_status:'VERIFIED'}},anchor:{carryHash:carry,previousMissionId:'m-0'},binding:{operationSha256:op,previousWorldHeadSha256:world},scene:{eventAccepted:true,renderInputReady:true,earthHash:hash,groundHash:ground,evidenceDigest:`${hash}.${ground}`}};
+const a=await compileRenderIntentLineageR211(input),b=await compileRenderIntentLineageR211(input);
+assert.equal(a.state,'RENDER_INTENT_LINEAGE_READY');
+assert.equal(a.lineageSha256,b.lineageSha256,'same mission/world/evidence input must produce stable lineage');
+assert.match(a.lineageSha256,/^[a-f0-9]{64}$/);
+assert.equal(a.renderedFrame,false);assert.equal(a.renderReceipt,false);assert.equal(a.computedPhotorealRealityProved,false);assert.equal(a.solverValidityProved,false);assert.equal(a.nativeExecutionClaimed,false);assert.equal(a.federationClosureProved,false);assert.equal(a.canonicalMutation,false);assert.equal(a.canonicalAdmissionAuthority,'R125');
+const changed=await compileRenderIntentLineageR211({...input,scene:{...input.scene,groundHash:'f'.repeat(64)}});
+assert.notEqual(changed.lineageSha256,a.lineageSha256,'evidence change must change pre-render identity');
+const held=await compileRenderIntentLineageR211({mission:input.mission,anchor:input.anchor,binding:input.binding,scene:{renderInputReady:false}});
+assert.equal(held.state,'HELD_FOR_PROOF');assert.ok(held.missing.includes('EARTH_EVIDENCE_HASH'));assert.ok(held.missing.includes('GROUND_EVIDENCE_HASH'));assert.ok(held.missing.includes('R122_INPUT_READY'));
+const manifest=manifestR211();assert.equal(manifest.authority.newRenderer,false);assert.equal(manifest.authority.newExecutor,false);assert.equal(manifest.authority.newPersistenceAuthority,false);assert.equal(manifest.authority.newFederationAuthority,false);assert.equal(manifest.authority.newCanonAuthority,false);assert.equal(manifest.authority.computedReality,'R122');assert.equal(manifest.authority.canonicalAdmission,'R125');
+const ui=fs.readFileSync('src/MissionWorldContinuityR206.tsx','utf8');
+for(const token of ['compileRenderIntentLineageR211','R204 → R206 → R208 → R211','PRE-RENDER LINEAGE','COMPUTED PHOTOREAL REALITY UNPROVEN','Federation receipt-gated'])assert.ok(ui.includes(token),`missing UI truth token ${token}`);
+for(const forbidden of ['renderReceipt:true','computedPhotorealRealityProved:true','solverValidityProved:true','nativeExecutionClaimed:true','canonicalMutation:true'])assert.ok(!fs.readFileSync('src/world/renderIntentLineageR211.js','utf8').includes(forbidden),`R211 must not overclaim ${forbidden}`);
+console.log('R211 RENDER INTENT LINEAGE PASS · mission/world/evidence receive deterministic pre-render identity without renderer/PC/federation/solver/photoreal/Canon overclaim');
