@@ -1,3 +1,4 @@
+import './r229-cloudflare-tombstone-reconciliation-invariants.mjs';
 import fs from 'node:fs';
 import {deriveSpecialistPrefetchPolicyR110,selectWorkingSetPanelsR110,WORKING_SET_POLICY_TRUTH_R110} from '../src/specialistWorkingSetPolicyR110.js';
 const read=p=>fs.readFileSync(p,'utf8');
