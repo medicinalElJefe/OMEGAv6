@@ -3,32 +3,44 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>SAR Accumulation Studio</title>
+<meta name="color-scheme" content="dark" />
+<title>OMEGA SAR Accumulation Studio</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 <header>
-  <div><b>OMEGA · SAR ACCUMULATION STUDIO</b><span class="tag">MEASURED-FIRST</span></div>
-  <div class="sub">Acquisition chronology · accumulated footprint evidence · revisit analysis · deterministic provenance</div>
+  <div class="brand"><b>OMEGA · SAR ACCUMULATION STUDIO</b><span class="tag">MEASURED-FIRST</span><span class="tag" id="liveTag">LIVE READY</span></div>
+  <div class="sub">Acquisition chronology · actual Sentinel-1 GRD pixels · NISAR/ASF evidence · revisit · temporal stack · deterministic provenance</div>
+  <div class="head-status"><span>Clock <b id="wallClock">—</b></span><span>Source <b id="sourceBadge">NONE</b></span><span>Latest data <b id="freshness">—</b></span></div>
 </header>
 <main>
   <aside class="controls">
-    <section><h2>Authoritative search</h2>
+    <section><h2>Evidence source</h2>
+      <label>Source<select id="sourceMode"><option value="stac">Sentinel-1 actual GRD COG · Earth Search/AWS</option><option value="asf">ASF mission catalog · Sentinel-1 / NISAR</option></select></label>
       <label>Dataset<select id="dataset"><option>SENTINEL-1</option><option>NISAR</option></select></label>
       <div class="two"><label>Start<input id="start" type="date"></label><label>End<input id="end" type="date"></label></div>
-      <label>Processing level<input id="level" placeholder="e.g. SLC, GRD, GCOV, GSLC"></label>
+      <label>Processing level<input id="level" placeholder="SLC, GRD_HD, GCOV, GSLC…"></label>
       <label>Data maturity<select id="maturity"><option value="">Any</option><option>PROVISIONAL</option><option>BETA</option></select></label>
       <label>Flight direction<select id="direction"><option value="">Any</option><option>ASCENDING</option><option>DESCENDING</option></select></label>
       <div class="two"><label>Polarization<input id="polarization" placeholder="VV+VH"></label><label>Relative orbit<input id="relativeOrbit" placeholder="track"></label></div>
-      <label>AOI WKT<input id="aoi" placeholder="point(-110.92 32.22) or polygon((...))"></label>
-      <label>Max results<input id="maxResults" type="number" min="1" max="10000" value="3000"></label>
-      <div class="buttons"><button id="load">Load ASF</button><button id="preview" class="quiet">Preview URL</button></div>
-      <label class="file">Or import ASF/GeoJSON<input id="file" type="file" accept=".json,.geojson,application/geo+json,application/json"></label>
+      <label>AOI WKT<input id="aoi" placeholder="POINT(-110.92 32.22) or POLYGON((...))"></label>
+      <label>Max results<input id="maxResults" type="number" min="1" max="5000" value="500"></label>
+      <div class="buttons"><button id="load">Load live</button><button id="preview" class="quiet">Preview request</button></div>
+      <label class="file">Import ASF/GeoJSON<input id="file" type="file" accept=".json,.geojson,application/geo+json,application/json"></label>
       <div id="status">Ready. No observations loaded.</div>
     </section>
-    <section><h2>Semantics</h2>
-      <p><b>Footprint ≠ radar pixel.</b> Accumulated geometry indicates catalog/product coverage only.</p>
-      <p><b>Animation ≠ new observation.</b> Only acquisition timestamps advance the evidence ledger.</p>
+
+    <section><h2>Continuous refresh</h2>
+      <label class="inline-check"><input id="liveRefresh" type="checkbox"> Poll source for newly published acquisitions</label>
+      <label>Refresh interval<select id="refreshInterval"><option value="60000">1 minute</option><option value="300000" selected>5 minutes</option><option value="900000">15 minutes</option></select></label>
+      <p>The refresh loop only adds source records. It never synthesizes observations between acquisitions.</p>
+    </section>
+
+    <section><h2>Truth semantics</h2>
+      <p><b>Footprint ≠ radar pixel.</b> Footprint accumulation is coverage geometry.</p>
+      <p><b>Browse ≠ measurement raster.</b> ASF browse imagery is supporting visualization only.</p>
+      <p><b>COG pixel = measured GRD value.</b> Display stretch is visual; radiometric calibration is not claimed unless explicitly supplied.</p>
+      <p><b>Animation ≠ new observation.</b> Acquisition timestamps are the only observation clock.</p>
       <ul id="warnings"></ul>
     </section>
   </aside>
@@ -38,24 +50,52 @@
       <button id="prev">◀</button><button id="play">Play</button><button id="next">▶</button>
       <input id="timeline" type="range" min="0" max="0" value="0">
       <span id="frameIndex">0 / 0</span>
-      <label>Playback<select id="mode"><option value="accumulate">Accumulate</option><option value="single">Single acquisition</option></select></label>
-      <label>Layer<select id="visual"><option value="footprints">Footprints</option><option value="density">Overlap emphasis</option></select></label>
-      <label>Speed<input id="speed" type="range" min="50" max="1000" value="750"></label>
+      <label>View<select id="mode"><option value="accumulate">Accumulate evidence</option><option value="single">Single acquisition</option></select></label>
+      <label>Motion<select id="playbackMode"><option value="event">Event-step</option><option value="temporal">Time-proportional</option></select></label>
+      <label>Warp<select id="timeWarp"><option value="3600">1 h / s</option><option value="21600">6 h / s</option><option value="86400" selected>1 d / s</option><option value="604800">7 d / s</option><option value="2592000">30 d / s</option></select></label>
+      <label>Coverage<select id="visual"><option value="footprints">Chronological depth</option><option value="density">Overlap density</option></select></label>
+      <label>Step speed<input id="speed" type="range" min="50" max="1000" value="720"></label>
       <button id="export">Export proof manifest</button>
     </div>
-    <div class="map-wrap"><canvas id="map"></canvas><div class="map-note">WGS84 lon/lat evidence view · drag to pan · wheel to zoom · click a point for revisit statistics</div></div>
+
+    <div class="map-wrap"><canvas id="map"></canvas><div class="map-note">WGS84 evidence plane · drag pan · wheel zoom · click for revisit + pixel stack probe</div></div>
+
     <div class="stats">
       <div><span>Visible observations</span><b id="obsCount">0</b></div>
       <div><span>Current UTC</span><b id="currentTime">—</b></div>
       <div><span>Evidence grade</span><b id="grade">—</b><small id="gradeReason">No acquisition selected</small></div>
-      <div><span>Platform/product</span><b id="platform">—</b></div>
+      <div><span>Platform / product</span><b id="platform">—</b></div>
       <div><span>Orbit</span><b id="orbit">—</b></div>
-      <div><span>Scene/product</span><b id="currentScene">—</b></div>
+      <div><span>Scene / product</span><b id="currentScene">—</b></div>
+      <div><span>Median cadence</span><b id="medianCadence">—</b></div>
+      <div><span>Pixel-ready scenes</span><b id="pixelReady">0</b></div>
     </div>
+
+    <div class="evidence-grid">
+      <section class="pixel-panel"><div class="section-head"><h2>Actual measurement raster</h2><div><select id="assetSelect"></select><button id="loadRaster">Load current COG</button></div></div>
+        <div class="pixel-stage"><canvas id="raster"></canvas><div id="rasterEmpty">No actual COG raster loaded.</div></div>
+        <div class="raster-stats" id="rasterStats">Actual Sentinel-1 GRD values appear here when the selected record exposes a public COG asset.</div>
+      </section>
+      <section class="browse-panel"><div class="section-head"><h2>Source browse / preview</h2><span class="micro">supporting visualization</span></div>
+        <div class="browse-stage"><img id="browseImage" alt="Source browse preview" referrerpolicy="no-referrer"><div id="browseEmpty">No source browse image for this acquisition.</div></div>
+        <div id="browseCaption" class="raster-stats">Browse pixels are never promoted to calibrated measurement evidence.</div>
+      </section>
+    </div>
+
     <div class="lower">
-      <section><h2>Point revisit probe</h2><div class="probe"><span>Point <b id="point">click map</b></span><span>Hits <b id="pointHits">0</b></span><span>First <b id="pointFirst">—</b></span><span>Last <b id="pointLast">—</b></span><span>Mean interval <b id="pointMean">—</b></span></div></section>
-      <section><h2>Acquisition ledger</h2><div class="table-wrap"><table><thead><tr><th>#</th><th>UTC</th><th>Platform</th><th>Level</th><th>Pass</th><th>Rel orbit</th><th>Grade</th><th>Product</th></tr></thead><tbody id="rows"></tbody></table></div></section>
-      <details><summary>Exact ASF query</summary><code id="queryPreview"></code></details>
+      <section><h2>Point revisit + temporal pixel probe</h2>
+        <div class="probe"><span>Point <b id="point">click map</b></span><span>Coverage hits <b id="pointHits">0</b></span><span>First <b id="pointFirst">—</b></span><span>Last <b id="pointLast">—</b></span><span>Mean interval <b id="pointMean">—</b></span><button id="probeStack" disabled>Probe actual pixel stack</button></div>
+        <div id="pixelProbeStatus" class="micro">Pixel probing is available for loaded EPSG:4326 COG scenes.</div>
+        <div class="probe-chart"><canvas id="probeChart"></canvas></div>
+      </section>
+
+      <section><h2>Chronology diagnostics</h2>
+        <div class="diagnostics"><span>Span <b id="spanMetric">—</b></span><span>Mean cadence <b id="meanCadence">—</b></span><span>Longest gap <b id="maxGap">—</b></span><span>Anomalous gaps <b id="anomalyCount">0</b></span><span>Grades <b id="gradeMix">—</b></span></div>
+        <div id="gapList" class="micro"></div>
+      </section>
+
+      <section><h2>Acquisition ledger</h2><div class="table-wrap"><table><thead><tr><th>#</th><th>UTC</th><th>Platform</th><th>Level</th><th>Pass</th><th>Rel orbit</th><th>Grade</th><th>Pixels</th><th>Product</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+      <details><summary>Exact source request / query</summary><code id="queryPreview"></code></details>
     </div>
   </section>
 </main>
