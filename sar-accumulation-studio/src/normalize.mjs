@@ -42,6 +42,12 @@ function maturityOf(props) {
   return v ? String(v).toUpperCase() : null;
 }
 
+function firstBrowse(props) {
+  const b = FIRST(props.browse, props.browseURL, props.browseUrl, props.thumbnail, props.thumbnailUrl);
+  if (Array.isArray(b)) return b.find(Boolean) || null;
+  return b || null;
+}
+
 export function evidenceGrade({ geometry, startTime, source, properties }) {
   if (!geometry || !startTime) return { grade: "C", reason: "Missing authoritative footprint or acquisition time" };
   if (truthyPreciseOrbit(properties)) return { grade: "A", reason: "Footprint/time present and precise-orbit evidence declared in source metadata" };
@@ -71,6 +77,16 @@ export function normalizeFeature(feature, source = {}) {
     startTime,
     stopTime,
     geometry,
+    browse: firstBrowse(p),
+    downloadUrl: FIRST(p.url, p.downloadUrl, p.productUrl, null),
+    dataAssets: {},
+    projection: null,
+    measurement: {
+      kind: 'CATALOG_FOOTPRINT',
+      actualPixelsAvailable: false,
+      radiometricCalibrationClaimed: false,
+      interpretation: 'Catalog/product footprint only. Browse imagery, when present, is supporting visualization and is not treated as a georeferenced measurement raster.'
+    },
     source: {
       authority: source.authority || "IMPORTED",
       endpoint: source.endpoint || null,
