@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {ChevronLeft,ChevronRight,Home,Layers3,Menu,Orbit,Search,ShieldCheck,Sparkles,Waypoints} from 'lucide-react';
 import {CAPABILITY_REALITY_LABEL} from './capabilityAuthority';
 import {effectiveCapabilityReality} from './operationalCapabilityRuntimeR45';
@@ -13,12 +13,14 @@ import './extremeLayerIntegrityR104.css';
 import './dataTruthNavigationR105.css';
 import './omegaSideNavigatorR120.css';
 import './wholeSystemExperienceR132.css';
+import './omegaSideNavigatorR210.css';
 
 type BrowserLayer='EVERYWHERE'|'SOFTWARE';
 type WorkspaceFilter='ALL'|OmegaWorkspaceIdR82;
 type Props={currentPanel?:string;onNavigate:(panel:string)=>void;onHome?:()=>void};
 
 export const R88_ALL_ROUTES=OMEGA_ALL_ROUTES_R82;
+export const R210_NAV_REVISION='R210';
 const routeMark=(name:string)=>{const words=name.split(/\s+/).filter(Boolean);return words.map((x,i)=>i<2?x[0]:'').join('').toUpperCase()||'Ω'};
 const validWorkspace=(value:any):value is OmegaWorkspaceIdR82=>OMEGA_WORKSPACES_R82.some(w=>w.id===value);
 const storedWorkspace=():WorkspaceFilter=>{try{const value=localStorage.getItem('omega.r82.workspace');return validWorkspace(value)?value:'ALL'}catch{return'ALL'}};
@@ -26,13 +28,15 @@ const storedRailWide=()=>{try{return localStorage.getItem('omega.r120.navWide')=
 
 export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome}:Props){
  const[expanded,setExpanded]=useState(false),[railWide,setRailWide]=useState(storedRailWide),[layer,setLayer]=useState<BrowserLayer>('EVERYWHERE'),[query,setQuery]=useState(''),[workspaceFilter,setWorkspaceFilter]=useState<WorkspaceFilter>('ALL');
+ const shellRef=useRef<HTMLElement|null>(null),searchRef=useRef<HTMLInputElement|null>(null);
  const operationAudit=useMemo(()=>auditAuthoritativeOperationChainR143(),[]);
  useEffect(()=>{
   const openNavigator=(e:Event)=>{const detail=(e as CustomEvent<{layer?:'APPLICATIONS'|'SOFTWARE'|'EVERYWHERE';workspace?:OmegaWorkspaceIdR82}>).detail;if(detail?.layer==='SOFTWARE'){setLayer('SOFTWARE');setWorkspaceFilter('ALL')}else{setLayer('EVERYWHERE');const requested=validWorkspace(detail?.workspace)?detail?.workspace:detail?.layer==='APPLICATIONS'?storedWorkspace():'ALL';setWorkspaceFilter(requested)}setQuery('');setExpanded(true)};
-  const key=(e:KeyboardEvent)=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setExpanded(true)}if((e.metaKey||e.ctrlKey)&&e.shiftKey&&e.key.toLowerCase()==='m'){e.preventDefault();setRailWide(v=>!v)}if(e.key==='Escape')setExpanded(false)};
+  const key=(e:KeyboardEvent)=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setExpanded(true)}if((e.metaKey||e.ctrlKey)&&e.shiftKey&&e.key.toLowerCase()==='m'){e.preventDefault();setRailWide(v=>!v)}if(e.key==='Escape'){setExpanded(false)}};
   window.addEventListener('omega-r88-open-navigator',openNavigator as EventListener);window.addEventListener('keydown',key);
   return()=>{window.removeEventListener('omega-r88-open-navigator',openNavigator as EventListener);window.removeEventListener('keydown',key)};
  },[]);
+ useEffect(()=>{if(!expanded)return;const id=requestAnimationFrame(()=>searchRef.current?.focus({preventScroll:true}));const outside=(e:PointerEvent)=>{const target=e.target as Node|null;if(target&&!shellRef.current?.contains(target))setExpanded(false)};document.addEventListener('pointerdown',outside);return()=>{cancelAnimationFrame(id);document.removeEventListener('pointerdown',outside)}},[expanded,layer]);
  useEffect(()=>{document.documentElement.dataset.omegaNavPresent='true';document.documentElement.dataset.omegaNavExpanded=expanded?'true':'false';return()=>{delete document.documentElement.dataset.omegaNavPresent;delete document.documentElement.dataset.omegaNavExpanded}},[expanded]);
  useEffect(()=>{document.documentElement.dataset.omegaNavWide=railWide?'true':'false';try{localStorage.setItem('omega.r120.navWide',String(railWide))}catch{}return()=>{delete document.documentElement.dataset.omegaNavWide}},[railWide]);
  const activeWorkspace=workspaceFilter==='ALL'?null:OMEGA_WORKSPACES_R82.find(w=>w.id===workspaceFilter)||null;
@@ -40,9 +44,9 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
  const go=(panel:string)=>{onNavigate(panel);setExpanded(false);setQuery('')};
  const open=(next:BrowserLayer)=>{setLayer(next);setExpanded(true)};
  const currentWorkspace=currentPanel?workspaceForRouteR82(currentPanel as any):null,currentOrganization=currentPanel?organizationForRouteR132(currentPanel):null,routeCount=OMEGA_ROUTE_INVENTORY_R107.currentCount;
- return <aside className={'r94-side-toolbar '+(expanded?'expanded':'collapsed')+' '+(railWide?'rail-wide':'rail-compact')+' r100-professional-nav r104-readable-nav r105-context-nav r120-adaptive-nav r132-organized-nav'} aria-label='OMEGA global navigation toolbar' data-operation-chain='R143' data-operation-chain-pass={operationAudit.pass?'true':'false'}>
+ return <aside ref={shellRef} className={'r94-side-toolbar '+(expanded?'expanded':'collapsed')+' '+(railWide?'rail-wide':'rail-compact')+' r100-professional-nav r104-readable-nav r105-context-nav r120-adaptive-nav r132-organized-nav r210-converged-nav'} aria-label='OMEGA global navigation toolbar' data-operation-chain='R143' data-operation-chain-pass={operationAudit.pass?'true':'false'} data-navigation-revision={R210_NAV_REVISION}>
   <div className='r94-nav-rail'>
-   <button className='r88-navigator-trigger r100-rail-cap' onClick={()=>{setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setExpanded(v=>!v)}} aria-label={expanded?'Collapse OMEGA navigator':'Expand OMEGA navigator'} aria-expanded={expanded}>
+   <button className='r88-navigator-trigger r100-rail-cap' onClick={()=>{setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setExpanded(v=>!v)}} aria-label={expanded?'Collapse OMEGA navigator':'Expand OMEGA navigator'} aria-expanded={expanded} aria-controls='omega-global-navigator'>
     <span className='r100-omega-mark'>Ω</span><small>MENU</small><b>{routeCount}</b>
    </button>
    <button className='r120-rail-width-toggle' onClick={()=>setRailWide(v=>!v)} aria-label={railWide?'Narrow side toolbar':'Widen side toolbar to show full labels'} aria-pressed={railWide} title={railWide?'Use compact toolbar':'Widen toolbar'}><ChevronRight/><span>{railWide?'COMPACT':'WIDE MENU'}</span><kbd>Ctrl⇧M</kbd></button>
@@ -57,9 +61,9 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
    <button className={'r94-rail-action '+(layer==='SOFTWARE'&&expanded?'active':'')} onClick={()=>{setWorkspaceFilter('ALL');open('SOFTWARE')}} aria-label='Browse full software and capability map' title='Software'><Layers3/><span>SYS</span></button>
    <div className='r94-rail-current r100-rail-current' title={currentPanel||'OMEGA'}><i/><small>ACTIVE</small><b>{railWide?(currentPanel||'OMEGA'):routeMark(currentPanel||'OMEGA')}</b></div>
   </div>
-  <section className='r88-navigator r89-flat-navigator r94-nav-panel r100-nav-panel r104-nav-panel' aria-hidden={!expanded}>
+  <section id='omega-global-navigator' className='r88-navigator r89-flat-navigator r94-nav-panel r100-nav-panel r104-nav-panel' aria-label='OMEGA destination browser' aria-hidden={!expanded}>
    <header className='r88-navigator-head r100-navigator-head r104-navigator-head'>
-    <div><span>OMEGA V6 · INSTRUMENT OS · R143 OPERATION CHAIN</span><b>{layer==='EVERYWHERE'?(activeWorkspace?`${activeWorkspace.label} tools`:'Everywhere'):'Software / capability map'}</b><small>{layer==='EVERYWHERE'?(`${rows.length}/${routeCount} registered destinations visible · ${operationAudit.mappedRoutes}/${operationAudit.totalRoutes} route→capability contracts · ${activeWorkspace?activeWorkspace.copy:'all destinations remain reachable'}`):'Full software lineage, capability, execution-domain, receipt and proof authority map'}</small></div>
+    <div><span>OMEGA V6 · R210 NAVIGATION CONVERGENCE · R143 OPERATION CHAIN</span><b>{layer==='EVERYWHERE'?(activeWorkspace?`${activeWorkspace.label} tools`:'Everywhere'):'Software / capability map'}</b><small>{layer==='EVERYWHERE'?(`${rows.length}/${routeCount} registered destinations visible · ${operationAudit.mappedRoutes}/${operationAudit.totalRoutes} route→capability contracts · ${activeWorkspace?activeWorkspace.copy:'all destinations remain reachable'}`):'Full software lineage, capability, execution-domain, receipt and proof authority map'}</small></div>
     <div className='r88-head-actions'><button onClick={()=>setExpanded(false)} aria-label='Collapse navigator'><ChevronLeft/></button></div>
    </header>
    <nav className='r89-nav-mode r100-nav-mode r104-nav-mode' aria-label='Navigator mode'><button className={layer==='EVERYWHERE'?'active':''} onClick={()=>{setLayer('EVERYWHERE');setWorkspaceFilter('ALL')}}><Menu/>Everywhere <b>{routeCount}</b></button><button className={layer==='SOFTWARE'?'active':''} onClick={()=>{setLayer('SOFTWARE');setWorkspaceFilter('ALL')}}><Layers3/>Software map</button></nav>
@@ -68,14 +72,15 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
    {layer==='EVERYWHERE'?<>
     <nav className='r105-workspace-filter' aria-label='Application workspace submenu'><button className={workspaceFilter==='ALL'?'active':''} onClick={()=>setWorkspaceFilter('ALL')}>ALL <b>{routeCount}</b></button>{OMEGA_WORKSPACES_R82.map(workspace=><button key={workspace.id} className={workspaceFilter===workspace.id?'active':''} onClick={()=>setWorkspaceFilter(workspace.id)} title={workspace.copy}>{workspace.label} <b>{workspace.routes.length}</b></button>)}</nav>
     <div className='r105-context-note'><span>SUBMENU</span><b>{activeWorkspace?`${activeWorkspace.label} · ${activeWorkspace.copy}`:`All working contexts · ${OMEGA_EXPERIENCE_LAWS_R132.hierarchy.toLowerCase().replaceAll('_',' ')}`}</b></div>
-    <label className='r88-search r100-search r104-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search registered OMEGA destinations' aria-label={activeWorkspace?`Search ${activeWorkspace.label} tools within the shared application registry`:'Search all registered OMEGA applications'}/><kbd>⌘K</kbd></label>
+    <label className='r88-search r100-search r104-search'><Search/><input ref={searchRef} value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search registered OMEGA destinations' aria-label={activeWorkspace?`Search ${activeWorkspace.label} tools within the shared application registry`:'Search all registered OMEGA applications'}/><kbd>⌘K</kbd></label>
+    <div className='r210-nav-status' role='status' aria-live='polite'>{rows.length} of {routeCount} destinations visible{query.trim()?` for “${query.trim()}”`:''}.</div>
     <div className='r89-flat-scroll r104-route-scroll' aria-label={activeWorkspace?`${activeWorkspace.label} OMEGA applications`:'All registered OMEGA applications'}>
      {rows.map(route=>{const index=OMEGA_ALL_ROUTES_R82.indexOf(route)+1,workspace=workspaceForRouteR82(route),reality=effectiveCapabilityReality(route),org=organizationForRouteR132(route),chain=operationContractForRouteR143(route);return <button key={route} title={`${workspace.copy} · ${org.layout.replaceAll('_',' ')}`} className={'r89-flat-route r104-route '+(currentPanel===route?'active':'')} aria-current={currentPanel===route?'page':undefined} onClick={()=>go(route)} data-route-id={chain.routeId} data-capability-id={chain.capabilityId} data-execution-domain={chain.executionDomain} data-execution-state={chain.state}>
       <i>{String(index).padStart(2,'0')}</i><span><b>{route}</b><small className='r132-route-meta'><span className='r132-route-tier' data-tier={org.tier}>{org.tier}</span>{workspace.label} · {org.surfaceClass} · {org.layout.replaceAll('_',' ')} · {chain.executionDomain}/{chain.state} · {CAPABILITY_REALITY_LABEL[reality]}</small><em>{workspace.copy}</em></span><ChevronRight/>
      </button>})}
      {rows.length===0&&<div className='r88-empty'>No route matches that workspace/search combination.</div>}
     </div>
-    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>Persistent rail · active application remains visible · R143 authoritative operation chain {operationAudit.pass?'PASS':'HOLD'} · {operationAudit.mappedRoutes}/{operationAudit.totalRoutes} registered routes carry route ID → capability ID → execution domain → R142 receipt authority · navigation never claims execution proof or R125 admission.</span></footer>
+    <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>R210 readable navigation · persistent rail · explicit focus/search state · active application remains visible · R143 authoritative operation chain {operationAudit.pass?'PASS':'HOLD'} · {operationAudit.mappedRoutes}/{operationAudit.totalRoutes} registered routes carry route ID → capability ID → execution domain → R142 receipt authority · navigation never claims execution proof or R125 admission.</span></footer>
    </>:<div className='r88-software-layer'><OmegaSystemInventoryR83 compact onNavigate={go}/></div>}
   </section>
  </aside>;
