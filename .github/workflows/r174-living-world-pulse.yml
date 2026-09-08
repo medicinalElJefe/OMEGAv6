@@ -20,6 +20,7 @@ on:
       - 'src/world/elevationSceneMeshR219.js'
       - 'src/world/elevationEvidenceAcquisitionR220.js'
       - 'src/world/canonicalElevationRuntimeBridgeR221.js'
+      - 'src/world/sourceBackedTerrainProjectionR222.js'
       - 'src/OmegaGovernanceProjectMediaR29.tsx'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
@@ -39,6 +40,7 @@ on:
       - 'tests/r219-source-backed-elevation-mesh-invariants.mjs'
       - 'tests/r220-bounded-usgs-elevation-acquisition-invariants.mjs'
       - 'tests/r221-canonical-elevation-runtime-bridge-invariants.mjs'
+      - 'tests/r222-source-backed-terrain-visual-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -55,6 +57,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R222 source-backed terrain visual projection
+        run: node tests/r222-source-backed-terrain-visual-invariants.mjs
       - name: Prove R221 canonical Worker-mediated elevation runtime bridge
         run: node tests/r221-canonical-elevation-runtime-bridge-invariants.mjs
       - name: Prove R220 bounded USGS elevation evidence acquisition
