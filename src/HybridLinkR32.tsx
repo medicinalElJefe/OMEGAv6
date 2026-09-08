@@ -3,6 +3,7 @@ import {Cpu,FolderOpen,Gauge,GraduationCap,ShieldCheck,TerminalSquare} from 'luc
 import HybridMissionControlR8 from './HybridMissionControlR8';
 import SovereignConnectionR117 from './SovereignConnectionR117';
 import HybridProofClosureR141 from './HybridProofClosureR141';
+import MissionLineageReviewR209 from './MissionLineageReviewR209';
 import './hybridLinkR32.css';
 import './hybridLinkR112.css';
 
@@ -12,12 +13,13 @@ export default function HybridLinkR32({status,record}:Props){
  const[deepOpen,setDeepOpen]=useState(false);
  return <section className='hybrid-r32 special-app r112-hybrid-link'>
   <header className='r112-hybrid-hero'>
-   <div><span>SOVEREIGN COMPUTE · HYBRID LINK · R117 CONNECTION + R141 PROOF CLOSURE</span><h2>Your PC is an OMEGA compute node.</h2><p>The ordinary path stays narrow: rotate one fresh durable credential, download one clean Windows connector, prove one current heartbeat, execute only confirmed bounded work, then close every returned host packet into exact-payload fingerprint-verified continuity/scar evidence with deterministic replay. R139 unified capability routing and the admitted R140 living-world operation bridge remain preserved layers.</p></div>
-   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat. Native execution is claimed only while an authenticated agent heartbeat is current. A returned workload is not accepted as execution proof until R141 verifies its exact payload fingerprint and semantic equality. Neither heartbeat, durable closure, world projection nor replay promotes CanonState.</small></div>
+   <div><span>SOVEREIGN COMPUTE · HYBRID LINK · R117 CONNECTION + R141 PROOF CLOSURE + R209 LINEAGE</span><h2>Your PC is an OMEGA compute node.</h2><p>The ordinary path stays narrow: rotate one fresh durable credential, download one clean Windows connector, prove one current heartbeat, execute only confirmed bounded work, then close every returned host packet into exact-payload fingerprint-verified continuity/scar evidence with deterministic replay. R209 adds a SHA-bound operator-review lineage from SAI proposal through held Hybrid plan and later execution/proof identities without creating another executor or Canon authority.</p></div>
+   <div className='r112-hybrid-truth'><ShieldCheck/><b>PROOF BEFORE NATIVE ACTION</b><small>Browser state never substitutes for a real host heartbeat. Native execution is claimed only while an authenticated agent heartbeat is current. A returned workload is not accepted as execution proof until R141 verifies its exact payload fingerprint and semantic equality. Neither heartbeat, R209 correlation, durable closure, world projection nor replay promotes CanonState.</small></div>
   </header>
 
   <SovereignConnectionR117/>
   <HybridProofClosureR141/>
+  <MissionLineageReviewR209/>
 
   <section className='r112-host-uses' aria-label='What Sovereign Compute adds'>
    <article><FolderOpen/><div><b>Work with the approved local root</b><span>Read, index, hash, patch, build, test and package only inside the bounded machine root.</span></div></article>
@@ -31,6 +33,6 @@ export default function HybridLinkR32({status,record}:Props){
    {deepOpen&&<HybridMissionControlR8 status={status} record={record}/>}
   </details>
 
-  <footer className='special-boundary'><ShieldCheck/>R141 preserves the durable R101/R32 bridge and allow-listed job queue, R117 clean bootstrap, R113 vector carry, R114 federation closure, R115 machine adapters, R116 truth separation, R125 admission authority, R134 world/scar continuity, R136 living evidence framing, R138 capability-first visuals, R139 unified capability engine and R140 living-world operation bridge. Host return closure, operator projection and deterministic replay remain evidence only.</footer>
+  <footer className='special-boundary'><ShieldCheck/>R141 preserves the durable R101/R32 bridge and allow-listed job queue, R117 clean bootstrap, R113 vector carry, R114 federation closure, R115 machine adapters, R116 truth separation, R125 admission authority, R134 world/scar continuity, R136 living evidence framing, R138 capability-first visuals, R139 unified capability engine, R140 living-world operation bridge and R209 correlation-only lineage. Host return closure, operator lineage review, world projection and deterministic replay remain evidence only.</footer>
  </section>;
 }
