@@ -14,6 +14,7 @@ on:
       - 'src/SourceSpatialReconstructionR228.tsx'
       - 'src/SourceSpatialComputedFrameR230.tsx'
       - 'src/SourceSpatialCalibrationValidationR232.tsx'
+      - 'src/SourceSpatialCalibrationSufficiencyR234.tsx'
       - 'src/missionWorldContinuityR206.css'
       - 'src/world/missionWorldHeadBindingR208.ts'
       - 'src/world/renderIntentLineageR211.js'
@@ -32,6 +33,7 @@ on:
       - 'src/world/sourceSpatialReconstructionR228.js'
       - 'src/world/sourceSpatialComputedFrameR230.js'
       - 'src/world/sourceSpatialCalibrationValidationR232.js'
+      - 'src/world/sourceSpatialCalibrationSufficiencyR234.js'
       - 'src/OmegaGovernanceProjectMediaR29.tsx'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
@@ -61,6 +63,7 @@ on:
       - 'tests/r228-living-world-source-spatial-reconstruction-invariants.mjs'
       - 'tests/r230-proof-bound-computed-frame-invariants.mjs'
       - 'tests/r232-independent-spatial-calibration-validation-invariants.mjs'
+      - 'tests/r234-calibration-sufficiency-envelope-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -77,6 +80,10 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R234 calibration sufficiency envelope
+        run: node tests/r234-calibration-sufficiency-envelope-invariants.mjs
+      - name: Syntax-check R234 calibration sufficiency
+        run: node --check src/world/sourceSpatialCalibrationSufficiencyR234.js
       - name: Prove R232 independent spatial calibration validation
         run: node tests/r232-independent-spatial-calibration-validation-invariants.mjs
       - name: Syntax-check R232 calibration validation
