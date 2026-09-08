@@ -1,0 +1,132 @@
+const TIFF_CACHE = new Map();
+let geotiffModulePromise = null;
+
+async function geotiffModule() {
+  if (!geotiffModulePromise) geotiffModulePromise = import('https://cdn.jsdelivr.net/npm/geotiff@3.0.5/+esm');
+  return geotiffModulePromise;
+}
+
+async function openTiff(url) {
+  if (!url) throw new Error('No GeoTIFF URL supplied');
+  if (!TIFF_CACHE.has(url)) {
+    TIFF_CACHE.set(url, (async () => {
+      const mod = await geotiffModule();
+      const tiff = await mod.fromUrl(url, { cacheSize: 64 * 1024 * 1024 });
+      const image = await tiff.getImage();
+      return { tiff, image };
+    })());
+  }
+  return TIFF_CACHE.get(url);
+}
+
+export function percentile(sorted, p) {
+  if (!sorted.length) return null;
+  const i = Math.max(0, Math.min(sorted.length - 1, (sorted.length - 1) * p));
+  const lo = Math.floor(i), hi = Math.ceil(i);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo);
+}
+
+export function rasterStats(values, nodata = 0) {
+  const sample = [];
+  let sum = 0, min = Infinity, max = -Infinity, count = 0;
+  const stride = Math.max(1, Math.floor(values.length / 250000));
+  for (let i = 0; i < values.length; i += stride) {
+    const v = Number(values[i]);
+    if (!Number.isFinite(v) || v === nodata) continue;
+    count++; sum += v; min = Math.min(min, v); max = Math.max(max, v); sample.push(v);
+  }
+  sample.sort((a,b) => a-b);
+  return {
+    sampledCount: count,
+    min: count ? min : null,
+    max: count ? max : null,
+    mean: count ? sum / count : null,
+    p02: percentile(sample, .02),
+    p50: percentile(sample, .50),
+    p98: percentile(sample, .98)
+  };
+}
+
+export function stretchByte(v, low, high, gamma = 0.72) {
+  if (!Number.isFinite(v) || !Number.isFinite(low) || !Number.isFinite(high) || high <= low) return 0;
+  const t = Math.max(0, Math.min(1, (v - low) / (high - low)));
+  return Math.round(255 * Math.pow(t, gamma));
+}
+
+export async function renderCog(url, canvas, { maxWidth = 1100, maxHeight = 780, gamma = 0.72 } = {}) {
+  const { image } = await openTiff(url);
+  const sourceWidth = image.getWidth();
+  const sourceHeight = image.getHeight();
+  const scale = Math.min(1, maxWidth / sourceWidth, maxHeight / sourceHeight);
+  const width = Math.max(1, Math.round(sourceWidth * scale));
+  const height = Math.max(1, Math.round(sourceHeight * scale));
+  const raster = await image.readRasters({ width, height, samples: [0], interleave: true, resampleMethod: 'bilinear' });
+  const nodataText = image.getGDALNoData?.();
+  const nodata = nodataText == null ? 0 : Number(nodataText);
+  const stats = rasterStats(raster, Number.isFinite(nodata) ? nodata : 0);
+  const low = stats.p02 ?? stats.min ?? 0;
+  const high = stats.p98 ?? stats.max ?? 1;
+
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.createImageData(width, height);
+  for (let i = 0; i < raster.length; i++) {
+    const v = Number(raster[i]);
+    const byte = v === nodata ? 0 : stretchByte(v, low, high, gamma);
+    const j = i * 4;
+    imageData.data[j] = byte;
+    imageData.data[j + 1] = Math.min(255, Math.round(byte * 1.03));
+    imageData.data[j + 2] = Math.min(255, Math.round(byte * 1.08));
+    imageData.data[j + 3] = v === nodata ? 0 : 255;
+  }
+  ctx.putImageData(imageData, 0, 0);
+  const bbox = image.getBoundingBox?.() || null;
+  const resolution = image.getResolution?.() || null;
+  const geoKeys = image.getGeoKeys?.() || {};
+  return {
+    sourceWidth, sourceHeight, renderedWidth: width, renderedHeight: height,
+    bbox, resolution, geoKeys, nodata, stats,
+    displayTransform: { type: 'percentile-linear-plus-gamma', low, high, gamma, scientificCalibrationClaimed: false }
+  };
+}
+
+export async function sampleCogAtPoint(url, lon, lat, { epsg = 4326 } = {}) {
+  if (Number(epsg) !== 4326) throw new Error(`Point sampling currently requires EPSG:4326 COGs; source declares EPSG:${epsg}`);
+  const { image } = await openTiff(url);
+  const bbox = image.getBoundingBox();
+  const [minX,minY,maxX,maxY] = bbox;
+  if (lon < minX || lon > maxX || lat < minY || lat > maxY) return { inside: false, value: null, bbox };
+  const width = image.getWidth(), height = image.getHeight();
+  const x = Math.max(0, Math.min(width - 1, Math.floor((lon - minX) / (maxX - minX) * width)));
+  const y = Math.max(0, Math.min(height - 1, Math.floor((maxY - lat) / (maxY - minY) * height)));
+  const values = await image.readRasters({ window: [x,y,x+1,y+1], samples: [0], interleave: true });
+  const value = Number(values[0]);
+  const nodataText = image.getGDALNoData?.();
+  const nodata = nodataText == null ? 0 : Number(nodataText);
+  return { inside: true, value: Number.isFinite(value) && value !== nodata ? value : null, x, y, bbox, nodata };
+}
+
+export function dataAssetChoices(record) {
+  return Object.values(record?.dataAssets || {}).filter(a => a?.href);
+}
+
+export async function probeStack(records, lon, lat, assetKey, { maxScenes = 96, onProgress } = {}) {
+  const candidates = records.filter(r => r.dataAssets && (r.dataAssets[assetKey] || Object.values(r.dataAssets)[0])).slice(-maxScenes);
+  const out = [];
+  for (let i = 0; i < candidates.length; i++) {
+    const r = candidates[i];
+    const asset = r.dataAssets[assetKey] || Object.values(r.dataAssets)[0];
+    try {
+      const sample = await sampleCogAtPoint(asset.href, lon, lat, { epsg: r.projection?.epsg || 4326 });
+      if (sample.inside) out.push({ id:r.id, startTime:r.startTime, platform:r.platform, assetKey:asset.key, value:sample.value, pixel:[sample.x,sample.y] });
+    } catch (error) {
+      out.push({ id:r.id, startTime:r.startTime, platform:r.platform, assetKey:asset.key, value:null, error:error.message });
+    }
+    onProgress?.(i + 1, candidates.length);
+  }
+  return out;
+}
+
+export function clearRasterCache() { TIFF_CACHE.clear(); }
