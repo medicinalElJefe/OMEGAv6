@@ -16,6 +16,7 @@ on:
       - 'src/world/renderAttemptContinuityR214.js'
       - 'src/world/evidenceReconstructionIntentR216.js'
       - 'src/world/evidenceReconstructionFrameR217.js'
+      - 'src/world/geospatialSceneFieldR218.js'
       - 'src/OmegaGovernanceProjectMediaR29.tsx'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
@@ -31,6 +32,7 @@ on:
       - 'tests/r215-render-artifact-continuity-invariants.mjs'
       - 'tests/r216-evidence-reconstruction-intent-invariants.mjs'
       - 'tests/r217-evidence-reconstruction-frame-invariants.mjs'
+      - 'tests/r218-geospatial-scene-field-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -47,6 +49,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R218 evidence-bound WGS84 geospatial scene field
+        run: node tests/r218-geospatial-scene-field-invariants.mjs
       - name: Prove R217 exact-byte evidence reconstruction frame receipt
         run: node tests/r217-evidence-reconstruction-frame-invariants.mjs
       - name: Prove R216 evidence-bound reconstruction intent
