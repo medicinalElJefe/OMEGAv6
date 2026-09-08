@@ -1,4 +1,4 @@
-// OMEGA R231 preserves the proven R116 Worker spine and all current durable state. Historical R201/R203 classes remain absent from code and live bindings; Cloudflare production reconciliation now reports both deletion tombstones stale with no remaining namespaces, so their completed retirement markers are removed rather than kept as dead export declarations.
+// OMEGA R230.1 preserves the proven R116 Worker spine and all current durable state. Historical R201/R203 classes remain absent from code and live bindings; Cloudflare production reconciliation now reports both deletion tombstones stale with no remaining namespaces, so their completed retirement markers are removed rather than kept as dead export declarations.
 // Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes. R125 remains canonical admission authority.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
