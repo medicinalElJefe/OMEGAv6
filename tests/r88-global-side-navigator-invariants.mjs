@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R88/R89/R210 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R88/R89/R210/R228.1 '+msg)};
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const css=read('src/omegaSideNavigatorR88.css');
 const css210=read('src/omegaSideNavigatorR210.css');
@@ -31,5 +31,5 @@ for(const token of ['/commits/${sha}/pulls','/actions/runs?head_sha=${candidate}
 for(const token of ['pull_request:','actions: read','pull-requests: read','contents: read','group: omega-r210-release-controller','cancel-in-progress: false','collision-free exact-base candidate identity','OMEGA_RELEASE_GUARD_MODE: PR'])must(releaseWorkflow.includes(token),`R210 PR-only release-controller workflow missing ${token}`);
 must(!/^\s*push\s*:/m.test(releaseWorkflow),'R210 successor release controller must remain PR-only; canonical ci.yml owns main-push deployment/correlation authority');
 must(!releaseWorkflow.includes('OMEGA_RELEASE_GUARD_MODE: PUSH')&&!releaseWorkflow.includes('contents: write')&&!releaseWorkflow.includes('deploy')&&!releaseWorkflow.includes('wrangler'),'R210 controller is proof-only/PR-only and must not gain main-push deployment/source mutation authority');
-for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203'])must(!wrangler.includes(retired),`R210 stale retired Durable Object config must be absent: ${retired}`);
-console.log(`R88/R89/R104/R210 CONVERGENCE PASS · persistent readable side toolbar · ${routes.length} destinations · focus/outside-close/live-count accessibility · readable mobile overlay · PR-only exact-head candidate fence + separate exact-merge guard logic · stale DO config removed · no new navigation/deploy/Canon authority`);
+for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){must(wrangler.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`R228.1 deleted-only retirement export missing: ${retired}`);must(!wrangler.includes(`"class_name": "${retired}"`),`R228.1 retired namespace regained live binding: ${retired}`)}
+console.log(`R88/R89/R104/R210/R228.1 CONVERGENCE PASS · persistent readable side toolbar · ${routes.length} destinations · focus/outside-close/live-count accessibility · readable mobile overlay · PR-only exact-head candidate fence + separate exact-merge guard logic · deleted-only DO reconciliation · no new navigation/deploy/Canon authority`);
