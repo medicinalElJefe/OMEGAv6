@@ -54,6 +54,13 @@ const badQ=await reconstructSourceSpatialGeometryR228({bundle:badQBundle,camera:
 assert.equal(badQ.state,'HELD_FOR_NUMERIC_SOURCE_SPATIAL_PROOF');
 assert.ok(badQ.missing.includes('camera.pose.orientation.unitQuaternion'),'R228 must fail closed on an inadmissible declared quaternion');
 
+const mismatchedGridDepth={...depth,samplesOrDepthMap:{width:320,height:240,values:Array(320*240).fill(1)}};
+const mismatchedGridBundle=await bindSourceSpatialEvidenceBundleR227({request,camera,depth:mismatchedGridDepth});
+assert.equal(mismatchedGridBundle.state,'SOURCE_SPATIAL_EVIDENCE_BUNDLE_BOUND');
+const mismatchedGrid=await reconstructSourceSpatialGeometryR228({bundle:mismatchedGridBundle,camera,depth:mismatchedGridDepth});
+assert.equal(mismatchedGrid.state,'HELD_FOR_NUMERIC_SOURCE_SPATIAL_PROOF');
+assert.ok(mismatchedGrid.missing.includes('depth.gridCameraResolutionMatch'),'R228 must not silently resample or reinterpret an unregistered depth-grid resolution');
+
 const denseDepth={...depth,samplesOrDepthMap:Array.from({length:3000},(_,i)=>({u:i%600,v:Math.floor(i/600),depth:1+(i%7)/10}))};
 const denseBundle=await bindSourceSpatialEvidenceBundleR227({request,camera,depth:denseDepth});
 const bounded=await reconstructSourceSpatialGeometryR228({bundle:denseBundle,camera,depth:denseDepth,maxPoints:256});
@@ -66,4 +73,5 @@ const manifest=manifestR228();
 assert.equal(manifest.revision,'R228');
 assert.equal(manifest.authority['canonicalAdmission'],'R125');
 assert.match(manifest.truthBoundary,/does not independently prove camera calibration/i);
-console.log(`R228 SOURCE SPATIAL RECONSTRUCTION PASS · ${a.reconstructedPointCount} exact-bound points · geometry ${a.geometrySha256.slice(0,12)} · hash-only/tamper/quaternion fail closed · bounded dense path ${bounded.reconstructedPointCount}/${bounded.sourceSampleCount}`);
+assert.match(manifest.truthBoundary,/does not independently prove camera calibration[\s\S]*resample an unregistered depth grid/i);
+console.log(`R228 SOURCE SPATIAL RECONSTRUCTION PASS · ${a.reconstructedPointCount} exact-bound points · geometry ${a.geometrySha256.slice(0,12)} · hash/tamper/quaternion/grid mismatch fail closed · bounded dense path ${bounded.reconstructedPointCount}/${bounded.sourceSampleCount}`);
