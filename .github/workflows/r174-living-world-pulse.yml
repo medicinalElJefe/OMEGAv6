@@ -10,6 +10,7 @@ on:
       - 'src/interfacePolishR203.css'
       - 'src/MissionWorldContinuityR206.tsx'
       - 'src/LivingTerrainSurfaceR225.tsx'
+      - 'src/SourceSpatialEvidenceIntakeR227.tsx'
       - 'src/missionWorldContinuityR206.css'
       - 'src/world/missionWorldHeadBindingR208.ts'
       - 'src/world/renderIntentLineageR211.js'
@@ -24,6 +25,7 @@ on:
       - 'src/world/sourceBackedTerrainProjectionR222.js'
       - 'src/world/livingTerrainExperienceR224.js'
       - 'src/world/spatialReconstructionEvidenceR226.js'
+      - 'src/world/sourceSpatialEvidenceBundleR227.js'
       - 'src/OmegaGovernanceProjectMediaR29.tsx'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
@@ -47,6 +49,8 @@ on:
       - 'tests/r224-living-source-terrain-experience-invariants.mjs'
       - 'tests/r225-living-world-terrain-surface-invariants.mjs'
       - 'tests/r226-spatial-reconstruction-evidence-invariants.mjs'
+      - 'tests/r227-source-spatial-evidence-bundle-invariants.mjs'
+      - 'tests/r227-living-world-spatial-evidence-intake-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -63,6 +67,10 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R227 source-backed camera/depth evidence binding
+        run: node tests/r227-source-spatial-evidence-bundle-invariants.mjs
+      - name: Prove R227 visual-first Living World evidence intake
+        run: node tests/r227-living-world-spatial-evidence-intake-invariants.mjs
       - name: Prove R226 source-backed spatial reconstruction evidence contract
         run: node tests/r226-spatial-reconstruction-evidence-invariants.mjs
       - name: Prove R225 canonical Living World terrain interaction
