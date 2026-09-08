@@ -11,6 +11,7 @@ on:
       - 'src/MissionWorldContinuityR206.tsx'
       - 'src/LivingTerrainSurfaceR225.tsx'
       - 'src/SourceSpatialEvidenceIntakeR227.tsx'
+      - 'src/SourceSpatialReconstructionR228.tsx'
       - 'src/missionWorldContinuityR206.css'
       - 'src/world/missionWorldHeadBindingR208.ts'
       - 'src/world/renderIntentLineageR211.js'
@@ -26,6 +27,7 @@ on:
       - 'src/world/livingTerrainExperienceR224.js'
       - 'src/world/spatialReconstructionEvidenceR226.js'
       - 'src/world/sourceSpatialEvidenceBundleR227.js'
+      - 'src/world/sourceSpatialReconstructionR228.js'
       - 'src/OmegaGovernanceProjectMediaR29.tsx'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
@@ -51,6 +53,8 @@ on:
       - 'tests/r226-spatial-reconstruction-evidence-invariants.mjs'
       - 'tests/r227-source-spatial-evidence-bundle-invariants.mjs'
       - 'tests/r227-living-world-spatial-evidence-intake-invariants.mjs'
+      - 'tests/r228-source-spatial-reconstruction-invariants.mjs'
+      - 'tests/r228-living-world-source-spatial-reconstruction-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -62,11 +66,17 @@ jobs:
   prove-r174-living-world-pulse:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R228 exact-bound source spatial reconstruction
+        run: node tests/r228-source-spatial-reconstruction-invariants.mjs
+      - name: Prove R228 Living World reconstruction surface and truth boundary
+        run: node tests/r228-living-world-source-spatial-reconstruction-invariants.mjs
+      - name: Syntax-check R228 numeric source geometry
+        run: node --check src/world/sourceSpatialReconstructionR228.js
       - name: Prove R227 source-backed camera/depth evidence binding
         run: node tests/r227-source-spatial-evidence-bundle-invariants.mjs
       - name: Prove R227 visual-first Living World evidence intake
