@@ -5,6 +5,12 @@ const AGENT_ORIGIN='https://omegav6.jeffdeweyeljefe.workers.dev';
 const CANONICAL_AGENT_ASSET='/omega-hybrid-agent-r207.py';
 const IMMUTABLE_BASE_AGENT_ASSET='/omega-hybrid-agent-base-r205.py';
 const HEARTBEAT_FRESH_MS=30000;
+const DIRECT_AGENT_PATHS_R2074=Object.freeze({
+ '/api/hybrid/agent/register':'/agent/register',
+ '/api/hybrid/agent/heartbeat':'/agent/heartbeat',
+ '/api/hybrid/agent/poll':'/agent/poll',
+ '/api/hybrid/agent/result':'/agent/result'
+});
 const json=(data,status=200)=>new Response(JSON.stringify(data,null,2),{status,headers:JSON_HEADERS});
 const text=v=>String(v??'').trim();
 const safeId=(v,fallback='')=>{const s=text(v).slice(0,160);return /^[A-Za-z0-9._:-]+$/.test(s)?s:fallback};
@@ -15,6 +21,20 @@ async function runtimeFetch(env,id,path,request,method='GET',body){
  const headers=new Headers(request.headers);headers.set('content-type','application/json');
  const init={method,headers};if(body!==undefined&&method!=='GET')init.body=JSON.stringify(body);
  return runtimeStub(env,id).fetch(new Request('https://omega-runtime.internal'+path,init));
+}
+async function directHybridAgentRelayR2074(request,env,path){
+ const internalPath=DIRECT_AGENT_PATHS_R2074[path];
+ if(!internalPath)return null;
+ if(request.method!=='POST')return json({ok:false,code:'R2074_AGENT_RELAY_METHOD_NOT_ALLOWED',allow:'POST'},405);
+ if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE',boundary:'Hybrid agent transport requires the canonical OMEGA_RUNTIME Durable Object binding.'},503);
+ const body=await request.clone().json().catch(()=>({})),id=bridgeId(request,body);
+ if(!id||id==='anon')return json({ok:false,code:'HYBRID_RUNTIME_ID_REQUIRED',boundary:'Register, heartbeat, poll and result require an explicit bridge/session runtime identity.'},400);
+ const response=await runtimeFetch(env,id,internalPath,request,'POST',body),headers=new Headers(response.headers);
+ headers.set('x-omega-hybrid-agent-relay','R207.4-DIRECT-DURABLE');
+ headers.set('x-omega-canonical-origin',AGENT_ORIGIN);
+ headers.set('x-omega-hybrid-protocol','R127_ZERO_DRIFT_SHA256');
+ headers.set('x-omega-hybrid-runtime','OMEGA_RUNTIME_DURABLE_OBJECT');
+ return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }
 async function sha256(source){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source));return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 
@@ -70,7 +90,7 @@ async function canonicalAgentSource(request,env){
 
 async function connectorManifestR127(request,env){
  const a=await canonicalAgentSource(request,env);if(!a.ok)return a.response;
- return json({ok:true,schema:'OMEGA_HYBRID_CONNECTOR_MANIFEST_R127',canonicalControlOrigin:AGENT_ORIGIN,agent:{path:'/api/hybrid/agent-download',version:a.version,sha256:a.digest,bytes:a.bytes,identity:'OMEGA R207 canonical Hybrid Link proof wrapper',proofClosureRevision:'R141',immutableBaseAsset:IMMUTABLE_BASE_AGENT_ASSET,baseTransportVersion:'R34.1',baseCapabilityRevision:'R132',baseProofExtension:'R205'},heartbeatFreshnessWindowMs:HEARTBEAT_FRESH_MS,rootPolicy:{defaultApprovedRoot:'J:\\',systemDriveRuntimeFallback:false,explicitAlternateNonSystemRootAllowed:true},transportPolicy:{singleCanonicalControlHost:true,controlHostFallback:false,downloadQuarantineRequired:true,serverDeclaredSha256Required:true,pythonParsePreflightRequired:true,blindRestart:false,transientReachabilityRetry:'BOUNDED',immutableBaseRollback:true,exactR141SemanticFingerprint:true},truthBoundary:'MANIFEST_DESCRIBES_CONNECTOR_BYTES_AND_POLICY; IT IS NOT PC ONLINE PROOF, EXECUTION SUCCESS, SOLVER VALIDITY, OR CANONSTATE'});
+ return json({ok:true,schema:'OMEGA_HYBRID_CONNECTOR_MANIFEST_R127',canonicalControlOrigin:AGENT_ORIGIN,agent:{path:'/api/hybrid/agent-download',version:a.version,sha256:a.digest,bytes:a.bytes,identity:'OMEGA R207 canonical Hybrid Link proof wrapper',proofClosureRevision:'R141',immutableBaseAsset:IMMUTABLE_BASE_AGENT_ASSET,baseTransportVersion:'R34.1',baseCapabilityRevision:'R132',baseProofExtension:'R205'},heartbeatFreshnessWindowMs:HEARTBEAT_FRESH_MS,rootPolicy:{defaultApprovedRoot:'J:\\',systemDriveRuntimeFallback:false,explicitAlternateNonSystemRootAllowed:true},transportPolicy:{singleCanonicalControlHost:true,controlHostFallback:false,downloadQuarantineRequired:true,serverDeclaredSha256Required:true,pythonParsePreflightRequired:true,blindRestart:false,transientReachabilityRetry:'BOUNDED',immutableBaseRollback:true,exactR141SemanticFingerprint:true,directDurableAgentRelay:'R207.4'},truthBoundary:'MANIFEST_DESCRIBES CONNECTOR BYTES, DIRECT DURABLE AGENT TRANSPORT, AND POLICY; IT IS NOT PC ONLINE PROOF, EXECUTION SUCCESS, SOLVER VALIDITY, OR CANONSTATE'});
 }
 
 async function serveCanonicalHybridAgentR101(request,env){
@@ -92,6 +112,7 @@ async function serveCanonicalHybridAgentR101(request,env){
 
 async function fetchR101(request,env){
  const path=new URL(request.url).pathname;
+ if(DIRECT_AGENT_PATHS_R2074[path])return directHybridAgentRelayR2074(request,env,path);
  if(path==='/omega-hybrid-agent.py'&&request.method==='GET')return serveCanonicalHybridAgentR101(request,env);
  if(path==='/api/hybrid/connector-manifest'&&request.method==='GET')return connectorManifestR127(request,env);
  if(path==='/api/hybrid/status'&&request.method==='GET'){
