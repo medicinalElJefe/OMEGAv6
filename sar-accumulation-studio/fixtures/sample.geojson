@@ -1,0 +1,7 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[-112,31],[-109,31],[-109,34],[-112,34],[-112,31]]]},"properties":{"fileID":"DEMO_S1_A","sceneName":"DEMO_S1_A","platform":"Sentinel-1A","sensor":"C-SAR","startTime":"2026-08-01T12:00:00Z","stopTime":"2026-08-01T12:01:00Z","processingLevel":"SLC","flightDirection":"ASCENDING","orbit":100,"pathNumber":42,"polarization":"VV+VH"}},
+    {"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[-111.5,31.5],[-108.5,31.5],[-108.5,34.5],[-111.5,34.5],[-111.5,31.5]]]},"properties":{"fileID":"DEMO_S1_B","sceneName":"DEMO_S1_B","platform":"Sentinel-1A","sensor":"C-SAR","startTime":"2026-08-13T12:00:00Z","stopTime":"2026-08-13T12:01:00Z","processingLevel":"SLC","flightDirection":"ASCENDING","orbit":275,"pathNumber":42,"polarization":"VV+VH","orbitQuality":"PRECISE"}}
+  ]
+}
