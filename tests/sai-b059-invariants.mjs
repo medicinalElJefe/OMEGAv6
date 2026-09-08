@@ -25,6 +25,7 @@ assert.match(control,/DONOR \{x\.donor\}/,'donor self-test evidence must remain 
 assert.match(fabric,/SAISovereignControl/,'SAI/Kernel Intelligence surface must bind B059 sovereign control');
 assert.match(fabric,/IntelligenceBridgeR195/,'R195.1 live intelligence bridge must be wired above the retained SAI lab');
 assert.match(fabric,/SaiHybridHandoffPanelR1961/,'R196.1 governed SAI to Hybrid handoff must be wired without replacing the SAI lab');
+assert.match(fabric,/R209 may bind that validated held draft to SHA-256 ancestry for explicit operator review/,'R209 lineage truth boundary must be visible in Intelligence Fabric');
 assert.match(differential,/OMEGA_DIFFERENTIAL_PARTITION_EXECUTION_R195/,'R195 differential partition execution must retain its canonical revision identity');
 for(const token of ['OMEGA_AUTHENTICATED_INTELLIGENCE_BRIDGE_R195_1',"R195_REVISION='R195.1'",'AUTHENTICATED_SAI_HYBRID_BRIDGE_AVAILABLE','DEVICE_PROOF_REQUIRED','R147_EXECUTOR_SELECTION','R141_EXACT_RETURN_PROOF','R146_DURABLE_EXECUTION_HISTORY','R125_SEPARATE_CANON_ADMISSION','canonicalMutation:false','canonicalAdmissionAuthority:\'R125\''])assert.match(bridge,new RegExp(token.replace(/[.]/g,'\\.')),`missing R195.1 bridge contract ${token}`);
 assert.match(bridge,/nativeExecutionClaimed===true&&devices\.length>0/,'R195.1 must require current authenticated device evidence before online bridge state');
@@ -39,12 +40,14 @@ assert.match(handoff,/draft\?\.confirmed!==false/,'R196.1 must fail validation i
 assert.match(handoff,/draft\?\.deviceId!==null/,'R196.1 must fail validation if a held draft is pre-bound to a device');
 assert.ok(handoffUi.includes("api.post<any>('/api/hybrid/plan'"),'R196.1 must use the existing governed Hybrid planning contract');
 assert.ok(handoffUi.includes("api.post<any>('/api/hybrid/validate'"),'R196.1 must use the existing Hybrid validation contract');
-assert.doesNotMatch(handoffUi,/\/api\/hybrid\/(?:queue|confirm|execute|claim|dispatch)/,'R196.1 panel must have no queue/confirm/execute/claim/dispatch endpoint');
+assert.doesNotMatch(handoffUi,/\/api\/hybrid\/(?:queue|confirm|execute|claim|dispatch)/,'R196.1/R209 SAI panel must have no queue/confirm/execute/claim/dispatch endpoint');
 assert.match(handoffUi,/queueMutation:false,executionClaimed:false/,'R196.1 ledger receipt must preserve held/non-executed truth');
-assert.match(handoffUi,/Continue through the existing Hybrid Mission Control for explicit governed execution/,'R196.1 must route actual execution back to the existing authority surface');
+assert.match(handoffUi,/After R209 lineage binding, the Hybrid Link R209 review surface must still explicitly import the held draft/,'R209 must route continuation through explicit Hybrid operator review');
+assert.match(handoffUi,/R209_LINEAGE_HELD_FOR_OPERATOR_IMPORT/,'R209 lineage receipt must be appended after exact validation');
 assert.doesNotMatch(bridge,/canonicalMutation:true|canonicalAdmissionAuthority:'R195(?:\.1)?'/,'R195.1 must never claim Canon mutation/admission authority');
 assert.doesNotMatch(handoff,/canonicalMutation:true|canonicalAdmissionAuthority:'R196(?:\.1)?'/,'R196.1 must never claim Canon mutation/admission authority');
 assert.doesNotMatch(runtime,/superintelligence.*true|foundationModelLoaded:true/i,'must not claim hidden superintelligence/model weights');
 assert.doesNotMatch(pkg,/@appdeploy\/client|appdeploy\.ai/i,'SAI restoration must remain portable');
 assert.match(manifest,/OMEGA_SAI_B059_PART_01_CORE_COMPILED\.zip/,'manifest must identify exact donor archive');
-console.log('SAI_B059_R196_1_INVARIANTS PASS · R195 differential + R195.1 live bridge + R196.1 held SAI→Hybrid handoff · authority boundaries locked');
+await import('./r209-end-to-end-mission-lineage-invariants.mjs');
+console.log('SAI_B059_R209_INVARIANTS PASS · R195 differential + R195.1 live bridge + R196.1 held SAI→Hybrid handoff + R209 SHA-bound operator-review lineage · authority boundaries locked');
