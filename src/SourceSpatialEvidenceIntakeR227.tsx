@@ -3,6 +3,7 @@ import {ScanSearch,ShieldCheck} from 'lucide-react';
 import {readSpatialReconstructionEvidenceRequestR226,R226_EVENT} from './world/spatialReconstructionEvidenceR226.js';
 import {bindSourceSpatialEvidenceBundleR227,persistSourceSpatialEvidenceBundleR227,readSourceSpatialEvidenceBundleR227,R227_EVENT} from './world/sourceSpatialEvidenceBundleR227.js';
 import SourceSpatialReconstructionR228 from './SourceSpatialReconstructionR228';
+import SourceSpatialComputedFrameR230 from './SourceSpatialComputedFrameR230';
 import {emitOperationR86} from './omegaOperationBusR86';
 import {activeProjectIdR87,recordProjectOperationR87} from './omegaProjectContinuityR87';
 
@@ -27,5 +28,5 @@ export default function SourceSpatialEvidenceIntakeR227(){
   </div>
   <div className='r206-world-mission-proof'><ShieldCheck/><span>R226 request bound</span><span>source evidence hashes</span><span>declared frame + time checked</span><span>R122 reconstruction not executed</span><span>Photoreal unproven</span></div>
   {!ready&&<button onClick={bind} disabled={busy||!cameraText.trim()||!depthText.trim()}>{busy?'Binding…':'Bind source 3-D evidence'}</button>}
- </div>{ready&&<SourceSpatialReconstructionR228 cameraEvidenceText={cameraText} depthEvidenceText={depthText}/>}</>;
+ </div>{ready&&<><SourceSpatialReconstructionR228 cameraEvidenceText={cameraText} depthEvidenceText={depthText}/><SourceSpatialComputedFrameR230/></>}</>;
 }
