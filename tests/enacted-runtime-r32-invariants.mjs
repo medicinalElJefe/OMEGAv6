@@ -45,3 +45,4 @@ await import('./r1901-living-world-proof-membrane-invariants.mjs');
 await import('./r205-pc-proof-closure-invariants.mjs');
 await import('./r2061-durable-host-evidence-continuity-invariants.mjs');
 await import('./r207-r141-native-host-evidence-invariants.mjs');
+await import('./advancement-ledger-invariants.mjs');
