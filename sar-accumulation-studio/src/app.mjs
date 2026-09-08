@@ -1,11 +1,11 @@
 import { fetchAsf, buildAsfQuery } from './asf.mjs';
 import { normalizeFeatureCollection } from './normalize.mjs';
-import { dedupeAndSort, frameState, maturityWarnings, revisitStats } from './engine.mjs';
+import { dedupeAndSort, frameState, maturityWarnings, revisitStats, knownMissionWarnings } from './engine.mjs';
 import { buildManifest, downloadJson } from './export.mjs';
 import { WorldRenderer } from './render.mjs';
 
 const $ = s => document.querySelector(s);
-const state = { records: [], frame: 0, playing: false, timer: null, query: null, sourceUrl: null, errors: [], mode:'accumulate', visual:'footprints' };
+const state = { records: [], frame: 0, playing: false, timer: null, query: null, sourceUrl: null, errors: [], contextWarnings: [], mode:'accumulate', visual:'footprints' };
 const renderer = new WorldRenderer($('#map'));
 renderer.redraw = draw;
 renderer.onPoint = point => updatePoint(point);
@@ -41,6 +41,7 @@ function setRecords(records, errors=[], context={}) {
   $('#timeline').value = state.frame;
   state.query = context.query || null;
   state.sourceUrl = context.url || null;
+  state.contextWarnings = context.warnings || [];
   renderWarnings(); draw(); renderTable();
 }
 
@@ -52,7 +53,7 @@ async function loadLive() {
   try {
     const result=await fetchAsf(opts);
     const normalized=normalizeFeatureCollection(result.featureCollection,result.source);
-    setRecords(normalized.records,normalized.errors,{query:result.source.query,url:result.url});
+    setRecords(normalized.records,normalized.errors,{query:result.source.query,url:result.url,warnings:knownMissionWarnings(opts)});
     setStatus(`${state.records.length} authoritative acquisitions loaded${normalized.errors.length?` · ${normalized.errors.length} rejected`:''}`,'ok');
   } catch(error) {
     setStatus(error.message,'error');
@@ -87,7 +88,7 @@ function draw() {
 
 function renderWarnings() {
   const list=$('#warnings'); list.innerHTML='';
-  const warnings=maturityWarnings(state.records);
+  const warnings=[...maturityWarnings(state.records), ...state.contextWarnings];
   if (state.errors.length) warnings.push(`${state.errors.length} input feature(s) were rejected by normalization.`);
   if (!warnings.length) warnings.push('No maturity/authority warning detected in the loaded metadata.');
   warnings.forEach(w=>{const li=document.createElement('li');li.textContent=w;list.append(li)});
