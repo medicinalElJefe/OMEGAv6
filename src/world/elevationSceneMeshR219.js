@@ -9,7 +9,7 @@ const bytes=(v)=>new TextEncoder().encode(v);
 const hex=(buffer)=>[...new Uint8Array(buffer)].map(x=>x.toString(16).padStart(2,'0')).join('');
 const sha256=async(v)=>hex(await crypto.subtle.digest('SHA-256',bytes(JSON.stringify(stable(v)))));
 const hash64=(v)=>/^[a-f0-9]{64}$/.test(String(v||''));
-const finite=(v)=>Number.isFinite(Number(v));
+const finite=(v)=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
 const text=(v)=>String(v||'');
 const close=(a,b,tol=1e-7)=>finite(a)&&finite(b)&&Math.abs(Number(a)-Number(b))<=tol;
 
