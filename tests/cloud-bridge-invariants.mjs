@@ -15,4 +15,8 @@ assert.match(workflow,/AUTH REQUIRED/);
 assert.doesNotMatch(workflow,/@appdeploy|appdeploy\.ai/i);
 assert.match(wrangler,/"name"\s*:\s*"omegav6"/);
 assert.match(wrangler,/"workers_dev"\s*:\s*true/);
-console.log('cloud bridge invariants PASS');
+for(const activeClass of ['OmegaRuntime','OmegaSwarmCell','OmegaSwarmCoordinator','OmegaSwarmBranch','OmegaSwarmOrgan','OmegaSwarmOrganismCoordinator','OmegaSwarmAutonomicCoordinator']){
+  assert.match(wrangler,new RegExp(`"${activeClass}"\\s*:\\s*\\{`),`active Durable Object export missing: ${activeClass}`);
+}
+assert.doesNotMatch(wrangler,/OmegaMissionLedgerR201|OmegaHybridMissionLedgerR203/,'retired R201/R203 Durable Object classes must remain absent after completed Cloudflare namespace retirement');
+console.log('cloud bridge invariants PASS · R233 retired R201/R203 exports absent');
