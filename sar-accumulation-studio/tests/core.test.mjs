@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeFeatureCollection } from '../src/normalize.mjs';
-import { dedupeAndSort, frameState, maturityWarnings, revisitStats } from '../src/engine.mjs';
+import { dedupeAndSort, frameState, maturityWarnings, revisitStats, knownMissionWarnings } from '../src/engine.mjs';
 import { geometryContainsPoint } from '../src/geometry.mjs';
 import { buildAsfQuery } from '../src/asf.mjs';
 
@@ -58,4 +58,11 @@ test('ASF query uses preferred dataset + geojson and exact UTC boundaries',()=>{
   assert.equal(url.searchParams.get('dataMaturity'),'PROVISIONAL');
   assert.equal(url.searchParams.get('maxResults'),'5');
   assert.match(url.searchParams.get('start'),/^2026-08-01T00:00:00.000Z$/);
+});
+
+test('known NISAR instrument gap is surfaced when a query overlaps it',()=>{
+  const warnings=knownMissionWarnings({dataset:'NISAR',start:'2026-07-20T00:00:00Z',end:'2026-08-15T00:00:00Z'});
+  assert.equal(warnings.length,1);
+  assert.match(warnings[0],/2026-07-27T22:03:25Z/);
+  assert.equal(knownMissionWarnings({dataset:'NISAR',start:'2026-08-15T00:00:00Z',end:'2026-09-01T00:00:00Z'}).length,0);
 });
