@@ -12,10 +12,10 @@ for(const live of ['OmegaRuntime','OmegaSwarmCell','OmegaSwarmCoordinator','Omeg
 for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){
  assert.ok(!source.includes(`export class ${retired}`),`retired namespace must not be silently restored as executable authority ${retired}`);
  assert.ok(!config.includes(`"class_name": "${retired}"`),`retired namespace must not have a live binding ${retired}`);
- assert.ok(!config.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`R210 must remove stale no-op retirement tombstone ${retired}`);
+ assert.ok(config.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`provisioned retired namespace must remain a deleted-only export ${retired}`);
  assert.ok(!config.includes(`"${retired}": {"type": "durable-object", "storage": "sqlite"}`),`retired namespace must never become a live sqlite export ${retired}`);
 }
-assert.ok(config.includes('OMEGA R210 preserves the proven R116 Worker spine'),'R210 deployment reconciliation provenance missing');
-assert.ok(config.includes('stale no-ops because no namespace exists'),'R210 stale-tombstone cleanup evidence law missing');
+assert.ok(config.includes('OMEGA R228.1 preserves the proven R116 Worker spine'),'R228.1 deployment reconciliation provenance missing');
+assert.ok(config.includes('remain provisioned')&&config.includes('deleted export tombstones'),'R228.1 live Cloudflare namespace reconciliation evidence law missing');
 assert.ok(config.includes('R125 remains canonical admission authority'),'R125 admission authority guardrail missing');
-console.log('R193.1/R210 CLOUDFLARE DURABLE OBJECT RECONCILIATION PASS · R201/R203 executable classes, live bindings and stale tombstones absent · all seven live R116 durable authorities intact');
+console.log('R193.1/R228.1 CLOUDFLARE DURABLE OBJECT RECONCILIATION PASS · R201/R203 executable classes and live bindings absent · provisioned historical namespaces retired by deleted-only exports · all seven live R116 durable authorities intact');
