@@ -15,7 +15,7 @@ for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){
  assert.ok(!config.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`completed provider retirement must not retain a stale tombstone ${retired}`);
  assert.ok(!config.includes(`"${retired}": {"type": "durable-object", "storage": "sqlite"}`),`retired namespace must never become a live sqlite export ${retired}`);
 }
-assert.ok(config.includes('OMEGA R231 preserves the proven R116 Worker spine'),'R231 deployment reconciliation provenance missing');
-assert.ok(config.includes('reports both deletion tombstones stale with no remaining namespaces'),'R231 completed provider-state reconciliation evidence law missing');
+assert.ok(config.includes('OMEGA R230.1 preserves the proven R116 Worker spine'),'R230.1 deployment reconciliation provenance missing');
+assert.ok(config.includes('reports both deletion tombstones stale with no remaining namespaces'),'R230.1 completed provider-state reconciliation evidence law missing');
 assert.ok(config.includes('R125 remains canonical admission authority'),'R125 admission authority guardrail missing');
-console.log('R193.1/R231 CLOUDFLARE DURABLE OBJECT RECONCILIATION PASS · R201/R203 executable classes, live bindings, sqlite exports, and completed tombstones absent · all seven live R116 durable authorities intact');
+console.log('R193.1/R230.1 CLOUDFLARE DURABLE OBJECT RECONCILIATION PASS · R201/R203 executable classes, live bindings, sqlite exports, and completed tombstones absent · all seven live R116 durable authorities intact');
