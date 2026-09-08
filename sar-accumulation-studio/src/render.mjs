@@ -1,5 +1,15 @@
 import { geometryRings, unwrapRing, wrapLon } from './geometry.mjs';
 
+function centroidOfGeometry(geometry) {
+  const points=[];
+  for(const ring of geometryRings(geometry)) for(const [lon,lat] of ring) if(Number.isFinite(lon)&&Number.isFinite(lat)) points.push([lon,lat]);
+  if(!points.length) return null;
+  const anchor=points[0][0];
+  let sx=0,sy=0;
+  for(const [lon,lat] of points){let x=lon;while(x-anchor>180)x-=360;while(x-anchor<-180)x+=360;sx+=x;sy+=lat}
+  return [wrapLon(sx/points.length),sy/points.length];
+}
+
 export class WorldRenderer {
   constructor(canvas) {
     this.canvas = canvas;
@@ -8,6 +18,7 @@ export class WorldRenderer {
     this.drag = null;
     this.point = null;
     this.onPoint = null;
+    this.motionPhase = 0;
     this._wire();
     new ResizeObserver(() => this.resize()).observe(canvas);
     this.resize();
@@ -24,7 +35,7 @@ export class WorldRenderer {
   }
 
   project(lon, lat) {
-    let dlon = wrapLon(lon - this.view.centerLon);
+    const dlon = wrapLon(lon - this.view.centerLon);
     const x = this.w / 2 + dlon * (this.w / 360) * this.view.scale;
     const y = this.h / 2 - (lat - this.view.centerLat) * (this.h / 180) * this.view.scale;
     return [x,y];
@@ -39,14 +50,15 @@ export class WorldRenderer {
   clear() {
     const c = this.ctx;
     c.clearRect(0,0,this.w,this.h);
-    c.fillStyle = '#071017'; c.fillRect(0,0,this.w,this.h);
+    const g=c.createLinearGradient(0,0,0,this.h);
+    g.addColorStop(0,'#061119');g.addColorStop(1,'#03070a');c.fillStyle=g;c.fillRect(0,0,this.w,this.h);
     this._graticule();
   }
 
   _graticule() {
     const c = this.ctx;
-    c.lineWidth = 1; c.strokeStyle = 'rgba(150,180,195,.16)';
-    c.font = '10px ui-monospace, monospace'; c.fillStyle = 'rgba(180,205,217,.5)';
+    c.lineWidth = 1; c.strokeStyle = 'rgba(150,180,195,.14)';
+    c.font = '10px ui-monospace, monospace'; c.fillStyle = 'rgba(180,205,217,.48)';
     for (let lat=-60; lat<=60; lat+=30) {
       const [,y] = this.project(this.view.centerLon, lat);
       c.beginPath(); c.moveTo(0,y); c.lineTo(this.w,y); c.stroke();
@@ -59,27 +71,53 @@ export class WorldRenderer {
       c.fillText(`${lon}°`, x+3, this.h-6);
     }
     const [x0] = this.project(0,0); const [,y0] = this.project(0,0);
-    c.strokeStyle = 'rgba(200,220,230,.25)';
+    c.strokeStyle = 'rgba(210,230,240,.20)';
     c.beginPath(); c.moveTo(0,y0); c.lineTo(this.w,y0); c.stroke();
     c.beginPath(); c.moveTo(x0,0); c.lineTo(x0,this.h); c.stroke();
   }
 
-  drawRecords(records, currentId, mode='footprints') {
+  drawRecords(records, currentId, mode='footprints', phase=0) {
     const c = this.ctx;
     const total = Math.max(1, records.length);
-    records.forEach((r) => {
+    records.forEach((r, index) => {
       const current = r.id === currentId;
-      const alpha = mode === 'density' ? Math.min(.5, .07 + .4/Math.sqrt(total)) : (current ? .8 : .20);
-      c.lineWidth = current ? 2.4 : 1;
-      c.strokeStyle = current ? 'rgba(227,248,255,.95)' : 'rgba(98,211,245,.55)';
-      c.fillStyle = `rgba(${current ? '137,224,255' : '54,181,220'},${alpha})`;
+      const recency = records.length <= 1 ? 1 : (index + 1) / records.length;
+      const alpha = mode === 'density'
+        ? Math.min(.44, .045 + .52/Math.sqrt(total))
+        : current ? .68 : .06 + .18 * recency;
+      c.lineWidth = current ? 2.2 : .8;
+      if(current){
+        const pulse=.65+.35*Math.sin(phase*Math.PI*2);
+        c.strokeStyle = `rgba(241,250,255,${.72+.2*pulse})`;
+        c.fillStyle = `rgba(94,214,239,${alpha})`;
+        c.shadowColor='rgba(102,225,255,.75)';c.shadowBlur=10+10*pulse;
+      } else {
+        const hue = mode === 'density' ? [69,196,211] : [76+Math.round(38*recency),178+Math.round(28*recency),210+Math.round(30*recency)];
+        c.strokeStyle = `rgba(${hue.join(',')},${.18+.32*recency})`;
+        c.fillStyle = `rgba(${hue.join(',')},${alpha})`;
+        c.shadowBlur=0;
+      }
       this._drawGeometry(r.geometry);
+      c.shadowBlur=0;
     });
+    const current=records.find(r=>r.id===currentId);
+    if(current) this._drawMotionBeacon(current,phase);
     if (this.point) {
       const [x,y] = this.project(this.point.lon, this.point.lat);
       c.fillStyle='white'; c.beginPath(); c.arc(x,y,4,0,Math.PI*2); c.fill();
-      c.strokeStyle='rgba(0,0,0,.8)'; c.stroke();
+      c.strokeStyle='rgba(0,0,0,.8)'; c.lineWidth=1; c.stroke();
+      c.beginPath();c.arc(x,y,9+5*Math.sin(phase*Math.PI*2),0,Math.PI*2);c.strokeStyle='rgba(255,255,255,.35)';c.stroke();
     }
+  }
+
+  _drawMotionBeacon(record,phase){
+    const center=centroidOfGeometry(record.geometry);if(!center)return;
+    const [x,y]=this.project(center[0],center[1]);const c=this.ctx;
+    const r=9+24*((phase+.15)%1);
+    c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.strokeStyle=`rgba(239,250,255,${.75*(1-phase)})`;c.lineWidth=1.4;c.stroke();
+    const sweep=(phase*2-1)*42;
+    c.beginPath();c.moveTo(x-54,y+sweep);c.lineTo(x+54,y+sweep);c.strokeStyle='rgba(170,242,255,.34)';c.lineWidth=1;c.stroke();
+    c.beginPath();c.arc(x,y,3.2,0,Math.PI*2);c.fillStyle='rgba(255,255,255,.92)';c.fill();
   }
 
   _drawGeometry(geometry) {
