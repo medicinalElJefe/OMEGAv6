@@ -16,7 +16,8 @@ const launcher112=fs.existsSync('src/sovereignLauncherR112.ts')?read('src/sovere
 const sovereign117=fs.existsSync('src/SovereignConnectionR117.tsx')?read('src/SovereignConnectionR117.tsx'):hybrid;
 const launcher117=fs.existsSync('src/sovereignLauncherR117.ts')?read('src/sovereignLauncherR117.ts'):hybrid;
 const bootstrap117=fs.existsSync('src/hybridBootstrapR117.ts')?read('src/hybridBootstrapR117.ts'):'';
-const agent=read('public/omega-hybrid-agent.py');
+const agent=fs.existsSync('public/omega-hybrid-agent-base-r205.py')?read('public/omega-hybrid-agent-base-r205.py'):read('public/omega-hybrid-agent.py');
+const canonicalAgent=read('public/omega-hybrid-agent.py');
 const weave=read('src/weaveStateR100.ts');
 const stage=read('src/TraversalModeStageR100.tsx');
 const studio=read('src/OmegaTraversalStudio.tsx');
@@ -55,8 +56,9 @@ must(launcher117.includes('/api/hybrid/agent-download?r117=1')&&launcher117.incl
 // Retain the R112 donor/recovery path as inherited evidence, but it is no longer the active ordinary mount.
 must(sovereign112.includes('reconnectHybridBridge(false)')&&sovereign112.includes('reconnectHybridBridge(true)'),'R112 donor connection surface must retain explicit verify-then-repair transport');
 must(launcher112.includes('/api/hybrid/agent-download?r112=1')&&launcher112.includes("OMEGA_ORIGIN=${ORIGIN}"),'R112 donor launcher must remain internally coherent for rollback evidence');
-must(agent.includes("VERSION='R34.1'")&&agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"),'sovereign agent canonical transport/version must remain intact');
+must(agent.includes("VERSION='R34.1'")&&agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"),'frozen sovereign executor canonical transport/version must remain intact');
 must(agent.includes('/api/hybrid/agent/register')&&agent.includes('/api/hybrid/agent/heartbeat')&&agent.includes('/api/hybrid/agent/poll'),'agent register/heartbeat/poll loop must remain present');
+if(fs.existsSync('public/omega-hybrid-agent-base-r205.py'))for(const token of ["VERSION='R207'","BASE_PATH='/omega-hybrid-agent-base-r205.py'","FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'"])must(canonicalAgent.includes(token),`canonical R207 wrapper missing ${token}`);
 
 must(weave.includes('ATLAS_RESOLUTION_LEVELS_R101=[12,144,1728,20736,248832]'),'R101 effective-resolution registry missing');
 must(weave.includes('resolutionDemand')&&weave.includes('resolutionIndexR101')&&weave.includes('effectiveResolution'),'effective resolution must be derived from bounded weave demand');
@@ -79,6 +81,6 @@ must(accepted.includes("id:'WEAVE_DERIVED_RESOLUTION'")&&accepted.includes("id:'
 must(accepted.includes("'R100 woven continuity geometry/time + professional instrument rail authority'")&&accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority'"),'R101 must extend R100 rather than flatten it');
 must(![worker,worker114,worker115,worker116,adapter,hybrid,sovereign117,launcher117,weave,stage].join('\n').includes('@appdeploy/client'),'R101 must remain provider portable');
 
-console.log('R101 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · R117 fresh durable bridge bootstrap · authenticated-heartbeat truth preserved through R116→R115→R114→R101');
+console.log('R101/R207 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · R117 fresh durable bridge bootstrap · frozen R205 transport loop + canonical R207 R141 proof wrapper · authenticated-heartbeat truth preserved through R116→R115→R114→R101');
 await import('./r102-federated-instrument-experience-invariants.mjs');
 await import('./r112-sovereign-living-fabric-invariants.mjs');
