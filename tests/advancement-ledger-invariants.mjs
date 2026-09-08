@@ -30,3 +30,4 @@ for(const token of ['issue **#435**','Every completed OMEGA advancement must pub
 for(const token of ['R207.2 LIVE PASS','49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'])must(verifier.includes(token),`production-proven R207.2 verifier identity missing ${token}`);
 
 console.log('OMEGA R210 ADVANCEMENT LEDGER PASS · issue #435 human ledger + deployed stable index + mandatory SHA/PR/CI/Worker/live-proof/residual/next-boundary completion contract · forward-only repair + live-truth recovery + advanced-layer visibility laws · no execution or Canon authority added');
+await import('./r210-forward-live-truth-invariants.mjs');
