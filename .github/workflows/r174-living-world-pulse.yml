@@ -11,6 +11,7 @@ on:
       - 'src/MissionWorldContinuityR206.tsx'
       - 'src/missionWorldContinuityR206.css'
       - 'src/world/missionWorldHeadBindingR208.ts'
+      - 'src/world/renderIntentLineageR211.js'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
       - 'src/HybridMissionControl.tsx'
@@ -19,6 +20,7 @@ on:
       - 'tests/r203-interface-navigation-polish-invariants.mjs'
       - 'tests/r206-world-mission-continuity-invariants.mjs'
       - 'tests/r208-durable-mission-world-head-binding-invariants.mjs'
+      - 'tests/r211-render-intent-lineage-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -35,6 +37,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R211 deterministic pre-render lineage receipt
+        run: node tests/r211-render-intent-lineage-invariants.mjs
       - name: Prove R208 durable mission-world head binding
         run: node tests/r208-durable-mission-world-head-binding-invariants.mjs
       - name: Prove R206 world mission continuity bridge
