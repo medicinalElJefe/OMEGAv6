@@ -42,3 +42,4 @@ await import('./r1931-cloudflare-durable-object-reconciliation-invariants.mjs');
 await import('./r186-verified-return-live-world-ingress-invariants.mjs');
 await import('./r1901-living-world-proof-membrane-invariants.mjs');
 await import('./r205-pc-proof-closure-invariants.mjs');
+await import('./r2061-durable-host-evidence-continuity-invariants.mjs');
