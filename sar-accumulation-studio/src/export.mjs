@@ -16,6 +16,17 @@ export async function sha256Hex(text) {
   return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+function serializableAssets(assets = {}) {
+  return Object.fromEntries(Object.entries(assets).map(([key,a]) => [key, {
+    key: a.key || key,
+    href: a.href || null,
+    sourceHref: a.sourceHref || null,
+    type: a.type || null,
+    title: a.title || null,
+    roles: a.roles || []
+  }]));
+}
+
 export async function buildManifest(records, context = {}) {
   const acquisitions = records.map(r => ({
     id: r.id,
@@ -33,15 +44,23 @@ export async function buildManifest(records, context = {}) {
     startTime: r.startTime,
     stopTime: r.stopTime,
     evidence: r.evidence,
+    measurement: r.measurement || null,
+    browse: r.browse || null,
+    downloadUrl: r.downloadUrl || null,
+    dataAssets: serializableAssets(r.dataAssets),
+    projection: r.projection || null,
     geometry: r.geometry,
     source: r.source
   }));
   const core = {
-    schema: 'omega.sar.accumulation.manifest.v1',
+    schema: 'omega.sar.accumulation.manifest.v2',
     generatedAt: new Date().toISOString(),
     semantics: {
-      observationRule: 'Only source acquisitions are observations. Animation interpolation is display-only and never adds observations.',
-      geometryRule: 'Footprints are catalog/product geometry, not calibrated SAR pixel arrays or InSAR displacement.'
+      observationRule: 'Only source acquisitions are observations. Animation interpolation and continuous motion are display-only and never add observations.',
+      geometryRule: 'Footprints are catalog/product coverage geometry and are not promoted to calibrated SAR pixels or InSAR displacement.',
+      browseRule: 'Browse/thumbnail imagery is supporting visualization only and is not promoted to measurement evidence.',
+      rasterRule: 'COG values are actual source raster samples. Any percentile/gamma stretch is a display transform only; radiometric calibration is not claimed unless explicitly bound.',
+      temporalProbeRule: 'Point stack values are source pixel samples at georeferenced coordinates and retain each acquisition timestamp; cross-scene physical comparability requires explicit calibration/normalization.'
     },
     context,
     acquisitions
