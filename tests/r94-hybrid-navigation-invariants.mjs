@@ -6,6 +6,7 @@ const hybrid=read('src/HybridMissionControlR8.tsx');
 const hybridLink=read('src/HybridLinkR32.tsx');
 const launcher=fs.existsSync('src/sovereignLauncherR117.ts')?read('src/sovereignLauncherR117.ts'):hybridLink;
 const agent=read('public/omega-hybrid-agent.py');
+const baseAgent=fs.existsSync('public/omega-hybrid-agent-base-r205.py')?read('public/omega-hybrid-agent-base-r205.py'):agent;
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const css=read('src/omegaSideNavigatorR88.css');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
@@ -28,9 +29,10 @@ must(!hybrid.includes('/api/hybrid/agent-download?r94=1')&&!hybrid.includes('Inv
 must(launcher.includes('/api/hybrid/agent-download?r117=1&r120=1&r127=1&validator=zero-drift')&&launcher.includes('--server "!OMEGA_ORIGIN!" --pair'),'current shared launcher must use the canonical validated transport contract');
 must(launcher.includes('x-omega-agent-sha256')&&launcher.includes('hashlib.sha256(b).hexdigest()')&&launcher.includes('-m py_compile "!OMEGA_AGENT_PART!"'),'current shared launcher must verify exact server-declared SHA-256 and parser-preflight quarantined bytes before execution');
 must(launcher.includes("needle='DEFAULT_SERVER='+chr(39)+'https://omegav6.jeffdeweyeljefe.workers.dev'+chr(39)"),'current launcher identity validator must remain cmd-quote safe');
-must(agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"),'agent default server must remain canonical');
-must(agent.includes('probe_server(server)')&&agent.includes('/api/hybrid/agent/register'),'agent must still require canonical reachability and authenticated registration');
-must(![hybrid,hybridLink,agent,worker].join('\n').includes('omega-sovereign-convergence.foundasound.chatgpt.site')&&!launcher.includes('https://omega-sovereign-convergence.foundasound.chatgpt.site'),'obsolete Hybrid host must not exist as an active Hybrid transport path');
+must(agent.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'"),'canonical agent wrapper default server must remain canonical');
+must(baseAgent.includes('probe_server(server)')&&baseAgent.includes('/api/hybrid/agent/register'),'frozen executor must still require canonical reachability and authenticated registration');
+must(agent.includes("VERSION='R207'")&&agent.includes("BASE_PATH='/omega-hybrid-agent-base-r205.py'")&&agent.includes("FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'"),'canonical R207 wrapper must bind frozen executor and exact R141 return proof');
+must(![hybrid,hybridLink,agent,baseAgent,worker].join('\n').includes('omega-sovereign-convergence.foundasound.chatgpt.site')&&!launcher.includes('https://omega-sovereign-convergence.foundasound.chatgpt.site'),'obsolete Hybrid host must not exist as an active Hybrid transport path');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
@@ -59,4 +61,4 @@ must(ci.includes("fetch(base+'/api/hybrid/agent-download'")&&ci.includes("OMEGA 
 must(ci.includes("readFileSync('public/omega-hybrid-agent.py')")&&ci.includes('servedSha256!==expectedSha256')&&ci.includes('receiptSha256!==expectedSha256'),'live Hybrid probe must compare the response body and receipt to the repository source SHA-256');
 must(!css.includes('@appdeploy/client')&&!nav.includes('@appdeploy/client'),'R94 navigation must remain provider portable');
 
-console.log('R94/R152 HYBRID + NAVIGATION PASS · canonical agent route preserved through current R127 zero-drift launcher · stale origin inheritance and legacy R94 downloader removed · persistent non-covering side toolbar · unified destination controls · 44 routes preserved');
+console.log('R94/R207 HYBRID + NAVIGATION PASS · canonical R207 proof wrapper over frozen R205 executor · R127 zero-drift launcher · persistent non-covering side toolbar · 44 routes preserved');
