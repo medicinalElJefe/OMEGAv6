@@ -26,6 +26,14 @@ requireInvariant(
   'R170 must continue failing for unexpected PR creation errors',
 );
 requireInvariant(
+  workflow.includes('actions/checkout@v7') && workflow.includes('actions/setup-node@v7'),
+  'R170 must use the current Node-24-capable v7 GitHub action generation',
+);
+requireInvariant(
+  !workflow.includes('actions/checkout@v4') && !workflow.includes('actions/setup-node@v4'),
+  'R170 must not regress to Node-20-targeting v4 GitHub actions',
+);
+requireInvariant(
   workflow.includes('R125 remains sole CanonState admission authority'),
   'R125 sole CanonState admission authority must remain explicit',
 );
@@ -34,4 +42,4 @@ requireInvariant(
   'R170 must preserve no-direct-main and no-auto-merge boundaries',
 );
 
-console.log('R214.1 R170 PR POLICY FAIL-CLOSE PASS · held candidate branches block regeneration · known repository-policy rejection becomes a truth-gated held state · unexpected PR errors still fail · R125/no-direct-main/no-auto-merge boundaries preserved');
+console.log('R220.1 R170 RUNTIME HYGIENE PASS · held candidate branches block regeneration · known repository-policy rejection remains truth-gated · unexpected PR errors still fail · v7 GitHub actions avoid Node-20 runtime deprecation · R125/no-direct-main/no-auto-merge boundaries preserved');
