@@ -14,6 +14,7 @@ on:
       - 'src/world/renderIntentLineageR211.js'
       - 'src/world/adaptiveRenderAttemptR213.js'
       - 'src/world/renderAttemptContinuityR214.js'
+      - 'src/OmegaGovernanceProjectMediaR29.tsx'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
       - 'src/HybridMissionControl.tsx'
@@ -25,6 +26,7 @@ on:
       - 'tests/r211-render-intent-lineage-invariants.mjs'
       - 'tests/r213-adaptive-render-attempt-lineage-invariants.mjs'
       - 'tests/r214-render-attempt-continuity-invariants.mjs'
+      - 'tests/r215-render-artifact-continuity-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -41,6 +43,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R215 byte-hashed representational artifact continuity
+        run: node tests/r215-render-artifact-continuity-invariants.mjs
       - name: Prove R214 recoverable render-attempt continuity
         run: node tests/r214-render-attempt-continuity-invariants.mjs
       - name: Prove R213 adaptive render-attempt lineage
