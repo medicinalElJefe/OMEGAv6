@@ -12,6 +12,8 @@ on:
       - 'src/LivingTerrainSurfaceR225.tsx'
       - 'src/SourceSpatialEvidenceIntakeR227.tsx'
       - 'src/SourceSpatialReconstructionR228.tsx'
+      - 'src/SourceSpatialComputedFrameR230.tsx'
+      - 'src/SourceSpatialCalibrationValidationR231.tsx'
       - 'src/missionWorldContinuityR206.css'
       - 'src/world/missionWorldHeadBindingR208.ts'
       - 'src/world/renderIntentLineageR211.js'
@@ -28,6 +30,8 @@ on:
       - 'src/world/spatialReconstructionEvidenceR226.js'
       - 'src/world/sourceSpatialEvidenceBundleR227.js'
       - 'src/world/sourceSpatialReconstructionR228.js'
+      - 'src/world/sourceSpatialComputedFrameR230.js'
+      - 'src/world/sourceSpatialCalibrationValidationR231.js'
       - 'src/OmegaGovernanceProjectMediaR29.tsx'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
@@ -55,6 +59,8 @@ on:
       - 'tests/r227-living-world-spatial-evidence-intake-invariants.mjs'
       - 'tests/r228-source-spatial-reconstruction-invariants.mjs'
       - 'tests/r228-living-world-source-spatial-reconstruction-invariants.mjs'
+      - 'tests/r230-proof-bound-computed-frame-invariants.mjs'
+      - 'tests/r231-independent-spatial-calibration-validation-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -71,6 +77,12 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R231 independent spatial calibration validation
+        run: node tests/r231-independent-spatial-calibration-validation-invariants.mjs
+      - name: Syntax-check R231 calibration validation
+        run: node --check src/world/sourceSpatialCalibrationValidationR231.js
+      - name: Prove R230 exact-byte computed frame
+        run: node tests/r230-proof-bound-computed-frame-invariants.mjs
       - name: Prove R228 exact-bound source spatial reconstruction
         run: node tests/r228-source-spatial-reconstruction-invariants.mjs
       - name: Prove R228 Living World reconstruction surface and truth boundary
