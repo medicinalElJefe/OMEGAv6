@@ -31,7 +31,7 @@ function projectionForSurface(surface:string){
 
 export function compileOperationWorldInputR140(event:OmegaOperationR86){
  const p=(event.payload&&typeof event.payload==='object'?event.payload:{}) as Record<string,unknown>;
- const sourceIds=list(p.sourceIds),proofIds=list(p.proofIds),scarIds=[...list(p.scarIds),...(event.status==='HOLD'?[event.sha256]:[])];
+ const sourceIds=list(p.sourceIds),proofIds=list(p.proofIds),missionScarIds=list(p.missionScarIds),scarIds=[...missionScarIds,...list(p.scarIds),...(event.status==='HOLD'?[event.sha256]:[])];
  const earthObserved=p.earthObserved===true&&sourceIds.length>0;
  const federationReturned=p.federationReturned===true&&(sourceIds.length>0||proofIds.length>0);
  const devices=Array.isArray(p.devices)?p.devices:[];
@@ -42,12 +42,14 @@ export function compileOperationWorldInputR140(event:OmegaOperationR86){
   continuity:num(p.continuity,0),plasticity:num(p.plasticity,0),contradiction:num(p.contradiction,event.status==='HOLD'?1:0),
   burden:num(p.burden,event.status==='HOLD'?.5:0),evidence:num(p.evidence,event.status==='PASS'?1:0),uncertainty:num(p.uncertainty,event.status==='HOLD'?1:.5),scar:num(p.scar,event.status==='HOLD'?1:0)
  };
+ const missionId=text(p.missionId)||event.id;
+ const missionPlanDigest=text(p.missionCarryHash)||event.sha256;
  return{
   eventTime:event.at,
   observerId:`browser-${text(event.surface,48).replace(/[^A-Za-z0-9._:-]+/g,'-')||'operator'}`,
   projection:projectionForSurface(event.surface),address:num(event.nextAddress??event.address,0),
   intent:{id:event.workflowId?`workflow-${text(event.workflowId,120)}`:`operation-${text(event.type,80)}`,sourceIds:[event.sha256]},
-  mission:{id:event.id,planDigest:event.sha256,scarIds},
+  mission:{id:missionId,planDigest:missionPlanDigest,scarIds},
   earth:{observed:earthObserved,sourceIds:earthObserved?sourceIds:[],proofIds:earthObserved?proofIds:[],scarIds:earthObserved?scarIds:[],payloadDigest:earthObserved?text(p.payloadDigest):null},
   federation:{returned:federationReturned,node:federationReturned?text(p.federationNode)||'federation-return':null,sourceIds:federationReturned?sourceIds:[],proofIds:federationReturned?proofIds:[],scarIds:federationReturned?scarIds:[],payloadDigest:federationReturned?text(p.payloadDigest):null},
   hybrid:{nativeExecutionClaimed,devices:nativeExecutionClaimed?devices:[],proofIds:nativeExecutionClaimed?proofIds:[],resultFingerprint:nativeExecutionClaimed?text(p.resultFingerprint):null},
@@ -71,7 +73,7 @@ export async function advanceOperationWorldR140(event:OmegaOperationR86,previous
  const input={...compileOperationWorldInputR140(event),previousHead:previousHead===undefined?readHead():previousHead};
  const frame=await assembleLivingWorldFrameR136(input);
  saveFrame(frame);
- return{schema:R140_SCHEMA,revision:R140_REVISION,eventId:event.id,eventSha256:event.sha256,frame,canonicalMutation:false,canonicalAdmissionAuthority:'R125',durability:'BROWSER_PERSISTED; R97 durable continuity still requires authenticated Hybrid continuity sync',truthBoundary:'R140 bridges real R86 browser/runtime operation receipts into the existing R136 visual-first one-world frame and R134 scar/proof chain. It never upgrades browser actions into Earth, federation, native Hybrid, solver, deployment or photoreal proof unless the operation payload carries the explicit source/proof fields already required by those domains.'};
+ return{schema:R140_SCHEMA,revision:R140_REVISION,eventId:event.id,eventSha256:event.sha256,frame,canonicalMutation:false,canonicalAdmissionAuthority:'R125',durability:'BROWSER_PERSISTED; R97 durable continuity still requires authenticated Hybrid continuity sync',truthBoundary:'R140 bridges real R86 browser/runtime operation receipts into the existing R136 visual-first one-world frame and R134 scar/proof chain. R208 mission continuity metadata may supply the mission ID, carry digest and scar lineage, but never upgrades mission intent into execution proof. R140 never upgrades browser actions into Earth, federation, native Hybrid, solver, deployment or photoreal proof unless the operation payload carries the explicit source/proof fields already required by those domains.'};
 }
 
 let installed=false;
