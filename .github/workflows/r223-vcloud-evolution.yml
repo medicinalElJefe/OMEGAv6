@@ -1,0 +1,38 @@
+name: R223 VCloud Evolution Authority
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r223-vcloud-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prove-vcloud-evolution-boundaries:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Prove VCloud evolution policy and promotion boundaries
+        run: |
+          node --check vcloud/lib/evolution-policy.mjs
+          node --check vcloud/lib/generated-capsules.mjs
+          node --check vcloud/lib/github-machine.mjs
+          node --check vcloud/api/evolution-cycle.mjs
+          node tests/r223-vcloud-evolution-invariants.mjs
+      - name: Preserve deployment and admission separation
+        run: |
+          ! grep -R -E 'wrangler deploy|gh pr merge|git push .*main' vcloud
+          grep -q "productionDeploymentWorkflow: 'ci.yml'" vcloud/lib/evolution-policy.mjs
+          grep -q "canonAdmission: 'R125'" vcloud/lib/evolution-policy.mjs
+          grep -q "dispatch: 'R147'" vcloud/lib/evolution-policy.mjs
+          grep -q "durableHistory: 'R146'" vcloud/lib/evolution-policy.mjs
+          grep -q "hybridReturnProof: 'R141'" vcloud/lib/evolution-policy.mjs
