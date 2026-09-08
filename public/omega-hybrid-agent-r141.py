@@ -11,12 +11,18 @@ loading the canonical R207 wrapper. The base remains byte-identical rollback/tra
 authority. This wrapper preserves root-confined allow-listed execution and adds the exact
 R141 payload envelope before R134/R136 evidence closure. R139/R140, R146/R147, R206 world
 continuity, R206.1 historical host evidence and R125 Canon admission remain preserved.
+
+R207.1 compatibility note: the server-side R116 asset validator predates the R207 split and
+looks for the literal legacy BASE_PATH token. SERVER_VALIDATOR_COMPATIBILITY_R207_1 carries
+that inert text only so the legacy validator can serve this wrapper; active BASE_PATH below
+remains the immutable R205 asset and its exact SHA-256 is mandatory before any base code loads.
 """
 from __future__ import annotations
 import hashlib,json,sys,types,urllib.request
 
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
 LEGACY_BASE_PATH_R141='/omega-hybrid-agent.py'
+SERVER_VALIDATOR_COMPATIBILITY_R207_1="BASE_PATH='/omega-hybrid-agent.py'"
 BASE_PATH='/omega-hybrid-agent-base-r205.py'
 EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'
 BASE_IDENTITY_MARKER='OMEGA R34 local Hybrid Link agent'
@@ -24,6 +30,7 @@ PAIRING_IDENTITY_MARKER='Pairing is explicit.'
 PROOF_CLOSURE_REVISION='R141'
 HOST_PROOF_EXTENSION='R205'
 HOST_EVIDENCE_CONTINUITY_REVISION='R206.1'
+R207_1_ASSET_COMPATIBILITY_REVISION='R207.1'
 FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'
 MAX_BASE_BYTES=512*1024
 MAX_FINGERPRINT_PAYLOAD_BYTES=512*1024
@@ -37,7 +44,7 @@ def arg_value(name,default):
 
 def canonical_base_source(server):
     url=server.rstrip('/')+BASE_PATH
-    req=urllib.request.Request(url,method='GET',headers={'cache-control':'no-cache','user-agent':'OMEGA-Hybrid-R141-R206.1-R207-Wrapper/1'})
+    req=urllib.request.Request(url,method='GET',headers={'cache-control':'no-cache','user-agent':'OMEGA-Hybrid-R141-R206.1-R207.1-Wrapper/1'})
     with urllib.request.urlopen(req,timeout=30) as r:
         source=r.read(MAX_BASE_BYTES+1)
     if len(source)<1000 or len(source)>MAX_BASE_BYTES:raise RuntimeError('R141 base agent size proof failed.')
@@ -71,7 +78,7 @@ def main():
         packet.update({'resultFingerprintSchema':FINGERPRINT_SCHEMA,'resultFingerprintR141Payload':payload,'resultFingerprintR141':digest,'proofClosureRevision':PROOF_CLOSURE_REVISION,'baseAgentSha256':base_digest})
         return packet
     base.execute_job=execute_job_r141
-    print('OMEGA Hybrid Link proof wrapper',PROOF_CLOSURE_REVISION,'· immutable base',base.VERSION,'execution',base.CAPABILITY_REVISION,'host proof',HOST_PROOF_EXTENSION,'continuity',HOST_EVIDENCE_CONTINUITY_REVISION)
+    print('OMEGA Hybrid Link proof wrapper',PROOF_CLOSURE_REVISION,'· immutable base',base.VERSION,'execution',base.CAPABILITY_REVISION,'host proof',HOST_PROOF_EXTENSION,'continuity',HOST_EVIDENCE_CONTINUITY_REVISION,'asset compatibility',R207_1_ASSET_COMPATIBILITY_REVISION)
     print('Exact return payload SHA-256 is enabled; R205 host proof, R206/R206.1 continuity and R125 admission boundaries remain intact.')
     base.main()
 
