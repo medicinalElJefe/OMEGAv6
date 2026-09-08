@@ -18,6 +18,7 @@ on:
       - 'src/world/evidenceReconstructionFrameR217.js'
       - 'src/world/geospatialSceneFieldR218.js'
       - 'src/world/elevationSceneMeshR219.js'
+      - 'src/world/elevationEvidenceAcquisitionR220.js'
       - 'src/OmegaGovernanceProjectMediaR29.tsx'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
@@ -35,6 +36,7 @@ on:
       - 'tests/r217-evidence-reconstruction-frame-invariants.mjs'
       - 'tests/r218-geospatial-scene-field-invariants.mjs'
       - 'tests/r219-source-backed-elevation-mesh-invariants.mjs'
+      - 'tests/r220-bounded-usgs-elevation-acquisition-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -51,6 +53,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R220 bounded USGS elevation evidence acquisition
+        run: node tests/r220-bounded-usgs-elevation-acquisition-invariants.mjs
       - name: Prove R219 source-backed elevation scene mesh
         run: node tests/r219-source-backed-elevation-mesh-invariants.mjs
       - name: Prove R218 evidence-bound WGS84 geospatial scene field
