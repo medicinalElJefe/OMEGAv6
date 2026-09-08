@@ -1,0 +1,71 @@
+name: R223 Cloudflare Evolution Authority
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r223-cloudflare-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prove-cloudflare-evolution-boundaries:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install --no-fund
+      - name: Prove CLOUD-01 evolution policy and promotion boundaries
+        run: |
+          node --check cloudflare/lib/evolution-policy.mjs
+          node --check cloudflare/lib/generated-capsules.mjs
+          node --check cloudflare/lib/github-machine.mjs
+          node --check cloudflare/workerR223.js
+          node tests/r223-cloudflare-evolution-invariants.mjs
+      - name: Prove ancillary Worker package without deployment
+        run: npx wrangler deploy --config wrangler.evolution-machine-r223.jsonc --dry-run --outdir .wrangler-r223-cloud-01
+
+  provision-cloud-01:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: prove-cloudflare-evolution-boundaries
+    runs-on: ubuntu-24.04
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      OMEGA_EVOLUTION_GITHUB_TOKEN: ${{ secrets.OMEGA_EVOLUTION_GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install --no-fund
+      - name: Require infrastructure credentials
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo '::error title=Cloudflare token required::OMEGA_CLOUDFLARE_TOKEN is unavailable.'; exit 1; }
+          test -n "$OMEGA_EVOLUTION_GITHUB_TOKEN" || { echo '::error title=Evolution GitHub credential required::Create the production environment secret OMEGA_EVOLUTION_GITHUB_TOKEN with narrowly scoped medicinalElJefe/OMEGAv6 branch, pull-request, actions-read, and merge permissions.'; exit 1; }
+      - name: Deploy CLOUD-01 ancillary evolution Worker
+        run: npx wrangler deploy --config wrangler.evolution-machine-r223.jsonc
+      - name: Bind CLOUD-01 GitHub credential as encrypted Worker secret
+        shell: bash
+        run: printf '%s' "$OMEGA_EVOLUTION_GITHUB_TOKEN" | npx wrangler secret put OMEGA_GITHUB_TOKEN --config wrangler.evolution-machine-r223.jsonc
+      - name: Generate and bind manual-trigger secret
+        shell: bash
+        run: |
+          CRON_SECRET="$(openssl rand -hex 32)"
+          printf '%s' "$CRON_SECRET" | npx wrangler secret put OMEGA_CRON_SECRET --config wrangler.evolution-machine-r223.jsonc
+          unset CRON_SECRET
+          echo 'CLOUD-01 manual-trigger secret generated and stored only in Cloudflare encrypted secret state.'
+      - name: Record provisioning boundary
+        run: |
+          echo 'CLOUD-01 provisioned as ancillary Cloudflare evolution compute.'
+          echo 'Canonical OMEGA production remains exclusively deployed by ci.yml deploy-main.'
+          echo 'CLOUD-01 may create governed GitHub source PRs and merge only exact-head fully green candidates; it cannot deploy canonical OMEGA directly.'
