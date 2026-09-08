@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {computeGeospatialSceneFieldR218,manifestR218} from '../src/world/geospatialSceneFieldR218.js';
+
+const h='a'.repeat(64),b='b'.repeat(64),c='c'.repeat(64),d='d'.repeat(64),e='e'.repeat(64),f='f'.repeat(64);
+const frame={state:'EVIDENCE_RECONSTRUCTION_FRAME_RENDERED',receiptSha256:h,frameSha256:b,evidenceBoundRepresentationalFrame:true,computedPhotorealRealityProved:false,missionId:'mission-r218',projectId:'project-r218',r216RequestSha256:c,r214AnchorSha256:d,r213AttemptSha256:e,r211LineageSha256:f,r208WorldBindingOperationSha256:h,previousWorldHeadSha256:b,earthHash:'earth-hash-r218',groundHash:'ground-hash-r218',evidenceDigest:'evidence-r218',profile:'FULL_FIELD'};
+const scene={eventAccepted:true,renderInputReady:true,earthHash:'earth-hash-r218',groundHash:'ground-hash-r218',target:{lat:32.2226,lon:-110.9747,crs:'WGS84 / EPSG:4326'}};
+const a=await computeGeospatialSceneFieldR218({frame,scene});
+const again=await computeGeospatialSceneFieldR218({frame,scene});
+assert.equal(a.state,'GEOSPATIAL_SCENE_FIELD_COMPUTED');
+assert.equal(a.fieldComputed,true);
+assert.equal(a.profile,'FULL_FIELD');
+assert.equal(a.side,9);
+assert.equal(a.spacingM,2);
+assert.equal(a.sampleCount,81);
+assert.match(a.fieldSha256,/^[a-f0-9]{64}$/);
+assert.match(a.receiptSha256,/^[a-f0-9]{64}$/);
+assert.equal(a.fieldSha256,again.fieldSha256,'identical evidence target and lineage must yield a stable field hash');
+assert.equal(a.receiptSha256,again.receiptSha256,'identical field receipt must be deterministic');
+const center=a.samples[40];
+assert.equal(center.eastM,0);assert.equal(center.northM,0);assert.equal(center.lat,32.2226);assert.equal(center.lon,-110.9747);
+assert.equal(center.elevationM,null);assert.equal(center.depthM,null);assert.equal(center.radiometry,null);assert.equal(center.material,null);
+assert.equal(a.spatialCalibrationProved,false);assert.equal(a.depthReconstruction,false);assert.equal(a.materialReconstruction,false);assert.equal(a.radiometricReconstruction,false);assert.equal(a.empiricalPixelReconstruction,false);assert.equal(a.computedPhotorealRealityProved,false);assert.equal(a.solverValidityProved,false);assert.equal(a.nativeExecutionClaimed,false);assert.equal(a.federationClosureProved,false);assert.equal(a.canonicalMutation,false);
+assert.equal(a.computedRealityAuthority,'R122_EXISTING_COMPUTED_REALITY');assert.equal(a.adaptivePerformanceAuthority,'R185_EXISTING_PERFORMANCE_LAYER');
+const mismatch=await computeGeospatialSceneFieldR218({frame,scene:{...scene,earthHash:'different'}});assert.equal(mismatch.state,'HELD_FOR_PROOF');assert.equal(mismatch.fieldComputed,false);
+const badCrs=await computeGeospatialSceneFieldR218({frame,scene:{...scene,target:{...scene.target,crs:'LOCAL'}}});assert.equal(badCrs.state,'HELD_FOR_PROOF');
+const manifest=manifestR218();assert.equal(manifest.authority.computedReality,'R122 existing authority');assert.equal(manifest.authority.canonicalAdmission,'R125');assert.match(manifest.truthBoundary,/does not infer elevation, depth, surface geometry, materials, radiometry, empirical pixels/i);
+console.log('R218 geospatial scene field invariants: PASS');
