@@ -63,7 +63,7 @@ export async function proposeCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   return {...inspection,mutation:'BRANCH_AND_PR_CREATED',branch,prNumber:pr.number,prUrl:pr.html_url,generation,capsuleId:capsule.id};
 }
 
-export async function promoteGreenVCloudPr({token,repo='medicinalElJefe/OMEGAv6',prNumber,requiredWorkflows=['OMEGA Cloud Bridge CI','R170 Current Convergence','R202 Operational Source Authority','R210 Release Controller']}){
+export async function promoteGreenVCloudPr({token,repo='medicinalElJefe/OMEGAv6',prNumber,requiredWorkflows=['OMEGA Cloud Bridge CI','R170 Current Convergence','R202 Operational Source Authority','R210 Release Controller','R223 VCloud Evolution Authority']}){
   const pr=await gh(token,`/repos/${repo}/pulls/${prNumber}`);
   if(pr.state!=='open')return {action:'NONE',reason:`PR is ${pr.state}`};
   if(!String(pr.head?.ref||'').startsWith('vcloud/evolution-'))return {action:'NONE',reason:'not a VCloud evolution PR'};
