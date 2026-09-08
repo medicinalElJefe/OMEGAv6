@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const effects=read('src/HybridHostEffectsR212.tsx');
+const hybrid=read('src/HybridLinkR32.tsx');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+for(const token of ["api.get<any>('/api/hybrid/status')","api.get<any>('/api/missions')",'CURRENT MISSION ≠ HISTORICAL RETURN','CURRENT HOST JOB','The current mission is still executing.','NO SOURCE MUTATION IN THIS RETURN','APPLY_PATCH','WRITE_TEXT','stepProofs','outputPaths','FILESYSTEM OUTPUTS','SOURCE MUTATION','resultFingerprint'])must(effects.includes(token),`R212 host-effects surface missing ${token}`);
+must(effects.includes("const MUTATION_OPS=new Set(['APPLY_PATCH','WRITE_TEXT'])"),'R212 source mutation classification must be exact and bounded');
+must(effects.includes("['ACTIVE','PAUSED']")&&effects.includes('currentMission?.currentJob')&&effects.includes('terminalJobs'),'R212 must keep active mission/current job separate from historical terminal returns');
+must(effects.includes('window.setInterval(()=>void refresh(),3000)'),'R212 host effects must refresh while the authenticated bridge remains live');
+must(!effects.includes('api.post<any>')&&!effects.includes('fetch('),'R212 host-effects surface must remain read-only and may not create a second execution path');
+must(hybrid.includes("import HybridHostEffectsR212 from './HybridHostEffectsR212'"),'Hybrid Link must import R212 host effects');
+must(hybrid.indexOf('<HybridHostEffectsR212/>')>hybrid.indexOf('<SovereignConnectionR117/>')&&hybrid.indexOf('<HybridHostEffectsR212/>')<hybrid.indexOf('<HybridProofClosureR141/>'),'R212 host effects must sit between current connection truth and R141 proof closure');
+must(hybrid.includes('Build success is not source mutation'),'Hybrid Link must explain that successful execution does not imply a source edit');
+must(effects.includes('does not queue a job')&&effects.includes('does not')&&effects.includes('alter R141/R146/R147/R125 authority'),'R212 authority boundary missing');
+console.log('OMEGA R212 LIVE HOST EFFECTS PASS · current mission separated from historical returns · exact host step proofs/output paths visible · source mutations only from returned APPLY_PATCH/WRITE_TEXT · read-only observer preserves R141/R146/R147/R125');
