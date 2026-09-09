@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const worker=read('src/workerR32.js');
+const worker117=read('src/workerR117.js');
+const bootstrap117=read('src/hybridBootstrapR117.ts');
 const deck=read('src/HybridCommandDeckR237.tsx');
 const hybrid=read('src/HybridLinkR32.tsx');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
@@ -24,6 +26,21 @@ must(worker.includes("reply:'Existing pairing must authenticate before rotation.
 must(worker.includes("path.startsWith('/api/hybrid/jobs/')&&path.endsWith('/cancel')"),'R237 public queued-job cancellation route missing');
 must(worker.includes("The selected host already has active native work"),'R237 per-device backpressure truth copy missing');
 must(!worker.includes("status:'KILLED'"),'R237 must not fake force-killing a running native process');
+
+for(const token of [
+ "const currentSecret=text(request.headers.get('x-omega-bridge-secret'))",
+ "if(currentSecret)headers.set('x-omega-bridge-secret',currentSecret)",
+ "body:JSON.stringify({rotate:true})",
+ "rotates an existing credential only when the caller proves the current bridge secret"
+])must(worker117.includes(token),`R237 R117 authenticated bootstrap continuity missing ${token}`);
+for(const token of [
+ "getHybridBridge",
+ "const session=runtimeSessionId()",
+ "const current=getHybridBridge()",
+ "current?.bridgeId===session&&current.secret",
+ "headers['x-omega-bridge-secret']=current.secret"
+])must(bootstrap117.includes(token),`R237 browser bootstrap credential continuity missing ${token}`);
+must(!bootstrap117.includes("headers['x-omega-bridge-secret']=current.secret;\n  if(current?.bridgeId!==session"),'R237 must never forward a saved bridge secret before session identity is matched');
 
 for(const token of [
  "api.get<any>('/api/hybrid/status')",
@@ -52,4 +69,4 @@ must(hybrid.includes("import HybridCommandDeckR237 from './HybridCommandDeckR237
 must(hybrid.indexOf('<HybridCommandDeckR237/>')>hybrid.indexOf('<HybridHostEffectsR212/>')&&hybrid.indexOf('<HybridCommandDeckR237/>')<hybrid.indexOf('<HybridProofClosureR141/>'),'R237 command deck must sit between first-hand R212 host effects and R141 closure');
 for(const token of ['R125 admission authority','R141 exact return closure','R146 history','R147 executor/dispatch authority'])must(hybrid.includes(token),`R237 Hybrid Link authority boundary regressed ${token}`);
 
-console.log('OMEGA R237 HYBRID COMMAND AUTHORITY PASS · authenticated mission control + one-active-job-per-device backpressure + queued cancellation + capability-negotiated native command deck · no direct source/shell mutation primitive · R141/R146/R147/R125 preserved');
+console.log('OMEGA R237 HYBRID COMMAND AUTHORITY PASS · authenticated secret rotation + same-session reconnect continuity + authenticated mission control + one-active-job-per-device backpressure + queued cancellation + capability-negotiated native command deck · no direct source/shell mutation primitive · R141/R146/R147/R125 preserved');
