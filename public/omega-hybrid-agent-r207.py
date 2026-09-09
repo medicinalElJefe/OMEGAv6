@@ -170,10 +170,11 @@ def main():
             send_progress('RETURNING');stop_event.set();thread.join(timeout=1.0);motion_update(active=False,state='RETURNING')
         return wrap_packet(packet,base_digest)
 
+    def execute_job_r207(job,root):return execute_job_r243(job,root)
     def capabilities_r207():return base_capabilities()
     base.execute_step=execute_step_r243
     base.request_json=request_json_r243
-    base.execute_job=execute_job_r243
+    base.execute_job=execute_job_r207
     base.capabilities=capabilities_r207
     original_main=base.main
     print('OMEGA Hybrid Link proof wrapper',VERSION,'· base',base.VERSION,'execution',base.CAPABILITY_REVISION,'proof',BASE_PROOF_EXTENSION,'→',PROOF_CLOSURE_REVISION,'motion',EXECUTION_MOTION_EXTENSION)
