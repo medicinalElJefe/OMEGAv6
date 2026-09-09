@@ -44,8 +44,10 @@ jobs:
       - name: Prove R245 Full Overall Canon convergence without a new workflow authority
         run: node tests/r245-full-overall-canon-invariants.mjs
 
-      - name: Prove R248 relative contribution fabric without a new authority plane
-        run: node tests/r248-relative-contribution-fabric-invariants.mjs
+      - name: Prove R248 contribution fabric and operational calculus governor
+        run: |
+          node tests/r248-relative-contribution-fabric-invariants.mjs
+          node tests/r248-operational-calculus-governor-invariants.mjs
 
       - name: Prove R245 shared R170 and CLOUD-01 governed self-build convergence
         run: node tests/r245-governed-selfbuild-convergence-invariants.mjs
@@ -111,7 +113,7 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + R239/R242 Navigation + R245 Full Overall Canon + R248 Contribution Fabric'
+            echo '## R241 Archive Convergence + R239/R242 Navigation + R245 Full Overall Canon + R248 Contribution + Operational Calculus'
             echo "- Candidate: $GITHUB_SHA"
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
             echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
@@ -119,9 +121,11 @@ jobs:
             echo '- R248 reuses that exact epoch and factors contributors across capability, authority, provenance, freshness, latency, reliability, resource, contradiction, execution, continuity, observability and admission dimensions.'
             echo '- R248 structural profiles are comparison weights, not fabricated measurements; live contributor state remains PROVED, AVAILABLE_UNPROVED or UNOBSERVED from returned evidence.'
             echo '- R248 relation, contradiction and residual ledgers preserve specialized contribution without collapsing authority boundaries.'
+            echo '- R248 operational calculus derives CΩ/Φ/q/Λ/evidence/uncertainty/scar only from current software, Hybrid, resource and job evidence; it reuses the established R123 STAY/TURN/ESCALATE decision law.'
+            echo '- R248 now governs the real R247→R153 mission objective and bounded recursion budget instead of leaving calculus as a display-only model; it creates no executor or dispatch path.'
             echo '- R245 exposes 7 Canon axes, 7 permanent strata, 12 logical organs and 12→144→1,728→20,736→248,832 address/scheduling levels without physical-dimension inflation.'
             echo '- R245 desktop/mobile built-browser proof requires the actual System Atlas surface, preserves the R153 executor and proves manual observation refresh remains non-mutating.'
-            echo '- R245/R248 delegate mutation/execution to existing Build Out/R153/Hybrid authorities and own no POST/PUT/DELETE, executor, production writer or Canon admission path.'
+            echo '- R245/R248 delegate mutation/execution to existing Build Out/R153/Hybrid authorities and own no production writer or Canon admission path.'
             echo '- R245 also binds R170 and CLOUD-01 to one canonical R164 residual policy, one R240/R243 candidate-selection law and one deterministic SG001–SG005 generator.'
             echo '- The autonomous one-open-candidate fence covers both selfbuild/r170-* and cloud/evolution-* namespaces; the two machines may not independently advance competing source proposals.'
             echo '- R241 PR concurrency cancels superseded candidate proofs so expensive browser work follows the exact current head instead of serializing stale heads.'
