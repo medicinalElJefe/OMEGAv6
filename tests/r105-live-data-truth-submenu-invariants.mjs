@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R105 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R105/R239 '+msg)};
 
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const registry=read('src/omegaExperienceRegistryR82.ts');
@@ -21,7 +21,7 @@ must(nav.includes('OMEGA_WORKSPACES_R82')&&nav.includes("type WorkspaceFilter='A
 must(nav.includes("localStorage.getItem('omega.r82.workspace')")&&nav.includes("detail?.layer==='APPLICATIONS'?storedWorkspace()"),'Home contextual All tools handoff must retain active workspace');
 must(nav.includes("className='r105-workspace-filter'")&&nav.includes('OMEGA_WORKSPACES_R82.map(workspace=>'),'six workspace submenu controls must be rendered');
 must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'submenu filtering must preserve flat registered route inventory and direct reachability');
-must(nav.includes('routeCount=OMEGA_ROUTE_INVENTORY_R107.currentCount')&&nav.includes("setWorkspaceFilter('ALL');open('EVERYWHERE')")&&nav.includes('Everywhere <b>{routeCount}</b>'),'global Everywhere path must restore the complete registered route inventory dynamically');
+must(nav.includes('routeCount=OMEGA_ROUTE_INVENTORY_R107.currentCount')&&nav.includes("setWorkspaceFilter('ALL');open('EVERYWHERE')")&&nav.includes("title='All tools'"),'global All Tools path must restore the complete registered route inventory dynamically');
 must(nav.includes('OmegaSystemInventoryR83 compact onNavigate={go}'),'software-system submenu must remain functional');
 
 // Archived 2025 workbook SAMPLE data stays preserved but cannot own the primary NOW graph.
@@ -47,5 +47,5 @@ must(accepted.includes("id:'NO_STALE_NOW_GRAPH'")&&accepted.includes("'R105 live
 for(const prior of ['R100 woven continuity geometry/time','R101 weave-derived effective resolution','R102 four-node capability fabric','R103 task-first capability router','R104 eight-layer functional correlation'])must(accepted.includes(prior),'prior accepted layer lost: '+prior);
 must(r55.includes("await import('./r105-live-data-truth-submenu-invariants.mjs')")||r55.includes("import './r105-live-data-truth-submenu-invariants.mjs'"),'R105 gate must execute inside full R55/static release path');
 
-console.log(`R105 LIVE DATA TRUTH + SUBMENU PASS · ${registeredRoutes.length} registered routes preserved · 6 contextual submenus · current canonical recurrence separated from 2025 donor samples · current-session performance truth enforced`);
+console.log(`R105/R239 LIVE DATA TRUTH + SUBMENU PASS · ${registeredRoutes.length} registered routes preserved · 6 contextual submenus · complete All Tools recovery · current canonical recurrence separated from 2025 donor samples · current-session performance truth enforced`);
 await import('./r106-temporal-ledger-truth-invariants.mjs');

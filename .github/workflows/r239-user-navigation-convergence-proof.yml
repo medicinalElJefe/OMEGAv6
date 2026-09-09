@@ -1,0 +1,71 @@
+name: OMEGA R239 User Navigation Convergence
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/OmegaHomeR71.tsx'
+      - 'src/OmegaSideNavigatorR88.tsx'
+      - 'src/omegaSideNavigatorR239.css'
+      - 'tests/r132-whole-system-experience-invariants.mjs'
+      - 'tests/r239-user-navigation-convergence-invariants.mjs'
+      - 'tests/r239-user-navigation-browser-e2e.mjs'
+      - '.github/workflows/r239-user-navigation-convergence-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install exact application graph
+        run: npm install
+      - name: R239 user-navigation invariants
+        run: |
+          node tests/r239-user-navigation-convergence-invariants.mjs
+          node tests/r132-whole-system-experience-invariants.mjs
+          node tests/r88-global-side-navigator-invariants.mjs
+          node tests/r84-responsive-coherent-navigation-invariants.mjs
+      - name: Full inherited application verification
+        run: npm run check
+      - name: Preserve workflow authority topology
+        run: node scripts/verify_workflow_topology_r170.mjs
+      - name: Worker packaging proof only
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r239-dry-run
+
+  built-browser-proof:
+    needs: source-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run build
+      - name: Install pinned browser harness
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Start built preview
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/r239-vite.log 2>&1 &
+          ready=0
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then cat /tmp/r239-vite.log; exit 1; fi
+      - name: Prove user navigation in the built product
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r239-user-navigation-browser-e2e.mjs
