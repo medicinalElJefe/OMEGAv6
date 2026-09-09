@@ -53,6 +53,9 @@ for(const token of [
  '1,728 / 20,736',
  'STAY ${topology.counts.STAY}', 'TURN ${topology.counts.TURN}', 'ESC ${topology.counts.ESCALATE}', 'UNPROVED ${topology.counts.UNPROVED}',
  'COGNITION / AUTHORITY',
+ 'INGRESS / EGRESS / BLOCKED / RESIDUE',
+ 'TURN / BASIN',
+ 'CΩ / Φ / q / Λ',
  'R125/R141/R146/R147 AUTHORITIES UNCHANGED',
  'LIVING_TOPOLOGY_BOUNDARY_R241','COGNITIVE_AUTHORITY_BOUNDARY_R241'
 ])must(overlay.includes(token),`R241 visible convergence missing ${token}`);
@@ -66,4 +69,4 @@ must(commandInvariant.includes('semantic LOCKED or HELD without prose overclaim'
 
 for(const file of [topology,cognition,overlay])for(const forbidden of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203'])must(!file.includes(forbidden),`R241 must not restore retired Durable Object ${forbidden}`);
 
-console.log('OMEGA R241 ARCHIVE CONVERGENCE PASS · 1,728 deterministic 12×12×12 topology over exact 20,736 packet · source route/neighbor filaments · evidence-aware STAY/TURN/ESCALATE/UNPROVED · AGI/QTI typed cognition read-only through proposal · authorization/execution/return/Canon fail closed · existing R13/R113/R119 visual layers preserved · R240 live verifier repaired to semantic LOCKED/HELD truth · R125/R141/R146/R147 and retired R201/R203 boundaries preserved');
+console.log('OMEGA R241 ARCHIVE CONVERGENCE PASS · 1,728 deterministic 12×12×12 topology over exact 20,736 packet · source route/neighbor filaments · evidence-aware STAY/TURN/ESCALATE/UNPROVED · AGI/QTI typed cognition read-only through proposal · authorization/execution/return/Canon fail closed · inherited R182 INGRESS/EGRESS/BLOCKED/RESIDUE + TURN/BASIN + CΩ/Φ/q/Λ legend preserved · existing R13/R113/R119 visual layers preserved · R240 live verifier repaired to semantic LOCKED/HELD truth · R125/R141/R146/R147 and retired R201/R203 boundaries preserved');
