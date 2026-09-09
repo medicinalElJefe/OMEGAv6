@@ -4,7 +4,7 @@ import { normalizeFeatureCollection } from '../src/normalize.mjs';
 import { dedupeAndSort, frameState, maturityWarnings, revisitStats, knownMissionWarnings } from '../src/engine.mjs';
 import { geometryContainsPoint } from '../src/geometry.mjs';
 import { buildAsfQuery } from '../src/asf.mjs';
-import { buildStacBody, normalizeStacItem, s3ToHttps, wktBounds } from '../src/stac.mjs';
+import { buildStacBody, normalizeStacItem, s3ToHttps, wktBounds, wktPoint } from '../src/stac.mjs';
 import { chronologyMetrics, temporalPosition } from '../src/analytics.mjs';
 import { percentile, rasterStats, stretchByte } from '../src/raster.mjs';
 import { atlasAddress, atlasHierarchy, deweyAtlasEstimate, nominalCellScaleKm } from '../src/atlas.mjs';
@@ -72,12 +72,23 @@ test('known NISAR instrument gap is surfaced when a query overlaps it',()=>{
   assert.equal(knownMissionWarnings({dataset:'NISAR',start:'2026-08-15T00:00:00Z',end:'2026-09-01T00:00:00Z'}).length,0);
 });
 
-test('WKT is reduced to a deterministic STAC bbox and request body',()=>{
-  assert.deepEqual(wktBounds('POLYGON((-112 31,-109 31,-109 34,-112 34,-112 31))'),[-112,31,-109,34]);
+test('POINT WKT becomes a GeoJSON intersects query and never a zero-area bbox',()=>{
+  assert.deepEqual(wktPoint('POINT(-110.9 32.2)'),{type:'Point',coordinates:[-110.9,32.2]});
   const body=buildStacBody({start:'2026-09-01T00:00:00Z',end:'2026-09-08T23:59:59Z',intersectsWith:'POINT(-110.9 32.2)',limit:50});
   assert.deepEqual(body.collections,['sentinel-1-grd']);
-  assert.deepEqual(body.bbox,[-110.9,32.2,-110.9,32.2]);
+  assert.deepEqual(body.intersects,{type:'Point',coordinates:[-110.9,32.2]});
+  assert.equal('bbox' in body,false);
   assert.equal(body.limit,50);
+});
+
+test('polygon WKT retains deterministic non-zero STAC bbox',()=>{
+  assert.deepEqual(wktBounds('POLYGON((-112 31,-109 31,-109 34,-112 34,-112 31))'),[-112,31,-109,34]);
+  const body=buildStacBody({intersectsWith:'POLYGON((-112 31,-109 31,-109 34,-112 34,-112 31))'});
+  assert.deepEqual(body.bbox,[-112,31,-109,34]);
+});
+
+test('explicit zero-area STAC bbox is rejected rather than sent upstream',()=>{
+  assert.throws(()=>buildStacBody({bbox:[-110.9,32.2,-110.9,32.2]}),/non-zero area/);
 });
 
 test('STAC Sentinel-1 data assets are preserved as actual COG measurements',()=>{
