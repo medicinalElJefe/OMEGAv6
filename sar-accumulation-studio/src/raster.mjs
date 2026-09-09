@@ -19,8 +19,8 @@ async function openTiff(url) {
   if (!TIFF_CACHE.has(cacheKey)) {
     TIFF_CACHE.set(cacheKey, (async () => {
       const mod = await geotiffModule();
-      const tiff = await mod.fromUrl(transport, { cacheSize: 64 * 1024 * 1024 });
-      const image = await tiff.getImage();
+      const tiff = await mod.fromUrl(transport, { cacheSize: 32 * 1024 * 1024, blockSize: 65536 });
+      const image = await tiff.getImage(0);
       return { tiff, image };
     })());
   }
@@ -66,76 +66,84 @@ function optionalGeoMetadata(image) {
     affine,
     spatialInterpretation: affine
       ? 'GeoTIFF affine transform available.'
-      : 'Raster decoded successfully, but this product does not expose a simple affine GeoTIFF transform. Display is valid; coordinate-to-pixel sampling remains unproved until product geolocation/GCP mapping is bound.'
+      : 'Raster decoded successfully, but this product does not expose a simple affine GeoTIFF transform. The displayed tile contains actual source pixels; coordinate-to-pixel sampling remains unproved until product geolocation/GCP mapping is bound.'
   };
 }
 
-async function choosePreviewImage(tiff, baseImage, maxWidth, maxHeight) {
-  let count = 1;
-  try { count = Math.max(1, await tiff.getImageCount()); } catch {}
-  const candidates = [];
-  for (let i = 0; i < count; i++) {
-    let image;
-    try { image = i === 0 ? baseImage : await tiff.getImage(i); } catch { continue; }
-    const width = image.getWidth(), height = image.getHeight();
-    if (!Number.isFinite(width) || !Number.isFinite(height) || width < 1 || height < 1) continue;
-    candidates.push({ image, index:i, width, height, area:width * height });
-  }
-  if (!candidates.length) return { image:baseImage, index:0, width:baseImage.getWidth(), height:baseImage.getHeight(), overview:false };
-
-  const targetArea = Math.max(1, maxWidth * maxHeight);
-  const usable = candidates
-    .filter(c => c.width >= Math.min(256,maxWidth) && c.height >= Math.min(256,maxHeight) && c.area <= targetArea * 12)
-    .sort((a,b) => Math.abs(Math.log(a.area / targetArea)) - Math.abs(Math.log(b.area / targetArea)));
-  const selected = usable[0] || candidates.slice().sort((a,b)=>a.area-b.area)[0];
-  return { ...selected, overview:selected.index !== 0 };
-}
-
-function boundedCenterWindow(sourceWidth, sourceHeight, maxSourcePixels = 4_000_000) {
-  if (sourceWidth * sourceHeight <= maxSourcePixels) return null;
-  const aspect = sourceWidth / sourceHeight;
-  const windowHeight = Math.max(256, Math.min(sourceHeight, Math.floor(Math.sqrt(maxSourcePixels / Math.max(aspect,1e-6)))));
-  const windowWidth = Math.max(256, Math.min(sourceWidth, Math.floor(windowHeight * aspect)));
+export function boundedNativeWindow(sourceWidth, sourceHeight, maxSide = 1024) {
+  const side = Math.max(256, Math.min(2048, Math.round(maxSide)));
+  if (sourceWidth <= side && sourceHeight <= side) return [0, 0, sourceWidth, sourceHeight];
+  const windowWidth = Math.min(sourceWidth, side);
+  const windowHeight = Math.min(sourceHeight, side);
   const x0 = Math.max(0, Math.floor((sourceWidth - windowWidth) / 2));
   const y0 = Math.max(0, Math.floor((sourceHeight - windowHeight) / 2));
-  return [x0,y0,Math.min(sourceWidth,x0+windowWidth),Math.min(sourceHeight,y0+windowHeight)];
+  return [x0, y0, x0 + windowWidth, y0 + windowHeight];
 }
 
-export async function renderCog(url, canvas, { maxWidth = 1100, maxHeight = 780, gamma = 0.72 } = {}) {
-  const { tiff, image:baseImage } = await openTiff(url);
-  const baseWidth = baseImage.getWidth(), baseHeight = baseImage.getHeight();
-  const selected = await choosePreviewImage(tiff, baseImage, maxWidth, maxHeight);
-  const sourceWidth = selected.width, sourceHeight = selected.height;
-  const previewWindow = selected.overview ? null : boundedCenterWindow(sourceWidth, sourceHeight);
-  const windowWidth = previewWindow ? previewWindow[2]-previewWindow[0] : sourceWidth;
-  const windowHeight = previewWindow ? previewWindow[3]-previewWindow[1] : sourceHeight;
-  const scale = Math.min(1, maxWidth / windowWidth, maxHeight / windowHeight);
-  const width = Math.max(1, Math.round(windowWidth * scale)), height = Math.max(1, Math.round(windowHeight * scale));
-  const readOptions = { width, height, samples:[0], interleave:true, resampleMethod:'bilinear' };
-  if (previewWindow) readOptions.window = previewWindow;
-  const raster = await selected.image.readRasters(readOptions);
-  const nodataText = selected.image.getGDALNoData?.();
-  const nodata = nodataText == null ? 0 : Number(nodataText);
-  const stats = rasterStats(raster, Number.isFinite(nodata) ? nodata : 0);
-  const low = stats.p02 ?? stats.min ?? 0, high = stats.p98 ?? stats.max ?? 1;
-
-  canvas.width = width; canvas.height = height;
-  const ctx = canvas.getContext('2d'), imageData = ctx.createImageData(width, height);
+function drawRaster(canvas, raster, width, height, nodata, low, high, gamma) {
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.createImageData(width, height);
   for (let i = 0; i < raster.length; i++) {
     const v = Number(raster[i]);
-    const byte = v === nodata ? 0 : stretchByte(v, low, high, gamma), j = i * 4;
-    imageData.data[j] = byte; imageData.data[j + 1] = Math.min(255, Math.round(byte * 1.03)); imageData.data[j + 2] = Math.min(255, Math.round(byte * 1.08)); imageData.data[j + 3] = v === nodata ? 0 : 255;
+    const missing = !Number.isFinite(v) || v === nodata;
+    const byte = missing ? 0 : stretchByte(v, low, high, gamma);
+    const j = i * 4;
+    imageData.data[j] = byte;
+    imageData.data[j + 1] = Math.min(255, Math.round(byte * 1.03));
+    imageData.data[j + 2] = Math.min(255, Math.round(byte * 1.08));
+    imageData.data[j + 3] = missing ? 0 : 255;
   }
   ctx.putImageData(imageData, 0, 0);
-  const geo = optionalGeoMetadata(selected.image);
-  const renderCoverage = selected.overview ? 'FULL_SCENE_OVERVIEW' : previewWindow ? 'BOUNDED_CENTER_WINDOW' : 'FULL_SCENE_BASE_IMAGE';
+}
+
+export async function renderCog(url, canvas, { maxSide = 1024, gamma = 0.72, onStage } = {}) {
+  onStage?.('OPEN_TIFF');
+  const { image } = await openTiff(url);
+  const sourceWidth = image.getWidth();
+  const sourceHeight = image.getHeight();
+  if (!Number.isFinite(sourceWidth) || !Number.isFinite(sourceHeight) || sourceWidth < 1 || sourceHeight < 1) throw new Error('GeoTIFF reports invalid raster dimensions.');
+
+  const previewWindow = boundedNativeWindow(sourceWidth, sourceHeight, maxSide);
+  const width = previewWindow[2] - previewWindow[0];
+  const height = previewWindow[3] - previewWindow[1];
+  onStage?.('READ_NATIVE_WINDOW');
+  const raster = await image.readRasters({ window: previewWindow, samples: [0], interleave: true });
+  const nodataText = image.getGDALNoData?.();
+  const nodata = nodataText == null ? 0 : Number(nodataText);
+  onStage?.('COMPUTE_DISPLAY_STATS');
+  const stats = rasterStats(raster, Number.isFinite(nodata) ? nodata : 0);
+  const low = stats.p02 ?? stats.min ?? 0;
+  const high = stats.p98 ?? stats.max ?? 1;
+  onStage?.('PAINT_NATIVE_PIXELS');
+  drawRaster(canvas, raster, width, height, Number.isFinite(nodata) ? nodata : 0, low, high, gamma);
+
+  const geo = optionalGeoMetadata(image);
+  const fullScene = previewWindow[0] === 0 && previewWindow[1] === 0 && previewWindow[2] === sourceWidth && previewWindow[3] === sourceHeight;
+  onStage?.('READY');
   return {
-    baseWidth, baseHeight, sourceWidth, sourceHeight, renderedWidth: width, renderedHeight: height,
-    imageIndex:selected.index, overview:selected.overview, previewWindow, renderCoverage,
-    bbox: geo.bbox, resolution: geo.resolution, geoKeys: geo.geoKeys, affine: geo.affine,
+    baseWidth: sourceWidth,
+    baseHeight: sourceHeight,
+    sourceWidth,
+    sourceHeight,
+    renderedWidth: width,
+    renderedHeight: height,
+    imageIndex: 0,
+    overview: false,
+    previewWindow,
+    renderCoverage: fullScene ? 'FULL_SCENE_BASE_IMAGE' : 'BOUNDED_NATIVE_CENTER_TILE',
+    bbox: geo.bbox,
+    resolution: geo.resolution,
+    geoKeys: geo.geoKeys,
+    affine: geo.affine,
     spatialInterpretation: geo.spatialInterpretation,
-    nodata, stats, sourceUrl:url, transportUrl:rasterTransportUrl(url),
-    displayTransform: { type: 'percentile-linear-plus-gamma', low, high, gamma, scientificCalibrationClaimed: false }
+    nodata: Number.isFinite(nodata) ? nodata : 0,
+    stats,
+    sourceUrl: url,
+    transportUrl: rasterTransportUrl(url),
+    displayTransform: { type: 'percentile-linear-plus-gamma', low, high, gamma, scientificCalibrationClaimed: false },
+    pixelSemantics: 'Actual source measurement pixels from the selected GeoTIFF window. No synthesized SAR observation is introduced.'
   };
 }
 
