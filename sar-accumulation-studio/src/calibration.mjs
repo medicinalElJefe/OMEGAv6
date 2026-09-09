@@ -1,147 +1,246 @@
 import { deweyAtlasEstimate } from './atlas.mjs';
+import {
+  FOLD_SCALE_CANON,
+  EMPIRICAL_TURN_PROFILES,
+  WOVEN_RELEASE_CALIBRATION,
+  EARTH_PROXY_CHART,
+  PRIOR_VALIDATION_REFERENCES,
+  PROOF_BOUNDARY
+} from './charted-canon.mjs';
 
-export const EMPIRICAL_REFERENCE_LEDGER = Object.freeze({
-  frameworkBenchmarks: [
-    {
-      id: 'PSC_HELDOUT_RECORDED',
-      domain: 'prior framework benchmark',
-      rows: 149679,
-      r2: 0.8785,
-      maeImprovementVsStatedBaselinePct: 65.84,
-      status: 'RECORDED_SINGLE_DATASET_RESULT',
-      useForSarClaim: false,
-      boundary: 'Historical framework evidence only. It does not calibrate or validate SAR inference.'
-    },
-    {
-      id: 'PLANCK_20736_REPRODUCTION',
-      domain: 'numerical reproduction',
-      cells: 20736,
-      maxRelativeResidual: 1.42e-14,
-      status: 'RECORDED_NUMERICAL_REPRODUCTION',
-      useForSarClaim: false,
-      boundary: 'Demonstrates numerical reconstruction fidelity for that analytic target; not evidence of SAR predictive accuracy.'
-    },
-    {
-      id: 'SEED_CHAIN_600',
-      domain: 'prior validation dataset',
-      rows: 600,
-      testRows: 180,
-      baselineMAE: 0.1067787442837301,
-      deweyMAE: 0.0281954303372119,
-      deweyRMSE: 0.0362083255507555,
-      deweyR2: 0.9180417606289796,
-      improvementVsBaselinePct: 73.59452901759957,
-      status: 'DEWEY_METHOD_SUPPORTED_ON_THIS_DATASET',
-      useForSarClaim: false,
-      boundary: 'Dataset-specific reference only; Auto-Ping did not converge in the stored result.'
-    }
-  ],
-  universalClaimStatus: 'OPEN_REQUIRES_INDEPENDENT_MULTI_DATASET_BENCHMARKING'
+export const CHARTED_CALIBRATION_CONTRACT = Object.freeze({
+  foldScale: FOLD_SCALE_CANON,
+  empiricalTurnProfiles: EMPIRICAL_TURN_PROFILES,
+  wovenReleaseCalibration: WOVEN_RELEASE_CALIBRATION,
+  earthProxyChart: EARTH_PROXY_CHART,
+  priorValidationReferences: PRIOR_VALIDATION_REFERENCES,
+  proofBoundary: PROOF_BOUNDARY
 });
 
+const finite = value => Number.isFinite(Number(value));
+const clamp01 = value => Math.max(0, Math.min(1, Number(value)));
+
+// Exact formal operators transcribed from the existing Fold-Scale calibration harness.
+export function omegaViability(E, Lambda, q) {
+  const e = Number(E), burden = Number(Lambda), contradiction = Number(q);
+  if (![e, burden, contradiction].every(Number.isFinite)) return null;
+  const denominator = 1 + Math.max(0, burden) + Math.abs(contradiction);
+  return denominator > 0 ? e / denominator : null;
+}
+
+export function memoryUpdate(M, retention, Delta) {
+  const m = Number(M), lambda = Number(retention), delta = Number(Delta);
+  if (![m, lambda, delta].every(Number.isFinite)) return null;
+  if (lambda < 0 || lambda > 1) throw new Error('Memory retention lambda must remain in [0,1]');
+  return lambda * m + delta;
+}
+
+export function burdenUpdate(Lambda, q, g) {
+  const burden = Number(Lambda), contradiction = Number(q), integration = Number(g);
+  if (![burden, contradiction, integration].every(Number.isFinite)) return null;
+  return Math.max(0, burden + contradiction - integration);
+}
+
+export function phaseTurn(phi, theta) {
+  const p = Number(phi), t = Number(theta);
+  if (![p, t].every(Number.isFinite)) return null;
+  const twoPi = Math.PI * 2;
+  return ((p + t) % twoPi + twoPi) % twoPi;
+}
+
+export function compressionUpdate(scale, c) {
+  const s = Number(scale), factor = Number(c);
+  if (![s, factor].every(Number.isFinite)) return null;
+  if (factor <= 0) throw new Error('Compression factor c must be > 0');
+  return s * factor;
+}
+
+export function dispatchOmega(Omega, tau = 0.05) {
+  const omega = Number(Omega), tolerance = Math.abs(Number(tau));
+  if (![omega, tolerance].every(Number.isFinite)) return 'UNRESOLVED';
+  if (omega > 1 + tolerance) return 'STAY';
+  if (Math.abs(omega - 1) <= tolerance) return 'TURN';
+  return 'ESCALATE';
+}
+
+export function shellSimplex(amplitudes, epsilon = 1e-9) {
+  if (!Array.isArray(amplitudes) || amplitudes.length !== 7) throw new Error('1+6 shell requires [a0,a1,a2,a3,a4,a5,a6]');
+  const a = amplitudes.map(Number);
+  if (!a.every(Number.isFinite)) throw new Error('1+6 shell amplitudes must be finite');
+  const u = [a[1] - a[4], a[2] - a[5], a[3] - a[6]];
+  const denominator = u.reduce((sum, value) => sum + Math.abs(value), 0) + Math.max(Number.EPSILON, Number(epsilon));
+  const lambda = u.map(value => Math.abs(value) / denominator);
+  const dominantAxis = lambda.indexOf(Math.max(...lambda)) + 1;
+  return { center: a[0], contrasts: u, lambda, dominantAxis, lambdaSum: lambda.reduce((x, y) => x + y, 0) };
+}
+
+export function empiricalTurnDecision(profileName, value) {
+  const profile = EMPIRICAL_TURN_PROFILES[profileName];
+  if (!profile) throw new Error(`Unknown charted TURN profile: ${profileName}`);
+  const x = Number(value);
+  if (!Number.isFinite(x)) return { state: 'UNRESOLVED', profileName, profile };
+  const turn = profile.orientation === 'lower=TURN' ? x <= profile.threshold : x >= profile.threshold;
+  return { state: turn ? 'TURN' : 'NON_TURN', value: x, profileName, profile };
+}
+
+export function normalizeObservedRange(value, min, max) {
+  const x = Number(value), lo = Number(min), hi = Number(max);
+  if (![x, lo, hi].every(Number.isFinite) || hi <= lo) return null;
+  return clamp01((x - lo) / (hi - lo));
+}
+
+export function releaseReferencePosition(variableName, value) {
+  const profile = WOVEN_RELEASE_CALIBRATION[variableName];
+  if (!profile || !finite(value)) return null;
+  return {
+    variableName,
+    value: Number(value),
+    observedReleaseMin: profile.min,
+    observedReleaseMean: profile.mean,
+    observedReleaseMax: profile.max,
+    calibrated24Mean: profile.calibrated24Mean,
+    boundedPosition: normalizeObservedRange(value, profile.min, profile.max),
+    role: 'REFERENCE_ONLY_FOR_SAR_UNTIL_HOST_VALIDATED'
+  };
+}
+
 export function mae(actual, predicted) {
-  const pairs = actual.map((a,i)=>[Number(a),Number(predicted[i])]).filter(([a,p])=>Number.isFinite(a)&&Number.isFinite(p));
-  return pairs.length ? pairs.reduce((s,[a,p])=>s+Math.abs(a-p),0)/pairs.length : null;
+  const pairs = actual.map((a, i) => [Number(a), Number(predicted[i])]).filter(([a, p]) => Number.isFinite(a) && Number.isFinite(p));
+  return pairs.length ? pairs.reduce((sum, [a, p]) => sum + Math.abs(a - p), 0) / pairs.length : null;
 }
 
 export function rmse(actual, predicted) {
-  const pairs = actual.map((a,i)=>[Number(a),Number(predicted[i])]).filter(([a,p])=>Number.isFinite(a)&&Number.isFinite(p));
-  return pairs.length ? Math.sqrt(pairs.reduce((s,[a,p])=>s+(a-p)**2,0)/pairs.length) : null;
+  const pairs = actual.map((a, i) => [Number(a), Number(predicted[i])]).filter(([a, p]) => Number.isFinite(a) && Number.isFinite(p));
+  return pairs.length ? Math.sqrt(pairs.reduce((sum, [a, p]) => sum + (a - p) ** 2, 0) / pairs.length) : null;
 }
 
 export function r2(actual, predicted) {
-  const pairs = actual.map((a,i)=>[Number(a),Number(predicted[i])]).filter(([a,p])=>Number.isFinite(a)&&Number.isFinite(p));
-  if(pairs.length<2)return null;
-  const mean=pairs.reduce((s,[a])=>s+a,0)/pairs.length;
-  const ssTot=pairs.reduce((s,[a])=>s+(a-mean)**2,0);
-  if(ssTot===0)return null;
-  const ssRes=pairs.reduce((s,[a,p])=>s+(a-p)**2,0);
-  return 1-ssRes/ssTot;
+  const pairs = actual.map((a, i) => [Number(a), Number(predicted[i])]).filter(([a, p]) => Number.isFinite(a) && Number.isFinite(p));
+  if (pairs.length < 2) return null;
+  const avg = pairs.reduce((sum, [a]) => sum + a, 0) / pairs.length;
+  const total = pairs.reduce((sum, [a]) => sum + (a - avg) ** 2, 0);
+  if (total === 0) return null;
+  const residual = pairs.reduce((sum, [a, p]) => sum + (a - p) ** 2, 0);
+  return 1 - residual / total;
 }
 
-export function median(values){
-  const v=values.map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
-  if(!v.length)return null;const m=Math.floor(v.length/2);return v.length%2?v[m]:(v[m-1]+v[m])/2;
+export function median(values) {
+  const sorted = values.map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+  if (!sorted.length) return null;
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
-export function mean(values){
-  const v=values.map(Number).filter(Number.isFinite);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;
+export function mean(values) {
+  const clean = values.map(Number).filter(Number.isFinite);
+  return clean.length ? clean.reduce((a, b) => a + b, 0) / clean.length : null;
 }
 
 export function baselinePredictions(samples, holdoutIndex) {
-  const target=samples[holdoutIndex];
-  const train=samples.filter((_,i)=>i!==holdoutIndex).filter(s=>Number.isFinite(Number(s.value)));
-  const earlier=train.filter(s=>new Date(s.time)<=new Date(target.time)).sort((a,b)=>new Date(a.time)-new Date(b.time));
-  const nearest=train.slice().sort((a,b)=>Math.abs(new Date(a.time)-new Date(target.time))-Math.abs(new Date(b.time)-new Date(target.time)))[0];
+  const target = samples[holdoutIndex];
+  const train = samples.filter((_, i) => i !== holdoutIndex).filter(sample => finite(sample.value));
+  const earlier = train.filter(sample => new Date(sample.time) <= new Date(target.time)).sort((a, b) => new Date(a.time) - new Date(b.time));
+  const nearest = train.slice().sort((a, b) => Math.abs(new Date(a.time) - new Date(target.time)) - Math.abs(new Date(b.time) - new Date(target.time)))[0];
   return {
-    median: median(train.map(s=>s.value)),
-    mean: mean(train.map(s=>s.value)),
+    median: median(train.map(sample => sample.value)),
+    mean: mean(train.map(sample => sample.value)),
     persistence: earlier.at(-1)?.value ?? nearest?.value ?? null
   };
 }
 
-function improvementPct(baseline,model){
-  return Number.isFinite(baseline)&&baseline>0&&Number.isFinite(model)?100*(baseline-model)/baseline:null;
+function improvementPct(baseline, model) {
+  return Number.isFinite(baseline) && baseline > 0 && Number.isFinite(model) ? 100 * (baseline - model) / baseline : null;
 }
 
-export function scoreRscFromCalibration({ coverage=0, modelMae=null, baselineMae=null, r2Value=null, uncertaintyRatio=null, outlierFraction=0 }={}){
-  const CΩ=Math.max(0,Math.min(1,Number(coverage)||0));
-  const gain=Number.isFinite(modelMae)&&Number.isFinite(baselineMae)&&baselineMae>0?Math.max(0,Math.min(1,(baselineMae-modelMae)/baselineMae)):0;
-  const Φ=Math.max(0,Math.min(1,.55*gain+.45*Math.max(0,Math.min(1,(Number(r2Value)||0)))));
-  const q=Math.max(.001,Math.min(1,Number(outlierFraction)||0));
-  const Λ=Math.max(.001,Math.min(1,Number(uncertaintyRatio)||0));
-  const epsilon=.001;
-  const Dewey_S=(CΩ*Φ)/(q+Λ+epsilon);
-  return {CΩ,Φ,q,Λ,epsilon,Dewey_S};
-}
+// Host validation follows the previously charted rule: measured observations -> model -> benchmark vs baseline.
+// It deliberately does NOT derive a new Dewey score from regression metrics.
+export function leaveOneOutAtlasCalibration(samples, options = {}) {
+  const clean = (samples || [])
+    .map((sample, index) => ({ ...sample, index, value: Number(sample.value), lon: Number(sample.lon), lat: Number(sample.lat) }))
+    .filter(sample => sample.measured !== false && Number.isFinite(sample.value) && Number.isFinite(sample.lon) && Number.isFinite(sample.lat) && sample.time);
 
-export const RSC_THRESHOLD_PROFILES=Object.freeze({
-  research_environment_2026_07:{PASS:.7,PING:.86,WATCH:.7,REJECT:.5,epsilon:.001,source:'master_relational_skin_calculus_research_environment'},
-  autoping_20736_2026_07:{PING:.55,WATCH:.45,epsilon:.001,source:'20736D_relational_skin_calculus_atlas_autoping'}
-});
-
-export function rscGate(score, profile='research_environment_2026_07'){
-  const p=RSC_THRESHOLD_PROFILES[profile]||RSC_THRESHOLD_PROFILES.research_environment_2026_07;
-  const s=Number(score);
-  if(!Number.isFinite(s))return {state:'UNRESOLVED',profile,thresholds:p};
-  if(s>=p.PING)return {state:'PING',profile,thresholds:p};
-  if(s>=p.WATCH)return {state:'WATCH',profile,thresholds:p};
-  if(p.REJECT!=null&&s<p.REJECT)return {state:'REJECT',profile,thresholds:p};
-  return {state:'TURN',profile,thresholds:p};
-}
-
-export function leaveOneOutAtlasCalibration(samples, options={}){
-  const clean=(samples||[]).map((s,i)=>({...s,index:i,value:Number(s.value)})).filter(s=>Number.isFinite(s.value)&&Number.isFinite(Number(s.lon))&&Number.isFinite(Number(s.lat))&&s.time);
-  if(clean.length<4)return {state:'INSUFFICIENT_CALIBRATION_DATA',n:clean.length,minimum:4,folds:[]};
-  const folds=[];
-  for(let i=0;i<clean.length;i++){
-    const target=clean[i],train=clean.filter((_,j)=>j!==i);
-    const estimate=deweyAtlasEstimate(train,{lon:Number(target.lon),lat:Number(target.lat),time:target.time},options);
-    const baselines=baselinePredictions(clean,i);
-    folds.push({id:target.id||String(i),time:target.time,actual:target.value,predicted:Number.isFinite(estimate.value)?estimate.value:null,uncertainty:estimate.uncertainty??null,confidence:estimate.confidence??null,atlasLevel:estimate.level??null,baselines});
+  if (clean.length < 4) {
+    return {
+      state: 'INSUFFICIENT_MEASURED_HOST_DATA',
+      n: clean.length,
+      minimumForDiagnostic: 4,
+      minimumForChartedBenchmarkGate: 30,
+      folds: [],
+      claim: 'NO_SAR_CALIBRATION_CLAIM'
+    };
   }
-  const actual=folds.map(f=>f.actual);
-  const predicted=folds.map(f=>f.predicted);
-  const baselineNames=['median','mean','persistence'];
-  const model={mae:mae(actual,predicted),rmse:rmse(actual,predicted),r2:r2(actual,predicted)};
-  const baselines=Object.fromEntries(baselineNames.map(name=>[name,{mae:mae(actual,folds.map(f=>f.baselines[name])),rmse:rmse(actual,folds.map(f=>f.baselines[name])),r2:r2(actual,folds.map(f=>f.baselines[name]))}]));
-  const bestBaselineName=baselineNames.slice().sort((a,b)=>(baselines[a].mae??Infinity)-(baselines[b].mae??Infinity))[0];
-  const bestBaseline=baselines[bestBaselineName];
-  const improvement=improvementPct(bestBaseline.mae,model.mae);
-  const coverage=folds.filter(f=>Number.isFinite(f.predicted)).length/folds.length;
-  const scale=Math.max(1e-12,median(actual.map(v=>Math.abs(v)))||1);
-  const uncertaintyRatio=median(folds.map(f=>Number(f.uncertainty)/scale).filter(Number.isFinite))??1;
-  const residuals=folds.filter(f=>Number.isFinite(f.predicted)).map(f=>Math.abs(f.actual-f.predicted));
-  const medRes=median(residuals)??0, mad=median(residuals.map(v=>Math.abs(v-medRes)))??0;
-  const outlierFraction=residuals.length?residuals.filter(v=>v>medRes+6*Math.max(mad,1e-12)).length/residuals.length:1;
-  const rsc=scoreRscFromCalibration({coverage,modelMae:model.mae,baselineMae:bestBaseline.mae,r2Value:model.r2,uncertaintyRatio,outlierFraction});
-  const gate=rscGate(rsc.Dewey_S,options.thresholdProfile||'research_environment_2026_07');
-  const calibrated=coverage>=.8&&Number.isFinite(improvement)&&improvement>0&&Number.isFinite(model.r2)&&model.r2>0;
+
+  const folds = [];
+  for (let i = 0; i < clean.length; i++) {
+    const target = clean[i];
+    const training = clean.filter((_, j) => j !== i);
+    const estimate = deweyAtlasEstimate(training, { lon: target.lon, lat: target.lat, time: target.time }, options);
+    const baselines = baselinePredictions(clean, i);
+    folds.push({
+      id: target.id || String(i),
+      time: target.time,
+      actual: target.value,
+      predicted: Number.isFinite(estimate.value) ? estimate.value : null,
+      uncertainty: estimate.uncertainty ?? null,
+      confidence: estimate.confidence ?? null,
+      atlasLevel: estimate.level ?? null,
+      inferenceState: estimate.state,
+      baselines
+    });
+  }
+
+  const actual = folds.map(fold => fold.actual);
+  const predicted = folds.map(fold => fold.predicted);
+  const baselineNames = ['median', 'mean', 'persistence'];
+  const model = { mae: mae(actual, predicted), rmse: rmse(actual, predicted), r2: r2(actual, predicted) };
+  const baselines = Object.fromEntries(baselineNames.map(name => [name, {
+    mae: mae(actual, folds.map(fold => fold.baselines[name])),
+    rmse: rmse(actual, folds.map(fold => fold.baselines[name])),
+    r2: r2(actual, folds.map(fold => fold.baselines[name]))
+  }]));
+  const bestBaselineName = baselineNames.slice().sort((a, b) => (baselines[a].mae ?? Infinity) - (baselines[b].mae ?? Infinity))[0];
+  const bestBaseline = baselines[bestBaselineName];
+  const improvement = improvementPct(bestBaseline.mae, model.mae);
+  const predictedCount = folds.filter(fold => Number.isFinite(fold.predicted)).length;
+  const coverage = predictedCount / folds.length;
+
+  const beatsBaseline = Number.isFinite(model.mae) && Number.isFinite(bestBaseline.mae) && model.mae < bestBaseline.mae;
+  const meetsChartedSampleGate = clean.length >= 30;
+  const benchmarkPass = meetsChartedSampleGate && beatsBaseline && predictedCount === folds.length;
+
   return {
-    state:calibrated?'CALIBRATED_ON_CURRENT_MEASURED_STACK':'NOT_CALIBRATED_ON_CURRENT_MEASURED_STACK',
-    n:clean.length,folds,coverage,model,baselines,bestBaselineName,bestBaseline,
-    improvementVsBestBaselinePct:improvement,
-    uncertaintyRatio,outlierFraction,rsc,gate,
-    semantics:'Leave-one-out validation on the currently measured SAR stack. This calibrates only the present product/location/sample regime and does not imply universal validity.'
+    state: benchmarkPass ? 'SAR_HOST_BENCHMARK_PASS' : beatsBaseline ? 'SAR_HOST_DIAGNOSTIC_GAIN_ONLY' : 'SAR_HOST_PRUNE_OR_RETUNE',
+    n: clean.length,
+    measuredOnly: true,
+    folds,
+    coverage,
+    model,
+    baselines,
+    bestBaselineName,
+    bestBaseline,
+    improvementVsBestBaselinePct: improvement,
+    gate: {
+      minimumMeasuredObservations: 30,
+      meetsChartedSampleGate,
+      beatsBaseline,
+      completePredictionCoverage: predictedCount === folds.length,
+      benchmarkPass
+    },
+    claim: benchmarkPass ? 'PRACTICAL_UTILITY_CANDIDATE_FOR_THIS_SAR_HOST_REGIME_ONLY' : 'NO_SAR_CALIBRATION_CLAIM',
+    semantics: 'Leave-one-out validation using only the current measured SAR host samples. Prior workbook benchmarks are reference evidence and are never injected as SAR observations.'
+  };
+}
+
+export function calibrationProofPacket(calibration) {
+  return {
+    schema: 'omega.sar.charted-calibration.v1',
+    canon: CHARTED_CALIBRATION_CONTRACT,
+    sarHostValidation: calibration || null,
+    authority: {
+      measuredSarRequired: true,
+      priorBenchmarksCountAsSarObservations: false,
+      proxyEarthChartCountsAsRawTerrain: false,
+      inferredValuesCountAsObservations: false
+    }
   };
 }
