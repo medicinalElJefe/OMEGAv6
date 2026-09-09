@@ -1,0 +1,63 @@
+{
+  "schema": "OMEGA_RECURSIVE_EXACT_SELF_PROMOTION_R240",
+  "revision": "R240",
+  "state": "SOURCE_CANDIDATE_NOT_PRODUCTION_PROOF",
+  "inherits": {
+    "hybridCorrelation": "R238_WOVEN_HYBRID_CONTINUITY",
+    "hybridResourceGovernor": "R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING",
+    "governedSelfBuild": "R170.4"
+  },
+  "continuityOperator": "PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION",
+  "resolution": {"organs":12,"branches":144,"cells":1728,"lanes":20736,"deepAddress":248832,"physicalDimensionsClaimed":false},
+  "scheduler": {
+    "sparseActivation": true,
+    "dependencyFrontier": true,
+    "pressureDirected": true,
+    "maxPlanningFrontier": 12,
+    "parallelPlanningDoesNotEqualParallelMutation": true,
+    "evidenceSource": "R164 returned residual evidence plus declared dependency topology",
+    "userValueDeficitPolicy": "zero unless explicitly evidenced; never inferred",
+    "empiricalTruthClaimed": false
+  },
+  "selfPromotion": {
+    "enabled": true,
+    "eligibleScope": "R170-generated LOW/MEDIUM-risk bounded roadmap capsules only",
+    "githubAutoMergeFeature": false,
+    "exactSuccessfulProductionBaseRequired": true,
+    "r164ResidualGateRequired": "PASS",
+    "highOrCriticalResidualPromotion": false,
+    "committedCandidateReproofRequired": true,
+    "allDeclaredCandidateTestsRequired": true,
+    "allowlistedDiffRequired": true,
+    "unchangedBaseImmediatelyBeforeMerge": true,
+    "expectedHeadShaRequired": true,
+    "mergeMethod": "merge",
+    "twoParentMergeRequired": true,
+    "directMainPushFromGenerator": false
+  },
+  "allowlistedAutonomousDiff": [
+    "the exact generated src/generated/selfbuildR170 target named by the candidate receipt",
+    "public/omega-r170-selfbuild-state.json",
+    "public/omega-r170-selfbuild-candidate.json"
+  ],
+  "deployment": {
+    "soleCanonicalWriter": ".github/workflows/ci.yml",
+    "explicitWorkflowDispatchAfterActionsTokenMerge": true,
+    "selfBuilderMayDeployDirectly": false,
+    "selfBuilderMayDispatchItself": false,
+    "exactMergedShaProductionSuccessRequired": true,
+    "redProductionResult": "SOURCE_PROMOTED_NOT_PRODUCTION_PROVEN__STOP_FUTURE_AUTONOMOUS_GENERATIONS_AND_REQUIRE_FORWARD_REPAIR"
+  },
+  "authority": {
+    "sourcePlanning": "R240 scheduling-only over R170 roadmap",
+    "sourcePromotion": "R240 bounded inside existing R170 governed self-build workflow",
+    "hybridResourceAdmission": "R239",
+    "dispatch": "R147",
+    "hybridReturn": "R141",
+    "durableHistory": "R146",
+    "canonStateAdmission": "R125",
+    "canonAdmissionClaimed": false
+  },
+  "truthLaw": "generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
+  "truthBoundary": "R240 automates only evidence-bound planning, bounded R170 source candidate generation, exact source promotion, and handoff to the same canonical ci.yml deployment/proof authority. It cannot promote arbitrary PRs, cannot bypass current-production/residual/expected-head/diff/proof gates, cannot create a second production writer, cannot infer a user-value deficit, cannot call a red deployment successful, and cannot admit CanonState. R239 remains the distinct selected-host Hybrid resource governor."
+}
