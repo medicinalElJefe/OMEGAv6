@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildEarthContextModel, earthStructuralScore, anchorsFromCalibratedPatch, buildOmegaContinuousField } from '../src/omega-field-core.mjs';
 import { buildFullOmegaField, FULL_OMEGA_MODE_STACK } from '../src/omega-mode-stack.mjs';
+import { satelliteFeatures } from '../src/omega-satellite-skin.mjs';
 import { EARTH_GRID_SOURCE_SHA256 } from '../src/earth-grid.mjs';
 
 const numericFields=['real_elev_proxy_m','relief_alignment_score','motion_rel_score','water_triangle_ratio','scar_carry_index','thread_score','depth_motion_tension','water_bathy_tension','orogenic_scar_tension'];
@@ -19,6 +20,17 @@ function syntheticGrid(){
     rows.push([0,0,0,0,0,0,0,elev,align,motion,water,scar,thread,depth,bathy,orogenic]);
   }
   return {schema:'omega.earth.proxy-grid.compact.v1',sourceSha256:EARTH_GRID_SOURCE_SHA256,boundary:'synthetic unit-test grid',grid:[-90,90,5,-180,175,5,37,72,2664],categoryFields:['topology_zone','real_surface_class','relativity_thread','new_lens_type','thread_tier','lat_band','land_ocean_alignment'],categories:{topology_zone:['test'],real_surface_class:['test'],relativity_thread:['test'],new_lens_type:['quiet'],thread_tier:['strong'],lat_band:['test'],land_ocean_alignment:['test']},numericFields,rows};
+}
+function syntheticSatellite(){
+  const width=80,height=50,data=new Uint8ClampedArray(width*height*4);
+  for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+    const u=x/(width-1),v=y/(height-1),j=(y*width+x)*4;
+    data[j]=Math.round(255*(.2+.7*u));
+    data[j+1]=Math.round(255*(.18+.68*(1-v)));
+    data[j+2]=Math.round(255*(.12+.55*(.35*u+.65*v)));
+    data[j+3]=255;
+  }
+  return {schema:'omega.realtime.satellite-context.v1',width,height,bbox:[-116,28,-106,36],data,date:'2026-09-09',layers:['TEST_TRUE_COLOR'],authority:'TEST SATELLITE CONTEXT',measurement:false};
 }
 
 const grid=syntheticGrid();
@@ -53,11 +65,26 @@ test('measured SAR anchors calibrate the correlated field into numeric reconstru
   assert.ok(field.cells.every(c=>!(c.measured&&c.inferred)));
 });
 
+test('real-time satellite skin is calibrated by measured SAR before it contributes SAR-unit reconstruction',()=>{
+  const satelliteContext=syntheticSatellite(),anchors=[];
+  for(let iy=0;iy<4;iy++)for(let ix=0;ix<6;ix++){
+    const lon=-114.8+ix*1.55,lat=29+iy*1.7,f=satelliteFeatures(satelliteContext,lon,lat);
+    const value=-24+9*f.brightness+5*f.rg-3*f.gb+7*f.texture;
+    anchors.push({id:`sat-${ix}-${iy}`,lon,lat,time:'2026-09-08T12:00:00Z',value,measured:true,inferred:false,grade:'A'});
+  }
+  const field=buildFullOmegaField({bbox:[-116,28,-106,36],cols:18,rows:12,time:'2026-09-09T12:00:00Z',anchors,grid,satelliteContext});
+  assert.equal(field.satelliteFit.state,'SATELLITE_SAR_FIT_READY');
+  assert.ok(field.satelliteFit.confidence>0);
+  assert.ok(field.cells.some(c=>c.modeLedger?.REALTIME_SATELLITE_SKIN?.state==='ASSIMILATED_CORRELATED_REALTIME_CONTEXT'));
+  assert.ok(field.cells.some(c=>(c.provenance?.realtimeSatellite||0)>0));
+  assert.ok(field.cells.every(c=>!c.measured||c.modeLedger?.REALTIME_SATELLITE_SKIN?.action==='MEASURED_ANCHOR_FIXED'||c.modeLedger?.REALTIME_SATELLITE_SKIN?.state!=='ASSIMILATED_CORRELATED_REALTIME_CONTEXT'));
+});
+
 test('full OMEGA mode stack performs recovery, admission, guidance and truth traversal without zero-filling unknowns',()=>{
   const anchors=[];
   for(let i=0;i<24;i++)anchors.push({id:`m${i}`,lon:-111.5+(i%6)*.45,lat:31.2+Math.floor(i/6)*.5,time:`2026-09-${String(1+i%9).padStart(2,'0')}T12:00:00Z`,value:-20+Math.sin(i/3)*4+i*.08,measured:true,inferred:false,grade:'A'});
   const field=buildFullOmegaField({bbox:[-114,29,-108,34],cols:12,rows:10,time:'2026-09-09T12:00:00Z',anchors,grid});
-  for(const required of ['OVERALL_CANON','MODE188','DEEP_MOTHER','HIGH_FATHER','NO_NOTHING_TRUTH','FULL_SPHERE','ALPHA','CRIMSON','FORECAST','RAFT188','CTDE','GAMMA_ADMISSION','HEAVY_PRUNE','TRUTH_TRAVERSAL'])assert.ok(FULL_OMEGA_MODE_STACK.includes(required));
+  for(const required of ['OVERALL_CANON','MODE188','DEEP_MOTHER','HIGH_FATHER','NO_NOTHING_TRUTH','FULL_SPHERE','ALPHA','CRIMSON','FORECAST','RAFT188','CTDE','GAMMA_ADMISSION','HEAVY_PRUNE','TRUTH_TRAVERSAL','REALTIME_SATELLITE_SKIN'])assert.ok(FULL_OMEGA_MODE_STACK.includes(required));
   assert.ok(field.cells.every(c=>c.gammaAdmission));
   assert.ok(field.cells.every(c=>c.modeLedger?.TRUTH_TRAVERSAL));
   assert.ok(field.cells.every(c=>Number.isFinite(c.value)||c.value===null));
