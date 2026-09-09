@@ -29,7 +29,7 @@ test('charted empirical TURN constants are preserved exactly',()=>{
 test('Fold-Scale formal operators execute the charted equations',()=>{
   assert.equal(omegaViability(.8,.2,.3),.8/1.5);
   assert.equal(memoryUpdate(.4,.5,.1),.3);
-  assert.equal(burdenUpdate(.5,.4,.7),.2);
+  assert.ok(Math.abs(burdenUpdate(.5,.4,.7)-.2)<1e-12);
   assert.ok(Math.abs(phaseTurn(0,Math.PI/2)-Math.PI/2)<1e-12);
   assert.equal(compressionUpdate(4,.5),2);
 });
