@@ -80,8 +80,7 @@ function inject(){
     if(point) syncSelectedPoint(point,{syncInputs:true});
   });
 
-  const jumpButton=$('jumpLocation');
-  jumpButton?.addEventListener('click',()=>{
+  $('jumpLocation')?.addEventListener('click',()=>{
     const point=normalizePoint({lat:Number($('jumpLat')?.value),lon:Number($('jumpLon')?.value)});
     if(point) syncSelectedPoint(point,{syncInputs:false});
   });
@@ -92,10 +91,15 @@ function inject(){
     observer.observe(pointNode,{childList:true,characterData:true,subtree:true});
     syncSelectedFromPoint(pointNode.textContent);
   }
-  updateSurfaceHealth();
-  const healthObserver=new MutationObserver(updateSurfaceHealth);
-  healthObserver.observe(document.body,{childList:true,subtree:true});
-  setTimeout(()=>healthObserver.disconnect(),15000);
+
+  let healthChecks=0;
+  const refreshHealth=()=>{
+    healthChecks++;
+    const allMounted=updateSurfaceHealth();
+    if(allMounted||healthChecks>=40) clearInterval(healthTimer);
+  };
+  const healthTimer=setInterval(refreshHealth,250);
+  refreshHealth();
 }
 
 function normalizePoint(point){
@@ -166,15 +170,20 @@ async function resolveSelectedPlace(point){
 }
 
 function updateSurfaceHealth(){
-  const root=$('earthSurfaceHealth');if(!root)return;
+  const root=$('earthSurfaceHealth');if(!root)return false;
   const surfaces=[
     ['Earth map','#map'],['Sentinel raster','#raster'],['Browse','#browseImage'],['Probe','#probeChart'],['Atlas','#inferState'],['Ledger','#rows'],['Canon','#canonConsole'],['NISAR','#nisarNativeConsole']
   ];
-  root.innerHTML='';
-  for(const [label,selector] of surfaces){
-    const present=Boolean(document.querySelector(selector));
-    const span=document.createElement('span');span.textContent=`${label} ${present?'MOUNTED':'LOADING'}`;span.dataset.state=present?'ready':'waiting';root.append(span);
+  const status=surfaces.map(([label,selector])=>[label,Boolean(document.querySelector(selector))]);
+  const signature=status.map(([label,present])=>`${label}:${present?'1':'0'}`).join('|');
+  if(root.dataset.signature!==signature){
+    root.dataset.signature=signature;
+    root.innerHTML='';
+    for(const [label,present] of status){
+      const span=document.createElement('span');span.textContent=`${label} ${present?'MOUNTED':'LOADING'}`;span.dataset.state=present?'ready':'waiting';root.append(span);
+    }
   }
+  return status.every(([,present])=>present);
 }
 
 inject();
