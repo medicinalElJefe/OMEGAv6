@@ -10,11 +10,12 @@ try{
   const page=await browser.newPage({viewport:{width:1440,height:1000}});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const response=await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});assert.ok(response?.ok(),`root HTTP ${response?.status()}`);
-  await page.waitForFunction(()=>globalThis.OMEGA_SAR_NAVIGATION?.selectTarget&&globalThis.OMEGA_SAR_RENDERER&&globalThis.OMEGA_SAR_INTERACTION,null,{timeout:20000});
+  // Renderer is intentionally lazy-captured. selectTarget() bootstraps/captures it.
+  await page.waitForFunction(()=>globalThis.OMEGA_SAR_NAVIGATION?.selectTarget&&globalThis.OMEGA_SAR_INTERACTION,null,{timeout:20000});
 
   await page.evaluate(async p=>{await globalThis.OMEGA_SAR_NAVIGATION.selectTarget(p,{scale:120,reason:'R4 authority proof'});},tucson);
-  await page.waitForFunction(p=>{const n=globalThis.OMEGA_SAR_NAVIGATION;return n?.target&&Math.abs(n.target.lon-p.lon)<1e-6&&Math.abs(n.target.lat-p.lat)<1e-6;},tucson,{timeout:10000});
-  await page.waitForFunction(()=>Number(document.querySelector('#obsCount')?.textContent||0)>0,null,{timeout:70000});
+  await page.waitForFunction(p=>{const n=globalThis.OMEGA_SAR_NAVIGATION,r=globalThis.OMEGA_SAR_RENDERER;return n?.target&&r&&Math.abs(n.target.lon-p.lon)<1e-6&&Math.abs(n.target.lat-p.lat)<1e-6;},tucson,{timeout:10000});
+  await page.waitForFunction(()=>globalThis.OMEGA_SAR_INTERACTION?.targetKey&&globalThis.OMEGA_SAR_INTERACTION?.activating===false&&Number(document.querySelector('#obsCount')?.textContent||0)>0,null,{timeout:70000});
   await page.waitForFunction(()=>globalThis.OMEGA_SAR_SOURCE_FRAME?.src&&globalThis.OMEGA_SAR_INTERACTION?.sourceSequence>=1,null,{timeout:30000});
 
   const authority=await page.evaluate(()=>({target:globalThis.OMEGA_SAR_NAVIGATION.target,view:{...globalThis.OMEGA_SAR_RENDERER.view},point:document.querySelector('#point')?.textContent||'',opacity:globalThis.OMEGA_SAR_RENDERER.baseOpacity,source:globalThis.OMEGA_SAR_SOURCE_FRAME?.id||null}));
@@ -22,22 +23,29 @@ try{
   assert.ok(close(authority.view.centerLon,tucson.lon,1e-6)&&close(authority.view.centerLat,tucson.lat,1e-6),`camera did not center target ${JSON.stringify(authority)}`);
   assert.ok(authority.opacity<=.14,`Earth context dominates SAR surface: opacity ${authority.opacity}`);
 
-  // A post-search click must be interpreted by the current camera, not a stale whole-world frame.
+  // A post-search click must be interpreted by the CURRENT camera, then change target only.
   const clickPlan=await page.evaluate(()=>{const c=document.querySelector('#map'),r=c.getBoundingClientRect(),x=r.left+r.width*.61,y=r.top+r.height*.47;const [lon,lat]=globalThis.OMEGA_SAR_RENDERER.unproject(x-r.left,y-r.top);return {x,y,lon,lat,before:{...globalThis.OMEGA_SAR_RENDERER.view}};});
   await page.mouse.click(clickPlan.x,clickPlan.y);
   await page.waitForFunction(p=>{const n=globalThis.OMEGA_SAR_NAVIGATION?.target;return n&&Math.abs(n.lon-p.lon)<3e-5&&Math.abs(n.lat-p.lat)<3e-5;},{lon:clickPlan.lon,lat:clickPlan.lat},{timeout:10000});
   const clicked=await page.evaluate(()=>({target:globalThis.OMEGA_SAR_NAVIGATION.target,view:{...globalThis.OMEGA_SAR_RENDERER.view},point:document.querySelector('#point')?.textContent||''}));
   assert.ok(close(clicked.target.lon,clickPlan.lon,3e-5)&&close(clicked.target.lat,clickPlan.lat,3e-5),`click used stale coordinate frame ${JSON.stringify({clickPlan,clicked})}`);
   assert.ok(Math.abs(clicked.target.lon-tucson.lon)<1&&Math.abs(clicked.target.lat-tucson.lat)<1,`local click jumped to remote Earth location ${JSON.stringify(clicked.target)}`);
+  assert.ok(close(clicked.view.centerLon,clickPlan.before.centerLon,1e-9)&&close(clicked.view.centerLat,clickPlan.before.centerLat,1e-9)&&close(clicked.view.scale,clickPlan.before.scale,1e-9),`click rebound the camera instead of only binding target ${JSON.stringify({clickPlan,clicked})}`);
 
-  // Return to Tucson and prove calibration cannot silently move the camera.
+  // Return to Tucson and wait for the target-specific catalog/source path to settle.
   await page.evaluate(async p=>{await globalThis.OMEGA_SAR_NAVIGATION.selectTarget(p,{scale:120,reason:'return target'});},tucson);
-  await page.waitForFunction(()=>Number(document.querySelector('#obsCount')?.textContent||0)>0,null,{timeout:70000});
+  await page.waitForFunction(p=>{const i=globalThis.OMEGA_SAR_INTERACTION,n=globalThis.OMEGA_SAR_NAVIGATION;return i?.activating===false&&n?.target&&Math.abs(n.target.lon-p.lon)<1e-6&&Math.abs(n.target.lat-p.lat)<1e-6&&Number(document.querySelector('#obsCount')?.textContent||0)>0;},tucson,{timeout:70000});
   await page.waitForFunction(()=>globalThis.OMEGA_SAR_SENTINEL?.loadCalibratedCurrent,null,{timeout:20000});
+
+  // If the background calibration is running, let it finish before forcing another read.
+  await page.waitForFunction(()=>globalThis.OMEGA_SAR_INTERACTION?.calibrationBusy===false,null,{timeout:90000});
   const beforeCal=await page.evaluate(()=>({...globalThis.OMEGA_SAR_RENDERER.view}));
-  const patch=await page.evaluate(async()=>{const p=await globalThis.OMEGA_SAR_SENTINEL.loadCalibratedCurrent({force:true});return p?{state:p.state,id:p.id,measured:p.evidence?.measured,mesh:p.geoMesh?.validNodeCount,target:p.target}:null;});
+  let patch=await page.evaluate(()=>{const p=globalThis.OMEGA_SAR_RENDERER?.sarOverlay?.patch;return p?{state:p.state,id:p.id,measured:p.evidence?.measured,mesh:p.geoMesh?.validNodeCount,target:p.target}:null;});
+  if(!patch){
+    patch=await page.evaluate(async()=>{let p=null;for(let attempt=0;attempt<3&&!p;attempt++){try{p=await globalThis.OMEGA_SAR_SENTINEL.loadCalibratedCurrent({force:true});}catch{}if(!p)await new Promise(r=>setTimeout(r,1200));}return p?{state:p.state,id:p.id,measured:p.evidence?.measured,mesh:p.geoMesh?.validNodeCount,target:p.target}:null;});
+  }
   assert.equal(patch?.state,'CALIBRATED_SENTINEL1_TARGET_PATCH');assert.equal(patch?.measured,true);assert.ok(patch?.mesh>=4);
-  await page.waitForTimeout(300);
+  await page.waitForFunction(()=>globalThis.OMEGA_SAR_EARTH_OVERLAY?.measurement===true&&document.querySelector('#omegaFitSar')?.disabled===false,null,{timeout:15000});
   const afterCal=await page.evaluate(()=>({view:{...globalThis.OMEGA_SAR_RENDERER.view},overlay:globalThis.OMEGA_SAR_EARTH_OVERLAY,opacity:globalThis.OMEGA_SAR_RENDERER.baseOpacity,fitDisabled:document.querySelector('#omegaFitSar')?.disabled}));
   assert.ok(close(beforeCal.centerLon,afterCal.view.centerLon,1e-8)&&close(beforeCal.centerLat,afterCal.view.centerLat,1e-8)&&close(beforeCal.scale,afterCal.view.scale,1e-8),`calibrated patch hijacked camera ${JSON.stringify({beforeCal,afterCal})}`);
   assert.equal(afterCal.overlay?.measurement,true,'exact measured SAR did not bind to main Earth renderer');
