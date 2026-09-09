@@ -10,6 +10,8 @@ const snapshot=read('src/HybridRuntimeSnapshotR238.tsx');
 const workflow=read('.github/workflows/r238-hybrid-host-intelligence-proof.yml');
 const windowsProof=read('tests/r238-windows-host-runtime-proof.py');
 const browserProof=read('tests/r238-host-intelligence-browser-e2e.mjs');
+const liveVerifier=read('scripts/verify_live_hybrid_host_intelligence_r238.mjs');
+const sourceVerifier=read('scripts/verify_live_operational_source_authority_r202.mjs');
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
 
 for(const token of [
@@ -60,4 +62,19 @@ must(workflow.includes('playwright@1.63.0')&&workflow.includes('tests/r238-host-
 for(const token of ["memory.get('totalBytes')","memory.get('availableBytes')",'logicalProcessors','profileSha256','verify_macro_replay','tampered macro hash was not rejected'])must(windowsProof.includes(token),`R238 Windows runtime proof missing ${token}`);
 for(const token of ['CPU-A-ONLY','CPU-B-ONLY','proof_job_a','proof_job_b','Authenticated compute host','data-r238-selected-device','leaked host A proof','leaked host B proof'])must(browserProof.includes(token),`R238 browser host-isolation proof missing ${token}`);
 
-console.log('OMEGA R238 HYBRID HOST INTELLIGENCE PASS · immutable R205 byte SHA preserved · R141 exact-return proof preserved · one shared selected-host snapshot epoch · no duplicate polling reality · no screenshot constants · Windows CPU/RAM/GPU/storage/Python/RCWA evidence · no dependency installation · bounded macro metadata/schema/hash/count/order/time/coordinate/window preflight · Windows runtime CI · built-browser cross-host isolation · v7 Actions hygiene');
+const wrapperRoute="/api/hybrid/agent-download?r117=1&r120=1&r127=1&validator=zero-drift";
+must(sourceVerifier.includes(wrapperRoute),'R238.2 must remain aligned to the already-proven R202 live R141 wrapper authority route');
+for(const token of [
+ "const R141_WRAPPER_ROUTE='/api/hybrid/agent-download?r117=1&r120=1&r127=1&validator=zero-drift'",
+ "readFileSync('public/omega-hybrid-agent-r141.py','utf8')",
+ 'servedWrapperSha!==expectedWrapperSha',
+ "wrapperResponse.headers.get('x-omega-agent-sha256')",
+ "wrapperResponse.headers.get('x-omega-proof-closure')!=='R141'",
+ "wrapperResponse.headers.get('x-omega-canonical-origin')!==base",
+ "const R205_BASE_ROUTE='/omega-hybrid-agent-base-r205.py'"
+])must(liveVerifier.includes(token),`R238.2 live verifier missing explicit wrapper/base identity proof ${token}`);
+must(!liveVerifier.includes("fetch(base+'/omega-hybrid-agent.py'"),'R238.2 live host-intelligence verifier must never mistake the canonical R207 agent asset for the R141 proof wrapper');
+must(liveVerifier.includes('wrapper!==expectedWrapper'),'R238.2 must require byte-identical live R141 wrapper content, not token presence alone');
+must(liveVerifier.includes('baseAgent!==expectedBase'),'R238.2 must require byte-identical live immutable R205 base content');
+
+console.log('OMEGA R238 HYBRID HOST INTELLIGENCE PASS · immutable R205 byte SHA preserved · R141 exact-return proof preserved · explicit R207-agent/R141-wrapper identity separation · governed wrapper route + byte/header verification · one shared selected-host snapshot epoch · no duplicate polling reality · no screenshot constants · Windows CPU/RAM/GPU/storage/Python/RCWA evidence · no dependency installation · bounded macro metadata/schema/hash/count/order/time/coordinate/window preflight · Windows runtime CI · built-browser cross-host isolation · v7 Actions hygiene');
