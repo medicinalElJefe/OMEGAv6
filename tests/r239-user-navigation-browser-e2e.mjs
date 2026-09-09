@@ -31,8 +31,12 @@ const openAllTools=async()=>{if(!(await nav.isVisible()))await page.getByLabel('
 await allTools.click();
 await nav.waitFor({state:'visible'});
 const contextualText=await nav.innerText();
-if(!contextualText.includes('Explore tools')||!contextualText.includes('Explore · Inspect matter, traversal, Earth and visual state.'))throw new Error('R239 Home All tools did not preserve the active Explore workspace context');
-if(await nav.locator('.r89-flat-route').count()!==9)throw new Error(`R239 contextual Explore browser expected 9 routes, saw ${await nav.locator('.r89-flat-route').count()}`);
+if(!contextualText.includes('Explore tools')||!contextualText.includes('matter · earth · motion · scale'))throw new Error('R239 Home All tools did not preserve the active Explore workspace context');
+const exploreFilter=nav.getByRole('button',{name:/^Explore\s+\d+$/});
+if(await exploreFilter.count()!==1)throw new Error('R239 contextual Explore workspace filter missing');
+const expectedExploreCount=Number((await exploreFilter.innerText()).match(/\d+/)?.[0]||0);
+const contextualRouteCount=await nav.locator('.r89-flat-route').count();
+if(expectedExploreCount<1||contextualRouteCount!==expectedExploreCount)throw new Error(`R239 contextual Explore browser count mismatch: filter=${expectedExploreCount} rendered=${contextualRouteCount}`);
 for(const label of ['Open Command Center','Open Hybrid Link','Open Earth Now','Open Evidence and Proof','Browse all registered OMEGA tools','Browse full software and capability map'])if(!(await page.getByLabel(label).count()))throw new Error(`R239 permanent rail missing ${label}`);
 if(await page.getByLabel('Open Woven Continuity traversal instrument').count())throw new Error('R239 permanent rail still contains specialized Weave shortcut');
 if(await page.getByLabel('Open Matter Traversal').count())throw new Error('R239 permanent rail still contains specialized Matter shortcut');
