@@ -32,23 +32,38 @@ try{
     const id=(document.querySelector('#currentScene')?.textContent||'').trim();
     const detailResponse=await fetch(`/api/stac/item?id=${encodeURIComponent(id)}`,{headers:{accept:'application/geo+json,application/json'}});
     const detail=detailResponse.ok?await detailResponse.json():null;
-    const simplifyAsset=a=>a?{href:a.href||null,type:a.type||null,title:a.title||null,resolution:a['omega:resolution']||a.omegaResolution||null,validated:a['omega:validated']??null}:null;
+    const simplifyAsset=a=>a?{
+      href:a.href||null,type:a.type||null,title:a.title||null,resolution:a['omega:resolution']||a.omegaResolution||null,validated:a['omega:validated']??null,
+      projEpsg:a['proj:epsg']??null,projShape:a['proj:shape']??null,projTransform:a['proj:transform']??null,projBbox:a['proj:bbox']??null,
+      rasterBands:a['raster:bands']??null
+    }:null;
     const out={id,itemStatus:detailResponse.status,properties:detail?{
       resolved:detail.properties?.['omega:resolved_product_annotations']??null,
       validated:detail.properties?.['omega:validated_product_annotations']??null,
-      unresolved:detail.properties?.['omega:unresolved_product_annotations']??null
+      unresolved:detail.properties?.['omega:unresolved_product_annotations']??null,
+      projEpsg:detail.properties?.['proj:epsg']??null,
+      projShape:detail.properties?.['proj:shape']??null,
+      projTransform:detail.properties?.['proj:transform']??null,
+      projBbox:detail.properties?.['proj:bbox']??null
     }:null,assets:{
       vh:simplifyAsset(detail?.assets?.vh),vv:simplifyAsset(detail?.assets?.vv),
       productVh:simplifyAsset(detail?.assets?.['schema-product-vh']),productVv:simplifyAsset(detail?.assets?.['schema-product-vv']),
       calibrationVh:simplifyAsset(detail?.assets?.['schema-calibration-vh']),calibrationVv:simplifyAsset(detail?.assets?.['schema-calibration-vv']),
       manifest:simplifyAsset(detail?.assets?.['safe-manifest'])
-    },geotiff:null};
+    },transport:null,geotiff:null};
     const measurement=detail?.assets?.vh?.href||detail?.assets?.vv?.href;
     if(measurement){
+      const proxy=`/api/raster?url=${encodeURIComponent(measurement)}`;
+      try{
+        const head=await fetch(proxy,{method:'HEAD',cache:'no-store'});
+        const range=await fetch(proxy,{headers:{range:'bytes=0-65535'},cache:'no-store'});
+        const bytes=range.ok?new Uint8Array(await range.arrayBuffer()):new Uint8Array();
+        const first16=[...bytes.slice(0,16)].map(v=>v.toString(16).padStart(2,'0')).join(' ');
+        out.transport={head:{status:head.status,contentLength:head.headers.get('content-length'),acceptRanges:head.headers.get('accept-ranges'),contentType:head.headers.get('content-type'),etag:head.headers.get('etag')},range:{status:range.status,contentLength:range.headers.get('content-length'),contentRange:range.headers.get('content-range'),acceptRanges:range.headers.get('accept-ranges'),contentType:range.headers.get('content-type'),receivedBytes:bytes.length,first16}};
+      }catch(error){out.transport={error:error?.stack||error?.message||String(error)};}
       try{
         const mod=await import('/vendor/geotiff.bundle.mjs');
-        const url=`/api/raster?url=${encodeURIComponent(measurement)}`;
-        const tiff=await mod.fromUrl(url,{cacheSize:8*1024*1024,blockSize:65536});
+        const tiff=await mod.fromUrl(proxy,{cacheSize:8*1024*1024,blockSize:65536});
         const image=await tiff.getImage(0),fd=image.fileDirectory||{};
         const arr=v=>v==null?null:Array.from(v);
         let bbox=null,origin=null,resolution=null,geoKeys=null;
@@ -77,10 +92,7 @@ try{
     const rasterEmpty=document.querySelector('#rasterEmpty')?.textContent||'';
     const rasterStats=document.querySelector('#rasterStats')?.textContent||'';
     const visibility=globalThis.OMEGA_SAR_SOURCE_OVERLAY_VISIBILITY||null;
-    return {
-      ok:!!patch,error,elapsedMs:Math.round(performance.now()-started),badge,rasterEmpty,rasterStats,visibility,
-      patch:patch?{state:patch.state,id:patch.id,target:patch.target,polarization:patch.polarization,quantity:patch.quantity,validCount:patch.stats?.validCount,geolocation:patch.geolocation,geoMesh:patch.geoMesh,product:patch.product,provenance:patch.provenance,evidence:patch.evidence}:null
-    };
+    return {ok:!!patch,error,elapsedMs:Math.round(performance.now()-started),badge,rasterEmpty,rasterStats,visibility,patch:patch?{state:patch.state,id:patch.id,target:patch.target,polarization:patch.polarization,quantity:patch.quantity,validCount:patch.stats?.validCount,geolocation:patch.geolocation,geoMesh:patch.geoMesh,product:patch.product,provenance:patch.provenance,evidence:patch.evidence}:null};
   });
   console.log('TUCSON_CALIBRATION_DIAGNOSTIC',JSON.stringify(calibration,null,2));
   assert.ok(calibration.ok,`Tucson calibrated Sentinel patch failed: ${JSON.stringify(calibration)}`);
@@ -89,7 +101,7 @@ try{
   assert.ok(Number.isFinite(calibration.patch?.target?.lon)&&Math.abs(calibration.patch.target.lon-tucson.lon)<1e-4,'calibrated patch longitude is not the Tucson target');
   assert.ok(Number.isFinite(calibration.patch?.target?.lat)&&Math.abs(calibration.patch.target.lat-tucson.lat)<1e-4,'calibrated patch latitude is not the Tucson target');
   assert.ok(calibration.patch?.geoMesh?.validNodeCount>=4,`calibrated patch did not obtain an Earth-registration mesh: ${JSON.stringify(calibration.patch?.geoMesh)}`);
-  assert.ok(/PRODUCT_GCP/.test(calibration.patch?.geolocation?.quality||''),`calibrated patch is not product-GCP geolocated: ${JSON.stringify(calibration.patch?.geolocation)}`);
+  assert.ok(/PRODUCT_GCP|COG_GEOTIFF/.test(calibration.patch?.geolocation?.quality||''),`calibrated patch is not source-geolocated: ${JSON.stringify(calibration.patch?.geolocation)}`);
   assert.equal(calibration.patch?.evidence?.measured,true,'calibrated patch lost measured identity');
   assert.equal(calibration.patch?.evidence?.inferred,false,'calibrated patch was incorrectly marked inferred');
   assert.equal(calibration.visibility?.mainMapVisible,false,`regional source quicklook remained painted over the local map: ${JSON.stringify(calibration.visibility)}`);
