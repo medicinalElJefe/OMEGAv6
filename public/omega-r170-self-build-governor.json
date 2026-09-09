@@ -1,12 +1,12 @@
 {
   "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
-  "revision": "R170.5-R240",
+  "revision": "R170.5-R241",
   "authority": "OMEGAV6",
   "state": "GOVERNED_AUTONOMOUS_PROPOSAL_AND_EXACT_SOURCE_PROMOTION_CONTROL_PLANE",
   "engineRevision": "R170.2+R240",
-  "currentCapabilityFloor": "R239",
+  "currentCapabilityFloor": "R241",
   "promotedSuccessorContinuity": ["R175", "R176", "R177", "R178", "R179", "R180"],
-  "postR180ProofContinuity": ["R200", "R200.1", "R202", "R210", "R223", "R236", "R237", "R238", "R239"],
+  "postR180ProofContinuity": ["R200", "R200.1", "R202", "R210", "R223", "R236", "R237", "R238", "R239", "R240", "R241"],
   "activeWorkflowAuthority": {
     "productionDeploy": ".github/workflows/ci.yml",
     "currentConvergence": ".github/workflows/r170-current-convergence.yml",
@@ -28,7 +28,7 @@
     "autoMergeAllowed": false,
     "focusedInvariantRequired": true,
     "dynamicProofRunner": "scripts/prove_successor_workflow_invariants_r175.mjs",
-    "policy": "Post-R170 successor workflows remain read-only proof or explicit workflow_dispatch infrastructure authorities. They may not schedule themselves, push-trigger on main, gain repository write permissions, recursively dispatch workflows, merge PRs, or directly mutate main. R240 exact source promotion is confined to the existing R170 governed self-build authority and does not grant merge authority to the R239 resource governor or successor proof workflows. R223 CLOUD-01 recurring execution remains in Cloudflare."
+    "policy": "Post-R170 successor workflows remain read-only proof or explicit workflow_dispatch infrastructure authorities. They may not schedule themselves, push-trigger on main, gain repository write permissions, recursively dispatch workflows, merge PRs, or directly mutate main. R240 exact source promotion remains confined to the existing R170 governed self-build authority. R241 is a read-only archive-convergence visual/intelligence proof layer and grants no source, execution, deployment, or Canon authority. R223 CLOUD-01 recurring execution remains in Cloudflare."
   },
   "historicalWorkflowArchive": {
     "sourceCommitSha": "b4b939552085f3f63297d33d51878c97e3c43c0d",
@@ -55,7 +55,7 @@
     "residualAuthority": "R164",
     "recursiveScheduler": "R240",
     "successorContinuityProof": "scripts/prove_successor_workflow_invariants_r175.mjs",
-    "latestExplicitSuccessorProof": "tests/r239-adaptive-hybrid-resource-governor-invariants.mjs",
+    "latestExplicitSuccessorProof": "tests/r241-archive-convergence-invariants.mjs",
     "canonicalAdmissionAuthority": "R125",
     "cloudEvolutionMachine": "CLOUD-01",
     "cloudEvolutionHost": "CLOUDFLARE_WORKER"
@@ -105,8 +105,9 @@
     "hybridCommandAuthority": "R237_AUTHENTICATED_BOUNDED_NATIVE_CONTROL",
     "hybridHostIntelligence": "R238_RETURNED_RESOURCE_AND_MACRO_INTEGRITY_PROOF",
     "hybridResourceGovernor": "R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING",
-    "recursiveSelfBuildAndExactPromotion": "R240_R164_EVIDENCE_BOUND_SPARSE_FRONTIER_PLUS_EXACT_SOURCE_PROMOTION"
+    "recursiveSelfBuildAndExactPromotion": "R240_R164_EVIDENCE_BOUND_SPARSE_FRONTIER_PLUS_EXACT_SOURCE_PROMOTION",
+    "archiveConvergenceVisualIntelligence": "R241_READ_ONLY_1728_OVER_20736_TOPOLOGY_AND_TYPED_COGNITION_PROJECTION"
   },
   "truthLaw": "reachable != writable != generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
-  "truthBoundary": "R170.5/R240 preserves every production R239 Hybrid resource-governor boundary while adding evidence-bound recursive source planning and exact self-promotion only for R170-generated low/medium-risk roadmap capsules. R240 ranks the dependency-ready sparse frontier from returned R164 residual evidence plus dependency topology and never infers user-value deficit. Promotion requires an exact production-proven base, residual PASS, committed-candidate re-proof, every declared candidate test true, an allowlisted diff limited to the generated target plus R170 state/receipt artifacts, unchanged base immediately before merge, exact expected PR head, and a normal two-parent merge. GitHub auto-merge remains disabled. After source merge, R170 may dispatch only canonical ci.yml; ci.yml remains the sole canonical production Worker writer and must prove the exact promoted merge. A red production proof stops future autonomous generations and requires forward repair; it is never relabeled successful or auto-rolled back. R239 cannot merge source. R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable history authority, and R141 exact Hybrid return-proof authority."
+  "truthBoundary": "R170.5/R241 advances the current proof-topology floor through a read-only archive-convergence visual/intelligence layer while preserving the R240 self-promotion engine and every production R239 Hybrid resource-governor boundary. R241 aggregates the exact existing 20,736-state packet into deterministic 12×12×12 visual topology and typed cognition through proposal only; it does not create physical measurement, permission, execution, return, deployment, or Canon authority. R240 exact promotion remains limited to R170-generated low/medium-risk roadmap capsules and still requires an exact production-proven base, residual PASS, committed-candidate re-proof, every declared candidate test true, allowlisted diff, unchanged base, exact expected head, and a normal two-parent merge. GitHub auto-merge remains disabled. ci.yml remains the sole canonical production Worker writer. A red production proof requires forward repair. R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable history authority, and R141 exact Hybrid return-proof authority."
 }
