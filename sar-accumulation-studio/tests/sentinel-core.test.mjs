@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCalibrationXml, parseProductXml, geolocateToPixel, calibrationLutAt } from '../src/sentinel1-calibration.mjs';
+import { parseCalibrationXml, parseProductXml, geolocateToPixel, calibrationLutAt, manifestProductAnnotation, resolveRelativeSafeAsset } from '../src/sentinel1-calibration.mjs';
 
 test('namespace-qualified SAFE calibration XML parses without DOM namespace assumptions', () => {
   const xml=`<s:calibration xmlns:s="urn:test"><s:absoluteCalibrationConstant>0</s:absoluteCalibrationConstant><s:calibrationVectorList><s:calibrationVector><s:azimuthTime>2026-01-01T00:00:00Z</s:azimuthTime><s:line>0</s:line><s:pixel>0 10</s:pixel><s:sigmaNought>1 3</s:sigmaNought><s:betaNought>2 4</s:betaNought><s:gamma>4 6</s:gamma><s:dn>1 1</s:dn></s:calibrationVector><s:calibrationVector><s:line>10</s:line><s:pixel>0 10</s:pixel><s:sigmaNought>3 5</s:sigmaNought><s:betaNought>4 6</s:betaNought><s:gamma>6 8</s:gamma><s:dn>1 1</s:dn></s:calibrationVector></s:calibrationVectorList></s:calibration>`;
@@ -47,4 +47,18 @@ test('geolocation stays unresolved when the target is outside GCP support', () =
   ]};
   const g=geolocateToPixel(product,50,50);
   assert.equal(g.state,'GEOLOCATION_UNRESOLVED');
+});
+
+test('SAFE manifest recovery selects the root product annotation and never the RFI auxiliary XML', () => {
+  const manifest=`<xfdu><dataObjectSection>
+    <byteStream><fileLocation href="./annotation/rfi/rfi-iw-vh.xml"/></byteStream>
+    <byteStream><fileLocation href="./annotation/calibration/calibration-iw-vh.xml"/></byteStream>
+    <byteStream><fileLocation xlink:href="./annotation/s1d-iw-grd-vh-20260907t131154-20260907t131219-004472-0084aa-002.xml"/></byteStream>
+    <byteStream><fileLocation href="./annotation/s1d-iw-grd-vv-20260907t131154-20260907t131219-004472-0084aa-001.xml"/></byteStream>
+  </dataObjectSection></xfdu>`;
+  const relative=manifestProductAnnotation(manifest,'vh');
+  assert.equal(relative,'./annotation/s1d-iw-grd-vh-20260907t131154-20260907t131219-004472-0084aa-002.xml');
+  assert.ok(!relative.includes('/rfi/'));
+  const resolved=resolveRelativeSafeAsset('s3://sentinel-s1-l1c/GRD/2026/9/7/IW/DV/SCENE/manifest.safe',relative);
+  assert.equal(resolved,'s3://sentinel-s1-l1c/GRD/2026/9/7/IW/DV/SCENE/annotation/s1d-iw-grd-vh-20260907t131154-20260907t131219-004472-0084aa-002.xml');
 });
