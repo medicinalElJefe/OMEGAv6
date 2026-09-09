@@ -1,5 +1,7 @@
 import { geometryRings, unwrapRing, wrapLon } from './geometry.mjs';
 
+const MAX_VIEW_SCALE=8192;
+
 function centroidOfGeometry(geometry) {
   const points=[];
   for(const ring of geometryRings(geometry)) for(const [lon,lat] of ring) if(Number.isFinite(lon)&&Number.isFinite(lat)) points.push([lon,lat]);
@@ -52,11 +54,28 @@ export class WorldRenderer {
     return [minLon,minLat,maxLon,maxLat];
   }
 
-  fitLocation(lon,lat,scale=8){
+  fitLocation(lon,lat,scale=180){
     this.view.centerLon=wrapLon(Number(lon));
     this.view.centerLat=Math.max(-85,Math.min(85,Number(lat)));
-    this.view.scale=Math.max(1,Math.min(24,Number(scale)||8));
+    this.view.scale=Math.max(1,Math.min(MAX_VIEW_SCALE,Number(scale)||180));
     this.redraw?.();this._notifyView();
+  }
+
+  fitBounds(bbox,{padding=1.55,minScale=1,maxScale=MAX_VIEW_SCALE}={}){
+    if(!Array.isArray(bbox)||bbox.length!==4||!bbox.every(Number.isFinite))return false;
+    let [minLon,minLat,maxLon,maxLat]=bbox;
+    if(maxLat<=minLat)return false;
+    let lonSpan=maxLon-minLon;
+    if(lonSpan<0)lonSpan+=360;
+    if(lonSpan<=0)return false;
+    const centerLon=wrapLon(minLon+lonSpan/2),centerLat=(minLat+maxLat)/2;
+    const paddedLon=Math.max(lonSpan*padding,0.0008),paddedLat=Math.max((maxLat-minLat)*padding,0.0005);
+    const scaleLon=360/paddedLon,scaleLat=180/paddedLat;
+    this.view.centerLon=centerLon;
+    this.view.centerLat=Math.max(-85,Math.min(85,centerLat));
+    this.view.scale=Math.max(minScale,Math.min(maxScale,Math.min(scaleLon,scaleLat)));
+    this.redraw?.();this._notifyView();
+    return true;
   }
 
   async setBaseImage(url, meta=null){
@@ -113,7 +132,7 @@ export class WorldRenderer {
     const e=d00[0]-a*sx0-cc*sy0,f=d00[1]-b*sx0-d*sy0;
     const c=this.ctx;c.save();
     c.beginPath();c.moveTo(d00[0],d00[1]);c.lineTo(d10[0],d10[1]);c.lineTo(d11[0],d11[1]);c.lineTo(d01[0],d01[1]);c.closePath();c.clip();
-    c.globalAlpha=.92;c.imageSmoothingEnabled=true;c.transform(a,b,cc,d,e,f);c.drawImage(image,0,0);c.restore();
+    c.globalAlpha=.96;c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.transform(a,b,cc,d,e,f);c.drawImage(image,0,0);c.restore();
   }
 
   _drawSarOverlay(){
@@ -131,9 +150,9 @@ export class WorldRenderer {
     }
     if(cells){
       const c=this.ctx,target=overlay.patch.target,[tx,ty]=this.project(target.lon,target.lat);
-      c.save();c.strokeStyle='rgba(238,252,255,.92)';c.lineWidth=1.2;c.beginPath();c.arc(tx,ty,5,0,Math.PI*2);c.stroke();
-      c.fillStyle='rgba(0,8,12,.74)';c.fillRect(tx+7,ty-17,145,16);c.fillStyle='rgba(235,250,255,.94)';c.font='9px ui-monospace,monospace';
-      c.fillText(`CALIBRATED S1 ${overlay.patch.polarization} ${overlay.patch.quantity}`,tx+11,ty-6);c.restore();
+      c.save();c.strokeStyle='rgba(246,250,252,.98)';c.lineWidth=1.5;c.beginPath();c.arc(tx,ty,5,0,Math.PI*2);c.stroke();
+      c.fillStyle='rgba(0,6,9,.80)';c.fillRect(tx+8,ty-20,170,18);c.fillStyle='rgba(244,248,250,.98)';c.font='600 10px Inter,Segoe UI,sans-serif';
+      c.fillText(`CALIBRATED S1 ${overlay.patch.polarization} ${overlay.patch.quantity}`,tx+13,ty-7);c.restore();
     }
     return cells>0;
   }
@@ -176,9 +195,9 @@ export class WorldRenderer {
       const current = r.id === currentId;
       const recency = records.length <= 1 ? 1 : (index + 1) / records.length;
       if(mode==='earth'){
-        c.lineWidth=current?1.6:.45;
-        c.strokeStyle=current?'rgba(210,248,255,.86)':`rgba(110,215,234,${.025+.06*recency})`;
-        c.fillStyle=current?'rgba(57,184,210,.025)':'rgba(0,0,0,0)';
+        c.lineWidth=current?1.4:.4;
+        c.strokeStyle=current?'rgba(235,245,248,.58)':`rgba(210,225,230,${.018+.04*recency})`;
+        c.fillStyle='rgba(0,0,0,0)';
         c.shadowBlur=0;
       }else{
         const alpha = mode === 'density' ? Math.min(.38, .035 + .46/Math.sqrt(total)) : current ? .48 : .035 + .13 * recency;
@@ -261,8 +280,8 @@ export class WorldRenderer {
     this.canvas.style.touchAction='none';
     this.canvas.addEventListener('wheel', e => {
       e.preventDefault();
-      const factor=e.deltaY<0?1.18:1/1.18;
-      this.view.scale=Math.max(1,Math.min(24,this.view.scale*factor));
+      const factor=e.deltaY<0?1.35:1/1.35;
+      this.view.scale=Math.max(1,Math.min(MAX_VIEW_SCALE,this.view.scale*factor));
       this.redraw?.();
       clearTimeout(this._viewTimer);
       this._viewTimer=setTimeout(()=>this._notifyView(),120);
@@ -284,14 +303,8 @@ export class WorldRenderer {
       if(performance.now()-this._lastPointerDownAt<80)return;
       this._beginDrag(e.clientX,e.clientY);
     });
-    window.addEventListener('mousemove', e => {
-      if(!this.drag)return;
-      this._moveDrag(e.clientX,e.clientY);
-    });
-    window.addEventListener('mouseup', e => {
-      if(e.button!==0||!this.drag)return;
-      this._finishDrag(e.clientX,e.clientY);
-    });
+    window.addEventListener('mousemove', e => {if(!this.drag)return;this._moveDrag(e.clientX,e.clientY);});
+    window.addEventListener('mouseup', e => {if(e.button!==0||!this.drag)return;this._finishDrag(e.clientX,e.clientY);});
 
     this.canvas.addEventListener('click', e => {
       if(performance.now()-this._lastSelectionAt<120)return;
