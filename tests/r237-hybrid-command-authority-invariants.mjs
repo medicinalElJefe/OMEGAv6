@@ -110,14 +110,20 @@ for(const token of ['R125 admission authority','R141 exact return closure','R146
 for(const token of [
   "[data-r237-command-authority=\"AUTHENTICATED_BOUNDED_NATIVE_CONTROL\"]",
   "data-r237-snapshot-epoch",
-  "R238 changes correlation and sampling, not execution or Canon authority",
+  "[data-r238-host-intelligence]",
+  "data-r238-selected-device",
+  "data-r238-snapshot-epoch",
+  "RETURNED_HOST_PROOF",
+  "AWAITING_RETURNED_PROFILE",
   "R212/R141",
   "R146",
   "R147",
   "R125",
   "Refresh shared snapshot"
-])must(liveVerifier.includes(token),`R238.1 live R237 verifier missing durable Woven authority marker ${token}`);
-must(!liveVerifier.includes('R141/R146/R147/R125 authority remains unchanged'),'R238.1 live verifier must not depend on the retired pre-Woven literal authority sentence');
-must(liveVerifier.includes("if(!Number.isFinite(epoch)||epoch<1)throw new Error"),'R238.1 live verifier must prove a completed shared snapshot epoch before accepting the command surface');
+])must(liveVerifier.includes(token),`R239.1 live R237 verifier missing durable semantic authority marker ${token}`);
+must(!liveVerifier.includes('R238 changes correlation and sampling, not execution or Canon authority'),'R239.1 live verifier must not depend on retired explanatory R238 prose');
+must(!liveVerifier.includes('R141/R146/R147/R125 authority remains unchanged'),'R239.1 live verifier must not depend on retired pre-Woven prose');
+must(liveVerifier.includes("if(!Number.isFinite(epoch)||epoch<1)throw new Error"),'R239.1 live verifier must prove a completed shared snapshot epoch before accepting the command surface');
+must(liveVerifier.includes('intelligenceEpoch!==epoch'),'R239.1 live verifier must bind R237 command and R238 intelligence to the same snapshot epoch');
 
-console.log('OMEGA R237 HYBRID COMMAND AUTHORITY PASS · authenticated secret rotation + same-session reconnect continuity · authenticated mission control · one-active-job-per-device backpressure · R238 shared host/job/mission/epoch correlation · stale fail-closed writes · capability-negotiated native command deck · no direct source/shell mutation primitive · durable Woven live-verifier markers · R141/R146/R147/R125 preserved');
+console.log('OMEGA R237/R239.1 HYBRID COMMAND AUTHORITY PASS · authenticated secret rotation + same-session reconnect continuity · authenticated mission control · one-active-job-per-device backpressure · R238 shared host/job/mission/epoch correlation · stale fail-closed writes · capability-negotiated native command deck · no direct source/shell mutation primitive · semantic live-verifier identities instead of brittle prose · R141/R146/R147/R125 preserved');
