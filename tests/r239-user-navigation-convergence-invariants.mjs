@@ -24,6 +24,7 @@ for(const token of [
  'r239-route-group',
  'showTechnical',
  "aria-pressed={showTechnical}",
+ "aria-hidden={!expanded} inert={!expanded}",
  "YOU ARE HERE",
  'rows.map(route=>',
  'OMEGA_WORKSPACES_R82.map(workspace=>',
@@ -65,4 +66,4 @@ for(const token of [
  "@media(max-width:560px)"
 ])must(css.includes(token),'R239 responsive presentation law missing '+token);
 
-console.log('R239.1 USER NAVIGATION CONVERGENCE PASS · Home→workspace→start-here→all-tools hierarchy · universal rail Command/Hybrid/Earth/Proof · full 44-route registry retained · primary/support/expert grouped · technical metadata opt-in · visible/accessible naming aligned · R104 semantic location/destination explanation bound · focus/deep density preserved · no new execution or Canon authority');
+console.log('R239.1 USER NAVIGATION CONVERGENCE PASS · Home→workspace→start-here→all-tools hierarchy · universal rail Command/Hybrid/Earth/Proof · full 44-route registry retained · primary/support/expert grouped · technical metadata opt-in · visible/accessible naming aligned · collapsed navigator becomes immediately inert while R94 exit visibility transition completes · R104 semantic location/destination explanation bound · focus/deep density preserved · no new execution or Canon authority');
