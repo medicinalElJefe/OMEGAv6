@@ -51,14 +51,19 @@ await intelligence.waitFor({state:'visible'});
 const text=await intelligence.innerText();
 const profileState=String(await intelligence.getAttribute('data-r238-host-intelligence')||'');
 for(const token of ['R238 · HYBRID HOST INTELLIGENCE','Use the machine you actually have.','RCWA PYTHON DEPENDENCY','LOCAL MACRO STORE','R141 exact-payload fingerprint'])if(!text.includes(token))throw new Error(`R238 live browser missing invariant surface token ${token}`);
-if(!['AWAITING_RETURNED_PROFILE','RETURNED_HOST_PROOF'].includes(profileState))throw new Error(`R238 live browser returned unsupported host-intelligence state ${profileState}`);
-if(profileState==='RETURNED_HOST_PROOF'&&!text.includes('R141 exact return closure'))throw new Error('R238 returned host proof is visible without its R141 exact-return footer boundary');
-if(profileState==='AWAITING_RETURNED_PROFILE'&&(!text.includes('NOT YET RETURNED')||!text.includes('Run “Prove host + tree”')))throw new Error('R238 awaiting-profile state does not truthfully expose the proof bootstrap path');
+if(!['AWAITING_RETURNED_PROFILE','RETURNED_HOST_PROOF'].includes(profileState))throw new Error(`R238 live browser returned unsupported host-intelligence state ${profileState||'NONE'}`);
 const selected=await intelligence.getAttribute('data-r238-selected-device');
 if(current.length===0){
-  if(selected!=='NONE'||!text.includes('DEVICE PROOF REQUIRED')||profileState!=='AWAITING_RETURNED_PROFILE')throw new Error(`R238 live browser should truthfully hold with no current device/profile; selected=${selected} profile=${profileState}`);
+  if(selected!=='NONE'||profileState!=='AWAITING_RETURNED_PROFILE'||!text.includes('DEVICE PROOF REQUIRED')||!text.includes('NOT YET RETURNED'))throw new Error(`R238 live browser should truthfully hold with no current device/proof; selected=${selected} profile=${profileState}`);
 }else if(!current.some(d=>d.id===selected))throw new Error(`R238 live browser selected device ${selected} is not a current authenticated device`);
+if(profileState==='RETURNED_HOST_PROOF'){
+  const returnedProofTokens=['R141 exact return closure','Hardware presence does not prove CUDA runtime','does not prove CUDA runtime, RCWA numerical validity, scientific truth, source mutation, or CanonState admission'];
+  for(const token of returnedProofTokens)if(!text.includes(token))throw new Error(`R238 returned host proof missing truth boundary ${token}`);
+}else{
+  if(!text.includes('Run “Prove host + tree”'))throw new Error('R238 awaiting-profile state does not expose the proof bootstrap path');
+  if(text.includes('Proof source: selected authenticated Hybrid device'))throw new Error('R238 awaiting state rendered a returned-proof source claim');
+}
 if(pageErrors.length)throw new Error(`R238 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R238 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · R141 wrapper byte SHA ${liveWrapperSha} · immutable R205 base ${baseSha} · Hybrid ${status.body.state} · current public devices ${current.length} · profile ${profileState} · live Home→TOOLS→Hybrid host-intelligence truth state rendered without cross-authority claims`);
+console.log(`R238 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · R141 wrapper byte SHA ${liveWrapperSha} · immutable R205 base ${baseSha} · Hybrid ${status.body.state} · current public devices ${current.length} · profile ${profileState} · returned-proof boundary is conditional and awaiting state rejects fabricated proof-source claims`);
