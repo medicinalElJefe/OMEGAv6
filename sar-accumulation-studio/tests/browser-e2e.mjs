@@ -72,12 +72,13 @@ try {
     const beforeClickLat=await page.inputValue('#jumpLat');
     const beforeClickLon=await page.inputValue('#jumpLon');
     await page.mouse.click(box.x+box.width*.63,box.y+box.height*.43);
-    await page.waitForTimeout(120);
+    await page.waitForTimeout(80);
     const afterClickLat=await page.inputValue('#jumpLat');
     const afterClickLon=await page.inputValue('#jumpLon');
     assert.ok(afterClickLat!==beforeClickLat||afterClickLon!==beforeClickLon,'map click did not synchronize canonical location fields');
     assert.match(await page.textContent('#earthSelectedCoords'),/WGS84 \/ EPSG:4326/);
-    assert.equal(reverseRequests,2,'new clicked coordinate should generate exactly one additional reverse-geocode request');
+    for(let i=0;i<30&&reverseRequests<2;i++) await page.waitForTimeout(50);
+    assert.equal(reverseRequests,2,'new clicked coordinate should generate exactly one additional throttled reverse-geocode request');
 
     const beforeScale=parseFloat((await page.textContent('#earthViewScale')).replace('×',''));
     await page.locator('[data-map-command="zoom-in"]').click();
