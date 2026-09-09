@@ -74,17 +74,18 @@ async function fetchR102(request,env){
 }
 
 export class OmegaRuntime extends OmegaRuntimeR101 {
- async recoverStalledJobsR243(deviceId){
+ async recoverStalledJobsR243(deviceId=null){
   await super.recoverStalledJobsR243(deviceId);
   const jobs=await this.get('jobs',[]),missions=await this.get('missions',[]),t=now();let changed=false;
   for(const mission of missions){
-   if(mission?.targetDeviceId!==deviceId||String(mission?.status||'').toUpperCase()!=='ACTIVE'||!mission?.currentJobId)continue;
-   const current=jobs.find(j=>j?.id===mission.currentJobId&&j?.targetDeviceId===deviceId);
+   const targetDeviceId=safeId(mission?.targetDeviceId,'');
+   if((deviceId&&targetDeviceId!==deviceId)||String(mission?.status||'').toUpperCase()!=='ACTIVE'||!mission?.currentJobId)continue;
+   const current=jobs.find(j=>j?.id===mission.currentJobId&&(!targetDeviceId||j?.targetDeviceId===targetDeviceId));
    if(!current||String(current?.status||'').toUpperCase()!=='FAILED'||current?.stallReason!=='R243_EXECUTION_LEASE_EXPIRED')continue;
-   const replacement=jobs.find(j=>j?.recoveryOf===current.id&&j?.targetDeviceId===deviceId&&['QUEUED','RUNNING'].includes(String(j?.status||'').toUpperCase()));
+   const replacement=jobs.find(j=>j?.recoveryOf===current.id&&(!targetDeviceId||j?.targetDeviceId===targetDeviceId)&&['QUEUED','RUNNING'].includes(String(j?.status||'').toUpperCase()));
    if(replacement)continue;
-   Object.assign(mission,{status:'PAUSED',pausedAt:t,updatedAt:t,currentJob:current,holdReason:'R243_STALL_OPERATOR_REVIEW_REQUIRED',operatorReviewRequired:true});changed=true;
-   await this.event('R243_MISSION_STALL_PAUSED',`Mission ${mission.id} paused after expired job ${current.id}; no safe automatic replay exists.`,{deviceId,missionId:mission.id,jobId:current.id,stage:mission.stage||null,holdReason:mission.holdReason});
+   Object.assign(mission,{status:'PAUSED',pausedAt:t,updatedAt:t,currentJob:current,holdReason:'R243_STALL_OPERATOR_REVIEW_REQUIRED',operatorReviewRequired:true,stallReconciliationRevision:'R244'});changed=true;
+   await this.event('R243_MISSION_STALL_PAUSED',`R244 paused mission ${mission.id} after expired job ${current.id}; no safe automatic replay exists.`,{deviceId:targetDeviceId||null,missionId:mission.id,jobId:current.id,stage:mission.stage||null,holdReason:mission.holdReason,reconciliationRevision:'R244'});
   }
   if(changed)await this.put('missions',missions.slice(-60));
  }
