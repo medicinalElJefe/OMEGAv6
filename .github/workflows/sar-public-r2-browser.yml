@@ -1,0 +1,104 @@
+name: SAR Public R2 Browser Verification
+
+on:
+  push:
+    branches:
+      - release/sar-accumulation-studio-public-r2
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sar-public-r2-browser
+  cancel-in-progress: false
+
+jobs:
+  verify-r2:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sar-accumulation-studio
+    steps:
+      - name: Checkout R2 release
+        uses: actions/checkout@v7
+
+      - name: Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: sar-accumulation-studio/processor/requirements.txt
+
+      - name: Install native SAR processor dependencies
+        run: python -m pip install -r processor/requirements.txt
+
+      - name: Re-run deterministic source and native processor gates
+        run: |
+          npm run check
+          npm test
+          python -m compileall -q processor
+          python -m pytest -q tests/test_nisar_gcov.py tests/test_nisar_gunw.py tests/test_omega_sar_public.py
+          node --check src/location-ui.mjs
+          grep -q "_drawBaseImage" src/render.mjs
+          grep -q "Natural Earth 1:50m" src/render.mjs
+          grep -q "NOMINATIM_REVERSE" src/location-ui.mjs
+          grep -q "omega-map-command" src/render.mjs
+
+      - name: Install Chromium verification runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start local public workstation
+        run: |
+          python -m http.server 8765 >/tmp/sar-r2-http.log 2>&1 &
+          echo $! > /tmp/sar-r2-http.pid
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8765/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/sar-r2-http.log
+          exit 1
+
+      - name: Chromium desktop tablet mobile interaction suite
+        env:
+          SAR_TEST_URL: http://127.0.0.1:8765/
+        run: node tests/browser-e2e.mjs
+
+      - name: Stop local workstation
+        if: always()
+        run: kill "$(cat /tmp/sar-r2-http.pid)" || true
+
+      - name: Verify immutable public CDN files for exact R2 commit
+        shell: bash
+        run: |
+          base="https://rawcdn.githack.com/medicinalElJefe/OMEGAv6/${GITHUB_SHA}/sar-accumulation-studio"
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error --location "$base/index.html" -o /tmp/r2-index.html \
+              && curl --fail --silent --show-error --location "$base/src/render.mjs" -o /tmp/r2-render.mjs \
+              && curl --fail --silent --show-error --location "$base/src/location-ui.mjs" -o /tmp/r2-location.mjs; then
+              if grep -q 'PUBLIC SCIENTIFIC WORKSTATION' /tmp/r2-index.html \
+                && grep -q '_drawBaseImage' /tmp/r2-render.mjs \
+                && grep -q 'Selected Earth location' /tmp/r2-location.mjs; then
+                echo "SAR_PUBLIC_R2_BASE=$base" >> "$GITHUB_ENV"
+                exit 0
+              fi
+            fi
+            sleep 2
+          done
+          echo '::error title=R2 CDN propagation failed::Exact commit was not available from the public CDN.'
+          exit 1
+
+      - name: Chromium verify exact public R2 URL
+        env:
+          SAR_TEST_URL: ${{ env.SAR_PUBLIC_R2_BASE }}/index.html
+        run: node tests/browser-e2e.mjs
+
+      - name: Publish exact public R2 URL
+        run: echo "PUBLIC_SAR_R2_URL=${SAR_PUBLIC_R2_BASE}/index.html"
