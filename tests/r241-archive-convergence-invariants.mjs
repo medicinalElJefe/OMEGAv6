@@ -66,7 +66,7 @@ must(continuous.includes('same 20,736-state packet')&&continuous.includes('not n
 
 for(const token of ["data-r237-correlation","['LOCKED','HELD']","correlation==='LOCKED'",'HOST / JOB / MISSION / EPOCH LOCKED','EXECUTION CONTEXT HELD'])must(commandVerifier.includes(token),`R241 R240 repair missing semantic correlation token ${token}`);
 must(!commandVerifier.includes("'intentionally contain no APPLY_PATCH or WRITE_TEXT','HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE'"),'R241 must not regress to unconditional LOCKED prose coupling');
-must(commandInvariant.includes('semantic LOCKED or HELD without prose overclaim'),'R241 must pin the R237 verifier truth-state repair in focused invariants');
+must(commandInvariant.includes('semantic LOCKED or fail-closed HELD'),'R241 must pin the R237 verifier semantic truth-state repair in focused invariants');
 
 must(governor.revision==='R170.5-R241','R241 must advance the governor proof revision without changing the R240 promotion engine');
 must(governor.engineRevision==='R170.2+R240'&&governor.selfPromotion?.revision==='R240','R241 must not replace the established R240 exact self-promotion engine');
