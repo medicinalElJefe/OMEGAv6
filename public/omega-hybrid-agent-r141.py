@@ -20,8 +20,9 @@ remains the immutable R205 asset and its exact SHA-256 is mandatory before any b
 R238 host-intelligence extension: DESKTOP_HEALTH returned proof is enriched with bounded,
 host-observed CPU/RAM/GPU/root-storage/Python/RCWA state and a bounded local macro inventory.
 No screenshot value is hard-coded. No dependency is installed. Macro contents are not uploaded.
-REPLAY_MACRO is preflight-verified against its stored schema/hash/event bounds/window lock before
-execution. All added host facts remain inside the existing R141 exact returned-payload proof.
+REPLAY_MACRO is preflight-verified against its stored schema/hash/event count/order/time/coordinate
+bounds and window lock before execution. All added host facts remain inside the existing R141
+exact returned-payload proof.
 """
 from __future__ import annotations
 import ctypes,hashlib,importlib.util,json,os,platform,shutil,socket,subprocess,sys,time,types,urllib.request
@@ -48,6 +49,8 @@ MAX_FINGERPRINT_PAYLOAD_BYTES=512*1024
 MAX_MACRO_FILE_BYTES=1024*1024
 MAX_MACRO_INVENTORY=64
 MAX_MACRO_EVENTS_R238=5000
+MAX_MACRO_SECONDS_R238=300
+MAX_MACRO_COORD_ABS_R238=100000
 PROFILE_CACHE_SECONDS=60
 MACRO_CACHE_SECONDS=30
 
@@ -92,7 +95,7 @@ def _windows_cpu():
     try:
         p=subprocess.run(['powershell.exe','-NoProfile','-NonInteractive','-Command',script],text=True,capture_output=True,timeout=8,shell=False)
         if p.returncode==0 and p.stdout.strip():
-            d=json.loads(p.stdout);return {'model':str(d.get('Name') or '').strip()[:160],'physicalCores':int(d.get('NumberOfCores') or 0),'logicalProcessors':int(d.get('NumberOfLogicalProcessors') or 0)}
+            d=json.loads(p.stdout);return {'model':str(d.get('Name') or '').strip()[:160],'physicalCores':int(d.get('NumberOfCores') or 0),'logicalProcessors':int(d.get('NumberOfLogicalProcessors') or 0),'query':'WINDOWS_CIM_FIXED_READ_ONLY'}
     except Exception:pass
     return{}
 
@@ -103,33 +106,61 @@ def _windows_memory():
             _fields_=[('dwLength',ctypes.c_ulong),('dwMemoryLoad',ctypes.c_ulong),('ullTotalPhys',ctypes.c_ulonglong),('ullAvailPhys',ctypes.c_ulonglong),('ullTotalPageFile',ctypes.c_ulonglong),('ullAvailPageFile',ctypes.c_ulonglong),('ullTotalVirtual',ctypes.c_ulonglong),('ullAvailVirtual',ctypes.c_ulonglong),('ullAvailExtendedVirtual',ctypes.c_ulonglong)]
         m=M();m.dwLength=ctypes.sizeof(M)
         if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(m)):
-            return {'totalBytes':int(m.ullTotalPhys),'availableBytes':int(m.ullAvailPhys),'loadPercent':int(m.dwMemoryLoad)}
+            return {'totalBytes':int(m.ullTotalPhys),'availableBytes':int(m.ullAvailPhys),'loadPercent':int(m.dwMemoryLoad),'query':'GLOBAL_MEMORY_STATUS_EX'}
     except Exception:pass
     return{}
 
+def _windows_gpu_adapters():
+    if os.name!='nt':return []
+    script="$ErrorActionPreference='Stop';Get-CimInstance Win32_VideoController|Select-Object Name,AdapterRAM,DriverVersion|ConvertTo-Json -Compress"
+    try:
+        p=subprocess.run(['powershell.exe','-NoProfile','-NonInteractive','-Command',script],text=True,capture_output=True,timeout=8,shell=False)
+        if p.returncode or not p.stdout.strip():return []
+        rows=json.loads(p.stdout);rows=rows if isinstance(rows,list) else [rows]
+        out=[]
+        for d in rows[:8]:
+            if not isinstance(d,dict):continue
+            ram=d.get('AdapterRAM')
+            try:reported=int(ram) if ram is not None else None
+            except Exception:reported=None
+            out.append({'name':str(d.get('Name') or 'Windows display adapter')[:160],'adapterRamReportedBytes':reported if reported and reported>0 else None,'driverVersion':str(d.get('DriverVersion') or '')[:80] or None,'query':'WINDOWS_CIM_FIXED_READ_ONLY'})
+        return out
+    except Exception:return []
+
 def _nvidia_gpu():
     exe=shutil.which('nvidia-smi')
-    if not exe:return {'present':False,'query':'NVIDIA_SMI_NOT_FOUND'}
+    if not exe:return {'available':False,'query':'NVIDIA_SMI_NOT_FOUND'}
     try:
         p=subprocess.run([exe,'--query-gpu=name,memory.total,driver_version','--format=csv,noheader,nounits'],text=True,capture_output=True,timeout=8,shell=False)
-        if p.returncode!=0 or not p.stdout.strip():return {'present':False,'query':'NVIDIA_SMI_QUERY_FAILED'}
-        first=p.stdout.splitlines()[0];parts=[x.strip() for x in first.split(',')]
-        mib=float(parts[1]) if len(parts)>1 and parts[1] else 0
-        return {'present':True,'name':parts[0][:160] if parts else 'NVIDIA GPU','vramBytes':int(mib*1024*1024),'driverVersion':parts[2][:80] if len(parts)>2 else None,'query':'NVIDIA_SMI_FIXED_READ_ONLY'}
-    except Exception as e:return {'present':False,'query':'NVIDIA_SMI_QUERY_ERROR','error':str(e)[:240]}
+        if p.returncode!=0 or not p.stdout.strip():return {'available':False,'query':'NVIDIA_SMI_QUERY_FAILED'}
+        rows=[]
+        for line in p.stdout.splitlines()[:8]:
+            parts=[x.strip() for x in line.split(',')];mib=float(parts[1]) if len(parts)>1 and parts[1] else 0
+            rows.append({'name':parts[0][:160] if parts else 'NVIDIA GPU','vramBytes':int(mib*1024*1024),'driverVersion':parts[2][:80] if len(parts)>2 else None})
+        return {'available':bool(rows),'query':'NVIDIA_SMI_FIXED_READ_ONLY','adapters':rows}
+    except Exception as e:return {'available':False,'query':'NVIDIA_SMI_QUERY_ERROR','error':str(e)[:240]}
+
+def _gpu_state():
+    cim=_windows_gpu_adapters();nvidia=_nvidia_gpu();nrows=nvidia.get('adapters') if isinstance(nvidia,dict) and isinstance(nvidia.get('adapters'),list) else []
+    primary=(nrows[0] if nrows else (cim[0] if cim else {}))
+    return {
+      'present':bool(cim or nrows),'name':primary.get('name'),'vramBytes':primary.get('vramBytes'),'adapterRamReportedBytes':primary.get('adapterRamReportedBytes'),'driverVersion':primary.get('driverVersion'),
+      'adapters':cim,'nvidiaSmi':nvidia,'query':'WINDOWS_CIM_PLUS_OPTIONAL_NVIDIA_SMI' if os.name=='nt' else nvidia.get('query','GPU_QUERY_UNAVAILABLE'),
+      'truthBoundary':'GPU adapter presence is host inventory only. NVIDIA SMI, when available, is a fixed read-only enrichment. Neither path proves CUDA runtime availability, kernel execution, solver validity, or scientific correctness.'
+    }
 
 def host_profile(root:Path,cache:dict):
     now=time.time();prior=cache.get('profile')
     if prior and now-cache.get('at',0)<PROFILE_CACHE_SECONDS:return prior
-    wc=_windows_cpu();logical=int(wc.get('logicalProcessors') or os.cpu_count() or 1);physical=int(wc.get('physicalCores') or 0)
-    cpu={'model':wc.get('model') or platform.processor() or os.environ.get('PROCESSOR_IDENTIFIER') or platform.machine(),'physicalCores':physical or None,'logicalProcessors':logical}
+    wc=_windows_cpu();logical=max(1,int(wc.get('logicalProcessors') or os.cpu_count() or 1));physical=int(wc.get('physicalCores') or 0)
+    cpu={'model':wc.get('model') or platform.processor() or os.environ.get('PROCESSOR_IDENTIFIER') or platform.machine(),'physicalCores':physical or None,'logicalProcessors':logical,'query':wc.get('query') or 'PYTHON_RUNTIME_FALLBACK'}
     memory=_windows_memory()
-    try:u=shutil.disk_usage(root);storage={'rootLabel':root.name or root.anchor,'totalBytes':int(u.total),'usedBytes':int(u.used),'freeBytes':int(u.free)}
-    except Exception as e:storage={'rootLabel':root.name or root.anchor,'error':str(e)[:240]}
+    try:u=shutil.disk_usage(root);storage={'rootLabel':root.name or root.anchor,'totalBytes':int(u.total),'usedBytes':int(u.used),'freeBytes':int(u.free),'query':'PYTHON_DISK_USAGE_APPROVED_ROOT'}
+    except Exception as e:storage={'rootLabel':root.name or root.anchor,'error':str(e)[:240],'query':'PYTHON_DISK_USAGE_FAILED'}
     grcwa=importlib.util.find_spec('grcwa') is not None
     profile={
       'schema':HOST_PROFILE_SCHEMA,'revision':HOST_INTELLIGENCE_EXTENSION,'observedAt':int(now*1000),'hostName':socket.gethostname()[:120],'platform':platform.platform()[:200],
-      'cpu':cpu,'memory':memory,'gpu':_nvidia_gpu(),'storage':storage,
+      'cpu':cpu,'memory':memory,'gpu':_gpu_state(),'storage':storage,
       'python':{'version':platform.python_version(),'executable':Path(sys.executable).name,'architecture':platform.architecture()[0]},
       'rcwa':{'pythonDependencyAvailable':bool(grcwa),'state':'PYTHON_DEPENDENCY_AVAILABLE' if grcwa else 'PYTHON_DEPENDENCY_NOT_INSTALLED','reason':'grcwa is import-discoverable in the exact Hybrid agent Python environment.' if grcwa else 'grcwa is not installed in the exact Hybrid agent Python environment; General Hybrid remains available and R238 does not auto-install dependencies.'},
       'schedulerAdvisory':{'recommendedCpuWorkers':max(1,min(12,logical-2 if logical>4 else max(1,logical-1))),'policy':'RESERVE_OS_HEADROOM_CAP_12','authority':'ADVISORY_ONLY'},
@@ -140,15 +171,23 @@ def host_profile(root:Path,cache:dict):
 def _macro_core_valid(d):
     if not isinstance(d,dict) or d.get('schema')!='OMEGA_LOCAL_MACRO_R132':return False,'SCHEMA_MISMATCH'
     title=str(d.get('windowTitleLock') or '').strip();events=d.get('events')
-    if not title:return False,'WINDOW_TITLE_LOCK_REQUIRED'
-    if not isinstance(events,list) or len(events)>MAX_MACRO_EVENTS_R238:return False,'EVENT_BOUND_INVALID'
+    if not title or len(title)>240:return False,'WINDOW_TITLE_LOCK_REQUIRED'
+    if not isinstance(events,list) or not 1<=len(events)<=MAX_MACRO_EVENTS_R238:return False,'EVENT_BOUND_INVALID'
+    try:event_count=int(d.get('eventCount'))
+    except Exception:return False,'EVENT_COUNT_INVALID'
+    if event_count!=len(events):return False,'EVENT_COUNT_MISMATCH'
     stored=str(d.get('macroSha256') or '').lower();core=dict(d);core.pop('macroSha256',None)
     if len(stored)!=64 or sha_json(core)!=stored:return False,'MACRO_HASH_MISMATCH'
+    prior=-1.0
     for e in events:
         if not isinstance(e,dict) or e.get('type') not in {'MOVE','CLICK','KEY_RAW'}:return False,'EVENT_TYPE_REJECTED'
         try:
-            if float(e.get('t',0))<0:return False,'EVENT_TIME_INVALID'
-            if e.get('type') in {'MOVE','CLICK'}:int(e.get('x'));int(e.get('y'))
+            t=float(e.get('t',0))
+            if t<prior or t<0 or t>MAX_MACRO_SECONDS_R238:return False,'EVENT_TIME_INVALID'
+            prior=t
+            if e.get('type') in {'MOVE','CLICK'}:
+                x=int(e.get('x'));y=int(e.get('y'))
+                if abs(x)>MAX_MACRO_COORD_ABS_R238 or abs(y)>MAX_MACRO_COORD_ABS_R238:return False,'EVENT_COORDINATE_INVALID'
             if e.get('type')=='CLICK' and str(e.get('button','LEFT')).upper() not in {'LEFT','RIGHT'}:return False,'BUTTON_REJECTED'
             if e.get('type')=='KEY_RAW' and not 8<=int(e.get('vk'))<=255:return False,'KEY_REJECTED'
         except Exception:return False,'EVENT_VALUE_INVALID'
