@@ -57,7 +57,7 @@ jobs:
             test "$attempt" != 20 || { echo 'R4 root did not become live'; exit 1; }
             sleep 3
           done
-          for module in omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs; do
+          for module in omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs; do
             code="$(curl -sS -o "/tmp/$module" -w '%{http_code}' "$SAR_PUBLIC_URL/src/$module")"
             test "$code" = 200 || { echo "R4 $module HTTP $code"; exit 1; }
           done
@@ -68,6 +68,11 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
+      - name: Prove single-camera target authority and SAR-first rendering
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
+        run: node tests/r4-target-camera-e2e.mjs
       - name: Prove exact Tucson camera and calibrated Sentinel patch
         working-directory: sar-accumulation-studio
         env:
