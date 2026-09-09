@@ -1,0 +1,75 @@
+name: SAR R4 Continuous OMEGA Preview
+
+on:
+  push:
+    branches:
+      - release/sar-r4-omega-continuous-field
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sar-r4-preview
+  cancel-in-progress: true
+
+env:
+  SAR_PUBLIC_URL: https://omega-sar-r4.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Verify source and OMEGA field invariants
+        working-directory: sar-accumulation-studio
+        run: |
+          npm run check
+          npm test
+      - name: Build self-contained GeoTIFF runtime
+        working-directory: sar-accumulation-studio
+        run: |
+          npm install --no-package-lock
+          mkdir -p vendor
+          npx --yes esbuild@0.25.9 src/geotiff-entry.mjs --bundle --format=esm --platform=browser --target=es2022 --minify --outfile=vendor/geotiff.bundle.mjs
+          test -s vendor/geotiff.bundle.mjs
+      - name: Verify Cloudflare authorization
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler@latest whoami
+      - name: Dry-run isolated R4 worker
+        run: npx wrangler@latest deploy --config wrangler.sar-r4.jsonc --dry-run --outdir .wrangler-sar-r4
+      - name: Deploy isolated R4 worker
+        run: npx wrangler@latest deploy --config wrangler.sar-r4.jsonc
+      - name: Verify R4 public transport
+        run: |
+          set -euo pipefail
+          for attempt in {1..20}; do
+            code="$(curl -sS -o /tmp/r4.html -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/" || true)"
+            if [ "$code" = 200 ] && grep -q 'OMEGA SAR' /tmp/r4.html; then break; fi
+            test "$attempt" != 20 || { echo 'R4 root did not become live'; exit 1; }
+            sleep 3
+          done
+          for module in omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs; do
+            code="$(curl -sS -o "/tmp/$module" -w '%{http_code}' "$SAR_PUBLIC_URL/src/$module")"
+            test "$code" = 200 || { echo "R4 $module HTTP $code"; exit 1; }
+          done
+          code="$(curl -sS -o /tmp/stac.json -w '%{http_code}' -X POST -H 'content-type: application/json' --data '{"collections":["sentinel-1-grd"],"limit":1,"intersects":{"type":"Point","coordinates":[-110.9747,32.2226]}}' "$SAR_PUBLIC_URL/api/stac/search")"
+          test "$code" = 200 || { cat /tmp/stac.json; echo "R4 STAC proxy HTTP $code"; exit 1; }
+          grep -q 'FeatureCollection' /tmp/stac.json
+      - name: Install Chromium proof runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Prove worldwide continuous field and real SAR anchoring
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
+        run: node tests/r4-continuous-field-e2e.mjs
