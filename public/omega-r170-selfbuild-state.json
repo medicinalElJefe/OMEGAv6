@@ -13,6 +13,25 @@
   "rejected": [],
   "blocked": [],
   "receipts": [],
+  "residualPolicy": {
+    "schema": "OMEGA_R170_AUTONOMOUS_SOURCE_RESIDUAL_POLICY_V1",
+    "sourceAuthority": "R164",
+    "requireEvidence": true,
+    "blockSeverities": ["HIGH", "CRITICAL"],
+    "blockModes": ["BLOCK"],
+    "blockedEvidenceStates": ["BLOCKED"],
+    "highOrCriticalAutoRepair": false,
+    "canonicalMutation": false,
+    "canonicalAdmission": false,
+    "canonicalAdmissionAuthority": "R125"
+  },
+  "autonomousCandidatePolicy": {
+    "schema": "OMEGA_R170_AUTONOMOUS_CANDIDATE_POLICY_V1",
+    "branchPrefixes": ["selfbuild/r170-", "cloud/evolution-"],
+    "maxOpenCandidatePrs": 1,
+    "crossMachineFence": true,
+    "exactBaseRequired": true
+  },
   "laws": [
     "EXACT_CURRENT_MAIN_REQUIRES_SUCCESSFUL_CANONICAL_PRODUCTION_PROOF",
     "UNPROVEN_OR_RED_PRODUCTION_HEAD_FORCES_OBSERVE_ONLY",
@@ -27,6 +46,8 @@
     "ONE_CAPSULE_ONE_BRANCH_ONE_PROOF_RECEIPT_ONE_PR",
     "HIGH_OR_CRITICAL_RESIDUALS_BLOCK_AUTONOMOUS_CANDIDATE_GENERATION",
     "NO_OPEN_SELFBUILD_PR_MEANS_AT_MOST_ONE_NEW_CANDIDATE_PER_PULSE",
+    "ONE_OPEN_AUTONOMOUS_CANDIDATE_FENCE_COVERS_R170_AND_CLOUD01",
+    "R170_AND_CLOUD01_SHARE_ONE_RESIDUAL_POLICY_ONE_R240_R243_SELECTION_LAW_AND_ONE_CAPSULE_GENERATOR",
     "NO_RECURSIVE_SELF_WORKFLOW_TRIGGER_CHAIN",
     "CURRENT_READ_ONLY_SUCCESSOR_CHAIN_MUST_PROVE_BEFORE_AUTONOMOUS_CANDIDATE",
     "BACKLOG_EXHAUSTION_ENTERS_OBSERVE_MODE",
