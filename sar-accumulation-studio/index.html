@@ -4,30 +4,33 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <meta name="color-scheme" content="dark" />
-<title>OMEGA SAR Accumulation Studio</title>
+<meta name="description" content="OMEGA SAR Accumulation Studio — source-backed Sentinel-1 and NISAR acquisition, calibrated backscatter, registered temporal accumulation, and GUNW interferometric evidence with explicit proof boundaries." />
+<meta name="theme-color" content="#061017" />
+<title>OMEGA SAR Accumulation Studio · Sentinel-1 + NISAR</title>
 <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="public.css" />
 </head>
 <body>
 <header>
-  <div class="brand"><b>OMEGA · SAR ACCUMULATION STUDIO</b><span class="tag">MEASURED-FIRST</span><span class="tag" id="liveTag">LIVE READY</span><span class="tag">WORLD + ATLAS</span></div>
-  <div class="sub">Acquisition chronology · actual Sentinel-1 GRD pixels · NISAR/ASF evidence · NASA near-real-time world context · Dewey Atlas inference with uncertainty</div>
-  <div class="head-status"><span>Clock <b id="wallClock">—</b></span><span>Source <b id="sourceBadge">NONE</b></span><span>Latest SAR <b id="freshness">—</b></span><span>Context <b id="contextStamp">OFF</b></span></div>
+  <div class="brand"><b>OMEGA · SAR ACCUMULATION STUDIO</b><span class="tag">SOURCE-BACKED</span><span class="tag" id="liveTag">LIVE READY</span><span class="tag">SENTINEL-1 + NISAR</span><span class="tag">GCOV + GUNW</span><span class="tag">PROOF-BOUND</span></div>
+  <div class="sub">Acquisition chronology · calibrated radar backscatter · strict registered temporal stacks · source GUNW interferometry · NASA context · Atlas inference kept visibly separate</div>
+  <div class="head-status"><span>Clock <b id="wallClock">—</b></span><span>Catalog source <b id="sourceBadge">NONE</b></span><span>Latest SAR <b id="freshness">—</b></span><span>Context <b id="contextStamp">OFF</b></span></div>
 </header>
 <main>
   <aside class="controls">
     <section><h2>Evidence source</h2>
-      <label>Source<select id="sourceMode"><option value="stac">Sentinel-1 actual GRD COG · Earth Search/AWS</option><option value="asf">ASF mission catalog · Sentinel-1 / NISAR</option></select></label>
+      <label>Source<select id="sourceMode"><option value="stac">Sentinel-1 GRD COG · Earth Search/AWS</option><option value="asf">ASF mission catalog · Sentinel-1 / NISAR</option></select></label>
       <label>Dataset<select id="dataset"><option>SENTINEL-1</option><option>NISAR</option></select></label>
       <div class="two"><label>Start<input id="start" type="date"></label><label>End<input id="end" type="date"></label></div>
-      <label>Processing level<input id="level" placeholder="SLC, GRD_HD, GCOV, GSLC…"></label>
+      <label>Processing level<input id="level" placeholder="SLC, GRD_HD, GCOV, GUNW, GSLC…"></label>
       <label>Data maturity<select id="maturity"><option value="">Any</option><option>PROVISIONAL</option><option>BETA</option></select></label>
       <label>Flight direction<select id="direction"><option value="">Any</option><option>ASCENDING</option><option>DESCENDING</option></select></label>
-      <div class="two"><label>Polarization<input id="polarization" placeholder="VV+VH"></label><label>Relative orbit<input id="relativeOrbit" placeholder="track"></label></div>
+      <div class="two"><label>Polarization<input id="polarization" placeholder="VV+VH or HH"></label><label>Relative orbit<input id="relativeOrbit" placeholder="track"></label></div>
       <label>AOI WKT<input id="aoi" placeholder="POINT(-110.92 32.22) or POLYGON((...))"></label>
       <label>Max results<input id="maxResults" type="number" min="1" max="5000" value="500"></label>
       <div class="buttons"><button id="load">Load live</button><button id="preview" class="quiet">Preview request</button></div>
       <label class="file">Import ASF/GeoJSON<input id="file" type="file" accept=".json,.geojson,application/geo+json,application/json"></label>
-      <div id="status">Ready. No observations loaded.</div>
+      <div id="status">Ready. No catalog observations loaded.</div>
     </section>
 
     <section><h2>World satellite context</h2>
@@ -37,26 +40,38 @@
       <div class="two"><label>Latitude<input id="jumpLat" inputmode="decimal" placeholder="32.2226"></label><label>Longitude<input id="jumpLon" inputmode="decimal" placeholder="-110.9747"></label></div>
       <div class="buttons"><button id="jumpLocation">View location</button><button id="worldView" class="quiet">Whole world</button></div>
       <button id="deviceLocation" class="quiet wide">Use device location</button>
-      <div id="atlasAddress" class="atlas-box">Click the map or enter coordinates to resolve the 12→144→1728→20,736 Atlas address stack.</div>
+      <div id="atlasAddress" class="atlas-box">Click the map or enter coordinates to resolve the 12→144→1728→20,736 Atlas address stack. These are address/resolution levels, not physical dimensions.</div>
     </section>
 
     <section><h2>Continuous refresh</h2>
-      <label class="inline-check"><input id="liveRefresh" type="checkbox"> Poll source for newly published acquisitions</label>
+      <label class="inline-check"><input id="liveRefresh" type="checkbox"> Poll the selected catalog for newly published acquisitions</label>
       <label>Refresh interval<select id="refreshInterval"><option value="60000">1 minute</option><option value="300000" selected>5 minutes</option><option value="900000">15 minutes</option></select></label>
-      <p>The refresh loop only adds source records. It never synthesizes observations between acquisitions.</p>
+      <p>The refresh loop adds source records only. It never creates synthetic acquisitions between real timestamps.</p>
     </section>
 
     <section><h2>Truth semantics</h2>
-      <p><b>Measured.</b> Source SAR footprint/pixel with acquisition provenance.</p>
-      <p><b>Calibrated.</b> Sentinel-1 GRD DN converted with the product calibration LUT; calibration provenance remains attached.</p>
-      <p><b>Contextual.</b> NASA GIBS/Worldview imagery and the stored Earth proxy chart are aligned context; neither is promoted to SAR values.</p>
-      <p><b>Inferred.</b> Dewey Atlas gap estimate computed only from measured anchors and accompanied by uncertainty/confidence/scar support.</p>
-      <p><b>Unknown.</b> If support is inadequate, the system preserves the gap.</p>
+      <p><b>Catalog.</b> Acquisition metadata and footprints establish where/when a product exists; a footprint is not a radar pixel.</p>
+      <p><b>Sentinel-1 calibrated.</b> GRD digital numbers are converted with the product calibration LUT before calibrated temporal comparison.</p>
+      <p><b>NISAR GCOV.</b> Mission Level-2 radiometrically terrain-corrected gamma⁰ backscatter is source-product calibrated evidence; sigma⁰ is emitted only when the mission gamma→sigma factor is present.</p>
+      <p><b>NISAR GUNW.</b> Source Level-2 differential interferometric phase/coherence/components are pair-product evidence. Corrections remain separate unless explicitly applied.</p>
+      <p><b>Derived.</b> Registered stack statistics, QA masks, Canon host variables, and signed slant-range change retain exact source manifests and never become new observations.</p>
+      <p><b>Contextual / inferred.</b> NASA imagery, Earth proxy cells, and Atlas gap estimates are never promoted into SAR measurements.</p>
       <ul id="warnings"></ul>
+    </section>
+
+    <section class="source-ref"><h2>Scientific references</h2>
+      <a href="https://nisar-docs.asf.alaska.edu/gcov/" target="_blank" rel="noreferrer">NISAR GCOV product guide ↗</a>
+      <a href="https://nisar-docs.asf.alaska.edu/gunw/" target="_blank" rel="noreferrer">NISAR GUNW product guide ↗</a>
+      <a href="https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/sar" target="_blank" rel="noreferrer">NASA Earthdata SAR fundamentals ↗</a>
     </section>
   </aside>
 
   <section class="workbench">
+    <div class="public-intro">
+      <div><b>PUBLIC SCIENTIFIC WORKSTATION</b><span>Browser catalog + visualization are live. Native NISAR HDF5 processing is intentionally file/processor driven so multi-GB science products are not faked or downcast into browser metadata.</span></div>
+      <div class="truth-chain">CATALOG → PRODUCT → CALIBRATED / SOURCE-DERIVED RASTER → QA → REGISTERED STACK / PAIR → PROOF MANIFEST → ANIMATION</div>
+    </div>
+
     <div class="toolbar">
       <button id="prev">◀</button><button id="play">Play</button><button id="next">▶</button>
       <input id="timeline" type="range" min="0" max="0" value="0">
@@ -69,7 +84,7 @@
       <button id="export">Export proof manifest</button>
     </div>
 
-    <div class="map-wrap"><canvas id="map"></canvas><div class="map-note">NASA context underlay + WGS84 SAR evidence plane · drag pan · wheel zoom · click for revisit, Atlas address and gap inference</div></div>
+    <div class="map-wrap"><canvas id="map"></canvas><div class="map-note">NASA context underlay + WGS84 SAR evidence plane · drag pan · wheel zoom · click for revisit, Atlas address and bounded gap inference</div></div>
 
     <div class="stats">
       <div><span>Visible observations</span><b id="obsCount">0</b></div>
@@ -83,11 +98,11 @@
     </div>
 
     <div class="evidence-grid">
-      <section class="pixel-panel"><div class="section-head"><h2>Actual measurement raster</h2><div><select id="assetSelect"></select><button id="loadRaster">Load current COG</button></div></div>
+      <section class="pixel-panel"><div class="section-head"><h2>Sentinel-1 source measurement raster</h2><div><select id="assetSelect"></select><button id="loadRaster">Load current COG</button></div></div>
         <div class="pixel-stage"><canvas id="raster"></canvas><div id="rasterEmpty">No actual COG raster loaded.</div></div>
-        <div class="raster-stats" id="rasterStats">Actual Sentinel-1 GRD values appear here when the selected record exposes a public COG asset.</div>
+        <div class="raster-stats" id="rasterStats">Actual Sentinel-1 GRD values appear here when the selected source record exposes a public COG asset.</div>
       </section>
-      <section class="browse-panel"><div class="section-head"><h2>Source browse / preview</h2><span class="micro">supporting visualization</span></div>
+      <section class="browse-panel"><div class="section-head"><h2>Source browse / preview</h2><span class="micro">supporting visualization only</span></div>
         <div class="browse-stage"><img id="browseImage" alt="Source browse preview" referrerpolicy="no-referrer"><div id="browseEmpty">No source browse image for this acquisition.</div></div>
         <div id="browseCaption" class="raster-stats">Browse pixels are never promoted to calibrated measurement evidence.</div>
       </section>
@@ -96,13 +111,13 @@
     <div class="lower">
       <section><h2>Point revisit + temporal pixel probe</h2>
         <div class="probe"><span>Point <b id="point">click map</b></span><span>Coverage hits <b id="pointHits">0</b></span><span>First <b id="pointFirst">—</b></span><span>Last <b id="pointLast">—</b></span><span>Mean interval <b id="pointMean">—</b></span><button id="probeStack" disabled>Probe actual pixel stack</button></div>
-        <div id="pixelProbeStatus" class="micro">Raw point probing is a diagnostic view. Use the Charted Canon panel for product-LUT calibrated temporal comparison.</div>
+        <div id="pixelProbeStatus" class="micro">Raw point probing is diagnostic. Use the Charted Canon panel for product-LUT calibrated temporal comparison.</div>
         <div class="probe-chart"><canvas id="probeChart"></canvas></div>
       </section>
 
-      <section class="atlas-inference"><div class="section-head"><h2>Dewey Atlas gap field</h2><button id="inferGap" disabled>Infer missing point/time</button></div>
+      <section class="atlas-inference"><div class="section-head"><h2>Dewey Atlas bounded gap field</h2><button id="inferGap" disabled>Infer missing point/time</button></div>
         <div class="inference-grid"><div><span>State</span><b id="inferState">UNRESOLVED</b></div><div><span>Value</span><b id="inferValue">—</b></div><div><span>Uncertainty</span><b id="inferUncertainty">—</b></div><div><span>Confidence</span><b id="inferConfidence">—</b></div><div><span>Atlas level</span><b id="inferLevel">—</b></div><div><span>Support</span><b id="inferSupport">—</b></div></div>
-        <div id="inferExplanation" class="micro">Inference is disabled until measured pixel anchors are available. Estimated values are never admitted as observations.</div>
+        <div id="inferExplanation" class="micro">Inference is disabled until measured/calibrated anchors are available. Estimated values are never admitted as observations.</div>
       </section>
 
       <section><h2>Chronology diagnostics</h2>
@@ -117,5 +132,6 @@
 </main>
 <script type="module" src="src/app.mjs"></script>
 <script type="module" src="src/canon-console.mjs"></script>
+<script type="module" src="src/nisar-console.mjs"></script>
 </body>
 </html>
