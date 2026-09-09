@@ -2,7 +2,7 @@ import {useCallback,useEffect,useMemo,useState} from 'react';
 import {Activity,BrainCircuit,CloudCog,Cpu,Database,GitBranch,Layers3,RefreshCw,Route,ShieldCheck,Waypoints,Wrench} from 'lucide-react';
 import {api} from './platformAdapter';
 import {wholeSystemConvergenceManifestR155} from './system/wholeSystemConvergenceR155.js';
-import {compileFullOverallCanonR245,R245_REVISION} from './system/fullOverallCanonR245.js';
+import {compileFullOverallCanonR245} from './system/fullOverallCanonR245.js';
 import './fullOverallCanonR245.css';
 
 type RawObservation={
@@ -71,7 +71,6 @@ export default function FullOverallCanonR245({onNavigate}:{onNavigate:(name:stri
  }),[raw,capabilities,observedAt]);
  const roadmap=canon.selfBuild.roadmap||[],recommended=canon.selfBuild.recommendedCapsule;
  const connectorMotion=raw.connector?.executionMotion?.revision||canon.hybrid.executionMotionRevision||'—';
- const errorSources=new Set(errors.map(x=>x.source));
 
  return <section className='r245-canon' data-r245-full-overall-canon='true' data-r245-epoch={epoch} data-r245-read-only='true'>
   <header className='r245-head'>
