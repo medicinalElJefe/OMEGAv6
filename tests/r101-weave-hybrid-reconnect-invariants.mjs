@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R101 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R101/R242 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const worker=read('src/workerR101.js');
@@ -22,6 +22,7 @@ const weave=read('src/weaveStateR100.ts');
 const stage=read('src/TraversalModeStageR100.tsx');
 const studio=read('src/OmegaTraversalStudio.tsx');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
+const lemma=read('src/navigationLemmaCalculusR242.js');
 const accepted=read('src/acceptedProductionContractR95.ts');
 const css=read('src/designModesR99.css');
 const wrangler=read('wrangler.jsonc');
@@ -75,12 +76,13 @@ must(stage.includes('applyWovenContinuityR100(')&&stage.includes('compileSourceT
 must(studio.includes("import TraversalModeStageR99 from './TraversalModeStageR100'"),'accepted Traversal Studio binding must remain promoted');
 must(!stage.includes('Math.random'),'R101 primary stage may not use random/fake geometry');
 
-must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>'),'44-route navigation/search must remain directly reachable');
+must(nav.includes('compileNavigationLemmaR242({routes:routeRecords,query,workspaceFilter,currentRoute:currentPanel})')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'44-route navigation/search must remain directly reachable through the R242 calculus-conserved projection');
+must(lemma.includes('EXACT_IDENTITY_OUTRANKS_PREFIX_TOKEN_AND_METADATA_MATCHES')&&lemma.includes('WORKSPACE_PARTITION_MUST_CONSERVE_THE_COMPLETE_ROUTE_SET'),'R242 route identity and partition conservation must preserve R101 navigation reachability');
 must(css.includes(".mt-stage .mt-hud")&&css.includes(".visual-stage .visual-equation")&&css.includes('display:none!important'),'Matter/Visual overlay suppression must remain intact');
 must(accepted.includes("id:'WEAVE_DERIVED_RESOLUTION'")&&accepted.includes("id:'HYBRID_BRIDGE_ID_CONTINUITY'"),'R101 non-regression authorities must be persisted');
 must(accepted.includes("'R100 woven continuity geometry/time + professional instrument rail authority'")&&accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority'"),'R101 must extend R100 rather than flatten it');
 must(![worker,worker114,worker115,worker116,adapter,hybrid,sovereign117,launcher117,weave,stage].join('\n').includes('@appdeploy/client'),'R101 must remain provider portable');
 
-console.log('R101/R237 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · R117 rotated same-session durable bridge bootstrap · frozen R205 transport loop + canonical R207 R141 proof wrapper · authenticated-heartbeat truth preserved through R116→R115→R114→R101');
+console.log('R101/R237/R242 WEAVE + HYBRID PASS · 44 routes intact through calculus-conserved navigation · weave-derived effective atlas resolution · R117 rotated same-session durable bridge bootstrap · frozen R205 transport loop + canonical R207 R141 proof wrapper · authenticated-heartbeat truth preserved through R116→R115→R114→R101');
 await import('./r102-federated-instrument-experience-invariants.mjs');
 await import('./r112-sovereign-living-fabric-invariants.mjs');
