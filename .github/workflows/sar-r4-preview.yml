@@ -73,3 +73,8 @@ jobs:
         env:
           SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
         run: node tests/r4-continuous-field-e2e.mjs
+      - name: Prove exact Tucson camera and calibrated Sentinel patch
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
+        run: node tests/r4-tucson-calibration-e2e.mjs
