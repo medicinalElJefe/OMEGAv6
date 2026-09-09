@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - r237-hybrid-command-authority
+    paths:
+      - '.github/r237-finalize.trigger'
 
 permissions:
   contents: write
@@ -12,14 +14,14 @@ jobs:
   finalize:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: r237-hybrid-command-authority
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
-      - name: Apply exact deployed-authority finalization
+      - name: Apply exact deployed-runtime finalization
         run: python .github/r237_finalize_authority.py
       - name: Prove focused R117 and R237 authority contracts
         run: |
@@ -27,13 +29,12 @@ jobs:
           node --check src/workerR32.js
           node tests/r117-real-sovereign-bootstrap-invariants.mjs
           node tests/r237-hybrid-command-authority-invariants.mjs
-      - name: Commit exact finalization and remove scaffold
+      - name: Commit exact runtime finalization
         run: |
-          git rm -f .github/workflows/r237-finalize-deployed-authority.yml
           git rm -f .github/r237_finalize_authority.py
-          git rm -f .github/r237-finalize.trigger || true
-          git add src/workerR116.js .github/workflows/ci.yml
+          git rm -f .github/r237-finalize.trigger
+          git add src/workerR116.js
           git config user.name 'Jeffrey A Dewey'
           git config user.email 'b6qrfb57ky@privaterelay.appleid.com'
-          git commit -m 'R237: bind authenticated rotation into canonical deployment'
+          git commit -m 'R237: bind authenticated rotation into canonical runtime'
           git push origin HEAD:r237-hybrid-command-authority
