@@ -55,12 +55,13 @@ export function gibsContextManifest({bbox,date,layers,url,requestedDate=null,fal
 }
 
 if(typeof document!=='undefined'){
-  import('./location.mjs?r4lod=1').catch(()=>{});
-  import('./map-navigation-runtime.mjs?r4lod=1').catch(error=>console.error('OMEGA map navigation failed to initialize',error));
-  import('./local-navigation-map.mjs?r4lod=1').catch(error=>console.error('OMEGA local navigation map failed to initialize',error));
-  import('./sentinel-console.mjs?r4lod=1').catch(error=>console.error('Sentinel calibrated console failed to initialize',error));
-  import('./sar-browse-overlay.mjs?r4lod=1').catch(error=>console.error('Sentinel source browse overlay failed to initialize',error));
-  import('./sar-earth-overlay.mjs?r4lod=1').catch(()=>{});
-  import('./omega-field-console.mjs?r4lod=1').catch(error=>console.error('OMEGA continuous field failed to initialize',error));
-  import('./interaction-runtime.mjs?r4lod=1').catch(error=>console.error('OMEGA interaction runtime failed to initialize',error));
+  // R4SAR2 deliberately has no conventional street/basemap layer. The primary
+  // instrument remains SAR + source-bound Earth observation context.
+  import('./location.mjs?r4sar=2').catch(()=>{});
+  import('./map-navigation-runtime.mjs?r4sar=2').catch(error=>console.error('OMEGA map navigation failed to initialize',error));
+  import('./sentinel-console.mjs?r4sar=2').catch(error=>console.error('Sentinel calibrated console failed to initialize',error));
+  import('./sar-browse-overlay.mjs?r4sar=2').catch(error=>console.error('Sentinel source browse overlay failed to initialize',error));
+  import('./sar-earth-overlay.mjs?r4sar=2').catch(()=>{});
+  import('./omega-field-console.mjs?r4sar=2').catch(error=>console.error('OMEGA continuous field failed to initialize',error));
+  import('./interaction-runtime.mjs?r4sar=2').catch(error=>console.error('OMEGA interaction runtime failed to initialize',error));
 }
