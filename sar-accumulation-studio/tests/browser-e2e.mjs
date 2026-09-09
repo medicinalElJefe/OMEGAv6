@@ -11,11 +11,12 @@ try {
   for (const viewport of [{width:1440,height:1000},{width:900,height:900},{width:390,height:844}]) {
     const page = await browser.newPage({viewport});
     const consoleErrors=[];
+    let reverseRequests=0;
     page.on('console',msg=>{ if(msg.type()==='error') consoleErrors.push(msg.text()); });
     page.on('pageerror',err=>consoleErrors.push(err.message));
-    await page.route('**nominatim.openstreetmap.org/reverse**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(nominatim)}));
-    await page.route('**natural-earth-vector@ca96624a/**',route=>route.fulfill({status:200,contentType:'application/geo+json',body:JSON.stringify(countries)}));
-    await page.route('**gibs.earthdata.nasa.gov/**',route=>route.fulfill({status:200,contentType:'image/png',body:tinyPng}));
+    await page.route(/https:\/\/nominatim\.openstreetmap\.org\/reverse.*/,route=>{reverseRequests++;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(nominatim)});});
+    await page.route(/https:\/\/cdn\.jsdelivr\.net\/gh\/nvkelso\/natural-earth-vector@ca96624a\/.*/,route=>route.fulfill({status:200,contentType:'application/geo+json',body:JSON.stringify(countries)}));
+    await page.route(/https:\/\/gibs\.earthdata\.nasa\.gov\/.*/,route=>route.fulfill({status:200,contentType:'image/png',body:tinyPng}));
 
     try {
       await page.goto(base,{waitUntil:'commit',timeout:15000});
@@ -44,7 +45,13 @@ try {
     await page.fill('#jumpLon','-110.974700');
     await page.click('#jumpLocation');
     await page.waitForFunction(()=>document.querySelector('#earthSelectedCoords')?.textContent.includes('32.222600'),null,{timeout:10000});
-    await page.waitForFunction(()=>document.querySelector('#earthPlaceName')?.textContent==='Tucson',null,{timeout:10000});
+    try {
+      await page.waitForFunction(()=>document.querySelector('#earthPlaceName')?.textContent==='Tucson',null,{timeout:10000});
+    } catch(error){
+      console.error(`GEOCODE_FAILURE ${viewport.width}: requests=${reverseRequests} name=${await page.textContent('#earthPlaceName')} region=${await page.textContent('#earthPlaceRegion')} coords=${await page.textContent('#earthSelectedCoords')}`);
+      throw error;
+    }
+    assert.equal(reverseRequests,1,'one explicit location selection should generate one reverse-geocode request');
     assert.match(await page.textContent('#earthPlaceRegion'),/Arizona/);
 
     const map=page.locator('#map');
@@ -65,11 +72,12 @@ try {
     const beforeClickLat=await page.inputValue('#jumpLat');
     const beforeClickLon=await page.inputValue('#jumpLon');
     await page.mouse.click(box.x+box.width*.63,box.y+box.height*.43);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(120);
     const afterClickLat=await page.inputValue('#jumpLat');
     const afterClickLon=await page.inputValue('#jumpLon');
     assert.ok(afterClickLat!==beforeClickLat||afterClickLon!==beforeClickLon,'map click did not synchronize canonical location fields');
     assert.match(await page.textContent('#earthSelectedCoords'),/WGS84 \/ EPSG:4326/);
+    assert.equal(reverseRequests,2,'new clicked coordinate should generate exactly one additional reverse-geocode request');
 
     const beforeScale=parseFloat((await page.textContent('#earthViewScale')).replace('×',''));
     await page.locator('[data-map-command="zoom-in"]').click();
@@ -82,6 +90,7 @@ try {
     assert.equal(await page.textContent('#earthViewScale'),'1.00×');
     assert.equal(await page.textContent('#earthViewCenter'),'0.000000, 0.000000');
 
+    await page.waitForFunction(()=>[...document.querySelectorAll('#earthSurfaceHealth span')].filter(x=>x.textContent.includes('MOUNTED')).length===8,null,{timeout:5000});
     const health=await page.locator('#earthSurfaceHealth span').allTextContents();
     for(const name of ['Earth map','Sentinel raster','Browse','Probe','Atlas','Ledger','Canon','NISAR']){
       assert.ok(health.some(x=>x.includes(`${name} MOUNTED`)),`${name} surface not mounted`);
@@ -91,7 +100,7 @@ try {
     assert.deepEqual(serious,[],`browser errors at ${viewport.width}: ${serious.join(' | ')}`);
     await page.close();
   }
-  console.log('SAR_BROWSER_E2E_PASS desktop/tablet/mobile map + surface interaction + canonical location synchronization');
+  console.log('SAR_BROWSER_E2E_PASS desktop/tablet/mobile map + surface interaction + canonical location synchronization + deterministic place lookup');
 } finally {
   await browser.close();
 }
