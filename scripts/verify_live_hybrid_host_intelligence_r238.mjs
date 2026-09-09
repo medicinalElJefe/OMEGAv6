@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import {readFileSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 const base=(process.env.OMEGA_PUBLIC_URL||'https://omegav6.jeffdeweyeljefe.workers.dev').replace(/\/$/,'');
@@ -12,17 +13,22 @@ if(!receipt.response.ok)throw new Error(`R238 build receipt HTTP ${receipt.respo
 const servedSha=receipt.body?.promotion?.promotedMergeSha||receipt.body?.source?.sha||'';
 if(servedSha!==expected)throw new Error(`R238 exact promoted SHA mismatch expected ${expected} served ${servedSha||'NONE'}`);
 
+const expectedWrapper=readFileSync('public/omega-hybrid-agent-r141.py','utf8');
+const expectedWrapperSha=sha(expectedWrapper);
 const wrapperResponse=await fetch(base+'/omega-hybrid-agent-r141.py',{headers:{'cache-control':'no-cache'}});
 const wrapper=await wrapperResponse.text();
 if(!wrapperResponse.ok)throw new Error(`R238 Hybrid wrapper HTTP ${wrapperResponse.status}`);
+const liveWrapperSha=sha(wrapper);
+if(wrapper!==expectedWrapper||liveWrapperSha!==expectedWrapperSha)throw new Error(`R238 live R141 wrapper byte drift expected ${expectedWrapperSha} served ${liveWrapperSha}`);
 for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'","MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'","EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'",'Get-CimInstance Win32_VideoController','MAX_MACRO_SECONDS_R238=300','MAX_MACRO_COORD_ABS_R238=100000'])if(!wrapper.includes(token))throw new Error(`R238 live wrapper missing ${token}`);
 for(const forbidden of ['Ryzen 7 3700X','RTX 2070 SUPER','32.0 GB','19045.6456','shell=True','pip install','python -m pip'])if(wrapper.includes(forbidden))throw new Error(`R238 live wrapper contains forbidden overclaim/unsafe token ${forbidden}`);
 
+const expectedBase=readFileSync('public/omega-hybrid-agent-base-r205.py','utf8');
 const baseAgentResponse=await fetch(base+'/omega-hybrid-agent-base-r205.py',{headers:{'cache-control':'no-cache'}});
 const baseAgent=await baseAgentResponse.text();
 if(!baseAgentResponse.ok)throw new Error(`R238 immutable base agent HTTP ${baseAgentResponse.status}`);
 const baseSha=sha(baseAgent);
-if(baseSha!=='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046')throw new Error(`R238 immutable R205 base SHA drifted: ${baseSha}`);
+if(baseSha!=='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'||baseAgent!==expectedBase)throw new Error(`R238 immutable R205 base drifted: ${baseSha}`);
 
 const status=await parse(await fetch(base+'/api/hybrid/status',{headers:{'cache-control':'no-cache'}}));
 if(!status.response.ok)throw new Error(`R238 public Hybrid status HTTP ${status.response.status}`);
@@ -43,12 +49,16 @@ await hybridEntry.waitFor({state:'visible'});await hybridEntry.click();
 const intelligence=page.locator('[data-r238-host-intelligence]');
 await intelligence.waitFor({state:'visible'});
 const text=await intelligence.innerText();
-for(const token of ['R238 · HYBRID HOST INTELLIGENCE','Use the machine you actually have.','RCWA PYTHON DEPENDENCY','LOCAL MACRO STORE','R141 exact return closure'])if(!text.includes(token))throw new Error(`R238 live browser missing ${token}`);
+const profileState=String(await intelligence.getAttribute('data-r238-host-intelligence')||'');
+for(const token of ['R238 · HYBRID HOST INTELLIGENCE','Use the machine you actually have.','RCWA PYTHON DEPENDENCY','LOCAL MACRO STORE','R141 exact-payload fingerprint'])if(!text.includes(token))throw new Error(`R238 live browser missing invariant surface token ${token}`);
+if(!['AWAITING_RETURNED_PROFILE','RETURNED_HOST_PROOF'].includes(profileState))throw new Error(`R238 live browser returned unsupported host-intelligence state ${profileState}`);
+if(profileState==='RETURNED_HOST_PROOF'&&!text.includes('R141 exact return closure'))throw new Error('R238 returned host proof is visible without its R141 exact-return footer boundary');
+if(profileState==='AWAITING_RETURNED_PROFILE'&&(!text.includes('NOT YET RETURNED')||!text.includes('Run “Prove host + tree”')))throw new Error('R238 awaiting-profile state does not truthfully expose the proof bootstrap path');
 const selected=await intelligence.getAttribute('data-r238-selected-device');
 if(current.length===0){
-  if(selected!=='NONE'||!text.includes('DEVICE PROOF REQUIRED'))throw new Error(`R238 live browser should truthfully hold with no current device; selected=${selected}`);
+  if(selected!=='NONE'||!text.includes('DEVICE PROOF REQUIRED')||profileState!=='AWAITING_RETURNED_PROFILE')throw new Error(`R238 live browser should truthfully hold with no current device/profile; selected=${selected} profile=${profileState}`);
 }else if(!current.some(d=>d.id===selected))throw new Error(`R238 live browser selected device ${selected} is not a current authenticated device`);
 if(pageErrors.length)throw new Error(`R238 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R238 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · immutable R205 base ${baseSha} · R238 R141 proof wrapper served · Hybrid ${status.body.state} · current public devices ${current.length} · live Home→TOOLS→Hybrid host-intelligence surface rendered without cross-authority claims`);
+console.log(`R238 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · R141 wrapper byte SHA ${liveWrapperSha} · immutable R205 base ${baseSha} · Hybrid ${status.body.state} · current public devices ${current.length} · profile ${profileState} · live Home→TOOLS→Hybrid host-intelligence truth state rendered without cross-authority claims`);
