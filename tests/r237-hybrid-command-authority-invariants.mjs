@@ -16,6 +16,11 @@ for(const token of [
  "JOB_CANCELLED"
 ])must(worker.includes(token),`R237 runtime command-authority guard missing ${token}`);
 
+const pairRoute=worker.indexOf("if(path==='/pair'&&request.method==='POST')");
+const rotationGate=worker.indexOf("existing&&body.rotate&&!await this.authorized(request)",pairRoute);
+const secretIssue=worker.indexOf("const secret=randomToken(24)",pairRoute);
+must(pairRoute>=0&&rotationGate>pairRoute&&secretIssue>rotationGate,'R237 existing-pair rotation must authenticate before any replacement secret is issued');
+must(worker.includes("reply:'Existing pairing must authenticate before rotation.'"),'R237 authenticated rotation refusal truth copy missing');
 must(worker.includes("path.startsWith('/api/hybrid/jobs/')&&path.endsWith('/cancel')"),'R237 public queued-job cancellation route missing');
 must(worker.includes("The selected host already has active native work"),'R237 per-device backpressure truth copy missing');
 must(!worker.includes("status:'KILLED'"),'R237 must not fake force-killing a running native process');
