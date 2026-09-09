@@ -1,0 +1,45 @@
+name: R245 Full Overall Canon Convergence Proof
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/system/fullOverallCanonR245.js'
+      - 'src/FullOverallCanonR245.tsx'
+      - 'src/fullOverallCanonR245.css'
+      - 'src/FullSystemConvergencePanelR95.tsx'
+      - 'tests/r245-full-overall-canon-invariants.mjs'
+      - '.github/workflows/r245-full-overall-canon-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r245-full-overall-canon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Prove R245 Full Overall Canon topology and authority
+        run: node tests/r245-full-overall-canon-invariants.mjs
+      - name: Re-prove governed whole-system execution and ownership
+        run: |
+          node tests/r153-full-system-completion-invariants.mjs
+          node tests/r155-whole-system-convergence-invariants.mjs
+          node tests/r168-buildout-adaptive-mission-spine-invariants.mjs
+      - name: Re-prove recursive exact promotion and current Hybrid recovery
+        run: |
+          node tests/r240-recursive-exact-self-promotion-invariants.mjs
+          node tests/r2431-live-agent-header-closure-invariants.mjs
+          node tests/r244-live-motion-and-stale-lease-closure-invariants.mjs
+      - name: Full inherited application regression and production build
+        run: npm run check
+      - name: Canonical Worker package dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r245-full-overall-canon
