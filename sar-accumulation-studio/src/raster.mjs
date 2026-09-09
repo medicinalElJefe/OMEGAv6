@@ -54,6 +54,22 @@ export function stretchByte(v, low, high, gamma = 0.72) {
   return Math.round(255 * Math.pow(t, gamma));
 }
 
+function optionalGeoMetadata(image) {
+  let bbox = null, resolution = null, geoKeys = {}, affine = false;
+  try { bbox = image.getBoundingBox?.() || null; affine = Array.isArray(bbox) && bbox.length === 4; } catch {}
+  try { resolution = image.getResolution?.() || null; } catch {}
+  try { geoKeys = image.getGeoKeys?.() || {}; } catch {}
+  return {
+    bbox,
+    resolution,
+    geoKeys,
+    affine,
+    spatialInterpretation: affine
+      ? 'GeoTIFF affine transform available.'
+      : 'Raster decoded successfully, but this product does not expose a simple affine GeoTIFF transform. Display is valid; coordinate-to-pixel sampling remains unproved until product geolocation/GCP mapping is bound.'
+  };
+}
+
 export async function renderCog(url, canvas, { maxWidth = 1100, maxHeight = 780, gamma = 0.72 } = {}) {
   const { image } = await openTiff(url);
   const sourceWidth = image.getWidth(), sourceHeight = image.getHeight();
@@ -73,14 +89,28 @@ export async function renderCog(url, canvas, { maxWidth = 1100, maxHeight = 780,
     imageData.data[j] = byte; imageData.data[j + 1] = Math.min(255, Math.round(byte * 1.03)); imageData.data[j + 2] = Math.min(255, Math.round(byte * 1.08)); imageData.data[j + 3] = v === nodata ? 0 : 255;
   }
   ctx.putImageData(imageData, 0, 0);
-  const bbox = image.getBoundingBox?.() || null, resolution = image.getResolution?.() || null, geoKeys = image.getGeoKeys?.() || {};
-  return { sourceWidth, sourceHeight, renderedWidth: width, renderedHeight: height, bbox, resolution, geoKeys, nodata, stats, sourceUrl:url, transportUrl:rasterTransportUrl(url), displayTransform: { type: 'percentile-linear-plus-gamma', low, high, gamma, scientificCalibrationClaimed: false } };
+  const geo = optionalGeoMetadata(image);
+  return {
+    sourceWidth, sourceHeight, renderedWidth: width, renderedHeight: height,
+    bbox: geo.bbox, resolution: geo.resolution, geoKeys: geo.geoKeys, affine: geo.affine,
+    spatialInterpretation: geo.spatialInterpretation,
+    nodata, stats, sourceUrl:url, transportUrl:rasterTransportUrl(url),
+    displayTransform: { type: 'percentile-linear-plus-gamma', low, high, gamma, scientificCalibrationClaimed: false }
+  };
+}
+
+function affineBoundingBox(image) {
+  try {
+    const bbox = image.getBoundingBox();
+    if (Array.isArray(bbox) && bbox.length === 4 && bbox.every(Number.isFinite)) return bbox;
+  } catch {}
+  throw new Error('Coordinate-to-pixel sampling requires a proven affine transform or product GCP/geolocation-grid mapping; this COG exposes neither through the current reader.');
 }
 
 export async function sampleCogAtPoint(url, lon, lat, { epsg = 4326 } = {}) {
   if (Number(epsg) !== 4326) throw new Error(`Point sampling currently requires EPSG:4326 COGs; source declares EPSG:${epsg}`);
   const { image } = await openTiff(url);
-  const bbox = image.getBoundingBox();
+  const bbox = affineBoundingBox(image);
   const [minX,minY,maxX,maxY] = bbox;
   if (lon < minX || lon > maxX || lat < minY || lat > maxY) return { inside: false, value: null, bbox };
   const width = image.getWidth(), height = image.getHeight();
@@ -96,7 +126,7 @@ export async function sampleCogAtPoint(url, lon, lat, { epsg = 4326 } = {}) {
 export async function sampleCogNeighborhood(url, lon, lat, { epsg = 4326, radiusPixels = 2 } = {}) {
   if (Number(epsg) !== 4326) throw new Error(`Neighborhood sampling currently requires EPSG:4326 COGs; source declares EPSG:${epsg}`);
   const { image } = await openTiff(url);
-  const [minX,minY,maxX,maxY] = image.getBoundingBox();
+  const [minX,minY,maxX,maxY] = affineBoundingBox(image);
   if (lon < minX || lon > maxX || lat < minY || lat > maxY) return [];
   const width=image.getWidth(), height=image.getHeight();
   const cx=Math.max(0,Math.min(width-1,Math.floor((lon-minX)/(maxX-minX)*width)));
