@@ -3,6 +3,7 @@ import {Cpu,FolderOpen,Gauge,GraduationCap,ShieldCheck,TerminalSquare} from 'luc
 import HybridMissionControlR8 from './HybridMissionControlR8';
 import SovereignConnectionR117 from './SovereignConnectionR117';
 import HybridWovenContinuityR238 from './HybridWovenContinuityR238';
+import HybridExecutionMotionR243 from './HybridExecutionMotionR243';
 import HybridHostIntelligenceR238 from './HybridHostIntelligenceR238';
 import HybridResourceGovernorR239 from './HybridResourceGovernorR239';
 import HybridHostEffectsR212 from './HybridHostEffectsR212';
@@ -19,13 +20,14 @@ export default function HybridLinkR32({status,record}:Props){
  const[deepOpen,setDeepOpen]=useState(false);
  return <section className='hybrid-r32 special-app r112-hybrid-link'>
   <header className='r112-hybrid-hero'>
-   <div><span>SOVEREIGN COMPUTE · HYBRID LINK · R117 CONNECTION + R238 WOVEN SNAPSHOT/HOST PROOF + R239 RESOURCE GOVERNOR + R237 COMMAND + R212 EFFECTS + R141 PROOF CLOSURE</span><h2>Your PC is an OMEGA compute node.</h2><p>R238 converges host identity, Hybrid/Mission observation and returned machine evidence into one selected-host epoch. R239 now turns that returned CPU/RAM/storage envelope into deterministic pressure-aware worker and scan budgets before heavier local work is treated as advisable. R212 observes only the selected host's returned effects; R237 remains the bounded authenticated command authority; R141 closes exact returned payloads. The continuity operator remains partition → exchange/transform → invariant carry → scar/history carry → re-contextualize/repartition.</p></div>
-   <div className='r112-hybrid-truth'><ShieldCheck/><b>ONE HOST · ONE SNAPSHOT EPOCH · ONE RESOURCE ENVELOPE · ONE RECOVERABLE PROOF PATH</b><small>Native execution is claimed only while an authenticated agent heartbeat is current. Browser state, screenshots and hardware labels never substitute for that heartbeat or returned proof. Build success is not source mutation; a source edit still requires returned APPLY_PATCH/WRITE_TEXT proof. R239 resource governance is derived only from returned R238 host evidence and remains pressure-aware/advisory until work crosses the existing R237 queue boundary. It does not create a second executor, infer CUDA/RCWA validity, install dependencies, mutate CanonState or expand R125/R141/R146/R147 authority.</small></div>
+   <div><span>SOVEREIGN COMPUTE · HYBRID LINK · R117 CONNECTION + R243 WOVEN SELF-BUILD + EXECUTION-MOTION CONVERGENCE · R242 NAVIGATION PRESERVED · R239 RESOURCE GOVERNOR · R238 HOST PROOF · R237 COMMAND · R141 PROOF CLOSURE</span><h2>Your PC is a governed OMEGA compute node.</h2><p>R243 advances the whole Hybrid path without replacing the proven spine. R117 remains the authenticated connection/bootstrap authority. R243 now closes the INVOKED→RETURNED liveness gap end to end: the canonical downloaded PC agent emits authenticated renewable leases and step pulses, while the selected-host snapshot exposes that exact motion. R240 remains the single source-mutation/promotion gate, and the already-promoted R242 navigation lemma remains read-only.</p></div>
+   <div className='r112-hybrid-truth'><ShieldCheck/><b>ONE HOST · ONE SNAPSHOT EPOCH · ONE R243 EXECUTION LEASE · ONE RESOURCE ENVELOPE · ONE SOURCE-MUTATION CANDIDATE</b><small>Native execution is claimed only while an authenticated agent heartbeat is current. R243 lease motion proves continued ownership/liveness of a RUNNING claim and the currently entered allow-listed step; final success still requires a returned R141 packet. Build success is not source mutation. Exact APPLY_PATCH/WRITE_TEXT return proof remains mandatory for a source edit; expired motion fails closed; mutation is never blindly replayed; R240 alone may promote one exact proved source candidate; R125 alone may admit CanonState.</small></div>
   </header>
 
   <HybridRuntimeSnapshotProviderR238>
    <SovereignConnectionR117/>
    <HybridWovenContinuityR238/>
+   <HybridExecutionMotionR243/>
    <HybridHostIntelligenceR238/>
    <HybridResourceGovernorR239/>
    <HybridHostEffectsR212/>
@@ -36,16 +38,16 @@ export default function HybridLinkR32({status,record}:Props){
 
   <section className='r112-host-uses' aria-label='What Sovereign Compute adds'>
    <article><FolderOpen/><div><b>Partition one bounded local frame</b><span>The selected host, approved root, jobs and missions form the current local part. Other online hosts remain outside that frame until explicitly selected; they are not silently merged into control state.</span></div></article>
-   <article><Cpu/><div><b>Transform work without continuity drift</b><span>R238 shares one observation epoch across host resource proof, R212 effects and R237 command admission. R239 derives a pressure-aware CPU worker envelope and bounded HASH_TREE/TRAIN_LOCAL result ceilings from returned host evidence without turning hardware inventory into execution or scientific proof.</span></div></article>
-   <article><GraduationCap/><div><b>Carry invariants and local learning</b><span>Device identity, capability proof, authority boundaries and bounded TRAIN_LOCAL receipts survive re-contextualization. R239 can reduce the suggested training/search envelope under pressure; foundation weights are not silently changed.</span></div></article>
-   <article><Gauge/><div><b>Carry scars, returns and recoverable lineage</b><span>Returned step proofs and deterministic fingerprints remain selected-host history. R141 closes exact returns, R146 carries durable history, and host selection repartitions the view without rewriting prior receipts.</span></div></article>
+   <article><Cpu/><div><b>Transform work with visible authenticated motion</b><span>R243 makes long native steps observable through the same canonical connector you download: current step, elapsed time, lease freshness and returned-step count replace an opaque RUNNING badge.</span></div></article>
+   <article><GraduationCap/><div><b>Carry invariants, scars and planning state</b><span>The R243 planning fabric carries dependency state, residual scars, address identity and authority boundaries across 12→144→1,728→20,736→248,832 atlas/address levels. These are representational resolution levels, not literal physical dimensions.</span></div></article>
+   <article><Gauge/><div><b>Repartition without rewriting history</b><span>R239 can reduce bounded work under pressure; host selection repartitions the active view; R141 closes exact returns; R146 keeps durable execution history; R240 selects one exact source-mutation candidate; prior receipts are not rewritten by a new view.</span></div></article>
   </section>
 
   <details className='r112-hybrid-deep' onToggle={e=>setDeepOpen((e.currentTarget as HTMLDetailsElement).open)}>
-   <summary><TerminalSquare/><span><b>Advanced federation, mission planning and diagnostics</b><small>Not required to connect the PC or use the governed Hybrid surfaces. Open this when inspecting lower-level routes, solver details, recovery or donor architecture.</small></span></summary>
+   <summary><TerminalSquare/><span><b>Advanced federation, mission planning and diagnostics</b><small>Open this for lower-level routes, solver details, recovery, donor architecture or mission internals. It is not required for ordinary Hybrid connection/control.</small></span></summary>
    {deepOpen&&<HybridMissionControlR8 status={status} record={record}/>} 
   </details>
 
-  <footer className='special-boundary'><ShieldCheck/>R239 is additive over the admitted R238 Woven Hybrid line. It preserves the durable R101/R32 bridge and allow-listed job queue, immutable R205 executor, R117 authenticated bootstrap continuity, R125 admission authority, R134 world/scar continuity, R141 exact return closure, R146 history, R147 executor/dispatch authority, R209 correlation-only lineage, R212 first-hand host-effect observation, R237 authenticated command authority and R238 selected-host/shared-epoch/host-intelligence convergence. R239 adds only deterministic resource-envelope computation and operator-visible pressure boundaries. The 12→144→1,728→20,736→248,832 values remain atlas/address resolution levels, not literal physical dimensions.</footer>
+  <footer className='special-boundary'><ShieldCheck/>R243 is additive over the signed production R242 navigation release and the admitted R240/R239/R238 Hybrid/self-build line. It preserves the durable R101/R32 bridge, immutable R205 executor, R117 authenticated bootstrap, R125 admission authority, R134 world/scar continuity, R141 exact return closure, R146 history, R147 executor/dispatch authority, R209 correlation-only lineage, R212 first-hand host effects, R237 command authority, R238 selected-host/shared-epoch host intelligence, R239 resource governance and R240 exact one-candidate source promotion. R243 adds woven planning/evaluation plus a canonical authenticated execution-motion protocol; it does not create another production writer or Canon authority.</footer>
  </section>;
 }

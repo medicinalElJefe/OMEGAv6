@@ -69,3 +69,7 @@ if(pageErrors.length)throw new Error(`R238 live browser page errors: ${pageError
 await browser.close();
 
 console.log(`R238/R239.1/R240 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · R141 wrapper byte SHA ${liveWrapperSha} · immutable R205 base ${baseSha} · R141 wrapper advertises R238 host intelligence + R240 bridge calculus · Hybrid ${status.body.state} · current public devices ${current.length} · state ${intelligenceState} · shared epoch ${epoch} · returned-proof provenance required only when evidence exists · Home→TOOLS→Hybrid surface truth-gated without cross-authority claims`);
+
+// R243 production closure is intentionally chained into the already-required R238 live gate.
+// This adds no writer or command authority: the imported verifier is exact-SHA, read-only and issues no Hybrid work.
+await import('./verify_live_hybrid_execution_motion_r243.mjs');
