@@ -10,6 +10,8 @@ on:
       - 'public/omega-r243-woven-selfbuild-fabric.json'
       - 'scripts/lib/r243-woven-selfbuild-fabric.mjs'
       - 'scripts/r170-selfbuild-engine.mjs'
+      - 'scripts/verify_live_hybrid_execution_motion_r243.mjs'
+      - 'src/workerR33.js'
       - 'src/workerR101.js'
       - 'src/workerR102.js'
       - 'src/execution/adaptiveSovereignMissionR152.js'
@@ -32,6 +34,7 @@ on:
       - 'tests/r243-woven-selfbuild-fabric-invariants.mjs'
       - 'tests/r243-woven-execution-convergence-invariants.mjs'
       - 'tests/r243-hybrid-execution-motion-browser-e2e.mjs'
+      - 'tests/r2431-live-agent-header-closure-invariants.mjs'
       - 'tests/r240-recursive-exact-self-promotion-invariants.mjs'
       - '.github/workflows/r238-hybrid-host-intelligence-proof.yml'
   workflow_dispatch:
@@ -60,10 +63,11 @@ jobs:
         run: |
           node tests/r238-hybrid-host-intelligence-invariants.mjs
           node tests/r238-hybrid-correlated-snapshot-invariants.mjs
-      - name: R243 canonical lease protocol + terminal fence proof
+      - name: R243 canonical lease protocol + terminal fence + live header closure proof
         run: |
           node tests/r243-hybrid-execution-motion-invariants.mjs
           node tests/r243-hybrid-terminal-fence-invariants.mjs
+          node tests/r2431-live-agent-header-closure-invariants.mjs
           node tests/r153-adaptive-sovereign-build-missions-invariants.mjs
       - name: R243 woven planning + execution convergence proof
         run: |
