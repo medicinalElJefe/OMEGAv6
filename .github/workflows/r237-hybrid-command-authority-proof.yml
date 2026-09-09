@@ -63,7 +63,7 @@ jobs:
       - run: npm run build
       - run: npm install --no-save playwright@1.63.0
       - run: npx playwright install --with-deps chromium
-      - name: Prove R237 command + R238 shared epoch in built browser surface
+      - name: Prove R237 command + R238 shared epoch + R239 resource hold in built browser surface
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 >/tmp/r238-vite.log 2>&1 &
@@ -97,10 +97,10 @@ jobs:
 
           let {deck}=await openHybrid();
           let text=await deck.innerText();
-          for(const token of ['DEVICE PROOF REQUIRED','ROOT-CONFINED','PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','R125','intentionally contain no APPLY_PATCH or WRITE_TEXT'])if(!text.includes(token))throw new Error(`R237/R238 built browser missing ${token}`);
-          const runButtons=deck.getByRole('button',{name:/Run on this PC|Device busy/});
-          if(await runButtons.count()!==4)throw new Error('R237 expected four bounded native presets');
-          for(let i=0;i<4;i++)if(!(await runButtons.nth(i).isDisabled()))throw new Error('R237 allowed queueing without current device proof');
+          for(const token of ['DEVICE PROOF REQUIRED','ROOT-CONFINED','PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','R125','intentionally contain no APPLY_PATCH or WRITE_TEXT'])if(!text.includes(token))throw new Error(`R237/R238/R239 built browser missing ${token}`);
+          const runButtons=deck.getByRole('button',{name:/Run on this PC|Device busy|Resource held/});
+          if(await runButtons.count()!==4)throw new Error('R237/R239 expected four bounded native preset controls');
+          for(let i=0;i<4;i++)if(!(await runButtons.nth(i).isDisabled()))throw new Error('R237/R239 allowed queueing without current device proof');
 
           const now=Date.now();
           const caps=['DESKTOP_HEALTH','HASH_TREE','FORENSIC_HASH_LEDGER','INDEX','BUILD','TEST','PACKAGE','TRAIN_LOCAL'];
@@ -133,6 +133,6 @@ jobs:
           if(!effectsText.includes('fp-b'))throw new Error('R212 did not expose selected-host return fingerprint');
           for(const forbidden of ['job_a','mission_a','fp-a'])if(deckText.includes(forbidden)||effectsText.includes(forbidden))throw new Error(`R238 leaked foreign-host context ${forbidden}`);
           if(pageErrors.length)throw new Error(`built browser page errors: ${pageErrors.join(' | ')}`);
-          console.log(`R238 BUILT BROWSER PASS · real Home→TOOLS→Hybrid · two hosts · selected dev-b shared by R212/R237 · shared epoch ${e237} · foreign host isolated · R237 command gates retained`);
+          console.log(`R239 BUILT BROWSER PASS · real Home→TOOLS→Hybrid · resource-held controls counted · two hosts · selected dev-b shared by R212/R237 · shared epoch ${e237} · foreign host isolated · R237 command gates retained`);
           await browser.close();
           NODE

@@ -49,7 +49,7 @@ for(const token of [
  'selectedDeviceJobs.filter',
  'snapshotEpoch:epoch',
  'snapshotObservedAt:observedAt',
- 'This selection is shared by R212 and R237'
+ 'This selection is shared by R212, R237, R238 and R239'
 ])must(deck.includes(token),`R238 R237 correlation invariant missing ${token}`);
 
 must(hybrid.includes('<HybridRuntimeSnapshotProviderR238>'),'R238 provider must wrap the Hybrid operational surfaces');
@@ -63,4 +63,4 @@ for(const token of ['<HybridHostEffectsR212/>','<HybridCommandDeckR237/>','<Hybr
 for(const token of ['R125 admission authority','R141 exact return closure','R146 history','R147 executor/dispatch authority'])must(hybrid.includes(token),`R238 authority boundary regressed ${token}`);
 for(const text of [provider,hostEffects])for(const forbidden of ["api.post<any>('/api/hybrid/jobs'","op:'APPLY_PATCH'","op:'WRITE_TEXT'"])must(!text.includes(forbidden),`R238 read-only sampling/observation plane introduced mutation primitive ${forbidden}`);
 
-console.log('OMEGA R238 HYBRID CORRELATED SNAPSHOT PASS · one atomic Hybrid/Mission polling owner · in-flight coalescing · visibility-aware refresh · persistent selected device · R212/R237 shared epoch + host identity · selected-host return isolation · stale fail-closed command writes · R141/R146/R147/R125 preserved');
+console.log('OMEGA R238 HYBRID CORRELATED SNAPSHOT PASS · one atomic Hybrid/Mission polling owner · in-flight coalescing · visibility-aware refresh · persistent selected device · R212/R237/R238/R239 shared epoch + host identity · selected-host return isolation · stale fail-closed command writes · R141/R146/R147/R125 preserved');
