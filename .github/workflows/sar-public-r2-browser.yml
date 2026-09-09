@@ -46,7 +46,8 @@ jobs:
           python -m pytest -q tests/test_nisar_gcov.py tests/test_nisar_gunw.py tests/test_omega_sar_public.py
           node --check src/location-ui.mjs
           grep -q "_drawBaseImage" src/render.mjs
-          grep -q "Natural Earth 1:50m" src/render.mjs
+          grep -q "backgroundDirty" src/render.mjs
+          grep -q "Natural Earth 1:110m" src/render.mjs
           grep -q "NOMINATIM_REVERSE" src/location-ui.mjs
           grep -q "omega-map-command" src/render.mjs
 
@@ -85,6 +86,7 @@ jobs:
               && curl --fail --silent --show-error --location "$base/src/location-ui.mjs" -o /tmp/r2-location.mjs; then
               if grep -q 'PUBLIC SCIENTIFIC WORKSTATION' /tmp/r2-index.html \
                 && grep -q '_drawBaseImage' /tmp/r2-render.mjs \
+                && grep -q 'backgroundDirty' /tmp/r2-render.mjs \
                 && grep -q 'Selected Earth location' /tmp/r2-location.mjs; then
                 echo "SAR_PUBLIC_R2_BASE=$base" >> "$GITHUB_ENV"
                 exit 0
