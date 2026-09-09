@@ -37,6 +37,7 @@ jobs:
           node tests/r170-self-build-governor-invariants.mjs
           node tests/r2141-r170-pr-policy-failclose-invariants.mjs
           node tests/r240-recursive-exact-self-promotion-invariants.mjs
+          node tests/r245-governed-selfbuild-convergence-invariants.mjs
       - name: Require successful canonical production proof for this exact main SHA
         id: production
         env:
@@ -55,17 +56,28 @@ jobs:
           if ! grep -q '^production_ready=true$' /tmp/r170-production-proof.env; then
             echo "Exact current main SHA has no successful canonical production Cloud Bridge proof; pulse remains OBSERVE_ONLY."
           fi
-      - name: Refuse parallel autonomous candidate PRs
+      - name: Refuse parallel autonomous candidate PRs across R170 and CLOUD-01
         if: steps.production.outputs.production_ready == 'true'
         id: open_pr
         env:
           GH_TOKEN: ${{ secrets.OMEGA_EVOLUTION_GITHUB_TOKEN || github.token }}
         shell: bash
         run: |
-          PR_COUNT=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --search 'head:selfbuild/r170-' --json number --jq 'length')
-          echo "count=$PR_COUNT" >> "$GITHUB_OUTPUT"
-          echo "pr_count=$PR_COUNT" >> "$GITHUB_OUTPUT"
-          if [ "$PR_COUNT" -gt 0 ]; then echo "Existing open R170 candidate PR found; OBSERVE_ONLY."; fi
+          OPEN=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --base main --limit 100 --json number,headRefName)
+          OPEN="$OPEN" node <<'NODE' > /tmp/r245-autonomous-pr-fence.env
+          const fs=require('fs');
+          const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
+          const policy=state.autonomousCandidatePolicy||{};
+          const prefixes=Array.isArray(policy.branchPrefixes)?policy.branchPrefixes:[];
+          if(policy.schema!=='OMEGA_R170_AUTONOMOUS_CANDIDATE_POLICY_V1'||policy.maxOpenCandidatePrs!==1||policy.crossMachineFence!==true)throw new Error('canonical autonomous candidate policy invalid');
+          if(!prefixes.includes('selfbuild/r170-')||!prefixes.includes('cloud/evolution-'))throw new Error('cross-machine branch fence is incomplete');
+          const prs=JSON.parse(process.env.OPEN||'[]');
+          const held=prs.filter(pr=>prefixes.some(prefix=>String(pr.headRefName||'').startsWith(prefix)));
+          process.stdout.write(`count=${held.length}\npr_count=${held.length}\nheld=${held.map(x=>`#${x.number}:${x.headRefName}`).join(',')}\n`);
+          NODE
+          cat /tmp/r245-autonomous-pr-fence.env >> "$GITHUB_OUTPUT"
+          PR_COUNT=$(sed -n 's/^count=//p' /tmp/r245-autonomous-pr-fence.env)
+          if [ "$PR_COUNT" -gt 0 ]; then echo "Existing governed autonomous candidate PR found across R170/CLOUD-01; OBSERVE_ONLY."; fi
       - name: Collect current fail-closed residual evidence
         if: steps.production.outputs.production_ready == 'true' && steps.open_pr.outputs.count == '0'
         run: node scripts/collect_selfbuild_residual_gate_r170.mjs
@@ -103,6 +115,7 @@ jobs:
         run: |
           node tests/r170-self-build-governor-invariants.mjs
           node tests/r2141-r170-pr-policy-failclose-invariants.mjs
+          node tests/r245-governed-selfbuild-convergence-invariants.mjs
           node scripts/verify_workflow_topology_r170.mjs
           node scripts/prove_successor_workflow_invariants_r175.mjs
           node tests/r180-living-world-execution-dispatch-invariants.mjs
@@ -150,7 +163,7 @@ jobs:
           receipt.baseSha=process.env.BASE;
           receipt.productionRunId=process.env.PRODUCTION_RUN;
           receipt.canonicalAdmission=false;
-          receipt.tests={r170:true,r180:true,r179:true,currentSuccessorChain:true,r175:true,r169:true,r168:true,r167:true,r166:true,r164:true,r163:true,r1532:true,r239:true,r240:true,inherited:true,build:true,canonicalDryRun:true,opticalDryRun:true};
+          receipt.tests={r170:true,r180:true,r179:true,currentSuccessorChain:true,r175:true,r169:true,r168:true,r167:true,r166:true,r164:true,r163:true,r1532:true,r239:true,r240:true,r245SelfbuildConvergence:true,inherited:true,build:true,canonicalDryRun:true,opticalDryRun:true};
           fs.writeFileSync(p,JSON.stringify(state,null,2)+'\n');
           const candidate=JSON.parse(fs.readFileSync(c));
           candidate.receipt=receipt;
@@ -167,7 +180,7 @@ jobs:
           git checkout -b '${{ steps.candidate.outputs.branch }}'
           git add src/generated/selfbuildR170 public/omega-r170-selfbuild-state.json public/omega-r170-selfbuild-candidate.json
           git diff --cached --check
-          git commit -m "R170/R240 self-build generation ${{ steps.select.outputs.generation }}: ${{ steps.select.outputs.capsule }}"
+          git commit -m "R170/R240/R245 self-build generation ${{ steps.select.outputs.generation }}: ${{ steps.select.outputs.capsule }}"
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           git push origin HEAD:'${{ steps.candidate.outputs.branch }}'
       - name: Re-prove exact committed candidate and allowlisted diff
@@ -181,6 +194,7 @@ jobs:
           test -z "$(git status --porcelain)"
           node tests/r170-self-build-governor-invariants.mjs
           node tests/r2141-r170-pr-policy-failclose-invariants.mjs
+          node tests/r245-governed-selfbuild-convergence-invariants.mjs
           node scripts/verify_workflow_topology_r170.mjs
           node scripts/prove_successor_workflow_invariants_r175.mjs
           node tests/r239-adaptive-hybrid-resource-governor-invariants.mjs
@@ -195,6 +209,7 @@ jobs:
           if(candidate.status!=='PROVED_PENDING_PR'||receipt.status!=='PROVED_PENDING_PR')throw new Error('candidate receipt is not PROVED_PENDING_PR');
           if(receipt.baseSha!==process.env.BASE)throw new Error(`candidate base mismatch ${receipt.baseSha} != ${process.env.BASE}`);
           if(receipt.canonicalAdmission!==false)throw new Error('candidate receipt leaked Canon admission');
+          if(candidate.generatorContract!=='R245_SHARED_CANONICAL_GENERATOR'||receipt.generatorContract!=='R245_SHARED_CANONICAL_GENERATOR')throw new Error('candidate is not bound to shared R245 generator contract');
           if(!receipt.tests||Object.values(receipt.tests).some(v=>v!==true))throw new Error('not every declared candidate test is true');
           const target=candidate.capsule?.target;
           if(!target||!/^src\/generated\/selfbuildR170\//.test(target))throw new Error(`candidate target not allowlisted: ${target}`);
@@ -203,7 +218,7 @@ jobs:
           const forbidden=changed.filter(x=>!allowed.has(x));
           if(forbidden.length)throw new Error(`R240 allowlisted diff violation: ${forbidden.join(', ')}`);
           if(!changed.includes(target))throw new Error('generated target is absent from exact candidate diff');
-          console.log(`R240 EXACT CANDIDATE PASS · ${process.env.CANDIDATE_SHA} · base ${process.env.BASE} · ${changed.length} allowlisted paths`);
+          console.log(`R240/R245 EXACT CANDIDATE PASS · ${process.env.CANDIDATE_SHA} · base ${process.env.BASE} · ${changed.length} allowlisted paths`);
           NODE
           echo "status=PASS" >> "$GITHUB_OUTPUT"
       - name: Open governed exact-head candidate PR
@@ -215,7 +230,7 @@ jobs:
         run: |
           BRANCH='${{ steps.candidate.outputs.branch }}'
           set +e
-          OUTPUT=$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --title "R170/R240 self-build g${{ steps.select.outputs.generation }} — ${{ steps.select.outputs.capsule }}" --body "Bounded autonomous source proposal and exact-source-promotion candidate. Production-proven base: ${{ steps.freshness.outputs.base }}. Candidate: ${{ steps.commit.outputs.sha }}. R164 residual gate passed; committed candidate was re-proved; diff is allowlisted; R239 is preserved; this PR is not CanonState admission and R125 remains sole CanonState admission authority." 2>&1)
+          OUTPUT=$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --title "R170/R240/R245 self-build g${{ steps.select.outputs.generation }} — ${{ steps.select.outputs.capsule }}" --body "Bounded autonomous source proposal and exact-source-promotion candidate. Production-proven base: ${{ steps.freshness.outputs.base }}. Candidate: ${{ steps.commit.outputs.sha }}. Shared R164 residual policy passed; R240/R243 selected one source candidate; R170 and CLOUD-01 use one deterministic generator and one-open-candidate fence; committed candidate was re-proved; diff is allowlisted; R239 is preserved; this PR is not CanonState admission and R125 remains sole CanonState admission authority." 2>&1)
           RC=$?
           set -e
           if [ "$RC" -eq 0 ]; then
@@ -250,7 +265,7 @@ jobs:
             if [ -n "$RUN_ID" ]; then break; fi
             sleep 5
           done
-          test -n "$RUN_ID" || { echo '::error::No pull_request ci.yml run appeared for exact R240 candidate SHA.'; exit 1; }
+          test -n "$RUN_ID" || { echo '::error::No pull_request ci.yml run appeared for exact R240/R245 candidate SHA.'; exit 1; }
           gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
           RUN=$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json headSha,status,conclusion,event,url)
           CANDIDATE_SHA="$CANDIDATE_SHA" RUN="$RUN" node -e "const r=JSON.parse(process.env.RUN);if(r.headSha!==process.env.CANDIDATE_SHA||r.event!=='pull_request'||r.status!=='completed'||r.conclusion!=='success')throw new Error('exact candidate PR CI did not finish green')"
@@ -317,18 +332,21 @@ jobs:
       - name: Record autonomous pulse receipt
         if: always()
         run: |
-          echo "## R170.5 / R240 governed recursive self-build pulse" >> "$GITHUB_STEP_SUMMARY"
+          echo "## R170.5 / R240 / R245 governed recursive self-build pulse" >> "$GITHUB_STEP_SUMMARY"
           echo "- Observation cadence: hourly at minute 17" >> "$GITHUB_STEP_SUMMARY"
           echo "- Exact production head ready: ${{ steps.production.outputs.production_ready || 'false' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Production base proof run: ${{ steps.production.outputs.production_run_id || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Existing candidate PRs: ${{ steps.open_pr.outputs.pr_count || 'not-checked' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Existing autonomous candidate PRs across R170/CLOUD-01: ${{ steps.open_pr.outputs.pr_count || 'not-checked' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Selection: ${{ steps.select.outputs.status || 'OBSERVE_ONLY' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Candidate exact re-proof: ${{ steps.exact_candidate.outputs.status || 'not-attempted' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- PR creation: ${{ steps.create_pr.outputs.status || 'not-attempted' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Candidate PR CI: ${{ steps.pr_ci.outputs.status || 'not-attempted' }} / ${{ steps.pr_ci.outputs.run_id || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Exact two-parent source merge: ${{ steps.merge.outputs.sha || 'not-promoted' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Canonical production proof: ${{ steps.deployment.outputs.status || 'not-proven' }} / ${{ steps.deployment.outputs.run_id || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Parallel planning: bounded R240 frontier; one source mutation candidate per pulse" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Residual gate: one canonical R164 policy shared by R170 and CLOUD-01" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Planning: one shared R240/R243 sparse frontier and Woven selection law; one source mutation candidate per pulse" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Generator: one deterministic R245 SG001–SG005 source body shared by R170 and CLOUD-01" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Candidate fence: one open autonomous PR maximum across selfbuild/r170-* and cloud/evolution-*" >> "$GITHUB_STEP_SUMMARY"
           echo "- GitHub auto-merge feature: disabled" >> "$GITHUB_STEP_SUMMARY"
           echo "- Direct generator push to main: forbidden" >> "$GITHUB_STEP_SUMMARY"
           echo "- Sole canonical production writer: ci.yml" >> "$GITHUB_STEP_SUMMARY"

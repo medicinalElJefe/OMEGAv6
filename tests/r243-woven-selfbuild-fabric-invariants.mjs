@@ -9,6 +9,7 @@ const policy=JSON.parse(fs.readFileSync('public/omega-r243-woven-selfbuild-fabri
 const r240=JSON.parse(fs.readFileSync('public/omega-r240-recursive-exact-self-promotion.json','utf8'));
 const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
 const engine=fs.readFileSync('scripts/r170-selfbuild-engine.mjs','utf8');
+const sharedSelection=fs.readFileSync('scripts/lib/r245-governed-selfbuild-selection.mjs','utf8');
 const workflow=fs.readFileSync('.github/workflows/r170-governed-selfbuild.yml','utf8');
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
 const r240Test=fs.readFileSync('tests/r240-recursive-exact-self-promotion-invariants.mjs','utf8');
@@ -116,7 +117,8 @@ assert.equal(badPlan.canonicalAdmission,false);
 const standalone=buildWorkCellR243(roadmap[0],0,{admitted:new Set(),evidence,scars});
 assert.equal(rolePacketsForCellR243(standalone).length,8);
 
-for(const token of ["import {planWovenBuildFabricR243} from './lib/r243-woven-selfbuild-fabric.mjs'",'const wovenPlan=planWovenBuildFabricR243','BLOCKED_BY_R243_FABRIC','BLOCKED_BY_R243_R240_SELECTION_DIVERGENCE','const capsule=candidates[0]||null','wovenFabricR243',"planningFabricRevision:'R243'",'R240 retained exactly one source-mutation/promotion candidate'])assert.ok(engine.includes(token),`R243 engine integration missing ${token}`);
+for(const token of ["import {planWovenBuildFabricR243} from './r243-woven-selfbuild-fabric.mjs'",'const woven=planWovenBuildFabricR243','const candidates=rankDependencyReadyCapsulesR240','const capsule=candidates[0]||null'])assert.ok(sharedSelection.includes(token),`R243 shared selection integration missing ${token}`);
+for(const token of ['planGovernedCandidateR245','BLOCKED_BY_R243_FABRIC','BLOCKED_BY_R243_R240_SELECTION_DIVERGENCE','wovenFabricR243',"planningFabricRevision:'R243'",'R240 retained exactly one source-mutation/promotion candidate'])assert.ok(engine.includes(token),`R243 R170 integration missing ${token}`);
 assert.ok(!/git\s+push/i.test(engine),'R243 planning engine must not directly push source');
 assert.equal(state.recursiveSchedulerRevision,'R240','R243 must not silently replace R240 exact source scheduler/promotion authority');
 assert.equal(state.exactSelfPromotionRevision,'R240');
@@ -135,4 +137,4 @@ assert.ok(ci.includes('node tests/r240-recursive-exact-self-promotion-invariants
 assert.ok(workflow.includes('node tests/r240-recursive-exact-self-promotion-invariants.mjs'),'governed self-build must execute the R240→R243 proof chain before generation/promotion');
 assert.ok(!/^\s*workflow_run\s*:/m.test(workflow),'R243 must not create recursive workflow fanout');
 
-console.log('OMEGA R243 WOVEN SELF-BUILD FABRIC PASS · production R242 navigation preserved · 12/144/1728/20736/248832 address topology · DAG fail-closed · sparse multi-cell planning/evaluation · typed work packets · scar/invariant carry · R240 single mutation/promotion · R239/R147/R141/R146/R125 authorities preserved');
+console.log('OMEGA R243/R245 WOVEN SELF-BUILD FABRIC PASS · R245 shared selection carries R240 pressure and R243 Woven planning into both autonomous machines · production R242 navigation preserved · 12/144/1728/20736/248832 address topology · DAG fail-closed · sparse multi-cell planning/evaluation · R240 single mutation/promotion · R239/R147/R141/R146/R125 authorities preserved');

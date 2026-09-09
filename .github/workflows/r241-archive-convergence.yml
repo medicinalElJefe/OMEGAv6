@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: r241-archive-convergence-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   prove-r241:
@@ -41,6 +41,12 @@ jobs:
       - name: Prove R242 navigation lemma calculus
         run: node tests/r242-navigation-lemma-calculus-invariants.mjs
 
+      - name: Prove R245 Full Overall Canon convergence without a new workflow authority
+        run: node tests/r245-full-overall-canon-invariants.mjs
+
+      - name: Prove R245 shared R170 and CLOUD-01 governed self-build convergence
+        run: node tests/r245-governed-selfbuild-convergence-invariants.mjs
+
       - name: Re-prove inherited continuous field and Hybrid command boundaries
         run: |
           node tests/continuous-field-r13-invariants.mjs
@@ -57,7 +63,7 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
-      - name: Prove built R241 visual intelligence and R239/R242 navigation convergence
+      - name: Prove built R241/R239/R242/R245 convergence in the real UI
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
@@ -68,6 +74,7 @@ jobs:
           curl -fsS http://127.0.0.1:4173/ >/dev/null || { cat /tmp/omega-r241-vite.log; exit 1; }
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r241-archive-convergence-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r239-user-navigation-browser-e2e.mjs
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r245-full-overall-canon-browser-e2e.mjs
 
       - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'pull_request'
@@ -101,16 +108,23 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + R239/R242 Operator Navigation'
+            echo '## R241 Archive Convergence + R239/R242 Navigation + R245 Full Overall Canon'
             echo "- Candidate: $GITHUB_SHA"
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
             echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
+            echo '- R245 correlates runtime, production receipt, Hybrid, capability and governed self-build truth into one read-only observation epoch.'
+            echo '- R245 exposes 7 Canon axes, 7 permanent strata, 12 logical organs and 12→144→1,728→20,736→248,832 address/scheduling levels without physical-dimension inflation.'
+            echo '- R245 desktop/mobile built-browser proof requires the actual System Atlas surface, preserves the R153 executor and proves manual observation refresh remains non-mutating.'
+            echo '- R245 delegates mutation/execution to existing Build Out/R153/Hybrid authorities and owns no POST/PUT/DELETE, executor, production writer or Canon admission path.'
+            echo '- R245 also binds R170 and CLOUD-01 to one canonical R164 residual policy, one R240/R243 candidate-selection law and one deterministic SG001–SG005 generator.'
+            echo '- The autonomous one-open-candidate fence covers both selfbuild/r170-* and cloud/evolution-* namespaces; the two machines may not independently advance competing source proposals.'
+            echo '- R241 PR concurrency cancels superseded candidate proofs so expensive browser work follows the exact current head instead of serializing stale heads.'
             echo '- Exact route identity outranks prefix/token/metadata search; ambiguity and empty results carry explicit residuals rather than fabricated destinations.'
             echo '- Route filaments are source routeNext-derived; neighbor filaments are deterministic display topology.'
             echo '- Gradient/curl/variance are display proxies, not physical measurement claims.'
             echo '- Typed cognition is read-only through proposal; permission/execution/return/Canon remain separately gated.'
             echo '- R239 navigation remains converged in this proof plane: six workspaces, complete 44-route registry, immediate aria-hidden/inert close, ancestor-aware visible-canvas sanity, exhaustive route activation, and mobile containment.'
-            echo '- No 25th workflow authority is introduced; active workflow topology remains within the R170 governed bound.'
+            echo '- No 25th workflow authority is introduced; R245 proof is converged into this existing R241 proof plane and active workflow topology remains within the R170 governed bound.'
             echo '- R147 dispatch, R146 durable history, R141 exact return and R125 sole CanonState admission remain unchanged.'
             echo '- R201/R203 remain retired.'
             echo '- PR live proof binds to the exact SHA actually served by the canonical Worker; it does not compare against a moving Git ref.'

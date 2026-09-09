@@ -24,11 +24,14 @@ jobs:
       - run: npm install --no-fund
       - name: Prove CLOUD-01 evolution policy and promotion boundaries
         run: |
+          node --check src/system/governedSelfBuildContractR245.js
+          node --check scripts/lib/r245-governed-selfbuild-selection.mjs
           node --check cloudflare/lib/evolution-policy.mjs
           node --check cloudflare/lib/generated-capsules.mjs
           node --check cloudflare/lib/github-machine.mjs
           node --check cloudflare/workerR223.js
           node tests/r223-cloudflare-evolution-invariants.mjs
+          node tests/r245-governed-selfbuild-convergence-invariants.mjs
       - name: Prove ancillary Worker package without deployment
         run: npx wrangler deploy --config wrangler.evolution-machine-r223.jsonc --dry-run --outdir .wrangler-r223-cloud-01
 
@@ -68,4 +71,5 @@ jobs:
         run: |
           echo 'CLOUD-01 provisioned as ancillary Cloudflare evolution compute.'
           echo 'Canonical OMEGA production remains exclusively deployed by ci.yml deploy-main.'
-          echo 'CLOUD-01 may create governed GitHub source PRs and merge only exact-head fully green candidates; it cannot deploy canonical OMEGA directly.'
+          echo 'CLOUD-01 shares the R245 residual/selection/generator/candidate-fence contract with R170 and may merge only exact-head fully green governed source candidates.'
+          echo 'CLOUD-01 cannot deploy canonical OMEGA directly; R125 remains sole CanonState admission authority.'
