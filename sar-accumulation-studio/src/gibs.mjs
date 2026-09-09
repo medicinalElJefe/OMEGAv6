@@ -47,7 +47,7 @@ export function contextualTimestamp(record, fallbackDate=new Date()){
 export function gibsContextManifest({bbox,date,layers,url,requestedDate=null,fallbackDays=0}){
   return {
     authority:'NASA EOSDIS GIBS',
-    kind:'EARTH_CONTEXT',
+    kind:'NEAR_REAL_TIME_CONTEXT',
     measurementPromotion:false,
     bbox:normalizeBbox(bbox),date,requestedDate:requestedDate||date,fallbackDays,layers,url,
     semantics:'GIBS imagery is synchronized contextual Earth-observation evidence. It does not replace SAR measurement pixels and is not used as a SAR value unless a quantitative layer with an explicit physical mapping is separately decoded.'
