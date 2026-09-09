@@ -24,18 +24,32 @@ export function buildGibsWmsUrl({bbox=[-180,-90,180,90],date=new Date().toISOStr
   return `${GIBS_ENDPOINT}?${p.toString()}`;
 }
 
+export function gibsTransportUrl(url){
+  if(!url)return null;
+  const origin=globalThis.location?.origin;
+  return origin?`${origin.replace(/\/$/,'')}/api/gibs?url=${encodeURIComponent(url)}`:url;
+}
+
+export function fallbackDates(date,maxBack=4){
+  const start=new Date(`${String(date).slice(0,10)}T12:00:00Z`);
+  if(!Number.isFinite(start.getTime()))return [];
+  const out=[];
+  for(let i=0;i<=Math.max(0,Math.min(10,Number(maxBack)||0));i++)out.push(new Date(start.getTime()-i*86400000).toISOString().slice(0,10));
+  return out;
+}
+
 export function contextualTimestamp(record, fallbackDate=new Date()){
   const t=record?.startTime?new Date(record.startTime):fallbackDate;
   if(!Number.isFinite(t.getTime()))return new Date().toISOString().slice(0,10);
   return t.toISOString().slice(0,10);
 }
 
-export function gibsContextManifest({bbox,date,layers,url}){
+export function gibsContextManifest({bbox,date,layers,url,requestedDate=null,fallbackDays=0}){
   return {
     authority:'NASA EOSDIS GIBS',
     kind:'NEAR_REAL_TIME_CONTEXT',
     measurementPromotion:false,
-    bbox:normalizeBbox(bbox),date,layers,url,
+    bbox:normalizeBbox(bbox),date,requestedDate:requestedDate||date,fallbackDays,layers,url,
     semantics:'GIBS imagery is synchronized contextual Earth-observation evidence. It does not replace SAR measurement pixels and is not used as a SAR value unless a quantitative layer with an explicit physical mapping is separately decoded.'
   };
 }
