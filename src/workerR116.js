@@ -112,8 +112,10 @@ async function durablePairR117(request,env){
  if(!sid)return json({ok:false,code:'SESSION_ID_REQUIRED',reply:'A browser runtime session is required before a fresh PC connector can be issued.'},400);
  if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE'},503);
  const stub=env.OMEGA_RUNTIME.get(env.OMEGA_RUNTIME.idFromName(sid));
- const cleanHeaders=new Headers({'content-type':'application/json','x-omega-session-id':sid});
- const pairResponse=await stub.fetch(new Request('https://omega-runtime.internal/pair',{method:'POST',headers:cleanHeaders,body:JSON.stringify({rotate:true})}));
+ const pairHeaders=new Headers({'content-type':'application/json','x-omega-session-id':sid});
+ const currentSecret=text(request.headers.get('x-omega-bridge-secret'));
+ if(currentSecret)pairHeaders.set('x-omega-bridge-secret',currentSecret);
+ const pairResponse=await stub.fetch(new Request('https://omega-runtime.internal/pair',{method:'POST',headers:pairHeaders,body:JSON.stringify({rotate:true})}));
  const pair=await pairResponse.clone().json().catch(()=>({}));
  if(!pairResponse.ok||!pair?.secret)return json({ok:false,code:pair?.code||'PAIR_BOOTSTRAP_FAILED',reply:pair?.reply||'OMEGA could not mint a fresh server-backed Hybrid credential.'},pairResponse.status||503);
  const bridgeId=safeId(pair.bridgeId||sid,sid),secret=text(pair.secret),pairingCode=`${bridgeId}.${secret}`;
@@ -134,7 +136,7 @@ async function durablePairR117(request,env){
   rcwaAgentPath:'/api/federation/rcwa/agent-download?r117=1',
   agentRestartRequired:true,
   nativeExecutionClaimed:false,
-  truthBoundary:'This endpoint rotates a fresh bridge credential directly in durable runtime state using only the canonical browser session. Stale browser bridge headers are ignored. PC ONLINE remains false until a real authenticated host heartbeat arrives.'
+  truthBoundary:'This endpoint mints the first bridge credential for an unpaired canonical browser session or rotates an existing credential only when that session proves its current bridge secret. Cross-session or stale credentials cannot seize pairing authority. PC ONLINE remains false until a real authenticated host heartbeat arrives.'
  });
 }
 
