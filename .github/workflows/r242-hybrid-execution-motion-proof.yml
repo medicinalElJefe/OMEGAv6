@@ -5,12 +5,14 @@ on:
     branches: [main]
     paths:
       - 'src/workerR101.js'
+      - 'src/workerR102.js'
       - 'src/execution/adaptiveSovereignMissionR152.js'
       - 'public/omega-hybrid-agent-r141.py'
       - 'src/HybridExecutionMotionR242.tsx'
       - 'src/hybridExecutionMotionR242.css'
       - 'src/HybridLinkR32.tsx'
       - 'tests/r242-hybrid-execution-motion-invariants.mjs'
+      - 'tests/r242-hybrid-terminal-fence-invariants.mjs'
       - 'tests/r242-hybrid-execution-motion-browser-e2e.mjs'
       - '.github/workflows/r242-hybrid-execution-motion-proof.yml'
   workflow_dispatch:
@@ -36,7 +38,9 @@ jobs:
       - name: Compile R242 host wrapper
         run: python -m py_compile public/omega-hybrid-agent-r141.py
       - name: Prove execution motion and fail-closed stall recovery
-        run: node tests/r242-hybrid-execution-motion-invariants.mjs
+        run: |
+          node tests/r242-hybrid-execution-motion-invariants.mjs
+          node tests/r242-hybrid-terminal-fence-invariants.mjs
       - name: Preserve adaptive mission progression
         run: node tests/r153-adaptive-sovereign-build-missions-invariants.mjs
       - name: Preserve Hybrid command and host-proof authorities
