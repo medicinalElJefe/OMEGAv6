@@ -29,7 +29,7 @@ for(const token of [
 ])must(governor.includes(token),`R239 governor missing ${token}`);
 
 must(governor.includes("jobs:[])].filter((j:any)=>j?.targetDeviceId===deviceId&&j?.returnPacket)"),'R239 must isolate returned host proof to the selected device');
-must(governor.includes("load>=92||avail<1*GiB||disk<2*GiB")&&governor.includes("load>=82||avail<2*GiB||disk<5*GiB"),'R239 critical/elevated resource pressure thresholds missing');
+must(governor.includes("memLoad>=92||avail<1*GiB||disk<2*GiB")&&governor.includes("memLoad>=82||avail<2*GiB||disk<5*GiB"),'R239 critical/elevated resource pressure thresholds missing');
 must(governor.includes("load??100")&&governor.includes("available??0")&&governor.includes("free??0"),'R239 missing host values must fail closed rather than synthesize headroom');
 must(governor.includes("clamp(Math.floor(advisory*pressureFactor),1,12)"),'R239 effective CPU worker envelope must remain bounded to 1..12');
 must(governor.includes("const proveHost=input.snapshotCurrent&&!input.activeNativeWork"),'R239 must preserve a bootstrap path to obtain first returned DESKTOP_HEALTH proof');
@@ -70,7 +70,6 @@ must(state.postR180ProofContinuity.at(-1)==='R239','R239 must be the current pos
 must(state.selfBuild.latestExplicitSuccessorProof==='tests/r239-adaptive-hybrid-resource-governor-invariants.mjs','R239 must become the explicit successor proof');
 must(state.preservedRuntime.hybridResourceGovernor==='R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING','R239 preserved-runtime identity missing');
 
-// Independent boundary table proves the intended admission policy remains monotonic.
 const classify=({load,availGiB,diskGiB,workers=8,profile=true,snapshot=true,active=false})=>{
  if(!snapshot)return'HOLD';if(!profile)return'UNPROVED';if(active)return'HOLD';
  if(load>=92||availGiB<1||diskGiB<2)return'HOLD';
