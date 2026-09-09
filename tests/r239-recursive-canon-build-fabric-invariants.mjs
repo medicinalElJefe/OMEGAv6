@@ -28,12 +28,14 @@ assert.equal(policy.inherits.hybridCorrelation,'R238 Woven Hybrid Continuity');
 
 for(const token of [
  "R239_RESOLUTION=Object.freeze({organs:12,branches:144,cells:1728,lanes:20736,deepAddress:248832})",
- 'R239_ORGANS=Object.freeze([','r239CellAddress','r239LaneRange','r239Pressure','r239CandidateScore','r239ReadyFrontier','r239MergeAdmissible',
- 'MAXIMUM_INTERNAL EVOLUTION'
-]){
- if(token==='MAXIMUM INTERNAL EVOLUTION')continue;
- assert.ok(core.includes(token),`R239 core missing ${token}`);
-}
+ 'R239_ORGANS=Object.freeze([',
+ 'r239CellAddress',
+ 'r239LaneRange',
+ 'r239Pressure',
+ 'r239CandidateScore',
+ 'r239ReadyFrontier',
+ 'r239MergeAdmissible'
+])assert.ok(core.includes(token),`R239 core missing ${token}`);
 for(const token of ["admissionLaw:'MAXIMUM INTERNAL EVOLUTION + STRICT EXTERNAL ADMISSION'","canonicalAdmissionAuthority:'R125'","dispatchAuthority:'R147'","hybridReturnAuthority:'R141'","durableHistoryAuthority:'R146'"])assert.ok(core.includes(token),`R239 authority law missing ${token}`);
 
 const roadmap=[
