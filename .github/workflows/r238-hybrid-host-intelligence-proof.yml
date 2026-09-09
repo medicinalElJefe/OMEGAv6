@@ -6,6 +6,9 @@ on:
     paths:
       - 'public/omega-hybrid-agent-r141.py'
       - 'public/omega-r170-self-build-governor.json'
+      - 'public/omega-r243-woven-selfbuild-fabric.json'
+      - 'scripts/lib/r243-woven-selfbuild-fabric.mjs'
+      - 'scripts/r170-selfbuild-engine.mjs'
       - 'src/workerR101.js'
       - 'src/workerR102.js'
       - 'src/execution/adaptiveSovereignMissionR152.js'
@@ -22,6 +25,7 @@ on:
       - 'tests/r238-hybrid-host-intelligence-invariants.mjs'
       - 'tests/r238-windows-host-runtime-proof.py'
       - 'tests/r238-host-intelligence-browser-e2e.mjs'
+      - 'tests/r243-woven-selfbuild-fabric-invariants.mjs'
       - 'tests/r243-hybrid-execution-motion-invariants.mjs'
       - 'tests/r243-hybrid-terminal-fence-invariants.mjs'
       - 'tests/r243-hybrid-execution-motion-browser-e2e.mjs'
@@ -52,6 +56,8 @@ jobs:
         run: |
           node tests/r238-hybrid-host-intelligence-invariants.mjs
           node tests/r238-hybrid-correlated-snapshot-invariants.mjs
+      - name: R243 woven self-build planning and R240 agreement
+        run: node tests/r243-woven-selfbuild-fabric-invariants.mjs
       - name: R243 leased execution motion + terminal fence
         run: |
           node tests/r243-hybrid-execution-motion-invariants.mjs
