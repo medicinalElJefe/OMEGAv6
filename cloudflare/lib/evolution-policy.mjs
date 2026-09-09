@@ -1,3 +1,8 @@
+import {buildDevelopmentResidualGraphR164} from '../../src/system/developmentResidualGraphR164.js';
+import {deriveResidualGateR245,R245_GOVERNED_SELFBUILD_CONTRACT} from '../../src/system/governedSelfBuildContractR245.js';
+import {candidateScoreR240} from '../../scripts/lib/r240-recursive-selfbuild-fabric.mjs';
+import {planGovernedCandidateR245} from '../../scripts/lib/r245-governed-selfbuild-selection.mjs';
+
 export const MACHINE_ID='CLOUD-01';
 export const AUTHORITY_BOUNDARIES=Object.freeze({
   canonAdmission:'R125',
@@ -9,16 +14,16 @@ export const AUTHORITY_BOUNDARIES=Object.freeze({
   retiredDurableObjects:Object.freeze(['R201','R203']),
 });
 
-export function scoreCapsule(capsule){
-  const riskFactor=capsule.risk==='LOW'?1:capsule.risk==='MEDIUM'?0.7:0.35;
-  return Number(capsule.expectedGain||0)/Math.max(0.01,Number(capsule.complexity||0)+Number(capsule.contradictionRisk||0))*riskFactor;
+function asResidualGraph(evidence={}){
+  return evidence?.schema==='OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164'?evidence:buildDevelopmentResidualGraphR164({runtimeEvidence:evidence||{}});
 }
 
-export function selectCapsule(state){
-  const admitted=new Set(state.admittedSourceCapsules||[]);
-  return (state.roadmap||[])
-    .filter(c=>!admitted.has(c.id)&&(c.prerequisites||[]).every(p=>admitted.has(p)))
-    .sort((a,b)=>scoreCapsule(b)-scoreCapsule(a)||a.id.localeCompare(b.id))[0]||null;
+export function scoreCapsule(capsule){return candidateScoreR240(capsule)}
+
+export function selectCapsule(state,evidence={}){
+  const graph=asResidualGraph(evidence);
+  const plan=planGovernedCandidateR245({state,evidence:graph});
+  return plan.state==='PROPOSE'?plan.capsule:null;
 }
 
 export function classifyHeldCandidates({currentMainSha,candidates}){
@@ -30,12 +35,10 @@ export function classifyHeldCandidates({currentMainSha,candidates}){
   return {exact,stale};
 }
 
-export function deriveResidualGate({coreHealth,releaseEvidence,runtimeAttestation}){
-  if(!(coreHealth?.ok===true&&coreHealth?.state==='LIVE'&&coreHealth?.schema==='OMEGA_CANONICAL_CORE_HEALTH_R163'))return{allow:false,state:'BLOCK',reason:'R163 canonical core health is not first-hand LIVE'};
-  const releaseSha=releaseEvidence?.source?.sha||null;
-  const runtimeSha=runtimeAttestation?.source?.sha||null;
-  if(releaseSha&&runtimeSha&&releaseSha!==runtimeSha)return{allow:false,state:'BLOCK',reason:'release/runtime source SHA mismatch'};
-  return{allow:true,state:'PASS',reason:'no high/critical autonomous-source blocker observed'};
+export function deriveResidualGate(evidence,stateOrPolicy={}){
+  const graph=asResidualGraph(evidence);
+  const policy=stateOrPolicy?.residualPolicy||stateOrPolicy;
+  return deriveResidualGateR245(graph,policy);
 }
 
 export function reconcileObservedSource(state,presentTargets){
@@ -54,10 +57,11 @@ export function decideCycle({currentMainSha,productionProofGreen,state,candidate
   if(!productionProofGreen)return{action:'OBSERVE_ONLY',reason:'exact current main lacks green canonical production proof'};
   if(!state?.active)return{action:'OBSERVE_ONLY',reason:'self-build state inactive'};
   const held=classifyHeldCandidates({currentMainSha,candidates});
-  if(held.exact.length)return{action:'OBSERVE_ONLY',reason:'exact-head candidate already held',held};
-  const gate=deriveResidualGate(evidence);
-  if(!gate.allow)return{action:'OBSERVE_ONLY',reason:gate.reason,gate,held};
-  const capsule=selectCapsule(state);
-  if(!capsule)return{action:'OBSERVE_ONLY',reason:'bounded roadmap exhausted or no dependency-ready capsule',gate,held};
-  return{action:'PROPOSE',capsule,gate,held,canonicalAdmission:false,deploymentAuthority:AUTHORITY_BOUNDARIES.productionDeploymentWorkflow,machineId:MACHINE_ID};
+  if(held.exact.length)return{action:'OBSERVE_ONLY',reason:'exact-head autonomous candidate already held',held,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
+  const graph=asResidualGraph(evidence);
+  const gate=deriveResidualGateR245(graph,state.residualPolicy);
+  if(!gate.allow)return{action:'OBSERVE_ONLY',reason:gate.reason,gate,held,residualGraphState:graph.state,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
+  const plan=planGovernedCandidateR245({state,evidence:graph});
+  if(plan.state!=='PROPOSE'||!plan.capsule)return{action:'OBSERVE_ONLY',reason:plan.reason||plan.state||'bounded roadmap exhausted or no dependency-ready capsule',gate,held,plan,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
+  return{action:'PROPOSE',capsule:plan.capsule,score:plan.score,frontier:plan.frontier,woven:plan.woven,selectionLaw:plan.selectionLaw,gate,held,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,canonicalAdmission:false,deploymentAuthority:AUTHORITY_BOUNDARIES.productionDeploymentWorkflow,machineId:MACHINE_ID};
 }
