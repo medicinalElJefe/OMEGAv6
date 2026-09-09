@@ -29,9 +29,14 @@ selected-device identity, shared snapshot epoch and source-profile fingerprint i
 validated step. The wrapper validates that carry before native execution, preserves the address
 through the host frame and echoes it into returned step proof with reversed orientation before
 R141 exact-return fingerprinting. This is software/state continuity, not a physical-dimension claim.
+
+R242 execution-motion extension: while an allow-listed host job is executing, the wrapper emits
+bounded authenticated progress/lease pulses from a daemon telemetry thread. The pulse reports only
+job/step identity, ordinal progress and elapsed time; it does not expose arbitrary process output,
+add an executor, bypass R141 result proof, or convert liveness into execution success.
 """
 from __future__ import annotations
-import ctypes,hashlib,importlib.util,json,os,platform,shutil,socket,subprocess,sys,time,types,urllib.request
+import ctypes,hashlib,importlib.util,json,os,platform,shutil,socket,subprocess,sys,threading,time,types,urllib.request
 from pathlib import Path
 
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
@@ -47,6 +52,7 @@ HOST_EVIDENCE_CONTINUITY_REVISION='R206.1'
 R207_1_ASSET_COMPATIBILITY_REVISION='R207.1'
 HOST_INTELLIGENCE_EXTENSION='R238'
 BRIDGE_CALCULUS_EXTENSION='R240'
+EXECUTION_MOTION_EXTENSION='R242'
 HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'
 MACRO_INVENTORY_SCHEMA='OMEGA_LOCAL_MACRO_INVENTORY_R238'
 MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'
@@ -60,6 +66,8 @@ MAX_MACRO_SECONDS_R238=300
 MAX_MACRO_COORD_ABS_R238=100000
 PROFILE_CACHE_SECONDS=60
 MACRO_CACHE_SECONDS=30
+PROGRESS_INTERVAL_SECONDS=3.0
+PROGRESS_HTTP_TIMEOUT_SECONDS=10
 
 def sha_bytes(b:bytes):return hashlib.sha256(b).hexdigest()
 def sha_json(o):return sha_bytes(json.dumps(o,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode('utf-8'))
@@ -71,7 +79,7 @@ def arg_value(name,default):
 
 def canonical_base_source(server):
     url=server.rstrip('/')+BASE_PATH
-    req=urllib.request.Request(url,method='GET',headers={'cache-control':'no-cache','user-agent':'OMEGA-Hybrid-R141-R206.1-R207.1-R238-R240-Wrapper/1'})
+    req=urllib.request.Request(url,method='GET',headers={'cache-control':'no-cache','user-agent':'OMEGA-Hybrid-R141-R206.1-R207.1-R238-R240-R242-Wrapper/1'})
     with urllib.request.urlopen(req,timeout=30) as r:
         source=r.read(MAX_BASE_BYTES+1)
     if len(source)<1000 or len(source)>MAX_BASE_BYTES:raise RuntimeError('R141 base agent size proof failed.')
@@ -257,21 +265,52 @@ def validate_bridge_calculus_r240(job):
 def main():
     server=arg_value('--server',DEFAULT_SERVER).rstrip('/');base,base_digest=load_base(server);root=Path(base.normalize_root_arg(arg_value('--root','.'))).expanduser().resolve();cache={}
     base_execute=base.execute_job;original_execute_step=base.execute_step;original_request_json=base.request_json
+    transport={};motion={'active':False};motion_lock=threading.Lock()
+    def motion_update(**values):
+        with motion_lock:motion.update(values)
+    def progress_payload(state_override=None):
+        with motion_lock:
+            if not motion.get('active') or not transport.get('deviceId') or not motion.get('jobId'):return None
+            motion['seq']=int(motion.get('seq',0))+1
+            return {'bridgeId':transport.get('bridgeId'),'deviceId':transport.get('deviceId'),'jobId':motion.get('jobId'),'seq':motion['seq'],'state':state_override or motion.get('state') or 'STEP_RUNNING','stepId':motion.get('stepId') or '','stepOp':motion.get('stepOp') or '','stepIndex':int(motion.get('stepIndex') or 0),'totalSteps':int(motion.get('totalSteps') or 0),'completedSteps':int(motion.get('completedSteps') or 0),'elapsedMs':max(0,int((time.monotonic()-float(motion.get('startedMono') or time.monotonic()))*1000)),'message':str(motion.get('message') or '')[:240]}
+    def send_progress(state_override=None):
+        payload=progress_payload(state_override)
+        if not payload:return False
+        try:
+            original_request_json(transport['server'],'/api/hybrid/agent/progress',payload,transport['bridgeId'],transport['secret'],PROGRESS_HTTP_TIMEOUT_SECONDS);return True
+        except Exception as e:
+            motion_update(lastProgressError=str(e)[:240]);return False
+    def progress_loop(stop_event):
+        while not stop_event.wait(PROGRESS_INTERVAL_SECONDS):send_progress()
     def execute_step_r238(step,approved_root):
-        op=str(step.get('op','')).upper()
+        op=str(step.get('op','')).upper();step_id=str(step.get('id') or '')
+        with motion_lock:
+            idx=int((motion.get('stepIndexById') or {}).get(step_id,motion.get('stepIndex') or 0));motion.update({'state':'STEP_RUNNING','stepId':step_id,'stepOp':op,'stepIndex':idx,'message':str(step.get('label') or op)[:240]})
         preflight=verify_macro_replay(base,approved_root,step.get('macroName'),step.get('windowTitle')) if op=='REPLAY_MACRO' else None
-        result=original_execute_step(step,approved_root)
-        if op=='DESKTOP_HEALTH' and isinstance(result,dict):
-            result=dict(result);result['hostProfileR238']=host_profile(approved_root,cache);result['macroInventoryR238']=macro_inventory(approved_root,cache)
-        if preflight is not None and isinstance(result,dict):result=dict(result);result['macroPreflightR238']=preflight
-        return result
+        try:
+            result=original_execute_step(step,approved_root)
+            if op=='DESKTOP_HEALTH' and isinstance(result,dict):
+                result=dict(result);result['hostProfileR238']=host_profile(approved_root,cache);result['macroInventoryR238']=macro_inventory(approved_root,cache)
+            if preflight is not None and isinstance(result,dict):result=dict(result);result['macroPreflightR238']=preflight
+            with motion_lock:motion.update({'state':'STEP_COMPLETE','completedSteps':max(int(motion.get('completedSteps') or 0),idx),'message':f'{op} returned to the R141 wrapper.'})
+            send_progress('STEP_COMPLETE')
+            return result
+        except Exception:
+            motion_update(state='STEP_COMPLETE',message=f'{op} returned a bounded failure to the R141 wrapper.');send_progress('STEP_COMPLETE');raise
     def request_json_r238(server_url,path,payload,bridge_id,secret,timeout=30):
+        if isinstance(payload,dict) and path in {'/api/hybrid/agent/register','/api/hybrid/agent/heartbeat','/api/hybrid/agent/poll'}:
+            transport.update({'server':server_url,'bridgeId':bridge_id,'secret':secret,'deviceId':str(payload.get('deviceId') or transport.get('deviceId') or '')})
         if path in {'/api/hybrid/agent/register','/api/hybrid/agent/heartbeat'} and isinstance(payload,dict):
-            payload=dict(payload);extensions=list(dict.fromkeys([*(payload.get('proofExtensions') or []),HOST_INTELLIGENCE_EXTENSION,BRIDGE_CALCULUS_EXTENSION]));payload['proofExtensions']=extensions
+            payload=dict(payload);extensions=list(dict.fromkeys([*(payload.get('proofExtensions') or []),HOST_INTELLIGENCE_EXTENSION,BRIDGE_CALCULUS_EXTENSION]));extensions=list(dict.fromkeys([*extensions,EXECUTION_MOTION_EXTENSION]));payload['proofExtensions']=extensions
         return original_request_json(server_url,path,payload,bridge_id,secret,timeout)
     def execute_job_r141(job,approved_root):
-        bridge_by_step=validate_bridge_calculus_r240(job)
-        packet=base_execute(job,approved_root);packet['proofExtensions']=list(dict.fromkeys([*(packet.get('proofExtensions') or []),HOST_INTELLIGENCE_EXTENSION,BRIDGE_CALCULUS_EXTENSION]))
+        bridge_by_step=validate_bridge_calculus_r240(job);steps=list(job.get('steps') or [])[:24];step_index={str(s.get('id') or ''):i+1 for i,s in enumerate(steps) if isinstance(s,dict)}
+        motion_update(active=True,jobId=str(job.get('id') or ''),seq=0,state='CLAIMED',stepId='',stepOp='',stepIndex=0,totalSteps=len(steps),completedSteps=0,startedMono=time.monotonic(),stepIndexById=step_index,message='Authenticated host accepted the governed job.')
+        send_progress('CLAIMED');stop_event=threading.Event();thread=threading.Thread(target=progress_loop,args=(stop_event,),name='omega-r242-progress',daemon=True);thread.start()
+        try:packet=base_execute(job,approved_root)
+        finally:
+            send_progress('RETURNING');stop_event.set();thread.join(timeout=1.0);motion_update(active=False,state='RETURNING')
+        packet['proofExtensions']=list(dict.fromkeys([*(packet.get('proofExtensions') or []),HOST_INTELLIGENCE_EXTENSION,BRIDGE_CALCULUS_EXTENSION]));packet['proofExtensions']=list(dict.fromkeys([*packet['proofExtensions'],EXECUTION_MOTION_EXTENSION]))
         for proof in packet.get('stepProofs') or []:
             if not isinstance(proof,dict):continue
             bridge=bridge_by_step.get(str(proof.get('id') or ''))
@@ -282,8 +321,8 @@ def main():
         packet.update({'resultFingerprintSchema':FINGERPRINT_SCHEMA,'resultFingerprintR141Payload':payload,'resultFingerprintR141':digest,'proofClosureRevision':PROOF_CLOSURE_REVISION,'baseAgentSha256':base_digest})
         return packet
     base.execute_step=execute_step_r238;base.request_json=request_json_r238;base.execute_job=execute_job_r141
-    print('OMEGA Hybrid Link proof wrapper',PROOF_CLOSURE_REVISION,'· immutable base',base.VERSION,'execution',base.CAPABILITY_REVISION,'host proof',HOST_PROOF_EXTENSION,'continuity',HOST_EVIDENCE_CONTINUITY_REVISION,'asset compatibility',R207_1_ASSET_COMPATIBILITY_REVISION,'host intelligence',HOST_INTELLIGENCE_EXTENSION,'bridge calculus',BRIDGE_CALCULUS_EXTENSION)
-    print('Exact return payload SHA-256 is enabled; R238 adds bounded host-resource truth + macro preflight and R240 closes calculus address continuity across browser, durable queue, selected host and R141 return proof without new Canon authority.')
+    print('OMEGA Hybrid Link proof wrapper',PROOF_CLOSURE_REVISION,'· immutable base',base.VERSION,'execution',base.CAPABILITY_REVISION,'host proof',HOST_PROOF_EXTENSION,'continuity',HOST_EVIDENCE_CONTINUITY_REVISION,'asset compatibility',R207_1_ASSET_COMPATIBILITY_REVISION,'host intelligence',HOST_INTELLIGENCE_EXTENSION,'bridge calculus',BRIDGE_CALCULUS_EXTENSION,'execution motion',EXECUTION_MOTION_EXTENSION)
+    print('Exact return payload SHA-256 is enabled; R238 adds bounded host-resource truth + macro preflight, R240 closes calculus address continuity, and R242 keeps RUNNING work lease-visible with authenticated step motion while preserving R141 result authority.')
     base.main()
 
 if __name__=='__main__':main()
