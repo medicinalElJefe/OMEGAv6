@@ -2,21 +2,29 @@ const TIFF_CACHE = new Map();
 let geotiffModulePromise = null;
 
 async function geotiffModule() {
-  if (!geotiffModulePromise) geotiffModulePromise = import('https://cdn.jsdelivr.net/npm/geotiff@3.0.5/+esm');
+  if (!geotiffModulePromise) geotiffModulePromise = import('../vendor/geotiff.bundle.mjs');
   return geotiffModulePromise;
+}
+
+export function rasterTransportUrl(url, origin = globalThis.location?.origin || null) {
+  if (!url) return null;
+  if (!origin) return url;
+  return `${origin.replace(/\/$/,'')}/api/raster?url=${encodeURIComponent(url)}`;
 }
 
 async function openTiff(url) {
   if (!url) throw new Error('No GeoTIFF URL supplied');
-  if (!TIFF_CACHE.has(url)) {
-    TIFF_CACHE.set(url, (async () => {
+  const transport = rasterTransportUrl(url);
+  const cacheKey = `${url}|${transport}`;
+  if (!TIFF_CACHE.has(cacheKey)) {
+    TIFF_CACHE.set(cacheKey, (async () => {
       const mod = await geotiffModule();
-      const tiff = await mod.fromUrl(url, { cacheSize: 64 * 1024 * 1024 });
+      const tiff = await mod.fromUrl(transport, { cacheSize: 64 * 1024 * 1024 });
       const image = await tiff.getImage();
       return { tiff, image };
     })());
   }
-  return TIFF_CACHE.get(url);
+  return TIFF_CACHE.get(cacheKey);
 }
 
 export function percentile(sorted, p) {
@@ -66,7 +74,7 @@ export async function renderCog(url, canvas, { maxWidth = 1100, maxHeight = 780,
   }
   ctx.putImageData(imageData, 0, 0);
   const bbox = image.getBoundingBox?.() || null, resolution = image.getResolution?.() || null, geoKeys = image.getGeoKeys?.() || {};
-  return { sourceWidth, sourceHeight, renderedWidth: width, renderedHeight: height, bbox, resolution, geoKeys, nodata, stats, displayTransform: { type: 'percentile-linear-plus-gamma', low, high, gamma, scientificCalibrationClaimed: false } };
+  return { sourceWidth, sourceHeight, renderedWidth: width, renderedHeight: height, bbox, resolution, geoKeys, nodata, stats, sourceUrl:url, transportUrl:rasterTransportUrl(url), displayTransform: { type: 'percentile-linear-plus-gamma', low, high, gamma, scientificCalibrationClaimed: false } };
 }
 
 export async function sampleCogAtPoint(url, lon, lat, { epsg = 4326 } = {}) {
