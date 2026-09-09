@@ -37,15 +37,7 @@ export function rasterStats(values, nodata = 0) {
     count++; sum += v; min = Math.min(min, v); max = Math.max(max, v); sample.push(v);
   }
   sample.sort((a,b) => a-b);
-  return {
-    sampledCount: count,
-    min: count ? min : null,
-    max: count ? max : null,
-    mean: count ? sum / count : null,
-    p02: percentile(sample, .02),
-    p50: percentile(sample, .50),
-    p98: percentile(sample, .98)
-  };
+  return { sampledCount: count, min: count ? min : null, max: count ? max : null, mean: count ? sum / count : null, p02: percentile(sample, .02), p50: percentile(sample, .50), p98: percentile(sample, .98) };
 }
 
 export function stretchByte(v, low, high, gamma = 0.72) {
@@ -56,40 +48,25 @@ export function stretchByte(v, low, high, gamma = 0.72) {
 
 export async function renderCog(url, canvas, { maxWidth = 1100, maxHeight = 780, gamma = 0.72 } = {}) {
   const { image } = await openTiff(url);
-  const sourceWidth = image.getWidth();
-  const sourceHeight = image.getHeight();
+  const sourceWidth = image.getWidth(), sourceHeight = image.getHeight();
   const scale = Math.min(1, maxWidth / sourceWidth, maxHeight / sourceHeight);
-  const width = Math.max(1, Math.round(sourceWidth * scale));
-  const height = Math.max(1, Math.round(sourceHeight * scale));
+  const width = Math.max(1, Math.round(sourceWidth * scale)), height = Math.max(1, Math.round(sourceHeight * scale));
   const raster = await image.readRasters({ width, height, samples: [0], interleave: true, resampleMethod: 'bilinear' });
   const nodataText = image.getGDALNoData?.();
   const nodata = nodataText == null ? 0 : Number(nodataText);
   const stats = rasterStats(raster, Number.isFinite(nodata) ? nodata : 0);
-  const low = stats.p02 ?? stats.min ?? 0;
-  const high = stats.p98 ?? stats.max ?? 1;
+  const low = stats.p02 ?? stats.min ?? 0, high = stats.p98 ?? stats.max ?? 1;
 
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  const imageData = ctx.createImageData(width, height);
+  canvas.width = width; canvas.height = height;
+  const ctx = canvas.getContext('2d'), imageData = ctx.createImageData(width, height);
   for (let i = 0; i < raster.length; i++) {
     const v = Number(raster[i]);
-    const byte = v === nodata ? 0 : stretchByte(v, low, high, gamma);
-    const j = i * 4;
-    imageData.data[j] = byte;
-    imageData.data[j + 1] = Math.min(255, Math.round(byte * 1.03));
-    imageData.data[j + 2] = Math.min(255, Math.round(byte * 1.08));
-    imageData.data[j + 3] = v === nodata ? 0 : 255;
+    const byte = v === nodata ? 0 : stretchByte(v, low, high, gamma), j = i * 4;
+    imageData.data[j] = byte; imageData.data[j + 1] = Math.min(255, Math.round(byte * 1.03)); imageData.data[j + 2] = Math.min(255, Math.round(byte * 1.08)); imageData.data[j + 3] = v === nodata ? 0 : 255;
   }
   ctx.putImageData(imageData, 0, 0);
-  const bbox = image.getBoundingBox?.() || null;
-  const resolution = image.getResolution?.() || null;
-  const geoKeys = image.getGeoKeys?.() || {};
-  return {
-    sourceWidth, sourceHeight, renderedWidth: width, renderedHeight: height,
-    bbox, resolution, geoKeys, nodata, stats,
-    displayTransform: { type: 'percentile-linear-plus-gamma', low, high, gamma, scientificCalibrationClaimed: false }
-  };
+  const bbox = image.getBoundingBox?.() || null, resolution = image.getResolution?.() || null, geoKeys = image.getGeoKeys?.() || {};
+  return { sourceWidth, sourceHeight, renderedWidth: width, renderedHeight: height, bbox, resolution, geoKeys, nodata, stats, displayTransform: { type: 'percentile-linear-plus-gamma', low, high, gamma, scientificCalibrationClaimed: false } };
 }
 
 export async function sampleCogAtPoint(url, lon, lat, { epsg = 4326 } = {}) {
@@ -108,6 +85,28 @@ export async function sampleCogAtPoint(url, lon, lat, { epsg = 4326 } = {}) {
   return { inside: true, value: Number.isFinite(value) && value !== nodata ? value : null, x, y, bbox, nodata };
 }
 
+export async function sampleCogNeighborhood(url, lon, lat, { epsg = 4326, radiusPixels = 2 } = {}) {
+  if (Number(epsg) !== 4326) throw new Error(`Neighborhood sampling currently requires EPSG:4326 COGs; source declares EPSG:${epsg}`);
+  const { image } = await openTiff(url);
+  const [minX,minY,maxX,maxY] = image.getBoundingBox();
+  if (lon < minX || lon > maxX || lat < minY || lat > maxY) return [];
+  const width=image.getWidth(), height=image.getHeight();
+  const cx=Math.max(0,Math.min(width-1,Math.floor((lon-minX)/(maxX-minX)*width)));
+  const cy=Math.max(0,Math.min(height-1,Math.floor((maxY-lat)/(maxY-minY)*height)));
+  const r=Math.max(1,Math.min(8,Math.round(radiusPixels)));
+  const x0=Math.max(0,cx-r),y0=Math.max(0,cy-r),x1=Math.min(width,cx+r+1),y1=Math.min(height,cy+r+1);
+  const values=await image.readRasters({window:[x0,y0,x1,y1],samples:[0],interleave:true});
+  const nodataText=image.getGDALNoData?.(),nodata=nodataText==null?0:Number(nodataText);
+  const out=[];let k=0;
+  for(let py=y0;py<y1;py++)for(let px=x0;px<x1;px++,k++){
+    const value=Number(values[k]);if(!Number.isFinite(value)||value===nodata)continue;
+    const sampleLon=minX+((px+.5)/width)*(maxX-minX);
+    const sampleLat=maxY-((py+.5)/height)*(maxY-minY);
+    out.push({lon:sampleLon,lat:sampleLat,value,pixel:[px,py],measured:true});
+  }
+  return out;
+}
+
 export function dataAssetChoices(record) {
   return Object.values(record?.dataAssets || {}).filter(a => a?.href);
 }
@@ -116,14 +115,11 @@ export async function probeStack(records, lon, lat, assetKey, { maxScenes = 96, 
   const candidates = records.filter(r => r.dataAssets && (r.dataAssets[assetKey] || Object.values(r.dataAssets)[0])).slice(-maxScenes);
   const out = [];
   for (let i = 0; i < candidates.length; i++) {
-    const r = candidates[i];
-    const asset = r.dataAssets[assetKey] || Object.values(r.dataAssets)[0];
+    const r = candidates[i], asset = r.dataAssets[assetKey] || Object.values(r.dataAssets)[0];
     try {
       const sample = await sampleCogAtPoint(asset.href, lon, lat, { epsg: r.projection?.epsg || 4326 });
       if (sample.inside) out.push({ id:r.id, startTime:r.startTime, platform:r.platform, assetKey:asset.key, value:sample.value, pixel:[sample.x,sample.y] });
-    } catch (error) {
-      out.push({ id:r.id, startTime:r.startTime, platform:r.platform, assetKey:asset.key, value:null, error:error.message });
-    }
+    } catch (error) { out.push({ id:r.id, startTime:r.startTime, platform:r.platform, assetKey:asset.key, value:null, error:error.message }); }
     onProgress?.(i + 1, candidates.length);
   }
   return out;
