@@ -1,0 +1,39 @@
+name: R236 Dependency Security Repair
+
+on:
+  push:
+    branches: [r236-source-spatial-control-attestation]
+
+permissions:
+  contents: write
+
+jobs:
+  repair-and-lock:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: r236-source-spatial-control-attestation
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Pin current Wrangler and patched sharp override
+        run: |
+          npm pkg set 'devDependencies.wrangler=4.129.1'
+          npm pkg set 'overrides.sharp=0.35.4'
+      - name: Produce deterministic package lock
+        run: npm install --package-lock-only
+      - name: Prove high-severity audit clean
+        run: npm audit --audit-level=high
+      - name: Record resolved security graph
+        run: npm ls wrangler miniflare sharp --all
+      - name: Commit governed dependency repair
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package.json package-lock.json
+          git diff --cached --check
+          git commit -m 'R236 lock patched Wrangler and sharp dependency graph'
+          git push origin HEAD:r236-source-spatial-control-attestation
