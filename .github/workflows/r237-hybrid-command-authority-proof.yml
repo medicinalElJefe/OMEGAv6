@@ -26,10 +26,10 @@ jobs:
         run: |
           node tests/r237-hybrid-command-authority-invariants.mjs
           node tests/r238-hybrid-correlated-snapshot-invariants.mjs
-      - name: Prove R242 execution motion, lease recovery and terminal return fence
+      - name: Prove R243 execution motion, lease recovery and terminal return fence
         run: |
-          node tests/r242-hybrid-execution-motion-invariants.mjs
-          node tests/r242-hybrid-terminal-fence-invariants.mjs
+          node tests/r243-hybrid-execution-motion-invariants.mjs
+          node tests/r243-hybrid-terminal-fence-invariants.mjs
       - name: Run full inherited regression and production build
         run: npm run check
       - name: Prove Worker package without deployment
@@ -53,7 +53,7 @@ jobs:
           grep -q "npx wrangler deploy" .github/workflows/ci.yml
           grep -q "wrangler.evolution-machine-r223.jsonc" .github/workflows/r223-cloudflare-evolution.yml
           node scripts/verify_workflow_topology_r170.mjs
-          echo 'R242 authority PASS · existing R237 read-only successor workflow carries R238/R239 and execution-motion proof without adding pre-merge production authority.'
+          echo 'R243 authority PASS · existing R237 read-only successor workflow carries R238/R239 and R243 execution-motion proof without adding pre-merge production authority.'
 
   local-browser-proof:
     needs: source-proof
@@ -67,7 +67,7 @@ jobs:
       - run: npm run build
       - run: npm install --no-save playwright@1.63.0
       - run: npx playwright install --with-deps chromium
-      - name: Prove R237 command + R238 shared epoch + R239 resource hold + R242 motion in built browser surface
+      - name: Prove R237 command + R238 shared epoch + R239 resource hold + R243 motion in built browser surface
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 >/tmp/r238-vite.log 2>&1 &
@@ -140,4 +140,4 @@ jobs:
           console.log(`R239 BUILT BROWSER PASS · real Home→TOOLS→Hybrid · resource-held controls counted · two hosts · selected dev-b shared by R212/R237 · shared epoch ${e237} · foreign host isolated · R237 command gates retained`);
           await browser.close();
           NODE
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r242-hybrid-execution-motion-browser-e2e.mjs
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r243-hybrid-execution-motion-browser-e2e.mjs
