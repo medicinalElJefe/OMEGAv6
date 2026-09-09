@@ -102,10 +102,12 @@ await assertClosingTruth('Escape');
 // Prove every registered destination actually routes through the built product. Navigation-only: no action inside a destination is invoked.
 for(const routeName of routeNames){
  await openAllTools();
- const exactLabel=nav.locator('.r89-flat-route b').filter({hasText:new RegExp(`^${escapeRegex(routeName)}$`)});
- if(await exactLabel.count()!==1)throw new Error(`R242 registered destination disappeared or became ambiguous during sweep: ${routeName}`);
+ const exactLabel=page.locator('b').filter({hasText:new RegExp(`^${escapeRegex(routeName)}$`)});
  const row=nav.locator('.r89-flat-route').filter({has:exactLabel});
- if(await row.count()!==1||await row.getAttribute('data-route-name')!==routeName)throw new Error(`R242 exact route row identity mismatch during sweep: ${routeName}`);
+ if(await row.count()!==1)throw new Error(`R242 registered destination disappeared or became ambiguous during sweep: ${routeName}`);
+ if(await row.getAttribute('data-route-name')!==routeName)throw new Error(`R242 exact route row identity mismatch during sweep: ${routeName}`);
+ const rowLabel=await row.locator('b').first().innerText();
+ if(rowLabel!==routeName)throw new Error(`R242 visible route label diverged from exact route identity: expected ${routeName}, saw ${rowLabel}`);
  await row.click();
  await page.waitForFunction(name=>document.querySelector('.r94-rail-current')?.getAttribute('title')===name,routeName);
  const current=await page.locator('.r94-rail-current').getAttribute('title');
