@@ -64,8 +64,13 @@ if(await nav.locator('.r89-flat-route').count()<1)throw new Error('R239 complete
 await search.fill('');
 const routeRows=nav.locator('.r89-flat-route');
 if(await routeRows.count()!==44)throw new Error(`R239 All Tools must expose all 44 registered routes, saw ${await routeRows.count()}`);
-const routeNames=await routeRows.locator('b').allTextContents();
-if(new Set(routeNames).size!==44)throw new Error('R239 All Tools contains duplicate/missing route identities');
+const routeIdentities=await routeRows.evaluateAll(rows=>rows.map(row=>({
+ routeId:row instanceof HTMLElement?(row.dataset.routeId||''):'',
+ routeName:(row.querySelector(':scope > span > b')?.textContent||'').trim()
+})));
+const routeNames=routeIdentities.map(x=>x.routeName),routeIds=routeIdentities.map(x=>x.routeId);
+if(routeNames.some(x=>!x)||new Set(routeNames).size!==44)throw new Error('R239 All Tools contains duplicate/missing presentation route names');
+if(routeIds.some(x=>!x)||new Set(routeIds).size!==44)throw new Error('R239 All Tools contains duplicate/missing R143 machine route identities');
 
 const tech=nav.getByRole('button',{name:'Technical',exact:true});
 if(await tech.getAttribute('aria-pressed')!=='false')throw new Error('R239 technical metadata should default off');
@@ -74,15 +79,18 @@ if(await nav.getByRole('button',{name:'Simple view',exact:true}).getAttribute('a
 await page.keyboard.press('Escape');
 await assertClosingTruth('Escape');
 
-// Prove every registered destination actually routes through the built product. This is navigation-only:
+// Prove every registered destination actually routes through the built product. Machine-semantic R143
+// route identity selects the row; rendered text is checked only as a presentation binding. Navigation-only:
 // no command/action button is invoked inside a destination.
-for(const routeName of routeNames){
+for(const {routeName,routeId} of routeIdentities){
  await openAllTools();
- const labels=nav.locator('.r89-flat-route b');
- const exactLabel=labels.filter({hasText:new RegExp(`^${routeName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}$`)});
- if(await exactLabel.count()!==1)throw new Error(`R239 registered destination disappeared or became ambiguous during sweep: ${routeName}`);
- const row=exactLabel.locator('..');
- if(!(await row.evaluate(el=>el.classList.contains('r89-flat-route'))))throw new Error(`R239 registered destination label lost its route row: ${routeName}`);
+ const allRows=nav.locator('.r89-flat-route');
+ const routeIndex=await allRows.evaluateAll((rows,id)=>rows.findIndex(row=>row instanceof HTMLElement&&row.dataset.routeId===id),routeId);
+ if(routeIndex<0)throw new Error(`R239 R143 route identity disappeared during sweep: ${routeId} (${routeName})`);
+ const row=allRows.nth(routeIndex);
+ if(await row.getAttribute('data-route-id')!==routeId)throw new Error(`R239 route-row machine identity drifted: ${routeName}`);
+ const boundName=((await row.locator(':scope > span > b').textContent())||'').trim();
+ if(boundName!==routeName)throw new Error(`R239 route identity/presentation binding drifted: ${routeId} expected ${routeName}, saw ${boundName}`);
  await row.click();
  await page.waitForFunction(name=>document.querySelector('.r94-rail-current')?.getAttribute('title')===name,routeName);
  const current=await page.locator('.r94-rail-current').getAttribute('title');
@@ -141,5 +149,5 @@ if(!box||box.width>365)throw new Error(`R239 mobile navigator too wide: ${box?.w
 if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error('R239 mobile product introduces horizontal viewport overflow');
 if(pageErrors.length)throw new Error(`R239 page errors: ${pageErrors.join(' | ')}`);
 
-console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · exact route identity matching · visible-canvas sanity · universal rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · mobile containment');
+console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · unique R143 machine route identity + presentation binding · visible-canvas sanity · universal rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · mobile containment');
 await browser.close();
