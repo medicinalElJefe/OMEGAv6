@@ -1,0 +1,153 @@
+name: OMEGA R237 Hybrid Command Authority Proof
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install exact locked graph
+        run: npm install
+      - name: Audit locked application dependency tree
+        run: npm audit --audit-level=high
+      - name: Prove R237 Hybrid command authority
+        run: node tests/r237-hybrid-command-authority-invariants.mjs
+      - name: Run full inherited regression and production build
+        run: npm run check
+      - name: Prove Worker package without deployment
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r237-dry-run
+      - name: Prove production deployment remains single-writer
+        shell: bash
+        run: |
+          if grep -R --line-number --include='*.yml' --include='*.yaml' -E 'wrangler[[:space:]]+deploy($|[[:space:]])' .github/workflows | grep -v '/ci.yml:'; then
+            echo '::error title=DEPLOY AUTHORITY REGRESSION::A workflow other than ci.yml contains a production Wrangler deploy command.'
+            exit 1
+          fi
+          echo 'R237 single-writer production authority PASS'
+
+  local-browser-proof:
+    needs: source-proof
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run build
+      - run: npm install --no-save playwright@1.63.0
+      - run: npx playwright install --with-deps chromium
+      - name: Prove R237 command deck in built browser surface
+        shell: bash
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 >/tmp/r237-vite.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          node --input-type=module <<'NODE'
+          import {chromium} from 'playwright';
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1440,height:1000}});
+          const pageErrors=[]; page.on('pageerror',e=>pageErrors.push(String(e)));
+          await page.route('**/api/hybrid/status',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({state:'DEVICE_PROOF_REQUIRED',nativeExecutionClaimed:false,devices:[],jobs:[]})}));
+          await page.route('**/api/missions',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,missions:[],state:'DEVICE_PROOF_REQUIRED'})}));
+          await page.goto('http://127.0.0.1:4173/hybrid',{waitUntil:'networkidle'});
+          const deck=page.locator('[data-r237-command-authority="AUTHENTICATED_BOUNDED_NATIVE_CONTROL"]');
+          await deck.waitFor({state:'visible'});
+          const text=await deck.innerText();
+          for(const token of ['DEVICE PROOF REQUIRED','ROOT-CONFINED','PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','R141/R146/R147/R125 authority remains unchanged']){
+            if(!text.includes(token)) throw new Error(`R237 built browser missing ${token}`);
+          }
+          if(text.includes('APPLY_PATCH')||text.includes('WRITE_TEXT'))throw new Error('R237 primary command deck exposed a direct source mutation primitive');
+          const runButtons=deck.getByRole('button',{name:/Run on this PC|Device busy/});
+          const count=await runButtons.count();
+          if(count!==4)throw new Error(`R237 expected four bounded native presets, saw ${count}`);
+          for(let i=0;i<count;i++)if(!(await runButtons.nth(i).isDisabled()))throw new Error('R237 allowed native queueing without current device proof');
+          if(pageErrors.length)throw new Error(`R237 built browser page errors: ${pageErrors.join(' | ')}`);
+          console.log('R237 BUILT BROWSER PASS · command deck rendered · four presets · no direct source mutation primitive · no-device state fails closed');
+          await browser.close();
+          NODE
+
+  live-proof:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: source-proof
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.63.0
+      - run: npx playwright install --with-deps chromium
+      - name: Wait for exact promoted SHA to become live
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const expected=process.env.GITHUB_SHA;
+          let last='';
+          for(let i=1;i<=90;i++){
+            try{
+              const r=await fetch(base+'/omega-build-receipt.json',{headers:{'cache-control':'no-cache'}});
+              const raw=await r.text();
+              if(r.ok){
+                const body=JSON.parse(raw);
+                const sha=body?.promotion?.promotedMergeSha||body?.source?.sha||'';
+                if(sha===expected){console.log(`R237 exact live SHA PASS · ${sha} · attempt ${i}`);process.exit(0)}
+                last=`served ${sha||'NONE'}`;
+              }else last=`HTTP ${r.status}`;
+            }catch(e){last=String(e)}
+            await new Promise(r=>setTimeout(r,5000));
+          }
+          throw new Error(`R237 exact promoted SHA never became live: ${last}`);
+          NODE
+      - name: Prove live Hybrid truth and R237 browser surface
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {chromium} from 'playwright';
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const statusResponse=await fetch(base+'/api/hybrid/status',{headers:{'cache-control':'no-cache'}});
+          const status=await statusResponse.json();
+          const current=Array.isArray(status.devices)?status.devices.filter(d=>d?.online&&!d?.revoked):[];
+          if(status.state==='VERIFIED_DEVICE_ONLINE'){
+            if(status.nativeExecutionClaimed!==true||current.length<1)throw new Error('R237 live Hybrid claims device online without current authenticated heartbeat');
+          }else if(status.state==='DEVICE_PROOF_REQUIRED'||status.state==='PAIRING_REQUIRED'){
+            if(status.nativeExecutionClaimed===true||current.length!==0)throw new Error('R237 live Hybrid proof-required state conflicts with current device projection');
+          }else throw new Error(`Unsupported live Hybrid truth state ${status.state}`);
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1440,height:1000}});
+          const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
+          await page.goto(base+'/hybrid',{waitUntil:'networkidle'});
+          const deck=page.locator('[data-r237-command-authority="AUTHENTICATED_BOUNDED_NATIVE_CONTROL"]');
+          await deck.waitFor({state:'visible'});
+          const text=await deck.innerText();
+          for(const token of ['PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','R141/R146/R147/R125 authority remains unchanged'])if(!text.includes(token))throw new Error(`R237 live browser missing ${token}`);
+          if(text.includes('APPLY_PATCH')||text.includes('WRITE_TEXT'))throw new Error('R237 live primary command deck exposed direct source mutation primitive');
+          await deck.getByRole('button',{name:'Refresh'}).click();
+          await page.waitForTimeout(750);
+          if(pageErrors.length)throw new Error(`R237 live browser page errors: ${pageErrors.join(' | ')}`);
+          console.log(`R237 LIVE BROWSER PASS · ${base}/hybrid · Hybrid ${status.state} · current devices ${current.length} · non-mutating refresh proved`);
+          await browser.close();
+          NODE
+      - name: Re-prove direct durable Hybrid transport
+        env:
+          OMEGA_PROMOTED_SHA: ${{ github.sha }}
+        run: node scripts/verify_live_hybrid_direct_poll_r2074.mjs
