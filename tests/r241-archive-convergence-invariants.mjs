@@ -35,8 +35,10 @@ for(const forbidden of ['Math.random','setInterval','requestAnimationFrame','api
 must(css.includes('pointer-events:none'),'R241 overlay must retain non-intercepting pointer authority');
 must(continuous.includes('same 20,736-state packet')&&continuous.includes('not new measured physical variables'),'R241 must preserve the inherited R13 truth boundary');
 
-for(const token of ["data-r237-correlation","['LOCKED','HELD']","correlation==='LOCKED'",'HOST / JOB / MISSION / EPOCH LOCKED','EXECUTION CONTEXT HELD'])must(commandVerifier.includes(token),`R241 requires the production R240.1 semantic correlation proof token ${token}`);
-must(commandInvariant.includes('semantic LOCKED or HELD without prose overclaim')||commandInvariant.includes('LOCKED')&&commandInvariant.includes('HELD'),'R241 must inherit the R240.1 semantic Hybrid truth-state invariant');
+for(const token of ["data-r237-correlation","['LOCKED','HELD']","correlation==='LOCKED'",'data-r237-selected-device','data-r237-snapshot-epoch','data-r239-resource-tier','intelligenceDevice!==commandDevice','intelligenceEpoch!==epoch','refreshedIntelligenceEpoch!==refreshedEpoch'])must(commandVerifier.includes(token),`R241 requires the production R240.1 machine-semantic correlation proof token ${token}`);
+must(!commandVerifier.includes('const deckText=await deck.innerText()'),'R241 must inherit R240.1 machine-semantic proof rather than rendered-copy gating');
+must(!commandVerifier.includes("'HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE'"),'R241 must not reintroduce obsolete display-copy release gates');
+must(commandInvariant.includes("if(!['LOCKED','HELD'].includes(correlation))throw new Error")||commandInvariant.includes('LOCKED')&&commandInvariant.includes('HELD'),'R241 must inherit the R240.1 semantic Hybrid truth-state invariant');
 
 must(governor.revision==='R170.5-R241','R241 must advance the governor proof revision without changing the R240 promotion engine');
 must(governor.engineRevision==='R170.2+R240'&&governor.selfPromotion?.revision==='R240','R241 must not replace the established R240 exact self-promotion engine');
@@ -49,4 +51,4 @@ must(governor.preservedRuntime?.archiveConvergenceVisualIntelligence==='R241_REA
 
 for(const file of [topology,cognition,overlay])for(const forbidden of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203'])must(!file.includes(forbidden),`R241 must not restore retired Durable Object ${forbidden}`);
 
-console.log('OMEGA R241.1 ARCHIVE CONVERGENCE PASS · exact R240.1 semantic production proof inherited · governed proof floor R241 with R239/R240 authorities preserved · 1,728 deterministic 12×12×12 topology over exact 20,736 packet · source route/neighbor filaments · evidence-aware STAY/TURN/ESCALATE/UNPROVED · AGI/QTI typed cognition read-only through proposal · authorization/execution/return/Canon fail closed · R125/R141/R146/R147 and retired R201/R203 boundaries preserved');
+console.log('OMEGA R241.1 ARCHIVE CONVERGENCE PASS · exact R240.1 machine-semantic production proof inherited · governed proof floor R241 with R239/R240 authorities preserved · 1,728 deterministic 12×12×12 topology over exact 20,736 packet · source route/neighbor filaments · evidence-aware STAY/TURN/ESCALATE/UNPROVED · AGI/QTI typed cognition read-only through proposal · authorization/execution/return/Canon fail closed · R125/R141/R146/R147 and retired R201/R203 boundaries preserved');
