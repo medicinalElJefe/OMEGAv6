@@ -35,12 +35,11 @@ jobs:
           test = Path('tests/r237-hybrid-command-authority-invariants.mjs')
           t = test.read_text()
           anchor = "must(worker.includes(\"path.startsWith('/api/hybrid/jobs/')&&path.endsWith('/cancel')\"),'R237 public queued-job cancellation route missing');\n"
-          addition = """const pairRoute=worker.indexOf(\"if(path==='/pair'&&request.method==='POST')\");
-const rotationGate=worker.indexOf(\"existing&&body.rotate&&!await this.authorized(request)\",pairRoute);
-const secretIssue=worker.indexOf(\"const secret=randomToken(24)\",pairRoute);
-must(pairRoute>=0&&rotationGate>pairRoute&&secretIssue>rotationGate,'R237 existing-pair rotation must authenticate before any replacement secret is issued');
-must(worker.includes(\"reply:'Existing pairing must authenticate before rotation.'\"),'R237 authenticated rotation refusal truth copy missing');
-"""
+          addition = ("const pairRoute=worker.indexOf(\"if(path==='/pair'&&request.method==='POST')\");\n"
+                      "const rotationGate=worker.indexOf(\"existing&&body.rotate&&!await this.authorized(request)\",pairRoute);\n"
+                      "const secretIssue=worker.indexOf(\"const secret=randomToken(24)\",pairRoute);\n"
+                      "must(pairRoute>=0&&rotationGate>pairRoute&&secretIssue>rotationGate,'R237 existing-pair rotation must authenticate before any replacement secret is issued');\n"
+                      "must(worker.includes(\"reply:'Existing pairing must authenticate before rotation.'\"),'R237 authenticated rotation refusal truth copy missing');\n")
           if addition not in t:
               if anchor not in t:
                   raise SystemExit('R237 invariant anchor missing; refusing ambiguous patch')
