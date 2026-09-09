@@ -3,8 +3,10 @@ import {planIntentR103} from './federation/federationIntentRouterR103.js';
 
 const OPTICAL_PRIMARY_R102='https://omega-living-light-etching-private-woven2.vercel.app';
 const OPTICAL_LEGACY_R102='https://omega-optical-cloud-woven2.vercel.app';
+const R243_LEGACY_RUNNING_STALE_MS=90000;
 const text=v=>String(v??'').trim();
 const now=()=>Date.now();
+const safeId=(v,fallback='')=>{const s=text(v).slice(0,160);return /^[A-Za-z0-9._:-]+$/.test(s)?s:fallback};
 const json=(data,status=200,headers={})=>new Response(JSON.stringify(data,null,2),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',...headers}});
 
 function federationOriginR102(request){
@@ -54,7 +56,6 @@ async function fetchR102(request,env){
  if(path==='/api/federation/run/status'&&request.method==='GET'){
   const [base,optical]=await Promise.all([r101.fetch(request,env),probeOpticalR102(env)]),data=await base.clone().json().catch(()=>null);
   if(!data||typeof data!=='object')return withCorsR102(base,request);
-  // Keep the stable R97 status schema for existing clients and release probes; R102 is an additive experience revision.
   const next={...data,schema:'OMEGA_FEDERATION_RUN_STATUS_R97',nodes:{...(data.nodes||{}),optical},federationRevision:'R102',preferredOpticalOrigin:OPTICAL_PRIMARY_R102,experience:null};next.experience=experienceR102(next);
   return withCorsR102(json(next,base.status),request);
  }
@@ -68,5 +69,36 @@ async function fetchR102(request,env){
  return path.startsWith('/api/federation/')?withCorsR102(response,request):response;
 }
 
-export class OmegaRuntime extends OmegaRuntimeR101 {}
+export class OmegaRuntime extends OmegaRuntimeR101 {
+ async recoverStalledJobsR243(deviceId){
+  await super.recoverStalledJobsR243(deviceId);
+  const jobs=await this.get('jobs',[]),missions=await this.get('missions',[]),t=now();let changed=false;
+  for(const mission of missions){
+   if(mission?.targetDeviceId!==deviceId||String(mission?.status||'').toUpperCase()!=='ACTIVE'||!mission?.currentJobId)continue;
+   const current=jobs.find(j=>j?.id===mission.currentJobId&&j?.targetDeviceId===deviceId);
+   if(!current||String(current?.status||'').toUpperCase()!=='FAILED'||current?.stallReason!=='R243_EXECUTION_LEASE_EXPIRED')continue;
+   const replacement=jobs.find(j=>j?.recoveryOf===current.id&&j?.targetDeviceId===deviceId&&['QUEUED','RUNNING'].includes(String(j?.status||'').toUpperCase()));
+   if(replacement)continue;
+   Object.assign(mission,{status:'PAUSED',pausedAt:t,updatedAt:t,currentJob:current,holdReason:'R243_STALL_OPERATOR_REVIEW_REQUIRED',operatorReviewRequired:true});changed=true;
+   await this.event('R243_MISSION_STALL_PAUSED',`Mission ${mission.id} paused after expired job ${current.id}; no safe automatic replay exists.`,{deviceId,missionId:mission.id,jobId:current.id,stage:mission.stage||null,holdReason:mission.holdReason});
+  }
+  if(changed)await this.put('missions',missions.slice(-60));
+ }
+ async fetch(request){
+  const path=new URL(request.url).pathname;
+  if(path==='/agent/result'&&request.method==='POST'&&await this.authorized(request)){
+   const b=await request.clone().json().catch(()=>({})),jobId=safeId(b.jobId,''),deviceId=safeId(b.deviceId,'');
+   if(jobId&&deviceId){
+    const jobs=await this.get('jobs',[]),target=jobs.find(j=>j?.id===jobId&&j?.targetDeviceId===deviceId);
+    if(target){
+     const status=String(target?.status||'').toUpperCase();
+     if(status!=='RUNNING')return json({ok:false,code:'R243_TERMINAL_RESULT_FENCED',jobId,deviceId,status,boundary:'A terminal or replaced claim cannot be overwritten by a late host return.'},409);
+     const t=now(),leaseUntil=Number(target?.leaseUntil||0),startedAt=Number(target?.startedAt||0),leaseValid=leaseUntil>t||(!leaseUntil&&startedAt>0&&t-startedAt<=R243_LEGACY_RUNNING_STALE_MS);
+     if(!leaseValid)return json({ok:false,code:'R243_RESULT_LEASE_EXPIRED',jobId,deviceId,leaseUntil:leaseUntil||null,boundary:'An expired execution claim cannot admit a late result. The Worker must recover or hold the mission before later work proceeds.'},409);
+    }
+   }
+  }
+  return super.fetch(request);
+ }
+}
 export default{fetch:fetchR102};
