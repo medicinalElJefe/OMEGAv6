@@ -2,6 +2,12 @@ import {chromium} from 'playwright';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const viewports=[['desktop',{width:1440,height:960}],['mobile',{width:390,height:844}]];
+const MUTATING=new Set(['POST','PUT','PATCH','DELETE']);
+const INHERITED_PROOF_TELEMETRY=new Set(['/api/proof/packet','/api/proof/delta','/api/proof/performance']);
+const R245_REFRESH_GETS=new Set([
+ '/api/core-health','/api/system/operational','/api/system/convergence','/api/hybrid/status','/api/hybrid/connector-manifest','/omega-r170-selfbuild-state.json','/omega-build-receipt.json'
+]);
+const pathOf=url=>{try{return new URL(url).pathname}catch{return url}};
 
 async function openSystemAtlas(page,name){
  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
@@ -23,15 +29,20 @@ try{
  for(const [name,viewport] of viewports){
   const context=await browser.newContext({viewport,deviceScaleFactor:1});
   const page=await context.newPage();
-  const pageErrors=[],mutating=[];
+  const pageErrors=[],traffic=[];
   page.on('pageerror',error=>pageErrors.push(String(error)));
-  let observeMutation=false;
-  page.on('request',request=>{if(observeMutation&&['POST','PUT','PATCH','DELETE'].includes(request.method()))mutating.push(`${request.method()} ${request.url()}`)});
+  page.on('request',request=>traffic.push({method:request.method(),url:request.url(),path:pathOf(request.url())}));
   await page.goto(`${base}/?r245=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
-  observeMutation=true;
+
+  const openingStart=traffic.length;
   await openSystemAtlas(page,name);
-  await page.waitForTimeout(250);
+  await page.waitForLoadState('networkidle',{timeout:5000}).catch(()=>{});
+  await page.waitForTimeout(500);
+  const openingTraffic=traffic.slice(openingStart),openingMutations=openingTraffic.filter(x=>MUTATING.has(x.method));
+  const foreignOpeningMutations=openingMutations.filter(x=>!INHERITED_PROOF_TELEMETRY.has(x.path));
+  if(foreignOpeningMutations.length)throw new Error(`${name}: opening System Atlas emitted non-proof mutation outside the inherited R52/R53/R55 telemetry plane: ${foreignOpeningMutations.map(x=>`${x.method} ${x.url}`).join(' | ')}`);
+
   const before=Number(await page.locator('.r245-canon').getAttribute('data-r245-epoch')||0);
   const snapshot=await page.evaluate(()=>{
    const root=document.querySelector('.r245-canon');if(!root)return null;
@@ -54,12 +65,21 @@ try{
   for(const token of ['FULL OVERALL CANON','not physical dimension count','R125 admission','ci.yml production writer'])if(!snapshot.body.includes(token))throw new Error(`${name}: R245 truth/authority token missing: ${token}`);
   if(!snapshot.r153)throw new Error(`${name}: R245 replaced or obscured the existing R153 governed executor`);
   if(snapshot.overflow>12)throw new Error(`${name}: R245 introduced viewport overflow ${snapshot.overflow}px`);
+
+  // Establish a causal boundary after the host surface and its pre-existing proof telemetry settle.
+  const refreshStart=traffic.length;
   const refresh=page.getByRole('button',{name:/Refresh exact observation/i}).first();
   await refresh.click();
   await page.waitForFunction(previous=>Number(document.querySelector('.r245-canon')?.getAttribute('data-r245-epoch')||0)>Number(previous),before,{timeout:30000});
-  if(mutating.length)throw new Error(`${name}: opening or refreshing R245 emitted mutating requests: ${mutating.join(' | ')}`);
+  await page.waitForTimeout(250);
+  const refreshTraffic=traffic.slice(refreshStart),refreshMutations=refreshTraffic.filter(x=>MUTATING.has(x.method));
+  if(refreshMutations.length)throw new Error(`${name}: the R245 manual observation transaction emitted a mutating request: ${refreshMutations.map(x=>`${x.method} ${x.url}`).join(' | ')}`);
+  const refreshGets=new Set(refreshTraffic.filter(x=>x.method==='GET').map(x=>x.path));
+  const missingGets=[...R245_REFRESH_GETS].filter(path=>!refreshGets.has(path));
+  if(missingGets.length)throw new Error(`${name}: R245 refresh did not issue its complete seven-source GET epoch: ${missingGets.join(', ')}`);
+
   if(pageErrors.length)throw new Error(`${name}: R245 browser page errors: ${pageErrors.join(' | ')}`);
   await context.close();
  }
- console.log('OMEGA R245 BROWSER PASS · desktop/mobile System Atlas → Full Overall Canon · exact seven axes · 12 organs · 12→144→1,728→20,736→248,832 logical scheduler · R153 preserved · manual observation refresh GET-only · no mutating requests · no viewport overflow');
+ console.log('OMEGA R245 BROWSER PASS · desktop/mobile System Atlas → Full Overall Canon · exact seven axes · 12 organs · 12→144→1,728→20,736→248,832 logical scheduler · R153 preserved · inherited R52/R53/R55 proof telemetry causally separated · manual R245 seven-source observation epoch GET-only · no execution/Hybrid/Canon mutation · no viewport overflow');
 }finally{await browser.close()}
