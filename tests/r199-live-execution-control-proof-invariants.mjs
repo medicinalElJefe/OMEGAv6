@@ -43,7 +43,8 @@ assert.equal(manifest.canonicalMutation,false);
 assert.equal(manifest.canonicalAdmissionAuthority,'R125');
 
 assert.equal(fs.existsSync('.github/workflows/r199-live-execution-control-proof.yml'),false,'R199 must not create a second workflow authority or workflow_run fanout');
-assert.ok(ci.includes("if: github.event_name == 'push' && github.ref == 'refs/heads/main'"),'R199 proof must remain inside canonical main deployment authority');
+assert.ok(ci.includes('workflow_dispatch:'),'R240 explicit dispatch must remain inside canonical ci.yml rather than a second deploy workflow');
+assert.ok(ci.includes("github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')"),'R199 proof must remain inside canonical main deployment authority for push or exact R240 dispatch');
 assert.ok(ci.includes('Promoted main commit must be an exact two-parent merge commit'),'R199 must preserve exact governed merge lineage');
 assert.ok(ci.includes('node scripts/verify_federation_live_r1681.mjs'),'canonical deploy job must retain the propagation-safe live verifier');
 assert.ok(!ci.includes('workflow_run:'),'canonical CI must not reintroduce workflow_run fanout');
@@ -51,32 +52,10 @@ assert.ok(postDeploy.includes("process.env.OMEGA_PROMOTED_SHA"),'R199 must activ
 assert.ok(postDeploy.includes("await import('./verify_live_execution_control_r199.mjs')"),'existing canonical post-deploy verifier must chain the R199 proof');
 assert.ok(!postDeploy.includes('workflow_run'),'post-deploy chaining must not create recursive workflow authority');
 
-for(const token of [
-  'GITHUB_SHA',
-  'OMEGA_PROMOTED_SHA',
-  '/api/release-evidence',
-  '/api/runtime-attestation',
-  '/api/core-health',
-  '/api/execution/r147/manifest',
-  'OMEGA_RELEASE_EVIDENCE_V1',
-  'OMEGA_RUNTIME_DEPLOYMENT_ATTESTATION_R144',
-  'OMEGA_CANONICAL_CORE_HEALTH_R163',
-  'OMEGA_UNIFIED_EXECUTOR_FABRIC_MANIFEST_R147',
-  "manifest.performance?.multiAxis?.revision!=='R193'",
-  "manifest.contentReuse?.revision!=='R194'",
-  "manifest.differentialPartitionExecution?.revision!=='R195'",
-  "manifest.boundedPartitionParallelism?.revision!=='R196'",
-  "r197?.revision!=='R197'",
-  "r197?.controller?.type!=='BOUNDED_AIMD'",
-  "['STAY','TURN']",
-  "['NONE','DOWN','UP','CLAMP']",
-  "manifest.canonicalAdmissionAuthority!=='R125'",
-  'OMEGA R199 LIVE EXECUTION CONTROL PASS'
-]) assert.ok(probe.includes(token),`R199 live probe missing ${token}`);
-
+for(const token of ['GITHUB_SHA','OMEGA_PROMOTED_SHA','/api/release-evidence','/api/runtime-attestation','/api/core-health','/api/execution/r147/manifest','OMEGA_RELEASE_EVIDENCE_V1','OMEGA_RUNTIME_DEPLOYMENT_ATTESTATION_R144','OMEGA_CANONICAL_CORE_HEALTH_R163','OMEGA_UNIFIED_EXECUTOR_FABRIC_MANIFEST_R147',"manifest.performance?.multiAxis?.revision!=='R193'","manifest.contentReuse?.revision!=='R194'","manifest.differentialPartitionExecution?.revision!=='R195'","manifest.boundedPartitionParallelism?.revision!=='R196'","r197?.revision!=='R197'","r197?.controller?.type!=='BOUNDED_AIMD'","['STAY','TURN']","['NONE','DOWN','UP','CLAMP']","manifest.canonicalAdmissionAuthority!=='R125'",'OMEGA R199 LIVE EXECUTION CONTROL PASS'])assert.ok(probe.includes(token),`R199 live probe missing ${token}`);
 assert.ok(!probe.includes('/api/execution/runs'),'R199 live proof must not create, transition, dispatch, poll, or read private durable execution runs');
 assert.ok(!probe.includes('/api/hybrid/pair'),'R199 live proof must not create or rotate Hybrid pairing credentials');
 assert.ok(!probe.includes("method:'POST'"),'R199 live proof must remain GET-only/read-only');
 assert.ok(!probe.includes('canonicalMutation:true'),'R199 proof may not claim or perform Canon mutation');
 
-console.log('R199 LIVE EXECUTION CONTROL PROOF PASS · the existing canonical post-deploy Federation/RCWA verifier now conditionally chains exact promoted SHA + Worker Version ID to a GET-only first-hand R147 manifest proving deployed R185→R193→R194→R195→R196→R197 composition, max-12 bounded scheduling, AIMD feedback states, and R125-only admission without a second workflow authority');
+console.log('R199/R240 LIVE EXECUTION CONTROL PROOF PASS · canonical ci.yml remains sole deployment authority for push or exact explicit R240 dispatch · exact promoted SHA + Worker Version ID bind to GET-only R147 manifest · R185→R193→R194→R195→R196→R197 + max-12 AIMD proof · R125-only admission');
