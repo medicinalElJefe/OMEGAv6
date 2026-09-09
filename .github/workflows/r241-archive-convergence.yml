@@ -3,8 +3,6 @@ name: R241 Archive Convergence Visual Intelligence
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -88,5 +86,5 @@ jobs:
             echo '- Typed cognition is read-only through proposal; permission/execution/return/Canon remain separately gated.'
             echo '- R147 dispatch, R146 durable history, R141 exact return and R125 sole CanonState admission remain unchanged.'
             echo '- R201/R203 remain retired.'
-            echo '- R241 has no production deployment step; ci.yml remains the canonical production writer.'
+            echo '- R241 is pull-request/manual proof-only; it has no main push trigger and no deployment step; ci.yml remains the canonical production writer.'
           } >> "$GITHUB_STEP_SUMMARY"
