@@ -18,9 +18,13 @@ function polToken(filename,pol){
   const f=String(filename||'').toLowerCase(),p=String(pol||'').toLowerCase();
   return f.includes(`-${p}-`)||f.endsWith(`-${p}.xml`)||f.includes(`_${p}_`)||f.startsWith(`${p}-`);
 }
+function auxiliaryProductHref(value){
+  const low=String(value||'').toLowerCase();
+  return low.includes('/annotation/rfi/')||low.includes('/annotation/calibration/')||low.includes('/annotation/noise/')||low.includes('/noise-');
+}
 
-export function manifestProductAnnotation(manifestXml,polarization){
-  const pol=String(polarization||'').toLowerCase();if(!pol)return null;
+export function manifestProductAnnotations(manifestXml,polarization){
+  const pol=String(polarization||'').toLowerCase();if(!pol)return [];
   const hrefs=[...String(manifestXml||'').matchAll(/(?:\b|:)href\s*=\s*["']([^"']+)["']/gi)].map(m=>m[1]);
   const candidates=[];
   for(const href of hrefs){
@@ -30,9 +34,11 @@ export function manifestProductAnnotation(manifestXml,polarization){
     let score=0;if(/^s1[a-d]-/.test(file))score+=30;if(file.includes('-grd-'))score+=20;if(file.includes(`-${pol}-`))score+=10;score-=path.split('/').length;
     candidates.push({href,score});
   }
-  candidates.sort((a,b)=>b.score-a.score||String(a.href).length-String(b.href).length);
-  return candidates[0]?.href||null;
+  candidates.sort((a,b)=>b.score-a.score||String(a.href).length-String(b.href).length||String(a.href).localeCompare(String(b.href)));
+  return [...new Set(candidates.map(x=>x.href))];
 }
+
+export function manifestProductAnnotation(manifestXml,polarization){return manifestProductAnnotations(manifestXml,polarization)[0]||null;}
 
 export function resolveRelativeSafeAsset(manifestHref,relativeHref){
   if(!manifestHref||!relativeHref)return null;
@@ -62,22 +68,52 @@ async function openMeasurement(url){
   return TIFF_CACHE.get(source);
 }
 
-async function resolveProductAsset(detail,assets,polarization,signal){
-  const current=assets.product;
-  if(current?.sourceHref&&!String(current.sourceHref).toLowerCase().includes('/annotation/rfi/'))return current;
-  const manifest=assets.manifest||detail?.assets?.['safe-manifest'];
-  const manifestHref=manifest?.sourceHref||manifest?.href;if(!manifestHref)return current;
-  const manifestXml=await fetchText(manifestHref,signal);
-  const relative=manifestProductAnnotation(manifestXml,polarization);if(!relative)return current;
-  const sourceHref=resolveRelativeSafeAsset(manifestHref,relative);if(!sourceHref)return current;
+function candidateAsset(current,sourceHref,polarization,resolution){
   return {
     ...(current||{}),
     key:`omega-product-${String(polarization).toLowerCase()}`,
     href:s3ToHttps(sourceHref),sourceHref,
     title:`Resolved ${String(polarization).toUpperCase()} SAFE Product Annotation`,
-    description:'Root Sentinel-1 SAFE product annotation recovered from manifest.safe; Earth Search schema-product may reference RFI auxiliary XML.',
-    omegaResolution:'SAFE_MANIFEST_ROOT_ANNOTATION'
+    description:'Root Sentinel-1 SAFE product annotation validated before use. If Earth Search metadata is stale, auxiliary, or 404, manifest.safe is used to recover the existing root annotation.',
+    omegaResolution:resolution
   };
+}
+
+async function validateProductCandidate(asset,signal){
+  const sourceHref=asset?.sourceHref||asset?.href;if(!sourceHref||auxiliaryProductHref(sourceHref))return null;
+  try{
+    const xml=await fetchText(sourceHref,signal),product=parseProductXml(xml);
+    if(product.points.length<3)return null;
+    return {asset,xml,product};
+  }catch{return null;}
+}
+
+async function resolveProductAsset(detail,assets,polarization,signal){
+  const current=assets.product;
+  const attempts=[];
+  if(current?.sourceHref||current?.href)attempts.push(candidateAsset(current,current.sourceHref||current.href,polarization,current.omegaResolution||current['omega:resolution']||'EARTH_SEARCH_DIRECT_VALIDATED'));
+
+  const manifest=assets.manifest||detail?.assets?.['safe-manifest'];
+  const manifestHref=manifest?.sourceHref||manifest?.href;
+  if(manifestHref){
+    try{
+      const manifestXml=await fetchText(manifestHref,signal);
+      for(const relative of manifestProductAnnotations(manifestXml,polarization)){
+        const sourceHref=resolveRelativeSafeAsset(manifestHref,relative);if(!sourceHref)continue;
+        attempts.push(candidateAsset(current,sourceHref,polarization,'SAFE_MANIFEST_ROOT_ANNOTATION_VALIDATED'));
+      }
+    }catch{
+      // Keep the direct candidate in the attempt set. The final error will preserve every tried source.
+    }
+  }
+
+  const seen=new Set(),tried=[];
+  for(const candidate of attempts){
+    const source=s3ToHttps(candidate.sourceHref||candidate.href);if(!source||seen.has(source))continue;seen.add(source);tried.push(source);
+    const validated=await validateProductCandidate(candidate,signal);if(validated)return {...validated,tried};
+  }
+  const suffix=tried.length?` Tried: ${tried.join(' | ')}`:'';
+  throw new Error(`No existing root Sentinel-1 SAFE product annotation with geolocation GCPs resolved for ${String(polarization).toUpperCase()}.${suffix}`);
 }
 
 export async function resolveSentinel1ProductBundle(record,polarization,signal){
@@ -87,15 +123,12 @@ export async function resolveSentinel1ProductBundle(record,polarization,signal){
     const keys=Object.keys(detail?.assets||{}).join(', ');
     throw new Error(`Sentinel-1 ${record.id} lacks required measurement/calibration assets for ${String(polarization).toUpperCase()}; item assets: ${keys}`);
   }
-  assets.product=await resolveProductAsset(detail,assets,polarization,signal);
-  if(!assets.product)throw new Error(`Sentinel-1 ${record.id} has no usable SAFE product annotation for ${String(polarization).toUpperCase()}`);
-  const [calibrationXml,productXml]=await Promise.all([fetchText(assets.calibration.sourceHref||assets.calibration.href,signal),fetchText(assets.product.sourceHref||assets.product.href,signal)]);
-  const calibration=parseCalibrationXml(calibrationXml),product=parseProductXml(productXml);
+  const resolvedProduct=await resolveProductAsset(detail,assets,polarization,signal);
+  assets.product=resolvedProduct.asset;
+  const calibrationXml=await fetchText(assets.calibration.sourceHref||assets.calibration.href,signal),productXml=resolvedProduct.xml;
+  const calibration=parseCalibrationXml(calibrationXml),product=resolvedProduct.product;
   if(!calibration.vectors.length)throw new Error(`Calibration annotation parsed 0 vectors from ${assets.calibration.sourceHref}`);
-  if(product.points.length<3){
-    const wrong=String(assets.product.sourceHref||'').toLowerCase().includes('/annotation/rfi/');
-    throw new Error(`${wrong?'Earth Search RFI auxiliary metadata could not be replaced; ':' '}Product annotation parsed ${product.points.length} geolocation points from ${assets.product.sourceHref}`.trim());
-  }
+  if(product.points.length<3)throw new Error(`Product annotation parsed ${product.points.length} geolocation points from ${assets.product.sourceHref}`);
   return {detail,assets,calibration,product};
 }
 
@@ -134,7 +167,7 @@ export async function calibratedTargetPatch(record,lon,lat,{polarization='vv',qu
     const value=dn*dn/(lut*lut);power[k]=value;db[k]=value>0?10*Math.log10(value):NaN;if(Number.isFinite(db[k]))valid.push(db[k]);
   }
   const stats={validCount:valid.length,p02:percentile(valid,.02),p50:percentile(valid,.5),p98:percentile(valid,.98)},quality=geolocationQuality(geolocation);onStage?.('READY');
-  return {state:'CALIBRATED_SENTINEL1_TARGET_PATCH',id:record.id,startTime:record.startTime,platform:record.platform,target:{lon:Number(lon),lat:Number(lat)},polarization:String(polarization).toUpperCase(),quantity,sourceWindow:[x0,y0,x1,y1],width,height,centerPixel:[cx,cy],geolocation:{method:geolocation.state,residualDeg:geolocation.residualDeg??null,gcpSpanDeg:geolocation.gcpSpanDeg??null,quality,fractionalPixel:[geolocation.pixel,geolocation.line]},rawDn:raw,power,db,stats,processing:{thermalNoiseCorrectionPerformed:product.thermalNoiseCorrectionPerformed,radiometricCalibration:'PRODUCT_LUT',terrainFlattened:false,localIncidenceAngleCorrected:false},product:{rangePixelSpacing:product.rangePixelSpacing,azimuthPixelSpacing:product.azimuthPixelSpacing,incidenceAngleMidSwath:product.incidenceAngleMidSwath,orbitSource:product.orbitSource||detail.properties?.['s1:orbit_source']||null},evidence:{grade:evidenceGrade(quality),measured:true,inferred:false},provenance:{measurement:assets.measurement.sourceHref,calibration:assets.calibration.sourceHref,product:assets.product.sourceHref,noise:assets.noise?.sourceHref||null,manifest:assets.manifest?.sourceHref||assets.manifest?.href||null,productResolution:assets.product.omegaResolution||assets.product['omega:resolution']||'DIRECT'},boundary:'Target-centered actual Sentinel-1 GRD pixels, product-GCP geolocated and product-LUT calibrated. Root SAFE annotation is resolved from manifest.safe when Earth Search exposes RFI auxiliary XML. Not radiometric terrain correction, not SLC phase, not InSAR displacement.'};
+  return {state:'CALIBRATED_SENTINEL1_TARGET_PATCH',id:record.id,startTime:record.startTime,platform:record.platform,target:{lon:Number(lon),lat:Number(lat)},polarization:String(polarization).toUpperCase(),quantity,sourceWindow:[x0,y0,x1,y1],width,height,centerPixel:[cx,cy],geolocation:{method:geolocation.state,residualDeg:geolocation.residualDeg??null,gcpSpanDeg:geolocation.gcpSpanDeg??null,quality,fractionalPixel:[geolocation.pixel,geolocation.line]},rawDn:raw,power,db,stats,processing:{thermalNoiseCorrectionPerformed:product.thermalNoiseCorrectionPerformed,radiometricCalibration:'PRODUCT_LUT',terrainFlattened:false,localIncidenceAngleCorrected:false},product:{rangePixelSpacing:product.rangePixelSpacing,azimuthPixelSpacing:product.azimuthPixelSpacing,incidenceAngleMidSwath:product.incidenceAngleMidSwath,orbitSource:product.orbitSource||detail.properties?.['s1:orbit_source']||null},evidence:{grade:evidenceGrade(quality),measured:true,inferred:false},provenance:{measurement:assets.measurement.sourceHref,calibration:assets.calibration.sourceHref,product:assets.product.sourceHref,noise:assets.noise?.sourceHref||null,manifest:assets.manifest?.sourceHref||assets.manifest?.href||null,productResolution:assets.product.omegaResolution||assets.product['omega:resolution']||'DIRECT'},boundary:'Target-centered actual Sentinel-1 GRD pixels, product-GCP geolocated and product-LUT calibrated. Root SAFE annotation is validated before use and recovered from manifest.safe when direct STAC metadata is stale, auxiliary, or missing. Not radiometric terrain correction, not SLC phase, not InSAR displacement.'};
 }
 
 export function clearR4CalibrationCache(){TIFF_CACHE.clear();TEXT_CACHE.clear();}
