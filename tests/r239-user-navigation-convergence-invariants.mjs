@@ -8,6 +8,7 @@ const registry=read('src/omegaExperienceRegistryR82.ts');
 
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
 must(routes.length===44&&new Set(routes).size===44,'must preserve all 44 unique registered destinations');
+for(const workspace of ["id:'COMMAND',label:'Command'","id:'EXPLORE',label:'Explore'","id:'INTELLIGENCE',label:'Intelligence'","id:'EVIDENCE',label:'Evidence'","id:'BUILD',label:'Build'","id:'SYSTEM',label:'System'"])must(registry.includes(workspace),'workspace registry missing '+workspace);
 
 for(const token of [
  "R239_USER_NAV_REVISION='R239'",
@@ -23,12 +24,14 @@ for(const token of [
  'showTechnical',
  "aria-pressed={showTechnical}",
  "YOU ARE HERE",
- 'rows.map(route=>'
+ 'rows.map(route=>',
+ 'OMEGA_WORKSPACES_R82.map(workspace=>',
+ 'workspaceFilter===workspace.id',
+ 'workspace.routes.length'
 ])must(nav.includes(token),'global navigator missing '+token);
 for(const specialized of ["go('Extreme Traversal')","go('Matter Traversal')"])must(!nav.includes(specialized),'specialized Explore route must not consume permanent universal rail space: '+specialized);
 must(!nav.includes('rows.slice('),'all filtered registered routes must remain reachable');
 must(!nav.includes('/api/')&&!nav.includes('fetch('),'navigation must remain backend-independent and non-mutating');
-for(const workspace of ['Command','Explore','Intelligence','Evidence','Build','System'])must(nav.includes(`>${workspace} <b>{workspace.routes.length}</b>`),'workspace filter missing '+workspace);
 for(const tier of ['PRIMARY','SUPPORT','EXPERT'])must(nav.includes(tier),'priority tier missing '+tier);
 
 for(const token of [
