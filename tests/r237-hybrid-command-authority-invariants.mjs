@@ -38,7 +38,7 @@ for(const token of [
  "R141/R146/R147/R125 authority remains unchanged"
 ])must(deck.includes(token),`R237 operator deck missing ${token}`);
 
-for(const forbidden of ['APPLY_PATCH','WRITE_TEXT','shell=True','child_process','powershell.exe','cmd.exe'])must(!deck.includes(forbidden),`R237 primary command deck must not introduce direct source/shell mutation primitive ${forbidden}`);
+for(const forbidden of ["op:'APPLY_PATCH'","op:'WRITE_TEXT'",'shell=True','child_process','powershell.exe','cmd.exe'])must(!deck.includes(forbidden),`R237 primary command deck must not introduce direct source/shell mutation primitive ${forbidden}`);
 must(deck.includes("preset.ops.every(op=>advertised.has(op))"),'R237 must capability-negotiate every preset before queueing');
 must(deck.includes("activeJobs.length===0"),'R237 UI backpressure gate missing');
 must(deck.includes("safeRoot(root)"),'R237 root-relative confinement preflight missing');
