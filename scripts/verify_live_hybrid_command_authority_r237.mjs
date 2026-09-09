@@ -25,11 +25,23 @@ if(publicStatus.body?.state==='VERIFIED_DEVICE_ONLINE'){
 
 const boot=await post('/api/hybrid/bootstrap',{}, {'x-omega-session-id':session});
 if(!boot.response.ok||boot.body?.schema!=='OMEGA_SOVEREIGN_BOOTSTRAP_R117'||!boot.body?.bridgeId||!boot.body?.secret)throw new Error(`R237 bootstrap failed ${boot.response.status}: ${boot.raw.slice(0,500)}`);
-const bridge=boot.body.bridgeId,secret=boot.body.secret,auth={'x-omega-bridge-id':bridge,'x-omega-bridge-secret':secret};
-const register=await post('/api/hybrid/agent/register',{bridgeId:bridge,deviceId:device,name:'OMEGA R237 CI command-authority probe',platform:'CI',version:'R237-PROBE',capabilityRevision:'R132',proofExtensions:['R237_CI_TRANSPORT_ONLY'],capabilities:['INDEX'],rootLabel:'CI_NON_NATIVE_PROBE'},auth);
-if(!register.response.ok||register.body?.ok!==true)throw new Error(`R237 register failed ${register.response.status}: ${register.raw.slice(0,500)}`);
+const bridge=boot.body.bridgeId,initialSecret=boot.body.secret;
+const initialAuth={'x-omega-bridge-id':bridge,'x-omega-bridge-secret':initialSecret};
+
+const takeover=await post('/api/hybrid/bootstrap',{}, {'x-omega-session-id':session});
+if(takeover.response.status!==401||takeover.body?.code!=='PAIR_AUTH_FAILED')throw new Error(`R237 unauthenticated credential rotation was not rejected: ${takeover.response.status} ${takeover.raw.slice(0,700)}`);
+
+const register=await post('/api/hybrid/agent/register',{bridgeId:bridge,deviceId:device,name:'OMEGA R237 CI command-authority probe',platform:'CI',version:'R237-PROBE',capabilityRevision:'R132',proofExtensions:['R237_CI_TRANSPORT_ONLY'],capabilities:['INDEX'],rootLabel:'CI_NON_NATIVE_PROBE'},initialAuth);
+if(!register.response.ok||register.body?.ok!==true)throw new Error(`R237 original credential did not survive rejected rotation ${register.response.status}: ${register.raw.slice(0,500)}`);
+
+const rotated=await post('/api/hybrid/bootstrap',{}, {'x-omega-session-id':session,'x-omega-bridge-secret':initialSecret});
+if(!rotated.response.ok||rotated.body?.schema!=='OMEGA_SOVEREIGN_BOOTSTRAP_R117'||rotated.body?.bridgeId!==bridge||!rotated.body?.secret||rotated.body.secret===initialSecret)throw new Error(`R237 authenticated credential rotation failed ${rotated.response.status}: ${rotated.raw.slice(0,700)}`);
+const rotatedSecret=rotated.body.secret;
+const oldRejected=await post('/api/hybrid/agent/heartbeat',{bridgeId:bridge,deviceId:device,version:'R237-PROBE-OLD'},initialAuth);
+if(oldRejected.response.status!==401||oldRejected.body?.code!=='PAIR_AUTH_FAILED')throw new Error(`R237 old credential remained valid after authenticated rotation: ${oldRejected.response.status} ${oldRejected.raw.slice(0,700)}`);
+const auth={'x-omega-bridge-id':bridge,'x-omega-bridge-secret':rotatedSecret};
 const heartbeat=await post('/api/hybrid/agent/heartbeat',{bridgeId:bridge,deviceId:device,version:'R237-PROBE',capabilityRevision:'R132',proofExtensions:['R237_CI_TRANSPORT_ONLY']},auth);
-if(!heartbeat.response.ok||heartbeat.body?.ok!==true)throw new Error(`R237 heartbeat failed ${heartbeat.response.status}: ${heartbeat.raw.slice(0,500)}`);
+if(!heartbeat.response.ok||heartbeat.body?.ok!==true)throw new Error(`R237 rotated credential did not preserve host continuity ${heartbeat.response.status}: ${heartbeat.raw.slice(0,500)}`);
 
 const makeJob=()=>({schema:'OMEGA_HYBRID_OPERATOR_JOB_R237',action:'R237_LIVE_LIFECYCLE_PROBE',profile:'AUTO_BUILD',projectPath:'.',instructions:'CI transport lifecycle proof only; no native operation is executed by this verifier.',allowedDomains:[],steps:[{id:'S01',op:'INDEX',label:'CI admission/backpressure lifecycle probe',path:'.',maxResults:1}],targetDeviceId:device,confirmed:true});
 const first=await post('/api/hybrid/jobs',makeJob(),auth);
@@ -67,4 +79,4 @@ await page.waitForTimeout(750);
 if(pageErrors.length)throw new Error(`R237 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R237 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · isolated authenticated queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser navigation + non-mutating refresh · R141/R146/R147/R125 preserved`);
+console.log(`R237 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · unauthenticated rotation rejected + original secret preserved + authenticated rotation succeeded + old secret revoked + rotated secret preserved device continuity · queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser navigation + non-mutating refresh · R141/R146/R147/R125 preserved`);
