@@ -71,7 +71,7 @@ jobs:
           code="$(curl -sS -o /tmp/stac.json -w '%{http_code}' -X POST -H 'content-type: application/json' --data '{"collections":["sentinel-1-grd"],"limit":1,"intersects":{"type":"Point","coordinates":[-110.9747,32.2226]}}' "$SAR_PUBLIC_URL/api/stac/search")"
           test "$code" = 200 || { cat /tmp/stac.json; echo "R3 same-origin STAC proxy HTTP $code"; exit 1; }
           grep -q 'FeatureCollection' /tmp/stac.json
-          gibs_source='https://gibs.earthdata.nasa.gov/wms/epsg4326/nrt/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&SRS=EPSG%3A4326&BBOX=-180%2C-90%2C180%2C90&WIDTH=512&HEIGHT=256&FORMAT=image%2Fpng&TRANSPARENT=FALSE&TIME=2026-09-07&LAYERS=VIIRS_NOAA21_CorrectedReflectance_TrueColor&STYLES='
+          gibs_source='https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&SRS=EPSG%3A4326&BBOX=-180%2C-90%2C180%2C90&WIDTH=512&HEIGHT=256&FORMAT=image%2Fpng&TRANSPARENT=FALSE&TIME=2026-09-07&LAYERS=VIIRS_NOAA21_CorrectedReflectance_TrueColor&STYLES='
           code="$(curl -sS -D /tmp/gibs.headers -o /tmp/gibs.bin -w '%{http_code}' --get --data-urlencode "url=$gibs_source" "$SAR_PUBLIC_URL/api/gibs")"
           test "$code" = 200 || { echo "R3 NASA GIBS proxy HTTP $code"; cat /tmp/gibs.headers; exit 1; }
           grep -qi '^content-type: image/' /tmp/gibs.headers || { echo 'R3 NASA GIBS upstream did not return an image'; cat /tmp/gibs.headers; head -c 800 /tmp/gibs.bin || true; exit 1; }
