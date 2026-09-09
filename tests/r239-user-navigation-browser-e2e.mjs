@@ -61,15 +61,15 @@ if(await nav.isVisible())throw new Error('R239 Escape did not close navigator');
 // no command/action button is invoked inside a destination.
 for(const routeName of routeNames){
  await openAllTools();
- const row=nav.locator('.r89-flat-route').filter({has:nav.locator('b',{hasText:routeName})}).first();
- if(await row.count()!==1)throw new Error(`R239 registered destination disappeared during sweep: ${routeName}`);
+ const row=nav.locator('.r89-flat-route').filter({hasText:routeName}).first();
+ if(await row.count()!==1||await row.locator('b').innerText()!==routeName)throw new Error(`R239 registered destination disappeared during sweep: ${routeName}`);
  await row.click();
  await page.waitForFunction(name=>document.querySelector('.r94-rail-current')?.getAttribute('title')===name,routeName);
  const current=await page.locator('.r94-rail-current').getAttribute('title');
  if(current!==routeName)throw new Error(`R239 destination did not become active: expected ${routeName}, saw ${current}`);
  const visibleText=await page.locator('body').innerText();
  if(visibleText.trim().length<80)throw new Error(`R239 destination produced a blank/near-blank product surface: ${routeName}`);
- const badCanvas=await page.locator('canvas').evaluateAll(nodes=>nodes.some(node=>{const r=node.getBoundingClientRect(),s=getComputedStyle(node);const visible=s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0;return visible&&(r.width<=0||r.height<=0)}));
+ const badCanvas=await page.locator('canvas').evaluateAll(nodes=>nodes.some(node=>{const r=node.getBoundingClientRect(),s=getComputedStyle(node);const visible=s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&node.getClientRects().length>0;return visible&&(r.width<=0||r.height<=0)}));
  if(badCanvas)throw new Error(`R239 destination contains a visible zero-size canvas: ${routeName}`);
  if(pageErrors.length)throw new Error(`R239 page error while routing ${routeName}: ${pageErrors.join(' | ')}`);
 }
@@ -88,6 +88,10 @@ await nav.waitFor({state:'visible'});
 if(!(await nav.getByText('System map',{exact:true}).count()))throw new Error('R239 System map rail action did not expose the software/capability layer');
 await page.keyboard.press('Escape');
 
+const homeButton=page.getByLabel('Go to OMEGA home');
+if(await homeButton.count()!==1)throw new Error('R239 persistent Home action disappeared after route sweep');
+await homeButton.click();
+await page.locator('.r132-primary-strip').waitFor({state:'visible'});
 await page.getByRole('button',{name:/^Build/}).first().click();
 const startHere=page.locator('.r132-primary-strip');
 const startText=await startHere.innerText();
