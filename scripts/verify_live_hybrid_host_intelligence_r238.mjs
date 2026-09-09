@@ -51,7 +51,8 @@ if(current.length===0){
   if(selected!=='NONE'||intelligenceState!=='AWAITING_RETURNED_PROFILE'||!text.includes('DEVICE PROOF REQUIRED')||!text.includes('NOT YET RETURNED'))throw new Error(`R238 live browser should truthfully hold with no current device/proof; selected=${selected} intelligence=${intelligenceState}`);
 }else if(!current.some(d=>d.id===selected))throw new Error(`R238 live browser selected device ${selected} is not a current authenticated device`);
 if(intelligenceState==='RETURNED_HOST_PROOF'){
-  for(const token of ['R141 exact return closure','Hardware presence does not prove CUDA runtime','does not prove CUDA runtime, RCWA numerical validity, scientific truth, source mutation, or CanonState admission'])if(!text.includes(token))throw new Error(`R238 returned host proof missing truth boundary ${token}`);
+  const returnedProofTokens=['R141 exact return closure','Hardware presence does not prove CUDA runtime','does not prove CUDA runtime, RCWA numerical validity, scientific truth, source mutation, or CanonState admission'];
+  for(const token of returnedProofTokens)if(!text.includes(token))throw new Error(`R238 returned host proof missing truth boundary ${token}`);
 }else{
   if(text.includes('Proof source: selected authenticated Hybrid device'))throw new Error('R238 awaiting state rendered a returned-proof source claim');
 }
