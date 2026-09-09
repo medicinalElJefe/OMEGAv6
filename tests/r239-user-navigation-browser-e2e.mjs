@@ -78,8 +78,11 @@ await assertClosingTruth('Escape');
 // no command/action button is invoked inside a destination.
 for(const routeName of routeNames){
  await openAllTools();
- const row=nav.locator('.r89-flat-route').filter({hasText:routeName}).first();
- if(await row.count()!==1||await row.locator('b').innerText()!==routeName)throw new Error(`R239 registered destination disappeared during sweep: ${routeName}`);
+ const labels=nav.locator('.r89-flat-route b');
+ const exactLabel=labels.filter({hasText:new RegExp(`^${routeName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}$`)});
+ if(await exactLabel.count()!==1)throw new Error(`R239 registered destination disappeared or became ambiguous during sweep: ${routeName}`);
+ const row=exactLabel.locator('..');
+ if(!(await row.evaluate(el=>el.classList.contains('r89-flat-route'))))throw new Error(`R239 registered destination label lost its route row: ${routeName}`);
  await row.click();
  await page.waitForFunction(name=>document.querySelector('.r94-rail-current')?.getAttribute('title')===name,routeName);
  const current=await page.locator('.r94-rail-current').getAttribute('title');
@@ -138,5 +141,5 @@ if(!box||box.width>365)throw new Error(`R239 mobile navigator too wide: ${box?.w
 if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error('R239 mobile product introduces horizontal viewport overflow');
 if(pageErrors.length)throw new Error(`R239 page errors: ${pageErrors.join(' | ')}`);
 
-console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · visible-canvas sanity · universal rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · mobile containment');
+console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · exact route identity matching · visible-canvas sanity · universal rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · mobile containment');
 await browser.close();
