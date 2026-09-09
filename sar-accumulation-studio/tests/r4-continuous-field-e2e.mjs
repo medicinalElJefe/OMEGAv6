@@ -40,13 +40,13 @@ try{
   const pointAfterPan=await page.textContent('#point');
   assert.equal(pointAfterPan,pointBeforePan,'drag/pan silently rebound the SAR measurement target');
 
-  // Wheel zoom must stay anchored to the geographic point under the cursor.
+  // Wheel zoom must stay anchored under the cursor. Validate in CSS pixels because browser pointer events quantize coordinates.
   const anchorX=mapBox.x+mapBox.width*.72,anchorY=mapBox.y+mapBox.height*.38;
   const beforeZoom=await page.evaluate(({x,y})=>{const r=document.querySelector('#map').getBoundingClientRect(),v=globalThis.OMEGA_SAR_NAVIGATION.view;return {lon:v.centerLon+(x-r.left-r.width/2)/((r.width/360)*v.scale),lat:v.centerLat-(y-r.top-r.height/2)/((r.height/180)*v.scale),scale:v.scale};},{x:anchorX,y:anchorY});
   await page.mouse.move(anchorX,anchorY);await page.mouse.wheel(0,-420);await page.waitForTimeout(250);
-  const afterZoom=await page.evaluate(({x,y})=>{const r=document.querySelector('#map').getBoundingClientRect(),v=globalThis.OMEGA_SAR_NAVIGATION.view;return {lon:v.centerLon+(x-r.left-r.width/2)/((r.width/360)*v.scale),lat:v.centerLat-(y-r.top-r.height/2)/((r.height/180)*v.scale),scale:v.scale};},{x:anchorX,y:anchorY});
+  const afterZoom=await page.evaluate(({x,y,before})=>{const r=document.querySelector('#map').getBoundingClientRect(),v=globalThis.OMEGA_SAR_NAVIGATION.view;const lon=v.centerLon+(x-r.left-r.width/2)/((r.width/360)*v.scale),lat=v.centerLat-(y-r.top-r.height/2)/((r.height/180)*v.scale);const projectedX=r.left+r.width/2+(before.lon-v.centerLon)*(r.width/360)*v.scale,projectedY=r.top+r.height/2-(before.lat-v.centerLat)*(r.height/180)*v.scale;return {lon,lat,scale:v.scale,anchorDriftPx:Math.hypot(projectedX-x,projectedY-y)};},{x:anchorX,y:anchorY,before:beforeZoom});
   assert.ok(afterZoom.scale>beforeZoom.scale,'wheel did not zoom in');
-  assert.ok(Math.abs(afterZoom.lon-beforeZoom.lon)<1e-5&&Math.abs(afterZoom.lat-beforeZoom.lat)<1e-5,`wheel zoom drifted off pointer anchor: ${JSON.stringify({beforeZoom,afterZoom})}`);
+  assert.ok(afterZoom.anchorDriftPx<=1.5,`wheel zoom drifted more than one browser pixel from pointer anchor: ${JSON.stringify({beforeZoom,afterZoom})}`);
   assert.equal(await page.textContent('#point'),pointBeforePan,'zoom changed the selected measurement target');
 
   // Device target activation must load real acquisitions and show a footprint-registered source SAR scene.
