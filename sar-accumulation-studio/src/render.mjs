@@ -22,7 +22,8 @@ export class WorldRenderer {
     this.motionPhase = 0;
     this.baseImage = null;
     this.baseMeta = null;
-    this.baseOpacity = .58;
+    this.baseOpacity = 1;
+    this.displayMode = 'earth';
     this._lastSelectionAt = 0;
     this._lastPointerDownAt = 0;
     this._wire();
@@ -59,8 +60,9 @@ export class WorldRenderer {
 
   async setBaseImage(url, meta=null){
     if(!url){this.baseImage=null;this.baseMeta=null;this.redraw?.();return}
-    const img=new Image();img.crossOrigin='anonymous';
-    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('Satellite context image failed to load'));img.src=url});
+    const img=new Image();
+    img.decoding='async';
+    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('Earth context image failed to load'));img.src=url});
     this.baseImage=img;this.baseMeta=meta;this.redraw?.();
   }
 
@@ -77,19 +79,38 @@ export class WorldRenderer {
     return [lon, lat];
   }
 
+  _drawBaseImage(){
+    if(!this.baseImage)return false;
+    const c=this.ctx,bbox=this.baseMeta?.bbox;
+    c.save();c.globalAlpha=this.baseOpacity;
+    if(Array.isArray(bbox)&&bbox.length===4&&bbox.every(Number.isFinite)){
+      const [minLon,minLat,maxLon,maxLat]=bbox;
+      const [x0,y0]=this.project(minLon,maxLat),[x1,y1]=this.project(maxLon,minLat);
+      const w=x1-x0,h=y1-y0;
+      if(Number.isFinite(w)&&Number.isFinite(h)&&Math.abs(w)>1&&Math.abs(h)>1)c.drawImage(this.baseImage,x0,y0,w,h);
+      else c.drawImage(this.baseImage,0,0,this.w,this.h);
+    }else c.drawImage(this.baseImage,0,0,this.w,this.h);
+    c.restore();
+    return true;
+  }
+
   clear() {
     const c = this.ctx;
     c.clearRect(0,0,this.w,this.h);
-    const g=c.createLinearGradient(0,0,0,this.h);
-    g.addColorStop(0,'#061119');g.addColorStop(1,'#03070a');c.fillStyle=g;c.fillRect(0,0,this.w,this.h);
-    if(this.baseImage){c.globalAlpha=this.baseOpacity;c.drawImage(this.baseImage,0,0,this.w,this.h);c.globalAlpha=1;c.fillStyle='rgba(2,8,12,.18)';c.fillRect(0,0,this.w,this.h)}
-    this._graticule();
+    const hasEarth=this._drawBaseImage();
+    if(!hasEarth){
+      const g=c.createLinearGradient(0,0,0,this.h);
+      g.addColorStop(0,'#061119');g.addColorStop(1,'#020507');c.fillStyle=g;c.fillRect(0,0,this.w,this.h);
+    }else{
+      c.fillStyle='rgba(0,5,8,.055)';c.fillRect(0,0,this.w,this.h);
+    }
+    if(!hasEarth||this.displayMode!=='earth')this._graticule(hasEarth?.08:.19);
   }
 
-  _graticule() {
+  _graticule(alpha=.12) {
     const c = this.ctx;
-    c.lineWidth = 1; c.strokeStyle = 'rgba(180,205,215,.19)';
-    c.font = '10px ui-monospace, monospace'; c.fillStyle = 'rgba(218,237,244,.58)';
+    c.lineWidth = 1; c.strokeStyle = `rgba(205,225,232,${alpha})`;
+    c.font = '10px ui-monospace, monospace'; c.fillStyle = `rgba(230,240,244,${Math.min(.55,alpha*2.8)})`;
     for (let lat=-60; lat<=60; lat+=30) {
       const [,y] = this.project(this.view.centerLon, lat);
       c.beginPath(); c.moveTo(0,y); c.lineTo(this.w,y); c.stroke();
@@ -103,36 +124,43 @@ export class WorldRenderer {
     }
   }
 
-  drawRecords(records, currentId, mode='footprints', phase=0) {
+  drawRecords(records, currentId, mode='earth', phase=0) {
     const c = this.ctx;
     const total = Math.max(1, records.length);
     records.forEach((r, index) => {
       const current = r.id === currentId;
       const recency = records.length <= 1 ? 1 : (index + 1) / records.length;
-      const alpha = mode === 'density' ? Math.min(.44, .045 + .52/Math.sqrt(total)) : current ? .63 : .05 + .17 * recency;
-      c.lineWidth = current ? 2.2 : .8;
-      if(current){
-        const pulse=.65+.35*Math.sin(phase*Math.PI*2);
-        c.strokeStyle = `rgba(248,253,255,${.75+.18*pulse})`;c.fillStyle = `rgba(70,205,235,${alpha})`;
-        c.shadowColor='rgba(102,225,255,.78)';c.shadowBlur=10+10*pulse;
-      } else {c.strokeStyle=`rgba(92,207,232,${.15+.34*recency})`;c.fillStyle=`rgba(57,182,216,${alpha})`;c.shadowBlur=0}
+      if(mode==='earth'){
+        c.lineWidth=current?1.6:.45;
+        c.strokeStyle=current?'rgba(210,248,255,.86)':`rgba(110,215,234,${.025+.06*recency})`;
+        c.fillStyle=current?'rgba(57,184,210,.025)':'rgba(0,0,0,0)';
+        c.shadowBlur=0;
+      }else{
+        const alpha = mode === 'density' ? Math.min(.38, .035 + .46/Math.sqrt(total)) : current ? .48 : .035 + .13 * recency;
+        c.lineWidth = current ? 1.8 : .7;
+        if(current){
+          const pulse=.65+.35*Math.sin(phase*Math.PI*2);
+          c.strokeStyle = `rgba(235,251,255,${.72+.14*pulse})`;c.fillStyle = `rgba(55,191,219,${alpha})`;
+          c.shadowColor='rgba(102,225,255,.45)';c.shadowBlur=5+5*pulse;
+        } else {c.strokeStyle=`rgba(92,207,232,${.10+.22*recency})`;c.fillStyle=`rgba(57,182,216,${alpha})`;c.shadowBlur=0}
+      }
       this._drawGeometry(r.geometry);c.shadowBlur=0;
     });
-    const current=records.find(r=>r.id===currentId);if(current)this._drawMotionBeacon(current,phase);
+    const current=records.find(r=>r.id===currentId);
+    if(current&&mode!=='earth')this._drawMotionBeacon(current,phase);
     if (this.point) {
       const [x,y] = this.project(this.point.lon, this.point.lat);
-      c.fillStyle='white'; c.beginPath(); c.arc(x,y,4,0,Math.PI*2); c.fill();
+      c.fillStyle='white'; c.beginPath(); c.arc(x,y,3.5,0,Math.PI*2); c.fill();
       c.strokeStyle='rgba(0,0,0,.8)'; c.lineWidth=1; c.stroke();
-      c.beginPath();c.arc(x,y,9+5*Math.sin(phase*Math.PI*2),0,Math.PI*2);c.strokeStyle='rgba(255,255,255,.42)';c.stroke();
+      c.beginPath();c.arc(x,y,8+2*Math.sin(phase*Math.PI*2),0,Math.PI*2);c.strokeStyle='rgba(255,255,255,.45)';c.stroke();
     }
   }
 
   _drawMotionBeacon(record,phase){
     const center=centroidOfGeometry(record.geometry);if(!center)return;
-    const [x,y]=this.project(center[0],center[1]);const c=this.ctx;const r=9+24*((phase+.15)%1);
-    c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.strokeStyle=`rgba(239,250,255,${.75*(1-phase)})`;c.lineWidth=1.4;c.stroke();
-    const sweep=(phase*2-1)*42;c.beginPath();c.moveTo(x-54,y+sweep);c.lineTo(x+54,y+sweep);c.strokeStyle='rgba(170,242,255,.34)';c.lineWidth=1;c.stroke();
-    c.beginPath();c.arc(x,y,3.2,0,Math.PI*2);c.fillStyle='rgba(255,255,255,.92)';c.fill();
+    const [x,y]=this.project(center[0],center[1]);const c=this.ctx;const r=8+16*((phase+.15)%1);
+    c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.strokeStyle=`rgba(239,250,255,${.55*(1-phase)})`;c.lineWidth=1.2;c.stroke();
+    c.beginPath();c.arc(x,y,3,0,Math.PI*2);c.fillStyle='rgba(255,255,255,.9)';c.fill();
   }
 
   _drawGeometry(geometry) {
@@ -206,7 +234,6 @@ export class WorldRenderer {
     this.canvas.addEventListener('pointercancel', () => {this.drag=null;this._notifyView()});
     this.canvas.addEventListener('lostpointercapture', () => {if(this.drag){this.drag=null;this._notifyView()}});
 
-    // Mouse fallback: some embedded/headless/browser paths suppress or partially deliver Pointer Events.
     this.canvas.addEventListener('mousedown', e => {
       if(e.button!==0)return;
       if(performance.now()-this._lastPointerDownAt<80)return;
@@ -221,7 +248,6 @@ export class WorldRenderer {
       this._finishDrag(e.clientX,e.clientY);
     });
 
-    // Click is the final selection fallback. Pointer-up selection wins when it already succeeded.
     this.canvas.addEventListener('click', e => {
       if(performance.now()-this._lastSelectionAt<120)return;
       this._selectClient(e.clientX,e.clientY);
