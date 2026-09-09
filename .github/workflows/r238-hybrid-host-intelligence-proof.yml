@@ -1,0 +1,92 @@
+name: R238 Hybrid host intelligence proof
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/omega-hybrid-agent-r141.py'
+      - 'public/omega-r170-self-build-governor.json'
+      - 'src/HybridRuntimeSnapshotR238.tsx'
+      - 'src/HybridHostIntelligenceR238.tsx'
+      - 'src/HybridWovenContinuityR238.tsx'
+      - 'src/hybridHostIntelligenceR238.css'
+      - 'src/HybridLinkR32.tsx'
+      - 'tests/r170-self-build-governor-invariants.mjs'
+      - 'tests/r180-current-authority-convergence-invariants.mjs'
+      - 'tests/r238-hybrid-correlated-snapshot-invariants.mjs'
+      - 'tests/r238-hybrid-host-intelligence-invariants.mjs'
+      - 'tests/r238-windows-host-runtime-proof.py'
+      - 'tests/r238-host-intelligence-browser-e2e.mjs'
+      - '.github/workflows/r238-hybrid-host-intelligence-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r238:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install locked JS dependencies
+        run: npm ci
+      - name: Python syntax proof
+        run: python -m py_compile public/omega-hybrid-agent-r141.py tests/r238-windows-host-runtime-proof.py
+      - name: R238 host intelligence + shared snapshot invariants
+        run: |
+          node tests/r238-hybrid-host-intelligence-invariants.mjs
+          node tests/r238-hybrid-correlated-snapshot-invariants.mjs
+      - name: Re-run inherited Hybrid authority invariants
+        run: |
+          node tests/r205-pc-proof-closure-invariants.mjs
+          node tests/r2071-r141-asset-validator-repair-invariants.mjs
+          node tests/r212-live-host-effects-invariants.mjs
+          node tests/r237-hybrid-command-authority-invariants.mjs
+      - name: Prove governed capability floor and active workflow topology
+        run: |
+          node scripts/verify_workflow_topology_r170.mjs
+          node tests/r170-self-build-governor-invariants.mjs
+          node tests/r180-current-authority-convergence-invariants.mjs
+      - name: Cumulative enacted runtime chain
+        run: node tests/enacted-runtime-r32-invariants.mjs
+      - name: Production frontend build
+        run: npm run build
+      - name: Install pinned browser proof harness
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Start built preview
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/r238-vite.log 2>&1 &
+          ready=0
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then cat /tmp/r238-vite.log; exit 1; fi
+      - name: Prove R237-selected host drives R238 resource proof without cross-host leakage
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r238-host-intelligence-browser-e2e.mjs
+
+  windows-host-runtime-proof:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile exact R238 wrapper and Windows proof
+        run: python -m py_compile public/omega-hybrid-agent-r141.py tests/r238-windows-host-runtime-proof.py
+      - name: Execute bounded Windows host telemetry and macro-preflight proof
+        run: python tests/r238-windows-host-runtime-proof.py

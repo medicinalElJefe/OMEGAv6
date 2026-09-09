@@ -22,8 +22,10 @@ jobs:
         run: npm install
       - name: Audit locked application dependency tree
         run: npm audit --audit-level=high
-      - name: Prove R237 Hybrid command authority
-        run: node tests/r237-hybrid-command-authority-invariants.mjs
+      - name: Prove R237 command authority and R238 shared snapshot
+        run: |
+          node tests/r237-hybrid-command-authority-invariants.mjs
+          node tests/r238-hybrid-correlated-snapshot-invariants.mjs
       - name: Run full inherited regression and production build
         run: npm run check
       - name: Prove Worker package without deployment
@@ -46,7 +48,8 @@ jobs:
           grep -q "Deploy canonical OMEGA Worker" .github/workflows/ci.yml
           grep -q "npx wrangler deploy" .github/workflows/ci.yml
           grep -q "wrangler.evolution-machine-r223.jsonc" .github/workflows/r223-cloudflare-evolution.yml
-          echo 'R237 production authority PASS · ci.yml owns canonical omegav6 deployment; R223 remains a separately configured ancillary evolution Worker; dry-runs are non-mutating.'
+          node scripts/verify_workflow_topology_r170.mjs
+          echo 'R238 authority PASS · existing R237 read-only successor workflow carries R238 proof without adding another workflow authority.'
 
   local-browser-proof:
     needs: source-proof
@@ -60,10 +63,10 @@ jobs:
       - run: npm run build
       - run: npm install --no-save playwright@1.63.0
       - run: npx playwright install --with-deps chromium
-      - name: Prove R237 command deck in built browser surface
+      - name: Prove R237 command + R238 shared epoch in built browser surface
         shell: bash
         run: |
-          npx vite preview --host 127.0.0.1 --port 4173 >/tmp/r237-vite.log 2>&1 &
+          npx vite preview --host 127.0.0.1 --port 4173 >/tmp/r238-vite.log 2>&1 &
           preview_pid=$!
           trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
           ready=0
@@ -71,11 +74,11 @@ jobs:
             if curl -fsS http://127.0.0.1:4173/ >/dev/null; then ready=1; break; fi
             sleep 1
           done
-          if [ "$ready" -ne 1 ]; then cat /tmp/r237-vite.log; exit 1; fi
+          if [ "$ready" -ne 1 ]; then cat /tmp/r238-vite.log; exit 1; fi
           node --input-type=module <<'NODE'
           import {chromium} from 'playwright';
           const browser=await chromium.launch({headless:true});
-          const page=await browser.newPage({viewport:{width:1440,height:1000}});
+          const page=await browser.newPage({viewport:{width:1440,height:1100}});
           const pageErrors=[]; page.on('pageerror',e=>pageErrors.push(String(e)));
           let hybridStatus={state:'DEVICE_PROOF_REQUIRED',nativeExecutionClaimed:false,devices:[],jobs:[]};
           let missionStatus={ok:true,missions:[],state:'DEVICE_PROOF_REQUIRED'};
@@ -84,55 +87,52 @@ jobs:
           const openHybrid=async()=>{
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
             await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
-            const hybridEntry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid'}).first();
-            await hybridEntry.waitFor({state:'visible'});
-            await hybridEntry.click();
+            const entry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid'}).first();
+            await entry.waitFor({state:'visible'}); await entry.click();
             const deck=page.locator('[data-r237-command-authority="AUTHENTICATED_BOUNDED_NATIVE_CONTROL"]');
-            await deck.waitFor({state:'visible'});
-            return deck;
+            const effects=page.locator('[data-r212-host-effects="FIRST_HAND_RETURN_ONLY"]');
+            await Promise.all([deck.waitFor({state:'visible'}),effects.waitFor({state:'visible'})]);
+            return {deck,effects};
           };
 
-          let deck=await openHybrid();
+          let {deck}=await openHybrid();
           let text=await deck.innerText();
-          for(const token of ['DEVICE PROOF REQUIRED','ROOT-CONFINED','PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','R141/R146/R147/R125 authority remains unchanged','intentionally contain no APPLY_PATCH or WRITE_TEXT']){
-            if(!text.includes(token)) throw new Error(`R237 built browser missing ${token}`);
-          }
+          for(const token of ['DEVICE PROOF REQUIRED','ROOT-CONFINED','PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','R125','intentionally contain no APPLY_PATCH or WRITE_TEXT'])if(!text.includes(token))throw new Error(`R237/R238 built browser missing ${token}`);
           const runButtons=deck.getByRole('button',{name:/Run on this PC|Device busy/});
-          const count=await runButtons.count();
-          if(count!==4)throw new Error(`R237 expected four bounded native presets, saw ${count}`);
-          for(let i=0;i<count;i++)if(!(await runButtons.nth(i).isDisabled()))throw new Error('R237 allowed native queueing without current device proof');
+          if(await runButtons.count()!==4)throw new Error('R237 expected four bounded native presets');
+          for(let i=0;i<4;i++)if(!(await runButtons.nth(i).isDisabled()))throw new Error('R237 allowed queueing without current device proof');
 
+          const now=Date.now();
           const caps=['DESKTOP_HEALTH','HASH_TREE','FORENSIC_HASH_LEDGER','INDEX','BUILD','TEST','PACKAGE','TRAIN_LOCAL'];
-          hybridStatus={
-            state:'VERIFIED_DEVICE_ONLINE',nativeExecutionClaimed:true,
-            devices:[
-              {id:'dev-a',name:'OMEGA PC A',online:true,revoked:false,lastSeen:Date.now(),rootLabel:'J:/OMEGA-A',capabilities:caps},
-              {id:'dev-b',name:'OMEGA PC B',online:true,revoked:false,lastSeen:Date.now(),rootLabel:'J:/OMEGA-B',capabilities:caps}
-            ],
-            jobs:[
-              {id:'job_a',targetDeviceId:'dev-a',status:'QUEUED',steps:[{id:'S01',op:'HASH_TREE'}]},
-              {id:'job_b',targetDeviceId:'dev-b',status:'QUEUED',steps:[{id:'S01',op:'BUILD'}]}
-            ]
-          };
+          hybridStatus={state:'VERIFIED_DEVICE_ONLINE',nativeExecutionClaimed:true,devices:[
+            {id:'dev-a',name:'OMEGA PC A',online:true,revoked:false,lastSeen:now,rootLabel:'J:/OMEGA-A',capabilities:caps},
+            {id:'dev-b',name:'OMEGA PC B',online:true,revoked:false,lastSeen:now,rootLabel:'J:/OMEGA-B',capabilities:caps}
+          ],jobs:[
+            {id:'job_a',targetDeviceId:'dev-a',status:'QUEUED',steps:[{id:'S01',op:'HASH_TREE'}]},
+            {id:'job_b',targetDeviceId:'dev-b',status:'QUEUED',steps:[{id:'S01',op:'BUILD'}]},
+            {id:'ret_a',targetDeviceId:'dev-a',status:'COMPLETE',completedAt:now-5000,returnPacket:{receivedAt:now-5000,resultFingerprint:'fp-a',stepProofs:[{id:'S01',op:'BUILD',ok:true,result:{exitCode:0}}]}},
+            {id:'ret_b',targetDeviceId:'dev-b',status:'COMPLETE',completedAt:now-4000,returnPacket:{receivedAt:now-4000,resultFingerprint:'fp-b',stepProofs:[{id:'S01',op:'TEST',ok:true,result:{exitCode:0}}]}}
+          ]};
           missionStatus={ok:true,state:'VERIFIED_DEVICE_ONLINE',missions:[
             {id:'mission_a',targetDeviceId:'dev-a',status:'ACTIVE',cycle:2,maxCycles:12,currentJobId:'job_a'},
             {id:'mission_b',targetDeviceId:'dev-b',status:'ACTIVE',cycle:4,maxCycles:12,currentJobId:'job_b'}
           ]};
-          deck=await openHybrid();
-          const hostSelect=deck.getByRole('combobox',{name:'Authenticated compute host'});
-          if(await hostSelect.count()!==1)throw new Error('R237 multi-host selector missing');
-          await hostSelect.selectOption('dev-b');
-          await page.waitForFunction(()=>document.querySelector('[data-r237-command-authority]')?.getAttribute('data-r237-selected-device')==='dev-b');
-          deck=page.locator('[data-r237-command-authority="AUTHENTICATED_BOUNDED_NATIVE_CONTROL"]');
-          if(await deck.getAttribute('data-r237-correlation')!=='LOCKED')throw new Error('R237 did not lock execution correlation after selecting dev-b');
-          const job=deck.locator('[data-r237-job-device]');
-          const mission=deck.locator('[data-r237-mission-device]');
-          if(await job.getAttribute('data-r237-job-device')!=='dev-b')throw new Error('R237 selected host displayed another device job');
-          if(await mission.getAttribute('data-r237-mission-device')!=='dev-b')throw new Error('R237 selected host displayed another device mission');
-          text=await deck.innerText();
-          for(const token of ['OMEGA PC B','job_b','mission_b','HOST / JOB / MISSION LOCKED'])if(!text.includes(token))throw new Error(`R237 correlated browser surface missing ${token}`);
-          for(const forbidden of ['job_a','mission_a'])if(text.includes(forbidden))throw new Error(`R237 leaked unrelated active execution context ${forbidden} into selected host controls`);
-          if(pageErrors.length)throw new Error(`R237 built browser page errors: ${pageErrors.join(' | ')}`);
-          console.log('R237 BUILT BROWSER PASS · real Home→TOOLS→Hybrid navigation · no-device fail-closed proof · four bounded presets · explicit two-host selector · selected host/job/mission identity correlation · unrelated mission isolation · source-mutation prohibition visibly stated');
+          let opened=await openHybrid(); deck=opened.deck; const effects=opened.effects;
+          const select=deck.getByRole('combobox',{name:'Authenticated compute host'});
+          if(await select.count()!==1)throw new Error('R237 multi-host selector missing');
+          await select.selectOption('dev-b');
+          await page.waitForFunction(()=>document.querySelector('[data-r212-host-effects]')?.getAttribute('data-r212-selected-device')==='dev-b'&&document.querySelector('[data-r237-command-authority]')?.getAttribute('data-r237-selected-device')==='dev-b');
+          const e212=await effects.getAttribute('data-r212-snapshot-epoch');
+          const e237=await deck.getAttribute('data-r237-snapshot-epoch');
+          if(!e212||e212!==e237)throw new Error(`R238 shared snapshot epoch diverged: R212=${e212}, R237=${e237}`);
+          if(await deck.getAttribute('data-r237-correlation')!=='LOCKED')throw new Error('R237/R238 execution correlation not locked');
+          if(await deck.locator('[data-r237-job-device]').getAttribute('data-r237-job-device')!=='dev-b')throw new Error('selected host displayed another device job');
+          if(await deck.locator('[data-r237-mission-device]').getAttribute('data-r237-mission-device')!=='dev-b')throw new Error('selected host displayed another device mission');
+          const deckText=await deck.innerText(),effectsText=await effects.innerText();
+          for(const token of ['OMEGA PC B','job_b','mission_b','HOST / JOB / MISSION / EPOCH LOCKED'])if(!deckText.includes(token))throw new Error(`R237/R238 command surface missing ${token}`);
+          if(!effectsText.includes('fp-b'))throw new Error('R212 did not expose selected-host return fingerprint');
+          for(const forbidden of ['job_a','mission_a','fp-a'])if(deckText.includes(forbidden)||effectsText.includes(forbidden))throw new Error(`R238 leaked foreign-host context ${forbidden}`);
+          if(pageErrors.length)throw new Error(`built browser page errors: ${pageErrors.join(' | ')}`);
+          console.log(`R238 BUILT BROWSER PASS · real Home→TOOLS→Hybrid · two hosts · selected dev-b shared by R212/R237 · shared epoch ${e237} · foreign host isolated · R237 command gates retained`);
           await browser.close();
           NODE

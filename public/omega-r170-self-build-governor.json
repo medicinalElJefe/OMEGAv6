@@ -4,9 +4,9 @@
   "authority": "OMEGAV6",
   "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
   "engineRevision": "R170.2",
-  "currentCapabilityFloor": "R237",
+  "currentCapabilityFloor": "R238",
   "promotedSuccessorContinuity": ["R175", "R176", "R177", "R178", "R179", "R180"],
-  "postR180ProofContinuity": ["R200", "R200.1", "R202", "R210", "R223", "R236", "R237"],
+  "postR180ProofContinuity": ["R200", "R200.1", "R202", "R210", "R223", "R236", "R237", "R238"],
   "activeWorkflowAuthority": {
     "productionDeploy": ".github/workflows/ci.yml",
     "currentConvergence": ".github/workflows/r170-current-convergence.yml",
@@ -53,7 +53,7 @@
     "highOrCriticalAutoRepair": false,
     "residualAuthority": "R164",
     "successorContinuityProof": "scripts/prove_successor_workflow_invariants_r175.mjs",
-    "latestExplicitSuccessorProof": "tests/r237-hybrid-command-authority-invariants.mjs",
+    "latestExplicitSuccessorProof": "tests/r238-hybrid-host-intelligence-invariants.mjs",
     "canonicalAdmissionAuthority": "R125",
     "cloudEvolutionMachine": "CLOUD-01",
     "cloudEvolutionHost": "CLOUDFLARE_WORKER"
@@ -76,8 +76,9 @@
     "liveTruthRecovery": "R210_FORWARD_ONLY_REFRESH_AND_RUNTIME_VERSION_REANCHOR",
     "autonomousEvolution": "R223_CLOUD_01_CLOUDFLARE_GITHUB_PORTAL",
     "sourceSpatialControlAttestation": "R236_FAIL_CLOSED_INDEPENDENT_TRUST_BOUNDARY",
-    "hybridCommandAuthority": "R237_AUTHENTICATED_BOUNDED_NATIVE_CONTROL"
+    "hybridCommandAuthority": "R237_AUTHENTICATED_BOUNDED_NATIVE_CONTROL",
+    "hybridHostIntelligence": "R238_RETURNED_RESOURCE_AND_MACRO_INTEGRITY_PROOF"
   },
   "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
-  "truthBoundary": "R170.4 preserves the bounded self-build source-capsule law while the current capability floor advances through production R236 source-spatial attestation and candidate R237 authenticated Hybrid command authority. R223 remains the CLOUD-01 autonomous-evolution machine authority and keeps recurring evolution execution off GitHub Actions. CLOUD-01 may inspect exact-current-main production proof and live residual evidence, reconcile already-merged capsule targets, generate one dependency-ready low/medium-risk source candidate on an isolated cloud/evolution branch, open a GitHub PR, and merge only an exact-head candidate whose required GitHub proof stack is fully green on an unchanged exact base. GitHub remains the development/proof portal. Successor proof workflows remain read-only and may not push-trigger on main. Canonical OMEGA production deployment remains exclusively ci.yml. R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable execution-history authority, R141 exact Hybrid return-proof authority, and R201/R203 remain retired tombstones. R237 adds no arbitrary shell, direct source mutation preset, second executor, second production writer, federation authority, scientific-truth authority, or Canon mutation authority. No PC-online, solver-validity, renderer-validity, federation-closure, empirical, or Canon claim may be synthesized."
+  "truthBoundary": "R170.4 preserves the bounded self-build source-capsule law while the current capability/proof floor advances through production R236 source-spatial attestation, R237 authenticated Hybrid command authority, and candidate R238 returned host-resource/macro-integrity evidence. R223 remains the CLOUD-01 autonomous-evolution machine authority and keeps recurring evolution execution off GitHub Actions. CLOUD-01 may inspect exact-current-main production proof and live residual evidence, reconcile already-merged capsule targets, generate one dependency-ready low/medium-risk source candidate on an isolated cloud/evolution branch, open a GitHub PR, and merge only an exact-head candidate whose required GitHub proof stack is fully green on an unchanged exact base. GitHub remains the development/proof portal. Successor proof workflows remain read-only and may not push-trigger on main. Canonical OMEGA production deployment remains exclusively ci.yml. R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable execution-history authority, R141 exact Hybrid return-proof authority, and R201/R203 remain retired tombstones. R237 adds no arbitrary shell, direct source mutation preset, second executor, second production writer, federation authority, scientific-truth authority, or Canon mutation authority. R238 adds no dependency installer or new executor; it wraps the immutable R205 executor, reports resource/dependency truth only through returned DESKTOP_HEALTH step proof, and strengthens macro replay preflight without uploading recorded macro events. No PC-online, solver-validity, renderer-validity, federation-closure, empirical, or Canon claim may be synthesized."
 }
