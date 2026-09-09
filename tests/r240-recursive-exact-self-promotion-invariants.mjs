@@ -75,7 +75,10 @@ for(const token of ['attachEvidencePressureR240','planParallelFrontierR240','ran
 assert.ok(!/git\s+push/i.test(engine),'R240 scheduler engine itself must not push source');
 assert.equal(state.revision,'R170.2');
 assert.equal(state.recursiveSchedulerRevision,'R240');
-assert.equal(governor.currentCapabilityFloor,'R239','R240 must preserve production R239 capability floor until R240 proof completes');
+const capabilityFloor=Number(String(governor.currentCapabilityFloor||'').replace(/^R/,''));
+assert.ok(Number.isInteger(capabilityFloor)&&capabilityFloor>=239,'R240 must preserve the production R239 capability milestone under any later proof floor');
+assert.ok(governor.postR180ProofContinuity.includes('R240'),'R240 must remain in post-R180 proof continuity after later successors');
+assert.equal(governor.selfPromotion.revision,'R240','R240 remains the exact self-promotion engine even when the read-only proof floor advances');
 assert.equal(governor.preservedRuntime.hybridResourceGovernor,'R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING');
 for(const token of ["schema:'OMEGA_HYBRID_RESOURCE_ENVELOPE_R239'","revision:'R239'","profile?.schema==='OMEGA_HYBRID_HOST_PROFILE_R238'",'SHARED_SNAPSHOT_STALE_OR_UNPROVED','RETURNED_RESOURCE_PROFILE_STALE_OR_CLOCK_INVALID','ONE_ACTIVE_NATIVE_JOB_PER_DEVICE','RESOURCE_PRESSURE_CRITICAL','mutate CanonState'])assert.ok(r239.includes(token),`production R239 Hybrid resource governor contract missing ${token}`);
 assert.ok(!r239.includes('canonicalAdmission:true'),'R239 must not gain CanonState admission authority');
@@ -102,5 +105,5 @@ assert.ok(!ci.includes('workflow_run:'),'canonical deployment must not add recur
 for(const token of ['HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE','data-r239-resource-tier','R141','R146','R147','R125','intentionally contain no APPLY_PATCH or WRITE_TEXT'])assert.ok(verifier.includes(token),`R240 semantic live verifier missing ${token}`);
 assert.ok(!verifier.includes('R238 changes correlation and sampling, not execution or Canon authority'),'obsolete prose-coupled verifier must be gone');
 
-console.log('OMEGA R240 RECURSIVE EXACT SELF-PROMOTION PASS · actual R239 Hybrid governor contract preserved · R164 evidence-bound sparse scheduler · full 20,736 calculus surface preserved · exact production base/residual/all-green/allowlist/unchanged-base/expected-head gates · two-parent merge · canonical ci.yml exact-production proof · R125 admission unchanged');
+console.log(`OMEGA R240 RECURSIVE EXACT SELF-PROMOTION PASS · current proof floor R${capabilityFloor} preserves actual R239 Hybrid governor contract + R240 promotion engine · R164 evidence-bound sparse scheduler · full 20,736 calculus surface preserved · exact production base/residual/all-green/allowlist/unchanged-base/expected-head gates · two-parent merge · canonical ci.yml exact-production proof · R125 admission unchanged`);
 await import('./r240-full-calculus-bridge-invariants.mjs');
