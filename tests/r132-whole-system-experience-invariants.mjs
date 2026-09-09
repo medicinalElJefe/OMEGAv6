@@ -15,7 +15,7 @@ must(!org.includes('.slice('),'organization authority may not hide routes throug
 must(home.includes("data-r132-depth={depth}")&&home.includes("type SurfaceDepth='FOCUS'|'DEEP'"),'Home must expose persistent focus/deep density without creating a second product shell');
 must(home.includes("className='r132-primary-strip'")&&home.includes('primaryRoutesForWorkspaceR132(domain)')&&home.includes('START HERE'),'each Home workspace must surface its primary instruments directly with user-facing start-here language');
 must(home.includes("className='r132-inspector-tabs'")&&home.includes("'STATE'|'OPERATORS'|'TOOLS'")&&home.includes('>NOW</button>')&&home.includes('>ANALYZE</button>'),'focused inspector must separate packet, analysis and tool concerns using user-facing labels');
-must(home.includes("aria-label='All 44 applications'")&&home.includes('activeWorkspace.routes.map'),'historical route reachability must remain complete while focus-mode presentation becomes simpler');
+must(home.includes("aria-label='All tools'")&&home.includes('activeWorkspace.routes.map'),'historical route reachability must remain complete while visible and accessible Home language agree');
 must(home.includes("<Search/>All tools")&&home.includes('<Blocks/>System map')&&home.includes('ALWAYS AVAILABLE'),'Home must use plain-language global navigation labels');
 must(home.includes('OMEGA_FIELD_PROJECTIONS_R82.map')&&home.includes('projection={lens.projection}')&&home.includes('view={lens.view}'),'projection controls must still bind real canonical geometry/data views');
 
@@ -34,4 +34,4 @@ must(userCss.includes(".r239-home[data-r132-depth='FOCUS'] .r96-context-card>div
 
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
 must(routes.length===44&&new Set(routes).size===44,'presentation pass must not lose or duplicate the established 44-route registry');
-console.log('R132/R239 WHOLE-SYSTEM EXPERIENCE PASS · one visual-first instrument · workspace/start-here/all-tools hierarchy · primary/support/expert grouping · focus/deep density · complete 44-route reachability · user-first labels · technical detail on demand');
+console.log('R132/R239 WHOLE-SYSTEM EXPERIENCE PASS · one visual-first instrument · workspace/start-here/all-tools hierarchy · primary/support/expert grouping · focus/deep density · complete 44-route reachability · aligned accessibility · technical detail on demand');
