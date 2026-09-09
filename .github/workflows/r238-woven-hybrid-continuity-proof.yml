@@ -20,7 +20,7 @@ jobs:
         run: npm audit --audit-level=high
       - name: Prove R238 Woven Hybrid convergence
         run: node tests/r238-woven-hybrid-continuity-invariants.mjs
-      - name: Preserve R238 atomic snapshot
+      - name: Preserve R238 single durable-state snapshot
         run: node tests/r238-hybrid-correlated-snapshot-invariants.mjs
       - name: Preserve R238 host intelligence
         run: node tests/r238-hybrid-host-intelligence-invariants.mjs
@@ -59,6 +59,10 @@ jobs:
           const caps=['DESKTOP_HEALTH','HASH_TREE','FORENSIC_HASH_LEDGER','INDEX','BUILD','TEST','PACKAGE','TRAIN_LOCAL'];
           const profile=(id,label)=>({profileSha256:`profile-${id}`,observedAt:now-2500,cpu:{model:`CPU ${label}`,logicalProcessors:8},memory:{totalBytes:17179869184,availableBytes:8589934592},gpu:{present:true,name:`GPU ${label}`,vramBytes:8589934592,driverVersion:'test'},storage:{totalBytes:1099511627776,freeBytes:549755813888,rootLabel:`J:/OMEGA-${label}`},python:{version:'3.14',executable:`J:/OMEGA-${label}/python.exe`,architecture:'64bit'},rcwa:{pythonDependencyAvailable:true,reason:'returned test environment'},schedulerAdvisory:{recommendedCpuWorkers:4}});
           const ret=(id,deviceId,label,fp)=>({id,targetDeviceId:deviceId,status:'COMPLETE',completedAt:now-4000,returnPacket:{receivedAt:now-4000,resultFingerprint:fp,stepProofs:[{id:'S01',op:'DESKTOP_HEALTH',ok:true,result:{hostProfileR238:profile(id,label),macroInventoryR238:{verifiedCount:2,totalCount:2,invalidCount:0}}}]}});
+          const missionRows=[
+            {id:'mission_a',targetDeviceId:'dev-a',status:'ACTIVE',cycle:2,maxCycles:12,currentJobId:'job_a'},
+            {id:'mission_b',targetDeviceId:'dev-b',status:'ACTIVE',cycle:4,maxCycles:12,currentJobId:'job_b'}
+          ];
           const hybrid={state:'VERIFIED_DEVICE_ONLINE',nativeExecutionClaimed:true,devices:[
             {id:'dev-a',name:'OMEGA PC A',online:true,revoked:false,lastSeen:now,rootLabel:'J:/OMEGA-A',capabilities:caps},
             {id:'dev-b',name:'OMEGA PC B',online:true,revoked:false,lastSeen:now,rootLabel:'J:/OMEGA-B',capabilities:caps}
@@ -66,13 +70,11 @@ jobs:
             {id:'job_a',targetDeviceId:'dev-a',status:'QUEUED',steps:[{id:'S01',op:'HASH_TREE'}]},
             {id:'job_b',targetDeviceId:'dev-b',status:'QUEUED',steps:[{id:'S01',op:'BUILD'}]},
             ret('ret_a','dev-a','A','fp-a'),ret('ret_b','dev-b','B','fp-b')
-          ]};
-          const missions={ok:true,state:'VERIFIED_DEVICE_ONLINE',missions:[
-            {id:'mission_a',targetDeviceId:'dev-a',status:'ACTIVE',cycle:2,maxCycles:12,currentJobId:'job_a'},
-            {id:'mission_b',targetDeviceId:'dev-b',status:'ACTIVE',cycle:4,maxCycles:12,currentJobId:'job_b'}
-          ]};
+          ],missions:missionRows};
+          const missions={ok:true,state:'VERIFIED_DEVICE_ONLINE',missions:missionRows};
           let hybridGets=0,missionGets=0;
           await page.route('**/api/hybrid/status',route=>{hybridGets++;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(hybrid)})});
+          // Compatibility route for inherited Hybrid children; R238 provider source proof forbids using it.
           await page.route('**/api/missions',route=>{missionGets++;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(missions)})});
           await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
           await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
@@ -94,6 +96,6 @@ jobs:
           for(const token of ['OMEGA PC B','job_b','mission_b','HOST / JOB / MISSION / EPOCH LOCKED'])if(!deckText.includes(token))throw new Error(`R237 deck missing selected-host ${token}`);
           for(const forbidden of ['CPU A','GPU A','fp-a','job_a','mission_a'])if(intelText.includes(forbidden)||effectsText.includes(forbidden)||deckText.includes(forbidden))throw new Error(`foreign host context leaked into selected-host projection: ${forbidden}`);
           if(pageErrors.length)throw new Error(pageErrors.join(' | '));
-          console.log(`R238 WOVEN BROWSER PASS · device dev-b · shared epoch ${epochs[0]} · host profile + effects + command + scar carry correlated · foreign host isolated · GETs hybrid=${hybridGets} missions=${missionGets}`);
+          console.log(`R238 WOVEN BROWSER PASS · device dev-b · canonical durable-state epoch ${epochs[0]} · host profile + effects + command + scar carry correlated · foreign host isolated · requests hybrid=${hybridGets} legacy-missions=${missionGets}`);
           await browser.close();
           NODE
