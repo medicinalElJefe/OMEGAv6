@@ -2,7 +2,7 @@ name: OMEGA R238 Woven Hybrid Continuity Convergence
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, r238-woven-hybrid-continuity-convergence]
 
 permissions:
   contents: read
@@ -26,10 +26,15 @@ jobs:
         run: node tests/r238-hybrid-host-intelligence-invariants.mjs
       - name: Preserve R237 command authority
         run: node tests/r237-hybrid-command-authority-invariants.mjs
+      - name: Prove R239 recursive Canon build fabric
+        run: |
+          node tests/r239-recursive-canon-build-fabric-invariants.mjs
+          node tests/r170-self-build-governor-invariants.mjs
+          node scripts/verify_workflow_topology_r170.mjs
       - name: Full inherited regression and production build
         run: npm run check
       - name: Worker dry-run only
-        run: npx wrangler deploy --dry-run --outdir .wrangler-r238-woven-dry-run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r239-woven-dry-run
 
   browser-proof:
     needs: source-proof
@@ -46,7 +51,7 @@ jobs:
       - name: Prove Woven selected-host epoch across intelligence, effects and command
         shell: bash
         run: |
-          npx vite preview --host 127.0.0.1 --port 4173 >/tmp/r238-woven-vite.log 2>&1 &
+          npx vite preview --host 127.0.0.1 --port 4173 >/tmp/r239-woven-vite.log 2>&1 &
           preview_pid=$!
           trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
@@ -94,6 +99,6 @@ jobs:
           for(const token of ['OMEGA PC B','job_b','mission_b','HOST / JOB / MISSION / EPOCH LOCKED'])if(!deckText.includes(token))throw new Error(`R237 deck missing selected-host ${token}`);
           for(const forbidden of ['CPU A','GPU A','fp-a','job_a','mission_a'])if(intelText.includes(forbidden)||effectsText.includes(forbidden)||deckText.includes(forbidden))throw new Error(`foreign host context leaked into selected-host projection: ${forbidden}`);
           if(pageErrors.length)throw new Error(pageErrors.join(' | '));
-          console.log(`R238 WOVEN BROWSER PASS · device dev-b · shared epoch ${epochs[0]} · host profile + effects + command + scar carry correlated · foreign host isolated · GETs hybrid=${hybridGets} missions=${missionGets}`);
+          console.log(`R239 INHERITED WOVEN BROWSER PASS · device dev-b · shared epoch ${epochs[0]} · R238 host profile + effects + command + scar carry correlated · R239 build surface compiled in the same candidate · GETs hybrid=${hybridGets} missions=${missionGets}`);
           await browser.close();
           NODE
