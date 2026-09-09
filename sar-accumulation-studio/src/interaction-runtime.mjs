@@ -60,6 +60,11 @@ function wire(){
   inject();window.addEventListener('omega-source-sar-frame',event=>{state.sourceSequence++;state.lastSourceScene=event.detail?.id||null;state.lastSourceTime=event.detail?.startTime||null;});
   const point=$('#point');if(point){let last=keyOf(pointFromText());new MutationObserver(()=>{const p=pointFromText(),k=keyOf(p);if(!p||k===last)return;last=k;activateTarget(p,{reason:'authoritative WGS84 target change'});}).observe(point,{childList:true,subtree:true,characterData:true});}
   $('#play')?.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();startPlayback();},true);$('#prev')?.addEventListener('click',()=>setTimeout(()=>{if(!state.playing){clearOldMeasurement();startCalibrationBackground({force:false});}},80));$('#next')?.addEventListener('click',()=>setTimeout(()=>{if(!state.playing){clearOldMeasurement();startCalibrationBackground({force:false});}},80));$('#timeline')?.addEventListener('change',()=>{if(!state.playing){clearOldMeasurement();startCalibrationBackground({force:false});}});
-  map?.addEventListener('omega-map-select',event=>{const p=event.detail;if(p&&Number.isFinite(p.lon)&&Number.isFinite(p.lat)){state.target={lon:Number(p.lon),lat:Number(p.lat)};state.targetKey=keyOf(p);bindTargetInputs(p);}});
+  // The authoritative map-selection event starts target activation synchronously.
+  // The DOM MutationObserver above remains only as a compatibility fallback. This
+  // closes the old race where callers could see a new target while the catalog and
+  // calibration pipeline were still bound to the previous point.
+  map?.addEventListener('omega-map-select',event=>{const p=event.detail;if(p&&Number.isFinite(p.lon)&&Number.isFinite(p.lat))activateTarget({lon:Number(p.lon),lat:Number(p.lat)},{reason:'authoritative WGS84 target change'});});
 }
+state.activateTarget=activateTarget;state.exactCalibration=exactCalibration;
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else queueMicrotask(wire);}
