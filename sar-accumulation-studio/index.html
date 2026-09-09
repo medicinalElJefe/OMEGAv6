@@ -48,7 +48,8 @@
 
     <section><h2>Truth semantics</h2>
       <p><b>Measured.</b> Source SAR footprint/pixel with acquisition provenance.</p>
-      <p><b>Contextual.</b> NASA GIBS/Worldview satellite imagery aligned in time and geography; not promoted to SAR values.</p>
+      <p><b>Calibrated.</b> Sentinel-1 GRD DN converted with the product calibration LUT; calibration provenance remains attached.</p>
+      <p><b>Contextual.</b> NASA GIBS/Worldview imagery and the stored Earth proxy chart are aligned context; neither is promoted to SAR values.</p>
       <p><b>Inferred.</b> Dewey Atlas gap estimate computed only from measured anchors and accompanied by uncertainty/confidence/scar support.</p>
       <p><b>Unknown.</b> If support is inadequate, the system preserves the gap.</p>
       <ul id="warnings"></ul>
@@ -95,7 +96,7 @@
     <div class="lower">
       <section><h2>Point revisit + temporal pixel probe</h2>
         <div class="probe"><span>Point <b id="point">click map</b></span><span>Coverage hits <b id="pointHits">0</b></span><span>First <b id="pointFirst">—</b></span><span>Last <b id="pointLast">—</b></span><span>Mean interval <b id="pointMean">—</b></span><button id="probeStack" disabled>Probe actual pixel stack</button></div>
-        <div id="pixelProbeStatus" class="micro">Pixel probing is available for loaded EPSG:4326 COG scenes.</div>
+        <div id="pixelProbeStatus" class="micro">Raw point probing is a diagnostic view. Use the Charted Canon panel for product-LUT calibrated temporal comparison.</div>
         <div class="probe-chart"><canvas id="probeChart"></canvas></div>
       </section>
 
@@ -115,5 +116,6 @@
   </section>
 </main>
 <script type="module" src="src/app.mjs"></script>
+<script type="module" src="src/canon-console.mjs"></script>
 </body>
 </html>
