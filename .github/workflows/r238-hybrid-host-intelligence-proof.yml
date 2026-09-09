@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'public/omega-hybrid-agent-r141.py'
+      - 'public/omega-hybrid-agent-r207.py'
       - 'public/omega-r170-self-build-governor.json'
       - 'public/omega-r243-woven-selfbuild-fabric.json'
       - 'scripts/lib/r243-woven-selfbuild-fabric.mjs'
@@ -26,9 +27,8 @@ on:
       - 'tests/r238-hybrid-host-intelligence-invariants.mjs'
       - 'tests/r238-windows-host-runtime-proof.py'
       - 'tests/r238-host-intelligence-browser-e2e.mjs'
-      - 'tests/r242-hybrid-execution-motion-invariants.mjs'
-      - 'tests/r242-hybrid-terminal-fence-invariants.mjs'
-      - 'tests/r242-hybrid-execution-motion-browser-e2e.mjs'
+      - 'tests/r243-hybrid-execution-motion-invariants.mjs'
+      - 'tests/r243-hybrid-terminal-fence-invariants.mjs'
       - 'tests/r243-woven-selfbuild-fabric-invariants.mjs'
       - 'tests/r243-woven-execution-convergence-invariants.mjs'
       - 'tests/r243-hybrid-execution-motion-browser-e2e.mjs'
@@ -55,15 +55,15 @@ jobs:
       - name: Install locked JS dependencies
         run: npm ci
       - name: Python syntax proof
-        run: python -m py_compile public/omega-hybrid-agent-r141.py tests/r238-windows-host-runtime-proof.py
+        run: python -m py_compile public/omega-hybrid-agent-r141.py public/omega-hybrid-agent-r207.py tests/r238-windows-host-runtime-proof.py
       - name: R238 host intelligence + shared snapshot invariants
         run: |
           node tests/r238-hybrid-host-intelligence-invariants.mjs
           node tests/r238-hybrid-correlated-snapshot-invariants.mjs
-      - name: R242 lease transport + terminal fence protocol proof
+      - name: R243 canonical lease protocol + terminal fence proof
         run: |
-          node tests/r242-hybrid-execution-motion-invariants.mjs
-          node tests/r242-hybrid-terminal-fence-invariants.mjs
+          node tests/r243-hybrid-execution-motion-invariants.mjs
+          node tests/r243-hybrid-terminal-fence-invariants.mjs
           node tests/r153-adaptive-sovereign-build-missions-invariants.mjs
       - name: R243 woven planning + execution convergence proof
         run: |
@@ -103,11 +103,7 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r238-host-intelligence-browser-e2e.mjs
-      - name: Prove inherited R242 lease wire protocol in the built product
-        env:
-          OMEGA_E2E_URL: http://127.0.0.1:4173
-        run: node tests/r242-hybrid-execution-motion-browser-e2e.mjs
-      - name: Prove R243 selected-host convergence over R242 transport with R242 navigation preserved
+      - name: Prove native R243 selected-host execution motion in the same built product
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r243-hybrid-execution-motion-browser-e2e.mjs
@@ -120,7 +116,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Compile exact R238/R240/R242 transport wrapper and Windows proof
-        run: python -m py_compile public/omega-hybrid-agent-r141.py tests/r238-windows-host-runtime-proof.py
+      - name: Compile exact R238 proof wrapper, canonical R243-motion agent and Windows proof
+        run: python -m py_compile public/omega-hybrid-agent-r141.py public/omega-hybrid-agent-r207.py tests/r238-windows-host-runtime-proof.py
       - name: Execute bounded Windows host telemetry and macro-preflight proof
         run: python tests/r238-windows-host-runtime-proof.py
