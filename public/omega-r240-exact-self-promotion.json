@@ -1,0 +1,48 @@
+{
+  "schema": "OMEGA_EXACT_SELF_PROMOTION_R240",
+  "revision": "R240",
+  "state": "SOURCE_CANDIDATE_NOT_PRODUCTION_PROOF",
+  "sourceGenerator": "R170",
+  "scheduler": "R239",
+  "eligibleScope": "R170-generated low/medium-risk bounded capsules only",
+  "gates": {
+    "exactSuccessfulProductionBase": true,
+    "noParallelAutonomousCandidate": true,
+    "r164ResidualGate": "PASS",
+    "highOrCriticalResidualAllowed": false,
+    "preGenerationSuccessorProof": true,
+    "postGenerationFullProof": true,
+    "postCommitExactCandidateReproof": true,
+    "candidateReceiptStatus": "PROVED_PENDING_PR",
+    "candidateAllTestsTrue": true,
+    "unchangedBaseImmediatelyBeforeMerge": true,
+    "expectedHeadShaRequired": true,
+    "allowlistedDiffOnly": true,
+    "mergeMethod": "merge",
+    "twoParentMergeRequired": true
+  },
+  "allowlistedAutonomousDiff": [
+    "the exact generated src/generated/selfbuildR170 target named by the receipt",
+    "public/omega-r170-selfbuild-state.json",
+    "public/omega-r170-selfbuild-candidate.json"
+  ],
+  "deployment": {
+    "soleCanonicalWriter": ".github/workflows/ci.yml",
+    "explicitWorkflowDispatchAfterTokenMerge": true,
+    "selfBuilderMayDeployDirectly": false,
+    "selfBuilderMayDispatchItself": false,
+    "exactMergedShaProductionSuccessRequired": true,
+    "failedProductionResult": "STOP_AND_FORWARD_REPAIR"
+  },
+  "authority": {
+    "sourcePromotion": "R240 bounded inside existing R170 governed self-build workflow",
+    "dispatch": "R147",
+    "hybridReturn": "R141",
+    "durableHistory": "R146",
+    "canonStateAdmission": "R125",
+    "githubAutoMergeFeature": false,
+    "canonAdmissionClaimed": false
+  },
+  "truthLaw": "generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
+  "truthBoundary": "R240 automates only source promotion and canonical deployment verification of R170-generated bounded candidates. It cannot auto-admit CanonState, cannot promote arbitrary PRs, cannot bypass residual or exact-head proof, cannot create a second production writer, and cannot call a red production deployment successful."
+}
