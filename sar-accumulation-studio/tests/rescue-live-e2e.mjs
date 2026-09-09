@@ -32,6 +32,14 @@ try {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert.ok(overflow <= 2, `horizontal overflow ${overflow}px at ${viewport.width}`);
 
+    await page.evaluate(() => {
+      window.__omegaMapViews=[];
+      window.__omegaMapSelections=[];
+      const map=document.querySelector('#map');
+      map.addEventListener('omega-map-view', e => window.__omegaMapViews.push(e.detail));
+      map.addEventListener('omega-map-select', e => window.__omegaMapSelections.push(e.detail));
+    });
+
     await page.fill('#jumpLat','32.222600');
     await page.fill('#jumpLon','-110.974700');
     await page.click('#jumpLocation');
@@ -43,21 +51,27 @@ try {
     assert.ok(box);
     const beforePoint = await page.textContent('#point');
     await page.mouse.click(box.x + box.width * .62, box.y + box.height * .42);
-    await page.waitForTimeout(150);
+    await page.waitForFunction(before => (document.querySelector('#point')?.textContent || '') !== before, beforePoint, {timeout:5000});
     const afterPoint = await page.textContent('#point');
     assert.notEqual(afterPoint, beforePoint, `map click did not select a new location at ${viewport.width}`);
+    assert.ok(await page.evaluate(() => window.__omegaMapSelections.length >= 1), `selection event missing at ${viewport.width}`);
 
-    const beforeCanvas = await page.screenshot({fullPage:false});
+    const beforeView = await page.evaluate(() => window.__omegaMapViews.at(-1) || null);
     await page.mouse.move(box.x + box.width * .50, box.y + box.height * .50);
     await page.mouse.down();
     await page.mouse.move(box.x + box.width * .70, box.y + box.height * .57, {steps:6});
     await page.mouse.up();
-    await page.waitForTimeout(150);
-    const afterCanvas = await page.screenshot({fullPage:false});
-    assert.notDeepEqual(afterCanvas, beforeCanvas, `drag produced no visible change at ${viewport.width}`);
+    await page.waitForFunction(before => {
+      const now=window.__omegaMapViews.at(-1);
+      return now && (!before || now.centerLon!==before.centerLon || now.centerLat!==before.centerLat);
+    }, beforeView, {timeout:5000});
 
     await page.click('#worldView');
-    await page.waitForTimeout(100);
+    await page.waitForFunction(() => {
+      const now=window.__omegaMapViews.at(-1);
+      return now && Math.abs(now.centerLon)<1e-9 && Math.abs(now.centerLat)<1e-9 && Math.abs(now.scale-1)<1e-9;
+    }, null, {timeout:5000});
+
     assert.deepEqual(errors.filter(x => !/favicon|Failed to load resource|ERR_BLOCKED_BY_CLIENT/i.test(x)), [], `browser errors at ${viewport.width}: ${errors.join(' | ')}`);
     await page.close();
   }
