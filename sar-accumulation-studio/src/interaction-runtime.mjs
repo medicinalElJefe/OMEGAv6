@@ -24,11 +24,6 @@ function ensureLiveSource(){const source=$('#sourceMode');if(source&&source.valu
 function bindTargetInputs(point){const lat=$('#jumpLat'),lon=$('#jumpLon'),aoi=$('#aoi');if(lat)lat.value=point.lat.toFixed(6);if(lon)lon.value=point.lon.toFixed(6);if(aoi)aoi.value=`POINT(${point.lon.toFixed(6)} ${point.lat.toFixed(6)})`;}
 function setSentinelAutoPatch(enabled){const box=$('#sarAutoPatch');if(!box)return;if(box.checked!==enabled){box.checked=enabled;box.dispatchEvent(new Event('change',{bubbles:true}));}}
 async function waitFor(fn,{timeout=30000,interval=80}={}){const start=performance.now();let lastError=null;while(performance.now()-start<timeout){try{const value=fn();if(value)return value;}catch(error){lastError=error;}await sleep(interval);}if(lastError)throw lastError;throw new Error('Timed out waiting for live SAR state');}
-async function focusTarget(point){
-  bindTargetInputs(point);const nav=globalThis.OMEGA_SAR_NAVIGATION;
-  if(nav?.focusLocation)await nav.focusLocation(point,{scale:120,bind:false});
-  else await sleep(50);
-}
 function clearOldMeasurement(){globalThis.OMEGA_SAR_RENDERER?.clearSarOverlay?.();window.dispatchEvent(new CustomEvent('omega-calibrated-sar-patch-clear',{detail:{reason:'TARGET_OR_FRAME_CHANGED'}}));}
 async function loadCatalog(point,token){
   ensureLiveSource();bindTargetInputs(point);setHud('Searching Sentinel-1 at the selected target',`${point.lat.toFixed(5)}, ${point.lon.toFixed(5)} · Earth Search STAC`,'CATALOG',true);$('#load')?.click();
@@ -41,37 +36,29 @@ async function waitForSourceFrame({after=0,scene=null,timeout=15000}={}){return 
 async function ensureSentinel(){return waitFor(()=>globalThis.OMEGA_SAR_SENTINEL?.loadCalibratedCurrent&&globalThis.OMEGA_SAR_SENTINEL,{timeout:15000});}
 async function exactCalibration({force=false}={}){
   if(state.calibrationBusy)return null;state.calibrationBusy=true;const scene=currentScene(),sentinel=await ensureSentinel();
-  try{
-    const patch=await sentinel.loadCalibratedCurrent({force});if(!patch)return null;
-    const patchKey=`${patch.id}|${patch.startTime}|${patch.target?.lon},${patch.target?.lat}`;state.lastPatchKey=patchKey;state.patchSequence++;
-    if(currentScene()===patch.id)setHud('Exact measured SAR is ready',`${patch.polarization} ${patch.quantity} · ${patch.startTime} · source geolocation mesh · use FIT SAR for local view`,'CALIBRATED',false);
-    return patch;
-  }catch(error){if(currentScene()===scene&&!state.playing)setHud('Source SAR live · exact measured patch unresolved',error.message,'SOURCE SAR',false);return null;}
-  finally{state.calibrationBusy=false;}
+  try{const patch=await sentinel.loadCalibratedCurrent({force});if(!patch)return null;state.lastPatchKey=`${patch.id}|${patch.startTime}|${patch.target?.lon},${patch.target?.lat}`;state.patchSequence++;if(currentScene()===patch.id)setHud('Exact measured SAR is ready',`${patch.polarization} ${patch.quantity} · ${patch.startTime} · source geolocation mesh · FIT SAR for measurement-scale view`,'CALIBRATED',false);return patch;}
+  catch(error){if(currentScene()===scene&&!state.playing)setHud('Source SAR live · exact measured patch unresolved',error.message,'SOURCE SAR',false);return null;}finally{state.calibrationBusy=false;}
 }
 function startCalibrationBackground(options={}){exactCalibration(options).catch(()=>{});}
-async function activateTarget(point,{reason='Earth selection'}={}){
+async function activateTarget(point,{reason='target change'}={}){
   if(!point||!Number.isFinite(point.lon)||!Number.isFinite(point.lat))return;const k=keyOf(point);if(state.activating&&k===state.targetKey)return;
-  const token=++state.activation;state.activating=true;state.target={lon:Number(point.lon),lat:Number(point.lat)};state.targetKey=k;stopPlayback({quiet:true});clearOldMeasurement();setSentinelAutoPatch(false);
+  const token=++state.activation;state.activating=true;state.target={lon:Number(point.lon),lat:Number(point.lat)};state.targetKey=k;stopPlayback({quiet:true});clearOldMeasurement();setSentinelAutoPatch(false);bindTargetInputs(state.target);
   try{
-    setHud('Binding SAR target',`${point.lat.toFixed(5)}, ${point.lon.toFixed(5)} · ${reason}`,'TARGET',true);await focusTarget(point);if(token!==state.activation)return;
-    const found=await loadCatalog(point,token);if(token!==state.activation)return;if(!found){setHud('No Sentinel-1 acquisition resolved','Target remains correct; no matching scene was found in the expanded history.','NO SCENE',false);return;}
-    const scene=currentScene(),before=state.sourceSequence;setHud(`${obsCount()} Sentinel-1 acquisitions found`,'Putting real source SAR on the authoritative camera.','SOURCE SAR',true);
-    try{await waitForSourceFrame({after:before,scene,timeout:18000});}catch{}
-    if(token!==state.activation)return;setHud('SAR target is live',`${obsCount()} acquisitions · source SAR visible · exact calibrated patch computing without moving the camera`,'SOURCE SAR',false);startCalibrationBackground({force:true});
-  }catch(error){if(token===state.activation)setHud('SAR target did not resolve',error.message,'ERROR',false);}
-  finally{if(token===state.activation){state.activating=false;setSentinelAutoPatch(false);}}
+    // Camera authority is deliberately NOT changed here. Search/LOCATE already center the camera;
+    // a direct map click binds a new target at the clicked WGS84 coordinate without jumping the view.
+    setHud('Binding SAR target',`${point.lat.toFixed(5)}, ${point.lon.toFixed(5)} · ${reason}`,'TARGET',true);
+    const found=await loadCatalog(point,token);if(token!==state.activation)return;if(!found){setHud('No Sentinel-1 acquisition resolved','Target remains exact; no matching scene was found in the expanded history.','NO SCENE',false);return;}
+    const scene=currentScene(),before=state.sourceSequence;setHud(`${obsCount()} Sentinel-1 acquisitions found`,'Putting real source SAR on the current authoritative camera.','SOURCE SAR',true);try{await waitForSourceFrame({after:before,scene,timeout:18000});}catch{}if(token!==state.activation)return;
+    setHud('SAR target is live',`${obsCount()} acquisitions · source SAR visible · exact calibrated patch computing without moving the camera`,'SOURCE SAR',false);startCalibrationBackground({force:true});
+  }catch(error){if(token===state.activation)setHud('SAR target did not resolve',error.message,'ERROR',false);}finally{if(token===state.activation){state.activating=false;setSentinelAutoPatch(false);}}
 }
 function frameDelay(){const speed=Number($('#speed')?.value)||550;return clamp(1650-speed,650,1650);}
-async function playLoop(token){
-  while(state.playing&&token===state.playToken){const n=frameCount();if(n<2)break;const next=(currentFrame()+1)%n,timeline=$('#timeline'),before=state.sourceSequence;clearOldMeasurement();timeline.value=String(next);timeline.dispatchEvent(new Event('input',{bubbles:true}));const scene=currentScene();setHud(`Playing SAR ${next+1} / ${n}`,`${($('#currentTime')?.textContent||'').trim()} · changing actual Sentinel-1 source scene`,'PLAY',true);
-    try{await waitForSourceFrame({after:before,scene,timeout:12000});setHud(`Playing SAR ${next+1} / ${n}`,`${scene} · source scene visible on the same camera`,'PLAY',false);}catch(error){setHud(`Frame ${next+1} / ${n} delayed`,error.message,'PLAY',true);}if(!state.playing||token!==state.playToken)break;await sleep(frameDelay());}
-}
+async function playLoop(token){while(state.playing&&token===state.playToken){const n=frameCount();if(n<2)break;const next=(currentFrame()+1)%n,timeline=$('#timeline'),before=state.sourceSequence;clearOldMeasurement();timeline.value=String(next);timeline.dispatchEvent(new Event('input',{bubbles:true}));const scene=currentScene();setHud(`Playing SAR ${next+1} / ${n}`,`${($('#currentTime')?.textContent||'').trim()} · changing actual Sentinel-1 source scene`,'PLAY',true);try{await waitForSourceFrame({after:before,scene,timeout:12000});setHud(`Playing SAR ${next+1} / ${n}`,`${scene} · source scene visible on the same camera`,'PLAY',false);}catch(error){setHud(`Frame ${next+1} / ${n} delayed`,error.message,'PLAY',true);}if(!state.playing||token!==state.playToken)break;await sleep(frameDelay());}}
 async function startPlayback(){if(state.playing){stopPlayback();return;}if(state.activating)await waitFor(()=>!state.activating,{timeout:70000});const point=pointFromText();if(!point){setHud('Choose a SAR target first','Click the Earth, LOCATE, or search.','WAIT',false);return;}if(obsCount()<1){await activateTarget(point,{reason:'Play request'});if(obsCount()<1)return;}setSentinelAutoPatch(false);state.playing=true;const token=++state.playToken,button=$('#play');if(button)button.textContent='Pause';setHud('Starting SAR playback',`${obsCount()} acquisition(s) · source frames are synchronized to this target and camera`,'PLAY',true);await playLoop(token);}
-function stopPlayback({quiet=false}={}){const was=state.playing;state.playing=false;state.playToken++;const button=$('#play');if(button)button.textContent='Play';if(was&&!quiet){setHud('Playback paused',`${currentFrame()+1} / ${frameCount()} · loading exact measured patch for this frame without moving the camera`,'PAUSED',false);startCalibrationBackground({force:false});}}
+function stopPlayback({quiet=false}={}){const was=state.playing;state.playing=false;state.playToken++;const button=$('#play');if(button)button.textContent='Play';if(was&&!quiet){setHud('Playback paused',`${currentFrame()+1} / ${frameCount()} · loading exact measured patch without moving the camera`,'PAUSED',false);startCalibrationBackground({force:false});}}
 function wire(){
   inject();window.addEventListener('omega-source-sar-frame',event=>{state.sourceSequence++;state.lastSourceScene=event.detail?.id||null;state.lastSourceTime=event.detail?.startTime||null;});
-  const point=$('#point');if(point){let last=keyOf(pointFromText());new MutationObserver(()=>{const p=pointFromText(),k=keyOf(p);if(!p||k===last)return;last=k;activateTarget(p,{reason:'authoritative target change'});}).observe(point,{childList:true,subtree:true,characterData:true});}
+  const point=$('#point');if(point){let last=keyOf(pointFromText());new MutationObserver(()=>{const p=pointFromText(),k=keyOf(p);if(!p||k===last)return;last=k;activateTarget(p,{reason:'authoritative WGS84 target change'});}).observe(point,{childList:true,subtree:true,characterData:true});}
   $('#play')?.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();startPlayback();},true);$('#prev')?.addEventListener('click',()=>setTimeout(()=>{if(!state.playing){clearOldMeasurement();startCalibrationBackground({force:false});}},80));$('#next')?.addEventListener('click',()=>setTimeout(()=>{if(!state.playing){clearOldMeasurement();startCalibrationBackground({force:false});}},80));$('#timeline')?.addEventListener('change',()=>{if(!state.playing){clearOldMeasurement();startCalibrationBackground({force:false});}});
   map?.addEventListener('omega-map-select',event=>{const p=event.detail;if(p&&Number.isFinite(p.lon)&&Number.isFinite(p.lat)){state.target={lon:Number(p.lon),lat:Number(p.lat)};state.targetKey=keyOf(p);bindTargetInputs(p);}});
 }
