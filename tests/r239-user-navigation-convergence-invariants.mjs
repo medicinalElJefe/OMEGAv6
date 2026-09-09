@@ -5,6 +5,7 @@ const nav=read('src/OmegaSideNavigatorR88.tsx');
 const home=read('src/OmegaHomeR71.tsx');
 const css=read('src/omegaSideNavigatorR239.css');
 const registry=read('src/omegaExperienceRegistryR82.ts');
+const layerIntegrity=read('tests/r104-extreme-layer-integrity-invariants.mjs');
 
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
 must(routes.length===44&&new Set(routes).size===44,'must preserve all 44 unique registered destinations');
@@ -54,6 +55,7 @@ must(!home.includes("aria-label='All 44 applications'"),'visible All tools langu
 const quick=home.match(/const QUICK=\[(.*?)\] as const;/s)?.[1]||'';
 must(!quick.includes('SAI Lab')&&!quick.includes('Visual Instrument'),'universal quick actions must not duplicate workspace-specific specialist tools');
 must(home.includes("type SurfaceDepth='FOCUS'|'DEEP'"),'focus/deep density contract must remain available');
+must(layerIntegrity.includes("nav.includes('<span>YOU ARE HERE</span>')")&&layerIntegrity.includes("workspace.copy"),'R104 inherited layer integrity must prove current-location and destination explanation structurally instead of frozen prose');
 
 for(const token of [
  ".r239-home[data-r132-depth='FOCUS'] .r96-context-card>div{display:none}",
@@ -63,4 +65,4 @@ for(const token of [
  "@media(max-width:560px)"
 ])must(css.includes(token),'R239 responsive presentation law missing '+token);
 
-console.log('R239.1 USER NAVIGATION CONVERGENCE PASS · Home→workspace→start-here→all-tools hierarchy · universal rail Command/Hybrid/Earth/Proof · full 44-route registry retained · primary/support/expert grouped · technical metadata opt-in · visible/accessible naming aligned · focus/deep density preserved · no new execution or Canon authority');
+console.log('R239.1 USER NAVIGATION CONVERGENCE PASS · Home→workspace→start-here→all-tools hierarchy · universal rail Command/Hybrid/Earth/Proof · full 44-route registry retained · primary/support/expert grouped · technical metadata opt-in · visible/accessible naming aligned · R104 semantic location/destination explanation bound · focus/deep density preserved · no new execution or Canon authority');
