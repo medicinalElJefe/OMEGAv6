@@ -75,6 +75,16 @@ function inject(){
     const d=event.detail||{};
     $('earthBoundaryState').textContent=d.state==='ready'?`${d.source||'published'} · ${d.count||0} features`:d.state==='unavailable'?'boundary layer unavailable; WGS84 navigation still active':String(d.state||'unknown');
   });
+  canvas.addEventListener('omega-map-select',event=>{
+    const point=normalizePoint(event.detail);
+    if(point) syncSelectedPoint(point,{syncInputs:true});
+  });
+
+  const jumpButton=$('jumpLocation');
+  jumpButton?.addEventListener('click',()=>{
+    const point=normalizePoint({lat:Number($('jumpLat')?.value),lon:Number($('jumpLon')?.value)});
+    if(point) syncSelectedPoint(point,{syncInputs:false});
+  });
 
   const pointNode=$('point');
   if(pointNode){
@@ -88,18 +98,28 @@ function inject(){
   setTimeout(()=>healthObserver.disconnect(),15000);
 }
 
+function normalizePoint(point){
+  const lat=Number(point?.lat),lon=Number(point?.lon);
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat < -90||lat > 90||lon < -180||lon > 180)return null;
+  return {lat,lon};
+}
+
 function parsePointText(text){
   const values=String(text||'').match(/-?\d+(?:\.\d+)?/g)?.map(Number)||[];
-  if(values.length<2||!values.slice(0,2).every(Number.isFinite)) return null;
-  const [lat,lon]=values;
-  if(lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
-  return {lat,lon};
+  return values.length>=2?normalizePoint({lat:values[0],lon:values[1]}):null;
 }
 
 function syncSelectedFromPoint(text){
   const point=parsePointText(text);
-  if(!point) return;
+  if(point) syncSelectedPoint(point,{syncInputs:false});
+}
+
+function syncSelectedPoint(point,{syncInputs=false}={}){
   $('earthSelectedCoords').textContent=`${fmt(point.lat)}, ${fmt(point.lon)} · WGS84 / EPSG:4326`;
+  if(syncInputs){
+    if($('jumpLat'))$('jumpLat').value=Number(point.lat).toFixed(6);
+    if($('jumpLon'))$('jumpLon').value=Number(point.lon).toFixed(6);
+  }
   resolveSelectedPlace(point);
 }
 
