@@ -1,0 +1,61 @@
+name: SAR Pages Rescue
+
+on:
+  push:
+    branches:
+      - release/sar-public-rescue
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sar-pages-rescue
+  cancel-in-progress: true
+
+jobs:
+  verify-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout rescue build
+        uses: actions/checkout@v7
+
+      - name: Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Verify source syntax and deterministic tests
+        working-directory: sar-accumulation-studio
+        run: |
+          npm run check
+          npm test
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Build Pages artifact
+        run: |
+          mkdir -p _site/sar
+          cp -a sar-accumulation-studio/. _site/sar/
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./sar/"><title>OMEGA SAR</title><a href="./sar/">Open OMEGA SAR Accumulation Studio</a>' > _site/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: verify-and-package
+    steps:
+      - name: Deploy rescue site
+        id: deployment
+        uses: actions/deploy-pages@v4
