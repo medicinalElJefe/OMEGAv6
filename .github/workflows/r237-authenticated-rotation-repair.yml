@@ -9,7 +9,6 @@ permissions:
 
 jobs:
   repair:
-    if: github.event.head_commit.message == 'R237: stage one-shot authenticated rotation repair'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
