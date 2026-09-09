@@ -1,9 +1,10 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R100 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R100/R242 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
+const lemma=read('src/navigationLemmaCalculusR242.js');
 const navCss=read('src/omegaSideNavigatorR100.css');
 const studio=read('src/OmegaTraversalStudio.tsx');
 const stage=read('src/TraversalModeStageR100.tsx');
@@ -38,7 +39,8 @@ must(nav.includes("import './omegaSideNavigatorR100.css'"),'professional rail sk
 must(nav.includes('r100-professional-nav')&&nav.includes('r100-omega-mark'),'professional instrument rail identity missing');
 for(const token of ["go('Command Center')","go('Hybrid Link')","go('Earth Now')","go('Evidence & Proof')"])must(nav.includes(token),'universal rail quick action missing '+token);
 for(const route of ['Extreme Traversal','Matter Traversal'])must(surfaces.includes(route),`specialized R100 route must remain in the canonical 44-route universe: ${route}`);
-must(nav.includes("aria-label='Browse all registered OMEGA tools'")&&nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>'),'all 44 destinations, including specialized traversal instruments, must remain reachable through All Tools');
+must(nav.includes("aria-label='Browse all registered OMEGA tools'")&&nav.includes('compileNavigationLemmaR242({routes:routeRecords,query,workspaceFilter,currentRoute:currentPanel})')&&nav.includes('rows.map(route=>'),'all 44 destinations, including specialized traversal instruments, must remain reachable through the R242-conserved All Tools transform');
+must(lemma.includes('WORKSPACE_PARTITION_MUST_CONSERVE_THE_COMPLETE_ROUTE_SET')&&lemma.includes('QUERY_TRANSFORM_MAY_REORDER_PRESENTATION_BUT_MAY_NOT_RENAME_OR_DUPLICATE_ROUTES'),'R242 navigation calculus must preserve the R100 route universe under workspace/query transforms');
 must(nav.includes("dataset.omegaNavExpanded=expanded?'true':'false'"),'layout reservation state must remain intact');
 must(!nav.includes('r88-navigator-backdrop'),'professional rail may not regress to modal overlay navigation');
 must(navCss.includes('@media(min-width:901px)')&&navCss.includes('--r94-nav-rail:62px')&&navCss.includes('.r100-active-route'),'desktop rail/panel hierarchy missing');
@@ -51,4 +53,4 @@ must(accepted.includes("'R100 woven continuity geometry/time + professional inst
 must(accepted.includes("'R98 unobstructed visual-stage authority'")&&accepted.includes("'R99 source-driven design-mode correlation authority'"),'R100 must extend accepted R98/R99 authority');
 must(![nav,navCss,stage,weave,weaveCss].join('\n').includes('@appdeploy/client'),'R100 must remain provider portable');
 
-console.log('R100/R239.1 WEAVE INSTRUMENT PASS · professional non-covering universal rail · specialized traversal retained through complete All Tools registry · deterministic time-synchronized woven continuity geometry · atlas/address output preserved under R101 effective-resolution extension · R99 modes and 44 routes preserved');
+console.log('R100/R239.1/R242 WEAVE INSTRUMENT PASS · professional non-covering universal rail · specialized traversal retained through calculus-conserved All Tools registry · deterministic time-synchronized woven continuity geometry · atlas/address output preserved under R101 effective-resolution extension · R99 modes and 44 routes preserved');
