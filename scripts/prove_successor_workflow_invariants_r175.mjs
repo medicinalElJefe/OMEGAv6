@@ -12,10 +12,11 @@ const core=new Set([
   'r170-current-convergence.yml',
   'r170-governed-selfbuild.yml'
 ]);
+const maintenanceOnly=new Set(['r2461-legacy-ref-cleanup.yml']);
 const active=fs.readdirSync(activeDir).filter(x=>/\.ya?ml$/i.test(x)).sort();
 const successors=[];
 for(const name of active){
-  if(core.has(name))continue;
+  if(core.has(name)||maintenanceOnly.has(name))continue;
   const match=name.match(/^r(\d+)(?:[-.].*)?\.ya?ml$/i);
   assert.ok(match,`successor workflow name does not expose revision: ${name}`);
   const revision=Number(match[1]);
@@ -29,6 +30,14 @@ for(const name of active){
   successors.push({name,revision,test:own});
 }
 
+for(const name of maintenanceOnly){
+  if(!active.includes(name))continue;
+  const text=fs.readFileSync(path.join(activeDir,name),'utf8');
+  assert.match(text,/R246\.1 Legacy Autonomous Ref Cleanup/,'maintenance workflow identity drift');
+  assert.match(text,/OMEGA_R2461_LEGACY_AUTONOMOUS_REF_CLEANUP_V1/,'maintenance workflow must self-prove exact R246.1 policy');
+  assert.ok(!/^\s*schedule\s*:/m.test(text),`${name} may not enter recurring successor execution`);
+}
+
 successors.sort((a,b)=>a.revision-b.revision||a.name.localeCompare(b.name));
 for(const successor of successors){
   console.log(`PROVE SUCCESSOR R${successor.revision}: ${successor.test}`);
@@ -36,4 +45,4 @@ for(const successor of successors){
   if(result.error)throw result.error;
   assert.equal(result.status,0,`${successor.name} focused invariant failed with status ${result.status}`);
 }
-console.log(JSON.stringify({schema:'OMEGA_SUCCESSOR_WORKFLOW_PROOF_R175',successorCount:successors.length,successors,result:'PASS'},null,2));
+console.log(JSON.stringify({schema:'OMEGA_SUCCESSOR_WORKFLOW_PROOF_R175',successorCount:successors.length,maintenanceOnly:[...maintenanceOnly].filter(x=>active.includes(x)),successors,result:'PASS'},null,2));
