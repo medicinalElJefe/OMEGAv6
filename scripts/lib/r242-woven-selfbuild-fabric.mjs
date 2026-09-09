@@ -58,13 +58,8 @@ export function validateRoadmapDagR242(roadmap=[]){
 export function carryScarsR242(previousScars=[],evidence={}){
   const carried=(Array.isArray(previousScars)?previousScars:[]).map((s,index)=>({...s,carried:true,carryIndex:index}));
   const observed=(Array.isArray(evidence?.residuals)?evidence.residuals:[]).map((r,index)=>({
-    scarId:String(r?.id||`R164-${index}`),
-    severity:String(r?.severity||'UNSPECIFIED').toUpperCase(),
-    mode:String(r?.mode||'OBSERVE_ONLY').toUpperCase(),
-    summary:String(r?.summary||''),
-    provenance:'R164_RETURNED_RESIDUAL_EVIDENCE',
-    evidenceClass:'RETURNED_RESIDUAL',
-    carried:false
+    scarId:String(r?.id||`R164-${index}`),severity:String(r?.severity||'UNSPECIFIED').toUpperCase(),mode:String(r?.mode||'OBSERVE_ONLY').toUpperCase(),
+    summary:String(r?.summary||''),provenance:'R164_RETURNED_RESIDUAL_EVIDENCE',evidenceClass:'RETURNED_RESIDUAL',carried:false
   }));
   const out=[];const seen=new Set();
   for(const scar of [...carried,...observed]){
@@ -76,12 +71,10 @@ export function carryScarsR242(previousScars=[],evidence={}){
 
 export function rolePacketsForCellR242(cell){
   return R242_ROLES.map(role=>({
-    schema:'OMEGA_WOVEN_WORK_PACKET_R242',revision:'R242',role,
-    workCellId:cell.id,address:cell.address.address,objective:cell.objective,
+    schema:'OMEGA_WOVEN_WORK_PACKET_R242',revision:'R242',role,workCellId:cell.id,address:cell.address.address,objective:cell.objective,
     inputs:{dependencies:[...cell.dependencies],evidenceState:cell.evidenceState,scarIds:cell.scars.map(s=>s.scarId||s.id||'').filter(Boolean)},
-    invariants:[...R242_INVARIANT_CARRY],
-    provenance:cell.provenance,evidenceClass:cell.evidenceClass,sigma:0,
-    transformationHistory:['R240_PRESSURE_RANK','R242_DAG_READY','R242_WOVEN_PACKETIZE'],
+    invariants:[...R242_INVARIANT_CARRY],provenance:cell.provenance,evidenceClass:cell.evidenceClass,sigma:0,
+    transformationHistory:[...cell.transformationHistory,'R242_WOVEN_PACKETIZE'],executionIdentity:null,proofIdentity:null,
     authorityBoundary:{planning:'R242',singleSourceMutation:'R240',dispatch:'R147',exactReturn:'R141',durableHistory:'R146',canonAdmission:'R125'},
     sourceMutationAuthorized:false,dispatchAuthorized:false,canonAdmission:false
   }));
@@ -92,13 +85,16 @@ export function buildWorkCellR242(capsule,index,{admitted=new Set(),evidence={},
   const address=addressForCellR242(index);
   const dependencies=deps(capsule).map(String);
   const ready=dependencyReadyR240(capsule,admittedSet);
+  const target=capsule.target||null;
+  const scarCopy=scars.map(s=>({...s}));
   return {
     schema:'OMEGA_WOVEN_WORK_CELL_R242',revision:'R242',id:String(capsule.id),parent:'OMEGA_FULL_OVERALL_CANON',
-    objective:String(capsule.objective||capsule.title||capsule.id),target:capsule.target||null,address,dependencies,
-    invariants:[...R242_INVARIANT_CARRY],expectedOutputs:capsule.target?[capsule.target]:[],tests:[],
+    objective:String(capsule.objective||capsule.title||capsule.id),inputs:{dependencies,evidenceState:evidence?.state||'UNPROVEN'},
+    target,files:target?[target]:[],address,dependencies,invariants:[...R242_INVARIANT_CARRY],expectedOutputs:target?[target]:[],tests:[],
     authorityBoundary:{planning:'R242',sourceMutation:'R240_SINGLE_CANDIDATE_ONLY',dispatch:'R147',returnVerification:'R141',durableHistory:'R146',canonAdmission:'R125'},
-    residuals:[...scars],state:ready?'READY':'DEPENDENCY_BLOCKED',provenance:'R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DECLARED_ROADMAP_DAG',
-    evidenceClass:'PLANNING_DERIVED_FROM_RETURNED_EVIDENCE',sigma:0,score:candidateScoreR240(capsule),evidenceState:evidence?.state||'UNPROVEN',
+    residuals:scarCopy,scars:scarCopy,state:ready?'READY':'DEPENDENCY_BLOCKED',provenance:'R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DECLARED_ROADMAP_DAG',
+    evidenceClass:'PLANNING_DERIVED_FROM_RETURNED_EVIDENCE',sigma:0,transformationHistory:['R240_PRESSURE_RANK','R242_DAG_READY'],
+    executionIdentity:null,proofIdentity:null,score:candidateScoreR240(capsule),evidenceState:evidence?.state||'UNPROVEN',
     canonicalAdmission:false,sourceMutationAuthorized:false
   };
 }
@@ -108,19 +104,19 @@ export function planWovenBuildFabricR242({roadmap=[],admitted=[],maxParallel=12,
   const width=clampInt(maxParallel,1,12);
   const admittedSet=asSet(admitted);
   const scars=carryScarsR242(previousScars,evidence);
-  if(!dag.valid)return {schema:'OMEGA_WOVEN_SELFBUILD_FABRIC_R242',revision:'R242',state:'BLOCKED_INVALID_DAG',continuityOperator:R242_CONTINUITY_OPERATOR,resolution:R242_RESOLUTION,dag,sparseActivation:true,maxActiveCells:width,activeCells:[],packets:[],scars,invariantCarry:[...R242_INVARIANT_CARRY],sourceMutationCandidateId:null,parallelSourceMutation:false,canonicalAdmission:false,authority:'PLANNING_AND_EVALUATION_ONLY'};
-  if(roadmap.length>R242_RESOLUTION.cells)return {schema:'OMEGA_WOVEN_SELFBUILD_FABRIC_R242',revision:'R242',state:'BLOCKED_ADDRESS_CAPACITY',continuityOperator:R242_CONTINUITY_OPERATOR,resolution:R242_RESOLUTION,dag,sparseActivation:true,maxActiveCells:width,activeCells:[],packets:[],scars,invariantCarry:[...R242_INVARIANT_CARRY],sourceMutationCandidateId:null,parallelSourceMutation:false,canonicalAdmission:false,authority:'PLANNING_AND_EVALUATION_ONLY'};
+  const blocked=state=>({schema:'OMEGA_WOVEN_SELFBUILD_FABRIC_R242',revision:'R242',state,continuityOperator:R242_CONTINUITY_OPERATOR,resolution:R242_RESOLUTION,dag,sparseActivation:true,maxActiveCells:width,activeCells:[],packets:[],scars,invariantCarry:[...R242_INVARIANT_CARRY],sourceMutationCandidateId:null,parallelPlanning:true,parallelEvaluation:true,parallelSourceMutation:false,canonicalAdmission:false,authority:'PLANNING_AND_EVALUATION_ONLY'});
+  if(!dag.valid)return blocked('BLOCKED_INVALID_DAG');
+  if(roadmap.length>R242_RESOLUTION.cells)return blocked('BLOCKED_ADDRESS_CAPACITY');
   const pressured=attachEvidencePressureR240(roadmap,evidence);
   const cells=pressured.map((c,index)=>buildWorkCellR242(c,index,{admitted:admittedSet,evidence,scars}));
   const activeCells=cells.filter(c=>!admittedSet.has(c.id)&&c.state==='READY').sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id)).slice(0,width).map(c=>({...c,rolePackets:rolePacketsForCellR242(c)}));
   const packets=activeCells.flatMap(c=>c.rolePackets);
   return {
-    schema:'OMEGA_WOVEN_SELFBUILD_FABRIC_R242',revision:'R242',state:activeCells.length?'PLANNED':'OBSERVE',
-    continuityOperator:R242_CONTINUITY_OPERATOR,resolution:R242_RESOLUTION,dag,sparseActivation:true,maxActiveCells:width,
+    schema:'OMEGA_WOVEN_SELFBUILD_FABRIC_R242',revision:'R242',state:activeCells.length?'PLANNED':'OBSERVE',continuityOperator:R242_CONTINUITY_OPERATOR,
+    resolution:R242_RESOLUTION,dag,sparseActivation:true,maxActiveCells:width,
     addressSpace:{organs:12,branches:144,cells:1728,lanes:20736,deepAddress:248832,allocatedCells:cells.length,activeCells:activeCells.length},
-    cells,activeCells,packets,scars,invariantCarry:[...R242_INVARIANT_CARRY],
-    sourceMutationCandidateId:activeCells[0]?.id||null,parallelPlanning:true,parallelEvaluation:true,parallelSourceMutation:false,
-    provenance:'R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DECLARED_ROADMAP_DAG',evidenceState:evidence?.state||'UNPROVEN',
-    authority:'PLANNING_AND_EVALUATION_ONLY',canonicalAdmission:false
+    cells,activeCells,packets,scars,invariantCarry:[...R242_INVARIANT_CARRY],sourceMutationCandidateId:activeCells[0]?.id||null,
+    parallelPlanning:true,parallelEvaluation:true,parallelSourceMutation:false,provenance:'R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DECLARED_ROADMAP_DAG',
+    evidenceState:evidence?.state||'UNPROVEN',authority:'PLANNING_AND_EVALUATION_ONLY',canonicalAdmission:false
   };
 }
