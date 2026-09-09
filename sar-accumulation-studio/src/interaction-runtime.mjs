@@ -13,6 +13,7 @@ function obsCount(){return Number(($('#obsCount')?.textContent||'0').replace(/[^
 function statusKind(){return $('#status')?.dataset.kind||'';}
 function statusText(){return ($('#status')?.textContent||'').trim();}
 function currentScene(){return ($('#currentScene')?.textContent||'').trim();}
+function sourceFrame(){return globalThis.OMEGA_SAR_SOURCE_FRAME||null;}
 
 function inject(){
   const wrap=map?.closest('.map-wrap');if(!wrap||$('#omegaActionHud'))return;
@@ -28,10 +29,10 @@ function setSentinelAutoPatch(enabled){const box=$('#sarAutoPatch');if(!box)retu
 async function waitFor(fn,{timeout=30000,interval=80}={}){const start=performance.now();let lastError=null;while(performance.now()-start<timeout){try{const value=fn();if(value)return value;}catch(error){lastError=error;}await sleep(interval);}if(lastError)throw lastError;throw new Error('Timed out waiting for live SAR state');}
 
 async function focusTarget(point){
-  bindTargetInputs(point);$('#jumpLocation')?.click();await sleep(40);
-  const rect=map?.getBoundingClientRect();
-  for(let i=0;i<8;i++)map?.dispatchEvent(new WheelEvent('wheel',{deltaY:-120,clientX:(rect?.left||0)+(rect?.width||0)/2,clientY:(rect?.top||0)+(rect?.height||0)/2,bubbles:true,cancelable:true}));
-  await sleep(150);
+  bindTargetInputs(point);$('#jumpLocation')?.click();await sleep(100);
+  const nav=globalThis.OMEGA_SAR_NAVIGATION;if(nav?.focusScale)await nav.focusScale(950);
+  else {const rect=map?.getBoundingClientRect();for(let i=0;i<12;i++)map?.dispatchEvent(new WheelEvent('wheel',{deltaY:-120,clientX:(rect?.left||0)+(rect?.width||0)/2,clientY:(rect?.top||0)+(rect?.height||0)/2,bubbles:true,cancelable:true}));}
+  await sleep(100);
 }
 
 async function loadCatalog(point,token){
@@ -44,9 +45,10 @@ async function loadCatalog(point,token){
 
 async function waitForSourceFrame({after=0,scene=null,timeout=15000}={}){
   return waitFor(()=>{
-    const img=document.querySelector('.sar-source-browse-layer img'),visible=img&&img.complete&&img.naturalWidth>0&&Number.parseFloat(getComputedStyle(img).opacity)>.1;
+    const frame=sourceFrame(),canvas=document.querySelector('.sar-source-browse-canvas');
+    const visible=canvas?.dataset.ready==='true'&&canvas.width>1&&canvas.height>1;
     const sceneOk=!scene||state.lastSourceScene===scene;
-    return state.sourceSequence>after&&sceneOk&&visible?{scene:state.lastSourceScene,sequence:state.sourceSequence,src:img.currentSrc||img.src}:null;
+    return state.sourceSequence>after&&sceneOk&&visible&&frame?.src?{scene:state.lastSourceScene,sequence:state.sourceSequence,src:frame.src,registration:frame.registration}:null;
   },{timeout,interval:70});
 }
 
@@ -59,7 +61,7 @@ async function exactCalibration({force=false,focus=false}={}){
     if(!patch)return null;
     const patchKey=`${patch.id}|${patch.startTime}|${patch.target?.lon},${patch.target?.lat}`;state.lastPatchKey=patchKey;state.patchSequence++;
     if(currentScene()===patch.id){
-      if(focus&&patch.geoMesh?.validNodeCount>=4){const rect=map?.getBoundingClientRect();for(let i=0;i<11;i++)map?.dispatchEvent(new WheelEvent('wheel',{deltaY:-120,clientX:(rect?.left||0)+(rect?.width||0)/2,clientY:(rect?.top||0)+(rect?.height||0)/2,bubbles:true,cancelable:true}));}
+      if(focus&&patch.geoMesh?.validNodeCount>=4){const nav=globalThis.OMEGA_SAR_NAVIGATION;if(nav?.focusScale)await nav.focusScale(2600);}
       setHud('Calibrated measurement locked',`${patch.polarization} ${patch.quantity} · ${patch.startTime} · source GCP registration`,'CALIBRATED',false);
     }
     return patch;
@@ -78,10 +80,10 @@ async function activateTarget(point,{reason='Earth selection'}={}){
     const found=await loadCatalog(point,token);if(token!==state.activation)return;
     if(!found){setHud('No Sentinel-1 acquisition resolved','Location is active, but no scene was found in the expanded history window.','NO SCENE',false);return;}
     const scene=currentScene(),before=state.sourceSequence;
-    setHud(`${obsCount()} Sentinel-1 acquisitions found`,'Rendering the newest source SAR scene directly on Earth.','SOURCE SAR',true);
+    setHud(`${obsCount()} Sentinel-1 acquisitions found`,'Registering the newest source SAR browse to the published Sentinel-1 footprint.','SOURCE SAR',true);
     try{await waitForSourceFrame({after:before,scene,timeout:18000});}catch{}
     if(token!==state.activation)return;
-    setHud('Location is live',`${obsCount()} acquisitions · source SAR visible now · calibrated GCP/LUT layer computing in background`,'SOURCE SAR',false);
+    setHud('Location is live',`${obsCount()} acquisitions · footprint-registered source SAR visible · calibrated GCP/LUT layer computing in background`,'SOURCE SAR',false);
     startCalibrationBackground({force:true,focus:true});
   }catch(error){if(token===state.activation)setHud('SAR target did not resolve',error.message,'ERROR',false);}
   finally{if(token===state.activation){state.activating=false;setSentinelAutoPatch(false);}}
@@ -94,14 +96,14 @@ async function playLoop(token){
     const next=(currentFrame()+1)%n,timeline=$('#timeline'),before=state.sourceSequence;
     timeline.value=String(next);timeline.dispatchEvent(new Event('input',{bubbles:true}));const scene=currentScene();
     setHud(`Playing source SAR ${next+1} / ${n}`,`${($('#currentTime')?.textContent||'').trim()} · switching real Sentinel-1 scene`,'PLAY',true);
-    try{await waitForSourceFrame({after:before,scene,timeout:12000});setHud(`Playing source SAR ${next+1} / ${n}`,`${scene} · source scene visible · calibrated layer remains evidence-strengthening path`,'PLAY',false);}catch(error){setHud(`Frame ${next+1} / ${n} source visual delayed`,error.message,'PLAY',true);}
+    try{await waitForSourceFrame({after:before,scene,timeout:12000});setHud(`Playing source SAR ${next+1} / ${n}`,`${scene} · footprint-registered source scene visible · exact calibration remains separate`,'PLAY',false);}catch(error){setHud(`Frame ${next+1} / ${n} source visual delayed`,error.message,'PLAY',true);}
     if(!state.playing||token!==state.playToken)break;await sleep(frameDelay());
   }
 }
 async function startPlayback(){
   if(state.playing){stopPlayback();return;}
   if(state.activating)await waitFor(()=>!state.activating,{timeout:70000});
-  const point=pointFromText();if(!point){setHud('Choose a location first','Click the Earth or search for a place.','WAIT',false);return;}
+  const point=pointFromText();if(!point){setHud('Choose a location first','Click the Earth, use LOCATE, or search for a place.','WAIT',false);return;}
   if(obsCount()<1){await activateTarget(point,{reason:'Play request'});if(obsCount()<1)return;}
   state.restoreAutoPatch=$('#sarAutoPatch')?.checked!==false;setSentinelAutoPatch(false);state.playing=true;const token=++state.playToken;const button=$('#play');if(button)button.textContent='Pause';
   setHud('Starting live SAR playback',`${obsCount()} acquisition(s) · source SAR frames are synchronized to the timeline`,'PLAY',true);await playLoop(token);
