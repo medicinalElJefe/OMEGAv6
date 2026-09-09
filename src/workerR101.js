@@ -75,9 +75,14 @@ async function reconnectHybridR101(request,env){
  const body=await request.json().catch(()=>({})),sid=sessionId(request),requested=bridgeId(request,body),secret=text(request.headers.get('x-omega-bridge-secret'));
  if(requested&&secret){
   const auth=await runtimeFetch(env,requested,'/continuity',request,'GET');
-  if(auth.ok){const statusResponse=await hybridStatusR101(request,env,requested),status=await statusResponse.json();return json({...status,ok:true,reconnected:true,credentialState:'VALID',agentRestartRequired:false})}
+  if(auth.ok){
+   const statusResponse=await hybridStatusR101(request,env,requested),status=await statusResponse.json();
+   return json({...status,ok:true,reconnected:true,credentialState:'VALID',agentRestartRequired:false});
+  }
  }
- if(!body.repair)return json({ok:false,code:'PAIR_AUTH_FAILED',recoverable:true,credentialState:requested&&secret?'REJECTED':'MISSING',reply:'The browser pairing credential no longer authenticates this bridge. Repair can issue a fresh pairing without claiming the PC is online.'},401);
+ if(!body.repair){
+  return json({ok:false,code:'PAIR_AUTH_FAILED',recoverable:true,credentialState:requested&&secret?'REJECTED':'MISSING',reply:'The browser pairing credential no longer authenticates this bridge. Repair can issue a fresh pairing without claiming the PC is online.'},401);
+ }
  const pairResponse=await runtimeFetch(env,sid,'/pair',request,'POST',{rotate:true}),pair=await pairResponse.json().catch(()=>({}));
  if(!pairResponse.ok||!pair.secret)return json({ok:false,code:pair.code||'PAIR_REPAIR_FAILED',reply:pair.reply||'OMEGA could not issue a fresh Hybrid pairing credential.'},pairResponse.status||503);
  return json({...pair,ok:true,repaired:true,bridgeId:sid,pairingCode:`${sid}.${pair.secret}`,credentialState:'REISSUED',agentRestartRequired:true,agentPath:'/api/hybrid/agent-download',canonicalAgentRevision:'R207',proofClosureRevision:'R141',connectorProtocol:'R127_ZERO_DRIFT_SHA256',truthBoundary:'NEW_PAIR_REQUIRES_NEW_AUTHENTICATED_HEARTBEAT_R127'});
@@ -101,7 +106,20 @@ async function connectorManifestR127(request,env){
 
 async function serveCanonicalHybridAgentR101(request,env){
  const a=await canonicalAgentSource(request,env);if(!a.ok)return a.response;
- return new Response(a.source,{status:200,headers:{'content-type':'text/x-python; charset=utf-8','content-disposition':'attachment; filename="omega-hybrid-agent.py"','cache-control':'no-store, max-age=0','x-omega-agent-version':a.version,'x-omega-agent-sha256':a.digest,'x-omega-agent-bytes':String(a.bytes),'x-omega-agent-proof-closure':'R141','x-omega-agent-base-revision':'R205','x-omega-canonical-origin':AGENT_ORIGIN,'x-omega-hybrid-protocol':'R127_ZERO_DRIFT_SHA256','x-omega-execution-motion':EXECUTION_MOTION_REVISION,'x-omega-compat-route':'R101_DIRECT_AND_API_AGENT_DOWNLOAD'}});
+ return new Response(a.source,{status:200,headers:{
+  'content-type':'text/x-python; charset=utf-8',
+  'content-disposition':'attachment; filename="omega-hybrid-agent.py"',
+  'cache-control':'no-store, max-age=0',
+  'x-omega-agent-version':a.version,
+  'x-omega-agent-sha256':a.digest,
+  'x-omega-agent-bytes':String(a.bytes),
+  'x-omega-agent-proof-closure':'R141',
+  'x-omega-agent-base-revision':'R205',
+  'x-omega-canonical-origin':AGENT_ORIGIN,
+  'x-omega-hybrid-protocol':'R127_ZERO_DRIFT_SHA256',
+  'x-omega-execution-motion':EXECUTION_MOTION_REVISION,
+  'x-omega-compat-route':'R101_DIRECT_AND_API_AGENT_DOWNLOAD'
+ }});
 }
 
 async function fetchR101(request,env){
@@ -109,8 +127,14 @@ async function fetchR101(request,env){
  if(DIRECT_AGENT_PATHS_R2074[path])return directHybridAgentRelayR2074(request,env,path);
  if(path==='/omega-hybrid-agent.py'&&request.method==='GET')return serveCanonicalHybridAgentR101(request,env);
  if(path==='/api/hybrid/connector-manifest'&&request.method==='GET')return connectorManifestR127(request,env);
- if(path==='/api/hybrid/status'&&request.method==='GET'){if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE'},503);return hybridStatusR101(request,env,bridgeId(request))}
- if(path==='/api/hybrid/reconnect'&&request.method==='POST'){if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE'},503);return reconnectHybridR101(request,env)}
+ if(path==='/api/hybrid/status'&&request.method==='GET'){
+  if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE'},503);
+  return hybridStatusR101(request,env,bridgeId(request));
+ }
+ if(path==='/api/hybrid/reconnect'&&request.method==='POST'){
+  if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE'},503);
+  return reconnectHybridR101(request,env);
+ }
  return r34.fetch(request,env);
 }
 
@@ -120,7 +144,8 @@ export class OmegaRuntime extends OmegaRuntimeR34 {
   const t=Date.now(),jobs=await this.get('jobs',[]),missions=await this.get('missions',[]);let changed=false;
   for(const job of [...jobs]){
    if(job?.targetDeviceId!==deviceId||String(job?.status||'').toUpperCase()!=='RUNNING')continue;
-   const leaseUntil=Number(job?.leaseUntil||0),last=Number(job?.lastProgressAt||job?.startedAt||0),expired=leaseUntil>0?leaseUntil<t:Boolean(last&&t-last>LEGACY_RUNNING_STALE_MS);
+   const leaseUntil=Number(job?.leaseUntil||0),last=Number(job?.lastProgressAt||job?.startedAt||0);
+   const expired=leaseUntil>0?leaseUntil<t:Boolean(last&&t-last>LEGACY_RUNNING_STALE_MS);
    if(!expired)continue;
    changed=true;
    const failureCore={schema:'OMEGA_HYBRID_STALL_RETURN_R242',jobId:job.id,deviceId,failedAt:t,reason:leaseUntil?'EXECUTION_LEASE_EXPIRED':'LEGACY_RUNNING_WITHOUT_LEASE',lastProgressAt:Number(job?.lastProgressAt||0)||null,startedAt:Number(job?.startedAt||0)||null};
@@ -132,7 +157,12 @@ export class OmegaRuntime extends OmegaRuntimeR34 {
     if(stage==='DISCOVERY')safeSteps=safeSteps.filter(s=>String(s?.op||'').toUpperCase()==='INDEX').slice(0,1).map(s=>({...s,maxResults:4000,discoveryOnly:true,label:'R242 bounded project discovery after expired execution lease'}));
     else if(stage==='PROJECT_DISCOVERY')safeSteps=safeSteps.filter(s=>String(s?.op||'').toUpperCase()==='INDEX').slice(0,8).map(s=>({...s,maxResults:4000,discoveryOnly:true}));
     else if(stage==='SIGNATURE_DISCOVERY')safeSteps=safeSteps.filter(s=>String(s?.op||'').toUpperCase()==='SEARCH_TEXT').slice(0,1).map(s=>({...s,maxResults:120}));
-    if(safeSteps.length){const recovery={...job,id:randomIdR242('job'),status:'QUEUED',queuedAt:t,startedAt:null,completedAt:null,leaseUntil:null,lastProgressAt:null,progress:null,returnPacket:null,log:null,outputPaths:[],steps:safeSteps,recoveryOf:job.id,recoveryRevision:EXECUTION_MOTION_REVISION,recoveryReason:'EXPIRED_RUNNING_LEASE',inputFingerprint:await sha256(JSON.stringify({missionId:mission.id,recoveryOf:job.id,stage,steps:safeSteps,targetDeviceId:deviceId}))};jobs.push(recovery);Object.assign(mission,{status:'ACTIVE',currentJobId:recovery.id,currentJob:recovery,stallRecoveries:recoveries+1,stallRecoveryOf:job.id,holdReason:null,updatedAt:t});await this.event('R242_JOB_STALL_RECOVERED',`Expired non-mutating discovery job ${job.id} was replaced by bounded recovery ${recovery.id}.`,{deviceId,jobId:job.id,recoveryJobId:recovery.id,missionId:mission.id,stage});continue}
+    if(safeSteps.length){
+     const recovery={...job,id:randomIdR242('job'),status:'QUEUED',queuedAt:t,startedAt:null,completedAt:null,leaseUntil:null,lastProgressAt:null,progress:null,returnPacket:null,log:null,outputPaths:[],steps:safeSteps,recoveryOf:job.id,recoveryRevision:EXECUTION_MOTION_REVISION,recoveryReason:'EXPIRED_RUNNING_LEASE',inputFingerprint:await sha256(JSON.stringify({missionId:mission.id,recoveryOf:job.id,stage,steps:safeSteps,targetDeviceId:deviceId}))};
+     jobs.push(recovery);Object.assign(mission,{status:'ACTIVE',currentJobId:recovery.id,currentJob:recovery,stallRecoveries:recoveries+1,stallRecoveryOf:job.id,holdReason:null,updatedAt:t});
+     await this.event('R242_JOB_STALL_RECOVERED',`Expired non-mutating discovery job ${job.id} was replaced by bounded recovery ${recovery.id}.`,{deviceId,jobId:job.id,recoveryJobId:recovery.id,missionId:mission.id,stage});
+     continue;
+    }
    }
    await this.event('R242_JOB_STALL_FAILED',`Expired running job ${job.id} was failed closed; no blind replay was issued.`,{deviceId,jobId:job.id,missionId:mission?.id||null,stage:stage||null,mutation});
   }
@@ -146,14 +176,16 @@ export class OmegaRuntime extends OmegaRuntimeR34 {
    const t=Date.now(),jobs=await this.get('jobs',[]),target=jobs.find(j=>j?.id===jobId&&j?.targetDeviceId===deviceId&&String(j?.status||'').toUpperCase()==='RUNNING');if(!target)return json({ok:false,code:'R242_JOB_NOT_RUNNING'},409);
    const seq=Math.max(0,Math.floor(Number(b.seq)||0)),priorSeq=Math.max(-1,Math.floor(Number(target?.progress?.seq)||-1));if(seq<priorSeq)return json({ok:false,code:'R242_PROGRESS_SEQUENCE_STALE',expectedAtLeast:priorSeq},409);
    const state=['CLAIMED','STEP_RUNNING','STEP_COMPLETE','RETURNING'].includes(String(b.state||''))?String(b.state):'STEP_RUNNING',progress={schema:'OMEGA_HYBRID_EXECUTION_PROGRESS_R242',revision:EXECUTION_MOTION_REVISION,at:t,seq,state,stepId:safeId(b.stepId,''),stepOp:text(b.stepOp).slice(0,64),stepIndex:Math.max(0,Math.floor(Number(b.stepIndex)||0)),totalSteps:Math.max(0,Math.floor(Number(b.totalSteps)||0)),completedSteps:Math.max(0,Math.floor(Number(b.completedSteps)||0)),elapsedMs:Math.max(0,Math.floor(Number(b.elapsedMs)||0)),message:text(b.message).slice(0,240)};
-   const priorKey=`${target?.progress?.state||''}:${target?.progress?.stepId||''}:${target?.progress?.completedSteps||0}`,nextKey=`${progress.state}:${progress.stepId}:${progress.completedSteps}`,updated={...target,lastProgressAt:t,leaseUntil:t+RUNNING_LEASE_MS,progress};
-   await this.put('jobs',jobs.map(j=>j.id===jobId?updated:j));const devices=await this.get('devices',[]);await this.put('devices',devices.map(d=>d.id===deviceId?{...d,lastSeen:t}:d));if(priorKey!==nextKey)await this.event('R242_JOB_PROGRESS',`Job ${jobId} motion ${progress.state}${progress.stepOp?` · ${progress.stepOp}`:''}.`,{deviceId,jobId,progress});return json({ok:true,jobId,deviceId,leaseUntil:updated.leaseUntil,progress});
+   const priorKey=`${target?.progress?.state||''}:${target?.progress?.stepId||''}:${target?.progress?.completedSteps||0}`,nextKey=`${progress.state}:${progress.stepId}:${progress.completedSteps}`;
+   const updated={...target,lastProgressAt:t,leaseUntil:t+RUNNING_LEASE_MS,progress};await this.put('jobs',jobs.map(j=>j.id===jobId?updated:j));
+   const devices=await this.get('devices',[]);await this.put('devices',devices.map(d=>d.id===deviceId?{...d,lastSeen:t}:d));
+   if(priorKey!==nextKey)await this.event('R242_JOB_PROGRESS',`Job ${jobId} motion ${progress.state}${progress.stepOp?` · ${progress.stepOp}`:''}.`,{deviceId,jobId,progress});
+   return json({ok:true,jobId,deviceId,leaseUntil:updated.leaseUntil,progress});
   }
   if(path==='/agent/poll'&&request.method==='POST'){
    const b=await request.clone().json().catch(()=>({})),deviceId=safeId(b.deviceId,'');if(deviceId)await this.recoverStalledJobsR242(deviceId);
    const response=await super.fetch(request);if(!response.ok)return response;const data=await response.clone().json().catch(()=>({})),job=data?.job;if(!job?.id||String(job.status||'').toUpperCase()!=='RUNNING')return response;
-   const t=Date.now(),jobs=await this.get('jobs',[]),updated={...job,lastProgressAt:t,leaseUntil:t+RUNNING_LEASE_MS,progress:{schema:'OMEGA_HYBRID_EXECUTION_PROGRESS_R242',revision:EXECUTION_MOTION_REVISION,at:t,seq:0,state:'CLAIMED',stepId:'',stepOp:'',stepIndex:0,totalSteps:Array.isArray(job.steps)?job.steps.length:0,completedSteps:0,elapsedMs:0,message:'Authenticated host claimed the job; waiting for first step motion pulse.'}};
-   await this.put('jobs',jobs.map(j=>j.id===job.id?updated:j));return json({...data,job:updated},response.status);
+   const t=Date.now(),jobs=await this.get('jobs',[]),updated={...job,lastProgressAt:t,leaseUntil:t+RUNNING_LEASE_MS,progress:{schema:'OMEGA_HYBRID_EXECUTION_PROGRESS_R242',revision:EXECUTION_MOTION_REVISION,at:t,seq:0,state:'CLAIMED',stepId:'',stepOp:'',stepIndex:0,totalSteps:Array.isArray(job.steps)?job.steps.length:0,completedSteps:0,elapsedMs:0,message:'Authenticated host claimed the job; waiting for first step motion pulse.'}};await this.put('jobs',jobs.map(j=>j.id===job.id?updated:j));return json({...data,job:updated},response.status);
   }
   return super.fetch(request);
  }
