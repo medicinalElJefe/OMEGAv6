@@ -62,6 +62,15 @@ try {
     const afterCenter=await page.textContent('#earthViewCenter');
     assert.notEqual(afterCenter,beforeCenter,'drag pan did not change map center');
 
+    const beforeClickLat=await page.inputValue('#jumpLat');
+    const beforeClickLon=await page.inputValue('#jumpLon');
+    await page.mouse.click(box.x+box.width*.63,box.y+box.height*.43);
+    await page.waitForTimeout(100);
+    const afterClickLat=await page.inputValue('#jumpLat');
+    const afterClickLon=await page.inputValue('#jumpLon');
+    assert.ok(afterClickLat!==beforeClickLat||afterClickLon!==beforeClickLon,'map click did not synchronize canonical location fields');
+    assert.match(await page.textContent('#earthSelectedCoords'),/WGS84 \/ EPSG:4326/);
+
     const beforeScale=parseFloat((await page.textContent('#earthViewScale')).replace('×',''));
     await page.locator('[data-map-command="zoom-in"]').click();
     await page.waitForTimeout(80);
@@ -82,7 +91,7 @@ try {
     assert.deepEqual(serious,[],`browser errors at ${viewport.width}: ${serious.join(' | ')}`);
     await page.close();
   }
-  console.log('SAR_BROWSER_E2E_PASS desktop/tablet/mobile map + surface interaction');
+  console.log('SAR_BROWSER_E2E_PASS desktop/tablet/mobile map + surface interaction + canonical location synchronization');
 } finally {
   await browser.close();
 }
