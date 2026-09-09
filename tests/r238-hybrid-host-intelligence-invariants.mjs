@@ -8,6 +8,7 @@ const ui=read('src/HybridHostIntelligenceR238.tsx');
 const link=read('src/HybridLinkR32.tsx');
 const workflow=read('.github/workflows/r238-hybrid-host-intelligence-proof.yml');
 const windowsProof=read('tests/r238-windows-host-runtime-proof.py');
+const browserProof=read('tests/r238-host-intelligence-browser-e2e.mjs');
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
 
 for(const token of [
@@ -46,6 +47,8 @@ must(link.indexOf('<SovereignConnectionR117/>')<link.indexOf('<HybridHostIntelli
 must(workflow.includes('actions/checkout@v7')&&workflow.includes('actions/setup-node@v7'),'R238 proof workflow must preserve the R221.1 Node-24-capable v7 Actions hygiene floor');
 must(!workflow.includes('actions/checkout@v4')&&!workflow.includes('actions/setup-node@v4'),'R238 proof workflow must not regress to the old v4 checkout/setup-node generation');
 must(workflow.includes('windows-host-runtime-proof:')&&workflow.includes('runs-on: windows-latest')&&workflow.includes('python tests/r238-windows-host-runtime-proof.py'),'R238 must execute its Windows-specific host telemetry on an actual Windows CI runner');
+must(workflow.includes('playwright@1.63.0')&&workflow.includes('tests/r238-host-intelligence-browser-e2e.mjs'),'R238 must execute a focused built-browser proof for selected-host isolation');
 for(const token of ["memory.get('totalBytes')","memory.get('availableBytes')","logicalProcessors","profileSha256","verify_macro_replay","tampered macro hash was not rejected"])must(windowsProof.includes(token),`R238 Windows runtime proof missing ${token}`);
+for(const token of ['CPU-A-ONLY','CPU-B-ONLY','proof_job_a','proof_job_b','Authenticated compute host','data-r238-selected-device','leaked host A proof','leaked host B proof'])must(browserProof.includes(token),`R238 browser host-isolation proof missing ${token}`);
 
-console.log('OMEGA R238 HYBRID HOST INTELLIGENCE PASS · immutable R205 byte SHA preserved · R141 exact-return proof preserved · no screenshot constants · Windows CPU/RAM/GPU/storage/Python/RCWA evidence · no dependency installation · bounded macro metadata/schema/hash/count/order/time/coordinate/window preflight · exact selected-device correlation · Windows runtime CI · v7 Actions hygiene');
+console.log('OMEGA R238 HYBRID HOST INTELLIGENCE PASS · immutable R205 byte SHA preserved · R141 exact-return proof preserved · no screenshot constants · Windows CPU/RAM/GPU/storage/Python/RCWA evidence · no dependency installation · bounded macro metadata/schema/hash/count/order/time/coordinate/window preflight · exact selected-device correlation · Windows runtime CI · built-browser cross-host isolation · v7 Actions hygiene');
