@@ -34,7 +34,7 @@ for(const token of [
  "TRAIN_LOCAL_INDEX",
  "BACKPRESSURE ACTIVE",
  "Cancel before host claim",
- "running local process",
+ "executing local process",
  "R141/R146/R147/R125 authority remains unchanged"
 ])must(deck.includes(token),`R237 operator deck missing ${token}`);
 
