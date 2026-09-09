@@ -38,6 +38,9 @@ jobs:
       - name: Prove converged R239 user-navigation boundaries
         run: node tests/r239-user-navigation-convergence-invariants.mjs
 
+      - name: Prove R242 navigation lemma calculus
+        run: node tests/r242-navigation-lemma-calculus-invariants.mjs
+
       - name: Re-prove inherited continuous field and Hybrid command boundaries
         run: |
           node tests/continuous-field-r13-invariants.mjs
@@ -54,7 +57,7 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
-      - name: Prove built R241 visual intelligence and R239 navigation convergence
+      - name: Prove built R241 visual intelligence and R239/R242 navigation convergence
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
@@ -98,13 +101,15 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + R239 Operator Navigation'
+            echo '## R241 Archive Convergence + R239/R242 Operator Navigation'
             echo "- Candidate: $GITHUB_SHA"
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
+            echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
+            echo '- Exact route identity outranks prefix/token/metadata search; ambiguity and empty results carry explicit residuals rather than fabricated destinations.'
             echo '- Route filaments are source routeNext-derived; neighbor filaments are deterministic display topology.'
             echo '- Gradient/curl/variance are display proxies, not physical measurement claims.'
             echo '- Typed cognition is read-only through proposal; permission/execution/return/Canon remain separately gated.'
-            echo '- R239 navigation proof is converged into this existing proof plane: six workspaces, complete 44-route registry, exact route identity, immediate aria-hidden/inert close, transition-complete hidden state, and mobile containment.'
+            echo '- R239 navigation remains converged in this proof plane: six workspaces, complete 44-route registry, immediate aria-hidden/inert close, ancestor-aware visible-canvas sanity, exhaustive route activation, and mobile containment.'
             echo '- No 25th workflow authority is introduced; active workflow topology remains within the R170 governed bound.'
             echo '- R147 dispatch, R146 durable history, R141 exact return and R125 sole CanonState admission remain unchanged.'
             echo '- R201/R203 remain retired.'
