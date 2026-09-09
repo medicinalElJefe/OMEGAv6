@@ -78,9 +78,9 @@ must(link.includes("import HybridResourceGovernorR239 from './HybridResourceGove
 must(link.indexOf('<HybridHostIntelligenceR238/>')<link.indexOf('<HybridResourceGovernorR239/>')&&link.indexOf('<HybridResourceGovernorR239/>')<link.indexOf('<HybridCommandDeckR237/>'),'R239 resource governor must sit after returned host evidence and before native command admission');
 for(const literal of ['Ryzen 7 3700X','RTX 2070 SUPER','32.0 GB','19045.6456'])must(!governor.includes(literal)&&!surface.includes(literal)&&!deck.includes(literal),`R239 must not hard-code screenshot hardware literal ${literal}`);
 
-must(state.currentCapabilityFloor==='R239','R239 must advance the governed capability floor');
-must(state.postR180ProofContinuity.at(-1)==='R239','R239 must be the current post-R180 proof floor');
-must(state.selfBuild.latestExplicitSuccessorProof==='tests/r239-adaptive-hybrid-resource-governor-invariants.mjs','R239 must become the explicit successor proof');
+const capabilityFloor=Number(String(state.currentCapabilityFloor||'').replace(/^R/,''));
+must(Number.isInteger(capabilityFloor)&&capabilityFloor>=239,'R239 milestone requires current governed capability floor R239 or later');
+must(state.postR180ProofContinuity.includes('R239'),'R239 must remain in post-R180 proof continuity after later successors');
 must(state.preservedRuntime.hybridResourceGovernor==='R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING','R239 preserved-runtime identity missing');
 
 const classify=({load,availGiB,diskGiB,workers=8,profile=true,fresh=true,snapshot=true,active=false})=>{
@@ -97,4 +97,4 @@ must(classify({load:50,availGiB:12,diskGiB:80,active:true})==='HOLD','R239 activ
 must(classify({load:50,availGiB:12,diskGiB:80,profile:false})==='UNPROVED','R239 missing returned profile must remain unproved');
 must(classify({load:50,availGiB:12,diskGiB:80,fresh:false})==='HOLD','R239 stale returned resource proof must hold heavy work');
 
-console.log('OMEGA R239 ADAPTIVE HYBRID RESOURCE GOVERNOR PASS · selected-host R238 proof only · fresh bounded resource sample required · pressure-aware 1..12 worker envelope · exact device/epoch/profile job binding · bounded hash/train sizing · bootstrap PROVE_HOST retained · heavy work fail-closed under stale/memory/storage pressure · R237 queue authority preserved · no screenshot constants · R141/R146/R147/R125 authority unchanged');
+console.log(`OMEGA R239 ADAPTIVE HYBRID RESOURCE GOVERNOR PASS · milestone preserved under current capability floor R${capabilityFloor} · selected-host R238 proof only · fresh bounded resource sample required · pressure-aware 1..12 worker envelope · exact device/epoch/profile job binding · bounded hash/train sizing · bootstrap PROVE_HOST retained · heavy work fail-closed under stale/memory/storage pressure · R237 queue authority preserved · no screenshot constants · R141/R146/R147/R125 authority unchanged`);
