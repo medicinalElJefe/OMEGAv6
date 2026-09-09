@@ -1,0 +1,4 @@
+# Generated Wrangler proof outputs. These are transient build artifacts, never source candidates.
+.wrangler-r170-selfbuild/
+.wrangler-r170-selfbuild-optical/
+.wrangler-r240-exact-candidate/
