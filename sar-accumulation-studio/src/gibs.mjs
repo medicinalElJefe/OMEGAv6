@@ -53,3 +53,8 @@ export function gibsContextManifest({bbox,date,layers,url,requestedDate=null,fal
     semantics:'GIBS imagery is synchronized contextual Earth-observation evidence. It does not replace SAR measurement pixels and is not used as a SAR value unless a quantitative layer with an explicit physical mapping is separately decoded.'
   };
 }
+
+if(typeof document!=='undefined'){
+  import('./location.mjs').catch(()=>{});
+  import('./sar-earth-overlay.mjs').catch(()=>{});
+}
