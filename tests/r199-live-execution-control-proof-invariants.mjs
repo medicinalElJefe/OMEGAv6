@@ -43,8 +43,10 @@ assert.equal(manifest.canonicalMutation,false);
 assert.equal(manifest.canonicalAdmissionAuthority,'R125');
 
 assert.equal(fs.existsSync('.github/workflows/r199-live-execution-control-proof.yml'),false,'R199 must not create a second workflow authority or workflow_run fanout');
-assert.ok(ci.includes("if: github.event_name == 'push' && github.ref == 'refs/heads/main'"),'R199 proof must remain inside canonical main deployment authority');
-assert.ok(ci.includes('Promoted main commit must be an exact two-parent merge commit'),'R199 must preserve exact governed merge lineage');
+assert.ok(ci.includes("if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')"),'R199 proof must remain inside the sole canonical main deployment authority for either merge-push or exact R240 dispatch');
+assert.ok(ci.includes('workflow_dispatch:'),'R240 exact deployment may enter only through the existing canonical ci.yml authority');
+assert.ok(ci.includes('Promoted main commit must be an exact two-parent merge commit'),'R199 must preserve exact governed merge lineage for both canonical deployment triggers');
+assert.ok(ci.includes('Deploy canonical OMEGA Worker'),'R199 must remain in the one canonical Worker deployment workflow');
 assert.ok(ci.includes('node scripts/verify_federation_live_r1681.mjs'),'canonical deploy job must retain the propagation-safe live verifier');
 assert.ok(!ci.includes('workflow_run:'),'canonical CI must not reintroduce workflow_run fanout');
 assert.ok(postDeploy.includes("process.env.OMEGA_PROMOTED_SHA"),'R199 must activate only inside an exact promoted deployment context');
@@ -79,4 +81,4 @@ assert.ok(!probe.includes('/api/hybrid/pair'),'R199 live proof must not create o
 assert.ok(!probe.includes("method:'POST'"),'R199 live proof must remain GET-only/read-only');
 assert.ok(!probe.includes('canonicalMutation:true'),'R199 proof may not claim or perform Canon mutation');
 
-console.log('R199 LIVE EXECUTION CONTROL PROOF PASS · the existing canonical post-deploy Federation/RCWA verifier now conditionally chains exact promoted SHA + Worker Version ID to a GET-only first-hand R147 manifest proving deployed R185→R193→R194→R195→R196→R197 composition, max-12 bounded scheduling, AIMD feedback states, and R125-only admission without a second workflow authority');
+console.log('R199/R240 LIVE EXECUTION CONTROL PROOF PASS · R199 remains inside the sole canonical main-only ci.yml deployment authority for either merge-push or exact R240 dispatch · exact two-parent lineage retained · post-deploy Federation/RCWA verifier conditionally chains exact promoted SHA + Worker Version ID to a GET-only first-hand R147 manifest proving deployed R185→R193→R194→R195→R196→R197 composition, max-12 bounded scheduling, AIMD feedback states, and R125-only admission without a second workflow authority');
