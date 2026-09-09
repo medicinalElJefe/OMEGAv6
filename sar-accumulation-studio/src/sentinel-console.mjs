@@ -1,5 +1,6 @@
 import { fetchSentinel1Cog } from './stac.mjs';
-import { calibratedTargetPatch, paintCalibratedPatch, sampleCalibratedSentinel1 } from './sentinel1-calibration.mjs';
+import { calibratedTargetPatch, paintCalibratedPatch, sampleCalibratedSentinel1, supportTransportUrl, parseProductXml } from './sentinel1-calibration.mjs';
+import { buildPatchGeoMesh } from './sar-registration.mjs';
 
 const $=s=>typeof document==='undefined'?null:document.querySelector(s);
 const cache=new Map();
@@ -33,15 +34,35 @@ function remember(key,patch){
   while(cache.size>8)cache.delete(cache.keys().next().value);
 }
 
+async function attachGeoMesh(patch){
+  const productHref=patch?.provenance?.product;
+  if(!productHref)return patch;
+  try{
+    const response=await fetch(supportTransportUrl(productHref,'source'),{headers:{accept:'application/xml,text/xml,text/plain,*/*'}});
+    if(!response.ok)throw new Error(`product annotation ${response.status}`);
+    const product=parseProductXml(await response.text());
+    const geoMesh=buildPatchGeoMesh(product,patch.sourceWindow,4);
+    return {...patch,geoMesh};
+  }catch(error){
+    return {...patch,geoMesh:{state:'PATCH_GEOREGISTRATION_UNRESOLVED',error:error.message,validNodeCount:0,totalNodeCount:25}};
+  }
+}
+
+function publishEarthOverlay(patch,canvas){
+  if(typeof window==='undefined'||!patch||!canvas)return;
+  window.dispatchEvent(new CustomEvent('omega-calibrated-sar-patch',{detail:{patch,canvas}}));
+}
+
 function renderPatchStatus(patch){
   const e=$('#rasterEmpty'),stats=$('#rasterStats');
   if(e)e.style.display='none';
-  const s=patch.stats,g=patch.geolocation,p=patch.product;
-  if(stats)stats.textContent=`CALIBRATED GRD · ${patch.id} · ${patch.polarization} ${patch.quantity} · target ${patch.target.lat.toFixed(5)}, ${patch.target.lon.toFixed(5)} · source window ${patch.width}×${patch.height} @ ${patch.centerPixel[0]},${patch.centerPixel[1]} · valid ${s.validCount.toLocaleString()} · dB p02 ${fmt(s.p02)} · median ${fmt(s.p50)} · p98 ${fmt(s.p98)} · geolocation ${g.method} residual ${Number.isFinite(g.residualDeg)?g.residualDeg.toExponential(2):'—'}° · spacing ${fmt(p.rangePixelSpacing,1)}m range / ${fmt(p.azimuthPixelSpacing,1)}m azimuth · PRODUCT LUT · NOT RTC / NOT InSAR.`;
+  const s=patch.stats,g=patch.geolocation,p=patch.product,m=patch.geoMesh;
+  const mesh=m?.state?` · Earth mesh ${m.state}${Number.isFinite(m.validNodeCount)?` ${m.validNodeCount}/${m.totalNodeCount}`:''}`:'';
+  if(stats)stats.textContent=`CALIBRATED GRD · ${patch.id} · ${patch.polarization} ${patch.quantity} · target ${patch.target.lat.toFixed(5)}, ${patch.target.lon.toFixed(5)} · source window ${patch.width}×${patch.height} @ ${patch.centerPixel[0]},${patch.centerPixel[1]} · valid ${s.validCount.toLocaleString()} · dB p02 ${fmt(s.p02)} · median ${fmt(s.p50)} · p98 ${fmt(s.p98)} · geolocation ${g.method} residual ${Number.isFinite(g.residualDeg)?g.residualDeg.toExponential(2):'—'}° · spacing ${fmt(p.rangePixelSpacing,1)}m range / ${fmt(p.azimuthPixelSpacing,1)}m azimuth · PRODUCT LUT${mesh} · NOT RTC / NOT InSAR.`;
   const canvas=$('#raster');
   canvas?.classList.remove('flash');if(canvas){void canvas.offsetWidth;canvas.classList.add('flash');}
   const badge=$('#sarCalProof');
-  if(badge){badge.textContent=`${g.quality} · ${patch.evidence.grade} · ${patch.processing.thermalNoiseCorrectionPerformed?'NOISE CORRECTED':'NOISE STATE UNCONFIRMED'}`;badge.dataset.state='ready';}
+  if(badge){badge.textContent=`${g.quality} · ${patch.evidence.grade} · ${patch.processing.thermalNoiseCorrectionPerformed?'NOISE CORRECTED':'NOISE STATE UNCONFIRMED'} · ${m?.state||'EARTH MESH PENDING'}`;badge.dataset.state='ready';}
 }
 
 async function loadCalibratedCurrent({force=false}={}){
@@ -51,18 +72,21 @@ async function loadCalibratedCurrent({force=false}={}){
   }
   const pol=selectedPolarization(),quantity=selectedQuantity(),key=patchKey(record,target,pol,quantity),my=++generation;
   if(!force&&cache.has(key)){
-    const patch=cache.get(key);paintCalibratedPatch(patch,canvas);renderPatchStatus(patch);return patch;
+    const patch=cache.get(key);paintCalibratedPatch(patch,canvas);renderPatchStatus(patch);publishEarthOverlay(patch,canvas);return patch;
   }
   const e=$('#rasterEmpty');if(e){e.style.display='grid';e.textContent='Binding product geolocation grid…';}
   try{
-    const patch=await calibratedTargetPatch(record,target.lon,target.lat,{polarization:pol,quantity,radiusPixels:Number($('#sarPatchRadius')?.value||96),onStage:stage=>{if(my!==generation)return;if(e)e.textContent={LOAD_PRODUCT_ANNOTATION:'Loading Sentinel-1 calibration + geolocation annotation…',INVERT_PRODUCT_GCP_GRID:'Inverting product GCP grid at Earth target…',READ_TARGET_SOURCE_BLOCKS:'Reading target source blocks from real GRD measurement…',APPLY_PRODUCT_CALIBRATION_LUT:'Applying product radiometric calibration LUT…',READY:'Rendering calibrated SAR evidence…'}[stage]||stage;}});
+    let patch=await calibratedTargetPatch(record,target.lon,target.lat,{polarization:pol,quantity,radiusPixels:Number($('#sarPatchRadius')?.value||96),onStage:stage=>{if(my!==generation)return;if(e)e.textContent={LOAD_PRODUCT_ANNOTATION:'Loading Sentinel-1 calibration + geolocation annotation…',INVERT_PRODUCT_GCP_GRID:'Inverting product GCP grid at Earth target…',READ_TARGET_SOURCE_BLOCKS:'Reading target source blocks from real GRD measurement…',APPLY_PRODUCT_CALIBRATION_LUT:'Applying product radiometric calibration LUT…',READY:'Building Earth-registration mesh…'}[stage]||stage;}});
     if(my!==generation)return null;
-    remember(key,patch);paintCalibratedPatch(patch,canvas);renderPatchStatus(patch);return patch;
+    patch=await attachGeoMesh(patch);
+    if(my!==generation)return null;
+    remember(key,patch);paintCalibratedPatch(patch,canvas);renderPatchStatus(patch);publishEarthOverlay(patch,canvas);return patch;
   }catch(error){
     if(my!==generation)return null;
     if(e){e.style.display='grid';e.textContent=`Calibrated patch unavailable: ${error.message}`;}
     const stats=$('#rasterStats');if(stats)stats.textContent='No calibrated raster evidence loaded; failure remains explicit.';
     const badge=$('#sarCalProof');if(badge){badge.textContent='CALIBRATION / GEOLOCATION UNRESOLVED';badge.dataset.state='error';}
+    window.dispatchEvent(new CustomEvent('omega-calibrated-sar-patch-clear'));
     return null;
   }
 }
@@ -112,7 +136,7 @@ async function probeCalibratedStack(){
 function installControls(){
   const panel=document.querySelector('.pixel-panel');if(!panel||$('#sarCalControls'))return;
   const controls=document.createElement('div');controls.id='sarCalControls';controls.className='sar-cal-controls';
-  controls.innerHTML=`<label>MEASUREMENT<select id="sarCalQuantity"><option value="sigmaNought">σ⁰ calibrated backscatter</option><option value="betaNought">β⁰ calibrated backscatter</option><option value="gamma">γ⁰ ellipsoid referenced</option></select></label><label>PATCH RADIUS<select id="sarPatchRadius"><option value="64">64 px</option><option value="96" selected>96 px</option><option value="128">128 px</option><option value="192">192 px</option></select></label><label class="inline-check"><input id="sarAutoPatch" type="checkbox" checked> AUTO FRAME RASTER</label><span id="sarCalProof" class="sar-proof-badge">TARGET + PRODUCT GRID + LUT</span>`;
+  controls.innerHTML=`<label>MEASUREMENT<select id="sarCalQuantity"><option value="sigmaNought">σ⁰ calibrated backscatter</option><option value="betaNought">β⁰ calibrated backscatter</option><option value="gamma">γ⁰ ellipsoid referenced</option></select></label><label>PATCH RADIUS<select id="sarPatchRadius"><option value="64">64 px</option><option value="96" selected>96 px</option><option value="128">128 px</option><option value="192">192 px</option></select></label><label class="inline-check"><input id="sarAutoPatch" type="checkbox" checked> AUTO FRAME RASTER</label><span id="sarCalProof" class="sar-proof-badge">TARGET + PRODUCT GRID + LUT + EARTH MESH</span>`;
   const stats=$('#rasterStats');stats?.before(controls);
   $('#sarCalQuantity')?.addEventListener('change',()=>loadCalibratedCurrent({force:true}));
   $('#sarPatchRadius')?.addEventListener('change',()=>loadCalibratedCurrent({force:true}));
