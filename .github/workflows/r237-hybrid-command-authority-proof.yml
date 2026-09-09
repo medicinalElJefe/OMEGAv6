@@ -80,9 +80,11 @@ jobs:
           const browser=await chromium.launch({headless:true});
           const page=await browser.newPage({viewport:{width:1440,height:1100}});
           const pageErrors=[]; page.on('pageerror',e=>pageErrors.push(String(e)));
-          let hybridStatus={state:'DEVICE_PROOF_REQUIRED',nativeExecutionClaimed:false,devices:[],jobs:[]};
+          let hybridStatus={state:'DEVICE_PROOF_REQUIRED',nativeExecutionClaimed:false,devices:[],jobs:[],missions:[]};
           let missionStatus={ok:true,missions:[],state:'DEVICE_PROOF_REQUIRED'};
           await page.route('**/api/hybrid/status',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(hybridStatus)}));
+          // Legacy Hybrid children may still read /api/missions independently; R238 shared
+          // observation does not. Keep this route only for inherited compatibility surfaces.
           await page.route('**/api/missions',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(missionStatus)}));
           const openHybrid=async()=>{
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
@@ -112,11 +114,11 @@ jobs:
             {id:'job_b',targetDeviceId:'dev-b',status:'QUEUED',steps:[{id:'S01',op:'BUILD'}]},
             {id:'ret_a',targetDeviceId:'dev-a',status:'COMPLETE',completedAt:now-5000,returnPacket:{receivedAt:now-5000,resultFingerprint:'fp-a',stepProofs:[{id:'S01',op:'BUILD',ok:true,result:{exitCode:0}}]}},
             {id:'ret_b',targetDeviceId:'dev-b',status:'COMPLETE',completedAt:now-4000,returnPacket:{receivedAt:now-4000,resultFingerprint:'fp-b',stepProofs:[{id:'S01',op:'TEST',ok:true,result:{exitCode:0}}]}}
-          ]};
-          missionStatus={ok:true,state:'VERIFIED_DEVICE_ONLINE',missions:[
+          ],missions:[
             {id:'mission_a',targetDeviceId:'dev-a',status:'ACTIVE',cycle:2,maxCycles:12,currentJobId:'job_a'},
             {id:'mission_b',targetDeviceId:'dev-b',status:'ACTIVE',cycle:4,maxCycles:12,currentJobId:'job_b'}
           ]};
+          missionStatus={ok:true,state:'VERIFIED_DEVICE_ONLINE',missions:hybridStatus.missions};
           let opened=await openHybrid(); deck=opened.deck; const effects=opened.effects;
           const select=deck.getByRole('combobox',{name:'Authenticated compute host'});
           if(await select.count()!==1)throw new Error('R237 multi-host selector missing');
@@ -133,6 +135,6 @@ jobs:
           if(!effectsText.includes('fp-b'))throw new Error('R212 did not expose selected-host return fingerprint');
           for(const forbidden of ['job_a','mission_a','fp-a'])if(deckText.includes(forbidden)||effectsText.includes(forbidden))throw new Error(`R238 leaked foreign-host context ${forbidden}`);
           if(pageErrors.length)throw new Error(`built browser page errors: ${pageErrors.join(' | ')}`);
-          console.log(`R238 BUILT BROWSER PASS · real Home→TOOLS→Hybrid · two hosts · selected dev-b shared by R212/R237 · shared epoch ${e237} · foreign host isolated · R237 command gates retained`);
+          console.log(`R238 BUILT BROWSER PASS · real Home→TOOLS→Hybrid · one canonical durable-state envelope feeds R212/R237 · two hosts · selected dev-b · shared epoch ${e237} · foreign host isolated · R237 command gates retained`);
           await browser.close();
           NODE
