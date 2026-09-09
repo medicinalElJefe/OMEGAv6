@@ -28,16 +28,25 @@ jobs:
         run: npm run check
       - name: Prove Worker package without deployment
         run: npx wrangler deploy --dry-run --outdir .wrangler-r237-dry-run
-      - name: Prove production deployment remains single-writer
+      - name: Prove canonical OMEGA production remains single-writer
         shell: bash
         run: |
-          matches="$(grep -R --line-number --include='*.yml' --include='*.yaml' -E 'wrangler[[:space:]]+deploy([[:space:]]|$)' .github/workflows | grep -v '/ci.yml:' | grep -v -- '--dry-run' || true)"
+          matches="$(
+            grep -R --line-number --include='*.yml' --include='*.yaml' -E 'wrangler[[:space:]]+deploy([[:space:]]|$)' .github/workflows \
+              | grep -v -- '--dry-run' \
+              | grep -v '/ci.yml:' \
+              | grep -v -E '/r223-cloudflare-evolution.yml:.*--config[[:space:]]+wrangler\.evolution-machine-r223\.jsonc([[:space:]]|$)' \
+              || true
+          )"
           if [ -n "$matches" ]; then
-            echo "$matches"
-            echo '::error title=DEPLOY AUTHORITY REGRESSION::A workflow other than ci.yml contains a production Wrangler deploy command.'
+            printf '%s\n' "$matches"
+            echo '::error title=DEPLOY AUTHORITY REGRESSION::Unexpected production Wrangler writer discovered outside canonical ci.yml or the separately named R223 ancillary evolution-machine config.'
             exit 1
           fi
-          echo 'R237 single-writer production authority PASS'
+          grep -q "Deploy canonical OMEGA Worker" .github/workflows/ci.yml
+          grep -q "npx wrangler deploy" .github/workflows/ci.yml
+          grep -q "wrangler.evolution-machine-r223.jsonc" .github/workflows/r223-cloudflare-evolution.yml
+          echo 'R237 production authority PASS · ci.yml owns canonical omegav6 deployment; R223 remains a separately configured ancillary evolution Worker; dry-runs are non-mutating.'
 
   local-browser-proof:
     needs: source-proof
