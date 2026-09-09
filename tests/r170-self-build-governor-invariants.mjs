@@ -50,11 +50,11 @@ assert.doesNotMatch(workflow.slice(0,selectIndex),/npm install/);
 assert.match(workflow.slice(installIndex,preGenerationProofIndex),/if: steps\.select\.outputs\.status == 'PROPOSE'/);
 assert.match(workflow.slice(preGenerationProofIndex,generateIndex),/if: steps\.select\.outputs\.status == 'PROPOSE'/);
 
-assert.equal(governor.revision,'R170.5-R240');
+assert.equal(governor.revision,'R170.5-R241');
 assert.equal(governor.engineRevision,'R170.2+R240');
-assert.equal(governor.currentCapabilityFloor,'R239');
+assert.equal(governor.currentCapabilityFloor,'R241');
 assert.deepEqual(governor.promotedSuccessorContinuity,['R175','R176','R177','R178','R179','R180']);
-assert.deepEqual(governor.postR180ProofContinuity,['R200','R200.1','R202','R210','R223','R236','R237','R238','R239']);
+assert.deepEqual(governor.postR180ProofContinuity,['R200','R200.1','R202','R210','R223','R236','R237','R238','R239','R240','R241']);
 assert.equal(governor.successorWorkflowPolicy.readOnly,true);
 assert.equal(governor.successorWorkflowPolicy.mainPushAllowed,false);
 assert.equal(governor.successorWorkflowPolicy.recurringScheduleAllowed,false);
@@ -63,7 +63,7 @@ assert.equal(governor.selfBuild.schedule,'17 * * * *');
 assert.equal(governor.selfBuild.observationCadence,'HOURLY');
 assert.equal(governor.selfBuild.expensiveProofMode,'PROPOSE_ONLY');
 assert.equal(governor.selfBuild.recursiveScheduler,'R240');
-assert.equal(governor.selfBuild.latestExplicitSuccessorProof,'tests/r239-adaptive-hybrid-resource-governor-invariants.mjs');
+assert.equal(governor.selfBuild.latestExplicitSuccessorProof,'tests/r241-archive-convergence-invariants.mjs');
 assert.equal(governor.selfBuild.directMainMutation,false);
 assert.equal(governor.selfBuild.autoMerge,false);
 assert.equal(governor.selfBuild.recursiveTriggerChain,false);
@@ -79,7 +79,7 @@ assert.equal(governor.selfPromotion.canonicalDeploymentWorkflow,'.github/workflo
 assert.equal(governor.selfPromotion.productionProofRequiredAfterSourceMerge,true);
 assert.equal(governor.selfPromotion.canonStateAdmission,false);
 assert.equal(governor.selfPromotion.canonicalAdmissionAuthority,'R125');
-for(const [key,value] of Object.entries({livingWorldExecutionDispatch:'R180_EXPLICIT_DISPATCH_R147_AUTHORITY',deployedBrowserProof:'R200.1_EXACT_PROMOTED_SHA',operationalSourceAuthority:'R202_READ_ONLY_PROVENANCE_AND_LIFECYCLE_PROJECTION',liveTruthRecovery:'R210_FORWARD_ONLY_REFRESH_AND_RUNTIME_VERSION_REANCHOR',autonomousEvolution:'R223_CLOUD_01_CLOUDFLARE_GITHUB_PORTAL',sourceSpatialControlAttestation:'R236_FAIL_CLOSED_INDEPENDENT_TRUST_BOUNDARY',hybridCommandAuthority:'R237_AUTHENTICATED_BOUNDED_NATIVE_CONTROL',hybridHostIntelligence:'R238_RETURNED_RESOURCE_AND_MACRO_INTEGRITY_PROOF',hybridResourceGovernor:'R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING',recursiveSelfBuildAndExactPromotion:'R240_R164_EVIDENCE_BOUND_SPARSE_FRONTIER_PLUS_EXACT_SOURCE_PROMOTION'}))assert.equal(governor.preservedRuntime[key],value);
+for(const [key,value] of Object.entries({livingWorldExecutionDispatch:'R180_EXPLICIT_DISPATCH_R147_AUTHORITY',deployedBrowserProof:'R200.1_EXACT_PROMOTED_SHA',operationalSourceAuthority:'R202_READ_ONLY_PROVENANCE_AND_LIFECYCLE_PROJECTION',liveTruthRecovery:'R210_FORWARD_ONLY_REFRESH_AND_RUNTIME_VERSION_REANCHOR',autonomousEvolution:'R223_CLOUD_01_CLOUDFLARE_GITHUB_PORTAL',sourceSpatialControlAttestation:'R236_FAIL_CLOSED_INDEPENDENT_TRUST_BOUNDARY',hybridCommandAuthority:'R237_AUTHENTICATED_BOUNDED_NATIVE_CONTROL',hybridHostIntelligence:'R238_RETURNED_RESOURCE_AND_MACRO_INTEGRITY_PROOF',hybridResourceGovernor:'R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING',recursiveSelfBuildAndExactPromotion:'R240_R164_EVIDENCE_BOUND_SPARSE_FRONTIER_PLUS_EXACT_SOURCE_PROMOTION',archiveConvergenceVisualIntelligence:'R241_READ_ONLY_1728_OVER_20736_TOPOLOGY_AND_TYPED_COGNITION_PROJECTION'}))assert.equal(governor.preservedRuntime[key],value);
 assert.match(cloudWorkflow,/workflow_dispatch:/);assert.doesNotMatch(cloudWorkflow,/^\s*push\s*:/m);assert.match(cloudWorkflow,/wrangler\.evolution-machine-r223\.jsonc/);assert.match(cloudTest,/merged source advances generations/);
 
 function baseSimulationState(){const copy=JSON.parse(JSON.stringify(state));copy.active=true;copy.generation=0;copy.currentCapsuleId=null;copy.admittedSourceCapsules=[];copy.rejected=[];copy.blocked=[];copy.receipts=[];return copy}
@@ -90,4 +90,4 @@ try{assert.equal(first.result.status,0,`generation-1 engine simulation failed: $
 const critical=runEngineSimulation({simState:baseSimulationState(),residual:{state:'BLOCKED',summary:{blocking:1},residuals:[{id:'SIM_CRITICAL',severity:'CRITICAL',mode:'BLOCK'}]},apply:false});
 try{assert.equal(critical.result.status,0);const blocked=JSON.parse(critical.result.stdout);assert.equal(blocked.status,'BLOCKED_BY_RESIDUAL_GATE');assert.equal(blocked.gate.allow,false);assert.deepEqual(blocked.gate.blocking,['SIM_CRITICAL']);assert.equal(fs.existsSync(path.join(critical.root,'src/generated/selfbuildR170/workflowCapacityModelR170.ts')),false)}finally{fs.rmSync(critical.root,{recursive:true,force:true})}
 
-console.log(`R170.5/R239/R240 GOVERNED SELF-BUILD PASS · R239 host resource governor preserved · exact production base gate · R164 evidence-bound sparse scheduling · one bounded generated target · exact expected-head self-promotion contract · canonical ci.yml production proof required · R125 unchanged · generation ${state.generation}/${state.maxAutonomousGenerations}`);
+console.log(`R170.5/R239/R240/R241 GOVERNED SELF-BUILD PASS · current proof floor R241 · R239 host resource governor preserved · R240 exact promotion engine preserved · exact production base gate · R164 evidence-bound sparse scheduling · one bounded generated target · exact expected-head self-promotion contract · canonical ci.yml production proof required · R125 unchanged · generation ${state.generation}/${state.maxAutonomousGenerations}`);
