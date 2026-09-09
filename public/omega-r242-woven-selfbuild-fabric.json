@@ -1,0 +1,53 @@
+{
+  "schema": "OMEGA_WOVEN_SELFBUILD_FABRIC_R242",
+  "revision": "R242",
+  "state": "SOURCE_CANDIDATE_NOT_PRODUCTION_PROOF",
+  "inherits": {
+    "productionFloor": "R239.1_ON_R241.1",
+    "recursiveScheduler": "R240",
+    "exactSelfPromotion": "R240",
+    "hybridResourceGovernor": "R239",
+    "governedSelfBuild": "R170.4"
+  },
+  "continuityOperator": "PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION",
+  "resolution": {
+    "organs": 12,
+    "surfacesPerOrgan": 12,
+    "branches": 144,
+    "cellsPerBranch": 12,
+    "cells": 1728,
+    "lanesPerCell": 12,
+    "lanes": 20736,
+    "deepPerLane": 12,
+    "deepAddress": 248832,
+    "physicalDimensionsClaimed": false
+  },
+  "fabric": {
+    "dependencyDagRequired": true,
+    "missingDependencyBlocks": true,
+    "cyclesBlock": true,
+    "sparseActivation": true,
+    "maxActivePlanningCellsPerPulse": 12,
+    "parallelPlanning": true,
+    "parallelEvaluation": true,
+    "parallelSourceMutation": false,
+    "singleSourceMutationCandidateSelectedBy": "R240",
+    "typedRoles": ["PLANNER", "BUILDER", "TESTER", "ADVERSARIAL_REVIEWER", "PERFORMANCE", "INTEGRATION", "EVIDENCE", "RESIDUAL_ANALYSIS"],
+    "sigmaForPlanningPackets": 0,
+    "scarCarryRequired": true,
+    "evidenceSource": "R164 returned residual evidence plus declared roadmap DAG",
+    "userValueDeficitMayBeInferred": false
+  },
+  "authority": {
+    "planningAndEvaluation": "R242",
+    "sourceMutationAndPromotion": "R240_SINGLE_CANDIDATE_ONLY",
+    "hybridResourceAdmission": "R239",
+    "dispatch": "R147",
+    "hybridReturn": "R141",
+    "durableHistory": "R146",
+    "canonStateAdmission": "R125",
+    "canonAdmissionClaimed": false
+  },
+  "truthLaw": "planned != evaluated != generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
+  "truthBoundary": "R242 may concurrently plan and evaluate a sparse dependency-ready frontier, preserve declared invariants and scars, and emit typed work packets. It may not perform parallel source mutation, dispatch execution, verify returns, write durable execution history, admit CanonState, create a second production writer, or weaken R240 exact promotion gates. R240 remains the one-candidate source mutation/promotion boundary; R125 remains the sole CanonState admission authority."
+}
