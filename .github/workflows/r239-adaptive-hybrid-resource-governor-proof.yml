@@ -10,14 +10,30 @@ on:
       - 'src/HybridCommandDeckR237.tsx'
       - 'src/HybridLinkR32.tsx'
       - 'public/omega-r170-self-build-governor.json'
+      - 'scripts/verify_live_hybrid_resource_governor_r239.mjs'
       - 'tests/r239-adaptive-hybrid-resource-governor-invariants.mjs'
       - 'tests/r170-self-build-governor-invariants.mjs'
       - 'tests/r180-current-authority-convergence-invariants.mjs'
+      - '.github/workflows/r239-adaptive-hybrid-resource-governor-proof.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/hybridResourceGovernorR239.ts'
+      - 'src/HybridResourceGovernorR239.tsx'
+      - 'src/hybridResourceGovernorR239.css'
+      - 'src/HybridCommandDeckR237.tsx'
+      - 'src/HybridLinkR32.tsx'
+      - 'public/omega-r170-self-build-governor.json'
+      - 'scripts/verify_live_hybrid_resource_governor_r239.mjs'
+      - 'tests/r239-adaptive-hybrid-resource-governor-invariants.mjs'
       - '.github/workflows/r239-adaptive-hybrid-resource-governor-proof.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
 
 jobs:
   prove-r239:
@@ -48,3 +64,25 @@ jobs:
           node scripts/verify_workflow_topology_r170.mjs
       - name: Production frontend build
         run: npm run build
+
+  live-r239:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: prove-r239
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked application graph
+        run: npm ci
+      - name: Install pinned read-only browser harness
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Prove exact deployed R239 selected-host resource governor
+        env:
+          OMEGA_PROMOTED_SHA: ${{ github.sha }}
+        run: node scripts/verify_live_hybrid_resource_governor_r239.mjs
