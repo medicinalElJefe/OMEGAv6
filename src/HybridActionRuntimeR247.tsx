@@ -6,6 +6,7 @@ import {latestReturnedHostProofR239,resourceEnvelopeR239} from './hybridResource
 import {defaultCommandPlan,validateCommandPlan} from './hybridCommandRuntime';
 import {buildFullSystemMissionObjectiveR153,fullSystemStateContextR153} from './fullSystemCompletionR153.js';
 import {compileOperationalCalculusR248,operationalMissionObjectiveR248} from './operationalCalculusR248';
+import {compileOperationalConvergenceR249,sequenceGovernedStepsR249} from './system/operationalConvergenceR249.js';
 import './hybridActionRuntimeR247.css';
 
 const ACTIVE_JOB=new Set(['QUEUED','RUNNING']);
@@ -48,6 +49,7 @@ export default function HybridActionRuntimeR247(){
   foreignMissionActive,
   jobs:selectedDeviceJobs
  }),[snapshotCurrent,hybrid?.nativeExecutionClaimed,device?.online,device?.revoked,hostProofFresh,envelope.tier,envelope.effectiveCpuWorkers,hostProof?.profile?.profileSha256,activeJob,missionActive,foreignMissionActive,selectedDeviceJobs]);
+ const convergence=useMemo(()=>compileOperationalConvergenceR249({metrics:operational.metrics,configuredParallel:12,effectiveCpuWorkers:Number(envelope.effectiveCpuWorkers)||0,executionRequested:true}),[operational.metrics,envelope.effectiveCpuWorkers]);
  const fullReady=Boolean(nativeReady&&rootValid&&hostProofFresh&&!activeJob&&!selectedMissionActive&&!foreignMissionActive&&envelope.tier!=='HOLD');
 
  useEffect(()=>{if(!rootValid)return;try{window.localStorage.setItem('omega:hybrid:projectRoot',root.trim())}catch{}},[root,rootValid]);
@@ -87,31 +89,34 @@ export default function HybridActionRuntimeR247(){
    const initial=defaultCommandPlan('BUILD','AUTO_BUILD',root.trim());
    const validation=validateCommandPlan(initial,root.trim(),[]);
    if(!validation.passed)throw new Error(validation.errors.join(' ')||'Initial bounded full-system plan did not validate.');
+   const sequence=sequenceGovernedStepsR249(validation.steps,convergence);
+   if(!sequence.steps.length)throw new Error('R249 produced no lawful first-cycle steps from the validated R153 plan; mission held.');
    const baseObjective=buildFullSystemMissionObjectiveR153(root.trim());
    const objective=operationalMissionObjectiveR248(baseObjective,operational);
-   const stateContext=JSON.stringify({...fullSystemStateContextR153(),surface:'HybridActionRuntimeR247',connectedActionRuntime:'R247',adaptiveMissionEngine:'R153',operationalCalculusR248:operational,device:{id:device.id,name:device.name||null,platform:device.platform||null},approvedRoot:root.trim(),selectedSnapshotEpoch:epoch,resourceEnvelopeR239:{tier:envelope.tier,effectiveCpuWorkers:envelope.effectiveCpuWorkers,sourceProfileSha256:hostProof?.profile?.profileSha256||null}});
-   const r=await api.post<any>('/api/missions',{objective,threadId:'',stateContext,draft:{schema:'OMEGA_SOVEREIGN_FULL_BUILD_R151',action:'BUILD',profile:'AUTO_BUILD',projectPath:root.trim(),instructions:objective,allowedDomains:[],steps:validation.steps},targetDeviceId:device.id,allowedOps:R153_ALLOWED,maxCycles:operational.policy.maxCycles,confirmedMission:true,snapshotEpoch:epoch,snapshotObservedAt:observedAt});
+   const missionCycles=Math.max(4,Math.min(operational.policy.maxCycles,convergence.policy.maxMissionCycles));
+   const stateContext=JSON.stringify({...fullSystemStateContextR153(),surface:'HybridActionRuntimeR247',connectedActionRuntime:'R247',adaptiveMissionEngine:'R153',operationalCalculusR248:operational,operationalConvergenceR249:convergence,r249FirstCycle:{mode:sequence.mode,steps:sequence.steps.map((step:any)=>({id:step.id||null,op:step.op||null})),omitted:sequence.omitted},device:{id:device.id,name:device.name||null,platform:device.platform||null},approvedRoot:root.trim(),selectedSnapshotEpoch:epoch,resourceEnvelopeR239:{tier:envelope.tier,effectiveCpuWorkers:envelope.effectiveCpuWorkers,sourceProfileSha256:hostProof?.profile?.profileSha256||null}});
+   const r=await api.post<any>('/api/missions',{objective,threadId:'',stateContext,draft:{schema:'OMEGA_SOVEREIGN_FULL_BUILD_R151',action:'BUILD',profile:'AUTO_BUILD',projectPath:root.trim(),instructions:objective,allowedDomains:[],steps:sequence.steps},targetDeviceId:device.id,allowedOps:R153_ALLOWED,maxCycles:missionCycles,confirmedMission:true,snapshotEpoch:epoch,snapshotObservedAt:observedAt});
    if(!r.data?.mission?.id)throw new Error('No durable R153 mission identity returned; nothing is treated as started.');
-   setMessage(`Full R247→R153 mission ${r.data.mission.id} started on ${device.name||device.id} under R248 ${operational.decision} calculus with ${operational.policy.maxCycles} bounded cycles. It may inspect, repair with preimage-bound APPLY_PATCH/WRITE_TEXT, build, test, package and return proof on this approved root.`);
+   setMessage(`Full R247→R153 mission ${r.data.mission.id} started on ${device.name||device.id} under R248 ${operational.decision} calculus + R249 ${sequence.mode} with ${missionCycles} bounded cycles. It may proceed beyond the first-cycle sequence only from returned proof inside the unchanged R153/R147/R141 authority chain.`);
    await refresh();
   }catch(e:any){setError(e?.message||String(e))}finally{setBusy('')}
  };
 
- return <section className='r247-action-runtime' data-r247-host={device?.id||'NONE'} data-r247-ready={fullReady?'YES':'NO'} data-r248-operational-decision={operational.decision}>
-  <header><div><span>R247 · CONNECTED HOST ACTION RUNTIME · R248 OPERATIONAL CALCULUS</span><h3>Connection now advances into evidence-weighted work.</h3><p>A current authenticated heartbeat triggers host-health proof. R248 then derives a software-operational continuity/plasticity/contradiction/burden/evidence/uncertainty/scar packet from the returned state and uses the established STAY/TURN/ESCALATE calculus to govern the existing R153 mission objective and recursion budget.</p></div><div className={nativeReady?'r247-badge pass':'r247-badge hold'}>{nativeReady?<CheckCircle2/>:<TriangleAlert/>}<span><b>{nativeReady?'CONNECTED + ACTION-ELIGIBLE':'CURRENT HOST REQUIRED'}</b><small>{device?`${device.name||device.id} · ${age(device.lastSeen)}`:'no authenticated selected host'}</small></span></div></header>
+ return <section className='r247-action-runtime' data-r247-host={device?.id||'NONE'} data-r247-ready={fullReady?'YES':'NO'} data-r248-operational-decision={operational.decision} data-r249-step-mode={convergence.policy.stepMode}>
+  <header><div><span>R247 · CONNECTED HOST ACTION RUNTIME · R248 CALCULUS · R249 OPERATIONAL CONVERGENCE</span><h3>Connection now advances into evidence-weighted, causally sequenced work.</h3><p>R248 derives the current software-operational continuity packet. R249 applies the same decision to the actual validated R153 first-cycle steps and bounded planning width: coherent state preserves working order, TURN moves evidence ahead of downstream work, and ESCALATE becomes evidence-only before any later proof-bound mutation.</p></div><div className={nativeReady?'r247-badge pass':'r247-badge hold'}>{nativeReady?<CheckCircle2/>:<TriangleAlert/>}<span><b>{nativeReady?'CONNECTED + ACTION-ELIGIBLE':'CURRENT HOST REQUIRED'}</b><small>{device?`${device.name||device.id} · ${age(device.lastSeen)}`:'no authenticated selected host'}</small></span></div></header>
   <div className='r247-grid'>
    <article className={hostProofFresh?'pass':'hold'}><ShieldCheck/><span><small>HOST BOOTSTRAP</small><b>{hostProofFresh?'RETURNED + FRESH':busy==='bootstrap'?'QUEUING / CLAIM PENDING':'AUTO-BOOTSTRAP ARMED'}</b><em>{hostProofFresh?`profile ${String(hostProof?.profile?.profileSha256||'').slice(0,16)}…`:activeJob?`${activeJob.status} · ${activeJob.id}`:'DESKTOP_HEALTH will queue after connection'}</em></span></article>
    <article className={envelope.tier==='READY'||envelope.tier==='HIGH_CAPACITY'||envelope.tier==='CONSTRAINED'?'pass':'hold'}><Cpu/><span><small>RESOURCE ENVELOPE</small><b>{envelope.tier}</b><em>{envelope.effectiveCpuWorkers} worker advisory · {envelope.reasons.join(' · ')}</em></span></article>
-   <article className={operational.decision==='STAY'?'pass':'hold'}><Activity/><span><small>R248 OPERATIONAL CALCULUS</small><b>{operational.decision} · {operational.policy.strategy.replaceAll('_',' ')}</b><em>CΩ {operational.metrics.continuity.toFixed(2)} · Φ {operational.metrics.plasticity.toFixed(2)} · q {operational.metrics.contradiction.toFixed(2)} · Λ {operational.metrics.burden.toFixed(2)} · scar {operational.metrics.scar.toFixed(2)} · cycles {operational.policy.maxCycles}/12</em></span></article>
-   <article className={fullReady?'pass':'hold'}><Play/><span><small>FULL ACTION</small><b>{fullReady?'READY':'HELD UNTIL CURRENT PROOF'}</b><em>inspect + bounded repair + build + test + package · governed by current R248 packet</em></span></article>
+   <article className={operational.decision==='STAY'?'pass':'hold'}><Activity/><span><small>R248 → R249 OPERATING POLICY</small><b>{operational.decision} · {convergence.policy.stepMode.replaceAll('_',' ')}</b><em>CΩ {operational.metrics.continuity.toFixed(2)} · Φ {operational.metrics.plasticity.toFixed(2)} · q {operational.metrics.contradiction.toFixed(2)} · Λ {operational.metrics.burden.toFixed(2)} · scar {operational.metrics.scar.toFixed(2)} · R249 capacity {convergence.capacity.toFixed(2)}</em></span></article>
+   <article className={fullReady?'pass':'hold'}><Play/><span><small>FULL ACTION</small><b>{fullReady?'READY':'HELD UNTIL CURRENT PROOF'}</b><em>validated R153 plan · R249 first-cycle sequencing · returned-proof continuation</em></span></article>
   </div>
-  <div className='r247-root'><label><span>Approved-root relative project path</span><input value={root} onChange={e=>setRoot(e.target.value)} aria-invalid={!rootValid}/><small>Use <code>.</code> for the launcher-approved root. R247 removes passive UX gating; R248 changes mission policy, not root or execution authority.</small></label></div>
+  <div className='r247-root'><label><span>Approved-root relative project path</span><input value={root} onChange={e=>setRoot(e.target.value)} aria-invalid={!rootValid}/><small>Use <code>.</code> for the launcher-approved root. R249 changes scheduling/sequence only; it does not broaden root, operation, dispatch or mutation authority.</small></label></div>
   {(message||error)&&<div className={'r247-message '+(error?'error':'pass')}>{error?<TriangleAlert/>:<CheckCircle2/>}<span>{error||message}</span></div>}
   <div className='r247-actions'>
    <button onClick={()=>void bootstrapHost('MANUAL')} disabled={!!busy||!nativeReady||Boolean(activeJob)||missionActive||!rootValid}>{busy==='bootstrap'?<Loader2 className='spin'/>:<RefreshCw/>}{hostProofFresh?'Refresh host proof':'Prove host now'}</button>
    <button className='primary' onClick={()=>void runFull()} disabled={!fullReady||!!busy}>{busy==='full'?<Loader2 className='spin'/>:<Play/>}RUN FULL REPAIR + BUILD + TEST + PACKAGE</button>
    <button onClick={()=>void refresh()} disabled={!!busy}><RefreshCw/>Refresh shared state</button>
   </div>
-  <footer><ShieldCheck/><span>R248 applies the established living operational calculus to the real R247→R153 mission launch. The packet is derived only from current returned software/Hybrid/resource/job evidence; it is not empirical physics or Canon truth. R153 preimage-bound mutation, R147 dispatch, R141 return proof, R146 durable history, R240 source promotion and R125 CanonState admission remain separate authorities.</span></footer>
+  <footer><ShieldCheck/><span>R249 operationalizes the established continuity/scar/residual calculus in the real Hybrid first-cycle sequence and in governed self-build planning. It only orders or narrows already-valid work. R153 preimage-bound mutation, R147 dispatch, R141 return proof, R146 history, R240 source promotion, ci.yml production deployment and R125 CanonState admission remain separate authorities.</span></footer>
  </section>;
 }
