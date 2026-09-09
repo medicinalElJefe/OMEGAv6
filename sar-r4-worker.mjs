@@ -13,7 +13,7 @@ export default {
       headers.set('cache-control','no-store, max-age=0');
       headers.set('pragma','no-cache');
       headers.set('expires','0');
-      headers.set('x-omega-sar-build','R4-LOCAL-LOD-1');
+      headers.set('x-omega-sar-build','R4-SAR-SINGLE-CAMERA-4');
       if(url.pathname==='/'||/\.html?$/i.test(url.pathname))headers.set('clear-site-data','"cache"');
     }
     return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
