@@ -1,0 +1,46 @@
+/* R239 — user-facing navigation hierarchy. Presentation only; no execution or Canon authority. */
+.r239-user-nav .r88-navigator-head>div:first-child>span{letter-spacing:.09em;color:#7f9993}
+.r239-user-nav .r88-navigator-head>div:first-child>b{font-size:16px;letter-spacing:-.01em}
+.r239-user-nav .r239-tech-toggle{min-width:82px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#071216;color:#91a8a2;font:750 6.5px ui-monospace,monospace;letter-spacing:.05em}
+.r239-user-nav .r239-tech-toggle[aria-pressed='true']{border-color:rgba(118,221,204,.36);background:#0b1b1f;color:#dff7f2}
+.r239-user-nav .r239-route-group{position:sticky;top:0;z-index:1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center;margin:8px 4px 4px;padding:6px 7px;border-top:1px solid var(--line);border-bottom:1px solid rgba(255,255,255,.025);background:rgba(3,10,12,.94);backdrop-filter:blur(9px)}
+.r239-user-nav .r239-route-group span{font:850 6px ui-monospace,monospace;letter-spacing:.11em;color:#8bd8ca}
+.r239-user-nav .r239-route-group small{font:650 6px ui-monospace,monospace;color:#667d77}
+.r239-user-nav .r239-route-group[data-tier='SUPPORT'] span{color:#bda46f}
+.r239-user-nav .r239-route-group[data-tier='EXPERT'] span{color:#879894}
+.r239-user-nav .r89-flat-route{min-height:58px}
+.r239-user-nav .r89-flat-route>span>b{font-size:10px;letter-spacing:-.005em}
+.r239-user-nav .r132-route-meta{gap:5px;color:#778d87}
+.r239-user-nav .r89-flat-route>span>em{margin-top:3px;color:#627771;line-height:1.35}
+.r239-user-nav .r100-active-route>span{color:#8bd8ca}
+.r239-user-nav .r105-context-note{min-height:34px}
+.r239-user-nav .r105-context-note:after{content:none!important}
+.r239-user-nav .r88-search input{font-size:11px}
+.r239-user-nav .r88-navigator-foot{line-height:1.45}
+.r239-user-nav.rail-wide .r94-rail-action span{font-size:6.5px;letter-spacing:.04em}
+
+/* Home follows one mental model in FOCUS: workspace -> start here -> canvas -> selected inspector concern. */
+.r239-home[data-r132-depth='FOCUS'] .r96-context-card>div{display:none}
+.r239-home[data-r132-depth='FOCUS'] .r96-context-card header{margin-bottom:0}
+.r239-home[data-r132-depth='FOCUS'] .r96-context-card header>button{min-width:92px}
+.r239-home[data-r132-depth='FOCUS'] .r96-quick-card>div{grid-template-columns:repeat(2,minmax(0,1fr))}
+.r239-home .r132-primary-strip>span{color:#9bd9cf}
+.r239-home .r132-primary-strip button:last-child{border-color:rgba(118,221,204,.22);color:#bfe9e2}
+.r239-home .r132-inspector-tabs button{font-size:7px}
+.r239-home .r96-header-actions button{min-height:34px}
+
+@media(max-width:900px){
+ .r239-user-nav .r239-route-group{position:static}
+ .r239-user-nav .r239-tech-toggle{min-width:72px}
+}
+@media(max-width:720px){
+ .r239-home[data-r132-depth='FOCUS'] .r96-quick-card>div{grid-template-columns:1fr 1fr}
+ .r239-home .r132-primary-strip>div{padding-bottom:2px}
+}
+@media(max-width:560px){
+ .r239-user-nav .r88-navigator-head{align-items:start}
+ .r239-user-nav .r88-head-actions{display:flex;gap:4px}
+ .r239-user-nav .r239-route-group{grid-template-columns:1fr;gap:2px}
+ .r239-user-nav .r89-flat-route{min-height:62px}
+ .r239-home[data-r132-depth='FOCUS'] .r96-quick-card>div{grid-template-columns:1fr}
+}
