@@ -83,14 +83,14 @@ function runtimeProjection(core={},operational={},convergence={}){
 }
 
 function hybridProjection(hybrid={}){
- const online=currentOnlineDevices(hybrid),proved=hybrid?.state==='VERIFIED_DEVICE_ONLINE'&&hybrid?.nativeExecutionClaimed===true&&online.length>0;
+ const online=currentOnlineDevices(hybrid),proved=hybrid?.nativeExecutionClaimed===true&&online.length>0;
  return Object.freeze({
-  state:text(hybrid?.state,'DEVICE_PROOF_REQUIRED'),
+  state:text(hybrid?.state,proved?'VERIFIED_DEVICE_ONLINE':'DEVICE_PROOF_REQUIRED'),
   authenticatedCurrentDeviceProved:proved,
   currentOnlineDeviceCount:proved?online.length:0,
   executionMotionRevision:hybrid?.executionMotionRevision||null,
   staleReconciliationRevision:hybrid?.staleReconciliationRevision||null,
-  truthBoundary:'PC online is true only from a current authenticated non-revoked device heartbeat. Queue state, browser state, CI or deployment never substitutes for private-host proof.'
+  truthBoundary:'PC online is true only from nativeExecutionClaimed=true plus a current online non-revoked device returned by the authenticated Hybrid authority. Queue state, browser state, CI, deployment or a display-state label never substitutes for private-host proof.'
  });
 }
 
