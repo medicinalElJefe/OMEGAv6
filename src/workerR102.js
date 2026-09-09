@@ -52,6 +52,10 @@ function experienceR102(data){
 
 async function fetchR102(request,env){
  const path=new URL(request.url).pathname;
+ if(path==='/api/hybrid/agent-download'&&request.method==='GET'){
+  const url=new URL(request.url);url.pathname='/omega-hybrid-agent.py';
+  return r101.fetch(new Request(url,{method:'GET',headers:request.headers}),env);
+ }
  if(path.startsWith('/api/federation/')&&request.method==='OPTIONS')return preflightR102(request);
  if(path==='/api/federation/run/status'&&request.method==='GET'){
   const [base,optical]=await Promise.all([r101.fetch(request,env),probeOpticalR102(env)]),data=await base.clone().json().catch(()=>null);
