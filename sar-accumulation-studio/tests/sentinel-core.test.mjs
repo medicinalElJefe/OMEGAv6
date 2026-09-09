@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCalibrationXml, parseProductXml, geolocateToPixel, calibrationLutAt, manifestProductAnnotation, resolveRelativeSafeAsset } from '../src/sentinel1-calibration.mjs';
+import { parseCalibrationXml, parseProductXml, geolocateToPixel, calibrationLutAt, manifestProductAnnotations, manifestProductAnnotation, resolveRelativeSafeAsset } from '../src/sentinel1-calibration.mjs';
 
 test('namespace-qualified SAFE calibration XML parses without DOM namespace assumptions', () => {
   const xml=`<s:calibration xmlns:s="urn:test"><s:absoluteCalibrationConstant>0</s:absoluteCalibrationConstant><s:calibrationVectorList><s:calibrationVector><s:azimuthTime>2026-01-01T00:00:00Z</s:azimuthTime><s:line>0</s:line><s:pixel>0 10</s:pixel><s:sigmaNought>1 3</s:sigmaNought><s:betaNought>2 4</s:betaNought><s:gamma>4 6</s:gamma><s:dn>1 1</s:dn></s:calibrationVector><s:calibrationVector><s:line>10</s:line><s:pixel>0 10</s:pixel><s:sigmaNought>3 5</s:sigmaNought><s:betaNought>4 6</s:betaNought><s:gamma>6 8</s:gamma><s:dn>1 1</s:dn></s:calibrationVector></s:calibrationVectorList></s:calibration>`;
@@ -61,4 +61,17 @@ test('SAFE manifest recovery selects the root product annotation and never the R
   assert.ok(!relative.includes('/rfi/'));
   const resolved=resolveRelativeSafeAsset('s3://sentinel-s1-l1c/GRD/2026/9/7/IW/DV/SCENE/manifest.safe',relative);
   assert.equal(resolved,'s3://sentinel-s1-l1c/GRD/2026/9/7/IW/DV/SCENE/annotation/s1d-iw-grd-vh-20260907t131154-20260907t131219-004472-0084aa-002.xml');
+});
+
+test('SAFE manifest exposes all plausible root annotation candidates for existence validation', () => {
+  const manifest=`<xfdu><dataObjectSection>
+    <fileLocation href="./annotation/rfi/s1d-iw-grd-vh-rfi.xml"/>
+    <fileLocation href="./annotation/calibration/calibration-s1d-iw-grd-vh-scene.xml"/>
+    <fileLocation href="./annotation/s1d-iw-grd-vh-scene-stale-002.xml"/>
+    <fileLocation xlink:href="./annotation/s1d-iw-grd-vh-scene-existing-001.xml"/>
+  </dataObjectSection></xfdu>`;
+  assert.deepEqual(manifestProductAnnotations(manifest,'vh'),[
+    './annotation/s1d-iw-grd-vh-scene-stale-002.xml',
+    './annotation/s1d-iw-grd-vh-scene-existing-001.xml'
+  ]);
 });
