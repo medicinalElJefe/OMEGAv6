@@ -23,6 +23,12 @@ No screenshot value is hard-coded. No dependency is installed. Macro contents ar
 REPLAY_MACRO is preflight-verified against its stored schema/hash/event count/order/time/coordinate
 bounds and window lock before execution. All added host facts remain inside the existing R141
 exact returned-payload proof.
+
+R240 bridge-calculus extension: a calculus-bound job carries the same sparse 20,736 address,
+selected-device identity, shared snapshot epoch and source-profile fingerprint inside each
+validated step. The wrapper validates that carry before native execution, preserves the address
+through the host frame and echoes it into returned step proof with reversed orientation before
+R141 exact-return fingerprinting. This is software/state continuity, not a physical-dimension claim.
 """
 from __future__ import annotations
 import ctypes,hashlib,importlib.util,json,os,platform,shutil,socket,subprocess,sys,time,types,urllib.request
@@ -40,6 +46,7 @@ HOST_PROOF_EXTENSION='R205'
 HOST_EVIDENCE_CONTINUITY_REVISION='R206.1'
 R207_1_ASSET_COMPATIBILITY_REVISION='R207.1'
 HOST_INTELLIGENCE_EXTENSION='R238'
+BRIDGE_CALCULUS_EXTENSION='R240'
 HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'
 MACRO_INVENTORY_SCHEMA='OMEGA_LOCAL_MACRO_INVENTORY_R238'
 MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'
@@ -64,7 +71,7 @@ def arg_value(name,default):
 
 def canonical_base_source(server):
     url=server.rstrip('/')+BASE_PATH
-    req=urllib.request.Request(url,method='GET',headers={'cache-control':'no-cache','user-agent':'OMEGA-Hybrid-R141-R206.1-R207.1-R238-Wrapper/1'})
+    req=urllib.request.Request(url,method='GET',headers={'cache-control':'no-cache','user-agent':'OMEGA-Hybrid-R141-R206.1-R207.1-R238-R240-Wrapper/1'})
     with urllib.request.urlopen(req,timeout=30) as r:
         source=r.read(MAX_BASE_BYTES+1)
     if len(source)<1000 or len(source)>MAX_BASE_BYTES:raise RuntimeError('R141 base agent size proof failed.')
@@ -222,6 +229,31 @@ def verify_macro_replay(base,root:Path,name,title):
     if locked!=str(title or ''):raise base.AgentError('R238 macro preflight: requested window title does not exactly match the recorded lock.')
     return {'schema':MACRO_PREFLIGHT_SCHEMA,'revision':HOST_INTELLIGENCE_EXTENSION,'state':'VERIFIED','macroName':p.stem[:64],'fileSha256':sha_bytes(raw),'eventCount':len(data.get('events',[])),'windowTitleLock':locked[:160],'contentsReturned':False}
 
+def validate_bridge_calculus_r240(job):
+    steps=job.get('steps') if isinstance(job,dict) else None
+    if not isinstance(steps,list):return {}
+    target=str(job.get('targetDeviceId') or '')
+    carried={};seen=0
+    for step in steps:
+        if not isinstance(step,dict):continue
+        bridge=step.get('calculusBridgeR240')
+        if bridge is None:continue
+        seen+=1
+        if not isinstance(bridge,dict) or bridge.get('schema')!='OMEGA_HYBRID_BRIDGE_CALCULUS_R240' or bridge.get('revision')!='R240':raise RuntimeError('R240 bridge calculus schema/revision mismatch.')
+        address=bridge.get('address')
+        if not isinstance(address,dict):raise RuntimeError('R240 bridge calculus address missing.')
+        try:a=int(address.get('address'));deep=int(address.get('deepAddress'))
+        except Exception as e:raise RuntimeError('R240 bridge calculus address invalid.') from e
+        if a<0 or a>=20736 or deep<0 or deep>=248832:raise RuntimeError('R240 bridge calculus address out of bounded atlas range.')
+        if int(bridge.get('orientation',0))!=1:raise RuntimeError('R240 bridge dispatch orientation must be +1 before host execution.')
+        if bridge.get('sourceFrame')!='BROWSER_OPERATOR' or bridge.get('transitFrame')!='CLOUD_DURABLE_QUEUE' or bridge.get('destinationFrame')!='SELECTED_HYBRID_HOST':raise RuntimeError('R240 bridge frame transition mismatch.')
+        if target and str(bridge.get('targetDeviceId') or '')!=target:raise RuntimeError('R240 bridge target-device continuity mismatch.')
+        step_id=str(step.get('id') or '')
+        if not step_id:raise RuntimeError('R240 bridge calculus requires a stable step id.')
+        carried[step_id]=bridge
+    if seen and seen!=len(steps):raise RuntimeError('R240 calculus-bound Hybrid jobs must carry the bridge envelope on every step.')
+    return carried
+
 def main():
     server=arg_value('--server',DEFAULT_SERVER).rstrip('/');base,base_digest=load_base(server);root=Path(base.normalize_root_arg(arg_value('--root','.'))).expanduser().resolve();cache={}
     base_execute=base.execute_job;original_execute_step=base.execute_step;original_request_json=base.request_json
@@ -235,17 +267,23 @@ def main():
         return result
     def request_json_r238(server_url,path,payload,bridge_id,secret,timeout=30):
         if path in {'/api/hybrid/agent/register','/api/hybrid/agent/heartbeat'} and isinstance(payload,dict):
-            payload=dict(payload);extensions=list(dict.fromkeys([*(payload.get('proofExtensions') or []),HOST_INTELLIGENCE_EXTENSION]));payload['proofExtensions']=extensions
+            payload=dict(payload);extensions=list(dict.fromkeys([*(payload.get('proofExtensions') or []),HOST_INTELLIGENCE_EXTENSION,BRIDGE_CALCULUS_EXTENSION]));payload['proofExtensions']=extensions
         return original_request_json(server_url,path,payload,bridge_id,secret,timeout)
     def execute_job_r141(job,approved_root):
-        packet=base_execute(job,approved_root);packet['proofExtensions']=list(dict.fromkeys([*(packet.get('proofExtensions') or []),HOST_INTELLIGENCE_EXTENSION]))
+        bridge_by_step=validate_bridge_calculus_r240(job)
+        packet=base_execute(job,approved_root);packet['proofExtensions']=list(dict.fromkeys([*(packet.get('proofExtensions') or []),HOST_INTELLIGENCE_EXTENSION,BRIDGE_CALCULUS_EXTENSION]))
+        for proof in packet.get('stepProofs') or []:
+            if not isinstance(proof,dict):continue
+            bridge=bridge_by_step.get(str(proof.get('id') or ''))
+            if not isinstance(bridge,dict):continue
+            returned=dict(bridge);returned['orientation']=-1;returned['sourceFrame']='SELECTED_HYBRID_HOST';returned['transitFrame']='CLOUD_DURABLE_RETURN';returned['destinationFrame']='R141_RETURN_PROOF';returned['returnFrame']='R141_RETURN_PROOF';returned['returnedAt']=int(time.time()*1000);proof['calculusBridgeR240Return']=returned
         core={k:packet.get(k) for k in ('jobId','ok','stepProofs','outputPaths','log','evaluation','promotion','capabilityRevision')}
         payload=exact_payload(core);digest=sha_bytes(payload.encode('utf-8'))
         packet.update({'resultFingerprintSchema':FINGERPRINT_SCHEMA,'resultFingerprintR141Payload':payload,'resultFingerprintR141':digest,'proofClosureRevision':PROOF_CLOSURE_REVISION,'baseAgentSha256':base_digest})
         return packet
     base.execute_step=execute_step_r238;base.request_json=request_json_r238;base.execute_job=execute_job_r141
-    print('OMEGA Hybrid Link proof wrapper',PROOF_CLOSURE_REVISION,'· immutable base',base.VERSION,'execution',base.CAPABILITY_REVISION,'host proof',HOST_PROOF_EXTENSION,'continuity',HOST_EVIDENCE_CONTINUITY_REVISION,'asset compatibility',R207_1_ASSET_COMPATIBILITY_REVISION,'host intelligence',HOST_INTELLIGENCE_EXTENSION)
-    print('Exact return payload SHA-256 is enabled; R238 adds bounded host-resource truth + macro preflight without dependency installation, arbitrary shell, or Canon authority.')
+    print('OMEGA Hybrid Link proof wrapper',PROOF_CLOSURE_REVISION,'· immutable base',base.VERSION,'execution',base.CAPABILITY_REVISION,'host proof',HOST_PROOF_EXTENSION,'continuity',HOST_EVIDENCE_CONTINUITY_REVISION,'asset compatibility',R207_1_ASSET_COMPATIBILITY_REVISION,'host intelligence',HOST_INTELLIGENCE_EXTENSION,'bridge calculus',BRIDGE_CALCULUS_EXTENSION)
+    print('Exact return payload SHA-256 is enabled; R238 adds bounded host-resource truth + macro preflight and R240 closes calculus address continuity across browser, durable queue, selected host and R141 return proof without new Canon authority.')
     base.main()
 
 if __name__=='__main__':main()
