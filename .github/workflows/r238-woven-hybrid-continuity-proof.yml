@@ -1,0 +1,99 @@
+name: OMEGA R238 Woven Hybrid Continuity Convergence
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Audit locked application dependency tree
+        run: npm audit --audit-level=high
+      - name: Prove R238 Woven Hybrid convergence
+        run: node tests/r238-woven-hybrid-continuity-invariants.mjs
+      - name: Preserve R238 atomic snapshot
+        run: node tests/r238-hybrid-correlated-snapshot-invariants.mjs
+      - name: Preserve R238 host intelligence
+        run: node tests/r238-hybrid-host-intelligence-invariants.mjs
+      - name: Preserve R237 command authority
+        run: node tests/r237-hybrid-command-authority-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Worker dry-run only
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r238-woven-dry-run
+
+  browser-proof:
+    needs: source-proof
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run build
+      - run: npm install --no-save playwright@1.63.0
+      - run: npx playwright install --with-deps chromium
+      - name: Prove Woven selected-host epoch across intelligence, effects and command
+        shell: bash
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 >/tmp/r238-woven-vite.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+          node --input-type=module <<'NODE'
+          import {chromium} from 'playwright';
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1440,height:1250}});
+          const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
+          const now=Date.now();
+          const caps=['DESKTOP_HEALTH','HASH_TREE','FORENSIC_HASH_LEDGER','INDEX','BUILD','TEST','PACKAGE','TRAIN_LOCAL'];
+          const profile=(id,label)=>({profileSha256:`profile-${id}`,observedAt:now-2500,cpu:{model:`CPU ${label}`,logicalProcessors:8},memory:{totalBytes:17179869184,availableBytes:8589934592},gpu:{present:true,name:`GPU ${label}`,vramBytes:8589934592,driverVersion:'test'},storage:{totalBytes:1099511627776,freeBytes:549755813888,rootLabel:`J:/OMEGA-${label}`},python:{version:'3.14',executable:`J:/OMEGA-${label}/python.exe`,architecture:'64bit'},rcwa:{pythonDependencyAvailable:true,reason:'returned test environment'},schedulerAdvisory:{recommendedCpuWorkers:4}});
+          const ret=(id,deviceId,label,fp)=>({id,targetDeviceId:deviceId,status:'COMPLETE',completedAt:now-4000,returnPacket:{receivedAt:now-4000,resultFingerprint:fp,stepProofs:[{id:'S01',op:'DESKTOP_HEALTH',ok:true,result:{hostProfileR238:profile(id,label),macroInventoryR238:{verifiedCount:2,totalCount:2,invalidCount:0}}}]}});
+          const hybrid={state:'VERIFIED_DEVICE_ONLINE',nativeExecutionClaimed:true,devices:[
+            {id:'dev-a',name:'OMEGA PC A',online:true,revoked:false,lastSeen:now,rootLabel:'J:/OMEGA-A',capabilities:caps},
+            {id:'dev-b',name:'OMEGA PC B',online:true,revoked:false,lastSeen:now,rootLabel:'J:/OMEGA-B',capabilities:caps}
+          ],jobs:[
+            {id:'job_a',targetDeviceId:'dev-a',status:'QUEUED',steps:[{id:'S01',op:'HASH_TREE'}]},
+            {id:'job_b',targetDeviceId:'dev-b',status:'QUEUED',steps:[{id:'S01',op:'BUILD'}]},
+            ret('ret_a','dev-a','A','fp-a'),ret('ret_b','dev-b','B','fp-b')
+          ]};
+          const missions={ok:true,state:'VERIFIED_DEVICE_ONLINE',missions:[
+            {id:'mission_a',targetDeviceId:'dev-a',status:'ACTIVE',cycle:2,maxCycles:12,currentJobId:'job_a'},
+            {id:'mission_b',targetDeviceId:'dev-b',status:'ACTIVE',cycle:4,maxCycles:12,currentJobId:'job_b'}
+          ]};
+          let hybridGets=0,missionGets=0;
+          await page.route('**/api/hybrid/status',route=>{hybridGets++;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(hybrid)})});
+          await page.route('**/api/missions',route=>{missionGets++;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(missions)})});
+          await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+          await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
+          const hybridEntry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid'}).first();
+          await hybridEntry.waitFor({state:'visible'});await hybridEntry.click();
+          const woven=page.locator('[data-r238-woven-continuity]');
+          const intelligence=page.locator('[data-r238-host-intelligence]');
+          const effects=page.locator('[data-r212-host-effects]');
+          const deck=page.locator('[data-r237-command-authority]');
+          await Promise.all([woven.waitFor({state:'visible'}),intelligence.waitFor({state:'visible'}),effects.waitFor({state:'visible'}),deck.waitFor({state:'visible'})]);
+          await deck.getByRole('combobox',{name:'Authenticated compute host'}).selectOption('dev-b');
+          await page.waitForFunction(()=>['[data-r238-woven-continuity]','[data-r238-host-intelligence]','[data-r212-host-effects]','[data-r237-command-authority]'].every(sel=>document.querySelector(sel)?.getAttribute(sel.includes('woven')?'data-r238-woven-device':sel.includes('host-intelligence')?'data-r238-selected-device':sel.includes('r212')?'data-r212-selected-device':'data-r237-selected-device')==='dev-b'));
+          const epochs=[await woven.getAttribute('data-r238-woven-epoch'),await intelligence.getAttribute('data-r238-snapshot-epoch'),await effects.getAttribute('data-r212-snapshot-epoch'),await deck.getAttribute('data-r237-snapshot-epoch')];
+          if(!epochs[0]||new Set(epochs).size!==1)throw new Error(`R238 Woven epoch divergence ${epochs.join(' / ')}`);
+          const wovenText=await woven.innerText(),intelText=await intelligence.innerText(),effectsText=await effects.innerText(),deckText=await deck.innerText();
+          for(const token of ['WOVEN_CONTINUITY_LOCKED','+1 DISPATCH · 0 OBSERVE · -1 RETURN','fp-b'])if(!wovenText.includes(token))throw new Error(`Woven surface missing ${token}`);
+          for(const token of ['CPU B','GPU B','profile-ret_b'])if(!intelText.includes(token))throw new Error(`Host intelligence missing selected-host ${token}`);
+          if(!effectsText.includes('fp-b'))throw new Error('R212 effects did not carry selected-host return fingerprint');
+          for(const token of ['OMEGA PC B','job_b','mission_b','HOST / JOB / MISSION / EPOCH LOCKED'])if(!deckText.includes(token))throw new Error(`R237 deck missing selected-host ${token}`);
+          for(const forbidden of ['CPU A','GPU A','fp-a','job_a','mission_a'])if(intelText.includes(forbidden)||effectsText.includes(forbidden)||deckText.includes(forbidden))throw new Error(`foreign host context leaked into selected-host projection: ${forbidden}`);
+          if(pageErrors.length)throw new Error(pageErrors.join(' | '));
+          console.log(`R238 WOVEN BROWSER PASS · device dev-b · shared epoch ${epochs[0]} · host profile + effects + command + scar carry correlated · foreign host isolated · GETs hybrid=${hybridGets} missions=${missionGets}`);
+          await browser.close();
+          NODE
