@@ -30,20 +30,25 @@ const nav=page.locator('#omega-global-navigator');
 const openAllTools=async()=>{if(!(await nav.isVisible()))await page.getByLabel('Browse all registered OMEGA tools').click();await nav.waitFor({state:'visible'});const all=nav.getByRole('button',{name:/^ALL\s+44$/});if(await all.count())await all.click()};
 await allTools.click();
 await nav.waitFor({state:'visible'});
-const navText=await nav.innerText();
-for(const token of ['All tools','Command','Explore','Intelligence','Evidence','Build','System','PRIMARY','SUPPORT','EXPERT'])if(!navText.includes(token))throw new Error(`R239 navigator missing ${token}`);
+const contextualText=await nav.innerText();
+if(!contextualText.includes('Explore tools')||!contextualText.includes('Explore · Inspect matter, traversal, Earth and visual state.'))throw new Error('R239 Home All tools did not preserve the active Explore workspace context');
+if(await nav.locator('.r89-flat-route').count()!==9)throw new Error(`R239 contextual Explore browser expected 9 routes, saw ${await nav.locator('.r89-flat-route').count()}`);
 for(const label of ['Open Command Center','Open Hybrid Link','Open Earth Now','Open Evidence and Proof','Browse all registered OMEGA tools','Browse full software and capability map'])if(!(await page.getByLabel(label).count()))throw new Error(`R239 permanent rail missing ${label}`);
 if(await page.getByLabel('Open Woven Continuity traversal instrument').count())throw new Error('R239 permanent rail still contains specialized Weave shortcut');
 if(await page.getByLabel('Open Matter Traversal').count())throw new Error('R239 permanent rail still contains specialized Matter shortcut');
 
-// Every navigator option must preserve the complete registry rather than only proving static copy.
+// Every workspace filter must remain directly operable from the contextual browser.
 for(const workspace of ['Command','Explore','Intelligence','Evidence','Build','System']){
  const button=nav.getByRole('button',{name:new RegExp(`^${workspace}\\s+\\d+$`)});
  if(await button.count()!==1)throw new Error(`R239 navigator workspace filter missing ${workspace}`);
  await button.click();
  if(await nav.locator('.r89-flat-route').count()<1)throw new Error(`R239 navigator workspace ${workspace} exposes no registered routes`);
 }
+
+// ALL is a deliberate second step from a contextual Home launch and must restore the complete registry.
 await nav.getByRole('button',{name:/^ALL\s+44$/}).click();
+const globalText=await nav.innerText();
+for(const token of ['All tools','Command','Explore','Intelligence','Evidence','Build','System','PRIMARY','SUPPORT','EXPERT'])if(!globalText.includes(token))throw new Error(`R239 global navigator missing ${token}`);
 const search=nav.getByLabel('Search all registered OMEGA applications');
 await search.fill('Hybrid');
 if(await nav.locator('.r89-flat-route').count()<1)throw new Error('R239 complete-registry search cannot find Hybrid');
@@ -123,5 +128,5 @@ if(!box||box.width>365)throw new Error(`R239 mobile navigator too wide: ${box?.w
 if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error('R239 mobile product introduces horizontal viewport overflow');
 if(pageErrors.length)throw new Error(`R239 page errors: ${pageErrors.join(' | ')}`);
 
-console.log('R239 BUILT BROWSER PASS · Home hierarchy · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · visible-canvas sanity · universal rail · system map · technical detail opt-in · Escape/outside close · rail width · mobile containment');
+console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · visible-canvas sanity · universal rail · system map · technical detail opt-in · Escape/outside close · rail width · mobile containment');
 await browser.close();
