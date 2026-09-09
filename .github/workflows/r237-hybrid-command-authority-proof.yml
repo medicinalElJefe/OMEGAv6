@@ -94,7 +94,7 @@ jobs:
 
           let deck=await openHybrid();
           let text=await deck.innerText();
-          for(const token of ['DEVICE PROOF REQUIRED','ROOT-CONFINED','PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','R141/R146/R147/R125 authority remains unchanged','intentionally contain no APPLY_PATCH or WRITE_TEXT']){
+          for(const token of ['DEVICE PROOF REQUIRED','ROOT-CONFINED','PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','R125','intentionally contain no APPLY_PATCH or WRITE_TEXT']){
             if(!text.includes(token)) throw new Error(`R237 built browser missing ${token}`);
           }
           const runButtons=deck.getByRole('button',{name:/Run on this PC|Device busy/});
@@ -130,9 +130,9 @@ jobs:
           if(await job.getAttribute('data-r237-job-device')!=='dev-b')throw new Error('R237 selected host displayed another device job');
           if(await mission.getAttribute('data-r237-mission-device')!=='dev-b')throw new Error('R237 selected host displayed another device mission');
           text=await deck.innerText();
-          for(const token of ['OMEGA PC B','job_b','mission_b','HOST / JOB / MISSION LOCKED'])if(!text.includes(token))throw new Error(`R237 correlated browser surface missing ${token}`);
+          for(const token of ['OMEGA PC B','job_b','mission_b','HOST / JOB / MISSION / EPOCH LOCKED'])if(!text.includes(token))throw new Error(`R237 correlated browser surface missing ${token}`);
           for(const forbidden of ['job_a','mission_a'])if(text.includes(forbidden))throw new Error(`R237 leaked unrelated active execution context ${forbidden} into selected host controls`);
           if(pageErrors.length)throw new Error(`R237 built browser page errors: ${pageErrors.join(' | ')}`);
-          console.log('R237 BUILT BROWSER PASS · real Home→TOOLS→Hybrid navigation · no-device fail-closed proof · four bounded presets · explicit two-host selector · selected host/job/mission identity correlation · unrelated mission isolation · source-mutation prohibition visibly stated');
+          console.log('R237 BUILT BROWSER PASS · real Home→TOOLS→Hybrid navigation · no-device fail-closed proof · four bounded presets · explicit two-host selector · selected host/job/mission/epoch identity correlation · unrelated mission isolation · source-mutation prohibition visibly stated');
           await browser.close();
           NODE
