@@ -50,14 +50,14 @@ try {
     const box = await map.boundingBox();
     assert.ok(box);
     const beforePoint = await page.textContent('#point');
-    await page.mouse.click(box.x + box.width * .62, box.y + box.height * .42);
+    await map.click({position:{x:box.width*.62,y:box.height*.42},timeout:5000});
     await page.waitForFunction(before => (document.querySelector('#point')?.textContent || '') !== before, beforePoint, {timeout:5000});
     const afterPoint = await page.textContent('#point');
     assert.notEqual(afterPoint, beforePoint, `map click did not select a new location at ${viewport.width}`);
     assert.ok(await page.evaluate(() => window.__omegaMapSelections.length >= 1), `selection event missing at ${viewport.width}`);
 
     const beforeView = await page.evaluate(() => window.__omegaMapViews.at(-1) || null);
-    await page.mouse.move(box.x + box.width * .50, box.y + box.height * .50);
+    await map.hover({position:{x:box.width*.50,y:box.height*.50}});
     await page.mouse.down();
     await page.mouse.move(box.x + box.width * .70, box.y + box.height * .57, {steps:6});
     await page.mouse.up();
