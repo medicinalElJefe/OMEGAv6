@@ -59,4 +59,5 @@ if(typeof document!=='undefined'){
   import('./sentinel-console.mjs').catch(error=>console.error('Sentinel calibrated console failed to initialize',error));
   import('./sar-earth-overlay.mjs').catch(()=>{});
   import('./omega-field-console.mjs').catch(error=>console.error('OMEGA continuous field failed to initialize',error));
+  import('./interaction-runtime.mjs').catch(error=>console.error('OMEGA interaction runtime failed to initialize',error));
 }
