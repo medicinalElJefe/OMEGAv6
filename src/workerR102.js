@@ -1,5 +1,6 @@
 import r101,{OmegaRuntime as OmegaRuntimeR101} from './workerR101.js';
 import {planIntentR103} from './federation/federationIntentRouterR103.js';
+import {privateAgentGatewayR245} from './privateAgentGatewayR245.js';
 
 const OPTICAL_PRIMARY_R102='https://omega-living-light-etching-private-woven2.vercel.app';
 const OPTICAL_LEGACY_R102='https://omega-optical-cloud-woven2.vercel.app';
@@ -52,6 +53,9 @@ function experienceR102(data){
 
 async function fetchR102(request,env){
  const path=new URL(request.url).pathname;
+ if(path.startsWith('/private-agent/')){
+  const response=await privateAgentGatewayR245(request,env,{delegate:(nextRequest,nextEnv)=>r101.fetch(nextRequest,nextEnv)});if(response)return response;
+ }
  if(path==='/api/hybrid/agent-download'&&request.method==='GET'){
   const url=new URL(request.url);url.pathname='/omega-hybrid-agent.py';
   return r101.fetch(new Request(url,{method:'GET',headers:request.headers}),env);
