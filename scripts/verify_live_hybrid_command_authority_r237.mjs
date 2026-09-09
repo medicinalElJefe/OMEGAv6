@@ -75,21 +75,34 @@ await deck.waitFor({state:'visible'});
 if(await deck.getAttribute('data-r237-command-authority')!=='AUTHENTICATED_BOUNDED_NATIVE_CONTROL')throw new Error('R237 live browser lost bounded command-authority identity');
 const intelligence=page.locator('[data-r238-host-intelligence]');
 await intelligence.waitFor({state:'visible'});
-const intelligenceState=await intelligence.getAttribute('data-r238-host-intelligence');
-if(!['RETURNED_HOST_PROOF','AWAITING_RETURNED_PROFILE'].includes(String(intelligenceState)))throw new Error(`R237 live browser lost R238 host-intelligence truth identity: ${intelligenceState}`);
-const selectedDevice=await intelligence.getAttribute('data-r238-selected-device');
-if(!selectedDevice)throw new Error('R237 live browser lost R238 selected-device correlation identity');
+const intelligenceState=String(await intelligence.getAttribute('data-r238-host-intelligence')||'');
+if(!['RETURNED_HOST_PROOF','AWAITING_RETURNED_PROFILE'].includes(intelligenceState))throw new Error(`R237 live browser lost R238 host-intelligence truth identity: ${intelligenceState}`);
+
+const deckSelectedDevice=String(await deck.getAttribute('data-r237-selected-device')||'');
+const intelligenceSelectedDevice=String(await intelligence.getAttribute('data-r238-selected-device')||'');
+if(!deckSelectedDevice||!intelligenceSelectedDevice)throw new Error('R237/R238 live browser lost selected-device correlation identity');
+if(deckSelectedDevice!==intelligenceSelectedDevice)throw new Error(`R237/R238 selected-device mismatch: command ${deckSelectedDevice}, intelligence ${intelligenceSelectedDevice}`);
+
+const correlation=String(await deck.getAttribute('data-r237-correlation')||'');
+if(!['LOCKED','HELD'].includes(correlation))throw new Error(`R237 live browser exposed unsupported correlation state ${correlation||'NONE'}`);
 const deckText=await deck.innerText();
-for(const token of ['PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','intentionally contain no APPLY_PATCH or WRITE_TEXT','HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE','R212/R141','R146','R147','R125'])if(!deckText.includes(token))throw new Error(`R237/R238/R239 live semantic authority marker missing ${token}`);
+for(const token of ['PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','intentionally contain no APPLY_PATCH or WRITE_TEXT','CORRELATION LOCK','R239 RESOURCE ENVELOPE','R212/R141','R146','R147','R125'])if(!deckText.includes(token))throw new Error(`R237/R238/R239 live semantic authority marker missing ${token}`);
+if(correlation==='LOCKED'&&!deckText.includes('HOST / JOB / MISSION / EPOCH LOCKED'))throw new Error('R237 declared LOCKED correlation without rendering the locked execution-context truth state');
+if(correlation==='HELD'&&!deckText.includes('EXECUTION CONTEXT HELD'))throw new Error('R237 declared HELD correlation without rendering the fail-closed execution-context truth state');
+
 const epoch=Number(await deck.getAttribute('data-r237-snapshot-epoch')||0);
 if(!Number.isFinite(epoch)||epoch<1)throw new Error(`R237 live browser did not expose a completed shared snapshot epoch: ${epoch}`);
 const intelligenceEpoch=Number(await intelligence.getAttribute('data-r238-snapshot-epoch')||0);
 if(!Number.isFinite(intelligenceEpoch)||intelligenceEpoch!==epoch)throw new Error(`R237/R238 live shared-snapshot epoch mismatch: command ${epoch}, intelligence ${intelligenceEpoch}`);
 const tier=String(await deck.getAttribute('data-r239-resource-tier')||'');
-if(!tier)throw new Error('R239 live browser did not expose selected-host resource-envelope tier');
+if(!['UNPROVED','HOLD','CONSTRAINED','READY','HIGH_CAPACITY'].includes(tier))throw new Error(`R239 live browser exposed unsupported selected-host resource-envelope tier ${tier||'NONE'}`);
+
 await deck.getByRole('button',{name:'Refresh shared snapshot'}).click();
 await page.waitForTimeout(750);
+const refreshedEpoch=Number(await deck.getAttribute('data-r237-snapshot-epoch')||0);
+const refreshedIntelligenceEpoch=Number(await intelligence.getAttribute('data-r238-snapshot-epoch')||0);
+if(!Number.isFinite(refreshedEpoch)||refreshedEpoch<epoch||refreshedIntelligenceEpoch!==refreshedEpoch)throw new Error(`R237/R238 shared snapshot diverged after explicit refresh: before ${epoch}, command ${refreshedEpoch}, intelligence ${refreshedIntelligenceEpoch}`);
 if(pageErrors.length)throw new Error(`R237 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R237/R238/R239 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · authenticated secret rotation + host continuity · queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser · R238 host-intelligence identity + shared epoch ${epoch} · R239 resource tier ${tier} · R212/R141/R146/R147/R125 semantic authority markers preserved`);
+console.log(`R237/R238/R239/R240.1 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · authenticated secret rotation + host continuity · queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser · selected device ${deckSelectedDevice} · correlation ${correlation} · shared epoch ${refreshedEpoch} · R239 resource tier ${tier} · state-specific LOCKED/HELD truth accepted without prose inflation · R212/R141/R146/R147/R125 semantic authority preserved`);
