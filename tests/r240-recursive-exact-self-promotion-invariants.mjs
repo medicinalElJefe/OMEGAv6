@@ -6,6 +6,8 @@ const policy=JSON.parse(fs.readFileSync('public/omega-r240-recursive-exact-self-
 const governor=JSON.parse(fs.readFileSync('public/omega-r170-self-build-governor.json','utf8'));
 const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
 const engine=fs.readFileSync('scripts/r170-selfbuild-engine.mjs','utf8');
+const sharedSelection=fs.readFileSync('scripts/lib/r245-governed-selfbuild-selection.mjs','utf8');
+const sharedContract=fs.readFileSync('src/system/governedSelfBuildContractR245.js','utf8');
 const workflow=fs.readFileSync('.github/workflows/r170-governed-selfbuild.yml','utf8');
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
 const verifier=fs.readFileSync('scripts/verify_live_hybrid_command_authority_r237.mjs','utf8');
@@ -71,7 +73,9 @@ assert.equal(plan.canonicalAdmission,false);
 assert.equal(plan.readyCount,2);
 assert.equal(plan.pressureProvenance,'R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DEPENDENCY_TOPOLOGY');
 
-for(const token of ['attachEvidencePressureR240','planParallelFrontierR240','rankDependencyReadyCapsulesR240','const capsule=candidates[0]||null',"schedulerRevision:'R240'",'canonicalAdmission:false'])assert.ok(engine.includes(token),`R240 engine integration missing ${token}`);
+for(const token of ['planGovernedCandidateR245','deriveResidualGateR245','capsuleBodyR245',"schedulerRevision:'R240'",'canonicalAdmission:false'])assert.ok(engine.includes(token),`R240 engine integration missing shared boundary ${token}`);
+for(const token of ['attachEvidencePressureR240','planParallelFrontierR240','rankDependencyReadyCapsulesR240','const capsule=candidates[0]||null'])assert.ok(sharedSelection.includes(token),`R245 shared selection must preserve R240 primitive ${token}`);
+assert.match(sharedContract,/R245_SHARED_CANONICAL_GENERATOR/,'shared contract must bind deterministic generation rather than moving R240 promotion authority');
 assert.ok(!/git\s+push/i.test(engine),'R240 scheduler engine itself must not push source');
 assert.equal(state.revision,'R170.2');
 assert.equal(state.recursiveSchedulerRevision,'R240');
@@ -90,7 +94,7 @@ assert.ok(suite.includes("import CalculusAddressFabricR240 from './CalculusAddre
 assert.ok(suite.includes('<RecursiveSelfBuildR240/>'));
 assert.ok(suite.includes('<CalculusAddressFabricR240 record={record}/>'));
 
-for(const token of ['actions: write',"['push','workflow_dispatch'].includes(r.event)",'R240 EXACT CANDIDATE PASS','R240 exact two-parent source promotion PASS','pulls/$PR_NUMBER/merge','-f merge_method=merge','-f sha="$CANDIDATE_SHA"','actions/workflows/ci.yml/dispatches','--event workflow_dispatch','gh run watch "$RUN_ID"','R240 exact promoted merge is production-proven by canonical ci.yml','POLICY_BLOCKED_BRANCH_REMOVED'])assert.ok(workflow.includes(token),`R240 self-promotion workflow missing ${token}`);
+for(const token of ['actions: write',"['push','workflow_dispatch'].includes(r.event)",'R240/R245 EXACT CANDIDATE PASS','R240 exact two-parent source promotion PASS','pulls/$PR_NUMBER/merge','-f merge_method=merge','-f sha="$CANDIDATE_SHA"','actions/workflows/ci.yml/dispatches','--event workflow_dispatch','gh run watch "$RUN_ID"','R240 exact promoted merge is production-proven by canonical ci.yml','POLICY_BLOCKED_BRANCH_REMOVED'])assert.ok(workflow.includes(token),`R240 self-promotion workflow missing ${token}`);
 assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(workflow),'R240 may not direct-push generated source to main');
 assert.ok(!/gh\s+pr\s+merge/.test(workflow),'R240 must not use GitHub auto-merge/CLI merge');
 assert.ok(!/actions\/workflows\/r170-governed-selfbuild\.yml\/dispatches/.test(workflow),'R240 may not dispatch itself');
@@ -105,6 +109,6 @@ assert.ok(!ci.includes('workflow_run:'),'canonical deployment must not add recur
 for(const token of ['HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE','data-r239-resource-tier','R141','R146','R147','R125','intentionally contain no APPLY_PATCH or WRITE_TEXT'])assert.ok(verifier.includes(token),`R240 semantic live verifier missing ${token}`);
 assert.ok(!verifier.includes('R238 changes correlation and sampling, not execution or Canon authority'),'obsolete prose-coupled verifier must be gone');
 
-console.log(`OMEGA R240 RECURSIVE EXACT SELF-PROMOTION PASS · current proof floor R${capabilityFloor} preserves actual R239 Hybrid governor contract + R240 promotion engine · R164 evidence-bound sparse scheduler · full 20,736 calculus surface preserved · exact production base/residual/all-green/allowlist/unchanged-base/expected-head gates · two-parent merge · canonical ci.yml exact-production proof · R125 admission unchanged`);
+console.log(`OMEGA R240/R245 RECURSIVE EXACT SELF-PROMOTION PASS · current promoted proof floor R${capabilityFloor} preserves actual R239 Hybrid governor + R240 promotion authority · R245 shares R164 gating/R240-R243 selection/generation across R170 and CLOUD-01 without moving source-promotion authority · exact production base/residual/all-green/allowlist/unchanged-base/expected-head gates · two-parent merge · canonical ci.yml exact-production proof · R125 admission unchanged`);
 await import('./r240-full-calculus-bridge-invariants.mjs');
 await import('./r243-woven-selfbuild-fabric-invariants.mjs');
