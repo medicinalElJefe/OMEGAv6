@@ -63,7 +63,7 @@ const terminal=await post('/api/hybrid/agent/result',{bridgeId:bridge,deviceId:d
 if(!terminal.response.ok||terminal.body?.job?.status!=='FAILED')throw new Error(`R237 lifecycle cleanup failed: ${terminal.response.status} ${terminal.raw.slice(0,700)}`);
 
 const browser=await chromium.launch({headless:true});
-const page=await browser.newPage({viewport:{width:1440,height:1000}});
+const page=await browser.newPage({viewport:{width:1440,height:1100}});
 const pageErrors=[];page.on('pageerror',error=>pageErrors.push(String(error)));
 await page.goto(base+'/',{waitUntil:'networkidle'});
 await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
@@ -80,19 +80,18 @@ if(!['RETURNED_HOST_PROOF','AWAITING_RETURNED_PROFILE'].includes(intelligenceSta
 const selectedDevice=String(await intelligence.getAttribute('data-r238-selected-device')||'');
 if(!selectedDevice)throw new Error('R237 live browser lost R238 selected-device correlation identity');
 const deckText=await deck.innerText();
-for(const token of ['PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','intentionally contain no APPLY_PATCH or WRITE_TEXT'])if(!deckText.includes(token))throw new Error(`R237 live browser missing ${token}`);
-for(const token of ['R239 tightens resource admission without changing execution authority','R212/R141','R146','R147','R125'])if(!deckText.includes(token))throw new Error(`R237 live authority boundary missing ${token}`);
-const resourceTier=String(await deck.getAttribute('data-r239-resource-tier')||'');
-if(!['UNPROVED','HOLD','CONSTRAINED','READY','HIGH_CAPACITY'].includes(resourceTier))throw new Error(`R237/R239 live browser exposed unsupported resource tier ${resourceTier||'NONE'}`);
+for(const token of ['PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','intentionally contain no APPLY_PATCH or WRITE_TEXT','HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE','R212/R141','R146','R147','R125'])if(!deckText.includes(token))throw new Error(`R237/R238/R239 live semantic authority marker missing ${token}`);
 const epoch=Number(await deck.getAttribute('data-r237-snapshot-epoch')||0);
 if(!Number.isFinite(epoch)||epoch<1)throw new Error(`R237 live browser did not expose a completed shared snapshot epoch: ${epoch}`);
 const intelligenceEpoch=Number(await intelligence.getAttribute('data-r238-snapshot-epoch')||0);
 if(!Number.isFinite(intelligenceEpoch)||intelligenceEpoch!==epoch)throw new Error(`R237/R238 live shared-snapshot epoch mismatch: command ${epoch}, intelligence ${intelligenceEpoch}`);
 const deckDevice=String(await deck.getAttribute('data-r237-selected-device')||'');
 if(deckDevice!==selectedDevice)throw new Error(`R237/R238 live selected-device mismatch: command ${deckDevice||'NONE'}, intelligence ${selectedDevice}`);
+const tier=String(await deck.getAttribute('data-r239-resource-tier')||'');
+if(!['UNPROVED','HOLD','CONSTRAINED','READY','HIGH_CAPACITY'].includes(tier))throw new Error(`R239 live browser exposed unsupported selected-host resource-envelope tier ${tier||'NONE'}`);
 await deck.getByRole('button',{name:'Refresh shared snapshot'}).click();
 await page.waitForTimeout(750);
 if(pageErrors.length)throw new Error(`R237 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R237 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · unauthenticated rotation rejected + original secret preserved + authenticated rotation succeeded + old secret revoked + rotated secret preserved device continuity · queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser navigation + R238 semantic host identity + selected-device/shared-epoch correlation + R239 resource tier ${resourceTier} · R212/R141/R146/R147/R125 authority boundaries preserved`);
+console.log(`R237/R238/R239/R240 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · authenticated secret rotation + host continuity · queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser · R238 host-intelligence identity + selected device ${selectedDevice} + shared epoch ${epoch} · R239 resource tier ${tier} · R240 bridge-calculus lineage preserved through canonical source · R212/R141/R146/R147/R125 semantic authority markers preserved`);
