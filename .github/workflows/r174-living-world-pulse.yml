@@ -15,6 +15,7 @@ on:
       - 'src/SourceSpatialComputedFrameR230.tsx'
       - 'src/SourceSpatialCalibrationValidationR232.tsx'
       - 'src/SourceSpatialCalibrationSufficiencyR234.tsx'
+      - 'src/SourceSpatialControlAttestationR236.tsx'
       - 'src/missionWorldContinuityR206.css'
       - 'src/world/missionWorldHeadBindingR208.ts'
       - 'src/world/renderIntentLineageR211.js'
@@ -34,6 +35,7 @@ on:
       - 'src/world/sourceSpatialComputedFrameR230.js'
       - 'src/world/sourceSpatialCalibrationValidationR232.js'
       - 'src/world/sourceSpatialCalibrationSufficiencyR234.js'
+      - 'src/world/sourceSpatialControlAttestationR236.js'
       - 'src/OmegaGovernanceProjectMediaR29.tsx'
       - 'src/world/operationWorldBridgeR140.ts'
       - 'src/omegaOperationBusR86.ts'
@@ -64,6 +66,8 @@ on:
       - 'tests/r230-proof-bound-computed-frame-invariants.mjs'
       - 'tests/r232-independent-spatial-calibration-validation-invariants.mjs'
       - 'tests/r234-calibration-sufficiency-envelope-invariants.mjs'
+      - 'tests/r236-source-spatial-control-attestation-invariants.mjs'
+      - 'tests/r236-living-world-source-attestation-invariants.mjs'
       - '.github/workflows/r174-living-world-pulse.yml'
   push:
     branches: [r174-living-world-pulse-surface]
@@ -80,6 +84,12 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Prove R236 source spatial control attestation
+        run: node tests/r236-source-spatial-control-attestation-invariants.mjs
+      - name: Prove R236 Living World source-attestation wiring
+        run: node tests/r236-living-world-source-attestation-invariants.mjs
+      - name: Syntax-check R236 source attestation
+        run: node --check src/world/sourceSpatialControlAttestationR236.js
       - name: Prove R234 calibration sufficiency envelope
         run: node tests/r234-calibration-sufficiency-envelope-invariants.mjs
       - name: Syntax-check R234 calibration sufficiency
