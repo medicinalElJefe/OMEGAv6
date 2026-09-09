@@ -12,7 +12,7 @@ if(!receipt.response.ok)throw new Error(`R238 build receipt HTTP ${receipt.respo
 const servedSha=receipt.body?.promotion?.promotedMergeSha||receipt.body?.source?.sha||'';
 if(servedSha!==expected)throw new Error(`R238 exact promoted SHA mismatch expected ${expected} served ${servedSha||'NONE'}`);
 
-const wrapperResponse=await fetch(base+'/omega-hybrid-agent.py',{headers:{'cache-control':'no-cache'}});
+const wrapperResponse=await fetch(base+'/omega-hybrid-agent-r141.py',{headers:{'cache-control':'no-cache'}});
 const wrapper=await wrapperResponse.text();
 if(!wrapperResponse.ok)throw new Error(`R238 Hybrid wrapper HTTP ${wrapperResponse.status}`);
 for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'","MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'","EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'",'Get-CimInstance Win32_VideoController','MAX_MACRO_SECONDS_R238=300','MAX_MACRO_COORD_ABS_R238=100000'])if(!wrapper.includes(token))throw new Error(`R238 live wrapper missing ${token}`);
@@ -51,4 +51,4 @@ if(current.length===0){
 if(pageErrors.length)throw new Error(`R238 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R238 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · immutable R205 base ${baseSha} · R238 wrapper served · Hybrid ${status.body.state} · current public devices ${current.length} · live Home→TOOLS→Hybrid host-intelligence surface rendered without cross-authority claims`);
+console.log(`R238 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · immutable R205 base ${baseSha} · R238 R141 proof wrapper served · Hybrid ${status.body.state} · current public devices ${current.length} · live Home→TOOLS→Hybrid host-intelligence surface rendered without cross-authority claims`);
