@@ -1,3 +1,5 @@
+import {bindHybridJobBridgeCalculusR240,bridgeRequestHeadersR240} from './system/hybridBridgeCalculusR240';
+
 export type OmegaTruthState =
   | 'LIVE'
   | 'NOT_CONFIGURED'
@@ -48,19 +50,24 @@ export function resolveOmegaApiUrl(url:string,host=runtimeHost()){
   if(/^https?:\/\//i.test(url))return url;
   return shouldUseCanonicalApiAuthority(url,host)?`${OMEGA_CANONICAL_ORIGIN}${url}`:url;
 }
+function calculusBoundBody(method:string,url:string,body:unknown,sessionId:string){
+  if(body===undefined)return undefined;
+  if(String(method).toUpperCase()==='POST'&&(url==='/api/hybrid/jobs'||url==='/api/missions'))return bindHybridJobBridgeCalculusR240(body,sessionId);
+  return body;
+}
 
 async function request<T>(method: string, url: string, body?: unknown): Promise<ApiResult<T>> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 20000);
   try {
-    const bridge=getHybridBridge(),headers:Record<string,string>={'x-omega-session-id':runtimeSessionId()};
-    if(body!==undefined)headers['content-type']='application/json';
+    const sessionId=runtimeSessionId(),bridge=getHybridBridge(),headers:Record<string,string>={'x-omega-session-id':sessionId,...bridgeRequestHeadersR240(method,url)},outboundBody=calculusBoundBody(method,url,body,sessionId);
+    if(outboundBody!==undefined)headers['content-type']='application/json';
     if(bridge){headers['x-omega-bridge-id']=bridge.bridgeId;headers['x-omega-bridge-secret']=bridge.secret}
     const target=resolveOmegaApiUrl(url);
     const response = await fetch(target, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: outboundBody === undefined ? undefined : JSON.stringify(outboundBody),
       cache: 'no-store',
       credentials: target.startsWith(OMEGA_CANONICAL_ORIGIN)?'omit':'same-origin',
       signal: controller.signal
@@ -163,5 +170,5 @@ export const auth = Object.freeze({
 
 export const realtime = Object.freeze({
   state: 'LIVE' as OmegaTruthState,
-  reason: 'R32 durable event/runtime state is bound. Native-device actions remain separately proof-gated.'
+  reason: 'R32 durable event/runtime state is bound. R240 calculus metadata now travels through the same browser/Hybrid bridge; native-device actions and returned proof remain separately proof-gated.'
 });
