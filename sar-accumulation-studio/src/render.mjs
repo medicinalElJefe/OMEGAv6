@@ -24,6 +24,7 @@ export class WorldRenderer {
     this.baseMeta = null;
     this.baseOpacity = 1;
     this.displayMode = 'earth';
+    this.sarOverlay = null;
     this._lastSelectionAt = 0;
     this._lastPointerDownAt = 0;
     this._wire();
@@ -66,6 +67,16 @@ export class WorldRenderer {
     this.baseImage=img;this.baseMeta=meta;this.redraw?.();
   }
 
+  setSarOverlay(patch,sourceCanvas){
+    if(!patch||!sourceCanvas||!sourceCanvas.width||!sourceCanvas.height){this.sarOverlay=null;this.redraw?.();return}
+    const copy=document.createElement('canvas');copy.width=sourceCanvas.width;copy.height=sourceCanvas.height;
+    copy.getContext('2d').drawImage(sourceCanvas,0,0);
+    this.sarOverlay={patch,image:copy};
+    this.redraw?.();
+  }
+
+  clearSarOverlay(){this.sarOverlay=null;this.redraw?.();}
+
   project(lon, lat) {
     const dlon = wrapLon(lon - this.view.centerLon);
     const x = this.w / 2 + dlon * (this.w / 360) * this.view.scale;
@@ -94,6 +105,39 @@ export class WorldRenderer {
     return true;
   }
 
+  _drawSarCell(image,s00,s10,s01,d00,d10,d01,d11){
+    const sx0=s00[0],sy0=s00[1],sx1=s10[0],sy1=s01[1];
+    if(!(sx1>sx0&&sy1>sy0))return;
+    const a=(d10[0]-d00[0])/(sx1-sx0),b=(d10[1]-d00[1])/(sx1-sx0);
+    const cc=(d01[0]-d00[0])/(sy1-sy0),d=(d01[1]-d00[1])/(sy1-sy0);
+    const e=d00[0]-a*sx0-cc*sy0,f=d00[1]-b*sx0-d*sy0;
+    const c=this.ctx;c.save();
+    c.beginPath();c.moveTo(d00[0],d00[1]);c.lineTo(d10[0],d10[1]);c.lineTo(d11[0],d11[1]);c.lineTo(d01[0],d01[1]);c.closePath();c.clip();
+    c.globalAlpha=.92;c.imageSmoothingEnabled=true;c.transform(a,b,cc,d,e,f);c.drawImage(image,0,0);c.restore();
+  }
+
+  _drawSarOverlay(){
+    const overlay=this.sarOverlay,mesh=overlay?.patch?.geoMesh;
+    if(!overlay||!mesh?.nodes||mesh.validNodeCount<4)return false;
+    const image=overlay.image,[x0,y0]=mesh.sourceWindow||overlay.patch.sourceWindow||[0,0];
+    const n=mesh.segments||mesh.nodes.length-1;
+    let cells=0;
+    for(let gy=0;gy<n;gy++)for(let gx=0;gx<n;gx++){
+      const q00=mesh.nodes[gy]?.[gx],q10=mesh.nodes[gy]?.[gx+1],q01=mesh.nodes[gy+1]?.[gx],q11=mesh.nodes[gy+1]?.[gx+1];
+      if(![q00,q10,q01,q11].every(q=>Number.isFinite(q?.lon)&&Number.isFinite(q?.lat)))continue;
+      const d00=this.project(q00.lon,q00.lat),d10=this.project(q10.lon,q10.lat),d01=this.project(q01.lon,q01.lat),d11=this.project(q11.lon,q11.lat);
+      const s00=[q00.pixel-x0,q00.line-y0],s10=[q10.pixel-x0,q10.line-y0],s01=[q01.pixel-x0,q01.line-y0];
+      this._drawSarCell(image,s00,s10,s01,d00,d10,d01,d11);cells++;
+    }
+    if(cells){
+      const c=this.ctx,target=overlay.patch.target,[tx,ty]=this.project(target.lon,target.lat);
+      c.save();c.strokeStyle='rgba(238,252,255,.92)';c.lineWidth=1.2;c.beginPath();c.arc(tx,ty,5,0,Math.PI*2);c.stroke();
+      c.fillStyle='rgba(0,8,12,.74)';c.fillRect(tx+7,ty-17,145,16);c.fillStyle='rgba(235,250,255,.94)';c.font='9px ui-monospace,monospace';
+      c.fillText(`CALIBRATED S1 ${overlay.patch.polarization} ${overlay.patch.quantity}`,tx+11,ty-6);c.restore();
+    }
+    return cells>0;
+  }
+
   clear() {
     const c = this.ctx;
     c.clearRect(0,0,this.w,this.h);
@@ -104,6 +148,7 @@ export class WorldRenderer {
     }else{
       c.fillStyle='rgba(0,5,8,.055)';c.fillRect(0,0,this.w,this.h);
     }
+    if(this.displayMode==='earth')this._drawSarOverlay();
     if(!hasEarth||this.displayMode!=='earth')this._graticule(hasEarth?.08:.19);
   }
 
