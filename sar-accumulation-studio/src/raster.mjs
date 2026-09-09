@@ -111,6 +111,11 @@ export function dataAssetChoices(record) {
   return Object.values(record?.dataAssets || {}).filter(a => a?.href);
 }
 
+function dispatchProbeEvent(detail) {
+  if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function' || typeof CustomEvent === 'undefined') return;
+  window.dispatchEvent(new CustomEvent('omega:sar-probe-stack', { detail }));
+}
+
 export async function probeStack(records, lon, lat, assetKey, { maxScenes = 96, onProgress } = {}) {
   const candidates = records.filter(r => r.dataAssets && (r.dataAssets[assetKey] || Object.values(r.dataAssets)[0])).slice(-maxScenes);
   const out = [];
@@ -118,10 +123,11 @@ export async function probeStack(records, lon, lat, assetKey, { maxScenes = 96, 
     const r = candidates[i], asset = r.dataAssets[assetKey] || Object.values(r.dataAssets)[0];
     try {
       const sample = await sampleCogAtPoint(asset.href, lon, lat, { epsg: r.projection?.epsg || 4326 });
-      if (sample.inside) out.push({ id:r.id, startTime:r.startTime, platform:r.platform, assetKey:asset.key, value:sample.value, pixel:[sample.x,sample.y] });
-    } catch (error) { out.push({ id:r.id, startTime:r.startTime, platform:r.platform, assetKey:asset.key, value:null, error:error.message }); }
+      if (sample.inside) out.push({ id:r.id, startTime:r.startTime, time:r.startTime, platform:r.platform, assetKey:asset.key, value:sample.value, pixel:[sample.x,sample.y], lon:Number(lon), lat:Number(lat), measured:true });
+    } catch (error) { out.push({ id:r.id, startTime:r.startTime, time:r.startTime, platform:r.platform, assetKey:asset.key, value:null, error:error.message, lon:Number(lon), lat:Number(lat), measured:true }); }
     onProgress?.(i + 1, candidates.length);
   }
+  dispatchProbeEvent({ samples: out, point: { lon:Number(lon), lat:Number(lat) }, assetKey, candidateCount:candidates.length, generatedAt:new Date().toISOString() });
   return out;
 }
 
