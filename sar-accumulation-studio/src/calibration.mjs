@@ -55,9 +55,10 @@ export function compressionUpdate(scale, c) {
   return s * factor;
 }
 
-export function dispatchOmega(Omega, tau = 0.05) {
-  const omega = Number(Omega), tolerance = Math.abs(Number(tau));
-  if (![omega, tolerance].every(Number.isFinite)) return 'UNRESOLVED';
+// The charted law requires tau to be declared/calibrated for the host. Do not invent a default.
+export function dispatchOmega(Omega, tau) {
+  const omega = Number(Omega), tolerance = Number(tau);
+  if (!Number.isFinite(omega) || !Number.isFinite(tolerance) || tolerance < 0) return 'UNRESOLVED_HOST_THRESHOLD';
   if (omega > 1 + tolerance) return 'STAY';
   if (Math.abs(omega - 1) <= tolerance) return 'TURN';
   return 'ESCALATE';
@@ -80,7 +81,7 @@ export function empiricalTurnDecision(profileName, value) {
   const x = Number(value);
   if (!Number.isFinite(x)) return { state: 'UNRESOLVED', profileName, profile };
   const turn = profile.orientation === 'lower=TURN' ? x <= profile.threshold : x >= profile.threshold;
-  return { state: turn ? 'TURN' : 'NON_TURN', value: x, profileName, profile };
+  return { state: turn ? 'TURN' : 'NON_TURN', value: x, profileName, profile, role: 'PRIOR_EMPIRICAL_REFERENCE' };
 }
 
 export function normalizeObservedRange(value, min, max) {
