@@ -10,6 +10,7 @@ const snapshot=read('src/HybridRuntimeSnapshotR238.tsx');
 const workflow=read('.github/workflows/r238-hybrid-host-intelligence-proof.yml');
 const windowsProof=read('tests/r238-windows-host-runtime-proof.py');
 const browserProof=read('tests/r238-host-intelligence-browser-e2e.mjs');
+const liveVerifier=read('scripts/verify_live_hybrid_host_intelligence_r238.mjs');
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
 
 for(const token of [
@@ -21,6 +22,10 @@ for(const token of [
  "SERVER_VALIDATOR_COMPATIBILITY_R207_1=\"BASE_PATH='/omega-hybrid-agent.py'\"",
  "FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'"
 ])must(wrapper.includes(token),`R238 wrapper missing preserved/proof token ${token}`);
+
+must(liveVerifier.includes("fetch(base+'/omega-hybrid-agent-r141.py'"),'R238 live verifier must inspect the R141/R238 proof wrapper');
+must(!liveVerifier.includes("fetch(base+'/omega-hybrid-agent.py'"),'R238 live verifier must not require R238 proof tokens from the older canonical R207 download asset');
+for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'","MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'"])must(liveVerifier.includes(token),`R238 live verifier missing proof-wrapper token ${token}`);
 
 must(sha(base)==='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046','R238 must leave the immutable R205 base executor byte-identical');
 must(wrapper.includes("op=='DESKTOP_HEALTH'")&&wrapper.includes("result['hostProfileR238']=host_profile")&&wrapper.includes("result['macroInventoryR238']=macro_inventory"),'R238 must enrich the existing DESKTOP_HEALTH returned proof instead of creating an ungoverned telemetry channel');
@@ -60,4 +65,4 @@ must(workflow.includes('playwright@1.63.0')&&workflow.includes('tests/r238-host-
 for(const token of ["memory.get('totalBytes')","memory.get('availableBytes')",'logicalProcessors','profileSha256','verify_macro_replay','tampered macro hash was not rejected'])must(windowsProof.includes(token),`R238 Windows runtime proof missing ${token}`);
 for(const token of ['CPU-A-ONLY','CPU-B-ONLY','proof_job_a','proof_job_b','Authenticated compute host','data-r238-selected-device','leaked host A proof','leaked host B proof'])must(browserProof.includes(token),`R238 browser host-isolation proof missing ${token}`);
 
-console.log('OMEGA R238 HYBRID HOST INTELLIGENCE PASS · immutable R205 byte SHA preserved · R141 exact-return proof preserved · one shared selected-host snapshot epoch · no duplicate polling reality · no screenshot constants · Windows CPU/RAM/GPU/storage/Python/RCWA evidence · no dependency installation · bounded macro metadata/schema/hash/count/order/time/coordinate/window preflight · Windows runtime CI · built-browser cross-host isolation · v7 Actions hygiene');
+console.log('OMEGA R238 HYBRID HOST INTELLIGENCE PASS · immutable R205 byte SHA preserved · R141 exact-return proof preserved · live verifier bound to R141/R238 proof wrapper · one shared selected-host snapshot epoch · no duplicate polling reality · no screenshot constants · Windows CPU/RAM/GPU/storage/Python/RCWA evidence · no dependency installation · bounded macro metadata/schema/hash/count/order/time/coordinate/window preflight · Windows runtime CI · built-browser cross-host isolation · v7 Actions hygiene');
