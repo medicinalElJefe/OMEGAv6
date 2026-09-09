@@ -4,7 +4,7 @@ import { dedupeAndSort, frameState, maturityWarnings, revisitStats, knownMission
 import { fetchSentinel1Cog, buildStacBody } from './stac.mjs';
 import { chronologyMetrics, freshnessLabel, formatHours, temporalPosition } from './analytics.mjs';
 import { renderCog, dataAssetChoices, probeStack as probeCogStack, sampleCogNeighborhood } from './raster.mjs';
-import { buildGibsWmsUrl, GIBS_LAYERS, contextualTimestamp, gibsContextManifest } from './gibs.mjs';
+import { buildGibsWmsUrl, GIBS_LAYERS, contextualTimestamp, gibsContextManifest, gibsTransportUrl, fallbackDates } from './gibs.mjs';
 import { atlasHierarchy, deweyAtlasEstimate } from './atlas.mjs';
 import { buildManifest, downloadJson } from './export.mjs';
 import { WorldRenderer } from './render.mjs';
@@ -12,7 +12,7 @@ import { WorldRenderer } from './render.mjs';
 const $ = s => document.querySelector(s);
 const state = {
   records: [], frame: 0, playing: false, playTimer: null, temporalRaf: null,
-  query: null, sourceUrl: null, errors: [], contextWarnings: [], mode: 'accumulate', visual: 'footprints',
+  query: null, sourceUrl: null, errors: [], contextWarnings: [], mode: 'accumulate', visual: 'earth',
   metrics: chronologyMetrics([]), liveTimer: null, fetching: false, probeResults: [],
   virtualTime: null, previousWall: null, sourceMode: 'stac',
   gibsContext: null, gibsKey: null, gibsTimer: null, gibsGeneration: 0,
@@ -117,6 +117,7 @@ async function importFile(file) {
 }
 
 function drawMap() {
+  renderer.displayMode = state.visual;
   renderer.clear();
   const f = currentState();
   renderer.drawRecords(f.visible, f.current?.id, state.visual, renderer.motionPhase);
@@ -304,20 +305,33 @@ function scheduleGibs(bbox = renderer.viewBounds()) {
 async function refreshGibs(bbox = renderer.viewBounds()) {
   if (!$('#gibsEnabled').checked) { state.gibsContext = null; state.gibsKey = null; $('#contextStamp').textContent = 'OFF'; await renderer.setBaseImage(null); return; }
   const record = $('#gibsTime').value === 'frame' ? currentRecord() : null;
-  const date = $('#gibsTime').value === 'frame' ? contextualTimestamp(record, new Date()) : new Date().toISOString().slice(0, 10);
+  const requestedDate = $('#gibsTime').value === 'frame' ? contextualTimestamp(record, new Date()) : new Date().toISOString().slice(0, 10);
   const layers = gibsLayers();
   const width = Math.max(480, Math.round(renderer.w || 1200)), height = Math.max(240, Math.round(renderer.h || 600));
-  const key = JSON.stringify({ bbox: bbox.map(v => +v.toFixed(4)), date, layers, width, height });
+  const key = JSON.stringify({ bbox: bbox.map(v => +v.toFixed(4)), requestedDate, layers, width, height });
   if (key === state.gibsKey) return;
   state.gibsKey = key; const generation = ++state.gibsGeneration;
-  const url = buildGibsWmsUrl({ bbox, date, width, height, layers, transparent: false });
-  $('#contextStamp').textContent = `${date} · loading`;
-  try {
-    await renderer.setBaseImage(url, { bbox, date, layers });
-    if (generation !== state.gibsGeneration) return;
-    state.gibsContext = gibsContextManifest({ bbox, date, layers, url });
-    $('#contextStamp').textContent = `${date} · NASA GIBS`;
-  } catch (error) { if (generation === state.gibsGeneration) { state.gibsContext = null; $('#contextStamp').textContent = 'GIBS unavailable'; } }
+  const dates = fallbackDates(requestedDate, $('#gibsTime').value === 'today' ? 4 : 2);
+  $('#contextStamp').textContent = `${requestedDate} · Earth loading`;
+  let lastError = null;
+  for (let i = 0; i < dates.length; i++) {
+    const date = dates[i];
+    const sourceUrl = buildGibsWmsUrl({ bbox, date, width, height, layers, transparent: false });
+    const transportUrl = gibsTransportUrl(sourceUrl);
+    try {
+      await renderer.setBaseImage(transportUrl, { bbox, date, requestedDate, layers, sourceUrl });
+      if (generation !== state.gibsGeneration) return;
+      state.gibsContext = gibsContextManifest({ bbox, date, requestedDate, fallbackDays: i, layers, url: sourceUrl });
+      $('#contextStamp').textContent = i ? `${date} · NASA GIBS · −${i}d` : `${date} · NASA GIBS`;
+      drawMap();
+      return;
+    } catch (error) { lastError = error; }
+  }
+  if (generation === state.gibsGeneration) {
+    state.gibsContext = null;
+    $('#contextStamp').textContent = renderer.baseImage ? 'GIBS refresh failed · last Earth retained' : 'GIBS unavailable';
+    if (!renderer.baseImage) setStatus(`Earth surface unavailable: ${lastError?.message || 'NASA GIBS image did not resolve'}. SAR evidence remains loaded, but the abstract fallback is not a substitute for Earth imagery.`, 'error');
+  }
 }
 
 function jumpToLocation(lon, lat, scale = 9) {
@@ -352,7 +366,7 @@ $('#prev').onclick = () => { stop(); state.frame = Math.max(0, state.frame - 1);
 $('#next').onclick = () => { stop(); state.frame = Math.min(Math.max(0, state.records.length - 1), state.frame + 1); state.inference = null; resetInference(); draw(); renderTable(); };
 $('#timeline').oninput = e => { stop(); state.frame = Number(e.target.value); state.inference = null; resetInference(); draw(); renderTable(); };
 $('#mode').onchange = e => { state.mode = e.target.value; draw(); };
-$('#visual').onchange = e => { state.visual = e.target.value; drawMap(); };
+$('#visual').onchange = e => { state.visual = e.target.value; drawMap(); if(state.visual==='earth')scheduleGibs(renderer.viewBounds()); };
 $('#playbackMode').onchange = () => { if (state.playing) { stop(); play(); } };
 $('#sourceMode').onchange = configureSourceMode;
 $('#preview').onclick = previewRequest;
@@ -365,7 +379,7 @@ $('#gibsEnabled').onchange = () => { state.gibsKey = null; scheduleGibs(renderer
 $('#gibsLayer').onchange = () => { state.gibsKey = null; scheduleGibs(renderer.viewBounds()); };
 $('#gibsTime').onchange = () => { state.gibsKey = null; scheduleGibs(renderer.viewBounds()); };
 $('#jumpLocation').onclick = () => jumpToLocation(Number($('#jumpLon').value), Number($('#jumpLat').value));
-$('#worldView').onclick = () => { renderer.fitLocation(0, 0, 1); state.gibsKey = null; scheduleGibs(renderer.viewBounds()); };
+$('#worldView').onclick = () => { renderer.fitLocation(0, 0, 1); state.gibsKey = null; state.visual='earth'; if($('#visual'))$('#visual').value='earth'; scheduleGibs(renderer.viewBounds()); };
 $('#deviceLocation').onclick = () => navigator.geolocation ? navigator.geolocation.getCurrentPosition(p => jumpToLocation(p.coords.longitude, p.coords.latitude, 11), e => setStatus(`Device location unavailable: ${e.message}`, 'error'), { enableHighAccuracy: true, timeout: 10000 }) : setStatus('Geolocation is not supported by this browser.', 'error');
 $('#export').onclick = async () => {
   if (!state.records.length) return;
