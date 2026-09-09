@@ -31,12 +31,20 @@ must(liveVerifier.includes("readFileSync('public/omega-hybrid-agent-base-r205.py
 for(const token of [
  "const profileState=String(await intelligence.getAttribute('data-r238-host-intelligence')||'')",
  "['AWAITING_RETURNED_PROFILE','RETURNED_HOST_PROOF'].includes(profileState)",
- "profileState==='RETURNED_HOST_PROOF'&&!text.includes('R141 exact return closure')",
- "profileState==='AWAITING_RETURNED_PROFILE'",
- "text.includes('NOT YET RETURNED')",
- "text.includes('Run “Prove host + tree”')",
- "R141 exact-payload fingerprint"
-])must(liveVerifier.includes(token),`R239.1 live R238 verifier missing state-aware truth proof ${token}`);
+ "profileState==='RETURNED_HOST_PROOF'",
+ "R141 exact return closure",
+ "Proof source: selected authenticated Hybrid device",
+ "NOT YET RETURNED",
+ "Run “Prove host + tree”",
+ "R141 exact-payload fingerprint",
+ "does not prove CUDA runtime, RCWA numerical validity, scientific truth, source mutation, or CanonState admission"
+])must(liveVerifier.includes(token),`R239.1/R239.3 live R238 verifier missing state-aware truth proof ${token}`);
+must(liveVerifier.includes("profileState!=='AWAITING_RETURNED_PROFILE'"),'R239.3 no-device live state must require awaiting-returned-profile rather than returned proof');
+must(liveVerifier.includes("if(text.includes('Proof source: selected authenticated Hybrid device'))throw new Error"),'R239.3 awaiting state must reject a returned-proof source claim');
+const returnedBranch=liveVerifier.indexOf("if(profileState==='RETURNED_HOST_PROOF'){");
+const closureCheck=liveVerifier.indexOf("'R141 exact return closure'",returnedBranch);
+const awaitingElse=liveVerifier.indexOf("}else{",returnedBranch);
+must(returnedBranch>=0&&closureCheck>returnedBranch&&awaitingElse>closureCheck,'R239.3 R141 returned-proof footer check must be scoped inside RETURNED_HOST_PROOF before the awaiting branch');
 must(!liveVerifier.includes("for(const token of ['R238 · HYBRID HOST INTELLIGENCE','Use the machine you actually have.','RCWA PYTHON DEPENDENCY','LOCAL MACRO STORE','R141 exact return closure'])"),'R239.1 must not require a returned-proof-only footer while the host profile is truthfully absent');
 
 must(sha(base)==='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046','R238 must leave the immutable R205 base executor byte-identical');
@@ -63,6 +71,7 @@ for(const token of [
  'data-r238-selected-device','data-r238-snapshot-epoch','Refresh shared snapshot','physicalCores','gpuAdapters','nvidiaSmi'
 ])must(ui.includes(token),`R238 Hybrid UI missing truth-bound/shared-frame token ${token}`);
 must(ui.includes("data-r238-host-intelligence={p?'RETURNED_HOST_PROOF':'AWAITING_RETURNED_PROFILE'}"),'R238 UI must expose explicit returned-vs-awaiting host-intelligence state');
+must(ui.includes('{proof&&<footer>'),'R239.3 R141 returned-proof footer must remain conditional on an actual returned proof');
 must(!ui.includes("api.get<any>('/api/hybrid/status')"),'R238 host intelligence must not create a second Hybrid polling reality after shared snapshot convergence');
 must(!ui.includes('setInterval(()=>void refresh(),2500)'),'R238 host intelligence must not retain an independent polling loop after shared snapshot convergence');
 must(ui.includes('Run “Prove host + tree”')&&ui.includes('R141 exact return closure'),'R238 UI must direct resource proof through the existing R237/R141 path');
@@ -78,4 +87,4 @@ must(workflow.includes('playwright@1.63.0')&&workflow.includes('tests/r238-host-
 for(const token of ["memory.get('totalBytes')","memory.get('availableBytes')",'logicalProcessors','profileSha256','verify_macro_replay','tampered macro hash was not rejected'])must(windowsProof.includes(token),`R238 Windows runtime proof missing ${token}`);
 for(const token of ['CPU-A-ONLY','CPU-B-ONLY','proof_job_a','proof_job_b','Authenticated compute host','data-r238-selected-device','leaked host A proof','leaked host B proof'])must(browserProof.includes(token),`R238 browser host-isolation proof missing ${token}`);
 
-console.log('OMEGA R238/R239.1 HYBRID HOST INTELLIGENCE PASS · immutable R205 byte SHA preserved · R141 wrapper byte-bound · exact-return proof preserved · live verifier state-aware for returned vs awaiting profile · one shared selected-host snapshot epoch · no duplicate polling reality · no screenshot constants · Windows CPU/RAM/GPU/storage/Python/RCWA evidence · no dependency installation · bounded macro metadata/schema/hash/count/order/time/coordinate/window preflight · built-browser cross-host isolation · v7 Actions hygiene');
+console.log('OMEGA R238/R239.1/R239.3 HYBRID HOST INTELLIGENCE PASS · immutable R205 byte SHA preserved · R141 wrapper byte-bound · exact-return proof preserved · returned-proof footer required only when returned proof exists · proof-required state fail-closes without fabricated proof source · one shared selected-host snapshot epoch · no duplicate polling reality · no screenshot constants · Windows CPU/RAM/GPU/storage/Python/RCWA evidence · no dependency installation · bounded macro metadata/schema/hash/count/order/time/coordinate/window preflight · built-browser cross-host isolation · v7 Actions hygiene');
