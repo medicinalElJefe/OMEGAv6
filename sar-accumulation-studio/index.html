@@ -48,8 +48,9 @@
 
     <section><h2>Truth semantics</h2>
       <p><b>Measured.</b> Source SAR footprint/pixel with acquisition provenance.</p>
-      <p><b>Calibrated.</b> Sentinel-1 GRD DN converted with the product calibration LUT; calibration provenance remains attached.</p>
+      <p><b>Calibrated.</b> Sentinel-1 GRD DN converted with the product calibration LUT; NISAR GCOV uses the mission-provided radiometrically terrain-corrected gamma-naught power.</p>
       <p><b>Contextual.</b> NASA GIBS/Worldview imagery and the stored Earth proxy chart are aligned context; neither is promoted to SAR values.</p>
+      <p><b>Derived.</b> Registered temporal statistics, sigma-naught conversion, Canon host variables, and QA gates retain their exact source manifests and do not become new observations.</p>
       <p><b>Inferred.</b> Dewey Atlas gap estimate computed only from measured anchors and accompanied by uncertainty/confidence/scar support.</p>
       <p><b>Unknown.</b> If support is inadequate, the system preserves the gap.</p>
       <ul id="warnings"></ul>
@@ -117,5 +118,6 @@
 </main>
 <script type="module" src="src/app.mjs"></script>
 <script type="module" src="src/canon-console.mjs"></script>
+<script type="module" src="src/nisar-console.mjs"></script>
 </body>
 </html>
