@@ -4,6 +4,7 @@ import path from 'node:path';
 
 const activeDir='.github/workflows';
 const archiveDir='.github/workflows-archive';
+const maintenanceOnly='r2461-legacy-ref-cleanup.yml';
 const coreRequired=[
   'ci.yml',
   'r168-1-rcwa-byte-diagnostic.yml',
@@ -19,7 +20,9 @@ const maxActive=Number(successorPolicy.maxActiveWorkflowAuthorities||24);
 const minimumSuccessorRevision=Number(successorPolicy.minimumSuccessorRevision||171);
 
 for(const required of coreRequired)assert.ok(active.includes(required),`required current workflow missing: ${required}`);
-assert.ok(active.length<=maxActive,`active workflow authority count ${active.length} exceeds governed bound ${maxActive}`);
+const authorityWorkflows=active.filter(name=>name!==maintenanceOnly);
+assert.ok(authorityWorkflows.length<=maxActive,`active workflow authority count ${authorityWorkflows.length} exceeds governed bound ${maxActive}`);
+assert.ok(active.length<=maxActive+1,`total workflow file count ${active.length} exceeds governed authority bound plus one exact maintenance-only workflow`);
 assert.equal(fs.existsSync(archiveDir),true,'historical workflow archive missing');
 const archived=fs.readdirSync(archiveDir).filter(x=>/\.ya?ml$/i.test(x));
 assert.ok(archived.length>=40,`historical archive unexpectedly small: ${archived.length}`);
@@ -43,13 +46,35 @@ function triggerBlock(text,trigger){
   return '';
 }
 
+const maintenance=contents.get(maintenanceOnly);
+if(maintenance){
+  assert.match(maintenance,/name:\s*R246\.1 Legacy Autonomous Ref Cleanup/);
+  assert.match(maintenance,/permissions:\s*\n\s+contents:\s*read/,'R246.1 maintenance workflow must be read-only by default');
+  assert.match(maintenance,/cleanup-legacy-refs:[\s\S]*permissions:\s*\n\s+contents:\s*write/,'R246.1 write scope must be job-local');
+  assert.match(maintenance,/contains\(github\.event\.head_commit\.message, 'R246\.1 legacy autonomous ref cleanup'\)/,'R246.1 cleanup must be exact promotion-message gated');
+  assert.match(maintenance,/107addb9b479cfb2229e262794daedfef8cb1c48/,'R246.1 cleanup must bind production-proven R246 base');
+  for(const p of [
+    ".github/workflows/r2461-legacy-ref-cleanup.yml",
+    'public/omega-r2461-legacy-ref-cleanup.json',
+    'scripts/verify_workflow_topology_r170.mjs'
+  ])assert.ok(maintenance.includes(p),`R246.1 maintenance workflow missing path scope ${p}`);
+  for(const branch of [
+    'selfbuild/r170-g1-sg001-34173358679',
+    'selfbuild/r170-g1-sg001-34192823929',
+    'selfbuild/r170-g1-sg001-34317545058'
+  ])assert.ok(maintenance.includes(branch),`R246.1 exact cleanup target missing ${branch}`);
+  assert.ok(!/^\s*schedule\s*:/m.test(maintenance),'R246.1 maintenance workflow must never schedule recurring execution');
+  assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(maintenance),'R246.1 maintenance workflow may not mutate main source');
+  assert.ok(!/gh\s+pr\s+merge/i.test(maintenance),'R246.1 maintenance workflow may not merge PRs');
+}
+
 const successors=[];
 for(const [name,text] of contents){
   assert.ok(!/^\s*workflow_run\s*:/m.test(text),`${name} reintroduced workflow_run`);
   assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(text),`${name} directly mutates main`);
   assert.ok(!/gh\s+pr\s+merge/i.test(text),`${name} auto-merges`);
   assert.ok(!/gh\s+workflow\s+run/i.test(text),`${name} recursively dispatches workflows`);
-  if(name==='r170-governed-selfbuild.yml')continue;
+  if(name==='r170-governed-selfbuild.yml'||name===maintenanceOnly)continue;
   assert.ok(!/contents:\s*write/i.test(text),`${name} has unexpected contents write authority`);
   if(coreRequired.includes(name))continue;
 
@@ -88,4 +113,4 @@ assert.ok(floorMatch,'currentCapabilityFloor must be an R-number');
 const floorRevision=Number(floorMatch[1]);
 const highestSuccessorRevision=successors.reduce((max,x)=>Math.max(max,x.revision),170);
 assert.equal(floorRevision,highestSuccessorRevision,`currentCapabilityFloor R${floorRevision} must match highest active promoted successor R${highestSuccessorRevision}`);
-console.log(JSON.stringify({schema:'OMEGA_WORKFLOW_TOPOLOGY_R170_3',activeCount:active.length,coreCount:coreRequired.length,successorCount:successors.length,successors,archivedCount:archived.length,maxActive,currentCapabilityFloor:governor.currentCapabilityFloor,observationCadence:governor.selfBuild.observationCadence,expensiveProofMode:governor.selfBuild.expensiveProofMode,directMainCandidateMutation:false,recursiveWorkflowRunFanout:false,productionProofRequired:true,successorPolicy:'READ_ONLY_BRANCH_OR_PR_PROOF_AUTHORITIES',canonicalAdmissionAuthority:'R125',result:'PASS'},null,2));
+console.log(JSON.stringify({schema:'OMEGA_WORKFLOW_TOPOLOGY_R170_3',activeCount:active.length,authorityWorkflowCount:authorityWorkflows.length,maintenanceOnly:maintenance?maintenanceOnly:null,coreCount:coreRequired.length,successorCount:successors.length,successors,archivedCount:archived.length,maxActive,currentCapabilityFloor:governor.currentCapabilityFloor,observationCadence:governor.selfBuild.observationCadence,expensiveProofMode:governor.selfBuild.expensiveProofMode,directMainCandidateMutation:false,recursiveWorkflowRunFanout:false,productionProofRequired:true,successorPolicy:'READ_ONLY_BRANCH_OR_PR_PROOF_AUTHORITIES',canonicalAdmissionAuthority:'R125',result:'PASS'},null,2));

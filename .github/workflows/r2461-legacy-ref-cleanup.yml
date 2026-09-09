@@ -1,0 +1,109 @@
+name: R246.1 Legacy Autonomous Ref Cleanup
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/r2461-legacy-ref-cleanup.yml'
+      - 'public/omega-r2461-legacy-ref-cleanup.json'
+      - 'scripts/verify_workflow_topology_r170.mjs'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/r2461-legacy-ref-cleanup.yml'
+      - 'public/omega-r2461-legacy-ref-cleanup.json'
+      - 'scripts/verify_workflow_topology_r170.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-cleanup-contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Prove exact R246.1 maintenance policy
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('public/omega-r2461-legacy-ref-cleanup.json','utf8'));
+          if(p.schema!=='OMEGA_R2461_LEGACY_AUTONOMOUS_REF_CLEANUP_V1') throw new Error('R246.1 schema mismatch');
+          if(p.revision!=='R246.1'||p.authority!=='REPOSITORY_MAINTENANCE_ONLY') throw new Error('R246.1 authority mismatch');
+          if(p.canonicalAdmission!==false||p.productionWriterChanged!==false) throw new Error('R246.1 authority inflation');
+          const expected=[
+            'selfbuild/r170-g1-sg001-34173358679',
+            'selfbuild/r170-g1-sg001-34192823929',
+            'selfbuild/r170-g1-sg001-34317545058'
+          ];
+          if(JSON.stringify(p.branches)!==JSON.stringify(expected)) throw new Error('R246.1 exact allowlist drift');
+          for(const b of p.branches){
+            if(!/^selfbuild\/r170-g1-sg001-\d+$/.test(b)) throw new Error(`non-R170 legacy branch in allowlist: ${b}`);
+            if(b==='main'||b==='full-restore') throw new Error('protected branch leaked into cleanup allowlist');
+          }
+          for(const [k,v] of Object.entries(p.guards||{})) if(v!==true) throw new Error(`R246.1 guard not true: ${k}`);
+          console.log('R246.1 LEGACY REF CLEANUP CONTRACT PASS · exact three-ref allowlist · maintenance-only · no Canon or production-writer authority change');
+          NODE
+
+  cleanup-legacy-refs:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && contains(github.event.head_commit.message, 'R246.1 legacy autonomous ref cleanup')
+    needs: prove-cleanup-contract
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Require exact production-proven R246 base lineage
+        shell: bash
+        run: |
+          parents="$(git show -s --format=%P "$GITHUB_SHA")"
+          set -- $parents
+          test "$#" -eq 2 || { echo '::error::R246.1 cleanup promotion must be a two-parent merge'; exit 1; }
+          test "$1" = '107addb9b479cfb2229e262794daedfef8cb1c48' || { echo "::error::R246.1 first parent must be production-proven R246 base; got $1"; exit 1; }
+      - name: Delete exact historical R170 orphan refs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          node <<'NODE' > /tmp/r2461-branches.txt
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('public/omega-r2461-legacy-ref-cleanup.json','utf8'));
+          for(const b of p.branches) process.stdout.write(b+'\n');
+          NODE
+          while IFS= read -r branch; do
+            test -n "$branch" || continue
+            case "$branch" in
+              selfbuild/r170-g1-sg001-*) ;;
+              *) echo "::error::Refusing non-allowlisted namespace $branch"; exit 1 ;;
+            esac
+            encoded="${branch//\//%2F}"
+            if gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$encoded" >/dev/null 2>&1; then
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$encoded"
+              echo "Deleted legacy autonomous ref: $branch"
+            else
+              echo "Legacy ref already absent: $branch"
+            fi
+          done < /tmp/r2461-branches.txt
+      - name: Prove cleanup terminal state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          failed=0
+          for branch in \
+            selfbuild/r170-g1-sg001-34173358679 \
+            selfbuild/r170-g1-sg001-34192823929 \
+            selfbuild/r170-g1-sg001-34317545058; do
+            encoded="${branch//\//%2F}"
+            if gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$encoded" >/dev/null 2>&1; then
+              echo "::error::Legacy ref still exists: $branch"
+              failed=1
+            else
+              echo "Confirmed absent: $branch"
+            fi
+          done
+          test "$failed" -eq 0
+          echo 'R246.1 LEGACY AUTONOMOUS REF CLEANUP PASS · all three pre-R246 orphan refs absent'
