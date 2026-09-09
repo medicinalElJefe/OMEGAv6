@@ -1,0 +1,14 @@
+{
+  "schema": "OMEGA_RECURSIVE_CANON_BUILD_FABRIC_R239",
+  "revision": "R239",
+  "state": "SOURCE_CANDIDATE_NOT_PRODUCTION_PROOF",
+  "continuityOperator": "PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION",
+  "resolution": {"organs":12,"branches":144,"cells":1728,"lanes":20736,"deepAddress":248832,"physicalDimensionsClaimed":false},
+  "organs": ["CANON_KERNEL","STATE_MEMORY","APPLIED_CALCULUS","EVIDENCE_WORLD","HYBRID_COMPUTE","CLOUD_FABRIC","INTELLIGENCE","SWARM_ORGANISM","PROOF_GOVERNANCE","RENDER_PROJECTION","OPERATOR_INTERFACE","EVOLUTION_BUILD"],
+  "scheduler": {"sparseActivation":true,"dependencyFrontier":true,"pressureDirected":true,"maxPlanningFrontier":12,"parallelPlanningDoesNotEqualParallelMutation":true,"selectionLaw":"rank all dependency-ready cells from R164 returned residual evidence plus dependency topology; current R170 governor materializes only the strongest single bounded source candidate per pulse"},
+  "pressureField": {"terms":["contradiction","burden","residual","userValueDeficit","bottleneck","continuity"],"evidenceSource":"R164 returned residual graph plus dependency topology","userValueDeficitPolicy":"zero unless explicitly evidenced; never inferred","purpose":"internal development prioritization only","empiricalTruthClaimed":false},
+  "invariantEnvelope": ["authority","schemas","identity","provenance","continuity","truthBoundaries","interfaces"],
+  "admission": {"law":"MAXIMUM INTERNAL EVOLUTION + STRICT EXTERNAL ADMISSION","sourceMutation":"R170 bounded candidate branch only","dispatchAuthority":"R147","hybridReturnAuthority":"R141","durableHistoryAuthority":"R146","canonStateAdmissionAuthority":"R125","directMainMutation":false,"schedulerAutoMerge":false},
+  "inherits": {"hybridCorrelation":"R238 Woven Hybrid Continuity","commandAuthority":"R237","hostEffects":"R212","selfBuildGovernor":"R170.4"},
+  "truthBoundary": "R239 turns the established Woven Continuity and swarm hierarchy into a recursive software-development scheduler. 12→144→1,728→20,736→248,832 are logical address and planning resolutions, not physical spacetime dimensions. Planning fanout is not execution fanout. A candidate score is an internal prioritization signal grounded in returned residual evidence and declared dependency topology, not empirical or scientific truth. Returned work remains distinct from verified proof, source merge, deployment, and CanonState admission."
+}
