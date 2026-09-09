@@ -52,11 +52,19 @@ must(hybrid.includes('<HybridRuntimeSnapshotProviderR238>'),'Hybrid Link must mo
 must(hybrid.indexOf('<HybridCommandDeckR237/>')>hybrid.indexOf('<HybridHostEffectsR212/>')&&hybrid.indexOf('<HybridCommandDeckR237/>')<hybrid.indexOf('<HybridProofClosureR141/>'),'R237 command deck must remain between first-hand R212 host effects and R141 closure');
 for(const token of ['R125 admission authority','R141 exact return closure','R146 history','R147 executor/dispatch authority'])must(hybrid.includes(token),`R237 Hybrid Link authority boundary regressed ${token}`);
 
-for(const token of ["[data-r237-command-authority=\"AUTHENTICATED_BOUNDED_NATIVE_CONTROL\"]","data-r237-snapshot-epoch","[data-r238-host-intelligence]","data-r238-selected-device","data-r238-snapshot-epoch","RETURNED_HOST_PROOF","AWAITING_RETURNED_PROFILE","R212/R141","R146","R147","R125","Refresh shared snapshot","HOST / JOB / MISSION / EPOCH","R239 RESOURCE ENVELOPE","data-r239-resource-tier"])must(liveVerifier.includes(token),`R240 live R237 verifier missing durable semantic authority marker ${token}`);
-must(!liveVerifier.includes('R238 changes correlation and sampling, not execution or Canon authority'),'R240 live verifier must not depend on retired explanatory R238 prose');
-must(!liveVerifier.includes('R141/R146/R147/R125 authority remains unchanged'),'R240 live verifier must not depend on retired pre-Woven prose');
-must(liveVerifier.includes("if(!Number.isFinite(epoch)||epoch<1)throw new Error"),'R240 live verifier must prove a completed shared snapshot epoch before accepting the command surface');
-must(liveVerifier.includes('intelligenceEpoch!==epoch'),'R240 live verifier must bind R237 command and R238 intelligence to the same snapshot epoch');
-must(liveVerifier.includes("if(!tier)throw new Error('R239 live browser did not expose selected-host resource-envelope tier')"),'R240 live verifier must prove that R239 resource admission remains visible on the command surface');
+for(const token of [
+ "get('/api/core-health')","get('/api/system/convergence')","fetch(base+'/omega-hybrid-agent-r141.py'",
+ "proofClosureRevision!=='R141'","durableExecutionRevision!=='R146'","executorFabricRevision!=='R147'","canonicalAdmission?.authority!=='R125'",
+ "BRIDGE_CALCULUS_EXTENSION='R240'",'validate_bridge_calculus_r240','calculusBridgeR240Return',
+ "[data-r237-command-authority=\"AUTHENTICATED_BOUNDED_NATIVE_CONTROL\"]",'data-r237-correlation','data-r237-selected-device','data-r237-snapshot-epoch','data-r239-resource-tier',
+ "[data-r238-host-intelligence]",'data-r238-selected-device','data-r238-snapshot-epoch','RETURNED_HOST_PROOF','AWAITING_RETURNED_PROFILE',
+ "intelligenceDevice!==commandDevice",'intelligenceEpoch!==epoch',".r237-presets article",".r237-state-grid article",'Refresh shared snapshot'
+])must(liveVerifier.includes(token),`R240.1 live R237 verifier missing machine-semantic authority marker ${token}`);
+must(!liveVerifier.includes('const deckText=await deck.innerText()'),'R240.1 live verifier must not derive authority from rendered explanatory prose');
+must(!liveVerifier.includes("'HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE'"),'R240.1 live verifier must not use old display-copy token arrays as release gates');
+must(!liveVerifier.includes('R238 changes correlation and sampling, not execution or Canon authority'),'R240.1 live verifier must not depend on retired explanatory R238 prose');
+must(!liveVerifier.includes('R141/R146/R147/R125 authority remains unchanged'),'R240.1 live verifier must not depend on retired pre-Woven prose');
+must(liveVerifier.includes("if(!Number.isFinite(epoch)||epoch<1)throw new Error"),'R240.1 live verifier must prove a completed shared snapshot epoch before accepting the command surface');
+must(liveVerifier.includes("if(!tier)throw new Error('R239 live browser did not expose selected-host resource-envelope tier')"),'R240.1 live verifier must prove that R239 resource admission remains visible on the command surface');
 
-console.log('OMEGA R237/R239.2/R240 HYBRID COMMAND AUTHORITY PASS · authenticated rotation + same-session reconnect · per-device backpressure · shared host/job/mission/epoch + fresh resource envelope · 20,736 calculus step identity fingerprint-bound through R32 and echoed into R141 return proof · semantic live verifier · no direct source/shell mutation · R141/R146/R147/R125 preserved');
+console.log('OMEGA R237/R239.3/R240.1 HYBRID COMMAND AUTHORITY PASS · authenticated rotation + same-session reconnect · per-device backpressure · shared selected-device/epoch + resource tier · R240 bridge wrapper identity · R141/R146/R147 from semantic convergence + R125 from first-hand core health · no rendered-prose release gate · no direct source/shell mutation');
