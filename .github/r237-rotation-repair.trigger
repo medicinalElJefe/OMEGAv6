@@ -1,1 +1,1 @@
-trigger authenticated rotation repair on the already-registered branch workflow
+execute authenticated rotation repair after workflow registration
