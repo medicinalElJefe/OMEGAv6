@@ -1,0 +1,69 @@
+name: SAR Accumulation Studio CI
+
+on:
+  push:
+    branches:
+      - feature/sar-accumulation-studio
+    paths:
+      - 'sar-accumulation-studio/**'
+      - '.github/workflows/sar-accumulation-studio-ci.yml'
+  pull_request:
+    paths:
+      - 'sar-accumulation-studio/**'
+      - '.github/workflows/sar-accumulation-studio-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sar-accumulation-studio-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sar-accumulation-studio
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Runtime versions
+        run: |
+          node --version
+          python3 --version
+
+      - name: Syntax check
+        run: npm run check
+
+      - name: Deterministic unit and invariant tests
+        run: npm test
+
+      - name: Static workstation smoke
+        run: |
+          python3 -m http.server 8765 >/tmp/sar-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid || true' EXIT
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8765/ >/tmp/sar-index.html; then break; fi
+            sleep 0.25
+          done
+          grep -q 'OMEGA · SAR ACCUMULATION STUDIO' /tmp/sar-index.html
+          grep -q 'src/canon-console.mjs' /tmp/sar-index.html
+          curl --fail --silent http://127.0.0.1:8765/src/charted-canon.mjs >/dev/null
+          curl --fail --silent http://127.0.0.1:8765/src/sentinel1-calibration.mjs >/dev/null
+          curl --fail --silent http://127.0.0.1:8765/data/earth-grid.part06.txt >/dev/null
+
+      - name: Prove non-deployment authority
+        run: |
+          if grep -RniE 'wrangler[[:space:]]+deploy|vercel[[:space:]]+deploy|cloudflare.*deploy' . --exclude-dir=node_modules; then
+            echo 'Unexpected deployment authority text found in standalone SAR package.' >&2
+            exit 1
+          fi
+          echo 'SAR CI is read/test only; no production deploy command is present.'
