@@ -7,6 +7,8 @@ import { buildAsfQuery } from '../src/asf.mjs';
 import { buildStacBody, normalizeStacItem, s3ToHttps, wktBounds } from '../src/stac.mjs';
 import { chronologyMetrics, temporalPosition } from '../src/analytics.mjs';
 import { percentile, rasterStats, stretchByte } from '../src/raster.mjs';
+import { atlasAddress, atlasHierarchy, deweyAtlasEstimate, nominalCellScaleKm } from '../src/atlas.mjs';
+import { buildGibsWmsUrl, GIBS_LAYERS, gibsContextManifest } from '../src/gibs.mjs';
 
 const fc = {
   type:'FeatureCollection', features:[
@@ -109,4 +111,48 @@ test('raster display statistics are deterministic and do not imply calibration',
   assert.equal(s.mean,25);
   assert.equal(stretchByte(5,10,20),0);
   assert.equal(stretchByte(25,10,20),255);
+});
+
+test('Atlas hierarchy uses address-resolution levels rather than physical dimensions',()=>{
+  const hierarchy=atlasHierarchy(-110.9747,32.2226);
+  assert.deepEqual(hierarchy.map(x=>x.level),[12,144,1728,20736]);
+  assert.ok(hierarchy.every(x=>x.address.startsWith(`A${x.level}-F`)));
+  assert.ok(nominalCellScaleKm(20736)<nominalCellScaleKm(12));
+  const a=atlasAddress(-110.9747,32.2226,20736);
+  assert.ok(a.index>=0&&a.index<20736);
+});
+
+test('Dewey Atlas fills only from measured anchors and remains explicitly inferred',()=>{
+  const time='2026-09-08T12:00:00Z';
+  const anchors=[
+    {id:'a',lon:-111.01,lat:32.20,time,value:10,grade:'A',measured:true},
+    {id:'b',lon:-110.94,lat:32.20,time,value:12,grade:'B',measured:true},
+    {id:'c',lon:-110.97,lat:32.27,time,value:11,grade:'B',measured:true},
+    {id:'fake',lon:-110.97,lat:32.22,time,value:999,grade:'A',measured:false}
+  ];
+  const result=deweyAtlasEstimate(anchors,{lon:-110.9747,lat:32.2226,time});
+  assert.equal(result.state,'INFERRED_ATLAS');
+  assert.equal(result.measured,false);
+  assert.equal(result.inferred,true);
+  assert.ok(result.value>9&&result.value<13);
+  assert.ok(result.support.spatialLocations>=3);
+  assert.ok(result.confidence>=0&&result.confidence<=1);
+});
+
+test('Dewey Atlas preserves an unresolved gap with no measured support',()=>{
+  const result=deweyAtlasEstimate([{lon:0,lat:0,time:'2026-01-01T00:00:00Z',value:1,measured:false}],{lon:0,lat:0,time:'2026-01-01T00:00:00Z'});
+  assert.equal(result.state,'GAP_UNRESOLVED');
+  assert.equal(result.inferred,false);
+});
+
+test('NASA GIBS context is timestamped geospatial context and never promoted to SAR measurement',()=>{
+  const url=new URL(buildGibsWmsUrl({bbox:[-112,31,-109,34],date:'2026-09-08',width:800,height:600,layers:[GIBS_LAYERS.trueColor,GIBS_LAYERS.fires]}));
+  assert.equal(url.searchParams.get('SERVICE'),'WMS');
+  assert.equal(url.searchParams.get('VERSION'),'1.1.1');
+  assert.equal(url.searchParams.get('SRS'),'EPSG:4326');
+  assert.equal(url.searchParams.get('TIME'),'2026-09-08');
+  assert.match(url.searchParams.get('LAYERS'),/VIIRS_NOAA21_CorrectedReflectance_TrueColor/);
+  const manifest=gibsContextManifest({bbox:[-112,31,-109,34],date:'2026-09-08',layers:[GIBS_LAYERS.trueColor],url:url.toString()});
+  assert.equal(manifest.kind,'NEAR_REAL_TIME_CONTEXT');
+  assert.equal(manifest.measurementPromotion,false);
 });
