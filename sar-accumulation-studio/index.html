@@ -4,132 +4,187 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <meta name="color-scheme" content="dark" />
-<meta name="description" content="OMEGA SAR Accumulation Studio — source-backed Sentinel-1 and NISAR acquisition, calibrated backscatter, registered temporal accumulation, and GUNW interferometric evidence with explicit proof boundaries." />
-<meta name="theme-color" content="#061017" />
-<title>OMEGA SAR Accumulation Studio · Sentinel-1 + NISAR</title>
+<meta name="description" content="OMEGA SAR R3 — source-backed Sentinel-1 and NISAR mission workstation for acquisition chronology, real raster evidence, temporal accumulation, point probes, and proof manifests." />
+<meta name="theme-color" content="#020609" />
+<title>OMEGA SAR R3 · Mission Workstation</title>
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="public.css" />
 </head>
 <body>
-<header>
-  <div class="brand"><b>OMEGA · SAR ACCUMULATION STUDIO</b><span class="tag">SOURCE-BACKED</span><span class="tag" id="liveTag">LIVE READY</span><span class="tag">SENTINEL-1 + NISAR</span><span class="tag">GCOV + GUNW</span><span class="tag">PROOF-BOUND</span></div>
-  <div class="sub">Acquisition chronology · calibrated radar backscatter · strict registered temporal stacks · source GUNW interferometry · NASA context · Atlas inference kept visibly separate</div>
-  <div class="head-status"><span>Clock <b id="wallClock">—</b></span><span>Catalog source <b id="sourceBadge">NONE</b></span><span>Latest SAR <b id="freshness">—</b></span><span>Context <b id="contextStamp">OFF</b></span></div>
+<header class="topbar">
+  <div class="identity">
+    <div class="omega-mark">Ω</div>
+    <div><b>OMEGA SAR · R3</b><span>EARTH EVIDENCE / TEMPORAL ACCUMULATION WORKSTATION</span></div>
+  </div>
+  <div class="top-status">
+    <span class="state-pill strong">SOURCE BACKED</span>
+    <span class="state-pill" id="liveTag">LIVE READY</span>
+    <span class="state-pill">SENTINEL-1 + NISAR</span>
+    <span class="state-pill proof">PROOF BOUND</span>
+  </div>
+  <div class="telemetry-strip">
+    <span>UTC <b id="wallClock">—</b></span>
+    <span>SOURCE <b id="sourceBadge">NONE</b></span>
+    <span>FRESHNESS <b id="freshness">—</b></span>
+    <span>CONTEXT <b id="contextStamp">OFF</b></span>
+  </div>
 </header>
-<main>
-  <aside class="controls">
-    <section><h2>Evidence source</h2>
+
+<main class="station">
+  <aside class="controls mission-rail">
+    <div class="rail-title"><span>MISSION CONTROL</span><b>01</b></div>
+
+    <section class="control-card primary-control">
+      <div class="card-kicker">EVIDENCE ACQUISITION</div>
+      <h2>Load a real SAR stack</h2>
       <label>Source<select id="sourceMode"><option value="stac">Sentinel-1 GRD COG · Earth Search/AWS</option><option value="asf">ASF mission catalog · Sentinel-1 / NISAR</option></select></label>
       <label>Dataset<select id="dataset"><option>SENTINEL-1</option><option>NISAR</option></select></label>
       <div class="two"><label>Start<input id="start" type="date"></label><label>End<input id="end" type="date"></label></div>
-      <label>Processing level<input id="level" placeholder="SLC, GRD_HD, GCOV, GUNW, GSLC…"></label>
-      <label>Data maturity<select id="maturity"><option value="">Any</option><option>PROVISIONAL</option><option>BETA</option></select></label>
-      <label>Flight direction<select id="direction"><option value="">Any</option><option>ASCENDING</option><option>DESCENDING</option></select></label>
-      <div class="two"><label>Polarization<input id="polarization" placeholder="VV+VH or HH"></label><label>Relative orbit<input id="relativeOrbit" placeholder="track"></label></div>
-      <label>AOI WKT<input id="aoi" placeholder="POINT(-110.92 32.22) or POLYGON((...))"></label>
-      <label>Max results<input id="maxResults" type="number" min="1" max="5000" value="500"></label>
-      <div class="buttons"><button id="load">Load live</button><button id="preview" class="quiet">Preview request</button></div>
-      <label class="file">Import ASF/GeoJSON<input id="file" type="file" accept=".json,.geojson,application/geo+json,application/json"></label>
-      <div id="status">Ready. No catalog observations loaded.</div>
+      <div class="two"><label>Product<input id="level" placeholder="GRD, SLC, GCOV, GUNW…"></label><label>Maturity<select id="maturity"><option value="">Any</option><option>PROVISIONAL</option><option>BETA</option></select></label></div>
+      <div class="two"><label>Pass<select id="direction"><option value="">Any</option><option>ASCENDING</option><option>DESCENDING</option></select></label><label>Relative orbit<input id="relativeOrbit" placeholder="track"></label></div>
+      <div class="two"><label>Polarization<input id="polarization" placeholder="VV+VH"></label><label>Max scenes<input id="maxResults" type="number" min="1" max="5000" value="250"></label></div>
+      <label>Area of interest · WKT<input id="aoi" placeholder="POINT(-110.9747 32.2226)"></label>
+      <div class="action-row"><button id="load" class="execute">LOAD LIVE EVIDENCE</button><button id="preview" class="secondary">Inspect request</button></div>
+      <label class="file-drop">Import ASF / GeoJSON<input id="file" type="file" accept=".json,.geojson,application/geo+json,application/json"></label>
+      <div id="status" class="mission-status">Ready · no source observations loaded.</div>
     </section>
 
-    <section><h2>World satellite context</h2>
-      <label class="inline-check"><input id="gibsEnabled" type="checkbox" checked> NASA GIBS near-real-time context underlay</label>
-      <label>Context layer<select id="gibsLayer"><option value="trueColor">NOAA-21 VIIRS true color</option><option value="trueColor+fires">True color + thermal anomalies</option><option value="night">NOAA-21 VIIRS day/night band</option></select></label>
-      <label>Context time<select id="gibsTime"><option value="frame">Synchronize to current SAR acquisition date</option><option value="today">Most recent calendar date</option></select></label>
+    <section class="control-card">
+      <div class="card-kicker">EARTH TARGET</div>
+      <h2>Navigate / bind point</h2>
       <div class="two"><label>Latitude<input id="jumpLat" inputmode="decimal" placeholder="32.2226"></label><label>Longitude<input id="jumpLon" inputmode="decimal" placeholder="-110.9747"></label></div>
-      <div class="buttons"><button id="jumpLocation">View location</button><button id="worldView" class="quiet">Whole world</button></div>
-      <button id="deviceLocation" class="quiet wide">Use device location</button>
-      <div id="atlasAddress" class="atlas-box">Click the map or enter coordinates to resolve the 12→144→1728→20,736 Atlas address stack. These are address/resolution levels, not physical dimensions.</div>
+      <div class="action-row"><button id="jumpLocation">FOCUS TARGET</button><button id="worldView" class="secondary">WORLD</button></div>
+      <button id="deviceLocation" class="secondary wide">USE DEVICE LOCATION</button>
+      <div id="atlasAddress" class="atlas-box">Select a point to resolve the 12→144→1728→20,736 Atlas address stack. Address/resolution only — not physical dimensions.</div>
     </section>
 
-    <section><h2>Continuous refresh</h2>
-      <label class="inline-check"><input id="liveRefresh" type="checkbox"> Poll the selected catalog for newly published acquisitions</label>
-      <label>Refresh interval<select id="refreshInterval"><option value="60000">1 minute</option><option value="300000" selected>5 minutes</option><option value="900000">15 minutes</option></select></label>
-      <p>The refresh loop adds source records only. It never creates synthetic acquisitions between real timestamps.</p>
+    <section class="control-card compact-card">
+      <div class="card-kicker">CONTEXT PLANE</div>
+      <label class="inline-check"><input id="gibsEnabled" type="checkbox" checked> NASA GIBS underlay</label>
+      <label>Layer<select id="gibsLayer"><option value="trueColor">NOAA-21 VIIRS true color</option><option value="trueColor+fires">True color + thermal anomalies</option><option value="night">NOAA-21 VIIRS day/night band</option></select></label>
+      <label>Time<select id="gibsTime"><option value="frame">Current SAR acquisition date</option><option value="today">Most recent calendar date</option></select></label>
     </section>
 
-    <section><h2>Truth semantics</h2>
-      <p><b>Catalog.</b> Acquisition metadata and footprints establish where/when a product exists; a footprint is not a radar pixel.</p>
-      <p><b>Sentinel-1 calibrated.</b> GRD digital numbers are converted with the product calibration LUT before calibrated temporal comparison.</p>
-      <p><b>NISAR GCOV.</b> Mission Level-2 radiometrically terrain-corrected gamma⁰ backscatter is source-product calibrated evidence; sigma⁰ is emitted only when the mission gamma→sigma factor is present.</p>
-      <p><b>NISAR GUNW.</b> Source Level-2 differential interferometric phase/coherence/components are pair-product evidence. Corrections remain separate unless explicitly applied.</p>
-      <p><b>Derived.</b> Registered stack statistics, QA masks, Canon host variables, and signed slant-range change retain exact source manifests and never become new observations.</p>
-      <p><b>Contextual / inferred.</b> NASA imagery, Earth proxy cells, and Atlas gap estimates are never promoted into SAR measurements.</p>
-      <ul id="warnings"></ul>
+    <section class="control-card compact-card">
+      <div class="card-kicker">WATCH</div>
+      <label class="inline-check"><input id="liveRefresh" type="checkbox"> Continuously poll for new source acquisitions</label>
+      <label>Interval<select id="refreshInterval"><option value="60000">1 minute</option><option value="300000" selected>5 minutes</option><option value="900000">15 minutes</option></select></label>
     </section>
 
-    <section class="source-ref"><h2>Scientific references</h2>
-      <a href="https://nisar-docs.asf.alaska.edu/gcov/" target="_blank" rel="noreferrer">NISAR GCOV product guide ↗</a>
-      <a href="https://nisar-docs.asf.alaska.edu/gunw/" target="_blank" rel="noreferrer">NISAR GUNW product guide ↗</a>
-      <a href="https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/sar" target="_blank" rel="noreferrer">NASA Earthdata SAR fundamentals ↗</a>
-    </section>
+    <details class="truth-drawer">
+      <summary>Truth boundaries + warnings</summary>
+      <div class="truth-body">
+        <p><b>Footprints are not pixels.</b> Catalog geometry proves product coverage/time only.</p>
+        <p><b>Raster evidence stays source-bound.</b> Sentinel-1 COG values and NISAR product measurements are not upgraded by visualization.</p>
+        <p><b>Derived fields remain derived.</b> Temporal statistics, Atlas estimates and host variables never become observations.</p>
+        <ul id="warnings"></ul>
+      </div>
+    </details>
+
+    <details class="truth-drawer">
+      <summary>Scientific source references</summary>
+      <div class="source-ref truth-body">
+        <a href="https://nisar-docs.asf.alaska.edu/gcov/" target="_blank" rel="noreferrer">NISAR GCOV guide ↗</a>
+        <a href="https://nisar-docs.asf.alaska.edu/gunw/" target="_blank" rel="noreferrer">NISAR GUNW guide ↗</a>
+        <a href="https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/sar" target="_blank" rel="noreferrer">NASA SAR fundamentals ↗</a>
+      </div>
+    </details>
   </aside>
 
   <section class="workbench">
-    <div class="public-intro">
-      <div><b>PUBLIC SCIENTIFIC WORKSTATION</b><span>Browser catalog + visualization are live. Native NISAR HDF5 processing is intentionally file/processor driven so multi-GB science products are not faked or downcast into browser metadata.</span></div>
-      <div class="truth-chain">CATALOG → PRODUCT → CALIBRATED / SOURCE-DERIVED RASTER → QA → REGISTERED STACK / PAIR → PROOF MANIFEST → ANIMATION</div>
+    <div class="mission-banner">
+      <div><span class="eyebrow">MISSION STATE</span><b>REAL DATA FIRST · VISUALIZATION SECOND · INFERENCE EXPLICIT</b></div>
+      <div class="truth-chain">CATALOG → PRODUCT → RASTER → QA → TEMPORAL STACK / PAIR → PROOF</div>
     </div>
 
-    <div class="toolbar">
-      <button id="prev">◀</button><button id="play">Play</button><button id="next">▶</button>
-      <input id="timeline" type="range" min="0" max="0" value="0">
-      <span id="frameIndex">0 / 0</span>
-      <label>View<select id="mode"><option value="accumulate">Accumulate evidence</option><option value="single">Single acquisition</option></select></label>
-      <label>Motion<select id="playbackMode"><option value="event">Event-step</option><option value="temporal">Time-proportional</option></select></label>
-      <label>Warp<select id="timeWarp"><option value="3600">1 h / s</option><option value="21600">6 h / s</option><option value="86400" selected>1 d / s</option><option value="604800">7 d / s</option><option value="2592000">30 d / s</option></select></label>
-      <label>Coverage<select id="visual"><option value="footprints">Chronological depth</option><option value="density">Overlap density</option></select></label>
-      <label>Step speed<input id="speed" type="range" min="50" max="1000" value="720"></label>
-      <button id="export">Export proof manifest</button>
-    </div>
+    <div class="earth-grid">
+      <section class="earth-stage panel">
+        <div class="panel-head">
+          <div><span class="eyebrow">PRIMARY INSTRUMENT</span><h2>Earth evidence field</h2></div>
+          <div class="stage-readout"><span>POINT <b id="point">click map</b></span><span>HITS <b id="pointHits">0</b></span></div>
+        </div>
+        <div class="map-wrap">
+          <canvas id="map"></canvas>
+          <div class="map-corners"><i></i><i></i><i></i><i></i></div>
+          <div class="map-note">WGS84 evidence plane · drag pan · wheel zoom · click to bind revisit/probe target</div>
+          <div class="map-hud">
+            <div><span>OBS</span><b id="obsCount">0</b></div>
+            <div><span>UTC</span><b id="currentTime">—</b></div>
+            <div><span>GRADE</span><b id="grade">—</b><small id="gradeReason">No acquisition selected</small></div>
+            <div><span>PIXEL READY</span><b id="pixelReady">0</b></div>
+          </div>
+        </div>
 
-    <div class="map-wrap"><canvas id="map"></canvas><div class="map-note">NASA context underlay + WGS84 SAR evidence plane · drag pan · wheel zoom · click for revisit, Atlas address and bounded gap inference</div></div>
-
-    <div class="stats">
-      <div><span>Visible observations</span><b id="obsCount">0</b></div>
-      <div><span>Current UTC</span><b id="currentTime">—</b></div>
-      <div><span>Evidence grade</span><b id="grade">—</b><small id="gradeReason">No acquisition selected</small></div>
-      <div><span>Platform / product</span><b id="platform">—</b></div>
-      <div><span>Orbit</span><b id="orbit">—</b></div>
-      <div><span>Scene / product</span><b id="currentScene">—</b></div>
-      <div><span>Median cadence</span><b id="medianCadence">—</b></div>
-      <div><span>Pixel-ready scenes</span><b id="pixelReady">0</b></div>
-    </div>
-
-    <div class="evidence-grid">
-      <section class="pixel-panel"><div class="section-head"><h2>Sentinel-1 source measurement raster</h2><div><select id="assetSelect"></select><button id="loadRaster">Load current COG</button></div></div>
-        <div class="pixel-stage"><canvas id="raster"></canvas><div id="rasterEmpty">No actual COG raster loaded.</div></div>
-        <div class="raster-stats" id="rasterStats">Actual Sentinel-1 GRD values appear here when the selected source record exposes a public COG asset.</div>
+        <div class="transport-deck">
+          <div class="transport-main"><button id="prev" class="transport">◀</button><button id="play" class="transport play">PLAY</button><button id="next" class="transport">▶</button><input id="timeline" type="range" min="0" max="0" value="0"><b id="frameIndex">0 / 0</b></div>
+          <div class="transport-options">
+            <label>View<select id="mode"><option value="accumulate">Accumulated evidence</option><option value="single">Single acquisition</option></select></label>
+            <label>Clock<select id="playbackMode"><option value="event">Event-step</option><option value="temporal">Time-proportional</option></select></label>
+            <label>Warp<select id="timeWarp"><option value="3600">1 h / s</option><option value="21600">6 h / s</option><option value="86400" selected>1 d / s</option><option value="604800">7 d / s</option><option value="2592000">30 d / s</option></select></label>
+            <label>Field<select id="visual"><option value="footprints">Chronological depth</option><option value="density">Overlap density</option></select></label>
+            <label>Rate<input id="speed" type="range" min="50" max="1000" value="720"></label>
+            <button id="export" class="secondary">EXPORT PROOF</button>
+          </div>
+        </div>
       </section>
-      <section class="browse-panel"><div class="section-head"><h2>Source browse / preview</h2><span class="micro">supporting visualization only</span></div>
-        <div class="browse-stage"><img id="browseImage" alt="Source browse preview" referrerpolicy="no-referrer"><div id="browseEmpty">No source browse image for this acquisition.</div></div>
-        <div id="browseCaption" class="raster-stats">Browse pixels are never promoted to calibrated measurement evidence.</div>
-      </section>
+
+      <aside class="evidence-dock">
+        <section class="panel acquisition-card">
+          <div class="panel-head"><div><span class="eyebrow">CURRENT ACQUISITION</span><h2>Source identity</h2></div></div>
+          <div class="acquisition-readout">
+            <div><span>PLATFORM / PRODUCT</span><b id="platform">—</b></div>
+            <div><span>ORBIT</span><b id="orbit">—</b></div>
+            <div class="wide-cell"><span>SCENE / PRODUCT</span><b id="currentScene">—</b></div>
+            <div><span>MEDIAN CADENCE</span><b id="medianCadence">—</b></div>
+          </div>
+        </section>
+
+        <section class="panel pixel-panel">
+          <div class="panel-head"><div><span class="eyebrow">MEASUREMENT</span><h2>Sentinel-1 source raster</h2></div><div class="head-actions"><select id="assetSelect"></select><button id="loadRaster">LOAD COG</button></div></div>
+          <div class="pixel-stage"><canvas id="raster"></canvas><div id="rasterEmpty">No actual COG raster loaded.</div></div>
+          <div class="raster-stats" id="rasterStats">Select a real Sentinel-1 scene and load its source COG measurement.</div>
+        </section>
+
+        <section class="panel browse-panel">
+          <div class="panel-head"><div><span class="eyebrow">SOURCE SUPPORT</span><h2>Browse preview</h2></div><span class="micro">NOT MEASUREMENT</span></div>
+          <div class="browse-stage"><img id="browseImage" alt="Source browse preview" referrerpolicy="no-referrer"><div id="browseEmpty">No source browse image for this acquisition.</div></div>
+          <div id="browseCaption" class="raster-stats">Browse pixels are never promoted to calibrated measurement evidence.</div>
+        </section>
+      </aside>
     </div>
 
-    <div class="lower">
-      <section><h2>Point revisit + temporal pixel probe</h2>
-        <div class="probe"><span>Point <b id="point">click map</b></span><span>Coverage hits <b id="pointHits">0</b></span><span>First <b id="pointFirst">—</b></span><span>Last <b id="pointLast">—</b></span><span>Mean interval <b id="pointMean">—</b></span><button id="probeStack" disabled>Probe actual pixel stack</button></div>
-        <div id="pixelProbeStatus" class="micro">Raw point probing is diagnostic. Use the Charted Canon panel for product-LUT calibrated temporal comparison.</div>
+    <div class="lower analysis-deck">
+      <section class="panel probe-panel">
+        <div class="panel-head"><div><span class="eyebrow">TEMPORAL PROBE</span><h2>Point history</h2></div><button id="probeStack" disabled>PROBE ACTUAL PIXELS</button></div>
+        <div class="probe">
+          <span>First <b id="pointFirst">—</b></span><span>Last <b id="pointLast">—</b></span><span>Mean interval <b id="pointMean">—</b></span>
+        </div>
+        <div id="pixelProbeStatus" class="micro">Bind a map point and load source raster scenes to probe the actual temporal stack.</div>
         <div class="probe-chart"><canvas id="probeChart"></canvas></div>
       </section>
 
-      <section class="atlas-inference"><div class="section-head"><h2>Dewey Atlas bounded gap field</h2><button id="inferGap" disabled>Infer missing point/time</button></div>
-        <div class="inference-grid"><div><span>State</span><b id="inferState">UNRESOLVED</b></div><div><span>Value</span><b id="inferValue">—</b></div><div><span>Uncertainty</span><b id="inferUncertainty">—</b></div><div><span>Confidence</span><b id="inferConfidence">—</b></div><div><span>Atlas level</span><b id="inferLevel">—</b></div><div><span>Support</span><b id="inferSupport">—</b></div></div>
-        <div id="inferExplanation" class="micro">Inference is disabled until measured/calibrated anchors are available. Estimated values are never admitted as observations.</div>
+      <section class="panel atlas-inference">
+        <div class="panel-head"><div><span class="eyebrow">BOUNDED DERIVATION</span><h2>Dewey Atlas gap field</h2></div><button id="inferGap" disabled>INFER GAP</button></div>
+        <div class="inference-grid"><div><span>STATE</span><b id="inferState">UNRESOLVED</b></div><div><span>VALUE</span><b id="inferValue">—</b></div><div><span>UNCERTAINTY</span><b id="inferUncertainty">—</b></div><div><span>CONFIDENCE</span><b id="inferConfidence">—</b></div><div><span>ATLAS LEVEL</span><b id="inferLevel">—</b></div><div><span>SUPPORT</span><b id="inferSupport">—</b></div></div>
+        <div id="inferExplanation" class="micro">Inference remains disabled until measured/calibrated anchors exist. Estimated values are never admitted as observations.</div>
       </section>
 
-      <section><h2>Chronology diagnostics</h2>
+      <section class="panel diagnostics-panel">
+        <div class="panel-head"><div><span class="eyebrow">STACK HEALTH</span><h2>Chronology diagnostics</h2></div></div>
         <div class="diagnostics"><span>Span <b id="spanMetric">—</b></span><span>Mean cadence <b id="meanCadence">—</b></span><span>Longest gap <b id="maxGap">—</b></span><span>Anomalous gaps <b id="anomalyCount">0</b></span><span>Grades <b id="gradeMix">—</b></span></div>
         <div id="gapList" class="micro"></div>
       </section>
 
-      <section><h2>Acquisition ledger</h2><div class="table-wrap"><table><thead><tr><th>#</th><th>UTC</th><th>Platform</th><th>Level</th><th>Pass</th><th>Rel orbit</th><th>Grade</th><th>Pixels</th><th>Product</th></tr></thead><tbody id="rows"></tbody></table></div></section>
-      <details><summary>Exact source request / query</summary><code id="queryPreview"></code></details>
+      <section class="panel ledger-panel">
+        <div class="panel-head"><div><span class="eyebrow">PROVENANCE LEDGER</span><h2>Acquisition history</h2></div></div>
+        <div class="table-wrap"><table><thead><tr><th>#</th><th>UTC</th><th>Platform</th><th>Level</th><th>Pass</th><th>Rel orbit</th><th>Grade</th><th>Pixels</th><th>Product</th></tr></thead><tbody id="rows"></tbody></table></div>
+      </section>
+
+      <details class="query-drawer"><summary>Exact source request / query</summary><code id="queryPreview"></code></details>
     </div>
   </section>
 </main>
+
 <script type="module" src="src/app.mjs"></script>
 <script type="module" src="src/canon-console.mjs"></script>
 <script type="module" src="src/nisar-console.mjs"></script>
