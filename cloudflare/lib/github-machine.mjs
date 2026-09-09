@@ -1,5 +1,6 @@
 import {AUTHORITY_BOUNDARIES,MACHINE_ID,decideCycle,reconcileObservedSource} from './evolution-policy.mjs';
 import {capsuleBody} from './generated-capsules.mjs';
+import {autonomousCandidatePrefixesR245,isAutonomousCandidateBranchR245,validateAutonomousCandidatePolicyR245,R245_CAPSULE_GENERATOR_REVISION,R245_GOVERNED_SELFBUILD_CONTRACT} from '../../src/system/governedSelfBuildContractR245.js';
 
 const API='https://api.github.com';
 function utf8ToBase64(value){const bytes=new TextEncoder().encode(String(value));let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s)}
@@ -11,9 +12,9 @@ async function repoPathExists(token,repo,path,ref){try{await gh(token,`/repos/${
 async function putRepoFile(token,repo,path,branch,message,content,sha){const payload={message,content:utf8ToBase64(content),branch};if(sha)payload.sha=sha;return gh(token,`/repos/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g,'/')}`,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})}
 async function liveJson(base,path){const r=await fetch(`${base.replace(/\/$/,'')}${path}?cloud01_cycle=${Date.now()}`,{headers:{'cache-control':'no-cache'}});const text=await r.text();if(!r.ok)throw new Error(`${path} HTTP ${r.status}: ${text.slice(0,300)}`);return JSON.parse(text)}
 
-async function collectCandidates(token,repo){
+async function collectCandidates(token,repo,policy){
   const candidates=[];
-  for(const prefix of ['selfbuild/r170-','cloud/evolution-']){
+  for(const prefix of autonomousCandidatePrefixesR245(policy)){
     let refs=[];try{refs=await gh(token,`/repos/${repo}/git/matching-refs/heads/${prefix}`)}catch{}
     for(const ref of refs||[]){const branch=String(ref.ref||'').replace(/^refs\/heads\//,'');try{const candidate=await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch);candidates.push({...candidate.json,branch,headSha:ref.object?.sha||null})}catch(error){candidates.push({branch,headSha:ref.object?.sha||null,unreadable:true,error:String(error)})}}
   }
@@ -32,11 +33,12 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const productionProof=(runs.workflow_runs||[]).find(r=>r.head_sha===mainSha&&r.status==='completed'&&r.conclusion==='success')||null;
   const stateFile=await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',mainSha);
   const state=await reconcileMainState(token,repo,mainSha,stateFile.json);
-  const candidates=await collectCandidates(token,repo);
+  const candidatePolicy=validateAutonomousCandidatePolicyR245(state.autonomousCandidatePolicy);
+  const candidates=candidatePolicy.valid?await collectCandidates(token,repo,candidatePolicy.policy):[];
   const [coreHealth,releaseEvidence,runtimeAttestation,hybrid]=await Promise.all([liveJson(runtimeBase,'/api/core-health'),liveJson(runtimeBase,'/api/release-evidence'),liveJson(runtimeBase,'/api/runtime-attestation'),liveJson(runtimeBase,'/api/hybrid/status')]);
   const evidence={coreHealth,releaseEvidence,runtimeAttestation,hybrid};
-  const decision=decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence});
-  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidates,evidence,decision};
+  const decision=candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
+  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,decision};
 }
 
 export async function proposeCycle({token,repo='medicinalElJefe/OMEGAv6',runtimeBase}){
@@ -46,14 +48,15 @@ export async function proposeCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   await gh(token,`/repos/${repo}/git/refs`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({ref:`refs/heads/${branch}`,sha:mainSha})});
   await putRepoFile(token,repo,capsule.target,branch,`CLOUD-01 evolution g${generation}: ${capsule.id}`,capsuleBody(capsule.id));
   const branchState=await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch);
-  const receipt={schema:'OMEGA_CLOUDFLARE_EVOLUTION_RECEIPT_R223',machineId:MACHINE_ID,generation,capsuleId:capsule.id,target:capsule.target,baseSha:mainSha,branch,status:'GENERATED_PENDING_PROOF',canonicalAdmission:false,createdAt:new Date().toISOString(),authorityBoundaries:AUTHORITY_BOUNDARIES};
+  const receipt={schema:'OMEGA_CLOUDFLARE_EVOLUTION_RECEIPT_R223',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,candidatePolicy:state.autonomousCandidatePolicy?.schema||null,generation,capsuleId:capsule.id,target:capsule.target,baseSha:mainSha,branch,status:'GENERATED_PENDING_PROOF',canonicalAdmission:false,createdAt:new Date().toISOString(),authorityBoundaries:AUTHORITY_BOUNDARIES};
   const nextState={...state,generation,currentCapsuleId:capsule.id,receipts:[...(state.receipts||[]),receipt].slice(-64)};
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch,`Bind CLOUD-01 evolution receipt g${generation}`,`${JSON.stringify(nextState,null,2)}\n`,branchState.sha);
-  const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R223',revision:'R223',machineId:MACHINE_ID,capsule,receipt,status:'GENERATED_PENDING_PROOF',canonicalAdmission:false};
+  const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R223',revision:'R223',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,candidatePolicy:state.autonomousCandidatePolicy?.schema||null,capsule,receipt,status:'GENERATED_PENDING_PROOF',canonicalAdmission:false};
   let candidateSha=null;try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record CLOUD-01 candidate g${generation}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
   const recheck=await gh(token,`/repos/${repo}/branches/main`);if(recheck.commit.sha!==mainSha)throw new Error(`main drifted from ${mainSha} to ${recheck.commit.sha}; branch held, PR refused`);
-  const pr=await gh(token,`/repos/${repo}/pulls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:`R223 CLOUD-01 evolution g${generation} — ${capsule.id}: ${capsule.title}`,head:branch,base:'main',draft:false,body:`Cloudflare CLOUD-01 generated bounded source candidate.\n\nExact base: ${mainSha}\nProduction proof run: ${inspection.productionProof?.id||'none'}\nCapsule: ${capsule.id} — ${capsule.objective}\n\nSource proposal only. No Canon admission, PC-online, solver, renderer, empirical or federation-closure claim is synthesized. R125/R147/R146/R141 remain authoritative; R201/R203 tombstones remain retired. ci.yml remains the sole production deployment authority.`})});
+  const open=await gh(token,`/repos/${repo}/pulls?state=open&base=main&per_page=100`);const competing=(open||[]).filter(pr=>isAutonomousCandidateBranchR245(pr.head?.ref,state.autonomousCandidatePolicy));if(competing.length){throw new Error(`autonomous candidate appeared before CLOUD-01 PR creation: ${competing.map(pr=>`#${pr.number}:${pr.head?.ref}`).join(',')}`)}
+  const pr=await gh(token,`/repos/${repo}/pulls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:`R223 CLOUD-01 evolution g${generation} — ${capsule.id}: ${capsule.title}`,head:branch,base:'main',draft:false,body:`Cloudflare CLOUD-01 generated bounded source candidate through the shared R245 governed self-build contract.\n\nExact base: ${mainSha}\nProduction proof run: ${inspection.productionProof?.id||'none'}\nCapsule: ${capsule.id} — ${capsule.objective}\n\nR170 and CLOUD-01 share one R164 residual policy, R240/R243 selection law, capsule generator and one-open-candidate fence. Source proposal only. No Canon admission, PC-online, solver, renderer, empirical or federation-closure claim is synthesized. R125/R147/R146/R141 remain authoritative; R201/R203 tombstones remain retired. ci.yml remains the sole production deployment authority.`})});
   return{...inspection,mutation:'BRANCH_AND_PR_CREATED',branch,prNumber:pr.number,prUrl:pr.html_url,generation,capsuleId:capsule.id};
 }
 
@@ -69,8 +72,10 @@ export async function promoteGreenCloudPr({token,repo='medicinalElJefe/OMEGAv6',
 }
 
 export async function runAutonomousCycle({token,repo='medicinalElJefe/OMEGAv6',runtimeBase}){
-  const open=await gh(token,`/repos/${repo}/pulls?state=open&base=main&per_page=100`);const cloud=(open||[]).filter(pr=>String(pr.head?.ref||'').startsWith('cloud/evolution-')).sort((a,b)=>a.number-b.number);
-  if(cloud.length>1)return{ok:false,state:'BLOCKED',reason:'multiple open CLOUD-01 evolution PRs require review',prs:cloud.map(x=>x.number)};
-  if(cloud.length===1){const promotion=await promoteGreenCloudPr({token,repo,prNumber:cloud[0].number});return{ok:true,state:promotion.action==='MERGED_GREEN_EXACT_HEAD'?'PROMOTED':'HELD_FOR_PROOF',promotion}}
+  const main=await gh(token,`/repos/${repo}/branches/main`);const state=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',main.commit.sha)).json;const candidatePolicy=validateAutonomousCandidatePolicyR245(state.autonomousCandidatePolicy);
+  if(!candidatePolicy.valid)return{ok:false,state:'BLOCKED',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`};
+  const open=await gh(token,`/repos/${repo}/pulls?state=open&base=main&per_page=100`);const autonomous=(open||[]).filter(pr=>isAutonomousCandidateBranchR245(pr.head?.ref,candidatePolicy.policy)).sort((a,b)=>a.number-b.number);
+  if(autonomous.length>1)return{ok:false,state:'BLOCKED',reason:'multiple open governed autonomous candidate PRs require review',prs:autonomous.map(x=>x.number),branches:autonomous.map(x=>x.head?.ref)};
+  if(autonomous.length===1){const held=autonomous[0];if(String(held.head?.ref||'').startsWith('cloud/evolution-')){const promotion=await promoteGreenCloudPr({token,repo,prNumber:held.number});return{ok:true,state:promotion.action==='MERGED_GREEN_EXACT_HEAD'?'PROMOTED':'HELD_FOR_PROOF',promotion}}return{ok:true,state:'HELD_FOR_R170_CANDIDATE',reason:'shared one-open-autonomous-candidate fence holds CLOUD-01 while the R170 candidate exists',prNumber:held.number,branch:held.head?.ref}}
   const proposal=await proposeCycle({token,repo,runtimeBase});return{ok:true,state:proposal.mutation==='BRANCH_AND_PR_CREATED'?'PROPOSED':'OBSERVE_ONLY',proposal:{mainSha:proposal.mainSha,mutation:proposal.mutation,decision:proposal.decision,branch:proposal.branch||null,prNumber:proposal.prNumber||null,prUrl:proposal.prUrl||null,capsuleId:proposal.capsuleId||null}}
 }
