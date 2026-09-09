@@ -3,8 +3,16 @@ name: R246.1 Legacy Autonomous Ref Cleanup
 on:
   pull_request:
     branches: [main]
+    paths:
+      - '.github/workflows/r2461-legacy-ref-cleanup.yml'
+      - 'public/omega-r2461-legacy-ref-cleanup.json'
+      - 'scripts/verify_workflow_topology_r170.mjs'
   push:
     branches: [main]
+    paths:
+      - '.github/workflows/r2461-legacy-ref-cleanup.yml'
+      - 'public/omega-r2461-legacy-ref-cleanup.json'
+      - 'scripts/verify_workflow_topology_r170.mjs'
   workflow_dispatch:
 
 permissions:
@@ -46,6 +54,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - name: Require exact production-proven R246 base lineage
         shell: bash
         run: |
