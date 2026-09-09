@@ -1,10 +1,11 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {CheckCircle2,Cpu,Loader2,Play,RefreshCw,ShieldCheck,TriangleAlert} from 'lucide-react';
+import {Activity,CheckCircle2,Cpu,Loader2,Play,RefreshCw,ShieldCheck,TriangleAlert} from 'lucide-react';
 import {api} from './platformAdapter';
 import {useHybridRuntimeSnapshotR238} from './HybridRuntimeSnapshotR238';
 import {latestReturnedHostProofR239,resourceEnvelopeR239} from './hybridResourceGovernorR239';
 import {defaultCommandPlan,validateCommandPlan} from './hybridCommandRuntime';
 import {buildFullSystemMissionObjectiveR153,fullSystemStateContextR153} from './fullSystemCompletionR153.js';
+import {compileOperationalCalculusR248,operationalMissionObjectiveR248} from './operationalCalculusR248';
 import './hybridActionRuntimeR247.css';
 
 const ACTIVE_JOB=new Set(['QUEUED','RUNNING']);
@@ -33,6 +34,20 @@ export default function HybridActionRuntimeR247(){
  const foreignMissionActive=Boolean(missionActive&&device&&missionTarget&&missionTarget!==device.id);
  const envelope=useMemo(()=>resourceEnvelopeR239({profile:hostProof?.profile||null,snapshotCurrent,activeNativeWork:Boolean(activeJob)}),[hostProof?.profile,snapshotCurrent,activeJob]);
  const hostProofFresh=Boolean(hostProof&&envelope.profileFresh);
+ const operational=useMemo(()=>compileOperationalCalculusR248({
+  snapshotCurrent,
+  nativeExecutionClaimed:hybrid?.nativeExecutionClaimed===true,
+  deviceOnline:Boolean(device?.online),
+  deviceRevoked:Boolean(device?.revoked),
+  hostProofFresh,
+  resourceTier:String(envelope.tier||'HOLD'),
+  effectiveCpuWorkers:Number(envelope.effectiveCpuWorkers)||0,
+  sourceProfileSha256:hostProof?.profile?.profileSha256||null,
+  activeJob:Boolean(activeJob),
+  missionActive,
+  foreignMissionActive,
+  jobs:selectedDeviceJobs
+ }),[snapshotCurrent,hybrid?.nativeExecutionClaimed,device?.online,device?.revoked,hostProofFresh,envelope.tier,envelope.effectiveCpuWorkers,hostProof?.profile?.profileSha256,activeJob,missionActive,foreignMissionActive,selectedDeviceJobs]);
  const fullReady=Boolean(nativeReady&&rootValid&&hostProofFresh&&!activeJob&&!selectedMissionActive&&!foreignMissionActive&&envelope.tier!=='HOLD');
 
  useEffect(()=>{if(!rootValid)return;try{window.localStorage.setItem('omega:hybrid:projectRoot',root.trim())}catch{}},[root,rootValid]);
@@ -72,29 +87,31 @@ export default function HybridActionRuntimeR247(){
    const initial=defaultCommandPlan('BUILD','AUTO_BUILD',root.trim());
    const validation=validateCommandPlan(initial,root.trim(),[]);
    if(!validation.passed)throw new Error(validation.errors.join(' ')||'Initial bounded full-system plan did not validate.');
-   const objective=buildFullSystemMissionObjectiveR153(root.trim());
-   const stateContext=JSON.stringify({...fullSystemStateContextR153(),surface:'HybridActionRuntimeR247',connectedActionRuntime:'R247',adaptiveMissionEngine:'R153',device:{id:device.id,name:device.name||null,platform:device.platform||null},approvedRoot:root.trim(),selectedSnapshotEpoch:epoch,resourceEnvelopeR239:{tier:envelope.tier,effectiveCpuWorkers:envelope.effectiveCpuWorkers,sourceProfileSha256:hostProof?.profile?.profileSha256||null}});
-   const r=await api.post<any>('/api/missions',{objective,threadId:'',stateContext,draft:{schema:'OMEGA_SOVEREIGN_FULL_BUILD_R151',action:'BUILD',profile:'AUTO_BUILD',projectPath:root.trim(),instructions:objective,allowedDomains:[],steps:validation.steps},targetDeviceId:device.id,allowedOps:R153_ALLOWED,maxCycles:12,confirmedMission:true,snapshotEpoch:epoch,snapshotObservedAt:observedAt});
+   const baseObjective=buildFullSystemMissionObjectiveR153(root.trim());
+   const objective=operationalMissionObjectiveR248(baseObjective,operational);
+   const stateContext=JSON.stringify({...fullSystemStateContextR153(),surface:'HybridActionRuntimeR247',connectedActionRuntime:'R247',adaptiveMissionEngine:'R153',operationalCalculusR248:operational,device:{id:device.id,name:device.name||null,platform:device.platform||null},approvedRoot:root.trim(),selectedSnapshotEpoch:epoch,resourceEnvelopeR239:{tier:envelope.tier,effectiveCpuWorkers:envelope.effectiveCpuWorkers,sourceProfileSha256:hostProof?.profile?.profileSha256||null}});
+   const r=await api.post<any>('/api/missions',{objective,threadId:'',stateContext,draft:{schema:'OMEGA_SOVEREIGN_FULL_BUILD_R151',action:'BUILD',profile:'AUTO_BUILD',projectPath:root.trim(),instructions:objective,allowedDomains:[],steps:validation.steps},targetDeviceId:device.id,allowedOps:R153_ALLOWED,maxCycles:operational.policy.maxCycles,confirmedMission:true,snapshotEpoch:epoch,snapshotObservedAt:observedAt});
    if(!r.data?.mission?.id)throw new Error('No durable R153 mission identity returned; nothing is treated as started.');
-   setMessage(`Full R247→R153 mission ${r.data.mission.id} started on ${device.name||device.id}. It may inspect, repair with preimage-bound APPLY_PATCH/WRITE_TEXT, build, test, package and return proof on this approved root.`);
+   setMessage(`Full R247→R153 mission ${r.data.mission.id} started on ${device.name||device.id} under R248 ${operational.decision} calculus with ${operational.policy.maxCycles} bounded cycles. It may inspect, repair with preimage-bound APPLY_PATCH/WRITE_TEXT, build, test, package and return proof on this approved root.`);
    await refresh();
   }catch(e:any){setError(e?.message||String(e))}finally{setBusy('')}
  };
 
- return <section className='r247-action-runtime' data-r247-host={device?.id||'NONE'} data-r247-ready={fullReady?'YES':'NO'}>
-  <header><div><span>R247 · CONNECTED HOST ACTION RUNTIME</span><h3>Connection now advances into work.</h3><p>A current authenticated heartbeat automatically triggers read-only host-health proof. Once R238/R239 receives that return, the same Hybrid surface can launch the full existing R153 inspect → repair → build → test → package mission.</p></div><div className={nativeReady?'r247-badge pass':'r247-badge hold'}>{nativeReady?<CheckCircle2/>:<TriangleAlert/>}<span><b>{nativeReady?'CONNECTED + ACTION-ELIGIBLE':'CURRENT HOST REQUIRED'}</b><small>{device?`${device.name||device.id} · ${age(device.lastSeen)}`:'no authenticated selected host'}</small></span></div></header>
+ return <section className='r247-action-runtime' data-r247-host={device?.id||'NONE'} data-r247-ready={fullReady?'YES':'NO'} data-r248-operational-decision={operational.decision}>
+  <header><div><span>R247 · CONNECTED HOST ACTION RUNTIME · R248 OPERATIONAL CALCULUS</span><h3>Connection now advances into evidence-weighted work.</h3><p>A current authenticated heartbeat triggers host-health proof. R248 then derives a software-operational continuity/plasticity/contradiction/burden/evidence/uncertainty/scar packet from the returned state and uses the established STAY/TURN/ESCALATE calculus to govern the existing R153 mission objective and recursion budget.</p></div><div className={nativeReady?'r247-badge pass':'r247-badge hold'}>{nativeReady?<CheckCircle2/>:<TriangleAlert/>}<span><b>{nativeReady?'CONNECTED + ACTION-ELIGIBLE':'CURRENT HOST REQUIRED'}</b><small>{device?`${device.name||device.id} · ${age(device.lastSeen)}`:'no authenticated selected host'}</small></span></div></header>
   <div className='r247-grid'>
    <article className={hostProofFresh?'pass':'hold'}><ShieldCheck/><span><small>HOST BOOTSTRAP</small><b>{hostProofFresh?'RETURNED + FRESH':busy==='bootstrap'?'QUEUING / CLAIM PENDING':'AUTO-BOOTSTRAP ARMED'}</b><em>{hostProofFresh?`profile ${String(hostProof?.profile?.profileSha256||'').slice(0,16)}…`:activeJob?`${activeJob.status} · ${activeJob.id}`:'DESKTOP_HEALTH will queue after connection'}</em></span></article>
    <article className={envelope.tier==='READY'||envelope.tier==='HIGH_CAPACITY'||envelope.tier==='CONSTRAINED'?'pass':'hold'}><Cpu/><span><small>RESOURCE ENVELOPE</small><b>{envelope.tier}</b><em>{envelope.effectiveCpuWorkers} worker advisory · {envelope.reasons.join(' · ')}</em></span></article>
-   <article className={fullReady?'pass':'hold'}><Play/><span><small>FULL ACTION</small><b>{fullReady?'READY':'HELD UNTIL CURRENT PROOF'}</b><em>inspect + bounded repair + build + test + package</em></span></article>
+   <article className={operational.decision==='STAY'?'pass':'hold'}><Activity/><span><small>R248 OPERATIONAL CALCULUS</small><b>{operational.decision} · {operational.policy.strategy.replaceAll('_',' ')}</b><em>CΩ {operational.metrics.continuity.toFixed(2)} · Φ {operational.metrics.plasticity.toFixed(2)} · q {operational.metrics.contradiction.toFixed(2)} · Λ {operational.metrics.burden.toFixed(2)} · scar {operational.metrics.scar.toFixed(2)} · cycles {operational.policy.maxCycles}/12</em></span></article>
+   <article className={fullReady?'pass':'hold'}><Play/><span><small>FULL ACTION</small><b>{fullReady?'READY':'HELD UNTIL CURRENT PROOF'}</b><em>inspect + bounded repair + build + test + package · governed by current R248 packet</em></span></article>
   </div>
-  <div className='r247-root'><label><span>Approved-root relative project path</span><input value={root} onChange={e=>setRoot(e.target.value)} aria-invalid={!rootValid}/><small>Use <code>.</code> for the launcher-approved root. R247 removes passive UX gating, not the root boundary.</small></label></div>
+  <div className='r247-root'><label><span>Approved-root relative project path</span><input value={root} onChange={e=>setRoot(e.target.value)} aria-invalid={!rootValid}/><small>Use <code>.</code> for the launcher-approved root. R247 removes passive UX gating; R248 changes mission policy, not root or execution authority.</small></label></div>
   {(message||error)&&<div className={'r247-message '+(error?'error':'pass')}>{error?<TriangleAlert/>:<CheckCircle2/>}<span>{error||message}</span></div>}
   <div className='r247-actions'>
    <button onClick={()=>void bootstrapHost('MANUAL')} disabled={!!busy||!nativeReady||Boolean(activeJob)||missionActive||!rootValid}>{busy==='bootstrap'?<Loader2 className='spin'/>:<RefreshCw/>}{hostProofFresh?'Refresh host proof':'Prove host now'}</button>
    <button className='primary' onClick={()=>void runFull()} disabled={!fullReady||!!busy}>{busy==='full'?<Loader2 className='spin'/>:<Play/>}RUN FULL REPAIR + BUILD + TEST + PACKAGE</button>
    <button onClick={()=>void refresh()} disabled={!!busy}><RefreshCw/>Refresh shared state</button>
   </div>
-  <footer><ShieldCheck/><span>R247 permits real source repair through the already-established R153 mutation envelope when you explicitly start the full mission. Authentication, one-selected-host correlation, approved-root confinement, returned proof, and preimage/hash-bound source mutation remain enforced; arbitrary shell execution and silent CanonState admission are not introduced.</span></footer>
+  <footer><ShieldCheck/><span>R248 applies the established living operational calculus to the real R247→R153 mission launch. The packet is derived only from current returned software/Hybrid/resource/job evidence; it is not empirical physics or Canon truth. R153 preimage-bound mutation, R147 dispatch, R141 return proof, R146 durable history, R240 source promotion and R125 CanonState admission remain separate authorities.</span></footer>
  </section>;
 }
