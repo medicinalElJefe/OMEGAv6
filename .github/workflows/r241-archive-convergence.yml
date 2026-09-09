@@ -60,7 +60,7 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
-      - name: Prove built R241 visual intelligence and R239/R242 navigation convergence
+      - name: Prove built R241/R239/R242/R245 convergence in the real UI
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
@@ -71,6 +71,7 @@ jobs:
           curl -fsS http://127.0.0.1:4173/ >/dev/null || { cat /tmp/omega-r241-vite.log; exit 1; }
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r241-archive-convergence-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r239-user-navigation-browser-e2e.mjs
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r245-full-overall-canon-browser-e2e.mjs
 
       - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'pull_request'
@@ -110,6 +111,7 @@ jobs:
             echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
             echo '- R245 correlates runtime, production receipt, Hybrid, capability and governed self-build truth into one read-only observation epoch.'
             echo '- R245 exposes 7 Canon axes, 7 permanent strata, 12 logical organs and 12→144→1,728→20,736→248,832 address/scheduling levels without physical-dimension inflation.'
+            echo '- R245 desktop/mobile built-browser proof requires the actual System Atlas surface, preserves the R153 executor and proves manual observation refresh remains non-mutating.'
             echo '- R245 delegates mutation/execution to existing Build Out/R153/Hybrid authorities and owns no POST/PUT/DELETE, executor, production writer or Canon admission path.'
             echo '- Exact route identity outranks prefix/token/metadata search; ambiguity and empty results carry explicit residuals rather than fabricated destinations.'
             echo '- Route filaments are source routeNext-derived; neighbor filaments are deterministic display topology.'
