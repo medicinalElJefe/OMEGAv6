@@ -6,6 +6,7 @@ import {OmegaRuntime} from '../src/workerR101.js';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>assert.ok(ok,`R243 ${msg}`);
 const worker=read('src/workerR101.js');
+const worker102=read('src/workerR102.js');
 const agent=read('public/omega-hybrid-agent-r207.py');
 const base=read('public/omega-hybrid-agent-base-r205.py');
 const ui=read('src/HybridExecutionMotionR243.tsx');
@@ -21,6 +22,10 @@ for(const token of [
 must(!worker.includes("status:'KILLED'"),'stale recovery must not fabricate remote process termination');
 must(worker.includes("safeSteps=safeSteps.filter(s=>String(s?.op||'').toUpperCase()==='INDEX')"),'stale DISCOVERY recovery must strip root HASH_TREE and retain INDEX only');
 must(worker.includes("MUTATING_OPS_R243.has(String(s?.op||'').toUpperCase())"),'mutation replay guard missing');
+must(worker.includes("'x-omega-execution-motion':EXECUTION_MOTION_REVISION"),'canonical R243-aware agent handler must emit execution-motion identity');
+must(worker102.includes("if(path==='/api/hybrid/agent-download'&&request.method==='GET')"),'canonical API download path must be explicitly converged before inherited fallback');
+must(worker102.includes("url.pathname='/omega-hybrid-agent.py'"),'canonical API download path must reuse the R243-aware canonical agent handler');
+must(worker102.includes("return r101.fetch(new Request(url,{method:'GET',headers:request.headers}),env)"),'R102 route convergence must preserve request headers and delegate without adding execution authority');
 
 for(const token of [
  "EXECUTION_MOTION_EXTENSION='R243'",'import hashlib,json,sys,threading,time,types,urllib.request',
@@ -73,4 +78,4 @@ await storage.put('jobs',[{id:'job-mutation',status:'RUNNING',targetDeviceId:'pc
 await storage.put('missions',[{id:'mission-mut',status:'ACTIVE',stage:'REPAIR_VERIFY',targetDeviceId:'pc-r243',currentJobId:'job-mutation',stallRecoveries:0}]);
 await runtime.recoverStalledJobsR243('pc-r243');jobs=await storage.get('jobs');assert.equal(jobs.find(j=>j.id==='job-mutation').status,'FAILED');must(!jobs.some(j=>j.recoveryOf==='job-mutation'),'R243 must never blind-replay a stale mutation');
 
-console.log('OMEGA R243 HYBRID EXECUTION MOTION PASS · canonical downloaded R207 wrapper emits authenticated 3s step pulses · strict sequence replay fence · bounded RUNNING lease and heartbeat renewal · current step/elapsed/progress are operator-visible · expired claims fail closed · only bounded non-mutating discovery can auto-recover · root HASH_TREE is stripped from discovery · mutation is never blindly replayed · immutable R205 and R141/R146/R147/R125 authority preserved');
+console.log('OMEGA R243 HYBRID EXECUTION MOTION PASS · canonical /api/hybrid/agent-download converges to the R243-aware R101 handler · execution-motion response identity is invariant-proved · canonical downloaded R207 wrapper emits authenticated 3s step pulses · strict sequence replay fence · bounded RUNNING lease and heartbeat renewal · current step/elapsed/progress are operator-visible · expired claims fail closed · only bounded non-mutating discovery can auto-recover · root HASH_TREE is stripped from discovery · mutation is never blindly replayed · immutable R205 and R141/R146/R147/R125 authority preserved');
