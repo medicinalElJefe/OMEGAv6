@@ -31,6 +31,7 @@ export class WorldRenderer {
     this._lastSelectionAt = 0;
     this._lastPointerDownAt = 0;
     this._suppressClickUntil = 0;
+    this._viewTimer = null;
     this._wire();
     new ResizeObserver(() => this.resize()).observe(canvas);
     this.resize();
@@ -44,7 +45,7 @@ export class WorldRenderer {
     this.ctx.setTransform(dpr,0,0,dpr,0,0);
     this.w = rect.width; this.h = rect.height;
     this.redraw?.();
-    this._notifyView();
+    this._commitView();
   }
 
   viewBounds(){
@@ -60,7 +61,7 @@ export class WorldRenderer {
     this.view.centerLon=wrapLon(Number(lon));
     this.view.centerLat=clamp(lat,-85,85);
     this.view.scale=clamp(Number(scale)||640,1,MAX_VIEW_SCALE);
-    this.redraw?.();this._notifyView();
+    this.redraw?.();this._commitView();
   }
 
   fitBounds(bbox,{padding=1.55,minScale=1,maxScale=MAX_VIEW_SCALE}={}){
@@ -76,7 +77,7 @@ export class WorldRenderer {
     this.view.centerLon=centerLon;
     this.view.centerLat=clamp(centerLat,-85,85);
     this.view.scale=Math.max(minScale,Math.min(maxScale,Math.min(scaleLon,scaleLat)));
-    this.redraw?.();this._notifyView();
+    this.redraw?.();this._commitView();
     return true;
   }
 
@@ -94,7 +95,7 @@ export class WorldRenderer {
     if(!Number.isFinite(dx)||!Number.isFinite(dy)||!this.w||!this.h)return;
     this.view.centerLon=wrapLon(this.view.centerLon-dx/((this.w/360)*this.view.scale));
     this.view.centerLat=clamp(this.view.centerLat+dy/((this.h/180)*this.view.scale),-85,85);
-    this.redraw?.();this._notifyView();
+    this.redraw?.();this._commitView();
   }
 
   zoomAt(clientX,clientY,factor,{notify=true}={}){
@@ -102,17 +103,21 @@ export class WorldRenderer {
     const px=clamp(clientX-rect.left,0,this.w),py=clamp(clientY-rect.top,0,this.h);
     const [anchorLon,anchorLat]=this.unproject(px,py);
     const next=clamp(this.view.scale*(Number(factor)||1),1,MAX_VIEW_SCALE);
-    if(next===this.view.scale)return;
+    if(next===this.view.scale){
+      if(notify)this._emitView();
+      return false;
+    }
     this.view.scale=next;
     this.view.centerLon=wrapLon(anchorLon-(px-this.w/2)/((this.w/360)*next));
     this.view.centerLat=clamp(anchorLat+(py-this.h/2)/((this.h/180)*next),-85,85);
     this.redraw?.();
-    if(notify)this._notifyView();
+    if(notify)this._commitView();
+    return true;
   }
 
   zoomBy(factor,{notify=true}={}){
     const rect=this.canvas.getBoundingClientRect();
-    this.zoomAt(rect.left+rect.width/2,rect.top+rect.height/2,factor,{notify});
+    return this.zoomAt(rect.left+rect.width/2,rect.top+rect.height/2,factor,{notify});
   }
 
   async setBaseImage(url, meta=null){
@@ -274,10 +279,29 @@ export class WorldRenderer {
 
   _dispatch(name,detail){this.canvas.dispatchEvent(new CustomEvent(name,{detail,bubbles:false}));}
 
-  _notifyView(){
-    const detail={centerLon:this.view.centerLon,centerLat:this.view.centerLat,scale:this.view.scale,bbox:this.viewBounds()};
+  _viewDetail(){return {centerLon:this.view.centerLon,centerLat:this.view.centerLat,scale:this.view.scale,bbox:this.viewBounds()};}
+
+  _emitView(){
+    const detail=this._viewDetail();
     this._dispatch('omega-map-view',detail);
+    return detail;
+  }
+
+  _refreshView(){
+    const detail=this._viewDetail();
     this.onViewChange?.(detail.bbox);
+    return detail;
+  }
+
+  _commitView(){
+    const detail=this._emitView();
+    this.onViewChange?.(detail.bbox);
+    return detail;
+  }
+
+  _scheduleViewRefresh(delay=120){
+    clearTimeout(this._viewTimer);
+    this._viewTimer=setTimeout(()=>this._refreshView(),delay);
   }
 
   _selectClient(clientX,clientY){
@@ -297,7 +321,7 @@ export class WorldRenderer {
     this.view.centerLon=wrapLon(this.drag.lon-dx/((this.w/360)*this.view.scale));
     this.view.centerLat=clamp(this.drag.lat+dy/((this.h/180)*this.view.scale),-85,85);
     this.redraw?.();
-    this._dispatch('omega-map-view',{centerLon:this.view.centerLon,centerLat:this.view.centerLat,scale:this.view.scale,bbox:this.viewBounds()});
+    this._emitView();
     return true;
   }
 
@@ -307,7 +331,7 @@ export class WorldRenderer {
     this.drag=null;delete this.canvas.dataset.dragging;
     if(moved)this._suppressClickUntil=performance.now()+500;
     else if(selectOnClick)this._selectClient(clientX,clientY);
-    this._notifyView();
+    this._commitView();
     return moved;
   }
 
@@ -322,8 +346,8 @@ export class WorldRenderer {
       e.preventDefault();
       const factor=e.deltaY<0?1.42:1/1.42;
       this.zoomAt(e.clientX,e.clientY,factor,{notify:false});
-      clearTimeout(this._viewTimer);
-      this._viewTimer=setTimeout(()=>this._notifyView(),90);
+      this._emitView();
+      this._scheduleViewRefresh(120);
     }, {passive:false});
 
     this.canvas.addEventListener('dblclick',e=>{
@@ -342,8 +366,8 @@ export class WorldRenderer {
     });
     this.canvas.addEventListener('pointermove', e => this._moveDrag(e.clientX,e.clientY));
     this.canvas.addEventListener('pointerup', e => {this.canvas.style.cursor='grab';this._finishDrag(e.clientX,e.clientY)});
-    this.canvas.addEventListener('pointercancel', () => {this.canvas.style.cursor='grab';this.drag=null;delete this.canvas.dataset.dragging;this._notifyView()});
-    this.canvas.addEventListener('lostpointercapture', () => {if(this.drag){this.canvas.style.cursor='grab';this.drag=null;delete this.canvas.dataset.dragging;this._notifyView()}});
+    this.canvas.addEventListener('pointercancel', () => {this.canvas.style.cursor='grab';this.drag=null;delete this.canvas.dataset.dragging;this._commitView()});
+    this.canvas.addEventListener('lostpointercapture', () => {if(this.drag){this.canvas.style.cursor='grab';this.drag=null;delete this.canvas.dataset.dragging;this._commitView()}});
 
     this.canvas.addEventListener('mousedown', e => {
       if(e.button!==0)return;
@@ -357,7 +381,7 @@ export class WorldRenderer {
       if(performance.now()<this._suppressClickUntil)return;
       if(performance.now()-this._lastSelectionAt<160)return;
       this._selectClient(e.clientX,e.clientY);
-      this._notifyView();
+      this._commitView();
     });
 
     this.canvas.addEventListener('keydown',e=>{
