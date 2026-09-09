@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R104 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R104/R242 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const registry=read('src/omegaExperienceRegistryR82.ts');
@@ -10,6 +10,7 @@ const provenanceRegistry=read('src/surfaceProvenanceR94.ts');
 const provenanceUi=read('src/SurfaceProvenanceR94.tsx');
 const provenanceCss=read('src/surfaceProvenanceR94.css');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
+const navLemma=read('src/navigationLemmaCalculusR242.js');
 const navBase=read('src/omegaSideNavigatorR88.css');
 const nav100=read('src/omegaSideNavigatorR100.css');
 const css=read('src/extremeLayerIntegrityR104.css');
@@ -60,9 +61,10 @@ must(provenanceRegistry.includes('representationalPrimary.length===0')&&provenan
 must(provenanceUi.includes('surfaceLayerBindingR104(surface)')&&provenanceUi.includes("className='r104-layer-contract'"),'opened provenance must expose the actual R104 layer contract');
 must(provenanceCss.includes('.r104-layer-contract')&&provenanceCss.includes(".r94-provenance:not([open])>summary{min-height:30px"),'layer/provenance audit must stay progressive and compact while closed');
 
-// Readable, flat, reserved-space global navigation.
+// Readable, flat, reserved-space global navigation. R242 transforms the same flat registry through explicit conservation laws instead of direct filter coupling.
 must(nav.includes('r100-professional-nav r104-readable-nav')&&nav.includes('r104-nav-panel'),'R104 readable navigator classes must be active');
-must(nav.includes('OMEGA_ALL_ROUTES_R82.filter')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'all registered routes must remain one flat searchable list');
+must(nav.includes('compileNavigationLemmaR242({routes:routeRecords,query,workspaceFilter,currentRoute:currentPanel})')&&nav.includes('navigationLemma.routes.map')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'all registered routes must remain one flat searchable list through the R242 lemma transform');
+for(const law of ['WORKSPACE_PARTITION_MUST_CONSERVE_THE_COMPLETE_ROUTE_SET','ROUTE_IDENTITY_BEFORE_PRESENTATION_MATCH','AMBIGUITY_IS_CARRIED_AS_RESIDUAL_INSTEAD_OF_SILENTLY_RESOLVED'])must(navLemma.includes(law),'R242 navigation integrity law missing '+law);
 must(nav.includes('<span>YOU ARE HERE</span>')&&nav.includes('<small>{currentWorkspace.copy}</small>')&&nav.includes("showTechnical?`${chain.executionDomain}/${chain.state} · ${CAPABILITY_REALITY_LABEL[reality]}`:workspace.copy"),'expanded navigator must explain current location and every destination in simple view while retaining opt-in technical detail');
 must(nav.includes("setExpanded(false);setQuery('')"),'destination selection must collapse back to slim rail');
 must(!nav.includes('r88-navigator-backdrop')&&!nav.includes("document.body.style.overflow='hidden'"),'navigator must not regress to covering modal/body lock');
@@ -122,4 +124,4 @@ for(const rule of ['FULL_LAYER_FUNCTIONAL_CORRELATION','READABLE_NON_COVERING_NA
 must(accepted.includes("'R103 task-first capability router + truthful performance partition authority'")&&accepted.includes("'R104 eight-layer functional correlation + readable non-covering navigation authority'"),'R104 must preserve R103 and itself');
 must(packageJson.scripts['test:r104']==='node tests/r104-extreme-layer-integrity-invariants.mjs','R104 script missing');
 
-console.log('R104/R239.1 EXTREME LAYER INTEGRITY PASS · route/layer/provenance coverage · user-explained reserved-space navigation · source-driven visual modes · current zero-drift Hybrid transport + compatibility path · task-first federation preserved');
+console.log('R104/R242 EXTREME LAYER INTEGRITY PASS · route/layer/provenance coverage · calculus-conserved user-explained reserved-space navigation · source-driven visual modes · current zero-drift Hybrid transport + compatibility path · task-first federation preserved');
