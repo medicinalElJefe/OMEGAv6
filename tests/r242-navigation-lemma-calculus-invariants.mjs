@@ -35,7 +35,7 @@ must(system.routes[0]?.name==='System'&&system.exactRoute?.name==='System','exac
 const proof=compileNavigationLemmaR242({routes:routeRecords,query:'proof',workspaceFilter:'ALL'});
 must(proof.routes.some(route=>route.name==='Evidence & Proof'),'semantic proof query must preserve Evidence & Proof reachability');
 
-for(const [workspaceId] of workspaceBlocks){
+for(const [,workspaceId] of workspaceBlocks){
  const expected=routeRecords.filter(route=>route.workspaceId===workspaceId).length;
  const partition=compileNavigationLemmaR242({routes:routeRecords,query:'',workspaceFilter:workspaceId});
  must(expected>0&&partition.routes.length===expected,`${workspaceId} repartition must equal its source partition exactly`);
