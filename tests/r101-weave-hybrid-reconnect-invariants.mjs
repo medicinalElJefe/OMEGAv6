@@ -49,7 +49,7 @@ must(worker34.includes('return r33.fetch(request,env)'),'R101 must sit above the
 
 must(adapter.includes('reconnectHybridBridge')&&adapter.includes("'/api/hybrid/reconnect'"),'browser adapter must retain reconnect/repair transport for inherited clients');
 must(hybrid.includes("import SovereignConnectionR117 from './SovereignConnectionR117'")&&hybrid.includes('<SovereignConnectionR117/>'),'Hybrid route must use the R117 clean connection successor');
-must(bootstrap117.includes("fetch('/api/hybrid/bootstrap'")&&bootstrap117.includes("'x-omega-session-id':runtimeSessionId()")&&bootstrap117.includes('saveHybridBridge'),'R117 must bypass stale bridge headers during fresh bootstrap and persist the exact returned bridge');
+must(bootstrap117.includes("fetch('/api/hybrid/bootstrap'")&&bootstrap117.includes('const session=runtimeSessionId()')&&bootstrap117.includes("'x-omega-session-id':session")&&bootstrap117.includes('if(current?.bridgeId===session&&current.secret)')&&bootstrap117.includes("headers['x-omega-bridge-secret']=current.secret")&&bootstrap117.includes('body:JSON.stringify({rotate:true})')&&bootstrap117.includes('saveHybridBridge'),'R117 must reject stale cross-session bridge headers, rotate same-session credentials explicitly, and persist the exact returned bridge');
 must(sovereign117.includes("live?.nativeExecutionClaimed===true")&&sovereign117.includes('current.length>0'),'R117 Hybrid UI must distinguish fresh credential state from current device heartbeat truth');
 must(sovereign117.includes('DOWNLOAD CLEAN R117 CONNECTOR')&&sovereign117.includes('download={SOVEREIGN_LAUNCHER_FILENAME_R117}'),'R117 clean connector must remain an explicit user-clickable download after server bootstrap');
 must(launcher117.includes('/api/hybrid/agent-download?r117=1')&&launcher117.includes("OMEGA_ORIGIN=${ORIGIN}"),'R117 launcher must use the canonical validated endpoint and hard-bind canonical origin');
@@ -81,6 +81,6 @@ must(accepted.includes("id:'WEAVE_DERIVED_RESOLUTION'")&&accepted.includes("id:'
 must(accepted.includes("'R100 woven continuity geometry/time + professional instrument rail authority'")&&accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge-identity continuity authority'"),'R101 must extend R100 rather than flatten it');
 must(![worker,worker114,worker115,worker116,adapter,hybrid,sovereign117,launcher117,weave,stage].join('\n').includes('@appdeploy/client'),'R101 must remain provider portable');
 
-console.log('R101/R207 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · R117 fresh durable bridge bootstrap · frozen R205 transport loop + canonical R207 R141 proof wrapper · authenticated-heartbeat truth preserved through R116→R115→R114→R101');
+console.log('R101/R237 WEAVE + HYBRID PASS · 44 routes intact · weave-derived effective atlas resolution · R117 rotated same-session durable bridge bootstrap · frozen R205 transport loop + canonical R207 R141 proof wrapper · authenticated-heartbeat truth preserved through R116→R115→R114→R101');
 await import('./r102-federated-instrument-experience-invariants.mjs');
 await import('./r112-sovereign-living-fabric-invariants.mjs');
