@@ -10,7 +10,10 @@ await page.route('**/api/hybrid/status',route=>route.fulfill({status:200,content
 await page.route('**/omega-federation.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({schema:'OMEGA_TEST',nodes:[]})}));
 
 await page.goto(base,{waitUntil:'networkidle'});
-for(const text of ['All tools','System map','START HERE','FOCUS','DEEP'])if(!(await page.getByText(text,{exact:true}).count()))throw new Error(`R239 Home missing ${text}`);
+for(const text of ['All tools','System map','FOCUS','DEEP'])if(!(await page.getByText(text,{exact:true}).count()))throw new Error(`R239 Home missing ${text}`);
+const initialStartHere=page.locator('.r132-primary-strip');
+await initialStartHere.waitFor({state:'visible'});
+if(!(await initialStartHere.innerText()).includes('START HERE'))throw new Error('R239 Home primary strip missing START HERE semantics');
 for(const workspace of ['Command','Explore','Intelligence','Evidence','Build','System'])if(!(await page.getByRole('button',{name:new RegExp(`^${workspace}`)}).count()))throw new Error(`R239 workspace missing ${workspace}`);
 
 await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
