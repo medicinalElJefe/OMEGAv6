@@ -3,8 +3,10 @@ from pathlib import Path
 import h5py
 import numpy as np
 import rasterio
+import pytest
 
 from processor.nisar_gcov import apply_provisional_phase_correction, export_gcov, parse_granule_name, power_to_db, read_gcov
+from processor.nisar_stack import compile_stack
 
 
 def fixture(path: Path, frequency="A"):
@@ -70,3 +72,28 @@ def test_power_db_and_phase_helpers():
     assert np.allclose(d[:3], [0,10,20]) and np.isnan(d[3])
     c, meta = apply_provisional_phase_correction(np.array([1+0j]), "HHVH")
     assert meta["applied"] is False and np.allclose(c, [1+0j])
+
+
+def test_registered_stack_compiler(tmp_path):
+    manifests=[]
+    for i,scale in enumerate([1.0,2.0,4.0]):
+        f=tmp_path/f"scene{i}.h5"; fixture(f)
+        with h5py.File(f,"r+") as h5:
+            h5["/science/LSAR/GCOV/grids/frequencyA/HHHH"][:] *= scale
+        m=export_gcov(f,tmp_path/f"out{i}","A","HHHH"); manifests.append(m["manifest_path"])
+    s=compile_stack(manifests,tmp_path/"stack","gamma0_db")
+    assert s["source_count"] == 3 and s["semantics"]["resampling_performed"] is False
+    with rasterio.open(s["products"]["observation_count"]) as ds:
+        assert np.all(ds.read(1) == 3)
+
+
+def test_stack_refuses_grid_mismatch(tmp_path):
+    manifests=[]
+    for i in range(2):
+        f=tmp_path/f"scene{i}.h5"; fixture(f)
+        if i:
+            with h5py.File(f,"r+") as h5:
+                h5["/science/LSAR/GCOV/grids/frequencyA/xCoordinates"][:] += 10
+        m=export_gcov(f,tmp_path/f"out{i}","A","HHHH"); manifests.append(m["manifest_path"])
+    with pytest.raises(ValueError, match="GRID_MISMATCH"):
+        compile_stack(manifests,tmp_path/"stack")
