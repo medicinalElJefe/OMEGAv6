@@ -7,6 +7,8 @@ const membrane=read('src/CanonicalMembraneR95.tsx');
 const worker32=read('src/workerR32.js');
 const worker33=read('src/workerR33.js');
 const hybrid=read('src/HybridMissionControlR8.tsx');
+const nav=read('src/OmegaSideNavigatorR88.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const ci=read('.github/workflows/ci.yml');
 const release=read('.github/workflows/release-evidence-live.yml');
 const federation=JSON.parse(read('public/omega-federation.json'));
@@ -15,7 +17,9 @@ must(home.includes("className='r96-workspaces'")&&home.includes('OMEGA_WORKSPACE
 must(home.includes("className='r96-engine-spine'")&&home.includes('ENGINE_META.map'),'federated engine truth must live in the same canonical frame');
 must(home.includes('HOME_LENS')&&home.includes('projection={lens.projection}')&&home.includes('view={lens.view}'),'all Home lenses must control actual membrane geometry and data color');
 for(const mapping of ["FIELD:{projection:'MANDALA',view:'SOURCE_COLOR'}","MATTER:{projection:'LATTICE',view:'SCAR'}","TRAVERSAL:{projection:'THREAD',view:'CONTINUITY'}","FORECAST:{projection:'THREAD',view:'PHI'}","RELATIVITY:{projection:'INVERSE',view:'MATH'}","INFINITY:{projection:'MANDALA',view:'INVERSE'}","SCALE:{projection:'LATTICE',view:'PSC'}","CONVERGENCE:{projection:'INVERSE',view:'DECISION'}"])must(home.includes(mapping),'missing lawful Home lens '+mapping);
-must(home.includes('<OmegaSideNavigatorR88')&&home.includes('All 44 applications'),'44 historical routes must remain behind the shared tool catalog');
+const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(routes.length===44&&new Set(routes).size===44,'established route inventory must remain complete and unique');
+must(home.includes('<OmegaSideNavigatorR88')&&home.includes("aria-label='All tools'")&&home.includes('<Search/>All tools')&&nav.includes('OMEGA_ALL_ROUTES_R82')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'all registered routes must remain behind one complete shared All Tools catalog with user-consistent accessible naming');
 must(home.includes('<details open={showWorkflow}')&&home.includes('<details open={showSystemMap}'),'workflow and full lineage must remain available on demand');
 must(css.includes('.r96-workbench{display:grid;grid-template-columns:minmax(0,1fr) 318px'),'canonical canvas must dominate the working frame');
 must(css.includes('@media(max-width:980px)')&&css.includes('@media(max-width:720px)'),'unified Home must contain tablet and mobile layouts');
@@ -33,4 +37,4 @@ must(release.includes('attempt<=180'),'release evidence verifier must allow the 
 const sovereign=federation.nodes.find(node=>node.id==='omega-sovereign');
 must(sovereign?.url===null&&sovereign?.endpoint==='/api/federation/rcwa/status'&&sovereign?.stateGate==='DEVICE_PROOF_REQUIRED','sovereign execution must resolve through the canonical Hybrid queue, not a stale preview host');
 must(!read('public/omega-federation.json').includes('omega-sovereign-convergence.foundasound.chatgpt.site'),'obsolete sovereign preview host must be absent');
-console.log('R96 UNIFIED CANONICAL HOME PASS · one frame · controlled living membrane · truthful federation · exact Hybrid bytes');
+console.log('R96/R239.1 UNIFIED CANONICAL HOME PASS · one frame · complete All Tools reachability · accessible naming aligned · controlled living membrane · truthful federation · exact Hybrid bytes');
