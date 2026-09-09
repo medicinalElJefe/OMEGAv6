@@ -112,3 +112,4 @@ assert.ok(!verifier.includes('R238 changes correlation and sampling, not executi
 console.log(`OMEGA R240/R245 RECURSIVE EXACT SELF-PROMOTION PASS · current promoted proof floor R${capabilityFloor} preserves actual R239 Hybrid governor + R240 promotion authority · R245 shares R164 gating/R240-R243 selection/generation across R170 and CLOUD-01 without moving source-promotion authority · exact production base/residual/all-green/allowlist/unchanged-base/expected-head gates · two-parent merge · canonical ci.yml exact-production proof · R125 admission unchanged`);
 await import('./r240-full-calculus-bridge-invariants.mjs');
 await import('./r243-woven-selfbuild-fabric-invariants.mjs');
+await import('./r246-autonomous-candidate-lifecycle-invariants.mjs');
