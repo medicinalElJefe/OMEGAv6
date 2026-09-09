@@ -1,8 +1,8 @@
-export const GIBS_ENDPOINT='https://gibs.earthdata.nasa.gov/wms/epsg4326/nrt/wms.cgi';
+export const GIBS_ENDPOINT='https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi';
 export const GIBS_LAYERS={
   trueColor:'VIIRS_NOAA21_CorrectedReflectance_TrueColor',
-  fires:'VIIRS_NOAA21_Thermal_Anomalies_375m_All',
-  night:'VIIRS_NOAA21_DayNightBand'
+  fires:'VIIRS_NOAA20_Thermal_Anomalies_375m_Day',
+  night:'VIIRS_SNPP_DayNightBand_AtSensor_M15'
 };
 
 export function normalizeBbox(bbox){
@@ -47,7 +47,7 @@ export function contextualTimestamp(record, fallbackDate=new Date()){
 export function gibsContextManifest({bbox,date,layers,url,requestedDate=null,fallbackDays=0}){
   return {
     authority:'NASA EOSDIS GIBS',
-    kind:'NEAR_REAL_TIME_CONTEXT',
+    kind:'EARTH_CONTEXT',
     measurementPromotion:false,
     bbox:normalizeBbox(bbox),date,requestedDate:requestedDate||date,fallbackDays,layers,url,
     semantics:'GIBS imagery is synchronized contextual Earth-observation evidence. It does not replace SAR measurement pixels and is not used as a SAR value unless a quantitative layer with an explicit physical mapping is separately decoded.'
