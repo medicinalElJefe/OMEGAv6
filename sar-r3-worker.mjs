@@ -1,6 +1,7 @@
 const STAC_ENDPOINT='https://earth-search.aws.element84.com/v1/search';
 const STAC_ITEM_ROOT='https://earth-search.aws.element84.com/v1/collections/sentinel-1-grd/items/';
 const ASF_ENDPOINT='https://api.daac.asf.alaska.edu/services/search/param';
+const GIBS_HOST='gibs.earthdata.nasa.gov';
 
 function jsonError(message,status=400){
   return new Response(JSON.stringify({error:message}),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});
@@ -39,6 +40,15 @@ function allowedSourceUrl(raw){
     h.endsWith('.s3.amazonaws.com')||
     h.endsWith('.s3.us-west-2.amazonaws.com');
   return allowed?url:null;
+}
+
+function allowedGibsUrl(raw){
+  try{
+    const url=new URL(String(raw||''));
+    if(url.protocol!=='https:'||url.hostname.toLowerCase()!==GIBS_HOST)return null;
+    if(!url.pathname.startsWith('/wms/'))return null;
+    return url;
+  }catch{return null}
 }
 
 function resolveRelativeAsset(baseHref,relativeHref){
@@ -159,6 +169,17 @@ async function proxySource(request,url,kind='SOURCE'){
   return new Response(request.method==='HEAD'?null:upstream.body,{status:upstream.status,statusText:upstream.statusText,headers:responseHeaders});
 }
 
+async function proxyGibs(request,url){
+  if(request.method!=='GET'&&request.method!=='HEAD')return jsonError('GIBS proxy requires GET or HEAD',405);
+  const target=allowedGibsUrl(url.searchParams.get('url')||'');
+  if(!target)return jsonError('GIBS URL is not on the approved NASA Earthdata host/path',403);
+  const upstream=await fetch(target,{method:request.method,headers:{accept:'image/png,image/jpeg,image/*,*/*;q=0.8'},redirect:'follow'});
+  const headers=copyHeaders(upstream,['content-type','content-length','etag','last-modified','cache-control']);
+  headers.set('x-omega-upstream','NASA_EOSDIS_GIBS');
+  headers.set('x-content-type-options','nosniff');
+  return new Response(request.method==='HEAD'?null:upstream.body,{status:upstream.status,statusText:upstream.statusText,headers});
+}
+
 export default {
   async fetch(request,env){
     const url=new URL(request.url);
@@ -167,6 +188,7 @@ export default {
     if(url.pathname==='/api/asf/search')return proxyAsf(request,url);
     if(url.pathname==='/api/raster')return proxySource(request,url,'SENTINEL_S3_RASTER');
     if(url.pathname==='/api/source')return proxySource(request,url,'SENTINEL_S3_SUPPORT_ASSET');
+    if(url.pathname==='/api/gibs')return proxyGibs(request,url);
     return env.ASSETS.fetch(request);
   }
 };
