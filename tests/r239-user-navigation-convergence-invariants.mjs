@@ -6,6 +6,7 @@ const home=read('src/OmegaHomeR71.tsx');
 const css=read('src/omegaSideNavigatorR239.css');
 const registry=read('src/omegaExperienceRegistryR82.ts');
 const layerIntegrity=read('tests/r104-extreme-layer-integrity-invariants.mjs');
+const browser=read('tests/r239-user-navigation-browser-e2e.mjs');
 
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
 must(routes.length===44&&new Set(routes).size===44,'must preserve all 44 unique registered destinations');
@@ -25,6 +26,10 @@ for(const token of [
  'showTechnical',
  "aria-pressed={showTechnical}",
  "aria-hidden={!expanded} inert={!expanded}",
+ "data-route-id={chain.routeId}",
+ "data-capability-id={chain.capabilityId}",
+ "data-execution-domain={chain.executionDomain}",
+ "data-execution-state={chain.state}",
  "YOU ARE HERE",
  'rows.map(route=>',
  'OMEGA_WORKSPACES_R82.map(workspace=>',
@@ -35,6 +40,17 @@ for(const specialized of ["go('Extreme Traversal')","go('Matter Traversal')"])mu
 must(!nav.includes('rows.slice('),'all filtered registered routes must remain reachable');
 must(!nav.includes('/api/')&&!nav.includes('fetch('),'navigation must remain backend-independent and non-mutating');
 for(const tier of ['PRIMARY','SUPPORT','EXPERT'])must(nav.includes(tier),'priority tier missing '+tier);
+
+for(const token of [
+ 'routeIdentities=await routeRows.evaluateAll',
+ "row.dataset.routeId||''",
+ 'new Set(routeIds).size!==44',
+ 'row.dataset.routeId===id',
+ "row.getAttribute('data-route-id')",
+ "row.locator(':scope > span > b')",
+ 'route identity/presentation binding drifted'
+])must(browser.includes(token),'browser proof must bind exhaustive route activation to machine-semantic R143 identity: '+token);
+must(!browser.includes("const row=exactLabel.locator('..')"),'browser proof must not infer route identity from presentation DOM parent depth');
 
 for(const token of [
  "data-navigation-revision='R239'",
@@ -66,4 +82,4 @@ for(const token of [
  "@media(max-width:560px)"
 ])must(css.includes(token),'R239 responsive presentation law missing '+token);
 
-console.log('R239.1 USER NAVIGATION CONVERGENCE PASS · Home→workspace→start-here→all-tools hierarchy · universal rail Command/Hybrid/Earth/Proof · full 44-route registry retained · primary/support/expert grouped · technical metadata opt-in · visible/accessible naming aligned · collapsed navigator becomes immediately inert while R94 exit visibility transition completes · R104 semantic location/destination explanation bound · focus/deep density preserved · no new execution or Canon authority');
+console.log('R239.1 USER NAVIGATION CONVERGENCE PASS · Home→workspace→start-here→all-tools hierarchy · universal rail Command/Hybrid/Earth/Proof · full 44-route registry retained · primary/support/expert grouped · technical metadata opt-in · R143 machine route identity is unique and structurally bound independently of presentation markup · visible/accessible naming aligned · collapsed navigator becomes immediately inert while R94 exit visibility transition completes · R104 semantic location/destination explanation bound · focus/deep density preserved · no new execution or Canon authority');
