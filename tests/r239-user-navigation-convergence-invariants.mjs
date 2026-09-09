@@ -36,6 +36,7 @@ for(const tier of ['PRIMARY','SUPPORT','EXPERT'])must(nav.includes(tier),'priori
 
 for(const token of [
  "data-navigation-revision='R239'",
+ "aria-label='All tools'",
  '<Search/>All tools',
  '<Blocks/>System map',
  'START HERE',
@@ -49,6 +50,7 @@ for(const token of [
  'activeWorkspace.routes.map',
  'primaryRoutesForWorkspaceR132(domain)'
 ])must(home.includes(token),'Home user hierarchy missing '+token);
+must(!home.includes("aria-label='All 44 applications'"),'visible All Tools label and accessible name must not diverge');
 const quick=home.match(/const QUICK=\[(.*?)\] as const;/s)?.[1]||'';
 must(!quick.includes('SAI Lab')&&!quick.includes('Visual Instrument'),'universal quick actions must not duplicate workspace-specific specialist tools');
 must(home.includes("type SurfaceDepth='FOCUS'|'DEEP'"),'focus/deep density contract must remain available');
@@ -61,4 +63,4 @@ for(const token of [
  "@media(max-width:560px)"
 ])must(css.includes(token),'R239 responsive presentation law missing '+token);
 
-console.log('R239 USER NAVIGATION CONVERGENCE PASS · Home→workspace→start-here→all-tools hierarchy · universal rail Command/Hybrid/Earth/Proof · full 44-route registry retained · primary/support/expert grouped · technical metadata opt-in · focus/deep density preserved · no new execution or Canon authority');
+console.log('R239 USER NAVIGATION CONVERGENCE PASS · Home→workspace→start-here→all-tools hierarchy · universal rail Command/Hybrid/Earth/Proof · full 44-route registry retained · primary/support/expert grouped · technical metadata opt-in · aligned All Tools accessibility · focus/deep density preserved · no new execution or Canon authority');
