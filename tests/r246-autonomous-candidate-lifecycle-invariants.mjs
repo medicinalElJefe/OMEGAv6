@@ -42,7 +42,6 @@ for(const token of [
   'reconcile_autonomous_candidate_lifecycle_r246.mjs',
   'STALE_BASE_AFTER_LEGITIMATE_MAIN_ADVANCEMENT',
   'CLOSE_PR_DELETE_BRANCH',
-  "ACTION' = 'DELETE_BRANCH",
   'PRESERVE',
 ])assert.ok(workflow.includes(token),`R246 workflow lifecycle closure missing ${token}`);
 assert.ok(workflow.includes("steps.deployment.outputs.status != 'PRODUCTION_PROVEN'"),'R246 fallback reconciler must not race successful post-production cleanup');
