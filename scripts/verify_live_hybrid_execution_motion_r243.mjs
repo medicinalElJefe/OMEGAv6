@@ -16,33 +16,36 @@ if(servedSha!==expected)throw new Error(`R243 exact promoted SHA mismatch expect
 const manifest=await parse(await fetch(base+'/api/hybrid/connector-manifest',{headers:{'cache-control':'no-cache'}}));
 if(!manifest.response.ok)throw new Error(`R243 connector manifest HTTP ${manifest.response.status}: ${manifest.raw.slice(0,300)}`);
 if(manifest.body?.schema!=='OMEGA_HYBRID_CONNECTOR_MANIFEST_R127')throw new Error(`R243 connector manifest schema mismatch ${manifest.body?.schema||'NONE'}`);
-if(manifest.body?.executionMotion?.revision!=='R242')throw new Error(`R243 inherited motion transport revision mismatch ${manifest.body?.executionMotion?.revision||'NONE'}`);
+if(manifest.body?.executionMotion?.revision!=='R243')throw new Error(`R243 motion transport revision mismatch ${manifest.body?.executionMotion?.revision||'NONE'}`);
 if(manifest.body?.executionMotion?.progressPath!=='/api/hybrid/agent/progress')throw new Error(`R243 progress path mismatch ${manifest.body?.executionMotion?.progressPath||'NONE'}`);
 if(Number(manifest.body?.executionMotion?.runningLeaseMs)!==20000)throw new Error(`R243 running lease mismatch ${manifest.body?.executionMotion?.runningLeaseMs}`);
 if(Number(manifest.body?.executionMotion?.legacyStaleMs)!==90000)throw new Error(`R243 legacy stale window mismatch ${manifest.body?.executionMotion?.legacyStaleMs}`);
 
-const expectedWrapper=readFileSync('public/omega-hybrid-agent-r141.py','utf8');
-const expectedWrapperSha=sha(expectedWrapper);
-const wrapperResponse=await fetch(base+'/omega-hybrid-agent-r141.py',{headers:{'cache-control':'no-cache'}});
-const wrapper=await wrapperResponse.text();
-if(!wrapperResponse.ok)throw new Error(`R243 R141 wrapper HTTP ${wrapperResponse.status}`);
-const liveWrapperSha=sha(wrapper);
-if(wrapper!==expectedWrapper||liveWrapperSha!==expectedWrapperSha)throw new Error(`R243 live R141 wrapper byte drift expected ${expectedWrapperSha} served ${liveWrapperSha}`);
+const expectedAgent=readFileSync('public/omega-hybrid-agent-r207.py','utf8');
+const expectedAgentSha=sha(expectedAgent);
+const agentResponse=await fetch(base+'/api/hybrid/agent-download?r243=1',{headers:{'cache-control':'no-cache'}});
+const liveAgent=await agentResponse.text();
+if(!agentResponse.ok)throw new Error(`R243 canonical agent download HTTP ${agentResponse.status}: ${liveAgent.slice(0,300)}`);
+const liveAgentSha=sha(liveAgent),declaredAgentSha=String(agentResponse.headers.get('x-omega-agent-sha256')||'');
+if(liveAgent!==expectedAgent||liveAgentSha!==expectedAgentSha)throw new Error(`R243 canonical agent byte drift expected ${expectedAgentSha} served ${liveAgentSha}`);
+if(declaredAgentSha!==expectedAgentSha)throw new Error(`R243 canonical agent declared SHA mismatch expected ${expectedAgentSha} declared ${declaredAgentSha||'NONE'}`);
+if(agentResponse.headers.get('x-omega-execution-motion')!=='R243')throw new Error(`R243 canonical agent header lost execution motion identity ${agentResponse.headers.get('x-omega-execution-motion')||'NONE'}`);
 for(const token of [
-  "EXECUTION_MOTION_EXTENSION='R242'",
-  "'/api/hybrid/agent/progress'",
-  'PROGRESS_INTERVAL_SECONDS=3.0',
-  'threading.Thread',
-  "send_progress('CLAIMED')",
-  "send_progress('RETURNING')",
-  "BRIDGE_CALCULUS_EXTENSION='R240'",
+  "VERSION='R207'","EXECUTION_MOTION_EXTENSION='R243'","'/api/hybrid/agent/progress'",'PROGRESS_INTERVAL_SECONDS=3.0',
+  'threading.Thread',"send_progress('CLAIMED')","send_progress('RETURNING')","FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'",
   "EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'"
-])if(!wrapper.includes(token))throw new Error(`R243 live R141 wrapper missing ${token}`);
-for(const forbidden of ['shell=True','pip install','python -m pip','conda install'])if(wrapper.includes(forbidden))throw new Error(`R243 live wrapper contains forbidden authority ${forbidden}`);
+])if(!liveAgent.includes(token))throw new Error(`R243 canonical downloaded agent missing ${token}`);
+for(const forbidden of ['shell=True','pip install','python -m pip','conda install'])if(liveAgent.includes(forbidden))throw new Error(`R243 canonical downloaded agent contains forbidden authority ${forbidden}`);
+
+const expectedProofWrapper=readFileSync('public/omega-hybrid-agent-r141.py','utf8');
+const proofWrapperResponse=await fetch(base+'/omega-hybrid-agent-r141.py',{headers:{'cache-control':'no-cache'}});
+const liveProofWrapper=await proofWrapperResponse.text();
+if(!proofWrapperResponse.ok)throw new Error(`R243 historical R141 proof wrapper HTTP ${proofWrapperResponse.status}`);
+if(liveProofWrapper!==expectedProofWrapper)throw new Error(`R243 R141 proof-wrapper byte drift expected ${sha(expectedProofWrapper)} served ${sha(liveProofWrapper)}`);
 
 const status=await parse(await fetch(base+'/api/hybrid/status',{headers:{'cache-control':'no-cache'}}));
 if(!status.response.ok)throw new Error(`R243 Hybrid status HTTP ${status.response.status}`);
-if(status.body?.executionMotionRevision!=='R242')throw new Error(`R243 public status lost inherited motion revision: ${status.body?.executionMotionRevision||'NONE'}`);
+if(status.body?.executionMotionRevision!=='R243')throw new Error(`R243 public status lost motion revision: ${status.body?.executionMotionRevision||'NONE'}`);
 if(Number(status.body?.runningLeaseMs)!==20000)throw new Error(`R243 public status lease mismatch: ${status.body?.runningLeaseMs}`);
 const current=Array.isArray(status.body?.devices)?status.body.devices.filter(d=>d?.online&&!d?.revoked):[];
 if(status.body?.state==='VERIFIED_DEVICE_ONLINE'){
@@ -70,13 +73,13 @@ if(!Number.isFinite(motionEpoch)||motionEpoch<1)throw new Error(`R243 live brows
 const text=await motion.innerText();
 for(const token of ['R243 · HYBRID EXECUTION MOTION CONVERGENCE','CURRENT STEP','MOTION / LEASE','RETURNED STEP COUNT','R141 returned proof'])if(!text.includes(token))throw new Error(`R243 live browser missing ${token}`);
 if(motionState==='MOTION_PROVED'){
-  if(!['R242','R243'].includes(transport))throw new Error(`R243 MOTION_PROVED used unsupported transport ${transport}`);
+  if(transport!=='R243')throw new Error(`R243 MOTION_PROVED used non-R243 transport ${transport}`);
   if(!motionJob||motionJob==='NONE')throw new Error('R243 MOTION_PROVED lacks exact selected-host job identity');
   if(!text.includes('last pulse')||!text.includes('lease'))throw new Error('R243 MOTION_PROVED lacks visible pulse/lease evidence');
 }
-if(motionState==='LEGACY_RUNNING_NO_LEASE'&&!text.includes('restart the current PC connector after R243 deploy'))throw new Error('R243 legacy-running state does not expose the bounded recovery instruction');
-if(motionState==='STALL_DETECTED'&&!text.includes('fails closed'))throw new Error('R243 stalled state does not expose fail-closed semantics');
+if(motionState==='LEGACY_RUNNING_NO_LEASE'&&!text.includes('restart the canonical PC connector after R243 deploy'))throw new Error('R243 legacy-running state does not expose canonical connector recovery instruction');
+if(motionState==='STALL_DETECTED'&&!text.includes('fails the stale claim closed'))throw new Error('R243 stalled state does not expose fail-closed semantics');
 if(pageErrors.length)throw new Error(`R243 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R243 LIVE EXECUTION MOTION PASS · exact SHA ${expected} · R141 wrapper ${liveWrapperSha} · manifest transport R242 / progress endpoint / 20s lease / 90s legacy window · Hybrid ${status.body.state} · current devices ${current.length} · browser state ${motionState} · job ${motionJob||'NONE'} · transport ${transport} · shared epoch ${motionEpoch} · no command or mutation issued`);
+console.log(`R243 LIVE EXECUTION MOTION PASS · exact SHA ${expected} · canonical agent ${liveAgentSha} exact bytes + declared SHA · native R243 progress endpoint / 20s lease / 90s legacy window · Hybrid ${status.body.state} · current devices ${current.length} · browser state ${motionState} · job ${motionJob||'NONE'} · transport ${transport} · shared epoch ${motionEpoch} · no command or mutation issued`);
