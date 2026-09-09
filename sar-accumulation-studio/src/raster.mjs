@@ -1,3 +1,5 @@
+import './sentinel-console.mjs';
+
 const TIFF_CACHE = new Map();
 let geotiffModulePromise = null;
 
