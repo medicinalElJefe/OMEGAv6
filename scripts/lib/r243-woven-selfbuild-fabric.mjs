@@ -9,7 +9,6 @@ export const R243_INVARIANT_CARRY=Object.freeze([
  'SOURCE_MUTATION_REQUIRES_EXACT_APPLY_PATCH_OR_WRITE_TEXT_RETURN_PROOF','EXECUTION_SUCCESS_NEQ_SCIENTIFIC_TRUTH',
  'PROPOSAL_NEQ_AUTHORIZATION_NEQ_EXECUTION_NEQ_RETURN_NEQ_CANON_ADMISSION','CI_YML_SOLE_CANONICAL_PRODUCTION_WRITER'
 ]);
-const clampInt=(n,min,max)=>Math.max(min,Math.min(max,Math.floor(Number(n)||0));
 const asSet=x=>x instanceof Set?x:new Set(Array.isArray(x)?x:[]);
 const deps=c=>Array.isArray(c?.prerequisites)?c.prerequisites:Array.isArray(c?.dependencies)?c.dependencies:[];
 export function addressForCellR243(index){const ordinal=Number(index);if(!Number.isInteger(ordinal)||ordinal<0||ordinal>=R243_RESOLUTION.cells)throw new RangeError(`R243 cell ordinal out of range: ${index}`);const organ=Math.floor(ordinal/144),surface=Math.floor((ordinal%144)/12),branch=organ*12+surface,cell=ordinal%12,laneStart=ordinal*12,laneEnd=laneStart+11,deepStart=laneStart*12,deepEnd=(laneEnd+1)*12-1;return Object.freeze({organ,surface,branch,cell,ordinal,laneStart,laneEnd,deepStart,deepEnd,address:`O${String(organ).padStart(2,'0')}.B${String(branch).padStart(3,'0')}.C${String(cell).padStart(2,'0')}`})}
