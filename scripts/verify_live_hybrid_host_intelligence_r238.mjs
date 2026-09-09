@@ -1,10 +1,14 @@
 import crypto from 'node:crypto';
+import {readFileSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 const base=(process.env.OMEGA_PUBLIC_URL||'https://omegav6.jeffdeweyeljefe.workers.dev').replace(/\/$/,'');
 const expected=String(process.env.OMEGA_PROMOTED_SHA||process.env.GITHUB_SHA||'').trim();
 const parse=async response=>{const raw=await response.text();let body=null;try{body=JSON.parse(raw)}catch{}return{response,raw,body}};
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
+const R141_WRAPPER_ROUTE='/api/hybrid/agent-download?r117=1&r120=1&r127=1&validator=zero-drift';
+const R205_BASE_ROUTE='/omega-hybrid-agent-base-r205.py';
+const R205_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046';
 
 if(!expected)throw new Error('R238 live proof requires OMEGA_PROMOTED_SHA or GITHUB_SHA');
 const receipt=await parse(await fetch(base+'/omega-build-receipt.json',{headers:{'cache-control':'no-cache'}}));
@@ -12,17 +16,27 @@ if(!receipt.response.ok)throw new Error(`R238 build receipt HTTP ${receipt.respo
 const servedSha=receipt.body?.promotion?.promotedMergeSha||receipt.body?.source?.sha||'';
 if(servedSha!==expected)throw new Error(`R238 exact promoted SHA mismatch expected ${expected} served ${servedSha||'NONE'}`);
 
-const wrapperResponse=await fetch(base+'/omega-hybrid-agent.py',{headers:{'cache-control':'no-cache'}});
+const expectedWrapper=readFileSync('public/omega-hybrid-agent-r141.py','utf8');
+const expectedWrapperSha=sha(expectedWrapper);
+const wrapperResponse=await fetch(base+R141_WRAPPER_ROUTE,{headers:{'cache-control':'no-cache'}});
 const wrapper=await wrapperResponse.text();
-if(!wrapperResponse.ok)throw new Error(`R238 Hybrid wrapper HTTP ${wrapperResponse.status}`);
-for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'","MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'","EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'",'Get-CimInstance Win32_VideoController','MAX_MACRO_SECONDS_R238=300','MAX_MACRO_COORD_ABS_R238=100000'])if(!wrapper.includes(token))throw new Error(`R238 live wrapper missing ${token}`);
+if(!wrapperResponse.ok)throw new Error(`R238 R141 Hybrid wrapper HTTP ${wrapperResponse.status}`);
+const servedWrapperSha=sha(wrapper);
+const wrapperReceipt=wrapperResponse.headers.get('x-omega-agent-sha256');
+if(servedWrapperSha!==expectedWrapperSha||wrapper!==expectedWrapper)throw new Error(`R238 R141 wrapper bytes drifted expected ${expectedWrapperSha} served ${servedWrapperSha}`);
+if(wrapperReceipt!==expectedWrapperSha)throw new Error(`R238 R141 wrapper receipt SHA mismatch expected ${expectedWrapperSha} received ${wrapperReceipt||'NONE'}`);
+if(wrapperResponse.headers.get('x-omega-proof-closure')!=='R141')throw new Error(`R238 R141 proof-closure header missing: ${wrapperResponse.headers.get('x-omega-proof-closure')||'NONE'}`);
+if(wrapperResponse.headers.get('x-omega-canonical-origin')!==base)throw new Error(`R238 R141 canonical-origin header mismatch: ${wrapperResponse.headers.get('x-omega-canonical-origin')||'NONE'}`);
+for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'","MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'",`EXPECTED_BASE_SHA256='${R205_BASE_SHA256}'`,'Get-CimInstance Win32_VideoController','MAX_MACRO_SECONDS_R238=300','MAX_MACRO_COORD_ABS_R238=100000'])if(!wrapper.includes(token))throw new Error(`R238 live R141 wrapper missing ${token}`);
 for(const forbidden of ['Ryzen 7 3700X','RTX 2070 SUPER','32.0 GB','19045.6456','shell=True','pip install','python -m pip'])if(wrapper.includes(forbidden))throw new Error(`R238 live wrapper contains forbidden overclaim/unsafe token ${forbidden}`);
 
-const baseAgentResponse=await fetch(base+'/omega-hybrid-agent-base-r205.py',{headers:{'cache-control':'no-cache'}});
+const expectedBase=readFileSync('public/omega-hybrid-agent-base-r205.py','utf8');
+const baseAgentResponse=await fetch(base+R205_BASE_ROUTE,{headers:{'cache-control':'no-cache'}});
 const baseAgent=await baseAgentResponse.text();
 if(!baseAgentResponse.ok)throw new Error(`R238 immutable base agent HTTP ${baseAgentResponse.status}`);
 const baseSha=sha(baseAgent);
-if(baseSha!=='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046')throw new Error(`R238 immutable R205 base SHA drifted: ${baseSha}`);
+if(sha(expectedBase)!==R205_BASE_SHA256)throw new Error(`R238 repository immutable R205 base drifted: ${sha(expectedBase)}`);
+if(baseSha!==R205_BASE_SHA256||baseAgent!==expectedBase)throw new Error(`R238 immutable live R205 base drifted: ${baseSha}`);
 
 const status=await parse(await fetch(base+'/api/hybrid/status',{headers:{'cache-control':'no-cache'}}));
 if(!status.response.ok)throw new Error(`R238 public Hybrid status HTTP ${status.response.status}`);
@@ -51,4 +65,4 @@ if(current.length===0){
 if(pageErrors.length)throw new Error(`R238 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R238 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · immutable R205 base ${baseSha} · R238 wrapper served · Hybrid ${status.body.state} · current public devices ${current.length} · live Home→TOOLS→Hybrid host-intelligence surface rendered without cross-authority claims`);
+console.log(`R238 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · R141 wrapper ${servedWrapperSha} via governed wrapper route · immutable R205 base ${baseSha} · Hybrid ${status.body.state} · current public devices ${current.length} · live Home→TOOLS→Hybrid host-intelligence surface rendered without cross-authority claims`);
