@@ -16,6 +16,12 @@ for(const token of [
  "RESOURCE_PRESSURE_CRITICAL",
  "RESOURCE_PRESSURE_ELEVATED",
  "RESOURCE_HEADROOM_HIGH",
+ "RETURNED_RESOURCE_PROFILE_STALE_OR_CLOCK_INVALID",
+ "R239_MAX_PROFILE_AGE_MS=5*60_000",
+ "R239_MAX_PROFILE_CLOCK_LEAD_MS=2*60_000",
+ "profileFresh",
+ "profileObservedAt",
+ "profileAgeMs",
  "recommendedCpuWorkers",
  "effectiveCpuWorkers",
  "hashMaxResults",
@@ -29,10 +35,13 @@ for(const token of [
 ])must(governor.includes(token),`R239 governor missing ${token}`);
 
 must(governor.includes("jobs:[])].filter((j:any)=>j?.targetDeviceId===deviceId&&j?.returnPacket)"),'R239 must isolate returned host proof to the selected device');
+must(governor.includes("profileAgeMs>=-R239_MAX_PROFILE_CLOCK_LEAD_MS&&profileAgeMs<=R239_MAX_PROFILE_AGE_MS"),'R239 must temporally bind resource admission to a bounded returned host sample');
+must(governor.includes("else if(!profileFresh){tier='HOLD';reasons.push('RETURNED_RESOURCE_PROFILE_STALE_OR_CLOCK_INVALID')"),'R239 stale resource proof must fail closed before heavy-work admission');
 must(governor.includes("memLoad>=92||avail<1*GiB||disk<2*GiB")&&governor.includes("memLoad>=82||avail<2*GiB||disk<5*GiB"),'R239 critical/elevated resource pressure thresholds missing');
 must(governor.includes("load??100")&&governor.includes("available??0")&&governor.includes("free??0"),'R239 missing host values must fail closed rather than synthesize headroom');
 must(governor.includes("clamp(Math.floor(advisory*pressureFactor),1,12)"),'R239 effective CPU worker envelope must remain bounded to 1..12');
-must(governor.includes("const proveHost=input.snapshotCurrent&&!input.activeNativeWork"),'R239 must preserve a bootstrap path to obtain first returned DESKTOP_HEALTH proof');
+must(governor.includes("const proveHost=input.snapshotCurrent&&!input.activeNativeWork"),'R239 must preserve a bootstrap path to obtain fresh DESKTOP_HEALTH proof even when the previous resource sample is stale');
+must(governor.includes("const verify=profileProved&&profileFresh&&input.snapshotCurrent"),'R239 heavy-work verification must require fresh returned resource proof');
 must(governor.includes("const train=verify&&(available??0)>=4*GiB&&(free??0)>=10*GiB&&(load??100)<78"),'R239 local training must require explicit memory/storage/load headroom');
 
 for(const token of [
@@ -54,10 +63,14 @@ for(const token of [
  "if(!resourceEnvelope.admission[preset.id])",
  "const steps=applyEnvelopeToPresetR239",
  "resourceEnvelopeR239:{schema:resourceEnvelope.schema",
+ "targetDeviceId:device.id",
+ "snapshotEpoch:epoch",
+ "snapshotObservedAt:observedAt",
+ "sourceProfileSha256:hostProof?.profile?.profileSha256||null",
  "data-r239-resource-tier",
  "R239 resource hold",
  "R237 remains the authenticated command boundary"
-])must(deck.includes(token),`R239 command admission integration missing ${token}`);
+])must(deck.includes(token),`R239 command admission integration/Woven binding missing ${token}`);
 must(deck.includes("api.post<any>('/api/hybrid/jobs'")&&deck.includes("OMEGA_HYBRID_OPERATOR_JOB_R237"),'R239 must continue through the established R237 Hybrid job authority');
 must(!deck.includes("APPLY_PATCH',label")&&!deck.includes("WRITE_TEXT',label"),'R239 must not add a direct source mutation preset');
 
@@ -70,8 +83,8 @@ must(state.postR180ProofContinuity.at(-1)==='R239','R239 must be the current pos
 must(state.selfBuild.latestExplicitSuccessorProof==='tests/r239-adaptive-hybrid-resource-governor-invariants.mjs','R239 must become the explicit successor proof');
 must(state.preservedRuntime.hybridResourceGovernor==='R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING','R239 preserved-runtime identity missing');
 
-const classify=({load,availGiB,diskGiB,workers=8,profile=true,snapshot=true,active=false})=>{
- if(!snapshot)return'HOLD';if(!profile)return'UNPROVED';if(active)return'HOLD';
+const classify=({load,availGiB,diskGiB,workers=8,profile=true,fresh=true,snapshot=true,active=false})=>{
+ if(!snapshot)return'HOLD';if(!profile)return'UNPROVED';if(!fresh)return'HOLD';if(active)return'HOLD';
  if(load>=92||availGiB<1||diskGiB<2)return'HOLD';
  if(load>=82||availGiB<2||diskGiB<5)return'CONSTRAINED';
  if(load<=60&&availGiB>=8&&diskGiB>=20&&workers>=6)return'HIGH_CAPACITY';return'READY';
@@ -82,5 +95,6 @@ must(classify({load:86,availGiB:3,diskGiB:20})==='CONSTRAINED','R239 constrained
 must(classify({load:95,availGiB:8,diskGiB:100})==='HOLD','R239 critical memory pressure must hold');
 must(classify({load:50,availGiB:12,diskGiB:80,active:true})==='HOLD','R239 active native work must preserve one-job backpressure');
 must(classify({load:50,availGiB:12,diskGiB:80,profile:false})==='UNPROVED','R239 missing returned profile must remain unproved');
+must(classify({load:50,availGiB:12,diskGiB:80,fresh:false})==='HOLD','R239 stale returned resource proof must hold heavy work');
 
-console.log('OMEGA R239 ADAPTIVE HYBRID RESOURCE GOVERNOR PASS · selected-host R238 proof only · pressure-aware 1..12 worker envelope · bounded hash/train sizing · bootstrap PROVE_HOST retained · heavy work fail-closed under memory/storage pressure · R237 queue authority preserved · no screenshot constants · R141/R146/R147/R125 authority unchanged');
+console.log('OMEGA R239 ADAPTIVE HYBRID RESOURCE GOVERNOR PASS · selected-host R238 proof only · fresh bounded resource sample required · pressure-aware 1..12 worker envelope · exact device/epoch/profile job binding · bounded hash/train sizing · bootstrap PROVE_HOST retained · heavy work fail-closed under stale/memory/storage pressure · R237 queue authority preserved · no screenshot constants · R141/R146/R147/R125 authority unchanged');
