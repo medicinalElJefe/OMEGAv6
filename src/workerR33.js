@@ -28,6 +28,7 @@ export class OmegaRuntime extends OmegaRuntimeR32 {
 }
 
 const CANONICAL_ORIGIN_R94='https://omegav6.jeffdeweyeljefe.workers.dev';
+const EXECUTION_MOTION_REVISION_R243='R243';
 async function sha256TextR96(source){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source));return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function hybridAgentDownloadR94(request,env){
  if(!env?.ASSETS?.fetch)return json({ok:false,code:'HYBRID_AGENT_ASSET_BINDING_UNAVAILABLE'},503);
@@ -35,7 +36,7 @@ async function hybridAgentDownloadR94(request,env){
  const asset=await env.ASSETS.fetch(new Request(assetUrl,{headers:{'cache-control':'no-cache'}}));
  if(!asset.ok)return json({ok:false,code:'HYBRID_AGENT_ASSET_NOT_FOUND',status:asset.status},503);
  const source=await asset.text();
- const valid=source.length>1000&&source.startsWith('#!/usr/bin/env python3')&&source.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")&&source.includes("OMEGA Hybrid Link agent");
+ const valid=source.length>1000&&source.startsWith('#!/usr/bin/env python3')&&source.includes("DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'")&&source.includes("VERSION='R207'")&&source.includes("PROOF_CLOSURE_REVISION='R141'")&&source.includes("BASE_PATH='/omega-hybrid-agent-base-r205.py'")&&source.includes("EXECUTION_MOTION_EXTENSION='R243'")&&source.includes("'/api/hybrid/agent/progress'")&&source.includes('OMEGA R207 canonical Hybrid Link proof wrapper')&&source.includes('Pairing is explicit.');
  if(!valid)return json({ok:false,code:'HYBRID_AGENT_ASSET_INVALID'},503);
  const version=(source.match(/VERSION='([^']+)'/)||[])[1]||'UNKNOWN',digest=await sha256TextR96(source);
  return new Response(source,{status:200,headers:{
@@ -44,6 +45,9 @@ async function hybridAgentDownloadR94(request,env){
   'cache-control':'no-store, max-age=0',
   'x-omega-agent-version':version,
   'x-omega-agent-sha256':digest,
+  'x-omega-agent-proof-closure':'R141',
+  'x-omega-agent-base-revision':'R205',
+  'x-omega-execution-motion':EXECUTION_MOTION_REVISION_R243,
   'x-omega-canonical-origin':CANONICAL_ORIGIN_R94
  }});
 }
