@@ -53,7 +53,11 @@ if(!terminal.response.ok||terminal.body?.job?.status!=='FAILED')throw new Error(
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1440,height:1000}});
 const pageErrors=[];page.on('pageerror',error=>pageErrors.push(String(error)));
-await page.goto(base+'/hybrid',{waitUntil:'networkidle'});
+await page.goto(base+'/',{waitUntil:'networkidle'});
+await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
+const hybridEntry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid'}).first();
+await hybridEntry.waitFor({state:'visible'});
+await hybridEntry.click();
 const deck=page.locator('[data-r237-command-authority="AUTHENTICATED_BOUNDED_NATIVE_CONTROL"]');
 await deck.waitFor({state:'visible'});
 const deckText=await deck.innerText();
@@ -63,4 +67,4 @@ await page.waitForTimeout(750);
 if(pageErrors.length)throw new Error(`R237 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R237 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · isolated authenticated queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · live command deck + non-mutating refresh · R141/R146/R147/R125 preserved`);
+console.log(`R237 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · isolated authenticated queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser navigation + non-mutating refresh · R141/R146/R147/R125 preserved`);
