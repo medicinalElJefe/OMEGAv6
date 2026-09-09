@@ -46,6 +46,6 @@ must(link.indexOf('<SovereignConnectionR117/>')<link.indexOf('<HybridHostIntelli
 must(workflow.includes('actions/checkout@v7')&&workflow.includes('actions/setup-node@v7'),'R238 proof workflow must preserve the R221.1 Node-24-capable v7 Actions hygiene floor');
 must(!workflow.includes('actions/checkout@v4')&&!workflow.includes('actions/setup-node@v4'),'R238 proof workflow must not regress to the old v4 checkout/setup-node generation');
 must(workflow.includes('windows-host-runtime-proof:')&&workflow.includes('runs-on: windows-latest')&&workflow.includes('python tests/r238-windows-host-runtime-proof.py'),'R238 must execute its Windows-specific host telemetry on an actual Windows CI runner');
-for(const token of ['GlobalMemoryStatusEx','logicalProcessors','profileSha256','verify_macro_replay','tampered macro hash was not rejected'])must(windowsProof.includes(token),`R238 Windows runtime proof missing ${token}`);
+for(const token of ["memory.get('totalBytes')","memory.get('availableBytes')","logicalProcessors","profileSha256","verify_macro_replay","tampered macro hash was not rejected"])must(windowsProof.includes(token),`R238 Windows runtime proof missing ${token}`);
 
 console.log('OMEGA R238 HYBRID HOST INTELLIGENCE PASS · immutable R205 byte SHA preserved · R141 exact-return proof preserved · no screenshot constants · Windows CPU/RAM/GPU/storage/Python/RCWA evidence · no dependency installation · bounded macro metadata/schema/hash/count/order/time/coordinate/window preflight · exact selected-device correlation · Windows runtime CI · v7 Actions hygiene');
