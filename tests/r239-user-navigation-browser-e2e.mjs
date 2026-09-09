@@ -27,7 +27,12 @@ for(const forbidden of ['SAI Lab','Visual Instrument'])if(quickText.includes(for
 
 const allTools=page.locator('.r96-header-actions button').filter({hasText:'All tools'}).first();
 const nav=page.locator('#omega-global-navigator');
-const openAllTools=async()=>{if(!(await nav.isVisible()))await page.getByLabel('Browse all registered OMEGA tools').click();await nav.waitFor({state:'visible'});const all=nav.getByRole('button',{name:/^ALL\s+44$/});if(await all.count())await all.click()};
+const assertClosingTruth=async reason=>{
+ if(await nav.getAttribute('aria-hidden')!=='true')throw new Error(`R239 ${reason} did not set aria-hidden immediately`);
+ if(!(await nav.evaluate(el=>el.inert)))throw new Error(`R239 ${reason} did not make navigator inert immediately`);
+ await nav.waitFor({state:'hidden'});
+};
+const openAllTools=async()=>{if(await nav.getAttribute('aria-hidden')==='true')await page.getByLabel('Browse all registered OMEGA tools').click();await nav.waitFor({state:'visible'});const all=nav.getByRole('button',{name:/^ALL\s+44$/});if(await all.count())await all.click()};
 await allTools.click();
 await nav.waitFor({state:'visible'});
 const contextualText=await nav.innerText();
@@ -67,7 +72,7 @@ if(await tech.getAttribute('aria-pressed')!=='false')throw new Error('R239 techn
 await tech.click();
 if(await nav.getByRole('button',{name:'Simple view',exact:true}).getAttribute('aria-pressed')!=='true')throw new Error('R239 technical detail toggle did not activate');
 await page.keyboard.press('Escape');
-if(await nav.isVisible())throw new Error('R239 Escape did not close navigator');
+await assertClosingTruth('Escape');
 
 // Prove every registered destination actually routes through the built product. This is navigation-only:
 // no command/action button is invoked inside a destination.
@@ -99,6 +104,7 @@ await page.getByLabel('Browse full software and capability map').click();
 await nav.waitFor({state:'visible'});
 if(!(await nav.getByText('System map',{exact:true}).count()))throw new Error('R239 System map rail action did not expose the software/capability layer');
 await page.keyboard.press('Escape');
+await assertClosingTruth('System map Escape');
 
 const homeButton=page.getByLabel('Go to OMEGA home');
 if(await homeButton.count()!==1)throw new Error('R239 persistent Home action disappeared after route sweep');
@@ -122,7 +128,7 @@ await page.getByLabel('Narrow side toolbar').click();
 await page.getByLabel('Browse all registered OMEGA tools').click();
 await nav.waitFor({state:'visible'});
 await page.locator('.r96-now').click();
-if(await nav.isVisible())throw new Error('R239 outside-click did not close navigator');
+await assertClosingTruth('outside click');
 
 await page.setViewportSize({width:390,height:844});
 await page.getByLabel('Browse all registered OMEGA tools').click();
@@ -132,5 +138,5 @@ if(!box||box.width>365)throw new Error(`R239 mobile navigator too wide: ${box?.w
 if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error('R239 mobile product introduces horizontal viewport overflow');
 if(pageErrors.length)throw new Error(`R239 page errors: ${pageErrors.join(' | ')}`);
 
-console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · visible-canvas sanity · universal rail · system map · technical detail opt-in · Escape/outside close · rail width · mobile containment');
+console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · visible-canvas sanity · universal rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · mobile containment');
 await browser.close();
