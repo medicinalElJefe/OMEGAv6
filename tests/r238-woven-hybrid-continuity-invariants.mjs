@@ -33,11 +33,14 @@ must(!intelligence.includes("api.get<any>('/api/hybrid/status')"),'R238 host int
 for(const text of [effects,deck,intelligence,woven])must(text.includes('useHybridRuntimeSnapshotR238'), 'Every R238 operational projection must consume the same snapshot context');
 
 for(const token of [
- "Promise.all([api.get<any>('/api/hybrid/status'),api.get<any>('/api/missions')])",
+ "const h=await api.get<any>('/api/hybrid/status')",
+ "const missions=Array.isArray(hybrid?.missions)?hybrid.missions:[]",
+ 'one canonical OMEGA_RUNTIME Durable Object state projection',
  'epoch:previous.epoch+1',
  'selectedDeviceJobs',
  'targetForMission(mission,job)===device.id'
 ])must(snapshot.includes(token),`R238 Woven snapshot carry missing ${token}`);
+must(!snapshot.includes("api.get<any>('/api/missions')"),'R238 Woven observation must not split Hybrid and mission truth across a second client GET');
 
 const start=link.indexOf('<HybridRuntimeSnapshotProviderR238>'),end=link.indexOf('</HybridRuntimeSnapshotProviderR238>');
 must(start>=0&&end>start,'R238 shared provider boundary missing');
@@ -49,4 +52,4 @@ must(link.indexOf('<HybridHostIntelligenceR238/>')<link.indexOf('<HybridCommandD
 for(const token of ['R125 admission authority','R141 exact return closure','R146 history','R147 executor/dispatch authority'])must(link.includes(token),`R238 Woven authority boundary regressed ${token}`);
 must(link.includes('12→144→1,728→20,736→248,832')&&link.includes('not literal physical dimensions'),'R238 must retain atlas-resolution truth boundary');
 
-console.log('OMEGA R238 WOVEN HYBRID CONTINUITY PASS · two successor projections converge into one selected-host atomic epoch · frame-relative whole/part + inner/outer roles · +1/0/-1 orientation channels · invariant authority carry · selected-host scar/history carry · recoverable R134→R238→R141→R146→R147→R125 path · no new physical primitive or authority');
+console.log('OMEGA R238 WOVEN HYBRID CONTINUITY PASS · two successor projections converge into one selected-host durable-state epoch · one canonical runtime projection carries devices/jobs/missions together · frame-relative whole/part + inner/outer roles · +1/0/-1 orientation channels · invariant authority carry · selected-host scar/history carry · recoverable R134→R238→R141→R146→R147→R125 path · no new physical primitive or authority');
