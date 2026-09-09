@@ -5,6 +5,7 @@ on:
     branches: [main, full-restore]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -33,6 +34,10 @@ jobs:
         run: node tests/r237-hybrid-command-authority-invariants.mjs
       - name: Prove R238 Hybrid host intelligence
         run: node tests/r238-hybrid-host-intelligence-invariants.mjs
+      - name: Prove R239 recursive build and R240 exact self-promotion boundaries
+        run: |
+          node tests/r239-recursive-canon-build-fabric-invariants.mjs
+          node tests/r240-exact-self-promotion-invariants.mjs
       - run: npm run check
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
 
@@ -66,7 +71,7 @@ jobs:
         run: npx wrangler whoami
 
   deploy-main:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: verify
     runs-on: ubuntu-latest
     environment: production
@@ -288,6 +293,7 @@ jobs:
             echo "- Candidate: ${OMEGA_CANDIDATE_SHA:-UNAVAILABLE}"
             echo "- Rollback: ${OMEGA_ROLLBACK_SHA:-UNAVAILABLE}"
             echo "- Runtime: $OMEGA_PUBLIC_URL"
+            echo "- Trigger: ${{ github.event_name }}"
             echo "- Verify job: ${{ needs.verify.result }}"
             echo "- Deployment job: ${{ job.status }}"
             echo "- R163 first-hand canonical core health: required for deployment PASS"
@@ -296,8 +302,10 @@ jobs:
             echo "- R9 Earth ground source hierarchy: required for deployment PASS"
             echo "- R200.1 exact promoted-SHA desktop/mobile browser total-experience proof: required for deployment PASS"
             echo "- R202 read-only operational source-authority convergence: runtime/cloud/Hybrid/Drive-workbook/archive/empirical provenance boundaries required for deployment PASS"
-            echo "- R237 exact promoted-SHA Hybrid command authority: unauthenticated rotation rejected; authenticated same-session rotation required; old secret revoked; rotated secret preserves device continuity; per-device backpressure and cancellation lifecycle proven; Home→TOOLS→Hybrid browser path proven"
+            echo "- R237/R238 exact promoted-SHA Hybrid command authority: authenticated rotation + current shared epoch + semantic R141/R146/R147/R125 boundaries required"
             echo "- R238 exact promoted-SHA Hybrid host intelligence: immutable R205 executor SHA required; returned host CPU/RAM/GPU/storage/Python/RCWA profile stays R141 fingerprint-bound; selected-device correlation and no cross-host proof leakage required; bounded macro schema/hash/count/order/time/coordinate/window preflight required"
+            echo "- R239 recursive build scheduler: R164 evidence-bound source planning only; no production or Canon authority"
+            echo "- R240 explicit workflow_dispatch is permitted only so an R170 GitHub-token two-parent source merge can invoke this same sole canonical writer"
             echo "- R202 archive residual debt remains explicit: AT09 desktop health check PLANNED; AT10 forensic hash ledger PLANNED"
             echo "- Browser proof harness: Playwright 1.63.0 pinned; locked application dependency audit fails at high severity"
             echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"
