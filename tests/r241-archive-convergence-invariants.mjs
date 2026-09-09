@@ -7,6 +7,7 @@ const css=read('src/continuousFieldR13.css');
 const continuous=read('src/continuousFieldR13.ts');
 const commandVerifier=read('scripts/verify_live_hybrid_command_authority_r237.mjs');
 const commandInvariant=read('tests/r237-hybrid-command-authority-invariants.mjs');
+const workflow=read('.github/workflows/r241-archive-convergence.yml');
 const governor=JSON.parse(read('public/omega-r170-self-build-governor.json'));
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 
@@ -68,6 +69,12 @@ for(const token of ["data-r237-correlation","['LOCKED','HELD']","correlation==='
 must(!commandVerifier.includes("'intentionally contain no APPLY_PATCH or WRITE_TEXT','HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE'"),'R241 must not regress to unconditional LOCKED prose coupling');
 must(commandInvariant.includes('semantic LOCKED or fail-closed HELD'),'R241 must pin the R237 verifier semantic truth-state repair in focused invariants');
 
+for(const token of ["Prove R240.1 semantic verifier against exact served runtime","/omega-build-receipt.json","promotion?.promotedMergeSha||body?.source?.sha","OMEGA_PROMOTED_SHA=\"$SERVED_SHA\"","for attempt in 1 2 3","internally consistent exact served-runtime semantic proof"])must(workflow.includes(token),`R241.1 workflow race closure missing ${token}`);
+must(!workflow.includes('git fetch origin main --no-tags'),'R241.1 live proof must not bind verification to a moving main ref');
+must(!workflow.includes('BASE_SHA="$(git rev-parse origin/main)"'),'R241.1 live proof must not assume Git main and canonical deployment advance atomically');
+must(!/^\s*push\s*:/m.test(workflow)&&!/^\s*schedule\s*:/m.test(workflow),'R241 workflow must remain PR/manual proof-only');
+must(!/wrangler\s+deploy(?![^\n]*--dry-run)/.test(workflow),'R241 workflow must not acquire deployment authority');
+
 must(governor.revision==='R170.5-R241','R241 must advance the governor proof revision without changing the R240 promotion engine');
 must(governor.engineRevision==='R170.2+R240'&&governor.selfPromotion?.revision==='R240','R241 must not replace the established R240 exact self-promotion engine');
 must(governor.currentCapabilityFloor==='R241','R241 must be the current governed capability/proof floor');
@@ -79,4 +86,4 @@ must(governor.preservedRuntime?.archiveConvergenceVisualIntelligence==='R241_REA
 
 for(const file of [topology,cognition,overlay])for(const forbidden of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203'])must(!file.includes(forbidden),`R241 must not restore retired Durable Object ${forbidden}`);
 
-console.log('OMEGA R241 ARCHIVE CONVERGENCE PASS · governed proof floor R241 with R239/R240 authorities preserved · 1,728 deterministic 12×12×12 topology over exact 20,736 packet · source route/neighbor filaments · evidence-aware STAY/TURN/ESCALATE/UNPROVED · AGI/QTI typed cognition read-only through proposal · authorization/execution/return/Canon fail closed · inherited R182 INGRESS/EGRESS/BLOCKED/RESIDUE + TURN/BASIN + CΩ/Φ/q/Λ legend preserved · existing R13/R113/R119 visual layers preserved · R240 live verifier repaired to semantic LOCKED/HELD truth · R125/R141/R146/R147 and retired R201/R203 boundaries preserved');
+console.log('OMEGA R241.1 ARCHIVE CONVERGENCE PASS · governed proof floor R241 with R239/R240 authorities preserved · 1,728 deterministic 12×12×12 topology over exact 20,736 packet · source route/neighbor filaments · evidence-aware STAY/TURN/ESCALATE/UNPROVED · AGI/QTI typed cognition read-only through proposal · authorization/execution/return/Canon fail closed · inherited R182 INGRESS/EGRESS/BLOCKED/RESIDUE + TURN/BASIN + CΩ/Φ/q/Λ legend preserved · existing R13/R113/R119 visual layers preserved · live verifier binds to exact served runtime rather than moving main · R125/R141/R146/R147 and retired R201/R203 boundaries preserved');
