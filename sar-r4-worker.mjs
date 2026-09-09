@@ -2,7 +2,7 @@ import r3 from './sar-r3-worker.mjs';
 
 const STATIC_FRESH_EXT=/\.(?:html?|mjs|js|css|json)$/i;
 const SENTINEL_BUCKET='sentinel-s1-l1c';
-const SENTINEL_REGION='us-west-2';
+const SENTINEL_REGION='eu-central-1';
 
 function sentinelRegionalUrl(raw){
   if(!raw)return null;
@@ -34,7 +34,6 @@ async function proxySentinelRaster(request,url){
   headers.set('accept-encoding','identity');
   const requestedRange=headers.get('range');
   const upstream=await fetch(target,{method:request.method,headers,redirect:'manual',cf:{cacheTtl:0,cacheEverything:false}});
-  // Never silently turn a GeoTIFF byte-range request into a 500+ MB whole-object transfer.
   if(request.method==='GET'&&requestedRange&&upstream.status!==206){
     try{upstream.body?.cancel?.();}catch{}
     return jsonError(`Sentinel S3 range contract failed: requested ${requestedRange}, upstream returned ${upstream.status}`,502);
@@ -59,7 +58,7 @@ export default {
       headers.set('cache-control','no-store, max-age=0');
       headers.set('pragma','no-cache');
       headers.set('expires','0');
-      headers.set('x-omega-sar-build','R4-SAR-SINGLE-CAMERA-5');
+      headers.set('x-omega-sar-build','R4-SAR-SINGLE-CAMERA-6');
       if(url.pathname==='/'||/\.html?$/i.test(url.pathname))headers.set('clear-site-data','"cache"');
     }
     return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
