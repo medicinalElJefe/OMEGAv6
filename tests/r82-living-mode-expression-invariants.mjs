@@ -6,6 +6,7 @@ const home=read('src/OmegaHomeR71.tsx');
 const homeCss=read('src/omegaHomeR71.css');
 const shell=read('src/InstrumentOSShellR62.tsx');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
+const lemma=read('src/navigationLemmaCalculusR242.js');
 const modes=read('src/SourceBackedModesPanelR21.tsx');
 const modeRuntime=read('src/modeExpressionRuntimeR82.ts');
 const modeCanvas=read('src/ModeExpressionCanvasR82.tsx');
@@ -24,13 +25,15 @@ must(
  home.includes('omega-r88-open-navigator')&&
  nav.includes('ref={searchRef}')&&
  nav.includes('value={query}')&&
- nav.includes('onChange={e=>setQuery(e.target.value)}')&&
+ nav.includes('onChange={e=>{setQuery(e.target.value);setNavigationScar(\'\')}}')&&
  nav.includes("'Search all registered OMEGA applications'")&&
+ nav.includes('compileNavigationLemmaR242({routes:routeRecords,query,workspaceFilter,currentRoute:currentPanel})')&&
  nav.includes('rows.map(route=>')&&
  !nav.includes('rows.slice(')&&
  nav.includes("setWorkspaceFilter('ALL')"),
- 'Home must delegate complete unsliced application search to the one shared navigator'
+ 'Home must delegate complete unsliced application search to the one shared R242-conserved navigator'
 );
+must(lemma.includes('QUERY_TRANSFORM_MAY_REORDER_PRESENTATION_BUT_MAY_NOT_RENAME_OR_DUPLICATE_ROUTES')&&lemma.includes('EMPTY_SEARCH_RESULT_IS_OBSERVED_NOT_FABRICATED'),'R242 search calculus must preserve R82 route identity and fail closed on empty results');
 must(!home.includes('.slice(0,18)')&&!home.includes('.slice(0,10)'),'Home may not bury applications behind arbitrary result slicing');
 must(home.includes('projection.signature')&&home.includes('projection.intent'),'Home must explain the visual law selected by each projection button');
 must(homeCss.includes('.r71-modes')&&homeCss.includes('overflow-x:auto'),'all projection buttons must remain reachable without overlap');
@@ -46,7 +49,7 @@ must(
  nav.includes("setWorkspaceFilter('ALL')"),
  'deep historical route reachability must remain explicit in the persistent rail/browser with visible current-route identity'
 );
-must(nav.includes('rows.map(route=>')&&!nav.includes('rows.slice(')&&nav.includes("setWorkspaceFilter('ALL')"),'all filtered registered routes must remain structurally renderable with an explicit ALL view; navigation polish may not bury the deep route universe behind slicing');
+must(nav.includes('rows.map(route=>')&&!nav.includes('rows.slice(')&&nav.includes("setWorkspaceFilter('ALL')"),'all lemma-projected registered routes must remain structurally renderable with an explicit ALL view; navigation polish may not bury the deep route universe behind slicing');
 must(nav.includes("aria-label='Browse all registered OMEGA tools'")&&nav.includes("aria-label={activeWorkspace?`${activeWorkspace.label} OMEGA applications`:'All registered OMEGA applications'}"),'complete application reachability must remain exposed to assistive/browser navigation');
 
 for(const family of ['COHERENCE','FORECAST','PRUNE','RELATIVITY','FLOW','MEMORY','PROOF','TOPOLOGY','COMPRESSION','TRAVERSAL','RECURSION','GOVERNANCE','SCALE','LIGHT','GENERIC'])must(modeRuntime.includes(`'${family}'`),`mode expression family missing ${family}`);
@@ -71,4 +74,4 @@ must(surface.includes("record?:any")&&surface.includes("className='r82-surface-v
 must(surfaceCss.includes('.r82-surface-vital')&&!surfaceCss.includes('.r82-surface-vital{position:fixed'),'surface vitality must stay non-overlapping and inside the active panel');
 must(!modeRuntime.match(/physical dimension.*executed/i),'visual mode mapping must not convert representation into physical/execution claims');
 
-console.log(`R82/R239.1 LIVING MODE EXPRESSION PASS · ${routes.length} current registered destinations · one shared structurally-proven unsliced search authority · complete persistent navigation reachability · 8 projection grammars · individual mode expressions · state-bound surfaces preserved`);
+console.log(`R82/R239.1/R242 LIVING MODE EXPRESSION PASS · ${routes.length} current registered destinations · one shared structurally-proven unsliced R242 search authority · complete persistent navigation reachability · 8 projection grammars · individual mode expressions · state-bound surfaces preserved`);
