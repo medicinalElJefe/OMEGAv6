@@ -19,13 +19,28 @@
 .r239-user-nav .r88-navigator-foot{line-height:1.45}
 .r239-user-nav.rail-wide .r94-rail-action span{font-size:6.5px;letter-spacing:.04em}
 
+/* Home follows one mental model in FOCUS: workspace -> start here -> canvas -> selected inspector concern. */
+.r239-home[data-r132-depth='FOCUS'] .r96-context-card>div{display:none}
+.r239-home[data-r132-depth='FOCUS'] .r96-context-card header{margin-bottom:0}
+.r239-home[data-r132-depth='FOCUS'] .r96-context-card header>button{min-width:92px}
+.r239-home[data-r132-depth='FOCUS'] .r96-quick-card>div{grid-template-columns:repeat(2,minmax(0,1fr))}
+.r239-home .r132-primary-strip>span{color:#9bd9cf}
+.r239-home .r132-primary-strip button:last-child{border-color:rgba(118,221,204,.22);color:#bfe9e2}
+.r239-home .r132-inspector-tabs button{font-size:7px}
+.r239-home .r96-header-actions button{min-height:34px}
+
 @media(max-width:900px){
  .r239-user-nav .r239-route-group{position:static}
  .r239-user-nav .r239-tech-toggle{min-width:72px}
+}
+@media(max-width:720px){
+ .r239-home[data-r132-depth='FOCUS'] .r96-quick-card>div{grid-template-columns:1fr 1fr}
+ .r239-home .r132-primary-strip>div{padding-bottom:2px}
 }
 @media(max-width:560px){
  .r239-user-nav .r88-navigator-head{align-items:start}
  .r239-user-nav .r88-head-actions{display:flex;gap:4px}
  .r239-user-nav .r239-route-group{grid-template-columns:1fr;gap:2px}
  .r239-user-nav .r89-flat-route{min-height:62px}
+ .r239-home[data-r132-depth='FOCUS'] .r96-quick-card>div{grid-template-columns:1fr}
 }
