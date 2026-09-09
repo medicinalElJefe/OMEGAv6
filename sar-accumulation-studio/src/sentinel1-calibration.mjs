@@ -6,34 +6,46 @@ const DETAIL_CACHE=new Map();
 const XML_CACHE=new Map();
 let geotiffPromise=null;
 
+function origin(){return globalThis.location?.origin||null;}
+export function supportTransportUrl(url,kind='source'){
+  if(!url)return null;
+  const base=origin();
+  if(!base)return url;
+  return `${base.replace(/\/$/,'')}/api/${kind}?url=${encodeURIComponent(url)}`;
+}
+
 async function geotiff(){
-  if(!geotiffPromise)geotiffPromise=import('https://cdn.jsdelivr.net/npm/geotiff@3.0.5/+esm');
+  if(!geotiffPromise)geotiffPromise=import('../vendor/geotiff.bundle.mjs');
   return geotiffPromise;
 }
 
 async function openMeasurement(url){
-  if(!TIFF_CACHE.has(url))TIFF_CACHE.set(url,(async()=>{
+  const source=s3ToHttps(url);
+  if(!TIFF_CACHE.has(source))TIFF_CACHE.set(source,(async()=>{
     const mod=await geotiff();
-    const tiff=await mod.fromUrl(url,{cacheSize:64*1024*1024});
-    const image=await tiff.getImage();
-    return {tiff,image};
+    const tiff=await mod.fromUrl(supportTransportUrl(source,'raster'),{cacheSize:32*1024*1024,blockSize:65536});
+    const image=await tiff.getImage(0);
+    return {tiff,image,source};
   })());
-  return TIFF_CACHE.get(url);
+  return TIFF_CACHE.get(source);
 }
 
 async function fetchText(url,signal){
-  if(!XML_CACHE.has(url))XML_CACHE.set(url,(async()=>{
-    const response=await fetch(url,{signal});
-    if(!response.ok)throw new Error(`Sentinel-1 annotation ${response.status}: ${url}`);
+  const source=s3ToHttps(url);
+  if(!XML_CACHE.has(source))XML_CACHE.set(source,(async()=>{
+    const response=await fetch(supportTransportUrl(source,'source'),{signal,headers:{accept:'application/xml,text/xml,text/plain,*/*'}});
+    if(!response.ok)throw new Error(`Sentinel-1 support asset ${response.status}: ${source}`);
     return response.text();
   })());
-  return XML_CACHE.get(url);
+  return XML_CACHE.get(source);
 }
 
 export async function fetchSentinel1ItemDetail(id,signal){
   if(!id)throw new Error('Sentinel-1 item id is required');
   if(!DETAIL_CACHE.has(id))DETAIL_CACHE.set(id,(async()=>{
-    const response=await fetch(`${EARTH_SEARCH_ITEM}${encodeURIComponent(id)}`,{headers:{accept:'application/geo+json,application/json'},signal});
+    const base=origin();
+    const url=base?`${base.replace(/\/$/,'')}/api/stac/item?id=${encodeURIComponent(id)}`:`${EARTH_SEARCH_ITEM}${encodeURIComponent(id)}`;
+    const response=await fetch(url,{headers:{accept:'application/geo+json,application/json'},signal});
     if(!response.ok)throw new Error(`Earth Search item ${response.status}: ${id}`);
     return response.json();
   })());
@@ -63,7 +75,6 @@ function xmlDocument(text){
   if(error)throw new Error(`Sentinel-1 XML parse error: ${error.textContent?.slice(0,160)}`);
   return doc;
 }
-
 function textOf(node,tag){return node?.querySelector(tag)?.textContent?.trim()??null;}
 function numbers(text){return String(text||'').trim().split(/\s+/).filter(Boolean).map(Number).filter(Number.isFinite);}
 
@@ -113,15 +124,13 @@ function unwrapLon(lon,reference){
   while(x-r<-180)x+=360;
   return x;
 }
-
 function bilinear(c00,c10,c01,c11,u,v){return c00*(1-u)*(1-v)+c10*u*(1-v)+c01*(1-u)*v+c11*u*v;}
-
 function solveCell(targetLon,targetLat,p00,p10,p01,p11){
   const ref=targetLon;
   const L=[p00,p10,p01,p11].map(p=>unwrapLon(p.longitude,ref));
   const T=unwrapLon(targetLon,ref);
   let u=.5,v=.5;
-  for(let iter=0;iter<12;iter++){
+  for(let iter=0;iter<16;iter++){
     const lon=bilinear(L[0],L[1],L[2],L[3],u,v);
     const lat=bilinear(p00.latitude,p10.latitude,p01.latitude,p11.latitude,u,v);
     const f1=lon-T,f2=lat-targetLat;
@@ -134,7 +143,7 @@ function solveCell(targetLon,targetLat,p00,p10,p01,p11){
     const du=(f1*dvLat-f2*dvLon)/det;
     const dv=(duLon*f2-duLat*f1)/det;
     u-=du;v-=dv;
-    if(Math.abs(du)+Math.abs(dv)<1e-10)break;
+    if(Math.abs(du)+Math.abs(dv)<1e-11)break;
   }
   const lon=bilinear(L[0],L[1],L[2],L[3],u,v);
   const lat=bilinear(p00.latitude,p10.latitude,p01.latitude,p11.latitude,u,v);
@@ -176,7 +185,6 @@ function interp1(xs,ys,x){
   const t=(x-xs[lo])/span;
   return ys[lo]+(ys[hi]-ys[lo])*t;
 }
-
 function vectorValue(vector,pixel,kind){return interp1(vector.pixel,vector[kind],pixel);}
 
 export function calibrationLutAt(calibration,line,pixel,kind='sigmaNought'){
@@ -194,6 +202,14 @@ export function calibrationLutAt(calibration,line,pixel,kind='sigmaNought'){
   return a+(b-a)*t;
 }
 
+async function productBundle(record,polarization,signal){
+  const detail=await fetchSentinel1ItemDetail(record.id,signal);
+  const assets=sentinel1ProductAssets(detail,polarization);
+  if(!assets.measurement||!assets.calibration||!assets.product)throw new Error(`Sentinel-1 ${record.id} lacks measurement/calibration/product assets for ${String(polarization).toUpperCase()}`);
+  const [calText,productText]=await Promise.all([fetchText(assets.calibration.href,signal),fetchText(assets.product.href,signal)]);
+  return {detail,assets,calibration:parseCalibrationXml(calText),product:parseProductXml(productText)};
+}
+
 async function readDn(url,pixel,line){
   const {image}=await openMeasurement(url);
   const width=image.getWidth(),height=image.getHeight();
@@ -206,11 +222,7 @@ async function readDn(url,pixel,line){
 }
 
 export async function sampleCalibratedSentinel1(record,lon,lat,{polarization='vv',quantity='sigmaNought',signal}={}){
-  const detail=await fetchSentinel1ItemDetail(record.id,signal);
-  const assets=sentinel1ProductAssets(detail,polarization);
-  if(!assets.measurement||!assets.calibration||!assets.product)throw new Error(`Sentinel-1 ${record.id} lacks measurement/calibration/product assets for ${polarization.toUpperCase()}`);
-  const [calText,productText]=await Promise.all([fetchText(assets.calibration.href,signal),fetchText(assets.product.href,signal)]);
-  const calibration=parseCalibrationXml(calText),product=parseProductXml(productText);
+  const {detail,assets,calibration,product}=await productBundle(record,polarization,signal);
   const geolocation=geolocateToPixel(product,lon,lat);
   if(!Number.isFinite(geolocation.pixel)||!Number.isFinite(geolocation.line))return {state:'GEOLOCATION_UNRESOLVED',id:record.id,geolocation};
   const raw=await readDn(assets.measurement.href,geolocation.pixel,geolocation.line);
@@ -219,30 +231,93 @@ export async function sampleCalibratedSentinel1(record,lon,lat,{polarization='vv
   if(!Number.isFinite(lut)||lut===0)return {state:'CALIBRATION_LUT_UNRESOLVED',id:record.id,geolocation,raw,lut};
   const value=(raw.dn*raw.dn)/(lut*lut);
   const db=value>0?10*Math.log10(value):null;
-  const thermalNoiseCorrectionPerformed=product.thermalNoiseCorrectionPerformed;
   const quality=geolocation.state==='GEOLOCATED_BILINEAR_GCP'?'PRODUCT_GCP_BILINEAR':'NEAREST_GCP_FALLBACK';
   return {
-    state:'CALIBRATED_SENTINEL1_GRD_SAMPLE',
-    id:record.id,
-    startTime:record.startTime,
-    platform:record.platform,
-    polarization:String(polarization).toUpperCase(),
-    quantity,
-    value,
-    db,
-    measured:true,
-    inferred:false,
-    dn:raw.dn,
-    lut,
-    pixel:[raw.x,raw.y],
-    fractionalPixel:[geolocation.pixel,geolocation.line],
+    state:'CALIBRATED_SENTINEL1_GRD_SAMPLE',id:record.id,startTime:record.startTime,platform:record.platform,
+    polarization:String(polarization).toUpperCase(),quantity,value,db,measured:true,inferred:false,dn:raw.dn,lut,
+    pixel:[raw.x,raw.y],fractionalPixel:[geolocation.pixel,geolocation.line],
     geolocation:{method:geolocation.state,residualDeg:geolocation.residualDeg,quality},
-    processing:{thermalNoiseCorrectionPerformed,terrainFlattened:false,localIncidenceAngleCorrected:false},
+    processing:{thermalNoiseCorrectionPerformed:product.thermalNoiseCorrectionPerformed,terrainFlattened:false,localIncidenceAngleCorrected:false},
     product:{rangePixelSpacing:product.rangePixelSpacing,azimuthPixelSpacing:product.azimuthPixelSpacing,incidenceAngleMidSwath:product.incidenceAngleMidSwath,orbitSource:product.orbitSource||detail.properties?.['s1:orbit_source']||null},
-    evidence:{grade:quality==='PRODUCT_GCP_BILINEAR'?'A-':'B',reason:'Actual GRD DN sampled from measurement TIFF and radiometrically calibrated with the product calibration LUT; terrain flattening/local-incidence correction is not applied.'},
+    evidence:{grade:quality==='PRODUCT_GCP_BILINEAR'?'A-':'B',reason:'Actual GRD DN sampled from the measurement TIFF and radiometrically calibrated with the product calibration LUT. Terrain flattening/local-incidence correction is not applied.'},
     provenance:{measurement:assets.measurement.sourceHref,calibration:assets.calibration.sourceHref,product:assets.product.sourceHref,noise:assets.noise?.sourceHref||null,stacItem:`${EARTH_SEARCH_ITEM}${encodeURIComponent(record.id)}`},
     boundary:'Radiometrically calibrated ellipsoid-referenced Sentinel-1 Level-1 GRD backscatter. Not radiometric terrain correction, not SLC phase, not InSAR displacement.'
   };
+}
+
+function percentile(values,p){
+  const a=values.filter(Number.isFinite).sort((x,y)=>x-y);
+  if(!a.length)return null;
+  const q=(a.length-1)*p,lo=Math.floor(q),hi=Math.ceil(q);
+  return lo===hi?a[lo]:a[lo]+(a[hi]-a[lo])*(q-lo);
+}
+function displayByte(db,lo,hi){
+  if(!Number.isFinite(db)||!Number.isFinite(lo)||!Number.isFinite(hi)||hi<=lo)return 0;
+  const t=Math.max(0,Math.min(1,(db-lo)/(hi-lo)));
+  return Math.round(255*Math.pow(t,.78));
+}
+
+export async function calibratedTargetPatch(record,lon,lat,{polarization='vv',quantity='sigmaNought',radiusPixels=128,signal,onStage}={}){
+  onStage?.('LOAD_PRODUCT_ANNOTATION');
+  const {detail,assets,calibration,product}=await productBundle(record,polarization,signal);
+  onStage?.('INVERT_PRODUCT_GCP_GRID');
+  const geolocation=geolocateToPixel(product,lon,lat);
+  if(!Number.isFinite(geolocation.pixel)||!Number.isFinite(geolocation.line))throw new Error('Selected target could not be bound to the Sentinel-1 product geolocation grid.');
+  const {image}=await openMeasurement(assets.measurement.href);
+  const width=image.getWidth(),height=image.getHeight();
+  const r=Math.max(32,Math.min(256,Math.round(radiusPixels)));
+  const cx=Math.max(0,Math.min(width-1,Math.round(geolocation.pixel))),cy=Math.max(0,Math.min(height-1,Math.round(geolocation.line)));
+  const x0=Math.max(0,cx-r),y0=Math.max(0,cy-r),x1=Math.min(width,cx+r+1),y1=Math.min(height,cy+r+1);
+  onStage?.('READ_TARGET_SOURCE_BLOCKS');
+  const raw=await image.readRasters({window:[x0,y0,x1,y1],samples:[0],interleave:true});
+  const patchWidth=x1-x0,patchHeight=y1-y0;
+  const nodataText=image.getGDALNoData?.(),nodata=nodataText==null?0:Number(nodataText);
+  const db=new Float32Array(raw.length),power=new Float32Array(raw.length);
+  const valid=[];
+  onStage?.('APPLY_PRODUCT_CALIBRATION_LUT');
+  for(let py=0,k=0;py<patchHeight;py++){
+    const line=y0+py;
+    for(let px=0;px<patchWidth;px++,k++){
+      const dn=Number(raw[k]);
+      if(!Number.isFinite(dn)||dn===nodata){db[k]=NaN;power[k]=NaN;continue;}
+      const lut=calibrationLutAt(calibration,line,x0+px,quantity);
+      if(!Number.isFinite(lut)||lut===0){db[k]=NaN;power[k]=NaN;continue;}
+      const v=(dn*dn)/(lut*lut);
+      power[k]=v;
+      db[k]=v>0?10*Math.log10(v):NaN;
+      if(Number.isFinite(db[k]))valid.push(db[k]);
+    }
+  }
+  const p02=percentile(valid,.02),p50=percentile(valid,.5),p98=percentile(valid,.98);
+  const quality=geolocation.state==='GEOLOCATED_BILINEAR_GCP'?'PRODUCT_GCP_BILINEAR':'NEAREST_GCP_FALLBACK';
+  onStage?.('READY');
+  return {
+    state:'CALIBRATED_SENTINEL1_TARGET_PATCH',id:record.id,startTime:record.startTime,platform:record.platform,
+    target:{lon:Number(lon),lat:Number(lat)},polarization:String(polarization).toUpperCase(),quantity,
+    sourceWindow:[x0,y0,x1,y1],width:patchWidth,height:patchHeight,centerPixel:[cx,cy],
+    geolocation:{method:geolocation.state,residualDeg:geolocation.residualDeg,quality,fractionalPixel:[geolocation.pixel,geolocation.line]},
+    rawDn:raw,power,db,stats:{validCount:valid.length,p02,p50,p98},
+    processing:{thermalNoiseCorrectionPerformed:product.thermalNoiseCorrectionPerformed,radiometricCalibration:'PRODUCT_LUT',terrainFlattened:false,localIncidenceAngleCorrected:false},
+    product:{rangePixelSpacing:product.rangePixelSpacing,azimuthPixelSpacing:product.azimuthPixelSpacing,incidenceAngleMidSwath:product.incidenceAngleMidSwath,orbitSource:product.orbitSource||detail.properties?.['s1:orbit_source']||null},
+    evidence:{grade:quality==='PRODUCT_GCP_BILINEAR'?'A-':'B',measured:true,inferred:false},
+    provenance:{measurement:assets.measurement.sourceHref,calibration:assets.calibration.sourceHref,product:assets.product.sourceHref,noise:assets.noise?.sourceHref||null,stacItem:`${EARTH_SEARCH_ITEM}${encodeURIComponent(record.id)}`},
+    boundary:'Target-centered actual Sentinel-1 GRD pixels radiometrically calibrated by the product LUT and geolocated by the product grid. Not RTC, not SLC phase, not InSAR displacement.'
+  };
+}
+
+export function paintCalibratedPatch(patch,canvas){
+  const {width,height,db,stats}=patch;
+  canvas.width=width;canvas.height=height;
+  const ctx=canvas.getContext('2d'),image=ctx.createImageData(width,height);
+  const lo=stats.p02??-30,hi=stats.p98??0;
+  for(let i=0;i<db.length;i++){
+    const v=db[i],j=i*4;
+    if(!Number.isFinite(v)){image.data[j+3]=0;continue;}
+    const b=displayByte(v,lo,hi);
+    image.data[j]=b;image.data[j+1]=Math.min(255,Math.round(b*1.02));image.data[j+2]=Math.min(255,Math.round(b*1.08));image.data[j+3]=255;
+  }
+  ctx.putImageData(image,0,0);
+  return {displayRangeDb:[lo,hi],displayTransform:'percentile dB stretch only'};
 }
 
 export async function calibratedTemporalStack(records,lon,lat,{polarization='vv',quantity='sigmaNought',maxScenes=96,onProgress,signal}={}){
