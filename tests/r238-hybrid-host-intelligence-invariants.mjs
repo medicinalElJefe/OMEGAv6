@@ -29,7 +29,10 @@ for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","HOST_PROFILE_SCHEMA='O
 for(const token of ["RETURNED_HOST_PROOF","AWAITING_RETURNED_PROFILE","intelligenceState==='RETURNED_HOST_PROOF'","R141 exact return closure","Proof source: selected authenticated Hybrid device","NOT YET RETURNED"])must(liveVerifier.includes(token),`R239.3 live verifier missing conditional host-proof truth token ${token}`);
 must(liveVerifier.includes("intelligenceState!=='AWAITING_RETURNED_PROFILE'"),'R239.3 no-device live state must require awaiting-returned-profile rather than returned proof');
 must(liveVerifier.includes("if(text.includes('Proof source: selected authenticated Hybrid device'))throw new Error"),'R239.3 awaiting state must reject a returned-proof source claim');
-must(!/for\(const token of \[[^\]]*'R141 exact return closure'[^\]]*\]\)if\(!text\.includes\(token\)\)/s.test(liveVerifier),'R239.3 must not require R141 returned-proof footer unconditionally');
+const returnedBranch=liveVerifier.indexOf("if(intelligenceState==='RETURNED_HOST_PROOF'){");
+const closureCheck=liveVerifier.indexOf("'R141 exact return closure'",returnedBranch);
+const awaitingElse=liveVerifier.indexOf("}else{",returnedBranch);
+must(returnedBranch>=0&&closureCheck>returnedBranch&&awaitingElse>closureCheck,'R239.3 R141 returned-proof footer check must be scoped inside RETURNED_HOST_PROOF before the awaiting branch');
 
 must(sha(base)==='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046','R238 must leave the immutable R205 base executor byte-identical');
 must(wrapper.includes("op=='DESKTOP_HEALTH'")&&wrapper.includes("result['hostProfileR238']=host_profile")&&wrapper.includes("result['macroInventoryR238']=macro_inventory"),'R238 must enrich the existing DESKTOP_HEALTH returned proof instead of creating an ungoverned telemetry channel');
