@@ -76,7 +76,7 @@ export function rolePacketsForCellR242(cell){
     invariants:[...R242_INVARIANT_CARRY],provenance:cell.provenance,evidenceClass:cell.evidenceClass,sigma:0,
     transformationHistory:[...cell.transformationHistory,'R242_WOVEN_PACKETIZE'],executionIdentity:null,proofIdentity:null,
     authorityBoundary:{planning:'R242',singleSourceMutation:'R240',dispatch:'R147',exactReturn:'R141',durableHistory:'R146',canonAdmission:'R125'},
-    sourceMutationAuthorized:false,dispatchAuthorized:false,canonAdmission:false
+    sourceMutationAuthorized:false,dispatchAuthorized:false,canonicalAdmission:false
   }));
 }
 
