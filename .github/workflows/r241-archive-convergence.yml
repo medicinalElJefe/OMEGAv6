@@ -49,6 +49,9 @@ jobs:
           node tests/r248-relative-contribution-fabric-invariants.mjs
           node tests/r248-operational-calculus-governor-invariants.mjs
 
+      - name: Prove R249 operational convergence controls real work without new authority
+        run: node tests/r249-operational-convergence-invariants.mjs
+
       - name: Prove R245 shared R170 and CLOUD-01 governed self-build convergence
         run: node tests/r245-governed-selfbuild-convergence-invariants.mjs
 
@@ -113,20 +116,20 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + R239/R242 Navigation + R245 Full Overall Canon + R248 Contribution + Operational Calculus'
+            echo '## R241 Archive Convergence + R239/R242 Navigation + R245 Full Overall Canon + R248/R249 Operational Calculus'
             echo "- Candidate: $GITHUB_SHA"
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
             echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
             echo '- R245 correlates runtime, production receipt, Hybrid, capability and governed self-build truth into one read-only observation epoch.'
-            echo '- R248 reuses that exact epoch and factors contributors across capability, authority, provenance, freshness, latency, reliability, resource, contradiction, execution, continuity, observability and admission dimensions.'
-            echo '- R248 structural profiles are comparison weights, not fabricated measurements; live contributor state remains PROVED, AVAILABLE_UNPROVED or UNOBSERVED from returned evidence.'
-            echo '- R248 relation, contradiction and residual ledgers preserve specialized contribution without collapsing authority boundaries.'
-            echo '- R248 operational calculus derives CΩ/Φ/q/Λ/evidence/uncertainty/scar only from current software, Hybrid, resource and job evidence; it reuses the established R123 STAY/TURN/ESCALATE decision law.'
-            echo '- R248 now governs the real R247→R153 mission objective and bounded recursion budget instead of leaving calculus as a display-only model; it creates no executor or dispatch path.'
+            echo '- R248 factors contributors and derives CΩ/Φ/q/Λ/evidence/uncertainty/scar from current returned software/Hybrid/resource/job evidence.'
+            echo '- R248 governs the real R247→R153 mission objective and recursion budget; R249 now carries the same law into actual first-cycle step sequence and autonomous planning width.'
+            echo '- R249 STAY preserves validated order; TURN places evidence/cause work before downstream verification; ESCALATE permits an evidence-only first cycle and holds source mutation until returned proof.'
+            echo '- R249 narrows the R170/CLOUD-01 planning frontier before both R240 and R243 evaluate it, so parallel planning adapts without creating parallel source mutation or selection divergence.'
+            echo '- R249 common kernel, invariant carry, residual pressure, future plasticity and signed orientation are software-operational scheduling values, not physical measurements.'
             echo '- R245 exposes 7 Canon axes, 7 permanent strata, 12 logical organs and 12→144→1,728→20,736→248,832 address/scheduling levels without physical-dimension inflation.'
             echo '- R245 desktop/mobile built-browser proof requires the actual System Atlas surface, preserves the R153 executor and proves manual observation refresh remains non-mutating.'
-            echo '- R245/R248 delegate mutation/execution to existing Build Out/R153/Hybrid authorities and own no production writer or Canon admission path.'
-            echo '- R245 also binds R170 and CLOUD-01 to one canonical R164 residual policy, one R240/R243 candidate-selection law and one deterministic SG001–SG005 generator.'
+            echo '- R245/R248/R249 delegate mutation/execution to existing Build Out/R153/Hybrid authorities and own no production writer or Canon admission path.'
+            echo '- R245 binds R170 and CLOUD-01 to one canonical R164 residual policy, one R240/R243 candidate-selection law and one deterministic SG001–SG005 generator.'
             echo '- The autonomous one-open-candidate fence covers both selfbuild/r170-* and cloud/evolution-* namespaces; the two machines may not independently advance competing source proposals.'
             echo '- R241 PR concurrency cancels superseded candidate proofs so expensive browser work follows the exact current head instead of serializing stale heads.'
             echo '- Exact route identity outranks prefix/token/metadata search; ambiguity and empty results carry explicit residuals rather than fabricated destinations.'
@@ -134,8 +137,8 @@ jobs:
             echo '- Gradient/curl/variance are display proxies, not physical measurement claims.'
             echo '- Typed cognition is read-only through proposal; permission/execution/return/Canon remain separately gated.'
             echo '- R239 navigation remains converged in this proof plane: six workspaces, complete 44-route registry, immediate aria-hidden/inert close, ancestor-aware visible-canvas sanity, exhaustive route activation, and mobile containment.'
-            echo '- No 25th workflow authority is introduced; R248 proof is converged into this existing R241 proof plane and active workflow topology remains within the R170 governed bound.'
-            echo '- R147 dispatch, R146 durable history, R141 exact return and R125 sole CanonState admission remain unchanged.'
+            echo '- No 25th workflow authority is introduced; R249 proof is converged into this existing R241 proof plane and active workflow topology remains within the R170 governed bound.'
+            echo '- R153 mutation, R147 dispatch, R146 durable history, R141 exact return, R240 source promotion and R125 sole CanonState admission remain unchanged.'
             echo '- R201/R203 remain retired.'
             echo '- PR live proof binds to the exact SHA actually served by the canonical Worker; it does not compare against a moving Git ref.'
             echo '- This workflow is pull-request/manual proof-only; it has no main push trigger and no deployment step; ci.yml remains the canonical production writer.'
