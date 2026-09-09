@@ -62,16 +62,32 @@ jobs:
           curl -fsS http://127.0.0.1:4173/ >/dev/null || { cat /tmp/omega-r241-vite.log; exit 1; }
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r241-archive-convergence-browser-e2e.mjs
 
-      - name: Prove R240 deployed verifier repair against exact current base
+      - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'pull_request'
         shell: bash
         env:
           OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
         run: |
-          git fetch origin main --no-tags
-          BASE_SHA="$(git rev-parse origin/main)"
-          echo "R241 live repair proof targets exact current main $BASE_SHA"
-          OMEGA_PROMOTED_SHA="$BASE_SHA" node scripts/verify_live_hybrid_command_authority_r237.mjs
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            SERVED_SHA="$(node - <<'NODE'
+          const base=(process.env.OMEGA_PUBLIC_URL||'').replace(/\/$/,'');
+          const response=await fetch(base+'/omega-build-receipt.json',{headers:{'cache-control':'no-cache'}});
+          if(!response.ok)throw new Error(`build receipt HTTP ${response.status}`);
+          const body=await response.json();
+          const sha=body?.promotion?.promotedMergeSha||body?.source?.sha||'';
+          if(!/^[0-9a-f]{40}$/i.test(sha))throw new Error(`invalid served SHA ${sha||'NONE'}`);
+          process.stdout.write(sha);
+          NODE
+          )"
+            echo "R241 live semantic proof attempt $attempt targets exact served runtime $SERVED_SHA"
+            if OMEGA_PROMOTED_SHA="$SERVED_SHA" node scripts/verify_live_hybrid_command_authority_r237.mjs; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then sleep 2; fi
+          done
+          echo 'R241 could not obtain one internally consistent exact served-runtime semantic proof after 3 bounded attempts.' >&2
+          exit 1
 
       - name: Summarize authority boundary
         if: always()
@@ -86,5 +102,6 @@ jobs:
             echo '- Typed cognition is read-only through proposal; permission/execution/return/Canon remain separately gated.'
             echo '- R147 dispatch, R146 durable history, R141 exact return and R125 sole CanonState admission remain unchanged.'
             echo '- R201/R203 remain retired.'
+            echo '- PR live proof binds to the exact SHA actually served by the canonical Worker; it does not compare against a moving Git ref.'
             echo '- R241 is pull-request/manual proof-only; it has no main push trigger and no deployment step; ci.yml remains the canonical production writer.'
           } >> "$GITHUB_STEP_SUMMARY"
