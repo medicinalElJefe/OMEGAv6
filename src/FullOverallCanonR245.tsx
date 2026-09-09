@@ -3,6 +3,7 @@ import {Activity,BrainCircuit,CloudCog,Cpu,Database,GitBranch,Layers3,RefreshCw,
 import {api} from './platformAdapter';
 import {wholeSystemConvergenceManifestR155} from './system/wholeSystemConvergenceR155.js';
 import {compileFullOverallCanonR245} from './system/fullOverallCanonR245.js';
+import ContributionFabricR248 from './ContributionFabricR248';
 import './fullOverallCanonR245.css';
 
 type RawObservation={
@@ -93,6 +94,8 @@ export default function FullOverallCanonR245({onNavigate}:{onNavigate:(name:stri
    <article className={canon.source.capabilities.admittedOwners?'pass':'hold'}><Layers3/><span>CAPABILITY FAMILIES</span><b>{canon.source.capabilities.familyCount} CURRENT FAMILIES</b><small>{canon.source.capabilities.admittedOwners} admitted owners · {canon.source.capabilities.proofGated} proof-gated · {canon.source.capabilities.integrationTargets} targets</small></article>
    <article className={errors.length?'hold':'pass'}><ShieldCheck/><span>OBSERVATION CLOSURE</span><b>{errors.length?`${SOURCES.length-errors.length}/${SOURCES.length} RETURNED`:`${SOURCES.length}/${SOURCES.length} RETURNED`}</b><small>{errors.length?errors.map(x=>x.source).join(', ')+' retained from prior good epoch where available':'missing evidence was not fabricated'}</small></article>
   </div>
+
+  <ContributionFabricR248 canon={canon} raw={raw} errors={errors} observedAt={observedAt} onNavigate={onNavigate}/>
 
   <section className='r245-axis-strip' aria-label='Full Overall Canon axes'>
    {canon.axes.map((axis:string,index:number)=><div key={axis}><code>{String(index+1).padStart(2,'0')}</code><b>{axis}</b></div>)}
