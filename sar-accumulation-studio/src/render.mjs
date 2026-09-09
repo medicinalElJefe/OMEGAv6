@@ -23,6 +23,8 @@ export class WorldRenderer {
     this.baseImage = null;
     this.baseMeta = null;
     this.baseOpacity = .58;
+    this._lastSelectionAt = 0;
+    this._lastPointerDownAt = 0;
     this._wire();
     new ResizeObserver(() => this.resize()).observe(canvas);
     this.resize();
@@ -36,7 +38,7 @@ export class WorldRenderer {
     this.ctx.setTransform(dpr,0,0,dpr,0,0);
     this.w = rect.width; this.h = rect.height;
     this.redraw?.();
-    this.onViewChange?.(this.viewBounds());
+    this._notifyView();
   }
 
   viewBounds(){
@@ -52,7 +54,7 @@ export class WorldRenderer {
     this.view.centerLon=wrapLon(Number(lon));
     this.view.centerLat=Math.max(-85,Math.min(85,Number(lat)));
     this.view.scale=Math.max(1,Math.min(24,Number(scale)||8));
-    this.redraw?.();this.onViewChange?.(this.viewBounds());
+    this.redraw?.();this._notifyView();
   }
 
   async setBaseImage(url, meta=null){
@@ -141,10 +143,89 @@ export class WorldRenderer {
     }
   }
 
+  _dispatch(name,detail){this.canvas.dispatchEvent(new CustomEvent(name,{detail,bubbles:false}));}
+
+  _notifyView(){
+    const detail={centerLon:this.view.centerLon,centerLat:this.view.centerLat,scale:this.view.scale,bbox:this.viewBounds()};
+    this._dispatch('omega-map-view',detail);
+    this.onViewChange?.(detail.bbox);
+  }
+
+  _selectClient(clientX,clientY){
+    const rect=this.canvas.getBoundingClientRect();
+    const [lon,lat]=this.unproject(clientX-rect.left,clientY-rect.top);
+    this.point={lon,lat};
+    this._lastSelectionAt=performance.now();
+    this.onPoint?.(this.point);
+    this._dispatch('omega-map-select',this.point);
+    this.redraw?.();
+  }
+
+  _beginDrag(clientX,clientY){
+    this.drag={x:clientX,y:clientY,lon:this.view.centerLon,lat:this.view.centerLat};
+  }
+
+  _moveDrag(clientX,clientY){
+    if(!this.drag)return false;
+    const dx=clientX-this.drag.x,dy=clientY-this.drag.y;
+    this.view.centerLon=wrapLon(this.drag.lon-dx/((this.w/360)*this.view.scale));
+    this.view.centerLat=Math.max(-80,Math.min(80,this.drag.lat+dy/((this.h/180)*this.view.scale)));
+    this.redraw?.();
+    this._dispatch('omega-map-view',{centerLon:this.view.centerLon,centerLat:this.view.centerLat,scale:this.view.scale,bbox:this.viewBounds()});
+    return true;
+  }
+
+  _finishDrag(clientX,clientY,{selectOnClick=true}={}){
+    if(!this.drag)return false;
+    const moved=Math.hypot(clientX-this.drag.x,clientY-this.drag.y)>4;
+    this.drag=null;
+    if(!moved&&selectOnClick)this._selectClient(clientX,clientY);
+    this._notifyView();
+    return moved;
+  }
+
   _wire() {
-    this.canvas.addEventListener('wheel', e => {e.preventDefault();const factor=e.deltaY<0?1.18:1/1.18;this.view.scale=Math.max(1,Math.min(24,this.view.scale*factor));this.redraw?.();clearTimeout(this._viewTimer);this._viewTimer=setTimeout(()=>this.onViewChange?.(this.viewBounds()),120)}, {passive:false});
-    this.canvas.addEventListener('pointerdown', e => {this.canvas.setPointerCapture(e.pointerId);this.drag={x:e.clientX,y:e.clientY,lon:this.view.centerLon,lat:this.view.centerLat}});
-    this.canvas.addEventListener('pointermove', e => {if(!this.drag)return;const dx=e.clientX-this.drag.x,dy=e.clientY-this.drag.y;this.view.centerLon=wrapLon(this.drag.lon-dx/((this.w/360)*this.view.scale));this.view.centerLat=Math.max(-80,Math.min(80,this.drag.lat+dy/((this.h/180)*this.view.scale)));this.redraw?.()});
-    this.canvas.addEventListener('pointerup', e => {const moved=this.drag&&Math.hypot(e.clientX-this.drag.x,e.clientY-this.drag.y)>4;this.drag=null;if(!moved){const rect=this.canvas.getBoundingClientRect();const [lon,lat]=this.unproject(e.clientX-rect.left,e.clientY-rect.top);this.point={lon,lat};this.onPoint?.(this.point);this.redraw?.()}this.onViewChange?.(this.viewBounds())});
+    this.canvas.style.touchAction='none';
+    this.canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      const factor=e.deltaY<0?1.18:1/1.18;
+      this.view.scale=Math.max(1,Math.min(24,this.view.scale*factor));
+      this.redraw?.();
+      clearTimeout(this._viewTimer);
+      this._viewTimer=setTimeout(()=>this._notifyView(),120);
+    }, {passive:false});
+
+    this.canvas.addEventListener('pointerdown', e => {
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      this._lastPointerDownAt=performance.now();
+      this.canvas.setPointerCapture?.(e.pointerId);
+      this._beginDrag(e.clientX,e.clientY);
+    });
+    this.canvas.addEventListener('pointermove', e => this._moveDrag(e.clientX,e.clientY));
+    this.canvas.addEventListener('pointerup', e => this._finishDrag(e.clientX,e.clientY));
+    this.canvas.addEventListener('pointercancel', () => {this.drag=null;this._notifyView()});
+    this.canvas.addEventListener('lostpointercapture', () => {if(this.drag){this.drag=null;this._notifyView()}});
+
+    // Mouse fallback: some embedded/headless/browser paths suppress or partially deliver Pointer Events.
+    this.canvas.addEventListener('mousedown', e => {
+      if(e.button!==0)return;
+      if(performance.now()-this._lastPointerDownAt<80)return;
+      this._beginDrag(e.clientX,e.clientY);
+    });
+    window.addEventListener('mousemove', e => {
+      if(!this.drag)return;
+      this._moveDrag(e.clientX,e.clientY);
+    });
+    window.addEventListener('mouseup', e => {
+      if(e.button!==0||!this.drag)return;
+      this._finishDrag(e.clientX,e.clientY);
+    });
+
+    // Click is the final selection fallback. Pointer-up selection wins when it already succeeded.
+    this.canvas.addEventListener('click', e => {
+      if(performance.now()-this._lastSelectionAt<120)return;
+      this._selectClient(e.clientX,e.clientY);
+      this._notifyView();
+    });
   }
 }
