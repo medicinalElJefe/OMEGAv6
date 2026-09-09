@@ -48,3 +48,4 @@ await import('./r207-r141-native-host-evidence-invariants.mjs');
 await import('./r2074-hybrid-direct-durable-poll-invariants.mjs');
 await import('./advancement-ledger-invariants.mjs');
 await import('./r212-live-host-effects-invariants.mjs');
+await import('./r237-hybrid-command-authority-invariants.mjs');

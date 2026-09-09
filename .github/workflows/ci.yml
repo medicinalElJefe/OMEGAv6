@@ -29,6 +29,8 @@ jobs:
         run: node tests/r2001-deployed-total-experience-proof-invariants.mjs
       - name: Prove R202 operational source-authority convergence
         run: node tests/r202-operational-source-authority-invariants.mjs
+      - name: Prove R237 authenticated Hybrid command authority
+        run: node tests/r237-hybrid-command-authority-invariants.mjs
       - run: npm run check
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
 
@@ -270,6 +272,8 @@ jobs:
           OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r200-current-browser-proof-e2e.mjs
       - name: Verify live R202 operational source-authority surface
         run: node scripts/verify_live_operational_source_authority_r202.mjs
+      - name: Verify live R237 authenticated Hybrid command authority
+        run: node scripts/verify_live_hybrid_command_authority_r237.mjs
       - name: Record deployment receipt
         if: always()
         shell: bash
@@ -288,6 +292,7 @@ jobs:
             echo "- R9 Earth ground source hierarchy: required for deployment PASS"
             echo "- R200.1 exact promoted-SHA desktop/mobile browser total-experience proof: required for deployment PASS"
             echo "- R202 read-only operational source-authority convergence: runtime/cloud/Hybrid/Drive-workbook/archive/empirical provenance boundaries required for deployment PASS"
+            echo "- R237 exact promoted-SHA Hybrid command authority: unauthenticated rotation rejected; authenticated same-session rotation required; old secret revoked; rotated secret preserves device continuity; per-device backpressure and cancellation lifecycle proven; Home→TOOLS→Hybrid browser path proven"
             echo "- R202 archive residual debt remains explicit: AT09 desktop health check PLANNED; AT10 forensic hash ledger PLANNED"
             echo "- Browser proof harness: Playwright 1.63.0 pinned; locked application dependency audit fails at high severity"
             echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"

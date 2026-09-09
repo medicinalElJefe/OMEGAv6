@@ -5,7 +5,8 @@ export const OMEGA_ACCEPTED_PRODUCTION_R117={
  predecessor:OMEGA_ACCEPTED_PRODUCTION_R116.schema,
  authority:'ADDITIVE_PERSISTENT_NON_REGRESSION',
  laws:[
-  {id:'FRESH_PAIR_BOOTSTRAP_BYPASSES_STALE_BROWSER_HEADERS',text:'A user-requested connection repair mints a new bridge secret directly against the browser runtime session in durable runtime state and deliberately does not trust stale x-omega-bridge-id or x-omega-bridge-secret headers during bootstrap.'},
+  {id:'FRESH_UNPAIRED_BOOTSTRAP_REQUIRES_NO_BRIDGE_SECRET',text:'A brand-new browser runtime session may mint its first durable Hybrid credential without a pre-existing bridge secret. Bootstrap itself is not device proof.'},
+  {id:'EXISTING_PAIR_ROTATION_REQUIRES_MATCHING_BRIDGE_PROOF',text:'Once a runtime session already has a durable Hybrid credential, rotation must present that session’s current x-omega-bridge-secret before any replacement secret is generated or stored. A stale or cross-session credential cannot seize the pairing.'},
   {id:'ONE_CLEAN_CONNECTOR_IS_CANONICAL',text:'The ordinary Windows connection path exposes one current R117 connector bound only to https://omegav6.jeffdeweyeljefe.workers.dev. Retired Foundasound launchers and inherited fallback launchers are not part of the normal repair path.'},
   {id:'BOOTSTRAP_IS_NOT_DEVICE_PROOF',text:'Issuing or downloading a fresh credential never sets nativeExecutionClaimed and never becomes PC ONLINE. A current authenticated device heartbeat is still required.'},
   {id:'LIVE_WINDOWS_DIAGNOSTICS',text:'The clean connector prints canonical reachability, Python start, agent validation, authentication, heartbeat and governed poll output directly in the Windows console so failures are visible instead of hidden behind a silent launcher state.'},

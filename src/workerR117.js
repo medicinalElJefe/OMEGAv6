@@ -13,6 +13,8 @@ async function durablePairR117(request,env){
  if(!env?.OMEGA_RUNTIME)return json({ok:false,code:'RUNTIME_STATE_BINDING_UNAVAILABLE'},503);
  const stub=env.OMEGA_RUNTIME.get(env.OMEGA_RUNTIME.idFromName(sid));
  const headers=new Headers({'content-type':'application/json','x-omega-session-id':sid});
+ const currentSecret=text(request.headers.get('x-omega-bridge-secret'));
+ if(currentSecret)headers.set('x-omega-bridge-secret',currentSecret);
  const pairResponse=await stub.fetch(new Request('https://omega-runtime.internal/pair',{method:'POST',headers,body:JSON.stringify({rotate:true})}));
  const pair=await pairResponse.clone().json().catch(()=>({}));
  if(!pairResponse.ok||!pair?.secret)return json({ok:false,code:pair?.code||'PAIR_BOOTSTRAP_FAILED',reply:pair?.reply||'OMEGA could not mint a fresh server-backed Hybrid credential.'},pairResponse.status||503);
@@ -32,7 +34,7 @@ async function durablePairR117(request,env){
   rcwaAgentPath:'/api/federation/rcwa/agent-download?r117=1',
   agentRestartRequired:true,
   nativeExecutionClaimed:false,
-  truthBoundary:'This endpoint rotates a fresh bridge credential directly in durable runtime state and returns it only to the same-origin browser caller. PC ONLINE remains false until a real authenticated host heartbeat arrives.'
+  truthBoundary:'This endpoint creates a fresh bridge credential for an unpaired session or rotates an existing credential only when the caller proves the current bridge secret. PC ONLINE remains false until a real authenticated host heartbeat arrives.'
  });
 }
 
