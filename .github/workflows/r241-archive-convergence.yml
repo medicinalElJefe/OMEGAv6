@@ -44,6 +44,9 @@ jobs:
       - name: Prove R245 Full Overall Canon convergence without a new workflow authority
         run: node tests/r245-full-overall-canon-invariants.mjs
 
+      - name: Prove R245 shared R170 and CLOUD-01 governed self-build convergence
+        run: node tests/r245-governed-selfbuild-convergence-invariants.mjs
+
       - name: Re-prove inherited continuous field and Hybrid command boundaries
         run: |
           node tests/continuous-field-r13-invariants.mjs
@@ -113,6 +116,8 @@ jobs:
             echo '- R245 exposes 7 Canon axes, 7 permanent strata, 12 logical organs and 12→144→1,728→20,736→248,832 address/scheduling levels without physical-dimension inflation.'
             echo '- R245 desktop/mobile built-browser proof requires the actual System Atlas surface, preserves the R153 executor and proves manual observation refresh remains non-mutating.'
             echo '- R245 delegates mutation/execution to existing Build Out/R153/Hybrid authorities and owns no POST/PUT/DELETE, executor, production writer or Canon admission path.'
+            echo '- R245 also binds R170 and CLOUD-01 to one canonical R164 residual policy, one R240/R243 candidate-selection law and one deterministic SG001–SG005 generator.'
+            echo '- The autonomous one-open-candidate fence covers both selfbuild/r170-* and cloud/evolution-* namespaces; the two machines may not independently advance competing source proposals.'
             echo '- R241 PR concurrency cancels superseded candidate proofs so expensive browser work follows the exact current head instead of serializing stale heads.'
             echo '- Exact route identity outranks prefix/token/metadata search; ambiguity and empty results carry explicit residuals rather than fabricated destinations.'
             echo '- Route filaments are source routeNext-derived; neighbor filaments are deterministic display topology.'
