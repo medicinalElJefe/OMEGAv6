@@ -71,6 +71,16 @@ function authorityContributions(record:any,layers?:readonly OmegaLayerR104[]){
  });
 }
 
+export function allModeContributionsR107(record:any,surface?:string){
+ const layers=surface?surfaceLayerBindingR104(surface).layers:undefined;
+ const source=sourceContributions(record,layers),authority=authorityContributions(record,layers),all=[...source,...authority];
+ return{
+  schema:'OMEGA_ALL_MODE_CONTRIBUTIONS_R107',surface:surface||null,layers:layers||null,source,authority,all,
+  availability:{sourceCatalog:ALL_MODES_BOUNDARY.sourceModeEvaluations,canonLenses:ALL_MODES_BOUNDARY.canonAuthorities,totalRegistered:ALL_MODES_BOUNDARY.sourceModeEvaluations+ALL_MODES_BOUNDARY.canonAuthorities},
+  boundary:'All registered OMEGA source modes and canon/calculus lenses are represented. Applicability and weight remain separate from availability; catalog-only or gated rows remain addressable but non-executing.'
+ };
+}
+
 export function globalModeInfluenceR107(record:any):FullModeInfluenceR107{
  const source=sourceContributions(record),authority=authorityContributions(record),families=Object.keys(FAMILY_LAYERS) as ModeExpressionFamilyR82[],channels={} as Record<ModeExpressionFamilyR82,number>;
  for(const family of families){

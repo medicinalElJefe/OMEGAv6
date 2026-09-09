@@ -1,16 +1,16 @@
 {
   "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
-  "revision": "R170.4",
+  "revision": "R170.5-R240",
   "authority": "OMEGAV6",
-  "state": "PRODUCTION_PROVEN_GOVERNED_AUTONOMOUS_PROPOSAL_CONTROL_PLANE",
-  "engineRevision": "R170.2",
+  "state": "GOVERNED_AUTONOMOUS_PROPOSAL_AND_EXACT_SOURCE_PROMOTION_CONTROL_PLANE",
+  "engineRevision": "R170.2+R240",
   "currentCapabilityFloor": "R239",
   "promotedSuccessorContinuity": ["R175", "R176", "R177", "R178", "R179", "R180"],
   "postR180ProofContinuity": ["R200", "R200.1", "R202", "R210", "R223", "R236", "R237", "R238", "R239"],
   "activeWorkflowAuthority": {
     "productionDeploy": ".github/workflows/ci.yml",
     "currentConvergence": ".github/workflows/r170-current-convergence.yml",
-    "autonomousProposal": ".github/workflows/r170-governed-selfbuild.yml",
+    "autonomousProposalAndExactPromotion": ".github/workflows/r170-governed-selfbuild.yml",
     "cloudEvolutionProofAndProvisioning": ".github/workflows/r223-cloudflare-evolution.yml",
     "specializedCore": [
       ".github/workflows/r168-1-rcwa-byte-diagnostic.yml",
@@ -28,7 +28,7 @@
     "autoMergeAllowed": false,
     "focusedInvariantRequired": true,
     "dynamicProofRunner": "scripts/prove_successor_workflow_invariants_r175.mjs",
-    "policy": "Post-R170 successor GitHub workflows may remain active only as read-only proof or explicit workflow_dispatch infrastructure authorities. They may not schedule themselves, push-trigger on main, gain repository write permissions, recursively dispatch workflows, merge PRs, or directly mutate main. R223 CLOUD-01 recurring execution lives in Cloudflare, not GitHub Actions."
+    "policy": "Post-R170 successor workflows remain read-only proof or explicit workflow_dispatch infrastructure authorities. They may not schedule themselves, push-trigger on main, gain repository write permissions, recursively dispatch workflows, merge PRs, or directly mutate main. R240 exact source promotion is confined to the existing R170 governed self-build authority and does not grant merge authority to the R239 resource governor or successor proof workflows. R223 CLOUD-01 recurring execution remains in Cloudflare."
   },
   "historicalWorkflowArchive": {
     "sourceCommitSha": "b4b939552085f3f63297d33d51878c97e3c43c0d",
@@ -36,27 +36,53 @@
     "archivePath": ".github/workflows-archive",
     "preservation": "BYTE_PRESERVED_GIT_ARCHIVE_PLUS_IMMUTABLE_SOURCE_TREE",
     "historicalExecutionAuthority": false,
-    "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and remains independently addressable at the recorded pre-R170 source commit/tree, but is no longer an automatic GitHub Actions execution authority."
+    "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and independently addressable at the recorded source commit/tree, but has no automatic GitHub Actions execution authority."
   },
   "selfBuild": {
     "schedule": "17 * * * *",
     "observationCadence": "HOURLY",
     "expensiveProofMode": "PROPOSE_ONLY",
     "maxAutonomousGenerations": 5,
+    "maxParallelPlanningCells": 12,
     "candidatePolicy": "ONE_CAPSULE_ONE_BRANCH_ONE_PROOF_RECEIPT_ONE_PR",
     "exactProductionHeadRequired": true,
     "productionProofWorkflow": ".github/workflows/ci.yml",
-    "productionFailureMode": "OBSERVE_ONLY",
+    "productionFailureMode": "OBSERVE_ONLY_FORWARD_REPAIR_REQUIRED",
     "directMainMutation": false,
     "autoMerge": false,
     "recursiveTriggerChain": false,
     "highOrCriticalAutoRepair": false,
     "residualAuthority": "R164",
+    "recursiveScheduler": "R240",
     "successorContinuityProof": "scripts/prove_successor_workflow_invariants_r175.mjs",
     "latestExplicitSuccessorProof": "tests/r239-adaptive-hybrid-resource-governor-invariants.mjs",
     "canonicalAdmissionAuthority": "R125",
     "cloudEvolutionMachine": "CLOUD-01",
     "cloudEvolutionHost": "CLOUDFLARE_WORKER"
+  },
+  "selfPromotion": {
+    "revision": "R240",
+    "enabled": true,
+    "scope": "R170_GENERATED_LOW_OR_MEDIUM_RISK_CAPSULES_ONLY",
+    "githubAutoMergeFeature": false,
+    "exactExpectedHeadMergeRequired": true,
+    "exactUnchangedBaseRequired": true,
+    "allowlistedDiffRequired": true,
+    "candidateReceiptRequired": true,
+    "candidateReceiptStatus": "PROVED_PENDING_PR",
+    "allCandidateTestsRequired": true,
+    "residualGateRequired": "PASS",
+    "highOrCriticalResidualPromotion": false,
+    "mergeMethod": "merge",
+    "twoParentMergeRequired": true,
+    "canonicalDeploymentWorkflow": ".github/workflows/ci.yml",
+    "canonicalDeploymentDispatchAllowed": true,
+    "selfWorkflowDispatchAllowed": false,
+    "productionProofRequiredAfterSourceMerge": true,
+    "productionFailureMode": "SOURCE_PROMOTED_BUT_NOT_PRODUCTION_PROVEN__STOP_AND_REQUIRE_FORWARD_REPAIR",
+    "canonStateAdmission": false,
+    "canonicalAdmissionAuthority": "R125",
+    "truthLaw": "generated != proved != source-promoted != deployed != live-verified != Canon-admitted"
   },
   "preservedRuntime": {
     "canonicalWorkerSpine": "R116",
@@ -78,8 +104,9 @@
     "sourceSpatialControlAttestation": "R236_FAIL_CLOSED_INDEPENDENT_TRUST_BOUNDARY",
     "hybridCommandAuthority": "R237_AUTHENTICATED_BOUNDED_NATIVE_CONTROL",
     "hybridHostIntelligence": "R238_RETURNED_RESOURCE_AND_MACRO_INTEGRITY_PROOF",
-    "hybridResourceGovernor": "R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING"
+    "hybridResourceGovernor": "R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING",
+    "recursiveSelfBuildAndExactPromotion": "R240_R164_EVIDENCE_BOUND_SPARSE_FRONTIER_PLUS_EXACT_SOURCE_PROMOTION"
   },
-  "truthLaw": "reachable != writable != executed != returned != verified != promoted != Canon-admitted",
-  "truthBoundary": "R170.4 preserves the bounded self-build source-capsule law while the current capability/proof floor advances through production R236 source-spatial attestation, R237 authenticated Hybrid command authority, R238 selected-host/shared-epoch host intelligence, and candidate R239 pressure-aware Hybrid resource admission. R223 remains the CLOUD-01 autonomous-evolution machine authority and keeps recurring evolution execution off GitHub Actions. CLOUD-01 may inspect exact-current-main production proof and live residual evidence, reconcile already-merged capsule targets, generate one dependency-ready low/medium-risk source candidate on an isolated cloud/evolution branch, open a GitHub PR, and merge only an exact-head candidate whose required GitHub proof stack is fully green on an unchanged exact base. GitHub remains the development/proof portal. Successor proof workflows remain read-only and may not push-trigger on main. Canonical OMEGA production deployment remains exclusively ci.yml. R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable execution-history authority, R141 exact Hybrid return-proof authority, and R201/R203 remain retired tombstones. R237 adds no arbitrary shell, direct source mutation preset, second executor, second production writer, federation authority, scientific-truth authority, or Canon mutation authority. R238 adds no dependency installer or new executor; it wraps the immutable R205 executor, reports resource/dependency truth only through returned DESKTOP_HEALTH step proof, and strengthens selected-host continuity. R239 deterministically derives worker/result budgets and preset admission from that returned R238 profile plus the current selected-host snapshot; it cannot fabricate a missing profile, bypass R237 one-active-job backpressure, infer CUDA/RCWA validity, install dependencies, expand filesystem authority, or mutate CanonState. No PC-online, solver-validity, renderer-validity, federation-closure, empirical, or Canon claim may be synthesized."
+  "truthLaw": "reachable != writable != generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
+  "truthBoundary": "R170.5/R240 preserves every production R239 Hybrid resource-governor boundary while adding evidence-bound recursive source planning and exact self-promotion only for R170-generated low/medium-risk roadmap capsules. R240 ranks the dependency-ready sparse frontier from returned R164 residual evidence plus dependency topology and never infers user-value deficit. Promotion requires an exact production-proven base, residual PASS, committed-candidate re-proof, every declared candidate test true, an allowlisted diff limited to the generated target plus R170 state/receipt artifacts, unchanged base immediately before merge, exact expected PR head, and a normal two-parent merge. GitHub auto-merge remains disabled. After source merge, R170 may dispatch only canonical ci.yml; ci.yml remains the sole canonical production Worker writer and must prove the exact promoted merge. A red production proof stops future autonomous generations and requires forward repair; it is never relabeled successful or auto-rolled back. R239 cannot merge source. R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable history authority, and R141 exact Hybrid return-proof authority."
 }
