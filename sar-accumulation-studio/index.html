@@ -59,10 +59,10 @@
     </section>
 
     <section class="control-card compact-card">
-      <div class="card-kicker">CONTEXT PLANE</div>
-      <label class="inline-check"><input id="gibsEnabled" type="checkbox" checked> NASA GIBS underlay</label>
+      <div class="card-kicker">EARTH SURFACE</div>
+      <label class="inline-check"><input id="gibsEnabled" type="checkbox" checked> NASA GIBS satellite Earth surface</label>
       <label>Layer<select id="gibsLayer"><option value="trueColor">NOAA-21 VIIRS true color</option><option value="trueColor+fires">True color + thermal anomalies</option><option value="night">NOAA-21 VIIRS day/night band</option></select></label>
-      <label>Time<select id="gibsTime"><option value="frame">Current SAR acquisition date</option><option value="today">Most recent calendar date</option></select></label>
+      <label>Time<select id="gibsTime"><option value="frame">Current SAR acquisition date</option><option value="today">Most recent available Earth image</option></select></label>
     </section>
 
     <section class="control-card compact-card">
@@ -74,7 +74,8 @@
     <details class="truth-drawer">
       <summary>Truth boundaries + warnings</summary>
       <div class="truth-body">
-        <p><b>Footprints are not pixels.</b> Catalog geometry proves product coverage/time only.</p>
+        <p><b>Earth imagery is the visual surface, not a SAR measurement.</b> NASA GIBS supplies georegistered Earth context while SAR products remain separately proven.</p>
+        <p><b>Footprints are not pixels.</b> Catalog geometry proves product coverage/time only and is subordinate to the Earth surface.</p>
         <p><b>Raster evidence stays source-bound.</b> Sentinel-1 COG values and NISAR product measurements are not upgraded by visualization.</p>
         <p><b>Derived fields remain derived.</b> Temporal statistics, Atlas estimates and host variables never become observations.</p>
         <ul id="warnings"></ul>
@@ -93,20 +94,20 @@
 
   <section class="workbench">
     <div class="mission-banner">
-      <div><span class="eyebrow">MISSION STATE</span><b>REAL DATA FIRST · VISUALIZATION SECOND · INFERENCE EXPLICIT</b></div>
-      <div class="truth-chain">CATALOG → PRODUCT → RASTER → QA → TEMPORAL STACK / PAIR → PROOF</div>
+      <div><span class="eyebrow">MISSION STATE</span><b>REAL EARTH FIRST · SAR EVIDENCE REGISTERED ON TOP · INFERENCE EXPLICIT</b></div>
+      <div class="truth-chain">EARTH SURFACE → SAR COVERAGE → PRODUCT → RASTER → QA → TEMPORAL STACK / PAIR → PROOF</div>
     </div>
 
     <div class="earth-grid">
       <section class="earth-stage panel">
         <div class="panel-head">
-          <div><span class="eyebrow">PRIMARY INSTRUMENT</span><h2>Earth evidence field</h2></div>
+          <div><span class="eyebrow">PRIMARY INSTRUMENT</span><h2>SAR Earth surface</h2></div>
           <div class="stage-readout"><span>POINT <b id="point">click map</b></span><span>HITS <b id="pointHits">0</b></span></div>
         </div>
         <div class="map-wrap">
           <canvas id="map"></canvas>
           <div class="map-corners"><i></i><i></i><i></i><i></i></div>
-          <div class="map-note">WGS84 evidence plane · drag pan · wheel zoom · click to bind revisit/probe target</div>
+          <div class="map-note">Georegistered Earth satellite surface · SAR footprints/proofs are overlays · drag pan · wheel zoom · click to bind measurement target</div>
           <div class="map-hud">
             <div><span>OBS</span><b id="obsCount">0</b></div>
             <div><span>UTC</span><b id="currentTime">—</b></div>
@@ -121,7 +122,7 @@
             <label>View<select id="mode"><option value="accumulate">Accumulated evidence</option><option value="single">Single acquisition</option></select></label>
             <label>Clock<select id="playbackMode"><option value="event">Event-step</option><option value="temporal">Time-proportional</option></select></label>
             <label>Warp<select id="timeWarp"><option value="3600">1 h / s</option><option value="21600">6 h / s</option><option value="86400" selected>1 d / s</option><option value="604800">7 d / s</option><option value="2592000">30 d / s</option></select></label>
-            <label>Field<select id="visual"><option value="footprints">Chronological depth</option><option value="density">Overlap density</option></select></label>
+            <label>Field<select id="visual"><option value="earth" selected>Earth + SAR evidence</option><option value="footprints">SAR coverage history</option><option value="density">SAR overlap density</option></select></label>
             <label>Rate<input id="speed" type="range" min="50" max="1000" value="720"></label>
             <button id="export" class="secondary">EXPORT PROOF</button>
           </div>
