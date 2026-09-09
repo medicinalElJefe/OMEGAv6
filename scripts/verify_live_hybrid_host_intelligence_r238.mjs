@@ -15,7 +15,7 @@ if(servedSha!==expected)throw new Error(`R238 exact promoted SHA mismatch expect
 const wrapperResponse=await fetch(base+'/omega-hybrid-agent-r141.py',{headers:{'cache-control':'no-cache'}});
 const wrapper=await wrapperResponse.text();
 if(!wrapperResponse.ok)throw new Error(`R238 Hybrid wrapper HTTP ${wrapperResponse.status}`);
-for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'","MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'","EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'",'Get-CimInstance Win32_VideoController','MAX_MACRO_SECONDS_R238=300','MAX_MACRO_COORD_ABS_R238=100000'])if(!wrapper.includes(token))throw new Error(`R238 live wrapper missing ${token}`);
+for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'","MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'","EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'","FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'","'stepProofs'","'resultFingerprintR141':digest",'Get-CimInstance Win32_VideoController','MAX_MACRO_SECONDS_R238=300','MAX_MACRO_COORD_ABS_R238=100000'])if(!wrapper.includes(token))throw new Error(`R238 live wrapper missing ${token}`);
 for(const forbidden of ['Ryzen 7 3700X','RTX 2070 SUPER','32.0 GB','19045.6456','shell=True','pip install','python -m pip'])if(wrapper.includes(forbidden))throw new Error(`R238 live wrapper contains forbidden overclaim/unsafe token ${forbidden}`);
 
 const baseAgentResponse=await fetch(base+'/omega-hybrid-agent-base-r205.py',{headers:{'cache-control':'no-cache'}});
@@ -43,12 +43,14 @@ await hybridEntry.waitFor({state:'visible'});await hybridEntry.click();
 const intelligence=page.locator('[data-r238-host-intelligence]');
 await intelligence.waitFor({state:'visible'});
 const text=await intelligence.innerText();
-for(const token of ['R238 · HYBRID HOST INTELLIGENCE','Use the machine you actually have.','RCWA PYTHON DEPENDENCY','LOCAL MACRO STORE','R141 exact return closure'])if(!text.includes(token))throw new Error(`R238 live browser missing ${token}`);
+for(const token of ['R238 · HYBRID HOST INTELLIGENCE','RCWA PYTHON DEPENDENCY','LOCAL MACRO STORE'])if(!text.includes(token))throw new Error(`R238 live browser missing semantic surface marker ${token}`);
 const selected=await intelligence.getAttribute('data-r238-selected-device');
+const epoch=await intelligence.getAttribute('data-r238-snapshot-epoch');
+if(!epoch||!String(epoch).trim())throw new Error('R238 live browser missing shared-snapshot epoch correlation');
 if(current.length===0){
   if(selected!=='NONE'||!text.includes('DEVICE PROOF REQUIRED'))throw new Error(`R238 live browser should truthfully hold with no current device; selected=${selected}`);
 }else if(!current.some(d=>d.id===selected))throw new Error(`R238 live browser selected device ${selected} is not a current authenticated device`);
 if(pageErrors.length)throw new Error(`R238 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R238 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · immutable R205 base ${baseSha} · R238 R141 proof wrapper served · Hybrid ${status.body.state} · current public devices ${current.length} · live Home→TOOLS→Hybrid host-intelligence surface rendered without cross-authority claims`);
+console.log(`R238 LIVE HOST INTELLIGENCE PASS · exact SHA ${expected} · immutable R205 base ${baseSha} · R141 fingerprint/step-proof contract + R238 proof wrapper served · Hybrid ${status.body.state} · current public devices ${current.length} · shared snapshot epoch ${epoch} · live Home→TOOLS→Hybrid host-intelligence surface rendered without prose-coupled authority claims`);
