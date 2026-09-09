@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
-import {Activity,ArrowRight,Blocks,BrainCircuit,Command,Earth,Eye,Link2,Search,Send,ShieldCheck,Sparkles,Waypoints} from 'lucide-react';
+import {Activity,ArrowRight,Blocks,Command,Earth,Link2,Search,Send,ShieldCheck,Sparkles,Waypoints} from 'lucide-react';
 import {api,localState} from './platformAdapter';
 import {corpusState,decodeAddress,initCorpusPack,type Projection,type ViewMode} from './corpusRuntime';
 import {sourceBackedModeSummary} from './sourceBackedModeRuntimeR21';
@@ -27,7 +27,7 @@ type FederationManifest={schema?:string;canonicalAuthority?:string;nodes?:Federa
 
 const ROLES:OperatorColorRole[]=['ALPHA','BASE','CONSTRUCT','PRUNE','OMEGA'];
 const ROLE_COPY:Record<OperatorColorRole,string>={ALPHA:'seed possibility / phase opening',BASE:'substrate evidence / continuity anchor',CONSTRUCT:'expansion / admitted growth',PRUNE:'inversion / contradiction reduction',OMEGA:'integration / coherent closure'};
-const QUICK=[['Earth','Earth Now',Earth],['Hybrid','Hybrid Link',Link2],['SAI','SAI Lab',BrainCircuit],['Proof','Evidence & Proof',ShieldCheck],['Visual','Visual Instrument',Eye],['Command','Command Center',Command]] as const;
+const QUICK=[['Command','Command Center',Command],['Hybrid','Hybrid Link',Link2],['Earth','Earth Now',Earth],['Proof','Evidence & Proof',ShieldCheck]] as const;
 const HOME_LENS:Record<FieldMode,{projection:Projection;view:ViewMode}>={
  FIELD:{projection:'MANDALA',view:'SOURCE_COLOR'},MATTER:{projection:'LATTICE',view:'SCAR'},TRAVERSAL:{projection:'THREAD',view:'CONTINUITY'},FORECAST:{projection:'THREAD',view:'PHI'},
  RELATIVITY:{projection:'INVERSE',view:'MATH'},INFINITY:{projection:'MANDALA',view:'INVERSE'},SCALE:{projection:'LATTICE',view:'PSC'},CONVERGENCE:{projection:'INVERSE',view:'DECISION'}
@@ -75,19 +75,19 @@ export default function OmegaHomeR71({onEnter}:Props){
  const nativeOnline=Boolean(hybrid?.nativeExecutionClaimed===true&&(hybrid?.authenticatedHeartbeat===true||hybrid?.heartbeatAuthenticated===true||String(hybrid?.connectionState||hybrid?.state||'').toUpperCase()==='PC ONLINE'||String(hybrid?.state||'').toUpperCase()==='VERIFIED_DEVICE_ONLINE'));
  const hybridLabel=nativeOnline?'PC ONLINE':hybrid?.browserCredentialReady||hybrid?.paired?'BROWSER CREDENTIAL READY · PC UNPROVEN':'PC NOT PROVEN ONLINE';
  const federationNodes=new Map((federation?.nodes||[]).map(node=>[node.id,node]));
- const engineState=(id:string)=>id==='omega-v6'?(status?'LIVE':'UNVERIFIED'):id==='omega-sovereign'?(nativeOnline?'PC ONLINE':'DEVICE PROOF REQUIRED'):(federationNodes.get(id)?.availability||'REGISTERED · EXTERNAL GATE');
+ const engineState=(id:string)=>id==='omega-v6'?(status?'LIVE':'UNVERIFIED'):id==='omega-sovereign'?(nativeOnline?'PC ONLINE':'DEVICE_PROOF_REQUIRED'):(federationNodes.get(id)?.availability||'REGISTERED · EXTERNAL GATE');
  const showState=depth==='DEEP'||inspectorTab==='STATE',showOperators=depth==='DEEP'||inspectorTab==='OPERATORS',showTools=depth==='DEEP'||inspectorTab==='TOOLS';
 
- return <main className='r71-home r96-home r132-home' data-color-authority='ALPHA BASE CONSTRUCT PRUNE OMEGA' data-r132-depth={depth}>
+ return <main className='r71-home r96-home r132-home r239-home' data-color-authority='ALPHA BASE CONSTRUCT PRUNE OMEGA' data-r132-depth={depth} data-navigation-revision='R239'>
   <OmegaSideNavigatorR88 onNavigate={enter}/>
   <header className='r96-topbar'>
    <button className='r96-brand' onClick={()=>setDomain('EXPLORE')}><span className='r96-mark'/><span><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild} · ONE CANONICAL RUNTIME</small></span></button>
    <div className='r96-now'><span>NOW</span><b>{record?`STATE ${record.stateId.toLocaleString()}`:'MATERIALIZING'}</b><small>{record?`${record.metrics.decision} · D${coords.d+1} P${coords.p+1} R${coords.r+1} L${coords.l+1}`:'source-bound corpus'}</small></div>
-   <div className='r132-header-tools'><div className='r96-header-actions'><button onClick={()=>openApplications()}><Search/>All 44 applications</button><button onClick={openSoftware}><Blocks/>Complete software system</button></div><div className='r132-depth-toggle' aria-label='OMEGA surface depth'><button className={depth==='FOCUS'?'active':''} onClick={()=>setDepth('FOCUS')}>FOCUS</button><button className={depth==='DEEP'?'active':''} onClick={()=>setDepth('DEEP')}>DEEP</button></div></div>
+   <div className='r132-header-tools'><div className='r96-header-actions'><button aria-label='All tools' onClick={()=>openApplications()}><Search/>All tools</button><button onClick={openSoftware}><Blocks/>System map</button></div><div className='r132-depth-toggle' aria-label='OMEGA surface depth'><button className={depth==='FOCUS'?'active':''} onClick={()=>setDepth('FOCUS')}>FOCUS</button><button className={depth==='DEEP'?'active':''} onClick={()=>setDepth('DEEP')}>DEEP</button></div></div>
   </header>
 
-  <nav className='r96-workspaces' aria-label='OMEGA working contexts'>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} data-role={w.role} onClick={()=>{setDomain(w.id);setInspectorTab('TOOLS')}} style={{'--workspace-color':law?operatorColor(law,w.role,.95):undefined} as React.CSSProperties}><i/><span><b>{w.label}</b><small>{w.copy}</small></span><strong>{w.routes.length}</strong></button>)}</nav>
-  <section className='r132-primary-strip' aria-label={`${activeWorkspace.label} primary tools`}><span>{activeWorkspace.label.toUpperCase()} · PRIMARY</span><div>{primaryRoutes.map(panel=><button key={panel} onClick={()=>enter(panel)}>{panel}</button>)}<button onClick={()=>openApplications(domain)}>ALL {activeWorkspace.routes.length} TOOLS →</button></div></section>
+  <nav className='r96-workspaces' aria-label='OMEGA workspaces'>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} data-role={w.role} onClick={()=>{setDomain(w.id);setInspectorTab('TOOLS')}} style={{'--workspace-color':law?operatorColor(law,w.role,.95):undefined} as React.CSSProperties}><i/><span><b>{w.label}</b><small>{w.copy}</small></span><strong>{w.routes.length}</strong></button>)}</nav>
+  <section className='r132-primary-strip' aria-label={`${activeWorkspace.label} primary tools`}><span>{activeWorkspace.label.toUpperCase()} · START HERE</span><div>{primaryRoutes.map(panel=><button key={panel} onClick={()=>enter(panel)}>{panel}</button>)}<button onClick={()=>openApplications(domain)}>ALL {activeWorkspace.routes.length} TOOLS →</button></div></section>
 
   <section className='r96-engine-spine' aria-label='OMEGA federation engines'>
    {ENGINE_META.map((engine,index)=>{const node=federationNodes.get(engine.id),state=engineState(engine.id),live=state==='LIVE'||state==='PC ONLINE';return <article key={engine.id} className={live?'live':state.includes('REQUIRED')||state.includes('GATE')?'held':''} title={node?.role||engine.action}><span>0{index+1} · {engine.label}</span><b>{engine.action}</b><small><i/>{state}</small></article>})}
@@ -104,17 +104,17 @@ export default function OmegaHomeR71({onEnter}:Props){
    </section>
 
    <aside className='r96-inspector r132-inspector'>
-    <nav className='r132-inspector-tabs' aria-label='Focused inspector'><button className={inspectorTab==='STATE'?'active':''} onClick={()=>setInspectorTab('STATE')}>STATE</button><button className={inspectorTab==='OPERATORS'?'active':''} onClick={()=>setInspectorTab('OPERATORS')}>OPERATORS</button><button className={inspectorTab==='TOOLS'?'active':''} onClick={()=>setInspectorTab('TOOLS')}>TOOLS</button></nav>
+    <nav className='r132-inspector-tabs' aria-label='Focused inspector'><button className={inspectorTab==='STATE'?'active':''} onClick={()=>setInspectorTab('STATE')}>NOW</button><button className={inspectorTab==='OPERATORS'?'active':''} onClick={()=>setInspectorTab('OPERATORS')}>ANALYZE</button><button className={inspectorTab==='TOOLS'?'active':''} onClick={()=>setInspectorTab('TOOLS')}>TOOLS</button></nav>
     {showState&&<section className='r96-state-card'><header><span>CANONICAL PACKET</span><b>{record?record.stateId:'—'}</b></header>{record&&<div><article><span>CΩ</span><b>{fmt(record.metrics.continuity)}</b></article><article><span>Φ</span><b>{fmt(record.metrics.plasticity)}</b></article><article><span>q</span><b>{fmt(record.metrics.contradiction)}</b></article><article><span>Λ</span><b>{fmt(record.metrics.burden)}</b></article><article><span>COHERENCE</span><b>{fmt(unified?.unifiedCoherence)}</b></article><article><span>MODES</span><b>{modes?.appliedCount??0}</b><small>{modes?.gatedCount??0} gated</small></article></div>}</section>}
     {showOperators&&<section className='r96-operator-card'><header><div><span>COLOR RELATIVITY</span><b>Operators</b></div><Sparkles/></header><p>Function changes hue and the strongest lawful point on the admitted route.</p><div>{ROLES.map(role=>{const weight=law?.operatorWeights?.[role]??0;return <button key={role} className={selectedRole===role?'active':''} onClick={()=>targetRole(role)} style={{'--role-color':law?operatorColor(law,role,.95):undefined} as React.CSSProperties}><i/><span><b>{role}</b><small>{ROLE_COPY[role]}</small></span><strong>{Number(weight).toFixed(2)}</strong></button>})}</div></section>}
-    {showTools&&<section className='r96-context-card'><header><div><span>{activeWorkspace.label.toUpperCase()} CONTEXT</span><b>{activeWorkspace.copy}</b></div><button onClick={()=>openApplications(domain)}><Search/>All tools</button></header><div>{activeWorkspace.routes.map(panel=><button key={panel} onClick={()=>enter(panel)}><span>{panel}</span><ArrowRight/></button>)}</div></section>}
-    {showTools&&<section className='r96-quick-card'><header><span>DIRECT</span><small>specialist identity preserved</small></header><div>{QUICK.map(([label,panel,I])=><button key={panel} onClick={()=>enter(panel)}><I/><span><b>{label}</b><small>{panel}</small></span></button>)}</div></section>}
+    {showTools&&<section className='r96-context-card'><header><div><span>{activeWorkspace.label.toUpperCase()} WORKSPACE</span><b>{activeWorkspace.copy}</b></div><button onClick={()=>openApplications(domain)}><Search/>Browse all</button></header><div>{activeWorkspace.routes.map(panel=><button key={panel} onClick={()=>enter(panel)}><span>{panel}</span><ArrowRight/></button>)}</div></section>}
+    {showTools&&<section className='r96-quick-card'><header><span>ALWAYS AVAILABLE</span><small>universal operator destinations</small></header><div>{QUICK.map(([label,panel,I])=><button key={panel} onClick={()=>enter(panel)}><I/><span><b>{label}</b><small>{panel}</small></span></button>)}</div></section>}
    </aside>
   </section>
 
   <section className='r96-progressive'>
-   <details open={showWorkflow} onToggle={e=>setShowWorkflow(e.currentTarget.open)}><summary><span><Waypoints/><b>Operational workflow</b><small>intent → canonical actions → checkpoint → proof</small></span><strong>{showWorkflow?'Close':'Open'}</strong></summary>{record&&<OmegaIntentWorkbenchR85 record={record} address={address} currentPanel='Home' onAddress={setAddress} onNavigate={enter}/>}</details>
-   <details open={showSystemMap} onToggle={e=>setShowSystemMap(e.currentTarget.open)}><summary><span><Blocks/><b>System lineage</b><small>44 application routes · 100 system rows · 24 runtime families · 179 source modes · {CANON_AUTHORITY_COUNT} canon lenses</small></span><strong>{showSystemMap?'Close':'Open'}</strong></summary>{showSystemMap&&<OmegaSystemInventoryR83 compact onNavigate={enter}/>}</details>
+   <details open={showWorkflow} onToggle={e=>setShowWorkflow(e.currentTarget.open)}><summary><span><Waypoints/><b>How work moves</b><small>intent → canonical actions → checkpoint → proof</small></span><strong>{showWorkflow?'Close':'Open'}</strong></summary>{record&&<OmegaIntentWorkbenchR85 record={record} address={address} currentPanel='Home' onAddress={setAddress} onNavigate={enter}/>}</details>
+   <details open={showSystemMap} onToggle={e=>setShowSystemMap(e.currentTarget.open)}><summary><span><Blocks/><b>System map</b><small>44 application routes · 100 system rows · 24 runtime families · 179 source modes · {CANON_AUTHORITY_COUNT} canon lenses</small></span><strong>{showSystemMap?'Close':'Open'}</strong></summary>{showSystemMap&&<OmegaSystemInventoryR83 compact onNavigate={enter}/>}</details>
   </section>
 
   <footer className='r71-truthbar'><span className={status?'ok':'warn'}><Activity/>WORKER {status?'RESPONDING':'UNVERIFIED'}</span><span className={nativeOnline?'ok':'warn'}><Link2/>{hybridLabel}</span><span><ShieldCheck/>Representation shells are model/interface coordinates, not claims of physical dimensions. {OMEGA_EXPERIENCE_LAWS_R132.boundary}</span></footer>
