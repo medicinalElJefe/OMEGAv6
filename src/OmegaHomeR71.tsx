@@ -75,7 +75,7 @@ export default function OmegaHomeR71({onEnter}:Props){
  const nativeOnline=Boolean(hybrid?.nativeExecutionClaimed===true&&(hybrid?.authenticatedHeartbeat===true||hybrid?.heartbeatAuthenticated===true||String(hybrid?.connectionState||hybrid?.state||'').toUpperCase()==='PC ONLINE'||String(hybrid?.state||'').toUpperCase()==='VERIFIED_DEVICE_ONLINE'));
  const hybridLabel=nativeOnline?'PC ONLINE':hybrid?.browserCredentialReady||hybrid?.paired?'BROWSER CREDENTIAL READY · PC UNPROVEN':'PC NOT PROVEN ONLINE';
  const federationNodes=new Map((federation?.nodes||[]).map(node=>[node.id,node]));
- const engineState=(id:string)=>id==='omega-v6'?(status?'LIVE':'UNVERIFIED'):id==='omega-sovereign'?(nativeOnline?'PC ONLINE':'DEVICE PROOF REQUIRED'):(federationNodes.get(id)?.availability||'REGISTERED · EXTERNAL GATE');
+ const engineState=(id:string)=>id==='omega-v6'?(status?'LIVE':'UNVERIFIED'):id==='omega-sovereign'?(nativeOnline?'PC ONLINE':'DEVICE_PROOF_REQUIRED'):(federationNodes.get(id)?.availability||'REGISTERED · EXTERNAL GATE');
  const showState=depth==='DEEP'||inspectorTab==='STATE',showOperators=depth==='DEEP'||inspectorTab==='OPERATORS',showTools=depth==='DEEP'||inspectorTab==='TOOLS';
 
  return <main className='r71-home r96-home r132-home r239-home' data-color-authority='ALPHA BASE CONSTRUCT PRUNE OMEGA' data-r132-depth={depth} data-navigation-revision='R239'>
@@ -83,7 +83,7 @@ export default function OmegaHomeR71({onEnter}:Props){
   <header className='r96-topbar'>
    <button className='r96-brand' onClick={()=>setDomain('EXPLORE')}><span className='r96-mark'/><span><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild} · ONE CANONICAL RUNTIME</small></span></button>
    <div className='r96-now'><span>NOW</span><b>{record?`STATE ${record.stateId.toLocaleString()}`:'MATERIALIZING'}</b><small>{record?`${record.metrics.decision} · D${coords.d+1} P${coords.p+1} R${coords.r+1} L${coords.l+1}`:'source-bound corpus'}</small></div>
-   <div className='r132-header-tools'><div className='r96-header-actions'><button aria-label='All 44 applications' onClick={()=>openApplications()}><Search/>All tools</button><button onClick={openSoftware}><Blocks/>System map</button></div><div className='r132-depth-toggle' aria-label='OMEGA surface depth'><button className={depth==='FOCUS'?'active':''} onClick={()=>setDepth('FOCUS')}>FOCUS</button><button className={depth==='DEEP'?'active':''} onClick={()=>setDepth('DEEP')}>DEEP</button></div></div>
+   <div className='r132-header-tools'><div className='r96-header-actions'><button aria-label='All tools' onClick={()=>openApplications()}><Search/>All tools</button><button onClick={openSoftware}><Blocks/>System map</button></div><div className='r132-depth-toggle' aria-label='OMEGA surface depth'><button className={depth==='FOCUS'?'active':''} onClick={()=>setDepth('FOCUS')}>FOCUS</button><button className={depth==='DEEP'?'active':''} onClick={()=>setDepth('DEEP')}>DEEP</button></div></div>
   </header>
 
   <nav className='r96-workspaces' aria-label='OMEGA workspaces'>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} data-role={w.role} onClick={()=>{setDomain(w.id);setInspectorTab('TOOLS')}} style={{'--workspace-color':law?operatorColor(law,w.role,.95):undefined} as React.CSSProperties}><i/><span><b>{w.label}</b><small>{w.copy}</small></span><strong>{w.routes.length}</strong></button>)}</nav>
