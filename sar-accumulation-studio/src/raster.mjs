@@ -70,13 +70,51 @@ function optionalGeoMetadata(image) {
   };
 }
 
+async function choosePreviewImage(tiff, baseImage, maxWidth, maxHeight) {
+  let count = 1;
+  try { count = Math.max(1, await tiff.getImageCount()); } catch {}
+  const candidates = [];
+  for (let i = 0; i < count; i++) {
+    let image;
+    try { image = i === 0 ? baseImage : await tiff.getImage(i); } catch { continue; }
+    const width = image.getWidth(), height = image.getHeight();
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width < 1 || height < 1) continue;
+    candidates.push({ image, index:i, width, height, area:width * height });
+  }
+  if (!candidates.length) return { image:baseImage, index:0, width:baseImage.getWidth(), height:baseImage.getHeight(), overview:false };
+
+  const targetArea = Math.max(1, maxWidth * maxHeight);
+  const usable = candidates
+    .filter(c => c.width >= Math.min(256,maxWidth) && c.height >= Math.min(256,maxHeight) && c.area <= targetArea * 12)
+    .sort((a,b) => Math.abs(Math.log(a.area / targetArea)) - Math.abs(Math.log(b.area / targetArea)));
+  const selected = usable[0] || candidates.slice().sort((a,b)=>a.area-b.area)[0];
+  return { ...selected, overview:selected.index !== 0 };
+}
+
+function boundedCenterWindow(sourceWidth, sourceHeight, maxSourcePixels = 4_000_000) {
+  if (sourceWidth * sourceHeight <= maxSourcePixels) return null;
+  const aspect = sourceWidth / sourceHeight;
+  const windowHeight = Math.max(256, Math.min(sourceHeight, Math.floor(Math.sqrt(maxSourcePixels / Math.max(aspect,1e-6)))));
+  const windowWidth = Math.max(256, Math.min(sourceWidth, Math.floor(windowHeight * aspect)));
+  const x0 = Math.max(0, Math.floor((sourceWidth - windowWidth) / 2));
+  const y0 = Math.max(0, Math.floor((sourceHeight - windowHeight) / 2));
+  return [x0,y0,Math.min(sourceWidth,x0+windowWidth),Math.min(sourceHeight,y0+windowHeight)];
+}
+
 export async function renderCog(url, canvas, { maxWidth = 1100, maxHeight = 780, gamma = 0.72 } = {}) {
-  const { image } = await openTiff(url);
-  const sourceWidth = image.getWidth(), sourceHeight = image.getHeight();
-  const scale = Math.min(1, maxWidth / sourceWidth, maxHeight / sourceHeight);
-  const width = Math.max(1, Math.round(sourceWidth * scale)), height = Math.max(1, Math.round(sourceHeight * scale));
-  const raster = await image.readRasters({ width, height, samples: [0], interleave: true, resampleMethod: 'bilinear' });
-  const nodataText = image.getGDALNoData?.();
+  const { tiff, image:baseImage } = await openTiff(url);
+  const baseWidth = baseImage.getWidth(), baseHeight = baseImage.getHeight();
+  const selected = await choosePreviewImage(tiff, baseImage, maxWidth, maxHeight);
+  const sourceWidth = selected.width, sourceHeight = selected.height;
+  const previewWindow = selected.overview ? null : boundedCenterWindow(sourceWidth, sourceHeight);
+  const windowWidth = previewWindow ? previewWindow[2]-previewWindow[0] : sourceWidth;
+  const windowHeight = previewWindow ? previewWindow[3]-previewWindow[1] : sourceHeight;
+  const scale = Math.min(1, maxWidth / windowWidth, maxHeight / windowHeight);
+  const width = Math.max(1, Math.round(windowWidth * scale)), height = Math.max(1, Math.round(windowHeight * scale));
+  const readOptions = { width, height, samples:[0], interleave:true, resampleMethod:'bilinear' };
+  if (previewWindow) readOptions.window = previewWindow;
+  const raster = await selected.image.readRasters(readOptions);
+  const nodataText = selected.image.getGDALNoData?.();
   const nodata = nodataText == null ? 0 : Number(nodataText);
   const stats = rasterStats(raster, Number.isFinite(nodata) ? nodata : 0);
   const low = stats.p02 ?? stats.min ?? 0, high = stats.p98 ?? stats.max ?? 1;
@@ -89,9 +127,11 @@ export async function renderCog(url, canvas, { maxWidth = 1100, maxHeight = 780,
     imageData.data[j] = byte; imageData.data[j + 1] = Math.min(255, Math.round(byte * 1.03)); imageData.data[j + 2] = Math.min(255, Math.round(byte * 1.08)); imageData.data[j + 3] = v === nodata ? 0 : 255;
   }
   ctx.putImageData(imageData, 0, 0);
-  const geo = optionalGeoMetadata(image);
+  const geo = optionalGeoMetadata(selected.image);
+  const renderCoverage = selected.overview ? 'FULL_SCENE_OVERVIEW' : previewWindow ? 'BOUNDED_CENTER_WINDOW' : 'FULL_SCENE_BASE_IMAGE';
   return {
-    sourceWidth, sourceHeight, renderedWidth: width, renderedHeight: height,
+    baseWidth, baseHeight, sourceWidth, sourceHeight, renderedWidth: width, renderedHeight: height,
+    imageIndex:selected.index, overview:selected.overview, previewWindow, renderCoverage,
     bbox: geo.bbox, resolution: geo.resolution, geoKeys: geo.geoKeys, affine: geo.affine,
     spatialInterpretation: geo.spatialInterpretation,
     nodata, stats, sourceUrl:url, transportUrl:rasterTransportUrl(url),
