@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: sar-public-r2-browser
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   verify-r2:
