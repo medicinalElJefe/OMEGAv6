@@ -20,7 +20,17 @@ const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].ma
 must(routes.length>0&&new Set(routes).size===routes.length,'shared experience registry must retain unique registered destinations');
 must(registry.includes('INVENTORY_TELEMETRY_NOT_ARCHITECTURE')&&!registry.includes('routes.length===44'),'route count must be telemetry, not an R82 architectural constant');
 must(home.includes('OMEGA_WORKSPACES_R82.map')&&home.includes('OMEGA_FIELD_PROJECTIONS_R82.map'),'Home must consume shared workspace and projection registries');
-must(home.includes('omega-r88-open-navigator')&&nav.includes("placeholder='Search registered OMEGA destinations'"),'Home must delegate complete application search to the one shared navigator');
+must(
+ home.includes('omega-r88-open-navigator')&&
+ nav.includes('ref={searchRef}')&&
+ nav.includes('value={query}')&&
+ nav.includes('onChange={e=>setQuery(e.target.value)}')&&
+ nav.includes("'Search all registered OMEGA applications'")&&
+ nav.includes('rows.map(route=>')&&
+ !nav.includes('rows.slice(')&&
+ nav.includes("setWorkspaceFilter('ALL')"),
+ 'Home must delegate complete unsliced application search to the one shared navigator'
+);
 must(!home.includes('.slice(0,18)')&&!home.includes('.slice(0,10)'),'Home may not bury applications behind arbitrary result slicing');
 must(home.includes('projection.signature')&&home.includes('projection.intent'),'Home must explain the visual law selected by each projection button');
 must(homeCss.includes('.r71-modes')&&homeCss.includes('overflow-x:auto'),'all projection buttons must remain reachable without overlap');
@@ -28,7 +38,7 @@ must(homeCss.includes('.r71-modes')&&homeCss.includes('overflow-x:auto'),'all pr
 must(shell.includes('OmegaSideNavigatorR88')&&nav.includes('workspaceForRouteR82')&&nav.includes('OMEGA_ALL_ROUTES_R82'),'workstation menu must preserve shared route organization as metadata without forcing workspace compartments');
 must(nav.toLowerCase().includes('persistent rail')&&nav.includes('active application remains visible'),'deep historical route reachability must remain explicit in the persistent rail/browser');
 must(nav.includes('rows.map(route=>')&&!nav.includes('rows.slice(')&&nav.includes("setWorkspaceFilter('ALL')"),'all filtered registered routes must remain structurally renderable with an explicit ALL view; navigation polish may not bury the deep route universe behind slicing');
-must(nav.includes("aria-label='Browse all registered OMEGA applications'")&&nav.includes("aria-label={activeWorkspace?`${activeWorkspace.label} OMEGA applications`:'All registered OMEGA applications'}"),'complete application reachability must remain exposed to assistive/browser navigation');
+must(nav.includes("aria-label='Browse all registered OMEGA tools'")&&nav.includes("aria-label={activeWorkspace?`${activeWorkspace.label} OMEGA applications`:'All registered OMEGA applications'}"),'complete application reachability must remain exposed to assistive/browser navigation');
 
 for(const family of ['COHERENCE','FORECAST','PRUNE','RELATIVITY','FLOW','MEMORY','PROOF','TOPOLOGY','COMPRESSION','TRAVERSAL','RECURSION','GOVERNANCE','SCALE','LIGHT','GENERIC'])must(modeRuntime.includes(`'${family}'`),`mode expression family missing ${family}`);
 must(modeRuntime.includes("metadataOnly?'Visual expression is derived only from catalog metadata."),'registry-only mode visuals must remain explicitly non-executed');
@@ -52,4 +62,4 @@ must(surface.includes("record?:any")&&surface.includes("className='r82-surface-v
 must(surfaceCss.includes('.r82-surface-vital')&&!surfaceCss.includes('.r82-surface-vital{position:fixed'),'surface vitality must stay non-overlapping and inside the active panel');
 must(!modeRuntime.match(/physical dimension.*executed/i),'visual mode mapping must not convert representation into physical/execution claims');
 
-console.log(`R82/R210.1 LIVING MODE EXPRESSION PASS · ${routes.length} current registered destinations · complete unsliced persistent navigation reachability · 8 projection grammars · individual mode expressions · state-bound surfaces preserved`);
+console.log(`R82/R239.1 LIVING MODE EXPRESSION PASS · ${routes.length} current registered destinations · one shared structurally-proven unsliced search authority · complete persistent navigation reachability · 8 projection grammars · individual mode expressions · state-bound surfaces preserved`);
