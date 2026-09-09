@@ -112,8 +112,10 @@ jobs:
             echo "::notice title=Cloudflare account discovery::CLOUDFLARE_ACCOUNT_ID is not set; Wrangler will attempt account discovery from the API token."
           fi
       - name: Deploy canonical OMEGA Worker
+        id: deploy_worker
         run: npx wrangler deploy
       - name: Verify canonical public runtime
+        id: live_runtime
         shell: bash
         run: |
           node <<'NODE'
@@ -164,6 +166,7 @@ jobs:
           console.log(`OMEGA R163 public verification PASS: ${base}`);
           NODE
       - name: Verify canonical Hybrid agent download
+        id: hybrid_agent
         shell: bash
         run: |
           node <<'NODE'
@@ -198,8 +201,10 @@ jobs:
           throw new Error(`canonical Hybrid agent verification failed: ${last}`);
           NODE
       - name: Verify Federation Run and canonical RCWA downloads
+        id: federation_rcwa
         run: node scripts/verify_federation_live_r1681.mjs
       - name: Verify R8 Earth evidence and governed Hybrid contracts
+        id: earth_r8
         shell: bash
         run: |
           node <<'NODE'
@@ -234,6 +239,7 @@ jobs:
           console.log('OMEGA R8 PUBLIC RESTORE PASS · Earth evidence envelope + NOAA 9 coverage identities + Hybrid V90 draft/validation');
           NODE
       - name: Verify R9 Earth ground traversal contracts
+        id: earth_r9
         shell: bash
         run: |
           node <<'NODE'
@@ -250,6 +256,7 @@ jobs:
           console.log('OMEGA R9 PUBLIC GROUND PASS · Earth→Region→City→Street→Ground source envelopes verified; unavailable providers allowed without synthetic substitution');
           NODE
       - name: Verify live route-before-generation and AI synthesis
+        id: live_ai
         shell: bash
         run: |
           node <<'NODE'
@@ -272,17 +279,42 @@ jobs:
           console.log(`OMEGA LIVE AI PASS · ${chat.provider} · route ${route.route}`);
           NODE
       - name: Verify deployed R200 total-experience browser on exact promoted SHA
+        id: browser_r200
         shell: bash
         run: |
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
           OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r200-current-browser-proof-e2e.mjs
       - name: Verify live R202 operational source-authority surface
+        id: live_r202
         run: node scripts/verify_live_operational_source_authority_r202.mjs
       - name: Verify live R237 authenticated Hybrid command authority
+        id: live_r237
+        continue-on-error: true
         run: node scripts/verify_live_hybrid_command_authority_r237.mjs
       - name: Verify live R238 Hybrid host intelligence
+        id: live_r238
+        if: always()
+        continue-on-error: true
         run: node scripts/verify_live_hybrid_host_intelligence_r238.mjs
+      - name: Enforce complete Hybrid live-proof closure
+        if: always()
+        shell: bash
+        run: |
+          failed=0
+          if [ "${{ steps.live_r237.outcome }}" != "success" ]; then
+            echo "::error title=R237 LIVE PROOF FAILED::R237 outcome=${{ steps.live_r237.outcome }}"
+            failed=1
+          fi
+          if [ "${{ steps.live_r238.outcome }}" != "success" ]; then
+            echo "::error title=R238 LIVE PROOF FAILED::R238 outcome=${{ steps.live_r238.outcome }}"
+            failed=1
+          fi
+          if [ "$failed" -ne 0 ]; then
+            echo "R240.1 production truth closure FAILED: both R237 and R238 live proofs are independently observable and both are required."
+            exit 1
+          fi
+          echo "R240.1 production truth closure PASS: R237 and R238 live proofs both succeeded."
       - name: Record deployment receipt
         if: always()
         shell: bash
@@ -296,16 +328,19 @@ jobs:
             echo "- Trigger: ${{ github.event_name }}"
             echo "- Verify job: ${{ needs.verify.result }}"
             echo "- Deployment job: ${{ job.status }}"
-            echo "- R163 first-hand canonical core health: required for deployment PASS"
-            echo "- Live AI synthesis: required for deployment PASS"
-            echo "- R8 Earth/NOAA + Hybrid V90 contracts: required for deployment PASS"
-            echo "- R9 Earth ground source hierarchy: required for deployment PASS"
-            echo "- R200.1 exact promoted-SHA desktop/mobile browser total-experience proof: required for deployment PASS"
-            echo "- R202 read-only operational source-authority convergence: runtime/cloud/Hybrid/Drive-workbook/archive/empirical provenance boundaries required for deployment PASS"
-            echo "- R237/R238/R239 exact promoted-SHA Hybrid command authority: semantic shared-epoch + resource-envelope + R141/R146/R147/R125 boundaries required; authenticated rotation/backpressure lifecycle preserved"
-            echo "- R238 exact promoted-SHA Hybrid host intelligence: immutable R205 executor SHA required; returned host CPU/RAM/GPU/storage/Python/RCWA profile stays R141 fingerprint-bound; selected-device correlation and no cross-host proof leakage required; bounded macro schema/hash/count/order/time/coordinate/window preflight required"
-            echo "- R239 Hybrid resource governor: selected-host returned-resource freshness and fail-closed bounded admission preserved"
-            echo "- R240 explicit workflow_dispatch is accepted only so an R170 GitHub-token exact two-parent source merge can invoke this same sole canonical writer"
+            echo "- Canonical Worker deployment: ${{ steps.deploy_worker.outcome }}"
+            echo "- R163 first-hand canonical core health/public runtime: ${{ steps.live_runtime.outcome }}"
+            echo "- Canonical Hybrid agent bytes/SHA: ${{ steps.hybrid_agent.outcome }}"
+            echo "- Federation + canonical RCWA downloads: ${{ steps.federation_rcwa.outcome }}"
+            echo "- R8 Earth/NOAA + Hybrid V90 contracts: ${{ steps.earth_r8.outcome }}"
+            echo "- R9 Earth ground source hierarchy: ${{ steps.earth_r9.outcome }}"
+            echo "- Workers AI route-before-generation + synthesis: ${{ steps.live_ai.outcome }}"
+            echo "- R200.1 exact promoted-SHA desktop/mobile browser proof: ${{ steps.browser_r200.outcome }}"
+            echo "- R202 operational source-authority live proof: ${{ steps.live_r202.outcome }}"
+            echo "- R237 authenticated Hybrid command authority live proof: ${{ steps.live_r237.outcome }}"
+            echo "- R238 Hybrid host intelligence live proof: ${{ steps.live_r238.outcome }}"
+            echo "- R239 resource governance remains source-gated by verify job; live command surface reports a declared R239 tier."
+            echo "- R240/R240.1 truth boundary: one canonical ci.yml writer; two independent Hybrid live proof outcomes; state-semantic LOCKED/HELD verification; no unconditional PASS receipt text."
             echo "- R202 archive residual debt remains explicit: AT09 desktop health check PLANNED; AT10 forensic hash ledger PLANNED"
             echo "- Browser proof harness: Playwright 1.63.0 pinned; locked application dependency audit fails at high severity"
             echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"
