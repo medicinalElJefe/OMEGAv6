@@ -7,6 +7,7 @@ const bootstrap117=read('src/hybridBootstrapR117.ts');
 const deck=read('src/HybridCommandDeckR237.tsx');
 const hybrid=read('src/HybridLinkR32.tsx');
 const snapshot=read('src/HybridRuntimeSnapshotR238.tsx');
+const liveVerifier=read('scripts/verify_live_hybrid_command_authority_r237.mjs');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 
 for(const token of [
@@ -106,4 +107,17 @@ must(hybrid.includes('<HybridRuntimeSnapshotProviderR238>'),'Hybrid Link must mo
 must(hybrid.indexOf('<HybridCommandDeckR237/>')>hybrid.indexOf('<HybridHostEffectsR212/>')&&hybrid.indexOf('<HybridCommandDeckR237/>')<hybrid.indexOf('<HybridProofClosureR141/>'),'R237 command deck must remain between first-hand R212 host effects and R141 closure');
 for(const token of ['R125 admission authority','R141 exact return closure','R146 history','R147 executor/dispatch authority'])must(hybrid.includes(token),`R237 Hybrid Link authority boundary regressed ${token}`);
 
-console.log('OMEGA R237 HYBRID COMMAND AUTHORITY PASS · authenticated secret rotation + same-session reconnect continuity · authenticated mission control · one-active-job-per-device backpressure · R238 shared host/job/mission/epoch correlation · stale fail-closed writes · capability-negotiated native command deck · no direct source/shell mutation primitive · R141/R146/R147/R125 preserved');
+for(const token of [
+  "[data-r237-command-authority=\"AUTHENTICATED_BOUNDED_NATIVE_CONTROL\"]",
+  "data-r237-snapshot-epoch",
+  "R238 changes correlation and sampling, not execution or Canon authority",
+  "R212/R141",
+  "R146",
+  "R147",
+  "R125",
+  "Refresh shared snapshot"
+])must(liveVerifier.includes(token),`R238.1 live R237 verifier missing durable Woven authority marker ${token}`);
+must(!liveVerifier.includes('R141/R146/R147/R125 authority remains unchanged'),'R238.1 live verifier must not depend on the retired pre-Woven literal authority sentence');
+must(liveVerifier.includes("if(!Number.isFinite(epoch)||epoch<1)throw new Error"),'R238.1 live verifier must prove a completed shared snapshot epoch before accepting the command surface');
+
+console.log('OMEGA R237 HYBRID COMMAND AUTHORITY PASS · authenticated secret rotation + same-session reconnect continuity · authenticated mission control · one-active-job-per-device backpressure · R238 shared host/job/mission/epoch correlation · stale fail-closed writes · capability-negotiated native command deck · no direct source/shell mutation primitive · durable Woven live-verifier markers · R141/R146/R147/R125 preserved');
