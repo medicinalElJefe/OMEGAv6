@@ -1,4 +1,4 @@
-import {OmegaApiError,runtimeSessionId,saveHybridBridge} from './platformAdapter';
+import {OmegaApiError,getHybridBridge,runtimeSessionId,saveHybridBridge} from './platformAdapter';
 
 export type SovereignBootstrapR117={
  ok:true;
@@ -14,9 +14,13 @@ export async function bootstrapSovereignR117():Promise<SovereignBootstrapR117>{
  const controller=new AbortController();
  const timer=window.setTimeout(()=>controller.abort(),20000);
  try{
+  const session=runtimeSessionId();
+  const current=getHybridBridge();
+  const headers:Record<string,string>={'content-type':'application/json','x-omega-session-id':session};
+  if(current?.bridgeId===session&&current.secret)headers['x-omega-bridge-secret']=current.secret;
   const response=await fetch('/api/hybrid/bootstrap',{
    method:'POST',
-   headers:{'content-type':'application/json','x-omega-session-id':runtimeSessionId()},
+   headers,
    body:JSON.stringify({rotate:true}),
    cache:'no-store',
    credentials:'same-origin',
