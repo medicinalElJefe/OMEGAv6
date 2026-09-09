@@ -2,6 +2,8 @@ const NOMINATIM_REVERSE = 'https://nominatim.openstreetmap.org/reverse';
 const cache = new Map();
 let lastRequestAt = 0;
 let requestSerial = 0;
+let activeSelectionKey = null;
+let resolvedSelectionKey = null;
 
 const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -77,12 +79,12 @@ function inject(){
   });
   canvas.addEventListener('omega-map-select',event=>{
     const point=normalizePoint(event.detail);
-    if(point) syncSelectedPoint(point,{syncInputs:true});
+    if(point) syncSelectedPoint(point,{syncInputs:true,preservePrecision:true});
   });
 
   $('jumpLocation')?.addEventListener('click',()=>{
     const point=normalizePoint({lat:Number($('jumpLat')?.value),lon:Number($('jumpLon')?.value)});
-    if(point) syncSelectedPoint(point,{syncInputs:false});
+    if(point) syncSelectedPoint(point,{syncInputs:false,preservePrecision:true});
   });
 
   const pointNode=$('point');
@@ -115,19 +117,27 @@ function parsePointText(text){
 
 function syncSelectedFromPoint(text){
   const point=parsePointText(text);
-  if(point) syncSelectedPoint(point,{syncInputs:false});
+  if(point) syncSelectedPoint(point,{syncInputs:false,preservePrecision:false});
 }
 
-function syncSelectedPoint(point,{syncInputs=false}={}){
-  $('earthSelectedCoords').textContent=`${fmt(point.lat)}, ${fmt(point.lon)} · WGS84 / EPSG:4326`;
+function cacheKey({lat,lon}){return `${Number(lat).toFixed(5)},${Number(lon).toFixed(5)}`;}
+
+function syncSelectedPoint(point,{syncInputs=false,preservePrecision=false}={}){
+  const key=cacheKey(point);
+  const duplicate=key===activeSelectionKey;
+  if(!duplicate||preservePrecision||syncInputs){
+    $('earthSelectedCoords').textContent=`${fmt(point.lat)}, ${fmt(point.lon)} · WGS84 / EPSG:4326`;
+  }
   if(syncInputs){
     if($('jumpLat'))$('jumpLat').value=Number(point.lat).toFixed(6);
     if($('jumpLon'))$('jumpLon').value=Number(point.lon).toFixed(6);
   }
-  resolveSelectedPlace(point);
+  if(duplicate) return;
+  activeSelectionKey=key;
+  resolvedSelectionKey=null;
+  resolveSelectedPlace(point,key);
 }
 
-function cacheKey({lat,lon}){return `${Number(lat).toFixed(5)},${Number(lon).toFixed(5)}`;}
 function pickLocality(address={}){return address.city||address.town||address.village||address.hamlet||address.municipality||address.suburb||address.neighbourhood||address.county||null;}
 function pickRegion(address={}){return [address.state||address.region||address.county,address.country].filter(Boolean).join(' · ');}
 
@@ -146,13 +156,14 @@ async function reverseGeocode(point){
   cache.set(key,result);return result;
 }
 
-async function resolveSelectedPlace(point){
+async function resolveSelectedPlace(point,key=cacheKey(point)){
   const serial=++requestSerial;
   $('earthPlaceName').textContent='Resolving nearest named place…';
   $('earthPlaceRegion').textContent=`Selected ${fmt(point.lat)}, ${fmt(point.lon)} · exact coordinate retained independently of place-name lookup.`;
   try{
     const result=await reverseGeocode(point);
-    if(serial!==requestSerial)return;
+    if(serial!==requestSerial||key!==activeSelectionKey)return;
+    resolvedSelectionKey=key;
     if(!result.found){
       $('earthPlaceName').textContent='No named OpenStreetMap feature at this coordinate';
       $('earthPlaceRegion').textContent=`${fmt(point.lat)}, ${fmt(point.lon)} · coordinate remains valid; this may be open water, remote terrain, or an unmapped location.`;
@@ -163,7 +174,8 @@ async function resolveSelectedPlace(point){
     $('earthPlaceName').textContent=result.name||locality||result.displayName||'Named location resolved';
     $('earthPlaceRegion').textContent=[locality&&locality!==result.name?locality:null,region,result.category&&result.type?`${result.category}/${result.type}`:null].filter(Boolean).join(' · ')||result.displayName||`${fmt(point.lat)}, ${fmt(point.lon)}`;
   }catch(error){
-    if(serial!==requestSerial)return;
+    if(serial!==requestSerial||key!==activeSelectionKey)return;
+    resolvedSelectionKey=null;
     $('earthPlaceName').textContent='Place-name service unavailable';
     $('earthPlaceRegion').textContent=`${fmt(point.lat)}, ${fmt(point.lon)} · WGS84 coordinate selection remains active. ${error.message}`;
   }
