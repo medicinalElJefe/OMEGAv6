@@ -1,13 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {candidateScore,planParallelFrontier,rankDependencyReadyCapsules} from './lib/r239-recursive-build-fabric.mjs';
 
 const STATE_PATH='public/omega-r170-selfbuild-state.json';
 const CANDIDATE_PATH='public/omega-r170-selfbuild-candidate.json';
 const APPLY=process.env.OMEGA_R170_SELFBUILD_APPLY==='1';
 const state=JSON.parse(fs.readFileSync(STATE_PATH,'utf8'));
 const roadmap=Array.isArray(state.roadmap)?state.roadmap:[];
+const MAX_PARALLEL_PLAN=Math.max(1,Math.min(12,Number(state.maxParallelPlanningCells||12)));
 
-function score(c){const riskFactor=c.risk==='LOW'?1:c.risk==='MEDIUM'?.7:.35;return Number(c.expectedGain||0)/Math.max(.01,Number(c.complexity||0)+Number(c.contradictionRisk||0))*riskFactor}
 function reconcileMergedSourceCandidates(){const admitted=new Set(state.admittedSourceCapsules||[]);let changed=false;for(const receipt of state.receipts||[]){if(receipt.status!=='PROVED_PENDING_PR')continue;const capsule=roadmap.find(x=>x.id===receipt.capsuleId);if(!capsule||!fs.existsSync(capsule.target))continue;receipt.status='SOURCE_MERGE_OBSERVED';receipt.sourceMergedAt=new Date().toISOString();receipt.canonicalAdmission=false;admitted.add(receipt.capsuleId);changed=true}state.admittedSourceCapsules=[...admitted];if(state.currentCapsuleId&&admitted.has(state.currentCapsuleId)){state.currentCapsuleId=null;changed=true}return changed}
 function residualGate(){const p=process.env.OMEGA_R170_RESIDUAL_EVIDENCE_PATH;if(!p||!fs.existsSync(p))return {state:'UNPROVEN',allow:false,reason:'current residual evidence is required before autonomous generation'};const evidence=JSON.parse(fs.readFileSync(p,'utf8'));const residuals=Array.isArray(evidence.residuals)?evidence.residuals:[];const blocking=residuals.filter(r=>r?.mode==='BLOCK'||['HIGH','CRITICAL'].includes(String(r?.severity||'').toUpperCase()));if(evidence.state==='BLOCKED'||blocking.length)return {state:'BLOCK',allow:false,reason:'high/critical residual evidence blocks autonomous source generation',blocking:blocking.map(r=>r.id)};return {state:evidence.state||'OBSERVED',allow:true,reason:'no high/critical autonomous-build blocker observed',summary:evidence.summary||null}}
 
@@ -26,9 +27,13 @@ if(!state.active){console.log(JSON.stringify({status:'IDLE',reason:'state inacti
 if((state.admittedSourceCapsules||[]).length>=Number(state.maxAutonomousGenerations||0)){console.log(JSON.stringify({status:'OBSERVE',reason:'bounded R170 roadmap exhausted',generation:state.generation}));process.exit(0)}
 if(state.currentCapsuleId){console.log(JSON.stringify({status:'WAITING_FOR_GOVERNED_MERGE',capsuleId:state.currentCapsuleId,generation:state.generation}));process.exit(0)}
 const gate=residualGate();if(!gate.allow){console.log(JSON.stringify({status:'BLOCKED_BY_RESIDUAL_GATE',gate},null,2));process.exit(0)}
-const admitted=new Set(state.admittedSourceCapsules||[]);const candidates=roadmap.filter(c=>!admitted.has(c.id)&&(c.prerequisites||[]).every(p=>admitted.has(p))).sort((a,b)=>score(b)-score(a)||a.id.localeCompare(b.id));const capsule=candidates[0]||null;
-if(!capsule){console.log(JSON.stringify({status:'OBSERVE',reason:'no dependency-ready predefined capsule',generation:state.generation},null,2));process.exit(0)}
-const generation=Number(state.generation||0)+1;if(!APPLY){console.log(JSON.stringify({status:'PROPOSE',generation,capsuleId:capsule.id,title:capsule.title,target:capsule.target,score:score(capsule),gate},null,2));process.exit(0)}
+const admitted=new Set(state.admittedSourceCapsules||[]);
+const frontierPlan=planParallelFrontier({roadmap,admitted,maxParallel:MAX_PARALLEL_PLAN});
+const candidates=rankDependencyReadyCapsules(roadmap,admitted,MAX_PARALLEL_PLAN);
+const capsule=candidates[0]||null;
+if(!capsule){console.log(JSON.stringify({status:'OBSERVE',reason:'no dependency-ready predefined capsule',generation:state.generation,frontier:frontierPlan},null,2));process.exit(0)}
+const generation=Number(state.generation||0)+1;
+if(!APPLY){console.log(JSON.stringify({status:'PROPOSE',generation,capsuleId:capsule.id,title:capsule.title,target:capsule.target,score:candidateScore(capsule),gate,frontier:frontierPlan,selectionLaw:'R239 ranks the whole dependency-ready sparse frontier; R170 governance still materializes only the strongest single source candidate per pulse.'},null,2));process.exit(0)}
 const body=modules[capsule.id];if(!body)throw new Error(`No deterministic generator registered for ${capsule.id}`);fs.mkdirSync(path.dirname(capsule.target),{recursive:true});if(fs.existsSync(capsule.target))throw new Error(`Refusing to overwrite existing generated target ${capsule.target}`);fs.writeFileSync(capsule.target,body,'utf8');
-const receipt={schema:'OMEGA_SELFBUILD_CANDIDATE_RECEIPT_R170',generation,capsuleId:capsule.id,target:capsule.target,startedAt:new Date().toISOString(),baseSha:process.env.GITHUB_SHA||'UNKNOWN',branch:null,candidateSha:null,residualGate:'PASS',residualEvidence:gate,tests:{},status:'SANDBOX',canonicalAdmission:false,notes:['Generated deterministically from bounded R170 roadmap.','No direct main mutation is authorized.','R125 remains sole CanonState admission authority.']};
-state.generation=generation;state.currentCapsuleId=capsule.id;state.receipts=[...(state.receipts||[]),receipt].slice(-64);fs.writeFileSync(STATE_PATH,JSON.stringify(state,null,2)+'\n','utf8');fs.writeFileSync(CANDIDATE_PATH,JSON.stringify({schema:'OMEGA_SELFBUILD_CANDIDATE_R170',revision:'R170.2',capsule,score:score(capsule),receipt},null,2)+'\n','utf8');console.log(JSON.stringify({status:'SANDBOX',generation,capsuleId:capsule.id,target:capsule.target,score:score(capsule),gate},null,2));
+const receipt={schema:'OMEGA_SELFBUILD_CANDIDATE_RECEIPT_R170',generation,capsuleId:capsule.id,target:capsule.target,startedAt:new Date().toISOString(),baseSha:process.env.GITHUB_SHA||'UNKNOWN',branch:null,candidateSha:null,residualGate:'PASS',residualEvidence:gate,recursiveFrontier:frontierPlan,tests:{},status:'SANDBOX',canonicalAdmission:false,notes:['Generated deterministically from bounded R170 roadmap.','R239 ranked the full dependency-ready frontier before one-candidate materialization.','No direct main mutation is authorized.','R125 remains sole CanonState admission authority.']};
+state.generation=generation;state.currentCapsuleId=capsule.id;state.receipts=[...(state.receipts||[]),receipt].slice(-64);fs.writeFileSync(STATE_PATH,JSON.stringify(state,null,2)+'\n','utf8');fs.writeFileSync(CANDIDATE_PATH,JSON.stringify({schema:'OMEGA_SELFBUILD_CANDIDATE_R170',revision:'R170.2',schedulerRevision:'R239',capsule,score:candidateScore(capsule),frontier:frontierPlan,receipt},null,2)+'\n','utf8');console.log(JSON.stringify({status:'SANDBOX',generation,capsuleId:capsule.id,target:capsule.target,score:candidateScore(capsule),gate,frontier:frontierPlan},null,2));
