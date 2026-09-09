@@ -95,10 +95,28 @@ for(const {routeName,routeId} of routeIdentities){
  await page.waitForFunction(name=>document.querySelector('.r94-rail-current')?.getAttribute('title')===name,routeName);
  const current=await page.locator('.r94-rail-current').getAttribute('title');
  if(current!==routeName)throw new Error(`R239 destination did not become active: expected ${routeName}, saw ${current}`);
+ const workstation=page.locator('.omega-workstation-v2');
+ if(await workstation.count()!==1)throw new Error(`R239 destination lost the single workstation surface: ${routeName}`);
+ if(await workstation.getAttribute('data-panel')!==routeName)throw new Error(`R239 workstation semantic panel drifted from active route: ${routeName}`);
  const visibleText=await page.locator('body').innerText();
  if(visibleText.trim().length<80)throw new Error(`R239 destination produced a blank/near-blank product surface: ${routeName}`);
- const badCanvas=await page.locator('canvas').evaluateAll(nodes=>nodes.some(node=>{const r=node.getBoundingClientRect(),s=getComputedStyle(node);const visible=s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&node.getClientRects().length>0;return visible&&(r.width<=0||r.height<=0)}));
- if(badCanvas)throw new Error(`R239 destination contains a visible zero-size canvas: ${routeName}`);
+ const canvasIssues=await workstation.locator('canvas').evaluateAll(nodes=>nodes.flatMap((node,index)=>{
+   let rendered=true,el=node;
+   const ancestry=[];
+   while(el instanceof HTMLElement){
+     const style=getComputedStyle(el);
+     ancestry.push(`${el.tagName.toLowerCase()}${el.id?`#${el.id}`:''}${typeof el.className==='string'&&el.className?`.`+el.className.trim().split(/\s+/).slice(0,3).join('.'):''}`);
+     if(style.display==='none'||style.visibility==='hidden'||Number(style.opacity)===0||el.hidden||el.getAttribute('aria-hidden')==='true'||el.inert){rendered=false;break}
+     const parent=el.parentElement;
+     if(parent instanceof HTMLDetailsElement&&!parent.open&&el.tagName!=='SUMMARY'){rendered=false;break}
+     el=parent;
+   }
+   if(!rendered||node.getClientRects().length===0)return[];
+   const rect=node.getBoundingClientRect();
+   if(rect.width>0&&rect.height>0)return[];
+   return[{index,ariaLabel:node.getAttribute('aria-label')||'',className:typeof node.className==='string'?node.className:'',widthAttr:node.width,heightAttr:node.height,rect:{width:rect.width,height:rect.height,x:rect.x,y:rect.y},ancestry:ancestry.slice(0,8)}];
+ }));
+ if(canvasIssues.length)throw new Error(`R239 destination contains an actually-rendered zero-size canvas: ${routeName} · ${JSON.stringify(canvasIssues)}`);
  if(pageErrors.length)throw new Error(`R239 page error while routing ${routeName}: ${pageErrors.join(' | ')}`);
 }
 
@@ -149,5 +167,5 @@ if(!box||box.width>365)throw new Error(`R239 mobile navigator too wide: ${box?.w
 if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error('R239 mobile product introduces horizontal viewport overflow');
 if(pageErrors.length)throw new Error(`R239 page errors: ${pageErrors.join(' | ')}`);
 
-console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · unique R143 machine route identity + presentation binding · visible-canvas sanity · universal rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · mobile containment');
+console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · unique R143 machine route identity + presentation binding · active-workstation/ancestor-aware visible-canvas sanity · universal rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · mobile containment');
 await browser.close();
