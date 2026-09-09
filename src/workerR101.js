@@ -6,6 +6,7 @@ const CANONICAL_AGENT_ASSET='/omega-hybrid-agent-r207.py';
 const IMMUTABLE_BASE_AGENT_ASSET='/omega-hybrid-agent-base-r205.py';
 const HEARTBEAT_FRESH_MS=30000;
 const EXECUTION_MOTION_REVISION='R243';
+const STALE_RECONCILIATION_REVISION='R244';
 const RUNNING_LEASE_MS=20000;
 const LEGACY_RUNNING_STALE_MS=90000;
 const MAX_STALL_RECOVERIES=2;
@@ -61,6 +62,7 @@ async function hybridStatusR101(request,env,id){
   lastAuthenticatedHeartbeat,
   heartbeatFreshnessWindowMs:HEARTBEAT_FRESH_MS,
   executionMotionRevision:EXECUTION_MOTION_REVISION,
+  staleReconciliationRevision:STALE_RECONCILIATION_REVISION,
   runningLeaseMs:RUNNING_LEASE_MS,
   canonicalControlOrigin:AGENT_ORIGIN,
   connectorProtocol:'R127_ZERO_DRIFT_SHA256',
@@ -85,7 +87,7 @@ async function reconnectHybridR101(request,env){
  }
  const pairResponse=await runtimeFetch(env,sid,'/pair',request,'POST',{rotate:true}),pair=await pairResponse.json().catch(()=>({}));
  if(!pairResponse.ok||!pair.secret)return json({ok:false,code:pair.code||'PAIR_REPAIR_FAILED',reply:pair.reply||'OMEGA could not issue a fresh Hybrid pairing credential.'},pairResponse.status||503);
- return json({...pair,ok:true,repaired:true,bridgeId:sid,pairingCode:`${sid}.${pair.secret}`,credentialState:'REISSUED',agentRestartRequired:true,agentPath:'/api/hybrid/agent-download',canonicalAgentRevision:'R207',proofClosureRevision:'R141',executionMotionRevision:EXECUTION_MOTION_REVISION,connectorProtocol:'R127_ZERO_DRIFT_SHA256',truthBoundary:'NEW_PAIR_REQUIRES_NEW_AUTHENTICATED_HEARTBEAT_R127'});
+ return json({...pair,ok:true,repaired:true,bridgeId:sid,pairingCode:`${sid}.${pair.secret}`,credentialState:'REISSUED',agentRestartRequired:true,agentPath:'/api/hybrid/agent-download',canonicalAgentRevision:'R207',proofClosureRevision:'R141',executionMotionRevision:EXECUTION_MOTION_REVISION,staleReconciliationRevision:STALE_RECONCILIATION_REVISION,connectorProtocol:'R127_ZERO_DRIFT_SHA256',truthBoundary:'NEW_PAIR_REQUIRES_NEW_AUTHENTICATED_HEARTBEAT_R127'});
 }
 
 async function canonicalAgentSource(request,env){
@@ -101,7 +103,7 @@ async function canonicalAgentSource(request,env){
 
 async function connectorManifestR127(request,env){
  const a=await canonicalAgentSource(request,env);if(!a.ok)return a.response;
- return json({ok:true,schema:'OMEGA_HYBRID_CONNECTOR_MANIFEST_R127',canonicalControlOrigin:AGENT_ORIGIN,agent:{path:'/api/hybrid/agent-download',version:a.version,sha256:a.digest,bytes:a.bytes,identity:'OMEGA R207 canonical Hybrid Link proof wrapper',proofClosureRevision:'R141',immutableBaseAsset:IMMUTABLE_BASE_AGENT_ASSET,baseTransportVersion:'R34.1',baseCapabilityRevision:'R132',baseProofExtension:'R205'},heartbeatFreshnessWindowMs:HEARTBEAT_FRESH_MS,executionMotion:{revision:EXECUTION_MOTION_REVISION,progressPath:'/api/hybrid/agent/progress',runningLeaseMs:RUNNING_LEASE_MS,legacyStaleMs:LEGACY_RUNNING_STALE_MS},rootPolicy:{defaultApprovedRoot:'J:\\',systemDriveRuntimeFallback:false,explicitAlternateNonSystemRootAllowed:true},transportPolicy:{singleCanonicalControlHost:true,controlHostFallback:false,downloadQuarantineRequired:true,serverDeclaredSha256Required:true,pythonParsePreflightRequired:true,blindRestart:false,transientReachabilityRetry:'BOUNDED',immutableBaseRollback:true,exactR141SemanticFingerprint:true,directDurableAgentRelay:'R207.4'},truthBoundary:'MANIFEST DESCRIBES CONNECTOR BYTES, DIRECT DURABLE AGENT TRANSPORT, EXECUTION-MOTION LEASE POLICY, AND ROOT POLICY; IT IS NOT PC ONLINE PROOF, EXECUTION SUCCESS, SOLVER VALIDITY, OR CANONSTATE'});
+ return json({ok:true,schema:'OMEGA_HYBRID_CONNECTOR_MANIFEST_R127',canonicalControlOrigin:AGENT_ORIGIN,agent:{path:'/api/hybrid/agent-download',version:a.version,sha256:a.digest,bytes:a.bytes,identity:'OMEGA R207 canonical Hybrid Link proof wrapper',proofClosureRevision:'R141',immutableBaseAsset:IMMUTABLE_BASE_AGENT_ASSET,baseTransportVersion:'R34.1',baseCapabilityRevision:'R132',baseProofExtension:'R205'},heartbeatFreshnessWindowMs:HEARTBEAT_FRESH_MS,executionMotion:{revision:EXECUTION_MOTION_REVISION,progressPath:'/api/hybrid/agent/progress',runningLeaseMs:RUNNING_LEASE_MS,legacyStaleMs:LEGACY_RUNNING_STALE_MS,staleReconciliationRevision:STALE_RECONCILIATION_REVISION},rootPolicy:{defaultApprovedRoot:'J:\\',systemDriveRuntimeFallback:false,explicitAlternateNonSystemRootAllowed:true},transportPolicy:{singleCanonicalControlHost:true,controlHostFallback:false,downloadQuarantineRequired:true,serverDeclaredSha256Required:true,pythonParsePreflightRequired:true,blindRestart:false,transientReachabilityRetry:'BOUNDED',immutableBaseRollback:true,exactR141SemanticFingerprint:true,directDurableAgentRelay:'R207.4'},truthBoundary:'MANIFEST DESCRIBES CONNECTOR BYTES, DIRECT DURABLE AGENT TRANSPORT, EXECUTION-MOTION LEASE POLICY, AND ROOT POLICY; IT IS NOT PC ONLINE PROOF, EXECUTION SUCCESS, SOLVER VALIDITY, OR CANONSTATE'});
 }
 
 async function serveCanonicalHybridAgentR101(request,env){
@@ -118,6 +120,7 @@ async function serveCanonicalHybridAgentR101(request,env){
   'x-omega-canonical-origin':AGENT_ORIGIN,
   'x-omega-hybrid-protocol':'R127_ZERO_DRIFT_SHA256',
   'x-omega-execution-motion':EXECUTION_MOTION_REVISION,
+  'x-omega-stale-reconciliation':STALE_RECONCILIATION_REVISION,
   'x-omega-compat-route':'R101_DIRECT_AND_API_AGENT_DOWNLOAD'
  }});
 }
@@ -139,37 +142,46 @@ async function fetchR101(request,env){
 }
 
 export class OmegaRuntime extends OmegaRuntimeR34 {
- async recoverStalledJobsR243(deviceId){
-  if(!deviceId)return;
+ async recoverStalledJobsR243(deviceId=null){
   const t=Date.now(),jobs=await this.get('jobs',[]),missions=await this.get('missions',[]);let changed=false;
   for(const job of [...jobs]){
-   if(job?.targetDeviceId!==deviceId||String(job?.status||'').toUpperCase()!=='RUNNING')continue;
+   const targetDeviceId=safeId(job?.targetDeviceId,'');
+   if((deviceId&&targetDeviceId!==deviceId)||String(job?.status||'').toUpperCase()!=='RUNNING')continue;
    const leaseUntil=Number(job?.leaseUntil||0),last=Number(job?.lastProgressAt||job?.startedAt||0);
    const expired=leaseUntil>0?leaseUntil<t:Boolean(last&&t-last>LEGACY_RUNNING_STALE_MS);
    if(!expired)continue;
    changed=true;
-   const failureCore={schema:'OMEGA_HYBRID_STALL_RETURN_R243',jobId:job.id,deviceId,failedAt:t,reason:leaseUntil?'EXECUTION_LEASE_EXPIRED':'LEGACY_RUNNING_WITHOUT_LEASE',lastProgressAt:Number(job?.lastProgressAt||0)||null,startedAt:Number(job?.startedAt||0)||null};
+   const failureCore={schema:'OMEGA_HYBRID_STALL_RETURN_R243',jobId:job.id,deviceId:targetDeviceId||null,failedAt:t,reason:leaseUntil?'EXECUTION_LEASE_EXPIRED':'LEGACY_RUNNING_WITHOUT_LEASE',lastProgressAt:Number(job?.lastProgressAt||0)||null,startedAt:Number(job?.startedAt||0)||null,reconciliationRevision:STALE_RECONCILIATION_REVISION};
    const resultFingerprint=await sha256(JSON.stringify(failureCore));
-   Object.assign(job,{status:'FAILED',completedAt:t,stallReason:'R243_EXECUTION_LEASE_EXPIRED',leaseUntil:null,returnPacket:{...failureCore,receivedAt:t,stepProofs:[],outputPaths:[],log:'R243 execution-motion lease expired before a returned host result. No execution success is inferred.',resultFingerprint,proofExtensions:[EXECUTION_MOTION_REVISION],truthBoundary:'A missing execution-motion lease proves only that the Worker can no longer prove continued ownership of this RUNNING claim. It does not prove whether a local subprocess finished, failed, or was externally terminated.'}});
-   const mission=missions.find(m=>m?.currentJobId===job.id&&m?.targetDeviceId===deviceId),stage=String(mission?.stage||''),steps=Array.isArray(job?.steps)?job.steps:[],mutation=steps.some(s=>MUTATING_OPS_R243.has(String(s?.op||'').toUpperCase())),recoveries=Number(mission?.stallRecoveries||0);
+   Object.assign(job,{status:'FAILED',completedAt:t,stallReason:'R243_EXECUTION_LEASE_EXPIRED',leaseUntil:null,staleReconciliationRevision:STALE_RECONCILIATION_REVISION,returnPacket:{...failureCore,receivedAt:t,stepProofs:[],outputPaths:[],log:'R244 reconciled an expired R243 execution-motion lease before returning authenticated operator state. No execution success is inferred.',resultFingerprint,proofExtensions:[EXECUTION_MOTION_REVISION,STALE_RECONCILIATION_REVISION],truthBoundary:'A missing execution-motion lease proves only that the Worker can no longer prove continued ownership of this RUNNING claim. It does not prove whether a local subprocess finished, failed, or was externally terminated.'}});
+   const mission=missions.find(m=>m?.currentJobId===job.id&&(!targetDeviceId||m?.targetDeviceId===targetDeviceId)),stage=String(mission?.stage||''),steps=Array.isArray(job?.steps)?job.steps:[],mutation=steps.some(s=>MUTATING_OPS_R243.has(String(s?.op||'').toUpperCase())),recoveries=Number(mission?.stallRecoveries||0);
    if(mission&&RECOVERABLE_DISCOVERY_STAGES.has(stage)&&!mutation&&recoveries<MAX_STALL_RECOVERIES){
     let safeSteps=steps.filter(s=>!MUTATING_OPS_R243.has(String(s?.op||'').toUpperCase()));
-    if(stage==='DISCOVERY')safeSteps=safeSteps.filter(s=>String(s?.op||'').toUpperCase()==='INDEX').slice(0,1).map(s=>({...s,maxResults:4000,discoveryOnly:true,label:'R243 bounded project discovery after expired execution lease'}));
+    if(stage==='DISCOVERY')safeSteps=safeSteps.filter(s=>String(s?.op||'').toUpperCase()==='INDEX').slice(0,1).map(s=>({...s,maxResults:4000,discoveryOnly:true,label:'R244 bounded project discovery after reconciled expired R243 execution lease'}));
     else if(stage==='PROJECT_DISCOVERY')safeSteps=safeSteps.filter(s=>String(s?.op||'').toUpperCase()==='INDEX').slice(0,8).map(s=>({...s,maxResults:4000,discoveryOnly:true}));
     else if(stage==='SIGNATURE_DISCOVERY')safeSteps=safeSteps.filter(s=>String(s?.op||'').toUpperCase()==='SEARCH_TEXT').slice(0,1).map(s=>({...s,maxResults:120}));
     if(safeSteps.length){
-     const recovery={...job,id:randomIdR243('job'),status:'QUEUED',queuedAt:t,startedAt:null,completedAt:null,leaseUntil:null,lastProgressAt:null,progress:null,returnPacket:null,log:null,outputPaths:[],steps:safeSteps,recoveryOf:job.id,recoveryRevision:EXECUTION_MOTION_REVISION,recoveryReason:'EXPIRED_RUNNING_LEASE',inputFingerprint:await sha256(JSON.stringify({missionId:mission.id,recoveryOf:job.id,stage,steps:safeSteps,targetDeviceId:deviceId}))};
-     jobs.push(recovery);Object.assign(mission,{status:'ACTIVE',currentJobId:recovery.id,currentJob:recovery,stallRecoveries:recoveries+1,stallRecoveryOf:job.id,holdReason:null,operatorReviewRequired:false,updatedAt:t});
-     await this.event('R243_JOB_STALL_RECOVERED',`Expired non-mutating discovery job ${job.id} was replaced by bounded recovery ${recovery.id}.`,{deviceId,jobId:job.id,recoveryJobId:recovery.id,missionId:mission.id,stage});
+     const recovery={...job,id:randomIdR243('job'),status:'QUEUED',queuedAt:t,startedAt:null,completedAt:null,leaseUntil:null,lastProgressAt:null,progress:null,returnPacket:null,log:null,outputPaths:[],steps:safeSteps,recoveryOf:job.id,recoveryRevision:STALE_RECONCILIATION_REVISION,recoveryReason:'EXPIRED_RUNNING_LEASE',inputFingerprint:await sha256(JSON.stringify({missionId:mission.id,recoveryOf:job.id,stage,steps:safeSteps,targetDeviceId}))};
+     jobs.push(recovery);Object.assign(mission,{status:'ACTIVE',currentJobId:recovery.id,currentJob:recovery,stallRecoveries:recoveries+1,stallRecoveryOf:job.id,stallReconciliationRevision:STALE_RECONCILIATION_REVISION,holdReason:null,operatorReviewRequired:false,updatedAt:t});
+     await this.event('R243_JOB_STALL_RECOVERED',`R244 reconciled expired non-mutating discovery job ${job.id} with bounded recovery ${recovery.id}.`,{deviceId:targetDeviceId||null,jobId:job.id,recoveryJobId:recovery.id,missionId:mission.id,stage,reconciliationRevision:STALE_RECONCILIATION_REVISION});
      continue;
     }
    }
-   await this.event('R243_JOB_STALL_FAILED',`Expired running job ${job.id} was failed closed; no blind replay was issued.`,{deviceId,jobId:job.id,missionId:mission?.id||null,stage:stage||null,mutation});
+   await this.event('R243_JOB_STALL_FAILED',`R244 reconciled expired running job ${job.id} fail-closed; no blind replay was issued.`,{deviceId:targetDeviceId||null,jobId:job.id,missionId:mission?.id||null,stage:stage||null,mutation,reconciliationRevision:STALE_RECONCILIATION_REVISION});
   }
   if(changed){await this.put('jobs',jobs.slice(-120));await this.put('missions',missions.slice(-60))}
+  return changed;
  }
  async fetch(request){
   const path=new URL(request.url).pathname;
+  if((path==='/status'||path==='/snapshot')&&request.method==='GET'){
+   const authenticated=await this.authorized(request);
+   if(authenticated)await this.recoverStalledJobsR243();
+   const response=await super.fetch(request),headers=new Headers(response.headers);
+   headers.set('x-omega-stale-reconciliation',authenticated?'R244-AUTHENTICATED-READ':'R244-READ-ONLY-UNAUTHENTICATED');
+   headers.set('x-omega-execution-motion',EXECUTION_MOTION_REVISION);
+   return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+  }
   if(path==='/agent/progress'&&request.method==='POST'){
    if(!await this.authorized(request))return json({ok:false,code:'PAIR_AUTH_FAILED'},401);
    const b=await request.json().catch(()=>({})),deviceId=safeId(b.deviceId,''),jobId=safeId(b.jobId,'');
