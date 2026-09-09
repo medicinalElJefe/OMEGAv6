@@ -38,6 +38,7 @@ jobs:
         run: |
           node tests/r239-adaptive-hybrid-resource-governor-invariants.mjs
           node tests/r240-recursive-exact-self-promotion-invariants.mjs
+          node tests/r2481-deployment-receipt-audit-truth-invariants.mjs
       - run: npm run check
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
 
@@ -342,7 +343,7 @@ jobs:
             echo "- R239 resource governance remains source-gated by verify job; live command surface reports a declared R239 tier."
             echo "- R240/R240.1 truth boundary: one canonical ci.yml writer; two independent Hybrid live proof outcomes; state-semantic LOCKED/HELD verification; no unconditional PASS receipt text."
             echo "- R202 archive residual debt remains explicit: AT09 desktop health check PLANNED; AT10 forensic hash ledger PLANNED"
-            echo "- Browser proof harness: Playwright 1.63.0 pinned; locked application dependency audit fails at high severity"
+            echo "- Browser proof harness: Playwright 1.63.0 pinned; locked application dependency audit enforced at high severity; current run result is reported by the audit step"
             echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"
             echo "- Hybrid native execution: VERIFIED_DEVICE_ONLINE requires a current authenticated non-revoked heartbeat; otherwise DEVICE_PROOF_REQUIRED"
           } >> "$GITHUB_STEP_SUMMARY"
