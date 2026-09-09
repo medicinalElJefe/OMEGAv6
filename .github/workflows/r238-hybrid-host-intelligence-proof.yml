@@ -1,4 +1,4 @@
-name: R238/R243 Hybrid host + execution convergence proof
+name: R238/R244 Hybrid host + execution convergence proof
 
 on:
   pull_request:
@@ -35,6 +35,7 @@ on:
       - 'tests/r243-woven-execution-convergence-invariants.mjs'
       - 'tests/r243-hybrid-execution-motion-browser-e2e.mjs'
       - 'tests/r2431-live-agent-header-closure-invariants.mjs'
+      - 'tests/r244-live-motion-and-stale-lease-closure-invariants.mjs'
       - 'tests/r240-recursive-exact-self-promotion-invariants.mjs'
       - '.github/workflows/r238-hybrid-host-intelligence-proof.yml'
   workflow_dispatch:
@@ -43,7 +44,7 @@ permissions:
   contents: read
 
 jobs:
-  prove-r238-r243:
+  prove-r238-r244:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -69,6 +70,8 @@ jobs:
           node tests/r243-hybrid-terminal-fence-invariants.mjs
           node tests/r2431-live-agent-header-closure-invariants.mjs
           node tests/r153-adaptive-sovereign-build-missions-invariants.mjs
+      - name: R244 live motion header + authenticated stale-lease closure proof
+        run: node tests/r244-live-motion-and-stale-lease-closure-invariants.mjs
       - name: R243 woven planning + execution convergence proof
         run: |
           node tests/r243-woven-selfbuild-fabric-invariants.mjs
@@ -96,13 +99,13 @@ jobs:
       - name: Start built preview
         shell: bash
         run: |
-          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/r243-vite.log 2>&1 &
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/r244-vite.log 2>&1 &
           ready=0
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:4173/ >/dev/null; then ready=1; break; fi
             sleep 1
           done
-          if [ "$ready" -ne 1 ]; then cat /tmp/r243-vite.log; exit 1; fi
+          if [ "$ready" -ne 1 ]; then cat /tmp/r244-vite.log; exit 1; fi
       - name: Prove R237-selected host drives R238 resource proof without cross-host leakage
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
