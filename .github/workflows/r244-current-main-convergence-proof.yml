@@ -1,0 +1,50 @@
+name: R244 Current Main Convergence Proof
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/workerR101.js'
+      - 'src/workerR102.js'
+      - 'scripts/verify_live_hybrid_execution_motion_r243.mjs'
+      - 'tests/r244-live-motion-and-stale-lease-closure-invariants.mjs'
+      - 'tests/r2431-live-agent-header-closure-invariants.mjs'
+      - '.github/workflows/r244-current-main-convergence-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r244-current-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Preserve R243.1 live-agent header closure
+        run: node tests/r2431-live-agent-header-closure-invariants.mjs
+      - name: Prove R244 authenticated stale-lease closure
+        run: node tests/r244-live-motion-and-stale-lease-closure-invariants.mjs
+      - name: Re-prove R243 execution motion and terminal fence
+        run: |
+          node tests/r243-hybrid-execution-motion-invariants.mjs
+          node tests/r243-hybrid-terminal-fence-invariants.mjs
+          node tests/r243-woven-execution-convergence-invariants.mjs
+      - name: Re-prove inherited Hybrid authorities
+        run: |
+          node tests/r205-pc-proof-closure-invariants.mjs
+          node tests/r2071-r141-asset-validator-repair-invariants.mjs
+          node tests/r237-hybrid-command-authority-invariants.mjs
+          node tests/r240-recursive-exact-self-promotion-invariants.mjs
+      - name: Full application checks
+        run: npm run check
+      - name: Production build
+        run: npm run build
+      - name: Wrangler dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r244-current-main
