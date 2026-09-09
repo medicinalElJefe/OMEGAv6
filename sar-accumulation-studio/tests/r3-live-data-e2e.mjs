@@ -17,6 +17,7 @@ try {
   const response = await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 30000 });
   assert.ok(response?.ok(), `root failed: ${response?.status()}`);
   await page.waitForSelector('#load', { state: 'visible', timeout: 15000 });
+  await page.waitForSelector('#sarCalControls', { state: 'attached', timeout: 15000 });
 
   await page.selectOption('#sourceMode', 'stac');
   await page.fill('#maxResults', '12');
@@ -47,18 +48,31 @@ try {
   assert.equal(await rasterButton.isDisabled(), false, 'current real scene exposes no raster asset');
   await rasterButton.click();
   await page.waitForFunction(() => {
-    const text = document.querySelector('#rasterEmpty')?.textContent || '';
-    return !/Reading Cloud Optimized GeoTIFF ranges/i.test(text);
+    const stats = document.querySelector('#rasterStats')?.textContent || '';
+    const empty = document.querySelector('#rasterEmpty')?.textContent || '';
+    return /CALIBRATED GRD/i.test(stats) || /Calibrated patch unavailable/i.test(empty);
   }, null, { timeout: 60000 });
+
   const rasterText = (await page.textContent('#rasterEmpty') || '').trim();
   const rasterStats = (await page.textContent('#rasterStats') || '').trim();
-  const rasterLoaded = !/Raster unavailable|No actual COG raster loaded/i.test(rasterText) && /ACTUAL GRD/i.test(rasterStats);
+  const proof = (await page.textContent('#sarCalProof') || '').trim();
+  const rasterLoaded = /CALIBRATED GRD/i.test(rasterStats) && /PRODUCT LUT/i.test(rasterStats) && /PRODUCT_GCP_BILINEAR|NEAREST_GCP_FALLBACK/i.test(proof);
 
-  console.log(JSON.stringify({ statusText, obs, pixels, beforeFrame, afterFrame, rasterLoaded, rasterText, rasterStats, pageErrors, consoleErrors, failedRequests }, null, 2));
+  const canvasPixels = await page.evaluate(() => {
+    const c = document.querySelector('#raster');
+    if (!c || !c.width || !c.height) return 0;
+    const data = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    let visible = 0;
+    for (let i = 3; i < data.length; i += 4) if (data[i]) visible++;
+    return visible;
+  });
+
+  console.log(JSON.stringify({ statusText, obs, pixels, beforeFrame, afterFrame, rasterLoaded, rasterText, rasterStats, proof, canvasPixels, pageErrors, consoleErrors, failedRequests }, null, 2));
   assert.deepEqual(pageErrors, [], `page errors: ${pageErrors.join(' | ')}`);
-  assert.ok(rasterLoaded, `real COG raster failed: ${rasterText}\n${rasterStats}\nrequest failures: ${failedRequests.join('\n')}`);
+  assert.ok(rasterLoaded, `calibrated Sentinel-1 patch failed: ${rasterText}\n${rasterStats}\n${proof}\nrequest failures: ${failedRequests.join('\n')}`);
+  assert.ok(canvasPixels > 1000, `calibrated patch rendered too few visible measurement pixels: ${canvasPixels}`);
 
-  console.log('SAR_R3_LIVE_DATA_PASS');
+  console.log('SAR_R3_CALIBRATED_LIVE_DATA_PASS');
 } finally {
   await browser.close();
 }
