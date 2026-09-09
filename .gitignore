@@ -1,3 +1,6 @@
+# Local dependency installation is transient runner/workstation state, never a source candidate.
+node_modules/
+
 # Generated Wrangler proof outputs. These are transient build artifacts, never source candidates.
 .wrangler-r170-selfbuild/
 .wrangler-r170-selfbuild-optical/
