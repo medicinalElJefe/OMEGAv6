@@ -111,16 +111,23 @@ for(const token of [
   "[data-r237-command-authority=\"AUTHENTICATED_BOUNDED_NATIVE_CONTROL\"]",
   "data-r237-snapshot-epoch",
   "data-r239-resource-tier",
+  "[data-r238-host-intelligence]",
+  "data-r238-selected-device",
+  "data-r238-snapshot-epoch",
+  "RETURNED_HOST_PROOF",
+  "AWAITING_RETURNED_PROFILE",
   "R239 tightens resource admission without changing execution authority",
   "R212/R141",
   "R146",
   "R147",
   "R125",
   "Refresh shared snapshot"
-])must(liveVerifier.includes(token),`R239.1 live R237 verifier missing current Woven/resource authority marker ${token}`);
-must(!liveVerifier.includes('R238 changes correlation and sampling, not execution or Canon authority'),'R239.1 live verifier must not depend on the retired pre-resource-governor R238 copy');
+])must(liveVerifier.includes(token),`R239.1 live R237 verifier missing current semantic/Woven/resource authority marker ${token}`);
+must(!liveVerifier.includes('R238 changes correlation and sampling, not execution or Canon authority'),'R239.1 live verifier must not depend on retired explanatory R238 prose');
 must(!liveVerifier.includes('R141/R146/R147/R125 authority remains unchanged'),'R239.1 live verifier must not depend on the retired pre-Woven literal authority sentence');
 must(liveVerifier.includes("['UNPROVED','HOLD','CONSTRAINED','READY','HIGH_CAPACITY'].includes(resourceTier)"),'R239.1 live verifier must reject unsupported R239 resource tiers');
 must(liveVerifier.includes("if(!Number.isFinite(epoch)||epoch<1)throw new Error"),'R239.1 live verifier must prove a completed shared snapshot epoch before accepting the command surface');
+must(liveVerifier.includes('intelligenceEpoch!==epoch'),'R239.1 live verifier must bind R237 command and R238 intelligence to the same snapshot epoch');
+must(liveVerifier.includes('deckDevice!==selectedDevice'),'R239.1 live verifier must bind R237 command and R238 intelligence to the same selected device');
 
-console.log('OMEGA R237 HYBRID COMMAND AUTHORITY PASS · authenticated secret rotation + same-session reconnect continuity · authenticated mission control · one-active-job-per-device backpressure · R238 shared host/job/mission/epoch correlation · R239 live resource-tier acceptance · stale fail-closed writes · capability-negotiated native command deck · no direct source/shell mutation primitive · R141/R146/R147/R125 preserved');
+console.log('OMEGA R237/R239.1 HYBRID COMMAND AUTHORITY PASS · authenticated secret rotation + same-session reconnect continuity · authenticated mission control · one-active-job-per-device backpressure · R238 semantic selected-host/job/mission/epoch correlation · R239 live resource-tier acceptance · stale fail-closed writes · capability-negotiated native command deck · no direct source/shell mutation primitive · R141/R146/R147/R125 preserved');
