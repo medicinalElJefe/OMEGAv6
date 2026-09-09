@@ -1,7 +1,7 @@
 const $=s=>document.querySelector(s);
 const map=$('#map');
 const wrap=map?.closest('.map-wrap');
-const nav={view:{centerLon:0,centerLat:0,scale:1},lastSelectionKey:null,pendingDevice:false,focusToken:0};
+const nav={view:{centerLon:0,centerLat:0,scale:1},lastSelectionKey:null,pendingDevice:false,focusToken:0,focusing:false};
 globalThis.OMEGA_SAR_NAVIGATION=nav;
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -16,32 +16,35 @@ function centerErrorPixels(point){
   const dy=(point.lat-nav.view.centerLat)*(r.height/180)*s;
   return {dx,dy,distance:Math.hypot(dx,dy)};
 }
-async function recenterPoint(point,{maxPasses=3}={}){
+async function recenterPoint(point,{maxPasses=3,token=null}={}){
   if(!map||!point)return false;
   for(let pass=0;pass<maxPasses;pass++){
+    if(token!=null&&token!==nav.focusToken)return false;
     const r=map.getBoundingClientRect(),error=centerErrorPixels(point);if(!error)return false;
     if(error.distance<=.75)return true;
     const cx=r.left+r.width/2,cy=r.top+r.height/2;
-    // Apply a pure camera pan, then cancel the gesture so it can never become a target-selection click.
     map.dispatchEvent(new MouseEvent('mousedown',{clientX:cx,clientY:cy,button:0,buttons:1,bubbles:true,cancelable:true}));
+    if(token!=null&&token!==nav.focusToken){map.dispatchEvent(new PointerEvent('pointercancel',{pointerId:991,pointerType:'mouse',bubbles:true,cancelable:true}));return false;}
     window.dispatchEvent(new MouseEvent('mousemove',{clientX:cx+error.dx,clientY:cy+error.dy,buttons:1,bubbles:true,cancelable:true}));
     map.dispatchEvent(new PointerEvent('pointercancel',{clientX:cx+error.dx,clientY:cy+error.dy,pointerId:991,pointerType:'mouse',bubbles:true,cancelable:true}));
     await sleep(24);
   }
+  if(token!=null&&token!==nav.focusToken)return false;
   const final=centerErrorPixels(point);return !!final&&final.distance<=1.5;
 }
 async function focusScale(target=950,point=parsePoint()){
   target=Math.max(1,Math.min(8192,Number(target)||950));
-  const token=++nav.focusToken;
+  const token=++nav.focusToken;nav.focusing=true;
   for(let i=0;i<28&&token===nav.focusToken;i++){
     const s=Number(nav.view.scale)||1;
     if(s>=target/1.12&&s<=target*1.12)break;
     wheel(s<target?-120:120);await sleep(10);
   }
-  if(token===nav.focusToken&&point){await sleep(90);await recenterPoint(point);}
+  if(token===nav.focusToken&&point){await sleep(90);if(token===nav.focusToken)await recenterPoint(point,{token});}
+  if(token===nav.focusToken)nav.focusing=false;
   return nav.view.scale;
 }
-function cancelFocus(){nav.focusToken++;}
+function cancelFocus(){nav.focusToken++;nav.focusing=false;}
 function dispatchSelected(point){if(!point)return;map.dispatchEvent(new CustomEvent('omega-map-select',{detail:point,bubbles:false}));}
 async function focusCurrentTarget(scale=950){
   const p=parsePoint();if(!p)return false;
@@ -80,6 +83,7 @@ map?.addEventListener('omega-map-view',event=>{
 });
 map?.addEventListener('omega-map-select',event=>{const p=event.detail;if(p&&Number.isFinite(p.lon)&&Number.isFinite(p.lat))nav.lastSelectionKey=key(p);});
 map?.addEventListener('pointerdown',event=>{if(event.isTrusted)cancelFocus();},true);
+map?.addEventListener('mousedown',event=>{if(event.isTrusted)cancelFocus();},true);
 map?.addEventListener('wheel',event=>{if(event.isTrusted)cancelFocus();},true);
 
 function wireProgrammaticPointSync(){
