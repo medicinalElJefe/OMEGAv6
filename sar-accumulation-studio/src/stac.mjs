@@ -10,6 +10,15 @@ export function s3ToHttps(href) {
   return `https://${bucket}.s3.amazonaws.com/${key}`;
 }
 
+export function wktPoint(wkt) {
+  if (!wkt) return null;
+  const match = String(wkt).trim().match(/^POINT\s*\(\s*(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s+(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*\)$/i);
+  if (!match) return null;
+  const lon = Number(match[1]), lat = Number(match[2]);
+  if (!Number.isFinite(lon) || !Number.isFinite(lat) || lon < -180 || lon > 180 || lat < -90 || lat > 90) return null;
+  return { type: 'Point', coordinates: [lon, lat] };
+}
+
 export function wktBounds(wkt) {
   if (!wkt) return null;
   const nums = String(wkt).match(/-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g)?.map(Number) || [];
@@ -28,8 +37,23 @@ export function buildStacBody({ start, end, bbox, intersectsWith, limit = 250 } 
     sortby: [{ field: 'properties.datetime', direction: 'asc' }]
   };
   if (start || end) body.datetime = `${start || '..'}/${end || '..'}`;
-  const bounds = bbox || wktBounds(intersectsWith);
-  if (bounds) body.bbox = bounds;
+
+  if (bbox) {
+    if (!Array.isArray(bbox) || bbox.length !== 4 || !bbox.every(Number.isFinite) || bbox[0] >= bbox[2] || bbox[1] >= bbox[3]) {
+      throw new Error('STAC bbox must have non-zero area [west,south,east,north].');
+    }
+    body.bbox = bbox;
+  } else if (intersectsWith) {
+    const point = wktPoint(intersectsWith);
+    if (point) body.intersects = point;
+    else {
+      const bounds = wktBounds(intersectsWith);
+      if (bounds) {
+        if (bounds[0] >= bounds[2] || bounds[1] >= bounds[3]) throw new Error('Spatial WKT collapsed to a zero-area search geometry.');
+        body.bbox = bounds;
+      }
+    }
+  }
   return body;
 }
 
