@@ -1,4 +1,4 @@
-name: R241 Archive Convergence Visual Intelligence
+name: R241 Archive + R242 Calculus Navigation Convergence
 
 on:
   pull_request:
@@ -32,11 +32,11 @@ jobs:
       - name: Audit locked application dependency tree
         run: npm audit --audit-level=high
 
-      - name: Prove R241 archive convergence boundaries
-        run: node tests/r241-archive-convergence-invariants.mjs
-
-      - name: Prove converged R239 user-navigation boundaries
-        run: node tests/r239-user-navigation-convergence-invariants.mjs
+      - name: Prove R241 archive and R242 calculus-navigation boundaries
+        run: |
+          node tests/r241-archive-convergence-invariants.mjs
+          node tests/r239-user-navigation-convergence-invariants.mjs
+          node tests/r242-navigation-lemma-calculus-invariants.mjs
 
       - name: Re-prove inherited continuous field and Hybrid command boundaries
         run: |
@@ -54,7 +54,7 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
-      - name: Prove built R241 visual intelligence and R239 navigation convergence
+      - name: Prove built R241 visual intelligence, R239.1 machine identity, and R242 calculus navigation
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
@@ -65,6 +65,7 @@ jobs:
           curl -fsS http://127.0.0.1:4173/ >/dev/null || { cat /tmp/omega-r241-vite.log; exit 1; }
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r241-archive-convergence-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r239-user-navigation-browser-e2e.mjs
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r242-navigation-browser-e2e.mjs
 
       - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'pull_request'
@@ -84,13 +85,13 @@ jobs:
           process.stdout.write(sha);
           NODE
           )"
-            echo "R241 live semantic proof attempt $attempt targets exact served runtime $SERVED_SHA"
+            echo "R241/R242 live semantic proof attempt $attempt targets exact served runtime $SERVED_SHA"
             if OMEGA_PROMOTED_SHA="$SERVED_SHA" node scripts/verify_live_hybrid_command_authority_r237.mjs; then
               exit 0
             fi
             if [ "$attempt" -lt 3 ]; then sleep 2; fi
           done
-          echo 'R241 could not obtain one internally consistent exact served-runtime semantic proof after 3 bounded attempts.' >&2
+          echo 'R241/R242 could not obtain one internally consistent exact served-runtime semantic proof after 3 bounded attempts.' >&2
           exit 1
 
       - name: Summarize authority boundary
@@ -98,14 +99,15 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + R239 Operator Navigation'
+            echo '## R241 Archive + R239.1 Machine Identity + R242 Calculus Navigation Convergence'
             echo "- Candidate: $GITHUB_SHA"
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
+            echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
+            echo '- The complete registered route set is partition-conserved; exact route identity outranks prefix/token/metadata search and ambiguity fails closed as a residual.'
+            echo '- R239.1 R143 machine-route identity and ancestor-aware rendered-canvas proof remain intact and run before the R242 semantic browser proof.'
             echo '- Route filaments are source routeNext-derived; neighbor filaments are deterministic display topology.'
             echo '- Gradient/curl/variance are display proxies, not physical measurement claims.'
             echo '- Typed cognition is read-only through proposal; permission/execution/return/Canon remain separately gated.'
-            echo '- R239 navigation proof is converged into this existing proof plane: six workspaces, complete 44-route registry, exact route identity, immediate aria-hidden/inert close, transition-complete hidden state, and mobile containment.'
-            echo '- No 25th workflow authority is introduced; active workflow topology remains within the R170 governed bound.'
             echo '- R147 dispatch, R146 durable history, R141 exact return and R125 sole CanonState admission remain unchanged.'
             echo '- R201/R203 remain retired.'
             echo '- PR live proof binds to the exact SHA actually served by the canonical Worker; it does not compare against a moving Git ref.'
