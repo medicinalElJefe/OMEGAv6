@@ -1,0 +1,37 @@
+name: R237 Authenticated Rotation Repair
+
+on:
+  push:
+    branches:
+      - r237-hybrid-command-authority
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: r237-hybrid-command-authority
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply exact authenticated-rotation repair
+        run: python .github/r237_rotation_repair.py
+      - name: Prove focused authority contract
+        run: |
+          node --check src/workerR32.js
+          node tests/r237-hybrid-command-authority-invariants.mjs
+      - name: Commit repair and remove temporary scaffolds
+        run: |
+          git rm -f .github/workflows/r237-authenticated-rotation-repair.yml
+          git rm -f .github/r237_rotation_repair.py
+          git rm -f .github/r237-rotation-repair.trigger || true
+          git add src/workerR32.js tests/r237-hybrid-command-authority-invariants.mjs
+          git config user.name 'Jeffrey A Dewey'
+          git config user.email 'b6qrfb57ky@privaterelay.appleid.com'
+          git commit -m 'R237: require authenticated bridge-secret rotation'
+          git push origin HEAD:r237-hybrid-command-authority
