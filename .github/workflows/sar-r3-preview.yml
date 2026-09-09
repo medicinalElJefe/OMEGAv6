@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: sar-r3-preview
+  cancel-in-progress: true
+
 env:
   SAR_PUBLIC_URL: https://omega-sar-r3.jeffdeweyeljefe.workers.dev
 
@@ -42,8 +46,8 @@ jobs:
           set -euo pipefail
           for attempt in {1..20}; do
             code="$(curl -sS -o /tmp/r3.html -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/" || true)"
-            if [ "$code" = 200 ] && grep -q 'OMEGA · SAR ACCUMULATION STUDIO' /tmp/r3.html; then break; fi
-            test "$attempt" != 20 || exit 1
+            if [ "$code" = 200 ] && grep -q 'OMEGA SAR · R3' /tmp/r3.html; then break; fi
+            test "$attempt" != 20 || { echo 'R3 root identity did not become live'; exit 1; }
             sleep 3
           done
           curl -fsS -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/src/app.mjs" | grep -q 'const renderer'
