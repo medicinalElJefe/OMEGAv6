@@ -61,6 +61,10 @@ jobs:
           code="$(curl -sS -o /tmp/r3-app.mjs -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/src/app.mjs")"
           test "$code" = 200 || { echo "R3 app module HTTP $code"; exit 1; }
           grep -q "visual: 'earth'" /tmp/r3-app.mjs
+          for module in location.mjs sar-earth-overlay.mjs sentinel-console.mjs; do
+            code="$(curl -sS -o "/tmp/$module" -w '%{http_code}' "$SAR_PUBLIC_URL/src/$module")"
+            test "$code" = 200 || { echo "R3 $module HTTP $code"; exit 1; }
+          done
           code="$(curl -sS -o /tmp/geotiff.mjs -w '%{http_code}' "$SAR_PUBLIC_URL/vendor/geotiff.bundle.mjs")"
           test "$code" = 200 || { echo "R3 GeoTIFF bundle HTTP $code"; exit 1; }
           test "$(wc -c < /tmp/geotiff.mjs)" -gt 50000 || { echo 'R3 GeoTIFF bundle unexpectedly small'; exit 1; }
@@ -68,9 +72,9 @@ jobs:
           test "$code" = 200 || { cat /tmp/stac.json; echo "R3 same-origin STAC proxy HTTP $code"; exit 1; }
           grep -q 'FeatureCollection' /tmp/stac.json
           gibs_source='https://gibs.earthdata.nasa.gov/wms/epsg4326/nrt/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.1&SRS=EPSG%3A4326&BBOX=-180%2C-90%2C180%2C90&WIDTH=512&HEIGHT=256&FORMAT=image%2Fpng&TRANSPARENT=FALSE&TIME=2026-09-07&LAYERS=VIIRS_NOAA21_CorrectedReflectance_TrueColor&STYLES='
-          code="$(curl -sS -o /tmp/gibs.png -w '%{http_code}' --get --data-urlencode "url=$gibs_source" "$SAR_PUBLIC_URL/api/gibs")"
-          test "$code" = 200 || { echo "R3 NASA GIBS proxy HTTP $code"; exit 1; }
-          test "$(wc -c < /tmp/gibs.png)" -gt 1000 || { echo 'R3 NASA GIBS image unexpectedly small'; exit 1; }
+          code="$(curl -sS -D /tmp/gibs.headers -o /tmp/gibs.bin -w '%{http_code}' --get --data-urlencode "url=$gibs_source" "$SAR_PUBLIC_URL/api/gibs")"
+          test "$code" = 200 || { echo "R3 NASA GIBS proxy HTTP $code"; cat /tmp/gibs.headers; exit 1; }
+          grep -qi '^content-type: image/' /tmp/gibs.headers || { echo 'R3 NASA GIBS upstream did not return an image'; cat /tmp/gibs.headers; head -c 800 /tmp/gibs.bin || true; exit 1; }
       - name: Install Chromium proof runtime
         run: |
           npm install --no-save playwright@1.55.0
