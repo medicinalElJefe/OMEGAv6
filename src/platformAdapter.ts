@@ -60,10 +60,9 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 20000);
   try {
-    const sessionId=runtimeSessionId(),bridge=getHybridBridge(),headers:Record<string,string>={'x-omega-session-id':sessionId,...bridgeRequestHeadersR240(method,url)},outboundBody=calculusBoundBody(method,url,body,sessionId);
+    const sessionId=runtimeSessionId(),bridge=getHybridBridge(),outboundBody=calculusBoundBody(method,url,body,sessionId),target=resolveOmegaApiUrl(url),crossOriginCanonical=target.startsWith(OMEGA_CANONICAL_ORIGIN)&&!url.startsWith(OMEGA_CANONICAL_ORIGIN),headers:Record<string,string>={'x-omega-session-id':sessionId,...(crossOriginCanonical?{}:bridgeRequestHeadersR240(method,url))};
     if(outboundBody!==undefined)headers['content-type']='application/json';
     if(bridge){headers['x-omega-bridge-id']=bridge.bridgeId;headers['x-omega-bridge-secret']=bridge.secret}
-    const target=resolveOmegaApiUrl(url);
     const response = await fetch(target, {
       method,
       headers,
@@ -170,5 +169,5 @@ export const auth = Object.freeze({
 
 export const realtime = Object.freeze({
   state: 'LIVE' as OmegaTruthState,
-  reason: 'R32 durable event/runtime state is bound. R240 calculus metadata now travels through the same browser/Hybrid bridge; native-device actions and returned proof remain separately proof-gated.'
+  reason: 'R32 durable event/runtime state is bound. R240 calculus metadata is fingerprint-bound inside Hybrid job/mission steps across browser→cloud→host→R141 return; same-origin requests may also carry observational calculus headers. Native-device actions and returned proof remain separately proof-gated.'
 });
