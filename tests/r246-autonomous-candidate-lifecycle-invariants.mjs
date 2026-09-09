@@ -5,11 +5,16 @@ import {decideAutonomousCandidateLifecycleR246,R246_AUTONOMOUS_CANDIDATE_LIFECYC
 assert.equal(R246_AUTONOMOUS_CANDIDATE_LIFECYCLE,'OMEGA_AUTONOMOUS_CANDIDATE_LIFECYCLE_R246');
 
 const base={branch:'selfbuild/r170-g1-sg001-1',baseSha:'A',currentMainSha:'A',productionProven:false};
-assert.deepEqual(decideAutonomousCandidateLifecycleR246({...base,prState:'NONE'}).action,'DELETE_BRANCH');
-assert.equal(decideAutonomousCandidateLifecycleR246({...base,prState:'NONE'}).reason,'ORPHAN_BRANCH_WITHOUT_PR');
+const orphan=decideAutonomousCandidateLifecycleR246({...base,prState:'NONE'});
+assert.equal(orphan.action,'DELETE_BRANCH');
+assert.equal(orphan.reason,'ORPHAN_BRANCH_WITHOUT_PR');
+assert.equal(orphan.deleteBranch,true);
+assert.equal(orphan.closePr,false);
+assert.equal(orphan.requiresAttention,false);
 
 const stale=decideAutonomousCandidateLifecycleR246({...base,currentMainSha:'B',prState:'OPEN',prCi:'PASS'});
 assert.equal(stale.action,'CLOSE_PR_DELETE_BRANCH');
+assert.equal(stale.reason,'STALE_BASE_AFTER_LEGITIMATE_MAIN_ADVANCEMENT');
 assert.equal(stale.closePr,true);
 assert.equal(stale.deleteBranch,true);
 assert.equal(stale.requiresAttention,false);
@@ -35,9 +40,9 @@ const workflow=fs.readFileSync('.github/workflows/r170-governed-selfbuild.yml','
 for(const token of [
   'Reconcile unpromoted autonomous candidate lifecycle',
   'reconcile_autonomous_candidate_lifecycle_r246.mjs',
-  'ORPHAN_BRANCH_WITHOUT_PR',
   'STALE_BASE_AFTER_LEGITIMATE_MAIN_ADVANCEMENT',
   'CLOSE_PR_DELETE_BRANCH',
+  "ACTION' = 'DELETE_BRANCH",
   'PRESERVE',
 ])assert.ok(workflow.includes(token),`R246 workflow lifecycle closure missing ${token}`);
 assert.ok(workflow.includes("steps.deployment.outputs.status != 'PRODUCTION_PROVEN'"),'R246 fallback reconciler must not race successful post-production cleanup');
