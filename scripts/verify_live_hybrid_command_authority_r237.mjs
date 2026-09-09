@@ -73,10 +73,10 @@ await hybridEntry.click();
 const deck=page.locator('[data-r237-command-authority="AUTHENTICATED_BOUNDED_NATIVE_CONTROL"]');
 await deck.waitFor({state:'visible'});
 const deckText=await deck.innerText();
-for(const token of ['PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','R141/R146/R147/R125 authority remains unchanged','intentionally contain no APPLY_PATCH or WRITE_TEXT'])if(!deckText.includes(token))throw new Error(`R237 live browser missing ${token}`);
-await deck.getByRole('button',{name:'Refresh'}).click();
+for(const token of ['PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','HOST / JOB / MISSION / EPOCH','intentionally contain no APPLY_PATCH or WRITE_TEXT','R141','R146','R147','R125'])if(!deckText.includes(token))throw new Error(`R237/R238 live browser missing semantic authority marker ${token}`);
+await deck.getByRole('button',{name:/Refresh/}).click();
 await page.waitForTimeout(750);
 if(pageErrors.length)throw new Error(`R237 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R237 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · unauthenticated rotation rejected + original secret preserved + authenticated rotation succeeded + old secret revoked + rotated secret preserved device continuity · queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser navigation + non-mutating refresh · R141/R146/R147/R125 preserved`);
+console.log(`R237/R238 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · unauthenticated rotation rejected + original secret preserved + authenticated rotation succeeded + old secret revoked + rotated secret preserved device continuity · queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser navigation + shared epoch semantic authority proof · R141/R146/R147/R125 preserved`);
