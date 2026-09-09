@@ -1,0 +1,50 @@
+name: R239 Adaptive Hybrid Resource Governor Proof
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/hybridResourceGovernorR239.ts'
+      - 'src/HybridResourceGovernorR239.tsx'
+      - 'src/hybridResourceGovernorR239.css'
+      - 'src/HybridCommandDeckR237.tsx'
+      - 'src/HybridLinkR32.tsx'
+      - 'public/omega-r170-self-build-governor.json'
+      - 'tests/r239-adaptive-hybrid-resource-governor-invariants.mjs'
+      - 'tests/r170-self-build-governor-invariants.mjs'
+      - 'tests/r180-current-authority-convergence-invariants.mjs'
+      - '.github/workflows/r239-adaptive-hybrid-resource-governor-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-r239:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked application graph
+        run: npm ci
+      - name: Prove R239 adaptive Hybrid resource governor
+        run: node tests/r239-adaptive-hybrid-resource-governor-invariants.mjs
+      - name: Re-prove inherited Hybrid authority and host evidence
+        run: |
+          node tests/r238-hybrid-host-intelligence-invariants.mjs
+          node tests/r238-hybrid-correlated-snapshot-invariants.mjs
+          node tests/r238-woven-hybrid-continuity-invariants.mjs
+          node tests/r237-hybrid-command-authority-invariants.mjs
+          node tests/r212-live-host-effects-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+      - name: Prove governed capability floor and current authority
+        run: |
+          node tests/r170-self-build-governor-invariants.mjs
+          node tests/r180-current-authority-convergence-invariants.mjs
+          node scripts/verify_workflow_topology_r170.mjs
+      - name: Production frontend build
+        run: npm run build
