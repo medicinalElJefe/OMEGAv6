@@ -25,8 +25,8 @@ const status={
   {id:'dev-b',name:'OMEGA PC B',online:true,revoked:false,lastSeen:Date.now(),rootLabel:'J:/OMEGA-B',capabilities:caps}
  ],
  jobs:[
-  {id:'proof_job_a',targetDeviceId:'dev-a',status:'VERIFIED',returnPacket:{stepProofs:[{id:'S01',op:'DESKTOP_HEALTH',ok:true,result:{hostProfileR238:profile('a','CPU-A-ONLY','GPU-A-ONLY'),macroInventoryR238:macros('a')}}]}},
-  {id:'proof_job_b',targetDeviceId:'dev-b',status:'VERIFIED',returnPacket:{stepProofs:[{id:'S01',op:'DESKTOP_HEALTH',ok:true,result:{hostProfileR238:profile('b','CPU-B-ONLY','GPU-B-ONLY'),macroInventoryR238:macros('b')}}]}}
+  {id:'proof_job_a',targetDeviceId:'dev-a',status:'COMPLETE',completedAt:Date.now()-3000,returnPacket:{receivedAt:Date.now()-3000,resultFingerprint:'fp-a',stepProofs:[{id:'S01',op:'DESKTOP_HEALTH',ok:true,result:{hostProfileR238:profile('a','CPU-A-ONLY','GPU-A-ONLY'),macroInventoryR238:macros('a')}}]}},
+  {id:'proof_job_b',targetDeviceId:'dev-b',status:'COMPLETE',completedAt:Date.now()-2000,returnPacket:{receivedAt:Date.now()-2000,resultFingerprint:'fp-b',stepProofs:[{id:'S01',op:'DESKTOP_HEALTH',ok:true,result:{hostProfileR238:profile('b','CPU-B-ONLY','GPU-B-ONLY'),macroInventoryR238:macros('b')}}]}}
  ]
 };
 await page.route('**/api/hybrid/status',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(status)}));
@@ -56,5 +56,5 @@ for(const token of ['OMEGA PC B','dev-b','CPU-B-ONLY','GPU-B-ONLY','proof_job_b'
 for(const forbidden of ['CPU-A-ONLY','GPU-A-ONLY','proof_job_a'])if(text.includes(forbidden))throw new Error(`R238 leaked host A proof after R237 selected host B: ${forbidden}`);
 if(pageErrors.length)throw new Error(`R238 browser page errors: ${pageErrors.join(' | ')}`);
 
-console.log('OMEGA R238 BUILT BROWSER PASS · R237 selected-device identity drives R238 returned host proof · host A/B evidence isolation proven · no cross-host resource leakage');
+console.log('OMEGA R238 BUILT BROWSER PASS · real COMPLETE host returns · R237 selected-device identity drives R238 returned host proof · host A/B evidence isolation proven · no cross-host resource leakage');
 await browser.close();
