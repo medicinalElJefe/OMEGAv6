@@ -9,8 +9,8 @@
 </head>
 <body>
 <header>
-  <div class="brand"><b>OMEGA · SAR ACCUMULATION STUDIO</b><span class="tag">MEASURED-FIRST</span><span class="tag" id="liveTag">LIVE READY</span><span class="tag">WORLD + ATLAS</span></div>
-  <div class="sub">Acquisition chronology · actual Sentinel-1 GRD pixels · NISAR/ASF evidence · NASA near-real-time world context · Dewey Atlas inference with uncertainty</div>
+  <div class="brand"><b>OMEGA · SAR ACCUMULATION STUDIO</b><span class="tag">MEASURED-FIRST</span><span class="tag" id="liveTag">LIVE READY</span><span class="tag">WORLD + ATLAS</span><span class="tag">CHARTED CANON</span></div>
+  <div class="sub">Acquisition chronology · actual Sentinel-1 GRD pixels · NISAR/ASF evidence · NASA near-real-time world context · Dewey Atlas inference · charted Canon host calibration</div>
   <div class="head-status"><span>Clock <b id="wallClock">—</b></span><span>Source <b id="sourceBadge">NONE</b></span><span>Latest SAR <b id="freshness">—</b></span><span>Context <b id="contextStamp">OFF</b></span></div>
 </header>
 <main>
@@ -49,6 +49,7 @@
     <section><h2>Truth semantics</h2>
       <p><b>Measured.</b> Source SAR footprint/pixel with acquisition provenance.</p>
       <p><b>Contextual.</b> NASA GIBS/Worldview satellite imagery aligned in time and geography; not promoted to SAR values.</p>
+      <p><b>Derived.</b> Canon host variables computed from measured SAR only; they remain separate from the raw pixel.</p>
       <p><b>Inferred.</b> Dewey Atlas gap estimate computed only from measured anchors and accompanied by uncertainty/confidence/scar support.</p>
       <p><b>Unknown.</b> If support is inadequate, the system preserves the gap.</p>
       <ul id="warnings"></ul>
@@ -114,6 +115,6 @@
     </div>
   </section>
 </main>
-<script type="module" src="src/app.mjs"></script>
+<script type="module" src="src/bootstrap.mjs"></script>
 </body>
 </html>
