@@ -56,7 +56,7 @@ try {
   const rasterText = (await page.textContent('#rasterEmpty') || '').trim();
   const rasterStats = (await page.textContent('#rasterStats') || '').trim();
   const proof = (await page.textContent('#sarCalProof') || '').trim();
-  const rasterLoaded = /CALIBRATED GRD/i.test(rasterStats) && /PRODUCT LUT/i.test(rasterStats) && /PRODUCT_GCP_BILINEAR|NEAREST_GCP_FALLBACK/i.test(proof);
+  const rasterLoaded = /CALIBRATED GRD/i.test(rasterStats) && /PRODUCT LUT/i.test(rasterStats) && /PRODUCT_GCP_BILINEAR|PRODUCT_GCP_LOCAL_TRIANGLE|NEAREST_GCP_FALLBACK/i.test(proof);
 
   const canvasPixels = await page.evaluate(() => {
     const c = document.querySelector('#raster');
