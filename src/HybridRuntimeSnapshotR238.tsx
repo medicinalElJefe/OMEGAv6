@@ -42,9 +42,12 @@ export function HybridRuntimeSnapshotProviderR238({children}:{children:ReactNode
   if(inFlight.current)return inFlight.current;
   const request=(async()=>{
    try{
-    const[h,m]=await Promise.all([api.get<any>('/api/hybrid/status'),api.get<any>('/api/missions')]);
+    // R238 consumes one canonical OMEGA_RUNTIME Durable Object state projection.
+    // /api/hybrid/status is derived from that single durable state and already carries
+    // devices, jobs and missions together, so no second /api/missions read is allowed here.
+    const h=await api.get<any>('/api/hybrid/status');
     const hybrid=h.data||{};
-    const missions=Array.isArray(m.data?.missions)?m.data.missions:[];
+    const missions=Array.isArray(hybrid?.missions)?hybrid.missions:[];
     const observedAt=Date.now();
     setSnapshot(previous=>({hybrid,missions,observedAt,epoch:previous.epoch+1,loading:false}));
     setError('');
