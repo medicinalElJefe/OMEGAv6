@@ -11,6 +11,7 @@ const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
 const verifier=fs.readFileSync('scripts/verify_live_hybrid_command_authority_r237.mjs','utf8');
 const r239=fs.readFileSync('src/hybridResourceGovernorR239.ts','utf8');
 const ui=fs.readFileSync('src/RecursiveSelfBuildR240.tsx','utf8');
+const calculusUi=fs.readFileSync('src/CalculusAddressFabricR240.tsx','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 
 assert.equal(policy.schema,'OMEGA_RECURSIVE_EXACT_SELF_PROMOTION_R240');
@@ -80,8 +81,11 @@ assert.ok(r239.includes("R239_REVISION='R239'"),'production R239 Hybrid resource
 assert.ok(r239.includes("canonicalAdmissionAuthority:'R125'"),'R239 must preserve R125 authority');
 
 for(const token of ["data-r240-recursive-selfbuild='EVIDENCE_BOUND_SPARSE_PLAN_EXACT_PROMOTION'",'R240 · FULL OVERALL CANON · RECURSIVE SELF-BUILD + EXACT PROMOTION','R239 PRESERVED','GENERATED ≠ PROVED ≠ SOURCE-PROMOTED ≠ DEPLOYED ≠ LIVE-VERIFIED ≠ CANON-ADMITTED','R125 sole CanonState admission authority'])assert.ok(ui.includes(token),`R240 operator surface missing ${token}`);
+for(const token of ["data-r240-calculus-address='SPARSE_ADDRESS_FABRIC'",'20,736 ADDRESS FABRIC','179 source modes + 62 lenses','+1 DISPATCH','−1 RETURN','0 OBSERVE'])assert.ok(calculusUi.includes(token),`R240 calculus operator surface missing ${token}`);
 assert.ok(suite.includes("import RecursiveSelfBuildR240 from './RecursiveSelfBuildR240'"));
+assert.ok(suite.includes("import CalculusAddressFabricR240 from './CalculusAddressFabricR240'"));
 assert.ok(suite.includes('<RecursiveSelfBuildR240/>'));
+assert.ok(suite.includes('<CalculusAddressFabricR240 record={record}/>'));
 
 for(const token of ['actions: write',"['push','workflow_dispatch'].includes(r.event)",'R240 EXACT CANDIDATE PASS','R240 exact two-parent source promotion PASS','pulls/$PR_NUMBER/merge','-f merge_method=merge','-f sha="$CANDIDATE_SHA"','actions/workflows/ci.yml/dispatches','--event workflow_dispatch','gh run watch "$RUN_ID"','R240 exact promoted merge is production-proven by canonical ci.yml','POLICY_BLOCKED_BRANCH_REMOVED'])assert.ok(workflow.includes(token),`R240 self-promotion workflow missing ${token}`);
 assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(workflow),'R240 may not direct-push generated source to main');
@@ -98,4 +102,5 @@ assert.ok(!ci.includes('workflow_run:'),'canonical deployment must not add recur
 for(const token of ['HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE','data-r239-resource-tier','R141','R146','R147','R125','intentionally contain no APPLY_PATCH or WRITE_TEXT'])assert.ok(verifier.includes(token),`R240 semantic live verifier missing ${token}`);
 assert.ok(!verifier.includes('R238 changes correlation and sampling, not execution or Canon authority'),'obsolete prose-coupled verifier must be gone');
 
-console.log('OMEGA R240 RECURSIVE EXACT SELF-PROMOTION PASS · R239 Hybrid governor preserved · R164 evidence-bound sparse scheduler · user value never inferred · exact production base/residual/all-green/allowlist/unchanged-base/expected-head gates · two-parent merge · canonical ci.yml exact-production proof · R125 admission unchanged');
+console.log('OMEGA R240 RECURSIVE EXACT SELF-PROMOTION PASS · R239 Hybrid governor preserved · R164 evidence-bound sparse scheduler · full 20,736 calculus surface preserved · exact production base/residual/all-green/allowlist/unchanged-base/expected-head gates · two-parent merge · canonical ci.yml exact-production proof · R125 admission unchanged');
+await import('./r240-full-calculus-bridge-invariants.mjs');
