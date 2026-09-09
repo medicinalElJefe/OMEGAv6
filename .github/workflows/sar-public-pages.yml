@@ -1,9 +1,6 @@
-name: SAR Public Workstation
+name: SAR Public Workstation · GitHub Pages Fallback
 
 on:
-  push:
-    branches:
-      - release/sar-accumulation-studio-public-r1
   workflow_dispatch:
 
 permissions:
@@ -11,74 +8,11 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: sar-public-pages
-  cancel-in-progress: false
-
 jobs:
-  verify:
+  explain:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: sar-accumulation-studio
     steps:
-      - name: Checkout sealed release
-        uses: actions/checkout@v4
-
-      - name: Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: sar-accumulation-studio/processor/requirements.txt
-
-      - name: Install native SAR processor dependencies
-        run: python -m pip install -r processor/requirements.txt
-
-      - name: Verify public application and native processors
-        run: |
-          npm run check
-          npm test
-          python -m compileall -q processor
-          python -m pytest -q tests/test_nisar_gcov.py tests/test_nisar_gunw.py tests/test_omega_sar_public.py
-          python -m processor.cli --help | grep -q 'gunw-extract'
-          grep -q 'PUBLIC SCIENTIFIC WORKSTATION' index.html
-          grep -q 'GCOV + GUNW' index.html
-          grep -q 'omega.sar.nisar.gunw.measurement.v1' src/nisar-console.mjs
-
-      - name: Prove standalone non-production authority
-        run: |
-          if grep -RniE 'wrangler[[:space:]]+deploy|vercel[[:space:]]+deploy|cloudflare.*deploy' . --exclude-dir=node_modules; then
-            echo 'Unexpected production deployment authority found in standalone SAR package.' >&2
-            exit 1
-          fi
-          echo 'Standalone SAR release contains no OMEGA production deploy command.'
-
-      - name: Upload verified public workstation
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: sar-accumulation-studio
-
-  deploy:
-    needs: verify
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Enable and configure GitHub Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
-      - name: Deploy verified workstation
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Publish URL
-        run: echo "${{ steps.deployment.outputs.page_url }}"
+      - run: |
+          echo 'GitHub Pages fallback is intentionally manual.'
+          echo 'Repository-level Pages enablement is outside the GitHub Actions integration authority.'
+          echo 'Primary standalone public hosting uses the isolated Cloudflare Pages release workflow.'
