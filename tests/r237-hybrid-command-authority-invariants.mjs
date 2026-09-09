@@ -11,6 +11,7 @@ const liveVerifier=read('scripts/verify_live_hybrid_command_authority_r237.mjs')
 const adapter=read('src/platformAdapter.ts');
 const bridge=read('src/system/hybridBridgeCalculusR240.ts');
 const proofAgent=read('public/omega-hybrid-agent-r141.py');
+const ci=read('.github/workflows/ci.yml');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 
 for(const token of [
@@ -67,4 +68,20 @@ const staticTokenBlock=liveVerifier.match(/for\(const token of \[(.*?)\]\)if\(!d
 must(!staticTokenBlock.includes('HOST / JOB / MISSION / EPOCH LOCKED'),'R240.1 must not require LOCKED-state prose unconditionally');
 must(!staticTokenBlock.includes('EXECUTION CONTEXT HELD'),'R240.1 must not require HELD-state prose unconditionally');
 
-console.log('OMEGA R237/R239.2/R240.1 HYBRID COMMAND AUTHORITY PASS · authenticated rotation + same-session reconnect · per-device backpressure · shared selected-device/epoch/resource envelope · state-semantic LOCKED versus HELD live proof · 20,736 calculus step identity fingerprint-bound through R32 and echoed into R141 return proof · no direct source/shell mutation · R141/R146/R147/R125 preserved');
+for(const token of [
+ 'id: deploy_worker','id: live_runtime','id: hybrid_agent','id: federation_rcwa','id: earth_r8','id: earth_r9','id: live_ai','id: browser_r200','id: live_r202','id: live_r237','id: live_r238',
+ 'continue-on-error: true','if: always()','Enforce complete Hybrid live-proof closure',
+ '${{ steps.live_r237.outcome }}','${{ steps.live_r238.outcome }}','R240.1 production truth closure'
+])must(ci.includes(token),`R240.1 canonical deployment topology missing ${token}`);
+const r237Step=ci.indexOf('- name: Verify live R237 authenticated Hybrid command authority');
+const r238Step=ci.indexOf('- name: Verify live R238 Hybrid host intelligence');
+const closureStep=ci.indexOf('- name: Enforce complete Hybrid live-proof closure');
+const receiptStep=ci.indexOf('- name: Record deployment receipt');
+must(r237Step>=0&&r238Step>r237Step&&closureStep>r238Step&&receiptStep>closureStep,'R240.1 production proof order must run R237 then independently R238, enforce both outcomes, then record truth receipt');
+const r238Window=ci.slice(r238Step,closureStep);
+must(r238Window.includes('if: always()')&&r238Window.includes('continue-on-error: true'),'R240.1 R238 live proof must still execute after a red R237 gate so failures cannot hide one another');
+const receiptWindow=ci.slice(receiptStep);
+for(const id of ['deploy_worker','live_runtime','hybrid_agent','federation_rcwa','earth_r8','earth_r9','live_ai','browser_r200','live_r202','live_r237','live_r238'])must(receiptWindow.includes(`steps.${id}.outcome`),`R240.1 deployment receipt must report actual ${id} outcome`);
+must(!receiptWindow.includes('required for deployment PASS'),'R240.1 deployment receipt must not print unconditional PASS claims');
+
+console.log('OMEGA R237/R239.2/R240.1 HYBRID COMMAND AUTHORITY PASS · authenticated rotation + same-session reconnect · per-device backpressure · shared selected-device/epoch/resource envelope · state-semantic LOCKED versus HELD live proof · both live Hybrid gates independently execute before fail-closed closure · deployment receipt reports actual step outcomes · 20,736 calculus step identity fingerprint-bound through R32 and echoed into R141 return proof · no direct source/shell mutation · R141/R146/R147/R125 preserved');
