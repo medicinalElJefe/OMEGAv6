@@ -57,6 +57,7 @@ export function gibsContextManifest({bbox,date,layers,url,requestedDate=null,fal
 if(typeof document!=='undefined'){
   import('./location.mjs').catch(()=>{});
   import('./sentinel-console.mjs').catch(error=>console.error('Sentinel calibrated console failed to initialize',error));
+  import('./sar-browse-overlay.mjs').catch(error=>console.error('Sentinel source SAR overlay failed to initialize',error));
   import('./sar-earth-overlay.mjs').catch(()=>{});
   import('./omega-field-console.mjs').catch(error=>console.error('OMEGA continuous field failed to initialize',error));
   import('./interaction-runtime.mjs').catch(error=>console.error('OMEGA interaction runtime failed to initialize',error));
