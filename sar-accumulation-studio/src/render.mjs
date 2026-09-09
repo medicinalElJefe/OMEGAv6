@@ -1,6 +1,7 @@
 import { geometryRings, unwrapRing, wrapLon } from './geometry.mjs';
 
 const MAX_VIEW_SCALE=8192;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)));
 
 function centroidOfGeometry(geometry) {
   const points=[];
@@ -29,6 +30,7 @@ export class WorldRenderer {
     this.sarOverlay = null;
     this._lastSelectionAt = 0;
     this._lastPointerDownAt = 0;
+    this._suppressClickUntil = 0;
     this._wire();
     new ResizeObserver(() => this.resize()).observe(canvas);
     this.resize();
@@ -54,10 +56,10 @@ export class WorldRenderer {
     return [minLon,minLat,maxLon,maxLat];
   }
 
-  fitLocation(lon,lat,scale=180){
+  fitLocation(lon,lat,scale=640){
     this.view.centerLon=wrapLon(Number(lon));
-    this.view.centerLat=Math.max(-85,Math.min(85,Number(lat)));
-    this.view.scale=Math.max(1,Math.min(MAX_VIEW_SCALE,Number(scale)||180));
+    this.view.centerLat=clamp(lat,-85,85);
+    this.view.scale=clamp(Number(scale)||640,1,MAX_VIEW_SCALE);
     this.redraw?.();this._notifyView();
   }
 
@@ -72,10 +74,45 @@ export class WorldRenderer {
     const paddedLon=Math.max(lonSpan*padding,0.0008),paddedLat=Math.max((maxLat-minLat)*padding,0.0005);
     const scaleLon=360/paddedLon,scaleLat=180/paddedLat;
     this.view.centerLon=centerLon;
-    this.view.centerLat=Math.max(-85,Math.min(85,centerLat));
+    this.view.centerLat=clamp(centerLat,-85,85);
     this.view.scale=Math.max(minScale,Math.min(maxScale,Math.min(scaleLon,scaleLat)));
     this.redraw?.();this._notifyView();
     return true;
+  }
+
+  setPoint(lon,lat,{emit=true,redraw=true}={}){
+    lon=wrapLon(Number(lon));lat=clamp(lat,-90,90);
+    if(!Number.isFinite(lon)||!Number.isFinite(lat))return false;
+    this.point={lon,lat};
+    this._lastSelectionAt=performance.now();
+    if(emit){this.onPoint?.(this.point);this._dispatch('omega-map-select',this.point);}
+    if(redraw)this.redraw?.();
+    return true;
+  }
+
+  panByPixels(dx,dy){
+    if(!Number.isFinite(dx)||!Number.isFinite(dy)||!this.w||!this.h)return;
+    this.view.centerLon=wrapLon(this.view.centerLon-dx/((this.w/360)*this.view.scale));
+    this.view.centerLat=clamp(this.view.centerLat+dy/((this.h/180)*this.view.scale),-85,85);
+    this.redraw?.();this._notifyView();
+  }
+
+  zoomAt(clientX,clientY,factor,{notify=true}={}){
+    const rect=this.canvas.getBoundingClientRect();
+    const px=clamp(clientX-rect.left,0,this.w),py=clamp(clientY-rect.top,0,this.h);
+    const [anchorLon,anchorLat]=this.unproject(px,py);
+    const next=clamp(this.view.scale*(Number(factor)||1),1,MAX_VIEW_SCALE);
+    if(next===this.view.scale)return;
+    this.view.scale=next;
+    this.view.centerLon=wrapLon(anchorLon-(px-this.w/2)/((this.w/360)*next));
+    this.view.centerLat=clamp(anchorLat+(py-this.h/2)/((this.h/180)*next),-85,85);
+    this.redraw?.();
+    if(notify)this._notifyView();
+  }
+
+  zoomBy(factor,{notify=true}={}){
+    const rect=this.canvas.getBoundingClientRect();
+    this.zoomAt(rect.left+rect.width/2,rect.top+rect.height/2,factor,{notify});
   }
 
   async setBaseImage(url, meta=null){
@@ -105,7 +142,7 @@ export class WorldRenderer {
 
   unproject(x, y) {
     const lon = wrapLon(this.view.centerLon + (x - this.w/2) / ((this.w/360)*this.view.scale));
-    const lat = Math.max(-90, Math.min(90, this.view.centerLat - (y - this.h/2) / ((this.h/180)*this.view.scale)));
+    const lat = clamp(this.view.centerLat - (y - this.h/2) / ((this.h/180)*this.view.scale),-90,90);
     return [lon, lat];
   }
 
@@ -246,22 +283,19 @@ export class WorldRenderer {
   _selectClient(clientX,clientY){
     const rect=this.canvas.getBoundingClientRect();
     const [lon,lat]=this.unproject(clientX-rect.left,clientY-rect.top);
-    this.point={lon,lat};
-    this._lastSelectionAt=performance.now();
-    this.onPoint?.(this.point);
-    this._dispatch('omega-map-select',this.point);
-    this.redraw?.();
+    this.setPoint(lon,lat,{emit:true,redraw:true});
   }
 
   _beginDrag(clientX,clientY){
     this.drag={x:clientX,y:clientY,lon:this.view.centerLon,lat:this.view.centerLat};
+    this.canvas.dataset.dragging='true';
   }
 
   _moveDrag(clientX,clientY){
     if(!this.drag)return false;
     const dx=clientX-this.drag.x,dy=clientY-this.drag.y;
     this.view.centerLon=wrapLon(this.drag.lon-dx/((this.w/360)*this.view.scale));
-    this.view.centerLat=Math.max(-80,Math.min(80,this.drag.lat+dy/((this.h/180)*this.view.scale)));
+    this.view.centerLat=clamp(this.drag.lat+dy/((this.h/180)*this.view.scale),-85,85);
     this.redraw?.();
     this._dispatch('omega-map-view',{centerLon:this.view.centerLon,centerLat:this.view.centerLat,scale:this.view.scale,bbox:this.viewBounds()});
     return true;
@@ -270,33 +304,46 @@ export class WorldRenderer {
   _finishDrag(clientX,clientY,{selectOnClick=true}={}){
     if(!this.drag)return false;
     const moved=Math.hypot(clientX-this.drag.x,clientY-this.drag.y)>4;
-    this.drag=null;
-    if(!moved&&selectOnClick)this._selectClient(clientX,clientY);
+    this.drag=null;delete this.canvas.dataset.dragging;
+    if(moved)this._suppressClickUntil=performance.now()+500;
+    else if(selectOnClick)this._selectClient(clientX,clientY);
     this._notifyView();
     return moved;
   }
 
   _wire() {
     this.canvas.style.touchAction='none';
+    this.canvas.style.cursor='grab';
+    this.canvas.tabIndex=0;
+    this.canvas.setAttribute('role','application');
+    this.canvas.setAttribute('aria-label','Interactive Earth SAR map. Drag to pan, wheel to zoom at pointer, click to bind target.');
+
     this.canvas.addEventListener('wheel', e => {
       e.preventDefault();
-      const factor=e.deltaY<0?1.35:1/1.35;
-      this.view.scale=Math.max(1,Math.min(MAX_VIEW_SCALE,this.view.scale*factor));
-      this.redraw?.();
+      const factor=e.deltaY<0?1.42:1/1.42;
+      this.zoomAt(e.clientX,e.clientY,factor,{notify:false});
       clearTimeout(this._viewTimer);
-      this._viewTimer=setTimeout(()=>this._notifyView(),120);
+      this._viewTimer=setTimeout(()=>this._notifyView(),90);
     }, {passive:false});
+
+    this.canvas.addEventListener('dblclick',e=>{
+      e.preventDefault();
+      this.zoomAt(e.clientX,e.clientY,2,{notify:true});
+      this._suppressClickUntil=performance.now()+300;
+    });
 
     this.canvas.addEventListener('pointerdown', e => {
       if(e.pointerType==='mouse'&&e.button!==0)return;
       this._lastPointerDownAt=performance.now();
+      this.canvas.focus({preventScroll:true});
+      this.canvas.style.cursor='grabbing';
       this.canvas.setPointerCapture?.(e.pointerId);
       this._beginDrag(e.clientX,e.clientY);
     });
     this.canvas.addEventListener('pointermove', e => this._moveDrag(e.clientX,e.clientY));
-    this.canvas.addEventListener('pointerup', e => this._finishDrag(e.clientX,e.clientY));
-    this.canvas.addEventListener('pointercancel', () => {this.drag=null;this._notifyView()});
-    this.canvas.addEventListener('lostpointercapture', () => {if(this.drag){this.drag=null;this._notifyView()}});
+    this.canvas.addEventListener('pointerup', e => {this.canvas.style.cursor='grab';this._finishDrag(e.clientX,e.clientY)});
+    this.canvas.addEventListener('pointercancel', () => {this.canvas.style.cursor='grab';this.drag=null;delete this.canvas.dataset.dragging;this._notifyView()});
+    this.canvas.addEventListener('lostpointercapture', () => {if(this.drag){this.canvas.style.cursor='grab';this.drag=null;delete this.canvas.dataset.dragging;this._notifyView()}});
 
     this.canvas.addEventListener('mousedown', e => {
       if(e.button!==0)return;
@@ -304,12 +351,24 @@ export class WorldRenderer {
       this._beginDrag(e.clientX,e.clientY);
     });
     window.addEventListener('mousemove', e => {if(!this.drag)return;this._moveDrag(e.clientX,e.clientY);});
-    window.addEventListener('mouseup', e => {if(e.button!==0||!this.drag)return;this._finishDrag(e.clientX,e.clientY);});
+    window.addEventListener('mouseup', e => {if(e.button!==0||!this.drag)return;this.canvas.style.cursor='grab';this._finishDrag(e.clientX,e.clientY);});
 
     this.canvas.addEventListener('click', e => {
-      if(performance.now()-this._lastSelectionAt<120)return;
+      if(performance.now()<this._suppressClickUntil)return;
+      if(performance.now()-this._lastSelectionAt<160)return;
       this._selectClient(e.clientX,e.clientY);
       this._notifyView();
+    });
+
+    this.canvas.addEventListener('keydown',e=>{
+      const stepX=this.w*.12,stepY=this.h*.12;
+      if(e.key==='ArrowLeft'){e.preventDefault();this.panByPixels(-stepX,0)}
+      else if(e.key==='ArrowRight'){e.preventDefault();this.panByPixels(stepX,0)}
+      else if(e.key==='ArrowUp'){e.preventDefault();this.panByPixels(0,-stepY)}
+      else if(e.key==='ArrowDown'){e.preventDefault();this.panByPixels(0,stepY)}
+      else if(e.key==='+'||e.key==='='){e.preventDefault();this.zoomBy(1.55)}
+      else if(e.key==='-'||e.key==='_'){e.preventDefault();this.zoomBy(1/1.55)}
+      else if(e.key==='Home'||e.key==='0'){e.preventDefault();this.fitLocation(0,0,1)}
     });
   }
 }
