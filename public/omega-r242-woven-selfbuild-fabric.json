@@ -39,7 +39,7 @@
     "userValueDeficitMayBeInferred": false
   },
   "workCellEnvelope": [
-    "address", "parent", "objective", "inputs", "dependencies", "invariants", "target", "tests", "expectedOutputs", "authorityBoundary", "residuals", "state", "provenance", "evidenceClass", "sigma", "transformationHistory", "executionIdentity", "proofIdentity"
+    "address", "parent", "objective", "inputs", "dependencies", "invariants", "target", "files", "tests", "expectedOutputs", "authorityBoundary", "residuals", "state", "provenance", "evidenceClass", "sigma", "transformationHistory", "executionIdentity", "proofIdentity"
   ],
   "invariantCarry": [
     "R125 sole CanonState admission authority",
