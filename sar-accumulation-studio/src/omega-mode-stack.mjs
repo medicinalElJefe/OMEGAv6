@@ -1,14 +1,16 @@
 import { buildOmegaContinuousField, OMEGA_SKINS as CORE_SKINS } from './omega-field-core.mjs';
+import { fitSatelliteToSar, predictSarFromSatellite } from './omega-satellite-skin.mjs';
 
 export const FULL_OMEGA_MODE_STACK=Object.freeze([
   'OVERALL_CANON','UNIFIED_COHERENCE','MODE188','DEEP_MOTHER','HIGH_FATHER','NO_NOTHING_TRUTH','GUIDANCE_FIELD','FULL_SPHERE',
   'ALPHA','CRIMSON','FORECAST','RECOVERY','STABILIZATION','INTEGRATION','TRUTH_TRAVERSAL','RAFT188','CTDE','GAMMA_ADMISSION',
-  'CONTINUANCE_EVOLUTION','HEAVY_PRUNE','DIMENSION_SKIN','PROOF_LEDGER','RENDERER_FIELD',...CORE_SKINS
+  'CONTINUANCE_EVOLUTION','HEAVY_PRUNE','DIMENSION_SKIN','REALTIME_SATELLITE_SKIN','PROOF_LEDGER','RENDERER_FIELD',...CORE_SKINS
 ]);
 
 const clamp01=v=>Math.max(0,Math.min(1,Number(v)));
 const finite=v=>Number.isFinite(Number(v));
 const median=v=>{const x=v.filter(finite).map(Number).sort((a,b)=>a-b);if(!x.length)return null;const m=Math.floor(x.length/2);return x.length%2?x[m]:(x[m-1]+x[m])/2};
+const mad=(v,c=median(v))=>finite(c)?median(v.filter(finite).map(x=>Math.abs(Number(x)-c))):null;
 const key=(x,y)=>`${x}:${y}`;
 
 function neighborhood(field,cell,radius=1){
@@ -22,6 +24,38 @@ function neighborhood(field,cell,radius=1){
   return out;
 }
 
+function satelliteAssimilationPass(field,options){
+  const context=options?.satelliteContext;
+  if(!context)return {...field,satelliteFit:{state:'SATELLITE_CONTEXT_UNAVAILABLE',confidence:0}};
+  const anchors=(options?.anchors||[]).filter(a=>a?.measured!==false&&finite(a?.value));
+  const fit=fitSatelliteToSar(anchors,context);
+  if(fit.state!=='SATELLITE_SAR_FIT_READY'){
+    const cells=field.cells.map(c=>({...c,modeLedger:{...(c.modeLedger||{}),REALTIME_SATELLITE_SKIN:{state:fit.state,support:fit.support||0}}}));
+    return {...field,cells,satelliteFit:fit};
+  }
+  const anchorValues=anchors.map(a=>Number(a.value)),center=median(anchorValues)??0,scale=Math.max(1,1.4826*(mad(anchorValues,center)??3));
+  const cells=field.cells.map(cell=>{
+    const pred=predictSarFromSatellite(context,fit,cell.lon,cell.lat);
+    const ledger={...(cell.modeLedger||{})};
+    if(!pred){ledger.REALTIME_SATELLITE_SKIN='OUTSIDE_CONTEXT_OR_UNRESOLVED';return {...cell,modeLedger:ledger};}
+    ledger.REALTIME_SATELLITE_SKIN={state:'ASSIMILATED_CORRELATED_REALTIME_CONTEXT',authority:context.authority,date:context.date,layers:context.layers,fitR2:fit.r2,fitRmse:fit.rmse,fitConfidence:fit.confidence};
+    if(cell.measured)return {...cell,modeLedger:{...ledger,REALTIME_SATELLITE_SKIN:{...ledger.REALTIME_SATELLITE_SKIN,action:'MEASURED_ANCHOR_FIXED'}}};
+    const satSigma=Math.max(.8,pred.uncertainty||2),baseSigma=Math.max(.8,cell.uncertainty||3);
+    let value,confidence,uncertainty,satelliteFraction=1;
+    if(finite(cell.value)){
+      const wb=Math.max(.01,cell.confidence||.15)/(baseSigma*baseSigma),ws=Math.max(.01,pred.confidence)/(satSigma*satSigma),sum=wb+ws;
+      value=(wb*cell.value+ws*pred.value)/sum;uncertainty=Math.sqrt(1/sum);confidence=clamp01(1-(1-clamp01(cell.confidence||0))*(1-clamp01(pred.confidence)));satelliteFraction=ws/sum;
+    }else{
+      value=pred.value;uncertainty=satSigma;confidence=.72*pred.confidence;satelliteFraction=1;
+    }
+    const displayValue=clamp01(.5+.18*((value-center)/scale));
+    const state=confidence>=.72?'OMEGA_RECONSTRUCTED_SATELLITE_HIGH':confidence>=.42?'OMEGA_RECONSTRUCTED_SATELLITE':'OMEGA_RECONSTRUCTED_SATELLITE_LOW';
+    return {...cell,value,displayValue,uncertainty,confidence,state,measured:false,inferred:true,
+      provenance:{...(cell.provenance||{}),realtimeSatellite:satelliteFraction},modeLedger:ledger};
+  });
+  return {...field,cells,satelliteFit:fit};
+}
+
 function recoveryPass(field){
   const next=field.cells.map(cell=>({...cell,modeLedger:{...(cell.modeLedger||{})}}));
   for(const cell of next){
@@ -30,7 +64,6 @@ function recoveryPass(field){
     const peerMedian=median(peers.map(p=>p.value));
     if(!finite(peerMedian)){cell.modeLedger.RECOVERY='UNRESOLVED';continue;}
     if(!finite(cell.value)){
-      // Recovery creates an inferred candidate only when neighboring admitted state exists.
       cell.value=peerMedian;
       cell.displayValue=median(peers.map(p=>p.displayValue))??cell.displayValue;
       cell.confidence=Math.min(.38,median(peers.map(p=>p.confidence))??.25);
@@ -115,19 +148,19 @@ function summarize(field){
   const counts={};let admitted=0,prior=0,hold=0,contradictions=0,guidance=0;
   for(const c of field.cells){counts[c.gammaAdmission]=(counts[c.gammaAdmission]||0)+1;if(c.gammaAdmission?.startsWith('ADMIT'))admitted++;else if(c.gammaAdmission==='DISPLAY_PRIOR_ONLY')prior++;else hold++;contradictions+=c.contradictions?.length||0;guidance+=c.guidanceNeed||0;}
   const n=Math.max(1,field.cells.length);
-  return {...field.summary,admission:counts,admittedFraction:admitted/n,priorFraction:prior/n,holdFraction:hold/n,contradictions,guidanceMean:guidance/n};
+  return {...field.summary,admission:counts,admittedFraction:admitted/n,priorFraction:prior/n,holdFraction:hold/n,contradictions,guidanceMean:guidance/n,satelliteFit:field.satelliteFit||null};
 }
 
 export function buildFullOmegaField(options={}){
   const base=buildOmegaContinuousField(options);
-  // ALPHA controls pass order; each pass consumes the same frame-relative field state.
-  let field={...base,modePipeline:['ALPHA','RECOVERY','STABILIZATION','CTDE','GAMMA_ADMISSION','GUIDANCE_FIELD','TRUTH_TRAVERSAL','UNIFIED_COHERENCE','OVERALL_CANON']};
+  let field={...base,modePipeline:['ALPHA','REALTIME_SATELLITE_SKIN','RECOVERY','STABILIZATION','CTDE','GAMMA_ADMISSION','GUIDANCE_FIELD','TRUTH_TRAVERSAL','UNIFIED_COHERENCE','OVERALL_CANON']};
+  field=satelliteAssimilationPass(field,options);
   field=recoveryPass(field);
   field=stabilizationPass(field);
   field=evolutionPass(field,options.previousField||null);
   field=admissionPass(field);
   field=guidancePass(field);
   field=truthTraversalPass(field);
-  field={...field,summary:summarize(field),skins:FULL_OMEGA_MODE_STACK,boundary:`${field.boundary} Mode passes preserve measured anchors, never coerce missing state to zero, and retain per-cell admission, contradiction, guidance, recovery and evolution ledgers.`};
+  field={...field,summary:summarize(field),skins:FULL_OMEGA_MODE_STACK,boundary:`${field.boundary} Mode passes preserve measured anchors, never coerce missing state to zero, and retain per-cell satellite assimilation, admission, contradiction, guidance, recovery and evolution ledgers.`};
   return field;
 }
