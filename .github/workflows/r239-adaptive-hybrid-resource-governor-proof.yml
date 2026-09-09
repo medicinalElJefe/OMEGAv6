@@ -15,18 +15,6 @@ on:
       - 'tests/r170-self-build-governor-invariants.mjs'
       - 'tests/r180-current-authority-convergence-invariants.mjs'
       - '.github/workflows/r239-adaptive-hybrid-resource-governor-proof.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'src/hybridResourceGovernorR239.ts'
-      - 'src/HybridResourceGovernorR239.tsx'
-      - 'src/hybridResourceGovernorR239.css'
-      - 'src/HybridCommandDeckR237.tsx'
-      - 'src/HybridLinkR32.tsx'
-      - 'public/omega-r170-self-build-governor.json'
-      - 'scripts/verify_live_hybrid_resource_governor_r239.mjs'
-      - 'tests/r239-adaptive-hybrid-resource-governor-invariants.mjs'
-      - '.github/workflows/r239-adaptive-hybrid-resource-governor-proof.yml'
   workflow_dispatch:
 
 permissions:
@@ -66,7 +54,7 @@ jobs:
         run: npm run build
 
   live-r239:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     needs: prove-r239
     runs-on: ubuntu-24.04
     timeout-minutes: 12
