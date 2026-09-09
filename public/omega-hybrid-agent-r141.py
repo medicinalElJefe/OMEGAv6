@@ -30,7 +30,7 @@ validated step. The wrapper validates that carry before native execution, preser
 through the host frame and echoes it into returned step proof with reversed orientation before
 R141 exact-return fingerprinting. This is software/state continuity, not a physical-dimension claim.
 
-R242 execution-motion extension: while an allow-listed host job is executing, the wrapper emits
+R243 execution-motion extension: while an allow-listed host job is executing, the wrapper emits
 bounded authenticated progress/lease pulses from a daemon telemetry thread. The pulse reports only
 job/step identity, ordinal progress and elapsed time; it does not expose arbitrary process output,
 add an executor, bypass R141 result proof, or convert liveness into execution success.
@@ -52,7 +52,7 @@ HOST_EVIDENCE_CONTINUITY_REVISION='R206.1'
 R207_1_ASSET_COMPATIBILITY_REVISION='R207.1'
 HOST_INTELLIGENCE_EXTENSION='R238'
 BRIDGE_CALCULUS_EXTENSION='R240'
-EXECUTION_MOTION_EXTENSION='R242'
+EXECUTION_MOTION_EXTENSION='R243'
 HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'
 MACRO_INVENTORY_SCHEMA='OMEGA_LOCAL_MACRO_INVENTORY_R238'
 MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'
@@ -79,7 +79,7 @@ def arg_value(name,default):
 
 def canonical_base_source(server):
     url=server.rstrip('/')+BASE_PATH
-    req=urllib.request.Request(url,method='GET',headers={'cache-control':'no-cache','user-agent':'OMEGA-Hybrid-R141-R206.1-R207.1-R238-R240-R242-Wrapper/1'})
+    req=urllib.request.Request(url,method='GET',headers={'cache-control':'no-cache','user-agent':'OMEGA-Hybrid-R141-R206.1-R207.1-R238-R240-R243-Wrapper/1'})
     with urllib.request.urlopen(req,timeout=30) as r:
         source=r.read(MAX_BASE_BYTES+1)
     if len(source)<1000 or len(source)>MAX_BASE_BYTES:raise RuntimeError('R141 base agent size proof failed.')
@@ -306,7 +306,7 @@ def main():
     def execute_job_r141(job,approved_root):
         bridge_by_step=validate_bridge_calculus_r240(job);steps=list(job.get('steps') or [])[:24];step_index={str(s.get('id') or ''):i+1 for i,s in enumerate(steps) if isinstance(s,dict)}
         motion_update(active=True,jobId=str(job.get('id') or ''),seq=0,state='CLAIMED',stepId='',stepOp='',stepIndex=0,totalSteps=len(steps),completedSteps=0,startedMono=time.monotonic(),stepIndexById=step_index,message='Authenticated host accepted the governed job.')
-        send_progress('CLAIMED');stop_event=threading.Event();thread=threading.Thread(target=progress_loop,args=(stop_event,),name='omega-r242-progress',daemon=True);thread.start()
+        send_progress('CLAIMED');stop_event=threading.Event();thread=threading.Thread(target=progress_loop,args=(stop_event,),name='omega-r243-progress',daemon=True);thread.start()
         try:packet=base_execute(job,approved_root)
         finally:
             send_progress('RETURNING');stop_event.set();thread.join(timeout=1.0);motion_update(active=False,state='RETURNING')
@@ -322,7 +322,7 @@ def main():
         return packet
     base.execute_step=execute_step_r238;base.request_json=request_json_r238;base.execute_job=execute_job_r141
     print('OMEGA Hybrid Link proof wrapper',PROOF_CLOSURE_REVISION,'· immutable base',base.VERSION,'execution',base.CAPABILITY_REVISION,'host proof',HOST_PROOF_EXTENSION,'continuity',HOST_EVIDENCE_CONTINUITY_REVISION,'asset compatibility',R207_1_ASSET_COMPATIBILITY_REVISION,'host intelligence',HOST_INTELLIGENCE_EXTENSION,'bridge calculus',BRIDGE_CALCULUS_EXTENSION,'execution motion',EXECUTION_MOTION_EXTENSION)
-    print('Exact return payload SHA-256 is enabled; R238 adds bounded host-resource truth + macro preflight, R240 closes calculus address continuity, and R242 keeps RUNNING work lease-visible with authenticated step motion while preserving R141 result authority.')
+    print('Exact return payload SHA-256 is enabled; R238 adds bounded host-resource truth + macro preflight, R240 closes calculus address continuity, and R243 keeps RUNNING work lease-visible with authenticated step motion while preserving R141 result authority.')
     base.main()
 
 if __name__=='__main__':main()
