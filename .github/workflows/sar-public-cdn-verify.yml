@@ -1,0 +1,46 @@
+name: SAR Public CDN Verification
+
+on:
+  push:
+    branches:
+      - release/sar-accumulation-studio-public-r1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SAR_RELEASE_SHA: f118231a1ea4c5b41b7e5d15865b048c96008495
+  SAR_PUBLIC_BASE: https://rawcdn.githack.com/medicinalElJefe/OMEGAv6/f118231a1ea4c5b41b7e5d15865b048c96008495/sar-accumulation-studio
+
+jobs:
+  verify-public-cdn:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify public HTML and MIME
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --location --retry 4 --retry-delay 2 -D /tmp/index.headers "$SAR_PUBLIC_BASE/index.html" -o /tmp/index.html
+          grep -qiE '^content-type: *text/html' /tmp/index.headers
+          grep -q 'PUBLIC SCIENTIFIC WORKSTATION' /tmp/index.html
+          grep -q 'GCOV + GUNW' /tmp/index.html
+          grep -q 'PROOF-BOUND' /tmp/index.html
+
+      - name: Verify public application modules and data
+        shell: bash
+        run: |
+          for path in styles.css public.css src/app.mjs src/canon-console.mjs src/nisar-console.mjs src/raster.mjs src/charted-canon.mjs data/earth-grid.part06.txt; do
+            curl --fail --silent --show-error --location --retry 4 --retry-delay 2 "$SAR_PUBLIC_BASE/$path" -o "/tmp/$(basename "$path")"
+          done
+          grep -q 'omega.sar.nisar.gunw.measurement.v1' /tmp/nisar-console.mjs
+          grep -q 'geotiff@3.0.5' /tmp/raster.mjs
+          grep -q 'Charted Canon' /tmp/canon-console.mjs
+
+      - name: Verify third-party scientific runtime dependency is reachable
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --location --retry 4 --retry-delay 2 'https://cdn.jsdelivr.net/npm/geotiff@3.0.5/+esm' -o /tmp/geotiff.mjs
+          test -s /tmp/geotiff.mjs
+
+      - name: Report public URL
+        run: echo "PUBLIC_SAR_URL=$SAR_PUBLIC_BASE/index.html"
