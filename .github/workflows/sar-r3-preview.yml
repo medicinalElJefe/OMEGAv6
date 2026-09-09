@@ -50,7 +50,9 @@ jobs:
             test "$attempt" != 20 || { echo 'R3 root identity did not become live'; exit 1; }
             sleep 3
           done
-          curl -fsS -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/src/app.mjs" | grep -q 'const renderer'
+          code="$(curl -sS -o /tmp/r3-app.mjs -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/src/app.mjs")"
+          test "$code" = 200 || { echo "R3 app module HTTP $code"; exit 1; }
+          grep -q 'const renderer' /tmp/r3-app.mjs
       - name: Install Chromium proof runtime
         run: |
           npm install --no-save playwright@1.55.0
