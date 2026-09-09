@@ -36,7 +36,16 @@ must(home.includes('projection.signature')&&home.includes('projection.intent'),'
 must(homeCss.includes('.r71-modes')&&homeCss.includes('overflow-x:auto'),'all projection buttons must remain reachable without overlap');
 
 must(shell.includes('OmegaSideNavigatorR88')&&nav.includes('workspaceForRouteR82')&&nav.includes('OMEGA_ALL_ROUTES_R82'),'workstation menu must preserve shared route organization as metadata without forcing workspace compartments');
-must(nav.toLowerCase().includes('persistent rail')&&nav.includes('active application remains visible'),'deep historical route reachability must remain explicit in the persistent rail/browser');
+must(
+ nav.includes("className='r94-nav-rail'")&&
+ nav.includes('currentPanel===route')&&
+ nav.includes("aria-current={currentPanel===route?'page':undefined}")&&
+ nav.includes("<span>YOU ARE HERE</span>")&&
+ nav.includes('rows.map(route=>')&&
+ !nav.includes('rows.slice(')&&
+ nav.includes("setWorkspaceFilter('ALL')"),
+ 'deep historical route reachability must remain explicit in the persistent rail/browser with visible current-route identity'
+);
 must(nav.includes('rows.map(route=>')&&!nav.includes('rows.slice(')&&nav.includes("setWorkspaceFilter('ALL')"),'all filtered registered routes must remain structurally renderable with an explicit ALL view; navigation polish may not bury the deep route universe behind slicing');
 must(nav.includes("aria-label='Browse all registered OMEGA tools'")&&nav.includes("aria-label={activeWorkspace?`${activeWorkspace.label} OMEGA applications`:'All registered OMEGA applications'}"),'complete application reachability must remain exposed to assistive/browser navigation');
 
