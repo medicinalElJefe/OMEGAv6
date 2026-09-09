@@ -1,7 +1,7 @@
 import './location-ui.mjs';
 import { geometryRings, unwrapRing, wrapLon } from './geometry.mjs';
 
-const WORLD_COUNTRIES_URL = 'https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@ca96624a/geojson/ne_50m_admin_0_countries.geojson';
+const WORLD_COUNTRIES_URL = 'https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@ca96624a/geojson/ne_110m_admin_0_countries.geojson';
 
 function centroidOfGeometry(geometry) {
   const points=[];
@@ -17,6 +17,10 @@ export class WorldRenderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.backgroundCanvas = document.createElement('canvas');
+    this.backgroundCtx = this.backgroundCanvas.getContext('2d');
+    this.backgroundDirty = true;
+    this.dpr = 1;
     this.view = { centerLon: 0, centerLat: 0, scale: 1 };
     this.drag = null;
     this.point = null;
@@ -46,6 +50,8 @@ export class WorldRenderer {
     this.view.centerLat = Math.max(-maxLat, Math.min(maxLat, Number(this.view.centerLat) || 0));
   }
 
+  _markBackgroundDirty(){ this.backgroundDirty = true; }
+
   async _loadWorldBoundaries(){
     try {
       const response = await fetch(WORLD_COUNTRIES_URL, { cache: 'force-cache' });
@@ -57,18 +63,22 @@ export class WorldRenderer {
       this.worldFeatures = [];
       this.worldBoundaryState = 'unavailable';
     }
+    this._markBackgroundDirty();
     this.redraw?.();
-    this._dispatch('omega-map-boundaries', { state:this.worldBoundaryState, count:this.worldFeatures.length, source:'Natural Earth 1:50m' });
+    this._dispatch('omega-map-boundaries', { state:this.worldBoundaryState, count:this.worldFeatures.length, source:'Natural Earth 1:110m' });
   }
 
   resize() {
     const rect = this.canvas.getBoundingClientRect();
-    const dpr = Math.max(1, devicePixelRatio || 1);
-    this.canvas.width = Math.max(1, Math.round(rect.width * dpr));
-    this.canvas.height = Math.max(1, Math.round(rect.height * dpr));
-    this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    this.dpr = Math.max(1, devicePixelRatio || 1);
     this.w = Math.max(1, rect.width); this.h = Math.max(1, rect.height);
+    const pixelWidth=Math.max(1,Math.round(this.w*this.dpr)),pixelHeight=Math.max(1,Math.round(this.h*this.dpr));
+    if(this.canvas.width!==pixelWidth||this.canvas.height!==pixelHeight){this.canvas.width=pixelWidth;this.canvas.height=pixelHeight}
+    if(this.backgroundCanvas.width!==pixelWidth||this.backgroundCanvas.height!==pixelHeight){this.backgroundCanvas.width=pixelWidth;this.backgroundCanvas.height=pixelHeight}
+    this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+    this.backgroundCtx.setTransform(this.dpr,0,0,this.dpr,0,0);
     this._clampView();
+    this._markBackgroundDirty();
     this.redraw?.();
     this._notifyView();
   }
@@ -88,14 +98,15 @@ export class WorldRenderer {
     this.view.scale=Math.max(1,Math.min(48,Number(scale)||8));
     this.view.centerLat=Number(lat);
     this._clampView();
+    this._markBackgroundDirty();
     this.redraw?.(); this._notifyView();
   }
 
   async setBaseImage(url, meta=null){
-    if(!url){this.baseImage=null;this.baseMeta=null;this.redraw?.();return}
+    if(!url){this.baseImage=null;this.baseMeta=null;this._markBackgroundDirty();this.redraw?.();return}
     const img=new Image();img.crossOrigin='anonymous';
     await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('Satellite context image failed to load'));img.src=url});
-    this.baseImage=img;this.baseMeta=meta;this.redraw?.();
+    this.baseImage=img;this.baseMeta=meta;this._markBackgroundDirty();this.redraw?.();
   }
 
   project(lon, lat) {
@@ -117,9 +128,8 @@ export class WorldRenderer {
     return [lon, lat];
   }
 
-  _drawBaseImage(){
+  _drawBaseImage(c){
     if(!this.baseImage) return;
-    const c=this.ctx;
     const bbox=Array.isArray(this.baseMeta?.bbox)&&this.baseMeta.bbox.length===4?this.baseMeta.bbox:[-180,-90,180,90];
     const [minLon,minLat,maxLon,maxLat]=bbox.map(Number);
     if(![minLon,minLat,maxLon,maxLat].every(Number.isFinite)||maxLon<=minLon||maxLat<=minLat) return;
@@ -135,29 +145,40 @@ export class WorldRenderer {
     c.fillStyle='rgba(2,8,12,.13)';c.fillRect(0,0,this.w,this.h);
   }
 
-  clear() {
-    const c = this.ctx;
+  _renderBackground(){
+    const c=this.backgroundCtx;
+    c.setTransform(this.dpr,0,0,this.dpr,0,0);
     c.clearRect(0,0,this.w,this.h);
     const g=c.createLinearGradient(0,0,0,this.h);
     g.addColorStop(0,'#061119');g.addColorStop(1,'#03070a');c.fillStyle=g;c.fillRect(0,0,this.w,this.h);
-    this._drawBaseImage();
-    this._worldBoundaries();
-    this._graticule();
+    this._drawBaseImage(c);
+    this._worldBoundaries(c);
+    this._graticule(c);
+    this.backgroundDirty=false;
   }
 
-  _worldBoundaries(){
-    if(!this.worldFeatures.length) return;
+  clear() {
+    if(this.backgroundDirty) this._renderBackground();
     const c=this.ctx;
     c.save();
+    c.setTransform(1,0,0,1,0,0);
+    c.clearRect(0,0,this.canvas.width,this.canvas.height);
+    c.drawImage(this.backgroundCanvas,0,0);
+    c.restore();
+    c.setTransform(this.dpr,0,0,this.dpr,0,0);
+  }
+
+  _worldBoundaries(c){
+    if(!this.worldFeatures.length) return;
+    c.save();
     c.lineWidth=this.view.scale>=8?.8:.55;
-    c.strokeStyle=this.baseImage?'rgba(230,245,250,.35)':'rgba(152,189,202,.48)';
+    c.strokeStyle=this.baseImage?'rgba(230,245,250,.38)':'rgba(152,189,202,.52)';
     c.fillStyle=this.baseImage?'rgba(220,238,244,.018)':'rgba(75,110,122,.08)';
-    for(const feature of this.worldFeatures) this._drawGeometry(feature.geometry, {fill:true,stroke:true});
+    for(const feature of this.worldFeatures) this._drawGeometry(feature.geometry,{fill:true,stroke:true,ctx:c});
     c.restore();
   }
 
-  _graticule() {
-    const c = this.ctx;
+  _graticule(c) {
     c.lineWidth = 1; c.strokeStyle = 'rgba(180,205,215,.19)';
     c.font = '10px ui-monospace, monospace'; c.fillStyle = 'rgba(218,237,244,.58)';
     const latStep=this.view.scale>=12?5:this.view.scale>=5?10:30;
@@ -189,7 +210,7 @@ export class WorldRenderer {
         c.strokeStyle = `rgba(248,253,255,${.75+.18*pulse})`;c.fillStyle = `rgba(70,205,235,${alpha})`;
         c.shadowColor='rgba(102,225,255,.78)';c.shadowBlur=10+10*pulse;
       } else {c.strokeStyle=`rgba(92,207,232,${.15+.34*recency})`;c.fillStyle=`rgba(57,182,216,${alpha})`;c.shadowBlur=0}
-      this._drawGeometry(r.geometry);c.shadowBlur=0;
+      this._drawGeometry(r.geometry,{ctx:c});c.shadowBlur=0;
     });
     const current=records.find(r=>r.id===currentId);if(current)this._drawMotionBeacon(current,phase);
     if (this.point) {
@@ -211,21 +232,18 @@ export class WorldRenderer {
     c.beginPath();c.arc(x,y,3.2,0,Math.PI*2);c.fillStyle='rgba(255,255,255,.92)';c.fill();
   }
 
-  _drawGeometry(geometry,{fill=true,stroke=true}={}) {
-    const c = this.ctx;
+  _drawGeometry(geometry,{fill=true,stroke=true,ctx=this.ctx}={}) {
     for (const rawRing of geometryRings(geometry)) {
       const ring = unwrapRing(rawRing);if (!ring.length) continue;
       for (const shift of [-360,0,360]) {
-        c.beginPath();
-        ring.forEach(([lon,lat], i) => {const [x,y] = this._projectRaw(lon+shift,lat);if (i===0) c.moveTo(x,y); else c.lineTo(x,y)});
-        c.closePath(); if(fill)c.fill(); if(stroke)c.stroke();
+        ctx.beginPath();
+        ring.forEach(([lon,lat], i) => {const [x,y] = this._projectRaw(lon+shift,lat);if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y)});
+        ctx.closePath(); if(fill)ctx.fill(); if(stroke)ctx.stroke();
       }
     }
   }
 
-  _dispatch(name,detail){
-    this.canvas.dispatchEvent(new CustomEvent(name,{detail,bubbles:false}));
-  }
+  _dispatch(name,detail){ this.canvas.dispatchEvent(new CustomEvent(name,{detail,bubbles:false})); }
 
   _notifyView(){
     const detail={ centerLon:this.view.centerLon,centerLat:this.view.centerLat,scale:this.view.scale,bbox:this.viewBounds() };
@@ -238,14 +256,14 @@ export class WorldRenderer {
     this.view.scale=Math.max(1,Math.min(48,this.view.scale*factor));
     this.view.centerLon=wrapLon(anchorLon-(x-this.w/2)/((this.w/360)*this.view.scale));
     this.view.centerLat=anchorLat+(y-this.h/2)/((this.h/180)*this.view.scale);
-    this._clampView(); this.redraw?.(); this._notifyView();
+    this._clampView(); this._markBackgroundDirty(); this.redraw?.(); this._notifyView();
   }
 
   _panByFraction(dxFraction,dyFraction){
     const lonSpan=360/this.view.scale,latSpan=180/this.view.scale;
     this.view.centerLon=wrapLon(this.view.centerLon+lonSpan*dxFraction);
     this.view.centerLat=this.view.centerLat+latSpan*dyFraction;
-    this._clampView(); this.redraw?.(); this._notifyView();
+    this._clampView(); this._markBackgroundDirty(); this.redraw?.(); this._notifyView();
   }
 
   _command(detail={}){
@@ -281,7 +299,7 @@ export class WorldRenderer {
       const dx=e.clientX-this.drag.x,dy=e.clientY-this.drag.y;
       this.view.centerLon=wrapLon(this.drag.lon-dx/((this.w/360)*this.view.scale));
       this.view.centerLat=this.drag.lat+dy/((this.h/180)*this.view.scale);
-      this._clampView(); this.redraw?.();
+      this._clampView(); this._markBackgroundDirty(); this.redraw?.();
       this._dispatch('omega-map-view',{centerLon:this.view.centerLon,centerLat:this.view.centerLat,scale:this.view.scale,bbox:this.viewBounds()});
     });
 
