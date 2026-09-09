@@ -28,6 +28,43 @@ try{
   assert.ok(nav.view,'navigation state missing');
   assert.ok(nav.error&&nav.error.distance<=1.5,`camera is not centered on Tucson target within 1.5 CSS px: ${JSON.stringify(nav)}`);
 
+  const sourceDiagnostic=await page.evaluate(async()=>{
+    const id=(document.querySelector('#currentScene')?.textContent||'').trim();
+    const detailResponse=await fetch(`/api/stac/item?id=${encodeURIComponent(id)}`,{headers:{accept:'application/geo+json,application/json'}});
+    const detail=detailResponse.ok?await detailResponse.json():null;
+    const simplifyAsset=a=>a?{href:a.href||null,type:a.type||null,title:a.title||null,resolution:a['omega:resolution']||a.omegaResolution||null,validated:a['omega:validated']??null}:null;
+    const out={id,itemStatus:detailResponse.status,properties:detail?{
+      resolved:detail.properties?.['omega:resolved_product_annotations']??null,
+      validated:detail.properties?.['omega:validated_product_annotations']??null,
+      unresolved:detail.properties?.['omega:unresolved_product_annotations']??null
+    }:null,assets:{
+      vh:simplifyAsset(detail?.assets?.vh),vv:simplifyAsset(detail?.assets?.vv),
+      productVh:simplifyAsset(detail?.assets?.['schema-product-vh']),productVv:simplifyAsset(detail?.assets?.['schema-product-vv']),
+      calibrationVh:simplifyAsset(detail?.assets?.['schema-calibration-vh']),calibrationVv:simplifyAsset(detail?.assets?.['schema-calibration-vv']),
+      manifest:simplifyAsset(detail?.assets?.['safe-manifest'])
+    },geotiff:null};
+    const measurement=detail?.assets?.vh?.href||detail?.assets?.vv?.href;
+    if(measurement){
+      try{
+        const mod=await import('/vendor/geotiff.bundle.mjs');
+        const url=`/api/raster?url=${encodeURIComponent(measurement)}`;
+        const tiff=await mod.fromUrl(url,{cacheSize:8*1024*1024,blockSize:65536});
+        const image=await tiff.getImage(0),fd=image.fileDirectory||{};
+        const arr=v=>v==null?null:Array.from(v);
+        let bbox=null,origin=null,resolution=null,geoKeys=null;
+        try{bbox=image.getBoundingBox?.()||null}catch{}
+        try{origin=image.getOrigin?.()||null}catch{}
+        try{resolution=image.getResolution?.()||null}catch{}
+        try{geoKeys=image.getGeoKeys?.()||null}catch{}
+        out.geotiff={width:image.getWidth(),height:image.getHeight(),bbox:arr(bbox),origin:arr(origin),resolution:arr(resolution),geoKeys,
+          modelPixelScale:arr(fd.ModelPixelScale),modelTiepoint:arr(fd.ModelTiepoint),modelTransformation:arr(fd.ModelTransformation),
+          gdalMetadata:fd.GDAL_METADATA||null,gdalNoData:fd.GDAL_NODATA||null};
+      }catch(error){out.geotiff={error:error?.stack||error?.message||String(error)};}
+    }
+    return out;
+  });
+  console.log('TUCSON_SOURCE_GEOREFERENCE_DIAGNOSTIC',JSON.stringify(sourceDiagnostic,null,2));
+
   const calibration=await page.evaluate(async()=>{
     const select=document.querySelector('#assetSelect');
     if(select&&[...select.options].some(o=>o.value.toLowerCase()==='vh')){select.value='vh';select.dispatchEvent(new Event('change',{bubbles:true}));}
@@ -41,15 +78,8 @@ try{
     const rasterStats=document.querySelector('#rasterStats')?.textContent||'';
     const visibility=globalThis.OMEGA_SAR_SOURCE_OVERLAY_VISIBILITY||null;
     return {
-      ok:!!patch,
-      error,
-      elapsedMs:Math.round(performance.now()-started),
-      badge,rasterEmpty,rasterStats,visibility,
-      patch:patch?{
-        state:patch.state,id:patch.id,target:patch.target,polarization:patch.polarization,quantity:patch.quantity,
-        validCount:patch.stats?.validCount,geolocation:patch.geolocation,geoMesh:patch.geoMesh,
-        product:patch.product,provenance:patch.provenance,evidence:patch.evidence
-      }:null
+      ok:!!patch,error,elapsedMs:Math.round(performance.now()-started),badge,rasterEmpty,rasterStats,visibility,
+      patch:patch?{state:patch.state,id:patch.id,target:patch.target,polarization:patch.polarization,quantity:patch.quantity,validCount:patch.stats?.validCount,geolocation:patch.geolocation,geoMesh:patch.geoMesh,product:patch.product,provenance:patch.provenance,evidence:patch.evidence}:null
     };
   });
   console.log('TUCSON_CALIBRATION_DIAGNOSTIC',JSON.stringify(calibration,null,2));
@@ -62,8 +92,6 @@ try{
   assert.ok(/PRODUCT_GCP/.test(calibration.patch?.geolocation?.quality||''),`calibrated patch is not product-GCP geolocated: ${JSON.stringify(calibration.patch?.geolocation)}`);
   assert.equal(calibration.patch?.evidence?.measured,true,'calibrated patch lost measured identity');
   assert.equal(calibration.patch?.evidence?.inferred,false,'calibrated patch was incorrectly marked inferred');
-
-  // At local scale the low-resolution scene quicklook must not masquerade as local pixel registration.
   assert.equal(calibration.visibility?.mainMapVisible,false,`regional source quicklook remained painted over the local map: ${JSON.stringify(calibration.visibility)}`);
   assert.equal(calibration.visibility?.reason,'LOCAL_SCALE_REQUIRES_EXACT_GCP');
   assert.deepEqual(pageErrors,[],`page errors: ${pageErrors.join(' | ')}`);
