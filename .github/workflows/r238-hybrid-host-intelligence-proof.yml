@@ -2,6 +2,7 @@ name: R238 Hybrid host intelligence proof
 
 on:
   pull_request:
+    branches: [main]
     paths:
       - 'public/omega-hybrid-agent-r141.py'
       - 'public/omega-r170-self-build-governor.json'
@@ -11,6 +12,7 @@ on:
       - 'tests/r170-self-build-governor-invariants.mjs'
       - 'tests/r180-current-authority-convergence-invariants.mjs'
       - 'tests/r238-hybrid-host-intelligence-invariants.mjs'
+      - 'tests/r238-windows-host-runtime-proof.py'
       - '.github/workflows/r238-hybrid-host-intelligence-proof.yml'
   workflow_dispatch:
 
@@ -22,8 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -33,7 +35,7 @@ jobs:
       - name: Install locked JS dependencies
         run: npm ci
       - name: Python syntax proof
-        run: python -m py_compile public/omega-hybrid-agent-r141.py
+        run: python -m py_compile public/omega-hybrid-agent-r141.py tests/r238-windows-host-runtime-proof.py
       - name: R238 host intelligence invariants
         run: node tests/r238-hybrid-host-intelligence-invariants.mjs
       - name: Re-run inherited Hybrid authority invariants
@@ -51,3 +53,16 @@ jobs:
         run: node tests/enacted-runtime-r32-invariants.mjs
       - name: Production frontend build
         run: npm run build
+
+  windows-host-runtime-proof:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile exact R238 wrapper and Windows proof
+        run: python -m py_compile public/omega-hybrid-agent-r141.py tests/r238-windows-host-runtime-proof.py
+      - name: Execute bounded Windows host telemetry and macro-preflight proof
+        run: python tests/r238-windows-host-runtime-proof.py
