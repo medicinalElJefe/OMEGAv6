@@ -9,9 +9,9 @@
 </head>
 <body>
 <header>
-  <div class="brand"><b>OMEGA · SAR ACCUMULATION STUDIO</b><span class="tag">MEASURED-FIRST</span><span class="tag" id="liveTag">LIVE READY</span></div>
-  <div class="sub">Acquisition chronology · actual Sentinel-1 GRD pixels · NISAR/ASF evidence · revisit · temporal stack · deterministic provenance</div>
-  <div class="head-status"><span>Clock <b id="wallClock">—</b></span><span>Source <b id="sourceBadge">NONE</b></span><span>Latest data <b id="freshness">—</b></span></div>
+  <div class="brand"><b>OMEGA · SAR ACCUMULATION STUDIO</b><span class="tag">MEASURED-FIRST</span><span class="tag" id="liveTag">LIVE READY</span><span class="tag">WORLD + ATLAS</span></div>
+  <div class="sub">Acquisition chronology · actual Sentinel-1 GRD pixels · NISAR/ASF evidence · NASA near-real-time world context · Dewey Atlas inference with uncertainty</div>
+  <div class="head-status"><span>Clock <b id="wallClock">—</b></span><span>Source <b id="sourceBadge">NONE</b></span><span>Latest SAR <b id="freshness">—</b></span><span>Context <b id="contextStamp">OFF</b></span></div>
 </header>
 <main>
   <aside class="controls">
@@ -30,6 +30,16 @@
       <div id="status">Ready. No observations loaded.</div>
     </section>
 
+    <section><h2>World satellite context</h2>
+      <label class="inline-check"><input id="gibsEnabled" type="checkbox" checked> NASA GIBS near-real-time context underlay</label>
+      <label>Context layer<select id="gibsLayer"><option value="trueColor">NOAA-21 VIIRS true color</option><option value="trueColor+fires">True color + thermal anomalies</option><option value="night">NOAA-21 VIIRS day/night band</option></select></label>
+      <label>Context time<select id="gibsTime"><option value="frame">Synchronize to current SAR acquisition date</option><option value="today">Most recent calendar date</option></select></label>
+      <div class="two"><label>Latitude<input id="jumpLat" inputmode="decimal" placeholder="32.2226"></label><label>Longitude<input id="jumpLon" inputmode="decimal" placeholder="-110.9747"></label></div>
+      <div class="buttons"><button id="jumpLocation">View location</button><button id="worldView" class="quiet">Whole world</button></div>
+      <button id="deviceLocation" class="quiet wide">Use device location</button>
+      <div id="atlasAddress" class="atlas-box">Click the map or enter coordinates to resolve the 12→144→1728→20,736 Atlas address stack.</div>
+    </section>
+
     <section><h2>Continuous refresh</h2>
       <label class="inline-check"><input id="liveRefresh" type="checkbox"> Poll source for newly published acquisitions</label>
       <label>Refresh interval<select id="refreshInterval"><option value="60000">1 minute</option><option value="300000" selected>5 minutes</option><option value="900000">15 minutes</option></select></label>
@@ -37,10 +47,10 @@
     </section>
 
     <section><h2>Truth semantics</h2>
-      <p><b>Footprint ≠ radar pixel.</b> Footprint accumulation is coverage geometry.</p>
-      <p><b>Browse ≠ measurement raster.</b> ASF browse imagery is supporting visualization only.</p>
-      <p><b>COG pixel = measured GRD value.</b> Display stretch is visual; radiometric calibration is not claimed unless explicitly supplied.</p>
-      <p><b>Animation ≠ new observation.</b> Acquisition timestamps are the only observation clock.</p>
+      <p><b>Measured.</b> Source SAR footprint/pixel with acquisition provenance.</p>
+      <p><b>Contextual.</b> NASA GIBS/Worldview satellite imagery aligned in time and geography; not promoted to SAR values.</p>
+      <p><b>Inferred.</b> Dewey Atlas gap estimate computed only from measured anchors and accompanied by uncertainty/confidence/scar support.</p>
+      <p><b>Unknown.</b> If support is inadequate, the system preserves the gap.</p>
       <ul id="warnings"></ul>
     </section>
   </aside>
@@ -58,7 +68,7 @@
       <button id="export">Export proof manifest</button>
     </div>
 
-    <div class="map-wrap"><canvas id="map"></canvas><div class="map-note">WGS84 evidence plane · drag pan · wheel zoom · click for revisit + pixel stack probe</div></div>
+    <div class="map-wrap"><canvas id="map"></canvas><div class="map-note">NASA context underlay + WGS84 SAR evidence plane · drag pan · wheel zoom · click for revisit, Atlas address and gap inference</div></div>
 
     <div class="stats">
       <div><span>Visible observations</span><b id="obsCount">0</b></div>
@@ -87,6 +97,11 @@
         <div class="probe"><span>Point <b id="point">click map</b></span><span>Coverage hits <b id="pointHits">0</b></span><span>First <b id="pointFirst">—</b></span><span>Last <b id="pointLast">—</b></span><span>Mean interval <b id="pointMean">—</b></span><button id="probeStack" disabled>Probe actual pixel stack</button></div>
         <div id="pixelProbeStatus" class="micro">Pixel probing is available for loaded EPSG:4326 COG scenes.</div>
         <div class="probe-chart"><canvas id="probeChart"></canvas></div>
+      </section>
+
+      <section class="atlas-inference"><div class="section-head"><h2>Dewey Atlas gap field</h2><button id="inferGap" disabled>Infer missing point/time</button></div>
+        <div class="inference-grid"><div><span>State</span><b id="inferState">UNRESOLVED</b></div><div><span>Value</span><b id="inferValue">—</b></div><div><span>Uncertainty</span><b id="inferUncertainty">—</b></div><div><span>Confidence</span><b id="inferConfidence">—</b></div><div><span>Atlas level</span><b id="inferLevel">—</b></div><div><span>Support</span><b id="inferSupport">—</b></div></div>
+        <div id="inferExplanation" class="micro">Inference is disabled until measured pixel anchors are available. Estimated values are never admitted as observations.</div>
       </section>
 
       <section><h2>Chronology diagnostics</h2>
