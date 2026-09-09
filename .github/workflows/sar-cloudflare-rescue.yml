@@ -70,3 +70,15 @@ jobs:
           grep -qiE '^content-type:.*(javascript|ecmascript|text/plain)' /tmp/app.headers || { cat /tmp/app.headers; echo '::error title=MIME FAILED::Unexpected module MIME'; exit 1; }
           grep -q 'const renderer' /tmp/app.mjs || { echo '::error title=MODULE CONTENT FAILED::app.mjs content missing'; exit 1; }
           echo "SAR_RESCUE_LIVE=$SAR_PUBLIC_URL"
+
+      - name: Install Chromium verification runtime
+        working-directory: sar-accumulation-studio
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Prove live rescue in Chromium desktop and mobile
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
+        run: node tests/rescue-live-e2e.mjs
