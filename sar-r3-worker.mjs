@@ -63,61 +63,98 @@ function resolveRelativeAsset(baseHref,relativeHref){
   try{return new URL(rel,String(baseHref)).href}catch{return null}
 }
 
-function manifestProductAnnotation(manifestXml,polarization){
+function productHrefIsAuxiliary(value){
+  const low=String(value||'').toLowerCase();
+  return low.includes('/annotation/rfi/')||low.includes('/annotation/calibration/')||low.includes('/annotation/noise/')||low.includes('/noise-');
+}
+
+function manifestProductAnnotations(manifestXml,polarization){
   const pol=String(polarization||'').toLowerCase();
-  if(!pol)return null;
-  const hrefs=[...String(manifestXml||'').matchAll(/\bhref\s*=\s*["']([^"']+)["']/gi)].map(m=>m[1]);
-  const candidates=hrefs.filter(href=>{
+  if(!pol)return [];
+  const hrefs=[...String(manifestXml||'').matchAll(/(?:\b|:)href\s*=\s*["']([^"']+)["']/gi)].map(m=>m[1]);
+  const candidates=[];
+  for(const href of hrefs){
     const path=String(href).toLowerCase().replace(/^\.\//,'').replace(/^\//,'');
-    if(!path.startsWith('annotation/'))return false;
-    if(!path.endsWith('.xml'))return false;
-    if(path.includes('/calibration/')||path.includes('/rfi/')||path.includes('/noise/'))return false;
+    if(!path.startsWith('annotation/')||!path.endsWith('.xml'))continue;
+    if(path.includes('/calibration/')||path.includes('/rfi/')||path.includes('/noise/'))continue;
     const file=path.split('/').at(-1)||'';
-    return file.includes(`-${pol}-`)||file.endsWith(`-${pol}.xml`)||file.includes(`_${pol}_`)||file.startsWith(`${pol}-`);
-  });
-  candidates.sort((a,b)=>{
-    const ap=String(a).replace(/^\.\//,'').split('/').length;
-    const bp=String(b).replace(/^\.\//,'').split('/').length;
-    return ap-bp||String(a).length-String(b).length;
-  });
-  return candidates[0]||null;
+    if(!(file.includes(`-${pol}-`)||file.endsWith(`-${pol}.xml`)||file.includes(`_${pol}_`)||file.startsWith(`${pol}-`)))continue;
+    let score=0;if(/^s1[a-d]-/.test(file))score+=30;if(file.includes('-grd-'))score+=20;if(file.includes(`-${pol}-`))score+=10;score-=path.split('/').length;
+    candidates.push({href,score});
+  }
+  candidates.sort((a,b)=>b.score-a.score||String(a.href).length-String(b.href).length||String(a.href).localeCompare(String(b.href)));
+  return [...new Set(candidates.map(x=>x.href))];
+}
+
+async function probeSourceExists(raw){
+  const target=allowedSourceUrl(raw);if(!target)return false;
+  try{
+    let response=await fetch(target,{method:'HEAD',redirect:'follow'});
+    if(response.ok)return true;
+    // A few S3 frontends are inconsistent about HEAD. A one-byte range GET is the deterministic fallback.
+    response=await fetch(target,{method:'GET',headers:{range:'bytes=0-0'},redirect:'follow'});
+    return response.ok||response.status===206;
+  }catch{return false;}
 }
 
 async function resolveSentinelProductAnnotations(item){
   const assets=item?.assets||{};
-  const productEntries=Object.entries(assets).filter(([key,a])=>key.startsWith('schema-product-')&&a?.href&&String(a.href).toLowerCase().includes('/annotation/rfi/'));
-  if(!productEntries.length)return {item,resolved:0};
+  const productEntries=Object.entries(assets).filter(([key,a])=>key.startsWith('schema-product-')&&a?.href);
+  if(!productEntries.length)return {item,resolved:0,validated:0,failed:0};
   const manifest=assets['safe-manifest'];
-  if(!manifest?.href)return {item,resolved:0};
-  const manifestUrl=allowedSourceUrl(manifest.href);
-  if(!manifestUrl)return {item,resolved:0};
-  const manifestResponse=await fetch(manifestUrl,{headers:{accept:'application/xml,text/xml,text/plain,*/*'},redirect:'follow'});
-  if(!manifestResponse.ok)return {item,resolved:0};
-  const manifestXml=await manifestResponse.text();
-  let resolved=0;
+  let manifestXml=null;
+  async function getManifest(){
+    if(manifestXml!=null)return manifestXml;
+    if(!manifest?.href)return null;
+    const manifestUrl=allowedSourceUrl(manifest.href);if(!manifestUrl)return null;
+    try{
+      const response=await fetch(manifestUrl,{headers:{accept:'application/xml,text/xml,text/plain,*/*'},redirect:'follow'});
+      if(!response.ok)return null;
+      manifestXml=await response.text();return manifestXml;
+    }catch{return null;}
+  }
+
+  let resolved=0,validated=0,failed=0;
   for(const [key,current] of productEntries){
     const pol=key.slice('schema-product-'.length).toLowerCase();
-    const relative=manifestProductAnnotation(manifestXml,pol);
-    if(!relative)continue;
-    const candidate=resolveRelativeAsset(manifest.href,relative);
-    const candidateUrl=allowedSourceUrl(candidate);
-    if(!candidateUrl)continue;
-    const probe=await fetch(candidateUrl,{method:'HEAD',redirect:'follow'});
-    if(!probe.ok)continue;
+    const directUsable=!productHrefIsAuxiliary(current.href)&&await probeSourceExists(current.href);
+    if(directUsable){
+      assets[key]={...current,'omega:resolution':current['omega:resolution']||'EARTH_SEARCH_DIRECT_VALIDATED','omega:validated':true};
+      validated++;continue;
+    }
+
+    const xml=await getManifest();let replacement=null;
+    if(xml){
+      for(const relative of manifestProductAnnotations(xml,pol)){
+        const candidate=resolveRelativeAsset(manifest.href,relative);
+        if(!candidate||productHrefIsAuxiliary(candidate))continue;
+        if(await probeSourceExists(candidate)){replacement=candidate;break;}
+      }
+    }
+    if(!replacement){
+      assets[key]={...current,'omega:validated':false,'omega:resolution':'PRODUCT_ANNOTATION_UNRESOLVED','omega:earth_search_product_href':current.href,'omega:manifest_href':manifest?.href||null};
+      failed++;continue;
+    }
     assets[key]={
       ...current,
-      href:candidate,
+      href:replacement,
       title:`Resolved ${pol.toUpperCase()} Product Annotation`,
-      description:'Root Sentinel-1 SAFE product annotation resolved through manifest.safe because the Earth Search schema-product link referenced RFI auxiliary metadata.',
-      'omega:resolution':'SAFE_MANIFEST_ROOT_ANNOTATION',
+      description:'Existing root Sentinel-1 SAFE product annotation validated through manifest.safe because the direct STAC product link was auxiliary, stale, or returned 404.',
+      'omega:resolution':'SAFE_MANIFEST_ROOT_ANNOTATION_VALIDATED',
+      'omega:validated':true,
       'omega:earth_search_product_href':current.href,
       'omega:manifest_href':manifest.href
     };
-    resolved++;
+    resolved++;validated++;
   }
   item.assets=assets;
-  item.properties={...(item.properties||{}),'omega:resolved_product_annotations':resolved};
-  return {item,resolved};
+  item.properties={
+    ...(item.properties||{}),
+    'omega:resolved_product_annotations':resolved,
+    'omega:validated_product_annotations':validated,
+    'omega:unresolved_product_annotations':failed
+  };
+  return {item,resolved,validated,failed};
 }
 
 async function proxyStac(request){
@@ -145,6 +182,8 @@ async function proxyStacItem(request,url){
   headers.set('content-type','application/geo+json; charset=utf-8');
   headers.set('x-omega-upstream','EARTH_SEARCH_STAC_ITEM');
   headers.set('x-omega-product-annotations-resolved',String(resolution.resolved));
+  headers.set('x-omega-product-annotations-validated',String(resolution.validated));
+  headers.set('x-omega-product-annotations-unresolved',String(resolution.failed));
   return new Response(JSON.stringify(resolution.item),{status:200,headers});
 }
 
