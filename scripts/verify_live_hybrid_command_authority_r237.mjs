@@ -75,7 +75,9 @@ await deck.waitFor({state:'visible'});
 if(await deck.getAttribute('data-r237-command-authority')!=='AUTHENTICATED_BOUNDED_NATIVE_CONTROL')throw new Error('R237 live browser lost bounded command-authority identity');
 const deckText=await deck.innerText();
 for(const token of ['PROVE_HOST','VERIFY_PROJECT','PACKAGE_VERIFIED','TRAIN_LOCAL_INDEX','intentionally contain no APPLY_PATCH or WRITE_TEXT'])if(!deckText.includes(token))throw new Error(`R237 live browser missing ${token}`);
-for(const token of ['R238 changes correlation and sampling, not execution or Canon authority','R212/R141','R146','R147','R125'])if(!deckText.includes(token))throw new Error(`R237 live authority boundary missing ${token}`);
+for(const token of ['R239 tightens resource admission without changing execution authority','R212/R141','R146','R147','R125'])if(!deckText.includes(token))throw new Error(`R237 live authority boundary missing ${token}`);
+const resourceTier=String(await deck.getAttribute('data-r239-resource-tier')||'');
+if(!['UNPROVED','HOLD','CONSTRAINED','READY','HIGH_CAPACITY'].includes(resourceTier))throw new Error(`R237/R239 live browser exposed unsupported resource tier ${resourceTier||'NONE'}`);
 const epoch=Number(await deck.getAttribute('data-r237-snapshot-epoch')||0);
 if(!Number.isFinite(epoch)||epoch<1)throw new Error(`R237 live browser did not expose a completed shared snapshot epoch: ${epoch}`);
 await deck.getByRole('button',{name:'Refresh shared snapshot'}).click();
@@ -83,4 +85,4 @@ await page.waitForTimeout(750);
 if(pageErrors.length)throw new Error(`R237 live browser page errors: ${pageErrors.join(' | ')}`);
 await browser.close();
 
-console.log(`R237 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · unauthenticated rotation rejected + original secret preserved + authenticated rotation succeeded + old secret revoked + rotated secret preserved device continuity · queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser navigation + shared-snapshot refresh · R238 correlation layer + R212/R141/R146/R147/R125 authority boundaries preserved`);
+console.log(`R237 LIVE COMMAND AUTHORITY PASS · exact SHA ${expected} · Hybrid ${publicStatus.body.state} · current public devices ${current.length} · unauthenticated rotation rejected + original secret preserved + authenticated rotation succeeded + old secret revoked + rotated secret preserved device continuity · queue→DEVICE_BUSY→cancel + queue→RUNNING→cancel-refused→FAILED cleanup · real Home→TOOLS→Hybrid browser navigation + shared-snapshot refresh · R238 selected-host correlation + R239 resource tier ${resourceTier} + R212/R141/R146/R147/R125 authority boundaries preserved`);
