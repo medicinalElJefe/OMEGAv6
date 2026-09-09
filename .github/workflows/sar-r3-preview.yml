@@ -1,0 +1,58 @@
+name: SAR R3 Preview
+
+on:
+  push:
+    branches:
+      - release/sar-r3-workstation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SAR_PUBLIC_URL: https://omega-sar-r3.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Verify SAR source
+        working-directory: sar-accumulation-studio
+        run: |
+          npm run check
+          npm test
+      - name: Verify Cloudflare authorization
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler@latest whoami
+      - name: Dry-run R3 worker
+        run: npx wrangler@latest deploy --config wrangler.sar-r3.jsonc --dry-run --outdir .wrangler-sar-r3
+      - name: Deploy R3 worker
+        run: npx wrangler@latest deploy --config wrangler.sar-r3.jsonc
+      - name: Verify R3 root and module
+        run: |
+          set -euo pipefail
+          for attempt in {1..20}; do
+            code="$(curl -sS -o /tmp/r3.html -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/" || true)"
+            if [ "$code" = 200 ] && grep -q 'OMEGA · SAR ACCUMULATION STUDIO' /tmp/r3.html; then break; fi
+            test "$attempt" != 20 || exit 1
+            sleep 3
+          done
+          curl -fsS -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/src/app.mjs" | grep -q 'const renderer'
+      - name: Install Chromium proof runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Prove real live Sentinel-1 workflow
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
+        run: node tests/r3-live-data-e2e.mjs
