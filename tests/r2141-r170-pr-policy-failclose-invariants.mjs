@@ -6,8 +6,16 @@ const requireInvariant = (condition, message) => {
 };
 
 requireInvariant(
-  workflow.includes("gh pr list --repo \"$GITHUB_REPOSITORY\" --state open --search 'head:selfbuild/r170-'"),
-  'R240 must block parallel autonomous work on an actually open selfbuild PR',
+  workflow.includes('gh pr list --repo "$GITHUB_REPOSITORY" --state open --base main --limit 100 --json number,headRefName'),
+  'R245 must inspect actually open main-targeted PRs before autonomous generation',
+);
+requireInvariant(
+  workflow.includes("prefixes.includes('selfbuild/r170-')") && workflow.includes("prefixes.includes('cloud/evolution-')"),
+  'R245 cross-machine fence must cover both R170 and CLOUD-01 autonomous candidate prefixes',
+);
+requireInvariant(
+  workflow.includes('const held=prs.filter(pr=>prefixes.some(prefix=>String(pr.headRefName||\'\').startsWith(prefix)))'),
+  'R245 must derive the held autonomous candidates from the canonical branch-prefix policy',
 );
 requireInvariant(
   !workflow.includes('matching-refs/heads/selfbuild/r170-'),
@@ -50,4 +58,4 @@ requireInvariant(
   'R240 must preserve no-direct-generator-main-push and no-GitHub-auto-merge boundaries',
 );
 
-console.log('R240 R170 PR POLICY FAIL-CLOSE PASS · open PR blocks parallel work · historical orphan refs do not deadlock · known Actions PR-policy rejection removes the fresh orphan branch · unexpected PR errors fail · v7 actions preserved · R125/no-direct-generator-push/no-auto-merge boundaries preserved');
+console.log('R245 R170 PR POLICY FAIL-CLOSE PASS · one main-targeted PR inventory feeds the canonical R170/CLOUD-01 cross-machine fence · historical orphan refs do not deadlock · known Actions PR-policy rejection removes the fresh orphan branch · unexpected PR errors fail · v7 actions preserved · R125/no-direct-generator-push/no-auto-merge boundaries preserved');
