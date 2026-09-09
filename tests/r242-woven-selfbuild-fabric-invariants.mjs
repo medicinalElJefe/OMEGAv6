@@ -11,6 +11,7 @@ const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json',
 const engine=fs.readFileSync('scripts/r170-selfbuild-engine.mjs','utf8');
 const workflow=fs.readFileSync('.github/workflows/r170-governed-selfbuild.yml','utf8');
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+const r240Test=fs.readFileSync('tests/r240-recursive-exact-self-promotion-invariants.mjs','utf8');
 
 assert.equal(policy.schema,'OMEGA_WOVEN_SELFBUILD_FABRIC_R242');
 assert.equal(policy.revision,'R242');
@@ -73,7 +74,7 @@ assert.equal(plan.parallelSourceMutation,false);
 assert.equal(plan.authority,'PLANNING_AND_EVALUATION_ONLY');
 assert.equal(plan.canonicalAdmission,false);
 assert.ok(['A','B'].includes(plan.sourceMutationCandidateId));
-assert.equal(plan.activeCells[0].id,plan.sourceMutationCandidateId,'R242 must expose one strongest R240 mutation candidate while retaining the whole active plan');
+assert.equal(plan.activeCells[0].id,plan.sourceMutationCandidateId,'R242 may rank the same strongest candidate but cannot mutate it itself');
 for(const cell of plan.activeCells){
   for(const field of ['address','parent','objective','inputs','dependencies','invariants','files','tests','expectedOutputs','authorityBoundary','residuals','state','provenance','evidenceClass','sigma','transformationHistory','executionIdentity','proofIdentity'])assert.ok(Object.hasOwn(cell,field),`R242 work cell missing ${field}`);
   assert.equal(cell.sigma,0);
@@ -112,7 +113,7 @@ assert.equal(badPlan.canonicalAdmission,false);
 const standalone=buildWorkCellR242(roadmap[0],0,{admitted:new Set(),evidence,scars});
 assert.equal(rolePacketsForCellR242(standalone).length,8);
 
-for(const token of ["import {planWovenBuildFabricR242} from './lib/r242-woven-selfbuild-fabric.mjs'",'const wovenPlan=planWovenBuildFabricR242','BLOCKED_BY_R242_FABRIC','sourceMutationCandidateId','parallelSourceMutation','wovenFabricR242','planningFabricRevision:\'R242\'','R240 retained exactly one source-mutation/promotion candidate'])assert.ok(engine.includes(token),`R242 engine integration missing ${token}`);
+for(const token of ["import {planWovenBuildFabricR242} from './lib/r242-woven-selfbuild-fabric.mjs'",'const wovenPlan=planWovenBuildFabricR242','BLOCKED_BY_R242_FABRIC','BLOCKED_BY_R242_R240_SELECTION_DIVERGENCE','const capsule=candidates[0]||null','wovenFabricR242','planningFabricRevision:\'R242\'','R240 retained exactly one source-mutation/promotion candidate'])assert.ok(engine.includes(token),`R242 engine integration missing ${token}`);
 assert.ok(!/git\s+push/i.test(engine),'R242 planning engine must not directly push source');
 assert.equal(state.recursiveSchedulerRevision,'R240','R242 must not silently replace R240 exact source scheduler/promotion authority');
 assert.equal(state.exactSelfPromotionRevision,'R240');
@@ -125,8 +126,9 @@ assert.equal(policy.authority.hybridReturn,'R141');
 assert.equal(policy.authority.durableHistory,'R146');
 assert.equal(policy.authority.canonStateAdmission,'R125');
 assert.equal(policy.authority.canonAdmissionClaimed,false);
-assert.ok(ci.includes('node tests/r242-woven-selfbuild-fabric-invariants.mjs'),'canonical CI must prove R242');
-assert.ok(workflow.includes('node tests/r242-woven-selfbuild-fabric-invariants.mjs'),'governed self-build must prove R242 before generation/promotion');
+assert.ok(r240Test.includes("await import('./r242-woven-selfbuild-fabric-invariants.mjs')"),'mandatory R240 invariant must transitively execute R242 proof');
+assert.ok(ci.includes('node tests/r240-recursive-exact-self-promotion-invariants.mjs'),'canonical CI must execute the R240→R242 proof chain');
+assert.ok(workflow.includes('node tests/r240-recursive-exact-self-promotion-invariants.mjs'),'governed self-build must execute the R240→R242 proof chain before generation/promotion');
 assert.ok(!/^\s*workflow_run\s*:/m.test(workflow),'R242 must not create recursive workflow fanout');
 
 console.log('OMEGA R242 WOVEN SELF-BUILD FABRIC PASS · 12/144/1728/20736/248832 address topology · DAG fail-closed · sparse multi-cell planning/evaluation · typed Canon packets · scar/invariant carry · R240 single mutation/promotion · R239/R147/R141/R146/R125 authorities preserved');
