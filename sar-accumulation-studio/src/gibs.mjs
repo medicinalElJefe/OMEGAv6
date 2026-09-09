@@ -8,14 +8,13 @@ export function contextualTimestamp(record,fallbackDate=new Date()){const t=reco
 export function gibsContextManifest({bbox,date,layers,url,requestedDate=null,fallbackDays=0}){return {authority:'NASA EOSDIS GIBS',kind:'NEAR_REAL_TIME_CONTEXT',measurementPromotion:false,bbox:normalizeBbox(bbox),date,requestedDate:requestedDate||date,fallbackDays,layers,url,semantics:'GIBS imagery is synchronized contextual Earth-observation evidence. It does not replace SAR measurement pixels and is not used as a SAR value unless a quantitative layer with an explicit physical mapping is separately decoded.'};}
 
 if(typeof document!=='undefined'){
-  // No conventional basemap is admitted into the primary instrument. One WorldRenderer
-  // camera drives search, click, SAR registration and Earth context.
-  import('./location.mjs?r4sar=3').catch(()=>{});
-  import('./map-navigation-runtime.mjs?r4sar=3').catch(error=>console.error('OMEGA map navigation failed to initialize',error));
-  import('./sentinel-console.mjs?r4sar=3').catch(error=>console.error('Sentinel calibrated console failed to initialize',error));
-  import('./sar-focus-runtime.mjs?r4sar=3').catch(error=>console.error('SAR patch focus runtime failed to initialize',error));
-  import('./sar-browse-overlay.mjs?r4sar=3').catch(error=>console.error('Sentinel source browse overlay failed to initialize',error));
-  import('./sar-earth-overlay.mjs?r4sar=3').catch(()=>{});
-  import('./omega-field-console.mjs?r4sar=3').catch(error=>console.error('OMEGA continuous field failed to initialize',error));
-  import('./interaction-runtime.mjs?r4sar=3').catch(error=>console.error('OMEGA interaction runtime failed to initialize',error));
+  // R4 single-camera authority: target, view, source SAR, calibrated SAR and context all share one WGS84 renderer.
+  import('./location.mjs?r4sar=4').catch(error=>console.error('OMEGA location failed to initialize',error));
+  import('./map-navigation-runtime.mjs?r4sar=4').catch(error=>console.error('OMEGA SAR camera failed to initialize',error));
+  import('./sentinel-console.mjs?r4sar=4').catch(error=>console.error('Sentinel calibrated console failed to initialize',error));
+  import('./sar-focus-runtime.mjs?r4sar=4').catch(error=>console.error('SAR patch focus runtime failed to initialize',error));
+  import('./sar-browse-overlay.mjs?r4sar=4').catch(error=>console.error('Sentinel source browse overlay failed to initialize',error));
+  import('./sar-earth-overlay.mjs?r4sar=4').catch(error=>console.error('Exact SAR Earth overlay failed to initialize',error));
+  import('./omega-field-console.mjs?r4sar=4').catch(error=>console.error('OMEGA continuous field failed to initialize',error));
+  import('./interaction-runtime.mjs?r4sar=4').catch(error=>console.error('OMEGA interaction runtime failed to initialize',error));
 }
