@@ -7,11 +7,13 @@ on:
       - 'src/hybridResourceGovernorR239.ts'
       - 'src/HybridResourceGovernorR239.tsx'
       - 'src/hybridResourceGovernorR239.css'
+      - 'src/system/cloudHybridContinuityR251.js'
       - 'src/HybridCommandDeckR237.tsx'
       - 'src/HybridLinkR32.tsx'
       - 'public/omega-r170-self-build-governor.json'
       - 'scripts/verify_live_hybrid_resource_governor_r239.mjs'
       - 'tests/r239-adaptive-hybrid-resource-governor-invariants.mjs'
+      - 'tests/r251-cloud-hybrid-continuity-invariants.mjs'
       - 'tests/r170-self-build-governor-invariants.mjs'
       - 'tests/r180-current-authority-convergence-invariants.mjs'
       - '.github/workflows/r239-adaptive-hybrid-resource-governor-proof.yml'
@@ -37,6 +39,8 @@ jobs:
         run: npm ci
       - name: Prove R239 adaptive Hybrid resource governor
         run: node tests/r239-adaptive-hybrid-resource-governor-invariants.mjs
+      - name: Prove R251 cloud-authoritative Hybrid catch-up continuity
+        run: node tests/r251-cloud-hybrid-continuity-invariants.mjs
       - name: Re-prove inherited Hybrid authority and host evidence
         run: |
           node tests/r238-hybrid-host-intelligence-invariants.mjs
