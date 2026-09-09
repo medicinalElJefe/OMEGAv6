@@ -6,6 +6,7 @@ const must=(ok,msg)=>assert.ok(ok,`R243 ${msg}`);
 const policy=JSON.parse(read('public/omega-r243-woven-selfbuild-fabric.json'));
 const fabric=read('scripts/lib/r243-woven-selfbuild-fabric.mjs');
 const engine=read('scripts/r170-selfbuild-engine.mjs');
+const sharedSelection=read('scripts/lib/r245-governed-selfbuild-selection.mjs');
 const worker101=read('src/workerR101.js');
 const worker102=read('src/workerR102.js');
 const canonicalAgent=read('public/omega-hybrid-agent-r207.py');
@@ -22,7 +23,9 @@ assert.equal(policy.authority.sourceMutationAndPromotion,'R240_SINGLE_CANDIDATE_
 assert.equal(policy.authority.canonStateAdmission,'R125');
 assert.equal(policy.authority.canonAdmissionClaimed,false);
 for(const token of ['R242_READ_ONLY_NAVIGATION_LEMMA','R240_SINGLE_CANDIDATE_SOURCE_PROMOTION','R239_SELECTED_HOST_RESOURCE_ADMISSION','R147_EXECUTOR_SELECTION_AND_DISPATCH','R141_EXACT_RETURN_VERIFICATION','R146_DURABLE_EXECUTION_HISTORY','R125_SOLE_CANONSTATE_ADMISSION'])must(fabric.includes(token),`invariant carry missing ${token}`);
-for(const token of ['planWovenBuildFabricR243','BLOCKED_BY_R243_FABRIC','BLOCKED_BY_R243_R240_SELECTION_DIVERGENCE','wovenFabricR243',"planningFabricRevision:'R243'"])must(engine.includes(token),`self-build integration missing ${token}`);
+for(const token of ['planGovernedCandidateR245','BLOCKED_BY_R243_FABRIC','BLOCKED_BY_R243_R240_SELECTION_DIVERGENCE','wovenFabricR243',"planningFabricRevision:'R243'"])must(engine.includes(token),`self-build integration missing ${token}`);
+for(const token of ['planWovenBuildFabricR243','planParallelFrontierR240','rankDependencyReadyCapsulesR240','BLOCKED_BY_R243_FABRIC','BLOCKED_R243_R240_SELECTION_DIVERGENCE','woven.sourceMutationCandidateId!==capsule.id'])must(sharedSelection.includes(token),`shared R245 selection must preserve R243/R240 planning contract ${token}`);
+must(engine.includes("from './lib/r245-governed-selfbuild-selection.mjs'")&&sharedSelection.includes("from './r243-woven-selfbuild-fabric.mjs'"),'R170 engine must reach R243 woven planning only through the shared R245 governed selector');
 must(r240.includes("await import('./r243-woven-selfbuild-fabric-invariants.mjs')"),'R240 exact-promotion proof must transitively execute R243 fabric proof');
 
 for(const token of ["EXECUTION_MOTION_REVISION='R243'","'/api/hybrid/agent/progress':'/agent/progress'",'RUNNING_LEASE_MS=20000','recoverStalledJobsR243','R243_JOB_STALL_RECOVERED','R243_PROGRESS_SEQUENCE_STALE'])must(worker101.includes(token),`native execution-motion transport missing ${token}`);
@@ -40,4 +43,4 @@ must(nav.includes("R242_NAVIGATION_LEMMA_REVISION='R242'"),'R243 must not rename
 must(nav.includes('NAVIGATION_TRANSFORM_HAS_NO_EXECUTION_OR_CANONSTATE_AUTHORITY'),'R242 navigation must remain read-only under R243');
 for(const forbidden of ['canonicalAdmission:true','parallelSourceMutation:true'])must(!fabric.includes(forbidden),`R243 planning fabric may not gain forbidden authority ${forbidden}`);
 
-console.log('OMEGA R243 WOVEN EXECUTION CONVERGENCE PASS · signed R242 read-only navigation identity preserved · native authenticated R243 lease/terminal-fence transport bound to canonical downloaded R207 agent · R243 selected-host operator convergence mounted · R243 woven sparse planning bound to R240 one-candidate source promotion · R239/R147/R141/R146/R125 authorities unchanged');
+console.log('OMEGA R243/R245 WOVEN EXECUTION CONVERGENCE PASS · R170 engine reaches R243 woven planning through the shared R245 governed selector · R240/R243 selection agreement remains fail-closed · signed R242 read-only navigation identity preserved · native authenticated R243 lease/terminal-fence transport bound to canonical downloaded R207 agent · R243 selected-host operator convergence mounted · R239/R147/R141/R146/R125 authorities unchanged');
