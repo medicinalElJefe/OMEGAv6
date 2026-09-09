@@ -1,7 +1,7 @@
 import { fetchSentinel1Cog } from './stac.mjs';
 import { calibratedTargetPatch, paintCalibratedPatch, sampleCalibratedSentinel1 } from './sentinel1-calibration.mjs';
 
-const $=s=>document.querySelector(s);
+const $=s=>typeof document==='undefined'?null:document.querySelector(s);
 const cache=new Map();
 let generation=0;
 let autoPatch=true;
@@ -37,7 +37,7 @@ function renderPatchStatus(patch){
   const e=$('#rasterEmpty'),stats=$('#rasterStats');
   if(e)e.style.display='none';
   const s=patch.stats,g=patch.geolocation,p=patch.product;
-  if(stats)stats.textContent=`CALIBRATED GRD · ${patch.polarization} ${patch.quantity} · target ${patch.target.lat.toFixed(5)}, ${patch.target.lon.toFixed(5)} · source window ${patch.width}×${patch.height} @ ${patch.centerPixel[0]},${patch.centerPixel[1]} · valid ${s.validCount.toLocaleString()} · dB p02 ${fmt(s.p02)} · median ${fmt(s.p50)} · p98 ${fmt(s.p98)} · geolocation ${g.method} residual ${Number.isFinite(g.residualDeg)?g.residualDeg.toExponential(2):'—'}° · spacing ${fmt(p.rangePixelSpacing,1)}m range / ${fmt(p.azimuthPixelSpacing,1)}m azimuth · PRODUCT LUT · NOT RTC / NOT InSAR.`;
+  if(stats)stats.textContent=`CALIBRATED GRD · ${patch.id} · ${patch.polarization} ${patch.quantity} · target ${patch.target.lat.toFixed(5)}, ${patch.target.lon.toFixed(5)} · source window ${patch.width}×${patch.height} @ ${patch.centerPixel[0]},${patch.centerPixel[1]} · valid ${s.validCount.toLocaleString()} · dB p02 ${fmt(s.p02)} · median ${fmt(s.p50)} · p98 ${fmt(s.p98)} · geolocation ${g.method} residual ${Number.isFinite(g.residualDeg)?g.residualDeg.toExponential(2):'—'}° · spacing ${fmt(p.rangePixelSpacing,1)}m range / ${fmt(p.azimuthPixelSpacing,1)}m azimuth · PRODUCT LUT · NOT RTC / NOT InSAR.`;
   const canvas=$('#raster');
   canvas?.classList.remove('flash');if(canvas){void canvas.offsetWidth;canvas.classList.add('flash');}
   const badge=$('#sarCalProof');
@@ -74,7 +74,7 @@ function queryOptions(){
 
 function paintTemporalChart(samples){
   const canvas=$('#probeChart');if(!canvas)return;
-  const rect=canvas.getBoundingClientRect(),dpr=Math.max(1,devicePixelRatio||1);canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);
+  const rect=canvas.getBoundingClientRect(),dpr=Math.max(1,globalThis.devicePixelRatio||1);canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);
   const c=canvas.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);const w=rect.width,h=rect.height;c.clearRect(0,0,w,h);c.fillStyle='#061017';c.fillRect(0,0,w,h);
   const valid=samples.filter(s=>Number.isFinite(s.db)&&s.startTime);
   if(!valid.length){c.fillStyle='#8ca2ad';c.font='11px ui-monospace,monospace';c.fillText('No calibrated Sentinel-1 samples resolved at this target.',12,22);return;}
@@ -134,4 +134,7 @@ export function initializeSentinelConsole(){
   globalThis.OMEGA_SAR_SENTINEL={loadCalibratedCurrent,probeCalibratedStack,cache};
 }
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initializeSentinelConsole,{once:true});else queueMicrotask(initializeSentinelConsole);
+if(typeof document!=='undefined'){
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initializeSentinelConsole,{once:true});
+  else queueMicrotask(initializeSentinelConsole);
+}
