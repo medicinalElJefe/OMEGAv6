@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 await import('./r255-hybrid-experience-ledger-invariants.mjs');
-await import('./r263-hybrid-hyperperformance-invariants.mjs');
+await import('./r264-zero-constriction-hybrid-invariants.mjs');
 const read=p=>fs.readFileSync(p,'utf8');
 const governor=read('src/hybridResourceGovernorR239.ts');
 const surface=read('src/HybridResourceGovernorR239.tsx');
@@ -99,4 +99,4 @@ must(classify({load:50,availGiB:12,diskGiB:80,active:true})==='HOLD','R239 activ
 must(classify({load:50,availGiB:12,diskGiB:80,profile:false})==='UNPROVED','R239 missing returned profile must remain unproved');
 must(classify({load:50,availGiB:12,diskGiB:80,fresh:false})==='HOLD','R239 stale returned resource proof must hold heavy work');
 
-console.log(`OMEGA R239 ADAPTIVE HYBRID RESOURCE GOVERNOR PASS · milestone preserved under current capability floor R${capabilityFloor} · selected-host R238 proof only · fresh bounded resource sample required · pressure-aware 1..12 worker envelope · exact device/epoch/profile job binding · bounded hash/train sizing · bootstrap PROVE_HOST retained · heavy work fail-closed under stale/memory/storage pressure · R237 queue authority preserved · R263 desktop/mobile full-surface preservation required · no screenshot constants · R141/R146/R147/R125 authority unchanged`);
+console.log(`OMEGA R239 ADAPTIVE HYBRID RESOURCE GOVERNOR PASS · milestone preserved under current capability floor R${capabilityFloor} · selected-host R238 proof only · fresh bounded resource sample required · pressure-aware 1..12 worker envelope · exact device/epoch/profile job binding · bounded hash/train sizing · bootstrap PROVE_HOST retained · heavy work fail-closed under stale/memory/storage pressure · R237 queue authority preserved · R264 desktop/mobile full-surface preservation required · no screenshot constants · R141/R146/R147/R125 authority unchanged`);
