@@ -1,5 +1,5 @@
 const R_KM=6371.0088,DEG=Math.PI/180;
-const finite=v=>Number.isFinite(Number(v));
+const finite=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
 
 export function eventTimestamp(event){const t=new Date(event?.time||event?.eventTime||'').getTime();return Number.isFinite(t)?t:null;}
 
