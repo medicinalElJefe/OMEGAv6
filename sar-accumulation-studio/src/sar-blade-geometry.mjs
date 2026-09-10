@@ -40,7 +40,8 @@ export function sourcePointForNode(node,sourceWindow,imageWidth,imageHeight){
 export function drawMeshCellByBlades(ctx,image,sourceWindow,nodes,dest,{alpha=1,filter='none'}={}){
   if(!Array.isArray(nodes)||nodes.length!==4||!Array.isArray(dest)||dest.length!==4)return false;
   const [q00,q10,q01,q11]=nodes,[d00,d10,d01,d11]=dest;
-  const s00=sourcePointForNode(q00,sourceWindow,image.width,image.height),s10=sourcePointForNode(q10,sourceWindow,image.width,image.height),s01=sourcePointForNode(q01,sourceWindow,image.width,image.height),s11=sourcePointForNode(q11,sourceWindow,image.width,image.height);
+  const imageWidth=Number(image.naturalWidth||image.videoWidth||image.width),imageHeight=Number(image.naturalHeight||image.videoHeight||image.height);
+  const s00=sourcePointForNode(q00,sourceWindow,imageWidth,imageHeight),s10=sourcePointForNode(q10,sourceWindow,imageWidth,imageHeight),s01=sourcePointForNode(q01,sourceWindow,imageWidth,imageHeight),s11=sourcePointForNode(q11,sourceWindow,imageWidth,imageHeight);
   if(![s00,s10,s01,s11,...dest].every(p=>Array.isArray(p)&&p.every(finite)))return false;
   const a=drawWarpTriangle(ctx,image,[s00,s10,s11],[d00,d10,d11],{alpha,filter});
   const b=drawWarpTriangle(ctx,image,[s00,s11,s01],[d00,d11,d01],{alpha,filter});
@@ -88,7 +89,7 @@ export function analyzeBladeLens(mesh,target=null){
   const result={
     state:'BLADE_LENS_READY',center:{pixel:center.pixel,line:center.line,lon:center.lon,lat:center.lat},jacobianMetersPerSource:J,
     inverseSourcePerMeter:{pixelPerEast:inverse.a,pixelPerNorth:inverse.b,linePerEast:inverse.c,linePerNorth:inverse.d},
-    determinant:inverse.det===0?0:1/inverse.det,principalMetersPerPixel:{major,minor},conditionNumber:condition,pixelAxisDeg,lineAxisDeg,
+    determinantMeters2PerSourceCell:inverse.det,principalMetersPerPixel:{major,minor},conditionNumber:condition,pixelAxisDeg,lineAxisDeg,
     semantics:'Local differential lens from the registered SAR source grid. Forward Jacobian maps source-pixel motion to Earth ENU meters; inverse Jacobian reverse-computes focused source coordinates from local Earth offsets.'
   };
   globalThis.OMEGA_SAR_BLADE_LENS=result;return result;
