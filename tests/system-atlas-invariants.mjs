@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const runtime=fs.readFileSync('src/systemAtlasRuntime.ts','utf8'),predecessor=fs.readFileSync('src/systemAtlasPredecessor.ts','utf8'),completion=fs.readFileSync('src/completionRuntimeR48.ts','utf8'),ui=fs.readFileSync('src/SystemAtlasControl.tsx','utf8'),router=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8'),loader=fs.existsSync('src/specialistLoaderR109.tsx')?fs.readFileSync('src/specialistLoaderR109.tsx','utf8'):'';
-const foundry=fs.readFileSync('src/systemFoundryR268.ts','utf8'),foundryUi=fs.readFileSync('src/SystemFoundryR268.tsx','utf8'),foundryRuntime=fs.readFileSync('src/systemFoundryRuntimeR269.ts','utf8');
+const foundry=fs.readFileSync('src/systemFoundryR268.ts','utf8'),foundryUi=fs.readFileSync('src/SystemFoundryR268.tsx','utf8'),foundryRuntime=fs.readFileSync('src/systemFoundryRuntimeR269.ts','utf8'),foundryLive=fs.readFileSync('src/SystemFoundryLiveR270.tsx','utf8'),app=fs.readFileSync('src/App.tsx','utf8'),hybrid=fs.readFileSync('src/HybridLinkR32.tsx','utf8');
 const must=(x,m)=>{if(!x)throw new Error(m)};
 for(const x of ['61917364224','20736','SUBSYSTEM_COUNT=24','PHASE_COUNT=12','STREAM_COUNT=4','GRID_CELLS=27648','ONE FIELD / ONE PACKET / ONE CONTINUITY LAW'])must(runtime.includes(x),`missing donor invariant ${x}`);
 const families=[...runtime.matchAll(/F\('S(\d\d)'/g)].map(x=>x[1]);must(families.length===24,`expected 24 families, got ${families.length}`);must(new Set(families).size===24,'family IDs must be unique');
@@ -17,31 +17,37 @@ must(runtime.includes("S22','Omega Installer / One-Click Shell','DESKTOP_STARTUP
 must(runtime.includes("S23','Runtime API / WebSocket Service','LIVE_STATE_TRANSPORT'"),'active S23 must match authoritative v22 runtime transport family');
 must(completion.includes("S10:{successor:'SOURCE_ACTIVE',surface:'Matter Traversal'")&&completion.includes("S12:{successor:'LOCAL_ACTIVE',surface:'Build Out'")&&completion.includes("S21:{successor:'LOCAL_ACTIVE',surface:'Visual Instrument'"),'restored family successor surfaces must remain explicit');
 must(runtime.includes('not a claim of physical dimensions'),'physical-dimension truth boundary missing');
-must(ui.includes('Execution truth boundary'),'UI execution boundary missing');
-must(ui.includes('No fake OPEN button'),'non-executable family must not expose a fake Open action');
+must(ui.includes('Execution truth boundary')&&ui.includes('No fake OPEN button'),'System Atlas execution boundary missing');
 must(ui.includes("const currentRouteOf=(surface:string|undefined,fallback:string)=>String(surface||fallback||'System Atlas').split('/')[0].trim()"),'current successor surface must normalize to a registered primary route');
-must(ui.includes('currentRoute=currentRouteOf(current?.surface,cell.family.target)'),'selected family launch must derive from current successor surface');
-must(ui.includes("canOpen=Boolean(current&&currentExecutable.has(current.successor)&&currentRoute!=='System Atlas')"),'Open eligibility must use current successor status and route');
+must(ui.includes('currentRoute=currentRouteOf(current?.surface,cell.family.target)')&&ui.includes("canOpen=Boolean(current&&currentExecutable.has(current.successor)&&currentRoute!=='System Atlas')"),'current successor open authority regressed');
 must(ui.includes('onClick={()=>onNavigate(currentRoute)}')&&ui.includes('OPEN {currentRoute.toUpperCase()}'),'Open action must launch current successor route rather than predecessor target');
 must(ui.includes('V24 predecessor target')&&ui.includes('Current operator route'),'UI must show predecessor target and current route separately');
-must(ui.includes('Export current truth receipt'),'current truth receipt export missing');
-must(ui.includes("OMEGA_SYSTEM_ATLAS_R168_CURRENT_TRUTH.json"),'R168 current-truth receipt filename missing');
+must(ui.includes('Export current truth receipt')&&ui.includes("OMEGA_SYSTEM_ATLAS_R168_CURRENT_TRUTH.json"),'current truth receipt export missing');
 must(router.includes("case 'System Atlas'")&&router.includes("case 'Control Matrix'"),'System Atlas direct routes must remain');
 const eagerSystem=router.includes("import SystemAtlasControl from './SystemAtlasControl'")&&router.includes('<SystemAtlasControl record={record} onNavigate={go}');
 const deferredSystem=loader.includes("SystemAtlasControl:()=>import('./SystemAtlasControl')")&&loader.includes('export const SystemAtlasR109=lazy(LOADERS.SystemAtlasControl)')&&router.includes('<SystemAtlasR109 record={record} onNavigate={go}');
 must(eagerSystem||deferredSystem,'dedicated System Atlas control must remain mounted through eager or R109 deferred binding');
+
 for(const token of ["export type OmegaLayer='STATE'|'INTELLIGENCE'|'MEMORY'|'RELATION'|'COMPUTATION'|'ACTION'|'OBSERVATION'|'PROOF'","canonStateAdmission:'R125 only'","deployment:'.github/workflows/ci.yml only'","'R205 immutable executor semantics'","'R239 resource governance'","'R240 exact-head promotion'","'R243 Woven planning/execution-motion truth boundary'","maxMutationCandidates:1","compileSystemGenomeR268","dormantCapabilities","operatorDag"])must(foundry.includes(token),`R268 Foundry invariant missing ${token}`);
 for(const token of ['continuity.partition','continuity.transform','continuity.invariantCarry','continuity.scarCarry','continuity.recontextualize'])must(foundry.includes(token),`R268 Woven software operator missing ${token}`);
 for(const id of ['omega.self','collections.workbench','sar.lab','science.lab','software.factory'])must(foundry.includes(`id:'${id}'`),`R268 system genome missing ${id}`);
 must(foundry.includes("if(c.evidence.includes('DEVICE_PROOF_REQUIRED')&&!ctx.authenticatedDeviceHeartbeat)blockers.push('DEVICE_PROOF_REQUIRED')"),'device execution must remain heartbeat gated');
 must(foundry.includes("if(c.evidence.includes('EXTERNAL_DEGRADED')&&!ctx.externalBindings)blockers.push('EXTERNAL_DEGRADED')"),'external execution must remain binding gated');
 must(foundry.includes("active.filter(x=>x.status==='ACTIVE').reduce"),'cost/latency must exclude blocked work');
-must(foundryUi.includes('DEVICE_PROOF_REQUIRED — browser/CI state is not treated as private-PC proof.'),'Foundry UI must not promote browser/CI state into private-PC proof');
-must(foundryUi.includes('This surface plans; it does not create a second executor or production writer.'),'Foundry must declare planning-only authority');
-must(ui.includes("import SystemFoundryR268 from './SystemFoundryR268'" )&&ui.includes('<SystemFoundryR268/>'),'System Foundry must be mounted inside System Atlas without a parallel route shell');
+must(foundryUi.includes('DEVICE_PROOF_REQUIRED — browser/CI state is not treated as private-PC proof.')&&foundryUi.includes('This surface plans; it does not create a second executor or production writer.'),'Foundry UI authority boundary missing');
+
 for(const token of ['compileSystemRuntimeR269','resourceEnvelopeR239?:ResourceEnvelopeR239|null',"envelope.tier!=='HOLD'&&envelope.tier!=='UNPROVED'&&envelope.admission.VERIFY_PROJECT","R239_RESOURCE_PROOF_REQUIRED","cloud/browser capabilities remain independently placeable","planningOnly:true"])must(foundryRuntime.includes(token),`R269 runtime-truth invariant missing ${token}`);
 must(foundryRuntime.includes("truth.authenticatedDeviceHeartbeat&&resourceCurrent"),'R269 device resource admission must require both current device proof and current R239 truth');
 must(foundryRuntime.includes("if(capability.id!==DEVICE_CAPABILITY||capability.status==='BLOCKED')return capability"),'R269 must preserve pre-existing heartbeat/external blockers before resource classification');
 for(const forbidden of ["api.get<any>('/api/hybrid/status')","setInterval(","api.post<any>('/api/hybrid/jobs'"])must(!foundryRuntime.includes(forbidden),`R269 Foundry bridge must not create a second Hybrid polling/execution owner: ${forbidden}`);
 must(foundryUi.includes("data-runtime-truth='R269'")&&foundryUi.includes('R239 RESOURCE TIER')&&foundryUi.includes('R239_RESOURCE_PROOF_REQUIRED'),'R269 resource authority must be visible in the Foundry instrument');
-console.log('SYSTEM_ATLAS R168/R268/R269 PASS · 24-family current-truth atlas preserved · governed System Foundry compiler mounted · R239 runtime truth bridge fail-closed · no duplicate Hybrid polling owner · heartbeat + resource admission required for device assist · cloud/browser independence preserved · R125/R141/R146/R147/R205/R239/R240/R243 + ci.yml authority preserved');
+
+must(ui.includes("import SystemFoundryLiveR270 from './SystemFoundryLiveR270'")&&ui.includes('<SystemFoundryLiveR270/>'),'R270 live Foundry adapter must be mounted inside System Atlas without a parallel route shell');
+for(const token of ['useHybridRuntimeSnapshotR238','latestReturnedHostProofR239','resourceEnvelopeR239','snapshotCurrent=Boolean(epoch>0&&!stale)','authenticatedDeviceHeartbeat=Boolean(device&&snapshotCurrent)','<SystemFoundryR268 deviceHeartbeat={authenticatedDeviceHeartbeat} resourceEnvelopeR239={envelope}/>','noSecondPoller:true','noSecondExecutor:true'])must(foundryLive.includes(token),`R270 live Foundry truth invariant missing ${token}`);
+for(const forbidden of ["api.get<any>('/api/hybrid/status')","api.get<any>('/api/missions')",'setInterval(',"api.post<any>('/api/hybrid/jobs'"])must(!foundryLive.includes(forbidden),`R270 live Foundry adapter must consume shared context, not create polling/execution: ${forbidden}`);
+must(app.includes("import {HybridRuntimeSnapshotProviderR238} from './HybridRuntimeSnapshotR238'")&&app.includes('<HybridRuntimeSnapshotProviderR238><OmegaWorkstation/></HybridRuntimeSnapshotProviderR238>'),'R270 sole R238 provider must wrap the specialist workstation');
+must(!hybrid.includes("import {HybridRuntimeSnapshotProviderR238} from './HybridRuntimeSnapshotR238'")&&!hybrid.includes('<HybridRuntimeSnapshotProviderR238>'),'R270 Hybrid Link must not mount a duplicate R238 provider');
+must(((app+hybrid).match(/<HybridRuntimeSnapshotProviderR238>/g)||[]).length===1,'R270 must retain exactly one R238 provider mount across workstation + Hybrid');
+must(ui.includes("data-foundry-live-truth='R270_SHARED_R238_R239'"),'R270 System Atlas must expose shared live truth scope');
+
+console.log('SYSTEM_ATLAS R168/R268/R269/R270 PASS · 24-family current-truth atlas preserved · governed System Foundry compiler + R239 placement truth + one workstation-scoped R238 live owner · Hybrid and Foundry share selected host/epoch without duplicate polling · cloud/browser independence preserved · R125/R141/R146/R147/R205/R239/R240/R243 + ci.yml authority preserved');
