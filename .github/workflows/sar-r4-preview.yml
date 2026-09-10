@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - name: Verify source, geometry, water and OMEGA invariants
+      - name: Verify source, geometry, water, temporal and OMEGA invariants
         working-directory: sar-accumulation-studio
         run: |
           npm run check
@@ -48,7 +48,7 @@ jobs:
         run: npx wrangler@latest deploy --config wrangler.sar-r4.jsonc --dry-run --outdir .wrangler-sar-r4
       - name: Deploy isolated R4 worker
         run: npx wrangler@latest deploy --config wrangler.sar-r4.jsonc
-      - name: Verify R4 public transport and Earth awareness providers
+      - name: Verify R249 public transport and Earth awareness providers
         run: |
           set -euo pipefail
           for attempt in {1..20}; do
@@ -57,7 +57,7 @@ jobs:
             test "$attempt" != 20 || { echo 'R4 root did not become live'; exit 1; }
             sleep 3
           done
-          for module in r4-runtime.mjs r4-live-precision.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs sar-blade-geometry.mjs sar-blade-render-runtime.mjs sar-blade-lens-runtime.mjs sar-regional-measurement.mjs sar-regional-runtime.mjs water-geometry-core.mjs earth-awareness-runtime.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs; do
+          for module in r4-runtime.mjs r4-live-precision.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs sar-blade-geometry.mjs sar-blade-render-runtime.mjs sar-blade-lens-runtime.mjs sar-regional-measurement.mjs sar-regional-runtime.mjs water-geometry-core.mjs earth-awareness-runtime.mjs jrc-water-observation-runtime.mjs earth-temporal-core.mjs earth-temporal-sync.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs; do
             ready=0
             for attempt in {1..20}; do
               code="$(curl -sS -o "/tmp/$module" -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/src/$module?release=$GITHUB_SHA" || true)"
@@ -74,11 +74,16 @@ jobs:
           done
           test "$stac_ready" = 1 || { cat /tmp/stac.json || true; echo "R4 STAC proxy did not become healthy (last HTTP $code)"; exit 1; }
 
-          # Tucson Terrarium tile at z8 (72,103): must return actual PNG terrain bytes through the fixed allowlisted provider.
           terrain_code="$(curl -sS -D /tmp/terrain.headers -o /tmp/terrain.png -w '%{http_code}' "$SAR_PUBLIC_URL/api/terrain?z=8&x=49&y=103" || true)"
           test "$terrain_code" = 200 || { cat /tmp/terrain.headers || true; echo "Terrain provider failed HTTP $terrain_code"; exit 1; }
           grep -qi 'content-type: image/png' /tmp/terrain.headers
           test -s /tmp/terrain.png
+
+          water_code="$(curl -sS -D /tmp/water.headers -o /tmp/water.png -w '%{http_code}' "$SAR_PUBLIC_URL/api/water/jrc?layer=occurrence&z=8&x=49&y=103" || true)"
+          test "$water_code" = 200 || { cat /tmp/water.headers || true; echo "JRC surface-water provider failed HTTP $water_code"; exit 1; }
+          grep -qi 'content-type: image/png' /tmp/water.headers
+          grep -qi 'x-omega-water-period: 1984-2024' /tmp/water.headers
+          test -s /tmp/water.png
 
           usgs_code="$(curl -sS -o /tmp/usgs.json -w '%{http_code}' "$SAR_PUBLIC_URL/api/events/usgs?period=day" || true)"
           test "$usgs_code" = 200 && grep -q 'FeatureCollection' /tmp/usgs.json || { head -c 1000 /tmp/usgs.json || true; echo "USGS event provider failed HTTP $usgs_code"; exit 1; }
@@ -94,7 +99,7 @@ jobs:
         env:
           SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
         run: node tests/r4-authority-spine-e2e.mjs
-      - name: Prove adaptive regional SAR and Earth awareness
+      - name: Prove adaptive SAR and Earth-awareness stack
         working-directory: sar-accumulation-studio
         env:
           SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
