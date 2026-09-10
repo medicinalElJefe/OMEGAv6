@@ -99,21 +99,16 @@ jobs:
         env:
           SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
         run: node tests/r4-authority-spine-e2e.mjs
-      - name: Prove adaptive SAR and Earth-awareness stack
+      - name: Prove R249 full Earth-aware SAR build
         working-directory: sar-accumulation-studio
         env:
           SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
-        run: node tests/r4-continuous-field-e2e.mjs
-      - name: Prove live high-fidelity precision surface
-        working-directory: sar-accumulation-studio
-        env:
-          SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
-        run: node tests/r4-live-precision-e2e.mjs
-      - name: Archive R4 live visual proof
+        run: node tests/r249-full-build-e2e.mjs
+      - name: Archive R249 live visual proof
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: sar-r4-live-visual-proof
-          path: sar-accumulation-studio/test-results/r4-live-precision.png
+          name: sar-r249-full-build-proof
+          path: sar-accumulation-studio/test-results/r249-full-build.png
           if-no-files-found: warn
           retention-days: 14
