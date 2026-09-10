@@ -9,7 +9,7 @@
     {"binding":"OMEGA_CANONICAL","service":"omegav6"}
   ],
   "vars": {
-    "OMEGA_SAI_INVITES_JSON": "[{\"id\":\"private-peer-001\",\"label\":\"Private OMEGA / SAI Peer\",\"tokenSha256\":\"99209254fd50a443fe2ac3d871a35e9ec9fe15cdddb25a1d88b50a05a5c657a3\",\"active\":true,\"expiresAt\":\"2027-09-09T23:59:59Z\",\"scopes\":[\"COLLABORATE\",\"TRAINING_PROPOSE\",\"SESSION_READ\"],\"maxPromptChars\":12000,\"maxTrainingChars\":20000,\"retainConversation\":true}]",
+    "OMEGA_SAI_INVITES_JSON": "[{\"id\":\"private-peer-001\",\"publicSlug\":\"omega-peer-001\",\"label\":\"OMEGA / SAI Collaboration Peer\",\"tokenSha256\":\"99209254fd50a443fe2ac3d871a35e9ec9fe15cdddb25a1d88b50a05a5c657a3\",\"active\":true,\"expiresAt\":\"2027-09-09T23:59:59Z\",\"scopes\":[\"COLLABORATE\",\"TRAINING_PROPOSE\",\"SESSION_READ\"],\"maxPromptChars\":12000,\"maxTrainingChars\":20000,\"sessionTtlSeconds\":3600,\"retainConversation\":true}]",
     "OMEGA_SAI_ADMIN_TOKEN_SHA256": "a0581f25178fc639e070c7e065c01604e7fe26a6c1040b68e96d4bf1990ce9f2"
   },
   "durable_objects": {
