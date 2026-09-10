@@ -7,46 +7,28 @@ const intelligence=read('src/HybridHostIntelligenceR238.tsx');
 const effects=read('src/HybridHostEffectsR212.tsx');
 const deck=read('src/HybridCommandDeckR237.tsx');
 const link=read('src/HybridLinkR32.tsx');
+const app=read('src/App.tsx');
 
 for(const token of [
  "WOVEN_CONTINUITY_OPERATOR_R238='partition → exchange/transform → invariant carry → scar/history carry → re-contextualize/repartition'",
- 'useHybridRuntimeSnapshotR238',
- 'selectedDeviceJobs',
- 'missionEntries',
- 'data-r238-woven-device',
- 'data-r238-woven-epoch',
- '+1 DISPATCH · 0 OBSERVE · -1 RETURN',
- 'INVARIANT CARRY',
- 'SCAR / HISTORY CARRY',
- 'RECOVERABLE PATH',
- 'R134_WOVEN_RELATIVITY',
- 'R141_EXACT_RETURN_CLOSURE',
- 'R146_HISTORY',
- 'R147_DISPATCH',
- 'R125_CANON_ADMISSION',
+ 'useHybridRuntimeSnapshotR238','selectedDeviceJobs','missionEntries','data-r238-woven-device','data-r238-woven-epoch',
+ '+1 DISPATCH · 0 OBSERVE · -1 RETURN','INVARIANT CARRY','SCAR / HISTORY CARRY','RECOVERABLE PATH','R134_WOVEN_RELATIVITY',
+ 'R141_EXACT_RETURN_CLOSURE','R146_HISTORY','R147_DISPATCH','R125_CANON_ADMISSION',
  'Atlas resolution labels are representational/address levels, not literal physical dimensions'
 ])must(woven.includes(token),`R238 Woven continuity invariant missing ${token}`);
 
 must(!woven.includes("api.post<any>('/api/hybrid/jobs'"),'R238 Woven continuity surface must not gain command authority');
 must(!woven.includes("api.get<any>('/api/hybrid/status')"),'R238 Woven continuity surface must consume the shared observation frame rather than creating another poller');
 must(!intelligence.includes("api.get<any>('/api/hybrid/status')"),'R238 host intelligence must consume shared snapshot after Woven convergence');
-for(const text of [effects,deck,intelligence,woven])must(text.includes('useHybridRuntimeSnapshotR238'), 'Every R238 operational projection must consume the same snapshot context');
+for(const text of [effects,deck,intelligence,woven])must(text.includes('useHybridRuntimeSnapshotR238'),'Every R238 operational projection must consume the same snapshot context');
+for(const token of ["Promise.all([api.get<any>('/api/hybrid/status'),api.get<any>('/api/missions')])",'epoch:previous.epoch+1','selectedDeviceJobs','targetForMission(mission,job)===device.id'])must(snapshot.includes(token),`R238 Woven snapshot carry missing ${token}`);
 
-for(const token of [
- "Promise.all([api.get<any>('/api/hybrid/status'),api.get<any>('/api/missions')])",
- 'epoch:previous.epoch+1',
- 'selectedDeviceJobs',
- 'targetForMission(mission,job)===device.id'
-])must(snapshot.includes(token),`R238 Woven snapshot carry missing ${token}`);
-
-const start=link.indexOf('<HybridRuntimeSnapshotProviderR238>'),end=link.indexOf('</HybridRuntimeSnapshotProviderR238>');
-must(start>=0&&end>start,'R238 shared provider boundary missing');
-for(const token of ['<HybridWovenContinuityR238/>','<HybridHostIntelligenceR238/>','<HybridHostEffectsR212/>','<HybridCommandDeckR237/>','<HybridProofClosureR141/>','<MissionLineageReviewR209/>']){
- const i=link.indexOf(token);must(i>start&&i<end,`R238 shared provider must contain ${token}`);
-}
+must(app.includes('<HybridRuntimeSnapshotProviderR238><OmegaWorkstation/></HybridRuntimeSnapshotProviderR238>'),'R270 shared provider must wrap the full specialist workstation');
+must(!link.includes('<HybridRuntimeSnapshotProviderR238>'),'R270 Hybrid Link must not mount a second R238 provider');
+for(const token of ['<HybridWovenContinuityR238/>','<HybridHostIntelligenceR238/>','<HybridHostEffectsR212/>','<HybridCommandDeckR237/>','<HybridProofClosureR141/>','<MissionLineageReviewR209/>'])must(link.includes(token),`R238/R270 Hybrid projection missing ${token}`);
 must(link.indexOf('<HybridWovenContinuityR238/>')<link.indexOf('<HybridHostIntelligenceR238/>'),'Woven frame must be declared before the host-intelligence projection');
 must(link.indexOf('<HybridHostIntelligenceR238/>')<link.indexOf('<HybridCommandDeckR237/>'),'Host resource truth must precede native command admission');
 for(const token of ['R125 admission authority','R141 exact return closure','R146 history','R147 executor/dispatch authority'])must(link.includes(token),`R238 Woven authority boundary regressed ${token}`);
 must(link.includes('12→144→1,728→20,736→248,832')&&link.includes('not literal physical dimensions'),'R238 must retain atlas-resolution truth boundary');
 
-console.log('OMEGA R238 WOVEN HYBRID CONTINUITY PASS · two successor projections converge into one selected-host atomic epoch · frame-relative whole/part + inner/outer roles · +1/0/-1 orientation channels · invariant authority carry · selected-host scar/history carry · recoverable R134→R238→R141→R146→R147→R125 path · no new physical primitive or authority');
+console.log('OMEGA R238/R270 WOVEN HYBRID CONTINUITY PASS · one workstation-scoped selected-host atomic epoch shared across Hybrid + Foundry · frame-relative roles · invariant/scar carry · recoverable R134→R238→R141→R146→R147→R125 path · no new physical primitive, poller or authority');

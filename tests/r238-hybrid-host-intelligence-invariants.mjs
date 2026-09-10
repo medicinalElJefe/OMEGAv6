@@ -6,6 +6,7 @@ const wrapper=read('public/omega-hybrid-agent-r141.py');
 const base=read('public/omega-hybrid-agent-base-r205.py');
 const ui=read('src/HybridHostIntelligenceR238.tsx');
 const link=read('src/HybridLinkR32.tsx');
+const app=read('src/App.tsx');
 const snapshot=read('src/HybridRuntimeSnapshotR238.tsx');
 const workflow=read('.github/workflows/r238-hybrid-host-intelligence-proof.yml');
 const windowsProof=read('tests/r238-windows-host-runtime-proof.py');
@@ -13,17 +14,7 @@ const browserProof=read('tests/r238-host-intelligence-browser-e2e.mjs');
 const liveVerifier=read('scripts/verify_live_hybrid_host_intelligence_r238.mjs');
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
 
-for(const token of [
- "HOST_INTELLIGENCE_EXTENSION='R238'",
- "BRIDGE_CALCULUS_EXTENSION='R240'",
- "HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'",
- "MACRO_INVENTORY_SCHEMA='OMEGA_LOCAL_MACRO_INVENTORY_R238'",
- "MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'",
- "EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'",
- "SERVER_VALIDATOR_COMPATIBILITY_R207_1=\"BASE_PATH='/omega-hybrid-agent.py'\"",
- "FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'"
-])must(wrapper.includes(token),`R238/R240 wrapper missing preserved/proof token ${token}`);
-
+for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","BRIDGE_CALCULUS_EXTENSION='R240'","HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'","MACRO_INVENTORY_SCHEMA='OMEGA_LOCAL_MACRO_INVENTORY_R238'","MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'","EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'","SERVER_VALIDATOR_COMPATIBILITY_R207_1=\"BASE_PATH='/omega-hybrid-agent.py'\"","FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'"])must(wrapper.includes(token),`R238/R240 wrapper missing preserved/proof token ${token}`);
 must(liveVerifier.includes("fetch(base+'/omega-hybrid-agent-r141.py'"),'R238 live verifier must inspect the R141/R238/R240 proof wrapper');
 must(!liveVerifier.includes("fetch(base+'/omega-hybrid-agent.py'"),'R238 live verifier must not require proof-wrapper tokens from the older canonical R207 download asset');
 for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","BRIDGE_CALCULUS_EXTENSION='R240'","HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'","MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'"])must(liveVerifier.includes(token),`R238/R240 live verifier missing wrapper token ${token}`);
@@ -56,20 +47,15 @@ must(wrapper.includes('base_execute=base.execute_job')&&wrapper.includes('base.e
 must(wrapper.includes("'stepProofs'")&&wrapper.includes("'resultFingerprintR141':digest"),'R238 host facts and R240 bridge return carry must stay inside R141 exact returned step-proof continuity');
 must(wrapper.includes('bridge_by_step=validate_bridge_calculus_r240(job)')&&wrapper.includes("proof['calculusBridgeR240Return']=returned"),'R240 bridge calculus must validate before execution and enter returned step proof before R141 hashing');
 
-for(const token of [
- 'useHybridRuntimeSnapshotR238','selectedDeviceJobs','selectedDeviceId',
- "String(s?.op||'').toUpperCase()==='DESKTOP_HEALTH'",'s?.result?.hostProfileR238',
- 'RETURNED_HOST_PROOF','RCWA PYTHON DEPENDENCY','LOCAL MACRO STORE','Hardware presence does not prove CUDA runtime',
- 'data-r238-selected-device','data-r238-snapshot-epoch','Refresh shared snapshot','physicalCores','gpuAdapters','nvidiaSmi'
-])must(ui.includes(token),`R238 Hybrid UI missing truth-bound/shared-frame token ${token}`);
-must(!ui.includes("api.get<any>('/api/hybrid/status')"),'R238 host intelligence must not create a second Hybrid polling reality after shared snapshot convergence');
-must(!ui.includes('setInterval(()=>void refresh(),2500)'),'R238 host intelligence must not retain an independent polling loop after shared snapshot convergence');
+for(const token of ['useHybridRuntimeSnapshotR238','selectedDeviceJobs','selectedDeviceId',"String(s?.op||'').toUpperCase()==='DESKTOP_HEALTH'",'s?.result?.hostProfileR238','RETURNED_HOST_PROOF','RCWA PYTHON DEPENDENCY','LOCAL MACRO STORE','Hardware presence does not prove CUDA runtime','data-r238-selected-device','data-r238-snapshot-epoch','Refresh shared snapshot','physicalCores','gpuAdapters','nvidiaSmi'])must(ui.includes(token),`R238 Hybrid UI missing truth-bound/shared-frame token ${token}`);
+must(!ui.includes("api.get<any>('/api/hybrid/status')")&&!ui.includes('setInterval(()=>void refresh(),2500)'),'R238 host intelligence must consume the shared polling reality');
 must(ui.includes('Run “Prove host + tree”')&&ui.includes('R141 exact return closure'),'R238 UI must direct returned resource proof through the existing R237/R141 path');
 must(ui.includes("data-r238-host-intelligence={p?'RETURNED_HOST_PROOF':'AWAITING_RETURNED_PROFILE'}"),'R239.3 UI truth identity must distinguish returned proof from awaiting proof');
 must(ui.includes('{proof&&<footer>'),'R239.3 R141 returned-proof footer must remain conditional on an actual returned proof');
 for(const token of ["Promise.all([api.get<any>('/api/hybrid/status'),api.get<any>('/api/missions')])",'omega:hybrid:selectedDeviceId','selectedDeviceJobs'])must(snapshot.includes(token),`R238 shared snapshot prerequisite missing ${token}`);
 must(link.includes("import HybridHostIntelligenceR238 from './HybridHostIntelligenceR238'")&&link.includes('<HybridHostIntelligenceR238/>'),'Hybrid Link must mount the R238 host intelligence surface');
-must(link.includes('<HybridRuntimeSnapshotProviderR238>'),'R238 host intelligence must live inside the shared snapshot provider');
+must(app.includes("import {HybridRuntimeSnapshotProviderR238} from './HybridRuntimeSnapshotR238'")&&app.includes('<HybridRuntimeSnapshotProviderR238><OmegaWorkstation/></HybridRuntimeSnapshotProviderR238>'),'R270 host intelligence must live beneath the sole workstation-scoped R238 provider');
+must(!link.includes('<HybridRuntimeSnapshotProviderR238>'),'R270 Hybrid Link must not mount a second R238 provider');
 must(link.indexOf('<SovereignConnectionR117/>')<link.indexOf('<HybridHostIntelligenceR238/>')&&link.indexOf('<HybridHostIntelligenceR238/>')<link.indexOf('<HybridCommandDeckR237/>'),'R238 resource truth must appear after connection proof and before native command admission');
 
 must(workflow.includes('actions/checkout@v7')&&workflow.includes('actions/setup-node@v7'),'R238 proof workflow must preserve the R221.1 Node-24-capable v7 Actions hygiene floor');
@@ -79,4 +65,4 @@ must(workflow.includes('playwright@1.63.0')&&workflow.includes('tests/r238-host-
 for(const token of ["memory.get('totalBytes')","memory.get('availableBytes')",'logicalProcessors','profileSha256','verify_macro_replay','tampered macro hash was not rejected'])must(windowsProof.includes(token),`R238 Windows runtime proof missing ${token}`);
 for(const token of ['CPU-A-ONLY','CPU-B-ONLY','proof_job_a','proof_job_b','Authenticated compute host','data-r238-selected-device','leaked host A proof','leaked host B proof'])must(browserProof.includes(token),`R238 browser host-isolation proof missing ${token}`);
 
-console.log('OMEGA R238/R239.1/R239.3/R240 HYBRID HOST INTELLIGENCE PASS · immutable R205 byte SHA preserved · live R141 wrapper byte-bound to repository source · R141 exact-return proof preserved · R240 bridge-calculus extension present · live verifier truth-gated by RETURNED_HOST_PROOF/AWAITING_RETURNED_PROFILE and shared epoch · returned-proof footer required only with evidence · no duplicate polling · no screenshot constants · Windows CPU/RAM/GPU/storage/Python/RCWA evidence · bounded macro preflight · cross-host browser isolation · v7 Actions hygiene');
+console.log('OMEGA R238/R239.1/R239.3/R240/R270 HYBRID HOST INTELLIGENCE PASS · immutable R205 SHA preserved · one workstation-scoped R238 provider · R141 exact-return proof + R240 bridge calculus preserved · no duplicate polling · returned host evidence remains selected-device/epoch bound');

@@ -67,7 +67,7 @@ must(continuous.includes('same 20,736-state packet')&&continuous.includes('not n
 
 for(const token of ["data-r237-correlation","['LOCKED','HELD']","correlation==='LOCKED'",'HOST / JOB / MISSION / EPOCH LOCKED','EXECUTION CONTEXT HELD'])must(commandVerifier.includes(token),`R241 R240 repair missing semantic correlation token ${token}`);
 must(!commandVerifier.includes("'intentionally contain no APPLY_PATCH or WRITE_TEXT','HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE'"),'R241 must not regress to unconditional LOCKED prose coupling');
-must(commandInvariant.includes('semantic LOCKED or fail-closed HELD'),'R241 must pin the R237 verifier semantic truth-state repair in focused invariants');
+for(const token of ["data-r237-correlation","HOST / JOB / MISSION / EPOCH LOCKED","EXECUTION CONTEXT HELD","activeJob.targetDeviceId!==device?.id","targetForMission(currentMission,missionJob)!==device.id","snapshotCurrent","requireCurrentSnapshot"])must(commandInvariant.includes(token),`R241 must pin the R237 semantic LOCKED/HELD fail-closed truth behavior in focused invariants: ${token}`);
 
 for(const token of ["Prove R240.1 semantic verifier against exact served runtime","/omega-build-receipt.json","promotion?.promotedMergeSha||body?.source?.sha","OMEGA_PROMOTED_SHA=\"$SERVED_SHA\"","for attempt in 1 2 3","internally consistent exact served-runtime semantic proof"])must(workflow.includes(token),`R241.1 workflow race closure missing ${token}`);
 must(!workflow.includes('git fetch origin main --no-tags'),'R241.1 live proof must not bind verification to a moving main ref');
