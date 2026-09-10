@@ -39,7 +39,7 @@ export function translateLemmaState(input={},previous=null){
   if(contradictions>0&&evidenceClass!=='MEASURED')confidence*=1/(1+.35*contradictions);
   const previousState=previous?.state||null,changed=!!previousState&&previousState!==state;
   const transition=changed?clamp01(.42+.38*kernel.continuity):1;
-  const measuredWeight=exact?1:(regional?.92:0),sourceWeight=evidenceClass==='SOURCE_SUPPORT'?clamp01(.42+.42*confidence):0,reconstructionWeight=evidenceClass==='DERIVED'?clamp01(.22+.58*confidence):0,contextWeight=evidenceClass==='CONTEXT'?clamp01(.15+.30*confidence):((exact||regional)?.04:.10);
+  const measuredWeight=exact?1:(regional?0.92:0),sourceWeight=evidenceClass==='SOURCE_SUPPORT'?clamp01(.42+.42*confidence):0,reconstructionWeight=evidenceClass==='DERIVED'?clamp01(.22+.58*confidence):0,contextWeight=evidenceClass==='CONTEXT'?clamp01(.15+.30*confidence):((exact||regional)?0.04:0.10);
   return {
     schema:'omega.lemma-state.mode188.v1',state,evidenceClass,confidence:clamp01(confidence),mode188,changed,transition,kernel,
     render:{measuredWeight,sourceWeight,reconstructionWeight,contextWeight,coverageWeight:coverage?clamp01(.22+.10*Math.log1p(coverage)):0},
