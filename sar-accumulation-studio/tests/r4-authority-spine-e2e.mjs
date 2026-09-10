@@ -4,12 +4,14 @@ import assert from 'node:assert/strict';
 const base=process.env.SAR_TEST_URL;assert.ok(base,'SAR_TEST_URL is required');
 const tucson={lon:-110.9747,lat:32.2226};
 const close=(a,b,eps=1e-6)=>Math.abs(Number(a)-Number(b))<=eps;
+const watched=url=>/\/api\/(?:raster|source|stac\/item)/.test(url);
 const browser=await chromium.launch({headless:true});
 try{
   const context=await browser.newContext({viewport:{width:1440,height:1000},geolocation:{longitude:tucson.lon,latitude:tucson.lat,accuracy:18},permissions:['geolocation']});
-  const page=await context.newPage(),errors=[],rasterResponses=[],requestFailures=[];page.on('pageerror',e=>errors.push(e.message));
-  page.on('requestfailed',request=>{if(request.url().includes('/api/raster'))requestFailures.push({url:request.url(),failure:request.failure()?.errorText||'unknown'});});
-  page.on('response',async response=>{if(!response.url().includes('/api/raster'))return;const row={url:response.url(),status:response.status(),headers:await response.allHeaders()};if(response.status()>=400){try{row.body=(await response.text()).slice(0,1600);}catch(error){row.body=`UNREADABLE:${error.message}`;}}rasterResponses.push(row);});
+  const page=await context.newPage(),errors=[],transportResponses=[],requestFailures=[],consoleRows=[];page.on('pageerror',e=>errors.push(e.message));
+  page.on('console',msg=>{if(['error','warning'].includes(msg.type()))consoleRows.push({type:msg.type(),text:msg.text()});});
+  page.on('requestfailed',request=>{if(watched(request.url()))requestFailures.push({url:request.url(),failure:request.failure()?.errorText||'unknown'});});
+  page.on('response',async response=>{if(!watched(response.url()))return;const row={url:response.url(),status:response.status(),headers:await response.allHeaders()};if(response.status()>=300){try{row.body=(await response.text()).slice(0,2400);}catch(error){row.body=`UNREADABLE:${error.message}`;}}transportResponses.push(row);});
   const response=await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});assert.ok(response?.ok(),`root HTTP ${response?.status()}`);
   await page.waitForFunction(()=>globalThis.OMEGA_SAR_R4_RUNTIME?.conception==='CONTINUOUS_SAR_EARTH_INSTRUMENT'&&globalThis.OMEGA_SAR_R4_RUNTIME?.geometry?.focus==='LOCAL_FORWARD_AND_INVERSE_JACOBIAN'&&globalThis.OMEGA_SAR_AUTHORITY&&globalThis.OMEGA_SAR_NAVIGATION?.selectTarget&&globalThis.OMEGA_SAR_INTERACTION&&globalThis.OMEGA_SAR_BLADE_RENDER?.state==='ACTIVE',null,{timeout:30000});
   assert.match(await page.title(),/OMEGA SAR R4/);assert.equal(await page.locator('.omega-local-nav-map').count(),0,'conventional local map must not replace the SAR instrument');
@@ -29,7 +31,7 @@ try{
   let patch=await page.evaluate(()=>globalThis.OMEGA_SAR_RENDERER?.sarOverlay?.patch||null);
   if(!patch)patch=await page.evaluate(async()=>globalThis.OMEGA_SAR_SENTINEL.loadCalibratedCurrent({force:true}));
   const readiness=await page.evaluate(()=>globalThis.OMEGA_SAR_MEASUREMENT_READINESS?.scenes?.get((document.querySelector('#currentScene')?.textContent||'').trim())||null);
-  if(!patch){const ui=await page.evaluate(()=>({rasterEmpty:document.querySelector('#rasterEmpty')?.textContent||null,rasterStats:document.querySelector('#rasterStats')?.textContent||null,proof:document.querySelector('#sarCalProof')?.textContent||null,scene:(document.querySelector('#currentScene')?.textContent||'').trim()}));throw new Error(`Current acquisition did not resolve exact SAR during acceptance: ${JSON.stringify({readiness,ui,rasterResponses,requestFailures})}`);}
+  if(!patch){const ui=await page.evaluate(()=>({rasterEmpty:document.querySelector('#rasterEmpty')?.textContent||null,rasterStats:document.querySelector('#rasterStats')?.textContent||null,proof:document.querySelector('#sarCalProof')?.textContent||null,scene:(document.querySelector('#currentScene')?.textContent||'').trim(),source:globalThis.OMEGA_SAR_SOURCE_FRAME||null}));throw new Error(`Current acquisition did not resolve exact SAR during acceptance: ${JSON.stringify({readiness,ui,transportResponses,requestFailures,consoleRows})}`);}
   const exact={state:patch.state,id:patch.id,target:patch.target,validCount:patch.stats?.validCount,mesh:patch.geoMesh?.validNodeCount,evidence:patch.evidence};
   const scene=(await page.locator('#currentScene').textContent()||'').trim();assert.equal(exact.state,'CALIBRATED_SENTINEL1_TARGET_PATCH');assert.equal(exact.id,scene);assert.ok(close(exact.target.lon,tucson.lon,1e-4)&&close(exact.target.lat,tucson.lat,1e-4));assert.ok(exact.validCount>0&&exact.mesh>=4);assert.equal(exact.evidence?.measured,true);assert.equal(exact.evidence?.inferred,false);
 
@@ -44,5 +46,5 @@ try{
 
   const rejected=await page.evaluate(()=>{const a=globalThis.OMEGA_SAR_AUTHORITY,b={...a.rejected};window.dispatchEvent(new CustomEvent('omega-source-sar-frame',{detail:{id:'WRONG_SCENE',src:'wrong'}}));window.dispatchEvent(new CustomEvent('omega-calibrated-sar-patch',{detail:{patch:{id:'WRONG_SCENE',target:{lon:0,lat:0},evidence:{measured:true}}}}));return {before:b,after:{...a.rejected}};});
   assert.ok(rejected.after.source>rejected.before.source);assert.ok(rejected.after.measurement>rejected.before.measurement);assert.deepEqual(errors,[],`page errors: ${errors.join(' | ')}`);
-  console.log(JSON.stringify({initial,stale,readiness,exact,blade,reverse,fitted,rejected,rasterResponses,requestFailures},null,2));console.log('SAR_R4_R247_BLADE_AUTHORITY_FULL_PASS');
+  console.log(JSON.stringify({initial,stale,readiness,exact,blade,reverse,fitted,rejected,transportResponses,requestFailures,consoleRows},null,2));console.log('SAR_R4_R247_BLADE_AUTHORITY_FULL_PASS');
 }finally{await browser.close();}
