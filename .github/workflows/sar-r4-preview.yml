@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - name: Verify source, geometry, water, temporal, lemma, experience and OMEGA invariants
+      - name: Verify source, geometry, water, temporal, lemma, surface, experience and OMEGA invariants
         working-directory: sar-accumulation-studio
         run: |
           npm run check
@@ -42,9 +42,13 @@ jobs:
           node --check src/sar-experience-compat-runtime.mjs
           node --check src/sar-balanced-viewport-runtime.mjs
           node --check src/sar-primary-workstation-runtime.mjs
+          node --check src/data-native-surface-core.mjs
+          node --check src/data-native-terrain-runtime.mjs
+          node --check src/data-native-surface-runtime.mjs
           node --check src/r4-runtime.mjs
           node --check tests/r251-global-motion-e2e.mjs
           node --check tests/r253-balanced-viewport-e2e.mjs
+          node --check tests/r256-data-native-surface-e2e.mjs
       - name: Build self-contained GeoTIFF runtime
         working-directory: sar-accumulation-studio
         run: |
@@ -60,7 +64,7 @@ jobs:
         run: npx wrangler@latest deploy --config wrangler.sar-r4.jsonc --dry-run --outdir .wrangler-sar-r4
       - name: Deploy isolated R4 worker
         run: npx wrangler@latest deploy --config wrangler.sar-r4.jsonc
-      - name: Verify R255 public transport and Earth awareness providers
+      - name: Verify R256 public transport, terrain and Earth-awareness providers
         run: |
           set -euo pipefail
           for attempt in {1..20}; do
@@ -69,7 +73,7 @@ jobs:
             test "$attempt" != 20 || { echo 'R4 root did not become live'; exit 1; }
             sleep 3
           done
-          for module in r4-runtime.mjs r4-live-precision.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs sar-blade-geometry.mjs sar-blade-render-runtime.mjs sar-blade-lens-runtime.mjs sar-regional-measurement.mjs sar-regional-runtime.mjs lemma-state-calculus.mjs sar-smooth-motion-runtime.mjs sar-global-fabric-runtime.mjs sar-woven-motion-runtime.mjs omega-lemma-translator-runtime.mjs sar-experience-runtime.mjs sar-experience-compat-runtime.mjs sar-balanced-viewport-runtime.mjs sar-primary-workstation-runtime.mjs sar-browser-transport-resilience.mjs water-geometry-core.mjs earth-awareness-runtime.mjs jrc-water-observation-runtime.mjs earth-temporal-core.mjs earth-temporal-sync.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs r249-exact-lens-runtime.mjs; do
+          for module in r4-runtime.mjs r4-live-precision.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs sar-blade-geometry.mjs sar-blade-render-runtime.mjs sar-blade-lens-runtime.mjs sar-regional-measurement.mjs sar-regional-runtime.mjs lemma-state-calculus.mjs sar-smooth-motion-runtime.mjs sar-global-fabric-runtime.mjs sar-woven-motion-runtime.mjs omega-lemma-translator-runtime.mjs sar-experience-runtime.mjs sar-experience-compat-runtime.mjs sar-balanced-viewport-runtime.mjs sar-primary-workstation-runtime.mjs sar-browser-transport-resilience.mjs data-native-surface-core.mjs data-native-terrain-runtime.mjs data-native-surface-runtime.mjs water-geometry-core.mjs earth-awareness-runtime.mjs jrc-water-observation-runtime.mjs earth-temporal-core.mjs earth-temporal-sync.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs r249-exact-lens-runtime.mjs; do
             ready=0
             for attempt in {1..20}; do
               code="$(curl -sS -o "/tmp/$module" -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/src/$module?release=$GITHUB_SHA" || true)"
@@ -112,18 +116,24 @@ jobs:
         env:
           SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
         run: node tests/r251-global-motion-e2e.mjs
-      - name: Prove R255 controllable measured-SAR primary workstation
+      - name: Prove controllable measured-SAR primary workstation
         working-directory: sar-accumulation-studio
         env:
           SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
         run: node tests/r253-balanced-viewport-e2e.mjs
-      - name: Archive R255 live visual proof
+      - name: Prove R256 data-native shaped SAR surface
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
+        run: node tests/r256-data-native-surface-e2e.mjs
+      - name: Archive R256 live visual proof
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: sar-r255-primary-workstation-proof
+          name: sar-r256-data-native-surface-proof
           path: |
             sar-accumulation-studio/test-results/r251-global-motion.png
             sar-accumulation-studio/test-results/r255-sar-primary-workstation.png
+            sar-accumulation-studio/test-results/r256-data-native-surface.png
           if-no-files-found: warn
           retention-days: 14
