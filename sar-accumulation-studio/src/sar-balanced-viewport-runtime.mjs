@@ -1,5 +1,5 @@
 const $=s=>document.querySelector(s);
-const state={state:'INITIALIZING',profile:'BALANCED_VIEWPORT',version:'R253'};
+const state={state:'INITIALIZING',profile:'BALANCED_VIEWPORT',version:'R253.1'};
 globalThis.OMEGA_SAR_BALANCED_VIEWPORT=state;
 
 function install(){
@@ -18,13 +18,18 @@ function install(){
 
   body.omega-experience .station{padding-top:42px!important}
   body.omega-experience .workbench{height:calc(100vh - 42px)!important;padding:4px!important}
-  body.omega-experience .map-wrap{border-radius:11px!important}
+  body.omega-experience .earth-stage{position:relative!important}
+  body.omega-experience .map-wrap{height:100%!important;border-radius:11px!important}
+
+  /* Location search is a floating tool, never a full-width layout row. */
+  body.omega-experience .place-dock{position:absolute!important;z-index:55!important;top:8px!important;left:50%!important;right:auto!important;width:min(286px,28vw)!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;transform:translateX(-50%)!important;pointer-events:none!important}
+  body.omega-experience .place-dock-head,body.omega-experience .place-dock-grid{display:none!important}
+  body.omega-experience .place-dock .place-search{position:relative!important;top:auto!important;left:auto!important;right:auto!important;transform:none!important;width:100%!important;z-index:56!important;pointer-events:auto!important;filter:none!important}
+  body.omega-experience .place-dock .place-search input{height:30px!important;font-size:9px!important;padding:5px 9px!important;background:rgba(7,10,11,.78)!important;border-color:rgba(255,255,255,.12)!important;box-shadow:0 8px 24px rgba(0,0,0,.22)!important}
+  body.omega-experience .place-dock .place-search button{height:30px!important;min-width:48px!important;padding:0 9px!important;font-size:8px!important}
+  body.omega-experience .place-dock .place-search-results{top:34px!important;max-height:min(320px,46vh)!important;border-radius:10px!important}
 
   /* Everything visible in Explore must earn its pixels. */
-  body.omega-experience .place-search{top:8px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(286px,28vw)!important;z-index:37!important}
-  body.omega-experience .place-search input{height:30px!important;font-size:9px!important;padding:5px 9px!important}
-  body.omega-experience .place-search button{height:30px!important;padding:0 9px!important;font-size:8px!important}
-
   body.omega-experience .omega-experience-status{left:9px!important;top:9px!important;max-width:min(470px,40vw)!important;gap:3px!important}
   body.omega-experience .omega-experience-chip{height:22px!important;padding:0 7px!important;border-radius:8px!important;gap:4px!important}
   body.omega-experience .omega-experience-chip span{font-size:5.8px!important;letter-spacing:.06em!important}
@@ -60,7 +65,6 @@ function install(){
   body.omega-experience .panel-head h2{font-size:12px!important}
   body.omega-experience .raster-stats,body.omega-experience .micro{font-size:8px!important;line-height:1.35!important}
 
-  /* Proof mode may expose detail, but it still cannot bury the Earth. */
   body.omega-experience[data-mode=proof] #omegaFieldHud,body.omega-experience[data-mode=proof] #omegaEarthAwarenessHud,body.omega-experience[data-mode=proof] #omegaTemporalSyncHud{transform:scale(.68)!important;max-height:34vh!important;overflow:auto!important;opacity:.76!important}
 
   @media(max-height:820px){
@@ -74,7 +78,7 @@ function install(){
     body.omega-experience .pixel-stage{height:min(28vh,220px)!important}
   }
   @media(max-width:1050px){
-    body.omega-experience .place-search{width:min(250px,32vw)!important}
+    body.omega-experience .place-dock{width:min(250px,32vw)!important}
     body.omega-experience .omega-experience-status{max-width:36vw!important}
     body.omega-experience .omega-experience-chip:nth-child(n+3){display:none!important}
     body.omega-experience .analysis-deck{grid-template-columns:repeat(2,minmax(0,1fr))!important}
@@ -83,7 +87,7 @@ function install(){
     body.omega-experience .topbar{height:40px!important;min-height:40px!important}
     body.omega-experience .station{padding-top:40px!important}
     body.omega-experience .workbench{height:calc(100vh - 40px)!important;padding:2px!important}
-    body.omega-experience .place-search{top:5px!important;width:min(230px,58vw)!important}
+    body.omega-experience .place-dock{top:5px!important;width:min(230px,58vw)!important}
     body.omega-experience .omega-experience-status{display:none!important}
     body.omega-experience .omega-quickrail{left:5px!important;bottom:42px!important;flex-direction:row!important}
     body.omega-experience .transport-deck{left:5px!important;right:5px!important;bottom:5px!important;width:auto!important;transform:none!important}
@@ -94,6 +98,7 @@ function install(){
   document.head.append(style);
   state.state='READY';
   state.viewport={width:innerWidth,height:innerHeight};
+  state.searchLayout='FLOATING_OVER_EARTH_NO_FLOW_ROW';
   window.dispatchEvent(new CustomEvent('omega-balanced-viewport-ready',{detail:{...state}}));
 }
 
