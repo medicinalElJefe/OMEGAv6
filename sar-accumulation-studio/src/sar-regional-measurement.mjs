@@ -46,7 +46,12 @@ function sourceLocation(product,detail,full,lon,lat){return product?geolocateToP
 export async function calibratedRegionalViewport(record,viewBbox,{polarization='vv',quantity='sigmaNought',maxSamples=384,signal,onStage}={}){
   if(!record?.id)throw new Error('Regional SAR requires a current Sentinel-1 scene');
   onStage?.('REGIONAL_RESOLVE_PRODUCT');
-  const {detail,assets,calibration,product}=await resolveSentinel1ProductBundle(record,polarization,signal),{tiff,full}=await openMeasurement(assets.measurement.href);
+  // Product-detail/XML support caches are shared with exact-local calibration. Do not
+  // attach this rapidly cancelled camera request to those shared cache promises: a pan
+  // or zoom must never poison the exact target calibration with an AbortError. Stale
+  // regional results are still rejected below by the runtime generation/authority gate.
+  const {detail,assets,calibration,product}=await resolveSentinel1ProductBundle(record,polarization,undefined),{tiff,full}=await openMeasurement(assets.measurement.href);
+  if(signal?.aborted)throw new DOMException('Regional SAR request superseded','AbortError');
   const sceneBbox=Array.isArray(detail?.bbox)&&detail.bbox.length===4?detail.bbox.map(Number):Array.isArray(detail?.properties?.['proj:bbox'])?detail.properties['proj:bbox'].map(Number):null;
   const requested=Array.isArray(viewBbox)&&viewBbox.length===4?viewBbox.map(Number):sceneBbox,coverage=sceneBbox&&requested?intersection(requested,sceneBbox):sceneBbox||requested;
   if(!coverage)throw new Error('Current camera does not intersect the current Sentinel-1 measurement footprint');
@@ -62,6 +67,7 @@ export async function calibratedRegionalViewport(record,viewBbox,{polarization='
   const ox0=clamp(Math.floor(x0*overview.sx),0,ow-1),oy0=clamp(Math.floor(y0*overview.sy),0,oh-1),ox1=clamp(Math.ceil(x1*overview.sx),1,ow),oy1=clamp(Math.ceil(y1*overview.sy),1,oh),spanX=Math.max(1,ox1-ox0),spanY=Math.max(1,oy1-oy0),limit=Math.max(96,Math.min(768,Number(maxSamples)||384)),scale=Math.min(1,limit/Math.max(spanX,spanY)),width=Math.max(32,Math.round(spanX*scale)),height=Math.max(32,Math.round(spanY*scale));
   onStage?.('REGIONAL_READ_COG');
   const raw=await overview.image.readRasters({window:[ox0,oy0,ox1,oy1],width,height,samples:[0],interleave:true}),nodataRaw=overview.image.getGDALNoData?.(),nodata=nodataRaw==null?0:Number(nodataRaw),db=new Float32Array(raw.length),power=new Float32Array(raw.length),valid=[];
+  if(signal?.aborted)throw new DOMException('Regional SAR request superseded','AbortError');
   onStage?.('REGIONAL_CALIBRATE_LUT');
   for(let py=0,k=0;py<height;py++)for(let px=0;px<width;px++,k++){
     const dn=Number(raw[k]);if(!finite(dn)||dn===nodata){db[k]=NaN;power[k]=NaN;continue;}
