@@ -15,7 +15,7 @@ assert.ok(css.includes('Visual-only: no route, execution, proof, Canon, or persi
 assert.ok(!css.includes('display:none!important}.r94-rail-action'),'R203 must not hide the persistent route rail');
 
 assert.ok(nav.includes('OMEGA_ALL_ROUTES_R82'),'R203 must retain the complete authoritative route registry');
-assert.ok(nav.includes('onNavigate(panel)'),'R203 must retain the existing navigation dispatch path');
+assert.ok(nav.includes('onNavigate(panel)')||nav.includes('onNavigate(resolved.name)'),'R203 must retain the navigation dispatch path; later exact-route resolution may dispatch the resolved registered identity');
 assert.ok(nav.includes("if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')"),'R203 must retain command-search navigation shortcut');
 assert.ok(/if\(e\.key==='Escape'\)\s*\{?\s*setExpanded\(false\)/.test(nav),'R203 must retain navigator escape behavior across later accessibility/navigation convergence');
 assert.ok(nav.includes("onClick={()=>go(route)}"),'R203 must keep every registered route directly navigable');
@@ -24,4 +24,4 @@ assert.ok(workstation.includes("export const OMEGA_SURFACES=['Command Center'"),
 assert.ok(workstation.includes("const go=(name:string)=>"),'R203 must preserve the existing route/go execution path');
 assert.ok(r120.includes('calc(100vw - var(--r94-nav-rail) - 224px)'),'R203 must preserve the R155 mobile instrument-space floor');
 
-console.log('R203 PASS · unified late-loading design polish covers panels, menus, controls and responsive navigation while preserving the full route registry, existing go/onNavigate paths, living-world proof surfaces, mobile instrument floor, reduced-motion accessibility, and all authority boundaries.');
+console.log('R203 PASS · unified late-loading design polish covers panels, menus, controls and responsive navigation while preserving the full route registry, exact resolved go/onNavigate paths, living-world proof surfaces, mobile instrument floor, reduced-motion accessibility, and all authority boundaries.');
