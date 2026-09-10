@@ -7,6 +7,7 @@ import {defaultCommandPlan,validateCommandPlan} from './hybridCommandRuntime';
 import {buildFullSystemMissionObjectiveR153,fullSystemStateContextR153} from './fullSystemCompletionR153.js';
 import {compileOperationalCalculusR248,operationalMissionObjectiveR248} from './operationalCalculusR248';
 import {compileOperationalConvergenceR249,sequenceGovernedStepsR249} from './system/operationalConvergenceR249.js';
+import HybridExperienceLedgerR253 from './HybridExperienceLedgerR253';
 import './hybridActionRuntimeR247.css';
 
 const ACTIVE_JOB=new Set(['QUEUED','RUNNING']);
@@ -118,5 +119,6 @@ export default function HybridActionRuntimeR247(){
    <button onClick={()=>void refresh()} disabled={!!busy}><RefreshCw/>Refresh shared state</button>
   </div>
   <footer><ShieldCheck/><span>R249 operationalizes the established continuity/scar/residual calculus in the real Hybrid first-cycle sequence and in governed self-build planning. It only orders or narrows already-valid work. R153 preimage-bound mutation, R147 dispatch, R141 return proof, R146 history, R240 source promotion, ci.yml production deployment and R125 CanonState admission remain separate authorities.</span></footer>
+  <HybridExperienceLedgerR253/>
  </section>;
 }
