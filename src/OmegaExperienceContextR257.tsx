@@ -20,6 +20,7 @@ const normalize=(raw:Partial<OmegaExperienceStateR257>|null|undefined):OmegaExpe
  depth:DEPTHS.has(raw?.depth as OmegaExperienceDepthR257)?raw!.depth as OmegaExperienceDepthR257:DEFAULT.depth,
  immersive:raw?.immersive===true
 });
+const same=(a:OmegaExperienceStateR257,b:OmegaExperienceStateR257)=>a.experience===b.experience&&a.depth===b.depth&&a.immersive===b.immersive;
 const read=():OmegaExperienceStateR257=>{
  if(typeof window==='undefined')return DEFAULT;
  try{return normalize(JSON.parse(window.localStorage.getItem(KEY)||'null'))}catch{return DEFAULT}
@@ -38,20 +39,23 @@ export function OmegaExperienceProviderR257({children}:{children:ReactNode}){
  },[state]);
  useEffect(()=>{
   const sync=(event:StorageEvent)=>{
-   if(event.key!==KEY||event.newValue===null)return;
-   try{setState(normalize(JSON.parse(event.newValue)))}catch{}
+   if(event.key!==KEY)return;
+   try{
+    const next=event.newValue===null?DEFAULT:normalize(JSON.parse(event.newValue));
+    setState(prev=>same(prev,next)?prev:next);
+   }catch{setState(prev=>same(prev,DEFAULT)?prev:DEFAULT)}
   };
   window.addEventListener('storage',sync);
   return()=>window.removeEventListener('storage',sync);
  },[]);
- const setExperience=useCallback((experience:OmegaExperienceIdR257)=>{if(EXPERIENCES.has(experience))setState(prev=>({...prev,experience}))},[]);
- const setDepth=useCallback((depth:OmegaExperienceDepthR257)=>{if(DEPTHS.has(depth))setState(prev=>({...prev,depth}))},[]);
- const setImmersive=useCallback((immersive:boolean)=>setState(prev=>({...prev,immersive:Boolean(immersive)})),[]);
+ const setExperience=useCallback((experience:OmegaExperienceIdR257)=>{if(EXPERIENCES.has(experience))setState(prev=>prev.experience===experience?prev:{...prev,experience})},[]);
+ const setDepth=useCallback((depth:OmegaExperienceDepthR257)=>{if(DEPTHS.has(depth))setState(prev=>prev.depth===depth?prev:{...prev,depth})},[]);
+ const setImmersive=useCallback((immersive:boolean)=>setState(prev=>prev.immersive===Boolean(immersive)?prev:{...prev,immersive:Boolean(immersive)}),[]);
  const setExperienceProfile=useCallback((experience:OmegaExperienceIdR257,depth:OmegaExperienceDepthR257)=>{
   if(!EXPERIENCES.has(experience)||!DEPTHS.has(depth))return;
-  setState(prev=>({...prev,experience,depth}));
+  setState(prev=>prev.experience===experience&&prev.depth===depth?prev:{...prev,experience,depth});
  },[]);
- const reset=useCallback(()=>setState(DEFAULT),[]);
+ const reset=useCallback(()=>setState(prev=>same(prev,DEFAULT)?prev:DEFAULT),[]);
  const value=useMemo<Value>(()=>({...state,setExperience,setDepth,setImmersive,setExperienceProfile,reset}),[state,setExperience,setDepth,setImmersive,setExperienceProfile,reset]);
  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
