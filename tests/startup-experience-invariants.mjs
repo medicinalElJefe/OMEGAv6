@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+const app=fs.readFileSync('src/App.tsx','utf8');
 const home=fs.readFileSync('src/OmegaHome.tsx','utf8');
 const homeR71=fs.readFileSync('src/OmegaHomeR71.tsx','utf8');
 const daily=fs.readFileSync('src/dailyBrief.ts','utf8');
@@ -11,6 +12,7 @@ const modeRuntime=fs.readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
 const experience=fs.readFileSync('src/experienceR4.css','utf8');
 const experienceShell=fs.readFileSync('src/OmegaExperienceShellR257.tsx','utf8');
 const experienceContext=fs.readFileSync('src/OmegaExperienceContextR257.tsx','utf8');
+const experienceCss=fs.readFileSync('src/omegaExperienceShellR257.css','utf8');
 const fail=(m)=>{throw new Error(m)};
 
 for(const token of ['dailyBrief()','OMEGA curated operating lesson','TODAY\'S FIELD LESSON','OPEN FULL WORKSTATION','/api/route-preview','/api/chat','SOURCE-BACKED MODES'])if(!(home+daily).includes(token))fail(`startup experience missing ${token}`);
@@ -40,4 +42,10 @@ for(const token of ["OMEGA_EXPERIENCES_R257","omega-r257-experience-change","set
 for(const token of ["aria-pressed={depth==='FOCUS'}","aria-pressed={depth==='DEEP'}","aria-pressed={domain===w.id}","aria-pressed={mode===m.id}","aria-pressed={inspectorTab==='STATE'}","aria-pressed={selectedRole===role}","aria-label='Ask OMEGA'","role='status' aria-live='polite'","className='r96-now' aria-live='polite'"])if(!homeR71.includes(token))fail(`R260 accessible selected/live state missing ${token}`);
 if(!homeR71.includes("window.removeEventListener('omega-r257-experience-change',syncExperience as EventListener)"))fail('R260 experience listener must clean up on Home unmount');
 
-console.log('startup experience invariants: PASS · 44 registered routes + source-backed modes + R27 single frame + R259 atomic continuity + R260 live accessible Home application');
+// R260.1: browser storage failures, tab resets, viewport/safe-area behavior and keyboard focus must remain non-fatal and polished.
+for(const token of ["const safeStore=","safeStore('omega.v6.panel'","role='alert' aria-live='assertive'","role='status' aria-live='polite' aria-busy='true'"])if(!app.includes(token))fail(`R260.1 browser recovery semantics missing ${token}`);
+for(const token of ["const same=","event.newValue===null?DEFAULT","setState(prev=>same(prev,next)?prev:next)","setState(prev=>prev.experience===experience?prev", "setState(prev=>same(prev,DEFAULT)?prev:DEFAULT)"])if(!experienceContext.includes(token))fail(`R260.1 low-churn durable experience state missing ${token}`);
+for(const token of ["type='button'","role='region' aria-label='Immersive experience controls'","aria-label='Open all OMEGA systems'","role='status' aria-live='polite'"])if(!experienceShell.includes(token))fail(`R260.1 shell control semantics missing ${token}`);
+for(const token of ['min-height:100dvh','env(safe-area-inset-top,0px)',':focus-visible','@media(hover:hover)','@media(forced-colors:active)','min-height:44px','overscroll-behavior-inline:contain'])if(!experienceCss.includes(token))fail(`R260.1 responsive/accessibility polish missing ${token}`);
+
+console.log('startup experience invariants: PASS · 44 registered routes + source-backed modes + R27 single frame + R259 atomic continuity + R260 live Home coherence + R260.1 browser polish/error closure');
