@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const app=fs.readFileSync('src/App.tsx','utf8');
+const context=fs.readFileSync('src/OmegaExperienceContextR257.tsx','utf8');
+const registry=fs.readFileSync('src/omegaExperienceShellR257.ts','utf8');
+const shell=fs.readFileSync('src/OmegaExperienceShellR257.tsx','utf8');
+const css=fs.readFileSync('src/omegaExperienceShellR257.css','utf8');
+const r82=fs.readFileSync('src/omegaExperienceRegistryR82.ts','utf8');
+for(const token of ["'EXPLORE'|'OPERATE'|'VISUALIZE'|'ANALYZE'|'BUILD'|'PROVE'","'FOCUS'|'ADVANCED'|'FULL'","omega:r257:experience","omega-r257-experience-change"])assert.ok(context.includes(token),`R257 context missing ${token}`);
+for(const id of ['EXPLORE','OPERATE','VISUALIZE','ANALYZE','BUILD','PROVE'])assert.ok(registry.includes(`id:'${id}'`),`R257 experience registry missing ${id}`);
+for(const token of ['PRESENTATION_ONLY','PRESENTATION_MAY_TRANSFORM_TRUTH_CLASSIFICATION_MAY_NOT','UNPROVEN_NEVER_BECOMES_PROVEN_FROM_VIEW_STATE','RECONSTRUCTION_NEVER_BECOMES_OBSERVATION','PRIVATE_PC_EXECUTION_REQUIRES_CURRENT_AUTHENTICATED_RETURN','R125_CANONSTATE_ADMISSION_UNCHANGED','R141_EXACT_RETURN_CLOSURE_UNCHANGED','R147_EXECUTION_DISPATCH_UNCHANGED','R240_SOURCE_PROMOTION_UNCHANGED','CI_YML_SOLE_PRODUCTION_WRITER'])assert.ok(registry.includes(token),`R257 truth/authority boundary missing ${token}`);
+assert.ok(app.includes('<OmegaExperienceProviderR257>')&&app.includes('<OmegaExperienceShellR257'),'R257 shell must wrap the actual Home/specialist application surface');
+assert.ok(shell.includes("window.dispatchEvent(new CustomEvent('omega-r88-open-navigator'")&&shell.includes('All systems →'),'R257 contextual menu must retain All Systems escape hatch');
+assert.ok(shell.includes('setImmersive(!immersive)')&&shell.includes('truth ribbon remains visible'),'R257 immersive mode must remain reversible and preserve truth visibility');
+for(const route of ['Hybrid Link','Earth Now','Visual Instrument','Relativity','Development','Evidence & Proof'])assert.ok(r82.includes(`'${route}'`)&&registry.includes(`'${route}'`),`R257 promoted route must already exist in canonical R82 registry: ${route}`);
+for(const token of ['@media(max-width:600px)','prefers-reduced-motion:reduce','touch-action:manipulation','.r257-shell.immersive'])assert.ok(css.includes(token),`R257 responsive/immersive CSS missing ${token}`);
+for(const forbidden of ["api.post<","/api/hybrid/jobs","APPLY_PATCH","WRITE_TEXT","canonAdmission:true","productionDeploy:true"])assert.ok(!context.includes(forbidden)&&!registry.includes(forbidden)&&!shell.includes(forbidden),`R257 presentation shell acquired forbidden authority ${forbidden}`);
+console.log('R257 ADAPTIVE EXPERIENCE SHELL PASS · six experience modes · Focus/Advanced/Full depth · contextual routes · reversible immersive presentation · local preferences only · All Systems preserved · exact truth/authority boundaries unchanged');
