@@ -20,13 +20,13 @@ function applyDrag(r,now){
 function applyZoom(r,now,dt){
   const z=state.zoom;if(!z)return false;const current=Math.max(1,Number(r.view.scale)||1),target=Math.max(1,Math.min(8192,z.scale)),alpha=1-Math.exp(-Math.max(1,dt)/54),next=current+(target-current)*alpha;
   r.view.scale=next;r.view.centerLon=wrapLon(z.anchorLon-(z.px-r.w/2)/((r.w/360)*next));r.view.centerLat=clamp(z.anchorLat+(z.py-r.h/2)/((r.h/180)*next),-85,85);emitFrame(r,now);
-  if(Math.abs(Math.log(target/next))<.0015){r.view.scale=target;r.view.centerLon=wrapLon(z.anchorLon-(z.px-r.w/2)/((r.w/360)*target));r.view.centerLat=clamp(z.anchorLat+(z.py-r.h/2)/((r.h/180)*target),-85,85);state.zoom=null;emitFrame(r,now,true);commit(r);}
+  if(Math.abs(Math.log(target/next))<.0015){r.view.scale=target;r.view.centerLon=wrapLon(z.anchorLon-(z.px-r.w/2)/((r.w/360)*target));r.view.centerLat=clamp(z.anchorLat+(z.py-r.h/2)/((r.h/180)*target),-85,85);state.zoom=null;state.state='SETTLED';emitFrame(r,now,true);commit(r);}
   return true;
 }
 function applyInertia(r,now,dt){
   const i=state.inertia;if(!i)return false;const decay=Math.exp(-Math.max(1,dt)/210);i.vx*=decay;i.vy*=decay;const dx=i.vx*dt,dy=i.vy*dt;
   r.view.centerLon=wrapLon(r.view.centerLon-dx/((r.w/360)*r.view.scale));r.view.centerLat=clamp(r.view.centerLat+dy/((r.h/180)*r.view.scale),-85,85);emitFrame(r,now);
-  if(Math.hypot(i.vx,i.vy)<.018){state.inertia=null;emitFrame(r,now,true);commit(r);}
+  if(Math.hypot(i.vx,i.vy)<.018){state.inertia=null;state.state='SETTLED';emitFrame(r,now,true);commit(r);}
   return true;
 }
 function step(now){
