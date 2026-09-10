@@ -23,8 +23,8 @@ for(const token of ["CANONICAL_AGENT_ASSET='/omega-hybrid-agent-r207.py'","IMMUT
 for(const token of ["BASE_PATH='/omega-hybrid-agent-base-r205.py'",`EXPECTED_BASE_SHA256='${baseSha}'`,'R141/R207 immutable R205 base SHA-256 mismatch',"'/api/hybrid/agent/heartbeat'",'HOST_EVIDENCE_CONTINUITY_REVISION=\'R206.1\''])must(proofWrapper.includes(token),`R117/R141 launcher proof wrapper missing direct immutable-base gate ${token}`);
 must(worker116.includes("url.searchParams.get('r117')==='1'")&&worker116.includes("'/omega-hybrid-agent-r141.py'"),'R117 launcher path must remain explicitly routed through the R141 proof wrapper');
 for(const token of ['EXACT_AGENT_PAYLOAD_SHA_AND_SEMANTIC_EQUALITY_REQUIRED_BEFORE_PROOF','resultFingerprintR141Payload','semanticMatch','R141_FINGERPRINT_VERIFIED','R125_REMAINS_CANONICAL_ADMISSION_AUTHORITY'])must(r141.includes(token),`R141 semantic verification boundary missing ${token}`);
-const syntax=spawnSync('python3',['-c',"import ast,pathlib;[ast.parse(pathlib.Path(p).read_text()) for p in ['public/omega-hybrid-agent.py','public/omega-hybrid-agent-r207.py','public/omega-hybrid-agent-r141.py','public/omega-hybrid-agent-base-r205.py']]"],{encoding:'utf8'});assert.equal(syntax.status,0,`R207/R243/R141/R205 Python syntax failed: ${syntax.stderr}`);
-const simulation=spawnSync('python3',['-c',String.raw`import importlib.util,hashlib,json
+const syntax=spawnSync('python3',['-B','-c',"import ast,pathlib;[ast.parse(pathlib.Path(p).read_text()) for p in ['public/omega-hybrid-agent.py','public/omega-hybrid-agent-r207.py','public/omega-hybrid-agent-r141.py','public/omega-hybrid-agent-base-r205.py']]"],{encoding:'utf8'});assert.equal(syntax.status,0,`R207/R243/R141/R205 Python syntax failed: ${syntax.stderr}`);
+const simulation=spawnSync('python3',['-B','-c',String.raw`import importlib.util,hashlib,json
 spec=importlib.util.spec_from_file_location('r207','public/omega-hybrid-agent.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 assert m.EXPECTED_BASE_SHA256=='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'
 assert m.EXECUTION_MOTION_EXTENSION=='R243'
