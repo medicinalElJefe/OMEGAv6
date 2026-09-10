@@ -47,7 +47,7 @@ try{
   // Exact measured Sentinel-1 remains the mandatory high-fidelity local evidence plane.
   let exact=await page.evaluate(()=>globalThis.OMEGA_SAR_RENDERER?.sarOverlay?.patch?.state==='CALIBRATED_SENTINEL1_TARGET_PATCH');
   if(!exact){await page.evaluate(()=>globalThis.OMEGA_SAR_INTERACTION.settleExactMeasurement({maxScenes:24}));}
-  await page.waitForFunction(()=>globalThis.OMEGA_SAR_RENDERER?.sarOverlay?.patch?.state==='CALIBRATED_SENTINEL1_TARGET_PATCH'&&globalThis.OMEGA_SAR_RENDERER?.sarOverlay?.measurement===true&&globalThis.OMEGA_SAR_BLADE_FOCUS?.lens?.state==='BLADE_LENS_READY'&&document.querySelector('#omegaFitSar')?.disabled===false,null,{timeout:120000,polling:250});
+  await page.waitForFunction(()=>globalThis.OMEGA_SAR_RENDERER?.sarOverlay?.patch?.state==='CALIBRATED_SENTINEL1_TARGET_PATCH'&&globalThis.OMEGA_SAR_EARTH_OVERLAY?.measurement===true&&globalThis.OMEGA_SAR_BLADE_FOCUS?.lens?.state==='BLADE_LENS_READY'&&document.querySelector('#omegaFitSar')?.disabled===false,null,{timeout:120000,polling:250});
   const exactProof=await page.evaluate(()=>{const p=globalThis.OMEGA_SAR_RENDERER.sarOverlay.patch;return {state:p.state,validCount:p.stats?.validCount||0,mesh:p.geoMesh?.validNodeCount||0,evidence:p.evidence,blade:globalThis.OMEGA_SAR_BLADE_FOCUS?.lens,view:{...globalThis.OMEGA_SAR_RENDERER.view}};});
   assert.ok(exactProof.validCount>0);assert.ok(exactProof.mesh>=4);assert.equal(exactProof.evidence?.measured,true);assert.equal(exactProof.evidence?.inferred,false);assert.ok(exactProof.blade?.conditionNumber>0);
 
