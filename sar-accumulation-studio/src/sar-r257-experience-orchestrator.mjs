@@ -1,7 +1,7 @@
 const $=s=>document.querySelector(s);
 const map=$('#map'),wrap=map?.closest('.map-wrap');
 const PROOF_IDS=['omegaFieldHud','omegaCellInspector','omegaEarthAwarenessHud','omegaTemporalSyncHud','omegaGlobalSarFabricHud','omegaBladeLens'];
-let proofStack=null,stageEl=null,observer=null,raf=0;
+let proofStack=null,stageEl=null,observer=null,drawerObserver=null,raf=0;
 const state={state:'INITIALIZING',release:'R257',phase:'BOOT',detail:'',proofPanels:0,overlapPolicy:'RESERVED_ZONES_AND_SINGLE_STACK',progressiveLoading:true,updatedAt:null};
 globalThis.OMEGA_SAR_R257_EXPERIENCE=state;
 
@@ -33,9 +33,21 @@ function collectProofPanels(){
   for(const id of PROOF_IDS){const node=document.getElementById(id);if(node&&node!==stack&&node.parentElement!==stack)stack.append(node);}
   state.proofPanels=stack.children.length;
 }
+function syncDrawerReservation(){
+  const open=!!document.body.dataset.drawer,nav=$('#omegaMapNav'),stack=ensureProofStack();
+  document.body.dataset.r257DrawerReserved=open?'true':'false';
+  if(nav){
+    if(open){nav.style.setProperty('opacity','0','important');nav.style.setProperty('pointer-events','none','important');nav.style.setProperty('visibility','hidden','important');}
+    else{nav.style.removeProperty('opacity');nav.style.removeProperty('pointer-events');nav.style.removeProperty('visibility');}
+  }
+  if(stack){
+    if(open)stack.style.setProperty('display','none','important');
+    else stack.style.removeProperty('display');
+  }
+}
 function applyStage(){
   cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
-    ensureStage();collectProofPanels();const p=phase();state.phase=p.phase;state.detail=p.detail;state.updatedAt=new Date().toISOString();
+    ensureStage();collectProofPanels();syncDrawerReservation();const p=phase();state.phase=p.phase;state.detail=p.detail;state.updatedAt=new Date().toISOString();
     if(stageEl){stageEl.querySelector('b').textContent=p.phase;stageEl.querySelector('span').textContent=p.detail;stageEl.dataset.phase=p.phase.toLowerCase().replaceAll(' ','_');}
     document.body.dataset.r257Load=p.phase.includes('HD')||p.phase==='READY'||p.phase==='EARTH'?'settled':'progressive';
   });
@@ -52,8 +64,8 @@ function installStyle(){
   body.omega-experience .omega-r257-proof-stack>#omegaFieldHud,body.omega-experience .omega-r257-proof-stack>#omegaCellInspector,body.omega-experience .omega-r257-proof-stack>#omegaEarthAwarenessHud,body.omega-experience .omega-r257-proof-stack>#omegaTemporalSyncHud,body.omega-experience .omega-r257-proof-stack>#omegaGlobalSarFabricHud,body.omega-experience .omega-r257-proof-stack>#omegaBladeLens{position:relative!important;inset:auto!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;transform-origin:center!important;display:block!important;width:100%!important;max-width:none!important;min-width:0!important;max-height:180px!important;margin:0!important;opacity:.92!important;overflow:auto!important;box-sizing:border-box!important;pointer-events:auto!important}
   body.omega-experience .omega-r257-proof-stack>#omegaFieldHud{display:grid!important;grid-template-columns:minmax(130px,1.6fr) repeat(2,minmax(62px,.7fr))!important}.omega-r257-proof-stack>#omegaFieldHud>div:nth-of-type(n+4){display:none!important}.omega-r257-proof-stack>#omegaFieldHud small{grid-column:1/-1!important}
   body.omega-experience:not([data-mode=proof]) #omegaCellInspector{display:none!important}
-  body.omega-experience[data-drawer] .omega-map-nav{opacity:0!important;pointer-events:none!important;transition:opacity .16s ease}
-  body.omega-experience[data-drawer] .omega-r257-proof-stack{display:none!important}
+  body.omega-experience[data-drawer] .omega-map-nav,body[data-drawer] #omegaMapNav,body[data-r257-drawer-reserved=true] #omegaMapNav{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .12s ease}
+  body.omega-experience[data-drawer] .omega-r257-proof-stack,body[data-drawer] .omega-r257-proof-stack,body[data-r257-drawer-reserved=true] .omega-r257-proof-stack{display:none!important}
   body.omega-experience .evidence-dock,body.omega-experience .mission-rail,body.omega-experience .analysis-deck{overscroll-behavior:contain}
   body.omega-experience .evidence-dock>.panel,body.omega-experience .analysis-deck>*{contain:layout paint}
   @media(max-width:1120px){.omega-r257-stage{max-width:240px;min-width:160px}.omega-r257-stage span{display:none}.omega-r257-proof-stack{width:min(340px,42vw)}}
@@ -61,10 +73,11 @@ function installStyle(){
   `;document.head.append(style);
 }
 function install(){
-  installStyle();ensureStage();ensureProofStack();collectProofPanels();applyStage();
-  observer=new MutationObserver(()=>{collectProofPanels();ensureStage();});observer.observe(document.documentElement,{childList:true,subtree:true});
+  installStyle();ensureStage();ensureProofStack();collectProofPanels();syncDrawerReservation();applyStage();
+  observer=new MutationObserver(()=>{collectProofPanels();ensureStage();syncDrawerReservation();});observer.observe(document.documentElement,{childList:true,subtree:true});
+  drawerObserver=new MutationObserver(syncDrawerReservation);drawerObserver.observe(document.body,{attributes:true,attributeFilter:['data-drawer','data-mode']});
   const events=['omega-regional-sar-measurement','omega-calibrated-sar-patch','omega-calibrated-sar-patch-clear','omega-data-native-terrain','omega-earth-awareness-update','omega-temporal-sync','omega-map-view','omega-map-select'];for(const name of events)(name.startsWith('omega-map')?map:window)?.addEventListener?.(name,applyStage);
   state.state='READY';
 }
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(install),{once:true});else requestAnimationFrame(install);}
-state.refresh=applyStage;state.collectProofPanels=collectProofPanels;
+state.refresh=applyStage;state.collectProofPanels=collectProofPanels;state.syncDrawerReservation=syncDrawerReservation;
