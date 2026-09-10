@@ -2,6 +2,7 @@ import {useMemo,useState} from 'react';
 import {Boxes,Braces,CheckCircle2,Cpu,Network,ShieldCheck,TriangleAlert} from 'lucide-react';
 import {genomeByIdR268,SYSTEM_GENOMES_R268} from './systemFoundryR268';
 import {compileSystemRuntimeR269} from './systemFoundryRuntimeR269';
+import {analyzeFoundryDependenciesR273} from './systemFoundryDependencyR273';
 import type {ResourceEnvelopeR239} from './hybridResourceGovernorR239';
 import './systemFoundryR268.css';
 
@@ -16,10 +17,11 @@ export default function SystemFoundryR268({deviceHeartbeat=false,externalBinding
  const selectedCapability=plan.activeFrontier.find(x=>x.id===selectedCapabilityId)||plan.activeFrontier[0]||null;
  const selectedOperator=plan.operatorDag.find(x=>x.operator===selectedOperatorId)||null;
  const operatorCapabilities=selectedOperator?plan.activeFrontier.filter(c=>c.operators.includes(selectedOperator.operator)):[];
+ const dependencyAnalysis=useMemo(()=>analyzeFoundryDependenciesR273(plan,selectedCapability?.id||''),[plan,selectedCapability?.id]);
  const inspectCapability=(id:string)=>setSelectedCapabilityId(id);
  const inspectOperator=(id:string)=>setSelectedOperatorId(id);
- return <section className='foundry-r268' aria-label='R268 System Foundry' data-runtime-truth='R269' data-inspection-truth='R272_READ_ONLY'>
-  <header><div><span>R268/R269/R270/R271/R272 · SYSTEM-CONSTRUCTION + LIVE TRUTH + READ-ONLY INSPECTION</span><h3>OMEGA System Foundry</h3><p>Compile a declarative system genome into an active capability frontier, shared operator DAG, evidence-bound executor placements, lenses and proof obligations. Select any capability or operator to inspect exact compiled placement, blockers, reuse and consumers. This surface plans and inspects; it does not create a second executor or production writer.</p></div><div className='foundry-proof'><ShieldCheck/><b>FAIL-CLOSED</b><small>{plan.fingerprint}</small></div></header>
+ return <section className='foundry-r268' aria-label='R268 System Foundry' data-runtime-truth='R269' data-inspection-truth='R272_READ_ONLY' data-dependency-truth='R273_READ_ONLY'>
+  <header><div><span>R268/R269/R270/R271/R272/R273 · SYSTEM-CONSTRUCTION + LIVE TRUTH + CAUSAL INSPECTION</span><h3>OMEGA System Foundry</h3><p>Compile a declarative system genome into an active capability frontier, shared operator DAG, evidence-bound executor placements, lenses and proof obligations. Inspect capabilities, operators, dependency causality, root blockers and declared abstract critical paths without creating another executor or production writer.</p></div><div className='foundry-proof'><ShieldCheck/><b>FAIL-CLOSED</b><small>{plan.fingerprint}</small></div></header>
   <div className='foundry-picker'>{SYSTEM_GENOMES_R268.map(g=><button key={g.id} className={g.id===genome.id?'active':''} onClick={()=>setGenomeId(g.id)}><Braces/><span><b>{g.label}</b><small>{g.purpose}</small></span></button>)}</div>
   <div className='foundry-kpis'><article><Boxes/><b>{active.length}</b><span>ACTIVE FRONTIER</span></article><article><TriangleAlert/><b>{blocked.length}</b><span>TRUTH GATED</span></article><article><Network/><b>{plan.operatorDag.length}</b><span>UNIQUE OPERATORS</span></article><article><Cpu/><b>{plan.runtimeTruth.resourceTier}</b><span>R239 RESOURCE TIER</span></article></div>
   <div className='foundry-grid'>
@@ -46,6 +48,18 @@ export default function SystemFoundryR268({deviceHeartbeat=false,externalBinding
    </div>
    <div className='foundry-inspector-ops'><span>BOUND OPERATORS</span><div>{selectedCapability.operators.map(op=><button type='button' key={op} onClick={()=>inspectOperator(op)}>{op}</button>)}</div></div>
    <p>Inspection is a projection of the already-compiled R269/R270 plan. It does not dispatch, poll, mutate source, claim device liveness, admit CanonState, or create deployment authority.</p>
+  </section>}
+  {selectedCapability&&<section className='foundry-inspector foundry-dependency-inspector' aria-label='R273 dependency inspection'>
+   <header><div><span>R273 DEPENDENCY + CRITICAL PATH INSPECTION</span><b>{selectedCapability.id}</b><code>compiled frontier causality</code></div><em>READ ONLY</em></header>
+   <div className='foundry-inspector-grid'>
+    <article><span>DEPENDENCY CLOSURE</span><b>{dependencyAnalysis.dependencyOrder.length}</b><small>{dependencyAnalysis.dependencyOrder.join(' → ')||'NONE'}</small></article>
+    <article><span>ROOT BLOCKERS</span><b>{dependencyAnalysis.rootBlockers.length}</b><small>{dependencyAnalysis.rootBlockers.map(x=>`${x.id}: ${x.blockers.join(' · ')}`).join(' · ')||'NONE'}</small></article>
+    <article><span>ABSTRACT LATENCY</span><b>{dependencyAnalysis.abstractLatency}</b><small>Declared planning weight along the longest upstream dependency path; not measured wall-clock time.</small></article>
+    <article><span>ABSTRACT COST</span><b>{dependencyAnalysis.abstractCost}</b><small>Declared planning weight on that same path; not measured compute spend.</small></article>
+   </div>
+   <div className='foundry-paths'><span>CRITICAL PATH</span><div>{dependencyAnalysis.criticalPath.map((id,index)=><button type='button' key={id} onClick={()=>inspectCapability(id)}><small>{index+1}</small>{id}</button>)}</div></div>
+   <div className='foundry-paths'><span>DEPENDENCY ORDER</span><div>{dependencyAnalysis.dependencyOrder.map(id=><button type='button' key={id} onClick={()=>inspectCapability(id)}>{id}</button>)}</div></div>
+   <p>Dependency analysis is derived only from the already-compiled frontier and declared abstract cost/latency. It does not dispatch or claim measured runtime performance.</p>
   </section>}
   <div className='foundry-grid'>
    <section><header><span>INTERFACE LENSES</span><b>Representation does not redefine state</b></header><div className='foundry-lenses'>{plan.lenses.map(l=><article key={l.id}><b>{l.label}</b><small>{l.purpose}</small><code>{l.reads.join(' · ')}</code></article>)}</div></section>
