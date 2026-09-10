@@ -21,9 +21,20 @@ test('precision surface never upgrades browse or reconstructed cells into measur
   assert.equal(reconstructed.inferred,false);
 });
 
-test('precision surface admits measured state only from explicit measured overlay proof',()=>{
+test('precision surface admits exact local measurement only from explicit measured overlay proof',()=>{
   const measured=precisionTruth({overlay:{measurement:true},sourceFrame:{src:'quicklook.png'},field:{cells:[{value:1}]}});
-  assert.equal(measured.surface,'CALIBRATED SAR');
+  assert.equal(measured.surface,'CALIBRATED LOCAL SAR');
+  assert.equal(measured.exactMeasured,true);
+  assert.equal(measured.regionalMeasured,false);
+  assert.equal(measured.measured,true);
+  assert.equal(measured.measurementPromotion,true);
+});
+
+test('visible calibrated regional measurement is the primary camera surface without erasing exact evidence',()=>{
+  const measured=precisionTruth({overlay:{measurement:true},regional:{visible:true,patch:{evidence:{measured:true,inferred:false}}},sourceFrame:{src:'quicklook.png'}});
+  assert.equal(measured.surface,'CALIBRATED REGIONAL SAR');
+  assert.equal(measured.regionalMeasured,true);
+  assert.equal(measured.exactMeasured,true);
   assert.equal(measured.measured,true);
   assert.equal(measured.measurementPromotion,true);
 });
