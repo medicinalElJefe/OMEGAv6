@@ -12,6 +12,7 @@ const cloudPolicy=fs.readFileSync('cloudflare/lib/evolution-policy.mjs','utf8');
 const cloudMachine=fs.readFileSync('cloudflare/lib/github-machine.mjs','utf8');
 const workflow=fs.readFileSync('.github/workflows/r170-governed-selfbuild.yml','utf8');
 const cloudWorkflow=fs.readFileSync('.github/workflows/r223-cloudflare-evolution.yml','utf8');
+const gitignore=fs.readFileSync('.gitignore','utf8');
 
 assert.equal(R245_GOVERNED_SELFBUILD_CONTRACT,'OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245');
 assert.equal(R245_CAPSULE_GENERATOR_REVISION,'R245_SHARED_CANONICAL_GENERATOR');
@@ -96,7 +97,11 @@ assert.match(workflow,/cloud\/evolution-/,'R170 workflow must fence CLOUD-01 can
 assert.match(workflow,/r245-governed-selfbuild-convergence-invariants\.mjs/,'R170 candidate proof must re-prove the shared contract');
 assert.match(cloudWorkflow,/r245-governed-selfbuild-convergence-invariants\.mjs/,'CLOUD-01 proof must re-prove the shared contract');
 assert.doesNotMatch(cloudWorkflow,/^\s*push\s*:/m);
+assert.match(gitignore,/^\.wrangler\/$/m,'Wrangler root workspace/cache must be ignored so dry-run tool state cannot masquerade as R170 source mutation');
+assert.match(gitignore,/^\.wrangler-r170-selfbuild\/$/m);
+assert.match(gitignore,/^\.wrangler-r170-selfbuild-optical\/$/m);
+assert.match(gitignore,/^\.wrangler-r240-exact-candidate\/$/m);
 assert.equal(state.residualPolicy.canonicalMutation,false);
 assert.equal(state.residualPolicy.canonicalAdmission,false);
 
-console.log('R245 GOVERNED SELF-BUILD CONVERGENCE PASS · one R164 residual policy · one R240/R243 candidate selection law · one deterministic SG001–SG005 generator · one R170/CLOUD-01 open-candidate fence · R125/R141/R146/R147/R239/R240 and ci.yml authority preserved');
+console.log('R245/R266.3 GOVERNED SELF-BUILD CONVERGENCE PASS · Wrangler root tool workspace remains transient · one R164 residual policy · one R240/R243 candidate selection law · one deterministic SG001–SG005 generator · one R170/CLOUD-01 open-candidate fence · R125/R141/R146/R147/R239/R240 and ci.yml authority preserved');

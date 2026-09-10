@@ -4,6 +4,10 @@ node_modules/
 # Vite build output is transient proof/build state, never a source candidate.
 dist/
 
+# Wrangler's root workspace/cache is transient tool state. Dry-run bundling may create
+# .wrangler/tmp independently of the explicit --outdir, so it must never become source.
+.wrangler/
+
 # Generated Wrangler proof outputs. These are transient build artifacts, never source candidates.
 .wrangler-r170-selfbuild/
 .wrangler-r170-selfbuild-optical/
