@@ -54,8 +54,9 @@ function finishPointer(e,cancel=false){
 }
 function onClick(e){if(performance.now()<state.suppressClickUntil){e.preventDefault();e.stopImmediatePropagation();}}
 function onDblClick(e){const r=renderer();if(!r)return;e.preventDefault();e.stopImmediatePropagation();state.suppressClickUntil=performance.now()+500;const {px,py}=relativePoint(e,r),[anchorLon,anchorLat]=r.unproject(px,py);state.inertia=null;state.zoom={scale:clamp(r.view.scale*2,1,8192),anchorLon,anchorLat,px,py};state.state='SMOOTH_ZOOM';schedule();}
+function suppressLegacyMouse(e){if(state.drag||performance.now()<state.suppressClickUntil||e.type==='mousedown'){e.preventDefault();e.stopImmediatePropagation();}}
 function install(){
-  if(!map||map.dataset.omegaSmoothMotion==='true')return;map.dataset.omegaSmoothMotion='true';map.addEventListener('wheel',onWheel,{capture:true,passive:false});map.addEventListener('pointerdown',onPointerDown,{capture:true});map.addEventListener('pointermove',onPointerMove,{capture:true});map.addEventListener('pointerup',e=>finishPointer(e,false),{capture:true});map.addEventListener('pointercancel',e=>finishPointer(e,true),{capture:true});map.addEventListener('click',onClick,{capture:true});map.addEventListener('dblclick',onDblClick,{capture:true});state.state='READY';
+  if(!map||map.dataset.omegaSmoothMotion==='true')return;map.dataset.omegaSmoothMotion='true';map.addEventListener('wheel',onWheel,{capture:true,passive:false});map.addEventListener('pointerdown',onPointerDown,{capture:true});map.addEventListener('pointermove',onPointerMove,{capture:true});map.addEventListener('pointerup',e=>finishPointer(e,false),{capture:true});map.addEventListener('pointercancel',e=>finishPointer(e,true),{capture:true});map.addEventListener('mousedown',suppressLegacyMouse,{capture:true});map.addEventListener('click',onClick,{capture:true});map.addEventListener('dblclick',onDblClick,{capture:true});state.state='READY';
 }
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(install,0),{once:true});else setTimeout(install,0);}
 state.cancel=cancelAnimation;state.install=install;
