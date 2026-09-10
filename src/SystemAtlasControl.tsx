@@ -9,6 +9,7 @@ import ExtremeRestorationR46 from './ExtremeRestorationR46';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import {MASTER_SYSTEMS_R83} from './softwareMasterLedgerR83';
 import FullSystemConvergencePanelR95 from './FullSystemConvergencePanelR95';
+import SystemFoundryR268 from './SystemFoundryR268';
 import './systemAtlas.css';
 import './systemCapabilityR13.css';
 import './systemAtlasDepthR38_4.css';
@@ -19,7 +20,6 @@ const dl=(name:string,x:any)=>{const u=URL.createObjectURL(new Blob([JSON.string
 const currentByFamily=new Map(R48_COMPLETION_FAMILIES.map(x=>[x.id,x]));
 const currentExecutable=new Set(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE']);
 const currentRouteOf=(surface:string|undefined,fallback:string)=>String(surface||fallback||'System Atlas').split('/')[0].trim()||fallback||'System Atlas';
-// Immutable predecessor contract markers retained for inherited R45/V24 lineage checks only; R168 is the current routing/export authority.
 const R45_SYSTEM_ATLAS_PREDECESSOR_MARKERS=['V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE','OMEGA_SYSTEM_ATLAS_V24_TRUTH.json','R45 EXECUTION CONTRACT'] as const;void R45_SYSTEM_ATLAS_PREDECESSOR_MARKERS;
 
 export default function SystemAtlasControl({record,onNavigate,control=false}:Props){
@@ -31,9 +31,10 @@ export default function SystemAtlasControl({record,onNavigate,control=false}:Pro
  const restoreFocus=(()=>{try{const familyId=localStorage.getItem('omega.r83.familyFocus')||'';const systemId=localStorage.getItem('omega.r83.systemFocus')||'';const row=MASTER_SYSTEMS_R83.find(x=>x.id===systemId);return [familyId,row?.id,row?.artifact,row?.family,row?.role].filter(Boolean).join(' ')}catch{return''}})();
  void GRID_CELLS;void PHASE_COUNT;void STREAM_COUNT;void SUBSYSTEM_COUNT;
  return <section className='special-app system-atlas-r1 system-atlas-r13 system-atlas-r38' data-current-reality='R168' data-successor-debt={R48_COMPLETION_SUMMARY.restorationDebt}>
-  <header className='special-head'><div><span>R168 CURRENT SUCCESSOR REALITY · V24 PREDECESSOR EVIDENCE RETAINED · ONE CAPABILITY AUTHORITY</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{R48_COMPLETION_FAMILIES.length} FAMILIES · {audit.total} ROUTED APPLICATION SURFACES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision} · current reality ≠ historical registration</small></div></header>
-  <div className='atlas-r1-invariant'><ShieldCheck/><b>{SYSTEM_INVARIANT}</b><span>R168 uses the R48/R155 successor ledger for current family execution and the unified capabilityReality authority for routes. V24 donor/debt labels remain visible only as predecessor evidence; they no longer disable an admitted successor.</span></div>
+  <header className='special-head'><div><span>R168 CURRENT SUCCESSOR REALITY · R268 SYSTEM FOUNDRY · ONE CAPABILITY AUTHORITY</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{R48_COMPLETION_FAMILIES.length} FAMILIES · {audit.total} ROUTED APPLICATION SURFACES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision} · current reality ≠ historical registration</small></div></header>
+  <div className='atlas-r1-invariant'><ShieldCheck/><b>{SYSTEM_INVARIANT}</b><span>R168 uses the R48/R155 successor ledger for current family execution and the unified capabilityReality authority for routes. R268 compiles additional system genomes through that existing authority instead of creating a parallel runtime.</span></div>
   <FullSystemConvergencePanelR95 onNavigate={onNavigate}/>
+  <SystemFoundryR268/>
   <section className='atlas-r38-stage' aria-label='Active packet and System Atlas truth context'>
    <div className='atlas-r38-field'><CanonicalPacketTruthPlotR93 record={record} title={control?'System Control · canonical packet':'System Atlas · canonical packet'}/></div>
    <aside className='atlas-r38-context'>
