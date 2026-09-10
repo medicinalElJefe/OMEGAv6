@@ -37,15 +37,23 @@ function drawEvents(r){
   const events=globalThis.OMEGA_EARTH_AWARENESS?.events||[],bbox=r.viewBounds?.();if(!Array.isArray(bbox)||!events.length)return;const [w,s,e,n]=bbox,visible=events.filter(v=>v.lon>=w&&v.lon<=e&&v.lat>=s&&v.lat<=n).slice(0,60);if(!visible.length)return;
   ctx.save();for(const event of visible){const [x,y]=r.project(event.lon,event.lat),quake=event.authority==='USGS',m=Number.isFinite(event.magnitude)?event.magnitude:2.5,rad=quake?Math.min(7,1.8+m*.65):2.8;ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);ctx.fillStyle=quake?'rgba(245,236,225,.30)':'rgba(205,235,242,.24)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=.5;ctx.stroke();}ctx.restore();
 }
-function forceOpacity(selector,value){const node=document.querySelector(selector);if(!node)return;if(value==null)node.style.removeProperty('opacity');else node.style.setProperty('opacity',String(value),'important');}
+function forceStyle(selector,name,value){const node=document.querySelector(selector);if(!node)return;if(value==null)node.style.removeProperty(name);else node.style.setProperty(name,String(value),'important');}
 function applyLayerHierarchy(surface){
-  const shaped=surface==='REGIONAL_SHAPED_SAR'||surface==='EXACT_SHAPED_SAR',exact=surface==='EXACT_SHAPED_SAR';
-  forceOpacity('.omega-regional-sar-layer canvas',surface==='REGIONAL_SHAPED_SAR'?.012:null);
-  forceOpacity('.omega-global-sar-fabric canvas',shaped?.004:null);
-  forceOpacity('.omega-woven-motion canvas',shaped?.012:null);
-  forceOpacity('.omega-earth-awareness-layer canvas',0);
-  forceOpacity('#map',exact?.012:null);
+  const shaped=surface==='REGIONAL_SHAPED_SAR'||surface==='EXACT_SHAPED_SAR',regional=surface==='REGIONAL_SHAPED_SAR',exact=surface==='EXACT_SHAPED_SAR';
+  // Ownership must switch atomically. The native canvas itself can crossfade smoothly,
+  // but the old raw/support canvases must not spend 280 ms double-exposed underneath it.
+  // That transient washout was visually muddy and made fresh-page proof timing nondeterministic.
+  forceStyle('.omega-regional-sar-layer canvas','opacity',shaped?.012:null);
+  forceStyle('.omega-regional-sar-layer canvas','transition',shaped?'none':null);
+  forceStyle('.omega-regional-sar-layer canvas','filter',shaped?'none':null);
+  forceStyle('.omega-global-sar-fabric canvas','opacity',shaped?.004:null);
+  forceStyle('.omega-global-sar-fabric canvas','transition',shaped?'none':null);
+  forceStyle('.omega-woven-motion canvas','opacity',shaped?.012:null);
+  forceStyle('.omega-woven-motion canvas','transition',shaped?'none':null);
+  forceStyle('.omega-earth-awareness-layer canvas','opacity',0);
+  forceStyle('#map','opacity',exact?.012:null);
   const oldBadge=document.querySelector('#omegaRegionalSarBadge');if(oldBadge)oldBadge.style.setProperty('display','none','important');
+  state.layerOwnership={surface,shaped,regional,exact,atomicLegacyDemotion:shaped};
 }
 function updateDomState(surface){state.surface=surface;state.renderedAt=new Date().toISOString();document.body.dataset.dataNativeSurface=surface.toLowerCase();applyLayerHierarchy(surface);const badge=document.querySelector('#omegaDataNativeBadge');if(badge)badge.textContent=surface==='EXACT_SHAPED_SAR'?'EXACT MEASURED SAR · HIGH-DETAIL TERRAIN-SHAPED DISPLAY':surface==='REGIONAL_SHAPED_SAR'?'REGIONAL MEASURED SAR · HIGH-DETAIL TERRAIN-SHAPED DISPLAY':'DATA-NATIVE EARTH RELIEF · SOURCE DEM';}
 function draw(){
@@ -61,9 +69,9 @@ function resize(){if(!canvas||!map)return;const rect=map.getBoundingClientRect()
 function install(){
   if(!wrap||layer)return;const style=document.createElement('style');style.id='omegaDataNativeSurfaceStyle';style.textContent=`
   .omega-data-native-surface{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}.omega-data-native-surface canvas{position:absolute;inset:0;width:100%;height:100%;display:block;transition:opacity .28s cubic-bezier(.2,.75,.2,1),filter .28s cubic-bezier(.2,.75,.2,1)}.omega-data-native-badge{position:absolute;z-index:11;left:10px;top:10px;padding:5px 7px;border-radius:7px;border:1px solid rgba(255,255,255,.10);background:rgba(3,7,9,.48);backdrop-filter:blur(10px);font:700 7px Inter,Segoe UI,sans-serif;letter-spacing:.07em;color:rgba(236,244,246,.74);pointer-events:none}
-  body[data-data-native-surface=regional_shaped_sar][data-sar-surface=regional_measured] .omega-regional-sar-layer canvas{opacity:.012!important}
-  body[data-data-native-surface=regional_shaped_sar] .omega-global-sar-fabric canvas,body[data-data-native-surface=exact_shaped_sar] .omega-global-sar-fabric canvas{opacity:.004!important}
-  body[data-data-native-surface=regional_shaped_sar] .omega-woven-motion canvas,body[data-data-native-surface=exact_shaped_sar] .omega-woven-motion canvas{opacity:.012!important}
+  body[data-data-native-surface=regional_shaped_sar] .omega-regional-sar-layer canvas,body[data-data-native-surface=exact_shaped_sar] .omega-regional-sar-layer canvas{opacity:.012!important;transition:none!important;filter:none!important}
+  body[data-data-native-surface=regional_shaped_sar] .omega-global-sar-fabric canvas,body[data-data-native-surface=exact_shaped_sar] .omega-global-sar-fabric canvas{opacity:.004!important;transition:none!important}
+  body[data-data-native-surface=regional_shaped_sar] .omega-woven-motion canvas,body[data-data-native-surface=exact_shaped_sar] .omega-woven-motion canvas{opacity:.012!important;transition:none!important}
   body[data-data-native-surface=exact_shaped_sar] #map{opacity:.012!important}
   body.omega-experience .omega-earth-awareness-layer canvas{opacity:0!important}
   body.omega-experience .omega-jrc-water-layer canvas{opacity:.12!important;mix-blend-mode:screen!important;filter:saturate(.68) contrast(.96)!important}
