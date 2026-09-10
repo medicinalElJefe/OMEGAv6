@@ -36,6 +36,9 @@ try{
   }));
   assert.equal(regional.surface,'REGIONAL_SHAPED_SAR');assert.equal(regional.measured.state,'CALIBRATED_SENTINEL1_REGIONAL_VIEWPORT');assert.equal(regional.measured.evidence?.measured,true);assert.equal(regional.measured.evidence?.inferred,false);assert.ok(regional.measured.valid>100);assert.ok(regional.stats.validSar>100);assert.ok(regional.stats.terrainCoverage>.35,'terrain did not materially shape the measured SAR viewport');assert.equal(Number(regional.layers.oldAwareness),0,'legacy line-based terrain canvas still competes with shaped surface');assert.ok(Number(regional.layers.regional)<=.03,'raw regional canvas still washes out shaped output');assert.ok(Number(regional.layers.global)<=.01,'global support fabric still dominates measured surface');assert.match(regional.badge,/MEASURED SAR · TERRAIN-SHAPED DISPLAY/);assert.ok(regional.dimensions.stageW>regional.dimensions.vw*.84&&regional.dimensions.stageH>regional.dimensions.vh*.78,'data-native Earth surface is not the dominant workstation view');
 
+  await mkdir('test-results',{recursive:true});
+  await page.screenshot({path:'test-results/r256-data-native-regional.png',fullPage:false});
+
   // Navigation must remain controllable while the high-detail surface is active.
   const beforeScale=regional.view.scale;await page.click('#omegaZoomOut');await page.waitForTimeout(700);const afterScale=await page.evaluate(()=>globalThis.OMEGA_SAR_RENDERER.view.scale);assert.ok(afterScale<beforeScale,'high-detail surface blocked camera controls');await page.click('#omegaSarFocus');await page.waitForFunction(()=>{const s=globalThis.OMEGA_SAR_RENDERER?.view?.scale;return s>=260&&s<=720;},null,{timeout:12000});
 
@@ -45,7 +48,7 @@ try{
   const exact=await page.evaluate(()=>({surface:globalThis.OMEGA_DATA_NATIVE_SURFACE.surface,stats:globalThis.OMEGA_DATA_NATIVE_SURFACE.exactStats,boundary:globalThis.OMEGA_DATA_NATIVE_SURFACE.boundary,patch:{state:globalThis.OMEGA_SAR_RENDERER?.sarOverlay?.patch?.state,evidence:globalThis.OMEGA_SAR_RENDERER?.sarOverlay?.patch?.evidence},scale:globalThis.OMEGA_SAR_RENDERER?.view?.scale}));
   assert.equal(exact.surface,'EXACT_SHAPED_SAR');assert.equal(exact.patch.state,'CALIBRATED_SENTINEL1_TARGET_PATCH');assert.equal(exact.patch.evidence?.measured,true);assert.ok(exact.scale>900);assert.match(exact.boundary,/changes display only/i);
 
-  await mkdir('test-results',{recursive:true});await page.screenshot({path:'test-results/r256-data-native-surface.png',fullPage:false});
+  await page.screenshot({path:'test-results/r256-data-native-surface.png',fullPage:false});
   assert.deepEqual(errors,[],`page errors: ${errors.join(' | ')}`);
   console.log('SAR_R256_DATA_NATIVE_SURFACE_PASS',JSON.stringify({globalProof,regional,exact},null,2));
 }finally{await browser.close();}
