@@ -1,14 +1,13 @@
 import { WorldRenderer } from './render.mjs';
 
 const $=s=>typeof document==='undefined'?null:document.querySelector(s);
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)));
 
 export function formatAge(iso,now=Date.now()){
   const t=new Date(iso||'').getTime();
   if(!Number.isFinite(t))return '—';
   const seconds=Math.max(0,(Number(now)-t)/1000);
   if(seconds<90)return `${Math.round(seconds)}s`;
-  if(seconds<5400)return `${Math.round(seconds/60)}m`;
+  if(seconds<3600)return `${Math.round(seconds/60)}m`;
   if(seconds<172800)return `${(seconds/3600).toFixed(seconds<36000?1:0)}h`;
   return `${(seconds/86400).toFixed(seconds<864000?1:0)}d`;
 }
@@ -99,17 +98,18 @@ function startWatchAfterTarget(){
 function install(){
   const wrap=$('.map-wrap');if(!wrap||$('#omegaPrecisionStrip'))return;
   const style=document.createElement('style');style.id='omegaPrecisionStyle';style.textContent=`
-  .omega-precision-strip{position:absolute;z-index:10;left:50%;bottom:15px;transform:translateX(-50%);width:min(820px,66%);display:grid;grid-template-columns:auto repeat(5,minmax(92px,1fr));align-items:center;gap:0;border:1px solid rgba(255,255,255,.17);border-radius:15px;background:linear-gradient(180deg,rgba(7,10,12,.82),rgba(4,6,8,.72));backdrop-filter:blur(22px) saturate(120%);box-shadow:0 18px 55px rgba(0,0,0,.42);overflow:hidden;pointer-events:none;color:#f3f7f8;font-family:Inter,Segoe UI,sans-serif}
+  .omega-precision-strip{position:absolute;z-index:10;left:50%;bottom:15px;transform:translateX(-50%);width:min(820px,66%);display:grid;grid-template-columns:auto repeat(5,minmax(92px,1fr));align-items:center;gap:0;border:1px solid rgba(255,255,255,.17);border-radius:15px;background:linear-gradient(180deg,rgba(7,10,12,.84),rgba(4,6,8,.74));backdrop-filter:blur(22px) saturate(120%);box-shadow:0 18px 55px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.035);overflow:hidden;pointer-events:none;color:#f3f7f8;font-family:Inter,Segoe UI,sans-serif}
   .omega-precision-strip>div{min-width:0;padding:9px 11px;border-left:1px solid rgba(255,255,255,.08)}.omega-precision-strip>div:first-of-type{border-left:0}.omega-precision-strip span{display:block;font-size:7px;font-weight:750;letter-spacing:.13em;color:#87969c}.omega-precision-strip b{display:block;margin-top:3px;font-size:9px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.omega-precision-pulse{width:8px;height:8px;margin:0 11px;border-radius:50%;background:#79878d;box-shadow:0 0 0 0 rgba(226,248,255,.28)}.omega-precision-pulse[data-measured=true]{background:#e8f8fb;animation:omegaPrecisionPulse 1.8s ease-out infinite}@keyframes omegaPrecisionPulse{0%{box-shadow:0 0 0 0 rgba(226,248,255,.28)}70%{box-shadow:0 0 0 9px rgba(226,248,255,0)}100%{box-shadow:0 0 0 0 rgba(226,248,255,0)}}
   .map-wrap:after{content:'';position:absolute;z-index:3;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,transparent 0 26%,rgba(255,255,255,.018) 26.2% 26.5%,transparent 26.7%),linear-gradient(90deg,transparent 49.92%,rgba(255,255,255,.035) 50%,transparent 50.08%),linear-gradient(0deg,transparent 49.92%,rgba(255,255,255,.035) 50%,transparent 50.08%);mix-blend-mode:screen;opacity:.62}
-  @media(max-width:1100px){.omega-precision-strip{width:calc(100% - 26px);grid-template-columns:auto repeat(3,minmax(0,1fr))}.omega-precision-strip>div:nth-of-type(4),.omega-precision-strip>div:nth-of-type(5){display:none}}
-  @media(max-width:760px){.omega-precision-strip{bottom:58px;grid-template-columns:auto repeat(2,minmax(0,1fr))}.omega-precision-strip>div:nth-of-type(3){display:none}.omega-precision-strip b{font-size:8px}.map-wrap:after{opacity:.36}}
+  .omega-action-hud{bottom:79px!important;max-width:min(560px,44%)!important}.omega-cell-inspector{bottom:79px!important;max-width:420px!important}.map-hud{bottom:88px!important}.map-note{display:none!important}.earth-attribution{bottom:58px!important}.scale-readout{bottom:58px!important}
+  @media(max-width:1100px){.omega-precision-strip{width:calc(100% - 26px);grid-template-columns:auto repeat(3,minmax(0,1fr))}.omega-precision-strip>div:nth-of-type(4),.omega-precision-strip>div:nth-of-type(5){display:none}.omega-action-hud{max-width:46%!important}.omega-cell-inspector{max-width:46%!important}}
+  @media(max-width:760px){.omega-precision-strip{bottom:58px;grid-template-columns:auto repeat(2,minmax(0,1fr))}.omega-precision-strip>div:nth-of-type(3){display:none}.omega-precision-strip b{font-size:8px}.map-wrap:after{opacity:.36}.omega-action-hud{left:10px!important;right:10px!important;bottom:116px!important;max-width:none!important}.omega-cell-inspector{left:10px!important;right:10px!important;bottom:162px!important;max-width:none!important}.earth-attribution{bottom:102px!important}.scale-readout{bottom:78px!important}}
   @media(prefers-reduced-motion:reduce){.omega-precision-pulse[data-measured=true]{animation:none}}
   `;document.head.append(style);
   const el=document.createElement('div');el.id='omegaPrecisionStrip';el.className='omega-precision-strip';el.setAttribute('aria-label','R4 live SAR precision telemetry');
   el.innerHTML='<i class="omega-precision-pulse"></i><div><span>UTC NOW</span><b data-k="utc">—</b></div><div><span>PRIMARY SURFACE</span><b data-k="surface">WAITING FOR SAR</b></div><div><span>SAR FRAME AGE</span><b data-k="age">—</b></div><div><span>DETAIL</span><b data-k="detail">GLOBAL</b></div><div><span>GEO SUPPORT</span><b data-k="mesh">UNBOUND</b></div><div><span>Ω FIELD</span><b data-k="field">FIELD PENDING</b></div>';
   wrap.append(el);
-  const events=['omega-source-sar-frame','omega-source-sar-visibility','omega-calibrated-sar-patch','omega-calibrated-sar-patch-clear','omega-map-view'];for(const name of events)window.addEventListener(name,event=>{runtime.lastEvent=name;update();});
+  const events=['omega-source-sar-frame','omega-source-sar-visibility','omega-calibrated-sar-patch','omega-calibrated-sar-patch-clear','omega-map-view'];for(const name of events)window.addEventListener(name,()=>{runtime.lastEvent=name;update();});
   map?.addEventListener?.('omega-map-select',()=>{startWatchAfterTarget();update();});
   const point=$('#point');if(point)new MutationObserver(()=>{startWatchAfterTarget();update();}).observe(point,{childList:true,subtree:true,characterData:true});
   runtime.timer=setInterval(update,1000);update();
