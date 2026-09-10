@@ -16,6 +16,7 @@ const experienceCss=fs.readFileSync('src/omegaExperienceShellR257.css','utf8');
 const universal=fs.readFileSync('src/OmegaUniversalInterfaceR263.tsx','utf8');
 const universalRegistry=fs.readFileSync('src/omegaUniversalInterfaceR263.ts','utf8');
 const universalCss=fs.readFileSync('src/omegaUniversalInterfaceR263.css','utf8');
+const hybrid=fs.readFileSync('src/HybridLinkR32.tsx','utf8');
 const fail=(m)=>{throw new Error(m)};
 
 for(const token of ['dailyBrief()','OMEGA curated operating lesson','TODAY\'S FIELD LESSON','OPEN FULL WORKSTATION','/api/route-preview','/api/chat','SOURCE-BACKED MODES'])if(!(home+daily).includes(token))fail(`startup experience missing ${token}`);
@@ -50,14 +51,17 @@ for(const token of ['min-height:100dvh','env(safe-area-inset-top,0px)',':focus-v
 if(experienceCss.includes('.r257-stage{min-width:0;isolation:isolate}'))fail('R261.1 stage may not trap the persistent navigator in an isolated stacking context');
 if(/\.r257-shell\{[^}]*z-index\s*:/.test(experienceCss))fail('R261.1 shell root may not create a stacking context above the persistent navigator');
 
-// R263: one professional activity interface spans use, tools, science, education, creation and entertainment without changing truth or authority.
-if(!experienceShell.includes("import OmegaUniversalInterfaceR263")||!experienceShell.includes("!immersive&&<OmegaUniversalInterfaceR263 onNavigate={onNavigate}/>"))fail('R263 universal interface must be wired into the non-immersive experience shell');
+// R263: universal use fabric must expand capability without constricting specialist/Hybrid operation.
+if(!experienceShell.includes("import OmegaUniversalInterfaceR263")||!experienceShell.includes("!immersive&&<OmegaUniversalInterfaceR263 onNavigate={onNavigate} compact={!home}/>"))fail('R263 universal interface must stay full on Home and compact on specialist surfaces');
 for(const token of ["'DISCOVER'","'UNDERSTAND'","'LEARN'","'VISUALIZE'","'COMPARE'","'CREATE'","'OPERATE'","'PROVE'","'PLAY'"])if(!universalRegistry.includes(token))fail(`R263 activity fabric missing ${token}`);
 for(const token of ["'OBSERVED'","'DERIVED'","'RECONSTRUCTED'","'SIMULATED'","'FORECAST'","'REFERENCE'","'GENERATED'","'USER_ASSERTED'","'UNKNOWN'"])if(!universalRegistry.includes(token))fail(`R263 information classification missing ${token}`);
 for(const token of ["'REALITY'","'KNOWLEDGE'","'MODEL'","'COMPUTATION'","'ACTION'","'EXPERIENCE'","'CREATION'","'CONTINUITY'","'PROOF'"])if(!universalRegistry.includes(token))fail(`R263 interoperability plane missing ${token}`);
 for(const token of ['DATA_CLASSIFICATION_TRAVELS_WITH_INFORMATION','OBSERVED_NEVER_IMPLIED_FROM_GENERATED','TOOL_SELECTION_NEVER_CREATES_EXECUTION_AUTHORITY','R147_DISPATCH_UNCHANGED','R141_RETURN_PROOF_UNCHANGED','R240_SOURCE_PROMOTION_UNCHANGED','R125_CANONSTATE_UNCHANGED','CI_YML_PRODUCTION_WRITER_UNCHANGED'])if(!universalRegistry.includes(token))fail(`R263 truth/authority contract missing ${token}`);
-for(const token of ["role='search'","aria-label='Current information classification'","aria-label='OMEGA interoperability planes'","setExperienceProfile(next.experience","resolveActivityR263(intent)","type='submit' disabled={!intent.trim()}"])if(!universal.includes(token))fail(`R263 usable intent interface missing ${token}`);
-for(const token of ['grid-template-columns:repeat(9',':focus-visible','min-height:44px','@media(prefers-reduced-motion:reduce)','@media(forced-colors:active)'])if(!universalCss.includes(token))fail(`R263 commercial responsive/accessibility styling missing ${token}`);
+for(const token of ["role='search'","aria-label='Current information classification'","aria-label='OMEGA interoperability planes'","setExperienceProfile(next.experience","resolveActivityR263(intent)","type='submit' disabled={!intent.trim()}","compact=false","data-r263-compact"])if(!universal.includes(token))fail(`R263 usable intent/compact interface missing ${token}`);
+for(const token of ['grid-template-columns:repeat(9',':focus-visible','min-height:44px','@media(prefers-reduced-motion:reduce)','@media(forced-colors:active)', '.r263-universal.compact', '.r263-universal.compact .r263-brand{display:none}'])if(!universalCss.includes(token))fail(`R263 desktop/mobile non-constrictive styling missing ${token}`);
 if(/fetch\(|\/api\//.test(universal+universalRegistry))fail('R263 presentation/router layer may not create a second network or execution owner');
+const operational=['<SovereignConnectionR117/>','<HybridHostIntelligenceR238/>','<HybridResourceGovernorR239/>','<HybridActionRuntimeR247/>','<HybridOutcomeClosureR254/>','<HybridCommandDeckR237/>','<HybridHostEffectsR212/>'];
+let previous=-1;for(const token of operational){const index=hybrid.indexOf(token);if(index<0)fail(`R263 Hybrid operational surface missing ${token}`);if(index<=previous)fail(`R263 Hybrid operational controls must remain primary and ordered: ${token}`);previous=index}
+for(const token of ['<HybridExperienceLedgerR255/>','<HybridParallelDevelopmentR262/>'])if(hybrid.indexOf(token)<previous)fail(`${token} may not push primary Hybrid operational controls below telemetry/development surfaces`);
 
-console.log('startup experience invariants: PASS · 44 routes + R259 atomic continuity + R260 live Home coherence + R261.1 browser polish + R263 universal activity/evidence/tool interface');
+console.log('startup experience invariants: PASS · 44 routes + R259/R260 continuity + R261.1 browser polish + R263 universal interface + compact specialist viewport + primary Hybrid controls preserved');
