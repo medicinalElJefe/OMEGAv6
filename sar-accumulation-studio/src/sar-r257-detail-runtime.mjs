@@ -18,7 +18,7 @@ async function promoteDeep(){
     lastDeepKey=identity;state.deepPatch={id:patch.id,width:patch.width,height:patch.height,validCount:patch.stats?.validCount||0,sourceWindow:patch.sourceWindow,evidence:patch.evidence};state.promotions++;state.lastPromotion=new Date().toISOString();state.state='DEEP_READY';
     window.dispatchEvent(new CustomEvent('omega-r257-deep-detail',{detail:{...state.deepPatch,promotions:state.promotions}}));
   }catch(error){state.state='DEEP_UNRESOLVED';state.error=error.message;}
-  finally{deepRunning=false;if(select)select.value=String(state.deepRadius);globalThis.OMEGA_SAR_R257_EXPERIENCE?.refresh?.();}
+  finally{deepRunning=false;if(select)select.value=previous;globalThis.OMEGA_SAR_R257_EXPERIENCE?.refresh?.();}
 }
 function scheduleDeep(delay=420){clearTimeout(deepTimer);deepTimer=setTimeout(()=>promoteDeep(),delay);}
 function onPatch(event){const patch=event.detail?.patch;if(patch?.state!=='CALIBRATED_SENTINEL1_TARGET_PATCH'||patch?.evidence?.measured!==true)return;if(Math.min(patch.width||0,patch.height||0)>=240){lastDeepKey=currentIdentity()||lastDeepKey;state.deepPatch={id:patch.id,width:patch.width,height:patch.height,validCount:patch.stats?.validCount||0,sourceWindow:patch.sourceWindow,evidence:patch.evidence};state.state='DEEP_READY';return;}scheduleDeep(360);}
