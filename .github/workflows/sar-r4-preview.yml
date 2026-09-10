@@ -57,7 +57,7 @@ jobs:
             test "$attempt" != 20 || { echo 'R4 root did not become live'; exit 1; }
             sleep 3
           done
-          for module in r4-runtime.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs; do
+          for module in r4-runtime.mjs r4-live-precision.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs; do
             code="$(curl -sS -o "/tmp/$module" -w '%{http_code}' "$SAR_PUBLIC_URL/src/$module")"
             test "$code" = 200 || { echo "R4 $module HTTP $code"; exit 1; }
           done
@@ -74,8 +74,20 @@ jobs:
           SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
         run: node tests/r4-authority-spine-e2e.mjs
       - name: Prove worldwide continuous field and real SAR anchoring
-        if: ${{ always() }}
         working-directory: sar-accumulation-studio
         env:
           SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
         run: node tests/r4-continuous-field-e2e.mjs
+      - name: Prove live high-fidelity precision surface
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
+        run: node tests/r4-live-precision-e2e.mjs
+      - name: Archive R4 live visual proof
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sar-r4-live-visual-proof
+          path: sar-accumulation-studio/test-results/r4-live-precision.png
+          if-no-files-found: warn
+          retention-days: 14
