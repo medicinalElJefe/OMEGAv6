@@ -62,13 +62,10 @@ export function buildTerrainReliefSurface(terrain,water,{azimuthDeg=315,elevatio
   for(let i=0;i<width*height;i++){
     const z=Number(terrain.elevation[i]);if(!finite(z))continue;
     const slope=Number(g?.slope?.[i])||0,aspect=Number(g?.aspect?.[i])||0,curv=Number(g?.curvature?.[i])||0,q=clamp(Number(g?.conveyance?.[i])||0,0,1),light=terrainLight(slope,aspect,{azimuthDeg,elevationDeg}),light01=(light+1)*.5;
-    // At planetary scale local slope can be numerically small because each DEM cell spans
-    // hundreds of kilometres. Hypsometric tone preserves the actual broad Earth shape,
-    // while normal lighting and curvature progressively dominate as LOD increases.
     const elevNorm=clamp((z-range.min)/range.span,0,1),hypsometry=Math.log1p(18*elevNorm)/Math.log(19),micro=Math.tanh(Math.max(0,slope)*8),relief=clamp(.15+.38*hypsometry+.33*light01+.12*micro-.055*Math.tanh(curv*2500),.06,1),wet=q>.48?Math.pow((q-.48)/.52,1.4):0,j=i*4,base=Math.round(255*relief);
     rgba[j]=Math.round(base*(1-.17*wet));rgba[j+1]=Math.round(base*(1-.035*wet));rgba[j+2]=Math.min(255,Math.round(base*(1+.20*wet)));rgba[j+3]=Math.round(clamp(92+94*hypsometry+54*Math.abs(light-.5)+35*wet,92,238));
   }
-  return {width,height,rgba,stats:{minElevation:range.min,maxElevation:range.max,elevationSpan:range.span},semantics:'Source DEM hypsometry plus DEM-normal shaded relief and derived drainage-potential modulation. This is a data-shaped terrain image, not optical land-cover synthesis and not an observed-water claim.'};
+  return {width,height,rgba,stats:{minElevation:range.min,maxElevation:range.max,elevationSpan:range.span},semantics:'DEM-derived shaded relief using source DEM hypsometry plus DEM-normal lighting and derived drainage-potential modulation. This is a data-shaped terrain image, not optical land-cover synthesis and not an observed-water claim.'};
 }
 
 export function buildTerrainShapedSarSurface(patch,terrain,water,{azimuthDeg=315,elevationDeg=43,reliefStrength=.32,textureStrength=.12}={}){
