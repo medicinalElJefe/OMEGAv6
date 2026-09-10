@@ -85,7 +85,7 @@ export function deriveWeaveStateR100(address:number,u:UnifiedMath,timeSeconds=0,
 export function applyWovenContinuityR100(
  p:{x:number;y:number;z:number;weight:number},index:number,total:number,u:UnifiedMath,weave:WeaveStateR100,timeSeconds:number
 ){
- const f=index/Math.max(1,total-1),theta=f*TAU,orient=weave.orientation||1,r266Coherence=clamp(Number(weave.adaptiveCoherenceR266?.adaptation?.adaptiveCoherence??weave.dimensionalRelativityR265?.metrics?.computationCoherence??1));
+ const f=index/Math.max(1,total-1),theta=f*TAU,orient=weave.orientation||1,r265Coherence=clamp(Number(weave.dimensionalRelativityR265?.metrics?.computationCoherence??1)),r266Coherence=clamp(Number(weave.adaptiveCoherenceR266?.adaptation?.adaptiveCoherence??r265Coherence));
  const temporal=weave.phase+theta*weave.lobeCount+timeSeconds*(.08+.24*u.motionRelativity)*orient;
  const exchange=Math.sin(temporal)*(.018+.075*weave.continuityFlux)*(.90+.10*r266Coherence);
  const scar=Math.sin(theta*(2+Math.round(weave.residualCarry*5))-weave.phase*.7)*(.012+.065*weave.residualCarry);
