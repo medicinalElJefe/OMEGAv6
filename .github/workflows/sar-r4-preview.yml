@@ -39,6 +39,7 @@ jobs:
           node --check src/sar-woven-motion-runtime.mjs
           node --check src/omega-lemma-translator-runtime.mjs
           node --check src/sar-experience-runtime.mjs
+          node --check src/sar-experience-compat-runtime.mjs
           node --check src/r4-runtime.mjs
           node --check tests/r251-global-motion-e2e.mjs
           node --check tests/r252-experience-e2e.mjs
@@ -66,7 +67,7 @@ jobs:
             test "$attempt" != 20 || { echo 'R4 root did not become live'; exit 1; }
             sleep 3
           done
-          for module in r4-runtime.mjs r4-live-precision.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs sar-blade-geometry.mjs sar-blade-render-runtime.mjs sar-blade-lens-runtime.mjs sar-regional-measurement.mjs sar-regional-runtime.mjs lemma-state-calculus.mjs sar-smooth-motion-runtime.mjs sar-global-fabric-runtime.mjs sar-woven-motion-runtime.mjs omega-lemma-translator-runtime.mjs sar-experience-runtime.mjs water-geometry-core.mjs earth-awareness-runtime.mjs jrc-water-observation-runtime.mjs earth-temporal-core.mjs earth-temporal-sync.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs r249-exact-lens-runtime.mjs; do
+          for module in r4-runtime.mjs r4-live-precision.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs sar-blade-geometry.mjs sar-blade-render-runtime.mjs sar-blade-lens-runtime.mjs sar-regional-measurement.mjs sar-regional-runtime.mjs lemma-state-calculus.mjs sar-smooth-motion-runtime.mjs sar-global-fabric-runtime.mjs sar-woven-motion-runtime.mjs omega-lemma-translator-runtime.mjs sar-experience-runtime.mjs sar-experience-compat-runtime.mjs water-geometry-core.mjs earth-awareness-runtime.mjs jrc-water-observation-runtime.mjs earth-temporal-core.mjs earth-temporal-sync.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs r249-exact-lens-runtime.mjs; do
             ready=0
             for attempt in {1..20}; do
               code="$(curl -sS -o "/tmp/$module" -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/src/$module?release=$GITHUB_SHA" || true)"
