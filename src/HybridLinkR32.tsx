@@ -30,17 +30,17 @@ export default function HybridLinkR32({status,record}:Props){
 
   <HybridRuntimeSnapshotProviderR238>
    <SovereignConnectionR117/>
-   <HybridWovenContinuityR238/>
-   <HybridExecutionMotionR243/>
    <HybridHostIntelligenceR238/>
    <HybridResourceGovernorR239/>
    <HybridActionRuntimeR247/>
    <HybridOutcomeClosureR254/>
+   <HybridCommandDeckR237/>
+   <HybridHostEffectsR212/>
+   <HybridExecutionMotionR243/>
+   <HybridWovenContinuityR238/>
+   <HybridProofClosureR141/>
    <HybridExperienceLedgerR255/>
    <HybridParallelDevelopmentR262/>
-   <HybridHostEffectsR212/>
-   <HybridCommandDeckR237/>
-   <HybridProofClosureR141/>
    <MissionLineageReviewR209/>
   </HybridRuntimeSnapshotProviderR238>
 
