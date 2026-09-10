@@ -12,6 +12,7 @@ permissions:
 
 env:
   OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+  OMEGA_SAI_DOOR_URL: https://omega-sai-door-r256.jeffdeweyeljefe.workers.dev
 
 jobs:
   verify:
@@ -39,6 +40,11 @@ jobs:
           node tests/r239-adaptive-hybrid-resource-governor-invariants.mjs
           node tests/r240-recursive-exact-self-promotion-invariants.mjs
           node tests/r2481-deployment-receipt-audit-truth-invariants.mjs
+      - name: Prove R258 private SAI doorway without new workflow authority
+        run: |
+          node tests/r256-private-sai-doorway-invariants.mjs
+          node tests/r256-private-sai-doorway-protocol-e2e.mjs
+          npx wrangler deploy --config wrangler.sai-door-r256.jsonc --dry-run --outdir .wrangler-r256-doorway
       - run: npm run check
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
 
@@ -115,6 +121,35 @@ jobs:
       - name: Deploy canonical OMEGA Worker
         id: deploy_worker
         run: npx wrangler deploy
+      - name: Deploy isolated private SAI doorway
+        id: sai_doorway
+        run: npx wrangler deploy --config wrangler.sai-door-r256.jsonc
+      - name: Verify private SAI doorway non-disclosure boundary
+        id: sai_doorway_hidden
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_SAI_DOOR_URL.replace(/\/$/,'');
+          const invalid='x'.repeat(64);
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function hidden(path){
+            let last='';
+            for(let attempt=1;attempt<=12;attempt++){
+              try{
+                const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}});
+                const text=await r.text();
+                if(r.status===404&&String(r.headers.get('x-robots-tag')||'').includes('noindex')){console.log(`R258 PRIVATE HIDDEN PASS ${path} attempt ${attempt}`);return}
+                last=`HTTP ${r.status} ${text.slice(0,180)}`;
+              }catch(e){last=String(e)}
+              await sleep(5000);
+            }
+            throw new Error(`R258 private hidden-boundary verification failed ${path}: ${last}`);
+          }
+          await hidden('/');
+          await hidden('/sai-door/'+invalid);
+          await hidden('/api/admin/sai-peers');
+          console.log('R258 private SAI doorway deployed and public discovery boundary is closed.');
+          NODE
       - name: Verify canonical public runtime
         id: live_runtime
         shell: bash
@@ -326,10 +361,13 @@ jobs:
             echo "- Candidate: ${OMEGA_CANDIDATE_SHA:-UNAVAILABLE}"
             echo "- Rollback: ${OMEGA_ROLLBACK_SHA:-UNAVAILABLE}"
             echo "- Runtime: $OMEGA_PUBLIC_URL"
+            echo "- Private SAI doorway: $OMEGA_SAI_DOOR_URL"
             echo "- Trigger: ${{ github.event_name }}"
             echo "- Verify job: ${{ needs.verify.result }}"
             echo "- Deployment job: ${{ job.status }}"
             echo "- Canonical Worker deployment: ${{ steps.deploy_worker.outcome }}"
+            echo "- R258 isolated private SAI doorway deployment: ${{ steps.sai_doorway.outcome }}"
+            echo "- R258 private non-disclosure proof: ${{ steps.sai_doorway_hidden.outcome }}"
             echo "- R163 first-hand canonical core health/public runtime: ${{ steps.live_runtime.outcome }}"
             echo "- Canonical Hybrid agent bytes/SHA: ${{ steps.hybrid_agent.outcome }}"
             echo "- Federation + canonical RCWA downloads: ${{ steps.federation_rcwa.outcome }}"
