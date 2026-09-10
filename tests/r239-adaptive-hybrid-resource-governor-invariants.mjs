@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+await import('./r253-hybrid-experience-ledger-invariants.mjs');
 const read=p=>fs.readFileSync(p,'utf8');
 const governor=read('src/hybridResourceGovernorR239.ts');
 const surface=read('src/HybridResourceGovernorR239.tsx');
