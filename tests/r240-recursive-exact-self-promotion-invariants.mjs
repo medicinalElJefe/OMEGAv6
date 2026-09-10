@@ -113,4 +113,5 @@ console.log(`OMEGA R240/R245 RECURSIVE EXACT SELF-PROMOTION PASS · current prom
 await import('./r240-full-calculus-bridge-invariants.mjs');
 await import('./r243-woven-selfbuild-fabric-invariants.mjs');
 await import('./r265-woven-dimensional-relativity-invariants.mjs');
+await import('./r266-adaptive-coherence-cycle-invariants.mjs');
 await import('./r246-autonomous-candidate-lifecycle-invariants.mjs');
