@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
+await import('./r257-adaptive-experience-shell-invariants.mjs');
 
 const surface=fs.readFileSync('src/HybridExperienceLedgerR255.tsx','utf8');
 const link=fs.readFileSync('src/HybridLinkR32.tsx','utf8');
