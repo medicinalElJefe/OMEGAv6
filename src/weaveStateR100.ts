@@ -1,6 +1,7 @@
 import {decodeAddress} from './corpusRuntime';
 import type {UnifiedMath} from './unifiedCalculus';
 import {compileWovenDimensionalRelativityR265} from './system/wovenDimensionalRelativityR265.js';
+import {compileAdaptiveCoherenceR266,compileResolutionBridgeR266} from './system/adaptiveCoherenceCycleR266.js';
 
 export const ATLAS_RESOLUTION_LEVELS_R100=[12,144,1728,20736] as const;
 export const ATLAS_RESOLUTION_LEVELS_R101=[12,144,1728,20736,248832] as const;
@@ -41,6 +42,8 @@ export type WeaveStateR100={
  asymmetry:number;
  strata:{field:number;weave:number;projection:number};
  dimensionalRelativityR265:any;
+ adaptiveCoherenceR266:any;
+ resolutionBridgeR266:any;
  operator:typeof WOVEN_CONTINUITY_OPERATOR_R100;
  boundary:typeof WOVEN_CONTINUITY_BOUNDARY_R100;
  resolutionBoundary:typeof WEAVE_EFFECTIVE_RESOLUTION_BOUNDARY_R101;
@@ -70,19 +73,21 @@ export function deriveWeaveStateR100(address:number,u:UnifiedMath,timeSeconds=0,
  const resolutionIndex=resolutionIndexR101(resolutionDemand),effectiveResolution=ATLAS_RESOLUTION_LEVELS_R101[resolutionIndex];
  const field=clamp((u.C+u.Phi+(1-u.q)+u.curvature)/4),weave=clamp((continuityFlux+invariantCarry+recoverability+(1-threadTension))/4),projection=clamp((u.geometry+u.light.coherence+u.evidence+u.motionRelativity)/4);
  const dimensionalRelativityR265=compileWovenDimensionalRelativityR265({metrics:{continuity:u.C,plasticity:u.Phi,contradiction:u.q,burden:u.Lambda,scar:u.scar,evidence:u.evidence},invariantCarry,residual:residualCarry,correspondence:clamp((u.rsc+u.geometry+u.evidence+u.C)/4),orientation,water:{flow:u.water.speed,boundary:u.water.boundary,pressure:u.Lambda,memory:clamp((u.C+u.scar)/2),curvature:u.water.curvature,hysteresis:u.scar},sourceFrame:'UNIFIED_MATH',targetFrame:'WOVEN_RENDER_STATE',sourceSkin:'COMPUTE',targetSkin:'RENDER',sourceResolution:20736,targetResolution:effectiveResolution,provenance:['unifiedCalculus','weaveStateR100','source-backed-corpus-record']});
+ const resolutionBridgeR266=compileResolutionBridgeR266({address:a,sourceResolution:20736,targetResolution:effectiveResolution});
+ const adaptiveCoherenceR266=compileAdaptiveCoherenceR266({current:dimensionalRelativityR265,history:[{provenanceKind:'RETURNED_PROOF',outcomeScore:resolutionBridgeR266.roundTripStatus==='PASS'?1:.5,roundTripResidual:resolutionBridgeR266.roundTripResidual,coherence:dimensionalRelativityR265.metrics.computationCoherence,scar:u.scar,residual:residualCarry}]});
  const atlasPath=`${level12} / ${level144} / ${level1728} / ${level20736}`;
  const resolutionPath=`12 → 144 → 1,728 → 20,736 → 248,832 · ACTIVE ${effectiveResolution.toLocaleString('en-US')}`;
  return{
-  address:a,stateAddress:a+1,hierarchy:{level12,level144,level1728,level20736},atlasPath,resolutionPath,resolutionDemand,resolutionIndex,effectiveResolution,orientation,phase,phaseBand,pulse,continuityFlux,recoverability,invariantCarry,residualCarry,threadTension,aperture,ringCount,lobeCount,torsion,depth,branch,symmetry:u.shape.symmetry,asymmetry:u.shape.asymmetry,strata:{field,weave,projection},dimensionalRelativityR265,operator:WOVEN_CONTINUITY_OPERATOR_R100,boundary:WOVEN_CONTINUITY_BOUNDARY_R100,resolutionBoundary:WEAVE_EFFECTIVE_RESOLUTION_BOUNDARY_R101,weaveId:`W${level12.toString(12).toUpperCase()}-${level144.toString(12).toUpperCase()}-${level1728.toString(12).toUpperCase()}-${level20736.toString(12).toUpperCase()}-R${resolutionIndex+1}-S${orientation}`
+  address:a,stateAddress:a+1,hierarchy:{level12,level144,level1728,level20736},atlasPath,resolutionPath,resolutionDemand,resolutionIndex,effectiveResolution,orientation,phase,phaseBand,pulse,continuityFlux,recoverability,invariantCarry,residualCarry,threadTension,aperture,ringCount,lobeCount,torsion,depth,branch,symmetry:u.shape.symmetry,asymmetry:u.shape.asymmetry,strata:{field,weave,projection},dimensionalRelativityR265,adaptiveCoherenceR266,resolutionBridgeR266,operator:WOVEN_CONTINUITY_OPERATOR_R100,boundary:WOVEN_CONTINUITY_BOUNDARY_R100,resolutionBoundary:WEAVE_EFFECTIVE_RESOLUTION_BOUNDARY_R101,weaveId:`W${level12.toString(12).toUpperCase()}-${level144.toString(12).toUpperCase()}-${level1728.toString(12).toUpperCase()}-${level20736.toString(12).toUpperCase()}-R${resolutionIndex+1}-S${orientation}`
  };
 }
 
 export function applyWovenContinuityR100(
  p:{x:number;y:number;z:number;weight:number},index:number,total:number,u:UnifiedMath,weave:WeaveStateR100,timeSeconds:number
 ){
- const f=index/Math.max(1,total-1),theta=f*TAU,orient=weave.orientation||1,r265Coherence=clamp(Number(weave.dimensionalRelativityR265?.metrics?.computationCoherence??1));
+ const f=index/Math.max(1,total-1),theta=f*TAU,orient=weave.orientation||1,r265Coherence=clamp(Number(weave.dimensionalRelativityR265?.metrics?.computationCoherence??1)),r266Coherence=clamp(Number(weave.adaptiveCoherenceR266?.adaptation?.adaptiveCoherence??r265Coherence));
  const temporal=weave.phase+theta*weave.lobeCount+timeSeconds*(.08+.24*u.motionRelativity)*orient;
- const exchange=Math.sin(temporal)*(.018+.075*weave.continuityFlux)*(.90+.10*r265Coherence);
+ const exchange=Math.sin(temporal)*(.018+.075*weave.continuityFlux)*(.90+.10*r266Coherence);
  const scar=Math.sin(theta*(2+Math.round(weave.residualCarry*5))-weave.phase*.7)*(.012+.065*weave.residualCarry);
  const radial=1+exchange*(.45+.55*weave.aperture)-weave.threadTension*.035;
  const twist=weave.torsion*(.08+.20*Math.sin(theta+weave.phase));
@@ -90,7 +95,7 @@ export function applyWovenContinuityR100(
  const x=x0*ct-y0*st+Math.cos(theta+weave.phase)*scar;
  const y=x0*st+y0*ct+Math.sin(theta*1.5-weave.phase)*scar*.7;
  const z=p.z*(.82+.28*weave.depth)+orient*exchange*.55+(weave.invariantCarry-.5)*.035;
- return{x,y,z,weight:p.weight*(.74+.20*weave.invariantCarry+.06*r265Coherence)};
+ return{x,y,z,weight:p.weight*(.74+.20*weave.invariantCarry+.06*r266Coherence)};
 }
 
 export function weaveChannelR100(index:number,weave:WeaveStateR100,u:UnifiedMath){
