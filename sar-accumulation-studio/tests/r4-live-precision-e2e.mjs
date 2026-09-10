@@ -41,7 +41,7 @@ try{
   await page.locator('#omegaFitSar').click();
   await page.waitForFunction(()=>globalThis.OMEGA_SAR_LOCAL_FOCUS?.state==='CALIBRATED_PATCH_FIT_EXPLICIT'&&globalThis.OMEGA_SAR_RENDERER?.view?.scale>=900,null,{timeout:30000});
 
-  const proof=await page.evaluate(()=>({
+  const proof=await page.evaluate(preFit=>({
     runtime:globalThis.OMEGA_SAR_R4_RUNTIME,
     precision:globalThis.OMEGA_SAR_LIVE_PRECISION?.snapshot,
     overlay:globalThis.OMEGA_SAR_EARTH_OVERLAY,
@@ -56,7 +56,7 @@ try{
     precisionText:document.querySelector('#omegaPrecisionStrip')?.innerText,
     sourceVisibility:globalThis.OMEGA_SAR_SOURCE_OVERLAY_VISIBILITY,
     actionText:document.querySelector('#omegaActionHud')?.innerText
-  }));
+  }),preFit);
 
   assert.equal(proof.precision.truth.surface,'CALIBRATED SAR');
   assert.equal(proof.precision.truth.measured,true);
