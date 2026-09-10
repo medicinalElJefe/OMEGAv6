@@ -13,9 +13,11 @@ export const LEMMA_STATES=Object.freeze({
 
 export function atlasLodForScale(scale,{width=1200,height=700}={}){
   const s=Math.max(1,Number(scale)||1),area=Math.max(1,Number(width)||1)*Math.max(1,Number(height)||1);
-  const densityBoost=Math.max(.72,Math.min(1.55,Math.sqrt(area/(1200*700))));
-  const base=s<1.8?12:s<4?18:s<12?24:s<45?32:s<180?40:s<900?48:56;
-  const cols=Math.max(12,Math.min(72,Math.round(base*densityBoost))),rows=Math.max(6,Math.min(48,Math.round(cols*.52)));
+  const densityBoost=Math.max(.78,Math.min(1.35,Math.sqrt(area/(1200*700))));
+  // These are display/address sampling levels, not physical dimensions. Even the world
+  // camera keeps enough cells to expose distributed SAR coverage without a blocky 12×6 skin.
+  const base=s<1.8?36:s<4?44:s<12?52:s<45?60:s<180?68:s<900?78:88;
+  const cols=Math.max(28,Math.min(96,Math.round(base*densityBoost))),rows=Math.max(14,Math.min(52,Math.round(cols*.52)));
   return {cols,rows,atlasAddress:s<2?'12':s<12?'144':s<180?'1728':s<900?'20736':'248832',physicalDimensionClaim:false};
 }
 
@@ -37,7 +39,7 @@ export function translateLemmaState(input={},previous=null){
   if(contradictions>0&&evidenceClass!=='MEASURED')confidence*=1/(1+.35*contradictions);
   const previousState=previous?.state||null,changed=!!previousState&&previousState!==state;
   const transition=changed?clamp01(.42+.38*kernel.continuity):1;
-  const measuredWeight=exact?1:regional?.92:0,sourceWeight=evidenceClass==='SOURCE_SUPPORT'?clamp01(.42+.42*confidence):0,reconstructionWeight=evidenceClass==='DERIVED'?clamp01(.22+.58*confidence):0,contextWeight=evidenceClass==='CONTEXT'?clamp01(.15+.30*confidence):exact||regional?.04:.10;
+  const measuredWeight=exact?1:(regional?.92:0),sourceWeight=evidenceClass==='SOURCE_SUPPORT'?clamp01(.42+.42*confidence):0,reconstructionWeight=evidenceClass==='DERIVED'?clamp01(.22+.58*confidence):0,contextWeight=evidenceClass==='CONTEXT'?clamp01(.15+.30*confidence):((exact||regional)?.04:.10);
   return {
     schema:'omega.lemma-state.mode188.v1',state,evidenceClass,confidence:clamp01(confidence),mode188,changed,transition,kernel,
     render:{measuredWeight,sourceWeight,reconstructionWeight,contextWeight,coverageWeight:coverage?clamp01(.22+.10*Math.log1p(coverage)):0},
