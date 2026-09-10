@@ -34,7 +34,7 @@ export default function OmegaExperienceShellR257({children,onNavigate,onHome,hom
    <nav aria-label={`${active.label} promoted tools`}>{active.routes.map(route=><button type='button' key={route} onClick={()=>onNavigate(route)}>{route}</button>)}<button type='button' className='all' aria-label='Open all OMEGA systems' onClick={()=>window.dispatchEvent(new CustomEvent('omega-r88-open-navigator',{detail:{layer:'APPLICATIONS'}}))}>All systems →</button></nav>
    <div className='r257-depth' aria-label='Presentation depth'><Focus aria-hidden='true'/><span>DEPTH</span>{DEPTHS.map(x=><button type='button' key={x.id} aria-label={`Experience depth: ${x.label}`} aria-pressed={depth===x.id} className={depth===x.id?'active':''} onClick={()=>chooseDepth(x.id)} title={x.copy}>{x.label}</button>)}</div>
   </section>
-  {!immersive&&<OmegaUniversalInterfaceR263 onNavigate={onNavigate}/>} 
+  {!immersive&&<OmegaUniversalInterfaceR263 onNavigate={onNavigate} compact={!home}/>} 
   <main className='r257-stage' data-r257-stage={home?'HOME':'SPECIALIST'}>{children}</main>
   {immersive&&<div className='r257-immersive-dock' role='region' aria-label='Immersive experience controls'><Layers3 aria-hidden='true'/><span><b>{active.label}</b><small>{depth} · truth ribbon remains visible</small></span><button type='button' onClick={()=>setImmersive(false)}>Exit immersive</button></div>}
  </div>;
