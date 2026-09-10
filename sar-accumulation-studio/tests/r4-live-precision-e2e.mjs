@@ -7,7 +7,7 @@ const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1720,height:1080},deviceScaleFactor:1});
 try{
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
-  await page.waitForFunction(()=>globalThis.OMEGA_SAR_R4_RUNTIME?.visualState==='HIGH_FIDELITY_MEASURED_MESH_PLUS_LIVE_PRECISION',{timeout:30000});
+  await page.waitForFunction(()=>globalThis.OMEGA_SAR_R4_RUNTIME?.visualState==='HIGH_FIDELITY_MEASURED_MESH_PLUS_LIVE_PRECISION',null,{timeout:30000});
   await page.waitForSelector('#omegaPrecisionStrip',{state:'visible',timeout:30000});
   assert.match(await page.title(),/OMEGA SAR R4/);
 
@@ -18,12 +18,12 @@ try{
   await page.waitForFunction(()=>{
     const p=globalThis.OMEGA_SAR_RENDERER?.point;
     return p&&Math.abs(p.lat-32.2226)<1e-5&&Math.abs(p.lon+110.9747)<1e-5;
-  },{timeout:30000});
+  },null,{timeout:30000});
   await page.waitForFunction(()=>{
     const s=globalThis.OMEGA_SAR_LIVE_PRECISION?.snapshot;
     return s?.sceneId&&s?.sceneTime&&s.truth?.measured===true&&s.meshNodes>=4;
-  },{timeout:120000,polling:250});
-  await page.waitForFunction(()=>globalThis.OMEGA_SAR_CONTINUOUS_FIELD?.cells?.length>1000,{timeout:60000,polling:250});
+  },null,{timeout:120000,polling:250});
+  await page.waitForFunction(()=>globalThis.OMEGA_SAR_CONTINUOUS_FIELD?.cells?.length>1000,null,{timeout:60000,polling:250});
 
   const proof=await page.evaluate(()=>({
     runtime:globalThis.OMEGA_SAR_R4_RUNTIME,
