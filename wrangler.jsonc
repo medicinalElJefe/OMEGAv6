@@ -1,9 +1,9 @@
-// OMEGA R229 preserves the proven R116 Worker spine and all current durable state. Historical R201/R203 classes remain absent from code and live bindings; Cloudflare production reconciliation confirms their provisioned namespaces still exist, so deleted export tombstones remain required until the provider reports those namespaces fully retired.
-// Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes. R125 remains canonical admission authority.
+// OMEGA R255 mounts a read-only authenticated Hybrid experience-ledger successor over the proven R116 Worker spine and all current durable state. Historical R201/R203 classes remain absent from code and live bindings; deleted export tombstones remain required until the provider reports those namespaces fully retired.
+// Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes. R125 remains canonical admission authority. R255 adds observation/export only and preserves R116 as inherited execution spine.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR116.js",
+  "main": "src/workerR255.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
