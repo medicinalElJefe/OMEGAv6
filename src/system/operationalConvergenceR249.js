@@ -1,9 +1,10 @@
 import {compileSkinCycleR265,compileWovenDimensionalRelativityR265,R265_REVISION} from './wovenDimensionalRelativityR265.js';
+import {compileAdaptiveCoherenceR266,R266_REVISION} from './adaptiveCoherenceCycleR266.js';
 
 export const R249_SCHEMA='OMEGA_OPERATIONAL_CONVERGENCE_R249';
 export const R249_REVISION='R249';
 export const R249_CONTINUITY_OPERATOR='PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION';
-export const R249_BOUNDARY='R249 is a software-operational scheduling governor. R265 may modulate capacity/future-plasticity inside the existing bounded planning envelope by carrying Water/Woven/Violet/frame coherence, but neither layer creates execution authority, dispatch, native proof, source promotion, production deployment, empirical truth, or CanonState admission.';
+export const R249_BOUNDARY='R249 is a software-operational scheduling governor. R265 compiles Water/Woven/Violet/frame coherence and R266 may close proved carry into bounded next-cycle planning context. Neither layer creates execution authority, dispatch, native proof, source promotion, production deployment, empirical truth, foundation-weight training, or CanonState admission.';
 export const R249_AUTHORITY=Object.freeze({planning:'R249_SCHEDULING_ONLY',mutation:'R153_PREIMAGE_BOUND_ONLY',dispatch:'R147',returnProof:'R141',history:'R146',sourcePromotion:'R240',canonAdmission:'R125',productionWriter:'.github/workflows/ci.yml'});
 
 const clamp01=n=>Math.max(0,Math.min(1,Number.isFinite(Number(n))?Number(n):0));
@@ -46,7 +47,7 @@ export function metricsFromResidualGraphR249(evidence={},previousScars=[]){
  return{continuity,plasticity,contradiction,burden,evidence:evidenceScore,uncertainty,scar};
 }
 
-export function compileOperationalConvergenceR249({metrics={},evidence=null,previousScars=[],configuredParallel=12,effectiveCpuWorkers=0,executionRequested=false}={}){
+export function compileOperationalConvergenceR249({metrics={},evidence=null,previousScars=[],adaptiveHistory=[],configuredParallel=12,effectiveCpuWorkers=0,executionRequested=false}={}){
  const sourceMetrics=evidence?metricsFromResidualGraphR249(evidence,previousScars):metrics;
  const base=decisionR249(sourceMetrics),m=base.metrics;
  const commonKernel=(m.continuity*m.plasticity)/(m.contradiction+m.burden+1e-12);
@@ -62,15 +63,16 @@ export function compileOperationalConvergenceR249({metrics={},evidence=null,prev
   provenance:[String(evidence?.schema||'R249_DIRECT_METRICS'),R249_SCHEMA]
  });
  const organizationSkinR265=compileSkinCycleR265(dimensionalRelativityR265,'ORGANIZE');
- const futurePlasticity=clamp01(.80*legacyFuturePlasticity+.20*dimensionalRelativityR265.violet.futurePreservingSoftwareScore);
+ const adaptiveCoherenceR266=compileAdaptiveCoherenceR266({current:dimensionalRelativityR265,history:adaptiveHistory});
+ const futurePlasticity=clamp01(.80*legacyFuturePlasticity+.20*adaptiveCoherenceR266.adaptation.adaptiveFuturePreservation);
  const legacyCapacity=clamp01(mean(m.continuity,m.plasticity,m.evidence,1-m.burden,1-m.contradiction));
- const capacity=clamp01(.80*legacyCapacity+.20*dimensionalRelativityR265.metrics.computationCoherence);
+ const capacity=clamp01(.80*legacyCapacity+.20*adaptiveCoherenceR266.adaptation.adaptiveCoherence);
  const configured=clampInt(configuredParallel,1,12),cpu=clampInt(effectiveCpuWorkers||configured,1,12);
  const ceiling=Math.min(configured,cpu);
  const frontierWidth=base.decision==='STAY'?Math.max(1,Math.min(ceiling,Math.round(2+6*capacity))):base.decision==='TURN'?Math.max(1,Math.min(ceiling,Math.round(1+4*capacity))):1;
  const maxMissionCycles=base.decision==='STAY'?clampInt(Math.round(5+7*capacity),4,12):base.decision==='TURN'?clampInt(Math.round(4+5*capacity),4,9):4;
  const stepMode=base.decision==='STAY'?'PRESERVE_VALIDATED_ORDER':base.decision==='TURN'?'EVIDENCE_CAUSE_THEN_VERIFY':'EVIDENCE_ONLY_FIRST_CYCLE';
- return{schema:R249_SCHEMA,revision:R249_REVISION,continuityOperator:R249_CONTINUITY_OPERATOR,metrics:m,decision:base.decision,decisionScore:base.score,commonKernel,invariantCarry,residualPressure,futurePlasticity,orientation,capacity,policy:{frontierWidth,maxMissionCycles,stepMode,executionRequested:Boolean(executionRequested),parallelSourceMutation:false},wovenDimensionalRelativityR265:dimensionalRelativityR265,organizationSkinR265,r265Revision:R265_REVISION,authority:R249_AUTHORITY,boundary:R249_BOUNDARY};
+ return{schema:R249_SCHEMA,revision:R249_REVISION,continuityOperator:R249_CONTINUITY_OPERATOR,metrics:m,decision:base.decision,decisionScore:base.score,commonKernel,invariantCarry,residualPressure,futurePlasticity,orientation,capacity,policy:{frontierWidth,maxMissionCycles,stepMode,executionRequested:Boolean(executionRequested),parallelSourceMutation:false},wovenDimensionalRelativityR265:dimensionalRelativityR265,organizationSkinR265,adaptiveCoherenceR266,r265Revision:R265_REVISION,r266Revision:R266_REVISION,authority:R249_AUTHORITY,boundary:R249_BOUNDARY};
 }
 
 function stepRank(step){const op=String(step?.op||'').toUpperCase();if(evidenceOps.has(op))return 0;if(mutationOps.has(op))return 1;if(verifyOps.has(op))return 2;if(terminalOps.has(op))return 3;return 2}
@@ -89,6 +91,7 @@ export function assertOperationalConvergenceR249(){
  if(R249_AUTHORITY.dispatch!=='R147'||R249_AUTHORITY.returnProof!=='R141'||R249_AUTHORITY.history!=='R146'||R249_AUTHORITY.sourcePromotion!=='R240'||R249_AUTHORITY.canonAdmission!=='R125')throw new Error('R249 authority boundary drift.');
  const compiled=compileOperationalConvergenceR249({metrics:{continuity:.9,plasticity:.8,contradiction:.1,burden:.2,evidence:.9,uncertainty:.1,scar:.1}});
  if(compiled.wovenDimensionalRelativityR265?.authority?.sourceMutation!=='R240_SINGLE_CANDIDATE_ONLY'||compiled.organizationSkinR265?.sourceMutationAuthorized!==false)throw new Error('R265 cross-skin contract may not gain source-mutation authority through R249.');
+ if(compiled.adaptiveCoherenceR266?.authority?.sourceMutation!=='R240_SINGLE_CANDIDATE_ONLY'||compiled.adaptiveCoherenceR266?.adaptation?.foundationWeightsChanged!==false)throw new Error('R266 adaptive cycle may not gain source-mutation authority or fake weight training through R249.');
  const held=sequenceGovernedStepsR249([{id:'1',op:'INDEX'},{id:'2',op:'APPLY_PATCH'},{id:'3',op:'BUILD'}],{decision:'ESCALATE'});
  if(held.steps.some(step=>mutationOps.has(String(step.op).toUpperCase())))throw new Error('R249 ESCALATE may not put source mutation in its evidence-first first cycle.');
  return true;
