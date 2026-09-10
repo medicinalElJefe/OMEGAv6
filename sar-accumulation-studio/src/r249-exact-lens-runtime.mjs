@@ -38,8 +38,8 @@ function refreshLens(){
   panel.querySelector('[data-k=spacing]').textContent=`${fmt(patch.product?.rangePixelSpacing)} m R · ${fmt(patch.product?.azimuthPixelSpacing)} m A`;
 }
 function updateReleaseLabels(){
-  const h=$('#omegaEarthAwarenessHud header b');if(h)h.textContent='EARTH AWARENESS · R249';
-  const runtime=globalThis.OMEGA_SAR_LIVE_PRECISION;if(runtime)runtime.release='R4-R249';
+  const h=$('#omegaEarthAwarenessHud header b');if(h)h.textContent='EARTH AWARENESS · R251';
+  const runtime=globalThis.OMEGA_SAR_LIVE_PRECISION;if(runtime)runtime.release='R4-R251';
 }
 function install(){
   ensurePanel();updateReleaseLabels();
