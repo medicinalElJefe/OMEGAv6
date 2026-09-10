@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-await import('./r255-hybrid-experience-ledger-invariants.mjs');
 
 const read=p=>fs.readFileSync(p,'utf8');
 const surface=read('src/HybridParallelDevelopmentR262.tsx');
