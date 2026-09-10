@@ -23,17 +23,37 @@ async function reverse(lat,lon,zoom=10){const key=`r:${Number(lat).toFixed(4)}:$
 async function search(query){const q=String(query||'').trim();if(q.length<2)return [];return fetchJson(`/api/place/search?q=${encodeURIComponent(q)}`,`s:${q.toLowerCase()}`);}
 async function waitNavigation(timeout=3000){const start=performance.now();while(performance.now()-start<timeout){const nav=globalThis.OMEGA_SAR_NAVIGATION;if(nav?.selectTarget)return nav;await new Promise(r=>setTimeout(r,25));}return globalThis.OMEGA_SAR_NAVIGATION||null;}
 
+function installDockStyle(){
+  if($('#omegaLocationDockStyle'))return;
+  const style=document.createElement('style');style.id='omegaLocationDockStyle';style.textContent=`
+  .place-dock{position:relative;z-index:18;margin:0 0 10px;padding:11px;border:1px solid rgba(255,255,255,.11);border-radius:14px;background:linear-gradient(180deg,rgba(15,20,22,.98),rgba(10,14,16,.98));box-shadow:0 14px 36px rgba(0,0,0,.22);overflow:visible}
+  .place-dock-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;padding:0 2px}.place-dock-kicker{font:800 8px Inter,Segoe UI,sans-serif;letter-spacing:.14em;color:#dce7ea}.place-dock-state{font:700 7px Inter,Segoe UI,sans-serif;letter-spacing:.10em;color:#76858a}
+  .place-dock .place-search{position:relative;top:auto;left:auto;transform:none;width:100%;display:flex;filter:none;z-index:20}.place-dock .place-search input{height:44px;font-size:12px;background:#0c1113;border-color:rgba(255,255,255,.15)}.place-dock .place-search button{height:44px;min-width:72px}.place-dock .place-search-results{top:50px;z-index:30;max-height:min(360px,52vh);overflow:auto}
+  .place-dock-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(220px,.55fr);gap:8px;margin-top:8px}
+  .place-dock .location-hero,.place-dock .view-location{position:relative;left:auto;right:auto;top:auto;width:auto;max-width:none;min-width:0;margin:0;border:1px solid rgba(255,255,255,.09);background:#0b0f11;backdrop-filter:none;box-shadow:none;border-radius:11px;text-align:left}
+  .place-dock .location-hero{padding:10px 12px}.place-dock .location-hero strong{font-size:15px;line-height:1.2}.place-dock .location-hero>span:not(.location-kicker){font-size:10px}.place-dock .location-hero small{font-size:9px;margin-top:5px}
+  .place-dock .view-location{display:flex;flex-direction:column;justify-content:center;padding:10px 12px}.place-dock .view-location span{font-size:7px}.place-dock .view-location b{font-size:11px}.place-dock .view-location small{font-size:9px}
+  .place-navigator{z-index:7}.place-navigator .north-compass{top:18px}.place-navigator .earth-attribution{bottom:43px}.place-navigator .scale-readout{bottom:20px}
+  @media(max-width:920px){.place-dock-grid{grid-template-columns:minmax(0,1.15fr) minmax(190px,.85fr)}.place-dock{padding:9px}}
+  @media(max-width:700px){.place-dock{margin-bottom:7px;border-radius:12px;padding:8px}.place-dock-head{margin-bottom:6px}.place-dock-state{display:none}.place-dock-grid{grid-template-columns:1fr;gap:6px;margin-top:6px}.place-dock .place-search input{height:42px}.place-dock .place-search button{height:42px;min-width:58px;padding-left:12px;padding-right:12px}.place-dock .location-hero{padding:8px 10px}.place-dock .location-hero strong{font-size:14px}.place-dock .view-location{padding:7px 10px;display:grid;grid-template-columns:auto 1fr;column-gap:9px;align-items:center}.place-dock .view-location span{grid-row:1/3}.place-dock .view-location b,.place-dock .view-location small{margin:0}.place-navigator .north-compass{top:12px;right:12px}}
+  `;document.head.append(style);
+}
+
 function install(){
-  if(!wrap||$('#placeNavigator'))return;
-  const ui=document.createElement('div');ui.id='placeNavigator';ui.className='place-navigator';ui.innerHTML=`
+  if(!wrap||$('#placeDock'))return;
+  installDockStyle();
+  const dock=document.createElement('section');dock.id='placeDock';dock.className='place-dock';dock.setAttribute('aria-label','Location and SAR target controls');dock.innerHTML=`
+    <div class="place-dock-head"><span class="place-dock-kicker">LOCATION / SAR TARGET</span><span class="place-dock-state">SEARCH · SELECT · CAMERA</span></div>
     <form class="place-search" id="placeSearchForm">
       <input id="placeSearchInput" autocomplete="off" spellcheck="false" placeholder="Search SAR target: city, region or landmark" aria-label="Search SAR target">
       <button type="submit">Go</button><div id="placeSearchResults" class="place-search-results" hidden></div>
     </form>
-    <div class="location-hero" id="locationHero"><span class="location-kicker">SELECTED SAR TARGET</span><strong id="selectedPlaceName">Choose a point on Earth</strong><span id="selectedPlaceRegion">Click the SAR surface or search for a place.</span><small id="selectedPlaceCoords">WGS84 · EPSG:4326</small></div>
-    <div class="view-location" id="viewLocation"><span>CAMERA CENTER</span><b id="viewPlaceName">World view</b><small id="viewCoords">0.00000° N · 0.00000° E</small></div>
-    <div class="north-compass" aria-label="North">N<span>↑</span></div><div class="scale-readout"><i id="scaleBar"></i><b id="scaleLabel">—</b></div>
-    <div class="earth-attribution">SAR: Sentinel-1 / NISAR evidence · context: NASA EOSDIS GIBS · names: © OpenStreetMap contributors</div>`;wrap.append(ui);
+    <div class="place-dock-grid">
+      <div class="location-hero" id="locationHero"><span class="location-kicker">SELECTED SAR TARGET</span><strong id="selectedPlaceName">Choose a point on Earth</strong><span id="selectedPlaceRegion">Click the SAR surface or search for a place.</span><small id="selectedPlaceCoords">WGS84 · EPSG:4326</small></div>
+      <div class="view-location" id="viewLocation"><span>CAMERA CENTER</span><b id="viewPlaceName">World view</b><small id="viewCoords">0.00000° N · 0.00000° E</small></div>
+    </div>`;
+  wrap.before(dock);
+  const ui=document.createElement('div');ui.id='placeNavigator';ui.className='place-navigator';ui.innerHTML='<div class="north-compass" aria-label="North">N<span>↑</span></div><div class="scale-readout"><i id="scaleBar"></i><b id="scaleLabel">—</b></div><div class="earth-attribution">SAR: Sentinel-1 / NISAR evidence · context: NASA EOSDIS GIBS · names: © OpenStreetMap contributors</div>';wrap.append(ui);
   $('#placeSearchForm').addEventListener('submit',async event=>{
     event.preventDefault();const input=$('#placeSearchInput'),results=$('#placeSearchResults'),q=input.value.trim();if(q.length<2)return;
     results.hidden=false;results.innerHTML='<div class="place-result loading">Finding SAR target…</div>';
@@ -42,7 +62,7 @@ function install(){
       for(const place of found){const button=document.createElement('button');button.type='button';button.className='place-result';button.innerHTML=`<b>${primaryPlace(place,'Location')}</b><span>${secondaryPlace(place)}</span>`;button.onclick=async()=>{results.hidden=true;input.value=compactPlace(place)||q;await jump(place.lon,place.lat,place);};results.append(button);}
     }catch(error){results.innerHTML=`<div class="place-result empty">Location lookup unavailable. ${error.message}</div>`;}
   });
-  document.addEventListener('pointerdown',event=>{const results=$('#placeSearchResults');if(results&&!ui.contains(event.target))results.hidden=true;});
+  document.addEventListener('pointerdown',event=>{const results=$('#placeSearchResults');if(results&&!dock.contains(event.target))results.hidden=true;});
 }
 
 function bindPointToInputs(lon,lat){const latInput=$('#jumpLat'),lonInput=$('#jumpLon'),aoi=$('#aoi');if(latInput)latInput.value=Number(lat).toFixed(6);if(lonInput)lonInput.value=Number(lon).toFixed(6);if(aoi)aoi.value=`POINT(${Number(lon).toFixed(6)} ${Number(lat).toFixed(6)})`;}
