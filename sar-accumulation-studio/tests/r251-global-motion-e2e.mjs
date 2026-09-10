@@ -9,22 +9,17 @@ try{
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));
   const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});assert.ok(response?.ok(),`root failed ${response?.status()}`);
 
-  await page.waitForFunction(()=>globalThis.OMEGA_SAR_R4_RUNTIME?.release==='R4-R251'&&globalThis.OMEGA_SAR_SMOOTH_MOTION?.state==='READY'&&globalThis.OMEGA_SAR_GLOBAL_FABRIC&&globalThis.OMEGA_SAR_WOVEN_MOTION&&globalThis.OMEGA_SAR_LEMMA_TRANSLATOR,null,{timeout:30000});
+  await page.waitForFunction(()=>globalThis.OMEGA_SAR_R4_RUNTIME?.conception==='CONTINUOUS_SAR_EARTH_INSTRUMENT'&&globalThis.OMEGA_SAR_SMOOTH_MOTION?.state==='READY'&&globalThis.OMEGA_SAR_GLOBAL_FABRIC&&globalThis.OMEGA_SAR_WOVEN_MOTION&&globalThis.OMEGA_SAR_LEMMA_TRANSLATOR,null,{timeout:30000});
   assert.match(await page.title(),/OMEGA SAR R4/);
 
-  // The world camera should acquire a geographically distributed, source-backed Sentinel-1
-  // evidence fabric without calling it a calibrated global mosaic.
   await page.waitForFunction(()=>{const g=globalThis.OMEGA_SAR_GLOBAL_FABRIC;return g?.state==='READY'&&g.fabric?.cells?.some(c=>c.coverage>0)&&g.records?.length>20;},null,{timeout:120000,polling:250});
   const fabric=await page.evaluate(()=>{const g=globalThis.OMEGA_SAR_GLOBAL_FABRIC,f=g.fabric,covered=f.cells.filter(c=>c.coverage>0),source=covered[0];return {snapshot:g.snapshot(),recordCount:g.records.length,covered:covered.length,total:f.cells.length,lod:f.lod,sourceCell:{coverage:source.coverage,cog:source.cog,lemma:source.lemma},boundary:g.boundary};});
   assert.ok(fabric.recordCount>20);assert.ok(fabric.covered>0);assert.ok(fabric.total>=72);assert.equal(fabric.lod.physicalDimensionClaim,false);assert.equal(fabric.sourceCell.lemma.state,'SOURCE_COVERED');assert.equal(fabric.sourceCell.lemma.proof.measured,false);assert.equal(fabric.sourceCell.lemma.proof.sourceSupported,true);assert.match(fabric.boundary,/not a global calibrated SAR mosaic/i);
 
-  // Mode188/lemma translation is also applied to the continuous OMEGA field, while
-  // preserving measured/inferred/source distinctions.
   await page.waitForFunction(()=>globalThis.OMEGA_SAR_LEMMA_TRANSLATOR?.state==='READY'&&globalThis.OMEGA_SAR_LEMMA_TRANSLATOR?.annotated>100,null,{timeout:30000,polling:100});
   const lemma=await page.evaluate(()=>globalThis.OMEGA_SAR_LEMMA_TRANSLATOR.snapshot());
   assert.ok(lemma.annotated>100);assert.ok(Object.keys(lemma.counts).length>0);assert.match(lemma.boundary,/does not change measured values/i);
 
-  // Woven continuity animation is explicitly relational, not ground velocity or live radar.
   const framesBefore=await page.evaluate(()=>globalThis.OMEGA_SAR_WOVEN_MOTION.frames);
   await page.waitForTimeout(350);
   const woven=await page.evaluate(()=>({state:globalThis.OMEGA_SAR_WOVEN_MOTION.state,frames:globalThis.OMEGA_SAR_WOVEN_MOTION.frames,boundary:globalThis.OMEGA_SAR_WOVEN_MOTION.boundary}));
@@ -33,8 +28,6 @@ try{
   const map=page.locator('#map'),box=await map.boundingBox();assert.ok(box,'map has no browser box');
   await page.evaluate(()=>{window.__omegaMotionSamples=[];window.__omegaSelects=0;const m=document.querySelector('#map');m.addEventListener('omega-map-view',e=>window.__omegaMotionSamples.push({...e.detail,at:performance.now()}));m.addEventListener('omega-map-select',()=>window.__omegaSelects++);});
 
-  // Wheel zoom is eased through several camera states and expensive source refreshes
-  // commit after motion settles instead of on every wheel event.
   await page.mouse.move(box.x+box.width*.57,box.y+box.height*.48);
   const beforeZoom=await page.evaluate(()=>({scale:globalThis.OMEGA_SAR_RENDERER.view.scale,settles:globalThis.OMEGA_SAR_SMOOTH_MOTION.settles}));
   await page.mouse.wheel(0,-320);
@@ -42,8 +35,6 @@ try{
   const zoom=await page.evaluate(before=>{const samples=window.__omegaMotionSamples.map(x=>x.scale),unique=[...new Set(samples.map(x=>Number(x).toFixed(5)))].map(Number),r=globalThis.OMEGA_SAR_RENDERER;let maxRatio=1;for(let i=1;i<unique.length;i++)maxRatio=Math.max(maxRatio,Math.max(unique[i]/unique[i-1],unique[i-1]/unique[i]));return {before:before.scale,after:r.view.scale,samples:unique.length,maxRatio,settles:globalThis.OMEGA_SAR_SMOOTH_MOTION.settles};},beforeZoom);
   assert.ok(zoom.after>zoom.before*1.08,'wheel did not zoom in');assert.ok(zoom.samples>=3,`zoom was not interpolated; only ${zoom.samples} camera states`);assert.ok(zoom.maxRatio<1.25,`zoom had a large single-frame jump ratio ${zoom.maxRatio}`);
 
-  // Drag uses the same frame-coalesced camera, does not accidentally select a target,
-  // and settles through bounded inertia rather than fighting the legacy mouse path.
   await page.evaluate(()=>{window.__omegaMotionSamples=[];window.__omegaSelects=0;});
   const beforeDrag=await page.evaluate(()=>({view:{...globalThis.OMEGA_SAR_RENDERER.view},settles:globalThis.OMEGA_SAR_SMOOTH_MOTION.settles}));
   await page.mouse.move(box.x+box.width*.54,box.y+box.height*.55);await page.mouse.down();await page.mouse.move(box.x+box.width*.68,box.y+box.height*.62,{steps:12});await page.mouse.up();
@@ -56,5 +47,5 @@ try{
   assert.deepEqual(pageErrors,[],`page script errors: ${pageErrors.join(' | ')}`);
 
   await mkdir('test-results',{recursive:true});await page.locator('.map-wrap').screenshot({path:'test-results/r251-global-motion.png'});
-  console.log('SAR_R4_R251_GLOBAL_MOTION_PASS',JSON.stringify({fabric,lemma,woven,zoom,drag},null,2));
+  console.log('SAR_R4_RELEASE_FORWARD_GLOBAL_MOTION_PASS',JSON.stringify({release:runtime.release,fabric,lemma,woven,zoom,drag},null,2));
 }finally{await browser.close();}
