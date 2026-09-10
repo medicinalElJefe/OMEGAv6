@@ -26,19 +26,20 @@ function recordFromUi(){
 
 function selectedPolarization(){return ($('#assetSelect')?.value||'vv').toLowerCase();}
 function selectedQuantity(){return $('#sarCalQuantity')?.value||'sigmaNought';}
+function selectedRadius(){return Math.max(16,Math.min(128,Math.round(Number($('#sarPatchRadius')?.value||64))));}
 function fmt(v,d=3){return Number.isFinite(v)?Number(v).toFixed(d):'—';}
-function patchKey(record,target,pol,quantity){return `${record.id}|${target.lon.toFixed(6)},${target.lat.toFixed(6)}|${pol}|${quantity}`;}
+function patchKey(record,target,pol,quantity,radius){return `${record.id}|${target.lon.toFixed(6)},${target.lat.toFixed(6)}|${pol}|${quantity}|r${radius}`;}
 
-function remember(key,patch){cache.delete(key);cache.set(key,patch);while(cache.size>8)cache.delete(cache.keys().next().value);}
+function remember(key,patch){cache.delete(key);cache.set(key,patch);while(cache.size>12)cache.delete(cache.keys().next().value);}
 
 async function attachGeoMesh(patch){
   const productHref=patch?.provenance?.product;if(!productHref)return patch;
   try{
     const response=await fetch(supportTransportUrl(productHref,'source'),{headers:{accept:'application/xml,text/xml,text/plain,*/*'}});
     if(!response.ok)throw new Error(`product annotation ${response.status}`);
-    const product=parseProductXml(await response.text()),geoMesh=buildPatchGeoMesh(product,patch.sourceWindow,4);
-    return {...patch,geoMesh};
-  }catch(error){return {...patch,geoMesh:{state:'PATCH_GEOREGISTRATION_UNRESOLVED',error:error.message,validNodeCount:0,totalNodeCount:25}};}
+    const product=parseProductXml(await response.text()),span=Math.max(Number(patch.width)||0,Number(patch.height)||0),segments=Math.min(12,Math.max(6,Math.ceil(span/24))),geoMesh=buildPatchGeoMesh(product,patch.sourceWindow,segments);
+    return {...patch,geoMesh,registrationDetail:{segments,policy:'R257_ADAPTIVE_SOURCE_WINDOW_BLADE_MESH'}};
+  }catch(error){return {...patch,geoMesh:{state:'PATCH_GEOREGISTRATION_UNRESOLVED',error:error.message,validNodeCount:0,totalNodeCount:0}};}
 }
 
 function publishEarthOverlay(patch,canvas){if(typeof window!=='undefined'&&patch&&canvas)window.dispatchEvent(new CustomEvent('omega-calibrated-sar-patch',{detail:{patch,canvas}}));}
@@ -55,11 +56,11 @@ function renderPatchStatus(patch){
 async function loadCalibratedCurrent({force=false}={}){
   const record=recordFromUi(),target=pointFromUi(),canvas=$('#raster');
   if(!record||!target||!canvas){const e=$('#rasterEmpty');if(e){e.style.display='grid';e.textContent='Bind an Earth point and select a real Sentinel-1 acquisition to load calibrated measurement pixels.';}return null;}
-  const pol=selectedPolarization(),quantity=selectedQuantity(),key=patchKey(record,target,pol,quantity),my=++generation;
+  const pol=selectedPolarization(),quantity=selectedQuantity(),radius=selectedRadius(),key=patchKey(record,target,pol,quantity,radius),my=++generation;
   if(!force&&cache.has(key)){const patch=cache.get(key);paintCalibratedPatch(patch,canvas);renderPatchStatus(patch);publishEarthOverlay(patch,canvas);return patch;}
-  const e=$('#rasterEmpty');if(e){e.style.display='grid';e.textContent='Binding product geolocation grid…';}
+  const e=$('#rasterEmpty');if(e){e.style.display='grid';e.textContent=radius>=96?'Reading deeper measured Sentinel-1 source window…':'Binding product geolocation grid…';}
   try{
-    let patch=await calibratedTargetPatch(record,target.lon,target.lat,{polarization:pol,quantity,radiusPixels:Number($('#sarPatchRadius')?.value||32),onStage:stage=>{if(my!==generation)return;if(e)e.textContent={LOAD_PRODUCT_ANNOTATION:'Loading Sentinel-1 calibration + geolocation annotation…',INVERT_PRODUCT_GCP_GRID:'Inverting product GCP grid at Earth target…',READ_TARGET_SOURCE_BLOCKS:'Reading target source blocks from real GRD measurement…',APPLY_PRODUCT_CALIBRATION_LUT:'Applying product radiometric calibration LUT…',READY:'Building Earth-registration mesh…'}[stage]||stage;}});
+    let patch=await calibratedTargetPatch(record,target.lon,target.lat,{polarization:pol,quantity,radiusPixels:radius,onStage:stage=>{if(my!==generation)return;if(e)e.textContent={LOAD_PRODUCT_ANNOTATION:'Loading Sentinel-1 calibration + geolocation annotation…',INVERT_PRODUCT_GCP_GRID:'Inverting product GCP grid at Earth target…',READ_TARGET_SOURCE_BLOCKS:`Reading ${radius>=96?'deep ':''}target source blocks from real GRD measurement…`,APPLY_PRODUCT_CALIBRATION_LUT:'Applying product radiometric calibration LUT…',READY:'Building adaptive Earth-registration blade mesh…'}[stage]||stage;}});
     if(my!==generation)return null;patch=await attachGeoMesh(patch);if(my!==generation)return null;
     remember(key,patch);paintCalibratedPatch(patch,canvas);renderPatchStatus(patch);publishEarthOverlay(patch,canvas);return patch;
   }catch(error){
@@ -104,7 +105,7 @@ async function probeCalibratedStack(){
 function installControls(){
   const panel=document.querySelector('.pixel-panel');if(!panel||$('#sarCalControls'))return;
   const controls=document.createElement('div');controls.id='sarCalControls';controls.className='sar-cal-controls';
-  controls.innerHTML=`<label>MEASUREMENT<select id="sarCalQuantity"><option value="sigmaNought">σ⁰ calibrated backscatter</option><option value="betaNought">β⁰ calibrated backscatter</option><option value="gamma">γ⁰ ellipsoid referenced</option></select></label><label>PATCH RADIUS<select id="sarPatchRadius"><option value="24">24 px · fastest</option><option value="32" selected>32 px · interactive</option><option value="48">48 px</option><option value="64">64 px</option><option value="96">96 px · deep</option><option value="128">128 px · deep</option></select></label><label class="inline-check"><input id="sarAutoPatch" type="checkbox" checked> AUTO FRAME RASTER</label><span id="sarCalProof" class="sar-proof-badge">TARGET + PRODUCT GRID + LUT + EARTH MESH</span>`;
+  controls.innerHTML=`<label>MEASUREMENT<select id="sarCalQuantity"><option value="sigmaNought">σ⁰ calibrated backscatter</option><option value="betaNought">β⁰ calibrated backscatter</option><option value="gamma">γ⁰ ellipsoid referenced</option></select></label><label>PATCH RADIUS<select id="sarPatchRadius"><option value="24">24 px · fastest</option><option value="32">32 px</option><option value="48">48 px</option><option value="64" selected>64 px · interactive HD</option><option value="96">96 px · deep</option><option value="128">128 px · maximum source detail</option></select></label><label class="inline-check"><input id="sarAutoPatch" type="checkbox" checked> AUTO FRAME RASTER</label><span id="sarCalProof" class="sar-proof-badge">TARGET + PRODUCT GRID + LUT + EARTH MESH</span>`;
   const stats=$('#rasterStats');stats?.before(controls);
   $('#sarCalQuantity')?.addEventListener('change',()=>loadCalibratedCurrent({force:true}));$('#sarPatchRadius')?.addEventListener('change',()=>loadCalibratedCurrent({force:true}));$('#sarAutoPatch')?.addEventListener('change',e=>{autoPatch=e.target.checked;if(autoPatch)loadCalibratedCurrent();});
 }
