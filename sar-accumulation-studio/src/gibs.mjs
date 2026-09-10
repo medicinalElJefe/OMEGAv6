@@ -7,4 +7,7 @@ export function fallbackDates(date,maxBack=4){const start=new Date(`${String(dat
 export function contextualTimestamp(record,fallbackDate=new Date()){const t=record?.startTime?new Date(record.startTime):fallbackDate;if(!Number.isFinite(t.getTime()))return new Date().toISOString().slice(0,10);return t.toISOString().slice(0,10);}
 export function gibsContextManifest({bbox,date,layers,url,requestedDate=null,fallbackDays=0}){return {authority:'NASA EOSDIS GIBS',kind:'NEAR_REAL_TIME_CONTEXT',measurementPromotion:false,bbox:normalizeBbox(bbox),date,requestedDate:requestedDate||date,fallbackDays,layers,url,semantics:'GIBS imagery is synchronized contextual Earth-observation evidence. It does not replace SAR measurement pixels. In R4 it is subordinate to measured SAR and bounded OMEGA reconstruction, and stale camera/bbox requests are rejected before display.'};}
 
-if(typeof document!=='undefined')import('./r4-runtime.mjs?r4sar=authority-spine-1').catch(error=>console.error('OMEGA SAR R4 runtime failed to initialize',error));
+if(typeof document!=='undefined'){
+  try{await import('./r4-runtime.mjs?r4sar=authority-spine-2');}
+  catch(error){console.error('OMEGA SAR R4 runtime failed to initialize',error);}
+}
