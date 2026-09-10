@@ -52,18 +52,27 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in {1..20}; do
-            code="$(curl -sS -o /tmp/r4.html -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/" || true)"
+            code="$(curl -sS -o /tmp/r4.html -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/?release=$GITHUB_SHA" || true)"
             if [ "$code" = 200 ] && grep -q 'OMEGA SAR' /tmp/r4.html; then break; fi
             test "$attempt" != 20 || { echo 'R4 root did not become live'; exit 1; }
             sleep 3
           done
           for module in r4-runtime.mjs r4-live-precision.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs; do
-            code="$(curl -sS -o "/tmp/$module" -w '%{http_code}' "$SAR_PUBLIC_URL/src/$module")"
-            test "$code" = 200 || { echo "R4 $module HTTP $code"; exit 1; }
+            ready=0
+            for attempt in {1..20}; do
+              code="$(curl -sS -o "/tmp/$module" -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/src/$module?release=$GITHUB_SHA" || true)"
+              if [ "$code" = 200 ]; then ready=1; break; fi
+              sleep 2
+            done
+            test "$ready" = 1 || { echo "R4 $module did not become live after propagation window (last HTTP $code)"; exit 1; }
           done
-          code="$(curl -sS -o /tmp/stac.json -w '%{http_code}' -X POST -H 'content-type: application/json' --data '{"collections":["sentinel-1-grd"],"limit":1,"intersects":{"type":"Point","coordinates":[-110.9747,32.2226]}}' "$SAR_PUBLIC_URL/api/stac/search")"
-          test "$code" = 200 || { cat /tmp/stac.json; echo "R4 STAC proxy HTTP $code"; exit 1; }
-          grep -q 'FeatureCollection' /tmp/stac.json
+          stac_ready=0
+          for attempt in {1..12}; do
+            code="$(curl -sS -o /tmp/stac.json -w '%{http_code}' -X POST -H 'content-type: application/json' -H 'cache-control: no-cache' --data '{"collections":["sentinel-1-grd"],"limit":1,"intersects":{"type":"Point","coordinates":[-110.9747,32.2226]}}' "$SAR_PUBLIC_URL/api/stac/search" || true)"
+            if [ "$code" = 200 ] && grep -q 'FeatureCollection' /tmp/stac.json; then stac_ready=1; break; fi
+            sleep 2
+          done
+          test "$stac_ready" = 1 || { cat /tmp/stac.json || true; echo "R4 STAC proxy did not become healthy (last HTTP $code)"; exit 1; }
       - name: Install Chromium proof runtime
         run: |
           npm install --no-save playwright@1.55.0
