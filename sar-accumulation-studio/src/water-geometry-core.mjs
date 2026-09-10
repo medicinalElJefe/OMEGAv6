@@ -41,12 +41,15 @@ export function deriveWaterGeometry(elevation,width,height,{lonSpanDeg=1,latSpan
   const accumulation=new Float64Array(width*height);for(let i=0;i<accumulation.length;i++)accumulation[i]=valid[i]?1:0;
   const queue=[];for(let i=0;i<indegree.length;i++)if(valid[i]&&indegree[i]===0)queue.push(i);
   for(let q=0;q<queue.length;q++){const i=queue[q],j=flowTo[i];if(j>=0){accumulation[j]+=accumulation[i];if(--indegree[j]===0)queue.push(j);}}
-  // Closed depressions/cycles caused by quantized flats remain local basins rather than being fabricated into a channel.
+  // Closed depressions and quantized flats remain local basins. A cell earns channel
+  // conveyance only when upstream accumulation exceeds its own unit contribution.
   const wetness=new Float32Array(width*height),conveyance=new Float32Array(width*height);let maxAcc=1;
   for(const a of accumulation)if(a>maxAcc)maxAcc=a;
+  const hasNetwork=maxAcc>1+1e-9,networkDen=hasNetwork?Math.log1p(maxAcc-1):1;
   for(let i=0;i<accumulation.length;i++){
     if(!valid[i])continue;const area=Math.max(1,accumulation[i])*dx*dy,sl=Math.max(1e-5,slope[i]);
-    wetness[i]=Math.log(Math.max(1,area)/sl);conveyance[i]=clamp(Math.log1p(accumulation[i])/Math.log1p(maxAcc),0,1);
+    wetness[i]=Math.log(Math.max(1,area)/sl);
+    const upstream=Math.max(0,accumulation[i]-1);conveyance[i]=hasNetwork?clamp(Math.log1p(upstream)/networkDen,0,1):0;
   }
   const sinks=[];for(let i=0;i<flowTo.length;i++)if(valid[i]&&flowTo[i]<0)sinks.push(i);
   return {schema:'omega.water-geometry.topographic-flow.v1',width,height,dxMeters:dx,dyMeters:dy,flowTo,slope,aspect,curvature,drop,accumulation,wetness,conveyance,sinks,maxAccumulation:maxAcc,boundary:'Terrain-derived drainage potential from DEM gradients and D8 accumulation. This is not observed water depth, discharge, flood extent, or hydraulic routing.'};
