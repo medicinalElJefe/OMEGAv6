@@ -18,8 +18,8 @@ for(const forbidden of ["op:'APPLY_PATCH'","op:'WRITE_TEXT'","op:'BUILD'","op:'T
 for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){must(wrangler.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`${retired} provider-required retirement tombstone must remain under R229`);must(!wrangler.includes(`"class_name": "${retired}"`),`${retired} regained a live binding`);must(!wrangler.includes(`"${retired}": {"type": "durable-object", "storage": "sqlite"}`),`${retired} regained live storage`)}
 for(const token of ["VERSION='R34.1'","CAPABILITY_REVISION='R132'","'/api/hybrid/agent/poll'","'/api/hybrid/agent/result'"])must(r141.includes(token),`R141 base-agent proof contract no longer recognizes inherited transport token ${token}`);
 for(const token of ["VERSION='R207'","BASE_PATH='/omega-hybrid-agent-base-r205.py'","FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'"])must(canonicalAgent.includes(token),`R207 canonical wrapper missing R205 preservation/proof token ${token}`);
-const syntax=spawnSync('python3',['-c',"import ast,pathlib;ast.parse(pathlib.Path('public/omega-hybrid-agent-base-r205.py').read_text())"],{encoding:'utf8'});assert.equal(syntax.status,0,`R205 agent Python syntax failed: ${syntax.stderr}`);
-const simulation=spawnSync('python3',['-c',String.raw`import importlib.util,json,tempfile
+const syntax=spawnSync('python3',['-B','-c',"import ast,pathlib;ast.parse(pathlib.Path('public/omega-hybrid-agent-base-r205.py').read_text())"],{encoding:'utf8'});assert.equal(syntax.status,0,`R205 agent Python syntax failed: ${syntax.stderr}`);
+const simulation=spawnSync('python3',['-B','-c',String.raw`import importlib.util,json,tempfile
 from pathlib import Path
 spec=importlib.util.spec_from_file_location('omega_r205','public/omega-hybrid-agent-base-r205.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 with tempfile.TemporaryDirectory() as td:
