@@ -1,11 +1,15 @@
+import { sentinel1ProductAssets, supportTransportUrl, parseProductXml } from './sentinel1-calibration.mjs';
+import { buildPatchGeoMesh } from './sar-registration.mjs';
+import { drawMeshCellByBlades } from './sar-blade-geometry.mjs';
+
 const map=document.querySelector('#map');
 const wrap=map?.closest('.map-wrap');
 const browse=document.querySelector('#browseImage');
 const sceneEl=document.querySelector('#currentScene');
-const MAX_BROWSE_MAIN_MAP_SCALE=180;
+const MAX_BROWSE_MAIN_MAP_SCALE=260;
 let view={centerLon:0,centerLat:0,scale:1};
-let item=null,generation=0,ready=false;
-let layer,canvas,ctx,sourceImage,badge;
+let item=null,generation=0,ready=false,exactPatchVisible=false;
+let layer,canvas,ctx,sourceImage,badge,geoMesh=null,registration=null;
 
 function wrapLon(v){let x=Number(v);while(x>180)x-=360;while(x<-180)x+=360;return x;}
 function project(lon,lat,width,height){const dlon=wrapLon(Number(lon)-view.centerLon);return [width/2+dlon*(width/360)*view.scale,height/2-(Number(lat)-view.centerLat)*(height/180)*view.scale];}
@@ -21,83 +25,98 @@ function outerRing(geometry){
   if(out.length>1&&Math.abs(out[0][0]-out.at(-1)[0])<1e-10&&Math.abs(out[0][1]-out.at(-1)[1])<1e-10)out.pop();
   return out;
 }
-function distinctCorners(geometry){
-  const pts=outerRing(geometry);if(pts.length<4)return null;
-  const pick=score=>pts.reduce((best,p)=>!best||score(p)<score(best)?p:best,null);
-  const pickMax=score=>pts.reduce((best,p)=>!best||score(p)>score(best)?p:best,null);
-  const nw=pick(([lon,lat])=>lon-lat),ne=pickMax(([lon,lat])=>lon+lat),se=pickMax(([lon,lat])=>lon-lat),sw=pick(([lon,lat])=>lon+lat);
-  const corners=[nw,ne,se,sw];
-  const keys=new Set(corners.map(p=>`${p[0].toFixed(8)},${p[1].toFixed(8)}`));
-  if(keys.size<4){
-    const center=[pts.reduce((a,p)=>a+p[0],0)/pts.length,pts.reduce((a,p)=>a+p[1],0)/pts.length];
-    const ordered=[...pts].sort((a,b)=>Math.atan2(-(a[1]-center[1]),a[0]-center[0])-Math.atan2(-(b[1]-center[1]),b[0]-center[0]));
-    if(ordered.length>=4)return [ordered[0],ordered[Math.floor(ordered.length/4)],ordered[Math.floor(ordered.length/2)],ordered[Math.floor(3*ordered.length/4)]];
-  }
-  return corners;
+function selectedPolarization(){return String(document.querySelector('#assetSelect')?.value||'vv').toLowerCase();}
+function meshDimensions(product){
+  const points=product?.points||[];
+  const width=Number(product?.numberOfSamples)||Math.ceil(Math.max(0,...points.map(p=>Number(p.pixel)||0)))+1;
+  const height=Number(product?.numberOfLines)||Math.ceil(Math.max(0,...points.map(p=>Number(p.line)||0)))+1;
+  return width>1&&height>1?[width,height]:null;
 }
-function triangleTransform(s0,s1,s2,d0,d1,d2){
-  const [x0,y0]=s0,[x1,y1]=s1,[x2,y2]=s2,[u0,v0]=d0,[u1,v1]=d1,[u2,v2]=d2;
-  const den=x0*(y1-y2)+x1*(y2-y0)+x2*(y0-y1);if(Math.abs(den)<1e-9)return null;
-  return {
-    a:(u0*(y1-y2)+u1*(y2-y0)+u2*(y0-y1))/den,
-    c:(u0*(x2-x1)+u1*(x0-x2)+u2*(x1-x0))/den,
-    e:(u0*(x1*y2-x2*y1)+u1*(x2*y0-x0*y2)+u2*(x0*y1-x1*y0))/den,
-    b:(v0*(y1-y2)+v1*(y2-y0)+v2*(y0-y1))/den,
-    d:(v0*(x2-x1)+v1*(x0-x2)+v2*(x1-x0))/den,
-    f:(v0*(x1*y2-x2*y1)+v1*(x2*y0-x0*y2)+v2*(x0*y1-x1*y0))/den
-  };
+function previewConforms(mesh,image){
+  const [x0,y0,x1,y1]=mesh?.sourceWindow||[],sourceAspect=(x1-x0)/(y1-y0),previewAspect=Number(image?.naturalWidth)/Number(image?.naturalHeight);
+  if(!(sourceAspect>0&&previewAspect>0))return {ok:false,score:0};
+  const score=Math.min(sourceAspect/previewAspect,previewAspect/sourceAspect);
+  return {ok:score>=.82,score};
 }
-function drawTriangle(image,s0,s1,s2,d0,d1,d2){
-  const t=triangleTransform(s0,s1,s2,d0,d1,d2);if(!t)return false;
-  ctx.save();ctx.beginPath();ctx.moveTo(...d0);ctx.lineTo(...d1);ctx.lineTo(...d2);ctx.closePath();ctx.clip();
-  ctx.globalAlpha=.72;ctx.filter='grayscale(1) contrast(1.18) brightness(.98)';ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.transform(t.a,t.b,t.c,t.d,t.e,t.f);ctx.drawImage(image,0,0);ctx.restore();return true;
+async function resolveProductMesh(detail,signal){
+  const assets=sentinel1ProductAssets(detail,selectedPolarization()),asset=assets?.product;
+  const href=asset?.sourceHref||asset?.href;if(!href)return {mesh:null,registration:'FOOTPRINT_ONLY_NO_PRODUCT_GRID'};
+  const response=await fetch(supportTransportUrl(href,'source'),{signal,headers:{accept:'application/xml,text/xml,text/plain,*/*'}});
+  if(!response.ok)throw new Error(`product geolocation ${response.status}`);
+  const product=parseProductXml(await response.text()),dims=meshDimensions(product);if(!dims||product.points.length<3)return {mesh:null,registration:'FOOTPRINT_ONLY_PRODUCT_GRID_INSUFFICIENT'};
+  const mesh=buildPatchGeoMesh(product,[0,0,dims[0],dims[1]],12),coverage=mesh.totalNodeCount?mesh.validNodeCount/mesh.totalNodeCount:0;
+  if(coverage<.82)return {mesh:null,registration:`FOOTPRINT_ONLY_GCP_COVERAGE_${Math.round(coverage*100)}`};
+  return {mesh:{...mesh,sourceWindow:[0,0,dims[0],dims[1]],fullScene:true,measurementPromotion:false},registration:'SAFE_PRODUCT_GCP_FULL_SCENE_BLADE_MESH'};
 }
 function publishVisibility(mainMapVisible,reason){
-  const detail={mainMapVisible,reason,scale:view.scale,threshold:MAX_BROWSE_MAIN_MAP_SCALE,ready,itemId:item?.id||null};
+  const detail={mainMapVisible,reason,scale:view.scale,threshold:MAX_BROWSE_MAIN_MAP_SCALE,ready,itemId:item?.id||null,registration,exactPatchVisible};
   globalThis.OMEGA_SAR_SOURCE_OVERLAY_VISIBILITY=detail;
   window.dispatchEvent(new CustomEvent('omega-source-sar-visibility',{detail}));
 }
 function resize(){
   if(!canvas||!map)return;const rect=map.getBoundingClientRect(),dpr=Math.max(1,globalThis.devicePixelRatio||1);canvas.width=Math.max(1,Math.round(rect.width*dpr));canvas.height=Math.max(1,Math.round(rect.height*dpr));canvas.style.width=`${rect.width}px`;canvas.style.height=`${rect.height}px`;ctx.setTransform(dpr,0,0,dpr,0,0);draw();
 }
+function drawFootprint(rect,alpha=.8){
+  const ring=outerRing(item?.geometry);if(ring.length<3)return false;
+  ctx.save();ctx.strokeStyle=`rgba(235,244,247,${alpha})`;ctx.lineWidth=1.1;ctx.setLineDash([5,4]);ctx.beginPath();ring.forEach(([lon,lat],i)=>{const p=project(lon,lat,rect.width,rect.height);if(i)ctx.lineTo(...p);else ctx.moveTo(...p)});ctx.closePath();ctx.stroke();ctx.restore();return true;
+}
+function drawRegisteredBrowse(rect){
+  if(!geoMesh?.nodes||!sourceImage?.naturalWidth)return 0;
+  const n=geoMesh.segments||geoMesh.nodes.length-1;let cells=0;
+  for(let gy=0;gy<n;gy++)for(let gx=0;gx<n;gx++){
+    const q00=geoMesh.nodes[gy]?.[gx],q10=geoMesh.nodes[gy]?.[gx+1],q01=geoMesh.nodes[gy+1]?.[gx],q11=geoMesh.nodes[gy+1]?.[gx+1];
+    if(![q00,q10,q01,q11].every(q=>Number.isFinite(q?.lon)&&Number.isFinite(q?.lat)))continue;
+    const dest=[project(q00.lon,q00.lat,rect.width,rect.height),project(q10.lon,q10.lat,rect.width,rect.height),project(q01.lon,q01.lat,rect.width,rect.height),project(q11.lon,q11.lat,rect.width,rect.height)];
+    if(drawMeshCellByBlades(ctx,sourceImage,geoMesh.sourceWindow,[q00,q10,q01,q11],dest,{alpha:.38,filter:'grayscale(1) contrast(1.16) brightness(.94)'}))cells++;
+  }
+  return cells;
+}
 function draw(){
   if(!canvas||!ctx||!map)return;const rect=map.getBoundingClientRect();ctx.clearRect(0,0,rect.width,rect.height);canvas.dataset.ready=ready?'true':'false';canvas.dataset.mainMapVisible='false';
-  if(!item||!ready||!sourceImage?.naturalWidth){publishVisibility(false,'SOURCE_NOT_READY');return;}
-  if(view.scale>MAX_BROWSE_MAIN_MAP_SCALE){
-    canvas.dataset.ready='true';canvas.dataset.mainMapVisible='false';
-    badge.textContent='SOURCE SAR LOADED · REGIONAL QUICKLOOK HIDDEN AT LOCAL SCALE · EXACT GCP PATCH REQUIRED';badge.style.left='14px';badge.style.top=`${Math.max(12,rect.height-54)}px`;badge.style.opacity='.82';
-    publishVisibility(false,'LOCAL_SCALE_REQUIRES_EXACT_GCP');return;
+  if(!item||!ready||!sourceImage?.naturalWidth){badge.style.opacity='0';publishVisibility(false,'SOURCE_NOT_READY');return;}
+  drawFootprint(rect,exactPatchVisible?.42:.78);
+  if(exactPatchVisible){
+    badge.textContent='SOURCE SUPPORT · FOOTPRINT ONLY · EXACT CALIBRATED SAR IS PRIMARY';badge.style.left='14px';badge.style.top=`${Math.max(12,rect.height-54)}px`;badge.style.opacity='.7';publishVisibility(false,'EXACT_PATCH_PRIMARY');return;
   }
-  const corners=distinctCorners(item.geometry),ring=outerRing(item.geometry);if(!corners||ring.length<4){publishVisibility(false,'FOOTPRINT_UNRESOLVED');return;}
-  const dest=corners.map(p=>project(p[0],p[1],rect.width,rect.height));const [nw,ne,se,sw]=dest,w=sourceImage.naturalWidth,h=sourceImage.naturalHeight;
-  ctx.save();ctx.beginPath();ring.forEach(([lon,lat],i)=>{const p=project(lon,lat,rect.width,rect.height);if(i)ctx.lineTo(...p);else ctx.moveTo(...p)});ctx.closePath();ctx.clip();
-  drawTriangle(sourceImage,[0,0],[w,0],[w,h],nw,ne,se);drawTriangle(sourceImage,[0,0],[w,h],[0,h],nw,se,sw);ctx.restore();
-  canvas.dataset.ready='true';canvas.dataset.mainMapVisible='true';
-  const ys=dest.map(p=>p[1]),xs=dest.map(p=>p[0]),left=Math.max(10,Math.min(rect.width-290,Math.min(...xs)+10)),top=Math.max(10,Math.min(rect.height-36,Math.min(...ys)+10));badge.style.left=`${left}px`;badge.style.top=`${top}px`;badge.style.opacity='1';
-  badge.textContent=`SOURCE SAR · REGIONAL FOOTPRINT QUICKLOOK · ${item.id||''}`;publishVisibility(true,'REGIONAL_FOOTPRINT_QUICKLOOK');
+  if(view.scale>MAX_BROWSE_MAIN_MAP_SCALE){
+    badge.textContent='SOURCE SUPPORT · REGIONAL BROWSE HIDDEN AT LOCAL SCALE · EXACT GCP PATCH REQUIRED';badge.style.left='14px';badge.style.top=`${Math.max(12,rect.height-54)}px`;badge.style.opacity='.72';publishVisibility(false,'LOCAL_SCALE_REQUIRES_EXACT_GCP');return;
+  }
+  if(!geoMesh){
+    badge.textContent=`SOURCE SUPPORT · TRUE FOOTPRINT ONLY · ${registration||'PIXEL REGISTRATION UNRESOLVED'}`;badge.style.left='14px';badge.style.top=`${Math.max(12,rect.height-54)}px`;badge.style.opacity='.8';publishVisibility(false,'FOOTPRINT_ONLY');return;
+  }
+  const conformity=previewConforms(geoMesh,sourceImage);if(!conformity.ok){
+    badge.textContent=`SOURCE SUPPORT · PREVIEW NOT WARPED · RASTER ASPECT NOT PROVEN (${Math.round(conformity.score*100)}%)`;badge.style.left='14px';badge.style.top=`${Math.max(12,rect.height-54)}px`;badge.style.opacity='.8';publishVisibility(false,'PREVIEW_RASTER_CONFORMITY_UNRESOLVED');return;
+  }
+  const cells=drawRegisteredBrowse(rect);canvas.dataset.mainMapVisible=cells?'true':'false';
+  badge.textContent=cells?`SOURCE SUPPORT · GCP BLADE-REGISTERED FULL-SCENE BROWSE · ${item.id||''}`:'SOURCE SUPPORT · GCP MESH DRAW UNRESOLVED';badge.style.left='14px';badge.style.top=`${Math.max(12,rect.height-54)}px`;badge.style.opacity=cells?'.88':'.72';
+  publishVisibility(cells>0,cells?'GCP_BLADE_REGISTERED_SOURCE_BROWSE':'GCP_MESH_DRAW_UNRESOLVED');
 }
 async function loadCurrent(){
-  const id=(sceneEl?.textContent||'').trim(),src=browse?.src||'';const my=++generation;ready=false;
+  const id=(sceneEl?.textContent||'').trim(),src=browse?.src||'',my=++generation;ready=false;geoMesh=null;registration=null;
   if(!id||id==='—'||!src){item=null;sourceImage.removeAttribute('src');badge.style.opacity='0';draw();return;}
-  badge.textContent='SOURCE SAR · LOADING FOOTPRINT REGISTRATION';badge.style.opacity='1';
+  const controller=new AbortController();globalThis.OMEGA_SAR_BROWSE_ABORT?.abort?.();globalThis.OMEGA_SAR_BROWSE_ABORT=controller;
+  badge.textContent='SOURCE SUPPORT · RESOLVING FULL-SCENE PRODUCT GCP MESH';badge.style.opacity='1';
   try{
-    const response=await fetch(`/api/stac/item?id=${encodeURIComponent(id)}`,{headers:{accept:'application/geo+json,application/json'}});if(!response.ok)throw new Error(`scene ${response.status}`);
+    const response=await fetch(`/api/stac/item?id=${encodeURIComponent(id)}`,{signal:controller.signal,headers:{accept:'application/geo+json,application/json'}});if(!response.ok)throw new Error(`scene ${response.status}`);
     const detail=await response.json();if(my!==generation)return;item=detail;
-    await new Promise((resolve,reject)=>{sourceImage.onload=resolve;sourceImage.onerror=()=>reject(new Error('browse image load failed'));sourceImage.src=src});if(my!==generation)return;ready=true;
-    draw();
-    const frame={id,src,bbox:itemBbox(detail),geometry:detail.geometry,startTime:document.querySelector('#currentTime')?.textContent||null,evidenceClass:'SOURCE_BROWSE_VISUAL',registration:'FOOTPRINT_QUAD_WARP',mainMapVisible:view.scale<=MAX_BROWSE_MAIN_MAP_SCALE,measurementPromotion:false,semantics:'Source browse visual can be warped to the published Sentinel-1 scene footprint for regional context. It is intentionally suppressed from the local map because exact pixel geolocation requires the product GCP/calibrated layer.'};
+    const meshResult=await resolveProductMesh(detail,controller.signal).catch(error=>({mesh:null,registration:`FOOTPRINT_ONLY_${error.message}`}));if(my!==generation)return;geoMesh=meshResult.mesh;registration=meshResult.registration;
+    await new Promise((resolve,reject)=>{sourceImage.onload=resolve;sourceImage.onerror=()=>reject(new Error('browse image load failed'));sourceImage.src=src});if(my!==generation)return;ready=true;draw();
+    const frame={id,src,bbox:itemBbox(detail),geometry:detail.geometry,startTime:document.querySelector('#currentTime')?.textContent||null,evidenceClass:'SOURCE_BROWSE_VISUAL',registration,geoMeshState:geoMesh?.state||null,mainMapVisible:view.scale<=MAX_BROWSE_MAIN_MAP_SCALE&&!!geoMesh,measurementPromotion:false,semantics:'Source browse support is mapped only when the full-scene preview conforms to the source raster aspect and a Sentinel-1 SAFE product GCP mesh is available. Otherwise only the authoritative scene footprint is drawn. Browse pixels are never promoted to calibrated measurement evidence.'};
     globalThis.OMEGA_SAR_SOURCE_FRAME=frame;window.dispatchEvent(new CustomEvent('omega-source-sar-frame',{detail:frame}));
-  }catch(error){if(my!==generation)return;item=null;ready=false;draw();badge.textContent=`SOURCE SAR UNAVAILABLE · ${error.message}`;badge.style.opacity='1';}
+  }catch(error){if(my!==generation||error?.name==='AbortError')return;item=null;geoMesh=null;registration='SOURCE_UNAVAILABLE';ready=false;draw();badge.textContent=`SOURCE SUPPORT UNAVAILABLE · ${error.message}`;badge.style.opacity='1';}
 }
 
 if(wrap&&map){
   const style=document.createElement('style');style.textContent=`
-  .sar-source-browse-layer{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}.sar-source-browse-layer canvas{position:absolute;inset:0;width:100%;height:100%;display:block}.sar-source-browse-layer img{display:none!important}.sar-source-browse-badge{position:absolute;z-index:3;padding:6px 9px;border-radius:8px;background:rgba(5,7,9,.78);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);color:#e6e8e9;font:600 9px Inter,Segoe UI,sans-serif;letter-spacing:.04em;max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:opacity .15s linear}.sar-earth-overlay{z-index:4!important}.place-navigator,.omega-field-hud,.omega-action-hud,.omega-cell-inspector,.omega-map-nav{z-index:8!important}
+  .sar-source-browse-layer{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}.sar-source-browse-layer canvas{position:absolute;inset:0;width:100%;height:100%;display:block}.sar-source-browse-layer img{display:none!important}.sar-source-browse-badge{position:absolute;z-index:3;padding:6px 9px;border-radius:8px;background:rgba(5,7,9,.78);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);color:#e6e8e9;font:600 9px Inter,Segoe UI,sans-serif;letter-spacing:.04em;max-width:650px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:opacity .15s linear}.sar-earth-overlay{z-index:4!important}.place-navigator,.omega-field-hud,.omega-action-hud,.omega-cell-inspector,.omega-map-nav,.omega-blade-lens{z-index:8!important}
   `;document.head.append(style);
   layer=document.createElement('div');layer.className='sar-source-browse-layer';canvas=document.createElement('canvas');canvas.className='sar-source-browse-canvas';canvas.dataset.ready='false';canvas.dataset.mainMapVisible='false';ctx=canvas.getContext('2d');sourceImage=document.createElement('img');sourceImage.alt='Current Sentinel-1 source SAR browse';sourceImage.decoding='async';badge=document.createElement('div');badge.className='sar-source-browse-badge';badge.style.opacity='0';layer.append(canvas,sourceImage,badge);wrap.append(layer);
   new ResizeObserver(resize).observe(map);resize();
   map.addEventListener('omega-map-view',event=>{const d=event.detail||{};if(Number.isFinite(d.centerLon)&&Number.isFinite(d.centerLat)&&Number.isFinite(d.scale)){view={centerLon:d.centerLon,centerLat:d.centerLat,scale:d.scale};draw();}});
+  window.addEventListener('omega-calibrated-sar-patch',()=>{exactPatchVisible=true;draw();});
+  window.addEventListener('omega-calibrated-sar-patch-clear',()=>{exactPatchVisible=false;draw();});
   if(sceneEl)new MutationObserver(loadCurrent).observe(sceneEl,{childList:true,subtree:true,characterData:true});
   if(browse)new MutationObserver(loadCurrent).observe(browse,{attributes:true,attributeFilter:['src']});
+  document.querySelector('#assetSelect')?.addEventListener('change',loadCurrent);
   queueMicrotask(loadCurrent);
 }
