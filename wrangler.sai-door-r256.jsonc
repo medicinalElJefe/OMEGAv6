@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "omega-sai-door-r256",
+  "main": "src/privateSaiDoorwayWorkerR256.js",
+  "compatibility_date": "2026-09-09",
+  "workers_dev": true,
+  "preview_urls": false,
+  "services": [
+    {"binding":"OMEGA_CANONICAL","service":"omegav6"}
+  ],
+  "vars": {
+    "OMEGA_SAI_INVITES_JSON": "[{\"id\":\"private-peer-001\",\"label\":\"Private OMEGA / SAI Peer\",\"tokenSha256\":\"99209254fd50a443fe2ac3d871a35e9ec9fe15cdddb25a1d88b50a05a5c657a3\",\"active\":true,\"expiresAt\":\"2027-09-09T23:59:59Z\",\"scopes\":[\"COLLABORATE\",\"TRAINING_PROPOSE\",\"SESSION_READ\"],\"maxPromptChars\":12000,\"maxTrainingChars\":20000,\"retainConversation\":true}]",
+    "OMEGA_SAI_ADMIN_TOKEN_SHA256": "a0581f25178fc639e070c7e065c01604e7fe26a6c1040b68e96d4bf1990ce9f2"
+  },
+  "durable_objects": {
+    "bindings": [
+      {"name":"OMEGA_SAI_PEER_LEDGER_DO","class_name":"OmegaSaiPeerLedgerR256"}
+    ]
+  },
+  "migrations": [
+    {"tag":"r256-private-sai-doorway-v1","new_sqlite_classes":["OmegaSaiPeerLedgerR256"]}
+  ],
+  "observability": {"enabled": false}
+}
