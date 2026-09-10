@@ -30,6 +30,8 @@ export default function HybridLinkR32({status,record}:Props){
 
   <HybridRuntimeSnapshotProviderR238>
    <SovereignConnectionR117/>
+   <HybridWovenContinuityR238/>
+   <HybridExecutionMotionR243/>
    <HybridHostIntelligenceR238/>
    <HybridResourceGovernorR239/>
    <HybridActionRuntimeR247/>
@@ -37,8 +39,6 @@ export default function HybridLinkR32({status,record}:Props){
    <HybridHostEffectsR212/>
    <HybridCommandDeckR237/>
    <HybridProofClosureR141/>
-   <HybridExecutionMotionR243/>
-   <HybridWovenContinuityR238/>
    <HybridExperienceLedgerR255/>
    <HybridParallelDevelopmentR262/>
    <MissionLineageReviewR209/>
