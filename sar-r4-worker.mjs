@@ -6,6 +6,8 @@ const SENTINEL_REGION='eu-central-1';
 const TERRAIN_HOST='elevation-tiles-prod.s3.us-east-1.amazonaws.com';
 const USGS_HOST='earthquake.usgs.gov';
 const EONET_HOST='eonet.gsfc.nasa.gov';
+const JRC_WATER_HOST='storage.googleapis.com';
+const JRC_WATER_LAYERS=new Set(['occurrence','seasonality','recurrence','transitions','change','extent']);
 
 function approvedSentinelUrl(raw){
   if(!raw)return null;
@@ -44,6 +46,15 @@ async function proxyTerrain(request,url){
   headers.set('x-omega-upstream','AWS_OPEN_TERRAIN_TERRARIUM');headers.set('x-omega-elevation-kind','BARE_EARTH_TERRARIUM');headers.set('x-content-type-options','nosniff');return new Response(request.method==='HEAD'?null:upstream.body,{status:upstream.status,statusText:upstream.statusText,headers});
 }
 
+async function proxyJrcWater(request,url){
+  if(request.method!=='GET'&&request.method!=='HEAD')return jsonError('JRC water tile proxy requires GET or HEAD',405);
+  const layer=String(url.searchParams.get('layer')||'occurrence').toLowerCase(),z=Number(url.searchParams.get('z')),x=Number(url.searchParams.get('x')),y=Number(url.searchParams.get('y')),n=2**z;
+  if(!JRC_WATER_LAYERS.has(layer))return jsonError('Unsupported JRC Global Surface Water layer',400,{allowed:[...JRC_WATER_LAYERS]});
+  if(!Number.isInteger(z)||z<0||z>13||!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0||x>=n||y>=n)return jsonError('Valid JRC Web Mercator water tile z/x/y required',400);
+  const target=new URL(`https://${JRC_WATER_HOST}/water-world/tiles2024/${layer}/${z}/${x}/${y}.png`),upstream=await fetch(target,{method:request.method,headers:{accept:'image/png'},cf:{cacheTtl:86400,cacheEverything:true}}),headers=copyHeaders(upstream,['content-type','content-length','etag','last-modified','cache-control']);
+  headers.set('x-omega-upstream','EC_JRC_GLOBAL_SURFACE_WATER_2024_RGB_MAP');headers.set('x-omega-water-period','1984-2024');headers.set('x-omega-water-layer',layer);headers.set('x-omega-water-analysis-boundary','RGB_CARTOGRAPHIC_TILE_NOT_NUMERIC_ANALYSIS');headers.set('x-content-type-options','nosniff');return new Response(request.method==='HEAD'?null:upstream.body,{status:upstream.status,statusText:upstream.statusText,headers});
+}
+
 async function proxyUsgsEvents(request,url){
   if(request.method!=='GET')return jsonError('USGS event proxy requires GET',405);const period=String(url.searchParams.get('period')||'day').toLowerCase(),file=period==='week'?'all_week.geojson':period==='hour'?'all_hour.geojson':'all_day.geojson';
   const target=new URL(`https://${USGS_HOST}/earthquakes/feed/v1.0/summary/${file}`),upstream=await fetch(target,{headers:{accept:'application/geo+json,application/json'},cf:{cacheTtl:60,cacheEverything:true}}),headers=copyHeaders(upstream,['content-type','etag','last-modified','cache-control']);headers.set('x-omega-upstream','USGS_EARTHQUAKE_GEOJSON');headers.set('x-content-type-options','nosniff');return new Response(upstream.body,{status:upstream.status,statusText:upstream.statusText,headers});
@@ -62,11 +73,12 @@ export default {
     if(url.pathname==='/api/raster')return proxySentinelRaster(request,url);
     if(url.pathname==='/api/source')return proxySentinelSource(request,url);
     if(url.pathname==='/api/terrain')return proxyTerrain(request,url);
+    if(url.pathname==='/api/water/jrc')return proxyJrcWater(request,url);
     if(url.pathname==='/api/events/usgs')return proxyUsgsEvents(request,url);
     if(url.pathname==='/api/events/eonet')return proxyEonetEvents(request,url);
     if(url.pathname.startsWith('/api/'))return r3.fetch(request,env,ctx);
     const response=await env.ASSETS.fetch(request);if(!response)return response;const headers=new Headers(response.headers);
-    if(url.pathname==='/'||STATIC_FRESH_EXT.test(url.pathname)){headers.set('cache-control','no-store, max-age=0');headers.set('pragma','no-cache');headers.set('expires','0');headers.set('x-omega-sar-build','R248-REGIONAL-SAR-EARTH-AWARENESS-WATER-GEOMETRY');if(url.pathname==='/'||/\.html?$/i.test(url.pathname))headers.set('clear-site-data','"cache"');}
+    if(url.pathname==='/'||STATIC_FRESH_EXT.test(url.pathname)){headers.set('cache-control','no-store, max-age=0');headers.set('pragma','no-cache');headers.set('expires','0');headers.set('x-omega-sar-build','R249-WATER-OBSERVATION-TEMPORAL-SYNC');if(url.pathname==='/'||/\.html?$/i.test(url.pathname))headers.set('clear-site-data','"cache"');}
     return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
   }
 };
