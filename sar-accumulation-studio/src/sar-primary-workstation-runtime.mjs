@@ -42,9 +42,6 @@ function applyRegionalFocus(point=state.target,{reload=true}={}){
   return true;
 }
 function focusSar(){
-  // SAR always returns to the calibrated regional camera. Exact local pixels have a
-  // separate explicit FIT control so a user can never lose the navigable SAR view
-  // merely because an exact patch finished loading in the background.
   return applyRegionalFocus(nav()?.target||state.target);
 }
 function world(){state.intent='world';nav()?.world?.();setSurface();return true;}
@@ -66,7 +63,8 @@ function installStyle(){
   body[data-sar-surface=regional_measured] .omega-woven-motion canvas,body[data-sar-surface=exact_measured] .omega-woven-motion canvas{opacity:.025!important}
   body[data-sar-surface=regional_measured] .omega-jrc-water-layer canvas,body[data-sar-surface=exact_measured] .omega-jrc-water-layer canvas{opacity:.05!important}
   body[data-sar-surface=regional_measured] .sar-source-browse-canvas,body[data-sar-surface=exact_measured] .sar-source-browse-canvas{opacity:.02!important}
-  body[data-sar-surface=regional_measured] .omega-regional-sar-layer canvas{opacity:1!important;filter:contrast(1.22) brightness(1.04)!important}
+  body:not([data-data-native-surface=regional_shaped_sar])[data-sar-surface=regional_measured] .omega-regional-sar-layer canvas{opacity:1!important;filter:contrast(1.22) brightness(1.04)!important}
+  body[data-data-native-surface=regional_shaped_sar][data-sar-surface=regional_measured] .omega-regional-sar-layer canvas{opacity:.012!important;filter:none!important}
   body[data-sar-surface=regional_measured] #omegaExperienceStatus,body[data-sar-surface=exact_measured] #omegaExperienceStatus{opacity:.28!important}
   body.omega-experience .omega-map-nav{top:12px!important;right:10px!important;gap:4px!important}.omega-experience .omega-map-nav button{width:34px!important;height:31px!important;border-radius:8px!important;font-size:12px!important}.omega-experience .omega-map-nav button.small{font-size:7px!important}.omega-experience .omega-map-nav-readout,.omega-experience .omega-map-nav-hint{display:none!important}
   @media(max-width:900px){.omega-sar-primary-state{display:none}.omega-sar-primary-controls button{min-width:40px;padding:0 6px}.omega-sar-primary-controls button:nth-last-child(1){display:none}body.omega-experience .place-dock .place-search{width:min(330px,43vw)!important}}
