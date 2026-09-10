@@ -13,6 +13,7 @@ export const sarAuthority={
   camera:null,cameraEpoch:0,
   scene:null,sceneKey:null,sceneEpoch:0,
   measurement:null,source:null,
+  rejected:{source:0,measurement:0,context:0},
   revision:0,
 
   bindTarget(point,reason='target'){
@@ -43,7 +44,7 @@ export const sarAuthority={
   },
 
   bindSource(source){
-    if(!source)return;const id=sceneKey(source.id);if(id&&this.sceneKey&&id!==this.sceneKey)return false;
+    if(!source)return false;const id=sceneKey(source.id);if(id&&this.sceneKey&&id!==this.sceneKey)return false;
     this.source={...source,targetKey:this.targetKey,targetEpoch:this.targetEpoch,sceneKey:this.sceneKey,sceneEpoch:this.sceneEpoch};this.revision++;emit({kind:'SOURCE',...this.capture()});return true;
   },
 
@@ -52,7 +53,12 @@ export const sarAuthority={
     this.measurement={state:patch.state,id,targetKey:key,targetEpoch:this.targetEpoch,sceneEpoch:this.sceneEpoch,evidence:patch.evidence||null};this.revision++;emit({kind:'MEASUREMENT',...this.capture()});return true;
   },
 
-  capture(){return {revision:this.revision,target:this.target?{...this.target}:null,targetKey:this.targetKey,targetEpoch:this.targetEpoch,camera:this.camera?{...this.camera,bbox:this.camera.bbox?[...this.camera.bbox]:null}:null,cameraEpoch:this.cameraEpoch,scene:this.scene?{...this.scene}:null,sceneKey:this.sceneKey,sceneEpoch:this.sceneEpoch};},
+  reject(kind,detail={}){
+    if(kind in this.rejected)this.rejected[kind]++;
+    this.revision++;emit({kind:'REJECTED_STALE_RESULT',rejectedKind:kind,...detail,...this.capture()});return false;
+  },
+
+  capture(){return {revision:this.revision,target:this.target?{...this.target}:null,targetKey:this.targetKey,targetEpoch:this.targetEpoch,camera:this.camera?{...this.camera,bbox:this.camera.bbox?[...this.camera.bbox]:null}:null,cameraEpoch:this.cameraEpoch,scene:this.scene?{...this.scene}:null,sceneKey:this.sceneKey,sceneEpoch:this.sceneEpoch,rejected:{...this.rejected}};},
 
   accepts(snapshot,{target=true,camera=false,scene=false}={}){
     if(!snapshot)return false;
@@ -79,6 +85,21 @@ if(typeof document!=='undefined'){
       const update=()=>{const id=(scene.textContent||'').trim();if(id&&id!=='—')sarAuthority.bindScene({id,startTime:(document.querySelector('#currentTime')?.textContent||'').trim()||null},'timeline scene');};
       new MutationObserver(update).observe(scene,{childList:true,subtree:true,characterData:true});update();
     }
+    // These guards run in capture phase on window before ordinary consumers. A delayed
+    // source/calibration result from an older target or acquisition is therefore unable
+    // to paint itself onto the currently authoritative SAR camera.
+    window.addEventListener('omega-source-sar-frame',event=>{
+      const frame=event.detail||{};
+      if(sarAuthority.sceneKey&&sceneKey(frame.id)!==sarAuthority.sceneKey){event.stopImmediatePropagation();sarAuthority.reject('source',{reason:'SCENE_EPOCH_MISMATCH',candidateScene:sceneKey(frame.id)});return;}
+      sarAuthority.bindSource(frame);
+    },true);
+    window.addEventListener('omega-calibrated-sar-patch',event=>{
+      const patch=event.detail?.patch;
+      if(!patch||!sarAuthority.targetMatches(patch.target)||!sarAuthority.sceneMatches(patch.id)){
+        event.stopImmediatePropagation();sarAuthority.reject('measurement',{reason:'TARGET_OR_SCENE_EPOCH_MISMATCH',candidateTarget:pointKey(patch?.target),candidateScene:sceneKey(patch?.id)});return;
+      }
+      sarAuthority.bindMeasurement(patch);
+    },true);
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else queueMicrotask(install);
 }
