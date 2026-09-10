@@ -14,7 +14,7 @@ function focusPatch(candidate=patch){
   const pixels=Math.max(Number(candidate?.width)||0,Number(candidate?.height)||0),deep=pixels>=240;
   if(!r.fitBounds(bbox,{padding:deep?1.10:1.22,minScale:850,maxScale:deep?7600:5200}))return false;
   if(candidate.target)r.setPoint(candidate.target.lon,candidate.target.lat,{emit:false,redraw:true});
-  globalThis.OMEGA_SAR_LOCAL_FOCUS={state:deep?'CALIBRATED_DEEP_PATCH_FIT_EXPLICIT':'CALIBRATED_PATCH_FIT_EXPLICIT',targetKey:keyOf(candidate.target),bbox,scale:r.view.scale,sourcePixels:[candidate.width,candidate.height],deep};
+  globalThis.OMEGA_SAR_LOCAL_FOCUS={state:'CALIBRATED_PATCH_FIT_EXPLICIT',detailState:deep?'DEEP_SOURCE_PATCH':'INTERACTIVE_SOURCE_PATCH',targetKey:keyOf(candidate.target),bbox,scale:r.view.scale,sourcePixels:[candidate.width,candidate.height],deep};
   return true;
 }
 function updateButton(){const button=document.querySelector('#omegaFitSar');if(!button)return;button.disabled=!(patch?.evidence?.measured===true&&patchMatchesTarget(patch));button.dataset.ready=button.disabled?'false':'true';}
