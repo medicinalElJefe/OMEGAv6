@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const doorway=fs.readFileSync('src/privateSaiDoorwayR256.js','utf8');
+const admin=fs.readFileSync('src/privateSaiAdminR256.js','utf8');
+const req=(needle,msg)=>{if(!doorway.includes(needle)&&!admin.includes(needle))throw new Error(msg||`missing ${needle}`)};
+req("'x-robots-tag':'noindex, nofollow, noarchive'",'doorway must stay unlisted');
+req("unlisted:true",'doorway discovery must declare unlisted');
+req("trainingAdmissionAuthority:false",'peer must not gain training admission');
+req("canonAdmissionAuthority:false",'peer must not gain canon admission');
+req("directTrainingApplied:false",'training submission must remain proposal-only');
+req("PENDING_ADMIN_REVIEW",'training proposal must require admin review');
+req("OMEGA_SAI_ADMIN_TOKEN_SHA256",'admin ledger must require separate admin secret');
+req("R256_ADMIN_NOT_AUTHORIZED",'unauthorized admin probing must not disclose surface');
+for(const forbidden of ['HYBRID_SECRET','PC_PAIRING','R147_EXECUTION_DISPATCH','GITHUB_WRITE','PRODUCTION_DEPLOYMENT','R125_CANONSTATE_ADMISSION','ADMIN_LEDGER_READ'])req(forbidden,`missing forbidden authority ${forbidden}`);
+if(/\/systems|nav|menu|sidebar/i.test(doorway))throw new Error('private doorway core must not attach public navigation');
+console.log('R256 private SAI doorway invariants PASS');
