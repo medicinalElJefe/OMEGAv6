@@ -62,9 +62,17 @@ export function HybridRuntimeSnapshotProviderR238({children}:{children:ReactNode
   let timer:number|undefined;
   const arm=()=>{if(timer!==undefined)window.clearInterval(timer);timer=undefined;if(document.visibilityState==='visible')timer=window.setInterval(()=>void refresh(),POLL_MS)};
   const onVisibility=()=>{if(document.visibilityState==='visible')void refresh();arm()};
+  const onResume=()=>{if(document.visibilityState==='visible')void refresh()};
   document.addEventListener('visibilitychange',onVisibility);
+  window.addEventListener('focus',onResume);
+  window.addEventListener('online',onResume);
   arm();
-  return()=>{if(timer!==undefined)window.clearInterval(timer);document.removeEventListener('visibilitychange',onVisibility)};
+  return()=>{
+   if(timer!==undefined)window.clearInterval(timer);
+   document.removeEventListener('visibilitychange',onVisibility);
+   window.removeEventListener('focus',onResume);
+   window.removeEventListener('online',onResume);
+  };
  },[refresh]);
 
  const jobs=useMemo(()=>Array.isArray(snapshot.hybrid?.jobs)?snapshot.hybrid.jobs:[],[snapshot.hybrid]);
@@ -86,7 +94,8 @@ export function HybridRuntimeSnapshotProviderR238({children}:{children:ReactNode
  },[onlineDevices]);
 
  const selectedDeviceJobs=useMemo(()=>device?jobs.filter((job:any)=>job?.targetDeviceId===device.id):[],[jobs,device]);
- const missionEntries=useMemo(()=>snapshot.missions.map((mission:any)=>({mission,job:jobs.find((job:any)=>job.id===mission.currentJobId)||mission.currentJob||null})),[snapshot.missions,jobs]);
+ const jobById=useMemo(()=>new Map(jobs.map((job:any)=>[job?.id,job])),[jobs]);
+ const missionEntries=useMemo(()=>snapshot.missions.map((mission:any)=>({mission,job:jobById.get(mission.currentJobId)||mission.currentJob||null})),[snapshot.missions,jobById]);
  const currentMissionEntry=useMemo(()=>{if(!device)return null;return[...missionEntries].reverse().find(({mission,job})=>ACTIVE_MISSION.has(String(mission?.status||'').toUpperCase())&&targetForMission(mission,job)===device.id)||null},[missionEntries,device]);
  const stale=Boolean(snapshot.observedAt&&Date.now()-snapshot.observedAt>POLL_MS*4);
 
