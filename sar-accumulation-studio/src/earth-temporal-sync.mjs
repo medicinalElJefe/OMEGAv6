@@ -1,22 +1,15 @@
 import { sarAuthority } from './sar-authority.mjs';
+import { synchronizeEarthEvents } from './earth-temporal-core.mjs';
 
 const $=s=>document.querySelector(s),map=$('#map'),wrap=map?.closest('.map-wrap');
-const R_KM=6371.0088,DEG=Math.PI/180;
 const state={state:'WAITING',sceneId:null,sceneTime:null,target:null,eventCount:0,timedCount:0,nearestTemporal:null,nearestSpatial:null,coincident:[],updatedAt:null,boundary:'Spatial/temporal synchronization compares source timestamps and coordinates only. Proximity is not evidence of causation, event impact, deformation, hydrologic response, or SAR-observed change.'};
 globalThis.OMEGA_EARTH_TEMPORAL_SYNC=state;
 
-function eventTime(e){const t=new Date(e?.time||'').getTime();return Number.isFinite(t)?t:null;}
-function frameTime(){const t=($('#currentTime')?.textContent||'').trim(),ms=new Date(t).getTime();return Number.isFinite(ms)?{iso:new Date(ms).toISOString(),ms}:null;}
+function frameTime(){const t=($('#currentTime')?.textContent||'').trim(),ms=new Date(t).getTime();return Number.isFinite(ms)?new Date(ms).toISOString():null;}
 function sceneId(){const s=($('#currentScene')?.textContent||'').trim();return s&&s!=='—'?s:null;}
-function haversineKm(a,b){if(!a||!b)return null;const p1=Number(a.lat)*DEG,p2=Number(b.lat)*DEG,dp=(Number(b.lat)-Number(a.lat))*DEG,dl=(Number(b.lon)-Number(a.lon))*DEG,q=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R_KM*Math.asin(Math.min(1,Math.sqrt(q)));}
-function phase(deltaHours){if(!Number.isFinite(deltaHours))return 'TIME_UNRESOLVED';if(Math.abs(deltaHours)<=24)return 'NEAR_FRAME_24H';return deltaHours<0?'BEFORE_FRAME':'AFTER_FRAME';}
-function relation(e,frame,target){const t=eventTime(e),delta=t==null?null:(t-frame.ms)/3600000,distance=haversineKm(target,e);return {...e,eventTime:t==null?null:new Date(t).toISOString(),deltaHours:delta,distanceKm:distance,temporalPhase:phase(delta),relationOnly:true};}
 function compact(r){if(!r)return null;return {id:r.id,authority:r.authority,title:r.title,kind:r.kind,eventTime:r.eventTime,deltaHours:r.deltaHours,distanceKm:r.distanceKm,temporalPhase:r.temporalPhase,magnitude:r.magnitude??null};}
 function recompute(){
-  const frame=frameTime(),target=sarAuthority.target,events=globalThis.OMEGA_EARTH_AWARENESS?.events||[];state.sceneId=sceneId();state.sceneTime=frame?.iso||null;state.target=target?{...target}:null;state.eventCount=events.length;state.updatedAt=new Date().toISOString();
-  if(!frame||!target){state.state='WAITING_FOR_FRAME_TARGET';state.timedCount=0;state.nearestTemporal=null;state.nearestSpatial=null;state.coincident=[];updateHud();return;}
-  const rows=events.map(e=>relation(e,frame,target)),timed=rows.filter(r=>Number.isFinite(r.deltaHours)),spatial=rows.filter(r=>Number.isFinite(r.distanceKm));state.timedCount=timed.length;
-  timed.sort((a,b)=>Math.abs(a.deltaHours)-Math.abs(b.deltaHours));spatial.sort((a,b)=>a.distanceKm-b.distanceKm);state.nearestTemporal=compact(timed[0]||null);state.nearestSpatial=compact(spatial[0]||null);state.coincident=rows.filter(r=>Number.isFinite(r.deltaHours)&&Math.abs(r.deltaHours)<=24&&Number.isFinite(r.distanceKm)&&r.distanceKm<=250).sort((a,b)=>(a.distanceKm+Math.abs(a.deltaHours)*2)-(b.distanceKm+Math.abs(b.deltaHours)*2)).slice(0,12).map(compact);state.state='SYNCHRONIZED';updateHud();window.dispatchEvent(new CustomEvent('omega-earth-temporal-sync',{detail:snapshot()}));
+  const frame=frameTime(),target=sarAuthority.target,events=globalThis.OMEGA_EARTH_AWARENESS?.events||[],sync=synchronizeEarthEvents(events,frame,target,{nearHours:24,nearKm:250});state.sceneId=sceneId();state.sceneTime=sync.frameTime;state.target=sync.target;state.eventCount=sync.eventCount;state.timedCount=sync.timedCount;state.nearestTemporal=compact(sync.nearestTemporal);state.nearestSpatial=compact(sync.nearestSpatial);state.coincident=(sync.coincident||[]).slice(0,12).map(compact);state.state=sync.state;state.updatedAt=new Date().toISOString();updateHud();window.dispatchEvent(new CustomEvent('omega-earth-temporal-sync',{detail:snapshot()}));
 }
 function fmtHours(h){if(!Number.isFinite(h))return '—';const sign=h>0?'+':'';return Math.abs(h)>=48?`${sign}${(h/24).toFixed(1)}d`:`${sign}${h.toFixed(1)}h`;}
 function fmtKm(k){if(!Number.isFinite(k))return '—';return k>=1000?`${(k/1000).toFixed(1)}k km`:`${Math.round(k)} km`;}
