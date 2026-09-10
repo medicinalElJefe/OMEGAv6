@@ -193,7 +193,12 @@ jobs:
           BASE='${{ steps.freshness.outputs.base }}'
           CANDIDATE_SHA='${{ steps.commit.outputs.sha }}'
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          test -z "$(git status --porcelain)"
+          DIRTY_STATUS="$(git status --porcelain=v1 --untracked-files=all)"
+          if [[ -n "$DIRTY_STATUS" ]]; then
+            printf '%s\n' 'R170 exact-candidate worktree is dirty:' >&2
+            printf '%s\n' "$DIRTY_STATUS" >&2
+            exit 1
+          fi
           node tests/r170-self-build-governor-invariants.mjs
           node tests/r2141-r170-pr-policy-failclose-invariants.mjs
           node tests/r245-governed-selfbuild-convergence-invariants.mjs
