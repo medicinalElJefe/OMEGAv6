@@ -24,7 +24,7 @@ Unknown, inferred, unchosen or merely available alternatives do not become negat
 
 History is capped at 64 entries. Confidence grows only with admissible samples and reaches the configured full-confidence ceiling at 12 samples. Calibration is capped to ±0.08, so history can guide a cycle but cannot overwhelm the current source-backed state.
 
-With no admissible history, R266 is exactly R265: calibration delta is zero and adaptive coherence/future-preservation/water-memory are the R265 values.
+**Cold start is exactly R265.** With no admissible history, calibration delta is zero and adaptive coherence, future-preservation and Water-memory remain the R265 values.
 
 ## Carry and recontextualization
 
