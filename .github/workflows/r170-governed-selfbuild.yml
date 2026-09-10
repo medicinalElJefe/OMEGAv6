@@ -96,7 +96,7 @@ jobs:
           echo "generation=$GENERATION" >> "$GITHUB_OUTPUT"
       - name: Prepare candidate proof dependencies
         if: steps.select.outputs.status == 'PROPOSE'
-        run: npm install --no-fund
+        run: npm ci --no-fund
       - name: Prove current successor chain before generation
         if: steps.select.outputs.status == 'PROPOSE'
         run: |
