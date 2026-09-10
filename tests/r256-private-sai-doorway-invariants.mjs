@@ -1,7 +1,10 @@
 import fs from 'node:fs';
 const doorway=fs.readFileSync('src/privateSaiDoorwayR256.js','utf8');
 const admin=fs.readFileSync('src/privateSaiAdminR256.js','utf8');
-const req=(needle,msg)=>{if(!doorway.includes(needle)&&!admin.includes(needle))throw new Error(msg||`missing ${needle}`)};
+const isolated=fs.readFileSync('src/privateSaiDoorwayWorkerR256.js','utf8');
+const canonical=fs.readFileSync('wrangler.jsonc','utf8');
+const privateConfig=fs.readFileSync('wrangler.sai-door-r256.jsonc','utf8');
+const req=(needle,msg)=>{if(!doorway.includes(needle)&&!admin.includes(needle)&&!isolated.includes(needle))throw new Error(msg||`missing ${needle}`)};
 req("'x-robots-tag':'noindex, nofollow, noarchive'",'doorway must stay unlisted');
 req("unlisted:true",'doorway discovery must declare unlisted');
 req("trainingAdmissionAuthority:false",'peer must not gain training admission');
@@ -10,6 +13,12 @@ req("directTrainingApplied:false",'training submission must remain proposal-only
 req("PENDING_ADMIN_REVIEW",'training proposal must require admin review');
 req("OMEGA_SAI_ADMIN_TOKEN_SHA256",'admin ledger must require separate admin secret');
 req("R256_ADMIN_NOT_AUTHORIZED",'unauthorized admin probing must not disclose surface');
-for(const forbidden of ['HYBRID_SECRET','PC_PAIRING','R147_EXECUTION_DISPATCH','GITHUB_WRITE','PRODUCTION_DEPLOYMENT','R125_CANONSTATE_ADMISSION','ADMIN_LEDGER_READ'])req(forbidden,`missing forbidden authority ${forbidden}`);
-if(/\/systems|nav|menu|sidebar/i.test(doorway))throw new Error('private doorway core must not attach public navigation');
+req("protocolVersion:'0.3.0'",'A2A 0.3.0 discovery must be present');
+req("'2026-07-28'",'current stateless MCP protocol must be present');
+req('OmegaSaiPeerLedgerR256','private durable ledger class must exist');
+req('R256_RATE_LIMITED','private doorway must rate-limit bounded peer traffic');
+for(const forbidden of ['HYBRID_SECRET','PC_PAIRING','R147_EXECUTION_DISPATCH','GITHUB_WRITE','PRODUCTION_DEPLOYMENT','R125_CANONSTATE_ADMISSION','ADMIN_LEDGER_READ','DIRECT_TRAINING_ADMISSION'])req(forbidden,`missing forbidden authority ${forbidden}`);
+if(doorway.includes("'/systems'")||doorway.includes('sidebarRoute')||doorway.includes('publicMenuEntry'))throw new Error('private doorway core must not attach a public route/menu');
+if(!canonical.includes('"main": "src/workerR116.js"'))throw new Error('R256 must not replace canonical R116 entrypoint');
+if(!privateConfig.includes('"name": "omega-sai-door-r256"')||!privateConfig.includes('"service":"omegav6"'))throw new Error('isolated private Worker/service binding missing');
 console.log('R256 private SAI doorway invariants PASS');
