@@ -19,14 +19,6 @@ if(!WorldRenderer.prototype.__omegaExactVisualClosure){
 }
 
 function exactScale(){return Number(globalThis.OMEGA_SAR_RENDERER?.view?.scale)>=900;}
-function setPreferredPatchRadius(){
-  const select=$('#sarPatchRadius');if(!select)return false;
-  if(select.dataset.omegaPreferredApplied==='true')return true;
-  // 96 px radius = up to 193×193 actual GRD source pixels. This materially enlarges
-  // the georegistered exact footprint while remaining a bounded local COG read.
-  select.value='96';select.dataset.omegaPreferredApplied='true';select.title='OMEGA exact-view default: 96 px radius (193×193 source measurements)';
-  return true;
-}
 function fmt(v,d=1){return Number.isFinite(Number(v))?Number(v).toFixed(d):'—';}
 function ensurePanel(){
   if(!wrap||panel)return;
@@ -50,13 +42,10 @@ function updateReleaseLabels(){
   const runtime=globalThis.OMEGA_SAR_LIVE_PRECISION;if(runtime)runtime.release='R4-R249';
 }
 function install(){
-  setPreferredPatchRadius();ensurePanel();updateReleaseLabels();
+  ensurePanel();updateReleaseLabels();
   window.addEventListener('omega-calibrated-sar-patch',event=>{const candidate=event.detail?.patch,canvas=event.detail?.canvas;if(candidate?.state==='CALIBRATED_SENTINEL1_TARGET_PATCH'&&candidate?.evidence?.measured===true&&canvas){patch=candidate;sourceCanvas=canvas;refreshLens();}});
   window.addEventListener('omega-calibrated-sar-patch-clear',()=>{patch=null;sourceCanvas=null;refreshLens();});
   map?.addEventListener('omega-map-view',refreshLens);
-  // Controls can be inserted late on slow mobile browsers; keep the high-quality
-  // bounded default deterministic without forcing an extra measurement request.
-  if(!setPreferredPatchRadius()){const observer=new MutationObserver(()=>{if(setPreferredPatchRadius())observer.disconnect();});observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(()=>observer.disconnect(),12000);}
 }
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else queueMicrotask(install);}
 
