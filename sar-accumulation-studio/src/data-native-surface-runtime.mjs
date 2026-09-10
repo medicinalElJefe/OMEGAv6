@@ -36,7 +36,20 @@ function drawEvents(r){
   const events=globalThis.OMEGA_EARTH_AWARENESS?.events||[],bbox=r.viewBounds?.();if(!Array.isArray(bbox)||!events.length)return;const [w,s,e,n]=bbox,visible=events.filter(v=>v.lon>=w&&v.lon<=e&&v.lat>=s&&v.lat<=n).slice(0,80);if(!visible.length)return;
   ctx.save();for(const event of visible){const [x,y]=r.project(event.lon,event.lat),quake=event.authority==='USGS',m=Number.isFinite(event.magnitude)?event.magnitude:2.5,rad=quake?Math.min(8,2+m*.75):3.2;ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);ctx.fillStyle=quake?'rgba(245,236,225,.44)':'rgba(205,235,242,.34)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.30)';ctx.lineWidth=.6;ctx.stroke();}ctx.restore();
 }
-function updateDomState(surface){state.surface=surface;state.renderedAt=new Date().toISOString();document.body.dataset.dataNativeSurface=surface.toLowerCase();const badge=document.querySelector('#omegaDataNativeBadge');if(badge)badge.textContent=surface==='EXACT_SHAPED_SAR'?'EXACT MEASURED SAR · TERRAIN-SHAPED DISPLAY':surface==='REGIONAL_SHAPED_SAR'?'REGIONAL MEASURED SAR · TERRAIN-SHAPED DISPLAY':'DATA-NATIVE EARTH RELIEF · SOURCE DEM';}
+function forceOpacity(selector,value){const node=document.querySelector(selector);if(!node)return;if(value==null)node.style.removeProperty('opacity');else node.style.setProperty('opacity',String(value),'important');}
+function applyLayerHierarchy(surface){
+  const shaped=surface==='REGIONAL_SHAPED_SAR'||surface==='EXACT_SHAPED_SAR',exact=surface==='EXACT_SHAPED_SAR';
+  // These inline !important values deliberately outrank late-installed legacy runtime
+  // styles. R255 installs some CSS on requestAnimationFrame, so stylesheet source order
+  // is not an acceptable authority mechanism for the R256 image hierarchy.
+  forceOpacity('.omega-regional-sar-layer canvas',surface==='REGIONAL_SHAPED_SAR'?.02:null);
+  forceOpacity('.omega-global-sar-fabric canvas',shaped?.006:null);
+  forceOpacity('.omega-woven-motion canvas',shaped?.018:null);
+  forceOpacity('.omega-earth-awareness-layer canvas',0);
+  forceOpacity('#map',exact?.02:null);
+  const oldBadge=document.querySelector('#omegaRegionalSarBadge');if(oldBadge)oldBadge.style.setProperty('display','none','important');
+}
+function updateDomState(surface){state.surface=surface;state.renderedAt=new Date().toISOString();document.body.dataset.dataNativeSurface=surface.toLowerCase();applyLayerHierarchy(surface);const badge=document.querySelector('#omegaDataNativeBadge');if(badge)badge.textContent=surface==='EXACT_SHAPED_SAR'?'EXACT MEASURED SAR · TERRAIN-SHAPED DISPLAY':surface==='REGIONAL_SHAPED_SAR'?'REGIONAL MEASURED SAR · TERRAIN-SHAPED DISPLAY':'DATA-NATIVE EARTH RELIEF · SOURCE DEM';}
 function draw(){
   if(!ctx||!canvas||!map)return;ensureAssets();const rect=map.getBoundingClientRect();ctx.clearRect(0,0,rect.width,rect.height);const r=renderer();if(!r)return;const scale=Number(r.view.scale)||1;
   drawRelief(r);
@@ -50,14 +63,15 @@ function resize(){if(!canvas||!map)return;const rect=map.getBoundingClientRect()
 function install(){
   if(!wrap||layer)return;const style=document.createElement('style');style.id='omegaDataNativeSurfaceStyle';style.textContent=`
   .omega-data-native-surface{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}.omega-data-native-surface canvas{position:absolute;inset:0;width:100%;height:100%;display:block}.omega-data-native-badge{position:absolute;z-index:11;left:10px;top:10px;padding:5px 7px;border-radius:7px;border:1px solid rgba(255,255,255,.10);background:rgba(3,7,9,.48);backdrop-filter:blur(10px);font:700 7px Inter,Segoe UI,sans-serif;letter-spacing:.07em;color:rgba(236,244,246,.74);pointer-events:none}
-  body[data-data-native-surface=regional_shaped_sar] .omega-regional-sar-layer canvas,body[data-data-native-surface=exact_shaped_sar] #map{opacity:.02!important}
+  body[data-data-native-surface=regional_shaped_sar][data-sar-surface=regional_measured] .omega-regional-sar-layer canvas{opacity:.02!important}
   body[data-data-native-surface=regional_shaped_sar] .omega-global-sar-fabric canvas,body[data-data-native-surface=exact_shaped_sar] .omega-global-sar-fabric canvas{opacity:.006!important}
   body[data-data-native-surface=regional_shaped_sar] .omega-woven-motion canvas,body[data-data-native-surface=exact_shaped_sar] .omega-woven-motion canvas{opacity:.018!important}
+  body[data-data-native-surface=exact_shaped_sar] #map{opacity:.02!important}
   body.omega-experience .omega-earth-awareness-layer canvas{opacity:0!important}
   body.omega-experience .omega-jrc-water-layer canvas{opacity:.16!important;mix-blend-mode:screen!important;filter:saturate(.72) contrast(.94)!important}
   body.omega-experience #omegaRegionalSarBadge{display:none!important}
   @media(max-width:760px){.omega-data-native-badge{display:none}}
   `;document.head.append(style);layer=document.createElement('div');layer.className='omega-data-native-surface';canvas=document.createElement('canvas');ctx=canvas.getContext('2d');layer.append(canvas);const badge=document.createElement('div');badge.id='omegaDataNativeBadge';badge.className='omega-data-native-badge';badge.textContent='DATA-NATIVE EARTH SURFACE · LOADING';wrap.append(layer,badge);new ResizeObserver(resize).observe(map);resize();
-  map.addEventListener('omega-map-view',scheduleDraw);window.addEventListener('omega-data-native-terrain',()=>{lastTerrainKey='';lastRegionalKey='';lastExactKey='';scheduleDraw();});window.addEventListener('omega-regional-sar-measurement',()=>{lastRegionalKey='';scheduleDraw();});window.addEventListener('omega-calibrated-sar-patch',()=>{lastExactKey='';scheduleDraw();});window.addEventListener('omega-calibrated-sar-patch-clear',()=>{lastExactKey='';scheduleDraw();});window.addEventListener('omega-earth-awareness-update',scheduleDraw);state.state='READY';state.redraw=draw;
+  map.addEventListener('omega-map-view',scheduleDraw);window.addEventListener('omega-data-native-terrain',()=>{lastTerrainKey='';lastRegionalKey='';lastExactKey='';scheduleDraw();});window.addEventListener('omega-regional-sar-measurement',()=>{lastRegionalKey='';scheduleDraw();});window.addEventListener('omega-calibrated-sar-patch',()=>{lastExactKey='';scheduleDraw();});window.addEventListener('omega-calibrated-sar-patch-clear',()=>{lastExactKey='';scheduleDraw();});window.addEventListener('omega-earth-awareness-update',scheduleDraw);state.state='READY';state.redraw=draw;state.applyLayerHierarchy=applyLayerHierarchy;
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else queueMicrotask(install);
