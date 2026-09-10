@@ -14,11 +14,21 @@ for(const token of [
  "epoch:previous.epoch+1",
  "document.visibilityState==='visible'",
  "document.addEventListener('visibilitychange',onVisibility)",
+ "window.addEventListener('focus',onResume)",
+ "window.addEventListener('online',onResume)",
+ "window.removeEventListener('focus',onResume)",
+ "window.removeEventListener('online',onResume)",
  "omega:hybrid:selectedDeviceId",
  "selectedDeviceJobs",
+ "const jobById=useMemo(()=>new Map(jobs.map((job:any)=>[job?.id,job])),[jobs])",
+ "job:jobById.get(mission.currentJobId)||mission.currentJob||null",
  "targetForMission(mission,job)===device.id",
  "Date.now()-snapshot.observedAt>POLL_MS*4"
 ])must(provider.includes(token),`R238 shared snapshot invariant missing ${token}`);
+
+must(provider.includes('const POLL_MS=2500'),'R267 must not alter the established R238 polling cadence');
+must(!provider.includes('ACTIVE_POLL_MS')&&!provider.includes('IDLE_POLL_MS'),'R267 bounded polish must not introduce adaptive polling semantics');
+must(!provider.includes('jobs.find((job:any)=>job.id===mission.currentJobId)'),'R267 mission correlation must use the indexed job map rather than repeated linear lookup');
 
 const providerHybridGets=(provider.match(/api\.get<any>\('\/api\/hybrid\/status'\)/g)||[]).length;
 const providerMissionGets=(provider.match(/api\.get<any>\('\/api\/missions'\)/g)||[]).length;
@@ -63,4 +73,4 @@ for(const token of ['<HybridHostEffectsR212/>','<HybridCommandDeckR237/>','<Hybr
 for(const token of ['R125 admission authority','R141 exact return closure','R146 history','R147 executor/dispatch authority'])must(hybrid.includes(token),`R238 authority boundary regressed ${token}`);
 for(const text of [provider,hostEffects])for(const forbidden of ["api.post<any>('/api/hybrid/jobs'","op:'APPLY_PATCH'","op:'WRITE_TEXT'"])must(!text.includes(forbidden),`R238 read-only sampling/observation plane introduced mutation primitive ${forbidden}`);
 
-console.log('OMEGA R238 HYBRID CORRELATED SNAPSHOT PASS · one atomic Hybrid/Mission polling owner · in-flight coalescing · visibility-aware refresh · persistent selected device · R212/R237/R238/R239 shared epoch + host identity · selected-host return isolation · stale fail-closed command writes · R141/R146/R147/R125 preserved');
+console.log('OMEGA R238/R267 HYBRID CORRELATED SNAPSHOT PASS · one atomic Hybrid/Mission polling owner · in-flight coalescing · visibility/focus/network-resume refresh · indexed mission/job correlation · unchanged 2.5s cadence + stale gate · persistent selected device · R212/R237/R238/R239 shared epoch + host identity · selected-host return isolation · stale fail-closed command writes · R141/R146/R147/R125 preserved');
