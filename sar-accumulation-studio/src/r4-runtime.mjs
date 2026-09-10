@@ -5,6 +5,7 @@ import './sar-render-authority.mjs';
 import './map-navigation-runtime.mjs';
 import './location.mjs';
 import './sentinel-console.mjs';
+import './sar-measurement-authority.mjs';
 import './sar-browse-overlay.mjs';
 import './sar-earth-overlay.mjs';
 import './sar-focus-runtime.mjs';
