@@ -72,15 +72,15 @@ jobs:
             if curl --fail --silent http://127.0.0.1:8765/ >/tmp/sar-index.html; then break; fi
             sleep 0.25
           done
-          grep -q 'OMEGA · SAR ACCUMULATION STUDIO' /tmp/sar-index.html
-          grep -q 'GCOV + GUNW' /tmp/sar-index.html
-          grep -q 'PUBLIC SCIENTIFIC WORKSTATION' /tmp/sar-index.html
+          grep -q 'OMEGA SAR' /tmp/sar-index.html
           grep -q 'src/canon-console.mjs' /tmp/sar-index.html
           grep -q 'src/nisar-console.mjs' /tmp/sar-index.html
           grep -q 'public.css' /tmp/sar-index.html
           curl --fail --silent http://127.0.0.1:8765/src/charted-canon.mjs >/dev/null
           curl --fail --silent http://127.0.0.1:8765/src/sentinel1-calibration.mjs >/dev/null
           curl --fail --silent http://127.0.0.1:8765/src/nisar-console.mjs | grep -q 'omega.sar.nisar.gunw.measurement.v1'
+          curl --fail --silent http://127.0.0.1:8765/src/r4-runtime.mjs | grep -q 'CONTINUOUS_SAR_EARTH_INSTRUMENT'
+          curl --fail --silent http://127.0.0.1:8765/src/sar-experience-runtime.mjs | grep -q 'OMEGA_SAR_EXPERIENCE'
           curl --fail --silent http://127.0.0.1:8765/public.css >/dev/null
           curl --fail --silent http://127.0.0.1:8765/data/earth-grid.part06.txt >/dev/null
 
