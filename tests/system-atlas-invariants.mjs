@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 const runtime=fs.readFileSync('src/systemAtlasRuntime.ts','utf8'),predecessor=fs.readFileSync('src/systemAtlasPredecessor.ts','utf8'),completion=fs.readFileSync('src/completionRuntimeR48.ts','utf8'),ui=fs.readFileSync('src/SystemAtlasControl.tsx','utf8'),router=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8'),loader=fs.existsSync('src/specialistLoaderR109.tsx')?fs.readFileSync('src/specialistLoaderR109.tsx','utf8'):'';
+const foundry=fs.readFileSync('src/systemFoundryR268.ts','utf8'),foundryUi=fs.readFileSync('src/SystemFoundryR268.tsx','utf8');
 const must=(x,m)=>{if(!x)throw new Error(m)};
 for(const x of ['61917364224','20736','SUBSYSTEM_COUNT=24','PHASE_COUNT=12','STREAM_COUNT=4','GRID_CELLS=27648','ONE FIELD / ONE PACKET / ONE CONTINUITY LAW'])must(runtime.includes(x),`missing donor invariant ${x}`);
 const families=[...runtime.matchAll(/F\('S(\d\d)'/g)].map(x=>x[1]);must(families.length===24,`expected 24 families, got ${families.length}`);must(new Set(families).size===24,'family IDs must be unique');
@@ -29,4 +30,13 @@ must(router.includes("case 'System Atlas'")&&router.includes("case 'Control Matr
 const eagerSystem=router.includes("import SystemAtlasControl from './SystemAtlasControl'")&&router.includes('<SystemAtlasControl record={record} onNavigate={go}');
 const deferredSystem=loader.includes("SystemAtlasControl:()=>import('./SystemAtlasControl')")&&loader.includes('export const SystemAtlasR109=lazy(LOADERS.SystemAtlasControl)')&&router.includes('<SystemAtlasR109 record={record} onNavigate={go}');
 must(eagerSystem||deferredSystem,'dedicated System Atlas control must remain mounted through eager or R109 deferred binding');
-console.log('SYSTEM_ATLAS R168 PASS · 24-family V23/V24 lineage preserved · current R48/R153 successor status and operator route separated from predecessor target · current truth receipt locked · no fake Open · deferred routes preserved');
+for(const token of ["export type OmegaLayer='STATE'|'INTELLIGENCE'|'MEMORY'|'RELATION'|'COMPUTATION'|'ACTION'|'OBSERVATION'|'PROOF'","canonStateAdmission:'R125 only'","deployment:'.github/workflows/ci.yml only'","'R205 immutable executor semantics'","'R239 resource governance'","'R240 exact-head promotion'","'R243 Woven planning/execution-motion truth boundary'","maxMutationCandidates:1","compileSystemGenomeR268","dormantCapabilities","operatorDag"])must(foundry.includes(token),`R268 Foundry invariant missing ${token}`);
+for(const token of ['continuity.partition','continuity.transform','continuity.invariantCarry','continuity.scarCarry','continuity.recontextualize'])must(foundry.includes(token),`R268 Woven software operator missing ${token}`);
+for(const id of ['omega.self','collections.workbench','sar.lab','science.lab','software.factory'])must(foundry.includes(`id:'${id}'`),`R268 system genome missing ${id}`);
+must(foundry.includes("if(c.evidence.includes('DEVICE_PROOF_REQUIRED')&&!ctx.authenticatedDeviceHeartbeat)blockers.push('DEVICE_PROOF_REQUIRED')"),'device execution must remain heartbeat gated');
+must(foundry.includes("if(c.evidence.includes('EXTERNAL_DEGRADED')&&!ctx.externalBindings)blockers.push('EXTERNAL_DEGRADED')"),'external execution must remain binding gated');
+must(foundry.includes("active.filter(x=>x.status==='ACTIVE').reduce"),'cost/latency must exclude blocked work');
+must(foundryUi.includes('DEVICE_PROOF_REQUIRED — browser/CI state is not treated as private-PC proof.'),'Foundry UI must not promote browser/CI state into private-PC proof');
+must(foundryUi.includes('This surface plans; it does not create a second executor or production writer.'),'Foundry must declare planning-only authority');
+must(ui.includes("import SystemFoundryR268 from './SystemFoundryR268'" )&&ui.includes('<SystemFoundryR268/>'),'System Foundry must be mounted inside System Atlas without a parallel route shell');
+console.log('SYSTEM_ATLAS R168/R268 PASS · 24-family current-truth atlas preserved · governed System Foundry compiler mounted · five declarative genomes · lazy active frontier · operator DAG reuse · heartbeat/external gates fail closed · R125/R141/R146/R147/R205/R239/R240/R243 + ci.yml authority preserved');
