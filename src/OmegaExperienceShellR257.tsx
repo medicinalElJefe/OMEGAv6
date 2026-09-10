@@ -10,10 +10,12 @@ const DEPTHS:readonly {id:OmegaExperienceDepthR257;label:string;copy:string}[]=[
  {id:'ADVANCED',label:'Advanced',copy:'controls + context'},
  {id:'FULL',label:'Full',copy:'complete instrumentation'}
 ];
+const persistLegacyView=(workspace:string,lens:string,depth:OmegaExperienceDepthR257)=>{try{localStorage.setItem('omega.r82.workspace',workspace);localStorage.setItem('omega.r82.homeProjection',lens);localStorage.setItem('omega.r132.depth',depth==='FOCUS'?'FOCUS':'DEEP')}catch{}};
 export default function OmegaExperienceShellR257({children,onNavigate,onHome,home}:Props){
  const{experience,depth,immersive,setExperience,setDepth,setImmersive,reset}=useOmegaExperienceR257();
  const active=experienceDefinitionR257(experience);
- const choose=(id:typeof experience)=>{const next=experienceDefinitionR257(id);setExperience(id);setDepth(next.defaultDepth)};
+ const choose=(id:typeof experience)=>{const next=experienceDefinitionR257(id);persistLegacyView(next.workspace,next.lens,next.defaultDepth);setExperience(id);setDepth(next.defaultDepth)};
+ const chooseDepth=(next:OmegaExperienceDepthR257)=>{persistLegacyView(active.workspace,active.lens,next);setDepth(next)};
  return <div className={`r257-shell ${immersive?'immersive':''}`} data-r257-experience={experience} data-r257-depth={depth} data-r257-immersive={immersive?'true':'false'} data-r257-authority={EXPERIENCE_TRUTH_CONTRACT_R257.authority}>
   <div className='r257-truth-ribbon'><ShieldCheck/><b>SOURCE-BACKED VIEW</b><span>{EXPERIENCE_TRUTH_CONTRACT_R257.law.replaceAll('_',' ')}</span><small>Experience changes presentation and priority only. Proof, evidence class, execution authority and Canon admission do not change.</small></div>
   <header className='r257-experience-bar'>
@@ -24,7 +26,7 @@ export default function OmegaExperienceShellR257({children,onNavigate,onHome,hom
   <section className='r257-context-strip'>
    <div><span>{active.workspace} WORKSPACE</span><b>{active.lens} LENS</b></div>
    <nav aria-label={`${active.label} promoted tools`}>{active.routes.map(route=><button key={route} onClick={()=>onNavigate(route)}>{route}</button>)}<button className='all' onClick={()=>window.dispatchEvent(new CustomEvent('omega-r88-open-navigator',{detail:{layer:'APPLICATIONS'}}))}>All systems →</button></nav>
-   <div className='r257-depth' aria-label='Presentation depth'><Focus/><span>DEPTH</span>{DEPTHS.map(x=><button key={x.id} className={depth===x.id?'active':''} onClick={()=>setDepth(x.id)} title={x.copy}>{x.label}</button>)}</div>
+   <div className='r257-depth' aria-label='Presentation depth'><Focus/><span>DEPTH</span>{DEPTHS.map(x=><button key={x.id} className={depth===x.id?'active':''} onClick={()=>chooseDepth(x.id)} title={x.copy}>{x.label}</button>)}</div>
   </section>
   <main className='r257-stage' data-r257-stage={home?'HOME':'SPECIALIST'}>{children}</main>
   {immersive&&<div className='r257-immersive-dock'><Layers3/><span><b>{active.label}</b><small>{depth} · truth ribbon remains visible</small></span><button onClick={()=>setImmersive(false)}>Exit immersive</button></div>}
