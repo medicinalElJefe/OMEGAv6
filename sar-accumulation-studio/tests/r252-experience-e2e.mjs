@@ -37,7 +37,6 @@ try{
   await page.keyboard.press('m');await page.waitForTimeout(280);assert.equal(await page.evaluate(()=>document.body.dataset.drawer),'mission');
   await page.keyboard.press('Escape');
   await page.click('#omegaModeSwitch [data-mode="analyze"]');await page.waitForTimeout(320);
-  assert.equal(await page.evaluate(()=>({mode:document.body.dataset.mode,drawer:document.body.dataset.drawer})),undefined);
   const analyze=await page.evaluate(()=>({mode:document.body.dataset.mode,drawer:document.body.dataset.drawer,deck:document.querySelector('.analysis-deck').getBoundingClientRect()}));
   assert.equal(analyze.mode,'analyze');assert.equal(analyze.drawer,'analysis');assert.ok(analyze.deck.top<innerHeight-40);
   await page.click('#omegaModeSwitch [data-mode="explore"]');await page.waitForTimeout(280);
