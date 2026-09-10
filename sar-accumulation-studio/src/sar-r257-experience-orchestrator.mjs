@@ -1,7 +1,7 @@
 const $=s=>document.querySelector(s);
 const map=$('#map'),wrap=map?.closest('.map-wrap');
 const PROOF_IDS=['omegaFieldHud','omegaCellInspector','omegaEarthAwarenessHud','omegaTemporalSyncHud','omegaGlobalSarFabricHud','omegaBladeLens'];
-let proofStack=null,stageEl=null,observer=null,drawerObserver=null,raf=0;
+let proofStack=null,stageEl=null,observer=null,drawerObserver=null,navObserver=null,observedNav=null,raf=0;
 const state={state:'INITIALIZING',release:'R257',phase:'BOOT',detail:'',proofPanels:0,overlapPolicy:'RESERVED_ZONES_AND_SINGLE_STACK',progressiveLoading:true,updatedAt:null};
 globalThis.OMEGA_SAR_R257_EXPERIENCE=state;
 
@@ -33,17 +33,18 @@ function collectProofPanels(){
   for(const id of PROOF_IDS){const node=document.getElementById(id);if(node&&node!==stack&&node.parentElement!==stack)stack.append(node);}
   state.proofPanels=stack.children.length;
 }
+function setImportant(node,name,value){if(!node)return;const s=node.style;if(s.getPropertyValue(name)!==value||s.getPropertyPriority(name)!=='important')s.setProperty(name,value,'important');}
+function reserveNav(nav){setImportant(nav,'opacity','0');setImportant(nav,'visibility','hidden');setImportant(nav,'pointer-events','none');setImportant(nav,'display','none');}
+function releaseNav(nav){if(!nav)return;for(const name of ['opacity','visibility','pointer-events','display'])nav.style.removeProperty(name);}
+function ensureNavObserver(){
+  const nav=$('#omegaMapNav');if(!nav)return null;if(nav===observedNav&&navObserver)return nav;
+  navObserver?.disconnect?.();observedNav=nav;navObserver=new MutationObserver(()=>{if(document.body.dataset.drawer)reserveNav(nav);});navObserver.observe(nav,{attributes:true,attributeFilter:['style','class']});return nav;
+}
 function syncDrawerReservation(){
-  const open=!!document.body.dataset.drawer,nav=$('#omegaMapNav'),stack=ensureProofStack();
+  const open=!!document.body.dataset.drawer,nav=ensureNavObserver(),stack=ensureProofStack();
   document.body.dataset.r257DrawerReserved=open?'true':'false';
-  if(nav){
-    if(open){nav.style.setProperty('opacity','0','important');nav.style.setProperty('pointer-events','none','important');nav.style.setProperty('visibility','hidden','important');}
-    else{nav.style.removeProperty('opacity');nav.style.removeProperty('pointer-events');nav.style.removeProperty('visibility');}
-  }
-  if(stack){
-    if(open)stack.style.setProperty('display','none','important');
-    else stack.style.removeProperty('display');
-  }
+  if(nav){if(open)reserveNav(nav);else releaseNav(nav);}
+  if(stack){if(open)setImportant(stack,'display','none');else stack.style.removeProperty('display');}
 }
 function applyStage(){
   cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
@@ -65,7 +66,7 @@ function installStyle(){
   body.omega-experience .omega-r257-proof-stack>#omegaFieldHud{display:grid!important;grid-template-columns:minmax(130px,1.6fr) repeat(2,minmax(62px,.7fr))!important}.omega-r257-proof-stack>#omegaFieldHud>div:nth-of-type(n+4){display:none!important}.omega-r257-proof-stack>#omegaFieldHud small{grid-column:1/-1!important}
   body.omega-experience:not([data-mode=proof]) #omegaCellInspector{display:none!important}
   body.omega-experience[data-drawer] .omega-map-nav{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .12s ease}
-  body[data-drawer] #omegaMapNav,body[data-r257-drawer-reserved=true] #omegaMapNav{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .12s ease}
+  body[data-drawer] #omegaMapNav,body[data-r257-drawer-reserved=true] #omegaMapNav{opacity:0!important;visibility:hidden!important;pointer-events:none!important;display:none!important;transition:opacity .12s ease}
   body.omega-experience[data-drawer] .omega-r257-proof-stack{display:none!important}
   body[data-drawer] .omega-r257-proof-stack,body[data-r257-drawer-reserved=true] .omega-r257-proof-stack{display:none!important}
   body.omega-experience .evidence-dock,body.omega-experience .mission-rail,body.omega-experience .analysis-deck{overscroll-behavior:contain}
@@ -75,8 +76,8 @@ function installStyle(){
   `;document.head.append(style);
 }
 function install(){
-  installStyle();ensureStage();ensureProofStack();collectProofPanels();syncDrawerReservation();applyStage();
-  observer=new MutationObserver(()=>{collectProofPanels();ensureStage();syncDrawerReservation();});observer.observe(document.documentElement,{childList:true,subtree:true});
+  installStyle();ensureStage();ensureProofStack();collectProofPanels();ensureNavObserver();syncDrawerReservation();applyStage();
+  observer=new MutationObserver(()=>{collectProofPanels();ensureStage();ensureNavObserver();syncDrawerReservation();});observer.observe(document.documentElement,{childList:true,subtree:true});
   drawerObserver=new MutationObserver(syncDrawerReservation);drawerObserver.observe(document.body,{attributes:true,attributeFilter:['data-drawer','data-mode']});
   const events=['omega-regional-sar-measurement','omega-calibrated-sar-patch','omega-calibrated-sar-patch-clear','omega-data-native-terrain','omega-earth-awareness-update','omega-temporal-sync','omega-map-view','omega-map-select'];for(const name of events)(name.startsWith('omega-map')?map:window)?.addEventListener?.(name,applyStage);
   state.state='READY';
