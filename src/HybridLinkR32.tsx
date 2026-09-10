@@ -10,6 +10,7 @@ import HybridHostEffectsR212 from './HybridHostEffectsR212';
 import HybridCommandDeckR237 from './HybridCommandDeckR237';
 import HybridActionRuntimeR247 from './HybridActionRuntimeR247';
 import HybridOutcomeClosureR254 from './HybridOutcomeClosureR254';
+import HybridExperienceLedgerR255 from './HybridExperienceLedgerR255';
 import HybridProofClosureR141 from './HybridProofClosureR141';
 import MissionLineageReviewR209 from './MissionLineageReviewR209';
 import {HybridRuntimeSnapshotProviderR238} from './HybridRuntimeSnapshotR238';
@@ -34,6 +35,7 @@ export default function HybridLinkR32({status,record}:Props){
    <HybridResourceGovernorR239/>
    <HybridActionRuntimeR247/>
    <HybridOutcomeClosureR254/>
+   <HybridExperienceLedgerR255/>
    <HybridHostEffectsR212/>
    <HybridCommandDeckR237/>
    <HybridProofClosureR141/>
