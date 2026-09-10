@@ -10,6 +10,7 @@ import {RUNTIME_IDENTITY} from './runtimeIdentity';
 import {compileFullOverallModePlanR79,compactModePlanR79} from './fullOverallModeOrchestratorR79';
 import {OMEGA_ALL_ROUTES_R82,OMEGA_FIELD_PROJECTIONS_R82,OMEGA_WORKSPACES_R82,projectionForR82,type OmegaFieldProjectionR82,type OmegaWorkspaceIdR82} from './omegaExperienceRegistryR82';
 import {OMEGA_EXPERIENCE_LAWS_R132,primaryRoutesForWorkspaceR132} from './experienceOrganizationR132';
+import {OMEGA_EXPERIENCES_R257} from './omegaExperienceShellR257';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import OmegaSideNavigatorR88 from './OmegaSideNavigatorR88';
 import {CANON_AUTHORITY_COUNT} from './allModesAuthority';
@@ -24,6 +25,7 @@ type SurfaceDepth='FOCUS'|'DEEP';
 type InspectorTab='STATE'|'OPERATORS'|'TOOLS';
 type FederationNode={id:string;role:string;url?:string|null;endpoint?:string;availability?:string;stateGate?:string};
 type FederationManifest={schema?:string;canonicalAuthority?:string;nodes?:FederationNode[]};
+type ExperienceChangeDetail={experience?:string;depth?:string};
 
 const ROLES:OperatorColorRole[]=['ALPHA','BASE','CONSTRUCT','PRUNE','OMEGA'];
 const ROLE_COPY:Record<OperatorColorRole,string>={ALPHA:'seed possibility / phase opening',BASE:'substrate evidence / continuity anchor',CONSTRUCT:'expansion / admitted growth',PRUNE:'inversion / contradiction reduction',OMEGA:'integration / coherent closure'};
@@ -56,6 +58,18 @@ export default function OmegaHomeR71({onEnter}:Props){
  useEffect(()=>{try{localStorage.setItem('omega.r132.depth',depth)}catch{}},[depth]);
  useEffect(()=>{localState.write('omega.b015.chatDraft.v1',prompt)},[prompt]);
  useEffect(()=>{try{localStorage.setItem('omega.r88.systemMapOpen',String(showSystemMap))}catch{}},[showSystemMap]);
+ useEffect(()=>{
+  const syncExperience=(event:Event)=>{
+   const detail=(event as CustomEvent<ExperienceChangeDetail>).detail||{};
+   const profile=OMEGA_EXPERIENCES_R257.find(item=>item.id===detail.experience);
+   if(!profile)return;
+   if(OMEGA_WORKSPACES_R82.some(item=>item.id===profile.workspace))setDomain(profile.workspace as DomainId);
+   if(OMEGA_FIELD_PROJECTIONS_R82.some(item=>item.id===profile.lens))setMode(profile.lens as FieldMode);
+   setDepth(detail.depth==='FOCUS'?'FOCUS':'DEEP');
+  };
+  window.addEventListener('omega-r257-experience-change',syncExperience as EventListener);
+  return()=>window.removeEventListener('omega-r257-experience-change',syncExperience as EventListener);
+ },[]);
  useEffect(()=>{let live=true;const load=async()=>{try{const[s,h,f]=await Promise.all([api.get<any>('/api/status'),api.get<any>('/api/hybrid/status'),fetch('/omega-federation.json',{cache:'no-store'}).then(r=>r.ok?r.json():null)]);if(live){setStatus(s.data||null);setHybrid(h.data||null);setFederation(f)}}catch{if(live){setStatus(null);setHybrid(null)}}};void load();const id=window.setInterval(load,30000);return()=>{live=false;window.clearInterval(id)}},[]);
  const record=useMemo(()=>ready?corpusState(address):null,[ready,address]);
  const coords=useMemo(()=>decodeAddress(address),[address]);
@@ -82,11 +96,11 @@ export default function OmegaHomeR71({onEnter}:Props){
   <OmegaSideNavigatorR88 onNavigate={enter}/>
   <header className='r96-topbar'>
    <button className='r96-brand' onClick={()=>setDomain('EXPLORE')}><span className='r96-mark'/><span><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild} · ONE CANONICAL RUNTIME</small></span></button>
-   <div className='r96-now'><span>NOW</span><b>{record?`STATE ${record.stateId.toLocaleString()}`:'MATERIALIZING'}</b><small>{record?`${record.metrics.decision} · D${coords.d+1} P${coords.p+1} R${coords.r+1} L${coords.l+1}`:'source-bound corpus'}</small></div>
-   <div className='r132-header-tools'><div className='r96-header-actions'><button aria-label='All tools' onClick={()=>openApplications()}><Search/>All tools</button><button onClick={openSoftware}><Blocks/>System map</button></div><div className='r132-depth-toggle' aria-label='OMEGA surface depth'><button className={depth==='FOCUS'?'active':''} onClick={()=>setDepth('FOCUS')}>FOCUS</button><button className={depth==='DEEP'?'active':''} onClick={()=>setDepth('DEEP')}>DEEP</button></div></div>
+   <div className='r96-now' aria-live='polite'><span>NOW</span><b>{record?`STATE ${record.stateId.toLocaleString()}`:'MATERIALIZING'}</b><small>{record?`${record.metrics.decision} · D${coords.d+1} P${coords.p+1} R${coords.r+1} L${coords.l+1}`:'source-bound corpus'}</small></div>
+   <div className='r132-header-tools'><div className='r96-header-actions'><button aria-label='All tools' onClick={()=>openApplications()}><Search/>All tools</button><button onClick={openSoftware}><Blocks/>System map</button></div><div className='r132-depth-toggle' aria-label='OMEGA surface depth'><button aria-pressed={depth==='FOCUS'} className={depth==='FOCUS'?'active':''} onClick={()=>setDepth('FOCUS')}>FOCUS</button><button aria-pressed={depth==='DEEP'} className={depth==='DEEP'?'active':''} onClick={()=>setDepth('DEEP')}>DEEP</button></div></div>
   </header>
 
-  <nav className='r96-workspaces' aria-label='OMEGA workspaces'>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} className={domain===w.id?'active':''} data-role={w.role} onClick={()=>{setDomain(w.id);setInspectorTab('TOOLS')}} style={{'--workspace-color':law?operatorColor(law,w.role,.95):undefined} as React.CSSProperties}><i/><span><b>{w.label}</b><small>{w.copy}</small></span><strong>{w.routes.length}</strong></button>)}</nav>
+  <nav className='r96-workspaces' aria-label='OMEGA workspaces'>{OMEGA_WORKSPACES_R82.map(w=><button key={w.id} aria-pressed={domain===w.id} className={domain===w.id?'active':''} data-role={w.role} onClick={()=>{setDomain(w.id);setInspectorTab('TOOLS')}} style={{'--workspace-color':law?operatorColor(law,w.role,.95):undefined} as React.CSSProperties}><i/><span><b>{w.label}</b><small>{w.copy}</small></span><strong>{w.routes.length}</strong></button>)}</nav>
   <section className='r132-primary-strip' aria-label={`${activeWorkspace.label} primary tools`}><span>{activeWorkspace.label.toUpperCase()} · START HERE</span><div>{primaryRoutes.map(panel=><button key={panel} onClick={()=>enter(panel)}>{panel}</button>)}<button onClick={()=>openApplications(domain)}>ALL {activeWorkspace.routes.length} TOOLS →</button></div></section>
 
   <section className='r96-engine-spine' aria-label='OMEGA federation engines'>
@@ -96,17 +110,17 @@ export default function OmegaHomeR71({onEnter}:Props){
   <section className='r96-workbench'>
    <section className='r96-canvas'>
     <header className='r96-canvas-head'><div><span>ACTIVE COMPUTATION · 20,736 SOURCE CELLS</span><b>{projection.label}</b><small>{projection.intent}</small></div><button onClick={()=>enter(projection.panel)}>Open specialist <ArrowRight/></button></header>
-    <nav className='r71-modes' aria-label='Canonical membrane analysis lenses'>{OMEGA_FIELD_PROJECTIONS_R82.map(m=><button key={m.id} className={mode===m.id?'active':''} data-signature={m.signature} title={`${m.label} · ${m.intent}`} onClick={()=>setMode(m.id)}><b>{m.label}</b><small>{HOME_LENS[m.id].projection} · {HOME_LENS[m.id].view.replaceAll('_',' ')}</small></button>)}</nav>
+    <nav className='r71-modes' aria-label='Canonical membrane analysis lenses'>{OMEGA_FIELD_PROJECTIONS_R82.map(m=><button key={m.id} aria-pressed={mode===m.id} className={mode===m.id?'active':''} data-signature={m.signature} title={`${m.label} · ${m.intent}`} onClick={()=>setMode(m.id)}><b>{m.label}</b><small>{HOME_LENS[m.id].projection} · {HOME_LENS[m.id].view.replaceAll('_',' ')}</small></button>)}</nav>
     <div className='r96-projection-law'><span>{projection.signature}</span><b>{lens.projection} position + {lens.view.replaceAll('_',' ')} color</b><small>{projection.intent} · primary Home display remains the canonical 20,736-cell membrane</small></div>
     <div className='r71-field'>{record?<CanonicalMembraneR95 address={address} onAddress={setAddress} projection={lens.projection} view={lens.view} showControls={false} compact label={`HOME · ${projection.label.toUpperCase()} · CANONICAL MEMBRANE`}/>:<div className='r71-loading'><Activity/><b>Loading canonical membrane</b></div>}</div>
     <div className='r71-traverse'><button onClick={()=>setAddress(clamp(address-1))}>− STATE</button><input aria-label='Canonical atlas address' type='range' min='0' max='20735' value={address} onChange={e=>setAddress(clamp(Number(e.target.value)))}/><button onClick={()=>setAddress(nextAddress)}><Waypoints/>ADMITTED NEXT</button></div>
-    <div className='r96-command-dock'><div><span>SOURCE-BACKED ASSISTANT</span><b>Route first. Generate second.</b></div><textarea value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void ask()}}} placeholder='Ask OMEGA to explain, forecast, inspect, traverse, build or prove from this state…'/><button onClick={()=>void ask()} disabled={!record||busy||!prompt.trim()}><Send/><span>{busy?'RUNNING':'RUN OMEGA'}</span></button>{reply&&<div className='r71-reply'>{reply}</div>}</div>
+    <div className='r96-command-dock'><div><span>SOURCE-BACKED ASSISTANT</span><b>Route first. Generate second.</b></div><textarea aria-label='Ask OMEGA' value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void ask()}}} placeholder='Ask OMEGA to explain, forecast, inspect, traverse, build or prove from this state…'/><button onClick={()=>void ask()} disabled={!record||busy||!prompt.trim()}><Send/><span>{busy?'RUNNING':'RUN OMEGA'}</span></button>{reply&&<div className='r71-reply' role='status' aria-live='polite'>{reply}</div>}</div>
    </section>
 
    <aside className='r96-inspector r132-inspector'>
-    <nav className='r132-inspector-tabs' aria-label='Focused inspector'><button className={inspectorTab==='STATE'?'active':''} onClick={()=>setInspectorTab('STATE')}>NOW</button><button className={inspectorTab==='OPERATORS'?'active':''} onClick={()=>setInspectorTab('OPERATORS')}>ANALYZE</button><button className={inspectorTab==='TOOLS'?'active':''} onClick={()=>setInspectorTab('TOOLS')}>TOOLS</button></nav>
+    <nav className='r132-inspector-tabs' aria-label='Focused inspector'><button aria-pressed={inspectorTab==='STATE'} className={inspectorTab==='STATE'?'active':''} onClick={()=>setInspectorTab('STATE')}>NOW</button><button aria-pressed={inspectorTab==='OPERATORS'} className={inspectorTab==='OPERATORS'?'active':''} onClick={()=>setInspectorTab('OPERATORS')}>ANALYZE</button><button aria-pressed={inspectorTab==='TOOLS'} className={inspectorTab==='TOOLS'?'active':''} onClick={()=>setInspectorTab('TOOLS')}>TOOLS</button></nav>
     {showState&&<section className='r96-state-card'><header><span>CANONICAL PACKET</span><b>{record?record.stateId:'—'}</b></header>{record&&<div><article><span>CΩ</span><b>{fmt(record.metrics.continuity)}</b></article><article><span>Φ</span><b>{fmt(record.metrics.plasticity)}</b></article><article><span>q</span><b>{fmt(record.metrics.contradiction)}</b></article><article><span>Λ</span><b>{fmt(record.metrics.burden)}</b></article><article><span>COHERENCE</span><b>{fmt(unified?.unifiedCoherence)}</b></article><article><span>MODES</span><b>{modes?.appliedCount??0}</b><small>{modes?.gatedCount??0} gated</small></article></div>}</section>}
-    {showOperators&&<section className='r96-operator-card'><header><div><span>COLOR RELATIVITY</span><b>Operators</b></div><Sparkles/></header><p>Function changes hue and the strongest lawful point on the admitted route.</p><div>{ROLES.map(role=>{const weight=law?.operatorWeights?.[role]??0;return <button key={role} className={selectedRole===role?'active':''} onClick={()=>targetRole(role)} style={{'--role-color':law?operatorColor(law,role,.95):undefined} as React.CSSProperties}><i/><span><b>{role}</b><small>{ROLE_COPY[role]}</small></span><strong>{Number(weight).toFixed(2)}</strong></button>})}</div></section>}
+    {showOperators&&<section className='r96-operator-card'><header><div><span>COLOR RELATIVITY</span><b>Operators</b></div><Sparkles/></header><p>Function changes hue and the strongest lawful point on the admitted route.</p><div>{ROLES.map(role=>{const weight=law?.operatorWeights?.[role]??0;return <button key={role} aria-pressed={selectedRole===role} className={selectedRole===role?'active':''} onClick={()=>targetRole(role)} style={{'--role-color':law?operatorColor(law,role,.95):undefined} as React.CSSProperties}><i/><span><b>{role}</b><small>{ROLE_COPY[role]}</small></span><strong>{Number(weight).toFixed(2)}</strong></button>})}</div></section>}
     {showTools&&<section className='r96-context-card'><header><div><span>{activeWorkspace.label.toUpperCase()} WORKSPACE</span><b>{activeWorkspace.copy}</b></div><button onClick={()=>openApplications(domain)}><Search/>Browse all</button></header><div>{activeWorkspace.routes.map(panel=><button key={panel} onClick={()=>enter(panel)}><span>{panel}</span><ArrowRight/></button>)}</div></section>}
     {showTools&&<section className='r96-quick-card'><header><span>ALWAYS AVAILABLE</span><small>universal operator destinations</small></header><div>{QUICK.map(([label,panel,I])=><button key={panel} onClick={()=>enter(panel)}><I/><span><b>{label}</b><small>{panel}</small></span></button>)}</div></section>}
    </aside>
