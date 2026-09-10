@@ -9,7 +9,7 @@ import ExtremeRestorationR46 from './ExtremeRestorationR46';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import {MASTER_SYSTEMS_R83} from './softwareMasterLedgerR83';
 import FullSystemConvergencePanelR95 from './FullSystemConvergencePanelR95';
-import SystemFoundryR268 from './SystemFoundryR268';
+import SystemFoundryLiveR270 from './SystemFoundryLiveR270';
 import './systemAtlas.css';
 import './systemCapabilityR13.css';
 import './systemAtlasDepthR38_4.css';
@@ -30,11 +30,11 @@ export default function SystemAtlasControl({record,onNavigate,control=false}:Pro
  const activeAddress=Number.isFinite(Number(record?.address))?Number(record.address):Math.max(0,Number(record?.stateId||1)-1);
  const restoreFocus=(()=>{try{const familyId=localStorage.getItem('omega.r83.familyFocus')||'';const systemId=localStorage.getItem('omega.r83.systemFocus')||'';const row=MASTER_SYSTEMS_R83.find(x=>x.id===systemId);return [familyId,row?.id,row?.artifact,row?.family,row?.role].filter(Boolean).join(' ')}catch{return''}})();
  void GRID_CELLS;void PHASE_COUNT;void STREAM_COUNT;void SUBSYSTEM_COUNT;
- return <section className='special-app system-atlas-r1 system-atlas-r13 system-atlas-r38' data-current-reality='R168' data-successor-debt={R48_COMPLETION_SUMMARY.restorationDebt}>
-  <header className='special-head'><div><span>R168 CURRENT SUCCESSOR REALITY · R268 SYSTEM FOUNDRY · ONE CAPABILITY AUTHORITY</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{R48_COMPLETION_FAMILIES.length} FAMILIES · {audit.total} ROUTED APPLICATION SURFACES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision} · current reality ≠ historical registration</small></div></header>
-  <div className='atlas-r1-invariant'><ShieldCheck/><b>{SYSTEM_INVARIANT}</b><span>R168 uses the R48/R155 successor ledger for current family execution and the unified capabilityReality authority for routes. V24 donor/debt labels remain visible only as predecessor evidence; R268 compiles additional system genomes through that existing authority instead of creating a parallel runtime.</span></div>
+ return <section className='special-app system-atlas-r1 system-atlas-r13 system-atlas-r38' data-current-reality='R168' data-successor-debt={R48_COMPLETION_SUMMARY.restorationDebt} data-foundry-live-truth='R270_SHARED_R238_R239'>
+  <header className='special-head'><div><span>R168 CURRENT SUCCESSOR REALITY · R268/R269 SYSTEM FOUNDRY · R270 SHARED LIVE TRUTH · ONE CAPABILITY AUTHORITY</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{R48_COMPLETION_FAMILIES.length} FAMILIES · {audit.total} ROUTED APPLICATION SURFACES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision} · current reality ≠ historical registration</small></div></header>
+  <div className='atlas-r1-invariant'><ShieldCheck/><b>{SYSTEM_INVARIANT}</b><span>R168 uses the R48/R155 successor ledger for current family execution and the unified capabilityReality authority for routes. V24 donor/debt labels remain predecessor evidence; R270 lets Foundry consume the same workstation-scoped R238/R239 truth membrane as Hybrid without creating a parallel runtime or polling owner.</span></div>
   <FullSystemConvergencePanelR95 onNavigate={onNavigate}/>
-  <SystemFoundryR268/>
+  <SystemFoundryLiveR270/>
   <section className='atlas-r38-stage' aria-label='Active packet and System Atlas truth context'>
    <div className='atlas-r38-field'><CanonicalPacketTruthPlotR93 record={record} title={control?'System Control · canonical packet':'System Atlas · canonical packet'}/></div>
    <aside className='atlas-r38-context'>
