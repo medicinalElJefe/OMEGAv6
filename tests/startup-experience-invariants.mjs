@@ -8,6 +8,8 @@ const shell=fs.readFileSync('src/SingleFrameRuntimeShellR27.tsx','utf8');
 const frameCss=fs.readFileSync('src/singleFrameR27.css','utf8');
 const modeRuntime=fs.readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
 const experience=fs.readFileSync('src/experienceR4.css','utf8');
+const experienceShell=fs.readFileSync('src/OmegaExperienceShellR257.tsx','utf8');
+const experienceContext=fs.readFileSync('src/OmegaExperienceContextR257.tsx','utf8');
 const fail=(m)=>{throw new Error(m)};
 
 for(const token of ['dailyBrief()','OMEGA curated operating lesson','TODAY\'S FIELD LESSON','OPEN FULL WORKSTATION','/api/route-preview','/api/chat','SOURCE-BACKED MODES'])if(!(home+daily).includes(token))fail(`startup experience missing ${token}`);
@@ -23,4 +25,13 @@ for(const token of ['r27-desktop-frame','r27-route-pane','r27-mobile-head','r27-
 if(!bridge.includes('SingleFrameRuntimeShellR27')||bridge.includes('nav20-desktop'))fail('legacy layered shell must not remain active');
 for(const token of ['.r4-welcome','.r4-journeys','.r4-conversation','.r4-daily'])if(!experience.includes(token))fail(`R4 startup visual hierarchy missing ${token}`);
 if(home.includes('@appdeploy/client')||daily.includes('@appdeploy/client')||shell.includes('@appdeploy/client'))fail('AppDeploy runtime dependency is forbidden');
-console.log('startup experience invariants: PASS · 44 registered routes + source-backed modes + R27 single frame');
+
+// R258: one atomic presentation state must own experience/depth/immersive continuity.
+if(!experienceContext.includes("const[state,setState]=useState<OmegaExperienceStateR257>(read)"))fail('R258 experience state must be one atomic state object');
+if(experienceContext.includes('setExperienceState')||experienceContext.includes('setDepthState')||experienceContext.includes('setImmersiveState'))fail('R258 may not regress to independently persisted experience state slices');
+for(const token of ['setExperienceProfile','window.localStorage.setItem(KEY,JSON.stringify(state))',"window.addEventListener('storage',sync)","window.removeEventListener('storage',sync)"])if(!experienceContext.includes(token))fail(`R258 durable experience continuity missing ${token}`);
+if(!experienceShell.includes('setExperienceProfile(id,next.defaultDepth)'))fail('R258 experience selection must atomically bind mode + default depth');
+if(!experienceShell.includes('const resetAll=')||!experienceShell.includes('persistLegacyView(next.workspace,next.lens,next.defaultDepth);reset()'))fail('R258 reset must reconcile R257 and inherited R82/R132 presentation state');
+for(const token of ["aria-label={`Experience mode: ${x.label}`}",'aria-pressed={experience===x.id}',"aria-label={`Experience depth: ${x.label}`}",'aria-pressed={depth===x.id}'])if(!experienceShell.includes(token))fail(`R258 accessible experience state missing ${token}`);
+
+console.log('startup experience invariants: PASS · 44 registered routes + source-backed modes + R27 single frame + R258 atomic durable experience continuity');
