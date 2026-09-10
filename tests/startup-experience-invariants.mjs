@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 
 const home=fs.readFileSync('src/OmegaHome.tsx','utf8');
+const homeR71=fs.readFileSync('src/OmegaHomeR71.tsx','utf8');
 const daily=fs.readFileSync('src/dailyBrief.ts','utf8');
 const phase=fs.readFileSync('src/PhaseWheel.tsx','utf8');
 const bridge=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
@@ -34,4 +35,9 @@ if(!experienceShell.includes('setExperienceProfile(id,next.defaultDepth)'))fail(
 if(!experienceShell.includes('const resetAll=')||!experienceShell.includes('persistLegacyView(next.workspace,next.lens,next.defaultDepth);reset()'))fail('R259 reset must reconcile R257 and inherited R82/R132 presentation state');
 for(const token of ["aria-label={`Experience mode: ${x.label}`}",'aria-pressed={experience===x.id}',"aria-label={`Experience depth: ${x.label}`}",'aria-pressed={depth===x.id}'])if(!experienceShell.includes(token))fail(`R259 accessible experience state missing ${token}`);
 
-console.log('startup experience invariants: PASS · 44 registered routes + source-backed modes + R27 single frame + R259 atomic durable experience continuity');
+// R260: Experience selection must apply to the already-mounted Home immediately, not only after remount/reload.
+for(const token of ["OMEGA_EXPERIENCES_R257","omega-r257-experience-change","setDomain(profile.workspace as DomainId)","setMode(profile.lens as FieldMode)","setDepth(detail.depth==='FOCUS'?'FOCUS':'DEEP')"])if(!homeR71.includes(token))fail(`R260 live Home experience application missing ${token}`);
+for(const token of ["aria-pressed={depth==='FOCUS'}","aria-pressed={depth==='DEEP'}","aria-pressed={domain===w.id}","aria-pressed={mode===m.id}","aria-pressed={inspectorTab==='STATE'}","aria-pressed={selectedRole===role}","aria-label='Ask OMEGA'","role='status' aria-live='polite'","className='r96-now' aria-live='polite'"])if(!homeR71.includes(token))fail(`R260 accessible selected/live state missing ${token}`);
+if(!homeR71.includes("window.removeEventListener('omega-r257-experience-change',syncExperience as EventListener)"))fail('R260 experience listener must clean up on Home unmount');
+
+console.log('startup experience invariants: PASS · 44 registered routes + source-backed modes + R27 single frame + R259 atomic continuity + R260 live accessible Home application');
