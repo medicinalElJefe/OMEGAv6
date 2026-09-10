@@ -13,6 +13,9 @@ const experience=fs.readFileSync('src/experienceR4.css','utf8');
 const experienceShell=fs.readFileSync('src/OmegaExperienceShellR257.tsx','utf8');
 const experienceContext=fs.readFileSync('src/OmegaExperienceContextR257.tsx','utf8');
 const experienceCss=fs.readFileSync('src/omegaExperienceShellR257.css','utf8');
+const universal=fs.readFileSync('src/OmegaUniversalInterfaceR263.tsx','utf8');
+const universalRegistry=fs.readFileSync('src/omegaUniversalInterfaceR263.ts','utf8');
+const universalCss=fs.readFileSync('src/omegaUniversalInterfaceR263.css','utf8');
 const fail=(m)=>{throw new Error(m)};
 
 for(const token of ['dailyBrief()','OMEGA curated operating lesson','TODAY\'S FIELD LESSON','OPEN FULL WORKSTATION','/api/route-preview','/api/chat','SOURCE-BACKED MODES'])if(!(home+daily).includes(token))fail(`startup experience missing ${token}`);
@@ -47,4 +50,14 @@ for(const token of ['min-height:100dvh','env(safe-area-inset-top,0px)',':focus-v
 if(experienceCss.includes('.r257-stage{min-width:0;isolation:isolate}'))fail('R261.1 stage may not trap the persistent navigator in an isolated stacking context');
 if(/\.r257-shell\{[^}]*z-index\s*:/.test(experienceCss))fail('R261.1 shell root may not create a stacking context above the persistent navigator');
 
-console.log('startup experience invariants: PASS · 44 routes + source-backed modes + R259 atomic continuity + R260 live Home coherence + R261.1 browser polish with navigator stacking escape');
+// R263: one professional activity interface spans use, tools, science, education, creation and entertainment without changing truth or authority.
+if(!experienceShell.includes("import OmegaUniversalInterfaceR263")||!experienceShell.includes("!immersive&&<OmegaUniversalInterfaceR263 onNavigate={onNavigate}/>"))fail('R263 universal interface must be wired into the non-immersive experience shell');
+for(const token of ["'DISCOVER'","'UNDERSTAND'","'LEARN'","'VISUALIZE'","'COMPARE'","'CREATE'","'OPERATE'","'PROVE'","'PLAY'"])if(!universalRegistry.includes(token))fail(`R263 activity fabric missing ${token}`);
+for(const token of ["'OBSERVED'","'DERIVED'","'RECONSTRUCTED'","'SIMULATED'","'FORECAST'","'REFERENCE'","'GENERATED'","'USER_ASSERTED'","'UNKNOWN'"])if(!universalRegistry.includes(token))fail(`R263 information classification missing ${token}`);
+for(const token of ["'REALITY'","'KNOWLEDGE'","'MODEL'","'COMPUTATION'","'ACTION'","'EXPERIENCE'","'CREATION'","'CONTINUITY'","'PROOF'"])if(!universalRegistry.includes(token))fail(`R263 interoperability plane missing ${token}`);
+for(const token of ['DATA_CLASSIFICATION_TRAVELS_WITH_INFORMATION','OBSERVED_NEVER_IMPLIED_FROM_GENERATED','TOOL_SELECTION_NEVER_CREATES_EXECUTION_AUTHORITY','R147_DISPATCH_UNCHANGED','R141_RETURN_PROOF_UNCHANGED','R240_SOURCE_PROMOTION_UNCHANGED','R125_CANONSTATE_UNCHANGED','CI_YML_PRODUCTION_WRITER_UNCHANGED'])if(!universalRegistry.includes(token))fail(`R263 truth/authority contract missing ${token}`);
+for(const token of ["role='search'","aria-label='Current information classification'","aria-label='OMEGA interoperability planes'","setExperienceProfile(next.experience","resolveActivityR263(intent)","type='submit' disabled={!intent.trim()}"])if(!universal.includes(token))fail(`R263 usable intent interface missing ${token}`);
+for(const token of ['grid-template-columns:repeat(9',':focus-visible','min-height:44px','@media(prefers-reduced-motion:reduce)','@media(forced-colors:active)'])if(!universalCss.includes(token))fail(`R263 commercial responsive/accessibility styling missing ${token}`);
+if(/fetch\(|\/api\//.test(universal+universalRegistry))fail('R263 presentation/router layer may not create a second network or execution owner');
+
+console.log('startup experience invariants: PASS · 44 routes + R259 atomic continuity + R260 live Home coherence + R261.1 browser polish + R263 universal activity/evidence/tool interface');
