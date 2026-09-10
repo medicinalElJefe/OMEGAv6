@@ -14,7 +14,7 @@ function rgbaCanvas(surface){if(!surface?.rgba)return null;const c=document.crea
 function terrainKey(t){return t?.terrain?`${t.updatedAt}:${t.terrain.z}:${t.terrain.width}x${t.terrain.height}:${t.terrain.bbox?.join(',')}`:'';}
 function patchKey(p,t){return p?`${p.id}:${p.startTime}:${p.width}x${p.height}:${p.stats?.p02}:${p.stats?.p98}:${terrainKey(t)}`:'';}
 function ensureAssets(){
-  const t=terrainState();if(t?.state==='READY'&&t.terrain){const key=terrainKey(t);if(key&&key!==lastTerrainKey){const surface=buildTerrainReliefSurface(t.terrain,t.water);reliefCanvas=rgbaCanvas(surface);lastTerrainKey=key;state.terrainReady=!!reliefCanvas;}}
+  const t=terrainState();if(t?.state==='READY'&&t.terrain){const key=terrainKey(t);if(key&&key!==lastTerrainKey){const surface=buildTerrainReliefSurface(t.terrain,t.water);reliefCanvas=rgbaCanvas(surface);lastTerrainKey=key;state.terrainReady=!!reliefCanvas;state.reliefStats=surface?.stats||null;}}
   const rp=regionalPatch();if(rp){const key=patchKey(rp,t);if(key!==lastRegionalKey){const surface=buildTerrainShapedSarSurface(rp,t?.terrain,t?.water,{reliefStrength:.36,textureStrength:.14});regionalCanvas=rgbaCanvas(surface);lastRegionalKey=key;state.regionalStats=surface?.stats||null;state.regionalReady=!!regionalCanvas;}}
   else{regionalCanvas=null;lastRegionalKey='';state.regionalReady=false;state.regionalStats=null;}
   const ep=exactPatch();if(ep){const key=patchKey(ep,t);if(key!==lastExactKey){const surface=buildTerrainShapedSarSurface(ep,t?.terrain,t?.water,{reliefStrength:.29,textureStrength:.17});exactCanvas=rgbaCanvas(surface);lastExactKey=key;state.exactStats=surface?.stats||null;state.exactReady=!!exactCanvas;}}
@@ -22,7 +22,10 @@ function ensureAssets(){
 }
 function drawRelief(r){
   const t=terrainState()?.terrain;if(!reliefCanvas||!t?.bbox)return false;const [w,s,e,n]=t.bbox,a=r.project(w,n),b=r.project(e,s),x=Math.min(a[0],b[0]),y=Math.min(a[1],b[1]),dw=Math.abs(b[0]-a[0]),dh=Math.abs(b[1]-a[1]);if(dw<1||dh<1)return false;
-  ctx.save();ctx.globalCompositeOperation='soft-light';ctx.globalAlpha=Number(r.view.scale)<4?.70:.86;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(reliefCanvas,x,y,dw,dh);ctx.restore();return true;
+  // This is a dedicated transparent overlay. soft-light against transparency collapses
+  // the DEM signal, so R256 composites the already alpha-shaped source DEM raster with
+  // source-over. The per-pixel alpha is part of the data-derived relief surface itself.
+  ctx.save();ctx.globalCompositeOperation='source-over';ctx.globalAlpha=Number(r.view.scale)<4?.94:.72;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(reliefCanvas,x,y,dw,dh);ctx.restore();return true;
 }
 function drawPatch(r,patch,image,alpha=1){
   const mesh=patch?.geoMesh;if(!image||!mesh?.nodes||mesh.validNodeCount<4)return 0;const n=mesh.segments||mesh.nodes.length-1;let cells=0;ctx.save();ctx.globalCompositeOperation='source-over';
@@ -39,9 +42,6 @@ function drawEvents(r){
 function forceOpacity(selector,value){const node=document.querySelector(selector);if(!node)return;if(value==null)node.style.removeProperty('opacity');else node.style.setProperty('opacity',String(value),'important');}
 function applyLayerHierarchy(surface){
   const shaped=surface==='REGIONAL_SHAPED_SAR'||surface==='EXACT_SHAPED_SAR',exact=surface==='EXACT_SHAPED_SAR';
-  // These inline !important values deliberately outrank late-installed legacy runtime
-  // styles. R255 installs some CSS on requestAnimationFrame, so stylesheet source order
-  // is not an acceptable authority mechanism for the R256 image hierarchy.
   forceOpacity('.omega-regional-sar-layer canvas',surface==='REGIONAL_SHAPED_SAR'?.02:null);
   forceOpacity('.omega-global-sar-fabric canvas',shaped?.006:null);
   forceOpacity('.omega-woven-motion canvas',shaped?.018:null);
