@@ -32,7 +32,7 @@ export default function SystemAtlasControl({record,onNavigate,control=false}:Pro
  void GRID_CELLS;void PHASE_COUNT;void STREAM_COUNT;void SUBSYSTEM_COUNT;
  return <section className='special-app system-atlas-r1 system-atlas-r13 system-atlas-r38' data-current-reality='R168' data-successor-debt={R48_COMPLETION_SUMMARY.restorationDebt}>
   <header className='special-head'><div><span>R168 CURRENT SUCCESSOR REALITY · R268 SYSTEM FOUNDRY · ONE CAPABILITY AUTHORITY</span><h2>{control?'System Control Matrix':'System Atlas'}</h2></div><div className='atlas-r1-status'><b>{R48_COMPLETION_FAMILIES.length} FAMILIES · {audit.total} ROUTED APPLICATION SURFACES · {EXPRESSION_PLANES.length} EXPRESSION PLANES</b><small>{SYSTEM_ATLAS_ID} · STATE {record.stateId} · {record.metrics.decision} · current reality ≠ historical registration</small></div></header>
-  <div className='atlas-r1-invariant'><ShieldCheck/><b>{SYSTEM_INVARIANT}</b><span>R168 uses the R48/R155 successor ledger for current family execution and the unified capabilityReality authority for routes. R268 compiles additional system genomes through that existing authority instead of creating a parallel runtime.</span></div>
+  <div className='atlas-r1-invariant'><ShieldCheck/><b>{SYSTEM_INVARIANT}</b><span>R168 uses the R48/R155 successor ledger for current family execution and the unified capabilityReality authority for routes. V24 donor/debt labels remain visible only as predecessor evidence; R268 compiles additional system genomes through that existing authority instead of creating a parallel runtime.</span></div>
   <FullSystemConvergencePanelR95 onNavigate={onNavigate}/>
   <SystemFoundryR268/>
   <section className='atlas-r38-stage' aria-label='Active packet and System Atlas truth context'>
