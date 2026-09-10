@@ -42,7 +42,9 @@ function applyRegionalFocus(point=state.target,{reload=true}={}){
   return true;
 }
 function focusSar(){
-  const exact=currentExact();if(exact&&globalThis.OMEGA_SAR_PATCH_FOCUS?.focusPatch){state.intent='sar';globalThis.OMEGA_SAR_PATCH_FOCUS.focusPatch();setSurface();return true;}
+  // SAR always returns to the calibrated regional camera. Exact local pixels have a
+  // separate explicit FIT control so a user can never lose the navigable SAR view
+  // merely because an exact patch finished loading in the background.
   return applyRegionalFocus(nav()?.target||state.target);
 }
 function world(){state.intent='world';nav()?.world?.();setSurface();return true;}
@@ -60,7 +62,6 @@ function installStyle(){
   body.omega-experience .place-dock .place-search-results{top:31px!important;max-height:min(320px,46vh)!important}
   body.omega-experience .map-wrap{grid-row:2!important;height:100%!important;min-height:0!important;margin:0!important}
   .omega-sar-primary-controls{margin-left:auto;display:flex;align-items:center;gap:4px;min-width:0}.omega-sar-primary-state{max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px;font:750 7px Inter,Segoe UI,sans-serif;letter-spacing:.07em;color:#829197}.omega-sar-primary-state[data-kind=measured]{color:#edf9fb}.omega-sar-primary-state[data-kind=loading]{color:#c8d8dd}.omega-sar-primary-controls button{height:28px;min-width:46px;padding:0 9px;border:1px solid rgba(255,255,255,.10);border-radius:7px;background:rgba(255,255,255,.035);color:#a9b7bb;font:750 7px Inter,Segoe UI,sans-serif;letter-spacing:.06em;cursor:pointer}.omega-sar-primary-controls button:hover,.omega-sar-primary-controls button[aria-pressed=true]{background:rgba(229,246,250,.11);color:#f1fafb;border-color:rgba(224,246,250,.20)}.omega-sar-primary-controls button:disabled{opacity:.28;cursor:not-allowed}
-  /* When measured SAR exists it owns the image. Context remains available but cannot wash it out. */
   body[data-sar-surface=regional_measured] .omega-global-sar-fabric canvas,body[data-sar-surface=exact_measured] .omega-global-sar-fabric canvas{opacity:.015!important;filter:none!important}
   body[data-sar-surface=regional_measured] .omega-woven-motion canvas,body[data-sar-surface=exact_measured] .omega-woven-motion canvas{opacity:.025!important}
   body[data-sar-surface=regional_measured] .omega-jrc-water-layer canvas,body[data-sar-surface=exact_measured] .omega-jrc-water-layer canvas{opacity:.05!important}
@@ -94,8 +95,6 @@ function install(){
 
 map?.addEventListener('omega-map-select',event=>{
   const p=event.detail;if(!validTarget(p))return;saveTarget(p);state.intent='sar';
-  // Every explicit target choice, including a click made while viewing the whole world,
-  // enters the bounded regional measurement band. Panning never emits map-select.
   const scale=Number(renderer()?.view?.scale)||1;if(scale<REGIONAL_MIN||scale>REGIONAL_MAX)setTimeout(()=>applyRegionalFocus(p),60);
   setSurface();
 });
