@@ -55,7 +55,7 @@ for kind in ('orientation','address','partial','device'):
     except RuntimeError:pass
 print('R240 PYTHON BRIDGE VALIDATOR PASS')
 `;
-const sim=spawnSync('python3',['-c',python],{encoding:'utf8'});
+const sim=spawnSync('python3',['-B','-c',python],{encoding:'utf8'});
 assert.equal(sim.status,0,`R240 host bridge validator simulation failed: ${sim.stderr||sim.stdout}`);
 must(sim.stdout.includes('R240 PYTHON BRIDGE VALIDATOR PASS'),'R240 Python bridge validator did not complete');
 
