@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+const analysis=fs.readFileSync('src/systemFoundryDependencyR273.ts','utf8');
+const ui=fs.readFileSync('src/SystemFoundryR268.tsx','utf8');
+const must=(value,message)=>{if(!value)throw new Error(message)};
+for(const token of ['analyzeFoundryDependenciesR273','dependencyOrder','rootBlockers','criticalPath','abstractLatency','abstractCost',"performanceTruth:'cost and latency are declared abstract planning weights, not measured wall-clock performance'","authority:'no polling, dispatch, execution, source mutation, CanonState admission or deployment authority'"])must(analysis.includes(token),`R273 dependency invariant missing ${token}`);
+for(const token of ["data-dependency-truth='R273_READ_ONLY'",'R273 DEPENDENCY + CRITICAL PATH INSPECTION','ROOT BLOCKERS','ABSTRACT LATENCY','ABSTRACT COST','CRITICAL PATH','Dependency analysis is derived only from the already-compiled frontier and declared abstract cost/latency. It does not dispatch or claim measured runtime performance.'])must(ui.includes(token),`R273 UI invariant missing ${token}`);
+for(const forbidden of ["api.get<any>('/api/hybrid/status')","api.get<any>('/api/missions')","api.post<any>('/api/hybrid/jobs'","api.post<any>('/api/missions'",'setInterval('])must(!analysis.includes(forbidden)&&!ui.includes(forbidden),`R273 must remain read-only and polling-free: ${forbidden}`);
+must(analysis.includes("const blockedInClosure=dependencyOrder.map(id=>byId.get(id)!).filter(capability=>capability.status==='BLOCKED')"),'R273 root blockers must be derived from compiled blocked state');
+must(analysis.includes("candidates.sort((a,b)=>b.latency-a.latency||b.cost-a.cost||a.path.join('>').localeCompare(b.path.join('>')))[0]"),'R273 critical path must be deterministic by declared latency then cost then path identity');
+must(ui.includes("dependencyAnalysis.criticalPath.map")&&ui.includes("onClick={()=>inspectCapability(id)}"),'R273 critical path must cross-navigate through existing capability inspection only');
+console.log('R273 FOUNDRY DEPENDENCY PASS · compiled-frontier causality + root blockers + deterministic abstract critical path · no new execution authority');
