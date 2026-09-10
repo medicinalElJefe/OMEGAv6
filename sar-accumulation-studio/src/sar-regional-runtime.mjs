@@ -5,18 +5,24 @@ import { sarAuthority } from './sar-authority.mjs';
 
 const $=s=>document.querySelector(s);
 const map=$('#map'),wrap=map?.closest('.map-wrap');
-const MAX_SCALE=320,MIN_SCALE=3;
+// Full Sentinel-1 GRD products are hundreds of MB. Regional measured rendering is
+// admitted only once the authoritative camera is narrow enough that a bounded COG
+// window can be read without pretending a browse image is measurement. Below this
+// range the source/footprint + Earth-awareness layers remain the truthful surface;
+// above it exact target SAR owns the camera.
+const MIN_MEASURED_SCALE=260,MAX_MEASURED_SCALE=900,LOAD_BUDGET_MS=28000;
 let layer=null,canvas=null,ctx=null,dpr=1,patch=null,image=null,generation=0,abort=null,timer=null;
-const state={state:'IDLE',scene:null,visible:false,patch:null,error:null,requestedBbox:null,updatedAt:null,source:'CALIBRATED_SENTINEL1_REGIONAL_VIEWPORT'};
+const state={state:'IDLE',stage:null,scene:null,visible:false,patch:null,error:null,requestedBbox:null,updatedAt:null,source:'CALIBRATED_SENTINEL1_REGIONAL_VIEWPORT',scalePolicy:{minMeasured:MIN_MEASURED_SCALE,maxMeasured:MAX_MEASURED_SCALE,loadBudgetMs:LOAD_BUDGET_MS}};
 globalThis.OMEGA_SAR_REGIONAL_MEASUREMENT=state;
 
 function currentRecord(){const id=($('#currentScene')?.textContent||'').trim();if(!id||id==='—')return null;return {id,startTime:($('#currentTime')?.textContent||'').trim()||null,platform:(($('#platform')?.textContent||'sentinel-1').split('·')[0]||'sentinel-1').trim()};}
 function selectedPolarization(){return String($('#assetSelect')?.value||'vv').toLowerCase();}
 function selectedQuantity(){return $('#sarCalQuantity')?.value||'sigmaNought';}
 function renderer(){return globalThis.OMEGA_SAR_RENDERER||null;}
-function allowedScale(){const s=Number(renderer()?.view?.scale)||1;return s>=MIN_SCALE&&s<=MAX_SCALE;}
+function scaleClass(){const s=Number(renderer()?.view?.scale)||1;if(s<MIN_MEASURED_SCALE)return 'SOURCE_CONTEXT_SCALE';if(s>MAX_MEASURED_SCALE)return 'EXACT_LOCAL_SCALE';return 'REGIONAL_MEASURED_SCALE';}
+function allowedScale(){return scaleClass()==='REGIONAL_MEASURED_SCALE';}
 function emit(){window.dispatchEvent(new CustomEvent('omega-regional-sar-measurement',{detail:{...state,patch:patch?{state:patch.state,id:patch.id,startTime:patch.startTime,stats:patch.stats,evidence:patch.evidence,coverageBbox:patch.coverageBbox,overview:patch.overview,geolocation:patch.geolocation}:null}}));}
-function setState(next,error=null){state.state=next;state.error=error?String(error.message||error):null;state.scene=patch?.id||currentRecord()?.id||null;state.visible=!!(canvas?.dataset.visible==='true');state.updatedAt=new Date().toISOString();state.patch=patch;emit();updateBadge();}
+function setState(next,error=null,stage=null){state.state=next;state.stage=stage??state.stage;state.error=error?String(error.message||error):null;state.scene=patch?.id||currentRecord()?.id||null;state.visible=!!(canvas?.dataset.visible==='true');state.updatedAt=new Date().toISOString();state.patch=patch;emit();updateBadge();}
 function ensureLayer(){
   if(!wrap||layer)return;
   const style=document.createElement('style');style.id='omegaRegionalSarStyle';style.textContent=`
@@ -25,11 +31,13 @@ function ensureLayer(){
   layer=document.createElement('div');layer.className='omega-regional-sar-layer';canvas=document.createElement('canvas');canvas.dataset.visible='false';ctx=canvas.getContext('2d');const badge=document.createElement('div');badge.id='omegaRegionalSarBadge';badge.className='omega-regional-sar-badge';badge.textContent='REGIONAL MEASURED SAR · WAITING';layer.append(canvas,badge);wrap.append(layer);
   new ResizeObserver(resize).observe(map);resize();
 }
-function updateBadge(){const b=$('#omegaRegionalSarBadge');if(!b)return;b.dataset.state=state.state==='READY'?'READY':state.state==='ERROR'?'ERROR':'WAIT';
+function updateBadge(){const b=$('#omegaRegionalSarBadge');if(!b)return;b.dataset.state=state.state==='READY'?'READY':state.state==='ERROR'||state.state==='DEGRADED_SOURCE_CONTEXT'?'ERROR':'WAIT';
   if(state.state==='READY'&&patch)b.textContent=`REGIONAL MEASURED SAR · ${patch.polarization} ${patch.quantity} · ${patch.width}×${patch.height} display samples · ${patch.stats.validCount.toLocaleString()} valid · ${patch.geolocation.quality} · SOURCE MEASURED`;
-  else if(state.state==='LOADING')b.textContent='REGIONAL MEASURED SAR · reading calibrated COG overview…';
-  else if(state.state==='OUT_OF_SCALE')b.textContent='REGIONAL MEASURED SAR · hidden at this camera scale · exact local SAR has priority';
+  else if(state.state==='LOADING')b.textContent=`REGIONAL MEASURED SAR · ${String(state.stage||'COG').replaceAll('_',' ')}…`;
+  else if(state.state==='SOURCE_CONTEXT_SCALE')b.textContent=`WIDE CAMERA · source SAR + Earth awareness · zoom to ${MIN_MEASURED_SCALE}× for measured regional COG`;
+  else if(state.state==='EXACT_LOCAL_SCALE')b.textContent='EXACT LOCAL SAR SCALE · calibrated target patch has priority';
   else if(state.state==='NO_COVERAGE')b.textContent='REGIONAL MEASURED SAR · current scene does not cover this camera';
+  else if(state.state==='DEGRADED_SOURCE_CONTEXT')b.textContent='REGIONAL COG BUDGET EXCEEDED · source context retained · exact SAR remains available';
   else if(state.error)b.textContent=`REGIONAL MEASURED SAR · ${state.error}`;
   else b.textContent='REGIONAL MEASURED SAR · WAITING';
 }
@@ -46,19 +54,21 @@ function draw(){
   ctx.restore();
   if(cells){canvas.dataset.visible='true';state.visible=true;const [w,s,e,north]=patch.coverageBbox||[];if([w,s,e,north].every(Number.isFinite)){const a=r.project(w,north),b=r.project(e,north),c=r.project(e,s),d=r.project(w,s);ctx.save();ctx.strokeStyle='rgba(235,248,252,.60)';ctx.lineWidth=1;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.lineTo(...c);ctx.lineTo(...d);ctx.closePath();ctx.stroke();ctx.restore();}}
 }
+function deadline(ms,controller){return new Promise((_,reject)=>setTimeout(()=>{controller?.abort?.();const error=new Error(`Regional COG exceeded ${Math.round(ms/1000)}s bounded load budget`);error.code='REGIONAL_COG_BUDGET';reject(error);},ms));}
 async function load(){
   ensureLayer();const r=renderer(),record=currentRecord();if(!r||!record)return;
-  if(!allowedScale()){clear();setState('OUT_OF_SCALE');return;}
+  const cls=scaleClass();if(cls!=='REGIONAL_MEASURED_SCALE'){abort?.abort();patch=null;image=null;clear();setState(cls,null,cls);return;}
   const bbox=r.viewBounds?.();if(!Array.isArray(bbox)||bbox.length!==4)return;
-  abort?.abort();abort=new AbortController();const my=++generation,snapshot=sarAuthority.capture();state.requestedBbox=[...bbox];setState('LOADING');
+  abort?.abort();abort=new AbortController();const my=++generation,snapshot=sarAuthority.capture(),controller=abort;state.requestedBbox=[...bbox];state.stage='REGIONAL_RESOLVE_PRODUCT';setState('LOADING');
   try{
-    const next=await calibratedRegionalViewport(record,bbox,{polarization:selectedPolarization(),quantity:selectedQuantity(),maxSamples:Number(r.view.scale)<12?256:384,signal:abort.signal});
-    if(my!==generation||abort.signal.aborted)return;
+    const regional=calibratedRegionalViewport(record,bbox,{polarization:selectedPolarization(),quantity:selectedQuantity(),maxSamples:Number(r.view.scale)<420?256:384,signal:controller.signal,onStage:stage=>{if(my===generation){state.stage=stage;updateBadge();}}});
+    const next=await Promise.race([regional,deadline(LOAD_BUDGET_MS,controller)]);
+    if(my!==generation||controller.signal.aborted)return;
     if(!sarAuthority.accepts(snapshot,{target:true,camera:true,scene:true}))return;
-    patch=next;image=document.createElement('canvas');paintCalibratedPatch(patch,image);draw();setState('READY');
-  }catch(error){if(my!==generation||error?.name==='AbortError')return;patch=null;image=null;clear();setState(/does not intersect|could not be inverted/i.test(error.message)?'NO_COVERAGE':'ERROR',error);}
+    patch=next;image=document.createElement('canvas');paintCalibratedPatch(patch,image);draw();setState('READY',null,'REGIONAL_READY');
+  }catch(error){if(my!==generation||error?.name==='AbortError')return;patch=null;image=null;clear();if(error?.code==='REGIONAL_COG_BUDGET')setState('DEGRADED_SOURCE_CONTEXT',error,'REGIONAL_BUDGET_EXCEEDED');else setState(/does not intersect|could not be inverted/i.test(error.message)?'NO_COVERAGE':'ERROR',error,'REGIONAL_FAILED');}
 }
-function schedule(delay=500){clearTimeout(timer);timer=setTimeout(()=>load().catch(error=>setState('ERROR',error)),delay);}
+function schedule(delay=500){clearTimeout(timer);timer=setTimeout(()=>load().catch(error=>setState('ERROR',error,'UNHANDLED')),delay);}
 function install(){ensureLayer();map?.addEventListener('omega-map-view',()=>{draw();schedule(700);});window.addEventListener('omega-source-sar-frame',()=>schedule(100));window.addEventListener('omega-calibrated-sar-patch',()=>draw());window.addEventListener('omega-calibrated-sar-patch-clear',()=>draw());$('#assetSelect')?.addEventListener('change',()=>schedule(80));$('#sarCalQuantity')?.addEventListener('change',()=>schedule(80));const scene=$('#currentScene');if(scene)new MutationObserver(()=>schedule(80)).observe(scene,{childList:true,subtree:true,characterData:true});schedule(1200);}
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else queueMicrotask(install);}
 
