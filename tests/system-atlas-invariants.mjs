@@ -34,7 +34,7 @@ for(const id of ['omega.self','collections.workbench','sar.lab','science.lab','s
 must(foundry.includes("if(c.evidence.includes('DEVICE_PROOF_REQUIRED')&&!ctx.authenticatedDeviceHeartbeat)blockers.push('DEVICE_PROOF_REQUIRED')"),'device execution must remain heartbeat gated');
 must(foundry.includes("if(c.evidence.includes('EXTERNAL_DEGRADED')&&!ctx.externalBindings)blockers.push('EXTERNAL_DEGRADED')"),'external execution must remain binding gated');
 must(foundry.includes("active.filter(x=>x.status==='ACTIVE').reduce"),'cost/latency must exclude blocked work');
-must(foundryUi.includes('DEVICE_PROOF_REQUIRED — browser/CI state is not treated as private-PC proof.')&&foundryUi.includes('This surface plans; it does not create a second executor or production writer.'),'Foundry UI authority boundary missing');
+must(foundryUi.includes('DEVICE_PROOF_REQUIRED — browser/CI state is not treated as private-PC proof.')&&foundryUi.includes('This surface plans and inspects; it does not create a second executor or production writer.'),'Foundry UI authority boundary missing');
 
 for(const token of ['compileSystemRuntimeR269','resourceEnvelopeR239?:ResourceEnvelopeR239|null',"envelope.tier!=='HOLD'&&envelope.tier!=='UNPROVED'&&envelope.admission.VERIFY_PROJECT","R239_RESOURCE_PROOF_REQUIRED","cloud/browser capabilities remain independently placeable","planningOnly:true"])must(foundryRuntime.includes(token),`R269 runtime-truth invariant missing ${token}`);
 must(foundryRuntime.includes("truth.authenticatedDeviceHeartbeat&&resourceCurrent"),'R269 device resource admission must require both current device proof and current R239 truth');
@@ -50,4 +50,9 @@ must(!hybrid.includes("import {HybridRuntimeSnapshotProviderR238} from './Hybrid
 must(((app+hybrid).match(/<HybridRuntimeSnapshotProviderR238>/g)||[]).length===1,'R270 must retain exactly one R238 provider mount across workstation + Hybrid');
 must(ui.includes("data-foundry-live-truth='R270_SHARED_R238_R239'"),'R270 System Atlas must expose shared live truth scope');
 
-console.log('SYSTEM_ATLAS R168/R268/R269/R270 PASS · 24-family current-truth atlas preserved · governed System Foundry compiler + R239 placement truth + one workstation-scoped R238 live owner · Hybrid and Foundry share selected host/epoch without duplicate polling · cloud/browser independence preserved · R125/R141/R146/R147/R205/R239/R240/R243 + ci.yml authority preserved');
+for(const token of ["data-inspection-truth='R271_READ_ONLY'","role='button'","aria-pressed={selectedCapability?.id===c.id}",'R271 READ-ONLY CAPABILITY INSPECTION','NO EXECUTOR ADMITTED','BOUND OPERATORS','Inspection is a projection of the already-compiled R269/R270 plan.'])must(foundryUi.includes(token),`R271 Foundry inspection invariant missing ${token}`);
+for(const forbidden of ["api.post<any>('/api/hybrid/jobs'","api.post<any>('/api/missions'",'setInterval('])must(!foundryUi.includes(forbidden),`R271 inspector must remain read-only and consume compiled plan only: ${forbidden}`);
+must(foundryUi.includes("selectedCapability=plan.activeFrontier.find(x=>x.id===selectedCapabilityId)||plan.activeFrontier[0]||null"),'R271 inspection must select only from the compiled active frontier');
+must(foundryUi.includes("selectedCapability.blockers.join(' · ')")&&foundryUi.includes("selectedCapability.allowedExecutors.join(' · ')")&&foundryUi.includes("selectedCapability.operators.map"),'R271 inspection must expose blockers, executor options and bound operators from compiled truth');
+
+console.log('SYSTEM_ATLAS R168/R268/R269/R270/R271 PASS · 24-family current-truth atlas preserved · governed System Foundry compiler + R239 placement truth + one workstation-scoped R238 live owner + read-only capability inspection · Hybrid and Foundry share selected host/epoch without duplicate polling · cloud/browser independence preserved · R125/R141/R146/R147/R205/R239/R240/R243 + ci.yml authority preserved');
