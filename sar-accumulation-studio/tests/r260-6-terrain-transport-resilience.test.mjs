@@ -18,7 +18,7 @@ test('R260.6 same-origin terrain 502 recovers, while semantic 404 does not retry
   const originalFetch=globalThis.fetch,hadLocation=Object.prototype.hasOwnProperty.call(globalThis,'location'),originalLocation=globalThis.location;
   let transientAttempts=0,semanticAttempts=0;
   try{
-    Object.defineProperty(globalThis,'location',{value:{href:'https://omega.test/'},configurable:true,writable:true});
+    Object.defineProperty(globalThis,'location',{value:{href:'https://omega.test/',origin:'https://omega.test'},configurable:true,writable:true});
     globalThis.fetch=async input=>{
       const u=new URL(String(input),'https://omega.test/');
       if(u.pathname==='/api/terrain'){
