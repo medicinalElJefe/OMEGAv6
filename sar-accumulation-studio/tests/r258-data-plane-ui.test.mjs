@@ -9,6 +9,8 @@ test('R258 removes duplicate image layers once shaped measurement owns the camer
   assert.match(ui,/body\.omega-experience \.sar-source-browse-layer\{opacity:0!important;visibility:hidden!important\}/);
   assert.match(ui,/#omegaPrecisionStrip\{display:none!important/);
   assert.match(ui,/map-wrap:after\{display:none!important/);
+  assert.match(ui,/data-mode=explore[^\n]*#omegaActionHud[^\n]*display:none!important/);
+  assert.match(ui,/\.map-note\{display:none!important/);
   assert.match(ui,/DATA_PANEL_ONLY_NOT_MAIN_IMAGE/);
 });
 
@@ -18,6 +20,7 @@ test('drawers and proof reserve geometry instead of covering SAR pixels',()=>{
   assert.match(ui,/data-drawer=analysis[^\n]*map-wrap[^\n]*height:calc/);
   assert.match(ui,/data-mode=proof[^\n]*map-wrap[^\n]*width:calc/);
   assert.match(ui,/ONE_IMAGE_PLANE_WITH_RESERVED_TOOL_ZONES/);
+  assert.match(ui,/omegaModeSwitch[^\n]*data-mode/);
 });
 
 test('measured calculus provides source-bound spatial and temporal views',()=>{
