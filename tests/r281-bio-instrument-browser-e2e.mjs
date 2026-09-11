@@ -23,6 +23,7 @@ async function prove(viewport,label){
   const deep=page.getByRole('button',{name:/DEEP MATTER/});
   if(await deep.count())await deep.first().click();
   await page.waitForSelector('.r46-bio .bio281',{timeout:20000});
+  await page.waitForSelector('.r46-bio .bio281-allmodes',{timeout:20000});
 
   const surface=page.locator('.bio281');
   const text=await surface.innerText();
@@ -33,15 +34,29 @@ async function prove(viewport,label){
   const domainButtons=surface.locator('.bio281-domain-grid button');
   const layerButtons=surface.locator('.bio281-layer-grid button');
   const scaleButtons=surface.locator('.bio281-scale-rail button');
-  const modeRows=surface.locator('.bio281-modes article');
+  const canonRows=surface.locator('.bio281-modes article');
   if(await domainButtons.count()!==12)throw new Error(`${label} expected 12 bio domains, got ${await domainButtons.count()}`);
   if(await layerButtons.count()!==12)throw new Error(`${label} expected 12 Heavy Bio layers, got ${await layerButtons.count()}`);
   if(await scaleButtons.count()!==7)throw new Error(`${label} expected 7 physical scales, got ${await scaleButtons.count()}`);
 
   await surface.locator('.bio281-modes summary').click();
-  if(await modeRows.count()!==62)throw new Error(`${label} expected 62 mode overlays, got ${await modeRows.count()}`);
-  const modeText=await surface.locator('.bio281-modes').innerText();
-  if(!modeText.includes('measurement authority 0'))throw new Error(`${label} mode measurement-authority boundary missing`);
+  if(await canonRows.count()!==62)throw new Error(`${label} expected 62 canon overlays in instrument surface, got ${await canonRows.count()}`);
+  const canonText=await surface.locator('.bio281-modes').innerText();
+  if(!canonText.includes('measurement authority 0'))throw new Error(`${label} canon measurement-authority boundary missing`);
+
+  const allModes=page.locator('.bio281-allmodes');
+  const allModesText=await allModes.innerText();
+  for(const token of ['241 analytical channels','179 source catalog + 62 canon/calculus authorities','MEASUREMENT AUTHORITY','AFFINITY ≠ EXECUTION'])if(!allModesText.includes(token))throw new Error(`${label} complete mode fabric missing ${token}`);
+  const allRows=allModes.locator('.bio281-allmodes-list article');
+  const sourceRows=allModes.locator('.bio281-allmodes-list article[data-family="SOURCE_CATALOG"]');
+  const authorityRows=allModes.locator('.bio281-allmodes-list article[data-family="CANON_AUTHORITY"]');
+  if(await allRows.count()!==241)throw new Error(`${label} expected 241 total analytical mode channels, got ${await allRows.count()}`);
+  if(await sourceRows.count()!==179)throw new Error(`${label} expected 179 source-catalog channels, got ${await sourceRows.count()}`);
+  if(await authorityRows.count()!==62)throw new Error(`${label} expected 62 canon channels, got ${await authorityRows.count()}`);
+  const zeroAuthority=await allRows.evaluateAll(rows=>rows.every(r=>r.textContent?.includes('measurement authority 0')));
+  if(!zeroAuthority)throw new Error(`${label} at least one analytical mode channel escaped measurementAuthority=0`);
+  if(await allModes.locator('line.mode-tick.source').count()!==179)throw new Error(`${label} 179-source visual ring incomplete`);
+  if(await allModes.locator('line.mode-tick.canon').count()!==62)throw new Error(`${label} 62-canon visual ring incomplete`);
 
   for(let i=0;i<12;i++){
     await domainButtons.nth(i).click();
@@ -77,4 +92,4 @@ async function prove(viewport,label){
 
 await prove({width:1440,height:1100},'desktop');
 await prove({width:390,height:844},'mobile');
-console.log('R281 BROWSER PASS · 12 domains × 12 layers × 7 physical scales × 62 zero-authority mode overlays + calibrated instrument packet visualized on desktop/mobile');
+console.log('R281 BROWSER PASS · 12 domains × 12 layers × 7 physical scales × 241 zero-authority analytical channels (179 source + 62 canon) + calibrated instrument packet visualized on desktop/mobile');
