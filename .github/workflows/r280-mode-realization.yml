@@ -24,4 +24,11 @@ jobs:
       - name: Prove production bundle still compiles
         run: npm run build
       - name: Confirm read-only workflow authority
-        run: node -e "const fs=require('fs');const s=fs.readFileSync('.github/workflows/r280-mode-realization.yml','utf8');if(!/permissions:\s*\n\s*contents: read/.test(s))process.exit(1);console.log('R280 authority boundary PASS: contents read only')"
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const s=fs.readFileSync('.github/workflows/r280-mode-realization.yml','utf8');
+          if(!/permissions:\s*\n\s*contents: read/.test(s)) process.exit(1);
+          console.log('R280 authority boundary PASS - contents read only');
+          NODE
