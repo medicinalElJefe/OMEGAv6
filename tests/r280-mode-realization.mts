@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {initCorpusPack,corpusState} from '../src/corpusRuntime.ts';
 import {compileModeRealizationRegistryR280,R280_MODE_REALIZATION_SCHEMA} from '../src/modeRealizationRegistryR280.ts';
 import {compileHeavyBioStateR280,heavyBio20736AddressR280,heavyBioProjectedAddressR280,HEAVY_BIO_PROJECTED_STATE_COUNT_R280} from '../src/heavyBioRuntimeR280.ts';
+import {phaseElasticityR280,ctdeR280,ledgeredPhaseMetrologyR280,turnAtlasR280,continuanceShellR280,nonFlatPredictionR280} from '../src/continuityModesR280.ts';
 
 await initCorpusPack();
 const record=corpusState(0);
@@ -18,6 +19,9 @@ assert.ok(registry.rows.some(row=>row.name==='Deep Mother Mode'&&row.stage==='GA
 assert.ok(registry.rows.some(row=>row.name==='High Father Mode'&&row.stage==='GATED'),'High Father must stay gated when Aim/Proof are absent');
 assert.ok(registry.rows.some(row=>row.name==='Mode 188'&&row.stage==='PROMOTED'),'Mode 188 exact source runtime must remain promoted');
 assert.ok(registry.rows.some(row=>row.name==='20736D Atlas Mode'&&row.executionClass==='DOMAIN_RUNTIME'));
+for(const mode of ['Phase Elasticity Field','CTDE','Continuance Shell','Turn–Atlas Formalism','Ledgered Phase Metrology','Non-Flat Prediction Engine']){
+  assert.ok(registry.rows.some(row=>row.name===mode&&row.stage==='TESTED'),`${mode} must be runtime-bound and tested`);
+}
 
 assert.equal(heavyBio20736AddressR280({domain:1,phase:1,regulation:1,layer:1}),0);
 assert.equal(heavyBio20736AddressR280({domain:12,phase:12,regulation:12,layer:12}),20735);
@@ -46,4 +50,50 @@ assert.ok(Number(observed.atlas.projectedAddress)>=1);
 assert.ok(observed.continuity.scarCarry.next>=0&&observed.continuity.scarCarry.next<=1);
 assert.equal(observed.model.authority,'MODEL_DERIVED_COORDINATION_SCORE_NOT_MEDICAL_MEASUREMENT');
 
-console.log('R280 PASS · 62-authority realization registry + evidence-gated Heavy Bio runtime + 20,736/61,917,364,224 addressing boundaries');
+const evidence=[{id:'T1',source:'R280 invariant fixture',observedAt:'2026-09-10T12:00:00Z',verified:true}];
+const stable={continuity:.82,plasticity:.74,contradiction:.12,burden:.18,scar:.10};
+const stressed={continuity:.38,plasticity:.28,contradiction:.76,burden:.85,scar:.62};
+
+const pefHold=phaseElasticityR280({phase:10,state:stressed,stiffness:1,priorElasticDebt:.7,loadHistory:[]});
+assert.equal(pefHold.decision,'HOLD','PEF must not admit unaudited/missing-evidence state');
+assert.equal(pefHold.gates.snap,false,'PEF snap must require load history');
+const pef=phaseElasticityR280({phase:10,state:stressed,stiffness:1,priorElasticDebt:.8,loadHistory:[.7,.8],evidence});
+assert.equal(pef.gates.hasLoadHistory,true);
+assert.equal(pef.gates.auditable,true);
+assert.ok(pef.primitives.elasticDebt>=0&&pef.primitives.elasticDebt<=1);
+
+const ctdeLow=ctdeR280({state:stable});
+const ctdeHigh=ctdeR280({state:stressed});
+assert.equal(ctdeLow.resolution,144);
+assert.equal(ctdeHigh.resolution,20736);
+assert.match(ctdeHigh.truthBoundary,/not physical dimensions/i);
+
+const lpmBad=ledgeredPhaseMetrologyR280({id:'',phase:4,instrument:'',metric:'x',value:1,unit:'',observedAt:'bad',source:'',verified:false},stable);
+assert.equal(lpmBad.valid,false);
+assert.equal(lpmBad.decision,'HOLD');
+const lpm=ledgeredPhaseMetrologyR280({id:'M1',phase:4,instrument:'fixture',metric:'continuity',value:.82,unit:'ratio',observedAt:'2026-09-10T12:00:00Z',source:'R280 test',verified:true},stable);
+assert.equal(lpm.valid,true);
+assert.equal(lpm.contradictionPreserved,stable.contradiction);
+assert.equal(lpm.recordHash.length,8);
+
+const invariants={identity:'omega',authority:'R125'};
+const turnBroken=turnAtlasR280({state:stable,phase:11,declaredInvariants:invariants,candidateInvariants:{identity:'other',authority:'R125'},evidence});
+assert.equal(turnBroken.decision,'HOLD','broken invariant must never be promoted into a turn');
+const turn=turnAtlasR280({state:stable,phase:11,declaredInvariants:invariants,candidateInvariants:invariants,evidence});
+assert.notEqual(turn.decision,'HOLD');
+assert.equal(turn.invariant.preserved,true);
+
+const continuanceNoEvidence=continuanceShellR280({state:stable,phase:12});
+assert.equal(continuanceNoEvidence.decision,'HOLD');
+const continuance=continuanceShellR280({state:stable,phase:12,evidence});
+assert.equal(continuance.admissible,true);
+assert.equal(continuance.decision,'STAY');
+
+const nonFlatNoEvidence=nonFlatPredictionR280({state:stable,memory:.5});
+assert.equal(nonFlatNoEvidence.decision,'HOLD');
+const nonFlat=nonFlatPredictionR280({state:stable,memory:.5,alpha:.8,beta:.2,evidence});
+assert.notEqual(nonFlat.decision,'HOLD');
+assert.ok(nonFlat.memory.next>=0&&nonFlat.memory.next<=1);
+assert.notEqual(nonFlat.memory.next,0,'history must carry instead of being erased');
+
+console.log('R280 PASS · realization registry + Heavy Bio + PEF/CTDE/LPM/Turn–Atlas/Continuance/Non-Flat runtime boundaries');
