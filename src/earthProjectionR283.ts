@@ -1,7 +1,7 @@
 export type Vec3=[number,number,number];
 export type GeoPoint={lat:number;lon:number};
 export type ProjectedPoint={x:number;y:number;z:number;mu:number};
-export type InversePoint=GeoPoint&{mu:number};
+export type InversePoint=GeoPoint&{mu:number;normal:Vec3};
 
 export const WGS84_F=1/298.257223563;
 export const WGS84_B=1-WGS84_F;
@@ -11,7 +11,7 @@ export const clamp=(x:number,a:number,b:number)=>Math.max(a,Math.min(b,x));
 export const wrapLon=(x:number)=>((x+540)%360)-180;
 const rad=(d:number)=>d*Math.PI/180;
 const deg=(r:number)=>r*180/Math.PI;
-const dot=(a:Vec3,b:Vec3)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+export const dot3=(a:Vec3,b:Vec3)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
 const cross=(a:Vec3,b:Vec3):Vec3=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
 const norm=(a:Vec3)=>Math.hypot(a[0],a[1],a[2]);
 const normalize=(a:Vec3):Vec3=>{const n=Math.max(1e-12,norm(a));return[a[0]/n,a[1]/n,a[2]/n]};
@@ -38,13 +38,13 @@ export function inverseOrthoWgs84(nx:number,ny:number,centerLat:number,centerLon
  const B=2*(q[0]*up[0]+q[1]*up[1]+q[2]*up[2]*ib2);
  const C=q[0]*q[0]+q[1]*q[1]+q[2]*q[2]*ib2-1;
  const disc=B*B-4*A*C;if(disc<0)return null;
- const t=(-B+Math.sqrt(Math.max(0,disc)))/(2*A),p=add(q,scale(up,t)),lon=wrapLon(deg(Math.atan2(p[1],p[0]))),xy=Math.hypot(p[0],p[1]),lat=deg(Math.atan2(p[2],Math.max(1e-12,xy)*(1-WGS84_E2))),normal=geodeticNormal(lat,lon),mu=dot(normal,up);
- if(mu<-1e-8)return null;return{lat,lon,mu:clamp(mu,0,1)};
+ const t=(-B+Math.sqrt(Math.max(0,disc)))/(2*A),p=add(q,scale(up,t)),lon=wrapLon(deg(Math.atan2(p[1],p[0]))),xy=Math.hypot(p[0],p[1]),lat=deg(Math.atan2(p[2],Math.max(1e-12,xy)*(1-WGS84_E2))),normal=geodeticNormal(lat,lon),mu=dot3(normal,up);
+ if(mu<-1e-8)return null;return{lat,lon,mu:clamp(mu,0,1),normal};
 }
 
 export function forwardOrthoWgs84(lat:number,lon:number,centerLat:number,centerLon:number):ProjectedPoint{
- const {center,east,north,up}=cameraFrame(centerLat,centerLon),p=geodeticToEcef(lat,lon),d:Vec3=[p[0]-center[0],p[1]-center[1],p[2]-center[2]],normal=geodeticNormal(lat,lon),mu=dot(normal,up);
- return{x:dot(d,east),y:dot(d,north),z:mu,mu};
+ const {center,east,north,up}=cameraFrame(centerLat,centerLon),p=geodeticToEcef(lat,lon),d:Vec3=[p[0]-center[0],p[1]-center[1],p[2]-center[2]],normal=geodeticNormal(lat,lon),mu=dot3(normal,up);
+ return{x:dot3(d,east),y:dot3(d,north),z:mu,mu};
 }
 
 export function solarPoint(date:Date):GeoPoint{
@@ -59,5 +59,5 @@ export function terminatorGeodetic(date:Date,samples=240):GeoPoint[]{
 }
 
 export function solarIllumination(lat:number,lon:number,date:Date){
- const sun=solarPoint(date);return dot(geodeticNormal(lat,lon),geodeticNormal(sun.lat,sun.lon));
+ const sun=solarPoint(date);return dot3(geodeticNormal(lat,lon),geodeticNormal(sun.lat,sun.lon));
 }
