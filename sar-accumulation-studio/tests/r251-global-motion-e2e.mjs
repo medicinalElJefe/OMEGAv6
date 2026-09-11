@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
 const url=process.env.SAR_TEST_URL||'https://omega-sar-r4.jeffdeweyeljefe.workers.dev';
@@ -9,13 +9,36 @@ try{
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));
   const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});assert.ok(response?.ok(),`root failed ${response?.status()}`);
 
-  await page.waitForFunction(()=>{const r=globalThis.OMEGA_SAR_R4_RUNTIME,conception=r?.conception;return ['CONTINUOUS_SAR_EARTH_INSTRUMENT','CONTINUOUS_MULTI_SOURCE_EARTH_COMPUTATION_AND_SAR_INSTRUMENT'].includes(conception)&&globalThis.OMEGA_SAR_SMOOTH_MOTION?.state==='READY'&&globalThis.OMEGA_SAR_GLOBAL_FABRIC&&globalThis.OMEGA_SAR_WOVEN_MOTION&&globalThis.OMEGA_SAR_LEMMA_TRANSLATOR;},null,{timeout:30000});
+  try{
+    await page.waitForFunction(()=>{const r=globalThis.OMEGA_SAR_R4_RUNTIME,conception=r?.conception;return ['CONTINUOUS_SAR_EARTH_INSTRUMENT','CONTINUOUS_MULTI_SOURCE_EARTH_COMPUTATION_AND_SAR_INSTRUMENT'].includes(conception)&&globalThis.OMEGA_SAR_SMOOTH_MOTION?.state==='READY'&&globalThis.OMEGA_SAR_GLOBAL_FABRIC&&globalThis.OMEGA_SAR_WOVEN_MOTION&&globalThis.OMEGA_SAR_LEMMA_TRANSLATOR;},null,{timeout:30000});
+  }catch(error){
+    const diagnosis=await page.evaluate(()=>({
+      href:location.href,
+      readyState:document.readyState,
+      runtime:globalThis.OMEGA_SAR_R4_RUNTIME||null,
+      smoothMotion:globalThis.OMEGA_SAR_SMOOTH_MOTION||null,
+      globalFabric:globalThis.OMEGA_SAR_GLOBAL_FABRIC?.snapshot?.()||globalThis.OMEGA_SAR_GLOBAL_FABRIC||null,
+      wovenMotion:globalThis.OMEGA_SAR_WOVEN_MOTION||null,
+      lemmaTranslator:globalThis.OMEGA_SAR_LEMMA_TRANSLATOR?.snapshot?.()||globalThis.OMEGA_SAR_LEMMA_TRANSLATOR||null,
+      visualStability:globalThis.OMEGA_SAR_VISUAL_STABILITY||null,
+      renderer:globalThis.OMEGA_SAR_RENDERER?{view:{...globalThis.OMEGA_SAR_RENDERER.view},w:globalThis.OMEGA_SAR_RENDERER.w,h:globalThis.OMEGA_SAR_RENDERER.h}:null,
+      body:{mode:document.body?.dataset?.mode||null,drawer:document.body?.dataset?.drawer||null,surface:document.body?.dataset?.dataNativeSurface||null,visualStability:document.body?.dataset?.visualStability||null},
+      scripts:[...document.scripts].map(s=>s.src||'inline'),
+      pageErrors
+    }));
+    await mkdir('test-results',{recursive:true});
+    await writeFile('test-results/r251-readiness-diagnosis.json',JSON.stringify(diagnosis,null,2));
+    console.error('SAR_R251_INITIAL_READINESS_DIAGNOSIS',JSON.stringify(diagnosis,null,2));
+    throw error;
+  }
   assert.match(await page.title(),/OMEGA SAR R4/);
 
   try{
     await page.waitForFunction(()=>{const g=globalThis.OMEGA_SAR_GLOBAL_FABRIC;return g?.state==='READY'&&g.fabric?.cells?.some(c=>c.coverage>0)&&g.records?.length>20;},null,{timeout:120000,polling:250});
   }catch(error){
     const diagnosis=await page.evaluate(()=>({fabric:globalThis.OMEGA_SAR_GLOBAL_FABRIC?.snapshot?.()||globalThis.OMEGA_SAR_GLOBAL_FABRIC||null,coherence:globalThis.OMEGA_SAR_FABRIC_COHERENCE_TRANSPORT?.snapshot?.()||globalThis.OMEGA_SAR_FABRIC_COHERENCE_TRANSPORT||null,renderer:globalThis.OMEGA_SAR_RENDERER?.view||null,pageErrors:window.__omegaR251PageErrors||[]}));
+    await mkdir('test-results',{recursive:true});
+    await writeFile('test-results/r251-readiness-diagnosis.json',JSON.stringify(diagnosis,null,2));
     console.error('SAR_R251_GLOBAL_FABRIC_TIMEOUT_DIAGNOSIS',JSON.stringify(diagnosis,null,2));throw error;
   }
   const fabric=await page.evaluate(()=>{const g=globalThis.OMEGA_SAR_GLOBAL_FABRIC,f=g.fabric,covered=f.cells.filter(c=>c.coverage>0),source=covered[0];return {snapshot:g.snapshot(),recordCount:g.records.length,covered:covered.length,total:f.cells.length,lod:f.lod,sourceCell:{coverage:source.coverage,cog:source.cog,lemma:source.lemma},boundary:g.boundary};});
