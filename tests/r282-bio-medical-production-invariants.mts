@@ -28,6 +28,9 @@ assert.equal(measurement.counts.eligible,1);
 assert.equal(measurement.rows[0].canonicalValue,4);
 assert.equal(measurement.rows[0].definition?.canonicalUnit,'mV');
 assert.equal(measurement.rows[0].sample.rawValue,.004,'raw observation must remain unchanged');
+const staleMeasurement=compileMedicalMeasurementFrameR282(record,[sample],[definition],intendedUse,now+10*60*1000);
+assert.equal(staleMeasurement.gate,'FAIL','a sample beyond maxAgeMs must be rejected from the medical frame');
+assert.ok(staleMeasurement.rows[0].errors.includes('R281_REJECTED'));
 
 const wrongUnit={...sample,id:'S2',unit:'foo'};
 const wrongUnitFrame=compileMedicalMeasurementFrameR282(record,[wrongUnit],[definition],intendedUse,now);
@@ -89,15 +92,18 @@ assert.equal(update.state,'AUTHORIZED_CHANGE_ELIGIBLE');
 assert.equal(update.noDomainRegression,true);
 assert.equal(update.isolation.gate,'PASS');
 
-const blockedRelease=assessMedicalReleaseR282({record,samples:[sample],definitions:[definition],manifest:validationManifest,hazards:controlledHazards,empiricalCases});
+const staleRelease=assessMedicalReleaseR282({record,samples:[sample],definitions:[definition],manifest:validationManifest,hazards:controlledHazards,empiricalCases,nowMs:now+10*60*1000});
+assert.equal(staleRelease.releaseState,'ENGINEERING_INCOMPLETE','stale device evidence must prevent production-validation readiness');
+assert.equal(staleRelease.gates.measurement,'FAIL');
+const blockedRelease=assessMedicalReleaseR282({record,samples:[sample],definitions:[definition],manifest:validationManifest,hazards:controlledHazards,empiricalCases,nowMs:now});
 assert.equal(blockedRelease.releaseState,'CLINICAL_RELEASE_BLOCKED');
 assert.equal(blockedRelease.gates.measurement,'PASS');
 assert.equal(blockedRelease.gates.regulatoryAuthorization,'HOLD');
-const authorizedRelease=assessMedicalReleaseR282({record,samples:[sample],definitions:[definition],manifest:authorizedManifest,hazards:controlledHazards,empiricalCases});
+const authorizedRelease=assessMedicalReleaseR282({record,samples:[sample],definitions:[definition],manifest:authorizedManifest,hazards:controlledHazards,empiricalCases,nowMs:now});
 assert.equal(authorizedRelease.releaseState,'AUTHORIZED_CLINICAL_RELEASE_READY');
 assert.equal(authorizedRelease.gates.regulatoryAuthorization,'PASS');
 assert.equal(authorizedRelease.claims.instrumentProcessing,true);
 assert.equal(authorizedRelease.claims.clinicalDecisionSupport,false,'measurement-only intended use cannot silently become CDS');
 assert.equal(authorizedRelease.claims.autonomousClinicalAction,false);
 
-console.log('R282 PASS · intended-use measurands + unit/AMR/uncertainty gates + 241-mode authority separation + partition isolation + SHA-256 audit + controlled update + release authority');
+console.log('R282 PASS · intended-use measurands + freshness/unit/AMR/uncertainty gates + 241-mode authority separation + partition isolation + SHA-256 audit + controlled update + release authority');
