@@ -66,9 +66,33 @@ const BINDINGS:Record<string,ModeBindingR280>=Object.freeze({
     artifacts:['src/weaveStateR100.ts','src/physicsRelativityRuntimeR132.ts'],tests:['tests/dimensional-relativity-r24-invariants.mjs','tests/r77-woven-continuity-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'declared frame + transform + state',outputContract:'frame-relative representation with invariant/scar carry',
     boundary:'Frame-relative representation does not assert additional physical dimensions.'
   },
+  'Phase Elasticity Field':{
+    artifacts:['src/continuityModesR280.ts'],tests:['tests/r280-mode-realization.mts'],executionClass:'EVIDENCE_GATED_DOMAIN_RUNTIME',inputContract:'phase + normalized continuity vector + nonzero stiffness + load history + evidence',outputContract:'elastic debt + snap gate + recovery gradient',
+    boundary:'PEF is a bounded archived-model implementation, not an externally validated universal material/biological law.'
+  },
+  'CTDE':{
+    artifacts:['src/continuityModesR280.ts'],tests:['tests/r280-mode-realization.mts'],executionClass:'DOMAIN_RUNTIME',inputContract:'normalized continuity/constraint state + declared thresholds',outputContract:'144/1728/20736 representational resolution selection',
+    boundary:'CTDE escalates address resolution only; it does not create physical dimensions.'
+  },
+  'Continuance Shell':{
+    artifacts:['src/continuityModesR280.ts'],tests:['tests/r280-mode-realization.mts'],executionClass:'EVIDENCE_GATED_DOMAIN_RUNTIME',inputContract:'phase + explicit continuity/plasticity/burden/contradiction requirements + evidence',outputContract:'phase-specific continuance admission state',
+    boundary:'Failed continuance requirements are retained as boundary state, never erased.'
+  },
+  'Turn–Atlas Formalism':{
+    artifacts:['src/continuityModesR280.ts'],tests:['tests/r280-mode-realization.mts'],executionClass:'EVIDENCE_GATED_DOMAIN_RUNTIME',inputContract:'state + phase + declared/candidate invariants + evidence',outputContract:'STAY/TURN/ESCALATE/HOLD + closure state',
+    boundary:'A turn cannot be admitted if declared invariants fail or evidence is absent.'
+  },
+  'Ledgered Phase Metrology':{
+    artifacts:['src/continuityModesR280.ts'],tests:['tests/r280-mode-realization.mts'],executionClass:'EVIDENCE_GATED_DOMAIN_RUNTIME',inputContract:'phase-indexed measurement + instrument + unit + source + state',outputContract:'hashable measurement/contradiction/scar ledger record',
+    boundary:'Invalid measurements remain HOLD; contradiction is stored rather than destroyed.'
+  },
   'Executable Atlas Generator':{
     artifacts:['src/corpusRuntime.ts'],tests:['tests/system-atlas-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'atlas coordinate/state definitions',outputContract:'deterministic packet/address generation',
     boundary:'Generated atlas rows are computational state, not measured physical observations.'
+  },
+  'Non-Flat Prediction Engine':{
+    artifacts:['src/continuityModesR280.ts'],tests:['tests/r280-mode-realization.mts'],executionClass:'EVIDENCE_GATED_DOMAIN_RUNTIME',inputContract:'state + prior memory + alpha/beta recurrence + evidence',outputContract:'history-adjusted forecast/control score + memory carry',
+    boundary:'The memory recurrence is a bounded model forecast, not prophecy or independent evidence.'
   },
   'HEAVY SCIENCE REVIEW':{
     artifacts:['src/universalTruthEnvelopeR152.ts'],tests:['tests/r152-universal-truth-envelope.mts'],executionClass:'DOMAIN_RUNTIME',inputContract:'claim + typed evidence packets',outputContract:'evidence status + uncertainty + next action',
