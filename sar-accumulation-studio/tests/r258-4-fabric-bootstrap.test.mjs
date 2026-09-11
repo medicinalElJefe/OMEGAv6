@@ -16,10 +16,17 @@ test('R258.4 bootstrap has no authority to create source records or measurement 
   assert.match(boot,/cannot create records, coverage, calibrated pixels or measurements/i);
   assert.doesNotMatch(boot,/records\.push|buildFabric|translateFabricCell|measurementPromotion:true/);
   assert.match(runtime,/sar-global-fabric-bootstrap-runtime\.mjs/);
-  const r258=runtime.match(/featureRelease:'R258'[\s\S]*?patchRelease:'R258\.(\d+)'/);
-  const r259=runtime.match(/featureRelease:'R259'[\s\S]*?patchRelease:'R259\.(\d+)'/);
-  assert.ok(r258||r259,'release-forward patch metadata is missing');
-  if(r258)assert.ok(Number(r258[1])>=4,`bootstrap invariant requires R258.4+; found R258.${r258[1]}`);
-  if(r259)assert.ok(Number(r259[1])>=0,`unexpected R259 patch metadata: R259.${r259[1]}`);
+
+  const feature=runtime.match(/featureRelease:'R(\d+)'/);
+  const patch=runtime.match(/patchRelease:'R(\d+)\.(\d+)'/);
+  assert.ok(feature&&patch,'release-forward release metadata is missing');
+  const featureMajor=Number(feature[1]),patchMajor=Number(patch[1]),patchMinor=Number(patch[2]);
+  assert.ok(featureMajor>=258,`bootstrap invariant requires feature lineage R258+; found R${featureMajor}`);
+  assert.ok(patchMajor>258||(patchMajor===258&&patchMinor>=4),`bootstrap invariant requires patch lineage R258.4+; found R${patchMajor}.${patchMinor}`);
+
+  // The release may preserve an older feature contract while advancing a visual/patch
+  // release. What matters here is that no later layer grants bootstrap measurement authority.
   assert.match(runtime,/unresolvedFabricSectorCreatesCoverage:false/);
+  assert.match(runtime,/globalFabricIsCalibratedMosaic:false/);
+  assert.match(runtime,/mode188CreatesPhysicalLaw:false/);
 });
