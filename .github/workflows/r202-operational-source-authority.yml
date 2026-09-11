@@ -38,6 +38,8 @@ jobs:
         run: npx --yes tsx tests/r281-bio-instrument-invariants.mts
       - name: Prove R281 recursive empirical convergence + holdout promotion law
         run: npx --yes tsx tests/r281-bio-empirical-convergence-invariants.mts
+      - name: Prove R282 medical production + clinical authority boundaries
+        run: npx --yes tsx tests/r282-bio-medical-production-invariants.mts
       - name: Preserve R200.1 and inherited build
         run: |
           node tests/r2001-deployed-total-experience-proof-invariants.mjs
