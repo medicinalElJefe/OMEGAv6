@@ -1,0 +1,39 @@
+# Historical archive only. R283 SAR proof is converged into the existing R241 proof plane by R283.1 so this file carries no active GitHub Actions authority.
+name: R283 SAR Truth Proof
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/sar*.ts'
+      - 'src/SARTruthInstrumentR280.tsx'
+      - 'src/SARTruthInstrumentR280Surface.tsx'
+      - 'src/EarthObservatoryR8.tsx'
+      - 'src/sarTruthR280.css'
+      - 'tests/r280-*.mjs'
+      - 'tests/r283-*.mjs'
+      - 'docs/R280_SAR_TRUTH_INSTRUMENT.md'
+      - 'docs/R283_SAR_FULL_CONVERGENCE.md'
+      - '.github/workflows/r283-sar-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-sar-truth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove full R283 SAR convergence
+        run: |
+          node tests/r283-sar-full-stack-invariants.mjs
+          for f in tests/r280-*.mjs; do node "$f"; done
+      - name: Prove application build with SAR Earth integration
+        run: npm run build
+      - name: Prove production package remains dry-run deployable
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r283-sar
