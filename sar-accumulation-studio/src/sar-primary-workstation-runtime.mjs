@@ -41,9 +41,7 @@ function applyRegionalFocus(point=state.target,{reload=true}={}){
   setTimeout(()=>{state.transitioning=false;if(reload)globalThis.OMEGA_SAR_REGIONAL_MEASUREMENT?.reload?.();setSurface();},90);
   return true;
 }
-function focusSar(){
-  return applyRegionalFocus(nav()?.target||state.target);
-}
+function focusSar(){return applyRegionalFocus(nav()?.target||state.target);}
 function world(){state.intent='world';nav()?.world?.();setSurface();return true;}
 function evidence(){const b=$('#omegaQuickRail [data-drawer="evidence"]');if(b)b.click();else window.dispatchEvent(new KeyboardEvent('keydown',{key:'e',bubbles:true}));}
 
@@ -51,14 +49,16 @@ function installStyle(){
   if($('#omegaSarPrimaryWorkstationStyle'))return;
   const style=document.createElement('style');style.id='omegaSarPrimaryWorkstationStyle';style.textContent=`
   body.omega-experience .earth-stage{display:grid!important;grid-template-rows:40px minmax(0,1fr)!important;height:100%!important;min-height:0!important;overflow:hidden!important}
-  body.omega-experience .place-dock{grid-row:1!important;position:relative!important;z-index:60!important;top:auto!important;left:auto!important;right:auto!important;width:100%!important;height:36px!important;margin:0 0 4px!important;padding:3px 5px!important;transform:none!important;display:flex!important;align-items:center!important;gap:5px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:9px!important;background:rgba(7,10,12,.94)!important;box-shadow:none!important;overflow:visible!important;pointer-events:auto!important}
+  body.omega-experience .place-dock{grid-row:1!important;position:relative!important;z-index:60!important;top:auto!important;left:auto!important;right:auto!important;width:100%!important;height:36px!important;margin:0 0 4px!important;padding:3px 5px!important;transform:none!important;display:flex!important;align-items:center!important;gap:5px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:9px!important;background:rgba(7,10,12,.94)!important;box-shadow:none!important;overflow:visible!important;pointer-events:auto!important;box-sizing:border-box!important}
   body.omega-experience .place-dock-head,body.omega-experience .place-dock-grid{display:none!important}
   body.omega-experience .place-dock .place-search{position:relative!important;top:auto!important;left:auto!important;right:auto!important;transform:none!important;width:min(360px,31vw)!important;min-width:210px!important;z-index:62!important;pointer-events:auto!important}
-  body.omega-experience .place-dock .place-search input{height:28px!important;font-size:9px!important;padding:4px 8px!important;background:#0b1012!important;border-color:rgba(255,255,255,.12)!important;box-shadow:none!important}
-  body.omega-experience .place-dock .place-search button{height:28px!important;min-width:42px!important;padding:0 8px!important;font-size:8px!important}
+  body.omega-experience .place-dock .place-search input{height:28px!important;font-size:9px!important;padding:4px 8px!important;background:#0b1012!important;border-color:rgba(255,255,255,.12)!important;box-shadow:none!important;box-sizing:border-box!important}
+  body.omega-experience .place-dock .place-search button{height:28px!important;min-width:42px!important;padding:0 8px!important;font-size:8px!important;box-sizing:border-box!important}
   body.omega-experience .place-dock .place-search-results{top:31px!important;max-height:min(320px,46vh)!important}
   body.omega-experience .map-wrap{grid-row:2!important;height:100%!important;min-height:0!important;margin:0!important}
-  .omega-sar-primary-controls{margin-left:auto;display:flex;align-items:center;gap:4px;min-width:0}.omega-sar-primary-state{max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px;font:750 7px Inter,Segoe UI,sans-serif;letter-spacing:.07em;color:#829197}.omega-sar-primary-state[data-kind=measured]{color:#edf9fb}.omega-sar-primary-state[data-kind=loading]{color:#c8d8dd}.omega-sar-primary-controls button{height:28px;min-width:46px;padding:0 9px;border:1px solid rgba(255,255,255,.10);border-radius:7px;background:rgba(255,255,255,.035);color:#a9b7bb;font:750 7px Inter,Segoe UI,sans-serif;letter-spacing:.06em;cursor:pointer}.omega-sar-primary-controls button:hover,.omega-sar-primary-controls button[aria-pressed=true]{background:rgba(229,246,250,.11);color:#f1fafb;border-color:rgba(224,246,250,.20)}.omega-sar-primary-controls button:disabled{opacity:.28;cursor:not-allowed}
+  .omega-sar-primary-controls{margin-left:auto!important;display:flex!important;align-items:center!important;align-content:center!important;gap:4px!important;min-width:0!important;height:28px!important;max-height:28px!important;box-sizing:border-box!important;flex-wrap:nowrap!important;overflow:visible!important;white-space:nowrap!important}
+  .omega-sar-primary-controls>*{box-sizing:border-box!important;flex-shrink:0}
+  .omega-sar-primary-state{max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px;font:750 7px Inter,Segoe UI,sans-serif;letter-spacing:.07em;color:#829197}.omega-sar-primary-state[data-kind=measured]{color:#edf9fb}.omega-sar-primary-state[data-kind=loading]{color:#c8d8dd}.omega-sar-primary-controls button{height:28px!important;max-height:28px!important;min-width:46px;padding:0 9px;border:1px solid rgba(255,255,255,.10);border-radius:7px;background:rgba(255,255,255,.035);color:#a9b7bb;font:750 7px Inter,Segoe UI,sans-serif;letter-spacing:.06em;cursor:pointer;box-sizing:border-box!important}.omega-sar-primary-controls button:hover,.omega-sar-primary-controls button[aria-pressed=true]{background:rgba(229,246,250,.11);color:#f1fafb;border-color:rgba(224,246,250,.20)}.omega-sar-primary-controls button:disabled{opacity:.28;cursor:not-allowed}
   body[data-sar-surface=regional_measured] .omega-global-sar-fabric canvas,body[data-sar-surface=exact_measured] .omega-global-sar-fabric canvas{opacity:.015!important;filter:none!important}
   body[data-sar-surface=regional_measured] .omega-woven-motion canvas,body[data-sar-surface=exact_measured] .omega-woven-motion canvas{opacity:.025!important}
   body[data-sar-surface=regional_measured] .omega-jrc-water-layer canvas,body[data-sar-surface=exact_measured] .omega-jrc-water-layer canvas{opacity:.05!important}
@@ -79,10 +79,7 @@ function installControls(){
 function patchNavigation(){
   const n=nav();if(!n?.selectTarget||n.__omegaR255Primary)return false;n.__omegaR255Primary=true;
   const original=n.selectTarget.bind(n);
-  n.selectTarget=async(point,options={})=>{
-    const ok=await original(point,{...options,scale:Math.min(180,Number(options.scale)||180)});if(!ok)return false;
-    saveTarget(point);setTimeout(()=>applyRegionalFocus(point),40);return true;
-  };
+  n.selectTarget=async(point,options={})=>{const ok=await original(point,{...options,scale:Math.min(180,Number(options.scale)||180)});if(!ok)return false;saveTarget(point);setTimeout(()=>applyRegionalFocus(point),40);return true;};
   return true;
 }
 function restore(){if(state.restored||nav()?.target)return;const p=savedTarget();if(!p)return;state.restored=true;setTimeout(()=>nav()?.selectTarget?.(p,{scale:180,reason:'restore previous SAR target'}),450);}
