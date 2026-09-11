@@ -1,0 +1,6 @@
+import type{SarProductLevelR280,SarTruthClassR280}from'./sarTruthR280';
+export interface SarProcessStepR283{id:string;operator:string;processor:string;version:string;parameters:Record<string,unknown>;inputIds:string[];outputIds:string[];fromLevel:SarProductLevelR280;toLevel:SarProductLevelR280;truthBefore:SarTruthClassR280;truthAfter:SarTruthClassR280;at:string;receipt?:string}
+export interface SarProcessLineageR283{sourceProductId:string;steps:SarProcessStepR283[]}
+export function appendSarStepR283(lineage:SarProcessLineageR283,step:SarProcessStepR283):SarProcessLineageR283{return{...lineage,steps:[...lineage.steps,step]}}
+export function lineageAdmissionR283(lineage:SarProcessLineageR283){const reasons:string[]=[];if(!lineage.sourceProductId)reasons.push('SOURCE_PRODUCT_REQUIRED');for(const s of lineage.steps){if(!s.operator)reasons.push(`${s.id}:OPERATOR_REQUIRED`);if(!s.processor||!s.version)reasons.push(`${s.id}:PROCESSOR_VERSION_REQUIRED`);if(!s.inputIds.length||!s.outputIds.length)reasons.push(`${s.id}:IO_IDENTITY_REQUIRED`)}return{admitted:reasons.length===0,reasons}}
+export function lineageTruthBoundaryR283(){return'Processing level and truth class changes require an explicit recoverable step; a renderer or filename cannot silently promote evidence.'}

@@ -1,0 +1,18 @@
+import fs from'node:fs';import assert from'node:assert/strict';
+const read=p=>fs.readFileSync(p,'utf8');const must=(ok,msg)=>assert.ok(ok,'R280 '+msg);
+const truth=read('src/sarTruthR280.ts');const ui=read('src/SARTruthInstrumentR280.tsx');const css=read('src/sarTruthR280.css');const doc=read('docs/R280_SAR_TRUTH_INSTRUMENT.md');
+for(const token of ['OBSERVED_NATIVE','OBSERVED_CALIBRATED','CORRECTED','GEOCODED','FUSED','ASSIMILATED','SIMULATED','FORECAST','DERIVED_MODEL','VISUAL_ENHANCED'])must(truth.includes(token),'missing truth class '+token);
+for(const token of ['NO_SOURCE','OUT_OF_SWATH','RADAR_SHADOW','LAYOVER','NO_COHERENCE','CLOUD_MASKED','ATMOSPHERICALLY_DEGRADED','INTERPOLATED_ONLY'])must(truth.includes(token),'missing missingness '+token);
+for(const token of ['amplitude:number','phaseRad:number','sigma0Db?:number','coherence?:number'])must(truth.includes(token),'complex SAR field missing '+token);
+for(const token of ['incidenceDeg','azimuthDeg','losUnit','baselineM','temporalBaselineDays','surfaceClass'])must(truth.includes(token),'geometry field missing '+token);
+for(const token of ['atmosphereRad','orbitRad','topographyRad','noiseRad','decorrelation'])must(truth.includes(token),'residual field missing '+token);
+for(const token of ['sentinel-1','nisar','terrasar-x','tandem-x','radarsat','biomass','srtm'])must(truth.includes(token),'mission registry missing '+token);
+for(const token of ["'X'","'C'","'S'","'L'","'P'"])must(truth.includes(token),'band relativity missing '+token);
+for(const token of ['compileSarWovenStateR280','interferometricAdmissionR280','phaseToLosDisplacementR280','relativeBandComparisonR280'])must(truth.includes(token),'operator missing '+token);
+must(truth.includes('-(unwrappedPhaseRad*wavelengthM)/(4*Math.PI)'),'LOS displacement relation missing');
+for(const view of ['SOURCE','AMPLITUDE','PHASE','COHERENCE','INTERFEROGRAM','DEFORMATION','ELEVATION','POLARIMETRY','MULTI_BAND','TIME_STACK','SCAR_UNCERTAINTY','PROOF'])must(ui.includes(`'${view}'`),'view missing '+view);
+for(const token of ['NO SOURCE PIXELS CLAIMED','Visual values are lens encodings','deterministic demonstration','Truth inspector','Interferometry gate','Scar / residual ledger','Frame relativity','Woven Continuity · executable path'])must(ui.includes(token),'visual truth disclosure missing '+token);
+must(ui.includes("truth:'VISUAL_ENHANCED'"),'demo truth must be visual enhanced');must(ui.includes("missingness:['NO_SOURCE']"),'demo must mark no source');must(ui.includes('nativeDataBound:false')&&ui.includes('sourceEvidenceBound:false'),'demo must not claim bound source');
+for(const token of ['grid-template-columns','r280-canvas','r280-crosshair','r280-geometry-overlay','@media(max-width:760px)'])must(css.includes(token),'visual detail/responsive style missing '+token);
+for(const token of ['Rendering never upgrades evidence class','phase_observed = deformation + topography + orbit + atmosphere + noise','Atlas resolution levels remain software/addressing lenses, not literal physical dimensions','does not create a second CanonState writer'])must(doc.includes(token),'documentation invariant missing '+token);
+console.log('R280 SAR truth invariants PASS');
