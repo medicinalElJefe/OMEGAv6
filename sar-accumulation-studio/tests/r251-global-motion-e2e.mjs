@@ -12,7 +12,12 @@ try{
   await page.waitForFunction(()=>globalThis.OMEGA_SAR_R4_RUNTIME?.conception==='CONTINUOUS_SAR_EARTH_INSTRUMENT'&&globalThis.OMEGA_SAR_SMOOTH_MOTION?.state==='READY'&&globalThis.OMEGA_SAR_GLOBAL_FABRIC&&globalThis.OMEGA_SAR_WOVEN_MOTION&&globalThis.OMEGA_SAR_LEMMA_TRANSLATOR,null,{timeout:30000});
   assert.match(await page.title(),/OMEGA SAR R4/);
 
-  await page.waitForFunction(()=>{const g=globalThis.OMEGA_SAR_GLOBAL_FABRIC;return g?.state==='READY'&&g.fabric?.cells?.some(c=>c.coverage>0)&&g.records?.length>20;},null,{timeout:120000,polling:250});
+  try{
+    await page.waitForFunction(()=>{const g=globalThis.OMEGA_SAR_GLOBAL_FABRIC;return g?.state==='READY'&&g.fabric?.cells?.some(c=>c.coverage>0)&&g.records?.length>20;},null,{timeout:120000,polling:250});
+  }catch(error){
+    const diagnosis=await page.evaluate(()=>({fabric:globalThis.OMEGA_SAR_GLOBAL_FABRIC?.snapshot?.()||globalThis.OMEGA_SAR_GLOBAL_FABRIC||null,coherence:globalThis.OMEGA_SAR_FABRIC_COHERENCE_TRANSPORT?.snapshot?.()||globalThis.OMEGA_SAR_FABRIC_COHERENCE_TRANSPORT||null,renderer:globalThis.OMEGA_SAR_RENDERER?.view||null,pageErrors:window.__omegaR251PageErrors||[]}));
+    console.error('SAR_R251_GLOBAL_FABRIC_TIMEOUT_DIAGNOSIS',JSON.stringify(diagnosis,null,2));throw error;
+  }
   const fabric=await page.evaluate(()=>{const g=globalThis.OMEGA_SAR_GLOBAL_FABRIC,f=g.fabric,covered=f.cells.filter(c=>c.coverage>0),source=covered[0];return {snapshot:g.snapshot(),recordCount:g.records.length,covered:covered.length,total:f.cells.length,lod:f.lod,sourceCell:{coverage:source.coverage,cog:source.cog,lemma:source.lemma},boundary:g.boundary};});
   assert.ok(fabric.recordCount>20);assert.ok(fabric.covered>0);assert.ok(fabric.total>=72);assert.equal(fabric.lod.physicalDimensionClaim,false);assert.equal(fabric.sourceCell.lemma.state,'SOURCE_COVERED');assert.equal(fabric.sourceCell.lemma.proof.measured,false);assert.equal(fabric.sourceCell.lemma.proof.sourceSupported,true);assert.match(fabric.boundary,/not a global calibrated SAR mosaic/i);
 
