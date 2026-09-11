@@ -42,6 +42,7 @@ test('R260.3 binds command and drawer geometry without animated canvas resizing'
   assert.match(visual,/panel\.inert=!open/);
   assert.match(visual,/aria-hidden/);
   assert.match(visual,/geometryKey!==lastGeometryKey/);
+  assert.match(visual,/observe\(map\.closest\('\.map-wrap'\),\{childList:true,subtree:true\}\)/);
   assert.doesNotMatch(visual,/function settleCanvases\(\)[\s\S]*OMEGA_DATA_NATIVE_SURFACE\?\.redraw/);
 });
 

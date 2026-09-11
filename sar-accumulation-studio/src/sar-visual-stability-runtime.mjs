@@ -259,6 +259,7 @@ function install(){
   installStyle();
   installToolbars();
   new MutationObserver(scheduleSync).observe(body,{attributes:true,attributeFilter:['data-drawer','data-mode','data-data-native-surface','data-sar-surface']});
+  new MutationObserver(scheduleSync).observe(map.closest('.map-wrap'),{childList:true,subtree:true});
   for(const event of ['omega-earth-canon-update','omega-data-native-terrain','omega-regional-sar-measurement','omega-calibrated-sar-patch','omega-calibrated-sar-patch-clear'])window.addEventListener(event,scheduleSync);
   map.addEventListener('omega-map-view',scheduleSync);
   window.addEventListener('resize',scheduleSync,{passive:true});
