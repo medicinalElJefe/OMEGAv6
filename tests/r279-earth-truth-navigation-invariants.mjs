@@ -1,18 +1,23 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const earth=read('src/EarthObservatoryR8.tsx'),instrument=read('src/EarthNowInstrument.tsx'),observed=read('src/EarthObservedGlobeR281.tsx'),workerR9=read('src/workerR9.js'),observedCss=read('src/earthObservedGlobeR281.css'),earthCss=read('src/earthObservatoryR8.css'),main=read('src/main.tsx'),nav=read('src/navigationRegistry.ts'),r82=read('src/omegaExperienceRegistryR82.ts'),launcher=read('src/OmegaLauncher.tsx'),side=read('src/OmegaSideNavigatorR88.tsx'),shell=read('src/SingleFrameRuntimeShellR27.tsx');
-const must=(ok,msg)=>assert.ok(ok,'R279/R281 '+msg);
+const earth=read('src/EarthObservatoryR8.tsx'),instrument=read('src/EarthNowInstrument.tsx'),observed=read('src/EarthObservedGlobeR281.tsx'),projection=read('src/earthProjectionR284.ts'),workerR9=read('src/workerR9.js'),observedCss=read('src/earthObservedGlobeR281.css'),earthCss=read('src/earthObservatoryR8.css'),main=read('src/main.tsx'),nav=read('src/navigationRegistry.ts'),r82=read('src/omegaExperienceRegistryR82.ts'),launcher=read('src/OmegaLauncher.tsx'),side=read('src/OmegaSideNavigatorR88.tsx'),shell=read('src/SingleFrameRuntimeShellR27.tsx');
+const must=(ok,msg)=>assert.ok(ok,'R279/R284 '+msg);
 for(const view of ['SATELLITE','PLANET','MOTION','EVIDENCE','SPACE','GROUND','CALCULUS'])must(earth.includes(`'${view}'`),'Earth view missing '+view);
 for(const token of ['earth-r279-view-tabs','aria-pressed={view===x.id}','chooseView(x.id)','queryAt(initial.lat,initial.lon)','Return + query model-mapped target','FULL-DISK OBSERVATION PAIR','G19-FD','G18-FD','EarthGroundTraversalR9','EarthLivingFieldR36','EarthObservedGlobeR281'])must(earth.includes(token),'Earth interaction/source contract missing '+token);
 for(const token of ['fetchEarthMotionStateR278','drawClouds','drawParticles','solarState','SOURCE-FIRST PLANETARY INSTRUMENT','Missing source pixels remain missing'])must(instrument.includes(token),'motion/evidence instrument missing '+token);
 must(instrument.toLowerCase().includes('terminator'),'motion/evidence instrument missing solar terminator contract');
 must(instrument.toLowerCase().includes('returned observations remain distinct'),'motion/evidence instrument must preserve observed-versus-derived separation');
-for(const token of ['/api/earth/gibs/global','VIIRS_SNPP_CorrectedReflectance_TrueColor','BBOX:\'-180,-90,180,90\'','NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL','RETURNED_GLOBAL_OBSERVATION','NO_SYNTHETIC_SUBSTITUTE'])must(workerR9.includes(token),'R281 global GIBS worker contract missing '+token);
-for(const token of ['OBSERVED EARTH GLOBE','/api/earth/gibs/global','createImageBitmap','inverseOrtho','forwardOrtho','EPSG:4326','15°/hour rotation','Truth boundary.','unavailable source imagery is not replaced'])must(observed.includes(token),'R281 observed-globe contract missing '+token);
-must(observed.includes('2048&height=1024'),'R281 must request a materially detailed global observed texture');
-must(observed.includes("data-source-state={state}"),'R281 source state must remain machine-visible');
-must(observedCss.includes('.earth-r281-globe')&&observedCss.includes('.r281-stage canvas')&&observedCss.includes('touch-action:none'),'R281 globe hierarchy/interaction CSS missing');
+for(const token of ['/api/earth/gibs/global','VIIRS_SNPP_CorrectedReflectance_TrueColor','BBOX:\'-180,-90,180,90\'','NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL','RETURNED_GLOBAL_OBSERVATION','NO_SYNTHETIC_SUBSTITUTE'])must(workerR9.includes(token),'global GIBS worker contract missing '+token);
+for(const token of ['R284 · OBSERVED EARTH VISUAL INSTRUMENT','/api/earth/gibs/global','createImageBitmap','createWgs84Orthographic','WGS84 ELLIPSOID','EPSG:4326','15°/hour rotation','SOURCE BRIGHTNESS','DERIVED UTC GEOMETRY','OBSERVED PIXEL INSPECTOR','Truth boundary.','unavailable source imagery is not replaced'])must(observed.includes(token),'R284 observed-globe contract missing '+token);
+for(const token of ['WGS84_F=1/298.257223563','geodeticToEcef','createWgs84Orthographic','inverseOrthoWgs84','forwardOrthoWgs84','solarPoint','terminatorGeodetic','solarElevationDegrees'])must(projection.includes(token),'R284 WGS84 projection kernel missing '+token);
+must(observed.includes('2048&height=1024'),'Planet must request a materially detailed global observed texture');
+must(observed.includes("data-source-state={state}")&&observed.includes("data-projection='WGS84_ELLIPSOID_ORTHOGRAPHIC'"),'R284 source/projection state must remain machine-visible');
+for(const token of ['EXPECTED_SOURCE','EXPECTED_CRS','EXPECTED_BBOX','EXPECTED_TRUTH','global source identity mismatch','global source CRS mismatch','global source bbox mismatch','global source truth mismatch','global source aspect mismatch'])must(observed.includes(token),'R284 source truth fail-close missing '+token);
+must(observed.includes('(x0+1)%texture.width'),'R284 texture sampling must wrap across the ±180° seam');
+must(observed.includes('ResizeObserver')&&observed.includes('devicePixelRatio'),'R284 resize/DPR fidelity contract missing');
+must(observed.includes('source RGB sampled before illumination transform'),'R284 inspector must distinguish observed RGB from derived illumination');
+must(observedCss.includes('.earth-r281-globe')&&observedCss.includes('.r284-projection-strip')&&observedCss.includes('.r284-inspector')&&observedCss.includes('.r281-stage canvas')&&observedCss.includes('touch-action:none'),'R284 globe hierarchy/interaction CSS missing');
 must(!main.includes('earthVisualEnhancerR278'),'retired global visual enhancer must not auto-mount outside Earth Now');
 for(const token of ['earth-r279-view-tabs','earth-r279-satellite','earth-r279-global-pair','earth-r279-stage'])must(earthCss.includes(token),'Earth view hierarchy CSS missing '+token);
 const navNames=[...nav.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
@@ -24,4 +29,4 @@ must(r27Names.length===44&&new Set(r27Names).size===44,'R27 shell must retain al
 for(const name of navNames){must(r82Block.includes(name),'R82 workspace projection silently omitted '+name);must(r27Names.includes(name),'R27 shell silently omitted '+name)}
 must(launcher.includes('LAUNCHER_SURFACES=OMEGA_NAVIGATION'),'launcher must derive search inventory from canonical navigation');
 must(side.includes('OMEGA_ALL_ROUTES_R82.map')&&side.includes('All tools'),'persistent navigator must expose the complete route inventory');
-console.log('R279/R281 EARTH TRUTH + NAVIGATION PASS · NOAA imagery retained · NASA GIBS global true-color source projected onto Planet · live motion stays derived · no global wire overlay · canonical 44-route inventory preserved across navigation projections');
+console.log('R279/R284 EARTH TRUTH + NAVIGATION PASS · NOAA imagery retained · NASA GIBS global true-color source projected onto WGS84 ellipsoid Planet · UTC solar/terminator geometry remains declared derived rendering · seam-safe source sampling · inspector reports unshaded returned RGB · canonical 44-route inventory preserved');
