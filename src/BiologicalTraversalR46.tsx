@@ -23,6 +23,6 @@ export default function BiologicalTraversalR46({address,onAddress}:{address:numb
    <BioInstrumentSurfaceR281 address={address} onAddress={onAddress}/>
    <BioEmpiricalConvergenceR281/>
    <BioAllModesFabricR281 record={record}/>
-   <footer className='r46-bio-r281-boundary'><ShieldCheck/>Heavy Bio now keeps three authorities distinct on one surface: calibrated observations, empirical residual/convergence evidence, and the complete 241-channel analytical mode fabric. Verified observations are invariant carry; residuals are scar/history carry; FIT may propose calibration; untouched HOLDOUT/PROSPECTIVE evidence must validate any improvement. Analytical and calibration outputs retain measurement authority zero and cannot overwrite observations.</footer>
+   <footer className='r46-bio-r281-boundary'><ShieldCheck/>Representational biological-scale traversal only. Heavy Bio now keeps three authorities distinct on one surface: calibrated observations, empirical residual/convergence evidence, and the complete 241-channel analytical mode fabric. Verified observations are invariant carry; residuals are scar/history carry; FIT may propose calibration; untouched HOLDOUT/PROSPECTIVE evidence must validate any improvement. Analytical and calibration outputs retain measurement authority zero and cannot overwrite observations.</footer>
  </div>;
 }
