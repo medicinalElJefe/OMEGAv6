@@ -4,7 +4,7 @@ R280 upgrades OMEGA SAR from a visual/specialist surface into a source-first, me
 
 ## Governing principle
 
-The rendering plane is a lens over measurement state. It must never upgrade inferred, corrected, fused, simulated, or reconstructed data into direct observation.
+Rendering never upgrades evidence class. The rendering plane is a lens over measurement state. It must never upgrade inferred, corrected, fused, simulated, or reconstructed data into direct observation.
 
 ## Canon / Woven mechanics
 
