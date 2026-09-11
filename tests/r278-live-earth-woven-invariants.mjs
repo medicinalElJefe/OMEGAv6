@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error('R278 '+msg)};
+const motion=read('src/earthMotionStateR278.ts'),visual=read('src/earthVisualEnhancerR278.ts'),css=read('src/earthVisualEnhancerR278.css'),main=read('src/main.tsx'),wrangler=read('wrangler.jsonc');
+for(const token of ["OMEGA_EARTH_MOTION_STATE_R278","Open-Meteo current multi-coordinate WGS84 field","temperature_2m","cloud_cover","surface_pressure","wind_speed_10m","wind_direction_10m","compileWovenDimensionalRelativityR265","compileAdaptiveCoherenceR266","OBSERVED_TRANSITION","OPEN_METEO_CURRENT_WGS84","missing satellite pixels","not CanonState admission"])must(motion.includes(token),'motion/calculus truth contract missing '+token);
+must(motion.includes('const LATS=[')&&motion.includes('const LONS=[')&&motion.includes('GRID=LATS.flatMap'),'bounded global WGS84 grid missing');
+must(motion.includes("sourceSkin:'EVIDENCE'")&&motion.includes("targetSkin:'RENDER'")&&motion.includes('sourceResolution:20736,targetResolution:20736'),'R265 EVIDENCE→RENDER frame contract missing');
+for(const token of ['r121-sphere-stage','r134-stage','r278-earth-overlay','r278-woven-overlay','LIVE EARTH → WOVEN','Satellite evidence remains separate','requestAnimationFrame','5*60*1000'])must(visual.includes(token),'visual live-state contract missing '+token);
+must(main.includes("void import('./earthVisualEnhancerR278')")&&!main.includes("import {installEarthVisualEnhancerR278}"),'R278 must remain route-deferred and outside initial static entry graph');
+must(css.includes('pointer-events:none')&&css.includes('mix-blend-mode:screen'),'R278 overlay must remain non-authoritative and interaction-transparent');
+must(wrangler.includes('"main": "src/workerR116.js"'),'R278 must not replace the proven production Worker spine');
+for(const forbidden of ['CanonState=','nativeExecutionClaimed=true','OMEGA_RUNTIME.put','R147 dispatch override'])must(!motion.includes(forbidden)&&!visual.includes(forbidden),'R278 may not acquire execution or Canon authority: '+forbidden);
+console.log('R278 LIVE EARTH + WOVEN PASS · returned WGS84 current field → canonical R265/R266 software calculus → non-authoritative Earth/Woven render overlays · no fabricated satellite pixels · route-deferred · existing worker/execution/Canon authority preserved');
