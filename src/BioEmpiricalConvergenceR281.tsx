@@ -4,6 +4,7 @@ import {BIO_CONTEXT_LAYERS_R281,BIO_DOMAINS_R281} from './bioInstrumentRuntimeR2
 import {compileBioEmpiricalConvergenceR281,parseBioEmpiricalTextR281,type BioEmpiricalCaseR281} from './bioEmpiricalConvergenceR281';
 import {summarizeEmpiricalEvidenceRegistryR281} from './bioEmpiricalEvidenceRegistryR281';
 import './bioEmpiricalConvergenceR281.css';
+import './bioEmpiricalEvidenceR281.css';
 
 const fmt=(x:number|null|undefined,d=4)=>x==null||!Number.isFinite(x)?'—':Number(x).toFixed(d);
 const pct=(x:number|null|undefined)=>x==null||!Number.isFinite(x)?'—':`${(x*100).toFixed(2)}%`;
