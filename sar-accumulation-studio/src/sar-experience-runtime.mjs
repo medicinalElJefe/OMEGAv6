@@ -25,8 +25,8 @@ function installStyle(){
   body.omega-experience .map-wrap canvas#map{cursor:grab}body.omega-experience .map-wrap canvas#map[data-dragging=true]{cursor:grabbing}
 
   /* The wide-camera source fabric should read as atmosphere/coverage, never graph paper. */
-  body.omega-experience .omega-global-sar-fabric canvas{opacity:.28!important;filter:blur(7px) saturate(.72) contrast(.88);mix-blend-mode:screen!important;transform:scale(1.012)}
-  body.omega-experience .omega-woven-motion canvas{opacity:.20!important;filter:blur(.35px);mix-blend-mode:screen!important}
+  body.omega-experience .omega-global-sar-fabric canvas{opacity:.075!important;filter:none;mix-blend-mode:screen!important;transform:none}
+  body.omega-experience .omega-woven-motion canvas{opacity:.055!important;filter:none;mix-blend-mode:screen!important}
   body.omega-experience .sar-earth-overlay{opacity:.94}
   body.omega-experience .omega-regional-sar-layer canvas{opacity:.88!important}
 

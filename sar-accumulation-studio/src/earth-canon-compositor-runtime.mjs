@@ -14,9 +14,9 @@ function apply(cube){
   if(!cube?.renderPlan)return;const p=cube.renderPlan,measured=p.authority.includes('MEASURED'),exact=p.authority.startsWith('EXACT');state.authority=p.authority;state.primarySurface=p.primarySurface;state.mode188=cube.summary?.mode188||null;state.summary=englishCubeSummary(cube);state.state='READY';
   document.body.dataset.canonAuthority=p.authority.toLowerCase();document.body.dataset.canonDecision=String(cube.summary?.mode188?.decision||'unknown').toLowerCase();
   // Context is allowed to explain the image but not wash out calibrated SAR.
-  setOpacity('.omega-global-sar-fabric canvas',measured?Math.min(.012,p.contextCeiling*.08):Math.min(.14,p.contextCeiling*.20));
-  setOpacity('.omega-woven-motion canvas',measured?Math.min(.014,p.reconstructionWeight):Math.min(.12,p.reconstructionWeight));
-  setOpacity('.omega-jrc-water-layer canvas',measured?Math.min(.10,p.waterWeight):Math.min(.28,p.waterWeight+.08));
+  setOpacity('.omega-global-sar-fabric canvas',measured?Math.min(.012,p.contextCeiling*.08):Math.min(.075,p.contextCeiling*.12));
+  setOpacity('.omega-woven-motion canvas',measured?Math.min(.014,p.reconstructionWeight):Math.min(.055,p.reconstructionWeight));
+  setOpacity('.omega-jrc-water-layer canvas',measured?Math.min(.05,p.waterWeight):Math.min(.08,p.waterWeight));
   setOpacity('.omega-earth-awareness-layer canvas',measured?0:Math.min(.18,p.contextCeiling*.25));
   if(exact)setOpacity('#map',.001);
   updateReadout(cube);

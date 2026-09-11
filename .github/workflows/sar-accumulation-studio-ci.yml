@@ -84,8 +84,38 @@ jobs:
           curl --fail --silent http://127.0.0.1:8765/src/earth-canon-cube.mjs | grep -q 'omega.earth.canon.cube.v1'
           curl --fail --silent http://127.0.0.1:8765/src/earth-canon-runtime.mjs | grep -q 'OMEGA_EARTH_CANON_CUBE'
           curl --fail --silent http://127.0.0.1:8765/src/sar-experience-runtime.mjs | grep -q 'OMEGA_SAR_EXPERIENCE'
+          curl --fail --silent http://127.0.0.1:8765/src/sar-visual-stability-runtime.mjs | grep -q 'OMEGA_SAR_VISUAL_STABILITY'
           curl --fail --silent http://127.0.0.1:8765/public.css >/dev/null
           curl --fail --silent http://127.0.0.1:8765/data/earth-grid.part06.txt >/dev/null
+
+      - name: Install visual proof runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Prove stable desktop and phone visual hierarchy
+        env:
+          SAR_TEST_URL: http://127.0.0.1:8765
+        run: |
+          python -m http.server 8765 >/tmp/sar-visual-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid || true' EXIT
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8765/ >/dev/null; then break; fi
+            sleep 0.25
+          done
+          node tests/r260-3-visual-stability-e2e.mjs
+
+      - name: Archive visual proof
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sar-r260-3-visual-stability-proof
+          path: |
+            sar-accumulation-studio/test-results/r260-3-visual-stability-desktop.png
+            sar-accumulation-studio/test-results/r260-3-visual-stability-mobile.png
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Prove non-deployment authority
         run: |
