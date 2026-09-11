@@ -3,9 +3,12 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const root=new URL('../src/',import.meta.url);
-const [runtime,visual,app,woven]=await Promise.all([
+const [runtime,visual,experience,compositor,nativeSurface,app,woven]=await Promise.all([
   readFile(new URL('r4-runtime.mjs',root),'utf8'),
   readFile(new URL('sar-visual-stability-runtime.mjs',root),'utf8'),
+  readFile(new URL('sar-experience-runtime.mjs',root),'utf8'),
+  readFile(new URL('earth-canon-compositor-runtime.mjs',root),'utf8'),
+  readFile(new URL('data-native-surface-runtime.mjs',root),'utf8'),
   readFile(new URL('app.mjs',root),'utf8'),
   readFile(new URL('sar-woven-motion-runtime.mjs',root),'utf8')
 ]);
@@ -28,6 +31,12 @@ test('R260.3 keeps world context crisp and subordinate to measured SAR',()=>{
   assert.match(visual,/shaped\?\.004:\.075/);
   assert.match(visual,/shaped\?\.012:\.055/);
   assert.match(visual,/exact_shaped_sar'\?\.012:surface==='regional_shaped_sar'\?\.001:1/);
+  assert.match(experience,/omega-global-sar-fabric canvas\{opacity:\.075!important;filter:none/);
+  assert.match(experience,/omega-woven-motion canvas\{opacity:\.055!important;filter:none/);
+  assert.doesNotMatch(experience,/blur\(7px\)|scale\(1\.012\)/);
+  assert.match(compositor,/Math\.min\(\.075,p\.contextCeiling\*\.12\)/);
+  assert.match(compositor,/Math\.min\(\.055,p\.reconstructionWeight\)/);
+  assert.match(nativeSurface,/omega-jrc-water-layer canvas\{opacity:\.055!important/);
   assert.doesNotMatch(visual,/blur\(7px\)/);
   assert.doesNotMatch(visual,/scale\(1\.012\)/);
 });

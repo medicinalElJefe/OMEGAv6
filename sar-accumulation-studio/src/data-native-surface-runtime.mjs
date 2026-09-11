@@ -91,7 +91,7 @@ function install(){
   body[data-data-native-surface=regional_shaped_sar] .omega-woven-motion canvas,body[data-data-native-surface=exact_shaped_sar] .omega-woven-motion canvas{opacity:.012!important;transition:none!important}
   body[data-data-native-surface=exact_shaped_sar] #map{opacity:.012!important}
   body.omega-experience .omega-earth-awareness-layer canvas{opacity:0!important}
-  body.omega-experience .omega-jrc-water-layer canvas{opacity:.12!important;mix-blend-mode:screen!important;filter:saturate(.68) contrast(.96)!important}
+  body.omega-experience .omega-jrc-water-layer canvas{opacity:.055!important;mix-blend-mode:screen!important;filter:saturate(.74) contrast(1.02)!important}
   body.omega-experience #omegaRegionalSarBadge{display:none!important}
   @media(max-width:760px){.omega-data-native-badge{display:none}}
   `;document.head.append(style);layer=document.createElement('div');layer.className='omega-data-native-surface';canvas=document.createElement('canvas');ctx=canvas.getContext('2d');layer.append(canvas);const badge=document.createElement('div');badge.id='omegaDataNativeBadge';badge.className='omega-data-native-badge';badge.textContent='DATA-NATIVE EARTH SURFACE · LOADING';wrap.append(layer,badge);new ResizeObserver(resize).observe(map);resize();
