@@ -158,7 +158,10 @@ body.omega-experience .transport-deck{background:rgba(5,9,10,.86)!important;back
     background:#070b0d!important;box-shadow:0 18px 60px rgba(0,0,0,.72)!important;
   }
   body.omega-experience[data-drawer=mission] .mission-rail,body.omega-experience[data-drawer=evidence] .evidence-dock,
-  body.omega-experience[data-drawer=analysis] .analysis-deck{transform:translateY(0)!important}
+  body.omega-experience[data-drawer=analysis] .analysis-deck{
+    left:4px!important;right:4px!important;top:calc(var(--omega-top) + 80px)!important;bottom:max(4px,env(safe-area-inset-bottom))!important;
+    width:auto!important;height:auto!important;max-height:none!important;transform:translateY(0)!important;
+  }
   body.omega-experience .analysis-deck{display:grid!important;grid-template-columns:1fr!important;padding:0 7px 7px!important}
   body.omega-experience .analysis-deck>*{grid-column:1!important}
   body.omega-experience .mission-rail .two{grid-template-columns:1fr!important}

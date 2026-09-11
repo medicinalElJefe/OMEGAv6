@@ -63,6 +63,7 @@ test('R260.3 gives phones a contained two-row command bar and full sheet drawers
   assert.match(visual,/#omegaSarEvidence\{display:block!important\}/);
   assert.match(visual,/left:4px!important;right:4px!important/);
   assert.match(visual,/data-drawer=mission\] \.mission-rail[\s\S]*transform:translateY\(0\)!important/);
+  assert.match(visual,/data-drawer=analysis\] \.analysis-deck\{[\s\S]*width:auto!important;height:auto!important/);
   assert.match(visual,/env\(safe-area-inset-bottom\)/);
 });
 
