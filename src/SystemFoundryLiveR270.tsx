@@ -21,6 +21,7 @@ export const SYSTEM_FOUNDRY_LIVE_TRUTH_R270={
  deviceAuthority:'selected non-revoked online R238 device + current shared epoch; stale snapshot fails closed',
  resourceAuthority:'R239 envelope derived from exact selected-device returned host proof',
  externalBindings:'remain independently unproved unless explicitly supplied',
+ actionAuthority:'R277 keeps Foundry side effects AUTH_REQUIRED; R179 authorization and R147 dispatch remain outside this adapter',
  noSecondPoller:true,
  noSecondExecutor:true,
  canonStateAdmission:'R125 only',

@@ -17,6 +17,7 @@ export type CompiledSystemRuntimePlanR269=CompiledSystemPlan&{
   resourceReasons:string[];
   deviceAssistAdmitted:boolean;
   externalAuthority:'BOUND'|'EXTERNAL_DEGRADED';
+  actionAuthority:'R179_AUTHORIZATION_REQUIRED_R147_DISPATCH';
  };
 };
 
@@ -52,14 +53,15 @@ export function compileSystemRuntimeR269(genome:SystemGenome,truth:FoundryRuntim
   blockers,
   estimatedCost:active.reduce((sum,capability)=>sum+capability.cost,0),
   estimatedLatency:active.reduce((sum,capability)=>sum+capability.latency,0),
-  proofObligations:[...base.proofObligations,'R269 device assist requires both current device authority and R239 resource admission','R276 propagates blocked dependency truth only after direct and R239 runtime gates'],
+  proofObligations:[...base.proofObligations,'R269 device assist requires both current device authority and R239 resource admission','R276 propagates blocked dependency truth only after direct and R239 runtime gates','R277 keeps AUTH_REQUIRED side effects blocked inside the planning-only Foundry; R179 authorization and R147 dispatch remain external authorities'],
   runtimeTruth:{
    deviceAuthority:truth.authenticatedDeviceHeartbeat?'CURRENT_AUTHENTICATED_HEARTBEAT':'DEVICE_PROOF_REQUIRED',
    resourceAuthority:resourceCurrent?'R239_CURRENT_ENVELOPE':'R239_RESOURCE_PROOF_REQUIRED',
    resourceTier:envelope?.tier||'UNAVAILABLE',
    resourceReasons:envelope?.reasons||[],
    deviceAssistAdmitted,
-   externalAuthority:truth.externalBindings?'BOUND':'EXTERNAL_DEGRADED'
+   externalAuthority:truth.externalBindings?'BOUND':'EXTERNAL_DEGRADED',
+   actionAuthority:'R179_AUTHORIZATION_REQUIRED_R147_DISPATCH'
   }
  };
 }
@@ -71,5 +73,6 @@ export const FOUNDRY_RUNTIME_BOUNDARY_R269={
  resourceTruth:'R239 deterministic envelope over returned R238 host profile + current shared snapshot',
  cloudIndependence:'cloud/browser capabilities remain independently placeable while device assist is detached or resource-held',
  dependencyTruth:'R276 applies fail-closed dependency propagation after direct and resource truth; classification only',
- preserved:['R125','R141','R146','R147','R205','R239','R240','R243','.github/workflows/ci.yml']
+ actionTruth:'R277 keeps side-effect placement AUTH_REQUIRED inside Foundry; only the existing R179 authorization to R147 dispatch path may advance it',
+ preserved:['R125','R141','R146','R179','R147','R205','R239','R240','R243','.github/workflows/ci.yml']
 } as const;
