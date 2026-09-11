@@ -25,6 +25,7 @@ async function prove(viewport,label){
   await deep.first().click();
   await page.waitForFunction(()=>document.querySelector('.r43-workspace-stage')?.getAttribute('data-view')==='DEEP',{timeout:20000});
   await page.waitForSelector('.r46-bio .bio281',{state:'visible',timeout:20000});
+  await page.waitForSelector('.r46-bio .bio281-empirical',{state:'visible',timeout:20000});
   await page.waitForSelector('.r46-bio .bio281-allmodes',{state:'visible',timeout:20000});
 
   const surface=page.locator('.bio281');
@@ -86,6 +87,28 @@ async function prove(viewport,label){
   const activeRays=await surface.locator('line.bio281-ray.active').count();
   if(activeRings!==1||activeRays!==1)throw new Error(`${label} active domain/layer geometry invalid rings=${activeRings} rays=${activeRays}`);
 
+  const empirical=page.locator('.bio281-empirical');
+  const empiricalText=await empirical.innerText();
+  for(const token of ['Heavy Bio Empirical Perfection Loop','EMPIRICAL BENCHMARK / CALIBRATION PACKET','WOVEN CONTINUITY','12 DOMAIN + 12 LAYER PERFORMANCE SLICES'])if(!empiricalText.includes(token))throw new Error(`${label} empirical convergence surface missing ${token}`);
+  const empiricalCases=[
+    {id:'f1',domain:1,layer:1,variable:'fixture',unit:'u',observed:3,predicted:1,baseline:0,partition:'FIT',verified:true},
+    {id:'f2',domain:1,layer:2,variable:'fixture',unit:'u',observed:5,predicted:2,baseline:0,partition:'FIT',verified:true},
+    {id:'f3',domain:2,layer:3,variable:'fixture',unit:'u',observed:7,predicted:3,baseline:0,partition:'FIT',verified:true},
+    {id:'h1',domain:1,layer:1,variable:'fixture',unit:'u',observed:9,predicted:4,baseline:6,partition:'HOLDOUT',verified:true},
+    {id:'h2',domain:2,layer:2,variable:'fixture',unit:'u',observed:11,predicted:5,baseline:7,partition:'HOLDOUT',verified:true},
+    {id:'h3',domain:3,layer:3,variable:'fixture',unit:'u',observed:13,predicted:6,baseline:8,partition:'HOLDOUT',verified:true},
+    {id:'h4',domain:4,layer:4,variable:'fixture',unit:'u',observed:15,predicted:7,baseline:9,partition:'HOLDOUT',verified:true},
+    {id:'h5',domain:5,layer:5,variable:'fixture',unit:'u',observed:17,predicted:8,baseline:10,partition:'HOLDOUT',verified:true},
+    {id:'p1',domain:6,layer:6,variable:'fixture',unit:'u',observed:19,predicted:9,baseline:11,partition:'PROSPECTIVE',verified:true}
+  ];
+  const empiricalInput=empirical.locator('input[type=file]');
+  await empiricalInput.setInputFiles({name:'r281-empirical.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(empiricalCases))});
+  await page.waitForFunction(()=>document.querySelectorAll('.bio281-empirical-table tbody tr').length===9,{timeout:10000});
+  const empiricalAfter=await empirical.innerText();
+  for(const token of ['HOLDOUT PASS','0.0000','FIT N','HOLDOUT N'])if(!empiricalAfter.includes(token))throw new Error(`${label} empirical recursive calibration proof missing ${token}`);
+  if(await empirical.locator('.bio281-empirical-slice-grid article').count()!==24)throw new Error(`${label} empirical surface must expose all 12 domain + 12 layer slices`);
+  if(await empirical.locator('g[data-winner]').count()<9)throw new Error(`${label} empirical residual field did not render every accepted case`);
+
   const overflow=await page.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-window.innerWidth);
   if(overflow>10)throw new Error(`${label} Heavy Bio surface overflows viewport by ${overflow}px`);
   if(errors.length)throw new Error(`${label} page errors: ${errors.join(' | ')}`);
@@ -94,4 +117,4 @@ async function prove(viewport,label){
 
 await prove({width:1440,height:1100},'desktop');
 await prove({width:390,height:844},'mobile');
-console.log('R281 BROWSER PASS · 12 domains × 12 layers × 7 physical scales × 241 zero-authority analytical channels (179 source + 62 canon) + calibrated instrument packet visualized on desktop/mobile');
+console.log('R281 BROWSER PASS · deferred Deep Matter mount · 12 domains × 12 layers × 7 physical scales × 241 zero-authority analytical channels + calibrated instrument packet + recursive FIT→HOLDOUT→PROSPECTIVE empirical perfection loop on desktop/mobile');
