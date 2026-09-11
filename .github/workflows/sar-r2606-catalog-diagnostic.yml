@@ -26,3 +26,8 @@ jobs:
         env:
           SAR_TEST_URL: https://omega-sar-r4.jeffdeweyeljefe.workers.dev
         run: node tests/r260-6-catalog-diagnostic-e2e.mjs
+      - name: Reproduce complete production measured-workstation gate
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: https://omega-sar-r4.jeffdeweyeljefe.workers.dev
+        run: node tests/r253-balanced-viewport-e2e.mjs
