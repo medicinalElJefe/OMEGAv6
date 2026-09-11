@@ -13,7 +13,8 @@ try{
   page.on('requestfailed',request=>{if(watched(request.url()))requestFailures.push({url:request.url(),failure:request.failure()?.errorText||'unknown'});});
   page.on('response',async response=>{if(!watched(response.url()))return;const row={url:response.url(),status:response.status(),headers:await response.allHeaders()};if(response.status()>=300){try{row.body=(await response.text()).slice(0,2400);}catch(error){row.body=`UNREADABLE:${error.message}`;}}transportResponses.push(row);});
   const response=await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});assert.ok(response?.ok(),`root HTTP ${response?.status()}`);
-  await page.waitForFunction(()=>globalThis.OMEGA_SAR_R4_RUNTIME?.conception==='CONTINUOUS_SAR_EARTH_INSTRUMENT'&&globalThis.OMEGA_SAR_R4_RUNTIME?.geometry?.focus==='LOCAL_FORWARD_AND_INVERSE_JACOBIAN'&&globalThis.OMEGA_SAR_AUTHORITY&&globalThis.OMEGA_SAR_NAVIGATION?.selectTarget&&globalThis.OMEGA_SAR_INTERACTION&&globalThis.OMEGA_SAR_BLADE_RENDER?.state==='ACTIVE',null,{timeout:30000});
+  await page.waitForFunction(()=>{const r=globalThis.OMEGA_SAR_R4_RUNTIME;return r&&['CONTINUOUS_SAR_EARTH_INSTRUMENT','CONTINUOUS_MULTI_SOURCE_EARTH_COMPUTATION_AND_SAR_INSTRUMENT'].includes(r.conception)&&r.geometry?.focus==='LOCAL_FORWARD_AND_INVERSE_JACOBIAN'&&globalThis.OMEGA_SAR_AUTHORITY&&globalThis.OMEGA_SAR_NAVIGATION?.selectTarget&&globalThis.OMEGA_SAR_INTERACTION&&globalThis.OMEGA_SAR_BLADE_RENDER?.state==='ACTIVE';},null,{timeout:30000});
+  const runtime=await page.evaluate(()=>globalThis.OMEGA_SAR_R4_RUNTIME);assert.equal(runtime.featureRelease,'R259');assert.equal(runtime.canonMode,'FULL_OVERALL_CANON');assert.equal(runtime.coherenceMode,'UNIFIED_COHERENCE');
   assert.match(await page.title(),/OMEGA SAR R4/);assert.equal(await page.locator('.omega-local-nav-map').count(),0,'conventional local map must not replace the SAR instrument');
 
   await page.evaluate(({lon,lat})=>globalThis.OMEGA_SAR_LOCATION.jump(lon,lat,{name:'Tucson',region:'Arizona',country:'United States'}),tucson);
@@ -46,5 +47,5 @@ try{
 
   const rejected=await page.evaluate(()=>{const a=globalThis.OMEGA_SAR_AUTHORITY,b={...a.rejected};window.dispatchEvent(new CustomEvent('omega-source-sar-frame',{detail:{id:'WRONG_SCENE',src:'wrong'}}));window.dispatchEvent(new CustomEvent('omega-calibrated-sar-patch',{detail:{patch:{id:'WRONG_SCENE',target:{lon:0,lat:0},evidence:{measured:true}}}}));return {before:b,after:{...a.rejected}};});
   assert.ok(rejected.after.source>rejected.before.source);assert.ok(rejected.after.measurement>rejected.before.measurement);assert.deepEqual(errors,[],`page errors: ${errors.join(' | ')}`);
-  console.log(JSON.stringify({initial,stale,readiness,exact,blade,reverse,fitted,rejected,transportResponses,requestFailures,consoleRows},null,2));console.log('SAR_R4_R247_BLADE_AUTHORITY_FULL_PASS');
+  console.log(JSON.stringify({runtime:{featureRelease:runtime.featureRelease,canonMode:runtime.canonMode,coherenceMode:runtime.coherenceMode},initial,stale,readiness,exact,blade,reverse,fitted,rejected,transportResponses,requestFailures,consoleRows},null,2));console.log('SAR_R4_R259_BLADE_AUTHORITY_FULL_PASS');
 }finally{await browser.close();}
