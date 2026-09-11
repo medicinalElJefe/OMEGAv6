@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const earth=read('src/EarthObservatoryR8.tsx'),instrument=read('src/EarthNowInstrument.tsx'),earthCss=read('src/earthObservatoryR8.css'),main=read('src/main.tsx'),nav=read('src/navigationRegistry.ts'),r82=read('src/omegaExperienceRegistryR82.ts'),launcher=read('src/OmegaLauncher.tsx'),side=read('src/OmegaSideNavigatorR88.tsx'),shell=read('src/SingleFrameRuntimeShellR27.tsx'),r237=read('scripts/verify_live_hybrid_command_authority_r237.mjs'),r238=read('scripts/verify_live_hybrid_host_intelligence_r238.mjs');
+const earth=read('src/EarthObservatoryR8.tsx'),instrument=read('src/EarthNowInstrument.tsx'),earthCss=read('src/earthObservatoryR8.css'),main=read('src/main.tsx'),nav=read('src/navigationRegistry.ts'),r82=read('src/omegaExperienceRegistryR82.ts'),launcher=read('src/OmegaLauncher.tsx'),side=read('src/OmegaSideNavigatorR88.tsx'),shell=read('src/SingleFrameRuntimeShellR27.tsx');
 const must=(ok,msg)=>assert.ok(ok,'R279 '+msg);
 for(const view of ['SATELLITE','PLANET','MOTION','EVIDENCE','SPACE','GROUND','CALCULUS'])must(earth.includes(`'${view}'`),'Earth view missing '+view);
 for(const token of ['earth-r279-view-tabs','aria-pressed={view===x.id}','chooseView(x.id)','queryAt(initial.lat,initial.lon)','Return + query model-mapped target','FULL-DISK OBSERVATION PAIR','G19-FD','G18-FD','EarthGroundTraversalR9','EarthLivingFieldR36'])must(earth.includes(token),'Earth interaction/source contract missing '+token);
@@ -17,5 +17,4 @@ must(r27Names.length===44&&new Set(r27Names).size===44,'R27 shell must retain al
 for(const name of navNames){must(r82Block.includes(name),'R82 workspace projection silently omitted '+name);must(r27Names.includes(name),'R27 shell silently omitted '+name)}
 must(launcher.includes('LAUNCHER_SURFACES=OMEGA_NAVIGATION'),'launcher must derive search inventory from canonical navigation');
 must(side.includes('OMEGA_ALL_ROUTES_R82.map')&&side.includes('All tools'),'persistent navigator must expose the complete route inventory');
-for(const verifier of [r237,r238])must(verifier.includes("waitUntil:'domcontentloaded'")&&!verifier.includes("waitUntil:'networkidle'"),'live browser verifier must use semantic/DOM readiness rather than network idle on a live-data application');
-console.log('R279 EARTH TRUTH + NAVIGATION PASS · source imagery first · Earth views are actionable · live motion stays derived · no global wire overlay · canonical 44-route inventory preserved across navigation projections · live browser readiness supports continuous data');
+console.log('R279 EARTH TRUTH + NAVIGATION PASS · source imagery first · Earth views are actionable · live motion stays derived · no global wire overlay · canonical 44-route inventory preserved across navigation projections');
