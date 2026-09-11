@@ -1,11 +1,11 @@
 const TRANSIENT=new Set([429,500,502,503,504]);
 const DELAYS=[0,180,520,1250];
 const nativeFetch=globalThis.fetch?.bind(globalThis);
-const state={state:'INITIALIZING',requests:0,retries:0,recovered:0,failed:0,last:null,boundary:'Retries only transient network/429/5xx failures for same-origin Sentinel source/raster/STAC item transport. It never converts failed evidence into measurement and never retries semantic 4xx evidence failures.'};
+const state={state:'INITIALIZING',requests:0,retries:0,recovered:0,failed:0,last:null,boundary:'Retries only transient network/429/5xx failures for same-origin Sentinel source/raster/STAC item and source terrain tile transport. It never converts failed evidence into measurement, changes coordinates, substitutes terrain, or retries semantic 4xx evidence failures.'};
 globalThis.OMEGA_SAR_BROWSER_TRANSPORT=state;
 
 function watchedUrl(input){
-  try{const raw=input instanceof Request?input.url:String(input),u=new URL(raw,location.href);return u.origin===location.origin&&/^\/api\/(?:raster|source|stac\/item)$/.test(u.pathname)?u:null;}catch{return null;}
+  try{const raw=input instanceof Request?input.url:String(input),u=new URL(raw,location.href);return u.origin===location.origin&&/^\/api\/(?:raster|source|terrain|stac\/item)$/.test(u.pathname)?u:null;}catch{return null;}
 }
 function methodOf(input,init){return String(init?.method||(input instanceof Request?input.method:'GET')||'GET').toUpperCase();}
 function aborted(signal){return signal?.aborted;}
@@ -34,7 +34,7 @@ async function resilientFetch(input,init){
       state.retries++;
     }
   }
-  state.failed++;throw lastError||new Error(`Sentinel browser transport failed${lastStatus?` HTTP ${lastStatus}`:''}`);
+  state.failed++;throw lastError||new Error(`OMEGA source transport failed${lastStatus?` HTTP ${lastStatus}`:''}`);
 }
 
 if(nativeFetch&&globalThis.fetch!==resilientFetch){globalThis.fetch=resilientFetch;state.state='READY';}
