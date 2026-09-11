@@ -1,11 +1,10 @@
 import { buildCanonicalEarthCube, canonPacket, EARTH_SOURCE_FAMILIES, EARTH_CANON_ENGLISH, englishCubeSummary } from './earth-canon-cube.mjs';
 
 let timer=null,previousCube=null,generation=0;
-const state={state:'INITIALIZING',release:'R259',cube:null,packets:[],updatedAt:null,error:null,documentedAdapters:Object.fromEntries(Object.entries(EARTH_SOURCE_FAMILIES).filter(([,v])=>v.status==='DOCUMENTED_ADAPTER_PENDING')),english:EARTH_CANON_ENGLISH,boundary:'R259 unifies already-proven runtime evidence into one Canon/Unified-Coherence/Mode-188 state. It does not make pending GNSS/strain/seismic/tilt/pore-pressure/environment adapters live and it does not promote context or reconstruction into measurement.'};
+const state={state:'INITIALIZING',release:'R259',cube:null,packets:[],updatedAt:null,error:null,documentedAdapters:Object.fromEntries(Object.entries(EARTH_SOURCE_FAMILIES).filter(([,v])=>v.status==='DOCUMENTED_ADAPTER_PENDING')),english:EARTH_CANON_ENGLISH,boundary:'R259 unifies already-proven runtime evidence into one Canon/Unified-Coherence/Mode-188 state. Pending GNSS/strain/seismic/tilt/pore-pressure/environment families enter only through source-proven adapters; context or reconstruction never becomes measurement.'};
 globalThis.OMEGA_EARTH_CANON=state;
 
 const finite=v=>Number.isFinite(Number(v));
-const ageHours=iso=>{const t=new Date(iso||0).getTime();return Number.isFinite(t)?Math.max(0,(Date.now()-t)/3600000):0;};
 const renderer=()=>globalThis.OMEGA_SAR_RENDERER||null;
 
 function exactPacket(){
@@ -49,7 +48,10 @@ function omegaPacket(){
   const f=globalThis.OMEGA_SAR_FIELD_RUNTIME?.field;if(!f?.cells?.length)return null;const measured=f.cells.filter(c=>c.measured).length,inferred=f.cells.filter(c=>c.inferred).length,contradictions=Number(f.summary?.contradictions)||0;
   return canonPacket({id:`omega:${f.generatedAt||Date.now()}`,sourceFamily:'OMEGA_FIELD',parameter:'bounded_continuity_reconstruction',evidenceClass:'RECONSTRUCTED',continuity:Number(f.summary?.admittedFraction)||Number(f.summary?.coverage)||.35,burden:Math.min(1,(Number(f.summary?.holdFraction)||0)+contradictions/Math.max(1,f.cells.length)),contradiction:Math.min(1,contradictions/Math.max(1,f.cells.length)),value:inferred,units:'derived cells',sourceCoverage:measured,renderRole:'SUBORDINATE_RECONSTRUCTION',proofBoundary:f.boundary});
 }
-function collection(){return [exactPacket(),regionalPacket(),globalFabricPacket(),...terrainPackets(),jrcPacket(),...eventPackets(),measuredCalculusPacket(),temporalPacket(),omegaPacket()].filter(Boolean);}
+function adapterPackets(){
+  const raw=globalThis.OMEGA_EARTH_ADAPTER_PACKETS;return Array.isArray(raw)?raw.filter(p=>p?.schema==='omega.earth.canon.packet.v1'&&(!p.measured||p.canClaimLiveMeasurement===true)):[];
+}
+function collection(){return [exactPacket(),regionalPacket(),globalFabricPacket(),...terrainPackets(),jrcPacket(),...eventPackets(),measuredCalculusPacket(),temporalPacket(),omegaPacket(),...adapterPackets()].filter(Boolean);}
 
 function publish(cube){
   state.cube=cube;state.packets=cube.packets;state.updatedAt=cube.updatedAt;state.state='READY';state.error=null;globalThis.OMEGA_EARTH_CANON_CUBE=cube;
@@ -61,10 +63,10 @@ function rebuild(){
 }
 function schedule(delay=42){clearTimeout(timer);timer=setTimeout(rebuild,delay);}
 function install(){
-  const events=['omega-calibrated-sar-patch','omega-calibrated-sar-patch-clear','omega-regional-sar-measurement','omega-global-sar-fabric-update','omega-data-native-terrain','omega-earth-awareness-update','omega-r258-temporal-calculus','omega-water-observation-update','omega-field-update','omega-r257-deep-detail'];
+  const events=['omega-calibrated-sar-patch','omega-calibrated-sar-patch-clear','omega-regional-sar-measurement','omega-global-sar-fabric-update','omega-data-native-terrain','omega-earth-awareness-update','omega-r258-temporal-calculus','omega-water-observation-update','omega-field-update','omega-r257-deep-detail','omega-earth-adapter-update'];
   for(const name of events)window.addEventListener(name,()=>schedule(name.includes('terrain')?90:35));
   document.querySelector('#map')?.addEventListener('omega-map-select',()=>schedule(40));
   document.querySelector('#map')?.addEventListener('omega-map-view',()=>schedule(120));
-  schedule(120);setInterval(()=>schedule(0),5000);state.rebuild=rebuild;state.schedule=schedule;
+  schedule(120);setInterval(()=>schedule(0),5000);state.rebuild=rebuild;state.schedule=schedule;state.collection=collection;
 }
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else queueMicrotask(install);}
