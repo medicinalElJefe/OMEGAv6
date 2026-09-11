@@ -3,14 +3,15 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const root=new URL('../src/',import.meta.url);
-const [runtime,visual,experience,compositor,nativeSurface,app,woven]=await Promise.all([
+const [runtime,visual,experience,compositor,nativeSurface,app,woven,motion]=await Promise.all([
   readFile(new URL('r4-runtime.mjs',root),'utf8'),
   readFile(new URL('sar-visual-stability-runtime.mjs',root),'utf8'),
   readFile(new URL('sar-experience-runtime.mjs',root),'utf8'),
   readFile(new URL('earth-canon-compositor-runtime.mjs',root),'utf8'),
   readFile(new URL('data-native-surface-runtime.mjs',root),'utf8'),
   readFile(new URL('app.mjs',root),'utf8'),
-  readFile(new URL('sar-woven-motion-runtime.mjs',root),'utf8')
+  readFile(new URL('sar-woven-motion-runtime.mjs',root),'utf8'),
+  readFile(new URL('sar-smooth-motion-runtime.mjs',root),'utf8')
 ]);
 
 test('R260.3 installs one final visual contract after the image formation runtimes',()=>{
@@ -73,4 +74,13 @@ test('motion paint is evidence-bound and throttled for desktop and compact scree
   assert.match(app,/!document\.hidden && hasAnimatedEvidence/);
   assert.doesNotMatch(app,/function motionLoop\(now\) \{[^\n]+drawMap\(\); requestAnimationFrame/);
   assert.match(woven,/fpsTarget:matchMedia\('\(max-width:760px\)'\)\.matches\?10:18/);
+});
+
+test('R260.4 motion bootstrap is singleton-safe and reports durable installation',()=>{
+  assert.match(motion,/MOTION_CONTRACT='OMEGA_SAR_SMOOTH_MOTION_V1'/);
+  assert.match(motion,/prior\?\.contract===MOTION_CONTRACT\?prior/);
+  assert.match(motion,/installed:false/);
+  assert.match(motion,/map\.dataset\.omegaSmoothMotion==='true'/);
+  assert.match(motion,/state\.installed=true/);
+  assert.match(motion,/if\(state\.state==='INITIALIZING'\)state\.state='READY'/);
 });
