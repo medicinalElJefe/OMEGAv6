@@ -2,18 +2,18 @@ import React,{useMemo,useState}from'react';
 import{
  SAR_BAND_RELATIVITY_R280,SAR_MISSION_REGISTRY_R280,compileSarWovenStateR280,
  interferometricAdmissionR280,phaseToLosDisplacementR280,
- type SarBandR280,type SarMissingnessR280,type SarObservationR280,type SarTruthClassR280
+ type SarBandR280,type SarMissingnessR280,type SarObservationR280
 }from'./sarTruthR280';
+import{rasterCoverageR283,rasterVisualValueR283,type SarRasterFieldR283}from'./sarRasterR283';
 
 type View='SOURCE'|'AMPLITUDE'|'PHASE'|'COHERENCE'|'INTERFEROGRAM'|'DEFORMATION'|'ELEVATION'|'POLARIMETRY'|'MULTI_BAND'|'TIME_STACK'|'SCAR_UNCERTAINTY'|'PROOF';
 
 const VIEWS:View[]=['SOURCE','AMPLITUDE','PHASE','COHERENCE','INTERFEROGRAM','DEFORMATION','ELEVATION','POLARIMETRY','MULTI_BAND','TIME_STACK','SCAR_UNCERTAINTY','PROOF'];
-const truthRank:Record<SarTruthClassR280,number>={OBSERVED_NATIVE:10,OBSERVED_CALIBRATED:9,CORRECTED:8,GEOCODED:7,FUSED:6,ASSIMILATED:5,SIMULATED:2,FORECAST:1,DERIVED_MODEL:4,VISUAL_ENHANCED:3};
 const missingLabels:Record<SarMissingnessR280,string>={NO_SOURCE:'No source',OUT_OF_SWATH:'Out of swath',RADAR_SHADOW:'Radar shadow',LAYOVER:'Layover',NO_COHERENCE:'No coherence',CLOUD_MASKED:'Cloud masked',ATMOSPHERICALLY_DEGRADED:'Atmospheric degradation',INTERPOLATED_ONLY:'Interpolated only'};
 
 const DEMO:SarObservationR280={
- id:'r280-demo-observation',missionId:'sentinel-1',sensor:'C-SAR',productId:'DEMO-NO-LIVE-SOURCE',productLevel:'SLC',band:'C',frequencyGHz:5.405,wavelengthCm:5.55,polarization:'VV',
- provenance:{sourceId:'demo-only',provider:'R280 deterministic demonstration',acquiredAt:new Date(0).toISOString()},
+ id:'r283-demo-observation',missionId:'sentinel-1',sensor:'C-SAR',productId:'DEMO-NO-LIVE-SOURCE',productLevel:'SLC',band:'C',frequencyGHz:5.405,wavelengthCm:5.55,polarization:'VV',
+ provenance:{sourceId:'demo-only',provider:'R283 deterministic demonstration',acquiredAt:new Date(0).toISOString()},
  geometry:{crs:'EPSG:4326',surfaceClass:'SCATTERING_SURFACE',orbitDirection:'ASCENDING',incidenceDeg:39,azimuthDeg:12,lookDirection:'RIGHT',losUnit:[0.56,-0.16,0.81],baselineM:112,temporalBaselineDays:12,nativeResolutionM:[10,10],pixelSpacingM:[10,10]},
  truth:'VISUAL_ENHANCED',missingness:['NO_SOURCE'],residuals:{atmosphereRad:0.42,orbitRad:0.08,topographyRad:0.18,noiseRad:0.11,decorrelation:0.23,speckleBurden:0.34,interpolationBurden:0,notes:['Deterministic demonstration state only. No live complex SAR source is bound.']},
  nativeDataBound:false,complexDataBound:false,sourceEvidenceBound:false
@@ -46,13 +46,15 @@ function color(view:View,v:number,x:number,y:number){
  if(view==='POLARIMETRY')return `rgb(${Math.floor(35+210*v)},${Math.floor(35+170*fieldValue('AMPLITUDE',x,y,0))},${Math.floor(55+180*(1-v))})`;
  if(view==='MULTI_BAND')return `rgb(${Math.floor(40+180*v)},${Math.floor(70+110*(1-v))},${Math.floor(80+160*fieldValue('COHERENCE',x,y,0))})`;
  if(view==='SCAR_UNCERTAINTY')return `rgb(${Math.floor(65+190*v)},${Math.floor(45+90*(1-v))},${Math.floor(55+60*(1-v))})`;
+ if(view==='PROOF')return `rgb(${Math.floor(140*(1-v))},${Math.floor(45+205*v)},${Math.floor(70+120*v)})`;
  const q=Math.floor(18+225*Math.pow(v,.78));return `rgb(${q},${q},${q})`;
 }
 
-function SarCanvas({view,time}:{view:View;time:number}){
- const N=72;const cells=useMemo(()=>Array.from({length:N*N},(_,i)=>{const x=(i%N)/(N-1),y=Math.floor(i/N)/(N-1),v=fieldValue(view,x,y,time);return {i,v,c:color(view,v,x,y)}}),[view,time]);
- return <div className="r280-canvas" aria-label={`${view} deterministic visualization surface`}>
-  {cells.map(c=><i key={c.i} style={{background:c.c}}/>)}
+function SarCanvas({view,time,raster}:{view:View;time:number;raster?:SarRasterFieldR283}){
+ const N=72;const cells=useMemo(()=>Array.from({length:N*N},(_,i)=>{const x=(i%N)/(N-1),y=Math.floor(i/N)/(N-1),source=raster?rasterVisualValueR283(raster,view,x,y):null,v=source??fieldValue(view,x,y,time);return {i,v,c:color(view,v,x,y),source:source!=null}}),[view,time,raster]);
+ const sourceCells=cells.filter(x=>x.source).length;
+ return <div className="r280-canvas" aria-label={`${view} ${sourceCells?'source-bound raster':'deterministic demonstration'} visualization surface`} data-source-cells={sourceCells}>
+  {cells.map(c=><i key={c.i} style={{background:c.c}} data-source={c.source?'true':'false'}/>)}
   <div className="r280-grid"/><div className="r280-crosshair"><span/><b/></div>
   <div className="r280-range-labels"><span>RANGE →</span><span>AZIMUTH ↓</span></div>
  </div>
@@ -60,7 +62,7 @@ function SarCanvas({view,time}:{view:View;time:number}){
 
 function Metric({label,value,sub}:{label:string;value:string;sub?:string}){return <div className="r280-metric"><small>{label}</small><b>{value}</b>{sub&&<em>{sub}</em>}</div>}
 
-export function SARTruthInstrumentR280({observation=DEMO}:{observation?:SarObservationR280}){
+export function SARTruthInstrumentR280({observation=DEMO,raster}:{observation?:SarObservationR280;raster?:SarRasterFieldR283}){
  const [view,setView]=useState<View>('AMPLITUDE');const[time,setTime]=useState(4);const[bandB,setBandB]=useState<SarBandR280>('L');const[showGeometry,setShowGeometry]=useState(true);
  const mission=SAR_MISSION_REGISTRY_R280.find(x=>x.id===observation.missionId);
  const woven=useMemo(()=>compileSarWovenStateR280(observation,[view==='SOURCE'?'none':'render-lens'],[view]),[observation,view]);
@@ -68,11 +70,13 @@ export function SARTruthInstrumentR280({observation=DEMO}:{observation?:SarObser
  const admission=interferometricAdmissionR280(pair);
  const phaseExample=phaseToLosDisplacementR280(Math.PI/2,observation.wavelengthCm||5.55);
  const sourceBound=observation.sourceEvidenceBound&&observation.nativeDataBound;
+ const coverage=useMemo(()=>raster?rasterCoverageR283(raster,view):null,[raster,view]);
+ const viewBound=!!(sourceBound&&raster&&coverage?.bound);
  const proofTone=sourceBound&&woven.admission.state==='ADMITTED'?'ADMITTED':woven.admission.state;
  return <section className="sar-r280">
   <header className="r280-top">
-   <div><span className="r280-kicker">OMEGA · SAR TRUTH INSTRUMENT · R280</span><h2>Complex measurement → geometry → residual → proof → visual lens</h2><p>Source-first SAR workstation. Rendering never upgrades evidence class.</p></div>
-   <div className={`r280-proof ${proofTone.toLowerCase()}`}><small>PROOF STATE</small><b>{proofTone}</b><span>{sourceBound?'source measurement bound':'deterministic demonstration · no live SAR pixels bound'}</span></div>
+   <div><span className="r280-kicker">OMEGA · SAR TRUTH INSTRUMENT · R283</span><h2>Complex measurement → geometry → residual → proof → visual lens</h2><p>Source-first SAR workstation. Rendering never upgrades evidence class.</p></div>
+   <div className={`r280-proof ${proofTone.toLowerCase()}`}><small>PROOF STATE</small><b>{proofTone}</b><span>{sourceBound?'source observation bound':'deterministic demonstration · no live SAR pixels bound'}</span></div>
   </header>
 
   <nav className="r280-tabs" aria-label="SAR truth views">{VIEWS.map(x=><button key={x} aria-pressed={view===x} onClick={()=>setView(x)}>{x.replaceAll('_',' ')}</button>)}</nav>
@@ -93,15 +97,16 @@ export function SARTruthInstrumentR280({observation=DEMO}:{observation?:SarObser
    </aside>
 
    <main className="r280-center">
-    <div className="r280-screen-head"><span>{view.replaceAll('_',' ')}</span><b>{sourceBound?'BOUND SOURCE':'DEMONSTRATION FIELD'}</b><small>{observation.geometry.crs} · {observation.geometry.surfaceClass.replaceAll('_',' ')}</small></div>
-    <div className={`r280-screen ${showGeometry?'geometry-on':''}`}><SarCanvas view={view} time={time}/>{showGeometry&&<div className="r280-geometry-overlay"><span>INC {observation.geometry.incidenceDeg??'—'}°</span><span>LOOK {observation.geometry.lookDirection||'—'}</span><span>BASE {observation.geometry.baselineM??'—'} m</span><span>ΔT {observation.geometry.temporalBaselineDays??'—'} d</span></div>}</div>
+    <div className="r280-screen-head"><span>{view.replaceAll('_',' ')}</span><b>{viewBound?'BOUND MEASUREMENT FIELD':sourceBound?'SOURCE BOUND · FIELD UNAVAILABLE':'DEMONSTRATION FIELD'}</b><small>{observation.geometry.crs} · {observation.geometry.surfaceClass.replaceAll('_',' ')}</small></div>
+    <div className={`r280-screen ${showGeometry?'geometry-on':''}`}><SarCanvas view={view} time={time} raster={viewBound?raster:undefined}/>{showGeometry&&<div className="r280-geometry-overlay"><span>INC {observation.geometry.incidenceDeg??'—'}°</span><span>LOOK {observation.geometry.lookDirection||'—'}</span><span>BASE {observation.geometry.baselineM??'—'} m</span><span>ΔT {observation.geometry.temporalBaselineDays??'—'} d</span></div>}</div>
     {view==='TIME_STACK'&&<div className="r280-timeline"><button onClick={()=>setTime(Math.max(0,time-1))}>−</button><input type="range" min="0" max="11" value={time} onChange={e=>setTime(Number(e.target.value))}/><button onClick={()=>setTime(Math.min(11,time+1))}>+</button><b>T{String(time).padStart(2,'0')}</b></div>}
-    <footer className="r280-legend"><span>Visual values are lens encodings.</span><b>{sourceBound?'Measurement-linked rendering':'NO SOURCE PIXELS CLAIMED'}</b><span>Native resolution: {observation.geometry.nativeResolutionM?.join(' × ')||'unknown'} m</span></footer>
+    <footer className="r280-legend"><span>Visual values are lens encodings.</span><b>{viewBound?'MEASUREMENT-LINKED RENDERING':sourceBound?'SOURCE BOUND · THIS FIELD NOT BOUND':'NO SOURCE PIXELS CLAIMED'}</b><span>Native resolution: {observation.geometry.nativeResolutionM?.join(' × ')||'unknown'} m</span></footer>
    </main>
 
    <aside className="r280-right">
     <h3>Truth inspector</h3>
     <Metric label="SOURCE ID" value={observation.provenance.sourceId}/><Metric label="ACQUIRED" value={observation.provenance.acquiredAt}/>
+    {raster&&<><Metric label="RASTER SOURCE" value={raster.sourceId}/><Metric label="VIEW FIELD" value={coverage?.field||'none'} sub={coverage?`${coverage.actual}/${coverage.expected} values · ${coverage.complete?'complete':'partial'}`:undefined}/></>}
     <div className="r280-pair"><Metric label="INCIDENCE" value={`${observation.geometry.incidenceDeg??'—'}°`}/><Metric label="AZIMUTH" value={`${observation.geometry.azimuthDeg??'—'}°`}/></div>
     <Metric label="SURFACE" value={observation.geometry.surfaceClass.replaceAll('_',' ')}/>
     <Metric label="SCENE PROOF" value={observation.sourceEvidenceBound?'SOURCE BOUND':'SOURCE UNBOUND'}/>
