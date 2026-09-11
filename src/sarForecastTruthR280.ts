@@ -1,0 +1,4 @@
+import type{SarObservationR280}from'./sarTruthR280';
+export interface EarthStateR280{kind:'OBSERVED'|'CORRECTED'|'FUSED'|'ASSIMILATED'|'SIMULATED'|'FORECAST';sourceObservationIds:string[];modelId?:string;validAt:string;generatedAt?:string;uncertainty?:number;}
+export function earthStateFromObservationR280(obs:SarObservationR280):EarthStateR280{return{kind:obs.truth==='OBSERVED_NATIVE'||obs.truth==='OBSERVED_CALIBRATED'?'OBSERVED':obs.truth==='CORRECTED'||obs.truth==='GEOCODED'?'CORRECTED':obs.truth==='FUSED'?'FUSED':obs.truth==='ASSIMILATED'?'ASSIMILATED':obs.truth==='FORECAST'?'FORECAST':'SIMULATED',sourceObservationIds:[obs.id],validAt:obs.provenance.acquiredAt}}
+export function earthStateTruthBoundaryR280(){return'Assimilated, simulated and forecast Earth state may be constrained by SAR observations but never inherits direct-observation truth merely because observations contributed to it.'}
