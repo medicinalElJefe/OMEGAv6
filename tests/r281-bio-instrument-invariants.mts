@@ -5,6 +5,7 @@ import {
   BIO_CONTEXT_LAYERS_R281,BIO_DOMAINS_R281,BIO_SCALE_LEVELS_R281,
   calibrateBioInstrumentSampleR281,compileBioInstrumentFrameR281,parseBioInstrumentTextR281
 } from '../src/bioInstrumentRuntimeR281.ts';
+import {compileBioAllModesFabricR281} from '../src/bioAllModesFabricR281.ts';
 
 await initCorpusPack();
 const record=corpusState(11498);
@@ -31,6 +32,18 @@ assert.ok(empty.allModes.overlays.every(x=>x.measurementAuthority===0),'no canon
 assert.equal(empty.atlas.materializedAddressSpace,20736);
 assert.equal(empty.atlas.projectedAddressSpace,61917364224);
 assert.match(empty.truthBoundary,/not a declaration of medical-device clearance/i);
+
+const completeModes=compileBioAllModesFabricR281(record);
+assert.equal(completeModes.total,241,'all-modes fabric must include 179 source + 62 canon channels');
+assert.equal(completeModes.sourceCatalogCount,179);
+assert.equal(completeModes.canonAuthorityCount,62);
+assert.equal(completeModes.channels.filter(x=>x.family==='SOURCE_CATALOG').length,179);
+assert.equal(completeModes.channels.filter(x=>x.family==='CANON_AUTHORITY').length,62);
+assert.ok(completeModes.channels.every(x=>x.measurementAuthority===0),'all 241 analytical channels must have zero measurement authority');
+assert.ok(completeModes.channels.some(x=>x.family==='SOURCE_CATALOG'&&x.realization==='SOURCE_CATALOG_AFFINITY'));
+assert.ok(completeModes.channels.some(x=>x.family==='CANON_AUTHORITY'&&(x.realization==='GATED'||x.realization==='CHARTED')),'unproven/gated canon channels must remain visible');
+assert.match(completeModes.truthBoundary,/241 total/i);
+assert.match(completeModes.truthBoundary,/not exact execution/i);
 
 const sample={
   id:'BP-1',domain:2,layer:5,variable:'systolic_pressure',rawValue:121,unit:'mmHg',observedAt:'2026-09-10T11:59:00Z',sourceFormat:'DEVICE_PACKET' as const,source:'bench fixture',
@@ -83,9 +96,12 @@ assert.equal(csvRows[0].unit,'percent');
 
 const bio=fs.readFileSync('src/BiologicalTraversalR46.tsx','utf8');
 const surface=fs.readFileSync('src/BioInstrumentSurfaceR281.tsx','utf8');
-for(const token of ['ORGANISM','ORGAN','TISSUE','CELL','ORGANELLE','MOLECULE','ATOM','Representational biological-scale traversal only'])assert.ok(bio.includes(token),`R46 compatibility contract missing ${token}`);
+const allModeSurface=fs.readFileSync('src/BioAllModesFabricR281.tsx','utf8');
+for(const token of ['ORGANISM','ORGAN','TISSUE','CELL','ORGANELLE','MOLECULE','ATOM','Representational biological-scale traversal only','241 analytical channels'])assert.ok(bio.includes(token)||allModeSurface.includes(token),`R281 biological contract missing ${token}`);
 for(const token of ['INSTRUMENT READY','ALL 62 MODES','LOCAL INSTRUMENT PACKET INGEST','MEASUREMENT / MODEL SEPARATION','measurement authority'])assert.ok(surface.includes(token),`R281 visual instrument contract missing ${token}`);
+for(const token of ['241 analytical channels','179 source catalog + 62 canon/calculus authorities','measurement authority','AFFINITY ≠ EXECUTION'])assert.ok(allModeSurface.includes(token),`R281 complete mode fabric missing ${token}`);
 assert.ok(surface.includes('BIO_CONTEXT_LAYERS_R281')&&surface.includes('BIO_DOMAINS_R281'),'full domain/layer rendering missing');
 assert.ok(!surface.toLowerCase().includes('medical grade'),'surface may not self-label as medical grade before validation');
+assert.ok(!allModeSurface.toLowerCase().includes('medical grade'),'all-mode surface may not self-label as medical grade before validation');
 
-console.log('R281 PASS · calibrated measurement frame + uncertainty propagation + 12×12 Heavy Bio visualization + 62 zero-authority mode overlays');
+console.log('R281 PASS · calibrated measurement frame + uncertainty propagation + 12×12 Heavy Bio visualization + all 241 zero-authority analytical channels (179 source + 62 canon)');
