@@ -1,4 +1,5 @@
 import {compileSystemGenomeR268,type CompiledSystemPlan,type FoundryContext,type SystemGenome} from './systemFoundryR268';
+import {propagateDependencyBlocksR276} from './systemFoundryDependencyGateR276';
 import type {ResourceEnvelopeR239} from './hybridResourceGovernorR239';
 
 export type FoundryRuntimeTruthR269={
@@ -34,7 +35,7 @@ export function compileSystemRuntimeR269(genome:SystemGenome,truth:FoundryRuntim
   truth.authenticatedDeviceHeartbeat&&resourceCurrent&&envelope&&
   envelope.tier!=='HOLD'&&envelope.tier!=='UNPROVED'&&envelope.admission.VERIFY_PROJECT
  );
- const activeFrontier=base.activeFrontier.map(capability=>{
+ const resourceFrontier=base.activeFrontier.map(capability=>{
   if(capability.id!==DEVICE_CAPABILITY||capability.status==='BLOCKED')return capability;
   if(deviceAssistAdmitted)return capability;
   const resourceBlockers=envelope
@@ -42,6 +43,7 @@ export function compileSystemRuntimeR269(genome:SystemGenome,truth:FoundryRuntim
    :[RESOURCE_REQUIRED];
   return {...capability,status:'BLOCKED' as const,executor:null,blockers:resourceBlockers};
  });
+ const activeFrontier=propagateDependencyBlocksR276(resourceFrontier);
  const blockers=activeFrontier.flatMap(capability=>capability.blockers.map(blocker=>`${capability.id}:${blocker}`));
  const active=activeFrontier.filter(capability=>capability.status==='ACTIVE');
  return {
@@ -50,7 +52,7 @@ export function compileSystemRuntimeR269(genome:SystemGenome,truth:FoundryRuntim
   blockers,
   estimatedCost:active.reduce((sum,capability)=>sum+capability.cost,0),
   estimatedLatency:active.reduce((sum,capability)=>sum+capability.latency,0),
-  proofObligations:[...base.proofObligations,'R269 device assist requires both current device authority and R239 resource admission'],
+  proofObligations:[...base.proofObligations,'R269 device assist requires both current device authority and R239 resource admission','R276 propagates blocked dependency truth only after direct and R239 runtime gates'],
   runtimeTruth:{
    deviceAuthority:truth.authenticatedDeviceHeartbeat?'CURRENT_AUTHENTICATED_HEARTBEAT':'DEVICE_PROOF_REQUIRED',
    resourceAuthority:resourceCurrent?'R239_CURRENT_ENVELOPE':'R239_RESOURCE_PROOF_REQUIRED',
@@ -68,5 +70,6 @@ export const FOUNDRY_RUNTIME_BOUNDARY_R269={
  deviceTruth:'current authenticated R238-selected-device heartbeat only',
  resourceTruth:'R239 deterministic envelope over returned R238 host profile + current shared snapshot',
  cloudIndependence:'cloud/browser capabilities remain independently placeable while device assist is detached or resource-held',
+ dependencyTruth:'R276 applies fail-closed dependency propagation after direct and resource truth; classification only',
  preserved:['R125','R141','R146','R147','R205','R239','R240','R243','.github/workflows/ci.yml']
 } as const;
