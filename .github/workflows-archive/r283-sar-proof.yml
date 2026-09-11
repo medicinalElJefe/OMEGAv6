@@ -1,3 +1,4 @@
+# Historical archive only. R283 SAR proof is converged into the existing R241 proof plane by R283.1 so this file carries no active GitHub Actions authority.
 name: R283 SAR Truth Proof
 
 on:

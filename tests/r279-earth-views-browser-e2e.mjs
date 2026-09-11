@@ -10,7 +10,8 @@ const EXPECT=[
  ['Evidence','.earth-r279-instrument[data-earth-mode="EVIDENCE"]'],
  ['Earth / space','.earth-r279-instrument[data-earth-mode="SPACE"]'],
  ['Ground','.earth-r279-ground'],
- ['Calculus','.earth-r279-calculus']
+ ['Calculus','.earth-r279-calculus'],
+ ['SAR Truth','.earth-r283-sar[data-earth-view="SAR"]']
 ];
 
 async function enterEarth(page,label){
@@ -23,7 +24,11 @@ async function enterEarth(page,label){
  await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',{timeout:30000});
  await page.waitForSelector('.earth-r279',{state:'visible',timeout:30000});
  const tabs=page.locator('.earth-r279-view-tabs button');
- if(await tabs.count()!==7)throw new Error(`${label}: expected seven Earth view controls, found ${await tabs.count()}`);
+ const count=await tabs.count();
+ if(count!==EXPECT.length)throw new Error(`${label}: expected ${EXPECT.length} canonical Earth view controls, found ${count}`);
+ const labels=(await tabs.locator('b').allInnerTexts()).map(x=>x.trim());
+ const expectedLabels=EXPECT.map(([name])=>name);
+ if(JSON.stringify(labels)!==JSON.stringify(expectedLabels))throw new Error(`${label}: Earth view contract drifted: ${JSON.stringify(labels)}`);
 }
 
 const browser=await chromium.launch({headless:true});
@@ -33,7 +38,7 @@ try{
   const page=await context.newPage();
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
   await page.route('**/api/earth/gibs/global*',route=>route.fulfill({status:200,contentType:'image/png',body:R281_TEXTURE,headers:{'x-omega-source':'R281-BROWSER-OBSERVATION-FIXTURE','x-omega-date':'2026-09-09','x-omega-crs':'EPSG:4326','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION'}}));
-  await page.goto(`${base}/?r281=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?r2831=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   await enterEarth(page,label);
   for(const [name,selector] of EXPECT){
@@ -50,6 +55,11 @@ try{
     if(sampled.unique<8)throw new Error(`${label}: R281 globe did not render a materially varied observed texture (${sampled.unique} sampled colors)`);
     const text=await page.locator('.earth-r281-globe').innerText();for(const token of ['OBSERVED TEXTURE','EPSG:4326','Truth boundary'])if(!text.includes(token))throw new Error(`${label}: R281 source/projection truth missing ${token}`);
    }
+   if(name==='SAR Truth'){
+    const sar=page.locator('.earth-r283-sar');
+    const text=await sar.innerText();
+    for(const token of ['SAR','source','truth'])if(!text.toLowerCase().includes(token.toLowerCase()))throw new Error(`${label}: R283 SAR surface missing truth-context token ${token}`);
+   }
   }
   const reset=page.getByRole('button',{name:'Return + query model-mapped target'});
   await reset.waitFor({state:'visible',timeout:10000});
@@ -64,5 +74,5 @@ try{
   if(pageErrors.length)throw new Error(`${label}: Earth view browser errors: ${pageErrors.join(' | ')}`);
   await context.close();
  }
- console.log('R279/R281 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · seven Earth menu buttons mount distinct surfaces · R281 Planet renders varied returned-source pixels through orthographic globe projection · reset/query target works · no page errors or viewport overflow');
+ console.log('R279/R281/R283 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth mount distinct surfaces · R281 Planet renders varied returned-source pixels through orthographic globe projection · R283 SAR stays source/truth explicit · reset/query target works · no page errors or viewport overflow');
 }finally{await browser.close()}
