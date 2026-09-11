@@ -60,8 +60,10 @@ jobs:
           node tests/continuous-field-r13-invariants.mjs
           node tests/r237-hybrid-command-authority-invariants.mjs
 
-      - name: Prove R284 WGS84 Earth projection and solar geometry
-        run: npx --yes tsx tests/r284-earth-visual-fidelity.mts
+      - name: Prove R279/R284 Earth truth and WGS84 geometry
+        run: |
+          node tests/r279-earth-truth-navigation-invariants.mjs
+          npx --yes tsx tests/r284-earth-visual-fidelity.mts
 
       - name: Run complete application check and production build
         run: npm run check
@@ -74,7 +76,7 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
-      - name: Prove built R241/R239/R242/R245/R279/R281/R284 convergence in the real UI
+      - name: Prove built R241/R239/R242/R245/R279/R281/R283/R284 convergence in the real UI
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
@@ -121,7 +123,7 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + R239/R242 Navigation + R245 Full Overall Canon + R248/R249 Operational Calculus + R279/R284 Earth + R281 Heavy Bio UI proof'
+            echo '## R241 Archive Convergence + R239/R242 Navigation + R245 Full Overall Canon + R248/R249 Operational Calculus + R279/R283/R284 Earth + R281 Heavy Bio UI proof'
             echo "- Candidate: $GITHUB_SHA"
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
             echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
@@ -134,10 +136,11 @@ jobs:
             echo '- R245 exposes 7 Canon axes, 7 permanent strata, 12 logical organs and 12→144→1,728→20,736→248,832 address/scheduling levels without physical-dimension inflation.'
             echo '- R245 desktop/mobile built-browser proof requires the actual System Atlas surface, preserves the R153 executor and proves manual observation refresh remains non-mutating.'
             echo '- R281 desktop/mobile browser proof opens the real Matter Traversal Heavy Bio surface, proves 12 domains × 12 context layers × 7 physical scales × 62 zero-authority mode overlays, and verifies a calibrated packet is rendered with instrument-ready state.'
+            echo '- R283 SAR Truth remains an eighth Earth surface and is explicitly preserved by R284 desktop/mobile browser proof.'
             echo '- R284 upgrades Planet from spherical display math to WGS84 ellipsoid screen↔geodetic projection while keeping returned NASA GIBS source brightness as the default evidence view.'
             echo '- R284 fail-closes wrong source identity/CRS/bbox/truth/aspect, wraps the ±180° texture seam, separates UTC illumination/terminator/grid as derived transforms, and exposes unshaded returned RGB through the pixel inspector.'
             echo '- R284 numerical proof checks ellipsoid round-trip accuracy, dateline continuity, solar/subsolar geometry, terminator orthogonality and outside-limb no-fabrication before browser proof.'
-            echo '- R284 browser proof exercises desktop and 2×DPR mobile rendering, materially varied returned pixels, source/derived toggles, the pixel inspector and wrong-source fail-close behavior.'
+            echo '- R284 browser proof exercises desktop and 2×DPR mobile rendering, materially varied returned pixels, source/derived toggles, the pixel inspector, wrong-source fail-close behavior and inherited SAR Truth mounting.'
             echo '- R245/R248/R249 delegate mutation/execution to existing Build Out/R153/Hybrid authorities and own no production writer or Canon admission path.'
             echo '- R245 binds R170 and CLOUD-01 to one canonical R164 residual policy, one R240/R243 candidate-selection law and one deterministic SG001–SG005 generator.'
             echo '- The autonomous one-open-candidate fence covers both selfbuild/r170-* and cloud/evolution-* namespaces; the two machines may not independently advance competing source proposals.'
@@ -147,8 +150,8 @@ jobs:
             echo '- Gradient/curl/variance are display proxies, not physical measurement claims.'
             echo '- Typed cognition is read-only through proposal; permission/execution/return/Canon remain separately gated.'
             echo '- R239 navigation remains converged in this proof plane: six workspaces, complete 44-route registry, immediate aria-hidden/inert close, ancestor-aware visible-canvas sanity, exhaustive route activation, and mobile containment.'
-            echo '- R279/R284 proves all seven Earth controls still mount intended distinct surfaces while Planet gains higher geometric and source-truth fidelity; R281 proves the Heavy Bio instrument surface and its complete visual axes.'
-            echo '- No 25th workflow authority is introduced; R279/R281/R284 browser proofs are converged into this existing R241 proof plane and active workflow topology remains within the R170 governed bound.'
+            echo '- R279/R283/R284 proves all eight Earth controls mount intended distinct surfaces while Planet gains higher geometric and source-truth fidelity and SAR Truth remains intact; R281 proves the Heavy Bio instrument surface and its complete visual axes.'
+            echo '- No 25th workflow authority is introduced; R279/R281/R283/R284 browser proofs are converged into this existing R241 proof plane and active workflow topology remains within the R170 governed bound.'
             echo '- R153 mutation, R147 dispatch, R146 durable history, R141 exact return, R240 source promotion and R125 sole CanonState admission remain unchanged.'
             echo '- R201/R203 remain retired.'
             echo '- PR live proof binds to the exact SHA actually served by the canonical Worker; it does not compare against a moving Git ref.'
