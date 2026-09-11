@@ -19,10 +19,11 @@ test('R258.7 keeps camera changes authoritative while retaining previous surface
   assert.doesNotMatch(regional,/measurementPromotion:true|evidence:\{[^}]*measured:true/);
 });
 
-test('R258.7 metadata binds the scheduler repair to Unified Coherence without changing truth boundaries',()=>{
-  assert.match(runtime,/patchRelease:'R258\.7'/);
+test('R258.7 scheduler repair remains bound to Unified Coherence and truth boundaries under R259',()=>{
+  assert.match(runtime,/featureRelease:'R25[89]'/);
   assert.match(runtime,/SAME_KEY_REGIONAL_READ_REUSE/);
-  assert.match(runtime,/mode188:'EVIDENCE_ADMISSION_STATE_TRANSLATION_WITHOUT_PHYSICAL_PROMOTION'/);
+  assert.match(runtime,/EVIDENCE_ADMISSION_STATE_TRANSLATION_WITHOUT_PHYSICAL_PROMOTION/);
+  assert.match(runtime,/coherenceMode:'UNIFIED_COHERENCE'/);
   assert.match(runtime,/globalFabricIsCalibratedMosaic:false/);
   assert.match(runtime,/browseIsMeasurement:false/);
 });
