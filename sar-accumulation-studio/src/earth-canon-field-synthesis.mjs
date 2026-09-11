@@ -9,18 +9,18 @@ export function synthesizeCanonicalVisualField(cube,{terrainCoverage=0,temporalR
   const packets=cube.packets||[],s=cube.summary,total=Math.max(1,packets.length),measuredPackets=packets.filter(p=>p?.measured),derivedPackets=packets.filter(p=>p?.evidenceClass==='DERIVED_FROM_MEASURED'),contextPackets=packets.filter(p=>['CONTEXT','SOURCE_SUPPORT'].includes(p?.evidenceClass)),reconstructedPackets=packets.filter(p=>p?.evidenceClass==='RECONSTRUCTED'),unknownPackets=packets.filter(p=>p?.evidenceClass==='UNKNOWN');
   const measuredSupport=clamp(measuredPackets.length/Math.max(1,Math.min(3,total))),derivedSupport=clamp(derivedPackets.length/4),contextSupport=clamp(contextPackets.length/6),reconstructionSupport=clamp(reconstructedPackets.length/3),unknownSupport=clamp(unknownPackets.length/Math.max(1,total));
   const terrain=clamp(terrainCoverage),temporal=temporalReady?1:0,structure=structureReady?1:0,scarPressure=clamp((cube.scars?.length||0)/24),continuity=clamp(s.continuity),burden=clamp(s.burden+.35*scarPressure),contradiction=clamp(s.contradiction),gate=mode188FromChart({C:continuity,Lambda:burden,q:contradiction});
-  const admissionGain=gate.admissibility==='ACCEPT'?1:(gate.admissibility==='CONDITIONAL'?.74:.42),hasMeasured=measuredPackets.length>0,exact=cube.renderPlan.authority==='EXACT_MEASURED_SAR',regional=cube.renderPlan.authority==='REGIONAL_MEASURED_SAR';
-  const terrainMeasuredCap=exact?.10:(regional?.17:.13),waterCap=hasMeasured?.07:.20,eventCap=hasMeasured?.04:.12,reconstructionCap=hasMeasured?.02:.16;
+  const admissionGain=gate.admissibility==='ACCEPT'?1:(gate.admissibility==='CONDITIONAL'?0.74:0.42),hasMeasured=measuredPackets.length>0,exact=cube.renderPlan.authority==='EXACT_MEASURED_SAR',regional=cube.renderPlan.authority==='REGIONAL_MEASURED_SAR';
+  const terrainMeasuredCap=exact?0.10:(regional?0.17:0.13),waterCap=hasMeasured?0.07:0.20,eventCap=hasMeasured?0.04:0.12,reconstructionCap=hasMeasured?0.02:0.16;
   // The measured image is never attenuated below authority 1. Derived channels only shape presentation.
   const channels=Object.freeze({
     measuredLuminance:hasMeasured?1:0,
     measuredStructure:hasMeasured?clamp((.12+.10*structure+.06*derivedSupport)*admissionGain,0,.28):0,
     localContrast:hasMeasured?clamp((.10+.08*structure+.04*continuity)*admissionGain,0,.22):0,
     terrainRelief:hasMeasured?clamp(terrain*terrainMeasuredCap*admissionGain,0,.18):clamp(terrain*.70,0,.72),
-    waterContext:clamp(contextSupport*(hasMeasured?.055:.16)*admissionGain,0,waterCap),
+    waterContext:clamp(contextSupport*(hasMeasured?0.055:0.16)*admissionGain,0,waterCap),
     temporalChange:hasMeasured?clamp(temporal*(.07+.05*derivedSupport)*admissionGain,0,.12):0,
-    eventContext:clamp(contextSupport*(hasMeasured?.025:.10),0,eventCap),
-    reconstruction:clamp(reconstructionSupport*(hasMeasured?.012:.12)*admissionGain,0,reconstructionCap),
+    eventContext:clamp(contextSupport*(hasMeasured?0.025:0.10),0,eventCap),
+    reconstruction:clamp(reconstructionSupport*(hasMeasured?0.012:0.12)*admissionGain,0,reconstructionCap),
     uncertainty:clamp(.45*burden+.35*contradiction+.20*unknownSupport),
     scar:scarPressure
   });
