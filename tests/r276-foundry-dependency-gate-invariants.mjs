@@ -44,7 +44,7 @@ must(runtime.includes("if(capability.id!==DEVICE_CAPABILITY||capability.status==
 must(runtime.includes("estimatedCost:active.reduce")&&runtime.includes("estimatedLatency:active.reduce"),'R276 totals must be recomputed from the propagated ACTIVE frontier');
 must(runtime.includes('R276 propagates blocked dependency truth only after direct and R239 runtime gates'),'R276 runtime proof obligation missing');
 
-for(const forbidden of ['fetch(','setInterval(','api.post','api.get','dispatch(','update_file','create_file','CanonState'])must(!source.includes(forbidden),`R276 gate must remain classification-only: ${forbidden}`);
+for(const forbidden of ['fetch(','setInterval(','api.post','api.get','dispatch(','update_file','create_file'])must(!source.includes(forbidden),`R276 gate must remain classification-only: ${forbidden}`);
 for(const required of ["timing:'after direct evidence/executor gates and after R239 device-resource overlay'","rule:'a capability with any declared dependency currently BLOCKED is also BLOCKED'","directBlockers:'preserved; propagation is additive and never clears evidence/resource blockers'","authority:'classification only; no polling, dispatch, execution, evidence acquisition, source mutation, CanonState admission or deployment authority'"])must(source.includes(required),`R276 boundary missing ${required}`);
 
 console.log('R276_FOUNDRY_DEPENDENCY_GATE PASS · direct + transitive + cyclic dependency blocks converge fail-closed · independent work remains active · R239 overlay precedes propagation · direct blockers preserved · input immutable · classification-only authority');
