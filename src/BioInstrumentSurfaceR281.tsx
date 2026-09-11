@@ -75,7 +75,7 @@ export default function BioInstrumentSurfaceR281({address,onAddress}:Props){
 
   <BioMedicalProductionPanelR282 record={record} samples={samples}/>
 
-  <details className='bio281-modes'><summary>CANON MODE RING · experimental/model overlay ledger <span>{frame.allModes.count} canon authorities</span></summary><div>{modeMarks.map(m=><article key={m.id}><code>{String(m.id).padStart(2,'0')}</code><span><b>{m.name}</b><small>{m.realization} · {m.basis}</small></span><strong>{fmt(m.activation)}<small>measurement authority {m.measurementAuthority}</small></strong></article>)}</div></details>
+  <details className='bio281-modes'><summary>ALL 62 MODES · experimental/model overlay ledger <span>{frame.allModes.count} canon authorities</span></summary><div>{modeMarks.map(m=><article key={m.id}><code>{String(m.id).padStart(2,'0')}</code><span><b>{m.name}</b><small>{m.realization} · {m.basis}</small></span><strong>{fmt(m.activation)}<small>measurement authority {m.measurementAuthority}</small></strong></article>)}</div></details>
 
   <footer className='bio281-boundary'><ShieldCheck/><span>{frame.truthBoundary} R282 adds intended-use, risk, validation, audit and authorization gates. Production-validation readiness is not represented as regulatory clearance or clinical authorization unless real scope-matched evidence is loaded.</span></footer>
  </section>
