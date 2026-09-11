@@ -72,13 +72,14 @@ function normalizeEvidenceClass(value='UNKNOWN'){
 
 export function canonPacket(input={}){
   const evidenceClass=normalizeEvidenceClass(input.evidenceClass),rank=EARTH_EVIDENCE_ORDER[evidenceClass]??0,measured=evidenceClass==='MEASURED'||evidenceClass==='REGISTERED_MEASURED';
+  const exactMeasured=measured&&!!input.exactMeasured,regionalMeasured=measured&&!exactMeasured&&!!input.regionalMeasured;
   const continuity=clamp01(input.continuity??input.confidence??(measured?1:0)),burden=Math.max(0,Number(input.burden)||0),contradiction=Math.max(0,Number(input.contradiction)||0),mode188=mode188FromChart({C:continuity,Lambda:burden,q:contradiction});
-  const lemma=translateLemmaState({exactMeasured:!!input.exactMeasured,regionalMeasured:!!input.regionalMeasured,sourceCoverage:Number(input.sourceCoverage)||0,fieldConfidence:continuity,gammaAdmission:measured?'ADMIT_MEASURED':mode188.admissibility==='ACCEPT'?'ADMIT_HIGH':mode188.admissibility==='CONDITIONAL'?'ADMIT_BOUNDED':'HOLD_LOW_CONFIDENCE',frameGapHours:Number(input.frameGapHours)||0,spatialOverlap:input.spatialOverlap??(measured?1:0),cameraVelocity:Number(input.cameraVelocity)||0,orientation:input.orientation??1,contradictions:contradiction>0?1:0,contextAvailable:evidenceClass==='CONTEXT'});
+  const lemma=translateLemmaState({exactMeasured,regionalMeasured,sourceCoverage:Number(input.sourceCoverage)||0,fieldConfidence:continuity,gammaAdmission:measured?'ADMIT_MEASURED':mode188.admissibility==='ACCEPT'?'ADMIT_HIGH':mode188.admissibility==='CONDITIONAL'?'ADMIT_BOUNDED':'HOLD_LOW_CONFIDENCE',frameGapHours:Number(input.frameGapHours)||0,spatialOverlap:input.spatialOverlap??(measured?1:0),cameraVelocity:Number(input.cameraVelocity)||0,orientation:input.orientation??1,contradictions:contradiction>0?1:0,contextAvailable:evidenceClass==='CONTEXT'});
   const sourceFamily=String(input.sourceFamily||'UNKNOWN'),registry=EARTH_SOURCE_FAMILIES[sourceFamily]||null;
   const liveStatus=registry?.status||String(input.sourceStatus||'UNREGISTERED');
   const canClaimLiveMeasurement=measured&&liveStatus!=='DOCUMENTED_ADAPTER_PENDING'&&input.sourceProven!==false;
   return Object.freeze({
-    schema:'omega.earth.canon.packet.v1',id:String(input.id||`${sourceFamily}:${input.parameter||'state'}:${input.time||nowIso()}`),sourceFamily,sourceStatus:liveStatus,parameter:String(input.parameter||registry?.observable||'state'),evidenceClass,rank,measured,canClaimLiveMeasurement,
+    schema:'omega.earth.canon.packet.v1',id:String(input.id||`${sourceFamily}:${input.parameter||'state'}:${input.time||nowIso()}`),sourceFamily,sourceStatus:liveStatus,parameter:String(input.parameter||registry?.observable||'state'),evidenceClass,rank,measured,exactMeasured,regionalMeasured,canClaimLiveMeasurement,
     position:input.position||null,time:input.time||null,resolution:input.resolution||null,coverage:input.coverage||null,value:input.value??null,units:input.units||null,provenance:input.provenance||null,
     continuity,burden,contradiction,omega:continuity/(1+burden+Math.abs(contradiction)),mode188,lemma,
     memory:input.memory||null,scar:input.scar||null,renderRole:input.renderRole||null,proofBoundary:input.proofBoundary||null,
@@ -107,7 +108,7 @@ export function buildCanonicalEarthCube(packets=[],previous=null){
   const renderPlan={
     authority:exact?'EXACT_MEASURED_SAR':regional?'REGIONAL_MEASURED_SAR':measured?'MEASURED_EVIDENCE':'SOURCE_OR_CONTEXT_ONLY',
     primarySurface:exact?'EXACT_CANONICAL_SHAPE':regional?'REGIONAL_CANONICAL_SHAPE':terrain?'TERRAIN_RELIEF':'EARTH_CONTEXT',
-    measuredWeight:exact?1:regional?.98:measured?.95:0,
+    measuredWeight:exact?1:(regional?.98:(measured?.95:0)),
     terrainWeight:terrain?(measured?.32:.82):0,
     waterWeight:water?.14:0,
     temporalWeight:temporal?.22:0,
