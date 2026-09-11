@@ -10,7 +10,7 @@ try{
   const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});assert.ok(response?.ok(),`root HTTP ${response?.status()}`);
   await page.waitForFunction(()=>globalThis.OMEGA_SAR_R4_RUNTIME?.featureRelease==='R259'&&globalThis.OMEGA_EARTH_CANON?.state==='READY'&&globalThis.OMEGA_EARTH_SOURCE_ADAPTERS?.state==='READY'&&globalThis.OMEGA_EARTH_CANON_COMPOSITOR,null,{timeout:30000});
   const boot=await page.evaluate(()=>({runtime:globalThis.OMEGA_SAR_R4_RUNTIME,canon:globalThis.OMEGA_EARTH_CANON,adapterFamilies:globalThis.OMEGA_EARTH_SOURCE_ADAPTERS.documentedFamilies.map(x=>({family:x.family,status:x.status})),readout:document.querySelector('#omegaR259CanonReadout')?.textContent||''}));
-  assert.equal(boot.runtime.featureRelease,'R259');assert.equal(boot.runtime.patchRelease,'R259.0');assert.equal(boot.runtime.boundaries.documentedAdapterIsLiveData,false);assert.equal(boot.adapterFamilies.length,6);assert.ok(boot.adapterFamilies.every(x=>x.status==='DOCUMENTED_ADAPTER_PENDING'));assert.match(boot.readout,/CANON/i);
+  assert.equal(boot.runtime.featureRelease,'R259');assert.ok(['R259.0','R260.0'].includes(boot.runtime.patchRelease));assert.equal(boot.runtime.boundaries.documentedAdapterIsLiveData,false);assert.equal(boot.adapterFamilies.length,6);assert.ok(boot.adapterFamilies.every(x=>x.status==='DOCUMENTED_ADAPTER_PENDING'));assert.match(boot.readout,/CANON/i);
 
   await page.evaluate(()=>globalThis.OMEGA_SAR_LOCATION.jump(-110.9747,32.2226,{name:'Tucson',region:'Arizona',country:'United States'}));
   await page.waitForFunction(()=>globalThis.OMEGA_SAR_REGIONAL_MEASUREMENT?.state==='READY'&&globalThis.OMEGA_SAR_REGIONAL_MEASUREMENT?.patch?.evidence?.measured===true,null,{timeout:160000,polling:250});
@@ -28,5 +28,5 @@ try{
 
   await mkdir('test-results',{recursive:true});await page.screenshot({path:'test-results/r259-canonical-earth.png',fullPage:false});
   assert.deepEqual(pageErrors,[],`page errors: ${pageErrors.join(' | ')}`);
-  console.log('SAR_R259_CANONICAL_EARTH_PASS',JSON.stringify({boot:{featureRelease:boot.runtime.featureRelease,adapterFamilies:boot.adapterFamilies},live:{summary:live.summary,renderPlan:live.renderPlan,detail:live.detail},derived},null,2));
+  console.log('SAR_R259_CANONICAL_EARTH_RELEASE_FORWARD_PASS',JSON.stringify({boot:{featureRelease:boot.runtime.featureRelease,visualRelease:boot.runtime.visualRelease||null,patchRelease:boot.runtime.patchRelease,adapterFamilies:boot.adapterFamilies},live:{summary:live.summary,renderPlan:live.renderPlan,detail:live.detail},derived},null,2));
 }finally{await browser.close();}
