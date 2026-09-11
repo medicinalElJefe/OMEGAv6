@@ -18,9 +18,13 @@ try{
     const center={left:innerWidth*.24,right:innerWidth*.76,top:map.top+map.height*.20,bottom:map.top+map.height*.76};
     const selectors=['#omegaExperienceStatus','#omegaQuickRail','.transport-deck','#omegaMapNav','#omegaR257ProofStack'];
     const hits=selectors.filter(visible).map(s=>({selector:s,rect:rect(s)})).filter(({rect:r})=>r.left<center.right&&r.right>center.left&&r.top<center.bottom&&r.bottom>center.top);
-    return {vw:innerWidth,vh:innerHeight,map,visibleMap,top,dock,search,controls,transport,hits,layout:globalThis.OMEGA_SAR_R4_RUNTIME.experience.layout,surface:globalThis.OMEGA_SAR_PRIMARY_WORKSTATION.surface,nativeSurface:globalThis.OMEGA_DATA_NATIVE_SURFACE.surface,overlapPolicy:globalThis.OMEGA_SAR_R257_EXPERIENCE.overlapPolicy};
+    return {vw:innerWidth,vh:innerHeight,map,visibleMap,top,dock,search,controls,transport,hits,layout:globalThis.OMEGA_SAR_R4_RUNTIME.experience.layout,featureRelease:globalThis.OMEGA_SAR_R4_RUNTIME.featureRelease,patchRelease:globalThis.OMEGA_SAR_R4_RUNTIME.patchRelease,surface:globalThis.OMEGA_SAR_PRIMARY_WORKSTATION.surface,nativeSurface:globalThis.OMEGA_DATA_NATIVE_SURFACE.surface,overlapPolicy:globalThis.OMEGA_SAR_R257_EXPERIENCE.overlapPolicy};
   });
-  assert.equal(initial.layout,'SAR_PRIMARY_VIEW_WITH_COMMAND_STRIP_RESERVED_ZONES_BOUNDED_DRAWERS_AND_SINGLE_PROOF_TELEMETRY_STACK');
+  // Forward-compatibility gate: R253 geometry remains required, but R258 now owns the canonical
+  // one-image-plane layout contract. Do not force production back to the superseded R253 label.
+  assert.equal(initial.layout,'ONE_IMAGE_PLANE_WITH_RESERVED_PROOF_EVIDENCE_MISSION_AND_ANALYSIS_ZONES');
+  assert.equal(initial.featureRelease,'R258');
+  assert.match(initial.patchRelease,/^R258\./);
   assert.equal(initial.overlapPolicy,'RESERVED_ZONES_AND_SINGLE_STACK');
   assert.ok(initial.dock.height<=40,`command strip is too tall: ${initial.dock.height}px`);
   assert.ok(initial.search.height<=30,`location search is too tall: ${initial.search.height}px`);
@@ -64,5 +68,5 @@ try{
 
   await page.click('#omegaSarEvidence');await page.waitForTimeout(320);const evidence=await page.evaluate(()=>({drawer:document.body.dataset.drawer,d:document.querySelector('.evidence-dock').getBoundingClientRect(),vw:innerWidth,proofDisplay:getComputedStyle(document.querySelector('#omegaR257ProofStack')).display,mapNavOpacity:getComputedStyle(document.querySelector('#omegaMapNav')).opacity}));assert.equal(evidence.drawer,'evidence');assert.ok(evidence.d.width<=342);assert.ok(evidence.d.left>evidence.vw*.76);assert.equal(evidence.proofDisplay,'none');assert.equal(Number(evidence.mapNavOpacity),0);await page.keyboard.press('Escape');
   assert.deepEqual(pageErrors,[],`page script errors: ${pageErrors.join(' | ')}`);
-  console.log('SAR_R4_R257_PRIMARY_WORKSTATION_PASS',JSON.stringify({initial,measured,afterZoom,evidence},null,2));
+  console.log('SAR_R4_R258_FORWARD_PRIMARY_WORKSTATION_PASS',JSON.stringify({initial,measured,afterZoom,evidence},null,2));
 }finally{await browser.close();}
