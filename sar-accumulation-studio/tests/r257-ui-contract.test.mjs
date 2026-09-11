@@ -12,8 +12,9 @@ test('normal Explore removes redundant floating HUDs from the image',()=>{
 test('proof telemetry is one reserved bounded stack and drawers take priority',()=>{
   assert.match(ui,/\.omega-r257-proof-stack\{position:absolute/);
   assert.match(ui,/body\.omega-experience\[data-mode=proof\] \.omega-r257-proof-stack\{display:grid!important/);
-  assert.match(ui,/body\.omega-experience\[data-drawer\] \.omega-r257-proof-stack\{display:none!important\}/);
-  assert.match(ui,/body\.omega-experience\[data-drawer\] \.omega-map-nav\{opacity:0!important/);
+  assert.match(ui,/data-drawer[^\n]*omega-r257-proof-stack[^\n]*display:none!important/);
+  assert.match(ui,/data-drawer[^\n]*(?:omega-map-nav|omegaMapNav)[^\n]*opacity:0!important/);
+  assert.match(ui,/syncDrawerReservation/);
 });
 
 test('load state reports progressive real-source stages rather than blanking the surface',()=>{
