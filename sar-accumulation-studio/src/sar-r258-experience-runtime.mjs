@@ -1,6 +1,6 @@
 const $=s=>document.querySelector(s),map=$('#map'),wrap=map?.closest('.map-wrap'),body=document.body;
 let reticle=null,observer=null,raf=0,lastMode='';
-const state={state:'INITIALIZING',release:'R258',layout:'ONE_IMAGE_PLANE_WITH_RESERVED_TOOL_ZONES',legacyImageSuppression:true,proofRail:'RESERVED_RIGHT_COLUMN',drawerPolicy:'RESIZE_CAMERA_SURFACE_NOT_OVERLAY_IT',precisionStrip:'MERGED_OUT_OF_IMAGE_PLANE',sourceFootprint:'DATA_PANEL_ONLY_NOT_MAIN_IMAGE',updatedAt:null};
+const state={state:'INITIALIZING',release:'R258.1',layout:'ONE_IMAGE_PLANE_WITH_RESERVED_TOOL_ZONES',legacyImageSuppression:true,proofRail:'RESERVED_RIGHT_COLUMN',drawerPolicy:'RESIZE_CAMERA_SURFACE_NOT_OVERLAY_IT',precisionStrip:'MERGED_OUT_OF_IMAGE_PLANE',actionStatus:'PRIMARY_COMMAND_STRIP_NOT_FLOATING_MAP_CARD',sourceFootprint:'DATA_PANEL_ONLY_NOT_MAIN_IMAGE',updatedAt:null};
 globalThis.OMEGA_SAR_R258_EXPERIENCE=state;
 
 function renderer(){return globalThis.OMEGA_SAR_RENDERER||null;}
@@ -14,9 +14,10 @@ function installStyle(){if($('#omegaR258ExperienceStyle'))return;const style=doc
 /* One authoritative image plane: legacy canvas remains interactive but not visually double-exposed. */
 body.omega-experience[data-data-native-surface=regional_shaped_sar] #map,body.omega-experience[data-data-native-surface=exact_shaped_sar] #map{opacity:.001!important;transition:none!important}
 body.omega-experience .sar-source-browse-layer{opacity:0!important;visibility:hidden!important}
-body.omega-experience .sar-source-browse-badge{display:none!important}
+body.omega-experience .sar-source-browse-badge,body.omega-experience .map-note{display:none!important}
 body.omega-experience .map-wrap:after{display:none!important}
 body.omega-experience #omegaPrecisionStrip{display:none!important}
+body.omega-experience[data-mode=explore] #omegaActionHud,body.omega-experience[data-mode=proof] #omegaActionHud{display:none!important}
 body.omega-experience .earth-attribution{bottom:12px!important;right:12px!important;opacity:.34!important}
 body.omega-experience .scale-readout{bottom:27px!important;right:12px!important;opacity:.42!important}
 
@@ -49,6 +50,10 @@ body.omega-experience .omega-experience-chip{background:rgba(4,7,8,.54)!importan
 @media(max-width:1120px){:root{--r258-side:286px;--r258-mission:268px}.omega-r257-proof-stack{font-size:90%}body.omega-experience[data-drawer=analysis] .analysis-deck{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:760px){:root{--r258-side:min(86vw,310px);--r258-mission:min(86vw,290px);--r258-analysis:44vh}body.omega-experience[data-mode=proof]:not([data-drawer]) .map-wrap{width:100%!important;margin-right:0!important;height:54%!important;margin-bottom:46%!important}body.omega-experience[data-mode=proof] .omega-r257-proof-stack{left:5px!important;right:5px!important;top:auto!important;bottom:5px!important;width:auto!important;max-height:43vh!important}body.omega-experience[data-drawer=evidence] .map-wrap,body.omega-experience[data-drawer=mission] .map-wrap{width:100%!important;margin:0!important;opacity:.35!important}body.omega-experience[data-drawer=analysis] .analysis-deck{grid-template-columns:1fr!important}.omega-r258-target-reticle{width:18px;height:18px}}
 `;document.head.append(style);}
-function install(){if(!body||!wrap)return;installStyle();ensureReticle();lastMode=body.dataset.mode||'explore';observer=new MutationObserver(reserve);observer.observe(body,{attributes:true,attributeFilter:['data-mode','data-drawer','data-data-native-surface']});map?.addEventListener('omega-map-view',updateReticle);map?.addEventListener('omega-map-select',updateReticle);window.addEventListener('omega-regional-sar-measurement',updateReticle);window.addEventListener('omega-calibrated-sar-patch',updateReticle);window.addEventListener('resize',reserve);state.state='READY';reserve();}
+function install(){
+  if(!body||!wrap)return;installStyle();ensureReticle();lastMode=body.dataset.mode||'explore';observer=new MutationObserver(reserve);observer.observe(body,{attributes:true,attributeFilter:['data-mode','data-drawer','data-data-native-surface']});
+  $('#omegaModeSwitch')?.addEventListener('click',event=>{const button=event.target?.closest?.('[data-mode]'),mode=button?.dataset?.mode;if((mode==='explore'||mode==='proof')&&body.dataset.drawer)globalThis.OMEGA_SAR_EXPERIENCE?.setDrawer?.(null);},true);
+  map?.addEventListener('omega-map-view',updateReticle);map?.addEventListener('omega-map-select',updateReticle);window.addEventListener('omega-regional-sar-measurement',updateReticle);window.addEventListener('omega-calibrated-sar-patch',updateReticle);window.addEventListener('resize',reserve);state.state='READY';reserve();
+}
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(install),{once:true});else requestAnimationFrame(install);}
 state.reserve=reserve;state.updateReticle=updateReticle;
