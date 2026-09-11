@@ -60,6 +60,12 @@ jobs:
           node tests/continuous-field-r13-invariants.mjs
           node tests/r237-hybrid-command-authority-invariants.mjs
 
+      - name: Prove inherited R283 SAR truth stack inside existing R241 authority
+        shell: bash
+        run: |
+          node tests/r283-sar-full-stack-invariants.mjs
+          for f in tests/r280-*.mjs; do node "$f"; done
+
       - name: Prove R279/R284 Earth truth and WGS84 geometry
         run: |
           node tests/r279-earth-truth-navigation-invariants.mjs
@@ -136,7 +142,7 @@ jobs:
             echo '- R245 exposes 7 Canon axes, 7 permanent strata, 12 logical organs and 12→144→1,728→20,736→248,832 address/scheduling levels without physical-dimension inflation.'
             echo '- R245 desktop/mobile built-browser proof requires the actual System Atlas surface, preserves the R153 executor and proves manual observation refresh remains non-mutating.'
             echo '- R281 desktop/mobile browser proof opens the real Matter Traversal Heavy Bio surface, proves 12 domains × 12 context layers × 7 physical scales × 62 zero-authority mode overlays, and verifies a calibrated packet is rendered with instrument-ready state.'
-            echo '- R283 SAR Truth remains an eighth Earth surface and is explicitly preserved by R284 desktop/mobile browser proof.'
+            echo '- R283 SAR Truth remains an eighth Earth surface. Its full R283 + R280 proof suite is now converged into R241 instead of consuming a 25th active workflow authority.'
             echo '- R284 upgrades Planet from spherical display math to WGS84 ellipsoid screen↔geodetic projection while keeping returned NASA GIBS source brightness as the default evidence view.'
             echo '- R284 fail-closes wrong source identity/CRS/bbox/truth/aspect, wraps the ±180° texture seam, separates UTC illumination/terminator/grid as derived transforms, and exposes unshaded returned RGB through the pixel inspector.'
             echo '- R284 numerical proof checks ellipsoid round-trip accuracy, dateline continuity, solar/subsolar geometry, terminator orthogonality and outside-limb no-fabrication before browser proof.'
@@ -151,7 +157,7 @@ jobs:
             echo '- Typed cognition is read-only through proposal; permission/execution/return/Canon remain separately gated.'
             echo '- R239 navigation remains converged in this proof plane: six workspaces, complete 44-route registry, immediate aria-hidden/inert close, ancestor-aware visible-canvas sanity, exhaustive route activation, and mobile containment.'
             echo '- R279/R283/R284 proves all eight Earth controls mount intended distinct surfaces while Planet gains higher geometric and source-truth fidelity and SAR Truth remains intact; R281 proves the Heavy Bio instrument surface and its complete visual axes.'
-            echo '- No 25th workflow authority is introduced; R279/R281/R283/R284 browser proofs are converged into this existing R241 proof plane and active workflow topology remains within the R170 governed bound.'
+            echo '- Active workflow authority remains within the R170 governed maximum because the redundant R283 SAR workflow is archived and its checks execute inside R241.'
             echo '- R153 mutation, R147 dispatch, R146 durable history, R141 exact return, R240 source promotion and R125 sole CanonState admission remain unchanged.'
             echo '- R201/R203 remain retired.'
             echo '- PR live proof binds to the exact SHA actually served by the canonical Worker; it does not compare against a moving Git ref.'
