@@ -12,6 +12,9 @@ const workflow=read('.github/workflows/r238-hybrid-host-intelligence-proof.yml')
 const windowsProof=read('tests/r238-windows-host-runtime-proof.py');
 const browserProof=read('tests/r238-host-intelligence-browser-e2e.mjs');
 const liveVerifier=read('scripts/verify_live_hybrid_host_intelligence_r238.mjs');
+const liveCommandVerifier=read('scripts/verify_live_hybrid_command_authority_r237.mjs');
+const liveResourceVerifier=read('scripts/verify_live_hybrid_resource_governor_r239.mjs');
+const liveMotionVerifier=read('scripts/verify_live_hybrid_execution_motion_r243.mjs');
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
 
 for(const token of ["HOST_INTELLIGENCE_EXTENSION='R238'","BRIDGE_CALCULUS_EXTENSION='R240'","HOST_PROFILE_SCHEMA='OMEGA_HYBRID_HOST_PROFILE_R238'","MACRO_INVENTORY_SCHEMA='OMEGA_LOCAL_MACRO_INVENTORY_R238'","MACRO_PREFLIGHT_SCHEMA='OMEGA_MACRO_PREFLIGHT_R238'","EXPECTED_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046'","SERVER_VALIDATOR_COMPATIBILITY_R207_1=\"BASE_PATH='/omega-hybrid-agent.py'\"","FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'"])must(wrapper.includes(token),`R238/R240 wrapper missing preserved/proof token ${token}`);
@@ -28,6 +31,12 @@ const closureCheck=liveVerifier.indexOf("'R141 exact return closure'",returnedBr
 const awaitingElse=liveVerifier.indexOf("}else{",returnedBranch);
 must(returnedBranch>=0&&closureCheck>returnedBranch&&awaitingElse>closureCheck,'R239.3/R240 R141 returned-proof footer check must remain scoped inside RETURNED_HOST_PROOF before the awaiting branch');
 must(liveVerifier.includes("if(!Number.isFinite(epoch)||epoch<1)throw new Error"),'R240 live host-intelligence verifier must require a completed shared snapshot epoch');
+
+for(const [name,text] of [['R237',liveCommandVerifier],['R238',liveVerifier],['R239',liveResourceVerifier],['R243',liveMotionVerifier]]){
+ must(!text.includes("waitUntil:'networkidle'"),`${name} live verifier must not require global network idle from a continuously observing production runtime`);
+ must(text.includes("waitUntil:'domcontentloaded'"),`${name} live verifier must bind navigation to document readiness before semantic proof`);
+ must(text.includes("getByRole('button',{name:'TOOLS',exact:true})")&&text.includes("waitFor({state:'visible'})"),`${name} live verifier must explicitly wait for the OMEGA operator surface rather than treating document readiness as proof`);
+}
 
 must(sha(base)==='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046','R238 must leave the immutable R205 base executor byte-identical');
 must(wrapper.includes("op=='DESKTOP_HEALTH'")&&wrapper.includes("result['hostProfileR238']=host_profile")&&wrapper.includes("result['macroInventoryR238']=macro_inventory"),'R238 must enrich the existing DESKTOP_HEALTH returned proof instead of creating an ungoverned telemetry channel');
@@ -65,4 +74,4 @@ must(workflow.includes('playwright@1.63.0')&&workflow.includes('tests/r238-host-
 for(const token of ["memory.get('totalBytes')","memory.get('availableBytes')",'logicalProcessors','profileSha256','verify_macro_replay','tampered macro hash was not rejected'])must(windowsProof.includes(token),`R238 Windows runtime proof missing ${token}`);
 for(const token of ['CPU-A-ONLY','CPU-B-ONLY','proof_job_a','proof_job_b','Authenticated compute host','data-r238-selected-device','leaked host A proof','leaked host B proof'])must(browserProof.includes(token),`R238 browser host-isolation proof missing ${token}`);
 
-console.log('OMEGA R238/R239.1/R239.3/R240/R270 HYBRID HOST INTELLIGENCE PASS · immutable R205 SHA preserved · one workstation-scoped R238 provider · R141 exact-return proof + R240 bridge calculus preserved · no duplicate polling · returned host evidence remains selected-device/epoch bound');
+console.log('OMEGA R238/R239.1/R239.3/R240/R270/R278.1 HYBRID HOST INTELLIGENCE PASS · immutable R205 SHA preserved · one workstation-scoped R238 provider · R141 exact-return proof + R240 bridge calculus preserved · continuous-network live navigation uses semantic readiness rather than global network idle · no duplicate polling · returned host evidence remains selected-device/epoch bound');
