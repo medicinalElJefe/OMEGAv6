@@ -13,8 +13,8 @@ let observer:MutationObserver|null=null;
 
 function project(lat:number,lon:number,rotation:number,cx:number,cy:number,R:number){const la=rad(lat),lo=rad(wrapLon(lon-rotation)),x=R*Math.cos(la)*Math.sin(lo),y=-R*Math.sin(la),z=Math.cos(la)*Math.cos(lo);return{x:cx+x,y:cy+y,z,front:z>=0}}
 function windToward(sample:EarthMotionSampleR278){return ((sample.windDirectionDeg??0)+180)%360}
-function tempNorm(t:number|null){return t===null?.5:clamp((t+35)/80)}
-function pressureNorm(p:number|null){return p===null?.5:clamp((p-940)/120)}
+function tempNorm(t:number|null){return t===null ? .5 : clamp((t+35)/80)}
+function pressureNorm(p:number|null){return p===null ? .5 : clamp((p-940)/120)}
 function setHud(host:HTMLElement,state:EarthMotionStateR278){let hud=host.querySelector<HTMLElement>(':scope > .r278-live-hud');if(!hud){hud=document.createElement('div');hud.className='r278-live-hud';host.appendChild(hud)}const age=Math.max(0,Math.round((Date.now()-Date.parse(state.observedAt))/1000));hud.innerHTML=`<div><b>R278 · LIVE EARTH MOTION</b><span>${state.observedCount}/${state.sampleCount} returned samples · ${age}s state age</span></div><div class="r278-live-kpis"><span><i>FLOW</i><strong>${fmt(state.summary.flow)}</strong></span><span><i>CΩ</i><strong>${fmt(state.summary.continuity)}</strong></span><span><i>WOVEN</i><strong>${fmt(state.summary.woven)}</strong></span><span><i>SCAR</i><strong>${fmt(state.summary.scar)}</strong></span><span><i>WIND MAX</i><strong>${fmt(state.summary.maxWindKph,0)} km/h</strong></span></div><small>OBSERVED provider field → OMEGA-derived continuity/woven display metrics. Satellite evidence remains separate; missing pixels are never fabricated.</small>`}
 
 function ensureCanvas(host:HTMLElement,className:string){let c=host.querySelector<HTMLCanvasElement>(`:scope > canvas.${className}`);if(!c){c=document.createElement('canvas');c.className=className;c.setAttribute('aria-hidden','true');host.appendChild(c)}return c}
