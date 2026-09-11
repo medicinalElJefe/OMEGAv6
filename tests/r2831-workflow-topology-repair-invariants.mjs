@@ -15,14 +15,15 @@ for(const required of [
   'for f in tests/r280-*.mjs; do node "$f"; done',
   'node tests/r2831-workflow-topology-repair-invariants.mjs'
 ]) assert.ok(r241.includes(required),`R241 missing converged R283.1 proof: ${required}`);
+assert.ok(!/^\s{2}push:\s*$/m.test(r241),'R241 must remain PR/manual proof-only');
+assert.ok(!/^\s{2}schedule:\s*$/m.test(r241),'R241 must remain unscheduled');
+assert.ok(!/^\s{2}deploy-main:\s*$/m.test(r241),'R241 must not gain canonical deployment authority');
 
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
-assert.match(ci,/push:/,'canonical CI must retain the production push trigger');
-for(const name of active){
-  if(name==='ci.yml')continue;
-  const text=fs.readFileSync(`${activeDir}/${name}`,'utf8');
-  assert.ok(!/^\s{2}push:\s*\n(?:[\s\S]*?\n)?\s{4}branches:\s*\[[^\]]*\bmain\b[^\]]*\]/m.test(text),`${name} must not become a second main-push production authority`);
-}
+assert.match(ci,/^\s{2}push:\s*$/m,'canonical CI must retain its main push trigger');
+assert.match(ci,/^\s{2}deploy-main:\s*$/m,'ci.yml must retain the canonical deploy-main job');
+assert.match(ci,/Deploy canonical OMEGA Worker/,'ci.yml must retain canonical Worker deployment');
+assert.match(ci,/if: github\.ref == 'refs\/heads\/main'/,'deploy-main must remain gated to exact main');
 
 for(const boundary of [
   ['R125','sole CanonState admission'],
@@ -38,7 +39,8 @@ console.log(JSON.stringify({
   r283StandaloneActive:false,
   r283Archived:true,
   r283ProofConvergedInto:'R241',
-  canonicalProductionWriter:'ci.yml',
+  canonicalProductionWriter:'ci.yml/deploy-main',
+  r241DeploymentAuthority:false,
   canonAdmissionAuthority:'R125',
   exactHybridReturnAuthority:'R141',
   durableExecutionHistoryAuthority:'R146',
