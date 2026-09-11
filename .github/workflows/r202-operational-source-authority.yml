@@ -36,6 +36,8 @@ jobs:
         run: npx --yes tsx tests/r280-mode-realization.mts
       - name: Prove R281 Heavy Bio instrument accuracy + visualization boundaries
         run: npx --yes tsx tests/r281-bio-instrument-invariants.mts
+      - name: Prove R281 recursive empirical convergence + holdout promotion law
+        run: npx --yes tsx tests/r281-bio-empirical-convergence-invariants.mts
       - name: Preserve R200.1 and inherited build
         run: |
           node tests/r2001-deployed-total-experience-proof-invariants.mjs
