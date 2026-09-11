@@ -6,9 +6,10 @@ import { captureSatelliteContext } from './omega-satellite-skin.mjs';
 import './omega-nisar-bridge.mjs';
 
 const $=s=>document.querySelector(s);
+const FIELD_MAX_SCHEDULE_WAIT_MS=1500;
 const runtime={
   grid:null,field:null,previous:null,patch:null,patchAnchors:[],nisarAnchors:[],satelliteContext:null,activeChannel:null,
-  view:{bbox:[-180,-90,180,90],scale:1},timer:null,generation:0,enabled:true,lastKey:null
+  view:{bbox:[-180,-90,180,90],scale:1},timer:null,deadlineTimer:null,pendingReason:null,generation:0,revision:0,building:false,queued:false,queuedReason:null,enabled:true,lastKey:null,lastCommitAt:null
 };
 const fieldCanvasCache=new WeakMap();
 
@@ -125,18 +126,31 @@ function updateCellInspector(point){
 }
 
 async function rebuild(reason='state update'){
-  if(!runtime.enabled)return;const my=++runtime.generation,hud=$('#omegaFieldHud');if(hud)hud.classList.add('busy');
+  if(!runtime.enabled)return;
+  if(runtime.building){runtime.queued=true;runtime.queuedReason=reason;return;}
+  runtime.building=true;runtime.generation++;
+  clearTimeout(runtime.timer);runtime.timer=null;
+  if(runtime.deadlineTimer){clearTimeout(runtime.deadlineTimer);runtime.deadlineTimer=null;}
+  const hud=$('#omegaFieldHud');if(hud)hud.classList.add('busy');
   try{
-    runtime.grid ||= await loadEarthGrid();if(my!==runtime.generation)return;
+    runtime.grid ||= await loadEarthGrid();
     const anchors=allAnchors(),{cols,rows}=fieldResolution(),key=bboxKey(runtime.view.bbox),previous=runtime.lastKey===key?runtime.previous:null;
     const field=buildFullOmegaField({bbox:runtime.view.bbox,cols,rows,time:currentTime(),anchors,grid:runtime.grid,previousField:previous,satelliteContext:runtime.satelliteContext});
-    if(my!==runtime.generation)return;
-    runtime.previous=field;runtime.field=field;runtime.lastKey=key;globalThis.OMEGA_SAR_CONTINUOUS_FIELD=field;globalThis.OMEGA_SAR_SKINS=FULL_OMEGA_MODE_STACK;
+    runtime.previous=field;runtime.field=field;runtime.lastKey=key;runtime.revision++;runtime.lastCommitAt=new Date().toISOString();globalThis.OMEGA_SAR_CONTINUOUS_FIELD=field;globalThis.OMEGA_SAR_SKINS=FULL_OMEGA_MODE_STACK;
+    window.dispatchEvent(new CustomEvent('omega-continuous-field-update',{detail:{revision:runtime.revision,cellCount:field.cells?.length||0,reason,committedAt:runtime.lastCommitAt}}));
     updateHud(field,reason);forceRedraw();const p=selectedPoint();if(p)updateCellInspector(p);
   }catch(error){if(hud)hud.innerHTML=`<div class="omega-title"><span>Ω CONTINUOUS SAR</span><b>FIELD UNRESOLVED</b></div><small>${error.message}</small>`;}
-  finally{if(hud)hud.classList.remove('busy');}
+  finally{
+    runtime.building=false;if(hud)hud.classList.remove('busy');
+    if(runtime.queued){const next=runtime.queuedReason||'queued state update';runtime.queued=false;runtime.queuedReason=null;schedule(next,40);}
+  }
 }
-function schedule(reason,delay=180){clearTimeout(runtime.timer);runtime.timer=setTimeout(()=>rebuild(reason),delay);}
+function schedule(reason,delay=180){
+  runtime.pendingReason=reason;clearTimeout(runtime.timer);
+  runtime.timer=setTimeout(()=>{runtime.timer=null;rebuild(runtime.pendingReason||reason);},Math.max(0,Number(delay)||0));
+  if(!runtime.deadlineTimer)runtime.deadlineTimer=setTimeout(()=>{runtime.deadlineTimer=null;clearTimeout(runtime.timer);runtime.timer=null;rebuild(runtime.pendingReason||reason);},FIELD_MAX_SCHEDULE_WAIT_MS);
+}
+runtime.rebuild=rebuild;runtime.schedule=schedule;
 
 function installStyles(){
   if($('#omegaFieldStyle'))return;const style=document.createElement('style');style.id='omegaFieldStyle';style.textContent=`

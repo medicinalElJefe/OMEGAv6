@@ -21,7 +21,12 @@ try{
   const fabric=await page.evaluate(()=>{const g=globalThis.OMEGA_SAR_GLOBAL_FABRIC,f=g.fabric,covered=f.cells.filter(c=>c.coverage>0),source=covered[0];return {snapshot:g.snapshot(),recordCount:g.records.length,covered:covered.length,total:f.cells.length,lod:f.lod,sourceCell:{coverage:source.coverage,cog:source.cog,lemma:source.lemma},boundary:g.boundary};});
   assert.ok(fabric.recordCount>20);assert.ok(fabric.covered>0);assert.ok(fabric.total>=72);assert.equal(fabric.lod.physicalDimensionClaim,false);assert.equal(fabric.sourceCell.lemma.state,'SOURCE_COVERED');assert.equal(fabric.sourceCell.lemma.proof.measured,false);assert.equal(fabric.sourceCell.lemma.proof.sourceSupported,true);assert.match(fabric.boundary,/not a global calibrated SAR mosaic/i);
 
-  await page.waitForFunction(()=>globalThis.OMEGA_SAR_LEMMA_TRANSLATOR?.state==='READY'&&globalThis.OMEGA_SAR_LEMMA_TRANSLATOR?.annotated>100,null,{timeout:30000,polling:100});
+  try{
+    await page.waitForFunction(()=>globalThis.OMEGA_SAR_LEMMA_TRANSLATOR?.state==='READY'&&globalThis.OMEGA_SAR_LEMMA_TRANSLATOR?.annotated>100,null,{timeout:30000,polling:100});
+  }catch(error){
+    const diagnosis=await page.evaluate(()=>{const f=globalThis.OMEGA_SAR_FIELD_RUNTIME,l=globalThis.OMEGA_SAR_LEMMA_TRANSLATOR,c=globalThis.OMEGA_SAR_CONTINUOUS_FIELD;return {lemma:l?.snapshot?.()||l||null,fieldRuntime:f?{generation:f.generation,revision:f.revision,building:f.building,queued:f.queued,queuedReason:f.queuedReason,pendingReason:f.pendingReason,lastKey:f.lastKey,lastCommitAt:f.lastCommitAt,fieldCells:f.field?.cells?.length||0}:null,continuousField:c?{cells:c.cells?.length||0,cols:c.cols||null,rows:c.rows||null,bbox:c.bbox||null}:null,pageErrors};});
+    console.error('SAR_R251_LEMMA_TIMEOUT_DIAGNOSIS',JSON.stringify(diagnosis,null,2));throw error;
+  }
   const lemma=await page.evaluate(()=>globalThis.OMEGA_SAR_LEMMA_TRANSLATOR.snapshot());
   assert.ok(lemma.annotated>100);assert.ok(Object.keys(lemma.counts).length>0);assert.match(lemma.boundary,/does not change measured values/i);
 
