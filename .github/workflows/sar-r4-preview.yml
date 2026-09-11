@@ -60,6 +60,7 @@ jobs:
           node --check src/earth-canon-visual-core.mjs
           node --check src/earth-canon-field-runtime.mjs
           node --check src/earth-canon-r260-detail-runtime.mjs
+          node --check src/sar-visual-stability-runtime.mjs
           node --check src/r4-runtime.mjs
           node --check tests/r251-global-motion-e2e.mjs
           node --check tests/r253-balanced-viewport-e2e.mjs
@@ -68,6 +69,7 @@ jobs:
           node --check tests/r258-data-plane-e2e.mjs
           node --check tests/r259-canonical-earth-e2e.mjs
           node --check tests/r260-canonical-visual-e2e.mjs
+          node --check tests/r260-3-visual-stability-e2e.mjs
       - name: Build self-contained GeoTIFF runtime
         working-directory: sar-accumulation-studio
         run: |
@@ -92,7 +94,7 @@ jobs:
             test "$attempt" != 20 || { echo 'R4 root did not become live'; exit 1; }
             sleep 3
           done
-          for module in r4-runtime.mjs r4-live-precision.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs sar-blade-geometry.mjs sar-blade-render-runtime.mjs sar-blade-lens-runtime.mjs sar-regional-measurement.mjs sar-regional-runtime.mjs lemma-state-calculus.mjs sar-smooth-motion-runtime.mjs sar-global-fabric-runtime.mjs sar-woven-motion-runtime.mjs omega-lemma-translator-runtime.mjs sar-experience-runtime.mjs sar-experience-compat-runtime.mjs sar-balanced-viewport-runtime.mjs sar-primary-workstation-runtime.mjs sar-r257-detail-runtime.mjs sar-r257-experience-orchestrator.mjs sar-r258-calculus-runtime.mjs sar-r258-experience-runtime.mjs sar-measured-calculus-core.mjs sar-browser-transport-resilience.mjs data-native-surface-core.mjs data-native-terrain-runtime.mjs data-native-surface-runtime.mjs water-geometry-core.mjs earth-awareness-runtime.mjs jrc-water-observation-runtime.mjs earth-temporal-core.mjs earth-temporal-sync.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs r249-exact-lens-runtime.mjs sar-r257-affine-detail-runtime.mjs earth-canon-cube.mjs earth-canon-adapters.mjs earth-canon-runtime.mjs earth-canon-detail-runtime.mjs earth-canon-compositor-runtime.mjs earth-canon-domain-registry.mjs earth-canon-field-synthesis.mjs earth-canon-visual-core.mjs earth-canon-field-runtime.mjs earth-canon-r260-detail-runtime.mjs; do
+          for module in r4-runtime.mjs r4-live-precision.mjs sar-authority.mjs sar-render-authority.mjs sar-measurement-authority.mjs sar-blade-geometry.mjs sar-blade-render-runtime.mjs sar-blade-lens-runtime.mjs sar-regional-measurement.mjs sar-regional-runtime.mjs lemma-state-calculus.mjs sar-smooth-motion-runtime.mjs sar-global-fabric-runtime.mjs sar-woven-motion-runtime.mjs omega-lemma-translator-runtime.mjs sar-experience-runtime.mjs sar-experience-compat-runtime.mjs sar-balanced-viewport-runtime.mjs sar-primary-workstation-runtime.mjs sar-r257-detail-runtime.mjs sar-r257-experience-orchestrator.mjs sar-r258-calculus-runtime.mjs sar-r258-experience-runtime.mjs sar-measured-calculus-core.mjs sar-browser-transport-resilience.mjs data-native-surface-core.mjs data-native-terrain-runtime.mjs data-native-surface-runtime.mjs water-geometry-core.mjs earth-awareness-runtime.mjs jrc-water-observation-runtime.mjs earth-temporal-core.mjs earth-temporal-sync.mjs omega-field-core.mjs omega-mode-stack.mjs omega-field-console.mjs earth-grid.mjs sentinel-console.mjs map-navigation-runtime.mjs interaction-runtime.mjs sar-focus-runtime.mjs sar-earth-overlay.mjs sar-browse-overlay.mjs r249-exact-lens-runtime.mjs sar-r257-affine-detail-runtime.mjs earth-canon-cube.mjs earth-canon-adapters.mjs earth-canon-runtime.mjs earth-canon-detail-runtime.mjs earth-canon-compositor-runtime.mjs earth-canon-domain-registry.mjs earth-canon-field-synthesis.mjs earth-canon-visual-core.mjs earth-canon-field-runtime.mjs earth-canon-r260-detail-runtime.mjs sar-visual-stability-runtime.mjs; do
             ready=0
             for attempt in {1..20}; do
               code="$(curl -sS -o "/tmp/$module" -w '%{http_code}' -H 'cache-control: no-cache' "$SAR_PUBLIC_URL/src/$module?release=$GITHUB_SHA" || true)"
@@ -165,7 +167,12 @@ jobs:
         env:
           SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
         run: node tests/r260-canonical-visual-e2e.mjs
-      - name: Archive R260 live visual proof
+      - name: Prove R260.3 stable desktop and phone visual hierarchy
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: ${{ env.SAR_PUBLIC_URL }}
+        run: node tests/r260-3-visual-stability-e2e.mjs
+      - name: Archive R260.3 live visual proof
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
@@ -179,5 +186,7 @@ jobs:
             sar-accumulation-studio/test-results/r258-data-plane.png
             sar-accumulation-studio/test-results/r259-canonical-earth.png
             sar-accumulation-studio/test-results/r260-canonical-visual-cube.png
+            sar-accumulation-studio/test-results/r260-3-visual-stability-desktop.png
+            sar-accumulation-studio/test-results/r260-3-visual-stability-mobile.png
           if-no-files-found: warn
           retention-days: 14

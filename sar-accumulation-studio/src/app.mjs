@@ -389,5 +389,13 @@ $('#export').onclick = async () => {
 
 setInterval(updateClock, 1000); updateClock(); configureSourceMode(); renderWarnings(); renderDiagnostics(); draw(); drawProbeChart([]); scheduleGibs(renderer.viewBounds());
 let previousMotion = performance.now();
-function motionLoop(now) { const dt = Math.min(100, now - previousMotion); previousMotion = now; renderer.motionPhase = (renderer.motionPhase + dt / 1800) % 1; drawMap(); requestAnimationFrame(motionLoop); }
+let lastMotionDraw = 0;
+const motionFrameMs = matchMedia('(max-width:760px)').matches ? 100 : 50;
+function motionLoop(now) {
+  const dt = Math.min(100, now - previousMotion); previousMotion = now;
+  renderer.motionPhase = (renderer.motionPhase + dt / 1800) % 1;
+  const hasAnimatedEvidence = state.records.length > 0 || Boolean(renderer.point);
+  if (!document.hidden && hasAnimatedEvidence && now - lastMotionDraw >= motionFrameMs) { lastMotionDraw = now; drawMap(); }
+  requestAnimationFrame(motionLoop);
+}
 if (!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(motionLoop);
