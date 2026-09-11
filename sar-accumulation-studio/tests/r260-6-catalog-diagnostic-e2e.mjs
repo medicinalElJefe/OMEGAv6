@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
+// Branch-only live diagnostic: observe the exact user target-selection catalog handshake.
 const url=process.env.SAR_TEST_URL||'https://omega-sar-r4.jeffdeweyeljefe.workers.dev';
 const browser=await chromium.launch({headless:true});
 try{
