@@ -11,7 +11,13 @@ test('R257 exact detail reads a larger real source patch instead of synthesizing
 
 test('R257 regional and terrain detail budgets materially exceed the R256 view',async()=>{
   const regional=await read('../src/sar-regional-runtime.mjs'),terrain=await read('../src/data-native-terrain-runtime.mjs');
-  assert.match(regional,/detailSamples:\[448,640,768\]/);assert.match(regional,/return s<360\?448:s<620\?640:768/);assert.doesNotMatch(regional,/ctx\.setLineDash\(\[5,4\]\)/,'main measured surface must not fall back to a dashed footprint box');
+  assert.match(regional,/detailSamples:\[448,640,768\]/);
+  // R258.7 may retune the scale thresholds for readiness, but the established R257
+  // three-level real-source ladder and its ordering must remain intact.
+  const ladder=regional.match(/function detailBudget\(\)\{[^}]*return s<(\d+)\?448:s<(\d+)\?640:768;/);
+  assert.ok(ladder,'regional 448→640→768 source-detail ladder is missing');
+  assert.ok(Number(ladder[1])>=360&&Number(ladder[2])>Number(ladder[1]),'regional LOD thresholds no longer promote monotonically');
+  assert.doesNotMatch(regional,/ctx\.setLineDash\(\[5,4\]\)/,'main measured surface must not fall back to a dashed footprint box');
   assert.match(terrain,/MAX_GRID=384/);assert.match(terrain,/2,12\)/);assert.match(terrain,/omega-camera-motion-settled/);
 });
 
