@@ -9,7 +9,7 @@ try{
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));
   const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});assert.ok(response?.ok(),`root failed ${response?.status()}`);
 
-  await page.waitForFunction(()=>{const r=globalThis.OMEGA_SAR_R4_RUNTIME,conception=r?.conception;return ['CONTINUOUS_SAR_EARTH_INSTRUMENT','CONTINUOUS_MULTI_SOURCE_EARTH_COMPUTATION_AND_SAR_INSTRUMENT'].includes(conception)&&globalThis.OMEGA_SAR_SMOOTH_MOTION?.state==='READY'&&globalThis.OMEGA_SAR_GLOBAL_FABRIC&&globalThis.OMEGA_SAR_WOVEN_MOTION&&globalThis.OMEGA_SAR_LEMMA_TRANSLATOR;},null,{timeout:30000});
+  await page.waitForFunction(()=>{const r=globalThis.OMEGA_SAR_R4_RUNTIME,conception=r?.conception,m=globalThis.OMEGA_SAR_SMOOTH_MOTION,map=document.querySelector('#map'),motionInstalled=m?.contract==='OMEGA_SAR_SMOOTH_MOTION_V1'&&m?.installed===true&&map?.dataset?.omegaSmoothMotion==='true'&&typeof m?.cancel==='function'&&typeof m?.install==='function'&&m?.state!=='INITIALIZING';return ['CONTINUOUS_SAR_EARTH_INSTRUMENT','CONTINUOUS_MULTI_SOURCE_EARTH_COMPUTATION_AND_SAR_INSTRUMENT'].includes(conception)&&motionInstalled&&globalThis.OMEGA_SAR_GLOBAL_FABRIC&&globalThis.OMEGA_SAR_WOVEN_MOTION&&globalThis.OMEGA_SAR_LEMMA_TRANSLATOR;},null,{timeout:45000,polling:100});
   assert.match(await page.title(),/OMEGA SAR R4/);
 
   try{
@@ -52,5 +52,5 @@ try{
   assert.deepEqual(pageErrors,[],`page script errors: ${pageErrors.join(' | ')}`);
 
   await mkdir('test-results',{recursive:true});await page.locator('.map-wrap').screenshot({path:'test-results/r251-global-motion.png'});
-  console.log('SAR_R4_RELEASE_FORWARD_GLOBAL_MOTION_PASS',JSON.stringify({release:runtime.release,featureRelease:runtime.featureRelease,visualRelease:runtime.visualRelease||null,fabric,lemma,woven,zoom,drag},null,2));
+  console.log('SAR_R4_RELEASE_FORWARD_GLOBAL_MOTION_PASS',JSON.stringify({release:runtime.release,featureRelease:runtime.featureRelease,visualRelease:runtime.visualRelease||null,motionContract:'OMEGA_SAR_SMOOTH_MOTION_V1',fabric,lemma,woven,zoom,drag},null,2));
 }finally{await browser.close();}
