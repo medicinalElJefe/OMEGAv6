@@ -1,7 +1,8 @@
 import {useMemo,useState} from 'react';
-import {Activity,ChartNoAxesCombined,ShieldCheck,Trash2,Upload} from 'lucide-react';
+import {Activity,ChartNoAxesCombined,Database,ShieldCheck,Trash2,Upload} from 'lucide-react';
 import {BIO_CONTEXT_LAYERS_R281,BIO_DOMAINS_R281} from './bioInstrumentRuntimeR281';
 import {compileBioEmpiricalConvergenceR281,parseBioEmpiricalTextR281,type BioEmpiricalCaseR281} from './bioEmpiricalConvergenceR281';
+import {summarizeEmpiricalEvidenceRegistryR281} from './bioEmpiricalEvidenceRegistryR281';
 import './bioEmpiricalConvergenceR281.css';
 
 const fmt=(x:number|null|undefined,d=4)=>x==null||!Number.isFinite(x)?'—':Number(x).toFixed(d);
@@ -11,8 +12,9 @@ const polar=(cx:number,cy:number,r:number,a:number)=>({x:cx+Math.cos(a)*r,y:cy+M
 export default function BioEmpiricalConvergenceR281(){
  const[cases,setCases]=useState<BioEmpiricalCaseR281[]>([]),[error,setError]=useState('');
  const frame=useMemo(()=>compileBioEmpiricalConvergenceR281(cases),[cases]);
+ const evidence=useMemo(()=>summarizeEmpiricalEvidenceRegistryR281(),[]);
  const handleFile=async(file?:File)=>{if(!file)return;try{const rows=parseBioEmpiricalTextR281(await file.text(),file.name);setCases(rows);setError(rows.length?'':`No empirical cases parsed from ${file.name}.`)}catch(e:any){setError(String(e?.message||e));setCases([])}};
- const holdout=frame.summaries.holdout,candidate=frame.candidate;
+ const holdout=frame.summaries.holdout,candidate=frame.candidate,strongest=evidence.strongestHeldOut;
  return <section className='bio281-empirical' aria-label='Heavy Bio empirical convergence and recursive calibration'>
   <header className='bio281-empirical-head'>
    <div><span>R281 · EMPIRICAL CONVERGENCE · RECURSIVE CALIBRATION</span><h3>Heavy Bio Empirical Perfection Loop</h3><p>Verified reference observations are invariant carry. Model and baseline residuals become scar/history carry. FIT may propose a calibration transform; untouched HOLDOUT must prove it; PROSPECTIVE data keeps testing it as evidence accumulates.</p></div>
@@ -26,6 +28,19 @@ export default function BioEmpiricalConvergenceR281(){
    <article><span>CANDIDATE HOLDOUT MAE</span><b>{fmt(candidate.holdout.mae)}</b><small>vs current {pct(candidate.holdout.liftVsCurrent)}</small></article>
    <article><span>PROMOTION</span><b>{candidate.promotable?'HOLDOUT PASS':'HELD'}</b><small>measurement authority 0</small></article>
   </div>
+
+  <section className='bio281-empirical-evidence' aria-label='Immutable historical empirical evidence receipts'>
+   <header><Database/><div><b>ESTABLISHED EMPIRICAL EVIDENCE RECEIPTS</b><small>append-only archive anchors · prior wins and failures remain visible through later calibration cycles</small></div><strong>{evidence.counts.total} receipts</strong></header>
+   {strongest&&<div className='bio281-empirical-anchor'>
+    <div><span>STRONGEST HELD-OUT ARCHIVE RESULT</span><b>{strongest.title}</b><small>{strongest.scope}</small></div>
+    <dl><div><dt>rows</dt><dd>{strongest.sampleCount}</dd></div><div><dt>train / test</dt><dd>{strongest.trainCount} / {strongest.testCount}</dd></div><div><dt>MAE</dt><dd>{fmt(strongest.modelValue,6)}</dd></div><div><dt>baseline MAE</dt><dd>{fmt(strongest.baselineValue,6)}</dd></div><div><dt>improvement</dt><dd>{pct(strongest.improvement)}</dd></div></dl>
+    <p>{strongest.recordedState}</p>
+   </div>}
+   <div className='bio281-empirical-receipts'>{evidence.receipts.map(x=><article key={x.id} data-verdict={x.verdict} data-evidence-class={x.evidenceClass}>
+    <code>{x.evidenceClass}</code><span><b>{x.title}</b><small>{x.sourceArtifact} · {x.scope}</small></span><strong>{x.verdict.replaceAll('_',' ')}<small>{x.modelValue!=null?`${x.metric}: ${fmt(x.modelValue,6)}${x.baselineValue!=null?` · baseline ${fmt(x.baselineValue,6)}`:''}`:x.recordedState}</small></strong>
+   </article>)}</div>
+   <footer>{evidence.rule}</footer>
+  </section>
 
   <div className='bio281-empirical-main'>
    <div className='bio281-empirical-field'>
@@ -48,7 +63,7 @@ export default function BioEmpiricalConvergenceR281(){
   <section className='bio281-empirical-ingest'>
    <header><Upload/><div><b>EMPIRICAL BENCHMARK / CALIBRATION PACKET</b><small>JSON/CSV · observed + predicted + baseline + FIT/HOLDOUT/PROSPECTIVE</small></div><label>Load empirical packet<input type='file' accept='.json,.csv,application/json,text/csv' onChange={e=>handleFile(e.target.files?.[0])}/></label>{cases.length>0&&<button onClick={()=>{setCases([]);setError('')}}><Trash2/>Clear</button>}</header>
    {error&&<p className='bio281-empirical-error'>{error}</p>}
-   {!cases.length?<div className='bio281-empirical-empty'><Activity/><div><b>No empirical comparison packet loaded.</b><span>The convergence engine is idle. It does not fabricate benchmark evidence or promote a calibration from model coherence alone.</span></div></div>:
+   {!cases.length?<div className='bio281-empirical-empty'><Activity/><div><b>No new empirical comparison packet loaded.</b><span>Historical benchmark receipts remain visible above. The recursive convergence engine waits for row-level evidence rather than fabricating a calibration from summary metrics.</span></div></div>:
    <div className='bio281-empirical-table'><table><thead><tr><th>Variable</th><th>Partition</th><th>Observed</th><th>Model</th><th>Baseline</th><th>|e| Δ</th><th>Winner</th></tr></thead><tbody>{frame.residuals.map(x=><tr key={x.id} data-winner={x.winner}><td><b>{x.variable}</b><small>D{x.domain} · L{x.layer}</small></td><td>{x.partition}</td><td>{fmt(x.observed)} {x.unit}</td><td>{fmt(x.predicted)}<small>e={fmt(x.modelResidual)}</small></td><td>{fmt(x.baseline)}<small>e={fmt(x.baselineResidual)}</small></td><td>{fmt(x.deltaAbsError)}</td><td><b>{x.winner}</b></td></tr>)}</tbody></table></div>}
   </section>
 
