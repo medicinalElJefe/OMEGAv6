@@ -2,6 +2,7 @@ const $=selector=>document.querySelector(selector);
 const body=document.body;
 const map=$('#map');
 let lastGeometryKey='';
+const observers=[];
 const state={
   state:'INITIALIZING',release:'R260.3',
   contract:'ONE_COMMAND_BAR_ONE_IMAGE_PLANE_CONTAINED_DRAWERS',
@@ -200,7 +201,7 @@ function toolbar(panel,label){
   bar.className='omega-stability-toolbar';
   bar.setAttribute('role','toolbar');bar.setAttribute('aria-label',`${label} drawer actions`);
   bar.innerHTML=`<b>${label}</b><button class="omega-drawer-close" type="button" aria-label="Close ${label.toLowerCase()}">CLOSE</button>`;
-  bar.querySelector('button').addEventListener('click',()=>globalThis.OMEGA_SAR_EXPERIENCE?.setDrawer?.(null));
+  bar.querySelector('button').addEventListener('click',()=>{globalThis.OMEGA_SAR_EXPERIENCE?.setDrawer?.(null);sync();});
   panel.prepend(bar);
 }
 
@@ -258,8 +259,13 @@ function install(){
   if(!body||!map)return;
   installStyle();
   installToolbars();
-  new MutationObserver(scheduleSync).observe(body,{attributes:true,attributeFilter:['data-drawer','data-mode','data-data-native-surface','data-sar-surface']});
-  new MutationObserver(scheduleSync).observe(map.closest('.map-wrap'),{childList:true,subtree:true});
+  const stateObserver=new MutationObserver(scheduleSync),layerObserver=new MutationObserver(scheduleSync);
+  stateObserver.observe(body,{attributes:true,attributeFilter:['data-drawer','data-mode','data-data-native-surface','data-sar-surface']});
+  layerObserver.observe(map.closest('.map-wrap'),{childList:true,subtree:true});
+  observers.push(stateObserver,layerObserver);
+  $('#omegaQuickRail')?.addEventListener('click',()=>queueMicrotask(sync));
+  $('#omegaModeSwitch')?.addEventListener('click',()=>queueMicrotask(sync));
+  document.addEventListener('keydown',event=>{if(['Escape','m','M','e','E','a','A'].includes(event.key))queueMicrotask(sync);});
   for(const event of ['omega-earth-canon-update','omega-data-native-terrain','omega-regional-sar-measurement','omega-calibrated-sar-patch','omega-calibrated-sar-patch-clear'])window.addEventListener(event,scheduleSync);
   map.addEventListener('omega-map-view',scheduleSync);
   window.addEventListener('resize',scheduleSync,{passive:true});
