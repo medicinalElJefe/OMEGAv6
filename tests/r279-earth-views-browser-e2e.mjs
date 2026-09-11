@@ -15,7 +15,8 @@ const EXPECT=[
  ['Evidence','.earth-r279-instrument[data-earth-mode="EVIDENCE"]'],
  ['Earth / space','.earth-r279-instrument[data-earth-mode="SPACE"]'],
  ['Ground','.earth-r279-ground'],
- ['Calculus','.earth-r279-calculus']
+ ['Calculus','.earth-r279-calculus'],
+ ['SAR Truth','.earth-r283-sar[data-earth-view="SAR"]']
 ];
 
 async function enterEarth(page,label){
@@ -26,7 +27,7 @@ async function enterEarth(page,label){
  await earth.waitFor({state:'visible',timeout:15000});await earth.click();
  await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',{timeout:30000});
  await page.waitForSelector('.earth-r279',{state:'visible',timeout:30000});
- const tabs=page.locator('.earth-r279-view-tabs button');if(await tabs.count()!==7)throw new Error(`${label}: expected seven Earth view controls, found ${await tabs.count()}`);
+ const tabs=page.locator('.earth-r279-view-tabs button');if(await tabs.count()!==8)throw new Error(`${label}: expected eight Earth view controls including SAR Truth, found ${await tabs.count()}`);
 }
 
 async function openPlanet(page,label){
@@ -51,11 +52,14 @@ try{
     const illuminate=page.getByRole('button',{name:'Enable derived UTC illumination'});await illuminate.click();await page.waitForTimeout(80);text=await planet.innerText();if(!text.includes('DERIVED UTC ILLUMINATION'))throw new Error(`${label}: derived illumination did not become visibly declared`);await page.getByRole('button',{name:'Show source brightness'}).click();
     const grid=page.getByRole('button',{name:'Hide geodetic grid'}),terminator=page.getByRole('button',{name:'Hide UTC terminator'});if(!await grid.isVisible()||!await terminator.isVisible())throw new Error(`${label}: R284 geodetic overlay controls missing`);
    }
+   if(name==='SAR Truth'){
+    const sarText=await page.locator('.earth-r283-sar').innerText();if(!sarText.includes('SAR TRUTH INSTRUMENT'))throw new Error(`${label}: inherited R283 SAR Truth instrument did not remain mounted`);
+   }
   }
   const reset=page.getByRole('button',{name:'Return + query model-mapped target'});await reset.waitFor({state:'visible',timeout:10000});const lat=page.getByLabel('Latitude'),lon=page.getByLabel('Longitude');await lat.fill('12.34');await lon.fill('56.78');await reset.click();await page.waitForTimeout(100);const resetLat=Number(await lat.inputValue()),resetLon=Number(await lon.inputValue());if(Math.abs(resetLat-12.34)<.001&&Math.abs(resetLon-56.78)<.001)throw new Error(`${label}: reset/query control did not restore the model-mapped target`);
   const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);if(overflow>12)throw new Error(`${label}: Earth workspace introduced ${overflow}px horizontal overflow`);if(pageErrors.length)throw new Error(`${label}: Earth view browser errors: ${pageErrors.join(' | ')}`);await context.close();
  }
 
  const bad=await browser.newContext({viewport:{width:1100,height:820}}),page=await bad.newPage();await page.route('**/api/earth/gibs/global*',route=>route.fulfill({status:200,contentType:'image/png',body:R284_TEXTURE,headers:{...SOURCE_HEADERS,'x-omega-source':'UNVERIFIED-FIXTURE'}}));await page.goto(`${base}/?r284-failclose=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45000});const planet=await openPlanet(page,'fail-close');await page.waitForFunction(()=>document.querySelector('.earth-r281-globe')?.getAttribute('data-source-state')==='UNAVAILABLE',{timeout:15000});const badText=await planet.innerText();if(!badText.includes('global source identity mismatch'))throw new Error('R284 fail-close did not visibly reject wrong source identity');await bad.close();
- console.log('R279/R284 EARTH VIEW BROWSER PASS · desktop + 2×DPR mobile route to Earth Now · seven Earth surfaces preserved · WGS84 Planet renders varied returned-source pixels · observed pixel inspector reports unshaded RGB · source/derived controls explicit · wrong source identity fails closed · target reset works · no browser errors or viewport overflow');
+ console.log('R279/R284 EARTH VIEW BROWSER PASS · desktop + 2×DPR mobile route to Earth Now · all eight Earth surfaces preserved including R283 SAR Truth · WGS84 Planet renders varied returned-source pixels · observed pixel inspector reports unshaded RGB · source/derived controls explicit · wrong source identity fails closed · target reset works · no browser errors or viewport overflow');
 }finally{await browser.close()}
