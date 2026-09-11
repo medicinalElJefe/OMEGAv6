@@ -9,3 +9,5 @@ export * from'./sarExternalR283';
 export * from'./sarLexiconGraphR283';
 export * from'./sarBenchmarkR283';
 export * from'./sarFoundryR283';
+export * from'./sarRasterR283';
+export * from'./sarCdseStacR283';
