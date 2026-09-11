@@ -21,9 +21,11 @@ async function prove(viewport,label){
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   await openRoute(page,'Matter Traversal');
   const deep=page.getByRole('button',{name:/DEEP MATTER/});
-  if(await deep.count())await deep.first().click();
-  await page.waitForSelector('.r46-bio .bio281',{timeout:20000});
-  await page.waitForSelector('.r46-bio .bio281-allmodes',{timeout:20000});
+  await deep.first().waitFor({state:'visible',timeout:20000});
+  await deep.first().click();
+  await page.waitForFunction(()=>document.querySelector('.r43-workspace-stage')?.getAttribute('data-view')==='DEEP',{timeout:20000});
+  await page.waitForSelector('.r46-bio .bio281',{state:'visible',timeout:20000});
+  await page.waitForSelector('.r46-bio .bio281-allmodes',{state:'visible',timeout:20000});
 
   const surface=page.locator('.bio281');
   const text=await surface.innerText();
