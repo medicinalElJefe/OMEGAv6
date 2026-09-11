@@ -32,6 +32,8 @@ jobs:
           node --check public/omega-operational-source-authority-r202.js
           node --check scripts/verify_live_operational_source_authority_r202.mjs
           node tests/r202-operational-source-authority-invariants.mjs
+      - name: Prove R280 mode realization + Heavy Bio + continuity dynamics
+        run: npx --yes tsx tests/r280-mode-realization.mts
       - name: Preserve R200.1 and inherited build
         run: |
           node tests/r2001-deployed-total-experience-proof-invariants.mjs
