@@ -8,7 +8,7 @@ const profile={
  definitions:[{id:'DEF-PRESSURE-1',variable:'pressure_fixture',canonicalUnit:'mmHg',acceptedUnits:{mmHg:{scale:1,offset:0}},analyticalRange:{min:0,max:300},maxRelativeExpandedUncertainty:.10,calibrationTraceabilityRequired:true,referenceMethod:'BROWSER-REFERENCE',criticality:'HIGH',intendedUseId:'R282-BROWSER-IU',version:'1.0.0'}],
  hazards,modeEvidence:[],empiricalCases:[]
 };
-const sample={id:'R282-BROWSER-SAMPLE',domain:2,layer:5,variable:'pressure_fixture',rawValue:121,unit:'mmHg',observedAt:'2026-09-10T20:00:00Z',sourceFormat:'DEVICE_PACKET',source:'R282 browser fixture',device:{id:'R282-BROWSER-DEVICE',manufacturer:'fixture',model:'R282'},calibration:{calibratedAt:'2026-08-10T00:00:00Z',dueAt:'2027-08-10T00:00:00Z',traceability:'TRACE-R282',standard:'REFERENCE-FIXTURE',gain:1,offset:0,gainUncertainty:.001,offsetUncertainty:.02},uncertainty:{instrument:.4,calibration:.1,repeatability:.2,resolution:.1,coverageFactor:2},verified:true};
+const sample={id:'R282-BROWSER-SAMPLE',domain:2,layer:5,variable:'pressure_fixture',rawValue:121,unit:'mmHg',observedAt:new Date().toISOString(),maxAgeMs:5*60*1000,sourceFormat:'DEVICE_PACKET',source:'R282 browser fixture',device:{id:'R282-BROWSER-DEVICE',manufacturer:'fixture',model:'R282'},calibration:{calibratedAt:'2026-08-10T00:00:00Z',dueAt:'2027-08-10T00:00:00Z',traceability:'TRACE-R282',standard:'REFERENCE-FIXTURE',gain:1,offset:0,gainUncertainty:.001,offsetUncertainty:.02},uncertainty:{instrument:.4,calibration:.1,repeatability:.2,resolution:.1,coverageFactor:2},verified:true};
 
 async function prove(viewport,label){
  const browser=await chromium.launch({headless:true});const context=await browser.newContext({viewport});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
@@ -39,4 +39,4 @@ async function prove(viewport,label){
 }
 await prove({width:1440,height:1200},'desktop');
 await prove({width:390,height:844},'mobile');
-console.log('R282 BROWSER PASS · default clinical block + intended-use measurement profile + required risk set + SHA-256 audit + fixture authorized measurement release on desktop/mobile; 241 modes remain measurement authority 0');
+console.log('R282 BROWSER PASS · default clinical block + fresh intended-use measurement profile + required risk set + SHA-256 audit + fixture authorized measurement release on desktop/mobile; 241 modes remain measurement authority 0');
