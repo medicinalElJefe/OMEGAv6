@@ -16,5 +16,7 @@ test('R258.4 bootstrap has no authority to create source records or measurement'
   assert.match(boot,/cannot create records, coverage, calibrated pixels or measurements/i);
   assert.doesNotMatch(boot,/records\.push|buildFabric|translateFabricCell|measurementPromotion:true/);
   assert.match(runtime,/sar-global-fabric-bootstrap-runtime\.mjs/);
-  assert.match(runtime,/patchRelease:'R258\.4'/);
+  const release=runtime.match(/patchRelease:'R258\.(\d+)'/);
+  assert.ok(release,'R258 patch release metadata is missing');
+  assert.ok(Number(release[1])>=4,`bootstrap invariant requires R258.4+; found R258.${release[1]}`);
 });
