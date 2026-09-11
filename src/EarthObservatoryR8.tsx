@@ -4,6 +4,7 @@ import EarthNowInstrument,{type EarthInstrumentMode} from './EarthNowInstrument'
 import EarthObservedGlobeR281 from './EarthObservedGlobeR281';
 import EarthLivingFieldR36 from './EarthLivingFieldR36';
 import EarthGroundTraversalR9 from './EarthGroundTraversalR9';
+import SARTruthInstrumentR280 from './SARTruthInstrumentR280Surface';
 import {api} from './platformAdapter';
 import {decodeAddress} from './corpusRuntime';
 import './earthObservatoryR8.css';
@@ -11,7 +12,7 @@ import './earthObservatoryR8.css';
 type Props={address:number};
 type Coverage={id:string;label:string;state:string;lastModified?:string|null;truth?:string};
 type Focus='ALL'|'WEATHER'|'SEISMIC'|'EVENTS'|'SPACE';
-type EarthView='SATELLITE'|'PLANET'|'MOTION'|'EVIDENCE'|'SPACE'|'GROUND'|'CALCULUS';
+type EarthView='SATELLITE'|'PLANET'|'MOTION'|'EVIDENCE'|'SPACE'|'GROUND'|'CALCULUS'|'SAR';
 const fmt=(v:any,d=1)=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(d):'—';
 const VIEWS:{id:EarthView;label:string;copy:string}[]=[
  {id:'SATELLITE',label:'Satellite',copy:'latest returned NOAA/CIRA imagery'},
@@ -20,7 +21,8 @@ const VIEWS:{id:EarthView;label:string;copy:string}[]=[
  {id:'EVIDENCE',label:'Evidence',copy:'weather · seismic · events · space'},
  {id:'SPACE',label:'Earth / space',copy:'solar geometry + near-space frame'},
  {id:'GROUND',label:'Ground',copy:'region → city → street → ground evidence'},
- {id:'CALCULUS',label:'Calculus',copy:'representational comparison only'}
+ {id:'CALCULUS',label:'Calculus',copy:'representational comparison only'},
+ {id:'SAR',label:'SAR Truth',copy:'complex SAR · phase · coherence · deformation'}
 ];
 function savedView():EarthView{try{const v=localStorage.getItem('omega.earth.r279.view') as EarthView|null;return VIEWS.some(x=>x.id===v)?v!:'SATELLITE'}catch{return'SATELLITE'}}
 
@@ -50,15 +52,15 @@ export default function EarthObservatoryR8({address}:Props){
   {fullDisks.length>0&&<div className='earth-r279-global-pair'><header><Satellite/><span><b>FULL-DISK OBSERVATION PAIR</b><small>GOES-East + GOES-West returned views · separate source geometries, not falsely stitched.</small></span></header><div>{fullDisks.map(x=><figure key={x.id}><img src={`/api/earth/noaa/image?coverage=${encodeURIComponent(x.id)}`} alt={`${x.label} returned full-disk GeoColor`}/><figcaption><b>{x.label}</b><small>{x.lastModified||'timestamp unavailable'}</small></figcaption></figure>)}</div></div>}
  </section>;
  return <section className='earth-r8 earth-r72 earth-r279'>
-  <header className='earth-r72-bar'><div><span>EARTH NOW · SOURCE-FIRST PLANETARY WORKSPACE</span><h2>Observe first. Compute relationships second. Keep both visible.</h2><small>Satellite imagery, WGS84 observations, derived motion, ground evidence and representational calculus remain explicitly separated.</small></div><button type='button' className='primary' onClick={()=>void queryAt()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Refreshing…':'Refresh returned evidence'}</button></header>
+  <header className='earth-r72-bar'><div><span>EARTH NOW · SOURCE-FIRST PLANETARY WORKSPACE</span><h2>Observe first. Compute relationships second. Keep both visible.</h2><small>Satellite imagery, SAR measurement state, WGS84 observations, derived motion, ground evidence and representational calculus remain explicitly separated.</small></div><button type='button' className='primary' onClick={()=>void queryAt()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Refreshing…':'Refresh returned evidence'}</button></header>
   <nav className='earth-r279-view-tabs' aria-label='Earth view menu'>{VIEWS.map(x=><button type='button' key={x.id} className={view===x.id?'active':''} aria-pressed={view===x.id} onClick={()=>chooseView(x.id)}><b>{x.label}</b><small>{x.copy}</small></button>)}</nav>
   <div className='earth-r72-workspace'>
-   <div className='earth-r72-stage earth-r279-stage'>{view==='SATELLITE'?renderSatellite():view==='PLANET'?<EarthObservedGlobeR281 address={address} evidence={evidence} targetLat={lat} targetLon={lon}/>:view==='GROUND'?<section className='earth-r279-ground' data-earth-view='GROUND'><EarthGroundTraversalR9 lat={lat} lon={lon}/></section>:view==='CALCULUS'?<section className='earth-r279-calculus' data-earth-view='CALCULUS' data-provenance='REPRESENTATIONAL'><EarthLivingFieldR36 address={address} lat={lat} lon={lon} evidence={evidence}/><p>REPRESENTATIONAL ONLY · returned measurements determine observed quantities; OMEGA calculus changes relational rendering and inference, not source pixels.</p></section>:<EarthNowInstrument address={address} evidence={evidence} targetLat={lat} targetLon={lon} mode={instrumentMode}/>}</div>
+   <div className='earth-r72-stage earth-r279-stage'>{view==='SATELLITE'?renderSatellite():view==='PLANET'?<EarthObservedGlobeR281 address={address} evidence={evidence} targetLat={lat} targetLon={lon}/>:view==='SAR'?<section className='earth-r283-sar' data-earth-view='SAR'><SARTruthInstrumentR280/></section>:view==='GROUND'?<section className='earth-r279-ground' data-earth-view='GROUND'><EarthGroundTraversalR9 lat={lat} lon={lon}/></section>:view==='CALCULUS'?<section className='earth-r279-calculus' data-earth-view='CALCULUS' data-provenance='REPRESENTATIONAL'><EarthLivingFieldR36 address={address} lat={lat} lon={lon} evidence={evidence}/><p>REPRESENTATIONAL ONLY · returned measurements determine observed quantities; OMEGA calculus changes relational rendering and inference, not source pixels.</p></section>:<EarthNowInstrument address={address} evidence={evidence} targetLat={lat} targetLon={lon} mode={instrumentMode}/>}</div>
    <aside className='earth-r72-console'><div className='earth-r72-location'><Globe2/><div><b>WGS84 target</b><small>Changes the returned-source query target and evidence marker.</small></div></div><div className='earth-r72-coords'><label>Latitude<input type='number' min='-90' max='90' step='.01' value={lat} onChange={e=>setLat(Math.max(-90,Math.min(90,Number(e.target.value))))}/></label><label>Longitude<input type='number' min='-180' max='180' step='.01' value={lon} onChange={e=>setLon(Math.max(-180,Math.min(180,Number(e.target.value))))}/></label></div><button type='button' className='earth-r72-apply' onClick={()=>void queryAt()} disabled={busy}>Query this location</button><button type='button' className='earth-r72-reset' onClick={resetTarget}>Return + query model-mapped target</button><div className='earth-r72-focus-head'><b>Evidence channels</b><button type='button' className={focus==='ALL'?'active':''} onClick={()=>setFocus('ALL')}>Show all</button></div><div className='earth-r72-focus'>{focusRows.map(row=><button type='button' key={row.id} className={focus===row.id?'active':''} onClick={()=>setFocus(v=>v===row.id?'ALL':row.id)}>{row.icon}<span><b>{row.label}</b><strong>{row.value}</strong><small>{row.detail}</small></span></button>)}</div><div className='earth-r72-truth'><ShieldCheck/><span><b>{evidence?.evidenceHash?'RETURNED EVIDENCE BOUND':'EVIDENCE NOT YET BOUND'}</b><small>{evidence?.verifiedAt||'No verification timestamp returned.'}</small></span></div></aside>
   </div>
   {error&&<div className='earth-r8-error'>{error}</div>}
   <div className={`earth-r72-strip focus-${focus.toLowerCase()}`}>{focusRows.filter(x=>focus==='ALL'||focus===x.id).map(row=><article key={row.id}>{row.icon}<span>{row.label}</span><b>{row.value}</b><small>{row.detail}</small></article>)}<article className='derived'><Mountain/><span>Derived context</span><b>{fmt(evidence?.derivedContext?.index,4)}</b><small>display summary only · not physical proof</small></article></div>
-  <div className='earth-r279-shortcuts'><button type='button' onClick={()=>chooseView('SATELLITE')}><Satellite/>Observed imagery</button><button type='button' onClick={()=>chooseView('MOTION')}><Wind/>Global motion</button><button type='button' onClick={()=>chooseView('GROUND')}><Map/>Ground / street evidence</button><button type='button' onClick={()=>chooseView('CALCULUS')}><Layers3/>Representational calculus</button></div>
-  <footer className='earth-r72-proof'><ShieldCheck/><div><b>Evidence hash</b><code>{evidence?.evidenceHash||'not available'}</code></div><p>Earth → Region → City → Street → Ground remains source-backed. Satellite, returned point evidence, interpolated motion and OMEGA representation are visibly distinct; unavailable providers remain unavailable.</p></footer>
+  <div className='earth-r279-shortcuts'><button type='button' onClick={()=>chooseView('SATELLITE')}><Satellite/>Observed imagery</button><button type='button' onClick={()=>chooseView('SAR')}><Radio/>SAR Truth</button><button type='button' onClick={()=>chooseView('MOTION')}><Wind/>Global motion</button><button type='button' onClick={()=>chooseView('GROUND')}><Map/>Ground / street evidence</button><button type='button' onClick={()=>chooseView('CALCULUS')}><Layers3/>Representational calculus</button></div>
+  <footer className='earth-r72-proof'><ShieldCheck/><div><b>Evidence hash</b><code>{evidence?.evidenceHash||'not available'}</code></div><p>Earth → Region → City → Street → Ground remains source-backed. Satellite, SAR measurement state, returned point evidence, interpolated motion and OMEGA representation are visibly distinct; unavailable providers remain unavailable.</p></footer>
  </section>;
 }
