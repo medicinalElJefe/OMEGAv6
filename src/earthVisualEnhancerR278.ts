@@ -11,8 +11,8 @@ const rotations=new WeakMap<HTMLElement,RotationState>();
 
 function project(lat:number,lon:number,rotation:number,cx:number,cy:number,R:number){const la=rad(lat),lo=rad(wrapLon(lon-rotation)),x=R*Math.cos(la)*Math.sin(lo),y=-R*Math.sin(la),z=Math.cos(la)*Math.cos(lo);return{x:cx+x,y:cy+y,z,front:z>=0}}
 function windToward(sample:EarthMotionSampleR278){return ((sample.windDirectionDeg??0)+180)%360}
-function tempNorm(t:number|null){return t===null?.5:clamp((t+35)/80)}
-function pressureNorm(p:number|null){return p===null?.5:clamp((p-940)/120)}
+function tempNorm(t:number|null){return t===null ? .5 : clamp((t+35)/80)}
+function pressureNorm(p:number|null){return p===null ? .5 : clamp((p-940)/120)}
 function rotationState(host:HTMLElement){let s=rotations.get(host);if(!s){s={offset:0,lastRot:0,dragX:null,dragStartRot:0};rotations.set(host,s)}return s}
 function currentRotation(host:HTMLElement,time:number){const s=rotationState(host),section=host.closest<HTMLElement>('.r121-sphere'),paused=Array.from(section?.querySelectorAll('button')||[]).some(b=>b.textContent?.trim()==='Motion');if(!paused&&s.dragX===null)s.lastRot=wrapLon(time*.001*2.65+s.offset);return s.lastRot}
 function bindEarthInteraction(host:HTMLElement){const s=rotationState(host);host.addEventListener('pointerdown',e=>{s.dragX=e.clientX;s.dragStartRot=s.lastRot},{passive:true});host.addEventListener('pointermove',e=>{if(s.dragX===null)return;s.lastRot=wrapLon(s.dragStartRot+(e.clientX-s.dragX)*.32);s.offset=s.lastRot-performance.now()*.001*2.65},{passive:true});const end=()=>{s.dragX=null};host.addEventListener('pointerup',end,{passive:true});host.addEventListener('pointercancel',end,{passive:true})}
