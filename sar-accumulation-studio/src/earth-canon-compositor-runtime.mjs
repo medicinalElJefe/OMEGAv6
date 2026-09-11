@@ -1,4 +1,5 @@
 import { englishCubeSummary } from './earth-canon-cube.mjs';
+import './earth-canon-analysis-runtime.mjs';
 
 const $=s=>document.querySelector(s);
 const state={state:'INITIALIZING',release:'R259',authority:null,primarySurface:null,mode188:null,summary:null,boundary:'Compositor changes presentation authority/opacity only. It never changes calibrated measurement arrays or upgrades context/reconstruction to observation.'};
@@ -23,5 +24,5 @@ function apply(cube){
 function installStyle(){if($('#omegaR259CanonStyle'))return;const style=document.createElement('style');style.id='omegaR259CanonStyle';style.textContent=`
 .omega-r259-canon-readout{height:28px;min-width:150px;max-width:250px;display:flex;align-items:center;gap:6px;padding:0 7px;border:1px solid rgba(255,255,255,.08);border-radius:7px;background:rgba(2,6,8,.34);overflow:hidden}.omega-r259-canon-readout b{font:800 6px Inter,Segoe UI,sans-serif;letter-spacing:.12em;color:#9bb1b8}.omega-r259-canon-readout span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:650 7px Inter,Segoe UI,sans-serif;color:#d7e2e5}body[data-canon-authority^=exact] .omega-r259-canon-readout,body[data-canon-authority^=regional] .omega-r259-canon-readout{border-color:rgba(190,228,236,.18)}body[data-canon-decision=escalate] .omega-r259-canon-readout{border-color:rgba(255,215,170,.20)}@media(max-width:930px){.omega-r259-canon-readout{min-width:92px;max-width:130px}.omega-r259-canon-readout b{display:none}}
 `;document.head.append(style);}
-function install(){installStyle();installReadout();window.addEventListener('omega-earth-canon-update',event=>{const cube=globalThis.OMEGA_EARTH_CANON_CUBE;if(cube)apply(cube);});const cube=globalThis.OMEGA_EARTH_CANON_CUBE;if(cube)apply(cube);state.apply=apply;}
+function install(){installStyle();installReadout();window.addEventListener('omega-earth-canon-update',()=>{const cube=globalThis.OMEGA_EARTH_CANON_CUBE;if(cube)apply(cube);});const cube=globalThis.OMEGA_EARTH_CANON_CUBE;if(cube)apply(cube);state.apply=apply;}
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else queueMicrotask(install);}
