@@ -4,6 +4,7 @@ import ts from 'typescript';
 
 const must=(value,message)=>{if(!value)throw new Error(message)};
 const source=fs.readFileSync('src/systemFoundryDependencyGateR276.ts','utf8');
+const runtime=fs.readFileSync('src/systemFoundryRuntimeR269.ts','utf8');
 const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ES2022,target:ts.ScriptTarget.ES2022}}).outputText;
 const mod=await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
 const propagate=mod.propagateDependencyBlocksR276;
@@ -36,7 +37,14 @@ must(byId.get('cycle-b').status==='BLOCKED'&&byId.get('cycle-b').blockers.includ
 const twice=propagate(out);
 must(JSON.stringify(twice)===JSON.stringify(out),'R276 propagation must be idempotent after fixed-point convergence');
 
+const overlayAt=runtime.indexOf('const resourceFrontier=base.activeFrontier.map');
+const propagationAt=runtime.indexOf('const activeFrontier=propagateDependencyBlocksR276(resourceFrontier);');
+must(overlayAt>=0&&propagationAt>overlayAt,'R276 dependency propagation must run after the R239 resource overlay');
+must(runtime.includes("if(capability.id!==DEVICE_CAPABILITY||capability.status==='BLOCKED')return capability"),'R276 must preserve the pre-existing R269 evidence/resource guard');
+must(runtime.includes("estimatedCost:active.reduce")&&runtime.includes("estimatedLatency:active.reduce"),'R276 totals must be recomputed from the propagated ACTIVE frontier');
+must(runtime.includes('R276 propagates blocked dependency truth only after direct and R239 runtime gates'),'R276 runtime proof obligation missing');
+
 for(const forbidden of ['fetch(','setInterval(','api.post','api.get','dispatch(','update_file','create_file','CanonState'])must(!source.includes(forbidden),`R276 gate must remain classification-only: ${forbidden}`);
 for(const required of ["timing:'after direct evidence/executor gates and after R239 device-resource overlay'","rule:'a capability with any declared dependency currently BLOCKED is also BLOCKED'","directBlockers:'preserved; propagation is additive and never clears evidence/resource blockers'","authority:'classification only; no polling, dispatch, execution, evidence acquisition, source mutation, CanonState admission or deployment authority'"])must(source.includes(required),`R276 boundary missing ${required}`);
 
-console.log('R276_FOUNDRY_DEPENDENCY_GATE PASS · direct + transitive + cyclic dependency blocks converge fail-closed · independent work remains active · direct blockers preserved · input immutable · classification-only authority');
+console.log('R276_FOUNDRY_DEPENDENCY_GATE PASS · direct + transitive + cyclic dependency blocks converge fail-closed · independent work remains active · R239 overlay precedes propagation · direct blockers preserved · input immutable · classification-only authority');
