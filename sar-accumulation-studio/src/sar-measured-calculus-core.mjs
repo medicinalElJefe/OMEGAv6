@@ -5,49 +5,39 @@ function sampledQuantile(values,q=.98,max=10000){const n=values?.length||0;if(!n
 function at(db,w,h,x,y){if(x<0||y<0||x>=w||y>=h)return NaN;return Number(db[y*w+x]);}
 function localStats(db,w,h,x,y,r=1){let sum=0,sum2=0,n=0;for(let yy=Math.max(0,y-r);yy<=Math.min(h-1,y+r);yy++)for(let xx=Math.max(0,x-r);xx<=Math.min(w-1,x+r);xx++){const v=at(db,w,h,xx,yy);if(!finite(v))continue;sum+=v;sum2+=v*v;n++;}if(!n)return {mean:NaN,std:NaN};const mean=sum/n;return {mean,std:Math.sqrt(Math.max(0,sum2/n-mean*mean))};}
 function stretch(v,lo,hi,gamma=.82){if(!finite(v)||!finite(lo)||!finite(hi)||hi<=lo)return NaN;return Math.pow(clamp((v-lo)/(hi-lo)),gamma);}
+function earthDistanceMeters(a,b){if(![a?.lon,a?.lat,b?.lon,b?.lat].every(finite))return NaN;const r=Math.PI/180,p1=Number(a.lat)*r,p2=Number(b.lat)*r,dp=(Number(b.lat)-Number(a.lat))*r,dl=(Number(b.lon)-Number(a.lon))*r,s=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 6371008.8*2*Math.atan2(Math.sqrt(s),Math.sqrt(Math.max(0,1-s)));}
+function meshSourceMetric(mesh){const rows=mesh?.nodes;if(!Array.isArray(rows)||rows.length<2)return null;const gy=Math.max(0,Math.min(rows.length-2,Math.floor((rows.length-1)/2))),row=rows[gy],row2=rows[gy+1];if(!Array.isArray(row)||row.length<2||!Array.isArray(row2))return null;const gx=Math.max(0,Math.min(row.length-2,Math.floor((row.length-1)/2))),q00=row[gx],q10=row[gx+1],q01=row2[gx];const dxSource=Math.hypot(Number(q10?.pixel)-Number(q00?.pixel),Number(q10?.line)-Number(q00?.line)),dySource=Math.hypot(Number(q01?.pixel)-Number(q00?.pixel),Number(q01?.line)-Number(q00?.line)),mx=earthDistanceMeters(q00,q10),my=earthDistanceMeters(q00,q01);if(!(finite(mx)&&finite(my)&&dxSource>0&&dySource>0))return null;return {xMetersPerSourcePixel:mx/dxSource,yMetersPerSourcePixel:my/dySource,source:'REGISTERED_GEO_MESH_LOCAL_ARC'};}
+function displayMetric(patch,w,h,dxMeters,dyMeters){
+  const sw=Array.isArray(patch.sourceWindow)&&patch.sourceWindow.length===4?patch.sourceWindow.map(Number):null,sourcePerDisplayX=sw&&sw.every(finite)?Math.max(1e-9,Math.abs(sw[2]-sw[0])/Math.max(1,w)):1,sourcePerDisplayY=sw&&sw.every(finite)?Math.max(1e-9,Math.abs(sw[3]-sw[1])/Math.max(1,h)):1;
+  if(finite(dxMeters)&&Number(dxMeters)>0&&finite(dyMeters)&&Number(dyMeters)>0)return {x:Number(dxMeters),y:Number(dyMeters),units:'METER_PER_DISPLAY_SAMPLE',source:'EXPLICIT_DISPLAY_METRIC',sourcePixelsPerDisplaySample:{x:sourcePerDisplayX,y:sourcePerDisplayY}};
+  const meshMetric=meshSourceMetric(patch.geoMesh);if(meshMetric)return {x:meshMetric.xMetersPerSourcePixel*sourcePerDisplayX,y:meshMetric.yMetersPerSourcePixel*sourcePerDisplayY,units:'METER_PER_DISPLAY_SAMPLE',source:meshMetric.source,sourcePixelsPerDisplaySample:{x:sourcePerDisplayX,y:sourcePerDisplayY},metersPerSourcePixel:{x:meshMetric.xMetersPerSourcePixel,y:meshMetric.yMetersPerSourcePixel}};
+  const range=Number(patch.product?.rangePixelSpacing)||Number(patch.spacing?.range),azimuth=Number(patch.product?.azimuthPixelSpacing)||Number(patch.spacing?.azimuth);if(range>0&&azimuth>0)return {x:Math.abs(range)*sourcePerDisplayX,y:Math.abs(azimuth)*sourcePerDisplayY,units:'METER_PER_DISPLAY_SAMPLE',source:'SAFE_PRODUCT_PIXEL_SPACING',sourcePixelsPerDisplaySample:{x:sourcePerDisplayX,y:sourcePerDisplayY},metersPerSourcePixel:{x:Math.abs(range),y:Math.abs(azimuth)}};
+  return {x:sourcePerDisplayX,y:sourcePerDisplayY,units:'SOURCE_PIXEL_PER_DISPLAY_SAMPLE',source:'NO_PHYSICAL_SPACING_DECLARED',sourcePixelsPerDisplaySample:{x:sourcePerDisplayX,y:sourcePerDisplayY}};
+}
 
 export function buildMeasuredSpatialCalculus(patch,{dxMeters=null,dyMeters=null}={}){
   if(!patch?.db||!patch.width||!patch.height)throw new Error('Measured calculus requires a calibrated SAR patch');
-  const w=Number(patch.width),h=Number(patch.height),db=patch.db,n=w*h;
-  if(db.length<n)throw new Error('Measured SAR array is shorter than declared patch dimensions');
-  const rangeSpacing=Number(dxMeters)||Number(patch.product?.rangePixelSpacing)||Number(patch.spacing?.range)||10;
-  const azimuthSpacing=Number(dyMeters)||Number(patch.product?.azimuthPixelSpacing)||Number(patch.spacing?.azimuth)||10;
-  const dx=Math.max(.01,Math.abs(rangeSpacing)),dy=Math.max(.01,Math.abs(azimuthSpacing));
+  const w=Number(patch.width),h=Number(patch.height),db=patch.db,n=w*h;if(db.length<n)throw new Error('Measured SAR array is shorter than declared patch dimensions');
+  const metric=displayMetric(patch,w,h,dxMeters,dyMeters),dx=Math.max(1e-9,Math.abs(metric.x)),dy=Math.max(1e-9,Math.abs(metric.y));
   const gradient=new Float32Array(n),curvature=new Float32Array(n),texture=new Float32Array(n),detail=new Float32Array(n),raw=new Float32Array(n),orientation=new Float32Array(n);gradient.fill(NaN);curvature.fill(NaN);texture.fill(NaN);detail.fill(NaN);raw.fill(NaN);orientation.fill(NaN);
-  const lo=finite(patch.stats?.p02)?Number(patch.stats.p02):sampledQuantile(db,.02),hi=finite(patch.stats?.p98)?Number(patch.stats.p98):sampledQuantile(db,.98);
-  let valid=0;
+  const lo=finite(patch.stats?.p02)?Number(patch.stats.p02):sampledQuantile(db,.02),hi=finite(patch.stats?.p98)?Number(patch.stats.p98):sampledQuantile(db,.98);let valid=0;
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-    const i=y*w+x,c=at(db,w,h,x,y);if(!finite(c))continue;valid++;
-    const l=finite(at(db,w,h,x-1,y))?at(db,w,h,x-1,y):c,r=finite(at(db,w,h,x+1,y))?at(db,w,h,x+1,y):c,u=finite(at(db,w,h,x,y-1))?at(db,w,h,x,y-1):c,d=finite(at(db,w,h,x,y+1))?at(db,w,h,x,y+1):c;
-    const gx=(r-l)/(2*dx),gy=(d-u)/(2*dy),g=Math.hypot(gx,gy),lap=(r-2*c+l)/(dx*dx)+(d-2*c+u)/(dy*dy),local=localStats(db,w,h,x,y,1),base=stretch(c,lo,hi,.80);
-    raw[i]=base;gradient[i]=g;curvature[i]=lap;texture[i]=local.std;orientation[i]=Math.atan2(gy,gx);
-    const highpass=finite(local.mean)?Math.tanh((c-local.mean)/Math.max(1.25,local.std||1.25)):0;detail[i]=finite(base)?clamp(base+.18*highpass):NaN;
+    const i=y*w+x,c=at(db,w,h,x,y);if(!finite(c))continue;valid++;const lv=at(db,w,h,x-1,y),rv=at(db,w,h,x+1,y),uv=at(db,w,h,x,y-1),dv=at(db,w,h,x,y+1),l=finite(lv)?lv:c,r=finite(rv)?rv:c,u=finite(uv)?uv:c,d=finite(dv)?dv:c;
+    const gx=(r-l)/(2*dx),gy=(d-u)/(2*dy),g=Math.hypot(gx,gy),lap=(r-2*c+l)/(dx*dx)+(d-2*c+u)/(dy*dy),local=localStats(db,w,h,x,y,1),base=stretch(c,lo,hi,.80);raw[i]=base;gradient[i]=g;curvature[i]=lap;texture[i]=local.std;orientation[i]=Math.atan2(gy,gx);const highpass=finite(local.mean)?Math.tanh((c-local.mean)/Math.max(1.25,local.std||1.25)):0;detail[i]=finite(base)?clamp(base+.18*highpass):NaN;
   }
-  const g98=sampledQuantile(gradient,.98),c98=sampledQuantile(Array.from(curvature,v=>Math.abs(v)),.98),t98=sampledQuantile(texture,.98);
-  return {state:'MEASURED_SPATIAL_CALCULUS_READY',width:w,height:h,source:{id:patch.id,startTime:patch.startTime||null,quantity:patch.quantity,polarization:patch.polarization,evidence:patch.evidence},spacingMeters:{range:dx,azimuth:dy},arrays:{raw,detail,gradient,curvature,texture,orientation},scales:{db:[lo,hi],gradientP98:g98,absCurvatureP98:c98,textureP98:t98},stats:{validCount:valid,validFraction:n?valid/n:0},boundary:'Spatial derivative surfaces are deterministic transforms of calibrated measured SAR samples. They reveal local intensity structure but are not new measurements, terrain height, velocity, displacement, coherence or InSAR phase.'};
+  const g98=sampledQuantile(gradient,.98),c98=sampledQuantile(Array.from(curvature,v=>Math.abs(v)),.98),t98=sampledQuantile(texture,.98),physical=metric.units==='METER_PER_DISPLAY_SAMPLE';
+  return {state:'MEASURED_SPATIAL_CALCULUS_READY',width:w,height:h,source:{id:patch.id,startTime:patch.startTime||null,quantity:patch.quantity,polarization:patch.polarization,evidence:patch.evidence},metric,spacingMeters:physical?{range:dx,azimuth:dy}:null,derivativeUnits:physical?{gradient:'dB/m',curvature:'dB/m²'}:{gradient:'dB/source-pixel',curvature:'dB/source-pixel²'},arrays:{raw,detail,gradient,curvature,texture,orientation},scales:{db:[lo,hi],gradientP98:g98,absCurvatureP98:c98,textureP98:t98},stats:{validCount:valid,validFraction:n?valid/n:0},boundary:`Spatial derivative surfaces are deterministic transforms of calibrated measured SAR samples. Derivative metric is ${metric.source}; ${physical?'physical spacing is source-backed':'physical meter spacing is unresolved, so derivatives remain in source-pixel units'}. They are not new measurements, terrain height, velocity, displacement, coherence or InSAR phase.`};
 }
 
 export function renderMeasuredSpatialSurface(calculus,mode='detail'){
-  if(!calculus?.arrays)throw new Error('Spatial calculus is not ready');
-  const {width:w,height:h,arrays,scales}=calculus,rgba=new Uint8ClampedArray(w*h*4),key=String(mode||'detail').toLowerCase();
-  for(let i=0;i<w*h;i++){
-    let v=NaN;
-    if(key==='detail')v=arrays.detail[i];
-    else if(key==='raw'||key==='measured')v=arrays.raw[i];
-    else if(key==='gradient')v=finite(arrays.gradient[i])&&scales.gradientP98>0?Math.pow(clamp(arrays.gradient[i]/scales.gradientP98),.62):NaN;
-    else if(key==='curvature')v=finite(arrays.curvature[i])&&scales.absCurvatureP98>0?Math.pow(clamp(Math.abs(arrays.curvature[i])/scales.absCurvatureP98),.62):NaN;
-    else if(key==='texture')v=finite(arrays.texture[i])&&scales.textureP98>0?Math.pow(clamp(arrays.texture[i]/scales.textureP98),.68):NaN;
-    if(!finite(v))continue;const b=Math.round(clamp(v)*255),j=i*4;rgba[j]=b;rgba[j+1]=b;rgba[j+2]=b;rgba[j+3]=255;
-  }
+  if(!calculus?.arrays)throw new Error('Spatial calculus is not ready');const {width:w,height:h,arrays,scales}=calculus,rgba=new Uint8ClampedArray(w*h*4),key=String(mode||'detail').toLowerCase();
+  for(let i=0;i<w*h;i++){let v=NaN;if(key==='detail')v=arrays.detail[i];else if(key==='raw'||key==='measured')v=arrays.raw[i];else if(key==='gradient')v=finite(arrays.gradient[i])&&scales.gradientP98>0?Math.pow(clamp(arrays.gradient[i]/scales.gradientP98),.62):NaN;else if(key==='curvature')v=finite(arrays.curvature[i])&&scales.absCurvatureP98>0?Math.pow(clamp(Math.abs(arrays.curvature[i])/scales.absCurvatureP98),.62):NaN;else if(key==='texture')v=finite(arrays.texture[i])&&scales.textureP98>0?Math.pow(clamp(arrays.texture[i]/scales.textureP98),.68):NaN;if(!finite(v))continue;const b=Math.round(clamp(v)*255),j=i*4;rgba[j]=b;rgba[j+1]=b;rgba[j+2]=b;rgba[j+3]=255;}
   return {width:w,height:h,rgba,mode:key,evidence:{sourceMeasured:true,displayDerived:key!=='raw'&&key!=='measured',measurementPromotion:false},boundary:key==='raw'||key==='measured'?'Percentile-stretched calibrated SAR measurement display. Source values are unchanged.':'Derived display from calibrated SAR samples. No new observation is created.'};
 }
 
 export function analyzeMeasuredTemporalSamples(samples){
-  const valid=(samples||[]).filter(s=>Number.isFinite(Number(s?.db))&&Number.isFinite(new Date(s?.startTime||'').getTime())&&s?.measured!==false).map(s=>({...s,db:Number(s.db),t:new Date(s.startTime).getTime()})).sort((a,b)=>a.t-b.t);
-  if(!valid.length)return {state:'TEMPORAL_UNRESOLVED',observations:0,boundary:'No measured calibrated target samples are available.'};
-  const values=valid.map(s=>s.db),med=median(values),absDev=values.map(v=>Math.abs(v-med)),mad=median(absDev),pairs=[];
-  for(let i=1;i<valid.length;i++){const dtDays=(valid[i].t-valid[i-1].t)/86400000;if(!(dtDays>0))continue;pairs.push({from:valid[i-1].startTime,to:valid[i].startTime,deltaDb:valid[i].db-valid[i-1].db,days:dtDays,rateDbPerDay:(valid[i].db-valid[i-1].db)/dtDays});}
-  const latest=valid.at(-1),previous=valid.at(-2)||null,lastPair=pairs.at(-1)||null,medianRate=median(pairs.map(p=>p.rateDbPerDay)),cadenceHours=median(pairs.map(p=>p.days*24));
-  const robustZ=mad>1e-9?.67448975*(latest.db-med)/mad:0;
+  const valid=(samples||[]).filter(s=>Number.isFinite(Number(s?.db))&&Number.isFinite(new Date(s?.startTime||'').getTime())&&s?.measured!==false).map(s=>({...s,db:Number(s.db),t:new Date(s.startTime).getTime()})).sort((a,b)=>a.t-b.t);if(!valid.length)return {state:'TEMPORAL_UNRESOLVED',observations:0,boundary:'No measured calibrated target samples are available.'};
+  const values=valid.map(s=>s.db),med=median(values),absDev=values.map(v=>Math.abs(v-med)),mad=median(absDev),pairs=[];for(let i=1;i<valid.length;i++){const dtDays=(valid[i].t-valid[i-1].t)/86400000;if(!(dtDays>0))continue;pairs.push({from:valid[i-1].startTime,to:valid[i].startTime,deltaDb:valid[i].db-valid[i-1].db,days:dtDays,rateDbPerDay:(valid[i].db-valid[i-1].db)/dtDays});}
+  const latest=valid.at(-1),previous=valid.at(-2)||null,lastPair=pairs.at(-1)||null,medianRate=median(pairs.map(p=>p.rateDbPerDay)),cadenceHours=median(pairs.map(p=>p.days*24)),robustZ=mad>1e-9?.67448975*(latest.db-med)/mad:0;
   return {state:'MEASURED_TEMPORAL_CALCULUS_READY',observations:valid.length,firstTime:valid[0].startTime,lastTime:latest.startTime,spanDays:(latest.t-valid[0].t)/86400000,latestDb:latest.db,previousDb:previous?.db??null,deltaDb:lastPair?.deltaDb??null,rateDbPerDay:lastPair?.rateDbPerDay??null,medianRateDbPerDay:Number.isFinite(medianRate)?medianRate:null,medianCadenceHours:Number.isFinite(cadenceHours)?cadenceHours:null,medianDb:med,madDb:mad,latestRobustZ:robustZ,pairs,evidence:{measuredSamples:valid.length,derived:true,measurementPromotion:false},boundary:'Temporal deltas, rates and robust anomaly scores are derived from calibrated target backscatter samples at acquisition timestamps. They are intensity-change diagnostics only; they are not ground velocity, displacement, causal attribution or continuous live radar.'};
 }
