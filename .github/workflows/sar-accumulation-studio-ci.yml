@@ -79,7 +79,10 @@ jobs:
           curl --fail --silent http://127.0.0.1:8765/src/charted-canon.mjs >/dev/null
           curl --fail --silent http://127.0.0.1:8765/src/sentinel1-calibration.mjs >/dev/null
           curl --fail --silent http://127.0.0.1:8765/src/nisar-console.mjs | grep -q 'omega.sar.nisar.gunw.measurement.v1'
-          curl --fail --silent http://127.0.0.1:8765/src/r4-runtime.mjs | grep -q 'CONTINUOUS_SAR_EARTH_INSTRUMENT'
+          curl --fail --silent http://127.0.0.1:8765/src/r4-runtime.mjs | grep -Eq 'CONTINUOUS_(SAR_EARTH|MULTI_SOURCE_EARTH_COMPUTATION_AND_SAR)_INSTRUMENT|CONTINUOUS_MULTI_SOURCE_EARTH_COMPUTATION_AND_SAR_INSTRUMENT'
+          curl --fail --silent http://127.0.0.1:8765/src/r4-runtime.mjs | grep -q "featureRelease:'R259'"
+          curl --fail --silent http://127.0.0.1:8765/src/earth-canon-cube.mjs | grep -q 'omega.earth.canon.cube.v1'
+          curl --fail --silent http://127.0.0.1:8765/src/earth-canon-runtime.mjs | grep -q 'OMEGA_EARTH_CANON_CUBE'
           curl --fail --silent http://127.0.0.1:8765/src/sar-experience-runtime.mjs | grep -q 'OMEGA_SAR_EXPERIENCE'
           curl --fail --silent http://127.0.0.1:8765/public.css >/dev/null
           curl --fail --silent http://127.0.0.1:8765/data/earth-grid.part06.txt >/dev/null
