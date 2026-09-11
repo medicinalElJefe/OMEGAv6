@@ -2,7 +2,9 @@ const $=s=>document.querySelector(s);
 const map=$('#map');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)));
 const wrapLon=v=>{let x=Number(v);while(x>180)x-=360;while(x<-180)x+=360;return x};
-const state={state:'INITIALIZING',drag:null,raf:0,inertia:null,zoom:null,lastEmitAt:0,lastFrameAt:0,suppressClickUntil:0,frames:0,settles:0};
+const MOTION_CONTRACT='OMEGA_SAR_SMOOTH_MOTION_V1';
+const prior=globalThis.OMEGA_SAR_SMOOTH_MOTION;
+const state=prior?.contract===MOTION_CONTRACT?prior:{contract:MOTION_CONTRACT,state:'INITIALIZING',installed:false,drag:null,raf:0,inertia:null,zoom:null,lastEmitAt:0,lastFrameAt:0,suppressClickUntil:0,frames:0,settles:0};
 globalThis.OMEGA_SAR_SMOOTH_MOTION=state;
 
 function renderer(){return globalThis.OMEGA_SAR_RENDERER||null;}
@@ -56,7 +58,13 @@ function onClick(e){if(performance.now()<state.suppressClickUntil){e.preventDefa
 function onDblClick(e){const r=renderer();if(!r)return;e.preventDefault();e.stopImmediatePropagation();state.suppressClickUntil=performance.now()+500;const {px,py}=relativePoint(e,r),[anchorLon,anchorLat]=r.unproject(px,py);state.inertia=null;state.zoom={scale:clamp(r.view.scale*2,1,8192),anchorLon,anchorLat,px,py};state.state='SMOOTH_ZOOM';schedule();}
 function suppressLegacyMouse(e){if(state.drag||performance.now()<state.suppressClickUntil||e.type==='mousedown'){e.preventDefault();e.stopImmediatePropagation();}}
 function install(){
-  if(!map||map.dataset.omegaSmoothMotion==='true')return;map.dataset.omegaSmoothMotion='true';map.addEventListener('wheel',onWheel,{capture:true,passive:false});map.addEventListener('pointerdown',onPointerDown,{capture:true});map.addEventListener('pointermove',onPointerMove,{capture:true});map.addEventListener('pointerup',e=>finishPointer(e,false),{capture:true});map.addEventListener('pointercancel',e=>finishPointer(e,true),{capture:true});map.addEventListener('mousedown',suppressLegacyMouse,{capture:true});map.addEventListener('click',onClick,{capture:true});map.addEventListener('dblclick',onDblClick,{capture:true});state.state='READY';
+  if(!map)return;
+  if(map.dataset.omegaSmoothMotion==='true'){
+    state.installed=true;
+    if(state.state==='INITIALIZING')state.state='READY';
+    return;
+  }
+  map.dataset.omegaSmoothMotion='true';map.addEventListener('wheel',onWheel,{capture:true,passive:false});map.addEventListener('pointerdown',onPointerDown,{capture:true});map.addEventListener('pointermove',onPointerMove,{capture:true});map.addEventListener('pointerup',e=>finishPointer(e,false),{capture:true});map.addEventListener('pointercancel',e=>finishPointer(e,true),{capture:true});map.addEventListener('mousedown',suppressLegacyMouse,{capture:true});map.addEventListener('click',onClick,{capture:true});map.addEventListener('dblclick',onDblClick,{capture:true});state.installed=true;state.state='READY';
 }
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(install,0),{once:true});else setTimeout(install,0);}
 state.cancel=cancelAnimation;state.install=install;
