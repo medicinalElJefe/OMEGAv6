@@ -60,6 +60,11 @@ jobs:
           node tests/continuous-field-r13-invariants.mjs
           node tests/r237-hybrid-command-authority-invariants.mjs
 
+      - name: Prove full R283 SAR convergence inside existing authority lane
+        run: |
+          node tests/r283-sar-full-stack-invariants.mjs
+          for f in tests/r280-*.mjs; do node "$f"; done
+
       - name: Run complete application check and production build
         run: npm run check
 
@@ -71,7 +76,7 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
-      - name: Prove built R241/R239/R242/R245/R279/R281/R282 convergence in the real UI
+      - name: Prove built R241/R239/R242/R245/R279/R281/R282/R283 convergence in the real UI
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
@@ -119,7 +124,7 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + Navigation + Full Canon + R279 Earth + R281/R282 Heavy Bio production proof'
+            echo '## R241 Archive Convergence + Navigation + Full Canon + R279 Earth + R281/R282 Heavy Bio + R283 SAR proof'
             echo "- Candidate: $GITHUB_SHA"
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
             echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
@@ -129,6 +134,7 @@ jobs:
             echo '- R281 proves 12 domains × 12 context layers × 7 physical scales × 241 zero-measurement-authority analytical channels and calibrated instrument ingest.'
             echo '- R282 proves the real medical-production control plane defaults to blocked clinical release, then accepts an explicit test intended-use/measurand/risk/authorization fixture without granting modes measurement authority.'
             echo '- R282 clinical authorization is an evidence-bound internal release gate; no workflow or UI label manufactures FDA authorization, clinical validation or standards conformance.'
+            echo '- R283 SAR full-stack invariants are preserved inside this existing read-only lane; standalone R283 workflow authority was removed to restore the governed maximum of 24 active workflows.'
             echo '- R153 mutation, R147 dispatch, R146 durable history, R141 exact return, R240 source promotion and R125 sole CanonState admission remain unchanged.'
-            echo '- No new workflow authority is introduced; R282 proof is converged into existing R202/R241 read-only PR lanes and ci.yml remains the canonical production writer.'
+            echo '- No new workflow authority is introduced; R282/R283 proof is converged into existing read-only PR lanes and ci.yml remains the canonical production writer.'
           } >> "$GITHUB_STEP_SUMMARY"
