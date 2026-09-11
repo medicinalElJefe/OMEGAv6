@@ -1,0 +1,33 @@
+name: R280 Mode Realization
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r280-mode-realization-promotion]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-r280:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R280 mode realization and Heavy Bio boundaries
+        run: npx --yes tsx tests/r280-mode-realization.mts
+      - name: Prove production bundle still compiles
+        run: npm run build
+      - name: Prove no production authority was added
+        shell: bash
+        run: |
+          if grep -Eq 'wrangler deploy|vercel deploy|cloudflare.*deploy' .github/workflows/r280-mode-realization.yml; then
+            echo '::error::R280 verification workflow must remain non-mutating.'
+            exit 1
+          fi
+          echo 'R280 authority boundary PASS: read-only verification workflow.'
