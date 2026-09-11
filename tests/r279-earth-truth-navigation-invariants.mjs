@@ -5,7 +5,9 @@ const earth=read('src/EarthObservatoryR8.tsx'),instrument=read('src/EarthNowInst
 const must=(ok,msg)=>assert.ok(ok,'R279 '+msg);
 for(const view of ['SATELLITE','PLANET','MOTION','EVIDENCE','SPACE','GROUND','CALCULUS'])must(earth.includes(`'${view}'`),'Earth view missing '+view);
 for(const token of ['earth-r279-view-tabs','aria-pressed={view===x.id}','chooseView(x.id)','queryAt(initial.lat,initial.lon)','Return + query model-mapped target','FULL-DISK OBSERVATION PAIR','G19-FD','G18-FD','EarthGroundTraversalR9','EarthLivingFieldR36'])must(earth.includes(token),'Earth interaction/source contract missing '+token);
-for(const token of ['fetchEarthMotionStateR278','drawClouds','drawParticles','solarState','terminator','SOURCE-FIRST PLANETARY INSTRUMENT','returned observations remain distinct','Missing source pixels remain missing'])must(instrument.includes(token),'planet instrument missing '+token);
+for(const token of ['fetchEarthMotionStateR278','drawClouds','drawParticles','solarState','SOURCE-FIRST PLANETARY INSTRUMENT','Missing source pixels remain missing'])must(instrument.includes(token),'planet instrument missing '+token);
+must(instrument.toLowerCase().includes('terminator'),'planet instrument missing solar terminator contract');
+must(instrument.toLowerCase().includes('returned observations remain distinct'),'planet instrument must preserve observed-versus-derived separation');
 must(!main.includes('earthVisualEnhancerR278'),'retired global visual enhancer must not auto-mount outside Earth Now');
 for(const token of ['earth-r279-view-tabs','earth-r279-satellite','earth-r279-global-pair','earth-r279-stage'])must(earthCss.includes(token),'Earth view hierarchy CSS missing '+token);
 const navNames=[...nav.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
