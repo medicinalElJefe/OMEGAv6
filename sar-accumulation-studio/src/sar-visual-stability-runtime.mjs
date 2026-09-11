@@ -146,6 +146,7 @@ body.omega-experience .transport-deck{background:rgba(5,9,10,.86)!important;back
   body.omega-experience #omegaSarFit,body.omega-experience #omegaR259CanonReadout,
   body.omega-experience .omega-r257-stage,body.omega-experience .omega-r258-layer-control>span,
   body.omega-experience .omega-r258-layer-control>b{display:none!important}
+  body.omega-experience #omegaSarEvidence{display:block!important}
   body.omega-experience .omega-r258-layer-control{display:flex!important;flex:1 1 auto!important;width:auto!important;min-width:0!important;max-width:none!important;height:30px!important;padding:0 3px!important}
   body.omega-experience .omega-r258-layer-control select{width:100%!important;min-width:0!important;height:24px!important;font-size:7px!important}
   body.omega-experience .map-wrap{width:100%!important;height:100%!important;margin:0!important;opacity:1!important;transition:none!important;border-radius:9px!important}

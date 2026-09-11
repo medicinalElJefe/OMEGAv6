@@ -94,6 +94,8 @@ async function mobileProof(){
       return {vw:innerWidth,vh:innerHeight,htmlScroll:document.documentElement.scrollWidth,bodyScroll:document.body.scrollWidth,
         top:rect('.topbar'),dock:rect('.place-dock'),search:rect('.place-search'),controls:rect('#omegaSarPrimaryControls'),map:rect('.map-wrap'),visibleChildren};
     });
+    await mkdir('test-results',{recursive:true});
+    await page.screenshot({path:'test-results/r260-3-visual-stability-mobile.png',fullPage:false});
     assert.ok(initial.htmlScroll<=initial.vw+1&&initial.bodyScroll<=initial.vw+1,`mobile horizontal overflow ${initial.htmlScroll}/${initial.bodyScroll}/${initial.vw}`);
     assert.ok(initial.dock.left>=0&&initial.dock.right<=initial.vw,'mobile command bar escapes viewport');
     assert.ok(initial.search.bottom<=initial.controls.top+1,'mobile search and controls overlap');
