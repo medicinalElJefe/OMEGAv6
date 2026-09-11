@@ -1,0 +1,38 @@
+name: SAR R260.4 Readiness Diagnostic
+
+on:
+  push:
+    branches:
+      - r260-4-readiness-diagnostic-closure
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose-live-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install Chromium proof runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Diagnose exact live readiness gate
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: https://omega-sar-r4.jeffdeweyeljefe.workers.dev
+        run: node tests/r251-global-motion-e2e.mjs
+      - name: Archive readiness diagnosis
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sar-r2604-readiness-diagnosis
+          path: |
+            sar-accumulation-studio/test-results/r251-readiness-diagnosis.json
+            sar-accumulation-studio/test-results/r251-global-motion.png
+          if-no-files-found: warn
+          retention-days: 2
