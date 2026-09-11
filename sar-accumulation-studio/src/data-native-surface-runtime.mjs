@@ -2,8 +2,9 @@ import { buildTerrainReliefSurface, buildTerrainShapedSarSurface } from './data-
 import { drawMeshCellByBlades } from './sar-blade-geometry.mjs';
 
 const map=document.querySelector('#map'),wrap=map?.closest('.map-wrap');
+const MIN_TERRAIN_COVERAGE=.36;
 let layer=null,canvas=null,ctx=null,dpr=1,reliefCanvas=null,regionalCanvas=null,exactCanvas=null,lastTerrainKey='',lastRegionalKey='',lastExactKey='',raf=0;
-const state={state:'INITIALIZING',active:true,surface:'WORLD_RELIEF',terrainReady:false,regionalReady:false,exactReady:false,renderedAt:null,regionalStats:null,exactStats:null,detailPolicy:{regional:{reliefStrength:.38,textureStrength:.19},exactInteractive:{reliefStrength:.30,textureStrength:.20},exactDeep:{reliefStrength:.32,textureStrength:.24}},boundary:'This renderer changes display only. Calibrated SAR dB/power remain untouched measurement arrays. DEM relief and drainage potential are derived visual/context fields; no missing SAR pixels, water depth, or 3-D geometry are synthesized.'};
+const state={state:'INITIALIZING',active:true,surface:'WORLD_RELIEF',terrainReady:false,regionalReady:false,exactReady:false,renderedAt:null,regionalStats:null,exactStats:null,detailPolicy:{regional:{reliefStrength:.38,textureStrength:.19},exactInteractive:{reliefStrength:.30,textureStrength:.20},exactDeep:{reliefStrength:.32,textureStrength:.24}},admission:{terrainCoverageMinimum:MIN_TERRAIN_COVERAGE,rule:'SHAPED_SAR_REQUIRES_CURRENT_SOURCE_DEM_SUPPORT'},boundary:'This renderer changes display only. Calibrated SAR dB/power remain untouched measurement arrays. DEM relief and drainage potential are derived visual/context fields; no missing SAR pixels, water depth, or 3-D geometry are synthesized.'};
 globalThis.OMEGA_DATA_NATIVE_SURFACE=state;
 
 function renderer(){return globalThis.OMEGA_SAR_RENDERER||null;}
@@ -14,11 +15,28 @@ function rgbaCanvas(surface){if(!surface?.rgba)return null;const c=document.crea
 function terrainKey(t){return t?.terrain?`${t.updatedAt}:${t.terrain.z}:${t.terrain.width}x${t.terrain.height}:${t.terrain.bbox?.join(',')}`:'';}
 function patchKey(p,t){return p?`${p.id}:${p.startTime}:${p.width}x${p.height}:${p.stats?.p02}:${p.stats?.p98}:${terrainKey(t)}`:'';}
 function exactDisplayPolicy(p){return Math.max(Number(p?.width)||0,Number(p?.height)||0)>=240?state.detailPolicy.exactDeep:state.detailPolicy.exactInteractive;}
+function terrainCoherent(t,stats){return t?.state==='READY'&&!!t?.terrain&&Number(stats?.terrainCoverage)>=MIN_TERRAIN_COVERAGE;}
 function ensureAssets(){
   const t=terrainState();if(t?.state==='READY'&&t.terrain){const key=terrainKey(t);if(key&&key!==lastTerrainKey){const surface=buildTerrainReliefSurface(t.terrain,t.water);reliefCanvas=rgbaCanvas(surface);lastTerrainKey=key;state.terrainReady=!!reliefCanvas;state.reliefStats=surface?.stats||null;}}
-  const rp=regionalPatch();if(rp){const key=patchKey(rp,t);if(key!==lastRegionalKey){const surface=buildTerrainShapedSarSurface(rp,t?.terrain,t?.water,state.detailPolicy.regional);regionalCanvas=rgbaCanvas(surface);lastRegionalKey=key;state.regionalStats=surface?.stats||null;state.regionalReady=!!regionalCanvas;}}
+  const rp=regionalPatch();if(rp){
+    const key=patchKey(rp,t);
+    if(key!==lastRegionalKey){
+      // Unified Coherence admission: a calibrated SAR frame may remain visible while DEM
+      // is still resolving, but it is not called terrain-shaped until the current DEM
+      // actually covers the registered SAR support. This prevents a zero-terrain race
+      // from being promoted into the final data-native image plane.
+      if(t?.state==='READY'&&t?.terrain){const surface=buildTerrainShapedSarSurface(rp,t.terrain,t.water,state.detailPolicy.regional);const next=rgbaCanvas(surface),stats=surface?.stats||null;state.regionalStats=stats;state.regionalReady=!!next&&terrainCoherent(t,stats);regionalCanvas=state.regionalReady?next:null;lastRegionalKey=key;}
+      else {regionalCanvas=null;state.regionalReady=false;state.regionalStats={validSar:Number(rp.stats?.validCount)||0,terrainSamples:0,terrainCoverage:0,pendingTerrain:true};lastRegionalKey=key;}
+    }
+  }
   else if(globalThis.OMEGA_SAR_REGIONAL_MEASUREMENT?.state!=='LOADING'){regionalCanvas=null;lastRegionalKey='';state.regionalReady=false;state.regionalStats=null;}
-  const ep=exactPatch();if(ep){const key=patchKey(ep,t);if(key!==lastExactKey){const surface=buildTerrainShapedSarSurface(ep,t?.terrain,t?.water,exactDisplayPolicy(ep));exactCanvas=rgbaCanvas(surface);lastExactKey=key;state.exactStats=surface?.stats||null;state.exactReady=!!exactCanvas;state.exactSourcePixels=[ep.width,ep.height];}}
+  const ep=exactPatch();if(ep){
+    const key=patchKey(ep,t);
+    if(key!==lastExactKey){
+      if(t?.state==='READY'&&t?.terrain){const surface=buildTerrainShapedSarSurface(ep,t.terrain,t.water,exactDisplayPolicy(ep)),next=rgbaCanvas(surface),stats=surface?.stats||null;state.exactStats=stats;state.exactReady=!!next&&terrainCoherent(t,stats);exactCanvas=state.exactReady?next:null;lastExactKey=key;state.exactSourcePixels=[ep.width,ep.height];}
+      else {exactCanvas=null;state.exactReady=false;state.exactStats={validSar:Number(ep.stats?.validCount)||0,terrainSamples:0,terrainCoverage:0,pendingTerrain:true};lastExactKey=key;state.exactSourcePixels=[ep.width,ep.height];}
+    }
+  }
   else if(globalThis.OMEGA_SAR_R257_DETAIL?.state!=='DEEP_SOURCE_READ'){exactCanvas=null;lastExactKey='';state.exactReady=false;state.exactStats=null;state.exactSourcePixels=null;}
 }
 function drawRelief(r){
@@ -40,9 +58,8 @@ function drawEvents(r){
 function forceStyle(selector,name,value){const node=document.querySelector(selector);if(!node)return;if(value==null)node.style.removeProperty(name);else node.style.setProperty(name,String(value),'important');}
 function applyLayerHierarchy(surface){
   const shaped=surface==='REGIONAL_SHAPED_SAR'||surface==='EXACT_SHAPED_SAR',regional=surface==='REGIONAL_SHAPED_SAR',exact=surface==='EXACT_SHAPED_SAR';
-  // Ownership must switch atomically. The native canvas itself can crossfade smoothly,
-  // but the old raw/support canvases must not spend 280 ms double-exposed underneath it.
-  // That transient washout was visually muddy and made fresh-page proof timing nondeterministic.
+  // Ownership must switch atomically only after both calibrated SAR and coherent current
+  // DEM support are ready. Before that the raw measured SAR layer remains authoritative.
   forceStyle('.omega-regional-sar-layer canvas','opacity',shaped?.012:null);
   forceStyle('.omega-regional-sar-layer canvas','transition',shaped?'none':null);
   forceStyle('.omega-regional-sar-layer canvas','filter',shaped?'none':null);
@@ -53,15 +70,15 @@ function applyLayerHierarchy(surface){
   forceStyle('.omega-earth-awareness-layer canvas','opacity',0);
   forceStyle('#map','opacity',exact?.012:null);
   const oldBadge=document.querySelector('#omegaRegionalSarBadge');if(oldBadge)oldBadge.style.setProperty('display','none','important');
-  state.layerOwnership={surface,shaped,regional,exact,atomicLegacyDemotion:shaped};
+  state.layerOwnership={surface,shaped,regional,exact,atomicLegacyDemotion:shaped,terrainAdmission:shaped?'COHERENT':'PENDING_OR_WORLD'};
 }
-function updateDomState(surface){state.surface=surface;state.renderedAt=new Date().toISOString();document.body.dataset.dataNativeSurface=surface.toLowerCase();applyLayerHierarchy(surface);const badge=document.querySelector('#omegaDataNativeBadge');if(badge)badge.textContent=surface==='EXACT_SHAPED_SAR'?'EXACT MEASURED SAR · HIGH-DETAIL TERRAIN-SHAPED DISPLAY':surface==='REGIONAL_SHAPED_SAR'?'REGIONAL MEASURED SAR · HIGH-DETAIL TERRAIN-SHAPED DISPLAY':'DATA-NATIVE EARTH RELIEF · SOURCE DEM';}
+function updateDomState(surface){state.surface=surface;state.renderedAt=new Date().toISOString();document.body.dataset.dataNativeSurface=surface.toLowerCase();applyLayerHierarchy(surface);const badge=document.querySelector('#omegaDataNativeBadge');if(badge)badge.textContent=surface==='EXACT_SHAPED_SAR'?'EXACT MEASURED SAR · HIGH-DETAIL TERRAIN-SHAPED DISPLAY':surface==='REGIONAL_SHAPED_SAR'?'REGIONAL MEASURED SAR · HIGH-DETAIL TERRAIN-SHAPED DISPLAY':regionalPatch()&&!state.regionalReady?'REGIONAL MEASURED SAR · SOURCE DEM ALIGNMENT PENDING':'DATA-NATIVE EARTH RELIEF · SOURCE DEM';}
 function draw(){
   if(!ctx||!canvas||!map)return;ensureAssets();const rect=map.getBoundingClientRect();ctx.clearRect(0,0,rect.width,rect.height);const r=renderer();if(!r)return;const scale=Number(r.view.scale)||1;
   drawRelief(r);
   let surface='WORLD_RELIEF';const rp=regionalPatch(),ep=exactPatch();
-  if(scale>900&&ep&&exactCanvas&&drawPatch(r,ep,exactCanvas,1)>0)surface='EXACT_SHAPED_SAR';
-  else if(scale>=240&&scale<=950&&rp&&regionalCanvas&&drawPatch(r,rp,regionalCanvas,1)>0)surface='REGIONAL_SHAPED_SAR';
+  if(scale>900&&ep&&state.exactReady&&exactCanvas&&drawPatch(r,ep,exactCanvas,1)>0)surface='EXACT_SHAPED_SAR';
+  else if(scale>=240&&scale<=950&&rp&&state.regionalReady&&regionalCanvas&&drawPatch(r,rp,regionalCanvas,1)>0)surface='REGIONAL_SHAPED_SAR';
   if(scale<900)drawEvents(r);updateDomState(surface);
 }
 function scheduleDraw(){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw);}
