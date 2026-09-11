@@ -1,5 +1,9 @@
 import {chromium} from 'playwright';
 
+const annotateFailure=error=>{const raw=error?.stack||String(error),message=String(raw).replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A');console.error(`::error title=R279/R283 EARTH BROWSER PROOF::${message}`)};
+process.on('uncaughtException',error=>{annotateFailure(error);process.exit(1)});
+process.on('unhandledRejection',error=>{annotateFailure(error);process.exit(1)});
+
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const viewports=[['desktop',{width:1440,height:960},1],['mobile',{width:390,height:844},2]];
 const R283_TEXTURE=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABAAAAAICAYAAADwdn+XAAAAOUlEQVR4nGPkeB/wX4BBg0GA4QYDNpofhziMZmF4oMHAwHCDgYGBPJqF4QH5mhmo44KHA+6CgQ4DANv2SJzez11TAAAAAElFTkSuQmCC','base64');
