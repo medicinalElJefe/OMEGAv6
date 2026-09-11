@@ -2,10 +2,10 @@ import { lonLatToTile, terrariumElevation, deriveWaterGeometry, waterGeometrySum
 import { sarAuthority } from './sar-authority.mjs';
 
 const map=document.querySelector('#map');
-const TILE=256,MAX_TILES=24,MAX_GRID=384;
+const TILE=256,MAX_TILES=24,MAX_GRID=384,TERRAIN_MAX_SCHEDULE_WAIT_MS=1400;
 const tileCache=new Map();
-let timer=null,generation=0,controller=null;
-const state={state:'INITIALIZING',stage:null,terrain:null,water:null,updatedAt:null,error:null,tileCache,policy:{maxTiles:MAX_TILES,maxGrid:MAX_GRID,maxZoom:12,source:'AWS_OPEN_DATA_TERRAIN_TILES_TERRARIUM'},boundary:'Elevation is source terrain context. Derived slope/aspect/curvature/drainage are computed display/context fields and are not SAR measurements, observed water, or surveyed 3-D geometry.'};
+let timer=null,deadlineTimer=null,generation=0,controller=null,pendingDelay=460,queuedDelay=90;
+const state={state:'INITIALIZING',stage:null,terrain:null,water:null,updatedAt:null,error:null,tileCache,loading:false,queued:false,loads:0,lastStartAt:null,policy:{maxTiles:MAX_TILES,maxGrid:MAX_GRID,maxZoom:12,maxScheduleWaitMs:TERRAIN_MAX_SCHEDULE_WAIT_MS,source:'AWS_OPEN_DATA_TERRAIN_TILES_TERRARIUM'},boundary:'Elevation is source terrain context. Derived slope/aspect/curvature/drainage are computed display/context fields and are not SAR measurements, observed water, or surveyed 3-D geometry.'};
 globalThis.OMEGA_DATA_NATIVE_TERRAIN=state;
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)));
@@ -38,10 +38,10 @@ function gridSize(bbox,scale){
 }
 function emit(){window.dispatchEvent(new CustomEvent('omega-data-native-terrain',{detail:{state:state.state,stage:state.stage,terrain:state.terrain?{bbox:state.terrain.bbox,width:state.terrain.width,height:state.terrain.height,z:state.terrain.z,min:state.terrain.min,max:state.terrain.max,tileCount:state.terrain.tileCount,source:state.terrain.source}:null,water:state.water?{summary:state.water.summary}:null,error:state.error,updatedAt:state.updatedAt}}));}
 async function load(){
-  const r=renderer();if(!r)return;const bbox=r.viewBounds?.(),selection=tileSelection(bbox,r.view.scale);if(!selection)return;
-  controller?.abort();controller=new AbortController();const signal=controller.signal,my=++generation,snapshot=sarAuthority.capture();state.state='LOADING';state.stage='TERRAIN_TILES';state.error=null;emit();
+  const r=renderer();if(!r){state.queued=true;queuedDelay=90;return;}const bbox=r.viewBounds?.(),selection=tileSelection(bbox,r.view.scale);if(!selection){state.queued=true;queuedDelay=90;return;}
+  controller?.abort();controller=new AbortController();const signal=controller.signal,my=++generation,snapshot=sarAuthority.capture();state.loads++;state.lastStartAt=new Date().toISOString();state.state='LOADING';state.stage='TERRAIN_TILES';state.error=null;emit();
   try{
-    const tiles=await Promise.all(selection.tiles.map(t=>loadTile(t,signal)));if(signal.aborted||my!==generation)return;if(!sarAuthority.accepts(snapshot,{target:false,camera:true,scene:false}))return;
+    const tiles=await Promise.all(selection.tiles.map(t=>loadTile(t,signal)));if(signal.aborted||my!==generation)return;if(!sarAuthority.accepts(snapshot,{target:false,camera:true,scene:false})){state.queued=true;queuedDelay=90;return;}
     state.stage='TERRAIN_GRID';emit();const tileMap=new Map(tiles.map(t=>[t.key,t])),size=gridSize(bbox,r.view.scale),elevation=new Float64Array(size.width*size.height);let min=Infinity,max=-Infinity,valid=0;
     for(let y=0;y<size.height;y++){const lat=bbox[3]-(bbox[3]-bbox[1])*(y/(size.height-1));for(let x=0;x<size.width;x++){const lon=bbox[0]+(bbox[2]-bbox[0])*(x/(size.width-1)),z=elevationAt(tileMap,lon,lat,selection.z),i=y*size.width+x;elevation[i]=z;if(Number.isFinite(z)){min=Math.min(min,z);max=Math.max(max,z);valid++;}}}
     if(valid<size.width*size.height*.88)throw new Error(`terrain grid support ${Math.round(valid/(size.width*size.height)*100)}% below 88%`);
@@ -49,7 +49,21 @@ async function load(){
     state.terrain={schema:'omega.data-native.terrain.v2',bbox:[...bbox],width:size.width,height:size.height,z:selection.z,elevation,min,max,tileCount:tiles.length,source:'AWS_OPEN_DATA_TERRAIN_TILES',rawDem:true,measuredSar:false};state.water={geometry:waterGeometry,summary:waterGeometrySummary(waterGeometry),source:'DERIVED_FROM_DEM',observedWater:false};state.state='READY';state.stage='READY';state.updatedAt=new Date().toISOString();state.error=null;emit();
   }catch(error){if(signal.aborted||my!==generation)return;state.state='ERROR';state.stage='FAILED';state.error=error.message;emit();}
 }
-function schedule(delay=460){clearTimeout(timer);timer=setTimeout(()=>load().catch(error=>{state.state='ERROR';state.error=error.message;emit();}),delay);}
+function clearSchedule(){if(timer){clearTimeout(timer);timer=null;}if(deadlineTimer){clearTimeout(deadlineTimer);deadlineTimer=null;}}
+async function runScheduled(){
+  clearSchedule();
+  if(state.loading){state.queued=true;queuedDelay=Math.min(queuedDelay,pendingDelay);return;}
+  state.loading=true;
+  try{await load();}
+  catch(error){state.state='ERROR';state.stage='FAILED';state.error=error.message;emit();}
+  finally{state.loading=false;if(state.queued){const next=queuedDelay;state.queued=false;queuedDelay=90;schedule(next);}}
+}
+function schedule(delay=460){
+  const bounded=Math.max(0,Number(delay)||0);pendingDelay=bounded;
+  if(state.loading){state.queued=true;queuedDelay=Math.min(queuedDelay,bounded);return;}
+  if(timer)clearTimeout(timer);timer=setTimeout(runScheduled,bounded);
+  if(!deadlineTimer)deadlineTimer=setTimeout(runScheduled,TERRAIN_MAX_SCHEDULE_WAIT_MS);
+}
 function install(){map?.addEventListener('omega-map-view',()=>schedule(520));map?.addEventListener('omega-map-select',()=>schedule(90));window.addEventListener('omega-camera-motion-settled',()=>schedule(90));window.addEventListener('omega-sar-authority-change',event=>{if(['TARGET','CAMERA'].includes(event.detail?.kind))schedule(220);});schedule(650);}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else queueMicrotask(install);
-state.reload=()=>load();state.schedule=schedule;state.gridSize=gridSize;
+state.reload=()=>runScheduled();state.schedule=schedule;state.gridSize=gridSize;
