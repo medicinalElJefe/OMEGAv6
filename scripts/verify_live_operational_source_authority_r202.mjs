@@ -1,4 +1,5 @@
 import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 const base=(process.env.OMEGA_PUBLIC_URL||'https://omegav6.jeffdeweyeljefe.workers.dev').replace(/\/$/,'');
 const R205_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046';
@@ -28,7 +29,11 @@ if(expectedBaseSha!==R205_BASE_SHA256)throw new Error(`repository immutable R205
 if(servedBaseSha!==R205_BASE_SHA256||baseLive.body!==expectedBaseText)throw new Error(`live immutable R205 base mismatch expected ${R205_BASE_SHA256} served ${servedBaseSha}`);
 for(const token of ["VERSION='R34.1'","CAPABILITY_REVISION='R132'","R205_PROOF_EXTENSION='R205'",'DESKTOP_HEALTH','FORENSIC_HASH_LEDGER','root-confined','shell=False',"'/api/hybrid/agent/heartbeat'", "'/api/hybrid/agent/result'"])if(!baseLive.body.includes(token))throw new Error(`live immutable R205 base contract missing ${token}`);
 console.log(`R202/R205/R206/R206.1/R207.2 LIVE PASS · R282.1 GLOBAL OBSERVED EARTH PASS · ${base}/omega-operational-source-authority-r202.html · R141 wrapper sha256 ${servedWrapperSha} · immutable R205 base sha256 ${servedBaseSha} · global observed Earth ${earthGlobal.date} ${earthGlobal.bytes} bytes sha256 ${earthGlobal.sha} ${earthGlobal.crs} · exact-return truth gate · R206.1 read-only host evidence · R125 preserved`);
-if(String(process.env.OMEGA_PROMOTED_SHA||'').trim()){
+const promoted=String(process.env.OMEGA_PROMOTED_SHA||'').trim();
+if(promoted){
  await import('./verify_live_hybrid_direct_poll_r2074.mjs');
  await import('./verify_live_hybrid_command_authority_r237.mjs');
+ const liveVisual=spawnSync(process.execPath,['tests/r283-live-earth-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+ if(liveVisual.error)throw liveVisual.error;
+ if(liveVisual.status!==0)throw new Error(`R283 exact-production live Earth browser proof failed with exit ${liveVisual.status}`);
 }
