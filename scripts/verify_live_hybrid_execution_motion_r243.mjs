@@ -61,8 +61,9 @@ if(status.body?.state==='VERIFIED_DEVICE_ONLINE'){
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1440,height:1100}});
 const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
-await page.goto(base+'/',{waitUntil:'networkidle'});
-await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
+await page.goto(base+'/',{waitUntil:'domcontentloaded'});
+const toolsTab=page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true});
+await toolsTab.waitFor({state:'visible'});await toolsTab.click();
 const hybridEntry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid'}).first();
 await hybridEntry.waitFor({state:'visible'});await hybridEntry.click();
 const motion=page.locator('[data-r243-motion]');
