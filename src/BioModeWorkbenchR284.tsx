@@ -29,6 +29,7 @@ export default function BioModeWorkbenchR284({record,instrumentReady=0,instrumen
  const compare=(experience.channels.find((x:any)=>x.key===compareKey)||null) as any;
  const delta=compareBioModesR284(selected,compare);
  const activation=Math.max(0,Math.min(1,Number(selected?.activation)||0));
+ const boundaryText=String(selected?.boundary||'No mode-specific truth boundary is declared; this analytical channel remains non-measurement and non-clinical until independently validated.');
  const ring=251.327;
  const proofSignals=[
   ['PROOF REF',Boolean(selected?.proofPresent)],
@@ -68,7 +69,7 @@ export default function BioModeWorkbenchR284({record,instrumentReady=0,instrumen
     </button>):<div className='bio284-no-results'><Search/><b>No channels match these filters.</b><span>Clear or broaden the display filters. No analytical state was changed.</span></div>}
    </nav>
 
-   {selected&&<article className='bio284-detail' data-mode-key={selected.key} data-measurement-authority='0' aria-label={`Selected Heavy Bio mode ${selected.name}; measurement authority 0`}>
+   {selected&&<article className='bio284-detail' data-mode-key={selected.key} data-measurement-authority='0' data-truth-boundary={boundaryText} aria-label={`Selected Heavy Bio mode ${selected.name}; measurement authority 0`}>
     <header><div><span>{selected.family==='SOURCE_CATALOG'?'SOURCE CATALOG CHANNEL':'CANON AUTHORITY'} · {selected.key}</span><h4>{selected.name}</h4><p>{pretty(selected.group)} · {pretty(selected.state)} · {pretty(selected.realization)}</p><small>Measurement authority <b>0</b> · analytical channel only</small></div><div className='bio284-detail-actions'><button onClick={()=>setCompareKey(selected.key)}>{compareKey===selected.key?'COMPARE PINNED':'PIN FOR COMPARE'}</button>{compareKey&&<button className='quiet' onClick={()=>setCompareKey('')}>CLEAR COMPARE</button>}</div></header>
 
     <div className='bio284-visual-grid'>
@@ -91,8 +92,10 @@ export default function BioModeWorkbenchR284({record,instrumentReady=0,instrumen
      <section><header><Activity/><div><b>VALIDATION REQUIREMENT</b><small>What would be required before clinical influence</small></div></header><p>{selected.validationNeed}</p></section>
     </div>
 
+    <section className='bio284-truth-boundary' aria-label='Truth boundary'><ShieldCheck/><div><b>Truth boundary</b><p>{boundaryText}</p></div></section>
+
     <dl className='bio284-technical'>
-     <div><dt>Operator</dt><dd>{selected.operator||'Not declared'}</dd></div><div><dt>Algebra</dt><dd>{selected.algebra||'Not declared'}</dd></div><div><dt>Calculus / basis</dt><dd>{selected.calculus||'Not declared'}</dd></div><div><dt>Proof binding</dt><dd>{selected.proof||'No proof reference bound to this channel'}</dd></div><div className='wide'><dt>Truth boundary</dt><dd>{selected.boundary}</dd></div>
+     <div><dt>Operator</dt><dd>{selected.operator||'Not declared'}</dd></div><div><dt>Algebra</dt><dd>{selected.algebra||'Not declared'}</dd></div><div><dt>Calculus / basis</dt><dd>{selected.calculus||'Not declared'}</dd></div><div><dt>Proof binding</dt><dd>{selected.proof||'No proof reference bound to this channel'}</dd></div><div className='wide'><dt>Truth boundary</dt><dd>{boundaryText}</dd></div>
     </dl>
 
     <section className='bio284-ladder' aria-label='Evidence and authority ladder'><header><ShieldCheck/><div><b>EVIDENCE → AUTHORITY LADDER</b><small>The selected mode is deliberately kept downstream of measurement</small></div></header><div>
