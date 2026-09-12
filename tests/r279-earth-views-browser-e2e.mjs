@@ -58,9 +58,18 @@ try{
    if(name==='SAR Truth'){
     const sar=page.locator('.earth-r283-sar');
     const text=await sar.innerText();
-    for(const token of ['SAR','source','truth'])if(!text.toLowerCase().includes(token.toLowerCase()))throw new Error(`${label}: R283 SAR surface missing truth-context token ${token}`);
+    for(const token of ['SAR','source','truth'])if(!text.toLowerCase().includes(token.toLowerCase()))throw new Error(`${label}: R283/R285 SAR surface missing truth-context token ${token}`);
+    const workspace=page.locator('.earth-r72-workspace');
+    if(!(await workspace.evaluate(el=>el.classList.contains('sar-active'))))throw new Error(`${label}: SAR Truth did not enter the explicit full-width sar-active workspace state`);
+    if(await page.locator('.earth-r72-console').isVisible())throw new Error(`${label}: generic Earth console must remain hidden while the dedicated SAR workstation owns the active surface`);
    }
   }
+  // SAR Truth intentionally owns a full-width workstation and hides the generic Earth console.
+  // Re-enter a standard Earth view before proving the inherited model-target reset control.
+  const satellite=page.locator('.earth-r279-view-tabs button').filter({hasText:'Satellite'}).first();
+  await satellite.click();
+  await page.waitForSelector('.earth-r279-satellite',{state:'visible',timeout:20000});
+  if(await satellite.getAttribute('aria-pressed')!=='true')throw new Error(`${label}: Satellite did not restore the standard Earth workspace before reset proof`);
   const reset=page.getByRole('button',{name:'Return + query model-mapped target'});
   await reset.waitFor({state:'visible',timeout:10000});
   const lat=page.getByLabel('Latitude'),lon=page.getByLabel('Longitude');
@@ -74,5 +83,5 @@ try{
   if(pageErrors.length)throw new Error(`${label}: Earth view browser errors: ${pageErrors.join(' | ')}`);
   await context.close();
  }
- console.log('R279/R281/R283 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth mount distinct surfaces · R281 Planet renders varied returned-source pixels through orthographic globe projection · R283 SAR stays source/truth explicit · reset/query target works · no page errors or viewport overflow');
+ console.log('R279/R281/R283/R285 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth mount distinct surfaces · SAR Truth owns explicit full-width workspace with generic console hidden · R281 Planet renders varied returned-source pixels through orthographic globe projection · standard Earth reset/query target remains functional · no page errors or viewport overflow');
 }finally{await browser.close()}
