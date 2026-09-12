@@ -1,12 +1,14 @@
 import {compileProofCarryR292} from './proofCarryRuntimeR292.js';
+import {compileSingmasterExactClosureR296,SINGMASTER_EXACT_CLOSURE_BOUNDARY_R296} from './singmasterExactClosureR296.js';
 
 export type SingmasterGateStatusR290='PASS'|'ESTABLISHED_EXTERNAL'|'OPEN'|'SOURCE_MISSING'|'AUDITED_HOLD';
 export type SingmasterRepresentationR290={n:number;k:number};
 export type SingmasterFiberR290={id:string;representations:SingmasterRepresentationR290[];className:'sporadic'|'sharp-witness'|'fibonacci-family';expectedDigits?:number;expectedValue?:string};
+export type SingmasterFamilyR290={id:string;status:string;scope:string;exhaustive:boolean;terminal?:boolean;parentFamily?:string};
 
 export const SINGMASTER_PUBLIC_STATUS_R290='OPEN' as const;
-export const SINGMASTER_ATLAS_VERSION_R290='R290';
-export const SINGMASTER_TRUTH_BOUNDARY_R290='OMEGA R290 is a proof-audit and exact-arithmetic research instrument. It does not claim that the global Sharp Singmaster Bound N(a) <= 8 is proved. Promotion is allowed only after every four-nontrivial-column family is exhaustively closed by reproducible certificates.';
+export const SINGMASTER_ATLAS_VERSION_R290='R290+R296';
+export const SINGMASTER_TRUTH_BOUNDARY_R290='OMEGA R290/R296 is a proof-audit and exact-arithmetic research instrument. R296 adds exact finite-box closure, but it does not claim that the global Sharp Singmaster Bound N(a) <= 8 is proved. Promotion is allowed only after every four-nontrivial-column family is exhaustively closed by reproducible certificates.';
 
 export const SINGMASTER_EQUIVALENCES_R290=[
   'For every integer a > 1: N(a) <= 8.',
@@ -35,24 +37,26 @@ export const SINGMASTER_PROOF_GATES_R290:{id:string;label:string;status:Singmast
   {id:'G06',label:'Prime-valuation / Kummer carry invariant',status:'PASS',detail:'Equal integer coefficients have identical v_p signatures for every prime.'},
   {id:'G07',label:'Interior control',status:'ESTABLISHED_EXTERNAL',detail:'MRSTT controls sufficiently deep interior multiplicity.'},
   {id:'G08',label:'Known fixed-pair collision atlas',status:'ESTABLISHED_EXTERNAL',detail:'2017 classification and bounded verification are inherited, not re-proved.'},
-  {id:'G09',label:'Small-k four-column family exhaustion',status:'OPEN',detail:'Every possible nontrivial 4-tuple must enter an exhaustive certified family partition.'},
+  {id:'G09',label:'Small-k four-column family exhaustion',status:'OPEN',detail:'R296 exactly closes the baseline box 2 <= k <= 30, 2k <= n <= 300; every remaining nontrivial 4-tuple outside that finite box still requires an exhaustive certified family partition.'},
   {id:'G10',label:'Residual arithmetic-geometry closure',status:'OPEN',detail:'Every surviving curve/variety needs a complete admissible integral/rational point certificate.'},
   {id:'G11',label:'Referenced UCD forensic lineage',status:'SOURCE_MISSING',detail:'UCD_DEEP_FORENSIC_PROJECT_AUDIT_PASS1.txt is not available in the current connected corpus.'},
   {id:'G12',label:'2026 external Lean resolution claim',status:'AUDITED_HOLD',detail:'Inspected artifact defines the target proposition but was not admitted as a proof term for the uniform bound.'},
-  {id:'G13',label:'Final global M(a) <= 3 gate',status:'OPEN',detail:'This is the theorem-bearing closure and cannot be promoted from bounded search.'},
-  {id:'G14',label:'Sharpness witness 3003',status:'PASS',detail:'3003 has three nontrivial left-half representations plus the automatic k=1 representation, giving N(3003)=8.'}
+  {id:'G13',label:'Final global M(a) <= 3 gate',status:'OPEN',detail:'This is the theorem-bearing closure and cannot be promoted from bounded search, including a fully exact R296 finite-box certificate.'},
+  {id:'G14',label:'Sharpness witness 3003',status:'PASS',detail:'3003 has three nontrivial left-half representations plus the automatic k=1 representation, giving N(3003)=8.'},
+  {id:'G15',label:'R296 exact finite-box closure',status:'PASS',detail:'Exact BigInt enumeration of 7,801 cells with 2 <= k <= 30 and 2k <= n <= 300 finds maximum nontrivial multiplicity 3; this closes only that declared finite box.'}
 ];
 
 export const SINGMASTER_CERTIFICATE_FIELDS_R290=[
   'familyId','parentFamily','columnTuple','domainConstraints','commonFiberEquations','reductionMap','invariantCarry','localTests','separatingPrime','residualObject','pointCertificate','exhaustivenessParent','sourceOrCode','status','promotionHash'
 ] as const;
 
-export const SINGMASTER_FOUR_TUPLE_REGISTRY_R290=[
-  {id:'ROOT-ALL',status:'OPEN',scope:'Every possible four-nontrivial-column common fiber.',exhaustive:false},
+export const SINGMASTER_FOUR_TUPLE_REGISTRY_R290:SingmasterFamilyR290[]=[
+  {id:'ROOT-ALL',status:'OPEN',scope:'Every possible four-nontrivial-column common fiber.',exhaustive:false,terminal:false},
   {id:'KNOWN-3003',status:'KEEP_BELOW_THRESHOLD',scope:'k={2,5,6}; M(3003)=3, not a counterexample.',exhaustive:true},
   {id:'INTERIOR-4',status:'PRUNE_EXTERNAL',scope:'Four columns entirely inside the stated MRSTT interior hypotheses.',exhaustive:true},
-  {id:'MIXED-BOUNDARY',status:'OPEN',scope:'At least one small-k/boundary column; primary unresolved global family.',exhaustive:false}
-] as const;
+  {id:'MIXED-BOUNDARY',status:'OPEN',scope:'At least one small-k/boundary column; primary unresolved global family.',exhaustive:false},
+  {id:'R296-BOX-N300-K30',status:'PRUNE_EXACT_BOUNDED',scope:'Exact finite subregion 2 <= k <= 30 and 2k <= n <= 300; exhaustive within this box only.',exhaustive:true,terminal:false,parentFamily:'MIXED-BOUNDARY'}
+];
 
 export const SINGMASTER_KNOWN_FIBERS_R290:SingmasterFiberR290[]=[
   {id:'120',representations:[{n:16,k:2},{n:10,k:3}],className:'sporadic',expectedValue:'120',expectedDigits:3},
@@ -97,9 +101,9 @@ export function verify3003CarryR290(){
 }
 
 export function singmasterProofStatsR290(){
-  const fibers=verifyKnownFibersR290(),carry=verify3003CarryR290();
+  const fibers=verifyKnownFibersR290(),carry=verify3003CarryR290(),bounded=compileSingmasterExactClosureR296();
   const gates=SINGMASTER_PROOF_GATES_R290.reduce<Record<string,number>>((acc,g)=>{acc[g.status]=(acc[g.status]||0)+1;return acc},{});
-  return {publicStatus:SINGMASTER_PUBLIC_STATUS_R290,fibersPassed:fibers.filter(x=>x.pass).length,fiberCount:fibers.length,carryPassed:carry.filter(x=>x.pass).length,carryCount:carry.length,gates};
+  return {publicStatus:SINGMASTER_PUBLIC_STATUS_R290,fibersPassed:fibers.filter(x=>x.pass).length,fiberCount:fibers.length,carryPassed:carry.filter(x=>x.pass).length,carryCount:carry.length,boundedExact:{revision:'R296',scope:bounded.scope,collisionFiberCount:bounded.collisionFiberCount,maxNontrivialMultiplicity:bounded.maxNontrivialMultiplicity,fourfoldCandidateCount:bounded.fourfoldCandidateCount,boundedStatementPass:bounded.boundedStatementPass,fingerprint:bounded.fingerprint,boundary:SINGMASTER_EXACT_CLOSURE_BOUNDARY_R296},gates};
 }
 
 export const SINGMASTER_INVARIANT_TRANSFORMS_R292=[
@@ -110,8 +114,8 @@ export const SINGMASTER_INVARIANT_TRANSFORMS_R292=[
 ] as const;
 
 export function compileSingmasterProofCarryR292(){
-  const fibers=verifyKnownFibersR290(),carry=verify3003CarryR290();
-  const exactChecks=[...fibers.map(x=>({id:`FIBER-${x.id}`,pass:x.pass,detail:`Exact BigInt fiber ${x.id}`})),{id:'KUMMER-3003',pass:carry.every(x=>x.pass),detail:`${carry.length} exact valuation/carry checks on the sharpness witness`}];
+  const fibers=verifyKnownFibersR290(),carry=verify3003CarryR290(),bounded=compileSingmasterExactClosureR296();
+  const exactChecks=[...fibers.map(x=>({id:`FIBER-${x.id}`,pass:x.pass,detail:`Exact BigInt fiber ${x.id}`})),{id:'KUMMER-3003',pass:carry.every(x=>x.pass),detail:`${carry.length} exact valuation/carry checks on the sharpness witness`},{id:'R296-BOUNDED-N300-K30',pass:bounded.boundedStatementPass&&bounded.fourfoldCandidateCount===0&&bounded.collisionFibers.every((x:any)=>x.pass),detail:`Exact R296 finite closure: ${bounded.scope.scannedCells} cells, ${bounded.collisionFiberCount} collision fibers, maximum nontrivial multiplicity ${bounded.maxNontrivialMultiplicity}; global exterior remains open.`}];
   return compileProofCarryR292({
     domainId:'NUMBER_THEORY/PASCAL/SINGMASTER',
     claimId:'SHARP_SINGMASTER_N_LE_8',
@@ -119,7 +123,7 @@ export function compileSingmasterProofCarryR292(){
     claimStatus:SINGMASTER_PUBLIC_STATUS_R290,
     requirements:{exhaustivePartition:true,sourceLineage:true,invariantCarry:true,exactChecks:true},
     gates:SINGMASTER_PROOF_GATES_R290,
-    partitions:SINGMASTER_FOUR_TUPLE_REGISTRY_R290.map(x=>({...x,terminal:x.id!=='ROOT-ALL'})),
+    partitions:SINGMASTER_FOUR_TUPLE_REGISTRY_R290.map(x=>({...x,terminal:x.terminal??x.id!=='ROOT-ALL'})),
     transforms:SINGMASTER_INVARIANT_TRANSFORMS_R292,
     sources:SINGMASTER_SOURCES_R290,
     exactChecks

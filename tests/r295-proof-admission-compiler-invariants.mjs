@@ -1,3 +1,4 @@
+import './r296-singmaster-exact-closure-invariants.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {compileProofCarryR292} from '../src/proof/proofCarryRuntimeR292.js';
@@ -30,6 +31,7 @@ const adapter=proofDomainAdapterR295(domainId,claimId);
 assert(adapter,'Singmaster domain must be registered for R295 admission');
 assert.equal(adapter.adapterPath,'src/proof/singmasterProofAtlasR290.ts');
 assert(PROOF_DOMAIN_REGISTRY_R295[domainId].testPaths.includes('tests/r294-returned-evidence-closure-invariants.mjs'));
+assert(PROOF_DOMAIN_REGISTRY_R295[domainId].testPaths.includes('tests/r296-singmaster-exact-closure-invariants.mjs'));
 assert.equal(proofDomainAdapterR295(domainId,'WRONG'),null,'claim mismatch must not resolve a domain adapter');
 
 const unboundBase=compileProofAdmissionR295({proofReturn,baseSha:''});
