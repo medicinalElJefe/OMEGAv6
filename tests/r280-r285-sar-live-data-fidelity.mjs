@@ -12,7 +12,7 @@ must(live.includes('catalogBound={!!picked}')&&live.includes('allowDemonstration
 for(const token of ["https://stac.dataspace.copernicus.eu/v1/search","GRD:'sentinel-1-grd'","SLC:'sentinel-1-slc'",'normalizeItem','evidenceHash','UPSTREAM_UNAVAILABLE'])must(catalog.includes(token),'live catalogue contract missing '+token);
 must(worker.includes("import {sarCatalogR285} from './sarLiveCatalogR285.js'")&&worker.includes("url.pathname==='/api/earth/sar/catalog'"),'R8 must expose bounded live SAR catalogue route');
 for(const token of ['catalogOnly:true','sourceEvidenceBound:false','nativeDataBound:false','complexDataBound:false','CATALOG_DISCOVERY_ONLY'])must(catalog.includes(token),'catalogue must remain non-measurement evidence: '+token);
-must(catalog.includes('does not prove product bytes')&&catalog.includes('does not substitute fabricated acquisitions or pixels'),'catalogue truth boundary missing');
+must(catalog.includes('do not prove product bytes')&&catalog.includes('does not substitute fabricated acquisitions or pixels'),'catalogue truth boundary missing');
 
 // Returned metadata may drive labels/geometry, but never upgrades unbound arrays into measurements.
 for(const token of ['NATIVE PIXELS UNBOUND','DERIVED FIELDS UNBOUND','RETURNED CATALOGUE PREVIEW','not a decoded SAR measurement raster','No acquisition is fabricated'])must(live.includes(token),'live UI disclosure missing '+token);
