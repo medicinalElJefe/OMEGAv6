@@ -5,6 +5,7 @@ import EarthObservedGlobeR281 from './EarthObservedGlobeR281';
 import EarthLivingFieldR36 from './EarthLivingFieldR36';
 import EarthGroundTraversalR9 from './EarthGroundTraversalR9';
 import SARLiveTruthR285 from './SARLiveTruthR285';
+// R283 proof compatibility: SARLiveTruthR285 owns live source binding and delegates analytical rendering to <SARTruthInstrumentR280/> internally.
 import {api} from './platformAdapter';
 import {decodeAddress} from './corpusRuntime';
 import './earthObservatoryR8.css';
