@@ -1,0 +1,25 @@
+import {activeProofCarrySnapshotR292} from './proofCarryRuntimeR292.js';
+
+export const PROOF_EVOLUTION_SCHEMA_R293='OMEGA_PROOF_DIRECTED_EVOLUTION_R293';
+export const PROOF_EVOLUTION_BOUNDARY_R293='R293 converts unresolved proof-carry scars into deterministic research/evolution work cells. It schedules investigation only: it does not create evidence, prove claims, mutate CanonState, authorize source promotion, or write production.';
+
+const ORGANS=['CANON_KERNEL','STATE_MEMORY','APPLIED_CALCULUS','EVIDENCE_WORLD','HYBRID_COMPUTE','CLOUD_FABRIC','INTELLIGENCE','SWARM_ORGANISM','PROOF_GOVERNANCE','RENDER_PROJECTION','OPERATOR_INTERFACE','EVOLUTION_BUILD'];
+const ORGAN_BY_KIND={GATE:'PROOF_GOVERNANCE',PARTITION:'APPLIED_CALCULUS',TRANSFORM:'APPLIED_CALCULUS',EXACT_CHECK:'PROOF_GOVERNANCE',SOURCE:'EVIDENCE_WORLD',REQUIREMENT:'PROOF_GOVERNANCE'};
+const KIND_WEIGHT={GATE:.88,PARTITION:1,TRANSFORM:.9,EXACT_CHECK:.82,SOURCE:.96,REQUIREMENT:.92};
+const cl=n=>Math.max(0,Math.min(1,Number.isFinite(Number(n))?Number(n):0));
+const stable=value=>{if(value===null||typeof value!=='object')return JSON.stringify(value);if(Array.isArray(value))return`[${value.map(stable).join(',')}]`;return`{${Object.keys(value).sort().map(k=>`${JSON.stringify(k)}:${stable(value[k])}`).join(',')}}`};
+const hash32=value=>{const text=String(value);let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0};
+function operationFor(scar){const kind=String(scar?.kind||'GATE'),status=String(scar?.status||'OPEN');if(status==='SOURCE_MISSING'||kind==='SOURCE')return'SOURCE_RECOVERY';if(kind==='PARTITION')return'EXHAUSTIVE_PARTITION';if(kind==='TRANSFORM')return'INVARIANT_AUDIT';if(kind==='EXACT_CHECK')return'EXACT_REPLAY';if(status==='AUDITED_HOLD')return'EXTERNAL_CLAIM_AUDIT';return'PROOF_OBLIGATION_CLOSURE'}
+function organFor(scar){return ORGAN_BY_KIND[String(scar?.kind||'GATE')]||'PROOF_GOVERNANCE'}
+function addressFor(claimId,scar){const organ=organFor(scar),organIndex=Math.max(0,ORGANS.indexOf(organ)),h=hash32(`${claimId}:${scar?.kind}:${scar?.id}:${scar?.status}`),branch=h%12,cell=Math.floor(h/12)%12,address=organIndex*144+branch*12+cell;return{organ,organIndex,branch,cell,address,laneStart:address*12,laneEnd:address*12+11}}
+function priorityFor(packet,scar){const deficit=1-cl(packet?.supportScore),pressure=cl(packet?.scarPressure),kind=KIND_WEIGHT[String(scar?.kind||'GATE')]??.8,status=String(scar?.status||'OPEN'),severity=status==='SOURCE_MISSING'?1:status==='AUDITED_HOLD'?.9:status==='HOLD'?.85:.78;return cl(.34*deficit+.26*pressure+.22*kind+.18*severity)}
+
+export function compileProofEvolutionR293(packet=activeProofCarrySnapshotR292()){
+ const bound=Boolean(packet?.bound),claimId=String(packet?.claimId||packet?.claimLabel||'UNBOUND'),scars=bound&&Array.isArray(packet?.unresolvedScars)?packet.unresolvedScars:[];
+ const cells=scars.map((scar,index)=>{const address=addressFor(claimId,scar),operation=operationFor(scar),priority=priorityFor(packet,scar);return{schema:'OMEGA_PROOF_WORK_CELL_R293',id:`R293-${String(index+1).padStart(2,'0')}-${String(scar?.id||'SCAR')}`,claimId,claimLabel:String(packet?.claimLabel||claimId),kind:String(scar?.kind||'GATE'),status:String(scar?.status||'OPEN'),operation,objective:String(scar?.detail||'Resolve carried proof obligation with reproducible evidence.'),priority,address,dependencies:[],invariants:['PRESERVE_CLAIM_TRUTH_BOUNDARY','PRESERVE_SOURCE_LINEAGE','NO_CANONSTATE_MUTATION','NO_PRODUCTION_AUTHORITY'],canonicalMutation:false,sourcePromotionAuthority:false,productionAuthority:false,evidenceCreated:false}}).sort((a,b)=>b.priority-a.priority||a.address.address-b.address.address||a.id.localeCompare(b.id));
+ const operationCounts=cells.reduce((acc,row)=>(acc[row.operation]=(acc[row.operation]||0)+1,acc),{});
+ const fingerprint=`r293-${hash32(stable({proof:packet?.fingerprint||'UNBOUND',cells:cells.map(x=>[x.id,x.operation,x.address.address,x.priority])})).toString(16).padStart(8,'0')}`;
+ return{schema:PROOF_EVOLUTION_SCHEMA_R293,revision:'R293',bound,proofFingerprint:String(packet?.fingerprint||'R292-UNBOUND'),fingerprint,claimId,claimLabel:String(packet?.claimLabel||'No active proof context'),claimStatus:String(packet?.claimStatus||'UNBOUND'),supportScore:bound?cl(packet?.supportScore):1,scarPressure:bound?cl(packet?.scarPressure):0,promotionEligible:Boolean(packet?.promotionEligible),decision:bound?String(packet?.decision||'TURN'):'CARRY',unresolvedCount:cells.length,operationCounts,cells,frontier:cells.slice(0,12),resolution:{organs:12,branches:144,cells:1728,lanes:20736},authority:{scheduler:'R293_RESEARCH_PLANNING_ONLY',sourcePromotion:'R240/R245_GOVERNED_PATH',productionWriter:'.github/workflows/ci.yml',canonAdmission:'R125'},boundary:PROOF_EVOLUTION_BOUNDARY_R293};
+}
+
+export function activeProofEvolutionSnapshotR293(){return compileProofEvolutionR293(activeProofCarrySnapshotR292())}
