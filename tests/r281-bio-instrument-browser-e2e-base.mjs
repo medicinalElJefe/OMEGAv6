@@ -73,7 +73,8 @@ async function prove(viewport,label){
     calibration:{calibratedAt:'2026-08-10T00:00:00Z',dueAt:'2027-08-10T00:00:00Z',traceability:'TRACE-BROWSER',standard:'REFERENCE-FIXTURE',gain:1.01,offset:-0.5,gainUncertainty:0.001,offsetUncertainty:0.02},
     uncertainty:{instrument:0.4,calibration:0.1,repeatability:0.2,resolution:0.1,coverageFactor:2},verified:true
   };
-  const input=surface.locator('input[type=file]');
+  const input=surface.getByLabel('Load JSON/CSV');
+  if(await input.count()!==1)throw new Error(`${label} expected one accessible instrument packet uploader, got ${await input.count()}`);
   await input.setInputFiles({name:'r281-browser.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify([sample]))});
   await page.waitForFunction(()=>document.querySelectorAll('.bio281 tbody tr').length===1,{timeout:10000});
   const row=surface.locator('tbody tr').first();
