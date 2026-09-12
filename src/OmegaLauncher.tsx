@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {BrainCircuit,ChevronRight,Command,Globe2,Heart,Layers3,Search,ShieldCheck,Sparkles,Waypoints,X} from 'lucide-react';
 import {OMEGA_MASTER_MENU_NAVIGATION_R289,OMEGA_NAVIGATION,omegaMasterMenuForRouteR289} from './navigationRegistry';
 import './omegaLauncherR13.css';
+import './omegaLauncherR289.css';
 
 type Props={onNavigate:(name:string)=>void};
 export const LAUNCHER_SURFACES=OMEGA_NAVIGATION;
