@@ -19,7 +19,7 @@ export default function RecursiveSelfBuildR240(){
  const proofEvolution=useMemo(()=>activeProofEvolutionSnapshotR293(),[proofEpoch]);
  const promotionEnabled=policy?.selfPromotion?.enabled===true;
  return <section className='r240-selfbuild' aria-label='R240 recursive exact self-promotion fabric' data-r240-recursive-selfbuild='EVIDENCE_BOUND_SPARSE_PLAN_EXACT_PROMOTION'>
-  <header><div><span>R293 · FULL OVERALL CANON · PROOF-DIRECTED RECURSIVE EVOLUTION</span><h3>Build, prove, carry scars, turn gaps into work — without collapsing the gates.</h3><p>R293 extends R240/R292 by compiling unresolved proof obligations into deterministic sparse research work cells. Proof work can influence planning and ALL MODES coherence, but it cannot create evidence, overwrite the governed source roadmap, promote a theorem, deploy production, or mutate CanonState.</p></div><Sparkles/></header>
+  <header><div><span>R240 · FULL OVERALL CANON · RECURSIVE SELF-BUILD + EXACT PROMOTION · R293 PROOF-DIRECTED EVOLUTION</span><h3>Build, prove, carry scars, turn gaps into work — without collapsing the gates.</h3><p>R293 extends R240/R292 by compiling unresolved proof obligations into deterministic sparse research work cells. Proof work can influence planning and ALL MODES coherence, but it cannot create evidence, overwrite the governed source roadmap, promote a theorem, deploy production, or mutate CanonState.</p></div><Sparkles/></header>
   <div className='r240-resolution-grid'>
    <article><Boxes/><span><small>ORGANS</small><b>{R240_RESOLUTION.organs}</b><em>major development domains</em></span></article>
    <article><GitBranch/><span><small>BRANCHES</small><b>{R240_RESOLUTION.branches}</b><em>logical build surfaces</em></span></article>
