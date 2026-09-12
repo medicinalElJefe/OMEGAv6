@@ -1,3 +1,4 @@
+import './r293-proof-directed-evolution-invariants.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {activeProofCarrySnapshotR292,activateProofCarryR292,clearActiveProofCarryR292,compileProofCarryR292,readActiveProofCarryR292} from '../src/proof/proofCarryRuntimeR292.js';
@@ -57,15 +58,15 @@ const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 const navigation=fs.readFileSync('src/navigationRegistry.ts','utf8');
 
 for(const token of ['compileSingmasterProofCarryR292','SINGMASTER_INVARIANT_TRANSFORMS_R292','claimStatus:SINGMASTER_PUBLIC_STATUS_R290','exhaustivePartition:true'])assert(singmaster.includes(token),`Singmaster adapter missing ${token}`);
-for(const token of ['activateProofCarryR292','Run exact audit + bind','Bound R292 Singmaster certificate completeness into Woven Continuity and proof-aware ALL MODES scoring','proofCarry.metrics.supportScore'])assert(workbench.includes(token),`workbench missing ${token}`);
+for(const token of ['activateProofCarryR292','Run exact audit + bind','Bound R293 Singmaster proof context into Woven Continuity, ALL MODES, and deterministic proof-directed evolution','proofCarry.metrics.supportScore'])assert(workbench.includes(token),`workbench missing ${token}`);
 for(const token of ['activeProofCarrySnapshotR292','proofCarry:{','proofGlow=cl(law.proofGlow*(proofCarry.bound?proofCarry.routingSupport:1))'])assert(woven.includes(token),`Woven continuity missing ${token}`);
 for(const token of ['activeProofCarrySnapshotR292',"key=`${op.from}:${op.to}:${proofCarry.fingerprint}`",'contextualProof=proofCarry.bound?cl(op.proof)*proofCarry.routingSupport:cl(op.proof)',"id:'proof-carry'",'promotionEligible:proofCarry.promotionEligible'])assert(allModes.includes(token),`ALL MODES convergence missing ${token}`);
 for(const token of ['activeProofCarrySnapshotR292','affectsCanonicalRoute:false','cannot override the source autoPing route','R292 proof-carry context may inform proof-aware scoring but never changes the canonical source route'])assert(transition.includes(token),`transition receipt boundary missing ${token}`);
 assert(suite.includes("import './proofCarryR292.css'"),'proof-carry visual layer not loaded');
 const routeBlock=(navigation.match(/export const OMEGA_NAVIGATION:OmegaNavItem\[\]=\[(.*?)\];/s)||[])[1]||'';
 const routes=[...routeBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
-assert.equal(routes.length,44,'R292 must not inflate the 44-route authority');
-assert.equal(new Set(routes).size,44,'R292 must preserve unique route authority');
+assert.equal(routes.length,44,'R292/R293 must not inflate the 44-route authority');
+assert.equal(new Set(routes).size,44,'R292/R293 must preserve unique route authority');
 
-console.log('R292 PROOF-CARRY FABRIC PASS');
+console.log('R292/R293 PROOF-CARRY FABRIC PASS');
 console.log(JSON.stringify({closedSupport:closed.metrics.supportScore,openSupport:open.metrics.supportScore,boundRoutingSupport:bound.routingSupport,openScars:open.unresolvedScars.length,routes:routes.length}));
