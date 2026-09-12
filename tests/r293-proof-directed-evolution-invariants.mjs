@@ -1,3 +1,4 @@
+import './r294-returned-evidence-closure-invariants.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {activateProofCarryR292,clearActiveProofCarryR292,compileProofCarryR292} from '../src/proof/proofCarryRuntimeR292.js';
