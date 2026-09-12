@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R90 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R90/R305 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const css=read('src/surfaceHierarchyR90.css');
 const shell=read('src/InstrumentOSShellR62.tsx');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
@@ -14,14 +15,16 @@ const living=read('src/OmegaR36LivingSurfaces.tsx');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'canonical surface universe must remain 44/44 unique');
+const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(surfaces.length>0&&surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length&&new Set(routes).size===routes.length,'canonical surface universe must remain non-empty, unique and registry-aligned');
+for(const route of surfaces)must(routes.includes(route),`R90 workstation route absent from registry ${route}`);
+for(const route of routes)must(surfaces.includes(route),`R90 registry route absent from workstation ${route}`);
 must(workstation.includes("import './surfaceHierarchyR90.css';"),'R90 hierarchy authority must load after R89');
 must(workstation.indexOf("surfaceHierarchyR90.css")>workstation.indexOf("mobileVisualFirstR89.css"),'R90 must be final workstation presentation authority');
 must(shell.includes('OmegaSideNavigatorR88')&&!shell.includes("className='r62-rail'"),'active shell must remain the shared flat navigator, not a legacy rail');
-must(nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'flat 44-route navigation must remain intact');
+must(nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),`flat ${surfaces.length}-route navigation must remain intact`);
 
-for(const p of ['Earth Now','Hybrid Link','Modes','Evidence & Proof','SAI Lab','Kernel Intelligence','System Atlas','Control Matrix'])
- must(css.includes("data-panel='"+p+"'")||css.includes("data-panel='"+p+"']"),'missing R90 hierarchy coverage for '+p);
+for(const p of ['Earth Now','Hybrid Link','Modes','Evidence & Proof','SAI Lab','Kernel Intelligence','System Atlas','Control Matrix'])must(css.includes("data-panel='"+p+"'")||css.includes("data-panel='"+p+"']"),'missing R90 hierarchy coverage for '+p);
 must(css.includes("grid-template-rows:minmax(66dvh,1fr) auto")&&css.includes(".earth-legend{position:static!important"),'Earth mobile globe must own viewport and legend must leave canvas overlay');
 must(css.includes(".hybrid-r32-livegrid{display:flex!important")&&css.includes("scroll-snap-type:x proximity"),'Hybrid live proof lists must remain reachable without vertical wall');
 must(css.includes(".sbm21-expression{order:1}")&&css.includes(".sbm21-expression .mer82-stage{min-height:68dvh!important}"),'Modes selected expression must lead mobile hierarchy');
@@ -38,4 +41,4 @@ must(atlas.includes('current reality ≠ historical registration')&&atlas.includ
 must(atlas.includes("const currentExecutable=new Set(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE'])"),'System Atlas executable-successor whitelist must remain explicit');
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),'deep donor lost: '+token);
 must(!css.includes('@appdeploy/client'),'R90 hierarchy must remain provider portable');
-console.log('R90/R168 INTEGRITY-PRESERVING SURFACE HIERARCHY PASS · 44 routes · current successor truth gates intact · readable flat navigation retained');
+console.log(`R90/R168/R305 INTEGRITY-PRESERVING SURFACE HIERARCHY PASS · ${surfaces.length} current routes exactly aligned · current successor truth gates intact · readable flat navigation retained · no historical route-count ceiling`);
