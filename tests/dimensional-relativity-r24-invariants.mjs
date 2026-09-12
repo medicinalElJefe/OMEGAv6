@@ -1,3 +1,4 @@
+import './r306-blade-geometry-formalization-invariants.mjs';
 import fs from 'node:fs';import assert from 'node:assert/strict';
 const runtime=fs.readFileSync('src/dimensionalRelativityR24.ts','utf8'),panel=fs.readFileSync('src/DimensionalRelativityPanelR24.tsx','utf8'),lab=fs.readFileSync('src/RelativityLab.tsx','utf8');
 assert(runtime.includes("20736D_ALL_FULL_DIMENSION_RELATIVITY_ATLAS(2).xlsx"),'exact Drive donor source must remain explicit');
@@ -9,7 +10,8 @@ assert(runtime.includes("missing:['clarity','opportunity','risk']"),'Relative Tr
 assert(runtime.includes("missing:['authoritative current Skin(n)','Novelty']"),'skin recurrence must not invent novelty');
 assert(runtime.includes('not a claim that twelve extra physical spacetime dimensions were empirically established'),'physical-dimension boundary missing');
 assert(panel.includes('Formula execution ledger')&&panel.includes('0D → 12D WORKBOOK SKIN SEQUENCE'),'relativity donor instrument missing');
-assert(lab.includes("type Tab='FIELD'|'DIMENSIONAL'|'MOTION'|'CONTROLLER'|'VIOLET'|'EQUATIONS'"),'DIMENSIONAL tab missing');
-assert(lab.includes("useState<Tab>('DIMENSIONAL')"),'Drive-backed dimensional instrument should be default relativity view');
+assert(lab.includes("type Tab='FIELD'|'DIMENSIONAL'|'MOTION'|'CONTROLLER'|'VIOLET'|'BLADE'|'EQUATIONS'"),'DIMENSIONAL/BLADE tab registry missing');
+assert(lab.includes("useState<Tab>('DIMENSIONAL')"),'Drive-backed dimensional instrument should remain default relativity view');
 assert(lab.includes('<DimensionalRelativityPanelR24 record={record}/>'),'Relativity route must mount Drive donor instrument');
-console.log('OMEGA R24 DIMENSIONAL RELATIVITY PASS · exact donor formulas + gated missing inputs + 0D→12D skin sequence');
+assert(lab.includes("tab==='BLADE'")&&lab.includes('Blade Geometry'),'R306 Blade instrument must coexist inside Relativity without replacing dimensional authority');
+console.log('OMEGA R24/R306 DIMENSIONAL RELATIVITY PASS · exact donor formulas + gated missing inputs + 0D→12D skin sequence + source-recovered Blade finite reduction operator');
