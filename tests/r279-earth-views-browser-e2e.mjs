@@ -17,11 +17,11 @@ const EXPECT=[
 async function enterEarth(page,label){
  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
  if(await expand.count()&&await expand.first().isVisible())await expand.first().click();
- await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000}).catch(()=>{});
+ await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',null,{timeout:10000}).catch(()=>{});
  const earth=page.locator('.r89-flat-route').filter({has:page.locator('b',{hasText:'Earth Now'})}).first();
  await earth.waitFor({state:'visible',timeout:15000});
  await earth.click();
- await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',{timeout:30000});
+ await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',null,{timeout:30000});
  await page.waitForSelector('.earth-r279',{state:'visible',timeout:30000});
  const tabs=page.locator('.earth-r279-view-tabs button');
  const count=await tabs.count();
@@ -37,8 +37,8 @@ try{
   const context=await browser.newContext({viewport,deviceScaleFactor:1});
   const page=await context.newPage();
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
-  await page.route('**/api/earth/gibs/global*',route=>route.fulfill({status:200,contentType:'image/png',body:R281_TEXTURE,headers:{'x-omega-source':'R281-BROWSER-OBSERVATION-FIXTURE','x-omega-date':'2026-09-09','x-omega-crs':'EPSG:4326','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION'}}));
-  await page.goto(`${base}/?r285=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.route('**/api/earth/gibs/global*',route=>route.fulfill({status:200,contentType:'image/png',body:R281_TEXTURE,headers:{'x-omega-source':'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL','x-omega-date':'2026-09-09','x-omega-crs':'EPSG:4326','x-omega-bbox':'-180,-90,180,90','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION','x-omega-test-fixture':'R281-BROWSER-OBSERVATION-FIXTURE'}}));
+  await page.goto(`${base}/?r286=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   await enterEarth(page,label);
   for(const [name,selector] of EXPECT){
@@ -48,7 +48,7 @@ try{
    await page.waitForSelector(selector,{state:'visible',timeout:20000});
    if(await button.getAttribute('aria-pressed')!=='true')throw new Error(`${label}: ${name} did not become the active Earth view`);
    if(name==='Planet'){
-    await page.waitForFunction(()=>document.querySelector('.earth-r281-globe')?.getAttribute('data-source-state')==='OBSERVED',{timeout:20000});
+    await page.waitForFunction(()=>document.querySelector('.earth-r281-globe')?.getAttribute('data-source-state')==='OBSERVED',null,{timeout:20000});
     const globe=page.locator('.earth-r281-globe canvas');
     const rect=await globe.boundingBox();if(!rect||rect.width<260||rect.height<420)throw new Error(`${label}: R281 observed globe canvas unusable ${JSON.stringify(rect)}`);
     const sampled=await globe.evaluate(c=>{const ctx=c.getContext('2d');if(!ctx)return{unique:0,width:c.width,height:c.height};const d=ctx.getImageData(0,0,c.width,c.height).data,unique=new Set();for(let y=0;y<c.height&&unique.size<48;y+=Math.max(1,Math.floor(c.height/32)))for(let x=0;x<c.width&&unique.size<48;x+=Math.max(1,Math.floor(c.width/32))){const i=(y*c.width+x)*4;unique.add(`${d[i]},${d[i+1]},${d[i+2]},${d[i+3]}`)}return{unique:unique.size,width:c.width,height:c.height}});
@@ -80,5 +80,5 @@ try{
   if(pageErrors.length)throw new Error(`${label}: Earth view browser errors: ${pageErrors.join(' | ')}`);
   await context.close();
  }
- console.log('R279/R281/R283/R285 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth · R281 Planet renders varied returned-source pixels · live SAR owns full-width stage while dedicated + inherited target controls remain usable · reset/query continuity works · no page errors or viewport overflow');
+ console.log('R279/R281/R283/R285/R286 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth · strict R284 NASA-GIBS source identity + WGS84 bbox fixture contract · R281 Planet renders varied returned-source pixels · live SAR owns full-width stage while dedicated + inherited target controls remain usable · reset/query continuity works · no page errors or viewport overflow');
 }finally{await browser.close()}
