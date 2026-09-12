@@ -1,0 +1,44 @@
+name: SAR R260.7 Targeted Production Proof
+
+on:
+  push:
+    branches:
+      - r260-7-production-targeted-proof
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove-live-r2607:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install Chromium proof runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Prove repaired regional measured workstation
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: https://omega-sar-r4.jeffdeweyeljefe.workers.dev
+        run: node tests/r253-balanced-viewport-e2e.mjs
+      - name: Prove stable desktop and phone visual hierarchy
+        working-directory: sar-accumulation-studio
+        env:
+          SAR_TEST_URL: https://omega-sar-r4.jeffdeweyeljefe.workers.dev
+        run: node tests/r260-3-visual-stability-e2e.mjs
+      - name: Archive targeted visual proof
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sar-r2607-targeted-production-proof
+          path: |
+            sar-accumulation-studio/test-results/r255-sar-primary-workstation.png
+            sar-accumulation-studio/test-results/r260-3-visual-stability-desktop.png
+            sar-accumulation-studio/test-results/r260-3-visual-stability-mobile.png
+          if-no-files-found: warn
+          retention-days: 14
