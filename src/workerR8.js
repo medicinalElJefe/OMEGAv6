@@ -1,4 +1,5 @@
 import baseWorker from './worker.js';
+import {sarCatalogR285} from './sarLiveCatalogR285.js';
 
 const JSON_HEADERS={"content-type":"application/json; charset=utf-8","cache-control":"no-store"};
 const json=(data,status=200)=>new Response(JSON.stringify(data,null,2),{status,headers:JSON_HEADERS});
@@ -44,6 +45,7 @@ function validateHybridPlan(body){const plan=body?.plan||body,errors=[];if(!Arra
 async function omegaR8(request,env){const url=new URL(request.url);
  if(url.pathname==='/api/earth/evidence'&&request.method==='GET')return json(await earthEvidence(url));
  if(url.pathname==='/api/earth/noaa/catalog'&&request.method==='GET')return json(await noaaCatalog());
+ if(url.pathname==='/api/earth/sar/catalog'&&request.method==='GET'){const result=await sarCatalogR285(url);return json(result,result.ok?200:502)}
  if(url.pathname==='/api/earth/noaa/image'&&request.method==='GET'){const id=text(url.searchParams.get('coverage')),c=NOAA_COVERAGES[id];if(!c)return json({ok:false,code:'UNKNOWN_COVERAGE'},404);try{const r=await fetch(c.url,{cf:{cacheTtl:60,cacheEverything:false}});const ct=r.headers.get('content-type')||'';if(!r.ok||!ct.startsWith('image/'))return json({ok:false,code:'NOAA_IMAGE_UNAVAILABLE',coverage:id,status:r.status},502);return new Response(r.body,{status:200,headers:{'content-type':ct,'cache-control':'public, max-age=60','x-omega-source':'NOAA-STAR-LATEST-ALIAS','x-omega-last-modified':r.headers.get('last-modified')||''}})}catch(e){return json({ok:false,code:'NOAA_IMAGE_FETCH_FAILED',error:e instanceof Error?e.message:String(e)},502)}}
  if(url.pathname==='/api/hybrid/capabilities'&&request.method==='GET')return json({ok:true,schema:'OMEGA_HYBRID_V90_MIGRATION_CONTRACT_V1',state:'CLOUD_DRAFT_AND_VALIDATION_LIVE_NATIVE_EXECUTION_DEVICE_PROOF_REQUIRED',operations:HYBRID_OPERATIONS,profiles:HYBRID_PROFILES,missionCycles:{min:2,max:8},workspaceGovernor:{sourceFiles:25000,sourceBytes:2147483648,generatedBytes:536870912,changedFiles:80},trainLocal:{operation:'TRAIN_LOCAL',foundationWeightsChanged:false,requiredProof:'OMEGA_SAI_LOCAL_TRAINING_RECEIPT_V1 + active model fingerprint'},boundaries:['NO_ARBITRARY_SHELL','ROOT_CONFINED','EXPLICIT_CONFIRMATION_REQUIRED','NO_PASSWORD_CAPTURE','NO_UAC_OR_SECURE_DESKTOP','HOSTSTATE_NOT_MUTATED_BY_DRAFT']});
  if(url.pathname==='/api/hybrid/plan'&&request.method==='POST'){const body=await request.json().catch(()=>({}));return json({ok:true,draft:await hybridDraft(body)})}
