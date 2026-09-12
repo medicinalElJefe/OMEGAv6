@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R88/R89/R229/R299 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R88/R89/R229/R299/R300 '+msg)};
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const css=read('src/omegaSideNavigatorR88.css');
 const css210=read('src/omegaSideNavigatorR210.css');
@@ -27,9 +27,15 @@ for(const token of ["R210_NAV_REVISION='R210'","aria-controls='omega-global-navi
 must(!nav.includes('/api/')&&!nav.includes('fetch('),'R210 navigation must remain non-mutating and backend-independent');
 for(const token of ['.r210-converged-nav.expanded .r94-nav-panel','width:min(86vw,360px)','html[data-omega-nav-expanded=\'true\'] :where(.omega-workstation-v2,.r71-home)','focus-visible','prefers-reduced-motion'])must(css210.includes(token),`R210 polish CSS missing ${token}`);
 must(css210.includes('width:calc(100% - var(--r94-nav-rail))!important'),'R210 mobile overlay must preserve underlying instrument width instead of compressing it by panel width');
+for(const token of ['scrollbar-gutter:stable',"[tabindex]:not([tabindex='-1'])",'touch-action:manipulation','@media(any-pointer:coarse)','min-width:44px!important','min-height:44px!important','animation:none!important','scroll-behavior:auto!important'])must(css210.includes(token),`R300 navigator polish missing ${token}`);
+for(const token of ['-webkit-text-size-adjust:100%','text-size-adjust:100%','env(safe-area-inset-right,0px)','env(safe-area-inset-left,0px)','scrollbar-gutter:stable','@media(any-pointer:coarse)','min-height:44px','@media(prefers-reduced-motion:reduce)'])must(polish.includes(token),`R300 responsive polish missing ${token}`);
+must(polish.includes('padding:10px max(8px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))!important'),'R300 mobile workstation must honor left/right/bottom safe-area insets together');
+must(css210.includes(':where(.r88-head-actions button,.r89-nav-mode button,.r94-rail-action)'),'R300 coarse-pointer touch-target rule must cover inherited undersized navigator controls');
+must(css.includes('.r88-head-actions button{width:36px;height:36px')&&css.includes('min-height:32px'),'R300 repair must remain anchored to real inherited sub-44px controls');
+must(!css210.includes('/api/')&&!css210.includes('fetch(')&&!polish.includes('/api/')&&!polish.includes('fetch('),'R300 visual polish must remain presentation-only');
 for(const token of ['/commits/${sha}/pulls','/actions/runs?head_sha=${candidate}&event=pull_request','duplicate revision identity','OMEGA Cloud Bridge CI','R170 Current Convergence','R202 Operational Source Authority','parents.length!==2','exact candidate ${candidate} lacks successful required PR workflow'])must(releaseGuard.includes(token),`R210 release-correlation guard missing ${token}`);
 for(const token of ['pull_request:','actions: read','pull-requests: read','contents: read','group: omega-r210-release-controller','cancel-in-progress: false','collision-free exact-base candidate identity','OMEGA_RELEASE_GUARD_MODE: PR'])must(releaseWorkflow.includes(token),`R210 PR-only release-controller workflow missing ${token}`);
 must(!/^\s*push\s*:/m.test(releaseWorkflow),'R210 successor release controller must remain PR-only; canonical ci.yml owns main-push deployment/correlation authority');
 must(!releaseWorkflow.includes('OMEGA_RELEASE_GUARD_MODE: PUSH')&&!releaseWorkflow.includes('contents: write')&&!releaseWorkflow.includes('deploy')&&!releaseWorkflow.includes('wrangler'),'R210 controller is proof-only/PR-only and must not gain main-push deployment/source mutation authority');
 for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){must(!wrangler.includes(`"${retired}": {"type": "durable-object", "state": "deleted"}`),`R299 stale retired Durable Object tombstone must be absent: ${retired}`);must(!wrangler.includes(`"class_name": "${retired}"`),`R299 retired Durable Object regained live binding: ${retired}`);}
-console.log(`R88/R89/R104/R229/R299 CONVERGENCE PASS · persistent readable side toolbar · ${routes.length} destinations · focus/outside-close/live-count accessibility · readable mobile overlay · PR-only exact-head candidate fence + separate exact-merge guard logic · R201/R203 fully retired without live authority · no new navigation/deploy/Canon authority`);
+console.log(`R88/R89/R104/R229/R299/R300 CONVERGENCE PASS · persistent readable side toolbar · ${routes.length} destinations · focus/outside-close/live-count accessibility · readable mobile overlay · 44px coarse-pointer targets + complete mobile safe-area containment + stable scroll gutters + reduced-motion containment · PR-only exact-head candidate fence + separate exact-merge guard logic · R201/R203 fully retired without live authority · no new navigation/deploy/Canon authority`);
