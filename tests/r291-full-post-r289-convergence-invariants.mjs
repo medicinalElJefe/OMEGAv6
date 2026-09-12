@@ -1,15 +1,19 @@
 import fs from 'node:fs';
+import {reconcileImplementationCanonR291,R291_IMPLEMENTATION_CLASSIFICATION_SCOPE,R291_PUBLIC_SOURCE_PROVENANCE} from '../scripts/r291-implementation-canon-reconcile.mjs';
 
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(`R291 convergence failed: ${msg}`)};
 const recovery=read('src/archiveDeepRecoveryR290.ts');
 const recoveryUi=read('src/ArchiveDeepRecoveryR290.tsx');
+const genomeC=read('src/archiveGenomeLedgerR288c.ts');
+const genomeD=read('src/archiveGenomeLedgerR288d.ts');
 const genomeUi=read('src/ArchiveGenomeQueueR288.tsx');
 const proofVm=read('src/rscProofVmR290.js');
 const proofUi=read('src/RscProofLabR290.tsx');
 const liveNav=read('src/OmegaSideNavigatorR88.tsx');
 const bio=read('src/BioModeWorkbenchR284.tsx');
 const bioBrowser=read('tests/r284-bio-mode-workbench-browser-e2e.mjs');
+const canon=reconcileImplementationCanonR291();
 
 must(recovery.includes("R290_DEEP_RECOVERY_SCHEMA='OMEGA_DEEP_ARCHIVE_EXECUTION_CONVERGENCE_R290'"),'deep archive execution feeder missing');
 must(recoveryUi.includes("aria-label='R290 deep archive execution convergence'"),'deep archive recovery surface is not mounted as a semantic region');
@@ -33,4 +37,17 @@ for(const boundary of [
  'Rendered geometry, color, interpolation or cinematic polish never creates observations'
 ])must(recovery.includes(boundary),`archive recovery boundary missing: ${boundary}`);
 
-console.log('R291 FULL POST-R289 CONVERGENCE PASS · deep archive recovery + symbolic RSC VM + exact live navigation presentation + Heavy Bio read-only zero-authority comparison coexist under inherited R242/R282/R125/R141/R146/R147/R240/ci.yml authorities · no physical-dimension inflation or scientific-proof promotion');
+must(!/driveIds:\['/.test(genomeC)&&!/driveIds:\['/.test(genomeD),'new R291 archive rows must not add connected-storage locators to public source');
+must(recovery.includes('PUBLIC_CLIENT_USES_OPAQUE_PROVENANCE_KEYS_CONNECTED_STORAGE_LOCATORS_EXTERNAL'),'deep-recovery public provenance boundary missing');
+must(canon.schema==='OMEGA_IMPLEMENTATION_CANON_RECONCILIATION_R291','675-row implementation canon reconciliation schema missing');
+must(canon.source.rows===675,'implementation canon must contain exactly 675 rows');
+must(canon.source.payloadSha256==='d39ca1793694678516f6b5669ac60a651bcd68892164bb54082db9cfc0c26748','implementation canon payload hash drift');
+must(canon.source.publicProvenance===R291_PUBLIC_SOURCE_PROVENANCE&&!('driveId' in canon.source),'public reconciliation result must omit connected-storage locator');
+must(canon.classification.scope===R291_IMPLEMENTATION_CLASSIFICATION_SCOPE,'implementation classification scope drift');
+must(Object.values(canon.counts).reduce((a,b)=>a+Number(b),0)===675,'implementation canon state counts must conserve all 675 rows');
+for(const row of canon.rows){
+ if(row.currentState==='IMPLEMENTED'||row.currentState==='SUPERSEDED')must(row.evidence.sourceEvidence&&row.evidence.proofEvidence,`${row.id} promoted without source+proof evidence`);
+ must(row.claims.liveRuntimeProof===false&&row.claims.deviceProof===false&&row.claims.deploymentProof===false&&row.claims.empiricalScientificProof===false&&row.claims.canonAdmission===false,`${row.id} crossed the repository-classification truth boundary`);
+}
+
+console.log(`R291 FULL POST-R289 CONVERGENCE PASS · deep archive recovery + symbolic RSC VM + exact live navigation presentation + Heavy Bio read-only zero-authority comparison + exact ${canon.source.rows}-row implementation canon SHA/reconciliation coexist under inherited R242/R282/R125/R141/R146/R147/R240/ci.yml authorities · source/proof classification coverage ${(canon.evidencedCoverage*100).toFixed(2)}% · no physical-dimension inflation or scientific/live-execution proof promotion`);
