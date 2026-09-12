@@ -67,7 +67,7 @@ async function verifyR303InteractionEnvelope(page,viewportName){
     if(state.coarse!==true)throw new Error(`mobile: expected coarse-pointer emulation, received ${JSON.stringify(state)}`);
     if(state.reduced!==true)throw new Error(`mobile: expected reduced-motion emulation, received ${JSON.stringify(state)}`);
     if(state.targetCount<1)throw new Error('mobile: no navigator interaction targets were measurable');
-    if(state.undersized.length)throw new Error(`mobile: R302 coarse-pointer navigator targets below 44px: ${state.undersized.map(x=>`${x.label} ${x.width.toFixed(1)}×${x.height.toFixed(1)}`).join(' | ')}`);
+    if(state.undersized.length)throw new Error(`mobile: R302/R303 coarse-pointer navigator targets below 44px: ${state.undersized.map(x=>`${x.label} ${x.width.toFixed(1)}×${x.height.toFixed(1)}`).join(' | ')}`);
     if(state.transitionDuration && state.transitionDuration!=='0s')throw new Error(`mobile: reduced-motion navigator transition remained active: ${state.transitionDuration}`);
     if(state.animationDuration && state.animationDuration!=='0s')throw new Error(`mobile: reduced-motion navigator animation remained active: ${state.animationDuration}`);
   }
@@ -104,9 +104,9 @@ function usableSnapshot(){
   const rect=main?.getBoundingClientRect();
   const coarse=matchMedia('(any-pointer: coarse)').matches;
   const buttons=[...document.querySelectorAll('.workstation-main button')].filter(visible);
-  const controls=[...document.querySelectorAll('.omega-workstation-v2 button:not([disabled]),.omega-workstation-v2 select:not([disabled])')].filter(visible);
+  const controls=[...document.querySelectorAll('.omega-workstation-v2 button:not([disabled]),.omega-workstation-v2 [role="button"],.omega-workstation-v2 input:not([disabled]),.omega-workstation-v2 select:not([disabled]),.omega-workstation-v2 textarea:not([disabled])')].filter(visible);
   const unusable=buttons.filter(b=>{const r=b.getBoundingClientRect();return !b.disabled&&(r.width<8||r.height<8||getComputedStyle(b).pointerEvents==='none')}).map(b=>(b.textContent||b.getAttribute('aria-label')||'unnamed').trim().slice(0,80));
-  const undersizedTouch=coarse?controls.filter(el=>el.getBoundingClientRect().height<43.5).map(el=>{const r=el.getBoundingClientRect();return`${(el.textContent||el.getAttribute('aria-label')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
+  const undersizedTouch=coarse?controls.filter(el=>el.getBoundingClientRect().height<43.5).map(el=>{const r=el.getBoundingClientRect();return`${(el.textContent||el.getAttribute('aria-label')||el.getAttribute('placeholder')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
   const visibleChildren=main?[...main.children].filter(visible).length:0;
   const textLength=(main?.textContent||'').replace(/\s+/g,' ').trim().length;
   const richVisible=main?[...main.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible).length:0;
@@ -162,5 +162,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R286/R303 ALL-SURFACE BROWSER PASS · ALL + six contextual workspace submenus · 44/44 routes desktop + 390px 2×DPR touch mobile · coarse-pointer 44px navigator/workstation target proof · reduced-motion navigator proof · horizontal containment · exact panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
+  console.log('R286/R303 ALL-SURFACE BROWSER PASS · ALL + six contextual workspace submenus · 44/44 routes desktop + 390px 2×DPR touch mobile · coarse-pointer 44px navigator/action/form-control proof · reduced-motion navigator proof · horizontal containment · exact panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
 }finally{await browser.close()}
