@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R87 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R87/R305 '+msg)};
 const project=read('src/omegaProjectContinuityR87.ts');
 const workflow=read('src/omegaWorkflowRuntimeR85.ts');
 const workbench=read('src/OmegaIntentWorkbenchR85.tsx');
@@ -8,6 +8,7 @@ const media=read('src/OmegaGovernanceProjectMediaR29.tsx');
 const prompt=read('src/PromptOrchestrator.tsx');
 const evidence=read('src/OmegaEvidenceMemoryR28.tsx');
 const registry=read('src/omegaExperienceRegistryR82.ts');
+const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const opbus=read('src/omegaOperationBusR86.ts');
 const living=read('src/OmegaR36LivingSurfaces.tsx');
 
@@ -50,7 +51,11 @@ must(evidence.includes("projectContinuity.operations"),'Evidence UI must expose 
 
 must(opbus.includes("const MAX=188"),'R86 operation receipt boundary must remain');
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
-must(routes.length===44&&new Set(routes).size===44,'R87 must preserve 44 canonical routes');
+const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
+const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+must(routes.length===surfaces.length&&routes.length>0&&new Set(routes).size===routes.length&&new Set(surfaces).size===surfaces.length,'R87 must preserve the exact non-empty current route cardinality');
+for(const route of routes)must(surfaces.includes(route),`experience registry route missing from workstation: ${route}`);
+for(const route of surfaces)must(routes.includes(route),`workstation route missing from experience registry: ${route}`);
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),'deep specialist surface lost '+token);
 
-console.log('R87 PROJECT CONTINUITY PASS · workflows + hashed operations bind to real Projects · host/proof context carries project · 44/44 routes preserved');
+console.log(`R87/R305 PROJECT CONTINUITY PASS · workflows + hashed operations bind to real Projects · host/proof context carries project · ${routes.length}/${routes.length} current routes preserved by exact registry/workstation equality · no historical route-count ceiling`);
