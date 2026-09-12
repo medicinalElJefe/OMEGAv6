@@ -1,4 +1,4 @@
-/* R210/R302 — one readable navigation state across desktop/mobile. This layer changes presentation and focus behavior only; it adds no execution or Canon authority. */
+/* R210/R304 — one readable navigation state across desktop/mobile. This layer changes presentation and focus behavior only; it adds no execution or Canon authority. */
 .r210-converged-nav .r94-nav-panel{overscroll-behavior:contain;scrollbar-gutter:stable;box-shadow:24px 0 72px rgba(0,0,0,.42)}
 .r210-converged-nav :where(button,input,select,textarea,[tabindex]:not([tabindex='-1'])):focus-visible{outline:2px solid rgba(118,221,204,.78)!important;outline-offset:2px!important}
 .r210-converged-nav :where(button,[role='button']){touch-action:manipulation}
@@ -8,7 +8,9 @@
 .r210-nav-status{margin:0 10px 6px;padding:0 2px;color:#66817c;font:700 6px/1.3 ui-monospace,monospace;letter-spacing:.07em;text-transform:uppercase}
 
 @media(any-pointer:coarse){
- .r210-converged-nav :where(.r88-head-actions button,.r89-nav-mode button,.r94-rail-action){min-width:44px!important;min-height:44px!important}
+ .r210-converged-nav :where(.r88-head-actions button,.r94-rail-action){min-width:44px!important;min-height:44px!important}
+ /* R304: do not zero specificity for navigator-mode buttons. R104's compact !important rule is more specific than :where(...), so the old R210 declaration could lose and render ~40px hit targets. */
+ .r210-converged-nav .r89-nav-mode button{min-width:44px!important;min-height:44px!important}
  .r210-converged-nav .r89-flat-route{min-height:54px!important}
 }
 @media(max-width:900px){
