@@ -2,6 +2,7 @@ import OmegaUtilityAuthorityR26 from './OmegaUtilityAuthorityR26';
 import OmegaFieldMotionConvergenceR28 from './OmegaFieldMotionConvergenceR28';
 import OmegaEvidenceMemoryR28 from './OmegaEvidenceMemoryR28';
 import SingmasterProofWorkbenchR290 from './SingmasterProofWorkbenchR290';
+import './proofCarryR292.css';
 import OmegaGovernanceProjectMediaR29 from './OmegaGovernanceProjectMediaR29';
 import OmegaSystemConsolidationR30 from './OmegaSystemConsolidationR30';
 import OmegaSwarmR121 from './OmegaSwarmR121';
