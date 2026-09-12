@@ -18,6 +18,30 @@ async function openNavigator(page){
   await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
 }
 
+async function verifyWorkspaceSubmenus(page,viewportName){
+  await openNavigator(page);
+  const filters=page.locator('.r105-workspace-filter button');
+  const count=await filters.count();
+  if(count!==7)throw new Error(`${viewportName}: expected ALL + six workspace submenu controls, received ${count}`);
+  const labels=(await filters.allTextContents()).map(x=>x.replace(/\s+/g,' ').trim());
+  if(!labels[0]?.startsWith('ALL'))throw new Error(`${viewportName}: workspace submenu must begin with ALL, received ${labels[0]||'missing'}`);
+  for(let i=0;i<count;i++){
+    const button=filters.nth(i);
+    await button.scrollIntoViewIfNeeded();
+    await button.click({timeout:10000});
+    await page.waitForFunction(index=>{
+      const buttons=[...document.querySelectorAll('.r105-workspace-filter button')];
+      return buttons[index]?.classList.contains('active')===true;
+    },i,{timeout:10000});
+    const visibleRoutes=await page.locator('.r89-flat-route:visible').count();
+    if(visibleRoutes<1)throw new Error(`${viewportName}: workspace submenu ${labels[i]} produced no reachable routes`);
+  }
+  await filters.first().click();
+  await page.waitForFunction(()=>document.querySelector('.r105-workspace-filter button')?.classList.contains('active')===true,{timeout:10000});
+  const allRoutes=await page.locator('.r89-flat-route:visible').count();
+  if(allRoutes!==44)throw new Error(`${viewportName}: ALL workspace submenu did not restore 44 routes; received ${allRoutes}`);
+}
+
 async function clickRoute(page,route){
   await openNavigator(page);
   const buttons=page.locator('.r89-flat-route');
@@ -77,6 +101,7 @@ try{
     await page.goto(`${base}/?r285=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
     await openNavigator(page);
+    await verifyWorkspaceSubmenus(page,name);
     const navLabels=(await page.locator('.r89-flat-route b').allTextContents()).map(x=>x.trim()).filter(Boolean);
     const unique=[...new Set(navLabels)];
     if(unique.length!==44)throw new Error(`${name}: expected 44 unique route controls, received ${unique.length}`);
@@ -100,5 +125,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R285 ALL-SURFACE BROWSER PASS · 44/44 canonical route buttons pointer-clicked on desktop + 390px mobile · exact data-panel transitions · route-agnostic visible-content proof · enabled control hit geometry · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
+  console.log('R285 ALL-SURFACE BROWSER PASS · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + 390px mobile · exact data-panel transitions · route-agnostic visible-content proof · enabled control hit geometry · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
 }finally{await browser.close()}
