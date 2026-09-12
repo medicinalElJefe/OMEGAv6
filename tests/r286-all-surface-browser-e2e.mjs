@@ -84,7 +84,7 @@ async function verifyReachabilityFabric(page,viewportName){
  if(state.pass!=='true'||state.residuals!==0)throw new Error(`${viewportName}: R305 no-burial reachability audit not clean ${JSON.stringify(state)}`);
  const allMode=page.locator('.r89-nav-mode button').filter({hasText:'All tools'}).first();
  await allMode.click({timeout:10000});
- await page.waitForFunction(()=>document.querySelector('.r89-flat-route:visible')!==null,{timeout:10000});
+ await page.locator('.r89-flat-route:visible').first().waitFor({state:'visible',timeout:10000});
 }
 
 async function clickRoute(page,route){
