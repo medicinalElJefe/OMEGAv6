@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+const control=fs.readFileSync('src/ArchiveGovernanceControl.tsx','utf8');
+const queue=fs.readFileSync('src/ArchiveGenomeQueueR288.tsx','utf8');
+const runtime=fs.readFileSync('src/ArchiveRuntimeRecoveryR291.tsx','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(`R291 archive runtime wiring invariant failed: ${msg}`)};
+for(const token of ['ArchiveNativeConvergenceR288','ArchiveGenomeQueueR288','ArchiveRuntimeRecoveryR291'])must(control.includes(token),`governance surface missing ${token}`);
+must(control.includes('<ArchiveNativeConvergenceR288/><ArchiveGenomeQueueR288 operators={operators}/>{operators&&<ArchiveRuntimeRecoveryR291/>}'),'native convergence → genome → operator runtime composition changed');
+for(const token of ['ARCHIVE_GENOME_CURRENT_R289','OMEGA_R291_ARCHIVE_GENOME_RECEIPT.json','P1 only','RECOVER / ADAPT','ARCHIVE_SCARS_R288'])must(queue.includes(token),`Genome queue missing ${token}`);
+for(const token of ['RSC PROOF VM','675-ROW CANON RECONCILER','QTI CONTROLLED AGENT','NATIVE GPU','Run bounded proof cycle','OPENGL DEVICE GATED','advanceQtiTransactionR291','proveRscPairR291'])must(runtime.includes(token),`runtime proving ground missing ${token}`);
+must(runtime.includes("externalConsequence:false"),'bounded QTI UI demo must remain no-external-effect');
+must(runtime.includes("humanAuthorizationRequired:false"),'bounded local QTI demo authority declaration missing');
+console.log('R291 ARCHIVE RUNTIME WIRING PASS · native convergence + 26-family Genome + operator proving ground preserved');
