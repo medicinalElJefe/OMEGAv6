@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error('R301 HTML/SVG recovery invariant failed: '+msg)};
+const registry=read('src/htmlSvgCapabilityRecoveryR301.ts');
+const ui=read('src/HtmlSvgCapabilityRecoveryR301.tsx');
+const archive=read('src/ArchiveGovernanceControl.tsx');
+for(const id of ['HSV-01','HSV-02','HSV-03','HSV-04','HSV-05','HSV-06','HSV-07','HSV-08'])must(registry.includes(`id:'${id}'`),'missing recovered donor '+id);
+for(const artifact of ['omega_visual_atlas_live.html','full_modes_mode188_working_glyph_interface.html','mind_circuit_truthatlas.html','electric_bio_phase_engine_v2_atlas_self_drive.html','renderer_20736_color_state.html','executable_atlas_truth_engine_188.html','Dewey_Woven_Continuity_General_Equation_Full.svg','xref-OMEGA_Workstation.html'])must(registry.includes(artifact),'missing Drive-reviewed artifact '+artifact);
+for(const surface of ['Modes','Evidence & Proof','Biological Traversal','Visual Instrument','Relativity','Archive Operators'])must(registry.includes(`surface:'${surface}'`),'missing modern successor surface '+surface);
+must(registry.includes('copyPixels:false')&&registry.includes('copyArchiveAuthority:false'),'recovery must reject screenshot/pixel copying and archive authority promotion');
+must(registry.includes("preferredMethod:'EXTRACT_SCHEMA_ALGORITHM_GEOMETRY_INTERACTION_PROOF_CONTRACT'"),'recovery method must prioritize semantic mechanisms');
+must(registry.includes('20,736 is an address/resolution lens here, not a literal physical dimension'),'renderer boundary must preserve resolution-vs-physical-dimension rule');
+must(registry.includes('no diagnosis, treatment, physiological efficacy or clinical authority'),'Electric Bio donor must remain clinically gated');
+must(registry.includes('A historical import graph proves packaging/dependency relationships, not that those modules are currently executing'),'build graph may not imply execution');
+must(ui.includes('Recover logic, state, geometry and proof contracts')&&ui.includes('data-recovery-id'),'UI must expose capability recovery as structured state, not copied imagery');
+must(archive.includes("import HtmlSvgCapabilityRecoveryR301 from './HtmlSvgCapabilityRecoveryR301'")&&archive.includes('<HtmlSvgCapabilityRecoveryR301/>'),'Archive Census/Operators must mount R301 recovery without a new route');
+must(!registry.includes("authority:'CANON'")&&!registry.includes('CanonState admission'),'recovered donors may not create Canon authority');
+console.log('R301 HTML/SVG CAPABILITY RECOVERY PASS · 8 Drive-reviewed donors · semantic recovery only · existing governed surfaces · no pixel-copy authority');
