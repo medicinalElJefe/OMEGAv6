@@ -22,10 +22,11 @@ test('R260.7 refuses duplicate, in-flight, out-of-scale, and already-ready work'
   assert.match(regional,/if\(inFlightPromise&&inFlightKey===key\)return inFlightPromise/);
 });
 
-test('R260.7 has liveness authority only and preserves measurement truth',()=>{
+test('R260.7 has liveness authority only and preserves measurement and visual truth',()=>{
   assert.match(liveness,/does not alter source pixels, calibration, geolocation, evidence class, authority epochs, admission thresholds, or measurement truth/);
   assert.doesNotMatch(liveness,/patch\s*=/);
   assert.doesNotMatch(liveness,/evidence\s*=/);
   assert.doesNotMatch(liveness,/CALIBRATED_SENTINEL1_REGIONAL_VIEWPORT'\s*,/);
-  assert.match(r4,/patchRelease:'R260\.7'/);
+  assert.match(r4,/patchRelease:'R260\.3'/);
+  assert.match(r4,/livenessRelease:'R260\.7'/);
 });
