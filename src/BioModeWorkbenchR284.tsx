@@ -40,7 +40,7 @@ export default function BioModeWorkbenchR284({record,instrumentReady=0,instrumen
  ] as const;
  return <section className='bio284' aria-label='Heavy Bio 241-channel mode workbench'>
   <header className='bio284-head'>
-   <div><span>R284 · HEAVY BIO MODE EXPERIENCE</span><h3>241-Channel Mode Workbench</h3><p>Explore the real 179 source-catalog channels and 62 canon authorities by family, group, realization and evidence state. Visuals encode analytical metadata only; they do not create measurements, diagnoses, treatment recommendations or clinical authorization.</p></div>
+   <div><span>R284 · HEAVY BIO MODE EXPERIENCE · ALL MODES</span><h3>241-Channel Mode Workbench</h3><p>Explore the real 179 source-catalog channels and 62 canon authorities by family, group, realization and evidence state. Visuals encode analytical metadata only; they do not create measurements, diagnoses, treatment recommendations or clinical authorization.</p></div>
    <div className='bio284-authority'><ShieldCheck/><span><b>MEASUREMENT AUTHORITY 0</b><small>R282 owns any scope-matched clinical weighting</small></span></div>
   </header>
 
