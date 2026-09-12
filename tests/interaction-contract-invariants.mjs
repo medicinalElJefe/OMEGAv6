@@ -16,9 +16,16 @@ const hybridR8=read('src/HybridMissionControlR8.tsx');
 const earthR8=read('src/EarthObservatoryR8.tsx');
 
 assert.doesNotMatch(launcher,/<button className='omega-nexus-card'/,'launcher cards may not be buttons containing nested favorite buttons');
-assert.match(launcher,/className='omega-nexus-card'[^>]*role='button'[^>]*tabIndex=\{0\}/,'launcher cards must be keyboard-focusable controls');
-assert.match(launcher,/onClick=\{\(\)=>go\(x\.name\)\}/,'launcher cards must navigate');
-assert.match(launcher,/onKeyDown=\{e=>activate\(x\.name,e\)\}/,'launcher cards must support Enter/Space activation');
+const legacyCardControl=/className='omega-nexus-card'[^>]*role='button'[^>]*tabIndex=\{0\}/.test(launcher)&&/onKeyDown=\{e=>activate\(x\.name,e\)\}/.test(launcher);
+const semanticNativeControls=/className='omega-nexus-card'[^>]*data-r13-app/.test(launcher)&&/button type='button' className='omega-nexus-route' onClick=\{\(\)=>go\(x\.name\)\}/.test(launcher)&&/aria-label=\{`Open \$\{x\.name\}`\}/.test(launcher)&&/button type='button' className=\{'omega-nexus-fav '/.test(launcher);
+assert.ok(legacyCardControl||semanticNativeControls,'launcher route cards must expose keyboard-focusable semantic controls either through the legacy Enter/Space card contract or the stronger native route + favorite button successor');
+assert.match(launcher,/onClick=\{\(\)=>go\(x\.name\)\}/,'launcher route control must navigate');
+if(legacyCardControl)assert.match(launcher,/onKeyDown=\{e=>activate\(x\.name,e\)\}/,'legacy launcher cards must support Enter/Space activation');
+if(semanticNativeControls){
+ assert.match(launcher,/aria-label=\{`Open \$\{x\.name\}`\}/,'native route control must expose an accessible name');
+ assert.match(launcher,/aria-label=\{\(favorites\.includes\(x\.name\)\?'Remove ':'Add '\)\+x\.name\+' favorite'\}/,'native favorite control must expose an independent accessible name');
+ assert.doesNotMatch(launcher,/className='omega-nexus-card'[^>]*role='button'/,'container must not duplicate button semantics when child controls are native buttons');
+}
 assert.match(launcher,/omega-nexus-fav/,'favorite control must remain independently actionable');
 assert.match(launcher,/OMEGA_NAVIGATION/,'launcher donor must retain the shared navigation registry even though the duplicate global floating mount is retired');
 const launcherNames=[...navigation.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
@@ -54,4 +61,4 @@ assert.match(hybrid,/onClick=\{submit\}/,'Hybrid donor compile control must exec
 assert.match(hybridR8,/onClick=\{compile\}/,'R8 Hybrid governed draft control must execute');
 assert.match(hybridR8,/onClick=\{validate\}/,'R8 Hybrid validation control must execute');
 
-console.log('interaction contract invariants R27/R109 PASS · mounted single-frame navigation + source-backed modes + R8 Earth/Hybrid/SAI through eager or deferred bindings');
+console.log('interaction contract invariants R27/R109/R289 PASS · mounted single-frame navigation + semantic keyboard-focusable launcher controls + source-backed modes + R8 Earth/Hybrid/SAI through eager or deferred bindings');
