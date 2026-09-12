@@ -27,7 +27,7 @@ async function enterEarth(page,label){
  await earth.waitFor({state:'visible',timeout:15000});await earth.click();
  await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',{timeout:30000});
  await page.waitForSelector('.earth-r279',{state:'visible',timeout:30000});
- const tabs=page.locator('.earth-r279-view-tabs button');if(await tabs.count()!==EXPECT.length)throw new Error(`${label}: expected exactly ${EXPECT.length} Earth view controls including SAR Truth, found ${await tabs.count()}`);
+ const tabs=page.locator('.earth-r279-view-tabs button'),count=await tabs.count();if(count!==EXPECT.length)throw new Error(`${label}: expected exactly ${EXPECT.length} Earth view controls including SAR Truth, found ${count}`);
 }
 
 async function openPlanet(page,label){
