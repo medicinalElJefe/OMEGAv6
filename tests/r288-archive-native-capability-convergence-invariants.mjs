@@ -1,5 +1,6 @@
 import './r288-archive-genome-ledger-invariants.mjs';
 import './r289-full-archive-native-convergence-invariants.mjs';
+import './r289-recovered-menu-navigation-invariants.mjs';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(`R288 archive-native convergence invariant failed: ${msg}`)};
