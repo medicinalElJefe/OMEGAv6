@@ -4,6 +4,9 @@ import {BLADE_GEOMETRY_R306_OPERATOR,BLADE_GEOMETRY_R306_TRUTH,bladeGeometryDemo
 
 const source=fs.readFileSync('src/bladeGeometryR306.js','utf8');
 const relativity=fs.readFileSync('src/RelativityLab.tsx','utf8');
+const archive=fs.readFileSync('src/ArchiveNativeConvergenceR288.tsx','utf8');
+const browser=fs.readFileSync('tests/r306-blade-geometry-browser-e2e.mjs','utf8');
+const inheritedBrowser=fs.readFileSync('tests/r289-live-master-menu-browser-e2e.mjs','utf8');
 const workstation=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const must=(ok,msg)=>assert.ok(ok,`R306 ${msg}`);
 
@@ -15,10 +18,7 @@ for(const token of [
  'INVARIANT_VIOLATION','ORBIT_CROSSES_INVARIANT_CLASS','OBJECTIVE_NOT_ORBIT_INVARIANT','ILLEGAL_TRANSITION_TARGET','DUPLICATE_STATE_ID',
  'No generic polynomial/constant-time claim','physical-geometry claim'
 ])must(source.includes(token),`formal operator source missing ${token}`);
-for(const forbidden of ['Math.random','Date.now','performance.now','fetch(','api.post','localStorage','CanonState']){
- if(forbidden==='CanonState')continue;
- must(!source.includes(forbidden),`formal operator must remain deterministic and authority-free; forbidden ${forbidden}`);
-}
+for(const forbidden of ['Math.random','Date.now','performance.now','fetch(','api.post','localStorage'])must(!source.includes(forbidden),`formal operator must remain deterministic and authority-free; forbidden ${forbidden}`);
 must(source.includes('owns no CanonState')&&source.includes('execution')&&source.includes('deployment'),'formal operator must explicitly deny system authority');
 
 const demo=bladeGeometryDemoR306();
@@ -59,5 +59,8 @@ assert.equal(surfaces.length,44,'R306 must not add a 45th route');
 assert.equal(new Set(surfaces).size,44,'R306 must not duplicate route identity');
 must(relativity.includes("'BLADE'")&&relativity.includes('Blade Geometry')&&relativity.includes('bladeGeometryDemoR306'),'Blade must be visible inside the existing Relativity surface');
 must(!relativity.includes("onNavigate?.('Blade"),'Blade formalization must not create a hidden/parallel route');
+must(archive.includes('BLADE_GEOMETRY · FORMALIZED_BY_R306')&&archive.includes('Historical predecessor status is retained as provenance'),'Archive view must expose the recovered R306 successor without erasing R288 history');
+for(const token of ['getByRole(\'button\',{name:\'BLADE\'','center-point unoccluded','>=44×44','Blade Geometry'])must(browser.includes(token),`Blade browser proof missing ${token}`);
+must(inheritedBrowser.includes("await import('./r306-blade-geometry-browser-e2e.mjs')"),'R306 browser proof must execute through the existing bounded R289 browser lane, not a new workflow');
 
-console.log('R306 BLADE GEOMETRY PASS · recovered SYSTEM=(generator,constraints,invariants,symmetry,objective) formalized as deterministic finite search reduction · transition invariant + quotient/orbit + objective-constancy gates fail closed · exact representative solve/lift equals brute finite objective on demonstration domain · no universal complexity/physical-law claim · no 45th route or new Canon/execution/deployment authority.');
+console.log('R306 BLADE GEOMETRY PASS · recovered SYSTEM=(generator,constraints,invariants,symmetry,objective) formalized as deterministic finite search reduction · transition invariant + quotient/orbit + objective-constancy gates fail closed · exact representative solve/lift equals brute finite objective on demonstration domain · archive successor visible without rewriting R288 history · real-browser Blade reachability chained through bounded R289 lane · no universal complexity/physical-law claim · no 45th route or new Canon/execution/deployment authority.');
