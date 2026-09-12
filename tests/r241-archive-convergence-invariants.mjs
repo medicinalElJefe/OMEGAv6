@@ -70,6 +70,29 @@ must(!commandVerifier.includes("'intentionally contain no APPLY_PATCH or WRITE_T
 for(const token of ["data-r237-correlation","HOST / JOB / MISSION / EPOCH LOCKED","EXECUTION CONTEXT HELD","activeJob.targetDeviceId!==device?.id","targetForMission(currentMission,missionJob)!==device.id","snapshotCurrent","requireCurrentSnapshot"])must(commandInvariant.includes(token),`R241 must pin the R237 semantic LOCKED/HELD fail-closed truth behavior in focused invariants: ${token}`);
 
 for(const token of ["Prove R240.1 semantic verifier against exact served runtime","/omega-build-receipt.json","promotion?.promotedMergeSha||body?.source?.sha","OMEGA_PROMOTED_SHA=\"$SERVED_SHA\"","for attempt in 1 2 3","internally consistent exact served-runtime semantic proof"])must(workflow.includes(token),`R241.1 workflow race closure missing ${token}`);
+for(const token of [
+ 'timeout-minutes: 30',
+ 'timeout --signal=TERM --kill-after=15s 300s',
+ 'R303 BROWSER PROOF FAILED',
+ 'status 124 means the bounded 300-second suite timeout fired',
+ 'run_browser tests/r286-all-surface-browser-e2e.mjs',
+ '/tmp/r303-browser-failure.txt',
+ '/tmp/r303-browser-suite.log',
+ "echo \"suite=${test_file}\"",
+ "tail -n 180 \"$suite_log\"",
+ 'tail -n 160 /tmp/omega-r241-vite.log',
+ 'Upload R303 browser failure diagnostic',
+ 'if: failure()',
+ 'uses: actions/upload-artifact@v4',
+ 'name: r303-browser-failure-${{ github.run_id }}',
+ 'if-no-files-found: ignore',
+ 'retention-days: 3'
+])must(workflow.includes(token),`R303 bounded browser diagnostic pipeline missing ${token}`);
+const browserSuites=[...workflow.matchAll(/run_browser tests\/(.+?-browser-e2e\.mjs)/g)].map(m=>m[1]);
+must(browserSuites.length===9&&new Set(browserSuites).size===9,'R303 must preserve all nine inherited real-browser suites while bounding each one');
+must(workflow.includes("trap 'kill \"$VITE_PID\" 2>/dev/null || true' EXIT"),'R303 browser harness must clean up the preview server');
+must(workflow.includes('exit "$status"'),'R303 bounded browser failure must propagate exact suite/timeout status');
+must(!workflow.includes('continue-on-error: true'),'R303 must fail closed rather than suppress browser proof failures');
 must(!workflow.includes('git fetch origin main --no-tags'),'R241.1 live proof must not bind verification to a moving main ref');
 must(!workflow.includes('BASE_SHA="$(git rev-parse origin/main)"'),'R241.1 live proof must not assume Git main and canonical deployment advance atomically');
 must(!/^\s*push\s*:/m.test(workflow)&&!/^\s*schedule\s*:/m.test(workflow),'R241 workflow must remain PR/manual proof-only');
@@ -86,4 +109,4 @@ must(governor.preservedRuntime?.archiveConvergenceVisualIntelligence==='R241_REA
 
 for(const file of [topology,cognition,overlay])for(const forbidden of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203'])must(!file.includes(forbidden),`R241 must not restore retired Durable Object ${forbidden}`);
 
-console.log('OMEGA R241.1 ARCHIVE CONVERGENCE PASS · governed proof floor R241 with R239/R240 authorities preserved · 1,728 deterministic 12×12×12 topology over exact 20,736 packet · source route/neighbor filaments · evidence-aware STAY/TURN/ESCALATE/UNPROVED · AGI/QTI typed cognition read-only through proposal · authorization/execution/return/Canon fail closed · inherited R182 INGRESS/EGRESS/BLOCKED/RESIDUE + TURN/BASIN + CΩ/Φ/q/Λ legend preserved · existing R13/R113/R119 visual layers preserved · live verifier binds to exact served runtime rather than moving main · R125/R141/R146/R147 and retired R201/R203 boundaries preserved');
+console.log('OMEGA R241.1/R303 ARCHIVE CONVERGENCE PASS · governed proof floor R241 with R239/R240 authorities preserved · all nine browser suites retained, bounded and fail-closed · exact suite/status + suite-tail + Vite-tail diagnostic persisted and uploaded on failure · 1,728 deterministic 12×12×12 topology over exact 20,736 packet · source route/neighbor filaments · evidence-aware STAY/TURN/ESCALATE/UNPROVED · AGI/QTI typed cognition read-only through proposal · authorization/execution/return/Canon fail closed · inherited R182 INGRESS/EGRESS/BLOCKED/RESIDUE + TURN/BASIN + CΩ/Φ/q/Λ legend preserved · existing R13/R113/R119 visual layers preserved · live verifier binds to exact served runtime rather than moving main · R125/R141/R146/R147 and retired R201/R203 boundaries preserved');
