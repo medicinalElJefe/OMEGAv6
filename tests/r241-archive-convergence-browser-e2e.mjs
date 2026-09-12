@@ -57,3 +57,5 @@ try{
  }
  console.log('OMEGA R241 BROWSER PASS · desktop/mobile Home→Visual Instrument→DEEP COMPILER · living topology canvas rendered with varied field geometry · pointer authority none · no mutating requests · packet/measurement/Canon truth boundaries exposed · no page errors');
 }finally{await browser.close()}
+
+await import('./r301-html-svg-capability-recovery-browser-e2e.mjs');
