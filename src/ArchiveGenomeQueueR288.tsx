@@ -3,6 +3,7 @@ import {ArchiveRestore,Download,Filter,Search,ShieldCheck,TriangleAlert} from 'l
 import {ARCHIVE_SCARS_R288} from './archiveGenomeLedgerR288c';
 import {ARCHIVE_GENOME_CURRENT_R289,archiveGenomeCurrentSummaryR289} from './archiveGenomeLedgerR288d';
 import type {ArchiveGenomeRowR288,RuntimeCoverageR288,PromotionClassR288} from './archiveGenomeLedgerR288';
+import RscProofLabR290 from './RscProofLabR290';
 import './archiveGenomeR288.css';
 
 const COVERAGE:['ALL',...RuntimeCoverageR288[]]=['ALL','ACTIVE','PARTIAL','LEDGER_ONLY','ABSENT','GATED'];
@@ -21,6 +22,7 @@ export default function ArchiveGenomeQueueR288({operators=false}:{operators?:boo
   <div className='agr-summary'>{[['TYPED FAMILIES',summary.rows],['P1',summary.priority1],['ACTIVE',summary.active],['PARTIAL',summary.partial],['ABSENT',summary.absent],['GATED',summary.gated],['SCARS',summary.scars]].map(([k,v])=><div key={String(k)}><span>{k}</span><b>{v}</b></div>)}</div>
   <div className='agr-controls'><label><Search/><input value={q} onChange={e=>setQ(e.target.value)} placeholder='Search archive family, artifact, delta or validation…'/></label><label><Filter/><select value={coverage} onChange={e=>setCoverage(e.target.value as any)}>{COVERAGE.map(x=><option key={x}>{x}</option>)}</select></label><select value={promotion} onChange={e=>setPromotion(e.target.value as any)}>{PROMOTION.map(x=><option key={x}>{x}</option>)}</select><button className={priorityOnly?'active':''} onClick={()=>setPriorityOnly(x=>!x)}>P1 only</button></div>
   <div className='agr-pipeline'><span>PRUNE</span><i>→</i><span>FINGERPRINT</span><i>→</i><span>ORIGIN</span><i>→</i><span>MAP</span><i>→</i><span>DIFF</span><i>→</i><span>RECOVER / ADAPT</span><i>→</i><span>TEST</span><i>→</i><span>PROVE</span><i>→</i><span>PROMOTE</span><i>→</i><span>RE-ARCHIVE</span></div>
+  <RscProofLabR290/>
   <div className='agr-grid'>{rows.map(r=><article key={r.id} className={`agr-card p${r.priority}`}><header><div><ArchiveRestore/><span><b>{r.id} · {r.family}</b><small>{r.origin} · {r.evidenceState}</small></span></div><strong>P{r.priority}</strong></header><div className='agr-badges'><em>{r.currentCoverage}</em><em>{r.promotionClass}</em></div><p>{r.omegaV6Connection}</p><details open={operators&&r.priority===1}><summary>Missing delta · {r.missingDelta.length}</summary><ul>{r.missingDelta.map(x=><li key={x}>{x}</li>)}</ul></details><details><summary>Validation · {r.validation.length}</summary><ul>{r.validation.map(x=><li key={x}>{x}</li>)}</ul></details><details><summary>Archive evidence · {r.artifacts.length}</summary><code>{r.artifacts.join('\n')}</code></details><footer><ShieldCheck/><span>{r.boundary}</span></footer></article>)}</div>
   {operators&&<section className='agr-scars'><header><TriangleAlert/><div><b>Failure-derived scar ledger</b><span>Historical failures become explicit regression obligations, never hidden donors.</span></div></header><div>{ARCHIVE_SCARS_R288.map(s=><article key={s.id}><b>{s.id} · {s.failureClass}</b><p>{s.lesson}</p><code>{s.regressionTest}</code><span>{s.status}</span></article>)}</div></section>}
  </section>;
