@@ -61,9 +61,10 @@ const directR239Browser=workflow.includes('node tests/r239-user-navigation-brows
 const boundedR239Browser=workflow.includes('run_browser tests/r239-user-navigation-browser-e2e.mjs');
 must(directR239Browser||boundedR239Browser,'R241 bounded proof workflow must execute the R239 browser proof directly or through the fail-closed bounded runner');
 if(boundedR239Browser){
- must(workflow.includes('run_browser(){')&&workflow.includes('timeout -k 15s 300s'),'R303 bounded R239 browser invocation must retain the fail-closed timeout runner');
+ must(workflow.includes('run_browser() {')&&workflow.includes('timeout --signal=TERM --kill-after=15s 300s'),'R303 bounded R239 browser invocation must retain the fail-closed TERM→KILL 300-second timeout runner');
+ must(workflow.includes('exit "$status"'),'R303 bounded browser runner must propagate the exact nonzero/timeout status');
  must(!workflow.includes('continue-on-error: true'),'R303 bounded browser runner must not convert failure into success');
 }
 must(!workflow.includes('schedule:')&&!workflow.includes('push:'),'R241/R242 proof workflow must remain PR/manual read-only proof authority');
 
-console.log(`R242 NAVIGATION LEMMA CALCULUS PASS · ${routeRecords.length} source routes conserved · exact identity > prefix/token/metadata · Governance/System ambiguity closed · workspace partition conserved · unresolved/duplicate identities carried as residuals · query presentation cannot rename/duplicate routes · R239 browser proof remains mandatory direct-or-bounded · navigation remains read-only and non-Canon`);
+console.log(`R242 NAVIGATION LEMMA CALCULUS PASS · ${routeRecords.length} source routes conserved · exact identity > prefix/token/metadata · Governance/System ambiguity closed · workspace partition conserved · unresolved/duplicate identities carried as residuals · query presentation cannot rename/duplicate routes · R239 browser proof remains mandatory direct-or-bounded with fail-closed TERM→KILL timeout · navigation remains read-only and non-Canon`);
