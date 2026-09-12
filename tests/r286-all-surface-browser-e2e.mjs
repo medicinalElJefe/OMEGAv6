@@ -5,7 +5,7 @@ const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,''
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const block=(source.match(/export const OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const expected=[...block.matchAll(/'([^']+)'/g)].map(m=>m[1]);
-if(expected.length!==44||new Set(expected).size!==44)throw new Error(`R286/R304 expected 44 unique canonical surfaces, received ${expected.length}/${new Set(expected).size}`);
+if(expected.length!==44||new Set(expected).size!==44)throw new Error(`R286/R307 expected 44 unique canonical surfaces, received ${expected.length}/${new Set(expected).size}`);
 
 const profiles=[
  ['desktop',{viewport:{width:1440,height:960},deviceScaleFactor:1,hasTouch:false}],
@@ -15,7 +15,7 @@ const profiles=[
 async function openNavigator(page){
   if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
   const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
-  if(!await expand.count())throw new Error('R286/R304 global navigator expand control missing');
+  if(!await expand.count())throw new Error('R286/R307 global navigator expand control missing');
   await expand.first().scrollIntoViewIfNeeded();
   await expand.first().click();
   await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
@@ -28,10 +28,10 @@ async function verifyNavigatorModeTouchTargets(page,viewportName){
     const buttons=[...document.querySelectorAll('.r89-nav-mode button')].map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||'').replace(/\s+/g,' ').trim(),width:r.width,height:r.height}});
     return{coarse,buttons};
   });
-  if(state.coarse!==true)throw new Error(`mobile: R304 expected coarse-pointer emulation, received ${JSON.stringify(state)}`);
-  if(state.buttons.length!==2)throw new Error(`mobile: R304 expected two navigator-mode controls, received ${state.buttons.length}`);
+  if(state.coarse!==true)throw new Error(`mobile: R307 expected coarse-pointer emulation, received ${JSON.stringify(state)}`);
+  if(state.buttons.length!==2)throw new Error(`mobile: R307 expected two navigator-mode controls, received ${state.buttons.length}`);
   const undersized=state.buttons.filter(x=>x.width<43.5||x.height<43.5);
-  if(undersized.length)throw new Error(`mobile: R304 navigator-mode targets below 44px: ${undersized.map(x=>`${x.label} ${x.width.toFixed(1)}×${x.height.toFixed(1)}`).join(' | ')}`);
+  if(undersized.length)throw new Error(`mobile: R307 navigator-mode targets below 44px: ${undersized.map(x=>`${x.label} ${x.width.toFixed(1)}×${x.height.toFixed(1)}`).join(' | ')}`);
 }
 
 async function verifyWorkspaceSubmenus(page,viewportName){
@@ -67,7 +67,7 @@ async function clickRoute(page,route){
     const label=(await buttons.nth(i).locator('b').first().textContent().catch(()=>''))?.trim();
     if(label===route){hit=i;break}
   }
-  if(hit<0)throw new Error(`R286/R304 route button missing: ${route}`);
+  if(hit<0)throw new Error(`R286/R307 route button missing: ${route}`);
   const button=buttons.nth(hit);
   await button.scrollIntoViewIfNeeded();
   await button.click({timeout:10000});
@@ -86,12 +86,17 @@ function usableSnapshot(){
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0};
   const main=document.querySelector('.workstation-main');
   const rect=main?.getBoundingClientRect();
+  const coarse=matchMedia('(any-pointer: coarse)').matches;
   const buttons=[...document.querySelectorAll('.workstation-main button')].filter(visible);
+  const actions=[...document.querySelectorAll('.workstation-main button:not([disabled]),.workstation-main [role="button"]')].filter(visible);
+  const forms=[...document.querySelectorAll('.workstation-main input:not([disabled]),.workstation-main select:not([disabled]),.workstation-main textarea:not([disabled])')].filter(visible);
   const unusable=buttons.filter(b=>{const r=b.getBoundingClientRect();return !b.disabled&&(r.width<8||r.height<8||getComputedStyle(b).pointerEvents==='none')}).map(b=>(b.textContent||b.getAttribute('aria-label')||'unnamed').trim().slice(0,80));
+  const undersizedTouchActions=coarse?actions.filter(el=>{const r=el.getBoundingClientRect();return r.width<43.5||r.height<43.5}).map(el=>{const r=el.getBoundingClientRect();return`${(el.textContent||el.getAttribute('aria-label')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
+  const undersizedTouchForms=coarse?forms.filter(el=>el.getBoundingClientRect().height<43.5).map(el=>{const r=el.getBoundingClientRect();return`${(el.getAttribute('aria-label')||el.getAttribute('placeholder')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
   const visibleChildren=main?[...main.children].filter(visible).length:0;
   const textLength=(main?.textContent||'').replace(/\s+/g,' ').trim().length;
   const richVisible=main?[...main.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible).length:0;
-  return{width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,visibleChildren,textLength,richVisible};
+  return{width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,undersizedTouchActions,undersizedTouchForms,coarse,visibleChildren,textLength,richVisible};
 }
 
 async function verifySarGeometry(page,viewportName){
@@ -114,7 +119,7 @@ try{
     const page=await context.newPage();
     const pageErrors=[];
     page.on('pageerror',e=>pageErrors.push(String(e)));
-    await page.goto(`${base}/?r304=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(`${base}/?r307=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
     await openNavigator(page);
     await verifyNavigatorModeTouchTargets(page,name);
@@ -130,6 +135,9 @@ try{
       if(snap.width<220||snap.height<80)throw new Error(`${name}/${route}: workstation unusable ${JSON.stringify(snap)}`);
       if(snap.overflow>24)throw new Error(`${name}/${route}: viewport overflow ${snap.overflow}px`);
       if(snap.unusable.length)throw new Error(`${name}/${route}: visible enabled controls are non-interactive ${snap.unusable.join(' | ')}`);
+      if(name==='mobile'&&snap.coarse!==true)throw new Error(`${name}/${route}: expected coarse-pointer route proof`);
+      if(name==='mobile'&&snap.undersizedTouchActions.length)throw new Error(`${name}/${route}: coarse-pointer action controls below 44×44px ${snap.undersizedTouchActions.join(' | ')}`);
+      if(name==='mobile'&&snap.undersizedTouchForms.length)throw new Error(`${name}/${route}: coarse-pointer form controls below 44px high ${snap.undersizedTouchForms.join(' | ')}`);
       if(snap.visibleChildren<1||(snap.textLength<8&&snap.richVisible<1))throw new Error(`${name}/${route}: no visible route content mounted ${JSON.stringify(snap)}`);
       if(route==='SAR Truth')await verifySarGeometry(page,name);
     }
@@ -142,5 +150,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R286/R304 ALL-SURFACE BROWSER PASS · mobile navigator-mode controls browser-proven at >=44×44px under coarse-pointer emulation · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + 390px touch mobile · exact data-panel transitions · route-agnostic visible-content proof · enabled control hit geometry · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
+  console.log('R286/R307 ALL-SURFACE BROWSER PASS · mobile navigator-mode controls browser-proven at >=44×44px under coarse-pointer emulation · every visible enabled action on all 44 canonical routes browser-proven at >=44×44px and every enabled form control >=44px high on 390px touch mobile · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + mobile · exact data-panel transitions · route-agnostic visible-content proof · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
 }finally{await browser.close()}
