@@ -2,14 +2,20 @@ from __future__ import annotations
 import importlib.util
 import json
 import pathlib
+import sys
 import tempfile
+import types
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 GPU=ROOT/'native'/'r291_gpu'
 
 def load(name,path):
     spec=importlib.util.spec_from_file_location(name,path)
-    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);return module
+    if spec is None or spec.loader is None: raise ImportError(f'cannot load {name} from {path}')
+    module=importlib.util.module_from_spec(spec)
+    sys.modules[name]=module
+    spec.loader.exec_module(module)
+    return module
 
 parent=load('r291_parenting_compiler',GPU/'parenting_compiler.py')
 compiled=parent.compile_atlas('r291-ci-native-gpu-proof')
@@ -23,7 +29,6 @@ assert compiled.metadata['edge_count']==20735
 assert compiled.metadata['parent_rule']=='layer -> regulation -> phase -> domain'
 
 # Load supersampler as a package so its relative import resolves.
-import sys,types
 pkg=types.ModuleType('r291_gpu');pkg.__path__=[str(GPU)];sys.modules['r291_gpu']=pkg
 sys.modules['r291_gpu.parenting_compiler']=parent
 sup=load('r291_gpu.hierarchical_supersampler',GPU/'hierarchical_supersampler.py')
