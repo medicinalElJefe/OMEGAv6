@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R100/R242 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R100/R242/R305 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const navLemma=read('src/navigationLemmaCalculusR242.js');
 const navCss=read('src/omegaSideNavigatorR100.css');
@@ -14,7 +15,10 @@ const accepted=read('src/acceptedProductionContractR95.ts');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'canonical 44-route universe must remain intact');
+const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(surfaces.length>0&&surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length&&new Set(routes).size===routes.length,'canonical current route universe must remain non-empty, unique and registry-aligned');
+for(const route of surfaces)must(routes.includes(route),`R100 workstation route absent from registry ${route}`);
+for(const route of routes)must(surfaces.includes(route),`R100 registry route absent from workstation ${route}`);
 
 must(weave.includes('ATLAS_RESOLUTION_LEVELS_R100=[12,144,1728,20736]'),'nested atlas resolution registry missing');
 must(weave.includes('partition → exchange/transform → invariant carry → scar/residual carry → re-contextualize/repartition'),'woven continuity operator order missing');
@@ -38,8 +42,8 @@ must(studio.includes('<TraversalModeStageR99 variant={variant} address={address}
 must(nav.includes("import './omegaSideNavigatorR100.css'"),'professional rail skin must be active');
 must(nav.includes('r100-professional-nav')&&nav.includes('r100-omega-mark'),'professional instrument rail identity missing');
 for(const token of ["go('Command Center')","go('Hybrid Link')","go('Earth Now')","go('Evidence & Proof')"])must(nav.includes(token),'universal rail quick action missing '+token);
-for(const route of ['Extreme Traversal','Matter Traversal'])must(surfaces.includes(route),`specialized R100 route must remain in the canonical 44-route universe: ${route}`);
-must(nav.includes("aria-label='Browse all registered OMEGA tools'")&&nav.includes('compileNavigationLemmaR242({routes:routeRecords,query,workspaceFilter,currentRoute:currentPanel})')&&nav.includes('rows.map(route=>'),'all 44 destinations, including specialized traversal instruments, must remain reachable through R242-conserved All Tools');
+for(const route of ['Extreme Traversal','Matter Traversal'])must(surfaces.includes(route),`specialized R100 route must remain in the canonical current route universe: ${route}`);
+must(nav.includes("aria-label='Browse all registered OMEGA tools'")&&nav.includes('compileNavigationLemmaR242({routes:routeRecords,query,workspaceFilter,currentRoute:currentPanel})')&&nav.includes('rows.map(route=>'),`all ${surfaces.length} current destinations, including specialized traversal instruments, must remain reachable through R242-conserved All Tools`);
 for(const law of ['WORKSPACE_PARTITION_MUST_CONSERVE_THE_COMPLETE_ROUTE_SET','QUERY_TRANSFORM_MAY_REORDER_PRESENTATION_BUT_MAY_NOT_RENAME_OR_DUPLICATE_ROUTES'])must(navLemma.includes(law),'R242 All Tools conservation law missing '+law);
 must(nav.includes("dataset.omegaNavExpanded=expanded?'true':'false'"),'layout reservation state must remain intact');
 must(!nav.includes('r88-navigator-backdrop'),'professional rail may not regress to modal overlay navigation');
@@ -53,4 +57,4 @@ must(accepted.includes("'R100 woven continuity geometry/time + professional inst
 must(accepted.includes("'R98 unobstructed visual-stage authority'")&&accepted.includes("'R99 source-driven design-mode correlation authority'"),'R100 must extend accepted R98/R99 authority');
 must(![nav,navCss,stage,weave,weaveCss].join('\n').includes('@appdeploy/client'),'R100 must remain provider portable');
 
-console.log('R100/R242 WEAVE INSTRUMENT PASS · professional non-covering universal rail · specialized traversal retained through calculus-conserved All Tools registry · deterministic time-synchronized woven continuity geometry · atlas/address output preserved under R101 effective-resolution extension · R99 modes and 44 routes preserved');
+console.log(`R100/R242/R305 WEAVE INSTRUMENT PASS · professional non-covering universal rail · specialized traversal retained through calculus-conserved All Tools registry · deterministic time-synchronized woven continuity geometry · atlas/address output preserved under R101 effective-resolution extension · R99 modes and ${surfaces.length} current routes preserved · no historical route-count ceiling`);
