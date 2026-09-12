@@ -172,5 +172,6 @@ jobs:
             echo '- Every R284 analytical channel has measurement authority 0; clinical influence remains owned by R282 scope-matched validation and authorization.'
             echo '- R283 SAR proof remains converged here while active workflow topology stays within the R170 maximum of 24.'
             echo '- R153 mutation, R147 dispatch, R146 durable history, R141 exact return, R240 source promotion and R125 sole CanonState admission remain unchanged.'
+            echo '- R201/R203 remain retired.'
             echo '- This workflow is proof-only; ci.yml remains the canonical production writer.'
           } >> "$GITHUB_STEP_SUMMARY"
