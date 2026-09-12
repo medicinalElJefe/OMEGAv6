@@ -83,3 +83,6 @@ async function prove(viewportName,viewport){
 
 for(const [name,viewport] of viewports)await prove(name,viewport);
 console.log('R289 LIVE MASTER-MENU BROWSER PASS · actual R88/R239 navigator · ALL + 12 recovered master menus · existing ALL + six workspace filters retained · master-menu/search composition · same canonical route activation path · desktop/mobile containment · no page errors');
+
+// R306 extends the already-bounded R289 browser suite rather than adding a parallel workflow authority.
+await import('./r306-blade-geometry-browser-e2e.mjs');
