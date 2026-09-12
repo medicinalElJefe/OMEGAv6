@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>assert.ok(ok,'R286 '+msg);
+const must=(ok,msg)=>assert.ok(ok,'R286/R303 '+msg);
 
 await import('./r155-navigation-information-architecture-invariants.mjs');
 await import('./r203-interface-navigation-polish-invariants.mjs');
@@ -18,6 +18,7 @@ const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const shell=read('src/OmegaExperienceShellR257.tsx');
 const side=read('src/OmegaSideNavigatorR88.tsx');
 const adapter=read('src/platformAdapter.ts');
+const browserProof=read('tests/r286-all-surface-browser-e2e.mjs');
 
 must(index.includes('/src/r286InteractionIntegrity.css'),'compatibility layer must be loaded by the canonical HTML root');
 must(compat.includes('presentation only')&&compat.includes('No route, execution, proof, Canon, evidence, or persistence authority'),'compatibility layer must remain presentation-only');
@@ -35,4 +36,18 @@ must(workstation.includes("useEffect(()=>{localState.write('omega.v6.panel',pane
 must(shell.includes("new CustomEvent('omega-r88-open-navigator'")&&side.includes("addEventListener('omega-r88-open-navigator'"),'All systems dispatcher and global navigator listener must remain paired');
 must(adapter.includes('return raw === null ? fallback : JSON.parse(raw) as T'),'panel persistence adapter must decode stored route identity before normalization');
 
-console.log('R286 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + R284/R284.1 truth contracts + exact 78×78 mobile field geometry preserved.');
+for(const token of [
+ "deviceScaleFactor:2,hasTouch:true,isMobile:true,reducedMotion:'reduce'",
+ "matchMedia('(any-pointer: coarse)').matches",
+ "matchMedia('(prefers-reduced-motion: reduce)').matches",
+ '.r88-head-actions button,.r89-nav-mode button,.r94-rail-action,.r89-flat-route',
+ 'x.height<43.5||x.width<43.5',
+ 'controls below 44px',
+ 'active workstation escaped horizontal viewport containment',
+ "if(name==='mobile'&&snap.undersizedTouch.length)",
+ 'R286/R303 ALL-SURFACE BROWSER PASS'
+])must(browserProof.includes(token),`R303 real-browser interaction proof missing ${token}`);
+must(browserProof.includes("expected.length!==44")&&browserProof.includes("for(const route of expected)"),'R303 must strengthen rather than reduce the inherited 44-route traversal');
+must(!browserProof.includes('page.route(')&&!browserProof.includes('Math.random'),'R303 interaction proof must exercise the real built UI without request mocking or random acceptance');
+
+console.log('R286/R303 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + exact 78×78 mobile field geometry + 390px 2×DPR coarse-pointer/reduced-motion browser proof + 44px touch targets + horizontal containment preserved.');
