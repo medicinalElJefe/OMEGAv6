@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R86 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R86/R305 '+msg)};
 const bus=read('src/omegaOperationBusR86.ts');
 const workflow=read('src/omegaWorkflowRuntimeR85.ts');
 const workbench=read('src/OmegaIntentWorkbenchR85.tsx');
@@ -54,7 +54,11 @@ must(evidence.includes("emitOperationR86({type:'PROOF_REFRESHED'")&&evidence.inc
 must(evidence.includes("operationReceipts:readOperationLedgerR86()"),'exported Evidence receipt must carry bounded operation receipts');
 
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
-must(routes.length===44&&new Set(routes).size===44,'44 canonical routes must remain intact');
+const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
+const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+must(routes.length>0&&routes.length===surfaces.length&&new Set(routes).size===routes.length&&new Set(surfaces).size===surfaces.length,'current canonical routes must remain non-empty, unique and registry/workstation aligned');
+for(const route of routes)must(surfaces.includes(route),`R86 registry route missing from workstation ${route}`);
+for(const route of surfaces)must(routes.includes(route),`R86 workstation route missing from registry ${route}`);
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),'deep specialist surface lost '+token);
 
-console.log('R86 OPERATION PROOF BUS PASS · workflows now advance from hashed real operations · Full Overall intent carried into host/modes/visuals · 44/44 routes preserved');
+console.log(`R86/R305 OPERATION PROOF BUS PASS · workflows advance from hashed real operations · Full Overall intent carried into host/modes/visuals · ${routes.length}/${routes.length} current routes preserved by exact registry/workstation equality · no historical route-count ceiling`);
