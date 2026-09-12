@@ -5,17 +5,33 @@ const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,''
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const block=(source.match(/export const OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const expected=[...block.matchAll(/'([^']+)'/g)].map(m=>m[1]);
-if(expected.length!==44||new Set(expected).size!==44)throw new Error(`R286 expected 44 unique canonical surfaces, received ${expected.length}/${new Set(expected).size}`);
+if(expected.length!==44||new Set(expected).size!==44)throw new Error(`R286/R304 expected 44 unique canonical surfaces, received ${expected.length}/${new Set(expected).size}`);
 
-const viewports=[['desktop',{width:1440,height:960}],['mobile',{width:390,height:844}]];
+const profiles=[
+ ['desktop',{viewport:{width:1440,height:960},deviceScaleFactor:1,hasTouch:false}],
+ ['mobile',{viewport:{width:390,height:844},deviceScaleFactor:2,hasTouch:true,isMobile:true}],
+];
 
 async function openNavigator(page){
   if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
   const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
-  if(!await expand.count())throw new Error('R286 global navigator expand control missing');
+  if(!await expand.count())throw new Error('R286/R304 global navigator expand control missing');
   await expand.first().scrollIntoViewIfNeeded();
   await expand.first().click();
   await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
+}
+
+async function verifyNavigatorModeTouchTargets(page,viewportName){
+  if(viewportName!=='mobile')return;
+  const state=await page.evaluate(()=>{
+    const coarse=matchMedia('(any-pointer: coarse)').matches;
+    const buttons=[...document.querySelectorAll('.r89-nav-mode button')].map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||'').replace(/\s+/g,' ').trim(),width:r.width,height:r.height}});
+    return{coarse,buttons};
+  });
+  if(state.coarse!==true)throw new Error(`mobile: R304 expected coarse-pointer emulation, received ${JSON.stringify(state)}`);
+  if(state.buttons.length!==2)throw new Error(`mobile: R304 expected two navigator-mode controls, received ${state.buttons.length}`);
+  const undersized=state.buttons.filter(x=>x.width<43.5||x.height<43.5);
+  if(undersized.length)throw new Error(`mobile: R304 navigator-mode targets below 44px: ${undersized.map(x=>`${x.label} ${x.width.toFixed(1)}×${x.height.toFixed(1)}`).join(' | ')}`);
 }
 
 async function verifyWorkspaceSubmenus(page,viewportName){
@@ -51,7 +67,7 @@ async function clickRoute(page,route){
     const label=(await buttons.nth(i).locator('b').first().textContent().catch(()=>''))?.trim();
     if(label===route){hit=i;break}
   }
-  if(hit<0)throw new Error(`R286 route button missing: ${route}`);
+  if(hit<0)throw new Error(`R286/R304 route button missing: ${route}`);
   const button=buttons.nth(hit);
   await button.scrollIntoViewIfNeeded();
   await button.click({timeout:10000});
@@ -93,14 +109,15 @@ async function verifySarGeometry(page,viewportName){
 
 const browser=await chromium.launch({headless:true});
 try{
-  for(const [name,viewport] of viewports){
-    const context=await browser.newContext({viewport,deviceScaleFactor:1});
+  for(const [name,contextOptions] of profiles){
+    const context=await browser.newContext(contextOptions);
     const page=await context.newPage();
     const pageErrors=[];
     page.on('pageerror',e=>pageErrors.push(String(e)));
-    await page.goto(`${base}/?r286=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(`${base}/?r304=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
     await openNavigator(page);
+    await verifyNavigatorModeTouchTargets(page,name);
     await verifyWorkspaceSubmenus(page,name);
     const navLabels=(await page.locator('.r89-flat-route b').allTextContents()).map(x=>x.trim()).filter(Boolean);
     const unique=[...new Set(navLabels)];
@@ -125,5 +142,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R286 ALL-SURFACE BROWSER PASS · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + 390px mobile · exact data-panel transitions · route-agnostic visible-content proof · enabled control hit geometry · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
+  console.log('R286/R304 ALL-SURFACE BROWSER PASS · mobile navigator-mode controls browser-proven at >=44×44px under coarse-pointer emulation · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + 390px touch mobile · exact data-panel transitions · route-agnostic visible-content proof · enabled control hit geometry · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
 }finally{await browser.close()}
