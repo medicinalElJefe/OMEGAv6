@@ -38,7 +38,7 @@ try{
   const page=await context.newPage();
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
   await page.route('**/api/earth/gibs/global*',route=>route.fulfill({status:200,contentType:'image/png',body:R281_TEXTURE,headers:{'x-omega-source':'R281-BROWSER-OBSERVATION-FIXTURE','x-omega-date':'2026-09-09','x-omega-crs':'EPSG:4326','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION'}}));
-  await page.goto(`${base}/?r2831=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?r285=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   await enterEarth(page,label);
   for(const [name,selector] of EXPECT){
@@ -60,16 +60,14 @@ try{
     const text=await sar.innerText();
     for(const token of ['SAR','source','truth'])if(!text.toLowerCase().includes(token.toLowerCase()))throw new Error(`${label}: R283/R285 SAR surface missing truth-context token ${token}`);
     const workspace=page.locator('.earth-r72-workspace');
-    if(!(await workspace.evaluate(el=>el.classList.contains('sar-active'))))throw new Error(`${label}: SAR Truth did not enter the explicit full-width sar-active workspace state`);
-    if(await page.locator('.earth-r72-console').isVisible())throw new Error(`${label}: generic Earth console must remain hidden while the dedicated SAR workstation owns the active surface`);
+    if(!(await workspace.evaluate(el=>el.classList.contains('sar-active'))))throw new Error(`${label}: SAR Truth did not enter the explicit sar-active workspace state`);
+    const console=page.locator('.earth-r72-console');
+    await console.waitFor({state:'visible',timeout:10000});
+    const consoleText=await console.innerText();
+    if(!consoleText.includes('WGS84 target'))throw new Error(`${label}: SAR target-continuity console lost WGS84 target context`);
+    for(const selector of ['.earth-r72-focus-head','.earth-r72-focus','.earth-r72-truth'])if(await page.locator(selector).isVisible())throw new Error(`${label}: SAR target-continuity console exposed generic evidence-channel clutter ${selector}`);
    }
   }
-  // SAR Truth intentionally owns a full-width workstation and hides the generic Earth console.
-  // Re-enter a standard Earth view before proving the inherited model-target reset control.
-  const satellite=page.locator('.earth-r279-view-tabs button').filter({hasText:'Satellite'}).first();
-  await satellite.click();
-  await page.waitForSelector('.earth-r279-satellite',{state:'visible',timeout:20000});
-  if(await satellite.getAttribute('aria-pressed')!=='true')throw new Error(`${label}: Satellite did not restore the standard Earth workspace before reset proof`);
   const reset=page.getByRole('button',{name:'Return + query model-mapped target'});
   await reset.waitFor({state:'visible',timeout:10000});
   const lat=page.getByLabel('Latitude'),lon=page.getByLabel('Longitude');
@@ -83,5 +81,5 @@ try{
   if(pageErrors.length)throw new Error(`${label}: Earth view browser errors: ${pageErrors.join(' | ')}`);
   await context.close();
  }
- console.log('R279/R281/R283/R285 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth mount distinct surfaces · SAR Truth owns explicit full-width workspace with generic console hidden · R281 Planet renders varied returned-source pixels through orthographic globe projection · standard Earth reset/query target remains functional · no page errors or viewport overflow');
+ console.log('R279/R281/R283/R285 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth mount distinct surfaces · R285 SAR keeps dedicated live workstation plus compact WGS84 target-continuity controls while generic evidence clutter stays hidden · R281 Planet renders varied returned-source pixels · reset/query target works · no page errors or viewport overflow');
 }finally{await browser.close()}
