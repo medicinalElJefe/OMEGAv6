@@ -1,5 +1,5 @@
-/* OMEGA R286 · unified Heavy Bio + interaction / surface integrity compatibility layer
-   Corrects late-layer responsive geometry without mutating the historical R280/R284 source.
+/* OMEGA R286/R307 · unified Heavy Bio + interaction / surface integrity compatibility layer
+   Corrects late-layer responsive geometry without mutating the historical R280/R284/R132 source.
    Authority: presentation only. No route, execution, proof, Canon, evidence, or persistence authority.
    It also owns no Hybrid, Earth-source, or deployment authority. */
 
@@ -7,5 +7,20 @@
   .sar-r280 .r280-canvas{
     grid-template-columns:repeat(78,minmax(0,1fr));
     grid-template-rows:repeat(78,minmax(0,1fr));
+  }
+}
+
+/* R307: the twelve Matter Traversal physical-scale actions are real buttons.
+   On coarse pointers they must remain directly targetable rather than preserving
+   the historical 24px mouse-first strip geometry. The four-column reflow keeps
+   the 44px floor inside the narrowest supported data rail without horizontal overflow. */
+@media (any-pointer:coarse){
+  .r132-scale-strip{
+    grid-template-columns:repeat(4,minmax(44px,1fr));
+  }
+  .r132-scale-strip button{
+    min-width:44px;
+    min-height:44px;
+    height:44px;
   }
 }
