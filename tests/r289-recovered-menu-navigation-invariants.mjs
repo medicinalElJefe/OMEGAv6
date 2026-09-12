@@ -30,8 +30,16 @@ must(launcher.includes('44 routes · 12 recovered menus · ALL MODES'),'launcher
 must(launcher.includes("import './omegaLauncherR289.css'"),'responsive R289 menu layer must be mounted');
 must(launcherCss.includes('overflow-y:auto')&&launcherCss.includes('@media(max-height:760px)')&&launcherCss.includes('@media(max-width:760px)'),'12-menu rail must remain scrollable and responsive on short/mobile viewports');
 
+must(launcher.includes("className='omega-nexus-route'"),'each application row must expose a native route activation control');
+must(launcher.includes("type='button' className='omega-nexus-route'"),'route activator must be a native non-submit button');
+must(launcher.includes("className={'omega-nexus-fav '"),'favorite must remain an independent native button');
+must(launcher.includes("onClick={()=>fav(x.name)}"),'favorite action must not require bubbling through the route control');
+must(!launcher.includes("className='omega-nexus-card' role='button'"),'application row container must not masquerade as a second interactive control');
+must(!launcher.includes('onKeyDown={e=>activate(x.name,e)}')&&!launcher.includes('const activate='),'route keyboard activation must use native button semantics rather than synthetic key dispatch');
+must(launcherCss.includes('.omega-nexus-route:focus-visible')&&launcherCss.includes('.omega-nexus-card:focus-within'),'route and favorite focus must remain visibly represented');
+
 const bindRoutes=[...archive.matchAll(/bindsTo:\[([^\]]+)\]/g)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
 for(const route of [...new Set(bindRoutes)])must(routeNames.includes(route),`recovered Drive authority binds to non-route ${route}`);
 for(const required of ['Archive Census','Archive Operators','Build Out','System Atlas','Modes','Relativity','Matter Traversal','Evidence & Proof','Control Matrix'])must(bindRoutes.includes(required),`recovery corpus must remain visibly bound to ${required}`);
 
-console.log(`R289 RECOVERED MASTER-MENU NAVIGATION PASS · ${routeNames.length} routes · ${menus.length} recovered menus · ${new Set(bindRoutes).size} recovery-bound surfaces · zero orphan routes/bindings`);
+console.log(`R289 RECOVERED MASTER-MENU NAVIGATION PASS · ${routeNames.length} routes · ${menus.length} recovered menus · ${new Set(bindRoutes).size} recovery-bound surfaces · zero orphan routes/bindings · route/favorite controls use independent native semantics`);
