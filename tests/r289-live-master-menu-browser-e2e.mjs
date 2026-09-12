@@ -35,11 +35,16 @@ async function prove(viewportName,viewport){
   const workspace=page.getByRole('navigation',{name:'Application workspace submenu'});
   if(await workspace.locator('button').count()!==7)throw new Error(`${viewportName}: existing ALL + six workspace controls were not preserved`);
 
+  const workspaceAll=workspace.locator('button').first();
+  const workspaceAllText=(await workspaceAll.innerText()).replace(/\s+/g,' ').trim();
+  const expectedTotal=Number(workspaceAllText.match(/\d+/)?.[0]||0);
+  if(expectedTotal<1)throw new Error(`${viewportName}: current ALL workspace telemetry is invalid: ${workspaceAllText}`);
   await masterButtons.first().click();
+  await workspaceAll.click();
   await page.waitForFunction(()=>document.querySelector('#omega-global-navigator')?.getAttribute('data-master-menu')==='ALL',undefined,{timeout:10000});
   let routes=await visibleRouteSnapshot(page);
-  if(routes.length!==44)throw new Error(`${viewportName}: ALL MENUS did not expose all 44 canonical routes; received ${routes.length}`);
-  if(new Set(routes.map(x=>x.name)).size!==44)throw new Error(`${viewportName}: ALL MENUS contains duplicate route identities`);
+  if(routes.length!==expectedTotal)throw new Error(`${viewportName}: ALL MENUS did not expose all ${expectedTotal} current routes; received ${routes.length}`);
+  if(new Set(routes.map(x=>x.name)).size!==expectedTotal)throw new Error(`${viewportName}: ALL MENUS contains duplicate/missing route identities for current total ${expectedTotal}`);
 
   const perMenu=new Map();
   for(let i=0;i<expectedMenus.length;i++){
@@ -52,6 +57,8 @@ async function prove(viewportName,viewport){
    if(routes.some(x=>x.master!==id))throw new Error(`${viewportName}: recovered menu ${id} leaked route(s) from another menu: ${JSON.stringify(routes.filter(x=>x.master!==id))}`);
    perMenu.set(id,routes.length);
   }
+  const owned=[...perMenu.values()].reduce((sum,count)=>sum+count,0);
+  if(owned!==expectedTotal)throw new Error(`${viewportName}: 12 recovered menus must partition the complete current route universe exactly once; owned=${owned} current=${expectedTotal}`);
 
   const menu01=masterButtons.nth(1);await menu01.click();
   await page.waitForFunction(()=>document.querySelector('#omega-global-navigator')?.getAttribute('data-master-menu')==='01',undefined,{timeout:10000});
@@ -64,8 +71,8 @@ async function prove(viewportName,viewport){
   await search.fill('');
 
   await masterButtons.first().click();
-  await workspace.locator('button').first().click();
-  await page.waitForFunction(()=>document.querySelectorAll('.r89-flat-route').length===44,undefined,{timeout:10000});
+  await workspaceAll.click();
+  await page.waitForFunction(total=>document.querySelectorAll('.r89-flat-route').length===total,expectedTotal,{timeout:10000});
   const route=page.locator('.r89-flat-route').first();
   const routeName=await route.getAttribute('data-route-name');if(!routeName)throw new Error(`${viewportName}: canonical route identity missing`);
   await route.scrollIntoViewIfNeeded();await route.click();
@@ -77,9 +84,9 @@ async function prove(viewportName,viewport){
   const menuGeometry=await master.evaluate(el=>({clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,overflowX:getComputedStyle(el).overflowX}));
   if(!['auto','scroll'].includes(menuGeometry.overflowX))throw new Error(`${viewportName}: recovered-menu row is not horizontally scroll-contained`);
   if(errors.length)throw new Error(`${viewportName}: browser page errors ${errors.join(' | ').slice(0,3000)}`);
-  console.log(`R289 ${viewportName.toUpperCase()} PASS · 12 recovered menus · ${[...perMenu.entries()].map(([id,count])=>`${id}:${count}`).join(' ')} · 44-route ALL restore · search intersection · workspace preservation · native route activation · overflow ${overflow}px`);
+  console.log(`R289/R305 ${viewportName.toUpperCase()} PASS · 12 recovered menus · ${[...perMenu.entries()].map(([id,count])=>`${id}:${count}`).join(' ')} · ${expectedTotal}-route current ALL restore · exact menu partition · search intersection · workspace preservation · native route activation · overflow ${overflow}px · no historical route-count ceiling`);
  }finally{await context.close();await browser.close()}
 }
 
 for(const [name,viewport] of viewports)await prove(name,viewport);
-console.log('R289 LIVE MASTER-MENU BROWSER PASS · actual R88/R239 navigator · ALL + 12 recovered master menus · existing ALL + six workspace filters retained · master-menu/search composition · same canonical route activation path · desktop/mobile containment · no page errors');
+console.log('R289/R305 LIVE MASTER-MENU BROWSER PASS · actual R88/R239 navigator · ALL + 12 recovered master menus · existing ALL + six workspace filters retained · dynamic current-route partition · master-menu/search composition · same canonical route activation path · desktop/mobile containment · no historical route-count ceiling · no page errors');
