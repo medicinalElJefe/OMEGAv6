@@ -32,7 +32,13 @@ const assertClosingTruth=async reason=>{
  if(!(await nav.evaluate(el=>el.inert)))throw new Error(`R239 ${reason} did not make navigator inert immediately`);
  await nav.waitFor({state:'hidden'});
 };
-const openAllTools=async()=>{if(await nav.getAttribute('aria-hidden')==='true')await page.getByLabel('Browse all registered OMEGA tools').click();await nav.waitFor({state:'visible'});const all=nav.getByRole('button',{name:/^ALL\s+44$/});if(await all.count())await all.click()};
+const openAllTools=async()=>{
+ if(await nav.getAttribute('aria-hidden')==='true')await page.getByLabel('Browse all registered OMEGA tools').click();
+ await nav.waitFor({state:'visible'});
+ const all=nav.getByRole('button',{name:/^ALL\s+\d+$/});
+ if(await all.count()!==1)throw new Error('R239 dynamic ALL route-count control missing');
+ await all.click();
+};
 await allTools.click();
 await nav.waitFor({state:'visible'});
 const contextualText=await nav.innerText();
@@ -42,6 +48,10 @@ if(await exploreFilter.count()!==1)throw new Error('R239 contextual Explore work
 const expectedExploreCount=Number((await exploreFilter.innerText()).match(/\d+/)?.[0]||0);
 const contextualRouteCount=await nav.locator('.r89-flat-route').count();
 if(expectedExploreCount<1||contextualRouteCount!==expectedExploreCount)throw new Error(`R239 contextual Explore browser count mismatch: filter=${expectedExploreCount} rendered=${contextualRouteCount}`);
+const allFilter=nav.getByRole('button',{name:/^ALL\s+\d+$/});
+if(await allFilter.count()!==1)throw new Error('R239 current ALL route-count control missing');
+const expectedTotalCount=Number((await allFilter.innerText()).match(/\d+/)?.[0]||0);
+if(expectedTotalCount<1)throw new Error(`R239 current registered route total is invalid: ${expectedTotalCount}`);
 for(const label of ['Open Command Center','Open Hybrid Link','Open Earth Now','Open Evidence and Proof','Browse all registered OMEGA tools','Browse full software and capability map'])if(!(await page.getByLabel(label).count()))throw new Error(`R239 permanent rail missing ${label}`);
 if(await page.getByLabel('Open Woven Continuity traversal instrument').count())throw new Error('R239 permanent rail still contains specialized Weave shortcut');
 if(await page.getByLabel('Open Matter Traversal').count())throw new Error('R239 permanent rail still contains specialized Matter shortcut');
@@ -54,8 +64,8 @@ for(const workspace of ['Command','Explore','Intelligence','Evidence','Build','S
  if(await nav.locator('.r89-flat-route').count()<1)throw new Error(`R239 navigator workspace ${workspace} exposes no registered routes`);
 }
 
-// ALL is a deliberate second step from a contextual Home launch and must restore the complete registry.
-await nav.getByRole('button',{name:/^ALL\s+44$/}).click();
+// ALL is a deliberate second step from a contextual Home launch and must restore the complete current registry.
+await allFilter.click();
 const globalText=await nav.innerText();
 for(const token of ['All tools','Command','Explore','Intelligence','Evidence','Build','System','PRIMARY','SUPPORT','EXPERT'])if(!globalText.includes(token))throw new Error(`R239 global navigator missing ${token}`);
 const search=nav.getByLabel('Search all registered OMEGA applications');
@@ -63,14 +73,15 @@ await search.fill('Hybrid');
 if(await nav.locator('.r89-flat-route').count()<1)throw new Error('R239 complete-registry search cannot find Hybrid');
 await search.fill('');
 const routeRows=nav.locator('.r89-flat-route');
-if(await routeRows.count()!==44)throw new Error(`R239 All Tools must expose all 44 registered routes, saw ${await routeRows.count()}`);
+if(await routeRows.count()!==expectedTotalCount)throw new Error(`R239 All Tools must expose all ${expectedTotalCount} current registered routes, saw ${await routeRows.count()}`);
 const routeIdentities=await routeRows.evaluateAll(rows=>rows.map(row=>({
  routeId:row instanceof HTMLElement?(row.dataset.routeId||''):'',
  routeName:(row.querySelector(':scope > span > b')?.textContent||'').trim()
 })));
 const routeNames=routeIdentities.map(x=>x.routeName),routeIds=routeIdentities.map(x=>x.routeId);
-if(routeNames.some(x=>!x)||new Set(routeNames).size!==44)throw new Error('R239 All Tools contains duplicate/missing presentation route names');
-if(routeIds.some(x=>!x)||new Set(routeIds).size!==44)throw new Error('R239 All Tools contains duplicate/missing R143 machine route identities');
+if(routeIdentities.length!==expectedTotalCount)throw new Error(`R239 route identity count drifted from current ALL telemetry: ${routeIdentities.length}/${expectedTotalCount}`);
+if(routeNames.some(x=>!x)||new Set(routeNames).size!==routeIdentities.length)throw new Error('R239 All Tools contains duplicate/missing presentation route names');
+if(routeIds.some(x=>!x)||new Set(routeIds).size!==routeIdentities.length)throw new Error('R239 All Tools contains duplicate/missing R143 machine route identities');
 
 const tech=nav.getByRole('button',{name:'Technical',exact:true});
 if(await tech.getAttribute('aria-pressed')!=='false')throw new Error('R239 technical metadata should default off');
@@ -167,5 +178,5 @@ if(!box||box.width>365)throw new Error(`R239 mobile navigator too wide: ${box?.w
 if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error('R239 mobile product introduces horizontal viewport overflow');
 if(pageErrors.length)throw new Error(`R239 page errors: ${pageErrors.join(' | ')}`);
 
-console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · unique R143 machine route identity + presentation binding · active-workstation/ancestor-aware visible-canvas sanity · universal rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · mobile containment');
+console.log(`R239/R305 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive ${routeIdentities.length}-route activation sweep from live catalog telemetry · unique R143 machine route identity + presentation binding · active-workstation/ancestor-aware visible-canvas sanity · universal rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · mobile containment · no historical route-count ceiling`);
 await browser.close();
