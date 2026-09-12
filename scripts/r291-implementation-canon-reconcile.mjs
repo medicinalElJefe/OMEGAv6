@@ -6,7 +6,7 @@ import crypto from 'node:crypto';
 const ROOT=path.resolve(process.cwd());
 const DATA=path.join(ROOT,'data','implementation-canon-r291.json.gz.b64');
 const EXPECTED_ROWS=675;
-const EXPECTED_PAYLOAD_SHA256='d39ca1793694678516f6b5669ac60a651bcd68892164bb54082db9cfc0c26748';
+const EXPECTED_PAYLOAD_SHA256='8eb1d334cf1a1cbb6e7633b0f90e37893e1d95560de2cfe334e6a076cdbeb904';
 const STATES=['IMPLEMENTED','PARTIAL','SUPERSEDED','DONOR','PLANNED','REJECTED'];
 const ACTIVE_ROOTS=['src','tests','scripts','public','docs','.github/workflows'];
 const EXCLUDED_PREFIXES=['.github/workflows-archive/','node_modules/','dist/','.git/','.wrangler/','artifacts/','data/'];
