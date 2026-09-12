@@ -67,10 +67,11 @@ jobs:
           node tests/r283-sar-full-stack-invariants.mjs
           for f in tests/r280-*.mjs; do node "$f"; done
 
-      - name: Prove R285 Heavy Bio medical-production and 241-mode boundaries
+      - name: Prove R286 Heavy Bio medical-production, 241-mode and interaction boundaries
         run: |
           npx --yes tsx tests/r282-bio-medical-production-invariants.mts
           npx --yes tsx tests/r284-bio-mode-experience-invariants.mts
+          node tests/r286-ui-interaction-integrity-invariants.mjs
 
       - name: Prove R279/R284 Earth truth and WGS84 geometry
         run: |
@@ -88,7 +89,7 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
-      - name: Prove built R241/R239/R242/R245/R279/R281/R282/R283/R284/R285 convergence in the real UI
+      - name: Prove built R241/R239/R242/R245/R279/R281/R282/R283/R284/R286 convergence in the real UI
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
@@ -104,6 +105,7 @@ jobs:
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r281-bio-instrument-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r282-bio-medical-production-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r284-bio-mode-workbench-browser-e2e.mjs
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r286-all-surface-browser-e2e.mjs
 
       - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'pull_request'
@@ -137,7 +139,7 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + Navigation + Full Canon + Earth/SAR + R281/R282/R285 Heavy Bio proof'
+            echo '## R241 Archive Convergence + Navigation + Full Canon + Earth/SAR + R281/R282/R286 Heavy Bio/UI proof'
             echo "- Candidate: $GITHUB_SHA"
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
             echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
@@ -150,8 +152,9 @@ jobs:
             echo '- R284 WGS84 Planet keeps returned NASA GIBS source brightness distinct from UTC illumination, terminator, grid and other declared rendering transforms.'
             echo '- R281 preserves calibrated instrument evidence, uncertainty, provenance, 12 domains, 12 context layers, seven physical scales and the 62-mode canon overlay.'
             echo '- R282 preserves intended-use measurands, freshness/unit/AMR/uncertainty gates, risk, audit, controlled change and clinical-release authority separation.'
-            echo '- R285 exposes all 241 analytical channels through metadata-bound menus, evidence filters, mode-specific analytical visuals, education and read-only comparison without inventing biological mappings.'
-            echo '- Every R285 analytical channel retains measurement authority 0; clinical influence remains owned by R282 scope-matched validation and explicit authorization.'
+            echo '- R286 exposes all 241 analytical channels through metadata-bound menus, evidence filters, mode-specific analytical visuals, education and read-only comparison without inventing biological mappings.'
+            echo '- R286 also pointer-verifies ALL + six workspace submenus and all 44 canonical routes on desktop/mobile and preserves exact 78×78/6,084-cell SAR geometry on mobile.'
+            echo '- Every analytical channel retains measurement authority 0; clinical influence remains owned by R282 scope-matched validation and explicit authorization.'
             echo '- R239 navigation remains converged: six workspaces, complete route registry, immediate aria-hidden/inert close, exhaustive route activation and mobile containment.'
             echo '- R153 mutation, R147 dispatch, R146 durable history, R141 exact return, R240 source promotion and R125 sole CanonState admission remain unchanged.'
             echo '- R201/R203 remain retired.'
