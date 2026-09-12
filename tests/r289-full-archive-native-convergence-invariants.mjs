@@ -1,3 +1,4 @@
+import './r289-recovered-menu-navigation-invariants.mjs';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(`R289 full convergence invariant failed: ${msg}`)};
@@ -47,4 +48,4 @@ must(interaction.includes('44')||interaction.includes('OMEGA_SURFACES'),'R286 in
 for(const token of ['NO_NEW_PHYSICAL_PRIMITIVE','ADDRESS_LEVEL_NEQ_LITERAL_PHYSICAL_DIMENSION','DRIVE_FILE_PRESENCE_NEQ_RUNTIME_EXECUTION'])must(archiveNative.includes(token),`truth invariant missing ${token}`);
 must(archiveNative.includes('R125')&&archiveNative.includes('R240')&&archiveNative.includes('CI'),'archive-native convergence must preserve existing Canon/source/deployment authority');
 
-console.log(`R289 FULL ARCHIVE-NATIVE CONVERGENCE PASS · ${surfaces.length} routes · ${genomeIds.length} typed archive genome rows · 24 current software families · R282/R284 Heavy Bio · R286 full-surface UI · Drive-native authority registry · no new route/state/promotion authority`);
+console.log(`R289 FULL ARCHIVE-NATIVE CONVERGENCE PASS · ${surfaces.length} routes · ${genomeIds.length} typed archive genome rows · 24 current software families · 12 recovered master menus · R282/R284 Heavy Bio · R286 full-surface UI · Drive-native authority registry · no new route/state/promotion authority`);
