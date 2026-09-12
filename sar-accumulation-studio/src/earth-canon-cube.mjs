@@ -21,8 +21,8 @@ export const EARTH_SOURCE_FAMILIES=Object.freeze({
   TERRARIUM_DEM:{label:'AWS Terrain Tiles / Terrarium',kind:'TOPOGRAPHY',status:'LIVE_RUNTIME',observable:'elevation',evidence:'CONTEXT'},
   JRC_WATER:{label:'EC JRC Global Surface Water',kind:'WATER',status:'LIVE_RUNTIME',observable:'historical surface-water cartography',evidence:'CONTEXT'},
   USGS_SEISMIC:{label:'USGS earthquakes',kind:'SEISMIC_EVENT',status:'LIVE_RUNTIME',observable:'earthquake event metadata',evidence:'CONTEXT'},
-  NASA_EONET:{label:'NASA EONET',kind:'EARTH_EVENT',status:'LIVE_RUNTIME',observable:'natural-event metadata',evidence:'CONTEXT'},
-  GNSS:{label:'GNSS / GPS geodesy',kind:'GEODESY',status:'DOCUMENTED_ADAPTER_PENDING',observable:'position / displacement / velocity time series',evidence:'MEASURED_WHEN_SOURCE_PROVEN'},
+  NASA_EONET:{label:'NASA EONET events',kind:'EARTH_EVENT',status:'LIVE_RUNTIME',observable:'natural-event metadata',evidence:'CONTEXT'},
+  GNSS:{label:'EarthScope / NSF NGF GNSS geodesy',kind:'GEODESY',status:'LIVE_SOURCE_PROVEN_ADAPTER',observable:'station support / position / velocity / derived local velocity gradient',evidence:'MEASURED_WHEN_SOURCE_PROVEN'},
   STRAIN:{label:'Borehole strain',kind:'GEODESY',status:'DOCUMENTED_ADAPTER_PENDING',observable:'strain time series',evidence:'MEASURED_WHEN_SOURCE_PROVEN'},
   SEISMIC:{label:'Borehole / station seismic',kind:'SEISMOLOGY',status:'DOCUMENTED_ADAPTER_PENDING',observable:'seismic waveform / event state',evidence:'MEASURED_WHEN_SOURCE_PROVEN'},
   TILT:{label:'Tiltmeter',kind:'GEODESY',status:'DOCUMENTED_ADAPTER_PENDING',observable:'tilt / rotation time series',evidence:'MEASURED_WHEN_SOURCE_PROVEN'},
@@ -104,7 +104,7 @@ export function buildCanonicalEarthCube(packets=[],previous=null){
   for(let i=0;i<normalized.length;i++)for(let j=i+1;j<normalized.length;j++){const c=contradictionBetween(normalized[i],normalized[j]);if(c>0){contradictionSum+=c;contradictionPairs++;}}
   const measurementSupport=normalized.filter(p=>p.measured).reduce((s,p)=>s+p.continuity,0)/Math.max(1,measured),sourceDiversity=Object.keys(bySource).length,contradiction=contradictionPairs?contradictionSum/contradictionPairs:0;
   const missingPenalty=normalized.length?unknown/normalized.length:1,continuity=clamp01(.55*measurementSupport+.18*clamp01(sourceDiversity/6)+.17*(1-contradiction)+.10*(1-missingPenalty)),burden=clamp01(.48*missingPenalty+.30*clamp01(scars.length/Math.max(1,normalized.length))+.22*contradiction),gate=mode188FromChart({C:continuity,Lambda:burden,q:contradiction});
-  const exact=normalized.some(p=>p.exactMeasured&&p.measured),regional=normalized.some(p=>p.regionalMeasured&&p.measured),terrain=normalized.some(p=>p.sourceFamily==='TERRARIUM_DEM'&&(p.evidenceClass==='CONTEXT'||p.evidenceClass==='DERIVED_FROM_MEASURED')),temporal=normalized.some(p=>p.parameter==='temporal_backscatter_change'&&p.evidenceClass==='DERIVED_FROM_MEASURED'),water=normalized.some(p=>p.sourceFamily==='JRC_WATER'||p.parameter==='topographic_flow_potential');
+  const exact=normalized.some(p=>p.exactMeasured&&p.measured),regional=normalized.some(p=>p.regionalMeasured&&p.measured),terrain=normalized.some(p=>p.sourceFamily==='TERRARIUM_DEM'&&(p.evidenceClass==='CONTEXT'||p.evidenceClass==='DERIVED_FROM_MEASURED')),temporal=normalized.some(p=>p.parameter==='temporal_backscatter_change'&&p.evidenceClass==='DERIVED_FROM_MEASURED'),water=normalized.some(p=>p.sourceFamily==='JRC_WATER'||p.parameter==='topographic_flow_potential'),geodesy=normalized.some(p=>p.sourceFamily==='GNSS'&&p.canClaimLiveMeasurement===true);
   const renderPlan={
     authority:exact?'EXACT_MEASURED_SAR':regional?'REGIONAL_MEASURED_SAR':measured?'MEASURED_EVIDENCE':'SOURCE_OR_CONTEXT_ONLY',
     primarySurface:exact?'EXACT_CANONICAL_SHAPE':regional?'REGIONAL_CANONICAL_SHAPE':terrain?'TERRAIN_RELIEF':'EARTH_CONTEXT',
@@ -112,10 +112,11 @@ export function buildCanonicalEarthCube(packets=[],previous=null){
     terrainWeight:terrain?(measured?.32:.82):0,
     waterWeight:water?.14:0,
     temporalWeight:temporal?.22:0,
+    geodesyWeight:geodesy?.18:0,
     reconstructionWeight:measured?.025:.18,
     contextCeiling:measured?.10:.72,
-    modesAvailable:['MEASURED_DETAIL','MEASURED_SIGMA0','SPATIAL_GRADIENT','SPATIAL_CURVATURE','LOCAL_TEXTURE',...(terrain?['SAR_DEM_RELIEF']:[]),...(temporal?['TEMPORAL_CHANGE']:[]),...(water?['WATER_GEOMETRY_CONTEXT']:[]),'EVIDENCE_PROVENANCE','MODE188_COHERENCE'],
-    rule:'Measured evidence owns the image. Derived fields shape or explain the display only when source-backed; context is subordinate; reconstruction never overwrites measurement; unknown stays unknown.'
+    modesAvailable:['MEASURED_DETAIL','MEASURED_SIGMA0','SPATIAL_GRADIENT','SPATIAL_CURVATURE','LOCAL_TEXTURE',...(terrain?['SAR_DEM_RELIEF']:[]),...(temporal?['TEMPORAL_CHANGE']:[]),...(water?['WATER_GEOMETRY_CONTEXT']:[]),...(geodesy?['GNSS_VELOCITY_CONTEXT','GNSS_DERIVED_VELOCITY_GRADIENT']:[]),'EVIDENCE_PROVENANCE','MODE188_COHERENCE'],
+    rule:'Measured SAR owns the image when present. Other measured domains remain source-identified co-evidence; derived fields shape or explain the display only when source-backed; context is subordinate; reconstruction never overwrites measurement; unknown stays unknown.'
   };
   const priorScars=Array.isArray(previous?.scars)?previous.scars:[],scarLedger=[...priorScars.slice(-96),...scars].slice(-128);
   return Object.freeze({schema:'omega.earth.canon.cube.v1',updatedAt:nowIso(),axes:['x','y','z/context','t','source','parameter','evidence','mode'],atlas:FOLD_SCALE_CANON.stateSpace,packets:normalized,bySource,byEvidence,summary:{packets:normalized.length,measured,derived,context,reconstructed,unknown,sourceDiversity,continuity,burden,contradiction,omega:continuity/(1+burden+Math.abs(contradiction)),mode188:gate},renderPlan,scars:scarLedger,english:EARTH_CANON_ENGLISH,boundary:'This cube is a provenance/evidence/computation structure. It does not convert context, reconstruction, catalog footprints, charted Canon variables, or documented future adapters into physical measurements.'});
