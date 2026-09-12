@@ -18,7 +18,7 @@ That is stronger than asking whether all six unlabeled edges merely exist.
 
 ## Why the criterion is equivalent inside the bounded atlas
 
-Fixed-column uniqueness is already a proved reduction: for fixed `k`, `n -> C(n,k)` is strictly increasing on the left-half domain `n >= 2k`. Therefore a given exact coefficient label selects at most one row in each participating column.
+The fixed-column uniqueness reduction is already proved: for fixed `k`, `n -> C(n,k)` is strictly increasing on the left-half domain `n >= 2k`. Therefore a given exact coefficient label selects at most one row in each participating column.
 
 Consequently, if one label survives all six pair edges, the same exact integer coefficient has one representation in each of the four columns and therefore forms a coherent four-column fiber. Conversely, any four-column common fiber creates all six pair edges with that same label.
 
