@@ -1,0 +1,17 @@
+{
+  "schema": "OMEGA_NATIVE_GPU_ARCHIVE_ADMISSION_R291",
+  "sourceFamily": "OMEGA GPU Hierarchical Skin Workstation v12.1 / v15 reconstruction donor",
+  "authority": "DONOR_ONLY_UNTIL_HOST_PROOF",
+  "sources": [
+    {"name":"parenting_compiler.py","driveId":"1Vk-catIK7G71sav_m2MMqJbgnFNYwm8R","archiveSha256":"e8d400b2e0e854973825c9610ad8f58c1fa35607ae4a41e1877da75c9a176c43","bytes":6444,"r291State":"RECOVERED_SOURCE","proof":"20,736 packets / 20,735 edges / four-level ancestry / validator PASS"},
+    {"name":"hierarchical_supersampler.py","driveId":"1l4lTqTCCmbJQxZP1S-oHc58fScJMHUFf","archiveSha256":"7fa8f26ce657fce3d991c34d8b9b7b42b4570a9f132f296a84b79343a4adb1ec","bytes":18415,"r291State":"RECOVERED_SOURCE","proof":"controlled 192x128 bounded-closure probe: preclosure RMSE 8.0955; final RMSE 0.5758; max error 8; open gaps 0"},
+    {"name":"embodiment_renderer.py","driveId":"1KG_221VpdfkhTxfhzjMEh4OB_BvG0_-5","archiveSha256":"f014b33ac8cc2abe1c292920084b318869cbd2bd56c71a695a01a482ad076101","bytes":31185,"r291State":"DEVICE_GATED_SOURCE","proof":"Python compile PASS; static GLSL contract PASS; live OpenGL/ModernGL device/window proof still required"}
+  ],
+  "boundaries": [
+    "20,736 is a logical packet/address lattice, not a literal physical-dimensional claim.",
+    "The supersampler reconstructs and bounded-closes supplied source imagery; it does not invent unseen photoreal detail.",
+    "The interactive renderer is not a physically based path tracer, neural diffusion renderer, or production CAD kernel.",
+    "Archived rendering/state code cannot become a second Canon, state-writer, Hybrid, or deployment authority.",
+    "Live GPU execution may be claimed only after exact source/hash plus device/context/render/capture proof on the sovereign host."
+  ]
+}
