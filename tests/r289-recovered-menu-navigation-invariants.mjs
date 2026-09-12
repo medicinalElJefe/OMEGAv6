@@ -1,3 +1,4 @@
+import './r290-navigation-contract-closure-invariants.mjs';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(`R289 recovered-menu invariant failed: ${msg}`)};
