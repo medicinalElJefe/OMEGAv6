@@ -7,10 +7,11 @@ export const R21_MODE_AUTHORITY={
     'dewey_canon_phase2_objective_workbook.xlsx / Mode Ledger',
     'Dewey_Calculus_20736D_Complete_Trig_Water_Mode188_Atlas.xlsx / README + Mode Registry',
     'Dewey_Calculus_20736D_ENTIRE_Full_Canon_Trig_Water_Scar_Mode188_Atlas.xlsx / Formula_Ledger',
+    'OMEGA FULL CANON MODE WITH ATLAS / Formula_Ledger + 20,736-row formal atlas',
     'OMEGA_ALL_SOFTWARE_61917364224D_FULL_BUILD_v22.xlsx / TEST_MATRIX_ALL',
     'OMEGA_Master_Ledger_Milestone03.xlsx / Module_Dependencies'
   ],
-  boundary:'Only operators whose required inputs are present in the canonical packet are executed. Catalog names, semantic similarity and representation dimensions are never treated as execution or empirical proof.'
+  boundary:'Only operators whose required inputs are present in the canonical packet or exactly reconstructable from a declared formal source atlas are executed. Catalog names, semantic similarity and representation dimensions are never treated as execution or empirical proof.'
 } as const;
 
 export type SourceBackedModeState='EXECUTED_EXACT'|'SOURCE_PACKET'|'DERIVED_RUNTIME'|'GATED_MISSING_INPUTS';
@@ -22,10 +23,29 @@ const EPS=1e-9;
 const finite=(x:any)=>Number.isFinite(Number(x));
 const num=(x:any)=>finite(x)?Number(x):0;
 const fmt=(x:number)=>Number.isFinite(x)?Number(x.toFixed(6)):0;
+const clamp01=(x:number)=>Math.max(0,Math.min(1,x));
+
+export function canonicalFullCanonTermsR308(record:any){
+  const coordinates=record?.coordinates||{};
+  const d=Math.max(0,Math.min(11,Math.floor(num(coordinates.d))));
+  const p=Math.max(0,Math.min(11,Math.floor(num(coordinates.p))));
+  const r=Math.max(0,Math.min(11,Math.floor(num(coordinates.r))));
+  const l=Math.max(0,Math.min(11,Math.floor(num(coordinates.l))));
+  const domainIndex=d+1,stateIndex=p+1,phaseStep=Math.PI/6;
+  const baseCoherence=clamp01((1+Math.cos((domainIndex+stateIndex-2)*phaseStep))/2);
+  const structureVector=clamp01((1+Math.sin(domainIndex*phaseStep))/2);
+  const compressionVector=clamp01((1+Math.cos((stateIndex+1)*phaseStep))/2);
+  const traversalVector=clamp01((1+Math.sin((domainIndex+stateIndex-2)*phaseStep))/2);
+  const waterBasin=clamp01((1+Math.cos((r-l)*phaseStep))/2);
+  const motherMode=waterBasin*.618+compressionVector*.382;
+  const fatherMode=structureVector*.618+traversalVector*.382;
+  const unifiedCoherence=clamp01((baseCoherence+motherMode+fatherMode+waterBasin)/4);
+  return{domainIndex,stateIndex,trigIndex:r+1,waterIndex:l+1,baseCoherence,structureVector,compressionVector,traversalVector,waterBasin,motherMode,fatherMode,unifiedCoherence,sourceClass:'FORMAL_CANON_ATLAS' as const};
+}
 
 export function evaluateSourceBackedModes(record:any):SourceBackedModeResult[]{
   const C=num(record?.metrics?.continuity),Phi=num(record?.metrics?.plasticity),q=num(record?.metrics?.contradiction),Lambda=num(record?.metrics?.burden),scar=num(record?.metrics?.scar),evidence=num(record?.metrics?.evidence);
-  const prev=corpusState((Number(record?.address||0)+20735)%20736),angle=num(record?.geometry?.phi)*Math.PI*2;
+  const prev=corpusState((Number(record?.address||0)+20735)%20736),angle=num(record?.geometry?.phi)*Math.PI*2,canon=canonicalFullCanonTermsR308(record);
   const exact=(id:string,name:string,formula:string,source:string,value:number|string,inputs:string[],detail:string):SourceBackedModeResult=>({id,name,state:'EXECUTED_EXACT',formula,source,value:typeof value==='number'?fmt(value):value,inputs,missing:[],detail});
   const packet=(id:string,name:string,formula:string,source:string,value:number|string,inputs:string[],detail:string,state:SourceBackedModeState='SOURCE_PACKET'):SourceBackedModeResult=>({id,name,state,formula,source,value:typeof value==='number'?fmt(value):value,inputs,missing:[],detail});
   const gated=(id:string,name:string,formula:string,source:string,inputs:string[],missing:string[],detail:string):SourceBackedModeResult=>({id,name,state:'GATED_MISSING_INPUTS',formula,source,value:null,inputs,missing,detail});
@@ -44,12 +64,12 @@ export function evaluateSourceBackedModes(record:any):SourceBackedModeResult[]{
     packet('M012','Guidance Field','STAY / TURN / ESCALATE source decision','phase2 Mode Ledger',String(record?.metrics?.decision||'UNKNOWN'),['predict.decision'],'Exact categorical source decision. The donor ledger names max(S,T,E), but the three raw candidate score channels are not separately present.'),
     packet('M013','Future Plasticity','Φ source packet channel','20736D source packet',Phi,['Φ'],'Current packet future-plasticity/recoverability channel; no claim of physical dimension.'),
     packet('M014','Evidence / Proof Weight','identity.Evidence_Weight','20736D source packet',evidence,['Evidence_Weight'],'Source evidence weight only. Verified/Claimed counts needed by the separate P=Verified/Claimed operator are not silently inferred.'),
-    gated('M015','Deep Mother Mode','Mother=(CΩ·Care)/(Λ+ε)','phase2 Mode Ledger',['CΩ','Care','Λ'],['Care'],'Exact donor formula is preserved but execution is gated because Care is not an authoritative packet input.'),
-    gated('M016','High Father Mode','Father=(Proof·Aim)/(q+Λ+ε)','phase2 Mode Ledger',['Proof','Aim','q','Λ'],['Aim','Proof count/score'],'Exact donor formula is preserved but execution is gated because Aim and an authoritative Proof input are absent.'),
+    exact('M015','Deep Mother Mode','Mother_Mode=Water_Basin·0.618+Compression_Vector·0.382','OMEGA FULL CANON MODE WITH ATLAS / Formula_Ledger',canon.motherMode,['Water_Basin','Compression_Vector'],'R308 restores the exact Full Canon formal operator from the 20,736-row atlas. Water_Basin and Compression_Vector are reconstructed from the same declared address geometry; this is formal-model output, not empirical measurement.'),
+    exact('M016','High Father Mode','Father_Mode=Structure_Vector·0.618+Traversal_Vector·0.382','OMEGA FULL CANON MODE WITH ATLAS / Formula_Ledger',canon.fatherMode,['Structure_Vector','Traversal_Vector'],'R308 restores the exact Full Canon formal operator from the 20,736-row atlas. Structure and traversal vectors are reconstructed from the same declared address geometry; this is formal-model output, not empirical measurement.'),
     gated('M017','RAFT-188','RAFT=R+A+F+T','phase2 Mode Ledger',['Recovery','Anchor','Forecast','Transform'],['Recovery','Anchor','Transform'],'Formula retained; missing terms are not replaced with proxies.'),
     gated('M018','Gamma Admission Loop','Γ=Novelty·Fit·Proof','phase2 Mode Ledger',['Novelty','Fit','Proof'],['Novelty','Fit','Proof'],'Admission formula retained; missing calibrated inputs keep it gated.'),
     gated('M019','Renderer Cluster','R=Σ(layer_i·weight_i)','phase2 Mode Ledger',['layer_i','weight_i'],['authoritative layer weights'],'Renderer-composition law retained; the current packet does not supply the complete calibrated layer-weight vector.'),
-    gated('M020','Unified Coherence full blend','MAX(0,MIN(1,(Base_Coherence+Mother_Mode+Father_Mode+Water_Basin)/4))','Full Canon Formula_Ledger',['Base_Coherence','Mother_Mode','Father_Mode','Water_Basin'],['Mother_Mode','Father_Mode','Water_Basin'],'This alternate donor blend is not substituted for the primary executable kernel until its required terms are source-bound.')
+    exact('M020','Unified Coherence full blend','MAX(0,MIN(1,(Base_Coherence+Mother_Mode+Father_Mode+Water_Basin)/4))','OMEGA FULL CANON MODE WITH ATLAS / Formula_Ledger',canon.unifiedCoherence,['Base_Coherence','Mother_Mode','Father_Mode','Water_Basin'],'R308 restores the exact Full Canon normalized blend from its declared formal atlas inputs. It remains distinct from M001 and carries formal-model authority only.')
   ];
 }
 
