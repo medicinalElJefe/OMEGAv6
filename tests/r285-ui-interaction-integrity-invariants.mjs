@@ -31,8 +31,9 @@ const surfaceBlock=(workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as 
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(m=>m[1]);
 must(surfaces.length===44,'workstation must expose all 44 canonical surfaces');
 must(new Set(surfaces).size===44,'canonical workstation surfaces must be unique');
-must(workstation.includes('const go=(name:string)=>')&&workstation.includes("localState.write('omega.v6.panel',name)"),'canonical go() route path and persistence must remain wired');
+must(workstation.includes('const go=(name:string)=>'),'canonical go() route path must remain wired');
+must(workstation.includes("useEffect(()=>{localState.write('omega.v6.panel',panel)},[panel])"),'canonical panel identity must persist from the normalized active panel');
 must(shell.includes("new CustomEvent('omega-r88-open-navigator'")&&side.includes("addEventListener('omega-r88-open-navigator'"),'All systems dispatcher and global navigator listener must remain paired');
 must(adapter.includes('return raw === null ? fallback : JSON.parse(raw) as T'),'panel persistence adapter must decode stored route identity before normalization');
 
-console.log('R285 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + persisted panel identity + R284/R284.1 truth contracts + exact 78×78 mobile field geometry preserved.');
+console.log('R285 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + R284/R284.1 truth contracts + exact 78×78 mobile field geometry preserved.');
