@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const control=fs.readFileSync('src/ArchiveGovernanceControl.tsx','utf8');
+const ui=fs.readFileSync('src/ArchiveGenomeQueueR288.tsx','utf8');
+const ledger=fs.readFileSync('src/archiveGenomeLedgerR288c.ts','utf8');
+const css=fs.readFileSync('src/archiveGenomeR288.css','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(`R289 archive genome UI invariant failed: ${msg}`)};
+for(const token of ['ArchiveNativeConvergenceR288','ArchiveGenomeQueueR288','<ArchiveNativeConvergenceR288/>','<ArchiveGenomeQueueR288 operators={operators}/>'])must(control.includes(token),`missing composed archive surface ${token}`);
+for(const token of ['Upgrade Queue','Genome receipt','P1 only','RECOVER_EXECUTOR','Failure-derived scar ledger','ARCHIVE_GENOME_COMPLETE_R288','ARCHIVE_SCARS_R288'])must(ui.includes(token),`missing genome UI control ${token}`);
+must(ledger.includes("id:'AG-025'"),'complete ledger must reach AG-025');
+must(ledger.includes('SCAR-R288-005'),'scar ledger must reach SCAR-R288-005');
+must(css.includes('@media(max-width:560px)'),'mobile archive genome layout missing');
+must(css.includes('.agr-grid'),'genome card grid missing');
+console.log('R289 ARCHIVE GENOME UI COMPOSITION PASS · native convergence + 25-family genome queue + scar ledger preserved');
