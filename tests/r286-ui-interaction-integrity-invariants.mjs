@@ -73,6 +73,9 @@ for(const token of [
  'undersizedTouchForms',
  'coarse-pointer action controls below 44×44px',
  'coarse-pointer form controls below 44px high',
+ 'document.elementFromPoint',
+ 'snap.buried.length',
+ 'visible interactive controls are geometrically buried by another layer',
  'state.mainRect&&(state.mainRect.left<-1||state.mainRect.right>state.viewportWidth+1)',
  'mainPresent:Boolean(main&&rect)',
  'if(!snap.mainPresent||snap.left===null||snap.right===null||snap.left<-1||snap.right>snap.viewportWidth+1)',
@@ -83,6 +86,7 @@ must(browserProof.includes('expected.length!==44')&&browserProof.includes('for(c
 must(browserProof.indexOf('await verifyNavigatorModeTouchTargets(page,name)')<browserProof.indexOf('for(const route of expected){'),'R305 exact navigator-mode proof must run before exhaustive route activation');
 must(browserProof.indexOf('await verifyR305InteractionEnvelope(page,name)')<browserProof.indexOf('for(const route of expected){'),'R305 interaction envelope must be proved before route activation');
 must(browserProof.indexOf('if(!snap.mainPresent')>browserProof.indexOf('await clickRoute(page,route)'),'R305 workstation containment must be asserted after each canonical route is activated');
+must(browserProof.indexOf('if(snap.buried.length)')>browserProof.indexOf('await clickRoute(page,route)'),'R305 layer-occlusion rejection must execute after each canonical route is activated');
 must(!browserProof.includes('page.route(')&&!browserProof.includes('Math.random'),'R305 interaction proof must exercise the real built UI without request mocking or random acceptance');
 
-console.log('R286/R305 UI INTERACTION INTEGRITY PASS · 44 canonical surfaces + exact 78×78 mobile field geometry + real cascade-order scar bound · R304 navigator-mode specificity preserved outside :where() · final root-scoped touch/reduced-motion authority loaded at the last static specialist stylesheet position · 44×44 coarse-pointer action and 44px form floor protected from later inherited !important rules · exact two-button navigator proof + 390px 2×DPR coarse-pointer/reduced-motion browser proof + per-route containment preserved.');
+console.log('R286/R305 UI INTERACTION INTEGRITY PASS · 44 canonical surfaces + exact 78×78 mobile field geometry + real cascade-order scar bound · R304 navigator-mode specificity preserved outside :where() · final root-scoped touch/reduced-motion authority loaded at the last static specialist stylesheet position · 44×44 coarse-pointer action and 44px form floor protected from later inherited !important rules · exact two-button navigator proof + 390px 2×DPR coarse-pointer/reduced-motion browser proof + per-route containment + center-point layer-occlusion proof preserved.');
