@@ -13,12 +13,13 @@ const bioMedical=read('src/bioMedicalProductionR282.ts');
 const bioModes=read('src/bioModeExperienceR284.ts');
 const bioModeProof=read('tests/r284-bio-mode-experience-invariants.mts');
 const interaction=read('tests/r286-ui-interaction-integrity-invariants.mjs');
+const browser=read('tests/r286-all-surface-browser-e2e.mjs');
 const r241=read('.github/workflows/r241-archive-convergence.yml');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44,`expected exact 44-route authority, got ${surfaces.length}`);
-must(new Set(surfaces).size===44,'canonical surface registry must remain unique');
+must(surfaces.length>0,'current route authority must be non-empty');
+must(new Set(surfaces).size===surfaces.length,'canonical surface registry must remain unique');
 for(const name of ['Matter Traversal','Archive Census','Archive Operators','Relativity','Modes','System Atlas'])must(surfaces.includes(name),`required convergence surface missing ${name}`);
 
 must(archiveSurface.includes('<ArchiveNativeConvergenceR288/>'),'Drive-native convergence instrument must be mounted inside existing Archive Governance routes');
@@ -26,9 +27,9 @@ must(archiveUi.includes('Export convergence receipt')&&archiveUi.includes('onCli
 must(archiveUi.includes('onChange={e=>setState('),'archive successor filter must remain actionable');
 
 for(const token of ['OMEGA_ARCHIVE_NATIVE_CAPABILITY_CONVERGENCE_R288','HEAVY_BIO_FULL','WATER_GEOMETRY','RELATIONAL_SKIN','VIOLET','ATOMIC_MOTION','NATIVE_RENDERER_LEDGER','FULL_BUILD_LEDGER','DRIVE_FILE_PRESENCE_NEQ_RUNTIME_EXECUTION','UNKNOWN_OR_INCOMPLETE_OPERATORS_ARE_GATED_NOT_INVENTED'])must(archiveNative.includes(token),`archive-native authority missing ${token}`);
-must(archiveNative.includes("id:'BLADE_GEOMETRY',state:'FORMALIZATION_REQUIRED'"),'Blade Geometry must remain gated until an authoritative operator law exists');
+must(archiveNative.includes("id:'BLADE_GEOMETRY',state:'FORMALIZATION_REQUIRED'"),'Blade Geometry must remain gated until an authoritative operator law is promoted in a successor revision');
 must(archiveNative.includes('R288_FAMILY_CONVERGENCE.length===24'),'current successor audit must preserve 24 software families');
-must(archiveNative.includes('inventory.systems===100')&&archiveNative.includes('inventory.routes===44')&&archiveNative.includes('inventory.sourceModes===179')&&archiveNative.includes('inventory.canonLenses===62'),'full current inventory contract must remain explicit');
+for(const token of ['inheritedRouteSnapshot:R153_FULL_SYSTEM_CONTRACT.inventory.routes','currentRoutes:OMEGA_ALL_ROUTES_R82.length','inventory.systems===100','inventory.sourceModes===179','inventory.canonLenses===62','CURRENT_ROUTE_COUNT_IS_TELEMETRY_NOT_ARCHITECTURE'])must(archiveNative.includes(token),`full current inventory contract missing ${token}`);
 must(archiveNative.includes('restorationDebt===0'),'current successor restoration debt must remain zero');
 
 const genomeText=genomeA+'\n'+genomeB;
@@ -44,10 +45,11 @@ for(const token of ['assert.equal(experience.total,241)','assert.equal(experienc
 must(bioSurface.includes('BioMedicalProductionPanelR282')&&bioSurface.includes('BioModeWorkbenchR284'),'Heavy Bio instrument must mount R282 medical-production and R284 mode workbench surfaces');
 
 for(const token of ['R282','R284','R286'])must(r241.includes(token),`R241 deep convergence gate must include ${token}`);
-must(r241.includes('r286-all-surface-browser-e2e.mjs'),'R241 must retain the complete 44-route desktop/mobile browser traversal');
-must(interaction.includes('44')||interaction.includes('OMEGA_SURFACES'),'R286 interaction proof must retain full-surface coverage');
+must(r241.includes('r286-all-surface-browser-e2e.mjs'),'R241 must retain the complete current-route desktop/mobile browser traversal');
+must(interaction.includes('OMEGA_SURFACES'),'R286 interaction invariant must derive full-surface coverage from current source authority');
+must(browser.includes('expected.length===0||new Set(expected).size!==expected.length')&&browser.includes('for(const route of expected){'),'R286 browser proof must derive and traverse the complete current route universe without a historical count ceiling');
 
 for(const token of ['NO_NEW_PHYSICAL_PRIMITIVE','ADDRESS_LEVEL_NEQ_LITERAL_PHYSICAL_DIMENSION','DRIVE_FILE_PRESENCE_NEQ_RUNTIME_EXECUTION'])must(archiveNative.includes(token),`truth invariant missing ${token}`);
 must(archiveNative.includes('R125')&&archiveNative.includes('R240')&&archiveNative.includes('CI'),'archive-native convergence must preserve existing Canon/source/deployment authority');
 
-console.log(`R289 FULL ARCHIVE-NATIVE CONVERGENCE PASS · ${surfaces.length} routes · ${genomeIds.length} typed archive genome rows · 24 current software families · 12 recovered master menus · R282/R284 Heavy Bio · R286 full-surface UI · Drive-native authority registry · no new route/state/promotion authority`);
+console.log(`R289/R305 FULL ARCHIVE-NATIVE CONVERGENCE PASS · ${surfaces.length} current routes · ${genomeIds.length} typed archive genome rows · 24 current software families · 12 recovered master menus · R282/R284 Heavy Bio · R286 full-surface UI · Drive-native authority registry · current route count telemetry separated from inherited snapshot · no new route/state/promotion authority`);
