@@ -37,7 +37,7 @@ try{
   const context=await browser.newContext({viewport,deviceScaleFactor:1});
   const page=await context.newPage();
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
-  await page.route('**/api/earth/gibs/global*',route=>route.fulfill({status:200,contentType:'image/png',body:R281_TEXTURE,headers:{'x-omega-source':'R281-BROWSER-OBSERVATION-FIXTURE','x-omega-date':'2026-09-09','x-omega-crs':'EPSG:4326','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION'}}));
+  await page.route('**/api/earth/gibs/global*',route=>route.fulfill({status:200,contentType:'image/png',body:R281_TEXTURE,headers:{'x-omega-source':'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL','x-omega-date':'2026-09-09','x-omega-crs':'EPSG:4326','x-omega-bbox':'-180,-90,180,90','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION'}}));
   await page.goto(`${base}/?r287=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   await enterEarth(page,label);
@@ -72,7 +72,7 @@ try{
     const rect=await globe.boundingBox();if(!rect||rect.width<260||rect.height<420)throw new Error(`${label}: R281 observed globe canvas unusable ${JSON.stringify(rect)}`);
     const sampled=await globe.evaluate(c=>{const ctx=c.getContext('2d');if(!ctx)return{unique:0,width:c.width,height:c.height};const d=ctx.getImageData(0,0,c.width,c.height).data,unique=new Set();for(let y=0;y<c.height&&unique.size<48;y+=Math.max(1,Math.floor(c.height/32)))for(let x=0;x<c.width&&unique.size<48;x+=Math.max(1,Math.floor(c.width/32))){const i=(y*c.width+x)*4;unique.add(`${d[i]},${d[i+1]},${d[i+2]},${d[i+3]}`)}return{unique:unique.size,width:c.width,height:c.height}});
     if(sampled.unique<8)throw new Error(`${label}: R281 globe did not render a materially varied observed texture (${sampled.unique} sampled colors)`);
-    const text=await planet.innerText();for(const token of ['OBSERVED TEXTURE','EPSG:4326','Truth boundary'])if(!text.includes(token))throw new Error(`${label}: R281 source/projection truth missing ${token}`);
+    const text=await planet.innerText();for(const token of ['OBSERVED TEXTURE','NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL','EPSG:4326','Truth boundary'])if(!text.includes(token))throw new Error(`${label}: R281 source/projection truth missing ${token}`);
    }
    if(name==='SAR Truth'){
     const sar=page.locator('.earth-r283-sar');
@@ -99,5 +99,5 @@ try{
   if(pageErrors.length)throw new Error(`${label}: Earth view browser errors: ${pageErrors.join(' | ')}`);
   await context.close();
  }
- console.log('R279/R281/R283/R285/R287 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth · R281 Planet observed-source recovery actively exercises Reload observed texture when needed · varied returned-source pixels preserved · live SAR owns full-width stage while dedicated + inherited target controls remain usable · reset/query continuity works · no page errors or viewport overflow');
+ console.log('R279/R281/R283/R285/R287 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth · R281/R284 Planet source identity/CRS/bbox/truth contract exact · observed-source recovery actively exercises Reload observed texture when needed · varied returned-source pixels preserved · live SAR owns full-width stage while dedicated + inherited target controls remain usable · reset/query continuity works · no page errors or viewport overflow');
 }finally{await browser.close()}
