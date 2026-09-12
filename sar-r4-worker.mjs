@@ -1,4 +1,5 @@
 import r3 from './sar-r3-worker.mjs';
+import { handleEarthScope } from './sar-earthscope-worker.mjs';
 
 const STATIC_FRESH_EXT=/\.(?:html?|mjs|js|css|json)$/i;
 const SENTINEL_BUCKET='sentinel-s1-l1c';
@@ -96,9 +97,10 @@ export default {
     if(url.pathname==='/api/water/jrc')return proxyJrcWater(request,url);
     if(url.pathname==='/api/events/usgs')return proxyUsgsEvents(request,url);
     if(url.pathname==='/api/events/eonet')return proxyEonetEvents(request,url);
+    if(url.pathname.startsWith('/api/geodesy/')){const geodesy=await handleEarthScope(request,url);return geodesy||jsonError('Unsupported EarthScope geodesy route',404);}
     if(url.pathname.startsWith('/api/'))return r3.fetch(request,env,ctx);
     const response=await env.ASSETS.fetch(request);if(!response)return response;const headers=new Headers(response.headers);
-    if(url.pathname==='/'||STATIC_FRESH_EXT.test(url.pathname)){headers.set('cache-control','no-store, max-age=0');headers.set('pragma','no-cache');headers.set('expires','0');headers.set('x-omega-sar-build','R252-IMMERSIVE-SAR-TRANSIENT-RESILIENCE');if(url.pathname==='/'||/\.html?$/i.test(url.pathname))headers.set('clear-site-data','"cache"');}
+    if(url.pathname==='/'||STATIC_FRESH_EXT.test(url.pathname)){headers.set('cache-control','no-store, max-age=0');headers.set('pragma','no-cache');headers.set('expires','0');headers.set('x-omega-sar-build','R259-CANONICAL-EARTH-DATA-CUBE');if(url.pathname==='/'||/\.html?$/i.test(url.pathname))headers.set('clear-site-data','"cache"');}
     return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
   }
 };
