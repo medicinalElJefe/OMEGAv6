@@ -27,7 +27,7 @@ assert.deepEqual(edge(2,5)?.labels,['3003','11628'],'column pair 2/5 must retain
 assert.deepEqual(edge(2,6)?.labels,['3003']);
 assert.deepEqual(edge(5,6)?.labels,['3003']);
 assert.deepEqual(edge(39,40)?.labels,['61218182743304701891431482520']);
-assert(atlas.stars.some(x=>x.center===2&&x.arms.includes(5)&&x.arms.includes(6)&&x.commonArmLabels.includes('3003')),'3003 exact star label must survive at center k=2');
+assert(!atlas.stars.some(x=>x.commonArmLabels.includes('3003')),'the three-column 3003 witness must not inflate into a four-column pair-star');
 
 const syntheticFalse=compilePairStarFromFibersR298([
  {value:'101',representations:[{k:2},{k:3}]},
@@ -51,6 +51,7 @@ assert.equal(syntheticTrue.coherentFourTupleCount,1);
 assert.equal(syntheticTrue.falsePairwisePositiveCount,0);
 assert.deepEqual(syntheticTrue.coherentFourTuples[0].columns,[2,3,4,5]);
 assert.deepEqual(syntheticTrue.coherentFourTuples[0].commonLabels,['999']);
+assert(syntheticTrue.stars.some(x=>x.center===2&&x.arms.join(',')==='3,4,5'&&x.commonArmLabels.includes('999')),'genuine four-column label must survive the three-arm center star');
 
 const mixed=compilePairStarFromFibersR298([
  {value:'999',representations:[{k:2},{k:3},{k:4},{k:5}]},
