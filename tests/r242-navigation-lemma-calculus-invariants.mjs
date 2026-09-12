@@ -56,7 +56,14 @@ for(const token of [
  'no destination is fabricated'
 ])must(nav.includes(token),`navigator integration missing ${token}`);
 must(!nav.includes('organizedRoutesR132(filtered)'),'legacy ad-hoc route filtering must not bypass R242 lemma transform');
-for(const token of ['node tests/r242-navigation-lemma-calculus-invariants.mjs','node tests/r239-user-navigation-browser-e2e.mjs'])must(workflow.includes(token),`R241 bounded proof workflow must execute ${token}`);
+must(workflow.includes('node tests/r242-navigation-lemma-calculus-invariants.mjs'),'R241 bounded proof workflow must execute R242 navigation lemma invariants');
+const directR239Browser=workflow.includes('node tests/r239-user-navigation-browser-e2e.mjs');
+const boundedR239Browser=workflow.includes('run_browser tests/r239-user-navigation-browser-e2e.mjs');
+must(directR239Browser||boundedR239Browser,'R241 bounded proof workflow must execute the R239 browser proof directly or through the fail-closed bounded runner');
+if(boundedR239Browser){
+ must(workflow.includes('run_browser(){')&&workflow.includes('timeout -k 15s 300s'),'R303 bounded R239 browser invocation must retain the fail-closed timeout runner');
+ must(!workflow.includes('continue-on-error: true'),'R303 bounded browser runner must not convert failure into success');
+}
 must(!workflow.includes('schedule:')&&!workflow.includes('push:'),'R241/R242 proof workflow must remain PR/manual read-only proof authority');
 
-console.log(`R242 NAVIGATION LEMMA CALCULUS PASS · ${routeRecords.length} source routes conserved · exact identity > prefix/token/metadata · Governance/System ambiguity closed · workspace partition conserved · unresolved/duplicate identities carried as residuals · query presentation cannot rename/duplicate routes · navigation remains read-only and non-Canon`);
+console.log(`R242 NAVIGATION LEMMA CALCULUS PASS · ${routeRecords.length} source routes conserved · exact identity > prefix/token/metadata · Governance/System ambiguity closed · workspace partition conserved · unresolved/duplicate identities carried as residuals · query presentation cannot rename/duplicate routes · R239 browser proof remains mandatory direct-or-bounded · navigation remains read-only and non-Canon`);
