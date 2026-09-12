@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R91 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R91/R305 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const css=read('src/operationalSurfaceRefinementR91.css');
 const r90=read('src/surfaceHierarchyR90.css');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
@@ -13,13 +14,15 @@ const evidence=read('src/OmegaEvidenceMemoryR28.tsx');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'canonical surface universe must remain 44/44');
+const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(surfaces.length>0&&surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length&&new Set(routes).size===routes.length,'canonical surface universe must remain non-empty, unique and registry-aligned');
+for(const route of surfaces)must(routes.includes(route),`R91 workstation route absent from registry ${route}`);
+for(const route of routes)must(surfaces.includes(route),`R91 registry route absent from workstation ${route}`);
 must(workstation.includes("import './operationalSurfaceRefinementR91.css';"),'R91 stylesheet must be mounted');
 must(workstation.indexOf('operationalSurfaceRefinementR91.css')>workstation.indexOf('surfaceHierarchyR90.css'),'R91 presentation authority must load after R90');
 must(nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'flat global navigator must remain intact');
 
-for(const panel of ['Command Center','Workspace','Cockpit','Projects','Governance','Assets','Render Queue','Canon Evolution','Instructions','Settings','System','Consolidation','Memory','Create','Development'])
- must(css.includes("data-panel='"+panel+"'"),'missing operational refinement for '+panel);
+for(const panel of ['Command Center','Workspace','Cockpit','Projects','Governance','Assets','Render Queue','Canon Evolution','Instructions','Settings','System','Consolidation','Memory','Create','Development'])must(css.includes("data-panel='"+panel+"'"),'missing operational refinement for '+panel);
 
 must(css.includes(".command-visual{\n  min-height:48dvh!important")||css.includes(".command-visual{\n  min-height:48dvh!important"),'Command Center mobile field must remain primary');
 must(css.includes(".command-proof-strip{\n  display:flex!important"),'Command proof must remain visible and compact, not deleted');
@@ -39,4 +42,4 @@ must(system.includes('Settings alters browser-local presentation and layout only
 must(evidence.includes('Missing Drive, native-device, provider, or external authority remains HOLD'),'Evidence HOLD boundary must remain');
 must(r90.includes('presentation-only hierarchy'),'R90 integrity layer must remain mounted beneath R91');
 must(!css.includes('@appdeploy/client'),'R91 must remain provider portable');
-console.log('R91/R104 OPERATIONAL SURFACE REFINEMENT PASS · 44 routes · operational hierarchy aligned · readable flat navigation · proof and truth boundaries preserved');
+console.log(`R91/R104/R305 OPERATIONAL SURFACE REFINEMENT PASS · ${surfaces.length} current routes exactly aligned · operational hierarchy aligned · readable flat navigation · proof and truth boundaries preserved · no historical route-count ceiling`);
