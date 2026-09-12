@@ -39,7 +39,7 @@ must(shell.includes("new CustomEvent('omega-r88-open-navigator'")&&side.includes
 must(adapter.includes('return raw === null ? fallback : JSON.parse(raw) as T'),'panel persistence adapter must decode stored route identity before normalization');
 
 must(weaveCss.includes('min-height:32px!important'),'R303 repair must remain anchored to a real inherited specialist sub-44px !important rule');
-must(responsive.includes("@media(any-pointer:coarse)")&&responsive.includes(":where(button,[role='button'],input,select,textarea){min-height:44px!important}"),'R303 shared responsive layer must authoritatively override inherited specialist control heights on coarse pointers');
+must(responsive.includes("@media(any-pointer:coarse)")&&responsive.includes(":where(button,[role='button']){min-width:44px!important;min-height:44px!important}")&&responsive.includes(":where(input,select,textarea){min-height:44px!important}"),'R303 shared responsive layer must authoritatively override inherited specialist action/form control geometry on coarse pointers');
 
 for(const token of [
  "deviceScaleFactor:2,hasTouch:true,isMobile:true,reducedMotion:'reduce'",
@@ -49,12 +49,14 @@ for(const token of [
  'x.height<43.5||x.width<43.5',
  '.omega-workstation-v2 input:not([disabled])',
  '.omega-workstation-v2 textarea:not([disabled])',
- 'controls below 44px',
+ 'undersizedTouchActions',
+ 'undersizedTouchForms',
+ 'coarse-pointer action controls below 44×44px',
+ 'coarse-pointer form controls below 44px high',
  'active workstation escaped horizontal viewport containment',
- "if(name==='mobile'&&snap.undersizedTouch.length)",
  'R286/R303 ALL-SURFACE BROWSER PASS'
 ])must(browserProof.includes(token),`R303 real-browser interaction proof missing ${token}`);
 must(browserProof.includes("expected.length!==44")&&browserProof.includes("for(const route of expected)"),'R303 must strengthen rather than reduce the inherited 44-route traversal');
 must(!browserProof.includes('page.route(')&&!browserProof.includes('Math.random'),'R303 interaction proof must exercise the real built UI without request mocking or random acceptance');
 
-console.log('R286/R303 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + exact 78×78 mobile field geometry + authoritative 44px coarse-pointer override against inherited specialist !important rules + 390px 2×DPR coarse-pointer/reduced-motion browser proof for action/form controls + horizontal containment preserved.');
+console.log('R286/R303 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + exact 78×78 mobile field geometry + authoritative 44×44 coarse-pointer action override and 44px-high form-control override against inherited specialist !important rules + 390px 2×DPR coarse-pointer/reduced-motion browser proof + horizontal containment preserved.');
