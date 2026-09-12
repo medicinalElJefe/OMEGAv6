@@ -4,9 +4,9 @@ import type {ArchiveGenomeRowR288} from './archiveGenomeLedgerR288';
 export const ARCHIVE_GENOME_ROWS_R288C:ArchiveGenomeRowR288[]=[
  {
   id:'AG-023',family:'ADM bounded research/evolution workbook',
-  artifacts:['ADM_Research_Engine.xlsx'],driveIds:['1L0kJB_1vJUIiIEnKBMLZOjQtBaVaCG4Z'],
+  artifacts:['ADM_Research_Engine.xlsx'],driveIds:[],
   origin:'USER_AUTHORED',evidenceState:'ARCHIVE_VERIFIED',currentCoverage:'ABSENT',
-  omegaV6Connection:'Archive workbook is explicitly research-only and implements a bounded multiplicative field, time-step state evolution, shock inputs, thresholds and Mode188 admissibility flags. Current OMEGAv6 has no matching ADM runtime.',
+  omegaV6Connection:'Archive workbook is explicitly research-only and implements a bounded multiplicative field, time-step state evolution, shock inputs, thresholds and Mode188 admissibility flags. Public source preserves artifact identity by title while connected-storage locators remain outside the repository/client ledger. Current OMEGAv6 has no matching ADM runtime.',
   missingDelta:['typed ADM research schema','bounded state-step simulator','parameter/threshold registry','shock/recovery scenario runner','calibration plots','research-only proof label'],
   promotionClass:'CROSS_VALIDATE',
   validation:['replay workbook formulas exactly','neutral-baseline regression','floor/overload/rigidity/desynchronization gate tests','sensitivity analysis for alpha/beta/delta/sync/PJC parameters','keep synthetic research observations separate from external empirical data'],
@@ -15,9 +15,9 @@ export const ARCHIVE_GENOME_ROWS_R288C:ArchiveGenomeRowR288[]=[
  {
   id:'AG-024',family:'Crash-tree / B053 R9 reconstruction scar lineage',
   artifacts:['SOFTWARE CRASH FOLDER/2Software','clean0808/RECONSTRUC_OMEGA_B053_R9_J_DRIVE_FULL_SYSTEM.py','OMEGA_B053_R9_J_DRIVE_FULL_SYSTEM_PART_01_OF_30.zip ... PART_30_OF_30.zip'],
-  driveIds:['1jvhD_9qGho_3T_BUPYwZQgu45M3tjLCM','1UxBnjr7HGyBgeiJfmarpabnKdg3Bq6xh','1VZL_AQla22QXuuK0qb14cBtv0fAyX5XM','1NSXuBLWoE6BuI_wrJJhS6LjSKzgzqEJZ'],
+  driveIds:[],
   origin:'OMEGA_ARCHIVE',evidenceState:'SOURCE_REVIEWED',currentCoverage:'PARTIAL',
-  omegaV6Connection:'The crash tree preserves historical V6/V18/V32/V55/V160, partition, OS-bin, loader, sprint, prototype and clean-build branches. The B053 R9 reconstruction script contains reusable package-integrity and safe-extraction mechanics relevant to current native recovery.',
+  omegaV6Connection:'The crash tree preserves historical V6/V18/V32/V55/V160, partition, OS-bin, loader, sprint, prototype and clean-build branches. The B053 R9 reconstruction script contains reusable package-integrity and safe-extraction mechanics relevant to current native recovery. Public source keeps only artifact/family identity; connector storage locators are not part of this browser/repository contract.',
   missingDelta:['failure-family census','failure signature registry','known-bad-pattern regression corpus','multi-part archive manifest adapter','safe extraction library','disk-space preflight','master-size/hash verification','reconstruction receipt','repair-vs-rollback policy'],
   promotionClass:'PROOF_PROVENANCE',
   validation:['never execute old crash builds as authority','fingerprint each branch before reading donor code','verify traversal/symlink/duplicate/collision defenses','corrupt/missing/reordered-part negative tests','disk-space failure test','exact master hash/size reconstruction test','turn every confirmed historical failure cause into a regression test'],
@@ -26,9 +26,9 @@ export const ARCHIVE_GENOME_ROWS_R288C:ArchiveGenomeRowR288[]=[
  {
   id:'AG-025',family:'Historical Hybrid Link PowerShell bridge',
   artifacts:['OMEGA_HYBRID_LINK_BRIDGE.ps1','OMEGA_HYBRID_LINK_BRIDGE_V90_R4.ps1','hybridlinktestdumpsite'],
-  driveIds:['1piZfTbmBZ3Fk7oqesIY3S1wJTpxhhjr0','15iTnaXAi8X6pbexWc9Rid-qG36fuxhf-','1iWZcIjeCINLotY5LjBaYEoGJm8NaEh0R'],
+  driveIds:[],
   origin:'OMEGA_ARCHIVE',evidenceState:'SOURCE_REVIEWED',currentCoverage:'ACTIVE',
-  omegaV6Connection:'The archived bridge includes allowlisted file/build/test/package/patch/UI-automation operations, protected token storage, SHA-256 helpers, root/path confinement, bounded wait, visible-window assertions, password-field checks, patch restore, macro recording/replay and URL checks. Current OMEGAv6 Hybrid command runtime and Python agent already implement newer equivalents including patch preconditions, window locking and bounded macro execution.',
+  omegaV6Connection:'The archived bridge includes allowlisted file/build/test/package/patch/UI-automation operations, protected token storage, SHA-256 helpers, root/path confinement, bounded wait, visible-window assertions, password-field checks, patch restore, macro recording/replay and URL checks. Current OMEGAv6 Hybrid command runtime and Python agent already implement newer equivalents including patch preconditions, window locking and bounded macro execution. Connected-storage locators remain external to public source.',
   missingDelta:['old→current operation crosswalk','security-control delta','rollback semantic comparison','token-storage comparison','URL/window/path confinement regression vectors','historical bridge compatibility/migration note'],
   promotionClass:'CROSS_VALIDATE',
   validation:['prefer current Python Hybrid agent whenever equivalent','diff allowlists and bounds','prove no old bridge broadens current authority','port only stricter controls or missing negative tests','never persist/reveal credentials in archive ledger'],
