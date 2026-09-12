@@ -1,0 +1,24 @@
+import {useState} from 'react';
+import {CheckCircle2,Play,ShieldCheck,TriangleAlert,XCircle} from 'lucide-react';
+import {proveRscEquivalenceR290,RSC_MODEL_BOUNDARY_R290,RSC_THRESHOLDS_R290} from './rscProofVmR290.js';
+import './rscProofLabR290.css';
+
+const LEFT={id:'software-v1',nodes:[{id:'p',role:'Parent'},{id:'s',role:'Scar'},{id:'c',role:'Continuity'}],edges:[{from:'p',to:'s',relation:'interaction-history'},{from:'s',to:'c',relation:'carry'}]};
+const RIGHT={id:'software-v2',nodes:[{id:'root',role:'Parent'},{id:'history',role:'Scar'},{id:'continuity',role:'Continuity'}],edges:[{from:'root',to:'history',relation:'interaction-history'},{from:'history',to:'continuity',relation:'carry'}]};
+const pretty=(v:unknown)=>JSON.stringify(v,null,2);
+
+type Receipt={state:string;reason:string;threshold:number;translationPermitted:boolean;receiptSha256:string;boundary:string;comparison:{continuityScore:number;nodeScore:number;edgeScore:number;exactStructure:boolean;metric:string};counterexamples:{total:number;uncontrolled:number};trace:string[];claims:{externalScientificProof:boolean;physicalLaw:boolean;canonicalStateMutation:boolean}};
+
+export default function RscProofLabR290(){
+ const[left,setLeft]=useState(pretty(LEFT)),[right,setRight]=useState(pretty(RIGHT)),[threshold,setThreshold]=useState(RSC_THRESHOLDS_R290.PASS),[counterexampleOpen,setCounterexampleOpen]=useState(false),[receipt,setReceipt]=useState<Receipt|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const run=async()=>{setBusy(true);setError('');try{const result=await proveRscEquivalenceR290({left:JSON.parse(left),right:JSON.parse(right),threshold,counterexamples:counterexampleOpen?[{id:'operator-counterexample',controlled:false}]:[{id:'operator-counterexample',controlled:true}]});setReceipt(result as Receipt)}catch(e:any){setReceipt(null);setError(e?.message||String(e))}finally{setBusy(false)}};
+ const icon=receipt?.state==='PASS'?<CheckCircle2/>:receipt?.state==='FAIL'?<XCircle/>:<TriangleAlert/>;
+ return <section className='rsc290-lab' aria-label='RSC proof VM laboratory' data-proof-state={receipt?.state||'NOT_RUN'}>
+  <header><div><span>R290 · RELATIONAL SKIN CALCULUS · EXECUTABLE MODEL LAB</span><h3>Reduction → structural comparison → proof gate → translation</h3><p>Runs model-space graph comparison only. It does not create external scientific, physical, medical, or Canon-state authority.</p></div><div className='rsc290-boundary'><ShieldCheck/><b>{RSC_MODEL_BOUNDARY_R290}</b></div></header>
+  <div className='rsc290-flow'><code>ρ(Sa)=Ga</code><i>→</i><code>ρ(Sb)=Gb</code><i>→</i><code>CΩ(Ga,Gb)</code><i>→</i><code>R8 gate</code><i>→</i><code>R9 τ only if PASS</code></div>
+  <div className='rsc290-inputs'><label><b>LEFT SKIN / GRAPH JSON</b><textarea value={left} onChange={e=>setLeft(e.target.value)} spellCheck={false}/></label><label><b>RIGHT SKIN / GRAPH JSON</b><textarea value={right} onChange={e=>setRight(e.target.value)} spellCheck={false}/></label></div>
+  <div className='rsc290-controls'><label>PASS θ<input type='number' min='0' max='1' step='.01' value={threshold} onChange={e=>setThreshold(Math.max(0,Math.min(1,Number(e.target.value))))}/></label><button type='button' className={counterexampleOpen?'warn':''} onClick={()=>setCounterexampleOpen(x=>!x)} aria-pressed={counterexampleOpen}>{counterexampleOpen?'Uncontrolled counterexample OPEN':'Counterexamples controlled'}</button><button type='button' className='primary' onClick={()=>void run()} disabled={busy}><Play/>{busy?'Running…':'Run RSC proof'}</button></div>
+  {error&&<div className='rsc290-error'><TriangleAlert/><span>{error}</span></div>}
+  {receipt&&<div className={`rsc290-receipt ${receipt.state.toLowerCase()}`}><header>{icon}<div><small>PROOF RECEIPT</small><b>{receipt.state} · {receipt.reason}</b></div><strong>{(receipt.comparison.continuityScore*100).toFixed(1)}%</strong></header><div className='rsc290-metrics'><span><small>CΩ model score</small><b>{receipt.comparison.continuityScore.toFixed(4)}</b></span><span><small>Node score</small><b>{receipt.comparison.nodeScore.toFixed(4)}</b></span><span><small>Edge score</small><b>{receipt.comparison.edgeScore.toFixed(4)}</b></span><span><small>Translation τ</small><b>{receipt.translationPermitted?'PERMITTED':'DENIED'}</b></span><span><small>Open counterexamples</small><b>{receipt.counterexamples.uncontrolled}</b></span></div><code className='rsc290-metric-id'>{receipt.comparison.metric}</code><div className='rsc290-trace'>{receipt.trace.map(x=><span key={x}>{x}</span>)}</div><footer><code>SHA-256 {receipt.receiptSha256}</code><span>scientific proof {String(receipt.claims.externalScientificProof)} · physical law {String(receipt.claims.physicalLaw)} · Canon mutation {String(receipt.claims.canonicalStateMutation)}</span></footer></div>}
+ </section>;
+}
