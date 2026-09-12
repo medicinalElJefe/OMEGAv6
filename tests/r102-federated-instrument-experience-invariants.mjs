@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R102 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R102/R305 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const worker=read('src/workerR102.js');
 const worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'';
 const worker114=fs.existsSync('src/workerR114.js')?read('src/workerR114.js'):'';
@@ -19,7 +20,10 @@ const wrangler=read('wrangler.jsonc');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'canonical 44-route universe must remain intact');
+const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(surfaces.length>0&&surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length&&new Set(routes).size===routes.length,'canonical current route universe must remain non-empty, unique and registry-aligned');
+for(const route of surfaces)must(routes.includes(route),`R102 workstation route absent from registry ${route}`);
+for(const route of routes)must(surfaces.includes(route),`R102 registry route absent from workstation ${route}`);
 for(const route of ['Hybrid Link','Forecast','Relativity','Matter Traversal','Evidence & Proof','Visual Instrument'])must(surfaces.includes(route),'critical route missing '+route);
 
 const r102Direct=wrangler.includes('"main": "src/workerR102.js"');
@@ -64,5 +68,5 @@ must(accepted.includes("'R101 weave-derived effective resolution + Hybrid bridge
 if(r111PreservesR102||r114PreservesR102||r115PreservesR102||r116PreservesR102)must(accepted.includes('R111')&&worker111.includes("path==='/api/fabric/status'")&&worker111.includes('FABRIC_MESH_LAW_R111'),'successor must preserve R102 while adding bounded R111 fabric authority');
 must(![worker,worker114,worker115,worker116,experience,federation].join('\n').includes('Math.random'),'federation experience must not depend on fake/random state');
 
-console.log('R102 FEDERATED INSTRUMENT EXPERIENCE PASS · four specialized runtimes · task-first handoff trace · stable schema + additive R102/R111/R114/R115/R116 revision · single global CanonState authority · Optical endpoint continuity · R101/R34/44-route preservation');
+console.log(`R102/R305 FEDERATED INSTRUMENT EXPERIENCE PASS · four specialized runtimes · task-first handoff trace · stable schema + additive R102/R111/R114/R115/R116 revision · single global CanonState authority · Optical endpoint continuity · R101/R34 + ${surfaces.length}-route current preservation · no historical route-count ceiling`);
 await import('./r103-intent-capability-router-invariants.mjs');
