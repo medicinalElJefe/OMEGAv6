@@ -1,3 +1,5 @@
+import {MASTER_MENUS} from './systemAtlasRuntime';
+
 export type OmegaNavGroup='STUDIO'|'OPERATIONS'|'WORK'|'INTELLIGENCE'|'GOVERNANCE'|'SYSTEM';
 export type OmegaNavItem={id:string;group:OmegaNavGroup;name:string;hint:string;effect:'READ'|'COMPUTE'|'GOVERN'|'BUILD'|'EXTERNAL_GATE';authority:'CANONICAL'|'DERIVED'|'EVIDENCE_GATED'|'HOST_GATED'|'GOVERNANCE'};
 
@@ -51,3 +53,31 @@ export const OMEGA_NAVIGATION:OmegaNavItem[]=[
 export const OMEGA_NAV_GROUPS:OmegaNavGroup[]=['STUDIO','OPERATIONS','WORK','INTELLIGENCE','GOVERNANCE','SYSTEM'];
 export const OMEGA_NAV_NAMES=OMEGA_NAVIGATION.map(x=>x.name);
 export function omegaNavItem(name:string){return OMEGA_NAVIGATION.find(x=>x.name===name)||null}
+
+export type OmegaMasterMenuId=(typeof MASTER_MENUS)[number][0];
+export const OMEGA_MASTER_MENU_ROUTE_MAP_R289:Record<string,OmegaMasterMenuId>={
+ 'Command Center':'06','Hybrid Link':'11','Workspace':'01','Cockpit':'05','Immersive Traversal':'03','Matter Traversal':'09','Extreme Traversal':'03','Visual Instrument':'04','Relativity':'03','Earth Now':'09','Forecast':'09','Atlas':'07','Traversal':'03','Create':'04',
+ 'Field':'07','Data Motion':'07','Reality Lab':'09','Atlas Calculator':'07','Infinity':'03','Convergence':'09','Quality Compiler':'02','Build Out':'10','Projects':'12','Render Queue':'04','Assets':'11','Modes':'06','Kernel Intelligence':'06','Evidence & Proof':'02','Memory':'01','Archive Census':'11','Archive Operators':'11','Development':'10','Canon Evolution':'02','SAI Lab':'06','Governance':'02','Consolidation':'11','Instructions':'06','Plugins':'05','Settings':'10','System':'01','Validation':'02','System Atlas':'08','Scale Compiler':'07','Control Matrix':'12'
+};
+
+export const OMEGA_MASTER_MENU_NAVIGATION_R289=MASTER_MENUS.map(([id,label,target,purpose])=>({
+ id,
+ label,
+ target,
+ purpose,
+ routes:OMEGA_NAVIGATION.filter(item=>OMEGA_MASTER_MENU_ROUTE_MAP_R289[item.name]===id)
+}));
+
+export function omegaMasterMenuForRouteR289(name:string){
+ const id=OMEGA_MASTER_MENU_ROUTE_MAP_R289[name];
+ return OMEGA_MASTER_MENU_NAVIGATION_R289.find(menu=>menu.id===id)||null;
+}
+
+export const OMEGA_NAVIGATION_CONTRACT_R289=Object.freeze({
+ schema:'OMEGA_RECOVERED_MASTER_MENU_NAVIGATION_R289',
+ routeCount:OMEGA_NAVIGATION.length,
+ masterMenuCount:OMEGA_MASTER_MENU_NAVIGATION_R289.length,
+ orphanRoutes:OMEGA_NAVIGATION.filter(item=>!OMEGA_MASTER_MENU_ROUTE_MAP_R289[item.name]).map(item=>item.name),
+ emptyMenus:OMEGA_MASTER_MENU_NAVIGATION_R289.filter(menu=>menu.routes.length===0).map(menu=>menu.id),
+ rule:'ONE_44_ROUTE_AUTHORITY_PRESENTED_THROUGH_12_RECOVERED_MASTER_MENUS'
+});
