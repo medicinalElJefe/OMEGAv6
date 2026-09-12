@@ -1,3 +1,4 @@
+import './r297-singmaster-sharded-exact-fabric-invariants.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
