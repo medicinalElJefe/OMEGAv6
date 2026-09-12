@@ -1,12 +1,14 @@
 /* R105 — temporal data truth + contextual submenu refinement.
    Presentation only: no state, execution, proof, or route authority is created here. */
 
-.r105-workspace-filter{display:flex;gap:6px;align-items:center;padding:9px 12px 10px;border-bottom:1px solid rgba(120,176,172,.13);overflow-x:auto;scrollbar-width:thin}
+.r105-workspace-filter{display:flex;gap:6px;align-items:center;padding:9px 12px 10px;border-bottom:1px solid rgba(120,176,172,.13);overflow-x:auto;scrollbar-width:thin;position:relative;z-index:2}
 .r105-workspace-filter button{flex:0 0 auto;min-height:30px;padding:6px 9px;border:1px solid rgba(132,180,178,.18);border-radius:7px;background:rgba(5,15,18,.68);color:rgba(204,225,224,.76);font:600 10px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
 .r105-workspace-filter button:hover,.r105-workspace-filter button:focus-visible{border-color:rgba(150,211,203,.48);color:#e9f4f2;outline:none}
 .r105-workspace-filter button.active{border-color:rgba(169,224,215,.62);background:rgba(36,76,73,.48);color:#f4fbfa;box-shadow:inset 0 0 0 1px rgba(207,240,234,.05)}
 .r105-workspace-filter button b{margin-left:5px;color:rgba(159,207,201,.72);font-weight:700}
-.r105-context-note{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 13px;color:rgba(158,188,187,.72);font:500 10px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;border-bottom:1px solid rgba(120,176,172,.09);background:rgba(2,9,12,.42)}
+/* Informational only. It must never become an invisible pointer shield over the real submenu controls.
+   Keep the controls in the higher stacking layer and make this read-only context strip pointer-transparent. */
+.r105-context-note{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 13px;color:rgba(158,188,187,.72);font:500 10px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;border-bottom:1px solid rgba(120,176,172,.09);background:rgba(2,9,12,.42);position:relative;z-index:1;pointer-events:none}
 .r105-context-note b{color:rgba(220,237,235,.86);font-weight:650}
 
 .r105-live-recurrence{width:100%;border:1px solid rgba(119,183,177,.18);border-radius:12px;background:radial-gradient(circle at 50% 46%,rgba(43,92,87,.12),transparent 62%),rgba(2,8,11,.78);overflow:hidden}
