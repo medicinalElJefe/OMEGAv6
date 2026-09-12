@@ -1,3 +1,5 @@
+import {compileProofCarryR292} from './proofCarryRuntimeR292.js';
+
 export type SingmasterGateStatusR290='PASS'|'ESTABLISHED_EXTERNAL'|'OPEN'|'SOURCE_MISSING'|'AUDITED_HOLD';
 export type SingmasterRepresentationR290={n:number;k:number};
 export type SingmasterFiberR290={id:string;representations:SingmasterRepresentationR290[];className:'sporadic'|'sharp-witness'|'fibonacci-family';expectedDigits?:number;expectedValue?:string};
@@ -98,4 +100,28 @@ export function singmasterProofStatsR290(){
   const fibers=verifyKnownFibersR290(),carry=verify3003CarryR290();
   const gates=SINGMASTER_PROOF_GATES_R290.reduce<Record<string,number>>((acc,g)=>{acc[g.status]=(acc[g.status]||0)+1;return acc},{});
   return {publicStatus:SINGMASTER_PUBLIC_STATUS_R290,fibersPassed:fibers.filter(x=>x.pass).length,fiberCount:fibers.length,carryPassed:carry.filter(x=>x.pass).length,carryCount:carry.length,gates};
+}
+
+export const SINGMASTER_INVARIANT_TRANSFORMS_R292=[
+  {id:'LEFT_HALF_SYMMETRY',preservesInvariant:true,domainMapVerified:true,detail:'C(n,k)=C(n,n-k) preserves integer coefficient equality while choosing a canonical left-half representative.'},
+  {id:'AUTOMATIC_K1_REDUCTION',preservesInvariant:true,domainMapVerified:true,detail:'C(a,1)=a removes exactly one automatic left-half representation for a>1.'},
+  {id:'FIXED_COLUMN_MONOTONICITY',preservesInvariant:true,domainMapVerified:true,detail:'Strict increase in n at fixed k prevents duplicate n-values within one nontrivial column.'},
+  {id:'KUMMER_VALUATION_CARRY',preservesInvariant:true,domainMapVerified:true,detail:'Equal integer binomial coefficients must carry identical prime-adic valuation signatures; Kummer converts each valuation to a base-p carry count.'}
+] as const;
+
+export function compileSingmasterProofCarryR292(){
+  const fibers=verifyKnownFibersR290(),carry=verify3003CarryR290();
+  const exactChecks=[...fibers.map(x=>({id:`FIBER-${x.id}`,pass:x.pass,detail:`Exact BigInt fiber ${x.id}`})),{id:'KUMMER-3003',pass:carry.every(x=>x.pass),detail:`${carry.length} exact valuation/carry checks on the sharpness witness`}];
+  return compileProofCarryR292({
+    domainId:'NUMBER_THEORY/PASCAL/SINGMASTER',
+    claimId:'SHARP_SINGMASTER_N_LE_8',
+    claimLabel:'Sharp Singmaster Bound N(a) <= 8',
+    claimStatus:SINGMASTER_PUBLIC_STATUS_R290,
+    requirements:{exhaustivePartition:true,sourceLineage:true,invariantCarry:true,exactChecks:true},
+    gates:SINGMASTER_PROOF_GATES_R290,
+    partitions:SINGMASTER_FOUR_TUPLE_REGISTRY_R290.map(x=>({...x,terminal:x.id!=='ROOT-ALL'})),
+    transforms:SINGMASTER_INVARIANT_TRANSFORMS_R292,
+    sources:SINGMASTER_SOURCES_R290,
+    exactChecks
+  });
 }
