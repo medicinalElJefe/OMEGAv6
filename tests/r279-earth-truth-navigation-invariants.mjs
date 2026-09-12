@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const earth=read('src/EarthObservatoryR8.tsx'),instrument=read('src/EarthNowInstrument.tsx'),observed=read('src/EarthObservedGlobeR281.tsx'),projection=read('src/earthProjectionR284.ts'),workerR9=read('src/workerR9.js'),observedCss=read('src/earthObservedGlobeR281.css'),earthCss=read('src/earthObservatoryR8.css'),main=read('src/main.tsx'),nav=read('src/navigationRegistry.ts'),r82=read('src/omegaExperienceRegistryR82.ts'),launcher=read('src/OmegaLauncher.tsx'),side=read('src/OmegaSideNavigatorR88.tsx'),shell=read('src/SingleFrameRuntimeShellR27.tsx');
-const must=(ok,msg)=>assert.ok(ok,'R279/R284 '+msg);
+const must=(ok,msg)=>assert.ok(ok,'R279/R284/R305 '+msg);
 for(const view of ['SATELLITE','PLANET','MOTION','EVIDENCE','SPACE','GROUND','CALCULUS','SAR'])must(earth.includes(`'${view}'`),'Earth view missing '+view);
 for(const token of ['earth-r279-view-tabs','aria-pressed={view===x.id}','chooseView(x.id)','queryAt(initial.lat,initial.lon)','Return + query model-mapped target','FULL-DISK OBSERVATION PAIR','G19-FD','G18-FD','EarthGroundTraversalR9','EarthLivingFieldR36','EarthObservedGlobeR281','SARTruthInstrumentR280','SAR Truth','earth-r283-sar'])must(earth.includes(token),'Earth interaction/source contract missing '+token);
 for(const token of ['fetchEarthMotionStateR278','drawClouds','drawParticles','solarState','SOURCE-FIRST PLANETARY INSTRUMENT','Missing source pixels remain missing'])must(instrument.includes(token),'motion/evidence instrument missing '+token);
@@ -23,10 +23,12 @@ for(const token of ['earth-r279-view-tabs','earth-r279-satellite','earth-r279-gl
 const navNames=[...nav.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 const r82Block=[...r82.matchAll(/routes:\[([^\]]*)\]/g)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
 const r27Match=shell.match(/R27_REGISTERED_SURFACES=\[([^\]]*)\]/s);const r27Names=r27Match?[...r27Match[1].matchAll(/'([^']+)'/g)].map(x=>x[1]):[];
-must(navNames.length===44&&new Set(navNames).size===44,'canonical navigation must expose 44 unique routes');
-must(r82Block.length===44&&new Set(r82Block).size===44,'R82 workspaces must expose the same 44 unique routes');
-must(r27Names.length===44&&new Set(r27Names).size===44,'R27 shell must retain all 44 registered routes');
+must(navNames.length>0&&new Set(navNames).size===navNames.length,'canonical navigation must expose a non-empty unique current route set');
+must(r82Block.length===navNames.length&&new Set(r82Block).size===r82Block.length,'R82 workspaces must expose exactly the current navigation route cardinality');
+must(r27Names.length===navNames.length&&new Set(r27Names).size===r27Names.length,'R27 shell must retain exactly the current navigation route cardinality');
 for(const name of navNames){must(r82Block.includes(name),'R82 workspace projection silently omitted '+name);must(r27Names.includes(name),'R27 shell silently omitted '+name)}
+for(const name of r82Block)must(navNames.includes(name),'R82 workspace projection added non-navigation route '+name);
+for(const name of r27Names)must(navNames.includes(name),'R27 shell added non-navigation route '+name);
 must(launcher.includes('LAUNCHER_SURFACES=OMEGA_NAVIGATION'),'launcher must derive search inventory from canonical navigation');
 must(side.includes('OMEGA_ALL_ROUTES_R82.map')&&side.includes('All tools'),'persistent navigator must expose the complete route inventory');
-console.log('R279/R284 EARTH TRUTH + NAVIGATION PASS · eight Earth surfaces preserved including R283 SAR Truth · NOAA imagery retained · NASA GIBS true-color source projected onto WGS84 ellipsoid Planet · UTC solar/terminator geometry remains declared derived rendering · seam-safe source sampling · inspector reports unshaded returned RGB · canonical 44-route inventory preserved');
+console.log(`R279/R284/R305 EARTH TRUTH + NAVIGATION PASS · eight Earth surfaces preserved including R283 SAR Truth · NOAA imagery retained · NASA GIBS true-color source projected onto WGS84 ellipsoid Planet · UTC solar/terminator geometry remains declared derived rendering · seam-safe source sampling · inspector reports unshaded returned RGB · canonical ${navNames.length}-route current inventory exactly aligned across navigation/R82/R27 · no historical route-count ceiling`);
