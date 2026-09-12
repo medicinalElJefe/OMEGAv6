@@ -1,6 +1,8 @@
 import fs from 'node:fs';
+import {proveRscEquivalenceR290,reduceRscGraphR290,RSC_MODEL_BOUNDARY_R290,RSC_THRESHOLDS_R290} from '../src/rscProofVmR290.js';
 const runtime=fs.readFileSync('src/archiveGovernanceRuntime.ts','utf8');
 const ui=fs.readFileSync('src/ArchiveGovernanceControl.tsx','utf8');
+const genome=fs.readFileSync('src/ArchiveGenomeQueueR288.tsx','utf8');
 const router=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const loader=fs.existsSync('src/specialistLoaderR109.tsx')?fs.readFileSync('src/specialistLoaderR109.tsx','utf8'):'';
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
@@ -11,8 +13,22 @@ must(runtime.includes('not presented as a live Drive census'),'archive live-vs-h
 must(runtime.includes('Exact LATEST_OMEGA_UPDATE.json authority remains unresolved unless separately read and verified'),'release-authority unresolved boundary missing');
 must(runtime.includes("if(d.verification==='INVALID_CONTAINER'||d.regressionRisk>.8)return 'QUARANTINE'"),'dangerous donor quarantine rule missing');
 for(const x of ['FINGERPRINT','CLASSIFY','AUTHORITY SCORE','ADAPT','PROVE','OMEGA_ARCHIVE_GOVERNANCE_RECEIPT.json','CLASSIFIED DONOR FAMILIES','HISTORICAL REVIEWED','EXPLICIT FILE COUNTS'])must(ui.includes(x),`missing archive UI behavior ${x}`);
+must(ui.includes('ArchiveGenomeQueueR288')&&ui.includes('<ArchiveGenomeQueueR288 operators={operators}/>'),'deep archive genome must stay composed into governance');
+for(const x of ['R290 · ARCHIVE GENOME → OMEGAv6','OMEGA_R290_ARCHIVE_GENOME_RECEIPT.json','P1 only','Failure-derived scar ledger'])must(genome.includes(x),`missing R290 archive genome control ${x}`);
 must(!ui.includes('1,869 INDEXED FILES'),'historical count must not be shown as live indexed files');
 const eagerArchive=router.includes("import ArchiveGovernanceControl from './ArchiveGovernanceControl'")&&router.includes("case 'Archive Census':return <ArchiveGovernanceControl/>")&&router.includes("case 'Archive Operators':return <ArchiveGovernanceControl operators/>");
 const deferredArchive=loader.includes("ArchiveGovernanceControl:()=>import('./ArchiveGovernanceControl')")&&loader.includes('export const ArchiveGovernanceR109=lazy(LOADERS.ArchiveGovernanceControl)')&&router.includes("case 'Archive Census':return <ArchiveGovernanceR109/>")&&router.includes("case 'Archive Operators':return <ArchiveGovernanceR109 operators/>");
 must(eagerArchive||deferredArchive,'archive specialist must remain mounted for Census and Operators through eager or R109 deferred binding');
-console.log('ARCHIVE_GOVERNANCE R25/R109 PASS · live registry separated from historical cumulative evidence · deferred archive routes preserved');
+
+// R290 executable RSC proof VM: model-space equivalence may authorize translation only after reduction + threshold + controlled counterexamples.
+const A={id:'A',nodes:[{id:'p',role:'Parent'},{id:'s',role:'Scar'},{id:'o',role:'Continuity'}],edges:[{from:'p',to:'s',relation:'interaction-history'},{from:'s',to:'o',relation:'carry'}]};
+const B={id:'B',nodes:[{id:'root',role:'Parent'},{id:'memory',role:'Scar'},{id:'carry',role:'Continuity'}],edges:[{from:'root',to:'memory',relation:'interaction-history'},{from:'memory',to:'carry',relation:'carry'}]};
+const C={id:'C',nodes:[{id:'x',role:'Unrelated'},{id:'y',role:'Terminal'}],edges:[{from:'x',to:'y',relation:'disconnect'}]};
+const reduced=reduceRscGraphR290(A);must(reduced.schema==='OMEGA_RSC_REDUCED_GRAPH_R290'&&!reduced.empty,'RSC reduction must produce a non-empty typed reduced graph');
+const pass=await proveRscEquivalenceR290({left:A,right:B,counterexamples:[{id:'c1',controlled:true}]});
+must(pass.state==='PASS'&&pass.translationPermitted===true&&pass.comparison.continuityScore===1,'structurally identical reduced graphs must pass the bounded model gate');
+must(pass.boundary===RSC_MODEL_BOUNDARY_R290&&pass.claims.externalScientificProof===false&&pass.claims.physicalLaw===false&&pass.claims.canonicalStateMutation===false,'RSC receipt must deny scientific/physical/canonical authority inflation');
+must(typeof pass.receiptSha256==='string'&&pass.receiptSha256.length===64,'RSC proof must emit a SHA-256 receipt');
+const fail=await proveRscEquivalenceR290({left:A,right:C});must(fail.state==='FAIL'&&!fail.translationPermitted&&fail.comparison.continuityScore<RSC_THRESHOLDS_R290.PASS,'non-equivalent graphs must deny translation');
+const held=await proveRscEquivalenceR290({left:A,right:B,counterexamples:[{id:'open',controlled:false}]});must(held.state==='UNPROVED'&&!held.translationPermitted&&held.reason==='COUNTEREXAMPLE_UNCONTROLLED','uncontrolled counterexamples must hold translation even at perfect structural score');
+console.log('ARCHIVE_GOVERNANCE R25/R109/R290 PASS · live registry separated from historical evidence · 26-family genome composed · RSC proof VM executes bounded model-derived reduction/equivalence/translation receipts');
