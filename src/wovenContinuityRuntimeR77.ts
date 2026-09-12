@@ -3,6 +3,7 @@ import {sourceBackedModeSummary} from './sourceBackedModeRuntimeR21';
 import {calculusVisualLaw} from './calculusVisualLawR37';
 import {activeProofCarrySnapshotR292} from './proof/proofCarryRuntimeR292.js';
 import {activeProofEvolutionSnapshotR293} from './proof/proofEvolutionRuntimeR293.js';
+import {activeProofReturnSnapshotR294} from './proof/proofReturnRuntimeR294.js';
 
 export const WOVEN_CANONICAL_COUNT=20736;
 export const WOVEN_OUTER_SHELL_COUNT=2985984;
@@ -89,6 +90,7 @@ export function compileWovenContinuityR77(record:any){
  const law=calculusVisualLaw(record);
  const proofCarry=activeProofCarrySnapshotR292();
  const proofEvolution=activeProofEvolutionSnapshotR293();
+ const proofReturn=activeProofReturnSnapshotR294();
  const C=cl(Number(record?.metrics?.continuity));
  const Phi=cl(Number(record?.metrics?.plasticity));
  const q=cl(Number(record?.metrics?.contradiction));
@@ -143,6 +145,21 @@ export function compileWovenContinuityR77(record:any){
    authority:proofEvolution.authority,
    boundary:proofEvolution.boundary
   },
+  proofReturn:{
+   bound:proofReturn.bound,
+   fingerprint:proofReturn.fingerprint,
+   underlyingUnresolvedCount:proofReturn.underlyingUnresolvedCount,
+   readyCount:proofReturn.readyCount,
+   waitingCount:proofReturn.waitingCount,
+   returnedPendingAdmission:proofReturn.returnedPendingAdmission,
+   closureCandidates:proofReturn.closureCandidates,
+   truthClosureCount:proofReturn.truthClosureCount,
+   unverifiedCount:proofReturn.unverifiedCount,
+   staleCount:proofReturn.staleCount,
+   rejectedCount:proofReturn.rejectedCount,
+   authority:proofReturn.authority,
+   boundary:proofReturn.boundary
+  },
   visual:{
    coherence:law.sourceModeInfluence.coherence,
    mode188:law.sourceModeInfluence.mode188,
@@ -154,6 +171,6 @@ export function compileWovenContinuityR77(record:any){
    phaseSpeed:law.phaseSpeed,
    pulseRate:law.pulseRate
   },
-  boundary:`${WOVEN_R77_AUTHORITY.boundary} R292 proof carry is browser-local contextual pressure only; R293 carries its unresolved scars into deterministic research work cells. Neither layer manufactures theorem/external evidence, source-promotion, production, or CanonState authority.`
+  boundary:`${WOVEN_R77_AUTHORITY.boundary} R292 proof carry is browser-local contextual pressure only; R293 carries its unresolved scars into deterministic research work cells. R294 carries returned-work identity, provenance state, and pending-admission status without converting a returned artifact into theorem truth. None of these layers manufacture external evidence, source-promotion, production, or CanonState authority.`
  };
 }
