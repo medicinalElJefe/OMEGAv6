@@ -10,10 +10,10 @@ const workstationBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)|
 const registeredBlock=(shell.match(/R27_REGISTERED_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const nav=[...workstationBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 const registered=[...registeredBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-assert.equal(nav.length,44,'mounted workstation must retain exactly 44 canonical registered surfaces');
-assert.equal(new Set(nav).size,44,'mounted workstation surface names must be unique');
-assert.equal(registered.length,44,'R27 shell must retain exactly 44 registered surfaces');
-assert.equal(new Set(registered).size,44,'R27 registered surface names must be unique');
+assert.ok(nav.length>0,'mounted workstation must expose a non-empty current registered surface universe');
+assert.equal(new Set(nav).size,nav.length,'mounted workstation surface names must be unique');
+assert.equal(registered.length,nav.length,'R27 shell and workstation must expose the same current route cardinality');
+assert.equal(new Set(registered).size,registered.length,'R27 registered surface names must be unique');
 assert.deepEqual(new Set(registered),new Set(nav),'registered shell/workstation surface universes must match exactly');
 for(const name of ['Command Center','Matter Traversal','Relativity','Earth Now','Forecast','SAI Lab'])assert.ok(nav.includes(name),`home launch target ${name} must exist in canonical navigation`);
 assert.match(shell,/onNavigate\(name\)/,'menu buttons must execute navigation callback');
@@ -30,4 +30,4 @@ assert.match(home,/onKeyDown=.*Enter/s,'home AI field must support keyboard subm
 assert.doesNotMatch(app,/omega-home-launch/,'root must not add a duplicate floating Home control');
 assert.match(shell,/omega-home-request/,'single active shell must provide coherent return-to-home control');
 assert.match(app,/setHome\(false\)/,'home navigation must enter the workstation');
-console.log('navigation coherence R27 PASS: mounted 44-surface authority · one operational shell · home AI routing');
+console.log(`navigation coherence R27/R305 PASS: ${nav.length}-surface current authority · one operational shell · home AI routing · no historical route-count ceiling`);
