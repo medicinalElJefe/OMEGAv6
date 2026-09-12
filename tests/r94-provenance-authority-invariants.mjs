@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R94 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R94/R305 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const provenance=read('src/surfaceProvenanceR94.ts');
@@ -18,12 +18,15 @@ const infinity=read('src/OmegaInfinityPanel.tsx');
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const routes=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 const provenanceRows=[...provenance.matchAll(/P\('([^']+)'/g)].map(x=>x[1]);
-must(routes.length===44&&new Set(routes).size===44,'canonical route universe must remain 44/44');
-must(provenanceRows.length===44&&new Set(provenanceRows).size===44,'provenance authority must contain 44 unique surface contracts');
+must(routes.length>0&&new Set(routes).size===routes.length,'canonical route universe must remain non-empty and unique');
+must(provenanceRows.length===routes.length&&new Set(provenanceRows).size===provenanceRows.length,'provenance authority must contain one unique contract per current route');
 must(routes.every(x=>provenanceRows.includes(x))&&provenanceRows.every(x=>routes.includes(x)),'provenance contracts must match the canonical route set exactly');
+must(provenance.includes("import {OMEGA_ALL_ROUTES_R82} from './omegaExperienceRegistryR82'"),'provenance audit must consume the current shared route authority');
+must(provenance.includes('missingRoutes=routes.filter')&&provenance.includes('orphanProvenance=names.filter'),'audit must expose missing/orphan provenance residuals');
 must(provenance.includes("representationalPrimary=OMEGA_SURFACE_PROVENANCE_R94.filter(x=>x.primary==='REPRESENTATIONAL')"),'audit must explicitly reject representational primary truth');
 must(provenance.includes('representationalPrimary.length===0'),'R94 audit must fail if any route makes representation primary');
-must(provenance.includes('names.length===44&&new Set(names).size===44'),'R94 audit must require 44 unique routes');
+must(provenance.includes('names.length===routes.length')&&provenance.includes('missingRoutes.length===0')&&provenance.includes('orphanProvenance.length===0'),'R94 audit must require exact dynamic route/provenance set equality');
+must(!provenance.includes('names.length===44')&&!provenance.includes('size===44'),'R94 audit must not freeze a historical route count');
 for(const cls of ['RETURNED_EVIDENCE','IMPORTED_EVIDENCE','LOCAL_OBSERVATION','CANONICAL_PACKET','EXACT_EVALUATION','DERIVED_MODEL','FORECAST_MODEL','PROVIDER_SYNTHESIS','LOCAL_ARTIFACT','ARCHIVE_EVIDENCE','RUNTIME_PROOF','DEVICE_PROOF','REGISTRY_METADATA','GOVERNANCE_DECISION','REPRESENTATIONAL','UNAVAILABLE'])
  must(provenance.includes("'"+cls+"'"),'missing provenance class '+cls);
 
@@ -62,4 +65,4 @@ must(!provenance.includes("P('Earth Now','REPRESENTATIONAL'"),'Earth primary may
 must(!provenance.includes("P('Forecast','RETURNED_EVIDENCE'"),'Forecast may never be classified as returned evidence');
 must(!provenance.includes("P('Development','RUNTIME_PROOF'"),'browser development planning may not be relabeled as deployed runtime proof');
 
-console.log('R94 PROVENANCE AUTHORITY PASS · 44/44 surfaces classified · representational primary forbidden · R93 visual truth preserved · System Atlas/Cockpit/Earth corrected');
+console.log(`R94/R305 PROVENANCE AUTHORITY PASS · ${routes.length}/${routes.length} current surfaces classified · exact route/provenance equality · representational primary forbidden · R93 visual truth preserved · System Atlas/Cockpit/Earth corrected · no historical route-count ceiling`);
