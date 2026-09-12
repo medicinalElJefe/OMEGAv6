@@ -12,6 +12,8 @@ const stable=value=>{if(value===null||typeof value!=='object')return JSON.string
 const hash32=value=>{const text=String(value);let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0};
 const fingerprint=value=>`r294-${hash32(stable(value)).toString(16).padStart(8,'0')}`;
 const digestOk=value=>/^sha256:[0-9a-f]{64}$/i.test(String(value||''));
+const receiptBody=receipt=>{if(!receipt||typeof receipt!=='object')return null;const{receiptFingerprint,...body}=receipt;return body};
+const receiptFingerprintOk=receipt=>{const body=receiptBody(receipt);return Boolean(body)&&String(receipt?.receiptFingerprint||'')===fingerprint(body)};
 
 export function buildProofReturnReceiptR294(cell,evolution,input={}){
  if(!cell||cell.schema!=='OMEGA_PROOF_WORK_CELL_R293')throw new Error('R294 requires an R293 proof work cell');
@@ -47,6 +49,7 @@ export function validateProofReturnR294(evolution,receipt){
  const cells=Array.isArray(evolution?.cells)?evolution.cells:[];
  const cell=cells.find(x=>String(x.id)===String(receipt?.workCellId));
  if(!receipt||receipt.schema!==PROOF_RETURN_RECEIPT_SCHEMA_R294)return{status:'REJECTED_SCHEMA',accepted:false,closureCandidate:false,reason:'R294 receipt schema required',cell:null};
+ if(!receiptFingerprintOk(receipt))return{status:'REJECTED_RECEIPT_FINGERPRINT',accepted:false,closureCandidate:false,reason:'receipt fingerprint mismatch; returned metadata was altered after issuance',cell};
  if(String(receipt.claimId)!==String(evolution?.claimId))return{status:'REJECTED_IDENTITY',accepted:false,closureCandidate:false,reason:'claim identity mismatch',cell:null};
  if(!cell)return{status:'STALE_OR_RECOMPILED',accepted:false,closureCandidate:false,reason:'work cell no longer exists in the active proof evolution',cell:null};
  if(String(receipt.proofFingerprint)!==String(evolution?.proofFingerprint)||String(receipt.evolutionFingerprint)!==String(evolution?.fingerprint)||String(receipt.scarFingerprint)!==String(cell.scarFingerprint))return{status:'STALE_FINGERPRINT',accepted:false,closureCandidate:false,reason:'proof/evolution/scar fingerprint mismatch',cell};
@@ -109,6 +112,7 @@ export function readProofReturnLedgerR294(){
 }
 export function recordProofReturnR294(receipt){
  if(!receipt||receipt.schema!==PROOF_RETURN_RECEIPT_SCHEMA_R294)throw new Error('R294 receipt required');
+ if(!receiptFingerprintOk(receipt))throw new Error('R294 receipt fingerprint mismatch');
  const rows=readProofReturnLedgerR294(),next=[...rows.filter(x=>String(x.receiptId)!==String(receipt.receiptId)),receipt].slice(-256);
  try{localStorage.setItem(RETURN_LEDGER_KEY_R294,JSON.stringify(next));window.dispatchEvent(new CustomEvent('omega-r294-proof-return-changed',{detail:receipt}))}catch{}
  return receipt;
