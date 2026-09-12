@@ -1,6 +1,7 @@
 import {decodeAddress,evaluateCorpusModes} from './corpusRuntime';
 import {sourceBackedModeSummary} from './sourceBackedModeRuntimeR21';
 import {calculusVisualLaw} from './calculusVisualLawR37';
+import {activeProofCarrySnapshotR292} from './proof/proofCarryRuntimeR292.js';
 
 export const WOVEN_CANONICAL_COUNT=20736;
 export const WOVEN_OUTER_SHELL_COUNT=2985984;
@@ -85,6 +86,7 @@ export function compileWovenContinuityR77(record:any){
  const catalog=evaluateCorpusModes(record);
  const source=sourceBackedModeSummary(record);
  const law=calculusVisualLaw(record);
+ const proofCarry=activeProofCarrySnapshotR292();
  const C=cl(Number(record?.metrics?.continuity));
  const Phi=cl(Number(record?.metrics?.plasticity));
  const q=cl(Number(record?.metrics?.contradiction));
@@ -92,6 +94,7 @@ export function compileWovenContinuityR77(record:any){
  const evidence=cl(Number(record?.metrics?.evidence));
  const scar=cl(Number(record?.metrics?.scar));
  const dewey=(C*Phi)/(q+burden+1e-9);
+ const proofGlow=cl(law.proofGlow*(proofCarry.bound?proofCarry.routingSupport:1));
  return{
   schema:WOVEN_R77_AUTHORITY.schema,
   address:int(Number(record?.address||0),0,WOVEN_CANONICAL_COUNT-1),
@@ -116,17 +119,30 @@ export function compileWovenContinuityR77(record:any){
    decision:String(record?.metrics?.decision||'TURN'),
    mode188:String(record?.metrics?.mode188||'UNKNOWN')
   },
+  proofCarry:{
+   bound:proofCarry.bound,
+   fingerprint:proofCarry.fingerprint,
+   claimLabel:proofCarry.claimLabel,
+   claimStatus:proofCarry.claimStatus,
+   supportScore:proofCarry.supportScore,
+   routingSupport:proofCarry.routingSupport,
+   scarPressure:proofCarry.scarPressure,
+   unresolvedScars:proofCarry.unresolvedScars.length,
+   promotionEligible:proofCarry.promotionEligible,
+   decision:proofCarry.decision,
+   boundary:proofCarry.boundary
+  },
   visual:{
    coherence:law.sourceModeInfluence.coherence,
    mode188:law.sourceModeInfluence.mode188,
    forecast:law.sourceModeInfluence.forecast,
    prune:law.sourceModeInfluence.prune,
    routeStrength:law.routeStrength,
-   proofGlow:law.proofGlow,
+   proofGlow,
    contradictionPressure:law.contradictionPressure,
    phaseSpeed:law.phaseSpeed,
    pulseRate:law.pulseRate
   },
-  boundary:WOVEN_R77_AUTHORITY.boundary
+  boundary:`${WOVEN_R77_AUTHORITY.boundary} R292 proof carry is browser-local contextual pressure only; unbound state is neutral and bound state cannot manufacture theorem or external evidence authority.`
  };
 }
