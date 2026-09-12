@@ -1,6 +1,7 @@
 /* R210/R304/R305 — one readable navigation state across desktop/mobile. This layer changes presentation and focus behavior only; it adds no execution or Canon authority. */
 .r210-converged-nav{z-index:900!important;isolation:isolate}
-.r210-converged-nav .r94-nav-panel{display:flex!important;flex-direction:column!important;overscroll-behavior:contain;scrollbar-gutter:stable;box-shadow:24px 0 72px rgba(0,0,0,.42)}
+.r210-converged-nav .r94-nav-rail{z-index:2}
+.r210-converged-nav .r94-nav-panel{display:flex!important;flex-direction:column!important;z-index:1;overscroll-behavior:contain;scrollbar-gutter:stable;box-shadow:24px 0 72px rgba(0,0,0,.42)}
 .r210-converged-nav .r94-nav-panel>:not(.r89-flat-scroll):not(.r88-software-layer){flex:0 0 auto}
 .r210-converged-nav .r89-flat-scroll,.r210-converged-nav .r88-software-layer{flex:1 1 0!important;min-height:0!important}
 .r210-converged-nav .r88-navigator-foot{position:relative!important;z-index:1;flex:0 0 auto;background:#03080b}
