@@ -34,7 +34,8 @@ export function compileProofCarryR292(input={}){
  const exhaustivePartitions=terminalPartitions.filter(p=>p.exhaustive===true).length;
  const transformPass=transforms.filter(t=>t.preservesInvariant===true&&t.domainMapVerified!==false).length;
  const exactPass=checks.filter(c=>c.pass===true).length;
- const usableSources=sources.filter(s=>!['SOURCE_MISSING','REJECTED'].includes(String(s.status||s.authority))).length;
+ const unusableSources=sources.filter(s=>['SOURCE_MISSING','REJECTED'].includes(String(s.status||s.authority)));
+ const usableSources=sources.length-unusableSources.length;
  const gateCoverage=ratio(closedGates,gates.length,1);
  const partitionCoverage=ratio(exhaustivePartitions,terminalPartitions.length,requirements.exhaustivePartition?0:1);
  const invariantCarry=ratio(transformPass,transforms.length,requirements.invariantCarry?0:1);
@@ -48,7 +49,8 @@ export function compileProofCarryR292(input={}){
   ...openGates.map(g=>({kind:'GATE',id:String(g.id||'gate'),status:String(g.status||'OPEN'),detail:String(g.detail||g.label||'Unresolved gate')})),
   ...terminalPartitions.filter(p=>p.exhaustive!==true).map(p=>({kind:'PARTITION',id:String(p.id||'partition'),status:'OPEN',detail:String(p.scope||'Exhaustiveness missing')})),
   ...transforms.filter(t=>t.preservesInvariant!==true||t.domainMapVerified===false).map(t=>({kind:'TRANSFORM',id:String(t.id||'transform'),status:'HOLD',detail:String(t.detail||'Invariant/domain carry not certified')})),
-  ...checks.filter(c=>c.pass!==true).map(c=>({kind:'EXACT_CHECK',id:String(c.id||'check'),status:'HOLD',detail:String(c.detail||'Exact check failed')}))
+  ...checks.filter(c=>c.pass!==true).map(c=>({kind:'EXACT_CHECK',id:String(c.id||'check'),status:'HOLD',detail:String(c.detail||'Exact check failed')})),
+  ...unusableSources.map(s=>({kind:'SOURCE',id:String(s.id||'source'),status:String(s.status||s.authority||'SOURCE_MISSING'),detail:String(s.detail||s.label||'Required source lineage unavailable')}))
  ];
  const requirementPass={
   exhaustivePartition:!requirements.exhaustivePartition||partitionCoverage===1,
@@ -57,7 +59,7 @@ export function compileProofCarryR292(input={}){
   exactChecks:!requirements.exactChecks||exactCoverage===1
  };
  const promotionEligible=openGates.length===0&&Object.values(requirementPass).every(Boolean);
- const scarPressure=clamp(unresolvedScars.length/Math.max(1,gates.length+terminalPartitions.length+transforms.length+checks.length));
+ const scarPressure=clamp(unresolvedScars.length/Math.max(1,gates.length+terminalPartitions.length+transforms.length+checks.length+sources.length));
  const decision=promotionEligible?'CARRY':sourceCoverage<1||invariantCarry<1?'ESCALATE':'TURN';
  const core={
   schema:PROOF_CARRY_SCHEMA_R292,
@@ -89,7 +91,7 @@ export function readActiveProofCarryR292(){
 }
 export function activeProofCarrySnapshotR292(){
  const active=readActiveProofCarryR292();
- if(!active)return{schema:PROOF_CARRY_SCHEMA_R292,bound:false,fingerprint:'R292-UNBOUND',claimStatus:'UNBOUND',claimLabel:'No active proof context',promotionEligible:false,routingSupport:1,supportScore:1,scarPressure:0,unresolvedScars:[],decision:'CARRY',boundary:'No proof project is bound, so R292 is neutral and preserves pre-R292 traversal/mode scoring.'};
+ if(!active)return{schema:PROOF_CARRY_SCHEMA_R292,bound:false,fingerprint:'R292-UNBOUND',domainId:'UNBOUND',claimId:'UNBOUND',claimStatus:'UNBOUND',claimLabel:'No active proof context',requirements:{},requirementPass:{},promotionEligible:false,routingSupport:1,supportScore:1,scarPressure:0,unresolvedScars:[],decision:'CARRY',boundary:'No proof project is bound, so R292 is neutral and preserves pre-R292 traversal/mode scoring.'};
  const supportScore=clamp(active.metrics?.supportScore);
- return{schema:PROOF_CARRY_SCHEMA_R292,bound:true,fingerprint:String(active.fingerprint||proofCarryFingerprintR292(active)),claimStatus:String(active.claimStatus||'UNKNOWN'),claimLabel:String(active.claimLabel||active.claimId||'Proof context'),promotionEligible:Boolean(active.promotionEligible),routingSupport:clamp(.35+.65*supportScore),supportScore,scarPressure:clamp(active.metrics?.scarPressure),unresolvedScars:Array.isArray(active.unresolvedScars)?active.unresolvedScars:[],decision:String(active.decision||'TURN'),boundary:PROOF_CARRY_BOUNDARY_R292};
+ return{schema:PROOF_CARRY_SCHEMA_R292,bound:true,fingerprint:String(active.fingerprint||proofCarryFingerprintR292(active)),domainId:String(active.domainId||'UNKNOWN'),claimId:String(active.claimId||'UNKNOWN'),claimStatus:String(active.claimStatus||'UNKNOWN'),claimLabel:String(active.claimLabel||active.claimId||'Proof context'),requirements:active.requirements||{},requirementPass:active.requirementPass||{},promotionEligible:Boolean(active.promotionEligible),routingSupport:clamp(.35+.65*supportScore),supportScore,scarPressure:clamp(active.metrics?.scarPressure),unresolvedScars:Array.isArray(active.unresolvedScars)?active.unresolvedScars:[],decision:String(active.decision||'TURN'),boundary:PROOF_CARRY_BOUNDARY_R292};
 }

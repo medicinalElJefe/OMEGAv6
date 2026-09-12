@@ -2,6 +2,7 @@ import {decodeAddress,evaluateCorpusModes} from './corpusRuntime';
 import {sourceBackedModeSummary} from './sourceBackedModeRuntimeR21';
 import {calculusVisualLaw} from './calculusVisualLawR37';
 import {activeProofCarrySnapshotR292} from './proof/proofCarryRuntimeR292.js';
+import {activeProofEvolutionSnapshotR293} from './proof/proofEvolutionRuntimeR293.js';
 
 export const WOVEN_CANONICAL_COUNT=20736;
 export const WOVEN_OUTER_SHELL_COUNT=2985984;
@@ -87,6 +88,7 @@ export function compileWovenContinuityR77(record:any){
  const source=sourceBackedModeSummary(record);
  const law=calculusVisualLaw(record);
  const proofCarry=activeProofCarrySnapshotR292();
+ const proofEvolution=activeProofEvolutionSnapshotR293();
  const C=cl(Number(record?.metrics?.continuity));
  const Phi=cl(Number(record?.metrics?.plasticity));
  const q=cl(Number(record?.metrics?.contradiction));
@@ -132,6 +134,15 @@ export function compileWovenContinuityR77(record:any){
    decision:proofCarry.decision,
    boundary:proofCarry.boundary
   },
+  proofEvolution:{
+   bound:proofEvolution.bound,
+   fingerprint:proofEvolution.fingerprint,
+   unresolvedCount:proofEvolution.unresolvedCount,
+   frontierCount:proofEvolution.frontier.length,
+   operationCounts:proofEvolution.operationCounts,
+   authority:proofEvolution.authority,
+   boundary:proofEvolution.boundary
+  },
   visual:{
    coherence:law.sourceModeInfluence.coherence,
    mode188:law.sourceModeInfluence.mode188,
@@ -143,6 +154,6 @@ export function compileWovenContinuityR77(record:any){
    phaseSpeed:law.phaseSpeed,
    pulseRate:law.pulseRate
   },
-  boundary:`${WOVEN_R77_AUTHORITY.boundary} R292 proof carry is browser-local contextual pressure only; unbound state is neutral and bound state cannot manufacture theorem or external evidence authority.`
+  boundary:`${WOVEN_R77_AUTHORITY.boundary} R292 proof carry is browser-local contextual pressure only; R293 carries its unresolved scars into deterministic research work cells. Neither layer manufactures theorem/external evidence, source-promotion, production, or CanonState authority.`
  };
 }
