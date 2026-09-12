@@ -1,3 +1,4 @@
+import './r295-proof-admission-compiler-invariants.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {compileProofCarryR292} from '../src/proof/proofCarryRuntimeR292.js';
