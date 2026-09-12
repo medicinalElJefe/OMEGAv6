@@ -1,0 +1,13 @@
+/* R303 INTERACTION AUTHORITY — final presentation-only touch/reduced-motion contract.
+   Loaded after specialist surface CSS so inherited compact !important rules cannot undercut coarse-pointer usability.
+   This file owns no route, execution, proof, evidence, persistence, deployment, or Canon authority. */
+@media(any-pointer:coarse){
+ #root .omega-workstation-v2 :where(button,[role='button']){min-width:44px!important;min-height:44px!important;touch-action:manipulation}
+ #root .omega-workstation-v2 :where(input,select,textarea){min-height:44px!important}
+ #root .r210-converged-nav :where(.r88-head-actions button,.r89-nav-mode button,.r94-rail-action){min-width:44px!important;min-height:44px!important;touch-action:manipulation}
+ #root .r210-converged-nav .r89-flat-route{min-height:54px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #root .r210-converged-nav :where(.r89-flat-route,.r94-nav-panel,.r88-navigator-trigger){transition:none!important;animation:none!important;scroll-behavior:auto!important}
+ #root .omega-workstation-v2 :where([class*='scroll'],[class*='stage']){scroll-behavior:auto!important}
+}
