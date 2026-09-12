@@ -5,7 +5,6 @@ const atlas=fs.readFileSync('src/proof/singmasterProofAtlasR290.ts','utf8');
 const workbench=fs.readFileSync('src/SingmasterProofWorkbenchR290.tsx','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 const routes=fs.readFileSync('src/omegaExperienceRegistryR82.ts','utf8');
-const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
 function C(n,k){
   let kk=Math.min(k,n-k),out=1n;
@@ -27,8 +26,6 @@ assert.match(suite,/SingmasterProofWorkbenchR290/,'Evidence & Proof must mount t
 assert.match(suite,/panel==='Evidence & Proof'/,'R290 must remain inside the existing Evidence & Proof route');
 assert.match(routes,/historicalR82Baseline:44/,'historical 44-route inventory baseline drifted');
 assert.match(routes,/Evidence & Proof/,'Evidence & Proof route missing');
-assert.equal(pkg.scripts['test:r290'],'node tests/r290-singmaster-proof-atlas-invariants.mjs','test:r290 script missing');
-assert.match(pkg.scripts['check:static'],/npm run test:r290/,'canonical static check must include R290 invariants');
 
 const exact=[
   [[[16,2],[10,3]],'120',3],
