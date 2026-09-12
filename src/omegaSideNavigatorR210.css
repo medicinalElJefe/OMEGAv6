@@ -1,6 +1,9 @@
 /* R210/R304/R305 — one readable navigation state across desktop/mobile. This layer changes presentation and focus behavior only; it adds no execution or Canon authority. */
 .r210-converged-nav{z-index:900!important;isolation:isolate}
-.r210-converged-nav .r94-nav-panel{overscroll-behavior:contain;scrollbar-gutter:stable;box-shadow:24px 0 72px rgba(0,0,0,.42)}
+.r210-converged-nav .r94-nav-panel{display:flex!important;flex-direction:column!important;overscroll-behavior:contain;scrollbar-gutter:stable;box-shadow:24px 0 72px rgba(0,0,0,.42)}
+.r210-converged-nav .r94-nav-panel>:not(.r89-flat-scroll):not(.r88-software-layer){flex:0 0 auto}
+.r210-converged-nav .r89-flat-scroll,.r210-converged-nav .r88-software-layer{flex:1 1 0!important;min-height:0!important}
+.r210-converged-nav .r88-navigator-foot{position:relative!important;z-index:1;flex:0 0 auto;background:#03080b}
 .r210-converged-nav :where(button,input,select,textarea,[tabindex]:not([tabindex='-1'])):focus-visible{outline:2px solid rgba(118,221,204,.78)!important;outline-offset:2px!important}
 .r210-converged-nav :where(button,[role='button']){touch-action:manipulation}
 .r210-converged-nav .r88-search:focus-within{border-color:rgba(118,221,204,.52)!important;box-shadow:0 0 0 3px rgba(118,221,204,.08)!important;background:rgba(7,20,24,.98)!important}
