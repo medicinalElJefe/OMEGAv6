@@ -6,7 +6,7 @@ R285 upgrades the production Earth → SAR Truth workspace from a visually rich 
 
 The Earth SAR surface now queries the Copernicus Data Space Ecosystem STAC service for current Sentinel-1 acquisition records around the selected WGS84 target. The operator can switch between GRD and SLC catalogue searches, change the time window, move the target, inspect returned acquisition identity, time, mode, orbit, polarization, incidence metadata, asset counts, and open the exact returned STAC record.
 
-The R285 layout adds a dedicated source rail, acquisition browser, query controls, source return state, evidence hash, selected-source context, optional returned catalogue preview, and a larger analytical workstation. SAR mode uses the full Earth stage instead of competing with the generic Earth side console.
+The R285 layout adds a dedicated source rail, acquisition browser, query controls, source return state, evidence hash, selected-source context, optional returned catalogue preview, and a larger analytical workstation. SAR mode uses the full Earth stage and keeps only a compact target-continuity strip from the generic Earth console so coordinate/apply/reset controls remain available without duplicating the generic evidence channels.
 
 ## Measurement truth
 
@@ -35,7 +35,7 @@ The existing phase-to-LOS mathematical relation remains a mathematical relation 
 
 ## UI proof contract
 
-SAR Truth intentionally owns the full-width Earth workspace while it is active, so the generic Earth side console is hidden rather than layered over the dedicated SAR controls. The inherited Earth browser proof therefore validates the SAR full-width `sar-active` state and hidden generic console first, then returns to a standard Earth view before proving the unchanged model-mapped target reset/query control. This keeps the eight-view Earth contract, the SAR workstation layout, and the inherited target-reset behavior independently testable instead of coupling a standard-view control to the SAR-only presentation state.
+SAR Truth intentionally owns the full-width Earth workspace while active. R285 preserves target continuity by re-exposing only the WGS84 location, coordinate, apply, and model-target reset controls in a compact SAR-scoped strip; generic Earth evidence-channel controls and truth cards remain hidden. The inherited Earth browser proof validates the `sar-active` state, visible target-continuity strip, hidden generic evidence clutter, and unchanged model-mapped target reset/query behavior directly inside SAR. This keeps the eight-view Earth contract and the dedicated SAR workstation independently explicit without relying on a globally injected cross-release stylesheet.
 
 ## Runtime and authority
 
