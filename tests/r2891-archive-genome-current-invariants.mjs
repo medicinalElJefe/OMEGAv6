@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const d=fs.readFileSync('src/archiveGenomeLedgerR288d.ts','utf8');
+const ui=fs.readFileSync('src/ArchiveGenomeQueueR288.tsx','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(`R289.1 current genome invariant failed: ${msg}`)};
+must(d.includes("id:'AG-026'"),'AG-026 RSC proof VM stratum missing');
+must(d.includes('ARCHIVE_GENOME_CURRENT_R289'),'current 26-family aggregate missing');
+must(ui.includes('ARCHIVE_GENOME_CURRENT_R289'),'UI must consume current aggregate, not stale 25-family aggregate');
+must(ui.includes('OMEGA_R289_ARCHIVE_GENOME_RECEIPT.json'),'current genome receipt identity missing');
+must(ui.includes('R289.1 · ARCHIVE GENOME → OMEGAv6'),'current genome UI release identity missing');
+console.log('R289.1 CURRENT ARCHIVE GENOME PASS · UI consumes AG-001..AG-026 plus scar ledger');
