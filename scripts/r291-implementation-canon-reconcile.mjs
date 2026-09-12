@@ -4,8 +4,12 @@ import zlib from 'node:zlib';
 import crypto from 'node:crypto';
 
 const ROOT=path.resolve(process.cwd());
-const DATA=path.join(ROOT,'data','implementation-canon-r291.json.gz.b64');
+const DATA_PARTS=Array.from({length:8},(_,i)=>path.join(ROOT,'data',`implementation-canon-r291.part${String(i+1).padStart(2,'0')}.b64`));
 const EXPECTED_ROWS=675;
+const EXPECTED_PART_LENGTH=3045;
+const EXPECTED_BASE64_LENGTH=24360;
+const EXPECTED_GZIP_BYTES=18268;
+const EXPECTED_GZIP_SHA256='3faae0d831fcebaef806afdb80bdc30868726982a4f7d5649f9850453ff110b2';
 const EXPECTED_PAYLOAD_SHA256='8eb1d334cf1a1cbb6e7633b0f90e37893e1d95560de2cfe334e6a076cdbeb904';
 const STATES=['IMPLEMENTED','PARTIAL','SUPERSEDED','DONOR','PLANNED','REJECTED'];
 const ACTIVE_ROOTS=['src','tests','scripts','public','docs','.github/workflows'];
@@ -44,7 +48,25 @@ function validateDataset(data){
  if(new Set(ids).size!==ids.length)throw new Error('R291 canon dataset contains duplicate row ids');
  for(const row of data.rows){for(const field of REQUIRED_ROW_FIELDS)if(row?.[field]===undefined||row?.[field]===null||String(row[field]).trim()==='')throw new Error(`R291 ${row.id||'UNKNOWN'} missing required field ${field}`)}
  if(!data.summary||!Number.isFinite(Number(data.summary.locked))||!Number.isFinite(Number(data.summary.planned)))throw new Error('R291 canon dataset summary must provide numeric locked/planned counts');
+ if(Number(data.summary.locked)!==12||Number(data.summary.planned)!==663)throw new Error(`R291 archive summary drift: locked=${data.summary.locked} planned=${data.summary.planned}`);
  return data;
+}
+
+function readPinnedPayload(){
+ const chunks=DATA_PARTS.map((file,index)=>{
+  if(!fs.existsSync(file))throw new Error(`R291 canon payload part missing: ${path.basename(file)}`);
+  const part=fs.readFileSync(file,'utf8').trim();
+  if(part.length!==EXPECTED_PART_LENGTH)throw new Error(`R291 canon payload part ${index+1} length ${part.length} != ${EXPECTED_PART_LENGTH}`);
+  if(!/^[A-Za-z0-9+/=]+$/.test(part))throw new Error(`R291 canon payload part ${index+1} is not canonical base64 text`);
+  return part;
+ });
+ const b64=chunks.join('');
+ if(b64.length!==EXPECTED_BASE64_LENGTH)throw new Error(`R291 canon payload encoded length ${b64.length} != ${EXPECTED_BASE64_LENGTH}`);
+ const bytes=Buffer.from(b64,'base64');
+ if(bytes.length!==EXPECTED_GZIP_BYTES)throw new Error(`R291 canon payload compressed bytes ${bytes.length} != ${EXPECTED_GZIP_BYTES}`);
+ const gzipDigest=sha(bytes);
+ if(gzipDigest!==EXPECTED_GZIP_SHA256)throw new Error(`R291 canon payload compressed SHA-256 mismatch: ${gzipDigest}`);
+ return{b64,gzipDigest};
 }
 
 function decodePayloadByPinnedIntegrity(encoded){
@@ -70,11 +92,11 @@ function decodePayloadByPinnedIntegrity(encoded){
 }
 
 function loadDataset(){
- const b64=fs.readFileSync(DATA,'utf8').trim();
- if(!/^[A-Za-z0-9+/=]+$/.test(b64))throw new Error('R291 canon payload is not canonical base64 text');
- const decoded=decodePayloadByPinnedIntegrity(b64);
+ const pinned=readPinnedPayload();
+ const decoded=decodePayloadByPinnedIntegrity(pinned.b64);
  const data=validateDataset(JSON.parse(decoded.json));
  Object.defineProperty(data,'_payloadCodec',{value:decoded.codec,enumerable:false,writable:false});
+ Object.defineProperty(data,'_gzipSha256',{value:pinned.gzipDigest,enumerable:false,writable:false});
  return data;
 }
 
@@ -142,7 +164,7 @@ export function reconcileImplementationCanonR291(){
  const evidencedCoverage=Number(((implemented+superseded)/rows.length).toFixed(6));
  const result={
   schema:'OMEGA_IMPLEMENTATION_CANON_RECONCILIATION_R291',generatedAt:new Date().toISOString(),
-  source:{file:data.sourceFile||'IMPLEMENTATION_CANON_ARCHIVE_DATASET',provenanceKey:'ARCHIVE-IMPLEMENTATION-CANON-R291',publicProvenance:R291_PUBLIC_SOURCE_PROVENANCE,modified:data.sourceModified||null,payloadSha256:EXPECTED_PAYLOAD_SHA256,payloadCodec:data._payloadCodec,rows:rows.length,archiveLocked:Number(data.summary.locked),archivePlanned:Number(data.summary.planned)},
+  source:{file:data.sourceFile||'IMPLEMENTATION_CANON_ARCHIVE_DATASET',provenanceKey:'ARCHIVE-IMPLEMENTATION-CANON-R291',publicProvenance:R291_PUBLIC_SOURCE_PROVENANCE,modified:data.sourceModified||null,payloadParts:DATA_PARTS.length,payloadEncodedLength:EXPECTED_BASE64_LENGTH,payloadCompressedBytes:EXPECTED_GZIP_BYTES,payloadGzipSha256:data._gzipSha256,payloadSha256:EXPECTED_PAYLOAD_SHA256,payloadCodec:data._payloadCodec,rows:rows.length,archiveLocked:Number(data.summary.locked),archivePlanned:Number(data.summary.planned)},
   classification:{scope:R291_IMPLEMENTATION_CLASSIFICATION_SCOPE,implementedMeaning:'CURRENT SOURCE PLUS CURRENT PROOF SIGNAL IN REPOSITORY; NOT A LIVE EXECUTION CLAIM',supersededMeaning:'CURRENT SUCCESSOR SOURCE PLUS PROOF SIGNAL AT ANOTHER PATH',method:'BOUNDED_PATH_AND_TEXT_RECONCILIATION_REQUIRING_EXACT_HEAD_CI'},
   truthBoundary:'Archive PLANNED/LOCKED status is specification evidence only. IMPLEMENTED is repository source+proof classification, not live runtime/device/deployment/scientific/Canon proof. Live truth remains owned by the existing runtime, device, deployment and Canon admission authorities.',
   counts,byType,byPhase,evidencedCoverage,rows
@@ -153,6 +175,6 @@ export function reconcileImplementationCanonR291(){
 if(import.meta.url===`file://${process.argv[1]}`){
  const result=reconcileImplementationCanonR291();
  const arg=process.argv.find(x=>x.startsWith('--out='));
- if(arg){const out=path.resolve(arg.slice(6));fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(result,null,2));console.log(`R291 CANON RECONCILIATION PASS · ${result.source.rows} rows · codec=${result.source.payloadCodec} · source/proof coverage=${(result.evidencedCoverage*100).toFixed(2)}% · ${JSON.stringify(result.counts)} · ${out}`)}
+ if(arg){const out=path.resolve(arg.slice(6));fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(result,null,2));console.log(`R291 CANON RECONCILIATION PASS · ${result.source.rows} rows · ${result.source.payloadParts} bounded parts · codec=${result.source.payloadCodec} · source/proof coverage=${(result.evidencedCoverage*100).toFixed(2)}% · ${JSON.stringify(result.counts)} · ${out}`)}
  else console.log(JSON.stringify({schema:result.schema,source:result.source,classification:result.classification,counts:result.counts,evidencedCoverage:result.evidencedCoverage},null,2));
 }
