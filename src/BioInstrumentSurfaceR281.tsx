@@ -78,7 +78,7 @@ export default function BioInstrumentSurfaceR281({address,onAddress}:Props){
   <BioModeWorkbenchR284 record={record} instrumentReady={frame.measurement.instrumentReady} instrumentSupplied={frame.measurement.supplied}/>
   <BioMedicalProductionPanelR282 record={record} samples={samples}/>
 
-  <details className='bio281-modes'><summary>ALL 62 CANON MODES · analytical overlay ledger <span>{frame.allModes.count} canon authorities</span></summary><div>{modeMarks.map(m=><article key={m.id}><code>{String(m.id).padStart(2,'0')}</code><span><b>{m.name}</b><small>{m.realization} · {m.basis}</small></span><strong>{fmt(m.activation)}<small>measurement authority {m.measurementAuthority}</small></strong></article>)}</div></details>
+  <details className='bio281-modes'><summary>ALL 62 MODES · canon analytical overlay ledger <span>{frame.allModes.count} canon authorities</span></summary><div>{modeMarks.map(m=><article key={m.id}><code>{String(m.id).padStart(2,'0')}</code><span><b>{m.name}</b><small>{m.realization} · {m.basis}</small></span><strong>{fmt(m.activation)}<small>measurement authority {m.measurementAuthority}</small></strong></article>)}</div></details>
 
   <footer className='bio281-boundary'><ShieldCheck/><span>{frame.truthBoundary} R284 adds a truth-bound 241-channel educational/interaction layer while R282 retains intended-use, risk, validation, audit and authorization gates. Mode exploration cannot create measurement, diagnosis, treatment authority, regulatory clearance or clinical authorization.</span></footer>
  </section>
