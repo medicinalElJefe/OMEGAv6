@@ -76,6 +76,7 @@ function hitsFor(token,index,filter=()=>true,max=4){
 }
 
 function claimsForClassification(){return{liveRuntimeProof:false,deviceProof:false,deploymentProof:false,empiricalScientificProof:false,canonAdmission:false,classificationScope:R291_IMPLEMENTATION_CLASSIFICATION_SCOPE}}
+function hasExternalAuthorityClaim(claims){return claims.liveRuntimeProof!==false||claims.deviceProof!==false||claims.deploymentProof!==false||claims.empiricalScientificProof!==false||claims.canonAdmission!==false}
 
 function classify(row,index,overrides){
  const artifact=norm(row.artifact),symbol=meaningfulToken(row.symbol),component=meaningfulToken(row.component);
@@ -109,7 +110,7 @@ export function reconcileImplementationCanonR291(){
   if(!STATES.includes(r.currentState))throw new Error(`unknown state ${r.currentState}`);
   if(r.currentState==='IMPLEMENTED'&&(!r.evidence.sourceEvidence||!r.evidence.proofEvidence))throw new Error(`${r.id} IMPLEMENTED without source+proof`);
   if(r.currentState==='SUPERSEDED'&&(!r.evidence.sourceEvidence||!r.evidence.proofEvidence))throw new Error(`${r.id} SUPERSEDED without successor source+proof`);
-  if(Object.values(r.claims).some((v,k)=>k<5&&v===true))throw new Error(`${r.id} classification illegally asserted external authority`);
+  if(hasExternalAuthorityClaim(r.claims))throw new Error(`${r.id} classification illegally asserted external authority`);
  }
  const counts=Object.fromEntries(STATES.map(s=>[s,rows.filter(r=>r.currentState===s).length]));
  const byType=Object.fromEntries([...new Set(rows.map(r=>r.type))].sort().map(t=>[t,Object.fromEntries(STATES.map(s=>[s,rows.filter(r=>r.type===t&&r.currentState===s).length]))]));
