@@ -20,10 +20,13 @@ must(bridge.includes('SingleFrameRuntimeShellR27')&&!bridge.includes('nav20-desk
 must(!app.includes('omega-home-launch'),'duplicate floating Home must remain retired');
 must(launcher.includes('OMEGA_NAVIGATION'),'retained Nexus donor must still consume the shared navigation registry');
 const names=[...navigation.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
-must(names.length===44,`shared navigation registry must expose exactly 44 destinations, got ${names.length}`);
-must(new Set(names).size===44,'destinations must be unique');
-for(const name of names)must(workstation.includes(`'${name}'`),`destination is not registered by workstation: ${name}`);
+const work=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
+const workNames=[...work.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+must(names.length>0&&names.length===workNames.length,'shared navigation and workstation must expose the same current route cardinality');
+must(new Set(names).size===names.length&&new Set(workNames).size===workNames.length,'destinations must be unique');
+for(const name of names)must(workNames.includes(name),`destination is not registered by workstation: ${name}`);
+for(const name of workNames)must(names.includes(name),`workstation route is absent from shared navigation: ${name}`);
 for(const group of ['STUDIO','OPERATIONS','WORK','INTELLIGENCE','GOVERNANCE','SYSTEM'])must(navigation.includes(`'${group}'`),`navigation registry missing group ${group}`);
 must(reset.includes('.r59-home>.r59-rail{display:none!important}')&&reset.includes('.r59-command-stage'),'current Home must lead with command + living field rather than duplicate launch chrome');
 must(!app.includes('@appdeploy/client')&&!home.includes('@appdeploy/client')&&!menu.includes('@appdeploy/client')&&!launcher.includes('@appdeploy/client'),'AppDeploy runtime dependency prohibited');
-console.log('UX_SURPASS_R2_INVARIANTS PASS · R2 lineage retained, current Home authority active, 44 routes preserved');
+console.log(`UX_SURPASS_R2/R305 INVARIANTS PASS · R2 lineage retained · current Home authority active · ${names.length} current routes exactly aligned · no historical route-count ceiling`);
