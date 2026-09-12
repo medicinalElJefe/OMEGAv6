@@ -15,6 +15,7 @@ concurrency:
 jobs:
   prove-r241:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - name: Checkout exact candidate
         uses: actions/checkout@v7
@@ -95,21 +96,41 @@ jobs:
       - name: Prove built R241/R239/R242/R245/R279/R281/R282/R283/R284/R286/R289 convergence in the real UI
         shell: bash
         run: |
+          set -euo pipefail
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
+          VITE_PID=$!
+          trap 'kill "$VITE_PID" 2>/dev/null || true' EXIT
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
             sleep 1
           done
           curl -fsS http://127.0.0.1:4173/ >/dev/null || { cat /tmp/omega-r241-vite.log; exit 1; }
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r241-archive-convergence-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r239-user-navigation-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r245-full-overall-canon-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r279-earth-views-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r281-bio-instrument-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r282-bio-medical-production-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r284-bio-mode-workbench-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r289-live-master-menu-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r286-all-surface-browser-e2e.mjs
+
+          run_browser() {
+            local test_file="$1"
+            echo "::group::R303 browser proof ${test_file}"
+            set +e
+            timeout --signal=TERM --kill-after=15s 300s env OMEGA_E2E_URL=http://127.0.0.1:4173 node "$test_file"
+            local status=$?
+            set -e
+            echo "::endgroup::"
+            if [ "$status" -ne 0 ]; then
+              echo "::error title=R303 BROWSER PROOF FAILED::${test_file} exited with status ${status}; status 124 means the bounded 300-second suite timeout fired."
+              echo '--- Vite preview log ---'
+              cat /tmp/omega-r241-vite.log || true
+              exit "$status"
+            fi
+          }
+
+          run_browser tests/r241-archive-convergence-browser-e2e.mjs
+          run_browser tests/r239-user-navigation-browser-e2e.mjs
+          run_browser tests/r245-full-overall-canon-browser-e2e.mjs
+          run_browser tests/r279-earth-views-browser-e2e.mjs
+          run_browser tests/r281-bio-instrument-browser-e2e.mjs
+          run_browser tests/r282-bio-medical-production-browser-e2e.mjs
+          run_browser tests/r284-bio-mode-workbench-browser-e2e.mjs
+          run_browser tests/r289-live-master-menu-browser-e2e.mjs
+          run_browser tests/r286-all-surface-browser-e2e.mjs
 
       - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'pull_request'
@@ -143,8 +164,9 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + Navigation + Full Canon + Earth/SAR + R281/R282/R286/R289 Heavy Bio/UI proof'
+            echo '## R241/R303 Archive Convergence + Navigation + Full Canon + Earth/SAR + Heavy Bio/UI proof'
             echo "- Candidate: $GITHUB_SHA"
+            echo '- The proof job is bounded to 30 minutes and each real-browser suite is bounded to 300 seconds with failing-suite and Vite diagnostics; proof content is not skipped or weakened.'
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
             echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
             echo '- R245 correlates runtime, production receipt, Hybrid, capability and governed self-build truth into one read-only observation epoch.'
@@ -156,8 +178,8 @@ jobs:
             echo '- R284 WGS84 Planet keeps returned NASA GIBS source brightness distinct from UTC illumination, terminator, grid and other declared rendering transforms.'
             echo '- R281 preserves calibrated instrument evidence, uncertainty, provenance, 12 domains, 12 context layers, seven physical scales and the 62-mode canon overlay.'
             echo '- R282 preserves intended-use measurands, freshness/unit/AMR/uncertainty gates, risk, audit, controlled change and clinical-release authority separation.'
-            echo '- R286 exposes all 241 analytical channels through metadata-bound menus, evidence filters, mode-specific analytical visuals, education and read-only comparison without inventing biological mappings.'
-            echo '- R286 also pointer-verifies ALL + six workspace submenus and all 44 canonical routes on desktop/mobile and preserves exact 78×78/6,084-cell SAR geometry on mobile.'
+            echo '- R286/R303 exposes all 241 analytical channels and browser-proves all 44 routes on desktop and touch/coarse-pointer reduced-motion mobile, including 44px interaction targets.'
+            echo '- R286 also preserves exact 78×78/6,084-cell SAR geometry on mobile.'
             echo '- R289 presents the recovered 12-menu taxonomy on the actual R88/R239 navigator strictly downstream of the R242 lemma; it remains a filter over the same 44 routes, not a second router.'
             echo '- R289 browser proof verifies ALL + 12 master menus, preservation of ALL + six workspaces, search composition, canonical route activation and mobile containment.'
             echo '- Every analytical channel retains measurement authority 0; clinical influence remains owned by R282 scope-matched validation and explicit authorization.'
