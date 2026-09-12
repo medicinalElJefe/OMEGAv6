@@ -21,6 +21,8 @@ const adapter=read('src/platformAdapter.ts');
 const browserProof=read('tests/r286-all-surface-browser-e2e.mjs');
 const responsive=read('src/responsivePolishR88.css');
 const weaveCss=read('src/weaveGeometryR100.css');
+const specialistCss=read('src/specialistLoaderR109.css');
+const interactionAuthority=read('src/interactionAuthorityR303.css');
 
 must(index.includes('/src/r286InteractionIntegrity.css'),'compatibility layer must be loaded by the canonical HTML root');
 must(compat.includes('presentation only')&&compat.includes('No route, execution, proof, Canon, evidence, or persistence authority'),'compatibility layer must remain presentation-only');
@@ -39,7 +41,19 @@ must(shell.includes("new CustomEvent('omega-r88-open-navigator'")&&side.includes
 must(adapter.includes('return raw === null ? fallback : JSON.parse(raw) as T'),'panel persistence adapter must decode stored route identity before normalization');
 
 must(weaveCss.includes('min-height:32px!important'),'R303 repair must remain anchored to a real inherited specialist sub-44px !important rule');
-must(responsive.includes("@media(any-pointer:coarse)")&&responsive.includes(":where(button,[role='button']){min-width:44px!important;min-height:44px!important}")&&responsive.includes(":where(input,select,textarea){min-height:44px!important}"),'R303 shared responsive layer must authoritatively override inherited specialist action/form control geometry on coarse pointers');
+must(workstation.indexOf("import './responsivePolishR88.css'")<workstation.indexOf("import './mobileVisualFirstR89.css'"),'R303 cascade repair must remain anchored to the real inherited order where specialist mobile CSS loads after responsive polish');
+must(workstation.indexOf("import './mobileVisualFirstR89.css'")<workstation.indexOf("import './specialistLoaderR109.css'"),'R303 final authority carrier must load after inherited visual-first specialist CSS');
+must(specialistCss.startsWith("@import './interactionAuthorityR303.css';"),'R303 specialist loader stylesheet must import the final interaction authority before its own rules at the last static stylesheet position');
+must(interactionAuthority.includes('final presentation-only touch/reduced-motion contract')&&interactionAuthority.includes('owns no route, execution, proof, evidence, persistence, deployment, or Canon authority'),'R303 late interaction layer must remain presentation-only');
+for(const token of [
+ '#root .omega-workstation-v2 :where(button,[role=\'button\']){min-width:44px!important;min-height:44px!important',
+ '#root .omega-workstation-v2 :where(input,select,textarea){min-height:44px!important}',
+ '#root .r210-converged-nav :where(.r88-head-actions button,.r89-nav-mode button,.r94-rail-action){min-width:44px!important;min-height:44px!important',
+ '#root .r210-converged-nav .r89-flat-route{min-height:54px!important}',
+ '@media(prefers-reduced-motion:reduce)',
+ 'transition:none!important;animation:none!important;scroll-behavior:auto!important'
+])must(interactionAuthority.includes(token),`R303 late interaction authority missing ${token}`);
+must(responsive.includes("@media(any-pointer:coarse)")&&responsive.includes(":where(button,[role='button']){min-width:44px!important;min-height:44px!important}")&&responsive.includes(":where(input,select,textarea){min-height:44px!important}"),'R303 shared responsive layer must retain the baseline coarse-pointer action/form contract even though late authority owns cascade closure');
 
 for(const token of [
  "deviceScaleFactor:2,hasTouch:true,isMobile:true,reducedMotion:'reduce'",
@@ -65,4 +79,4 @@ must(browserProof.indexOf('await verifyR303InteractionEnvelope(page,name)')<brow
 must(browserProof.indexOf('if(!snap.mainPresent')>browserProof.indexOf('await clickRoute(page,route)'),'R303 workstation containment must be asserted after each canonical route is activated');
 must(!browserProof.includes('page.route(')&&!browserProof.includes('Math.random'),'R303 interaction proof must exercise the real built UI without request mocking or random acceptance');
 
-console.log('R286/R303 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + exact 78×78 mobile field geometry + authoritative 44×44 coarse-pointer action override and 44px-high form-control override against inherited specialist !important rules + 390px 2×DPR coarse-pointer/reduced-motion browser proof + Home/workstation lifecycle-aware per-route horizontal containment preserved.');
+console.log('R286/R303 UI INTERACTION INTEGRITY PASS · 44 canonical surfaces + exact 78×78 mobile field geometry + real cascade-order scar bound · final root-scoped touch/reduced-motion authority loaded at the last static specialist stylesheet position · 44×44 coarse-pointer action and 44px form floor protected from later inherited !important rules · 390px 2×DPR coarse-pointer/reduced-motion browser proof + Home/workstation lifecycle-aware per-route containment preserved.');
