@@ -5,7 +5,7 @@ const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,''
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const block=(source.match(/export const OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const expected=[...block.matchAll(/'([^']+)'/g)].map(m=>m[1]);
-if(expected.length!==44||new Set(expected).size!==44)throw new Error(`R286/R305 expected 44 unique canonical surfaces, received ${expected.length}/${new Set(expected).size}`);
+if(expected.length===0||new Set(expected).size!==expected.length)throw new Error(`R286/R305 expected a non-empty unique canonical surface inventory, received ${expected.length}/${new Set(expected).size}`);
 
 const profiles=[
  ['desktop',{viewport:{width:1440,height:960},deviceScaleFactor:1,hasTouch:false,reducedMotion:'no-preference'}],
@@ -56,7 +56,21 @@ async function verifyWorkspaceSubmenus(page,viewportName){
   if(await page.locator('.r89-flat-route:visible').count()<1)throw new Error(`${viewportName}: workspace submenu ${labels[i]} produced no reachable routes`);
  }
  await filters.first().click();await page.waitForFunction(()=>document.querySelector('.r105-workspace-filter button')?.classList.contains('active')===true,{timeout:10000});
- const allRoutes=await page.locator('.r89-flat-route:visible').count();if(allRoutes!==44)throw new Error(`${viewportName}: ALL workspace submenu did not restore 44 routes; received ${allRoutes}`);
+ const allRoutes=await page.locator('.r89-flat-route:visible').count();if(allRoutes!==expected.length)throw new Error(`${viewportName}: ALL workspace submenu did not restore the full dynamic route inventory; expected ${expected.length}, received ${allRoutes}`);
+}
+
+async function verifyReachabilityFabric(page,viewportName){
+ await openNavigator(page);
+ const systemMode=page.locator('.r89-nav-mode button').filter({hasText:'System map'}).first();
+ if(!await systemMode.count())throw new Error(`${viewportName}: R305 System map navigator mode missing`);
+ await systemMode.scrollIntoViewIfNeeded();await systemMode.click({timeout:10000});
+ const audit=page.locator('.r83-inventory[data-reachability-revision="R305"]');
+ await audit.waitFor({state:'visible',timeout:10000});
+ const state=await audit.evaluate(el=>({pass:el.getAttribute('data-reachability-pass'),residuals:Number(el.getAttribute('data-reachability-residual-count')||'-1')}));
+ if(state.pass!=='true'||state.residuals!==0)throw new Error(`${viewportName}: R305 no-burial reachability audit not clean ${JSON.stringify(state)}`);
+ const allMode=page.locator('.r89-nav-mode button').filter({hasText:'All tools'}).first();
+ await allMode.click({timeout:10000});
+ await page.waitForFunction(()=>document.querySelector('.r89-flat-route:visible')!==null,{timeout:10000});
 }
 
 async function clickRoute(page,route){
@@ -65,7 +79,6 @@ async function clickRoute(page,route){
  if(hit<0)throw new Error(`R286/R305 route button missing: ${route}`);
  const button=buttons.nth(hit);await button.scrollIntoViewIfNeeded();await button.click({timeout:10000});
  await page.waitForFunction(name=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===name,route,{timeout:20000});
- // Destination selection is specified to collapse back to the slim rail. Wait for that state before testing the active workspace for layer occlusion.
  await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded!=='true',{timeout:10000});
  await page.waitForFunction(()=>{
   const main=document.querySelector('.workstation-main');if(!main)return false;
@@ -79,7 +92,6 @@ function usableSnapshot(){
  const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0};
  const main=document.querySelector('.workstation-main'),rect=main?.getBoundingClientRect(),coarse=matchMedia('(any-pointer: coarse)').matches;
  const buttons=[...document.querySelectorAll('.workstation-main button')].filter(visible);
- // Navigator interaction geometry is proved separately while expanded. This envelope intentionally covers only the active workspace after route selection collapses the navigator.
  const actions=[...document.querySelectorAll('.workstation-main button:not([disabled]),.workstation-main [role="button"]')].filter(visible);
  const forms=[...document.querySelectorAll('.workstation-main input:not([disabled]),.workstation-main select:not([disabled]),.workstation-main textarea:not([disabled])')].filter(visible);
  const interactives=[...new Set([...actions,...forms])];
@@ -101,9 +113,9 @@ try{
  for(const [name,contextOptions] of profiles){
   const context=await browser.newContext(contextOptions),page=await context.newPage(),pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
   await page.goto(`${base}/?r305=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
-  await openNavigator(page);await verifyR305InteractionEnvelope(page,name);await verifyWorkspaceSubmenus(page,name);
+  await openNavigator(page);await verifyR305InteractionEnvelope(page,name);await verifyWorkspaceSubmenus(page,name);await verifyReachabilityFabric(page,name);await verifyR305InteractionEnvelope(page,name);
   const navLabels=(await page.locator('.r89-flat-route b').allTextContents()).map(x=>x.trim()).filter(Boolean),unique=[...new Set(navLabels)];
-  if(unique.length!==44)throw new Error(`${name}: expected 44 unique route controls, received ${unique.length}`);for(const route of expected)if(!unique.includes(route))throw new Error(`${name}: navigator omitted canonical route ${route}`);
+  if(unique.length!==expected.length)throw new Error(`${name}: expected ${expected.length} unique current route controls, received ${unique.length}`);for(const route of expected)if(!unique.includes(route))throw new Error(`${name}: navigator omitted canonical route ${route}`);
   for(const route of expected){
    await clickRoute(page,route);const snap=await page.evaluate(usableSnapshot);
    if(!snap.mainPresent||snap.left===null||snap.right===null||snap.left<-1||snap.right>snap.viewportWidth+1)throw new Error(`${name}/${route}: active workstation escaped horizontal viewport containment ${JSON.stringify({left:snap.left,right:snap.right,width:snap.width})} / ${snap.viewportWidth}`);
@@ -119,5 +131,5 @@ try{
   await openNavigator(page);await verifyR305InteractionEnvelope(page,name);await page.keyboard.press('Escape');await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded!=='true',{timeout:10000});await openNavigator(page);await verifyR305InteractionEnvelope(page,name);
   if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);await context.close();
  }
- console.log('R286/R305 ALL-SURFACE BROWSER PASS · R304 direct-selector specificity preserved · expanded navigator itself center-point occlusion-proved against global world layers · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical routes pointer-clicked on desktop + 390px 2×DPR touch/coarse mobile · every activated workstation horizontally contained · active-workspace controls proved after route collapse · coarse-pointer 44×44 action + 44px-high form-control proof · center-point layer-occlusion proof · reduced-motion navigator proof · exact data-panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
+ console.log(`R286/R305 ALL-SURFACE BROWSER PASS · R304 direct-selector specificity preserved · expanded navigator center-point occlusion-proved against global world layers · R305 cross-ledger no-burial reachability audit clean · ALL + six contextual workspace submenus pointer-verified · ${expected.length}/${expected.length} current canonical routes derived dynamically and pointer-clicked on desktop + 390px 2×DPR touch/coarse mobile · every activated workstation horizontally contained · active-workspace controls proved after route collapse · coarse-pointer 44×44 action + 44px-high form-control proof · center-point layer-occlusion proof · reduced-motion navigator proof · exact data-panel transitions · visible-content proof · SAR geometry retained when registered · Escape/reopen · no page errors · no historical route-count ceiling.`);
 }finally{await browser.close()}
