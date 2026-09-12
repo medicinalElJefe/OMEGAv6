@@ -1,3 +1,5 @@
+import {OMEGA_ALL_ROUTES_R82} from './omegaExperienceRegistryR82';
+
 export type ProvenanceClassR94=
  'RETURNED_EVIDENCE'|'IMPORTED_EVIDENCE'|'LOCAL_OBSERVATION'|'CANONICAL_PACKET'|'EXACT_EVALUATION'|
  'DERIVED_MODEL'|'FORECAST_MODEL'|'PROVIDER_SYNTHESIS'|'LOCAL_ARTIFACT'|'ARCHIVE_EVIDENCE'|
@@ -80,7 +82,9 @@ export function provenanceForSurfaceR94(surface:string){
 
 export function provenanceAuditR94(){
  const names=OMEGA_SURFACE_PROVENANCE_R94.map(x=>x.surface),duplicates=names.filter((x,i)=>names.indexOf(x)!==i);
+ const routes=[...OMEGA_ALL_ROUTES_R82],routeSet=new Set(routes),nameSet=new Set(names);
+ const missingRoutes=routes.filter(x=>!nameSet.has(x)),orphanProvenance=names.filter(x=>!routeSet.has(x));
  const representationalPrimary=OMEGA_SURFACE_PROVENANCE_R94.filter(x=>x.primary==='REPRESENTATIONAL').map(x=>x.surface);
  const missingProof=OMEGA_SURFACE_PROVENANCE_R94.filter(x=>!x.proof||!x.forbidden).map(x=>x.surface);
- return{total:names.length,unique:new Set(names).size,duplicates,representationalPrimary,missingProof,pass:names.length===44&&new Set(names).size===44&&duplicates.length===0&&representationalPrimary.length===0&&missingProof.length===0,boundary:'R94 provenance is presentation/runtime truth authority. It classifies what a surface may claim; it does not convert derived, forecast, provider, archive or representational output into observation.'};
+ return{total:names.length,unique:new Set(names).size,routeCount:routes.length,duplicates,missingRoutes,orphanProvenance,representationalPrimary,missingProof,pass:names.length===routes.length&&new Set(names).size===names.length&&duplicates.length===0&&missingRoutes.length===0&&orphanProvenance.length===0&&representationalPrimary.length===0&&missingProof.length===0,boundary:'R94 provenance is presentation/runtime truth authority. It classifies what every current registered route may claim; it does not convert derived, forecast, provider, archive or representational output into observation. Route count is telemetry, not an architectural ceiling.'};
 }
