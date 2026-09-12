@@ -16,7 +16,8 @@ test('R260.8 explicit SAR focus deterministically settles the existing target at
 test('R260.8 bounded settling yields to trusted manual map input and target changes',()=>{
   assert.match(focus,/if\(epoch!==manualEpoch\|\|key\(target\(\)\)!==key\(point\)\)return false/);
   assert.match(focus,/if\(event\.isTrusted\)manual\(\)/);
-  assert.match(focus,/state\.lastKickKey/);
+  assert.match(focus,/const epoch=manualEpoch/);
+  assert.match(focus,/for\(const delay of SETTLE_DELAYS\)setTimeout\(\(\)=>commit\(point,epoch\),delay\)/);
 });
 
 test('R260.8 is camera-command only and preserves visual/measurement release identities',()=>{
