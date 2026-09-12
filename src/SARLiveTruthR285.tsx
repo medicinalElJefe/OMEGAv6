@@ -4,6 +4,7 @@ import SARTruthInstrumentR280 from'./SARTruthInstrumentR280Surface';
 import{api}from'./platformAdapter';
 import type{SarObservationR280,SarPolarizationR280,SarProductLevelR280}from'./sarTruthR280';
 import'./sarLiveR285.css';
+import'./sarTargetContinuityR285.css';
 
 type ProductMode='GRD'|'SLC';
 type LiveProduct={id:string;collection:string;catalogUrl:string;acquiredAt:string|null;platform:string|null;constellation:string|null;instrumentMode:string|null;frequencyBand:string|null;centerFrequencyGHz:number|null;polarizations:string[];orbitState:string|null;relativeOrbit:number|null;incidenceAngle:number|null;bbox:number[]|null;geometry:any;previewUrl:string|null;previewAssetKey:string|null;assetCount:number;dataAssetCount:number;catalogOnly:true;sourceEvidenceBound:false;nativeDataBound:false;complexDataBound:false;truth:string};
