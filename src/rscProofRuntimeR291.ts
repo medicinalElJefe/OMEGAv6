@@ -9,7 +9,7 @@ export type RscComparison={left:string;right:string;nodeSimilarity:number;edgeSi
 export type RscTranslation={admitted:boolean;from:string;to:string;continuity:number;mapping:Record<string,string>;reason:string};
 export type RscInferenceTrace={rule:string;premise:string;conclusion:string;passed:boolean}[];
 
-export const RSC_TRUTH_BOUNDARY='RSC output is symbolic/model-derived structural analysis. It is not external scientific proof, physical-law authority, measurement authority, medical authority or evidence that one law governs unrelated domains.';
+export const RSC_TRUTH_BOUNDARY='RSC output is symbolic/model-derived structural analysis. It is not external scientific proof, physical-law authority, measurement authority or medical authority. It is not evidence that one law governs unrelated domains.';
 export const RSC_EQUIVALENCE_THRESHOLD=.70;
 
 export const RSC_AXIOMS_R291=[
