@@ -63,13 +63,13 @@ export default function BioModeWorkbenchR284({record,instrumentReady=0,instrumen
 
   <div className='bio284-layout'>
    <nav className='bio284-mode-list' aria-label='Analytical mode list'>
-    {filtered.length?filtered.map((m:any)=><button key={m.key} className={selected?.key===m.key?'selected':''} aria-current={selected?.key===m.key?'true':undefined} onClick={()=>setSelectedKey(m.key)}>
+    {filtered.length?filtered.map((m:any)=><button key={m.key} data-mode-key={m.key} className={selected?.key===m.key?'selected':''} aria-current={selected?.key===m.key?'true':undefined} onClick={()=>setSelectedKey(m.key)}>
      <code>{m.family==='SOURCE_CATALOG'?'S':'C'}{String(m.ordinal).padStart(3,'0')}</code><span><b>{m.name}</b><small>{pretty(m.group)} · {pretty(m.realization)}</small></span><strong>{pct(m.activation)}<small>{pretty(m.evidenceClass)}</small></strong>
     </button>):<div className='bio284-no-results'><Search/><b>No channels match these filters.</b><span>Clear or broaden the display filters. No analytical state was changed.</span></div>}
    </nav>
 
-   {selected&&<article className='bio284-detail'>
-    <header><div><span>{selected.family==='SOURCE_CATALOG'?'SOURCE CATALOG CHANNEL':'CANON AUTHORITY'} · {selected.key}</span><h4>{selected.name}</h4><p>{pretty(selected.group)} · {pretty(selected.state)} · {pretty(selected.realization)}</p></div><div className='bio284-detail-actions'><button onClick={()=>setCompareKey(selected.key)}>{compareKey===selected.key?'COMPARE PINNED':'PIN FOR COMPARE'}</button>{compareKey&&<button className='quiet' onClick={()=>setCompareKey('')}>CLEAR COMPARE</button>}</div></header>
+   {selected&&<article className='bio284-detail' data-mode-key={selected.key} data-measurement-authority='0' aria-label={`Selected Heavy Bio mode ${selected.name}; measurement authority 0`}>
+    <header><div><span>{selected.family==='SOURCE_CATALOG'?'SOURCE CATALOG CHANNEL':'CANON AUTHORITY'} · {selected.key}</span><h4>{selected.name}</h4><p>{pretty(selected.group)} · {pretty(selected.state)} · {pretty(selected.realization)}</p><small>Measurement authority <b>0</b> · analytical channel only</small></div><div className='bio284-detail-actions'><button onClick={()=>setCompareKey(selected.key)}>{compareKey===selected.key?'COMPARE PINNED':'PIN FOR COMPARE'}</button>{compareKey&&<button className='quiet' onClick={()=>setCompareKey('')}>CLEAR COMPARE</button>}</div></header>
 
     <div className='bio284-visual-grid'>
      <div className='bio284-signature' aria-label={`Analytical metadata signature for ${selected.name}`}>
