@@ -66,6 +66,9 @@ for(const token of [
  'undersizedTouchForms',
  'coarse-pointer action controls below 44×44px',
  'coarse-pointer form controls below 44px high',
+ 'document.elementFromPoint',
+ 'snap.buried.length',
+ 'visible interactive controls are geometrically buried by another layer',
  'if(!snap.mainPresent||snap.left===null||snap.right===null||snap.left<-1||snap.right>snap.viewportWidth+1)',
  'active workstation escaped horizontal viewport containment',
  'R286/R305 ALL-SURFACE BROWSER PASS'
@@ -73,6 +76,7 @@ for(const token of [
 must(browserProof.includes('expected.length!==44')&&browserProof.includes('for(const route of expected)'),'R305 must strengthen rather than reduce the inherited 44-route traversal');
 must(browserProof.indexOf('await verifyR305InteractionEnvelope(page,name)')<browserProof.indexOf('for(const route of expected){'),'R305 initial navigator envelope must be proved before route activation');
 must(browserProof.indexOf('if(!snap.mainPresent')>browserProof.indexOf('await clickRoute(page,route)'),'R305 workstation containment must be asserted after each canonical route is activated');
+must(browserProof.indexOf('if(snap.buried.length)')>browserProof.indexOf('await clickRoute(page,route)'),'R305 layer-occlusion rejection must execute after each canonical route activation');
 must(!browserProof.includes('page.route(')&&!browserProof.includes('Math.random'),'R305 interaction proof must exercise the real built UI without request mocking or random acceptance');
 
-console.log('R286/R305 UI INTERACTION INTEGRITY PASS · 44 canonical surfaces + exact 78×78 mobile field geometry + shared menu event + normalized persisted panel identity + final root-scoped coarse-pointer/reduced-motion authority + R304 selector-specificity closure preserved + exhaustive real-browser interaction envelope bound.');
+console.log('R286/R305 UI INTERACTION INTEGRITY PASS · 44 canonical surfaces + exact 78×78 mobile field geometry + shared menu event + normalized persisted panel identity + final root-scoped coarse-pointer/reduced-motion authority + R304 selector-specificity closure preserved + exhaustive real-browser interaction and layer-occlusion envelope bound.');
