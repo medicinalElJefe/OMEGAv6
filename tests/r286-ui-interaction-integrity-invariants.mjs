@@ -19,6 +19,8 @@ const shell=read('src/OmegaExperienceShellR257.tsx');
 const side=read('src/OmegaSideNavigatorR88.tsx');
 const adapter=read('src/platformAdapter.ts');
 const browserProof=read('tests/r286-all-surface-browser-e2e.mjs');
+const responsive=read('src/responsivePolishR88.css');
+const weaveCss=read('src/weaveGeometryR100.css');
 
 must(index.includes('/src/r286InteractionIntegrity.css'),'compatibility layer must be loaded by the canonical HTML root');
 must(compat.includes('presentation only')&&compat.includes('No route, execution, proof, Canon, evidence, or persistence authority'),'compatibility layer must remain presentation-only');
@@ -36,12 +38,17 @@ must(workstation.includes("useEffect(()=>{localState.write('omega.v6.panel',pane
 must(shell.includes("new CustomEvent('omega-r88-open-navigator'")&&side.includes("addEventListener('omega-r88-open-navigator'"),'All systems dispatcher and global navigator listener must remain paired');
 must(adapter.includes('return raw === null ? fallback : JSON.parse(raw) as T'),'panel persistence adapter must decode stored route identity before normalization');
 
+must(weaveCss.includes('min-height:32px!important'),'R303 repair must remain anchored to a real inherited specialist sub-44px !important rule');
+must(responsive.includes("@media(any-pointer:coarse)")&&responsive.includes(":where(button,[role='button'],input,select,textarea){min-height:44px!important}"),'R303 shared responsive layer must authoritatively override inherited specialist control heights on coarse pointers');
+
 for(const token of [
  "deviceScaleFactor:2,hasTouch:true,isMobile:true,reducedMotion:'reduce'",
  "matchMedia('(any-pointer: coarse)').matches",
  "matchMedia('(prefers-reduced-motion: reduce)').matches",
  '.r88-head-actions button,.r89-nav-mode button,.r94-rail-action,.r89-flat-route',
  'x.height<43.5||x.width<43.5',
+ '.omega-workstation-v2 input:not([disabled])',
+ '.omega-workstation-v2 textarea:not([disabled])',
  'controls below 44px',
  'active workstation escaped horizontal viewport containment',
  "if(name==='mobile'&&snap.undersizedTouch.length)",
@@ -50,4 +57,4 @@ for(const token of [
 must(browserProof.includes("expected.length!==44")&&browserProof.includes("for(const route of expected)"),'R303 must strengthen rather than reduce the inherited 44-route traversal');
 must(!browserProof.includes('page.route(')&&!browserProof.includes('Math.random'),'R303 interaction proof must exercise the real built UI without request mocking or random acceptance');
 
-console.log('R286/R303 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + exact 78×78 mobile field geometry + 390px 2×DPR coarse-pointer/reduced-motion browser proof + 44px touch targets + horizontal containment preserved.');
+console.log('R286/R303 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + exact 78×78 mobile field geometry + authoritative 44px coarse-pointer override against inherited specialist !important rules + 390px 2×DPR coarse-pointer/reduced-motion browser proof for action/form controls + horizontal containment preserved.');
