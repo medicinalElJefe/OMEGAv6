@@ -71,7 +71,7 @@ async function verifyR303InteractionEnvelope(page,viewportName){
     if(state.transitionDuration && state.transitionDuration!=='0s')throw new Error(`mobile: reduced-motion navigator transition remained active: ${state.transitionDuration}`);
     if(state.animationDuration && state.animationDuration!=='0s')throw new Error(`mobile: reduced-motion navigator animation remained active: ${state.animationDuration}`);
   }
-  if(!state.mainRect||state.mainRect.left<-1||state.mainRect.right>state.viewportWidth+1)throw new Error(`${viewportName}: active workstation escaped horizontal viewport containment ${JSON.stringify(state.mainRect)} / ${state.viewportWidth}`);
+  if(state.mainRect&&(state.mainRect.left<-1||state.mainRect.right>state.viewportWidth+1))throw new Error(`${viewportName}: active workstation escaped horizontal viewport containment ${JSON.stringify(state.mainRect)} / ${state.viewportWidth}`);
 }
 
 async function clickRoute(page,route){
@@ -112,7 +112,7 @@ function usableSnapshot(){
   const visibleChildren=main?[...main.children].filter(visible).length:0;
   const textLength=(main?.textContent||'').replace(/\s+/g,' ').trim().length;
   const richVisible=main?[...main.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible).length:0;
-  return{width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,undersizedTouchActions,undersizedTouchForms,coarse,visibleChildren,textLength,richVisible};
+  return{mainPresent:Boolean(main&&rect),left:rect?.left??null,right:rect?.right??null,viewportWidth:innerWidth,width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,undersizedTouchActions,undersizedTouchForms,coarse,visibleChildren,textLength,richVisible};
 }
 
 async function verifySarGeometry(page,viewportName){
@@ -148,6 +148,7 @@ try{
     for(const route of expected){
       await clickRoute(page,route);
       const snap=await page.evaluate(usableSnapshot);
+      if(!snap.mainPresent||snap.left===null||snap.right===null||snap.left<-1||snap.right>snap.viewportWidth+1)throw new Error(`${name}/${route}: active workstation escaped horizontal viewport containment ${JSON.stringify({left:snap.left,right:snap.right,width:snap.width})} / ${snap.viewportWidth}`);
       if(snap.width<220||snap.height<80)throw new Error(`${name}/${route}: workstation unusable ${JSON.stringify(snap)}`);
       if(snap.overflow>24)throw new Error(`${name}/${route}: viewport overflow ${snap.overflow}px`);
       if(snap.unusable.length)throw new Error(`${name}/${route}: visible enabled controls are non-interactive ${snap.unusable.join(' | ')}`);
@@ -165,5 +166,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R286/R303 ALL-SURFACE BROWSER PASS · ALL + six contextual workspace submenus · 44/44 routes desktop + 390px 2×DPR touch mobile · coarse-pointer 44×44 action + 44px-high form-control proof · reduced-motion navigator proof · horizontal containment · exact panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
+  console.log('R286/R303 ALL-SURFACE BROWSER PASS · initial Home may remain workstation-free · ALL + six contextual workspace submenus · 44/44 routes desktop + 390px 2×DPR touch mobile · every activated workstation horizontally contained · coarse-pointer 44×44 action + 44px-high form-control proof · reduced-motion navigator proof · exact panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
 }finally{await browser.close()}
