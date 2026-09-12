@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R99 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R99/R305 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const living=read('src/OmegaR36LivingSurfaces.tsx');
 const studio=read('src/OmegaTraversalStudio.tsx');
 const stage=read('src/TraversalModeStageR99.tsx');
@@ -15,7 +16,11 @@ const earth=read('src/EarthObservatoryR8.tsx');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'canonical 44-route universe must remain intact');
+const registryRoutes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(surfaces.length>0&&surfaces.length===registryRoutes.length,'current design-mode route universe must be non-empty and registry-cardinality aligned');
+must(new Set(surfaces).size===surfaces.length&&new Set(registryRoutes).size===registryRoutes.length,'current route universes must remain unique');
+for(const route of surfaces)must(registryRoutes.includes(route),`R99 workstation route absent from registry ${route}`);
+for(const route of registryRoutes)must(surfaces.includes(route),`R99 registry route absent from workstation ${route}`);
 
 for(const mode of ['UNIFIED','SHELL','WATER','LIGHT','SCAR','RELATIVITY','FORECAST','PROOF']){
  must(modes.includes(`${mode}:{id:'${mode}'`),`missing design grammar for ${mode}`);
@@ -47,5 +52,5 @@ must(hybrid.includes('PC ONLINE is never claimed')||hybrid.includes('authenticat
 must(earth.includes('RETURNED EVIDENCE BOUND')&&earth.includes('evidenceHash'),'Earth returned-evidence authority must remain intact');
 must(![stage,modes,studio,css].join('\n').includes('@appdeploy/client'),'R99 must remain provider portable');
 
-console.log('R99/R168 DESIGN MODES PASS · 8 source-driven traversal depictions · unobstructed high-detail stage · Extreme motion skin defaults open below canvas · proof/motion/donor layers preserved · 44 routes intact');
+console.log(`R99/R305 DESIGN MODES PASS · 8 source-driven traversal depictions · unobstructed high-detail stage · Extreme motion skin defaults open below canvas · proof/motion/donor layers preserved · ${surfaces.length} current routes cross-registry aligned · no historical route-count ceiling`);
 await import('./r100-weave-instrument-invariants.mjs');
