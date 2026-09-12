@@ -11,7 +11,7 @@ export const R21_MODE_AUTHORITY={
     'OMEGA_ALL_SOFTWARE_61917364224D_FULL_BUILD_v22.xlsx / TEST_MATRIX_ALL',
     'OMEGA_Master_Ledger_Milestone03.xlsx / Module_Dependencies'
   ],
-  boundary:'Only operators whose required inputs are present in the canonical packet or exactly reconstructable from a declared formal source atlas are executed. Catalog names, semantic similarity and representation dimensions are never treated as execution or empirical proof.'
+  boundary:'Only operators whose required inputs are present in the canonical packet are executed; an exact deterministic reconstruction from the declared Full Canon formal atlas is admitted only as a formal packet input with FORMAL_CANON_ATLAS provenance. Catalog names, semantic similarity and representation dimensions are never treated as execution or empirical proof.'
 } as const;
 
 export type SourceBackedModeState='EXECUTED_EXACT'|'SOURCE_PACKET'|'DERIVED_RUNTIME'|'GATED_MISSING_INPUTS';
