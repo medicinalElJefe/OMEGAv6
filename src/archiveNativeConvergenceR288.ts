@@ -2,6 +2,7 @@ import {R48_COMPLETION_FAMILIES,R48_COMPLETION_SUMMARY} from './completionRuntim
 import {R153_FULL_SYSTEM_CONTRACT} from './fullSystemCompletionR153.js';
 import {MASTER_MENUS,FAMILIES} from './systemAtlasRuntime';
 import {SOURCE_CORPUS_AUTHORITIES_R107,ULTIMATE_DEVELOPMENT_FABRIC_R107} from './sourceCorpusCorrelationR107';
+import {OMEGA_ALL_ROUTES_R82} from './omegaExperienceRegistryR82';
 import {R265_ADDRESS_LEVELS,R265_CYCLE,R265_INVARIANTS,R265_OPERATOR,R265_TRUTH_BOUNDARY} from './system/wovenDimensionalRelativityR265.js';
 import {R266_CYCLE,R266_PROVENANCE_KINDS,R266_BOUNDARY} from './system/adaptiveCoherenceCycleR266.js';
 
@@ -57,7 +58,7 @@ export const R288_ARCHIVE_NATIVE_CONVERGENCE=Object.freeze({
  revision:'R288',
  predecessor:'R287',
  objective:'Make the recovered Drive/archive software universe visible and actionable through current successor authority without reactivating stale donors or creating shadow state.',
- inventory:Object.freeze({...R153_FULL_SYSTEM_CONTRACT.inventory,driveAuthorities:R288_DRIVE_AUTHORITIES.length,currentFamilies:R288_FAMILY_CONVERGENCE.length,sourceCorpusAuthorities:SOURCE_CORPUS_AUTHORITIES_R107.length,masterMenus:MASTER_MENUS.length}),
+ inventory:Object.freeze({...R153_FULL_SYSTEM_CONTRACT.inventory,inheritedRouteSnapshot:R153_FULL_SYSTEM_CONTRACT.inventory.routes,currentRoutes:OMEGA_ALL_ROUTES_R82.length,driveAuthorities:R288_DRIVE_AUTHORITIES.length,currentFamilies:R288_FAMILY_CONVERGENCE.length,sourceCorpusAuthorities:SOURCE_CORPUS_AUTHORITIES_R107.length,masterMenus:MASTER_MENUS.length}),
  successor:Object.freeze({executable:R48_COMPLETION_SUMMARY.executable,gated:R48_COMPLETION_SUMMARY.gated,restorationDebt:R48_COMPLETION_SUMMARY.restorationDebt}),
  inheritedFabric:ULTIMATE_DEVELOPMENT_FABRIC_R107,
  operatorStack:R288_CANONICAL_OPERATOR_STACK,
@@ -72,9 +73,10 @@ export const R288_ARCHIVE_NATIVE_CONVERGENCE=Object.freeze({
   'OBSERVED_RETURNED_DERIVED_INFERRED_STAY_DISTINCT',
   'NATIVE_EXECUTION_REQUIRES_CURRENT_DEVICE_PROOF',
   'ALL_ENABLED_UI_CONTROLS_REMAIN_BOUND_AND_TESTED',
-  'UNKNOWN_OR_INCOMPLETE_OPERATORS_ARE_GATED_NOT_INVENTED'
+  'UNKNOWN_OR_INCOMPLETE_OPERATORS_ARE_GATED_NOT_INVENTED',
+  'CURRENT_ROUTE_COUNT_IS_TELEMETRY_NOT_ARCHITECTURE'
  ]),
- boundary:'R288 is an archive-native convergence/index/authority layer. It makes recovered capability and source provenance part of the live product design, but does not embed private Drive credentials, bulk-load every workbook row into the Worker, convert design ledgers into execution proof, fabricate empirical validation, or bypass R125/R141/R142/R240/CI authority.'
+ boundary:'R288 is an archive-native convergence/index/authority layer. It makes recovered capability and source provenance part of the live product design, but does not embed private Drive credentials, bulk-load every workbook row into the Worker, convert design ledgers into execution proof, fabricate empirical validation, freeze current product growth to an inherited route count, or bypass R125/R141/R142/R240/CI authority.'
 });
 
 export function archiveNativeConvergenceReceiptR288(){
@@ -97,10 +99,11 @@ export function archiveNativeConvergenceReceiptR288(){
 
 export function auditArchiveNativeConvergenceR288(){
  const ids=R288_DRIVE_AUTHORITIES.map(x=>x.id),fileIds=R288_DRIVE_AUTHORITIES.map(x=>x.fileId),familyIds=R288_FAMILY_CONVERGENCE.map(x=>x.id);
+ const routes=[...OMEGA_ALL_ROUTES_R82],routeUnique=new Set(routes).size===routes.length&&routes.length>0;
  const validStates=R288_FAMILY_CONVERGENCE.every(x=>['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE','EVIDENCE_GATED','DEVICE_GATED'].includes(x.current));
  const noDebt=R288_ARCHIVE_NATIVE_CONVERGENCE.successor.restorationDebt===0;
  const addressLaw=JSON.stringify(R288_CANONICAL_OPERATOR_STACK.addressLevels)===JSON.stringify([12,144,1728,20736,248832]);
  const unique=ids.length===new Set(ids).size&&fileIds.length===new Set(fileIds).size&&familyIds.length===new Set(familyIds).size;
- const pass=unique&&R288_FAMILY_CONVERGENCE.length===24&&MASTER_MENUS.length===12&&R153_FULL_SYSTEM_CONTRACT.inventory.systems===100&&R153_FULL_SYSTEM_CONTRACT.inventory.routes===44&&R153_FULL_SYSTEM_CONTRACT.inventory.sourceModes===179&&R153_FULL_SYSTEM_CONTRACT.inventory.canonLenses===62&&validStates&&noDebt&&addressLaw&&R288_EMERGING_OPERATORS.every(x=>x.state==='FORMALIZATION_REQUIRED');
- return{pass,unique,validStates,noDebt,addressLaw,driveAuthorities:R288_DRIVE_AUTHORITIES.length,families:R288_FAMILY_CONVERGENCE.length,menus:MASTER_MENUS.length,systems:R153_FULL_SYSTEM_CONTRACT.inventory.systems,routes:R153_FULL_SYSTEM_CONTRACT.inventory.routes,sourceModes:R153_FULL_SYSTEM_CONTRACT.inventory.sourceModes,canonLenses:R153_FULL_SYSTEM_CONTRACT.inventory.canonLenses,boundary:R288_ARCHIVE_NATIVE_CONVERGENCE.boundary};
+ const pass=unique&&routeUnique&&R288_FAMILY_CONVERGENCE.length===24&&MASTER_MENUS.length===12&&R153_FULL_SYSTEM_CONTRACT.inventory.systems===100&&R153_FULL_SYSTEM_CONTRACT.inventory.sourceModes===179&&R153_FULL_SYSTEM_CONTRACT.inventory.canonLenses===62&&validStates&&noDebt&&addressLaw&&R288_EMERGING_OPERATORS.every(x=>x.state==='FORMALIZATION_REQUIRED');
+ return{pass,unique,routeUnique,validStates,noDebt,addressLaw,driveAuthorities:R288_DRIVE_AUTHORITIES.length,families:R288_FAMILY_CONVERGENCE.length,menus:MASTER_MENUS.length,systems:R153_FULL_SYSTEM_CONTRACT.inventory.systems,inheritedRouteSnapshot:R153_FULL_SYSTEM_CONTRACT.inventory.routes,currentRoutes:routes.length,sourceModes:R153_FULL_SYSTEM_CONTRACT.inventory.sourceModes,canonLenses:R153_FULL_SYSTEM_CONTRACT.inventory.canonLenses,boundary:R288_ARCHIVE_NATIVE_CONVERGENCE.boundary};
 }
