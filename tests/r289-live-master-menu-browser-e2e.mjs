@@ -27,19 +27,36 @@ async function prove(viewportName,viewport){
   await openNavigator(page);
 
   const shell=page.locator('#omega-global-navigator');
-  if(await shell.getAttribute('data-master-menu-presentation-revision')==='')throw new Error(`${viewportName}: live navigator missing R289 presentation revision`);
+  const presentationRevision=await shell.getAttribute('data-master-menu-presentation-revision');
+  if(presentationRevision!=='R289')throw new Error(`${viewportName}: live destination browser must expose exact R289 presentation revision; received ${String(presentationRevision)}`);
   const master=page.getByRole('navigation',{name:'Recovered OMEGA master menus'});
   await master.waitFor({state:'visible',timeout:10000});
   const masterButtons=master.locator('button');
   if(await masterButtons.count()!==13)throw new Error(`${viewportName}: expected ALL + 12 recovered master-menu controls`);
   const workspace=page.getByRole('navigation',{name:'Application workspace submenu'});
-  if(await workspace.locator('button').count()!==7)throw new Error(`${viewportName}: existing ALL + six workspace controls were not preserved`);
+  const workspaceButtons=workspace.locator('button');
+  if(await workspaceButtons.count()!==7)throw new Error(`${viewportName}: existing ALL + six workspace controls were not preserved`);
+  const contextPointer=await page.locator('.r105-context-note').evaluate(el=>getComputedStyle(el).pointerEvents);
+  if(contextPointer!=='none')throw new Error(`${viewportName}: informational context strip must be pointer-transparent; received ${contextPointer}`);
 
   await masterButtons.first().click();
   await page.waitForFunction(()=>document.querySelector('#omega-global-navigator')?.getAttribute('data-master-menu')==='ALL',undefined,{timeout:10000});
   let routes=await visibleRouteSnapshot(page);
   if(routes.length!==44)throw new Error(`${viewportName}: ALL MENUS did not expose all 44 canonical routes; received ${routes.length}`);
   if(new Set(routes.map(x=>x.name)).size!==44)throw new Error(`${viewportName}: ALL MENUS contains duplicate route identities`);
+
+  const workspaceCounts=[];
+  for(let i=0;i<7;i++){
+   const button=workspaceButtons.nth(i);
+   await button.scrollIntoViewIfNeeded();
+   await button.click();
+   await page.waitForFunction(index=>document.querySelectorAll('.r105-workspace-filter button')[index]?.classList.contains('active')===true,i,{timeout:10000});
+   routes=await visibleRouteSnapshot(page);
+   if(routes.length<1)throw new Error(`${viewportName}: workspace filter ${i} produced no visible canonical routes`);
+   workspaceCounts.push(routes.length);
+  }
+  await workspaceButtons.first().click();
+  await page.waitForFunction(()=>document.querySelectorAll('.r89-flat-route').length===44,undefined,{timeout:10000});
 
   const perMenu=new Map();
   for(let i=0;i<expectedMenus.length;i++){
@@ -64,7 +81,7 @@ async function prove(viewportName,viewport){
   await search.fill('');
 
   await masterButtons.first().click();
-  await workspace.locator('button').first().click();
+  await workspaceButtons.first().click();
   await page.waitForFunction(()=>document.querySelectorAll('.r89-flat-route').length===44,undefined,{timeout:10000});
   const route=page.locator('.r89-flat-route').first();
   const routeName=await route.getAttribute('data-route-name');if(!routeName)throw new Error(`${viewportName}: canonical route identity missing`);
@@ -77,9 +94,9 @@ async function prove(viewportName,viewport){
   const menuGeometry=await master.evaluate(el=>({clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,overflowX:getComputedStyle(el).overflowX}));
   if(!['auto','scroll'].includes(menuGeometry.overflowX))throw new Error(`${viewportName}: recovered-menu row is not horizontally scroll-contained`);
   if(errors.length)throw new Error(`${viewportName}: browser page errors ${errors.join(' | ').slice(0,3000)}`);
-  console.log(`R289 ${viewportName.toUpperCase()} PASS · 12 recovered menus · ${[...perMenu.entries()].map(([id,count])=>`${id}:${count}`).join(' ')} · 44-route ALL restore · search intersection · workspace preservation · native route activation · overflow ${overflow}px`);
+  console.log(`R289 ${viewportName.toUpperCase()} PASS · exact R289 inner presentation contract · pointer-transparent context · workspaces ${workspaceCounts.join('/')} · 12 recovered menus · ${[...perMenu.entries()].map(([id,count])=>`${id}:${count}`).join(' ')} · 44-route ALL restore · search intersection · native route activation · overflow ${overflow}px`);
  }finally{await context.close();await browser.close()}
 }
 
 for(const [name,viewport] of viewports)await prove(name,viewport);
-console.log('R289 LIVE MASTER-MENU BROWSER PASS · actual R88/R239 navigator · ALL + 12 recovered master menus · existing ALL + six workspace filters retained · master-menu/search composition · same canonical route activation path · desktop/mobile containment · no page errors');
+console.log('R290 NAVIGATION CONTRACT BROWSER PASS · actual R88/R239 navigator · exact R289 inner presentation identity · pointer-transparent context strip · ALL + six workspace filters click-proven · ALL + 12 recovered master menus · master-menu/search composition · same canonical route activation path · desktop/mobile containment · no page errors');
