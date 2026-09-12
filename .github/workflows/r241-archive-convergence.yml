@@ -67,6 +67,12 @@ jobs:
           node tests/r283-sar-full-stack-invariants.mjs
           for f in tests/r280-*.mjs; do node "$f"; done
 
+      - name: Prove R286 Heavy Bio medical-production, 241-mode and interaction boundaries
+        run: |
+          npx --yes tsx tests/r282-bio-medical-production-invariants.mts
+          npx --yes tsx tests/r284-bio-mode-experience-invariants.mts
+          node tests/r286-ui-interaction-integrity-invariants.mjs
+
       - name: Prove R279/R284 Earth truth and WGS84 geometry
         run: |
           node tests/r279-earth-truth-navigation-invariants.mjs
@@ -83,7 +89,7 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
-      - name: Prove built R241/R239/R242/R245/R279/R281/R283/R284 convergence in the real UI
+      - name: Prove built R241/R239/R242/R245/R279/R281/R282/R283/R284/R286 convergence in the real UI
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
@@ -97,6 +103,9 @@ jobs:
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r245-full-overall-canon-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r279-earth-views-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r281-bio-instrument-browser-e2e.mjs
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r282-bio-medical-production-browser-e2e.mjs
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r284-bio-mode-workbench-browser-e2e.mjs
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r286-all-surface-browser-e2e.mjs
 
       - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'pull_request'
@@ -130,37 +139,25 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + R239/R242 Navigation + R245 Full Overall Canon + R248/R249 Operational Calculus + R279/R283/R284 Earth + R281 Heavy Bio UI proof'
+            echo '## R241 Archive Convergence + Navigation + Full Canon + Earth/SAR + R281/R282/R286 Heavy Bio/UI proof'
             echo "- Candidate: $GITHUB_SHA"
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
             echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
             echo '- R245 correlates runtime, production receipt, Hybrid, capability and governed self-build truth into one read-only observation epoch.'
             echo '- R248 factors contributors and derives CΩ/Φ/q/Λ/evidence/uncertainty/scar from current returned software/Hybrid/resource/job evidence.'
-            echo '- R248 governs the real R247→R153 mission objective and recursion budget; R249 now carries the same law into actual first-cycle step sequence and autonomous planning width.'
-            echo '- R249 STAY preserves validated order; TURN places evidence/cause work before downstream verification; ESCALATE permits an evidence-only first cycle and holds source mutation until returned proof.'
-            echo '- R249 narrows the R170/CLOUD-01 planning frontier before both R240 and R243 evaluate it, so parallel planning adapts without creating parallel source mutation or selection divergence.'
-            echo '- R249 common kernel, invariant carry, residual pressure, future plasticity and signed orientation are software-operational scheduling values, not physical measurements.'
+            echo '- R248 governs the real R247→R153 mission objective and recursion budget; R249 carries the same law into actual first-cycle step sequence and autonomous planning width.'
+            echo '- R249 STAY/TURN/ESCALATE scheduling values remain software-operational, not physical measurements.'
             echo '- R245 exposes 7 Canon axes, 7 permanent strata, 12 logical organs and 12→144→1,728→20,736→248,832 address/scheduling levels without physical-dimension inflation.'
-            echo '- R245 desktop/mobile built-browser proof requires the actual System Atlas surface, preserves the R153 executor and proves manual observation refresh remains non-mutating.'
-            echo '- R281 desktop/mobile browser proof opens the real Matter Traversal Heavy Bio surface, proves 12 domains × 12 context layers × 7 physical scales × 62 zero-authority mode overlays, and verifies a calibrated packet is rendered with instrument-ready state.'
-            echo '- R283.1 preserves SAR Truth as an eighth Earth surface while restoring the 24-workflow governance bound; its full R283 + R280 proof suite remains converged into R241.'
-            echo '- R284 upgrades Planet from spherical display math to WGS84 ellipsoid screen↔geodetic projection while keeping returned NASA GIBS source brightness as the default evidence view.'
-            echo '- R284 fail-closes wrong source identity/CRS/bbox/truth/aspect, wraps the ±180° texture seam, separates UTC illumination/terminator/grid as derived transforms, and exposes unshaded returned RGB through the pixel inspector.'
-            echo '- R284 numerical proof checks ellipsoid round-trip accuracy, dateline continuity, solar/subsolar geometry, terminator orthogonality and outside-limb no-fabrication before browser proof.'
-            echo '- R284 browser proof exercises desktop and 2×DPR mobile rendering, materially varied returned pixels, source/derived toggles, the pixel inspector, wrong-source fail-close behavior and inherited SAR Truth mounting.'
-            echo '- R245/R248/R249 delegate mutation/execution to existing Build Out/R153/Hybrid authorities and own no production writer or Canon admission path.'
-            echo '- R245 binds R170 and CLOUD-01 to one canonical R164 residual policy, one R240/R243 candidate-selection law and one deterministic SG001–SG005 generator.'
-            echo '- The autonomous one-open-candidate fence covers both selfbuild/r170-* and cloud/evolution-* namespaces; the two machines may not independently advance competing source proposals.'
-            echo '- R241 PR concurrency cancels superseded candidate proofs so expensive browser work follows the exact current head instead of serializing stale heads.'
-            echo '- Exact route identity outranks prefix/token/metadata search; ambiguity and empty results carry explicit residuals rather than fabricated destinations.'
-            echo '- Route filaments are source routeNext-derived; neighbor filaments are deterministic display topology.'
-            echo '- Gradient/curl/variance are display proxies, not physical measurement claims.'
-            echo '- Typed cognition is read-only through proposal; permission/execution/return/Canon remain separately gated.'
-            echo '- R239 navigation remains converged in this proof plane: six workspaces, complete 44-route registry, immediate aria-hidden/inert close, ancestor-aware visible-canvas sanity, exhaustive route activation, and mobile containment.'
-            echo '- R279/R283/R284 proves all eight Earth controls mount intended distinct surfaces while Planet gains higher geometric and source-truth fidelity and SAR Truth remains intact; R281 proves the Heavy Bio instrument surface and its complete visual axes.'
-            echo '- Active workflow authority remains within the R170 governed maximum because the redundant R283 workflow stays archived and its checks execute inside R241.'
+            echo '- R283.1 preserves SAR Truth as an eighth Earth surface while the redundant standalone SAR workflow remains archived inside the 24-workflow governance bound.'
+            echo '- R284 WGS84 Planet keeps returned NASA GIBS source brightness distinct from UTC illumination, terminator, grid and other declared rendering transforms.'
+            echo '- R281 preserves calibrated instrument evidence, uncertainty, provenance, 12 domains, 12 context layers, seven physical scales and the 62-mode canon overlay.'
+            echo '- R282 preserves intended-use measurands, freshness/unit/AMR/uncertainty gates, risk, audit, controlled change and clinical-release authority separation.'
+            echo '- R286 exposes all 241 analytical channels through metadata-bound menus, evidence filters, mode-specific analytical visuals, education and read-only comparison without inventing biological mappings.'
+            echo '- R286 also pointer-verifies ALL + six workspace submenus and all 44 canonical routes on desktop/mobile and preserves exact 78×78/6,084-cell SAR geometry on mobile.'
+            echo '- Every analytical channel retains measurement authority 0; clinical influence remains owned by R282 scope-matched validation and explicit authorization.'
+            echo '- R239 navigation remains converged: six workspaces, complete route registry, immediate aria-hidden/inert close, exhaustive route activation and mobile containment.'
             echo '- R153 mutation, R147 dispatch, R146 durable history, R141 exact return, R240 source promotion and R125 sole CanonState admission remain unchanged.'
             echo '- R201/R203 remain retired.'
-            echo '- PR live proof binds to the exact SHA actually served by the canonical Worker; it does not compare against a moving Git ref.'
+            echo '- PR live proof binds to the exact SHA actually served by the canonical Worker rather than a moving Git ref.'
             echo '- This workflow is pull-request/manual proof-only; it has no main push trigger and no deployment step; ci.yml remains the canonical production writer.'
           } >> "$GITHUB_STEP_SUMMARY"

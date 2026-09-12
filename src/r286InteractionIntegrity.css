@@ -1,0 +1,10 @@
+/* OMEGA R286 · unified Heavy Bio + interaction / surface integrity compatibility layer
+   Corrects late-layer responsive geometry without mutating the historical R280/R284 source.
+   Authority: presentation only. No route, execution, proof, Canon, evidence, persistence, Hybrid, Earth-source, or deployment authority. */
+
+@media (max-width:760px){
+  .sar-r280 .r280-canvas{
+    grid-template-columns:repeat(78,minmax(0,1fr));
+    grid-template-rows:repeat(78,minmax(0,1fr));
+  }
+}
