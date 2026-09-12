@@ -108,13 +108,30 @@ function usableSnapshot(){
   const buttons=[...document.querySelectorAll('.workstation-main button')].filter(visible);
   const actions=[...document.querySelectorAll('.omega-workstation-v2 button:not([disabled]),.omega-workstation-v2 [role="button"]')].filter(visible);
   const forms=[...document.querySelectorAll('.omega-workstation-v2 input:not([disabled]),.omega-workstation-v2 select:not([disabled]),.omega-workstation-v2 textarea:not([disabled])')].filter(visible);
+  const interactives=[...new Set([...actions,...forms])];
   const unusable=buttons.filter(b=>{const r=b.getBoundingClientRect();return !b.disabled&&(r.width<8||r.height<8||getComputedStyle(b).pointerEvents==='none')}).map(b=>(b.textContent||b.getAttribute('aria-label')||'unnamed').trim().slice(0,80));
   const undersizedTouchActions=coarse?actions.filter(el=>{const r=el.getBoundingClientRect();return r.width<43.5||r.height<43.5}).map(el=>{const r=el.getBoundingClientRect();return`${(el.textContent||el.getAttribute('aria-label')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
   const undersizedTouchForms=coarse?forms.filter(el=>el.getBoundingClientRect().height<43.5).map(el=>{const r=el.getBoundingClientRect();return`${(el.getAttribute('aria-label')||el.getAttribute('placeholder')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
+  const buried=interactives.filter(el=>{
+    const r=el.getBoundingClientRect();
+    if(r.right<=0||r.left>=innerWidth||r.bottom<=0||r.top>=innerHeight)return false;
+    const x=Math.max(0,Math.min(innerWidth-1,r.left+r.width/2));
+    const y=Math.max(0,Math.min(innerHeight-1,r.top+r.height/2));
+    const hit=document.elementFromPoint(x,y);
+    return Boolean(hit&&!el.contains(hit)&&!hit.contains(el));
+  }).map(el=>{
+    const r=el.getBoundingClientRect();
+    const x=Math.max(0,Math.min(innerWidth-1,r.left+r.width/2));
+    const y=Math.max(0,Math.min(innerHeight-1,r.top+r.height/2));
+    const hit=document.elementFromPoint(x,y);
+    const label=(el.textContent||el.getAttribute('aria-label')||el.getAttribute('placeholder')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64);
+    const blocker=(hit?.textContent||hit?.getAttribute?.('aria-label')||hit?.className||hit?.tagName||'unknown').toString().replace(/\s+/g,' ').trim().slice(0,64);
+    return`${label} <- ${blocker}`;
+  });
   const visibleChildren=main?[...main.children].filter(visible).length:0;
   const textLength=(main?.textContent||'').replace(/\s+/g,' ').trim().length;
   const richVisible=main?[...main.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible).length:0;
-  return{mainPresent:Boolean(main&&rect),left:rect?.left??null,right:rect?.right??null,viewportWidth:innerWidth,width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,undersizedTouchActions,undersizedTouchForms,coarse,visibleChildren,textLength,richVisible};
+  return{mainPresent:Boolean(main&&rect),left:rect?.left??null,right:rect?.right??null,viewportWidth:innerWidth,width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,undersizedTouchActions,undersizedTouchForms,buried,coarse,visibleChildren,textLength,richVisible};
 }
 
 async function verifySarGeometry(page,viewportName){
@@ -156,6 +173,7 @@ try{
       if(snap.unusable.length)throw new Error(`${name}/${route}: visible enabled controls are non-interactive ${snap.unusable.join(' | ')}`);
       if(name==='mobile'&&snap.undersizedTouchActions.length)throw new Error(`${name}/${route}: coarse-pointer action controls below 44×44px ${snap.undersizedTouchActions.join(' | ')}`);
       if(name==='mobile'&&snap.undersizedTouchForms.length)throw new Error(`${name}/${route}: coarse-pointer form controls below 44px high ${snap.undersizedTouchForms.join(' | ')}`);
+      if(snap.buried.length)throw new Error(`${name}/${route}: visible interactive controls are geometrically buried by another layer ${snap.buried.join(' | ')}`);
       if(snap.visibleChildren<1||(snap.textLength<8&&snap.richVisible<1))throw new Error(`${name}/${route}: no visible route content mounted ${JSON.stringify(snap)}`);
       if(route==='SAR Truth')await verifySarGeometry(page,name);
     }
@@ -168,5 +186,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R286/R305 ALL-SURFACE BROWSER PASS · R304 direct-selector specificity preserved · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical routes pointer-clicked on desktop + 390px 2×DPR touch/coarse mobile · every activated workstation horizontally contained · coarse-pointer 44×44 action + 44px-high form-control proof · reduced-motion navigator proof · exact data-panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
+  console.log('R286/R305 ALL-SURFACE BROWSER PASS · R304 direct-selector specificity preserved · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical routes pointer-clicked on desktop + 390px 2×DPR touch/coarse mobile · every activated workstation horizontally contained · coarse-pointer 44×44 action + 44px-high form-control proof · center-point layer-occlusion proof for visible interactive controls · reduced-motion navigator proof · exact data-panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
 }finally{await browser.close()}
