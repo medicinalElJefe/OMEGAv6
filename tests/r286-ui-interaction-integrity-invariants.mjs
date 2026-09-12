@@ -3,6 +3,7 @@ import fs from 'node:fs';
 
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>assert.ok(ok,'R286 '+msg);
+// R294.1 keeps the authored Heavy Bio comparison labels machine-visible without changing authority semantics.
 
 await import('./r155-navigation-information-architecture-invariants.mjs');
 await import('./r203-interface-navigation-polish-invariants.mjs');
