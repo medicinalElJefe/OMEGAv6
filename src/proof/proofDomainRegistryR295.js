@@ -13,7 +13,8 @@ export const PROOF_DOMAIN_REGISTRY_R295=Object.freeze({
       'tests/r294-returned-evidence-closure-invariants.mjs',
       'tests/r295-proof-admission-compiler-invariants.mjs',
       'tests/r296-singmaster-exact-closure-invariants.mjs',
-      'tests/r297-singmaster-sharded-exact-fabric-invariants.mjs'
+      'tests/r297-singmaster-sharded-exact-fabric-invariants.mjs',
+      'tests/r298-singmaster-labeled-pair-star-invariants.mjs'
     ]),
     admissionMode:'GOVERNED_SOURCE_PATCH_ONLY',
     publicTruthBoundary:'OPEN remains OPEN unless source-level proof gates and exhaustive arithmetic closure are changed by reproducible evidence and the full inherited proof suite remains green.'
