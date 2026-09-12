@@ -55,7 +55,7 @@ for(const token of [
  "data-master-menu-presentation-revision={R289_MASTER_MENU_PRESENTATION_REVISION}"
 ])must(liveNav.includes(token),`live navigator missing ${token}`);
 must(liveNav.indexOf('const navigationLemma=useMemo')<liveNav.indexOf('const lemmaRows=useMemo')&&liveNav.indexOf('const lemmaRows=useMemo')<liveNav.indexOf('const rows=useMemo'),'R289 master-menu filtering must remain downstream of the R242 navigation lemma');
-must(liveNav.includes("setMasterMenu('ALL')")&&liveNav.includes("const[masterMenu,setMasterMenu]=useState<MasterMenuFilterR289>('ALL')"),'live navigator must reset and explicitly own only presentation-filter state');
+must(liveNav.includes("setMasterMenu('ALL')")&&liveNav.includes("[masterMenu,setMasterMenu]=useState<MasterMenuFilterR289>('ALL')"),'live navigator must reset and explicitly own only presentation-filter state');
 must(liveNav.includes('OMEGA_WORKSPACES_R82.map'),'existing workspace filter must remain alongside recovered-menu filtering');
 must(!liveNav.includes('onNavigate(masterMenu')&&!liveNav.includes('resolveExactRouteR242(routeRecords,masterMenu'),'master-menu state must never become a route identity or navigation authority');
 must(liveNav.includes("R289 recovered-menu presentation downstream of lemma"),'visible technical truth must state the R289 authority boundary');
