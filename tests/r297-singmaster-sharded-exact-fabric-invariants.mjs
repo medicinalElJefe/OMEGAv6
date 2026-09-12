@@ -1,3 +1,4 @@
+import './r298-singmaster-labeled-pair-star-invariants.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {compileSingmasterExactClosureR296} from '../src/proof/singmasterExactClosureR296.js';
