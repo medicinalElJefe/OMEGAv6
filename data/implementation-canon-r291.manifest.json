@@ -1,0 +1,35 @@
+{
+  "schema": "OMEGA_IMPLEMENTATION_CANON_SOURCE_MANIFEST_R291",
+  "publicProvenanceKey": "ARCHIVE-IMPLEMENTATION-CANON-R291",
+  "source": {
+    "file": "OMEGA_20736D_IMPLEMENTATION_CANON_INDEX.xlsx",
+    "modified": "2026-08-03T13:29:58.020Z",
+    "workbookSha256": "fdda75804ffb67136e6c547f5549bf2b2a26fd2e30ddfd86cd38dfc28f556e4e",
+    "sheet": "Implementation_Index",
+    "range": "A1:J676",
+    "rowsIncludingHeader": 676,
+    "dataRows": 675,
+    "storageLocator": "OMITTED_FROM_PUBLIC_REPOSITORY"
+  },
+  "snapshot": {
+    "encoding": "UTF-8_JSON_CHUNKS",
+    "logicalRowsSha256": "af271c6c32420eb0e30c4315faebfcfbe01b32e1df527554ea6bea04818accfc",
+    "rows": 675,
+    "columns": ["id","type","phase","component","artifact","symbol","purpose","archiveStatus","priority","sequence"],
+    "chunks": [
+      {"path":"data/implementation-canon-r291/chunk-001.json","rows":68,"firstId":"CANON-000001","lastId":"CANON-000068","sha256":"a20bf3dddee1aae7098f0b4e0a697b68a664237391d82501da951f07f447fca4"},
+      {"path":"data/implementation-canon-r291/chunk-002.json","rows":68,"firstId":"CANON-000069","lastId":"CANON-000136","sha256":"dd5ec58d21747c43988ccd06ddfcd16782f95ab317aca4d4d9118fb0ad31d44a"},
+      {"path":"data/implementation-canon-r291/chunk-003.json","rows":68,"firstId":"CANON-000137","lastId":"CANON-000204","sha256":"6a7b6af8179466128789a377251782124ecfa8289e4f8d68ae3a2fef24b08d8a"},
+      {"path":"data/implementation-canon-r291/chunk-004.json","rows":68,"firstId":"CANON-000205","lastId":"CANON-000272","sha256":"772964377383fab303689be7e0b508a5932cb6699290dec46e9d00763db5936d"},
+      {"path":"data/implementation-canon-r291/chunk-005.json","rows":68,"firstId":"CANON-000273","lastId":"CANON-000340","sha256":"1158390f9cf87f8a5dec2604f937a3a1182c940bc169d20146d3d8606f9853f8"},
+      {"path":"data/implementation-canon-r291/chunk-006.json","rows":67,"firstId":"CANON-000341","lastId":"CANON-000407","sha256":"eb1ac74e842f6cea79f4498d3773b04bb70c74437325664db1e0a6d1753b8709"},
+      {"path":"data/implementation-canon-r291/chunk-007.json","rows":67,"firstId":"CANON-000408","lastId":"CANON-000474","sha256":"04555cfda3478f6ffc121bce27661abf217cf60647ad1ee5ebabf95d01e32ea1"},
+      {"path":"data/implementation-canon-r291/chunk-008.json","rows":67,"firstId":"CANON-000475","lastId":"CANON-000541","sha256":"ca877d85d2bc77c262aef4da9493633b46d73b5680a4064ffcebc568bb04e02d"},
+      {"path":"data/implementation-canon-r291/chunk-009.json","rows":67,"firstId":"CANON-000542","lastId":"CANON-000608","sha256":"3e1cb9fabfa9c66c2a21ccbfac5d0dbb6642f9796027517da01095f6a24423b2"},
+      {"path":"data/implementation-canon-r291/chunk-010.json","rows":67,"firstId":"CANON-000609","lastId":"CANON-000675","sha256":"2ef6c74be7bac259b7e8813edf7f6e666cf80402ee482b4d8d7c1a2ae8fb4192"}
+    ]
+  },
+  "conservation": {"statusCounts":{"LOCKED":12,"PLANNED":663},"typeCounts":{"API_ROUTE":22,"BUILD_GATE":25,"CONFIG_KEY":26,"DATABASE_TABLE":12,"EVENT":22,"HARD_INVARIANT":12,"MODULE":94,"SHADER_BINDING":31,"SYMBOL":408,"TEST":23}},
+  "dashboardSummary": {"masterFields":62,"modules":94,"symbolsFunctionsKernels":408,"shaderBindings":31,"runtimeEvents":22,"apiRoutes":22,"databaseTables":12,"configurationKeys":26,"testsAndBenchmarks":23,"buildGates":25,"hardInvariants":12},
+  "truthBoundary": "The workbook and source-derived chunk snapshot are implementation-specification evidence. They do not by themselves prove current implementation, live execution, device state, deployment, empirical scientific truth, or Canon admission. Current implementation classification requires repository source plus proof evidence under the existing R291 reconciliation gate."
+}
