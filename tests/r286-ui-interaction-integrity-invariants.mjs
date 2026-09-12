@@ -53,10 +53,16 @@ for(const token of [
  'undersizedTouchForms',
  'coarse-pointer action controls below 44×44px',
  'coarse-pointer form controls below 44px high',
+ 'state.mainRect&&(state.mainRect.left<-1||state.mainRect.right>state.viewportWidth+1)',
+ 'mainPresent:Boolean(main&&rect)',
+ 'if(!snap.mainPresent||snap.left===null||snap.right===null||snap.left<-1||snap.right>snap.viewportWidth+1)',
  'active workstation escaped horizontal viewport containment',
+ 'initial Home may remain workstation-free',
  'R286/R303 ALL-SURFACE BROWSER PASS'
 ])must(browserProof.includes(token),`R303 real-browser interaction proof missing ${token}`);
 must(browserProof.includes("expected.length!==44")&&browserProof.includes("for(const route of expected)"),'R303 must strengthen rather than reduce the inherited 44-route traversal');
+must(browserProof.indexOf('await verifyR303InteractionEnvelope(page,name)')<browserProof.indexOf('for(const route of expected){'),'R303 initial navigator envelope must be proved before route activation without requiring Home to fabricate a workstation');
+must(browserProof.indexOf('if(!snap.mainPresent')>browserProof.indexOf('await clickRoute(page,route)'),'R303 workstation containment must be asserted after each canonical route is activated');
 must(!browserProof.includes('page.route(')&&!browserProof.includes('Math.random'),'R303 interaction proof must exercise the real built UI without request mocking or random acceptance');
 
-console.log('R286/R303 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + exact 78×78 mobile field geometry + authoritative 44×44 coarse-pointer action override and 44px-high form-control override against inherited specialist !important rules + 390px 2×DPR coarse-pointer/reduced-motion browser proof + horizontal containment preserved.');
+console.log('R286/R303 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + exact 78×78 mobile field geometry + authoritative 44×44 coarse-pointer action override and 44px-high form-control override against inherited specialist !important rules + 390px 2×DPR coarse-pointer/reduced-motion browser proof + Home/workstation lifecycle-aware per-route horizontal containment preserved.');
