@@ -60,12 +60,14 @@ for(const token of [
  "matchMedia('(prefers-reduced-motion: reduce)').matches",
  '.r88-head-actions button,.r89-nav-mode button,.r94-rail-action,.r89-flat-route',
  'x.height<43.5||x.width<43.5',
- '.omega-workstation-v2 input:not([disabled])',
- '.omega-workstation-v2 textarea:not([disabled])',
+ '.workstation-main input:not([disabled])',
+ '.workstation-main textarea:not([disabled])',
  'undersizedTouchActions',
  'undersizedTouchForms',
  'coarse-pointer action controls below 44×44px',
  'coarse-pointer form controls below 44px high',
+ "document.documentElement.dataset.omegaNavExpanded!=='true'",
+ 'Navigator interaction geometry is proved separately while expanded',
  'document.elementFromPoint',
  'snap.buried.length',
  'visible interactive controls are geometrically buried by another layer',
@@ -77,6 +79,8 @@ must(browserProof.includes('expected.length!==44')&&browserProof.includes('for(c
 must(browserProof.indexOf('await verifyR305InteractionEnvelope(page,name)')<browserProof.indexOf('for(const route of expected){'),'R305 initial navigator envelope must be proved before route activation');
 must(browserProof.indexOf('if(!snap.mainPresent')>browserProof.indexOf('await clickRoute(page,route)'),'R305 workstation containment must be asserted after each canonical route is activated');
 must(browserProof.indexOf('if(snap.buried.length)')>browserProof.indexOf('await clickRoute(page,route)'),'R305 layer-occlusion rejection must execute after each canonical route activation');
+must(browserProof.includes("await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded!=='true'"),'R305 must wait for canonical destination-selection collapse before active-workspace occlusion proof');
+must(!browserProof.includes("document.querySelectorAll('.omega-workstation-v2 input:not([disabled])")&&!browserProof.includes("document.querySelectorAll('.omega-workstation-v2 button:not([disabled])"),'R305 workspace occlusion/size proof must not misclassify intentionally layered navigator controls as buried application controls');
 must(!browserProof.includes('page.route(')&&!browserProof.includes('Math.random'),'R305 interaction proof must exercise the real built UI without request mocking or random acceptance');
 
-console.log('R286/R305 UI INTERACTION INTEGRITY PASS · 44 canonical surfaces + exact 78×78 mobile field geometry + shared menu event + normalized persisted panel identity + final root-scoped coarse-pointer/reduced-motion authority + R304 selector-specificity closure preserved + exhaustive real-browser interaction and layer-occlusion envelope bound.');
+console.log('R286/R305 UI INTERACTION INTEGRITY PASS · 44 canonical surfaces + exact 78×78 mobile field geometry + shared menu event + normalized persisted panel identity + final root-scoped coarse-pointer/reduced-motion authority + R304 selector-specificity closure preserved + navigator geometry proved in expanded state + active-workspace geometry/occlusion proved after canonical route-collapse state.');
