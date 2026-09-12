@@ -12,17 +12,21 @@ const stable=value=>{if(value===null||typeof value!=='object')return JSON.string
 const hash32=value=>{const text=String(value);let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0};
 const fingerprint=value=>`r294-${hash32(stable(value)).toString(16).padStart(8,'0')}`;
 const digestOk=value=>/^sha256:[0-9a-f]{64}$/i.test(String(value||''));
+const canonicalTimestamp=value=>{if(typeof value!=='string'||!value)return null;const ms=Date.parse(value);if(!Number.isFinite(ms))return null;const iso=new Date(ms).toISOString();return iso===value?iso:null};
 const receiptBody=receipt=>{if(!receipt||typeof receipt!=='object')return null;const{receiptFingerprint,...body}=receipt;return body};
 const receiptFingerprintOk=receipt=>{const body=receiptBody(receipt);return Boolean(body)&&String(receipt?.receiptFingerprint||'')===fingerprint(body)};
 
 export function buildProofReturnReceiptR294(cell,evolution,input={}){
  if(!cell||cell.schema!=='OMEGA_PROOF_WORK_CELL_R293')throw new Error('R294 requires an R293 proof work cell');
  if(!evolution||!evolution.fingerprint)throw new Error('R294 requires an R293 evolution packet');
+ const returnedAt=input.returnedAt==null?new Date().toISOString():canonicalTimestamp(String(input.returnedAt));
+ if(!returnedAt)throw new Error('R294 returnedAt must be canonical ISO-8601 UTC');
  const body={
   schema:PROOF_RETURN_RECEIPT_SCHEMA_R294,
-  revision:'R294',
+  revision:'R294.1',
   receiptId:String(input.receiptId||`R294-${Date.now()}-${String(cell.id).slice(-12)}`),
-  returnedAt:String(input.returnedAt||new Date().toISOString()),
+  returnedAt,
+  domainId:String(cell.domainId||evolution.domainId||'UNBOUND'),
   claimId:String(cell.claimId),
   workCellId:String(cell.id),
   scarId:String(cell.scarId||cell.id),
@@ -50,8 +54,11 @@ export function validateProofReturnR294(evolution,receipt){
  const cell=cells.find(x=>String(x.id)===String(receipt?.workCellId));
  if(!receipt||receipt.schema!==PROOF_RETURN_RECEIPT_SCHEMA_R294)return{status:'REJECTED_SCHEMA',accepted:false,closureCandidate:false,reason:'R294 receipt schema required',cell:null};
  if(!receiptFingerprintOk(receipt))return{status:'REJECTED_RECEIPT_FINGERPRINT',accepted:false,closureCandidate:false,reason:'receipt fingerprint mismatch; returned metadata was altered after issuance',cell};
+ if(!canonicalTimestamp(receipt.returnedAt))return{status:'REJECTED_RETURNED_AT',accepted:false,closureCandidate:false,reason:'canonical ISO-8601 UTC returnedAt required',cell};
+ if(String(receipt.domainId)!==String(evolution?.domainId))return{status:'REJECTED_DOMAIN_IDENTITY',accepted:false,closureCandidate:false,reason:'proof domain identity mismatch',cell:null};
  if(String(receipt.claimId)!==String(evolution?.claimId))return{status:'REJECTED_IDENTITY',accepted:false,closureCandidate:false,reason:'claim identity mismatch',cell:null};
  if(!cell)return{status:'STALE_OR_RECOMPILED',accepted:false,closureCandidate:false,reason:'work cell no longer exists in the active proof evolution',cell:null};
+ if(String(cell.domainId)!==String(evolution?.domainId))return{status:'REJECTED_DOMAIN_IDENTITY',accepted:false,closureCandidate:false,reason:'work cell domain does not match evolution domain',cell};
  if(String(receipt.proofFingerprint)!==String(evolution?.proofFingerprint)||String(receipt.evolutionFingerprint)!==String(evolution?.fingerprint)||String(receipt.scarFingerprint)!==String(cell.scarFingerprint))return{status:'STALE_FINGERPRINT',accepted:false,closureCandidate:false,reason:'proof/evolution/scar fingerprint mismatch',cell};
  if(String(receipt.operation)!==String(cell.operation))return{status:'REJECTED_OPERATION',accepted:false,closureCandidate:false,reason:'returned operation does not match scheduled work',cell};
  if(!OUTCOMES.has(String(receipt.outcome)))return{status:'RETURNED_UNVERIFIED',accepted:false,closureCandidate:false,reason:'unsupported outcome class',cell};
@@ -67,8 +74,8 @@ export function compileProofReturnR294({evolution=activeProofEvolutionSnapshotR2
  const rows=(Array.isArray(receipts)?receipts:[]).map(receipt=>({receipt,validation:validateProofReturnR294(evolution,receipt)}));
  const accepted=rows.filter(x=>x.validation.accepted);
  const acceptedByCell=new Map();
- for(const row of accepted){const id=String(row.receipt.workCellId),prior=acceptedByCell.get(id);if(!prior||String(row.receipt.returnedAt)>String(prior.receipt.returnedAt))acceptedByCell.set(id,row)}
- const pendingAdmission=[...acceptedByCell.values()];
+ for(const row of accepted){const id=String(row.receipt.workCellId),prior=acceptedByCell.get(id),rowMs=Date.parse(row.receipt.returnedAt),priorMs=prior?Date.parse(prior.receipt.returnedAt):-Infinity;if(!prior||rowMs>priorMs||(rowMs===priorMs&&String(row.receipt.receiptId)>String(prior.receipt.receiptId)))acceptedByCell.set(id,row)}
+ const pendingAdmission=[...acceptedByCell.values()].sort((a,b)=>Date.parse(a.receipt.returnedAt)-Date.parse(b.receipt.returnedAt)||String(a.receipt.receiptId).localeCompare(String(b.receipt.receiptId)));
  const cells=Array.isArray(evolution?.cells)?evolution.cells:[];
  const readyCells=cells.filter(cell=>!acceptedByCell.has(String(cell.id)));
  const waitingCells=cells.filter(cell=>acceptedByCell.has(String(cell.id)));
@@ -77,8 +84,9 @@ export function compileProofReturnR294({evolution=activeProofEvolutionSnapshotR2
  const rejected=rows.filter(x=>String(x.validation.status).startsWith('REJECTED'));
  const core={
   schema:PROOF_RETURN_SCHEMA_R294,
-  revision:'R294',
+  revision:'R294.1',
   bound:Boolean(evolution?.bound),
+  domainId:String(evolution?.domainId||'UNBOUND'),
   claimId:String(evolution?.claimId||'UNBOUND'),
   claimLabel:String(evolution?.claimLabel||'No active proof context'),
   claimStatus:String(evolution?.claimStatus||'UNBOUND'),
@@ -104,7 +112,7 @@ export function compileProofReturnR294({evolution=activeProofEvolutionSnapshotR2
   authority:{researchReturnLedger:'R294_BROWSER_LOCAL_OR_EXPLICIT_PACKET',proofClosure:'DOMAIN_ADAPTER_RECOMPILE_REQUIRED',sourcePromotion:'R240/R245_GOVERNED_PATH',productionWriter:'.github/workflows/ci.yml',canonAdmission:'R125'},
   boundary:PROOF_RETURN_BOUNDARY_R294
  };
- return{...core,fingerprint:fingerprint({proof:core.proofFingerprint,evolution:core.evolutionFingerprint,pending:core.pendingAdmission.map(x=>x.receipt.receiptFingerprint),ready:readyCells.map(x=>x.id)})};
+ return{...core,fingerprint:fingerprint({domainId:core.domainId,proof:core.proofFingerprint,evolution:core.evolutionFingerprint,pending:core.pendingAdmission.map(x=>x.receipt.receiptFingerprint),ready:readyCells.map(x=>x.id)})};
 }
 
 export function readProofReturnLedgerR294(){
@@ -113,6 +121,7 @@ export function readProofReturnLedgerR294(){
 export function recordProofReturnR294(receipt){
  if(!receipt||receipt.schema!==PROOF_RETURN_RECEIPT_SCHEMA_R294)throw new Error('R294 receipt required');
  if(!receiptFingerprintOk(receipt))throw new Error('R294 receipt fingerprint mismatch');
+ if(!canonicalTimestamp(receipt.returnedAt))throw new Error('R294 canonical returnedAt required');
  const rows=readProofReturnLedgerR294(),next=[...rows.filter(x=>String(x.receiptId)!==String(receipt.receiptId)),receipt].slice(-256);
  try{localStorage.setItem(RETURN_LEDGER_KEY_R294,JSON.stringify(next));window.dispatchEvent(new CustomEvent('omega-r294-proof-return-changed',{detail:receipt}))}catch{}
  return receipt;
