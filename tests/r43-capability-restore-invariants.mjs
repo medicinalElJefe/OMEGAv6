@@ -5,9 +5,9 @@ const matrix=read('src/CapabilityMatrixR43.tsx');
 const living=read('src/OmegaR36LivingSurfaces.tsx');
 const app=read('src/App.tsx');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const corpus=read('src/corpusRuntime.ts');
 const requireText=(src,text,msg)=>{if(!src.includes(text))throw new Error(msg||`Missing ${text}`)};
-const count=(src,re)=>(src.match(re)||[]).length;
 
 for(const x of ['Full Overall Canon','Dewey Calculus','Relational Skin Calculus (RSC)','Unified Coherence','Deep Mother','High Father','No-Nothing Truth','Guidance Field','Full Sphere','Forecast Mode','Heavy Prune','Alpha / Crimson'])requireText(atlas,x,`R43 core mode missing: ${x}`);
 for(const x of ['AX01','AX02','AX03','AX04','AX05','AX06','AX07','AX08','AX09','AX10','AX11','AX12'])requireText(atlas,x,`R43 calculus axis missing: ${x}`);
@@ -32,9 +32,13 @@ if(living.includes("<details className='r36-advanced'"))throw new Error('R43 reg
 requireText(app,"import './mobileMatterR42.css';",'Mobile deep-workspace containment not inherited');
 requireText(workstation,"export const OMEGA_SURFACES=['Command Center'",'Workstation surface authority missing');
 const surfaceLiteral=workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const;/s)?.[1]||'';
-if(count(surfaceLiteral,/'[^']+'/g)!==44)throw new Error(`Expected 44 registered workstation surfaces, found ${count(surfaceLiteral,/'[^']+'/g)}`);
+const surfaces=[...surfaceLiteral.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+if(!surfaces.length||surfaces.length!==routes.length||new Set(surfaces).size!==surfaces.length||new Set(routes).size!==routes.length)throw new Error(`R43 current route authority mismatch: workstation=${surfaces.length}, registry=${routes.length}`);
+for(const route of surfaces)if(!routes.includes(route))throw new Error(`R43 workstation route missing from R82 ${route}`);
+for(const route of routes)if(!surfaces.includes(route))throw new Error(`R43 R82 route missing from workstation ${route}`);
 requireText(corpus,'patterns[c.d*12+c.p]','144-domain PSC pattern authority missing');
 requireText(corpus,'roots[c.r]','12-root PSC authority missing');
 requireText(corpus,'operators[c.l]','12-function/operator PSC authority missing');
 if(/appdeploy/i.test(atlas+matrix+living) && !/not/i.test(atlas+matrix+living))throw new Error('R43 must not introduce AppDeploy runtime dependency');
-console.log('R43 CAPABILITY RESTORE PASS — uploaded atlas authority, deep specialist parity, 44-surface registry, mobile containment and truth boundaries retained.');
+console.log(`R43/R305 CAPABILITY RESTORE PASS — uploaded atlas authority, deep specialist parity, ${surfaces.length} current routes exactly aligned, mobile containment and truth boundaries retained · no historical route-count ceiling.`);
