@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R94 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R94/R305 '+msg)};
 const worker=read('src/workerR33.js');
 const hybrid=read('src/HybridMissionControlR8.tsx');
 const hybridLink=read('src/HybridLinkR32.tsx');
@@ -10,6 +10,7 @@ const baseAgent=fs.existsSync('public/omega-hybrid-agent-base-r205.py')?read('pu
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const css=read('src/omegaSideNavigatorR88.css');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const ci=read('.github/workflows/ci.yml');
 
 const canonical='https://omegav6.jeffdeweyeljefe.workers.dev';
@@ -36,7 +37,10 @@ must(![hybrid,hybridLink,agent,baseAgent,worker].join('\n').includes('omega-sove
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'canonical 44-route universe must remain intact');
+const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(surfaces.length>0&&surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length&&new Set(routes).size===routes.length,'canonical current route universe must remain non-empty, unique and registry-aligned');
+for(const route of surfaces)must(routes.includes(route),`Hybrid navigation workstation route absent from registry ${route}`);
+for(const route of routes)must(surfaces.includes(route),`Hybrid navigation registry route absent from workstation ${route}`);
 
 must(nav.includes("className={'r94-side-toolbar '")&&nav.includes("className='r94-nav-rail'"),'global navigator must expose persistent slim side rail');
 must(nav.includes("const[expanded,setExpanded]=useState(false)"),'navigator must be collapsible');
@@ -51,8 +55,7 @@ must(css.includes("html[data-omega-nav-expanded='true'] :where(.omega-workstatio
 must(css.includes('--r94-nav-panel:min(42vw,220px)'),'mobile expanded navigation must remain deliberately narrow');
 must(css.includes('--r94-nav-panel:min(40vw,190px)'),'small-phone navigation must remain even slimmer');
 
-for(const selector of ['.r43-workspace-tabs','.r65-lens-nav','.rel-tabs','.r46-tabs','.depth-ribbon','.atlas-r36-toolbar','.hybrid-r32-buttons','.r28-route-strip'])
- must(css.includes(selector),'shared control language missing '+selector);
+for(const selector of ['.r43-workspace-tabs','.r65-lens-nav','.rel-tabs','.r46-tabs','.depth-ribbon','.atlas-r36-toolbar','.hybrid-r32-buttons','.r28-route-strip'])must(css.includes(selector),'shared control language missing '+selector);
 must(css.includes('--r94-control-bg:#071217')&&css.includes('--r94-control-line-active:rgba(101,208,191,.52)'),'unified control design tokens missing');
 must(css.includes("button:is(.active,[aria-pressed='true'])"),'active navigation state must share one design grammar');
 must(css.includes("button.primary-action,.primary-action"),'primary action hierarchy must remain visually distinct');
@@ -61,4 +64,4 @@ must(ci.includes("fetch(base+'/api/hybrid/agent-download'")&&ci.includes("OMEGA 
 must(ci.includes("readFileSync('public/omega-hybrid-agent.py')")&&ci.includes('servedSha256!==expectedSha256')&&ci.includes('receiptSha256!==expectedSha256'),'live Hybrid probe must compare the response body and receipt to the repository source SHA-256');
 must(!css.includes('@appdeploy/client')&&!nav.includes('@appdeploy/client'),'R94 navigation must remain provider portable');
 
-console.log('R94/R207 HYBRID + NAVIGATION PASS · canonical R207 proof wrapper over frozen R205 executor · R127 zero-drift launcher · persistent non-covering side toolbar · 44 routes preserved');
+console.log(`R94/R207/R305 HYBRID + NAVIGATION PASS · canonical R207 proof wrapper over frozen R205 executor · R127 zero-drift launcher · persistent non-covering side toolbar · ${surfaces.length} current routes exactly aligned · no historical route-count ceiling`);
