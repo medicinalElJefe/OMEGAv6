@@ -33,6 +33,10 @@ R285 removes optimistic display defaults from the interferometric gate.
 
 The existing phase-to-LOS mathematical relation remains a mathematical relation only and does not become a claim about an unbound scene.
 
+## UI proof contract
+
+SAR Truth intentionally owns the full-width Earth workspace while it is active, so the generic Earth side console is hidden rather than layered over the dedicated SAR controls. The inherited Earth browser proof therefore validates the SAR full-width `sar-active` state and hidden generic console first, then returns to a standard Earth view before proving the unchanged model-mapped target reset/query control. This keeps the eight-view Earth contract, the SAR workstation layout, and the inherited target-reset behavior independently testable instead of coupling a standard-view control to the SAR-only presentation state.
+
 ## Runtime and authority
 
 The canonical Worker entrypoint remains `src/workerR116.js`. R285 adds the bounded `/api/earth/sar/catalog` route through the inherited Earth R8 layer and creates no alternate deployment, CanonState, dispatch, execution, or evidence authority.
