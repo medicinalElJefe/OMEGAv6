@@ -43,7 +43,7 @@ async function verifyR305InteractionEnvelope(page,viewportName){
   const modeButtons=[...document.querySelectorAll('.r89-nav-mode button')].filter(visible).map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||'').replace(/\s+/g,' ').trim(),width:r.width,height:r.height}});
   const route=document.querySelector('.r89-flat-route'),style=route?getComputedStyle(route):null,main=document.querySelector('.workstation-main'),r=main?.getBoundingClientRect(),rail=document.querySelector('.r94-nav-rail'),panel=document.querySelector('.r94-nav-panel');
   const z=el=>{if(!el)return 0;const value=getComputedStyle(el).zIndex;return value==='auto'?0:(Number(value)||0)};
-  return{coarse,reduced,targetCount:targets.length,undersized,buriedTargets,modeButtons,railZ:z(rail),panelZ:z(panel),transitionDuration:style?.transitionDuration||'',animationDuration:style?.animationDuration||'',mainRect:r?{left:r.left,right:r.right,width:r.width}:null,viewportWidth:innerWidth};
+  return{coarse,reduced,targetCount:targets.length,undersized,buriedTargets,modeButtons,railZ:z(rail),panelZ:z(panel),transitionDuration:style?.transitionDuration||'',animationName:style?.animationName||'',animationDuration:style?.animationDuration||'',mainRect:r?{left:r.left,right:r.right,width:r.width}:null,viewportWidth:innerWidth};
  });
  if(!(state.railZ>state.panelZ))throw new Error(`${viewportName}: R305 persistent rail must remain above expanded panel in the internal navigator stack ${JSON.stringify({railZ:state.railZ,panelZ:state.panelZ})}`);
  if(state.buriedTargets.length)throw new Error(`${viewportName}: R305 expanded navigator controls are geometrically buried by another layer ${state.buriedTargets.join(' | ')}`);
@@ -54,7 +54,7 @@ async function verifyR305InteractionEnvelope(page,viewportName){
   if(state.targetCount<1)throw new Error('mobile: R305 no navigator interaction targets were measurable');
   if(state.undersized.length)throw new Error(`mobile: R305 coarse-pointer navigator targets below 44px: ${state.undersized.map(x=>`${x.label} ${x.width.toFixed(1)}×${x.height.toFixed(1)}`).join(' | ')}`);
   if(state.transitionDuration&&state.transitionDuration!=='0s')throw new Error(`mobile: R305 reduced-motion navigator transition remained active: ${state.transitionDuration}`);
-  if(state.animationDuration&&state.animationDuration!=='0s')throw new Error(`mobile: R305 reduced-motion navigator animation remained active: ${state.animationDuration}`);
+  if(state.animationName&&state.animationName!=='none')throw new Error(`mobile: R305 reduced-motion navigator animation remained active: ${state.animationName} @ ${state.animationDuration}`);
  }
  if(state.mainRect&&(state.mainRect.left<-1||state.mainRect.right>state.viewportWidth+1))throw new Error(`${viewportName}: R305 active workstation escaped horizontal viewport containment ${JSON.stringify(state.mainRect)} / ${state.viewportWidth}`);
 }
