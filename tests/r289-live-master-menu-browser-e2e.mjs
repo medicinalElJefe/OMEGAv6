@@ -1,4 +1,3 @@
-import './r291-archive-proof-browser-e2e.mjs';
 import {chromium} from 'playwright';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
@@ -100,4 +99,4 @@ async function prove(viewportName,viewport){
 }
 
 for(const [name,viewport] of viewports)await prove(name,viewport);
-console.log('R290/R291 NAVIGATION CONTRACT BROWSER PASS · unified archive proof runs first · actual R88/R239 navigator · exact R289 inner presentation identity · pointer-transparent context strip · ALL + six workspace filters click-proven · ALL + 12 recovered master menus · same canonical route activation path · desktop/mobile containment · no page errors');
+console.log('R290 NAVIGATION CONTRACT BROWSER PASS · actual R88/R239 navigator · exact R289 inner presentation identity · pointer-transparent context strip · ALL + six workspace filters click-proven · ALL + 12 recovered master menus · same canonical route activation path · desktop/mobile containment · no page errors');
