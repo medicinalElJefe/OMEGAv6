@@ -1,15 +1,20 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R239 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R239/R305 '+msg)};
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const home=read('src/OmegaHomeR71.tsx');
 const css=read('src/omegaSideNavigatorR239.css');
 const registry=read('src/omegaExperienceRegistryR82.ts');
+const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const layerIntegrity=read('tests/r104-extreme-layer-integrity-invariants.mjs');
 const browser=read('tests/r239-user-navigation-browser-e2e.mjs');
 
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
-must(routes.length===44&&new Set(routes).size===44,'must preserve all 44 unique registered destinations');
+const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
+const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+must(routes.length>0&&routes.length===surfaces.length&&new Set(routes).size===routes.length&&new Set(surfaces).size===surfaces.length,'must preserve one non-empty unique current route universe across R82 and workstation authority');
+for(const route of routes)must(surfaces.includes(route),`R239 registry route missing from workstation ${route}`);
+for(const route of surfaces)must(routes.includes(route),`R239 workstation route missing from registry ${route}`);
 for(const workspace of ["id:'COMMAND',label:'Command'","id:'EXPLORE',label:'Explore'","id:'INTELLIGENCE',label:'Intelligence'","id:'EVIDENCE',label:'Evidence'","id:'BUILD',label:'Build'","id:'SYSTEM',label:'System'"])must(registry.includes(workspace),'workspace registry missing '+workspace);
 
 for(const token of [
@@ -44,13 +49,16 @@ for(const tier of ['PRIMARY','SUPPORT','EXPERT'])must(nav.includes(tier),'priori
 for(const token of [
  'routeIdentities=await routeRows.evaluateAll',
  "row.dataset.routeId||''",
- 'new Set(routeIds).size!==44',
+ 'expectedTotalCount',
+ 'new Set(routeIds).size!==routeIdentities.length',
  'row.dataset.routeId===id',
  "row.getAttribute('data-route-id')",
  "row.locator(':scope > span > b')",
- 'route identity/presentation binding drifted'
-])must(browser.includes(token),'browser proof must bind exhaustive route activation to machine-semantic R143 identity: '+token);
+ 'route identity/presentation binding drifted',
+ 'no historical route-count ceiling'
+])must(browser.includes(token),'browser proof must bind exhaustive current-route activation to machine-semantic R143 identity without a historical count ceiling: '+token);
 must(!browser.includes("const row=exactLabel.locator('..')"),'browser proof must not infer route identity from presentation DOM parent depth');
+must(!browser.includes('/^ALL\\s+44$/')&&!browser.includes('count()!==44')&&!browser.includes('size!==44'),'R239 browser proof must not freeze the current route universe to a historical cardinality');
 
 for(const token of [
  "data-navigation-revision='R239'",
@@ -68,7 +76,7 @@ for(const token of [
  'activeWorkspace.routes.map',
  'primaryRoutesForWorkspaceR132(domain)'
 ])must(home.includes(token),'Home user hierarchy missing '+token);
-must(!home.includes("aria-label='All 44 applications'"),'visible All tools language and accessible All tools language must not diverge');
+must(!/aria-label='All \d+ applications'/.test(home),'visible All tools language and accessible All tools language must not be coupled to a route-count snapshot');
 const quick=home.match(/const QUICK=\[(.*?)\] as const;/s)?.[1]||'';
 must(!quick.includes('SAI Lab')&&!quick.includes('Visual Instrument'),'universal quick actions must not duplicate workspace-specific specialist tools');
 must(home.includes("type SurfaceDepth='FOCUS'|'DEEP'"),'focus/deep density contract must remain available');
@@ -82,4 +90,4 @@ for(const token of [
  "@media(max-width:560px)"
 ])must(css.includes(token),'R239 responsive presentation law missing '+token);
 
-console.log('R239.1 USER NAVIGATION CONVERGENCE PASS · Home→workspace→start-here→all-tools hierarchy · universal rail Command/Hybrid/Earth/Proof · full 44-route registry retained · primary/support/expert grouped · technical metadata opt-in · R143 machine route identity is unique and structurally bound independently of presentation markup · visible/accessible naming aligned · collapsed navigator becomes immediately inert while R94 exit visibility transition completes · R104 semantic location/destination explanation bound · focus/deep density preserved · no new execution or Canon authority');
+console.log(`R239.1/R305 USER NAVIGATION CONVERGENCE PASS · Home→workspace→start-here→all-tools hierarchy · universal rail Command/Hybrid/Earth/Proof · full ${routes.length}-route current registry exactly aligned with workstation · primary/support/expert grouped · technical metadata opt-in · R143 machine route identity structurally bound independently of presentation markup · visible/accessible naming aligned · collapsed navigator immediately inert while R94 exit visibility transition completes · R104 semantic location/destination explanation bound · focus/deep density preserved · no historical route-count ceiling · no new execution or Canon authority`);
