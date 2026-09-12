@@ -20,11 +20,9 @@ const EXPECT=[
 ];
 
 async function enterEarth(page,label){
- const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
- if(await expand.count()&&await expand.first().isVisible())await expand.first().click();
- await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000}).catch(()=>{});
- const earth=page.locator('.r89-flat-route').filter({has:page.locator('b',{hasText:'Earth Now'})}).first();
- await earth.waitFor({state:'visible',timeout:15000});await earth.click();
+ const railEarth=page.getByLabel('Open Earth Now');
+ await railEarth.waitFor({state:'visible',timeout:15000});
+ await railEarth.click();
  await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',{timeout:30000});
  await page.waitForSelector('.earth-r279',{state:'visible',timeout:30000});
  const tabs=page.locator('.earth-r279-view-tabs button'),count=await tabs.count();if(count!==EXPECT.length)throw new Error(`${label}: expected exactly ${EXPECT.length} Earth view controls including SAR Truth, found ${count}`);
@@ -60,6 +58,6 @@ try{
   const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);if(overflow>12)throw new Error(`${label}: Earth workspace introduced ${overflow}px horizontal overflow`);if(pageErrors.length)throw new Error(`${label}: Earth view browser errors: ${pageErrors.join(' | ')}`);await context.close();
  }
 
- const bad=await browser.newContext({viewport:{width:1100,height:820}}),page=await bad.newPage();await page.route('**/api/earth/gibs/global*',route=>route.fulfill({status:200,contentType:'image/png',body:R284_TEXTURE,headers:{...SOURCE_HEADERS,'x-omega-source':'UNVERIFIED-FIXTURE'}}));await page.goto(`${base}/?r284-failclose=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45000});const planet=await openPlanet(page,'fail-close');await page.waitForFunction(()=>document.querySelector('.earth-r281-globe')?.getAttribute('data-source-state')==='UNAVAILABLE',{timeout:15000});const badText=await planet.innerText();if(!badText.includes('global source identity mismatch'))throw new Error('R284 fail-close did not visibly reject wrong source identity');await bad.close();
+ const bad=await browser.newContext({viewport:{width:1440,height:960}}),page=await bad.newPage();await page.route('**/api/earth/gibs/global*',route=>route.fulfill({status:200,contentType:'image/png',body:R284_TEXTURE,headers:{...SOURCE_HEADERS,'x-omega-source':'UNVERIFIED-FIXTURE'}}));await page.goto(`${base}/?r284-failclose=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45000});const planet=await openPlanet(page,'fail-close');await page.waitForFunction(()=>document.querySelector('.earth-r281-globe')?.getAttribute('data-source-state')==='UNAVAILABLE',{timeout:15000});const badText=await planet.innerText();if(!badText.includes('global source identity mismatch'))throw new Error('R284 fail-close did not visibly reject wrong source identity');await bad.close();
  console.log('R279/R284 EARTH VIEW BROWSER PASS · desktop + 2×DPR mobile route to Earth Now · all eight Earth surfaces preserved including R283 SAR Truth · WGS84 Planet renders varied returned-source pixels · observed pixel inspector reports unshaded RGB · source/derived controls explicit · wrong source identity fails closed · target reset works · no browser errors or viewport overflow');
 }finally{await browser.close()}
