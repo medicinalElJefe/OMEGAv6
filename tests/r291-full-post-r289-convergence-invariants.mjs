@@ -48,7 +48,9 @@ must(!/driveIds:\['/.test(genomeC)&&!/driveIds:\['/.test(genomeD),'new R291 arch
 must(recovery.includes('PUBLIC_CLIENT_USES_OPAQUE_PROVENANCE_KEYS_CONNECTED_STORAGE_LOCATORS_EXTERNAL'),'deep-recovery public provenance boundary missing');
 must(canon.schema==='OMEGA_IMPLEMENTATION_CANON_RECONCILIATION_R291','675-row implementation canon reconciliation schema missing');
 must(canon.source.rows===675,'implementation canon must contain exactly 675 rows');
-must(canon.source.payloadSha256==='8eb1d334cf1a1cbb6e7633b0f90e37893e1d95560de2cfe334e6a076cdbeb904','implementation canon payload hash drift');
+must(canon.source.payloadParts===8&&canon.source.payloadEncodedLength===24360&&canon.source.payloadCompressedBytes===18268,'implementation canon bounded multipart transport contract drift');
+must(canon.source.payloadGzipSha256==='3faae0d831fcebaef806afdb80bdc30868726982a4f7d5649f9850453ff110b2','implementation canon compressed payload hash drift');
+must(canon.source.payloadSha256==='8eb1d334cf1a1cbb6e7633b0f90e37893e1d95560de2cfe334e6a076cdbeb904','implementation canon decompressed payload hash drift');
 must(canon.source.payloadCodec==='GZIP','implementation canon must remain the canonical gzip payload');
 must(canon.source.file==='OMEGA_20736D_IMPLEMENTATION_CANON_INDEX.xlsx','implementation canon source filename drift');
 must(canon.source.modified==='2026-08-03T13:29:58.020Z','implementation canon source modification identity drift');
@@ -61,4 +63,4 @@ for(const row of canon.rows){
  must(row.claims.liveRuntimeProof===false&&row.claims.deviceProof===false&&row.claims.deploymentProof===false&&row.claims.empiricalScientificProof===false&&row.claims.canonAdmission===false,`${row.id} crossed the repository-classification truth boundary`);
 }
 
-console.log(`R291 FULL POST-R289 CONVERGENCE PASS · canonical Singmaster remains OPEN · deep archive recovery + symbolic RSC VM + exact live navigation presentation + Heavy Bio read-only zero-authority comparison + exact ${canon.source.rows}-row implementation canon SHA/reconciliation coexist under inherited R242/R282/R125/R141/R146/R147/R240/ci.yml authorities · source/proof classification coverage ${(canon.evidencedCoverage*100).toFixed(2)}% · no physical-dimension inflation or scientific/live-execution proof promotion`);
+console.log(`R291 FULL POST-R289 CONVERGENCE PASS · canonical Singmaster remains OPEN · deep archive recovery + symbolic RSC VM + exact live navigation presentation + Heavy Bio read-only zero-authority comparison + exact ${canon.source.rows}-row implementation canon multipart SHA/reconciliation coexist under inherited R242/R282/R125/R141/R146/R147/R240/ci.yml authorities · source/proof classification coverage ${(canon.evidencedCoverage*100).toFixed(2)}% · no physical-dimension inflation or scientific/live-execution proof promotion`);
