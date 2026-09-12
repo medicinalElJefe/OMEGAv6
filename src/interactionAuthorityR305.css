@@ -1,0 +1,15 @@
+/* R305 INTERACTION AUTHORITY — final presentation-only touch/reduced-motion contract.
+   Loaded from the final static specialist stylesheet position so inherited compact !important rules cannot undercut coarse-pointer usability.
+   This layer owns no route, execution, proof, evidence, persistence, deployment, state, or Canon authority. */
+@media(any-pointer:coarse){
+ #root .omega-workstation-v2 :where(button,[role='button']){min-width:44px!important;min-height:44px!important;touch-action:manipulation}
+ #root .omega-workstation-v2 :where(input,select,textarea){min-height:44px!important}
+ #root .r210-converged-nav :where(.r88-head-actions button,.r94-rail-action){min-width:44px!important;min-height:44px!important;touch-action:manipulation}
+ /* Preserve the R304 specificity closure: navigator-mode buttons must never be hidden inside :where(...), because R104 owns a more-specific compact !important rule. */
+ #root .r210-converged-nav .r89-nav-mode button{min-width:44px!important;min-height:44px!important;touch-action:manipulation}
+ #root .r210-converged-nav .r89-flat-route{min-height:54px!important;touch-action:manipulation}
+}
+@media(prefers-reduced-motion:reduce){
+ #root .r210-converged-nav :where(.r89-flat-route,.r94-nav-panel,.r88-navigator-trigger){transition:none!important;animation:none!important;scroll-behavior:auto!important}
+ #root .omega-workstation-v2 :where([class*='scroll'],[class*='stage']){scroll-behavior:auto!important}
+}
