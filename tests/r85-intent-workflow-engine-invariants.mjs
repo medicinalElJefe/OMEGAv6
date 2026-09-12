@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R85 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R85/R305 '+msg)};
 const runtime=read('src/omegaWorkflowRuntimeR85.ts');
 const workbench=read('src/OmegaIntentWorkbenchR85.tsx');
 const css=read('src/omegaIntentWorkbenchR85.css');
@@ -20,9 +20,13 @@ must(runtime.includes("status:'ACTIVE'|'COMPLETE'|'CANCELLED'"),'workflow lifecy
 must(runtime.includes("truthBoundary:'Workflow execution coordinates existing OMEGA tools"),'workflow execution truth boundary missing');
 
 const registered=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
+const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 const workflowRoutes=[...runtime.matchAll(/route:'([^']+)'/g)].map(x=>x[1]);
 for(const route of workflowRoutes)must(registered.includes(route),`workflow targets non-canonical route ${route}`);
-must(new Set(registered).size===44&&registered.length===44,'R85 must preserve 44 canonical application routes');
+must(registered.length>0&&registered.length===surfaces.length&&new Set(registered).size===registered.length&&new Set(surfaces).size===surfaces.length,'R85 must preserve one exact current application route universe');
+for(const route of registered)must(surfaces.includes(route),`R85 registry route missing from workstation ${route}`);
+for(const route of surfaces)must(registered.includes(route),`R85 workstation route missing from registry ${route}`);
 
 must(workbench.includes("onAddress(nextAddress)"),'ADVANCE action must actually commit the admitted canonical candidate');
 must(workbench.includes("localState.write('omega.r18.workspace.snapshots'"),'CHECKPOINT action must actually write a replayable Workspace snapshot');
@@ -48,4 +52,4 @@ must(governance.includes("Admit and commit candidate")&&governance.includes("onA
 must(governance.includes("Queue SVG")&&governance.includes("Queue PNG")&&governance.includes("BROWSER_LOCAL_HASHED_ASSET"),'existing real asset hashing and artifact generation must remain intact');
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),`deep specialist surface lost ${token}`);
 
-console.log('R85 INTENT WORKFLOW ENGINE PASS · 8 executable intents · canonical transition + checkpoint + proof continuity · 44/44 routes preserved · mobile/desktop contained');
+console.log(`R85/R305 INTENT WORKFLOW ENGINE PASS · 8 executable intents · canonical transition + checkpoint + proof continuity · ${registered.length}/${registered.length} current routes exactly preserved · mobile/desktop contained · no historical route-count ceiling`);
