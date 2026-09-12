@@ -5,7 +5,7 @@ const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,''
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const block=(source.match(/export const OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const expected=[...block.matchAll(/'([^']+)'/g)].map(m=>m[1]);
-if(expected.length!==44||new Set(expected).size!==44)throw new Error(`R286 expected 44 unique canonical surfaces, received ${expected.length}/${new Set(expected).size}`);
+if(expected.length===0||new Set(expected).size!==expected.length)throw new Error(`R286/R305 expected a non-empty unique current surface universe, received ${expected.length}/${new Set(expected).size}`);
 
 const viewports=[['desktop',{width:1440,height:960}],['mobile',{width:390,height:844}]];
 const totals={desktop:0,mobile:0,disabledDesktop:0,disabledMobile:0};
@@ -13,7 +13,7 @@ const totals={desktop:0,mobile:0,disabledDesktop:0,disabledMobile:0};
 async function openNavigator(page){
   if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
   const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
-  if(!await expand.count())throw new Error('R286 global navigator expand control missing');
+  if(!await expand.count())throw new Error('R286/R305 global navigator expand control missing');
   await expand.first().scrollIntoViewIfNeeded();
   await expand.first().click({timeout:10000});
   await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
@@ -40,7 +40,7 @@ async function verifyWorkspaceSubmenus(page,viewportName){
   await filters.first().click();
   await page.waitForFunction(()=>document.querySelector('.r105-workspace-filter button')?.classList.contains('active')===true,{timeout:10000});
   const allRoutes=await page.locator('.r89-flat-route:visible').count();
-  if(allRoutes!==44)throw new Error(`${viewportName}: ALL workspace submenu did not restore 44 routes; received ${allRoutes}`);
+  if(allRoutes!==expected.length)throw new Error(`${viewportName}: ALL workspace submenu did not restore all ${expected.length} current routes; received ${allRoutes}`);
 }
 
 async function clickRoute(page,route){
@@ -52,7 +52,7 @@ async function clickRoute(page,route){
     const label=(await buttons.nth(i).locator('b').first().textContent().catch(()=>''))?.trim();
     if(label===route){hit=i;break}
   }
-  if(hit<0)throw new Error(`R286 route button missing: ${route}`);
+  if(hit<0)throw new Error(`R286/R305 route button missing: ${route}`);
   const button=buttons.nth(hit);
   await button.scrollIntoViewIfNeeded();
   await button.click({timeout:10000});
@@ -150,7 +150,7 @@ try{
     await verifyWorkspaceSubmenus(page,name);
     const navLabels=(await page.locator('.r89-flat-route b').allTextContents()).map(x=>x.trim()).filter(Boolean);
     const unique=[...new Set(navLabels)];
-    if(unique.length!==44)throw new Error(`${name}: expected 44 unique route controls, received ${unique.length}`);
+    if(unique.length!==expected.length)throw new Error(`${name}: expected ${expected.length} unique current route controls, received ${unique.length}`);
     for(const route of expected)if(!unique.includes(route))throw new Error(`${name}: navigator omitted canonical route ${route}`);
 
     for(const route of expected){
@@ -172,5 +172,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,4000)}`);
     await context.close();
   }
-  console.log(`R286 ALL-SURFACE NO-DEAD-CONTROL PASS · 44/44 canonical routes pointer-opened on desktop + 390px mobile · ALL + six workspace submenus pointer-exercised · ${totals.desktop} visible desktop controls + ${totals.mobile} visible mobile controls runtime-bound · ${totals.disabledDesktop+totals.disabledMobile} honestly disabled controls exempted · enabled controls require accessible labels, real React/native pointer-or-form action bindings, usable hit geometry and pointer events · role buttons require keyboard activation · exact data-panel transitions · exact 78×78/6084-cell SAR geometry · no material viewport overflow · navigator Escape/reopen · no page errors.`);
+  console.log(`R286/R305 ALL-SURFACE NO-DEAD-CONTROL PASS · ${expected.length}/${expected.length} current routes pointer-opened on desktop + 390px mobile · ALL + six workspace submenus pointer-exercised · ${totals.desktop} visible desktop controls + ${totals.mobile} visible mobile controls runtime-bound · ${totals.disabledDesktop+totals.disabledMobile} honestly disabled controls exempted · enabled controls require accessible labels, real React/native pointer-or-form action bindings, usable hit geometry and pointer events · role buttons require keyboard activation · exact data-panel transitions · exact 78×78/6084-cell SAR geometry · no material viewport overflow · navigator Escape/reopen · no historical route-count ceiling · no page errors.`);
 }finally{await browser.close()}
