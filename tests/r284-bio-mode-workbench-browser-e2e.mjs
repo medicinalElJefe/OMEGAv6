@@ -15,6 +15,8 @@ async function prove(viewport,label){
   const buttons=workbench.locator('.bio284-mode-list > button');const first=buttons.nth(0);const firstKey=await first.getAttribute('data-mode-key');if(!firstKey)throw new Error(`${label}: first canon channel missing machine-visible mode key`);await first.click();
   await page.waitForFunction(key=>document.querySelector('.bio284-detail')?.getAttribute('data-mode-key')===key,firstKey,{timeout:10000});
   const detail=workbench.locator('.bio284-detail');if(await detail.getAttribute('data-measurement-authority')!=='0')throw new Error(`${label}: selected mode detail machine authority boundary is not zero`);
+  const truthAttr=(await detail.getAttribute('data-truth-boundary')||'').trim();if(!truthAttr)throw new Error(`${label}: selected mode detail has no machine-bound truth boundary`);
+  const truthPanel=detail.locator('.bio284-truth-boundary');await truthPanel.waitFor({state:'visible',timeout:10000});const truthText=await truthPanel.innerText();if(!truthText.includes('Truth boundary')||truthText.length<20)throw new Error(`${label}: selected mode truth boundary is not visibly rendered`);
   const selectedText=await detail.innerText();for(const token of ['Measurement authority','0','VALIDATION REQUIREMENT','Truth boundary'])if(!selectedText.includes(token))throw new Error(`${label}: selected mode detail missing ${token}`);
   await workbench.getByRole('button',{name:/PIN FOR COMPARE|COMPARE PINNED/}).click();const second=buttons.nth(1),secondKey=await second.getAttribute('data-mode-key');if(!secondKey)throw new Error(`${label}: second canon channel missing machine-visible mode key`);await second.click();await page.waitForFunction(key=>document.querySelector('.bio284-detail')?.getAttribute('data-mode-key')===key,secondKey,{timeout:10000});await workbench.locator('.bio284-compare').waitFor({state:'visible',timeout:10000});const compareText=await workbench.locator('.bio284-compare').innerText();if(!compareText.includes('READ-ONLY COMPARISON')||!compareText.includes('Measurement authority Δ'))throw new Error(`${label}: read-only comparison contract missing`);
 
@@ -27,4 +29,4 @@ async function prove(viewport,label){
 }
 await prove({width:1440,height:1200},'desktop');
 await prove({width:390,height:844},'mobile');
-console.log('R284 BROWSER PASS · 241-channel menus · 179/62 family filters · exact selected-key state transition · machine-visible zero measurement authority · mode-specific metadata visual · evidence ladder · read-only comparison · desktop/mobile containment');
+console.log('R284 BROWSER PASS · 241-channel menus · 179/62 family filters · exact selected-key state transition · visible + machine-bound truth boundary · machine-visible zero measurement authority · mode-specific metadata visual · evidence ladder · read-only comparison · desktop/mobile containment');
