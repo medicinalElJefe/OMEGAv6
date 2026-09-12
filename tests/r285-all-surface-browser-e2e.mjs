@@ -32,16 +32,39 @@ async function clickRoute(page,route){
   await button.scrollIntoViewIfNeeded();
   await button.click({timeout:10000});
   await page.waitForFunction(name=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===name,route,{timeout:20000});
+  await page.waitForFunction(()=>{
+    const main=document.querySelector('.workstation-main');
+    if(!main)return false;
+    const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
+    const children=[...main.children].filter(visible);
+    const rich=[...main.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible);
+    return children.length>0&&(((main.textContent||'').replace(/\s+/g,' ').trim().length>=8)||rich.length>0);
+  },{timeout:20000});
 }
 
 function usableSnapshot(){
-  const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0};
+  const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0};
   const main=document.querySelector('.workstation-main');
   const rect=main?.getBoundingClientRect();
   const buttons=[...document.querySelectorAll('.workstation-main button')].filter(visible);
   const unusable=buttons.filter(b=>{const r=b.getBoundingClientRect();return !b.disabled&&(r.width<8||r.height<8||getComputedStyle(b).pointerEvents==='none')}).map(b=>(b.textContent||b.getAttribute('aria-label')||'unnamed').trim().slice(0,80));
-  const activePanels=[...document.querySelectorAll('.workstation-main :is(.panel,.special-app)')].filter(visible).length;
-  return{width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,activePanels};
+  const visibleChildren=main?[...main.children].filter(visible).length:0;
+  const textLength=(main?.textContent||'').replace(/\s+/g,' ').trim().length;
+  const richVisible=main?[...main.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible).length:0;
+  return{width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,visibleChildren,textLength,richVisible};
+}
+
+async function verifySarGeometry(page,viewportName){
+  const sar=await page.evaluate(()=>{
+    const grid=document.querySelector('.sar-r280 .r280-canvas');
+    if(!grid)return null;
+    const style=getComputedStyle(grid);
+    const cols=style.gridTemplateColumns.split(/\s+/).filter(Boolean).length;
+    const rows=style.gridTemplateRows.split(/\s+/).filter(Boolean).length;
+    return{cols,rows,cells:grid.children.length};
+  });
+  if(!sar)throw new Error(`${viewportName}/SAR Truth: canonical SAR canvas missing`);
+  if(sar.cols!==78||sar.rows!==78||sar.cells!==6084)throw new Error(`${viewportName}/SAR Truth: geometry mismatch ${JSON.stringify(sar)}`);
 }
 
 const browser=await chromium.launch({headless:true});
@@ -65,10 +88,17 @@ try{
       if(snap.width<220||snap.height<80)throw new Error(`${name}/${route}: workstation unusable ${JSON.stringify(snap)}`);
       if(snap.overflow>24)throw new Error(`${name}/${route}: viewport overflow ${snap.overflow}px`);
       if(snap.unusable.length)throw new Error(`${name}/${route}: visible enabled controls are non-interactive ${snap.unusable.join(' | ')}`);
-      if(snap.activePanels<1)throw new Error(`${name}/${route}: no visible panel/application content mounted`);
+      if(snap.visibleChildren<1||(snap.textLength<8&&snap.richVisible<1))throw new Error(`${name}/${route}: no visible route content mounted ${JSON.stringify(snap)}`);
+      if(route==='SAR Truth')await verifySarGeometry(page,name);
     }
+
+    await openNavigator(page);
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded!=='true',{timeout:10000});
+    await openNavigator(page);
+
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R285 ALL-SURFACE BROWSER PASS · 44/44 canonical route buttons exercised with real pointer clicks on desktop + 390px mobile · each route mounted its exact data-panel · visible controls retained usable hit geometry · no material viewport overflow · no page errors.');
+  console.log('R285 ALL-SURFACE BROWSER PASS · 44/44 canonical route buttons pointer-clicked on desktop + 390px mobile · exact data-panel transitions · route-agnostic visible-content proof · enabled control hit geometry · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
 }finally{await browser.close()}
