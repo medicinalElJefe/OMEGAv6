@@ -29,12 +29,14 @@ async function prove(viewport,label){
   await page.waitForFunction(()=>{const el=document.querySelector('.bio282-release');return el?.getAttribute('data-release-state')==='AUTHORIZED_CLINICAL_RELEASE_READY'&&el?.getAttribute('data-profile-id')==='R282-BROWSER-FIXTURE'},{timeout:10000});
   await page.waitForFunction(()=>document.querySelector('.bio282-release')?.getAttribute('data-audit-state')==='PASS',{timeout:10000});
   await page.waitForTimeout(100);
-  const releaseState=await release.getAttribute('data-release-state'),profileId=await release.getAttribute('data-profile-id'),auditState=await release.getAttribute('data-audit-state');
+  const releaseState=await release.getAttribute('data-release-state'),releaseDataLabel=await release.getAttribute('data-release-label'),profileId=await release.getAttribute('data-profile-id'),auditState=await release.getAttribute('data-audit-state'),ariaLabel=await release.getAttribute('aria-label');
   if(releaseState!=='AUTHORIZED_CLINICAL_RELEASE_READY'||profileId!=='R282-BROWSER-FIXTURE'||auditState!=='PASS')throw new Error(`${label} R282 release state was not stable after audit: state=${releaseState} profile=${profileId} audit=${auditState}`);
-  const releaseLabel=release.locator('b');
+  const releaseLabel=release.locator('.bio282-release-label');
   await releaseLabel.waitFor({state:'visible',timeout:10000});
   const releaseText=(await releaseLabel.innerText()).trim();
   if(releaseText!=='AUTHORIZED CLINICAL RELEASE READY')throw new Error(`${label} authorized release label mismatch: ${releaseText}`);
+  if(releaseDataLabel!==releaseText)throw new Error(`${label} release data-label drifted from visible label: ${releaseDataLabel} vs ${releaseText}`);
+  if(ariaLabel!==`R282 release state: ${releaseText}`)throw new Error(`${label} release aria-label drifted from visible label: ${ariaLabel}`);
   const after=await medical.innerText();
   for(const token of ['MEASUREMENT GATE','RISK GATE','AUTHORIZATION','PASS','R282-BROWSER-IU','MEASUREMENT ONLY','TEST-AUTHORIZATION-FIXTURE'])if(!after.includes(token))throw new Error(`${label} R282 authorized fixture missing ${token}`);
   const failGates=await medical.locator('.bio282-gates article.fail').count();if(failGates!==0)throw new Error(`${label} authorized fixture still has ${failGates} FAIL release gates`);
@@ -47,4 +49,4 @@ async function prove(viewport,label){
 }
 await prove({width:1440,height:1200},'desktop');
 await prove({width:390,height:844},'mobile');
-console.log('R282 BROWSER PASS · default clinical block + stable machine-readable authorized measurement release + exact visible release label + fresh intended-use profile + required risk set + SHA-256 audit on desktop/mobile; CDS/autonomous authority remain blocked and 241 modes remain measurement authority 0');
+console.log('R282 BROWSER PASS · default clinical block + stable machine-readable authorized measurement release + exact visible semantic release label + matching data/ARIA label + fresh intended-use profile + required risk set + SHA-256 audit on desktop/mobile; CDS/autonomous authority remain blocked and 241 modes remain measurement authority 0');
