@@ -48,7 +48,11 @@ must(!/driveIds:\['/.test(genomeC)&&!/driveIds:\['/.test(genomeD),'new R291 arch
 must(recovery.includes('PUBLIC_CLIENT_USES_OPAQUE_PROVENANCE_KEYS_CONNECTED_STORAGE_LOCATORS_EXTERNAL'),'deep-recovery public provenance boundary missing');
 must(canon.schema==='OMEGA_IMPLEMENTATION_CANON_RECONCILIATION_R291','675-row implementation canon reconciliation schema missing');
 must(canon.source.rows===675,'implementation canon must contain exactly 675 rows');
-must(canon.source.payloadSha256==='d39ca1793694678516f6b5669ac60a651bcd68892164bb54082db9cfc0c26748','implementation canon payload hash drift');
+must(canon.source.payloadSha256==='8eb1d334cf1a1cbb6e7633b0f90e37893e1d95560de2cfe334e6a076cdbeb904','implementation canon payload hash drift');
+must(canon.source.payloadCodec==='GZIP','implementation canon must remain the canonical gzip payload');
+must(canon.source.file==='OMEGA_20736D_IMPLEMENTATION_CANON_INDEX.xlsx','implementation canon source filename drift');
+must(canon.source.modified==='2026-08-03T13:29:58.020Z','implementation canon source modification identity drift');
+must(canon.source.archiveLocked===12&&canon.source.archivePlanned===663,'implementation canon source status totals drift');
 must(canon.source.publicProvenance===R291_PUBLIC_SOURCE_PROVENANCE&&!('driveId' in canon.source),'public reconciliation result must omit connected-storage locator');
 must(canon.classification.scope===R291_IMPLEMENTATION_CLASSIFICATION_SCOPE,'implementation classification scope drift');
 must(Object.values(canon.counts).reduce((a,b)=>a+Number(b),0)===675,'implementation canon state counts must conserve all 675 rows');
