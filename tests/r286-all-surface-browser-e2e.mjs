@@ -34,19 +34,6 @@ async function verifyNavigatorModeTouchTargets(page,viewportName){
   if(undersized.length)throw new Error(`mobile: R307 navigator-mode targets below 44px: ${undersized.map(x=>`${x.label} ${x.width.toFixed(1)}×${x.height.toFixed(1)}`).join(' | ')}`);
 }
 
-async function verifyMatterTraversalTouchTargets(page,viewportName){
-  if(viewportName!=='mobile')return;
-  const state=await page.evaluate(()=>{
-    const coarse=matchMedia('(any-pointer: coarse)').matches;
-    const buttons=[...document.querySelectorAll('.r132-scale-strip button')].map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||'').trim(),width:r.width,height:r.height}});
-    return{coarse,buttons};
-  });
-  if(state.coarse!==true)throw new Error(`mobile/Matter Traversal: R307 expected coarse-pointer emulation, received ${JSON.stringify(state)}`);
-  if(state.buttons.length!==12)throw new Error(`mobile/Matter Traversal: R307 expected twelve physical-scale actions, received ${state.buttons.length}`);
-  const undersized=state.buttons.filter(x=>x.width<43.5||x.height<43.5);
-  if(undersized.length)throw new Error(`mobile/Matter Traversal: R307 coarse-pointer scale targets below 44×44px ${undersized.map(x=>`${x.label||'unnamed'} ${x.width.toFixed(1)}×${x.height.toFixed(1)}`).join(' | ')}`);
-}
-
 async function verifyWorkspaceSubmenus(page,viewportName){
   await openNavigator(page);
   const filters=page.locator('.r105-workspace-filter button');
@@ -99,12 +86,17 @@ function usableSnapshot(){
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0};
   const main=document.querySelector('.workstation-main');
   const rect=main?.getBoundingClientRect();
+  const coarse=matchMedia('(any-pointer: coarse)').matches;
   const buttons=[...document.querySelectorAll('.workstation-main button')].filter(visible);
+  const actions=[...document.querySelectorAll('.workstation-main button:not([disabled]),.workstation-main [role="button"]')].filter(visible);
+  const forms=[...document.querySelectorAll('.workstation-main input:not([disabled]),.workstation-main select:not([disabled]),.workstation-main textarea:not([disabled])')].filter(visible);
   const unusable=buttons.filter(b=>{const r=b.getBoundingClientRect();return !b.disabled&&(r.width<8||r.height<8||getComputedStyle(b).pointerEvents==='none')}).map(b=>(b.textContent||b.getAttribute('aria-label')||'unnamed').trim().slice(0,80));
+  const undersizedTouchActions=coarse?actions.filter(el=>{const r=el.getBoundingClientRect();return r.width<43.5||r.height<43.5}).map(el=>{const r=el.getBoundingClientRect();return`${(el.textContent||el.getAttribute('aria-label')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
+  const undersizedTouchForms=coarse?forms.filter(el=>el.getBoundingClientRect().height<43.5).map(el=>{const r=el.getBoundingClientRect();return`${(el.getAttribute('aria-label')||el.getAttribute('placeholder')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
   const visibleChildren=main?[...main.children].filter(visible).length:0;
   const textLength=(main?.textContent||'').replace(/\s+/g,' ').trim().length;
   const richVisible=main?[...main.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible).length:0;
-  return{width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,visibleChildren,textLength,richVisible};
+  return{width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,undersizedTouchActions,undersizedTouchForms,coarse,visibleChildren,textLength,richVisible};
 }
 
 async function verifySarGeometry(page,viewportName){
@@ -143,8 +135,10 @@ try{
       if(snap.width<220||snap.height<80)throw new Error(`${name}/${route}: workstation unusable ${JSON.stringify(snap)}`);
       if(snap.overflow>24)throw new Error(`${name}/${route}: viewport overflow ${snap.overflow}px`);
       if(snap.unusable.length)throw new Error(`${name}/${route}: visible enabled controls are non-interactive ${snap.unusable.join(' | ')}`);
+      if(name==='mobile'&&snap.coarse!==true)throw new Error(`${name}/${route}: expected coarse-pointer route proof`);
+      if(name==='mobile'&&snap.undersizedTouchActions.length)throw new Error(`${name}/${route}: coarse-pointer action controls below 44×44px ${snap.undersizedTouchActions.join(' | ')}`);
+      if(name==='mobile'&&snap.undersizedTouchForms.length)throw new Error(`${name}/${route}: coarse-pointer form controls below 44px high ${snap.undersizedTouchForms.join(' | ')}`);
       if(snap.visibleChildren<1||(snap.textLength<8&&snap.richVisible<1))throw new Error(`${name}/${route}: no visible route content mounted ${JSON.stringify(snap)}`);
-      if(route==='Matter Traversal')await verifyMatterTraversalTouchTargets(page,name);
       if(route==='SAR Truth')await verifySarGeometry(page,name);
     }
 
@@ -156,5 +150,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R286/R307 ALL-SURFACE BROWSER PASS · mobile navigator-mode controls browser-proven at >=44×44px under coarse-pointer emulation · Matter Traversal 12/12 physical-scale actions browser-proven at >=44×44px on 390px touch mobile · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + mobile · exact data-panel transitions · route-agnostic visible-content proof · enabled control hit geometry · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
+  console.log('R286/R307 ALL-SURFACE BROWSER PASS · mobile navigator-mode controls browser-proven at >=44×44px under coarse-pointer emulation · every visible enabled action on all 44 canonical routes browser-proven at >=44×44px and every enabled form control >=44px high on 390px touch mobile · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + mobile · exact data-panel transitions · route-agnostic visible-content proof · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
 }finally{await browser.close()}
