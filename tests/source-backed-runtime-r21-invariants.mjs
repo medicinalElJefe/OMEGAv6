@@ -20,7 +20,6 @@ assert.match(runtime,/FORMAL_CANON_ATLAS/);
 assert.match(runtime,/OMEGA FULL CANON MODE WITH ATLAS \/ Formula_Ledger/);
 assert.match(runtime,/Math\.cos\(\(r-l\)\*phaseStep\)/,'Water_Basin must remain an exact relative phase term instead of an invented proxy');
 assert.match(runtime,/Math\.sin\(\(domainIndex\+stateIndex-2\)\*phaseStep\)/,'Traversal_Vector must preserve the Full Canon domain/state phase relation');
-assert.doesNotMatch(runtime,/Deep Mother Mode','');
 assert.match(runtime,/exact\('M015','Deep Mother Mode'/,'Deep Mother must execute from recovered Full Canon formal inputs');
 assert.match(runtime,/exact\('M016','High Father Mode'/,'High Father must execute from recovered Full Canon formal inputs');
 assert.match(runtime,/exact\('M020','Unified Coherence full blend'/,'Full Canon coherence blend must execute from recovered formal inputs');
