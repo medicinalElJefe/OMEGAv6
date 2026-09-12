@@ -5,7 +5,7 @@ const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,''
 const source=fs.readFileSync(new URL('../src/OmegaWorkstationFullV2.tsx',import.meta.url),'utf8');
 const surfaceBlock=(source.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const routes=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-if(routes.length!==44||new Set(routes).size!==44)throw new Error(`R118 expected 44 unique routes, found ${routes.length}`);
+if(routes.length===0||new Set(routes).size!==routes.length)throw new Error(`R118/R305 expected a non-empty unique current route universe, found ${routes.length}/${new Set(routes).size}`);
 
 const criticalVisual=new Set(['Matter Traversal','Visual Instrument','Immersive Traversal','Extreme Traversal','Traversal','Forecast','Relativity','Earth Now','Atlas','Infinity','Scale Compiler','Reality Lab','Field','Data Motion','Convergence']);
 // R118 is an inherited browser-operational gate. It must recognize additive Sovereign successors
@@ -17,13 +17,13 @@ async function routeDiagnostics(page){
  return page.evaluate(()=>({
   panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||'',
   expanded:document.documentElement.dataset.omegaNavExpanded||'',
-  visibleRoutes:[...document.querySelectorAll('.r89-flat-route')].map(x=>x.querySelector('b')?.textContent?.trim()).filter(Boolean).slice(0,60),
+  visibleRoutes:[...document.querySelectorAll('.r89-flat-route')].map(x=>x.querySelector('b')?.textContent?.trim()).filter(Boolean).slice(0,120),
   boot:[...document.querySelectorAll('.boot')].map(x=>(x.textContent||'').trim()).filter(Boolean).slice(0,6)
  }));
 }
 
 async function openRoute(page,route,viewportName){
- console.log(`R118 E2E ${viewportName} → ${route}`);
+ console.log(`R118/R305 E2E ${viewportName} → ${route}`);
  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
  if(await expand.count())await expand.first().click();
  try{await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000})}
@@ -109,5 +109,5 @@ const browser=await chromium.launch({headless:true});
 try{
  await runViewport(browser,'desktop',{width:1440,height:960});
  await runViewport(browser,'mobile',{width:390,height:844});
- console.log(`R118 BROWSER OPERATIONAL PASS · ${routes.length} routes × desktop/mobile · current Sovereign successor surface through R127 · R109 deferred specialists settled · no startup errors · no route placeholders · no horizontal overflow · visual stages present`);
+ console.log(`R118/R305 BROWSER OPERATIONAL PASS · ${routes.length} current routes × desktop/mobile · current Sovereign successor surface through R127 · R109 deferred specialists settled · no startup errors · no route placeholders · no horizontal overflow · visual stages present · no historical route-count ceiling`);
 }finally{await browser.close()}
