@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R92 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R92/R305 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const css=read('src/specialistSurfaceClarityR92.css');
 const reality=read('src/AppliedRealityLab.tsx');
 const forecast=read('src/ForecastSovereignPanel.tsx');
@@ -17,13 +18,15 @@ const r91=read('src/operationalSurfaceRefinementR91.css');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'canonical surface universe must remain 44/44');
+const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(surfaces.length>0&&surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length&&new Set(routes).size===routes.length,'canonical surface universe must remain non-empty, unique and registry-aligned');
+for(const route of surfaces)must(routes.includes(route),`R92 workstation route absent from registry ${route}`);
+for(const route of routes)must(surfaces.includes(route),`R92 registry route absent from workstation ${route}`);
 must(workstation.includes("import './specialistSurfaceClarityR92.css';"),'R92 stylesheet must be mounted');
 must(workstation.indexOf('specialistSurfaceClarityR92.css')>workstation.indexOf('operationalSurfaceRefinementR91.css'),'R92 must load after R91');
 must(workstation.includes("'Reality Lab','Field','Data Motion','Convergence'"),'Reality Lab must join explicit visual-first authority');
 
-for(const panel of ['Forecast','Relativity','Infinity','Atlas','Scale Compiler','Reality Lab','Field','Data Motion','Convergence','Archive Census','Archive Operators'])
- must(css.includes("data-panel='"+panel+"'"),'missing specialist clarity coverage for '+panel);
+for(const panel of ['Forecast','Relativity','Infinity','Atlas','Scale Compiler','Reality Lab','Field','Data Motion','Convergence','Archive Census','Archive Operators'])must(css.includes("data-panel='"+panel+"'"),'missing specialist clarity coverage for '+panel);
 
 must(infinity.includes('<InfinityTruthPlotR93 record={record} index={index}/>')&&!infinity.includes('<canvas ref={canvas}/>'),'Infinity must use recovered-source truth plot instead of mounted torus canvas');
 must(css.includes(".atlas-r36-stage canvas{\n  height:72dvh!important"),'Atlas mobile canvas must own the visual viewport');
@@ -48,4 +51,4 @@ must(archive.includes('This is not a live enumeration of every Drive file.'),'Ar
 must(restore.includes('None of these promote device/native execution without proof.'),'Restoration native-execution boundary must remain');
 must(r90.includes('presentation-only hierarchy')&&r91.includes('operational surface refinement'),'R90/R91 integrity layers must remain beneath R92');
 must(!css.includes('@appdeploy/client'),'R92 must remain provider portable');
-console.log('R92 SPECIALIST SURFACE CLARITY PASS · 44 routes · distinct specialist surfaces clarified · visual obstruction reduced · truth boundaries preserved');
+console.log(`R92/R305 SPECIALIST SURFACE CLARITY PASS · ${surfaces.length} current routes exactly aligned · distinct specialist surfaces clarified · visual obstruction reduced · truth boundaries preserved · no historical route-count ceiling`);
