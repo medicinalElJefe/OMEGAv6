@@ -1,4 +1,5 @@
 import './r290-navigation-contract-closure-invariants.mjs';
+import './r291-full-post-r289-convergence-invariants.mjs';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(`R289 recovered-menu invariant failed: ${msg}`)};
@@ -27,7 +28,6 @@ must(JSON.stringify(menus)===JSON.stringify(['01','02','03','04','05','06','07',
 for(const token of ['OMEGA_RECOVERED_MASTER_MENU_NAVIGATION_R289','ONE_44_ROUTE_AUTHORITY_PRESENTED_THROUGH_12_RECOVERED_MASTER_MENUS','OMEGA_MASTER_MENU_NAVIGATION_R289','omegaMasterMenuForRouteR289'])must(nav.includes(token),`navigation contract missing ${token}`);
 for(const token of ["['01','Runtime Core'","['02','Proof & Governance'","['03','Traversal'","['04','Render Field'","['05','Host Inputs'","['06','AI Orchestration'","['07','Data / Atlas'","['08','Audio / Signal'","['09','World / Forecast'","['10','Recovery / Packaging'","['11','Archive Merge'","['12','Operator Cockpit'"])must(atlas.includes(token),`system atlas master menu missing ${token}`);
 
-// Dormant/secondary launcher must still consume the same taxonomy and use valid native controls.
 must(launcher.includes('LAUNCHER_MASTER_MENUS_R289=OMEGA_MASTER_MENU_NAVIGATION_R289'),'launcher must consume the canonical recovered master-menu navigation');
 must(!launcher.includes('const DOMAIN_SECTIONS='),'launcher must not retain an independent hard-coded domain taxonomy');
 must(launcher.includes("data-master-menu={omegaMasterMenuForRouteR289(x.name)?.id||''}"),'rendered launcher routes must expose their recovered master-menu identity');
@@ -42,7 +42,6 @@ must(!launcher.includes("className='omega-nexus-card' role='button'"),'launcher 
 must(!launcher.includes('onKeyDown={e=>activate(x.name,e)}')&&!launcher.includes('const activate='),'launcher route keyboard activation must use native button semantics rather than synthetic key dispatch');
 must(launcherCss.includes('.omega-nexus-route:focus-visible')&&launcherCss.includes('.omega-nexus-card:focus-within'),'launcher route and favorite focus must remain visibly represented');
 
-// The actual Home-mounted R88/R239 navigator is the user-facing authority surface. R289 may organize it, never replace it.
 for(const token of [
  "import {OMEGA_MASTER_MENU_NAVIGATION_R289,omegaMasterMenuForRouteR289} from './navigationRegistry'",
  "import './omegaSideNavigatorR289.css'",
@@ -62,8 +61,6 @@ must(liveNav.includes('OMEGA_WORKSPACES_R82.map'),'existing workspace filter mus
 must(!liveNav.includes('onNavigate(masterMenu')&&!liveNav.includes('resolveExactRouteR242(routeRecords,masterMenu'),'master-menu state must never become a route identity or navigation authority');
 must(liveNav.includes("R289 recovered-menu presentation downstream of lemma"),'visible technical truth must state the R289 authority boundary');
 must(liveNavCss.includes('overflow-x:auto')&&liveNavCss.includes("[aria-pressed='true']")&&liveNavCss.includes('@media(max-width:760px)'),'live 12-menu filter must remain horizontally scrollable, selected-state explicit and mobile responsive');
-// R239 browser proof caught the read-only context strip physically intercepting workspace buttons.
-// The fix is part of the product contract: actionable filters stay above it and the informational strip is pointer-transparent.
 must(/\.r105-workspace-filter\{[^}]*position:relative;z-index:2/.test(dataTruthNavCss),'workspace filter controls must own the higher pointer stacking layer');
 must(/\.r105-context-note\{[^}]*position:relative;z-index:1;pointer-events:none/.test(dataTruthNavCss),'read-only context note must never intercept pointer input from workspace controls');
 
@@ -71,4 +68,4 @@ const bindRoutes=[...archive.matchAll(/bindsTo:\[([^\]]+)\]/g)].flatMap(m=>[...m
 for(const route of [...new Set(bindRoutes)])must(routeNames.includes(route),`recovered Drive authority binds to non-route ${route}`);
 for(const required of ['Archive Census','Archive Operators','Build Out','System Atlas','Modes','Relativity','Matter Traversal','Evidence & Proof','Control Matrix'])must(bindRoutes.includes(required),`recovery corpus must remain visibly bound to ${required}`);
 
-console.log(`R289 RECOVERED MASTER-MENU NAVIGATION PASS · ${routeNames.length} routes · ${menus.length} recovered menus · ${new Set(bindRoutes).size} recovery-bound surfaces · live R88/R239 organization is downstream of R242 lemma · workspace/search filters pointer-safe · zero orphan routes/bindings · launcher route/favorite controls use independent native semantics`);
+console.log(`R289/R291 RECOVERED MASTER-MENU NAVIGATION PASS · ${routeNames.length} routes · ${menus.length} recovered menus · ${new Set(bindRoutes).size} recovery-bound surfaces · unified post-R289 convergence chained through governed navigation/static proof · workspace/search filters pointer-safe · zero orphan routes/bindings`);
