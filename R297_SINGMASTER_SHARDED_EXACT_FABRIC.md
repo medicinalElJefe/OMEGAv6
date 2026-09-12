@@ -1,6 +1,6 @@
 # R297 · Singmaster Sharded Exact Fabric
 
-R297 scales the R296 exact finite-box kernel without weakening its arithmetic guarantees. Its canonical parent is promoted R296 main `07fffd8745a3d936e9c76087299b0d637d6442aa`. The computation is partitioned by nontrivial Pascal columns, but equality is reconstructed globally by deterministic buckets computed from the **exact integer coefficient value**. This preserves collisions that cross shard boundaries.
+R297 scales the R296 exact finite-box kernel without weakening its arithmetic guarantees. Its canonical parent is promoted R296 main `07fffd8745a3d936e9c76087299b0d637d6442aa`. The computation is partitioned by nontrivial Pascal columns, but equality is reconstructed globally by deterministic buckets computed from the **exact integer coefficient value**. This preserves cross-shard collisions.
 
 ## Baseline exact domain
 
