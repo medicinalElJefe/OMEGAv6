@@ -1,4 +1,5 @@
 import './r229-cloudflare-tombstone-reconciliation-invariants.mjs';
+import './r288-archive-native-capability-convergence-invariants.mjs';
 import fs from 'node:fs';
 import {deriveSpecialistPrefetchPolicyR110,selectWorkingSetPanelsR110,WORKING_SET_POLICY_TRUTH_R110} from '../src/specialistWorkingSetPolicyR110.js';
 const read=p=>fs.readFileSync(p,'utf8');
@@ -66,4 +67,4 @@ for(const retired of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203']){
  must(!wrangler.includes(`"class_name": "${retired}"`),`R229 must not restore retired namespace ${retired} as a live binding`);
 }
 
-console.log(`R110/R229/R270 RUNTIME-AWARE WORKING SET PASS · ${surfaces.length} registered destinations preserved dynamically · hidden/Save-Data/2G suppression · low-power/3G budget reduction · direct route demand preserved · Home deferred · exactly one branded suspense boundary · workstation-only shared R238 provider · 500 KiB initial-entry budget enforced · R201/R203 deleted tombstones retained without live bindings · one route/state/proof authority retained`);
+console.log(`R110/R229/R270/R288 RUNTIME-AWARE WORKING SET PASS · ${surfaces.length} registered destinations preserved dynamically · archive-native convergence gate chained · hidden/Save-Data/2G suppression · low-power/3G budget reduction · direct route demand preserved · Home deferred · exactly one branded suspense boundary · workstation-only shared R238 provider · 500 KiB initial-entry budget enforced · R201/R203 deleted tombstones retained without live bindings · one route/state/proof authority retained`);
