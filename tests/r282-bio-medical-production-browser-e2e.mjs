@@ -33,8 +33,13 @@ async function prove(viewport,label){
   if(releaseState!=='AUTHORIZED_CLINICAL_RELEASE_READY'||profileId!=='R282-BROWSER-FIXTURE'||auditState!=='PASS')throw new Error(`${label} R282 release state was not stable after audit: state=${releaseState} profile=${profileId} audit=${auditState}`);
   const releaseLabel=release.locator('.bio282-release-label');
   await releaseLabel.waitFor({state:'visible',timeout:10000});
+  // Heavy Bio is intentionally optimized with content-visibility:auto. Bring the status badge into the painted viewport before proving user-visible text.
+  await releaseLabel.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(50);
+  const labelBox=await releaseLabel.boundingBox();
+  if(!labelBox||labelBox.width<1||labelBox.height<1||labelBox.y+labelBox.height<=0||labelBox.y>=viewport.height)throw new Error(`${label} authorized release label is not painted inside the viewport: ${JSON.stringify(labelBox)}`);
   const releaseText=(await releaseLabel.innerText()).trim();
-  if(releaseText!=='AUTHORIZED CLINICAL RELEASE READY')throw new Error(`${label} authorized release label mismatch: ${releaseText}`);
+  if(releaseText!=='AUTHORIZED CLINICAL RELEASE READY')throw new Error(`${label} authorized release label mismatch after paint: ${releaseText}`);
   if(releaseDataLabel!==releaseText)throw new Error(`${label} release data-label drifted from visible label: ${releaseDataLabel} vs ${releaseText}`);
   if(ariaLabel!==`R282 release state: ${releaseText}`)throw new Error(`${label} release aria-label drifted from visible label: ${ariaLabel}`);
   const after=await medical.innerText();
@@ -49,4 +54,4 @@ async function prove(viewport,label){
 }
 await prove({width:1440,height:1200},'desktop');
 await prove({width:390,height:844},'mobile');
-console.log('R282 BROWSER PASS · default clinical block + stable machine-readable authorized measurement release + exact visible semantic release label + matching data/ARIA label + fresh intended-use profile + required risk set + SHA-256 audit on desktop/mobile; CDS/autonomous authority remain blocked and 241 modes remain measurement authority 0');
+console.log('R282 BROWSER PASS · default clinical block + stable machine-readable authorized measurement release + viewport-painted exact semantic release label + matching data/ARIA label + fresh intended-use profile + required risk set + SHA-256 audit on desktop/mobile; CDS/autonomous authority remain blocked and 241 modes remain measurement authority 0');
