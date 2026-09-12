@@ -10,7 +10,8 @@ export const PROOF_DOMAIN_REGISTRY_R295=Object.freeze({
       'tests/r290-singmaster-proof-atlas-invariants.mjs',
       'tests/r292-proof-carry-fabric-invariants.mjs',
       'tests/r293-proof-directed-evolution-invariants.mjs',
-      'tests/r294-returned-evidence-closure-invariants.mjs'
+      'tests/r294-returned-evidence-closure-invariants.mjs',
+      'tests/r295-proof-admission-compiler-invariants.mjs'
     ]),
     admissionMode:'GOVERNED_SOURCE_PATCH_ONLY',
     publicTruthBoundary:'OPEN remains OPEN unless source-level proof gates and exhaustive arithmetic closure are changed by reproducible evidence and the full inherited proof suite remains green.'
