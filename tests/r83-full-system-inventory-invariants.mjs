@@ -1,11 +1,12 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R83/R168 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R83/R168/R305 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const loader=fs.existsSync('src/specialistLoaderR109.tsx')?read('src/specialistLoaderR109.tsx'):'';
 const home=read('src/OmegaHomeR71.tsx');
 const shell=read('src/InstrumentOSShellR62.tsx');
 const navigator=read('src/OmegaSideNavigatorR88.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const atlas=read('src/SystemAtlasControl.tsx');
 const inventory=read('src/OmegaSystemInventoryR83.tsx');
 const inventoryCss=read('src/systemInventoryR83.css');
@@ -24,6 +25,8 @@ const living=read('src/OmegaR36LivingSurfaces.tsx');
 const extreme=read('src/ExtremeTraversalUnionR60.tsx');
 const restoration=read('src/ExtremeRestorationR46.tsx');
 const registry=read('src/omegaExperienceRegistryR82.ts');
+const reachability=read('src/capabilityReachabilityR305.ts');
+const browserProof=read('tests/r286-all-surface-browser-e2e.mjs');
 
 const systemIds=[...master.matchAll(/"id":\s*"(SYS-\d{3})"/g)].map(x=>x[1]);
 must(systemIds.length===100&&new Set(systemIds).size===100&&systemIds[0]==='SYS-001'&&systemIds.at(-1)==='SYS-100','master ledger must retain 100 unique system rows');
@@ -45,8 +48,11 @@ must(completion.includes('R48_COMPLETION_FAMILIES')&&completion.includes("S10:{s
 const surfBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 const routeBlocks=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+const navBlock=(navigation.match(/OMEGA_NAVIGATION:OmegaNavItem\[]=\[(.*?)\];/s)||[])[1]||'';
+const navNames=[...navBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length>0&&new Set(surfaces).size===surfaces.length,'application route layer must remain unique and non-empty');
 must(routeBlocks.length===surfaces.length&&new Set(routeBlocks).size===routeBlocks.length,'shared registry and workstation route inventory must stay aligned');
+must(navNames.length===routeBlocks.length&&new Set(navNames).size===navNames.length&&routeBlocks.every(x=>navNames.includes(x))&&navNames.every(x=>routeBlocks.includes(x)),'navigation registry must resolve the exact dynamic route set without orphan or missing destinations');
 
 const names=(authorities.match(/const NAMES=\[(.*?)\] as const/s)||[])[1]||'';
 const canonNames=[...names.matchAll(/'([^']+)'/g)].map(x=>x[1]);
@@ -66,6 +72,12 @@ must(hostBuild.includes('softwareRows:57')&&hostBuild.includes('autoPingCells:17
 must((hostBuild.match(/"id":\s*"(?:OS|CC|TCS|M188|HYB|RND|TRV|FOR|AI|PKG|DAT|AUD|HOST|SPEC)-/g)||[]).length===57,'local-host lineage must retain all 57 unique implementation rows');
 must(!inventoryCss.includes('.r83-inventory{position:fixed')&&!inventoryCss.includes('.r83-home-system-map{position:fixed'),'inventory may not create a global fixed overlay');
 
+for(const token of ['OMEGA_CAPABILITY_REACHABILITY_FABRIC_R305','NO_LAYER_MAY_BURY_A_REGISTERED_FUNCTION','OMEGA_ALL_ROUTES_R82','OMEGA_NAVIGATION','OMEGA_NAVIGATION_CONTRACT_R289','MASTER_SYSTEMS_R83','MASTER_MENU_OPTIONS_R83','MASTER_CAPABILITIES_R83','routeForSystemR83','routeForMenuOptionR83','routeForCapabilityR83','surfaceLayerAuditR104','sourceModeEvaluations','canonAuthorities','unreachableLedgerRows','residualCount','Route count remains telemetry rather than an architectural ceiling'])must(reachability.includes(token),`R305 cross-ledger reachability fabric missing ${token}`);
+must(!reachability.includes('fetch(')&&!reachability.includes('/api/')&&!reachability.includes('localStorage')&&!reachability.includes('sessionStorage'),'R305 reachability audit must remain read-only and backend independent');
+must(!reachability.includes('routes.length===44')&&!reachability.includes('navNames.length===44')&&!reachability.includes('routeCount:44'),'R305 must not turn the historical route count into an architecture ceiling');
+must(inventory.includes("import {R305_CAPABILITY_REACHABILITY} from './capabilityReachabilityR305'")&&inventory.includes("data-reachability-revision='R305'")&&inventory.includes('data-reachability-pass={R305_CAPABILITY_REACHABILITY.pass')&&inventory.includes('R305 reachability {R305_CAPABILITY_REACHABILITY.pass'),'System map must expose the R305 no-burial verdict without creating another router');
+must(!browserProof.includes('expected.length!==44')&&!browserProof.includes('allRoutes!==44')&&!browserProof.includes('unique.length!==44'),'real-browser route proof must follow the dynamic canonical inventory rather than historical count 44');
+
 must(archive.includes('software2VisibleItems:100')&&archive.includes('software2ListingComplete:false'),'2Software visible donor index must be exposed without falsely claiming a complete folder crawl');
 must((archive.match(/OMEGA_B043_FULL_SYSTEM_PART_/g)||[]).length===29&&archive.includes('OMEGA_B043_RECONSTRUCTION_KIT.zip'),'B043 29-part full-system archive and reconstruction kit must remain visible');
 must(archive.includes('presence ≠ execution')||archive.includes('do not mean those binaries are mounted, executing, promoted'),'archive-build presence must not be reported as runtime execution');
@@ -83,4 +95,4 @@ must(modeRuntime.includes('authorityLens')&&modeRuntime.includes('not an additio
 must(modeCanvas.includes('CANON / CALCULUS GOVERNANCE LENS')&&modeCanvas.includes('CANON / CALCULUS LENS'),'canon lens visual labels must not say source-backed execution');
 must(visual.includes("omega.r83.selectedModeRef")&&visual.includes('canon authority lens'),'Visual Instrument must carry selected source-mode/canon-lens identity across applications');
 
-console.log(`R83/R168 FULL SYSTEM INVENTORY RESTORATION PASS · ${surfaces.length} current destinations + 100 systems + 24 source families with current successor routing + 57 local-host rows + 1,728 auto-ping cells + 36 options + 18 capabilities + 179 source modes + 62 canon lenses + 24 V77 bins + reviewed archive builds preserved`);
+console.log(`R83/R168/R305 FULL SYSTEM INVENTORY + REACHABILITY PASS · ${surfaces.length} current destinations dynamically aligned across workstation/registry/navigation + 100 systems + 24 source families with current successor routing + 57 local-host rows + 1,728 auto-ping cells + 36 options + 18 capabilities + 179 source modes + 62 canon lenses + 24 V77 bins + reviewed archive builds preserved · no historical route-count ceiling`);
