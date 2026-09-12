@@ -1,10 +1,10 @@
 import {useMemo,useState} from 'react';
-import {Activity,CheckCircle2,Cpu,Database,Play,ShieldCheck,TriangleAlert} from 'lucide-react';
+import {Activity,Cpu,Database,Play,ShieldCheck,TriangleAlert} from 'lucide-react';
 import {proveRscPairR291,type RscSkin} from './rscProofRuntimeR291';
 import {IMPLEMENTATION_CANON_CORPUS_R291} from './implementationCanonCorpusR291';
 import {reconcileImplementationCanonRowR291,type CanonRow} from './implementationCanonReconcilerR291';
 import {advanceQtiTransactionR291,beginQtiTransactionR291,type QtiContext,type QtiIntent} from './qtiControlledAgentR291';
-import './archiveGenomeR288.css';
+import './archiveRuntimeRecoveryR291.css';
 
 const left:RscSkin={id:'r291-left',domain:'software',label:'Version A',nodes:[{id:'p',role:'parent'},{id:'s',role:'scar'},{id:'c',role:'constraint'},{id:'o',role:'continuity'}],edges:[{from:'p',to:'s',relation:'interaction'},{from:'s',to:'c',relation:'constrains'},{from:'c',to:'o',relation:'carries'}]};
 const right:RscSkin={id:'r291-right',domain:'software',label:'Version B',nodes:[{id:'p2',role:'parent'},{id:'s2',role:'scar'},{id:'c2',role:'constraint'},{id:'o2',role:'continuity'}],edges:[{from:'p2',to:'s2',relation:'interaction'},{from:'s2',to:'c2',relation:'constrains'},{from:'c2',to:'o2',relation:'carries'}]};
