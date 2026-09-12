@@ -24,6 +24,8 @@ const responsive=read('src/responsivePolishR88.css');
 const navCss=read('src/omegaSideNavigatorR210.css');
 const specialistCss=read('src/specialistLoaderR109.css');
 const interactionAuthority=read('src/interactionAuthorityR305.css');
+const reachability=read('src/capabilityReachabilityR305.ts');
+const inventory=read('src/OmegaSystemInventoryR83.tsx');
 
 must(index.includes('/src/r286InteractionIntegrity.css'),'compatibility layer must be loaded by the canonical HTML root');
 must(compat.includes('presentation only')&&compat.includes('No route, execution, proof, Canon, evidence, or persistence authority'),'compatibility layer must remain presentation-only');
@@ -34,8 +36,8 @@ if(sarCss.includes('grid-template-columns:repeat(56,1fr)'))must(compat.includes(
 
 const surfaceBlock=(workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(m=>m[1]);
-must(surfaces.length===44,'workstation must expose all 44 canonical surfaces');
-must(new Set(surfaces).size===44,'canonical workstation surfaces must be unique');
+must(surfaces.length===44,'current workstation source must expose the inherited 44 canonical surfaces');
+must(new Set(surfaces).size===surfaces.length,'canonical workstation surfaces must be unique');
 must(workstation.includes('const go=(name:string)=>'),'canonical go() route path must remain wired');
 must(workstation.includes("useEffect(()=>{localState.write('omega.v6.panel',panel)},[panel])"),'canonical panel identity must persist from the normalized active panel');
 must(shell.includes("new CustomEvent('omega-r88-open-navigator'")&&side.includes("addEventListener('omega-r88-open-navigator'"),'All systems dispatcher and global navigator listener must remain paired');
@@ -45,11 +47,15 @@ must(app.includes("<div className='r305-global-world-bands'><LivingWorldPulseR17
 must(navCss.includes('.r210-converged-nav{z-index:900!important;isolation:isolate}'),'persistent navigator must own an explicit interaction layer above root living-world presentation bands');
 must(navCss.includes("html[data-omega-nav-present='true'] .r305-global-world-bands")&&navCss.includes("html[data-omega-nav-expanded='true'] .r305-global-world-bands"),'root living-world membrane must reserve the same persistent/expanded navigation geometry as the active product shell');
 must(navCss.includes("@media(max-width:900px)")&&navCss.includes("Mobile uses a deliberate drawer above the reserved rail"),'mobile must preserve its drawer contract rather than collapsing the global world membrane to the desktop panel remainder');
-must(navCss.includes('.r210-converged-nav .r94-nav-panel{display:flex!important;flex-direction:column!important'),'expanded navigator must use one structural vertical flow rather than the obsolete fixed five-row grid while later controls are present');
+
+// Structural flow is the repair. Test the declarations semantically so harmless declaration ordering cannot invalidate proof.
+must(navCss.includes('.r210-converged-nav .r94-nav-panel{')&&navCss.includes('display:flex!important')&&navCss.includes('flex-direction:column!important'),'expanded navigator must use one structural vertical flow rather than the obsolete fixed five-row grid while later controls are present');
 must(navCss.includes('.r210-converged-nav .r94-nav-panel>:not(.r89-flat-scroll):not(.r88-software-layer){flex:0 0 auto}'),'navigator headers/filters/status/footer must remain outside the scroll allocation');
 must(navCss.includes('.r210-converged-nav .r89-flat-scroll,.r210-converged-nav .r88-software-layer{flex:1 1 0!important;min-height:0!important}'),'route/software body must own the remaining scrollable navigator height');
-must(navCss.includes('.r210-converged-nav .r88-navigator-foot{position:relative!important;z-index:1;flex:0 0 auto;background:#03080b}'),'navigator footer must remain in normal structural flow below the route body');
-must(!navCss.includes('.r210-converged-nav .r88-navigator-foot{pointer-events:none'),'navigator collision repair must not hide overlap by disabling footer hit testing');
+const footerRule=(navCss.match(/\.r210-converged-nav \.r88-navigator-foot\{([^}]*)\}/)||[])[1]||'';
+must(footerRule.includes('position:relative!important')&&footerRule.includes('flex:0 0 auto')&&footerRule.includes('z-index:1'),'navigator footer must remain in normal structural flow below the flexible route body');
+must(!footerRule.includes('pointer-events:none'),'navigator collision repair must not hide footer overlap by disabling hit testing');
+must(!navCss.includes('.r210-converged-nav .r105-context-note{pointer-events:none'),'noninteractive context copy must not be used as a transparent visual mask over live navigator controls');
 
 must(specialistCss.startsWith("@import './interactionAuthorityR305.css';"),'R305 final interaction authority must load from the last static specialist stylesheet position');
 must(interactionAuthority.includes('final presentation-only touch/reduced-motion contract')&&interactionAuthority.includes('owns no route, execution, proof, evidence, persistence, deployment, state, or Canon authority'),'R305 late interaction layer must remain presentation-only');
@@ -64,6 +70,25 @@ for(const token of [
 must(!interactionAuthority.includes(':where(.r88-head-actions button,.r89-nav-mode button'),'R305 must not regress the R304 navigator-mode selector into zero-specificity :where(...) grouping');
 must(navCss.includes('.r210-converged-nav .r89-nav-mode button{min-width:44px!important;min-height:44px!important}'),'R304 direct-selector navigator specificity closure must remain in the source navigation layer');
 must(responsive.includes("@media(any-pointer:coarse)")&&responsive.includes(":where(button,[role='button']){min-width:44px!important;min-height:44px!important}")&&responsive.includes(":where(input,select,textarea){min-height:44px!important}"),'R305 shared responsive layer must retain the baseline coarse-pointer action/form contract');
+
+// No-burial means discoverability across every current registry, not only geometry.
+for(const token of [
+ "rule:'NO_LAYER_MAY_BURY_A_REGISTERED_FUNCTION'",
+ 'OMEGA_ALL_ROUTES_R82',
+ 'missingInNavigation',
+ 'orphanNavigation',
+ 'duplicateNavigation',
+ 'unreachableLedgerRows',
+ 'OMEGA_NAVIGATION_CONTRACT_R289.orphanRoutes',
+ 'layerAudit.missingBindings',
+ 'modeRoutePresent',
+ 'systemMapPresent',
+ 'evidenceRoutePresent',
+ 'Registered, visible or routable does not mean executing, connected, empirically evidenced, deployed, promoted or Canon-admitted',
+ 'Route count remains telemetry rather than an architectural ceiling'
+])must(reachability.includes(token),`R305 cross-ledger reachability fabric missing ${token}`);
+must(!reachability.includes('routeCount===44')&&!reachability.includes('routes.length===44'),'R305 reachability fabric must not turn the current route count into an architectural ceiling');
+must(inventory.includes("data-reachability-revision='R305'")&&inventory.includes("data-reachability-pass={R305_CAPABILITY_REACHABILITY.pass?'true':'false'}")&&inventory.includes('data-reachability-residual-count={R305_CAPABILITY_REACHABILITY.residualCount}'),'System map must expose the read-only R305 reachability result to browser proof');
 
 for(const token of [
  "deviceScaleFactor:2,hasTouch:true,isMobile:true,reducedMotion:'reduce'",
@@ -80,16 +105,24 @@ for(const token of [
  'coarse-pointer action controls below 44×44px',
  'coarse-pointer form controls below 44px high',
  "document.documentElement.dataset.omegaNavExpanded!=='true'",
- 'Navigator interaction geometry is proved separately while expanded',
  'document.elementFromPoint',
  'snap.buried.length',
  'visible interactive controls are geometrically buried by another layer',
  'if(!snap.mainPresent||snap.left===null||snap.right===null||snap.left<-1||snap.right>snap.viewportWidth+1)',
  'active workstation escaped horizontal viewport containment',
+ 'verifyReachabilityFabric',
+ '.r83-inventory[data-reachability-revision="R305"]',
+ "state.pass!=='true'||state.residuals!==0",
+ 'R305 no-burial reachability audit not clean',
  'R286/R305 ALL-SURFACE BROWSER PASS'
-])must(browserProof.includes(token),`R305 real-browser interaction proof missing ${token}`);
-must(browserProof.includes('expected.length!==44')&&browserProof.includes('for(const route of expected)'),'R305 must strengthen rather than reduce the inherited 44-route traversal');
+])must(browserProof.includes(token),`R305 real-browser interaction/reachability proof missing ${token}`);
+
+// Current routes are source-derived. The browser test must grow automatically if a later governed release adds a route.
+must(browserProof.includes('expected.length===0||new Set(expected).size!==expected.length'),'browser proof must reject empty/duplicate current route inventories without hard-coding a historical route ceiling');
+must(browserProof.includes('allRoutes!==expected.length')&&browserProof.includes('unique.length!==expected.length')&&browserProof.includes('for(const route of expected)'),'browser proof must traverse the complete source-derived current route inventory');
+must(!browserProof.includes('expected.length!==44')&&!browserProof.includes('unique.length!==44'),'R305 browser traversal must not freeze future product growth to 44 routes');
 must(browserProof.indexOf('await verifyR305InteractionEnvelope(page,name)')<browserProof.indexOf('for(const route of expected){'),'R305 expanded navigator geometry/occlusion envelope must be proved before route activation');
+must(browserProof.indexOf('await verifyReachabilityFabric(page,name)')<browserProof.indexOf('for(const route of expected){'),'R305 cross-ledger reachability must be proved before exhaustive route activation');
 must(browserProof.indexOf('if(!snap.mainPresent')>browserProof.indexOf('await clickRoute(page,route)'),'R305 workstation containment must be asserted after each canonical route is activated');
 must(browserProof.indexOf('if(snap.buried.length)')>browserProof.indexOf('await clickRoute(page,route)'),'R305 active-workspace layer-occlusion rejection must execute after each canonical route is activated');
 must(browserProof.includes("await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded!=='true'"),'R305 must wait for canonical destination-selection collapse before active-workspace occlusion proof');
@@ -97,4 +130,4 @@ must(!browserProof.includes("document.querySelectorAll('.omega-workstation-v2 in
 must((browserProof.match(/await verifyR305InteractionEnvelope\(page,name\)/g)||[]).length>=3,'R305 navigator occlusion must be re-proved on initial open and final close/reopen sequence');
 must(!browserProof.includes('page.route(')&&!browserProof.includes('Math.random'),'R305 interaction proof must exercise the real built UI without request mocking or random acceptance');
 
-console.log('R286/R305 UI INTERACTION INTEGRITY PASS · 44 canonical surfaces + exact 78×78 mobile field geometry + global living-world reservation membrane + explicit navigator interaction layer + structural flex flow prevents footer/route collision + R304 selector-specificity closure preserved + expanded navigator center-point occlusion proof + active-workspace geometry/occlusion after canonical route collapse + touch/reduced-motion proof bound.');
+console.log(`R286/R305 UI INTERACTION INTEGRITY PASS · current ${surfaces.length}-surface source inventory is unique · exact 78×78 mobile SAR field geometry · global living-world reservation membrane · structural navigator flex flow without hit-test masking · R304 selector-specificity closure preserved · cross-ledger NO_LAYER_MAY_BURY_A_REGISTERED_FUNCTION audit bound · browser route traversal source-derived rather than historically capped · expanded navigator and active-workspace center-point occlusion proof · touch/reduced-motion proof bound.`);
