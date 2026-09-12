@@ -1,5 +1,5 @@
 /* OMEGA R286/R307 · unified Heavy Bio + interaction / surface integrity compatibility layer
-   Corrects late-layer responsive geometry without mutating the historical R280/R284/R132 source.
+   Corrects late-layer responsive geometry without mutating historical specialist sources.
    Authority: presentation only. No route, execution, proof, Canon, evidence, or persistence authority.
    It also owns no Hybrid, Earth-source, or deployment authority. */
 
@@ -10,17 +10,21 @@
   }
 }
 
-/* R307: the twelve Matter Traversal physical-scale actions are real buttons.
-   On coarse pointers they must remain directly targetable rather than preserving
-   the historical 24px mouse-first strip geometry. The four-column reflow keeps
-   the 44px floor inside the narrowest supported data rail without horizontal overflow. */
+/* R307: canonical workstation touch contract.
+   Historical specialist surfaces intentionally retain their mouse/desktop geometry;
+   this final compatibility layer supplies only the coarse-pointer interaction floor.
+   The explicit #root + workstation scope and !important are required because several
+   restored specialist stylesheets carry compact !important declarations. */
 @media (any-pointer:coarse){
-  .r132-scale-strip{
-    grid-template-columns:repeat(4,minmax(44px,1fr));
+  #root .omega-workstation-v2 button:not([disabled]),
+  #root .omega-workstation-v2 [role='button']{
+    min-width:44px!important;
+    min-height:44px!important;
+    touch-action:manipulation;
   }
-  .r132-scale-strip button{
-    min-width:44px;
-    min-height:44px;
-    height:44px;
+  #root .omega-workstation-v2 input:not([disabled]),
+  #root .omega-workstation-v2 select:not([disabled]),
+  #root .omega-workstation-v2 textarea:not([disabled]){
+    min-height:44px!important;
   }
 }
