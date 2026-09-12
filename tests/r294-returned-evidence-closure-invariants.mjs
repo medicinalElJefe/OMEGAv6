@@ -50,25 +50,32 @@ assert.equal(reconciliation.authority.canonAdmission,'R125');
 assert.equal(reconciliation.authority.productionWriter,'.github/workflows/ci.yml');
 assert.match(PROOF_RETURN_BOUNDARY_R294,/does not alter the underlying R292 proof packet/);
 
-const unverified={...receipt,receiptId:'RETURN-2',evidenceDigest:''};
+const unverified=buildProofReturnReceiptR294(target,evolution,{receiptId:'RETURN-2',returnedAt:'2026-09-12T04:01:00.000Z',outcome:'RETURNED',evidenceClass:'EXACT_COMPUTATION',evidenceDigest:'',verifierState:'EXACT_REPLAY_PASS',reproducible:true});
 assert.equal(validateProofReturnR294(evolution,unverified).status,'RETURNED_UNVERIFIED');
-const stale={...receipt,receiptId:'RETURN-3',proofFingerprint:'r292-stale'};
+const staleEvolution={...evolution,proofFingerprint:'r292-stale',fingerprint:'r293-stale'};
+const staleCell={...target,proofFingerprint:'r292-stale'};
+const stale=buildProofReturnReceiptR294(staleCell,staleEvolution,{receiptId:'RETURN-3',returnedAt:'2026-09-12T04:02:00.000Z',outcome:'RETURNED',evidenceClass:'EXACT_COMPUTATION',evidenceDigest:digest,verifierState:'EXACT_REPLAY_PASS',reproducible:true});
 assert.equal(validateProofReturnR294(evolution,stale).status,'STALE_FINGERPRINT');
-const wrongClaim={...receipt,receiptId:'RETURN-4',claimId:'OTHER'};
+const wrongEvolution={...evolution,claimId:'OTHER',fingerprint:'r293-other'};
+const wrongCell={...target,claimId:'OTHER'};
+const wrongClaim=buildProofReturnReceiptR294(wrongCell,wrongEvolution,{receiptId:'RETURN-4',returnedAt:'2026-09-12T04:03:00.000Z',outcome:'RETURNED',evidenceClass:'EXACT_COMPUTATION',evidenceDigest:digest,verifierState:'EXACT_REPLAY_PASS',reproducible:true});
 assert.equal(validateProofReturnR294(evolution,wrongClaim).status,'REJECTED_IDENTITY');
-const mixed=compileProofReturnR294({evolution,receipts:[receipt,unverified,stale,wrongClaim]});
+const tampered={...receipt,notes:'changed after issuance'};
+assert.equal(validateProofReturnR294(evolution,tampered).status,'REJECTED_RECEIPT_FINGERPRINT');
+const mixed=compileProofReturnR294({evolution,receipts:[receipt,unverified,stale,wrongClaim,tampered]});
 assert.equal(mixed.returnedPendingAdmission,1);
 assert.equal(mixed.unverifiedCount,1);
 assert.equal(mixed.staleCount,1);
-assert.equal(mixed.rejectedCount,1);
+assert.equal(mixed.rejectedCount,2);
 assert.equal(mixed.truthClosureCount,0);
 
 clearProofReturnLedgerR294();
 assert.equal(readProofReturnLedgerR294().length,0);
 recordProofReturnR294(receipt);
 assert.equal(readProofReturnLedgerR294().length,1);
-recordProofReturnR294({...receipt,notes:'replacement with same receipt id'});
+recordProofReturnR294(receipt);
 assert.equal(readProofReturnLedgerR294().length,1,'same receipt id must replace rather than duplicate');
+assert.throws(()=>recordProofReturnR294(tampered),/fingerprint mismatch/,'tampered receipt must never enter the local return ledger');
 clearProofReturnLedgerR294();
 
 const modes=fs.readFileSync('src/fullModeConvergenceRuntime.ts','utf8');
