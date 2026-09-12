@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>assert.ok(ok,'R286 '+msg);
+const must=(ok,msg)=>assert.ok(ok,'R286/R307 '+msg);
 
 await import('./r155-navigation-information-architecture-invariants.mjs');
 await import('./r203-interface-navigation-polish-invariants.mjs');
@@ -18,6 +18,7 @@ const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const shell=read('src/OmegaExperienceShellR257.tsx');
 const side=read('src/OmegaSideNavigatorR88.tsx');
 const adapter=read('src/platformAdapter.ts');
+const physicsCss=read('src/omegaPhysicsManifoldR132.css');
 
 must(index.includes('/src/r286InteractionIntegrity.css'),'compatibility layer must be loaded by the canonical HTML root');
 must(compat.includes('presentation only')&&compat.includes('No route, execution, proof, Canon, evidence, or persistence authority'),'compatibility layer must remain presentation-only');
@@ -25,6 +26,12 @@ const n=Number((sarUi.match(/const N=(\d+)/)||[])[1]);
 must(n===78,'SAR renderer must retain the canonical 78×78 field');
 must(compat.includes('grid-template-columns:repeat(78,minmax(0,1fr))')&&compat.includes('grid-template-rows:repeat(78,minmax(0,1fr))'),'mobile compatibility grid must equal renderer geometry in both axes');
 if(sarCss.includes('grid-template-columns:repeat(56,1fr)'))must(compat.includes('.sar-r280 .r280-canvas'),'legacy 56-column mobile rule must be superseded by a higher-specificity canonical-field selector');
+
+// R307 closes the inherited mouse-first R132 scale strip without altering R132 behavior or authority.
+must(physicsCss.includes('.r132-scale-strip button{height:24px'),'historical R132 mouse-first scale strip geometry must remain identifiable so the compatibility override cannot silently become dead code');
+must(compat.includes('@media (any-pointer:coarse)'),'Matter Traversal touch closure must be scoped to coarse-pointer interaction');
+must(compat.includes('.r132-scale-strip{')&&compat.includes('grid-template-columns:repeat(4,minmax(44px,1fr))'),'coarse-pointer Matter Traversal scale actions must reflow without horizontal overflow');
+must(compat.includes('.r132-scale-strip button{')&&compat.includes('min-width:44px')&&compat.includes('min-height:44px')&&compat.includes('height:44px'),'all twelve Matter Traversal scale actions must retain a deterministic 44×44 coarse-pointer floor');
 
 const surfaceBlock=(workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(m=>m[1]);
@@ -35,4 +42,4 @@ must(workstation.includes("useEffect(()=>{localState.write('omega.v6.panel',pane
 must(shell.includes("new CustomEvent('omega-r88-open-navigator'")&&side.includes("addEventListener('omega-r88-open-navigator'"),'All systems dispatcher and global navigator listener must remain paired');
 must(adapter.includes('return raw === null ? fallback : JSON.parse(raw) as T'),'panel persistence adapter must decode stored route identity before normalization');
 
-console.log('R286 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + R284/R284.1 truth contracts + exact 78×78 mobile field geometry preserved.');
+console.log('R286/R307 UI INTERACTION INTEGRITY PASS · modern navigation hierarchy + 44 canonical surfaces + shared menu event + normalized persisted panel identity + exact 78×78 mobile field geometry + Matter Traversal twelve-action coarse-pointer 44×44 target floor preserved.');
