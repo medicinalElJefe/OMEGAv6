@@ -3,7 +3,6 @@ const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const shell=read('src/InstrumentOSShellR62.tsx');
-const shellCss=read('src/instrumentOSR62.css');
 const navigator=read('src/OmegaSideNavigatorR88.tsx');
 const navigatorCss=read('src/omegaSideNavigatorR88.css');
 const navigatorCss210=read('src/omegaSideNavigatorR210.css');
@@ -13,12 +12,11 @@ const integrity=read('src/SurfaceIntegrityR81.tsx');
 const integrityCss=read('src/surfaceIntegrityR81.css');
 const app=read('src/App.tsx');
 const living=read('src/OmegaR36LivingSurfaces.tsx');
-const navigation=read('src/navigationRegistry.ts');
 const deferred=fs.existsSync('src/specialistLoaderR109.tsx')?read('src/specialistLoaderR109.tsx'):'';
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'R81 requires all 44 canonical surfaces, unique');
+must(surfaces.length>0&&new Set(surfaces).size===surfaces.length,'R81 requires a non-empty unique canonical surface set');
 
 const existingBlock=(workstation.match(/SPECIALIST_EXISTING=new Set<Panel>\(\[(.*?)\]\)/s)||[])[1]||'';
 const suiteBlock=(workstation.match(/SPECIALIST_SUITE=new Set<Panel>\(\[(.*?)\]\)/s)||[])[1]||'';
@@ -26,12 +24,14 @@ const existing=[...existingBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 const suite=[...suiteBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 const inline=['Command Center','Create','Development','Modes','Plugins'];
 const mounted=[...existing,...suite,...inline];
-must(mounted.length===44&&new Set(mounted).size===44,'every canonical surface must have one and only one mount owner');
+must(mounted.length===surfaces.length&&new Set(mounted).size===mounted.length,'every current canonical surface must have one and only one mount owner');
 for(const s of surfaces)must(mounted.includes(s),`surface has no explicit mount owner: ${s}`);
+for(const s of mounted)must(surfaces.includes(s),`mount owner references non-canonical surface: ${s}`);
 
 const workspaceRoutes=[...experience.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
-must(workspaceRoutes.length===44&&new Set(workspaceRoutes).size===44,'application browser must expose all 44 surfaces exactly once');
+must(workspaceRoutes.length===surfaces.length&&new Set(workspaceRoutes).size===workspaceRoutes.length,'application browser must expose every current surface exactly once');
 for(const s of surfaces)must(workspaceRoutes.includes(s),`application browser omitted ${s}`);
+for(const s of workspaceRoutes)must(surfaces.includes(s),`application browser exposes non-canonical surface ${s}`);
 
 const directContainment=workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}>{content}</SurfaceIntegrityR81>");
 const deferredContainment=workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}><Suspense fallback={specialistFallback}>{content}</Suspense></SurfaceIntegrityR81>")&&deferred.includes("schema:'OMEGA_ROUTE_DEFERRED_SPECIALIST_FABRIC_R109'");
@@ -53,15 +53,11 @@ must(navigator.includes("aria-current={currentPanel===route?'page':undefined}"),
 must(navigator.includes("aria-controls='omega-global-navigator'")&&navigator.includes("aria-live='polite'"),'R210.1 navigator must preserve accessible panel ownership and live route-search feedback');
 must(shell.includes('OmegaSideNavigatorR88'),'R81 containment must mount under the shared R88 navigator authority');
 
-for(const token of [
- "view==='DEEP'&&<MatterTraversal",
- "view==='DEEP'&&<OmegaVisualInstrument",
- "view==='DEEP'&&<OmegaTraversalStudio"
-])must(living.includes(token),`restored deep donor view is no longer reachable: ${token}`);
+for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),`restored deep donor view is no longer reachable: ${token}`);
 
 must(app.includes("import './surfaceIntegrityR81.css';"),'R81 integrity stylesheet must be loaded');
 must(app.indexOf("surfaceIntegrityR81.css")>app.indexOf("productResetR67.css"),'R81 containment must resolve later donor layout conflicts without reskinning the product');
 must(!integrityCss.includes('.omega-surface-r81{display:none')&&!integrityCss.includes('.omega-surface-r81>*{display:none'),'surface-integrity layer may not hide application content');
 must(!integrityCss.match(/position\s*:\s*fixed/),'surface-integrity layer may not create another fixed shell');
 
-console.log('R81/R109/R210.1 SURFACE INTEGRITY PASS · 44/44 mounted · 44/44 reachable · semantic Escape + readable mobile overlay + deferred specialist containment locked');
+console.log(`R81/R109/R210.1/R305 SURFACE INTEGRITY PASS · ${surfaces.length}/${surfaces.length} mounted · ${surfaces.length}/${surfaces.length} reachable · exact dynamic set equality · semantic Escape + readable mobile overlay + deferred specialist containment locked · no historical route-count ceiling`);
