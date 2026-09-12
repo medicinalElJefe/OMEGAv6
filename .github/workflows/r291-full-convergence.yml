@@ -59,7 +59,7 @@ jobs:
         run: |
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
-      - name: Prove repaired Heavy Bio and whole surface in rendered browser
+      - name: Prove R291 rendered convergence
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r291-vite.log 2>&1 &
@@ -68,6 +68,7 @@ jobs:
             sleep 1
           done
           curl -fsS http://127.0.0.1:4173/ >/dev/null || { cat /tmp/omega-r291-vite.log; exit 1; }
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r291-archive-genome-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r284-bio-mode-workbench-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r289-live-master-menu-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r286-all-surface-browser-e2e.mjs
@@ -82,6 +83,7 @@ jobs:
             echo '- QTI controlled-agent core separates proposal/simulation from independent authorization/execution.'
             echo '- Native GPU parenting/supersampling donor is source-recovered and regression-tested; live OpenGL device execution remains device-gated.'
             echo '- B053-derived safe recovery rejects traversal, absolute paths, symlinks, duplicate normalized paths and collisions and verifies multipart size/hash.'
+            echo '- Archive Census/Operators render native convergence plus the 26-family Genome queue; search/filter/P1/receipt/scar controls are browser-proven.'
             echo '- Heavy Bio read-only comparison is machine-bound with measurement-authority delta zero.'
             echo '- R290 Singmaster global theorem status remains OPEN.'
             echo '- Existing R125/R141/R146/R147/Hybrid/deployment authorities remain unchanged.'
