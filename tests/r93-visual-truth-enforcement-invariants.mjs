@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error('R93/R140 '+msg)};
+const must=(ok,msg)=>{if(!ok)throw new Error('R93/R140/R305 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const registry=read('src/omegaExperienceRegistryR82.ts');
 const home=read('src/OmegaHomeR71.tsx');
 const command=read('src/OmegaCommandDeck.tsx');
 const modes=read('src/SourceBackedModesPanelR21.tsx');
@@ -20,10 +21,12 @@ const capabilityCss=read('src/capabilityFirstR138.css');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-must(surfaces.length===44&&new Set(surfaces).size===44,'44/44 canonical routes must remain');
+const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+must(surfaces.length>0&&surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length&&new Set(routes).size===routes.length,'canonical current routes must remain non-empty, unique and registry-aligned');
+for(const route of surfaces)must(routes.includes(route),`R93 workstation route absent from registry ${route}`);
+for(const route of routes)must(surfaces.includes(route),`R93 registry route absent from workstation ${route}`);
 
-for(const name of ['CanonicalPacketTruthPlotR93','ModeTruthTraceR93','InfinityTruthPlotR93','TransitionTruthPlotR93','ScaleTruthPlotR93'])
- must(truth.includes('function '+name)||truth.includes('export function '+name),'missing truth visual '+name);
+for(const name of ['CanonicalPacketTruthPlotR93','ModeTruthTraceR93','InfinityTruthPlotR93','TransitionTruthPlotR93','ScaleTruthPlotR93'])must(truth.includes('function '+name)||truth.includes('export function '+name),'missing truth visual '+name);
 
 must(home.includes('<CanonicalMembraneR95')&&!home.includes('<CalculusFieldR37'),'Home primary display must be the canonical 20,736-cell membrane, not procedural field art');
 must(home.includes('primary Home display remains the canonical 20,736-cell membrane'),'Home projection selector must not imply the projection lens owns truth');
@@ -71,12 +74,6 @@ must(truth.includes('Ring sectors are exact D/P/R/L coordinates · contour radii
 must(!truth.includes('<rect')&&!truth.includes('Math.random'),'packet truth geometry must not regress to bars or random filler');
 must(truth.includes('The application will not fabricate a visual pattern'),'gated/nonnumeric modes must render no fake series');
 
-for(const boundary of [
- 'Competing legal futures without pretending to observe the future',
- 'observer changes projection, not canonical existence',
- 'Derived channels are labeled and missing observations are not invented',
- 'not claims of physical velocity or acceleration',
- 'not a claim of physical destiny or external causation'
-])must([forecast,relativity,reality,field].join('\n').includes(boundary),'truth boundary lost: '+boundary);
+for(const boundary of ['Competing legal futures without pretending to observe the future','observer changes projection, not canonical existence','Derived channels are labeled and missing observations are not invented','not claims of physical velocity or acceleration','not a claim of physical destiny or external causation'])must([forecast,relativity,reality,field].join('\n').includes(boundary),'truth boundary lost: '+boundary);
 
-console.log('R93/R95/R140 VISUAL TRUTH PASS · canonical manifold + evaluated data preserved · woven traversal promoted without hiding exact proof · no synthetic default data');
+console.log(`R93/R95/R140/R305 VISUAL TRUTH PASS · canonical manifold + evaluated data preserved · ${surfaces.length} current routes exactly aligned · woven traversal promoted without hiding exact proof · no synthetic default data · no historical route-count ceiling`);
