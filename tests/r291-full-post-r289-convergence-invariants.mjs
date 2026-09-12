@@ -1,6 +1,4 @@
 import fs from 'node:fs';
-import './r290-deep-archive-execution-convergence-invariants.mjs';
-import './r290-navigation-contract-closure-invariants.mjs';
 
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(`R291 convergence failed: ${msg}`)};
