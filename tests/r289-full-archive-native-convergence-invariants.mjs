@@ -39,8 +39,8 @@ for(const token of ['SAI / PSC compiled reasoning substrate','Water Geometry / M
 for(const token of ['THIRD_PARTY','DEPENDENCY','RECOVER_EXECUTOR','INGEST_TYPED_DATA','RECOVER_VISUAL_GRAMMAR','ADMIT_DEPENDENCY','PROOF_PROVENANCE','CROSS_VALIDATE'])must(genomeText.includes(token),`archive admission class missing ${token}`);
 
 for(const token of ['measurementAuthority','intendedUse','validation','risk','audit'])must(bioMedical.includes(token),`R282 medical-production boundary missing ${token}`);
-for(const token of ['sourceCatalogCount:fabric.sourceCatalogCount','canonAuthorityCount:fabric.canonAuthorityCount','measurementAuthority:0'])must(bioModes.includes(token),`R284 mode experience missing derived authority contract ${token}`);
-must(bioModeProof.includes('sourceCatalogCount===179')&&bioModeProof.includes('canonAuthorityCount===62')&&bioModeProof.includes('total===241'),'R284 direct proof must retain exact 179 source + 62 canon = 241 channel counts');
+for(const token of ['sourceCatalogCount:fabric.sourceCatalogCount','canonAuthorityCount:fabric.canonAuthorityCount','measurementAuthority:0','EVERY_CHANNEL_RETAINS_ZERO_MEASUREMENT_AUTHORITY'])must(bioModes.includes(token),`R284 mode experience missing derived authority contract ${token}`);
+for(const token of ['assert.equal(experience.total,241)','assert.equal(experience.sourceCatalogCount,179)','assert.equal(experience.canonAuthorityCount,62)','assert.equal(experience.measurementAuthority,0)','assert.equal(source.length,179)','assert.equal(canon.length,62)'])must(bioModeProof.includes(token),`R284 executable proof missing exact channel/authority assertion ${token}`);
 must(bioSurface.includes('BioMedicalProductionPanelR282')&&bioSurface.includes('BioModeWorkbenchR284'),'Heavy Bio instrument must mount R282 medical-production and R284 mode workbench surfaces');
 
 for(const token of ['R282','R284','R286'])must(r241.includes(token),`R241 deep convergence gate must include ${token}`);
