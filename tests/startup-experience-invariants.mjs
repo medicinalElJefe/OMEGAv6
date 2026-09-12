@@ -7,6 +7,7 @@ const daily=fs.readFileSync('src/dailyBrief.ts','utf8');
 const phase=fs.readFileSync('src/PhaseWheel.tsx','utf8');
 const bridge=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
 const shell=fs.readFileSync('src/SingleFrameRuntimeShellR27.tsx','utf8');
+const workstation=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const frameCss=fs.readFileSync('src/singleFrameR27.css','utf8');
 const modeRuntime=fs.readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
 const experience=fs.readFileSync('src/experienceR4.css','utf8');
@@ -22,8 +23,12 @@ for(const token of ['PHASE AWARENESS · SOURCE-BOUND','Selecting a phase changes
 for(const destination of ['Field','Evidence & Proof','Relativity','Matter Traversal','Memory','Scale Compiler','Forecast'])if(!shell.includes(`'${destination}'`)&&!home.includes(`'${destination}'`))fail(`daily destination not routed: ${destination}`);
 const registered=(shell.match(/R27_REGISTERED_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const names=[...registered.matchAll(/'([^']+)'/g)].map(x=>x[1]);
-if(names.length!==44)fail(`expected 44 registered workstation surfaces, found ${names.length}`);
-if(new Set(names).size!==44)fail('workstation registry contains duplicate surface names');
+const work=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
+const workNames=[...work.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+if(names.length===0||names.length!==workNames.length)fail(`startup route universe mismatch: R27 ${names.length}, workstation ${workNames.length}`);
+if(new Set(names).size!==names.length||new Set(workNames).size!==workNames.length)fail('startup route registries contain duplicate surface names');
+for(const name of names)if(!workNames.includes(name))fail(`startup R27 route absent from workstation: ${name}`);
+for(const name of workNames)if(!names.includes(name))fail(`startup workstation route absent from R27: ${name}`);
 for(const token of ['r27-desktop-frame','r27-route-pane','r27-mobile-head','r27-mobile-bottom','r27-mobile-drawer'])if(!(shell+frameCss).includes(token))fail(`single-frame professional navigation missing ${token}`);
 if(!bridge.includes('SingleFrameRuntimeShellR27')||bridge.includes('nav20-desktop'))fail('legacy layered shell must not remain active');
 for(const token of ['.r4-welcome','.r4-journeys','.r4-conversation','.r4-daily'])if(!experience.includes(token))fail(`R4 startup visual hierarchy missing ${token}`);
@@ -47,4 +52,4 @@ for(const token of ['min-height:100dvh','env(safe-area-inset-top,0px)',':focus-v
 if(experienceCss.includes('.r257-stage{min-width:0;isolation:isolate}'))fail('R261.1 stage may not trap the persistent navigator in an isolated stacking context');
 if(/\.r257-shell\{[^}]*z-index\s*:/.test(experienceCss))fail('R261.1 shell root may not create a stacking context above the persistent navigator');
 
-console.log('startup experience invariants: PASS · 44 routes + source-backed modes + R259 atomic continuity + R260 live Home coherence + R261.1 browser polish with navigator stacking escape');
+console.log(`startup experience invariants: PASS · ${names.length} current routes cross-registry aligned + source-backed modes + R259 atomic continuity + R260 live Home coherence + R261.1 browser polish with navigator stacking escape · no historical route-count ceiling`);
