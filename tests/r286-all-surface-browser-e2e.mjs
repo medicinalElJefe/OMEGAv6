@@ -12,18 +12,29 @@ const profiles=[
  ['mobile',{viewport:{width:390,height:844},deviceScaleFactor:2,hasTouch:true,isMobile:true,reducedMotion:'reduce'}],
 ];
 
+async function waitForNavigatorSettled(page){
+ await page.waitForFunction(()=>{
+  if(document.documentElement.dataset.omegaNavExpanded!=='true')return false;
+  const rail=document.querySelector('.r94-nav-rail'),panel=document.querySelector('.r94-nav-panel');
+  if(!rail||!panel)return false;
+  const rr=rail.getBoundingClientRect(),pr=panel.getBoundingClientRect(),style=getComputedStyle(panel);
+  return style.visibility!=='hidden'&&style.pointerEvents!=='none'&&Number(style.opacity)>=.99&&Math.abs(pr.left-rr.right)<=1&&Math.abs(pr.top-rr.top)<=1;
+ },{timeout:10000});
+}
+
 async function openNavigator(page){
- if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
+ if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true')){await waitForNavigatorSettled(page);return}
  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
  if(!await expand.count())throw new Error('R286/R305 global navigator expand control missing');
  await expand.first().scrollIntoViewIfNeeded();await expand.first().click();
  await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
+ await waitForNavigatorSettled(page);
 }
 
 async function verifyR305InteractionEnvelope(page,viewportName){
  const state=await page.evaluate(()=>{
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0};
-  const centerHit=el=>{const r=el.getBoundingClientRect();if(r.right<=0||r.left>=innerWidth||r.bottom<=0||r.top>=innerHeight)return null;const x=Math.max(0,Math.min(innerWidth-1,r.left+r.width/2)),y=Math.max(0,Math.min(innerHeight-1,r.top+r.height/2));for(let a=el.parentElement;a&&a!==document.documentElement;a=a.parentElement){const s=getComputedStyle(a),ar=a.getBoundingClientRect(),clipsX=/(auto|scroll|hidden|clip)/.test(s.overflowX),clipsY=/(auto|scroll|hidden|clip)/.test(s.overflowY);if((clipsX&&(x<ar.left||x>ar.right))||(clipsY&&(y<ar.top||y>ar.bottom)))return null}return{x,y,hit:document.elementFromPoint(x,y),rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}}};
+  const centerHit=el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;if(x<0||x>=innerWidth||y<0||y>=innerHeight)return null;for(let a=el.parentElement;a&&a!==document.documentElement;a=a.parentElement){const s=getComputedStyle(a),ar=a.getBoundingClientRect(),clipsX=/(auto|scroll|hidden|clip)/.test(s.overflowX),clipsY=/(auto|scroll|hidden|clip)/.test(s.overflowY);if((clipsX&&(x<ar.left||x>ar.right))||(clipsY&&(y<ar.top||y>ar.bottom)))return null}return{x,y,hit:document.elementFromPoint(x,y),rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}}};
   const coarse=matchMedia('(any-pointer: coarse)').matches,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const targetElements=[...document.querySelectorAll('.r88-head-actions button,.r89-nav-mode button,.r94-rail-action,.r89-flat-route')].filter(visible);
   const targets=targetElements.map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||el.getAttribute('aria-label')||el.className||'unnamed').replace(/\s+/g,' ').trim().slice(0,80),width:r.width,height:r.height}});
@@ -93,7 +104,7 @@ async function clickRoute(page,route){
 
 function usableSnapshot(){
  const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0};
- const centerHit=el=>{const r=el.getBoundingClientRect();if(r.right<=0||r.left>=innerWidth||r.bottom<=0||r.top>=innerHeight)return null;const x=Math.max(0,Math.min(innerWidth-1,r.left+r.width/2)),y=Math.max(0,Math.min(innerHeight-1,r.top+r.height/2));for(let a=el.parentElement;a&&a!==document.documentElement;a=a.parentElement){const s=getComputedStyle(a),ar=a.getBoundingClientRect(),clipsX=/(auto|scroll|hidden|clip)/.test(s.overflowX),clipsY=/(auto|scroll|hidden|clip)/.test(s.overflowY);if((clipsX&&(x<ar.left||x>ar.right))||(clipsY&&(y<ar.top||y>ar.bottom)))return null}return{x,y,hit:document.elementFromPoint(x,y)}};
+ const centerHit=el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;if(x<0||x>=innerWidth||y<0||y>=innerHeight)return null;for(let a=el.parentElement;a&&a!==document.documentElement;a=a.parentElement){const s=getComputedStyle(a),ar=a.getBoundingClientRect(),clipsX=/(auto|scroll|hidden|clip)/.test(s.overflowX),clipsY=/(auto|scroll|hidden|clip)/.test(s.overflowY);if((clipsX&&(x<ar.left||x>ar.right))||(clipsY&&(y<ar.top||y>ar.bottom)))return null}return{x,y,hit:document.elementFromPoint(x,y)}};
  const main=document.querySelector('.workstation-main'),rect=main?.getBoundingClientRect(),coarse=matchMedia('(any-pointer: coarse)').matches;
  const buttons=[...document.querySelectorAll('.workstation-main button')].filter(visible);
  const actions=[...document.querySelectorAll('.workstation-main button:not([disabled]),.workstation-main [role="button"]')].filter(visible);
@@ -135,5 +146,5 @@ try{
   await openNavigator(page);await verifyR305InteractionEnvelope(page,name);await page.keyboard.press('Escape');await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded!=='true',{timeout:10000});await openNavigator(page);await verifyR305InteractionEnvelope(page,name);
   if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);await context.close();
  }
- console.log(`R286/R305 ALL-SURFACE BROWSER PASS · explicit rail-over-panel interaction stack · clipping-aware center-point occlusion proof · R304 direct-selector specificity preserved · expanded navigator center-point occlusion-proved against global world layers · R305 cross-ledger no-burial reachability audit clean · ALL + six contextual workspace submenus pointer-verified · ${expected.length}/${expected.length} current canonical routes derived dynamically and pointer-clicked on desktop + 390px 2×DPR touch/coarse mobile · every activated workstation horizontally contained · active-workspace controls proved after route collapse · coarse-pointer 44×44 action + 44px-high form-control proof · reduced-motion navigator proof · exact data-panel transitions · visible-content proof · SAR geometry retained when registered · Escape/reopen · no page errors · no historical route-count ceiling.`);
+ console.log(`R286/R305 ALL-SURFACE BROWSER PASS · expanded-panel settle proof · explicit rail-over-panel interaction stack · clipping-aware unclamped center-point occlusion proof · R304 direct-selector specificity preserved · expanded navigator center-point occlusion-proved against global world layers · R305 cross-ledger no-burial reachability audit clean · ALL + six contextual workspace submenus pointer-verified · ${expected.length}/${expected.length} current canonical routes derived dynamically and pointer-clicked on desktop + 390px 2×DPR touch/coarse mobile · every activated workstation horizontally contained · active-workspace controls proved after route collapse · coarse-pointer 44×44 action + 44px-high form-control proof · reduced-motion navigator proof · exact data-panel transitions · visible-content proof · SAR geometry retained when registered · Escape/reopen · no page errors · no historical route-count ceiling.`);
 }finally{await browser.close()}
