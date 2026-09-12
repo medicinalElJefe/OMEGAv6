@@ -42,6 +42,8 @@ jobs:
           node tests/r290-singmaster-proof-atlas-invariants.mjs
       - name: Prove recovered native GPU hierarchy
         run: python tests/r291_native_gpu_donor_test.py
+      - name: Prove recovered safe archive scar logic
+        run: python tests/r291_safe_archive_recovery_test.py
       - name: Re-prove inherited archive and Hybrid authority
         run: |
           node tests/r241-archive-convergence-invariants.mjs
@@ -79,6 +81,7 @@ jobs:
             echo '- 675-row Implementation Canon is bound by exact workbook SHA/counts; archive PLANNED is never implementation proof.'
             echo '- QTI controlled-agent core separates proposal/simulation from independent authorization/execution.'
             echo '- Native GPU parenting/supersampling donor is source-recovered and regression-tested; live OpenGL device execution remains device-gated.'
+            echo '- B053-derived safe recovery rejects traversal, absolute paths, symlinks, duplicate normalized paths and collisions and verifies multipart size/hash.'
             echo '- Heavy Bio read-only comparison is machine-bound with measurement-authority delta zero.'
             echo '- R290 Singmaster global theorem status remains OPEN.'
             echo '- Existing R125/R141/R146/R147/Hybrid/deployment authorities remain unchanged.'
