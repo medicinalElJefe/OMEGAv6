@@ -30,6 +30,7 @@ export default function RecursiveSelfBuildR240(){
   <div className='r240-organs'>{R240_ORGANS.map((organ,index)=><span key={organ}><small>{String(index+1).padStart(2,'0')}</small>{organ.replaceAll('_',' ')}</span>)}</div>
   <div className='r240-status-grid'>
    <article className={promotionEnabled?'pass':'hold'}><ShieldCheck/><span><small>EXACT SELF-PROMOTION</small><b>{promotionEnabled?'ENABLED · FAIL-CLOSED':'NOT ADMITTED'}</b><em>{policy?.state||'policy not loaded'}</em></span></article>
+   <article className='pass'><ShieldCheck/><span><small>INHERITED PC GOVERNOR</small><b>R239 PRESERVED</b><em>selected-host resource envelope remains separate from source evolution</em></span></article>
    <article className={proofEvolution.bound?'hold':'pass'}><ShieldCheck/><span><small>R293 PROOF-DIRECTED EVOLUTION</small><b>{proofEvolution.bound?`${proofEvolution.unresolvedCount} LIVE WORK CELLS`:'NEUTRAL · NO PROOF BOUND'}</b><em>{proofEvolution.bound?`${proofEvolution.claimStatus} · ${(proofEvolution.supportScore*100).toFixed(1)}% certificate support`:'pre-R293 scheduling preserved'}</em></span></article>
   </div>
   {proofEvolution.bound&&<section className='r240-frontier r293-proof-frontier'>
@@ -41,6 +42,6 @@ export default function RecursiveSelfBuildR240(){
    {error&&<div className='r240-error'><TriangleAlert/>{error}</div>}
    <div className='r240-cell-list'>{frontier.map((row,index)=><article key={row.id}><span className='rank'>{index+1}</span><div><b>{row.id} · {row.title}</b><p>{row.objective}</p><small>{row.target} · risk {row.risk} · structural score {score(row).toFixed(3)} · deps {(row.prerequisites||[]).join(', ')||'none'}</small></div></article>)}{state&&!frontier.length&&<p className='empty'>No dependency-ready concrete capsule exists. R240 remains OBSERVE_ONLY instead of inventing source work.</p>}</div>
   </section>
-  <footer><ShieldCheck/><span>R293 proof work is a deterministic investigation frontier, not a shadow source-mutation queue. The concrete R170 roadmap remains separately governed. R239 governs Hybrid host resource pressure; R147 remains dispatch authority, R141 exact Hybrid return authority, R146 durable history authority, R240/R245 govern source promotion, ci.yml is the sole canonical production writer, and R125 is the sole CanonState admission authority.</span></footer>
+  <footer><ShieldCheck/><span>R293 proof work is a deterministic investigation frontier, not a shadow source-mutation queue. The concrete R170 roadmap remains separately governed. R239 governs Hybrid host resource pressure; R147 remains dispatch authority, R141 exact Hybrid return authority, R146 durable history authority, R240/R245 govern source promotion, ci.yml is the sole canonical production writer, and R125 sole CanonState admission authority.</span></footer>
  </section>;
 }
