@@ -79,5 +79,5 @@ export const OMEGA_NAVIGATION_CONTRACT_R289=Object.freeze({
  masterMenuCount:OMEGA_MASTER_MENU_NAVIGATION_R289.length,
  orphanRoutes:OMEGA_NAVIGATION.filter(item=>!OMEGA_MASTER_MENU_ROUTE_MAP_R289[item.name]).map(item=>item.name),
  emptyMenus:OMEGA_MASTER_MENU_NAVIGATION_R289.filter(menu=>menu.routes.length===0).map(menu=>menu.id),
- rule:'ONE_44_ROUTE_AUTHORITY_PRESENTED_THROUGH_12_RECOVERED_MASTER_MENUS'
+ rule:'ONE_CURRENT_ROUTE_AUTHORITY_PRESENTED_THROUGH_12_RECOVERED_MASTER_MENUS'
 });
