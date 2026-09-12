@@ -28,7 +28,8 @@ const expectedBase=readFileSync('public/omega-hybrid-agent-base-r205.py'),expect
 if(expectedBaseSha!==R205_BASE_SHA256)throw new Error(`repository immutable R205 base drifted: ${expectedBaseSha}`);
 if(servedBaseSha!==R205_BASE_SHA256||baseLive.body!==expectedBaseText)throw new Error(`live immutable R205 base mismatch expected ${R205_BASE_SHA256} served ${servedBaseSha}`);
 for(const token of ["VERSION='R34.1'","CAPABILITY_REVISION='R132'","R205_PROOF_EXTENSION='R205'",'DESKTOP_HEALTH','FORENSIC_HASH_LEDGER','root-confined','shell=False',"'/api/hybrid/agent/heartbeat'", "'/api/hybrid/agent/result'"])if(!baseLive.body.includes(token))throw new Error(`live immutable R205 base contract missing ${token}`);
-console.log(`R202/R205/R206/R206.1/R207.2 LIVE PASS · R282.1 GLOBAL OBSERVED EARTH PASS · ${base}/omega-operational-source-authority-r202.html · R141 wrapper sha256 ${servedWrapperSha} · immutable R205 base sha256 ${servedBaseSha} · global observed Earth ${earthGlobal.date} ${earthGlobal.bytes} bytes sha256 ${earthGlobal.sha} ${earthGlobal.crs} · exact-return truth gate · R206.1 read-only host evidence · R125 preserved`);
+await import('./verify_live_r300_at09_at10_handoff.mjs');
+console.log(`R202/R205/R206/R206.1/R207.2 LIVE PASS · R300 LIVE HANDOFF PASS · R282.1 GLOBAL OBSERVED EARTH PASS · ${base}/omega-operational-source-authority-r202.html · R141 wrapper sha256 ${servedWrapperSha} · immutable R205 base sha256 ${servedBaseSha} · global observed Earth ${earthGlobal.date} ${earthGlobal.bytes} bytes sha256 ${earthGlobal.sha} ${earthGlobal.crs} · exact-return truth gate · R206.1 read-only host evidence · armed AT09/AT10 handoff · R125 preserved`);
 const promoted=String(process.env.OMEGA_PROMOTED_SHA||'').trim();
 if(promoted){
  await import('./verify_live_hybrid_direct_poll_r2074.mjs');
