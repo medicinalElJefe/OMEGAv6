@@ -24,12 +24,15 @@ async function verifyR305InteractionEnvelope(page,viewportName){
  const state=await page.evaluate(()=>{
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0};
   const coarse=matchMedia('(any-pointer: coarse)').matches,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const targets=[...document.querySelectorAll('.r88-head-actions button,.r89-nav-mode button,.r94-rail-action,.r89-flat-route')].filter(visible).map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||el.getAttribute('aria-label')||el.className||'unnamed').replace(/\s+/g,' ').trim().slice(0,80),width:r.width,height:r.height}});
+  const targetElements=[...document.querySelectorAll('.r88-head-actions button,.r89-nav-mode button,.r94-rail-action,.r89-flat-route')].filter(visible);
+  const targets=targetElements.map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||el.getAttribute('aria-label')||el.className||'unnamed').replace(/\s+/g,' ').trim().slice(0,80),width:r.width,height:r.height}});
   const undersized=coarse?targets.filter(x=>x.height<43.5||x.width<43.5):[];
+  const buriedTargets=targetElements.filter(el=>{const r=el.getBoundingClientRect();if(r.right<=0||r.left>=innerWidth||r.bottom<=0||r.top>=innerHeight)return false;const x=Math.max(0,Math.min(innerWidth-1,r.left+r.width/2)),y=Math.max(0,Math.min(innerHeight-1,r.top+r.height/2)),hit=document.elementFromPoint(x,y);return Boolean(hit&&!el.contains(hit)&&!hit.contains(el))}).map(el=>{const r=el.getBoundingClientRect(),x=Math.max(0,Math.min(innerWidth-1,r.left+r.width/2)),y=Math.max(0,Math.min(innerHeight-1,r.top+r.height/2)),hit=document.elementFromPoint(x,y);return`${(el.textContent||el.getAttribute('aria-label')||el.className||'unnamed').replace(/\s+/g,' ').trim().slice(0,64)} <- ${(hit?.textContent||hit?.getAttribute?.('aria-label')||hit?.className||hit?.tagName||'unknown').toString().replace(/\s+/g,' ').trim().slice(0,64)}`});
   const modeButtons=[...document.querySelectorAll('.r89-nav-mode button')].filter(visible).map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||'').replace(/\s+/g,' ').trim(),width:r.width,height:r.height}});
   const route=document.querySelector('.r89-flat-route'),style=route?getComputedStyle(route):null,main=document.querySelector('.workstation-main'),r=main?.getBoundingClientRect();
-  return{coarse,reduced,targetCount:targets.length,undersized,modeButtons,transitionDuration:style?.transitionDuration||'',animationDuration:style?.animationDuration||'',mainRect:r?{left:r.left,right:r.right,width:r.width}:null,viewportWidth:innerWidth};
+  return{coarse,reduced,targetCount:targets.length,undersized,buriedTargets,modeButtons,transitionDuration:style?.transitionDuration||'',animationDuration:style?.animationDuration||'',mainRect:r?{left:r.left,right:r.right,width:r.width}:null,viewportWidth:innerWidth};
  });
+ if(state.buriedTargets.length)throw new Error(`${viewportName}: R305 expanded navigator controls are geometrically buried by another layer ${state.buriedTargets.join(' | ')}`);
  if(viewportName==='mobile'){
   if(state.coarse!==true)throw new Error(`mobile: R305 expected coarse-pointer emulation, received ${JSON.stringify(state)}`);
   if(state.reduced!==true)throw new Error(`mobile: R305 expected reduced-motion emulation, received ${JSON.stringify(state)}`);
@@ -113,8 +116,8 @@ try{
    if(snap.visibleChildren<1||(snap.textLength<8&&snap.richVisible<1))throw new Error(`${name}/${route}: no visible route content mounted ${JSON.stringify(snap)}`);
    if(route==='SAR Truth')await verifySarGeometry(page,name);
   }
-  await openNavigator(page);await page.keyboard.press('Escape');await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded!=='true',{timeout:10000});await openNavigator(page);
+  await openNavigator(page);await verifyR305InteractionEnvelope(page,name);await page.keyboard.press('Escape');await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded!=='true',{timeout:10000});await openNavigator(page);await verifyR305InteractionEnvelope(page,name);
   if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);await context.close();
  }
- console.log('R286/R305 ALL-SURFACE BROWSER PASS · R304 direct-selector specificity preserved · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical routes pointer-clicked on desktop + 390px 2×DPR touch/coarse mobile · every activated workstation horizontally contained · navigator geometry proved while expanded then active-workspace controls proved after route collapse · coarse-pointer 44×44 action + 44px-high form-control proof · center-point layer-occlusion proof for visible interactive controls · reduced-motion navigator proof · exact data-panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
+ console.log('R286/R305 ALL-SURFACE BROWSER PASS · R304 direct-selector specificity preserved · expanded navigator itself center-point occlusion-proved against global world layers · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical routes pointer-clicked on desktop + 390px 2×DPR touch/coarse mobile · every activated workstation horizontally contained · active-workspace controls proved after route collapse · coarse-pointer 44×44 action + 44px-high form-control proof · center-point layer-occlusion proof · reduced-motion navigator proof · exact data-panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
 }finally{await browser.close()}
