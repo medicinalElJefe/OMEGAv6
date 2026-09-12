@@ -104,13 +104,15 @@ function usableSnapshot(){
   const rect=main?.getBoundingClientRect();
   const coarse=matchMedia('(any-pointer: coarse)').matches;
   const buttons=[...document.querySelectorAll('.workstation-main button')].filter(visible);
-  const controls=[...document.querySelectorAll('.omega-workstation-v2 button:not([disabled]),.omega-workstation-v2 [role="button"],.omega-workstation-v2 input:not([disabled]),.omega-workstation-v2 select:not([disabled]),.omega-workstation-v2 textarea:not([disabled])')].filter(visible);
+  const actions=[...document.querySelectorAll('.omega-workstation-v2 button:not([disabled]),.omega-workstation-v2 [role="button"]')].filter(visible);
+  const forms=[...document.querySelectorAll('.omega-workstation-v2 input:not([disabled]),.omega-workstation-v2 select:not([disabled]),.omega-workstation-v2 textarea:not([disabled])')].filter(visible);
   const unusable=buttons.filter(b=>{const r=b.getBoundingClientRect();return !b.disabled&&(r.width<8||r.height<8||getComputedStyle(b).pointerEvents==='none')}).map(b=>(b.textContent||b.getAttribute('aria-label')||'unnamed').trim().slice(0,80));
-  const undersizedTouch=coarse?controls.filter(el=>el.getBoundingClientRect().height<43.5).map(el=>{const r=el.getBoundingClientRect();return`${(el.textContent||el.getAttribute('aria-label')||el.getAttribute('placeholder')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
+  const undersizedTouchActions=coarse?actions.filter(el=>{const r=el.getBoundingClientRect();return r.width<43.5||r.height<43.5}).map(el=>{const r=el.getBoundingClientRect();return`${(el.textContent||el.getAttribute('aria-label')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
+  const undersizedTouchForms=coarse?forms.filter(el=>el.getBoundingClientRect().height<43.5).map(el=>{const r=el.getBoundingClientRect();return`${(el.getAttribute('aria-label')||el.getAttribute('placeholder')||el.tagName).replace(/\s+/g,' ').trim().slice(0,64)} ${r.width.toFixed(1)}×${r.height.toFixed(1)}`}):[];
   const visibleChildren=main?[...main.children].filter(visible).length:0;
   const textLength=(main?.textContent||'').replace(/\s+/g,' ').trim().length;
   const richVisible=main?[...main.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible).length:0;
-  return{width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,undersizedTouch,coarse,visibleChildren,textLength,richVisible};
+  return{width:rect?.width||0,height:rect?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,visibleButtons:buttons.length,unusable,undersizedTouchActions,undersizedTouchForms,coarse,visibleChildren,textLength,richVisible};
 }
 
 async function verifySarGeometry(page,viewportName){
@@ -149,7 +151,8 @@ try{
       if(snap.width<220||snap.height<80)throw new Error(`${name}/${route}: workstation unusable ${JSON.stringify(snap)}`);
       if(snap.overflow>24)throw new Error(`${name}/${route}: viewport overflow ${snap.overflow}px`);
       if(snap.unusable.length)throw new Error(`${name}/${route}: visible enabled controls are non-interactive ${snap.unusable.join(' | ')}`);
-      if(name==='mobile'&&snap.undersizedTouch.length)throw new Error(`${name}/${route}: coarse-pointer controls below 44px ${snap.undersizedTouch.join(' | ')}`);
+      if(name==='mobile'&&snap.undersizedTouchActions.length)throw new Error(`${name}/${route}: coarse-pointer action controls below 44×44px ${snap.undersizedTouchActions.join(' | ')}`);
+      if(name==='mobile'&&snap.undersizedTouchForms.length)throw new Error(`${name}/${route}: coarse-pointer form controls below 44px high ${snap.undersizedTouchForms.join(' | ')}`);
       if(snap.visibleChildren<1||(snap.textLength<8&&snap.richVisible<1))throw new Error(`${name}/${route}: no visible route content mounted ${JSON.stringify(snap)}`);
       if(route==='SAR Truth')await verifySarGeometry(page,name);
     }
@@ -162,5 +165,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R286/R303 ALL-SURFACE BROWSER PASS · ALL + six contextual workspace submenus · 44/44 routes desktop + 390px 2×DPR touch mobile · coarse-pointer 44px navigator/action/form-control proof · reduced-motion navigator proof · horizontal containment · exact panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
+  console.log('R286/R303 ALL-SURFACE BROWSER PASS · ALL + six contextual workspace submenus · 44/44 routes desktop + 390px 2×DPR touch mobile · coarse-pointer 44×44 action + 44px-high form-control proof · reduced-motion navigator proof · horizontal containment · exact panel transitions · visible-content proof · exact 78×78/6084-cell SAR geometry · Escape/reopen · no page errors.');
 }finally{await browser.close()}
