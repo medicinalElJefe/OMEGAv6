@@ -6,6 +6,7 @@ const launcher=read('src/OmegaLauncher.tsx');
 const launcherCss=read('src/omegaLauncherR289.css');
 const liveNav=read('src/OmegaSideNavigatorR88.tsx');
 const liveNavCss=read('src/omegaSideNavigatorR289.css');
+const dataTruthNavCss=read('src/dataTruthNavigationR105.css');
 const atlas=read('src/systemAtlasRuntime.ts');
 const archive=read('src/archiveNativeConvergenceR288.ts');
 
@@ -60,9 +61,13 @@ must(liveNav.includes('OMEGA_WORKSPACES_R82.map'),'existing workspace filter mus
 must(!liveNav.includes('onNavigate(masterMenu')&&!liveNav.includes('resolveExactRouteR242(routeRecords,masterMenu'),'master-menu state must never become a route identity or navigation authority');
 must(liveNav.includes("R289 recovered-menu presentation downstream of lemma"),'visible technical truth must state the R289 authority boundary');
 must(liveNavCss.includes('overflow-x:auto')&&liveNavCss.includes("[aria-pressed='true']")&&liveNavCss.includes('@media(max-width:760px)'),'live 12-menu filter must remain horizontally scrollable, selected-state explicit and mobile responsive');
+// R239 browser proof caught the read-only context strip physically intercepting workspace buttons.
+// The fix is part of the product contract: actionable filters stay above it and the informational strip is pointer-transparent.
+must(/\.r105-workspace-filter\{[^}]*position:relative;z-index:2/.test(dataTruthNavCss),'workspace filter controls must own the higher pointer stacking layer');
+must(/\.r105-context-note\{[^}]*position:relative;z-index:1;pointer-events:none/.test(dataTruthNavCss),'read-only context note must never intercept pointer input from workspace controls');
 
 const bindRoutes=[...archive.matchAll(/bindsTo:\[([^\]]+)\]/g)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
 for(const route of [...new Set(bindRoutes)])must(routeNames.includes(route),`recovered Drive authority binds to non-route ${route}`);
 for(const required of ['Archive Census','Archive Operators','Build Out','System Atlas','Modes','Relativity','Matter Traversal','Evidence & Proof','Control Matrix'])must(bindRoutes.includes(required),`recovery corpus must remain visibly bound to ${required}`);
 
-console.log(`R289 RECOVERED MASTER-MENU NAVIGATION PASS · ${routeNames.length} routes · ${menus.length} recovered menus · ${new Set(bindRoutes).size} recovery-bound surfaces · live R88/R239 organization is downstream of R242 lemma · workspace/search filters preserved · zero orphan routes/bindings · launcher route/favorite controls use independent native semantics`);
+console.log(`R289 RECOVERED MASTER-MENU NAVIGATION PASS · ${routeNames.length} routes · ${menus.length} recovered menus · ${new Set(bindRoutes).size} recovery-bound surfaces · live R88/R239 organization is downstream of R242 lemma · workspace/search filters pointer-safe · zero orphan routes/bindings · launcher route/favorite controls use independent native semantics`);
