@@ -13,7 +13,19 @@ const corpus=read('src/corpusRuntime.ts');
 
 for(const formula of ['S=(CΩ·Φ)/(q+Λ+ε)','M188=(CΩ+Scar)/(1+q)','F_t=CΩ_t+Φ_t-q_t-Λ_t','Prune=q+Λ-CΩ','Turb=q/(CΩ+ε)','B=Λ/(CΩ+Φ+ε)','Previous_Scar·0.972'])assert.match(runtime,new RegExp(formula.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
 assert.match(runtime,/GATED_MISSING_INPUTS/);
-for(const missing of ['Care','Aim','Recovery','Novelty','authoritative layer weights'])assert.match(runtime,new RegExp(missing));
+for(const missing of ['Recovery','Novelty','authoritative layer weights'])assert.match(runtime,new RegExp(missing));
+for(const recovered of ['Mother_Mode=Water_Basin·0.618+Compression_Vector·0.382','Father_Mode=Structure_Vector·0.618+Traversal_Vector·0.382','Base_Coherence+Mother_Mode+Father_Mode+Water_Basin'])assert.ok(runtime.includes(recovered),`Full Canon source expression missing ${recovered}`);
+assert.match(runtime,/canonicalFullCanonTermsR308/);
+assert.match(runtime,/FORMAL_CANON_ATLAS/);
+assert.match(runtime,/OMEGA FULL CANON MODE WITH ATLAS \/ Formula_Ledger/);
+assert.ok(runtime.includes('Math.cos((r-l)*phaseStep)'),'Water_Basin must remain an exact relative phase term instead of an invented proxy');
+assert.ok(runtime.includes('Math.sin((domainIndex+stateIndex-2)*phaseStep)'),'Traversal_Vector must preserve the Full Canon domain/state phase relation');
+assert.match(runtime,/exact\('M015','Deep Mother Mode'/,'Deep Mother must execute from recovered Full Canon formal inputs');
+assert.match(runtime,/exact\('M016','High Father Mode'/,'High Father must execute from recovered Full Canon formal inputs');
+assert.match(runtime,/exact\('M020','Unified Coherence full blend'/,'Full Canon coherence blend must execute from recovered formal inputs');
+assert.match(runtime,/gated\('M017','RAFT-188'/,'RAFT-188 must remain gated until its authoritative terms exist');
+assert.match(runtime,/gated\('M018','Gamma Admission Loop'/,'Gamma admission must remain gated until calibrated proof inputs exist');
+assert.match(runtime,/gated\('M019','Renderer Cluster'/,'Renderer cluster must remain gated until authoritative weights exist');
 assert.match(runtime,/autoPing\.dataNext/);
 assert.match(runtime,/No interpolated state is presented as source data/);
 assert.match(panel,/179 catalog entries are loaded as source metadata, not automatically called/);
@@ -39,4 +51,4 @@ assert.doesNotMatch(nav,/nav20-desktop|nav20-context|nav20-mobile-sheet/);
 assert.match(corpus,/function scoreForText/); // legacy affinity catalog still exists, but is no longer execution authority.
 assert.doesNotMatch(runtime,/@appdeploy\/client/);
 assert.doesNotMatch(panel,/@appdeploy\/client/);
-console.log('R27/R109/R140 SOURCE-BACKED RUNTIME PASS · real formulas · gated inputs · single-frame operational navigation · canonical traversal · completion workspace retains the R21 instrument');
+console.log('R308/R27/R109/R140 SOURCE-BACKED RUNTIME PASS · Full Canon Mother/Father/coherence terms recovered from exact 20,736-row address geometry · remaining unsupported operators gated · single-frame operational navigation · canonical traversal retained');

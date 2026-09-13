@@ -28,7 +28,9 @@ must(!nav.includes('<b>44</b>')&&!nav.includes('Search all 44 OMEGA applications
 // Complete mode/canon authority remains globally available without false execution.
 must(sourceRuntime.includes('catalogCount:179'),'179-source-mode authority must remain declared');
 for(const id of ['M001','M002','M004','M005','M006','M007','M008','M009'])must(sourceRuntime.includes(`'${id}'`),'source-backed executable mode lost '+id);
-for(const id of ['M015','M016','M017','M018','M019','M020'])must(sourceRuntime.includes(`gated('${id}'`),'missing-input gate lost '+id);
+for(const id of ['M015','M016','M020'])must(sourceRuntime.includes(`exact('${id}'`),'recovered Full Canon exact mode lost '+id);
+for(const id of ['M017','M018','M019'])must(sourceRuntime.includes(`gated('${id}'`),'missing-input gate lost '+id);
+must(sourceRuntime.includes("sourceClass:'FORMAL_CANON_ATLAS'")&&sourceRuntime.includes('formal-model output, not empirical measurement'),'recovered Full Canon modes must retain formal-source provenance and empirical boundary');
 must(canon.includes('CANON_AUTHORITY_STACK')&&canon.includes('CANON_AUTHORITY_COUNT')&&canon.includes('canonAuthorities:62'),'62 canon/calculus lenses must remain separate from source-mode rows');
 for(const family of ['COHERENCE','FORECAST','PRUNE','RELATIVITY','FLOW','MEMORY','PROOF','TOPOLOGY','COMPRESSION','TRAVERSAL','RECURSION','GOVERNANCE','SCALE','LIGHT','GENERIC'])must(modes.includes(`'${family}'`),'mode-expression family lost '+family);
 
@@ -65,5 +67,5 @@ for(const rule of ['FULL_CALCULUS_MODE_FABRIC','SOURCE_CORPUS_CORRELATION','EMPI
 must(accepted.includes("'R107 full calculus/mode execution fabric + dynamic capability inventory authority'")&&accepted.includes("'R107 Drive corpus + cloud/validation correlation authority'"),'R107 preservation lineage missing');
 for(const prior of ['R100 woven continuity geometry/time','R101 weave-derived effective resolution','R102 four-node capability fabric','R103 task-first capability router','R104 eight-layer functional correlation','R105 live-data freshness','R106 temporal proof-ledger separation'])must(accepted.includes(prior),'prior accepted layer lost: '+prior);
 
-console.log('R107 FULL CALCULUS CAPABILITY FABRIC PASS · route count demoted to telemetry · 179 catalog + source-backed runtime + 62 lenses globally composed · 8-layer applicability · Drive/cloud/248832 correlation · global visual law wired · per-surface contribution trace');
+console.log('R308/R107 FULL CALCULUS CAPABILITY FABRIC PASS · route count demoted to telemetry · 179 catalog + source-backed runtime + 62 lenses globally composed · recovered Full Canon formal operators source-bound · 8-layer applicability · Drive/cloud/248832 correlation · global visual law wired · per-surface contribution trace');
 await import('./r107-control-action-truth-invariants.mjs');

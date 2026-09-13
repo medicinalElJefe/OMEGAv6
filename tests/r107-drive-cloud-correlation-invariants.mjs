@@ -30,7 +30,10 @@ must(source.includes('248,832 = 12 × 20,736')&&source.includes('AutoPing is int
 must(source.includes("schema:'OMEGA_ULTIMATE_DEVELOPMENT_FABRIC_R107'")&&source.includes("correlationOrder:['SOURCE','STATE','CALCULUS','MODES','LAYERS','CAPABILITY','RUNTIME','OBSERVATION','ACTION','PROOF','ADMISSION']"),'single correlated development order missing');
 
 // Full calculus remains exact where source-backed and empirically bounded where not validated.
-must(modes.includes("exact('M001'")&&modes.includes("exact('M009'")&&modes.includes("gated('M020'"),'source-backed/gated calculus execution boundaries lost');
+must(modes.includes("exact('M001'")&&modes.includes("exact('M009'"),'baseline source-backed exact calculus execution lost');
+for(const id of ['M015','M016','M020'])must(modes.includes(`exact('${id}'`),'Full Canon formal-atlas recovery lost '+id);
+for(const id of ['M017','M018','M019'])must(modes.includes(`gated('${id}'`),'unsupported source-backed calculus gate lost '+id);
+must(modes.includes("sourceClass:'FORMAL_CANON_ATLAS'")&&modes.includes('formal-model output, not empirical measurement'),'formal reconstruction must remain explicitly non-empirical');
 must(calculus.includes('fullAlignment:{formula:')&&calculus.includes('ready:false'),'expanded uncalibrated calculus must remain gated');
 must(source.includes('external dataset required for host validation')&&source.includes('out-of-sample performance must beat simple baselines')&&source.includes('does not claim new physics'),'scientific validation boundary must be explicit');
 
@@ -44,4 +47,4 @@ must(inspector.includes("SOURCE_CORPUS_AUTHORITIES_R107")&&inspector.includes('D
 must(inspector.includes("<details className='r107-calculus-fabric'"),'correlation must stay progressive disclosure');
 must(accepted.includes("id:'SOURCE_CORPUS_CORRELATION'")&&accepted.includes("id:'EMPIRICAL_VALIDATION_REQUIRED'"),'persistent Drive/cloud/science correlation laws missing');
 
-console.log('R107 DRIVE + CLOUD CORRELATION PASS · Drive design/calculus/248832/validation authorities correlated without private locators · cloud specialist roles preserved · all-mode/calculus execution remains evidence gated');
+console.log('R308/R107 DRIVE + CLOUD CORRELATION PASS · Drive design/calculus/248832/validation authorities correlated without private locators · recovered Full Canon operators remain formal-source-bound · unsupported operators remain gated · cloud specialist roles preserved');

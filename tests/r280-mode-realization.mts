@@ -15,8 +15,14 @@ assert.equal(registry.canonicalAdmissionAuthority,'R125');
 assert.ok(registry.summary.domainExecutable>0,'at least one real domain/source executor must be bound');
 assert.ok(registry.rows.every(row=>['CHARTED','IMPLEMENTED','TESTED','PROMOTED','GATED'].includes(row.stage)));
 assert.ok(registry.rows.some(row=>row.name==='HEAVY BIO MODE REVIEW'&&row.stage==='TESTED'),'Heavy Bio must be implemented and test-bound');
-assert.ok(registry.rows.some(row=>row.name==='Deep Mother Mode'&&row.stage==='GATED'),'Deep Mother must stay gated when Care is absent');
-assert.ok(registry.rows.some(row=>row.name==='High Father Mode'&&row.stage==='GATED'),'High Father must stay gated when Aim/Proof are absent');
+const mother=registry.rows.find(row=>row.name==='Deep Mother Mode');
+assert.ok(mother&&mother.stage==='IMPLEMENTED','Deep Mother must execute once its exact Full Canon formal-atlas inputs are recoverable');
+assert.ok(mother?.sourceRows.some(row=>row.id==='M015'&&row.state==='EXECUTED_EXACT'),'Deep Mother M015 must carry exact formal-atlas execution provenance');
+assert.ok(!mother?.gaps.some(gap=>gap.includes('Care')),'obsolete Care proxy gate must not survive exact Full Canon input recovery');
+const father=registry.rows.find(row=>row.name==='High Father Mode');
+assert.ok(father&&father.stage==='IMPLEMENTED','High Father must execute once its exact Full Canon formal-atlas inputs are recoverable');
+assert.ok(father?.sourceRows.some(row=>row.id==='M016'&&row.state==='EXECUTED_EXACT'),'High Father M016 must carry exact formal-atlas execution provenance');
+assert.ok(!father?.gaps.some(gap=>gap.includes('Aim')||gap.includes('Proof')),'obsolete Aim/Proof proxy gate must not survive exact Full Canon input recovery');
 assert.ok(registry.rows.some(row=>row.name==='Mode 188'&&row.stage==='PROMOTED'),'Mode 188 exact source runtime must remain promoted');
 assert.ok(registry.rows.some(row=>row.name==='20736D Atlas Mode'&&row.executionClass==='DOMAIN_RUNTIME'));
 for(const mode of ['Phase Elasticity Field','CTDE','Continuance Shell','Turn–Atlas Formalism','Ledgered Phase Metrology','Non-Flat Prediction Engine']){
@@ -96,4 +102,4 @@ assert.notEqual(nonFlat.decision,'HOLD');
 assert.ok(nonFlat.memory.next>=0&&nonFlat.memory.next<=1);
 assert.notEqual(nonFlat.memory.next,0,'history must carry instead of being erased');
 
-console.log('R280 PASS · realization registry + Heavy Bio + PEF/CTDE/LPM/Turn–Atlas/Continuance/Non-Flat runtime boundaries');
+console.log('R308/R280 PASS · realization registry + recovered Full Canon Mother/Father formal operators + Heavy Bio + PEF/CTDE/LPM/Turn–Atlas/Continuance/Non-Flat runtime boundaries');
