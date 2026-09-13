@@ -72,14 +72,17 @@ async function clickRoute(page,route){
   await button.scrollIntoViewIfNeeded();
   await button.click({timeout:10000});
   await page.waitForFunction(name=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===name,route,{timeout:20000});
-  await page.waitForFunction(()=>{
+  await page.waitForFunction(name=>{
     const main=document.querySelector('.workstation-main');
-    if(!main)return false;
+    const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
+    if(!main||!surface)return false;
     const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
-    const children=[...main.children].filter(visible);
-    const rich=[...main.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible);
-    return children.length>0&&(((main.textContent||'').replace(/\s+/g,' ').trim().length>=8)||rich.length>0);
-  },{timeout:20000});
+    const children=[...surface.children].filter(visible);
+    const rich=[...surface.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible);
+    const loader=[...surface.querySelectorAll('.r109-specialist-loading')].some(visible);
+    const failed=surface.querySelector('.panel-failure');
+    return visible(surface)&&!loader&&!failed&&children.length>0&&((((surface.textContent||'').replace(/\s+/g,' ').trim().length>=8)||rich.length>0));
+  },route,{timeout:30000});
 }
 
 function usableSnapshot(){
@@ -150,5 +153,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R286/R307 ALL-SURFACE BROWSER PASS · mobile navigator-mode controls browser-proven at >=44×44px under coarse-pointer emulation · every visible enabled action on all 44 canonical routes browser-proven at >=44×44px and every enabled form control >=44px high on 390px touch mobile · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + mobile · exact data-panel transitions · route-agnostic visible-content proof · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
+  console.log('R286/R307 ALL-SURFACE BROWSER PASS · exact active SurfaceIntegrity route readiness proven before each audit · mobile navigator-mode controls browser-proven at >=44×44px under coarse-pointer emulation · every visible enabled action on all 44 canonical routes browser-proven at >=44×44px and every enabled form control >=44px high on 390px touch mobile · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + mobile · exact data-panel transitions · route-agnostic visible-content proof · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
 }finally{await browser.close()}
