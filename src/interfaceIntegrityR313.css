@@ -35,6 +35,27 @@
   z-index:1!important;
 }
 
+/* Desktop Command Center is a split application, not an infinitely tall document.
+   Keep the prompt/actions column inside a viewport-bounded scroll authority so
+   scrollIntoView, keyboard focus and pointer targeting can always bring every
+   real control into an unobscured hit region.  This repairs the shared R286
+   failure affecting quick prompts, orchestrator actions and traversal links. */
+@media (min-width:901px){
+  .omega-workstation-v2[data-panel='Command Center'] .command-stage{
+    align-items:stretch;
+  }
+
+  .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+    min-height:0!important;
+    max-height:calc(100dvh - 156px);
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+    -webkit-overflow-scrolling:touch;
+  }
+}
+
 .omega-workstation-v2 .workstation-main :where(button,[role='button'],input,textarea,select,summary){
   scroll-margin-block:64px 24px;
 }
