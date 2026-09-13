@@ -11,6 +11,7 @@ type SnapshotContextValue={
  hybrid:any;
  missions:any[];
  jobs:any[];
+ knownDevices:any[];
  onlineDevices:any[];
  selectedDeviceId:string;
  device:any;
@@ -76,8 +77,9 @@ export function HybridRuntimeSnapshotProviderR238({children}:{children:ReactNode
  },[refresh]);
 
  const jobs=useMemo(()=>Array.isArray(snapshot.hybrid?.jobs)?snapshot.hybrid.jobs:[],[snapshot.hybrid]);
- const onlineDevices=useMemo(()=>Array.isArray(snapshot.hybrid?.devices)?snapshot.hybrid.devices.filter((row:any)=>row?.online&&!row?.revoked):[],[snapshot.hybrid]);
- const device=useMemo(()=>onlineDevices.find((row:any)=>row?.id===selectedDeviceId)||onlineDevices[0]||null,[onlineDevices,selectedDeviceId]);
+ const knownDevices=useMemo(()=>Array.isArray(snapshot.hybrid?.devices)?snapshot.hybrid.devices.filter((row:any)=>!row?.revoked):[],[snapshot.hybrid]);
+ const onlineDevices=useMemo(()=>knownDevices.filter((row:any)=>row?.online),[knownDevices]);
+ const device=useMemo(()=>onlineDevices.find((row:any)=>row?.id===selectedDeviceId)||onlineDevices[0]||(onlineDevices.length===0?knownDevices.find((row:any)=>row?.id===selectedDeviceId)||knownDevices[0]:null)||null,[knownDevices,onlineDevices,selectedDeviceId]);
 
  useEffect(()=>{
   const next=String(device?.id||'');
@@ -88,10 +90,10 @@ export function HybridRuntimeSnapshotProviderR238({children}:{children:ReactNode
 
  const selectDevice=useCallback((deviceId:string)=>{
   const id=String(deviceId||'');
-  if(id&&!onlineDevices.some((row:any)=>row?.id===id))return;
+  if(id&&!knownDevices.some((row:any)=>row?.id===id))return;
   setSelectedDeviceId(id);
   try{if(id)window.localStorage.setItem(SELECTED_DEVICE_KEY,id);else window.localStorage.removeItem(SELECTED_DEVICE_KEY)}catch{}
- },[onlineDevices]);
+ },[knownDevices]);
 
  const selectedDeviceJobs=useMemo(()=>device?jobs.filter((job:any)=>job?.targetDeviceId===device.id):[],[jobs,device]);
  const jobById=useMemo(()=>new Map(jobs.map((job:any)=>[job?.id,job])),[jobs]);
@@ -103,6 +105,7 @@ export function HybridRuntimeSnapshotProviderR238({children}:{children:ReactNode
   hybrid:snapshot.hybrid,
   missions:snapshot.missions,
   jobs,
+  knownDevices,
   onlineDevices,
   selectedDeviceId:String(device?.id||selectedDeviceId||''),
   device,
@@ -118,7 +121,7 @@ export function HybridRuntimeSnapshotProviderR238({children}:{children:ReactNode
   refresh,
   selectDevice,
   targetForMission
- }),[snapshot,jobs,onlineDevices,device,selectedDeviceId,selectedDeviceJobs,missionEntries,currentMissionEntry,stale,error,refresh,selectDevice]);
+ }),[snapshot,jobs,knownDevices,onlineDevices,device,selectedDeviceId,selectedDeviceJobs,missionEntries,currentMissionEntry,stale,error,refresh,selectDevice]);
 
  return <HybridRuntimeSnapshotContext.Provider value={value}>{children}</HybridRuntimeSnapshotContext.Provider>;
 }
