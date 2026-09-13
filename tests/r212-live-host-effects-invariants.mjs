@@ -29,6 +29,6 @@ must(app.includes('<HybridRuntimeSnapshotProviderR238><OmegaWorkstation/></Hybri
 must(!hybrid.includes('<HybridRuntimeSnapshotProviderR238>'),'Hybrid Link must not mount a second R238 provider after R270 convergence');
 must(hybrid.indexOf('<HybridHostEffectsR212/>')>hybrid.indexOf('<SovereignConnectionR117/>')&&hybrid.indexOf('<HybridHostEffectsR212/>')<hybrid.indexOf('<HybridProofClosureR141/>'),'R212 host effects must remain between current connection truth and R141 proof closure');
 must(hybrid.includes('Build success is not source mutation'),'Hybrid Link must preserve the source-mutation truth marker');
-must(effects.includes('R212 remains read-only observation')&&effects.includes('alter R141/R146/R147/R125 authority'),'R212 authority boundary missing');
+must(effects.includes('R212 remains read-only observation')&&effects.includes('never queues work')&&effects.includes('alter R141/R146/R147/R125 authority'),'R212 authority boundary missing');
 
 console.log('OMEGA R309/R212/R238/R270 LIVE HOST EFFECTS PASS · online execution priority · offline known-host read-only history · one shared snapshot epoch · cross-device return isolation · source mutations only from returned APPLY_PATCH/WRITE_TEXT · R141/R146/R147/R125 preserved');
