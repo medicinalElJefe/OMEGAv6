@@ -1,18 +1,18 @@
-/* R313.20 — interaction-safe route-transition scroll settlement.
+/* R313.21 — interaction-safe route-transition scroll settlement.
    Presentation/interaction integrity only. This owns no route, execution, proof,
    persistence, Canon, source, Hybrid, Earth, dispatch, or deployment authority.
 
-   OmegaWorkstationFullV2 historically schedules a smooth reset of both the active
-   workstation and the window on the next animation frame after each canonical
-   omega-capability-change. Even when that late reset is converted to behavior:auto,
-   it can still run after the destination mounts and overwrite an immediate user
-   scroll/focus action. Settle the historical top target synchronously at transition
-   dispatch, then suppress only the already-scheduled legacy smooth top reset during
-   the bounded two-frame compatibility window. Native scrolling is restored after
-   that window, so the first destination interaction cannot be pulled back to top. */
+   OmegaWorkstationFullV2 historically schedules a smooth top reset one animation
+   frame after the canonical omega-capability-change signal. The former compatibility
+   layer replaced scroll methods per transition and restored them two frames later.
+   Rapid/same-route transitions could therefore capture an already wrapped method and
+   restore wrappers out of order. Install one stable forwarding membrane instead: the
+   route top is settled synchronously, only the historical smooth top reset is ignored
+   during the bounded two-frame transition window, and every other scroll call forwards
+   directly to the original native implementation. */
 
 let installed=false;
-let transition=0;
+let suppressLegacyReset=false;
 
 type ScrollArgs=[options?:ScrollToOptions]|[x:number,y:number];
 
@@ -24,31 +24,31 @@ function isLegacyTopReset(args:ScrollArgs){
 export function installNavigationScrollIntegrityR313(){
   if(installed||typeof window==='undefined')return;
   installed=true;
+
+  const nativeWindowScrollTo=window.scrollTo;
+  const nativeElementScrollTo=HTMLElement.prototype.scrollTo;
+
+  window.scrollTo=((...args:ScrollArgs)=>{
+    if(suppressLegacyReset&&isLegacyTopReset(args))return;
+    return (nativeWindowScrollTo as any).apply(window,args);
+  }) as typeof window.scrollTo;
+
+  HTMLElement.prototype.scrollTo=(function(this:HTMLElement,...args:ScrollArgs){
+    if(suppressLegacyReset&&isLegacyTopReset(args)&&this.classList.contains('workstation-main'))return;
+    return (nativeElementScrollTo as any).apply(this,args);
+  }) as typeof HTMLElement.prototype.scrollTo;
+
   window.addEventListener('omega-capability-change',()=>{
-    const token=++transition;
-    const nativeWindowScrollTo=window.scrollTo;
-    const nativeElementScrollTo=HTMLElement.prototype.scrollTo;
+    suppressLegacyReset=true;
     const main=document.querySelector<HTMLElement>('.workstation-main');
 
-    // Preserve the historical route-to-top result before destination interaction can
-    // begin. These are synchronous transition-settlement calls, never delayed repairs.
+    // Route-to-top is a synchronous transition result. No delayed corrective scroll is
+    // allowed to compete with destination focus, audit, or user interaction.
     if(main)nativeElementScrollTo.call(main,{top:0,behavior:'auto'});
     nativeWindowScrollTo.call(window,{top:0,behavior:'auto'});
 
-    window.scrollTo=((...args:ScrollArgs)=>{
-      if(isLegacyTopReset(args))return;
-      return (nativeWindowScrollTo as any).apply(window,args);
-    }) as typeof window.scrollTo;
-
-    HTMLElement.prototype.scrollTo=(function(this:HTMLElement,...args:ScrollArgs){
-      if(isLegacyTopReset(args)&&this.classList.contains('workstation-main'))return;
-      return (nativeElementScrollTo as any).apply(this,args);
-    }) as typeof HTMLElement.prototype.scrollTo;
-
     window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{
-      if(token!==transition)return;
-      window.scrollTo=nativeWindowScrollTo;
-      HTMLElement.prototype.scrollTo=nativeElementScrollTo;
+      suppressLegacyReset=false;
     }));
   });
 }
