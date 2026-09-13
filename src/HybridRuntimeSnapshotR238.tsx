@@ -79,7 +79,7 @@ export function HybridRuntimeSnapshotProviderR238({children}:{children:ReactNode
  const jobs=useMemo(()=>Array.isArray(snapshot.hybrid?.jobs)?snapshot.hybrid.jobs:[],[snapshot.hybrid]);
  const knownDevices=useMemo(()=>Array.isArray(snapshot.hybrid?.devices)?snapshot.hybrid.devices.filter((row:any)=>!row?.revoked):[],[snapshot.hybrid]);
  const onlineDevices=useMemo(()=>knownDevices.filter((row:any)=>row?.online),[knownDevices]);
- const device=useMemo(()=>knownDevices.find((row:any)=>row?.id===selectedDeviceId)||onlineDevices[0]||knownDevices[0]||null,[knownDevices,onlineDevices,selectedDeviceId]);
+ const device=useMemo(()=>onlineDevices.find((row:any)=>row?.id===selectedDeviceId)||onlineDevices[0]||(onlineDevices.length===0?knownDevices.find((row:any)=>row?.id===selectedDeviceId)||knownDevices[0]:null)||null,[knownDevices,onlineDevices,selectedDeviceId]);
 
  useEffect(()=>{
   const next=String(device?.id||'');
