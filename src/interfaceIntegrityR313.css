@@ -3,6 +3,16 @@
    preserve real hit regions beneath the sticky workstation shell, and enforce
    coarse-pointer touch targets without changing action/authority semantics. */
 
+/* R313.25 NATIVE DISCLOSURE LAYOUT LAW
+   Author styles such as display:grid can outrank Chromium's user-agent rule for
+   closed <details> descendants. That leaves controls inside a visibly closed
+   drawer in layout and in the interaction inventory even though its summary is
+   the only disclosed surface. Enforce the native semantic at the workstation
+   boundary for every disclosure, including restored donor and proof drawers. */
+.omega-workstation-v2 details:not([open])>:not(summary){
+  display:none!important;
+}
+
 /* R313.6 OUTER COMMAND EXPERIENCE CLIP REPAIR
    R203 applies overflow:hidden to .command-experience-r4. That wrapper sits outside
    CommandDeck, so every prior inner stage/prompt scroll repair remained trapped behind
