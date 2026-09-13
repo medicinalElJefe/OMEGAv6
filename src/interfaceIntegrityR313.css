@@ -35,47 +35,46 @@
   z-index:1!important;
 }
 
-/* Desktop Command Center is a split application, not an infinitely tall document.
-   R313.1 bounded only the prompt descendant, R313.2 bounded the stage with max-height,
-   and R313.3 established a definite stage height. The inherited R286 browser gate
-   proved one more structural issue remained: explicitly sizing both grid children to
-   height:100% preserves their intrinsic/padded box instead of letting grid stretch own
-   the final border-box. The prompt can therefore be a nominal scroll container while
-   still extending through the stage clip boundary. R313.4 returns sizing authority to
-   the grid row: both children are stretch-sized border boxes with min-height:0, and the
-   prompt alone owns vertical scrolling. The stage no longer hides descendant hit regions;
-   if a later rule regresses child sizing, browser proof sees the overflow instead of a
-   silently clipped control. No action, route, proof or execution semantics change. */
+/* R313.5 DESKTOP COMMAND SCROLL LAW
+   The Command prompt is dynamic: PromptOrchestrator can add task plans, proof steps,
+   device choices and mission state after initial render. R313.1–R313.4 proved that
+   constraining that tree inside a fixed-height nested scrollport can leave native
+   scrollIntoView() unable to expose lower controls to the viewport. Desktop therefore
+   returns the prompt to the canonical workstation/document vertical scroll owner.
+   The visual remains a bounded top-aligned instrument; the grid row grows with prompt
+   content; no ancestor masks the prompt. This changes presentation/scroll ownership only. */
 @media (min-width:901px){
   .omega-workstation-v2[data-panel='Command Center'] .command-deck{
     min-height:0!important;
   }
 
   .omega-workstation-v2[data-panel='Command Center'] .command-stage{
-    align-items:stretch!important;
-    height:clamp(520px,calc(100dvh - 280px),680px)!important;
-    min-height:0!important;
+    align-items:start!important;
+    height:auto!important;
+    min-height:610px!important;
     max-height:none!important;
-    grid-template-rows:minmax(0,1fr)!important;
+    grid-template-rows:auto!important;
     overflow:visible!important;
   }
 
-  .omega-workstation-v2[data-panel='Command Center'] .command-visual,
-  .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+  .omega-workstation-v2[data-panel='Command Center'] .command-visual{
     box-sizing:border-box!important;
-    align-self:stretch!important;
-    min-height:0!important;
-    height:auto!important;
-    max-height:none!important;
+    align-self:start!important;
+    height:clamp(520px,calc(100dvh - 280px),680px)!important;
+    min-height:520px!important;
+    max-height:680px!important;
+    overflow:hidden!important;
   }
 
   .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
-    overflow-y:auto!important;
-    overflow-x:hidden!important;
-    overscroll-behavior:contain;
-    scrollbar-gutter:stable;
-    scroll-padding-block:64px 24px;
-    -webkit-overflow-scrolling:touch;
+    box-sizing:border-box!important;
+    align-self:start!important;
+    min-height:610px!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+    overscroll-behavior:auto!important;
+    scrollbar-gutter:auto!important;
   }
 }
 
