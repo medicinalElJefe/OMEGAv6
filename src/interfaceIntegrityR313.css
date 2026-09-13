@@ -89,6 +89,27 @@
     overscroll-behavior:auto!important;
     scrollbar-gutter:auto!important;
   }
+
+  /* R313.7 RESERVED-NAV WIDTH LAW
+     R286 audits with the canonical navigator expanded. At a 1440px desktop viewport,
+     R120 reserves the wide rail plus a 420–520px browser panel, leaving roughly 754–854px
+     for the active workstation. commandDeck.css otherwise keeps its two-column layout
+     until the viewport itself falls below 1220px, whose 520px + 390px minimum columns
+     cannot fit the navigator-reduced workspace. The entire prompt column is then clipped
+     horizontally, which is why every R286 failure belongs to that column, including its
+     first quick-prompt button. Navigation state is part of available layout geometry, so
+     collapse the stage while the browser is expanded rather than hiding controls or
+     weakening hit testing. */
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-stage{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+    min-width:0!important;
+    width:100%!important;
+    border-left:0!important;
+    border-top:1px solid #28444d!important;
+  }
 }
 
 .omega-workstation-v2 .workstation-main :where(button,[role='button'],input,textarea,select,summary){
