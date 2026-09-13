@@ -1,6 +1,8 @@
 import {useMemo,useState} from 'react';
 import {Activity,CheckCircle2,ChevronRight,GitBranch,Search,ShieldCheck,TriangleAlert} from 'lucide-react';
 import {buildConvergenceMasterR314} from './convergenceMasterR314';
+import {R314_SYNCHRONOUS_PACKET_SCHEMA,R314_SYNCHRONOUS_PACKET_REVISION} from './system/synchronousPacketR314';
+import {R314_MOTION_RELATIVITY_SCHEMA} from './system/motionRelativityR314';
 import './omegaConvergenceMasterR314.css';
 
 const label=(value:string)=>value.replaceAll('_',' ');
@@ -24,6 +26,12 @@ export default function OmegaConvergenceMasterR314(){
    <article><span>Archive families</span><b>{residual.archive.total}</b><small>{residual.archive.incomplete} not fully active · {residual.archive.priority1} priority-1 residuals</small></article>
    <article><span>Build graph</span><b>{residual.build.total}</b><small>{residual.build.invalidDependencies.length} invalid dependencies</small></article>
    <article><span>Residual pressure</span><b>{residual.archive.residualPressure}</b><small>deterministic scheduler pressure, not a scientific score</small></article>
+  </div>
+  <div className='r314-kpis' data-r314-runtime-spine>
+   <article><span>Synchronous packet spine</span><b>{R314_SYNCHRONOUS_PACKET_REVISION}</b><small>{R314_SYNCHRONOUS_PACKET_SCHEMA} · unit/frame/multi-clock/provenance contract</small></article>
+   <article><span>Motion / relativity kernel</span><b>R314</b><small>{R314_MOTION_RELATIVITY_SCHEMA} · rigid frame graph + observer projection + finite-difference motion</small></article>
+   <article><span>State rule</span><b>ONE</b><small>observer transforms alter projection, never canonical existence</small></article>
+   <article><span>Address rule</span><b>≠ D</b><small>12→144→1,728→20,736→248,832 remain representation/address resolution levels</small></article>
   </div>
 
   <details className='r314-chart' open>
