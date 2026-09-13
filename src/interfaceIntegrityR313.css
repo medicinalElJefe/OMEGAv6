@@ -148,6 +148,30 @@
     width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important;
     max-width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important;
   }
+
+  /* R313.11 EXPANDED-NAV INTRINSIC FLOW LAW
+     The remaining R241 failure occurs only after the canonical navigator stays expanded
+     for the exhaustive route traversal. A focused diagnostic can document-scroll and
+     hit the same ten Command Center controls, proving their actions and basic geometry.
+     Remove the last grid-track sizing variable from that constrained state: application
+     controls and the retained truth visual become ordinary intrinsic block-flow flex
+     items. This prevents implicit grid tracks/min-content sizing from making the prompt
+     visually present while excluding it from the scrolling element's reachable range.
+     No control, route, visual, source meaning, or authority is removed or bypassed. */
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-stage{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    min-height:0!important;
+    width:100%!important;
+  }
+
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt,
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-visual{
+    flex:0 0 auto!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
 }
 
 .omega-workstation-v2 .workstation-main :where(button,[role='button'],input,textarea,select,summary){
