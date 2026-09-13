@@ -4,6 +4,8 @@ export const DRIVE_CANON_SOURCE=Object.freeze({
   donorDriveFileId:'1yDFcTO9_f2sdmGC-INRpV-LMQb1n4E_v',
   runtimeWorkbook:'Mode188_Unified_Runtime_20736D_SYNCED.xlsx',
   runtimeWorkbookDriveFileId:'1Q9hKgW6R7jxzDFnGoaj0BokJAHixp5OU',
+  runtimeControlSheet:'Runtime_Control',
+  runtimeFormulaSheet:'Atlas_20736_Runtime',
   states:20736,
   baseStates:1728,
   domains:12,
@@ -30,11 +32,13 @@ export const DRIVE_CANON_SOURCE=Object.freeze({
     constructPrune:'ΔF=K-P',
     scarMemory:'Σ(t+1)=ρΣ(t)+(1-ρ)|Δstate|',
     motionDrive:'M=|dC/dt|+|dΦ/dt|+|dΣ/dt|',
-    canonGate:'R<=5 => redistribute before optimize'
+    canonGate:'R<=5 => redistribute before optimize',
+    mode188Sratio:'Sratio=CΩ/(Λ+q+γ(Λ·q)+ε)',
+    mode188Decision:'STAY when Sratio>=1.05 outside D10/D11; ESCALATE when Sratio<0.75 or D11 with q>0.5; otherwise TURN'
   },
-  controls:{Gamma_LambdaQ:.35,Epsilon:.05,Stay_Threshold:1.05,Turn_Threshold:.9,Escalate_Threshold:.75,Adjacency_Weight:.12,Congruence_Weight:.18},
+  controls:{Gamma_LambdaQ:.35,Epsilon:.05,Stay_Threshold:1.05,Turn_Threshold:.9,Escalate_Threshold:.75,Adjacency_Weight:.12,Congruence_Weight:.18,Host_Coverage_Weight:.22,Seed_Weight:.26,Regulation_Weight:.22,Mode:188},
   proofSnapshot:{atlasRows:20736,avgContinuity:1.337719165900511,avgLedger:.1138127922913544,avgContradiction:.03701020541169425,avgRatio:9.57031183284858},
-  boundary:'Drive-derived canon/runtime metadata is embedded as a source contract. The browser renderer is a representational instrument; physical claims remain measurement-gated.'
+  boundary:'Drive-derived canon/runtime metadata is embedded as a source contract. R311 binds the complete Runtime_Control parameter set and exact Mode-188 Sratio/decision expressions recovered from the declared Drive workbook. Browser packet channels remain source-derived runtime inputs; physical claims remain measurement-gated.'
 } as const);
 
 export const DRIVE_DOMAINS=['Structure','Motion','Boundary','Coupling','Memory','Constraint','Translation','Recurrence','Variation','Selection','Integration','Continuity'] as const;

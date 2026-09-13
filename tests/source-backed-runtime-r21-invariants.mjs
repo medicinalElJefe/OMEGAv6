@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const runtime=read('src/sourceBackedModeRuntimeR21.ts');
+const drive=read('src/driveCanonSource.ts');
+const mode188=read('src/mode188DriveRuntimeR311.ts');
 const panel=read('src/SourceBackedModesPanelR21.tsx');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const loader=fs.existsSync(new URL('../src/specialistLoaderR109.tsx',import.meta.url))?read('src/specialistLoaderR109.tsx'):'';
@@ -26,6 +28,13 @@ assert.match(runtime,/exact\('M020','Unified Coherence full blend'/,'Full Canon 
 assert.match(runtime,/gated\('M017','RAFT-188'/,'RAFT-188 must remain gated until its authoritative terms exist');
 assert.match(runtime,/gated\('M018','Gamma Admission Loop'/,'Gamma admission must remain gated until calibrated proof inputs exist');
 assert.match(runtime,/gated\('M019','Renderer Cluster'/,'Renderer cluster must remain gated until authoritative weights exist');
+assert.match(runtime,/evaluateMode188DriveRuntimeR311/,'R311 Drive Mode188 runtime must be bound into source-backed summary');
+assert.match(runtime,/mode188Drive/,'R311 Drive Mode188 result must remain addressable downstream');
+for(const token of ['runtimeControlSheet','runtimeFormulaSheet','mode188Sratio','mode188Decision','Host_Coverage_Weight:.22','Seed_Weight:.26','Regulation_Weight:.22','Mode:188'])assert.ok(drive.includes(token),`R311 Drive source contract missing ${token}`);
+for(const token of ['OMEGA_MODE188_DRIVE_RUNTIME_R311','Sratio=CΩ/(Λ+q+γ(Λ·q)+ε)','FORMULA_EXACT_PACKET_INPUTS','Stay_Threshold','Turn_Threshold','Escalate_Threshold','turnCorridor','escalationCorridor','packetGateComparable','canonicalMutation:false','empirical:false','auditMode188DriveRuntimeR311'])assert.ok(mode188.includes(token),`R311 Mode188 runtime missing ${token}`);
+assert.ok(mode188.includes("domain===10||domain===11"),'R311 must preserve the donor D10/D11 turn corridor');
+assert.ok(mode188.includes("domain===11&&q>.5"),'R311 must preserve the donor D11 contradiction escalation corridor');
+assert.ok(mode188.includes("sratio>=controls.Stay_Threshold&&!turnCorridor?'STAY':sratio<controls.Escalate_Threshold||escalationCorridor?'ESCALATE':'TURN'"),'R311 decision order must exactly preserve the donor workbook gate');
 assert.match(runtime,/autoPing\.dataNext/);
 assert.match(runtime,/No interpolated state is presented as source data/);
 assert.match(panel,/179 catalog entries are loaded as source metadata, not automatically called/);
@@ -51,4 +60,4 @@ assert.doesNotMatch(nav,/nav20-desktop|nav20-context|nav20-mobile-sheet/);
 assert.match(corpus,/function scoreForText/); // legacy affinity catalog still exists, but is no longer execution authority.
 assert.doesNotMatch(runtime,/@appdeploy\/client/);
 assert.doesNotMatch(panel,/@appdeploy\/client/);
-console.log('R308/R27/R109/R140 SOURCE-BACKED RUNTIME PASS · Full Canon Mother/Father/coherence terms recovered from exact 20,736-row address geometry · remaining unsupported operators gated · single-frame operational navigation · canonical traversal retained');
+console.log('R311/R308/R27/R109/R140 SOURCE-BACKED RUNTIME PASS · exact Drive Mode188 Sratio/decision law bound to source-derived packet inputs · Full Canon Mother/Father/coherence retained · remaining unsupported operators gated · canonical traversal retained');
