@@ -71,6 +71,8 @@ async function clickRoute(page,route){
 }
 
 async function runtimeControlAudit(){
+  const selector='.workstation-main button,.workstation-main [role="button"]';
+  const clean=el=>(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||el.getAttribute('value')||'').replace(/\s+/g,' ').trim();
   const visible=el=>{
     const s=getComputedStyle(el),r=el.getBoundingClientRect();
     return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0;
@@ -80,14 +82,104 @@ async function runtimeControlAudit(){
     return {};
   };
   const listenerBound=(el,type)=>typeof globalThis.__omegaR286HasListener==='function'&&globalThis.__omegaR286HasListener(el,type)===true;
-  const controls=[...document.querySelectorAll('.workstation-main button,.workstation-main [role="button"]')].filter(visible);
+  const initial=[...document.querySelectorAll(selector)].filter(visible);
+  const occurrenceByKey=new Map();
+  const probes=initial.map((el,index)=>{
+    const tag=el.tagName.toLowerCase();
+    const fullLabel=clean(el);
+    const key=`${tag}\u0000${fullLabel}`;
+    const occurrence=occurrenceByKey.get(key)||0;
+    occurrenceByKey.set(key,occurrence+1);
+    const id=`r286-live-control-${index}`;
+    el.setAttribute('data-r286-probe-id',id);
+    return{id,tag,fullLabel,occurrence};
+  });
+  const resolveProbe=probe=>{
+    let el=document.querySelector(`[data-r286-probe-id="${CSS.escape(probe.id)}"]`);
+    if(el&&visible(el))return el;
+    const candidates=[...document.querySelectorAll(selector)].filter(visible).filter(candidate=>candidate.tagName.toLowerCase()===probe.tag&&clean(candidate)===probe.fullLabel);
+    el=candidates[probe.occurrence]||null;
+    if(el)el.setAttribute('data-r286-probe-id',probe.id);
+    return el;
+  };
+  const settle=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   const failures=[];
   let disabled=0;
   const signatures=[];
-  for(const el of controls){
+
+  for(const probe of probes){
+    const displayLabel=probe.fullLabel.slice(0,120)||'unnamed';
+    let el=resolveProbe(probe);
+    if(!el){
+      failures.push(`${displayLabel} disappeared without a live replacement before audit`);
+      continue;
+    }
+
+    let reachable=false;
+    let finalRect=null;
+    let blocker=null;
+    let reachFailure='could not be scrolled to a reachable viewport hit region';
+
+    // A route may legitimately re-render presentation nodes while scroll settlement
+    // completes. Audit the current live replacement, not a detached pre-scroll node.
+    // Three bounded attempts preserve fail-closed reachability while eliminating stale
+    // DOM-reference false negatives exposed by the Command Center diagnostic.
+    for(let attempt=0;attempt<3;attempt++){
+      el=resolveProbe(probe);
+      if(!el){
+        reachFailure='disappeared without a live replacement during scroll settlement';
+        break;
+      }
+      el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});
+      await settle();
+      el=resolveProbe(probe);
+      if(!el){
+        reachFailure='remounted without a resolvable live replacement after scrolling';
+        continue;
+      }
+      const rect=el.getBoundingClientRect();
+      finalRect=rect;
+      const geometry=[rect.left,rect.right,rect.top,rect.bottom,rect.width,rect.height,innerWidth,innerHeight];
+      if(!geometry.every(Number.isFinite)){
+        reachFailure='returned non-finite viewport geometry';
+        continue;
+      }
+      if(rect.width<8||rect.height<8){
+        reachFailure=`has unusable ${Math.round(rect.width)}×${Math.round(rect.height)} hit geometry`;
+        continue;
+      }
+      const left=Math.max(rect.left,1),right=Math.min(rect.right,innerWidth-1),topEdge=Math.max(rect.top,1),bottom=Math.min(rect.bottom,innerHeight-1);
+      const hitWidth=right-left,hitHeight=bottom-top;
+      if(!Number.isFinite(hitWidth)||!Number.isFinite(hitHeight)||hitWidth<2||hitHeight<2){
+        reachFailure='could not be scrolled to a reachable viewport hit region';
+        continue;
+      }
+      const insetX=Math.min(4,Math.max(.5,hitWidth*.08)),insetY=Math.min(4,Math.max(.5,hitHeight*.08));
+      const x0=left+insetX,x1=right-insetX,y0=topEdge+insetY,y1=bottom-insetY;
+      const xs=[(x0+x1)/2,x0+(x1-x0)*.25,x0+(x1-x0)*.75];
+      const ys=[(y0+y1)/2,y0+(y1-y0)*.25,y0+(y1-y0)*.75];
+      const points=[[xs[0],ys[0]],[xs[1],ys[1]],[xs[2],ys[1]],[xs[1],ys[2]],[xs[2],ys[2]],[xs[1],ys[0]],[xs[2],ys[0]],[xs[0],ys[1]],[xs[0],ys[2]]];
+      blocker=null;
+      for(const [x,y] of points){
+        if(!Number.isFinite(x)||!Number.isFinite(y))continue;
+        const hit=document.elementFromPoint(x,y);
+        if(hit&&(hit===el||el.contains(hit)||hit.contains(el))){reachable=true;break}
+        if(!blocker&&hit)blocker=hit;
+      }
+      if(reachable)break;
+      const blockerName=blocker?`${blocker.tagName.toLowerCase()}.${[...blocker.classList].slice(0,2).join('.')}`:'none';
+      reachFailure=`has no unobscured hit point in its visible viewport intersection; blocker ${blockerName}`;
+    }
+
+    el=resolveProbe(probe);
+    if(!el){
+      failures.push(`${displayLabel} ${reachFailure}`);
+      continue;
+    }
+
     const tag=el.tagName.toLowerCase();
     const p=reactProps(el);
-    const label=(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||el.getAttribute('value')||'').replace(/\s+/g,' ').trim().slice(0,120);
+    const label=clean(el).slice(0,120);
     const isDisabled=Boolean(el.disabled)||el.getAttribute('aria-disabled')==='true';
     const pointer=getComputedStyle(el).pointerEvents;
     const clickBound=typeof p.onClick==='function'||typeof p.onPointerUp==='function'||typeof p.onPointerDown==='function'||typeof p.onMouseUp==='function'||typeof p.onMouseDown==='function'||typeof el.onclick==='function'||listenerBound(el,'click')||listenerBound(el,'pointerup')||listenerBound(el,'pointerdown');
@@ -100,50 +192,22 @@ async function runtimeControlAudit(){
     const roleButton=tag!=='button'&&el.getAttribute('role')==='button';
     const keyboardBound=typeof p.onKeyDown==='function'||typeof p.onKeyUp==='function'||typeof p.onKeyPress==='function'||listenerBound(el,'keydown')||listenerBound(el,'keyup');
     const anchorKeyboard=tag==='a'&&Boolean(el.getAttribute('href'));
+
     if(isDisabled){disabled++;continue}
     if(!label)failures.push('unnamed enabled control');
     if(pointer==='none')failures.push(`${label||'unnamed'} has pointer-events:none while enabled`);
     if(!actionBound)failures.push(`${label||'unnamed'} has no runtime click/pointer/form action binding`);
     if(roleButton&&!anchorKeyboard&&!keyboardBound)failures.push(`${label||'unnamed'} role=button has no runtime keyboard activation`);
-
-    el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    const rect=el.getBoundingClientRect();
-    const geometry=[rect.left,rect.right,rect.top,rect.bottom,rect.width,rect.height,innerWidth,innerHeight];
-    if(!geometry.every(Number.isFinite)){
-      failures.push(`${label||'unnamed'} returned non-finite viewport geometry`);
-    }else{
-      if(rect.width<8||rect.height<8)failures.push(`${label||'unnamed'} has unusable ${Math.round(rect.width)}×${Math.round(rect.height)} hit geometry`);
-      const left=Math.max(rect.left,1),right=Math.min(rect.right,innerWidth-1),topEdge=Math.max(rect.top,1),bottom=Math.min(rect.bottom,innerHeight-1);
-      const hitWidth=right-left,hitHeight=bottom-top;
-      if(!Number.isFinite(hitWidth)||!Number.isFinite(hitHeight)||hitWidth<2||hitHeight<2){
-        failures.push(`${label||'unnamed'} could not be scrolled to a reachable viewport hit region`);
-      }else{
-        const insetX=Math.min(4,Math.max(.5,hitWidth*.08)),insetY=Math.min(4,Math.max(.5,hitHeight*.08));
-        const x0=left+insetX,x1=right-insetX,y0=topEdge+insetY,y1=bottom-insetY;
-        const xs=[(x0+x1)/2,x0+(x1-x0)*.25,x0+(x1-x0)*.75];
-        const ys=[(y0+y1)/2,y0+(y1-y0)*.25,y0+(y1-y0)*.75];
-        const points=[[xs[0],ys[0]],[xs[1],ys[1]],[xs[2],ys[1]],[xs[1],ys[2]],[xs[2],ys[2]],[xs[1],ys[0]],[xs[2],ys[0]],[xs[0],ys[1]],[xs[0],ys[2]]];
-        let reachable=false,blocker=null;
-        for(const [x,y] of points){
-          if(!Number.isFinite(x)||!Number.isFinite(y))continue;
-          const hit=document.elementFromPoint(x,y);
-          if(hit&&(hit===el||el.contains(hit)||hit.contains(el))){reachable=true;break}
-          if(!blocker&&hit)blocker=hit;
-        }
-        if(!reachable){
-          const blockerName=blocker?`${blocker.tagName.toLowerCase()}.${[...blocker.classList].slice(0,2).join('.')}`:'none';
-          failures.push(`${label||'unnamed'} has no unobscured hit point in its visible viewport intersection; blocker ${blockerName}`);
-        }
-      }
-    }
+    if(!reachable)failures.push(`${label||'unnamed'} ${reachFailure}`);
+    if(finalRect&&(finalRect.width<8||finalRect.height<8))failures.push(`${label||'unnamed'} has unusable ${Math.round(finalRect.width)}×${Math.round(finalRect.height)} hit geometry`);
     signatures.push(`${tag}:${label}:${clickBound?'click':formBound?'form':nativeFormAction?'formaction':'none'}`);
   }
+
   const main=document.querySelector('.workstation-main');
   const mainRect=main?.getBoundingClientRect();
   const overflow=Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth;
   const textLength=(main?.textContent||'').replace(/\s+/g,' ').trim().length;
-  return{count:controls.length,disabled,failures:[...new Set(failures)],signatures:[...new Set(signatures)],width:mainRect?.width||0,height:mainRect?.height||0,overflow,textLength};
+  return{count:probes.length,disabled,failures:[...new Set(failures)],signatures:[...new Set(signatures)],width:mainRect?.width||0,height:mainRect?.height||0,overflow,textLength};
 }
 
 function panelStructureAudit(route){
