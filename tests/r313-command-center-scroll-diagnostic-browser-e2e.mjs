@@ -19,14 +19,19 @@ try{
   const context=await browser.newContext({viewport:{width:1440,height:960},deviceScaleFactor:1});
   const page=await context.newPage();
   await page.goto(`${base}/?r313-scroll-diagnostic=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45000});
-  await page.waitForSelector('.omega-workstation-v2',{timeout:30000});
 
+  // Enter the workstation through the canonical navigator from whatever initial
+  // surface the product mounts. Do not assume the workstation exists on Home.
+  await page.waitForSelector('.r94-side-navigator,button[aria-label="Expand OMEGA navigator"],.r89-flat-route',{timeout:30000});
   if(!(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))){
     const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
-    await expand.first().click({timeout:10000});
-    await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
+    if(await expand.count()){
+      await expand.first().click({timeout:10000});
+      await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
+    }
   }
 
+  await page.waitForSelector('.r89-flat-route',{timeout:20000});
   const routes=page.locator('.r89-flat-route');
   const count=await routes.count();
   let commandRoute=null;
@@ -38,6 +43,7 @@ try{
   if(!commandRoute)throw new Error('R313 diagnostic: Command Center route missing');
   await commandRoute.scrollIntoViewIfNeeded();
   await commandRoute.click({timeout:10000});
+  await page.waitForSelector('.omega-workstation-v2',{timeout:30000});
   await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Command Center',{timeout:20000});
   await page.waitForTimeout(250);
 
