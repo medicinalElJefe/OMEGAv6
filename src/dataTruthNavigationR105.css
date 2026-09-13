@@ -44,6 +44,15 @@
 .inf36-archive .inf36-toolbar{margin:0;padding:10px 14px;border-top:0}
 .inf36-archive .inf36-row-selector{padding:10px 14px}
 
+/* R313.26 — closed Infinity archive specificity repair.
+   Mobile specialist rules intentionally promote the archive toolbar and row selector
+   with display:flex!important when the disclosure is open. Their route-specific
+   specificity must never override the native closed-details contract: when the archive
+   is closed, only its summary participates in layout, paint and hit testing. */
+.omega-workstation-v2[data-panel='Infinity'] details.inf36-archive:not([open])>:not(summary){
+ display:none!important;
+}
+
 .r50-delta-ledger [data-r105-history='retained']{opacity:.76}
 
 @media(max-width:900px){
