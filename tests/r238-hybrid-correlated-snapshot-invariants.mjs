@@ -27,9 +27,12 @@ for(const token of [
  "Date.now()-snapshot.observedAt>POLL_MS*4"
 ])must(provider.includes(token),`R238 shared snapshot invariant missing ${token}`);
 
-must(provider.includes('const POLL_MS=2500'),'R267/R270 must not alter the established R238 polling cadence');
-must(!provider.includes('ACTIVE_POLL_MS')&&!provider.includes('IDLE_POLL_MS'),'R270 must not introduce adaptive polling semantics');
+must(provider.includes('const POLL_MS=2500'),'R267/R270/R309 must not alter the established R238 polling cadence');
+must(!provider.includes('ACTIVE_POLL_MS')&&!provider.includes('IDLE_POLL_MS'),'R270/R309 must not introduce adaptive polling semantics');
 must(!provider.includes('jobs.find((job:any)=>job.id===mission.currentJobId)'),'R267 mission correlation must use the indexed job map rather than repeated linear lookup');
+
+// R309 adds a read-only known-device plane without weakening current online execution selection.
+for(const token of ['knownDevices:any[]','const knownDevices=useMemo','const onlineDevices=useMemo(()=>knownDevices.filter','onlineDevices.find((row:any)=>row?.id===selectedDeviceId)||onlineDevices[0]','onlineDevices.length===0?knownDevices.find','if(id&&!knownDevices.some'])must(provider.includes(token),`R309 known-device history invariant missing ${token}`);
 
 const providerHybridGets=(provider.match(/api\.get<any>\('\/api\/hybrid\/status'\)/g)||[]).length;
 const providerMissionGets=(provider.match(/api\.get<any>\('\/api\/missions'\)/g)||[]).length;
@@ -43,8 +46,8 @@ for(const [name,text] of [['R212',hostEffects],['R237',deck]]){
 
 for(const token of [
  'data-r212-selected-device','data-r212-snapshot-epoch','selectedDeviceJobs.filter','otherHostTerminalCount',
- 'same selected authenticated host and the same atomic Hybrid/Mission snapshot epoch','last successful shared snapshot remains displayed'
-])must(hostEffects.includes(token),`R238 R212 correlation invariant missing ${token}`);
+ 'atomic Hybrid/Mission snapshot epoch','last successful shared snapshot remains displayed','OFFLINE HISTORY INSPECTION'
+])must(hostEffects.includes(token),`R309 R212 correlation invariant missing ${token}`);
 for(const token of [
  'data-r237-selected-device','data-r237-snapshot-epoch','snapshotCurrent=epoch>0&&!stale','requireCurrentSnapshot','nativeReady=Boolean(snapshotCurrent',
  'const correlationLocked=Boolean(snapshotCurrent&&device)','selectedDeviceJobs.filter','snapshotEpoch:epoch','snapshotObservedAt:observedAt',
@@ -62,4 +65,4 @@ must(hybrid.indexOf('<HybridHostEffectsR212/>')<hybrid.indexOf('<HybridCommandDe
 for(const token of ['R125 admission authority','R141 exact return closure','R146 history','R147 executor/dispatch authority'])must(hybrid.includes(token),`R238 authority boundary regressed ${token}`);
 for(const text of [provider,hostEffects])for(const forbidden of ["api.post<any>('/api/hybrid/jobs'","op:'APPLY_PATCH'","op:'WRITE_TEXT'"])must(!text.includes(forbidden),`R238 read-only sampling/observation plane introduced mutation primitive ${forbidden}`);
 
-console.log('OMEGA R238/R267/R270 HYBRID CORRELATED SNAPSHOT PASS · exactly one workstation-scoped Hybrid/Mission polling owner · Hybrid + Foundry share selected device and epoch · unchanged 2.5s cadence/stale gate · no duplicate poller · R141/R146/R147/R125 preserved');
+console.log('OMEGA R309/R238/R267/R270 HYBRID CORRELATED SNAPSHOT PASS · one polling owner · online execution selection retained · offline known-host read-only history admitted only without online authority · unchanged 2.5s cadence/stale gate · R141/R146/R147/R125 preserved');
