@@ -21,6 +21,9 @@ assert.ok(!settle.includes("requestAnimationFrame(()=>{main?.scrollTo"),'R313 mu
 assert.ok(!settle.includes("requestAnimationFrame(()=>{window.scrollTo"),'R313 must not issue a delayed corrective window scroll that can overwrite destination interaction');
 assert.match(provenanceCss,/\.r94-representational-disclosure:not\(\[open\]\)>:not\(summary\)\{display:none!important\}/,'R313 closed representational disclosures must remove authored-grid descendants from layout, hit testing and control inventory');
 assert.match(integrityCss,/\.omega-workstation-v2 details:not\(\[open\]\)>:not\(summary\)\s*\{\s*display:none!important;/,'R313 every closed workstation disclosure must remove author-displayed descendants from layout and hit testing');
+assert.ok(integrityCss.includes(".omega-workstation-v2[data-panel='Convergence'] .r138-capability-first"),'R313 must explicitly contain accumulated Convergence composition on mobile');
+assert.ok(integrityCss.includes('overflow-x:clip!important'),'R313 Convergence containment must clip without creating a programmatically scrollable hidden horizontal membrane');
+assert.ok(integrityCss.includes(".r138-capability-layout,.r240-calculus-address,.r168-restoration,.r126-max"),'R313 must constrain the known accumulated Convergence application roots to the canonical surface width');
 
 // Authority assertions apply to executable TypeScript, not explanatory comments.
 const executableSettle=settle
@@ -44,4 +47,4 @@ for(const forbiddenApi of [
 ]){
   assert.doesNotMatch(executableSettle,forbiddenApi,'R313 scroll settlement must remain DOM-presentation-only');
 }
-console.log('R313.25 NAVIGATION + DISCLOSURE SETTLEMENT INVARIANTS PASS · stable single scroll membrane · route top settles synchronously · legacy reset suppressed without wrapper stacking · every closed workstation disclosure removes authored descendants from layout and hit testing');
+console.log('R313.26 NAVIGATION + DISCLOSURE + MOBILE CONVERGENCE INVARIANTS PASS · stable route scroll membrane · native disclosure layout · accumulated Convergence roots constrained to canonical mobile inline size');
