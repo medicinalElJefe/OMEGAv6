@@ -82,7 +82,12 @@ export class R314FrameGraph{
   while(queue.length){const [id,chain]=queue.shift()!;for(const edge of this.edges.get(id)||[]){if(seen.has(edge.toFrameId))continue;const next=chain?composeRigidTransformsR314(chain,edge):edge;if(edge.toFrameId===toFrameId)return next;seen.add(edge.toFrameId);queue.push([edge.toFrameId,next])}}
   throw new Error(`R314 no transform path ${fromFrameId} -> ${toFrameId}`);
  }
- transformPoint(point:R314Vec3,fromFrameId:string,toFrameId:string){return applyRigidTransformR314(this.resolve(fromFrameId,toFrameId),point)}
+ transformPoint(point:R314Vec3,fromFrameId:string,toFrameId:string){
+  if(!finiteVec(point))throw new Error('R314 point must be finite');
+  if(!this.frames.has(fromFrameId)||!this.frames.has(toFrameId))throw new Error('R314 unknown frame');
+  if(fromFrameId===toFrameId)return{...point};
+  return applyRigidTransformR314(this.resolve(fromFrameId,toFrameId),point);
+ }
 }
 
 function packetPositionMeters(packet:R314SynchronousPacket<R314Vec3>):R314Vec3{
