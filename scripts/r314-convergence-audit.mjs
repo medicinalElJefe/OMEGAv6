@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {residualVectorR314} from '../src/system/autonomousConvergenceR314.js';
 
 const read=file=>fs.readFileSync(file,'utf8');
@@ -52,7 +53,8 @@ export function auditR314(root=process.cwd()){
  const archives=archiveIds(archiveSource);
  const stages=buildStageIds(masterSource);
  const roadmap=normalizeRoadmap(state);
- const realTargets=roadmap.filter(row=>typeof row?.target==='string'&&!row.target.startsWith('src/generated/selfbuildR170/'));
+ const realRoadmapTargets=roadmap.filter(row=>typeof row?.target==='string'&&!row.target.startsWith('src/generated/selfbuildR170/'));
+ const realizedRealTargets=realRoadmapTargets.filter(row=>exists(path.join(root,row.target)));
  const targetFamilies=unique(roadmap.map(row=>String(row?.target||'').split('/').slice(0,2).join('/')).filter(Boolean));
  const residuals=[];
 
@@ -62,9 +64,10 @@ export function auditR314(root=process.cwd()){
  if(!workflowSource.includes('schedule:'))residuals.push({id:'R314-CLOUD-SCHEDULE',severity:'HIGH',mode:'QUEUE_FOR_REVIEW',summary:'Existing governed self-build workflow has no cloud schedule',source:'.github/workflows/r170-governed-selfbuild.yml'});
  if(Number(state?.maxAutonomousGenerations||0)<=5)residuals.push({id:'R314-STATIC-GENERATION-CAP',severity:'HIGH',mode:'QUEUE_FOR_REVIEW',summary:`Self-build maxAutonomousGenerations=${state?.maxAutonomousGenerations??'missing'} prevents sustained convergence`,source:'public/omega-r170-selfbuild-state.json'});
  if(roadmap.length<=5)residuals.push({id:'R314-STATIC-CAPSULE-ROADMAP',severity:'HIGH',mode:'QUEUE_FOR_REVIEW',summary:`Self-build roadmap has only ${roadmap.length} capsules`,source:'public/omega-r170-selfbuild-state.json'});
- if(realTargets.length===0)residuals.push({id:'R314-GENERATED-ONLY-MUTATION',severity:'CRITICAL',mode:'BLOCK',summary:'All autonomous targets remain generated/projection files; no exact allowlisted product source repair can occur',source:'R170 workflow + state'});
+ if(realRoadmapTargets.length===0)residuals.push({id:'R314-GENERATED-ONLY-ROADMAP',severity:'CRITICAL',mode:'BLOCK',summary:'Autonomous roadmap contains no exact allowlisted product-source repair target',source:'R170 workflow + state'});
+ if(realizedRealTargets.length===0)residuals.push({id:'R314-NO-REALIZED-SOURCE-REPAIR',severity:'HIGH',mode:'QUEUE_FOR_REVIEW',summary:'No roadmap-defined product-source repair has yet been realized in the checked source tree',source:'R170 workflow + state'});
  if(!workflowSource.includes('src/generated/selfbuildR170/'))residuals.push({id:'R314-SELFBUILD-ALLOWLIST-MISSING',severity:'CRITICAL',mode:'BLOCK',summary:'Expected current generated-target boundary was not found; inspect workflow authority before broadening mutation',source:'.github/workflows/r170-governed-selfbuild.yml'});
- if(!engineSource.includes('refuses overwrite')&&!engineSource.includes('existsSync')&&!engineSource.includes('writeFile'))residuals.push({id:'R314-SELFBUILD-ENGINE-UNKNOWN',severity:'HIGH',mode:'QUEUE_FOR_REVIEW',summary:'Self-build engine mutation semantics could not be identified',source:'scripts/r170-selfbuild-engine.mjs'});
+ if(!engineSource.includes('existsSync')&&!engineSource.includes('writeFile'))residuals.push({id:'R314-SELFBUILD-ENGINE-UNKNOWN',severity:'HIGH',mode:'QUEUE_FOR_REVIEW',summary:'Self-build engine mutation semantics could not be identified',source:'scripts/r170-selfbuild-engine.mjs'});
  if(!masterSource.includes('BUILD_PROGRESS_REQUIRES_EVIDENCED_RESIDUAL_REDUCTION'))residuals.push({id:'R314-NO-GAIN-LAW',severity:'CRITICAL',mode:'BLOCK',summary:'Convergence master lacks measurable residual reduction law',source:'src/convergenceMasterR314.ts'});
  if(!masterSource.includes('SYNCHRONOUS_DATA_REQUIRES_EXPLICIT_CLOCK_FRAME_UNIT_AND_PROVENANCE_BINDING'))residuals.push({id:'R314-SYNC-SPINE-LAW',severity:'HIGH',mode:'QUEUE_FOR_REVIEW',summary:'Convergence master lacks explicit synchronous clock/frame/unit/provenance binding',source:'src/convergenceMasterR314.ts'});
 
@@ -72,9 +75,9 @@ export function auditR314(root=process.cwd()){
  return {
   schema:'OMEGA_R314_CONVERGENCE_AUDIT',
   generatedAt:new Date().toISOString(),
-  counts:{capabilities,archiveFamilies:archives.length,buildStages:stages.length,selfBuildCapsules:roadmap.length,realSourceTargets:realTargets.length,targetFamilies:targetFamilies.length},
+  counts:{capabilities,archiveFamilies:archives.length,buildStages:stages.length,selfBuildCapsules:roadmap.length,realRoadmapTargets:realRoadmapTargets.length,realizedRealTargets:realizedRealTargets.length,targetFamilies:targetFamilies.length},
   ids:{archiveFamilies:archives,buildStages:stages},
-  selfBuild:{active:Boolean(state?.active),generation:Number(state?.generation||0),maxAutonomousGenerations:Number(state?.maxAutonomousGenerations||0),capsules:roadmap.map(row=>({id:row.id,target:row.target,status:row.status||null,repairId:row.repairId||null,mutationClass:row.mutationClass||null})),realSourceTargets:realTargets.map(row=>row.target)},
+  selfBuild:{active:Boolean(state?.active),generation:Number(state?.generation||0),maxAutonomousGenerations:Number(state?.maxAutonomousGenerations||0),capsules:roadmap.map(row=>({id:row.id,target:row.target,status:row.status||null,repairId:row.repairId||null,mutationClass:row.mutationClass||null})),realRoadmapTargets:realRoadmapTargets.map(row=>row.target),realizedRealTargets:realizedRealTargets.map(row=>row.target)},
   residuals:vector.residuals,
   state:vector.state,
   pressure:vector.pressure,
@@ -84,7 +87,7 @@ export function auditR314(root=process.cwd()){
  };
 }
 
-if(import.meta.url===new URL(`file://${process.argv[1]}`).href){
+if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
  const args=parseArgs(process.argv.slice(2));
  const result=auditR314();
  const body=JSON.stringify(result,null,args.pretty?2:0)+'\n';
