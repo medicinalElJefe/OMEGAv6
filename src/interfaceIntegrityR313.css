@@ -36,18 +36,30 @@
 }
 
 /* Desktop Command Center is a split application, not an infinitely tall document.
-   Keep the prompt/actions column inside a viewport-bounded scroll authority so
-   scrollIntoView, keyboard focus and pointer targeting can always bring every
-   real control into an unobscured hit region.  This repairs the shared R286
-   failure affecting quick prompts, orchestrator actions and traversal links. */
+   Bound the split stage itself, not only the prompt child.  Grid children default
+   to min-height:auto, which can preserve intrinsic content height and defeat a
+   descendant scrollbar.  minmax(0,1fr) + min-height:0 establishes one explicit
+   viewport-bounded scroll authority while preserving the visual field. */
 @media (min-width:901px){
+  .omega-workstation-v2[data-panel='Command Center'] .command-deck{
+    min-height:0!important;
+  }
+
   .omega-workstation-v2[data-panel='Command Center'] .command-stage{
     align-items:stretch;
+    min-height:0!important;
+    max-height:calc(100dvh - 156px);
+    grid-template-rows:minmax(0,1fr)!important;
+    overflow:hidden!important;
+  }
+
+  .omega-workstation-v2[data-panel='Command Center'] .command-visual,
+  .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+    min-height:0!important;
+    max-height:100%!important;
   }
 
   .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
-    min-height:0!important;
-    max-height:calc(100dvh - 156px);
     overflow-y:auto!important;
     overflow-x:hidden!important;
     overscroll-behavior:contain;
