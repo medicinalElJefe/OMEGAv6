@@ -1,4 +1,5 @@
 import {corpusState} from './corpusRuntime';
+import {evaluateMode188DriveRuntimeR311} from './mode188DriveRuntimeR311';
 
 export const R21_MODE_AUTHORITY={
   schema:'OMEGA_SOURCE_BACKED_MODES_R21',
@@ -9,9 +10,10 @@ export const R21_MODE_AUTHORITY={
     'Dewey_Calculus_20736D_ENTIRE_Full_Canon_Trig_Water_Scar_Mode188_Atlas.xlsx / Formula_Ledger',
     'OMEGA FULL CANON MODE WITH ATLAS / Formula_Ledger + 20,736-row formal atlas',
     'OMEGA_ALL_SOFTWARE_61917364224D_FULL_BUILD_v22.xlsx / TEST_MATRIX_ALL',
-    'OMEGA_Master_Ledger_Milestone03.xlsx / Module_Dependencies'
+    'OMEGA_Master_Ledger_Milestone03.xlsx / Module_Dependencies',
+    'Mode188_Unified_Runtime_20736D_SYNCED.xlsx / Runtime_Control + Atlas_20736_Runtime'
   ],
-  boundary:'Only operators whose required inputs are present in the canonical packet are executed; an exact deterministic reconstruction from the declared Full Canon formal atlas is admitted only as a formal packet input with FORMAL_CANON_ATLAS provenance. Catalog names, semantic similarity and representation dimensions are never treated as execution or empirical proof.'
+  boundary:'Only operators whose required inputs are present in the canonical packet are executed; an exact deterministic reconstruction from the declared Full Canon formal atlas is admitted only as a formal packet input with FORMAL_CANON_ATLAS provenance. R311 additionally recomputes the exact Drive Mode-188 Sratio/decision law from source-derived packet channels without treating those browser channels as fresh empirical measurement. Catalog names, semantic similarity and representation dimensions are never treated as execution or empirical proof.'
 } as const;
 
 export type SourceBackedModeState='EXECUTED_EXACT'|'SOURCE_PACKET'|'DERIVED_RUNTIME'|'GATED_MISSING_INPUTS';
@@ -51,8 +53,8 @@ export function evaluateSourceBackedModes(record:any):SourceBackedModeResult[]{
   const gated=(id:string,name:string,formula:string,source:string,inputs:string[],missing:string[],detail:string):SourceBackedModeResult=>({id,name,state:'GATED_MISSING_INPUTS',formula,source,value:null,inputs,missing,detail});
   return [
     exact('M001','Unified Coherence / Dewey Score','S=(CΩ·Φ)/(q+Λ+ε)','phase2 Mode Ledger + 20736D README',(C*Phi)/(q+Lambda+EPS),['CΩ','Φ','q','Λ'],'Primary decision/coherence kernel with all required packet inputs present.'),
-    exact('M002','Mode 188 lens score','M188=(CΩ+Scar)/(1+q)','phase2 Mode Ledger',(C+scar)/(1+q),['CΩ','Scar','q'],'Exact donor formula; distinct from the categorical Mode188 source gate.'),
-    packet('M003','Mode 188 source gate','source category predict.mode188_gate','20736D source packet',String(record?.metrics?.mode188||'UNKNOWN'),['predict.mode188_gate'],'Exact categorical gate carried by the embedded source packet.'),
+    exact('M002','Mode 188 lens score','M188=(CΩ+Scar)/(1+q)','phase2 Mode Ledger',(C+scar)/(1+q),['CΩ','Scar','q'],'Exact donor lens formula; distinct from the Drive workbook Sratio/decision runtime exposed by sourceBackedModeSummary().mode188Drive.'),
+    packet('M003','Mode 188 source gate','source category predict.mode188_gate','20736D source packet',String(record?.metrics?.mode188||'UNKNOWN'),['predict.mode188_gate'],'Exact categorical gate carried by the embedded source packet. It remains distinct from the R311 Drive Sratio recomputation unless the source category is directly comparable.'),
     exact('M004','Forecast Mode','F_t=CΩ_t+Φ_t-q_t-Λ_t','phase2 Mode Ledger',C+Phi-q-Lambda,['CΩ','Φ','q','Λ'],'Exact time-weighted forward signal formula from the donor ledger; it is a model signal, not future observation.'),
     exact('M005','Prune Mode','Prune=q+Λ-CΩ','phase2 Mode Ledger',q+Lambda-C,['q','Λ','CΩ'],'Exact contradiction/burden pruning pressure.'),
     exact('M006','Host-Centered Runtime','HCR=CΩ_host/(Λ_host+ε)','phase2 Mode Ledger',C/(Lambda+EPS),['CΩ','Λ'],'Exact host-centered continuity-to-burden ratio using the current packet.'),
@@ -74,8 +76,8 @@ export function evaluateSourceBackedModes(record:any):SourceBackedModeResult[]{
 }
 
 export function sourceBackedModeSummary(record:any){
-  const rows=evaluateSourceBackedModes(record),executed=rows.filter(x=>x.state==='EXECUTED_EXACT'),packet=rows.filter(x=>x.state==='SOURCE_PACKET'||x.state==='DERIVED_RUNTIME'),gated=rows.filter(x=>x.state==='GATED_MISSING_INPUTS');
-  return{rows,executed,packet,gated,appliedCount:executed.length+packet.length,exactCount:executed.length,packetCount:packet.length,gatedCount:gated.length,catalogCount:R21_MODE_AUTHORITY.catalogCount,boundary:R21_MODE_AUTHORITY.boundary};
+  const rows=evaluateSourceBackedModes(record),executed=rows.filter(x=>x.state==='EXECUTED_EXACT'),packet=rows.filter(x=>x.state==='SOURCE_PACKET'||x.state==='DERIVED_RUNTIME'),gated=rows.filter(x=>x.state==='GATED_MISSING_INPUTS'),mode188Drive=evaluateMode188DriveRuntimeR311(record);
+  return{rows,executed,packet,gated,mode188Drive,appliedCount:executed.length+packet.length,exactCount:executed.length,packetCount:packet.length,gatedCount:gated.length,catalogCount:R21_MODE_AUTHORITY.catalogCount,boundary:R21_MODE_AUTHORITY.boundary};
 }
 
 export type TraversalStateR21={step:number;address:number;stateId:number;decision:string;C:number;Phi:number;q:number;Lambda:number;scar:number;evidence:number;dewey:number;mode188:number;next:number};
