@@ -168,7 +168,10 @@ async function proveReachable(page,route,probe){
     const resolved=await resolveProbe(page,route,probe);
     if(!resolved){reason='disappeared without a live replacement during reachability proof';continue}
     const locator=page.locator(`[data-r313-control-probe="${probe.id}"]`).first();
-    await locator.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})).catch(()=>{});
+    // Use Playwright's browser-level actionability scroll. This exercises Chromium's
+    // real scroll chain instead of the application-patched Element.scrollIntoView path,
+    // while every geometry, viewport and elementFromPoint assertion below stays strict.
+    await locator.scrollIntoViewIfNeeded({timeout:10000}).catch(()=>{});
     await twoFrames(page);
     const live=await resolveProbe(page,route,probe);
     if(!live){reason='remounted without a resolvable live replacement after scrolling';continue}
