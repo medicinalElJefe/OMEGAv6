@@ -1,29 +1,32 @@
-/* R210/R304 — one readable navigation state across desktop/mobile. This layer changes presentation and focus behavior only; it adds no execution or Canon authority. */
+/* R210/R311 — one readable navigation state across desktop/mobile. This layer changes presentation and focus behavior only; it adds no execution or Canon authority. */
 .r210-converged-nav .r94-nav-panel{overscroll-behavior:contain;scrollbar-gutter:stable;box-shadow:24px 0 72px rgba(0,0,0,.42)}
 .r210-converged-nav :where(button,input,select,textarea,[tabindex]:not([tabindex='-1'])):focus-visible{outline:2px solid rgba(118,221,204,.78)!important;outline-offset:2px!important}
 .r210-converged-nav :where(button,[role='button']){touch-action:manipulation}
 .r210-converged-nav .r88-search:focus-within{border-color:rgba(118,221,204,.52)!important;box-shadow:0 0 0 3px rgba(118,221,204,.08)!important;background:rgba(7,20,24,.98)!important}
 .r210-converged-nav .r89-flat-route{transition:border-color .14s ease,background .14s ease,transform .14s ease}
 .r210-converged-nav .r89-flat-route:hover,.r210-converged-nav .r89-flat-route:focus-visible{border-color:rgba(118,221,204,.30)!important;background:rgba(13,35,39,.94)!important}
-.r210-nav-status{margin:0 10px 6px;padding:0 2px;color:#66817c;font:700 6px/1.3 ui-monospace,monospace;letter-spacing:.07em;text-transform:uppercase}
+.r210-nav-status{margin:0 10px 6px;padding:0 2px;color:#78928d;font:700 9px/1.35 ui-monospace,monospace;letter-spacing:.055em;text-transform:uppercase}
 
 @media(any-pointer:coarse){
  .r210-converged-nav :where(.r88-head-actions button,.r94-rail-action){min-width:44px!important;min-height:44px!important}
- /* R304: do not zero specificity for navigator-mode buttons. R104's compact !important rule is more specific than :where(...), so the old R210 declaration could lose and render ~40px hit targets. */
- .r210-converged-nav .r89-nav-mode button{min-width:44px!important;min-height:44px!important}
- .r210-converged-nav .r89-flat-route{min-height:54px!important}
+ /* R304/R311: do not zero specificity for interactive navigation controls. Earlier compact !important rules can otherwise win and silently shrink real hit targets. */
+ .r210-converged-nav .r89-nav-mode button,
+ .r210-converged-nav .r289-master-menu-filter>button,
+ .r210-converged-nav .r105-workspace-filter>button,
+ .r210-converged-nav .r239-tech-toggle{min-width:44px!important;min-height:44px!important}
+ .r210-converged-nav .r89-flat-route{min-height:58px!important}
 }
 @media(max-width:900px){
- .r210-converged-nav.expanded .r94-nav-panel{width:min(86vw,360px)!important;max-width:min(86vw,360px)!important;min-width:min(300px,calc(100vw - var(--r94-nav-rail) - 12px))!important;background:rgba(4,13,17,.985)!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+ .r210-converged-nav.expanded .r94-nav-panel{width:min(88vw,380px)!important;max-width:min(88vw,380px)!important;min-width:min(310px,calc(100vw - var(--r94-nav-rail) - 12px))!important;background:rgba(4,13,17,.985)!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
  html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home){margin-left:var(--r94-nav-rail)!important;width:calc(100% - var(--r94-nav-rail))!important;max-width:calc(100% - var(--r94-nav-rail))!important}
- .r210-converged-nav .r89-flat-route{min-height:54px!important;grid-template-columns:24px minmax(0,1fr) 14px!important;padding:8px 9px!important}
- .r210-converged-nav .r89-flat-route span>b{font-size:9px!important;line-height:1.2!important}
+ .r210-converged-nav .r89-flat-route{min-height:60px!important;grid-template-columns:26px minmax(0,1fr) 16px!important;padding:9px 10px!important}
+ .r210-converged-nav .r89-flat-route span>b{font-size:12px!important;line-height:1.2!important}
  .r210-converged-nav .r132-route-meta,.r210-converged-nav .r89-flat-route em{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
  .r210-converged-nav .r105-context-note b{white-space:normal!important;text-overflow:clip!important}
- .r210-nav-status{margin-inline:7px}
+ .r210-nav-status{margin-inline:8px;font-size:9px}
 }
 @media(max-width:520px){
- .r210-converged-nav.expanded .r94-nav-panel{width:min(88vw,350px)!important;max-width:min(88vw,350px)!important;min-width:min(280px,calc(100vw - var(--r94-nav-rail) - 8px))!important}
+ .r210-converged-nav.expanded .r94-nav-panel{width:min(90vw,370px)!important;max-width:min(90vw,370px)!important;min-width:min(290px,calc(100vw - var(--r94-nav-rail) - 8px))!important}
 }
 @media(max-width:360px){
  .r210-converged-nav.expanded .r94-nav-panel{width:calc(100vw - var(--r94-nav-rail))!important;max-width:calc(100vw - var(--r94-nav-rail))!important;min-width:0!important}
