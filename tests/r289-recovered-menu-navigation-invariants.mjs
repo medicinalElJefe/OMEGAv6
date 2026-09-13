@@ -6,6 +6,8 @@ const launcher=read('src/OmegaLauncher.tsx');
 const launcherCss=read('src/omegaLauncherR289.css');
 const liveNav=read('src/OmegaSideNavigatorR88.tsx');
 const liveNavCss=read('src/omegaSideNavigatorR289.css');
+const userNavCss=read('src/omegaSideNavigatorR239.css');
+const convergenceNavCss=read('src/omegaSideNavigatorR210.css');
 const dataTruthNavCss=read('src/dataTruthNavigationR105.css');
 const atlas=read('src/systemAtlasRuntime.ts');
 const archive=read('src/archiveNativeConvergenceR288.ts');
@@ -61,6 +63,16 @@ must(liveNav.includes('OMEGA_WORKSPACES_R82.map'),'existing workspace filter mus
 must(!liveNav.includes('onNavigate(masterMenu')&&!liveNav.includes('resolveExactRouteR242(routeRecords,masterMenu'),'master-menu state must never become a route identity or navigation authority');
 must(liveNav.includes("R289 recovered-menu presentation downstream of lemma"),'visible technical truth must state the R289 authority boundary');
 must(liveNavCss.includes('overflow-x:auto')&&liveNavCss.includes("[aria-pressed='true']")&&liveNavCss.includes('@media(max-width:760px)'),'live 12-menu filter must remain horizontally scrollable, selected-state explicit and mobile responsive');
+
+// R311 closes the accumulated-layer readability/touch regression class without creating a new navigation authority.
+for(const token of ['min-height:40px','font-size:10.5px','font-size:13px','@media(any-pointer:coarse)'])must(liveNavCss.includes(token),`R311 live navigation readability contract missing ${token}`);
+must(liveNavCss.includes('.r289-master-menu-nav .r105-workspace-filter button')&&liveNavCss.includes('min-height:44px!important'),'workspace/master-menu filters must retain coarse-pointer-safe geometry');
+must(userNavCss.includes('font:750 9.5px/1.15')&&userNavCss.includes('font:850 9.5px/1.2')&&userNavCss.includes('.r132-inspector-tabs button{font-size:10px;min-height:34px}'),'R239 user-facing hierarchy must not regress to 6–7px controls');
+must(!userNavCss.includes('font:750 6.5px')&&!userNavCss.includes('font:850 6px')&&!userNavCss.includes('font-size:6.5px'),'legacy sub-readable R239 navigation typography must stay retired');
+for(const selector of ['.r289-master-menu-filter>button','.r105-workspace-filter>button','.r239-tech-toggle'])must(convergenceNavCss.includes(selector),`R210 coarse-pointer fence missing ${selector}`);
+must(convergenceNavCss.includes('min-width:44px!important;min-height:44px!important'),'coarse-pointer navigation targets must remain at least 44px');
+must(!/\.r210-nav-status\{[^}]*font:700 6px/.test(convergenceNavCss),'navigation status must not collapse back to 6px text');
+
 // R239 browser proof caught the read-only context strip physically intercepting workspace buttons.
 // The fix is part of the product contract: actionable filters stay above it and the informational strip is pointer-transparent.
 must(/\.r105-workspace-filter\{[^}]*position:relative;z-index:2/.test(dataTruthNavCss),'workspace filter controls must own the higher pointer stacking layer');
@@ -70,4 +82,4 @@ const bindRoutes=[...archive.matchAll(/bindsTo:\[([^\]]+)\]/g)].flatMap(m=>[...m
 for(const route of [...new Set(bindRoutes)])must(routeNames.includes(route),`recovered Drive authority binds to non-route ${route}`);
 for(const required of ['Archive Census','Archive Operators','Build Out','System Atlas','Modes','Relativity','Matter Traversal','Evidence & Proof','Control Matrix'])must(bindRoutes.includes(required),`recovery corpus must remain visibly bound to ${required}`);
 
-console.log(`R289 RECOVERED MASTER-MENU NAVIGATION PASS · ${routeNames.length} routes · ${menus.length} recovered menus · ${new Set(bindRoutes).size} recovery-bound surfaces · live R88/R239 organization is downstream of R242 lemma · workspace/search filters pointer-safe · zero orphan routes/bindings · launcher route/favorite controls use independent native semantics`);
+console.log(`R289/R311 RECOVERED MASTER-MENU NAVIGATION PASS · ${routeNames.length} routes · ${menus.length} recovered menus · ${new Set(bindRoutes).size} recovery-bound surfaces · live R88/R239 organization is downstream of R242 lemma · readable menu hierarchy · 44px coarse-pointer filters · workspace/search filters pointer-safe · zero orphan routes/bindings · launcher route/favorite controls use independent native semantics`);
