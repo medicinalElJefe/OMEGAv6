@@ -68,6 +68,10 @@ async function clickRoute(page,route){
     const failed=surface.querySelector('.panel-failure');
     return visible(surface)&&!loader&&!failed&&children.length>0&&((((surface.textContent||'').replace(/\s+/g,' ').trim().length>=8)||rich.length>0));
   },route,{timeout:30000});
+  // Same-route activation can satisfy data-panel readiness before the route transition's
+  // bounded two-frame scroll-compatibility window has closed. Wait one frame beyond that
+  // window so reachability is measured against the stable interactive destination.
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))));
 }
 
 async function runtimeControlAudit(){
