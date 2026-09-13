@@ -1,4 +1,4 @@
-/* R313.22 — interaction-safe route-transition and control-reachability scroll settlement.
+/* R313.23 — interaction-safe route-transition and control-reachability scroll settlement.
    Presentation/interaction integrity only. This owns no route, execution, proof,
    persistence, Canon, source, Hybrid, Earth, dispatch, or deployment authority.
 
@@ -13,16 +13,21 @@
 
    Chromium can also leave a deeply nested control outside the viewport after native
    Element.scrollIntoView when an accumulated presentation ancestor participates in
-   clipping/scroll containment. R313.22 preserves native scrolling first, then performs
+   clipping/scroll containment. R313.23 preserves native scrolling first, then performs
    one bounded canonical-document fallback only when the target is still wholly outside
    the viewport. This keeps one document scroll membrane and makes programmatic/focus
-   reachability agree with pointer reachability without inventing a nested Cockpit scroller. */
+   reachability agree with pointer reachability without inventing a nested Cockpit scroller.
+
+   R313.23 also closes the accumulated Cockpit clipping collision introduced by later
+   global .special-app polish. Cockpit's expanded capability constellation is allowed to
+   contribute its vertical visual overflow to the canonical document scroll extent while
+   horizontal containment remains closed. Interactive child glyphs/text do not become
+   competing pointer owners: their containing button remains the hit target. */
 
 let installed=false;
 let suppressLegacyReset=false;
 
 type ScrollArgs=[options?:ScrollToOptions]|[x:number,y:number];
-
 type IntoViewArg=boolean|ScrollIntoViewOptions|undefined;
 
 function isLegacyTopReset(args:ScrollArgs){
@@ -46,9 +51,42 @@ function settleElementIntoDocumentViewport(el:Element){
   root.scrollTo({top,behavior:'auto'});
 }
 
+function installCockpitInteractionIntegrity(){
+  if(document.getElementById('omega-r313-cockpit-interaction-integrity'))return;
+  const style=document.createElement('style');
+  style.id='omega-r313-cockpit-interaction-integrity';
+  style.textContent=`
+    .omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit{
+      overflow-x:hidden!important;
+      overflow-y:visible!important;
+    }
+    .omega-workstation-v2[data-panel='Cockpit'] :is(
+      .r62-node,
+      .r62-family-list button,
+      .r18-cockpit-nav button,
+      .r18-debt-list button
+    ){
+      scroll-margin-block:88px;
+    }
+    .omega-workstation-v2[data-panel='Cockpit'] :is(
+      .r62-node,
+      .r62-family-list button,
+      .r18-cockpit-nav button,
+      .r18-debt-list button
+    ) > *{
+      pointer-events:none;
+    }
+    .omega-workstation-v2[data-panel='Cockpit'] .r62-family-list button > div > *{
+      pointer-events:none;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 export function installNavigationScrollIntegrityR313(){
   if(installed||typeof window==='undefined')return;
   installed=true;
+  installCockpitInteractionIntegrity();
 
   const nativeWindowScrollTo=window.scrollTo;
   const nativeElementScrollTo=HTMLElement.prototype.scrollTo;
