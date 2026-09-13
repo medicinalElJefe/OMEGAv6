@@ -36,10 +36,14 @@
 }
 
 /* Desktop Command Center is a split application, not an infinitely tall document.
-   Bound the split stage itself, not only the prompt child.  Grid children default
-   to min-height:auto, which can preserve intrinsic content height and defeat a
-   descendant scrollbar.  minmax(0,1fr) + min-height:0 establishes one explicit
-   viewport-bounded scroll authority while preserving the visual field. */
+   R313.1 bounded only the prompt descendant and R313.2 added max-height to the
+   grid stage. The inherited R286 browser gate proved that was still insufficient:
+   percentage max-height on the prompt has no definite containing-block height when
+   the stage is constrained only by max-height, so intrinsic prompt content can stay
+   taller than the stage and be clipped by its overflow boundary. Establish one
+   definite stage block-size, then let the prompt consume that row and own vertical
+   scrolling. This preserves the visual field while making every prompt/action control
+   recoverable through ordinary scrollIntoView without changing any action semantics. */
 @media (min-width:901px){
   .omega-workstation-v2[data-panel='Command Center'] .command-deck{
     min-height:0!important;
@@ -47,8 +51,9 @@
 
   .omega-workstation-v2[data-panel='Command Center'] .command-stage{
     align-items:stretch;
+    height:clamp(520px,calc(100dvh - 280px),680px)!important;
     min-height:0!important;
-    max-height:calc(100dvh - 156px);
+    max-height:none!important;
     grid-template-rows:minmax(0,1fr)!important;
     overflow:hidden!important;
   }
@@ -56,7 +61,8 @@
   .omega-workstation-v2[data-panel='Command Center'] .command-visual,
   .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
     min-height:0!important;
-    max-height:100%!important;
+    height:100%!important;
+    max-height:none!important;
   }
 
   .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
