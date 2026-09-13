@@ -52,7 +52,7 @@ async function inventory(page,surface){
    const label=(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').replace(/\s+/g,' ').trim();
    const id=`r313-${surface.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${index}`;
    el.setAttribute('data-r313-probe-id',id);
-   return{id,index,label,tag:el.tagName,native:el.tagName==='BUTTON',role:el.getAttribute('role')||'',disabled:Boolean(el.disabled||el.getAttribute('aria-disabled')==='true'),width:r.width,height:r.height,pointer:getComputedStyle(el).pointerEvents};
+   return{id,index,label,tag:el.tagName,native:el.tagName==='BUTTON',role:el.getAttribute('role')||'',tabIndex:el.tabIndex,disabled:Boolean(el.disabled||el.getAttribute('aria-disabled')==='true'),width:r.width,height:r.height,pointer:getComputedStyle(el).pointerEvents};
   });
  },{navSel:NAV_SELECTOR,surface});
 }
@@ -109,6 +109,7 @@ async function clickSafeControls(page,surface,profile,pageErrors){
  for(const item of before){
   if(!item.label)throw new Error(`${profile}/${surface}: enabled visible control has no accessible name at ${item.id}`);
   if(!item.disabled&&(item.width<8||item.height<8||item.pointer==='none'))throw new Error(`${profile}/${surface}: unusable control ${item.label} ${item.width.toFixed(1)}x${item.height.toFixed(1)} pointer=${item.pointer}`);
+  if(!item.native&&!item.disabled&&(item.role!=='button'||item.tabIndex<0))throw new Error(`${profile}/${surface}: non-native control lacks keyboard role/tab contract: ${item.label} role=${item.role||'NONE'} tabindex=${item.tabIndex}`);
   if(profile==='mobile'&&!item.disabled&&(item.width<43.5||item.height<43.5))throw new Error(`${profile}/${surface}: touch control below 44x44 ${item.label} ${item.width.toFixed(1)}x${item.height.toFixed(1)}`);
   if(item.disabled)continue;
 
@@ -159,5 +160,5 @@ try{
   console.log(`R313 ${profile.toUpperCase()} CONTROL SWEEP PASS · 44/44 panels · ${total} visible controls inventoried · ${actionable} enabled controls verified · ${nativeActuated} safe native controls click-exercised · ${roleActuated} safe role buttons keyboard-exercised · mutating/network controls held behind declared proof/authorization semantics · no page errors · no material overflow`);
   await context.close();
  }
- console.log('R313 FULL CONTROL INTERACTION PASS · every canonical panel mounted on desktop + touch mobile; all visible panel buttons received accessibility/reachability/geometry classification; safe native controls were pointer-actuated; non-native role buttons were keyboard-actuated through their accessibility contract; state-changing/network controls were required to remain explicitly gated instead of being blindly fired; zero browser page errors.');
+ console.log('R313 FULL CONTROL INTERACTION PASS · every canonical panel mounted on desktop + touch mobile; all visible panel buttons received accessibility/reachability/geometry classification; safe native controls were pointer-actuated; non-native role buttons were keyboard-actuated through their explicit accessibility contract; state-changing/network controls were required to remain explicitly gated instead of being blindly fired; zero browser page errors.');
 }finally{await browser.close()}
