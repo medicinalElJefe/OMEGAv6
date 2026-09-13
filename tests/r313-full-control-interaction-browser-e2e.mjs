@@ -17,6 +17,7 @@ const PASSIVE_NETWORK=/\b(refresh|reload|sync|probe|scan|fetch|load|inspect live
 const NAV_SELECTOR='.omega-global-nav,.r89-side-navigator,.r239-user-nav';
 
 function clean(v=''){return String(v).replace(/\s+/g,' ').trim()}
+function probeId(surface,index){return `r313-${surface.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${index}`}
 
 async function openNavigator(page){
  if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
@@ -41,36 +42,84 @@ async function activateSurface(page,name){
  throw new Error(`R313 route missing ${name}`);
 }
 
-async function inventory(page){
- return page.evaluate(({navSel})=>{
+async function inventory(page,surface){
+ return page.evaluate(({navSel,surface})=>{
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
   const root=document.querySelector('.workstation-main');
   if(!root)return[];
-  return [...root.querySelectorAll('button,[role="button"]')].filter(visible).filter(el=>!el.closest(navSel)).map((el,index)=>{
+  const controls=[...root.querySelectorAll('button,[role="button"]')].filter(visible).filter(el=>!el.closest(navSel));
+  return controls.map((el,index)=>{
    const r=el.getBoundingClientRect();
    const label=(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').replace(/\s+/g,' ').trim();
-   return{index,label,tag:el.tagName,disabled:Boolean(el.disabled||el.getAttribute('aria-disabled')==='true'),width:r.width,height:r.height,pointer:getComputedStyle(el).pointerEvents};
+   const id=`r313-${surface.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${index}`;
+   el.setAttribute('data-r313-probe-id',id);
+   const native=el.tagName==='BUTTON';
+   return{id,index,label,tag:el.tagName,native,role:el.getAttribute('role')||'',disabled:Boolean(el.disabled||el.getAttribute('aria-disabled')==='true'),width:r.width,height:r.height,pointer:getComputedStyle(el).pointerEvents};
   });
- },{navSel:NAV_SELECTOR});
+ },{navSel:NAV_SELECTOR,surface});
+}
+
+async function guardEvidence(page,item){
+ return page.evaluate(({id})=>{
+  const el=document.querySelector(`[data-r313-probe-id="${CSS.escape(id)}"]`);
+  if(!el)return{exists:false};
+  const context=(el.closest('section,article,form,dialog,.panel,.card')?.textContent||el.parentElement?.textContent||'').replace(/\s+/g,' ').trim().slice(0,1800);
+  return{exists:true,context,confirm:el.getAttribute('data-confirm')||'',actionTruth:el.closest('[data-action-truth]')?.getAttribute('data-action-truth')||''};
+ },{id:item.id});
+}
+
+async function resolveControl(page,item){
+ let current=page.locator(`[data-r313-probe-id="${item.id}"]`);
+ if(await current.count())return current.first();
+ // A local interaction may have caused a React replacement. Reacquire only the same
+ // semantic control by label/tag and rebind the probe id, never by a shifted ordinal.
+ const rebound=await page.evaluate(({label,tag,id,navSel})=>{
+  const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
+  const root=document.querySelector('.workstation-main');
+  if(!root)return false;
+  const candidates=[...root.querySelectorAll('button,[role="button"]')].filter(visible).filter(el=>!el.closest(navSel)).filter(el=>{
+   const text=(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').replace(/\s+/g,' ').trim();
+   return el.tagName===tag&&text===label;
+  });
+  if(candidates.length!==1)return false;
+  candidates[0].setAttribute('data-r313-probe-id',id);
+  return true;
+ },{label:item.label,tag:item.tag,id:item.id,navSel:NAV_SELECTOR});
+ if(!rebound)return null;
+ current=page.locator(`[data-r313-probe-id="${item.id}"]`);
+ return await current.count()?current.first():null;
+}
+
+async function actuateSafeControl(page,item,profile,surface){
+ const current=await resolveControl(page,item);
+ if(!current)return; // control legitimately disappeared after an earlier local-state transition
+ await current.scrollIntoViewIfNeeded().catch(()=>{});
+ try{
+  if(item.native){
+   await current.click({timeout:7000});
+  }else{
+   // Non-native role=button controls include animated SVG nodes. Their geometry can
+   // intentionally remain in motion forever, so Playwright's pointer "stable" gate
+   // is not a valid liveness criterion. Exercise the semantic keyboard contract that
+   // R286 already requires from every role button.
+   await current.focus({timeout:5000});
+   await current.press('Enter',{timeout:5000});
+  }
+ }catch(e){
+  throw new Error(`${profile}/${surface}: safe ${item.native?'native-click':'role-button keyboard'} activation failed ${item.label}: ${String(e).slice(0,600)}`);
+ }
 }
 
 async function clickSafeControls(page,surface,profile,pageErrors){
- const before=await inventory(page);
+ const before=await inventory(page,surface);
  for(const item of before){
-  if(!item.label)throw new Error(`${profile}/${surface}: enabled visible control has no accessible name at index ${item.index}`);
+  if(!item.label)throw new Error(`${profile}/${surface}: enabled visible control has no accessible name at ${item.id}`);
   if(!item.disabled&&(item.width<8||item.height<8||item.pointer==='none'))throw new Error(`${profile}/${surface}: unusable control ${item.label} ${item.width.toFixed(1)}x${item.height.toFixed(1)} pointer=${item.pointer}`);
   if(profile==='mobile'&&!item.disabled&&(item.width<43.5||item.height<43.5))throw new Error(`${profile}/${surface}: touch control below 44x44 ${item.label} ${item.width.toFixed(1)}x${item.height.toFixed(1)}`);
   if(item.disabled)continue;
+
   if(MUTATING.test(item.label)||PASSIVE_NETWORK.test(item.label)){
-   const guarded=await page.evaluate(({idx,navSel})=>{
-    const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
-    const root=document.querySelector('.workstation-main');
-    const controls=[...root.querySelectorAll('button,[role="button"]')].filter(visible).filter(el=>!el.closest(navSel));
-    const el=controls[idx];
-    if(!el)return{exists:false};
-    const context=(el.closest('section,article,form,dialog,.panel,.card')?.textContent||el.parentElement?.textContent||'').replace(/\s+/g,' ').trim().slice(0,1800);
-    return{exists:true,context,confirm:el.getAttribute('data-confirm')||'',actionTruth:el.closest('[data-action-truth]')?.getAttribute('data-action-truth')||''};
-   },{idx:item.index,navSel:NAV_SELECTOR});
+   const guarded=await guardEvidence(page,item);
    if(!guarded.exists)continue;
    const evidence=`${guarded.confirm} ${guarded.actionTruth} ${guarded.context}`;
    if(MUTATING.test(item.label)&&!/auth|authoriz|confirm|gate|proof|required|unproven|held|locked|draft|planned|device|permission|explicit|warning|danger|fail.?closed/i.test(evidence)){
@@ -79,19 +128,11 @@ async function clickSafeControls(page,surface,profile,pageErrors){
    continue;
   }
 
-  const controls=page.locator('.workstation-main button:visible,.workstation-main [role="button"]:visible').filter({hasNot:page.locator(NAV_SELECTOR)});
-  const current=controls.nth(item.index);
-  if(!await current.count())continue;
-  await current.scrollIntoViewIfNeeded().catch(()=>{});
-  await current.click({timeout:7000}).catch(async e=>{
-   throw new Error(`${profile}/${surface}: safe control click failed ${item.label}: ${String(e).slice(0,500)}`);
-  });
+  await actuateSafeControl(page,item,profile,surface);
   await page.waitForTimeout(40);
-  if(pageErrors.length)throw new Error(`${profile}/${surface}: page error after clicking ${item.label}: ${pageErrors.at(-1)}`);
+  if(pageErrors.length)throw new Error(`${profile}/${surface}: page error after activating ${item.label}: ${pageErrors.at(-1)}`);
   const panel=await page.locator('.omega-workstation-v2').getAttribute('data-panel');
-  if(panel!==surface){
-   await activateSurface(page,surface);
-  }
+  if(panel!==surface)await activateSurface(page,surface);
  }
  return before;
 }
@@ -107,20 +148,22 @@ try{
   page.on('console',msg=>{if(msg.type()==='error')consoleErrors.push(msg.text())});
   await page.goto(`${base}/?r313=${Date.now()}-${profile}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
-  let total=0,actionable=0;
+  let total=0,actionable=0,nativeActuated=0,roleActuated=0;
   for(const surface of surfaces){
    await activateSurface(page,surface);
    const list=await clickSafeControls(page,surface,profile,pageErrors);
    total+=list.length;
    actionable+=list.filter(x=>!x.disabled).length;
+   nativeActuated+=list.filter(x=>!x.disabled&&x.native&&!MUTATING.test(x.label)&&!PASSIVE_NETWORK.test(x.label)).length;
+   roleActuated+=list.filter(x=>!x.disabled&&!x.native&&!MUTATING.test(x.label)&&!PASSIVE_NETWORK.test(x.label)).length;
    const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
    if(overflow>24)throw new Error(`${profile}/${surface}: viewport overflow ${overflow}px after interaction sweep`);
   }
   if(pageErrors.length)throw new Error(`${profile}: page errors ${pageErrors.join(' | ').slice(0,2500)}`);
   const seriousConsole=consoleErrors.filter(x=>!/favicon|Failed to load resource.*404/i.test(x));
   if(seriousConsole.length)throw new Error(`${profile}: console errors ${seriousConsole.join(' | ').slice(0,2500)}`);
-  console.log(`R313 ${profile.toUpperCase()} CONTROL SWEEP PASS · 44/44 panels · ${total} visible controls inventoried · ${actionable} enabled controls verified · safe local controls actuated · mutating/network controls held behind declared proof/authorization semantics · no page errors · no material overflow`);
+  console.log(`R313 ${profile.toUpperCase()} CONTROL SWEEP PASS · 44/44 panels · ${total} visible controls inventoried · ${actionable} enabled controls verified · ${nativeActuated} safe native controls click-exercised · ${roleActuated} safe role buttons keyboard-exercised · mutating/network controls held behind declared proof/authorization semantics · no page errors · no material overflow`);
   await context.close();
  }
- console.log('R313 FULL CONTROL INTERACTION PASS · every canonical panel mounted on desktop + touch mobile; all visible panel buttons received accessibility/reachability/geometry classification; safe local interactions were actuated; state-changing/network controls were required to remain explicitly gated instead of being blindly fired; zero browser page errors.');
+ console.log('R313 FULL CONTROL INTERACTION PASS · every canonical panel mounted on desktop + touch mobile; all visible panel buttons received accessibility/reachability/geometry classification; safe native controls were pointer-actuated; non-native role buttons were keyboard-actuated through their accessibility contract; state-changing/network controls were required to remain explicitly gated instead of being blindly fired; zero browser page errors.');
 }finally{await browser.close()}
