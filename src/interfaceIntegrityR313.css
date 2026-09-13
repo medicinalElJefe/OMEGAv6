@@ -36,32 +36,36 @@
 }
 
 /* Desktop Command Center is a split application, not an infinitely tall document.
-   R313.1 bounded only the prompt descendant and R313.2 added max-height to the
-   grid stage. The inherited R286 browser gate proved that was still insufficient:
-   percentage max-height on the prompt has no definite containing-block height when
-   the stage is constrained only by max-height, so intrinsic prompt content can stay
-   taller than the stage and be clipped by its overflow boundary. Establish one
-   definite stage block-size, then let the prompt consume that row and own vertical
-   scrolling. This preserves the visual field while making every prompt/action control
-   recoverable through ordinary scrollIntoView without changing any action semantics. */
+   R313.1 bounded only the prompt descendant, R313.2 bounded the stage with max-height,
+   and R313.3 established a definite stage height. The inherited R286 browser gate
+   proved one more structural issue remained: explicitly sizing both grid children to
+   height:100% preserves their intrinsic/padded box instead of letting grid stretch own
+   the final border-box. The prompt can therefore be a nominal scroll container while
+   still extending through the stage clip boundary. R313.4 returns sizing authority to
+   the grid row: both children are stretch-sized border boxes with min-height:0, and the
+   prompt alone owns vertical scrolling. The stage no longer hides descendant hit regions;
+   if a later rule regresses child sizing, browser proof sees the overflow instead of a
+   silently clipped control. No action, route, proof or execution semantics change. */
 @media (min-width:901px){
   .omega-workstation-v2[data-panel='Command Center'] .command-deck{
     min-height:0!important;
   }
 
   .omega-workstation-v2[data-panel='Command Center'] .command-stage{
-    align-items:stretch;
+    align-items:stretch!important;
     height:clamp(520px,calc(100dvh - 280px),680px)!important;
     min-height:0!important;
     max-height:none!important;
     grid-template-rows:minmax(0,1fr)!important;
-    overflow:hidden!important;
+    overflow:visible!important;
   }
 
   .omega-workstation-v2[data-panel='Command Center'] .command-visual,
   .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+    box-sizing:border-box!important;
+    align-self:stretch!important;
     min-height:0!important;
-    height:100%!important;
+    height:auto!important;
     max-height:none!important;
   }
 
@@ -70,6 +74,7 @@
     overflow-x:hidden!important;
     overscroll-behavior:contain;
     scrollbar-gutter:stable;
+    scroll-padding-block:64px 24px;
     -webkit-overflow-scrolling:touch;
   }
 }
@@ -82,7 +87,7 @@
   pointer-events:none;
 }
 
-/* Coarse-pointer acceptance is system-wide, not Command-Center-only.  Keep
+/* Coarse-pointer acceptance is system-wide, not Command-Center-only. Keep
    every discoverable action and form field finger-reachable on the 390px
    mobile proof surface without changing its label, route or action binding. */
 @media (max-width:900px), (pointer:coarse){
