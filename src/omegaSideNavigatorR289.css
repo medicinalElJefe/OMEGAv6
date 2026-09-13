@@ -1,1 +1,97 @@
-.r289-master-menu-filter{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding:8px 10px 6px;border-bottom:1px solid rgba(148,163,184,.12);scrollbar-width:thin;scrollbar-color:rgba(148,163,184,.28) transparent;overscroll-behavior-inline:contain}.r289-master-menu-filter>button{flex:0 0 auto;min-height:31px;display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(148,163,184,.18);border-radius:8px;background:rgba(15,23,42,.46);color:#91a5b8;padding:6px 8px;font-size:8px;letter-spacing:.03em;cursor:pointer;white-space:nowrap}.r289-master-menu-filter>button>span{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#7dd3fc;font-size:8px}.r289-master-menu-filter>button>b{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:rgba(148,163,184,.1);color:#b8c9d8;font-size:8px}.r289-master-menu-filter>button:hover{border-color:rgba(125,211,252,.34);background:rgba(8,47,73,.24);color:#d8e9f7}.r289-master-menu-filter>button.active,.r289-master-menu-filter>button[aria-pressed='true']{border-color:rgba(56,189,248,.52);background:rgba(14,116,144,.2);color:#e0f2fe}.r289-master-menu-filter>button:focus-visible{outline:2px solid rgba(125,211,252,.72);outline-offset:2px}.r289-master-menu-nav .r89-flat-route[data-master-menu] .r132-route-meta>span:nth-child(3){color:#7ca6b8}.r289-master-menu-nav .r105-context-note b{overflow-wrap:anywhere}@media(max-width:760px){.r289-master-menu-filter{padding-inline:8px;gap:5px;scroll-snap-type:x proximity}.r289-master-menu-filter>button{min-height:34px;padding:7px 8px;scroll-snap-align:start}.r289-master-menu-nav .r89-flat-route{scroll-margin-top:8px}}@media(max-height:700px){.r289-master-menu-filter{padding-block:5px}.r289-master-menu-filter>button{min-height:28px;padding-block:4px}}
+/* R289/R311 — recovered master-menu presentation, converged in place.
+   Presentation only: no route, execution, evidence, deployment, or Canon authority is created here. */
+.r289-master-menu-filter{
+ display:flex;
+ gap:7px;
+ overflow-x:auto;
+ overflow-y:hidden;
+ padding:9px 10px 8px;
+ border-bottom:1px solid rgba(148,163,184,.12);
+ scrollbar-width:thin;
+ scrollbar-color:rgba(148,163,184,.28) transparent;
+ overscroll-behavior-inline:contain;
+ position:relative;
+ z-index:3;
+ pointer-events:auto;
+}
+.r289-master-menu-filter>button{
+ flex:0 0 auto;
+ min-height:40px;
+ display:inline-flex;
+ align-items:center;
+ gap:7px;
+ border:1px solid rgba(148,163,184,.20);
+ border-radius:9px;
+ background:rgba(15,23,42,.58);
+ color:#a9bdce;
+ padding:8px 10px;
+ font-size:10.5px;
+ font-weight:700;
+ line-height:1.15;
+ letter-spacing:.025em;
+ cursor:pointer;
+ white-space:nowrap;
+ touch-action:manipulation;
+}
+.r289-master-menu-filter>button>span{
+ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+ color:#7dd3fc;
+ font-size:9.5px;
+ font-weight:800;
+}
+.r289-master-menu-filter>button>b{
+ display:inline-grid;
+ place-items:center;
+ min-width:20px;
+ height:20px;
+ padding:0 5px;
+ border-radius:10px;
+ background:rgba(148,163,184,.12);
+ color:#c8d7e3;
+ font-size:9.5px;
+}
+.r289-master-menu-filter>button:hover{border-color:rgba(125,211,252,.42);background:rgba(8,47,73,.34);color:#eef7fd}
+.r289-master-menu-filter>button.active,.r289-master-menu-filter>button[aria-pressed='true']{border-color:rgba(56,189,248,.62);background:rgba(14,116,144,.26);color:#f0f9ff;box-shadow:inset 0 0 0 1px rgba(125,211,252,.08)}
+.r289-master-menu-filter>button:focus-visible{outline:2px solid rgba(125,211,252,.82);outline-offset:2px}
+
+/* R311 accumulated-navigation convergence: the recovered master menus and workspace filters
+   remain separate semantic filters, but they no longer collapse into tiny control bands. */
+.r289-master-menu-nav .r105-workspace-filter{gap:7px;padding:8px 10px 9px;position:relative;z-index:3;pointer-events:auto}
+.r289-master-menu-nav .r105-workspace-filter button{min-height:40px!important;padding:8px 10px!important;font-size:10.5px!important;line-height:1.15!important;border-radius:9px!important;touch-action:manipulation}
+.r289-master-menu-nav .r239-tech-toggle{min-height:38px!important;padding:8px 10px!important;font-size:9.5px!important;line-height:1.15!important;touch-action:manipulation}
+.r289-master-menu-nav .r210-nav-status{font-size:9px!important;line-height:1.35!important;letter-spacing:.055em!important;color:#78928d!important}
+.r289-master-menu-nav .r105-context-note{font-size:10px!important;line-height:1.4!important;min-height:36px!important;padding:7px 11px!important}
+.r289-master-menu-nav .r105-context-note b{overflow-wrap:anywhere;font-size:10px!important}
+.r289-master-menu-nav .r239-route-group span{font-size:9.5px!important;line-height:1.2!important}
+.r289-master-menu-nav .r239-route-group small{font-size:9px!important;line-height:1.25!important}
+.r289-master-menu-nav .r89-flat-route>span>b{font-size:13px!important;line-height:1.18!important}
+.r289-master-menu-nav .r132-route-meta{font-size:9.5px!important;line-height:1.25!important;gap:6px!important}
+.r289-master-menu-nav .r89-flat-route>span>em{font-size:10px!important;line-height:1.38!important;margin-top:4px!important}
+.r289-master-menu-nav .r89-flat-route[data-master-menu] .r132-route-meta>span:nth-child(3){color:#8eb9ca}
+.r289-master-menu-nav .r88-search input{font-size:12px!important;line-height:1.25!important}
+.r289-master-menu-nav .r100-active-route>span{font-size:9px!important}
+.r289-master-menu-nav .r100-active-route>i{font-size:9.5px!important}
+.r289-master-menu-nav .r100-active-route>small{font-size:9.5px!important;line-height:1.35!important}
+
+@media(any-pointer:coarse){
+ .r289-master-menu-filter>button,
+ .r289-master-menu-nav .r105-workspace-filter button,
+ .r289-master-menu-nav .r239-tech-toggle{min-height:44px!important}
+}
+@media(max-width:760px){
+ .r289-master-menu-filter{padding:8px;gap:6px;scroll-snap-type:x proximity}
+ .r289-master-menu-filter>button{min-height:44px;padding:8px 10px;font-size:10px;scroll-snap-align:start}
+ .r289-master-menu-filter>button>span,.r289-master-menu-filter>button>b{font-size:9px}
+ .r289-master-menu-nav .r105-workspace-filter{padding-inline:8px}
+ .r289-master-menu-nav .r105-workspace-filter button{min-height:44px!important;font-size:10px!important}
+ .r289-master-menu-nav .r89-flat-route{scroll-margin-top:8px}
+ .r289-master-menu-nav .r89-flat-route>span>b{font-size:12px!important}
+ .r289-master-menu-nav .r132-route-meta{font-size:9px!important}
+ .r289-master-menu-nav .r89-flat-route>span>em{font-size:9.5px!important}
+}
+@media(max-height:700px){
+ .r289-master-menu-filter{padding-block:6px}
+ /* Keep interaction geometry intact even in short viewports; scrolling is preferable to tiny targets. */
+ .r289-master-menu-filter>button{min-height:40px;padding-block:7px}
+}
+@media(max-height:700px) and (any-pointer:coarse){.r289-master-menu-filter>button{min-height:44px!important}}
