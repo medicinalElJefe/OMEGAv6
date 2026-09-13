@@ -3,6 +3,7 @@ import fs from 'node:fs';
 
 const main=fs.readFileSync('src/main.tsx','utf8');
 const settle=fs.readFileSync('src/navigationScrollIntegrityR313.ts','utf8');
+const provenanceCss=fs.readFileSync('src/surfaceProvenanceR94.css','utf8');
 assert.ok(main.includes("installNavigationScrollIntegrityR313"),'R313 navigation scroll settlement must be installed at runtime');
 assert.ok(settle.includes("omega-capability-change"),'R313 must adapt only from the canonical capability-change transition signal');
 assert.ok(settle.includes("isLegacyTopReset"),'R313 must narrowly recognize the historical top=0 smooth route reset');
@@ -17,6 +18,7 @@ assert.ok(!settle.includes('window.scrollTo=nativeWindowScrollTo')&&!settle.incl
 assert.ok(!settle.includes('let transition='),'R313 must not stack transition-scoped native method captures');
 assert.ok(!settle.includes("requestAnimationFrame(()=>{main?.scrollTo"),'R313 must not issue a delayed corrective workstation scroll that can overwrite destination interaction');
 assert.ok(!settle.includes("requestAnimationFrame(()=>{window.scrollTo"),'R313 must not issue a delayed corrective window scroll that can overwrite destination interaction');
+assert.match(provenanceCss,/\.r94-representational-disclosure:not\(\[open\]\)>:not\(summary\)\{display:none!important\}/,'R313 closed representational disclosures must remove authored-grid descendants from layout, hit testing and control inventory');
 
 // Authority assertions apply to executable TypeScript, not explanatory comments.
 const executableSettle=settle
@@ -40,4 +42,4 @@ for(const forbiddenApi of [
 ]){
   assert.doesNotMatch(executableSettle,forbiddenApi,'R313 scroll settlement must remain DOM-presentation-only');
 }
-console.log('R313.21 NAVIGATION SCROLL SETTLEMENT INVARIANTS PASS · stable single scroll membrane · route top settles synchronously · legacy reset suppressed without wrapper stacking');
+console.log('R313.24 NAVIGATION + DISCLOSURE SETTLEMENT INVARIANTS PASS · stable single scroll membrane · route top settles synchronously · legacy reset suppressed without wrapper stacking · closed representational controls removed from layout and hit testing');
