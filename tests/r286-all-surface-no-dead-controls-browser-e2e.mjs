@@ -356,8 +356,10 @@ try{
       const structure=await page.evaluate(panelStructureAudit,route);
       if(structure.failures.length)throw new Error(`${name}/${route}: panel structure failure:\n${structure.failures.join('\n')}`);
       totals[name==='desktop'?'panelsDesktop':'panelsMobile']+=structure.panelCount;
-      const disclosures=await exerciseSafeDisclosures(page,name,route);
-      totals[name==='desktop'?'disclosuresDesktop':'disclosuresMobile']+=disclosures;
+
+      // Audit the unmodified route first. Disclosure toggles are independently exercised
+      // and restored below; their temporary focus/scroll anchoring must not contaminate
+      // the baseline proof that the route's enabled controls are reachable and bound.
       const audit=await page.evaluate(runtimeControlAudit);
       if(audit.width<220||audit.height<80)throw new Error(`${name}/${route}: workstation unusable ${JSON.stringify(audit)}`);
       if(audit.overflow>24)throw new Error(`${name}/${route}: viewport overflow ${audit.overflow}px`);
@@ -365,6 +367,9 @@ try{
       if(audit.failures.length)throw new Error(`${name}/${route}: dead/misbound/occluded control contract failure:\n${audit.failures.join('\n')}`);
       totals[name]+=audit.count;
       totals[name==='desktop'?'disabledDesktop':'disabledMobile']+=audit.disabled;
+
+      const disclosures=await exerciseSafeDisclosures(page,name,route);
+      totals[name==='desktop'?'disclosuresDesktop':'disclosuresMobile']+=disclosures;
       if(route==='SAR Truth')await verifySarGeometry(page,name);
       if(pageErrors.length)throw new Error(`${name}/${route}: browser page errors ${pageErrors.join(' | ').slice(0,4000)}`);
     }
