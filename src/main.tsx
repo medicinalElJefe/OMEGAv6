@@ -7,6 +7,7 @@ import './index.css';
 import './b036.css';
 import './b037.css';
 import './interfaceIntegrityR313.css';
+import './cockpitFlowIntegrityR313.css';
 
 installCanonicalApiTransportR183();
 installNavigationScrollIntegrityR313();
