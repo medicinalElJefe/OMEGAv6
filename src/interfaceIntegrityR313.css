@@ -110,6 +110,27 @@
     border-left:0!important;
     border-top:1px solid #28444d!important;
   }
+
+  /* R313.8 CONSTRAINED COMMAND-COMPOSITION LAW
+     R313.7 removed the horizontal two-column overflow, but its single-column order still
+     put the entire interactive prompt after a 520–680px visual. R286 keeps the navigator
+     expanded and audits actual viewport hit regions, so a higher scroll/viewport boundary
+     can still strand every prompt control together. In the constrained expanded-nav state,
+     application actions must lead and the retained visual follows them. This preserves the
+     full visual and every command action while reducing cognitive and scroll distance. */
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+    grid-row:1!important;
+    order:-1!important;
+    min-height:0!important;
+  }
+
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-visual{
+    grid-row:2!important;
+    order:1!important;
+    min-height:420px!important;
+    height:clamp(420px,48dvh,560px)!important;
+    max-height:560px!important;
+  }
 }
 
 .omega-workstation-v2 .workstation-main :where(button,[role='button'],input,textarea,select,summary){
