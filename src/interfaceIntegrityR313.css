@@ -3,6 +3,19 @@
    preserve real hit regions beneath the sticky workstation shell, and enforce
    coarse-pointer touch targets without changing action/authority semantics. */
 
+/* R313.6 OUTER COMMAND EXPERIENCE CLIP REPAIR
+   R203 applies overflow:hidden to .command-experience-r4. That wrapper sits outside
+   CommandDeck, so every prior inner stage/prompt scroll repair remained trapped behind
+   the same outer clipping ancestor. The real R286 browser gate proved the symptom by
+   failing native scrollIntoView() for the same ten lower prompt controls even after the
+   prompt itself returned to normal document flow. Command Center therefore restores
+   vertical overflow at the actual outer experience membrane. Horizontal containment is
+   still owned by SurfaceIntegrityR81/workstation responsive law. */
+.omega-workstation-v2[data-panel='Command Center'] .command-experience-r4{
+  overflow:visible!important;
+  min-height:0!important;
+}
+
 .omega-workstation-v2[data-panel='Command Center'] .command-deck{
   position:relative;
   isolation:isolate;
