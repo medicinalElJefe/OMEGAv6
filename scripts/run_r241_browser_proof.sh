@@ -2,11 +2,11 @@
 set -euo pipefail
 
 if [ "$#" -ne 1 ]; then
-  echo "usage: $0 <browser-proof-test.mjs>" >&2
+  echo "usage: $0 '<browser proof command>'" >&2
   exit 2
 fi
 
-test_file="$1"
+proof_command="$1"
 base="http://127.0.0.1:4173"
 log="/tmp/omega-r241-vite-${GITHUB_RUN_ID:-local}-${RANDOM}.log"
 
@@ -33,5 +33,5 @@ for i in $(seq 1 30); do
 done
 
 curl -fsS "$base/" >/dev/null || { cat "$log" >&2; exit 1; }
-echo "R241 browser proof: $test_file"
-OMEGA_E2E_URL="$base" node "$test_file"
+echo "R241 browser proof command: $proof_command"
+OMEGA_E2E_URL="$base" bash -lc "$proof_command"
