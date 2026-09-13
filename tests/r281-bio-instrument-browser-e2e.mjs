@@ -1,3 +1,2 @@
-// R287 browser convergence wrapper. Preserve the exact inherited R281 proof, then run the all-surface no-dead-control runtime audit in the same governed R241 browser job.
+// R313 keeps the Heavy Bio browser proof scoped to Heavy Bio. Global interaction integrity now runs from the all-surface browser gate instead of being hidden inside this specialist wrapper.
 await import('./r281-bio-instrument-browser-e2e-base.mjs');
-await import('./r286-all-surface-no-dead-controls-browser-e2e.mjs');
