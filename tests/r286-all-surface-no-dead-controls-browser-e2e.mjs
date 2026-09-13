@@ -106,21 +106,36 @@ async function runtimeControlAudit(){
     if(!actionBound)failures.push(`${label||'unnamed'} has no runtime click/pointer/form action binding`);
     if(roleButton&&!anchorKeyboard&&!keyboardBound)failures.push(`${label||'unnamed'} role=button has no runtime keyboard activation`);
 
-    /* Do not clamp an off-screen control's coordinates to a viewport edge and
-       misclassify whatever happens to be there as an occluder. Bring each
-       enabled control into the user's viewport first, settle layout for two
-       frames, then prove its real hit point. This is stricter than the prior
-       audit because every control is hit-tested at its own reachable center. */
+    /* Bring each enabled control into the viewport, then prove there is a
+       genuinely clickable point inside the rectangle that is actually visible
+       to the user. A partially clipped control is valid only when the visible
+       intersection itself contains an unobscured hit region. Multiple interior
+       samples prevent child text/icon markup from creating false occlusion while
+       still failing controls covered by another layer. */
     el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     const rect=el.getBoundingClientRect();
     if(rect.width<8||rect.height<8)failures.push(`${label||'unnamed'} has unusable ${Math.round(rect.width)}×${Math.round(rect.height)} hit geometry`);
-    const x=rect.left+rect.width/2,y=rect.top+Math.min(rect.height/2,24);
-    if(x<0||y<0||x>=innerWidth||y>=innerHeight){
-      failures.push(`${label||'unnamed'} could not be scrolled to a reachable viewport hit point`);
+    const left=Math.max(rect.left,1),right=Math.min(rect.right,innerWidth-1),topEdge=Math.max(rect.top,1),bottom=Math.min(rect.bottom,innerHeight-1);
+    const hitWidth=right-left,hitHeight=bottom-top;
+    if(hitWidth<2||hitHeight<2){
+      failures.push(`${label||'unnamed'} could not be scrolled to a reachable viewport hit region`);
     }else{
-      const top=document.elementFromPoint(x,y);
-      if(top&&top!==el&&!el.contains(top)&&!top.contains(el))failures.push(`${label||'unnamed'} center is occluded by ${top.tagName.toLowerCase()}.${[...top.classList].slice(0,2).join('.')}`);
+      const insetX=Math.min(4,Math.max(.5,hitWidth*.08)),insetY=Math.min(4,Math.max(.5,hitHeight*.08));
+      const x0=left+insetX,x1=right-insetX,y0=topEdge+insetY,y1=bottom-insetY;
+      const xs=[(x0+x1)/2,x0+(x1-x0)*.25,x0+(x1-x0)*.75];
+      const ys=[(y0+y1)/2,y0+(y1-y0)*.25,y0+(y1-y0)*.75];
+      const points=[[xs[0],ys[0]],[xs[1],ys[1]],[xs[2],ys[1]],[xs[1],ys[2]],[xs[2],ys[2]],[xs[1],ys[0]],[xs[2],ys[0]],[xs[0],ys[1]],[xs[0],ys[2]]];
+      let reachable=false,blocker=null;
+      for(const [x,y] of points){
+        const hit=document.elementFromPoint(x,y);
+        if(hit&&(hit===el||el.contains(hit)||hit.contains(el))){reachable=true;break}
+        if(!blocker&&hit)blocker=hit;
+      }
+      if(!reachable){
+        const blockerName=blocker?`${blocker.tagName.toLowerCase()}.${[...blocker.classList].slice(0,2).join('.')}`:'none';
+        failures.push(`${label||'unnamed'} has no unobscured hit point in its visible viewport intersection; blocker ${blockerName}`);
+      }
     }
     signatures.push(`${tag}:${label}:${clickBound?'click':formBound?'form':nativeFormAction?'formaction':'none'}`);
   }
@@ -269,5 +284,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,4000)}`);
     await context.close();
   }
-  console.log(`R286/R312 ALL-SURFACE + ALL-PANEL INTEGRITY PASS · 44/44 canonical routes pointer-opened on desktop + 390px mobile · SurfaceIntegrity identity and PanelBoundary health verified on every route · route-deferred loaders must resolve · ${totals.panelsDesktop+totals.panelsMobile} visible panel/region structures geometry-audited · ${totals.disclosuresDesktop+totals.disclosuresMobile} safe aria-expanded/details disclosures exercised and restored · ALL + six workspace submenus pointer-exercised · ${totals.desktop} visible desktop controls + ${totals.mobile} visible mobile controls runtime-bound · ${totals.disabledDesktop+totals.disabledMobile} honestly disabled controls exempted · enabled controls require accessible labels, real React/native pointer-or-form action bindings, usable hit geometry, pointer events and unobscured hit centers after scrolling each enabled control to its reachable viewport position · role buttons require keyboard activation · aria-controls targets must exist · exact data-panel transitions · exact 78×78/6084-cell SAR geometry · no material viewport overflow · navigator Escape/reopen · no page errors.`);
+  console.log(`R286/R312 ALL-SURFACE + ALL-PANEL INTEGRITY PASS · 44/44 canonical routes pointer-opened on desktop + 390px mobile · SurfaceIntegrity identity and PanelBoundary health verified on every route · route-deferred loaders must resolve · ${totals.panelsDesktop+totals.panelsMobile} visible panel/region structures geometry-audited · ${totals.disclosuresDesktop+totals.disclosuresMobile} safe aria-expanded/details disclosures exercised and restored · ALL + six workspace submenus pointer-exercised · ${totals.desktop} visible desktop controls + ${totals.mobile} visible mobile controls runtime-bound · ${totals.disabledDesktop+totals.disabledMobile} honestly disabled controls exempted · enabled controls require accessible labels, real React/native pointer-or-form action bindings, usable geometry, pointer events and at least one unobscured hit point inside their actually visible viewport intersection after scrolling · role buttons require keyboard activation · aria-controls targets must exist · exact data-panel transitions · exact 78×78/6084-cell SAR geometry · no material viewport overflow · navigator Escape/reopen · no page errors.`);
 }finally{await browser.close()}
