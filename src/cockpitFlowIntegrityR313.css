@@ -1,0 +1,74 @@
+/* R313 Cockpit flow convergence.
+   The global R203 panel polish deliberately clips .special-app surfaces, but Cockpit
+   contains an expandable capability constellation whose selected-family list can grow
+   beyond the initial panel box. Keep Cockpit on the canonical document scroll owner and
+   make the constellation's selector/list relationship intrinsic and non-overlapping.
+   Presentation only: no route, action, capability reality or proof authority changes. */
+
+.omega-workstation-v2[data-panel='Cockpit'],
+.omega-workstation-v2[data-panel='Cockpit'] .workstation-main,
+.omega-workstation-v2[data-panel='Cockpit'] .omega-surface-r81,
+.omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit,
+.omega-workstation-v2[data-panel='Cockpit'] .r94-representational-disclosure,
+.omega-workstation-v2[data-panel='Cockpit'] .r62-constellation{
+  height:auto!important;
+  max-height:none!important;
+  overflow-y:visible!important;
+  contain:none!important;
+  clip-path:none!important;
+}
+
+.omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit{
+  overflow:visible!important;
+}
+
+/* At workstation width the two-column constellation allowed the growing active-family
+   panel to paint over the selector strip while its overflow was excluded from document
+   height. Sequential flow is deterministic at every width and keeps the visual stage,
+   family selectors and live capability actions all reachable. */
+.omega-workstation-v2[data-panel='Cockpit'] .r62-layout{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+  width:100%!important;
+}
+
+.omega-workstation-v2[data-panel='Cockpit'] .r62-stage-column,
+.omega-workstation-v2[data-panel='Cockpit'] .r62-family-panel{
+  position:relative!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+}
+
+.omega-workstation-v2[data-panel='Cockpit'] .r62-family-panel{
+  align-self:auto!important;
+  border-left:0!important;
+  border-top:1px solid rgba(155,205,199,.12)!important;
+  overflow:visible!important;
+}
+
+.omega-workstation-v2[data-panel='Cockpit'] .r62-node-grid,
+.omega-workstation-v2[data-panel='Cockpit'] .r62-family-list{
+  position:relative!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+
+/* The semantic button owns the complete pointer target. Decorative descendants cannot
+   become a competing elementFromPoint owner during exhaustive browser proof. */
+.omega-workstation-v2[data-panel='Cockpit'] .r62-node > *,
+.omega-workstation-v2[data-panel='Cockpit'] .r62-family-list button > *{
+  pointer-events:none!important;
+}
+
+.omega-workstation-v2[data-panel='Cockpit'] :where(.r62-node,.r62-family-list button){
+  scroll-margin-block:72px 28px;
+}
