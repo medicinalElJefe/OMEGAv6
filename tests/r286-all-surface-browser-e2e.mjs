@@ -152,3 +152,9 @@ try{
   }
   console.log('R286/R307 ALL-SURFACE BROWSER PASS · mobile navigator-mode controls browser-proven at >=44×44px under coarse-pointer emulation · every visible enabled action on all 44 canonical routes browser-proven at >=44×44px and every enabled form control >=44px high on 390px touch mobile · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + mobile · exact data-panel transitions · route-agnostic visible-content proof · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
 }finally{await browser.close()}
+
+// R313: the exhaustive runtime binding audit is a first-class all-surface gate.
+// It verifies every visible enabled button/role=button across all 44 canonical panels
+// on desktop and mobile has a real React/native action binding, usable geometry,
+// pointer reachability and keyboard activation where required.
+await import('./r286-all-surface-no-dead-controls-browser-e2e.mjs');
