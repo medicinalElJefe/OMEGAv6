@@ -1,0 +1,62 @@
+/* R313 — interface integrity convergence.
+   Presentation-only repair: restore non-overlapping Command Center geometry,
+   preserve real hit regions beneath the sticky workstation shell, and enforce
+   coarse-pointer touch targets without changing action/authority semantics. */
+
+.omega-workstation-v2[data-panel='Command Center'] .command-deck{
+  position:relative;
+  isolation:isolate;
+  align-content:start;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .command-deck-head{
+  position:relative!important;
+  inset:auto!important;
+  transform:none!important;
+  margin:0!important;
+  z-index:0!important;
+  overflow:hidden;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .command-deck-head .boot-sequence,
+.omega-workstation-v2[data-panel='Command Center'] .command-deck-head .boot-sequence span{
+  position:relative;
+  inset:auto;
+  transform:none;
+  max-width:100%;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .command-stage,
+.omega-workstation-v2[data-panel='Command Center'] .command-proof-strip,
+.omega-workstation-v2[data-panel='Command Center'] .command-response{
+  position:relative!important;
+  inset:auto!important;
+  transform:none!important;
+  z-index:1!important;
+}
+
+.omega-workstation-v2 .workstation-main :where(button,[role='button'],input,textarea,select,summary){
+  scroll-margin-block:64px 24px;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .boot-sequence span{
+  pointer-events:none;
+}
+
+@media (max-width:900px), (pointer:coarse){
+  .omega-workstation-v2[data-panel='Command Center'] :where(.quick-prompts,.command-actions) button{
+    min-width:44px!important;
+    min-height:44px!important;
+    padding-block:9px!important;
+  }
+
+  .omega-workstation-v2[data-panel='Command Center'] .command-run,
+  .omega-workstation-v2[data-panel='Command Center'] .command-plan{
+    min-height:44px!important;
+  }
+
+  .omega-workstation-v2[data-panel='Command Center'] .quick-prompts,
+  .omega-workstation-v2[data-panel='Command Center'] .command-actions{
+    align-items:stretch!important;
+  }
+}
