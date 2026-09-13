@@ -12,7 +12,7 @@ must(live.includes('catalogBound={!!picked}')&&live.includes('allowDemonstration
 for(const token of ["https://stac.dataspace.copernicus.eu/v1/search","GRD:'sentinel-1-grd'","SLC:'sentinel-1-slc'",'normalizeItem','evidenceHash','UPSTREAM_UNAVAILABLE'])must(catalog.includes(token),'live catalogue contract missing '+token);
 must(worker.includes("import {sarCatalogR285} from './sarLiveCatalogR285.js'")&&worker.includes("url.pathname==='/api/earth/sar/catalog'"),'R8 must expose bounded live SAR catalogue route');
 for(const token of ['catalogOnly:true','sourceEvidenceBound:false','nativeDataBound:false','complexDataBound:false','CATALOG_DISCOVERY_ONLY'])must(catalog.includes(token),'catalogue must remain non-measurement evidence: '+token);
-must(catalog.includes('do not prove product bytes')&&catalog.includes('does not substitute fabricated acquisitions'),'catalogue truth boundary missing');
+must(catalog.includes('Asset discovery does not prove product bytes')&&catalog.includes('does not substitute fabricated acquisitions'),'catalogue truth boundary missing');
 
 // R309 prevents invalid dateline/pole catalogue boxes and preserves target truth.
 for(const token of ['boundedPointBbox','requestedSpan','effectiveSpan','boundaryLimited','centerPreserved'])must(catalog.includes(token),'boundary-safe catalogue geometry missing '+token);
@@ -23,7 +23,7 @@ must(live.includes('Boundary-safe catalogue window')&&live.includes('does not si
 // Returned metadata and asset pointers may drive labels/inspection, but never upgrade unbound arrays into measurements.
 for(const token of ['NATIVE PIXELS UNBOUND','DERIVED FIELDS UNBOUND','RETURNED CATALOGUE PREVIEW','not a decoded SAR measurement raster','No acquisition is fabricated'])must(live.includes(token),'live UI disclosure missing '+token);
 for(const token of ['native data asset pointer','catalog pointers only · bytes not yet bound','Open exact asset pointer','An asset URL is provenance/discovery, not measurement proof'])must(live.includes(token),'R309 asset-discovery truth UI missing '+token);
-must(catalog.includes('assets,dataAssetCount')||catalog.includes('dataAssetCount:dataAssets.length,assets'),'catalogue must return exact HTTPS asset pointers with explicit data-asset count');
+must(catalog.includes('dataAssetCount:dataAssets.length,assets'),'catalogue must return exact HTTPS asset pointers with explicit data-asset count');
 must(catalog.includes('Asset discovery does not prove product bytes'),'catalogue must preserve asset-pointer versus byte-proof boundary');
 must(ui.includes('OMEGA leaves this field empty rather than painting synthetic pixels'),'unbound live field must render explicit missing state');
 must(ui.includes("catalogBound?'CATALOG BOUND · PIXELS UNAVAILABLE'"),'catalog-bound screen state missing');
