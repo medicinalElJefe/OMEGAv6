@@ -1,21 +1,30 @@
 import fs from'node:fs';import assert from'node:assert/strict';
-const read=p=>fs.readFileSync(p,'utf8');const must=(ok,msg)=>assert.ok(ok,'R285 SAR '+msg);
+const read=p=>fs.readFileSync(p,'utf8');const must=(ok,msg)=>assert.ok(ok,'R309 SAR '+msg);
 const earth=read('src/EarthObservatoryR8.tsx'),live=read('src/SARLiveTruthR285.tsx'),ui=read('src/SARTruthInstrumentR280.tsx'),catalog=read('src/sarLiveCatalogR285.js'),worker=read('src/workerR8.js'),css=read('src/sarLiveR285.css'),raster=read('src/sarRasterR283.ts'),wrangler=read('wrangler.jsonc');
 
-// Earth owns one R285 live-data wrapper; the R280 analytical instrument remains its truth renderer.
-must(earth.includes("import SARLiveTruthR285 from './SARLiveTruthR285'"),'Earth must import R285 live SAR wrapper');
+// Earth owns one live-data wrapper; the R280 analytical instrument remains its truth renderer.
+must(earth.includes("import SARLiveTruthR285 from './SARLiveTruthR285'"),'Earth must import live SAR wrapper');
 must(earth.includes("data-earth-view='SAR'")&&earth.includes('<SARLiveTruthR285 lat={lat} lon={lon} onTargetChange={setSarTarget}/>'),'Earth SAR view must mount live wrapper with WGS84 target');
-must(live.includes("import SARTruthInstrumentR280 from'./SARTruthInstrumentR280Surface'"),'R285 wrapper must delegate analytical rendering to R280 instrument');
+must(live.includes("import SARTruthInstrumentR280 from'./SARTruthInstrumentR280Surface'"),'live wrapper must delegate analytical rendering to R280 instrument');
 must(live.includes('catalogBound={!!picked}')&&live.includes('allowDemonstration={false}'),'live wrapper must disable demonstration pixels for catalog data');
 
 // Current public CDSE catalogue is queried at runtime with bounded WGS84/time constraints.
 for(const token of ["https://stac.dataspace.copernicus.eu/v1/search","GRD:'sentinel-1-grd'","SLC:'sentinel-1-slc'",'normalizeItem','evidenceHash','UPSTREAM_UNAVAILABLE'])must(catalog.includes(token),'live catalogue contract missing '+token);
 must(worker.includes("import {sarCatalogR285} from './sarLiveCatalogR285.js'")&&worker.includes("url.pathname==='/api/earth/sar/catalog'"),'R8 must expose bounded live SAR catalogue route');
 for(const token of ['catalogOnly:true','sourceEvidenceBound:false','nativeDataBound:false','complexDataBound:false','CATALOG_DISCOVERY_ONLY'])must(catalog.includes(token),'catalogue must remain non-measurement evidence: '+token);
-must(catalog.includes('do not prove product bytes')&&catalog.includes('does not substitute fabricated acquisitions or pixels'),'catalogue truth boundary missing');
+must(catalog.includes('do not prove product bytes')&&catalog.includes('does not substitute fabricated acquisitions'),'catalogue truth boundary missing');
 
-// Returned metadata may drive labels/geometry, but never upgrades unbound arrays into measurements.
+// R309 prevents invalid dateline/pole catalogue boxes and preserves target truth.
+for(const token of ['boundedPointBbox','requestedSpan','effectiveSpan','boundaryLimited','centerPreserved'])must(catalog.includes(token),'boundary-safe catalogue geometry missing '+token);
+must(catalog.includes('180-Math.abs(lon)')&&catalog.includes('90-Math.abs(lat)'),'catalogue boundary room must derive from WGS84 limits');
+must(catalog.includes("revision:'R309'"),'R309 catalogue revision must be explicit');
+must(live.includes('Boundary-safe catalogue window')&&live.includes('does not silently query invalid longitude/latitude coordinates'),'boundary narrowing must be visible to operator');
+
+// Returned metadata and asset pointers may drive labels/inspection, but never upgrade unbound arrays into measurements.
 for(const token of ['NATIVE PIXELS UNBOUND','DERIVED FIELDS UNBOUND','RETURNED CATALOGUE PREVIEW','not a decoded SAR measurement raster','No acquisition is fabricated'])must(live.includes(token),'live UI disclosure missing '+token);
+for(const token of ['native data asset pointer','catalog pointers only · bytes not yet bound','Open exact asset pointer','An asset URL is provenance/discovery, not measurement proof'])must(live.includes(token),'R309 asset-discovery truth UI missing '+token);
+must(catalog.includes('assets,dataAssetCount')||catalog.includes('dataAssetCount:dataAssets.length,assets'),'catalogue must return exact HTTPS asset pointers with explicit data-asset count');
+must(catalog.includes('Asset discovery does not prove product bytes'),'catalogue must preserve asset-pointer versus byte-proof boundary');
 must(ui.includes('OMEGA leaves this field empty rather than painting synthetic pixels'),'unbound live field must render explicit missing state');
 must(ui.includes("catalogBound?'CATALOG BOUND · PIXELS UNAVAILABLE'"),'catalog-bound screen state missing');
 must(ui.includes("catalogBound?'CATALOG BOUND · NATIVE FIELD NOT BOUND'"),'catalog-bound legend missing');
@@ -31,7 +40,7 @@ must(!ui.includes('meanCoherence:.72'),'hard-coded coherence is prohibited');
 must(!ui.includes('orbitHandled:true'),'hard-coded orbit correction is prohibited');
 for(const token of ['processing.unwrappedPhaseBound===true','processing.topographyHandled===true','processing.orbitHandled===true','processing.atmosphereHandled===true'])must(ui.includes(token),'declared processing gate missing '+token);
 
-// R285 visually expands the workstation without moving canonical runtime authority.
-for(const token of ['.r285-livebar','.r285-querybar','.r285-source-ribbon','.r285-live-layout','.r285-products','.r285-stage','.r285-field-empty','.r285-truth-law','earth-r72-workspace.sar-active'])must(css.includes(token),'visual organ missing '+token);
-must(wrangler.includes('"main": "src/workerR116.js"'),'R285 must not fork canonical Worker entrypoint');
-console.log('R285 SAR LIVE DATA FIDELITY PASS · live Sentinel-1 catalogue · no fabricated measurement fields · data-bound interferometry · R116 authority preserved');
+// R309 expands the evidence workstation without moving canonical runtime authority.
+for(const token of ['.r285-livebar','.r285-querybar','.r285-source-ribbon','.r285-live-layout','.r285-products','.r285-stage','.r285-field-empty','.r285-truth-law','.r309-sar-assets','.r309-sar-boundary','earth-r72-workspace.sar-active'])must(css.includes(token),'visual organ missing '+token);
+must(wrangler.includes('"main": "src/workerR116.js"'),'R309 must not fork canonical Worker entrypoint');
+console.log('R309 SAR LIVE DATA FIDELITY PASS · live Sentinel-1 catalogue · exact asset pointers exposed as discovery only · boundary-safe WGS84 search · no fabricated measurement fields · data-bound interferometry · R116 authority preserved');
