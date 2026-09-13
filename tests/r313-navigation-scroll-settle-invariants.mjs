@@ -6,11 +6,15 @@ const settle=fs.readFileSync('src/navigationScrollIntegrityR313.ts','utf8');
 assert.ok(main.includes("installNavigationScrollIntegrityR313"),'R313 navigation scroll settlement must be installed at runtime');
 assert.ok(settle.includes("omega-capability-change"),'R313 must adapt only from the canonical capability-change transition signal');
 assert.ok(settle.includes("isLegacyTopReset"),'R313 must narrowly recognize the historical top=0 smooth route reset');
-assert.ok(settle.includes("behavior:'auto'"),'R313 must convert the historical smooth reset to deterministic auto settlement');
-assert.ok(settle.includes('nativeWindowScrollTo')&&settle.includes('nativeElementScrollTo'),'R313 must preserve and restore both historical native scroll owners');
-assert.ok(settle.includes('window.scrollTo=nativeWindowScrollTo')&&settle.includes('HTMLElement.prototype.scrollTo=nativeElementScrollTo'),'R313 must restore native scrolling after the bounded route-reset frame');
-assert.ok(!settle.includes("main?.scrollTo({top:0,left:0,behavior:'auto'})"),'R313 must not issue a delayed corrective workstation scroll that can overwrite destination interaction');
-assert.ok(!settle.includes("window.scrollTo({top:0,left:0,behavior:'auto'})"),'R313 must not issue a delayed corrective window scroll that can overwrite destination interaction');
+assert.ok(settle.includes("behavior:'auto'"),'R313 must synchronously settle the historical route-to-top target');
+assert.ok(settle.includes("nativeElementScrollTo.call(main,{top:0,behavior:'auto'})"),'R313 must settle workstation scroll synchronously inside the transition event');
+assert.ok(settle.includes("nativeWindowScrollTo.call(window,{top:0,behavior:'auto'})"),'R313 must settle document scroll synchronously inside the transition event');
+assert.ok(settle.includes("if(isLegacyTopReset(args))return"),'R313 must suppress the already-scheduled legacy window reset after synchronous settlement');
+assert.ok(settle.includes("this.classList.contains('workstation-main')"),'R313 must scope legacy element-reset suppression to the historical workstation owner');
+assert.ok(settle.includes('nativeWindowScrollTo')&&settle.includes('nativeElementScrollTo'),'R313 must preserve both historical native scroll owners');
+assert.ok(settle.includes('window.scrollTo=nativeWindowScrollTo')&&settle.includes('HTMLElement.prototype.scrollTo=nativeElementScrollTo'),'R313 must restore native scrolling after the bounded route-reset window');
+assert.ok(!settle.includes("requestAnimationFrame(()=>{main?.scrollTo"),'R313 must not issue a delayed corrective workstation scroll that can overwrite destination interaction');
+assert.ok(!settle.includes("requestAnimationFrame(()=>{window.scrollTo"),'R313 must not issue a delayed corrective window scroll that can overwrite destination interaction');
 
 // Authority assertions apply to executable TypeScript, not explanatory comments.
 const executableSettle=settle
@@ -34,4 +38,4 @@ for(const forbiddenApi of [
 ]){
   assert.doesNotMatch(executableSettle,forbiddenApi,'R313 scroll settlement must remain DOM-presentation-only');
 }
-console.log('R313.18 NAVIGATION SCROLL SETTLEMENT INVARIANTS PASS · legacy route reset is synchronous for one bounded frame · no delayed corrective scroll may overwrite destination interaction');
+console.log('R313.20 NAVIGATION SCROLL SETTLEMENT INVARIANTS PASS · route top settles synchronously · scheduled legacy reset suppressed · first destination interaction cannot be overwritten');
