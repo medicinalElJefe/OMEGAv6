@@ -43,10 +43,20 @@
   pointer-events:none;
 }
 
+/* Coarse-pointer acceptance is system-wide, not Command-Center-only.  Keep
+   every discoverable action and form field finger-reachable on the 390px
+   mobile proof surface without changing its label, route or action binding. */
 @media (max-width:900px), (pointer:coarse){
+  .omega-workstation-v2 .workstation-main :where(button,[role='button']):not([disabled]):not([aria-disabled='true']){
+    min-inline-size:44px!important;
+    min-block-size:44px!important;
+  }
+
+  .omega-workstation-v2 .workstation-main :where(input,textarea,select):not([disabled]){
+    min-block-size:44px!important;
+  }
+
   .omega-workstation-v2[data-panel='Command Center'] :where(.quick-prompts,.command-actions) button{
-    min-width:44px!important;
-    min-height:44px!important;
     padding-block:9px!important;
   }
 
