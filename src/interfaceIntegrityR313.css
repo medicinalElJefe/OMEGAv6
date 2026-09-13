@@ -58,164 +58,56 @@
   z-index:1!important;
 }
 
-/* R313.5 DESKTOP COMMAND SCROLL LAW
-   The Command prompt is dynamic: PromptOrchestrator can add task plans, proof steps,
-   device choices and mission state after initial render. R313.1–R313.4 proved that
-   constraining that tree inside a fixed-height nested scrollport can leave native
-   scrollIntoView() unable to expose lower controls to the viewport. Desktop therefore
-   returns the prompt to the canonical workstation/document vertical scroll owner.
-   The visual remains a bounded top-aligned instrument; the grid row grows with prompt
-   content; no ancestor masks the prompt. This changes presentation/scroll ownership only. */
+/* R313.5 DESKTOP COMMAND SCROLL LAW */
 @media (min-width:901px){
-  .omega-workstation-v2[data-panel='Command Center'] .command-deck{
-    min-height:0!important;
-  }
+  .omega-workstation-v2[data-panel='Command Center'] .command-deck{min-height:0!important}
+  .omega-workstation-v2[data-panel='Command Center'] .command-stage{align-items:start!important;height:auto!important;min-height:610px!important;max-height:none!important;grid-template-rows:auto!important;overflow:visible!important}
+  .omega-workstation-v2[data-panel='Command Center'] .command-visual{box-sizing:border-box!important;align-self:start!important;height:clamp(520px,calc(100dvh - 280px),680px)!important;min-height:520px!important;max-height:680px!important;overflow:hidden!important}
+  .omega-workstation-v2[data-panel='Command Center'] .command-prompt{box-sizing:border-box!important;align-self:start!important;min-height:610px!important;height:auto!important;max-height:none!important;overflow:visible!important;overscroll-behavior:auto!important;scrollbar-gutter:auto!important}
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-stage{grid-template-columns:minmax(0,1fr)!important}
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt{min-width:0!important;width:100%!important;border-left:0!important;border-top:1px solid #28444d!important;grid-row:1!important;order:-1!important;min-height:0!important}
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-visual{grid-row:2!important;order:1!important;min-height:420px!important;height:clamp(420px,48dvh,560px)!important;max-height:560px!important}
+  .omega-workstation-v2[data-panel='Command Center'],.omega-workstation-v2[data-panel='Command Center'] .workstation-main,.omega-workstation-v2[data-panel='Command Center'] .omega-surface-r81,.omega-workstation-v2[data-panel='Command Center'] .command-experience-r4,.omega-workstation-v2[data-panel='Command Center'] .command-deck{height:auto!important;max-height:none!important;overflow-y:visible!important}
+  .omega-workstation-v2[data-panel='Command Center'] .command-stage,.omega-workstation-v2[data-panel='Command Center'] .command-prompt{contain:none!important;clip-path:none!important}
+  html[data-omega-nav-present='true'][data-omega-nav-expanded='true']:not([data-omega-nav-wide='true']) .omega-workstation-v2{margin-left:calc(var(--r94-nav-rail) + var(--r94-nav-panel))!important;width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important;max-width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important}
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-stage{display:flex!important;flex-direction:column!important;align-items:stretch!important;min-height:0!important;width:100%!important}
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt,html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-visual{flex:0 0 auto!important;width:100%!important;max-width:100%!important}
+}
 
-  .omega-workstation-v2[data-panel='Command Center'] .command-stage{
-    align-items:start!important;
-    height:auto!important;
-    min-height:610px!important;
-    max-height:none!important;
-    grid-template-rows:auto!important;
-    overflow:visible!important;
-  }
+.omega-workstation-v2 .workstation-main :where(button,[role='button'],input,textarea,select,summary){scroll-margin-block:64px 24px}
+.omega-workstation-v2[data-panel='Command Center'] .boot-sequence span{pointer-events:none}
 
-  .omega-workstation-v2[data-panel='Command Center'] .command-visual{
-    box-sizing:border-box!important;
-    align-self:start!important;
-    height:clamp(520px,calc(100dvh - 280px),680px)!important;
-    min-height:520px!important;
-    max-height:680px!important;
-    overflow:hidden!important;
-  }
+@media (max-width:900px), (pointer:coarse){
+  .omega-workstation-v2 .workstation-main :where(button,[role='button']):not([disabled]):not([aria-disabled='true']){min-inline-size:44px!important;min-block-size:44px!important}
+  .omega-workstation-v2 .workstation-main :where(input,textarea,select):not([disabled]){min-block-size:44px!important}
+  .omega-workstation-v2[data-panel='Command Center'] :where(.quick-prompts,.command-actions) button{padding-block:9px!important}
+  .omega-workstation-v2[data-panel='Command Center'] .command-run,.omega-workstation-v2[data-panel='Command Center'] .command-plan{min-height:44px!important}
+  .omega-workstation-v2[data-panel='Command Center'] .quick-prompts,.omega-workstation-v2[data-panel='Command Center'] .command-actions{align-items:stretch!important}
 
-  .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
-    box-sizing:border-box!important;
-    align-self:start!important;
-    min-height:610px!important;
-    height:auto!important;
-    max-height:none!important;
-    overflow:visible!important;
-    overscroll-behavior:auto!important;
-    scrollbar-gutter:auto!important;
-  }
-
-  /* R313.7 RESERVED-NAV WIDTH LAW */
-  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-stage{
-    grid-template-columns:minmax(0,1fr)!important;
-  }
-
-  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+  /* R313.26 MOBILE CONVERGENCE INLINE-CONTAINMENT LAW
+     Convergence composes several accepted historical applications under one capability-first
+     route. Their independent min-content grids can otherwise enlarge an overflow-clipped
+     ancestor into a hidden horizontal scroll membrane. Programmatic focus/scroll then moves
+     that membrane and leaves later controls outside a 390px viewport even though document
+     overflow remains hidden. Constrain every direct accumulated application to the canonical
+     surface inline size and use overflow-x:clip (not hidden) so the wrapper cannot become a
+     programmatically scrollable horizontal owner. This changes presentation only. */
+  .omega-workstation-v2[data-panel='Convergence'] .r138-capability-first,
+  .omega-workstation-v2[data-panel='Convergence'] .r138-capability-first>div{
     min-width:0!important;
     width:100%!important;
-    border-left:0!important;
-    border-top:1px solid #28444d!important;
+    max-width:100%!important;
+    overflow-x:clip!important;
   }
-
-  /* R313.8 CONSTRAINED COMMAND-COMPOSITION LAW */
-  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
-    grid-row:1!important;
-    order:-1!important;
-    min-height:0!important;
+  .omega-workstation-v2[data-panel='Convergence'] .r138-capability-first>*,
+  .omega-workstation-v2[data-panel='Convergence'] .r138-capability-first>div>*{
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
   }
-
-  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-visual{
-    grid-row:2!important;
-    order:1!important;
-    min-height:420px!important;
-    height:clamp(420px,48dvh,560px)!important;
-    max-height:560px!important;
-  }
-
-  /* R313.9 VIEWPORT SCROLL OWNERSHIP LAW
-     R286's exact failure is not an event-binding failure: all ten Command Center
-     controls are live, but native scrollIntoView cannot bring any of them into a
-     viewport intersection. Earlier repairs removed local clipping one layer at a
-     time; this converges the complete Command Center ancestor chain on document-flow
-     vertical ownership. No nested ancestor may cap or consume vertical travel. */
-  .omega-workstation-v2[data-panel='Command Center'],
-  .omega-workstation-v2[data-panel='Command Center'] .workstation-main,
-  .omega-workstation-v2[data-panel='Command Center'] .omega-surface-r81,
-  .omega-workstation-v2[data-panel='Command Center'] .command-experience-r4,
-  .omega-workstation-v2[data-panel='Command Center'] .command-deck{
-    height:auto!important;
-    max-height:none!important;
-    overflow-y:visible!important;
-  }
-
-  .omega-workstation-v2[data-panel='Command Center'] .command-stage,
-  .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
-    contain:none!important;
-    clip-path:none!important;
-  }
-
-  /* R120 reserves expanded navigation width only when the rail is in its wide state.
-     R286 expands the canonical browser independently of rail width. Reserve the compact
-     rail + browser too so an expanded navigator never leaves the active application
-     physically beneath navigation chrome. */
-  html[data-omega-nav-present='true'][data-omega-nav-expanded='true']:not([data-omega-nav-wide='true']) .omega-workstation-v2{
-    margin-left:calc(var(--r94-nav-rail) + var(--r94-nav-panel))!important;
-    width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important;
-    max-width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important;
-  }
-
-  /* R313.11 EXPANDED-NAV INTRINSIC FLOW LAW
-     The remaining R241 failure occurs only after the canonical navigator stays expanded
-     for the exhaustive route traversal. A focused diagnostic can document-scroll and
-     hit the same ten Command Center controls, proving their actions and basic geometry.
-     Remove the last grid-track sizing variable from that constrained state: application
-     controls and the retained truth visual become ordinary intrinsic block-flow flex
-     items. This prevents implicit grid tracks/min-content sizing from making the prompt
-     visually present while excluding it from the scrolling element's reachable range.
-     No control, route, visual, source meaning, or authority is removed or bypassed. */
-  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-stage{
-    display:flex!important;
-    flex-direction:column!important;
-    align-items:stretch!important;
-    min-height:0!important;
-    width:100%!important;
-  }
-
-  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt,
-  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-visual{
-    flex:0 0 auto!important;
+  .omega-workstation-v2[data-panel='Convergence'] :where(.r138-capability-layout,.r240-calculus-address,.r168-restoration,.r126-max){
+    min-width:0!important;
     width:100%!important;
     max-width:100%!important;
-  }
-}
-
-.omega-workstation-v2 .workstation-main :where(button,[role='button'],input,textarea,select,summary){
-  scroll-margin-block:64px 24px;
-}
-
-.omega-workstation-v2[data-panel='Command Center'] .boot-sequence span{
-  pointer-events:none;
-}
-
-/* Coarse-pointer acceptance is system-wide, not Command-Center-only. Keep
-   every discoverable action and form field finger-reachable on the 390px
-   mobile proof surface without changing its label, route or action binding. */
-@media (max-width:900px), (pointer:coarse){
-  .omega-workstation-v2 .workstation-main :where(button,[role='button']):not([disabled]):not([aria-disabled='true']){
-    min-inline-size:44px!important;
-    min-block-size:44px!important;
-  }
-
-  .omega-workstation-v2 .workstation-main :where(input,textarea,select):not([disabled]){
-    min-block-size:44px!important;
-  }
-
-  .omega-workstation-v2[data-panel='Command Center'] :where(.quick-prompts,.command-actions) button{
-    padding-block:9px!important;
-  }
-
-  .omega-workstation-v2[data-panel='Command Center'] .command-run,
-  .omega-workstation-v2[data-panel='Command Center'] .command-plan{
-    min-height:44px!important;
-  }
-
-  .omega-workstation-v2[data-panel='Command Center'] .quick-prompts,
-  .omega-workstation-v2[data-panel='Command Center'] .command-actions{
-    align-items:stretch!important;
   }
 }
