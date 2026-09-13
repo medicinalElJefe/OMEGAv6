@@ -92,7 +92,7 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
-      - name: Prove built R241/R239/R242/R245/R279/R281/R282/R283/R284/R286/R289 convergence in the real UI
+      - name: Prove built R241/R239/R242/R245/R279/R281/R282/R283/R284/R286/R289/R313 convergence in the real UI
         shell: bash
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
@@ -110,6 +110,7 @@ jobs:
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r284-bio-mode-workbench-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r289-live-master-menu-browser-e2e.mjs
           OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r286-all-surface-browser-e2e.mjs
+          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r313-full-control-interaction-browser-e2e.mjs
 
       - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'pull_request'
@@ -143,8 +144,9 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + Navigation + Full Canon + Earth/SAR + R281/R282/R286/R289 Heavy Bio/UI proof'
+            echo '## R241 Archive Convergence + Navigation + Full Canon + Earth/SAR + R281/R282/R286/R289/R313 Heavy Bio/UI/control proof'
             echo "- Candidate: $GITHUB_SHA"
+            echo '- R313 inventories every visible panel button on all 44 canonical routes on desktop and touch mobile, actuates safe local UI controls, and requires state-changing/network controls to remain proof/authorization gated.'
             echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
             echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
             echo '- R245 correlates runtime, production receipt, Hybrid, capability and governed self-build truth into one read-only observation epoch.'
