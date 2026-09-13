@@ -25,9 +25,9 @@ assert.doesNotMatch(app,/@appdeploy\/client|appdeploy\.ai/i);
 
 // R314 is an extension of this existing Consolidation proof owner, not a shadow workflow.
 assert.match(suite,/OmegaConvergenceMasterR314/,'R314 convergence master must remain wired into Consolidation');
-for(const test of ['tests/r314-convergence-master-invariants.mjs','tests/r314-autonomous-convergence-invariants.mjs','tests/r314-runtime-executable-invariants.mjs']){
+for(const test of ['tests/r314-convergence-master-invariants.mjs','tests/r314-autonomous-convergence-invariants.mjs','tests/r314-ai-repair-invariants.mjs','tests/r314-runtime-executable-invariants.mjs']){
  const result=spawnSync(process.execPath,[test],{encoding:'utf8',stdio:['ignore','pipe','pipe']});
  assert.equal(result.status,0,`${test} failed\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`);
  process.stdout.write(result.stdout);
 }
-console.log('R168/R314 SYSTEM CONSOLIDATION PASS · shared instructions · consumed settings · live system diagnostics · convergence charts · executable sync/motion/canon proof · non-mutating consolidation');
+console.log('R168/R314 SYSTEM CONSOLIDATION PASS · shared instructions · consumed settings · live system diagnostics · convergence charts · bounded AI repair membrane · executable sync/motion/canon proof · non-mutating consolidation');
