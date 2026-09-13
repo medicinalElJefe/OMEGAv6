@@ -1,0 +1,93 @@
+/* R313 — interface integrity convergence.
+   Presentation-only repair: restore non-overlapping Command Center geometry,
+   preserve real hit regions beneath the sticky workstation shell, and enforce
+   coarse-pointer touch targets without changing action/authority semantics. */
+
+.omega-workstation-v2[data-panel='Command Center'] .command-deck{
+  position:relative;
+  isolation:isolate;
+  align-content:start;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .command-deck-head{
+  position:relative!important;
+  inset:auto!important;
+  transform:none!important;
+  margin:0!important;
+  z-index:0!important;
+  overflow:hidden;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .command-deck-head .boot-sequence,
+.omega-workstation-v2[data-panel='Command Center'] .command-deck-head .boot-sequence span{
+  position:relative;
+  inset:auto;
+  transform:none;
+  max-width:100%;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .command-stage,
+.omega-workstation-v2[data-panel='Command Center'] .command-proof-strip,
+.omega-workstation-v2[data-panel='Command Center'] .command-response{
+  position:relative!important;
+  inset:auto!important;
+  transform:none!important;
+  z-index:1!important;
+}
+
+/* Desktop Command Center is a split application, not an infinitely tall document.
+   Keep the prompt/actions column inside a viewport-bounded scroll authority so
+   scrollIntoView, keyboard focus and pointer targeting can always bring every
+   real control into an unobscured hit region.  This repairs the shared R286
+   failure affecting quick prompts, orchestrator actions and traversal links. */
+@media (min-width:901px){
+  .omega-workstation-v2[data-panel='Command Center'] .command-stage{
+    align-items:stretch;
+  }
+
+  .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+    min-height:0!important;
+    max-height:calc(100dvh - 156px);
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+    -webkit-overflow-scrolling:touch;
+  }
+}
+
+.omega-workstation-v2 .workstation-main :where(button,[role='button'],input,textarea,select,summary){
+  scroll-margin-block:64px 24px;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .boot-sequence span{
+  pointer-events:none;
+}
+
+/* Coarse-pointer acceptance is system-wide, not Command-Center-only.  Keep
+   every discoverable action and form field finger-reachable on the 390px
+   mobile proof surface without changing its label, route or action binding. */
+@media (max-width:900px), (pointer:coarse){
+  .omega-workstation-v2 .workstation-main :where(button,[role='button']):not([disabled]):not([aria-disabled='true']){
+    min-inline-size:44px!important;
+    min-block-size:44px!important;
+  }
+
+  .omega-workstation-v2 .workstation-main :where(input,textarea,select):not([disabled]){
+    min-block-size:44px!important;
+  }
+
+  .omega-workstation-v2[data-panel='Command Center'] :where(.quick-prompts,.command-actions) button{
+    padding-block:9px!important;
+  }
+
+  .omega-workstation-v2[data-panel='Command Center'] .command-run,
+  .omega-workstation-v2[data-panel='Command Center'] .command-plan{
+    min-height:44px!important;
+  }
+
+  .omega-workstation-v2[data-panel='Command Center'] .quick-prompts,
+  .omega-workstation-v2[data-panel='Command Center'] .command-actions{
+    align-items:stretch!important;
+  }
+}
