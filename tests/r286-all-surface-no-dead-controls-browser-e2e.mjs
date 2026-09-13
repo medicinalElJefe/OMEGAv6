@@ -122,8 +122,10 @@ async function runtimeControlAudit(){
 
     // A route may legitimately re-render presentation nodes while scroll settlement
     // completes. Audit the current live replacement, not a detached pre-scroll node.
-    // Three bounded attempts preserve fail-closed reachability while eliminating stale
-    // DOM-reference false negatives exposed by the Command Center diagnostic.
+    // First use the browser's semantic scrollIntoView path. If that leaves the live
+    // control wholly outside the viewport, use the canonical document scroll membrane
+    // proven by R313.21 and the Command Center geometry diagnostic. Either path must
+    // still finish with a real unobscured elementFromPoint hit on the live control.
     for(let attempt=0;attempt<3;attempt++){
       el=resolveProbe(probe);
       if(!el){
@@ -137,9 +139,9 @@ async function runtimeControlAudit(){
         reachFailure='remounted without a resolvable live replacement after scrolling';
         continue;
       }
-      const rect=el.getBoundingClientRect();
+      let rect=el.getBoundingClientRect();
       finalRect=rect;
-      const geometry=[rect.left,rect.right,rect.top,rect.bottom,rect.width,rect.height,innerWidth,innerHeight];
+      let geometry=[rect.left,rect.right,rect.top,rect.bottom,rect.width,rect.height,innerWidth,innerHeight];
       if(!geometry.every(Number.isFinite)){
         reachFailure='returned non-finite viewport geometry';
         continue;
@@ -148,8 +150,30 @@ async function runtimeControlAudit(){
         reachFailure=`has unusable ${Math.round(rect.width)}×${Math.round(rect.height)} hit geometry`;
         continue;
       }
-      const left=Math.max(rect.left,1),right=Math.min(rect.right,innerWidth-1),topEdge=Math.max(rect.top,1),bottom=Math.min(rect.bottom,innerHeight-1);
-      const hitWidth=right-left,hitHeight=bottom-top;
+
+      let left=Math.max(rect.left,1),right=Math.min(rect.right,innerWidth-1),topEdge=Math.max(rect.top,1),bottom=Math.min(rect.bottom,innerHeight-1);
+      let hitWidth=right-left,hitHeight=bottom-top;
+      if(!Number.isFinite(hitWidth)||!Number.isFinite(hitHeight)||hitWidth<2||hitHeight<2){
+        const scroller=document.scrollingElement||document.documentElement;
+        const maxTop=Math.max(0,scroller.scrollHeight-innerHeight);
+        const targetTop=Math.min(maxTop,Math.max(0,scroller.scrollTop+rect.top-(innerHeight-rect.height)/2));
+        scroller.scrollTo({top:targetTop,left:scroller.scrollLeft,behavior:'instant'});
+        await settle();
+        el=resolveProbe(probe);
+        if(!el){
+          reachFailure='remounted without a resolvable live replacement after document scrolling';
+          continue;
+        }
+        rect=el.getBoundingClientRect();
+        finalRect=rect;
+        geometry=[rect.left,rect.right,rect.top,rect.bottom,rect.width,rect.height,innerWidth,innerHeight];
+        if(!geometry.every(Number.isFinite)){
+          reachFailure='returned non-finite viewport geometry after document scrolling';
+          continue;
+        }
+        left=Math.max(rect.left,1);right=Math.min(rect.right,innerWidth-1);topEdge=Math.max(rect.top,1);bottom=Math.min(rect.bottom,innerHeight-1);
+        hitWidth=right-left;hitHeight=bottom-top;
+      }
       if(!Number.isFinite(hitWidth)||!Number.isFinite(hitHeight)||hitWidth<2||hitHeight<2){
         reachFailure='could not be scrolled to a reachable viewport hit region';
         continue;
