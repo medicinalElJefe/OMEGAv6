@@ -9,10 +9,12 @@ assert.ok(settle.includes("isLegacyTopReset"),'R313 must narrowly recognize the 
 assert.ok(settle.includes("behavior:'auto'"),'R313 must synchronously settle the historical route-to-top target');
 assert.ok(settle.includes("nativeElementScrollTo.call(main,{top:0,behavior:'auto'})"),'R313 must settle workstation scroll synchronously inside the transition event');
 assert.ok(settle.includes("nativeWindowScrollTo.call(window,{top:0,behavior:'auto'})"),'R313 must settle document scroll synchronously inside the transition event');
-assert.ok(settle.includes("if(isLegacyTopReset(args))return"),'R313 must suppress the already-scheduled legacy window reset after synchronous settlement');
-assert.ok(settle.includes("this.classList.contains('workstation-main')"),'R313 must scope legacy element-reset suppression to the historical workstation owner');
-assert.ok(settle.includes('nativeWindowScrollTo')&&settle.includes('nativeElementScrollTo'),'R313 must preserve both historical native scroll owners');
-assert.ok(settle.includes('window.scrollTo=nativeWindowScrollTo')&&settle.includes('HTMLElement.prototype.scrollTo=nativeElementScrollTo'),'R313 must restore native scrolling after the bounded route-reset window');
+assert.ok(settle.includes("suppressLegacyReset&&isLegacyTopReset(args)"),'R313 must suppress only the scheduled legacy top reset during the transition window');
+assert.ok(settle.includes("this.classList.contains('workstation-main')"),'R313 must scope element reset suppression to the historical workstation owner');
+assert.ok(settle.includes('const nativeWindowScrollTo=window.scrollTo')&&settle.includes('const nativeElementScrollTo=HTMLElement.prototype.scrollTo'),'R313 must capture native scroll owners exactly once at installation');
+assert.ok(settle.includes('suppressLegacyReset=false'),'R313 must reopen ordinary scrolling after the bounded transition window');
+assert.ok(!settle.includes('window.scrollTo=nativeWindowScrollTo')&&!settle.includes('HTMLElement.prototype.scrollTo=nativeElementScrollTo'),'R313 must not restore per-transition wrappers out of order');
+assert.ok(!settle.includes('let transition='),'R313 must not stack transition-scoped native method captures');
 assert.ok(!settle.includes("requestAnimationFrame(()=>{main?.scrollTo"),'R313 must not issue a delayed corrective workstation scroll that can overwrite destination interaction');
 assert.ok(!settle.includes("requestAnimationFrame(()=>{window.scrollTo"),'R313 must not issue a delayed corrective window scroll that can overwrite destination interaction');
 
@@ -38,4 +40,4 @@ for(const forbiddenApi of [
 ]){
   assert.doesNotMatch(executableSettle,forbiddenApi,'R313 scroll settlement must remain DOM-presentation-only');
 }
-console.log('R313.20 NAVIGATION SCROLL SETTLEMENT INVARIANTS PASS · route top settles synchronously · scheduled legacy reset suppressed · first destination interaction cannot be overwritten');
+console.log('R313.21 NAVIGATION SCROLL SETTLEMENT INVARIANTS PASS · stable single scroll membrane · route top settles synchronously · legacy reset suppressed without wrapper stacking');
