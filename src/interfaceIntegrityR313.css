@@ -90,16 +90,7 @@
     scrollbar-gutter:auto!important;
   }
 
-  /* R313.7 RESERVED-NAV WIDTH LAW
-     R286 audits with the canonical navigator expanded. At a 1440px desktop viewport,
-     R120 reserves the wide rail plus a 420–520px browser panel, leaving roughly 754–854px
-     for the active workstation. commandDeck.css otherwise keeps its two-column layout
-     until the viewport itself falls below 1220px, whose 520px + 390px minimum columns
-     cannot fit the navigator-reduced workspace. The entire prompt column is then clipped
-     horizontally, which is why every R286 failure belongs to that column, including its
-     first quick-prompt button. Navigation state is part of available layout geometry, so
-     collapse the stage while the browser is expanded rather than hiding controls or
-     weakening hit testing. */
+  /* R313.7 RESERVED-NAV WIDTH LAW */
   html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-stage{
     grid-template-columns:minmax(0,1fr)!important;
   }
@@ -111,13 +102,7 @@
     border-top:1px solid #28444d!important;
   }
 
-  /* R313.8 CONSTRAINED COMMAND-COMPOSITION LAW
-     R313.7 removed the horizontal two-column overflow, but its single-column order still
-     put the entire interactive prompt after a 520–680px visual. R286 keeps the navigator
-     expanded and audits actual viewport hit regions, so a higher scroll/viewport boundary
-     can still strand every prompt control together. In the constrained expanded-nav state,
-     application actions must lead and the retained visual follows them. This preserves the
-     full visual and every command action while reducing cognitive and scroll distance. */
+  /* R313.8 CONSTRAINED COMMAND-COMPOSITION LAW */
   html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
     grid-row:1!important;
     order:-1!important;
@@ -130,6 +115,38 @@
     min-height:420px!important;
     height:clamp(420px,48dvh,560px)!important;
     max-height:560px!important;
+  }
+
+  /* R313.9 VIEWPORT SCROLL OWNERSHIP LAW
+     R286's exact failure is not an event-binding failure: all ten Command Center
+     controls are live, but native scrollIntoView cannot bring any of them into a
+     viewport intersection. Earlier repairs removed local clipping one layer at a
+     time; this converges the complete Command Center ancestor chain on document-flow
+     vertical ownership. No nested ancestor may cap or consume vertical travel. */
+  .omega-workstation-v2[data-panel='Command Center'],
+  .omega-workstation-v2[data-panel='Command Center'] .workstation-main,
+  .omega-workstation-v2[data-panel='Command Center'] .omega-surface-r81,
+  .omega-workstation-v2[data-panel='Command Center'] .command-experience-r4,
+  .omega-workstation-v2[data-panel='Command Center'] .command-deck{
+    height:auto!important;
+    max-height:none!important;
+    overflow-y:visible!important;
+  }
+
+  .omega-workstation-v2[data-panel='Command Center'] .command-stage,
+  .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+    contain:none!important;
+    clip-path:none!important;
+  }
+
+  /* R120 reserves expanded navigation width only when the rail is in its wide state.
+     R286 expands the canonical browser independently of rail width. Reserve the compact
+     rail + browser too so an expanded navigator never leaves the active application
+     physically beneath navigation chrome. */
+  html[data-omega-nav-present='true'][data-omega-nav-expanded='true']:not([data-omega-nav-wide='true']) .omega-workstation-v2{
+    margin-left:calc(var(--r94-nav-rail) + var(--r94-nav-panel))!important;
+    width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important;
+    max-width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important;
   }
 }
 
