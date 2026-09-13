@@ -94,40 +94,40 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Browser proof · R241 archive convergence
-        run: bash scripts/run_r241_browser_proof.sh tests/r241-archive-convergence-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r241-archive-convergence-browser-e2e.mjs'
 
       - name: Browser proof · R239 user navigation
-        run: bash scripts/run_r241_browser_proof.sh tests/r239-user-navigation-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r239-user-navigation-browser-e2e.mjs'
 
       - name: Browser proof · R245 Full Overall Canon
-        run: bash scripts/run_r241_browser_proof.sh tests/r245-full-overall-canon-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r245-full-overall-canon-browser-e2e.mjs'
 
       - name: Browser proof · R279 Earth views
-        run: bash scripts/run_r241_browser_proof.sh tests/r279-earth-views-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r279-earth-views-browser-e2e.mjs'
 
       - name: Browser proof · R281 Bio instrument
-        run: bash scripts/run_r241_browser_proof.sh tests/r281-bio-instrument-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r281-bio-instrument-browser-e2e.mjs'
 
       - name: Browser proof · R282 Bio medical production
-        run: bash scripts/run_r241_browser_proof.sh tests/r282-bio-medical-production-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r282-bio-medical-production-browser-e2e.mjs'
 
       - name: Browser proof · R284 Bio mode workbench
-        run: bash scripts/run_r241_browser_proof.sh tests/r284-bio-mode-workbench-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r284-bio-mode-workbench-browser-e2e.mjs'
 
       - name: Browser proof · R289 live master menu
-        run: bash scripts/run_r241_browser_proof.sh tests/r289-live-master-menu-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r289-live-master-menu-browser-e2e.mjs'
 
       - name: Browser proof · R286 canonical all-surface routes
-        run: bash scripts/run_r241_browser_proof.sh tests/r286-all-surface-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r286-all-surface-browser-e2e.mjs'
 
       - name: Browser proof · R286 accumulated no-dead-control contract
-        run: bash scripts/run_r241_browser_proof.sh tests/r286-all-surface-no-dead-controls-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r286-all-surface-no-dead-controls-browser-e2e.mjs'
 
       - name: Browser proof · R313 panel disclosure contract
-        run: bash scripts/run_r241_browser_proof.sh tests/r313-panel-disclosure-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-panel-disclosure-browser-e2e.mjs'
 
       - name: Browser proof · R313 full safe-control interaction contract
-        run: bash scripts/run_r241_browser_proof.sh tests/r313-full-control-interaction-browser-e2e.mjs
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-full-control-interaction-browser-e2e.mjs'
 
       - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'pull_request'
