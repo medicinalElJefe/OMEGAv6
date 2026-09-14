@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {spawnSync} from 'node:child_process';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const suite=read('src/OmegaSpecialistSuite.tsx');
 const app=read('src/OmegaSystemConsolidationR30.tsx');
@@ -21,4 +22,12 @@ assert.match(authority,/CAPABILITY_PREDECESSOR_REALITY_R23/);
 assert.match(authority,/'Plugins':'DONOR_ONLY'/,'Plugin donor predecessor must remain preserved as historical evidence');
 assert.match(authority,/'Plugins':'LOCAL_ACTIVE'/,'R168 current Plugin registry successor must be locally active');
 assert.doesNotMatch(app,/@appdeploy\/client|appdeploy\.ai/i);
-console.log('R168 SYSTEM CONSOLIDATION PASS · shared instructions · consumed settings · live system diagnostics · predecessor donor evidence separated from current local Plugin successor · non-mutating consolidation');
+
+// R314 extends the accumulated Consolidation proof owner; it does not replace R30/R168 authority.
+assert.match(suite,/OmegaConvergenceMasterR314/,'R314 convergence master must remain wired into Consolidation');
+for(const test of ['tests/r314-convergence-master-invariants.mjs','tests/r314-autonomous-convergence-invariants.mjs','tests/r314-ai-repair-invariants.mjs','tests/r314-runtime-executable-invariants.mjs']){
+ const result=spawnSync(process.execPath,[test],{encoding:'utf8',stdio:['ignore','pipe','pipe']});
+ assert.equal(result.status,0,`${test} failed\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`);
+ process.stdout.write(result.stdout);
+}
+console.log('R168/R314 SYSTEM CONSOLIDATION PASS · shared instructions · consumed settings · live system diagnostics · convergence charts · bounded AI repair membrane · executable sync/motion/canon proof · non-mutating consolidation');
