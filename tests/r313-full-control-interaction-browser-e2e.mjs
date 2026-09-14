@@ -128,7 +128,11 @@ async function clickSafeControls(page,surface,profile,pageErrors){
   await actuateSafeControl(page,item,profile,surface);
   await page.waitForTimeout(40);
   if(pageErrors.length)throw new Error(`${profile}/${surface}: page error after activating ${item.label}: ${pageErrors.at(-1)}`);
-  const panel=await page.locator('.omega-workstation-v2').getAttribute('data-panel');
+  const shell=page.locator('.omega-workstation-v2');
+  if(!await shell.count()){
+   throw new Error(`${profile}/${surface}: canonical workstation shell missing after activating ${item.label}; url=${page.url()}`);
+  }
+  const panel=await shell.first().getAttribute('data-panel',{timeout:3000}).catch(()=>null);
   if(panel!==surface)await activateSurface(page,surface);
  }
  return before;
