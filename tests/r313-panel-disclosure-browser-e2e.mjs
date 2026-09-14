@@ -48,6 +48,16 @@ async function directContentState(details){
   });
 }
 
+async function detailsDiagnostic(details){
+  return details.evaluate(el=>({
+    className:String(el.className||''),
+    summary:(el.querySelector(':scope > summary')?.textContent||'').replace(/\s+/g,' ').trim().slice(0,240),
+    open:Boolean(el.open),
+    ancestors:[...function*(){let p=el.parentElement?.closest('details')||null;while(p){yield String(p.className||p.tagName);p=p.parentElement?.closest('details')||null}}()],
+    children:[...el.children].filter(x=>x.tagName!=='SUMMARY').map(node=>{const s=getComputedStyle(node),r=node.getBoundingClientRect();return{tag:node.tagName,className:String(node.className||''),display:s.display,visibility:s.visibility,opacity:s.opacity,width:Number(r.width.toFixed(2)),height:Number(r.height.toFixed(2)),text:(node.textContent||'').replace(/\s+/g,' ').trim().slice(0,180)}})
+  }));
+}
+
 async function testDetails(page,viewport,route){
   const list=page.locator('.workstation-main .omega-surface-r81 details');
   const count=await list.count();
@@ -72,7 +82,7 @@ async function testDetails(page,viewport,route){
       const after=await details.evaluate(el=>el.open);
       if(after===before)throw new Error(`${viewport}/${route}: details #${i} summary did not toggle`);
       const afterState=await directContentState(details);
-      if(after&&afterState.text>0&&afterState.visible===0)throw new Error(`${viewport}/${route}: opened details #${i} exposes no meaningful direct content`);
+      if(after&&afterState.text>0&&afterState.visible===0){const diag=await detailsDiagnostic(details);throw new Error(`${viewport}/${route}: opened details #${i} exposes no meaningful direct content · ${JSON.stringify(diag)}`)}
       if(!after&&afterState.visible>0)throw new Error(`${viewport}/${route}: closed details #${i} still exposes ${afterState.visible} direct content regions`);
       await summary.click({timeout:10000});
       await page.waitForTimeout(35);
