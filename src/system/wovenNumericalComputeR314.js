@@ -1,7 +1,7 @@
 export const R314_SCHEMA='OMEGA_WOVEN_NUMERICAL_COMPUTE_R314';
-export const R314_REVISION='R314';
+export const R314_REVISION='R314.2';
 export const R314_AUTHORITY=Object.freeze({addressing:'R240',continuity:'R265',dispatch:'R147',returnProof:'R141',history:'R146',canonAdmission:'R125',productionWriter:'.github/workflows/ci.yml',addsAuthority:false});
-export const R314_NUMERICAL_CAPABILITIES=Object.freeze(['SCALAR','VECTOR','MATRIX','DAG','GRADIENT','JACOBIAN','HESSIAN','INTEGRATION','ROOT','LINEAR_SOLVE','OPTIMIZATION','FRAME_TRANSFORM','COVARIANCE_PROPAGATION','ROUND_TRIP_RESIDUAL','COMMUTATION_RESIDUAL']);
+export const R314_NUMERICAL_CAPABILITIES=Object.freeze(['SCALAR','VECTOR','MATRIX','DAG','GRADIENT','JACOBIAN','HESSIAN','INTEGRATION','ROOT','LINEAR_SOLVE','OPTIMIZATION','FRAME_TRANSFORM','COVARIANCE_PROPAGATION','ROUND_TRIP_RESIDUAL','COMMUTATION_RESIDUAL','BATCH','SCENARIO_SWEEP','LINEARIZED_UNCERTAINTY','RK4_DYNAMICS']);
 export const R314_TRUTH_BOUNDARY='R314 is a deterministic bounded numerical substrate. Numerical convergence is computation proof only; it is not empirical truth, execution proof, CanonState admission, or a literal physical-dimension claim.';
 
 const finite=n=>{const x=Number(n);if(!Number.isFinite(x))throw new Error('R314 requires finite numeric values');return x};
@@ -45,6 +45,32 @@ export function affineFrameTransformR314(x,basis,{offset=null}={}){x=vec(x);basi
 export function propagateCovarianceR314(J,covariance){J=matrix(J);covariance=matrix(covariance);if(covariance.length!==covariance[0].length||J[0].length!==covariance.length)throw new Error('R314 covariance propagation shape mismatch');return matmulR314(matmulR314(J,covariance),transposeR314(J))}
 export function roundTripResidualR314(forward,inverse,x){x=vec(x);const y=vec(forward(x)),back=vec(inverse(y));same(x,back);return{schema:R314_SCHEMA,revision:R314_REVISION,kind:'ROUND_TRIP_RESIDUAL',residual:normR314(vectorSubR314(back,x)),forwardHash:structuralHashR314(y),returnHash:structuralHashR314(back),authority:R314_AUTHORITY}}
 export function commutationResidualR314(A,B,x){x=vec(x);const ab=vec(A(vec(B(x)))),ba=vec(B(vec(A(x))));same(ab,ba);return{schema:R314_SCHEMA,revision:R314_REVISION,kind:'COMMUTATION_RESIDUAL',residual:normR314(vectorSubR314(ab,ba)),abHash:structuralHashR314(ab),baHash:structuralHashR314(ba),authority:R314_AUTHORITY}}
+
+export function batchEvaluateR314(fn,samples,{maxBatch=256,provenance=[]}={}){
+ if(!Array.isArray(samples)||!samples.length)throw new Error('R314 batch requires samples');if(samples.length>maxBatch)throw new Error('R314 batch exceeds bounded maxBatch');
+ const values=samples.map((sample,index)=>{const value=fn(sample,index);const normalized=Array.isArray(value)?vec(value):finite(value);return{index,value:normalized,hash:structuralHashR314(normalized)}});
+ return{schema:R314_SCHEMA,revision:R314_REVISION,kind:'BATCH',count:values.length,values,batchHash:structuralHashR314(values.map(v=>v.hash)),provenance:[...provenance],authority:R314_AUTHORITY,executionProofClaimed:false};
+}
+
+export function scenarioSweepR314(fn,scenarios,{score=null,maxScenarios=144,provenance=[]}={}){
+ if(!Array.isArray(scenarios)||!scenarios.length)throw new Error('R314 scenario sweep requires scenarios');if(scenarios.length>maxScenarios)throw new Error('R314 scenario sweep exceeds bounded maxScenarios');
+ const evaluated=scenarios.map((scenario,index)=>{const result=fn(scenario,index);const rank=score?finite(score(result,scenario,index)):null;return{index,id:String(scenario?.id??index),inputHash:structuralHashR314(scenario),result,resultHash:structuralHashR314(result),score:rank}});
+ const ranked=score?[...evaluated].sort((a,b)=>b.score-a.score||a.index-b.index):evaluated;
+ return{schema:R314_SCHEMA,revision:R314_REVISION,kind:'SCENARIO_SWEEP',count:evaluated.length,evaluated,ranked,provenance:[...provenance],authority:R314_AUTHORITY,canonicalAdmissionClaimed:false};
+}
+
+export function propagateUncertaintyLinearizedR314(fn,mean,covariance,{relativeStep=1e-5}={}){
+ mean=vec(mean);covariance=matrix(covariance);if(covariance.length!==mean.length||covariance[0].length!==mean.length)throw new Error('R314 uncertainty covariance shape mismatch');
+ const output=vec(fn(mean)),J=jacobianR314(fn,mean,{relativeStep}),outputCovariance=propagateCovarianceR314(J,covariance);
+ return{schema:R314_SCHEMA,revision:R314_REVISION,kind:'LINEARIZED_UNCERTAINTY',mean:output,jacobian:J,covariance:outputCovariance,inputHash:structuralHashR314({mean,covariance}),authority:R314_AUTHORITY,empiricalTruthClaimed:false};
+}
+
+export function integrateRK4R314(derivative,initialState,t0,t1,{steps=128,provenance=[]}={}){
+ let state=vec(initialState),time=finite(t0);const end=finite(t1),n=Math.max(1,Math.min(100000,Math.floor(steps))),h=(end-time)/n,trajectory=[{t:time,state:[...state]}];
+ const d=(t,s)=>{const out=vec(derivative(t,[...s]));same(out,s);return out};
+ for(let i=0;i<n;i++){const k1=d(time,state),k2=d(time+h/2,vectorAddR314(state,scaleR314(k1,h/2))),k3=d(time+h/2,vectorAddR314(state,scaleR314(k2,h/2))),k4=d(time+h,vectorAddR314(state,scaleR314(k3,h)));const delta=scaleR314(vectorAddR314(vectorAddR314(k1,scaleR314(k2,2)),vectorAddR314(scaleR314(k3,2),k4)),h/6);state=vectorAddR314(state,delta);time=t0+(i+1)*h;trajectory.push({t:time,state:[...state]})}
+ return{schema:R314_SCHEMA,revision:R314_REVISION,kind:'RK4_DYNAMICS',value:state,t0:finite(t0),t1:end,steps:n,trajectory,trajectoryHash:structuralHashR314(trajectory),provenance:[...provenance],authority:R314_AUTHORITY,executionProofClaimed:false};
+}
 
 const OPS={add:(a,b)=>typeof a==='number'&&typeof b==='number'?a+b:vectorAddR314(a,b),sub:(a,b)=>typeof a==='number'&&typeof b==='number'?a-b:vectorSubR314(a,b),mul:(a,b)=>finite(a)*finite(b),dot:dotR314,norm:normR314,matmul:matmulR314,matvec:matvecR314};
 export function executeDagR314(nodes,{inputs={},memo=new Map(),provenance=[]}={}){
