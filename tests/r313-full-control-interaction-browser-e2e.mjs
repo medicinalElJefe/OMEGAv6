@@ -67,8 +67,9 @@ async function guardEvidence(page,item){
 }
 
 async function resolveControl(page,item){
- let current=page.locator(`[data-r313-probe-id="${item.id}"]`);
- if(await current.count())return current.first();
+ const probe=`[data-r313-probe-id="${item.id}"]`;
+ let current=page.locator(probe);
+ if(await current.count()&&await current.first().isVisible().catch(()=>false))return current.first();
  const rebound=await page.evaluate(({label,tag,id,navSel})=>{
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
   const root=document.querySelector('.workstation-main');
@@ -78,12 +79,13 @@ async function resolveControl(page,item){
    return el.tagName===tag&&text===label;
   });
   if(candidates.length!==1)return false;
+  root.querySelectorAll(`[data-r313-probe-id="${CSS.escape(id)}"]`).forEach(el=>el.removeAttribute('data-r313-probe-id'));
   candidates[0].setAttribute('data-r313-probe-id',id);
   return true;
  },{label:item.label,tag:item.tag,id:item.id,navSel:NAV_SELECTOR});
  if(!rebound)return null;
- current=page.locator(`[data-r313-probe-id="${item.id}"]`);
- return await current.count()?current.first():null;
+ current=page.locator(probe);
+ return await current.count()&&await current.first().isVisible().catch(()=>false)?current.first():null;
 }
 
 async function actuateSafeControl(page,item,profile,surface){
