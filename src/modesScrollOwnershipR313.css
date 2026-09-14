@@ -1,15 +1,20 @@
-/* R313.29 — Modes mobile scroll-ownership closure.
+/* R313.30 — Modes mobile scroll-ownership closure.
    The accumulated Modes surface contains several accepted historical registries that
-   independently own vertical overflow. On coarse-pointer/mobile viewports those nested
-   scroll owners can also retain inline scroll state during Chromium actionability
-   scrolling, moving later canonical controls outside the visual viewport even when the
-   document itself has no material horizontal overflow.
+   independently owned overflow. On coarse-pointer/mobile viewports those nested owners
+   could retain inline scroll state during Chromium actionability scrolling, moving later
+   canonical controls thousands of pixels outside the visual viewport even when the
+   document itself had no material horizontal overflow.
+
+   R313.29 correctly attempted overflow-x:clip, but some structural ancestors still
+   inherited overflow-y:hidden from historical surface CSS. Per CSS overflow computation,
+   clip paired with a non-visible/non-clip opposite axis computes back to hidden, which is
+   programmatically scrollable. That left a real hidden horizontal scroll membrane.
 
    Mobile/coarse-pointer Modes therefore has exactly one scrolling membrane: the document.
-   The retained mode, authority and catalog registries expand into document flow rather than
-   becoming nested scrollports. Inline containment stays clipped and every composite root
-   is shrinkable. This changes presentation/scroll ownership only; it does not alter mode,
-   route, source, execution, proof, Canon, Hybrid or deployment authority. */
+   Structural shells use overflow:clip on BOTH axes (not hidden); retained registries expand
+   into document flow; every composite root remains shrinkable. This changes presentation
+   and scroll ownership only. It does not alter mode, route, source, execution, proof,
+   Canon, Hybrid or deployment authority. */
 
 @media (max-width:900px), (pointer:coarse){
   .omega-workstation-v2[data-panel='Modes'],
@@ -17,8 +22,25 @@
   .omega-workstation-v2[data-panel='Modes'] .omega-surface-r81,
   .omega-workstation-v2[data-panel='Modes'] .sbm21-app{
     min-inline-size:0!important;
+    inline-size:100%!important;
     max-inline-size:100%!important;
-    overflow-x:clip!important;
+    box-sizing:border-box!important;
+  }
+
+  /* IMPORTANT: use the overflow shorthand here. `overflow-x:clip` combined with an
+     inherited `overflow-y:hidden|auto` computes the x-axis back to hidden in Chromium,
+     recreating a programmatically scrollable horizontal membrane. Both axes must remain
+     clip/visible for clip to retain its non-scroll-container semantics. */
+  .omega-workstation-v2[data-panel='Modes'] .omega-surface-r81,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app,
+  .omega-workstation-v2[data-panel='Modes'] :where(
+    .sbm21-expression,
+    .sbm21-route,
+    .sbm21-mode-columns>section,
+    .sbm21-authorities,
+    .sbm21-catalog
+  ){
+    overflow:clip!important;
   }
 
   .omega-workstation-v2[data-panel='Modes'] .sbm21-app :where(
@@ -37,13 +59,12 @@
     min-inline-size:0!important;
     inline-size:100%!important;
     max-inline-size:100%!important;
-    overflow-x:clip!important;
     box-sizing:border-box!important;
+    contain:inline-size;
   }
 
-  /* One vertical owner on mobile: document flow.  `overflow-y:auto` combined with a
-     non-visible overflow-x value can still establish a programmatically scrollable box,
-     so remove the nested scrollports entirely at the viewport where the failure occurs. */
+  /* Flatten retained list scrollports into the single document-flow owner on mobile.
+     This deliberately overrides their historical max-height/overflow:auto contracts. */
   .omega-workstation-v2[data-panel='Modes'] :where(
     .sbm21-mode-list,
     .sbm21-authority-grid,
@@ -67,6 +88,24 @@
     min-inline-size:0!important;
     max-inline-size:100%!important;
     box-sizing:border-box!important;
+  }
+
+  /* Headers that contain the two controls previously observed off-screen are explicitly
+     single-column mobile composition roots. This prevents desktop min-content tracks from
+     surviving through historical cascade layers. */
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression>header,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog>header{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    align-items:stretch!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression>header>*,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog>header>*{
+    min-inline-size:0!important;
+    inline-size:100%!important;
+    max-inline-size:100%!important;
+    transform:none!important;
+    inset:auto!important;
   }
 
   .omega-workstation-v2[data-panel='Modes'] .sbm21-mode-list article{
