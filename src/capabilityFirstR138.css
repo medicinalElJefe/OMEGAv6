@@ -2,6 +2,8 @@
 
 /* R140 hierarchy law: proof plots stay out of primary operation, but exact transition evidence is reachable in explicit proof contexts. */
 .r93-truth-plot.r93-mode-trace,.r93-truth-plot.r93-infinity-source,.r93-truth-plot.r93-transition,.r93-truth-plot.r93-scale{display:none!important}.r93-packet,.r95-canonical-manifold,.r95-state-mandala{display:block}.r43-workspace-stage[data-view='ROUTE'] .r93-truth-plot.r93-transition{display:grid!important}
+/* R313.41 disclosure law: the secondary inspector is itself an explicit proof context. Keep retired plots subordinate while closed, then restore their native grid geometry only after the user deliberately opens the inspector. */
+.r95-secondary-inspector[open]>.r93-truth-plot.r93-mode-trace,.r95-secondary-inspector[open]>.r93-truth-plot.r93-transition{display:grid!important}
 
 @keyframes r138spin{to{transform:rotate(360deg)}}
 @media(max-width:900px){.r138-capability-layout{grid-template-columns:1fr}.r138-action-stack{max-height:none;grid-template-columns:repeat(2,minmax(0,1fr))}.r138-capability-head{display:grid}.r138-health{text-align:left}.r138-live-stage,.r138-live-stage svg{min-height:360px}}
