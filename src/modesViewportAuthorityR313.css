@@ -54,3 +54,45 @@
     align-self:stretch!important;
   }
 }
+
+/* R313.33 — close the remaining percentage-basis escape.
+   Exact R241 browser proof on a 390px coarse-pointer viewport still observed the selected
+   mode and catalog command groups at x≈4200 after actionability scrolling. Both controls
+   share no local layout ancestor, so their identical displacement proves the percentage
+   basis above them was still oversized. Do not let a historical ancestor decide the finite
+   mobile Modes width: bind the workstation, canonical surface host, Modes app and the two
+   named command roots directly to the dynamic viewport budget. Percentages remain useful
+   inside those finite roots, but cannot recursively reproduce an oversized containing block.
+   This is presentation/interaction geometry only; all route, mode, source, proof, execution,
+   Canon, Hybrid and deployment authorities remain unchanged. */
+@media (max-width:900px), (pointer:coarse){
+  .omega-workstation-v2[data-panel='Modes']{
+    box-sizing:border-box!important;
+    inline-size:calc(100dvw - var(--r94-nav-rail,48px))!important;
+    min-inline-size:0!important;
+    max-inline-size:calc(100dvw - var(--r94-nav-rail,48px))!important;
+    overflow:clip visible!important;
+  }
+
+  .omega-workstation-v2[data-panel='Modes'] .workstation-main,
+  .omega-workstation-v2[data-panel='Modes'] .omega-surface-r81,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression>header,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog>header,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog>header>div:last-child{
+    box-sizing:border-box!important;
+    min-inline-size:0!important;
+    max-inline-size:calc(100dvw - var(--r94-nav-rail,48px))!important;
+  }
+
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog>header>div:last-child{
+    inline-size:calc(100dvw - var(--r94-nav-rail,48px) - 28px)!important;
+    width:calc(100dvw - var(--r94-nav-rail,48px) - 28px)!important;
+    max-inline-size:calc(100dvw - var(--r94-nav-rail,48px) - 28px)!important;
+    justify-self:start!important;
+  }
+}
