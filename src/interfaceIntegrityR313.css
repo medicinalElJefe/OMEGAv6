@@ -1,0 +1,231 @@
+/* R313 — interface integrity convergence.
+   Presentation-only repair: restore non-overlapping Command Center geometry,
+   preserve real hit regions beneath the sticky workstation shell, and enforce
+   coarse-pointer touch targets without changing action/authority semantics. */
+
+/* R313.25 NATIVE DISCLOSURE LAYOUT LAW
+   Author styles such as display:grid can outrank Chromium's user-agent rule for
+   closed <details> descendants. That leaves controls inside a visibly closed
+   drawer in layout and in the interaction inventory even though its summary is
+   the only disclosed surface. Enforce the native semantic at the workstation
+   boundary for every disclosure, including restored donor and proof drawers. */
+.omega-workstation-v2 details:not([open])>:not(summary){
+  display:none!important;
+}
+
+/* R313.6 OUTER COMMAND EXPERIENCE CLIP REPAIR
+   R203 applies overflow:hidden to .command-experience-r4. That wrapper sits outside
+   CommandDeck, so every prior inner stage/prompt scroll repair remained trapped behind
+   the same outer clipping ancestor. The real R286 browser gate proved the symptom by
+   failing native scrollIntoView() for the same ten lower prompt controls even after the
+   prompt itself returned to normal document flow. Command Center therefore restores
+   vertical overflow at the actual outer experience membrane. Horizontal containment is
+   still owned by SurfaceIntegrityR81/workstation responsive law. */
+.omega-workstation-v2[data-panel='Command Center'] .command-experience-r4{
+  overflow:visible!important;
+  min-height:0!important;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .command-deck{
+  position:relative;
+  isolation:isolate;
+  align-content:start;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .command-deck-head{
+  position:relative!important;
+  inset:auto!important;
+  transform:none!important;
+  margin:0!important;
+  z-index:0!important;
+  overflow:hidden;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .command-deck-head .boot-sequence,
+.omega-workstation-v2[data-panel='Command Center'] .command-deck-head .boot-sequence span{
+  position:relative;
+  inset:auto;
+  transform:none;
+  max-width:100%;
+}
+
+.omega-workstation-v2[data-panel='Command Center'] .command-stage,
+.omega-workstation-v2[data-panel='Command Center'] .command-proof-strip,
+.omega-workstation-v2[data-panel='Command Center'] .command-response{
+  position:relative!important;
+  inset:auto!important;
+  transform:none!important;
+  z-index:1!important;
+}
+
+/* R313.5 DESKTOP COMMAND SCROLL LAW */
+@media (min-width:901px){
+  .omega-workstation-v2[data-panel='Command Center'] .command-deck{min-height:0!important}
+  .omega-workstation-v2[data-panel='Command Center'] .command-stage{align-items:start!important;height:auto!important;min-height:610px!important;max-height:none!important;grid-template-rows:auto!important;overflow:visible!important}
+  .omega-workstation-v2[data-panel='Command Center'] .command-visual{box-sizing:border-box!important;align-self:start!important;height:clamp(520px,calc(100dvh - 280px),680px)!important;min-height:520px!important;max-height:680px!important;overflow:hidden!important}
+  .omega-workstation-v2[data-panel='Command Center'] .command-prompt{box-sizing:border-box!important;align-self:start!important;min-height:610px!important;height:auto!important;max-height:none!important;overflow:visible!important;overscroll-behavior:auto!important;scrollbar-gutter:auto!important}
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-stage{grid-template-columns:minmax(0,1fr)!important}
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt{min-width:0!important;width:100%!important;border-left:0!important;border-top:1px solid #28444d!important;grid-row:1!important;order:-1!important;min-height:0!important}
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-visual{grid-row:2!important;order:1!important;min-height:420px!important;height:clamp(420px,48dvh,560px)!important;max-height:560px!important}
+  .omega-workstation-v2[data-panel='Command Center'],.omega-workstation-v2[data-panel='Command Center'] .workstation-main,.omega-workstation-v2[data-panel='Command Center'] .omega-surface-r81,.omega-workstation-v2[data-panel='Command Center'] .command-experience-r4,.omega-workstation-v2[data-panel='Command Center'] .command-deck{height:auto!important;max-height:none!important;overflow-y:visible!important}
+  .omega-workstation-v2[data-panel='Command Center'] .command-stage,.omega-workstation-v2[data-panel='Command Center'] .command-prompt{contain:none!important;clip-path:none!important}
+  html[data-omega-nav-present='true'][data-omega-nav-expanded='true']:not([data-omega-nav-wide='true']) .omega-workstation-v2{margin-left:calc(var(--r94-nav-rail) + var(--r94-nav-panel))!important;width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important;max-width:calc(100% - var(--r94-nav-rail) - var(--r94-nav-panel))!important}
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-stage{display:flex!important;flex-direction:column!important;align-items:stretch!important;min-height:0!important;width:100%!important}
+  html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-prompt,html[data-omega-nav-expanded='true'] .omega-workstation-v2[data-panel='Command Center'] .command-visual{flex:0 0 auto!important;width:100%!important;max-width:100%!important}
+}
+
+.omega-workstation-v2 .workstation-main :where(button,[role='button'],input,textarea,select,summary){scroll-margin-block:64px 24px}
+.omega-workstation-v2[data-panel='Command Center'] .boot-sequence span{pointer-events:none}
+
+@media (max-width:900px), (pointer:coarse){
+  .omega-workstation-v2 .workstation-main :where(button,[role='button']):not([disabled]):not([aria-disabled='true']){min-inline-size:44px!important;min-block-size:44px!important}
+  .omega-workstation-v2 .workstation-main :where(input,textarea,select):not([disabled]){min-block-size:44px!important}
+  .omega-workstation-v2[data-panel='Command Center'] :where(.quick-prompts,.command-actions) button{padding-block:9px!important}
+  .omega-workstation-v2[data-panel='Command Center'] .command-run,.omega-workstation-v2[data-panel='Command Center'] .command-plan{min-height:44px!important}
+  .omega-workstation-v2[data-panel='Command Center'] .quick-prompts,.omega-workstation-v2[data-panel='Command Center'] .command-actions{align-items:stretch!important}
+
+  /* R313.26 MOBILE CONVERGENCE INLINE-CONTAINMENT LAW
+     Convergence composes several accepted historical applications under one capability-first
+     route. Their independent min-content grids can otherwise enlarge an overflow-clipped
+     ancestor into a hidden horizontal scroll membrane. Programmatic focus/scroll then moves
+     that membrane and leaves later controls outside a 390px viewport even though document
+     overflow remains hidden. Constrain every direct accumulated application to the canonical
+     surface inline size and use overflow-x:clip (not hidden) so the wrapper cannot become a
+     programmatically scrollable horizontal owner. This changes presentation only. */
+  .omega-workstation-v2[data-panel='Convergence'] .r138-capability-first,
+  .omega-workstation-v2[data-panel='Convergence'] .r138-capability-first>div{
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:clip!important;
+  }
+  .omega-workstation-v2[data-panel='Convergence'] .r138-capability-first>*,
+  .omega-workstation-v2[data-panel='Convergence'] .r138-capability-first>div>*{
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Convergence'] :where(.r138-capability-layout,.r240-calculus-address,.r168-restoration,.r126-max){
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+
+  /* R313.27 MOBILE MODES INLINE-CONTAINMENT LAW
+     The Modes surface composes source-mode selection, transition proof, traversal SVG,
+     mode/authority registries and route actions. Several accepted historical children carry
+     desktop min-content preferences. After focus/scroll on a 390px coarse-pointer viewport,
+     those preferences can widen a clipped ancestor into a hidden horizontal scroll owner and
+     move later controls thousands of pixels away from the visual viewport. Keep one canonical
+     inline-size authority at the Modes surface, let every composed child shrink, and clip only
+     horizontal visual overflow so no nested programmatic horizontal scroller can steal focus.
+     This is presentation-only: no mode, route, proof, action or Canon authority is changed. */
+  .omega-workstation-v2[data-panel='Modes'] .omega-surface-r81,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app>*{
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app{
+    overflow-x:clip!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] :where(.sbm21-expression,.sbm21-expression>header,.sbm21-expression-controls,.sbm21-route,.sbm21-route>header,.sbm21-route-actions,.sbm21-mode-columns,.sbm21-authorities,.sbm21-catalog,.sbm21-actions){
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls{
+    display:grid!important;
+    grid-template-columns:44px minmax(0,1fr) 44px!important;
+    align-items:stretch!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>label{
+    grid-column:1/-1!important;
+    grid-row:1!important;
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>button:nth-of-type(1){grid-column:1!important;grid-row:2!important;width:44px!important}
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>button:nth-of-type(2){grid-column:3!important;grid-row:2!important;width:44px!important}
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>button:nth-of-type(3){grid-column:1/-1!important;grid-row:3!important;width:100%!important}
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-actions{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-actions>button,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-route-actions>button{
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-route>svg{
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  /* R313.28 MODES NESTED SCROLL-OWNER CLOSURE
+     R313.27 bounded the composition roots, but three retained component lists still declared
+     overflow:auto. Chromium therefore kept legal horizontal scroll state inside those lists;
+     scrollIntoView() could move the hidden inline scroll position even while the page itself
+     remained at zero material overflow. The exhaustive R286 audit then observed later controls
+     thousands of pixels to the right. Preserve vertical list scrolling while making horizontal
+     overflow non-scrollable, and force every grid/flex descendant back into a shrinkable track. */
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app :where(section,header,footer,div,label,article,details,summary,button,input,select,strong,span,small,p,em,code){
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] :where(.sbm21-expression,.sbm21-route,.sbm21-mode-columns>section,.sbm21-authorities,.sbm21-catalog){
+    overflow-x:clip!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] :where(.sbm21-mode-list,.sbm21-authority-grid,.sbm21-catalog-grid){
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:clip!important;
+    overflow-y:auto!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] :where(.sbm21-mode-list>*,.sbm21-authority-grid>*,.sbm21-catalog-grid>*){
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-authority-grid>button{
+    grid-template-columns:45px minmax(0,1fr)!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-authority-grid>button>strong{
+    grid-column:2!important;
+    justify-items:start!important;
+    white-space:normal!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog-grid summary{
+    grid-template-columns:36px minmax(0,1fr) auto auto!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog>header>div{
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog>header>div:last-child{
+    grid-template-columns:minmax(0,1fr) minmax(44px,auto)!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-route-actions{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    justify-content:stretch!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-route-actions>button{
+    width:100%!important;
+    white-space:normal!important;
+    justify-content:center!important;
+  }
+}
+
+@media (max-width:560px){
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-route-actions{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}

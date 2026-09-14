@@ -88,7 +88,8 @@ for(const token of ["schema:'OMEGA_HYBRID_RESOURCE_ENVELOPE_R239'","revision:'R2
 assert.ok(!r239.includes('canonicalAdmission:true'),'R239 must not gain CanonState admission authority');
 
 for(const token of ["data-r240-recursive-selfbuild='EVIDENCE_BOUND_SPARSE_PLAN_EXACT_PROMOTION'",'R240 · FULL OVERALL CANON · RECURSIVE SELF-BUILD + EXACT PROMOTION','R239 PRESERVED','GENERATED ≠ PROVED ≠ SOURCE-PROMOTED ≠ DEPLOYED ≠ LIVE-VERIFIED ≠ CANON-ADMITTED','R125 sole CanonState admission authority'])assert.ok(ui.includes(token),`R240 operator surface missing ${token}`);
-for(const token of ["data-r240-calculus-address='SPARSE_ADDRESS_FABRIC'",'20,736 ADDRESS FABRIC','179 source modes + 62 lenses','+1 DISPATCH','−1 RETURN','0 OBSERVE'])assert.ok(calculusUi.includes(token),`R240 calculus operator surface missing ${token}`);
+for(const token of ["data-r240-calculus-address='SPARSE_ADDRESS_FABRIC'",'20,736 ADDRESS FABRIC','179 source modes + 62 lenses','+1 OUTVERSE','−1 INVERSE','0 OBSERVE'])assert.ok(calculusUi.includes(token),`R240 calculus operator surface missing ${token}`);
+assert.ok(!calculusUi.includes('+1 DISPATCH')&&!calculusUi.includes('−1 RETURN'),'signed orientation must remain separate from R147 dispatch/return authorities');
 assert.ok(suite.includes("import RecursiveSelfBuildR240 from './RecursiveSelfBuildR240'"));
 assert.ok(suite.includes("import CalculusAddressFabricR240 from './CalculusAddressFabricR240'"));
 assert.ok(suite.includes('<RecursiveSelfBuildR240/>'));

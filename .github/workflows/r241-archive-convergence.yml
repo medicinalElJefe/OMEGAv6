@@ -72,6 +72,7 @@ jobs:
           npx --yes tsx tests/r282-bio-medical-production-invariants.mts
           npx --yes tsx tests/r284-bio-mode-experience-invariants.mts
           node tests/r286-ui-interaction-integrity-invariants.mjs
+          node tests/r313-navigation-scroll-settle-invariants.mjs
 
       - name: Prove R279/R284 Earth truth and WGS84 geometry
         run: |
@@ -80,6 +81,12 @@ jobs:
 
       - name: Prove R289 recovered-menu design on the live navigator
         run: node tests/r289-recovered-menu-navigation-invariants.mjs
+
+      - name: Prove R314/R315 numerical compute and Woven cross-skin evolution
+        run: |
+          node tests/r314-woven-numerical-compute-invariants.mjs
+          node tests/r314-expression-compute-invariants.mjs
+          node tests/r315-woven-system-traversal-invariants.mjs
 
       - name: Run complete application check and production build
         run: npm run check
@@ -92,24 +99,56 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
-      - name: Prove built R241/R239/R242/R245/R279/R281/R282/R283/R284/R286/R289 convergence in the real UI
-        shell: bash
-        run: |
-          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega-r241-vite.log 2>&1 &
-          for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
-            sleep 1
-          done
-          curl -fsS http://127.0.0.1:4173/ >/dev/null || { cat /tmp/omega-r241-vite.log; exit 1; }
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r241-archive-convergence-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r239-user-navigation-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r245-full-overall-canon-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r279-earth-views-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r281-bio-instrument-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r282-bio-medical-production-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r284-bio-mode-workbench-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r289-live-master-menu-browser-e2e.mjs
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r286-all-surface-browser-e2e.mjs
+      - name: Browser proof · R313 panel disclosure contract · fail fast
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-panel-disclosure-ci-wrapper.mjs'
+
+      - name: Capture exact R313 panel disclosure failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r313-panel-disclosure-failure
+          path: r313-panel-disclosure-failure.txt
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: Browser proof · R241 archive convergence
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r241-archive-convergence-browser-e2e.mjs'
+
+      - name: Browser proof · R239 user navigation
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r239-user-navigation-browser-e2e.mjs'
+
+      - name: Browser proof · R245 Full Overall Canon
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r245-full-overall-canon-browser-e2e.mjs'
+
+      - name: Browser proof · R279 Earth views
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r279-earth-views-browser-e2e.mjs'
+
+      - name: Browser proof · R281 inherited Bio instrument
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r281-bio-instrument-browser-e2e-base.mjs'
+
+      - name: Browser proof · R282 Bio medical production
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r282-bio-medical-production-browser-e2e.mjs'
+
+      - name: Browser proof · R284 Bio mode workbench
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r284-bio-mode-workbench-browser-e2e.mjs'
+
+      - name: Browser proof · R289 live master menu
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r289-live-master-menu-browser-e2e.mjs'
+
+      - name: Browser proof · R286 canonical all-surface routes
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r286-all-surface-browser-e2e.mjs'
+
+      - name: Browser diagnostic · R313 Command Center scroll geometry
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-command-center-scroll-diagnostic-browser-e2e.mjs'
+
+      - name: Browser diagnostic · R313 Modes scroll ownership
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-modes-scroll-diagnostic-browser-e2e.mjs'
+
+      - name: Browser proof · R286 accumulated no-dead-control contract
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r286-all-surface-no-dead-controls-ci-wrapper.mjs'
+
+      - name: Browser proof · R313 full safe-control interaction contract
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-full-control-interaction-browser-e2e.mjs'
 
       - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'pull_request'
@@ -143,27 +182,15 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 Archive Convergence + Navigation + Full Canon + Earth/SAR + R281/R282/R286/R289 Heavy Bio/UI proof'
+            echo '## R241 accumulated interface-integrity and Woven compute proof'
             echo "- Candidate: $GITHUB_SHA"
-            echo '- 1,728 deterministic D×P×R aggregate topology nodes over the exact existing 20,736-state packet.'
-            echo '- R242 applies PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION to navigation state.'
-            echo '- R245 correlates runtime, production receipt, Hybrid, capability and governed self-build truth into one read-only observation epoch.'
-            echo '- R248 factors contributors and derives CΩ/Φ/q/Λ/evidence/uncertainty/scar from current returned software/Hybrid/resource/job evidence.'
-            echo '- R248 governs the real R247→R153 mission objective and recursion budget; R249 carries the same law into actual first-cycle step sequence and autonomous planning width.'
-            echo '- R249 STAY/TURN/ESCALATE scheduling values remain software-operational, not physical measurements.'
-            echo '- R245 exposes 7 Canon axes, 7 permanent strata, 12 logical organs and 12→144→1,728→20,736→248,832 address/scheduling levels without physical-dimension inflation.'
-            echo '- R283.1 preserves SAR Truth as an eighth Earth surface while the redundant standalone SAR workflow remains archived inside the 24-workflow governance bound.'
-            echo '- R284 WGS84 Planet keeps returned NASA GIBS source brightness distinct from UTC illumination, terminator, grid and other declared rendering transforms.'
-            echo '- R281 preserves calibrated instrument evidence, uncertainty, provenance, 12 domains, 12 context layers, seven physical scales and the 62-mode canon overlay.'
-            echo '- R282 preserves intended-use measurands, freshness/unit/AMR/uncertainty gates, risk, audit, controlled change and clinical-release authority separation.'
-            echo '- R286 exposes all 241 analytical channels through metadata-bound menus, evidence filters, mode-specific analytical visuals, education and read-only comparison without inventing biological mappings.'
-            echo '- R286 also pointer-verifies ALL + six workspace submenus and all 44 canonical routes on desktop/mobile and preserves exact 78×78/6,084-cell SAR geometry on mobile.'
-            echo '- R289 presents the recovered 12-menu taxonomy on the actual R88/R239 navigator strictly downstream of the R242 lemma; it remains a filter over the same 44 routes, not a second router.'
-            echo '- R289 browser proof verifies ALL + 12 master menus, preservation of ALL + six workspaces, search composition, canonical route activation and mobile containment.'
-            echo '- Every analytical channel retains measurement authority 0; clinical influence remains owned by R282 scope-matched validation and explicit authorization.'
-            echo '- R239 navigation remains converged: six workspaces, complete route registry, immediate aria-hidden/inert close, exhaustive route activation and mobile containment.'
-            echo '- R153 mutation, R147 dispatch, R146 durable history, R141 exact return, R240 source promotion and R125 sole CanonState admission remain unchanged.'
+            echo '- R313 disclosure is fail-fast and diagnostic-transport only: the unchanged strict child acceptance remains authoritative; failure capture does not convert a red gate to green.'
+            echo '- R314 numerical evaluation and R315 Woven field/traversal invariants are explicit proof gates, including frame-relative 12^k source/target continuity and recoverable scar/history carry.'
+            echo '- Browser acceptance is decomposed into individually named proofs so a failure identifies its actual contract without weakening any assertion.'
+            echo '- R281 inherited Bio proof is isolated from the accumulated no-dead-control and R313 contracts; the latter remain explicit blocking gates.'
+            echo '- R313 Command Center and Modes geometry diagnostics are observational only and run before the unchanged blocking R286 no-dead-control contract.'
+            echo '- R286/R313 retain legacy all-surface coverage plus no-dead-control, disclosure, occlusion, desktop/mobile and safe-interaction contracts.'
+            echo '- R125 sole CanonState admission, R141 exact return, R146 durable history, R147 dispatch, R153 mutation and R240 source promotion remain unchanged.'
             echo '- R201/R203 remain retired.'
-            echo '- PR live proof binds to the exact SHA actually served by the canonical Worker rather than a moving Git ref.'
             echo '- This workflow is pull-request/manual proof-only; it has no main push trigger and no deployment step; ci.yml remains the canonical production writer.'
           } >> "$GITHUB_STEP_SUMMARY"
