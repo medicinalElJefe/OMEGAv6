@@ -123,6 +123,9 @@ jobs:
       - name: Browser diagnostic · R313 Command Center scroll geometry
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-command-center-scroll-diagnostic-browser-e2e.mjs'
 
+      - name: Browser diagnostic · R313 Modes scroll ownership
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-modes-scroll-diagnostic-browser-e2e.mjs'
+
       - name: Browser proof · R286 accumulated no-dead-control contract
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r286-all-surface-no-dead-controls-browser-e2e.mjs'
 
@@ -168,7 +171,7 @@ jobs:
             echo "- Candidate: $GITHUB_SHA"
             echo '- Browser acceptance is decomposed into individually named proofs so a failure identifies its actual contract without weakening any assertion.'
             echo '- R281 inherited Bio proof is isolated from the accumulated no-dead-control and R313 contracts; the latter remain explicit later gates.'
-            echo '- R313 Command Center geometry diagnostic is observational only and runs immediately before the unchanged blocking R286 no-dead-control contract.'
+            echo '- R313 Command Center and Modes geometry diagnostics are observational only and run immediately before the unchanged blocking R286 no-dead-control contract.'
             echo '- R286/R313 retain legacy all-surface coverage plus no-dead-control, disclosure, occlusion, desktop/mobile and safe-interaction contracts.'
             echo '- R125 sole CanonState admission, R141 exact return, R146 durable history, R147 dispatch, R153 mutation and R240 source promotion remain unchanged.'
             echo '- R201/R203 remain retired.'
