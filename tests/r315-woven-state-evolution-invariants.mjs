@@ -12,29 +12,40 @@ const operators=[
 
 assert.equal(R315_FIELD_SCHEMA,'OMEGA_WOVEN_STATE_EVOLUTION_R315');
 assert.equal(R315_FIELD_REVISION,'R315.FIELD');
-assert.deepEqual(R315_FIELD_OPERATOR,['PARTITION','EXCHANGE_TRANSPORT','INVARIANT_CARRY','SCAR_HISTORY_CARRY','ORIENTATION_FRAME_REEXPRESSION','RECONTEXTUALIZE_REPARTITION','PROVE']);
+assert.deepEqual(R315_FIELD_OPERATOR,['PARTITION','RELATIONAL_EXCHANGE_TRANSPORT','INVARIANT_CARRY','SCAR_HISTORY_CARRY','ORIENTATION_FRAME_REEXPRESSION','RECONTEXTUALIZE_REPARTITION','PROVE']);
 assert.equal(R315_FIELD_AUTHORITY.orchestration,'R315_CROSS_SKIN_ORCHESTRATION');
 assert.equal(R315_FIELD_AUTHORITY.dispatch,'R147');
 assert.equal(R315_FIELD_AUTHORITY.history,'R146');
 assert.equal(R315_FIELD_AUTHORITY.returnProof,'R141');
 assert.equal(R315_FIELD_AUTHORITY.canonAdmission,'R125');
 assert.match(R315_FIELD_BOUNDARY,/frame-relative/i);
+assert.match(R315_FIELD_BOUNDARY,/relation-aware/i);
 assert.match(R315_FIELD_BOUNDARY,/does not claim empirical truth/i);
 
 const observe=executeWovenStateEvolutionR315({operators,orientation:0,transportRate:.125,targetResolution:20736,provenance:['TEST_OBSERVE']});
 near(observe.invariantBefore,1);near(observe.invariantAfterTransport,1);near(observe.invariantAfterRepartition,1);near(observe.invariantResidual,0);
-assert.equal(observe.sourceResolution,20736);assert.equal(observe.targetResolution,20736);assert.equal(observe.exchange.edges.length,0);assert.equal(observe.scarMagnitude,0);assert.equal(observe.proof.invariantStatus,'PASS');assert.equal(observe.proof.recoverableFromLedger,true);assert.equal(observe.receipt.executionProofClaimed,false);assert.equal(observe.receipt.canonAdmissionClaimed,false);
+assert.equal(observe.sourceResolution,20736);assert.equal(observe.targetResolution,20736);assert.equal(observe.exchange.edges.length,0);assert.ok(observe.exchange.topology.length>0);assert.equal(observe.scarMagnitude,0);assert.equal(observe.proof.invariantStatus,'PASS');assert.equal(observe.proof.recoverableFromLedger,true);assert.equal(observe.proof.topologyPreservedAcrossFrame,true);assert.equal(observe.receipt.executionProofClaimed,false);assert.equal(observe.receipt.canonAdmissionClaimed,false);
 
 const outverse=executeWovenStateEvolutionR315({operators,orientation:1,transportRate:.1,targetResolution:20736,provenance:['TEST_OUTVERSE']});
 near(outverse.invariantBefore,1);near(outverse.invariantAfterTransport,1);near(outverse.invariantAfterRepartition,1);near(outverse.invariantResidual,0);
-assert.equal(outverse.exchange.edges.length,3);assert.ok(outverse.scarMagnitude>0);assert.equal(outverse.exchange.edges[0].fromRef,'M1');assert.equal(outverse.exchange.edges[0].toRef,'M2');
-near(outverse.exchange.edges[0].amount,.05);
+assert.equal(outverse.exchange.mode,'RELATIONAL');assert.equal(outverse.exchange.edges.length,2);assert.ok(outverse.scarMagnitude>0);assert.equal(outverse.exchange.edges[0].fromRef,'M1');assert.equal(outverse.exchange.edges[0].toRef,'M2');
+near(outverse.exchange.edges[0].amount,.05);assert.ok(!outverse.exchange.edges.some(edge=>edge.fromRef==='M3'&&edge.toRef==='M1'),'address fallback must not wrap the field into an arbitrary ring');
 
 const inverse=executeWovenStateEvolutionR315({operators,orientation:-1,transportRate:.1,targetResolution:20736,provenance:['TEST_INVERSE']});
-assert.equal(inverse.exchange.edges.length,3);assert.equal(inverse.exchange.edges[0].fromRef,'M1');assert.equal(inverse.exchange.edges[0].toRef,'M3');near(inverse.invariantResidual,0);
+assert.equal(inverse.exchange.edges.length,2);assert.equal(inverse.exchange.edges[0].fromRef,'M2');assert.equal(inverse.exchange.edges[0].toRef,'M1');near(inverse.invariantResidual,0);
+
+const relationalOperators=[
+ {ref:'A',family:'STATE',organ:'PARENT',value:.6,address:0,relations:[{ref:'C',weight:3,kind:'CONTINUITY'},{ref:'B',weight:1,kind:'INTERACTION'}]},
+ {ref:'B',family:'FLOW',organ:'INTERACTION',value:.25,address:120,relations:[{ref:'C',weight:1,kind:'SCAR'}]},
+ {ref:'C',family:'PROOF',organ:'CONTINUITY',value:.15,address:240,relations:[{ref:'A',weight:1,kind:'RETURN_PATH'}]}
+];
+const relational=executeWovenStateEvolutionR315({operators:relationalOperators,orientation:1,transportRate:.1,sourceResolution:1728,targetResolution:144,provenance:['TEST_RELATIONAL_TOPOLOGY']});
+near(relational.invariantAfterTransport,1);near(relational.invariantAfterRepartition,1);assert.equal(relational.proof.invariantStatus,'PASS');assert.ok(relational.exchange.topology.some(edge=>edge.fromRef==='A'&&edge.toRef==='C'&&edge.topology==='DECLARED_RELATION'));assert.ok(relational.exchange.edges.some(edge=>edge.fromRef==='A'&&edge.toRef==='C'));assert.ok(relational.recontextualized.operators.some(row=>Array.isArray(row.relations)&&row.relations.length>0),'projected relation topology must survive frame re-contextualization');assert.ok(relational.path.projectedTopology.length>0);assert.equal(relational.proof.topologyPreservedAcrossFrame,true);
+const relationalNext=executeWovenStateEvolutionR315({operators:relational.recontextualized.operators,orientation:-1,transportRate:.1,sourceResolution:144,targetResolution:1728,scarLedger:relational.carry.scarLedger,provenance:['TEST_RELATIONAL_TOPOLOGY_RETURN']});
+near(relationalNext.invariantAfterRepartition,1);assert.ok(relationalNext.exchange.topology.some(edge=>edge.topology==='DECLARED_RELATION'),'projected relation must remain declared topology in the next compute cycle');
 
 const restored=restoreWovenStateR315(outverse);
-assert.equal(restored.recoverablePathUsed,true);assert.equal(restored.sourceResolution,20736);assert.equal(restored.dispatchRequested,false);assert.equal(restored.canonAdmissionClaimed,false);
+assert.equal(restored.recoverablePathUsed,true);assert.equal(restored.topologyRestored,true);assert.equal(restored.sourceResolution,20736);assert.equal(restored.dispatchRequested,false);assert.equal(restored.canonAdmissionClaimed,false);
 assert.deepEqual(restored.restored.map(x=>[x.ref,x.address,x.value]),[['M1',0,.5],['M2',144,.3],['M3',1728,.2]]);
 
 const coarse=executeWovenStateEvolutionR315({operators,orientation:0,targetResolution:12,provenance:['TEST_COARSE']});
@@ -42,7 +53,7 @@ near(coarse.invariantAfterRepartition,1);assert.equal(coarse.proof.invariantStat
 const deep=executeWovenStateEvolutionR315({operators,orientation:0,targetResolution:248832,provenance:['TEST_DEEP']});
 near(deep.invariantAfterRepartition,1);assert.equal(deep.proof.invariantStatus,'PASS');assert.equal(deep.r265.dimensionalRelativity.targetResolution,248832);
 
-// R315.1: dimensional relativity must preserve the actual source frame across repeated field evolution.
+// R315.1+: dimensional relativity must preserve the actual source frame across repeated field evolution.
 const frame144=[
  {ref:'A',family:'TEST',organ:'FRAME',value:2,address:0},
  {ref:'B',family:'TEST',organ:'FRAME',value:3,address:72},
@@ -75,4 +86,4 @@ for(const token of ['R315 woven state evolution','INVARIANT CARRY','SCAR / HISTO
 assert.ok(!ui.includes('FIELD ENERGY Σw²'),'legacy scalar energy proxy must not remain the primary woven-calculus surface');
 assert.ok(!ui.includes('+1 DISPATCH'),'orientation must not be mislabeled as R147 dispatch');
 
-console.log('OMEGA R315.1 WOVEN STATE EVOLUTION PASS · partition → conservative exchange/transport → invariant carry → scar/history carry → orientation/frame re-expression → re-contextualize/repartition → proof · source and target 12^k address frames remain explicit across repeated evolution · next-cycle operator field is the re-contextualized target field · inverse/outverse structure factored · recoverable ledger path · R147/R146/R141/R125 authority unchanged');
+console.log('OMEGA R315.3 WOVEN STATE EVOLUTION PASS · partition → relation-aware conservative exchange/transport → invariant carry → scar/history/topology carry → orientation/frame re-expression → re-contextualize/repartition → proof · declared relationship paths and directional address-neighbor fallback survive projected 12^k frame transitions without arbitrary ring wrap · inverse/outverse structure factored · recoverable ledger path · R147/R146/R141/R125 authority unchanged');
