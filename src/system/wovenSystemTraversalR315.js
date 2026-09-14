@@ -1,24 +1,12 @@
 import {compileWovenDimensionalRelativityR265,compileSkinCycleR265,R265_SKIN_CONTRACTS,R265_AUTHORITY} from './wovenDimensionalRelativityR265.js';
 import {executeNumericalPlanR314} from './wovenExpressionComputeR314.js';
+import {executeWovenStateEvolutionR315,R315_FIELD_SCHEMA,R315_FIELD_REVISION,R315_FIELD_AUTHORITY} from './wovenStateEvolutionR315.js';
 
 export const R315_SCHEMA='OMEGA_WOVEN_SYSTEM_TRAVERSAL_R315';
 export const R315_REVISION='R315';
 export const R315_SKINS=Object.freeze(['FUNCTION','EVIDENCE','ORGANIZE','COMPUTE','LEARN','RENDER','EXECUTE','SELF_BUILD']);
-export const R315_AUTHORITY=Object.freeze({
- stateTraversal:'R315_CROSS_SKIN_ORCHESTRATION',
- semanticKernel:'R265',
- numericalCompute:'R314',
- addressAndSourceMutation:'R240',
- dispatch:'R147',
- durableHistory:'R146',
- hybridReturnProof:'R141',
- canonAdmission:'R125',
- productionWriter:'.github/workflows/ci.yml',
- addsDispatchAuthority:false,
- addsSourceMutationAuthority:false,
- addsCanonAuthority:false
-});
-export const R315_TRUTH_BOUNDARY='R315 composes existing OMEGA skins into one recoverable state path. It may calculate, classify, organize, project, record explicit outcomes, or prepare execution/self-build requests, but it does not itself dispatch work, mutate source, admit CanonState, claim external scientific truth, or reinterpret atlas address levels as literal physical dimensions.';
+export const R315_AUTHORITY=Object.freeze({stateTraversal:'R315_CROSS_SKIN_ORCHESTRATION',fieldEvolution:'R315.FIELD',semanticKernel:'R265',numericalCompute:'R314',addressAndSourceMutation:'R240',dispatch:'R147',durableHistory:'R146',hybridReturnProof:'R141',canonAdmission:'R125',productionWriter:'.github/workflows/ci.yml',addsDispatchAuthority:false,addsSourceMutationAuthority:false,addsCanonAuthority:false});
+export const R315_TRUTH_BOUNDARY='R315 composes existing OMEGA skins into one recoverable state path. COMPUTE may invoke R315.FIELD conservative Woven state evolution and/or R314 bounded numerical plans. R315 may calculate, classify, organize, project, record explicit outcomes, or prepare execution/self-build requests, but it does not itself dispatch work, mutate source, admit CanonState, claim external scientific truth, or reinterpret atlas address levels as literal physical dimensions.';
 
 const clamp01=n=>Math.max(0,Math.min(1,Number.isFinite(Number(n))?Number(n):0));
 const clone=v=>v===undefined?undefined:JSON.parse(JSON.stringify(v));
@@ -27,137 +15,42 @@ const finiteOr=n=>Number.isFinite(Number(n))?Number(n):0;
 const SKIN_SET=new Set(R315_SKINS);
 const EVIDENCE_CLASSES=new Set(['OBSERVED','RETURNED','DERIVED','INFERRED']);
 
-function normalizeMetrics(metrics={}){
- return{
-  continuity:clamp01(metrics.continuity??metrics.C??metrics.COmega??.5),
-  plasticity:clamp01(metrics.plasticity??metrics.Phi??.5),
-  contradiction:clamp01(metrics.contradiction??metrics.q??0),
-  burden:clamp01(metrics.burden??metrics.Lambda??0),
-  scar:clamp01(metrics.scar??0),
-  evidence:clamp01(metrics.evidence??.5)
- };
-}
+function normalizeMetrics(metrics={}){return{continuity:clamp01(metrics.continuity??metrics.C??metrics.COmega??.5),plasticity:clamp01(metrics.plasticity??metrics.Phi??.5),contradiction:clamp01(metrics.contradiction??metrics.q??0),burden:clamp01(metrics.burden??metrics.Lambda??0),scar:clamp01(metrics.scar??0),evidence:clamp01(metrics.evidence??.5)}}
+function deriveMetrics(previous,step,outcome){const base=normalizeMetrics(previous?.metrics||{}),patch=normalizeMetrics({...base,...(step?.metrics||{})});const residual=clamp01(outcome?.fieldEvolution?.proof?.roundTripResidual??outcome?.residual??step?.residual??0),scarCarry=clamp01(Math.max(base.scar,patch.scar,residual,outcome?.fieldEvolution?.scarMagnitude??0));return{...patch,scar:scarCarry}}
+function classifyEvidence(payload,step){const evidenceClass=text(step.evidenceClass,'DERIVED').toUpperCase();if(!EVIDENCE_CLASSES.has(evidenceClass))throw new Error(`R315 evidenceClass must be OBSERVED, RETURNED, DERIVED, or INFERRED; received ${evidenceClass}`);return{payload:clone(payload),evidenceClass,source:text(step.source,'UNSPECIFIED'),claim:text(step.claim,''),observed:evidenceClass==='OBSERVED',returned:evidenceClass==='RETURNED',derived:evidenceClass==='DERIVED',inferred:evidenceClass==='INFERRED'}}
+function organizePayload(payload,step){if(Array.isArray(payload)){const key=step.partitionKey;if(!key)return{kind:'SEQUENCE',count:payload.length,items:clone(payload)};const groups={};for(const item of payload){const bucket=text(item?.[key],'UNSPECIFIED');(groups[bucket]??=[]).push(clone(item))}return{kind:'PARTITIONED_SEQUENCE',partitionKey:key,count:payload.length,groups}}if(payload&&typeof payload==='object'){const keys=Array.isArray(step.keys)&&step.keys.length?step.keys:Object.keys(payload).sort();return{kind:'OBJECT_PARTITION',keys,values:Object.fromEntries(keys.filter(k=>Object.hasOwn(payload,k)).map(k=>[k,clone(payload[k])]))}}return{kind:'SCALAR_PARTITION',value:clone(payload)}}
+function renderProjection(payload,step){if(Array.isArray(step.fields)&&payload&&typeof payload==='object'&&!Array.isArray(payload)){return{projection:'FIELDS',fields:[...step.fields],value:Object.fromEntries(step.fields.filter(k=>Object.hasOwn(payload,k)).map(k=>[k,clone(payload[k])]))}}return{projection:text(step.projection,'IDENTITY'),value:clone(payload)}}
+function functionEnvelope(payload,step){const declaredInputs=Array.isArray(step.inputs)?step.inputs.map(String):[],declaredOutputs=Array.isArray(step.outputs)?step.outputs.map(String):[];return{payload:clone(payload),declaredInputs,declaredOutputs,contractSatisfied:declaredInputs.every(Boolean)&&declaredOutputs.every(Boolean)}}
+function learnEnvelope(payload,step){const evidenceClass=text(step.evidenceClass,'').toUpperCase(),explicitOutcome=step.outcome!==undefined||evidenceClass==='OBSERVED'||evidenceClass==='RETURNED';return{payload:clone(payload),updated:explicitOutcome,outcome:explicitOutcome?clone(step.outcome??payload):null,reason:explicitOutcome?'EXPLICIT_OR_OBSERVED_OUTCOME':'UNCHOSEN_OR_UNOBSERVED_CANDIDATE_IS_NOT_FAILURE',foundationWeightsChanged:false}}
+function executeEnvelope(payload,step){return{payload:clone(payload),request:clone(step.request??payload),dispatchRequested:Boolean(step.request),dispatchPerformed:false,dispatchAuthority:'R147',durableHistoryAuthority:'R146',hybridReturnAuthority:'R141',executionProofClaimed:false}}
+function selfBuildEnvelope(payload,step){return{payload:clone(payload),candidate:clone(step.candidate??payload),sourceMutationRequested:Boolean(step.candidate),sourceMutationPerformed:false,sourceMutationAuthority:'R240',canonAdmissionAuthority:'R125'}}
 
-function deriveMetrics(previous,step,outcome){
- const base=normalizeMetrics(previous?.metrics||{}),patch=normalizeMetrics({...base,...(step?.metrics||{})});
- const residual=clamp01(outcome?.residual??step?.residual??0),scarCarry=clamp01(Math.max(base.scar,patch.scar,residual));
- return{...patch,scar:scarCarry};
+function computeEnvelope(payload,step,state){
+ const plan=step.plan?{...clone(step.plan),variables:{...(step.plan.variables||{}),...(step.variables||{})}}:null;
+ const computation=plan?executeNumericalPlanR314(plan):null;
+ const fieldOperators=Array.isArray(step.fieldOperators)?step.fieldOperators:Array.isArray(state?.operatorField)?state.operatorField:[];
+ const fieldEvolution=fieldOperators.length?executeWovenStateEvolutionR315({operators:fieldOperators,orientation:step.orientation??state.orientation,transportRate:step.transportRate??.125,targetResolution:step.targetResolution??step.resolution??state.resolution,scarLedger:state.fieldScarLedger,provenance:[...state.provenance,...(Array.isArray(step.provenance)?step.provenance:step.provenance?[step.provenance]:[])],context:{metrics:state.metrics,water:state.water,correspondence:state.correspondence,invariantCarry:state.invariantCarry,sourceFrame:state.frame,targetFrame:step.targetFrame??state.frame,sourceSkin:state.skin,targetSkin:'COMPUTE'}}):null;
+ const computed=Boolean(computation||fieldEvolution),result=computation?clone(computation.result):fieldEvolution?clone(fieldEvolution.recontextualized.field):clone(payload);
+ return{payload:clone(payload),computed,result,computation,fieldEvolution,fieldSchema:fieldEvolution?R315_FIELD_SCHEMA:null,fieldRevision:fieldEvolution?R315_FIELD_REVISION:null,fieldAuthority:fieldEvolution?R315_FIELD_AUTHORITY:null};
 }
-
-function classifyEvidence(payload,step){
- const evidenceClass=text(step.evidenceClass,'DERIVED').toUpperCase();
- if(!EVIDENCE_CLASSES.has(evidenceClass))throw new Error(`R315 evidenceClass must be OBSERVED, RETURNED, DERIVED, or INFERRED; received ${evidenceClass}`);
- return{payload:clone(payload),evidenceClass,source:text(step.source,'UNSPECIFIED'),claim:text(step.claim,''),observed:evidenceClass==='OBSERVED',returned:evidenceClass==='RETURNED',derived:evidenceClass==='DERIVED',inferred:evidenceClass==='INFERRED'};
-}
-
-function organizePayload(payload,step){
- if(Array.isArray(payload)){
-  const key=step.partitionKey;
-  if(!key)return{kind:'SEQUENCE',count:payload.length,items:clone(payload)};
-  const groups={};
-  for(const item of payload){const bucket=text(item?.[key],'UNSPECIFIED');(groups[bucket]??=[]).push(clone(item))}
-  return{kind:'PARTITIONED_SEQUENCE',partitionKey:key,count:payload.length,groups};
- }
- if(payload&&typeof payload==='object'){
-  const keys=Array.isArray(step.keys)&&step.keys.length?step.keys:Object.keys(payload).sort();
-  return{kind:'OBJECT_PARTITION',keys,values:Object.fromEntries(keys.filter(k=>Object.hasOwn(payload,k)).map(k=>[k,clone(payload[k])]))};
- }
- return{kind:'SCALAR_PARTITION',value:clone(payload)};
-}
-
-function renderProjection(payload,step){
- if(Array.isArray(step.fields)&&payload&&typeof payload==='object'&&!Array.isArray(payload)){
-  return{projection:'FIELDS',fields:[...step.fields],value:Object.fromEntries(step.fields.filter(k=>Object.hasOwn(payload,k)).map(k=>[k,clone(payload[k])]))};
- }
- return{projection:text(step.projection,'IDENTITY'),value:clone(payload)};
-}
-
-function functionEnvelope(payload,step){
- const declaredInputs=Array.isArray(step.inputs)?step.inputs.map(String):[];
- const declaredOutputs=Array.isArray(step.outputs)?step.outputs.map(String):[];
- return{payload:clone(payload),declaredInputs,declaredOutputs,contractSatisfied:declaredInputs.every(Boolean)&&declaredOutputs.every(Boolean)};
-}
-
-function learnEnvelope(payload,step){
- const evidenceClass=text(step.evidenceClass,'').toUpperCase();
- const explicitOutcome=step.outcome!==undefined||evidenceClass==='OBSERVED'||evidenceClass==='RETURNED';
- return{payload:clone(payload),updated:explicitOutcome,outcome:explicitOutcome?clone(step.outcome??payload):null,reason:explicitOutcome?'EXPLICIT_OR_OBSERVED_OUTCOME':'UNCHOSEN_OR_UNOBSERVED_CANDIDATE_IS_NOT_FAILURE',foundationWeightsChanged:false};
-}
-
-function executeEnvelope(payload,step){
- return{payload:clone(payload),request:clone(step.request??payload),dispatchRequested:Boolean(step.request),dispatchPerformed:false,dispatchAuthority:'R147',durableHistoryAuthority:'R146',hybridReturnAuthority:'R141',executionProofClaimed:false};
-}
-
-function selfBuildEnvelope(payload,step){
- return{payload:clone(payload),candidate:clone(step.candidate??payload),sourceMutationRequested:Boolean(step.candidate),sourceMutationPerformed:false,sourceMutationAuthority:'R240',canonAdmissionAuthority:'R125'};
-}
-
-function computeEnvelope(payload,step){
- if(!step.plan)return{payload:clone(payload),computed:false,result:clone(payload),receipt:null};
- const plan={...clone(step.plan),variables:{...(step.plan.variables||{}),...(step.variables||{})}};
- const computation=executeNumericalPlanR314(plan);
- return{payload:clone(payload),computed:true,result:clone(computation.result),computation};
-}
-
-function applySkin(payload,skin,step){
- switch(skin){
-  case 'FUNCTION':return functionEnvelope(payload,step);
-  case 'EVIDENCE':return classifyEvidence(payload,step);
-  case 'ORGANIZE':return organizePayload(payload,step);
-  case 'COMPUTE':return computeEnvelope(payload,step);
-  case 'LEARN':return learnEnvelope(payload,step);
-  case 'RENDER':return renderProjection(payload,step);
-  case 'EXECUTE':return executeEnvelope(payload,step);
-  case 'SELF_BUILD':return selfBuildEnvelope(payload,step);
-  default:throw new Error(`R315 unsupported skin ${skin}`);
- }
-}
-
-function nextPayload(skin,outcome,prior){
- if(skin==='COMPUTE'&&outcome.computed)return clone(outcome.result);
- if(skin==='RENDER')return clone(outcome.value);
- if(skin==='EVIDENCE')return clone(outcome.payload);
- if(skin==='ORGANIZE')return clone(outcome);
- if(skin==='LEARN')return clone(outcome.outcome??outcome.payload);
- if(skin==='FUNCTION'||skin==='EXECUTE'||skin==='SELF_BUILD')return clone(outcome.payload);
- return clone(prior);
-}
+function applySkin(payload,skin,step,state){switch(skin){case'FUNCTION':return functionEnvelope(payload,step);case'EVIDENCE':return classifyEvidence(payload,step);case'ORGANIZE':return organizePayload(payload,step);case'COMPUTE':return computeEnvelope(payload,step,state);case'LEARN':return learnEnvelope(payload,step);case'RENDER':return renderProjection(payload,step);case'EXECUTE':return executeEnvelope(payload,step);case'SELF_BUILD':return selfBuildEnvelope(payload,step);default:throw new Error(`R315 unsupported skin ${skin}`)}}
+function nextPayload(skin,outcome,prior){if(skin==='COMPUTE'&&outcome.computed)return clone(outcome.result);if(skin==='RENDER')return clone(outcome.value);if(skin==='EVIDENCE')return clone(outcome.payload);if(skin==='ORGANIZE')return clone(outcome);if(skin==='LEARN')return clone(outcome.outcome??outcome.payload);if(skin==='FUNCTION'||skin==='EXECUTE'||skin==='SELF_BUILD')return clone(outcome.payload);return clone(prior)}
 
 export function createWovenSystemStateR315(input={}){
  const provenance=Array.isArray(input.provenance)?input.provenance.map(String).filter(Boolean):[];
- return{
-  schema:R315_SCHEMA,revision:R315_REVISION,
-  payload:clone(input.payload),
-  frame:text(input.frame,'OMEGA'),skin:text(input.skin,'FUNCTION').toUpperCase(),resolution:Number(input.resolution??20736),orientation:Math.sign(finiteOr(input.orientation)),
-  metrics:normalizeMetrics(input.metrics),water:clone(input.water||{}),invariantCarry:clamp01(input.invariantCarry??.5),residual:clamp01(input.residual??0),correspondence:clamp01(input.correspondence??.5),
-  provenance,scarLedger:Array.isArray(input.scarLedger)?clone(input.scarLedger):[],evidenceLedger:Array.isArray(input.evidenceLedger)?clone(input.evidenceLedger):[],residualLedger:Array.isArray(input.residualLedger)?clone(input.residualLedger):[],history:Array.isArray(input.history)?clone(input.history):[],
-  authority:R315_AUTHORITY,truthBoundary:R315_TRUTH_BOUNDARY,physicalDimensionsClaimed:false
- };
+ return{schema:R315_SCHEMA,revision:R315_REVISION,payload:clone(input.payload),frame:text(input.frame,'OMEGA'),skin:text(input.skin,'FUNCTION').toUpperCase(),resolution:Number(input.resolution??20736),orientation:Math.sign(finiteOr(input.orientation)),metrics:normalizeMetrics(input.metrics),water:clone(input.water||{}),invariantCarry:clamp01(input.invariantCarry??.5),residual:clamp01(input.residual??0),correspondence:clamp01(input.correspondence??.5),provenance,scarLedger:Array.isArray(input.scarLedger)?clone(input.scarLedger):[],fieldScarLedger:Array.isArray(input.fieldScarLedger)?clone(input.fieldScarLedger):[],operatorField:Array.isArray(input.operatorField)?clone(input.operatorField):[],evidenceLedger:Array.isArray(input.evidenceLedger)?clone(input.evidenceLedger):[],residualLedger:Array.isArray(input.residualLedger)?clone(input.residualLedger):[],history:Array.isArray(input.history)?clone(input.history):[],authority:R315_AUTHORITY,truthBoundary:R315_TRUTH_BOUNDARY,physicalDimensionsClaimed:false};
 }
 
 export function traverseWovenSkinR315(stateInput={},step={}){
- const state=stateInput?.schema===R315_SCHEMA?createWovenSystemStateR315(stateInput):createWovenSystemStateR315(stateInput);
- const skin=text(step.skin,state.skin).toUpperCase();
- if(!SKIN_SET.has(skin))throw new Error(`R315 skin must be one of ${R315_SKINS.join(', ')}; received ${skin}`);
+ const state=createWovenSystemStateR315(stateInput),skin=text(step.skin,state.skin).toUpperCase();if(!SKIN_SET.has(skin))throw new Error(`R315 skin must be one of ${R315_SKINS.join(', ')}; received ${skin}`);
  const sourceFrame=text(state.frame,'OMEGA'),targetFrame=text(step.targetFrame??step.frame,sourceFrame),sourceSkin=text(state.skin,'FUNCTION').toUpperCase(),targetResolution=Number(step.targetResolution??step.resolution??state.resolution),orientation=Number.isFinite(Number(step.orientation))?Math.sign(Number(step.orientation)):state.orientation;
- const outcome=applySkin(state.payload,skin,step);
- const metrics=deriveMetrics(state,step,outcome);
- const provenance=[...state.provenance,...(Array.isArray(step.provenance)?step.provenance.map(String).filter(Boolean):step.provenance?[String(step.provenance)]:[]),`R315:${skin}`];
- const residual=clamp01(step.residual??outcome?.computation?.residual??state.residual);
- const correspondence=clamp01(step.correspondence??state.correspondence);
- const r265=compileWovenDimensionalRelativityR265({metrics,invariantCarry:step.invariantCarry??state.invariantCarry,residual,correspondence,orientation,water:{...state.water,...(step.water||{})},sourceFrame,targetFrame,sourceSkin,targetSkin:skin,sourceResolution:state.resolution,targetResolution,provenance,roundTripResidual:step.roundTripResidual,commutationResidual:step.commutationResidual});
- const cycle=compileSkinCycleR265(r265,skin,{sourceSkin,targetSkin:skin});
- const event={index:state.history.length,skin,contract:R265_SKIN_CONTRACTS[skin],sourceFrame,targetFrame,sourceResolution:state.resolution,targetResolution,orientation,outcome:clone(outcome),r265:{metrics:clone(r265.metrics),water:clone(r265.water),woven:clone(r265.woven),violet:clone(r265.violet),proof:clone(r265.proof),development:clone(r265.development)},provenance:[...provenance]};
- const scarLedger=[...state.scarLedger,{index:event.index,skin,scar:r265.metrics.scar,residualCarry:r265.woven.residualCarry}];
- const residualLedger=[...state.residualLedger,{index:event.index,skin,residual,roundTripStatus:r265.proof.roundTripStatus,commutationStatus:r265.proof.commutationStatus}];
- const evidenceLedger=[...state.evidenceLedger];
- if(skin==='EVIDENCE')evidenceLedger.push({index:event.index,class:outcome.evidenceClass,source:outcome.source,claim:outcome.claim});
- return{...state,payload:nextPayload(skin,outcome,state.payload),frame:targetFrame,skin,resolution:targetResolution,orientation,metrics:r265.metrics,water:r265.water,invariantCarry:r265.woven.invariantCarry,residual,correspondence:r265.woven.correspondence,provenance,scarLedger,evidenceLedger,residualLedger,history:[...state.history,event],lastCycle:cycle,lastR265:r265,authority:R315_AUTHORITY,truthBoundary:R315_TRUTH_BOUNDARY,canonicalAdmission:false,dispatchPerformed:false,sourceMutationPerformed:false,externalScientificTruthClaimed:false,physicalDimensionsClaimed:false};
+ const outcome=applySkin(state.payload,skin,step,state),metrics=deriveMetrics(state,step,outcome),provenance=[...state.provenance,...(Array.isArray(step.provenance)?step.provenance.map(String).filter(Boolean):step.provenance?[String(step.provenance)]:[]),`R315:${skin}`];
+ const residual=clamp01(step.residual??outcome?.fieldEvolution?.proof?.roundTripResidual??outcome?.computation?.residual??state.residual),correspondence=clamp01(step.correspondence??state.correspondence);
+ const r265=compileWovenDimensionalRelativityR265({metrics,invariantCarry:step.invariantCarry??state.invariantCarry,residual,correspondence,orientation,water:{...state.water,...(step.water||{})},sourceFrame,targetFrame,sourceSkin,targetSkin:skin,sourceResolution:state.resolution,targetResolution,provenance,roundTripResidual:outcome?.fieldEvolution?.proof?.roundTripResidual??step.roundTripResidual,commutationResidual:step.commutationResidual});
+ const cycle=compileSkinCycleR265(r265,skin,{sourceSkin,targetSkin:skin}),event={index:state.history.length,skin,contract:R265_SKIN_CONTRACTS[skin],sourceFrame,targetFrame,sourceResolution:state.resolution,targetResolution,orientation,outcome:clone(outcome),r265:{metrics:clone(r265.metrics),water:clone(r265.water),woven:clone(r265.woven),violet:clone(r265.violet),proof:clone(r265.proof),development:clone(r265.development)},provenance:[...provenance]};
+ const scarLedger=[...state.scarLedger,{index:event.index,skin,scar:r265.metrics.scar,residualCarry:r265.woven.residualCarry}],residualLedger=[...state.residualLedger,{index:event.index,skin,residual,roundTripStatus:r265.proof.roundTripStatus,commutationStatus:r265.proof.commutationStatus}],evidenceLedger=[...state.evidenceLedger];if(skin==='EVIDENCE')evidenceLedger.push({index:event.index,class:outcome.evidenceClass,source:outcome.source,claim:outcome.claim});
+ const fieldScarLedger=outcome?.fieldEvolution?.carry?.scarLedger?clone(outcome.fieldEvolution.carry.scarLedger):state.fieldScarLedger;
+ const operatorField=outcome?.fieldEvolution?.exchange?.transported?clone(outcome.fieldEvolution.exchange.transported):state.operatorField;
+ return{...state,payload:nextPayload(skin,outcome,state.payload),frame:targetFrame,skin,resolution:targetResolution,orientation,metrics:r265.metrics,water:r265.water,invariantCarry:r265.woven.invariantCarry,residual,correspondence,provenance,scarLedger,fieldScarLedger,operatorField,evidenceLedger,residualLedger,history:[...state.history,event],lastCycle:cycle,lastR265:r265,lastFieldEvolution:outcome?.fieldEvolution??state.lastFieldEvolution,authority:R315_AUTHORITY,truthBoundary:R315_TRUTH_BOUNDARY,canonicalAdmission:false,dispatchPerformed:false,sourceMutationPerformed:false,externalScientificTruthClaimed:false,physicalDimensionsClaimed:false};
 }
-
-export function runWovenSystemPathR315(input={},steps=[]){
- if(!Array.isArray(steps))throw new Error('R315 steps must be an array');
- let state=createWovenSystemStateR315(input);
- for(const step of steps)state=traverseWovenSkinR315(state,step||{});
- return{...state,path:state.history.map(x=>x.skin),complete:true,authority:R315_AUTHORITY,r265Authority:R265_AUTHORITY};
-}
+export function runWovenSystemPathR315(input={},steps=[]){if(!Array.isArray(steps))throw new Error('R315 steps must be an array');let state=createWovenSystemStateR315(input);for(const step of steps)state=traverseWovenSkinR315(state,step||{});return{...state,path:state.history.map(x=>x.skin),complete:true,authority:R315_AUTHORITY,r265Authority:R265_AUTHORITY}}
