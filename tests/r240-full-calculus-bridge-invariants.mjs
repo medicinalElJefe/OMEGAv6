@@ -66,3 +66,4 @@ assert.equal(seen.size,20736,'12×12×12×12 must produce exactly 20,736 unique 
 assert.equal(20736*12,248832,'deep 12-phase address expansion must equal 248,832');
 console.log('OMEGA R240 FULL CALCULUS + BRIDGE PASS · 241 registered mode/lens authorities remain separately addressable · sparse 12×12×12×12 = 20,736 fabric · R239 bounds active parallelism · R314 numerical substrate is address-bound without new authority · browser→durable queue→selected host→R141 return preserves calculus address/device/epoch/profile continuity · fail-closed Python host validation · cross-origin proof travels in fingerprint-bound step envelope while same-origin observations may use headers · +1 dispatch / 0 observation / -1 return · no physical-dimension or Canon-authority inflation');
 await import('./r314-woven-numerical-compute-invariants.mjs');
+await import('./r314-expression-compute-invariants.mjs');
