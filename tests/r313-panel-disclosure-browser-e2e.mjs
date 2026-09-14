@@ -58,6 +58,23 @@ async function detailsDiagnostic(details){
   }));
 }
 
+async function hiddenSummaryDiagnostic(details){
+  return details.evaluate(el=>{
+    const summary=el.querySelector(':scope > summary');
+    const es=getComputedStyle(el),er=el.getBoundingClientRect();
+    if(!summary)return{className:String(el.className||''),summary:null};
+    const s=getComputedStyle(summary),r=summary.getBoundingClientRect();
+    return{
+      className:String(el.className||''),
+      open:Boolean(el.open),
+      details:{display:es.display,visibility:es.visibility,opacity:es.opacity,width:Number(er.width.toFixed(2)),height:Number(er.height.toFixed(2)),overflow:es.overflow,position:es.position},
+      summary:{text:(summary.textContent||'').replace(/\s+/g,' ').trim().slice(0,240),display:s.display,visibility:s.visibility,opacity:s.opacity,width:Number(r.width.toFixed(2)),height:Number(r.height.toFixed(2)),overflow:s.overflow,position:s.position,contentVisibility:s.contentVisibility},
+      parent:summary.parentElement?{tag:summary.parentElement.tagName,className:String(summary.parentElement.className||'')}:null,
+      ancestors:[...function*(){let p=el.parentElement;while(p){const ps=getComputedStyle(p),pr=p.getBoundingClientRect();yield{tag:p.tagName,className:String(p.className||''),display:ps.display,visibility:ps.visibility,width:Number(pr.width.toFixed(2)),height:Number(pr.height.toFixed(2)),overflow:ps.overflow};p=p.parentElement}}()].slice(0,8)
+    };
+  });
+}
+
 async function testDetails(page,viewport,route){
   const list=page.locator('.workstation-main .omega-surface-r81 details');
   const count=await list.count();
@@ -72,7 +89,7 @@ async function testDetails(page,viewport,route){
       if(!await details.isVisible().catch(()=>false))continue;
       const summary=details.locator(':scope > summary');
       if(await summary.count()!==1)throw new Error(`${viewport}/${route}: visible details #${i} does not own exactly one direct summary`);
-      if(!await summary.isVisible())throw new Error(`${viewport}/${route}: details #${i} summary is not visible`);
+      if(!await summary.isVisible()){const diag=await hiddenSummaryDiagnostic(details);throw new Error(`${viewport}/${route}: details #${i} summary is not visible · ${JSON.stringify(diag)}`)}
       const before=await details.evaluate(el=>el.open);
       const beforeState=await directContentState(details);
       if(!before&&beforeState.visible>0)throw new Error(`${viewport}/${route}: closed details #${i} leaks ${beforeState.visible}/${beforeState.count} direct content regions`);
