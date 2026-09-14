@@ -164,4 +164,68 @@
     min-width:0!important;
     max-width:100%!important;
   }
+
+  /* R313.28 MODES NESTED SCROLL-OWNER CLOSURE
+     R313.27 bounded the composition roots, but three retained component lists still declared
+     overflow:auto. Chromium therefore kept legal horizontal scroll state inside those lists;
+     scrollIntoView() could move the hidden inline scroll position even while the page itself
+     remained at zero material overflow. The exhaustive R286 audit then observed later controls
+     thousands of pixels to the right. Preserve vertical list scrolling while making horizontal
+     overflow non-scrollable, and force every grid/flex descendant back into a shrinkable track. */
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app :where(section,header,footer,div,label,article,details,summary,button,input,select,strong,span,small,p,em,code){
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] :where(.sbm21-expression,.sbm21-route,.sbm21-mode-columns>section,.sbm21-authorities,.sbm21-catalog){
+    overflow-x:clip!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] :where(.sbm21-mode-list,.sbm21-authority-grid,.sbm21-catalog-grid){
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:clip!important;
+    overflow-y:auto!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] :where(.sbm21-mode-list>*,.sbm21-authority-grid>*,.sbm21-catalog-grid>*){
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-authority-grid>button{
+    grid-template-columns:45px minmax(0,1fr)!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-authority-grid>button>strong{
+    grid-column:2!important;
+    justify-items:start!important;
+    white-space:normal!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog-grid summary{
+    grid-template-columns:36px minmax(0,1fr) auto auto!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog>header>div{
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog>header>div:last-child{
+    grid-template-columns:minmax(0,1fr) minmax(44px,auto)!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-route-actions{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    justify-content:stretch!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-route-actions>button{
+    width:100%!important;
+    white-space:normal!important;
+    justify-content:center!important;
+  }
+}
+
+@media (max-width:560px){
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-route-actions{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
 }
