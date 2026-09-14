@@ -6,8 +6,10 @@ const settle=fs.readFileSync('src/navigationScrollIntegrityR313.ts','utf8');
 const provenanceCss=fs.readFileSync('src/surfaceProvenanceR94.css','utf8');
 const integrityCss=fs.readFileSync('src/interfaceIntegrityR313.css','utf8');
 const createIntegrityCss=fs.readFileSync('src/createCompositionIntegrityR313.css','utf8');
+const specialistContainmentCss=fs.readFileSync('src/specialistSurfaceContainmentR313.css','utf8');
 assert.ok(main.includes("installNavigationScrollIntegrityR313"),'R313 navigation scroll settlement must be installed at runtime');
 assert.ok(main.includes("./createCompositionIntegrityR313.css"),'R313 Create composition integrity must be installed at runtime');
+assert.ok(main.includes("./specialistSurfaceContainmentR313.css"),'R313 shared specialist containment must be installed at runtime');
 assert.ok(settle.includes("omega-capability-change"),'R313 must adapt only from the canonical capability-change transition signal');
 assert.ok(settle.includes("isLegacyTopReset"),'R313 must narrowly recognize the historical top=0 smooth route reset');
 assert.ok(settle.includes("behavior:'auto'"),'R313 must synchronously settle the historical route-to-top target');
@@ -31,6 +33,11 @@ assert.ok(createIntegrityCss.includes('flex-direction:column!important'),'R313 C
 assert.ok(createIntegrityCss.includes(".omega-workstation-v2[data-panel='Create'] .command-prompt")&&createIntegrityCss.includes('order:1!important'),'R313 Create must keep its embedded prompt in reachable document flow before the visual instrument');
 assert.ok(createIntegrityCss.includes(".omega-workstation-v2[data-panel='Create'] .command-visual")&&createIntegrityCss.includes('order:2!important'),'R313 Create must retain the canonical visual instrument after the embedded prompt');
 assert.ok(createIntegrityCss.includes('contain:none!important')&&createIntegrityCss.includes('overflow:visible!important'),'R313 Create command composition must not create a clipped nested interaction membrane');
+assert.ok(specialistContainmentCss.includes('.omega-workstation-v2 .r138-capability-first'),'R313 must own mobile inline sizing at the shared specialist composition boundary');
+assert.ok(specialistContainmentCss.includes('grid-template-columns:minmax(0,1fr)!important'),'R313 shared specialist composition must use a shrinkable canonical inline track');
+assert.ok(specialistContainmentCss.includes('overflow-x:clip!important')&&specialistContainmentCss.includes('overflow-y:visible!important'),'R313 shared specialist membrane must be non-scrollable horizontally while preserving vertical document flow');
+for(const root of ['.r240-calculus-address','.r240-selfbuild','.r29-canon','.r29-governance'])assert.ok(specialistContainmentCss.includes(root),`R313 shared specialist containment must cover ${root}`);
+assert.ok(!specialistContainmentCss.includes('canvas')&&!specialistContainmentCss.includes('svg{'),'R313 specialist containment must not reinterpret rendered canvas/SVG geometry');
 
 // Authority assertions apply to executable TypeScript, not explanatory comments.
 const executableSettle=settle
@@ -54,4 +61,4 @@ for(const forbiddenApi of [
 ]){
   assert.doesNotMatch(executableSettle,forbiddenApi,'R313 scroll settlement must remain DOM-presentation-only');
 }
-console.log('R313.29 NAVIGATION + DISCLOSURE + CONVERGENCE + CREATE COMPOSITION INVARIANTS PASS · stable route scroll membrane · native disclosure layout · accumulated roots constrained to reachable document flow');
+console.log('R313.36 NAVIGATION + DISCLOSURE + CONVERGENCE + CREATE + SPECIALIST CONTAINMENT INVARIANTS PASS · shared mobile suite roots constrained to reachable document flow');
