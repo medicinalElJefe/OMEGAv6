@@ -11,6 +11,7 @@ import './cockpitFlowIntegrityR313.css';
 import './createCompositionIntegrityR313.css';
 import './modesScrollOwnershipR313.css';
 import './modesViewportAuthorityR313.css';
+import './specialistSurfaceContainmentR313.css';
 
 installCanonicalApiTransportR183();
 installNavigationScrollIntegrityR313();
