@@ -1,0 +1,56 @@
+/* R313.32 — Modes viewport-relative inline authority.
+   R313.30 removed nested hidden scroll owners and R313.31 replaced implicit auto tracks
+   with minmax(0,1fr), but those percentages were still relative to an accumulated ancestor.
+   On a 390px coarse-pointer viewport a historical min-content contribution could therefore
+   enlarge the ancestor itself; `width:100%` then faithfully reproduced that oversized basis.
+   Chromium actionability scrolling exposed the result as canonical Modes controls near x=4200.
+
+   The mobile/coarse-pointer Modes workstation now resolves its inline geometry from the
+   dynamic viewport minus the persistent navigation rail. Every downstream structural owner
+   inherits that finite basis. Horizontal overflow is clipped without becoming a scroll
+   container; vertical document flow remains visible. This is presentation/interaction
+   integrity only and changes no mode, source, execution, proof, Canon, Hybrid or deployment
+   authority. */
+
+@media (max-width:900px), (pointer:coarse){
+  html[data-omega-nav-present='true'] .omega-workstation-v2[data-panel='Modes']{
+    box-sizing:border-box!important;
+    margin-inline-start:var(--r94-nav-rail,48px)!important;
+    margin-inline-end:0!important;
+    inline-size:calc(100dvw - var(--r94-nav-rail,48px))!important;
+    min-inline-size:0!important;
+    max-inline-size:calc(100dvw - var(--r94-nav-rail,48px))!important;
+    overflow:clip visible!important;
+    transform:none!important;
+    inset-inline:auto!important;
+  }
+
+  .omega-workstation-v2[data-panel='Modes'] .workstation-main,
+  .omega-workstation-v2[data-panel='Modes'] .omega-surface-r81,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app{
+    box-sizing:border-box!important;
+    inline-size:100%!important;
+    min-inline-size:0!important;
+    max-inline-size:100%!important;
+    overflow:clip visible!important;
+    transform:none!important;
+    inset-inline:auto!important;
+  }
+
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app>*{
+    box-sizing:border-box!important;
+    min-inline-size:0!important;
+    max-inline-size:100%!important;
+  }
+
+  /* These two command groups contain the controls named by the strict R286 browser
+     contract. Keep their sizing relative to the finite surface track, never max-content. */
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog>header>div:last-child{
+    inline-size:100%!important;
+    min-inline-size:0!important;
+    max-inline-size:100%!important;
+    justify-self:stretch!important;
+    align-self:stretch!important;
+  }
+}
