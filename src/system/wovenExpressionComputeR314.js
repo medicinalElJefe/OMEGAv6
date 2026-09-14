@@ -68,7 +68,7 @@ export function executeNumericalPlanR314(plan={}){
  } else if(kind==='BATCH'){
   const names=variableNames,expression=plan.expression;result=batchEvaluateR314(sample=>evaluateExpressionR314(expression,Object.fromEntries(names.map((n,i)=>[n,sample[i]]))),plan.samples,plan.options||{});
  } else if(kind==='SCENARIO_SWEEP'){
-  const expression=plan.expression,scoreExpression=plan.scoreExpression;result=scenarioSweepR314(s=>({value:evaluateExpressionR314(expression,normalizeVariables(s.variables||s))}),plan.scenarios,{...(plan.options||{}),score:scoreExpression?((r,s)=>evaluateExpressionR314(scoreExpression,{...normalizeVariables(s.variables||s),result:r.value})):null});
+  const expression=plan.expression,scoreExpression=plan.scoreExpression;result=scenarioSweepR314(s=>({value:evaluateExpressionR314(expression,s.variables||s)}),plan.scenarios,{...(plan.options||{}),score:scoreExpression?((r,s)=>evaluateExpressionR314(scoreExpression,{...(s.variables||s),result:r.value})):null});
  }
  const planHash=structuralHashR314(plan),resultHash=structuralHashR314(result),numericalReceipt=receipt(plan,result);
  return{schema:R314_EXPRESSION_SCHEMA,revision:R314_EXPRESSION_REVISION,numericalSchema:R314_SCHEMA,numericalRevision:R314_REVISION,kind,planHash,resultHash,result,numericalReceipt,authority:R314_AUTHORITY,arbitraryCodeExecution:false,externalScientificTruthClaimed:false,executionProofClaimed:false,canonAdmissionClaimed:false};
