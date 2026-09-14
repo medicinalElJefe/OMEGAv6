@@ -1,0 +1,71 @@
+/* R313.36 — accumulated specialist-surface inline containment.
+   Presentation-only. OmegaSpecialistSuite composes multiple accepted historical
+   applications beneath the shared r138 capability-first shell. On coarse/mobile
+   viewports, desktop min-content contributions in one child can otherwise widen a
+   clipped ancestor into a hidden horizontal scroll membrane; programmatic focus or
+   scroll may then move that membrane while document overflow remains apparently clean.
+
+   Own inline sizing once at the shared specialist composition boundary instead of
+   adding route-specific patches. Preserve ordinary vertical document flow and do not
+   reinterpret canvases/SVGs, calculus address levels, action semantics, routing, proof,
+   execution, Hybrid, source, deployment, or Canon authority. */
+
+@media (max-width:900px), (pointer:coarse){
+  .omega-workstation-v2 .r138-capability-first{
+    min-inline-size:0!important;
+    inline-size:100%!important;
+    max-inline-size:100%!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    overflow-x:clip!important;
+    overflow-y:visible!important;
+    box-sizing:border-box!important;
+  }
+
+  .omega-workstation-v2 .r138-capability-first>*{
+    min-inline-size:0!important;
+    max-inline-size:100%!important;
+    box-sizing:border-box!important;
+  }
+
+  .omega-workstation-v2 .r138-capability-first>div{
+    inline-size:100%!important;
+    overflow-x:clip!important;
+    overflow-y:visible!important;
+  }
+
+  .omega-workstation-v2 .r138-capability-first>div>*{
+    min-inline-size:0!important;
+    max-inline-size:100%!important;
+    box-sizing:border-box!important;
+  }
+
+  /* These are the shared accumulated suite roots currently composed by Canon
+     Evolution/Governance and Convergence. Clip only inline overflow at their outer
+     presentation membranes; nested components retain their intentional vertical flow. */
+  .omega-workstation-v2 .r138-capability-first :where(
+    .r240-calculus-address,
+    .r240-selfbuild,
+    .r168-restoration,
+    .r126-max,
+    .r29-canon,
+    .r29-governance,
+    .r29-projects,
+    .r29-assets
+  ){
+    min-inline-size:0!important;
+    inline-size:100%!important;
+    max-inline-size:100%!important;
+    overflow-x:clip!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Grid/flex structural descendants must be permitted to shrink below historical
+     desktop min-content width. SVG/canvas/WebGL media are intentionally excluded. */
+  .omega-workstation-v2 .r138-capability-first :where(
+    section,article,header,footer,div,form,fieldset,label,details,summary
+  ){
+    min-inline-size:0!important;
+    max-inline-size:100%!important;
+    box-sizing:border-box!important;
+  }
+}
