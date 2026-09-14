@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
  R314_EXPRESSION_SCHEMA,R314_EXPRESSION_REVISION,R314_EXPRESSION_OPS,R314_PLAN_KINDS,
  evaluateExpressionR314,expressionFunctionR314,vectorExpressionFunctionR314,executeNumericalPlanR314
 } from '../src/system/wovenExpressionComputeR314.js';
 
+const r240=fs.readFileSync('src/system/calculusAddressFabricR240.ts','utf8');
 const near=(a,b,t=1e-6)=>assert.ok(Math.abs(a-b)<=t,`${a} !~= ${b}`);
 const C=value=>({op:'const',value});
 const V=name=>({op:'var',name});
@@ -15,6 +17,7 @@ assert.equal(R314_EXPRESSION_SCHEMA,'OMEGA_WOVEN_EXPRESSION_PLAN_R314');
 assert.equal(R314_EXPRESSION_REVISION,'R314.3');
 for(const op of ['const','var','add','sub','mul','div','pow','sin','cos','exp','log'])assert.ok(R314_EXPRESSION_OPS.includes(op));
 for(const kind of ['EVALUATE','GRADIENT','JACOBIAN','HESSIAN','INTEGRATE','ROOT','OPTIMIZE','BATCH','SCENARIO_SWEEP'])assert.ok(R314_PLAN_KINDS.includes(kind));
+for(const token of ["import {executeNumericalPlanR314}",'executeAddressedNumericalPlanR240','OMEGA_R240_ADDRESSED_NUMERICAL_PLAN',"dispatchAuthority:'R147'","durableHistoryAuthority:'R146'","hybridReturnAuthority:'R141'","canonAdmissionAuthority:'R125'",'serializablePlanExecution:true'])assert.ok(r240.includes(token),`R240 addressed numerical-plan integration missing ${token}`);
 
 const quadratic=A(P(V('x'),C(2)),M(C(3),P(V('y'),C(2))));
 assert.equal(evaluateExpressionR314(quadratic,{x:2,y:-1}),7);
@@ -40,4 +43,4 @@ const sweep=executeNumericalPlanR314({kind:'SCENARIO_SWEEP',expression:{op:'sub'
 
 const again=executeNumericalPlanR314({kind:'EVALUATE',expression:quadratic,variables:{y:-1,x:2},provenance:['DECLARED_PLAN']});assert.equal(again.planHash,evaluated.planHash,'structurally equivalent declared plans must hash deterministically');assert.equal(again.resultHash,evaluated.resultHash);
 
-console.log('OMEGA R314.3 EXPRESSION COMPUTE PASS · serializable bounded expression AST + evaluate/gradient/Jacobian/Hessian/integrate/root/optimize/batch/scenario plans · deterministic plan/result hashes · no arbitrary-code, dispatch, execution-proof, empirical-proof or Canon authority inflation');
+console.log('OMEGA R314.3 EXPRESSION COMPUTE PASS · serializable bounded expression AST + evaluate/gradient/Jacobian/Hessian/integrate/root/optimize/batch/scenario plans · deterministic plan/result hashes · addressed through R240 while R147/R146/R141/R125 remain sole authorities · no arbitrary-code, execution-proof, empirical-proof or Canon inflation');
