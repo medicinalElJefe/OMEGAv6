@@ -18,11 +18,12 @@ assert.equal(R315_FIELD_AUTHORITY.dispatch,'R147');
 assert.equal(R315_FIELD_AUTHORITY.history,'R146');
 assert.equal(R315_FIELD_AUTHORITY.returnProof,'R141');
 assert.equal(R315_FIELD_AUTHORITY.canonAdmission,'R125');
-assert.match(R315_FIELD_BOUNDARY,/does not claim literal physical dimensions/i);
+assert.match(R315_FIELD_BOUNDARY,/frame-relative/i);
+assert.match(R315_FIELD_BOUNDARY,/does not claim empirical truth/i);
 
 const observe=executeWovenStateEvolutionR315({operators,orientation:0,transportRate:.125,targetResolution:20736,provenance:['TEST_OBSERVE']});
 near(observe.invariantBefore,1);near(observe.invariantAfterTransport,1);near(observe.invariantAfterRepartition,1);near(observe.invariantResidual,0);
-assert.equal(observe.exchange.edges.length,0);assert.equal(observe.scarMagnitude,0);assert.equal(observe.proof.invariantStatus,'PASS');assert.equal(observe.proof.recoverableFromLedger,true);assert.equal(observe.receipt.executionProofClaimed,false);assert.equal(observe.receipt.canonAdmissionClaimed,false);
+assert.equal(observe.sourceResolution,20736);assert.equal(observe.targetResolution,20736);assert.equal(observe.exchange.edges.length,0);assert.equal(observe.scarMagnitude,0);assert.equal(observe.proof.invariantStatus,'PASS');assert.equal(observe.proof.recoverableFromLedger,true);assert.equal(observe.receipt.executionProofClaimed,false);assert.equal(observe.receipt.canonAdmissionClaimed,false);
 
 const outverse=executeWovenStateEvolutionR315({operators,orientation:1,transportRate:.1,targetResolution:20736,provenance:['TEST_OUTVERSE']});
 near(outverse.invariantBefore,1);near(outverse.invariantAfterTransport,1);near(outverse.invariantAfterRepartition,1);near(outverse.invariantResidual,0);
@@ -33,13 +34,32 @@ const inverse=executeWovenStateEvolutionR315({operators,orientation:-1,transport
 assert.equal(inverse.exchange.edges.length,3);assert.equal(inverse.exchange.edges[0].fromRef,'M1');assert.equal(inverse.exchange.edges[0].toRef,'M3');near(inverse.invariantResidual,0);
 
 const restored=restoreWovenStateR315(outverse);
-assert.equal(restored.recoverablePathUsed,true);assert.equal(restored.dispatchRequested,false);assert.equal(restored.canonAdmissionClaimed,false);
+assert.equal(restored.recoverablePathUsed,true);assert.equal(restored.sourceResolution,20736);assert.equal(restored.dispatchRequested,false);assert.equal(restored.canonAdmissionClaimed,false);
 assert.deepEqual(restored.restored.map(x=>[x.ref,x.address,x.value]),[['M1',0,.5],['M2',144,.3],['M3',1728,.2]]);
 
 const coarse=executeWovenStateEvolutionR315({operators,orientation:0,targetResolution:12,provenance:['TEST_COARSE']});
 near(coarse.invariantAfterRepartition,1);assert.equal(coarse.proof.invariantStatus,'PASS');assert.ok(coarse.targetCount<=12);assert.ok(coarse.proof.roundTripResidual>=0);assert.equal(coarse.r265.dimensionalRelativity.physicalDimensionsClaimed,false);
 const deep=executeWovenStateEvolutionR315({operators,orientation:0,targetResolution:248832,provenance:['TEST_DEEP']});
 near(deep.invariantAfterRepartition,1);assert.equal(deep.proof.invariantStatus,'PASS');assert.equal(deep.r265.dimensionalRelativity.targetResolution,248832);
+
+// R315.1: dimensional relativity must preserve the actual source frame across repeated field evolution.
+const frame144=[
+ {ref:'A',family:'TEST',organ:'FRAME',value:2,address:0},
+ {ref:'B',family:'TEST',organ:'FRAME',value:3,address:72},
+ {ref:'C',family:'TEST',organ:'FRAME',value:5,address:143}
+];
+const down=executeWovenStateEvolutionR315({operators:frame144,sourceResolution:144,targetResolution:12,orientation:1,transportRate:.1,provenance:['R315_1_DOWN']});
+assert.equal(down.sourceResolution,144);assert.equal(down.targetResolution,12);assert.equal(down.r265.dimensionalRelativity.sourceResolution,144);assert.equal(down.r265.dimensionalRelativity.targetResolution,12);near(down.invariantBefore,10);near(down.invariantAfterTransport,10);near(down.invariantAfterRepartition,10);assert.equal(down.proof.invariantStatus,'PASS');assert.ok(down.recontextualized.operators.every(row=>row.address>=0&&row.address<12));
+const up=executeWovenStateEvolutionR315({operators:down.recontextualized.operators,sourceResolution:12,targetResolution:144,orientation:-1,transportRate:.1,scarLedger:down.carry.scarLedger,provenance:['R315_1_UP']});
+assert.equal(up.sourceResolution,12);assert.equal(up.targetResolution,144);near(up.invariantBefore,10);near(up.invariantAfterRepartition,10);assert.equal(up.proof.invariantStatus,'PASS');assert.ok(up.recontextualized.operators.every(row=>row.address>=0&&row.address<144));assert.ok(up.carry.scarLedger.length>down.carry.scarLedger.length);
+assert.throws(()=>executeWovenStateEvolutionR315({operators:[{ref:'OUT',value:1,address:12}],sourceResolution:12,targetResolution:144}),/out of range for resolution 12/);
+
+const framePath=runWovenSystemPathR315({payload:{name:'multi-resolution'},operatorField:frame144,orientation:1,resolution:144,metrics:{continuity:.8,plasticity:.7,evidence:.9},provenance:['R315_1_PATH']},[
+ {skin:'COMPUTE',transportRate:.1,targetResolution:12,provenance:['DOWN_FRAME']},
+ {skin:'COMPUTE',transportRate:.1,targetResolution:144,orientation:-1,provenance:['UP_FRAME']}
+]);
+assert.equal(framePath.history[0].outcome.fieldEvolution.sourceResolution,144);assert.equal(framePath.history[0].outcome.fieldEvolution.targetResolution,12);assert.ok(framePath.history[0].outcome.fieldEvolution.recontextualized.operators.every(row=>row.address<12));
+assert.equal(framePath.history[1].outcome.fieldEvolution.sourceResolution,12);assert.equal(framePath.history[1].outcome.fieldEvolution.targetResolution,144);assert.equal(framePath.resolution,144);assert.ok(framePath.operatorField.every(row=>row.address<144));near(framePath.lastFieldEvolution.invariantAfterRepartition,10);
 
 const path=runWovenSystemPathR315({payload:{name:'field'},operatorField:operators,orientation:1,resolution:20736,metrics:{continuity:.8,plasticity:.7,evidence:.9},provenance:['TEST_PATH']},[
  {skin:'FUNCTION',inputs:['operatorField'],outputs:['wovenField']},
@@ -55,4 +75,4 @@ for(const token of ['R315 woven state evolution','INVARIANT CARRY','SCAR / HISTO
 assert.ok(!ui.includes('FIELD ENERGY Σw²'),'legacy scalar energy proxy must not remain the primary woven-calculus surface');
 assert.ok(!ui.includes('+1 DISPATCH'),'orientation must not be mislabeled as R147 dispatch');
 
-console.log('OMEGA R315 WOVEN STATE EVOLUTION PASS · partition → conservative exchange/transport → invariant carry → scar/history carry → orientation/frame re-expression → re-contextualize/repartition → proof · inverse/outverse structure factored · 12→144→1728→20736→248832 software projection · recoverable ledger path · R315 orchestration with R265/R266/R314 under R240 addressing · R147/R146/R141/R125 authority unchanged');
+console.log('OMEGA R315.1 WOVEN STATE EVOLUTION PASS · partition → conservative exchange/transport → invariant carry → scar/history carry → orientation/frame re-expression → re-contextualize/repartition → proof · source and target 12^k address frames remain explicit across repeated evolution · next-cycle operator field is the re-contextualized target field · inverse/outverse structure factored · recoverable ledger path · R147/R146/R141/R125 authority unchanged');
