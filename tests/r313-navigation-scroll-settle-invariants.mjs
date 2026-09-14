@@ -37,7 +37,8 @@ assert.ok(specialistContainmentCss.includes('.omega-workstation-v2 .r138-capabil
 assert.ok(specialistContainmentCss.includes('grid-template-columns:minmax(0,1fr)!important'),'R313 shared specialist composition must use a shrinkable canonical inline track');
 assert.ok(specialistContainmentCss.includes('overflow-x:clip!important')&&specialistContainmentCss.includes('overflow-y:visible!important'),'R313 shared specialist membrane must be non-scrollable horizontally while preserving vertical document flow');
 for(const root of ['.r240-calculus-address','.r240-selfbuild','.r29-canon','.r29-governance'])assert.ok(specialistContainmentCss.includes(root),`R313 shared specialist containment must cover ${root}`);
-assert.ok(!specialistContainmentCss.includes('canvas')&&!specialistContainmentCss.includes('svg{'),'R313 specialist containment must not reinterpret rendered canvas/SVG geometry');
+const executableSpecialistCss=specialistContainmentCss.replace(/\/\*[\s\S]*?\*\//g,'');
+assert.doesNotMatch(executableSpecialistCss,/(^|[,\s>+~])(?:canvas|svg|video)(?=[$,{.#:\s>+~])/m,'R313 specialist containment must not directly rewrite rendered media geometry');
 
 // Authority assertions apply to executable TypeScript, not explanatory comments.
 const executableSettle=settle
