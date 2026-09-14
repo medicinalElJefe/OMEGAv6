@@ -110,4 +110,58 @@
     width:100%!important;
     max-width:100%!important;
   }
+
+  /* R313.27 MOBILE MODES INLINE-CONTAINMENT LAW
+     The Modes surface composes source-mode selection, transition proof, traversal SVG,
+     mode/authority registries and route actions. Several accepted historical children carry
+     desktop min-content preferences. After focus/scroll on a 390px coarse-pointer viewport,
+     those preferences can widen a clipped ancestor into a hidden horizontal scroll owner and
+     move later controls thousands of pixels away from the visual viewport. Keep one canonical
+     inline-size authority at the Modes surface, let every composed child shrink, and clip only
+     horizontal visual overflow so no nested programmatic horizontal scroller can steal focus.
+     This is presentation-only: no mode, route, proof, action or Canon authority is changed. */
+  .omega-workstation-v2[data-panel='Modes'] .omega-surface-r81,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app>*{
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app{
+    overflow-x:clip!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] :where(.sbm21-expression,.sbm21-expression>header,.sbm21-expression-controls,.sbm21-route,.sbm21-route>header,.sbm21-route-actions,.sbm21-mode-columns,.sbm21-authorities,.sbm21-catalog,.sbm21-actions){
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls{
+    display:grid!important;
+    grid-template-columns:44px minmax(0,1fr) 44px!important;
+    align-items:stretch!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>label{
+    grid-column:1/-1!important;
+    grid-row:1!important;
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>button:nth-of-type(1){grid-column:1!important;grid-row:2!important;width:44px!important}
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>button:nth-of-type(2){grid-column:3!important;grid-row:2!important;width:44px!important}
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-expression-controls>button:nth-of-type(3){grid-column:1/-1!important;grid-row:3!important;width:100%!important}
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-actions{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-actions>button,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-route-actions>button{
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-route>svg{
+    min-width:0!important;
+    max-width:100%!important;
+  }
 }
