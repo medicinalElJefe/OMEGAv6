@@ -1,0 +1,96 @@
+/* R313.29 — Modes mobile scroll-ownership closure.
+   The accumulated Modes surface contains several accepted historical registries that
+   independently own vertical overflow. On coarse-pointer/mobile viewports those nested
+   scroll owners can also retain inline scroll state during Chromium actionability
+   scrolling, moving later canonical controls outside the visual viewport even when the
+   document itself has no material horizontal overflow.
+
+   Mobile/coarse-pointer Modes therefore has exactly one scrolling membrane: the document.
+   The retained mode, authority and catalog registries expand into document flow rather than
+   becoming nested scrollports. Inline containment stays clipped and every composite root
+   is shrinkable. This changes presentation/scroll ownership only; it does not alter mode,
+   route, source, execution, proof, Canon, Hybrid or deployment authority. */
+
+@media (max-width:900px), (pointer:coarse){
+  .omega-workstation-v2[data-panel='Modes'],
+  .omega-workstation-v2[data-panel='Modes'] .workstation-main,
+  .omega-workstation-v2[data-panel='Modes'] .omega-surface-r81,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app{
+    min-inline-size:0!important;
+    max-inline-size:100%!important;
+    overflow-x:clip!important;
+  }
+
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-app :where(
+    .sbm21-expression,
+    .sbm21-expression>header,
+    .sbm21-expression-controls,
+    .sbm21-route,
+    .sbm21-route>header,
+    .sbm21-route-actions,
+    .sbm21-mode-columns,
+    .sbm21-mode-columns>section,
+    .sbm21-authorities,
+    .sbm21-catalog,
+    .sbm21-actions
+  ){
+    min-inline-size:0!important;
+    inline-size:100%!important;
+    max-inline-size:100%!important;
+    overflow-x:clip!important;
+    box-sizing:border-box!important;
+  }
+
+  /* One vertical owner on mobile: document flow.  `overflow-y:auto` combined with a
+     non-visible overflow-x value can still establish a programmatically scrollable box,
+     so remove the nested scrollports entirely at the viewport where the failure occurs. */
+  .omega-workstation-v2[data-panel='Modes'] :where(
+    .sbm21-mode-list,
+    .sbm21-authority-grid,
+    .sbm21-catalog-grid
+  ){
+    min-inline-size:0!important;
+    inline-size:100%!important;
+    max-inline-size:100%!important;
+    max-block-size:none!important;
+    overflow:visible!important;
+    overscroll-behavior:auto!important;
+    scrollbar-gutter:auto!important;
+    box-sizing:border-box!important;
+  }
+
+  .omega-workstation-v2[data-panel='Modes'] :where(
+    .sbm21-mode-list>*,
+    .sbm21-authority-grid>*,
+    .sbm21-catalog-grid>*
+  ){
+    min-inline-size:0!important;
+    max-inline-size:100%!important;
+    box-sizing:border-box!important;
+  }
+
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-mode-list article{
+    grid-template-columns:36px minmax(0,1fr)!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-mode-list article>strong{
+    grid-column:2!important;
+    justify-items:start!important;
+    white-space:normal!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-authority-grid>button{
+    grid-template-columns:45px minmax(0,1fr)!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-authority-grid>button>strong{
+    grid-column:2!important;
+    justify-items:start!important;
+    white-space:normal!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog-grid summary{
+    grid-template-columns:36px minmax(0,1fr)!important;
+  }
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog-grid summary>strong,
+  .omega-workstation-v2[data-panel='Modes'] .sbm21-catalog-grid summary>svg{
+    grid-column:2!important;
+    justify-self:start!important;
+  }
+}
