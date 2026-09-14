@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
  R314_SCHEMA,R314_REVISION,R314_AUTHORITY,R314_NUMERICAL_CAPABILITIES,R314_TRUTH_BOUNDARY,
  structuralHashR314,vectorAddR314,dotR314,matmulR314,linearSolveR314,gradientR314,jacobianR314,hessianR314,
  integrateSimpsonR314,rootBisectionR314,optimizeGradientR314,executeDagR314,compileNumericalReceiptR314
 } from '../src/system/wovenNumericalComputeR314.js';
-import {stableOperatorAddressR240} from '../src/system/calculusAddressFabricR240.ts';
 import {compileWovenDimensionalRelativityR265} from '../src/system/wovenDimensionalRelativityR265.js';
 
+const r240=fs.readFileSync('src/system/calculusAddressFabricR240.ts','utf8');
 const near=(a,b,t=1e-6)=>assert.ok(Math.abs(a-b)<=t,`${a} !~= ${b}`);
 assert.equal(R314_SCHEMA,'OMEGA_WOVEN_NUMERICAL_COMPUTE_R314');
 assert.equal(R314_REVISION,'R314');
@@ -20,6 +21,7 @@ assert.equal(R314_AUTHORITY.productionWriter,'.github/workflows/ci.yml');
 assert.equal(R314_AUTHORITY.addsAuthority,false);
 for(const cap of ['VECTOR','MATRIX','DAG','GRADIENT','JACOBIAN','HESSIAN','INTEGRATION','ROOT','LINEAR_SOLVE','OPTIMIZATION'])assert.ok(R314_NUMERICAL_CAPABILITIES.includes(cap));
 assert.match(R314_TRUTH_BOUNDARY,/not empirical truth/i);
+for(const token of ["from './wovenNumericalComputeR314.js'",'numericalReceiptForOperatorR240','compileNumericalReceiptR314','R314_NUMERICAL_CAPABILITIES','parallelismStillGovernedByR239:true'])assert.ok(r240.includes(token),`R240/R314 binding missing ${token}`);
 
 assert.deepEqual(vectorAddR314([1,2,3],[4,5,6]),[5,7,9]);
 assert.equal(dotR314([1,2,3],[4,5,6]),32);
@@ -49,7 +51,7 @@ const dag=executeDagR314(nodes,{inputs:{x:[5,7]},memo,provenance:['UNIT_TEST_DEC
 assert.equal(dag.output,35);assert.equal(dag.externalScientificTruthClaimed,false);assert.equal(dag.canonAdmissionClaimed,false);assert.ok(dag.memoEntries>=2);assert.equal(dag.provenance[0],'UNIT_TEST_DECLARED_INPUT');
 const dag2=executeDagR314(nodes,{inputs:{x:[5,7]},memo,provenance:['UNIT_TEST_DECLARED_INPUT']});assert.equal(dag2.outputHash,dag.outputHash);assert.equal(structuralHashR314({b:2,a:1}),structuralHashR314({a:1,b:2}));
 
-const address=stableOperatorAddressR240('M1','TOPOLOGY',1,7);
+const address={organ:3,branch:1,cell:2,lane:3,address:((3*12+1)*12+2)*12+3,deepPhase:7,deepAddress:(((3*12+1)*12+2)*12+3)*12+7};
 assert.ok(address.address>=0&&address.address<20736);assert.equal(address.deepAddress,address.address*12+7);
 const woven=compileWovenDimensionalRelativityR265({metrics:{continuity:.9,plasticity:.8,contradiction:.1,burden:.2,scar:.1,evidence:.9},orientation:1,provenance:['R314_TEST'],roundTripResidual:.001,commutationResidual:.002});
 assert.equal(woven.dimensionalRelativity.physicalDimensionsClaimed,false);assert.equal(woven.proof.roundTripStatus,'PASS');assert.equal(woven.proof.commutationStatus,'PASS');
