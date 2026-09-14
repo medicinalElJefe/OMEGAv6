@@ -5,6 +5,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>assert.ok(ok,'R240 calculus/bridge '+msg);
 const address=read('src/system/calculusAddressFabricR240.ts');
 const traversal=read('src/system/wovenSystemTraversalR315.js');
+const fieldEvolution=read('src/system/wovenStateEvolutionR315.js');
 const surface=read('src/CalculusAddressFabricR240.tsx');
 const bridge=read('src/system/hybridBridgeCalculusR240.ts');
 const modes=read('src/modeExecutionFabricR107.ts');
@@ -20,10 +21,13 @@ must(address.includes('allModeContributionsR107'),'20,736 compiler must consume 
 must(address.includes("row.state!=='CATALOG_ONLY'")&&address.includes("row.state!=='GATED_MISSING_INPUTS'"),'catalog-only and gated modes must remain addressable but non-executing');
 must(address.includes('Math.min(12,Number(resourceEnvelope?.effectiveCpuWorkers)||1)'),'R239 fresh resource envelope must bound active parallel execution');
 for(const token of ['R314_SCHEMA','R314_NUMERICAL_CAPABILITIES','numericalReceiptForOperatorR240','executeAddressedNumericalPlanR240','serializablePlanExecution:true','parallelismStillGovernedByR239:true'])must(address.includes(token),`R314 numerical substrate missing from R240 address fabric: ${token}`);
-for(const token of ['R315_SCHEMA','R315_SKINS','R315_AUTHORITY','executeAddressedWovenPathR240','r265GovernsTransitions:true','r314IsComputeTransform:true',"role:'COMPUTE_TRANSFORM_INSIDE_R265_R315_CROSS_SKIN_PATH'",'FRAME/RESOLUTION/SKIN PARTITION → WATER TRANSPORT → WOVEN PATH/CORRESPONDENCE → VIOLET RE-EXPRESSION'])must(address.includes(token),`R315 cross-skin calculus integration missing from R240 address fabric: ${token}`);
-for(const token of ["R315_SCHEMA='OMEGA_WOVEN_SYSTEM_TRAVERSAL_R315'",'traverseWovenSkinR315','runWovenSystemPathR315','scarLedger','residualLedger','evidenceLedger',"case 'EVIDENCE'","case 'ORGANIZE'","case 'COMPUTE'","case 'LEARN'","case 'RENDER'","case 'EXECUTE'","case 'SELF_BUILD'",'compileWovenDimensionalRelativityR265','compileSkinCycleR265'])must(traversal.includes(token),`R315 whole-system traversal missing ${token}`);
-for(const token of ['executeAddressedNumericalPlanR240','R240_ACTIVE_FRONTIER_PROJECTION','R240_ACTIVE_FRONTIER_SENSITIVITY',"data-r314-projection='ACTIVE_FRONTIER'",'FIELD ENERGY Σw²','SENSITIVITY ‖∇Σw²‖₂','DETERMINISTIC RECEIPT'])must(surface.includes(token),`R314 active-field projection missing ${token}`);
-must(!surface.includes('dispatchNumerical')&&!surface.includes('submitNumerical')&&!surface.includes('canonAdmission'),'R314 projection surface must remain observational/read-only and not introduce dispatch or Canon controls');
+for(const token of ['R315_SCHEMA','R315_SKINS','R315_AUTHORITY','executeAddressedWovenPathR240','r265GovernsTransitions:true','r315FieldExecutesWovenContinuity:true','r314IsBoundedNumericalPrimitive:true',"role:'BOUNDED_NUMERICAL_PRIMITIVES_INSIDE_R315_COMPUTE'",'PARTITION → CONSTRAINED EXCHANGE/TRANSPORT → INVARIANT CARRY → SCAR/HISTORY CARRY → ORIENTATION/FRAME RE-EXPRESSION → RE-CONTEXTUALIZE/REPARTITION → PROVE'])must(address.includes(token),`R315 cross-skin calculus integration missing from R240 address fabric: ${token}`);
+for(const token of ['R315_FIELD_SCHEMA','R315_FIELD_OPERATOR','executeWovenStateEvolutionR315','executeActiveWovenStateR240','resolutionLadder','conservativeTransport:true','recoverablePath:true'])must(address.includes(token),`R315.FIELD integration missing from R240 address fabric: ${token}`);
+for(const token of ["R315_SCHEMA='OMEGA_WOVEN_SYSTEM_TRAVERSAL_R315'",'traverseWovenSkinR315','runWovenSystemPathR315','scarLedger','fieldScarLedger','residualLedger','evidenceLedger',"case'EVIDENCE'","case'ORGANIZE'","case'COMPUTE'","case'LEARN'","case'RENDER'","case'EXECUTE'","case'SELF_BUILD'",'compileWovenDimensionalRelativityR265','compileSkinCycleR265','executeWovenStateEvolutionR315'])must(traversal.includes(token),`R315 whole-system traversal missing ${token}`);
+for(const token of ["R315_FIELD_SCHEMA='OMEGA_WOVEN_STATE_EVOLUTION_R315'",'EXCHANGE_TRANSPORT','INVARIANT_CARRY','SCAR_HISTORY_CARRY','RECONTEXTUALIZE_REPARTITION','conservativeRingTransport','restoreWovenStateR315','projectAddressR266'])must(fieldEvolution.includes(token),`R315.FIELD woven evolution missing ${token}`);
+for(const token of ['executeActiveWovenStateR240',"data-r315-field='WOVEN_STATE_EVOLUTION'",'INVARIANT CARRY','SCAR / HISTORY','RECOVERABLE PATH','ROUND-TRIP PROJECTION','+1 OUTVERSE','−1 INVERSE'])must(surface.includes(token),`R315 live woven surface missing ${token}`);
+must(!surface.includes('FIELD ENERGY Σw²')&&!surface.includes('+1 DISPATCH'),'primary calculus surface must not collapse Woven Continuity into the retired scalar proxy or mislabel orientation as dispatch');
+must(!surface.includes('dispatchNumerical')&&!surface.includes('submitNumerical')&&!surface.includes('canonAdmission'),'calculus surface must remain observational/read-only and not introduce dispatch or Canon controls');
 for(const token of ['sourceModeEvaluations:179','canonAuthorities:62'])must(canon.includes(token),`all-mode authority count missing ${token}`);
 must(modes.includes('allModeContributionsR107')&&modes.includes('totalRegistered:ALL_MODES_BOUNDARY.sourceModeEvaluations+ALL_MODES_BOUNDARY.canonAuthorities'),'R107 must expose all 241 registered source/lens contributions without promoting them all to execution');
 for(const token of ['organs:12','branches:144','cells:1728','lanes:20736','deepAddress:248832'])must(recursive.includes(token),`recursive address hierarchy missing ${token}`);
@@ -63,14 +67,11 @@ for kind in ('orientation','address','partial','device'):
 print('R240 PYTHON BRIDGE VALIDATOR PASS')
 `;
 const sim=spawnSync('python3',['-B','-c',python],{encoding:'utf8'});
-assert.equal(sim.status,0,`R240 host bridge validator simulation failed: ${sim.stderr||sim.stdout}`);
-must(sim.stdout.includes('R240 PYTHON BRIDGE VALIDATOR PASS'),'R240 Python bridge validator did not complete');
+assert.equal(sim.status,0,`R240 host bridge validator simulation failed: ${sim.stderr||sim.stdout}`);must(sim.stdout.includes('R240 PYTHON BRIDGE VALIDATOR PASS'),'R240 Python bridge validator did not complete');
 
-const encode=(o,b,c,l)=>(((o*12)+b)*12+c)*12+l;
-const seen=new Set();for(let o=0;o<12;o++)for(let b=0;b<12;b++)for(let c=0;c<12;c++)for(let l=0;l<12;l++){const a=encode(o,b,c,l);assert.ok(a>=0&&a<20736);seen.add(a)}
-assert.equal(seen.size,20736,'12×12×12×12 must produce exactly 20,736 unique computational addresses');
-assert.equal(20736*12,248832,'deep 12-phase address expansion must equal 248,832');
-console.log('OMEGA R240 FULL CALCULUS + BRIDGE PASS · 241 registered mode/lens authorities remain separately addressable · sparse 12×12×12×12 = 20,736 fabric · R239 bounds active parallelism · R315 restores one R265-governed cross-skin state path while R314 remains its bounded COMPUTE transform · browser→durable queue→selected host→R141 return preserves calculus address/device/epoch/profile continuity · fail-closed Python host validation · cross-origin proof travels in fingerprint-bound step envelope while same-origin observations may use headers · +1 dispatch / 0 observation / -1 return · no physical-dimension or Canon-authority inflation');
+const encode=(o,b,c,l)=>(((o*12)+b)*12+c)*12+l;const seen=new Set();for(let o=0;o<12;o++)for(let b=0;b<12;b++)for(let c=0;c<12;c++)for(let l=0;l<12;l++){const a=encode(o,b,c,l);assert.ok(a>=0&&a<20736);seen.add(a)}
+assert.equal(seen.size,20736,'12×12×12×12 must produce exactly 20,736 unique computational addresses');assert.equal(20736*12,248832,'deep 12-phase address expansion must equal 248,832');
+console.log('OMEGA R240 FULL CALCULUS + BRIDGE PASS · 241 registered mode/lens authorities remain separately addressable · sparse 12×12×12×12 = 20,736 fabric · R239 bounds active parallelism · R315 cross-skin orchestration invokes R315.FIELD conservative Woven evolution while R314 remains bounded numerical primitives · browser→durable queue→selected host→R141 return preserves calculus address/device/epoch/profile continuity · fail-closed Python host validation · signed inverse/outverse orientation remains separate from R147 dispatch · no physical-dimension or Canon-authority inflation');
 await import('./r314-woven-numerical-compute-invariants.mjs');
 await import('./r314-expression-compute-invariants.mjs');
 await import('./r315-woven-system-traversal-invariants.mjs');
