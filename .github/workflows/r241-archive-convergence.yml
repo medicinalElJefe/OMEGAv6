@@ -99,6 +99,18 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
+      - name: Browser proof · R313 panel disclosure contract · fail fast
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-panel-disclosure-ci-wrapper.mjs'
+
+      - name: Capture exact R313 panel disclosure failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r313-panel-disclosure-failure
+          path: r313-panel-disclosure-failure.txt
+          if-no-files-found: ignore
+          retention-days: 3
+
       - name: Browser proof · R241 archive convergence
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r241-archive-convergence-browser-e2e.mjs'
 
@@ -134,18 +146,6 @@ jobs:
 
       - name: Browser proof · R286 accumulated no-dead-control contract
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r286-all-surface-no-dead-controls-ci-wrapper.mjs'
-
-      - name: Browser proof · R313 panel disclosure contract
-        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-panel-disclosure-ci-wrapper.mjs'
-
-      - name: Capture exact R313 panel disclosure failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: r313-panel-disclosure-failure
-          path: r313-panel-disclosure-failure.txt
-          if-no-files-found: ignore
-          retention-days: 3
 
       - name: Browser proof · R313 full safe-control interaction contract
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-full-control-interaction-browser-e2e.mjs'
@@ -184,10 +184,11 @@ jobs:
           {
             echo '## R241 accumulated interface-integrity and Woven compute proof'
             echo "- Candidate: $GITHUB_SHA"
+            echo '- R313 disclosure is fail-fast and diagnostic-transport only: the unchanged strict child acceptance remains authoritative; failure capture does not convert a red gate to green.'
             echo '- R314 numerical evaluation and R315 Woven field/traversal invariants are explicit proof gates, including frame-relative 12^k source/target continuity and recoverable scar/history carry.'
             echo '- Browser acceptance is decomposed into individually named proofs so a failure identifies its actual contract without weakening any assertion.'
-            echo '- R281 inherited Bio proof is isolated from the accumulated no-dead-control and R313 contracts; the latter remain explicit later gates.'
-            echo '- R313 Command Center and Modes geometry diagnostics are observational only and run immediately before the unchanged blocking R286 no-dead-control contract.'
+            echo '- R281 inherited Bio proof is isolated from the accumulated no-dead-control and R313 contracts; the latter remain explicit blocking gates.'
+            echo '- R313 Command Center and Modes geometry diagnostics are observational only and run before the unchanged blocking R286 no-dead-control contract.'
             echo '- R286/R313 retain legacy all-surface coverage plus no-dead-control, disclosure, occlusion, desktop/mobile and safe-interaction contracts.'
             echo '- R125 sole CanonState admission, R141 exact return, R146 durable history, R147 dispatch, R153 mutation and R240 source promotion remain unchanged.'
             echo '- R201/R203 remain retired.'
