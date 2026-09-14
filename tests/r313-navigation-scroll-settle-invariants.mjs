@@ -5,7 +5,9 @@ const main=fs.readFileSync('src/main.tsx','utf8');
 const settle=fs.readFileSync('src/navigationScrollIntegrityR313.ts','utf8');
 const provenanceCss=fs.readFileSync('src/surfaceProvenanceR94.css','utf8');
 const integrityCss=fs.readFileSync('src/interfaceIntegrityR313.css','utf8');
+const createIntegrityCss=fs.readFileSync('src/createCompositionIntegrityR313.css','utf8');
 assert.ok(main.includes("installNavigationScrollIntegrityR313"),'R313 navigation scroll settlement must be installed at runtime');
+assert.ok(main.includes("./createCompositionIntegrityR313.css"),'R313 Create composition integrity must be installed at runtime');
 assert.ok(settle.includes("omega-capability-change"),'R313 must adapt only from the canonical capability-change transition signal');
 assert.ok(settle.includes("isLegacyTopReset"),'R313 must narrowly recognize the historical top=0 smooth route reset');
 assert.ok(settle.includes("behavior:'auto'"),'R313 must synchronously settle the historical route-to-top target');
@@ -24,6 +26,11 @@ assert.match(integrityCss,/\.omega-workstation-v2 details:not\(\[open\]\)>:not\(
 assert.ok(integrityCss.includes(".omega-workstation-v2[data-panel='Convergence'] .r138-capability-first"),'R313 must explicitly contain accumulated Convergence composition on mobile');
 assert.ok(integrityCss.includes('overflow-x:clip!important'),'R313 Convergence containment must clip without creating a programmatically scrollable hidden horizontal membrane');
 assert.ok(integrityCss.includes(".r138-capability-layout,.r240-calculus-address,.r168-restoration,.r126-max"),'R313 must constrain the known accumulated Convergence application roots to the canonical surface width');
+assert.ok(createIntegrityCss.includes(".omega-workstation-v2[data-panel='Create'] .command-stage"),'R313 Create must own an explicit embedded Command Deck composition boundary');
+assert.ok(createIntegrityCss.includes('flex-direction:column!important'),'R313 Create must stack the retained Command Deck instead of forcing its full Command Center desktop minimum across a narrower shell');
+assert.ok(createIntegrityCss.includes(".omega-workstation-v2[data-panel='Create'] .command-prompt")&&createIntegrityCss.includes('order:1!important'),'R313 Create must keep its embedded prompt in reachable document flow before the visual instrument');
+assert.ok(createIntegrityCss.includes(".omega-workstation-v2[data-panel='Create'] .command-visual")&&createIntegrityCss.includes('order:2!important'),'R313 Create must retain the canonical visual instrument after the embedded prompt');
+assert.ok(createIntegrityCss.includes('contain:none!important')&&createIntegrityCss.includes('overflow:visible!important'),'R313 Create command composition must not create a clipped nested interaction membrane');
 
 // Authority assertions apply to executable TypeScript, not explanatory comments.
 const executableSettle=settle
@@ -47,4 +54,4 @@ for(const forbiddenApi of [
 ]){
   assert.doesNotMatch(executableSettle,forbiddenApi,'R313 scroll settlement must remain DOM-presentation-only');
 }
-console.log('R313.26 NAVIGATION + DISCLOSURE + MOBILE CONVERGENCE INVARIANTS PASS · stable route scroll membrane · native disclosure layout · accumulated Convergence roots constrained to canonical mobile inline size');
+console.log('R313.29 NAVIGATION + DISCLOSURE + CONVERGENCE + CREATE COMPOSITION INVARIANTS PASS · stable route scroll membrane · native disclosure layout · accumulated roots constrained to reachable document flow');
