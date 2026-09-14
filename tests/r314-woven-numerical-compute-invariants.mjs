@@ -4,14 +4,15 @@ import {
  R314_SCHEMA,R314_REVISION,R314_AUTHORITY,R314_NUMERICAL_CAPABILITIES,R314_TRUTH_BOUNDARY,
  structuralHashR314,vectorAddR314,dotR314,matmulR314,linearSolveR314,gradientR314,jacobianR314,hessianR314,
  integrateSimpsonR314,rootBisectionR314,optimizeGradientR314,affineFrameTransformR314,propagateCovarianceR314,
- roundTripResidualR314,commutationResidualR314,executeDagR314,compileNumericalReceiptR314
+ roundTripResidualR314,commutationResidualR314,batchEvaluateR314,scenarioSweepR314,propagateUncertaintyLinearizedR314,
+ integrateRK4R314,executeDagR314,compileNumericalReceiptR314
 } from '../src/system/wovenNumericalComputeR314.js';
 import {compileWovenDimensionalRelativityR265} from '../src/system/wovenDimensionalRelativityR265.js';
 
 const r240=fs.readFileSync('src/system/calculusAddressFabricR240.ts','utf8');
 const near=(a,b,t=1e-6)=>assert.ok(Math.abs(a-b)<=t,`${a} !~= ${b}`);
 assert.equal(R314_SCHEMA,'OMEGA_WOVEN_NUMERICAL_COMPUTE_R314');
-assert.equal(R314_REVISION,'R314');
+assert.equal(R314_REVISION,'R314.2');
 assert.equal(R314_AUTHORITY.addressing,'R240');
 assert.equal(R314_AUTHORITY.continuity,'R265');
 assert.equal(R314_AUTHORITY.dispatch,'R147');
@@ -20,7 +21,7 @@ assert.equal(R314_AUTHORITY.returnProof,'R141');
 assert.equal(R314_AUTHORITY.canonAdmission,'R125');
 assert.equal(R314_AUTHORITY.productionWriter,'.github/workflows/ci.yml');
 assert.equal(R314_AUTHORITY.addsAuthority,false);
-for(const cap of ['VECTOR','MATRIX','DAG','GRADIENT','JACOBIAN','HESSIAN','INTEGRATION','ROOT','LINEAR_SOLVE','OPTIMIZATION','FRAME_TRANSFORM','COVARIANCE_PROPAGATION','ROUND_TRIP_RESIDUAL','COMMUTATION_RESIDUAL'])assert.ok(R314_NUMERICAL_CAPABILITIES.includes(cap));
+for(const cap of ['VECTOR','MATRIX','DAG','GRADIENT','JACOBIAN','HESSIAN','INTEGRATION','ROOT','LINEAR_SOLVE','OPTIMIZATION','FRAME_TRANSFORM','COVARIANCE_PROPAGATION','ROUND_TRIP_RESIDUAL','COMMUTATION_RESIDUAL','BATCH','SCENARIO_SWEEP','LINEARIZED_UNCERTAINTY','RK4_DYNAMICS'])assert.ok(R314_NUMERICAL_CAPABILITIES.includes(cap));
 assert.match(R314_TRUTH_BOUNDARY,/not empirical truth/i);
 for(const token of ["from './wovenNumericalComputeR314.js'",'numericalReceiptForOperatorR240','compileNumericalReceiptR314','R314_NUMERICAL_CAPABILITIES','parallelismStillGovernedByR239:true'])assert.ok(r240.includes(token),`R240/R314 binding missing ${token}`);
 
@@ -41,9 +42,22 @@ const root=rootBisectionR314(x=>x*x-2,0,2,{tolerance:1e-12});near(root.value,Mat
 const optimum=optimizeGradientR314(([x,y])=>(x-3)**2+(y+2)**2,[9,9],{learningRate:.2,tolerance:1e-9,maxIterations:300});near(optimum.value[0],3,1e-4);near(optimum.value[1],-2,1e-4);assert.ok(optimum.objective<1e-8);
 
 const rotated=affineFrameTransformR314([1,0],[[0,-1],[1,0]],{offset:[2,3]});near(rotated[0],2);near(rotated[1],4);
-const cov=propagateCovarianceR314([[2,0],[0,3]],[[1,.2],[.2,4]]);assert.deepEqual(cov,[[4,1.2],[1.2,36]]);
+const cov=propagateCovarianceR314([[2,0],[0,3]],[[1,.2],[.2,4]]);near(cov[0][0],4);near(cov[0][1],1.2,1e-12);near(cov[1][0],1.2,1e-12);near(cov[1][1],36);
 const rt=roundTripResidualR314(v=>[2*v[0],3*v[1]],v=>[v[0]/2,v[1]/3],[4,-9]);near(rt.residual,0,1e-12);
 const commute=commutationResidualR314(v=>[v[0]+1,v[1]],v=>[2*v[0],v[1]],[3,4]);assert.ok(commute.residual>0,'non-commuting transforms must produce measured residual');
+
+const batch=batchEvaluateR314(v=>dotR314(v,[2,3]),[[1,1],[2,1],[2,2]],{maxBatch:12,provenance:['DECLARED_BATCH']});
+assert.equal(batch.count,3);assert.deepEqual(batch.values.map(x=>x.value),[5,7,10]);assert.equal(batch.executionProofClaimed,false);assert.equal(batch.provenance[0],'DECLARED_BATCH');
+assert.throws(()=>batchEvaluateR314(x=>x,[1,2,3],{maxBatch:2}),/maxBatch/);
+
+const scenarios=scenarioSweepR314(s=>({gain:s.x*2,cost:s.cost}),[{id:'A',x:2,cost:5},{id:'B',x:4,cost:10},{id:'C',x:3,cost:3}],{score:r=>r.gain-r.cost,provenance:['DECLARED_SCENARIOS']});
+assert.equal(scenarios.count,3);assert.equal(scenarios.ranked[0].id,'C');assert.equal(scenarios.canonicalAdmissionClaimed,false);
+
+const uncertainty=propagateUncertaintyLinearizedR314(([x,y])=>[2*x,3*y],[10,20],[[.25,.1],[.1,1]]);
+near(uncertainty.mean[0],20);near(uncertainty.mean[1],60);near(uncertainty.jacobian[0][0],2,1e-4);near(uncertainty.jacobian[1][1],3,1e-4);near(uncertainty.covariance[0][0],1,1e-3);near(uncertainty.covariance[0][1],.6,1e-3);near(uncertainty.covariance[1][1],9,1e-3);assert.equal(uncertainty.empiricalTruthClaimed,false);
+
+const dynamics=integrateRK4R314((t,[x])=>[x],[1],0,1,{steps:128,provenance:['DECLARED_ODE']});
+near(dynamics.value[0],Math.E,1e-8);assert.equal(dynamics.steps,128);assert.equal(dynamics.trajectory.length,129);assert.equal(dynamics.executionProofClaimed,false);
 
 const nodes=[
  {id:'x',op:'input',key:'x'},
@@ -64,4 +78,4 @@ assert.equal(woven.dimensionalRelativity.physicalDimensionsClaimed,false);assert
 const receipt=compileNumericalReceiptR314({operation:'DAG_EVALUATION',result:dag.output,address,orientation:woven.dimensionalRelativity.orientation,provenance:dag.provenance});
 assert.equal(receipt.address.address,address.address);assert.equal(receipt.orientation,1);assert.equal(receipt.physicalDimensionsClaimed,false);assert.equal(receipt.executionProofClaimed,false);assert.equal(receipt.externalScientificTruthClaimed,false);assert.equal(receipt.canonAdmissionClaimed,false);assert.equal(receipt.authority.dispatch,'R147');assert.equal(receipt.authority.canonAdmission,'R125');
 
-console.log('OMEGA R314 WOVEN NUMERICAL COMPUTE PASS · deterministic vector/matrix algebra + linear solve + gradient/Jacobian/Hessian + integration + root solve + bounded optimization + affine frames + covariance + measured round-trip/commutation residuals + memoized DAG + R240 address binding + R265 continuity/provenance + R147/R146/R141/R125 authority unchanged');
+console.log('OMEGA R314.2 WOVEN NUMERICAL COMPUTE PASS · deterministic algebra + solvers + derivatives + integration + optimization + affine frames + covariance + residuals + bounded batch/scenario ensembles + linearized uncertainty + RK4 dynamics + memoized DAG + R240/R265 binding + R147/R146/R141/R125 authority unchanged');
