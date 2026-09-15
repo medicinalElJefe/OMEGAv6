@@ -53,7 +53,7 @@ export function reconcileObservedSource(state,presentTargets){
   return next;
 }
 
-export function decideCycle({currentMainSha,productionProofGreen,state,candidates,evidence}){
+export function decideCycle({currentMainSha,productionProofGreen,state,candidates,evidence,repairTarget=null}){
   if(!productionProofGreen)return{action:'OBSERVE_ONLY',reason:'exact current main lacks green canonical production proof'};
   if(!state?.active)return{action:'OBSERVE_ONLY',reason:'self-build state inactive'};
   const held=classifyHeldCandidates({currentMainSha,candidates});
@@ -61,7 +61,10 @@ export function decideCycle({currentMainSha,productionProofGreen,state,candidate
   const graph=asResidualGraph(evidence);
   const gate=deriveResidualGateR245(graph,state.residualPolicy);
   if(!gate.allow)return{action:'OBSERVE_ONLY',reason:gate.reason,gate,held,residualGraphState:graph.state,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
+  if(repairTarget?.targetable===true){
+    return{action:'PROPOSE',strategy:'R314_AI_REPAIR',repairTarget,gate,held,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,canonicalAdmission:false,deploymentAuthority:AUTHORITY_BOUNDARIES.productionDeploymentWorkflow,machineId:MACHINE_ID};
+  }
   const plan=planGovernedCandidateR245({state,evidence:graph});
   if(plan.state!=='PROPOSE'||!plan.capsule)return{action:'OBSERVE_ONLY',reason:plan.reason||plan.state||'bounded roadmap exhausted or no dependency-ready capsule',gate,held,plan,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
-  return{action:'PROPOSE',capsule:plan.capsule,score:plan.score,frontier:plan.frontier,woven:plan.woven,selectionLaw:plan.selectionLaw,gate,held,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,canonicalAdmission:false,deploymentAuthority:AUTHORITY_BOUNDARIES.productionDeploymentWorkflow,machineId:MACHINE_ID};
+  return{action:'PROPOSE',strategy:'STATIC_CAPSULE',capsule:plan.capsule,score:plan.score,frontier:plan.frontier,woven:plan.woven,selectionLaw:plan.selectionLaw,gate,held,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,canonicalAdmission:false,deploymentAuthority:AUTHORITY_BOUNDARIES.productionDeploymentWorkflow,machineId:MACHINE_ID};
 }

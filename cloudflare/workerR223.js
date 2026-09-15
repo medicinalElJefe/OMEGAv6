@@ -1,17 +1,19 @@
 import {inspectCycle,proposeCycle,promoteGreenCloudPr,runAutonomousCycle} from './lib/github-machine.mjs';
 import {MACHINE_ID} from './lib/evolution-policy.mjs';
+import {R314_AI_REPAIR_MODEL_DEFAULT} from '../src/system/autonomousRepairPolicyR314.js';
 
 const json=(body,status=200)=>new Response(`${JSON.stringify(body,null,2)}\n`,{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});
 const repoOf=env=>env.OMEGA_GITHUB_REPO||'medicinalElJefe/OMEGAv6';
 const runtimeOf=env=>env.OMEGA_PUBLIC_URL||'https://omegav6.jeffdeweyeljefe.workers.dev';
+const modelOf=env=>env.OMEGA_WORKERS_AI_MODEL||R314_AI_REPAIR_MODEL_DEFAULT;
 
 async function execute(mode,env,url){
   const token=env.OMEGA_GITHUB_TOKEN;
   if(!token)return{ok:false,state:'FAILED_CLOSED',error:'OMEGA_GITHUB_TOKEN_REQUIRED'};
-  const repo=repoOf(env),runtimeBase=runtimeOf(env);
-  if(mode==='cycle')return runAutonomousCycle({token,repo,runtimeBase});
+  const repo=repoOf(env),runtimeBase=runtimeOf(env),ai=env.AI||null,model=modelOf(env);
+  if(mode==='cycle')return runAutonomousCycle({token,repo,runtimeBase,ai,model});
   if(mode==='inspect')return{ok:true,inspection:await inspectCycle({token,repo,runtimeBase})};
-  if(mode==='propose')return{ok:true,proposal:await proposeCycle({token,repo,runtimeBase})};
+  if(mode==='propose')return{ok:true,proposal:await proposeCycle({token,repo,runtimeBase,ai,model})};
   if(mode==='promote'){
     const prNumber=Number(url.searchParams.get('pr'));
     if(!Number.isInteger(prNumber)||prNumber<1)return{ok:false,error:'VALID_PR_REQUIRED'};
@@ -23,8 +25,8 @@ async function execute(mode,env,url){
 export default{
   async scheduled(_controller,env,ctx){
     ctx.waitUntil((async()=>{
-      try{const result=await execute('cycle',env,new URL('https://cloud-01.invalid/'));console.log(JSON.stringify({schema:'OMEGA_CLOUDFLARE_EVOLUTION_PULSE_R223',machineId:MACHINE_ID,...result}))}
-      catch(error){console.error(JSON.stringify({schema:'OMEGA_CLOUDFLARE_EVOLUTION_PULSE_R223',machineId:MACHINE_ID,ok:false,state:'FAILED_CLOSED',error:error instanceof Error?error.message:String(error)}))}
+      try{const result=await execute('cycle',env,new URL('https://cloud-01.invalid/'));console.log(JSON.stringify({schema:'OMEGA_CLOUDFLARE_EVOLUTION_PULSE_R314',machineId:MACHINE_ID,...result}))}
+      catch(error){console.error(JSON.stringify({schema:'OMEGA_CLOUDFLARE_EVOLUTION_PULSE_R314',machineId:MACHINE_ID,ok:false,state:'FAILED_CLOSED',error:error instanceof Error?error.message:String(error)}))}
     })());
   },
   async fetch(request,env){

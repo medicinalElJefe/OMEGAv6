@@ -5,6 +5,7 @@ import SingmasterProofWorkbenchR290 from './SingmasterProofWorkbenchR290';
 import './proofCarryR292.css';
 import OmegaGovernanceProjectMediaR29 from './OmegaGovernanceProjectMediaR29';
 import OmegaSystemConsolidationR30 from './OmegaSystemConsolidationR30';
+import OmegaConvergenceMasterR314 from './OmegaConvergenceMasterR314';
 import OmegaSwarmR121 from './OmegaSwarmR121';
 import OmegaOrganismR123 from './OmegaOrganismR123';
 import OmegaAutonomicR125 from './OmegaAutonomicR125';
@@ -39,6 +40,7 @@ export default function OmegaSpecialistSuite(props:Props){
  if(panel==='Memory')return wrap(<OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/>);
  if(panel==='Canon Evolution'||panel==='Governance')return wrap(<div><CalculusAddressFabricR240 record={record}/><RecursiveSelfBuildR240/><OmegaGovernanceProjectMediaR29 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/></div>);
  if(panel==='Projects'||panel==='Assets'||panel==='Render Queue')return wrap(<OmegaGovernanceProjectMediaR29 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>);
- if(panel==='Instructions'||panel==='Settings'||panel==='System'||panel==='Consolidation')return wrap(<OmegaSystemConsolidationR30 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore} uiMode={props.uiMode} onUiMode={props.onUiMode}/>);
+ if(panel==='Consolidation')return wrap(<div><OmegaSystemConsolidationR30 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore} uiMode={props.uiMode} onUiMode={props.onUiMode}/><OmegaConvergenceMasterR314/></div>);
+ if(panel==='Instructions'||panel==='Settings'||panel==='System')return wrap(<OmegaSystemConsolidationR30 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore} uiMode={props.uiMode} onUiMode={props.onUiMode}/>);
  return wrap(<OmegaUtilityAuthorityR26 {...props}/>);
 }
