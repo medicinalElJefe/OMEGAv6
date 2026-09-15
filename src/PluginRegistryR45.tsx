@@ -18,7 +18,7 @@ function persist(rows:PluginManifest[]){localState.write(KEY,rows.filter(x=>x.so
 function exportJson(rows:PluginManifest[]){const receipts=rows.map(pluginManifestReceiptR142),summary=summarizeCapabilityReceiptsR142(receipts),blob=new Blob([JSON.stringify({schema:'OMEGA_PLUGIN_REGISTRY_R45_R142',plugins:rows,executionReceipts:receipts,executionSummary:summary,boundary:'Registry manifests describe local adapter contracts only. This surface does not embed external ChatGPT connectors. R142 separates registration, authorization and availability from invocation, return and verification; no registry entry alone proves a remote provider, model, device or backend executed.'},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='OMEGA_PLUGIN_REGISTRY_R45.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
 function routeThroughCanonicalNavigator(panel:string){
  const candidates=Array.from(document.querySelectorAll<HTMLElement>('button[data-route-number],button.r27-route'));
- const target=candidates.find(el=>{const label=(el.querySelector('b')?.textContent||el.textContent||'').trim();return label===panel||label.startsWith(`${panel}\n`)||label.startsWith(`${panel} `)});
+ const target=candidates.find(el=>el.dataset.routeName===panel||el.getAttribute('aria-label')===`Open ${panel}`||el.querySelector('b')?.textContent?.trim()===panel);
  if(!target)throw new Error(`Canonical OMEGA route control unavailable for ${panel}; navigation held without reload.`);
  target.click();
 }
