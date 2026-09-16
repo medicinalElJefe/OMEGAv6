@@ -88,6 +88,9 @@ jobs:
           node tests/r314-expression-compute-invariants.mjs
           node tests/r315-woven-system-traversal-invariants.mjs
 
+      - name: Prove R316 research advancement fabric without empirical overclaim
+        run: npx --yes tsx tests/r316-research-advancement-invariants.mts
+
       - name: Run complete application check and production build
         run: npm run check
 
@@ -186,6 +189,7 @@ jobs:
             echo "- Candidate: $GITHUB_SHA"
             echo '- R313 disclosure is fail-fast and diagnostic-transport only: the unchanged strict child acceptance remains authoritative; failure capture does not convert a red gate to green.'
             echo '- R314 numerical evaluation and R315 Woven field/traversal invariants are explicit proof gates, including frame-relative 12^k source/target continuity and recoverable scar/history carry.'
+            echo '- R316 adds model-only fabrication transforms, optical field/polarization state, relational candidate identity, solver promotion gates, experiment residuals, spectral provenance, acquisition receipts and hardware topology without claiming empirical proof.'
             echo '- Browser acceptance is decomposed into individually named proofs so a failure identifies its actual contract without weakening any assertion.'
             echo '- R281 inherited Bio proof is isolated from the accumulated no-dead-control and R313 contracts; the latter remain explicit blocking gates.'
             echo '- R313 Command Center and Modes geometry diagnostics are observational only and run before the unchanged blocking R286 no-dead-control contract.'
