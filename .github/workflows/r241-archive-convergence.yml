@@ -103,10 +103,11 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Browser proof · R313 panel disclosure contract · fail fast
+        id: panel_disclosure
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-panel-disclosure-ci-wrapper.mjs'
 
       - name: Capture exact R313 panel disclosure failure
-        if: failure()
+        if: failure() && steps.panel_disclosure.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: r313-panel-disclosure-failure
@@ -151,13 +152,14 @@ jobs:
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r286-all-surface-no-dead-controls-ci-wrapper.mjs'
 
       - name: Browser proof · R313 full safe-control interaction contract
+        id: full_control
         shell: bash
         run: |
           set -o pipefail
           bash scripts/run_r241_browser_proof.sh 'node tests/r313-full-control-interaction-browser-e2e.mjs' 2>&1 | tee r313-full-control-interaction.log
 
       - name: Capture exact R313 full-control interaction failure
-        if: failure()
+        if: failure() && steps.full_control.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: r313-full-control-interaction-failure
