@@ -19,7 +19,7 @@ The Builder does not edit GitHub source, open or merge pull requests, admit Cano
 - **R146** remains durable execution-history authority.
 - **R141** remains exact Hybrid return-proof authority.
 - **R170/R240** remain governed source self-build and exact-source-promotion authority.
-- **`ci.yml`** remains the canonical OMEGAv6 production deployment writer.
+- **`ci.yml`** remains the canonical OMEGAv6 production deployment writer and the only GitHub workflow allowed to deploy the Builder.
 - Retired R201/R203 Durable Object tombstones remain retired.
 
 The Builder is therefore not a shadow authority. It is an evidence-correlation membrane around the existing authority chain.
@@ -34,6 +34,8 @@ The Builder is therefore not a shadow authority. It is an evidence-correlation m
 4. A **Cloudflare Workflow** named `omega-v6-builder-cycle` scheduled hourly at minute 7.
 5. Public GitHub observation of `main`, `ci.yml` workflow runs, and open PRs. GitHub access is read-only.
 6. An optional authenticated `/api/run` endpoint. If `OMEGA_BUILDER_TOKEN` is not configured, this endpoint remains fail-closed while the scheduled Workflow continues to operate.
+
+The hourly schedule above is a Cloudflare Workflow schedule declared inside `wrangler.builder.jsonc`; it does not add another recurring GitHub Actions workflow authority.
 
 ## Decision law
 
@@ -63,9 +65,13 @@ The invariant carry is the preserved authority chain. The scar/residual carry is
 
 ## Deployment law
 
-The Builder Worker is deployed by `.github/workflows/r314-builder-control-plane.yml` only after a successful `OMEGA Cloud Bridge CI` run on `main`, or by explicit workflow dispatch. That workflow deploys only `wrangler.builder.jsonc`; it must never deploy `wrangler.jsonc` and therefore cannot replace the canonical OMEGAv6 production writer.
+R314 does **not** add a new GitHub workflow authority. Builder proof and deployment are converged into the existing `.github/workflows/ci.yml` authority.
 
-Every deploy must run the R314 invariant test and a Wrangler dry-run before deployment, then verify:
+On pull requests, canonical CI runs the R314 invariant test, Worker syntax check, and `wrangler.builder.jsonc` dry-run. On an exact two-parent merge promoted to `main`, the existing `deploy-main` job deploys the canonical `omegav6` Worker, the isolated SAI doorway, and the auxiliary `omega-v6-builder` Worker under the same governed Cloudflare authorization boundary. It then verifies both the canonical runtime and Builder runtime first-hand and records both outcomes in the deployment receipt.
+
+This preserves the R170 governed maximum of 24 active GitHub workflow authorities and avoids `workflow_run` fan-out while still allowing the Cloudflare-hosted Builder Workflow to run hourly after deployment.
+
+Every deploy must verify:
 
 `https://omega-v6-builder.jeffdeweyeljefe.workers.dev/api/health`
 
