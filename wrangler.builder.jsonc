@@ -1,0 +1,45 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "omega-v6-builder",
+  "main": "workers/builder/index.js",
+  "compatibility_date": "2026-09-15",
+  "workers_dev": true,
+  "preview_urls": true,
+  "vars": {
+    "OMEGA_PUBLIC_URL": "https://omegav6.jeffdeweyeljefe.workers.dev",
+    "GITHUB_REPOSITORY": "medicinalElJefe/OMEGAv6"
+  },
+  "services": [
+    {
+      "binding": "OMEGA_CANONICAL",
+      "service": "omegav6"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "BUILD_LEDGER",
+        "class_name": "OmegaBuilderLedger"
+      }
+    ]
+  },
+  "exports": {
+    "OmegaBuilderLedger": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  },
+  "workflows": [
+    {
+      "binding": "BUILD_CYCLE",
+      "name": "omega-v6-builder-cycle",
+      "class_name": "OmegaBuildWorkflow",
+      "schedules": [
+        "7 * * * *"
+      ]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
