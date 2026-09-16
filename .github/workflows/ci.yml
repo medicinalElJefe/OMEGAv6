@@ -13,6 +13,7 @@ permissions:
 env:
   OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
   OMEGA_SAI_DOOR_URL: https://omega-sai-door-r256.jeffdeweyeljefe.workers.dev
+  OMEGA_BUILDER_URL: https://omega-v6-builder.jeffdeweyeljefe.workers.dev
 
 jobs:
   verify:
@@ -45,6 +46,11 @@ jobs:
           node tests/r256-private-sai-doorway-invariants.mjs
           node tests/r256-private-sai-doorway-protocol-e2e.mjs
           npx wrangler deploy --config wrangler.sai-door-r256.jsonc --dry-run --outdir .wrangler-r256-doorway
+      - name: Prove R318 Builder control plane without new GitHub workflow authority
+        run: |
+          node tests/r318-cloudflare-builder-control-plane-invariants.mjs
+          node --check workers/builder/index.js
+          npx wrangler deploy --config wrangler.builder.jsonc --dry-run --outdir .wrangler-r318-builder
       - run: npm run check
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
 
@@ -124,6 +130,9 @@ jobs:
       - name: Deploy isolated private SAI doorway
         id: sai_doorway
         run: npx wrangler deploy --config wrangler.sai-door-r256.jsonc
+      - name: Deploy auxiliary R318 Builder Worker
+        id: builder_worker
+        run: npx wrangler deploy --config wrangler.builder.jsonc
       - name: Verify private SAI doorway non-disclosure boundary
         id: sai_doorway_hidden
         shell: bash
@@ -200,6 +209,32 @@ jobs:
           }
           for(const [name,path] of targets) await probe(name,path);
           console.log(`OMEGA R163 public verification PASS: ${base}`);
+          NODE
+      - name: Verify auxiliary R318 Builder Worker live health
+        id: builder_live
+        shell: bash
+        run: |
+          node <<'NODE'
+          const url=process.env.OMEGA_BUILDER_URL.replace(/\/$/,'')+'/api/health';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let last='';
+          for(let attempt=1;attempt<=12;attempt++){
+            try{
+              const r=await fetch(url,{headers:{'cache-control':'no-cache'}});
+              const text=await r.text();
+              if(r.ok){
+                const data=JSON.parse(text);
+                if(data.schema!=='OMEGA_CLOUDFLARE_BUILDER_CONTROL_PLANE_V1')throw new Error(`schema ${data.schema}`);
+                if(data.revision!=='R318'||data.state!=='LIVE'||data.ok!==true)throw new Error('R318 live identity mismatch');
+                if(data.authority?.sourceMutationAuthorized!==false||data.authority?.canonAdmissionAuthorized!==false||data.authority?.productionPromotionAuthorized!==false)throw new Error('R318 authority boundary regressed');
+                console.log(`R318 BUILDER LIVE PASS · ${url} · attempt ${attempt}`);
+                process.exit(0);
+              }
+              last=`HTTP ${r.status} ${text.slice(0,240)}`;
+            }catch(e){last=e instanceof Error?e.message:String(e)}
+            await sleep(5000);
+          }
+          throw new Error(`R318 Builder live verification failed: ${last}`);
           NODE
       - name: Verify canonical Hybrid agent download
         id: hybrid_agent
@@ -362,13 +397,16 @@ jobs:
             echo "- Rollback: ${OMEGA_ROLLBACK_SHA:-UNAVAILABLE}"
             echo "- Runtime: $OMEGA_PUBLIC_URL"
             echo "- Private SAI doorway: $OMEGA_SAI_DOOR_URL"
+            echo "- R318 Builder: $OMEGA_BUILDER_URL"
             echo "- Trigger: ${{ github.event_name }}"
             echo "- Verify job: ${{ needs.verify.result }}"
             echo "- Deployment job: ${{ job.status }}"
             echo "- Canonical Worker deployment: ${{ steps.deploy_worker.outcome }}"
             echo "- R258 isolated private SAI doorway deployment: ${{ steps.sai_doorway.outcome }}"
+            echo "- R318 auxiliary Builder deployment: ${{ steps.builder_worker.outcome }}"
             echo "- R258 private non-disclosure proof: ${{ steps.sai_doorway_hidden.outcome }}"
             echo "- R163 first-hand canonical core health/public runtime: ${{ steps.live_runtime.outcome }}"
+            echo "- R318 Builder first-hand health/authority proof: ${{ steps.builder_live.outcome }}"
             echo "- Canonical Hybrid agent bytes/SHA: ${{ steps.hybrid_agent.outcome }}"
             echo "- Federation + canonical RCWA downloads: ${{ steps.federation_rcwa.outcome }}"
             echo "- R8 Earth/NOAA + Hybrid V90 contracts: ${{ steps.earth_r8.outcome }}"
@@ -380,6 +418,8 @@ jobs:
             echo "- R238 Hybrid host intelligence live proof: ${{ steps.live_r238.outcome }}"
             echo "- R239 resource governance remains source-gated by verify job; live command surface reports a declared R239 tier."
             echo "- R240/R240.1 truth boundary: one canonical ci.yml writer; two independent Hybrid live proof outcomes; state-semantic LOCKED/HELD verification; no unconditional PASS receipt text."
+            echo "- R318 truth boundary: Builder is OBSERVE/CORRELATE/LEDGER/ADVISE only; no source mutation, Canon admission, or canonical production promotion authority."
+            echo "- R314/R315/R316/R317 identities retain their existing numerical/Woven/research/convergence meanings; Builder does not reuse them."
             echo "- R202 archive residual debt remains explicit: AT09 desktop health check PLANNED; AT10 forensic hash ledger PLANNED"
             echo "- Browser proof harness: Playwright 1.63.0 pinned; locked application dependency audit enforced at high severity; current run result is reported by the audit step"
             echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"
