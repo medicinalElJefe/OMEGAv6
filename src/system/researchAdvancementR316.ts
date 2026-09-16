@@ -1,0 +1,164 @@
+export const R316_SCHEMA='OMEGA_RESEARCH_ADVANCEMENT_R316' as const;
+export const R316_REVISION='R316' as const;
+export const R316_ATLAS_RESOLUTIONS=Object.freeze([12,144,1728,20736,248832] as const);
+export const R316_WOVEN_OPERATOR=Object.freeze([
+ 'PARTITION',
+ 'EXCHANGE_TRANSFORM',
+ 'INVARIANT_CARRY',
+ 'SCAR_HISTORY_CARRY',
+ 'RECONTEXTUALIZE_REPARTITION',
+ 'PROVE'
+] as const);
+export const R316_AUTHORITY=Object.freeze({
+ canonAdmission:'R125',
+ dispatch:'R147',
+ durableHistory:'R146',
+ hybridReturnProof:'R141',
+ sourcePromotion:'R240',
+ wovenEvolution:'R315.FIELD',
+ researchAdvancement:'R316_MODEL_ONLY'
+} as const);
+export const R316_TRUTH_BOUNDARY='R316 compiles bounded software models, routing decisions, provenance and validation requirements. It does not fabricate empirical measurements, solver convergence, fabrication success, hardware availability, external execution or Canon admission.' as const;
+
+export type AtlasResolutionR316=typeof R316_ATLAS_RESOLUTIONS[number];
+export type OrientationR316=-1|0|1;
+export type SolverRouteR316='FAST_SCREEN'|'RCWA'|'FDTD'|'FEM'|'HOLD_MISSING_EVIDENCE';
+export type SolverCapabilityR316='STATIC_PERIODIC'|'STATIC_FINITE'|'DISPERSIVE'|'ANISOTROPIC'|'NONLINEAR'|'TIME_VARYING';
+
+export interface OpticalFieldSampleR316{
+ x:number;y:number;wavelengthNm:number;intensity:number;phaseRad:number;
+ thetaRad:number;psiRad:number;polarization:[number,number,number,number];
+ timeS:number;frame:string;sourceAuthority:'MODEL'|'MEASURED';
+}
+export interface FabricationErrorR316{
+ etchDepthNm?:number;criticalDimensionNm?:number;overlayXNm?:number;overlayYNm?:number;
+ roughnessRmsNm?:number;sidewallAngleDeg?:number;indexDelta?:number;
+}
+export interface OpticalGeometryR316{
+ geometryId:string;featureNm:number;etchDepthNm:number;offsetXNm?:number;offsetYNm?:number;
+ rotationDeg?:number;layerGapNm?:number;material?:string;boundary?:string;
+}
+export interface SpectralObservationR316{
+ packetId:string;atlasResolution:AtlasResolutionR316;address:string;capturedAt:string;
+ instrument:string;sourceUri:string;calibrationId:string;uncertainty:number;
+ bands:{wavelengthNm:number;value:number;unit:string}[];frame:string;
+ derived:false;renderProducts:string[];provenanceHash:string;
+}
+
+const finite=(n:number,name:string)=>{if(!Number.isFinite(n))throw new Error(`${name} must be finite`);return n;};
+const nonnegative=(n:number,name:string)=>{finite(n,name);if(n<0)throw new Error(`${name} must be nonnegative`);return n;};
+const text=(v:unknown,name:string)=>{const s=String(v??'').trim();if(!s)throw new Error(`${name} required`);return s;};
+const clamp=(v:number,lo:number,hi:number)=>Math.max(lo,Math.min(hi,v));
+export const canonicalJsonR316=(value:unknown):string=>{
+ if(value===null||typeof value!=='object')return JSON.stringify(value);
+ if(Array.isArray(value))return `[${value.map(canonicalJsonR316).join(',')}]`;
+ const row=value as Record<string,unknown>;
+ return `{${Object.keys(row).sort().map(k=>`${JSON.stringify(k)}:${canonicalJsonR316(row[k])}`).join(',')}}`;
+};
+export const structuralHashR316=(value:unknown)=>{
+ const input=canonicalJsonR316(value);let h=0x811c9dc5;
+ for(let i=0;i<input.length;i++){h^=input.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}
+ return `r316-${h.toString(16).padStart(8,'0')}`;
+};
+export const assertAtlasResolutionR316=(value:number):AtlasResolutionR316=>{
+ if(!(R316_ATLAS_RESOLUTIONS as readonly number[]).includes(value))throw new Error('atlas resolution must be one of 12→144→1728→20,736→248,832 representational levels');
+ return value as AtlasResolutionR316;
+};
+
+export function normalizeStokesR316(stokes:[number,number,number,number]):[number,number,number,number]{
+ const [s0,s1,s2,s3]=stokes.map((v,i)=>finite(v,`S${i}`)) as [number,number,number,number];
+ if(s0<=0)throw new Error('S0 must be positive');
+ const p=Math.sqrt(s1*s1+s2*s2+s3*s3);
+ const scale=p>s0?s0/p:1;
+ return [s0,s1*scale/s0,s2*scale/s0,s3*scale/s0];
+}
+
+export function makeOpticalFieldSampleR316(input:Partial<OpticalFieldSampleR316>&Pick<OpticalFieldSampleR316,'x'|'y'|'wavelengthNm'|'intensity'|'phaseRad'|'thetaRad'|'psiRad'|'polarization'|'timeS'|'frame'>):OpticalFieldSampleR316{
+ return{
+  x:finite(input.x,'x'),y:finite(input.y,'y'),wavelengthNm:nonnegative(input.wavelengthNm,'wavelengthNm'),
+  intensity:nonnegative(input.intensity,'intensity'),phaseRad:finite(input.phaseRad,'phaseRad'),
+  thetaRad:finite(input.thetaRad,'thetaRad'),psiRad:finite(input.psiRad,'psiRad'),
+  polarization:normalizeStokesR316(input.polarization),timeS:finite(input.timeS,'timeS'),
+  frame:text(input.frame,'frame'),sourceAuthority:input.sourceAuthority==='MEASURED'?'MEASURED':'MODEL'
+ };
+}
+
+export function applyFabricationTransformR316(ideal:OpticalGeometryR316,error:FabricationErrorR316={}){
+ const fabricated={
+  ...ideal,
+  featureNm:Math.max(0,ideal.featureNm+(error.criticalDimensionNm??0)),
+  etchDepthNm:Math.max(0,ideal.etchDepthNm+(error.etchDepthNm??0)),
+  offsetXNm:(ideal.offsetXNm??0)+(error.overlayXNm??0),
+  offsetYNm:(ideal.offsetYNm??0)+(error.overlayYNm??0)
+ };
+ return{
+  schema:'OMEGA_FABRICATION_TRANSFORM_R316',ideal:{...ideal},fabricated,
+  processScar:{...error},modelOnly:true,
+  fabricationProved:false,
+  identity:structuralHashR316({fabricated,error})
+ };
+}
+
+export function opticalCandidateIdentityR316(input:{geometry:OpticalGeometryR316;relation?:Record<string,number>;material?:Record<string,unknown>;boundary?:Record<string,unknown>}){
+ return structuralHashR316({geometry:input.geometry,relation:input.relation??{},material:input.material??{},boundary:input.boundary??{}});
+}
+
+export function routeOpticalSolverR316(input:{periodic?:boolean;finiteArray?:boolean;neighborCoupling?:number;edgeEffects?:boolean;broadbandTransient?:boolean;timeVarying?:boolean;nonlinear?:boolean;anisotropic?:boolean;fastOnly?:boolean;proofGate?:'STAY'|'TURN'|'ESCALATE'|'HOLD';mode188Stability?:number;contradiction?:number;contradictionCeiling?:number}){
+ if(input.proofGate&&input.proofGate!=='STAY')return{route:'HOLD_MISSING_EVIDENCE' as SolverRouteR316,reason:'Tier-2 admission requires STAY'};
+ if(input.mode188Stability!==undefined&&input.mode188Stability<1.05)return{route:'HOLD_MISSING_EVIDENCE' as SolverRouteR316,reason:'Mode-188 stability below 1.05'};
+ if(input.contradiction!==undefined&&input.contradiction>Number(input.contradictionCeiling??0.2))return{route:'HOLD_MISSING_EVIDENCE' as SolverRouteR316,reason:'contradiction exceeds ceiling'};
+ if(input.fastOnly)return{route:'FAST_SCREEN' as SolverRouteR316,reason:'explicit screening-only request'};
+ if(input.timeVarying||input.nonlinear||input.broadbandTransient||input.edgeEffects||input.finiteArray||Number(input.neighborCoupling??0)>=0.35)return{route:'FDTD' as SolverRouteR316,reason:'finite/transient/nonlinear/high-coupling regime'};
+ if(input.periodic)return{route:'RCWA' as SolverRouteR316,reason:'periodic or locally-periodic regime'};
+ if(input.anisotropic)return{route:'FEM' as SolverRouteR316,reason:'specialized anisotropic geometry/material route'};
+ return{route:'FDTD' as SolverRouteR316,reason:'conservative finite-structure default'};
+}
+
+export function evaluateOpticalPromotionR316(input:{fast?:{efficiency:number;phaseRad:number};rcwa?:{efficiency:number;phaseRad:number;converged:boolean;energyResidual:number};fdtd?:{efficiency:number;phaseRad:number;converged:boolean;energyResidual:number};fabricationRobustness?:number;maxEfficiencyError?:number;maxPhaseErrorRad?:number;maxEnergyResidual?:number;minFabricationRobustness?:number}){
+ const maxEfficiencyError=input.maxEfficiencyError??0.05,maxPhaseError=input.maxPhaseErrorRad??0.12,maxEnergy=input.maxEnergyResidual??0.02,minRobust=input.minFabricationRobustness??0.85;
+ const reference=input.fdtd??input.rcwa;
+ if(!input.fast||!reference)return{state:'HOLD',reason:'fast and rigorous solver evidence required',physicalValidation:false};
+ if(!reference.converged)return{state:'HOLD',reason:'rigorous solver not converged',physicalValidation:false};
+ const efficiencyError=Math.abs(input.fast.efficiency-reference.efficiency);
+ const phaseError=Math.abs(Math.atan2(Math.sin(input.fast.phaseRad-reference.phaseRad),Math.cos(input.fast.phaseRad-reference.phaseRad)));
+ const robustness=input.fabricationRobustness??0;
+ const pass=efficiencyError<=maxEfficiencyError&&phaseError<=maxPhaseError&&reference.energyResidual<=maxEnergy&&robustness>=minRobust;
+ return{state:pass?'PROMOTE_MODEL':'HOLD',efficiencyError,phaseError,energyResidual:reference.energyResidual,fabricationRobustness:robustness,physicalValidation:false,measurementRequired:true};
+}
+
+export function buildExperimentEpisodeR316(input:{hypothesis:string;parameters:Record<string,unknown>;prediction:Record<string,number>;measurement?:Record<string,number>;uncertainty?:Record<string,number>;parentReceipt?:string}){
+ const keys=Object.keys(input.prediction).sort();
+ const residual:Record<string,number|null>={};
+ for(const key of keys)residual[key]=input.measurement&&Number.isFinite(input.measurement[key])?input.measurement[key]-input.prediction[key]:null;
+ const episode={schema:'OMEGA_EXPERIMENT_EPISODE_R316',hypothesis:text(input.hypothesis,'hypothesis'),parameters:input.parameters,prediction:input.prediction,measurement:input.measurement??null,residual,uncertainty:input.uncertainty??{},parentReceipt:input.parentReceipt??null,empirical:!!input.measurement};
+ return{...episode,episodeHash:structuralHashR316(episode)};
+}
+
+export function buildSpectralObservationR316(input:Omit<SpectralObservationR316,'derived'|'renderProducts'|'provenanceHash'>):SpectralObservationR316{
+ const packet={...input,atlasResolution:assertAtlasResolutionR316(input.atlasResolution),packetId:text(input.packetId,'packetId'),address:text(input.address,'address'),capturedAt:text(input.capturedAt,'capturedAt'),instrument:text(input.instrument,'instrument'),sourceUri:text(input.sourceUri,'sourceUri'),calibrationId:text(input.calibrationId,'calibrationId'),frame:text(input.frame,'frame'),uncertainty:nonnegative(input.uncertainty,'uncertainty'),bands:input.bands.map((b,i)=>({wavelengthNm:nonnegative(b.wavelengthNm,`band ${i} wavelength`),value:finite(b.value,`band ${i} value`),unit:text(b.unit,`band ${i} unit`)})),derived:false as const,renderProducts:[] as string[],provenanceHash:''};
+ packet.provenanceHash=structuralHashR316({packetId:packet.packetId,sourceUri:packet.sourceUri,capturedAt:packet.capturedAt,instrument:packet.instrument,calibrationId:packet.calibrationId,bands:packet.bands});
+ return packet;
+}
+
+export function buildAcquisitionReceiptR316(input:{uri:string;requestedAt:string;requester:string;purpose:string;responseHash:string;policy:string;parentReceipt?:string}){
+ const body={schema:'OMEGA_SOURCE_ACQUISITION_RECEIPT_R316',uri:text(input.uri,'uri'),requestedAt:text(input.requestedAt,'requestedAt'),requester:text(input.requester,'requester'),purpose:text(input.purpose,'purpose'),responseHash:text(input.responseHash,'responseHash'),policy:text(input.policy,'policy'),parentReceipt:input.parentReceipt??null,authority:'PROVENANCE_ONLY',canonAdmission:false};
+ return{...body,receiptHash:structuralHashR316(body)};
+}
+
+export function scoreHardwareTargetR316(target:{id:string;latencyMs:number;energyJ:number;cost:number;bandwidthGbps:number;risk:number;available:boolean;capabilities:string[]},requiredCapabilities:string[],weights={latency:1,energy:1,cost:1,bandwidth:1,risk:1}){
+ const capabilityOk=requiredCapabilities.every(c=>target.capabilities.includes(c));
+ if(!target.available||!capabilityOk)return{...target,eligible:false,score:Infinity,reason:!target.available?'unavailable':'missing capability'};
+ const score=weights.latency*nonnegative(target.latencyMs,'latencyMs')+weights.energy*nonnegative(target.energyJ,'energyJ')+weights.cost*nonnegative(target.cost,'cost')+weights.bandwidth*(1/Math.max(0.001,target.bandwidthGbps))+weights.risk*clamp(target.risk,0,1);
+ return{...target,eligible:true,score,reason:'eligible'};
+}
+
+export function compileResearchAdvancementR316(input:{atlasResolution?:number;orientation?:OrientationR316;hardwareTargets?:Parameters<typeof scoreHardwareTargetR316>[0][];requiredCapabilities?:string[]}){
+ const atlasResolution=assertAtlasResolutionR316(input.atlasResolution??20736);
+ const hardware=(input.hardwareTargets??[]).map(t=>scoreHardwareTargetR316(t,input.requiredCapabilities??[])).sort((a,b)=>a.score-b.score);
+ return{
+  schema:R316_SCHEMA,revision:R316_REVISION,atlasResolution,orientation:input.orientation??0,
+  physicalDimensionsClaimed:false,wovenOperator:[...R316_WOVEN_OPERATOR],authority:R316_AUTHORITY,
+  capabilities:{fabricationTransform:true,opticalField:true,polarization:true,relationalCandidateIdentity:true,solverRouting:true,solverPromotion:true,experimentResidualLedger:true,immutableSpectralObservation:true,sourceAcquisitionReceipts:true,hardwareTopologyScoring:true},
+  hardware,truthBoundary:R316_TRUTH_BOUNDARY
+ };
+}
