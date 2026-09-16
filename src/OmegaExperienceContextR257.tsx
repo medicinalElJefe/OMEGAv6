@@ -3,6 +3,7 @@ import {createContext,useCallback,useContext,useEffect,useMemo,useState,type Rea
 export type OmegaExperienceIdR257='EXPLORE'|'OPERATE'|'VISUALIZE'|'ANALYZE'|'BUILD'|'PROVE';
 export type OmegaExperienceDepthR257='FOCUS'|'ADVANCED'|'FULL';
 export type OmegaExperienceStateR257={experience:OmegaExperienceIdR257;depth:OmegaExperienceDepthR257;immersive:boolean};
+type OmegaPersistedExperienceR318=Pick<OmegaExperienceStateR257,'experience'|'depth'>;
 
 type Value=OmegaExperienceStateR257&{
  setExperience:(v:OmegaExperienceIdR257)=>void;
@@ -15,10 +16,13 @@ const KEY='omega:r257:experience';
 const EXPERIENCES=new Set<OmegaExperienceIdR257>(['EXPLORE','OPERATE','VISUALIZE','ANALYZE','BUILD','PROVE']);
 const DEPTHS=new Set<OmegaExperienceDepthR257>(['FOCUS','ADVANCED','FULL']);
 const DEFAULT:OmegaExperienceStateR257={experience:'EXPLORE',depth:'FOCUS',immersive:false};
-const normalize=(raw:Partial<OmegaExperienceStateR257>|null|undefined):OmegaExperienceStateR257=>({
+/* R318: immersive presentation is deliberately session-only. It changes viewport/chrome ownership,
+   so restoring it from localStorage can resurrect an overlay-style state after reload. Only the
+   non-occluding experience/depth preferences are durable. */
+const normalize=(raw:Partial<OmegaPersistedExperienceR318>|null|undefined):OmegaExperienceStateR257=>({
  experience:EXPERIENCES.has(raw?.experience as OmegaExperienceIdR257)?raw!.experience as OmegaExperienceIdR257:DEFAULT.experience,
  depth:DEPTHS.has(raw?.depth as OmegaExperienceDepthR257)?raw!.depth as OmegaExperienceDepthR257:DEFAULT.depth,
- immersive:raw?.immersive===true
+ immersive:false
 });
 const same=(a:OmegaExperienceStateR257,b:OmegaExperienceStateR257)=>a.experience===b.experience&&a.depth===b.depth&&a.immersive===b.immersive;
 const read=():OmegaExperienceStateR257=>{
@@ -27,7 +31,8 @@ const read=():OmegaExperienceStateR257=>{
 };
 const write=(state:OmegaExperienceStateR257)=>{
  if(typeof window==='undefined')return;
- try{window.localStorage.setItem(KEY,JSON.stringify(state))}catch{}
+ const persisted:OmegaPersistedExperienceR318={experience:state.experience,depth:state.depth};
+ try{window.localStorage.setItem(KEY,JSON.stringify(persisted))}catch{}
 };
 const Ctx=createContext<Value|null>(null);
 
