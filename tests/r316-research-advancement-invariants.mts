@@ -7,6 +7,10 @@ import {
  makeExecutionEnvironmentR316,authorizeObservedInstructionR316,ciTrustRiskR316,buildExperimentEpisodeR316,
  buildScenePacketR316,buildSpectralObservationR316,buildAcquisitionReceiptR316,scoreHardwareTargetR316,compileResearchAdvancementR316
 } from '../src/system/researchAdvancementR316.ts';
+import {
+ R316_EXTENSION_SCHEMA,makeAgentAdapterR316,makeFederationNodeR316,routeFederatedTaskR316,makeSolverSkillR316,
+ makeInterventionRecordR316,applyTileTransformR316,defineFormalInvariantR316,compileResearchExtensionsR316
+} from '../src/system/researchExtensionsR316.ts';
 
 assert.equal(R316_SCHEMA,'OMEGA_RESEARCH_ADVANCEMENT_R316');
 assert.equal(R316_REVISION,'R316');
@@ -80,7 +84,6 @@ const scene=buildScenePacketR316({packetId:'scene-1',observationHash:'obs-hash',
 assert.equal(scene.canonicalObservationImmutable,true);
 assert.equal(scene.renderIsCanonical,false);
 assert.match(scene.packetHash,/^r316-/);
-
 const spectral=buildSpectralObservationR316({packetId:'obs-1',atlasResolution:1728,address:'12/4/3',capturedAt:'2026-09-15T00:00:00Z',instrument:'TEST-SPECTROMETER',sourceUri:'urn:omega:test',calibrationId:'cal-1',uncertainty:.02,bands:[{wavelengthNm:680,value:.44,unit:'radiance'}],frame:'WGS84'});
 assert.equal(spectral.derived,false);
 assert.deepEqual(spectral.renderProducts,[]);
@@ -96,6 +99,31 @@ const eligible=scoreHardwareTargetR316({id:'local',latencyMs:5,energyJ:2,cost:0,
 assert.equal(eligible.eligible,true);
 assert.ok(Number.isFinite(eligible.score));
 
+assert.equal(R316_EXTENSION_SCHEMA,'OMEGA_RESEARCH_EXTENSIONS_R316');
+const adapter=makeAgentAdapterR316({adapterId:'adapter-1',agentIdentity:'agent-A',provider:'provider-A',protocol:'MCP',capabilities:['RESEARCH','RCWA'],permissionCeiling:['READ'],executionEnvironment:'LOCAL_PC',receiptSupport:true});
+assert.equal(adapter.providerOwnsCanon,false);
+assert.equal(adapter.providerOwnsDispatch,false);
+assert.match(adapter.adapterHash,/^r316-/);
+const pc=makeFederationNodeR316({nodeId:'pc',kind:'PC',capabilities:['RCWA'],latencyMs:5,queueDepth:1,authorityScope:['READ'],heartbeatAt:'2026-09-15T12:00:00Z',proofState:'VERIFIED',available:true});
+const cloud=makeFederationNodeR316({nodeId:'cloud',kind:'CLOUD',capabilities:['RCWA'],latencyMs:30,queueDepth:0,authorityScope:['READ'],heartbeatAt:'2026-09-15T12:00:00Z',proofState:'VERIFIED',available:true});
+assert.equal(routeFederatedTaskR316([cloud,pc],{requiredCapabilities:['RCWA'],requiredAuthority:['READ']}).selected?.nodeId,'pc');
+assert.equal(pc.logicalFederationNotHardwareFusion,true);
+const skill=makeSolverSkillR316({skillId:'skill-1',geometryFamily:'periodic-post',wavelengthDomainNm:[450,900],parameterSchema:['pitch','height'],solverBackend:'grcwa',solverVersion:'0.1.2',meshPolicy:'harmonic-sweep',convergencePolicy:'energy+phase',knownFailureModes:['high-coupling'],validationDistribution:'held-out geometry families',evidenceReceipts:['receipt-1'],revision:1});
+assert.equal(skill.modelMemoryIsNotEvidence,true);
+assert.match(skill.skillHash,/^r316-/);
+const intervention=makeInterventionRecordR316({failureId:'failure-1',hypothesis:'cache key collision',intervention:'salt key with revision',preStateHash:'a',postStateHash:'b',metricBefore:.2,metricAfter:.9,repeatCount:5,successfulRepeats:5});
+assert.equal(intervention.diagnosisPromoted,true);
+assert.equal(intervention.causalCandidate,true);
+const tile=applyTileTransformR316({tileId:'tile-1',localXNm:100,localYNm:0,rotationDeg:90,globalOriginXNm:1000,globalOriginYNm:2000,overlayErrorXNm:5});
+assert.ok(Math.abs(tile.globalXNm-1005)<1e-9);
+assert.ok(Math.abs(tile.globalYNm-2100)<1e-9);
+assert.equal(tile.fabricationMeasurementClaimed,false);
+const invariant=defineFormalInvariantR316({id:'inv-1',subject:'Hybrid receipt',condition:'returned hash equals expected task hash',failureDisposition:'HOLD',authorityOwner:'R141'});
+assert.equal(invariant.descriptiveOnlyUntilExecutableProof,true);
+const extensions=compileResearchExtensionsR316();
+assert.equal(Object.values(extensions.capabilities).filter(Boolean).length,6);
+assert.match(extensions.truthBoundary,/do not claim/i);
+
 const compiled=compileResearchAdvancementR316({atlasResolution:20736,orientation:1,hardwareTargets:[{id:'local',latencyMs:5,energyJ:2,cost:0,bandwidthGbps:40,risk:.05,available:true,capabilities:['RCWA']}],requiredCapabilities:['RCWA']});
 assert.equal(compiled.schema,R316_SCHEMA);
 assert.equal(compiled.physicalDimensionsClaimed,false);
@@ -105,4 +133,4 @@ assert.equal(Object.values(compiled.capabilities).filter(Boolean).length,17);
 assert.equal(compiled.authority.dispatch,'R147');
 assert.equal(compiled.authority.canonAdmission,'R125');
 
-console.log('R316 research advancement invariants PASS · agent authority leases, typed receipts, mission state, execution skins, visual trust boundary, CI trust graph, fabrication-aware optics, polarization/field state, rigorous solver gates, experiment residuals, immutable scenes/spectra, provenance and hardware topology · no empirical or Canon overclaim');
+console.log('R316 research advancement invariants PASS · agent authority leases, provider-neutral adapters, logical federation, typed receipts, mission state, execution skins, visual trust boundary, CI trust graph, solver skills, intervention repair, fabrication/tile transforms, polarization/field state, rigorous solver gates, experiment residuals, immutable scenes/spectra, provenance and hardware topology · no empirical or Canon overclaim');
