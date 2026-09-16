@@ -46,7 +46,14 @@
     "selfBuilderMayDeployDirectly": false,
     "selfBuilderMayDispatchItself": false,
     "exactMergedShaProductionSuccessRequired": true,
-    "redProductionResult": "SOURCE_PROMOTED_NOT_PRODUCTION_PROVEN__STOP_FUTURE_AUTONOMOUS_GENERATIONS_AND_REQUIRE_FORWARD_REPAIR"
+    "lastKnownGoodRemainsServingDuringCandidateProof": true,
+    "candidateVersionUploadedWithoutTraffic": true,
+    "candidateAttachedAtZeroPercentBeforeProof": true,
+    "versionOverrideSemanticProofRequiredBeforePromotion": true,
+    "versionOverrideBrowserProofRequiredBeforePromotion": true,
+    "atomicHundredPercentPromotionAfterProof": true,
+    "automaticRollbackOnPostPromotionFailure": true,
+    "redProductionResult": "SOURCE_PROMOTED_NOT_PRODUCTION_PROVEN__ROLL_BACK_TO_LAST_KNOWN_GOOD_AND_REQUIRE_FORWARD_REPAIR"
   },
   "authority": {
     "sourcePlanning": "R240 scheduling-only over R170 roadmap",
@@ -58,6 +65,6 @@
     "canonStateAdmission": "R125",
     "canonAdmissionClaimed": false
   },
-  "truthLaw": "generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
-  "truthBoundary": "R240 automates only evidence-bound planning, bounded R170 source candidate generation, exact source promotion, and handoff to the same canonical ci.yml deployment/proof authority. It cannot promote arbitrary PRs, cannot bypass current-production/residual/expected-head/diff/proof gates, cannot create a second production writer, cannot infer a user-value deficit, cannot call a red deployment successful, and cannot admit CanonState. R239 remains the distinct selected-host Hybrid resource governor."
+  "truthLaw": "generated != proved != source-promoted != staged-live-proved != deployed != live-verified != Canon-admitted",
+  "truthBoundary": "R240 automates only evidence-bound planning, bounded R170 source candidate generation, exact source promotion, and handoff to the same canonical ci.yml deployment/proof authority. The last known-good Worker remains at 100% traffic while a new Cloudflare Worker version is uploaded, attached at 0%, and proved through version override plus browser/runtime semantics. Only an exact proved candidate may move to 100%, and any post-promotion live-proof failure must roll traffic back to the captured last-known-good version. R240 cannot promote arbitrary PRs, cannot bypass current-production/residual/expected-head/diff/proof gates, cannot create a second production writer, cannot infer a user-value deficit, cannot call a red deployment successful, and cannot admit CanonState. R239 remains the distinct selected-host Hybrid resource governor."
 }
