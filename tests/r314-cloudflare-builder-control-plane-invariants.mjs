@@ -44,6 +44,7 @@ assert.ok(!source.includes('wrangler deploy'), 'runtime builder must not self-de
 
 assert.ok(workflow.includes('workflow_run:'), 'builder deployment must follow canonical CI rather than replace it');
 assert.ok(workflow.includes('OMEGA Cloud Bridge CI'), 'builder deployment must be downstream of canonical CI');
+assert.ok(workflow.includes('github.event.pull_request.head.sha'), 'PR verification must checkout the exact candidate head');
 assert.ok(workflow.includes('npx wrangler deploy --config wrangler.builder.jsonc --dry-run'), 'builder must dry-run before deploy');
 assert.ok(workflow.includes('npx wrangler deploy --config wrangler.builder.jsonc'), 'builder deployment step missing');
 assert.ok(workflow.includes('https://omega-v6-builder.jeffdeweyeljefe.workers.dev'), 'builder canonical URL missing');
