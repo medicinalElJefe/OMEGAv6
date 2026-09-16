@@ -39,3 +39,23 @@ Additional mandatory rules:
 - Keep the previous accepted implementation recoverable as donor/optional lineage until verified supersession.
 - Previously accepted behavior remains a requirement across chats/sessions unless explicitly superseded by the user.
 - No-regression-by-omission applies across State + Intelligence + Memory + Relation + Computation + Action + Observation + Proof.
+
+## R316 Cloudflare Builder continuity authority
+
+`omega-v6-builder` is part of the accumulated OMEGAv6 architecture as an auxiliary Cloudflare control plane. Future automated cycles and cross-chat continuation must recover `R316_CLOUDFLARE_BUILDER_CONTROL_PLANE.md`, `wrangler.builder.jsonc`, `workers/builder/index.js`, and the latest Builder status/receipt when that Worker is live.
+
+R316 is distinct from the established R314 numerical-compute and R315 Woven state-evolution lineage. Do not reuse or reinterpret those revision identities.
+
+The Builder is evidence infrastructure, not release authority. Its only canonical role is `OBSERVE -> CORRELATE -> LEDGER -> ADVISE`. It may correlate exact GitHub `main`, `ci.yml` proof, open governed self-build candidates, canonical public core-health, and the direct Cloudflare service binding, then issue `STAY`, `TURN`, or `ESCALATE` guidance. It may not mutate GitHub source, merge a PR, admit Canon state, or deploy the canonical `omegav6` Worker.
+
+Preserve these boundaries in every future upgrade:
+- R125 remains sole CanonState admission authority.
+- R147 remains dispatch/executor-selection authority.
+- R146 remains durable execution-history authority.
+- R141 remains exact Hybrid return-proof authority.
+- R170/R240 remain governed source-self-build and exact-source-promotion authority.
+- R314 remains numerical-compute authority and R315 remains Woven state-evolution authority.
+- `ci.yml` remains the canonical OMEGAv6 production deployment writer and is also the only GitHub workflow permitted to deploy the auxiliary Builder.
+- `omega-v6-builder` uses a SQLite-backed Durable Object receipt ledger and an hourly Cloudflare Workflow as an additional observation/correlation layer only; no new GitHub Actions workflow authority is created.
+
+Builder availability is additive. If its endpoint is degraded or unavailable, classify the Builder itself as degraded and continue using first-hand GitHub/Cloudflare/Hybrid/source evidence; never weaken or bypass an existing proof gate merely because the auxiliary Builder is unavailable.
