@@ -45,10 +45,20 @@ export function applyFabricationTransformR316(ideal:R316GeometryRecord,process:R
  return{geometry,process:{...process},processScar};
 }
 
+export type R316FabricationToleranceSummary={count:number;mean:number;min:number;max:number;values:number[]};
+export function evaluateFabricationToleranceR316(ideal:R316GeometryRecord,processes:R316FabricationProcess[],evaluate:(fabricated:R316FabricatedGeometry)=>number):R316FabricationToleranceSummary{
+ if(!processes.length)throw new Error('R316 fabrication tolerance evaluation requires at least one process sample');
+ const values=processes.map(process=>evaluate(applyFabricationTransformR316(ideal,process)));
+ if(values.some(value=>!finite(value)))throw new Error('R316 fabrication tolerance evaluator must return finite values');
+ return{count:values.length,mean:values.reduce((sum,value)=>sum+value,0)/values.length,min:Math.min(...values),max:Math.max(...values),values};
+}
+
 export type R316Direction={thetaRad:number;phiRad:number};
 export type R316StokesState={kind:'STOKES';s0:number;s1:number;s2:number;s3:number};
 export type R316JonesState={kind:'JONES';exRe:number;exIm:number;eyRe:number;eyIm:number};
 export type R316PolarizationState=R316StokesState|R316JonesState;
+export type R316MuellerRow=readonly[number,number,number,number];
+export type R316MuellerMatrix=readonly[R316MuellerRow,R316MuellerRow,R316MuellerRow,R316MuellerRow];
 export type R316OpticalFieldSample={
  x:number;y:number;wavelengthNm:number;intensity:number;phaseRad:number;
  direction:R316Direction;polarization:R316PolarizationState;time:string;frameId:string;
@@ -64,6 +74,14 @@ export function validateOpticalFieldSampleR316(sample:R316OpticalFieldSample){
   return Math.sqrt(s1*s1+s2*s2+s3*s3)<=s0+1e-9;
  }
  return [sample.polarization.exRe,sample.polarization.exIm,sample.polarization.eyRe,sample.polarization.eyIm].every(value=>finite(value));
+}
+
+export function applyMuellerR316(state:R316StokesState,matrix:R316MuellerMatrix):R316StokesState{
+ const vector=[state.s0,state.s1,state.s2,state.s3] as const;
+ const out=matrix.map(row=>row.reduce((sum,value,index)=>sum+value*vector[index],0));
+ const transformed:R316StokesState={kind:'STOKES',s0:out[0],s1:out[1],s2:out[2],s3:out[3]};
+ if(!validateOpticalFieldSampleR316({x:0,y:0,wavelengthNm:1,intensity:Math.max(0,transformed.s0),phaseRad:0,direction:{thetaRad:0,phiRad:0},polarization:transformed,time:'1970-01-01T00:00:00.000Z',frameId:'MUELLER_CHECK'}))throw new Error('R316 Mueller transform produced a non-physical Stokes state');
+ return transformed;
 }
 
 export type R316RelationalGeometry={dxNm:number;dyNm:number;dzNm:number;thetaDeg:number;sigma:-1|0|1;phaseRad:number};
@@ -131,17 +149,24 @@ export function scheduleHardwareR316(nodes:R316HardwareNode[],requiredCapability
   .sort((a,b)=>a.score-b.score||a.node.nodeId.localeCompare(b.node.nodeId))[0];
 }
 
-export type R316ResearchDelta={id:string;title:string;buildStage:string;implementation:string;proof:string;state:'INTEGRATED'|'EVIDENCE_GATED'|'DEVICE_GATED'};
+export type R316MediaReconstructionExperiment={
+ experimentId:string;provider:'LUNA'|'OTHER';sourceArtifactHash:string;
+ requestedOutputs:('STEMS'|'MIDI'|'CHORDS'|'LYRICS')[];returnedArtifactHashes:string[];
+ state:'PROVIDER_GATED'|'RETURNED';canonicalAdmission:false;
+};
+
+export type R316ResearchDelta={id:string;title:string;buildStage:string;implementation:string;proof:string;state:'INTEGRATED'|'EVIDENCE_GATED'|'DEVICE_GATED'|'PROVIDER_GATED'};
 export const R316_RESEARCH_DELTAS:readonly R316ResearchDelta[]=[
- {id:'R316-D01',title:'Fabrication-aware optical validation',buildStage:'R314-B14',implementation:'Ideal geometry is transformed through explicit CD/etch/overlay/roughness/sidewall process state before promotion.',proof:'Tolerance sweeps must preserve declared optical merit before physical claims.',state:'INTEGRATED'},
- {id:'R316-D02',title:'Directional spectral optical-field state',buildStage:'R314-B07',implementation:'Field samples bind wavelength, intensity, phase, outgoing direction, frame and Jones/Stokes polarization.',proof:'Conventional raster/polarizer cases must be recoverable as constrained subsets.',state:'INTEGRATED'},
+ {id:'R316-D01',title:'Fabrication-aware optical validation',buildStage:'R314-B14',implementation:'Ideal geometry is transformed through explicit CD/etch/overlay/roughness/sidewall process state and tolerance ensembles before promotion.',proof:'Tolerance sweeps must preserve declared optical merit before physical claims.',state:'INTEGRATED'},
+ {id:'R316-D02',title:'Directional spectral optical-field state',buildStage:'R314-B07',implementation:'Field samples bind wavelength, intensity, phase, outgoing direction, frame and Jones/Stokes state with Mueller transforms.',proof:'Conventional raster/polarizer cases must be recoverable as constrained subsets.',state:'INTEGRATED'},
  {id:'R316-D03',title:'Relational optical candidate identity',buildStage:'R314-B06',implementation:'Candidate identity hashes intrinsic geometry plus relative transform, material and boundary conditions.',proof:'Changing only relation must produce a distinct candidate identity.',state:'INTEGRATED'},
  {id:'R316-D04',title:'Receipt-backed experiment episodes',buildStage:'R314-B08',implementation:'Prediction, measurement, residual, uncertainty and scar carry are stored per experiment episode.',proof:'Known wrong models must accumulate residual instead of silently promoting.',state:'INTEGRATED'},
  {id:'R316-D05',title:'Immutable spectral observation packets',buildStage:'R314-B10',implementation:'Spectral source observations remain calibrated, provenance-bound and explicitly non-derived beneath renders.',proof:'Derived views must be reproducible after deleting render products.',state:'INTEGRATED'},
- {id:'R316-D06',title:'Unified acquisition provenance receipts',buildStage:'R314-B16',implementation:'External acquisition binds URI, requester, purpose, authority, policy and response/artifact hashes.',proof:'Every derived research claim must trace to source evidence without self-admission.',state:'INTEGRATED'},
+ {id:'R316-D06',title:'Unified acquisition provenance receipts',buildStage:'R314-B16',implementation:'External acquisition binds URI, requester, purpose, authority, policy, parent receipt and response/artifact hashes.',proof:'Every derived research claim must trace to source evidence without self-admission.',state:'INTEGRATED'},
  {id:'R316-D07',title:'Hardware/interconnect-aware federation scheduling',buildStage:'R314-B13',implementation:'Scheduler scores authorized nodes by latency, energy, cost, inverse bandwidth and risk with explicit interconnect type.',proof:'Offline or unauthorized nodes must never win dispatch.',state:'INTEGRATED'},
  {id:'R316-D08',title:'Time-varying/nonlinear solver capability flags',buildStage:'R314-B14',implementation:'Solver declarations distinguish static periodic/finite, dispersive, anisotropic, nonlinear and time-varying regimes.',proof:'Static validation cannot satisfy a time-varying material claim.',state:'INTEGRATED'},
  {id:'R316-D09',title:'Physical fabrication and measurement closure',buildStage:'R314-B14',implementation:'Software can represent fabrication/measurement evidence but does not invent it.',proof:'Promotion to empirical truth remains blocked until returned physical evidence exists.',state:'EVIDENCE_GATED'},
+ {id:'R316-D10',title:'Generated-media reconstruction experiment',buildStage:'R314-B14',implementation:'External stem/MIDI/chord/lyric reconstruction is represented as a provider-returned experiment, not assumed capability.',proof:'A real source master and returned reconstruction artifacts are required before quality claims.',state:'PROVIDER_GATED'},
 ] as const;
 
 export function buildResearchAdvancementR316(){
@@ -151,7 +176,7 @@ export function buildResearchAdvancementR316(){
   atlasResolutions:R316_ATLAS_RESOLUTIONS,
   opticalPromotion:R316_OPTICAL_PROMOTION_SEQUENCE,
   deltas:R316_RESEARCH_DELTAS,
-  truthBoundary:'R316 integrates software schemas, transforms, routing inputs and proof obligations derived from current research. It does not assert fabrication, FDTD, measurement, hardware, scientific or CanonState evidence that has not actually been returned.',
+  truthBoundary:'R316 integrates software schemas, transforms, routing inputs and proof obligations derived from current research. It does not assert fabrication, FDTD, measurement, hardware, external-provider, scientific or CanonState evidence that has not actually been returned.',
   wovenContinuity:['PARTITION','EXCHANGE_TRANSFORM','INVARIANT_CARRY','SCAR_HISTORY_CARRY','RE_CONTEXTUALIZE_REPARTITION'] as const,
  };
 }
