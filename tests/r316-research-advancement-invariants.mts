@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import './r317-research-continuity-invariants.mts';
 import {
  R316_ATLAS_RESOLUTIONS,
  R316_OPTICAL_PROMOTION_SEQUENCE,
@@ -81,4 +82,4 @@ assert.match(advancement.truthBoundary,/does not assert fabrication/i);
 assert.match(advancement.truthBoundary,/external-provider/i);
 assert.deepEqual(advancement.wovenContinuity,['PARTITION','EXCHANGE_TRANSFORM','INVARIANT_CARRY','SCAR_HISTORY_CARRY','RE_CONTEXTUALIZE_REPARTITION']);
 
-console.log('R316 RESEARCH ADVANCEMENT PASS · fabrication ensemble · Mueller/Jones/Stokes field state · relation identity · experiment residuals · spectral truth · acquisition receipts · hardware scheduler · provider/evidence gates');
+console.log('R316 RESEARCH ADVANCEMENT PASS · fabrication ensemble · Mueller/Jones/Stokes field state · relation identity · experiment residuals · spectral truth · acquisition receipts · hardware scheduler · provider/evidence gates · R317 accumulated continuity chained');
