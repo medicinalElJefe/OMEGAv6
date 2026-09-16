@@ -10,8 +10,8 @@ export default function OmegaResearchAdvancementR316(){
  const gated=advancement.deltas.length-integrated;
  return <section className='r316-research' aria-label='R316 research advancement integration' data-r316-research={advancement.revision}>
   <header className='r316-head'>
-   <div><span>R316 · RESEARCH → ENGINEERING → PROOF</span><h2>Research Advancement Integration</h2><p>Current research deltas are translated into typed OMEGAv6 contracts without bypassing existing R125/R141/R146/R147 authority or asserting unreturned physical evidence.</p></div>
-   <div className='r316-state'><ShieldCheck/><b>{integrated} INTEGRATED</b><small>{gated} evidence-gated</small></div>
+   <div><span>R316 · RESEARCH → ENGINEERING → PROOF</span><h2>Research Advancement Integration</h2><p>Current research deltas are translated into typed OMEGAv6 contracts without bypassing existing R125/R141/R146/R147 authority or asserting unreturned physical, device, provider, or scientific evidence.</p></div>
+   <div className='r316-state'><ShieldCheck/><b>{integrated} INTEGRATED</b><small>{gated} still externally gated</small></div>
   </header>
   <div className='r316-kpis'>
    <article><Layers3/><span><small>ATLAS ADDRESS RESOLUTION</small><b>{advancement.atlasResolutions.join(' → ')}</b><em>representational only · never literal physical dimensions</em></span></article>
