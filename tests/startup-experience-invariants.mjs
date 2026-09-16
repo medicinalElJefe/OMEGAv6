@@ -31,7 +31,7 @@ if(home.includes('@appdeploy/client')||daily.includes('@appdeploy/client')||shel
 
 if(!experienceContext.includes("const[state,setState]=useState<OmegaExperienceStateR257>(read)"))fail('R259 experience state must be one atomic state object');
 if(experienceContext.includes('setExperienceState')||experienceContext.includes('setDepthState')||experienceContext.includes('setImmersiveState'))fail('R259 may not regress to independently persisted experience state slices');
-for(const token of ['setExperienceProfile','window.localStorage.setItem(KEY,JSON.stringify(state))',"window.addEventListener('storage',sync)","window.removeEventListener('storage',sync)"])if(!experienceContext.includes(token))fail(`R259 durable experience continuity missing ${token}`);
+for(const token of ['setExperienceProfile','window.localStorage.setItem(KEY,JSON.stringify(persisted))',"window.addEventListener('storage',sync)","window.removeEventListener('storage',sync)"])if(!experienceContext.includes(token))fail(`R259 durable experience continuity missing ${token}`);
 if(!experienceShell.includes('setExperienceProfile(id,next.defaultDepth)'))fail('R259 experience selection must atomically bind mode + default depth');
 if(!experienceShell.includes('const resetAll=')||!experienceShell.includes('persistLegacyView(next.workspace,next.lens,next.defaultDepth);reset()'))fail('R259 reset must reconcile R257 and inherited R82/R132 presentation state');
 for(const token of ["aria-label={`Experience mode: ${x.label}`}",'aria-pressed={experience===x.id}',"aria-label={`Experience depth: ${x.label}`}",'aria-pressed={depth===x.id}'])if(!experienceShell.includes(token))fail(`R259 accessible experience state missing ${token}`);
@@ -54,5 +54,7 @@ if(!app.includes("<LivingWorldPulseR174 onNavigate={navigate}/><LivingSceneEvide
 for(const token of ["html[data-omega-nav-present='true'] .r257-shell","html[data-omega-nav-present='true'] .r257-shell :where(.r71-home,.omega-workstation-v2)","html[data-omega-nav-expanded='true'] .r257-shell",".r318-system-diagnostics:not([open])>:not(summary){display:none!important}",".r257-shell[data-r257-depth='FOCUS'] .r318-system-diagnostics{display:none}"])if(!experienceCss.includes(token))fail(`R318 viewport ownership law missing ${token}`);
 if(/\.r257-truth-ribbon\{[^}]*position:sticky/.test(experienceCss)||/\.r257-experience-bar\{[^}]*position:sticky/.test(experienceCss))fail('R318 shell chrome may not become sticky viewport overlays');
 if(/\.r318-system-diagnostics\{[^}]*position:(?:fixed|sticky|absolute)/.test(experienceCss))fail('R318 diagnostics may not create an overlay positioning context');
+for(const token of ["type OmegaPersistedExperienceR318=Pick<OmegaExperienceStateR257,'experience'|'depth'>","immersive:false","const persisted:OmegaPersistedExperienceR318={experience:state.experience,depth:state.depth}"])if(!experienceContext.includes(token))fail(`R318 reload-safe presentation state missing ${token}`);
+if(experienceContext.includes('window.localStorage.setItem(KEY,JSON.stringify(state))'))fail('R318 immersive viewport state may not persist and return after reload');
 
-console.log('startup experience invariants: PASS · 44 routes + source-backed modes + R259 atomic continuity + R260 live Home coherence + R261.1 browser polish + R318 single viewport ownership');
+console.log('startup experience invariants: PASS · 44 routes + source-backed modes + R259 atomic continuity + R260 live Home coherence + R261.1 browser polish + R318 single viewport ownership + reload-safe immersive state');
