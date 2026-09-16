@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const source = fs.readFileSync('workers/builder/index.js', 'utf8');
 const configText = fs.readFileSync('wrangler.builder.jsonc', 'utf8');
 const config = JSON.parse(configText);
-const workflow = fs.readFileSync('.github/workflows/r314-builder-control-plane.yml', 'utf8');
+const ci = fs.readFileSync('.github/workflows/ci.yml', 'utf8');
 const contract = fs.readFileSync('R314_CLOUDFLARE_BUILDER_CONTROL_PLANE.md', 'utf8');
 
 assert.equal(config.name, 'omega-v6-builder');
@@ -42,14 +42,16 @@ assert.ok(!source.includes('api.github.com/repos/${repository}/git/refs'), 'buil
 assert.ok(!source.includes('/merge'), 'builder must not merge source');
 assert.ok(!source.includes('wrangler deploy'), 'runtime builder must not self-deploy');
 
-assert.ok(workflow.includes('workflow_run:'), 'builder deployment must follow canonical CI rather than replace it');
-assert.ok(workflow.includes('OMEGA Cloud Bridge CI'), 'builder deployment must be downstream of canonical CI');
-assert.ok(workflow.includes('github.event.pull_request.head.sha'), 'PR verification must checkout the exact candidate head');
-assert.ok(workflow.includes('npx wrangler deploy --config wrangler.builder.jsonc --dry-run'), 'builder must dry-run before deploy');
-assert.ok(workflow.includes('npx wrangler deploy --config wrangler.builder.jsonc'), 'builder deployment step missing');
-assert.ok(workflow.includes('https://omega-v6-builder.jeffdeweyeljefe.workers.dev'), 'builder canonical URL missing');
-assert.ok(workflow.includes("+'/api/health'"), 'builder live health path verification missing');
-assert.ok(!workflow.includes('npx wrangler deploy --config wrangler.jsonc'), 'builder workflow must never deploy canonical omegav6');
+assert.ok(ci.startsWith('name: OMEGA Cloud Bridge CI'), 'canonical CI identity changed');
+assert.ok(!fs.existsSync('.github/workflows/r314-builder-control-plane.yml'), 'R314 must not create a 25th GitHub workflow authority');
+assert.ok(ci.includes('Prove R314 Builder control plane without new GitHub workflow authority'), 'canonical verify job must prove R314');
+assert.ok(ci.includes('npx wrangler deploy --config wrangler.builder.jsonc --dry-run'), 'Builder must dry-run inside canonical CI');
+assert.ok(ci.includes('Deploy auxiliary R314 Builder Worker'), 'Builder production deployment must remain inside canonical ci.yml');
+assert.ok(ci.includes('npx wrangler deploy --config wrangler.builder.jsonc'), 'Builder deployment command missing');
+assert.ok(ci.includes('https://omega-v6-builder.jeffdeweyeljefe.workers.dev'), 'Builder canonical URL missing');
+assert.ok(ci.includes("+'/api/health'"), 'Builder live health path verification missing');
+assert.ok(ci.includes('R314 Builder first-hand health/authority proof'), 'deployment receipt must record Builder proof');
+assert.ok(ci.includes('one canonical ci.yml writer'), 'canonical deployment-writer boundary missing');
 
 for (const marker of [
   'R125', 'R147', 'R146', 'R141', 'R170/R240', 'ci.yml',
