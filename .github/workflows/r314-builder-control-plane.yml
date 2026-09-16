@@ -1,0 +1,98 @@
+name: R314 Cloudflare Builder Control Plane
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'workers/builder/**'
+      - 'wrangler.builder.jsonc'
+      - 'tests/r314-cloudflare-builder-control-plane-invariants.mjs'
+      - 'R314_CLOUDFLARE_BUILDER_CONTROL_PLANE.md'
+      - 'AUTO_UPDATE_CONTRACT.md'
+      - '.github/workflows/r314-builder-control-plane.yml'
+  workflow_run:
+    workflows: ['OMEGA Cloud Bridge CI']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_BUILDER_URL: https://omega-v6-builder.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-builder:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R314 builder authority boundaries
+        run: node tests/r314-cloudflare-builder-control-plane-invariants.mjs
+      - name: Prove Builder Worker syntax
+        run: node --check workers/builder/index.js
+      - name: Cloudflare Builder dry-run
+        run: npx wrangler deploy --config wrangler.builder.jsonc --dry-run --outdir .wrangler-r314-builder
+
+  deploy-builder:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    needs: verify-builder
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Require Cloudflare deployment authority
+        shell: bash
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error title=AUTH REQUIRED::OMEGA_CLOUDFLARE_TOKEN is unavailable."
+            exit 1
+          fi
+          echo "Cloudflare builder deployment authorization is present."
+      - name: Re-prove R314 exact source before deployment
+        run: |
+          node tests/r314-cloudflare-builder-control-plane-invariants.mjs
+          node --check workers/builder/index.js
+          npx wrangler deploy --config wrangler.builder.jsonc --dry-run --outdir .wrangler-r314-builder-exact
+      - name: Deploy auxiliary Builder Worker only
+        run: npx wrangler deploy --config wrangler.builder.jsonc
+      - name: Verify Builder Worker live health
+        shell: bash
+        run: |
+          node <<'NODE'
+          const url=process.env.OMEGA_BUILDER_URL.replace(/\/$/,'')+'/api/health';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let last='';
+          for(let attempt=1;attempt<=12;attempt++){
+            try{
+              const r=await fetch(url,{headers:{'cache-control':'no-cache'}});
+              const text=await r.text();
+              if(r.ok){
+                const data=JSON.parse(text);
+                if(data.schema!=='OMEGA_CLOUDFLARE_BUILDER_CONTROL_PLANE_V1')throw new Error(`schema ${data.schema}`);
+                if(data.revision!=='R314'||data.state!=='LIVE'||data.ok!==true)throw new Error('R314 live identity mismatch');
+                if(data.authority?.sourceMutationAuthorized!==false||data.authority?.canonAdmissionAuthorized!==false||data.authority?.productionPromotionAuthorized!==false)throw new Error('builder authority boundary regressed');
+                console.log(`R314 BUILDER LIVE PASS · ${url} · attempt ${attempt}`);
+                process.exit(0);
+              }
+              last=`HTTP ${r.status} ${text.slice(0,240)}`;
+            }catch(e){last=e instanceof Error?e.message:String(e)}
+            await sleep(5000);
+          }
+          throw new Error(`R314 builder live verification failed: ${last}`);
+          NODE
