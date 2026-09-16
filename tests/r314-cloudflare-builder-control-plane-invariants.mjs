@@ -46,7 +46,8 @@ assert.ok(workflow.includes('workflow_run:'), 'builder deployment must follow ca
 assert.ok(workflow.includes('OMEGA Cloud Bridge CI'), 'builder deployment must be downstream of canonical CI');
 assert.ok(workflow.includes('npx wrangler deploy --config wrangler.builder.jsonc --dry-run'), 'builder must dry-run before deploy');
 assert.ok(workflow.includes('npx wrangler deploy --config wrangler.builder.jsonc'), 'builder deployment step missing');
-assert.ok(workflow.includes('https://omega-v6-builder.jeffdeweyeljefe.workers.dev/api/health'), 'builder live health verification missing');
+assert.ok(workflow.includes('https://omega-v6-builder.jeffdeweyeljefe.workers.dev'), 'builder canonical URL missing');
+assert.ok(workflow.includes("+'/api/health'"), 'builder live health path verification missing');
 assert.ok(!workflow.includes('npx wrangler deploy --config wrangler.jsonc'), 'builder workflow must never deploy canonical omegav6');
 
 for (const marker of [
