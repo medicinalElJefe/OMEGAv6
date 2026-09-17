@@ -45,7 +45,7 @@ assert.match(staged,/fail-closed: expected exactly one current 100% production W
 assert.match(staged,/restore_previous_on_error/);
 
 for(const token of [
-  'Cloudflare-Workers-Version-Overrides',
+  'cf-workers-version-overrides',
   'OMEGA_WORKER_VERSION_ID',
   'OMEGA_WORKER_NAME',
   'verify_live_operational_source_authority_r202.mjs',
@@ -53,7 +53,7 @@ for(const token of [
   'verify_live_hybrid_host_intelligence_r238.mjs'
 ])assert.ok(verifier.includes(token)||override.includes(token),`staged exact-version semantic proof missing ${token}`);
 assert.match(override,/targetOrigin!==canonicalOrigin/,'version override helper must not leak to non-canonical external providers');
-assert.match(browser,/Cloudflare-Workers-Version-Overrides/);
+assert.match(browser,/cf-workers-version-overrides/);
 assert.match(browser,/extraHTTPHeaders:overrideHeaders/);
 
 for(const token of [
