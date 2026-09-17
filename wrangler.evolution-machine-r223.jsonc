@@ -9,9 +9,13 @@
   "triggers": {
     "crons": ["17 * * * *"]
   },
+  "ai": {
+    "binding": "AI"
+  },
   "vars": {
     "OMEGA_GITHUB_REPO": "medicinalElJefe/OMEGAv6",
-    "OMEGA_PUBLIC_URL": "https://omegav6.jeffdeweyeljefe.workers.dev"
+    "OMEGA_PUBLIC_URL": "https://omegav6.jeffdeweyeljefe.workers.dev",
+    "OMEGA_WORKERS_AI_MODEL": "@cf/google/gemma-4-26b-a4b-it"
   },
   "observability": {
     "enabled": true

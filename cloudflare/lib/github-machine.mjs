@@ -1,5 +1,10 @@
 import {AUTHORITY_BOUNDARIES,MACHINE_ID,decideCycle,reconcileObservedSource} from './evolution-policy.mjs';
 import {capsuleBody} from './generated-capsules.mjs';
+import {buildCloudResidualStateR314} from './r314-residual-adapter.mjs';
+import {selectRepairTargetR314} from './r314-target-registry.mjs';
+import {proposeAiRepairR314} from './r314-ai-repair.mjs';
+import {canAttemptRepairR314,recordRepairAttemptR314} from '../../src/system/autonomousConvergenceR314.js';
+import {R314_AI_REPAIR_MODEL_DEFAULT} from '../../src/system/autonomousRepairPolicyR314.js';
 import {autonomousCandidatePrefixesR245,isAutonomousCandidateBranchR245,validateAutonomousCandidatePolicyR245,R245_CAPSULE_GENERATOR_REVISION,R245_GOVERNED_SELFBUILD_CONTRACT} from '../../src/system/governedSelfBuildContractR245.js';
 
 const API='https://api.github.com';
@@ -7,10 +12,12 @@ function utf8ToBase64(value){const bytes=new TextEncoder().encode(String(value))
 function base64ToUtf8(value){const raw=atob(String(value||'').replace(/\n/g,''));const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes)}
 function headers(token){return{'accept':'application/vnd.github+json','authorization':`Bearer ${token}`,'x-github-api-version':'2022-11-28','user-agent':'omega-cloud-01-evolution-machine'}}
 async function gh(token,path,init={}){const r=await fetch(`${API}${path}`,{...init,headers:{...headers(token),...(init.headers||{})}});const text=await r.text();let body=null;try{body=text?JSON.parse(text):null}catch{body=text}if(!r.ok)throw new Error(`GitHub ${init.method||'GET'} ${path} -> ${r.status}: ${typeof body==='string'?body:JSON.stringify(body)}`);return body}
-async function getRepoFile(token,repo,path,ref){const body=await gh(token,`/repos/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g,'/')}?ref=${encodeURIComponent(ref)}`);return{sha:body.sha,text:base64ToUtf8(body.content),json:JSON.parse(base64ToUtf8(body.content))}}
+async function getRepoTextFile(token,repo,path,ref){const body=await gh(token,`/repos/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g,'/')}?ref=${encodeURIComponent(ref)}`);return{path,sha:body.sha,text:base64ToUtf8(body.content)}}
+async function getRepoFile(token,repo,path,ref){const file=await getRepoTextFile(token,repo,path,ref);return{...file,json:JSON.parse(file.text)}}
 async function repoPathExists(token,repo,path,ref){try{await gh(token,`/repos/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g,'/')}?ref=${encodeURIComponent(ref)}`);return true}catch(error){if(String(error).includes('-> 404:'))return false;throw error}}
 async function putRepoFile(token,repo,path,branch,message,content,sha){const payload={message,content:utf8ToBase64(content),branch};if(sha)payload.sha=sha;return gh(token,`/repos/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g,'/')}`,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})}
 async function liveJson(base,path){const r=await fetch(`${base.replace(/\/$/,'')}${path}?cloud01_cycle=${Date.now()}`,{headers:{'cache-control':'no-cache'}});const text=await r.text();if(!r.ok)throw new Error(`${path} HTTP ${r.status}: ${text.slice(0,300)}`);return JSON.parse(text)}
+const slug=value=>String(value||'repair').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48)||'repair';
 
 async function collectCandidates(token,repo,policy){
   const candidates=[];
@@ -27,6 +34,10 @@ async function reconcileMainState(token,repo,mainSha,state){
   return reconcileObservedSource(state,presentTargets);
 }
 
+function workflowEvidenceForSha(runs,sha){
+  return (runs||[]).filter(run=>run?.head_sha===sha).map(run=>({databaseId:run.id,workflowName:run.name||'OMEGA Cloud Bridge CI',status:run.status,conclusion:run.conclusion,url:run.html_url,headSha:run.head_sha}));
+}
+
 export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtimeBase='https://omegav6.jeffdeweyeljefe.workers.dev'}){
   const main=await gh(token,`/repos/${repo}/branches/main`);const mainSha=main.commit.sha;
   const runs=await gh(token,`/repos/${repo}/actions/workflows/ci.yml/runs?branch=main&event=push&per_page=30`);
@@ -35,16 +46,50 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const state=await reconcileMainState(token,repo,mainSha,stateFile.json);
   const candidatePolicy=validateAutonomousCandidatePolicyR245(state.autonomousCandidatePolicy);
   const candidates=candidatePolicy.valid?await collectCandidates(token,repo,candidatePolicy.policy):[];
+  let accuracyState={};try{accuracyState=(await getRepoFile(token,repo,'public/omega-r125-accuracy-state.json',mainSha)).json}catch{}
   const [coreHealth,releaseEvidence,runtimeAttestation,hybrid]=await Promise.all([liveJson(runtimeBase,'/api/core-health'),liveJson(runtimeBase,'/api/release-evidence'),liveJson(runtimeBase,'/api/runtime-attestation'),liveJson(runtimeBase,'/api/hybrid/status')]);
   const evidence={coreHealth,releaseEvidence,runtimeAttestation,hybrid};
-  const decision=candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
-  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,decision};
+  const residualState=buildCloudResidualStateR314({accuracyState,runtimeEvidence:evidence,workflowEvidence:workflowEvidenceForSha(runs.workflow_runs,mainSha)});
+  const selectedTarget=selectRepairTargetR314(residualState);
+  const repairId=selectedTarget.targetable?`R314-AI:${selectedTarget.residualId}:${selectedTarget.paths.join('|')}`:null;
+  const retry=repairId?canAttemptRepairR314({history:state.r314RepairHistory||[],fingerprint:residualState.vector.fingerprint,repairId}):null;
+  const repairTarget=selectedTarget.targetable&&retry&&!retry.allow?{...selectedTarget,targetable:false,reasons:[...selectedTarget.reasons,'R314_RETRY_BUDGET_EXHAUSTED']}:{...selectedTarget,repairId};
+  const decision=candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence,repairTarget}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
+  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,r314:{residualState,repairTarget,retry},decision};
 }
 
-export async function proposeCycle({token,repo='medicinalElJefe/OMEGAv6',runtimeBase}){
-  const inspection=await inspectCycle({token,repo,runtimeBase});
-  if(inspection.decision.action!=='PROPOSE')return{...inspection,mutation:'NONE'};
+async function ensureNoCompetingCandidate(token,repo,state,mainSha){
+  const recheck=await gh(token,`/repos/${repo}/branches/main`);if(recheck.commit.sha!==mainSha)throw new Error(`main drifted from ${mainSha} to ${recheck.commit.sha}; candidate held, PR refused`);
+  const open=await gh(token,`/repos/${repo}/pulls?state=open&base=main&per_page=100`);const competing=(open||[]).filter(pr=>isAutonomousCandidateBranchR245(pr.head?.ref,state.autonomousCandidatePolicy));if(competing.length)throw new Error(`autonomous candidate appeared before CLOUD-01 PR creation: ${competing.map(pr=>`#${pr.number}:${pr.head?.ref}`).join(',')}`);
+}
+
+async function proposeR314AiCycle({inspection,token,repo,ai,model}){
+  const{mainSha,state,decision,r314}=inspection;const target=decision.repairTarget;
+  if(!target?.targetable)return{...inspection,mutation:'NONE',reason:'R314 repair target is not targetable'};
+  const contextFiles=[];for(const path of target.paths)contextFiles.push(await getRepoTextFile(token,repo,path,mainSha));
+  const stage={id:'CLOUD-01-R314-AI-REPAIR',baseSha:mainSha,residualFingerprint:r314.residualState.vector.fingerprint,repairId:target.repairId,paths:target.paths};
+  const repair=await proposeAiRepairR314({ai,model:model||R314_AI_REPAIR_MODEL_DEFAULT,residual:target.residual,stage,contextFiles});
+  if(!repair.ok)return{...inspection,mutation:'NONE',reason:repair.state,repair:{state:repair.state,reasons:repair.reasons||repair.validation?.reasons||[]}};
+  await ensureNoCompetingCandidate(token,repo,state,mainSha);
+  const generation=Number(state.generation||0)+1;const branch=`cloud/evolution-r314-${slug(target.residualId)}-${r314.residualState.vector.fingerprint.slice(-8)}-${mainSha.slice(0,8)}`;
+  await gh(token,`/repos/${repo}/git/refs`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({ref:`refs/heads/${branch}`,sha:mainSha})});
+  for(const patch of repair.patches)await putRepoFile(token,repo,patch.path,branch,`CLOUD-01 R314 repair ${target.residualId}: ${patch.path}`,patch.content,patch.preimageSha);
+  const receipt={schema:'OMEGA_CLOUDFLARE_R314_AI_REPAIR_RECEIPT',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R314_AI_REPAIR',residualPolicy:state.residualPolicy?.schema||null,candidatePolicy:state.autonomousCandidatePolicy?.schema||null,generation,residualId:target.residualId,residualFingerprint:r314.residualState.vector.fingerprint,repairId:target.repairId,targetPaths:repair.patches.map(p=>p.path),baseSha:mainSha,branch,status:'GENERATED_PENDING_PROOF',canonicalAdmission:false,directProductionMutation:false,model:repair.model,expectedProofs:repair.proposal.expectedProofs,createdAt:new Date().toISOString(),authorityBoundaries:AUTHORITY_BOUNDARIES};
+  const branchState=await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch);
+  const history=recordRepairAttemptR314(state.r314RepairHistory||[],{fingerprint:r314.residualState.vector.fingerprint,repairId:target.repairId,outcome:'PROPOSED',evidenceId:target.residual?.evidenceId||null});
+  const nextState={...state,generation,r314RepairHistory:history,receipts:[...(state.receipts||[]),receipt].slice(-64)};
+  await putRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch,`Bind CLOUD-01 R314 repair receipt g${generation}`,`${JSON.stringify(nextState,null,2)}\n`,branchState.sha);
+  const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R314',revision:'R314.1',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R314_AI_REPAIR',residualPolicy:state.residualPolicy?.schema||null,candidatePolicy:state.autonomousCandidatePolicy?.schema||null,repair:{residualId:target.residualId,residualFingerprint:r314.residualState.vector.fingerprint,repairId:target.repairId,paths:repair.patches.map(p=>p.path),expectedProofs:repair.proposal.expectedProofs},receipt,status:'GENERATED_PENDING_PROOF',canonicalAdmission:false,directProductionMutation:false};
+  let candidateSha=null;try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
+  await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record CLOUD-01 R314 candidate g${generation}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
+  await ensureNoCompetingCandidate(token,repo,state,mainSha);
+  const pr=await gh(token,`/repos/${repo}/pulls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:`R314 CLOUD-01 repair g${generation} — ${target.residualId}`,head:branch,base:'main',draft:false,body:`CLOUD-01 generated a bounded R314 product-source repair from an explicit residual.\n\nExact base: ${mainSha}\nResidual: ${target.residualId}\nResidual fingerprint: ${r314.residualState.vector.fingerprint}\nRepair hypothesis: ${target.repairId}\nPaths: ${repair.patches.map(p=>p.path).join(', ')}\nExpected independent proofs: ${(repair.proposal.expectedProofs||[]).join(', ')}\n\nThe model was supplied only exact-base allowlisted product source. R314 rejected governance/tests/deployment/secrets/Canon/Worker mutation. This PR is source proposal only: R125 Canon admission remains separate and ci.yml remains sole production deployment authority.`})});
+  return{...inspection,mutation:'R314_AI_BRANCH_AND_PR_CREATED',branch,prNumber:pr.number,prUrl:pr.html_url,generation,residualId:target.residualId,residualFingerprint:r314.residualState.vector.fingerprint,changedPaths:repair.patches.map(p=>p.path)};
+}
+
+async function proposeStaticCapsuleCycle({inspection,token,repo}){
   const{mainSha,state,decision}=inspection;const capsule=decision.capsule;const generation=Number(state.generation||0)+1;const branch=`cloud/evolution-g${generation}-${capsule.id.toLowerCase()}-${mainSha.slice(0,10)}`;
+  await ensureNoCompetingCandidate(token,repo,state,mainSha);
   await gh(token,`/repos/${repo}/git/refs`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({ref:`refs/heads/${branch}`,sha:mainSha})});
   await putRepoFile(token,repo,capsule.target,branch,`CLOUD-01 evolution g${generation}: ${capsule.id}`,capsuleBody(capsule.id));
   const branchState=await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch);
@@ -54,13 +99,19 @@ export async function proposeCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R223',revision:'R223',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,candidatePolicy:state.autonomousCandidatePolicy?.schema||null,capsule,receipt,status:'GENERATED_PENDING_PROOF',canonicalAdmission:false};
   let candidateSha=null;try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record CLOUD-01 candidate g${generation}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
-  const recheck=await gh(token,`/repos/${repo}/branches/main`);if(recheck.commit.sha!==mainSha)throw new Error(`main drifted from ${mainSha} to ${recheck.commit.sha}; branch held, PR refused`);
-  const open=await gh(token,`/repos/${repo}/pulls?state=open&base=main&per_page=100`);const competing=(open||[]).filter(pr=>isAutonomousCandidateBranchR245(pr.head?.ref,state.autonomousCandidatePolicy));if(competing.length){throw new Error(`autonomous candidate appeared before CLOUD-01 PR creation: ${competing.map(pr=>`#${pr.number}:${pr.head?.ref}`).join(',')}`)}
+  await ensureNoCompetingCandidate(token,repo,state,mainSha);
   const pr=await gh(token,`/repos/${repo}/pulls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:`R223 CLOUD-01 evolution g${generation} — ${capsule.id}: ${capsule.title}`,head:branch,base:'main',draft:false,body:`Cloudflare CLOUD-01 generated bounded source candidate through the shared R245 governed self-build contract.\n\nExact base: ${mainSha}\nProduction proof run: ${inspection.productionProof?.id||'none'}\nCapsule: ${capsule.id} — ${capsule.objective}\n\nR170 and CLOUD-01 share one R164 residual policy, R240/R243 selection law, capsule generator and one-open-candidate fence. Source proposal only. No Canon admission, PC-online, solver, renderer, empirical or federation-closure claim is synthesized. R125/R147/R146/R141 remain authoritative; R201/R203 tombstones remain retired. ci.yml remains the sole production deployment authority.`})});
   return{...inspection,mutation:'BRANCH_AND_PR_CREATED',branch,prNumber:pr.number,prUrl:pr.html_url,generation,capsuleId:capsule.id};
 }
 
-export async function promoteGreenCloudPr({token,repo='medicinalElJefe/OMEGAv6',prNumber,requiredWorkflows=['OMEGA Cloud Bridge CI','R170 Current Convergence','R202 Operational Source Authority','R210 Release Controller','R223 Cloudflare Evolution Authority']}){
+export async function proposeCycle({token,repo='medicinalElJefe/OMEGAv6',runtimeBase,ai=null,model=R314_AI_REPAIR_MODEL_DEFAULT}){
+  const inspection=await inspectCycle({token,repo,runtimeBase});
+  if(inspection.decision.action!=='PROPOSE')return{...inspection,mutation:'NONE'};
+  if(inspection.decision.strategy==='R314_AI_REPAIR')return proposeR314AiCycle({inspection,token,repo,ai,model});
+  return proposeStaticCapsuleCycle({inspection,token,repo});
+}
+
+export async function promoteGreenCloudPr({token,repo='medicinalElJefe/OMEGAv6',prNumber,requiredWorkflows=['OMEGA Cloud Bridge CI','R170 Current Convergence','R202 Operational Source Authority','R210 Release Controller','R223 Cloudflare Evolution Authority','R241 Archive Convergence Visual Intelligence']}){
   const pr=await gh(token,`/repos/${repo}/pulls/${prNumber}`);if(pr.state!=='open')return{action:'NONE',reason:`PR is ${pr.state}`};if(!String(pr.head?.ref||'').startsWith('cloud/evolution-'))return{action:'NONE',reason:'not a CLOUD-01 evolution PR'};
   const candidate=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',pr.head.ref)).json;const expectedBase=candidate?.receipt?.baseSha||null;const currentMain=(await gh(token,`/repos/${repo}/branches/main`)).commit.sha;
   if(!expectedBase||expectedBase!==currentMain)return{action:'NONE',reason:'main drifted or candidate lacks exact-base receipt; stale candidate must not promote',expectedBase,currentMain};
@@ -71,11 +122,11 @@ export async function promoteGreenCloudPr({token,repo='medicinalElJefe/OMEGAv6',
   return{action:'MERGED_GREEN_EXACT_HEAD',headSha,baseSha:expectedBase,mergeSha:merge.sha,merged:merge.merged===true};
 }
 
-export async function runAutonomousCycle({token,repo='medicinalElJefe/OMEGAv6',runtimeBase}){
+export async function runAutonomousCycle({token,repo='medicinalElJefe/OMEGAv6',runtimeBase,ai=null,model=R314_AI_REPAIR_MODEL_DEFAULT}){
   const main=await gh(token,`/repos/${repo}/branches/main`);const state=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',main.commit.sha)).json;const candidatePolicy=validateAutonomousCandidatePolicyR245(state.autonomousCandidatePolicy);
   if(!candidatePolicy.valid)return{ok:false,state:'BLOCKED',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`};
   const open=await gh(token,`/repos/${repo}/pulls?state=open&base=main&per_page=100`);const autonomous=(open||[]).filter(pr=>isAutonomousCandidateBranchR245(pr.head?.ref,candidatePolicy.policy)).sort((a,b)=>a.number-b.number);
   if(autonomous.length>1)return{ok:false,state:'BLOCKED',reason:'multiple open governed autonomous candidate PRs require review',prs:autonomous.map(x=>x.number),branches:autonomous.map(x=>x.head?.ref)};
   if(autonomous.length===1){const held=autonomous[0];if(String(held.head?.ref||'').startsWith('cloud/evolution-')){const promotion=await promoteGreenCloudPr({token,repo,prNumber:held.number});return{ok:true,state:promotion.action==='MERGED_GREEN_EXACT_HEAD'?'PROMOTED':'HELD_FOR_PROOF',promotion}}return{ok:true,state:'HELD_FOR_R170_CANDIDATE',reason:'shared one-open-autonomous-candidate fence holds CLOUD-01 while the R170 candidate exists',prNumber:held.number,branch:held.head?.ref}}
-  const proposal=await proposeCycle({token,repo,runtimeBase});return{ok:true,state:proposal.mutation==='BRANCH_AND_PR_CREATED'?'PROPOSED':'OBSERVE_ONLY',proposal:{mainSha:proposal.mainSha,mutation:proposal.mutation,decision:proposal.decision,branch:proposal.branch||null,prNumber:proposal.prNumber||null,prUrl:proposal.prUrl||null,capsuleId:proposal.capsuleId||null}}
+  const proposal=await proposeCycle({token,repo,runtimeBase,ai,model});return{ok:true,state:['BRANCH_AND_PR_CREATED','R314_AI_BRANCH_AND_PR_CREATED'].includes(proposal.mutation)?'PROPOSED':'OBSERVE_ONLY',proposal:{mainSha:proposal.mainSha,mutation:proposal.mutation,decision:proposal.decision,branch:proposal.branch||null,prNumber:proposal.prNumber||null,prUrl:proposal.prUrl||null,capsuleId:proposal.capsuleId||null,residualId:proposal.residualId||null,residualFingerprint:proposal.residualFingerprint||null,reason:proposal.reason||null}}
 }

@@ -88,6 +88,9 @@ jobs:
           node tests/r314-expression-compute-invariants.mjs
           node tests/r315-woven-system-traversal-invariants.mjs
 
+      - name: Prove R316 research advancement contracts inside accumulated proof authority
+        run: npx --yes tsx tests/r316-research-advancement-invariants.mts
+
       - name: Run complete application check and production build
         run: npm run check
 
@@ -100,10 +103,11 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Browser proof · R313 panel disclosure contract · fail fast
+        id: panel_disclosure
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-panel-disclosure-ci-wrapper.mjs'
 
       - name: Capture exact R313 panel disclosure failure
-        if: failure()
+        if: failure() && steps.panel_disclosure.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: r313-panel-disclosure-failure
@@ -148,33 +152,50 @@ jobs:
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r286-all-surface-no-dead-controls-ci-wrapper.mjs'
 
       - name: Browser proof · R313 full safe-control interaction contract
-        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-full-control-interaction-browser-e2e.mjs'
+        id: full_control
+        shell: bash
+        run: |
+          set -o pipefail
+          bash scripts/run_r241_browser_proof.sh 'node tests/r313-full-control-interaction-browser-e2e.mjs' 2>&1 | tee r313-full-control-interaction.log
+
+      - name: Capture exact R313 full-control interaction failure
+        if: failure() && steps.full_control.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: r313-full-control-interaction-failure
+          path: r313-full-control-interaction.log
+          if-no-files-found: error
+          retention-days: 3
 
       - name: Prove R240.1 semantic verifier against exact served runtime
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
         run: |
           set -euo pipefail
           for attempt in 1 2 3; do
-            SERVED_SHA="$(node - <<'NODE'
+            SERVED_VERSION="$(node - <<'NODE'
           const base=(process.env.OMEGA_PUBLIC_URL||'').replace(/\/$/,'');
-          const response=await fetch(base+'/omega-build-receipt.json',{headers:{'cache-control':'no-cache'}});
-          if(!response.ok)throw new Error(`build receipt HTTP ${response.status}`);
-          const body=await response.json();
-          const sha=body?.promotion?.promotedMergeSha||body?.source?.sha||'';
-          if(!/^[0-9a-f]{40}$/i.test(sha))throw new Error(`invalid served SHA ${sha||'NONE'}`);
-          process.stdout.write(sha);
+          const response=await fetch(base+`/api/core-health?r241=${Date.now()}`,{headers:{'cache-control':'no-cache'}});
+          const raw=await response.text();
+          let body=null;
+          try{body=JSON.parse(raw)}catch{throw new Error(`core-health was not JSON: ${raw.slice(0,180)}`)}
+          if(!response.ok)throw new Error(`core-health HTTP ${response.status}: ${raw.slice(0,300)}`);
+          if(body?.schema!=='OMEGA_CANONICAL_CORE_HEALTH_R163'||body?.revision!=='R163'||body?.state!=='LIVE'||body?.ok!==true||body?.canonicalRequest!==true)throw new Error(`invalid R163 core-health identity ${body?.schema||'NONE'}/${body?.revision||'NONE'}/${body?.state||'NONE'}`);
+          if(response.headers.get('x-omega-core-health')!=='R163-FIRST-HAND')throw new Error('core-health lost first-hand R163 response identity');
+          const version=String(body?.runtimeVersion?.id||'').trim();
+          if(!version)throw new Error('core-health did not return Cloudflare Worker Version ID');
+          process.stdout.write(version);
           NODE
           )"
-            echo "R241 live semantic proof attempt $attempt targets exact served runtime $SERVED_SHA"
-            if OMEGA_PROMOTED_SHA="$SERVED_SHA" node scripts/verify_live_hybrid_command_authority_r237.mjs; then
+            echo "R241 live semantic proof attempt $attempt pins exact served Cloudflare Worker version $SERVED_VERSION"
+            if OMEGA_EXPECTED_WORKER_VERSION_ID="$SERVED_VERSION" OMEGA_WORKER_VERSION_ID="$SERVED_VERSION" OMEGA_WORKER_NAME=omegav6 node scripts/verify_live_hybrid_command_authority_r237.mjs; then
               exit 0
             fi
             if [ "$attempt" -lt 3 ]; then sleep 2; fi
           done
-          echo 'R241 could not obtain one internally consistent exact served-runtime semantic proof after 3 bounded attempts.' >&2
+          echo 'R241 could not obtain one internally consistent exact Worker-version semantic proof after 3 bounded attempts.' >&2
           exit 1
 
       - name: Summarize authority boundary
@@ -182,15 +203,20 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## R241 accumulated interface-integrity and Woven compute proof'
+            echo '## R241 accumulated interface-integrity, Woven compute and R316 research-advancement proof'
             echo "- Candidate: $GITHUB_SHA"
             echo '- R313 disclosure is fail-fast and diagnostic-transport only: the unchanged strict child acceptance remains authoritative; failure capture does not convert a red gate to green.'
+            echo '- R313 full safe-control output is retained on failure as diagnostic transport only; the unchanged interaction assertions remain authoritative and red still blocks promotion.'
             echo '- R314 numerical evaluation and R315 Woven field/traversal invariants are explicit proof gates, including frame-relative 12^k source/target continuity and recoverable scar/history carry.'
+            echo '- R316 fabrication-transform/tolerance, optical-field polarization, relational identity, experiment residual, spectral observation, acquisition provenance and topology-aware scheduler contracts are proved here without adding a workflow authority.'
+            echo '- R316 physical fabrication, FDTD/measurement results, device availability and external-provider outputs remain evidence/device/provider gated until independently returned.'
+            echo '- R241 manual live semantic proof pins the first-hand R163 Cloudflare Worker Version ID; PR exact-head proof remains source/build/browser only so a stale production runtime cannot deadlock its own governed replacement.'
+            echo '- Governed staged promotion remains stricter: canonical ci.yml keeps last-known-good at 100%, proves the exact 0%-traffic candidate by version override, and promotes only after semantic + browser proof.'
             echo '- Browser acceptance is decomposed into individually named proofs so a failure identifies its actual contract without weakening any assertion.'
             echo '- R281 inherited Bio proof is isolated from the accumulated no-dead-control and R313 contracts; the latter remain explicit blocking gates.'
             echo '- R313 Command Center and Modes geometry diagnostics are observational only and run before the unchanged blocking R286 no-dead-control contract.'
             echo '- R286/R313 retain legacy all-surface coverage plus no-dead-control, disclosure, occlusion, desktop/mobile and safe-interaction contracts.'
             echo '- R125 sole CanonState admission, R141 exact return, R146 durable history, R147 dispatch, R153 mutation and R240 source promotion remain unchanged.'
             echo '- R201/R203 remain retired.'
-            echo '- This workflow is pull-request/manual proof-only; it has no main push trigger and no deployment step; ci.yml remains the canonical production writer.'
+            echo '- This workflow is PR/manual proof-only; it has no main push trigger and no deployment step; ci.yml remains the canonical production writer and live release authority.'
           } >> "$GITHUB_STEP_SUMMARY"
