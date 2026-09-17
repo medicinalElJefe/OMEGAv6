@@ -47,14 +47,15 @@ for(const token of ['min-height:100dvh','env(safe-area-inset-top,0px)',':focus-v
 if(experienceCss.includes('.r257-stage{min-width:0;isolation:isolate}'))fail('R261.1 stage may not trap the persistent navigator in an isolated stacking context');
 if(/\.r257-shell\{[^}]*z-index\s*:/.test(experienceCss))fail('R261.1 shell root may not create a stacking context above the persistent navigator');
 
-/* R318 — one viewport owner. Global diagnostic surfaces remain mounted for event continuity,
-   but they may not sit above/outside the canonical experience shell or return as sticky overlays. */
-if(!app.includes("<OmegaExperienceShellR257 onNavigate={navigate} onHome={()=>setHome(true)} home={home}><details className='r318-system-diagnostics'>"))fail('R318 diagnostics must live inside the canonical experience shell');
-if(!app.includes("<LivingWorldPulseR174 onNavigate={navigate}/><LivingSceneEvidenceBandR2023 onNavigate={navigate}/><MissionWorldContinuityR206 onNavigate={navigate}/><LivingTerrainSurfaceR225/>"))fail('R318 must preserve living-world diagnostic continuity inside the bounded disclosure');
+/* R318/R317.1 — one viewport owner. R257 still owns the experience boundary, but its duplicate
+   chrome is suppressed by an explicit presentation prop; diagnostics and product remain inside it. */
+if(!app.includes("<OmegaExperienceShellR257 chrome={false} onNavigate={navigate} onHome={()=>setHome(true)} home={home}><main className='r317-product-root'"))fail('R317.1 canonical experience shell must wrap the product in headless presentation mode');
+if(!app.includes("<details className='r318-system-diagnostics'><summary>System status</summary><LivingWorldPulseR174 onNavigate={navigate}/><LivingSceneEvidenceBandR2023 onNavigate={navigate}/><MissionWorldContinuityR206 onNavigate={navigate}/><LivingTerrainSurfaceR225/></details>"))fail('R318 diagnostics must live inside the canonical experience shell');
+if(!experienceShell.includes('chrome?:boolean')||!experienceShell.includes('if(!chrome)return <div className=\'r257-shell r257-shell-headless\''))fail('R317.1 headless shell presentation contract missing');
 for(const token of ["html[data-omega-nav-present='true'] .r257-shell","html[data-omega-nav-present='true'] .r257-shell :where(.r71-home,.omega-workstation-v2)","html[data-omega-nav-expanded='true'] .r257-shell",".r318-system-diagnostics:not([open])>:not(summary){display:none!important}",".r257-shell[data-r257-depth='FOCUS'] .r318-system-diagnostics{display:none}"])if(!experienceCss.includes(token))fail(`R318 viewport ownership law missing ${token}`);
 if(/\.r257-truth-ribbon\{[^}]*position:sticky/.test(experienceCss)||/\.r257-experience-bar\{[^}]*position:sticky/.test(experienceCss))fail('R318 shell chrome may not become sticky viewport overlays');
 if(/\.r318-system-diagnostics\{[^}]*position:(?:fixed|sticky|absolute)/.test(experienceCss))fail('R318 diagnostics may not create an overlay positioning context');
 for(const token of ["type OmegaPersistedExperienceR318=Pick<OmegaExperienceStateR257,'experience'|'depth'>","immersive:false","const persisted:OmegaPersistedExperienceR318={experience:state.experience,depth:state.depth}"])if(!experienceContext.includes(token))fail(`R318 reload-safe presentation state missing ${token}`);
 if(experienceContext.includes('window.localStorage.setItem(KEY,JSON.stringify(state))'))fail('R318 immersive viewport state may not persist and return after reload');
 
-console.log('startup experience invariants: PASS · 44 routes + source-backed modes + R259 atomic continuity + R260 live Home coherence + R261.1 browser polish + R318 single viewport ownership + reload-safe immersive state');
+console.log('startup experience invariants: PASS · 44 routes + source-backed modes + R259 atomic continuity + R260 live Home coherence + R261.1 browser polish + R318/R317.1 single viewport ownership + reload-safe immersive state');
