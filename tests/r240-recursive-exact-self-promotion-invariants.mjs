@@ -17,7 +17,7 @@ const calculusUi=fs.readFileSync('src/CalculusAddressFabricR240.tsx','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 
 assert.equal(policy.schema,'OMEGA_RECURSIVE_EXACT_SELF_PROMOTION_R240');
-assert.equal(policy.revision,'R240');
+assert.equal(policy.revision,'R240.1');
 assert.deepEqual(R240_RESOLUTION,{organs:12,branches:144,cells:1728,lanes:20736,deepAddress:248832});
 assert.equal(policy.resolution.physicalDimensionsClaimed,false);
 assert.equal(policy.scheduler.parallelPlanningDoesNotEqualParallelMutation,true);
