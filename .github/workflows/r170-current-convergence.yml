@@ -54,6 +54,8 @@ jobs:
         run: |
           node scripts/verify_workflow_topology_r170.mjs
           node tests/r170-self-build-governor-invariants.mjs
+      - name: Preserve R317 single canonical product composition without a separate workflow authority
+        run: node tests/r317-single-product-composition-invariants.mjs
       - name: Prove current R180 living-world execution chain
         run: |
           node tests/r180-living-world-execution-dispatch-invariants.mjs
@@ -129,5 +131,6 @@ jobs:
           echo 'R197 adaptive backpressure remains execution scheduling authority; R196.2 remains proof projection authority; R198 remains read-only living-world intelligence projection.'
           echo 'R147 remains dispatch authority; R146 remains durable lifecycle and execution-history authority; R141 remains exact-return proof authority; R125 remains sole CanonState admission authority.'
           echo 'R175 world truth → R176 intent → R177 mission → R178 contract → R179 authorization → R180 dispatch → R182/R186 verified-return continuity remains proved.'
+          echo 'R317 single canonical product composition is preserved inside this existing convergence authority; no additional workflow authority is required.'
           echo 'Hybrid/Build native execution, trained weights, factual truth, Earth truth, federation closure, solver validity, deployment and computed-photoreal reality remain separately proof-gated.'
           echo 'R170.3 remains low-cost OBSERVE/PROPOSE control; canonical deployment remains exclusively governed by ci.yml two-parent merge law.'
