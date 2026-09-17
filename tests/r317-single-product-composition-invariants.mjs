@@ -1,14 +1,1 @@
-import assert from 'node:assert/strict';
-import fs from 'node:fs';
-const app=fs.readFileSync('src/App.tsx','utf8');
-const home=fs.readFileSync('src/OmegaHomeR71.tsx','utf8');
-assert.ok(app.includes("data-r317-composition='SINGLE_CANONICAL_NAVIGATOR'"),'R317 composition marker missing');
-assert.ok(!app.includes("import OmegaExperienceShellR257 from './OmegaExperienceShellR257'"),'duplicate R257 visible shell must not be mounted by App');
-assert.ok(!app.includes('<OmegaExperienceShellR257'),'duplicate R257 visible shell still mounted');
-assert.ok(app.includes('<OmegaExperienceProviderR257>'),'R257 context/provider continuity must remain');
-assert.ok(app.includes("<details className='r318-system-diagnostics'><summary>System status</summary>"),'system status must remain progressive disclosure');
-assert.ok(home.includes('<OmegaSideNavigatorR88 onNavigate={enter}/>'),'canonical R88 navigator missing');
-assert.ok(home.includes("OMEGA_WORKSPACES_R82.map"),'canonical R82 workspace navigation missing');
-assert.ok(home.includes("aria-label='OMEGA workspaces'"),'workspace navigation semantics missing');
-assert.ok(home.includes("openApplications"),'all accumulated applications must remain reachable');
-console.log('R317 single product composition invariants: PASS');
+import assert from 'node:assert/strict';import fs from 'node:fs';const app=fs.readFileSync('src/App.tsx','utf8');const shell=fs.readFileSync('src/OmegaExperienceShellR257.tsx','utf8');const home=fs.readFileSync('src/OmegaHomeR71.tsx','utf8');assert.ok(app.includes("data-r317-composition='SINGLE_CANONICAL_NAVIGATOR'"));assert.ok(app.includes("<OmegaExperienceShellR257 chrome={false}"),'R257 authority shell must wrap product in headless mode');assert.ok(shell.includes("if(!chrome)return")&&shell.includes("data-r257-presentation='HEADLESS_CANONICAL_NAV'"),'headless R257 mode missing');assert.ok(app.includes('<OmegaExperienceProviderR257>'));assert.ok(app.includes("<details className='r318-system-diagnostics'><summary>System status</summary>"));assert.ok(home.includes('<OmegaSideNavigatorR88 onNavigate={enter}/>'));assert.ok(home.includes("OMEGA_WORKSPACES_R82.map"));assert.ok(home.includes("aria-label='OMEGA workspaces'"));assert.ok(home.includes('openApplications'));console.log('R317.1 single visible navigator + retained R257 shell authority: PASS');
