@@ -47,10 +47,9 @@ try{
   }
   await page.keyboard.press('Escape');
   await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='false',{timeout:10000});
-  await page.waitForTimeout(220);
 
   const summary=diagnostics.locator(':scope > summary');
-  if(!await summary.isVisible())fail(name,'system status summary must remain directly reachable');
+  try{await summary.waitFor({state:'visible',timeout:5000})}catch{fail(name,'system status summary must remain directly reachable',{summary:await rect(summary).catch(()=>null),diagnostics:await rect(diagnostics).catch(()=>null),navExpanded:await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded)})}
   await summary.click({timeout:10000});await page.waitForTimeout(80);
   if(await diagnostics.getAttribute('open')===null)fail(name,'diagnostics disclosure did not open on explicit request');
   if(['fixed','sticky','absolute'].includes(await diagnostics.evaluate(el=>getComputedStyle(el).position)))fail(name,'opened diagnostics became an overlay');
