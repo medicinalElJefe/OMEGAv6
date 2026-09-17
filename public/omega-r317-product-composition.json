@@ -1,0 +1,11 @@
+{
+  "schema": "OMEGA_PRODUCT_COMPOSITION_R317",
+  "revision": "R317",
+  "authority": "PRODUCT_COMPOSITION_ONLY",
+  "visibleNavigator": "R71_R82_R88",
+  "duplicateOuterChromeMounted": false,
+  "experienceContextRetained": "R257_PROVIDER",
+  "systemStatus": "PROGRESSIVE_DISCLOSURE",
+  "capabilityPolicy": "PRESERVE_ACCUMULATED_ROUTES",
+  "truthBoundary": "NO_NEW_CANON_PROOF_EXECUTION_DEPLOYMENT_AUTHORITY"
+}

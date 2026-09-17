@@ -12,30 +12,35 @@ assert.equal(policy.deployment.soleCanonicalWriter,'.github/workflows/ci.yml');
 for(const key of [
   'lastKnownGoodRemainsServingDuringCandidateProof',
   'candidateVersionUploadedWithoutTraffic',
-  'candidateAttachedAtZeroPercentBeforeProof',
+  'candidateRemainsUndeployedBeforeProof',
+  'mixedVersionTrafficSplitForbidden',
+  'durableObjectExportSetChangeCompatible',
   'versionOverrideSemanticProofRequiredBeforePromotion',
   'versionOverrideBrowserProofRequiredBeforePromotion',
   'atomicHundredPercentPromotionAfterProof',
   'automaticRollbackOnPostPromotionFailure'
-])assert.equal(policy.deployment[key],true,`R240 live continuity policy missing ${key}`);
+])assert.equal(policy.deployment[key],true,`R240.1 live continuity policy missing ${key}`);
 assert.match(policy.truthLaw,/staged-live-proved/);
 assert.match(policy.truthBoundary,/last known-good Worker remains at 100% traffic/);
-assert.match(policy.truthBoundary,/attached at 0%/);
+assert.match(policy.truthBoundary,/uploaded but not deployed/);
+assert.match(policy.truthBoundary,/No mixed-version traffic split/);
+assert.match(policy.truthBoundary,/different Durable Object export sets/);
+assert.match(policy.truthBoundary,/R201\/R203 remain deleted export tombstones/);
 assert.match(policy.truthBoundary,/roll traffic back/);
 
 for(const token of [
   'npx wrangler deployments status',
   'npx wrangler versions upload',
-  'npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%"',
   'node scripts/verify_staged_release.mjs',
   'node tests/r200-current-browser-proof-e2e.mjs',
   'npx wrangler versions deploy "${CANDIDATE_VERSION_ID}@100%"'
 ])assert.ok(staged.includes(token),`staged release membrane missing ${token}`);
-const stageAttach=staged.indexOf('"${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%"');
+assert.ok(!staged.includes('"${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%"'),'candidate proof must not create a mixed-version deployment; Cloudflare rejects gradual traffic when Durable Object export sets differ');
+const upload=staged.indexOf('npx wrangler versions upload');
 const semanticProof=staged.indexOf('node scripts/verify_staged_release.mjs');
 const browserProof=staged.indexOf('node tests/r200-current-browser-proof-e2e.mjs');
 const promote=staged.indexOf('"${CANDIDATE_VERSION_ID}@100%"');
-assert.ok(stageAttach>=0&&semanticProof>stageAttach&&browserProof>semanticProof&&promote>browserProof,'candidate must remain off-traffic until semantic and browser proofs finish');
+assert.ok(upload>=0&&semanticProof>upload&&browserProof>semanticProof&&promote>browserProof,'candidate must remain uploaded/off-traffic until semantic and browser proofs finish');
 assert.match(staged,/fail-closed: expected exactly one current 100% production Worker version/);
 assert.match(staged,/restore_previous_on_error/);
 
@@ -60,4 +65,4 @@ for(const token of [
 assert.ok(!/name: Deploy canonical OMEGA Worker\s+id: deploy_worker\s+run: npx wrangler deploy\b/m.test(ci),'canonical Worker must not replace production before live candidate proof');
 assert.ok(!ci.includes('workflow_run:'),'continuity repair must not create recursive workflow fanout');
 
-console.log('R240 LIVE CONTINUITY PROMOTION PASS · last-known-good stays usable during self-build · exact candidate 0% version-override semantic/browser proof precedes promotion · post-promotion failure rolls back · ci.yml remains sole canonical production writer · R125/R141/R146/R147 unchanged');
+console.log('R240.1 LIVE CONTINUITY PROMOTION PASS · last-known-good stays usable during candidate proof · exact uploaded candidate remains undeployed/off-traffic for version-override semantic/browser proof · no mixed-version Durable Object export split · atomic promotion only after proof · post-promotion failure rolls back · ci.yml remains sole canonical production writer · R125/R141/R146/R147 unchanged · R201/R203 remain retired tombstones');

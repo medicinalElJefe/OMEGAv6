@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const app=fs.readFileSync('src/App.tsx','utf8');
+const home=fs.readFileSync('src/OmegaHomeR71.tsx','utf8');
+assert.ok(app.includes("data-r317-composition='SINGLE_CANONICAL_NAVIGATOR'"),'R317 composition marker missing');
+assert.ok(!app.includes("import OmegaExperienceShellR257 from './OmegaExperienceShellR257'"),'duplicate R257 visible shell must not be mounted by App');
+assert.ok(!app.includes('<OmegaExperienceShellR257'),'duplicate R257 visible shell still mounted');
+assert.ok(app.includes('<OmegaExperienceProviderR257>'),'R257 context/provider continuity must remain');
+assert.ok(app.includes("<details className='r318-system-diagnostics'><summary>System status</summary>"),'system status must remain progressive disclosure');
+assert.ok(home.includes('<OmegaSideNavigatorR88 onNavigate={enter}/>'),'canonical R88 navigator missing');
+assert.ok(home.includes("OMEGA_WORKSPACES_R82.map"),'canonical R82 workspace navigation missing');
+assert.ok(home.includes("aria-label='OMEGA workspaces'"),'workspace navigation semantics missing');
+assert.ok(home.includes("openApplications"),'all accumulated applications must remain reachable');
+console.log('R317 single product composition invariants: PASS');
