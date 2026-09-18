@@ -61,10 +61,15 @@ test -n "$PREVIOUS_VERSION_ID"
 # last-known-good authority.
 BASELINE_USABLE=0
 BASELINE_PROBE_JSON="$TMP_DIR/baseline-usability.json"
-set +e
-node scripts/probe_live_usability_r3199.mjs "$OMEGA_PUBLIC_URL" "$GITHUB_SHA" > "$BASELINE_PROBE_JSON"
-BASELINE_PROBE_RC=$?
-set -e
+# The usability probe intentionally uses non-zero exit states to distinguish
+# a positively identified interlock (42) from an indeterminate surface (3).
+# Run it as an if-condition so Bash's global ERR trap does not misclassify
+# those expected probe states as a release failure before candidate upload.
+if node scripts/probe_live_usability_r3199.mjs "$OMEGA_PUBLIC_URL" "$GITHUB_SHA" > "$BASELINE_PROBE_JSON"; then
+  BASELINE_PROBE_RC=0
+else
+  BASELINE_PROBE_RC=$?
+fi
 cat "$BASELINE_PROBE_JSON" || true
 if [[ "$BASELINE_PROBE_RC" == "0" ]]; then
   BASELINE_USABLE=1
