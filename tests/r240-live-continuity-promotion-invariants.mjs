@@ -9,7 +9,7 @@ const override=fs.readFileSync('scripts/cloudflare-version-override-fetch.mjs','
 const browser=fs.readFileSync('tests/r200-current-browser-proof-e2e.mjs','utf8');
 
 assert.equal(policy.revision,'R240.1');
-assert.equal(policy.deploymentContractRevision,'R321');
+assert.equal(policy.deploymentContractRevision,'R322');
 assert.equal(policy.deployment.soleCanonicalWriter,'.github/workflows/ci.yml');
 for(const key of [
   'candidateVersionUploadedWithoutTraffic',
@@ -31,10 +31,13 @@ for(const key of [
 ])assert.equal(policy.deployment[key],false,`R240/R321 policy must reject obsolete assumption ${key}`);
 
 assert.match(policy.truthLaw,/staged-live-proved/);
-assert.match(policy.truthBoundary,/previous Worker retains 100% ordinary user traffic/i);
+assert.match(policy.truthBoundary,/previous version retains 100% ordinary traffic/i);
 assert.match(policy.truthBoundary,/candidate is admitted .* at 0%/i);
 assert.match(policy.truthBoundary,/no unproved candidate receives ordinary traffic/i);
-assert.match(policy.truthBoundary,/restore the previous Worker only when that previous baseline independently proved usable/i);
+assert.match(policy.truthBoundary,/Cloudflare can reject a percentage split when Durable Object exports differ/i);
+assert.match(policy.truthBoundary,/positively identified.*application-withholding interlock/i);
+assert.match(policy.truthBoundary,/unknown or merely unproved baseline does not qualify/i);
+assert.match(policy.truthBoundary,/known-bad blocking baseline has no rollback authority/i);
 assert.match(policy.truthBoundary,/R201\/R203 remain deleted export tombstones/);
 
 for(const token of [
@@ -56,6 +59,9 @@ assert.match(staged,/STAGED_DEPLOYMENT_READY/);
 assert.match(staged,/previous 100%, candidate 0%/);
 assert.match(staged,/rollback_eligible=\$ROLLBACK_ELIGIBLE/);
 assert.match(staged,/BASELINE_USABLE/);
+assert.match(staged,/FORWARD_RECOVERY_EXPORT_SET/);
+assert.match(staged,/BASELINE_PROBE_RC.*42/);
+assert.match(staged,/identical .*exports|percentage-split deployment.*Durable Object/i);
 
 for(const token of [
   'Cloudflare-Workers-Version-Overrides',
@@ -79,4 +85,4 @@ for(const token of [
 assert.ok(!/name: Deploy canonical OMEGA Worker\s+id: deploy_worker\s+run: npx wrangler deploy\b/m.test(ci),'canonical Worker must not replace production before candidate proof');
 assert.ok(!ci.includes('workflow_run:'),'continuity repair must not create recursive workflow fanout');
 
-console.log('R240.1/R321 LIVE CONTINUITY PROMOTION PASS · candidate is in current deployment at 0% for exact override proof · ordinary traffic remains 100% on previous version · proof precedes 100% promotion · known-bad baselines have no rollback authority · ci.yml remains sole canonical production writer · R125/R141/R146/R147 unchanged · R201/R203 remain retired tombstones');
+console.log('R240.1/R322 LIVE CONTINUITY PROMOTION PASS · normal path remains previous@100/candidate@0 exact override proof · bounded forward-only recovery exists only for positive blocking-baseline proof plus Cloudflare DO export-set split rejection · broken baseline has no rollback authority · ci.yml remains sole canonical production writer · R125/R141/R146/R147 unchanged · R201/R203 remain retired tombstones');

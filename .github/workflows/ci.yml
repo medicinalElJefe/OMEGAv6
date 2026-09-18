@@ -332,11 +332,11 @@ jobs:
         run: node scripts/verify_live_hybrid_command_authority_r237.mjs
       - name: Verify live R238 Hybrid host intelligence
         id: live_r238
-        if: always()
+        if: always() && steps.deploy_worker.outcome == 'success'
         continue-on-error: true
         run: node scripts/verify_live_hybrid_host_intelligence_r238.mjs
       - name: Enforce complete Hybrid live-proof closure
-        if: always()
+        if: always() && steps.deploy_worker.outcome == 'success'
         shell: bash
         run: |
           failed=0
@@ -379,7 +379,8 @@ jobs:
             echo "- Canonical Worker staged proof + promotion: ${{ steps.deploy_worker.outcome }}"
             echo "- Previous Cloudflare Worker version: ${{ steps.deploy_worker.outputs.previous_version_id || 'UNAVAILABLE' }}"
             echo "- Candidate Cloudflare Worker version: ${{ steps.deploy_worker.outputs.candidate_version_id || 'UNAVAILABLE' }}"
-            echo "- Off-traffic staged proof: ${{ steps.deploy_worker.outputs.staged_proof || 'NOT_PROVEN' }}"
+            echo "- Candidate semantic/browser proof: ${{ steps.deploy_worker.outputs.staged_proof || 'NOT_PROVEN' }}"
+            echo "- Release mode: ${{ steps.deploy_worker.outputs.release_mode || 'NOT_REACHED' }}"
             echo "- Previous baseline rollback eligibility: ${{ steps.deploy_worker.outputs.rollback_eligible || 'NOT_PROVEN' }}"
             echo "- Automatic rollback after post-promotion failure: ${{ steps.rollback_worker.outcome || 'not-needed' }}"
             echo "- R258 isolated private SAI doorway deployment: ${{ steps.sai_doorway.outcome }}"
@@ -395,7 +396,7 @@ jobs:
             echo "- R237 authenticated Hybrid command authority live proof: ${{ steps.live_r237.outcome }}"
             echo "- R238 Hybrid host intelligence live proof: ${{ steps.live_r238.outcome }}"
             echo "- R239 resource governance remains source-gated by verify job; live command surface reports a declared R239 tier."
-            echo "- R240/R321 truth boundary: one canonical ci.yml writer; the previous Worker retains 100% ordinary traffic while the candidate is admitted to the current Cloudflare deployment at 0% solely for exact version-override proof; only the proved candidate promotes to 100%; post-promotion rollback is permitted only when the previous baseline independently proved usable; R237/R238 remain independently required."
+            echo "- R240/R322 truth boundary: one canonical ci.yml writer; normal releases use previous@100/candidate@0 exact override proof. If Cloudflare rejects that split specifically for incompatible Durable Object exports and the previous Worker is positively proved to be the application-withholding interlock, R322 permits forward-only candidate@100 export-set recovery followed immediately by the same semantic/browser proof; the broken previous Worker never regains rollback authority. R237/R238 remain independently required after canonical deployment succeeds."
             echo "- R202 archive residual debt remains explicit: AT09 desktop health check PLANNED; AT10 forensic hash ledger PLANNED"
             echo "- Browser proof harness: Playwright 1.63.0 pinned; locked application dependency audit enforced at high severity; current run result is reported by the audit step"
             echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"
