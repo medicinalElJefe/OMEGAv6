@@ -148,9 +148,9 @@ NODE
 else
   SPLIT_RC=$?
   cat "$SPLIT_LOG" || true
-  if [[ "$BASELINE_USABLE" != "1" ]] && grep -Eqi 'identical .*exports|percentage-split deployment.*Durable Object|All versions in a multi-version deployment must declare identical' "$SPLIT_LOG"; then
+  if [[ "$BASELINE_PROBE_RC" == "42" ]] && grep -Eqi 'identical .*exports|percentage-split deployment.*Durable Object|All versions in a multi-version deployment must declare identical' "$SPLIT_LOG"; then
     STAGING_MODE="FORWARD_RECOVERY_EXPORT_SET"
-    echo "::warning title=FORWARD RECOVERY REQUIRED::Cloudflare rejected 100/0 staging because Worker exports differ, and the previous Worker is already usability-unproved/known-bad. Promoting the exact source/build-proved candidate forward to establish the required export set; rollback to the broken baseline remains forbidden."
+    echo "::warning title=FORWARD RECOVERY REQUIRED::Cloudflare rejected 100/0 staging because Worker exports differ, and the previous Worker is positively identified as the application-withholding interlock. Promoting the exact source/build-proved candidate forward to establish the required export set; rollback to the broken baseline remains forbidden."
     npx wrangler versions deploy "${CANDIDATE_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA R322 forward recovery export-set transition $GITHUB_SHA" -y
     FORWARD_READY=0
     for attempt in $(seq 1 12); do
