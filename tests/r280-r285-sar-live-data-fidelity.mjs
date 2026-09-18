@@ -21,13 +21,13 @@ must(catalog.includes("revision:'R309'"),'R309 catalogue revision must be explic
 must(live.includes('Boundary-safe catalogue window')&&live.includes('does not silently query invalid longitude/latitude coordinates'),'boundary narrowing must be visible to operator');
 
 // Returned metadata and asset pointers may drive labels/inspection, but never upgrade unbound arrays into measurements.
-for(const token of ['NATIVE PIXELS UNBOUND','DERIVED FIELDS UNBOUND','RETURNED CATALOGUE PREVIEW','not a decoded SAR measurement raster','No acquisition is fabricated'])must(live.includes(token),'live UI disclosure missing '+token);
+for(const token of ['NATIVE PIXELS','DERIVED FIELDS UNBOUND','RETURNED CATALOGUE PREVIEW','not a decoded SAR measurement raster','No acquisition is fabricated'])must(live.includes(token),'live UI disclosure missing '+token);
 for(const token of ['native data asset pointer','Open exact asset pointer','Probe native asset','ASSET BYTES','PREFIX BOUND'])must(live.includes(token),'R325 asset-binding truth UI missing '+token);
 must(catalog.includes('dataAssetCount:dataAssets.length,assets'),'catalogue must return exact HTTPS asset pointers with explicit data-asset count');
 must(catalog.includes('Asset discovery does not prove product bytes'),'catalogue must preserve asset-pointer versus byte-proof boundary');
 for(const token of ['SAR_ASSET_PROBE_SCHEMA_R325','Range','bytes=0-','nativeByteEvidenceBound','nativeDataBound:false','derivedFieldBound:false','tiffProbe','UNTRUSTED_ASSET_ORIGIN','AUTH_REQUIRED'])must(probe.includes(token),'R325 exact asset probe missing '+token);
 must(worker.includes("import {sarAssetProbeR325} from './sarAssetProbeR325.js'")&&worker.includes("url.pathname==='/api/earth/sar/asset-probe'"),'canonical Earth worker must expose R325 bounded asset probe');
-must(live.includes("missingness:['NATIVE_DATA_UNBOUND','CALIBRATION_UNBOUND']"),'catalog-bound observation must not be mislabeled NO_SOURCE');
+must(live.includes("missingness:nativeBound?['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND']:['NATIVE_DATA_UNBOUND','CALIBRATION_UNBOUND']"),'catalog-bound observation must not be mislabeled NO_SOURCE and decoded native source must retain calibration/derived missingness');
 for(const token of ['NATIVE_DATA_UNBOUND','CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND','PAIR_REQUIRED','PROCESSING_REQUIRED'])must(truth.includes(token),'R325 typed missingness missing '+token);
 for(const token of ['GRD intensity cannot be promoted into phase','Coherence is a pair-derived measurement','Metric deformation is held','Multi-band means different radar wavelength frames','A time stack requires more than one acquisition epoch'])must(plan.includes(token),'R325 per-lens prerequisite law missing '+token);
 must(ui.includes('currentPlan?.next')&&ui.includes('Requires: {currentPlan.requires.join'),'unbound live field must render explicit prerequisite/next-step state');
@@ -48,4 +48,4 @@ for(const token of ['processing.unwrappedPhaseBound===true','processing.topograp
 // R309 expands the evidence workstation without moving canonical runtime authority.
 for(const token of ['.r285-livebar','.r285-querybar','.r285-source-ribbon','.r285-live-layout','.r285-products','.r285-stage','.r285-field-empty','.r285-truth-law','.r309-sar-assets','.r309-sar-boundary','earth-r72-workspace.sar-active'])must(css.includes(token),'visual organ missing '+token);
 must(wrangler.includes('"main": "src/workerR116.js"'),'R309 must not fork canonical Worker entrypoint');
-console.log('R309/R325 SAR LIVE DATA FIDELITY PASS · catalogue ≠ byte prefix ≠ decoded pixels ≠ derived fields · exact Copernicus asset probe · per-lens prerequisite plan · no fabricated measurement fields · R116 authority preserved');
+console.log('R309/R325/R326 SAR LIVE DATA FIDELITY PASS · catalogue ≠ byte prefix ≠ decoded native samples ≠ calibrated/derived fields · exact Copernicus asset probe · per-lens prerequisite plan · no fabricated measurement fields · R116 authority preserved');
