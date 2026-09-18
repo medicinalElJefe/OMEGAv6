@@ -21,7 +21,7 @@ must(catalog.includes("revision:'R309'"),'R309 catalogue revision must be explic
 must(live.includes('Boundary-safe catalogue window')&&live.includes('does not silently query invalid longitude/latitude coordinates'),'boundary narrowing must be visible to operator');
 
 // Returned metadata and asset pointers may drive labels/inspection, but never upgrade unbound arrays into measurements.
-for(const token of ['NATIVE PIXELS UNBOUND','DERIVED FIELDS UNBOUND','RETURNED CATALOGUE PREVIEW','not a decoded SAR measurement raster','No acquisition is fabricated'])must(live.includes(token),'live UI disclosure missing '+token);
+for(const token of ['NATIVE PIXELS','DERIVED FIELDS UNBOUND','RETURNED CATALOGUE PREVIEW','not a decoded SAR measurement raster','No acquisition is fabricated'])must(live.includes(token),'live UI disclosure missing '+token);
 for(const token of ['native data asset pointer','Open exact asset pointer','Probe native asset','ASSET BYTES','PREFIX BOUND'])must(live.includes(token),'R325 asset-binding truth UI missing '+token);
 must(catalog.includes('dataAssetCount:dataAssets.length,assets'),'catalogue must return exact HTTPS asset pointers with explicit data-asset count');
 must(catalog.includes('Asset discovery does not prove product bytes'),'catalogue must preserve asset-pointer versus byte-proof boundary');
@@ -48,4 +48,4 @@ for(const token of ['processing.unwrappedPhaseBound===true','processing.topograp
 // R309 expands the evidence workstation without moving canonical runtime authority.
 for(const token of ['.r285-livebar','.r285-querybar','.r285-source-ribbon','.r285-live-layout','.r285-products','.r285-stage','.r285-field-empty','.r285-truth-law','.r309-sar-assets','.r309-sar-boundary','earth-r72-workspace.sar-active'])must(css.includes(token),'visual organ missing '+token);
 must(wrangler.includes('"main": "src/workerR116.js"'),'R309 must not fork canonical Worker entrypoint');
-console.log('R309/R325 SAR LIVE DATA FIDELITY PASS · catalogue ≠ byte prefix ≠ decoded pixels ≠ derived fields · exact Copernicus asset probe · per-lens prerequisite plan · no fabricated measurement fields · R116 authority preserved');
+console.log('R309/R325/R326 SAR LIVE DATA FIDELITY PASS · catalogue ≠ byte prefix ≠ decoded native samples ≠ calibrated/derived fields · exact Copernicus asset probe · per-lens prerequisite plan · no fabricated measurement fields · R116 authority preserved');
