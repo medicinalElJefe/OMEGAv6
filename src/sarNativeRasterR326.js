@@ -103,7 +103,7 @@ async function georefForIfd(href,ctx,ifd){
  }
  const projected=Number(keyMap[3072]||0),geographic=Number(keyMap[2048]||0),epsg=projected>0&&projected<32767?projected:geographic>0&&geographic<32767?geographic:null;
  let affine=null,method='NONE';
- if(transform.length===16&&transform.every(Number.isFinite)){affine:[number,number,number,number,number,number];affine=[Number(transform[0]),Number(transform[1]),Number(transform[3]),Number(transform[4]),Number(transform[5]),Number(transform[7])];method='MODEL_TRANSFORMATION'}
+ if(transform.length===16&&transform.every(Number.isFinite)){affine=[Number(transform[0]),Number(transform[1]),Number(transform[3]),Number(transform[4]),Number(transform[5]),Number(transform[7])];method='MODEL_TRANSFORMATION'}
  else if(pixelScale.length>=2&&tiepoints.length>=6&&[pixelScale[0],pixelScale[1],tiepoints[0],tiepoints[1],tiepoints[3],tiepoints[4]].every(Number.isFinite)){
   const sx=Number(pixelScale[0]),sy=Number(pixelScale[1]),i=Number(tiepoints[0]),j=Number(tiepoints[1]),x=Number(tiepoints[3]),y=Number(tiepoints[4]);
   affine=[sx,0,x-i*sx,0,-sy,y+j*sy];method='PIXEL_SCALE_TIEPOINT'
