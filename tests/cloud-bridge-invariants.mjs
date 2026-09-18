@@ -17,7 +17,7 @@ assert.match(staged,/node scripts\/verify_staged_release\.mjs/);
 assert.match(staged,/node tests\/r200-current-browser-proof-e2e\.mjs/);
 assert.match(staged,/\$\{CANDIDATE_VERSION_ID\}@100%/);
 const upload=staged.indexOf('npx wrangler versions upload');
-const admit=staged.indexOf('${PREVIOUS_VERSION_ID}@100%');
+const admit=staged.indexOf('${PREVIOUS_VERSION_ID}@100%',upload);
 const semantic=staged.indexOf('node scripts/verify_staged_release.mjs');
 const browser=staged.indexOf('node tests/r200-current-browser-proof-e2e.mjs');
 const promote=staged.indexOf('${CANDIDATE_VERSION_ID}@100%',browser);
