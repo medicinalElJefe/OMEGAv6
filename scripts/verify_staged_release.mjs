@@ -11,7 +11,7 @@ if(!base||!expected||!versionId)throw new Error('staged release proof requires O
 // Cloudflare Workers version overrides use the cf-workers-version-overrides request header.
 // Keep this helper identical to the child-process preload so every staged request is pinned
 // to the exact uploaded candidate while normal production traffic remains on last-known-good.
-const override=versionId;
+const override=`${workerName}="${versionId}"`;
 const headers=(extra={})=>({'cache-control':'no-cache','cf-workers-version-overrides':override,...extra});
 async function parse(response){const raw=await response.text();let body=null;try{body=JSON.parse(raw)}catch{}return{response,raw,body}}
 async function get(path){const row=await parse(await fetch(base+path,{headers:headers()}));if(!row.response.ok)throw new Error(`${path} HTTP ${row.response.status}: ${row.raw.slice(0,500)}`);return row}
