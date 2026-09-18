@@ -23,6 +23,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Install pinned browser proof runtime
+        run: npm install --no-save playwright@1.63.0
       - name: Audit locked application dependency tree
         run: npm audit --audit-level=high
       - name: Prove R163 canonical core-health boundary
