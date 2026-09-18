@@ -192,10 +192,15 @@ NODE
   fi
 fi
 
-OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_staged_release.mjs
-
+# verify_staged_release.mjs invokes R202, which itself executes the R284
+# browser proof.  The Playwright package and Chromium executable therefore
+# must exist before the semantic verifier begins, not only before the later
+# R200 browser proof.
 npm install --no-save playwright@1.63.0
 npx playwright install --with-deps chromium
+
+OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_staged_release.mjs
+
 OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node tests/r200-current-browser-proof-e2e.mjs
 
 if [[ "$STAGING_MODE" == "ZERO_PERCENT_OVERRIDE" ]]; then
