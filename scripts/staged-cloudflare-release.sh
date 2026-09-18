@@ -192,10 +192,14 @@ NODE
   fi
 fi
 
-OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_staged_release.mjs
-
+# R323 proof-runtime order: verify_staged_release invokes R202, which invokes
+# the R237 browser-backed Hybrid command verifier. Chromium must therefore be
+# installed before the semantic verifier, not only before the later R200 pass.
 npm install --no-save playwright@1.63.0
 npx playwright install --with-deps chromium
+
+OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_staged_release.mjs
+
 OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node tests/r200-current-browser-proof-e2e.mjs
 
 if [[ "$STAGING_MODE" == "ZERO_PERCENT_OVERRIDE" ]]; then
