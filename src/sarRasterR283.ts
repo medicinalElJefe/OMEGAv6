@@ -1,7 +1,7 @@
 import{clamp01R280,normalizeDbR280,normalizeLinearR280,normalizePhaseR280,normalizeSignedR280}from'./sarVisualMathR280';
 export interface SarRasterFieldR283{
  width:number;height:number;sourceId:string;native:boolean;
- nativeIntensity?:number[];validMask?:number[];sourceUnits?:string;sampling?:{sourceWidth:number;sourceHeight:number;selectedIfdOffset:number;overview:boolean;method:string;validSamples:number;totalSamples:number};
+ nativeIntensity?:number[];validMask?:number[];sourceUnits?:string;sampling?:{sourceWidth:number;sourceHeight:number;selectedIfdOffset:number;overview:boolean;method:string;validSamples:number;totalSamples:number};georeference?:{bound:boolean;method:string;crs:string|null;epsg:number|null;affine:number[]|null;corners:Array<{x:number;y:number}|null>};
  amplitudeDb?:number[];phaseRad?:number[];coherence?:number[];losDisplacementM?:number[];elevationM?:number[];polarimetricPower?:number[];multiBandRelative?:number[];timeStackRelative?:number[];uncertainty?:number[];quality?:number[];
  ranges?:{nativeIntensity?:[number,number];amplitudeDb?:[number,number];losDisplacementM?:[number,number];elevationM?:[number,number];polarimetricPower?:[number,number];multiBandRelative?:[number,number];timeStackRelative?:[number,number]};
 }
