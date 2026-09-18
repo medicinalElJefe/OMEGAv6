@@ -11,7 +11,7 @@ if(candidateVersion&&canonicalBase){
     try{targetOrigin=new URL(rawUrl,canonicalBase).origin}catch{}
     if(targetOrigin!==canonicalOrigin)return nativeFetch(input,init);
     const headers=new Headers(init?.headers||(typeof input==='object'&&input?.headers?input.headers:undefined));
-    headers.set('cf-workers-version-overrides',`${workerName}="${candidateVersion}"`);
+    headers.set('Cloudflare-Workers-Version-Overrides',`${workerName}="${candidateVersion}"`);
     return nativeFetch(input,{...init,headers});
   };
 }
