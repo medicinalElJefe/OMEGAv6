@@ -30,7 +30,7 @@ must(worker.includes("import {sarAssetProbeR325} from './sarAssetProbeR325.js'")
 must(live.includes("missingness:['NATIVE_DATA_UNBOUND','CALIBRATION_UNBOUND']"),'catalog-bound observation must not be mislabeled NO_SOURCE');
 for(const token of ['NATIVE_DATA_UNBOUND','CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND','PAIR_REQUIRED','PROCESSING_REQUIRED'])must(truth.includes(token),'R325 typed missingness missing '+token);
 for(const token of ['GRD intensity cannot be promoted into phase','Coherence is a pair-derived measurement','Metric deformation is held','Multi-band means different radar wavelength frames','A time stack requires more than one acquisition epoch'])must(plan.includes(token),'R325 per-lens prerequisite law missing '+token);
-must(ui.includes('OMEGA leaves this field empty rather than painting synthetic pixels'),'unbound live field must render explicit missing state');
+must(ui.includes('currentPlan?.next')&&ui.includes('Requires: {currentPlan.requires.join'),'unbound live field must render explicit prerequisite/next-step state');
 must(ui.includes("catalogBound?'CATALOG BOUND · PIXELS UNAVAILABLE'"),'catalog-bound screen state missing');
 must(ui.includes("catalogBound?'CATALOG BOUND · NATIVE FIELD NOT BOUND'"),'catalog-bound legend missing');
 must(ui.includes('data-missing={c.missing')&&ui.includes('allowDemo={allowDemo}'),'canvas missingness must be explicit');
