@@ -1,6 +1,6 @@
 {
   "schema": "OMEGA_RECURSIVE_EXACT_SELF_PROMOTION_R240",
-  "revision": "R240.2/R321",
+  "revision": "R240.1",
   "state": "SOURCE_CANDIDATE_NOT_PRODUCTION_PROOF",
   "inherits": {
     "hybridCorrelation": "R238_WOVEN_HYBRID_CONTINUITY",
@@ -53,7 +53,7 @@
     "selfBuilderMayDeployDirectly": false,
     "selfBuilderMayDispatchItself": false,
     "exactMergedShaProductionSuccessRequired": true,
-    "lastKnownGoodRemainsServingDuringCandidateProof": true,
+    "lastKnownGoodRemainsServingDuringCandidateProof": false,
     "candidateVersionUploadedWithoutTraffic": true,
     "candidateRemainsUndeployedBeforeProof": false,
     "mixedVersionTrafficSplitForbidden": false,
@@ -66,7 +66,8 @@
     "candidateAdmittedToCurrentDeploymentAtZeroPercent": true,
     "unprovedCandidateReceivesOrdinaryTraffic": false,
     "durableObjectLifecycleMutationAllowedInStagedVersionPath": false,
-    "rollbackRequiresProvedUsablePreviousBaseline": true
+    "rollbackRequiresProvedUsablePreviousBaseline": true,
+    "previousVersionRetainsHundredPercentOrdinaryTrafficDuringCandidateProof": true
   },
   "authority": {
     "sourcePlanning": "R240 scheduling-only over R170 roadmap",
@@ -79,5 +80,6 @@
     "canonAdmissionClaimed": false
   },
   "truthLaw": "generated != proved != source-promoted != staged-live-proved != deployed != live-verified != Canon-admitted",
-  "truthBoundary": "R240.2/R321 preserves one canonical ci.yml deployment/proof authority. The previous Worker retains 100% ordinary user traffic while the exact uploaded candidate is admitted to the current Cloudflare deployment at 0% so Cloudflare version overrides can address that candidate. Semantic and desktop/mobile browser proof are pinned to the 0%-traffic candidate; no unproved candidate receives ordinary traffic. Only an exact proved candidate may move to 100%. Durable Object lifecycle/export-set mutations are excluded from this staged-version path and require their own compatible migration boundary. A post-promotion proof failure may restore the previous Worker only when that previous baseline independently proved usable; a known-bad or indeterminate R211/R205/R216 application-withholding baseline has no rollback authority. R201/R203 remain deleted export tombstones and are never restored as executable authorities. R240/R321 cannot promote arbitrary PRs, bypass expected-head/diff/proof gates, create a second production writer, infer a user-value deficit, call a red deployment successful, or admit CanonState. R125 remains CanonState admission authority."
+  "truthBoundary": "R240.2/R321 preserves one canonical ci.yml deployment/proof authority. The previous Worker retains 100% ordinary user traffic while the exact uploaded candidate is admitted to the current Cloudflare deployment at 0% so Cloudflare version overrides can address that candidate. Semantic and desktop/mobile browser proof are pinned to the 0%-traffic candidate; no unproved candidate receives ordinary traffic. Only an exact proved candidate may move to 100%. Durable Object lifecycle/export-set mutations are excluded from this staged-version path and require their own compatible migration boundary. A post-promotion proof failure may restore the previous Worker only when that previous baseline independently proved usable; a known-bad or indeterminate R211/R205/R216 application-withholding baseline has no rollback authority. R201/R203 remain deleted export tombstones and are never restored as executable authorities. R240/R321 cannot promote arbitrary PRs, bypass expected-head/diff/proof gates, create a second production writer, infer a user-value deficit, call a red deployment successful, or admit CanonState. R125 remains CanonState admission authority.",
+  "deploymentContractRevision": "R321"
 }
