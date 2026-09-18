@@ -91,6 +91,26 @@ async function summarizeIfd(href,ctx,ifd){
  const width=Number(await first(href,ctx,ifd,256,0)),height=Number(await first(href,ctx,ifd,257,0));
  return{ifd,width,height,bits:Number(await first(href,ctx,ifd,258,0)),compression:Number(await first(href,ctx,ifd,259,1)),samplesPerPixel:Number(await first(href,ctx,ifd,277,1)),rowsPerStrip:Number(await first(href,ctx,ifd,278,0)),planar:Number(await first(href,ctx,ifd,284,1)),predictor:Number(await first(href,ctx,ifd,317,1)),tileWidth:Number(await first(href,ctx,ifd,322,0)),tileHeight:Number(await first(href,ctx,ifd,323,0)),sampleFormat:Number(await first(href,ctx,ifd,339,1))}
 }
+async function georefForIfd(href,ctx,ifd){
+ const pixelScale=await entryValues(href,ctx,ifd.entries.get(33550),8).catch(()=>[]);
+ const tiepoints=await entryValues(href,ctx,ifd.entries.get(33922),64).catch(()=>[]);
+ const transform=await entryValues(href,ctx,ifd.entries.get(34264),16).catch(()=>[]);
+ const keys=(await entryValues(href,ctx,ifd.entries.get(34735),512).catch(()=>[])).map(Number);
+ const keyMap={};
+ if(keys.length>=4){
+  const n=Number(keys[3]||0);
+  for(let i=0;i<n;i++){const o=4+i*4;if(o+3>=keys.length)break;const keyId=keys[o],location=keys[o+1],count=keys[o+2],value=keys[o+3];if(location===0&&count===1)keyMap[keyId]=value}
+ }
+ const projected=Number(keyMap[3072]||0),geographic=Number(keyMap[2048]||0),epsg=projected>0&&projected<32767?projected:geographic>0&&geographic<32767?geographic:null;
+ let affine=null,method='NONE';
+ if(transform.length===16&&transform.every(Number.isFinite)){affine:[number,number,number,number,number,number];affine=[Number(transform[0]),Number(transform[1]),Number(transform[3]),Number(transform[4]),Number(transform[5]),Number(transform[7])];method='MODEL_TRANSFORMATION'}
+ else if(pixelScale.length>=2&&tiepoints.length>=6&&[pixelScale[0],pixelScale[1],tiepoints[0],tiepoints[1],tiepoints[3],tiepoints[4]].every(Number.isFinite)){
+  const sx=Number(pixelScale[0]),sy=Number(pixelScale[1]),i=Number(tiepoints[0]),j=Number(tiepoints[1]),x=Number(tiepoints[3]),y=Number(tiepoints[4]);
+  affine=[sx,0,x-i*sx,0,-sy,y+j*sy];method='PIXEL_SCALE_TIEPOINT'
+ }
+ const point=(px,py)=>affine?{x:affine[0]*px+affine[1]*py+affine[2],y:affine[3]*px+affine[4]*py+affine[5]}:null;
+ return{bound:!!affine,method,epsg,crs:epsg?`EPSG:${epsg}`:null,modelType:keyMap[1024]||null,rasterType:keyMap[1025]||null,pixelScale:pixelScale.slice(0,3),tiepoint:tiepoints.slice(0,6),affine,point}
+}
 async function collectIfds(href,ctx){
  const queue=[ctx.ifdOffset],seen=new Set(),rows=[];
  while(queue.length&&rows.length<10){
@@ -173,7 +193,7 @@ export async function sarNativeRasterR326(url){
  if(!probe.nativeByteEvidenceBound||!probe.asset?.href)return{ok:false,...base,state:probe.state==='AUTH_REQUIRED'?'AUTH_REQUIRED':'BYTE_EVIDENCE_REQUIRED',probe,truthBoundary:'R326 decodes only an exact asset whose byte/container evidence passed R325. No catalogue pointer or preview can become a native raster.'};
  if(probe.collection!=='sentinel-1-grd')return{ok:false,...base,state:'SLC_COMPLEX_DECODER_REQUIRED',probe,truthBoundary:'R326 native raster ingress is limited to Sentinel-1 GRD intensity containers. SLC complex I/Q requires a separate complex decoder and is not approximated from GRD logic.'};
  try{
-  const href=probe.asset.href,header=await fetchRange(href,0,16),ctx=parseHeader(header),ifds=await collectIfds(href,ctx),meta=chooseIfd(ifds);
+  const href=probe.asset.href,header=await fetchRange(href,0,16),ctx=parseHeader(header),ifds=await collectIfds(href,ctx),meta=chooseIfd(ifds),geo=await georefForIfd(href,ctx,meta.ifd);
   if(meta.planar!==1||meta.samplesPerPixel!==1)return{ok:false,...base,state:'RASTER_LAYOUT_HELD',probe,decoder:{planar:meta.planar,samplesPerPixel:meta.samplesPerPixel},truthBoundary:'R326 currently admits only one-sample chunky GRD rasters. Multi-sample/planar layouts stay held rather than being misdecoded.'};
   if(![8,16,32].includes(meta.bits)||![1,2,3].includes(meta.sampleFormat))return{ok:false,...base,state:'SAMPLE_ENCODING_HELD',probe,decoder:{bits:meta.bits,sampleFormat:meta.sampleFormat},truthBoundary:'Unsupported native sample encoding remains held. OMEGA does not reinterpret bytes under a guessed scalar type.'};
   let{w,h}=outputShape(meta.width,meta.height),plan=planSamples(meta,w,h);
@@ -193,8 +213,9 @@ export async function sarNativeRasterR326(url){
    blockReceipts.push({block,offset,compressedBytes:count,decodedBytes:raw.byteLength})
   }
   const range=finiteRange(values,mask);if(!range.count)throw new Error('NO_FINITE_NATIVE_SAMPLES');
-  const raster={width:w,height:h,sourceId:`${probe.productId}:${probe.assetKey}`,native:true,nativeIntensity:values,validMask:mask,sourceUnits:'NATIVE_DN',ranges:{nativeIntensity:[range.lo,range.hi]},sampling:{sourceWidth:meta.width,sourceHeight:meta.height,selectedIfdOffset:meta.ifd.offset,overview:meta.width!==ifds[0]?.width||meta.height!==ifds[0]?.height,method:'EVEN_GRID_NATIVE_SAMPLE',validSamples:range.count,totalSamples:w*h}};
-  return{ok:true,...base,state:'NATIVE_SAMPLES_BOUND',latencyMs:Date.now()-started,nativeDataBound:true,sourceEvidenceBound:true,calibrationBound:false,amplitudeBound:false,derivedFieldBound:false,raster,decoder:{container:probe.tiff?.container||null,width:meta.width,height:meta.height,bits:meta.bits,sampleFormat:meta.sampleFormat,compression:meta.compression,predictor:meta.predictor,tiled:plan.tiled,tileWidth:meta.tileWidth||null,tileHeight:meta.tileHeight||null,rowsPerStrip:meta.rowsPerStrip||null,ifdCount:ifds.length,selectedIfdOffset:meta.ifd.offset,blocksRead:plan.blocks.size,compressedBytesRead:compressedTotal,blockReceipts},probe:{state:probe.state,prefix:probe.prefix,http:probe.http,asset:probe.asset},truthBoundary:'R326 binds a bounded grid of decoded numerical samples from the exact Sentinel-1 GRD native asset. SOURCE may render those returned native DN samples. Radiometric calibration, sigma0/gamma0 backscatter, complex phase, coherence, deformation, elevation and all other derived fields remain unbound until their own evidence and processing receipts exist.'}
+  const corners=geo.bound?[geo.point(0,0),geo.point(meta.width-1,0),geo.point(meta.width-1,meta.height-1),geo.point(0,meta.height-1)]:[];
+  const raster={width:w,height:h,sourceId:`${probe.productId}:${probe.assetKey}`,native:true,nativeIntensity:values,validMask:mask,sourceUnits:'NATIVE_DN',ranges:{nativeIntensity:[range.lo,range.hi]},sampling:{sourceWidth:meta.width,sourceHeight:meta.height,selectedIfdOffset:meta.ifd.offset,overview:meta.width!==ifds[0]?.width||meta.height!==ifds[0]?.height,method:'EVEN_GRID_NATIVE_SAMPLE',validSamples:range.count,totalSamples:w*h},georeference:{bound:geo.bound,method:geo.method,crs:geo.crs,epsg:geo.epsg,affine:geo.affine,corners}};
+  return{ok:true,...base,state:'NATIVE_SAMPLES_BOUND',latencyMs:Date.now()-started,nativeDataBound:true,sourceEvidenceBound:true,calibrationBound:false,amplitudeBound:false,derivedFieldBound:false,raster,decoder:{container:probe.tiff?.container||null,width:meta.width,height:meta.height,bits:meta.bits,sampleFormat:meta.sampleFormat,compression:meta.compression,predictor:meta.predictor,tiled:plan.tiled,tileWidth:meta.tileWidth||null,tileHeight:meta.tileHeight||null,rowsPerStrip:meta.rowsPerStrip||null,ifdCount:ifds.length,selectedIfdOffset:meta.ifd.offset,blocksRead:plan.blocks.size,compressedBytesRead:compressedTotal,blockReceipts,georeference:{bound:geo.bound,method:geo.method,crs:geo.crs,epsg:geo.epsg}},probe:{state:probe.state,prefix:probe.prefix,http:probe.http,asset:probe.asset},truthBoundary:'R326/R327 binds a bounded grid of decoded numerical samples from the exact Sentinel-1 GRD native asset, including CDSE COG_SAFE ZSTD tiles. SOURCE may render those returned native DN samples. GeoTIFF model transforms are reported only when actually present; absent CRS/geotransform metadata remains unresolved. Radiometric calibration, sigma0/gamma0 backscatter, complex phase, coherence, deformation, elevation and all other derived fields remain unbound until their own evidence and processing receipts exist.'}
  }catch(e){return{ok:false,...base,state:String(e instanceof Error?e.message:e).startsWith('UNSUPPORTED_TIFF_COMPRESSION_')?'COMPRESSION_HELD':'NATIVE_DECODE_HELD',latencyMs:Date.now()-started,error:e instanceof Error?e.message:String(e),probe,truthBoundary:'Native decode failure is explicit. OMEGA retains catalogue/byte evidence and does not fabricate source pixels or derived measurements.'}}
 }
 
