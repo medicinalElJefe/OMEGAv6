@@ -19,7 +19,7 @@ restore_previous_on_error(){
     echo "Staged release failed; restoring verified-usable previous production version $PREVIOUS_VERSION_ID to 100% traffic."
     npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA fail-closed staged release restore after $GITHUB_SHA" -y
   elif [[ -n "$PREVIOUS_VERSION_ID" ]]; then
-    echo "::error title=ROLLBACK REFUSED::Previous version $PREVIOUS_VERSION_ID is the positively identified application-withholding interlock. R319.8 refuses to falsely label/redeploy it as last-known-good; existing traffic is left unchanged while the failed candidate remains off-traffic."
+    echo "::error title=ROLLBACK REFUSED::Previous version $PREVIOUS_VERSION_ID did not prove usable and cannot regain production authority. Cloudflare traffic is left on the current forward state for explicit repair rather than resurrecting the application-withholding baseline."
   fi
   cleanup
   exit "$rc"
@@ -95,17 +95,25 @@ test -n "$CANDIDATE_VERSION_ID"
 test "$CANDIDATE_VERSION_ID" != "$PREVIOUS_VERSION_ID"
 echo "Candidate uploaded without production traffic: $CANDIDATE_VERSION_ID"
 
-# Cloudflare version overrides can target only a version that belongs to the
-# current deployment. Admit the candidate at 0% while keeping all ordinary
-# user traffic on the previous version. The override header below is then the
-# only path that can reach the candidate before proof.
+# Primary R321 path: Cloudflare version overrides can target only a version
+# that belongs to the current deployment. Admit the candidate at 0% while
+# keeping ordinary user traffic on the previous version.
+#
+# R322 forward-recovery path: Cloudflare refuses a percentage-split deployment
+# when Durable Object exports differ. If and only if the previous surface has
+# already failed usability proof, preserving that broken Worker is not a valid
+# continuity outcome. In that exact case the source/build-proved candidate is
+# promoted forward to 100% to establish the new export set, then immediately
+# subjected to the same semantic + desktop/mobile browser proof. The unusable
+# prior Worker never regains rollback authority.
+STAGING_MODE="ZERO_PERCENT_OVERRIDE"
+SPLIT_LOG="$TMP_DIR/split-deployment.log"
 echo "Admitting exact candidate to the current deployment at 0% traffic while $PREVIOUS_VERSION_ID remains at 100%."
-npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%" --name "$WORKER_NAME" --message "OMEGA off-traffic staged candidate $GITHUB_SHA" -y
-
-STAGED_DEPLOYMENT_READY=0
-for attempt in $(seq 1 12); do
-  npx wrangler deployments status --name "$WORKER_NAME" --json > "$STATUS_JSON"
-  if node - "$STATUS_JSON" "$PREVIOUS_VERSION_ID" "$CANDIDATE_VERSION_ID" <<'NODE'
+if npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%" --name "$WORKER_NAME" --message "OMEGA off-traffic staged candidate $GITHUB_SHA" -y > >(tee "$SPLIT_LOG") 2>&1; then
+  STAGED_DEPLOYMENT_READY=0
+  for attempt in $(seq 1 12); do
+    npx wrangler deployments status --name "$WORKER_NAME" --json > "$STATUS_JSON"
+    if node - "$STATUS_JSON" "$PREVIOUS_VERSION_ID" "$CANDIDATE_VERSION_ID" <<'NODE'
 const fs=require('fs');
 const data=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
 const previousId=process.argv[3],candidateId=process.argv[4],rows=[];
@@ -124,30 +132,78 @@ const candidateReady=rows.some(x=>x.id===candidateId&&Math.abs(x.pct)<=0.001);
 const unexpectedServing=rows.filter(x=>x.id!==previousId&&x.pct>0.001);
 if(!previousReady||!candidateReady||unexpectedServing.length)process.exit(1);
 NODE
-  then
-    STAGED_DEPLOYMENT_READY=1
-    echo "Staged deployment membership confirmed on attempt $attempt: previous 100%, candidate 0%."
-    break
+    then
+      STAGED_DEPLOYMENT_READY=1
+      echo "Staged deployment membership confirmed on attempt $attempt: previous 100%, candidate 0%."
+      break
+    fi
+    sleep 2
+  done
+  if [[ "$STAGED_DEPLOYMENT_READY" != "1" ]]; then
+    echo "::error title=STAGED DEPLOYMENT NOT READY::Candidate $CANDIDATE_VERSION_ID was not observed at 0% beside previous $PREVIOUS_VERSION_ID at 100%."
+    false
   fi
   sleep 2
-done
-if [[ "$STAGED_DEPLOYMENT_READY" != "1" ]]; then
-  echo "::error title=STAGED DEPLOYMENT NOT READY::Candidate $CANDIDATE_VERSION_ID was not observed at 0% beside previous $PREVIOUS_VERSION_ID at 100%."
-  false
+  echo "Proving exact 0%-traffic candidate through Cloudflare version override; normal user traffic remains on $PREVIOUS_VERSION_ID."
+else
+  SPLIT_RC=$?
+  cat "$SPLIT_LOG" || true
+  if [[ "$BASELINE_USABLE" != "1" ]] && grep -Eqi 'identical .*exports|percentage-split deployment.*Durable Object|All versions in a multi-version deployment must declare identical' "$SPLIT_LOG"; then
+    STAGING_MODE="FORWARD_RECOVERY_EXPORT_SET"
+    echo "::warning title=FORWARD RECOVERY REQUIRED::Cloudflare rejected 100/0 staging because Worker exports differ, and the previous Worker is already usability-unproved/known-bad. Promoting the exact source/build-proved candidate forward to establish the required export set; rollback to the broken baseline remains forbidden."
+    npx wrangler versions deploy "${CANDIDATE_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA R322 forward recovery export-set transition $GITHUB_SHA" -y
+    FORWARD_READY=0
+    for attempt in $(seq 1 12); do
+      npx wrangler deployments status --name "$WORKER_NAME" --json > "$STATUS_JSON"
+      if node - "$STATUS_JSON" "$CANDIDATE_VERSION_ID" <<'NODE'
+const fs=require('fs');
+const data=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+const candidateId=process.argv[3],rows=[];
+function walk(value){
+  if(!value||typeof value!=='object')return;
+  if(Array.isArray(value)){for(const x of value)walk(x);return}
+  const id=typeof value.version_id==='string'?value.version_id:(typeof value.versionId==='string'?value.versionId:null);
+  const raw=value.percentage??value.traffic_percentage??value.trafficPercentage;
+  const pct=Number(raw);
+  if(id&&Number.isFinite(pct))rows.push({id,pct});
+  for(const x of Object.values(value))walk(x);
+}
+walk(data);
+const candidateReady=rows.some(x=>x.id===candidateId&&x.pct>=99.999);
+const unexpectedServing=rows.filter(x=>x.id!==candidateId&&x.pct>0.001);
+if(!candidateReady||unexpectedServing.length)process.exit(1);
+NODE
+      then
+        FORWARD_READY=1
+        echo "R322 forward deployment confirmed on attempt $attempt: candidate 100%, obsolete baseline no longer serving."
+        break
+      fi
+      sleep 2
+    done
+    if [[ "$FORWARD_READY" != "1" ]]; then
+      echo "::error title=FORWARD RECOVERY NOT READY::Candidate $CANDIDATE_VERSION_ID was not observed as the sole 100% serving version."
+      false
+    fi
+    sleep 2
+    echo "Proving exact R322 forward-recovery candidate now serving 100%; prior baseline has no rollback authority."
+  else
+    echo "::error title=STAGED DEPLOYMENT FAILED::Cloudflare 100/0 staging failed with rc=$SPLIT_RC and no admissible R322 forward-recovery condition."
+    false
+  fi
 fi
 
-# Give Cloudflare's version-override routing a bounded propagation interval
-# after current-deployment membership is observed.
-sleep 2
-echo "Proving exact 0%-traffic candidate through Cloudflare version override; normal user traffic remains on $PREVIOUS_VERSION_ID."
 OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_staged_release.mjs
 
 npm install --no-save playwright@1.63.0
 npx playwright install --with-deps chromium
 OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node tests/r200-current-browser-proof-e2e.mjs
 
-echo "Off-traffic semantic + browser proof passed; promoting exact candidate to 100%."
-npx wrangler versions deploy "${CANDIDATE_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA exact proved promotion $GITHUB_SHA" -y
+if [[ "$STAGING_MODE" == "ZERO_PERCENT_OVERRIDE" ]]; then
+  echo "Off-traffic semantic + browser proof passed; promoting exact candidate to 100%."
+  npx wrangler versions deploy "${CANDIDATE_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA exact proved promotion $GITHUB_SHA" -y
+else
+  echo "R322 forward-recovery semantic + browser proof passed on the exact 100% candidate."
+fi
 
 ROLLBACK_ELIGIBLE=false
 if [[ "$BASELINE_USABLE" == "1" ]]; then ROLLBACK_ELIGIBLE=true; fi
@@ -156,8 +212,9 @@ if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
     echo "previous_version_id=$PREVIOUS_VERSION_ID"
     echo "candidate_version_id=$CANDIDATE_VERSION_ID"
     echo "staged_proof=PASS"
+    echo "release_mode=$STAGING_MODE"
     echo "rollback_eligible=$ROLLBACK_ELIGIBLE"
   } >> "$GITHUB_OUTPUT"
 fi
 
-echo "OMEGA STAGED PROMOTION PASS · previous $PREVIOUS_VERSION_ID → proved candidate $CANDIDATE_VERSION_ID · source $GITHUB_SHA · rollback_eligible $ROLLBACK_ELIGIBLE"
+echo "OMEGA RELEASE PASS · mode $STAGING_MODE · previous $PREVIOUS_VERSION_ID → proved candidate $CANDIDATE_VERSION_ID · source $GITHUB_SHA · rollback_eligible $ROLLBACK_ELIGIBLE"
