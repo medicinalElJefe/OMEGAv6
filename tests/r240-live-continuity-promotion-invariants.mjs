@@ -9,7 +9,7 @@ const override=fs.readFileSync('scripts/cloudflare-version-override-fetch.mjs','
 const browser=fs.readFileSync('tests/r200-current-browser-proof-e2e.mjs','utf8');
 
 assert.equal(policy.revision,'R240.1');
-assert.equal(policy.deploymentContractRevision,'R322');
+assert.equal(policy.deploymentContractRevision,'R324');
 assert.equal(policy.deployment.soleCanonicalWriter,'.github/workflows/ci.yml');
 for(const key of [
   'candidateVersionUploadedWithoutTraffic',
@@ -68,9 +68,10 @@ for(const token of [
   'OMEGA_WORKER_VERSION_ID',
   'OMEGA_WORKER_NAME',
   'verify_live_operational_source_authority_r202.mjs',
-  'verify_live_hybrid_command_authority_r237.mjs',
-  'verify_live_hybrid_host_intelligence_r238.mjs'
+  "OMEGA_STAGED_READ_ONLY:'1'"
 ])assert.ok(verifier.includes(token)||override.includes(token),`staged exact-version semantic proof missing ${token}`);
+assert.ok(!verifier.includes("'scripts/verify_live_hybrid_command_authority_r237.mjs'"),'0%-traffic staged proof must not mutate Hybrid Durable Object state through R237');
+assert.ok(!verifier.includes("'scripts/verify_live_hybrid_host_intelligence_r238.mjs'"),'0%-traffic staged proof must not run promoted-live R238 stateful proof');
 assert.match(override,/targetOrigin!==canonicalOrigin/,'version override helper must not leak to non-canonical external providers');
 assert.match(browser,/Cloudflare-Workers-Version-Overrides/);
 assert.match(browser,/extraHTTPHeaders:overrideHeaders/);
@@ -85,4 +86,4 @@ for(const token of [
 assert.ok(!/name: Deploy canonical OMEGA Worker\s+id: deploy_worker\s+run: npx wrangler deploy\b/m.test(ci),'canonical Worker must not replace production before candidate proof');
 assert.ok(!ci.includes('workflow_run:'),'continuity repair must not create recursive workflow fanout');
 
-console.log('R240.1/R322 LIVE CONTINUITY PROMOTION PASS · normal path remains previous@100/candidate@0 exact override proof · bounded forward-only recovery exists only for positive blocking-baseline proof plus Cloudflare DO export-set split rejection · broken baseline has no rollback authority · ci.yml remains sole canonical production writer · R125/R141/R146/R147 unchanged · R201/R203 remain retired tombstones');
+console.log('R240.1/R324 LIVE CONTINUITY PROMOTION PASS · exact 0%-traffic candidate gets read-only semantic/browser proof only · stateful Hybrid DO transport proof is deferred to exact promoted live R202/R237/R238 · rollback remains usability-gated · R322 export-set forward recovery preserved · ci.yml sole writer · R125/R141/R146/R147 unchanged');

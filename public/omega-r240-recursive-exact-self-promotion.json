@@ -74,7 +74,15 @@
     "forwardRecoveryTrigger": "CLOUDFLARE_DURABLE_OBJECT_EXPORT_SET_SPLIT_REJECTED",
     "forwardRecoveryCandidateMustBeSourceBuildProved": true,
     "forwardRecoveryImmediateSemanticBrowserProof": true,
-    "forwardRecoveryRollbackToBlockingBaseline": false
+    "forwardRecoveryRollbackToBlockingBaseline": false,
+    "stagedStatefulHybridDurableMutationProof": false,
+    "stagedReadOnlyCandidateSemanticProof": true,
+    "postPromotionStatefulHybridProofRequired": true,
+    "postPromotionHybridAuthorities": [
+      "R202",
+      "R237",
+      "R238"
+    ]
   },
   "authority": {
     "sourcePlanning": "R240 scheduling-only over R170 roadmap",
@@ -87,6 +95,6 @@
     "canonAdmissionClaimed": false
   },
   "truthLaw": "generated != proved != source-promoted != staged-live-proved != deployed != live-verified != Canon-admitted",
-  "truthBoundary": "R240.1/R322 preserves one canonical ci.yml deployment/proof authority. Normal releases upload the exact candidate; the candidate is admitted to the current Cloudflare deployment at 0% while the previous version retains 100% ordinary traffic. Semantic plus desktop/mobile browser proof are pinned to that exact candidate before any 100% promotion, so no unproved candidate receives ordinary traffic. Cloudflare can reject a percentage split when Durable Object exports differ. R322 permits one forward-only recovery exception only when the existing baseline has already been positively identified by R319.9 as the R211/R205/R216 application-withholding interlock and Cloudflare returns the Durable Object export-set split rejection: the exact source/build-proved candidate may move to 100% to establish the required export set and is then immediately subjected to the same semantic/browser proof. An unknown or merely unproved baseline does not qualify for this exception. A known-bad blocking baseline has no rollback authority. R201/R203 remain deleted export tombstones and are never restored as executable authorities. R125 remains CanonState admission authority.",
-  "deploymentContractRevision": "R322"
+  "truthBoundary": "R240.1/R324 preserves one canonical ci.yml deployment/proof authority. Normal releases upload the exact candidate; the candidate is admitted to the current Cloudflare deployment at 0% while the previous version retains 100% ordinary traffic. Pre-promotion proof is exact-version, read-only/execution-free candidate proof plus browser proof; no unproved candidate receives ordinary traffic; it must not register, heartbeat, poll, or otherwise mutate shared Hybrid Durable Object state from a 0%-traffic version. After the exact candidate reaches 100%, canonical CI independently requires the full stateful R202/R237/R238 Hybrid live proof. A failed post-promotion proof can restore only an independently proved-usable previous baseline. A known-bad blocking baseline has no rollback authority. Cloudflare can reject a percentage split when Durable Object exports differ. The bounded R322 forward-recovery exception remains allowed only when the existing baseline is positively identified by R319.9 as the R211/R205/R216 application-withholding interlock and Cloudflare returns the exact export-set rejection; an unknown or merely unproved baseline does not qualify. After forward recovery the same promoted-live stateful proofs are required. R201/R203 remain deleted export tombstones. R125 remains CanonState admission authority.",
+  "deploymentContractRevision": "R324"
 }

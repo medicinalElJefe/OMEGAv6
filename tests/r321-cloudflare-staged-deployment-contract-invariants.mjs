@@ -35,7 +35,7 @@ assert.ok(staged.includes('rollback_eligible=$ROLLBACK_ELIGIBLE'),'release must 
 assert.ok(ci.includes("steps.deploy_worker.outputs.rollback_eligible == 'true'"),'post-promotion rollback must require positive usability authority');
 assert.ok(ci.includes('Refuse rollback to an unproved or known-bad baseline'),'CI must explicitly preserve the no-resurrection rule');
 
-assert.equal(policy.deploymentContractRevision,'R322');
+assert.equal(policy.deploymentContractRevision,'R324');
 assert.equal(policy.deployment.candidateAdmittedToCurrentDeploymentAtZeroPercent,true);
 assert.equal(policy.deployment.previousVersionRetainsHundredPercentOrdinaryTrafficDuringCandidateProof,true);
 assert.equal(policy.deployment.unprovedCandidateReceivesOrdinaryTraffic,false);

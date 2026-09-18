@@ -28,7 +28,7 @@ assert.ok(!staged.includes('if [[ "$BASELINE_USABLE" != "1" ]] && grep -Eqi'),'i
 assert.ok(staged.includes('ROLLBACK_ELIGIBLE=false'),'forward recovery must begin with rollback disabled');
 assert.ok(staged.includes('if [[ "$BASELINE_USABLE" == "1" ]]'),'rollback authority still requires independent usable-baseline proof');
 
-assert.equal(policy.deploymentContractRevision,'R322');
+assert.equal(policy.deploymentContractRevision,'R324');
 assert.equal(policy.deployment.forwardRecoveryAllowed,true);
 assert.equal(policy.deployment.forwardRecoveryRequiresPositiveBlockingBaselineProof,true);
 assert.equal(policy.deployment.forwardRecoveryTrigger,'CLOUDFLARE_DURABLE_OBJECT_EXPORT_SET_SPLIT_REJECTED');

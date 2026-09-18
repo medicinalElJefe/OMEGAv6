@@ -75,11 +75,18 @@ if(chat?.ok!==true||chat?.modelInvoked!==true||!String(chat?.provider||'').start
 
 const helper='--import=./scripts/cloudflare-version-override-fetch.mjs';
 const childEnv={...process.env,NODE_OPTIONS:[process.env.NODE_OPTIONS,helper].filter(Boolean).join(' ')};
-for(const script of [
-  'scripts/verify_federation_live_r1681.mjs',
-  'scripts/verify_live_operational_source_authority_r202.mjs',
-  'scripts/verify_live_hybrid_command_authority_r237.mjs',
-  'scripts/verify_live_hybrid_host_intelligence_r238.mjs'
-])execFileSync(process.execPath,[script],{stdio:'inherit',env:childEnv});
 
-console.log(`OMEGA STAGED RELEASE PASS · exact source ${expected} · Cloudflare version ${versionId} · normal production traffic preserved during proof`);
+// R324 platform boundary: a 0%-traffic Worker version can be addressed by
+// Cloudflare version override for read-only/execution-free semantic proof, but
+// Hybrid register/heartbeat/poll mutates the Durable Object execution plane.
+// Those stateful transport proofs are therefore deferred until after the exact
+// candidate is promoted to 100%, where canonical CI already requires R202,
+// R237 and R238 and can roll back only to an independently proved-usable
+// baseline.  Do not let pre-promotion proof mutate shared Durable state.
+execFileSync(process.execPath,['scripts/verify_federation_live_r1681.mjs'],{stdio:'inherit',env:childEnv});
+execFileSync(process.execPath,['scripts/verify_live_operational_source_authority_r202.mjs'],{
+  stdio:'inherit',
+  env:{...childEnv,OMEGA_PROMOTED_SHA:'',OMEGA_STAGED_READ_ONLY:'1'}
+});
+
+console.log(`OMEGA STAGED RELEASE PASS · exact source ${expected} · Cloudflare version ${versionId} · read-only candidate semantics + browser proof only · stateful Hybrid transport proof deferred to promoted live`);
