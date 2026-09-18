@@ -15,9 +15,11 @@ restore_previous_on_error(){
   local rc=$?
   trap - ERR
   set +e
-  if [[ -n "$PREVIOUS_VERSION_ID" ]]; then
-    echo "Staged release failed; restoring previous production version $PREVIOUS_VERSION_ID to 100% traffic."
+  if [[ -n "$PREVIOUS_VERSION_ID" && "${BASELINE_USABLE:-1}" == "1" ]]; then
+    echo "Staged release failed; restoring verified-usable previous production version $PREVIOUS_VERSION_ID to 100% traffic."
     npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA fail-closed staged release restore after $GITHUB_SHA" -y
+  elif [[ -n "$PREVIOUS_VERSION_ID" ]]; then
+    echo "::error title=ROLLBACK REFUSED::Previous version $PREVIOUS_VERSION_ID is the positively identified application-withholding interlock. R319.8 refuses to falsely label/redeploy it as last-known-good; existing traffic is left unchanged while the failed candidate remains off-traffic."
   fi
   cleanup
   exit "$rc"
@@ -51,7 +53,26 @@ process.stdout.write(stable[0].id);
 NODE
 )"
 test -n "$PREVIOUS_VERSION_ID"
-echo "Production invariant captured: $PREVIOUS_VERSION_ID remains the only serving version."
+
+# R319.8 usability authority: a 100%-traffic version is not automatically a
+# last-known-good version.  Historical R211/R205/R216 interlock artifacts can
+# be technically live while withholding the application.  Detect that exact
+# product-failure class before candidate work and never describe it as stable.
+BASELINE_USABLE=1
+BASELINE_BODY="$TMP_DIR/baseline-root.html"
+if curl -fsS --max-time 20 -H 'cache-control: no-cache' "$OMEGA_PUBLIC_URL/?omega_release_probe=$GITHUB_SHA" -o "$BASELINE_BODY"; then
+  if grep -Eqi 'LIVE BINDING INTERLOCK|VERIFYING LIVE BINDINGS|R211 provenance[[:space:]]*\\+[[:space:]]*R205 whole-system health' "$BASELINE_BODY"; then
+    BASELINE_USABLE=0
+    echo "::error title=UNUSABLE PRODUCTION BASELINE::Current 100% Worker $PREVIOUS_VERSION_ID is an obsolete R211/R205/R216 application-withholding interlock. It is not last-known-good and must not be treated as a usable rollback target."
+  fi
+else
+  echo "::warning title=BASELINE ROOT UNREADABLE::Could not read the current root surface; preserving normal rollback semantics unless the exact interlock is positively identified."
+fi
+if [[ "$BASELINE_USABLE" == "1" ]]; then
+  echo "Production invariant captured: $PREVIOUS_VERSION_ID is the only serving version and no known application-withholding interlock was detected."
+else
+  echo "Production defect captured: $PREVIOUS_VERSION_ID serves 100% traffic but is NOT a usable baseline."
+fi
 
 rm -f "$WRANGLER_NDJSON"
 WRANGLER_OUTPUT_FILE_PATH="$WRANGLER_NDJSON" npx wrangler versions upload --name "$WORKER_NAME" --message "OMEGA staged candidate $GITHUB_SHA"
