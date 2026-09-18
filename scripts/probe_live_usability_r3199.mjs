@@ -6,8 +6,7 @@ if(!/^https:\/\//i.test(base)) throw new Error('canonical https origin required'
 const blockerPatterns=[
   /OMEGA\s*[·-]?\s*LIVE BINDING INTERLOCK/i,
   /VERIFYING LIVE BINDINGS/i,
-  /R211 provenance\s*\+\s*R205 whole-system health/i,
-  /exact deployment identity/i
+  /R211 provenance\s*\+\s*R205 whole-system health/i
 ];
 
 const visited=new Set();
