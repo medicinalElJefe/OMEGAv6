@@ -354,10 +354,14 @@ jobs:
           fi
           echo "R240.1 production truth closure PASS: R237 and R238 live proofs both succeeded."
       - name: Roll back canonical OMEGA Worker on post-promotion proof failure
-        if: failure() && steps.deploy_worker.outputs.previous_version_id != ''
+        if: failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible == 'true'
         id: rollback_worker
         shell: bash
         run: npx wrangler rollback "${{ steps.deploy_worker.outputs.previous_version_id }}" --name omegav6 --message "OMEGA automatic rollback after live proof failure for $GITHUB_SHA"
+      - name: Refuse rollback to an unproved or known-bad baseline
+        if: failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible != 'true'
+        shell: bash
+        run: echo "::warning title=ROLLBACK REFUSED::Post-promotion proof failed, but the previous Worker did not prove usable and cannot regain production authority."
       - name: Record deployment receipt
         if: always()
         shell: bash
@@ -376,6 +380,7 @@ jobs:
             echo "- Previous Cloudflare Worker version: ${{ steps.deploy_worker.outputs.previous_version_id || 'UNAVAILABLE' }}"
             echo "- Candidate Cloudflare Worker version: ${{ steps.deploy_worker.outputs.candidate_version_id || 'UNAVAILABLE' }}"
             echo "- Off-traffic staged proof: ${{ steps.deploy_worker.outputs.staged_proof || 'NOT_PROVEN' }}"
+            echo "- Previous baseline rollback eligibility: ${{ steps.deploy_worker.outputs.rollback_eligible || 'NOT_PROVEN' }}"
             echo "- Automatic rollback after post-promotion failure: ${{ steps.rollback_worker.outcome || 'not-needed' }}"
             echo "- R258 isolated private SAI doorway deployment: ${{ steps.sai_doorway.outcome }}"
             echo "- R258 private non-disclosure proof: ${{ steps.sai_doorway_hidden.outcome }}"
@@ -390,7 +395,7 @@ jobs:
             echo "- R237 authenticated Hybrid command authority live proof: ${{ steps.live_r237.outcome }}"
             echo "- R238 Hybrid host intelligence live proof: ${{ steps.live_r238.outcome }}"
             echo "- R239 resource governance remains source-gated by verify job; live command surface reports a declared R239 tier."
-            echo "- R240/R240.1 truth boundary: one canonical ci.yml writer; last-known-good remains live during 0% candidate semantic/browser proof; exact proved candidate promotes atomically; post-promotion live-proof failure rolls back; R237/R238 remain independently required."
+            echo "- R240/R321 truth boundary: one canonical ci.yml writer; the previous Worker retains 100% ordinary traffic while the candidate is admitted to the current Cloudflare deployment at 0% solely for exact version-override proof; only the proved candidate promotes to 100%; post-promotion rollback is permitted only when the previous baseline independently proved usable; R237/R238 remain independently required."
             echo "- R202 archive residual debt remains explicit: AT09 desktop health check PLANNED; AT10 forensic hash ledger PLANNED"
             echo "- Browser proof harness: Playwright 1.63.0 pinned; locked application dependency audit enforced at high severity; current run result is reported by the audit step"
             echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"
