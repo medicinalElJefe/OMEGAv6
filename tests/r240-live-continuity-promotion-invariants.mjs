@@ -31,7 +31,7 @@ for(const key of [
 ])assert.equal(policy.deployment[key],false,`R240/R321 policy must reject obsolete assumption ${key}`);
 
 assert.match(policy.truthLaw,/staged-live-proved/);
-assert.match(policy.truthBoundary,/previous Worker retains 100% ordinary user traffic/i);
+assert.match(policy.truthBoundary,/previous version retains 100% ordinary traffic/i);
 assert.match(policy.truthBoundary,/candidate is admitted .* at 0%/i);
 assert.match(policy.truthBoundary,/no unproved candidate receives ordinary traffic/i);
 assert.match(policy.truthBoundary,/Cloudflare can reject a percentage split when Durable Object exports differ/i);
