@@ -95,22 +95,69 @@ test -n "$CANDIDATE_VERSION_ID"
 test "$CANDIDATE_VERSION_ID" != "$PREVIOUS_VERSION_ID"
 echo "Candidate uploaded without production traffic: $CANDIDATE_VERSION_ID"
 
-echo "Candidate remains undeployed; proving exact uploaded version through Cloudflare version override while normal traffic remains on $PREVIOUS_VERSION_ID."
+# Cloudflare version overrides can target only a version that belongs to the
+# current deployment. Admit the candidate at 0% while keeping all ordinary
+# user traffic on the previous version. The override header below is then the
+# only path that can reach the candidate before proof.
+echo "Admitting exact candidate to the current deployment at 0% traffic while $PREVIOUS_VERSION_ID remains at 100%."
+npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%" --name "$WORKER_NAME" --message "OMEGA off-traffic staged candidate $GITHUB_SHA" -y
+
+STAGED_DEPLOYMENT_READY=0
+for attempt in $(seq 1 12); do
+  npx wrangler deployments status --name "$WORKER_NAME" --json > "$STATUS_JSON"
+  if node - "$STATUS_JSON" "$PREVIOUS_VERSION_ID" "$CANDIDATE_VERSION_ID" <<'NODE'
+const fs=require('fs');
+const data=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+const previousId=process.argv[3],candidateId=process.argv[4],rows=[];
+function walk(value){
+  if(!value||typeof value!=='object')return;
+  if(Array.isArray(value)){for(const x of value)walk(x);return}
+  const id=typeof value.version_id==='string'?value.version_id:(typeof value.versionId==='string'?value.versionId:null);
+  const raw=value.percentage??value.traffic_percentage??value.trafficPercentage;
+  const pct=Number(raw);
+  if(id&&Number.isFinite(pct))rows.push({id,pct});
+  for(const x of Object.values(value))walk(x);
+}
+walk(data);
+const previousReady=rows.some(x=>x.id===previousId&&x.pct>=99.999);
+const candidateReady=rows.some(x=>x.id===candidateId&&Math.abs(x.pct)<=0.001);
+const unexpectedServing=rows.filter(x=>x.id!==previousId&&x.pct>0.001);
+if(!previousReady||!candidateReady||unexpectedServing.length)process.exit(1);
+NODE
+  then
+    STAGED_DEPLOYMENT_READY=1
+    echo "Staged deployment membership confirmed on attempt $attempt: previous 100%, candidate 0%."
+    break
+  fi
+  sleep 2
+done
+if [[ "$STAGED_DEPLOYMENT_READY" != "1" ]]; then
+  echo "::error title=STAGED DEPLOYMENT NOT READY::Candidate $CANDIDATE_VERSION_ID was not observed at 0% beside previous $PREVIOUS_VERSION_ID at 100%."
+  false
+fi
+
+# Give Cloudflare's version-override routing a bounded propagation interval
+# after current-deployment membership is observed.
+sleep 2
+echo "Proving exact 0%-traffic candidate through Cloudflare version override; normal user traffic remains on $PREVIOUS_VERSION_ID."
 OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_staged_release.mjs
 
 npm install --no-save playwright@1.63.0
 npx playwright install --with-deps chromium
 OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node tests/r200-current-browser-proof-e2e.mjs
 
-echo "Off-traffic semantic + browser proof passed; promoting exact candidate atomically. No mixed-version traffic split is used, so Durable Object export-set changes cannot violate Cloudflare gradual-deployment compatibility."
+echo "Off-traffic semantic + browser proof passed; promoting exact candidate to 100%."
 npx wrangler versions deploy "${CANDIDATE_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA exact proved promotion $GITHUB_SHA" -y
 
+ROLLBACK_ELIGIBLE=false
+if [[ "$BASELINE_USABLE" == "1" ]]; then ROLLBACK_ELIGIBLE=true; fi
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
   {
     echo "previous_version_id=$PREVIOUS_VERSION_ID"
     echo "candidate_version_id=$CANDIDATE_VERSION_ID"
     echo "staged_proof=PASS"
+    echo "rollback_eligible=$ROLLBACK_ELIGIBLE"
   } >> "$GITHUB_OUTPUT"
 fi
 
-echo "OMEGA STAGED PROMOTION PASS · stable $PREVIOUS_VERSION_ID → proved candidate $CANDIDATE_VERSION_ID · source $GITHUB_SHA"
+echo "OMEGA STAGED PROMOTION PASS · previous $PREVIOUS_VERSION_ID → proved candidate $CANDIDATE_VERSION_ID · source $GITHUB_SHA · rollback_eligible $ROLLBACK_ELIGIBLE"

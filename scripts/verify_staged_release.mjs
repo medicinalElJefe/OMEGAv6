@@ -8,11 +8,11 @@ const versionId=String(process.env.OMEGA_WORKER_VERSION_ID||'').trim();
 const workerName=String(process.env.OMEGA_WORKER_NAME||'omegav6').trim();
 if(!base||!expected||!versionId)throw new Error('staged release proof requires OMEGA_PUBLIC_URL, exact promoted/source SHA, and OMEGA_WORKER_VERSION_ID');
 
-// Cloudflare Workers version overrides use the cf-workers-version-overrides request header.
+// Cloudflare Workers version overrides use the Cloudflare-Workers-Version-Overrides request header.
 // Keep this helper identical to the child-process preload so every staged request is pinned
 // to the exact uploaded candidate while normal production traffic remains on last-known-good.
 const override=`${workerName}="${versionId}"`;
-const headers=(extra={})=>({'cache-control':'no-cache','cf-workers-version-overrides':override,...extra});
+const headers=(extra={})=>({'cache-control':'no-cache','Cloudflare-Workers-Version-Overrides':override,...extra});
 async function parse(response){const raw=await response.text();let body=null;try{body=JSON.parse(raw)}catch{}return{response,raw,body}}
 async function get(path){const row=await parse(await fetch(base+path,{headers:headers()}));if(!row.response.ok)throw new Error(`${path} HTTP ${row.response.status}: ${row.raw.slice(0,500)}`);return row}
 async function post(path,body){const row=await parse(await fetch(base+path,{method:'POST',headers:headers({'content-type':'application/json'}),body:JSON.stringify(body)}));if(!row.response.ok)throw new Error(`${path} HTTP ${row.response.status}: ${row.raw.slice(0,500)}`);return row}

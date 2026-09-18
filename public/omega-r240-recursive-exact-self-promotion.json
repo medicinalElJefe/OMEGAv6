@@ -8,7 +8,14 @@
     "governedSelfBuild": "R170.4"
   },
   "continuityOperator": "PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION",
-  "resolution": {"organs":12,"branches":144,"cells":1728,"lanes":20736,"deepAddress":248832,"physicalDimensionsClaimed":false},
+  "resolution": {
+    "organs": 12,
+    "branches": 144,
+    "cells": 1728,
+    "lanes": 20736,
+    "deepAddress": 248832,
+    "physicalDimensionsClaimed": false
+  },
   "scheduler": {
     "sparseActivation": true,
     "dependencyFrontier": true,
@@ -46,16 +53,21 @@
     "selfBuilderMayDeployDirectly": false,
     "selfBuilderMayDispatchItself": false,
     "exactMergedShaProductionSuccessRequired": true,
-    "lastKnownGoodRemainsServingDuringCandidateProof": true,
+    "lastKnownGoodRemainsServingDuringCandidateProof": false,
     "candidateVersionUploadedWithoutTraffic": true,
-    "candidateRemainsUndeployedBeforeProof": true,
-    "mixedVersionTrafficSplitForbidden": true,
-    "durableObjectExportSetChangeCompatible": true,
+    "candidateRemainsUndeployedBeforeProof": false,
+    "mixedVersionTrafficSplitForbidden": false,
+    "durableObjectExportSetChangeCompatible": false,
     "versionOverrideSemanticProofRequiredBeforePromotion": true,
     "versionOverrideBrowserProofRequiredBeforePromotion": true,
     "atomicHundredPercentPromotionAfterProof": true,
     "automaticRollbackOnPostPromotionFailure": true,
-    "redProductionResult": "SOURCE_PROMOTED_NOT_PRODUCTION_PROVEN__ROLL_BACK_TO_LAST_KNOWN_GOOD_AND_REQUIRE_FORWARD_REPAIR"
+    "redProductionResult": "SOURCE_PROMOTED_NOT_PRODUCTION_PROVEN__ROLL_BACK_TO_LAST_KNOWN_GOOD_AND_REQUIRE_FORWARD_REPAIR",
+    "candidateAdmittedToCurrentDeploymentAtZeroPercent": true,
+    "unprovedCandidateReceivesOrdinaryTraffic": false,
+    "durableObjectLifecycleMutationAllowedInStagedVersionPath": false,
+    "rollbackRequiresProvedUsablePreviousBaseline": true,
+    "previousVersionRetainsHundredPercentOrdinaryTrafficDuringCandidateProof": true
   },
   "authority": {
     "sourcePlanning": "R240 scheduling-only over R170 roadmap",
@@ -68,5 +80,6 @@
     "canonAdmissionClaimed": false
   },
   "truthLaw": "generated != proved != source-promoted != staged-live-proved != deployed != live-verified != Canon-admitted",
-  "truthBoundary": "R240.1 automates only evidence-bound planning, bounded R170 source candidate generation, exact source promotion, and handoff to the same canonical ci.yml deployment/proof authority. The last known-good Worker remains at 100% traffic while a new Cloudflare Worker version is uploaded but not deployed, then proved directly through version override plus browser/runtime semantics. No mixed-version traffic split is created, preserving compatibility when the candidate and production versions expose different Durable Object export sets. Only an exact proved candidate may move atomically to 100%, and any post-promotion live-proof failure must roll traffic back to the captured last-known-good version. R201/R203 remain deleted export tombstones and are never restored as executable authorities. R240.1 cannot promote arbitrary PRs, cannot bypass current-production/residual/expected-head/diff/proof gates, cannot create a second production writer, cannot infer a user-value deficit, cannot call a red deployment successful, and cannot admit CanonState. R239 remains the distinct selected-host Hybrid resource governor."
+  "truthBoundary": "R240.2/R321 preserves one canonical ci.yml deployment/proof authority. The previous Worker retains 100% ordinary user traffic while the exact uploaded candidate is admitted to the current Cloudflare deployment at 0% so Cloudflare version overrides can address that candidate. Semantic and desktop/mobile browser proof are pinned to the 0%-traffic candidate; no unproved candidate receives ordinary traffic. Only an exact proved candidate may move to 100%. Durable Object lifecycle/export-set mutations are excluded from this staged-version path and require their own compatible migration boundary. A post-promotion proof failure may restore the previous Worker only when that previous baseline independently proved usable; a known-bad or indeterminate R211/R205/R216 application-withholding baseline has no rollback authority. R201/R203 remain deleted export tombstones and are never restored as executable authorities. R240/R321 cannot promote arbitrary PRs, bypass expected-head/diff/proof gates, create a second production writer, infer a user-value deficit, call a red deployment successful, or admit CanonState. R125 remains CanonState admission authority.",
+  "deploymentContractRevision": "R321"
 }
