@@ -1,3 +1,4 @@
+import{decompress as zstdDecompressR327}from'./vendor/fzstdR327.js';
 import{sarAssetProbeR325}from'./sarAssetProbeR325.js';
 
 export const SAR_NATIVE_RASTER_SCHEMA_R326='OMEGA_SAR_NATIVE_RASTER_R326';
@@ -132,6 +133,7 @@ async function decompress(bytes,compression){
  if(compression===5)return lzw(bytes);
  if(compression===8||compression===32946)return inflate(bytes);
  if(compression===32773)return packBits(bytes);
+ if(compression===50000)return zstdDecompressR327(bytes);
  throw new Error(`UNSUPPORTED_TIFF_COMPRESSION_${compression}`)
 }
 function undoPredictor(bytes,width,height,bits,spp,predictor,le){
