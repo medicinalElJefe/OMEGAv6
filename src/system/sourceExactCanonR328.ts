@@ -6,7 +6,7 @@ export const R328_REPOSITORY_NORMALIZED_SHA256='478922fb496a9402a82063908811dd9e
 export const R328_SOURCE_CANON_EXPECTED_RECORDS=3743 as const;
 export const R328_CONFLICT_POLICY='CONFLICT_VARIANTS_PRESERVED_UNTIL_EXPLICIT_PROOF' as const;
 export const R328_SOURCE_CANON_RECEIPT=Object.freeze({
- originalSha256:R328_SOURCE_ORIGINAL_SHA256,repositoryNormalizedSha256:R328_REPOSITORY_NORMALIZED_SHA256,originalSizeBytes:1838041,repositorySizeBytes:1834293,transportNormalization:'UTF8_BOM_REMOVED_CRLF_TO_LF_FINAL_EOL_REMOVED_VALUES_UNCHANGED',records:3743,sourceFamilies:13,sourceFiles:10,categories:47,concepts:495,propertyNames:173,computationHeads:45,epistemicStatuses:63,blankEpistemicRows:2,conflictGroups:463,multiVariantConflictGroups:405
+ originalSha256:R328_SOURCE_ORIGINAL_SHA256,repositoryNormalizedSha256:R328_REPOSITORY_NORMALIZED_SHA256,originalSizeBytes:1838041,repositorySizeBytes:1834293,transportNormalization:'UTF8_BOM_REMOVED_CRLF_TO_LF_FINAL_EOL_REMOVED_VALUES_UNCHANGED',records:3743,sourceFamilies:13,sourceFiles:10,categories:47,concepts:495,propertyNames:173,computationHeads:45,epistemicStatuses:63,blankEpistemicRows:2,blankValidationRows:3,conflictGroups:463,multiVariantConflictGroups:405
 });
 
 export const R328_SOURCE_CANON_COLUMNS=[
@@ -56,7 +56,7 @@ export function parseSourceExactCanonCsvR328(text:string){
   R328_SOURCE_CANON_COLUMNS.forEach((column,i)=>out[column]=values[i]??'');
   const expected=`R${String(index+1).padStart(6,'0')}`;
   if(out.record_id!==expected)throw new Error(`R328 record sequence mismatch ${out.record_id} != ${expected}`);
-  for(const key of ['record_id','source_family','source_section','source_row_key','category','concept_name','property_name','canonical_value','computation_language','validation_rule'] as R328CanonColumn[])if(!clean(out[key]))throw new Error(`R328 required field empty ${out.record_id}.${key}`);
+  for(const key of ['record_id','source_family','source_section','source_row_key','category','concept_name','property_name','canonical_value','computation_language'] as R328CanonColumn[])if(!clean(out[key]))throw new Error(`R328 required field empty ${out.record_id}.${key}`);
   return out;
  });
  if(rows.length!==R328_SOURCE_CANON_EXPECTED_RECORDS)throw new Error(`R328 record-count mismatch ${rows.length} != ${R328_SOURCE_CANON_EXPECTED_RECORDS}`);
@@ -141,7 +141,7 @@ export function compileSourceExactCanonR328(rows:readonly R328CanonRow[]){
  const conflicts=[...conflictMap].map(([id,variants])=>({id,records:variants.map(x=>x.record_id),variantCount:new Set(variants.map(x=>x.canonical_value)).size,concepts:[...new Set(variants.map(x=>x.concept_name))]}));
  return {
   schema:R328_SOURCE_CANON_SCHEMA,revision:R328_SOURCE_CANON_REVISION,rowCount:rows.length,
-  census:{sourceFamilies:sourceFamilies.size,sourceFiles:sourceFiles.size,categories:categories.size,concepts:concepts.size,propertyNames:properties.size,computationHeads:operationHeads.size,epistemicStatuses:epistemicStatuses.size,conflictGroups:conflicts.length,multiVariantConflictGroups:conflicts.filter(x=>x.variantCount>1).length},
+  census:{sourceFamilies:sourceFamilies.size,sourceFiles:sourceFiles.size,categories:categories.size,concepts:concepts.size,propertyNames:properties.size,computationHeads:operationHeads.size,epistemicStatuses:epistemicStatuses.size,blankEpistemicRows:rows.filter(r=>!clean(r.epistemic_status)).length,blankValidationRows:rows.filter(r=>!clean(r.validation_rule)).length,conflictGroups:conflicts.length,multiVariantConflictGroups:conflicts.filter(x=>x.variantCount>1).length},
   operations:Object.fromEntries([...byOperation].sort()),
   epistemic:Object.fromEntries([...byEpistemic].sort()),
   crosswalk:Object.fromEntries([...crosswalk].sort()),

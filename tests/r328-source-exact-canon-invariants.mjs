@@ -1,6 +1,7 @@
 import assert from'node:assert/strict';
 import fs from'node:fs';
 import{createHash}from'node:crypto';
+import{R328_SOURCE_CANON_RECEIPT,parseSourceExactCanonCsvR328,compileSourceExactCanonR328}from'../src/system/sourceExactCanonR328.ts';
 
 const csvPath='public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv';
 const bytes=fs.readFileSync(csvPath),text=bytes.toString('utf8').replace(/^\uFEFF/,'');
@@ -26,6 +27,13 @@ assert.equal(createHash('sha256').update(bytes).digest('hex'),'478922fb496a9402a
 assert.equal(rows.length,3743);
 
 const objects=rows.map((values,index)=>{assert.equal(values.length,16,`R328 column count row ${index+2}`);const r=Object.fromEntries(expected.map((k,i)=>[k,values[i]??'']));assert.equal(r.record_id,`R${String(index+1).padStart(6,'0')}`);return r});
+const productionRows=parseSourceExactCanonCsvR328(text);
+assert.equal(productionRows.length,3743,'production parser must load the exact repository canon');
+assert.deepEqual(productionRows.filter(r=>!r.validation_rule).map(r=>r.record_id),['R000001','R000002','R003743'],'exact source intentionally preserves three undeclared validation rules');
+assert.equal(R328_SOURCE_CANON_RECEIPT.blankValidationRows,3,'receipt must disclose validation missingness');
+const productionCompiled=compileSourceExactCanonR328(productionRows);
+assert.equal(productionCompiled.census.blankValidationRows,3,'compiler census must preserve validation missingness');
+assert.equal(productionCompiled.census.blankEpistemicRows,2,'compiler census must preserve epistemic missingness');
 const unique=k=>new Set(objects.map(r=>r[k]).filter(Boolean));
 assert.equal(unique('source_family').size,13);
 assert.equal(unique('source_file').size,10);
@@ -54,6 +62,7 @@ assert.ok(compiler.includes("PUBLIC_REFERENCE")&&compiler.includes("src/physicsR
 assert.ok(compiler.includes("webgpu|vulkan|metal")&&compiler.includes("'DEVICE_GATED'"),'native GPU requirements must remain device-gated');
 
 assert.ok(ui.includes('3,743-record Canon Registry')&&ui.includes('Search record, concept, formula, source, conflict group')&&ui.includes('Open exact source CSV'),'R328 operator surface incomplete');
+assert.ok(ui.includes('NO VALIDATION RULE DECLARED IN SOURCE'),'R328 UI must render exact missing validation as missing, not blank or fabricated');
 assert.ok(master.includes('SOURCE_EXACT_SEMANTIC_CANON_REMAINS_SEPARATE_FROM_IMPLEMENTATION_CANON'),'convergence law must separate semantic and implementation canons');
 assert.ok(master.includes("R328 SOURCE-EXACT CANON")&&master.includes("3,743-row semantic registry"),'R314 build stage must consume R328 source canon');
 assert.ok(implementation.includes('R314_IMPLEMENTATION_CANON_EXPECTED_ROWS=675'),'R328 must not overwrite the distinct 675-row implementation canon');

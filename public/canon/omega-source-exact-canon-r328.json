@@ -23,7 +23,8 @@
     "multiVariantConflictGroups": 405,
     "epistemicStatusVariants": 63,
     "namedEpistemicStatuses": 62,
-    "blankEpistemicRows": 2
+    "blankEpistemicRows": 2,
+    "blankValidationRows": 3
   },
   "authority": {
     "semanticSource": "R328 source-exact registry",
