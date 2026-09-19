@@ -56,9 +56,13 @@ for(const needle of ['api/core-health','api/release-evidence','api/runtime-attes
 for(const needle of ['gh run list','headSha','production_ready','OBSERVE_ONLY','prove_successor_workflow_invariants_r175.mjs','r180-living-world-execution-dispatch-invariants.mjs','r179-living-world-durable-authorization-invariants.mjs','r245-governed-selfbuild-convergence-invariants.mjs','autonomousCandidatePolicy','cloud/evolution-','R240/R245 EXACT CANDIDATE PASS','R240 exact two-parent source promotion PASS','git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA"','--force-with-lease="refs/heads/main:$BASE"','--event push','gh run watch'])assert.ok(workflow.includes(needle),`self-build workflow missing ${needle}`);
 assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(workflow),'R170 may not direct-push candidate source to main');
 assert.ok(!/gh\s+pr\s+merge/i.test(workflow),'GitHub auto-merge/CLI merge remains unused');
-assert.ok(!/gh\s+workflow\s+run/i.test(workflow),'canonical dispatch uses explicit API binding, not recursive CLI fanout');
+assert.ok(!/gh\s+workflow\s+run/i.test(workflow),'self-builder may not recursively dispatch itself');
 assert.ok(!/^\s*workflow_run\s*:/m.test(workflow));
-assert.match(workflow,/cron: '17 \* \* \* \*'/);
+assert.ok(!/^\s*schedule\s*:/m.test(workflow),'R330 removes hourly polling from the self-builder');
+assert.ok(!/gh\s+pr\s+create/i.test(workflow),'R330 must not depend on repository Actions PR-creation permission');
+assert.match(ci,/continue-governed-selfbuild:/,'canonical production CI must own continuation');
+assert.match(ci,/actions\/workflows\/r170-governed-selfbuild\.yml\/dispatches/,'successful canonical production must dispatch the next governed cycle');
+assert.match(ci,/needs:\s*deploy-main/,'continuation must be downstream of successful canonical deployment');
 const selectIndex=workflow.indexOf('name: Select next bounded capsule');
 const installIndex=workflow.indexOf('name: Prepare candidate proof dependencies');
 const preGenerationProofIndex=workflow.indexOf('name: Prove current successor chain before generation');
