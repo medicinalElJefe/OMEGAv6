@@ -141,11 +141,11 @@ export function compileTrainingBatchR331(entries){
   row?.canonicalAdmission===false&&row?.trainingApproved===true&&String(row?.state||'').startsWith('ADMITTED')&&
   ['COMMUNICATION_PREFERENCE','SEMANTIC_LESSON','PROCEDURAL_LESSON','SCAR'].includes(row?.memoryClass)
  );
- const examples=eligible.map(row=>({
+ const examples=eligible.slice(-64).map(row=>({
   schema:'OMEGA_TRAINING_EXAMPLE_R331',memoryId:row.memoryId,memoryClass:row.memoryClass,truthClass:row.truthClass,
   messages:[
    {role:'system',content:'Preserve this approved OMEGA learning item according to its truth class. Do not promote preference, correction, model output, or procedural guidance into external factual authority.'},
-   {role:'user',content:row.text},
+   {role:'user',content:sanitizeMemoryTextR331(row.text,4000)},
    {role:'assistant',content:'Acknowledged as '+row.memoryClass+' with '+row.truthClass+' authority.'}
   ],
   evidenceReceiptIds:row.evidenceReceiptIds||[],proofReceiptIds:row.proofReceiptIds||[],canonicalAdmission:false
