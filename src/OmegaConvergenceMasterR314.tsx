@@ -3,7 +3,6 @@ import {Activity,CheckCircle2,ChevronRight,GitBranch,Search,ShieldCheck,Triangle
 import {buildConvergenceMasterR314} from './convergenceMasterR314';
 import {R314_SYNCHRONOUS_PACKET_SCHEMA,R314_SYNCHRONOUS_PACKET_REVISION} from './system/synchronousPacketR314';
 import {R314_MOTION_RELATIVITY_SCHEMA} from './system/motionRelativityR314';
-import SourceExactCanonR328 from './SourceExactCanonR328';
 import './omegaConvergenceMasterR314.css';
 
 const label=(value:string)=>value.replaceAll('_',' ');
@@ -44,7 +43,6 @@ export default function OmegaConvergenceMasterR314(){
    <article><span>Address rule</span><b>≠ D</b><small>12→144→1,728→20,736→248,832 remain representation/address resolution levels</small></article>
   </div>
 
-  <SourceExactCanonR328/>
 
   <details className='r314-chart' id='r314-current' open>
    <summary><span><Activity/>Chart 1 · What OMEGAv6 has now</span><b>{current.length}/{master.charts.current.length}</b></summary>

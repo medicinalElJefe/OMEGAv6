@@ -6,8 +6,8 @@ import{R328_SOURCE_CANON_RECEIPT,R328_REPOSITORY_NORMALIZED_SHA256,parseSourceEx
 const csvPath='public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv';
 const bytes=fs.readFileSync(csvPath),text=bytes.toString('utf8').replace(/^\uFEFF/,'');
 const compiler=fs.readFileSync('src/system/sourceExactCanonR328.ts','utf8');
-const ui=fs.readFileSync('src/SourceExactCanonR328.tsx','utf8');
 const master=fs.readFileSync('src/convergenceMasterR314.ts','utf8');
+const convergenceUi=fs.readFileSync('src/OmegaConvergenceMasterR314.tsx','utf8');
 const implementation=fs.readFileSync('src/system/implementationCanonCompilerR314.ts','utf8');
 const audit=fs.readFileSync('scripts/r314-convergence-audit.mjs','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
@@ -62,9 +62,8 @@ for(const sf of ['MASTER','SOURCE_MANIFEST','VALIDATION','RSC','ATOMIC_WOVEN','W
 assert.ok(compiler.includes("PUBLIC_REFERENCE")&&compiler.includes("src/physicsRelativityRuntimeR132.ts"),'public physics/math must remain reference-classed');
 assert.ok(compiler.includes("webgpu|vulkan|metal")&&compiler.includes("'DEVICE_GATED'"),'native GPU requirements must remain device-gated');
 
-assert.ok(ui.includes('3,743-record Canon Registry')&&ui.includes('Search record, concept, formula, source, conflict group')&&ui.includes('Open exact source CSV'),'R328 operator surface incomplete');
-assert.ok(ui.includes('NO VALIDATION RULE DECLARED IN SOURCE'),'R328 UI must render exact missing validation as missing, not blank or fabricated');
 assert.ok(master.includes('SOURCE_EXACT_SEMANTIC_CANON_REMAINS_SEPARATE_FROM_IMPLEMENTATION_CANON'),'convergence law must separate semantic and implementation canons');
+assert.ok(!convergenceUi.includes('SourceExactCanonR328')&&!convergenceUi.includes('r328-canon'),'R328 source registry must remain data/proof authority, not a nested Convergence operator panel');
 assert.ok(master.includes("R328 SOURCE-EXACT CANON")&&master.includes("3,743-row semantic registry"),'R314 build stage must consume R328 source canon');
 assert.ok(implementation.includes('R314_IMPLEMENTATION_CANON_EXPECTED_ROWS=675'),'R328 must not overwrite the distinct 675-row implementation canon');
 assert.ok(audit.includes('R328-SOURCE-CANON-HASH')&&audit.includes('R328-SOURCE-CANON-CENSUS')&&audit.includes("sourceCanonRecords!==3743"),'convergence audit must fail closed on R328 source corruption');
