@@ -8,7 +8,7 @@ const verifier=fs.readFileSync('scripts/verify_staged_release.mjs','utf8');
 const override=fs.readFileSync('scripts/cloudflare-version-override-fetch.mjs','utf8');
 const browser=fs.readFileSync('tests/r200-current-browser-proof-e2e.mjs','utf8');
 
-assert.equal(policy.revision,'R240.1');
+assert.equal(policy.revision,'R240.2');
 assert.equal(policy.deploymentContractRevision,'R324');
 assert.equal(policy.deployment.soleCanonicalWriter,'.github/workflows/ci.yml');
 for(const key of [

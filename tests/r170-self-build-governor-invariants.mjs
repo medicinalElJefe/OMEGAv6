@@ -12,6 +12,7 @@ const workflow=fs.readFileSync('.github/workflows/r170-governed-selfbuild.yml','
 const governor=JSON.parse(fs.readFileSync('public/omega-r170-self-build-governor.json','utf8'));
 const cloudWorkflow=fs.readFileSync('.github/workflows/r223-cloudflare-evolution.yml','utf8');
 const cloudTest=fs.readFileSync('tests/r223-cloudflare-evolution-invariants.mjs','utf8');
+const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
 
 assert.equal(state.schema,'OMEGA_GOVERNED_SELFBUILD_STATE_R170');
 assert.equal(state.revision,'R170.2');
@@ -52,12 +53,16 @@ assert.doesNotMatch(engine,/function\s+residualGate\s*\(/);
 assert.ok(!/git\s+push/i.test(engine),'scheduler engine itself has no repository push authority');
 assert.ok(!/Math\.random|crypto\.random/i.test(engine),'self-build generation must remain deterministic');
 for(const needle of ['api/core-health','api/release-evidence','api/runtime-attestation','api/hybrid/status','UNREACHABLE'])assert.ok(collector.includes(needle));
-for(const needle of ['gh run list','headSha','production_ready','OBSERVE_ONLY','prove_successor_workflow_invariants_r175.mjs','r180-living-world-execution-dispatch-invariants.mjs','r179-living-world-durable-authorization-invariants.mjs','r245-governed-selfbuild-convergence-invariants.mjs','autonomousCandidatePolicy','cloud/evolution-','R240/R245 EXACT CANDIDATE PASS','R240 exact two-parent source promotion PASS','actions/workflows/ci.yml/dispatches','gh run watch'])assert.ok(workflow.includes(needle),`self-build workflow missing ${needle}`);
+for(const needle of ['gh run list','headSha','production_ready','OBSERVE_ONLY','prove_successor_workflow_invariants_r175.mjs','r180-living-world-execution-dispatch-invariants.mjs','r179-living-world-durable-authorization-invariants.mjs','r245-governed-selfbuild-convergence-invariants.mjs','autonomousCandidatePolicy','cloud/evolution-','R240/R245 EXACT CANDIDATE PASS','R240 exact two-parent source promotion PASS','git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA"','--force-with-lease="refs/heads/main:$BASE"','--event push','gh run watch'])assert.ok(workflow.includes(needle),`self-build workflow missing ${needle}`);
 assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(workflow),'R170 may not direct-push candidate source to main');
 assert.ok(!/gh\s+pr\s+merge/i.test(workflow),'GitHub auto-merge/CLI merge remains unused');
-assert.ok(!/gh\s+workflow\s+run/i.test(workflow),'canonical dispatch uses explicit API binding, not recursive CLI fanout');
+assert.ok(!/gh\s+workflow\s+run/i.test(workflow),'self-builder may not recursively dispatch itself');
 assert.ok(!/^\s*workflow_run\s*:/m.test(workflow));
-assert.match(workflow,/cron: '17 \* \* \* \*'/);
+assert.ok(!/^\s*schedule\s*:/m.test(workflow),'R330 removes hourly polling from the self-builder');
+assert.ok(!/gh\s+pr\s+create/i.test(workflow),'R330 must not depend on repository Actions PR-creation permission');
+assert.match(ci,/continue-governed-selfbuild:/,'canonical production CI must own continuation');
+assert.match(ci,/actions\/workflows\/r170-governed-selfbuild\.yml\/dispatches/,'successful canonical production must dispatch the next governed cycle');
+assert.match(ci,/needs:\s*deploy-main/,'continuation must be downstream of successful canonical deployment');
 const selectIndex=workflow.indexOf('name: Select next bounded capsule');
 const installIndex=workflow.indexOf('name: Prepare candidate proof dependencies');
 const preGenerationProofIndex=workflow.indexOf('name: Prove current successor chain before generation');
@@ -67,8 +72,8 @@ assert.doesNotMatch(workflow.slice(0,selectIndex),/npm install/);
 assert.match(workflow.slice(installIndex,preGenerationProofIndex),/if: steps\.select\.outputs\.status == 'PROPOSE'/);
 assert.match(workflow.slice(preGenerationProofIndex,generateIndex),/if: steps\.select\.outputs\.status == 'PROPOSE'/);
 
-assert.equal(governor.revision,'R170.5-R241');
-assert.equal(governor.engineRevision,'R170.2+R240');
+assert.equal(governor.revision,'R170.6-R330');
+assert.equal(governor.engineRevision,'R170.2+R240+R330');
 assert.equal(governor.currentCapabilityFloor,'R241');
 assert.deepEqual(governor.promotedSuccessorContinuity,['R175','R176','R177','R178','R179','R180']);
 assert.deepEqual(governor.postR180ProofContinuity,['R200','R200.1','R202','R210','R223','R236','R237','R238','R239','R240','R241']);
@@ -76,8 +81,8 @@ assert.equal(governor.successorWorkflowPolicy.readOnly,true);
 assert.equal(governor.successorWorkflowPolicy.mainPushAllowed,false);
 assert.equal(governor.successorWorkflowPolicy.recurringScheduleAllowed,false);
 assert.equal(governor.successorWorkflowPolicy.autoMergeAllowed,false);
-assert.equal(governor.selfBuild.schedule,'17 * * * *');
-assert.equal(governor.selfBuild.observationCadence,'HOURLY');
+assert.equal(governor.selfBuild.schedule,'PRODUCTION_SUCCESS_EVENT');
+assert.equal(governor.selfBuild.observationCadence,'EVENT_DRIVEN');
 assert.equal(governor.selfBuild.expensiveProofMode,'PROPOSE_ONLY');
 assert.equal(governor.selfBuild.recursiveScheduler,'R240');
 assert.equal(governor.selfBuild.latestExplicitSuccessorProof,'tests/r241-archive-convergence-invariants.mjs');
@@ -86,6 +91,8 @@ assert.equal(governor.selfBuild.autoMerge,false);
 assert.equal(governor.selfBuild.recursiveTriggerChain,false);
 assert.equal(governor.selfBuild.highOrCriticalAutoRepair,false);
 assert.equal(governor.selfBuild.canonicalAdmissionAuthority,'R125');
+assert.equal(governor.selfBuild.eventDrivenContinuation,true);
+assert.equal(governor.selfBuild.continuationAuthority,'.github/workflows/ci.yml::continue-governed-selfbuild');
 assert.equal(governor.selfPromotion.revision,'R240');
 assert.equal(governor.selfPromotion.enabled,true);
 assert.equal(governor.selfPromotion.exactExpectedHeadMergeRequired,true);
@@ -96,6 +103,11 @@ assert.equal(governor.selfPromotion.canonicalDeploymentWorkflow,'.github/workflo
 assert.equal(governor.selfPromotion.productionProofRequiredAfterSourceMerge,true);
 assert.equal(governor.selfPromotion.canonStateAdmission,false);
 assert.equal(governor.selfPromotion.canonicalAdmissionAuthority,'R125');
+assert.equal(governor.selfPromotion.exactTwoParentMainUpdate,true);
+assert.equal(governor.selfPromotion.repositoryPrCreationRequired,false);
+assert.equal(governor.selfPromotion.candidatePullRequestRequired,false);
+assert.equal(governor.selfPromotion.canonicalDeploymentPushTrigger,true);
+assert.equal(governor.selfPromotion.productionContinuationDispatch,'.github/workflows/ci.yml -> r170-governed-selfbuild.yml');
 for(const [key,value] of Object.entries({livingWorldExecutionDispatch:'R180_EXPLICIT_DISPATCH_R147_AUTHORITY',deployedBrowserProof:'R200.1_EXACT_PROMOTED_SHA',operationalSourceAuthority:'R202_READ_ONLY_PROVENANCE_AND_LIFECYCLE_PROJECTION',liveTruthRecovery:'R210_FORWARD_ONLY_REFRESH_AND_RUNTIME_VERSION_REANCHOR',autonomousEvolution:'R223_CLOUD_01_CLOUDFLARE_GITHUB_PORTAL',sourceSpatialControlAttestation:'R236_FAIL_CLOSED_INDEPENDENT_TRUST_BOUNDARY',hybridCommandAuthority:'R237_AUTHENTICATED_BOUNDED_NATIVE_CONTROL',hybridHostIntelligence:'R238_RETURNED_RESOURCE_AND_MACRO_INTEGRITY_PROOF',hybridResourceGovernor:'R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING',recursiveSelfBuildAndExactPromotion:'R240_R164_EVIDENCE_BOUND_SPARSE_FRONTIER_PLUS_EXACT_SOURCE_PROMOTION',archiveConvergenceVisualIntelligence:'R241_READ_ONLY_1728_OVER_20736_TOPOLOGY_AND_TYPED_COGNITION_PROJECTION'}))assert.equal(governor.preservedRuntime[key],value);
 assert.match(cloudWorkflow,/workflow_dispatch:/);assert.doesNotMatch(cloudWorkflow,/^\s*push\s*:/m);assert.match(cloudWorkflow,/wrangler\.evolution-machine-r223\.jsonc/);assert.match(cloudWorkflow,/r245-governed-selfbuild-convergence-invariants\.mjs/);assert.match(cloudTest,/shared R164 residual policy/);
 
@@ -111,4 +123,4 @@ try{assert.equal(mediumObserve.result.status,0);const proposed=JSON.parse(medium
 const critical=runEngineSimulation({simState:baseSimulationState(),residual:{schema:'OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164',state:'BLOCKED',summary:{blocking:1},residuals:[{id:'SIM_CRITICAL',severity:'CRITICAL',mode:'BLOCK'}]},apply:false});
 try{assert.equal(critical.result.status,0);const blocked=JSON.parse(critical.result.stdout);assert.equal(blocked.status,'BLOCKED_BY_RESIDUAL_GATE');assert.equal(blocked.gate.allow,false);assert.deepEqual(blocked.gate.blocking,['SIM_CRITICAL']);assert.equal(fs.existsSync(path.join(critical.root,'src/generated/selfbuildR170/workflowCapacityModelR170.ts')),false)}finally{fs.rmSync(critical.root,{recursive:true,force:true})}
 
-console.log(`R170.5/R239/R240/R241/R245 GOVERNED SELF-BUILD PASS · promoted proof floor remains R241 until source promotion · R245 shares R164 residual policy, R240/R243 selection and deterministic generator with CLOUD-01 · one cross-machine candidate fence · R239 preserved · R240 exact promotion preserved · ci.yml sole production writer · R125 unchanged · generation ${state.generation}/${state.maxAutonomousGenerations}`);
+console.log(`R170.6/R239/R240/R241/R245/R330 GOVERNED SELF-BUILD PASS · promoted proof floor remains R241 until source promotion · R245 shares R164 residual policy, R240/R243 selection and deterministic generator with CLOUD-01 · one cross-machine candidate fence · R239 preserved · R240 exact promotion preserved · ci.yml sole production writer · R125 unchanged · generation ${state.generation}/${state.maxAutonomousGenerations}`);
