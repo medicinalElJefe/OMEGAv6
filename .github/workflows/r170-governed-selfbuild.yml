@@ -2,6 +2,8 @@ name: R170 Governed Self-Build
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
 
 permissions:
   contents: write
@@ -227,65 +229,105 @@ jobs:
           console.log(`R240/R245 EXACT CANDIDATE PASS · ${process.env.CANDIDATE_SHA} · base ${process.env.BASE} · ${changed.length} allowlisted paths`);
           NODE
           echo "status=PASS" >> "$GITHUB_OUTPUT"
-      - name: Promote exact candidate as an atomic two-parent merge
+      - name: Open governed exact-head candidate PR
         if: steps.exact_candidate.outputs.status == 'PASS'
+        id: create_pr
+        env:
+          GH_TOKEN: ${{ secrets.OMEGA_EVOLUTION_GITHUB_TOKEN || github.token }}
+        shell: bash
+        run: |
+          BRANCH='${{ steps.candidate.outputs.branch }}'
+          set +e
+          OUTPUT=$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --title "R170/R240/R245 self-build g${{ steps.select.outputs.generation }} — ${{ steps.select.outputs.capsule }}" --body "Bounded autonomous source proposal and exact-source-promotion candidate. Production-proven base: ${{ steps.freshness.outputs.base }}. Candidate: ${{ steps.commit.outputs.sha }}. Shared R164 residual policy passed; R240/R243 selected one source candidate; R170 and CLOUD-01 use one deterministic generator and one-open-candidate fence; committed candidate was re-proved; diff is allowlisted; R239 is preserved; this PR is not CanonState admission and R125 remains sole CanonState admission authority." 2>&1)
+          RC=$?
+          set -e
+          if [ "$RC" -eq 0 ]; then
+            PR_NUMBER="${OUTPUT##*/}"
+            test -n "$PR_NUMBER"
+            echo "status=OPENED" >> "$GITHUB_OUTPUT"
+            echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+            echo "$OUTPUT"
+            exit 0
+          fi
+          if echo "$OUTPUT" | grep -q 'GitHub Actions is not permitted to create or approve pull requests'; then
+            git push origin --delete "$BRANCH" || true
+            echo "status=POLICY_BLOCKED_BRANCH_REMOVED" >> "$GITHUB_OUTPUT"
+            echo "POLICY_BLOCKED_BRANCH_REMOVED · repository Actions policy refused PR creation; orphan candidate branch removed fail-closed."
+            exit 0
+          fi
+          echo "$OUTPUT" >&2
+          exit "$RC"
+      - name: Require exact candidate PR CI success
+        if: steps.create_pr.outputs.status == 'OPENED'
+        id: pr_ci
+        env:
+          GH_TOKEN: ${{ secrets.OMEGA_EVOLUTION_GITHUB_TOKEN || github.token }}
+        shell: bash
+        run: |
+          CANDIDATE_SHA='${{ steps.commit.outputs.sha }}'
+          BRANCH='${{ steps.candidate.outputs.branch }}'
+          RUN_ID=''
+          for attempt in $(seq 1 36); do
+            RUNS=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch "$BRANCH" --event pull_request --limit 20 --json databaseId,headSha,status,conclusion,event,url)
+            RUN_ID=$(CANDIDATE_SHA="$CANDIDATE_SHA" RUNS="$RUNS" node -e "const rs=JSON.parse(process.env.RUNS||'[]');const r=rs.find(x=>x.headSha===process.env.CANDIDATE_SHA&&x.event==='pull_request');process.stdout.write(String(r?.databaseId||''))")
+            if [ -n "$RUN_ID" ]; then break; fi
+            sleep 5
+          done
+          test -n "$RUN_ID" || { echo '::error::No pull_request ci.yml run appeared for exact R240/R245 candidate SHA.'; exit 1; }
+          gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
+          RUN=$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json headSha,status,conclusion,event,url)
+          CANDIDATE_SHA="$CANDIDATE_SHA" RUN="$RUN" node -e "const r=JSON.parse(process.env.RUN);if(r.headSha!==process.env.CANDIDATE_SHA||r.event!=='pull_request'||r.status!=='completed'||r.conclusion!=='success')throw new Error('exact candidate PR CI did not finish green')"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "status=PASS" >> "$GITHUB_OUTPUT"
+      - name: Merge exact expected-head candidate and prove two-parent source promotion
+        if: steps.pr_ci.outputs.status == 'PASS'
         id: merge
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.OMEGA_EVOLUTION_GITHUB_TOKEN || github.token }}
         shell: bash
         run: |
           BASE='${{ steps.freshness.outputs.base }}'
           CANDIDATE_SHA='${{ steps.commit.outputs.sha }}'
+          PR_NUMBER='${{ steps.create_pr.outputs.number }}'
           git fetch origin main
           CURRENT=$(git rev-parse origin/main)
           test "$CURRENT" = "$BASE" || { echo "::error::main moved from exact base $BASE to $CURRENT; refusing R240 source promotion"; exit 42; }
-
-          TREE=$(git rev-parse "$CANDIDATE_SHA^{tree}")
-          export GIT_AUTHOR_NAME='OMEGA R170 Governed Self Builder'
-          export GIT_AUTHOR_EMAIL='actions@users.noreply.github.com'
-          export GIT_COMMITTER_NAME='OMEGA R170 Governed Self Builder'
-          export GIT_COMMITTER_EMAIL='actions@users.noreply.github.com'
-          MERGE_SHA=$(printf '%s\n\n%s\n%s\n' \
-            "R170/R240/R245 governed exact source promotion" \
-            "Base: $BASE" \
-            "Candidate: $CANDIDATE_SHA" | git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA")
-
+          PR=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
+          BASE="$BASE" CANDIDATE_SHA="$CANDIDATE_SHA" PR="$PR" node -e "const p=JSON.parse(process.env.PR);if(p.state!=='open'||p.base?.ref!=='main'||p.base?.sha!==process.env.BASE||p.head?.sha!==process.env.CANDIDATE_SHA)throw new Error('PR identity/base/head drifted before exact merge')"
+          MERGE=$(gh api --method PUT "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/merge" -f merge_method=merge -f sha="$CANDIDATE_SHA")
+          MERGE_SHA=$(MERGE="$MERGE" node -e "const m=JSON.parse(process.env.MERGE);if(m.merged!==true||!m.sha)throw new Error('GitHub exact-head merge was not accepted');process.stdout.write(m.sha)")
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "$MERGE_SHA" || { echo '::error::main does not equal returned exact merge SHA'; exit 1; }
           PARENTS=$(git show -s --format=%P "$MERGE_SHA")
           set -- $PARENTS
           test "$#" -eq 2 || { echo "::error::R240 promoted source must be exactly two-parent merge"; exit 1; }
           test "$1" = "$BASE" || { echo "::error::R240 first parent does not equal exact production base"; exit 1; }
           test "$2" = "$CANDIDATE_SHA" || { echo "::error::R240 second parent does not equal exact proved candidate"; exit 1; }
-          test "$(git rev-parse "$MERGE_SHA^{tree}")" = "$TREE" || { echo "::error::R240 merge tree drifted from exact proved candidate"; exit 1; }
-
-          git push origin "$MERGE_SHA:refs/heads/main" --force-with-lease="refs/heads/main:$BASE"
-          git fetch origin main
-          test "$(git rev-parse origin/main)" = "$MERGE_SHA" || { echo "::error::main does not equal exact atomic merge SHA"; exit 1; }
           echo "sha=$MERGE_SHA" >> "$GITHUB_OUTPUT"
           echo "R240 exact two-parent source promotion PASS · $BASE + $CANDIDATE_SHA → $MERGE_SHA"
-
-      - name: Require sole canonical production writer for exact promoted merge
+      - name: Dispatch sole canonical production writer for exact promoted merge
         if: steps.merge.outputs.sha != ''
         id: deployment
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.OMEGA_EVOLUTION_GITHUB_TOKEN || github.token }}
         shell: bash
         run: |
           MERGE_SHA='${{ steps.merge.outputs.sha }}'
+          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/dispatches" -f ref=main
           RUN_ID=''
-          for attempt in $(seq 1 72); do
-            RUNS=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --event push --limit 30 --json databaseId,headSha,status,conclusion,event,url)
-            RUN_ID=$(MERGE_SHA="$MERGE_SHA" RUNS="$RUNS" node -e "const rs=JSON.parse(process.env.RUNS||'[]');const r=rs.find(x=>x.headSha===process.env.MERGE_SHA&&x.event==='push');process.stdout.write(String(r?.databaseId||''))")
+          for attempt in $(seq 1 36); do
+            RUNS=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --event workflow_dispatch --limit 20 --json databaseId,headSha,status,conclusion,event,url)
+            RUN_ID=$(MERGE_SHA="$MERGE_SHA" RUNS="$RUNS" node -e "const rs=JSON.parse(process.env.RUNS||'[]');const r=rs.find(x=>x.headSha===process.env.MERGE_SHA&&x.event==='workflow_dispatch');process.stdout.write(String(r?.databaseId||''))")
             if [ -n "$RUN_ID" ]; then break; fi
             sleep 5
           done
-          test -n "$RUN_ID" || { echo '::error::Canonical ci.yml push run did not appear for exact promoted merge.'; exit 1; }
+          test -n "$RUN_ID" || { echo '::error::Canonical ci.yml workflow_dispatch did not appear for exact promoted merge.'; exit 1; }
           gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
           RUN=$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json headSha,status,conclusion,event,url)
-          MERGE_SHA="$MERGE_SHA" RUN="$RUN" node -e "const r=JSON.parse(process.env.RUN);if(r.headSha!==process.env.MERGE_SHA||r.event!=='push'||r.status!=='completed'||r.conclusion!=='success')throw new Error('canonical production proof does not bind exact promoted merge')"
+          MERGE_SHA="$MERGE_SHA" RUN="$RUN" node -e "const r=JSON.parse(process.env.RUN);if(r.headSha!==process.env.MERGE_SHA||r.event!=='workflow_dispatch'||r.status!=='completed'||r.conclusion!=='success')throw new Error('canonical production proof does not bind exact promoted merge')"
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
           echo "status=PRODUCTION_PROVEN" >> "$GITHUB_OUTPUT"
           echo "R240 exact promoted merge is production-proven by canonical ci.yml · merge $MERGE_SHA · run $RUN_ID"
-
       - name: Clean promoted candidate branch only after production proof
         if: steps.deployment.outputs.status == 'PRODUCTION_PROVEN'
         env:
@@ -333,20 +375,22 @@ jobs:
         if: always()
         run: |
           echo "## R170.5 / R240 / R245 / R246 governed recursive self-build pulse" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Observation cadence: event-driven after canonical production success" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Observation cadence: hourly at minute 17" >> "$GITHUB_STEP_SUMMARY"
           echo "- Exact production head ready: ${{ steps.production.outputs.production_ready || 'false' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Production base proof run: ${{ steps.production.outputs.production_run_id || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Existing autonomous candidate PRs across R170/CLOUD-01: ${{ steps.open_pr.outputs.pr_count || 'not-checked' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Selection: ${{ steps.select.outputs.status || 'OBSERVE_ONLY' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Candidate exact re-proof: ${{ steps.exact_candidate.outputs.status || 'not-attempted' }}" >> "$GITHUB_STEP_SUMMARY"
-                              echo "- Exact two-parent source merge: ${{ steps.merge.outputs.sha || 'not-promoted' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- PR creation: ${{ steps.create_pr.outputs.status || 'not-attempted' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Candidate PR CI: ${{ steps.pr_ci.outputs.status || 'not-attempted' }} / ${{ steps.pr_ci.outputs.run_id || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Exact two-parent source merge: ${{ steps.merge.outputs.sha || 'not-promoted' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Canonical production proof: ${{ steps.deployment.outputs.status || 'not-proven' }} / ${{ steps.deployment.outputs.run_id || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- R246 candidate lifecycle: ${{ steps.lifecycle.outputs.action || 'not-needed' }} / ${{ steps.lifecycle.outputs.reason || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Residual gate: one canonical R164 policy shared by R170 and CLOUD-01" >> "$GITHUB_STEP_SUMMARY"
           echo "- Planning: one shared R240/R243 sparse frontier and Woven selection law; one source mutation candidate per pulse" >> "$GITHUB_STEP_SUMMARY"
           echo "- Generator: one deterministic R245 SG001–SG005 source body shared by R170 and CLOUD-01" >> "$GITHUB_STEP_SUMMARY"
           echo "- Candidate fence: one open autonomous PR maximum across selfbuild/r170-* and cloud/evolution-*" >> "$GITHUB_STEP_SUMMARY"
-          echo "- GitHub Actions PR creation dependency: removed; exact atomic two-parent merge promotion is used after full local candidate proof" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Generator direct push to main: forbidden; only the governed exact two-parent promotion step may update main under an unchanged-base lease" >> "$GITHUB_STEP_SUMMARY"
+          echo "- GitHub auto-merge feature: disabled" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Direct generator push to main: forbidden" >> "$GITHUB_STEP_SUMMARY"
           echo "- Sole canonical production writer: ci.yml" >> "$GITHUB_STEP_SUMMARY"
           echo "- CanonState admission authority: R125" >> "$GITHUB_STEP_SUMMARY"
