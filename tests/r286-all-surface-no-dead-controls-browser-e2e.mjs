@@ -94,7 +94,7 @@ async function panelStructureAudit(page,route){
     for(const panel of panels){
       const r=panel.getBoundingClientRect();
       if(![r.left,r.right,r.top,r.bottom,r.width,r.height].every(Number.isFinite))failures.push('visible panel returned non-finite geometry');
-      if(r.width<8||r.height<8){const id=[panel.tagName.toLowerCase(),String(panel.className||'').trim().replace(/\s+/g,'.')].filter(Boolean).join('.');const parent=panel.parentElement?[panel.parentElement.tagName.toLowerCase(),String(panel.parentElement.className||'').trim().replace(/\s+/g,'.')].filter(Boolean).join('.'):'none';failures.push(`visible panel ${id||'unknown'} under ${parent} has unusable ${Math.round(r.width)}×${Math.round(r.height)} geometry`)};
+      if(r.width<8||r.height<8)failures.push(`visible panel has unusable ${Math.round(r.width)}×${Math.round(r.height)} geometry`);
     }
     for(const owner of surface.querySelectorAll('[aria-controls]')){
       const id=owner.getAttribute('aria-controls');
