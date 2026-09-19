@@ -4,6 +4,7 @@ export const R328_SOURCE_CANON_URL='/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT
 export const R328_SOURCE_ORIGINAL_SHA256='1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb' as const;
 export const R328_REPOSITORY_NORMALIZED_SHA256='478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf' as const;
 export const R328_SOURCE_CANON_EXPECTED_RECORDS=3743 as const;
+export const R328_CONFLICT_POLICY='CONFLICT_VARIANTS_PRESERVED_UNTIL_EXPLICIT_PROOF' as const;
 export const R328_SOURCE_CANON_RECEIPT=Object.freeze({
  originalSha256:R328_SOURCE_ORIGINAL_SHA256,repositoryNormalizedSha256:R328_REPOSITORY_NORMALIZED_SHA256,originalSizeBytes:1838041,repositorySizeBytes:1834293,transportNormalization:'UTF8_BOM_REMOVED_CRLF_TO_LF_FINAL_EOL_REMOVED_VALUES_UNCHANGED',records:3743,sourceFamilies:13,sourceFiles:10,categories:47,concepts:495,propertyNames:173,computationHeads:45,epistemicStatuses:63,blankEpistemicRows:2,conflictGroups:463,multiVariantConflictGroups:405
 });
@@ -144,6 +145,7 @@ export function compileSourceExactCanonR328(rows:readonly R328CanonRow[]){
   operations:Object.fromEntries([...byOperation].sort()),
   epistemic:Object.fromEntries([...byEpistemic].sort()),
   crosswalk:Object.fromEntries([...crosswalk].sort()),
+  conflictPolicy:R328_CONFLICT_POLICY,
   conflicts,
   dependency:{declaredRows:rows.filter(x=>tokens(x.dependency_symbols).length>0).length},
   canonicalAdmission:false,
