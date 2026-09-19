@@ -4,10 +4,13 @@
   "source": {
     "name": "OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv",
     "publicPath": "/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv",
-    "sha256": "1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb",
-    "sizeBytes": 1838041,
     "records": 3743,
-    "physicalLines": 3744
+    "physicalLines": 3744,
+    "originalSha256": "1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb",
+    "originalSizeBytes": 1838041,
+    "repositoryNormalizedSha256": "478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf",
+    "repositorySizeBytes": 1834293,
+    "transportNormalization": "UTF8_BOM_REMOVED_CRLF_TO_LF_FINAL_EOL_REMOVED_VALUES_UNCHANGED"
   },
   "census": {
     "sourceFamilies": 13,
@@ -36,5 +39,5 @@
     "REPRESENTATIONAL_ADDRESS_LEVEL_NEQ_LITERAL_PHYSICAL_DIMENSION",
     "GENERATED_NEQ_PROVED_NEQ_DEPLOYED_NEQ_CANON_ADMITTED"
   ],
-  "truthBoundary": "R328 imports and classifies the exact 3,743-record source canon as immutable semantic/provenance data. It does not by itself execute symbolic formulas, validate user-defined physical claims, satisfy device/provider gates, prove production deployment, or mutate CanonState."
+  "truthBoundary": "R328 imports and classifies all 3,743 source records without changing any CSV field value. Git repository text transport removes the UTF-8 BOM, normalizes CRLF to LF, and omits the final newline; both the original-upload byte hash and normalized repository hash are recorded. This does not by itself execute symbolic formulas, validate user-defined physical claims, satisfy device/provider gates, prove deployment, or mutate CanonState."
 }
