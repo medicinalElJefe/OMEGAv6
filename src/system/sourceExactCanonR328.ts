@@ -5,7 +5,7 @@ export const R328_SOURCE_ORIGINAL_SHA256='1c805af0e6e3a5ef2bb869bfc7d389ecba8746
 export const R328_REPOSITORY_NORMALIZED_SHA256='478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf' as const;
 export const R328_SOURCE_CANON_EXPECTED_RECORDS=3743 as const;
 export const R328_SOURCE_CANON_RECEIPT=Object.freeze({
- originalSha256:R328_SOURCE_ORIGINAL_SHA256,repositoryNormalizedSha256:R328_REPOSITORY_NORMALIZED_SHA256,originalSizeBytes:1838041,repositorySizeBytes:1834293,transportNormalization:'UTF8_BOM_REMOVED_CRLF_TO_LF_FINAL_EOL_REMOVED_VALUES_UNCHANGED',records:3743,sourceFamilies:13,sourceFiles:10,categories:47,concepts:495,propertyNames:173,computationHeads:45,epistemicStatuses:63,conflictGroups:463,multiVariantConflictGroups:405
+ originalSha256:R328_SOURCE_ORIGINAL_SHA256,repositoryNormalizedSha256:R328_REPOSITORY_NORMALIZED_SHA256,originalSizeBytes:1838041,repositorySizeBytes:1834293,transportNormalization:'UTF8_BOM_REMOVED_CRLF_TO_LF_FINAL_EOL_REMOVED_VALUES_UNCHANGED',records:3743,sourceFamilies:13,sourceFiles:10,categories:47,concepts:495,propertyNames:173,computationHeads:45,epistemicStatuses:63,blankEpistemicRows:2,conflictGroups:463,multiVariantConflictGroups:405
 });
 
 export const R328_SOURCE_CANON_COLUMNS=[
@@ -130,7 +130,7 @@ export function compileSourceExactCanonR328(rows:readonly R328CanonRow[]){
  const sourceFamilies=new Set<string>(),sourceFiles=new Set<string>(),categories=new Set<string>(),concepts=new Set<string>(),properties=new Set<string>(),epistemicStatuses=new Set<string>(),operationHeads=new Set<string>();
  const conflictMap=new Map<string,R328CanonRow[]>(),byOperation=new Map<string,number>(),byEpistemic=new Map<string,number>(),crosswalk=new Map<R328CrosswalkState,number>();
  for(const row of rows){
-  sourceFamilies.add(row.source_family);if(row.source_file)sourceFiles.add(row.source_file);categories.add(row.category);concepts.add(row.concept_name);properties.add(row.property_name);if(row.epistemic_status)epistemicStatuses.add(row.epistemic_status);
+  sourceFamilies.add(row.source_family);if(row.source_file)sourceFiles.add(row.source_file);categories.add(row.category);concepts.add(row.concept_name);properties.add(row.property_name);epistemicStatuses.add(row.epistemic_status);
   operationHeads.add(computationHeadR328(row.computation_language));
   const op=operationFamilyR328(row.computation_language);byOperation.set(op,(byOperation.get(op)||0)+1);
   const ep=epistemicClassR328(row.epistemic_status);byEpistemic.set(ep,(byEpistemic.get(ep)||0)+1);
