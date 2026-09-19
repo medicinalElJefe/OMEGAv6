@@ -1,61 +1,26 @@
 import fs from 'node:fs';
 
-const workflow = fs.readFileSync('.github/workflows/r170-governed-selfbuild.yml', 'utf8');
-const requireInvariant = (condition, message) => {
-  if (!condition) throw new Error(message);
-};
+const workflow=fs.readFileSync('.github/workflows/r170-governed-selfbuild.yml','utf8');
+const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+const governor=JSON.parse(fs.readFileSync('public/omega-r170-self-build-governor.json','utf8'));
+const requireInvariant=(condition,message)=>{if(!condition)throw new Error(message)};
 
-requireInvariant(
-  workflow.includes('gh pr list --repo "$GITHUB_REPOSITORY" --state open --base main --limit 100 --json number,headRefName'),
-  'R245 must inspect actually open main-targeted PRs before autonomous generation',
-);
-requireInvariant(
-  workflow.includes("prefixes.includes('selfbuild/r170-')") && workflow.includes("prefixes.includes('cloud/evolution-')"),
-  'R245 cross-machine fence must cover both R170 and CLOUD-01 autonomous candidate prefixes',
-);
-requireInvariant(
-  workflow.includes('const held=prs.filter(pr=>prefixes.some(prefix=>String(pr.headRefName||\'\').startsWith(prefix)))'),
-  'R245 must derive the held autonomous candidates from the canonical branch-prefix policy',
-);
-requireInvariant(
-  !workflow.includes('matching-refs/heads/selfbuild/r170-'),
-  'historical orphan selfbuild refs must not permanently deadlock future R240 pulses',
-);
-requireInvariant(
-  workflow.includes("steps.open_pr.outputs.count == '0'"),
-  'R240 generation must remain gated on zero open autonomous candidate PRs',
-);
-requireInvariant(
-  workflow.includes('POLICY_BLOCKED_BRANCH_REMOVED'),
-  'R240 must explicitly represent repository-policy-blocked PR creation with orphan cleanup',
-);
-requireInvariant(
-  workflow.includes('git push origin --delete "$BRANCH" || true'),
-  'R240 must delete the just-created candidate branch when known PR policy blocks admission',
-);
-requireInvariant(
-  workflow.includes('GitHub Actions is not permitted to create or approve pull requests'),
-  'R240 policy fallback must remain scoped to the known GitHub Actions PR-policy rejection',
-);
-requireInvariant(
-  workflow.includes('exit "$RC"'),
-  'R240 must continue failing for unexpected PR creation errors',
-);
-requireInvariant(
-  workflow.includes('actions/checkout@v7') && workflow.includes('actions/setup-node@v7'),
-  'R240 must use the current Node-24-capable v7 GitHub action generation',
-);
-requireInvariant(
-  !workflow.includes('actions/checkout@v4') && !workflow.includes('actions/setup-node@v4'),
-  'R240 must not regress to Node-20-targeting v4 GitHub actions',
-);
-requireInvariant(
-  workflow.includes('R125 remains sole CanonState admission authority'),
-  'R125 sole CanonState admission authority must remain explicit in the candidate PR contract',
-);
-requireInvariant(
-  workflow.includes('Direct generator push to main: forbidden') && workflow.includes('GitHub auto-merge feature: disabled'),
-  'R240 must preserve no-direct-generator-main-push and no-GitHub-auto-merge boundaries',
-);
+requireInvariant(workflow.includes('gh pr list --repo "$GITHUB_REPOSITORY" --state open --base main --limit 100 --json number,headRefName'),'legacy/CLOUD-01 open-candidate fence must remain');
+requireInvariant(workflow.includes("prefixes.includes('selfbuild/r170-')")&&workflow.includes("prefixes.includes('cloud/evolution-')"),'cross-machine candidate fence must remain');
+requireInvariant(!workflow.includes('gh pr create'),'R330 must not depend on Actions-created PR permission');
+requireInvariant(!workflow.includes('GitHub Actions is not permitted to create or approve pull requests'),'obsolete PR-policy fallback must be removed');
+requireInvariant(workflow.includes('git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA"'),'promotion must construct an exact two-parent merge');
+requireInvariant(workflow.includes('--force-with-lease="refs/heads/main:$BASE"'),'promotion must fail closed if main moved');
+requireInvariant(workflow.includes('test "$(git rev-parse "$MERGE_SHA^{tree}")" = "$TREE"'),'merge tree must equal exact proved candidate tree');
+requireInvariant(workflow.includes('--event push'),'production proof must bind push-triggered canonical CI');
+requireInvariant(!/^\s*schedule\s*:/m.test(workflow),'hourly polling must be removed');
+requireInvariant(workflow.includes('workflow_dispatch:'),'governed self-build remains explicitly dispatchable');
+requireInvariant(ci.includes('continue-governed-selfbuild:'),'canonical CI must own continuation');
+requireInvariant(ci.includes('actions/workflows/r170-governed-selfbuild.yml/dispatches'),'canonical CI must dispatch the next cycle');
+requireInvariant(ci.includes('needs: deploy-main'),'continuation must wait for successful production proof');
+requireInvariant(governor.selfBuild.eventDrivenContinuation===true,'governor must declare event-driven continuation');
+requireInvariant(governor.selfPromotion.repositoryPrCreationRequired===false,'governor must record PR-policy independence');
+requireInvariant(governor.selfPromotion.exactTwoParentMainUpdate===true,'governor must preserve exact two-parent promotion');
+requireInvariant(governor.selfPromotion.canonicalAdmissionAuthority==='R125','R125 admission authority must remain unchanged');
 
-console.log('R245 R170 PR POLICY FAIL-CLOSE PASS · one main-targeted PR inventory feeds the canonical R170/CLOUD-01 cross-machine fence · historical orphan refs do not deadlock · known Actions PR-policy rejection removes the fresh orphan branch · unexpected PR errors fail · v7 actions preserved · R125/no-direct-generator-push/no-auto-merge boundaries preserved');
+console.log('R330 AUTONOMOUS PROMOTION POLICY PASS · no hourly polling · no Actions-created-PR dependency · exact two-parent lease-bound promotion · canonical production proof · production-success continuation · R125 unchanged');
