@@ -19,9 +19,11 @@
     "concepts": 495,
     "propertyNames": 173,
     "computationHeads": 45,
-    "epistemicStatuses": 63,
     "conflictGroups": 463,
-    "multiVariantConflictGroups": 405
+    "multiVariantConflictGroups": 405,
+    "epistemicStatusVariants": 63,
+    "namedEpistemicStatuses": 62,
+    "blankEpistemicRows": 2
   },
   "authority": {
     "semanticSource": "R328 source-exact registry",
