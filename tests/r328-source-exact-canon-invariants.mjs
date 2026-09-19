@@ -21,8 +21,8 @@ function parseCsv(source){
 const matrix=parseCsv(text),header=matrix.shift(),rows=matrix.filter(x=>x.length>1||x[0]);
 const expected=['record_id','source_family','source_file','source_section','source_row_key','category','concept_name','property_name','canonical_value','computation_language','epistemic_status','units_or_frame','dependency_symbols','validation_rule','conflict_group','provenance_note'];
 assert.deepEqual(header,expected);
-assert.equal(bytes.length,1838041);
-assert.equal(createHash('sha256').update(bytes).digest('hex'),'1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb');
+assert.equal(bytes.length,1834293);
+assert.equal(createHash('sha256').update(bytes).digest('hex'),'478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf');
 assert.equal(rows.length,3743);
 
 const objects=rows.map((values,index)=>{assert.equal(values.length,16,`R328 column count row ${index+2}`);const r=Object.fromEntries(expected.map((k,i)=>[k,values[i]??'']));assert.equal(r.record_id,`R${String(index+1).padStart(6,'0')}`);return r});
@@ -45,7 +45,7 @@ for(const r of objects)if(r.conflict_group){const a=groups.get(r.conflict_group)
 assert.equal(groups.size,463);
 assert.equal([...groups.values()].filter(v=>new Set(v.map(r=>r.canonical_value)).size>1).length,405);
 
-for(const token of ['R328_SOURCE_CANON_EXPECTED_RECORDS=3743','compileComputationLanguageR328','compileSourceExactCanonR328','crosswalkSourceExactRecordR328','DIRECT_SYMBOLIC_EXPR','autoExecute:false','PUBLIC_REFERENCE','CANON_MODEL','DEVICE_GATED','CONFLICT'])assert.ok(compiler.includes(token),`R328 compiler missing ${token}`);
+for(const token of ['R328_SOURCE_ORIGINAL_SHA256','R328_REPOSITORY_NORMALIZED_SHA256','R328_SOURCE_CANON_EXPECTED_RECORDS=3743','compileComputationLanguageR328','compileSourceExactCanonR328','crosswalkSourceExactRecordR328','DIRECT_SYMBOLIC_EXPR','autoExecute:false','PUBLIC_REFERENCE','CANON_MODEL','DEVICE_GATED','CONFLICT'])assert.ok(compiler.includes(token),`R328 compiler missing ${token}`);
 assert.ok(!/\beval\s*\(/.test(compiler)&&!compiler.includes('new Function'),'R328 semantic compiler may not dynamically execute source formulas');
 for(const sf of ['MASTER','SOURCE_MANIFEST','VALIDATION','RSC','ATOMIC_WOVEN','WOVEN_20736','JULY_ALL_MODES','MODE_INVENTORY','OMEGA_BUILD_CANON','LATER_CANON','DEWEY_TREE','UNIFIED_AUDIT','MASTER_EQUATION_LEDGER'])assert.ok(compiler.includes(sf),`R328 crosswalk missing source family ${sf}`);
 assert.ok(compiler.includes("PUBLIC_REFERENCE")&&compiler.includes("src/physicsRelativityRuntimeR132.ts"),'public physics/math must remain reference-classed');
@@ -58,4 +58,4 @@ assert.ok(implementation.includes('R314_IMPLEMENTATION_CANON_EXPECTED_ROWS=675')
 assert.ok(audit.includes('R328-SOURCE-CANON-HASH')&&audit.includes('R328-SOURCE-CANON-CENSUS')&&audit.includes("sourceCanonRecords!==3743"),'convergence audit must fail closed on R328 source corruption');
 assert.ok(suite.includes("if(panel==='Convergence')return wrap(<div>\n  <OmegaConvergenceMasterR314/>"),'Convergence route must expose the semantic/implementation master');
 
-console.log('R328 SOURCE-EXACT CANON PASS · 3,743 exact records · 495 concepts · 173 properties · 45 computation heads · 463 conflict groups / 405 multivariant · exact SHA/census gated · 675-row implementation canon remains separate · no symbolic auto-execution');
+console.log('R328 SOURCE-EXACT CANON PASS · 3,743 exact records · 495 concepts · 173 properties · 45 computation heads · 463 conflict groups / 405 multivariant · original + normalized SHA/census gated · 675-row implementation canon remains separate · no symbolic auto-execution');
