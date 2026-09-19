@@ -51,9 +51,14 @@ assert.equal(manifest.persistence,'OMEGA_RUNTIME_DURABLE_OBJECT_SESSION_SCOPED')
 assert.equal(manifest.directFoundationWeightMutation,false);
 assert.equal(manifest.canonicalAdmission,false);
 
-const worker=fs.readFileSync('src/workerR331.js','utf8');
+const worker=fs.readFileSync('src/workerR116.js','utf8');
+const membrane=fs.readFileSync('src/system/coherentLearningWorkerR331.js','utf8');
 for(const token of [
- "from './workerR116.js'",
+ "from './system/coherentLearningWorkerR331.js'",
+ "publicLearningR331(request,env,r115.fetch.bind(r115))",
+ "runtimeLearningR331(this,request)"
+])assert.ok(worker.includes(token),`R331 R116 integration missing ${token}`);
+for(const token of [
  "/api/chat",
  "/api/intelligence/r331/manifest",
  "/api/intelligence/r331/feedback",
@@ -62,12 +67,23 @@ for(const token of [
  "compileConversationMemoryR331",
  "compileLearningMemoryR331",
  "canonicalAdmission:false"
-])assert.ok(worker.includes(token),`R331 worker missing ${token}`);
-assert.ok(!/canonicalAdmission\s*:\s*true/.test(worker),'R331 worker may not self-admit CanonState');
+])assert.ok(membrane.includes(token),`R331 learning membrane missing ${token}`);
+assert.ok(!/canonicalAdmission\s*:\s*true/.test(membrane),'R331 membrane may not self-admit CanonState');
 
 const wrangler=fs.readFileSync('wrangler.jsonc','utf8');
-assert.match(wrangler,/"main"\s*:\s*"src\/workerR331\.js"/,'canonical Worker must promote through R331 wrapper');
+assert.match(wrangler,/"main"\s*:\s*"src\/workerR116\.js"/,'R331 must preserve the proven R116 canonical Worker entrypoint');
 assert.match(wrangler,/"OMEGA_RUNTIME"/,'R331 durable learning must reuse the existing canonical runtime Durable Object');
+
+const orchestrator=fs.readFileSync('src/PromptOrchestrator.tsx','utf8');
+for(const token of [
+ '/api/intelligence/r331/training-batch',
+ "op:'WRITE_TEXT'",
+ "op:'TRAIN_LOCAL'",
+ 'approvedLessons',
+ 'foundationWeightsChanged=false',
+ 'OMEGA_SAI_LOCAL_LEARNING_REQUEST_R331'
+])assert.ok(orchestrator.includes(token),`R331 local training handoff missing ${token}`);
+assert.match(orchestrator,/createOnly:true/,'R331 approved lesson artifact must be bounded new-file output');
 
 const fabric=fs.readFileSync('src/intelligenceFabric.ts','utf8');
 assert.match(fabric,/r331-coherent-learning/,'intelligence fabric must expose R331 as an active hosted contributor');
