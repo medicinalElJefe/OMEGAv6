@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  actions: write
 
 env:
   OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
@@ -403,20 +402,3 @@ jobs:
             echo "- R199.1 packaging hygiene: 500 KiB initial-entry budget + clean durable exports + v7 JavaScript actions"
             echo "- Hybrid native execution: VERIFIED_DEVICE_ONLINE requires a current authenticated non-revoked heartbeat; otherwise DEVICE_PROOF_REQUIRED"
           } >> "$GITHUB_STEP_SUMMARY"
-
-
-  continue-governed-selfbuild:
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    needs: deploy-main
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: write
-    steps:
-      - name: Continue governed self-build after exact production success
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r170-governed-selfbuild.yml/dispatches" -f ref=main
-          echo "R330 event-driven continuation dispatched after canonical production proof for $GITHUB_SHA."
