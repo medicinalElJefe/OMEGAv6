@@ -1,6 +1,7 @@
 name: OMEGA R237 Hybrid Command Authority Proof
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [main]
 
