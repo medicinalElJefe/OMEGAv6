@@ -1,0 +1,47 @@
+{
+  "schema": "OMEGA_SOURCE_EXACT_CANON_RECEIPT_R328",
+  "revision": "R328",
+  "source": {
+    "name": "OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv",
+    "publicPath": "/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv",
+    "records": 3743,
+    "physicalLines": 3744,
+    "originalSha256": "1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb",
+    "originalSizeBytes": 1838041,
+    "repositoryNormalizedSha256": "478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf",
+    "repositorySizeBytes": 1834293,
+    "transportNormalization": "UTF8_BOM_REMOVED_CRLF_TO_LF_FINAL_EOL_REMOVED_VALUES_UNCHANGED"
+  },
+  "census": {
+    "sourceFamilies": 13,
+    "sourceFiles": 10,
+    "categories": 47,
+    "concepts": 495,
+    "propertyNames": 173,
+    "computationHeads": 45,
+    "conflictGroups": 463,
+    "multiVariantConflictGroups": 405,
+    "epistemicStatusVariants": 63,
+    "namedEpistemicStatuses": 62,
+    "blankEpistemicRows": 2,
+    "blankValidationRows": 3
+  },
+  "authority": {
+    "semanticSource": "R328 source-exact registry",
+    "implementationCanon": "R314 675-row implementation canon remains separate",
+    "canonAdmission": "R125",
+    "returnedProof": "R141/R142",
+    "dispatch": "R147",
+    "history": "R146"
+  },
+  "laws": [
+    "SOURCE_EXACT_SEMANTICS_NEQ_IMPLEMENTATION_PROOF",
+    "IMPLEMENTATION_CANON_NEQ_SEMANTIC_SOURCE_CANON",
+    "CONFLICT_VARIANTS_ARE_PRESERVED_NOT_OVERWRITTEN",
+    "SERVED_SOURCE_HASH_MUST_MATCH_REPOSITORY_NORMALIZED_HASH",
+    "PUBLIC_PHYSICS_MATH_NEQ_USER_DEFINED_CANON_MODEL",
+    "REPRESENTATIONAL_ADDRESS_LEVEL_NEQ_LITERAL_PHYSICAL_DIMENSION",
+    "GENERATED_NEQ_PROVED_NEQ_DEPLOYED_NEQ_CANON_ADMITTED"
+  ],
+  "truthBoundary": "R328 imports and classifies all 3,743 source records without changing any CSV field value. Git repository text transport removes the UTF-8 BOM, normalizes CRLF to LF, and omits the final newline; both the original-upload byte hash and normalized repository hash are recorded. This does not by itself execute symbolic formulas, validate user-defined physical claims, satisfy device/provider gates, prove deployment, or mutate CanonState."
+}

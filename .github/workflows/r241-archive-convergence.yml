@@ -86,6 +86,12 @@ jobs:
         run: |
           node tests/r314-woven-numerical-compute-invariants.mjs
           node tests/r314-expression-compute-invariants.mjs
+      
+      - name: Prove R327/R328 SAR + source-exact semantic convergence
+        run: |
+          node tests/r327-sar-cog-zstd-georef-invariants.mjs
+          node tests/r328-source-exact-canon-invariants.mjs
+          node scripts/r314-convergence-audit.mjs --compact > /tmp/r314-r328-audit.json
           node tests/r315-woven-system-traversal-invariants.mjs
 
       - name: Prove R316 research advancement contracts inside accumulated proof authority

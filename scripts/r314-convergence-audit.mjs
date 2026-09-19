@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
+import {createHash} from 'node:crypto';
 import {residualVectorR314} from '../src/system/autonomousConvergenceR314.js';
 
 const read=file=>fs.readFileSync(file,'utf8');
@@ -41,6 +42,7 @@ export function auditR314(root=process.cwd()){
  const workflowPath=path.join(root,'.github/workflows/r170-governed-selfbuild.yml');
  const selfbuildPath=path.join(root,'public/omega-r170-selfbuild-state.json');
  const enginePath=path.join(root,'scripts/r170-selfbuild-engine.mjs');
+ const sourceCanonPath=path.join(root,'public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv');
 
  const capabilitySource=read(capabilityPath);
  const archiveSource=`${read(archiveAPath)}\n${read(archiveBPath)}`;
@@ -48,6 +50,7 @@ export function auditR314(root=process.cwd()){
  const workflowSource=read(workflowPath);
  const engineSource=read(enginePath);
  const state=JSON.parse(read(selfbuildPath));
+ const sourceCanonExists=exists(sourceCanonPath),sourceCanonBytes=sourceCanonExists?fs.readFileSync(sourceCanonPath):Buffer.alloc(0),sourceCanonSha=sourceCanonExists?createHash('sha256').update(sourceCanonBytes).digest('hex'):'',sourceCanonLines=sourceCanonExists?sourceCanonBytes.toString('utf8').split(/\r?\n/).filter((x,i,all)=>i<all.length-1||x.length>0).length:0,sourceCanonRecords=Math.max(0,sourceCanonLines-1);
 
  const capabilities=countCapabilityRows(capabilitySource);
  const archives=archiveIds(archiveSource);
@@ -70,12 +73,17 @@ export function auditR314(root=process.cwd()){
  if(!engineSource.includes('existsSync')&&!engineSource.includes('writeFile'))residuals.push({id:'R314-SELFBUILD-ENGINE-UNKNOWN',severity:'HIGH',mode:'QUEUE_FOR_REVIEW',summary:'Self-build engine mutation semantics could not be identified',source:'scripts/r170-selfbuild-engine.mjs'});
  if(!masterSource.includes('BUILD_PROGRESS_REQUIRES_EVIDENCED_RESIDUAL_REDUCTION'))residuals.push({id:'R314-NO-GAIN-LAW',severity:'CRITICAL',mode:'BLOCK',summary:'Convergence master lacks measurable residual reduction law',source:'src/convergenceMasterR314.ts'});
  if(!masterSource.includes('SYNCHRONOUS_DATA_REQUIRES_EXPLICIT_CLOCK_FRAME_UNIT_AND_PROVENANCE_BINDING'))residuals.push({id:'R314-SYNC-SPINE-LAW',severity:'HIGH',mode:'QUEUE_FOR_REVIEW',summary:'Convergence master lacks explicit synchronous clock/frame/unit/provenance binding',source:'src/convergenceMasterR314.ts'});
+ if(!sourceCanonExists)residuals.push({id:'R328-SOURCE-CANON-MISSING',severity:'CRITICAL',mode:'BLOCK',summary:'R328 source-exact semantic canon CSV is missing',source:'public/canon'});
+ if(sourceCanonExists&&sourceCanonSha!=='478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf')residuals.push({id:'R328-SOURCE-CANON-HASH',severity:'CRITICAL',mode:'BLOCK',summary:`R328 source canon SHA mismatch ${sourceCanonSha}`,source:'public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv'});
+ if(sourceCanonExists&&sourceCanonRecords!==3743)residuals.push({id:'R328-SOURCE-CANON-CENSUS',severity:'CRITICAL',mode:'BLOCK',summary:`R328 source canon record count ${sourceCanonRecords} != 3743`,source:'public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv'});
+ if(!masterSource.includes('SOURCE_EXACT_SEMANTIC_CANON_REMAINS_SEPARATE_FROM_IMPLEMENTATION_CANON'))residuals.push({id:'R328-CANON-LAYER-SEPARATION',severity:'CRITICAL',mode:'BLOCK',summary:'Convergence master does not preserve semantic-source versus implementation-canon separation',source:'src/convergenceMasterR314.ts'});
 
  const vector=residualVectorR314({state:residuals.some(row=>row.mode==='BLOCK')?'HOLD':residuals.length?'TURN':'STAY',residuals});
  return {
   schema:'OMEGA_R314_CONVERGENCE_AUDIT',
   generatedAt:new Date().toISOString(),
-  counts:{capabilities,archiveFamilies:archives.length,buildStages:stages.length,selfBuildCapsules:roadmap.length,realRoadmapTargets:realRoadmapTargets.length,realizedRealTargets:realizedRealTargets.length,targetFamilies:targetFamilies.length},
+  counts:{capabilities,archiveFamilies:archives.length,buildStages:stages.length,selfBuildCapsules:roadmap.length,realRoadmapTargets:realRoadmapTargets.length,realizedRealTargets:realizedRealTargets.length,targetFamilies:targetFamilies.length,sourceCanonRecords,sourceCanonLines},
+  sourceExactCanon:{present:sourceCanonExists,sha256:sourceCanonSha,expectedRepositoryNormalizedSha256:'478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf',originalSourceSha256:'1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb',records:sourceCanonRecords,expectedRecords:3743},
   ids:{archiveFamilies:archives,buildStages:stages},
   selfBuild:{active:Boolean(state?.active),generation:Number(state?.generation||0),maxAutonomousGenerations:Number(state?.maxAutonomousGenerations||0),capsules:roadmap.map(row=>({id:row.id,target:row.target,status:row.status||null,repairId:row.repairId||null,mutationClass:row.mutationClass||null})),realRoadmapTargets:realRoadmapTargets.map(row=>row.target),realizedRealTargets:realizedRealTargets.map(row=>row.target)},
   residuals:vector.residuals,
