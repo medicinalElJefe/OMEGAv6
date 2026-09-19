@@ -1,9 +1,9 @@
-// OMEGA R331 wraps the proven R116 Worker spine with session-scoped coherent learning while preserving all current durable state and authority boundaries. Historical R201/R203 executable classes and live bindings remain retired; Cloudflare provider-state reconciliation on 2026-09-15 proved both provisioned namespaces still exist and therefore require explicit deleted export tombstones as non-executable scar/history state.
+// OMEGA R331 extends the proven R116 Worker spine internally with session-scoped coherent learning while preserving R116 as the sole canonical Worker entrypoint and all current durable state/authority boundaries. Historical R201/R203 executable classes and live bindings remain retired; Cloudflare provider-state reconciliation on 2026-09-15 proved both provisioned namespaces still exist and therefore require explicit deleted export tombstones as non-executable scar/history state.
 // Hierarchy: 1 seed/root -> 12 organ identities -> 144 branch identities -> 1,728 stateful cells -> 20,736 lanes. R125 remains canonical admission authority.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "omegav6",
-  "main": "src/workerR331.js",
+  "main": "src/workerR116.js",
   "compatibility_date": "2026-08-28",
   "workers_dev": true,
   "preview_urls": true,
