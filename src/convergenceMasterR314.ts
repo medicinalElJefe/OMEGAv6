@@ -1,5 +1,6 @@
 import {OMEGA_CAPABILITY_AUTHORITY,capabilityReality,type CapabilityReality} from './capabilityAuthority';
 import {ARCHIVE_GENOME_ALL_ROWS_R288,archiveGenomeAllSummaryR288} from './archiveGenomeLedgerR288b';
+import {R328_SOURCE_CANON_RECEIPT} from './system/sourceExactCanonR328';
 
 export const R314_CONVERGENCE_SCHEMA='OMEGA_CONVERGENCE_MASTER_R314' as const;
 export const R314_CONVERGENCE_REVISION='R314' as const;
@@ -119,8 +120,11 @@ export function buildConvergenceMasterR314(){
    'ATLAS_RESOLUTION_LEVELS_ARE_ADDRESSES_NOT_LITERAL_PHYSICAL_DIMENSIONS',
    'SYNCHRONOUS_DATA_REQUIRES_EXPLICIT_CLOCK_FRAME_UNIT_AND_PROVENANCE_BINDING',
    'SCAR_HISTORY_SURVIVES_REPAIR_ROLLBACK_AND_REPLAY',
+   'SOURCE_EXACT_SEMANTIC_CANON_REMAINS_SEPARATE_FROM_IMPLEMENTATION_CANON',
+   'CONFLICT_VARIANTS_ARE_PRESERVED_UNTIL_EXPLICIT_PROOF_RESOLVES_THEM',
   ],
   archiveSummary:archiveGenomeAllSummaryR288(),
+  sourceExactCanon:{revision:'R328',...R328_SOURCE_CANON_RECEIPT,semanticSource:true,implementationCanonSeparate:true,canonicalAdmission:false},
   residual:convergenceResidualR314(),
   charts:{current,incomplete,build},
  };
