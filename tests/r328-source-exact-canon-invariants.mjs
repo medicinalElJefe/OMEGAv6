@@ -32,7 +32,7 @@ assert.equal(unique('source_file').size,10);
 assert.equal(unique('category').size,47);
 assert.equal(unique('concept_name').size,495);
 assert.equal(unique('property_name').size,173);
-assert.equal(unique('epistemic_status').size,63);
+assert.equal(unique('epistemic_status').size,62);\nassert.equal(new Set(objects.map(r=>r.epistemic_status)).size,63);\nassert.equal(objects.filter(r=>!r.epistemic_status).length,2);
 
 const opHeads=new Set(objects.map(r=>(r.computation_language.match(/^([A-Za-z0-9_ΩσΛΦΔ]+)\s*(?::=|\[|\(|∈|$)/u)||[])[1]||r.computation_language.split(/\s+/)[0]||''));
 assert.equal(opHeads.size,45);
