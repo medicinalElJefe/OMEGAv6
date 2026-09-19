@@ -12,7 +12,7 @@ const roadmap=Array.isArray(state.roadmap)?state.roadmap:[];
 function reconcileMergedSourceCandidates(){
  const admitted=new Set(state.admittedSourceCapsules||[]);let changed=false;
  for(const receipt of state.receipts||[]){
-  if(!['PROVED_PENDING_PR','SOURCE_PROMOTED_PENDING_PRODUCTION'].includes(receipt.status))continue;
+  if(!['PROVED_PENDING_PROMOTION','SOURCE_PROMOTED_PENDING_PRODUCTION'].includes(receipt.status))continue;
   const capsule=roadmap.find(x=>x.id===receipt.capsuleId);
   if(!capsule||!fs.existsSync(capsule.target))continue;
   receipt.status='SOURCE_MERGE_OBSERVED';receipt.sourceMergedAt=receipt.sourceMergedAt||new Date().toISOString();receipt.canonicalAdmission=false;admitted.add(receipt.capsuleId);changed=true;
