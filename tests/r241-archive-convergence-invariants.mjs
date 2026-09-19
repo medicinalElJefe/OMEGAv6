@@ -76,8 +76,8 @@ must(!workflow.includes("const response=await fetch(base+'/omega-build-receipt.j
 must(!/^\s*push\s*:/m.test(workflow)&&!/^\s*schedule\s*:/m.test(workflow),'R241 workflow must remain PR/manual proof-only');
 must(!/wrangler\s+deploy(?![^\n]*--dry-run)/.test(workflow),'R241 workflow must not acquire deployment authority');
 
-must(governor.revision==='R170.5-R241','R241 must advance the governor proof revision without changing the R240 promotion engine');
-must(governor.engineRevision==='R170.2+R240'&&governor.selfPromotion?.revision==='R240','R241 must not replace the established R240 exact self-promotion engine');
+must(governor.revision==='R170.6-R330','R330 may advance the self-build control-plane revision while R241 remains the read-only capability/proof floor');
+must(governor.engineRevision==='R170.2+R240+R330'&&governor.selfPromotion?.revision==='R240','R330 must preserve the established R240 exact self-promotion engine beneath the event-driven continuation repair');
 must(governor.currentCapabilityFloor==='R241','R241 must be the current governed capability/proof floor');
 must(governor.postR180ProofContinuity?.at(-1)==='R241'&&governor.postR180ProofContinuity?.includes('R239')&&governor.postR180ProofContinuity?.includes('R240'),'R241 must extend rather than replace R239/R240 proof continuity');
 must(governor.selfBuild?.latestExplicitSuccessorProof==='tests/r241-archive-convergence-invariants.mjs','R241 must become the explicit successor proof floor');
