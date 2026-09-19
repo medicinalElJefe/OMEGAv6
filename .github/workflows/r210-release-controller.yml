@@ -1,16 +1,6 @@
 name: R210 Release Controller
 
 on:
-  workflow_dispatch:
-    inputs:
-      expected_base_sha:
-        description: Exact production-proven main SHA the candidate descends from
-        required: true
-        type: string
-      expected_head_sha:
-        description: Exact proved candidate SHA checked out by this run
-        required: true
-        type: string
   pull_request:
     branches: [main]
 
@@ -25,7 +15,7 @@ concurrency:
 
 jobs:
   candidate-fence:
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -36,19 +26,10 @@ jobs:
           node-version: 22
       - name: Prove focused R210 release-controller contract
         run: node tests/r210-release-controller-invariants.mjs
-      - name: Prove collision-free exact-base PR candidate identity
-        if: github.event_name == 'pull_request'
+      - name: Prove collision-free exact-base candidate identity
         env:
           GITHUB_TOKEN: ${{ github.token }}
           OMEGA_RELEASE_GUARD_MODE: PR
           OMEGA_PR_NUMBER: ${{ github.event.pull_request.number }}
           OMEGA_EXPECTED_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node scripts/releaseCandidateGuardR210.mjs
-      - name: Prove exact dispatched candidate identity
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          OMEGA_RELEASE_GUARD_MODE: CANDIDATE
-          OMEGA_EXPECTED_BASE_SHA: ${{ inputs.expected_base_sha }}
-          OMEGA_EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha }}
         run: node scripts/releaseCandidateGuardR210.mjs
