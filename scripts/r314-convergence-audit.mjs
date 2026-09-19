@@ -74,7 +74,7 @@ export function auditR314(root=process.cwd()){
  if(!masterSource.includes('BUILD_PROGRESS_REQUIRES_EVIDENCED_RESIDUAL_REDUCTION'))residuals.push({id:'R314-NO-GAIN-LAW',severity:'CRITICAL',mode:'BLOCK',summary:'Convergence master lacks measurable residual reduction law',source:'src/convergenceMasterR314.ts'});
  if(!masterSource.includes('SYNCHRONOUS_DATA_REQUIRES_EXPLICIT_CLOCK_FRAME_UNIT_AND_PROVENANCE_BINDING'))residuals.push({id:'R314-SYNC-SPINE-LAW',severity:'HIGH',mode:'QUEUE_FOR_REVIEW',summary:'Convergence master lacks explicit synchronous clock/frame/unit/provenance binding',source:'src/convergenceMasterR314.ts'});
  if(!sourceCanonExists)residuals.push({id:'R328-SOURCE-CANON-MISSING',severity:'CRITICAL',mode:'BLOCK',summary:'R328 source-exact semantic canon CSV is missing',source:'public/canon'});
- if(sourceCanonExists&&sourceCanonSha!=='1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb')residuals.push({id:'R328-SOURCE-CANON-HASH',severity:'CRITICAL',mode:'BLOCK',summary:`R328 source canon SHA mismatch ${sourceCanonSha}`,source:'public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv'});
+ if(sourceCanonExists&&sourceCanonSha!=='478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf')residuals.push({id:'R328-SOURCE-CANON-HASH',severity:'CRITICAL',mode:'BLOCK',summary:`R328 source canon SHA mismatch ${sourceCanonSha}`,source:'public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv'});
  if(sourceCanonExists&&sourceCanonRecords!==3743)residuals.push({id:'R328-SOURCE-CANON-CENSUS',severity:'CRITICAL',mode:'BLOCK',summary:`R328 source canon record count ${sourceCanonRecords} != 3743`,source:'public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv'});
  if(!masterSource.includes('SOURCE_EXACT_SEMANTIC_CANON_REMAINS_SEPARATE_FROM_IMPLEMENTATION_CANON'))residuals.push({id:'R328-CANON-LAYER-SEPARATION',severity:'CRITICAL',mode:'BLOCK',summary:'Convergence master does not preserve semantic-source versus implementation-canon separation',source:'src/convergenceMasterR314.ts'});
 
@@ -83,7 +83,7 @@ export function auditR314(root=process.cwd()){
   schema:'OMEGA_R314_CONVERGENCE_AUDIT',
   generatedAt:new Date().toISOString(),
   counts:{capabilities,archiveFamilies:archives.length,buildStages:stages.length,selfBuildCapsules:roadmap.length,realRoadmapTargets:realRoadmapTargets.length,realizedRealTargets:realizedRealTargets.length,targetFamilies:targetFamilies.length,sourceCanonRecords,sourceCanonLines},
-  sourceExactCanon:{present:sourceCanonExists,sha256:sourceCanonSha,expectedSha256:'1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb',records:sourceCanonRecords,expectedRecords:3743},
+  sourceExactCanon:{present:sourceCanonExists,sha256:sourceCanonSha,expectedRepositoryNormalizedSha256:'478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf',originalSourceSha256:'1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb',records:sourceCanonRecords,expectedRecords:3743},
   ids:{archiveFamilies:archives,buildStages:stages},
   selfBuild:{active:Boolean(state?.active),generation:Number(state?.generation||0),maxAutonomousGenerations:Number(state?.maxAutonomousGenerations||0),capsules:roadmap.map(row=>({id:row.id,target:row.target,status:row.status||null,repairId:row.repairId||null,mutationClass:row.mutationClass||null})),realRoadmapTargets:realRoadmapTargets.map(row=>row.target),realizedRealTargets:realizedRealTargets.map(row=>row.target)},
   residuals:vector.residuals,
