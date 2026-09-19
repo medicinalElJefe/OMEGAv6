@@ -1,6 +1,7 @@
 name: OMEGA R238 Woven Hybrid Continuity Convergence
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [main]
 
