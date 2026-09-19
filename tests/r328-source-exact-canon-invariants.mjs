@@ -1,7 +1,7 @@
 import assert from'node:assert/strict';
 import fs from'node:fs';
 import{createHash}from'node:crypto';
-import{R328_SOURCE_CANON_RECEIPT,parseSourceExactCanonCsvR328,compileSourceExactCanonR328}from'../src/system/sourceExactCanonR328.ts';
+import{R328_SOURCE_CANON_RECEIPT,R328_REPOSITORY_NORMALIZED_SHA256,parseSourceExactCanonCsvR328,compileSourceExactCanonR328,sha256HexR328}from'../src/system/sourceExactCanonR328.ts';
 
 const csvPath='public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv';
 const bytes=fs.readFileSync(csvPath),text=bytes.toString('utf8').replace(/^\uFEFF/,'');
@@ -24,6 +24,7 @@ const expected=['record_id','source_family','source_file','source_section','sour
 assert.deepEqual(header,expected);
 assert.equal(bytes.length,1834293);
 assert.equal(createHash('sha256').update(bytes).digest('hex'),'478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf');
+assert.equal(await sha256HexR328(new Uint8Array(bytes)),R328_REPOSITORY_NORMALIZED_SHA256,'production browser hash verifier must prove the served repository bytes');
 assert.equal(rows.length,3743);
 
 const objects=rows.map((values,index)=>{assert.equal(values.length,16,`R328 column count row ${index+2}`);const r=Object.fromEntries(expected.map((k,i)=>[k,values[i]??'']));assert.equal(r.record_id,`R${String(index+1).padStart(6,'0')}`);return r});
@@ -55,7 +56,7 @@ for(const r of objects)if(r.conflict_group){const a=groups.get(r.conflict_group)
 assert.equal(groups.size,463);
 assert.equal([...groups.values()].filter(v=>new Set(v.map(r=>r.canonical_value)).size>1).length,405);
 
-for(const token of ['R328_SOURCE_ORIGINAL_SHA256','R328_REPOSITORY_NORMALIZED_SHA256','R328_SOURCE_CANON_EXPECTED_RECORDS=3743','compileComputationLanguageR328','compileSourceExactCanonR328','crosswalkSourceExactRecordR328','DIRECT_SYMBOLIC_EXPR','autoExecute:false','PUBLIC_REFERENCE','CANON_MODEL','DEVICE_GATED','CONFLICT'])assert.ok(compiler.includes(token),`R328 compiler missing ${token}`);
+for(const token of ['R328_SOURCE_ORIGINAL_SHA256','R328_REPOSITORY_NORMALIZED_SHA256','R328_SOURCE_CANON_EXPECTED_RECORDS=3743','sha256HexR328','source canon SHA-256 mismatch','compileComputationLanguageR328','compileSourceExactCanonR328','crosswalkSourceExactRecordR328','DIRECT_SYMBOLIC_EXPR','autoExecute:false','PUBLIC_REFERENCE','CANON_MODEL','DEVICE_GATED','CONFLICT'])assert.ok(compiler.includes(token),`R328 compiler missing ${token}`);
 assert.ok(!/\beval\s*\(/.test(compiler)&&!compiler.includes('new Function'),'R328 semantic compiler may not dynamically execute source formulas');
 for(const sf of ['MASTER','SOURCE_MANIFEST','VALIDATION','RSC','ATOMIC_WOVEN','WOVEN_20736','JULY_ALL_MODES','MODE_INVENTORY','OMEGA_BUILD_CANON','LATER_CANON','DEWEY_TREE','UNIFIED_AUDIT','MASTER_EQUATION_LEDGER'])assert.ok(compiler.includes(sf),`R328 crosswalk missing source family ${sf}`);
 assert.ok(compiler.includes("PUBLIC_REFERENCE")&&compiler.includes("src/physicsRelativityRuntimeR132.ts"),'public physics/math must remain reference-classed');

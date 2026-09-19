@@ -153,9 +153,18 @@ export function compileSourceExactCanonR328(rows:readonly R328CanonRow[]){
  };
 }
 
+export async function sha256HexR328(bytes:Uint8Array){
+ const subtle=globalThis.crypto?.subtle;
+ if(!subtle)throw new Error('R328 SHA-256 verifier unavailable');
+ const digest=await subtle.digest('SHA-256',bytes);
+ return[...new Uint8Array(digest)].map(value=>value.toString(16).padStart(2,'0')).join('');
+}
+
 export async function loadSourceExactCanonR328(signal?:AbortSignal){
  const response=await fetch(R328_SOURCE_CANON_URL,{signal,cache:'no-store'});
  if(!response.ok)throw new Error(`R328 source canon HTTP ${response.status}`);
- const text=await response.text(),rows=parseSourceExactCanonCsvR328(text),compiled=compileSourceExactCanonR328(rows);
- return{rows,compiled};
+ const bytes=new Uint8Array(await response.arrayBuffer()),sha256=await sha256HexR328(bytes);
+ if(sha256!==R328_REPOSITORY_NORMALIZED_SHA256)throw new Error(`R328 source canon SHA-256 mismatch ${sha256}`);
+ const text=new TextDecoder().decode(bytes),rows=parseSourceExactCanonCsvR328(text),compiled=compileSourceExactCanonR328(rows);
+ return{rows,compiled,sha256};
 }
