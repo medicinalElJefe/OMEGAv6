@@ -16,7 +16,7 @@ assert.ok(native.includes("zstdDecompressR327(bytes)"),'ZSTD TIFF path must use 
 
 for(const token of ['33550','33922','34264','34735','MODEL_TIEPOINT_GCPS','gcpCount','affineBound','gcpBound'])assert.ok(native.includes(token),`R327 GeoTIFF evidence missing ${token}`);
 assert.ok(native.includes("const corners=geo.affineBound?"),'corner projection must require an actual affine transform');
-assert.ok(native.includes("multiple GCPs are retained as control evidence and are never collapsed into a fabricated affine transform"),'GCP truth boundary missing');
+assert.ok(native.includes("multiple GCPs are retained as control evidence")&&native.includes("never collapsed into a fabricated affine transform"),'GCP truth boundary missing or weakened');
 assert.ok(raster.includes('gcpCount?:number')&&raster.includes('gcps?:Array<'),'native raster type must carry bounded GCP evidence');
 assert.ok(!native.includes("crs:'EPSG:4326'"),'R327 must not invent WGS84 when the native TIFF does not declare it');
 
