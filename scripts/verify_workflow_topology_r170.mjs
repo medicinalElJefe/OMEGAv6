@@ -91,8 +91,8 @@ for(const [name,text] of contents){
 }
 
 const selfbuild=contents.get('r170-governed-selfbuild.yml');
-assert.match(selfbuild,/schedule:/);assert.match(selfbuild,/workflow_dispatch:/);assert.ok(!/^\s*push\s*:/m.test(selfbuild));assert.ok(!/^\s*pull_request\s*:/m.test(selfbuild));assert.match(selfbuild,/gh\s+pr\s+create/);assert.match(selfbuild,/gh run list/);assert.match(selfbuild,/production_ready/);assert.match(selfbuild,/OBSERVE_ONLY/);assert.match(selfbuild,/prove_successor_workflow_invariants_r175\.mjs/);assert.match(selfbuild,/cron: '17 \* \* \* \*'/);
-const ci=contents.get('ci.yml');assert.match(ci,/Promoted main commit must be an exact two-parent merge commit/);assert.match(ci,/verify_federation_live_r1681\.mjs/,'canonical CI must delegate live Federation/Optical identity proof to the propagation-safe verifier');
+assert.match(selfbuild,/workflow_dispatch:/);assert.ok(!/^\s*schedule\s*:/m.test(selfbuild));assert.ok(!/^\s*push\s*:/m.test(selfbuild));assert.ok(!/^\s*pull_request\s*:/m.test(selfbuild));assert.ok(!/gh\s+pr\s+create/i.test(selfbuild));assert.match(selfbuild,/gh run list/);assert.match(selfbuild,/production_ready/);assert.match(selfbuild,/OBSERVE_ONLY/);assert.match(selfbuild,/prove_successor_workflow_invariants_r175\.mjs/);assert.ok(selfbuild.includes('git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA"'));assert.ok(selfbuild.includes('--force-with-lease="refs/heads/main:$BASE"'));assert.ok(selfbuild.includes('--event push'));
+const ci=contents.get('ci.yml');assert.match(ci,/Promoted main commit must be an exact two-parent merge commit/);assert.match(ci,/verify_federation_live_r1681\.mjs/,'canonical CI must delegate live Federation/Optical identity proof to the propagation-safe verifier');assert.match(ci,/continue-governed-selfbuild:/);assert.ok(ci.includes('actions/workflows/r170-governed-selfbuild.yml/dispatches'));
 const convergence=contents.get('r170-current-convergence.yml');
 for(const needle of [
   'r180-current-authority-convergence-invariants.mjs',
@@ -107,7 +107,7 @@ for(const needle of [
   'r1532-adaptive-external-search-invariants.mjs',
   'wrangler.optical-machine-r1532.jsonc'
 ])assert.ok(convergence.includes(needle),`current convergence missing proof: ${needle}`);
-assert.equal(governor.historicalWorkflowArchive.historicalExecutionAuthority,false);assert.equal(governor.selfBuild.exactProductionHeadRequired,true);assert.equal(governor.selfBuild.autoMerge,false);assert.equal(governor.selfBuild.directMainMutation,false);assert.equal(governor.selfBuild.schedule,'17 * * * *');assert.equal(governor.selfBuild.observationCadence,'HOURLY');assert.equal(governor.selfBuild.expensiveProofMode,'PROPOSE_ONLY');assert.equal(successorPolicy.readOnly,true);assert.equal(successorPolicy.mainPushAllowed,false);assert.equal(successorPolicy.recurringScheduleAllowed,false);
+assert.equal(governor.historicalWorkflowArchive.historicalExecutionAuthority,false);assert.equal(governor.selfBuild.exactProductionHeadRequired,true);assert.equal(governor.selfBuild.autoMerge,false);assert.equal(governor.selfBuild.directMainMutation,false);assert.equal(governor.selfBuild.schedule,'PRODUCTION_SUCCESS_EVENT');assert.equal(governor.selfBuild.observationCadence,'EVENT_DRIVEN');assert.equal(governor.selfBuild.eventDrivenContinuation,true);assert.equal(governor.selfBuild.continuationAuthority,'.github/workflows/ci.yml::continue-governed-selfbuild');assert.equal(governor.selfBuild.expensiveProofMode,'PROPOSE_ONLY');assert.equal(successorPolicy.readOnly,true);assert.equal(successorPolicy.mainPushAllowed,false);assert.equal(successorPolicy.recurringScheduleAllowed,false);
 const floorMatch=String(governor.currentCapabilityFloor||'').match(/^R(\d+)$/);
 assert.ok(floorMatch,'currentCapabilityFloor must be an R-number');
 const floorRevision=Number(floorMatch[1]);
