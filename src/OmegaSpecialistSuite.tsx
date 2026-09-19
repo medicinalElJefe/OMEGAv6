@@ -25,6 +25,7 @@ export default function OmegaSpecialistSuite(props:Props){
  const capability=<OmegaCapabilityFieldR138 panel={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>;
  const wrap=(content:any)=><div className='r138-capability-first'>{capability}{content}</div>;
  if(panel==='Convergence')return wrap(<div>
+  <OmegaConvergenceMasterR314/>
   <AppliedCalculusR168/>
   <CalculusAddressFabricR240 record={record}/>
   <OmegaResearchAdvancementR316/>
