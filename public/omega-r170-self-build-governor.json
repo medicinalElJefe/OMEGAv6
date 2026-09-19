@@ -1,12 +1,31 @@
 {
   "schema": "OMEGA_SELF_BUILD_GOVERNOR_R170",
-  "revision": "R170.5-R241",
+  "revision": "R170.6-R330",
   "authority": "OMEGAV6",
   "state": "GOVERNED_AUTONOMOUS_PROPOSAL_AND_EXACT_SOURCE_PROMOTION_CONTROL_PLANE",
-  "engineRevision": "R170.2+R240",
+  "engineRevision": "R170.2+R240+R330",
   "currentCapabilityFloor": "R241",
-  "promotedSuccessorContinuity": ["R175", "R176", "R177", "R178", "R179", "R180"],
-  "postR180ProofContinuity": ["R200", "R200.1", "R202", "R210", "R223", "R236", "R237", "R238", "R239", "R240", "R241"],
+  "promotedSuccessorContinuity": [
+    "R175",
+    "R176",
+    "R177",
+    "R178",
+    "R179",
+    "R180"
+  ],
+  "postR180ProofContinuity": [
+    "R200",
+    "R200.1",
+    "R202",
+    "R210",
+    "R223",
+    "R236",
+    "R237",
+    "R238",
+    "R239",
+    "R240",
+    "R241"
+  ],
   "activeWorkflowAuthority": {
     "productionDeploy": ".github/workflows/ci.yml",
     "currentConvergence": ".github/workflows/r170-current-convergence.yml",
@@ -39,8 +58,8 @@
     "policy": "Superseded workflow YAML remains byte-preserved under .github/workflows-archive and independently addressable at the recorded source commit/tree, but has no automatic GitHub Actions execution authority."
   },
   "selfBuild": {
-    "schedule": "17 * * * *",
-    "observationCadence": "HOURLY",
+    "schedule": "PRODUCTION_SUCCESS_EVENT",
+    "observationCadence": "EVENT_DRIVEN",
     "expensiveProofMode": "PROPOSE_ONLY",
     "maxAutonomousGenerations": 5,
     "maxParallelPlanningCells": 12,
@@ -58,7 +77,9 @@
     "latestExplicitSuccessorProof": "tests/r241-archive-convergence-invariants.mjs",
     "canonicalAdmissionAuthority": "R125",
     "cloudEvolutionMachine": "CLOUD-01",
-    "cloudEvolutionHost": "CLOUDFLARE_WORKER"
+    "cloudEvolutionHost": "CLOUDFLARE_WORKER",
+    "eventDrivenContinuation": true,
+    "continuationAuthority": ".github/workflows/ci.yml::continue-governed-selfbuild"
   },
   "selfPromotion": {
     "revision": "R240",
@@ -76,13 +97,18 @@
     "mergeMethod": "merge",
     "twoParentMergeRequired": true,
     "canonicalDeploymentWorkflow": ".github/workflows/ci.yml",
-    "canonicalDeploymentDispatchAllowed": true,
+    "canonicalDeploymentDispatchAllowed": false,
     "selfWorkflowDispatchAllowed": false,
     "productionProofRequiredAfterSourceMerge": true,
     "productionFailureMode": "SOURCE_PROMOTED_BUT_NOT_PRODUCTION_PROVEN__STOP_AND_REQUIRE_FORWARD_REPAIR",
     "canonStateAdmission": false,
     "canonicalAdmissionAuthority": "R125",
-    "truthLaw": "generated != proved != source-promoted != deployed != live-verified != Canon-admitted"
+    "truthLaw": "generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
+    "exactTwoParentMainUpdate": true,
+    "repositoryPrCreationRequired": false,
+    "candidatePullRequestRequired": false,
+    "canonicalDeploymentPushTrigger": true,
+    "productionContinuationDispatch": ".github/workflows/ci.yml -> r170-governed-selfbuild.yml"
   },
   "preservedRuntime": {
     "canonicalWorkerSpine": "R116",
@@ -109,5 +135,5 @@
     "archiveConvergenceVisualIntelligence": "R241_READ_ONLY_1728_OVER_20736_TOPOLOGY_AND_TYPED_COGNITION_PROJECTION"
   },
   "truthLaw": "reachable != writable != generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
-  "truthBoundary": "R170.5/R241 advances the current proof-topology floor through a read-only archive-convergence visual/intelligence layer while preserving the R240 self-promotion engine and every production R239 Hybrid resource-governor boundary. R241 aggregates the exact existing 20,736-state packet into deterministic 12×12×12 visual topology and typed cognition through proposal only; it does not create physical measurement, permission, execution, return, deployment, or Canon authority. R240 exact promotion remains limited to R170-generated low/medium-risk roadmap capsules and still requires an exact production-proven base, residual PASS, committed-candidate re-proof, every declared candidate test true, allowlisted diff, unchanged base, exact expected head, and a normal two-parent merge. GitHub auto-merge remains disabled. ci.yml remains the sole canonical production Worker writer. A red production proof requires forward repair. R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable history authority, and R141 exact Hybrid return-proof authority."
+  "truthBoundary": "R170.6/R330 preserves the R240 exact-source promotion gates while removing dependence on GitHub Actions-created pull requests and hourly polling. The generator still cannot write main. Only the governed promotion step may construct the exact two-parent merge commit from an unchanged production-proven base and an exact re-proved allowlisted candidate tree, then update main under a lease. That main update triggers ci.yml as the sole canonical production writer. Only after successful staged deployment and live verification may ci.yml dispatch the next governed self-build cycle. The self-builder never dispatches itself, workflow_run fanout remains forbidden, red production stops continuation, R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable history authority, and R141 exact Hybrid return-proof authority."
 }
