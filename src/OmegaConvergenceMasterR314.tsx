@@ -43,7 +43,6 @@ export default function OmegaConvergenceMasterR314(){
    <article><span>Address rule</span><b>≠ D</b><small>12→144→1,728→20,736→248,832 remain representation/address resolution levels</small></article>
   </div>
 
-
   <details className='r314-chart' id='r314-current' open>
    <summary><span><Activity/>Chart 1 · What OMEGAv6 has now</span><b>{current.length}/{master.charts.current.length}</b></summary>
    <p className='r314-chart-intro'>Every canonical user-facing capability is represented exactly once with its implementation topology, proof boundary and current reality state.</p>
