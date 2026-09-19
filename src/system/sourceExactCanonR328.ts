@@ -3,6 +3,9 @@ export const R328_SOURCE_CANON_REVISION='R328' as const;
 export const R328_SOURCE_CANON_URL='/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv' as const;
 export const R328_SOURCE_CANON_SHA256='1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb' as const;
 export const R328_SOURCE_CANON_EXPECTED_RECORDS=3743 as const;
+export const R328_SOURCE_CANON_RECEIPT=Object.freeze({
+ sha256:R328_SOURCE_CANON_SHA256,sizeBytes:1838041,records:3743,sourceFamilies:13,sourceFiles:10,categories:47,concepts:495,propertyNames:173,computationHeads:45,epistemicStatuses:63,conflictGroups:463,multiVariantConflictGroups:405
+});
 
 export const R328_SOURCE_CANON_COLUMNS=[
  'record_id','source_family','source_file','source_section','source_row_key','category','concept_name','property_name','canonical_value','computation_language','epistemic_status','units_or_frame','dependency_symbols','validation_rule','conflict_group','provenance_note'
