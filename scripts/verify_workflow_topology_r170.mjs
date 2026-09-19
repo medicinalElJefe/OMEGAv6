@@ -113,6 +113,5 @@ assert.ok(floorMatch,'currentCapabilityFloor must be an R-number');
 const floorRevision=Number(floorMatch[1]);
 const highestSuccessorRevision=successors.reduce((max,x)=>Math.max(max,x.revision),170);
 assert.equal(floorRevision,highestSuccessorRevision,`currentCapabilityFloor R${floorRevision} must match highest active promoted successor R${highestSuccessorRevision}`);
-const ci=contents.get('ci.yml');
 assert.match(ci,/continue-governed-selfbuild:/);assert.match(ci,/actions\/workflows\/r170-governed-selfbuild\.yml\/dispatches/);assert.match(ci,/needs:\s*deploy-main/);
 console.log(JSON.stringify({schema:'OMEGA_WORKFLOW_TOPOLOGY_R170_4',activeCount:active.length,authorityWorkflowCount:authorityWorkflows.length,maintenanceOnly:maintenance?maintenanceOnly:null,coreCount:coreRequired.length,successorCount:successors.length,successors,archivedCount:archived.length,maxActive,currentCapabilityFloor:governor.currentCapabilityFloor,observationCadence:governor.selfBuild.observationCadence,expensiveProofMode:governor.selfBuild.expensiveProofMode,directMainCandidateMutation:false,recursiveWorkflowRunFanout:false,productionProofRequired:true,successorPolicy:'READ_ONLY_BRANCH_OR_PR_PROOF_AUTHORITIES',canonicalAdmissionAuthority:'R125',result:'PASS'},null,2));
