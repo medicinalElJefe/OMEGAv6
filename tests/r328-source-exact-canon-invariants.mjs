@@ -67,6 +67,7 @@ assert.ok(!convergenceUi.includes('SourceExactCanonR328')&&!convergenceUi.includ
 assert.ok(master.includes("R328 SOURCE-EXACT CANON")&&master.includes("3,743-row semantic registry"),'R314 build stage must consume R328 source canon');
 assert.ok(implementation.includes('R314_IMPLEMENTATION_CANON_EXPECTED_ROWS=675'),'R328 must not overwrite the distinct 675-row implementation canon');
 assert.ok(audit.includes('R328-SOURCE-CANON-HASH')&&audit.includes('R328-SOURCE-CANON-CENSUS')&&audit.includes("sourceCanonRecords!==3743"),'convergence audit must fail closed on R328 source corruption');
-assert.ok(suite.includes("if(panel==='Convergence')return wrap(<div>\n  <OmegaConvergenceMasterR314/>"),'Convergence route must expose the semantic/implementation master');
+assert.ok(!suite.includes("if(panel==='Convergence')return wrap(<div>\n  <OmegaConvergenceMasterR314/>"),'R328 source authority must not duplicate the Convergence master inside the Convergence route');
+assert.ok(suite.includes("if(panel==='Convergence')return wrap(<div>\n  <AppliedCalculusR168/>\n  <CalculusAddressFabricR240 record={record}/>\n  <OmegaResearchAdvancementR316/>\n  <RecursiveSelfBuildR240/>"),'Convergence route must retain the established calculus → address → research → self-build stack');
 
 console.log('R328 SOURCE-EXACT CANON PASS · 3,743 exact records · 495 concepts · 173 properties · 45 computation heads · 463 conflict groups / 405 multivariant · original + normalized SHA/census gated · 675-row implementation canon remains separate · no symbolic auto-execution');
