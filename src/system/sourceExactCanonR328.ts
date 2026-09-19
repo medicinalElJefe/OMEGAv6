@@ -1,10 +1,11 @@
 export const R328_SOURCE_CANON_SCHEMA='OMEGA_SOURCE_EXACT_CANON_R328' as const;
 export const R328_SOURCE_CANON_REVISION='R328' as const;
 export const R328_SOURCE_CANON_URL='/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv' as const;
-export const R328_SOURCE_CANON_SHA256='1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb' as const;
+export const R328_SOURCE_ORIGINAL_SHA256='1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb' as const;
+export const R328_REPOSITORY_NORMALIZED_SHA256='478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf' as const;
 export const R328_SOURCE_CANON_EXPECTED_RECORDS=3743 as const;
 export const R328_SOURCE_CANON_RECEIPT=Object.freeze({
- sha256:R328_SOURCE_CANON_SHA256,sizeBytes:1838041,records:3743,sourceFamilies:13,sourceFiles:10,categories:47,concepts:495,propertyNames:173,computationHeads:45,epistemicStatuses:63,conflictGroups:463,multiVariantConflictGroups:405
+ originalSha256:R328_SOURCE_ORIGINAL_SHA256,repositoryNormalizedSha256:R328_REPOSITORY_NORMALIZED_SHA256,originalSizeBytes:1838041,repositorySizeBytes:1834293,transportNormalization:'UTF8_BOM_REMOVED_CRLF_TO_LF_FINAL_EOL_REMOVED_VALUES_UNCHANGED',records:3743,sourceFamilies:13,sourceFiles:10,categories:47,concepts:495,propertyNames:173,computationHeads:45,epistemicStatuses:63,conflictGroups:463,multiVariantConflictGroups:405
 });
 
 export const R328_SOURCE_CANON_COLUMNS=[
