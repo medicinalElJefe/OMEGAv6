@@ -74,7 +74,7 @@ for(const id of ['SG001','SG002','SG003','SG004','SG005']){
  assert.match(canonical,/R245_SHARED_CANONICAL_GENERATOR/);
 }
 const sg004=capsuleBodyR245('SG004');
-for(const status of ['GENERATED_PENDING_PROOF','SANDBOX','PROVED_PENDING_PROMOTION','SOURCE_PROMOTED_PENDING_PRODUCTION','SOURCE_MERGE_OBSERVED','REJECTED'])assert.ok(sg004.includes(status),`SG004 missing unified lifecycle ${status}`);
+for(const status of ['GENERATED_PENDING_PROOF','SANDBOX','PROVED_PENDING_PR','SOURCE_PROMOTED_PENDING_PRODUCTION','SOURCE_MERGE_OBSERVED','REJECTED'])assert.ok(sg004.includes(status),`SG004 missing unified lifecycle ${status}`);
 const sg003=capsuleBodyR245('SG003');
 assert.match(sg003,/ResidualPolicy/);
 assert.match(sg003,/policy\.blockModes\.includes\(x\.mode\)\|\|policy\.blockSeverities\.includes\(x\.severity\)/,'generated residual projection must receive policy rather than freeze a separate threshold law');
