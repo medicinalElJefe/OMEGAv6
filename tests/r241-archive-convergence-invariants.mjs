@@ -76,15 +76,19 @@ must(!workflow.includes("const response=await fetch(base+'/omega-build-receipt.j
 must(!/^\s*push\s*:/m.test(workflow)&&!/^\s*schedule\s*:/m.test(workflow),'R241 workflow must remain PR/manual proof-only');
 must(!/wrangler\s+deploy(?![^\n]*--dry-run)/.test(workflow),'R241 workflow must not acquire deployment authority');
 
-must(governor.revision==='R170.5-R241','R241 must advance the governor proof revision without changing the R240 promotion engine');
-must(governor.engineRevision==='R170.2+R240'&&governor.selfPromotion?.revision==='R240','R241 must not replace the established R240 exact self-promotion engine');
+must(governor.revision==='R170.6-R330','R330 may advance the governor transport revision only while preserving the R241 proof floor and R240 promotion engine');
+must(governor.engineRevision==='R170.2+R240+R330'&&governor.selfPromotion?.revision==='R240','R330 event-driven transport must not replace the established R240 exact self-promotion engine');
 must(governor.currentCapabilityFloor==='R241','R241 must be the current governed capability/proof floor');
 must(governor.postR180ProofContinuity?.at(-1)==='R241'&&governor.postR180ProofContinuity?.includes('R239')&&governor.postR180ProofContinuity?.includes('R240'),'R241 must extend rather than replace R239/R240 proof continuity');
-must(governor.selfBuild?.latestExplicitSuccessorProof==='tests/r241-archive-convergence-invariants.mjs','R241 must become the explicit successor proof floor');
+must(governor.selfBuild?.latestExplicitSuccessorProof==='tests/r241-archive-convergence-invariants.mjs','R241 must remain the explicit successor proof floor');
+must(governor.selfBuild?.schedule==='PRODUCTION_SUCCESS_EVENT'&&governor.selfBuild?.observationCadence==='EVENT_DRIVEN','R330 continuation must be production-success event driven, not hourly polling');
+must(governor.selfBuild?.eventDrivenContinuation===true&&governor.selfBuild?.continuationAuthority==='.github/workflows/ci.yml::continue-governed-selfbuild','R330 continuation authority must remain canonical ci.yml after successful production proof');
+must(governor.selfPromotion?.repositoryPrCreationRequired===false&&governor.selfPromotion?.candidatePullRequestRequired===false,'R330 exact promotion must not depend on GitHub Actions PR creation permission');
+must(governor.selfPromotion?.exactTwoParentMainUpdate===true&&governor.selfPromotion?.canonicalDeploymentPushTrigger===true,'R330 promotion must preserve exact two-parent source lineage and canonical push-triggered deployment');
 must(governor.preservedRuntime?.hybridResourceGovernor==='R239_SELECTED_HOST_PRESSURE_AWARE_ADMISSION_AND_BOUNDED_WORK_SIZING','R241 must preserve R239 Hybrid resource authority');
 must(governor.preservedRuntime?.recursiveSelfBuildAndExactPromotion==='R240_R164_EVIDENCE_BOUND_SPARSE_FRONTIER_PLUS_EXACT_SOURCE_PROMOTION','R241 must preserve R240 self-promotion authority');
 must(governor.preservedRuntime?.archiveConvergenceVisualIntelligence==='R241_READ_ONLY_1728_OVER_20736_TOPOLOGY_AND_TYPED_COGNITION_PROJECTION','R241 preserved-runtime identity missing');
 
 for(const file of [topology,cognition,overlay])for(const forbidden of ['OmegaMissionLedgerR201','OmegaHybridMissionLedgerR203'])must(!file.includes(forbidden),`R241 must not restore retired Durable Object ${forbidden}`);
 
-console.log('OMEGA R241.1 ARCHIVE CONVERGENCE PASS · governed proof floor R241 with R239/R240 authorities preserved · 1,728 deterministic 12×12×12 topology over exact 20,736 packet · source route/neighbor filaments · evidence-aware STAY/TURN/ESCALATE/UNPROVED · AGI/QTI typed cognition read-only through proposal · authorization/execution/return/Canon fail closed · inherited R182 INGRESS/EGRESS/BLOCKED/RESIDUE + TURN/BASIN + CΩ/Φ/q/Λ legend preserved · existing R13/R113/R119 visual layers preserved · live verifier pins first-hand Cloudflare Worker Version ID while staged promotion retains exact SHA/receipt proof · R125/R141/R146/R147 and retired R201/R203 boundaries preserved');
+console.log('OMEGA R241.1/R330 ARCHIVE CONVERGENCE PASS · governed proof floor R241 with R239/R240 authorities preserved · 1,728 deterministic 12×12×12 topology over exact 20,736 packet · source route/neighbor filaments · evidence-aware STAY/TURN/ESCALATE/UNPROVED · AGI/QTI typed cognition read-only through proposal · authorization/execution/return/Canon fail closed · inherited R182 INGRESS/EGRESS/BLOCKED/RESIDUE + TURN/BASIN + CΩ/Φ/q/Λ legend preserved · existing R13/R113/R119 visual layers preserved · live verifier pins first-hand Cloudflare Worker Version ID while staged promotion retains exact SHA/receipt proof · R125/R141/R146/R147 and retired R201/R203 boundaries preserved');
