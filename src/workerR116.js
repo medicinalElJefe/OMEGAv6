@@ -9,7 +9,7 @@ import {manifestR130,operationalR130,R130_REVISION} from './system/operationalCo
 import {closeHybridReturnR141,readHybridClosureR141,replayHybridClosureR141,manifestR141,R141_REVISION} from './hybridProofClosureR141.js';
 import {createRunR146,listRunsR146,manifestR146,readRunR146,replayRunR146,transitionRunR146,R146_REVISION} from './execution/durableOperationExecutionR146.js';
 import {dispatchRunR147,executorDirectoryR147,manifestR147,pollRunR147,readResultR147,syncHybridClaimR147,syncHybridReturnR147,R147_REVISION} from './execution/unifiedExecutorFabricR147.js';
-import {advanceSovereignMissionR152,hydrateSovereignMissionsR152,manifestR152,resumeSovereignMissionR152,tagSovereignMissionR152,R152_MISSION_SCHEMA,R152_REVISION,R152_SOURCE_SCHEMA} from './execution/adaptiveSovereignMissionR152.js';
+import {advanceSovereignMissionR152,hydrateSovereignMissionsR152,manifestR152,resumeSovereignMissionR152,tagSovereignMissionR152,R152_MISSION_SCHEMA,R152_REVISION,R152_SOURCE_SCHEMA} from './execution/adaptiveSovereignMissionR152.js';\nimport {publicLearningR331,runtimeLearningR331} from './system/coherentLearningWorkerR331.js';
 
 export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator,OmegaSwarmAutonomicCoordinator};
 
@@ -168,8 +168,8 @@ async function probeFetchR130(request,env){
 }
 
 async function fetchR116(request,env){
- const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path==='/api/health'||path==='/api/core-health'||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
- if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
+ const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path.startsWith('/api/intelligence/r331/')||path==='/api/chat'||path==='/api/health'||path==='/api/core-health'||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
+ if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);\n const learningR331=await publicLearningR331(request,env,r115.fetch.bind(r115));if(learningR331)return withCorsR116(learningR331,request);
  if((path==='/api/health'||path==='/api/core-health')&&request.method==='GET')return withCorsR116(coreHealthR163(request,env),request);
  if((path==='/api/health'||path==='/api/core-health')&&request.method!=='GET')return withCorsR116(json({ok:false,schema:CORE_HEALTH_SCHEMA,revision:CORE_HEALTH_REVISION,state:'METHOD_NOT_ALLOWED',method:request.method,canonicalMutation:false,truthBoundary:'R163 canonical core-health endpoints are read-only.'},405,{allow:'GET','x-omega-core-health':'R163-FIRST-HAND'}),request);
  if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
