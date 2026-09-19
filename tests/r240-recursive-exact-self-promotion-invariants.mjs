@@ -95,16 +95,19 @@ assert.ok(suite.includes("import CalculusAddressFabricR240 from './CalculusAddre
 assert.ok(suite.includes('<RecursiveSelfBuildR240/>'));
 assert.ok(suite.includes('<CalculusAddressFabricR240 record={record}/>'));
 
-for(const token of ['actions: write',"['push','workflow_dispatch'].includes(r.event)",'R240/R245 EXACT CANDIDATE PASS','R240 exact two-parent source promotion PASS','pulls/$PR_NUMBER/merge','-f merge_method=merge','-f sha="$CANDIDATE_SHA"','actions/workflows/ci.yml/dispatches','--event workflow_dispatch','gh run watch "$RUN_ID"','R240 exact promoted merge is production-proven by canonical ci.yml','POLICY_BLOCKED_BRANCH_REMOVED'])assert.ok(workflow.includes(token),`R240 self-promotion workflow missing ${token}`);
-assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(workflow),'R240 may not direct-push generated source to main');
-assert.ok(!/gh\s+pr\s+merge/.test(workflow),'R240 must not use GitHub auto-merge/CLI merge');
+for(const token of ['actions: write',"['push','workflow_dispatch'].includes(r.event)",'R240/R245 EXACT CANDIDATE PASS','R240 exact two-parent source promotion PASS','git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA"','--force-with-lease="refs/heads/main:$BASE"','--event push','gh run watch "$RUN_ID"','R240 exact promoted merge is production-proven by canonical ci.yml'])assert.ok(workflow.includes(token),`R240 self-promotion workflow missing ${token}`);
+assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(workflow),'R240 generator may not direct-push source to main');
+assert.ok(!/gh\s+pr\s+create|gh\s+pr\s+merge/.test(workflow),'R330 exact promotion must not depend on Actions PR creation or GitHub auto-merge/CLI merge');
 assert.ok(!/actions\/workflows\/r170-governed-selfbuild\.yml\/dispatches/.test(workflow),'R240 may not dispatch itself');
 assert.ok(!/^\s*workflow_run\s*:/m.test(workflow),'R240 must not create recursive workflow_run fanout');
+assert.ok(!/^\s*schedule\s*:/m.test(workflow),'R330 must remove hourly self-build polling');
 
-assert.ok(ci.includes('workflow_dispatch:'),'canonical ci.yml must accept explicit exact R240 deployment dispatch');
-assert.ok(ci.includes("github.event_name == 'workflow_dispatch'"),'canonical deployment must distinguish explicit R240 dispatch');
-assert.ok(ci.includes("github.ref == 'refs/heads/main'"),'explicit canonical deploy must remain main-only');
+assert.ok(ci.includes('workflow_dispatch:'),'canonical ci.yml remains manually dispatchable');
+assert.ok(ci.includes("github.ref == 'refs/heads/main'"),'canonical deploy must remain main-only');
 assert.ok(ci.includes('Promoted main commit must be an exact two-parent merge commit'),'canonical deployment must retain exact two-parent lineage');
+assert.ok(ci.includes('continue-governed-selfbuild:'),'canonical production proof must own the next-cycle continuation');
+assert.ok(ci.includes('actions/workflows/r170-governed-selfbuild.yml/dispatches'),'canonical production proof must dispatch the next governed cycle');
+assert.ok(ci.includes('needs: deploy-main'),'continuation must require deploy-main success');
 assert.ok(!ci.includes('workflow_run:'),'canonical deployment must not add recursive workflow fanout');
 
 for(const token of ['HOST / JOB / MISSION / EPOCH','R239 RESOURCE ENVELOPE','data-r239-resource-tier','R141','R146','R147','R125','intentionally contain no APPLY_PATCH or WRITE_TEXT'])assert.ok(verifier.includes(token),`R240 semantic live verifier missing ${token}`);
