@@ -57,7 +57,7 @@ assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(workflow),'R170 may not direc
 assert.ok(!/gh\s+pr\s+merge/i.test(workflow),'GitHub auto-merge/CLI merge remains unused');
 assert.ok(!/gh\s+workflow\s+run/i.test(workflow),'canonical dispatch uses explicit API binding, not recursive CLI fanout');
 assert.ok(!/^\s*workflow_run\s*:/m.test(workflow));
-assert.match(workflow,/cron: '17 \* \* \* \*'/);
+assert.doesNotMatch(workflow,/^\s*schedule\s*:/m);assert.match(workflow,/workflow_dispatch:/);assert.doesNotMatch(workflow,/gh\s+pr\s+create/);assert.match(workflow,/git commit-tree/);assert.match(workflow,/--force-with-lease=/);
 const selectIndex=workflow.indexOf('name: Select next bounded capsule');
 const installIndex=workflow.indexOf('name: Prepare candidate proof dependencies');
 const preGenerationProofIndex=workflow.indexOf('name: Prove current successor chain before generation');
@@ -67,8 +67,8 @@ assert.doesNotMatch(workflow.slice(0,selectIndex),/npm install/);
 assert.match(workflow.slice(installIndex,preGenerationProofIndex),/if: steps\.select\.outputs\.status == 'PROPOSE'/);
 assert.match(workflow.slice(preGenerationProofIndex,generateIndex),/if: steps\.select\.outputs\.status == 'PROPOSE'/);
 
-assert.equal(governor.revision,'R170.5-R241');
-assert.equal(governor.engineRevision,'R170.2+R240');
+assert.equal(governor.revision,'R170.6-R330');
+assert.equal(governor.engineRevision,'R170.2+R240+R330');
 assert.equal(governor.currentCapabilityFloor,'R241');
 assert.deepEqual(governor.promotedSuccessorContinuity,['R175','R176','R177','R178','R179','R180']);
 assert.deepEqual(governor.postR180ProofContinuity,['R200','R200.1','R202','R210','R223','R236','R237','R238','R239','R240','R241']);
@@ -91,7 +91,7 @@ assert.equal(governor.selfPromotion.enabled,true);
 assert.equal(governor.selfPromotion.exactExpectedHeadMergeRequired,true);
 assert.equal(governor.selfPromotion.exactUnchangedBaseRequired,true);
 assert.equal(governor.selfPromotion.allowlistedDiffRequired,true);
-assert.equal(governor.selfPromotion.githubAutoMergeFeature,false);
+assert.equal(governor.selfPromotion.githubAutoMergeFeature,false);assert.equal(governor.selfPromotion.repositoryPrCreationRequired,false);assert.equal(governor.selfPromotion.candidatePullRequestRequired,false);assert.equal(governor.selfPromotion.exactTwoParentMainUpdate,true);assert.equal(governor.selfPromotion.canonicalDeploymentPushTrigger,true);
 assert.equal(governor.selfPromotion.canonicalDeploymentWorkflow,'.github/workflows/ci.yml');
 assert.equal(governor.selfPromotion.productionProofRequiredAfterSourceMerge,true);
 assert.equal(governor.selfPromotion.canonStateAdmission,false);
