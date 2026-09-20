@@ -73,8 +73,13 @@ for(const [name,text] of contents){
   assert.ok(!/^\s*workflow_run\s*:/m.test(text),`${name} reintroduced workflow_run`);
   assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(text),`${name} directly mutates main`);
   assert.ok(!/gh\s+pr\s+merge/i.test(text),`${name} auto-merges`);
+  if(name==='r170-governed-selfbuild.yml'){
+    assert.equal((text.match(/gh\s+workflow\s+run\s+ci\.yml/g)||[]).length,1,'R340 self-build may dispatch exactly one existing canonical ci.yml run after exact source promotion');
+    assert.ok(!/gh\s+workflow\s+run\s+r170-governed-selfbuild\.yml/i.test(text),'R340 self-build may not recursively dispatch itself');
+    continue;
+  }
   assert.ok(!/gh\s+workflow\s+run/i.test(text),`${name} recursively dispatches workflows`);
-  if(name==='r170-governed-selfbuild.yml'||name===maintenanceOnly)continue;
+  if(name===maintenanceOnly)continue;
   assert.ok(!/contents:\s*write/i.test(text),`${name} has unexpected contents write authority`);
   if(coreRequired.includes(name))continue;
 
@@ -91,7 +96,7 @@ for(const [name,text] of contents){
 }
 
 const selfbuild=contents.get('r170-governed-selfbuild.yml');
-assert.match(selfbuild,/workflow_dispatch:/);assert.ok(!/^\s*schedule\s*:/m.test(selfbuild));assert.ok(!/^\s*push\s*:/m.test(selfbuild));assert.ok(!/^\s*pull_request\s*:/m.test(selfbuild));assert.ok(!/gh\s+pr\s+create/i.test(selfbuild));assert.match(selfbuild,/gh run list/);assert.match(selfbuild,/production_ready/);assert.match(selfbuild,/OBSERVE_ONLY/);assert.match(selfbuild,/prove_successor_workflow_invariants_r175\.mjs/);assert.ok(selfbuild.includes('git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA"'));assert.ok(selfbuild.includes('--force-with-lease="refs/heads/main:$BASE"'));assert.ok(selfbuild.includes('--event push'));
+assert.match(selfbuild,/workflow_dispatch:/);assert.ok(!/^\s*schedule\s*:/m.test(selfbuild));assert.ok(!/^\s*push\s*:/m.test(selfbuild));assert.ok(!/^\s*pull_request\s*:/m.test(selfbuild));assert.ok(!/gh\s+pr\s+create/i.test(selfbuild));assert.match(selfbuild,/gh run list/);assert.match(selfbuild,/production_ready/);assert.match(selfbuild,/OBSERVE_ONLY/);assert.match(selfbuild,/prove_successor_workflow_invariants_r175\.mjs/);assert.ok(selfbuild.includes('git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA"'));assert.ok(selfbuild.includes('--force-with-lease="refs/heads/main:$BASE"'));assert.ok(selfbuild.includes('--event workflow_dispatch'));assert.ok(selfbuild.includes('gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref main'));
 const ci=contents.get('ci.yml');assert.match(ci,/Promoted main commit must be an exact two-parent merge commit/);assert.match(ci,/verify_federation_live_r1681\.mjs/,'canonical CI must delegate live Federation/Optical identity proof to the propagation-safe verifier');assert.match(ci,/continue-governed-selfbuild:/);assert.ok(ci.includes('actions/workflows/r170-governed-selfbuild.yml/dispatches'));
 const convergence=contents.get('r170-current-convergence.yml');
 for(const needle of [
