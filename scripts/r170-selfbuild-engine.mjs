@@ -10,7 +10,8 @@ const PROPOSAL_PATH=process.env.OMEGA_R170_PROPOSAL_PATH||'';
 function emitAndExit(payload,replacer=null,space=0){
  const output=JSON.stringify(payload,replacer,space)+'\n';
  if(PROPOSAL_PATH)fs.writeFileSync(PROPOSAL_PATH,output,'utf8');
- process.stdout.write(output,()=>process.exit(0));
+ fs.writeSync(process.stdout.fd,output);
+ process.exit(0);
 }
 const state=JSON.parse(fs.readFileSync(STATE_PATH,'utf8'));
 const roadmap=Array.isArray(state.roadmap)?state.roadmap:[];
