@@ -31,7 +31,7 @@ assert.ok(raster.includes("if(view==='AMPLITUDE'){v=at(r.amplitudeDb,i)"),'AMPLI
 assert.ok(raster.includes("v=at(r.nativeIntensity,i,r.validMask)"),'R336 may render exact native intensity in the AMPLITUDE lens only as an explicitly uncalibrated native-DN fallback');
 assert.ok(raster.includes("if(view==='TIME_STACK'){v=at(r.timeStackRelative,i)"),'TIME_STACK must not reuse a single-scene amplitude raster');
 
-for(const token of ["'/api/earth/sar/measurement-raster'","native?.nativeDataBound?'NATIVE SOURCE BOUND'","raster={native?.nativeDataBound?native.raster:undefined}",'Decode native raster','NATIVE PIXELS {native?.nativeDataBound?\'BOUND\':\'UNBOUND\'}'])assert.ok(live.includes(token),`R326/R337 live surface missing ${token}`);
+for(const token of ["'/api/earth/sar/measurement-raster'","native?.nativeDataBound?'NATIVE SOURCE BOUND'",'raster={native?.nativeDataBound?displayRaster:undefined}','Decode native raster','NATIVE PIXELS {native?.nativeDataBound?\'BOUND\':\'UNBOUND\'}'])assert.ok(live.includes(token),`R326/R337/R341 live surface missing ${token}`);
 assert.ok(live.includes("truth:nativeBound?'OBSERVED_NATIVE':'VISUAL_ENHANCED'"),'decoded native samples must upgrade only to OBSERVED_NATIVE');
 assert.ok(live.includes("missingness:nativeBound?(complexBound?['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND','PAIR_REQUIRED']:['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND'])"),'decoded native source must retain calibration/derived missingness while complex SLC also retains pair-required missingness');
 
@@ -40,3 +40,5 @@ assert.ok(plan.includes("timeStackRelative"),'time-stack planner must require it
 assert.ok(worker.includes("import {sarNativeRasterR326} from './sarNativeRasterR326.js'")&&worker.includes("url.pathname==='/api/earth/sar/native-raster'"),'canonical Earth worker must own R326 ingress route');
 
 console.log('R326/R336 SAR NATIVE RASTER INGRESS PASS · bounded exact COG/TIFF decode · native DN may drive SOURCE and an explicitly uncalibrated AMPLITUDE display lens · calibrated backscatter/phase/derived physics remain independently gated · no SLC approximation · canonical worker preserved');
+
+assert.ok(live.includes("const displayRaster=pairDerived?.state==='PAIR_FIELDS_BOUND'?pairDerived.pairRaster:native?.raster"),'R341 may replace the displayed analytical raster only after pair-derived fields are explicitly bound; native source remains fallback');
