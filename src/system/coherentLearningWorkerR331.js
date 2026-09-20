@@ -107,15 +107,30 @@ export async function runtimeLearningR331(runtime,request){
   return jsonR331({ok:true,stored:[user.memoryId,assistant.memoryId],ledgerCount:ledger.count,lastEventHash:ledger.event.eventHash,canonicalAdmission:false});
  }
  if(path==='/intelligence/r331/feedback'&&request.method==='POST'){
-  const body=await request.json().catch(()=>({})),rows=await read();let memory;
+  const body=await request.json().catch(()=>({})),rows=await read(),kind=cleanR331(body?.kind).toUpperCase();
+  if(kind==='REVOKE'){
+   const memoryId=cleanR331(body?.memoryId).slice(0,220),target=rows.find(x=>x?.memoryId===memoryId);
+   if(!memoryId||!target)return jsonR331({ok:false,code:'R331_MEMORY_NOT_FOUND',canonicalAdmission:false},404);
+   const revokedAt=new Date().toISOString(),reason=cleanR331(body?.reason).slice(0,500)||'Explicit user memory revocation';
+   const next=rows.map(x=>x?.memoryId===memoryId?{...x,state:'REVOKED',revokedAt,revocationReason:reason,canonicalAdmission:false}:x);
+   await write(next);const ledger=await appendLedgerR331(runtime,'MEMORY_REVOKED',{memoryId,priorState:target.state,reason});
+   try{await runtime.event('R331_MEMORY_REVOKED','R331 revoked a persistent memory without deleting history.',{memoryId,priorState:target.state,canonicalAdmission:false})}catch{}
+   return jsonR331({ok:true,memoryId,state:'REVOKED',ledgerCount:ledger.count,lastEventHash:ledger.event.eventHash,historyPreserved:true,canonicalAdmission:false});
+  }
+  let memory;
   try{memory=compileLearningMemoryR331(body)}catch(error){return jsonR331({ok:false,code:'R331_FEEDBACK_REJECTED',message:error instanceof Error?error.message:String(error)},400)}
-  await write([...rows,memory]);const ledger=await appendLedgerR331(runtime,'FEEDBACK',{memoryId:memory.memoryId,memoryClass:memory.memoryClass,state:memory.state,trainingApproved:memory.trainingApproved===true});
-  try{await runtime.event('R331_LEARNING_MEMORY','R331 stored explicit typed learning feedback.',{memoryId:memory.memoryId,memoryClass:memory.memoryClass,state:memory.state,canonicalAdmission:false})}catch{}
-  return jsonR331({ok:true,memory,trainingEligible:memory.trainingApproved===true&&String(memory.state).startsWith('ADMITTED'),ledgerCount:ledger.count,lastEventHash:ledger.event.eventHash,canonicalAdmission:false});
+  const supersedes=Array.isArray(memory.supersedes)?memory.supersedes:[],superseded=[];
+  const next=rows.map(x=>{
+   if(!supersedes.includes(x?.memoryId)||String(x?.state||'').startsWith('REVOKED'))return x;
+   superseded.push(x.memoryId);return{...x,state:'SUPERSEDED',supersededBy:memory.memoryId,supersededAt:memory.createdAt,canonicalAdmission:false};
+  });
+  await write([...next,memory]);const ledger=await appendLedgerR331(runtime,'FEEDBACK',{memoryId:memory.memoryId,memoryClass:memory.memoryClass,state:memory.state,trainingApproved:memory.trainingApproved===true,superseded});
+  try{await runtime.event('R331_LEARNING_MEMORY','R331 stored explicit typed learning feedback.',{memoryId:memory.memoryId,memoryClass:memory.memoryClass,state:memory.state,superseded,canonicalAdmission:false})}catch{}
+  return jsonR331({ok:true,memory,superseded,trainingEligible:memory.trainingApproved===true&&String(memory.state).startsWith('ADMITTED'),ledgerCount:ledger.count,lastEventHash:ledger.event.eventHash,historyPreserved:true,canonicalAdmission:false});
  }
  if(path==='/intelligence/r331/state'&&request.method==='GET'){
   const rows=await read(),ledger=await runtime.get('intelligenceLedgerR331',[]),context=buildCommunicationContextR331(rows,'',{});
-  const counts={episodic:rows.filter(x=>x.memoryClass==='EPISODIC').length,preferences:rows.filter(x=>x.memoryClass==='COMMUNICATION_PREFERENCE').length,semantic:rows.filter(x=>x.memoryClass==='SEMANTIC_LESSON').length,procedural:rows.filter(x=>x.memoryClass==='PROCEDURAL_LESSON').length,scars:rows.filter(x=>x.memoryClass==='SCAR').length};
+  const counts={episodic:rows.filter(x=>x.memoryClass==='EPISODIC').length,preferences:rows.filter(x=>x.memoryClass==='COMMUNICATION_PREFERENCE').length,semantic:rows.filter(x=>x.memoryClass==='SEMANTIC_LESSON').length,procedural:rows.filter(x=>x.memoryClass==='PROCEDURAL_LESSON').length,scars:rows.filter(x=>x.memoryClass==='SCAR').length,active:rows.filter(x=>String(x?.state||'').startsWith('ADMITTED')||x?.state==='RECORDED').length,superseded:rows.filter(x=>x?.state==='SUPERSEDED').length,revoked:rows.filter(x=>x?.state==='REVOKED').length};
   return jsonR331({ok:true,schema:'OMEGA_INTELLIGENCE_STATE_R331',revision:R331_INTELLIGENCE_REVISION,memoryCount:rows.length,counts,ledgerCount:Array.isArray(ledger)?ledger.length:0,lastEventHash:Array.isArray(ledger)?ledger.at(-1)?.eventHash||null:null,coherence:context.coherence,foundationWeightsChanged:false,canonicalAdmission:false});
  }
  if(path==='/intelligence/r331/training-batch'&&request.method==='GET'){
