@@ -10,7 +10,7 @@ const probe=read('src/sarAssetProbeR325.js');
 const worker=read('src/workerR8.js');
 
 for(const token of ['NATIVE_DATA_UNBOUND','CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND','PAIR_REQUIRED','PROCESSING_REQUIRED'])assert.ok(truth.includes(token),`R325 missing typed missingness ${token}`);
-assert.ok(live.includes("missingness:nativeBound?['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND']:['NATIVE_DATA_UNBOUND','CALIBRATION_UNBOUND']"),'real catalogue acquisition must never regress to NO_SOURCE; decoded native source must advance while retaining calibration/derived missingness');
+assert.ok(live.includes("missingness:nativeBound?(complexBound?['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND','PAIR_REQUIRED']:['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND']):['NATIVE_DATA_UNBOUND','CALIBRATION_UNBOUND']"),'real catalogue acquisition must never regress to NO_SOURCE; decoded native source must advance while retaining calibration/derived missingness');
 assert.ok(live.includes('assetPrefixBound={probe?.nativeByteEvidenceBound===true}'),'byte-prefix evidence must flow into analytical field planner');
 assert.ok(live.includes('Probe native asset'),'operator must be able to retry exact native asset proof');
 

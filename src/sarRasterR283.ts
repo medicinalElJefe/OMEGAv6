@@ -2,7 +2,7 @@ import{clamp01R280,normalizeDbR280,normalizeLinearR280,normalizePhaseR280,normal
 export interface SarRasterFieldR283{
  width:number;height:number;sourceId:string;native:boolean;
  nativeIntensity?:number[];validMask?:number[];sourceUnits?:string;sampling?:{sourceWidth:number;sourceHeight:number;selectedIfdOffset:number;overview:boolean;method:string;validSamples:number;totalSamples:number};georeference?:{bound:boolean;affineBound?:boolean;gcpBound?:boolean;method:string;crs:string|null;epsg:number|null;affine:number[]|null;corners:Array<{x:number;y:number}|null>;gcpCount?:number;gcps?:Array<{pixel:number;line:number;zPixel:number;x:number;y:number;z:number}>};
- amplitudeDb?:number[];phaseRad?:number[];coherence?:number[];losDisplacementM?:number[];elevationM?:number[];polarimetricPower?:number[];multiBandRelative?:number[];timeStackRelative?:number[];uncertainty?:number[];quality?:number[];
+ amplitudeDb?:number[];complexI?:number[];complexQ?:number[];phaseRad?:number[];coherence?:number[];losDisplacementM?:number[];elevationM?:number[];polarimetricPower?:number[];multiBandRelative?:number[];timeStackRelative?:number[];uncertainty?:number[];quality?:number[];
  scarBurden?:number[];proofCoverage?:number[];
  derivationR336?:{schema:string;sourceId:string;evidenceClass:string;operators:string[];truthBoundary:string};
  ranges?:{nativeIntensity?:[number,number];amplitudeDb?:[number,number];losDisplacementM?:[number,number];elevationM?:[number,number];polarimetricPower?:[number,number];multiBandRelative?:[number,number];timeStackRelative?:[number,number]};

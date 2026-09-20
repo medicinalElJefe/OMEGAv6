@@ -222,3 +222,4 @@ export async function sarNativeRasterR326(url){
 }
 
 export const R326_TESTABLE=Object.freeze({parseHeader,packBits,undoPredictor,outputShape,planSamples});
+export const R326_INTERNAL=Object.freeze({fetchRange,readIfd,entryValues,collectIfds,chooseIfd,georefForIfd,decompress,undoPredictor,outputShape,planSamples,finiteRange});
