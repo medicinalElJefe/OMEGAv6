@@ -4,6 +4,7 @@ import {computeLensScore,LENS_CALCULUS,type LensInput,type OmegaLens} from './le
 import {compileSourceTraversal,evaluateSourceBackedModes} from './sourceBackedModeRuntimeR21';
 import {decodeAddress,evaluateCorpusModes,corpusState,STATE_COUNT} from './corpusRuntime';
 import {calibratedRelativityR334} from './system/calibrationR334.js';
+import {calibrationManifestR340} from './system/calibrationR340.js';
 
 export const R132_REVISION='R132' as const;
 export const R132_SCHEMA='OMEGA_RELATIONAL_PHYSICS_MANIFOLD_R132' as const;
@@ -112,6 +113,7 @@ export function compilePhysicsRelativityR132(address:number,earthEvidence?:any){
   canonAuthorityField:{count:authorities.length,active:authorities.filter(x=>x.state==='ACTIVE').length,watch:authorities.filter(x=>x.state==='WATCH').length,quiet:authorities.filter(x=>x.state==='QUIET').length,harmonics:authorityHarmonics,top:[...authorities].sort((a,b)=>b.activation-a.activation).slice(0,8)},
   lensField:lenses,dimensional,dynamics,observed,field,
   calibration:calibratedRelativityR334(),
+  calibrationAdvance:calibrationManifestR340(),
   physicsReference:{constants:R132_REFERENCE_CONSTANTS,forceReference:R132_FORCE_REFERENCE,scaleHierarchy:R132_SCALE_HIERARCHY,domainBasis:R132_DOMAIN_BASIS,stateBasis:R132_STATE_BASIS,source:'Standard_Model_Lagrangian_20736D_Pi_Motion_AutoPing.xlsx / 20736D Motion Relativity Force Atlas donor'},
   hierarchy:{canonicalStates:STATE_COUNT,addressResolution:'12×12×12×12',modeRegistry:ALL_MODES_BOUNDARY.sourceModeEvaluations,canonAuthorities:ALL_MODES_BOUNDARY.canonAuthorities},
   continuityLaw:'partition -> transform/exchange -> invariant carry -> scar/history carry -> re-contextualize -> repartition',
