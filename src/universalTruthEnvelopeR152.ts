@@ -2,6 +2,7 @@ import type {EvidencePacket as R126EvidencePacket,EvidenceKind} from './causal/c
 import {corpusState,STATE_COUNT} from './corpusRuntime';
 import {allModesTruthFusionAtAddressR151} from './allModesTruthFusionR151';
 import {calibrationPropagationManifestR335} from './system/calibrationPropagationR335.js';
+import {calibrationPropagationManifestR339} from './system/calibrationPropagationR339.js';
 
 export const R152_SCHEMA='OMEGA_UNIVERSAL_TRUTH_ENVELOPE_R152' as const;
 export const R152_LAWS=Object.freeze([
@@ -13,7 +14,8 @@ export const R152_LAWS=Object.freeze([
   'MISSING_DATA_RETURNS_UNKNOWN_OR_NEXT_ACTION_NOT_SYNTHETIC_COMPLETION',
   'INTERNAL_COHERENCE_CAN_PRIORITIZE_WHERE_TO_MEASURE_BUT_CANNOT_CREATE_MEASUREMENT',
   'CANONICAL_SOURCE_DISPATCH_AND_R125_ADMISSION_REMAIN_EXTERNAL_AUTHORITIES',
-  'R335_CALIBRATION_IS_CONTEXT_NOT_EMPIRICAL_AUTHORITY'
+  'R335_CALIBRATION_IS_CONTEXT_NOT_EMPIRICAL_AUTHORITY',
+  'R339_FROZEN_FORECAST_IS_PROSPECTIVE_CONTEXT_NOT_OBSERVATION_AND_CANNOT_BE_RETUNED'
 ]);
 
 export type UniversalEvidencePacketR152=R126EvidencePacket&{
@@ -204,9 +206,10 @@ export function compileUniversalTruthEnvelopeR152(input:UniversalTruthInputR152)
     },
     executionProof:input.executionProof||null,
     calibrationContext:calibrationPropagationManifestR335(),
+    advancedCalibrationContext:calibrationPropagationManifestR339(),
     appliedModes:{sourceModes:fusion.sourceModeCount,canonAuthorities:fusion.canonAuthorityCount,totalChannels:fusion.channelCount,provenance:fusion.provenance},
     fingerprint:fnv1a32(JSON.stringify(compact)),canonicalMutation:false,canonicalAdmissionAuthority:'R125',
-    truthBoundary:'R152 is a maximum-available truth envelope, not absolute or omniscient truth. Verified empirical evidence and independent source families outrank model/canon coherence. R151 all-mode agreement supplies internal coherence and measurement priority only. Missing, contradictory or unverified data remain explicit; execution truth, physical validation and R125 CanonState admission remain separate. R335 calibration is carried as versioned context only and cannot promote reconstructed or derived quantities into empirical evidence.'
+    truthBoundary:'R152 is a maximum-available truth envelope, not absolute or omniscient truth. Verified empirical evidence and independent source families outrank model/canon coherence. R151 all-mode agreement supplies internal coherence and measurement priority only. Missing, contradictory or unverified data remain explicit; execution truth, physical validation and R125 CanonState admission remain separate. R335 calibration is carried as versioned context only and cannot promote reconstructed or derived quantities into empirical evidence. R339 carries the frozen prospective forecast/ablation contract without adding empirical weight; future evaluation must preserve its pre-registered transform, covariance rule and threshold.'
   };
 }
 

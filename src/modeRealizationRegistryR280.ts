@@ -1,6 +1,7 @@
 import {CANON_AUTHORITY_STACK,evaluateCanonAuthorityStack} from './allModesAuthority';
 import {sourceBackedModeSummary,type SourceBackedModeResult} from './sourceBackedModeRuntimeR21';
 import {calibrationManifestR334} from './system/calibrationR334.js';
+import {calibrationManifestR339} from './system/ablationForecastR339.js';
 
 export const R280_MODE_REALIZATION_SCHEMA='OMEGA_MODE_REALIZATION_REGISTRY_R280' as const;
 export const R280_MODE_REALIZATION_LAWS=Object.freeze([
@@ -180,9 +181,10 @@ export function compileModeRealizationRegistryR280(record:any){
     authorityCount:rows.length,sourceCatalogCount:source.catalogCount,sourceBackedRuntimeRows:source.rows.length,
     summary:{promoted,tested,implemented,gated,charted,domainExecutable,fullyBound,lensExecutable:rows.length},
     calibrationContext:{...calibrationManifestR334(),propagationRevision:'R335',use:'EVIDENCE_CONTEXT_ONLY'},
+    advancedCalibrationContext:{...calibrationManifestR339(),propagationRevision:'R339',use:'ABLATION_FORECAST_EVIDENCE_CONTEXT_ONLY'},
     rows,criticalGaps,
     canonicalMutation:false,canonicalAdmissionAuthority:'R125',
-    truthBoundary:'R280 distinguishes a named/charted mode, a derived lens, a source-executed operator, and a domain runtime. All 62 canon authorities have executable read-only lenses through the inherited R12 evaluator, but lens execution is not equivalent to realizing every historical domain executor. R335 carries the R334 calibrated CERN/Omega evidence context across the registry without treating every mode as a CERN executor or independent replication. Gated inputs remain explicit. Promotion status requires bound runtime/test evidence and never overrides empirical evidence, physical validation, execution receipts, or R125 CanonState admission.'
+    truthBoundary:'R280 distinguishes a named/charted mode, a derived lens, a source-executed operator, and a domain runtime. All 62 canon authorities have executable read-only lenses through the inherited R12 evaluator, but lens execution is not equivalent to realizing every historical domain executor. R335 carries the R334 calibrated CERN/Omega evidence context across the registry without treating every mode as a CERN executor or independent replication. R339 additionally carries the frozen ablation/forecast successor layer as evidence context only; it does not retroactively convert prospective tests into observations. Gated inputs remain explicit. Promotion status requires bound runtime/test evidence and never overrides empirical evidence, physical validation, execution receipts, or R125 CanonState admission.'
   };
 }
 

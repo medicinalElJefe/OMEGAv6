@@ -45,6 +45,7 @@ export function auditR314(root=process.cwd()){
  const sourceCanonPath=path.join(root,'public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv');
  const r334ClosurePath=path.join(root,'public/canon/Dewey_OMEGA_CERN_Dewey_Relativity_Closure_v3_2026-09-19.csv');
  const r334BridgePath=path.join(root,'public/canon/Dewey_OMEGA_CERN_ADV02_ADV04_Quantitative_Bridge_2026-09-19.csv');
+ const r339AdvPath=path.join(root,'public/canon/Dewey_OMEGA_CERN_ADV05_ADV06_Ablation_RoundTrip_Forecast_v4_2026-09-19.csv');
 
  const capabilitySource=read(capabilityPath);
  const archiveSource=`${read(archiveAPath)}\n${read(archiveBPath)}`;
@@ -56,6 +57,7 @@ export function auditR314(root=process.cwd()){
  const calibrationMeta=(file,expectedSha,expectedRecords)=>{const present=exists(file),bytes=present?fs.readFileSync(file):Buffer.alloc(0),sha256=present?createHash('sha256').update(bytes).digest('hex'):'',lines=present?bytes.toString('utf8').split(/\r?\n/).filter((x,i,all)=>i<all.length-1||x.length>0).length:0,records=Math.max(0,lines-1);return{present,sha256,expectedSha,records,expectedRecords,path:path.relative(root,file).replaceAll('\\','/')}};
  const r334Closure=calibrationMeta(r334ClosurePath,'bbb0a6957512a0fd87a0668c914b62be459910e011c2c882b3d96c38cb844d8c',23);
  const r334Bridge=calibrationMeta(r334BridgePath,'2fa0753e49445b9e8d0d7b56b320503aec61e091a3f7eae17619c74ad84936ba',36);
+ const r339Adv=calibrationMeta(r339AdvPath,'d4eeab6ec5f4310cb0554973538d60ce333a981ad0b8a3c301f8d359b692a410',25);
 
  const capabilities=countCapabilityRows(capabilitySource);
  const archives=archiveIds(archiveSource);
@@ -87,15 +89,22 @@ export function auditR314(root=process.cwd()){
   else if(data.sha256!==data.expectedSha)residuals.push({id:`${id}-HASH`,severity:'CRITICAL',mode:'BLOCK',summary:`R334 calibrated dataset SHA mismatch ${data.sha256}`,source:data.path});
   if(data.present&&data.records!==data.expectedRecords)residuals.push({id:`${id}-CENSUS`,severity:'CRITICAL',mode:'BLOCK',summary:`R334 calibrated dataset records ${data.records} != ${data.expectedRecords}`,source:data.path});
  }
+ for(const [id,data] of [['R339-ADV',r339Adv]]){
+  if(!data.present)residuals.push({id:`${id}-MISSING`,severity:'CRITICAL',mode:'BLOCK',summary:`R339 calibrated dataset missing ${data.path}`,source:data.path});
+  else if(data.sha256!==data.expectedSha)residuals.push({id:`${id}-HASH`,severity:'CRITICAL',mode:'BLOCK',summary:`R339 calibrated dataset SHA mismatch ${data.sha256}`,source:data.path});
+  if(data.present&&data.records!==data.expectedRecords)residuals.push({id:`${id}-CENSUS`,severity:'CRITICAL',mode:'BLOCK',summary:`R339 calibrated dataset records ${data.records} != ${data.expectedRecords}`,source:data.path});
+ }
+ if(!masterSource.includes('R339_PROPAGATION_RECEIPT')||!masterSource.includes('FROZEN_FORECAST_PARAMETERS_AND_THRESHOLD_MUST_NOT_BE_RETUNED_AFTER_TARGET_INSPECTION'))residuals.push({id:'R339-CONVERGENCE-BINDING',severity:'CRITICAL',mode:'BLOCK',summary:'R314 convergence master does not preserve the R339 frozen-forecast/no-retuning binding',source:'src/convergenceMasterR314.ts'});
  if(!masterSource.includes('R334_B06_PROGRESS_RECEIPT')||!masterSource.includes('RELATIONAL_TRANSITIONS_REQUIRE_PROVENANCE_SCAR_AND_QTI_PROOF_BEFORE_FORECAST_OR_NEXT_PARENT'))residuals.push({id:'R334-CONVERGENCE-BINDING',severity:'CRITICAL',mode:'BLOCK',summary:'R314 convergence master does not preserve the proof-governed R334 relational/calibration binding',source:'src/convergenceMasterR314.ts'});
 
  const vector=residualVectorR314({state:residuals.some(row=>row.mode==='BLOCK')?'HOLD':residuals.length?'TURN':'STAY',residuals});
  return {
   schema:'OMEGA_R314_CONVERGENCE_AUDIT',
   generatedAt:new Date().toISOString(),
-  counts:{capabilities,archiveFamilies:archives.length,buildStages:stages.length,selfBuildCapsules:roadmap.length,realRoadmapTargets:realRoadmapTargets.length,realizedRealTargets:realizedRealTargets.length,targetFamilies:targetFamilies.length,sourceCanonRecords,sourceCanonLines,r334CalibratedRecords:r334Closure.records+r334Bridge.records},
+  counts:{capabilities,archiveFamilies:archives.length,buildStages:stages.length,selfBuildCapsules:roadmap.length,realRoadmapTargets:realRoadmapTargets.length,realizedRealTargets:realizedRealTargets.length,targetFamilies:targetFamilies.length,sourceCanonRecords,sourceCanonLines,r334CalibratedRecords:r334Closure.records+r334Bridge.records,r339AdvancementRecords:r339Adv.records},
   sourceExactCanon:{present:sourceCanonExists,sha256:sourceCanonSha,expectedRepositoryNormalizedSha256:'478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf',originalSourceSha256:'1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb',records:sourceCanonRecords,expectedRecords:3743},
   calibratedCernRelativity:{revision:'R334',closure:r334Closure,bridge:r334Bridge,masterRecords:4260,inheritedBridgeRecords:4237,deltaRecords:23,canonicalAdmission:false,externalReplicationGate:'OPEN'},
+  calibratedAblationForecast:{revision:'R339',advancement:r339Adv,masterRecords:4285,advancementRecords:25,forecastFrozenAt:'2026-09-19',noRetuning:true,canonicalAdmission:false},
   ids:{archiveFamilies:archives,buildStages:stages},
   selfBuild:{active:Boolean(state?.active),generation:Number(state?.generation||0),maxAutonomousGenerations:Number(state?.maxAutonomousGenerations||0),capsules:roadmap.map(row=>({id:row.id,target:row.target,status:row.status||null,repairId:row.repairId||null,mutationClass:row.mutationClass||null})),realRoadmapTargets:realRoadmapTargets.map(row=>row.target),realizedRealTargets:realizedRealTargets.map(row=>row.target)},
   residuals:vector.residuals,

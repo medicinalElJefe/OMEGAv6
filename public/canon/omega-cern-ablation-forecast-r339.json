@@ -1,0 +1,55 @@
+{
+  "schema": "OMEGA_CERN_ABLATION_FORECAST_RECEIPT_R339",
+  "revision": "R339",
+  "releaseId": "DEWEY_OMEGA_CERN_ABLATION_FORECAST_V4_2026-09-19",
+  "datasets": {
+    "advancedMasterV4": {
+      "records": 4285,
+      "columns": 68,
+      "originalSha256": "0f966c0f8b40d26ba177324c6f0a6246ebda959e0030d5ad8ab2196f480a9891",
+      "repositoryNormalizedSha256": "e8c6aaf1217919d1f714a2399638e49d48922780bf9635f700eabbf164bd3ff2",
+      "materialization": "MANIFEST_ONLY"
+    },
+    "adv05Adv07V4": {
+      "records": 25,
+      "columns": 14,
+      "stageCounts": {
+        "ADV-05": 18,
+        "ADV-06": 5,
+        "ADV-07": 2
+      },
+      "publicPath": "/canon/Dewey_OMEGA_CERN_ADV05_ADV06_Ablation_RoundTrip_Forecast_v4_2026-09-19.csv",
+      "originalSha256": "e4aaaae441a326d663ba1de049e91c2ee9b392096b982f7608f6d10d6096d6b9",
+      "repositoryNormalizedSha256": "d4eeab6ec5f4310cb0554973538d60ce333a981ad0b8a3c301f8d359b692a410"
+    }
+  },
+  "roundTrip": {
+    "inversePointResidual": 5.551115123125783e-17,
+    "jacobianResidual": 2.0816681711721685e-17,
+    "covarianceResidual": 2.7756422635651865e-17
+  },
+  "forecast": {
+    "frozenAt": "2026-09-19",
+    "commonStateCenter": {
+      "fL": 0.551411180209,
+      "cParallel": 0.451340588867
+    },
+    "compatibilityThresholdD2": 5.991464547108,
+    "noRetuning": true
+  },
+  "promotion": "PARTIAL_PROMOTION_WITHIN_RESTRICTED_BENCHMARK",
+  "nextInternalParent": "V4_FROZEN_STATE_PLUS_FORECAST_CONTRACT",
+  "canonicalAdmission": false,
+  "truthBoundary": "R339 preserves a frozen prospective forecast and model-dependent ablation evidence. It does not claim an official ATLAS/CMS combination, a guaranteed future measurement, or universal physics. Future evaluation must use the frozen transform, covariance rule and threshold without after-the-fact retuning.",
+  "masterSuffixProof": {
+    "verifiedFromUploadedPair": true,
+    "masterSuffixRows": 25,
+    "masterSuffixStartSequence": 4261,
+    "masterSuffixEndSequence": 4285,
+    "sourceRowOrderMatches": true,
+    "classificationMatchesResult": true,
+    "evidenceStatusMatchesEvidenceClass": true,
+    "sourceFileMatches": true,
+    "boundary": "This proves only the final 25-row correspondence between the uploaded v4 master and uploaded ADV05-ADV07 evidence file; it does not prove byte identity of the first 4,260 rows to the earlier v3 master."
+  }
+}
