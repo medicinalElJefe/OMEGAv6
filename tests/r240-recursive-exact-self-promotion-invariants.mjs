@@ -42,7 +42,7 @@ assert.equal(policy.deployment.soleCanonicalWriter,'.github/workflows/ci.yml');
 assert.equal(policy.deployment.selfBuilderMayDeployDirectly,false);
 assert.equal(policy.deployment.selfBuilderMayDispatchItself,false);
 assert.equal(policy.deployment.exactMergedShaProductionSuccessRequired,true);
-assert.equal(policy.deployment.explicitWorkflowDispatchAfterActionsTokenMerge,false);
+assert.equal(policy.deployment.explicitWorkflowDispatchAfterActionsTokenMerge,true);
 assert.equal(policy.deployment.canonicalDeploymentPushTrigger,true);
 assert.equal(policy.deployment.eventDrivenContinuation,true);
 assert.equal(policy.deployment.continuationWorkflow,'.github/workflows/r170-governed-selfbuild.yml');
@@ -103,7 +103,7 @@ assert.ok(suite.includes("import CalculusAddressFabricR240 from './CalculusAddre
 assert.ok(suite.includes('<RecursiveSelfBuildR240/>'));
 assert.ok(suite.includes('<CalculusAddressFabricR240 record={record}/>'));
 
-for(const token of ['actions: write',"['push','workflow_dispatch'].includes(r.event)",'R240/R245 EXACT CANDIDATE PASS','R240 exact two-parent source promotion PASS','git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA"','--force-with-lease="refs/heads/main:$BASE"','--event push','gh run watch "$RUN_ID"','R240 exact promoted merge is production-proven by canonical ci.yml'])assert.ok(workflow.includes(token),`R240 self-promotion workflow missing ${token}`);
+for(const token of ['actions: write',"['push','workflow_dispatch'].includes(r.event)",'R240/R245 EXACT CANDIDATE PASS','R240 exact two-parent source promotion PASS','git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA"','--force-with-lease="refs/heads/main:$BASE"','gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref main','--event workflow_dispatch','gh run watch "$RUN_ID"','R240 exact promoted merge is production-proven by canonical ci.yml'])assert.ok(workflow.includes(token),`R240 self-promotion workflow missing ${token}`);
 assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(workflow),'R240 generator may not direct-push source to main');
 assert.ok(!/gh\s+pr\s+create|gh\s+pr\s+merge/.test(workflow),'R330 exact promotion must not depend on Actions PR creation or GitHub auto-merge/CLI merge');
 assert.ok(!/actions\/workflows\/r170-governed-selfbuild\.yml\/dispatches/.test(workflow),'R240 may not dispatch itself');
