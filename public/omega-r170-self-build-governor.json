@@ -97,10 +97,10 @@
     "mergeMethod": "merge",
     "twoParentMergeRequired": true,
     "canonicalDeploymentWorkflow": ".github/workflows/ci.yml",
-    "canonicalDeploymentDispatchAllowed": false,
+    "canonicalDeploymentDispatchAllowed": true,
     "selfWorkflowDispatchAllowed": false,
     "productionProofRequiredAfterSourceMerge": true,
-    "productionFailureMode": "SOURCE_PROMOTED_BUT_NOT_PRODUCTION_PROVEN__STOP_AND_REQUIRE_FORWARD_REPAIR",
+    "productionFailureMode": "SOURCE_PROMOTED_BUT_NOT_PRODUCTION_PROVEN__CANONICAL_CI_PUSH_OR_EXPLICIT_MAIN_DISPATCH_REQUIRED",
     "canonStateAdmission": false,
     "canonicalAdmissionAuthority": "R125",
     "truthLaw": "generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
@@ -135,5 +135,5 @@
     "archiveConvergenceVisualIntelligence": "R241_READ_ONLY_1728_OVER_20736_TOPOLOGY_AND_TYPED_COGNITION_PROJECTION"
   },
   "truthLaw": "reachable != writable != generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
-  "truthBoundary": "R170.6/R330 preserves the R240 exact-source promotion gates while removing dependence on GitHub Actions-created pull requests and hourly polling. The generator still cannot write main. Only the governed promotion step may construct the exact two-parent merge commit from an unchanged production-proven base and an exact re-proved allowlisted candidate tree, then update main under a lease. That main update triggers ci.yml as the sole canonical production writer. Only after successful staged deployment and live verification may ci.yml dispatch the next governed self-build cycle. The self-builder never dispatches itself, workflow_run fanout remains forbidden, red production stops continuation, R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable history authority, and R141 exact Hybrid return-proof authority."
+  "truthBoundary": "R170.6/R339 preserves the R240 exact-source promotion gates and one canonical ci.yml production authority. Because a main update performed with the GitHub Actions token may not emit another push-triggered workflow, the governed R170 promotion step first waits for an exact-SHA ci.yml push run and, only if none appears while main still equals the promoted merge, explicitly dispatches that same canonical ci.yml on main. The self-builder never deploys directly and never dispatches itself. ci.yml remains the sole production writer and must prove the exact promoted two-parent merge before continuation. Red production stops continuation; R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable history authority, and R141 exact Hybrid return-proof authority."
 }
