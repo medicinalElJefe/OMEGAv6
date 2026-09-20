@@ -1,6 +1,7 @@
 import {CANON_AUTHORITY_STACK,evaluateCanonAuthorityStack} from './allModesAuthority';
 import {sourceBackedModeSummary,type SourceBackedModeResult} from './sourceBackedModeRuntimeR21';
 import {calibrationManifestR334} from './system/calibrationR334.js';
+import {calibrationManifestR339} from './system/calibrationR339.js';
 
 export const R280_MODE_REALIZATION_SCHEMA='OMEGA_MODE_REALIZATION_REGISTRY_R280' as const;
 export const R280_MODE_REALIZATION_LAWS=Object.freeze([
@@ -27,7 +28,7 @@ export type ModeBindingR280={
 
 const BINDINGS:Record<string,ModeBindingR280>=Object.freeze({
   'OVERALL CANON MODE':{
-    artifacts:['src/allModesTruthFusionR151.ts','src/universalTruthEnvelopeR152.ts','src/system/calibrationR334.js'],
+    artifacts:['src/allModesTruthFusionR151.ts','src/universalTruthEnvelopeR152.ts','src/system/calibrationR334.js','src/system/calibrationR339.js'],
     tests:['tests/r151-all-modes-truth-fusion.mts','tests/r152-universal-truth-envelope.mts','tests/r334-calibration-convergence-invariants.mjs'],
     executionClass:'DOMAIN_RUNTIME',inputContract:'canonical packet + evidence',outputContract:'truth fusion + universal truth envelope',
     boundary:'Internal mode coherence cannot overrule empirical evidence, execution proof, or R125 admission.'
@@ -64,7 +65,7 @@ const BINDINGS:Record<string,ModeBindingR280>=Object.freeze({
     boundary:'The lattice is a finite state/address space.'
   },
   'Dimensional Relativity Mode':{
-    artifacts:['src/weaveStateR100.ts','src/physicsRelativityRuntimeR132.ts','src/system/calibrationR334.js'],tests:['tests/dimensional-relativity-r24-invariants.mjs','tests/r77-woven-continuity-invariants.mjs','tests/r334-calibration-convergence-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'declared frame + transform + state',outputContract:'frame-relative representation with invariant/scar carry',
+    artifacts:['src/weaveStateR100.ts','src/physicsRelativityRuntimeR132.ts','src/system/calibrationR334.js','src/system/calibrationR339.js'],tests:['tests/dimensional-relativity-r24-invariants.mjs','tests/r77-woven-continuity-invariants.mjs','tests/r334-calibration-convergence-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'declared frame + transform + state',outputContract:'frame-relative representation with invariant/scar carry',
     boundary:'Frame-relative representation does not assert additional physical dimensions.'
   },
   'Phase Elasticity Field':{
@@ -104,7 +105,7 @@ const BINDINGS:Record<string,ModeBindingR280>=Object.freeze({
     boundary:'Missing evidence returns unknown/measure/fetch rather than synthetic completion.'
   },
   'Dewey Calculus Mode':{
-    artifacts:['src/sourceBackedModeRuntimeR21.ts','src/AppliedCalculusR168.tsx','src/system/calibrationR334.js'],tests:['tests/r107-full-calculus-capability-fabric-invariants.mjs','tests/r334-calibration-convergence-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'CΩ Φ q Λ Scar + declared operators',outputContract:'bounded derived calculus/control variables',
+    artifacts:['src/sourceBackedModeRuntimeR21.ts','src/AppliedCalculusR168.tsx','src/system/calibrationR334.js','src/system/calibrationR339.js'],tests:['tests/r107-full-calculus-capability-fabric-invariants.mjs','tests/r334-calibration-convergence-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'CΩ Φ q Λ Scar + declared operators',outputContract:'bounded derived calculus/control variables',
     boundary:'Physics-themed notation remains model-space unless independently measured.'
   },
   'HEAVY BIO MODE REVIEW':{
@@ -180,9 +181,10 @@ export function compileModeRealizationRegistryR280(record:any){
     authorityCount:rows.length,sourceCatalogCount:source.catalogCount,sourceBackedRuntimeRows:source.rows.length,
     summary:{promoted,tested,implemented,gated,charted,domainExecutable,fullyBound,lensExecutable:rows.length},
     calibrationContext:{...calibrationManifestR334(),propagationRevision:'R335',use:'EVIDENCE_CONTEXT_ONLY'},
+    forecastCalibrationContext:{...calibrationManifestR339(),propagationRevision:'R339',use:'POST_FREEZE_ABLATION_AND_FORECAST_ONLY'},
     rows,criticalGaps,
     canonicalMutation:false,canonicalAdmissionAuthority:'R125',
-    truthBoundary:'R280 distinguishes a named/charted mode, a derived lens, a source-executed operator, and a domain runtime. All 62 canon authorities have executable read-only lenses through the inherited R12 evaluator, but lens execution is not equivalent to realizing every historical domain executor. R335 carries the R334 calibrated CERN/Omega evidence context across the registry without treating every mode as a CERN executor or independent replication. Gated inputs remain explicit. Promotion status requires bound runtime/test evidence and never overrides empirical evidence, physical validation, execution receipts, or R125 CanonState admission.'
+    truthBoundary:'R280 distinguishes a named/charted mode, a derived lens, a source-executed operator, and a domain runtime. All 62 canon authorities have executable read-only lenses through the inherited R12 evaluator, but lens execution is not equivalent to realizing every historical domain executor. R339 carries the R334 calibrated CERN/Omega evidence context plus the frozen V4 ablation/forecast contract across the registry without treating every mode as a CERN executor or independent replication. Gated inputs remain explicit. Promotion status requires bound runtime/test evidence and never overrides empirical evidence, physical validation, execution receipts, or R125 CanonState admission.'
   };
 }
 
