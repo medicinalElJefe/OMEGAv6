@@ -183,7 +183,7 @@ export function compileModeRealizationRegistryR280(record:any){
     rows,criticalGaps,
     calibration:calibrationContextR335(),
     canonicalMutation:false,canonicalAdmissionAuthority:'R125',
-    truthBoundary:'R280 distinguishes a named/charted mode, a derived lens, a source-executed operator, and a domain runtime. All 62 canon authorities have executable read-only lenses through the inherited R12 evaluator, but lens execution is not equivalent to realizing every historical domain executor. Gated inputs remain explicit. Promotion status requires bound runtime/test evidence and never overrides empirical evidence, physical validation, execution receipts, or R125 CanonState admission. R335 supplies one shared calibrated CERN/Omega evidence context to the registry without promoting every mode to a new executor or changing any mode's authority class.'
+    truthBoundary:'R280 distinguishes a named/charted mode, a derived lens, a source-executed operator, and a domain runtime. All 62 canon authorities have executable read-only lenses through the inherited R12 evaluator, but lens execution is not equivalent to realizing every historical domain executor. Gated inputs remain explicit. Promotion status requires bound runtime/test evidence and never overrides empirical evidence, physical validation, execution receipts, or R125 CanonState admission. R335 supplies one shared calibrated CERN/Omega evidence context to the registry without promoting every mode to a new executor or changing any mode authority class.'
   };
 }
 
