@@ -100,7 +100,8 @@ const worker=fs.readFileSync('src/workerR116.js','utf8');
 for(const token of [
  "from './system/qtiWorkerR332.js'",
  "path.startsWith('/api/intelligence/r332/qti/')",
- 'publicQtiR332(request)'
+ 'publicQtiR332(request)',
+ 'qtiVerification:qtiManifestR332()'
 ])assert.ok(worker.includes(token),`R332 Worker integration missing ${token}`);
 
 const qtiWorker=fs.readFileSync('src/system/qtiWorkerR332.js','utf8');
