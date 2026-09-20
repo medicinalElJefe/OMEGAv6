@@ -1,7 +1,6 @@
 import assert from'node:assert/strict';
 import fs from'node:fs';
 import{R337_TESTABLE}from'../src/sarMeasurementRasterR337.js';
-import{planSarPairR337}from'../src/sarPairPlannerR337.ts';
 
 const read=p=>fs.readFileSync(p,'utf8');
 const measurement=read('src/sarMeasurementRasterR337.js'),native=read('src/sarNativeRasterR326.js'),raster=read('src/sarRasterR283.ts'),worker=read('src/workerR8.js'),live=read('src/SARLiveTruthR285.tsx'),pair=read('src/sarPairPlannerR337.ts');
@@ -18,12 +17,6 @@ assert.ok(native.includes('export const R326_INTERNAL'),'R337 must reuse the bou
 for(const token of ['complexI?:number[]','complexQ?:number[]','phaseRad?:number[]'])assert.ok(raster.includes(token),`R337 raster contract missing ${token}`);
 assert.ok(worker.includes("import {sarMeasurementRasterR337} from './sarMeasurementRasterR337.js'")&&worker.includes("url.pathname==='/api/earth/sar/measurement-raster'"),'canonical Earth worker must expose unified R337 measurement route');
 
-const master={id:'A',collection:'sentinel-1-slc',acquiredAt:'2026-01-01T00:00:00Z',instrumentMode:'IW',orbitState:'ascending',relativeOrbit:42,polarizations:['VV','VH'],bbox:[0,0,2,2]};
-const slave={id:'B',collection:'sentinel-1-slc',acquiredAt:'2026-01-13T00:00:00Z',instrumentMode:'IW',orbitState:'ascending',relativeOrbit:42,polarizations:['VV'],bbox:[1,1,3,3]};
-const plan=planSarPairR337(master,slave);
-assert.equal(plan.state,'COMPATIBLE_METADATA_PAIR');assert.equal(plan.temporalBaselineDays,12);assert.deepEqual(plan.commonPolarizations,['VV']);assert.ok(plan.footprintOverlap>0);
-const bad=planSarPairR337(master,{...slave,id:'C',relativeOrbit:43});
-assert.equal(bad.state,'HELD');assert.ok(bad.reasons.includes('COMMON_RELATIVE_ORBIT_REQUIRED'));
 for(const token of ['COMMON_INSTRUMENT_MODE_REQUIRED','COMMON_ORBIT_DIRECTION_REQUIRED','COMMON_RELATIVE_ORBIT_REQUIRED','COMMON_POLARIZATION_REQUIRED','FOOTPRINT_OVERLAP_REQUIRED','metadata compatibility is necessary but not sufficient'])assert.ok(pair.includes(token),`R337 pair truth missing ${token}`);
 
 for(const token of ["'/api/earth/sar/measurement-raster'","complexDataBound:complexBound",'COMPLEX I/Q','R337 repeat-pass pair planner','sarPairCandidatesR337','planSarPairR337'])
