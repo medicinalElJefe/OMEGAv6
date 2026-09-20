@@ -105,6 +105,9 @@ export function auditR314(root=process.cwd()){
   "repositoryNormalizedSha256:'a3677e2b5a22b37235948999ed0896defbf706d13531676e84448096231913f4'",
   "repositoryNormalizedBytes:7884622",
   "invariant:'EXACT_R334_MASTER_V3_PREFIX'",
+  "appendedPayloadInvariant:'ALL_25_MASTER_V4_SUFFIX_SOURCE_EXACT_PAYLOAD_JSON_MATCH_ADVANCEMENT_ROWS_AND_ROW_SHA256'",
+  "appendedPayloadCanonicalJsonSha256:'3e2cbe6b52f5d253079acd9a4ed9bf9449cccdcdf588e16c3acbbceeb12a6d16'",
+  "derivationParentOriginalSha256:'c2a5966b0a4aa3aa2de2acd18491e2333653290eaa312058fd1dfe0f1446a18d'",
   "noRetuning:true"
  ];
  if(!exists(r339ModulePath)||r339ManifestTokens.some(token=>!r339ModuleSource.includes(token)))residuals.push({id:'R339-MASTER-MANIFEST',severity:'CRITICAL',mode:'BLOCK',summary:'R339 master-v4 hash/census, exact R334 prefix, or no-retuning contract is incomplete',source:'src/system/calibrationAdvancementR339.js'});
