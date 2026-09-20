@@ -18,6 +18,7 @@ import './wholeSystemExperienceR132.css';
 import './omegaSideNavigatorR210.css';
 import './omegaSideNavigatorR239.css';
 import './omegaSideNavigatorR289.css';
+import './omegaSideNavigatorR333.css';
 
 type BrowserLayer='EVERYWHERE'|'SOFTWARE';
 type WorkspaceFilter='ALL'|OmegaWorkspaceIdR82;
@@ -28,6 +29,7 @@ export const R88_ALL_ROUTES=OMEGA_ALL_ROUTES_R82;
 export const R210_NAV_REVISION='R210';
 export const R239_USER_NAV_REVISION='R239';
 export const R289_MASTER_MENU_PRESENTATION_REVISION='R289';
+export const R333_NAVIGATION_CLEANUP_REVISION='R333';
 const routeMark=(name:string)=>{const words=name.split(/\s+/).filter(Boolean);return words.map((x,i)=>i<2?x[0]:'').join('').toUpperCase()||'Ω'};
 const validWorkspace=(value:any):value is OmegaWorkspaceIdR82=>OMEGA_WORKSPACES_R82.some(w=>w.id===value);
 const storedWorkspace=():WorkspaceFilter=>{try{const value=localStorage.getItem('omega.r82.workspace');return validWorkspace(value)?value:'ALL'}catch{return'ALL'}};
@@ -57,7 +59,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
  const open=(next:BrowserLayer)=>{setLayer(next);setNavigationScar('');setExpanded(true)};
  const currentWorkspace=currentPanel?workspaceForRouteR82(currentPanel as any):null,currentOrganization=currentPanel?organizationForRouteR132(currentPanel):null,routeCount=OMEGA_ROUTE_INVENTORY_R107.currentCount;
  const residualCount=navigationLemma.residualCount+(navigationScar?1:0);
- return <aside ref={shellRef} className={'r94-side-toolbar '+(expanded?'expanded':'collapsed')+' '+(railWide?'rail-wide':'rail-compact')+' r100-professional-nav r104-readable-nav r105-context-nav r120-adaptive-nav r132-organized-nav r210-converged-nav r239-user-nav r289-master-menu-nav'} aria-label='OMEGA global navigation toolbar' data-operation-chain='R143' data-operation-chain-pass={operationAudit.pass?'true':'false'} data-navigation-revision={R239_USER_NAV_REVISION} data-navigation-lemma-revision={R242_NAVIGATION_LEMMA_REVISION} data-master-menu-presentation-revision={R289_MASTER_MENU_PRESENTATION_REVISION}>
+ return <aside ref={shellRef} className={'r94-side-toolbar '+(expanded?'expanded':'collapsed')+' '+(railWide?'rail-wide':'rail-compact')+' r100-professional-nav r104-readable-nav r105-context-nav r120-adaptive-nav r132-organized-nav r210-converged-nav r239-user-nav r289-master-menu-nav r333-clean-nav'} aria-label='OMEGA global navigation toolbar' data-operation-chain='R143' data-operation-chain-pass={operationAudit.pass?'true':'false'} data-navigation-revision={R239_USER_NAV_REVISION} data-navigation-lemma-revision={R242_NAVIGATION_LEMMA_REVISION} data-master-menu-presentation-revision={R289_MASTER_MENU_PRESENTATION_REVISION} data-navigation-cleanup-revision={R333_NAVIGATION_CLEANUP_REVISION}>
   <div className='r94-nav-rail'>
    <button className='r88-navigator-trigger r100-rail-cap' onClick={()=>{setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setMasterMenu('ALL');setNavigationScar('');setExpanded(v=>!v)}} aria-label={expanded?'Collapse OMEGA navigator':'Expand OMEGA navigator'} aria-expanded={expanded} aria-controls='omega-global-navigator'>
     <span className='r100-omega-mark'>Ω</span><small>MENU</small><b>{routeCount}</b>
@@ -83,14 +85,22 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
    {currentPanel&&currentWorkspace&&<div className='r100-active-route r104-active-route'><span>YOU ARE HERE</span><b>{currentPanel}</b><i>{currentWorkspace.label}{showTechnical&&currentOrganization?` · ${currentOrganization.tier} · ${currentOrganization.layout.replaceAll('_',' ')}`:''}</i><small>{currentWorkspace.copy}</small></div>}
    {currentPanel&&<RouteOutputRibbonR111 route={currentPanel}/>}
    {layer==='EVERYWHERE'?<>
-    <nav className='r289-master-menu-filter' aria-label='Recovered OMEGA master menus'><button aria-pressed={masterMenu==='ALL'} className={masterMenu==='ALL'?'active':''} onClick={()=>{setMasterMenu('ALL');setNavigationScar('')}}>ALL MENUS <b>{routeCount}</b></button>{OMEGA_MASTER_MENU_NAVIGATION_R289.map(menu=><button key={menu.id} aria-pressed={masterMenu===menu.id} className={masterMenu===menu.id?'active':''} onClick={()=>{setMasterMenu(menu.id as MasterMenuFilterR289);setNavigationScar('')}} title={menu.purpose}><span>{menu.id}</span>{menu.label}<b>{menu.routes.length}</b></button>)}</nav>
-    <nav className='r105-workspace-filter' aria-label='Application workspace submenu'><button className={workspaceFilter==='ALL'?'active':''} onClick={()=>{setWorkspaceFilter('ALL');setNavigationScar('')}}>ALL <b>{routeCount}</b></button>{OMEGA_WORKSPACES_R82.map(workspace=><button key={workspace.id} className={workspaceFilter===workspace.id?'active':''} onClick={()=>{setWorkspaceFilter(workspace.id);setNavigationScar('')}} title={workspace.copy}>{workspace.label} <b>{workspace.routes.length}</b></button>)}</nav>
-    <div className='r105-context-note'><span>FILTERS</span><b>{activeMasterMenu?`${activeMasterMenu.id} ${activeMasterMenu.label}`:'All recovered menus'} · {activeWorkspace?`${activeWorkspace.label} · ${activeWorkspace.copy}`:'Command · Explore · Intelligence · Evidence · Build · System'}</b></div>
-    <label className='r88-search r100-search r104-search'><Search/><input ref={searchRef} value={query} onChange={e=>{setQuery(e.target.value);setNavigationScar('')}} placeholder='Search tools, surfaces, or workflows' aria-label={activeWorkspace?`Search ${activeWorkspace.label} tools within the shared application registry`:'Search all registered OMEGA applications'}/><kbd>⌘K</kbd></label>
+    <label className='r88-search r100-search r104-search r333-search'><Search/><input ref={searchRef} value={query} onChange={e=>{setQuery(e.target.value);setNavigationScar('')}} placeholder='Search tools, surfaces, or workflows' aria-label={activeWorkspace?`Search ${activeWorkspace.label} tools within the shared application registry`:'Search all registered OMEGA applications'}/><kbd>⌘K</kbd></label>
+    <div className='r333-filter-stack' aria-label='Navigation filters'>
+     <div className='r333-filter-row'>
+      <div className='r333-filter-label'><b>MENU</b><small>Function</small></div>
+      <nav className='r289-master-menu-filter' aria-label='Recovered OMEGA master menus'><button aria-pressed={masterMenu==='ALL'} className={masterMenu==='ALL'?'active':''} onClick={()=>{setMasterMenu('ALL');setNavigationScar('')}}>ALL MENUS <b>{routeCount}</b></button>{OMEGA_MASTER_MENU_NAVIGATION_R289.map(menu=><button key={menu.id} aria-pressed={masterMenu===menu.id} className={masterMenu===menu.id?'active':''} onClick={()=>{setMasterMenu(menu.id as MasterMenuFilterR289);setNavigationScar('')}} title={menu.purpose}><span>{menu.id}</span>{menu.label}<b>{menu.routes.length}</b></button>)}</nav>
+     </div>
+     <div className='r333-filter-row'>
+      <div className='r333-filter-label'><b>SPACE</b><small>Workspace</small></div>
+      <nav className='r105-workspace-filter' aria-label='Application workspace submenu'><button className={workspaceFilter==='ALL'?'active':''} onClick={()=>{setWorkspaceFilter('ALL');setNavigationScar('')}}>ALL <b>{routeCount}</b></button>{OMEGA_WORKSPACES_R82.map(workspace=><button key={workspace.id} className={workspaceFilter===workspace.id?'active':''} onClick={()=>{setWorkspaceFilter(workspace.id);setNavigationScar('')}} title={workspace.copy}>{workspace.label} <b>{workspace.routes.length}</b></button>)}</nav>
+     </div>
+     <div className='r105-context-note r333-filter-summary'><span>SHOWING</span><b>{activeMasterMenu?`${activeMasterMenu.id} ${activeMasterMenu.label}`:'All menus'} · {activeWorkspace?activeWorkspace.label:'All workspaces'}</b></div>
+    </div>
     <div className='r210-nav-status' role='status' aria-live='polite'>{rows.length} of {routeCount} destinations visible{activeMasterMenu?` in ${activeMasterMenu.id} ${activeMasterMenu.label}`:''}{query.trim()?` for “${query.trim()}”`:''}{navigationScar?` · ${navigationScar}`:residualCount?` · ${residualCount} calculus residual${residualCount===1?'':'s'} carried`:''}.</div>
     <div className='r89-flat-scroll r104-route-scroll' aria-label={activeWorkspace?`${activeWorkspace.label} OMEGA applications`:'All registered OMEGA applications'}>
      {rows.map(route=>{const index=OMEGA_ALL_ROUTES_R82.indexOf(route)+1,workspace=workspaceForRouteR82(route),reality=effectiveCapabilityReality(route),org=organizationForRouteR132(route),chain=operationContractForRouteR143(route),master=omegaMasterMenuForRouteR289(route),firstOfTier=!navigationLemma.searching&&rows.find(candidate=>organizationForRouteR132(candidate).tier===org.tier)===route;return <Fragment key={route}>{firstOfTier&&<div className='r239-route-group' data-tier={org.tier}><span>{org.tier}</span><small>{TIER_COPY[org.tier]}</small></div>}<button title={`${workspace.copy} · ${org.layout.replaceAll('_',' ')}`} className={'r89-flat-route r104-route '+(currentPanel===route?'active':'')} aria-current={currentPanel===route?'page':undefined} onClick={()=>go(route)} data-route-name={route} data-route-id={chain.routeId} data-capability-id={chain.capabilityId} data-execution-domain={chain.executionDomain} data-execution-state={chain.state} data-master-menu={master?.id||''}>
-      <i>{String(index).padStart(2,'0')}</i><span><b>{route}</b><small className='r132-route-meta'><span className='r132-route-tier' data-tier={org.tier}>{org.tier}</span><span>{workspace.label}</span>{master&&<span> · {master.id} {master.label}</span>}{showTechnical&&<span> · {org.surfaceClass} · {org.layout.replaceAll('_',' ')}</span>}</small><em>{showTechnical?`${chain.executionDomain}/${chain.state} · ${CAPABILITY_REALITY_LABEL[reality]}`:workspace.copy}</em></span><ChevronRight/>
+      <i>{String(index).padStart(2,'0')}</i><span><b>{route}</b><small className='r132-route-meta'><span className='r132-route-tier' data-tier={org.tier}>{org.tier}</span><span>{workspace.label}</span>{showTechnical&&master&&<span> · {master.id} {master.label}</span>}{showTechnical&&<span> · {org.surfaceClass} · {org.layout.replaceAll('_',' ')}</span>}</small>{showTechnical&&<em>{chain.executionDomain}/{chain.state} · {CAPABILITY_REALITY_LABEL[reality]}</em>}</span><ChevronRight/>
      </button></Fragment>})}
      {rows.length===0&&<div className='r88-empty'>No tool matches that recovered-menu/workspace/search combination. The query is preserved as a residual; no destination is fabricated.</div>}
     </div>
