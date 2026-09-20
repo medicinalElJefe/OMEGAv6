@@ -28,6 +28,8 @@ const memory=[user,model,preference,correction,factualHeld,factual,procedural];
 const selected=selectMemoryR331(memory,'How should the build promotion proof communicate exact SHA and physical dimension boundaries?',10);
 assert.ok(selected.some(x=>x.memoryId===preference.memoryId));
 assert.ok(selected.some(x=>x.memoryId===correction.memoryId));
+assert.ok(!selected.some(x=>x.memoryId===factualHeld.memoryId),'unproved factual lessons must remain stored but quarantined from synthesis retrieval');
+assert.ok(!selected.some(x=>x.memoryId===proceduralHeld.memoryId),'unproved procedural lessons must remain stored but quarantined from synthesis retrieval');
 const context=buildCommunicationContextR331(memory,'Explain the build and keep it direct.',{metrics:{continuity:.8,plasticity:.7,contradiction:.1,burden:.2,evidence:.9}});
 assert.equal(context.canonicalAdmission,false);
 assert.ok(context.coherence.communicationCoherence>0);
