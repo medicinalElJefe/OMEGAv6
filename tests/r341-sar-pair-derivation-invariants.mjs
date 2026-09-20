@@ -12,6 +12,7 @@ for(const token of[
  'EXACT_GCP_SAMPLED_GRID_IDENTITY',
  'SUBPIXEL_COREGISTRATION_NOT_PROVEN',
  'PAIR_FIELDS_BOUND',
+ 'GRID_IDENTITY_REQUIRED',
  'interferogramPhaseRad:phase',
  'gamma = |sum(s1*conj(s2))|',
  'Math.log((sa+1)/(ma+1))',
