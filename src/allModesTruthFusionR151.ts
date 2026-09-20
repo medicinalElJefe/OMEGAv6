@@ -1,6 +1,7 @@
 import {corpusState,evaluateCorpusModes,STATE_COUNT} from './corpusRuntime';
 import {CANON_AUTHORITY_COUNT,evaluateCanonAuthorityStack} from './allModesAuthority';
 import {sourceBackedModeSummary,type SourceBackedModeState} from './sourceBackedModeRuntimeR21';
+import {calibrationPropagationManifestR335} from './system/calibrationPropagationR335.js';
 
 export const R151_SCHEMA='OMEGA_ALL_MODES_TRUTH_FUSION_R151' as const;
 export const R151_CHANNEL_COUNT=179+CANON_AUTHORITY_COUNT;
@@ -12,7 +13,8 @@ export const R151_LAWS=Object.freeze([
  'MODE_AGREEMENT_IS_NOT_INDEPENDENT_EMPIRICAL_REPLICATION',
  'FUSION_RECOMMENDATION_NEVER_OVERRIDES_CANONICAL_DISPATCH',
  'REPRESENTATION_DIMENSIONS_ARE_ATLAS_RESOLUTION_NOT_PHYSICAL_DIMENSIONS',
- 'R125_REMAINS_THE_CANONSTATE_ADMISSION_AUTHORITY'
+ 'R125_REMAINS_THE_CANONSTATE_ADMISSION_AUTHORITY',
+ 'R335_CALIBRATION_CONTEXT_IS_READ_ONLY_AND_CANNOT_BECOME_EMPIRICAL_WEIGHT'
 ]);
 
 type FusionProvenanceR151='SOURCE_EXECUTED_EXACT'|'SOURCE_PACKET'|'DERIVED_RUNTIME'|'GATED_MISSING_INPUTS'|'CATALOG_LENS'|'CANON_AUTHORITY_LENS';
@@ -73,8 +75,9 @@ export function compileAllModesTruthFusionR151(record:any){
   gateDistribution:compact.gateDistribution,canonStates:compact.canonStates,
   operator:{canonical:canonicalOperator,advisory:advisoryOperator,agreement:canonicalOperator===advisoryOperator,pressure:operatorPressure,authority:'ADVISORY_ONLY_CANONICAL_DISPATCH_UNCHANGED'},
   weakestTrusted,strongestTrusted,outliers,missingInputPressure:missingRatio,
+  calibrationContext:calibrationPropagationManifestR335(),
   fingerprint:fnv1a32(JSON.stringify(compact)),canonicalMutation:false,canonicalAdmissionAuthority:'R125',
-  truthBoundary:'R151 fuses 179 source-mode evaluations and 62 higher-order canon/calculus lenses over one canonical packet with provenance weights. Correlated mode agreement is internal coherence, not 241 independent empirical replications. Gated modes add missing-input pressure but zero executed-truth weight. The advisory operator never overrides canonical source dispatch, R142 execution proof, R144 deployment attestation, physical measurement, or R125 CanonState admission.'
+  truthBoundary:'R151 fuses 179 source-mode evaluations and 62 higher-order canon/calculus lenses over one canonical packet with provenance weights. Correlated mode agreement is internal coherence, not 241 independent empirical replications. Gated modes add missing-input pressure but zero executed-truth weight. The advisory operator never overrides canonical source dispatch, R142 execution proof, R144 deployment attestation, physical measurement, or R125 CanonState admission. R335 calibration is carried as read-only context and contributes zero independent empirical voting weight.'
  };
 }
 
