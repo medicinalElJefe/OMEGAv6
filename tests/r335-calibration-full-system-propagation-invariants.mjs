@@ -87,9 +87,13 @@ const audit=read('scripts/r314-convergence-audit.mjs');
 for(const token of ['Dewey_OMEGA_CERN_Dewey_Relativity_Closure_v3_2026-09-19.csv','Dewey_OMEGA_CERN_ADV02_ADV04_Quantitative_Bridge_2026-09-19.csv','R334 calibrated dataset SHA mismatch','R334 calibrated dataset records'])assert.ok(audit.includes(token),'convergence audit missing '+token);
 
 const workflow=read('.github/workflows/r170-governed-selfbuild.yml');
+const engine=read('scripts/r170-selfbuild-engine.mjs');
 assert.ok(workflow.includes('tee /tmp/r170-engine-output.log'),'R170 must preserve raw selector stdout for diagnosis');
-assert.ok(workflow.includes("fs.writeFileSync('/tmp/r170-proposal.json',JSON.stringify(parsed,null,2)+'\\n')"),'R170 must materialize a clean parsed proposal');
-assert.ok(workflow.includes("R170 selector emitted no parseable final top-level JSON proposal"),'R170 must fail closed if no proposal JSON exists');
+assert.ok(workflow.includes('OMEGA_R170_PROPOSAL_PATH=/tmp/r170-proposal.json'),'R338 must bind an out-of-band clean proposal artifact');
+assert.ok(workflow.includes("R338 selector emitted no clean proposal artifact"),'R338 must fail closed if the clean proposal artifact is absent');
+assert.ok(workflow.includes("R338 selector proposal artifact is not a valid status object"),'R338 must validate the clean proposal object before workflow outputs are bound');
+assert.ok(engine.includes("const PROPOSAL_PATH=String(process.env.OMEGA_R170_PROPOSAL_PATH||'').trim()"),'R338 engine must own the clean proposal channel');
+assert.ok(engine.includes("fs.writeFileSync(PROPOSAL_PATH,body,'utf8')"),'R338 engine must atomically materialize the emitted status object');
 assert.ok(!workflow.includes('tee /tmp/r170-proposal.json'),'raw mixed stdout must never again be treated directly as proposal JSON');
 
 function extractFinalTopLevelJson(raw){
