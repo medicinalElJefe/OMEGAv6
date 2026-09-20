@@ -107,6 +107,9 @@ assert.equal(cycle.selectedCandidate.qti.outcome,'PASS');
 assert.equal(cycle.authorizationRequest.transactionId,'tx-improve');
 assert.equal(cycle.execution,null);
 assert.equal(cycle.canonicalAdmission,false);
+assert.equal(cycle.calibration.revision,'R334');
+assert.equal(cycle.calibration.releaseId,'DEWEY_OMEGA_CERN_RELATIVITY_CLOSURE_2026-09-19');
+assert.equal(cycle.calibration.canonicalMutation,false);
 
 const finalized=await finalizeRelationalCycleR334({
  state,
@@ -177,8 +180,11 @@ assert.equal(manifest.authorizationAuthority,false);
 assert.equal(manifest.executionAuthority,false);
 assert.equal(manifest.canonicalAdmission,false);
 assert.equal(manifest.canonicalAdmissionAuthority,'R125');
+assert.equal(manifest.calibration.revision,'R334');
+assert.equal(manifest.calibration.canonicalMutation,false);
 
 assert.equal(R334_B06_PROGRESS_RECEIPT.stage,'R314-B06');
+assert.equal(R334_B06_PROGRESS_RECEIPT.calibrationRelease,'DEWEY_OMEGA_CERN_RELATIVITY_CLOSURE_2026-09-19');
 assert.equal(R334_B06_PROGRESS_RECEIPT.state,'ACTIVE_PARTIAL');
 assert.equal(R334_B06_PROGRESS_RECEIPT.authorizationAuthority,false);
 assert.equal(R334_B06_PROGRESS_RECEIPT.executionAuthority,false);
