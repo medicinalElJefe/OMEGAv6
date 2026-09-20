@@ -6,6 +6,8 @@ export const R335_SCHEMA='OMEGA_CALIBRATION_FULL_SYSTEM_PROPAGATION_R335';
 export const R335_CALIBRATION_CONSUMERS=Object.freeze([
  {id:'CAPABILITY_DATASET_REGISTRY',artifact:'src/capabilityAtlasR43.ts',role:'dataset census and operator-facing calibrated source inventory'},
  {id:'MODE_REALIZATION_REGISTRY',artifact:'src/modeRealizationRegistryR280.ts',role:'global mode/lens evidence context without converting calibration into independent mode execution'},
+ {id:'ALL_MODES_TRUTH_FUSION',artifact:'src/allModesTruthFusionR151.ts',role:'read-only calibrated context across all-mode synthesis with zero independent empirical vote'},
+ {id:'UNIVERSAL_TRUTH_ENVELOPE',artifact:'src/universalTruthEnvelopeR152.ts',role:'versioned calibration context without evidence-class promotion'},
  {id:'RELATIVITY_RUNTIME',artifact:'src/physicsRelativityRuntimeR132.ts',role:'calibrated relativity evidence context in observer/frame runtime'},
  {id:'RELATIVITY_SURFACE',artifact:'src/RelativityCalibrationR334.tsx',role:'operator-visible calibrated values, caveats and proof boundaries'},
  {id:'RELATIONAL_RUNTIME',artifact:'src/system/proofGovernedRelationalRuntimeR334.js',role:'proof-governed relation/continuity cycle calibration context'},
@@ -30,7 +32,7 @@ export function calibrationPropagationManifestR335(){
   canonicalMutation:false,
   canonicalAdmissionAuthority:'R125',
   truthBoundary:calibration.truthBoundary,
-  propagationBoundary:'R335 propagates the already-proved R334 calibration identity/evidence context through relevant OMEGA runtime, mode, UI, manifest, convergence and autonomy surfaces. It does not make every mode a CERN executor, does not alter raw experiment evidence, does not resolve the still-open native ATLAS workspace gate, and creates no new execution or CanonState authority.'
+  propagationBoundary:'R335 propagates the already-proved R334 calibration identity/evidence context through relevant OMEGA runtime, all-mode synthesis, truth-envelope, mode, UI, manifest, convergence and autonomy surfaces. It does not make every mode a CERN executor, does not alter raw experiment evidence, does not resolve the still-open native ATLAS workspace gate, and creates no new execution or CanonState authority.'
  });
 }
 
