@@ -3,7 +3,7 @@ import fs from'node:fs';
 import{createHash}from'node:crypto';
 import{
  R339_REVISION,R339_SCHEMA,R339_RELEASE_ID,R339_BASE_RELEASE_ID,R339_SOURCE_MANIFEST,R339_SOURCE_EXACT_SUMMARY,
- R339_ROUNDTRIP,R339_ABLATION,R339_PHYSICALITY_NEGATIVE_CONTROL,R339_SM_BASELINE,R339_FORECAST_CONTRACT,R339_CONTINUANCE,
+ R339_ROUNDTRIP,R339_ABLATION,R339_PHYSICALITY_NEGATIVE_CONTROL,R339_SM_BASELINE,R339_FORECAST_CONTRACT,R339_FORECAST_CONTRACT_SHA256,R339_CONTINUANCE,
  R339_TRANSPORT_NORMALIZATION,forecastReferenceCovarianceR339,ablationAreaInflationR339,ablationJointReductionR339,
  evaluateFrozenForecastR339,calibrationAdvancementManifestR339,calibratedRelativityR339
 }from'../src/system/calibrationAdvancementR339.js';
@@ -91,19 +91,27 @@ assert.equal(R339_FORECAST_CONTRACT.compatibilityThresholdD2,5.991464547108);
 assert.equal(R339_FORECAST_CONTRACT.noRetuning,true);
 assert.equal(by['V4-0044'].result,'HARD LOCK');
 assert.match(by['V4-0044'].value,/No parameter, transform, covariance rule, interval, or pass threshold may be altered/i);
+const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(k=>[k,canonical(value[k])])):value;
+const contractHash=createHash('sha256').update(JSON.stringify(canonical(R339_FORECAST_CONTRACT))).digest('hex');
+assert.equal(contractHash,R339_FORECAST_CONTRACT_SHA256);
+assert.equal(R339_FORECAST_CONTRACT_SHA256,'9325ace1a4a51c2dd33a9b9a4216f2f614241d5b34e000bcb03943c43f0a2354');
+
 const ref=forecastReferenceCovarianceR339();
 assert.ok(ref[0][0]>0&&ref[1][1]>0);
-const center=evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,fL:R339_FORECAST_CONTRACT.stateCenter.fL,cParallel:R339_FORECAST_CONTRACT.stateCenter.cParallel,covariance:[[0,0],[0,0]]});
+const contractInput={contractId:R339_FORECAST_CONTRACT.id,contractSha256:R339_FORECAST_CONTRACT_SHA256,basis:R339_FORECAST_CONTRACT.basis};
+const center=evaluateFrozenForecastR339({...contractInput,assumptionsPreserved:true,fL:R339_FORECAST_CONTRACT.stateCenter.fL,cParallel:R339_FORECAST_CONTRACT.stateCenter.cParallel,covariance:[[0,0],[0,0]]});
 assert.equal(center.state,'PASS');assert.equal(center.d2,0);
+assert.equal(center.contractSha256,R339_FORECAST_CONTRACT_SHA256);
 assert.equal(center.inputClass,'OPERATOR_SUPPLIED_COMPATIBILITY_TEST');
 assert.equal(center.futureObservationAuthority,false);
-const far=evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,fL:0.95,cParallel:-0.95,covariance:[[1e-6,0],[0,1e-6]]});
+const far=evaluateFrozenForecastR339({...contractInput,assumptionsPreserved:true,fL:0.95,cParallel:-0.95,covariance:[[1e-6,0],[0,1e-6]]});
 assert.equal(far.state,'FAIL');assert.ok(far.d2>R339_FORECAST_CONTRACT.compatibilityThresholdD2);
 assert.equal(evaluateFrozenForecastR339({}).state,'HELD');
-assert.equal(evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:false}).reason,'ASSUMPTIONS_AND_COVARIANCE_PROVENANCE_REQUIRED');
-assert.equal(evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,fL:1.01,cParallel:0,covariance:[[0.01,0],[0,0.01]]}).reason,'RESTRICTED_PHYSICAL_DOMAIN_REQUIRED');
-assert.equal(evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,fL:0.5,cParallel:0,covariance:[[-0.01,0],[0,0.01]]}).reason,'POSITIVE_SEMIDEFINITE_INPUT_COVARIANCE_REQUIRED');
-assert.equal(evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,fL:0.5,cParallel:0,covariance:[[0.01,0.02],[0.02,0.01]]}).reason,'POSITIVE_SEMIDEFINITE_INPUT_COVARIANCE_REQUIRED');
+assert.equal(evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id}).reason,'FROZEN_CONTRACT_SHA256_REQUIRED');
+assert.equal(evaluateFrozenForecastR339({...contractInput,assumptionsPreserved:false}).reason,'ASSUMPTIONS_AND_COVARIANCE_PROVENANCE_REQUIRED');
+assert.equal(evaluateFrozenForecastR339({...contractInput,assumptionsPreserved:true,fL:1.01,cParallel:0,covariance:[[0.01,0],[0,0.01]]}).reason,'RESTRICTED_PHYSICAL_DOMAIN_REQUIRED');
+assert.equal(evaluateFrozenForecastR339({...contractInput,assumptionsPreserved:true,fL:0.5,cParallel:0,covariance:[[-0.01,0],[0,0.01]]}).reason,'POSITIVE_SEMIDEFINITE_INPUT_COVARIANCE_REQUIRED');
+assert.equal(evaluateFrozenForecastR339({...contractInput,assumptionsPreserved:true,fL:0.5,cParallel:0,covariance:[[0.01,0.02],[0.02,0.01]]}).reason,'POSITIVE_SEMIDEFINITE_INPUT_COVARIANCE_REQUIRED');
 
 assert.equal(by['V4-0050'].result,'PARTIAL PROMOTION');
 assert.equal(by['V4-0051'].result,'PROMOTED AS NEXT INTERNAL PARENT');
