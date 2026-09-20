@@ -1,0 +1,454 @@
+{
+  "schema": "OMEGA_SELFBUILD_CANDIDATE_R170",
+  "revision": "R170.2",
+  "schedulerRevision": "R240",
+  "planningFabricRevision": "R243",
+  "dimensionalRelativityRevision": "R265",
+  "adaptiveCoherenceRevision": "R266",
+  "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
+  "generatorContract": "R245_SHARED_CANONICAL_GENERATOR",
+  "residualPolicy": "OMEGA_R170_AUTONOMOUS_SOURCE_RESIDUAL_POLICY_V1",
+  "capsule": {
+    "id": "SG001",
+    "title": "Workflow capacity model",
+    "objective": "Represent bounded active workflow capacity, archived proof lineage, and scheduler pressure as a typed read-only control-plane model.",
+    "target": "src/generated/selfbuildR170/workflowCapacityModelR170.ts",
+    "risk": "LOW",
+    "prerequisites": [],
+    "expectedGain": 0.97,
+    "complexity": 0.22,
+    "contradictionRisk": 0.05,
+    "pressure": {
+      "contradiction": 0,
+      "burden": 0.08333333333333333,
+      "residual": 0.42,
+      "userValueDeficit": 0,
+      "bottleneck": 0.5,
+      "continuity": 0.8491666666666666,
+      "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
+      "userValueSignal": "NOT_INFERRED"
+    }
+  },
+  "score": 2.311869259259259,
+  "frontier": {
+    "schema": "OMEGA_RECURSIVE_SELFBUILD_FRONTIER_R240",
+    "revision": "R240",
+    "continuityOperator": "PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION",
+    "resolution": {
+      "organs": 12,
+      "branches": 144,
+      "cells": 1728,
+      "lanes": 20736,
+      "deepAddress": 248832
+    },
+    "sparseActivation": true,
+    "maxParallel": 7,
+    "readyCount": 1,
+    "evidenceState": "RESIDUALS_PRESENT",
+    "pressureProvenance": "R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DEPENDENCY_TOPOLOGY",
+    "frontier": [
+      {
+        "rank": 1,
+        "id": "SG001",
+        "title": "Workflow capacity model",
+        "target": "src/generated/selfbuildR170/workflowCapacityModelR170.ts",
+        "risk": "LOW",
+        "score": 2.311869259259259,
+        "pressure": {
+          "contradiction": 0,
+          "burden": 0.08333333333333333,
+          "residual": 0.42,
+          "userValueDeficit": 0,
+          "bottleneck": 0.5,
+          "continuity": 0.8491666666666666,
+          "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
+          "userValueSignal": "NOT_INFERRED"
+        },
+        "dependencies": []
+      }
+    ],
+    "canonicalAdmission": false,
+    "authority": "SCHEDULING_ONLY"
+  },
+  "wovenFabric": {
+    "schema": "OMEGA_WOVEN_SELFBUILD_FABRIC_R243",
+    "revision": "R243",
+    "state": "PLANNED",
+    "addressSpace": {
+      "organs": 12,
+      "branches": 144,
+      "cells": 1728,
+      "lanes": 20736,
+      "deepAddress": 248832,
+      "allocatedCells": 5,
+      "activeCells": 1
+    },
+    "activeCells": [
+      {
+        "id": "SG001",
+        "address": "O00.B000.C00",
+        "score": 2.311869259259259,
+        "roleCount": 8,
+        "state": "READY"
+      }
+    ],
+    "packetCount": 8,
+    "scarCount": 1,
+    "sourceMutationCandidateId": "SG001",
+    "parallelPlanning": true,
+    "parallelEvaluation": true,
+    "parallelSourceMutation": false,
+    "authority": "PLANNING_AND_EVALUATION_ONLY",
+    "canonicalAdmission": false
+  },
+  "wovenDimensionalRelativityR265": {
+    "schema": "OMEGA_WOVEN_DIMENSIONAL_RELATIVITY_R265",
+    "revision": "R265",
+    "cycle": [
+      "OBSERVE",
+      "WATER_TRANSPORT",
+      "WOVEN_PATH",
+      "VIOLET_REEXPRESSION",
+      "PROVE",
+      "CARRY",
+      "RECONTEXTUALIZE"
+    ],
+    "decision": "STAY",
+    "computationCoherence": 0.7875385244136062,
+    "waterTransportCoherence": 0.7484900000000001,
+    "wovenContinuity": 0.8196446103644834,
+    "violetFuturePreservingSoftwareScore": 0.8151717068711635,
+    "promotionPosture": "HEALTHY_FORWARD",
+    "blockedByR265": false,
+    "sourceSkin": "EVIDENCE",
+    "targetSkin": "ORGANIZE",
+    "sourceResolution": 20736,
+    "targetResolution": 248832,
+    "physicalDimensionsClaimed": false,
+    "orientation": 1,
+    "provenanceState": "DECLARED",
+    "authority": {
+      "planning": "R265_CROSS_SKIN_STATE_AND_CYCLE_COMPILATION",
+      "sourceMutation": "R240_SINGLE_CANDIDATE_ONLY",
+      "dispatch": "R147",
+      "returnProof": "R141",
+      "history": "R146",
+      "canonAdmission": "R125",
+      "productionWriter": ".github/workflows/ci.yml",
+      "addsPromotionAuthority": false
+    },
+    "externalScientificTruthClaimed": false
+  },
+  "adaptiveCoherenceR266": {
+    "schema": "OMEGA_ADAPTIVE_COHERENCE_CYCLE_R266",
+    "revision": "R266",
+    "cycle": [
+      "OBSERVE",
+      "WATER_TRANSPORT",
+      "WOVEN_PATH",
+      "VIOLET_REEXPRESSION",
+      "PROVE",
+      "CARRY",
+      "RECONTEXTUALIZE",
+      "ADAPT_NEXT_CONTEXT"
+    ],
+    "sampleCount": 1,
+    "confidence": 0.08333333333333333,
+    "trend": 0,
+    "calibrationDelta": 0,
+    "adaptiveCoherence": 0.7875385244136062,
+    "adaptiveFuturePreservation": 0.8151717068711635,
+    "carriedScar": 0.231,
+    "residualMemory": 0,
+    "coldStartEquivalentToR265": false,
+    "foundationWeightsChanged": false,
+    "nextContext": {
+      "memory": 0.5148159999999999,
+      "scar": 0.231,
+      "residual": 0.19772916666666668,
+      "computationCoherence": 0.7875385244136062,
+      "futurePreservation": 0.8151717068711635,
+      "provenance": [
+        "R265_CURRENT_STATE",
+        "RETURNED_PROOF"
+      ]
+    },
+    "proof": {
+      "roundTripResidual": null,
+      "roundTripStatus": "NOT_MEASURED",
+      "commutationResidual": null,
+      "commutationStatus": "NOT_MEASURED",
+      "measuredRoundTripSamples": 0,
+      "measuredCommutationSamples": 0,
+      "externalScientificTruthClaimed": false
+    },
+    "authority": {
+      "adaptation": "BOUNDED_CONTEXT_CALIBRATION_ONLY",
+      "planning": "R249_SCHEDULING_ONLY",
+      "sourceMutation": "R240_SINGLE_CANDIDATE_ONLY",
+      "dispatch": "R147",
+      "returnProof": "R141",
+      "history": "R146",
+      "canonAdmission": "R125",
+      "productionWriter": ".github/workflows/ci.yml",
+      "foundationWeightsChanged": false,
+      "addsPromotionAuthority": false
+    }
+  },
+  "receipt": {
+    "schema": "OMEGA_SELFBUILD_CANDIDATE_RECEIPT_R170",
+    "generation": 1,
+    "capsuleId": "SG001",
+    "target": "src/generated/selfbuildR170/workflowCapacityModelR170.ts",
+    "startedAt": "2026-09-20T03:20:29.147Z",
+    "baseSha": "104be1f607bc8709f6df9c10a5538ca2711c8c84",
+    "branch": "selfbuild/r170-g1-sg001-35486298774",
+    "candidateSha": null,
+    "residualGate": "PASS",
+    "residualEvidence": {
+      "schema": "OMEGA_AUTONOMOUS_SOURCE_RESIDUAL_GATE_R245",
+      "contract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
+      "state": "RESIDUALS_PRESENT",
+      "allow": true,
+      "reason": "canonical R164 residual policy permits bounded autonomous source generation",
+      "blocking": [],
+      "blockingRows": [],
+      "summary": {
+        "total": 1,
+        "blocking": 0,
+        "review": 0,
+        "observe": 1
+      },
+      "evidenceState": "RESIDUALS_PRESENT",
+      "policy": {
+        "schema": "OMEGA_R170_AUTONOMOUS_SOURCE_RESIDUAL_POLICY_V1",
+        "sourceAuthority": "R164",
+        "requireEvidence": true,
+        "blockSeverities": [
+          "HIGH",
+          "CRITICAL"
+        ],
+        "blockModes": [
+          "BLOCK"
+        ],
+        "blockedEvidenceStates": [
+          "BLOCKED"
+        ],
+        "highOrCriticalAutoRepair": false,
+        "canonicalMutation": false,
+        "canonicalAdmission": false,
+        "canonicalAdmissionAuthority": "R125"
+      },
+      "policyValid": true
+    },
+    "residualPolicy": "OMEGA_R170_AUTONOMOUS_SOURCE_RESIDUAL_POLICY_V1",
+    "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
+    "generatorContract": "R245_SHARED_CANONICAL_GENERATOR",
+    "recursiveFrontierR240": {
+      "schema": "OMEGA_RECURSIVE_SELFBUILD_FRONTIER_R240",
+      "revision": "R240",
+      "continuityOperator": "PARTITION → EXCHANGE/TRANSFORM → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE/REPARTITION",
+      "resolution": {
+        "organs": 12,
+        "branches": 144,
+        "cells": 1728,
+        "lanes": 20736,
+        "deepAddress": 248832
+      },
+      "sparseActivation": true,
+      "maxParallel": 7,
+      "readyCount": 1,
+      "evidenceState": "RESIDUALS_PRESENT",
+      "pressureProvenance": "R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DEPENDENCY_TOPOLOGY",
+      "frontier": [
+        {
+          "rank": 1,
+          "id": "SG001",
+          "title": "Workflow capacity model",
+          "target": "src/generated/selfbuildR170/workflowCapacityModelR170.ts",
+          "risk": "LOW",
+          "score": 2.311869259259259,
+          "pressure": {
+            "contradiction": 0,
+            "burden": 0.08333333333333333,
+            "residual": 0.42,
+            "userValueDeficit": 0,
+            "bottleneck": 0.5,
+            "continuity": 0.8491666666666666,
+            "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
+            "userValueSignal": "NOT_INFERRED"
+          },
+          "dependencies": []
+        }
+      ],
+      "canonicalAdmission": false,
+      "authority": "SCHEDULING_ONLY"
+    },
+    "wovenFabricR243": {
+      "schema": "OMEGA_WOVEN_SELFBUILD_FABRIC_R243",
+      "revision": "R243",
+      "state": "PLANNED",
+      "addressSpace": {
+        "organs": 12,
+        "branches": 144,
+        "cells": 1728,
+        "lanes": 20736,
+        "deepAddress": 248832,
+        "allocatedCells": 5,
+        "activeCells": 1
+      },
+      "activeCells": [
+        {
+          "id": "SG001",
+          "address": "O00.B000.C00",
+          "score": 2.311869259259259,
+          "roleCount": 8,
+          "state": "READY"
+        }
+      ],
+      "packetCount": 8,
+      "scarCount": 1,
+      "sourceMutationCandidateId": "SG001",
+      "parallelPlanning": true,
+      "parallelEvaluation": true,
+      "parallelSourceMutation": false,
+      "authority": "PLANNING_AND_EVALUATION_ONLY",
+      "canonicalAdmission": false
+    },
+    "wovenDimensionalRelativityR265": {
+      "schema": "OMEGA_WOVEN_DIMENSIONAL_RELATIVITY_R265",
+      "revision": "R265",
+      "cycle": [
+        "OBSERVE",
+        "WATER_TRANSPORT",
+        "WOVEN_PATH",
+        "VIOLET_REEXPRESSION",
+        "PROVE",
+        "CARRY",
+        "RECONTEXTUALIZE"
+      ],
+      "decision": "STAY",
+      "computationCoherence": 0.7875385244136062,
+      "waterTransportCoherence": 0.7484900000000001,
+      "wovenContinuity": 0.8196446103644834,
+      "violetFuturePreservingSoftwareScore": 0.8151717068711635,
+      "promotionPosture": "HEALTHY_FORWARD",
+      "blockedByR265": false,
+      "sourceSkin": "EVIDENCE",
+      "targetSkin": "ORGANIZE",
+      "sourceResolution": 20736,
+      "targetResolution": 248832,
+      "physicalDimensionsClaimed": false,
+      "orientation": 1,
+      "provenanceState": "DECLARED",
+      "authority": {
+        "planning": "R265_CROSS_SKIN_STATE_AND_CYCLE_COMPILATION",
+        "sourceMutation": "R240_SINGLE_CANDIDATE_ONLY",
+        "dispatch": "R147",
+        "returnProof": "R141",
+        "history": "R146",
+        "canonAdmission": "R125",
+        "productionWriter": ".github/workflows/ci.yml",
+        "addsPromotionAuthority": false
+      },
+      "externalScientificTruthClaimed": false
+    },
+    "adaptiveCoherenceR266": {
+      "schema": "OMEGA_ADAPTIVE_COHERENCE_CYCLE_R266",
+      "revision": "R266",
+      "cycle": [
+        "OBSERVE",
+        "WATER_TRANSPORT",
+        "WOVEN_PATH",
+        "VIOLET_REEXPRESSION",
+        "PROVE",
+        "CARRY",
+        "RECONTEXTUALIZE",
+        "ADAPT_NEXT_CONTEXT"
+      ],
+      "sampleCount": 1,
+      "confidence": 0.08333333333333333,
+      "trend": 0,
+      "calibrationDelta": 0,
+      "adaptiveCoherence": 0.7875385244136062,
+      "adaptiveFuturePreservation": 0.8151717068711635,
+      "carriedScar": 0.231,
+      "residualMemory": 0,
+      "coldStartEquivalentToR265": false,
+      "foundationWeightsChanged": false,
+      "nextContext": {
+        "memory": 0.5148159999999999,
+        "scar": 0.231,
+        "residual": 0.19772916666666668,
+        "computationCoherence": 0.7875385244136062,
+        "futurePreservation": 0.8151717068711635,
+        "provenance": [
+          "R265_CURRENT_STATE",
+          "RETURNED_PROOF"
+        ]
+      },
+      "proof": {
+        "roundTripResidual": null,
+        "roundTripStatus": "NOT_MEASURED",
+        "commutationResidual": null,
+        "commutationStatus": "NOT_MEASURED",
+        "measuredRoundTripSamples": 0,
+        "measuredCommutationSamples": 0,
+        "externalScientificTruthClaimed": false
+      },
+      "authority": {
+        "adaptation": "BOUNDED_CONTEXT_CALIBRATION_ONLY",
+        "planning": "R249_SCHEDULING_ONLY",
+        "sourceMutation": "R240_SINGLE_CANDIDATE_ONLY",
+        "dispatch": "R147",
+        "returnProof": "R141",
+        "history": "R146",
+        "canonAdmission": "R125",
+        "productionWriter": ".github/workflows/ci.yml",
+        "foundationWeightsChanged": false,
+        "addsPromotionAuthority": false
+      }
+    },
+    "pressureProvenance": "R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DEPENDENCY_TOPOLOGY",
+    "tests": {
+      "r170": true,
+      "r180": true,
+      "r179": true,
+      "currentSuccessorChain": true,
+      "r175": true,
+      "r169": true,
+      "r168": true,
+      "r167": true,
+      "r166": true,
+      "r164": true,
+      "r163": true,
+      "r1532": true,
+      "r239": true,
+      "r240": true,
+      "r245SelfbuildConvergence": true,
+      "r246CandidateLifecycle": true,
+      "inherited": true,
+      "build": true,
+      "canonicalDryRun": true,
+      "opticalDryRun": true
+    },
+    "status": "PROVED_PENDING_PR",
+    "canonicalAdmission": false,
+    "notes": [
+      "Generated deterministically from bounded R170 roadmap through the shared R245 governed self-build contract.",
+      "R170 and CLOUD-01 share one R164 residual policy, R240/R243 selection law and capsule generator.",
+      "R243 activated typed dependency-ready planning/evaluation cells and carried returned residual scars without granting mutation authority.",
+      "R265 applies Water transport → Woven path/correspondence → Violet re-expression → proof/carry/recontextualization while preserving structure/orientation separation and provenance.",
+      "R265 may influence bounded planning capacity through R249 computation coherence but cannot block a capability merely because it is new or uses a new skin.",
+      "R266 closes returned proof/carry into bounded next-cycle context; cold start remains exactly R265 and calibration is confidence-gated and bounded.",
+      "R266 accepts only explicit operator outcomes, observed transitions or returned proof and never treats unchosen candidates as failures.",
+      "R266 foundationWeightsChanged remains false and adds no source-mutation, deployment or CanonState authority.",
+      "R240 retained exactly one source-mutation/promotion candidate.",
+      "R239 Hybrid resource governor remains separate and preserved.",
+      "R125 remains sole CanonState admission authority."
+    ],
+    "provedAt": "2026-09-20T03:21:08.136Z",
+    "productionRunId": "35486126544"
+  },
+  "status": "PROVED_PENDING_PR"
+}
