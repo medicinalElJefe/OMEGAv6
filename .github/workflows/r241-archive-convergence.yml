@@ -94,6 +94,9 @@ jobs:
           node scripts/r314-convergence-audit.mjs --compact > /tmp/r314-r328-audit.json
           node tests/r315-woven-system-traversal-invariants.mjs
 
+      - name: Prove R334 calibrated CERN/Dewey relativity data
+        run: node tests/r334-calibrated-cern-relativity-invariants.mjs
+
       - name: Prove R316 research advancement contracts inside accumulated proof authority
         run: npx --yes tsx tests/r316-research-advancement-invariants.mts
 
