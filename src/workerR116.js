@@ -11,6 +11,8 @@ import {createRunR146,listRunsR146,manifestR146,readRunR146,replayRunR146,transi
 import {dispatchRunR147,executorDirectoryR147,manifestR147,pollRunR147,readResultR147,syncHybridClaimR147,syncHybridReturnR147,R147_REVISION} from './execution/unifiedExecutorFabricR147.js';
 import {advanceSovereignMissionR152,hydrateSovereignMissionsR152,manifestR152,resumeSovereignMissionR152,tagSovereignMissionR152,R152_MISSION_SCHEMA,R152_REVISION,R152_SOURCE_SCHEMA} from './execution/adaptiveSovereignMissionR152.js';
 import {publicLearningR331,runtimeLearningR331} from './system/coherentLearningWorkerR331.js';
+import {publicQtiR332} from './system/qtiWorkerR332.js';
+import {qtiManifestR332} from './system/qtiControlR332.js';
 
 export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator,OmegaSwarmAutonomicCoordinator};
 
@@ -169,8 +171,9 @@ async function probeFetchR130(request,env){
 }
 
 async function fetchR116(request,env){
- const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path.startsWith('/api/intelligence/r331/')||path==='/api/chat'||path==='/api/health'||path==='/api/core-health'||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
+ const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path.startsWith('/api/intelligence/r331/')||path.startsWith('/api/intelligence/r332/qti/')||path==='/api/chat'||path==='/api/health'||path==='/api/core-health'||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
+ const qtiR332=await publicQtiR332(request);if(qtiR332)return withCorsR116(qtiR332,request);
  const learningR331=await publicLearningR331(request,env,r115.fetch.bind(r115));if(learningR331)return withCorsR116(learningR331,request);
  if((path==='/api/health'||path==='/api/core-health')&&request.method==='GET')return withCorsR116(coreHealthR163(request,env),request);
  if((path==='/api/health'||path==='/api/core-health')&&request.method!=='GET')return withCorsR116(json({ok:false,schema:CORE_HEALTH_SCHEMA,revision:CORE_HEALTH_REVISION,state:'METHOD_NOT_ALLOWED',method:request.method,canonicalMutation:false,truthBoundary:'R163 canonical core-health endpoints are read-only.'},405,{allow:'GET','x-omega-core-health':'R163-FIRST-HAND'}),request);
@@ -197,7 +200,7 @@ async function fetchR116(request,env){
   return withCorsR116(json({...plan,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,executorFabricRevision:R147_REVISION,sovereignMissionRevision:R152_REVISION,machineAwareRouting:true,machineServices:{genesis:machine?.nodes?.genesis?.state||'UNKNOWN',optical:machine?.nodes?.optical?.state||'UNKNOWN'},truthBoundary:`${plan.truthBoundary} R116 treats live R115 machine adapters as execution readiness for their existing PROPOSE/SCREEN roles while preserving protected human-surface state separately.`},plan.ok?200:400),request);
  }
  if(path==='/api/system/convergence'&&request.method==='GET')return withCorsR116(json(await convergenceR116(request,env)),request);
- if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141(),durableExecution:manifestR146(),executorFabric:manifestR147(),adaptiveSovereignMission:manifestR152(),coreHealth:{revision:CORE_HEALTH_REVISION,schema:CORE_HEALTH_SCHEMA,path:'/api/core-health'}},200,{'x-omega-control-plane':R130_REVISION}),request);
+ if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141(),durableExecution:manifestR146(),executorFabric:manifestR147(),adaptiveSovereignMission:manifestR152(),qtiVerification:qtiManifestR332(),coreHealth:{revision:CORE_HEALTH_REVISION,schema:CORE_HEALTH_SCHEMA,path:'/api/core-health'}},200,{'x-omega-control-plane':R130_REVISION}),request);
  if(path==='/api/system/operational'&&request.method==='GET')return withCorsR116(json(await operationalR130(request,env,probeFetchR130),200,{'x-omega-control-plane':R130_REVISION}),request);
  const response=await r115.fetch(request,env);return withCorsR116(response,request);
 }
