@@ -1,6 +1,8 @@
 import type{SarRasterFieldR283}from'./sarRasterR283';
 
 export const SAR_PAIR_DERIVATION_SCHEMA_R341='OMEGA_SAR_PAIR_DERIVATION_R341';
+export const SAR_COHERENCE_OPERATOR_R341='gamma=|sum(s1*conj(s2))|/sqrt(sum(|s1|^2)*sum(|s2|^2))';
+export const SAR_TIME_CHANGE_OPERATOR_R341='delta_lnA=ln(|slave|/|master|); positive finite amplitudes only';
 
 export type SarPairDerivationStateR341=
  |'PAIR_FIELDS_BOUND'
@@ -19,6 +21,9 @@ export interface SarPairDerivationR341{
  windowRadius:number;
  gridIdentity:boolean;
  gridReason:string;
+ sampledGridIdentity?:boolean;
+ subpixelCoregistrationBound?:boolean;
+ interferometricPhaseValidity?:'HELD'|'ESTABLISHED';
  truthBoundary:string;
 }
 
@@ -41,7 +46,7 @@ export function sarSampledGridIdentityR341(a:SarRasterFieldR283,b:SarRasterField
   const ok=ag.gcps.every((g,i)=>{const h=bg.gcps?.[i];return!!h&&close(g.pixel,h.pixel)&&close(g.line,h.line)&&close(g.x,h.x,1e-8)&&close(g.y,h.y,1e-8)&&close(g.z,h.z,1e-5)});
   if(ok)return{ok:true,reason:'EXACT_GCP_SAMPLED_GRID_IDENTITY'};
  }
- return{ok:false,reason:'SUBPIXEL_COREGISTRATION_NOT_PROVEN'};
+ return{ok:false,reason:'SAMPLED_GRID_IDENTITY_NOT_PROVEN'};
 }
 
 function interferogramAt(mi:number,mq:number,si:number,sq:number){
@@ -79,12 +84,12 @@ export function deriveSarPairFieldsR341(master:SarRasterFieldR283,slave:SarRaste
   phase[i]=z.phaseRad;
   if(gamma!=null)coherence[i]=gamma;
   const ma=Math.hypot(mi,mq),sa=Math.hypot(si,sq);
-  timeStackRelative[i]=Math.log((sa+1)/(ma+1));
+  if(ma>0&&sa>0)timeStackRelative[i]=Math.log(sa/ma);
   mask[i]=1;scar[i]=gamma==null?1:Math.max(0,1-gamma);proof[i]=1;commonValid++;
  }
  if(!commonValid)return{schema:SAR_PAIR_DERIVATION_SCHEMA_R341,state:'EMPTY_OVERLAP',commonValid:0,expected,coverage:0,windowRadius,gridIdentity:true,gridReason:grid.reason,truthBoundary:'The proven common grid contains no jointly valid complex samples.'};
- const pairRaster:SarRasterFieldR283={...master,sourceId:`${master.sourceId}::PAIR::${slave.sourceId}`,native:false,interferogramPhaseRad:phase,coherence,timeStackRelative,validMask:mask,scarBurden:scar,proofCoverage:proof,pairDerivationR341:{schema:SAR_PAIR_DERIVATION_SCHEMA_R341,masterSourceId:master.sourceId,slaveSourceId:slave.sourceId,gridIdentity:grid.reason,windowRadius:Math.max(1,Math.min(3,Math.floor(windowRadius))),commonValid}};
- return{schema:SAR_PAIR_DERIVATION_SCHEMA_R341,state:'PAIR_FIELDS_BOUND',pairRaster,commonValid,expected,coverage:commonValid/Math.max(1,expected),windowRadius:grid.ok?Math.max(1,Math.min(3,Math.floor(windowRadius))):windowRadius,gridIdentity:true,gridReason:grid.reason,truthBoundary:'R341 computes wrapped interferogram phase, local normalized complex coherence, two-epoch log-amplitude change, pair missingness burden, and evidence coverage only on a proven identical sampled complex grid. It does not claim Sentinel-1 TOPS subpixel co-registration, phase unwrapping, orbit/topographic/atmospheric correction, calibrated backscatter, or metric deformation.'};
+ const pairRaster:SarRasterFieldR283={...master,sourceId:`${master.sourceId}::PAIR::${slave.sourceId}`,native:false,interferogramPhaseRad:phase,coherence,timeStackRelative,validMask:mask,scarBurden:scar,proofCoverage:proof,pairDerivationR341:{schema:SAR_PAIR_DERIVATION_SCHEMA_R341,masterSourceId:master.sourceId,slaveSourceId:slave.sourceId,gridIdentity:grid.reason,sampledGridIdentity:true,subpixelCoregistrationBound:false,interferometricPhaseValidity:'HELD',windowRadius:Math.max(1,Math.min(3,Math.floor(windowRadius))),commonValid}};
+ return{schema:SAR_PAIR_DERIVATION_SCHEMA_R341,state:'PAIR_FIELDS_BOUND',pairRaster,commonValid,expected,coverage:commonValid/Math.max(1,expected),windowRadius:grid.ok?Math.max(1,Math.min(3,Math.floor(windowRadius))):windowRadius,gridIdentity:true,gridReason:grid.reason,sampledGridIdentity:true,subpixelCoregistrationBound:false,interferometricPhaseValidity:'HELD',truthBoundary:'R341 computes exact-grid candidate wrapped cross-phase, normalized complex correlation, scale-invariant two-epoch log-amplitude ratio, pair missingness burden, and evidence coverage. Exact sampled-grid identity is not Sentinel-1 TOPS subpixel co-registration; interferometric phase validity, unwrapping, orbit/topographic/atmospheric correction, calibrated backscatter, and metric deformation remain held.'};
 }
 
 export const R341_TESTABLE=Object.freeze({interferogramAt,localCoherence});
