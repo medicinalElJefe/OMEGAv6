@@ -116,12 +116,22 @@ export const R339_FORECAST_CONTRACT=Object.freeze({
  negativity:Object.freeze({medianApprox:0.528866981067,interval95:Object.freeze([0.238152370091,0.876067421549]),probabilityPositiveApprox:1}),
  compatibilityThresholdD2:5.991464547108,
  criterion:'D2=(x_new-x*)^T(Sigma_new+Sigma*)^-1(x_new-x*)',
+ referenceCovariance:Object.freeze({
+  sigmaFL:0.063410799260,
+  sigmaCParallel:0.311324424948,
+  correlation:0.056278541826,
+  matrix:Object.freeze([
+   Object.freeze([0.004020929462792016,0.0011110133007235067]),
+   Object.freeze([0.0011110133007235067,0.09692289756920289])
+  ]),
+  source:'R334_COMMON_STATE'
+ }),
  noRetuning:true,
  nextGate:'FIRST_SUITABLE_INDEPENDENT_FUTURE_H_TO_ZZ_SPIN_ENTANGLEMENT_MEASUREMENT',
  truthBoundary:'The forecast is a frozen prospective contract for the restricted common-state model. It is not a guaranteed future measured central value and the approximate negativity interval is not an official experimental combined interval.'
 });
 
-export const R339_FORECAST_CONTRACT_SHA256='4022c839c0e3d001be7e707c2acef85ee850cd2d434a0b26809823cc5a24d2e8';
+export const R339_FORECAST_CONTRACT_SHA256='fdee3585d75c0bc887342fbf9ffef89b00c8dc8eddeaec7ba5433a960c5d7671';
 
 export const R339_CONTINUANCE=Object.freeze({
  state:'PROMOTED_AS_NEXT_INTERNAL_PARENT',
@@ -134,7 +144,7 @@ export const R339_CONTINUANCE=Object.freeze({
 
 const finite=n=>Number.isFinite(Number(n));
 function cov2(sigmaA,sigmaB,rho){const a=Number(sigmaA),b=Number(sigmaB),r=Number(rho);return [[a*a,r*a*b],[r*a*b,b*b]]}
-export function forecastReferenceCovarianceR339(){return cov2(R334_COMMON_STATE.fLUncertainty,R334_COMMON_STATE.cParallelUncertainty,R334_COMMON_STATE.nativeCorrelation)}
+export function forecastReferenceCovarianceR339(){return R339_FORECAST_CONTRACT.referenceCovariance.matrix.map(row=>[...row])}
 export function ablationAreaInflationR339(areaProxy){
  const a=Number(areaProxy),j=R339_ABLATION.joint.areaProxy;
  return finite(a)&&a>0?((a/j)-1)*100:null;
