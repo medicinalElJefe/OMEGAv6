@@ -6,6 +6,12 @@ import {capsuleBodyR245,deriveResidualGateR245,R245_GOVERNED_SELFBUILD_CONTRACT,
 const STATE_PATH='public/omega-r170-selfbuild-state.json';
 const CANDIDATE_PATH='public/omega-r170-selfbuild-candidate.json';
 const APPLY=process.env.OMEGA_R170_SELFBUILD_APPLY==='1';
+const PROPOSAL_PATH=String(process.env.OMEGA_R170_PROPOSAL_PATH||'').trim();
+function emitProposal(payload,pretty=false){
+ const body=JSON.stringify(payload,null,pretty?2:undefined)+'\n';
+ if(PROPOSAL_PATH){fs.mkdirSync(path.dirname(PROPOSAL_PATH),{recursive:true});fs.writeFileSync(PROPOSAL_PATH,body,'utf8')}
+ process.stdout.write(body);
+}
 const state=JSON.parse(fs.readFileSync(STATE_PATH,'utf8'));
 const roadmap=Array.isArray(state.roadmap)?state.roadmap:[];
 
@@ -26,13 +32,13 @@ function returnedAdaptiveRowR266(evidence){const s=String(evidence?.state||'').t
 
 const reconciled=reconcileMergedSourceCandidates();
 if(reconciled&&!APPLY)fs.writeFileSync(STATE_PATH,JSON.stringify(state,null,2)+'\n');
-if(!state.active){console.log(JSON.stringify({status:'IDLE',reason:'state inactive'}));process.exit(0)}
-if((state.admittedSourceCapsules||[]).length>=Number(state.maxAutonomousGenerations||0)){console.log(JSON.stringify({status:'OBSERVE',reason:'bounded R170 roadmap exhausted',generation:state.generation}));process.exit(0)}
-if(state.currentCapsuleId){console.log(JSON.stringify({status:'WAITING_FOR_GOVERNED_MERGE',capsuleId:state.currentCapsuleId,generation:state.generation}));process.exit(0)}
+if(!state.active){emitProposal({status:'IDLE',reason:'state inactive'});process.exit(0)}
+if((state.admittedSourceCapsules||[]).length>=Number(state.maxAutonomousGenerations||0)){emitProposal({status:'OBSERVE',reason:'bounded R170 roadmap exhausted',generation:state.generation});process.exit(0)}
+if(state.currentCapsuleId){emitProposal({status:'WAITING_FOR_GOVERNED_MERGE',capsuleId:state.currentCapsuleId,generation:state.generation});process.exit(0)}
 
 const evidence=readResidualEvidence();
 const gate=deriveResidualGateR245(evidence,state.residualPolicy);
-if(!gate.allow){console.log(JSON.stringify({status:'BLOCKED_BY_RESIDUAL_GATE',governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate},null,2));process.exit(0)}
+if(!gate.allow){emitProposal({status:'BLOCKED_BY_RESIDUAL_GATE',governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate},true);process.exit(0)}
 
 const plan=planGovernedCandidateR245({state,evidence:evidence||{}});
 const r265=plan.wovenDimensionalRelativityR265||null;
@@ -41,19 +47,19 @@ const r266=plan.adaptiveCoherenceR266||null;
 const r266Summary=r266?{schema:r266.schema,revision:r266.revision,cycle:r266.cycle,sampleCount:r266.history?.sampleCount,confidence:r266.history?.confidence,trend:r266.history?.trend,calibrationDelta:r266.adaptation?.calibrationDelta,adaptiveCoherence:r266.adaptation?.adaptiveCoherence,adaptiveFuturePreservation:r266.adaptation?.adaptiveFuturePreservation,carriedScar:r266.adaptation?.carriedScar,residualMemory:r266.adaptation?.residualMemory,coldStartEquivalentToR265:r266.adaptation?.coldStartEquivalentToR265,foundationWeightsChanged:r266.adaptation?.foundationWeightsChanged,nextContext:r266.nextContext,proof:r266.proof,authority:r266.authority}:null;
 const cycleContext={dimensionalRelativityR265:r265Summary,adaptiveCoherenceR266:r266Summary};
 if(plan.state==='BLOCKED_BY_R243_FABRIC'){
- console.log(JSON.stringify({status:'BLOCKED_BY_R243_FABRIC',generation:state.generation,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate,fabric:plan.woven,...cycleContext},null,2));process.exit(0);
+ emitProposal({status:'BLOCKED_BY_R243_FABRIC',generation:state.generation,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate,fabric:plan.woven,...cycleContext},true);process.exit(0);
 }
 if(plan.state==='BLOCKED_R243_R240_SELECTION_DIVERGENCE'){
- console.log(JSON.stringify({status:'BLOCKED_BY_R243_R240_SELECTION_DIVERGENCE',generation:state.generation,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate,r240Candidate:plan.r240CandidateId,r243Candidate:plan.r243CandidateId,frontier:plan.frontier,fabric:plan.woven,...cycleContext},null,2));process.exit(0);
+ emitProposal({status:'BLOCKED_BY_R243_R240_SELECTION_DIVERGENCE',generation:state.generation,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate,r240Candidate:plan.r240CandidateId,r243Candidate:plan.r243CandidateId,frontier:plan.frontier,fabric:plan.woven,...cycleContext},true);process.exit(0);
 }
 if(plan.state!=='PROPOSE'||!plan.capsule){
- console.log(JSON.stringify({status:'OBSERVE',reason:plan.reason||'no dependency-ready predefined capsule',generation:state.generation,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate,frontier:plan.frontier,fabric:plan.woven,...cycleContext},null,2));process.exit(0);
+ emitProposal({status:'OBSERVE',reason:plan.reason||'no dependency-ready predefined capsule',generation:state.generation,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate,frontier:plan.frontier,fabric:plan.woven,...cycleContext},true);process.exit(0);
 }
 
 const capsule=plan.capsule;
 const generation=Number(state.generation||0)+1;
 if(!APPLY){
- console.log(JSON.stringify({status:'PROPOSE',generation,capsuleId:capsule.id,title:capsule.title,target:capsule.target,score:plan.score,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,gate,frontier:plan.frontier,fabric:plan.woven,...cycleContext,selectionLaw:plan.selectionLaw},null,2));process.exit(0);
+ emitProposal({status:'PROPOSE',generation,capsuleId:capsule.id,title:capsule.title,target:capsule.target,score:plan.score,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,gate,frontier:plan.frontier,fabric:plan.woven,...cycleContext,selectionLaw:plan.selectionLaw},true);process.exit(0);
 }
 
 const body=capsuleBodyR245(capsule.id);
@@ -68,4 +74,4 @@ const returnedRow=returnedAdaptiveRowR266(evidence);
 state.generation=generation;state.currentCapsuleId=capsule.id;state.selfBuildScars=wovenPlan.scars;state.receipts=[...(state.receipts||[]),receipt].slice(-64);if(returnedRow)state.adaptiveCoherenceHistoryR266=[...(state.adaptiveCoherenceHistoryR266||[]),returnedRow].slice(-64);
 fs.writeFileSync(STATE_PATH,JSON.stringify(state,null,2)+'\n','utf8');
 fs.writeFileSync(CANDIDATE_PATH,JSON.stringify({schema:'OMEGA_SELFBUILD_CANDIDATE_R170',revision:'R170.2',schedulerRevision:'R240',planningFabricRevision:'R243',dimensionalRelativityRevision:'R265',adaptiveCoherenceRevision:'R266',governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,capsule,score:plan.score,frontier:plan.frontier,wovenFabric:wovenSummary,wovenDimensionalRelativityR265:r265Summary,adaptiveCoherenceR266:r266Summary,receipt},null,2)+'\n','utf8');
-console.log(JSON.stringify({status:'SANDBOX',generation,capsuleId:capsule.id,target:capsule.target,score:plan.score,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,gate,frontier:plan.frontier,fabric:wovenSummary,...cycleContext},null,2));
+emitProposal({status:'SANDBOX',generation,capsuleId:capsule.id,target:capsule.target,score:plan.score,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,gate,frontier:plan.frontier,fabric:wovenSummary,...cycleContext},true);
