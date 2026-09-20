@@ -12,7 +12,9 @@ export const R43_DATASETS=[
  {id:'CERN_MASTER_R334',rows:4260,columns:68,label:'R334 CERN/Omega Advanced Master v3 · calibrated source-exact + derived closure'},
  {id:'CERN_BRIDGE_R334',rows:4237,columns:68,label:'R334 Advanced Quantitative Bridge v2 · pre-closure calibrated bridge'},
  {id:'CERN_CLOSURE_R334',rows:23,columns:14,label:'R334 Dewey Relativity Closure v3 · executable calibrated closure'},
- {id:'CERN_ADV_R334',rows:36,columns:18,label:'R334 ADV-02→ADV-04 Quantitative Bridge · executable cross-representation results'}
+ {id:'CERN_ADV_R334',rows:36,columns:18,label:'R334 ADV-02→ADV-04 Quantitative Bridge · executable cross-representation results'},
+ {id:'CERN_MASTER_R340',rows:4285,columns:68,label:'R340 CERN/Omega Advanced Master v4 · preserved source-exact + ablation/forecast successor'},
+ {id:'CERN_ADV_R340',rows:25,columns:14,label:'R340 ADV-05→ADV-07 · round-trip, ablation and frozen prospective forecast'}
 ] as const;
 
 export const R43_CORE_MODES=[
