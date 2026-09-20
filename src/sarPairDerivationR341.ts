@@ -69,7 +69,7 @@ export function deriveSarPairFieldsR341(master:SarRasterFieldR283,slave:SarRaste
  const grid=sarSampledGridIdentityR341(master,slave);
  if(!grid.ok)return{schema:SAR_PAIR_DERIVATION_SCHEMA_R341,state:'GRID_IDENTITY_REQUIRED',commonValid:0,expected,coverage:0,windowRadius,gridIdentity:false,gridReason:grid.reason,truthBoundary:'R341 refuses interferometric products until sampled-grid identity is proven. Metadata pair compatibility alone is insufficient; unproven subpixel co-registration stays held.'};
 
- const n=expected,phase=new Array(n).fill(0),coherence=new Array(n).fill(0),mask=new Array(n).fill(0),timeStackRelative=new Array(n).fill(0),scar=new Array(n).fill(1),proof=new Array(n).fill(0);
+ const n=expected,phase=new Array(n).fill(Number.NaN),coherence=new Array(n).fill(Number.NaN),mask=new Array(n).fill(0),timeStackRelative=new Array(n).fill(Number.NaN),scar=new Array(n).fill(1),proof=new Array(n).fill(0);
  let commonValid=0;
  for(let y=0;y<master.height;y++)for(let x=0;x<master.width;x++){
   const i=y*master.width+x;
