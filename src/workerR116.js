@@ -15,6 +15,8 @@ import {publicQtiR332} from './system/qtiWorkerR332.js';
 import {qtiManifestR332} from './system/qtiControlR332.js';
 import {calibrationManifestR334} from './system/calibrationR334.js';
 import {calibrationPropagationManifestR335} from './system/calibrationPropagationR335.js';
+import {calibrationManifestR340} from './system/calibrationR340.js';
+import {calibrationPropagationManifestR340} from './system/calibrationPropagationR340.js';
 
 export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator,OmegaSwarmAutonomicCoordinator};
 
@@ -202,7 +204,7 @@ async function fetchR116(request,env){
   return withCorsR116(json({...plan,runtimeRevision:REVISION,connectorRevision:CONNECTOR_REVISION,proofClosureRevision:R141_REVISION,durableExecutionRevision:R146_REVISION,executorFabricRevision:R147_REVISION,sovereignMissionRevision:R152_REVISION,machineAwareRouting:true,machineServices:{genesis:machine?.nodes?.genesis?.state||'UNKNOWN',optical:machine?.nodes?.optical?.state||'UNKNOWN'},truthBoundary:`${plan.truthBoundary} R116 treats live R115 machine adapters as execution readiness for their existing PROPOSE/SCREEN roles while preserving protected human-surface state separately.`},plan.ok?200:400),request);
  }
  if(path==='/api/system/convergence'&&request.method==='GET')return withCorsR116(json(await convergenceR116(request,env)),request);
- if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141(),durableExecution:manifestR146(),executorFabric:manifestR147(),adaptiveSovereignMission:manifestR152(),qtiVerification:qtiManifestR332(),calibration:calibrationManifestR334(),calibrationPropagation:calibrationPropagationManifestR335(),coreHealth:{revision:CORE_HEALTH_REVISION,schema:CORE_HEALTH_SCHEMA,path:'/api/core-health'}},200,{'x-omega-control-plane':R130_REVISION}),request);
+ if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141(),durableExecution:manifestR146(),executorFabric:manifestR147(),adaptiveSovereignMission:manifestR152(),qtiVerification:qtiManifestR332(),calibration:calibrationManifestR334(),calibrationPropagation:calibrationPropagationManifestR335(),calibrationAdvance:calibrationManifestR340(),calibrationAdvancePropagation:calibrationPropagationManifestR340(),coreHealth:{revision:CORE_HEALTH_REVISION,schema:CORE_HEALTH_SCHEMA,path:'/api/core-health'}},200,{'x-omega-control-plane':R130_REVISION}),request);
  if(path==='/api/system/operational'&&request.method==='GET')return withCorsR116(json(await operationalR130(request,env,probeFetchR130),200,{'x-omega-control-plane':R130_REVISION}),request);
  const response=await r115.fetch(request,env);return withCorsR116(response,request);
 }
