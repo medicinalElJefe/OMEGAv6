@@ -104,6 +104,8 @@ assert.equal(receipt.revision,'R339');
 assert.equal(receipt.datasets.advancedMasterV4.records,4285);
 assert.equal(receipt.datasets.advancedMasterV4.inheritedPrefix.records,4260);
 assert.equal(receipt.datasets.advancedMasterV4.inheritedPrefix.repositoryNormalizedSha256,'a3677e2b5a22b37235948999ed0896defbf706d13531676e84448096231913f4');
+assert.equal(receipt.datasets.advancedMasterV4.appendedPayloadInvariant,'ALL_25_MASTER_V4_SUFFIX_SOURCE_EXACT_PAYLOAD_JSON_MATCH_ADVANCEMENT_ROWS_AND_ROW_SHA256');
+assert.equal(receipt.datasets.advancedMasterV4.appendedPayloadCanonicalJsonSha256,'3e2cbe6b52f5d253079acd9a4ed9bf9449cccdcdf588e16c3acbbceeb12a6d16');
 assert.equal(receipt.datasets.adv05Adv07V4.records,25);
 assert.equal(receipt.forecast.noRetuning,true);
 assert.equal(receipt.forecast.futureObservationUsed,false);
