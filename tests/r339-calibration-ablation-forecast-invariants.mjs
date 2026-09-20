@@ -95,6 +95,8 @@ const ref=forecastReferenceCovarianceR339();
 assert.ok(ref[0][0]>0&&ref[1][1]>0);
 const center=evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,fL:R339_FORECAST_CONTRACT.stateCenter.fL,cParallel:R339_FORECAST_CONTRACT.stateCenter.cParallel,covariance:[[0,0],[0,0]]});
 assert.equal(center.state,'PASS');assert.equal(center.d2,0);
+assert.equal(center.inputClass,'OPERATOR_SUPPLIED_COMPATIBILITY_TEST');
+assert.equal(center.futureObservationAuthority,false);
 const far=evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,fL:0.95,cParallel:-0.95,covariance:[[1e-6,0],[0,1e-6]]});
 assert.equal(far.state,'FAIL');assert.ok(far.d2>R339_FORECAST_CONTRACT.compatibilityThresholdD2);
 assert.equal(evaluateFrozenForecastR339({}).state,'HELD');
