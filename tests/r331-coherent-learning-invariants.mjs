@@ -31,6 +31,9 @@ assert.ok(selected.some(x=>x.memoryId===correction.memoryId));
 const context=buildCommunicationContextR331(memory,'Explain the build and keep it direct.',{metrics:{continuity:.8,plasticity:.7,contradiction:.1,burden:.2,evidence:.9}});
 assert.equal(context.canonicalAdmission,false);
 assert.ok(context.coherence.communicationCoherence>0);
+assert.ok(context.coherence.composite>0&&context.coherence.composite<=1);
+assert.deepEqual(Object.keys(context.coherence.components).sort(),['causal','evidence','goal','logical','memory','temporal']);
+assert.equal(context.coherence.validatedScientificMetric,false);
 assert.ok(['STAY','TURN','ESCALATE'].includes(context.coherence.decision));
 assert.ok(context.communicationLaws.includes('MODEL_SYNTHESIS_MEMORY_MAY_SUPPORT_CONTINUITY_BUT_NEVER_SELF_PROMOTES_TO_FACT'));
 
@@ -49,6 +52,8 @@ assert.ok(!batch.examples.some(x=>x.memoryId===model.memoryId));
 const manifest=intelligenceManifestR331();
 assert.equal(manifest.persistence,'OMEGA_RUNTIME_DURABLE_OBJECT_SESSION_SCOPED');
 assert.equal(manifest.directFoundationWeightMutation,false);
+assert.ok(manifest.loops.includes('WORKING_CONTEXT'));
+assert.ok(manifest.loops.includes('APPEND_ONLY_LEARNING_LEDGER'));
 assert.equal(manifest.canonicalAdmission,false);
 
 const worker=fs.readFileSync('src/workerR116.js','utf8');
@@ -63,9 +68,14 @@ for(const token of [
  "/api/intelligence/r331/manifest",
  "/api/intelligence/r331/feedback",
  "/api/intelligence/r331/training-batch",
+ "/api/intelligence/r331/state",
  "/intelligence/r331/context",
  "compileConversationMemoryR331",
  "compileLearningMemoryR331",
+ "appendLedgerR331",
+ "intelligenceLedgerR331",
+ "previousHash",
+ "lastEventHash",
  "canonicalAdmission:false"
 ])assert.ok(membrane.includes(token),`R331 learning membrane missing ${token}`);
 assert.ok(!/canonicalAdmission\s*:\s*true/.test(membrane),'R331 membrane may not self-admit CanonState');
@@ -90,4 +100,4 @@ assert.match(fabric,/r331-coherent-learning/,'intelligence fabric must expose R3
 assert.match(fabric,/durable session memory/i);
 assert.match(fabric,/does not claim trained foundation weights/i);
 
-console.log('R331 COHERENT LEARNING PASS · durable conversation continuity · typed learning · evidence/proof gates · approved TRAIN_LOCAL export · no Canon or weight-training fiction');
+console.log('R331 COHERENT LEARNING PASS · durable conversation continuity · working/episodic/semantic/procedural learning · append-only hash ledger · decomposed coherence · evidence/proof gates · approved TRAIN_LOCAL export · no Canon or weight-training fiction');
