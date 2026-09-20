@@ -3,7 +3,7 @@ import fs from'node:fs';
 import crypto from'node:crypto';
 import{
  R340_REVISION,R340_SCHEMA,R340_RELEASE_ID,R340_SOURCE_MANIFEST,R340_TRANSPORT_NORMALIZATION,
- R340_ROUNDTRIP_PROOF,R340_ABLATION,R340_FORECAST,physicalityGateR340,forecastCompatibilityR340,calibrationForecastManifestR340
+ R340_SOURCE_EXACT_SUMMARY,R340_ROUNDTRIP_PROOF,R340_ABLATION,R340_FORECAST,physicalityGateR340,forecastCompatibilityR340,calibrationForecastManifestR340
 }from'../src/system/calibrationForecastR340.js';
 import{calibrationPropagationManifestR340,R340_PROPAGATION_RECEIPT}from'../src/system/calibrationPropagationR340.js';
 
@@ -27,6 +27,10 @@ assert.match(sources.MASTER_V4.composition,/3,743 OMEGA source-exact.*25 ablatio
 assert.match(sources.MASTER_V4.extensionLayerIdentity,/25\/25 origin_record_id rows match/i);
 assert.equal(sources.ADV05_ADV07_V4.rows,25);
 assert.equal(sources.ADV05_ADV07_V4.columns,14);
+assert.equal(R340_SOURCE_EXACT_SUMMARY.sourceExactRows,4105);
+assert.equal(R340_SOURCE_EXACT_SUMMARY.derivedNoOverwriteRows,180);
+assert.equal(R340_SOURCE_EXACT_SUMMARY.postV3ProofAdvancementRows,25);
+assert.deepEqual(R340_SOURCE_EXACT_SUMMARY.advancementStageCounts,{'ADV-05':18,'ADV-06':5,'ADV-07':2});
 assert.equal(sha(exact),'d4eeab6ec5f4310cb0554973538d60ce333a981ad0b8a3c301f8d359b692a410');
 assert.equal(exact.split('\n').length-1,25);
 assert.equal(Buffer.byteLength(exact),10282);
@@ -69,6 +73,8 @@ assert.equal(R340_FORECAST.nextParent,'V4_FROZEN_STATE_PLUS_FORECAST_CONTRACT');
 
 const centered=forecastCompatibilityR340({fL:R340_FORECAST.state.fL,cParallel:R340_FORECAST.state.cParallel,covariance:[[0,0],[0,0]]});
 assert.equal(centered.state,'EVALUATED_FROZEN_RULE');near(centered.d2,0,1e-15);assert.equal(centered.pass,true);assert.equal(centered.retuned,false);
+const unphysical=forecastCompatibilityR340({fL:0.946665284,cParallel:1.489527994,covariance:[[0.01,0],[0,0.01]]});
+assert.equal(unphysical.state,'EVALUATED_OUTSIDE_RESTRICTED_PHYSICAL_DOMAIN');assert.equal(unphysical.physicality.admitted,false);assert.equal(unphysical.pass,false);
 const manifest=calibrationForecastManifestR340(),prop=calibrationPropagationManifestR340();
 assert.equal(manifest.canonicalMutation,false);assert.equal(manifest.canonicalAdmission,false);
 assert.equal(manifest.externalEmpiricalStatus,'FUTURE_VALIDATION_PENDING');
@@ -89,6 +95,8 @@ const files={
  audit:read('scripts/r314-convergence-audit.mjs')
 };
 assert.ok(files.lab.includes('RelativityForecastR340')&&files.lab.includes('<RelativityForecastR340/>'));
+const forecastUi=read('src/RelativityForecastR340.tsx');
+for(const token of ['data-r340-future-evaluator','R340 future fL','R340 future C parallel','OPERATOR_SUPPLIED_NOT_EMPIRICAL','PHYSICALITY HOLD','cannot alter the frozen center'])assert.ok(forecastUi.includes(token),`R340 prospective evaluator missing ${token}`);
 for(const source of [files.physics,files.relation,files.modes,files.worker,files.fusion,files.envelope])assert.ok(source.includes('R340')||source.includes('calibrationForecast'), 'R340 propagation missing from a runtime surface');
 for(const token of ['CERN_MASTER_V4_R340','CERN_ADV05_ADV07_R340'])assert.ok(files.atlas.includes(token));
 assert.ok(files.master.includes('R340_PROPAGATION_RECEIPT,R335_PROPAGATION_RECEIPT,R334_B06_PROGRESS_RECEIPT'));
