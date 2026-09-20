@@ -20,7 +20,7 @@ assert.equal(R339_PROPAGATION_RECEIPT.canonicalAdmissionAuthority,'R125');
 const requiredConsumers=[
  'CAPABILITY_DATASET_REGISTRY','MODE_REALIZATION_REGISTRY','ALL_MODES_TRUTH_FUSION','UNIVERSAL_TRUTH_ENVELOPE',
  'RELATIVITY_RUNTIME','RELATIVITY_SURFACE','FORECAST_SURFACE','RELATIONAL_RUNTIME','WORKER_MANIFEST',
- 'CONVERGENCE_MASTER','CONVERGENCE_AUDIT'
+ 'CONVERGENCE_MASTER','CONVERGENCE_AUDIT','EXTERNAL_MASTER_VERIFIER'
 ];
 assert.deepEqual(R339_CALIBRATION_CONSUMERS.map(x=>x.id),requiredConsumers);
 const manifest=calibrationAdvancementManifestR339();
@@ -98,6 +98,16 @@ for(const token of [
  'a3677e2b5a22b37235948999ed0896defbf706d13531676e84448096231913f4',
  'R339 advancement dataset SHA mismatch','R339-CONVERGENCE-BINDING','calibratedCernAdvancement'
 ])assert.ok(audit.includes(token),'R339 convergence audit missing '+token);
+
+const externalVerifier=read('scripts/verify_r339_external_master.mjs');
+for(const token of [
+ '0f966c0f8b40d26ba177324c6f0a6246ebda959e0030d5ad8ab2196f480a9891',
+ 'e8c6aaf1217919d1f714a2399638e49d48922780bf9635f700eabbf164bd3ff2',
+ 'a3677e2b5a22b37235948999ed0896defbf706d13531676e84448096231913f4',
+ '3e2cbe6b52f5d253079acd9a4ed9bf9449cccdcdf588e16c3acbbceeb12a6d16',
+ "m.source_exact_payload_json,payload","m.source_row_sha256,sha(Buffer.from(payload,'utf8'))",
+ "source_exact_preserved,'DERIVED_NO_OVERWRITE'","provenance_tier,'DERIVED_FROM_FROZEN_V3'"
+])assert.ok(externalVerifier.includes(token),'R339 external verifier missing '+token);
 
 const receipt=JSON.parse(read('public/canon/omega-cern-ablation-forecast-r339.json'));
 assert.equal(receipt.revision,'R339');
