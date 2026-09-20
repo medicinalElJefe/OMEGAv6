@@ -3,11 +3,13 @@ export const R334_SCHEMA='OMEGA_CALIBRATION_CONVERGENCE_R334';
 export const R334_RELEASE_ID='DEWEY_OMEGA_CERN_RELATIVITY_CLOSURE_2026-09-19';
 
 export const R334_SOURCE_MANIFEST=Object.freeze([
- {id:'MASTER_V3',name:'Dewey_OMEGA_CERN_Advanced_Master_v3_Relativity_Closure_2026-09-19.csv',rows:4260,columns:68,bytes:7888887,sha256:'c2a5966b0a4aa3aa2de2acd18491e2333653290eaa312058fd1dfe0f1446a18d',role:'FULL_CALIBRATION_MASTER',runtimePayload:'MANIFEST_ONLY'},
- {id:'BRIDGE_V2',name:'Dewey_OMEGA_CERN_Advanced_Quantitative_Bridge_v2_2026-09-19.csv',rows:4237,columns:68,bytes:7844136,sha256:'2cfab8182563c598e86c30a18de418331c2319839f1900a03f6687c2fe01a3d2',role:'FULL_QUANTITATIVE_BRIDGE',runtimePayload:'MANIFEST_ONLY'},
- {id:'CLOSURE_V3',name:'Dewey_OMEGA_CERN_Dewey_Relativity_Closure_v3_2026-09-19.csv',rows:23,columns:14,bytes:7778,sha256:'98a0ac1c820e10aef307364e1efc996e3e3167d9192bca96352cda75f57b02fb',role:'EXECUTABLE_RELATIVITY_CLOSURE',runtimePayload:'EMBEDDED_CALIBRATION_ROWS'},
- {id:'ADV02_ADV04',name:'Dewey_OMEGA_CERN_ADV02_ADV04_Quantitative_Bridge_2026-09-19.csv',rows:36,columns:18,bytes:12080,sha256:'6eb08be1ba49e1dd234c1ea621ce86ddf976add16fba1fb4dbfa58b0bc317f34',role:'EXECUTABLE_QUANTITATIVE_BRIDGE',runtimePayload:'EMBEDDED_CALIBRATION_ROWS'}
+ {id:'MASTER_V3',name:'Dewey_OMEGA_CERN_Advanced_Master_v3_Relativity_Closure_2026-09-19.csv',rows:4260,columns:68,bytes:7888887,sha256:'c2a5966b0a4aa3aa2de2acd18491e2333653290eaa312058fd1dfe0f1446a18d',repositoryNormalizedSha256:'a3677e2b5a22b37235948999ed0896defbf706d13531676e84448096231913f4',repositoryNormalizedBytes:7884622,role:'FULL_CALIBRATION_MASTER',runtimePayload:'MANIFEST_ONLY',materialization:'EXTERNAL_MASTER_HASH_CENSUS_BOUND',composition:'BRIDGE_V2 exact 4237-row prefix + CLOSURE_V3 exact 23-row suffix'},
+ {id:'BRIDGE_V2',name:'Dewey_OMEGA_CERN_Advanced_Quantitative_Bridge_v2_2026-09-19.csv',rows:4237,columns:68,bytes:7844136,sha256:'2cfab8182563c598e86c30a18de418331c2319839f1900a03f6687c2fe01a3d2',repositoryNormalizedSha256:'72659e188f0d3b80d4fcc4ad960b1986797a6a823b0801bd99aef58bba5d6b82',repositoryNormalizedBytes:7839894,role:'FULL_QUANTITATIVE_BRIDGE',runtimePayload:'MANIFEST_ONLY',materialization:'EXTERNAL_MASTER_HASH_CENSUS_BOUND'},
+ {id:'CLOSURE_V3',name:'Dewey_OMEGA_CERN_Dewey_Relativity_Closure_v3_2026-09-19.csv',rows:23,columns:14,bytes:7778,sha256:'98a0ac1c820e10aef307364e1efc996e3e3167d9192bca96352cda75f57b02fb',repositoryNormalizedSha256:'bbb0a6957512a0fd87a0668c914b62be459910e011c2c882b3d96c38cb844d8c',repositoryNormalizedBytes:7750,publicPath:'/canon/Dewey_OMEGA_CERN_Dewey_Relativity_Closure_v3_2026-09-19.csv',role:'EXECUTABLE_RELATIVITY_CLOSURE',runtimePayload:'REPOSITORY_CALIBRATION_ROWS',materialization:'REPOSITORY_EXACT_VALUES_NORMALIZED_TRANSPORT'},
+ {id:'ADV02_ADV04',name:'Dewey_OMEGA_CERN_ADV02_ADV04_Quantitative_Bridge_2026-09-19.csv',rows:36,columns:18,bytes:12080,sha256:'6eb08be1ba49e1dd234c1ea621ce86ddf976add16fba1fb4dbfa58b0bc317f34',repositoryNormalizedSha256:'2fa0753e49445b9e8d0d7b56b320503aec61e091a3f7eae17619c74ad84936ba',repositoryNormalizedBytes:12039,publicPath:'/canon/Dewey_OMEGA_CERN_ADV02_ADV04_Quantitative_Bridge_2026-09-19.csv',role:'EXECUTABLE_QUANTITATIVE_BRIDGE',runtimePayload:'REPOSITORY_CALIBRATION_ROWS',materialization:'REPOSITORY_EXACT_VALUES_NORMALIZED_TRANSPORT'}
 ]);
+
+export const R334_TRANSPORT_NORMALIZATION='UTF8_BOM_REMOVED_CRLF_TO_LF_FINAL_EOL_REMOVED_VALUES_UNCHANGED';
 
 export const R334_SOURCE_EXACT_SUMMARY=Object.freeze({
  sourceExactRows:4105,
