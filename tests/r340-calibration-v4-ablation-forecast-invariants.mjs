@@ -42,6 +42,11 @@ near(R340_ABLATION.variants.REMOVE_ATLAS_C21.areaIncreaseVsJointPct,46.147675924
 near(R340_ABLATION.variants.REMOVE_ATLAS_C22.areaIncreaseVsJointPct,2.229207888473428,1e-12);
 near(R340_ABLATION.variants.REMOVE_CMS_FL.areaIncreaseVsJointPct,382.7099629277001,1e-12);
 near(R340_ABLATION.variants.REMOVE_CMS_CPAR.areaIncreaseVsJointPct,37.27517008480727,1e-12);
+near(R340_ABLATION.variants.CMS_ONLY.jointReductionPctVsVariant,33.19651503024619,1e-12);
+near(R340_ABLATION.variants.REMOVE_ATLAS_C21.jointReductionPctVsVariant,31.57605869042151,1e-12);
+near(R340_ABLATION.variants.REMOVE_ATLAS_C22.jointReductionPctVsVariant,2.180597829639229,1e-12);
+near(R340_ABLATION.variants.REMOVE_CMS_FL.jointReductionPctVsVariant,79.28362626006583,1e-12);
+near(R340_ABLATION.variants.REMOVE_CMS_CPAR.jointReductionPctVsVariant,27.15361420552532,1e-12);
 assert.equal(R340_ABLATION.summaries.cmsFL,'DOMINANT_PRECISION_ANCHOR');
 assert.equal(R340_ABLATION.summaries.atlasC22,'LOWER_INCREMENTAL_INFORMATION_NOT_PHYSICALLY_DISPENSABLE');
 assert.equal(R340_ABLATION.physicalityGate.state,'GATE_NECESSARY');
