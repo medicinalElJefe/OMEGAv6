@@ -68,6 +68,11 @@ const hybridEntry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid
 await hybridEntry.waitFor({state:'visible'});await hybridEntry.click();
 const motion=page.locator('[data-r243-motion]');
 await motion.waitFor({state:'visible'});
+await page.waitForFunction(()=>{
+  const el=document.querySelector('[data-r243-motion]');
+  const epoch=Number(el?.getAttribute('data-r243-epoch')||0);
+  return Number.isFinite(epoch)&&epoch>=1;
+},{timeout:15000});
 const motionState=String(await motion.getAttribute('data-r243-motion')||'');
 const motionJob=String(await motion.getAttribute('data-r243-job')||'');
 const motionEpoch=Number(await motion.getAttribute('data-r243-epoch')||0);
