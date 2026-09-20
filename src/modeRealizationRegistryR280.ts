@@ -1,5 +1,6 @@
 import {CANON_AUTHORITY_STACK,evaluateCanonAuthorityStack} from './allModesAuthority';
 import {sourceBackedModeSummary,type SourceBackedModeResult} from './sourceBackedModeRuntimeR21';
+import {calibrationContextR335} from './system/calibrationPropagationR335.js';
 
 export const R280_MODE_REALIZATION_SCHEMA='OMEGA_MODE_REALIZATION_REGISTRY_R280' as const;
 export const R280_MODE_REALIZATION_LAWS=Object.freeze([
@@ -10,7 +11,8 @@ export const R280_MODE_REALIZATION_LAWS=Object.freeze([
   'PROMOTED_REQUIRES_EXECUTABLE_STATE_OBSERVABLE_OUTPUT_TEST_AND_BOUNDARY',
   'MODE_AGREEMENT_IS_INTERNAL_COHERENCE_NOT_INDEPENDENT_REPLICATION',
   'REPRESENTATION_LEVELS_ARE_ADDRESS_RESOLUTION_NOT_LITERAL_PHYSICAL_DIMENSIONS',
-  'R125_REMAINS_CANONSTATE_ADMISSION_AUTHORITY'
+  'R125_REMAINS_CANONSTATE_ADMISSION_AUTHORITY',
+  'R335_CALIBRATION_CONTEXT_APPLIES_GLOBALLY_WITHOUT_CHANGING_MODE_AUTHORITY'
 ]);
 
 export type ModeRealizationStageR280='CHARTED'|'IMPLEMENTED'|'TESTED'|'PROMOTED'|'GATED';
@@ -179,8 +181,9 @@ export function compileModeRealizationRegistryR280(record:any){
     authorityCount:rows.length,sourceCatalogCount:source.catalogCount,sourceBackedRuntimeRows:source.rows.length,
     summary:{promoted,tested,implemented,gated,charted,domainExecutable,fullyBound,lensExecutable:rows.length},
     rows,criticalGaps,
+    calibration:calibrationContextR335(),
     canonicalMutation:false,canonicalAdmissionAuthority:'R125',
-    truthBoundary:'R280 distinguishes a named/charted mode, a derived lens, a source-executed operator, and a domain runtime. All 62 canon authorities have executable read-only lenses through the inherited R12 evaluator, but lens execution is not equivalent to realizing every historical domain executor. Gated inputs remain explicit. Promotion status requires bound runtime/test evidence and never overrides empirical evidence, physical validation, execution receipts, or R125 CanonState admission.'
+    truthBoundary:'R280 distinguishes a named/charted mode, a derived lens, a source-executed operator, and a domain runtime. All 62 canon authorities have executable read-only lenses through the inherited R12 evaluator, but lens execution is not equivalent to realizing every historical domain executor. Gated inputs remain explicit. Promotion status requires bound runtime/test evidence and never overrides empirical evidence, physical validation, execution receipts, or R125 CanonState admission. R335 supplies one shared calibrated CERN/Omega evidence context to the registry without promoting every mode to a new executor or changing any mode's authority class.'
   };
 }
 
