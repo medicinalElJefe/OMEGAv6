@@ -52,7 +52,7 @@
   ],
   "deployment": {
     "soleCanonicalWriter": ".github/workflows/ci.yml",
-    "explicitWorkflowDispatchAfterActionsTokenMerge": false,
+    "explicitWorkflowDispatchAfterActionsTokenMerge": true,
     "selfBuilderMayDeployDirectly": false,
     "selfBuilderMayDispatchItself": false,
     "exactMergedShaProductionSuccessRequired": true,
@@ -86,10 +86,12 @@
       "R237",
       "R238"
     ],
-    "canonicalDeploymentPushTrigger": true,
+    "canonicalDeploymentPushTrigger": false,
     "eventDrivenContinuation": true,
     "continuationWorkflow": ".github/workflows/r170-governed-selfbuild.yml",
-    "continuationAuthority": ".github/workflows/ci.yml::continue-governed-selfbuild"
+    "continuationAuthority": ".github/workflows/ci.yml::continue-governed-selfbuild",
+    "canonicalDeploymentDispatchTrigger": true,
+    "selfBuilderMayDispatchCanonicalWriter": true
   },
   "authority": {
     "sourcePlanning": "R240 scheduling-only over R170 roadmap",
@@ -102,6 +104,6 @@
     "canonAdmissionClaimed": false
   },
   "truthLaw": "generated != proved != source-promoted != staged-live-proved != deployed != live-verified != Canon-admitted",
-  "truthBoundary": "R240.2/R324/R330 preserves one canonical ci.yml deployment/proof authority while removing dependence on GitHub Actions-created pull requests and hourly polling. The deterministic generator still has no main-write authority. After exact candidate re-proof, the governed R170 promotion step may construct only the candidate tree as an exact two-parent merge over the unchanged production-proven base and update main under a force-with-lease compare-and-swap guard. That source promotion triggers ci.yml on main; ci.yml remains the sole production writer. Normal releases upload the exact candidate; the candidate is admitted to the current Cloudflare deployment at 0% while the previous version retains 100% ordinary traffic. Pre-promotion proof is exact-version, read-only/execution-free candidate proof plus browser proof; no unproved candidate receives ordinary traffic; it must not register, heartbeat, poll, or otherwise mutate shared Hybrid Durable Object state from a 0%-traffic version. After the exact candidate reaches 100%, canonical CI independently requires the full stateful R202/R237/R238 Hybrid live proof. A failed post-promotion proof can restore only an independently proved-usable previous baseline. A known-bad blocking baseline has no rollback authority. Cloudflare can reject a percentage split when Durable Object exports differ. The bounded R322 forward-recovery exception remains allowed only when the existing baseline is positively identified by R319.9 as the R211/R205/R216 application-withholding interlock and Cloudflare returns the exact export-set rejection; an unknown or merely unproved baseline does not qualify. Only after successful canonical production proof may ci.yml dispatch the next governed self-build cycle; red production or residual blocking stops continuation. R201/R203 remain deleted export tombstones. R125 remains CanonState admission authority; R147 dispatch, R146 durable history and R141 exact Hybrid return-proof authorities are unchanged.",
+  "truthBoundary": "R240.2/R324/R330 preserves one canonical ci.yml deployment/proof authority while removing dependence on GitHub Actions-created pull requests and hourly polling. The deterministic generator still has no main-write authority. After exact candidate re-proof, the governed R170 promotion step may construct only the candidate tree as an exact two-parent merge over the unchanged production-proven base and update main under a force-with-lease compare-and-swap guard. Because a main update authenticated by GitHub Actions' GITHUB_TOKEN does not recursively emit another push-triggered workflow, the governed promotion step explicitly dispatches ci.yml on the exact promoted main SHA; ci.yml remains the sole production writer. Normal releases upload the exact candidate; the candidate is admitted to the current Cloudflare deployment at 0% while the previous version retains 100% ordinary traffic. Pre-promotion proof is exact-version, read-only/execution-free candidate proof plus browser proof; no unproved candidate receives ordinary traffic; it must not register, heartbeat, poll, or otherwise mutate shared Hybrid Durable Object state from a 0%-traffic version. After the exact candidate reaches 100%, canonical CI independently requires the full stateful R202/R237/R238 Hybrid live proof. A failed post-promotion proof can restore only an independently proved-usable previous baseline. A known-bad blocking baseline has no rollback authority. Cloudflare can reject a percentage split when Durable Object exports differ. The bounded R322 forward-recovery exception remains allowed only when the existing baseline is positively identified by R319.9 as the R211/R205/R216 application-withholding interlock and Cloudflare returns the exact export-set rejection; an unknown or merely unproved baseline does not qualify. Only after successful canonical production proof may ci.yml dispatch the next governed self-build cycle; red production or residual blocking stops continuation. R201/R203 remain deleted export tombstones. R125 remains CanonState admission authority; R147 dispatch, R146 durable history and R141 exact Hybrid return-proof authorities are unchanged.",
   "deploymentContractRevision": "R324"
 }
