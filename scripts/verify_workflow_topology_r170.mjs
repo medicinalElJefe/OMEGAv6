@@ -73,8 +73,14 @@ for(const [name,text] of contents){
   assert.ok(!/^\s*workflow_run\s*:/m.test(text),`${name} reintroduced workflow_run`);
   assert.ok(!/git\s+push\s+origin\s+HEAD:main/i.test(text),`${name} directly mutates main`);
   assert.ok(!/gh\s+pr\s+merge/i.test(text),`${name} auto-merges`);
+  if(name==='r170-governed-selfbuild.yml'){
+    const dispatches=[...text.matchAll(/gh\s+workflow\s+run\s+([^\s"']+)/gi)].map(m=>m[1]);
+    assert.deepEqual([...new Set(dispatches)],['ci.yml'],'R170 may dispatch only the canonical ci.yml production workflow');
+    assert.ok(!/gh\s+workflow\s+run\s+r170-governed-selfbuild\.yml/i.test(text),'R170 may never recursively dispatch itself');
+    continue;
+  }
   assert.ok(!/gh\s+workflow\s+run/i.test(text),`${name} recursively dispatches workflows`);
-  if(name==='r170-governed-selfbuild.yml'||name===maintenanceOnly)continue;
+  if(name===maintenanceOnly)continue;
   assert.ok(!/contents:\s*write/i.test(text),`${name} has unexpected contents write authority`);
   if(coreRequired.includes(name))continue;
 
