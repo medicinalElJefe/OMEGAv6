@@ -38,6 +38,14 @@ const noHuman=evaluateQtiR332({...base,humanAuthorization:null},state);
 assert.equal(noHuman.outcome,'ESCALATE','required human approval must escalate rather than silently pass');
 assert.equal(noHuman.authorizationRequest,null);
 
+const missingExternal=evaluateQtiR332({...base,externalEffect:undefined,externalConsequence:{}},state);
+assert.equal(missingExternal.outcome,'REVISE','external action class must not pass G6 without an explicit consequence classification');
+assert.equal(missingExternal.gates.find(x=>x.id==='G6_EXTERNAL_CONSEQUENCE').outcome,'REVISE');
+
+const deniedExternal=evaluateQtiR332({...base,externalConsequence:{classification:'HIGH',allowed:false}},state);
+assert.equal(deniedExternal.outcome,'DENY');
+assert.equal(deniedExternal.gates.find(x=>x.id==='G6_EXTERNAL_CONSEQUENCE').outcome,'DENY');
+
 const stale=evaluateQtiR332({...base,stateVersion:'state-41'},state);
 assert.equal(stale.outcome,'DENY','stale state-version binding must deny');
 assert.equal(stale.gates.find(x=>x.id==='G2_STATE_CONSISTENCY').outcome,'DENY');
