@@ -38,3 +38,18 @@ export function calibrationPropagationManifestR340(){
   propagationBoundary:'R340 carries the v4 numerical round-trip, ablation diagnostics, physicality retention, and frozen prospective forecast through relevant read-only OMEGA evidence surfaces. It preserves R334/R335 history, does not overwrite reported experiment evidence, does not convert forecast output into observation, does not retune after future inspection, and creates no execution or CanonState authority.'
  });
 }
+
+
+export const R340_PROPAGATION_RECEIPT=Object.freeze({
+ revision:'R340',
+ stage:'R314-B06',
+ state:'V4_FORECAST_EXTENSION_BOUND',
+ calibrationRelease:R340_RELEASE_ID,
+ sourceHashes:Object.freeze(Object.fromEntries(R340_SOURCE_MANIFEST.map(x=>[x.id,x.sha256]))),
+ forecastFrozen:true,
+ noRetuning:true,
+ externalEmpiricalValidation:'PENDING',
+ canonicalMutation:false,
+ canonicalAdmission:false,
+ canonicalAdmissionAuthority:'R125'
+});
