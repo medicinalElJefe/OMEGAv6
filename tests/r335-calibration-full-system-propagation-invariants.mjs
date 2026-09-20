@@ -58,7 +58,7 @@ const modes=read('src/modeRealizationRegistryR280.ts');
 for(const token of ["calibrationManifestR334","calibrationContext:{...calibrationManifestR334(),propagationRevision:'R335'","'OVERALL CANON MODE'","'Dewey Calculus Mode'","src/system/calibrationR334.js"])assert.ok(modes.includes(token),'mode propagation missing '+token);
 
 const fusion=read('src/allModesTruthFusionR151.ts');
-for(const token of ["calibrationPropagationManifestR335","calibrationContext:calibrationPropagationManifestR335()","ZERO independent empirical voting weight"])assert.ok(fusion.includes(token),'all-mode calibration propagation missing '+token);
+for(const token of ["calibrationPropagationManifestR335","calibrationContext:calibrationPropagationManifestR335()","zero independent empirical voting weight"])assert.ok(fusion.includes(token),'all-mode calibration propagation missing '+token);
 
 const truthEnvelope=read('src/universalTruthEnvelopeR152.ts');
 for(const token of ["calibrationPropagationManifestR335","calibrationContext:calibrationPropagationManifestR335()","cannot promote reconstructed or derived quantities into empirical evidence"])assert.ok(truthEnvelope.includes(token),'truth-envelope calibration propagation missing '+token);
