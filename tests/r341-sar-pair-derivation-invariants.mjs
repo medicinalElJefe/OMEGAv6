@@ -40,6 +40,10 @@ for(const token of[
  'raster={native?.nativeDataBound?displayRaster:undefined}'
 ])assert.ok(live.includes(token),`R341 live workstation missing ${token}`);
 
+assert.ok(live.includes("masterPolarization=/^(vv|vh|hh|hv)$/i"),'R341 must bind the master measurement polarization from the exact selected asset');
+assert.ok(live.includes("referenceAssets.filter(a=>String(a.key).toUpperCase()===masterPolarization)"),'R341 reference decode must use the exact same polarization channel as the master');
+assert.ok(live.includes('COMMON_POLARIZATION_ASSET_REQUIRED'),'R341 must fail closed when the reference product has no matching polarization asset');
+assert.ok(live.includes("&&pairAssetCompatible?deriveSarPairFieldsR341"),'R341 must not derive pair physics across mismatched polarization assets');
 assert.ok(live.includes("coRegistrationBound:true"),'R341 live observation must declare co-registration only after the exact-grid gate passes');
 assert.ok(live.includes("timeStackCount:2"),'R341 two-epoch temporal field must carry explicit epoch count');
 assert.ok(live.includes("deformation remains held"),'R341 UI must not promote wrapped pair phase into deformation');
