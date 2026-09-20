@@ -38,7 +38,7 @@ export function rasterCoverageR283(r:SarRasterFieldR283,view:string){
   view==='MULTI_BAND'?'multiBandRelative':
   view==='SCAR_UNCERTAINTY'?(r.uncertainty?.length?'uncertainty':'scarBurden'):
   view==='PROOF'?(r.quality?.length?'quality':'proofCoverage'):'amplitudeDb';
- const a=(r as any)[key] as number[]|undefined,mask=key==='nativeIntensity'?r.validMask:undefined,actual=a?.length?(mask?mask.filter((x,i)=>x>0&&Number.isFinite(a[i])).length:a.filter(Number.isFinite).length):0;
+ const a=(r as any)[key] as number[]|undefined,mask=r.validMask?.length===r.width*r.height?r.validMask:undefined,actual=a?.length?(mask?mask.filter((x,i)=>x>0&&Number.isFinite(a[i])).length:a.filter(Number.isFinite).length):0;
  return{field:key,bound:actual>0,expected:r.width*r.height,actual,complete:actual===r.width*r.height}
 }
 export function rasterTruthBoundaryR283(){return'R283/R336 raster rendering reads declared measurement arrays plus R336 evidence diagnostics. SOURCE reads exact decoded native samples. AMPLITUDE may display those same native DN samples as an explicitly uncalibrated native-intensity lens until a separately authoritative amplitudeDb field is bound. SCAR/PROOF may display exact validity/evidence coverage diagnostics. Missing arrays/pixels remain missing and never become claimed source evidence; no native DN is promoted into calibrated sigma0/gamma0, phase, coherence, deformation, elevation, polarimetry, multi-band, or time-stack measurements. R341 pair fields, when present, remain separately typed and never overwrite source phase.'}
