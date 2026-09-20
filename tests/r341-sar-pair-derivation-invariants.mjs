@@ -18,7 +18,7 @@ for(const token of[
  'gamma=|sum(s1*conj(s2))|/sqrt(sum(|s1|^2)*sum(|s2|^2))',
  'SAR_TIME_CHANGE_OPERATOR_R341',
  'Math.log(sa/ma)',
- 'It does not claim Sentinel-1 TOPS subpixel co-registration'
+ 'Exact sampled-grid identity is not Sentinel-1 TOPS subpixel co-registration'
 ])assert.ok(pair.includes(token),`R341 pair runtime missing ${token}`);
 
 assert.ok(pair.includes('const re=mi*si+mq*sq,im=mq*si-mi*sq'),'R341 interferogram must implement master * conj(slave)');
