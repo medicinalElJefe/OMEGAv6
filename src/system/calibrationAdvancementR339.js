@@ -121,6 +121,8 @@ export const R339_FORECAST_CONTRACT=Object.freeze({
  truthBoundary:'The forecast is a frozen prospective contract for the restricted common-state model. It is not a guaranteed future measured central value and the approximate negativity interval is not an official experimental combined interval.'
 });
 
+export const R339_FORECAST_CONTRACT_SHA256='9325ace1a4a51c2dd33a9b9a4216f2f614241d5b34e000bcb03943c43f0a2354';
+
 export const R339_CONTINUANCE=Object.freeze({
  state:'PROMOTED_AS_NEXT_INTERNAL_PARENT',
  internalParent:'V4_FROZEN_STATE_PLUS_FORECAST_CONTRACT',
@@ -142,8 +144,9 @@ export function ablationJointReductionR339(areaProxy){
  return finite(a)&&a>0?((a-j)/a)*100:null;
 }
 export function evaluateFrozenForecastR339(input={}){
- const contractId=String(input.contractId||''),basis=String(input.basis||'');
+ const contractId=String(input.contractId||''),contractSha256=String(input.contractSha256||''),basis=String(input.basis||'');
  if(contractId!==R339_FORECAST_CONTRACT.id)return{state:'HELD',reason:'FROZEN_CONTRACT_ID_REQUIRED',canonicalMutation:false};
+ if(contractSha256!==R339_FORECAST_CONTRACT_SHA256)return{state:'HELD',reason:'FROZEN_CONTRACT_SHA256_REQUIRED',canonicalMutation:false};
  if(basis!==R339_FORECAST_CONTRACT.basis)return{state:'HELD',reason:'COMMON_STATE_BASIS_REQUIRED',canonicalMutation:false};
  if(input.assumptionsPreserved!==true)return{state:'HELD',reason:'ASSUMPTIONS_AND_COVARIANCE_PROVENANCE_REQUIRED',canonicalMutation:false};
  const fL=Number(input.fL),cParallel=Number(input.cParallel),c=input.covariance;
@@ -163,6 +166,7 @@ export function evaluateFrozenForecastR339(input={}){
   threshold:R339_FORECAST_CONTRACT.compatibilityThresholdD2,
   basis:R339_FORECAST_CONTRACT.basis,
   contractId:R339_FORECAST_CONTRACT.id,
+  contractSha256:R339_FORECAST_CONTRACT_SHA256,
   noRetuning:true,
   inputClass:'OPERATOR_SUPPLIED_COMPATIBILITY_TEST',
   futureObservationAuthority:false,
@@ -197,6 +201,7 @@ export const R339_PROPAGATION_RECEIPT=Object.freeze({
  repositoryNormalizedHashes:Object.freeze(Object.fromEntries(R339_SOURCE_MANIFEST.map(x=>[x.id,x.repositoryNormalizedSha256]))),
  consumers:R339_CALIBRATION_CONSUMERS.map(x=>x.id),
  forecastContract:R339_FORECAST_CONTRACT.id,
+ forecastContractSha256:R339_FORECAST_CONTRACT_SHA256,
  noRetuning:R339_FORECAST_CONTRACT.noRetuning,
  exactR334Prefix:true,
  sourceExactPreserved:true,
@@ -221,6 +226,7 @@ export function calibrationAdvancementManifestR339(){
   physicalityNegativeControl:R339_PHYSICALITY_NEGATIVE_CONTROL,
   smBaseline:R339_SM_BASELINE,
   forecast:R339_FORECAST_CONTRACT,
+  forecastContractSha256:R339_FORECAST_CONTRACT_SHA256,
   continuance:R339_CONTINUANCE,
   consumers:R339_CALIBRATION_CONSUMERS,
   propagationReceipt:R339_PROPAGATION_RECEIPT,
@@ -242,6 +248,7 @@ export function calibratedRelativityR339(){
   physicalityNegativeControl:R339_PHYSICALITY_NEGATIVE_CONTROL,
   smBaseline:R339_SM_BASELINE,
   forecast:R339_FORECAST_CONTRACT,
+  forecastContractSha256:R339_FORECAST_CONTRACT_SHA256,
   continuance:R339_CONTINUANCE,
   transforms:Object.freeze({cmsToAtlas:cmsToAtlasR334,atlasToCms:atlasToCmsR334}),
   canonicalMutation:false,
