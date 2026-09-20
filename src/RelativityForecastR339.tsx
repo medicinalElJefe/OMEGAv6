@@ -1,7 +1,7 @@
 import {useMemo,useState} from 'react';
 import {ShieldCheck} from 'lucide-react';
 import {
- R339_RELEASE_ID,R339_FORECAST_CONTRACT,R339_ABLATION,R339_PHYSICALITY_NEGATIVE_CONTROL,R339_SM_BASELINE,
+ R339_RELEASE_ID,R339_FORECAST_CONTRACT,R339_FORECAST_CONTRACT_SHA256,R339_ABLATION,R339_PHYSICALITY_NEGATIVE_CONTROL,R339_SM_BASELINE,
  evaluateFrozenForecastR339
 } from './system/calibrationAdvancementR339.js';
 
@@ -16,7 +16,7 @@ export default function RelativityForecastR339(){
  const evaluation=useMemo(()=>{
   const sf=num(sigmaFL),sc=num(sigmaCParallel),r=num(rho),cov=[[sf*sf,r*sf*sc],[r*sf*sc,sc*sc]];
   return evaluateFrozenForecastR339({
-   contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,
+   contractId:R339_FORECAST_CONTRACT.id,contractSha256:R339_FORECAST_CONTRACT_SHA256,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,
    fL:num(fL),cParallel:num(cParallel),covariance:cov
   });
  },[fL,cParallel,sigmaFL,sigmaCParallel,rho]);
@@ -29,6 +29,7 @@ export default function RelativityForecastR339(){
    <article><span>95% MODEL</span><b>fL interval</b><strong>{n(R339_FORECAST_CONTRACT.state95.fL[0],3)} → {n(R339_FORECAST_CONTRACT.state95.fL[1],3)}</strong></article>
    <article><span>95% MODEL</span><b>C∥ interval</b><strong>{n(R339_FORECAST_CONTRACT.state95.cParallel[0],3)} → {n(R339_FORECAST_CONTRACT.state95.cParallel[1],3)}</strong></article>
    <article><span>FORECAST GATE</span><b>D² threshold</b><strong>≤ {n(R339_FORECAST_CONTRACT.compatibilityThresholdD2,6)}</strong></article>
+   <article><span>CONTRACT HASH</span><b>SHA-256</b><strong>{R339_FORECAST_CONTRACT_SHA256.slice(0,12)}…</strong></article>
    <article><span>NEGATIVITY</span><b>median approx</b><strong>{n(R339_FORECAST_CONTRACT.negativity.medianApprox,6)}</strong></article>
    <article><span>ABLATION</span><b>CMS fL removal</b><strong>+{n(variants.REMOVE_CMS_FL.areaInflationVsJointPct,3)}% area</strong></article>
    <article><span>ABLATION</span><b>ATLAS C21 removal</b><strong>+{n(variants.REMOVE_ATLAS_C21.areaInflationVsJointPct,3)}% area</strong></article>
