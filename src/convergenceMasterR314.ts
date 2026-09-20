@@ -1,5 +1,6 @@
 import {R332_B12_PROGRESS_RECEIPT} from './system/qtiControlR332.js';
 import {R334_B06_PROGRESS_RECEIPT} from './system/proofGovernedRelationalRuntimeR334.js';
+import {R335_B07_PROGRESS_RECEIPT} from './system/calibrationPropagationR335.js';
 import {OMEGA_CAPABILITY_AUTHORITY,capabilityReality,type CapabilityReality} from './capabilityAuthority';
 import {ARCHIVE_GENOME_ALL_ROWS_R288,archiveGenomeAllSummaryR288} from './archiveGenomeLedgerR288b';
 import {R328_SOURCE_CANON_RECEIPT} from './system/sourceExactCanonR328';
@@ -127,10 +128,11 @@ export function buildConvergenceMasterR314(){
    'CONFLICT_VARIANTS_ARE_PRESERVED_UNTIL_EXPLICIT_PROOF_RESOLVES_THEM',
    'RELATIONAL_TRANSITIONS_REQUIRE_PROVENANCE_SCAR_AND_QTI_PROOF_BEFORE_FORECAST_OR_NEXT_PARENT',
    'FORECAST_IS_A_PROSPECTIVE_STATE_PROPOSAL_NOT_EXECUTION_OR_CANON_ADMISSION',
+   'CALIBRATED_EXTERNAL_CONTEXT_PROPAGATES_READ_ONLY_ACROSS_SYSTEM_SYNTHESIS',
   ],
   archiveSummary:archiveGenomeAllSummaryR288(),
   sourceExactCanon:{revision:'R328',...R328_SOURCE_CANON_RECEIPT,semanticSource:true,implementationCanonSeparate:true,canonicalAdmission:false},
-  promotionReceipts:[R334_B06_PROGRESS_RECEIPT,R332_B12_PROGRESS_RECEIPT,R329_B05_PROMOTION_RECEIPT],
+  promotionReceipts:[R335_B07_PROGRESS_RECEIPT,R334_B06_PROGRESS_RECEIPT,R332_B12_PROGRESS_RECEIPT,R329_B05_PROMOTION_RECEIPT],
   residual:convergenceResidualR314(),
   charts:{current,incomplete,build},
  };
