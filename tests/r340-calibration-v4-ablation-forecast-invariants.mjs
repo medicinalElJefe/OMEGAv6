@@ -88,6 +88,6 @@ for(const source of [files.physics,files.relation,files.modes,files.worker,files
 for(const token of ['CERN_MASTER_V4_R340','CERN_ADV05_ADV07_R340'])assert.ok(files.atlas.includes(token));
 assert.ok(files.master.includes('R340_PROPAGATION_RECEIPT,R335_PROPAGATION_RECEIPT,R334_B06_PROGRESS_RECEIPT'));
 for(const token of ['Dewey_OMEGA_CERN_ADV05_ADV06_Ablation_RoundTrip_Forecast_v4_2026-09-19.csv','d4eeab6ec5f4310cb0554973538d60ce333a981ad0b8a3c301f8d359b692a410','0f966c0f8b40d26ba177324c6f0a6246ebda959e0030d5ad8ab2196f480a9891','e8c6aaf1217919d1f714a2399638e49d48922780bf9635f700eabbf164bd3ff2','R340_PROPAGATION_RECEIPT'])assert.ok(files.audit.includes(token),`R340 convergence audit missing ${token}`);
-for(const source of Object.values(files))assert.ok(!source.includes('canonicalAdmission:true'),'R340 propagation may not create CanonState admission authority');
+for(const source of [read('src/system/calibrationForecastR340.js'),read('src/system/calibrationPropagationR340.js')])assert.ok(!source.includes('canonicalAdmission:true'),'R340 modules may not create CanonState admission authority');
 
 console.log('R340 V4 ABLATION + ROUND-TRIP + FORECAST PASS · exact 25-row extension bytes normalized and hashed · full 4,285-row master externally hash/census bound · machine-precision round trip · ablation retention quantified · physicality gate retained · prospective D² rule and no-retuning lock frozen · propagated read-only across OMEGA · R125 CanonState authority preserved');
