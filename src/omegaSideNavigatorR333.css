@@ -179,6 +179,16 @@
  font-size:9px!important;
  color:#69807b!important;
 }
+.r333-clean-nav[data-technical='false'] .r89-flat-route>span>em{
+ white-space:nowrap!important;
+ overflow:hidden!important;
+ text-overflow:ellipsis!important;
+}
+.r333-clean-nav[data-technical='true'] .r89-flat-route>span>em{
+ white-space:normal!important;
+ overflow:visible!important;
+ text-overflow:clip!important;
+}
 .r333-clean-nav .r88-navigator-foot{
  flex:0 0 auto;
  padding-top:7px;
