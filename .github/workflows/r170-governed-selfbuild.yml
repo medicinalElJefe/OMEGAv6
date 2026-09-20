@@ -85,7 +85,24 @@ jobs:
         id: select
         shell: bash
         run: |
-          node scripts/r170-selfbuild-engine.mjs | tee /tmp/r170-proposal.json
+          set -o pipefail
+          node scripts/r170-selfbuild-engine.mjs | tee /tmp/r170-engine-output.log
+          node <<'NODE'
+          const fs=require('fs');
+          const raw=fs.readFileSync('/tmp/r170-engine-output.log','utf8');
+          const starts=[];
+          if(raw.startsWith('{'))starts.push(0);
+          for(let i=0;i<raw.length-1;i++)if(raw[i]==='\n'&&raw[i+1]==='{')starts.push(i+1);
+          const end=raw.lastIndexOf('}');
+          let parsed=null;
+          for(let i=starts.length-1;i>=0&&!parsed;i--){
+            if(end<starts[i])continue;
+            try{parsed=JSON.parse(raw.slice(starts[i],end+1))}catch{}
+          }
+          if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw new Error('R170 selector emitted no parseable final top-level JSON proposal');
+          fs.writeFileSync('/tmp/r170-proposal.json',JSON.stringify(parsed,null,2)+'\n');
+          NODE
+          cat /tmp/r170-proposal.json
           STATUS=$(node -e "const x=require('/tmp/r170-proposal.json');process.stdout.write(x.status||'UNKNOWN')")
           CAPSULE=$(node -e "const x=require('/tmp/r170-proposal.json');process.stdout.write(x.capsuleId||'')")
           GENERATION=$(node -e "const x=require('/tmp/r170-proposal.json');process.stdout.write(String(x.generation||0))")
