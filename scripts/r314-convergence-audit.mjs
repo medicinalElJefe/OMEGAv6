@@ -96,6 +96,7 @@ export function auditR314(root=process.cwd()){
   if(data.present&&data.records!==data.expectedRecords)residuals.push({id:`${id}-CENSUS`,severity:'CRITICAL',mode:'BLOCK',summary:`R340 v4 dataset records ${data.records} != ${data.expectedRecords}`,source:data.path});
  }
   if(!masterSource.includes('R334_B06_PROGRESS_RECEIPT')||!masterSource.includes('RELATIONAL_TRANSITIONS_REQUIRE_PROVENANCE_SCAR_AND_QTI_PROOF_BEFORE_FORECAST_OR_NEXT_PARENT'))residuals.push({id:'R334-CONVERGENCE-BINDING',severity:'CRITICAL',mode:'BLOCK',summary:'R314 convergence master does not preserve the proof-governed R334 relational/calibration binding',source:'src/convergenceMasterR314.ts'});
+ if(!masterSource.includes('R340_PROPAGATION_RECEIPT'))residuals.push({id:'R340-CONVERGENCE-BINDING',severity:'CRITICAL',mode:'BLOCK',summary:'R314 convergence master does not preserve the R340 frozen forecast propagation receipt',source:'src/convergenceMasterR314.ts'});
 
  const vector=residualVectorR314({state:residuals.some(row=>row.mode==='BLOCK')?'HOLD':residuals.length?'TURN':'STAY',residuals});
  return {
