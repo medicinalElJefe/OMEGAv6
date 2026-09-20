@@ -65,8 +65,12 @@ for(const token of [
 ])assert.ok(relational.includes(token),'R339 relational runtime missing '+token);
 
 const worker=read('src/workerR116.js');
-assert.ok(worker.includes("calibrationAdvancementManifestR339"));
-assert.ok(worker.includes('calibrationAdvancement:calibrationAdvancementManifestR339()'));
+for(const token of [
+ "calibrationAdvancementManifestR339","evaluateFrozenForecastR339",
+ 'calibrationAdvancement:calibrationAdvancementManifestR339()',
+ "path==='/api/system/calibration/r339'","path==='/api/system/calibration/r339/evaluate'",
+ "x-omega-forecast-contract","cannot retune the contract"
+])assert.ok(worker.includes(token),'R339 worker/API integration missing '+token);
 
 const relativityLab=read('src/RelativityLab.tsx'),forecast=read('src/ForecastSovereignPanel.tsx'),surface=read('src/RelativityForecastR339.tsx');
 assert.ok(relativityLab.includes("import RelativityForecastR339")&&relativityLab.includes('<RelativityForecastR339/>'),'Relativity surface must expose R339');
