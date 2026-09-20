@@ -49,6 +49,7 @@ const hybridEntry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid
 await hybridEntry.waitFor({state:'visible'});await hybridEntry.click();
 const intelligence=page.locator('[data-r238-host-intelligence]');
 await intelligence.waitFor({state:'visible'});
+await page.waitForFunction(()=>Number(document.querySelector('[data-r238-host-intelligence]')?.getAttribute('data-r238-snapshot-epoch')||0)>=1,{timeout:15000});
 const intelligenceState=String(await intelligence.getAttribute('data-r238-host-intelligence')||'');
 const text=await intelligence.innerText();
 for(const token of ['R238 · HYBRID HOST INTELLIGENCE','Use the machine you actually have.','RCWA PYTHON DEPENDENCY','LOCAL MACRO STORE','R141 exact-payload fingerprint'])if(!text.includes(token))throw new Error(`R238 live browser missing ${token}`);
