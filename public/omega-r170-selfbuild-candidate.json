@@ -9,29 +9,30 @@
   "generatorContract": "R245_SHARED_CANONICAL_GENERATOR",
   "residualPolicy": "OMEGA_R170_AUTONOMOUS_SOURCE_RESIDUAL_POLICY_V1",
   "capsule": {
-    "id": "SG003",
-    "title": "Residual read-only projection",
-    "objective": "Project R164 residual evidence into operator-facing categories while preserving observation versus mutation authority.",
-    "target": "src/generated/selfbuildR170/residualReadOnlyProjectionR170.ts",
-    "risk": "LOW",
+    "id": "SG005",
+    "title": "Current capability projection",
+    "objective": "Project admitted source capabilities by authority, liveness and proof class without promoting availability into execution or Canon truth.",
+    "target": "src/generated/selfbuildR170/currentCapabilityProjectionR170.ts",
+    "risk": "MEDIUM",
     "prerequisites": [
-      "SG001"
+      "SG003",
+      "SG004"
     ],
-    "expectedGain": 0.91,
-    "complexity": 0.3,
-    "contradictionRisk": 0.07,
+    "expectedGain": 0.93,
+    "complexity": 0.4,
+    "contradictionRisk": 0.1,
     "pressure": {
       "contradiction": 0,
       "burden": 0.08333333333333333,
       "residual": 0.42,
       "userValueDeficit": 0,
-      "bottleneck": 0.25,
+      "bottleneck": 0,
       "continuity": 0.8491666666666666,
       "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
       "userValueSignal": "NOT_INFERRED"
     }
   },
-  "score": 1.532882702702703,
+  "score": 0.7851190200000001,
   "frontier": {
     "schema": "OMEGA_RECURSIVE_SELFBUILD_FRONTIER_R240",
     "revision": "R240",
@@ -51,23 +52,24 @@
     "frontier": [
       {
         "rank": 1,
-        "id": "SG003",
-        "title": "Residual read-only projection",
-        "target": "src/generated/selfbuildR170/residualReadOnlyProjectionR170.ts",
-        "risk": "LOW",
-        "score": 1.532882702702703,
+        "id": "SG005",
+        "title": "Current capability projection",
+        "target": "src/generated/selfbuildR170/currentCapabilityProjectionR170.ts",
+        "risk": "MEDIUM",
+        "score": 0.7851190200000001,
         "pressure": {
           "contradiction": 0,
           "burden": 0.08333333333333333,
           "residual": 0.42,
           "userValueDeficit": 0,
-          "bottleneck": 0.25,
+          "bottleneck": 0,
           "continuity": 0.8491666666666666,
           "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
           "userValueSignal": "NOT_INFERRED"
         },
         "dependencies": [
-          "SG001"
+          "SG003",
+          "SG004"
         ]
       }
     ],
@@ -89,16 +91,16 @@
     },
     "activeCells": [
       {
-        "id": "SG003",
-        "address": "O00.B000.C02",
-        "score": 1.532882702702703,
+        "id": "SG005",
+        "address": "O00.B000.C04",
+        "score": 0.7851190200000001,
         "roleCount": 8,
         "state": "READY"
       }
     ],
     "packetCount": 8,
     "scarCount": 1,
-    "sourceMutationCandidateId": "SG003",
+    "sourceMutationCandidateId": "SG005",
     "parallelPlanning": true,
     "parallelEvaluation": true,
     "parallelSourceMutation": false,
@@ -156,8 +158,8 @@
       "RECONTEXTUALIZE",
       "ADAPT_NEXT_CONTEXT"
     ],
-    "sampleCount": 4,
-    "confidence": 0.3333333333333333,
+    "sampleCount": 5,
+    "confidence": 0.4166666666666667,
     "trend": 0,
     "calibrationDelta": 0,
     "adaptiveCoherence": 0.7875385244136062,
@@ -174,6 +176,7 @@
       "futurePreservation": 0.8151717068711635,
       "provenance": [
         "R265_CURRENT_STATE",
+        "RETURNED_PROOF",
         "RETURNED_PROOF",
         "RETURNED_PROOF",
         "RETURNED_PROOF",
@@ -204,12 +207,12 @@
   },
   "receipt": {
     "schema": "OMEGA_SELFBUILD_CANDIDATE_RECEIPT_R170",
-    "generation": 4,
-    "capsuleId": "SG003",
-    "target": "src/generated/selfbuildR170/residualReadOnlyProjectionR170.ts",
-    "startedAt": "2026-09-20T23:42:58.507Z",
-    "baseSha": "af625dda9fde0c9cfc0a7a148c6cfd0952de05d8",
-    "branch": "selfbuild/r170-g4-sg003-35545439216",
+    "generation": 5,
+    "capsuleId": "SG005",
+    "target": "src/generated/selfbuildR170/currentCapabilityProjectionR170.ts",
+    "startedAt": "2026-09-20T23:49:20.268Z",
+    "baseSha": "d7caa6ae51ea87e030178f694f9a80faa82a08af",
+    "branch": "selfbuild/r170-g5-sg005-35545744085",
     "candidateSha": null,
     "residualGate": "PASS",
     "residualEvidence": {
@@ -270,23 +273,24 @@
       "frontier": [
         {
           "rank": 1,
-          "id": "SG003",
-          "title": "Residual read-only projection",
-          "target": "src/generated/selfbuildR170/residualReadOnlyProjectionR170.ts",
-          "risk": "LOW",
-          "score": 1.532882702702703,
+          "id": "SG005",
+          "title": "Current capability projection",
+          "target": "src/generated/selfbuildR170/currentCapabilityProjectionR170.ts",
+          "risk": "MEDIUM",
+          "score": 0.7851190200000001,
           "pressure": {
             "contradiction": 0,
             "burden": 0.08333333333333333,
             "residual": 0.42,
             "userValueDeficit": 0,
-            "bottleneck": 0.25,
+            "bottleneck": 0,
             "continuity": 0.8491666666666666,
             "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
             "userValueSignal": "NOT_INFERRED"
           },
           "dependencies": [
-            "SG001"
+            "SG003",
+            "SG004"
           ]
         }
       ],
@@ -308,16 +312,16 @@
       },
       "activeCells": [
         {
-          "id": "SG003",
-          "address": "O00.B000.C02",
-          "score": 1.532882702702703,
+          "id": "SG005",
+          "address": "O00.B000.C04",
+          "score": 0.7851190200000001,
           "roleCount": 8,
           "state": "READY"
         }
       ],
       "packetCount": 8,
       "scarCount": 1,
-      "sourceMutationCandidateId": "SG003",
+      "sourceMutationCandidateId": "SG005",
       "parallelPlanning": true,
       "parallelEvaluation": true,
       "parallelSourceMutation": false,
@@ -375,8 +379,8 @@
         "RECONTEXTUALIZE",
         "ADAPT_NEXT_CONTEXT"
       ],
-      "sampleCount": 4,
-      "confidence": 0.3333333333333333,
+      "sampleCount": 5,
+      "confidence": 0.4166666666666667,
       "trend": 0,
       "calibrationDelta": 0,
       "adaptiveCoherence": 0.7875385244136062,
@@ -393,6 +397,7 @@
         "futurePreservation": 0.8151717068711635,
         "provenance": [
           "R265_CURRENT_STATE",
+          "RETURNED_PROOF",
           "RETURNED_PROOF",
           "RETURNED_PROOF",
           "RETURNED_PROOF",
@@ -459,8 +464,8 @@
       "R239 Hybrid resource governor remains separate and preserved.",
       "R125 remains sole CanonState admission authority."
     ],
-    "provedAt": "2026-09-20T23:43:38.020Z",
-    "productionRunId": "35545246831"
+    "provedAt": "2026-09-20T23:49:50.396Z",
+    "productionRunId": "35545549316"
   },
   "status": "PROVED_PENDING_PR"
 }
