@@ -1,0 +1,215 @@
+/* R333 — navigation cleanup.
+   Presentation-only successor to R289/R311. Keeps all 44 routes, 12 recovered menus,
+   six workspaces, R242 identity, R143 operation-chain bindings, and all existing authority boundaries. */
+
+.r333-clean-nav .r94-nav-panel.r88-navigator{
+ display:flex!important;
+ flex-direction:column!important;
+ min-height:0;
+}
+.r333-clean-nav .r100-navigator-head{
+ flex:0 0 auto;
+ min-height:70px!important;
+ padding-bottom:9px!important;
+}
+.r333-clean-nav .r100-navigator-head>div:first-child{gap:2px}
+.r333-clean-nav .r100-navigator-head>div:first-child>b{font-size:16px!important}
+.r333-clean-nav .r100-navigator-head>div:first-child>small{
+ max-width:44ch;
+ white-space:nowrap;
+ overflow:hidden;
+ text-overflow:ellipsis;
+}
+.r333-clean-nav .r100-nav-mode{
+ flex:0 0 auto;
+ padding-top:5px!important;
+ padding-bottom:5px!important;
+}
+.r333-clean-nav .r100-active-route{
+ flex:0 0 auto;
+ margin-top:4px;
+ padding:7px 9px;
+}
+.r333-clean-nav .r100-active-route small{
+ white-space:nowrap;
+ overflow:hidden;
+ text-overflow:ellipsis;
+}
+.r333-clean-nav .r111-output-ribbon{flex:0 0 auto}
+
+.r333-clean-nav .r333-search{
+ flex:0 0 auto;
+ order:0;
+ margin:7px 10px 6px!important;
+ min-height:42px!important;
+ background:rgba(4,13,17,.96)!important;
+}
+.r333-clean-nav .r333-filter-stack{
+ flex:0 0 auto;
+ margin:0 10px 6px;
+ padding:6px;
+ display:grid;
+ gap:5px;
+ border:1px solid rgba(126,185,177,.11);
+ border-radius:11px;
+ background:rgba(4,12,15,.62);
+ box-shadow:inset 0 1px rgba(255,255,255,.012);
+ min-width:0;
+}
+.r333-clean-nav .r333-filter-row{
+ min-width:0;
+ display:grid;
+ grid-template-columns:58px minmax(0,1fr);
+ gap:6px;
+ align-items:center;
+}
+.r333-clean-nav .r333-filter-label{
+ min-width:0;
+ display:grid;
+ gap:2px;
+ align-content:center;
+ padding-left:4px;
+}
+.r333-clean-nav .r333-filter-label b{
+ color:#9dcac2;
+ font:850 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+ letter-spacing:.10em;
+}
+.r333-clean-nav .r333-filter-label small{
+ color:#5f7772;
+ font:650 7px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.r333-clean-nav .r289-master-menu-filter{
+ min-width:0;
+ padding:0!important;
+ gap:5px!important;
+ border:0!important;
+ background:transparent;
+ z-index:auto;
+}
+.r333-clean-nav .r289-master-menu-filter>button{
+ min-height:40px;
+ padding:7px 9px;
+ border-radius:8px;
+ font-size:10px;
+}
+.r333-clean-nav .r105-workspace-filter{
+ min-width:0;
+ display:flex!important;
+ flex-wrap:nowrap!important;
+ overflow-x:auto!important;
+ overflow-y:hidden!important;
+ gap:5px!important;
+ padding:0!important;
+ border:0!important;
+ scrollbar-width:thin;
+ overscroll-behavior-inline:contain;
+}
+.r333-clean-nav .r105-workspace-filter button{
+ flex:0 0 auto!important;
+ min-height:40px!important;
+ padding:7px 9px!important;
+ border-radius:8px!important;
+ font-size:10px!important;
+ white-space:nowrap!important;
+}
+.r333-clean-nav .r333-filter-summary{
+ margin:0!important;
+ min-height:28px!important;
+ padding:5px 7px!important;
+ grid-template-columns:auto minmax(0,1fr)!important;
+ border:0!important;
+ border-top:1px solid rgba(126,185,177,.08)!important;
+ border-radius:0!important;
+ background:transparent!important;
+}
+.r333-clean-nav .r333-filter-summary span{
+ color:#617c76;
+ font-size:7px;
+}
+.r333-clean-nav .r333-filter-summary b{
+ color:#8aa29d;
+ font-size:9px!important;
+ font-weight:700;
+ white-space:nowrap!important;
+ overflow:hidden!important;
+ text-overflow:ellipsis!important;
+}
+.r333-clean-nav .r210-nav-status{
+ flex:0 0 auto;
+ margin:0 11px 5px;
+ font-size:8px!important;
+ letter-spacing:.04em!important;
+ text-transform:none;
+}
+.r333-clean-nav .r89-flat-scroll,
+.r333-clean-nav .r104-route-scroll{
+ flex:1 1 auto;
+ min-height:0!important;
+ padding-top:0;
+}
+.r333-clean-nav .r239-route-group{
+ top:0;
+ margin:5px 4px 3px;
+ padding:5px 7px;
+ gap:7px;
+}
+.r333-clean-nav .r239-route-group small{font-size:8.5px!important}
+.r333-clean-nav .r89-flat-route{
+ min-height:52px!important;
+ margin:1px 4px!important;
+ width:calc(100% - 8px)!important;
+ padding-top:7px!important;
+ padding-bottom:7px!important;
+}
+.r333-clean-nav .r89-flat-route>span{
+ gap:3px;
+}
+.r333-clean-nav .r89-flat-route>span>b{
+ font-size:13px!important;
+}
+.r333-clean-nav .r132-route-meta{
+ font-size:9px!important;
+ white-space:nowrap!important;
+ overflow:hidden!important;
+ text-overflow:ellipsis!important;
+}
+.r333-clean-nav .r89-flat-route>span>em{
+ margin-top:1px!important;
+ font-size:9px!important;
+ color:#69807b!important;
+}
+.r333-clean-nav .r88-navigator-foot{
+ flex:0 0 auto;
+ padding-top:7px;
+ padding-bottom:7px;
+}
+.r333-clean-nav .r88-software-layer{
+ flex:1 1 auto;
+ min-height:0;
+ grid-row:auto;
+}
+
+@media(any-pointer:coarse){
+ .r333-clean-nav .r289-master-menu-filter>button,
+ .r333-clean-nav .r105-workspace-filter>button{min-height:44px!important}
+ .r333-clean-nav .r89-flat-route{min-height:58px!important}
+}
+@media(max-width:900px){
+ .r333-clean-nav .r100-navigator-head{min-height:58px!important}
+ .r333-clean-nav .r333-search{margin-inline:8px!important}
+ .r333-clean-nav .r333-filter-stack{margin-inline:8px;padding:5px}
+ .r333-clean-nav .r333-filter-row{grid-template-columns:50px minmax(0,1fr);gap:5px}
+ .r333-clean-nav .r333-filter-label small{display:none}
+ .r333-clean-nav .r289-master-menu-filter>button,
+ .r333-clean-nav .r105-workspace-filter button{font-size:10px!important}
+ .r333-clean-nav .r210-nav-status{margin-inline:9px}
+ .r333-clean-nav .r239-route-group{position:static}
+ .r333-clean-nav .r89-flat-route{margin-inline:3px!important;width:calc(100% - 6px)!important}
+}
+@media(max-width:520px){
+ .r333-clean-nav .r333-filter-row{grid-template-columns:42px minmax(0,1fr)}
+ .r333-clean-nav .r333-filter-label b{font-size:7px}
+ .r333-clean-nav .r333-filter-summary{display:none!important}
+ .r333-clean-nav .r210-nav-status{font-size:7.5px!important}
+}
