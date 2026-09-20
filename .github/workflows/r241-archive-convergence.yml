@@ -103,6 +103,12 @@ jobs:
       - name: Prove R335 calibrated data full-system propagation and autonomy handoff
         run: npm run test:r335
 
+      - name: Prove R338 dedicated governed self-build proposal transport
+        run: npm run test:r338
+
+      - name: Prove R339 ablation round-trip and frozen forecast propagation
+        run: npm run test:r339
+
       - name: Run complete application check and production build
         run: npm run check
 
