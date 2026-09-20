@@ -121,7 +121,7 @@ export const R339_FORECAST_CONTRACT=Object.freeze({
  truthBoundary:'The forecast is a frozen prospective contract for the restricted common-state model. It is not a guaranteed future measured central value and the approximate negativity interval is not an official experimental combined interval.'
 });
 
-export const R339_FORECAST_CONTRACT_SHA256='9325ace1a4a51c2dd33a9b9a4216f2f614241d5b34e000bcb03943c43f0a2354';
+export const R339_FORECAST_CONTRACT_SHA256='4022c839c0e3d001be7e707c2acef85ee850cd2d434a0b26809823cc5a24d2e8';
 
 export const R339_CONTINUANCE=Object.freeze({
  state:'PROMOTED_AS_NEXT_INTERNAL_PARENT',
