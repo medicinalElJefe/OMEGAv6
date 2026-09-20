@@ -27,7 +27,8 @@ assert.ok(!native.includes('amplitudeDb:values'),'uncalibrated DN must never be 
 
 for(const token of ['nativeIntensity?:number[]','validMask?:number[]','sourceUnits?:string','timeStackRelative?:number[]'])assert.ok(raster.includes(token),`R326 raster contract missing ${token}`);
 assert.ok(raster.includes("if(view==='SOURCE'){v=at(r.nativeIntensity,i,r.validMask)"),'SOURCE lens must read exact native samples when present');
-assert.ok(raster.includes("if(view==='AMPLITUDE'){v=at(r.amplitudeDb,i)"),'AMPLITUDE must remain independently calibrated-array bound');
+assert.ok(raster.includes("if(view==='AMPLITUDE'){v=at(r.amplitudeDb,i)"),'AMPLITUDE must prefer independently calibrated amplitudeDb when present');
+assert.ok(raster.includes("v=at(r.nativeIntensity,i,r.validMask)"),'R336 may render exact native intensity in the AMPLITUDE lens only as an explicitly uncalibrated native-DN fallback');
 assert.ok(raster.includes("if(view==='TIME_STACK'){v=at(r.timeStackRelative,i)"),'TIME_STACK must not reuse a single-scene amplitude raster');
 
 for(const token of ["'/api/earth/sar/native-raster'","native?.nativeDataBound?'NATIVE SOURCE BOUND'","raster={native?.nativeDataBound?native.raster:undefined}",'Decode native raster','NATIVE PIXELS {native?.nativeDataBound?\'BOUND\':\'UNBOUND\'}'])assert.ok(live.includes(token),`R326 live surface missing ${token}`);
@@ -38,4 +39,4 @@ assert.ok(plan.includes("has(raster?.nativeIntensity)||has(raster?.amplitudeDb)"
 assert.ok(plan.includes("timeStackRelative"),'time-stack planner must require its own materialized array');
 assert.ok(worker.includes("import {sarNativeRasterR326} from './sarNativeRasterR326.js'")&&worker.includes("url.pathname==='/api/earth/sar/native-raster'"),'canonical Earth worker must own R326 ingress route');
 
-console.log('R326 SAR NATIVE RASTER INGRESS PASS · bounded exact COG/TIFF decode · SOURCE native DN only · calibration/amplitude/phase/derived fields remain independently gated · no SLC approximation · canonical worker preserved');
+console.log('R326/R336 SAR NATIVE RASTER INGRESS PASS · bounded exact COG/TIFF decode · native DN may drive SOURCE and an explicitly uncalibrated AMPLITUDE display lens · calibrated backscatter/phase/derived physics remain independently gated · no SLC approximation · canonical worker preserved');
