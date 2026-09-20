@@ -143,8 +143,11 @@ export function evaluateFrozenForecastR339(input={}){
  if(input.assumptionsPreserved!==true)return{state:'HELD',reason:'ASSUMPTIONS_AND_COVARIANCE_PROVENANCE_REQUIRED',canonicalMutation:false};
  const fL=Number(input.fL),cParallel=Number(input.cParallel),c=input.covariance;
  if(!finite(fL)||!finite(cParallel)||!Array.isArray(c)||c.length!==2||!Array.isArray(c[0])||!Array.isArray(c[1]))return{state:'HELD',reason:'FINITE_2D_STATE_AND_COVARIANCE_REQUIRED',canonicalMutation:false};
+ if(!(fL>0&&fL<1&&Math.abs(cParallel)<=1))return{state:'HELD',reason:'RESTRICTED_PHYSICAL_DOMAIN_REQUIRED',canonicalMutation:false};
  const n00=Number(c[0][0]),n01=Number(c[0][1]),n10=Number(c[1][0]),n11=Number(c[1][1]);
  if(![n00,n01,n10,n11].every(Number.isFinite)||Math.abs(n01-n10)>1e-12)return{state:'HELD',reason:'SYMMETRIC_FINITE_COVARIANCE_REQUIRED',canonicalMutation:false};
+ const inputDet=n00*n11-n01*n10;
+ if(n00<0||n11<0||inputDet<-1e-12)return{state:'HELD',reason:'POSITIVE_SEMIDEFINITE_INPUT_COVARIANCE_REQUIRED',canonicalMutation:false};
  const ref=forecastReferenceCovarianceR339(),a=n00+ref[0][0],b=n01+ref[0][1],d=n11+ref[1][1],det=a*d-b*b;
  if(!(a>0&&d>0&&det>0))return{state:'HELD',reason:'POSITIVE_DEFINITE_COMBINED_COVARIANCE_REQUIRED',canonicalMutation:false};
  const dx=fL-R339_FORECAST_CONTRACT.stateCenter.fL,dy=cParallel-R339_FORECAST_CONTRACT.stateCenter.cParallel;
