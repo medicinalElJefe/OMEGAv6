@@ -87,42 +87,14 @@ const audit=read('scripts/r314-convergence-audit.mjs');
 for(const token of ['Dewey_OMEGA_CERN_Dewey_Relativity_Closure_v3_2026-09-19.csv','Dewey_OMEGA_CERN_ADV02_ADV04_Quantitative_Bridge_2026-09-19.csv','R334 calibrated dataset SHA mismatch','R334 calibrated dataset records'])assert.ok(audit.includes(token),'convergence audit missing '+token);
 
 const workflow=read('.github/workflows/r170-governed-selfbuild.yml');
-assert.ok(workflow.includes('tee /tmp/r170-engine-output.log'),'R170 must preserve raw selector stdout for diagnosis');
+assert.ok(workflow.includes('OMEGA_R170_PROPOSAL_PATH=/tmp/r170-proposal.json node scripts/r170-selfbuild-engine.mjs | tee /tmp/r170-engine-output.log'),'R170 must separate the atomic proposal file from diagnostic stdout');
 assert.ok(workflow.includes("fs.writeFileSync('/tmp/r170-proposal.json',JSON.stringify(parsed,null,2)+'\\n')"),'R170 must materialize a clean parsed proposal');
 assert.ok(workflow.includes("R170 selector emitted no parseable final top-level JSON proposal"),'R170 must fail closed if no proposal JSON exists');
 assert.ok(!workflow.includes('tee /tmp/r170-proposal.json'),'raw mixed stdout must never again be treated directly as proposal JSON');
 
-function extractFinalTopLevelJson(raw){
- let parsed=null,start=-1,depth=0,inString=false,escaped=false;
- for(let i=0;i<raw.length;i++){
-  const ch=raw[i];
-  if(start<0){
-   if(ch==='{'&&(i===0||raw[i-1]==='\n')){start=i;depth=1;inString=false;escaped=false}
-   continue;
-  }
-  if(inString){
-   if(escaped)escaped=false;
-   else if(ch==='\\\\')escaped=true;
-   else if(ch==='"')inString=false;
-   continue;
-  }
-  if(ch==='"'){inString=true;continue}
-  if(ch==='{'){depth++;continue}
-  if(ch!=='}')continue;
-  depth--;
-  if(depth!==0)continue;
-  try{
-   const candidate=JSON.parse(raw.slice(start,i+1));
-   if(candidate&&typeof candidate==='object'&&!Array.isArray(candidate)&&typeof candidate.status==='string')parsed=candidate;
-  }catch{}
-  start=-1;
- }
- if(!parsed)throw new Error('no proposal');
- return parsed;
-}
-const contaminated='diagnostic line\n'+JSON.stringify({state:'RESIDUALS_PRESENT'})+'\nextra diagnostic\n'+JSON.stringify({status:'PROPOSE',capsuleId:'SG005',generation:9,nested:{text:'brace } in string'}},null,2)+'\n'+JSON.stringify({diagnostic:true})+'\n';
-assert.deepEqual(extractFinalTopLevelJson(contaminated),{status:'PROPOSE',capsuleId:'SG005',generation:9,nested:{text:'brace } in string'}});
-assert.throws(()=>extractFinalTopLevelJson('diagnostic only\n'+JSON.stringify({diagnostic:true})+'\n'));
+const engine=read('scripts/r170-selfbuild-engine.mjs');
+for(const token of ["const PROPOSAL_PATH=process.env.OMEGA_R170_PROPOSAL_PATH||''","fs.writeFileSync(PROPOSAL_PATH,output,'utf8')","fs.writeSync(process.stdout.fd,output)","process.exit(0)"])assert.ok(engine.includes(token),'R170 atomic proposal handoff missing '+token);
+assert.ok(!workflow.includes("raw.lastIndexOf('}')"),'R170 workflow must not reconstruct a proposal from buffered diagnostic stdout');
 
 const moduleSource=read('src/system/calibrationPropagationR335.js');
 for(const forbidden of ['canonicalMutation:true','canonicalAdmission:true','executionAuthority:true','authorizationAuthority:true'])assert.ok(!moduleSource.includes(forbidden),'R335 propagation gained forbidden authority '+forbidden);
