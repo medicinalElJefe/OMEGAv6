@@ -41,8 +41,12 @@ requireInvariant(
  'R240.2 must prove parent identity and exact candidate-tree identity before source promotion'
 );
 requireInvariant(
- workflow.includes("RUNS=$(gh run list --repo \"$GITHUB_REPOSITORY\" --workflow ci.yml --branch main --event push")&&workflow.includes('gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status'),
- 'R240.2 must require canonical ci.yml success for the exact promoted merge'
+ workflow.includes("x.event==='push'")&&
+ workflow.includes('gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref main')&&
+ workflow.includes('--event workflow_dispatch')&&
+ workflow.includes("['push','workflow_dispatch'].includes(r.event)")&&
+ workflow.includes('gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status'),
+ 'R240.2 must require canonical ci.yml success for the exact promoted merge through observed push or explicit canonical main dispatch'
 );
 requireInvariant(
  workflow.includes("steps.deployment.outputs.status == 'PRODUCTION_PROVEN'"),
