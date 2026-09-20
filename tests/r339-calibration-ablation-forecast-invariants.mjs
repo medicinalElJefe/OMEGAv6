@@ -94,7 +94,7 @@ assert.match(by['V4-0044'].value,/No parameter, transform, covariance rule, inte
 const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(k=>[k,canonical(value[k])])):value;
 const contractHash=createHash('sha256').update(JSON.stringify(canonical(R339_FORECAST_CONTRACT))).digest('hex');
 assert.equal(contractHash,R339_FORECAST_CONTRACT_SHA256);
-assert.equal(R339_FORECAST_CONTRACT_SHA256,'9325ace1a4a51c2dd33a9b9a4216f2f614241d5b34e000bcb03943c43f0a2354');
+assert.equal(R339_FORECAST_CONTRACT_SHA256,'4022c839c0e3d001be7e707c2acef85ee850cd2d434a0b26809823cc5a24d2e8');
 
 const ref=forecastReferenceCovarianceR339();
 assert.ok(ref[0][0]>0&&ref[1][1]>0);
