@@ -64,7 +64,7 @@
     "noRetuning": true,
     "futureObservationUsed": false,
     "nextGate": "FIRST_SUITABLE_INDEPENDENT_FUTURE_H_TO_ZZ_SPIN_ENTANGLEMENT_MEASUREMENT",
-    "contractSha256": "9325ace1a4a51c2dd33a9b9a4216f2f614241d5b34e000bcb03943c43f0a2354"
+    "contractSha256": "4022c839c0e3d001be7e707c2acef85ee850cd2d434a0b26809823cc5a24d2e8"
   },
   "canonicalMutation": false,
   "canonicalAdmission": false,
