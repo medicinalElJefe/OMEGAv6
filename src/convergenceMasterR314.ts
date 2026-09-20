@@ -2,6 +2,7 @@ import {OMEGA_CAPABILITY_AUTHORITY,capabilityReality,type CapabilityReality} fro
 import {ARCHIVE_GENOME_ALL_ROWS_R288,archiveGenomeAllSummaryR288} from './archiveGenomeLedgerR288b';
 import {R328_SOURCE_CANON_RECEIPT} from './system/sourceExactCanonR328';
 import {R329_B05_PROMOTION_RECEIPT} from './system/authoritativeStateSpineR329';
+import {R331_B12_PROGRESS_RECEIPT} from './cognitiveLearningR331.js';
 
 export const R314_CONVERGENCE_SCHEMA='OMEGA_CONVERGENCE_MASTER_R314' as const;
 export const R314_CONVERGENCE_REVISION='R314' as const;
@@ -126,7 +127,7 @@ export function buildConvergenceMasterR314(){
   ],
   archiveSummary:archiveGenomeAllSummaryR288(),
   sourceExactCanon:{revision:'R328',...R328_SOURCE_CANON_RECEIPT,semanticSource:true,implementationCanonSeparate:true,canonicalAdmission:false},
-  promotionReceipts:[R329_B05_PROMOTION_RECEIPT],
+  promotionReceipts:[R329_B05_PROMOTION_RECEIPT,R331_B12_PROGRESS_RECEIPT],
   residual:convergenceResidualR314(),
   charts:{current,incomplete,build},
  };
