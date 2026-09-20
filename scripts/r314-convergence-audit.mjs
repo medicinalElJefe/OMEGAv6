@@ -43,6 +43,8 @@ export function auditR314(root=process.cwd()){
  const selfbuildPath=path.join(root,'public/omega-r170-selfbuild-state.json');
  const enginePath=path.join(root,'scripts/r170-selfbuild-engine.mjs');
  const sourceCanonPath=path.join(root,'public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv');
+ const r334ClosurePath=path.join(root,'public/canon/Dewey_OMEGA_CERN_Dewey_Relativity_Closure_v3_2026-09-19.csv');
+ const r334BridgePath=path.join(root,'public/canon/Dewey_OMEGA_CERN_ADV02_ADV04_Quantitative_Bridge_2026-09-19.csv');
 
  const capabilitySource=read(capabilityPath);
  const archiveSource=`${read(archiveAPath)}\n${read(archiveBPath)}`;
@@ -77,13 +79,20 @@ export function auditR314(root=process.cwd()){
  if(sourceCanonExists&&sourceCanonSha!=='478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf')residuals.push({id:'R328-SOURCE-CANON-HASH',severity:'CRITICAL',mode:'BLOCK',summary:`R328 source canon SHA mismatch ${sourceCanonSha}`,source:'public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv'});
  if(sourceCanonExists&&sourceCanonRecords!==3743)residuals.push({id:'R328-SOURCE-CANON-CENSUS',severity:'CRITICAL',mode:'BLOCK',summary:`R328 source canon record count ${sourceCanonRecords} != 3743`,source:'public/canon/OMEGA_CANON_ALL_CONCEPTS_SOURCE_EXACT_2026-09-18.csv'});
  if(!masterSource.includes('SOURCE_EXACT_SEMANTIC_CANON_REMAINS_SEPARATE_FROM_IMPLEMENTATION_CANON'))residuals.push({id:'R328-CANON-LAYER-SEPARATION',severity:'CRITICAL',mode:'BLOCK',summary:'Convergence master does not preserve semantic-source versus implementation-canon separation',source:'src/convergenceMasterR314.ts'});
+ for(const [id,data] of [['R334-CLOSURE',r334Closure],['R334-BRIDGE',r334Bridge]]){
+  if(!data.present)residuals.push({id:`${id}-MISSING`,severity:'CRITICAL',mode:'BLOCK',summary:`R334 calibrated dataset missing ${data.path}`,source:data.path});
+  else if(data.sha256!==data.expectedSha)residuals.push({id:`${id}-HASH`,severity:'CRITICAL',mode:'BLOCK',summary:`R334 calibrated dataset SHA mismatch ${data.sha256}`,source:data.path});
+  if(data.present&&data.records!==data.expectedRecords)residuals.push({id:`${id}-CENSUS`,severity:'CRITICAL',mode:'BLOCK',summary:`R334 calibrated dataset records ${data.records} != ${data.expectedRecords}`,source:data.path});
+ }
+ if(!masterSource.includes('R334 CERN/DEWEY CALIBRATION')||!masterSource.includes('calibratedCernRelativity'))residuals.push({id:'R334-CONVERGENCE-BINDING',severity:'CRITICAL',mode:'BLOCK',summary:'R314 convergence master does not bind the R334 calibrated evidence layer',source:'src/convergenceMasterR314.ts'});
 
  const vector=residualVectorR314({state:residuals.some(row=>row.mode==='BLOCK')?'HOLD':residuals.length?'TURN':'STAY',residuals});
  return {
   schema:'OMEGA_R314_CONVERGENCE_AUDIT',
   generatedAt:new Date().toISOString(),
-  counts:{capabilities,archiveFamilies:archives.length,buildStages:stages.length,selfBuildCapsules:roadmap.length,realRoadmapTargets:realRoadmapTargets.length,realizedRealTargets:realizedRealTargets.length,targetFamilies:targetFamilies.length,sourceCanonRecords,sourceCanonLines},
+  counts:{capabilities,archiveFamilies:archives.length,buildStages:stages.length,selfBuildCapsules:roadmap.length,realRoadmapTargets:realRoadmapTargets.length,realizedRealTargets:realizedRealTargets.length,targetFamilies:targetFamilies.length,sourceCanonRecords,sourceCanonLines,r334CalibratedRecords:r334Closure.records+r334Bridge.records},
   sourceExactCanon:{present:sourceCanonExists,sha256:sourceCanonSha,expectedRepositoryNormalizedSha256:'478922fb496a9402a82063908811dd9e264a0214e198dac4fb6ecfe2e95807bf',originalSourceSha256:'1c805af0e6e3a5ef2bb869bfc7d389ecba8746ba18b311859dca88b4b400a8eb',records:sourceCanonRecords,expectedRecords:3743},
+  calibratedCernRelativity:{revision:'R334',closure:r334Closure,bridge:r334Bridge,masterRecords:4260,inheritedBridgeRecords:4237,deltaRecords:23,canonicalAdmission:false,externalReplicationGate:'OPEN'},
   ids:{archiveFamilies:archives,buildStages:stages},
   selfBuild:{active:Boolean(state?.active),generation:Number(state?.generation||0),maxAutonomousGenerations:Number(state?.maxAutonomousGenerations||0),capsules:roadmap.map(row=>({id:row.id,target:row.target,status:row.status||null,repairId:row.repairId||null,mutationClass:row.mutationClass||null})),realRoadmapTargets:realRoadmapTargets.map(row=>row.target),realizedRealTargets:realizedRealTargets.map(row=>row.target)},
   residuals:vector.residuals,
