@@ -4,6 +4,7 @@ import {
  buildCommunicationContextR331,compileConversationMemoryR331,compileLearningMemoryR331,
  compileTrainingBatchR331,coherenceVectorR331,intelligenceManifestR331,selectMemoryR331
 } from '../src/system/coherentLearningR331.js';
+import {runtimeLearningR331} from '../src/system/coherentLearningWorkerR331.js';
 
 const user=compileConversationMemoryR331({role:'USER',text:'I prefer concise answers that preserve the proof boundary.',at:'2026-09-19T21:00:00Z'});
 const model=compileConversationMemoryR331({role:'ASSISTANT',text:'Model-generated interpretation.',provider:'WORKERS_AI',evidenceStatus:'MODEL_SYNTHESIS',at:'2026-09-19T21:00:01Z'});
@@ -58,6 +59,47 @@ assert.ok(manifest.loops.includes('WORKING_CONTEXT'));
 assert.ok(manifest.loops.includes('APPEND_ONLY_LEARNING_LEDGER'));
 assert.equal(manifest.canonicalAdmission,false);
 
+
+class MemRuntimeR331{
+ constructor(){this.map=new Map();this.events=[]}
+ async get(k,fallback){return this.map.has(k)?structuredClone(this.map.get(k)):fallback}
+ async put(k,v){this.map.set(k,structuredClone(v))}
+ async event(type,message,payload){this.events.push({type,message,payload})}
+}
+const runtimeR331=new MemRuntimeR331();
+const feedbackRequest=body=>new Request('https://omega-runtime.internal/intelligence/r331/feedback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+
+const firstFeedbackResponse=await runtimeLearningR331(runtimeR331,feedbackRequest({kind:'USER_PREFERENCE',text:'Prefer exact SHA receipts.',trainingApproved:true}));
+assert.equal(firstFeedbackResponse.status,200);
+const firstFeedback=await firstFeedbackResponse.json();
+const firstMemoryId=firstFeedback.memory.memoryId;
+assert.ok(firstMemoryId);
+
+const supersedingResponse=await runtimeLearningR331(runtimeR331,feedbackRequest({kind:'CORRECTION',text:'Prefer exact SHA plus production receipt.',supersedes:[firstMemoryId],trainingApproved:true}));
+assert.equal(supersedingResponse.status,200);
+const superseding=await supersedingResponse.json();
+assert.deepEqual(superseding.superseded,[firstMemoryId]);
+let durableRows=await runtimeR331.get('intelligenceMemoryR331',[]);
+assert.equal(durableRows.find(x=>x.memoryId===firstMemoryId).state,'SUPERSEDED');
+const replacementId=superseding.memory.memoryId;
+assert.equal(durableRows.find(x=>x.memoryId===replacementId).state,'ADMITTED_USER_CORRECTION');
+
+const revokeResponse=await runtimeLearningR331(runtimeR331,feedbackRequest({kind:'REVOKE',memoryId:replacementId,reason:'Explicit rollback test'}));
+assert.equal(revokeResponse.status,200);
+const revoked=await revokeResponse.json();
+assert.equal(revoked.state,'REVOKED');
+assert.equal(revoked.historyPreserved,true);
+durableRows=await runtimeR331.get('intelligenceMemoryR331',[]);
+assert.equal(durableRows.find(x=>x.memoryId===replacementId).state,'REVOKED');
+assert.ok(durableRows.find(x=>x.memoryId===firstMemoryId),'superseded memory must remain in append-only history');
+assert.ok(durableRows.find(x=>x.memoryId===replacementId),'revoked memory must remain in append-only history');
+const rollbackContext=buildCommunicationContextR331(durableRows,'exact SHA production receipt',{});
+assert.ok(!rollbackContext.selected.some(x=>x.memoryId===firstMemoryId),'superseded memory must be excluded from retrieval');
+assert.ok(!rollbackContext.selected.some(x=>x.memoryId===replacementId),'revoked memory must be excluded from retrieval');
+const rollbackLedger=await runtimeR331.get('intelligenceLedgerR331',[]);
+assert.ok(rollbackLedger.some(x=>x.type==='MEMORY_REVOKED'));
+assert.ok(rollbackLedger.every((x,i)=>i===0?x.previousHash===null:x.previousHash===rollbackLedger[i-1].eventHash),'learning ledger must preserve hash-chain order through rollback');
+
 const worker=fs.readFileSync('src/workerR116.js','utf8');
 const membrane=fs.readFileSync('src/system/coherentLearningWorkerR331.js','utf8');
 for(const token of [
@@ -78,6 +120,10 @@ for(const token of [
  "intelligenceLedgerR331",
  "previousHash",
  "lastEventHash",
+ "MEMORY_REVOKED",
+ "SUPERSEDED",
+ "REVOKED",
+ "historyPreserved",
  "canonicalAdmission:false"
 ])assert.ok(membrane.includes(token),`R331 learning membrane missing ${token}`);
 assert.ok(!/canonicalAdmission\s*:\s*true/.test(membrane),'R331 membrane may not self-admit CanonState');
@@ -102,4 +148,4 @@ assert.match(fabric,/r331-coherent-learning/,'intelligence fabric must expose R3
 assert.match(fabric,/durable session memory/i);
 assert.match(fabric,/does not claim trained foundation weights/i);
 
-console.log('R331 COHERENT LEARNING PASS · durable conversation continuity · working/episodic/semantic/procedural learning · append-only hash ledger · decomposed coherence · evidence/proof gates · approved TRAIN_LOCAL export · no Canon or weight-training fiction');
+console.log('R331 COHERENT LEARNING PASS · durable conversation continuity · working/episodic/semantic/procedural learning · append-only hash ledger · supersede/revoke rollback · decomposed coherence · evidence/proof gates · approved TRAIN_LOCAL export · no Canon or weight-training fiction');
