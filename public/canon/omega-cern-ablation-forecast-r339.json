@@ -1,0 +1,68 @@
+{
+  "schema": "OMEGA_CERN_ABLATION_FORECAST_RECEIPT_R339",
+  "revision": "R339",
+  "releaseId": "DEWEY_OMEGA_CERN_ABLATION_FORECAST_V4_2026-09-19",
+  "baseRelease": "DEWEY_OMEGA_CERN_RELATIVITY_CLOSURE_2026-09-19",
+  "datasets": {
+    "advancedMasterV4": {
+      "records": 4285,
+      "columns": 68,
+      "originalBytes": 7938333,
+      "originalSha256": "0f966c0f8b40d26ba177324c6f0a6246ebda959e0030d5ad8ab2196f480a9891",
+      "repositoryNormalizedBytes": 7934043,
+      "repositoryNormalizedSha256": "e8c6aaf1217919d1f714a2399638e49d48922780bf9635f700eabbf164bd3ff2",
+      "materialization": "MANIFEST_ONLY_EXTERNAL_MASTER_HASH_CENSUS_BOUND",
+      "composition": "exact normalized R334 MASTER_V3 4260-row prefix + 25-row DERIVED_NO_OVERWRITE advancement suffix",
+      "inheritedPrefix": {
+        "records": 4260,
+        "repositoryNormalizedBytes": 7884622,
+        "repositoryNormalizedSha256": "a3677e2b5a22b37235948999ed0896defbf706d13531676e84448096231913f4",
+        "invariant": "EXACT_R334_MASTER_V3_PREFIX"
+      }
+    },
+    "adv05Adv07V4": {
+      "records": 25,
+      "columns": 14,
+      "originalBytes": 10312,
+      "originalSha256": "e4aaaae441a326d663ba1de049e91c2ee9b392096b982f7608f6d10d6096d6b9",
+      "repositoryNormalizedBytes": 10282,
+      "repositoryNormalizedSha256": "d4eeab6ec5f4310cb0554973538d60ce333a981ad0b8a3c301f8d359b692a410",
+      "publicPath": "/canon/Dewey_OMEGA_CERN_ADV05_ADV06_Ablation_RoundTrip_Forecast_v4_2026-09-19.csv",
+      "stageCensus": {
+        "ADV-05": 18,
+        "ADV-06": 5,
+        "ADV-07": 2
+      }
+    }
+  },
+  "rowAccounting": {
+    "total": 4285,
+    "sourceExact": 4105,
+    "derivedNoOverwrite": 180,
+    "inheritedR334": 4260,
+    "appended": 25
+  },
+  "roundTrip": {
+    "inversePointResidual": 5.551115123125783e-17,
+    "jacobianResidual": 2.0816681711721685e-17,
+    "covarianceResidual": 2.7756422635651865e-17
+  },
+  "forecast": {
+    "contractId": "R339_FROZEN_FORECAST_V4_2026-09-19",
+    "frozenAt": "2026-09-19",
+    "basis": "RESTRICTED_COMMON_STATE_FL_CPAR",
+    "center": {
+      "fL": 0.551411180209,
+      "cParallel": 0.451340588867
+    },
+    "compatibilityThresholdD2": 5.991464547108,
+    "noRetuning": true,
+    "futureObservationUsed": false,
+    "nextGate": "FIRST_SUITABLE_INDEPENDENT_FUTURE_H_TO_ZZ_SPIN_ENTANGLEMENT_MEASUREMENT"
+  },
+  "canonicalMutation": false,
+  "canonicalAdmission": false,
+  "canonicalAdmissionAuthority": "R125",
+  "externalValidationGate": "OPEN",
+  "truthBoundary": "R339 is a source-hash-bound derived advancement over the exact R334 normalized master prefix. It preserves raw/source-exact rows, carries ablation and round-trip evidence separately, and freezes a prospective restricted-model compatibility contract against after-the-fact retuning. It is not an official ATLAS/CMS combination, not a future observation, and cannot independently mutate or admit CanonState."
+}
