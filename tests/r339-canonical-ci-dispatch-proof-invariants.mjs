@@ -1,3 +1,4 @@
+// R339 exact canonical CI dispatch fallback regression.
 import assert from'node:assert/strict';
 import fs from'node:fs';
 
