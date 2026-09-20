@@ -81,7 +81,7 @@ assert.ok(worker.includes('calibrationPropagation:calibrationPropagationManifest
 
 const master=read('src/convergenceMasterR314.ts');
 assert.ok(master.includes('R335_PROPAGATION_RECEIPT'));
-assert.ok(master.includes('promotionReceipts:[R335_PROPAGATION_RECEIPT,R334_B06_PROGRESS_RECEIPT'));
+assert.ok(master.indexOf('R335_PROPAGATION_RECEIPT')>=0&&master.indexOf('R334_B06_PROGRESS_RECEIPT')>master.indexOf('R335_PROPAGATION_RECEIPT'),'R335 propagation receipt must remain ahead of inherited R334 receipt even when newer successor receipts are prepended');
 
 const audit=read('scripts/r314-convergence-audit.mjs');
 for(const token of ['Dewey_OMEGA_CERN_Dewey_Relativity_Closure_v3_2026-09-19.csv','Dewey_OMEGA_CERN_ADV02_ADV04_Quantitative_Bridge_2026-09-19.csv','R334 calibrated dataset SHA mismatch','R334 calibrated dataset records'])assert.ok(audit.includes(token),'convergence audit missing '+token);
