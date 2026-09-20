@@ -93,21 +93,36 @@ assert.ok(workflow.includes("R170 selector emitted no parseable final top-level 
 assert.ok(!workflow.includes('tee /tmp/r170-proposal.json'),'raw mixed stdout must never again be treated directly as proposal JSON');
 
 function extractFinalTopLevelJson(raw){
- const starts=[];
- if(raw.startsWith('{'))starts.push(0);
- for(let i=0;i<raw.length-1;i++)if(raw[i]==='\n'&&raw[i+1]==='{')starts.push(i+1);
- const end=raw.lastIndexOf('}');
- let parsed=null;
- for(let i=starts.length-1;i>=0&&!parsed;i--){
-  if(end<starts[i])continue;
-  try{parsed=JSON.parse(raw.slice(starts[i],end+1))}catch{}
+ let parsed=null,start=-1,depth=0,inString=false,escaped=false;
+ for(let i=0;i<raw.length;i++){
+  const ch=raw[i];
+  if(start<0){
+   if(ch==='{'&&(i===0||raw[i-1]==='\n')){start=i;depth=1;inString=false;escaped=false}
+   continue;
+  }
+  if(inString){
+   if(escaped)escaped=false;
+   else if(ch==='\\\\')escaped=true;
+   else if(ch==='"')inString=false;
+   continue;
+  }
+  if(ch==='"'){inString=true;continue}
+  if(ch==='{'){depth++;continue}
+  if(ch!=='}')continue;
+  depth--;
+  if(depth!==0)continue;
+  try{
+   const candidate=JSON.parse(raw.slice(start,i+1));
+   if(candidate&&typeof candidate==='object'&&!Array.isArray(candidate)&&typeof candidate.status==='string')parsed=candidate;
+  }catch{}
+  start=-1;
  }
- if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw new Error('no proposal');
+ if(!parsed)throw new Error('no proposal');
  return parsed;
 }
-const contaminated='diagnostic line\n'+JSON.stringify({state:'RESIDUALS_PRESENT'})+'\nextra diagnostic\n'+JSON.stringify({status:'PROPOSE',capsuleId:'SG005',generation:9},null,2)+'\n';
-assert.deepEqual(extractFinalTopLevelJson(contaminated),{status:'PROPOSE',capsuleId:'SG005',generation:9});
-assert.throws(()=>extractFinalTopLevelJson('diagnostic only\n'));
+const contaminated='diagnostic line\n'+JSON.stringify({state:'RESIDUALS_PRESENT'})+'\nextra diagnostic\n'+JSON.stringify({status:'PROPOSE',capsuleId:'SG005',generation:9,nested:{text:'brace } in string'}},null,2)+'\n'+JSON.stringify({diagnostic:true})+'\n';
+assert.deepEqual(extractFinalTopLevelJson(contaminated),{status:'PROPOSE',capsuleId:'SG005',generation:9,nested:{text:'brace } in string'}});
+assert.throws(()=>extractFinalTopLevelJson('diagnostic only\n'+JSON.stringify({diagnostic:true})+'\n'));
 
 const moduleSource=read('src/system/calibrationPropagationR335.js');
 for(const forbidden of ['canonicalMutation:true','canonicalAdmission:true','executionAuthority:true','authorizationAuthority:true'])assert.ok(!moduleSource.includes(forbidden),'R335 propagation gained forbidden authority '+forbidden);
