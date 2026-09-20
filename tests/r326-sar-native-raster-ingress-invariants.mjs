@@ -33,7 +33,7 @@ assert.ok(raster.includes("if(view==='TIME_STACK'){v=at(r.timeStackRelative,i)")
 
 for(const token of ["'/api/earth/sar/measurement-raster'","native?.nativeDataBound?'NATIVE SOURCE BOUND'","raster={native?.nativeDataBound?native.raster:undefined}",'Decode native raster','NATIVE PIXELS {native?.nativeDataBound?\'BOUND\':\'UNBOUND\'}'])assert.ok(live.includes(token),`R326/R337 live surface missing ${token}`);
 assert.ok(live.includes("truth:nativeBound?'OBSERVED_NATIVE':'VISUAL_ENHANCED'"),'decoded native samples must upgrade only to OBSERVED_NATIVE');
-assert.ok(live.includes("missingness:nativeBound?['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND']"),'decoded native source must retain calibration/derived missingness');
+assert.ok(live.includes("missingness:nativeBound?(complexBound?['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND','PAIR_REQUIRED']:['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND'])"),'decoded native source must retain calibration/derived missingness while complex SLC also retains pair-required missingness');
 
 assert.ok(plan.includes("has(raster?.nativeIntensity)||has(raster?.amplitudeDb)"),'SOURCE planner must admit native DN samples');
 assert.ok(plan.includes("timeStackRelative"),'time-stack planner must require its own materialized array');
