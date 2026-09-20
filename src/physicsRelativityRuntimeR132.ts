@@ -4,6 +4,7 @@ import {computeLensScore,LENS_CALCULUS,type LensInput,type OmegaLens} from './le
 import {compileSourceTraversal,evaluateSourceBackedModes} from './sourceBackedModeRuntimeR21';
 import {decodeAddress,evaluateCorpusModes,corpusState,STATE_COUNT} from './corpusRuntime';
 import {calibratedRelativityR334} from './system/calibrationR334.js';
+import {calibratedRelativityR339} from './system/calibrationAdvancementR339.js';
 
 export const R132_REVISION='R132' as const;
 export const R132_SCHEMA='OMEGA_RELATIONAL_PHYSICS_MANIFOLD_R132' as const;
@@ -112,9 +113,10 @@ export function compilePhysicsRelativityR132(address:number,earthEvidence?:any){
   canonAuthorityField:{count:authorities.length,active:authorities.filter(x=>x.state==='ACTIVE').length,watch:authorities.filter(x=>x.state==='WATCH').length,quiet:authorities.filter(x=>x.state==='QUIET').length,harmonics:authorityHarmonics,top:[...authorities].sort((a,b)=>b.activation-a.activation).slice(0,8)},
   lensField:lenses,dimensional,dynamics,observed,field,
   calibration:calibratedRelativityR334(),
+  calibrationAdvancement:calibratedRelativityR339(),
   physicsReference:{constants:R132_REFERENCE_CONSTANTS,forceReference:R132_FORCE_REFERENCE,scaleHierarchy:R132_SCALE_HIERARCHY,domainBasis:R132_DOMAIN_BASIS,stateBasis:R132_STATE_BASIS,source:'Standard_Model_Lagrangian_20736D_Pi_Motion_AutoPing.xlsx / 20736D Motion Relativity Force Atlas donor'},
   hierarchy:{canonicalStates:STATE_COUNT,addressResolution:'12×12×12×12',modeRegistry:ALL_MODES_BOUNDARY.sourceModeEvaluations,canonAuthorities:ALL_MODES_BOUNDARY.canonAuthorities},
   continuityLaw:'partition -> transform/exchange -> invariant carry -> scar/history carry -> re-contextualize -> repartition',
-  truthBoundary:'REFERENCE_PHYSICS is kept separate from returned OBSERVED_EVIDENCE. Canonical CΩ/Φ/q/Λ/scar and all 179 mode evaluations remain computational packet channels. Route derivatives, harmonic folds, 4D projection, shells and visual curvature are DERIVED or REPRESENTATIONAL and are not asserted as literal extra spacetime dimensions, measured force fields, new physical constants or empirical causal proof. R334 adds a versioned calibrated ATLAS/CMS cross-representation as evidence-layer context only; it does not overwrite the canonical packet or claim an official experiment combination.'
+  truthBoundary:'REFERENCE_PHYSICS is kept separate from returned OBSERVED_EVIDENCE. Canonical CΩ/Φ/q/Λ/scar and all 179 mode evaluations remain computational packet channels. Route derivatives, harmonic folds, 4D projection, shells and visual curvature are DERIVED or REPRESENTATIONAL and are not asserted as literal extra spacetime dimensions, measured force fields, new physical constants or empirical causal proof. R334 adds a versioned calibrated ATLAS/CMS cross-representation as evidence-layer context only. R339 carries the hash-bound v4 ablation/round-trip/frozen forecast contract as a derived prospective layer with no-retuning; neither overwrites the canonical packet, promotes approximation into observation, or claims an official experiment combination.'
  };
 }
