@@ -37,6 +37,11 @@ assert.equal(sources.MASTER_V4.basePrefix.rows,4260);
 assert.equal(sources.MASTER_V4.basePrefix.repositoryNormalizedSha256,r334Sources.MASTER_V3.repositoryNormalizedSha256);
 assert.equal(sources.MASTER_V4.basePrefix.repositoryNormalizedBytes,r334Sources.MASTER_V3.repositoryNormalizedBytes);
 assert.equal(sources.MASTER_V4.rows-sources.MASTER_V4.basePrefix.rows,25);
+assert.equal(sources.MASTER_V4.appendedPayloadInvariant,'ALL_25_MASTER_V4_SUFFIX_SOURCE_EXACT_PAYLOAD_JSON_MATCH_ADVANCEMENT_ROWS_AND_ROW_SHA256');
+assert.equal(sources.MASTER_V4.appendedPayloadCanonicalJsonBytes,15934);
+assert.equal(sources.MASTER_V4.appendedPayloadCanonicalJsonSha256,'3e2cbe6b52f5d253079acd9a4ed9bf9449cccdcdf588e16c3acbbceeb12a6d16');
+assert.equal(sources.MASTER_V4.derivationParentOriginalSha256,'c2a5966b0a4aa3aa2de2acd18491e2333653290eaa312058fd1dfe0f1446a18d');
+assert.equal(sources.MASTER_V4.provenanceTier,'DERIVED_FROM_FROZEN_V3');
 
 assert.equal(rows.length,25);
 assert.equal(new Set(rows.map(x=>x.row_id)).size,25);
