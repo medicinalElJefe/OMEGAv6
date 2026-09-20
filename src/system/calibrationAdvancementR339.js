@@ -183,7 +183,8 @@ export const R339_CALIBRATION_CONSUMERS=Object.freeze([
  {id:'RELATIONAL_RUNTIME',artifact:'src/system/proofGovernedRelationalRuntimeR334.js',role:'proof-governed relational cycle carries R339 read-only advancement context'},
  {id:'WORKER_MANIFEST',artifact:'src/workerR116.js',role:'deployed system manifest exposes R339 release identity'},
  {id:'CONVERGENCE_MASTER',artifact:'src/convergenceMasterR314.ts',role:'promotion receipt and no-retuning convergence laws'},
- {id:'CONVERGENCE_AUDIT',artifact:'scripts/r314-convergence-audit.mjs',role:'source hash/census and R334-prefix continuity audit'}
+ {id:'CONVERGENCE_AUDIT',artifact:'scripts/r314-convergence-audit.mjs',role:'source hash/census and R334-prefix continuity audit'},
+ {id:'EXTERNAL_MASTER_VERIFIER',artifact:'scripts/verify_r339_external_master.mjs',role:'reproducible full v4 original/normalized hash, exact R334 prefix, 25-row suffix payload and row-SHA verification when the external master is present'}
 ]);
 
 export const R339_PROPAGATION_RECEIPT=Object.freeze({
