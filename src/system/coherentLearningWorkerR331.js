@@ -7,6 +7,12 @@ import {
 const cleanR331=v=>String(v??'').trim();
 const jsonR331=(data,status=200)=>new Response(JSON.stringify(data,null,2),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-omega-intelligence-revision':R331_INTELLIGENCE_REVISION}});
 const sessionR331=request=>{const id=cleanR331(request.headers.get('x-omega-session-id')).slice(0,160);return /^[A-Za-z0-9._:-]{8,160}$/.test(id)?id:''};
+async function sha256R331(value){const bytes=new TextEncoder().encode(typeof value==='string'?value:JSON.stringify(value));const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function appendLedgerR331(runtime,type,payload){
+ const rows=await runtime.get('intelligenceLedgerR331',[]),prior=Array.isArray(rows)?rows:[],previousHash=prior.at(-1)?.eventHash||null;
+ const core={schema:'OMEGA_INTELLIGENCE_LEDGER_EVENT_R331',type,at:new Date().toISOString(),payload,previousHash,canonicalAdmission:false};
+ const event={...core,eventHash:await sha256R331(core)};const next=[...prior,event].slice(-512);await runtime.put('intelligenceLedgerR331',next);return{event,count:next.length};
+}
 
 function runtimeStubR331(env,id){return env?.OMEGA_RUNTIME?.get?.(env.OMEGA_RUNTIME.idFromName(id))}
 async function runtimeRequestR331(env,id,path,method='GET',body){
@@ -69,6 +75,9 @@ export async function publicLearningR331(request,env,delegate){
   const body=await request.json().catch(()=>({})),response=await runtimeRequestR331(env,sessionId,'/intelligence/r331/feedback','POST',body);
   return response?withRevisionR331(response):jsonR331({ok:false,code:'R331_DURABLE_RUNTIME_UNAVAILABLE'},503);
  }
+ if(path==='/api/intelligence/r331/state'&&request.method==='GET'){
+  const response=await runtimeRequestR331(env,sessionId,'/intelligence/r331/state','GET');return response?withRevisionR331(response):jsonR331({ok:false,code:'R331_DURABLE_RUNTIME_UNAVAILABLE'},503);
+ }
  if(path==='/api/intelligence/r331/training-batch'&&request.method==='GET'){
   const response=await runtimeRequestR331(env,sessionId,'/intelligence/r331/training-batch','GET');return response?withRevisionR331(response):jsonR331({ok:false,code:'R331_DURABLE_RUNTIME_UNAVAILABLE'},503);
  }
@@ -93,16 +102,21 @@ export async function runtimeLearningR331(runtime,request){
   const body=await request.json().catch(()=>({})),rows=await read();
   const user=compileConversationMemoryR331({role:'USER',text:body.prompt,at:new Date().toISOString()});
   const assistant=compileConversationMemoryR331({role:'ASSISTANT',text:body.reply,provider:body.provider,evidenceStatus:body.evidenceStatus,at:new Date().toISOString()});
-  await write([...rows,user,assistant]);
+  await write([...rows,user,assistant]);const ledger=await appendLedgerR331(runtime,'TURN',{userMemoryId:user.memoryId,assistantMemoryId:assistant.memoryId,provider:body.provider||null,evidenceStatus:body.evidenceStatus||null});
   try{await runtime.event('R331_CONVERSATION_MEMORY','R331 stored a bounded conversation turn.',{userMemoryId:user.memoryId,assistantMemoryId:assistant.memoryId,provider:body.provider||null,canonicalAdmission:false})}catch{}
-  return jsonR331({ok:true,stored:[user.memoryId,assistant.memoryId],canonicalAdmission:false});
+  return jsonR331({ok:true,stored:[user.memoryId,assistant.memoryId],ledgerCount:ledger.count,lastEventHash:ledger.event.eventHash,canonicalAdmission:false});
  }
  if(path==='/intelligence/r331/feedback'&&request.method==='POST'){
   const body=await request.json().catch(()=>({})),rows=await read();let memory;
   try{memory=compileLearningMemoryR331(body)}catch(error){return jsonR331({ok:false,code:'R331_FEEDBACK_REJECTED',message:error instanceof Error?error.message:String(error)},400)}
-  await write([...rows,memory]);
+  await write([...rows,memory]);const ledger=await appendLedgerR331(runtime,'FEEDBACK',{memoryId:memory.memoryId,memoryClass:memory.memoryClass,state:memory.state,trainingApproved:memory.trainingApproved===true});
   try{await runtime.event('R331_LEARNING_MEMORY','R331 stored explicit typed learning feedback.',{memoryId:memory.memoryId,memoryClass:memory.memoryClass,state:memory.state,canonicalAdmission:false})}catch{}
-  return jsonR331({ok:true,memory,trainingEligible:memory.trainingApproved===true&&String(memory.state).startsWith('ADMITTED'),canonicalAdmission:false});
+  return jsonR331({ok:true,memory,trainingEligible:memory.trainingApproved===true&&String(memory.state).startsWith('ADMITTED'),ledgerCount:ledger.count,lastEventHash:ledger.event.eventHash,canonicalAdmission:false});
+ }
+ if(path==='/intelligence/r331/state'&&request.method==='GET'){
+  const rows=await read(),ledger=await runtime.get('intelligenceLedgerR331',[]),context=buildCommunicationContextR331(rows,'',{});
+  const counts={episodic:rows.filter(x=>x.memoryClass==='EPISODIC').length,preferences:rows.filter(x=>x.memoryClass==='COMMUNICATION_PREFERENCE').length,semantic:rows.filter(x=>x.memoryClass==='SEMANTIC_LESSON').length,procedural:rows.filter(x=>x.memoryClass==='PROCEDURAL_LESSON').length,scars:rows.filter(x=>x.memoryClass==='SCAR').length};
+  return jsonR331({ok:true,schema:'OMEGA_INTELLIGENCE_STATE_R331',revision:R331_INTELLIGENCE_REVISION,memoryCount:rows.length,counts,ledgerCount:Array.isArray(ledger)?ledger.length:0,lastEventHash:Array.isArray(ledger)?ledger.at(-1)?.eventHash||null:null,coherence:context.coherence,foundationWeightsChanged:false,canonicalAdmission:false});
  }
  if(path==='/intelligence/r331/training-batch'&&request.method==='GET'){
   const rows=await read(),batch=compileTrainingBatchR331(rows);return jsonR331({ok:true,...batch});
