@@ -1,6 +1,7 @@
 import {CANON_AUTHORITY_STACK,evaluateCanonAuthorityStack} from './allModesAuthority';
 import {sourceBackedModeSummary,type SourceBackedModeResult} from './sourceBackedModeRuntimeR21';
 import {calibrationManifestR334} from './system/calibrationR334.js';
+import {calibrationAdvancementManifestR339} from './system/calibrationAdvancementR339.js';
 
 export const R280_MODE_REALIZATION_SCHEMA='OMEGA_MODE_REALIZATION_REGISTRY_R280' as const;
 export const R280_MODE_REALIZATION_LAWS=Object.freeze([
@@ -27,8 +28,8 @@ export type ModeBindingR280={
 
 const BINDINGS:Record<string,ModeBindingR280>=Object.freeze({
   'OVERALL CANON MODE':{
-    artifacts:['src/allModesTruthFusionR151.ts','src/universalTruthEnvelopeR152.ts','src/system/calibrationR334.js'],
-    tests:['tests/r151-all-modes-truth-fusion.mts','tests/r152-universal-truth-envelope.mts','tests/r334-calibration-convergence-invariants.mjs'],
+    artifacts:['src/allModesTruthFusionR151.ts','src/universalTruthEnvelopeR152.ts','src/system/calibrationR334.js','src/system/calibrationAdvancementR339.js'],
+    tests:['tests/r151-all-modes-truth-fusion.mts','tests/r152-universal-truth-envelope.mts','tests/r334-calibration-convergence-invariants.mjs','tests/r339-calibration-ablation-forecast-invariants.mjs'],
     executionClass:'DOMAIN_RUNTIME',inputContract:'canonical packet + evidence',outputContract:'truth fusion + universal truth envelope',
     boundary:'Internal mode coherence cannot overrule empirical evidence, execution proof, or R125 admission.'
   },
@@ -43,8 +44,16 @@ const BINDINGS:Record<string,ModeBindingR280>=Object.freeze({
     boundary:'Mode 188 evaluates packet state; it does not manufacture source evidence.'
   },
   'Prune / Heavy Prune Mode':{
-    artifacts:['src/sourceBackedModeRuntimeR21.ts'],tests:['tests/source-backed-runtime-r21-invariants.mjs'],executionClass:'SOURCE_EXECUTED',inputContract:'q Λ CΩ',outputContract:'prune pressure',
-    boundary:'Prune pressure is advisory unless separately bound to canonical dispatch.'
+    artifacts:['src/sourceBackedModeRuntimeR21.ts','src/system/calibrationAdvancementR339.js'],tests:['tests/source-backed-runtime-r21-invariants.mjs','tests/r339-calibration-ablation-forecast-invariants.mjs'],executionClass:'SOURCE_EXECUTED',inputContract:'q Λ CΩ + evidence-preserving ablation ledger',outputContract:'prune pressure + retained/pruned calibration components',
+    boundary:'Prune pressure is advisory unless separately bound to canonical dispatch. R339 ablation may remove early scalar compression but cannot discard source evidence or physically necessary variables merely because their incremental local information is low.'
+  },
+  'Forecast Mode':{
+    artifacts:['src/forecastRuntime.ts','src/ForecastSovereignPanel.tsx','src/system/calibrationAdvancementR339.js'],
+    tests:['tests/restore-invariants.mjs','tests/r339-calibration-ablation-forecast-invariants.mjs'],
+    executionClass:'EVIDENCE_GATED_DOMAIN_RUNTIME',
+    inputContract:'canonical source state + frozen R339 contract; future external evaluation additionally requires same restricted basis + covariance + preserved assumptions',
+    outputContract:'competing internal state-space corridors + frozen no-retuning D² future-compatibility gate',
+    boundary:'Internal forecast corridors are model traversals, not future observations. The R339 prospective gate is evaluable only against a genuinely future independent measurement and cannot be retuned after inspection.'
   },
   'Guidance Field Mode':{
     artifacts:['src/sourceBackedModeRuntimeR21.ts'],tests:['tests/source-backed-runtime-r21-invariants.mjs'],executionClass:'SOURCE_PACKET',inputContract:'source decision channel',outputContract:'STAY/TURN/ESCALATE source decision',
@@ -64,7 +73,7 @@ const BINDINGS:Record<string,ModeBindingR280>=Object.freeze({
     boundary:'The lattice is a finite state/address space.'
   },
   'Dimensional Relativity Mode':{
-    artifacts:['src/weaveStateR100.ts','src/physicsRelativityRuntimeR132.ts','src/system/calibrationR334.js'],tests:['tests/dimensional-relativity-r24-invariants.mjs','tests/r77-woven-continuity-invariants.mjs','tests/r334-calibration-convergence-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'declared frame + transform + state',outputContract:'frame-relative representation with invariant/scar carry',
+    artifacts:['src/weaveStateR100.ts','src/physicsRelativityRuntimeR132.ts','src/system/calibrationR334.js','src/system/calibrationAdvancementR339.js'],tests:['tests/dimensional-relativity-r24-invariants.mjs','tests/r77-woven-continuity-invariants.mjs','tests/r334-calibration-convergence-invariants.mjs','tests/r339-calibration-ablation-forecast-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'declared frame + transform + state',outputContract:'frame-relative representation with invariant/scar carry',
     boundary:'Frame-relative representation does not assert additional physical dimensions.'
   },
   'Phase Elasticity Field':{
@@ -100,11 +109,11 @@ const BINDINGS:Record<string,ModeBindingR280>=Object.freeze({
     boundary:'Verified evidence outranks model/canon coherence.'
   },
   'No-Nothing Truth Mode':{
-    artifacts:['src/universalTruthEnvelopeR152.ts'],tests:['tests/r152-universal-truth-envelope.mts'],executionClass:'DOMAIN_RUNTIME',inputContract:'claim/evidence/execution proof',outputContract:'truth boundary + contradiction preservation',
-    boundary:'Missing evidence returns unknown/measure/fetch rather than synthetic completion.'
+    artifacts:['src/universalTruthEnvelopeR152.ts','src/system/calibrationAdvancementR339.js'],tests:['tests/r152-universal-truth-envelope.mts','tests/r339-calibration-ablation-forecast-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'claim/evidence/execution proof + frozen-contract identity',outputContract:'truth boundary + contradiction preservation + no-retuning enforcement',
+    boundary:'Missing evidence returns unknown/measure/fetch rather than synthetic completion. R339 prospective evaluation is demoted from predictive to descriptive if its frozen contract is altered after the target is inspected.'
   },
   'Dewey Calculus Mode':{
-    artifacts:['src/sourceBackedModeRuntimeR21.ts','src/AppliedCalculusR168.tsx','src/system/calibrationR334.js'],tests:['tests/r107-full-calculus-capability-fabric-invariants.mjs','tests/r334-calibration-convergence-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'CΩ Φ q Λ Scar + declared operators',outputContract:'bounded derived calculus/control variables',
+    artifacts:['src/sourceBackedModeRuntimeR21.ts','src/AppliedCalculusR168.tsx','src/system/calibrationR334.js','src/system/calibrationAdvancementR339.js'],tests:['tests/r107-full-calculus-capability-fabric-invariants.mjs','tests/r334-calibration-convergence-invariants.mjs','tests/r339-calibration-ablation-forecast-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'CΩ Φ q Λ Scar + declared operators + covariance/proof carry',outputContract:'bounded derived calculus/control variables + round-trip/forecast proof context',
     boundary:'Physics-themed notation remains model-space unless independently measured.'
   },
   'HEAVY BIO MODE REVIEW':{
@@ -149,6 +158,8 @@ function executionClassFor(sourceRows:SourceBackedModeResult[],binding:ModeBindi
   if(sourceRows.some(x=>x.state==='SOURCE_PACKET'||x.state==='DERIVED_RUNTIME'))return'SOURCE_PACKET';
   return binding?.executionClass||'DERIVED_LENS';
 }
+
+export const R280_CALIBRATION_ADVANCEMENT_R339=calibrationAdvancementManifestR339();
 
 export function compileModeRealizationRegistryR280(record:any){
   const source=sourceBackedModeSummary(record),sourceById=new Map(source.rows.map(x=>[x.id,x]));
