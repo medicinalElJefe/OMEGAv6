@@ -97,6 +97,9 @@ jobs:
       - name: Prove R316 research advancement contracts inside accumulated proof authority
         run: npx --yes tsx tests/r316-research-advancement-invariants.mts
 
+      - name: Prove R334 calibrated data convergence
+        run: node tests/r334-calibration-convergence-invariants.mjs
+
       - name: Run complete application check and production build
         run: npm run check
 
