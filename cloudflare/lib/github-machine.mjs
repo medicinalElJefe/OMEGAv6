@@ -40,8 +40,8 @@ function workflowEvidenceForSha(runs,sha){
 
 export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtimeBase='https://omegav6.jeffdeweyeljefe.workers.dev'}){
   const main=await gh(token,`/repos/${repo}/branches/main`);const mainSha=main.commit.sha;
-  const runs=await gh(token,`/repos/${repo}/actions/workflows/ci.yml/runs?branch=main&event=push&per_page=30`);
-  const productionProof=(runs.workflow_runs||[]).find(r=>r.head_sha===mainSha&&r.status==='completed'&&r.conclusion==='success')||null;
+  const runs=await gh(token,`/repos/${repo}/actions/workflows/ci.yml/runs?branch=main&per_page=60`);
+  const productionProof=(runs.workflow_runs||[]).find(r=>r.head_sha===mainSha&&['push','workflow_dispatch'].includes(r.event)&&r.status==='completed'&&r.conclusion==='success')||null;
   const stateFile=await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',mainSha);
   const state=await reconcileMainState(token,repo,mainSha,stateFile.json);
   const candidatePolicy=validateAutonomousCandidatePolicyR245(state.autonomousCandidatePolicy);
