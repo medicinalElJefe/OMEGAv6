@@ -89,8 +89,17 @@ export function scoreMemoryR331(row,prompt,nowMs=Date.now()){
 
 export function selectMemoryR331(entries,prompt,limit=R331_CONTEXT_LIMIT){
  const rows=Array.isArray(entries)?entries:[];
+ const retrievalAdmissible=row=>{
+  if(!row||row.canonicalAdmission!==false||!row.text)return false;
+  if(row.memoryClass==='EPISODIC')return true;
+  if(row.memoryClass==='COMMUNICATION_PREFERENCE')return row.state==='ADMITTED_USER_PREFERENCE';
+  if(row.memoryClass==='SCAR')return row.state==='ADMITTED_USER_CORRECTION';
+  if(row.memoryClass==='SEMANTIC_LESSON')return row.state==='ADMITTED_EVIDENCE_BOUND';
+  if(row.memoryClass==='PROCEDURAL_LESSON')return row.state==='ADMITTED_PROOF_BOUND';
+  return false;
+ };
  return rows
-  .filter(x=>x&&x.canonicalAdmission===false&&x.text)
+  .filter(retrievalAdmissible)
   .map(x=>({...x,relevance:scoreMemoryR331(x,prompt)}))
   .sort((a,b)=>b.relevance-a.relevance||String(b.createdAt).localeCompare(String(a.createdAt)))
   .slice(0,Math.max(1,Math.min(20,Number(limit)||R331_CONTEXT_LIMIT)));
