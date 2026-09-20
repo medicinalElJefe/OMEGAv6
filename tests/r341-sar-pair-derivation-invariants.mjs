@@ -20,9 +20,11 @@ for(const token of[
 
 assert.ok(pair.includes('const re=mi*si+mq*sq,im=mq*si-mi*sq'),'R341 interferogram must implement master * conj(slave)');
 assert.ok(pair.includes('Math.hypot(nr,ni)/den'),'R341 coherence must use normalized complex correlation magnitude');
+assert.ok(pair.includes('fill(Number.NaN)'),'R341 missing pair-derived samples must remain missing rather than synthetic zero');
 assert.ok(pair.includes("return{ok:false,reason:'SUBPIXEL_COREGISTRATION_NOT_PROVEN'}"),'R341 must fail closed when sampled-grid identity is not proven');
 
 assert.ok(raster.includes('interferogramPhaseRad?:number[]'),'R341 raster contract must keep pair interferogram phase separate from source phase');
+assert.ok(raster.includes('mask=r.validMask?.length===r.width*r.height?r.validMask:undefined'),'R341 coverage must honor validity masks for all displayed fields');
 assert.ok(raster.includes("view==='INTERFEROGRAM'?'interferogramPhaseRad'"),'INTERFEROGRAM coverage must use pair phase, never source phase');
 assert.ok(derivation.includes("'interferogramPhaseRad','rad'"),'field resolver must expose the pair-derived interferogram');
 assert.ok(derivation.includes("'timeStackRelative','log amplitude ratio'"),'time-stack lens must identify the two-epoch log-amplitude operator');
