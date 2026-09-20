@@ -1,4 +1,5 @@
 import {evaluateQtiR332,verifyObservedOutcomeR332} from './qtiControlR332.js';
+import {calibratedRelativityR334,calibrationManifestR334} from './calibrationR334.js';
 
 export const R334_RELATIONAL_SCHEMA='OMEGA_PROOF_GOVERNED_RELATIONAL_RUNTIME_R334';
 export const R334_RELATIONAL_REVISION='R334';
@@ -187,6 +188,7 @@ export function evaluateRelationalCycleR334(input={}){
   authorizationRequest:selectedCandidate?.qti?.authorizationRequest??null,
   execution:null,
   observedOutcome:null,
+  calibration:calibratedRelativityR334(),
   canonicalAdmission:false,
   authorityBoundary:'R334 reconstructs, prunes, proves and forecasts candidate state transitions. It may emit an R332 authorization request but cannot authorize, dispatch, execute or admit CanonState.',
  });
@@ -238,6 +240,7 @@ export function relationalManifestR334(){
   selection:'QTI_PASS_AND_PARETO_IMPROVEMENT_WITH_EXPLICIT_PRIORITY_TIE_BREAK',
   ledger:'APPEND_ONLY_HASH_BOUND_EVENT',
   returnProof:'R332_POSTCONDITION_REQUIRED_BEFORE_NEXT_PARENT_PROPOSAL',
+  calibration:calibrationManifestR334(),
   authorizationAuthority:false,
   executionAuthority:false,
   canonicalAdmission:false,
@@ -260,6 +263,7 @@ export const R334_B06_PROGRESS_RECEIPT=Object.freeze({
   'authorization-request-only transition boundary',
   'append-only hash-bound relational ledger event',
   'observed-return proof before next-parent proposal',
+  'R334 calibrated CERN/Omega relativity evidence context with source-exact/derived separation',
  ]),
  remaining:Object.freeze([
   'full observer/frame transform registry',
