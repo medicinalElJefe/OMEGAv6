@@ -16,7 +16,7 @@ assert.equal(sources.MASTER_V4.rows,4285);
 assert.equal(sources.MASTER_V4.columns,68);
 assert.equal(sources.MASTER_V4.sha256,'0f966c0f8b40d26ba177324c6f0a6246ebda959e0030d5ad8ab2196f480a9891');
 assert.equal(sources.MASTER_V4.repositoryNormalizedSha256,'e8c6aaf1217919d1f714a2399638e49d48922780bf9635f700eabbf164bd3ff2');
-assert.match(sources.MASTER_V4.composition,/prefix byte identity is not asserted/i);
+assert.match(sources.MASTER_V4.composition,/identity of the 4,260-row prefix.*not asserted/i);
 
 const p='public/canon/Dewey_OMEGA_CERN_ADV05_ADV06_Ablation_RoundTrip_Forecast_v4_2026-09-19.csv';
 const csv=read(p),lines=normalize(csv).split('\n');
