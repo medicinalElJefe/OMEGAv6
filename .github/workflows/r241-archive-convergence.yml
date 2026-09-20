@@ -100,6 +100,9 @@ jobs:
       - name: Prove R334 proof-governed calibrated data convergence
         run: npm run test:r334
 
+      - name: Prove R335 full-system calibrated data propagation
+        run: npm run test:r335
+
       - name: Run complete application check and production build
         run: npm run check
 
