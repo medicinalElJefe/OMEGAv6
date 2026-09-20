@@ -164,8 +164,10 @@ export function evaluateFrozenForecastR339(input={}){
   basis:R339_FORECAST_CONTRACT.basis,
   contractId:R339_FORECAST_CONTRACT.id,
   noRetuning:true,
+  inputClass:'OPERATOR_SUPPLIED_COMPATIBILITY_TEST',
+  futureObservationAuthority:false,
   canonicalMutation:false,
-  interpretation:'Prospective compatibility result only; does not independently establish or refute underlying physics.'
+  interpretation:'Prospective compatibility calculation only. This function does not verify that the input is a genuinely future independent observation and does not independently establish or refute underlying physics.'
  };
 }
 
