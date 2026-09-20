@@ -9,17 +9,17 @@
   "generatorContract": "R245_SHARED_CANONICAL_GENERATOR",
   "residualPolicy": "OMEGA_R170_AUTONOMOUS_SOURCE_RESIDUAL_POLICY_V1",
   "capsule": {
-    "id": "SG002",
-    "title": "Deployment convergence receipt",
-    "objective": "Represent published source, runtime source, asset propagation and acceptance as distinct states without treating reachability as promotion.",
-    "target": "src/generated/selfbuildR170/deploymentConvergenceReceiptR170.ts",
+    "id": "SG004",
+    "title": "Candidate proof receipt",
+    "objective": "Encode candidate branch, base SHA, proof gates, residual gate and PR state without Canon admission leakage.",
+    "target": "src/generated/selfbuildR170/candidateProofReceiptR170.ts",
     "risk": "LOW",
     "prerequisites": [
-      "SG001"
+      "SG002"
     ],
-    "expectedGain": 0.95,
-    "complexity": 0.28,
-    "contradictionRisk": 0.06,
+    "expectedGain": 0.94,
+    "complexity": 0.31,
+    "contradictionRisk": 0.05,
     "pressure": {
       "contradiction": 0,
       "burden": 0.08333333333333333,
@@ -31,7 +31,7 @@
       "userValueSignal": "NOT_INFERRED"
     }
   },
-  "score": 1.741461764705882,
+  "score": 1.627401111111111,
   "frontier": {
     "schema": "OMEGA_RECURSIVE_SELFBUILD_FRONTIER_R240",
     "revision": "R240",
@@ -51,11 +51,11 @@
     "frontier": [
       {
         "rank": 1,
-        "id": "SG002",
-        "title": "Deployment convergence receipt",
-        "target": "src/generated/selfbuildR170/deploymentConvergenceReceiptR170.ts",
+        "id": "SG004",
+        "title": "Candidate proof receipt",
+        "target": "src/generated/selfbuildR170/candidateProofReceiptR170.ts",
         "risk": "LOW",
-        "score": 1.741461764705882,
+        "score": 1.627401111111111,
         "pressure": {
           "contradiction": 0,
           "burden": 0.08333333333333333,
@@ -67,7 +67,7 @@
           "userValueSignal": "NOT_INFERRED"
         },
         "dependencies": [
-          "SG001"
+          "SG002"
         ]
       },
       {
@@ -110,9 +110,9 @@
     },
     "activeCells": [
       {
-        "id": "SG002",
-        "address": "O00.B000.C01",
-        "score": 1.741461764705882,
+        "id": "SG004",
+        "address": "O00.B000.C03",
+        "score": 1.627401111111111,
         "roleCount": 8,
         "state": "READY"
       },
@@ -126,7 +126,7 @@
     ],
     "packetCount": 16,
     "scarCount": 1,
-    "sourceMutationCandidateId": "SG002",
+    "sourceMutationCandidateId": "SG004",
     "parallelPlanning": true,
     "parallelEvaluation": true,
     "parallelSourceMutation": false,
@@ -184,8 +184,8 @@
       "RECONTEXTUALIZE",
       "ADAPT_NEXT_CONTEXT"
     ],
-    "sampleCount": 2,
-    "confidence": 0.16666666666666666,
+    "sampleCount": 3,
+    "confidence": 0.25,
     "trend": 0,
     "calibrationDelta": 0,
     "adaptiveCoherence": 0.7875385244136062,
@@ -202,6 +202,7 @@
       "futurePreservation": 0.8151717068711635,
       "provenance": [
         "R265_CURRENT_STATE",
+        "RETURNED_PROOF",
         "RETURNED_PROOF",
         "RETURNED_PROOF"
       ]
@@ -230,12 +231,12 @@
   },
   "receipt": {
     "schema": "OMEGA_SELFBUILD_CANDIDATE_RECEIPT_R170",
-    "generation": 2,
-    "capsuleId": "SG002",
-    "target": "src/generated/selfbuildR170/deploymentConvergenceReceiptR170.ts",
-    "startedAt": "2026-09-20T21:08:26.901Z",
-    "baseSha": "ceda8dea307dbc342782b2539404440092475296",
-    "branch": "selfbuild/r170-g2-sg002-35537743983",
+    "generation": 3,
+    "capsuleId": "SG004",
+    "target": "src/generated/selfbuildR170/candidateProofReceiptR170.ts",
+    "startedAt": "2026-09-20T23:36:37.264Z",
+    "baseSha": "b10c5217e6e4179e348ea4f3706eb0e887463982",
+    "branch": "selfbuild/r170-g3-sg004-35545136302",
     "candidateSha": null,
     "residualGate": "PASS",
     "residualEvidence": {
@@ -296,11 +297,11 @@
       "frontier": [
         {
           "rank": 1,
-          "id": "SG002",
-          "title": "Deployment convergence receipt",
-          "target": "src/generated/selfbuildR170/deploymentConvergenceReceiptR170.ts",
+          "id": "SG004",
+          "title": "Candidate proof receipt",
+          "target": "src/generated/selfbuildR170/candidateProofReceiptR170.ts",
           "risk": "LOW",
-          "score": 1.741461764705882,
+          "score": 1.627401111111111,
           "pressure": {
             "contradiction": 0,
             "burden": 0.08333333333333333,
@@ -312,7 +313,7 @@
             "userValueSignal": "NOT_INFERRED"
           },
           "dependencies": [
-            "SG001"
+            "SG002"
           ]
         },
         {
@@ -355,9 +356,9 @@
       },
       "activeCells": [
         {
-          "id": "SG002",
-          "address": "O00.B000.C01",
-          "score": 1.741461764705882,
+          "id": "SG004",
+          "address": "O00.B000.C03",
+          "score": 1.627401111111111,
           "roleCount": 8,
           "state": "READY"
         },
@@ -371,7 +372,7 @@
       ],
       "packetCount": 16,
       "scarCount": 1,
-      "sourceMutationCandidateId": "SG002",
+      "sourceMutationCandidateId": "SG004",
       "parallelPlanning": true,
       "parallelEvaluation": true,
       "parallelSourceMutation": false,
@@ -429,8 +430,8 @@
         "RECONTEXTUALIZE",
         "ADAPT_NEXT_CONTEXT"
       ],
-      "sampleCount": 2,
-      "confidence": 0.16666666666666666,
+      "sampleCount": 3,
+      "confidence": 0.25,
       "trend": 0,
       "calibrationDelta": 0,
       "adaptiveCoherence": 0.7875385244136062,
@@ -447,6 +448,7 @@
         "futurePreservation": 0.8151717068711635,
         "provenance": [
           "R265_CURRENT_STATE",
+          "RETURNED_PROOF",
           "RETURNED_PROOF",
           "RETURNED_PROOF"
         ]
@@ -511,8 +513,8 @@
       "R239 Hybrid resource governor remains separate and preserved.",
       "R125 remains sole CanonState admission authority."
     ],
-    "provedAt": "2026-09-20T21:09:03.759Z",
-    "productionRunId": "35537510088"
+    "provedAt": "2026-09-20T23:37:16.904Z",
+    "productionRunId": "35544923846"
   },
   "status": "PROVED_PENDING_PR"
 }
