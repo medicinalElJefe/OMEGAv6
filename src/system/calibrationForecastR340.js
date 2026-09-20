@@ -11,6 +11,16 @@ export const R340_SOURCE_MANIFEST=Object.freeze([
 
 export const R340_TRANSPORT_NORMALIZATION='UTF8_BOM_REMOVED_CRLF_TO_LF_FINAL_EOL_REMOVED_VALUES_UNCHANGED';
 
+export const R340_SOURCE_EXACT_SUMMARY=Object.freeze({
+ sourceExactRows:4105,
+ derivedNoOverwriteRows:180,
+ priorR334MasterRows:4260,
+ postV3ProofAdvancementRows:25,
+ masterRows:4285,
+ advancementStageCounts:Object.freeze({'ADV-05':18,'ADV-06':5,'ADV-07':2}),
+ canonicalMutation:false
+});
+
 export const R340_ROUNDTRIP_PROOF=Object.freeze({
  commonStateProjection:Object.freeze({c21:-0.476181648882,c22:0.672883229686,state:'PASS',evidenceClass:'EXACT_ALGEBRAIC_TRANSLATION'}),
  inversePointResidual:5.551115123125782702e-17,
@@ -98,7 +108,8 @@ export function forecastCompatibilityR340(input={}){
  if(!inverse)return{state:'NON_INVERTIBLE_COVARIANCE',d2:null,threshold:R340_FORECAST.compatibility.threshold,pass:false};
  const dx=[f-R334_COMMON_STATE.fL,c-R334_COMMON_STATE.cParallel];
  const d2=dx[0]*(inverse[0][0]*dx[0]+inverse[0][1]*dx[1])+dx[1]*(inverse[1][0]*dx[0]+inverse[1][1]*dx[1]);
- return{state:'EVALUATED_FROZEN_RULE',d2,threshold:R340_FORECAST.compatibility.threshold,pass:d2<=R340_FORECAST.compatibility.threshold,physicality:physicalityGateR340(f,c),retuned:false};
+ const physicality=physicalityGateR340(f,c),withinD2=d2<=R340_FORECAST.compatibility.threshold;
+ return{state:physicality.admitted?'EVALUATED_FROZEN_RULE':'EVALUATED_OUTSIDE_RESTRICTED_PHYSICAL_DOMAIN',d2,threshold:R340_FORECAST.compatibility.threshold,pass:physicality.admitted&&withinD2,withinD2,physicality,retuned:false};
 }
 
 export function calibrationForecastManifestR340(){
@@ -107,6 +118,7 @@ export function calibrationForecastManifestR340(){
   schema:R340_SCHEMA,revision:R340_REVISION,releaseId:R340_RELEASE_ID,calibratedAt:'2026-09-19',
   inherits:Object.freeze({revision:inherited.revision,releaseId:inherited.releaseId}),
   sources:R340_SOURCE_MANIFEST,
+  sourceExact:R340_SOURCE_EXACT_SUMMARY,
   roundTrip:R340_ROUNDTRIP_PROOF,
   ablation:R340_ABLATION,
   forecast:R340_FORECAST,
