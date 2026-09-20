@@ -57,6 +57,7 @@ export function compileLearningMemoryR331(input={}){
   schema:R331_INTELLIGENCE_SCHEMA,revision:R331_INTELLIGENCE_REVISION,memoryClass,source:'EXPLICIT_FEEDBACK',truthClass,state,
   role:'USER',text,evidenceReceiptIds,proofReceiptIds,
   contradictionOf:Array.isArray(input.contradictionOf)?input.contradictionOf.map(x=>txt(x,220)).filter(Boolean).slice(0,24):[],
+  supersedes:Array.isArray(input.supersedes)?input.supersedes.map(x=>txt(x,220)).filter(Boolean).slice(0,24):(input.supersedes?[txt(input.supersedes,220)].filter(Boolean):[]),
   trainingApproved,createdAt:txt(input.createdAt,64)||nowIso(),canonicalAdmission:false
  };
  return Object.freeze({...row,memoryId:memoryIdR331(row)});
