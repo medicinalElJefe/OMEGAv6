@@ -94,6 +94,9 @@ const far=evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis
 assert.equal(far.state,'FAIL');assert.ok(far.d2>R339_FORECAST_CONTRACT.compatibilityThresholdD2);
 assert.equal(evaluateFrozenForecastR339({}).state,'HELD');
 assert.equal(evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:false}).reason,'ASSUMPTIONS_AND_COVARIANCE_PROVENANCE_REQUIRED');
+assert.equal(evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,fL:1.01,cParallel:0,covariance:[[0.01,0],[0,0.01]]}).reason,'RESTRICTED_PHYSICAL_DOMAIN_REQUIRED');
+assert.equal(evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,fL:0.5,cParallel:0,covariance:[[-0.01,0],[0,0.01]]}).reason,'POSITIVE_SEMIDEFINITE_INPUT_COVARIANCE_REQUIRED');
+assert.equal(evaluateFrozenForecastR339({contractId:R339_FORECAST_CONTRACT.id,basis:R339_FORECAST_CONTRACT.basis,assumptionsPreserved:true,fL:0.5,cParallel:0,covariance:[[0.01,0.02],[0.02,0.01]]}).reason,'POSITIVE_SEMIDEFINITE_INPUT_COVARIANCE_REQUIRED');
 
 assert.equal(by['V4-0050'].result,'PARTIAL PROMOTION');
 assert.equal(by['V4-0051'].result,'PROMOTED AS NEXT INTERNAL PARENT');
