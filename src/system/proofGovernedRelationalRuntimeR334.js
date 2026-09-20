@@ -275,4 +275,5 @@ export const R334_B06_PROGRESS_RECEIPT=Object.freeze({
  canonicalAdmission:false,
  authorizationAuthority:false,
  executionAuthority:false,
+ calibrationRelease:calibrationManifestR334().releaseId,
 });
