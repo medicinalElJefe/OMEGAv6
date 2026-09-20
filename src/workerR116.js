@@ -10,6 +10,7 @@ import {closeHybridReturnR141,readHybridClosureR141,replayHybridClosureR141,mani
 import {createRunR146,listRunsR146,manifestR146,readRunR146,replayRunR146,transitionRunR146,R146_REVISION} from './execution/durableOperationExecutionR146.js';
 import {dispatchRunR147,executorDirectoryR147,manifestR147,pollRunR147,readResultR147,syncHybridClaimR147,syncHybridReturnR147,R147_REVISION} from './execution/unifiedExecutorFabricR147.js';
 import {advanceSovereignMissionR152,hydrateSovereignMissionsR152,manifestR152,resumeSovereignMissionR152,tagSovereignMissionR152,R152_MISSION_SCHEMA,R152_REVISION,R152_SOURCE_SCHEMA} from './execution/adaptiveSovereignMissionR152.js';
+import {appendLearningEventR331,communicationContextR331,createMemoryR331,R331_B12_PROGRESS_RECEIPT,R331_COGNITIVE_LEARNING_REVISION} from './cognitiveLearningR331.js';
 
 export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator,OmegaSwarmAutonomicCoordinator};
 
@@ -167,9 +168,36 @@ async function probeFetchR130(request,env){
  return r115.fetch(request,env);
 }
 
+
+function cognitionSessionIdR331(request){return safeId(request.headers.get('x-omega-session-id'),'')}
+function cognitionStubR331(env,sessionId){return env.OMEGA_RUNTIME.get(env.OMEGA_RUNTIME.idFromName(sessionId))}
+async function cognitionInternalR331(env,sessionId,path,body,method='POST'){
+ if(!env?.OMEGA_RUNTIME||!sessionId)return null;
+ const headers=new Headers({'content-type':'application/json','x-omega-internal-cognition':'R331'});
+ return cognitionStubR331(env,sessionId).fetch(new Request('https://omega-runtime.internal'+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body)}));
+}
+async function cognitiveChatR331(request,env){
+ const body=await request.clone().json().catch(()=>({})),sessionId=cognitionSessionIdR331(request),userText=text(body?.text||body?.message).slice(0,16384);
+ if(!sessionId||!env?.OMEGA_RUNTIME)return r115.fetch(request,env);
+ const contextResponse=await cognitionInternalR331(env,sessionId,'/cognition/context',{query:userText,runtimeContext:body?.context||{}}),memoryContext=contextResponse?await contextResponse.clone().json().catch(()=>null):null;
+ const enrichedContext={...(body?.context&&typeof body.context==='object'?body.context:{}),cognitiveLearningR331:memoryContext?.context||null};
+ const headers=new Headers(request.headers);headers.set('content-type','application/json');
+ const inherited=await r115.fetch(new Request(request.url,{method:'POST',headers,body:JSON.stringify({...body,text:userText,context:enrichedContext})}),env),data=await inherited.clone().json().catch(()=>null);
+ if(!data||typeof data!=='object')return inherited;
+ const recordResponse=await cognitionInternalR331(env,sessionId,'/cognition/record',{userText,assistantReply:text(data.reply).slice(0,12000),provider:text(data.provider),evidenceStatus:text(data.evidenceStatus),routing:data.routing||null,runtimeContext:body?.context||{}}),receipt=recordResponse?await recordResponse.clone().json().catch(()=>null):null;
+ return json({...data,learning:{revision:R331_COGNITIVE_LEARNING_REVISION,persisted:Boolean(receipt?.ok),memoryCount:receipt?.memoryCount??memoryContext?.summary?.memoryCount??0,eventCount:receipt?.eventCount??memoryContext?.summary?.eventCount??0,coherence:receipt?.coherence??memoryContext?.context?.coherence??null,foundationWeightsChanged:false,canonicalAdmission:false}},inherited.status);
+}
+
 async function fetchR116(request,env){
  const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path==='/api/health'||path==='/api/core-health'||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
+ if(path==='/api/chat'&&request.method==='POST')return withCorsR116(await cognitiveChatR331(request,env),request);
+ if(path==='/api/cognition/state'&&request.method==='GET'){
+  const sessionId=cognitionSessionIdR331(request);if(!sessionId)return withCorsR116(json({ok:false,code:'R331_SESSION_REQUIRED'},400),request);const response=await cognitionInternalR331(env,sessionId,'/cognition/state',undefined,'GET');return withCorsR116(response||json({ok:false,code:'R331_RUNTIME_UNAVAILABLE'},503),request);
+ }
+ if(path==='/api/cognition/feedback'&&request.method==='POST'){
+  const sessionId=cognitionSessionIdR331(request);if(!sessionId)return withCorsR116(json({ok:false,code:'R331_SESSION_REQUIRED'},400),request);const body=await request.clone().json().catch(()=>({})),response=await cognitionInternalR331(env,sessionId,'/cognition/feedback',body);return withCorsR116(response||json({ok:false,code:'R331_RUNTIME_UNAVAILABLE'},503),request);
+ }
  if((path==='/api/health'||path==='/api/core-health')&&request.method==='GET')return withCorsR116(coreHealthR163(request,env),request);
  if((path==='/api/health'||path==='/api/core-health')&&request.method!=='GET')return withCorsR116(json({ok:false,schema:CORE_HEALTH_SCHEMA,revision:CORE_HEALTH_REVISION,state:'METHOD_NOT_ALLOWED',method:request.method,canonicalMutation:false,truthBoundary:'R163 canonical core-health endpoints are read-only.'},405,{allow:'GET','x-omega-core-health':'R163-FIRST-HAND'}),request);
  if(path.startsWith('/api/swarm/'))return withSwarmCorsR121(await swarmApiR121(request,env,url),request);
@@ -203,6 +231,32 @@ async function fetchR116(request,env){
 export class OmegaRuntime extends OmegaRuntimeR115 {
  async fetch(request){
   const url=new URL(request.url),path=url.pathname;
+  if(path.startsWith('/cognition/')){
+   if(request.headers.get('x-omega-internal-cognition')!=='R331')return json({ok:false,code:'R331_INTERNAL_ONLY'},403);
+   if(path==='/cognition/context'&&request.method==='POST'){
+    const body=await request.json().catch(()=>({})),memories=await this.get('cognitionMemoriesR331',[]),ledger=await this.get('cognitionLedgerR331',[]),context=communicationContextR331({memories,ledger,query:text(body?.query).slice(0,16384),runtimeContext:body?.runtimeContext||{}});
+    return json({ok:true,revision:R331_COGNITIVE_LEARNING_REVISION,context,summary:{memoryCount:memories.length,eventCount:ledger.length,lastEventHash:ledger.at(-1)?.eventHash||null},canonicalAdmission:false});
+   }
+   if(path==='/cognition/record'&&request.method==='POST'){
+    const body=await request.json().catch(()=>({})),timestamp=Date.now();let memories=await this.get('cognitionMemoriesR331',[]),ledger=await this.get('cognitionLedgerR331',[]);
+    const episode=await createMemoryR331({kind:'EPISODIC',content:`User: ${text(body?.userText).slice(0,1800)}\nOMEGA: ${text(body?.assistantReply).slice(0,2200)}`,source:text(body?.provider)||'MODEL_SYNTHESIS',writer:'OMEGA_CHAT_R331',scope:'SESSION',confidence:body?.evidenceStatus==='VERIFIED_RUNTIME'?.78:.52,evidenceClass:body?.evidenceStatus==='VERIFIED_RUNTIME'?'SOURCE_BOUND':'MODEL_SYNTHESIS',stateVersion:text(body?.runtimeContext?.stateVersion||body?.runtimeContext?.stateId)||null,timestamp});
+    memories=[...memories,episode].slice(-256);
+    ledger=await appendLearningEventR331(ledger,{type:'TURN',timestamp,payload:{userText:text(body?.userText).slice(0,4000),assistantReply:text(body?.assistantReply).slice(0,6000),provider:text(body?.provider),evidenceStatus:text(body?.evidenceStatus),routing:body?.routing||null,memoryId:episode.id}});
+    await this.put('cognitionMemoriesR331',memories);await this.put('cognitionLedgerR331',ledger);const context=communicationContextR331({memories,ledger,query:text(body?.userText),runtimeContext:body?.runtimeContext||{}});
+    return json({ok:true,revision:R331_COGNITIVE_LEARNING_REVISION,memoryId:episode.id,memoryCount:memories.length,eventCount:ledger.length,lastEventHash:ledger.at(-1)?.eventHash||null,coherence:context.coherence,foundationWeightsChanged:false,canonicalAdmission:false});
+   }
+   if(path==='/cognition/feedback'&&request.method==='POST'){
+    const body=await request.json().catch(()=>({})),signal=['HELPFUL','CORRECTED','REJECTED'].includes(text(body?.signal).toUpperCase())?text(body.signal).toUpperCase():'HELPFUL',correction=text(body?.correction).slice(0,4000),kind=text(body?.kind).toUpperCase()==='PROCEDURAL'?'PROCEDURAL':'SEMANTIC';let memories=await this.get('cognitionMemoriesR331',[]),ledger=await this.get('cognitionLedgerR331',[]),promoted=null;
+    if(signal==='CORRECTED'&&correction){promoted=await createMemoryR331({kind,content:correction,source:'USER_FEEDBACK',writer:'USER_CONFIRMED_R331',scope:'SESSION',confidence:.98,evidenceClass:'USER_CONFIRMED',stateVersion:text(body?.stateVersion)||null,supersedes:text(body?.supersedes)||null});memories=[...memories,promoted].slice(-256);await this.put('cognitionMemoriesR331',memories)}
+    ledger=await appendLearningEventR331(ledger,{type:'FEEDBACK',payload:{signal,correction:correction||null,promotedMemoryId:promoted?.id||null,kind:promoted?.kind||null}});await this.put('cognitionLedgerR331',ledger);
+    return json({ok:true,revision:R331_COGNITIVE_LEARNING_REVISION,signal,promotedMemory:promoted?{id:promoted.id,kind:promoted.kind,evidenceClass:promoted.evidenceClass}:null,memoryCount:memories.length,eventCount:ledger.length,foundationWeightsChanged:false,canonicalAdmission:false});
+   }
+   if(path==='/cognition/state'&&request.method==='GET'){
+    const memories=await this.get('cognitionMemoriesR331',[]),ledger=await this.get('cognitionLedgerR331',[]),counts=Object.fromEntries(['WORKING','EPISODIC','SEMANTIC','PROCEDURAL'].map(kind=>[kind,memories.filter(x=>x?.kind===kind&&x?.status==='ACTIVE').length]));
+    return json({ok:true,revision:R331_COGNITIVE_LEARNING_REVISION,receipt:R331_B12_PROGRESS_RECEIPT,memoryCount:memories.length,eventCount:ledger.length,counts,lastEventHash:ledger.at(-1)?.eventHash||null,foundationWeightsChanged:false,canonicalAdmission:false});
+   }
+   return json({ok:false,code:'R331_COGNITION_ROUTE_NOT_FOUND'},404);
+  }
   if(path==='/missions'&&request.method==='POST'){
    const body=await request.clone().json().catch(()=>({})),response=await super.fetch(request);if(!response.ok||body?.draft?.schema!==R152_SOURCE_SCHEMA)return response;const data=await response.clone().json().catch(()=>({})),mission=await tagSovereignMissionR152(this,body,data?.mission);return json({...data,mission,adaptiveRevision:R152_REVISION,adaptiveSchema:R152_MISSION_SCHEMA},response.status);
   }
