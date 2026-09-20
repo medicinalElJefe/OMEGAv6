@@ -73,11 +73,11 @@ export function resolveSarFieldR336(obs:SarObservationR280,r0:SarRasterFieldR283
   return result(view,productBlock?'UNAVAILABLE_FROM_PRODUCT':'DEPENDENCY_MISSING','UNBOUND',null,'rad',r,undefined,false,'complex phase extraction','phase = atan2(Q,I)',['SLC complex I/Q'],[productBlock?'GRD_HAS_NO_COMPLEX_PHASE':'SLC_COMPLEX_IQ_REQUIRED'],productBlock?'GRD intensity cannot reconstruct phase; select and decode SLC complex I/Q.':'Decode SLC complex I/Q before phase can be calculated.');
  }
  if(view==='COHERENCE'){
-  if(has(r.coherence))return result(view,'DISPLAYABLE','DERIVED_MEASUREMENT','coherence','unitless',r,r.coherence,false,'normalized complex cross-correlation','gamma = |sum(s1*conj(s2))| / sqrt(sum|s1|^2 sum|s2|^2)',['co-registered SLC pair','coherence window'],[],'Pair-derived interferometric coherence.');
+  if(has(r.coherence))return result(view,'DISPLAYABLE','DERIVED_MEASUREMENT','coherence','unitless',r,r.coherence,false,'normalized complex cross-correlation','gamma = |sum(s1*conj(s2))| / sqrt(sum|s1|^2 sum|s2|^2)',['proven identical sampled complex grid','coherence window'],[],'Pair-derived local complex coherence on the proven sampled grid.');
   return result(view,obs.productLevel==='GRD'?'UNAVAILABLE_FROM_PRODUCT':'DEPENDENCY_MISSING','UNBOUND',null,'unitless',r,undefined,false,'normalized complex cross-correlation','gamma = normalized complex correlation',['co-registered SLC pair','common geometry','coherence window'],['SECOND_COMPLEX_ACQUISITION_REQUIRED'],'Coherence requires two compatible complex observations; a single GRD scene cannot supply it.');
  }
  if(view==='INTERFEROGRAM'){
-  if(has(r.phaseRad)&&obs.complexDataBound&&Number(obs.geometry.temporalBaselineDays)>0)return result(view,'DISPLAYABLE','DERIVED_MEASUREMENT','phaseRad','rad',r,r.phaseRad,false,'complex conjugate product','I = master * conj(slave); wrapped phase = arg(I)',['co-registered SLC pair','wrapped phase'],[],'Bound interferometric phase on a declared pair path.');
+  if(has(r.interferogramPhaseRad))return result(view,'DISPLAYABLE','DERIVED_MEASUREMENT','interferogramPhaseRad','rad',r,r.interferogramPhaseRad,false,'complex conjugate product','I = master * conj(slave); wrapped phase = arg(I)',['proven identical sampled complex grid','complex SLC pair'],[],'Wrapped pair interferogram phase derived from two complex source rasters.');
   return result(view,obs.productLevel==='GRD'?'UNAVAILABLE_FROM_PRODUCT':'DEPENDENCY_MISSING','UNBOUND',null,'rad',r,undefined,false,'complex conjugate product','I = master * conj(slave)',['co-registered SLC pair','wrapped phase difference'],['COMPATIBLE_SLC_PAIR_REQUIRED'],'An interferogram is a pair-derived field and is not synthesized from single-scene intensity.');
  }
  if(view==='DEFORMATION'){
@@ -98,7 +98,7 @@ export function resolveSarFieldR336(obs:SarObservationR280,r0:SarRasterFieldR283
   return result(view,'DEPENDENCY_MISSING','UNBOUND',null,'relative',r,undefined,false,'cross-band frame comparison','delta = normalized bandB - normalized bandA',['two or more physical radar bands','common frame/normalization'],['SECOND_RADAR_BAND_REQUIRED'],'A different polarization is not a different wavelength band.');
  }
  if(view==='TIME_STACK'){
-  if(has(r.timeStackRelative))return result(view,'DISPLAYABLE','DERIVED_TEMPORAL','timeStackRelative','relative',r,r.timeStackRelative,false,'registered temporal stack','value = declared multi-epoch stack operator',['multiple acquisitions','common grid','epoch ordering'],[],'Bound temporal field derived from multiple registered epochs.');
+  if(has(r.timeStackRelative))return result(view,'DISPLAYABLE','DERIVED_TEMPORAL','timeStackRelative','log amplitude ratio',r,r.timeStackRelative,false,'two-epoch complex amplitude change','ln((|slave|+1)/(|master|+1))',['two complex acquisitions','proven identical sampled grid','epoch ordering'],[],'Two-epoch log-amplitude change on the proven sampled grid; this is temporal change, not deformation.');
   return result(view,Number(p.timeStackCount)>=2?'COMPUTABLE':'DEPENDENCY_MISSING','UNBOUND',null,'relative',r,undefined,false,'registered temporal stack','value = declared multi-epoch stack operator',['multiple acquisitions','common grid','epoch ordering','declared time-stack array'],['MULTI_EPOCH_ARRAY_REQUIRED'],'A time stack cannot reuse a single-scene raster.');
  }
  if(view==='SCAR_UNCERTAINTY'){
@@ -117,5 +117,5 @@ export function resolveAllSarFieldsR336(obs:SarObservationR280,r?:SarRasterField
 }
 
 export function sarDerivationTruthBoundaryR336(){
- return'R336 resolves each analytical lens through an explicit evidence/dependency graph. Native GRD intensity may be displayed as native DN in the AMPLITUDE lens but is never promoted to calibrated sigma0/gamma0. GRD cannot recreate complex phase, coherence, interferograms, or deformation. Scar and proof projections derived from the validity mask are diagnostics of evidence coverage, not physical uncertainty.';
+ return'R336/R341 resolves each analytical lens through an explicit evidence/dependency graph. Native GRD intensity may be displayed as native DN in the AMPLITUDE lens but is never promoted to calibrated sigma0/gamma0. GRD cannot recreate complex phase, coherence, interferograms, or deformation. Scar and proof projections derived from the validity mask are diagnostics of evidence coverage, not physical uncertainty.';
 }
