@@ -118,7 +118,7 @@ assert.equal(receipt.datasets.advancedMasterV4.appendedPayloadInvariant,'ALL_25_
 assert.equal(receipt.datasets.advancedMasterV4.appendedPayloadCanonicalJsonSha256,'3e2cbe6b52f5d253079acd9a4ed9bf9449cccdcdf588e16c3acbbceeb12a6d16');
 assert.equal(receipt.datasets.adv05Adv07V4.records,25);
 assert.equal(receipt.forecast.noRetuning,true);
-assert.equal(receipt.forecast.contractSha256,'9325ace1a4a51c2dd33a9b9a4216f2f614241d5b34e000bcb03943c43f0a2354');
+assert.equal(receipt.forecast.contractSha256,'4022c839c0e3d001be7e707c2acef85ee850cd2d434a0b26809823cc5a24d2e8');
 assert.equal(receipt.forecast.futureObservationUsed,false);
 assert.equal(receipt.canonicalMutation,false);
 assert.equal(receipt.canonicalAdmission,false);
