@@ -23,6 +23,8 @@ assert.deepEqual([sources.MASTER_V4.rows,sources.MASTER_V4.columns,sources.MASTE
 assert.equal(sources.MASTER_V4.sha256,'0f966c0f8b40d26ba177324c6f0a6246ebda959e0030d5ad8ab2196f480a9891');
 assert.equal(sources.MASTER_V4.repositoryNormalizedSha256,'e8c6aaf1217919d1f714a2399638e49d48922780bf9635f700eabbf164bd3ff2');
 assert.equal(sources.MASTER_V4.runtimePayload,'MANIFEST_ONLY');
+assert.match(sources.MASTER_V4.composition,/3,743 OMEGA source-exact.*25 ablation\/round-trip\/forecast.*23 relativity closure/i);
+assert.match(sources.MASTER_V4.extensionLayerIdentity,/25\/25 origin_record_id rows match/i);
 assert.equal(sources.ADV05_ADV07_V4.rows,25);
 assert.equal(sources.ADV05_ADV07_V4.columns,14);
 assert.equal(sha(exact),'d4eeab6ec5f4310cb0554973538d60ce333a981ad0b8a3c301f8d359b692a410');
