@@ -63,7 +63,8 @@
     "compatibilityThresholdD2": 5.991464547108,
     "noRetuning": true,
     "futureObservationUsed": false,
-    "nextGate": "FIRST_SUITABLE_INDEPENDENT_FUTURE_H_TO_ZZ_SPIN_ENTANGLEMENT_MEASUREMENT"
+    "nextGate": "FIRST_SUITABLE_INDEPENDENT_FUTURE_H_TO_ZZ_SPIN_ENTANGLEMENT_MEASUREMENT",
+    "contractSha256": "9325ace1a4a51c2dd33a9b9a4216f2f614241d5b34e000bcb03943c43f0a2354"
   },
   "canonicalMutation": false,
   "canonicalAdmission": false,
