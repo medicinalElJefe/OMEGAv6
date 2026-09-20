@@ -18,6 +18,11 @@ export const R339_SOURCE_MANIFEST=Object.freeze([
   runtimePayload:'MANIFEST_ONLY',
   materialization:'EXTERNAL_MASTER_HASH_CENSUS_BOUND',
   composition:'MASTER_V3 exact normalized 4260-row prefix + 25-row post-freeze ADV-05/ADV-06/ADV-07 suffix',
+  appendedPayloadInvariant:'ALL_25_MASTER_V4_SUFFIX_SOURCE_EXACT_PAYLOAD_JSON_MATCH_ADVANCEMENT_ROWS_AND_ROW_SHA256',
+  appendedPayloadCanonicalJsonBytes:15934,
+  appendedPayloadCanonicalJsonSha256:'3e2cbe6b52f5d253079acd9a4ed9bf9449cccdcdf588e16c3acbbceeb12a6d16',
+  derivationParentOriginalSha256:'c2a5966b0a4aa3aa2de2acd18491e2333653290eaa312058fd1dfe0f1446a18d',
+  provenanceTier:'DERIVED_FROM_FROZEN_V3',
   basePrefix:Object.freeze({
    rows:4260,
    repositoryNormalizedSha256:'a3677e2b5a22b37235948999ed0896defbf706d13531676e84448096231913f4',
