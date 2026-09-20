@@ -97,7 +97,7 @@
     "mergeMethod": "merge",
     "twoParentMergeRequired": true,
     "canonicalDeploymentWorkflow": ".github/workflows/ci.yml",
-    "canonicalDeploymentDispatchAllowed": false,
+    "canonicalDeploymentDispatchAllowed": true,
     "selfWorkflowDispatchAllowed": false,
     "productionProofRequiredAfterSourceMerge": true,
     "productionFailureMode": "SOURCE_PROMOTED_BUT_NOT_PRODUCTION_PROVEN__STOP_AND_REQUIRE_FORWARD_REPAIR",
@@ -107,8 +107,9 @@
     "exactTwoParentMainUpdate": true,
     "repositoryPrCreationRequired": false,
     "candidatePullRequestRequired": false,
-    "canonicalDeploymentPushTrigger": true,
-    "productionContinuationDispatch": ".github/workflows/ci.yml -> r170-governed-selfbuild.yml"
+    "canonicalDeploymentPushTrigger": false,
+    "productionContinuationDispatch": ".github/workflows/ci.yml -> r170-governed-selfbuild.yml",
+    "canonicalDeploymentDispatchTrigger": true
   },
   "preservedRuntime": {
     "canonicalWorkerSpine": "R116",
@@ -135,5 +136,5 @@
     "archiveConvergenceVisualIntelligence": "R241_READ_ONLY_1728_OVER_20736_TOPOLOGY_AND_TYPED_COGNITION_PROJECTION"
   },
   "truthLaw": "reachable != writable != generated != proved != source-promoted != deployed != live-verified != Canon-admitted",
-  "truthBoundary": "R170.6/R330 preserves the R240 exact-source promotion gates while removing dependence on GitHub Actions-created pull requests and hourly polling. The generator still cannot write main. Only the governed promotion step may construct the exact two-parent merge commit from an unchanged production-proven base and an exact re-proved allowlisted candidate tree, then update main under a lease. That main update triggers ci.yml as the sole canonical production writer. Only after successful staged deployment and live verification may ci.yml dispatch the next governed self-build cycle. The self-builder never dispatches itself, workflow_run fanout remains forbidden, red production stops continuation, R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable history authority, and R141 exact Hybrid return-proof authority."
+  "truthBoundary": "R170.6/R330 preserves the R240 exact-source promotion gates while removing dependence on GitHub Actions-created pull requests and hourly polling. The generator still cannot write main. Only the governed promotion step may construct the exact two-parent merge commit from an unchanged production-proven base and an exact re-proved allowlisted candidate tree, then update main under a lease. Because a GITHUB_TOKEN-authored main update cannot recursively trigger another Actions push workflow, the governed promotion step explicitly dispatches ci.yml on the exact promoted main SHA; ci.yml remains the sole canonical production writer. Only after successful staged deployment and live verification may ci.yml dispatch the next governed self-build cycle. The self-builder never dispatches itself, workflow_run fanout remains forbidden, red production stops continuation, R125 remains sole CanonState admission authority, R147 dispatch authority, R146 durable history authority, and R141 exact Hybrid return-proof authority."
 }
