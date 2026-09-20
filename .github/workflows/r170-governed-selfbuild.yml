@@ -275,20 +275,23 @@ jobs:
         shell: bash
         run: |
           MERGE_SHA='${{ steps.merge.outputs.sha }}'
+          # A main update performed with GITHUB_TOKEN does not recursively emit another push-triggered workflow.
+          # Dispatch the existing canonical writer explicitly; deployment authority remains entirely inside ci.yml.
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref main
           RUN_ID=''
           for attempt in $(seq 1 72); do
-            RUNS=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --event push --limit 30 --json databaseId,headSha,status,conclusion,event,url)
-            RUN_ID=$(MERGE_SHA="$MERGE_SHA" RUNS="$RUNS" node -e "const rs=JSON.parse(process.env.RUNS||'[]');const r=rs.find(x=>x.headSha===process.env.MERGE_SHA&&x.event==='push');process.stdout.write(String(r?.databaseId||''))")
+            RUNS=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --event workflow_dispatch --limit 30 --json databaseId,headSha,status,conclusion,event,url,createdAt)
+            RUN_ID=$(MERGE_SHA="$MERGE_SHA" RUNS="$RUNS" node -e "const rs=JSON.parse(process.env.RUNS||'[]');const r=rs.find(x=>x.headSha===process.env.MERGE_SHA&&x.event==='workflow_dispatch');process.stdout.write(String(r?.databaseId||''))")
             if [ -n "$RUN_ID" ]; then break; fi
             sleep 5
           done
-          test -n "$RUN_ID" || { echo '::error::Canonical ci.yml push run did not appear for exact promoted merge.'; exit 1; }
+          test -n "$RUN_ID" || { echo '::error::Canonical ci.yml workflow_dispatch run did not appear for exact promoted merge.'; exit 1; }
           gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
           RUN=$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json headSha,status,conclusion,event,url)
-          MERGE_SHA="$MERGE_SHA" RUN="$RUN" node -e "const r=JSON.parse(process.env.RUN);if(r.headSha!==process.env.MERGE_SHA||r.event!=='push'||r.status!=='completed'||r.conclusion!=='success')throw new Error('canonical production proof does not bind exact promoted merge')"
+          MERGE_SHA="$MERGE_SHA" RUN="$RUN" node -e "const r=JSON.parse(process.env.RUN);if(r.headSha!==process.env.MERGE_SHA||r.event!=='workflow_dispatch'||r.status!=='completed'||r.conclusion!=='success')throw new Error('canonical production proof does not bind exact promoted merge')"
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
           echo "status=PRODUCTION_PROVEN" >> "$GITHUB_OUTPUT"
-          echo "R240 exact promoted merge is production-proven by canonical ci.yml · merge $MERGE_SHA · run $RUN_ID"
+          echo "R240 exact promoted merge is production-proven by canonical ci.yml workflow_dispatch · merge $MERGE_SHA · run $RUN_ID"
 
       - name: Clean promoted candidate branch only after production proof
         if: steps.deployment.outputs.status == 'PRODUCTION_PROVEN'
