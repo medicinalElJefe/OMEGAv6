@@ -110,6 +110,7 @@ await hybridEntry.waitFor({state:'visible'});
 await hybridEntry.click();
 const deck=page.locator('[data-r237-command-authority="AUTHENTICATED_BOUNDED_NATIVE_CONTROL"]');
 await deck.waitFor({state:'visible'});
+await page.waitForFunction(()=>Number(document.querySelector('[data-r237-command-authority="AUTHENTICATED_BOUNDED_NATIVE_CONTROL"]')?.getAttribute('data-r237-snapshot-epoch')||0)>=1,{timeout:15000});
 if(await deck.getAttribute('data-r237-command-authority')!=='AUTHENTICATED_BOUNDED_NATIVE_CONTROL')throw new Error('R237 live browser lost bounded command-authority identity');
 const intelligence=page.locator('[data-r238-host-intelligence]');
 await intelligence.waitFor({state:'visible'});
