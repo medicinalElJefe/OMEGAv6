@@ -161,6 +161,40 @@ export function evaluateFrozenForecastR339(input={}){
  };
 }
 
+
+export const R339_CALIBRATION_CONSUMERS=Object.freeze([
+ {id:'CAPABILITY_DATASET_REGISTRY',artifact:'src/capabilityAtlasR43.ts',role:'v4 dataset census and operator-visible source inventory'},
+ {id:'MODE_REALIZATION_REGISTRY',artifact:'src/modeRealizationRegistryR280.ts',role:'Forecast/Heavy Prune/No-Nothing/Relativity/Dewey mode evidence context'},
+ {id:'ALL_MODES_TRUTH_FUSION',artifact:'src/allModesTruthFusionR151.ts',role:'read-only frozen forecast context with zero empirical vote'},
+ {id:'UNIVERSAL_TRUTH_ENVELOPE',artifact:'src/universalTruthEnvelopeR152.ts',role:'forecast identity and no-retuning context without evidence-class promotion'},
+ {id:'RELATIVITY_RUNTIME',artifact:'src/physicsRelativityRuntimeR132.ts',role:'round-trip/ablation/frozen forecast context in frame-relative runtime'},
+ {id:'RELATIVITY_SURFACE',artifact:'src/RelativityLab.tsx',role:'operator-visible R334 base plus R339 advancement'},
+ {id:'FORECAST_SURFACE',artifact:'src/ForecastSovereignPanel.tsx',role:'separate frozen external forecast contract from internal state-space corridors'},
+ {id:'RELATIONAL_RUNTIME',artifact:'src/system/proofGovernedRelationalRuntimeR334.js',role:'proof-governed relational cycle carries R339 read-only advancement context'},
+ {id:'WORKER_MANIFEST',artifact:'src/workerR116.js',role:'deployed system manifest exposes R339 release identity'},
+ {id:'CONVERGENCE_MASTER',artifact:'src/convergenceMasterR314.ts',role:'promotion receipt and no-retuning convergence laws'},
+ {id:'CONVERGENCE_AUDIT',artifact:'scripts/r314-convergence-audit.mjs',role:'source hash/census and R334-prefix continuity audit'}
+]);
+
+export const R339_PROPAGATION_RECEIPT=Object.freeze({
+ revision:R339_REVISION,
+ stage:'R314-B06',
+ state:'PROPAGATION_CLOSED',
+ releaseId:R339_RELEASE_ID,
+ baseRelease:R339_BASE_RELEASE_ID,
+ sourceHashes:Object.freeze(Object.fromEntries(R339_SOURCE_MANIFEST.map(x=>[x.id,x.sha256]))),
+ repositoryNormalizedHashes:Object.freeze(Object.fromEntries(R339_SOURCE_MANIFEST.map(x=>[x.id,x.repositoryNormalizedSha256]))),
+ consumers:R339_CALIBRATION_CONSUMERS.map(x=>x.id),
+ forecastContract:R339_FORECAST_CONTRACT.id,
+ noRetuning:R339_FORECAST_CONTRACT.noRetuning,
+ exactR334Prefix:true,
+ sourceExactPreserved:true,
+ rawExperimentalOverwrite:false,
+ canonicalMutation:false,
+ canonicalAdmission:false,
+ canonicalAdmissionAuthority:'R125'
+});
+
 export function calibrationAdvancementManifestR339(){
  const base=calibrationManifestR334();
  return Object.freeze({
@@ -177,6 +211,8 @@ export function calibrationAdvancementManifestR339(){
   smBaseline:R339_SM_BASELINE,
   forecast:R339_FORECAST_CONTRACT,
   continuance:R339_CONTINUANCE,
+  consumers:R339_CALIBRATION_CONSUMERS,
+  propagationReceipt:R339_PROPAGATION_RECEIPT,
   canonicalMutation:false,
   canonicalAdmission:false,
   canonicalAdmissionAuthority:'R125',
