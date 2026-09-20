@@ -5,7 +5,7 @@ export interface SarRasterFieldR283{
  amplitudeDb?:number[];complexI?:number[];complexQ?:number[];phaseRad?:number[];interferogramPhaseRad?:number[];coherence?:number[];losDisplacementM?:number[];elevationM?:number[];polarimetricPower?:number[];multiBandRelative?:number[];timeStackRelative?:number[];uncertainty?:number[];quality?:number[];
  scarBurden?:number[];proofCoverage?:number[];
  derivationR336?:{schema:string;sourceId:string;evidenceClass:string;operators:string[];truthBoundary:string};
- pairDerivationR341?:{schema:string;masterSourceId:string;slaveSourceId:string;gridIdentity:string;windowRadius:number;commonValid:number};
+ pairDerivationR341?:{schema:string;masterSourceId:string;slaveSourceId:string;gridIdentity:string;sampledGridIdentity?:boolean;subpixelCoregistrationBound?:boolean;interferometricPhaseValidity?:'HELD'|'ESTABLISHED';windowRadius:number;commonValid:number};
  ranges?:{nativeIntensity?:[number,number];amplitudeDb?:[number,number];losDisplacementM?:[number,number];elevationM?:[number,number];polarimetricPower?:[number,number];multiBandRelative?:[number,number];timeStackRelative?:[number,number]};
 }
 const at=(a:number[]|undefined,i:number,mask?:number[])=>a&&i>=0&&i<a.length&&Number.isFinite(a[i])&&(!mask||mask[i]>0)?a[i]:null;
