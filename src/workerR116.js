@@ -15,7 +15,7 @@ import {publicQtiR332} from './system/qtiWorkerR332.js';
 import {qtiManifestR332} from './system/qtiControlR332.js';
 import {calibrationManifestR334} from './system/calibrationR334.js';
 import {calibrationPropagationManifestR335} from './system/calibrationPropagationR335.js';
-import {calibrationAdvancementManifestR339} from './system/calibrationAdvancementR339.js';
+import {calibrationAdvancementManifestR339,evaluateFrozenForecastR339} from './system/calibrationAdvancementR339.js';
 
 export {OmegaSwarmCell,OmegaSwarmCoordinator,OmegaSwarmBranch,OmegaSwarmOrgan,OmegaSwarmOrganismCoordinator,OmegaSwarmAutonomicCoordinator};
 
@@ -204,6 +204,11 @@ async function fetchR116(request,env){
  }
  if(path==='/api/system/convergence'&&request.method==='GET')return withCorsR116(json(await convergenceR116(request,env)),request);
  if(path==='/api/system/manifest'&&request.method==='GET')return withCorsR116(json({...manifestR130(),proofClosure:manifestR141(),durableExecution:manifestR146(),executorFabric:manifestR147(),adaptiveSovereignMission:manifestR152(),qtiVerification:qtiManifestR332(),calibration:calibrationManifestR334(),calibrationPropagation:calibrationPropagationManifestR335(),calibrationAdvancement:calibrationAdvancementManifestR339(),coreHealth:{revision:CORE_HEALTH_REVISION,schema:CORE_HEALTH_SCHEMA,path:'/api/core-health'}},200,{'x-omega-control-plane':R130_REVISION}),request);
+ if(path==='/api/system/calibration/r339'&&request.method==='GET')return withCorsR116(json({ok:true,advancement:calibrationAdvancementManifestR339()},200,{'x-omega-calibration-advancement':'R339'}),request);
+ if(path==='/api/system/calibration/r339/evaluate'&&request.method==='POST'){
+  const body=await request.clone().json().catch(()=>({})),result=evaluateFrozenForecastR339(body),status=result.state==='HELD'?400:200;
+  return withCorsR116(json({ok:result.state!=='HELD',result,truthBoundary:'Deterministic evaluation of the frozen R339 restricted-model compatibility contract only. This route cannot retune the contract, create a future observation, authorize execution, or admit CanonState.'},status,{'x-omega-calibration-advancement':'R339','x-omega-forecast-contract':'R339_FROZEN_FORECAST_V4_2026-09-19'}),request);
+ }
  if(path==='/api/system/operational'&&request.method==='GET')return withCorsR116(json(await operationalR130(request,env,probeFetchR130),200,{'x-omega-control-plane':R130_REVISION}),request);
  const response=await r115.fetch(request,env);return withCorsR116(response,request);
 }
