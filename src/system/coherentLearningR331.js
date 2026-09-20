@@ -108,9 +108,19 @@ export function coherenceVectorR331(runtimeContext={},selectedMemory=[]){
  const q=clamp01(baseQ+Math.min(.3,corrections*.035));
  const memorySupport=clamp01(admitted/Math.max(1,selectedMemory.length));
  const stability=clamp01((C*Phi*(.55+.45*evidence))/(q+L+.15));
+ const components={
+  logical:clamp01(1-q),
+  temporal:clamp01(selectedMemory.length?.9:.72),
+  causal:clamp01(.5+.4*C-.15*q),
+  memory:clamp01(.45+.55*memorySupport),
+  evidence:clamp01(evidence),
+  goal:clamp01(.4+.4*C+.2*Phi)
+ };
+ const weights={logical:.2,temporal:.12,causal:.16,memory:.18,evidence:.22,goal:.12};
+ const composite=clamp01(Object.entries(weights).reduce((sum,[key,weight])=>sum+components[key]*weight,0));
  const communicationCoherence=clamp01(.35*C+.2*Phi+.2*evidence+.15*memorySupport+.1*(1-q));
  const decision=stability>=.72?'STAY':stability>=.34?'TURN':'ESCALATE';
- return{continuity:C,plasticity:Phi,contradiction:q,burden:L,evidence,memorySupport,stability,communicationCoherence,decision};
+ return{continuity:C,plasticity:Phi,contradiction:q,burden:L,evidence,memorySupport,components,weights,composite,stability,communicationCoherence,decision,validatedScientificMetric:false};
 }
 
 export function buildCommunicationContextR331(entries,prompt,runtimeContext={}){
@@ -160,7 +170,7 @@ export function compileTrainingBatchR331(entries){
 export function intelligenceManifestR331(){
  return{
   schema:R331_INTELLIGENCE_SCHEMA,revision:R331_INTELLIGENCE_REVISION,
-  loops:['CONVERSATION_CONTINUITY','EPISODIC_MEMORY','EVIDENCE_GATED_SEMANTIC_LEARNING','PROOF_GATED_PROCEDURAL_LEARNING','EXPLICIT_TRAINING_EXPORT'],
+  loops:['WORKING_CONTEXT','CONVERSATION_CONTINUITY','EPISODIC_MEMORY','EVIDENCE_GATED_SEMANTIC_LEARNING','PROOF_GATED_PROCEDURAL_LEARNING','APPEND_ONLY_LEARNING_LEDGER','EXPLICIT_TRAINING_EXPORT'],
   persistence:'OMEGA_RUNTIME_DURABLE_OBJECT_SESSION_SCOPED',
   training:'APPROVED_LESSONS_EXPORT_TO_EXISTING_TRAIN_LOCAL_PIPELINE',
   directFoundationWeightMutation:false,
