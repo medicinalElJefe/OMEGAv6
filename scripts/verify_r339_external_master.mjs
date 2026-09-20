@@ -63,6 +63,10 @@ requireEq(masterRaw.length,EXPECTED.masterOriginalBytes,'master original bytes')
 requireEq(sha(masterRaw),EXPECTED.masterOriginalSha256,'master original SHA256');
 requireEq(masterNorm.length,EXPECTED.masterNormalizedBytes,'master normalized bytes');
 requireEq(sha(masterNorm),EXPECTED.masterNormalizedSha256,'master normalized SHA256');
+const advRawSha=sha(advRaw);
+const advTransportState=advRawSha===EXPECTED.advancementOriginalSha256&&advRaw.length===EXPECTED.advancementOriginalBytes?'ORIGINAL_SOURCE_BYTES'
+ :advRawSha===EXPECTED.advancementNormalizedSha256&&advRaw.length===EXPECTED.advancementNormalizedBytes?'REPOSITORY_NORMALIZED_BYTES':'UNRECOGNIZED_BYTES';
+if(advTransportState==='UNRECOGNIZED_BYTES')throw new Error(`advancement raw transport identity is unrecognized: bytes=${advRaw.length} sha256=${advRawSha}`);
 requireEq(advNorm.length,EXPECTED.advancementNormalizedBytes,'advancement normalized bytes');
 requireEq(sha(advNorm),EXPECTED.advancementNormalizedSha256,'advancement normalized SHA256');
 
@@ -106,7 +110,7 @@ const receipt={
  schema:'OMEGA_R339_EXTERNAL_MASTER_VERIFICATION',
  verified:true,
  master:{path:masterPath,originalBytes:masterRaw.length,originalSha256:sha(masterRaw),normalizedBytes:masterNorm.length,normalizedSha256:sha(masterNorm),records:master.rows.length,columns:master.header.length},
- advancement:{path:advPath,normalizedBytes:advNorm.length,normalizedSha256:sha(advNorm),records:adv.rows.length,columns:adv.header.length,stageCensus},
+ advancement:{path:advPath,transportState:advTransportState,rawBytes:advRaw.length,rawSha256:advRawSha,normalizedBytes:advNorm.length,normalizedSha256:sha(advNorm),records:adv.rows.length,columns:adv.header.length,stageCensus},
  prefix:{records:EXPECTED.r334PrefixRecords,bytes:prefix.length,sha256:sha(prefix),state:'EXACT_R334_MASTER_V3_PREFIX'},
  suffix:{records:suffix.length,payloadAggregateBytes:payloadAggregate.length,payloadAggregateSha256:sha(payloadAggregate),state:'EXACT_ADVANCEMENT_ROW_PAYLOAD_AND_ROW_HASH_MATCH'},
  sourceExactCensus:exactCensus,
