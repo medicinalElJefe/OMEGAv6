@@ -53,6 +53,9 @@ export function auditR314(root=process.cwd()){
  const engineSource=read(enginePath);
  const state=JSON.parse(read(selfbuildPath));
  const sourceCanonExists=exists(sourceCanonPath),sourceCanonBytes=sourceCanonExists?fs.readFileSync(sourceCanonPath):Buffer.alloc(0),sourceCanonSha=sourceCanonExists?createHash('sha256').update(sourceCanonBytes).digest('hex'):'',sourceCanonLines=sourceCanonExists?sourceCanonBytes.toString('utf8').split(/\r?\n/).filter((x,i,all)=>i<all.length-1||x.length>0).length:0,sourceCanonRecords=Math.max(0,sourceCanonLines-1);
+ const calibrationMeta=(file,expectedSha,expectedRecords)=>{const present=exists(file),bytes=present?fs.readFileSync(file):Buffer.alloc(0),sha256=present?createHash('sha256').update(bytes).digest('hex'):'',lines=present?bytes.toString('utf8').split(/\r?\n/).filter((x,i,all)=>i<all.length-1||x.length>0).length:0,records=Math.max(0,lines-1);return{present,sha256,expectedSha,records,expectedRecords,path:path.relative(root,file).replaceAll('\\','/')}};
+ const r334Closure=calibrationMeta(r334ClosurePath,'bbb0a6957512a0fd87a0668c914b62be459910e011c2c882b3d96c38cb844d8c',23);
+ const r334Bridge=calibrationMeta(r334BridgePath,'2fa0753e49445b9e8d0d7b56b320503aec61e091a3f7eae17619c74ad84936ba',36);
 
  const capabilities=countCapabilityRows(capabilitySource);
  const archives=archiveIds(archiveSource);
