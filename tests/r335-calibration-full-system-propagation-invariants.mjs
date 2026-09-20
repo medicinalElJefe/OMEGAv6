@@ -44,7 +44,7 @@ assert.equal(R335_PROPAGATION_RECEIPT.state,'PROPAGATION_CLOSED');
 assert.equal(R335_PROPAGATION_RECEIPT.canonicalAdmission,false);
 
 const requiredConsumers=[
- 'CAPABILITY_DATASET_REGISTRY','MODE_REALIZATION_REGISTRY','RELATIVITY_RUNTIME',
+ 'CAPABILITY_DATASET_REGISTRY','MODE_REALIZATION_REGISTRY','ALL_MODES_TRUTH_FUSION','UNIVERSAL_TRUTH_ENVELOPE','RELATIVITY_RUNTIME',
  'RELATIVITY_SURFACE','RELATIONAL_RUNTIME','WORKER_MANIFEST','CONVERGENCE_MASTER',
  'CONVERGENCE_AUDIT','R170_AUTONOMY'
 ];
@@ -56,6 +56,12 @@ for(const token of ['CERN_MASTER_R334','CERN_BRIDGE_R334','CERN_CLOSURE_R334','C
 
 const modes=read('src/modeRealizationRegistryR280.ts');
 for(const token of ["calibrationManifestR334","calibrationContext:{...calibrationManifestR334(),propagationRevision:'R335'","'OVERALL CANON MODE'","'Dewey Calculus Mode'","src/system/calibrationR334.js"])assert.ok(modes.includes(token),'mode propagation missing '+token);
+
+const fusion=read('src/allModesTruthFusionR151.ts');
+for(const token of ["calibrationPropagationManifestR335","calibrationContext:calibrationPropagationManifestR335()","ZERO independent empirical voting weight"])assert.ok(fusion.includes(token),'all-mode calibration propagation missing '+token);
+
+const truthEnvelope=read('src/universalTruthEnvelopeR152.ts');
+for(const token of ["calibrationPropagationManifestR335","calibrationContext:calibrationPropagationManifestR335()","cannot promote reconstructed or derived quantities into empirical evidence"])assert.ok(truthEnvelope.includes(token),'truth-envelope calibration propagation missing '+token);
 
 const physics=read('src/physicsRelativityRuntimeR132.ts');
 assert.ok(physics.includes("import {calibratedRelativityR334}"));
@@ -106,4 +112,4 @@ assert.throws(()=>extractFinalTopLevelJson('diagnostic only\n'));
 const moduleSource=read('src/system/calibrationPropagationR335.js');
 for(const forbidden of ['canonicalMutation:true','canonicalAdmission:true','executionAuthority:true','authorizationAuthority:true'])assert.ok(!moduleSource.includes(forbidden),'R335 propagation gained forbidden authority '+forbidden);
 
-console.log('R335 FULL-SYSTEM CALIBRATION PROPAGATION PASS · exact four-source hash/census identity · relevant runtime/mode/UI/worker/convergence/autonomy consumers bound · R170 mixed-stdout proposal boundary repaired · R125 admission preserved · no raw experimental overwrite or new scientific claim');
+console.log('R335 FULL-SYSTEM CALIBRATION PROPAGATION PASS · exact four-source hash/census identity · runtime/all-mode/truth-envelope/mode/UI/worker/convergence/autonomy consumers bound · R170 mixed-stdout proposal boundary repaired · R125 admission preserved · no raw experimental overwrite or new scientific claim');
