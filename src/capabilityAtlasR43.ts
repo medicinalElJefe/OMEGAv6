@@ -8,7 +8,11 @@ export const R43_DATASETS=[
  {id:'AUTOPING',rows:20736,columns:35,label:'PSC AutoPing Expanded Build'},
  {id:'CALCULUS',rows:20736,columns:47,label:'Dewey Relational Calculus'},
  {id:'RELATIVITY',rows:20736,columns:119,label:'Dewey Relativity Calculus Tree'},
- {id:'CARRY',rows:20736,columns:30,label:'PSC Next Carry Realization Index'}
+ {id:'CARRY',rows:20736,columns:30,label:'PSC Next Carry Realization Index'},
+ {id:'CERN_MASTER_R334',rows:4260,columns:68,label:'R334 CERN/Omega Advanced Master v3 · calibrated source-exact + derived closure'},
+ {id:'CERN_BRIDGE_R334',rows:4237,columns:68,label:'R334 Advanced Quantitative Bridge v2 · pre-closure calibrated bridge'},
+ {id:'CERN_CLOSURE_R334',rows:23,columns:14,label:'R334 Dewey Relativity Closure v3 · executable calibrated closure'},
+ {id:'CERN_ADV_R334',rows:36,columns:18,label:'R334 ADV-02→ADV-04 Quantitative Bridge · executable cross-representation results'}
 ] as const;
 
 export const R43_CORE_MODES=[

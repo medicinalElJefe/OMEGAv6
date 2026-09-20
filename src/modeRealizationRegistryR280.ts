@@ -63,7 +63,7 @@ const BINDINGS:Record<string,ModeBindingR280>=Object.freeze({
     boundary:'The lattice is a finite state/address space.'
   },
   'Dimensional Relativity Mode':{
-    artifacts:['src/weaveStateR100.ts','src/physicsRelativityRuntimeR132.ts'],tests:['tests/dimensional-relativity-r24-invariants.mjs','tests/r77-woven-continuity-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'declared frame + transform + state',outputContract:'frame-relative representation with invariant/scar carry',
+    artifacts:['src/weaveStateR100.ts','src/physicsRelativityRuntimeR132.ts','src/system/calibrationR334.js'],tests:['tests/dimensional-relativity-r24-invariants.mjs','tests/r77-woven-continuity-invariants.mjs','tests/r334-calibration-convergence-invariants.mjs'],executionClass:'DOMAIN_RUNTIME',inputContract:'declared frame + transform + state',outputContract:'frame-relative representation with invariant/scar carry',
     boundary:'Frame-relative representation does not assert additional physical dimensions.'
   },
   'Phase Elasticity Field':{

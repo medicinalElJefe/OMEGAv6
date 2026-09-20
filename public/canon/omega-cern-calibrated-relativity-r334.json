@@ -1,0 +1,38 @@
+{
+  "schema": "OMEGA_CERN_CALIBRATED_RELATIVITY_RECEIPT_R334",
+  "revision": "R334",
+  "datasets": {
+    "advancedMasterV3": {
+      "records": 4260,
+      "columns": 68,
+      "originalSha256": "c2a5966b0a4aa3aa2de2acd18491e2333653290eaa312058fd1dfe0f1446a18d",
+      "repositoryNormalizedSha256": "a3677e2b5a22b37235948999ed0896defbf706d13531676e84448096231913f4",
+      "composition": "4237-row Advanced Quantitative Bridge v2 exact prefix + 23-row Dewey Relativity Closure v3 suffix"
+    },
+    "advancedQuantitativeBridgeV2": {
+      "records": 4237,
+      "columns": 68,
+      "originalSha256": "2cfab8182563c598e86c30a18de418331c2319839f1900a03f6687c2fe01a3d2",
+      "repositoryNormalizedSha256": "72659e188f0d3b80d4fcc4ad960b1986797a6a823b0801bd99aef58bba5d6b82"
+    },
+    "relativityClosureV3": {
+      "records": 23,
+      "columns": 14,
+      "publicPath": "/canon/Dewey_OMEGA_CERN_Dewey_Relativity_Closure_v3_2026-09-19.csv",
+      "originalSha256": "98a0ac1c820e10aef307364e1efc996e3e3167d9192bca96352cda75f57b02fb",
+      "repositoryNormalizedSha256": "bbb0a6957512a0fd87a0668c914b62be459910e011c2c882b3d96c38cb844d8c"
+    },
+    "adv02Adv04Bridge": {
+      "records": 36,
+      "columns": 18,
+      "publicPath": "/canon/Dewey_OMEGA_CERN_ADV02_ADV04_Quantitative_Bridge_2026-09-19.csv",
+      "originalSha256": "6eb08be1ba49e1dd234c1ea621ce86ddf976add16fba1fb4dbfa58b0bc317f34",
+      "repositoryNormalizedSha256": "2fa0753e49445b9e8d0d7b56b320503aec61e091a3f7eae17619c74ad84936ba"
+    }
+  },
+  "calibratedRows": 59,
+  "sourceExactR328Separate": true,
+  "canonicalAdmission": false,
+  "externalReplicationGate": "OPEN",
+  "truthBoundary": "R334 integrates the calibrated bridge/closure without promoting reconstructed or approximate quantities into raw experimental observation or an official ATLAS+CMS combination."
+}
