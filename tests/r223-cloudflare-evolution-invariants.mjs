@@ -45,6 +45,7 @@ const manifest=JSON.parse(fs.readFileSync('cloudflare/omega-cloud-machine.json',
 const workflow=fs.readFileSync('.github/workflows/r223-cloudflare-evolution.yml','utf8');
 assert.match(machine,/cloud\/evolution-/,'CLOUD-01 must isolate its generated source branch namespace');
 assert.match(machine,/candidate\?\.receipt\?\.baseSha/,'promotion must bind original candidate base receipt');
+assert.match(machine,/\['push','workflow_dispatch'\]\.includes\(r\.event\)/,'CLOUD-01 must recognize canonical production proof from either ordinary main push or exact R340 workflow dispatch');
 assert.match(machine,/head_sha=\$\{headSha\}.*event=pull_request/,'proof lookup must bind exact PR head');
 assert.match(machine,/sha:headSha,merge_method:'merge'/,'merge must use expected-head locking');
 assert.match(machine,/main drifted during promotion gate/,'main must be rechecked immediately before merge');
