@@ -3,7 +3,7 @@ import fs from'node:fs';
 import{R337_TESTABLE}from'../src/sarMeasurementRasterR337.js';
 
 const read=p=>fs.readFileSync(p,'utf8');
-const measurement=read('src/sarMeasurementRasterR337.js'),native=read('src/sarNativeRasterR326.js'),raster=read('src/sarRasterR283.ts'),worker=read('src/workerR8.js'),live=read('src/SARLiveTruthR285.tsx'),pair=read('src/sarPairPlannerR337.ts');
+const measurement=read('src/sarMeasurementRasterR337.js'),native=read('src/sarNativeRasterR326.js'),raster=read('src/sarRasterR283.ts'),worker=read('src/workerR8.js'),live=read('src/SARLiveTruthR285.tsx'),pair=read('src/sarPairPlannerR337.ts'),catalog=read('src/sarLiveCatalogR285.js'),probe=read('src/sarAssetProbeR325.js');
 
 const bytes=new Uint8Array(4),dv=new DataView(bytes.buffer);dv.setInt16(0,-3,true);dv.setInt16(2,4,true);
 const z=R337_TESTABLE.complexAt(bytes,0,true);
@@ -14,6 +14,8 @@ for(const token of ['SAR_MEASUREMENT_RASTER_SCHEMA_R337','sentinel-1-slc','meta.
 assert.ok(measurement.includes("meta.compression!==1"),'SLC ingress must fail closed on non-standard compression');
 assert.ok(measurement.includes('does not establish radiometric calibration, co-registration, coherence, interferometric phase between acquisitions'),'complex source truth boundary missing');
 assert.ok(native.includes('export const R326_INTERNAL'),'R337 must reuse the bounded proven TIFF primitives instead of creating an unrestricted fetch path');
+for(const source of [catalog,probe]){assert.ok(source.includes('alternate?.https?.href'),'R337 must resolve the STAC-declared alternate HTTPS measurement location');assert.ok(source.includes('STAC_ALTERNATE_HTTPS'),'alternate transport authority must remain explicit')}
+assert.ok(live.includes('assetRank')&&live.includes('/tiff|geotiff/i'),'live source selection must prioritize measurement TIFFs over whole-product archives');
 for(const token of ['complexI?:number[]','complexQ?:number[]','phaseRad?:number[]'])assert.ok(raster.includes(token),`R337 raster contract missing ${token}`);
 assert.ok(worker.includes("import {sarMeasurementRasterR337} from './sarMeasurementRasterR337.js'")&&worker.includes("url.pathname==='/api/earth/sar/measurement-raster'"),'canonical Earth worker must expose unified R337 measurement route');
 
