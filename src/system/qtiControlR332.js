@@ -88,9 +88,10 @@ export function evaluateQtiR332(proposal={},state={}){
 
  const externalRequired=required.has('G6_EXTERNAL_CONSEQUENCE');
  const externalClass=clean(external.classification).toUpperCase();
- const externalAllowed=proposal.externalEffect!==true||bool(external.allowed);
- const externalBounded=proposal.externalEffect!==true||['LOW','MEDIUM','HIGH','CRITICAL'].includes(externalClass);
- const g6Outcome=!externalRequired?'PASS':externalAllowed&&externalBounded?'PASS':proposal.externalEffect===true&&externalAllowed===false?'DENY':'REVISE';
+ const externalEffect=proposal.externalEffect===true||externalRequired;
+ const externalAllowed=!externalRequired||bool(external.allowed);
+ const externalBounded=!externalRequired||['LOW','MEDIUM','HIGH','CRITICAL'].includes(externalClass);
+ const g6Outcome=!externalRequired?'PASS':external.allowed===false?'DENY':externalAllowed&&externalBounded?'PASS':'REVISE';
 
  const securityPass=bool(security.isolated)&&bool(security.inputValidated)&&bool(security.policyIntegrity)&&security.unresolvedCriticalThreat!==true;
  const g7Outcome=security.unresolvedCriticalThreat===true?'DENY':securityPass?'PASS':'REVISE';
@@ -114,7 +115,7 @@ export function evaluateQtiR332(proposal={},state={}){
   result('G3_PERMISSION',g3Outcome,required.has('G3_PERMISSION'),permissionPass?'capability and scope are admitted':'capability/scope proof missing or revoked',{capability:Boolean(permissions.capability),scopeAllowed:Boolean(permissions.scopeAllowed),revoked:permissions.revoked===true}),
   result('G4_RESOURCE_BUDGET',g4Outcome,required.has('G4_RESOURCE_BUDGET'),budgetExceeded?'declared resource budget exceeded':budgetSeen?'declared budgets within bounds':'resource budget evidence missing',{budgetSeen,budgetExceeded}),
   result('G5_REVERSIBILITY',g5Outcome,required.has('G5_REVERSIBILITY'),rollbackDeclared?'rollback/safe-undo evidence present':'required rollback/recovery evidence missing',{rollbackDeclared,irreversibleAcknowledged}),
-  result('G6_EXTERNAL_CONSEQUENCE',g6Outcome,required.has('G6_EXTERNAL_CONSEQUENCE'),externalRequired?'external consequence classification evaluated':'no external-consequence gate required',{externalEffect:proposal.externalEffect===true,classification:externalClass||null,allowed:externalAllowed}),
+  result('G6_EXTERNAL_CONSEQUENCE',g6Outcome,required.has('G6_EXTERNAL_CONSEQUENCE'),externalRequired?'external consequence classification evaluated':'no external-consequence gate required',{externalEffect,classification:externalClass||null,allowed:externalAllowed}),
   result('G7_SECURITY',g7Outcome,required.has('G7_SECURITY'),securityPass?'security/isolation checks pass':'security evidence incomplete or critical threat unresolved',{isolated:Boolean(security.isolated),inputValidated:Boolean(security.inputValidated),policyIntegrity:Boolean(security.policyIntegrity),unresolvedCriticalThreat:security.unresolvedCriticalThreat===true}),
   result('G8_HUMAN_AUTHORIZATION',g8Outcome,required.has('G8_HUMAN_AUTHORIZATION'),humanRequired?(humanPresent?'human approval presented':'human approval required but absent'):'human approval not required by this proposal class',{approved:Boolean(humanPresent),stateBound:Boolean(humanStateBound)}),
   result('G9_SIMULATION_VALIDATION',g9Outcome,required.has('G9_SIMULATION_VALIDATION'),simulationRequired?`simulation ${clean(simulation.status)||'MISSING'} @ ${clamp(simulation.confidence).toFixed(3)}`:'simulation not required',{status:clean(simulation.status)||null,confidence:clamp(simulation.confidence)}),
