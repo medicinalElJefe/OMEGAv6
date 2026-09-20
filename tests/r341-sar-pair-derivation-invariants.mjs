@@ -52,6 +52,6 @@ assert.ok(live.includes("sampledGridIdentityBound:true"),'R341 live observation 
 assert.ok(live.includes("coRegistrationBound:false"),'R341 must not equate exact sampled-grid identity with physical TOPS co-registration');
 assert.ok(live.includes("subpixelCoregistrationBound:false"),'R341 must keep subpixel co-registration held until residual proof exists');
 assert.ok(live.includes("timeStackCount:2"),'R341 two-epoch temporal field must carry explicit epoch count');
-assert.ok(live.includes("deformation remains held"),'R341 UI must not promote wrapped pair phase into deformation');
+assert.ok(live.includes("coRegistrationBound:false")&&live.includes("subpixelCoregistrationBound:false")&&live.includes("interferometricPhaseValidity:'HELD'"),'R341 UI must keep physical interferometry and deformation held until TOPS coregistration proof');
 
 console.log('R341.1 SAR PAIR DERIVATION PASS · exact sampled-grid identity separated from TOPS subpixel coregistration · master×conj(slave) cross-phase · normalized complex correlation · scale-invariant ln amplitude ratio · source phase remains distinct · phase-valid interferometry and deformation stay held');
