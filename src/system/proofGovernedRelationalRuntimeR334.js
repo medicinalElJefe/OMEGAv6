@@ -1,5 +1,6 @@
 import {evaluateQtiR332,verifyObservedOutcomeR332} from './qtiControlR332.js';
 import {calibratedRelativityR334,calibrationManifestR334} from './calibrationR334.js';
+import {calibrationForecastManifestR340} from './calibrationForecastR340.js';
 
 export const R334_RELATIONAL_SCHEMA='OMEGA_PROOF_GOVERNED_RELATIONAL_RUNTIME_R334';
 export const R334_RELATIONAL_REVISION='R334';
@@ -241,6 +242,7 @@ export function relationalManifestR334(){
   ledger:'APPEND_ONLY_HASH_BOUND_EVENT',
   returnProof:'R332_POSTCONDITION_REQUIRED_BEFORE_NEXT_PARENT_PROPOSAL',
   calibration:calibrationManifestR334(),
+  calibrationForecast:calibrationForecastManifestR340(),
   authorizationAuthority:false,
   executionAuthority:false,
   canonicalAdmission:false,
@@ -276,4 +278,5 @@ export const R334_B06_PROGRESS_RECEIPT=Object.freeze({
  authorizationAuthority:false,
  executionAuthority:false,
  calibrationRelease:calibrationManifestR334().releaseId,
+ calibrationForecastRelease:calibrationForecastManifestR340().releaseId,
 });
