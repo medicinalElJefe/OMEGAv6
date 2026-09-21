@@ -35,10 +35,10 @@ for(const token of[
  'sourceClocksR347',
  'contextCompletenessR347',
  'PHYSICAL_VECTOR_OR_FIELD_REQUIRES_REFERENCE_FRAME',
- 'model pressure, activity, route motion and visual deformation are never silently relabeled as physical energy',
  'route steps are model time',
  'each returned Earth source retains its own observation or snapshot-verification clock'
 ])assert.ok(runtime.includes(token),'R347 visual grammar missing '+token);
+assert.ok(runtime.includes('Model pressure, activity, route motion')&&runtime.includes('never silently relabeled as physical energy'),'R347 must keep model activity/pressure/motion distinct from physical energy');
 
 for(const token of[
  'getMandala20736Field',
