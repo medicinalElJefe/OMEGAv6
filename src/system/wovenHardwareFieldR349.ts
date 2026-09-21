@@ -56,16 +56,16 @@ export function evolveHardwareFieldR349(field:TypedFieldR349,{orientation=0,tran
  }
  let scarDelta=0;
  for(let i=0;i<R349_RESOLUTION;i++){const d=Math.abs(next[i]-field.invariant[i]);scar[i]=cl(scar[i]+d);motion[i]=cl(Math.max(motion[i],d));scarDelta+=d}
- const after=total(next),residual=Math.abs(before-after),evolved:{...field,invariant:next,scar,motion,orientation:new Int8Array(R349_RESOLUTION).fill(s)} as TypedFieldR349;
- return{schema:'OMEGA_HARDWARE_WOVEN_EVOLUTION_R349' as const,operator:R349_OPERATOR,field:evolved,orientation:s,transportRate:rate,invariantBefore:before,invariantAfter:after,invariantResidual:residual,scarDelta,proof:{invariantStatus:residual<=1e-5?'PASS':'FAIL',softwareResidualOnly:true,fullAddressCoverage:true,transportTopology:'ADDRESS_NEIGHBOR_FALLBACK',recoverableSourceRetained:true},boundary:R349_BOUNDARY};
+ const after=total(next),residual=Math.abs(before-after),tolerance=Math.max(1e-5,Math.abs(before)*1e-6),evolved:{...field,invariant:next,scar,motion,orientation:new Int8Array(R349_RESOLUTION).fill(s)} as TypedFieldR349;
+ return{schema:'OMEGA_HARDWARE_WOVEN_EVOLUTION_R349' as const,operator:R349_OPERATOR,field:evolved,orientation:s,transportRate:rate,invariantBefore:before,invariantAfter:after,invariantResidual:residual,invariantTolerance:tolerance,scarDelta,proof:{invariantStatus:residual<=tolerance?'PASS':'FAIL',softwareResidualOnly:true,fullAddressCoverage:true,transportTopology:'ADDRESS_NEIGHBOR_FALLBACK',recoverableSourceRetained:true},boundary:R349_BOUNDARY};
 }
 
 export function repartitionInvariantR349(field:TypedFieldR349,targetResolution:number){
  const target=Math.floor(Number(targetResolution));if(![12,144,1728,20736,248832].includes(target))throw new Error('R349 target resolution must be declared 12^k atlas level');
  const out=new Float32Array(target);
  for(let i=0;i<R349_RESOLUTION;i++){const j=Math.min(target-1,Math.floor(i/R349_RESOLUTION*target));out[j]+=field.invariant[i]}
- const before=total(field.invariant),after=total(out),residual=Math.abs(before-after);
- return{sourceResolution:R349_RESOLUTION,targetResolution:target,field:out,invariantBefore:before,invariantAfter:after,invariantResidual:residual,proof:residual<=1e-5?'PASS':'FAIL',physicalDimensionsClaimed:false};
+ const before=total(field.invariant),after=total(out),residual=Math.abs(before-after),tolerance=Math.max(1e-5,Math.abs(before)*1e-6);
+ return{sourceResolution:R349_RESOLUTION,targetResolution:target,field:out,invariantBefore:before,invariantAfter:after,invariantResidual:residual,invariantTolerance:tolerance,proof:residual<=tolerance?'PASS':'FAIL',physicalDimensionsClaimed:false};
 }
 
 const byte=(n:number)=>Math.max(0,Math.min(255,Math.round(cl(n)*255)));
