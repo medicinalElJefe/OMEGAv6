@@ -9,29 +9,30 @@
   "generatorContract": "R245_SHARED_CANONICAL_GENERATOR",
   "residualPolicy": "OMEGA_R170_AUTONOMOUS_SOURCE_RESIDUAL_POLICY_V1",
   "capsule": {
-    "id": "SG002",
-    "title": "Deployment convergence receipt",
-    "objective": "Represent published source, runtime source, asset propagation and acceptance as distinct states without treating reachability as promotion.",
-    "target": "src/generated/selfbuildR170/deploymentConvergenceReceiptR170.ts",
-    "risk": "LOW",
+    "id": "SG005",
+    "title": "Current capability projection",
+    "objective": "Project admitted source capabilities by authority, liveness and proof class without promoting availability into execution or Canon truth.",
+    "target": "src/generated/selfbuildR170/currentCapabilityProjectionR170.ts",
+    "risk": "MEDIUM",
     "prerequisites": [
-      "SG001"
+      "SG003",
+      "SG004"
     ],
-    "expectedGain": 0.95,
-    "complexity": 0.28,
-    "contradictionRisk": 0.06,
+    "expectedGain": 0.93,
+    "complexity": 0.4,
+    "contradictionRisk": 0.1,
     "pressure": {
       "contradiction": 0,
       "burden": 0.08333333333333333,
       "residual": 0.42,
       "userValueDeficit": 0,
-      "bottleneck": 0.25,
+      "bottleneck": 0,
       "continuity": 0.8491666666666666,
       "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
       "userValueSignal": "NOT_INFERRED"
     }
   },
-  "score": 1.741461764705882,
+  "score": 0.7851190200000001,
   "frontier": {
     "schema": "OMEGA_RECURSIVE_SELFBUILD_FRONTIER_R240",
     "revision": "R240",
@@ -45,50 +46,30 @@
     },
     "sparseActivation": true,
     "maxParallel": 7,
-    "readyCount": 2,
+    "readyCount": 1,
     "evidenceState": "RESIDUALS_PRESENT",
     "pressureProvenance": "R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DEPENDENCY_TOPOLOGY",
     "frontier": [
       {
         "rank": 1,
-        "id": "SG002",
-        "title": "Deployment convergence receipt",
-        "target": "src/generated/selfbuildR170/deploymentConvergenceReceiptR170.ts",
-        "risk": "LOW",
-        "score": 1.741461764705882,
+        "id": "SG005",
+        "title": "Current capability projection",
+        "target": "src/generated/selfbuildR170/currentCapabilityProjectionR170.ts",
+        "risk": "MEDIUM",
+        "score": 0.7851190200000001,
         "pressure": {
           "contradiction": 0,
           "burden": 0.08333333333333333,
           "residual": 0.42,
           "userValueDeficit": 0,
-          "bottleneck": 0.25,
+          "bottleneck": 0,
           "continuity": 0.8491666666666666,
           "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
           "userValueSignal": "NOT_INFERRED"
         },
         "dependencies": [
-          "SG001"
-        ]
-      },
-      {
-        "rank": 2,
-        "id": "SG003",
-        "title": "Residual read-only projection",
-        "target": "src/generated/selfbuildR170/residualReadOnlyProjectionR170.ts",
-        "risk": "LOW",
-        "score": 1.532882702702703,
-        "pressure": {
-          "contradiction": 0,
-          "burden": 0.08333333333333333,
-          "residual": 0.42,
-          "userValueDeficit": 0,
-          "bottleneck": 0.25,
-          "continuity": 0.8491666666666666,
-          "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
-          "userValueSignal": "NOT_INFERRED"
-        },
-        "dependencies": [
-          "SG001"
+          "SG003",
+          "SG004"
         ]
       }
     ],
@@ -106,27 +87,20 @@
       "lanes": 20736,
       "deepAddress": 248832,
       "allocatedCells": 5,
-      "activeCells": 2
+      "activeCells": 1
     },
     "activeCells": [
       {
-        "id": "SG002",
-        "address": "O00.B000.C01",
-        "score": 1.741461764705882,
-        "roleCount": 8,
-        "state": "READY"
-      },
-      {
-        "id": "SG003",
-        "address": "O00.B000.C02",
-        "score": 1.532882702702703,
+        "id": "SG005",
+        "address": "O00.B000.C04",
+        "score": 0.7851190200000001,
         "roleCount": 8,
         "state": "READY"
       }
     ],
-    "packetCount": 16,
+    "packetCount": 8,
     "scarCount": 1,
-    "sourceMutationCandidateId": "SG002",
+    "sourceMutationCandidateId": "SG005",
     "parallelPlanning": true,
     "parallelEvaluation": true,
     "parallelSourceMutation": false,
@@ -184,8 +158,8 @@
       "RECONTEXTUALIZE",
       "ADAPT_NEXT_CONTEXT"
     ],
-    "sampleCount": 2,
-    "confidence": 0.16666666666666666,
+    "sampleCount": 5,
+    "confidence": 0.4166666666666667,
     "trend": 0,
     "calibrationDelta": 0,
     "adaptiveCoherence": 0.7875385244136062,
@@ -202,6 +176,9 @@
       "futurePreservation": 0.8151717068711635,
       "provenance": [
         "R265_CURRENT_STATE",
+        "RETURNED_PROOF",
+        "RETURNED_PROOF",
+        "RETURNED_PROOF",
         "RETURNED_PROOF",
         "RETURNED_PROOF"
       ]
@@ -230,12 +207,12 @@
   },
   "receipt": {
     "schema": "OMEGA_SELFBUILD_CANDIDATE_RECEIPT_R170",
-    "generation": 2,
-    "capsuleId": "SG002",
-    "target": "src/generated/selfbuildR170/deploymentConvergenceReceiptR170.ts",
-    "startedAt": "2026-09-20T21:08:26.901Z",
-    "baseSha": "ceda8dea307dbc342782b2539404440092475296",
-    "branch": "selfbuild/r170-g2-sg002-35537743983",
+    "generation": 5,
+    "capsuleId": "SG005",
+    "target": "src/generated/selfbuildR170/currentCapabilityProjectionR170.ts",
+    "startedAt": "2026-09-20T23:49:20.268Z",
+    "baseSha": "d7caa6ae51ea87e030178f694f9a80faa82a08af",
+    "branch": "selfbuild/r170-g5-sg005-35545744085",
     "candidateSha": null,
     "residualGate": "PASS",
     "residualEvidence": {
@@ -290,50 +267,30 @@
       },
       "sparseActivation": true,
       "maxParallel": 7,
-      "readyCount": 2,
+      "readyCount": 1,
       "evidenceState": "RESIDUALS_PRESENT",
       "pressureProvenance": "R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DEPENDENCY_TOPOLOGY",
       "frontier": [
         {
           "rank": 1,
-          "id": "SG002",
-          "title": "Deployment convergence receipt",
-          "target": "src/generated/selfbuildR170/deploymentConvergenceReceiptR170.ts",
-          "risk": "LOW",
-          "score": 1.741461764705882,
+          "id": "SG005",
+          "title": "Current capability projection",
+          "target": "src/generated/selfbuildR170/currentCapabilityProjectionR170.ts",
+          "risk": "MEDIUM",
+          "score": 0.7851190200000001,
           "pressure": {
             "contradiction": 0,
             "burden": 0.08333333333333333,
             "residual": 0.42,
             "userValueDeficit": 0,
-            "bottleneck": 0.25,
+            "bottleneck": 0,
             "continuity": 0.8491666666666666,
             "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
             "userValueSignal": "NOT_INFERRED"
           },
           "dependencies": [
-            "SG001"
-          ]
-        },
-        {
-          "rank": 2,
-          "id": "SG003",
-          "title": "Residual read-only projection",
-          "target": "src/generated/selfbuildR170/residualReadOnlyProjectionR170.ts",
-          "risk": "LOW",
-          "score": 1.532882702702703,
-          "pressure": {
-            "contradiction": 0,
-            "burden": 0.08333333333333333,
-            "residual": 0.42,
-            "userValueDeficit": 0,
-            "bottleneck": 0.25,
-            "continuity": 0.8491666666666666,
-            "provenance": "R164_RETURNED_RESIDUAL_EVIDENCE",
-            "userValueSignal": "NOT_INFERRED"
-          },
-          "dependencies": [
-            "SG001"
+            "SG003",
+            "SG004"
           ]
         }
       ],
@@ -351,27 +308,20 @@
         "lanes": 20736,
         "deepAddress": 248832,
         "allocatedCells": 5,
-        "activeCells": 2
+        "activeCells": 1
       },
       "activeCells": [
         {
-          "id": "SG002",
-          "address": "O00.B000.C01",
-          "score": 1.741461764705882,
-          "roleCount": 8,
-          "state": "READY"
-        },
-        {
-          "id": "SG003",
-          "address": "O00.B000.C02",
-          "score": 1.532882702702703,
+          "id": "SG005",
+          "address": "O00.B000.C04",
+          "score": 0.7851190200000001,
           "roleCount": 8,
           "state": "READY"
         }
       ],
-      "packetCount": 16,
+      "packetCount": 8,
       "scarCount": 1,
-      "sourceMutationCandidateId": "SG002",
+      "sourceMutationCandidateId": "SG005",
       "parallelPlanning": true,
       "parallelEvaluation": true,
       "parallelSourceMutation": false,
@@ -429,8 +379,8 @@
         "RECONTEXTUALIZE",
         "ADAPT_NEXT_CONTEXT"
       ],
-      "sampleCount": 2,
-      "confidence": 0.16666666666666666,
+      "sampleCount": 5,
+      "confidence": 0.4166666666666667,
       "trend": 0,
       "calibrationDelta": 0,
       "adaptiveCoherence": 0.7875385244136062,
@@ -447,6 +397,9 @@
         "futurePreservation": 0.8151717068711635,
         "provenance": [
           "R265_CURRENT_STATE",
+          "RETURNED_PROOF",
+          "RETURNED_PROOF",
+          "RETURNED_PROOF",
           "RETURNED_PROOF",
           "RETURNED_PROOF"
         ]
@@ -511,8 +464,8 @@
       "R239 Hybrid resource governor remains separate and preserved.",
       "R125 remains sole CanonState admission authority."
     ],
-    "provedAt": "2026-09-20T21:09:03.759Z",
-    "productionRunId": "35537510088"
+    "provedAt": "2026-09-20T23:49:50.396Z",
+    "productionRunId": "35545549316"
   },
   "status": "PROVED_PENDING_PR"
 }
