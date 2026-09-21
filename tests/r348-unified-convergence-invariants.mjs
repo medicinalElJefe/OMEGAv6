@@ -2,6 +2,7 @@ import assert from'node:assert/strict';
 import fs from'node:fs';
 
 const engine=fs.readFileSync('src/system/unifiedConvergenceR348.ts','utf8');
+const deweyKernel=fs.readFileSync('src/system/deweyReferenceKernelR348.ts','utf8');
 const ui=fs.readFileSync('src/OmegaUnifiedConvergenceR348.tsx','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 const accepted=fs.readFileSync('src/acceptedProductionContractR95.ts','utf8');
@@ -31,6 +32,10 @@ for(const token of[
  'probability:null'
 ])assert.ok(engine.includes(token),'R348 convergence engine missing '+token);
 
+for(const token of['DEWEY_REFERENCE_KERNEL_R348','compileB0StandardR348','compileB3CanonicalStateR348','compileB4MotionR348','compileB5ParentR348','compileB6GateR348','compileGravityMotionAddressR348','executeDeweyReferenceKernelR348','B4'||'B5'])assert.ok(deweyKernel.includes(token),'R348 executable Dewey kernel missing '+token);
+assert.ok(deweyKernel.includes('9c0701b81fcd5d83444c5e8b2da362c01bab3067d6efec9cfd9ea775db1349ae'),'Dewey kernel must bind the exact supplied reference source hash');
+assert.ok(engine.includes('executeDeweyReferenceKernelR348(record?.deweyReferencePacket??null)'),'unified convergence must expose source-bound Dewey computation without synthesizing a packet');
+
 assert.equal(manifest.schema,'OMEGA_R348_CONVERGENCE_SOURCE_MANIFEST');
 assert.equal(manifest.sources.length,8);
 assert.equal(manifest.historicalCorpusAudit.filesAudited,188);
@@ -53,6 +58,7 @@ for(const token of[
  'B3 default · B0 fallback · B4–B6 gated',
  'HISTORICAL CORPUS AUDIT',
  'ONE-SYSTEM LEDGER',
+ 'REFERENCE KERNEL',
  'FINGERPRINTED CORPUS',
  'packet.truthBoundary'
 ])assert.ok(ui.includes(token),'R348 operational convergence surface missing '+token);
@@ -61,7 +67,7 @@ assert.ok(suite.includes("import OmegaUnifiedConvergenceR348 from './OmegaUnifie
 assert.ok(suite.includes('<OmegaUnifiedConvergenceR348 record={record} status={status}/>'),'R348 must be mounted on Convergence');
 assert.ok(accepted.includes("id:'UNIFIED_SCENE_PACKET_CONVERGENCE'"),'accepted production contract must preserve R348');
 assert.ok(accepted.includes("'R348 unified scene-packet convergence authority'"),'preserved layer list must include R348');
-assert.ok(pkg.scripts['test:r348']?.includes('tests/r348-unified-convergence-invariants.mjs'),'R348 proof must be registered');
+assert.ok(pkg.scripts['test:r348']?.includes('tests/r348-unified-convergence-invariants.mjs')&&pkg.scripts['test:r348']?.includes('tests/r348-dewey-reference-kernel.mts'),'R348 static + executable kernel proofs must be registered');
 assert.ok(pkg.scripts['check:static']?.includes('npm run test:r348'),'R348 proof must participate in canonical static gate');
 
 console.log('R348 UNIFIED CONVERGENCE PASS · one canonical scene packet · physical/canonical/system frames separated · 7 scene layers · 8 machine layers · source fingerprints bound · B0/B3/B4-B6 recalibration policy enforced · no new physical primitive · R125/R141/R146/R147 authority preserved');
