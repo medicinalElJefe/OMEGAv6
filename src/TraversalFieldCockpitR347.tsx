@@ -26,8 +26,8 @@ function lensRadius(lens:Lens,n:TraversalFieldNodeR347){
 }
 
 export default function TraversalFieldCockpitR347({variant,address,onAddress}:Props){
- const canvas=useRef<HTMLCanvasElement|null>(null),clock=useRef({last:0,t:0});
- const[lens,setLens]=useState<Lens>('UNIFIED'),[playing,setPlaying]=useState(false),[depth,setDepth]=useState(48),[speed,setSpeed]=useState(1),[cursor,setCursor]=useState(0);
+ const canvas=useRef<HTMLCanvasElement|null>(null),clock=useRef({last:0,t:0}),camera=useRef({yaw:0,pitch:0,drag:false,lastX:0,lastY:0});
+ const[lens,setLens]=useState<Lens>('UNIFIED'),[playing,setPlaying]=useState(false),[depth,setDepth]=useState(48),[speed,setSpeed]=useState(1),[cursor,setCursor]=useState(0),[zoom,setZoom]=useState(1);
  const field=useMemo(()=>compileTraversalFieldR347(address,depth),[address,depth]);
  useEffect(()=>{setCursor(0);clock.current={last:0,t:0}},[address,depth]);
  useEffect(()=>{if(!playing)return;const id=window.setInterval(()=>setCursor(i=>Math.min(field.nodes.length-1,i+1)),Math.max(120,800/speed));return()=>clearInterval(id)},[playing,speed,field.nodes.length]);
@@ -42,7 +42,7 @@ export default function TraversalFieldCockpitR347({variant,address,onAddress}:Pr
    const horizon=ctx.createRadialGradient(cx,cy,8,cx,cy,scale*1.5);horizon.addColorStop(0,'rgba(32,89,88,.12)');horizon.addColorStop(.55,'rgba(7,22,27,.08)');horizon.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=horizon;ctx.fillRect(0,0,w,h);
 
    for(let i=0;i<5;i++){const rr=scale*(.26+i*.19);ctx.beginPath();ctx.arc(cx,cy,rr,0,Math.PI*2);ctx.strokeStyle='rgba(180,201,195,'+(0.035+i*.008)+')';ctx.lineWidth=.7;ctx.stroke()}
-   const pts=field.nodes.map((n,i)=>{const phase=(i/Math.max(1,field.nodes.length-1)-.5)*.9,nx=n.x*.72+Math.sin(phase)*.28,ny=n.y*.58-phase*.38;return{x:cx+nx*scale,y:cy+ny*scale,z:n.z,n}});
+   const pts=field.nodes.map((n,i)=>{const phase=(i/Math.max(1,field.nodes.length-1)-.5)*.9,x0=n.x*.72+Math.sin(phase)*.28,y0=n.y*.58-phase*.38,z0=n.z,cyaw=Math.cos(camera.current.yaw),syaw=Math.sin(camera.current.yaw),cp=Math.cos(camera.current.pitch),sp=Math.sin(camera.current.pitch),x1=x0*cyaw+z0*syaw,z1=-x0*syaw+z0*cyaw,y1=y0*cp-z1*sp,z2=y0*sp+z1*cp,persp=1/(1.7-.45*z2),s=scale*zoom*persp;return{x:cx+x1*s,y:cy+y1*s,z:z2,n}});
 
    for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],n=b.n,active=i<=cursor;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=active?'rgba(78,205,187,'+(.18+.52*n.evidence)+')':'rgba(91,122,126,.09)';ctx.lineWidth=active?1+4*(.55*n.continuityFlux+.45*n.invariantCarry):.7;ctx.stroke()}
    for(let i=0;i<pts.length;i++){const p=pts[i],n=p.n,active=i<=cursor,uncertainty=clamp(.55*n.contradiction+.45*n.burden);
@@ -57,13 +57,17 @@ export default function TraversalFieldCockpitR347({variant,address,onAddress}:Pr
    if(lens==='TIME'){const y=h*.90;ctx.beginPath();ctx.moveTo(w*.08,y);ctx.lineTo(w*.92,y);ctx.strokeStyle='rgba(174,197,198,.24)';ctx.stroke();pts.forEach((p,i)=>{if(i%Math.max(1,Math.floor(pts.length/12))===0||i===cursor){const x=w*.08+(w*.84)*(i/Math.max(1,pts.length-1));ctx.beginPath();ctx.moveTo(x,y-7);ctx.lineTo(x,y+7);ctx.strokeStyle=i===cursor?'rgba(226,188,111,.9)':'rgba(148,173,177,.26)';ctx.stroke()}})}
    raf=requestAnimationFrame(render)};
   raf=requestAnimationFrame(render);return()=>{alive=false;cancelAnimationFrame(raf)}
- },[field,lens,cursor,playing,speed]);
+ },[field,lens,cursor,playing,speed,zoom]);
 
+ const pointerDown=(e:React.PointerEvent<HTMLCanvasElement>)=>{camera.current.drag=true;camera.current.lastX=e.clientX;camera.current.lastY=e.clientY;e.currentTarget.setPointerCapture(e.pointerId)};
+ const pointerMove=(e:React.PointerEvent<HTMLCanvasElement>)=>{if(!camera.current.drag)return;const dx=e.clientX-camera.current.lastX,dy=e.clientY-camera.current.lastY;camera.current.lastX=e.clientX;camera.current.lastY=e.clientY;camera.current.yaw+=dx*.006;camera.current.pitch=Math.max(-1.2,Math.min(1.2,camera.current.pitch+dy*.006))};
+ const pointerUp=(e:React.PointerEvent<HTMLCanvasElement>)=>{camera.current.drag=false;try{if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId)}catch{}};
+ const wheel=(e:React.WheelEvent<HTMLCanvasElement>)=>{e.preventDefault();setZoom(v=>Math.max(.55,Math.min(2.2,v*(e.deltaY>0?.92:1.08))))};
  const current=field.nodes[Math.min(cursor,field.nodes.length-1)]||field.nodes[0];
  return <section className='r347-cockpit' data-lens={lens} data-energy-authority={field.energy.authority}>
   <header><div><span>R347 HUMAN-CORRELATED FIELD · ONE VISUAL LAW</span><b>{variant} · {lens}</b><small>Worldline + field + admissible future cone · source state preserved</small></div><code>STATE {current?.stateId??'—'} · t+{current?.step??0}</code></header>
   <nav aria-label='R347 traversal lens'>{LENSES.map(x=><button key={x} className={lens===x?'active':''} onClick={()=>setLens(x)}>{x}</button>)}</nav>
-  <div className='r347-stage'><canvas ref={canvas} aria-label='Human-correlated OMEGA traversal field'/></div>
+  <div className='r347-stage'><canvas ref={canvas} aria-label='Human-correlated OMEGA traversal field' onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} onWheel={wheel}/></div>
   <div className='r347-timebar'><span>PAST / SCAR</span><input type='range' min='0' max={Math.max(0,field.nodes.length-1)} value={Math.min(cursor,Math.max(0,field.nodes.length-1))} onChange={e=>{setPlaying(false);setCursor(Number(e.target.value))}}/><b>t+{current?.step??0} / {Math.max(0,field.nodes.length-1)}</b><span>ADMISSIBLE FUTURES</span></div>
   <div className='r347-futures'>{field.futures.slice(0,6).map(f=><button key={f.relation+f.address} onClick={()=>onAddress(f.address)} title={f.truthBoundary}><span>{f.relation.replaceAll('_',' ')}</span><b>{fmt(f.support)}</b><small>support · not probability · state {f.stateId}</small></button>)}</div>
   <div className='r347-readout'>
@@ -76,7 +80,7 @@ export default function TraversalFieldCockpitR347({variant,address,onAddress}:Pr
    <div><span>RESOLUTION</span><b>{(current?.effectiveResolution??0).toLocaleString()}</b><small>representational address level</small></div>
    <div><span>{field.energy.label}</span><b>{fmt(current?.modelIntensity??0)}</b><small>not physical energy</small></div>
   </div>
-  <div className='r347-controls'><button onClick={()=>{setPlaying(false);const i=Math.max(0,cursor-1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepBack/>Previous</button><button className='primary' onClick={()=>setPlaying(v=>!v)}>{playing?<Pause/>:<Play/>}{playing?'Pause':'Traverse'}</button><button onClick={()=>{setPlaying(false);const i=Math.min(field.nodes.length-1,cursor+1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepForward/>Next</button><button onClick={()=>{setPlaying(false);setCursor(0);onAddress(address)}}><RotateCcw/>Origin</button><label>DEPTH<input type='range' min='12' max='96' step='12' value={depth} onChange={e=>setDepth(Number(e.target.value))}/><b>{depth}</b></label><label>RATE<input type='range' min='.25' max='3' step='.25' value={speed} onChange={e=>setSpeed(Number(e.target.value))}/><b>{speed.toFixed(2)}×</b></label></div>
+  <div className='r347-controls'><button onClick={()=>{setPlaying(false);const i=Math.max(0,cursor-1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepBack/>Previous</button><button className='primary' onClick={()=>setPlaying(v=>!v)}>{playing?<Pause/>:<Play/>}{playing?'Pause':'Traverse'}</button><button onClick={()=>{setPlaying(false);const i=Math.min(field.nodes.length-1,cursor+1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepForward/>Next</button><button onClick={()=>{setPlaying(false);setCursor(0);onAddress(address)}}><RotateCcw/>Origin</button><label>DEPTH<input type='range' min='12' max='96' step='12' value={depth} onChange={e=>setDepth(Number(e.target.value))}/><b>{depth}</b></label><label>RATE<input type='range' min='.25' max='3' step='.25' value={speed} onChange={e=>setSpeed(Number(e.target.value))}/><b>{speed.toFixed(2)}×</b></label><label>VIEW<input type='range' min='.55' max='2.2' step='.05' value={zoom} onChange={e=>setZoom(Number(e.target.value))}/><b>{zoom.toFixed(2)}×</b></label></div>
   <details><summary>VISUAL GRAMMAR · exact mapping</summary><div className='r347-grammar'>{Object.entries(TRAVERSAL_VISUAL_GRAMMAR_R347).map(([k,v])=><div key={k}><span>{k}</span><b>{v}</b></div>)}</div><p>{field.truthBoundary}</p></details>
  </section>
 }
