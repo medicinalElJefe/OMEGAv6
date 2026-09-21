@@ -64,6 +64,8 @@ export default function TraversalFieldCockpitR347({variant,address,onAddress}:Pr
   <header><div><span>R347 HUMAN-CORRELATED FIELD · ONE VISUAL LAW</span><b>{variant} · {lens}</b><small>Worldline + field + admissible future cone · source state preserved</small></div><code>STATE {current?.stateId??'—'} · t+{current?.step??0}</code></header>
   <nav aria-label='R347 traversal lens'>{LENSES.map(x=><button key={x} className={lens===x?'active':''} onClick={()=>setLens(x)}>{x}</button>)}</nav>
   <div className='r347-stage'><canvas ref={canvas} aria-label='Human-correlated OMEGA traversal field'/></div>
+  <div className='r347-timebar'><span>PAST / SCAR</span><input type='range' min='0' max={Math.max(0,field.nodes.length-1)} value={Math.min(cursor,Math.max(0,field.nodes.length-1))} onChange={e=>{setPlaying(false);setCursor(Number(e.target.value))}}/><b>t+{current?.step??0} / {Math.max(0,field.nodes.length-1)}</b><span>ADMISSIBLE FUTURES</span></div>
+  <div className='r347-futures'>{field.futures.slice(0,6).map(f=><button key={f.relation+f.address} onClick={()=>onAddress(f.address)} title={f.truthBoundary}><span>{f.relation.replaceAll('_',' ')}</span><b>{fmt(f.support)}</b><small>support · not probability · state {f.stateId}</small></button>)}</div>
   <div className='r347-readout'>
    <div><span>LOGICAL TIME</span><b>t+{current?.step??0}</b><small>route step · not event time</small></div>
    <div><span>CONTINUITY FLUX</span><b>{fmt(current?.continuityFlux??0)}</b><small>edge thickness</small></div>
