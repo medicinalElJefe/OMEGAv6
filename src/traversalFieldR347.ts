@@ -79,7 +79,7 @@ export function traversalFuturesR347(address:number):TraversalFutureR347[]{
 export function compileTraversalFieldR347(startAddress:number,depth=48,observations:TraversalObservationPacketR347[]=[]){
  const route=compileSourceTraversal(startAddress,depth),obs=new Map(observations.map(x=>[x.address,x]));
  const nodes=route.path.map((x:any,i:number)=>bindTraversalObservationR347(traversalNodeR347(x.address,i),obs.get(x.address)));
- const futures=traversalFuturesR347(startAddress),physicalPositions=nodes.filter(x=>x.physicalPosition).map(x=>x.physicalPosition!),spaceCompatible=physicalPositions.length>0&&physicalPositions.every(x=>x.frame===physicalPositions[0].frame&&x.unit===physicalPositions[0].unit);
+ const futures=traversalFuturesR347(startAddress),physicalPositions=nodes.filter(x=>x.physicalPosition).map(x=>x.physicalPosition!),spaceCompatible=nodes.length>0&&physicalPositions.length===nodes.length&&physicalPositions.every(x=>x.frame===physicalPositions[0].frame&&x.unit===physicalPositions[0].unit);
  return{schema:TRAVERSAL_FIELD_SCHEMA_R347,startAddress,nodes,futures,closed:route.closed,routeBoundary:route.boundary,
   time:{logicalAuthority:'ROUTE_STEP',eventTimeBound:nodes.some(x=>!!x.eventTime),renderClockAuthority:'DISPLAY_ONLY'},
   space:{authority:spaceCompatible?'UNIT_BOUND_PHYSICAL_SPACE':'ATLAS_SPACE',physicalPositionBound:spaceCompatible,frame:spaceCompatible?physicalPositions[0].frame:null,unit:spaceCompatible?physicalPositions[0].unit:null,mixedFrameHold:physicalPositions.length>0&&!spaceCompatible},
