@@ -132,7 +132,7 @@ assert.ok(cockpit.includes("calibratedValue(cal,'evidence'")&&cockpit.includes("
 assert.ok(cockpit.includes("source:sourceName(earth?.sources?.openMeteo),observedAt:earth?.localConditions?.time"),'R347 weather channels must use returned source identity and weather observation time, not fallback provenance');
 assert.ok(cockpit.includes("source:sourceName(earth?.sources?.swpc),observedAt:earth?.spaceWeather?.observationTime"),'R347 Kp must use returned SWPC source and observation time');
 
-assert.ok(cockpit.includes("const alpha=(.05+.70*E)*visibility*(.45+.55*w)"),'R347 rendered evidence opacity must execute the declared α=.05+.70·E_c base mapping');
+assert.ok(cockpit.includes("alpha=(.05+.70*E)*visibility*(.45+.55*w)"),'R347 rendered evidence opacity must execute the declared α=.05+.70·E_c base mapping');
 assert.ok(cockpit.includes("line=.6+2.8*calibratedValue(cal,'C'"),'R347 rendered route weight must execute the declared w=.6+2.8·CΩ_c mapping');
 
 assert.ok(!loader.includes("Workspace:[LOADERS.OmegaWorkspaceCockpitR18],Cockpit:[LOADERS.OmegaWorkspaceCockpitR18]"),'R347 active shell must not keep Cockpit bound to the pre-R347 shared specialist');
