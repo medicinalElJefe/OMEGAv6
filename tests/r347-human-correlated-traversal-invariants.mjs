@@ -6,6 +6,7 @@ const cockpit=fs.readFileSync('src/TraversalFieldCockpitR347.tsx','utf8');
 const studio=fs.readFileSync('src/OmegaTraversalStudio.tsx','utf8');
 const workspace=fs.readFileSync('src/OmegaWorkspaceCockpitR18.tsx','utf8');
 const css=fs.readFileSync('src/traversalFieldR347.css','utf8');
+const accepted=fs.readFileSync('src/acceptedProductionContractR95.ts','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
 for(const token of[
@@ -25,7 +26,12 @@ for(const token of[
  'eventTime:null',
  'probability:null',
  'it is not a calibrated probability',
- 'Model intensity/action proxy is not physical energy'
+ 'Model intensity/action proxy is not physical energy',
+ 'TraversalObservationPacketR347',
+ 'bindTraversalObservationR347',
+ "energyAuthority:physicalEnergy?'UNIT_BOUND_PHYSICAL':'MODEL_PROXY'",
+ 'eventTimeBound:nodes.some(x=>!!x.eventTime)',
+ "physicalEnergyBound:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')"
 ])assert.ok(field.includes(token),'R347 field truth/mapping contract missing '+token);
 
 assert.ok(!field.includes('Math.random')&&!cockpit.includes('Math.random'),'R347 geometry must remain deterministic');
@@ -61,3 +67,5 @@ assert.ok(pkg.scripts['test:r347']?.includes('tests/r347-human-correlated-traver
 assert.ok(pkg.scripts['check:static']?.includes('npm run test:r347'),'R347 proof must participate in canonical static gate');
 
 console.log('R347 HUMAN-CORRELATED TRAVERSAL PASS · deterministic canonical worldline · exact visual grammar · logical/event time separated · model intensity not physical energy · admissible futures not probabilities · R100/R23/R35/donor authority preserved · current R18 Cockpit upgraded without proof-layer loss');
+
+assert.ok(accepted.includes("id:'HUMAN_CORRELATED_FIELD_VISUAL_LAW'")&&accepted.includes("'R347 human-correlated field visual law + preserved predecessor renderer authority'"),'R347 accepted production contract must preserve the new visual law without replacing R100/R35/R23');
