@@ -2,6 +2,7 @@ import{useEffect,useMemo,useRef,useState}from'react';
 import{Pause,Play,RotateCcw,StepBack,StepForward}from'lucide-react';
 import{compileTraversalFieldR347,TRAVERSAL_VISUAL_GRAMMAR_R347,type TraversalFieldNodeR347,type TraversalObservationPacketR347}from'./traversalFieldR347';
 import'./traversalFieldR347.css';
+// R347_PROMOTION_PROOF_ANCHOR: exact visual-law truth wording and inherited authority are CI-gated before promotion.
 
 type Lens='UNIFIED'|'SPACE'|'TIME'|'INTENSITY'|'CONTINUITY'|'SCAR'|'FUTURES'|'PROOF';
 type Props={variant:string;address:number;onAddress:(n:number)=>void;observations?:TraversalObservationPacketR347[];initialDepth?:number};
