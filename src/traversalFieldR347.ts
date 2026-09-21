@@ -18,7 +18,7 @@ export const TRAVERSAL_VISUAL_GRAMMAR_R347={
  intensity:'model light intensity/action proxy unless unit-bound physical energy is supplied',
  logicalTime:'canonical route step; never labeled event time',
  eventTime:'only externally bound timestamps',
- futureSupport:'normalized admissibility support; never probability without calibrated probability authority'
+ futureSupport:'existing unifiedCoherence channel for candidate readability; admitted-next relation remains canonical; never probability without calibrated probability authority'
 }as const;
 
 const cl=(n:number)=>Math.max(0,Math.min(1,Number.isFinite(n)?n:0));
@@ -53,7 +53,7 @@ export type TraversalFutureR347={
 
 export function traversalNodeR347(address:number,step=0):TraversalFieldNodeR347{
  const r=corpusState(address),u=unifiedFromRecord(r),w=deriveWeaveStateR100(address,u,0,1),p=projectionPoint(address,'MANDALA',1000);
- const support=cl(.24*u.C+.20*u.Phi+.20*u.evidence+.14*(1-u.q)+.12*(1-u.Lambda)+.10*u.unifiedCoherence);
+ const support=cl(u.unifiedCoherence);
  const z=Math.sin(u.phase)*(.28+.52*w.depth)*(w.orientation||1);
  return{address,stateId:r.stateId,step,decision:String(r.metrics.decision),x:(p.x/1000-.5)*2,y:(p.y/1000-.5)*2,z,
   continuity:u.C,plasticity:u.Phi,contradiction:u.q,burden:u.Lambda,scar:u.scar,evidence:u.evidence,
@@ -69,7 +69,7 @@ export function traversalFuturesR347(address:number):TraversalFutureR347[]{
   if(!Number.isFinite(a)||seen.has(a)||a===address)continue;seen.add(a);
   const n=traversalNodeR347(a,1);
   rows.push({relation,address:a,stateId:n.stateId,support:n.support,x:n.x,y:n.y,z:n.z,decision:n.decision,probability:null,
-   truthBoundary:'R347 support is a deterministic admissibility/readability score derived from the candidate packet; it is not a calibrated probability.'});
+   truthBoundary:'R347 support is the existing candidate unifiedCoherence channel used only for visual readability; ADMITTED_NEXT is the canonical route relation. Support is not a calibrated probability or a replacement route score.'});
  }
  return rows.sort((a,b)=>b.support-a.support);
 }
