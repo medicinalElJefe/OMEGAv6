@@ -23,13 +23,13 @@ assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=480'),'R313 panel discl
 assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=600'),'deep R286/R313 control sweeps must have an explicit bounded budget');
 assert.ok(r241.includes('Stop shared R241 preview server')&&r241.includes('if: always()'),'R241 shared preview must always clean up');
 
-assert.ok(r241.includes('R286_PROOF_SHARDS=4 R286_SHARD_TIMEOUT_SEC=420'),'R286 exhaustive browser audit must run as four bounded deterministic shards');
-assert.ok(r241.includes('R313_PROOF_SHARDS=4 R313_SHARD_TIMEOUT_SEC=420'),'R313 safe-control sweep must run as four bounded deterministic shards');
+assert.ok(r241.includes('R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=270'),'R286 exhaustive browser audit must run as eight deterministic shards in bounded four-way waves');
+assert.ok(r241.includes('R313_PROOF_SHARDS=8 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=270'),'R313 safe-control sweep must run as eight deterministic shards in bounded four-way waves');
 assert.ok(r286ShardRunner.includes('R286_SHARD_COUNT="$shards" R286_SHARD_INDEX="$i"'),'R286 shard runner must bind every child to an explicit partition identity');
-assert.ok(r286ShardRunner.includes('for ((i=0;i<shards;i++))'),'R286 shard runner must launch the complete shard set');
+assert.ok(r286ShardRunner.includes('for ((wave_start=0; wave_start<shards; wave_start+=max_parallel))'),'R286 shard runner must cover the complete shard set in bounded waves');
 assert.ok(r286ShardRunner.includes('wait "${pids[$i]}"'),'R286 shard runner must recombine only after every child returns');
 assert.ok(r313ShardRunner.includes('R313_SHARD_COUNT="$shards" R313_SHARD_INDEX="$i"'),'R313 shard runner must bind every child to an explicit partition identity');
-assert.ok(r313ShardRunner.includes('for ((i=0;i<shards;i++))'),'R313 shard runner must launch the complete shard set');
+assert.ok(r313ShardRunner.includes('for ((wave_start=0; wave_start<shards; wave_start+=max_parallel))'),'R313 shard runner must cover the complete shard set in bounded waves');
 assert.ok(r313ShardRunner.includes('wait "${pids[$i]}"'),'R313 shard runner must recombine only after every child returns');
 assert.ok(r286Browser.includes('profileIndex*expected.length+routeIndex'),'R286 partition law must deterministically cover profile × route address space');
 assert.ok(r313Browser.includes('profileIndex*surfaces.length+surfaceIndex'),'R313 partition law must deterministically cover profile × route address space');
@@ -39,4 +39,4 @@ assert.ok(runner.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC:-300'),'R241 runner m
 assert.ok(runner.includes('timeout --signal=TERM --kill-after=15s'),'R241 runner must terminate hung children fail-closed');
 assert.ok(runner.includes('R241 browser proof timeout'),'R241 timeout must produce an explicit diagnostic annotation');
 
-console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286/R313 exhaustive 88-case contracts partitioned and recombined across bounded shards · every child proof bounded · fail-closed diagnostics retained');
+console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286/R313 exhaustive 88-case contracts partitioned and recombined across eight bounded shards in two four-way waves · every child proof bounded · fail-closed diagnostics retained');
