@@ -5,6 +5,8 @@ export const TWO_PI_R343=2*Math.PI;
 
 export type SarLutVectorR343={line:number;pixels:number[];values:number[]};
 export type SarSparseLutR343={vectors:SarLutVectorR343[];source:string;units:string;kind:string};
+export type SarAzimuthNoiseBlockR343={swath?:string|null;firstAzimuthLine:number;lastAzimuthLine:number;firstRangeSample:number;lastRangeSample:number;lines:number[];values:number[]};
+export type SarNoiseModelR343={range:SarSparseLutR343;azimuth?:SarAzimuthNoiseBlockR343[];source:string};
 export type SarCoregReceiptR343={
  method:string;fullResolution:boolean;burstGeometryBound:boolean;orbitBound:boolean;
  azimuthResidualSamples:number;rangeResidualSamples:number;rangeThresholdSamples:number;
@@ -67,10 +69,18 @@ export function calibratedPowerR343(dn:number,A:number,noiseLinearPower=0){
  if(!finite(dn)||!finite(A)||A<=0||!finite(noiseLinearPower)||noiseLinearPower<0)return Number.NaN;
  const p=dn*dn-noiseLinearPower;return p>0?p/(A*A):Number.NaN;
 }
-export function materializeRadiometryR343(r:SarRasterFieldR283,cal:{beta0?:SarSparseLutR343;sigma0?:SarSparseLutR343;gamma0?:SarSparseLutR343},noise?:SarSparseLutR343){
+function interpolate1d(xs:number[],ys:number[],x:number){
+ if(!xs.length||xs.length!==ys.length)return Number.NaN;if(x<=xs[0])return Number(ys[0]);if(x>=xs[xs.length-1])return Number(ys[ys.length-1]);let lo=0,hi=xs.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(xs[m]<=x)lo=m;else hi=m}const a=Number(xs[lo]),b=Number(xs[hi]),va=Number(ys[lo]),vb=Number(ys[hi]);if(![a,b,va,vb].every(finite))return Number.NaN;return b===a?va:va+(vb-va)*(x-a)/(b-a);
+}
+export function materializeNoiseMapR343(r:SarRasterFieldR283,noise:SarNoiseModelR343|SarSparseLutR343){
+ const model=('range'in noise)?noise:{range:noise,source:noise.source},n=expected(r),range=materializeSparseLutR343(r,model.range).values,out=new Array(n).fill(Number.NaN),mask=new Array(n).fill(0),sw=r.sampling?.sourceWidth||r.width,sh=r.sampling?.sourceHeight||r.height,blocks=model.azimuth||[];let validSamples=0;
+ for(let y=0;y<r.height;y++)for(let x=0;x<r.width;x++){const i=y*r.width+x;if(!validAt(r,i)||!finite(range[i]))continue;const sx=r.width<=1?0:x*(sw-1)/(r.width-1),sy=r.height<=1?0:y*(sh-1)/(r.height-1);let az=1;if(blocks.length){const b=blocks.find(q=>sy>=q.firstAzimuthLine&&sy<=q.lastAzimuthLine&&sx>=q.firstRangeSample&&sx<=q.lastRangeSample);if(!b)continue;az=interpolate1d(b.lines,b.values,sy);if(!finite(az))continue}const v=range[i]*az;if(finite(v)&&v>=0){out[i]=v;mask[i]=1;validSamples++}}
+ return{noiseLinearPower:out,validMask:mask,validSamples,rangeSource:model.range.source,source:model.source,azimuthBlocks:blocks.length,operator:blocks.length?'noise = interpolated range LUT × interpolated azimuth LUT':'noise = interpolated range LUT'};
+}
+export function materializeRadiometryR343(r:SarRasterFieldR283,cal:{beta0?:SarSparseLutR343;sigma0?:SarSparseLutR343;gamma0?:SarSparseLutR343},noise?:SarNoiseModelR343|SarSparseLutR343){
  const n=expected(r),src=r.nativeIntensity,beta0=new Array(n).fill(Number.NaN),sigma0=new Array(n).fill(Number.NaN),gamma0=new Array(n).fill(Number.NaN),mask=new Array(n).fill(0);
  if(!src?.length)return{beta0,sigma0,gamma0,validMask:mask,validSamples:0,calibrationBound:false};
- const b=cal.beta0?materializeSparseLutR343(r,cal.beta0).values:null,s=cal.sigma0?materializeSparseLutR343(r,cal.sigma0).values:null,g=cal.gamma0?materializeSparseLutR343(r,cal.gamma0).values:null,eta=noise?materializeSparseLutR343(r,noise).values:null;
+ const b=cal.beta0?materializeSparseLutR343(r,cal.beta0).values:null,s=cal.sigma0?materializeSparseLutR343(r,cal.sigma0).values:null,g=cal.gamma0?materializeSparseLutR343(r,cal.gamma0).values:null,eta=noise?materializeNoiseMapR343(r,noise).noiseLinearPower:null;
  let validSamples=0;
  for(let i=0;i<n;i++){if(!validAt(r,i)||!finite(src[i]))continue;const q=finite(eta?.[i])?Number(eta![i]):0;if(b&&finite(b[i]))beta0[i]=calibratedPowerR343(src[i],b[i],q);if(s&&finite(s[i]))sigma0[i]=calibratedPowerR343(src[i],s[i],q);if(g&&finite(g[i]))gamma0[i]=calibratedPowerR343(src[i],g[i],q);if(finite(beta0[i])||finite(sigma0[i])||finite(gamma0[i])){mask[i]=1;validSamples++}}
  return{beta0,sigma0,gamma0,validMask:mask,validSamples,calibrationBound:validSamples>0};
@@ -138,7 +148,7 @@ export function applyDisplacementCorrectionsR343(los:number[],correctionsM:numbe
 
 export function closeSarPhysicalChainR343(input:{
  master:SarRasterFieldR283;slave?:SarRasterFieldR283;coregisteredSlave?:SarRasterFieldR283;coregReceipt?:SarCoregReceiptR343;
- calibration?:{beta0?:SarSparseLutR343;sigma0?:SarSparseLutR343;gamma0?:SarSparseLutR343};noise?:SarSparseLutR343;
+ calibration?:{beta0?:SarSparseLutR343;sigma0?:SarSparseLutR343;gamma0?:SarSparseLutR343};noise?:SarNoiseModelR343|SarSparseLutR343;
  localIncidenceDeg?:number[];referenceIncidenceDeg?:number[];correctionLedger?:SarCorrectionLedgerR343;
  wavelengthM?:number;losSign?:1|-1;unwrapClosureRmsMax?:number;
 }):SarPhysicalClosureR343{
