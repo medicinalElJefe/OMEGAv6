@@ -13,15 +13,15 @@ type Props={
 type Form={
  projectPath:string;masterPath:string;slavePath:string;masterOrbitPath:string;slaveOrbitPath:string;demPath:string;subswath:'IW1'|'IW2'|'IW3';
  firstBurst:number;lastBurst:number;outputPath:string;coregProofPath:string;interferogramPath:string;coherencePath:string;correctedInterferogramPath:string;geometricPhaseProofPath:string;receiptPath:string;
- executeGraph:boolean;previewJsonPath:string;unwrapPath:string;unwrapMaskPath:string;unwrapProofPath:string;atmospherePath:string;etadPath:string;losPath:string;correctedLosPath:string;signConvention:string;losSign:1|-1;wavelengthM:number;
+ executeGraph:boolean;previewJsonPath:string;beta0Path:string;sigma0Path:string;gamma0Path:string;terrainGamma0Path:string;unwrapPath:string;unwrapMaskPath:string;unwrapProofPath:string;atmospherePath:string;etadPath:string;otherCorrectionPath:string;losPath:string;correctedLosPath:string;signConvention:string;losSign:1|-1;wavelengthM:number;independentLosJsonPath:string;deformationEastPath:string;deformationNorthPath:string;deformationUpPath:string;deformationProofPath:string;
 };
 const cleanId=(v:string)=>v.replace(/[^A-Za-z0-9._-]+/g,'_').slice(0,90);
 const initial=(master:string,slave:string):Form=>{const pair=(cleanId(master||'master')+'__'+cleanId(slave||'slave')).slice(0,150),base='.omega_hybrid/sar/r345/'+pair;return{
  projectPath:'.',masterPath:'',slavePath:'',masterOrbitPath:'',slaveOrbitPath:'',demPath:'',subswath:'IW2',firstBurst:1,lastBurst:999,
  outputPath:base+'/snap_ifg.dim',coregProofPath:base+'/coreg-proof.json',interferogramPath:base+'/interferogram.img',coherencePath:base+'/coherence.img',
  correctedInterferogramPath:base+'/corrected-interferogram.img',geometricPhaseProofPath:base+'/geometric-phase-proof.json',receiptPath:base+'/r344-receipt.json',
- executeGraph:true,previewJsonPath:'',unwrapPath:'',unwrapMaskPath:'',unwrapProofPath:'',atmospherePath:'',etadPath:'',losPath:'',correctedLosPath:'',
- signConvention:'positive toward sensor',losSign:1,wavelengthM:.0555
+ executeGraph:true,previewJsonPath:'',beta0Path:'',sigma0Path:'',gamma0Path:'',terrainGamma0Path:'',unwrapPath:'',unwrapMaskPath:'',unwrapProofPath:'',atmospherePath:'',etadPath:'',otherCorrectionPath:'',losPath:'',correctedLosPath:'',
+ signConvention:'positive toward sensor',losSign:1,wavelengthM:.0555,independentLosJsonPath:'',deformationEastPath:'',deformationNorthPath:'',deformationUpPath:'',deformationProofPath:''
 }};
 const requiredKeys:(keyof Form)[]=['projectPath','masterPath','slavePath','masterOrbitPath','slaveOrbitPath','demPath','outputPath','coregProofPath','interferogramPath','coherencePath','correctedInterferogramPath','geometricPhaseProofPath','receiptPath'];
 
@@ -38,9 +38,9 @@ export default function SarHybridClosureR345({masterProductId,slaveProductId,mas
   masterPath:form.masterPath,slavePath:form.slavePath,masterAcquired,slaveAcquired,polarization:polarization as any,subswath:form.subswath,firstBurst:form.firstBurst,lastBurst:form.lastBurst,
   masterOrbitPath:form.masterOrbitPath,slaveOrbitPath:form.slaveOrbitPath,demPath:form.demPath,outputPath:form.outputPath,coregProofPath:form.coregProofPath,interferogramPath:form.interferogramPath,
   coherencePath:form.coherencePath,correctedInterferogramPath:form.correctedInterferogramPath,geometricPhaseProofPath:form.geometricPhaseProofPath,receiptPath:form.receiptPath,executeGraph:form.executeGraph,
-  previewJsonPath:form.previewJsonPath||undefined,unwrapPath:form.unwrapPath||undefined,unwrapMaskPath:form.unwrapMaskPath||undefined,unwrapProofPath:form.unwrapProofPath||undefined,
-  atmospherePath:form.atmospherePath||undefined,etadPath:form.etadPath||undefined,losPath:form.losPath||undefined,correctedLosPath:form.correctedLosPath||undefined,
-  wavelengthM:form.wavelengthM,losSign:form.losSign,signConvention:form.signConvention
+  previewJsonPath:form.previewJsonPath||undefined,beta0Path:form.beta0Path||undefined,sigma0Path:form.sigma0Path||undefined,gamma0Path:form.gamma0Path||undefined,terrainGamma0Path:form.terrainGamma0Path||undefined,unwrapPath:form.unwrapPath||undefined,unwrapMaskPath:form.unwrapMaskPath||undefined,unwrapProofPath:form.unwrapProofPath||undefined,
+  atmospherePath:form.atmospherePath||undefined,etadPath:form.etadPath||undefined,otherCorrectionPath:form.otherCorrectionPath||undefined,losPath:form.losPath||undefined,correctedLosPath:form.correctedLosPath||undefined,
+  wavelengthM:form.wavelengthM,losSign:form.losSign,signConvention:form.signConvention,independentLosJsonPath:form.independentLosJsonPath||undefined,deformationEastPath:form.deformationEastPath||undefined,deformationNorthPath:form.deformationNorthPath||undefined,deformationUpPath:form.deformationUpPath||undefined,deformationProofPath:form.deformationProofPath||undefined
  });
  const localValidation=useMemo(()=>validateCommandPlan([{op:'SAR_R344_CLOSURE',label:'Execute R344 full-resolution SAR closure and return exact receipt',path:form.projectPath,maxRuntimeSeconds:21600,sarClosure:spec()}],form.projectPath,[]),[form,masterAcquired,slaveAcquired,polarization]);
  const complete=requiredKeys.every(k=>String(form[k]??'').trim().length>0)&&!!masterAcquired&&!!slaveAcquired&&/^(VV|VH|HH|HV)$/i.test(polarization);
@@ -75,7 +75,7 @@ export default function SarHybridClosureR345({masterProductId,slaveProductId,mas
     <label className='r345-check'><input type='checkbox' checked={form.executeGraph} onChange={e=>set('executeGraph',e.target.checked)}/><span>Execute promoted SNAP TOPS graph first<small>Graph success is computation only; residual/proof artifacts remain mandatory.</small></span></label>
    </section>
    <details className='r345-optional'><summary>Optional unwrap / correction / LOS return artifacts</summary><div>{([
-    ['previewJsonPath','Hash-linked preview JSON'],['unwrapPath','Unwrapped phase'],['unwrapMaskPath','Unwrap mask'],['unwrapProofPath','Unwrap closure proof'],['atmospherePath','Atmosphere correction'],['etadPath','ETAD correction'],['losPath','Raw LOS'],['correctedLosPath','Corrected LOS']
+    ['previewJsonPath','Hash-linked preview JSON'],['beta0Path','β⁰ artifact'],['sigma0Path','σ⁰ artifact'],['gamma0Path','γ⁰ artifact'],['terrainGamma0Path','Terrain-flattened γ⁰ artifact'],['unwrapPath','Unwrapped phase'],['unwrapMaskPath','Unwrap mask'],['unwrapProofPath','Unwrap closure proof'],['atmospherePath','Atmosphere correction'],['etadPath','ETAD correction'],['otherCorrectionPath','Other correction'],['losPath','Raw LOS'],['correctedLosPath','Corrected LOS'],['independentLosJsonPath','Independent LOS geometry JSON'],['deformationEastPath','East deformation'],['deformationNorthPath','North deformation'],['deformationUpPath','Up deformation'],['deformationProofPath','3-D inversion proof']
    ]as [keyof Form,string][]).map(([key,label])=><label key={key}><span>{label}</span><input value={String(form[key]??'')} onChange={e=>set(key,e.target.value as any)} placeholder='optional root-relative path'/></label>)}</div></details>
    <article className='r345-validation'><span><b>{localValidation.passed?'STRUCTURED PLAN PASS':'PLAN HELD'}</b><small>{localValidation.passed?'All supplied paths are root-relative and the SAR closure structure is admissible.':localValidation.errors.join(' · ')}</small></span>{localValidation.passed?<CheckCircle2/>:<TriangleAlert/>}</article>
    <label className='r345-confirm'><input type='checkbox' checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/><span>I explicitly authorize this full-resolution host computation on the selected authenticated device. Missing evidence must remain held.</span></label>
