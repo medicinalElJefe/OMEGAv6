@@ -24,6 +24,9 @@ for(const token of[
  "op:'SAR_R344_CLOSURE'",
  "['CALIBRATE','COREGISTER','VALIDATE_PHASE','TERRAIN','UNWRAP','LOS','CORRECT','ADD_GEOMETRY']",
  'authorizationRequired:true',
+ 'SPEC_RULES',
+ "RADIOMETRIC_BACKSCATTER:'at least one of beta0Path / sigma0Path / gamma0Path with annotation provenance'",
+ "CORRECTED_LOS:'correctedLosPath + at least one of atmospherePath / etadPath / otherCorrectionPath'",
  'SPEC_FIELDS',
  "UNWRAPPED_PHASE:['unwrapPath','unwrapMaskPath','unwrapProofPath']",
  "FULL_3D_DEFORMATION:['independentLosJsonPath','deformationEastPath','deformationNorthPath','deformationUpPath','deformationProofPath']"
@@ -41,6 +44,7 @@ for(const token of[
  'Next evidence-producing action:',
  'information gain',
  "item.sarSpecFields.join(', ')",
+ 'item.sarSpecRule',
  "item.blockedBy.join(', ')"
 ])assert.ok(live.includes(token),'R346 live workstation integration missing '+token);
 
