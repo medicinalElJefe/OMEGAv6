@@ -31,7 +31,7 @@ for(const token of[
 for(const token of[
  "'SAR_R344_CLOSURE'",
  'validateSarClosureR345',
- "SAR_R344_CLOSURE requires safe root-relative",
+ "SAR_R344_CLOSURE requires explicit safe root-relative",
  "if(row?.op==='SAR_R344_CLOSURE')validateSarClosureR345",
  "target.capabilities?.includes(op)",
  "explicit confirmation required",
