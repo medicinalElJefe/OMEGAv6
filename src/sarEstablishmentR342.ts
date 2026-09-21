@@ -1,6 +1,14 @@
 export const SAR_ESTABLISHMENT_SCHEMA_R342='OMEGA_SAR_ESTABLISHMENT_R342_20736D';
 export const SAR_ESTABLISHMENT_CARDINALITY_R342=12**4;
 export const S1_TOPS_AZIMUTH_COREG_TARGET_SAMPLES_R342=0.001;
+export const SAR_R342_CANONICAL_MODES=Object.freeze([
+ 'Full Overall Canon','Unified Coherence','Unified Comprehension','Dewey Calculus','Relational Skin Calculus','Woven Continuity',
+ 'Mode 188','RAFT-188','Deep Mother','High Father','No-Nothing Truth','Guidance Field','Forecast','Forecast Gates','Prune',
+ 'Heavy Prune','Alpha','Crimson','FULL SPHERE','Continuity Field','Scar Carry','Scar Ledger','Proof Ledger','Water Geometry Calculus',
+ 'Violet Calculus','Dimensional Relativity','Inverse','Outverse','Dualverse','PEF','LPM','CTDE','EAG','Γ Admission','Continuance',
+ 'Evolution','Reality Admission','B0–B6'
+]as const);
+export const SAR_R342_MODE_BOUNDARY='All 38 canonical modes may govern routing, pruning, continuity, scars, admissibility, forecasting, comparison and proof. No mode may replace authoritative SAR measurement equations, invent missing observations, or promote a failed hard physical gate.';
 
 export const SAR_R342_AUTHORITIES=Object.freeze({
  sentinel1ProductSpecification:'https://sentiwiki.copernicus.eu/__attachments/1673968/S1-RS-MDA-52-7441-Sentinel-1-Product-Specification-2025-3.16.3.pdf',
