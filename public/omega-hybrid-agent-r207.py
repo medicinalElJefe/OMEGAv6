@@ -152,7 +152,7 @@ def main():
         pol=str(q.get('polarization') or '').upper();swath=str(q.get('subswath') or '').upper()
         if pol not in {'VV','VH','HH','HV'} or swath not in {'IW1','IW2','IW3'}:raise RuntimeError('R345 invalid polarization/subswath.')
         first=max(1,int(q.get('firstBurst') or 1));last=max(first,int(q.get('lastBurst') or first))
-        fields={'master':'--master','slave':'--slave','masterOrbit':'--master-orbit','slaveOrbit':'--slave-orbit','coregProof':'--coreg-proof','interferogram':'--interferogram','coherence':'--coherence','correctedInterferogram':'--corrected-interferogram','geometricPhaseProof':'--geometric-phase-proof','receipt':'--receipt'}
+        fields={'master':'--master','slave':'--slave','masterOrbit':'--master-orbit','slaveOrbit':'--slave-orbit','output':'--output','coregProof':'--coreg-proof','interferogram':'--interferogram','coherence':'--coherence','correctedInterferogram':'--corrected-interferogram','geometricPhaseProof':'--geometric-phase-proof','receipt':'--receipt'}
         cmd=[sys.executable,str(script)]
         for name,flag in fields.items():cmd += [flag,str(safe(name,True))]
         cmd += ['--master-acquired',str(q.get('masterAcquired') or ''),'--slave-acquired',str(q.get('slaveAcquired') or ''),'--polarization',pol,'--subswath',swath,'--first-burst',str(first),'--last-burst',str(last),'--dem-name',str(q.get('demName') or 'Copernicus 30m Global DEM'),'--graph',str(graph)]
