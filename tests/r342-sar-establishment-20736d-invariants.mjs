@@ -5,6 +5,10 @@ const source=fs.readFileSync('src/sarEstablishmentR342.ts','utf8');
 const live=fs.readFileSync('src/SARLiveTruthR285.tsx','utf8');
 
 assert.equal(12**4,20736,'R342 address space must be exactly 20,736 states');
+assert.ok(source.includes('SAR_R342_CANONICAL_MODES'),'R342 must bind the full canonical mode inventory');
+const modeBlock=source.slice(source.indexOf('SAR_R342_CANONICAL_MODES'),source.indexOf('SAR_R342_MODE_BOUNDARY'));
+assert.equal((modeBlock.match(/'/g)||[]).length/2,38,'R342 canonical mode inventory must contain exactly 38 modes');
+assert.ok(source.includes('No mode may replace authoritative SAR measurement equations'),'full modes must remain subordinate to physical measurement authority');
 for(const token of[
  'OMEGA_SAR_ESTABLISHMENT_R342_20736D',
  'SAR_ESTABLISHMENT_CARDINALITY_R342=12**4',
