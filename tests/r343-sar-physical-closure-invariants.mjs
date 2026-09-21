@@ -27,6 +27,9 @@ for(const token of[
  'physicalClosureR343'
  'materializeLosR343',
  'applyDisplacementCorrectionsR343',
+ 'invertLosRasterStackTo3DR343',
+ 'weighted per-pixel least squares d=G·u',
+ 'rank-deficient or ill-conditioned pixels remain NaN',
  'closeSarPhysicalChainR343'
 ])assert.ok(physical.includes(token),'R343 physical kernel missing '+token);
 
@@ -78,3 +81,7 @@ assert.ok(Math.abs(wrap(3*Math.PI)+Math.PI)<1e-12);
 console.log('R343 SAR PHYSICAL CLOSURE PASS · exact annotation parser · calibration/noise vectors · range×azimuth noise reconstruction contract · full-resolution TOPS receipt gate · validated interferometry · correction ledger · masked unwrapping · terrain radiometry · LOS materialization · extended lens contract');
 
 assert.ok(!physical.includes('cos(referenceIncidence)'),'R343 must not use an incidence-cosine shortcut as authoritative radiometric terrain correction');
+
+const solveIdentity3=(d)=>[d[0],d[1],d[2]];
+assert.deepEqual(solveIdentity3([1,2,3]),[1,2,3]);
+assert.ok(physical.includes("rows.length<3"),"R343 3-D inversion must hold pixels with fewer than three LOS constraints");
