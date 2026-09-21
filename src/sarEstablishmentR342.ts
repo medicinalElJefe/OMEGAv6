@@ -3,6 +3,7 @@ import type{SarRasterFieldR283}from'./sarRasterR283';
 export const SAR_ESTABLISHMENT_SCHEMA_R342='OMEGA_SAR_ESTABLISHMENT_R342';
 export const SAR_20736D_ADDRESS_SPACE_R342=12**4;
 export const SAR_TOPS_AZIMUTH_COREG_TARGET_SAMPLES_R342=0.001;
+export const SAR_TOPS_RANGE_COREG_TARGET_SAMPLES_R342=0.1;
 
 export const R342_EVIDENCE_AXIS=[
  'SOURCE_IDENTITY','NATIVE_GRD','NATIVE_SLC_IQ','PAIR_METADATA','POLARIZATION_ASSET','SAMPLED_GRID',
@@ -92,7 +93,7 @@ const held=(id:SarR342LayerId,gate:string,requires:string[],operator:string,proo
 
 function finite(v:unknown):v is number{return typeof v==='number'&&Number.isFinite(v)}
 export function topsCoregistrationAdmittedR342(e:SarEstablishmentEvidenceR342){
- const az=Number(e.azimuthCoregResidualSamples),rg=Number(e.rangeCoregResidualSamples),rgMax=Number(e.rangeCoregThresholdSamples);
+ const az=Number(e.azimuthCoregResidualSamples),rg=Number(e.rangeCoregResidualSamples),rgMax=finite(e.rangeCoregThresholdSamples)?Number(e.rangeCoregThresholdSamples):SAR_TOPS_RANGE_COREG_TARGET_SAMPLES_R342;
  return e.subpixelCoregistrationBound===true&&finite(az)&&Math.abs(az)<=SAR_TOPS_AZIMUTH_COREG_TARGET_SAMPLES_R342&&finite(rg)&&finite(rgMax)&&rgMax>0&&Math.abs(rg)<=rgMax;
 }
 
@@ -140,6 +141,48 @@ export function sar20736AddressR342(stateId:number):Sar20736AddressR342{
  return{stateId,address:`${digit(e)}-${digit(t)}-${digit(p)}-${digit(s)}`,evidenceIndex:e,evidence:R342_EVIDENCE_AXIS[e],transformIndex:t,transform:R342_TRANSFORM_AXIS[t],proofIndex:p,proof:R342_PROOF_AXIS[p],surfaceIndex:s,surface:R342_SURFACE_AXIS[s],deweySequence:'PARTITION → PRUNE → TRANSLATE → PROVE → INVARIANT_CARRY → SCAR_CARRY → RECONTEXTUALIZE',rscLoop:'Parent → Interaction → Scar → Continuity → Compression → Skin → Interpretation → Behavior → New Parent'};
 }
 export function enumerateSar20736R342(){return Array.from({length:SAR_20736D_ADDRESS_SPACE_R342},(_,i)=>sar20736AddressR342(i+1))}
+
+
+export interface SarRadiometricLutsR342{
+ beta0?:number[];
+ sigma0?:number[];
+ gamma0?:number[];
+ noiseLinearPower?:number[];
+ validMask?:number[];
+ source:string;
+ interpolation:string;
+}
+export interface SarRadiometricMaterializationR342{
+ beta0:number[];
+ sigma0:number[];
+ gamma0:number[];
+ selectedDb:number[];
+ selectedKind:'SIGMA0'|'GAMMA0'|'BETA0'|'NONE';
+ validMask:number[];
+ validSamples:number;
+ expected:number;
+ calibrationBound:boolean;
+ truthBoundary:string;
+}
+export function materializeSentinel1RadiometryR342(r:SarRasterFieldR283,luts:SarRadiometricLutsR342,preferred:'SIGMA0'|'GAMMA0'|'BETA0'='SIGMA0'):SarRadiometricMaterializationR342{
+ const expected=Math.max(0,r.width*r.height),beta0=new Array(expected).fill(Number.NaN),sigma0=new Array(expected).fill(Number.NaN),gamma0=new Array(expected).fill(Number.NaN),selectedDb=new Array(expected).fill(Number.NaN),validMask=new Array(expected).fill(0);
+ const src=r.nativeIntensity,mask=r.validMask?.length===expected?r.validMask:undefined;
+ if(!src?.length)return{beta0,sigma0,gamma0,selectedDb,selectedKind:'NONE',validMask,validSamples:0,expected,calibrationBound:false,truthBoundary:'R342 radiometry requires decoded native DN/amplitude samples plus returned calibration LUT evidence.'};
+ let validSamples=0;
+ for(let i=0;i<expected;i++){
+  if(mask&&Number(mask[i])<=0)continue;
+  const dn=Number(src[i]),noise=Number(luts.noiseLinearPower?.[i]??0);
+  if(!finite(dn)||!finite(noise)||noise<0)continue;
+  const b=sentinel1CalibratedPowerR342(dn,Number(luts.beta0?.[i]),noise);
+  const s=sentinel1CalibratedPowerR342(dn,Number(luts.sigma0?.[i]),noise);
+  const g=sentinel1CalibratedPowerR342(dn,Number(luts.gamma0?.[i]),noise);
+  if(finite(b)&&b>0)beta0[i]=b;if(finite(s)&&s>0)sigma0[i]=s;if(finite(g)&&g>0)gamma0[i]=g;
+  const selected=preferred==='SIGMA0'?sigma0[i]:preferred==='GAMMA0'?gamma0[i]:beta0[i];
+  if(finite(selected)&&selected>0){selectedDb[i]=10*Math.log10(selected);validMask[i]=1;validSamples++}
+ }
+ const selectedKind=validSamples?preferred:'NONE';
+ return{beta0,sigma0,gamma0,selectedDb,selectedKind,validMask,validSamples,expected,calibrationBound:validSamples>0,truthBoundary:'R342 applies Sentinel-1 L1 calibration/noise LUT evidence as value=(DN²-noiseLut)/calibrationLut². Invalid or non-positive corrected power remains missing/NaN; raw source samples are not overwritten.'};
+}
 
 export function sentinel1CalibratedPowerR342(dnMagnitude:number,calibrationLut:number,noiseLutLinearPower=0){
  if(!finite(dnMagnitude)||!finite(calibrationLut)||calibrationLut<=0||!finite(noiseLutLinearPower)||noiseLutLinearPower<0)return Number.NaN;
