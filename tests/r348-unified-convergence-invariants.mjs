@@ -22,6 +22,10 @@ for(const token of[
  'CANONICAL, PHYSICAL AND SYSTEM FRAMES MAY BE CORRELATED BUT NEVER SILENTLY CONVERTED',
  'MODEL ACTIVITY IS DIMENSIONLESS MODEL STATE UNLESS UNIT-BOUND PHYSICAL EVIDENCE IS PRESENT',
  'R125 REMAINS SOLE CANONSTATE ADMISSION AUTHORITY',
+ 'R348_HISTORICAL_CORPUS_AUDIT',
+ 'R348_SOFTWARE_LEDGER_CENSUS',
+ 'strongestUnconfirmed:\'UNIVERSAL_ONTOLOGY\'',
+ "invariant:'ONE_FIELD_ONE_PACKET_ONE_CONTINUITY_LAW'",
  'validatePhysicalObservationR348',
  'SHA256_EVIDENCE_HASH_REQUIRED',
  'probability:null'
@@ -29,6 +33,11 @@ for(const token of[
 
 assert.equal(manifest.schema,'OMEGA_R348_CONVERGENCE_SOURCE_MANIFEST');
 assert.equal(manifest.sources.length,8);
+assert.equal(manifest.historicalCorpusAudit.filesAudited,188);
+assert.equal(manifest.historicalCorpusAudit.visibleMegabytes,463.7);
+assert.equal(manifest.softwareLedgerCensus.systems,100);
+assert.equal(manifest.softwareLedgerCensus.families,24);
+assert.equal(manifest.softwareLedgerCensus.routes,44);
 const qcd=manifest.sources.find(x=>x.name==='OmegaJ_FULL_MODE_QCD_JUNCTION_COHERENCE_ORCHESTRATED_v5.csv');
 assert.equal(qcd.rows,20782);assert.equal(qcd.columns,151);
 assert.equal(qcd.sha256,'5648bf1ceb9adb050604d4d430f41b5dbc550d9a9dd7496c8c33fcb6d136a5b2');
@@ -42,6 +51,8 @@ for(const token of[
  'ONE STATE / THREE FRAMES / SEVEN SCENE LAYERS',
  'DEWEY RECALIBRATION POLICY',
  'B3 default · B0 fallback · B4–B6 gated',
+ 'HISTORICAL CORPUS AUDIT',
+ 'ONE-SYSTEM LEDGER',
  'FINGERPRINTED CORPUS',
  'packet.truthBoundary'
 ])assert.ok(ui.includes(token),'R348 operational convergence surface missing '+token);
