@@ -25,7 +25,7 @@ for(const token of[
  "channel:'COLOR_CLASS'",
  "channel:'UNCERTAINTY'",
  '20,736 is an address space',
- 'physical energy remains UNBOUND',
+ 'physical energy/power/flux remain UNBOUND',
  'r347-correlation-frame',
  'r347-source-clocks',
  'r347-quantity-registry',
