@@ -25,7 +25,7 @@ for(const token of[
  'R347_UNIT_POLICY',
  'admitScalarChannelR347',
  'OBSERVED_SCALAR_REQUIRES_VALUE_UNIT_SOURCE_TIMESTAMP',
- 'finite value, explicit unit, source identity and observation timestamp'
+ 'finite value, explicit unit, source identity and observation timestamp',
  'route steps are model time',
  'Earth timestamps are observation time'
 ])assert.ok(runtime.includes(token),'R347 visual grammar missing '+token);
@@ -52,7 +52,9 @@ for(const token of[
  'navigator.hardwareConcurrency',
  'stride=low?4:W<1100?2:1',
  'projected.current=pts',
- 'onPointerDown={choose}',
+ 'onPointerDown={pointerDown}',
+ 'onPointerMove={pointerMove}',
+ 'onPointerUp={pointerUp}',
  'onSelect(x.address)',
  'calibratedValue',
  "const zoomBand=zoom<.95?'CONTEXT':zoom<1.5?'CORRIDOR':'DETAIL'",
@@ -104,3 +106,6 @@ assert.ok(!cockpit.includes('const rr=Math.round')&&!cockpit.includes('gg=Math.r
 assert.ok(cockpit.includes("calibratedValue(cal,'evidence'")&&cockpit.includes("calibratedValue(cal,'C'")&&cockpit.includes("calibratedValue(cal,'q'")&&cockpit.includes("calibratedValue(cal,'Lambda'")&&cockpit.includes("calibratedValue(cal,'scar'"),'R347 stage pixels must use the same full-field calibration as the inspector');
 assert.ok(cockpit.includes("source:sourceName(earth?.sources?.openMeteo),observedAt:earth?.localConditions?.time"),'R347 weather channels must use returned source identity and weather observation time, not fallback provenance');
 assert.ok(cockpit.includes("source:sourceName(earth?.sources?.swpc),observedAt:earth?.spaceWeather?.observationTime"),'R347 Kp must use returned SWPC source and observation time');
+
+assert.ok(cockpit.includes("const alpha=(.05+.70*E)*visibility*(.45+.55*w)"),'R347 rendered evidence opacity must execute the declared α=.05+.70·E_c base mapping');
+assert.ok(cockpit.includes("line=.6+2.8*calibratedValue(cal,'C'"),'R347 rendered route weight must execute the declared w=.6+2.8·CΩ_c mapping');
