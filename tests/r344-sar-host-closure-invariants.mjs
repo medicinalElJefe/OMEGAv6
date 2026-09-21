@@ -5,6 +5,8 @@ const receipt=fs.readFileSync('src/sarHostClosureR344.ts','utf8');
 const live=fs.readFileSync('src/SARLiveTruthR285.tsx','utf8');
 const raster=fs.readFileSync('src/sarRasterR283.ts','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+const host=fs.readFileSync('scripts/sar_r344_host_closure.py','utf8');
+const graph=fs.readFileSync('scripts/sar_r344_snap_tops_insar.xml','utf8');
 
 for(const token of[
  'OMEGA_SAR_HOST_CLOSURE_R344',
@@ -43,6 +45,28 @@ for(const token of[
 ])assert.ok(live.includes(token),'R344 live workstation missing '+token);
 
 for(const token of[
+ 'SCHEMA="OMEGA_SAR_HOST_CLOSURE_R344"',
+ 'probe_snap',
+ 'sha256_path',
+ 'annotation_hashes',
+ '--coreg-proof',
+ '--unwrap-proof',
+ '--independent-los-json',
+ 'A process exit is not proof'
+])assert.ok(host.includes(token),'R344 host driver missing '+token);
+for(const token of[
+ '<operator>TOPSAR-Split</operator>',
+ '<operator>Apply-Orbit-File</operator>',
+ '<operator>Back-Geocoding</operator>',
+ '<operator>Enhanced-Spectral-Diversity</operator>',
+ '<operator>Interferogram</operator>',
+ '<operator>TOPSAR-Deburst</operator>',
+ '<operator>TopoPhaseRemoval</operator>',
+ '<operator>GoldsteinPhaseFiltering</operator>',
+ '${master}','${slave}','${subswath}','${polarization}','${output}'
+])assert.ok(graph.includes(token),'R344 SNAP graph missing '+token);
+
+for(const token of[
  'correctedUnwrappedPhaseRad?:number[]',
  'correctedLosDisplacementM?:number[]',
  'deformationEastM?:number[]',
@@ -74,7 +98,8 @@ assert.equal(base.master.productId!==base.slave.productId,true);
 assert.ok(Math.abs(base.coregistration.azimuthResidualSamples)<=.001);
 assert.ok(Math.abs(base.coregistration.rangeResidualSamples)<=base.coregistration.rangeThresholdSamples);
 assert.equal(base.independentLos.length,3);
-assert.equal(pkg.scripts['test:r344'],'node tests/r344-sar-host-closure-invariants.mjs');
+assert.ok(pkg.scripts['test:r344'].includes('python3 -m py_compile scripts/sar_r344_host_closure.py'));
+assert.ok(pkg.scripts['test:r344'].includes('node tests/r344-sar-host-closure-invariants.mjs'));
 assert.ok(pkg.scripts['check:static'].includes('npm run test:r344'),'R344 must participate in the full release gate');
 
 console.log('R344 SAR HOST CLOSURE PASS · source/annotation/orbit/DEM hashes · full-resolution TOPS residual receipt · interferogram/coherence · topographic phase proof · unwrap closure · corrections · metric LOS · rank-3 deformation · hash-linked preview import');
