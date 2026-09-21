@@ -5,6 +5,8 @@ const runtime=fs.readFileSync('src/visualTraversalCockpitR347.ts','utf8');
 const cockpit=fs.readFileSync('src/TraversalCockpitR347.tsx','utf8');
 const css=fs.readFileSync('src/traversalCockpitR347.css','utf8');
 const workstation=fs.readFileSync('src/OmegaWorkstation.tsx','utf8');
+const workstationV2=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const loader=fs.readFileSync('src/specialistLoaderR109.tsx','utf8');
 const matter=fs.readFileSync('src/MatterTraversal.tsx','utf8');
 const earth=fs.readFileSync('src/EarthObservatoryR8.tsx','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
@@ -78,9 +80,12 @@ for(const token of[
 assert.ok(!cockpit.includes('api.post<')&&!cockpit.includes('api.post('),'R347 cockpit must remain read-only and may not acquire execution authority');
 for(const forbidden of['CanonState=','OMEGA_RUNTIME.put','nativeExecutionClaimed=true','SAR_R344_CLOSURE'])assert.ok(!cockpit.includes(forbidden)&&!runtime.includes(forbidden),'R347 visual path may not acquire established authority: '+forbidden);
 
-assert.ok(workstation.includes("import TraversalCockpitR347 from './TraversalCockpitR347';"),'R347 cockpit import missing');
-assert.ok(workstation.includes("if(panel==='Cockpit')return <><TraversalCockpitR347"),'R347 must replace only the Cockpit surface');
-assert.ok(workstation.includes("if(panel==='Workspace')return"),'R347 must preserve Workspace as a separate established surface');
+assert.ok(workstation.includes("import TraversalCockpitR347 from './TraversalCockpitR347';"),'R347 legacy workstation compatibility import missing');
+assert.ok(loader.includes("TraversalCockpitR347:()=>import('./TraversalCockpitR347')"),'R347 active deferred specialist loader missing');
+assert.ok(loader.includes('export const TraversalCockpitR347R109=lazy(LOADERS.TraversalCockpitR347)'),'R347 deferred specialist export missing');
+assert.ok(loader.includes("Workspace:[LOADERS.OmegaWorkspaceCockpitR18],Cockpit:[LOADERS.TraversalCockpitR347]"),'R347 must preserve Workspace R18 while routing Cockpit to the new specialist');
+assert.ok(workstationV2.includes("case 'Workspace':return <OmegaWorkspaceCockpitR109 variant='Workspace'"),'R347 must preserve Workspace as the established R18 surface');
+assert.ok(workstationV2.includes("case 'Cockpit':return <TraversalCockpitR347R109 address={address} onSelect={commit} onNavigate={go}/>"),'R347 must mount on the actual current R307 Cockpit route');
 assert.ok(matter.includes('matter-traversal'),'R347 must preserve MatterTraversal');
 assert.ok(earth.includes("type EarthView='SATELLITE'|'PLANET'|'MOTION'|'EVIDENCE'|'SPACE'|'GROUND'|'CALCULUS'|'SAR'"),'R347 must preserve Earth/SAR view authority');
 
@@ -109,3 +114,5 @@ assert.ok(cockpit.includes("source:sourceName(earth?.sources?.swpc),observedAt:e
 
 assert.ok(cockpit.includes("const alpha=(.05+.70*E)*visibility*(.45+.55*w)"),'R347 rendered evidence opacity must execute the declared α=.05+.70·E_c base mapping');
 assert.ok(cockpit.includes("line=.6+2.8*calibratedValue(cal,'C'"),'R347 rendered route weight must execute the declared w=.6+2.8·CΩ_c mapping');
+
+assert.ok(!loader.includes("Workspace:[LOADERS.OmegaWorkspaceCockpitR18],Cockpit:[LOADERS.OmegaWorkspaceCockpitR18]"),'R347 active shell must not keep Cockpit bound to the pre-R347 shared specialist');
