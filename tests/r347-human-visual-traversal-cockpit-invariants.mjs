@@ -10,6 +10,8 @@ const loader=fs.readFileSync('src/specialistLoaderR109.tsx','utf8');
 const matter=fs.readFileSync('src/MatterTraversal.tsx','utf8');
 const earth=fs.readFileSync('src/EarthObservatoryR8.tsx','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+const r347Browser=fs.readFileSync('tests/r347-visual-traversal-cockpit-browser-e2e.mjs','utf8');
+const r241Workflow=fs.readFileSync('.github/workflows/r241-archive-convergence.yml','utf8');
 
 for(const token of[
  'OMEGA_HUMAN_VISUAL_TRAVERSAL_COCKPIT_R347',
@@ -116,3 +118,8 @@ assert.ok(cockpit.includes("const alpha=(.05+.70*E)*visibility*(.45+.55*w)"),'R3
 assert.ok(cockpit.includes("line=.6+2.8*calibratedValue(cal,'C'"),'R347 rendered route weight must execute the declared w=.6+2.8·CΩ_c mapping');
 
 assert.ok(!loader.includes("Workspace:[LOADERS.OmegaWorkspaceCockpitR18],Cockpit:[LOADERS.OmegaWorkspaceCockpitR18]"),'R347 active shell must not keep Cockpit bound to the pre-R347 shared specialist');
+
+for(const token of['current R307 Cockpit route mounts deferred R347 specialist','drag camera does not mutate state','wheel semantic zoom reaches DETAIL','unit/source/time admitted live scalars visible','no mutating requests'])assert.ok(r347Browser.includes(token),'R347 focused browser proof missing '+token);
+assert.ok(r347Browser.includes("['POST','PUT','PATCH','DELETE']"),'R347 browser proof must reject mutating network requests');
+assert.ok(r241Workflow.includes("Browser proof · R347 visual traversal cockpit")&&r241Workflow.includes("tests/r347-visual-traversal-cockpit-browser-e2e.mjs"),'R347 focused browser proof must run inside accumulated R241 visual CI');
+assert.ok(css.includes('.r347-cockpit button{min-width:44px;min-height:44px}')&&css.includes('grid-template-columns:repeat(24,44px)'),'R347 mobile touch-target contract must preserve inherited >=44px action geometry');
