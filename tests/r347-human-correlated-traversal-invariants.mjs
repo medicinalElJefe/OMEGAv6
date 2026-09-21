@@ -20,7 +20,7 @@ for(const token of[
  'opacityFocus:\'evidence weight\'',
  'handedness:\'signed orientation σ\'',
  'logicalTime:\'canonical route step; never labeled event time\'',
- 'futureSupport:\'normalized admissibility support; never probability without calibrated probability authority\'',
+ 'futureSupport:\'existing unifiedCoherence channel for candidate readability; admitted-next relation remains canonical; never probability without calibrated probability authority\'',
  "energyAuthority:'MODEL_PROXY'",
  'physicalEnergy:null',
  'eventTime:null',
@@ -37,6 +37,7 @@ for(const token of[
 assert.ok(!field.includes('Math.random')&&!cockpit.includes('Math.random'),'R347 geometry must remain deterministic');
 assert.ok(field.includes("projectionPoint(address,'MANDALA',1000)"),'R347 position must remain canonical projection/address derived');
 assert.ok(field.includes('compileSourceTraversal(startAddress,depth)'),'R347 worldline must use canonical admitted route');
+assert.ok(field.includes('const support=cl(u.unifiedCoherence)'),'R347 future readability support must reuse established unified coherence rather than invent a weighted score');
 assert.ok(field.includes("['ADMITTED_NEXT',r?.autoPing?.dataNext]")&&field.includes("'OPPOSITE_DOMAIN'"),'R347 future cone must use declared canonical alternatives');
 
 for(const token of[
@@ -44,7 +45,8 @@ for(const token of[
  "type Lens='UNIFIED'|'SPACE'|'TIME'|'INTENSITY'|'CONTINUITY'|'SCAR'|'FUTURES'|'PROOF'",
  "route step · not event time",
  "not physical energy",
- "support · not probability",
+ "unified coherence · not probability",
+ "f.relation==='ADMITTED_NEXT'?' · CANON':''",
  "className='r347-timebar'",
  "className='r347-futures'",
  "TRAVERSAL_VISUAL_GRAMMAR_R347",
