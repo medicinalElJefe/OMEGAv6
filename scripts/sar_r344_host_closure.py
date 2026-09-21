@@ -12,7 +12,7 @@ This driver does not turn a successful process exit into physical proof. It can:
 The R344 validator remains authoritative for promotion.
 """
 from __future__ import annotations
-import argparse, hashlib, json, os, pathlib, subprocess, sys
+import argparse, hashlib, json, os, pathlib, subprocess, sys, zipfile
 from datetime import datetime, timezone
 from typing import Any
 
@@ -57,8 +57,16 @@ def annotation_hashes(safe:pathlib.Path)->list[str]:
         roots.extend(safe.glob("annotation/**/*.xml"))
         roots.extend(safe.glob("annotation/*.xml"))
     elif safe.suffix.lower()==".zip":
-        # ZIP bytes are already source-hashed; unpacked annotation proof is intentionally not invented.
-        return []
+        hashes=set()
+        with zipfile.ZipFile(safe,"r") as z:
+            for name in sorted(z.namelist()):
+                low=name.lower()
+                if low.endswith("manifest.safe") or ("/annotation/" in low and low.endswith(".xml")):
+                    h=hashlib.sha256()
+                    with z.open(name,"r") as src:
+                        for b in iter(lambda:src.read(1024*1024),b""): h.update(b)
+                    hashes.add(h.hexdigest())
+        return sorted(hashes)
     return sorted({sha256_file(p) for p in roots if p.is_file()})
 
 def load_json(path:str|None)->dict[str,Any]:
