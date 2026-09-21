@@ -9,12 +9,13 @@ const text=(v:any)=>typeof v==='string'&&v.trim()?v.trim():'';
 const validIso=(v:any)=>text(v)&&Number.isFinite(Date.parse(String(v)));
 const sha=(v:any)=>text(v)&&/^[0-9a-f]{64}$/i.test(String(v))?String(v):'';
 const sourceName=(v:any)=>text(v?.source)||text(v?.provider)||text(v?.endpoint)||text(v?.id);
-const received=(earth:any)=>validIso(earth?.verifiedAt)?new Date(earth.verifiedAt).toISOString():new Date().toISOString();
+const received=(earth:any)=>validIso(earth?.verifiedAt)?new Date(earth.verifiedAt).toISOString():'';
 
 function observation(input:{id:string;quantity:string;value:any;unit:string;frame:string;eventTime:any;source:any;earth:any;provenance:string[]}):PhysicalObservationR348|null{
  const value=Number(input.value),eventTime=validIso(input.eventTime)?new Date(input.eventTime).toISOString():'',sourceId=sourceName(input.source),evidenceHash=sha(input.earth?.evidenceHash);
- if(!Number.isFinite(value)||!eventTime||!sourceId||!evidenceHash)return null;
- return{id:input.id,sourceId,quantity:input.quantity,value,unit:input.unit,frame:input.frame,eventTime,receivedAt:received(input.earth),provenance:input.provenance,evidenceHash,uncertainty:null};
+ const receivedAt=received(input.earth);
+ if(!Number.isFinite(value)||!eventTime||!sourceId||!evidenceHash||!receivedAt)return null;
+ return{id:input.id,sourceId,quantity:input.quantity,value,unit:input.unit,frame:input.frame,eventTime,receivedAt,provenance:input.provenance,evidenceHash,uncertainty:null};
 }
 
 export function compileLiveSceneCorrelationR348(address:number,earth:any,status:any,hybrid:any,calibration:VisualCalibration|null){
