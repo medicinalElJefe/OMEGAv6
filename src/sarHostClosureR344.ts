@@ -1,10 +1,20 @@
 import{invertIndependentLosTo3DR342,type LosObservationR342}from'./sarEstablishmentR342';
+import type{SarRasterFieldR283}from'./sarRasterR283';
 
 export const SAR_HOST_CLOSURE_SCHEMA_R344='OMEGA_SAR_HOST_CLOSURE_R344';
 export const SHA256_RE_R344=/^[a-f0-9]{64}$/i;
 
 export type SarArtifactRefR344={path:string;sha256:string;bytes?:number;format?:string;units?:string};
 export type SarSourceRefR344={productId:string;assetKey:string;sha256:string;polarization:string;acquiredAt:string};
+export type SarClosurePreviewR344={
+ width:number;height:number;validMask:number[];
+ beta0?:number[];sigma0?:number[];gamma0?:number[];terrainFlattenedGamma0?:number[];
+ interferogramPhaseRad?:number[];correctedInterferometricPhaseRad?:number[];coherence?:number[];
+ unwrappedPhaseRad?:number[];losDisplacementM?:number[];correctedLosDisplacementM?:number[];
+ deformationEastM?:number[];deformationNorthM?:number[];deformationUpM?:number[];
+ sourceArtifactSha256:{[field:string]:string};
+};
+
 export type SarHostClosureReceiptR344={
  schema:string;revision:string;createdAt:string;processor:string;processorVersion:string;
  master:SarSourceRefR344;slave:SarSourceRefR344;
@@ -19,6 +29,7 @@ export type SarHostClosureReceiptR344={
  los?:{artifact:SarArtifactRefR344;wavelengthM:number;signConvention:string;sign:1|-1;validPixels:number};
  independentLos?:Array<LosObservationR342&{source:string;artifactSha256:string}>;
  deformation3d?:{east:SarArtifactRefR344;north:SarArtifactRefR344;up:SarArtifactRefR344;rank:number;conditionNumber:number;weightedRmsResidualM:number};
+ preview?:SarClosurePreviewR344;
  truthBoundary:string;
 };
 
@@ -67,6 +78,23 @@ export function validateSarHostClosureR344(r:SarHostClosureReceiptR344):SarClosu
  gates.push(gate('FULL_3D_DEFORMATION',threeDOk,'ADDITIONAL_VIEWING_GEOMETRY_REQUIRED',['>=3 rank-independent look vectors or equivalent constraints','3-D inversion artifacts','rank/conditioning/residual proof']));
  const scars=gates.filter(g=>g.state==='HELD').map(g=>g.reason),established=gates.filter(g=>g.state==='ESTABLISHED').map(g=>g.id);
  return{ok:schemaOk&&sourcesOk&&annOk&&orbitOk&&coregOk,gates,scars:[...new Set(scars)],established,threeD,truthBoundary:'R344 validates a full-resolution host processing receipt; it does not infer missing artifacts from a successful process exit. Each promoted physical layer requires hashes plus its own numerical/provenance gate. Full 3-D remains held unless the look-geometry matrix has rank 3 and the returned inversion artifacts are independently identified.'};
+}
+
+function previewArrayValid(a:number[]|undefined,n:number){return!!a&&a.length===n&&a.some(Number.isFinite)}
+export function applySarHostClosurePreviewR344(base:SarRasterFieldR283,r:SarHostClosureReceiptR344,v=validateSarHostClosureR344(r)):SarRasterFieldR283{
+ const p=r.preview;if(!p||!Number.isInteger(p.width)||!Number.isInteger(p.height)||p.width<1||p.height<1||p.width*p.height!==p.validMask?.length)return base;
+ const n=p.width*p.height,state=(id:string)=>v.gates.find(g=>g.id===id)?.state==='ESTABLISHED',hashLinked=(field:string)=>hash(p.sourceArtifactSha256?.[field]);
+ const out:SarRasterFieldR283={...base,width:p.width,height:p.height,validMask:p.validMask.map(x=>Number(x)>0?1:0),native:false,sourceId:base.sourceId+'::R344_PREVIEW'};
+ if(state('ANNOTATION_HASHES')){if(previewArrayValid(p.beta0,n)&&hashLinked('beta0'))out.beta0=p.beta0;if(previewArrayValid(p.sigma0,n)&&hashLinked('sigma0'))out.sigma0=p.sigma0;if(previewArrayValid(p.gamma0,n)&&hashLinked('gamma0'))out.gamma0=p.gamma0}
+ if(state('GEOMETRIC_PHASE_REMOVAL')&&previewArrayValid(p.terrainFlattenedGamma0,n)&&hashLinked('terrainFlattenedGamma0'))out.terrainFlattenedGamma0=p.terrainFlattenedGamma0;
+ if(state('PHYSICAL_INTERFEROGRAM')){if(previewArrayValid(p.interferogramPhaseRad,n)&&hashLinked('interferogramPhaseRad'))out.interferogramPhaseRad=p.interferogramPhaseRad;if(previewArrayValid(p.coherence,n)&&hashLinked('coherence'))out.coherence=p.coherence}
+ if(state('GEOMETRIC_PHASE_REMOVAL')&&previewArrayValid(p.correctedInterferometricPhaseRad,n)&&hashLinked('correctedInterferometricPhaseRad'))out.correctedInterferometricPhaseRad=p.correctedInterferometricPhaseRad;
+ if(state('UNWRAP_CLOSURE')&&previewArrayValid(p.unwrappedPhaseRad,n)&&hashLinked('unwrappedPhaseRad'))out.unwrappedPhaseRad=p.unwrappedPhaseRad;
+ if(state('METRIC_LOS')&&previewArrayValid(p.losDisplacementM,n)&&hashLinked('losDisplacementM'))out.losDisplacementM=p.losDisplacementM;
+ if(state('CORRECTION_LEDGER')&&previewArrayValid(p.correctedLosDisplacementM,n)&&hashLinked('correctedLosDisplacementM'))out.correctedLosDisplacementM=p.correctedLosDisplacementM;
+ if(state('FULL_3D_DEFORMATION')){if(previewArrayValid(p.deformationEastM,n)&&hashLinked('deformationEastM'))out.deformationEastM=p.deformationEastM;if(previewArrayValid(p.deformationNorthM,n)&&hashLinked('deformationNorthM'))out.deformationNorthM=p.deformationNorthM;if(previewArrayValid(p.deformationUpM,n)&&hashLinked('deformationUpM'))out.deformationUpM=p.deformationUpM}
+ out.physicalClosureR343={schema:SAR_HOST_CLOSURE_SCHEMA_R344,coregistrationBound:state('TOPS_SUBPIXEL_COREGISTRATION'),interferometricPhaseValidated:state('PHYSICAL_INTERFEROGRAM'),calibrationBound:state('ANNOTATION_HASHES')&&(!!out.beta0||!!out.sigma0||!!out.gamma0),terrainFlattenedBound:!!out.terrainFlattenedGamma0,unwrappedPhaseBound:state('UNWRAP_CLOSURE')&&!!out.unwrappedPhaseRad,correctionLedgerBound:state('CORRECTION_LEDGER'),losDisplacementBound:state('METRIC_LOS')&&!!out.losDisplacementM,correctedLosBound:state('CORRECTION_LEDGER')&&!!out.correctedLosDisplacementM,proof:v.established,scars:v.scars};
+ return out;
 }
 
 export function sarClosurePromotionStateR344(v:SarClosureValidationR344){
