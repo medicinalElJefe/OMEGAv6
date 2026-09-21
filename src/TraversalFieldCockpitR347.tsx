@@ -77,7 +77,7 @@ export default function TraversalFieldCockpitR347({variant,address,onAddress,obs
   <div className='r347-timebar'><span>PAST / SCAR</span><input type='range' min='0' max={Math.max(0,field.nodes.length-1)} value={Math.min(cursor,Math.max(0,field.nodes.length-1))} onChange={e=>{setPlaying(false);setCursor(Number(e.target.value))}}/><b>t+{current?.step??0} / {Math.max(0,field.nodes.length-1)}</b><span>ADMISSIBLE FUTURES</span></div>
   <div className='r347-futures'>{field.futures.slice(0,6).map(f=><button key={f.relation+f.address} onClick={()=>onAddress(f.address)} title={f.truthBoundary}><span>{f.relation.replaceAll('_',' ')}{f.relation==='ADMITTED_NEXT'?' · CANON':''}</span><b>{fmt(f.support)}</b><small>unified coherence · not probability · state {f.stateId}</small></button>)}</div>
   <div className='r347-readout'>
-   <div><span>LOGICAL TIME</span><b>t+{current?.step??0}</b><small>{current?.eventTime?('event '+new Date(current.eventTime).toLocaleString()):'route step · event time unbound'}</small></div>
+   <div><span>LOGICAL TIME</span><b>t+{current?.step??0}</b><small>{current?.eventTime?('event '+new Date(current.eventTime).toLocaleString()):'route step · not event time · event time unbound'}</small></div>
    <div><span>CONTINUITY FLUX</span><b>{fmt(current?.continuityFlux??0)}</b><small>edge thickness</small></div>
    <div><span>EVIDENCE</span><b>{fmt(current?.evidence??0)}</b><small>focus / opacity</small></div>
    <div><span>UNCERTAINTY PRESSURE</span><b>{fmt(.55*(current?.contradiction??0)+.45*(current?.burden??0))}</b><small>q + Λ halo</small></div>
