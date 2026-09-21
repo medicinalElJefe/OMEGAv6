@@ -4,7 +4,7 @@ import{compileTraversalFieldR347,TRAVERSAL_VISUAL_GRAMMAR_R347,type TraversalFie
 import'./traversalFieldR347.css';
 
 type Lens='UNIFIED'|'SPACE'|'TIME'|'INTENSITY'|'CONTINUITY'|'SCAR'|'FUTURES'|'PROOF';
-type Props={variant:string;address:number;onAddress:(n:number)=>void;observations?:TraversalObservationPacketR347[]};
+type Props={variant:string;address:number;onAddress:(n:number)=>void;observations?:TraversalObservationPacketR347[];initialDepth?:number};
 const LENSES:Lens[]=['UNIFIED','SPACE','TIME','INTENSITY','CONTINUITY','SCAR','FUTURES','PROOF'];
 const RESOLUTIONS=[12,144,1728,20736,248832] as const;
 const EMPTY_OBSERVATIONS:TraversalObservationPacketR347[]=[];
@@ -27,11 +27,12 @@ function lensRadius(lens:Lens,n:TraversalFieldNodeR347){
  return 3+5*n.support;
 }
 
-export default function TraversalFieldCockpitR347({variant,address,onAddress,observations=EMPTY_OBSERVATIONS}:Props){
+export default function TraversalFieldCockpitR347({variant,address,onAddress,observations=EMPTY_OBSERVATIONS,initialDepth=48}:Props){
  const canvas=useRef<HTMLCanvasElement|null>(null),clock=useRef({last:0,t:0}),camera=useRef({yaw:0,pitch:0,drag:false,lastX:0,lastY:0});
- const[lens,setLens]=useState<Lens>('UNIFIED'),[playing,setPlaying]=useState(false),[depth,setDepth]=useState(48),[speed,setSpeed]=useState(1),[cursor,setCursor]=useState(0),[zoom,setZoom]=useState(1);
+ const[lens,setLens]=useState<Lens>('UNIFIED'),[playing,setPlaying]=useState(false),[depth,setDepth]=useState(()=>Math.max(12,Math.min(144,initialDepth))),[speed,setSpeed]=useState(1),[cursor,setCursor]=useState(0),[zoom,setZoom]=useState(1);
  const field=useMemo(()=>compileTraversalFieldR347(address,depth,observations),[address,depth,observations]);
  useEffect(()=>{setCursor(0);clock.current={last:0,t:0}},[address,depth]);
+ useEffect(()=>setDepth(Math.max(12,Math.min(144,initialDepth))),[initialDepth]);
  useEffect(()=>{if(!playing)return;const n=field.nodes[Math.min(cursor,field.nodes.length-1)],rate=.35+1.65*(n?.motionRate??0),id=window.setTimeout(()=>setCursor(i=>Math.min(field.nodes.length-1,i+1)),Math.max(100,900/(speed*rate)));return()=>clearTimeout(id)},[playing,speed,cursor,field.nodes]);
  useEffect(()=>{if(cursor>=field.nodes.length-1)setPlaying(false)},[cursor,field.nodes.length]);
 
@@ -85,7 +86,7 @@ export default function TraversalFieldCockpitR347({variant,address,onAddress,obs
    <div><span>SPACE FRAME</span><b>{lens==='SPACE'&&field.space.authority==='UNIT_BOUND_PHYSICAL_SPACE'?'PHYSICAL':'ATLAS'}</b><small>{field.space.authority==='UNIT_BOUND_PHYSICAL_SPACE'?(field.space.frame+' · '+field.space.unit):(field.space.mixedFrameHold?'physical packets held · incomplete/mixed frame':'representational address geometry')}</small></div><div><span>RESOLUTION</span><b>{(current?.effectiveResolution??0).toLocaleString()}</b><small>representational address level</small></div>
    <div><span>{field.energy.label}</span><b>{current?.physicalEnergy?(fmt(current.physicalEnergy.value)+' '+current.physicalEnergy.unit):fmt(current?.modelIntensity??0)}</b><small>{current?.physicalEnergy?'unit-bound returned channel':'model proxy · not physical energy'}</small></div>
   </div>
-  <div className='r347-controls'><button onClick={()=>{setPlaying(false);const i=Math.max(0,cursor-1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepBack/>Previous</button><button className='primary' onClick={()=>setPlaying(v=>!v)}>{playing?<Pause/>:<Play/>}{playing?'Pause':'Traverse'}</button><button onClick={()=>{setPlaying(false);const i=Math.min(field.nodes.length-1,cursor+1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepForward/>Next</button><button onClick={()=>{setPlaying(false);setCursor(0);onAddress(address)}}><RotateCcw/>Origin</button><label>DEPTH<input type='range' min='12' max='96' step='12' value={depth} onChange={e=>setDepth(Number(e.target.value))}/><b>{depth}</b></label><label>RATE<input type='range' min='.25' max='3' step='.25' value={speed} onChange={e=>setSpeed(Number(e.target.value))}/><b>{speed.toFixed(2)}×</b></label><label>VIEW<input type='range' min='.55' max='2.2' step='.05' value={zoom} onChange={e=>setZoom(Number(e.target.value))}/><b>{zoom.toFixed(2)}×</b></label></div>
+  <div className='r347-controls'><button onClick={()=>{setPlaying(false);const i=Math.max(0,cursor-1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepBack/>Previous</button><button className='primary' onClick={()=>setPlaying(v=>!v)}>{playing?<Pause/>:<Play/>}{playing?'Pause':'Traverse'}</button><button onClick={()=>{setPlaying(false);const i=Math.min(field.nodes.length-1,cursor+1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepForward/>Next</button><button onClick={()=>{setPlaying(false);setCursor(0);onAddress(address)}}><RotateCcw/>Origin</button><label>DEPTH<input type='range' min='12' max='144' step='12' value={depth} onChange={e=>setDepth(Number(e.target.value))}/><b>{depth}</b></label><label>RATE<input type='range' min='.25' max='3' step='.25' value={speed} onChange={e=>setSpeed(Number(e.target.value))}/><b>{speed.toFixed(2)}×</b></label><label>VIEW<input type='range' min='.55' max='2.2' step='.05' value={zoom} onChange={e=>setZoom(Number(e.target.value))}/><b>{zoom.toFixed(2)}×</b></label></div>
   <details><summary>VISUAL GRAMMAR · exact mapping</summary><div className='r347-grammar'>{Object.entries(TRAVERSAL_VISUAL_GRAMMAR_R347).map(([k,v])=><div key={k}><span>{k}</span><b>{v}</b></div>)}</div><p>{field.truthBoundary}</p></details>
  </section>
 }
