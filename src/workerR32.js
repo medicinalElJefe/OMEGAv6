@@ -18,7 +18,7 @@ function relativePath(v){const s=text(v||'.').replace(/\\/g,'/');if(!s||s==='.')
 function parseProjectPath(prompt){const m=String(prompt).match(/(?:project|root|folder|path)\s*(?:=|:|at|is)?\s*["'`](.+?)["'`]/i);return relativePath(m?.[1]||'.')||'.'}
 function validateSarClosureR345(raw,stepNumber,errors){
  const s=raw&&typeof raw==='object'?raw:{},required=['masterPath','slavePath','masterOrbitPath','slaveOrbitPath','demPath','outputPath','coregProofPath','interferogramPath','coherencePath','correctedInterferogramPath','geometricPhaseProofPath','receiptPath'];
- for(const key of required)if(!relativePath(s[key]))errors.push(`step ${stepNumber}: SAR_R344_CLOSURE requires safe root-relative ${key}`);
+ for(const key of required){const rawPath=text(s[key]),normalized=rawPath?relativePath(rawPath):null;if(!normalized||normalized==='.')errors.push(`step ${stepNumber}: SAR_R344_CLOSURE requires explicit safe root-relative ${key}`)}
  for(const key of ['beta0Path','sigma0Path','gamma0Path','terrainGamma0Path','unwrapPath','unwrapMaskPath','unwrapProofPath','atmospherePath','etadPath','otherCorrectionPath','losPath','correctedLosPath','independentLosJsonPath','deformationEastPath','deformationNorthPath','deformationUpPath','deformationProofPath','previewJsonPath'])if(s[key]!=null&&text(s[key])&&!relativePath(s[key]))errors.push(`step ${stepNumber}: SAR_R344_CLOSURE has unsafe ${key}`);
  if(!Number.isFinite(Date.parse(text(s.masterAcquired))))errors.push(`step ${stepNumber}: SAR_R344_CLOSURE masterAcquired must be an ISO timestamp`);
  if(!Number.isFinite(Date.parse(text(s.slaveAcquired))))errors.push(`step ${stepNumber}: SAR_R344_CLOSURE slaveAcquired must be an ISO timestamp`);
