@@ -32,6 +32,11 @@ for(const token of[
  "energyAuthority:physicalEnergy?'UNIT_BOUND_PHYSICAL':'MODEL_PROXY'",
  'eventTimeBound:nodes.some(x=>!!x.eventTime)',
  "physicalEnergyBound:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')"
+, "'RETURNED_EVIDENCE'|'HOST_PROOF'"
+, "/^[0-9a-f]{64}$/i.test(packet.evidenceHash)"
+, "pp.frame.trim()===packet.frame.trim()"
+, "physicalPositions.length===nodes.length"
+, "mixedFrameHold"
 ])assert.ok(field.includes(token),'R347 field truth/mapping contract missing '+token);
 
 assert.ok(!field.includes('Math.random')&&!cockpit.includes('Math.random'),'R347 geometry must remain deterministic');
@@ -60,6 +65,9 @@ for(const token of[
 , "const cuts=Math.max(1,Math.round(1+n.contradiction*5))"
 , "persistence=.18+.82*n.scar"
 , "rate=.35+1.65*(n?.motionRate??0)"
+, "EMPTY_OBSERVATIONS:TraversalObservationPacketR347[]=[]"
+, "event time unbound"
+, "<span>RESOLUTION</span>"
 ])assert.ok(cockpit.includes(token),'R347 human cockpit missing '+token);
 
 assert.ok(studio.includes("import TraversalFieldCockpitR347 from './TraversalFieldCockpitR347'"),'R347 must be primary traversal component');
