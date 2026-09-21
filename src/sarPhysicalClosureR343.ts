@@ -26,6 +26,7 @@ export type SarPhysicalClosureR343={
  unwrappedPhaseBound:boolean;
  correctionLedgerBound:boolean;
  losDisplacementBound:boolean;
+ correctedLosBound:boolean;
  proof:string[];
  scars:string[];
  truthBoundary:string;
@@ -111,11 +112,11 @@ export function deriveValidatedInterferogramR343(master:SarRasterFieldR283,slave
  return{phase,coherence,validMask:mask,validSamples,validated:validSamples>0};
 }
 
-export function subtractPhaseLedgerR343(phase:number[],ledger:SarCorrectionLedgerR343,mask?:number[]){
- const n=phase.length,out=new Array(n).fill(Number.NaN),validMask=new Array(n).fill(0),parts=[ledger.flatEarthPhaseRad,ledger.topographicPhaseRad,ledger.atmosphericPhaseRad,ledger.etadPhaseRad,ledger.otherPhaseRad].filter(Boolean)as number[][];
+export function subtractPhaseLedgerR343(phase:number[],ledger:SarCorrectionLedgerR343,mask?:number[],stage:'PRE_UNWRAP'|'POST_UNWRAP'='PRE_UNWRAP'){
+ const n=phase.length,out=new Array(n).fill(Number.NaN),validMask=new Array(n).fill(0),parts=(stage==='PRE_UNWRAP'?[ledger.flatEarthPhaseRad,ledger.topographicPhaseRad]:[ledger.atmosphericPhaseRad,ledger.etadPhaseRad,ledger.otherPhaseRad]).filter(Boolean)as number[][];
  let validSamples=0;
- for(let i=0;i<n;i++){if(mask&&Number(mask[i])<=0||ledger.validMask&&Number(ledger.validMask[i])<=0||!finite(phase[i]))continue;let v=phase[i],ok=true;for(const a of parts){if(a.length!==n||!finite(a[i])){ok=false;break}v-=a[i]}if(ok){out[i]=wrap(v);validMask[i]=1;validSamples++}}
- return{correctedWrappedPhaseRad:out,validMask,validSamples,correctionCount:parts.length,source:ledger.source};
+ for(let i=0;i<n;i++){if(mask&&Number(mask[i])<=0||ledger.validMask&&Number(ledger.validMask[i])<=0||!finite(phase[i]))continue;let v=phase[i],ok=true;for(const a of parts){if(a.length!==n||!finite(a[i])){ok=false;break}v-=a[i]}if(ok){out[i]=stage==='PRE_UNWRAP'?wrap(v):v;validMask[i]=1;validSamples++}}
+ return{correctedPhaseRad:out,correctedWrappedPhaseRad:stage==='PRE_UNWRAP'?out:undefined,validMask,validSamples,correctionCount:parts.length,stage,source:ledger.source};
 }
 
 function phaseResiduesR343(phase:number[],mask:number[],width:number,height:number){
@@ -131,10 +132,10 @@ export function unwrapQualityGuidedR343(wrapped:number[],quality:number[]|undefi
  return{unwrappedPhaseRad:out,validMask,componentId,residueCount:residues.count,closureRmsRad:residues.rms,largestComponent:largest,expected:n,established,truthBoundary:'R343 quality-guided masked unwrapping preserves disconnected components and missing pixels. Establishment additionally requires an explicit closure threshold and does not infer across invalid gaps.'};
 }
 
-export function terrainFlattenGammaR343(gamma0:number[],localIncidenceDeg:number[],referenceIncidenceDeg:number[],mask?:number[]){
+export function terrainFlattenGammaR343(gamma0:number[],demAreaNormalizationFactor:number[],mask?:number[]){
  const n=gamma0.length,out=new Array(n).fill(Number.NaN),validMask=new Array(n).fill(0);let validSamples=0;
- for(let i=0;i<n;i++){if(mask&&Number(mask[i])<=0||!finite(gamma0[i])||gamma0[i]<=0||!finite(localIncidenceDeg[i])||!finite(referenceIncidenceDeg[i]))continue;const li=localIncidenceDeg[i]*Math.PI/180,ri=referenceIncidenceDeg[i]*Math.PI/180,c=Math.cos(li),r=Math.cos(ri);if(c<=0||r<=0)continue;out[i]=gamma0[i]*r/c;validMask[i]=1;validSamples++}
- return{terrainFlattenedGamma0:out,validMask,validSamples,operator:'gamma0_terrain = gamma0_ellipsoid * cos(referenceIncidence)/cos(localIncidence)'};
+ for(let i=0;i<n;i++){if(mask&&Number(mask[i])<=0||!finite(gamma0[i])||gamma0[i]<=0||!finite(demAreaNormalizationFactor[i])||demAreaNormalizationFactor[i]<=0)continue;out[i]=gamma0[i]*demAreaNormalizationFactor[i];validMask[i]=1;validSamples++}
+ return{terrainFlattenedGamma0:out,validMask,validSamples,operator:'gamma0_terrain = gamma0_reference * DEM-derived scattering-area normalization factor',truthBoundary:'R343 does not infer the DEM scattering-area factor from incidence angle alone. The factor must be produced by an authoritative terrain/radar-geometry integration and bound as evidence.'};
 }
 
 export function materializeLosR343(unwrappedCorrectedPhaseRad:number[],wavelengthM:number,sign:1|-1,mask?:number[]){
@@ -149,18 +150,22 @@ export function applyDisplacementCorrectionsR343(los:number[],correctionsM:numbe
 export function closeSarPhysicalChainR343(input:{
  master:SarRasterFieldR283;slave?:SarRasterFieldR283;coregisteredSlave?:SarRasterFieldR283;coregReceipt?:SarCoregReceiptR343;
  calibration?:{beta0?:SarSparseLutR343;sigma0?:SarSparseLutR343;gamma0?:SarSparseLutR343};noise?:SarNoiseModelR343|SarSparseLutR343;
- localIncidenceDeg?:number[];referenceIncidenceDeg?:number[];correctionLedger?:SarCorrectionLedgerR343;
+ demAreaNormalizationFactor?:number[];demAreaNormalizationSource?:string;correctionLedger?:SarCorrectionLedgerR343;
  wavelengthM?:number;losSign?:1|-1;unwrapClosureRmsMax?:number;
 }):SarPhysicalClosureR343{
  let r={...input.master},proof:string[]=[],scars:string[]=[];
- let calibrationBound=false,terrainFlattenedBound=false,coregistrationBound=false,interferometricPhaseValidated=false,unwrappedPhaseBound=false,correctionLedgerBound=false,losDisplacementBound=false;
+ let calibrationBound=false,terrainFlattenedBound=false,coregistrationBound=false,interferometricPhaseValidated=false,unwrappedPhaseBound=false,correctionLedgerBound=false,losDisplacementBound=false,correctedLosBound=false;
  if(input.calibration){const rad=materializeRadiometryR343(r,input.calibration,input.noise);if(rad.calibrationBound){r={...r,beta0:rad.beta0,sigma0:rad.sigma0,gamma0:rad.gamma0,calibrationR343:{schema:SAR_PHYSICAL_CLOSURE_SCHEMA_R343,source:[input.calibration.beta0?.source,input.calibration.sigma0?.source,input.calibration.gamma0?.source,input.noise?.source].filter(Boolean)as string[],validSamples:rad.validSamples}} as SarRasterFieldR283;calibrationBound=true;proof.push('RADIOMETRY_BOUND')}else scars.push('CALIBRATION_MATERIALIZATION_EMPTY')}else scars.push('CALIBRATION_ANNOTATION_REQUIRED');
- if(calibrationBound&&arrayBound((r as any).gamma0,expected(r))&&input.localIncidenceDeg?.length===expected(r)&&input.referenceIncidenceDeg?.length===expected(r)){const tf=terrainFlattenGammaR343((r as any).gamma0,input.localIncidenceDeg,input.referenceIncidenceDeg,r.validMask);if(tf.validSamples){r={...r,terrainFlattenedGamma0:tf.terrainFlattenedGamma0} as SarRasterFieldR283;terrainFlattenedBound=true;proof.push('TERRAIN_FLATTENED_GAMMA0_BOUND')}}else scars.push('DEM_LOCAL_GEOMETRY_REQUIRED');
+ if(calibrationBound&&arrayBound((r as any).gamma0,expected(r))&&input.demAreaNormalizationFactor?.length===expected(r)&&input.demAreaNormalizationSource){const tf=terrainFlattenGammaR343((r as any).gamma0,input.demAreaNormalizationFactor,r.validMask);if(tf.validSamples){r={...r,terrainFlattenedGamma0:tf.terrainFlattenedGamma0} as SarRasterFieldR283;terrainFlattenedBound=true;proof.push('TERRAIN_FLATTENED_GAMMA0_BOUND')}}else scars.push('DEM_SCATTERING_AREA_FACTOR_REQUIRED');
  coregistrationBound=coregistrationAdmittedR343(input.coregReceipt);if(coregistrationBound)proof.push('TOPS_COREGISTRATION_BOUND');else scars.push('SUBPIXEL_COREGISTRATION_NOT_PROVEN');
  if(input.slave&&input.coregisteredSlave&&input.coregReceipt&&coregistrationBound){const ig=deriveValidatedInterferogramR343(r,input.coregisteredSlave,input.coregReceipt);if(ig.validated){r={...r,interferogramPhaseRad:ig.phase,coherence:ig.coherence,validMask:ig.validMask} as SarRasterFieldR283;interferometricPhaseValidated=true;proof.push('INTERFEROMETRIC_PHASE_VALIDATED')}}else scars.push('PHASE_VALIDITY_REQUIRES_COREGISTRATION');
  let wrapped=r.interferogramPhaseRad,phaseMask=r.validMask;
- if(interferometricPhaseValidated&&wrapped&&input.correctionLedger){const corrected=subtractPhaseLedgerR343(wrapped,input.correctionLedger,phaseMask);if(corrected.validSamples){wrapped=corrected.correctedWrappedPhaseRad;phaseMask=corrected.validMask;r={...r,correctedInterferometricPhaseRad:wrapped}as SarRasterFieldR283;correctionLedgerBound=true;proof.push('PHASE_CORRECTION_LEDGER_BOUND')}}else scars.push('PHASE_CORRECTION_LEDGER_REQUIRED');
+ if(interferometricPhaseValidated&&wrapped&&input.correctionLedger){const pre=subtractPhaseLedgerR343(wrapped,input.correctionLedger,phaseMask,'PRE_UNWRAP');if(pre.validSamples){wrapped=pre.correctedPhaseRad;phaseMask=pre.validMask;r={...r,correctedInterferometricPhaseRad:wrapped}as SarRasterFieldR283;proof.push('PRE_UNWRAP_GEOMETRIC_PHASE_CORRECTION_BOUND')}}else scars.push('PRE_UNWRAP_PHASE_CORRECTION_LEDGER_REQUIRED');
  if(interferometricPhaseValidated&&wrapped&&phaseMask){const uw=unwrapQualityGuidedR343(wrapped,r.coherence,phaseMask,r.width,r.height,input.unwrapClosureRmsMax??.25);r={...r,unwrappedPhaseRad:uw.unwrappedPhaseRad,unwrapComponentId:uw.componentId}as SarRasterFieldR283;if(uw.established){unwrappedPhaseBound=true;proof.push('UNWRAP_CLOSURE_BOUND')}else scars.push('UNWRAP_CLOSURE_NOT_PROVEN')}else scars.push('UNWRAP_INPUT_REQUIRED');
  if(unwrappedPhaseBound&&finite(input.wavelengthM)&&input.losSign){const los=materializeLosR343((r as any).unwrappedPhaseRad,input.wavelengthM,input.losSign,phaseMask);if(los.validSamples){r={...r,losDisplacementM:los.losDisplacementM}as SarRasterFieldR283;losDisplacementBound=true;proof.push('LOS_DISPLACEMENT_BOUND')}}else scars.push('WAVELENGTH_SIGN_RESIDUAL_CHAIN_REQUIRED');
- return{raster:r,coregistrationBound,interferometricPhaseValidated,calibrationBound,terrainFlattenedBound,unwrappedPhaseBound,correctionLedgerBound,losDisplacementBound,proof:[...new Set(proof)],scars:[...new Set(scars)],truthBoundary:'R343 executes the full evidence-gated SAR closure graph. Computational availability never substitutes for missing Sentinel-1 annotation, full-resolution TOPS residual, DEM geometry, correction, unwrap-closure, wavelength/sign, or independent-geometry evidence.'};
+ if(unwrappedPhaseBound&&input.correctionLedger&&finite(input.wavelengthM)&&input.losSign){const post=subtractPhaseLedgerR343((r as any).unwrappedPhaseRad,input.correctionLedger,phaseMask,'POST_UNWRAP');if(post.validSamples){correctionLedgerBound=true;r={...r,correctedUnwrappedPhaseRad:post.correctedPhaseRad}as SarRasterFieldR283;const correctedLos=materializeLosR343(post.correctedPhaseRad,input.wavelengthM,input.losSign,post.validMask);if(correctedLos.validSamples){r={...r,correctedLosDisplacementM:correctedLos.losDisplacementM}as SarRasterFieldR283;correctedLosBound=true;proof.push('POST_UNWRAP_ATMOSPHERE_ETAD_CORRECTION_BOUND','CORRECTED_LOS_BOUND')}}}
+ if(!correctionLedgerBound)scars.push('POST_UNWRAP_ATMOSPHERE_ETAD_CORRECTION_REQUIRED');
+ const uniqueProof=[...new Set(proof)],uniqueScars=[...new Set(scars)];
+ r={...r,physicalClosureR343:{schema:SAR_PHYSICAL_CLOSURE_SCHEMA_R343,coregistrationBound,interferometricPhaseValidated,calibrationBound,terrainFlattenedBound,unwrappedPhaseBound,correctionLedgerBound,losDisplacementBound,correctedLosBound,proof:uniqueProof,scars:uniqueScars}}as SarRasterFieldR283;
+ return{raster:r,coregistrationBound,interferometricPhaseValidated,calibrationBound,terrainFlattenedBound,unwrappedPhaseBound,correctionLedgerBound,losDisplacementBound,correctedLosBound,proof:uniqueProof,scars:uniqueScars,truthBoundary:'R343 executes the evidence-gated SAR closure graph. Pre-unwrapping geometry phase and post-unwrapping atmosphere/ETAD corrections are kept distinct. Terrain flattening requires an authoritative DEM-derived scattering-area factor. Computational availability never substitutes for missing annotation, full-resolution TOPS residual, DEM geometry, unwrap closure, wavelength/sign, correction evidence, or independent viewing geometry.'};
 }
