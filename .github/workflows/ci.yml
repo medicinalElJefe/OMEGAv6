@@ -265,7 +265,7 @@ jobs:
           }
           const caps=await get('/api/hybrid/capabilities');
           if(!String(caps.state||'').includes('DEVICE_PROOF_REQUIRED')) throw new Error('R8 Hybrid capability truth gate missing');
-          if(!Array.isArray(caps.operations)||!caps.operations.includes('TRAIN_LOCAL')||!caps.operations.includes('BUILD')||!caps.operations.includes('READ_VISIBLE_TEXT')) throw new Error('R8 Hybrid typed operation registry incomplete');
+          if(!Array.isArray(caps.operations)||!caps.operations.includes('TRAIN_LOCAL')||!caps.operations.includes('BUILD')||!caps.operations.includes('READ_VISIBLE_TEXT')||!caps.operations.includes('SAR_R344_CLOSURE')) throw new Error('R345 Hybrid typed operation registry incomplete');
           if(caps.trainLocal?.foundationWeightsChanged!==false) throw new Error('TRAIN_LOCAL foundation-weight truth boundary regressed');
           const plan=await post('/api/hybrid/plan',{prompt:'Inspect this project, hash the tree, repair the smallest proven defect, build, test, package, and return proof.',root:'.'});
           if(plan.draft?.state!=='DRAFT_ONLY_NOT_QUEUED'||plan.draft?.confirmed!==false||plan.draft?.deviceId!==null) throw new Error('Hybrid draft mutated queue/confirmation/device state');
