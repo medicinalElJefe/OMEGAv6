@@ -149,3 +149,5 @@ assert.ok(cockpit.includes('sourceClocksR347(earth)')&&cockpit.includes('context
 assert.ok(cockpit.includes('MODEL ACTIVITY')&&cockpit.includes('explicitly not joules, watts or physical flux'),'R347 must keep dimensionless model activity separate from physical energy');
 assert.ok(runtime.includes("R347_PHYSICAL_QUANTITY_REGISTRY")&&runtime.includes("ENERGY")&&runtime.includes("POWER")&&runtime.includes("FLUX"),'R347 physical quantity registry must keep future energy/power/flux channels explicitly held until source-bound');
 assert.ok(css.includes('.r347-correlation-frame')&&css.includes('.r347-source-clocks')&&css.includes('.r347-quantity-registry'),'R347 human correlation/time/physical authority surfaces must be styled');
+
+assert.ok(css.includes('.r347-workspace{display:flex;flex-wrap:wrap')&&css.includes('flex:1 1 620px')&&css.includes('flex:0 1 320px'),'R347 traversal stage must dominate available nested-workstation width and wrap the inspector instead of squeezing the canvas');
