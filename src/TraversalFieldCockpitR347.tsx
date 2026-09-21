@@ -1,10 +1,10 @@
 import{useEffect,useMemo,useRef,useState}from'react';
 import{Pause,Play,RotateCcw,StepBack,StepForward}from'lucide-react';
-import{compileTraversalFieldR347,TRAVERSAL_VISUAL_GRAMMAR_R347,type TraversalFieldNodeR347}from'./traversalFieldR347';
+import{compileTraversalFieldR347,TRAVERSAL_VISUAL_GRAMMAR_R347,type TraversalFieldNodeR347,type TraversalObservationPacketR347}from'./traversalFieldR347';
 import'./traversalFieldR347.css';
 
 type Lens='UNIFIED'|'SPACE'|'TIME'|'INTENSITY'|'CONTINUITY'|'SCAR'|'FUTURES'|'PROOF';
-type Props={variant:string;address:number;onAddress:(n:number)=>void};
+type Props={variant:string;address:number;onAddress:(n:number)=>void;observations?:TraversalObservationPacketR347[]};
 const LENSES:Lens[]=['UNIFIED','SPACE','TIME','INTENSITY','CONTINUITY','SCAR','FUTURES','PROOF'];
 const RESOLUTIONS=[12,144,1728,20736,248832] as const;
 const clamp=(n:number,a=0,b=1)=>Math.max(a,Math.min(b,n));
@@ -26,10 +26,10 @@ function lensRadius(lens:Lens,n:TraversalFieldNodeR347){
  return 3+5*n.support;
 }
 
-export default function TraversalFieldCockpitR347({variant,address,onAddress}:Props){
+export default function TraversalFieldCockpitR347({variant,address,onAddress,observations=[]}:Props){
  const canvas=useRef<HTMLCanvasElement|null>(null),clock=useRef({last:0,t:0}),camera=useRef({yaw:0,pitch:0,drag:false,lastX:0,lastY:0});
  const[lens,setLens]=useState<Lens>('UNIFIED'),[playing,setPlaying]=useState(false),[depth,setDepth]=useState(48),[speed,setSpeed]=useState(1),[cursor,setCursor]=useState(0),[zoom,setZoom]=useState(1);
- const field=useMemo(()=>compileTraversalFieldR347(address,depth),[address,depth]);
+ const field=useMemo(()=>compileTraversalFieldR347(address,depth,observations),[address,depth,observations]);
  useEffect(()=>{setCursor(0);clock.current={last:0,t:0}},[address,depth]);
  useEffect(()=>{if(!playing)return;const n=field.nodes[Math.min(cursor,field.nodes.length-1)],rate=.35+1.65*(n?.motionRate??0),id=window.setTimeout(()=>setCursor(i=>Math.min(field.nodes.length-1,i+1)),Math.max(100,900/(speed*rate)));return()=>clearTimeout(id)},[playing,speed,cursor,field.nodes]);
  useEffect(()=>{if(cursor>=field.nodes.length-1)setPlaying(false)},[cursor,field.nodes.length]);
@@ -44,7 +44,8 @@ export default function TraversalFieldCockpitR347({variant,address,onAddress}:Pr
 
    const activeNode=field.nodes[Math.min(cursor,field.nodes.length-1)],activeResolutionIndex=Math.max(0,RESOLUTIONS.indexOf((activeNode?.effectiveResolution??12) as any));
    for(let i=0;i<5;i++){const rr=scale*(.26+i*.19),active=i===activeResolutionIndex;ctx.beginPath();ctx.arc(cx,cy,rr,0,Math.PI*2);ctx.strokeStyle=active?'rgba(222,186,111,.58)':'rgba(180,201,195,'+(0.035+i*.008)+')';ctx.lineWidth=active?1.8:.7;ctx.setLineDash(active?[]:[2+i,9+i*2]);ctx.stroke();ctx.setLineDash([])}
-   const pts=field.nodes.map((n,i)=>{const phase=(i/Math.max(1,field.nodes.length-1)-.5)*.9,x0=n.x*.72+Math.sin(phase)*.28,y0=n.y*.58-phase*.38,z0=n.z,cyaw=Math.cos(camera.current.yaw),syaw=Math.sin(camera.current.yaw),cp=Math.cos(camera.current.pitch),sp=Math.sin(camera.current.pitch),x1=x0*cyaw+z0*syaw,z1=-x0*syaw+z0*cyaw,y1=y0*cp-z1*sp,z2=y0*sp+z1*cp,persp=1/(1.7-.45*z2),s=scale*zoom*persp;return{x:cx+x1*s,y:cy+y1*s,z:z2,n}});
+   const physicalSpace=lens==='SPACE'&&field.space.authority==='UNIT_BOUND_PHYSICAL_SPACE',pp=physicalSpace?field.nodes.map(n=>n.physicalPosition!):[],xs=pp.map(p=>p.x),ys=pp.map(p=>p.y),zs=pp.map(p=>p.z),mid=(v:number[])=>v.length?(Math.min(...v)+Math.max(...v))/2:0,span=(v:number[])=>v.length?Math.max(1e-12,Math.max(...v)-Math.min(...v)):1,pxMid=mid(xs),pyMid=mid(ys),pzMid=mid(zs),pScale=Math.max(span(xs),span(ys),span(zs));
+   const pts=field.nodes.map((n,i)=>{const phase=(i/Math.max(1,field.nodes.length-1)-.5)*.9,physical=n.physicalPosition,x0=physicalSpace&&physical?(physical.x-pxMid)/pScale:n.x*.72+Math.sin(phase)*.28,y0=physicalSpace&&physical?(physical.y-pyMid)/pScale:n.y*.58-phase*.38,z0=physicalSpace&&physical?(physical.z-pzMid)/pScale:n.z,cyaw=Math.cos(camera.current.yaw),syaw=Math.sin(camera.current.yaw),cp=Math.cos(camera.current.pitch),sp=Math.sin(camera.current.pitch),x1=x0*cyaw+z0*syaw,z1=-x0*syaw+z0*cyaw,y1=y0*cp-z1*sp,z2=y0*sp+z1*cp,persp=1/(1.7-.45*z2),s=scale*zoom*persp;return{x:cx+x1*s,y:cy+y1*s,z:z2,n}});
 
    for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],n=b.n,active=i<=cursor,persistence=.18+.82*n.scar;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=active?'rgba(78,205,187,'+(.10+.44*n.evidence+.18*persistence)+')':'rgba(91,122,126,.09)';ctx.lineWidth=active?1+4*(.55*n.continuityFlux+.45*n.invariantCarry):.7;ctx.stroke();if(active&&n.scar>.08){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle='rgba(207,78,100,'+(.02+.12*n.scar)+')';ctx.lineWidth=.5+2.2*n.residualCarry;ctx.stroke()}}
    for(let i=0;i<pts.length;i++){const p=pts[i],n=p.n,active=i<=cursor,uncertainty=clamp(.55*n.contradiction+.45*n.burden);
@@ -80,8 +81,8 @@ export default function TraversalFieldCockpitR347({variant,address,onAddress}:Pr
    <div><span>UNCERTAINTY PRESSURE</span><b>{fmt(.55*(current?.contradiction??0)+.45*(current?.burden??0))}</b><small>q + Λ halo</small></div>
    <div><span>SCAR CARRY</span><b>{fmt(current?.scar??0)}</b><small>trail persistence</small></div>
    <div><span>ORIENTATION σ</span><b>{(current?.orientation??0)>0?'+1':(current?.orientation??0)<0?'−1':'0'}</b><small>handedness</small></div>
-   <div><span>RESOLUTION</span><b>{(current?.effectiveResolution??0).toLocaleString()}</b><small>representational address level</small></div>
-   <div><span>{field.energy.label}</span><b>{fmt(current?.modelIntensity??0)}</b><small>not physical energy</small></div>
+   <div><span>SPACE FRAME</span><b>{lens==='SPACE'&&field.space.authority==='UNIT_BOUND_PHYSICAL_SPACE'?'PHYSICAL':'ATLAS'}</b><small>{field.space.authority==='UNIT_BOUND_PHYSICAL_SPACE'?(field.space.frame+' · '+field.space.unit):(field.space.mixedFrameHold?'physical packets held · incomplete/mixed frame':'representational address geometry')}</small></div>
+   <div><span>{field.energy.label}</span><b>{current?.physicalEnergy?(fmt(current.physicalEnergy.value)+' '+current.physicalEnergy.unit):fmt(current?.modelIntensity??0)}</b><small>{current?.physicalEnergy?'unit-bound returned channel':'model proxy · not physical energy'}</small></div>
   </div>
   <div className='r347-controls'><button onClick={()=>{setPlaying(false);const i=Math.max(0,cursor-1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepBack/>Previous</button><button className='primary' onClick={()=>setPlaying(v=>!v)}>{playing?<Pause/>:<Play/>}{playing?'Pause':'Traverse'}</button><button onClick={()=>{setPlaying(false);const i=Math.min(field.nodes.length-1,cursor+1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepForward/>Next</button><button onClick={()=>{setPlaying(false);setCursor(0);onAddress(address)}}><RotateCcw/>Origin</button><label>DEPTH<input type='range' min='12' max='96' step='12' value={depth} onChange={e=>setDepth(Number(e.target.value))}/><b>{depth}</b></label><label>RATE<input type='range' min='.25' max='3' step='.25' value={speed} onChange={e=>setSpeed(Number(e.target.value))}/><b>{speed.toFixed(2)}×</b></label><label>VIEW<input type='range' min='.55' max='2.2' step='.05' value={zoom} onChange={e=>setZoom(Number(e.target.value))}/><b>{zoom.toFixed(2)}×</b></label></div>
   <details><summary>VISUAL GRAMMAR · exact mapping</summary><div className='r347-grammar'>{Object.entries(TRAVERSAL_VISUAL_GRAMMAR_R347).map(([k,v])=><div key={k}><span>{k}</span><b>{v}</b></div>)}</div><p>{field.truthBoundary}</p></details>
