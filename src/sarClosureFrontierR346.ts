@@ -2,6 +2,7 @@ import type{SarEstablishmentLayerR342,SarR342LayerId}from'./sarEstablishmentR342
 import type{SarHostClosureReceiptR344,SarClosureValidationR344}from'./sarHostClosureR344';
 
 export const SAR_CLOSURE_FRONTIER_SCHEMA_R346='OMEGA_SAR_CLOSURE_FRONTIER_R346';
+export const R346_FULL_3D_VETO='ADDITIONAL_VIEWING_GEOMETRY_REQUIRED' as const;
 export type SarClosureActionKindR346='BIND_SOURCE'|'DECODE'|'CALIBRATE'|'COREGISTER'|'VALIDATE_PHASE'|'TERRAIN'|'UNWRAP'|'LOS'|'CORRECT'|'ADD_GEOMETRY'|'VERIFY';
 export type SarClosureExecutionModeR346='CLOUD_OR_HOST'|'R345_EXECUTES'|'R345_BINDS_EVIDENCE';
 export type SarClosureFrontierItemR346={
@@ -86,5 +87,5 @@ export function buildSarClosureFrontierR346(layers:SarEstablishmentLayerR342[],v
   return{rank:0,layer:layer.id,kind:k,gate:layer.gate,reason:layer.next,requires:layer.requires,command:commandFor(layer.id,receipt),produces:[layer.id],blockedBy,informationGain,admissible,physicalAuthority:layer.physicalAuthority,modeSequence:'PRUNE → TRANSLATE → PROVE → INVARIANT_CARRY → SCAR_CARRY → RECONTEXTUALIZE',sarSpecFields,sarSpecRule,executionMode:mode,hybridOperation:hostKinds.has(k)?{op:'SAR_R344_CLOSURE',authorizationRequired:true,requiredEvidence:layer.requires,specFields:sarSpecFields,specRule:sarSpecRule}:null};
  }).sort((a,b)=>Number(b.admissible)-Number(a.admissible)||b.informationGain-a.informationGain||a.layer.localeCompare(b.layer));
  out.forEach((x,i)=>x.rank=i+1);
- return{schema:SAR_CLOSURE_FRONTIER_SCHEMA_R346,state:out.length?'OPEN_FRONTIER':'PHYSICAL_CLOSURE_COMPLETE',next:out.find(x=>x.admissible)??null,items:out,validationScars:validation?.scars||[],truthBoundary:'R346 computes a dependency-closed next-action frontier and distinguishes computation executed by R345 from external/full-resolution evidence merely bound by R345 into the R344 receipt. Governed host binding uses SAR_R344_CLOSURE with explicit authorization. Ordering cannot manufacture Sentinel-1 measurements, DEM/orbit/correction evidence, unwrap closure, corrected LOS, 3-D products, or independent viewing geometry.'};
+ return{schema:SAR_CLOSURE_FRONTIER_SCHEMA_R346,full3dVeto:R346_FULL_3D_VETO,state:out.length?'OPEN_FRONTIER':'PHYSICAL_CLOSURE_COMPLETE',next:out.find(x=>x.admissible)??null,items:out,validationScars:validation?.scars||[],truthBoundary:'R346 computes a dependency-closed next-action frontier and distinguishes computation executed by R345 from external/full-resolution evidence merely bound by R345 into the R344 receipt. Governed host binding uses SAR_R344_CLOSURE with explicit authorization. Ordering cannot manufacture Sentinel-1 measurements, DEM/orbit/correction evidence, unwrap closure, corrected LOS, 3-D products, or independent viewing geometry.'};
 }
