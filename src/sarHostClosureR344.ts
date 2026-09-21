@@ -108,6 +108,8 @@ export function sarClosurePromotionStateR344(v:SarClosureValidationR344){
  return{
   pairSourcesBound:state('EXACT_PAIR_SOURCES'),
   annotationsBound:state('ANNOTATION_HASHES'),
+  radiometricBackscatterBound:state('RADIOMETRIC_BACKSCATTER'),
+  terrainRadiometryBound:state('TERRAIN_RADIOMETRY'),
   orbitBound:state('ORBIT_EVIDENCE'),
   subpixelCoregistrationBound:state('TOPS_SUBPIXEL_COREGISTRATION'),
   interferometricPhaseValidated:state('PHYSICAL_INTERFEROGRAM'),
