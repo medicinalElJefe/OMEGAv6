@@ -183,14 +183,14 @@ jobs:
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-modes-scroll-diagnostic-browser-e2e.mjs'
 
       - name: Browser proof · R286 accumulated no-dead-control contract
-        run: OMEGA_BROWSER_PROOF_TIMEOUT_SEC=600 bash scripts/run_r241_browser_proof.sh 'R286_PROOF_SHARDS=4 R286_SHARD_TIMEOUT_SEC=420 bash scripts/run_r286_control_shards.sh'
+        run: OMEGA_BROWSER_PROOF_TIMEOUT_SEC=600 bash scripts/run_r241_browser_proof.sh 'R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=270 bash scripts/run_r286_control_shards.sh'
 
       - name: Browser proof · R313 full safe-control interaction contract
         id: full_control
         shell: bash
         run: |
           set -o pipefail
-          OMEGA_BROWSER_PROOF_TIMEOUT_SEC=600 bash scripts/run_r241_browser_proof.sh 'R313_PROOF_SHARDS=4 R313_SHARD_TIMEOUT_SEC=420 bash scripts/run_r313_control_shards.sh' 2>&1 | tee r313-full-control-interaction.log
+          OMEGA_BROWSER_PROOF_TIMEOUT_SEC=600 bash scripts/run_r241_browser_proof.sh 'R313_PROOF_SHARDS=8 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=270 bash scripts/run_r313_control_shards.sh' 2>&1 | tee r313-full-control-interaction.log
 
       - name: Capture exact R313 full-control interaction failure
         if: failure() && steps.full_control.outcome == 'failure'
