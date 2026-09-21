@@ -53,3 +53,5 @@ assert.ok(live.includes('recommendedFields={closureFrontierR346.next?.sarSpecFie
 assert.ok(css.includes('.r346-recommended')&&css.includes('R346 NEXT'),'R346 recommended host inputs must be visibly identified');
 
 for(const token of['beta0Path:string','sigma0Path:string','gamma0Path:string','terrainGamma0Path:string','otherCorrectionPath:string','independentLosJsonPath:string','deformationEastPath:string','deformationNorthPath:string','deformationUpPath:string','deformationProofPath:string','beta0Path:form.beta0Path||undefined','independentLosJsonPath:form.independentLosJsonPath||undefined'])assert.ok(hybrid.includes(token),'R346 must expose the complete governed R344 host evidence surface: '+token);
+
+for(const token of['LOS wavelength (m)','recommended.has(\'wavelengthM\')','recommended.has(\'losSign\')','recommended.has(\'signConvention\')',"className={recommended.has(String(key))?'r346-recommended':''}"])assert.ok(hybrid.includes(token),'R346 recommended evidence input is not operator-visible: '+token);
