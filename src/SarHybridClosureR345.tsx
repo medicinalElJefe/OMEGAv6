@@ -33,7 +33,7 @@ export default function SarHybridClosureR345({masterProductId,slaveProductId,mas
  const activeJob=useMemo(()=>selectedDeviceJobs.find((x:any)=>x.id===jobId)||null,[selectedDeviceJobs,jobId]);
  const returned=activeJob?.returnPacket?.stepProofs?.find((x:any)=>x?.op==='SAR_R344_CLOSURE')?.result||null;
  useEffect(()=>{const receipt=returned?.receipt as SarHostClosureReceiptR344|undefined,fingerprint=String(returned?.receiptSha256||'');if(activeJob?.status==='COMPLETE'&&receipt?.schema==='OMEGA_SAR_HOST_CLOSURE_R344'&&fingerprint&&fingerprint!==ingested){onReceipt(receipt);setIngested(fingerprint);setMessage('R345 host returned an R344 receipt. It has been handed to the R344 validator; only gates proved by that receipt may promote.')}},[activeJob?.status,returned,ingested,onReceipt]);
- const set=<K extends keyof Form>(k:K,v:Form[K])=>setForm(x=>({...x,[k]:v}));
+ const set=<K extends keyof Form,>(k:K,v:Form[K])=>setForm(x=>({...x,[k]:v}));
  const spec=():SarR344ClosureSpec=>({
   masterPath:form.masterPath,slavePath:form.slavePath,masterAcquired,slaveAcquired,polarization:polarization as any,subswath:form.subswath,firstBurst:form.firstBurst,lastBurst:form.lastBurst,
   masterOrbitPath:form.masterOrbitPath,slaveOrbitPath:form.slaveOrbitPath,demPath:form.demPath,outputPath:form.outputPath,coregProofPath:form.coregProofPath,interferogramPath:form.interferogramPath,
