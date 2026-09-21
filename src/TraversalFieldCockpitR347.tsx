@@ -62,7 +62,7 @@ export default function TraversalFieldCockpitR347({variant,address,onAddress}:Pr
  const pointerDown=(e:React.PointerEvent<HTMLCanvasElement>)=>{camera.current.drag=true;camera.current.lastX=e.clientX;camera.current.lastY=e.clientY;e.currentTarget.setPointerCapture(e.pointerId)};
  const pointerMove=(e:React.PointerEvent<HTMLCanvasElement>)=>{if(!camera.current.drag)return;const dx=e.clientX-camera.current.lastX,dy=e.clientY-camera.current.lastY;camera.current.lastX=e.clientX;camera.current.lastY=e.clientY;camera.current.yaw+=dx*.006;camera.current.pitch=Math.max(-1.2,Math.min(1.2,camera.current.pitch+dy*.006))};
  const pointerUp=(e:React.PointerEvent<HTMLCanvasElement>)=>{camera.current.drag=false;try{if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId)}catch{}};
- const wheel=(e:React.WheelEvent<HTMLCanvasElement>)=>{e.preventDefault();setZoom(v=>Math.max(.55,Math.min(2.2,v*(e.deltaY>0?.92:1.08))))};
+ const wheel=(e:React.WheelEvent<HTMLCanvasElement>)=>{e.preventDefault();setZoom(v=>Math.max(.55,Math.min(2.2,v*(e.deltaY>0 ? .92 : 1.08))))};
  const current=field.nodes[Math.min(cursor,field.nodes.length-1)]||field.nodes[0];
  return <section className='r347-cockpit' data-lens={lens} data-energy-authority={field.energy.authority}>
   <header><div><span>R347 HUMAN-CORRELATED FIELD · ONE VISUAL LAW</span><b>{variant} · {lens}</b><small>Worldline + field + admissible future cone · source state preserved</small></div><code>STATE {current?.stateId??'—'} · t+{current?.step??0}</code></header>
