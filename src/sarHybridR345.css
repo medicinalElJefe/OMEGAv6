@@ -25,3 +25,5 @@
 .r345-job code{font-size:7px;color:#76a4af;word-break:break-all}
 .r345-message{grid-column:1/-1;padding:9px!important;border:1px solid #214b59;border-radius:8px;background:#07161b;color:#a8dbe7!important}
 @media(max-width:850px){.r345-grid,.r345-form,.r345-optional>div{grid-template-columns:1fr}.r345-status,.r345-validation{grid-column:1}.r345-form label,.r345-optional label{grid-template-columns:1fr}.r345-actions{justify-content:stretch}.r345-actions button{flex:1;justify-content:center}}
+
+.r345-sar-hybrid .r346-frontier-hint{border-style:solid}.r345-sar-hybrid label.r346-recommended{outline:2px solid currentColor;outline-offset:2px;border-radius:8px}.r345-sar-hybrid label.r346-recommended span:first-child::after{content:' · R346 NEXT';font-size:.68em;font-weight:700;letter-spacing:.06em}
