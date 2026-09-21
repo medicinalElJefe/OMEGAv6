@@ -28,7 +28,8 @@ for(const token of[
  "RADIOMETRIC_BACKSCATTER:'at least one of beta0Path / sigma0Path / gamma0Path with annotation provenance'",
  "CORRECTED_LOS:'correctedLosPath + at least one of atmospherePath / etadPath / otherCorrectionPath'",
  'SPEC_FIELDS',
- "UNWRAPPED_PHASE:['unwrapPath','unwrapMaskPath','unwrapProofPath']",
+ "PHYSICALLY_VALID_INTERFEROMETRIC_PHASE:['interferogramPath','coherencePath']",
+ "UNWRAPPED_PHASE:['demPath','correctedInterferogramPath','geometricPhaseProofPath','unwrapPath','unwrapMaskPath','unwrapProofPath']",
  "FULL_3D_DEFORMATION:['independentLosJsonPath','deformationEastPath','deformationNorthPath','deformationUpPath','deformationProofPath']"
 ])assert.ok(frontier.includes(token),'R346 frontier contract missing '+token);
 
