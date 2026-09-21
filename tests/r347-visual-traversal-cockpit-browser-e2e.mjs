@@ -50,6 +50,8 @@ async function openCockpit(){
  await rows.nth(hit).click();
  await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Cockpit',{timeout:20000});
  await page.locator('.r347-cockpit').waitFor({state:'visible',timeout:30000});
+ await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded!=='true',{timeout:10000});
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
 }
 
 await page.goto(base+'/?r347-browser='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
