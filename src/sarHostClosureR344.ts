@@ -5,7 +5,7 @@ export const SAR_HOST_CLOSURE_SCHEMA_R344='OMEGA_SAR_HOST_CLOSURE_R344';
 export const SHA256_RE_R344=/^[a-f0-9]{64}$/i;
 
 export type SarArtifactRefR344={path:string;sha256:string;bytes?:number;format?:string;units?:string};
-export type SarSourceRefR344={productId:string;assetKey:string;sha256:string;polarization:string;acquiredAt:string};
+export type SarSourceRefR344={productId:string;assetKey:string;sha256:string;polarization:string;productLevel:'SLC';acquiredAt:string};
 export type SarClosurePreviewR344={
  width:number;height:number;validMask:number[];
  beta0?:number[];sigma0?:number[];gamma0?:number[];terrainFlattenedGamma0?:number[];
@@ -42,7 +42,7 @@ const finite=(v:unknown):v is number=>typeof v==='number'&&Number.isFinite(v);
 const hash=(v:unknown)=>typeof v==='string'&&SHA256_RE_R344.test(v);
 const pol=(v:unknown)=>/^(VV|VH|HH|HV)$/i.test(String(v||''));
 const artifact=(a:unknown)=>{const x=a as SarArtifactRefR344|undefined;return!!x&&typeof x.path==='string'&&x.path.length>0&&hash(x.sha256)&&(!finite(x.bytes)||Number(x.bytes)>=0)};
-const source=(s:unknown)=>{const x=s as SarSourceRefR344|undefined;return!!x&&typeof x.productId==='string'&&x.productId.length>0&&typeof x.assetKey==='string'&&x.assetKey.length>0&&hash(x.sha256)&&pol(x.polarization)&&Number.isFinite(Date.parse(x.acquiredAt))};
+const source=(s:unknown)=>{const x=s as SarSourceRefR344|undefined;return!!x&&typeof x.productId==='string'&&x.productId.length>0&&typeof x.assetKey==='string'&&x.assetKey.length>0&&hash(x.sha256)&&pol(x.polarization)&&x.productLevel==='SLC'&&Number.isFinite(Date.parse(x.acquiredAt))};
 const gate=(id:string,ok:boolean,reason:string,requires:string[]):SarClosureGateR344=>({id,state:ok?'ESTABLISHED':'HELD',reason:ok?'PROVED':reason,requires:ok?[]:requires});
 
 function matrixRank3(rows:LosObservationR342[]){
@@ -57,7 +57,7 @@ export function validateSarHostClosureR344(r:SarHostClosureReceiptR344):SarClosu
  const schemaOk=r?.schema===SAR_HOST_CLOSURE_SCHEMA_R344&&typeof r.revision==='string'&&!!r.revision;
  gates.push(gate('RECEIPT_SCHEMA',schemaOk,'R344_RECEIPT_SCHEMA_REQUIRED',['OMEGA_SAR_HOST_CLOSURE_R344','revision']));
  const sourcesOk=source(r?.master)&&source(r?.slave)&&r.master.productId!==r.slave.productId&&r.master.polarization.toUpperCase()===r.slave.polarization.toUpperCase();
- gates.push(gate('EXACT_PAIR_SOURCES',sourcesOk,'EXACT_DISTINCT_SAME_POLARIZATION_SOURCES_REQUIRED',['master/slave product IDs','asset keys','full SHA-256','same polarization','acquisition times']));
+ gates.push(gate('EXACT_PAIR_SOURCES',sourcesOk,'EXACT_DISTINCT_SAME_POLARIZATION_SOURCES_REQUIRED',['master/slave SLC product IDs','asset keys','full SHA-256','same polarization','acquisition times']));
  const annOk=Array.isArray(r?.annotations?.master)&&r.annotations.master.length>0&&r.annotations.master.every(hash)&&Array.isArray(r?.annotations?.slave)&&r.annotations.slave.length>0&&r.annotations.slave.every(hash);
  gates.push(gate('ANNOTATION_HASHES',annOk,'ANNOTATION_HASH_PROVENANCE_REQUIRED',['master annotation hashes','slave annotation hashes']));
  const orbitOk=artifact(r?.orbit?.master)&&artifact(r?.orbit?.slave);
