@@ -17,6 +17,7 @@ import AppliedCalculusR168 from './AppliedCalculusR168';
 import FullRestorationConvergenceR168 from './FullRestorationConvergenceR168';
 import RecursiveSelfBuildR240 from './RecursiveSelfBuildR240';
 import CalculusAddressFabricR240 from './CalculusAddressFabricR240';
+import OmegaUnifiedConvergenceR348 from './OmegaUnifiedConvergenceR348';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -25,6 +26,7 @@ export default function OmegaSpecialistSuite(props:Props){
  const capability=<OmegaCapabilityFieldR138 panel={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>;
  const wrap=(content:any)=><div className='r138-capability-first'>{capability}{content}</div>;
  if(panel==='Convergence')return wrap(<div>
+  <OmegaUnifiedConvergenceR348 record={record} status={status}/>
   <AppliedCalculusR168/>
   <CalculusAddressFabricR240 record={record}/>
   <OmegaResearchAdvancementR316/>
