@@ -17,6 +17,7 @@ import AppliedCalculusR168 from './AppliedCalculusR168';
 import FullRestorationConvergenceR168 from './FullRestorationConvergenceR168';
 import RecursiveSelfBuildR240 from './RecursiveSelfBuildR240';
 import CalculusAddressFabricR240 from './CalculusAddressFabricR240';
+import OmegaUnifiedConvergenceR348 from './OmegaUnifiedConvergenceR348';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -29,6 +30,7 @@ export default function OmegaSpecialistSuite(props:Props){
   <CalculusAddressFabricR240 record={record}/>
   <OmegaResearchAdvancementR316/>
   <RecursiveSelfBuildR240/>
+  <OmegaUnifiedConvergenceR348 record={record} status={status}/>
   <FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/>
   <OmegaMaximumCockpitR126 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>
   <details className='r121-legacy-convergence' open><summary>R164 returned reflex → autonomic swarm · replay / residual carry / governed recruitment</summary><ReflexAutonomicR164/></details>

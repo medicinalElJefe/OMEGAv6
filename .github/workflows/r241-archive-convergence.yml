@@ -15,6 +15,7 @@ concurrency:
 jobs:
   prove-r241:
     runs-on: ubuntu-24.04
+    timeout-minutes: 40
     steps:
       - name: Checkout exact candidate
         uses: actions/checkout@v7
@@ -117,9 +118,27 @@ jobs:
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
 
+      - name: Start one shared R241 preview server
+        shell: bash
+        run: |
+          set -euo pipefail
+          log=/tmp/omega-r241-shared-preview.log
+          node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173 >"$log" 2>&1 &
+          pid=$!
+          echo "$pid" > /tmp/omega-r241-shared-preview.pid
+          ready=0
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 2 http://127.0.0.1:4173/ >/dev/null 2>&1; then ready=1; break; fi
+            if ! kill -0 "$pid" 2>/dev/null; then cat "$log" >&2; exit 1; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then cat "$log" >&2; exit 1; fi
+          echo 'OMEGA_E2E_URL=http://127.0.0.1:4173' >> "$GITHUB_ENV"
+          echo "R241 shared preview ready pid=$pid"
+
       - name: Browser proof · R313 panel disclosure contract · fail fast
         id: panel_disclosure
-        run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-panel-disclosure-ci-wrapper.mjs'
+        run: OMEGA_BROWSER_PROOF_TIMEOUT_SEC=480 bash scripts/run_r241_browser_proof.sh 'node tests/r313-panel-disclosure-ci-wrapper.mjs'
 
       - name: Capture exact R313 panel disclosure failure
         if: failure() && steps.panel_disclosure.outcome == 'failure'
@@ -164,14 +183,14 @@ jobs:
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-modes-scroll-diagnostic-browser-e2e.mjs'
 
       - name: Browser proof · R286 accumulated no-dead-control contract
-        run: bash scripts/run_r241_browser_proof.sh 'node tests/r286-all-surface-no-dead-controls-ci-wrapper.mjs'
+        run: OMEGA_BROWSER_PROOF_TIMEOUT_SEC=600 bash scripts/run_r241_browser_proof.sh 'R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=270 bash scripts/run_r286_control_shards.sh'
 
       - name: Browser proof · R313 full safe-control interaction contract
         id: full_control
         shell: bash
         run: |
           set -o pipefail
-          bash scripts/run_r241_browser_proof.sh 'node tests/r313-full-control-interaction-browser-e2e.mjs' 2>&1 | tee r313-full-control-interaction.log
+          OMEGA_BROWSER_PROOF_TIMEOUT_SEC=600 bash scripts/run_r241_browser_proof.sh 'R313_PROOF_SHARDS=8 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=270 bash scripts/run_r313_control_shards.sh' 2>&1 | tee r313-full-control-interaction.log
 
       - name: Capture exact R313 full-control interaction failure
         if: failure() && steps.full_control.outcome == 'failure'
@@ -212,6 +231,17 @@ jobs:
           done
           echo 'R241 could not obtain one internally consistent exact Worker-version semantic proof after 3 bounded attempts.' >&2
           exit 1
+
+      - name: Stop shared R241 preview server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/omega-r241-shared-preview.pid ]; then
+            pid="$(cat /tmp/omega-r241-shared-preview.pid)"
+            kill "$pid" 2>/dev/null || true
+            wait "$pid" 2>/dev/null || true
+          fi
+          rm -f /tmp/omega-r241-shared-preview.pid
 
       - name: Summarize authority boundary
         if: always()

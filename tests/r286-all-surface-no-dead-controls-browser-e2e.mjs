@@ -13,6 +13,11 @@ const profiles=[
 ];
 const totals={desktop:0,mobile:0,disabledDesktop:0,disabledMobile:0,disclosuresDesktop:0,disclosuresMobile:0,panelsDesktop:0,panelsMobile:0};
 const CONTROL_SELECTOR='button,[role="button"]';
+const shardCount=Number(process.env.R286_SHARD_COUNT||'1');
+const shardIndex=Number(process.env.R286_SHARD_INDEX||'0');
+if(!Number.isInteger(shardCount)||shardCount<1||shardCount>16)throw new Error(`R286_SHARD_COUNT must be an integer 1..16, received ${process.env.R286_SHARD_COUNT||'unset'}`);
+if(!Number.isInteger(shardIndex)||shardIndex<0||shardIndex>=shardCount)throw new Error(`R286_SHARD_INDEX must be an integer 0..${shardCount-1}, received ${process.env.R286_SHARD_INDEX||'unset'}`);
+const assignedRoutes=profileIndex=>expected.filter((_,routeIndex)=>((profileIndex*expected.length+routeIndex)%shardCount)===shardIndex);
 
 async function twoFrames(page){
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
@@ -283,7 +288,9 @@ async function verifySarGeometry(page,viewportName){
 
 const browser=await chromium.launch({headless:true});
 try{
-  for(const [name,contextOptions] of profiles){
+  for(const [profileIndex,[name,contextOptions]] of profiles.entries()){
+    const routes=assignedRoutes(profileIndex);
+    if(!routes.length)continue;
     const context=await browser.newContext(contextOptions);
     const page=await context.newPage();
     const pageErrors=[];
@@ -308,7 +315,9 @@ try{
     if(unique.length!==44)throw new Error(`${name}: expected 44 unique route controls, received ${unique.length}`);
     for(const route of expected)if(!unique.includes(route))throw new Error(`${name}: navigator omitted canonical route ${route}`);
 
-    for(const route of expected){
+    for(const route of routes){
+      const routeStarted=performance.now();
+      console.log(`R286 SHARD ${shardIndex+1}/${shardCount} BEGIN · ${name}/${route}`);
       await clickRoute(page,route);
       const structure=await panelStructureAudit(page,route);
       if(structure.failures.length)throw new Error(`${name}/${route}: panel structure failure:\n${structure.failures.join('\n')}`);
@@ -326,6 +335,7 @@ try{
       totals[name==='desktop'?'disclosuresDesktop':'disclosuresMobile']+=disclosures;
       if(route==='SAR Truth')await verifySarGeometry(page,name);
       if(pageErrors.length)throw new Error(`${name}/${route}: browser page errors ${pageErrors.join(' | ').slice(0,4000)}`);
+      console.log(`R286 SHARD ${shardIndex+1}/${shardCount} ROUTE PASS · ${name}/${route} · controls=${audit.count} · panels=${structure.panelCount} · disclosures=${disclosures} · elapsedMs=${Math.round(performance.now()-routeStarted)}`);
     }
 
     await openNavigator(page);
@@ -335,5 +345,6 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,4000)}`);
     await context.close();
   }
-  console.log(`R286/R313 ALL-SURFACE + ALL-PANEL INTEGRITY PASS · 44/44 canonical routes pointer-opened on desktop + 390px mobile · active SurfaceIntegrity identity and PanelBoundary health proven on every route · route-deferred loaders resolve · ${totals.panelsDesktop+totals.panelsMobile} visible panel/region structures geometry-audited · ${totals.disclosuresDesktop+totals.disclosuresMobile} safe disclosures exercised and restored · ALL + six workspace submenus exercised · ${totals.desktop} desktop + ${totals.mobile} mobile visible controls audited on live browser nodes · ${totals.disabledDesktop+totals.disabledMobile} honestly disabled controls exempted · every enabled control requires an accessible name, real runtime action binding, finite usable geometry, pointer events and an unobscured elementFromPoint hit after browser-native scrollIntoView · role buttons require keyboard activation · aria-controls targets exist · exact 78×78/6084 SAR geometry · no material viewport overflow · navigator Escape/reopen · no page errors.`);
+  const shardCases=profiles.reduce((sum,_,profileIndex)=>sum+assignedRoutes(profileIndex).length,0);
+  console.log(`R286/R313 SHARD ${shardIndex+1}/${shardCount} PASS · ${shardCases} deterministic route/viewport cases · canonical 44-route navigator verified for every entered viewport · active SurfaceIntegrity identity and PanelBoundary health proven · route-deferred loaders resolve · ${totals.panelsDesktop+totals.panelsMobile} visible panel/region structures geometry-audited · ${totals.disclosuresDesktop+totals.disclosuresMobile} safe disclosures exercised and restored · ALL + six workspace submenus exercised · ${totals.desktop} desktop + ${totals.mobile} mobile visible controls audited on live browser nodes · ${totals.disabledDesktop+totals.disabledMobile} honestly disabled controls exempted · every enabled control requires an accessible name, real runtime action binding, finite usable geometry, pointer events and an unobscured elementFromPoint hit after browser-native scrollIntoView · role buttons require keyboard activation · aria-controls targets exist · SAR geometry is checked in the shard owning SAR Truth · no material viewport overflow · navigator Escape/reopen · no page errors.`);
 }finally{await browser.close()}

@@ -13,6 +13,7 @@ env:
 jobs:
   source-proof:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -58,6 +59,7 @@ jobs:
   local-browser-proof:
     needs: source-proof
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -79,17 +81,20 @@ jobs:
             sleep 1
           done
           if [ "$ready" -ne 1 ]; then cat /tmp/r238-vite.log; exit 1; fi
-          node --input-type=module <<'NODE'
+          set +e
+          timeout --signal=TERM --kill-after=15s 180s node --input-type=module <<'NODE'
           import {chromium} from 'playwright';
           const browser=await chromium.launch({headless:true});
           const page=await browser.newPage({viewport:{width:1440,height:1100}});
+          page.setDefaultTimeout(12000); page.setDefaultNavigationTimeout(30000);
           const pageErrors=[]; page.on('pageerror',e=>pageErrors.push(String(e)));
           let hybridStatus={state:'DEVICE_PROOF_REQUIRED',nativeExecutionClaimed:false,devices:[],jobs:[]};
           let missionStatus={ok:true,missions:[],state:'DEVICE_PROOF_REQUIRED'};
           await page.route('**/api/hybrid/status',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(hybridStatus)}));
           await page.route('**/api/missions',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(missionStatus)}));
           const openHybrid=async()=>{
-            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:30000});
+            await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:20000});
             await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
             const entry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid'}).first();
             await entry.waitFor({state:'visible'}); await entry.click();
@@ -140,4 +145,23 @@ jobs:
           console.log(`R239 BUILT BROWSER PASS · real Home→TOOLS→Hybrid · resource-held controls counted · two hosts · selected dev-b shared by R212/R237 · shared epoch ${e237} · foreign host isolated · R237 command gates retained`);
           await browser.close();
           NODE
-          OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r243-hybrid-execution-motion-browser-e2e.mjs
+          browser_status=$?
+          set -e
+          if [ "$browser_status" -ne 0 ]; then
+            cat /tmp/r238-vite.log >&2 || true
+            if [ "$browser_status" -eq 124 ] || [ "$browser_status" -eq 137 ]; then
+              echo "::error title=R237 browser proof timeout::Hybrid command/shared-epoch proof exceeded 180 seconds and was terminated fail-closed." >&2
+            fi
+            exit "$browser_status"
+          fi
+          set +e
+          timeout --signal=TERM --kill-after=15s 150s env OMEGA_E2E_URL=http://127.0.0.1:4173 node tests/r243-hybrid-execution-motion-browser-e2e.mjs
+          motion_status=$?
+          set -e
+          if [ "$motion_status" -ne 0 ]; then
+            cat /tmp/r238-vite.log >&2 || true
+            if [ "$motion_status" -eq 124 ] || [ "$motion_status" -eq 137 ]; then
+              echo "::error title=R243 browser proof timeout::Execution-motion proof exceeded 150 seconds and was terminated fail-closed." >&2
+            fi
+            exit "$motion_status"
+          fi
