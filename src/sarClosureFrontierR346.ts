@@ -26,20 +26,20 @@ const DEPENDENCIES:Record<SarR342LayerId,SarR342LayerId[]>={
 };
 const SPEC_RULES:Partial<Record<SarR342LayerId,string>>={
  TOPS_SUBPIXEL_COREGISTRATION:'all listed identity/orbit/DEM/coreg/output/receipt fields',
- PHYSICALLY_VALID_INTERFEROMETRIC_PHASE:'interferogram + coherence + corrected interferogram + geometry proof',
+ PHYSICALLY_VALID_INTERFEROMETRIC_PHASE:'interferogramPath + coherencePath after proved TOPS co-registration',
  RADIOMETRIC_BACKSCATTER:'at least one of beta0Path / sigma0Path / gamma0Path with annotation provenance',
  TERRAIN_FLATTENED_GAMMA0:'demPath + terrainGamma0Path',
- UNWRAPPED_PHASE:'unwrapPath + unwrapMaskPath + unwrapProofPath',
+ UNWRAPPED_PHASE:'demPath + correctedInterferogramPath + geometricPhaseProofPath + unwrapPath + unwrapMaskPath + unwrapProofPath',
  LOS_DISPLACEMENT:'losPath + wavelengthM + losSign + signConvention',
  CORRECTED_LOS:'correctedLosPath + at least one of atmospherePath / etadPath / otherCorrectionPath',
  FULL_3D_DEFORMATION:'independentLosJsonPath + East/North/Up artifacts + deformationProofPath'
 };
 const SPEC_FIELDS:Partial<Record<SarR342LayerId,string[]>>={
  TOPS_SUBPIXEL_COREGISTRATION:['masterPath','slavePath','masterAcquired','slaveAcquired','polarization','subswath','firstBurst','lastBurst','masterOrbitPath','slaveOrbitPath','demPath','coregProofPath','outputPath','receiptPath'],
- PHYSICALLY_VALID_INTERFEROMETRIC_PHASE:['interferogramPath','coherencePath','correctedInterferogramPath','geometricPhaseProofPath'],
+ PHYSICALLY_VALID_INTERFEROMETRIC_PHASE:['interferogramPath','coherencePath'],
  RADIOMETRIC_BACKSCATTER:['beta0Path','sigma0Path','gamma0Path'],
  TERRAIN_FLATTENED_GAMMA0:['demPath','terrainGamma0Path'],
- UNWRAPPED_PHASE:['unwrapPath','unwrapMaskPath','unwrapProofPath'],
+ UNWRAPPED_PHASE:['demPath','correctedInterferogramPath','geometricPhaseProofPath','unwrapPath','unwrapMaskPath','unwrapProofPath'],
  LOS_DISPLACEMENT:['losPath','wavelengthM','losSign','signConvention'],
  CORRECTED_LOS:['atmospherePath','etadPath','otherCorrectionPath','correctedLosPath'],
  FULL_3D_DEFORMATION:['independentLosJsonPath','deformationEastPath','deformationNorthPath','deformationUpPath','deformationProofPath']
