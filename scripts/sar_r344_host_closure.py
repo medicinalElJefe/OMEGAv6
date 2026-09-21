@@ -127,6 +127,7 @@ def main()->int:
     ap.add_argument("--terrain-gamma0")
     ap.add_argument("--interferogram",required=True)
     ap.add_argument("--coherence",required=True)
+    ap.add_argument("--corrected-interferogram",required=True)
     ap.add_argument("--geometric-phase-proof",required=True)
     ap.add_argument("--unwrap")
     ap.add_argument("--unwrap-mask")
@@ -212,7 +213,8 @@ def main()->int:
         "coherence":artifact(args.coherence,units="unitless"),
         "geometricPhase":{
             "flatEarthRemoved":True,"topographicRemoved":True,
-            "artifact":artifact(args.geometric_phase_proof,fmt="application/json")
+            "correctedInterferogram":artifact(args.corrected_interferogram,units="rad"),
+            "proofArtifact":artifact(args.geometric_phase_proof,fmt="application/json")
         },
         "truthBoundary":"Machine-generated host receipt. A process exit is not proof; R344 independently re-checks exact hashes, residual thresholds, correction/unwrap evidence and look-geometry rank."
     }
