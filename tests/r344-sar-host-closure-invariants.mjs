@@ -24,6 +24,7 @@ for(const token of[
  'matrixRank3',
  'applySarHostClosurePreviewR344',
  'sourceArtifactSha256',
+ "productLevel:'SLC'",
  'rank>=3',
  'rank-independent look vectors'
 ])assert.ok(receipt.includes(token),'R344 receipt contract missing '+token);
@@ -78,8 +79,8 @@ const sha='a'.repeat(64);
 const artifact={path:'artifact.tif',sha256:sha,bytes:1024};
 const base={
  schema:'OMEGA_SAR_HOST_CLOSURE_R344',revision:'R344',createdAt:'2026-09-20T00:00:00Z',processor:'SNAP/S1TBX',processorVersion:'14',
- master:{productId:'M',assetKey:'VV',sha256:sha,polarization:'VV',acquiredAt:'2026-09-01T00:00:00Z'},
- slave:{productId:'S',assetKey:'VV',sha256:sha,polarization:'VV',acquiredAt:'2026-09-13T00:00:00Z'},
+ master:{productId:'M',assetKey:'VV',sha256:sha,polarization:'VV',productLevel:'SLC',acquiredAt:'2026-09-01T00:00:00Z'},
+ slave:{productId:'S',assetKey:'VV',sha256:sha,polarization:'VV',productLevel:'SLC',acquiredAt:'2026-09-13T00:00:00Z'},
  annotations:{master:[sha],slave:[sha]},orbit:{master:artifact,slave:artifact,precise:true},
  coregistration:{fullResolution:true,burstGeometryBound:true,method:'Back-Geocoding+ESD',resampler:'truncated-sinc',azimuthResidualSamples:.0008,rangeResidualSamples:.03,rangeThresholdSamples:.1,proofArtifact:artifact},
  interferogram:artifact,coherence:artifact,dem:artifact,geometricPhase:{flatEarthRemoved:true,topographicRemoved:true,artifact},
