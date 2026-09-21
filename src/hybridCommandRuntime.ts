@@ -30,7 +30,7 @@ const shaValue=(v:unknown)=>/^[0-9a-f]{64}$/i.test(String(v??''))?String(v).toLo
 const relativeSarPath=(value:unknown)=>pathValue(value);
 const isoValue=(value:unknown)=>{const s=textValue(value,64);return s&&Number.isFinite(Date.parse(s))?new Date(s).toISOString():null};
 const sarClosureValue=(raw:any,errors:string[],stepNumber:number):SarR344ClosureSpec|null=>{
- const req=(key:string)=>{const v=relativeSarPath(raw?.[key]);if(!v)errors.push('Step '+stepNumber+' SAR closure requires safe root-relative '+key+'.');return v||'.'};
+ const req=(key:string)=>{const source=String(raw?.[key]??'').trim(),v=source?relativeSarPath(source):null;if(!v||v==='.')errors.push('Step '+stepNumber+' SAR closure requires an explicit safe root-relative '+key+'.');return v&&v!=='.'?v:''};
  const opt=(key:string)=>{const v=raw?.[key];if(v==null||String(v).trim()==='')return undefined;const p=relativeSarPath(v);if(!p)errors.push('Step '+stepNumber+' SAR closure has unsafe '+key+'.');return p||undefined};
  const masterAcquired=isoValue(raw?.masterAcquired),slaveAcquired=isoValue(raw?.slaveAcquired);
  if(!masterAcquired)errors.push('Step '+stepNumber+' SAR closure requires a valid master acquisition timestamp.');
