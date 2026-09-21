@@ -47,7 +47,11 @@ for(const token of[
  "support · not probability",
  "className='r347-timebar'",
  "className='r347-futures'",
- "TRAVERSAL_VISUAL_GRAMMAR_R347"
+ "TRAVERSAL_VISUAL_GRAMMAR_R347",
+ "camera=useRef({yaw:0,pitch:0,drag:false,lastX:0,lastY:0})",
+ "onPointerDown={pointerDown}",
+ "onWheel={wheel}",
+ "setZoom(v=>Math.max(.55,Math.min(2.2"
 ])assert.ok(cockpit.includes(token),'R347 human cockpit missing '+token);
 
 assert.ok(studio.includes("import TraversalFieldCockpitR347 from './TraversalFieldCockpitR347'"),'R347 must be primary traversal component');
@@ -69,3 +73,6 @@ assert.ok(pkg.scripts['check:static']?.includes('npm run test:r347'),'R347 proof
 console.log('R347 HUMAN-CORRELATED TRAVERSAL PASS · deterministic canonical worldline · exact visual grammar · logical/event time separated · model intensity not physical energy · admissible futures not probabilities · R100/R23/R35/donor authority preserved · current R18 Cockpit upgraded without proof-layer loss');
 
 assert.ok(accepted.includes("id:'HUMAN_CORRELATED_FIELD_VISUAL_LAW'")&&accepted.includes("'R347 human-correlated field visual law + preserved predecessor renderer authority'"),'R347 accepted production contract must preserve the new visual law without replacing R100/R35/R23');
+
+assert.ok(cockpit.includes('camera.current.yaw')&&cockpit.includes('camera.current.pitch')&&cockpit.includes('persp=1/(1.7-.45*z2)'),'R347 observer transform must use projected x/y/z without rewriting source nodes');
+assert.ok(!cockpit.includes('onAddress(field.nodes[cursor]')&&!cockpit.includes('setAddress('),'observer drag/zoom must not mutate canonical address authority');
