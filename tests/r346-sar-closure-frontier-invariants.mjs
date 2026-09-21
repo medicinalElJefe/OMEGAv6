@@ -18,7 +18,10 @@ for(const token of[
  'cannot manufacture Sentinel-1 measurements',
  'DEPENDENCIES',
  "op:'SAR_R344_CLOSURE'",
- 'authorizationRequired:true'
+ 'authorizationRequired:true',
+ 'SPEC_FIELDS',
+ "UNWRAPPED_PHASE:['unwrapPath','unwrapMaskPath','unwrapProofPath']",
+ "FULL_3D_DEFORMATION:['independentLosJsonPath','deformationEastPath','deformationNorthPath','deformationUpPath','deformationProofPath']"
 ])assert.ok(frontier.includes(token),'R346 frontier contract missing '+token);
 
 assert.ok(frontier.includes("Number(receipt?.independentLos?.length||0)>=3"),'R346 must not admit full 3-D without independent viewing geometry');
@@ -31,7 +34,8 @@ for(const token of[
  'const closureFrontierR346=useMemo',
  'R346 closure frontier',
  'Next evidence-producing action:',
- 'information gain'
+ 'information gain',
+ "item.sarSpecFields.join(', ')"
 ])assert.ok(live.includes(token),'R346 live workstation integration missing '+token);
 
 assert.ok(pkg.scripts['test:r346']?.includes('tests/r346-sar-closure-frontier-invariants.mjs'),'R346 proof must be registered');
