@@ -3,6 +3,8 @@ import fs from'node:fs';
 
 const engine=fs.readFileSync('src/system/unifiedConvergenceR348.ts','utf8');
 const deweyKernel=fs.readFileSync('src/system/deweyReferenceKernelR348.ts','utf8');
+const liveScene=fs.readFileSync('src/system/liveSceneCorrelationR348.ts','utf8');
+const donorContext=fs.readFileSync('src/visualTraversalContextR347.ts','utf8');
 const ui=fs.readFileSync('src/OmegaUnifiedConvergenceR348.tsx','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 const accepted=fs.readFileSync('src/acceptedProductionContractR95.ts','utf8');
@@ -32,9 +34,14 @@ for(const token of[
  'probability:null'
 ])assert.ok(engine.includes(token),'R348 convergence engine missing '+token);
 
+for(const token of['OMEGA_LIVE_SCENE_CORRELATION_R348','compileLiveSceneCorrelationR348','WGS84_QUERY_CONTEXT','EARTH_SPACE_WEATHER_CONTEXT','evidenceHash','physicalObservations','sourceClocksR347','contextCompletenessR347'])assert.ok(liveScene.includes(token),'R348 live scene correlation missing '+token);
+for(const token of['R347_VISUAL_GRAMMAR','modelMappedWgs84R347','admitPhysicalQuantityR347','sourceClocksR347','contextCompletenessR347','R347_PHYSICAL_QUANTITY_REGISTRY'])assert.ok(donorContext.includes(token),'R347 calibrated context donor missing '+token);
+
 for(const token of['DEWEY_REFERENCE_KERNEL_R348','compileB0StandardR348','compileB3CanonicalStateR348','compileB4MotionR348','compileB5ParentR348','compileB6GateR348','compileGravityMotionAddressR348','executeDeweyReferenceKernelR348','B4'||'B5'])assert.ok(deweyKernel.includes(token),'R348 executable Dewey kernel missing '+token);
 assert.ok(deweyKernel.includes('9c0701b81fcd5d83444c5e8b2da362c01bab3067d6efec9cfd9ea775db1349ae'),'Dewey kernel must bind the exact supplied reference source hash');
 assert.ok(engine.includes('executeDeweyReferenceKernelR348(record?.deweyReferencePacket??null)'),'unified convergence must expose source-bound Dewey computation without synthesizing a packet');
+assert.ok(ui.includes("compileUnifiedConvergenceR348(record,liveStatus??status,live.physicalObservations)"),'unified convergence UI must feed validated live observations into the one scene packet');
+assert.ok(ui.includes("api.get<any>('/api/status')")&&ui.includes("api.get<any>('/api/hybrid/status')")&&ui.includes("/api/earth/evidence?lat="),'R348 live correlation must use existing read-only Earth/runtime/Hybrid authorities');
 
 assert.equal(manifest.schema,'OMEGA_R348_CONVERGENCE_SOURCE_MANIFEST');
 assert.equal(manifest.sources.length,8);
@@ -58,6 +65,12 @@ for(const token of[
  'B3 default · B0 fallback · B4–B6 gated',
  'HISTORICAL CORPUS AUDIT',
  'ONE-SYSTEM LEDGER',
+ 'LIVE QUERY CONTEXT',
+ '20,736-STATE CALIBRATION',
+ 'SOURCE CLOCKS',
+ 'PHYSICAL OBSERVATIONS',
+ 'HYBRID RETURN',
+ 'Refresh live scene',
  'REFERENCE KERNEL',
  'FINGERPRINTED CORPUS',
  'packet.truthBoundary'
