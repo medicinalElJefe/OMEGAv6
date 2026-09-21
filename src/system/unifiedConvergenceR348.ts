@@ -1,4 +1,5 @@
 import{TRAVERSAL_VISUAL_GRAMMAR_R347,traversalNodeR347}from'../traversalFieldR347';
+import{executeDeweyReferenceKernelR348}from'./deweyReferenceKernelR348';
 
 export const OMEGA_UNIFIED_CONVERGENCE_SCHEMA_R348='OMEGA_UNIFIED_CONVERGENCE_R348';
 export const OMEGA_R348_SOURCE_MANIFEST='/canon/omega-r348-source-manifest.json';
@@ -98,6 +99,7 @@ export function compileUnifiedConvergenceR348(record:any,status:any=null,observa
  const physicalHeld=checked.filter(x=>!x.validation.valid);
  const runtimeReturned=Boolean(status&&!status?.error);
  const runtimeState=runtimeReturned?String(status?.state??status?.status??status?.cloud?.worker??'RETURNED'):'UNBOUND';
+ const deweyReferenceComputation=executeDeweyReferenceKernelR348(record?.deweyReferencePacket??null);
  const metrics={
   continuity:node.continuity,plasticity:node.plasticity,contradiction:node.contradiction,burden:node.burden,
   scar:node.scar,evidence:node.evidence,continuityFlux:node.continuityFlux,invariantCarry:node.invariantCarry,
@@ -123,6 +125,7 @@ export function compileUnifiedConvergenceR348(record:any,status:any=null,observa
   wovenOperator:R348_WOVEN_OPERATOR,
   governanceOperator:R348_GOVERNANCE_OPERATOR,
   deweyStagePolicy:DEWEY_STAGE_POLICY_R348,
+  deweyReferenceComputation,
   sourceManifest:OMEGA_R348_SOURCE_MANIFEST,
   sourceBindings:R348_CORPUS_BINDINGS,
   historicalCorpusAudit:R348_HISTORICAL_CORPUS_AUDIT,
