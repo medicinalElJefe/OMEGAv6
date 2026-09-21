@@ -30,7 +30,8 @@ assert.ok(!pair.includes('Math.log((sa+1)/(ma+1))'),'R341 must not use an arbitr
 
 assert.ok(raster.includes('interferogramPhaseRad?:number[]'),'R341 raster contract must keep pair interferogram phase separate from source phase');
 assert.ok(raster.includes('mask=r.validMask?.length===r.width*r.height?r.validMask:undefined'),'R341 coverage must honor validity masks for all displayed fields');
-assert.ok(raster.includes("view==='INTERFEROGRAM'?'interferogramPhaseRad'"),'INTERFEROGRAM coverage must use pair phase, never source phase');
+assert.ok(raster.includes("view==='INTERFEROGRAM'?(r.correctedInterferometricPhaseRad?.length?'correctedInterferometricPhaseRad':'interferogramPhaseRad')"),'INTERFEROGRAM coverage must prefer correction-ledger pair phase, fall back to raw pair phase, and never use source phase');
+assert.ok(raster.includes("const a=r.correctedInterferometricPhaseRad?.length?r.correctedInterferometricPhaseRad:r.interferogramPhaseRad"),'INTERFEROGRAM rendering must preserve corrected→raw pair-phase precedence');
 assert.ok(derivation.includes("'interferogramPhaseRad','rad'"),'field resolver must expose the pair-derived interferogram');
 assert.ok(derivation.includes("'timeStackRelative','ln amplitude ratio'"),'time-stack lens must identify the scale-invariant two-epoch log-amplitude operator');
 
