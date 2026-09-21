@@ -26,11 +26,11 @@ export default function OmegaSpecialistSuite(props:Props){
  const capability=<OmegaCapabilityFieldR138 panel={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>;
  const wrap=(content:any)=><div className='r138-capability-first'>{capability}{content}</div>;
  if(panel==='Convergence')return wrap(<div>
-  <OmegaUnifiedConvergenceR348 record={record} status={status}/>
   <AppliedCalculusR168/>
   <CalculusAddressFabricR240 record={record}/>
   <OmegaResearchAdvancementR316/>
   <RecursiveSelfBuildR240/>
+  <OmegaUnifiedConvergenceR348 record={record} status={status}/>
   <FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/>
   <OmegaMaximumCockpitR126 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>
   <details className='r121-legacy-convergence' open><summary>R164 returned reflex → autonomic swarm · replay / residual carry / governed recruitment</summary><ReflexAutonomicR164/></details>
