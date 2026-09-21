@@ -4,6 +4,10 @@ import fs from 'node:fs';
 const r237=fs.readFileSync('.github/workflows/r237-hybrid-command-authority-proof.yml','utf8');
 const r241=fs.readFileSync('.github/workflows/r241-archive-convergence.yml','utf8');
 const runner=fs.readFileSync('scripts/run_r241_browser_proof.sh','utf8');
+const r286ShardRunner=fs.readFileSync('scripts/run_r286_control_shards.sh','utf8');
+const r313ShardRunner=fs.readFileSync('scripts/run_r313_control_shards.sh','utf8');
+const r286Browser=fs.readFileSync('tests/r286-all-surface-no-dead-controls-browser-e2e.mjs','utf8');
+const r313Browser=fs.readFileSync('tests/r313-full-control-interaction-browser-e2e.mjs','utf8');
 
 assert.ok(!r237.includes("waitUntil:'networkidle'"),'R237 browser proof must not wait for global network idle on a polling/live SPA');
 assert.ok(r237.includes("waitUntil:'domcontentloaded'"),'R237 must use deterministic DOM readiness');
@@ -19,9 +23,20 @@ assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=480'),'R313 panel discl
 assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=600'),'deep R286/R313 control sweeps must have an explicit bounded budget');
 assert.ok(r241.includes('Stop shared R241 preview server')&&r241.includes('if: always()'),'R241 shared preview must always clean up');
 
+assert.ok(r241.includes('R286_PROOF_SHARDS=4 R286_SHARD_TIMEOUT_SEC=420'),'R286 exhaustive browser audit must run as four bounded deterministic shards');
+assert.ok(r241.includes('R313_PROOF_SHARDS=4 R313_SHARD_TIMEOUT_SEC=420'),'R313 safe-control sweep must run as four bounded deterministic shards');
+assert.ok(r286ShardRunner.includes('R286_SHARD_COUNT="$shards" R286_SHARD_INDEX="$i"'),'R286 shard runner must bind every child to an explicit partition identity');
+assert.ok(r286ShardRunner.includes('for ((i=0;i<shards;i++))'),'R286 shard runner must launch the complete shard set');
+assert.ok(r286ShardRunner.includes('wait "${pids[$i]}"'),'R286 shard runner must recombine only after every child returns');
+assert.ok(r313ShardRunner.includes('R313_SHARD_COUNT="$shards" R313_SHARD_INDEX="$i"'),'R313 shard runner must bind every child to an explicit partition identity');
+assert.ok(r313ShardRunner.includes('for ((i=0;i<shards;i++))'),'R313 shard runner must launch the complete shard set');
+assert.ok(r313ShardRunner.includes('wait "${pids[$i]}"'),'R313 shard runner must recombine only after every child returns');
+assert.ok(r286Browser.includes('profileIndex*expected.length+routeIndex'),'R286 partition law must deterministically cover profile × route address space');
+assert.ok(r313Browser.includes('profileIndex*surfaces.length+surfaceIndex'),'R313 partition law must deterministically cover profile × route address space');
+
 assert.ok(runner.includes('reusing healthy shared preview'),'R241 runner must reuse the already healthy preview');
 assert.ok(runner.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC:-300'),'R241 runner must default every child proof to a finite wall-clock budget');
 assert.ok(runner.includes('timeout --signal=TERM --kill-after=15s'),'R241 runner must terminate hung children fail-closed');
 assert.ok(runner.includes('R241 browser proof timeout'),'R241 timeout must produce an explicit diagnostic annotation');
 
-console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · every child proof bounded · fail-closed diagnostics retained');
+console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286/R313 exhaustive 88-case contracts partitioned and recombined across bounded shards · every child proof bounded · fail-closed diagnostics retained');
