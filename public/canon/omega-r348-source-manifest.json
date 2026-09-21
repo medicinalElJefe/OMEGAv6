@@ -1,0 +1,82 @@
+{
+  "schema": "OMEGA_R348_CONVERGENCE_SOURCE_MANIFEST",
+  "revision": "R348",
+  "authority": "SOURCE_FINGERPRINT_AND_EPISTEMIC_BOUNDARY_ONLY",
+  "createdFrom": "User-supplied convergence corpus in the R348 build session",
+  "sources": [
+    {
+      "name": "Dewey_Reference_Implementation_v2_FULL.zip",
+      "sha256": "9c0701b81fcd5d83444c5e8b2da362c01bab3067d6efec9cfd9ea775db1349ae",
+      "bytes": 14252436,
+      "entries": 56,
+      "role": "FORMAL_REFERENCE_IMPLEMENTATION"
+    },
+    {
+      "name": "OmegaJ_FULL_COHERENCE_ORCHESTRATION_QCD_ATLAS.csv",
+      "sha256": "9670eb94bedbc41c941b6aa21cf426dced3ae729ce22fcf7a67f7157439ab6df",
+      "bytes": 125293,
+      "rows": 306,
+      "columns": 20,
+      "role": "QCD_RELATIONAL_ATLAS"
+    },
+    {
+      "name": "OmegaJ_FULL_MODE_FINAL_QCD_JUNCTION_ATLAS.csv",
+      "sha256": "2a8b599256ada51e5c888e006c1cb0bbec7e81b14c1a4ec2c9bc4a0aae6870ba",
+      "bytes": 45585,
+      "rows": 203,
+      "columns": 16,
+      "role": "QCD_JUNCTION_ATLAS"
+    },
+    {
+      "name": "OmegaJ_FULL_MODE_QCD_JUNCTION_COHERENCE_ORCHESTRATED_v5.csv",
+      "sha256": "5648bf1ceb9adb050604d4d430f41b5dbc550d9a9dd7496c8c33fcb6d136a5b2",
+      "bytes": 61953307,
+      "rows": 20782,
+      "columns": 151,
+      "role": "20736_STATE_QCD_ORCHESTRATION"
+    },
+    {
+      "name": "dewey_calculus_comprehensive_full_alignment.csv",
+      "sha256": "323a5c473138d46fcc6dd492e148b87e73b4d13f9028475932b0141167f41133",
+      "bytes": 9910,
+      "rows": 28,
+      "columns": 7,
+      "role": "CALCULUS_ALIGNMENT_CROSSWALK"
+    },
+    {
+      "name": "Dewey_Full_Corpus_Recalibrated_Direct_Rerun.xlsx",
+      "sha256": "3b5eac2b4057d2b0c0e5087ad0c51214a08fcdbae1e822e5a8d333292ca3f4e7",
+      "bytes": 116102,
+      "role": "RECALIBRATION_EVIDENCE"
+    },
+    {
+      "name": "PSC_20736D_FINISHED_FULL_ATLAS_QR_ALL_DATA_UNDER_150MB.zip",
+      "sha256": "b085ffc7c1e3a8d8381c81817801a5d640adb32ed88205e03e6c28bc8a3bab7b",
+      "bytes": 117477478,
+      "entries": 58,
+      "role": "SEARCHABLE_CORPUS_DONOR"
+    },
+    {
+      "name": "Pasted markdown.md",
+      "sha256": "20cc66171f173a948c9cf8d9d76721a83651e793a4285e0f5690235f1fa6002b",
+      "bytes": 14866,
+      "role": "VISUAL_SCENE_ARCHITECTURE"
+    }
+  ],
+  "driveDonorContracts": [
+    "OMEGA Temporal Field — Master Architecture + Build Ledger",
+    "OMEGA_ONE_SYSTEM_FULL_SOFTWARE_MENU_LEDGER.xlsx",
+    "OMEGA_ALL_SOFTWARE_61917364224D_FULL_BUILD_v22.xlsx",
+    "OMEGA_ONE_SYSTEM_J_DRIVE_1728D_AUTOPING_LEDGER.xlsx",
+    "DIMREL_NATIVE_RENDERER_1728_MASTER_PLAN.md",
+    "MASTER_CORPUS_AUDIT_REPORT.md"
+  ],
+  "boundaries": [
+    "NO_NEW_PHYSICAL_PRIMITIVE",
+    "20,736 is an atlas/address resolution, not a literal physical dimensional count",
+    "retrieval or representation never upgrades source evidence class",
+    "formal proof is not independent empirical validation",
+    "Dewey recalibration rejects universal superiority; B0 remains fallback and B3 is the strongest reusable core in the supplied rerun",
+    "Drive identifiers/credentials are not published; only donor contract titles are retained here"
+  ]
+}
