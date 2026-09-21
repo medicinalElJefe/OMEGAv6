@@ -4,7 +4,7 @@
 OMEGA Hybrid Link agent compatibility signature.
 R207 preserves the proven R34.1/R132/R205 executor as an immutable downloaded base
 and adds the exact R141 return-payload fingerprint envelope required by the canonical
-Worker proof-closure path. The wrapper does not widen the operation allow-list, root
+Worker proof-closure path. The wrapper preserves the proven base operation implementations and R345 adds one narrowly typed SAR_R344_CLOSURE operation; root
 boundary, shell policy, pairing authority, heartbeat truth, Canon authority, or solver
 claims. Pairing is explicit.
 
@@ -14,7 +14,8 @@ job/step identity, ordinal progress and elapsed time. Motion proves continued ow
 a RUNNING claim, never execution success. Final success remains the exact R141 return.
 """
 from __future__ import annotations
-import hashlib,json,sys,threading,time,types,urllib.request
+import hashlib,json,sys,threading,time,types,urllib.request,subprocess
+from pathlib import Path
 
 VERSION='R207'
 BASE_TRANSPORT_VERSION='R34.1'
@@ -23,6 +24,7 @@ BASE_PROOF_EXTENSION='R205'
 PROOF_CLOSURE_REVISION='R141'
 R207_PROOF_EXTENSION='R207'
 EXECUTION_MOTION_EXTENSION='R243'
+SAR_CLOSURE_EXTENSION='R345'
 FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
 BASE_PATH='/omega-hybrid-agent-base-r205.py'
@@ -135,6 +137,42 @@ def main():
     def progress_loop(stop_event):
         while not stop_event.wait(PROGRESS_INTERVAL_SECONDS):send_progress()
 
+    def sar_r344_closure(step,approved_root):
+        q=step.get('sarRequest') if isinstance(step,dict) else None
+        if not isinstance(q,dict):raise RuntimeError('R345 SAR closure request missing.')
+        def safe(name,required=False):
+            raw=str(q.get(name) or '').strip()
+            if not raw:
+                if required:raise RuntimeError('R345 SAR closure missing '+name)
+                return None
+            return Path(base.secure_path(approved_root,raw))
+        script=Path(base.secure_path(approved_root,'scripts/sar_r344_host_closure.py'))
+        graph=Path(base.secure_path(approved_root,'scripts/sar_r344_snap_tops_insar.xml'))
+        if not script.is_file() or not graph.is_file():raise RuntimeError('R345 checked-in R344 host driver/graph missing from approved root.')
+        pol=str(q.get('polarization') or '').upper();swath=str(q.get('subswath') or '').upper()
+        if pol not in {'VV','VH','HH','HV'} or swath not in {'IW1','IW2','IW3'}:raise RuntimeError('R345 invalid polarization/subswath.')
+        first=max(1,int(q.get('firstBurst') or 1));last=max(first,int(q.get('lastBurst') or first))
+        fields={'master':'--master','slave':'--slave','masterOrbit':'--master-orbit','slaveOrbit':'--slave-orbit','coregProof':'--coreg-proof','interferogram':'--interferogram','coherence':'--coherence','correctedInterferogram':'--corrected-interferogram','geometricPhaseProof':'--geometric-phase-proof','receipt':'--receipt'}
+        cmd=[sys.executable,str(script)]
+        for name,flag in fields.items():cmd += [flag,str(safe(name,True))]
+        cmd += ['--master-acquired',str(q.get('masterAcquired') or ''),'--slave-acquired',str(q.get('slaveAcquired') or ''),'--polarization',pol,'--subswath',swath,'--first-burst',str(first),'--last-burst',str(last),'--dem-name',str(q.get('demName') or 'Copernicus 30m Global DEM'),'--graph',str(graph)]
+        optional={'demArtifact':'--dem-artifact','unwrap':'--unwrap','unwrapMask':'--unwrap-mask','unwrapProof':'--unwrap-proof','atmosphere':'--atmosphere','etad':'--etad','otherCorrection':'--other-correction','los':'--los','correctedLos':'--corrected-los','beta0':'--beta0','sigma0':'--sigma0','gamma0':'--gamma0','terrainGamma0':'--terrain-gamma0','independentLosJson':'--independent-los-json','deformationEast':'--deformation-east','deformationNorth':'--deformation-north','deformationUp':'--deformation-up','deformationProof':'--deformation-proof','previewJson':'--preview-json'}
+        for name,flag in optional.items():
+            p=safe(name,False)
+            if p is not None:cmd += [flag,str(p)]
+        if q.get('execute') is True:cmd.append('--execute')
+        completed=subprocess.run(cmd,cwd=str(approved_root),capture_output=True,text=True,timeout=21600,shell=False)
+        log=(completed.stdout+'\n'+completed.stderr)[-12000:]
+        if completed.returncode!=0:raise RuntimeError('R345 R344 closure driver failed rc='+str(completed.returncode)+' · '+log[-4000:])
+        receipt=safe('receipt',True)
+        if not receipt.is_file():raise RuntimeError('R345 R344 closure driver returned without receipt.')
+        raw=receipt.read_text(encoding='utf-8')
+        digest=hashlib.sha256(raw.encode('utf-8')).hexdigest()
+        parsed=json.loads(raw)
+        if parsed.get('schema')!='OMEGA_SAR_HOST_CLOSURE_R344':raise RuntimeError('R345 host receipt schema mismatch.')
+        rel=receipt.resolve().relative_to(Path(approved_root).resolve()).as_posix()
+        return {'path':rel,'receiptPath':rel,'receiptSha256':digest,'receiptSchema':parsed.get('schema'),'receiptRevision':parsed.get('revision'),'receiptJson':raw if len(raw.encode('utf-8'))<=400000 else None,'driverLog':log,'executionRequested':q.get('execute') is True,'authority':'R344_RECEIPT_REQUIRES_BROWSER_VALIDATION'}
+
     def execute_step_r243(step,approved_root):
         op=str(step.get('op','')).upper();step_id=str(step.get('id') or '')
         with motion_lock:
@@ -142,7 +180,7 @@ def main():
             motion.update({'state':'STEP_RUNNING','stepId':step_id,'stepOp':op,'stepIndex':idx,'message':str(step.get('label') or op)[:240]})
         send_progress('STEP_RUNNING')
         try:
-            result=base_execute_step(step,approved_root)
+            result=sar_r344_closure(step,approved_root) if op=='SAR_R344_CLOSURE' else base_execute_step(step,approved_root)
             with motion_lock:motion.update({'state':'STEP_COMPLETE','completedSteps':max(int(motion.get('completedSteps') or 0),idx),'message':f'{op} returned to the R207/R141 proof wrapper.'})
             send_progress('STEP_COMPLETE')
             return result
@@ -155,7 +193,7 @@ def main():
         if isinstance(payload,dict) and path in {'/api/hybrid/agent/register','/api/hybrid/agent/heartbeat','/api/hybrid/agent/poll'}:
             transport.update({'server':server_url,'bridgeId':bridge_id,'secret':secret,'deviceId':str(payload.get('deviceId') or transport.get('deviceId') or '')})
         if path in {'/api/hybrid/agent/register','/api/hybrid/agent/heartbeat'} and isinstance(payload,dict):
-            payload=dict(payload);payload['proofExtensions']=list(dict.fromkeys([*(payload.get('proofExtensions') or []),EXECUTION_MOTION_EXTENSION]))
+            payload=dict(payload);payload['proofExtensions']=list(dict.fromkeys([*(payload.get('proofExtensions') or []),EXECUTION_MOTION_EXTENSION,SAR_CLOSURE_EXTENSION]))
         return base_request_json(server_url,path,payload,bridge_id,secret,timeout)
 
     def execute_job_r243(job,root):
@@ -171,13 +209,13 @@ def main():
         return wrap_packet(packet,base_digest)
 
     def execute_job_r207(job,root):return execute_job_r243(job,root)
-    def capabilities_r207():return base_capabilities()
+    def capabilities_r207():return list(dict.fromkeys(base_capabilities()+['SAR_R344_CLOSURE']))
     base.execute_step=execute_step_r243
     base.request_json=request_json_r243
     base.execute_job=execute_job_r207
     base.capabilities=capabilities_r207
     original_main=base.main
-    print('OMEGA Hybrid Link proof wrapper',VERSION,'· base',base.VERSION,'execution',base.CAPABILITY_REVISION,'proof',BASE_PROOF_EXTENSION,'→',PROOF_CLOSURE_REVISION,'motion',EXECUTION_MOTION_EXTENSION)
+    print('OMEGA Hybrid Link proof wrapper',VERSION,'· base',base.VERSION,'execution',base.CAPABILITY_REVISION,'proof',BASE_PROOF_EXTENSION,'→',PROOF_CLOSURE_REVISION,'motion',EXECUTION_MOTION_EXTENSION,'sar',SAR_CLOSURE_EXTENSION)
     print('Exact R141 semantic return fingerprint enabled; R243 lease/progress is liveness only. R125 remains sole CanonState admission authority.')
     original_main()
 
