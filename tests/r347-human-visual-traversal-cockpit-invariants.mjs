@@ -26,10 +26,25 @@ for(const token of[
  "channel:'UNCERTAINTY'",
  '20,736 is an address space',
  'physical energy remains UNBOUND',
+ 'r347-correlation-frame',
+ 'r347-source-clocks',
+ 'r347-quantity-registry',
+ 'MODEL ACTIVITY',
+ 'sourceClocksR347(earth)',
+ 'contextCompletenessR347(liveScalars,sourceClocks)',
+ "uncertainty>.55&&!isSelected",
+ "ctx.strokeRect",
+ "R347_PHYSICAL_QUANTITY_REGISTRY.map",
  'R347_UNIT_POLICY',
  'admitScalarChannelR347',
  'OBSERVED_SCALAR_REQUIRES_VALUE_UNIT_SOURCE_TIMESTAMP',
  'finite value, explicit unit, source identity and observation timestamp',
+ 'R347_PHYSICAL_QUANTITY_REGISTRY',
+ 'admitPhysicalQuantityR347',
+ 'sourceClocksR347',
+ 'contextCompletenessR347',
+ 'PHYSICAL_VECTOR_OR_FIELD_REQUIRES_REFERENCE_FRAME',
+ 'model pressure, activity, route motion and visual deformation are never silently relabeled as physical energy',
  'route steps are model time',
  'Earth timestamps are observation time'
 ])assert.ok(runtime.includes(token),'R347 visual grammar missing '+token);
@@ -98,6 +113,9 @@ for(const token of[
  '.r347-inspector',
  '.r347-time',
  '.r347-lens-row',
+ '.r347-correlation-frame',
+ '.r347-source-clocks',
+ '.r347-quantity-registry',
  '.r347-grammar',
  '@media(max-width:760px)',
  '@media(prefers-reduced-motion:reduce)'
@@ -125,3 +143,9 @@ assert.ok(r241Workflow.includes("Browser proof · R347 visual traversal cockpit"
 assert.ok(css.includes('.r347-cockpit button{min-width:44px;min-height:44px}')&&css.includes('grid-template-columns:repeat(24,44px)'),'R347 mobile touch-target contract must preserve inherited >=44px action geometry');
 
 assert.ok(css.includes('container-type:inline-size')&&css.includes('@container (max-width:900px)')&&css.includes('@container (max-width:620px)'),'R347 must reflow from its actual mounted container width, not viewport width alone');
+
+assert.ok(cockpit.includes("uncertainty>.55&&!isSelected")&&cockpit.includes('ctx.strokeRect'),'R347 low-evidence nodes must become structurally hollow/outlined instead of merely dim');
+assert.ok(cockpit.includes('sourceClocksR347(earth)')&&cockpit.includes('contextCompletenessR347(liveScalars,sourceClocks)'),'R347 must expose source-specific clocks and context completeness');
+assert.ok(cockpit.includes('MODEL ACTIVITY')&&cockpit.includes('explicitly not joules, watts or physical flux'),'R347 must keep dimensionless model activity separate from physical energy');
+assert.ok(runtime.includes("R347_PHYSICAL_QUANTITY_REGISTRY")&&runtime.includes("ENERGY")&&runtime.includes("POWER")&&runtime.includes("FLUX"),'R347 physical quantity registry must keep future energy/power/flux channels explicitly held until source-bound');
+assert.ok(css.includes('.r347-correlation-frame')&&css.includes('.r347-source-clocks')&&css.includes('.r347-quantity-registry'),'R347 human correlation/time/physical authority surfaces must be styled');
