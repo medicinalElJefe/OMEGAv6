@@ -9,6 +9,10 @@ const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
 for(const token of[
  'OMEGA_SAR_CLOSURE_FRONTIER_R346',
+ 'SarClosureExecutionModeR346',
+ 'R345_EXECUTES',
+ 'R345_BINDS_EVIDENCE',
+ 'CLOUD_OR_HOST',
  'buildSarClosureFrontierR346',
  'TOPS_SUBPIXEL_COREGISTRATION',
  'RADIOMETRIC_BACKSCATTER',
@@ -44,6 +48,7 @@ for(const token of[
  'R346 closure frontier',
  'Next evidence-producing action:',
  'information gain',
+ "item.executionMode.replaceAll('_',' ')",
  "item.sarSpecFields.join(', ')",
  'item.sarSpecRule',
  "item.blockedBy.join(', ')"
