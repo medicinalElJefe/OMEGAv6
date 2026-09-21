@@ -85,6 +85,7 @@ def source_ref(path:pathlib.Path,pol:str,acquired:str,asset_key:str|None=None)->
         "assetKey":asset_key or pol.upper(),
         "sha256":sha256_path(path),
         "polarization":pol.upper(),
+        "productLevel":"SLC",
         "acquiredAt":acquired
     }
 
