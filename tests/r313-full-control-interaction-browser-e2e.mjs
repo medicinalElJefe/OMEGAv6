@@ -11,6 +11,11 @@ const profiles=[
  ['desktop',{viewport:{width:1440,height:960},deviceScaleFactor:1,hasTouch:false}],
  ['mobile',{viewport:{width:390,height:844},deviceScaleFactor:2,hasTouch:true,isMobile:true}],
 ];
+const shardCount=Number(process.env.R313_SHARD_COUNT||'1');
+const shardIndex=Number(process.env.R313_SHARD_INDEX||'0');
+if(!Number.isInteger(shardCount)||shardCount<1||shardCount>16)throw new Error(`R313_SHARD_COUNT must be an integer 1..16, received ${process.env.R313_SHARD_COUNT||'unset'}`);
+if(!Number.isInteger(shardIndex)||shardIndex<0||shardIndex>=shardCount)throw new Error(`R313_SHARD_INDEX must be an integer 0..${shardCount-1}, received ${process.env.R313_SHARD_INDEX||'unset'}`);
+const assignedSurfaces=profileIndex=>surfaces.filter((_,surfaceIndex)=>((profileIndex*surfaces.length+surfaceIndex)%shardCount)===shardIndex);
 
 const MUTATING=/\b(run|execute|deploy|dispatch|authorize|train|build|delete|remove|revoke|promote|merge|send|submit|commit|write|save|create|launch|pair|connect|reconnect|repair|apply|acquire|upload|import|install|trigger|start mission|queue)\b/i;
 const PASSIVE_NETWORK=/\b(refresh|reload|sync|probe|scan|fetch|load|inspect live|check live|update status)\b/i;
@@ -140,7 +145,9 @@ async function clickSafeControls(page,surface,profile,pageErrors){
 
 const browser=await chromium.launch({headless:true});
 try{
- for(const [profile,options] of profiles){
+ for(const [profileIndex,[profile,options]] of profiles.entries()){
+  const assigned=assignedSurfaces(profileIndex);
+  if(!assigned.length)continue;
   const context=await browser.newContext(options);
   const page=await context.newPage();
   const pageErrors=[];
@@ -150,7 +157,7 @@ try{
   await page.goto(`${base}/?r313=${Date.now()}-${profile}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   let total=0,actionable=0,nativeActuated=0,roleActuated=0;
-  for(const surface of surfaces){
+  for(const surface of assigned){
    await activateSurface(page,surface);
    const list=await clickSafeControls(page,surface,profile,pageErrors);
    total+=list.length;
@@ -163,8 +170,9 @@ try{
   if(pageErrors.length)throw new Error(`${profile}: page errors ${pageErrors.join(' | ').slice(0,2500)}`);
   const seriousConsole=consoleErrors.filter(x=>!/favicon|Failed to load resource.*404/i.test(x));
   if(seriousConsole.length)throw new Error(`${profile}: console errors ${seriousConsole.join(' | ').slice(0,2500)}`);
-  console.log(`R313 ${profile.toUpperCase()} CONTROL SWEEP PASS · 44/44 panels · ${total} visible controls inventoried · ${actionable} enabled controls verified · ${nativeActuated} safe native controls click-exercised · ${roleActuated} safe role buttons keyboard-exercised · mutating/network controls held behind declared proof/authorization semantics · no page errors · no material overflow`);
+  console.log(`R313 ${profile.toUpperCase()} SHARD ${shardIndex+1}/${shardCount} CONTROL SWEEP PASS · ${assigned.length} deterministic panels · ${total} visible controls inventoried · ${actionable} enabled controls verified · ${nativeActuated} safe native controls click-exercised · ${roleActuated} safe role buttons keyboard-exercised · mutating/network controls held behind declared proof/authorization semantics · no page errors · no material overflow`);
   await context.close();
  }
- console.log('R313 FULL CONTROL INTERACTION PASS · every canonical panel mounted on desktop + touch mobile; all visible panel buttons received accessibility/reachability/geometry classification; safe native controls were pointer-actuated; non-native role buttons were keyboard-actuated through their explicit accessibility contract; state-changing/network controls were required to remain explicitly gated instead of being blindly fired; zero browser page errors.');
+ const shardCases=profiles.reduce((sum,_,profileIndex)=>sum+assignedSurfaces(profileIndex).length,0);
+ console.log(`R313 SHARD ${shardIndex+1}/${shardCount} PASS · ${shardCases} deterministic route/viewport cases · all assigned visible panel buttons received accessibility/reachability/geometry classification; safe native controls were pointer-actuated; non-native role buttons were keyboard-actuated through their explicit accessibility contract; state-changing/network controls remained explicitly gated; zero browser page errors.`);
 }finally{await browser.close()}
