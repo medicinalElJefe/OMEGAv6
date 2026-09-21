@@ -66,7 +66,7 @@ export function buildSarClosureFrontierR346(layers:SarEstablishmentLayerR342[],v
   const geometryReady=layer.id!=='FULL_3D_DEFORMATION'||Number(receipt?.independentLos?.length||0)>=3||layer.state==='COMPUTABLE';
   const admissible=blockedBy.length===0&&geometryReady;
   const informationGain=(PRIORITY[layer.id]||50)+(layer.id==='TOPS_SUBPIXEL_COREGISTRATION'||layer.id==='UNWRAPPED_PHASE'?20:0)-(blockedBy.length*20)-(geometryReady?0:50);
-  const hostKinds=new Set<SarClosureActionKindR346>(['COREGISTER','VALIDATE_PHASE','TERRAIN','UNWRAP','LOS','CORRECT','ADD_GEOMETRY']);const k=kind(layer.id),sarSpecFields=SPEC_FIELDS[layer.id]||[];
+  const hostKinds=new Set<SarClosureActionKindR346>(['CALIBRATE','COREGISTER','VALIDATE_PHASE','TERRAIN','UNWRAP','LOS','CORRECT','ADD_GEOMETRY']);const k=kind(layer.id),sarSpecFields=SPEC_FIELDS[layer.id]||[];
   return{rank:0,layer:layer.id,kind:k,gate:layer.gate,reason:layer.next,requires:layer.requires,command:commandFor(layer.id,receipt),produces:[layer.id],blockedBy,informationGain,admissible,physicalAuthority:layer.physicalAuthority,modeSequence:'PRUNE → TRANSLATE → PROVE → INVARIANT_CARRY → SCAR_CARRY → RECONTEXTUALIZE',sarSpecFields,hybridOperation:hostKinds.has(k)?{op:'SAR_R344_CLOSURE',authorizationRequired:true,requiredEvidence:layer.requires,specFields:sarSpecFields}:null};
  }).sort((a,b)=>Number(b.admissible)-Number(a.admissible)||b.informationGain-a.informationGain||a.layer.localeCompare(b.layer));
  out.forEach((x,i)=>x.rank=i+1);
