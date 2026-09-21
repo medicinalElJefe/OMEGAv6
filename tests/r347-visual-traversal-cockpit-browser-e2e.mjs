@@ -41,6 +41,7 @@ async function openNavigator(){
 }
 async function openCockpit(){
  await openNavigator();
+ const all=page.getByRole('button',{name:/^ALL\s+44$/});if(await all.count())await all.first().click();
  const rows=page.locator('.r89-flat-route');
  const count=await rows.count();let hit=-1;
  for(let i=0;i<count;i++){const label=((await rows.nth(i).locator('b').first().textContent().catch(()=>''))||'').trim();if(label==='Cockpit'){hit=i;break}}
@@ -54,6 +55,7 @@ async function openCockpit(){
 await page.goto(base+'/?r347-browser='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
 await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
 await openCockpit();
+mutations.length=0;
 
 if(await page.locator('.r347-cockpit').count()!==1)throw new Error('R347 current Cockpit route did not mount exactly one visual cockpit');
 for(const text of['OBSERVED','COMPUTED','FORECAST','PHYSICAL ENERGY HELD','TIME CORRELATION','WHY IT LOOKS THIS WAY','Visual encoding registry · exact channel authority'])if(!(await page.getByText(text,{exact:true}).count()))throw new Error('R347 cockpit missing '+text);
