@@ -147,6 +147,25 @@ export function applyDisplacementCorrectionsR343(los:number[],correctionsM:numbe
  const n=los.length,out=new Array(n).fill(Number.NaN),validMask=new Array(n).fill(0);let validSamples=0;for(let i=0;i<n;i++){if(mask&&Number(mask[i])<=0||!finite(los[i]))continue;let v=los[i],ok=true;for(const a of correctionsM){if(a.length!==n||!finite(a[i])){ok=false;break}v-=a[i]}if(ok){out[i]=v;validMask[i]=1;validSamples++}}return{correctedLosDisplacementM:out,validMask,validSamples,correctionCount:correctionsM.length};
 }
 
+export type SarLosRasterObservationR343={
+ losM:number[];lookEast:number[]|number;lookNorth:number[]|number;lookUp:number[]|number;
+ validMask?:number[];weight?:number[]|number;source:string;
+};
+const fieldAtR343=(v:number[]|number,i:number)=>Array.isArray(v)?Number(v[i]):Number(v);
+function solveNormal3R343(a:number[][],b:number[]){
+ const m=a.map((r,i)=>[r[0],r[1],r[2],b[i]]),pivots:number[]=[];
+ for(let col=0,row=0;col<3&&row<3;col++){let p=row;for(let i=row+1;i<3;i++)if(Math.abs(m[i][col])>Math.abs(m[p][col]))p=i;if(Math.abs(m[p][col])<1e-12)return null;[m[row],m[p]]=[m[p],m[row]];const q=m[row][col];pivots.push(Math.abs(q));for(let j=col;j<4;j++)m[row][j]/=q;for(let i=0;i<3;i++)if(i!==row){const z=m[i][col];for(let j=col;j<4;j++)m[i][j]-=z*m[row][j]}row++}
+ if(pivots.length<3)return null;const min=Math.min(...pivots),max=Math.max(...pivots);return{u:[m[0][3],m[1][3],m[2][3]]as[number,number,number],conditionProxy:max/Math.max(min,1e-15)};
+}
+export function invertLosRasterStackTo3DR343(layers:SarLosRasterObservationR343[],width:number,height:number,maxConditionProxy=1e8){
+ const n=Math.max(0,width*height),east=new Array(n).fill(Number.NaN),north=new Array(n).fill(Number.NaN),up=new Array(n).fill(Number.NaN),residualRmsM=new Array(n).fill(Number.NaN),conditionProxy=new Array(n).fill(Number.NaN),validMask=new Array(n).fill(0);let validSamples=0,rankDeficient=0,illConditioned=0;
+ for(let i=0;i<n;i++){const rows:{d:number;e:number;n:number;u:number;w:number}[]=[];for(const l of layers){if(l.losM.length!==n||l.validMask&&Number(l.validMask[i])<=0)continue;const d=Number(l.losM[i]),e=fieldAtR343(l.lookEast,i),nn=fieldAtR343(l.lookNorth,i),u=fieldAtR343(l.lookUp,i),w=Math.max(0,fieldAtR343(l.weight??1,i));if([d,e,nn,u,w].every(finite)&&w>0)rows.push({d,e,n:nn,u,w})}if(rows.length<3){rankDeficient++;continue}
+  const A=[[0,0,0],[0,0,0],[0,0,0]],b=[0,0,0];for(const r of rows){const g=[r.e,r.n,r.u];for(let a=0;a<3;a++){b[a]+=r.w*g[a]*r.d;for(let q=0;q<3;q++)A[a][q]+=r.w*g[a]*g[q]}}
+  const solved=solveNormal3R343(A,b);if(!solved){rankDeficient++;continue}if(!finite(solved.conditionProxy)||solved.conditionProxy>maxConditionProxy){illConditioned++;continue}const[e,nn,u]=solved.u;let ss=0,ws=0;for(const r of rows){const pred=r.e*e+r.n*nn+r.u*u,err=r.d-pred;ss+=r.w*err*err;ws+=r.w}east[i]=e;north[i]=nn;up[i]=u;residualRmsM[i]=Math.sqrt(ss/Math.max(ws,1e-15));conditionProxy[i]=solved.conditionProxy;validMask[i]=1;validSamples++}
+ return{deformationEastM:east,deformationNorthM:north,deformationUpM:up,residualRmsM,conditionProxy,validMask,validSamples,expected:n,rankDeficient,illConditioned,sourceCount:layers.length,operator:'weighted per-pixel least squares d=G·u; rank-deficient or ill-conditioned pixels remain NaN',truthBoundary:'R343 3-D inversion solves only where at least three independent LOS constraints produce a full-rank, bounded-condition normal system. It never converts one LOS into 3-D deformation.'};
+}
+
+
 export function closeSarPhysicalChainR343(input:{
  master:SarRasterFieldR283;slave?:SarRasterFieldR283;coregisteredSlave?:SarRasterFieldR283;coregReceipt?:SarCoregReceiptR343;
  calibration?:{beta0?:SarSparseLutR343;sigma0?:SarSparseLutR343;gamma0?:SarSparseLutR343};noise?:SarNoiseModelR343|SarSparseLutR343;
