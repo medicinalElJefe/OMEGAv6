@@ -27,11 +27,12 @@ assert.ok(!native.includes('amplitudeDb:values'),'uncalibrated DN must never be 
 
 for(const token of ['nativeIntensity?:number[]','validMask?:number[]','sourceUnits?:string','timeStackRelative?:number[]'])assert.ok(raster.includes(token),`R326 raster contract missing ${token}`);
 assert.ok(raster.includes("if(view==='SOURCE'){v=at(r.nativeIntensity,i,r.validMask)"),'SOURCE lens must read exact native samples when present');
-assert.ok(raster.includes("if(view==='AMPLITUDE'){v=at(r.amplitudeDb,i)"),'AMPLITUDE must prefer independently calibrated amplitudeDb when present');
+assert.ok(raster.includes("if(view==='AMPLITUDE'){const power=r.terrainFlattenedGamma0?.length?r.terrainFlattenedGamma0:r.gamma0?.length?r.gamma0:r.sigma0?.length?r.sigma0:r.beta0?.length?r.beta0:undefined"),'AMPLITUDE must prefer independently materialized calibrated power products when present');
+assert.ok(raster.includes("v=at(r.amplitudeDb,i)"),'AMPLITUDE must retain independently calibrated amplitudeDb as the next fallback before native DN');
 assert.ok(raster.includes("v=at(r.nativeIntensity,i,r.validMask)"),'R336 may render exact native intensity in the AMPLITUDE lens only as an explicitly uncalibrated native-DN fallback');
 assert.ok(raster.includes("if(view==='TIME_STACK'){v=at(r.timeStackRelative,i)"),'TIME_STACK must not reuse a single-scene amplitude raster');
 
-for(const token of ["'/api/earth/sar/measurement-raster'","native?.nativeDataBound?'NATIVE SOURCE BOUND'","raster={native?.nativeDataBound?native.raster:undefined}",'Decode native raster','NATIVE PIXELS {native?.nativeDataBound?\'BOUND\':\'UNBOUND\'}'])assert.ok(live.includes(token),`R326/R337 live surface missing ${token}`);
+for(const token of ["'/api/earth/sar/measurement-raster'","native?.nativeDataBound?'NATIVE SOURCE BOUND'",'raster={(native?.nativeDataBound||hostPreviewRaster)?displayRaster:undefined}','Decode native raster','NATIVE PIXELS {native?.nativeDataBound?\'BOUND\':\'UNBOUND\'}'])assert.ok(live.includes(token),`R326/R337/R341 live surface missing ${token}`);
 assert.ok(live.includes("truth:nativeBound?'OBSERVED_NATIVE':'VISUAL_ENHANCED'"),'decoded native samples must upgrade only to OBSERVED_NATIVE');
 assert.ok(live.includes("missingness:nativeBound?(complexBound?['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND','PAIR_REQUIRED']:['CALIBRATION_UNBOUND','DERIVED_FIELD_UNBOUND'])"),'decoded native source must retain calibration/derived missingness while complex SLC also retains pair-required missingness');
 
@@ -40,3 +41,5 @@ assert.ok(plan.includes("timeStackRelative"),'time-stack planner must require it
 assert.ok(worker.includes("import {sarNativeRasterR326} from './sarNativeRasterR326.js'")&&worker.includes("url.pathname==='/api/earth/sar/native-raster'"),'canonical Earth worker must own R326 ingress route');
 
 console.log('R326/R336 SAR NATIVE RASTER INGRESS PASS · bounded exact COG/TIFF decode · native DN may drive SOURCE and an explicitly uncalibrated AMPLITUDE display lens · calibrated backscatter/phase/derived physics remain independently gated · no SLC approximation · canonical worker preserved');
+
+assert.ok(live.includes("const localDisplayRaster=pairDerived?.state==='PAIR_FIELDS_BOUND'?pairDerived.pairRaster:masterRaster")&&live.includes("const displayRaster=hostPreviewRaster||localDisplayRaster"),'R341 pair fields may replace the local analytical raster only after binding, while R344 may supersede it only with a validated hash-linked host preview');
