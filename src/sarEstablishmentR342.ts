@@ -49,6 +49,7 @@ export interface SarEstablishmentEvidenceR342{
  gamma0Bound?:boolean;
  demBound?:boolean;
  localIncidenceGeometryBound?:boolean;
+ demScatteringAreaFactorBound?:boolean;
  terrainFlattenedGamma0Bound?:boolean;
  orbitBound?:boolean;
  topographicPhaseRemoved?:boolean;
@@ -115,8 +116,8 @@ export function resolveSarEstablishmentR342(e:SarEstablishmentEvidenceR342):SarE
  out.push(phaseValid?established('PHYSICALLY_VALID_INTERFEROMETRIC_PHASE','arg(master×conj(coregistered slave))','coreg receipt + pair mask + phase convention','Sentinel-1 interferometry'):held('PHYSICALLY_VALID_INTERFEROMETRIC_PHASE','PHASE_VALIDITY_REQUIRES_COREGISTRATION',['TOPS subpixel co-registration','complex pair','phase convention'],'wrapped interferometric phase after proven co-registration','phase validity receipt','validate pair phase only after coregistration','Sentinel-1 interferometry'));
  const radiometry=(e.beta0Bound||e.sigma0Bound||e.gamma0Bound)&&e.calibrationLutBound;
  out.push(radiometry?established('RADIOMETRIC_BACKSCATTER','value=(DN²-noiseLut)/calibrationLut²','calibration LUT + optional noise LUT + interpolation + units','Sentinel-1 L1 calibration/noise annotation'):held('RADIOMETRIC_BACKSCATTER','CALIBRATION_ANNOTATION_REQUIRED',['calibration LUT','noise LUT/noise policy','pixel/LUT interpolation','declared output β⁰/σ⁰/γ⁰'],'Sentinel-1 radiometric calibration','LUT provenance + unit proof','bind calibration/noise annotations and materialize calibrated power','Sentinel-1 Product Specification'));
- const rtc=e.terrainFlattenedGamma0Bound===true&&e.demBound&&e.localIncidenceGeometryBound&&radiometry;
- out.push(rtc?established('TERRAIN_FLATTENED_GAMMA0','radiometric terrain correction','DEM + local geometry + calibrated backscatter + mask','DEM + Sentinel-1 radiometry'):held('TERRAIN_FLATTENED_GAMMA0','DEM_LOCAL_GEOMETRY_REQUIRED',['calibrated backscatter','authoritative DEM','local incidence geometry','terrain correction operator'],'radiometric terrain flattening','DEM/geometric/radiometric closure','bind DEM/local geometry and compute terrain-flattened γ⁰','DEM + Sentinel-1 geometry'));
+ const rtc=e.terrainFlattenedGamma0Bound===true&&e.demBound&&e.demScatteringAreaFactorBound===true&&radiometry;
+ out.push(rtc?established('TERRAIN_FLATTENED_GAMMA0','radiometric terrain correction','DEM + local geometry + calibrated backscatter + mask','DEM + Sentinel-1 radiometry'):held('TERRAIN_FLATTENED_GAMMA0','DEM_LOCAL_GEOMETRY_REQUIRED',['calibrated backscatter','authoritative DEM','radar-geometry scattering-area normalization factor','terrain correction operator'],'radiometric terrain flattening','DEM/scattering-area/radiometric closure','bind authoritative DEM-derived scattering-area normalization and compute terrain-flattened γ⁰','DEM + Sentinel-1 radar geometry'));
  const unwrap=e.unwrappedPhaseBound===true&&e.unwrapClosureBound===true&&phaseValid;
  out.push(unwrap?established('UNWRAPPED_PHASE','2π ambiguity resolution with closure validation','unwrapped phase + closure/quality mask','validated unwrapping method'):held('UNWRAPPED_PHASE','UNWRAP_CLOSURE_NOT_PROVEN',['physically valid wrapped interferometric phase','unwrapping result','closure/residue quality proof'],'phase unwrapping under mask topology','closure loops + residues + quality mask','run and validate unwrapping without synthetic fill','validated unwrapping algorithm'));
  const wavelength=finite(e.wavelengthM)&&Number(e.wavelengthM)>0;
