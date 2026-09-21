@@ -79,10 +79,10 @@ export function traversalFuturesR347(address:number):TraversalFutureR347[]{
 export function compileTraversalFieldR347(startAddress:number,depth=48,observations:TraversalObservationPacketR347[]=[]){
  const route=compileSourceTraversal(startAddress,depth),obs=new Map(observations.map(x=>[x.address,x]));
  const nodes=route.path.map((x:any,i:number)=>bindTraversalObservationR347(traversalNodeR347(x.address,i),obs.get(x.address)));
- const futures=traversalFuturesR347(startAddress);
+ const futures=traversalFuturesR347(startAddress),physicalPositions=nodes.filter(x=>x.physicalPosition).map(x=>x.physicalPosition!),spaceCompatible=physicalPositions.length>0&&physicalPositions.every(x=>x.frame===physicalPositions[0].frame&&x.unit===physicalPositions[0].unit);
  return{schema:TRAVERSAL_FIELD_SCHEMA_R347,startAddress,nodes,futures,closed:route.closed,routeBoundary:route.boundary,
   time:{logicalAuthority:'ROUTE_STEP',eventTimeBound:nodes.some(x=>!!x.eventTime),renderClockAuthority:'DISPLAY_ONLY'},
-  space:{authority:nodes.some(x=>x.spaceAuthority==='UNIT_BOUND_PHYSICAL_SPACE')?'UNIT_BOUND_PHYSICAL_SPACE':'ATLAS_SPACE',physicalPositionBound:nodes.some(x=>!!x.physicalPosition)},
+  space:{authority:spaceCompatible?'UNIT_BOUND_PHYSICAL_SPACE':'ATLAS_SPACE',physicalPositionBound:spaceCompatible,frame:spaceCompatible?physicalPositions[0].frame:null,unit:spaceCompatible?physicalPositions[0].unit:null,mixedFrameHold:physicalPositions.length>0&&!spaceCompatible},
   energy:{authority:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')?'UNIT_BOUND_PHYSICAL':'MODEL_PROXY',label:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')?'PHYSICAL ENERGY / MODEL INTENSITY':'MODEL INTENSITY',physicalEnergyBound:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')},
   grammar:TRAVERSAL_VISUAL_GRAMMAR_R347,
   truthBoundary:'R347 visual geometry is a deterministic projection of canonical OMEGA packet state. Logical route time is not wall-clock/event time. Model intensity/action proxy is not physical energy. Future support is not probability. External unit-bound observations may add physical position or energy only with explicit provenance, units, frame and event time. Atlas position remains separate from physical position.'};
