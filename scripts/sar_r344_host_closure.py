@@ -121,6 +121,10 @@ def main()->int:
     ap.add_argument("--execute",action="store_true")
     ap.add_argument("--probe-only",action="store_true")
     ap.add_argument("--coreg-proof",required=True,help="JSON from an independent post-registration residual proof")
+    ap.add_argument("--beta0")
+    ap.add_argument("--sigma0")
+    ap.add_argument("--gamma0")
+    ap.add_argument("--terrain-gamma0")
     ap.add_argument("--interferogram",required=True)
     ap.add_argument("--coherence",required=True)
     ap.add_argument("--geometric-phase-proof",required=True)
@@ -131,6 +135,7 @@ def main()->int:
     ap.add_argument("--etad")
     ap.add_argument("--other-correction")
     ap.add_argument("--los")
+    ap.add_argument("--corrected-los")
     ap.add_argument("--wavelength-m",type=float,default=0.0555)
     ap.add_argument("--los-sign",type=int,choices=[-1,1])
     ap.add_argument("--sign-convention")
@@ -197,6 +202,12 @@ def main()->int:
             "rangeThresholdSamples":float(coreg["rangeThresholdSamples"]),
             "proofArtifact":proof_art
         },
+        "radiometry":{k:v for k,v in {
+            "beta0":artifact(args.beta0,units="linear power") if args.beta0 else None,
+            "sigma0":artifact(args.sigma0,units="linear power") if args.sigma0 else None,
+            "gamma0":artifact(args.gamma0,units="linear power") if args.gamma0 else None,
+            "terrainFlattenedGamma0":artifact(args.terrain_gamma0,units="linear power") if args.terrain_gamma0 else None
+        }.items() if v is not None},
         "interferogram":artifact(args.interferogram,units="rad"),
         "coherence":artifact(args.coherence,units="unitless"),
         "geometricPhase":{
@@ -220,6 +231,7 @@ def main()->int:
     if corrections: receipt["corrections"]=corrections
     if args.los and args.los_sign and args.sign_convention:
         receipt["los"]={"artifact":artifact(args.los,units="m"),"wavelengthM":args.wavelength_m,"signConvention":args.sign_convention,"sign":args.los_sign,"validPixels":int(unwrap_proof.get("validPixels",0))}
+    if args.corrected_los: receipt["correctedLos"]=artifact(args.corrected_los,units="m")
     if independent: receipt["independentLos"]=independent
     if args.deformation_east and args.deformation_north and args.deformation_up and args.deformation_proof:
         receipt["deformation3d"]={
