@@ -14,7 +14,7 @@ job/step identity, ordinal progress and elapsed time. Motion proves continued ow
 a RUNNING claim, never execution success. Final success remains the exact R141 return.
 """
 from __future__ import annotations
-import hashlib,json,sys,threading,time,types,urllib.request
+import hashlib,json,sys,threading,time,types,urllib.request,subprocess,pathlib
 
 VERSION='R207'
 BASE_TRANSPORT_VERSION='R34.1'
@@ -23,6 +23,9 @@ BASE_PROOF_EXTENSION='R205'
 PROOF_CLOSURE_REVISION='R141'
 R207_PROOF_EXTENSION='R207'
 EXECUTION_MOTION_EXTENSION='R243'
+SAR_CLOSURE_EXTENSION='R345'
+SAR_CLOSURE_OPERATION='SAR_R344_CLOSURE'
+MAX_SAR_RECEIPT_BYTES=4*1024*1024
 FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'
 DEFAULT_SERVER='https://omegav6.jeffdeweyeljefe.workers.dev'
 BASE_PATH='/omega-hybrid-agent-base-r205.py'
@@ -89,7 +92,7 @@ def wrap_packet(packet,base_digest):
         'resultFingerprintR141':sha_bytes(payload.encode('utf-8')),
         'proofClosureRevision':PROOF_CLOSURE_REVISION,
         'baseAgentSha256':base_digest,
-        'proofExtensions':list(dict.fromkeys(list(packet.get('proofExtensions') or [])+[BASE_PROOF_EXTENSION,R207_PROOF_EXTENSION,EXECUTION_MOTION_EXTENSION]))
+        'proofExtensions':list(dict.fromkeys(list(packet.get('proofExtensions') or [])+[BASE_PROOF_EXTENSION,R207_PROOF_EXTENSION,EXECUTION_MOTION_EXTENSION,SAR_CLOSURE_EXTENSION]))
     })
     return packet
 
@@ -135,6 +138,58 @@ def main():
     def progress_loop(stop_event):
         while not stop_event.wait(PROGRESS_INTERVAL_SECONDS):send_progress()
 
+    def execute_sar_closure_r345(step,approved_root):
+        spec=step.get('sarClosure') if isinstance(step,dict) else None
+        if not isinstance(spec,dict):raise base.AgentError('SAR_R344_CLOSURE requires a structured sarClosure object.')
+        project=base.secure_path(approved_root,step.get('path','.'))
+        script=(project/'scripts'/'sar_r344_host_closure.py').resolve()
+        graph=(project/'scripts'/'sar_r344_snap_tops_insar.xml').resolve()
+        try:script.relative_to(approved_root.resolve());graph.relative_to(approved_root.resolve())
+        except ValueError:raise base.AgentError('R345 SAR closure runner escaped approved root.')
+        if not script.is_file() or not graph.is_file():raise base.AgentError('R345 requires the promoted R344 host driver and SNAP graph inside the selected OMEGAv6 project.')
+        def req(key,exists=True):
+            value=str(spec.get(key) or '').strip()
+            if not value:raise base.AgentError('SAR_R344_CLOSURE missing '+key)
+            p=base.secure_path(approved_root,value)
+            if exists and not p.exists():raise base.AgentError('SAR_R344_CLOSURE input missing '+key+': '+value)
+            return p
+        def opt(key,exists=True):
+            value=str(spec.get(key) or '').strip()
+            if not value:return None
+            p=base.secure_path(approved_root,value)
+            if exists and not p.exists():raise base.AgentError('SAR_R344_CLOSURE optional input missing '+key+': '+value)
+            return p
+        master=req('masterPath');slave=req('slavePath');master_orbit=req('masterOrbitPath');slave_orbit=req('slaveOrbitPath');dem=req('demPath')
+        execute=spec.get('executeGraph') is True
+        output=req('outputPath',False);receipt=req('receiptPath',False)
+        coreg=req('coregProofPath');interferogram=req('interferogramPath',not execute);coherence=req('coherencePath',not execute)
+        corrected=req('correctedInterferogramPath',not execute);geo=req('geometricPhaseProofPath')
+        pol=str(spec.get('polarization') or '').upper();swath=str(spec.get('subswath') or '').upper()
+        if pol not in {'VV','VH','HH','HV'}:raise base.AgentError('SAR_R344_CLOSURE polarization must be VV/VH/HH/HV.')
+        if swath not in {'IW1','IW2','IW3'}:raise base.AgentError('SAR_R344_CLOSURE subswath must be IW1/IW2/IW3.')
+        first=max(1,min(999,int(spec.get('firstBurst') or 1)));last=max(first,min(999,int(spec.get('lastBurst') or first)))
+        ma=str(spec.get('masterAcquired') or '').strip();sa=str(spec.get('slaveAcquired') or '').strip()
+        if not ma or not sa:raise base.AgentError('SAR_R344_CLOSURE requires explicit acquisition timestamps.')
+        cmd=[sys.executable,str(script),'--master',str(master),'--slave',str(slave),'--master-acquired',ma,'--slave-acquired',sa,'--polarization',pol,'--subswath',swath,'--first-burst',str(first),'--last-burst',str(last),'--dem-artifact',str(dem),'--master-orbit',str(master_orbit),'--slave-orbit',str(slave_orbit),'--graph',str(graph),'--output',str(output),'--coreg-proof',str(coreg),'--interferogram',str(interferogram),'--coherence',str(coherence),'--corrected-interferogram',str(corrected),'--geometric-phase-proof',str(geo),'--receipt',str(receipt)]
+        if execute:cmd.append('--execute')
+        optional_args=[('beta0Path','--beta0'),('sigma0Path','--sigma0'),('gamma0Path','--gamma0'),('terrainGamma0Path','--terrain-gamma0'),('unwrapPath','--unwrap'),('unwrapMaskPath','--unwrap-mask'),('unwrapProofPath','--unwrap-proof'),('atmospherePath','--atmosphere'),('etadPath','--etad'),('otherCorrectionPath','--other-correction'),('losPath','--los'),('correctedLosPath','--corrected-los'),('independentLosJsonPath','--independent-los-json'),('deformationEastPath','--deformation-east'),('deformationNorthPath','--deformation-north'),('deformationUpPath','--deformation-up'),('deformationProofPath','--deformation-proof'),('previewJsonPath','--preview-json')]
+        for key,flag in optional_args:
+            p=opt(key,False if key in {'deformationEastPath','deformationNorthPath','deformationUpPath'} else True)
+            if p is not None:cmd.extend([flag,str(p)])
+        if spec.get('wavelengthM') is not None:cmd.extend(['--wavelength-m',str(float(spec['wavelengthM']))])
+        if spec.get('losSign') in (-1,1,'-1','1'):cmd.extend(['--los-sign',str(int(spec['losSign']))])
+        if str(spec.get('signConvention') or '').strip():cmd.extend(['--sign-convention',str(spec['signConvention']).strip()[:240]])
+        timeout=max(300,min(43200,int(step.get('maxRuntimeSeconds') or 21600)))
+        started=time.time();p=subprocess.run(cmd,cwd=project,text=True,capture_output=True,timeout=timeout,shell=False)
+        if p.returncode:raise base.AgentError(json.dumps({'operation':SAR_CLOSURE_OPERATION,'exitCode':p.returncode,'stdout':p.stdout[-12000:],'stderr':p.stderr[-12000:]},ensure_ascii=False))
+        if not receipt.is_file():raise base.AgentError('R345 host driver returned success without the required R344 receipt.')
+        raw=receipt.read_bytes()
+        if not raw or len(raw)>MAX_SAR_RECEIPT_BYTES:raise base.AgentError('R345 R344 receipt is empty or exceeds the bounded return size.')
+        parsed=json.loads(raw.decode('utf-8'))
+        if parsed.get('schema')!='OMEGA_SAR_HOST_CLOSURE_R344':raise base.AgentError('R345 returned receipt has the wrong schema.')
+        rel=receipt.relative_to(approved_root.resolve()).as_posix()
+        return {'schema':'OMEGA_SAR_HYBRID_CLOSURE_RETURN_R345','state':'R344_RECEIPT_RETURNED','path':rel,'receiptPath':rel,'receiptSha256':hashlib.sha256(raw).hexdigest(),'receipt':parsed,'runtimeSeconds':round(time.time()-started,3),'stdout':p.stdout[-6000:],'stderr':p.stderr[-3000:],'shell':False,'rootConfined':True}
+
     def execute_step_r243(step,approved_root):
         op=str(step.get('op','')).upper();step_id=str(step.get('id') or '')
         with motion_lock:
@@ -142,7 +197,7 @@ def main():
             motion.update({'state':'STEP_RUNNING','stepId':step_id,'stepOp':op,'stepIndex':idx,'message':str(step.get('label') or op)[:240]})
         send_progress('STEP_RUNNING')
         try:
-            result=base_execute_step(step,approved_root)
+            result=execute_sar_closure_r345(step,approved_root) if op==SAR_CLOSURE_OPERATION else base_execute_step(step,approved_root)
             with motion_lock:motion.update({'state':'STEP_COMPLETE','completedSteps':max(int(motion.get('completedSteps') or 0),idx),'message':f'{op} returned to the R207/R141 proof wrapper.'})
             send_progress('STEP_COMPLETE')
             return result
@@ -155,7 +210,7 @@ def main():
         if isinstance(payload,dict) and path in {'/api/hybrid/agent/register','/api/hybrid/agent/heartbeat','/api/hybrid/agent/poll'}:
             transport.update({'server':server_url,'bridgeId':bridge_id,'secret':secret,'deviceId':str(payload.get('deviceId') or transport.get('deviceId') or '')})
         if path in {'/api/hybrid/agent/register','/api/hybrid/agent/heartbeat'} and isinstance(payload,dict):
-            payload=dict(payload);payload['proofExtensions']=list(dict.fromkeys([*(payload.get('proofExtensions') or []),EXECUTION_MOTION_EXTENSION]))
+            payload=dict(payload);payload['proofExtensions']=list(dict.fromkeys([*(payload.get('proofExtensions') or []),EXECUTION_MOTION_EXTENSION,SAR_CLOSURE_EXTENSION]))
         return base_request_json(server_url,path,payload,bridge_id,secret,timeout)
 
     def execute_job_r243(job,root):
@@ -171,13 +226,13 @@ def main():
         return wrap_packet(packet,base_digest)
 
     def execute_job_r207(job,root):return execute_job_r243(job,root)
-    def capabilities_r207():return base_capabilities()
+    def capabilities_r207():return list(dict.fromkeys([*base_capabilities(),SAR_CLOSURE_OPERATION]))
     base.execute_step=execute_step_r243
     base.request_json=request_json_r243
     base.execute_job=execute_job_r207
     base.capabilities=capabilities_r207
     original_main=base.main
-    print('OMEGA Hybrid Link proof wrapper',VERSION,'· base',base.VERSION,'execution',base.CAPABILITY_REVISION,'proof',BASE_PROOF_EXTENSION,'→',PROOF_CLOSURE_REVISION,'motion',EXECUTION_MOTION_EXTENSION)
+    print('OMEGA Hybrid Link proof wrapper',VERSION,'· base',base.VERSION,'execution',base.CAPABILITY_REVISION,'proof',BASE_PROOF_EXTENSION,'→',PROOF_CLOSURE_REVISION,'motion',EXECUTION_MOTION_EXTENSION,'sar',SAR_CLOSURE_EXTENSION)
     print('Exact R141 semantic return fingerprint enabled; R243 lease/progress is liveness only. R125 remains sole CanonState admission authority.')
     original_main()
 
