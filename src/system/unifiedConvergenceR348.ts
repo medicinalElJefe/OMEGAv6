@@ -22,6 +22,23 @@ export const R348_SCENE_LAYERS=['World','Canon','Motion','Memory','Future','Evid
 export const R348_WOVEN_OPERATOR=['PARTITION','EXCHANGE_OR_TRANSFORM','INVARIANT_CARRY','SCAR_OR_RESIDUAL_CARRY','RECONTEXTUALIZE','PROVE']as const;
 export const R348_GOVERNANCE_OPERATOR=['PRUNE','TRANSLATE','PROVE']as const;
 
+
+export const R348_HISTORICAL_CORPUS_AUDIT={
+ source:'MASTER_CORPUS_AUDIT_REPORT.md',filesAudited:188,visibleMegabytes:463.7,
+ kinds:{workbook:52,image:37,pdf:37,csv:24,zip:12,svg:7,video:7,docx:3,other:3,html:3,text:1,json:1,tsv:1},
+ strongestConfirmed:'FRAMEWORK_MATERIALLY_INSTANTIATED_ACROSS_FILES_FORMATS_TABLES_SOFTWARE_AND_REPORTS',
+ strongestUnconfirmed:'UNIVERSAL_ONTOLOGY',
+ externalGate:'FREEZE_EQUATIONS_THEN_TEST_ONE_EXTERNAL_DATASET_AGAINST_STANDARD_BASELINES_WITH_DECLARED_PASS_FAIL'
+}as const;
+
+export const R348_SOFTWARE_LEDGER_CENSUS={
+ sources:['OMEGA_ONE_SYSTEM_FULL_SOFTWARE_MENU_LEDGER.xlsx','OMEGA_ALL_SOFTWARE_61917364224D_FULL_BUILD_v22.xlsx'],
+ systems:100,families:24,masterMenus:12,menuControls:36,capabilities:18,routes:44,
+ historicalGridRows:27648,
+ invariant:'ONE_FIELD_ONE_PACKET_ONE_CONTINUITY_LAW',
+ boundary:'Inventory counts are recovery/non-regression telemetry, not physical dimensions, scientific validation, or a reason to execute every capability.'
+}as const;
+
 export const DEWEY_STAGE_POLICY_R348={
  source:'Dewey_Full_Corpus_Recalibrated_Direct_Rerun.xlsx',
  sourceSha256:'3b5eac2b4057d2b0c0e5087ad0c51214a08fcdbae1e822e5a8d333292ca3f4e7',
@@ -108,6 +125,8 @@ export function compileUnifiedConvergenceR348(record:any,status:any=null,observa
   deweyStagePolicy:DEWEY_STAGE_POLICY_R348,
   sourceManifest:OMEGA_R348_SOURCE_MANIFEST,
   sourceBindings:R348_CORPUS_BINDINGS,
+  historicalCorpusAudit:R348_HISTORICAL_CORPUS_AUDIT,
+  softwareLedgerCensus:R348_SOFTWARE_LEDGER_CENSUS,
   physicalEvidence:{admitted:admittedPhysical.length,held:physicalHeld.length,observations:admittedPhysical},
   runtime:{returned:runtimeReturned,state:runtimeState},
   truthBoundary:[
