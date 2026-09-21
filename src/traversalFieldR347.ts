@@ -18,7 +18,7 @@ export const TRAVERSAL_VISUAL_GRAMMAR_R347={
  intensity:'model light intensity/action proxy unless unit-bound physical energy is supplied',
  logicalTime:'canonical route step; never labeled event time',
  eventTime:'only externally bound timestamps',
- futureSupport:'existing unifiedCoherence channel for candidate readability; admitted-next relation remains canonical; never probability without calibrated probability authority'
+ futureSupport:'existing unifiedCoherence channel for candidate readability; admitted-next relation remains canonical; it is not a calibrated probability; never probability without calibrated probability authority'
 }as const;
 
 const cl=(n:number)=>Math.max(0,Math.min(1,Number.isFinite(n)?n:0));
