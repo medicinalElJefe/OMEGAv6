@@ -71,6 +71,14 @@ The context packet remains:
 
 `(domain, codomain, units, frame, time, boundary, uncertainty, provenance)`
 
+## Executable Dewey reference kernel
+
+R348 includes an equation-faithful TypeScript port of the supplied deterministic v2 reference operators. It binds the exact supplied ZIP SHA-256 and executes **B0 and B3 directly** from an explicit fitted transform packet. B4 motion, B5 parent and B6 routing execute only when the requested stage is explicitly validated and an admissible parent vector is supplied. Otherwise the runtime falls back to B3 rather than fabricating missing parent authority.
+
+The kernel preserves the supplied constants and equations for geometry, motion, parent relation, STAY/TURN/ESCALATE gating and the separate four-axis base-12 gravity-motion address. The latter remains a **diagnostic model address**; its motion-energy term is model activity, not joules or measured physical energy. A sealed fixture generated from the supplied Python reference implementation is reproduced in `tests/r348-dewey-reference-kernel.mts`.
+
+No fitted transform or source vector is invented. If the current Canon packet does not carry an explicit `deweyReferencePacket`, the computation reports **HELD / REFERENCE_PACKET_REQUIRED**.
+
 ## Historical corpus-wide census
 
 The connected Drive master audit covers **188 artifacts / 463.7 MB visible corpus** across workbooks, CSV, PDF, images, ZIPs, SVG, video, documents, HTML, JSON, TSV and text. Its own synthesis is preserved as an evidence ceiling: the framework is materially instantiated across files, tables, software and reports; universal ontology remains unconfirmed and requires external testing.
