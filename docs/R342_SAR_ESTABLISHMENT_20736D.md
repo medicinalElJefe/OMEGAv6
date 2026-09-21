@@ -6,9 +6,13 @@ R342 turns the SAR workstation from a panel-oriented renderer into a proof-gover
 
 `12 evidence states × 12 transforms × 12 proof states × 12 software surfaces = 20,736 states`.
 
+**20,736D is the canonical atlas/address-resolution label here, not a claim of 20,736 physical spacetime dimensions.**
+
 Dewey/Woven calculus governs **evidence routing, continuity, scar/residual carry, contradiction retention, falsification, and promotion**. Sentinel-1 product definitions and returned measurement evidence govern SAR physics.
 
 Hard boundary: **NO NEW PHYSICAL PRIMITIVE**.
+
+R342 also binds the complete 38-mode canon as an operational governance inventory. Those modes may change pruning, proof, continuity/scar carry, comparison, forecasting and admissibility; they may not replace mission physics or rescue a failed physical evidence gate.
 
 ## 20,736D axes
 
