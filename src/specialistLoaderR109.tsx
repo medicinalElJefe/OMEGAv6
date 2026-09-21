@@ -7,6 +7,7 @@ const LOADERS={
  HybridLinkR117:()=>import('./HybridLinkR32'),
  HybridMissionControlR8:()=>import('./HybridMissionControlR8'),
  OmegaWorkspaceCockpitR18:()=>import('./OmegaWorkspaceCockpitR18'),
+ TraversalCockpitR347:()=>import('./TraversalCockpitR347'),
  ArchiveGovernanceControl:()=>import('./ArchiveGovernanceControl'),
  UniversalQualityControl:()=>import('./UniversalQualityControl'),
  SystemAtlasControl:()=>import('./SystemAtlasControl'),
@@ -31,6 +32,7 @@ const LOADERS={
 
 export const HybridMissionControlR109=lazy(LOADERS.HybridLinkR117);
 export const OmegaWorkspaceCockpitR109=lazy(LOADERS.OmegaWorkspaceCockpitR18);
+export const TraversalCockpitR347R109=lazy(LOADERS.TraversalCockpitR347);
 export const ArchiveGovernanceR109=lazy(LOADERS.ArchiveGovernanceControl);
 export const UniversalQualityR109=lazy(LOADERS.UniversalQualityControl);
 export const SystemAtlasR109=lazy(LOADERS.SystemAtlasControl);
@@ -64,7 +66,7 @@ export const RETAINED_DEEP_SPECIALIST_LOADERS_R109={
 
 const ROUTE_LOADERS:Record<string,readonly (()=>Promise<any>)[]>={
  'Hybrid Link':[LOADERS.HybridLinkR117],
- Workspace:[LOADERS.OmegaWorkspaceCockpitR18],Cockpit:[LOADERS.OmegaWorkspaceCockpitR18],
+ Workspace:[LOADERS.OmegaWorkspaceCockpitR18],Cockpit:[LOADERS.TraversalCockpitR347],
  'Archive Census':[LOADERS.ArchiveGovernanceControl],'Archive Operators':[LOADERS.ArchiveGovernanceControl],
  'Quality Compiler':[LOADERS.UniversalQualityControl],Validation:[LOADERS.UniversalQualityControl],
  'System Atlas':[LOADERS.SystemAtlasControl],'Control Matrix':[LOADERS.SystemAtlasControl],
