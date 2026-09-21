@@ -22,9 +22,10 @@ assert.ok(!derivation.includes('amplitudeDb:r.nativeIntensity'),'native DN must 
 assert.ok(!derivation.includes('coherence:r.nativeIntensity'),'native intensity must never be relabeled coherence');
 assert.ok(!derivation.includes('phaseRad:r.nativeIntensity'),'native intensity must never be relabeled phase');
 
-for(const token of ['scarBurden?:number[]','proofCoverage?:number[]','derivationR336?:','if(view===\'AMPLITUDE\'){v=at(r.amplitudeDb,i)','v=at(r.nativeIntensity,i,r.validMask)','if(view===\'SCAR_UNCERTAINTY\')','if(view===\'PROOF\')'])
+for(const token of ['scarBurden?:number[]','proofCoverage?:number[]','derivationR336?:','beta0?:number[]','sigma0?:number[]','gamma0?:number[]','terrainFlattenedGamma0?:number[]','if(view===\'AMPLITUDE\'){const power=','v=at(r.amplitudeDb,i)','v=at(r.nativeIntensity,i,r.validMask)','if(view===\'SCAR_UNCERTAINTY\')','if(view===\'PROOF\')'])
  assert.ok(raster.includes(token),`R336 raster integration missing ${token}`);
-assert.ok(raster.includes('no native DN is promoted into calibrated sigma0/gamma0, phase, coherence, deformation, elevation, polarimetry, multi-band, or time-stack measurements'),'R336 raster truth boundary must remain explicit');
+assert.ok(raster.includes("r.terrainFlattenedGamma0?.length?r.terrainFlattenedGamma0:r.gamma0?.length?r.gamma0:r.sigma0?.length?r.sigma0:r.beta0?.length?r.beta0"),'AMPLITUDE hierarchy must prefer materialized terrain/calibrated power before amplitudeDb/native DN');
+assert.ok(raster.includes('Missing arrays/pixels remain missing as NaN/masked')&&raster.includes('no display path promotes an absent physical correction'),'R336/R343 raster truth boundary must remain explicit and fail closed');
 
 for(const token of ['R336 DERIVATION GRAPH','data-r336-state','resolveAllSarFieldsR336','materializeSarSafeDerivationsR336','currentResult?.interpretation','currentResult?.evidenceClass'])
  assert.ok(ui.includes(token),`R336 analytical surface missing ${token}`);
