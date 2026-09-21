@@ -24,7 +24,7 @@ for(const token of[
  'DEM-derived scattering-area normalization factor',
  "'PRE_UNWRAP'|'POST_UNWRAP'",
  'correctedLosBound',
- 'physicalClosureR343'
+ 'physicalClosureR343',
  'materializeLosR343',
  'applyDisplacementCorrectionsR343',
  'invertLosRasterStackTo3DR343',
