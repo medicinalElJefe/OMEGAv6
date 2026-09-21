@@ -52,6 +52,12 @@ for(const token of[
  "onPointerDown={pointerDown}",
  "onWheel={wheel}",
  "setZoom(v=>Math.max(.55,Math.min(2.2"
+, "const RESOLUTIONS=[12,144,1728,20736,248832] as const"
+, "activeResolutionIndex"
+, "compression=1-.48*n.burden"
+, "const cuts=Math.max(1,Math.round(1+n.contradiction*5))"
+, "persistence=.18+.82*n.scar"
+, "rate=.35+1.65*(n?.motionRate??0)"
 ])assert.ok(cockpit.includes(token),'R347 human cockpit missing '+token);
 
 assert.ok(studio.includes("import TraversalFieldCockpitR347 from './TraversalFieldCockpitR347'"),'R347 must be primary traversal component');
