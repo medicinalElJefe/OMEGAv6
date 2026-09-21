@@ -1,6 +1,6 @@
 import{useMemo}from'react';
 import{Activity,Boxes,Clock3,Database,GitBranch,ShieldCheck,Waypoints}from'lucide-react';
-import{compileUnifiedConvergenceR348,DEWEY_STAGE_POLICY_R348,FRAME_AUTHORITY_R348,R348_CORPUS_BINDINGS,R348_MACHINE_LAYERS}from'./system/unifiedConvergenceR348';
+import{compileUnifiedConvergenceR348,DEWEY_STAGE_POLICY_R348,FRAME_AUTHORITY_R348,R348_CORPUS_BINDINGS,R348_HISTORICAL_CORPUS_AUDIT,R348_MACHINE_LAYERS,R348_SOFTWARE_LEDGER_CENSUS}from'./system/unifiedConvergenceR348';
 import'./omegaUnifiedConvergenceR348.css';
 
 type Props={record:any;status:any};
@@ -28,6 +28,8 @@ export default function OmegaUnifiedConvergenceR348({record,status}:Props){
     <strong>{layer.state}</strong>
    </article>)}
   </div>
+
+  <div className='r348-census'><article><Database/><span><small>HISTORICAL CORPUS AUDIT</small><b>{R348_HISTORICAL_CORPUS_AUDIT.filesAudited} artifacts · {R348_HISTORICAL_CORPUS_AUDIT.visibleMegabytes} MB</b><em>material instantiation confirmed · universal ontology unconfirmed</em></span></article><article><Boxes/><span><small>ONE-SYSTEM LEDGER</small><b>{R348_SOFTWARE_LEDGER_CENSUS.systems} systems · {R348_SOFTWARE_LEDGER_CENSUS.families} families</b><em>{R348_SOFTWARE_LEDGER_CENSUS.masterMenus} menus · {R348_SOFTWARE_LEDGER_CENSUS.routes} routes · inventory ≠ execution</em></span></article></div>
 
   <div className='r348-readout'>
    <article><Waypoints/><span><small>CONTINUITY CΩ</small><b>{fmt(metrics.continuity)}</b><em>structural persistence</em></span></article>
