@@ -22,7 +22,7 @@ for(const token of[
  'matrixRank3',
  'applySarHostClosurePreviewR344',
  'sourceArtifactSha256',
- 'GEOMETRY_MATRIX_RANK',
+ 'rank>=3',
  'rank-independent look vectors'
 ])assert.ok(receipt.includes(token),'R344 receipt contract missing '+token);
 
@@ -74,5 +74,7 @@ assert.equal(base.master.productId!==base.slave.productId,true);
 assert.ok(Math.abs(base.coregistration.azimuthResidualSamples)<=.001);
 assert.ok(Math.abs(base.coregistration.rangeResidualSamples)<=base.coregistration.rangeThresholdSamples);
 assert.equal(base.independentLos.length,3);
+assert.equal(pkg.scripts['test:r344'],'node tests/r344-sar-host-closure-invariants.mjs');
+assert.ok(pkg.scripts['check:static'].includes('npm run test:r344'),'R344 must participate in the full release gate');
 
 console.log('R344 SAR HOST CLOSURE PASS · source/annotation/orbit/DEM hashes · full-resolution TOPS residual receipt · interferogram/coherence · topographic phase proof · unwrap closure · corrections · metric LOS · rank-3 deformation · hash-linked preview import');
