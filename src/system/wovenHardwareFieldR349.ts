@@ -56,7 +56,8 @@ export function evolveHardwareFieldR349(field:TypedFieldR349,{orientation=0,tran
  }
  let scarDelta=0;
  for(let i=0;i<R349_RESOLUTION;i++){const d=Math.abs(next[i]-field.invariant[i]);scar[i]=cl(scar[i]+d);motion[i]=cl(Math.max(motion[i],d));scarDelta+=d}
- const after=total(next),residual=Math.abs(before-after),tolerance=Math.max(1e-5,Math.abs(before)*1e-6);\n const evolved={...field,invariant:next,scar,motion,orientation:new Int8Array(R349_RESOLUTION).fill(s)} as TypedFieldR349;
+ const after=total(next),residual=Math.abs(before-after),tolerance=Math.max(1e-5,Math.abs(before)*1e-6);
+ const evolved={...field,invariant:next,scar,motion,orientation:new Int8Array(R349_RESOLUTION).fill(s)} as TypedFieldR349;
  return{schema:'OMEGA_HARDWARE_WOVEN_EVOLUTION_R349' as const,operator:R349_OPERATOR,field:evolved,orientation:s,transportRate:rate,invariantBefore:before,invariantAfter:after,invariantResidual:residual,invariantTolerance:tolerance,scarDelta,proof:{invariantStatus:residual<=tolerance?'PASS':'FAIL',softwareResidualOnly:true,fullAddressCoverage:true,transportTopology:'ADDRESS_NEIGHBOR_FALLBACK',recoverableSourceRetained:true},boundary:R349_BOUNDARY};
 }
 
