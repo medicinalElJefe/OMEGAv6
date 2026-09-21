@@ -35,6 +35,17 @@ export type TraversalFieldNodeR347={
  eventTime:string|null;physicalEnergy:{value:number;unit:string}|null;energyAuthority:'MODEL_PROXY'|'UNIT_BOUND_PHYSICAL';
 };
 
+export type TraversalObservationPacketR347={
+ address:number;sourceId:string;eventTime:string;receivedAt:string;frame:string;provenance:string[];
+ physicalEnergy?:{value:number;unit:string};
+};
+function validIso(v:string){return Number.isFinite(Date.parse(v))}
+export function bindTraversalObservationR347(node:TraversalFieldNodeR347,packet?:TraversalObservationPacketR347|null):TraversalFieldNodeR347{
+ if(!packet||packet.address!==node.address||!packet.sourceId||!packet.frame||!Array.isArray(packet.provenance)||!packet.provenance.length||!validIso(packet.eventTime)||!validIso(packet.receivedAt))return node;
+ const pe=packet.physicalEnergy,physicalEnergy=pe&&Number.isFinite(pe.value)&&pe.unit.trim()?{value:Number(pe.value),unit:pe.unit.trim()}:null;
+ return{...node,eventTime:new Date(packet.eventTime).toISOString(),physicalEnergy,energyAuthority:physicalEnergy?'UNIT_BOUND_PHYSICAL':'MODEL_PROXY'};
+}
+
 export type TraversalFutureR347={
  relation:string;address:number;stateId:number;support:number;x:number;y:number;z:number;decision:string;
  probability:null;truthBoundary:string;
@@ -63,13 +74,13 @@ export function traversalFuturesR347(address:number):TraversalFutureR347[]{
  return rows.sort((a,b)=>b.support-a.support);
 }
 
-export function compileTraversalFieldR347(startAddress:number,depth=48){
- const route=compileSourceTraversal(startAddress,depth);
- const nodes=route.path.map((x:any,i:number)=>traversalNodeR347(x.address,i));
+export function compileTraversalFieldR347(startAddress:number,depth=48,observations:TraversalObservationPacketR347[]=[]){
+ const route=compileSourceTraversal(startAddress,depth),obs=new Map(observations.map(x=>[x.address,x]));
+ const nodes=route.path.map((x:any,i:number)=>bindTraversalObservationR347(traversalNodeR347(x.address,i),obs.get(x.address)));
  const futures=traversalFuturesR347(startAddress);
  return{schema:TRAVERSAL_FIELD_SCHEMA_R347,startAddress,nodes,futures,closed:route.closed,routeBoundary:route.boundary,
-  time:{logicalAuthority:'ROUTE_STEP',eventTimeBound:false,renderClockAuthority:'DISPLAY_ONLY'},
-  energy:{authority:'MODEL_PROXY',label:'MODEL INTENSITY',physicalEnergyBound:false},
+  time:{logicalAuthority:'ROUTE_STEP',eventTimeBound:nodes.some(x=>!!x.eventTime),renderClockAuthority:'DISPLAY_ONLY'},
+  energy:{authority:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')?'UNIT_BOUND_PHYSICAL':'MODEL_PROXY',label:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')?'PHYSICAL ENERGY / MODEL INTENSITY':'MODEL INTENSITY',physicalEnergyBound:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')},
   grammar:TRAVERSAL_VISUAL_GRAMMAR_R347,
   truthBoundary:'R347 visual geometry is a deterministic projection of canonical OMEGA packet state. Logical route time is not wall-clock/event time. Model intensity/action proxy is not physical energy. Future support is not probability. External unit-bound observations may be added only with explicit provenance, units, frame and event time.'};
 }
