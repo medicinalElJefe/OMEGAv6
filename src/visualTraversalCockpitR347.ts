@@ -40,4 +40,15 @@ export function lensScoreSetR347(address:number,cal:VisualCalibration){
  return lenses.map(lens=>({lens,score:computeLensScore(lens,input),descriptor:LENS_CALCULUS[lens]}));
 }
 export function scaleReferenceR347(index:number){return SCALE_DOMAINS[Math.max(0,Math.min(SCALE_DOMAINS.length-1,index|0))]}
+
+export type R347ScalarTruth='OBSERVED'|'COMPUTED'|'FORECAST'|'HELD';
+export type R347ScalarInput={id:string;label:string;value?:number|null;unit?:string|null;source?:string|null;observedAt?:string|null;truth:R347ScalarTruth;uncertainty?:number|null};
+export function admitScalarChannelR347(x:R347ScalarInput){
+ const finite=typeof x.value==='number'&&Number.isFinite(x.value),unit=String(x.unit||'').trim(),source=String(x.source||'').trim(),at=String(x.observedAt||'').trim(),timestamp=at&&Number.isFinite(Date.parse(at));
+ if(x.truth==='OBSERVED'&&(!finite||!unit||!source||!timestamp))return{...x,value:finite?x.value:null,truth:'HELD' as const,reason:'OBSERVED_SCALAR_REQUIRES_VALUE_UNIT_SOURCE_TIMESTAMP'};
+ if(x.truth!=='HELD'&&!finite)return{...x,value:null,truth:'HELD' as const,reason:'FINITE_VALUE_REQUIRED'};
+ return{...x,reason:'ADMITTED',uncertainty:typeof x.uncertainty==='number'&&Number.isFinite(x.uncertainty)?Math.max(0,x.uncertainty):null};
+}
+export const R347_UNIT_POLICY='A physical quantity enters the observed layer only with a finite value, explicit unit, source identity and observation timestamp. A label such as energy, force, power, velocity or temperature never supplies physical authority by itself.';
+
 export const R347_TRUTH_BOUNDARY='R347 changes visual organization, projection and interaction only. Existing source, CanonState, R125 admission, R342/R344 SAR gates, Hybrid authority and deployment authority remain unchanged. 20,736 is an address space, route steps are model time, Earth timestamps are observation time, and physical energy remains UNBOUND unless a unit-bearing source establishes it.';
