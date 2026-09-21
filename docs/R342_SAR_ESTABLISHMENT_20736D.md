@@ -112,10 +112,12 @@ R342 records the Sentinel-1 Product Specification and S1 Processing documentatio
 ## Software contract
 
 - `src/sarPairDerivationR341.ts` — exact-grid pair candidate calculations; explicit grid/coreg separation.
-- `src/sarEstablishmentR342.ts` — 20,736D state address system, establishment ladder, calibration kernel, residual phase→LOS kernel, rank-3 LOS inversion.
+- `src/sarEstablishmentR342.ts` — 20,736D state address system, full 38-mode governance inventory, establishment ladder, calibration kernel, residual phase→LOS kernel, rank-3 LOS inversion.
+- `src/sarProofLedgerR342.ts` — hash-bound Dewey/RSC proof receipts with parent/source continuity, cycle rejection, scar carry and explicit scar-resolution proof.
 - `src/SARLiveTruthR285.tsx` — live established-count and next-held-gate projection.
 - `tests/r341-sar-pair-derivation-invariants.mjs` — R341.1 estimator/coreg truth proof.
-- `tests/r342-sar-establishment-20736d-invariants.mjs` — 12⁴ address round-trip and hard physical boundary proof.
+- `tests/r342-sar-establishment-20736d-invariants.mjs` — 12⁴ address round-trip, 38-mode inventory, and hard physical boundary proof.
+- `tests/r342-sar-proof-ledger-invariants.mjs` — executable lineage/scar/hash continuity proof.
 
 ## Promotion rule
 
