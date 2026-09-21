@@ -27,11 +27,13 @@ assert.ok(r241.includes('R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHAR
 assert.ok(r241.includes('R313_PROOF_SHARDS=8 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=270'),'R313 safe-control sweep must run as eight deterministic shards in bounded four-way waves');
 assert.ok(r286ShardRunner.includes('R286_SHARD_COUNT="$shards" R286_SHARD_INDEX="$i"'),'R286 shard runner must bind every child to an explicit partition identity');
 assert.ok(r286ShardRunner.includes('for ((wave_start=0; wave_start<shards; wave_start+=max_parallel))'),'R286 shard runner must cover the complete shard set in bounded waves');
-assert.ok(r286ShardRunner.includes('wait "${pids[$i]}"'),'R286 shard runner must recombine only after every child returns');
+assert.ok(r286ShardRunner.includes('for ((j=0;j<${#pids[@]};j++)); do')&&r286ShardRunner.includes('if wait "${pids[$j]}"'),'R286 shard runner must recombine every child in each bounded wave before advancing');
 assert.ok(r313ShardRunner.includes('R313_SHARD_COUNT="$shards" R313_SHARD_INDEX="$i"'),'R313 shard runner must bind every child to an explicit partition identity');
 assert.ok(r313ShardRunner.includes('for ((wave_start=0; wave_start<shards; wave_start+=max_parallel))'),'R313 shard runner must cover the complete shard set in bounded waves');
-assert.ok(r313ShardRunner.includes('wait "${pids[$i]}"'),'R313 shard runner must recombine only after every child returns');
+assert.ok(r313ShardRunner.includes('for ((j=0;j<${#pids[@]};j++)); do')&&r313ShardRunner.includes('if wait "${pids[$j]}"'),'R313 shard runner must recombine every child in each bounded wave before advancing');
+assert.ok(r286ShardRunner.includes('status=1')&&r286ShardRunner.includes('if [ "$status" -ne 0 ]'),'R286 partition recombination must remain fail-closed if any shard fails');
 assert.ok(r286Browser.includes('profileIndex*expected.length+routeIndex'),'R286 partition law must deterministically cover profile × route address space');
+assert.ok(r313ShardRunner.includes('status=1')&&r313ShardRunner.includes('if [ "$status" -ne 0 ]'),'R313 partition recombination must remain fail-closed if any shard fails');
 assert.ok(r313Browser.includes('profileIndex*surfaces.length+surfaceIndex'),'R313 partition law must deterministically cover profile × route address space');
 
 assert.ok(runner.includes('reusing healthy shared preview'),'R241 runner must reuse the already healthy preview');
