@@ -78,6 +78,23 @@ for(const token of['Temperature','31.4 °C','Wind','18.7 km/h','Seismic events',
 if(liveText.includes('Temperature\n31.4 °C · HELD')||liveText.includes('Wind\n18.7 km/h · HELD')||liveText.includes('Kp index\n3.7 index · HELD'))throw new Error('R347 source-complete mocked scalar was incorrectly held');
 if(!liveText.includes('does not infer causation'))throw new Error('R347 non-causal correlation boundary missing');
 
+const correlation=page.locator('.r347-correlation-frame');
+if(await correlation.count()!==1)throw new Error('R347 correlation frame missing');
+const correlationText=await correlation.innerText();
+for(const token of['HUMAN CORRELATION FRAME','STATE','SPACE','TIME','ROUTE','CONTEXT','MODEL ACTIVITY','100%'])if(!correlationText.includes(token))throw new Error('R347 human correlation frame missing '+token);
+if(!correlationText.includes('not joules, watts or physical flux'))throw new Error('R347 model activity was not explicitly separated from physical energy');
+
+const clocks=page.locator('.r347-source-clocks article');
+if(await clocks.count()!==4)throw new Error(`R347 expected 4 independent source clocks, saw ${await clocks.count()}`);
+const clocksText=await page.locator('.r347-source-clocks').innerText();
+for(const token of['Weather observation','Kp observation','USGS seismic snapshot','EONET event snapshot','OBSERVATION','SNAPSHOT VERIFICATION'])if(!clocksText.includes(token))throw new Error('R347 source-clock rail missing '+token);
+
+const quantities=page.locator('.r347-quantity-registry');
+if(await quantities.count()!==1)throw new Error('R347 physical-quantity registry missing');
+const quantityText=await quantities.innerText();
+for(const token of['MODEL ACTIVITY','ENERGY','POWER','FLUX','VELOCITY','FIELD_STRENGTH','HELD UNTIL BOUND'])if(!quantityText.includes(token))throw new Error('R347 quantity authority missing '+token);
+
+
 const proofButton=taskButtons.filter({hasText:'Proof'}).first();
 await proofButton.click();
 if(!(await proofButton.getAttribute('class')||'').includes('active'))throw new Error('R347 Proof task view did not activate');
@@ -108,9 +125,18 @@ await page.getByRole('button',{name:/Pause route/}).click();
 
 const noOverflow=await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+24);
 if(!noOverflow)throw new Error('R347 desktop cockpit introduced material horizontal viewport overflow');
+
+await page.setViewportSize({width:390,height:844});
+await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+const mobileBox=await canvas.boundingBox();
+if(!mobileBox||mobileBox.width<340||mobileBox.height<450)throw new Error(`R347 mobile stage too small ${JSON.stringify(mobileBox)}`);
+const mobileNoOverflow=await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+16);
+if(!mobileNoOverflow)throw new Error('R347 mobile cockpit introduced horizontal viewport overflow');
+if(await page.locator('.r347-correlation-frame').count()!==1||await page.locator('.r347-quantity-registry').count()!==1)throw new Error('R347 mobile reflow lost correlation/quantity surfaces');
+
 if(mutations.length)throw new Error('R347 read-only cockpit emitted mutating network requests '+JSON.stringify(mutations));
 if(pageErrors.length)throw new Error('R347 browser page errors '+pageErrors.join(' | '));
 
-console.log('R347 BROWSER PASS · current R307 Cockpit route mounts deferred R347 specialist · 20,736 calibrated canvas visible · task views operable · drag camera does not mutate state · wheel semantic zoom reaches DETAIL · model-route state selection/playback works · unit/source/time admitted live scalars visible · non-causal correlation boundary present · no mutating requests · no page errors');
+console.log('R347 BROWSER PASS · current R307 Cockpit route mounts deferred R347 specialist · 20,736 calibrated canvas visible · task views operable · drag camera does not mutate state · wheel semantic zoom reaches DETAIL · model-route state selection/playback works · unit/source/time admitted live scalars visible · source-specific clocks + correlation frame + physical quantity authority visible · desktop/mobile stage usable without overflow · non-causal correlation boundary present · no mutating requests · no page errors');
 await context.close();
 await browser.close();
