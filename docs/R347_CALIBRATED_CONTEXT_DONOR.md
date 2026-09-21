@@ -138,3 +138,8 @@ R347 is promotable only after:
 
 
 > Preserved from PR #747 as a donor contract. Canonical R347 traversal authority remains the human-correlated field; R348 may consume these calibration/live-context functions without creating a second state authority.
+
+
+## Collision resolution
+
+PR #747 is closed as a preserved donor after its strongest calibrated/live-context contracts were copied into the canonical R347/R348 path. This removes the duplicate R347 release identity without deleting the donor branch or its historical implementation.
