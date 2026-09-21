@@ -15,11 +15,15 @@ for(const token of[
  'FULL_3D_DEFORMATION',
  'ADDITIONAL_VIEWING_GEOMETRY_REQUIRED',
  'PRUNE → TRANSLATE → PROVE → INVARIANT_CARRY → SCAR_CARRY → RECONTEXTUALIZE',
- 'cannot manufacture Sentinel-1 measurements'
+ 'cannot manufacture Sentinel-1 measurements',
+ 'DEPENDENCIES',
+ "op:'SAR_R344_CLOSURE'",
+ 'authorizationRequired:true'
 ])assert.ok(frontier.includes(token),'R346 frontier contract missing '+token);
 
 assert.ok(frontier.includes("Number(receipt?.independentLos?.length||0)>=3"),'R346 must not admit full 3-D without independent viewing geometry');
-assert.ok(frontier.includes("python scripts/sar_r344_host_closure.py --execute"),'R346 must produce an executable host-closure next action');
+assert.ok(frontier.includes("blockedBy=DEPENDENCIES[layer.id].filter"),'R346 must derive admissibility from an explicit closure dependency DAG');
+assert.ok(frontier.includes("Queue governed R345 SAR_R344_CLOSURE"),'R346 must route host work through the governed R345 operation rather than invent a new executor');
 assert.ok(frontier.includes("informationGain"),'R346 must rank closure actions instead of presenting an unordered held list');
 
 for(const token of[
