@@ -37,14 +37,14 @@ export type TraversalFieldNodeR347={
 };
 
 export type TraversalObservationPacketR347={
- address:number;sourceId:string;eventTime:string;receivedAt:string;frame:string;provenance:string[];
+ address:number;sourceId:string;eventTime:string;receivedAt:string;frame:string;provenance:string[];evidenceAuthority:'RETURNED_EVIDENCE'|'HOST_PROOF';evidenceHash:string;
  physicalEnergy?:{value:number;unit:string};
  physicalPosition?:{x:number;y:number;z:number;unit:string;frame:string};
 };
 function validIso(v:string){return Number.isFinite(Date.parse(v))}
 export function bindTraversalObservationR347(node:TraversalFieldNodeR347,packet?:TraversalObservationPacketR347|null):TraversalFieldNodeR347{
- if(!packet||packet.address!==node.address||!packet.sourceId||!packet.frame||!Array.isArray(packet.provenance)||!packet.provenance.length||!validIso(packet.eventTime)||!validIso(packet.receivedAt))return node;
- const pe=packet.physicalEnergy,physicalEnergy=pe&&Number.isFinite(pe.value)&&pe.unit.trim()?{value:Number(pe.value),unit:pe.unit.trim()}:null,pp=packet.physicalPosition,physicalPosition=pp&&[pp.x,pp.y,pp.z].every(Number.isFinite)&&pp.unit.trim()&&pp.frame.trim()?{x:Number(pp.x),y:Number(pp.y),z:Number(pp.z),unit:pp.unit.trim(),frame:pp.frame.trim()}:null;
+ if(!packet||packet.address!==node.address||!packet.sourceId||!packet.frame||!Array.isArray(packet.provenance)||!packet.provenance.length||!['RETURNED_EVIDENCE','HOST_PROOF'].includes(packet.evidenceAuthority)||!/^[0-9a-f]{64}$/i.test(packet.evidenceHash)||!validIso(packet.eventTime)||!validIso(packet.receivedAt))return node;
+ const pe=packet.physicalEnergy,physicalEnergy=pe&&Number.isFinite(pe.value)&&pe.unit.trim()?{value:Number(pe.value),unit:pe.unit.trim()}:null,pp=packet.physicalPosition,physicalPosition=pp&&[pp.x,pp.y,pp.z].every(Number.isFinite)&&pp.unit.trim()&&pp.frame.trim()&&pp.frame.trim()===packet.frame.trim()?{x:Number(pp.x),y:Number(pp.y),z:Number(pp.z),unit:pp.unit.trim(),frame:pp.frame.trim()}:null;
  return{...node,eventTime:new Date(packet.eventTime).toISOString(),physicalEnergy,energyAuthority:physicalEnergy?'UNIT_BOUND_PHYSICAL':'MODEL_PROXY',physicalPosition,spaceAuthority:physicalPosition?'UNIT_BOUND_PHYSICAL_SPACE':'ATLAS_SPACE'};
 }
 
@@ -85,5 +85,5 @@ export function compileTraversalFieldR347(startAddress:number,depth=48,observati
   space:{authority:spaceCompatible?'UNIT_BOUND_PHYSICAL_SPACE':'ATLAS_SPACE',physicalPositionBound:spaceCompatible,frame:spaceCompatible?physicalPositions[0].frame:null,unit:spaceCompatible?physicalPositions[0].unit:null,mixedFrameHold:physicalPositions.length>0&&!spaceCompatible},
   energy:{authority:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')?'UNIT_BOUND_PHYSICAL':'MODEL_PROXY',label:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')?'PHYSICAL ENERGY / MODEL INTENSITY':'MODEL INTENSITY',physicalEnergyBound:nodes.some(x=>x.energyAuthority==='UNIT_BOUND_PHYSICAL')},
   grammar:TRAVERSAL_VISUAL_GRAMMAR_R347,
-  truthBoundary:'R347 visual geometry is a deterministic projection of canonical OMEGA packet state. Logical route time is not wall-clock/event time. Model intensity/action proxy is not physical energy. Future support is not probability. External unit-bound observations may add physical position or energy only with explicit provenance, units, frame and event time. Atlas position remains separate from physical position.'};
+  truthBoundary:'R347 visual geometry is a deterministic projection of canonical OMEGA packet state. Logical route time is not wall-clock/event time. Model intensity/action proxy is not physical energy. Future support is not probability. External unit-bound observations may add physical position or energy only with returned-evidence/host-proof authority, a SHA-256 evidence hash, explicit provenance, units, frame and event time. Atlas position remains separate from physical position.'};
 }
