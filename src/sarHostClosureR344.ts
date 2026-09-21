@@ -24,7 +24,7 @@ export type SarHostClosureReceiptR344={
  coregistration:{fullResolution:boolean;burstGeometryBound:boolean;method:string;resampler:string;azimuthResidualSamples:number;rangeResidualSamples:number;rangeThresholdSamples:number;proofArtifact:SarArtifactRefR344};
  radiometry?:{beta0?:SarArtifactRefR344;sigma0?:SarArtifactRefR344;gamma0?:SarArtifactRefR344;terrainFlattenedGamma0?:SarArtifactRefR344};
  interferogram?:SarArtifactRefR344;coherence?:SarArtifactRefR344;
- geometricPhase?:{flatEarthRemoved:boolean;topographicRemoved:boolean;artifact?:SarArtifactRefR344};
+ geometricPhase?:{flatEarthRemoved:boolean;topographicRemoved:boolean;correctedInterferogram:SarArtifactRefR344;proofArtifact:SarArtifactRefR344};
  unwrap?:{artifact:SarArtifactRefR344;mask:SarArtifactRefR344;closureRmsRad:number;residueCount:number;largestComponentPixels:number;validPixels:number};
  corrections?:{atmosphere?:SarArtifactRefR344;etad?:SarArtifactRefR344;other?:SarArtifactRefR344};
  los?:{artifact:SarArtifactRefR344;wavelengthM:number;signConvention:string;sign:1|-1;validPixels:number};
@@ -72,8 +72,8 @@ export function validateSarHostClosureR344(r:SarHostClosureReceiptR344):SarClosu
  gates.push(gate('TOPS_SUBPIXEL_COREGISTRATION',coregOk,'SUBPIXEL_COREGISTRATION_NOT_PROVEN',['full-resolution processor','burst geometry','azimuth residual <=0.001 sample','range residual <= declared threshold','proof artifact hash']));
  const ifgOk=coregOk&&artifact(r?.interferogram)&&artifact(r?.coherence);
  gates.push(gate('PHYSICAL_INTERFEROGRAM',ifgOk,'INTERFEROGRAM_ARTIFACTS_REQUIRED',['proved TOPS coregistration','interferogram artifact','coherence artifact']));
- const topoOk=ifgOk&&r?.geometricPhase?.flatEarthRemoved===true&&r?.geometricPhase?.topographicRemoved===true&&artifact(r?.geometricPhase?.artifact)&&artifact(r?.dem);
- gates.push(gate('GEOMETRIC_PHASE_REMOVAL',topoOk,'DEM_TOPOGRAPHIC_PHASE_PROOF_REQUIRED',['DEM artifact','flat-earth removal','topographic phase removal','phase-removal artifact']));
+ const topoOk=ifgOk&&r?.geometricPhase?.flatEarthRemoved===true&&r?.geometricPhase?.topographicRemoved===true&&artifact(r?.geometricPhase?.correctedInterferogram)&&artifact(r?.geometricPhase?.proofArtifact)&&artifact(r?.dem);
+ gates.push(gate('GEOMETRIC_PHASE_REMOVAL',topoOk,'DEM_TOPOGRAPHIC_PHASE_PROOF_REQUIRED',['DEM artifact','flat-earth removal','topographic phase removal','corrected interferogram artifact','phase-removal proof artifact']));
  const u=r?.unwrap,unwrapOk=topoOk&&!!u&&artifact(u.artifact)&&artifact(u.mask)&&finite(u.closureRmsRad)&&u.closureRmsRad<=.25&&finite(u.validPixels)&&u.validPixels>0&&finite(u.largestComponentPixels)&&u.largestComponentPixels>0;
  gates.push(gate('UNWRAP_CLOSURE',unwrapOk,'UNWRAP_CLOSURE_NOT_PROVEN',['unwrapped artifact','mask artifact','closure RMS <=0.25 rad','valid connected component']));
  const l=r?.los,losOk=unwrapOk&&!!l&&artifact(l.artifact)&&finite(l.wavelengthM)&&l.wavelengthM>0&&(l.sign===1||l.sign===-1)&&typeof l.signConvention==='string'&&l.signConvention.length>0&&finite(l.validPixels)&&l.validPixels>0;
@@ -94,7 +94,7 @@ export function applySarHostClosurePreviewR344(base:SarRasterFieldR283,r:SarHost
  if(state('RADIOMETRIC_BACKSCATTER')){if(previewArrayValid(p.beta0,n)&&linked('beta0',r.radiometry?.beta0?.sha256))out.beta0=p.beta0;if(previewArrayValid(p.sigma0,n)&&linked('sigma0',r.radiometry?.sigma0?.sha256))out.sigma0=p.sigma0;if(previewArrayValid(p.gamma0,n)&&linked('gamma0',r.radiometry?.gamma0?.sha256))out.gamma0=p.gamma0}
  if(state('TERRAIN_RADIOMETRY')&&previewArrayValid(p.terrainFlattenedGamma0,n)&&linked('terrainFlattenedGamma0',r.radiometry?.terrainFlattenedGamma0?.sha256))out.terrainFlattenedGamma0=p.terrainFlattenedGamma0;
  if(state('PHYSICAL_INTERFEROGRAM')){if(previewArrayValid(p.interferogramPhaseRad,n)&&linked('interferogramPhaseRad',r.interferogram?.sha256))out.interferogramPhaseRad=p.interferogramPhaseRad;if(previewArrayValid(p.coherence,n)&&linked('coherence',r.coherence?.sha256))out.coherence=p.coherence}
- if(state('GEOMETRIC_PHASE_REMOVAL')&&previewArrayValid(p.correctedInterferometricPhaseRad,n)&&linked('correctedInterferometricPhaseRad',r.geometricPhase?.artifact?.sha256))out.correctedInterferometricPhaseRad=p.correctedInterferometricPhaseRad;
+ if(state('GEOMETRIC_PHASE_REMOVAL')&&previewArrayValid(p.correctedInterferometricPhaseRad,n)&&linked('correctedInterferometricPhaseRad',r.geometricPhase?.correctedInterferogram.sha256))out.correctedInterferometricPhaseRad=p.correctedInterferometricPhaseRad;
  if(state('UNWRAP_CLOSURE')&&previewArrayValid(p.unwrappedPhaseRad,n)&&linked('unwrappedPhaseRad',r.unwrap?.artifact.sha256))out.unwrappedPhaseRad=p.unwrappedPhaseRad;
  if(state('METRIC_LOS')&&previewArrayValid(p.losDisplacementM,n)&&linked('losDisplacementM',r.los?.artifact.sha256))out.losDisplacementM=p.losDisplacementM;
  if(state('CORRECTION_LEDGER')&&previewArrayValid(p.correctedLosDisplacementM,n)&&linked('correctedLosDisplacementM',r.correctedLos?.sha256))out.correctedLosDisplacementM=p.correctedLosDisplacementM;
