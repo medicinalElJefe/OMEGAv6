@@ -40,7 +40,8 @@ for(const token of[
  'R346 closure frontier',
  'Next evidence-producing action:',
  'information gain',
- "item.sarSpecFields.join(', ')"
+ "item.sarSpecFields.join(', ')",
+ "item.blockedBy.join(', ')"
 ])assert.ok(live.includes(token),'R346 live workstation integration missing '+token);
 
 assert.ok(pkg.scripts['test:r346']?.includes('tests/r346-sar-closure-frontier-invariants.mjs'),'R346 proof must be registered');
