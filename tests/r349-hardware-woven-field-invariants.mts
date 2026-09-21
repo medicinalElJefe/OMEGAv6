@@ -1,0 +1,20 @@
+import assert from'node:assert/strict';
+import fs from'node:fs';
+import{addressFromPixelR349,compileCanonicalTypedFieldR349,compileHardwareExecutionPlanR349,evolveHardwareFieldR349,renderExactAddressFieldR349,repartitionInvariantR349,R349_RESOLUTION,R349_SIDE,R349_SCHEMA}from'../src/system/wovenHardwareFieldR349';
+
+const plan=compileHardwareExecutionPlanR349({logicalCores:8,deviceMemoryGB:8,devicePixelRatio:2,workerAvailable:true});
+assert.equal(plan.schema,R349_SCHEMA);assert.equal(plan.resolution,20736);assert.equal(plan.side,144);assert.equal(plan.workerCount,7);
+assert.equal(plan.partitions[0].start,0);assert.equal(plan.partitions.at(-1)?.endExclusive,R349_RESOLUTION);assert.equal(plan.partitions.reduce((n,p)=>n+p.count,0),R349_RESOLUTION);
+for(let i=1;i<plan.partitions.length;i++)assert.equal(plan.partitions[i-1].endExclusive,plan.partitions[i].start);
+const sampler=(a:number)=>({continuity:(a%144)/143,plasticity:(a%12)/11,burden:((a>>1)%12)/11,contradiction:((a>>2)%12)/11,scar:0,evidence:.75,invariantCarry:.25+(a%17)/68,motionRate:(a%9)/8,support:.5,orientation:1 as const});
+const source=compileCanonicalTypedFieldR349(0,sampler);
+for(const key of['continuity','plasticity','burden','contradiction','scar','evidence','invariant','motion','support']as const)assert.equal(source[key].length,R349_RESOLUTION);
+assert.equal(source.orientation.length,R349_RESOLUTION);assert.equal(source.knownMask.length,R349_RESOLUTION);assert.equal(source.knownMask[123],0x01ff);
+const evolved=evolveHardwareFieldR349(source,{orientation:1,transportRate:.125});assert.equal(evolved.field.invariant.length,R349_RESOLUTION);assert.equal(evolved.proof.fullAddressCoverage,true);assert.ok(evolved.invariantResidual<=Math.max(1e-5,Math.abs(evolved.invariantBefore)*1e-6));
+const projected=repartitionInvariantR349(evolved.field,1728);assert.equal(projected.field.length,1728);assert.ok(projected.invariantResidual<=Math.max(1e-5,Math.abs(projected.invariantBefore)*1e-6));
+const render=renderExactAddressFieldR349(evolved.field,'COMPOSITE');assert.equal(render.width,R349_SIDE);assert.equal(render.height,R349_SIDE);assert.equal(render.pixelCount,R349_RESOLUTION);assert.equal(render.rgba.length,R349_RESOLUTION*4);assert.match(render.checksum,/^[0-9a-f]{8}$/);assert.equal(render.physicalImageClaimed,false);
+assert.equal(addressFromPixelR349(0,0),0);assert.equal(addressFromPixelR349(143,143),20735);assert.equal(addressFromPixelR349(12,34),34*144+12);
+const worker=fs.readFileSync('src/system/wovenHardwareWorkerR349.ts','utf8'),surface=fs.readFileSync('src/OmegaHardwareFieldR349.tsx','utf8');
+for(const token of['new Worker(new URL','wovenHardwareWorkerR349.ts','deviceMemory','hardwareConcurrency','ImageData','144 by 144 canonical address field'])assert.ok(surface.includes(token),`R349 hardware surface missing ${token}`);
+for(const token of['compileCanonicalTypedFieldR349','evolveHardwareFieldR349','renderExactAddressFieldR349','postMessage'])assert.ok(worker.includes(token),`R349 worker missing ${token}`);
+console.log('R349 HARDWARE WOVEN FIELD PASS · 20,736 typed addresses · deterministic bounded hardware partitions · conservative Woven transport · scar/motion carry · declared-resolution repartition · exact 144×144 ImageData raster · Web Worker path + fallback · no new physical or authority claim');
