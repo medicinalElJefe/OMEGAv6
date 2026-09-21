@@ -7,6 +7,7 @@ type Lens='UNIFIED'|'SPACE'|'TIME'|'INTENSITY'|'CONTINUITY'|'SCAR'|'FUTURES'|'PR
 type Props={variant:string;address:number;onAddress:(n:number)=>void;observations?:TraversalObservationPacketR347[]};
 const LENSES:Lens[]=['UNIFIED','SPACE','TIME','INTENSITY','CONTINUITY','SCAR','FUTURES','PROOF'];
 const RESOLUTIONS=[12,144,1728,20736,248832] as const;
+const EMPTY_OBSERVATIONS:TraversalObservationPacketR347[]=[];
 const clamp=(n:number,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const fmt=(n:number,d=3)=>Number.isFinite(n)?n.toFixed(d):'—';
 
@@ -26,7 +27,7 @@ function lensRadius(lens:Lens,n:TraversalFieldNodeR347){
  return 3+5*n.support;
 }
 
-export default function TraversalFieldCockpitR347({variant,address,onAddress,observations=[]}:Props){
+export default function TraversalFieldCockpitR347({variant,address,onAddress,observations=EMPTY_OBSERVATIONS}:Props){
  const canvas=useRef<HTMLCanvasElement|null>(null),clock=useRef({last:0,t:0}),camera=useRef({yaw:0,pitch:0,drag:false,lastX:0,lastY:0});
  const[lens,setLens]=useState<Lens>('UNIFIED'),[playing,setPlaying]=useState(false),[depth,setDepth]=useState(48),[speed,setSpeed]=useState(1),[cursor,setCursor]=useState(0),[zoom,setZoom]=useState(1);
  const field=useMemo(()=>compileTraversalFieldR347(address,depth,observations),[address,depth,observations]);
@@ -75,13 +76,13 @@ export default function TraversalFieldCockpitR347({variant,address,onAddress,obs
   <div className='r347-timebar'><span>PAST / SCAR</span><input type='range' min='0' max={Math.max(0,field.nodes.length-1)} value={Math.min(cursor,Math.max(0,field.nodes.length-1))} onChange={e=>{setPlaying(false);setCursor(Number(e.target.value))}}/><b>t+{current?.step??0} / {Math.max(0,field.nodes.length-1)}</b><span>ADMISSIBLE FUTURES</span></div>
   <div className='r347-futures'>{field.futures.slice(0,6).map(f=><button key={f.relation+f.address} onClick={()=>onAddress(f.address)} title={f.truthBoundary}><span>{f.relation.replaceAll('_',' ')}{f.relation==='ADMITTED_NEXT'?' · CANON':''}</span><b>{fmt(f.support)}</b><small>unified coherence · not probability · state {f.stateId}</small></button>)}</div>
   <div className='r347-readout'>
-   <div><span>LOGICAL TIME</span><b>t+{current?.step??0}</b><small>route step · not event time</small></div>
+   <div><span>LOGICAL TIME</span><b>t+{current?.step??0}</b><small>{current?.eventTime?('event '+new Date(current.eventTime).toLocaleString()):'route step · event time unbound'}</small></div>
    <div><span>CONTINUITY FLUX</span><b>{fmt(current?.continuityFlux??0)}</b><small>edge thickness</small></div>
    <div><span>EVIDENCE</span><b>{fmt(current?.evidence??0)}</b><small>focus / opacity</small></div>
    <div><span>UNCERTAINTY PRESSURE</span><b>{fmt(.55*(current?.contradiction??0)+.45*(current?.burden??0))}</b><small>q + Λ halo</small></div>
    <div><span>SCAR CARRY</span><b>{fmt(current?.scar??0)}</b><small>trail persistence</small></div>
    <div><span>ORIENTATION σ</span><b>{(current?.orientation??0)>0?'+1':(current?.orientation??0)<0?'−1':'0'}</b><small>handedness</small></div>
-   <div><span>SPACE FRAME</span><b>{lens==='SPACE'&&field.space.authority==='UNIT_BOUND_PHYSICAL_SPACE'?'PHYSICAL':'ATLAS'}</b><small>{field.space.authority==='UNIT_BOUND_PHYSICAL_SPACE'?(field.space.frame+' · '+field.space.unit):(field.space.mixedFrameHold?'physical packets held · incomplete/mixed frame':'representational address geometry')}</small></div>
+   <div><span>SPACE FRAME</span><b>{lens==='SPACE'&&field.space.authority==='UNIT_BOUND_PHYSICAL_SPACE'?'PHYSICAL':'ATLAS'}</b><small>{field.space.authority==='UNIT_BOUND_PHYSICAL_SPACE'?(field.space.frame+' · '+field.space.unit):(field.space.mixedFrameHold?'physical packets held · incomplete/mixed frame':'representational address geometry')}</small></div><div><span>RESOLUTION</span><b>{(current?.effectiveResolution??0).toLocaleString()}</b><small>representational address level</small></div>
    <div><span>{field.energy.label}</span><b>{current?.physicalEnergy?(fmt(current.physicalEnergy.value)+' '+current.physicalEnergy.unit):fmt(current?.modelIntensity??0)}</b><small>{current?.physicalEnergy?'unit-bound returned channel':'model proxy · not physical energy'}</small></div>
   </div>
   <div className='r347-controls'><button onClick={()=>{setPlaying(false);const i=Math.max(0,cursor-1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepBack/>Previous</button><button className='primary' onClick={()=>setPlaying(v=>!v)}>{playing?<Pause/>:<Play/>}{playing?'Pause':'Traverse'}</button><button onClick={()=>{setPlaying(false);const i=Math.min(field.nodes.length-1,cursor+1);setCursor(i);onAddress(field.nodes[i]?.address??address)}}><StepForward/>Next</button><button onClick={()=>{setPlaying(false);setCursor(0);onAddress(address)}}><RotateCcw/>Origin</button><label>DEPTH<input type='range' min='12' max='96' step='12' value={depth} onChange={e=>setDepth(Number(e.target.value))}/><b>{depth}</b></label><label>RATE<input type='range' min='.25' max='3' step='.25' value={speed} onChange={e=>setSpeed(Number(e.target.value))}/><b>{speed.toFixed(2)}×</b></label><label>VIEW<input type='range' min='.55' max='2.2' step='.05' value={zoom} onChange={e=>setZoom(Number(e.target.value))}/><b>{zoom.toFixed(2)}×</b></label></div>
