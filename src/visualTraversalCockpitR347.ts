@@ -49,6 +49,37 @@ export function admitScalarChannelR347(x:R347ScalarInput){
  if(x.truth!=='HELD'&&!finite)return{...x,value:null,truth:'HELD' as const,reason:'FINITE_VALUE_REQUIRED'};
  return{...x,reason:'ADMITTED',uncertainty:typeof x.uncertainty==='number'&&Number.isFinite(x.uncertainty)?Math.max(0,x.uncertainty):null};
 }
-export const R347_UNIT_POLICY='A physical quantity enters the observed layer only with a finite value, explicit unit, source identity and observation timestamp. A label such as energy, force, power, velocity or temperature never supplies physical authority by itself.';
+export const R347_UNIT_POLICY='A physical quantity enters the observed layer only with a finite value, explicit unit, source identity and observation timestamp. A label such as energy, force, power, velocity or temperature never supplies physical authority by itself. Model pressure, activity, route motion and visual deformation are never silently relabeled as physical energy.';
 
-export const R347_TRUTH_BOUNDARY='R347 changes visual organization, projection and interaction only. Existing source, CanonState, R125 admission, R342/R344 SAR gates, Hybrid authority and deployment authority remain unchanged. 20,736 is an address space, route steps are model time, Earth timestamps are observation time, and physical energy remains UNBOUND unless a unit-bearing source establishes it.';
+export type R347PhysicalQuantityKind='ENERGY'|'POWER'|'FLUX'|'TEMPERATURE'|'VELOCITY'|'FIELD_STRENGTH'|'OTHER';
+export type R347PhysicalQuantityInput=R347ScalarInput&{kind:R347PhysicalQuantityKind;frame?:string|null};
+export function admitPhysicalQuantityR347(x:R347PhysicalQuantityInput){
+ const admitted=admitScalarChannelR347(x),frame=String(x.frame||'').trim();
+ if(admitted.truth==='HELD')return{...admitted,kind:x.kind,frame:frame||null,physicalAuthority:false};
+ if(['VELOCITY','FIELD_STRENGTH'].includes(x.kind)&&!frame)return{...admitted,truth:'HELD' as const,reason:'PHYSICAL_VECTOR_OR_FIELD_REQUIRES_REFERENCE_FRAME',kind:x.kind,frame:null,physicalAuthority:false};
+ return{...admitted,kind:x.kind,frame:frame||null,physicalAuthority:true};
+}
+export const R347_PHYSICAL_QUANTITY_REGISTRY=Object.freeze([
+ {kind:'ENERGY',canonicalUnit:'J',status:'HELD_UNTIL_BOUND',requires:['finite value','unit','source','observation time']},
+ {kind:'POWER',canonicalUnit:'W',status:'HELD_UNTIL_BOUND',requires:['finite value','unit','source','observation time']},
+ {kind:'FLUX',canonicalUnit:'declared source unit',status:'HELD_UNTIL_BOUND',requires:['finite value','unit','source','observation time']},
+ {kind:'VELOCITY',canonicalUnit:'m/s',status:'HELD_UNTIL_BOUND',requires:['finite value','unit','source','observation time','reference frame']},
+ {kind:'FIELD_STRENGTH',canonicalUnit:'declared SI/source unit',status:'HELD_UNTIL_BOUND',requires:['finite value','unit','source','observation time','reference frame']}
+] as const);
+
+export type R347SourceClock={id:string;label:string;source:string;observedAt:string|null;verifiedAt:string|null;timeClass:'OBSERVATION'|'SNAPSHOT_VERIFICATION';bound:boolean};
+export function sourceClocksR347(earth:any):R347SourceClock[]{
+ const src=(x:any)=>String(x?.source||x?.provider||x?.endpoint||'').trim(),iso=(x:any)=>{const s=String(x||'').trim();return s&&Number.isFinite(Date.parse(s))?s:null};
+ return[
+  {id:'weather',label:'Weather observation',source:src(earth?.sources?.openMeteo),observedAt:iso(earth?.localConditions?.time),verifiedAt:iso(earth?.sources?.openMeteo?.verifiedAt),timeClass:'OBSERVATION',bound:Boolean(src(earth?.sources?.openMeteo)&&iso(earth?.localConditions?.time))},
+  {id:'space-weather',label:'Kp observation',source:src(earth?.sources?.swpc),observedAt:iso(earth?.spaceWeather?.observationTime),verifiedAt:iso(earth?.sources?.swpc?.verifiedAt),timeClass:'OBSERVATION',bound:Boolean(src(earth?.sources?.swpc)&&iso(earth?.spaceWeather?.observationTime))},
+  {id:'seismic',label:'USGS seismic snapshot',source:src(earth?.sources?.usgs),observedAt:null,verifiedAt:iso(earth?.sources?.usgs?.verifiedAt),timeClass:'SNAPSHOT_VERIFICATION',bound:Boolean(src(earth?.sources?.usgs)&&iso(earth?.sources?.usgs?.verifiedAt))},
+  {id:'events',label:'EONET event snapshot',source:src(earth?.sources?.eonet),observedAt:null,verifiedAt:iso(earth?.sources?.eonet?.verifiedAt),timeClass:'SNAPSHOT_VERIFICATION',bound:Boolean(src(earth?.sources?.eonet)&&iso(earth?.sources?.eonet?.verifiedAt))}
+ ];
+}
+export function contextCompletenessR347(channels:ReturnType<typeof admitScalarChannelR347>[],clocks:R347SourceClock[]){
+ const admitted=channels.filter(x=>x.truth!=='HELD').length,clockBound=clocks.filter(x=>x.bound).length,total=channels.length+clocks.length;
+ return total?{admitted,clockBound,total,ratio:(admitted+clockBound)/total}:{admitted:0,clockBound:0,total:0,ratio:0};
+}
+
+export const R347_TRUTH_BOUNDARY='R347 changes visual organization, projection and interaction only. Existing source, CanonState, R125 admission, R342/R344 SAR gates, Hybrid authority and deployment authority remain unchanged. 20,736 is an address space, route steps are model time, each returned Earth source retains its own observation or snapshot-verification clock, and physical energy/power/flux remain UNBOUND unless a unit-bearing source establishes them. Co-location and visual synchronization are correlation aids, not causal proof.';
