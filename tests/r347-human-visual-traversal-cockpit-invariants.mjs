@@ -123,3 +123,5 @@ for(const token of['current R307 Cockpit route mounts deferred R347 specialist',
 assert.ok(r347Browser.includes("['POST','PUT','PATCH','DELETE']"),'R347 browser proof must reject mutating network requests');
 assert.ok(r241Workflow.includes("Browser proof · R347 visual traversal cockpit")&&r241Workflow.includes("tests/r347-visual-traversal-cockpit-browser-e2e.mjs"),'R347 focused browser proof must run inside accumulated R241 visual CI');
 assert.ok(css.includes('.r347-cockpit button{min-width:44px;min-height:44px}')&&css.includes('grid-template-columns:repeat(24,44px)'),'R347 mobile touch-target contract must preserve inherited >=44px action geometry');
+
+assert.ok(css.includes('container-type:inline-size')&&css.includes('@container (max-width:900px)')&&css.includes('@container (max-width:620px)'),'R347 must reflow from its actual mounted container width, not viewport width alone');
