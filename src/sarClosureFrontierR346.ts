@@ -3,10 +3,11 @@ import type{SarHostClosureReceiptR344,SarClosureValidationR344}from'./sarHostClo
 
 export const SAR_CLOSURE_FRONTIER_SCHEMA_R346='OMEGA_SAR_CLOSURE_FRONTIER_R346';
 export type SarClosureActionKindR346='BIND_SOURCE'|'DECODE'|'CALIBRATE'|'COREGISTER'|'VALIDATE_PHASE'|'TERRAIN'|'UNWRAP'|'LOS'|'CORRECT'|'ADD_GEOMETRY'|'VERIFY';
+export type SarClosureExecutionModeR346='CLOUD_OR_HOST'|'R345_EXECUTES'|'R345_BINDS_EVIDENCE';
 export type SarClosureFrontierItemR346={
  rank:number;layer:SarR342LayerId;kind:SarClosureActionKindR346;gate:string;reason:string;
  requires:string[];command:string|null;produces:string[];blockedBy:SarR342LayerId[];informationGain:number;
- admissible:boolean;physicalAuthority:string;modeSequence:string;sarSpecFields:string[];sarSpecRule:string|null;
+ admissible:boolean;physicalAuthority:string;modeSequence:string;sarSpecFields:string[];sarSpecRule:string|null;executionMode:SarClosureExecutionModeR346;
  hybridOperation:null|{op:'SAR_R344_CLOSURE';authorizationRequired:true;requiredEvidence:string[];specFields:string[];specRule:string|null};
 };
 const PRIORITY:Record<SarR342LayerId,number>={
@@ -57,14 +58,19 @@ function kind(id:SarR342LayerId):SarClosureActionKindR346{
  if(id==='FULL_3D_DEFORMATION')return'ADD_GEOMETRY';
  return'VERIFY';
 }
+function executionMode(id:SarR342LayerId):SarClosureExecutionModeR346{
+ if(id==='TOPS_SUBPIXEL_COREGISTRATION'||id==='PHYSICALLY_VALID_INTERFEROMETRIC_PHASE')return'R345_EXECUTES';
+ if(id==='TERRAIN_FLATTENED_GAMMA0'||id==='UNWRAPPED_PHASE'||id==='LOS_DISPLACEMENT'||id==='CORRECTED_LOS'||id==='FULL_3D_DEFORMATION')return'R345_BINDS_EVIDENCE';
+ return'CLOUD_OR_HOST';
+}
 function commandFor(id:SarR342LayerId,r?:SarHostClosureReceiptR344|null){
  if(id==='TOPS_SUBPIXEL_COREGISTRATION')return'Queue governed R345 SAR_R344_CLOSURE with exact pair/orbit/DEM/coreg-proof paths';
  if(id==='RADIOMETRIC_BACKSCATTER')return'Bind exact calibration/noise XML or R344 beta0/sigma0/gamma0 artifacts';
  if(id==='TERRAIN_FLATTENED_GAMMA0')return'Run DEM/radar-geometry scattering-area normalization and bind terrainFlattenedGamma0 artifact';
- if(id==='UNWRAPPED_PHASE')return'Run masked phase unwrapping; emit unwrap raster, mask, closure RMS and residue proof';
- if(id==='LOS_DISPLACEMENT')return'Bind wavelength + explicit sign convention; materialize metric LOS artifact';
- if(id==='CORRECTED_LOS')return'Bind atmospheric + ETAD/system correction artifacts and corrected LOS';
- if(id==='FULL_3D_DEFORMATION')return'Add >=3 rank-independent LOS/GNSS constraints and run weighted d=G·u inversion';
+ if(id==='UNWRAPPED_PHASE')return'Produce full-resolution masked phase-unwrapping artifacts upstream; R345 binds unwrap raster, mask and closure proof into the R344 receipt';
+ if(id==='LOS_DISPLACEMENT')return'Produce metric LOS using bound wavelength/sign convention; R345 binds the LOS artifact and proof metadata';
+ if(id==='CORRECTED_LOS')return'Produce atmospheric/ETAD/system-corrected LOS upstream; R345 binds corrections + corrected LOS with provenance';
+ if(id==='FULL_3D_DEFORMATION')return'Add >=3 rank-independent LOS/GNSS constraints and produce weighted d=G·u inversion artifacts; R345 binds rank/conditioning/residual proof';
  if(id==='PHYSICALLY_VALID_INTERFEROMETRIC_PHASE')return'Bind full-resolution coreg receipt + interferogram/coherence artifacts';
  return r?'Use bound R344 receipt evidence to satisfy this gate':'Satisfy the exact R342 evidence gate';
 }
@@ -76,9 +82,9 @@ export function buildSarClosureFrontierR346(layers:SarEstablishmentLayerR342[],v
   const geometryReady=layer.id!=='FULL_3D_DEFORMATION'||Number(receipt?.independentLos?.length||0)>=3||layer.state==='COMPUTABLE';
   const admissible=blockedBy.length===0&&geometryReady;
   const informationGain=(PRIORITY[layer.id]||50)+(layer.id==='TOPS_SUBPIXEL_COREGISTRATION'||layer.id==='UNWRAPPED_PHASE'?20:0)-(blockedBy.length*20)-(geometryReady?0:50);
-  const hostKinds=new Set<SarClosureActionKindR346>(['CALIBRATE','COREGISTER','VALIDATE_PHASE','TERRAIN','UNWRAP','LOS','CORRECT','ADD_GEOMETRY']);const k=kind(layer.id),sarSpecFields=SPEC_FIELDS[layer.id]||[],sarSpecRule=SPEC_RULES[layer.id]||null;
-  return{rank:0,layer:layer.id,kind:k,gate:layer.gate,reason:layer.next,requires:layer.requires,command:commandFor(layer.id,receipt),produces:[layer.id],blockedBy,informationGain,admissible,physicalAuthority:layer.physicalAuthority,modeSequence:'PRUNE → TRANSLATE → PROVE → INVARIANT_CARRY → SCAR_CARRY → RECONTEXTUALIZE',sarSpecFields,sarSpecRule,hybridOperation:hostKinds.has(k)?{op:'SAR_R344_CLOSURE',authorizationRequired:true,requiredEvidence:layer.requires,specFields:sarSpecFields,specRule:sarSpecRule}:null};
+  const hostKinds=new Set<SarClosureActionKindR346>(['CALIBRATE','COREGISTER','VALIDATE_PHASE','TERRAIN','UNWRAP','LOS','CORRECT','ADD_GEOMETRY']);const k=kind(layer.id),sarSpecFields=SPEC_FIELDS[layer.id]||[],sarSpecRule=SPEC_RULES[layer.id]||null,mode=executionMode(layer.id);
+  return{rank:0,layer:layer.id,kind:k,gate:layer.gate,reason:layer.next,requires:layer.requires,command:commandFor(layer.id,receipt),produces:[layer.id],blockedBy,informationGain,admissible,physicalAuthority:layer.physicalAuthority,modeSequence:'PRUNE → TRANSLATE → PROVE → INVARIANT_CARRY → SCAR_CARRY → RECONTEXTUALIZE',sarSpecFields,sarSpecRule,executionMode:mode,hybridOperation:hostKinds.has(k)?{op:'SAR_R344_CLOSURE',authorizationRequired:true,requiredEvidence:layer.requires,specFields:sarSpecFields,specRule:sarSpecRule}:null};
  }).sort((a,b)=>Number(b.admissible)-Number(a.admissible)||b.informationGain-a.informationGain||a.layer.localeCompare(b.layer));
  out.forEach((x,i)=>x.rank=i+1);
- return{schema:SAR_CLOSURE_FRONTIER_SCHEMA_R346,state:out.length?'OPEN_FRONTIER':'PHYSICAL_CLOSURE_COMPLETE',next:out.find(x=>x.admissible)??null,items:out,validationScars:validation?.scars||[],truthBoundary:'R346 computes a dependency-closed next-action frontier. Host actions are routed only through the governed R345 SAR_R344_CLOSURE operation with explicit authorization. Ordering cannot manufacture Sentinel-1 measurements, DEM/orbit/correction evidence, unwrap closure, or independent viewing geometry.'};
+ return{schema:SAR_CLOSURE_FRONTIER_SCHEMA_R346,state:out.length?'OPEN_FRONTIER':'PHYSICAL_CLOSURE_COMPLETE',next:out.find(x=>x.admissible)??null,items:out,validationScars:validation?.scars||[],truthBoundary:'R346 computes a dependency-closed next-action frontier and distinguishes computation executed by R345 from external/full-resolution evidence merely bound by R345 into the R344 receipt. Governed host binding uses SAR_R344_CLOSURE with explicit authorization. Ordering cannot manufacture Sentinel-1 measurements, DEM/orbit/correction evidence, unwrap closure, corrected LOS, 3-D products, or independent viewing geometry.'};
 }
