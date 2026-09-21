@@ -21,6 +21,10 @@ for(const token of[
  'subtractPhaseLedgerR343',
  'unwrapQualityGuidedR343',
  'terrainFlattenGammaR343',
+ 'DEM-derived scattering-area normalization factor',
+ "'PRE_UNWRAP'|'POST_UNWRAP'",
+ 'correctedLosBound',
+ 'physicalClosureR343'
  'materializeLosR343',
  'applyDisplacementCorrectionsR343',
  'closeSarPhysicalChainR343'
@@ -28,7 +32,7 @@ for(const token of[
 
 for(const token of[
  'beta0?:number[]','sigma0?:number[]','gamma0?:number[]','terrainFlattenedGamma0?:number[]',
- 'correctedInterferometricPhaseRad?:number[]','unwrappedPhaseRad?:number[]','correctedLosDisplacementM?:number[]',
+ 'correctedInterferometricPhaseRad?:number[]','unwrappedPhaseRad?:number[]','correctedUnwrappedPhaseRad?:number[]','correctedLosDisplacementM?:number[]',
  'deformationEastM?:number[]','deformationNorthM?:number[]','deformationUpM?:number[]','physicalClosureR343?:'
 ])assert.ok(raster.includes(token),'R343 raster contract missing '+token);
 
@@ -72,3 +76,5 @@ const wrap=x=>{let y=(x+Math.PI)%(2*Math.PI);if(y<0)y+=2*Math.PI;return y-Math.P
 assert.ok(Math.abs(wrap(3*Math.PI)+Math.PI)<1e-12);
 
 console.log('R343 SAR PHYSICAL CLOSURE PASS · exact annotation parser · calibration/noise vectors · range×azimuth noise reconstruction contract · full-resolution TOPS receipt gate · validated interferometry · correction ledger · masked unwrapping · terrain radiometry · LOS materialization · extended lens contract');
+
+assert.ok(!physical.includes('cos(referenceIncidence)'),'R343 must not use an incidence-cosine shortcut as authoritative radiometric terrain correction');
