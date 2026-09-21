@@ -71,6 +71,12 @@ The context packet remains:
 
 `(domain, codomain, units, frame, time, boundary, uncertainty, provenance)`
 
+## Historical corpus-wide census
+
+The connected Drive master audit covers **188 artifacts / 463.7 MB visible corpus** across workbooks, CSV, PDF, images, ZIPs, SVG, video, documents, HTML, JSON, TSV and text. Its own synthesis is preserved as an evidence ceiling: the framework is materially instantiated across files, tables, software and reports; universal ontology remains unconfirmed and requires external testing.
+
+The one-system software ledgers describe **100 systems / 24 families / 12 master menus / 36 menu controls / 18 capabilities**, while the current application exposes **44 routes**. These are inventory and non-regression counts, not permission to execute everything and not physical dimensions.
+
 ## Drive correlation
 
 The current connected Drive corpus contributes donor contracts, not competing runtime state. R348 carries titles only, not private Drive identifiers or credentials. Important correlated donor contracts include:
