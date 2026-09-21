@@ -53,6 +53,7 @@ for(const token of[
  'probe_snap',
  'sha256_path',
  'annotation_hashes',
+ 'zipfile.ZipFile',
  '--coreg-proof',
  '--corrected-interferogram',
  '--corrected-los',
