@@ -316,6 +316,8 @@ try{
     for(const route of expected)if(!unique.includes(route))throw new Error(`${name}: navigator omitted canonical route ${route}`);
 
     for(const route of routes){
+      const routeStarted=performance.now();
+      console.log(`R286 SHARD ${shardIndex+1}/${shardCount} BEGIN · ${name}/${route}`);
       await clickRoute(page,route);
       const structure=await panelStructureAudit(page,route);
       if(structure.failures.length)throw new Error(`${name}/${route}: panel structure failure:\n${structure.failures.join('\n')}`);
@@ -333,6 +335,7 @@ try{
       totals[name==='desktop'?'disclosuresDesktop':'disclosuresMobile']+=disclosures;
       if(route==='SAR Truth')await verifySarGeometry(page,name);
       if(pageErrors.length)throw new Error(`${name}/${route}: browser page errors ${pageErrors.join(' | ').slice(0,4000)}`);
+      console.log(`R286 SHARD ${shardIndex+1}/${shardCount} ROUTE PASS · ${name}/${route} · controls=${audit.count} · panels=${structure.panelCount} · disclosures=${disclosures} · elapsedMs=${Math.round(performance.now()-routeStarted)}`);
     }
 
     await openNavigator(page);
