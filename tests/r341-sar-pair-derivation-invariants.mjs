@@ -41,7 +41,7 @@ for(const token of[
  "pairDerived?.state==='PAIR_FIELDS_BOUND'",
  'PAIR FIELDS',
  'R337 SOURCE + R341 PAIR DERIVATION TRUTH',
- 'raster={native?.nativeDataBound?displayRaster:undefined}'
+ 'raster={(native?.nativeDataBound||hostPreviewRaster)?displayRaster:undefined}'
 ])assert.ok(live.includes(token),`R341 live workstation missing ${token}`);
 
 assert.ok(live.includes("masterPolarization=/^(vv|vh|hh|hv)$/i"),'R341 must bind the master measurement polarization from the exact selected asset');
