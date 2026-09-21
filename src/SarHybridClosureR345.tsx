@@ -8,7 +8,7 @@ import'./sarHybridR345.css';
 
 type Props={
  masterProductId:string;slaveProductId:string;masterAcquired:string;slaveAcquired:string;polarization:string;
- pairReady:boolean;onReceipt:(receipt:SarHostClosureReceiptR344)=>void;
+ pairReady:boolean;onReceipt:(receipt:SarHostClosureReceiptR344)=>void;recommendedFields?:string[];recommendedLayer?:string|null;
 };
 type Form={
  projectPath:string;masterPath:string;slavePath:string;masterOrbitPath:string;slaveOrbitPath:string;demPath:string;subswath:'IW1'|'IW2'|'IW3';
@@ -25,7 +25,7 @@ const initial=(master:string,slave:string):Form=>{const pair=(cleanId(master||'m
 }};
 const requiredKeys:(keyof Form)[]=['projectPath','masterPath','slavePath','masterOrbitPath','slaveOrbitPath','demPath','outputPath','coregProofPath','interferogramPath','coherencePath','correctedInterferogramPath','geometricPhaseProofPath','receiptPath'];
 
-export default function SarHybridClosureR345({masterProductId,slaveProductId,masterAcquired,slaveAcquired,polarization,pairReady,onReceipt}:Props){
+export default function SarHybridClosureR345({masterProductId,slaveProductId,masterAcquired,slaveAcquired,polarization,pairReady,onReceipt,recommendedFields=[],recommendedLayer=null}:Props){
  const{device,selectedDeviceJobs,refresh,stale}=useHybridRuntimeSnapshotR238();
  const[form,setForm]=useState<Form>(()=>initial(masterProductId,slaveProductId)),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[jobId,setJobId]=useState(''),[ingested,setIngested]=useState('');
  useEffect(()=>{setForm(v=>({...initial(masterProductId,slaveProductId),projectPath:v.projectPath,masterPath:'',slavePath:'',masterOrbitPath:'',slaveOrbitPath:'',demPath:''}));setConfirmed(false);setJobId('');setIngested('');setMessage('')},[masterProductId,slaveProductId]);
@@ -45,6 +45,7 @@ export default function SarHybridClosureR345({masterProductId,slaveProductId,mas
  const localValidation=useMemo(()=>validateCommandPlan([{op:'SAR_R344_CLOSURE',label:'Execute R344 full-resolution SAR closure and return exact receipt',path:form.projectPath,maxRuntimeSeconds:21600,sarClosure:spec()}],form.projectPath,[]),[form,masterAcquired,slaveAcquired,polarization]);
  const complete=requiredKeys.every(k=>String(form[k]??'').trim().length>0)&&!!masterAcquired&&!!slaveAcquired&&/^(VV|VH|HH|HV)$/i.test(polarization);
  const queue=async()=>{if(busy||!pairReady||!complete||!confirmed||!capable||!device?.id||!localValidation.passed)return;setBusy(true);setMessage('');try{const r=await api.post<any>('/api/hybrid/jobs',{schema:'OMEGA_SAR_HYBRID_CLOSURE_JOB_R345',action:'SAR_R344_CLOSURE',profile:'AUTO_BUILD',projectPath:form.projectPath,instructions:'Execute the promoted R344 Sentinel-1 full-resolution closure driver on the explicitly supplied root-confined evidence. Return the exact R344 receipt; do not promote missing physical stages.',allowedDomains:[],steps:localValidation.steps,targetDeviceId:device.id,confirmed:true});const id=String(r.data?.job?.id||'');if(!id)throw new Error('Hybrid authority returned no durable job identity.');setJobId(id);setConfirmed(false);setMessage('R345 closure job queued on '+String(device.name||device.id)+'. The authenticated agent must claim it and return exact R141/R344 proof before the ledger changes.');await refresh()}catch(e:any){setMessage(e?.message||String(e))}finally{setBusy(false)}};
+ const recommended=new Set(recommendedFields);
  const fields:[keyof Form,string,string][]=[
   ['projectPath','OMEGAv6 project path','Root-relative folder containing scripts/sar_r344_host_closure.py'],
   ['masterPath','Master SLC SAFE / ZIP','Root-relative exact master SLC'],
@@ -63,10 +64,11 @@ export default function SarHybridClosureR345({masterProductId,slaveProductId,mas
  return <details className='r309-sar-assets r345-sar-hybrid' open>
   <summary><span><Cpu/><b>R345 · FULL-RESOLUTION HYBRID CLOSURE</b></span><small>{activeJob?.status||(!device?'NO HOST':capable?'READY':'HOST UPGRADE REQUIRED')}</small></summary>
   <div className='r345-grid'>
+   {recommendedLayer&&<article className='r345-status r346-frontier-hint'><span><b>R346 NEXT · {recommendedLayer.replaceAll('_',' ')}</b><small>{recommendedFields.length?'Highlighted fields are the exact governed R345 spec inputs associated with the current frontier action.':'This frontier action has no direct R345 host-path fields.'}</small></span><ShieldCheck/></article>}
    <article className='r345-status'><span><b>{device?.name||'No selected Hybrid host'}</b><small>{device?.online?'authenticated heartbeat current':'DEVICE_PROOF_REQUIRED'} · capability {capable?'SAR_R344_CLOSURE advertised':'not advertised'} · shared R238 epoch</small></span>{capable?<CheckCircle2/>:<TriangleAlert/>}</article>
    <article className='r345-status'><span><b>{masterProductId||'master not selected'} → {slaveProductId||'reference not selected'}</b><small>{polarization||'no polarization'} · {masterAcquired||'master time unavailable'} → {slaveAcquired||'slave time unavailable'}</small></span><ShieldCheck/></article>
    <section className='r345-form'>
-    {fields.map(([key,label,hint])=><label key={key}><span>{label}<small>{hint}</small></span><input value={String(form[key]??'')} onChange={e=>set(key,e.target.value as any)} placeholder='root-relative path'/></label>)}
+    {fields.map(([key,label,hint])=><label key={key} className={recommended.has(String(key))?'r346-recommended':''}><span>{label}<small>{hint}</small></span><input value={String(form[key]??'')} onChange={e=>set(key,e.target.value as any)} placeholder='root-relative path'/></label>)}
     <label><span>Subswath<small>TOPS IW sub-swath</small></span><select value={form.subswath} onChange={e=>set('subswath',e.target.value as any)}><option>IW1</option><option>IW2</option><option>IW3</option></select></label>
     <label><span>First burst<small>Inclusive</small></span><input type='number' min={1} max={999} value={form.firstBurst} onChange={e=>set('firstBurst',Number(e.target.value))}/></label>
     <label><span>Last burst<small>Inclusive</small></span><input type='number' min={1} max={999} value={form.lastBurst} onChange={e=>set('lastBurst',Number(e.target.value))}/></label>
