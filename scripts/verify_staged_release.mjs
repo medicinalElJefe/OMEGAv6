@@ -50,7 +50,7 @@ if(servedAgentHash!==expectedAgentHash||agent.response.headers.get('x-omega-agen
 
 const caps=(await get('/api/hybrid/capabilities')).body;
 if(!String(caps?.state||'').includes('DEVICE_PROOF_REQUIRED'))throw new Error('staged Hybrid capability truth gate missing');
-for(const op of ['TRAIN_LOCAL','BUILD','READ_VISIBLE_TEXT'])if(!caps?.operations?.includes(op))throw new Error(`staged Hybrid capability missing ${op}`);
+for(const op of ['TRAIN_LOCAL','BUILD','READ_VISIBLE_TEXT','SAR_R344_CLOSURE'])if(!caps?.operations?.includes(op))throw new Error(`staged Hybrid capability missing ${op}`);
 if(caps?.trainLocal?.foundationWeightsChanged!==false)throw new Error('staged TRAIN_LOCAL truth boundary regressed');
 const plan=(await post('/api/hybrid/plan',{prompt:'Inspect this project, hash the tree, repair the smallest proven defect, build, test, package, and return proof.',root:'.'})).body;
 if(plan?.draft?.state!=='DRAFT_ONLY_NOT_QUEUED'||plan?.draft?.confirmed!==false||plan?.draft?.deviceId!==null)throw new Error('staged Hybrid draft mutated queue/confirmation/device state');
