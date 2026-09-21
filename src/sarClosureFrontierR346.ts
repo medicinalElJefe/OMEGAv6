@@ -6,8 +6,8 @@ export type SarClosureActionKindR346='BIND_SOURCE'|'DECODE'|'CALIBRATE'|'COREGIS
 export type SarClosureFrontierItemR346={
  rank:number;layer:SarR342LayerId;kind:SarClosureActionKindR346;gate:string;reason:string;
  requires:string[];command:string|null;produces:string[];blockedBy:SarR342LayerId[];informationGain:number;
- admissible:boolean;physicalAuthority:string;modeSequence:string;sarSpecFields:string[];
- hybridOperation:null|{op:'SAR_R344_CLOSURE';authorizationRequired:true;requiredEvidence:string[];specFields:string[]};
+ admissible:boolean;physicalAuthority:string;modeSequence:string;sarSpecFields:string[];sarSpecRule:string|null;
+ hybridOperation:null|{op:'SAR_R344_CLOSURE';authorizationRequired:true;requiredEvidence:string[];specFields:string[];specRule:string|null};
 };
 const PRIORITY:Record<SarR342LayerId,number>={
  EXACT_ACQUISITION:100,NATIVE_GRD_SAMPLES:95,NATIVE_SLC_IQ:95,COMPATIBLE_PAIR_METADATA:94,SAME_POLARIZATION_ASSET:93,
@@ -23,6 +23,16 @@ const DEPENDENCIES:Record<SarR342LayerId,SarR342LayerId[]>={
  PHYSICALLY_VALID_INTERFEROMETRIC_PHASE:['TOPS_SUBPIXEL_COREGISTRATION','COMPLEX_CROSS_PRODUCT'],RADIOMETRIC_BACKSCATTER:['EXACT_ACQUISITION'],
  TERRAIN_FLATTENED_GAMMA0:['RADIOMETRIC_BACKSCATTER'],UNWRAPPED_PHASE:['PHYSICALLY_VALID_INTERFEROMETRIC_PHASE'],
  LOS_DISPLACEMENT:['UNWRAPPED_PHASE'],CORRECTED_LOS:['LOS_DISPLACEMENT'],FULL_3D_DEFORMATION:['CORRECTED_LOS']
+};
+const SPEC_RULES:Partial<Record<SarR342LayerId,string>>={
+ TOPS_SUBPIXEL_COREGISTRATION:'all listed identity/orbit/DEM/coreg/output/receipt fields',
+ PHYSICALLY_VALID_INTERFEROMETRIC_PHASE:'interferogram + coherence + corrected interferogram + geometry proof',
+ RADIOMETRIC_BACKSCATTER:'at least one of beta0Path / sigma0Path / gamma0Path with annotation provenance',
+ TERRAIN_FLATTENED_GAMMA0:'demPath + terrainGamma0Path',
+ UNWRAPPED_PHASE:'unwrapPath + unwrapMaskPath + unwrapProofPath',
+ LOS_DISPLACEMENT:'losPath + wavelengthM + losSign + signConvention',
+ CORRECTED_LOS:'correctedLosPath + at least one of atmospherePath / etadPath / otherCorrectionPath',
+ FULL_3D_DEFORMATION:'independentLosJsonPath + East/North/Up artifacts + deformationProofPath'
 };
 const SPEC_FIELDS:Partial<Record<SarR342LayerId,string[]>>={
  TOPS_SUBPIXEL_COREGISTRATION:['masterPath','slavePath','masterAcquired','slaveAcquired','polarization','subswath','firstBurst','lastBurst','masterOrbitPath','slaveOrbitPath','demPath','coregProofPath','outputPath','receiptPath'],
@@ -66,8 +76,8 @@ export function buildSarClosureFrontierR346(layers:SarEstablishmentLayerR342[],v
   const geometryReady=layer.id!=='FULL_3D_DEFORMATION'||Number(receipt?.independentLos?.length||0)>=3||layer.state==='COMPUTABLE';
   const admissible=blockedBy.length===0&&geometryReady;
   const informationGain=(PRIORITY[layer.id]||50)+(layer.id==='TOPS_SUBPIXEL_COREGISTRATION'||layer.id==='UNWRAPPED_PHASE'?20:0)-(blockedBy.length*20)-(geometryReady?0:50);
-  const hostKinds=new Set<SarClosureActionKindR346>(['CALIBRATE','COREGISTER','VALIDATE_PHASE','TERRAIN','UNWRAP','LOS','CORRECT','ADD_GEOMETRY']);const k=kind(layer.id),sarSpecFields=SPEC_FIELDS[layer.id]||[];
-  return{rank:0,layer:layer.id,kind:k,gate:layer.gate,reason:layer.next,requires:layer.requires,command:commandFor(layer.id,receipt),produces:[layer.id],blockedBy,informationGain,admissible,physicalAuthority:layer.physicalAuthority,modeSequence:'PRUNE → TRANSLATE → PROVE → INVARIANT_CARRY → SCAR_CARRY → RECONTEXTUALIZE',sarSpecFields,hybridOperation:hostKinds.has(k)?{op:'SAR_R344_CLOSURE',authorizationRequired:true,requiredEvidence:layer.requires,specFields:sarSpecFields}:null};
+  const hostKinds=new Set<SarClosureActionKindR346>(['CALIBRATE','COREGISTER','VALIDATE_PHASE','TERRAIN','UNWRAP','LOS','CORRECT','ADD_GEOMETRY']);const k=kind(layer.id),sarSpecFields=SPEC_FIELDS[layer.id]||[],sarSpecRule=SPEC_RULES[layer.id]||null;
+  return{rank:0,layer:layer.id,kind:k,gate:layer.gate,reason:layer.next,requires:layer.requires,command:commandFor(layer.id,receipt),produces:[layer.id],blockedBy,informationGain,admissible,physicalAuthority:layer.physicalAuthority,modeSequence:'PRUNE → TRANSLATE → PROVE → INVARIANT_CARRY → SCAR_CARRY → RECONTEXTUALIZE',sarSpecFields,sarSpecRule,hybridOperation:hostKinds.has(k)?{op:'SAR_R344_CLOSURE',authorizationRequired:true,requiredEvidence:layer.requires,specFields:sarSpecFields,specRule:sarSpecRule}:null};
  }).sort((a,b)=>Number(b.admissible)-Number(a.admissible)||b.informationGain-a.informationGain||a.layer.localeCompare(b.layer));
  out.forEach((x,i)=>x.rank=i+1);
  return{schema:SAR_CLOSURE_FRONTIER_SCHEMA_R346,state:out.length?'OPEN_FRONTIER':'PHYSICAL_CLOSURE_COMPLETE',next:out.find(x=>x.admissible)??null,items:out,validationScars:validation?.scars||[],truthBoundary:'R346 computes a dependency-closed next-action frontier. Host actions are routed only through the governed R345 SAR_R344_CLOSURE operation with explicit authorization. Ordering cannot manufacture Sentinel-1 measurements, DEM/orbit/correction evidence, unwrap closure, or independent viewing geometry.'};
