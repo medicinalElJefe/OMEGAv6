@@ -26,15 +26,6 @@ for(const token of[
  "channel:'UNCERTAINTY'",
  '20,736 is an address space',
  'physical energy/power/flux remain UNBOUND',
- 'r347-correlation-frame',
- 'r347-source-clocks',
- 'r347-quantity-registry',
- 'MODEL ACTIVITY',
- 'sourceClocksR347(earth)',
- 'contextCompletenessR347(liveScalars,sourceClocks)',
- "uncertainty>.55&&!isSelected",
- "ctx.strokeRect",
- "R347_PHYSICAL_QUANTITY_REGISTRY.map",
  'R347_UNIT_POLICY',
  'admitScalarChannelR347',
  'OBSERVED_SCALAR_REQUIRES_VALUE_UNIT_SOURCE_TIMESTAMP',
@@ -46,7 +37,7 @@ for(const token of[
  'PHYSICAL_VECTOR_OR_FIELD_REQUIRES_REFERENCE_FRAME',
  'model pressure, activity, route motion and visual deformation are never silently relabeled as physical energy',
  'route steps are model time',
- 'Earth timestamps are observation time'
+ 'each returned Earth source retains its own observation or snapshot-verification clock'
 ])assert.ok(runtime.includes(token),'R347 visual grammar missing '+token);
 
 for(const token of[
@@ -91,7 +82,16 @@ for(const token of[
  'earth?.spaceWeather?.observationTime',
  'Co-located values are shown for correlation and inspection only.',
  'does not infer causation',
- 'R347_UNIT_POLICY'
+ 'R347_UNIT_POLICY',
+ 'r347-correlation-frame',
+ 'r347-source-clocks',
+ 'r347-quantity-registry',
+ 'MODEL ACTIVITY',
+ 'sourceClocksR347(earth)',
+ 'contextCompletenessR347(liveScalars,sourceClocks)',
+ "uncertainty>.55&&!isSelected",
+ "ctx.strokeRect",
+ "R347_PHYSICAL_QUANTITY_REGISTRY.map"
 ])assert.ok(cockpit.includes(token),'R347 cockpit missing '+token);
 
 assert.ok(!cockpit.includes('api.post<')&&!cockpit.includes('api.post('),'R347 cockpit must remain read-only and may not acquire execution authority');
