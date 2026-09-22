@@ -1,0 +1,23 @@
+import assert from'node:assert/strict';
+import fs from'node:fs';
+import{compileCanonicalTypedFieldR349}from'../src/system/wovenHardwareFieldR349';
+import{cloneTypedFieldR350,compileTemporalBudgetR350,evolveTemporalTimelineR350,fieldHashR350,proveTimelineReplayR350,replayFromCheckpointR350,seekTemporalStateR350,timelineFramesR350,validateCheckpointR350,R350_LAWS,R350_SCHEMA}from'../src/system/temporalCheckpointReplayR350';
+
+const source=compileCanonicalTypedFieldR349(0,a=>({continuity:(a%144)/143,plasticity:(a%12)/11,burden:((a>>1)%12)/11,contradiction:((a>>2)%12)/11,scar:0,evidence:.8,invariantCarry:.2+(a%13)/65,motionRate:(a%7)/6,support:.6,orientation:1 as const}));
+const sourceHash=fieldHashR350(source),clone=cloneTypedFieldR350(source);assert.equal(fieldHashR350(clone),sourceHash);clone.invariant[0]+=.01;assert.notEqual(fieldHashR350(clone),sourceHash,'complete typed-field hash must detect state mutation');
+const budget=compileTemporalBudgetR350({source:'R185_R193_DECLARED_PLAN',targetHz:30,workingSetResolution:20736,addressScale:20736,proofDepth:'FINGERPRINT_REQUIRED',referenceFrame:'PRESERVE_DECLARED_FRAME'});
+assert.equal(budget.source,'R185_R193_DECLARED_PLAN');assert.equal(budget.targetHz,30);assert.equal(budget.addressScale,20736);
+const timeline=evolveTemporalTimelineR350(source,{steps:8,checkpointEvery:2,orientations:[1,-1,1,0],transportRate:.125,nowTick:4,budget});
+assert.equal(timeline.schema,R350_SCHEMA);assert.equal(timeline.stepReceipts.length,8);assert.deepEqual(timeline.checkpoints.map(x=>x.tick),[0,2,4,6,8]);assert.equal(timeline.initialFieldHash,sourceHash);assert.equal(timeline.proof.fullAddressCoverage,true);
+for(const c of timeline.checkpoints)assert.equal(validateCheckpointR350(c).ok,true,`checkpoint ${c.tick} must validate`);
+const proof=proveTimelineReplayR350(timeline);assert.equal(proof.deterministicReplay,true);assert.equal(proof.finalHashMatch,true);assert.equal(proof.chainIntegrity,true);
+for(let tick=0;tick<=8;tick++){const seek=seekTemporalStateR350(timeline,tick);const direct=evolveTemporalTimelineR350(source,{steps:tick,checkpointEvery:Math.max(1,tick||1),orientations:[1,-1,1,0],transportRate:.125,nowTick:tick,budget});assert.equal(seek.fieldHash,direct.finalFieldHash,`seek/replay must equal direct deterministic evolution at tick ${tick}`)}
+const cp4=timeline.checkpoints.find(x=>x.tick===4)!;const replay8=replayFromCheckpointR350(cp4,timeline.stepReceipts,8);assert.equal(replay8.fieldHash,timeline.finalFieldHash);
+const tampered={...cp4,field:cloneTypedFieldR350(cp4.field)};tampered.field.invariant[7]+=.02;assert.equal(validateCheckpointR350(tampered).ok,false);assert.throws(()=>replayFromCheckpointR350(tampered,timeline.stepReceipts,8),/checkpoint integrity failure/);
+const frames=timelineFramesR350(timeline,4);assert.deepEqual(frames.map(x=>x.relation),['HISTORY','HISTORY','NOW','FORECAST','FORECAST']);assert.ok(frames.filter(x=>x.relation==='FORECAST').every(x=>x.observationState==='MODEL_PROJECTED_NOT_OBSERVED'));assert.ok(frames.every(x=>x.observedHistoryClaimed===false&&x.durableHistoryClaimed===false));
+for(const law of['R141_REMAINS_EXACT_RETURN_PROOF_AUTHORITY','R146_REMAINS_DURABLE_EXECUTION_HISTORY_AUTHORITY','R125_REMAINS_THE_ONLY_CANONSTATE_ADMISSION_AUTHORITY'])assert.ok(R350_LAWS.includes(law as any));
+const surface=fs.readFileSync('src/OmegaTemporalCheckpointR350.tsx','utf8'),suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8'),core=fs.readFileSync('src/system/temporalCheckpointReplayR350.ts','utf8');
+for(const token of['HISTORY','NOW','FORECAST','R141 exact return','R146 durable history','deterministic software/model replay'])assert.ok(surface.includes(token),`R350 surface missing ${token}`);
+assert.ok(suite.includes('OmegaTemporalCheckpointR350'),'R350 must be surfaced inside canonical Convergence');
+for(const forbidden of['localStorage','runtimeStorageR168','canonicalMutation:true','durableHistoryClaimed:true','observedHistoryClaimed:true'])assert.ok(!core.includes(forbidden),`R350 may not create competing durable/canonical authority: ${forbidden}`);
+console.log('R350 TEMPORAL CHECKPOINT REPLAY PASS · complete typed-field hashing · hash-chained checkpoints · nearest-checkpoint seek · deterministic replay/direct-evolution equivalence at every tested tick · tamper rejection · HISTORY/NOW/FORECAST epistemic separation · R141/R146/R125 authorities preserved');
