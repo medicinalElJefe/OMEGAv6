@@ -12,7 +12,7 @@ export default function OmegaTemporalCheckpointR350(){
   return{timeline,proof:proveTimelineReplayR350(timeline),frames:timelineFramesR350(timeline,4)};
  },[]);
  return <section className='r350-time' data-r350-temporal-checkpoint='OMEGA_TEMPORAL_CHECKPOINT_REPLAY_R350'>
-  <header><div><span>R350 · TEMPORAL CHECKPOINT / REPLAY</span><h3>Deterministic time traversal over the 20,736-address typed field</h3><p>Integer model ticks are hash-bound to complete field state. Seek uses the nearest prior checkpoint and declared step receipts; forecast remains model projection, never observation.</p></div><Clock3/></header>
+  <header><div><span>R350 · TEMPORAL CHECKPOINT / REPLAY</span><h3>Deterministic time traversal over the 20,736-address typed field</h3><p>Integer model ticks are hash-bound to complete field state. HISTORY / NOW / FORECAST are explicit model-time roles. Seek uses the nearest prior checkpoint and declared step receipts; FORECAST remains model projection, never observation.</p></div><Clock3/></header>
   <div className='r350-proof'>
    <article><ShieldCheck/><span><small>REPLAY PROOF</small><b>{model.proof.deterministicReplay?'PASS':'FAIL'}</b><em>checkpoint + lineage + final hash</em></span></article>
    <article><Waypoints/><span><small>CHECKPOINTS</small><b>{model.timeline.checkpoints.length}</b><em>{model.timeline.stepReceipts.length} deterministic ticks</em></span></article>
