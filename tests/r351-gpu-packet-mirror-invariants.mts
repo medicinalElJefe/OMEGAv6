@@ -1,0 +1,15 @@
+import assert from'node:assert/strict';import fs from'node:fs';
+import{compileCanonicalTypedFieldR349}from'../src/system/wovenHardwareFieldR349';
+import{compileHdrOffscreenR351,compilePacketMirrorR351,deterministicFrameReceiptR351,packetMirrorReceiptR351,rendererRestartProofR351,R351_EDGE_COUNT,R351_SCALE_LAWS}from'../src/system/gpuPacketMirrorR351';
+const sampler=(a:number)=>({continuity:(a%144)/143,plasticity:(a%12)/11,burden:((a>>1)%12)/11,contradiction:((a>>2)%12)/11,scar:(a%5)/20,evidence:.8,invariantCarry:.25+(a%17)/68,motionRate:(a%9)/8,support:.5,orientation:1 as const});
+const field=compileCanonicalTypedFieldR349(0,sampler),mirror=compilePacketMirrorR351(field),receipt=packetMirrorReceiptR351(mirror);
+assert.equal(mirror.packetCount,20736);assert.equal(mirror.packets.length,20736*9);assert.equal(R351_EDGE_COUNT,20735);assert.equal(mirror.edges.length,20735*2);assert.equal(receipt.exactCounts,true);
+for(let i=0;i<20735;i++){assert.equal(mirror.edges[i*2],i);assert.equal(mirror.edges[i*2+1],i+1)}
+assert.equal(mirror.parent1728[20735],1727);assert.equal(mirror.parent144[20735],143);assert.equal(mirror.parent12[20735],11);assert.equal(mirror.local12[20735],11);
+assert.deepEqual(R351_SCALE_LAWS.map(x=>x.resolution),[12,144,1728,20736,248832]);
+const hdr=compileHdrOffscreenR351(field);assert.equal(hdr.pixelCount,20736);assert.equal(hdr.hdr.length,20736*4);assert.equal(hdr.physicalImageClaimed,false);
+const a=deterministicFrameReceiptR351(field,7),b=deterministicFrameReceiptR351(field,7);assert.equal(a.receiptHash,b.receiptHash);assert.equal(rendererRestartProofR351(field).statePreserved,true);
+const core=fs.readFileSync('src/system/gpuPacketMirrorR351.ts','utf8'),surface=fs.readFileSync('src/OmegaGpuPacketMirrorR351.tsx','utf8'),worker=fs.readFileSync('src/system/gpuPacketWorkerR351.ts','utf8');
+for(const token of['requestAdapter','requestDevice','copyBufferToBuffer','mapAsync','GPU_EXECUTION_UNAVAILABLE','deviceExecutionProved','GPU adapter probe','GPU device request','GPU readback map'])assert.ok(core.includes(token),`R351 missing ${token}`);
+for(const forbidden of['canonicalMutation:true','physicalImageClaimed:true'])assert.ok(!core.includes(forbidden),`R351 forbidden claim ${forbidden}`);
+for(const token of["new Worker(new URL('./system/gpuPacketWorkerR351.ts'","data-r351-ready","worker compilation deferred from route readiness"])assert.ok(surface.includes(token),`R351 surface missing async-readiness token ${token}`);assert.ok(!surface.includes('useMemo'),'R351 must not synchronously compile full packet/HDR/restart mirrors during React render');for(const token of['compileCanonicalTypedFieldR349','compilePacketMirrorR351','deterministicFrameReceiptR351','rendererRestartProofR351','postMessage'])assert.ok(worker.includes(token),`R351 worker missing ${token}`);assert.ok(surface.includes('CPU↔GPU BYTE MATCH'));console.log('R351 GPU PACKET MIRROR PASS · 20,736 packets · 20,735 edges · four-level ancestry · five scale laws · deterministic HDR/frame receipt · off-main-thread CPU compilation · bounded optional WebGPU upload/readback correspondence · immediate route readiness · no new truth authority');
