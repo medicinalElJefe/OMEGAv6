@@ -1,14 +1,15 @@
 import{useMemo}from'react';
 import{Clock3,History,ShieldCheck,Waypoints}from'lucide-react';
 import{compileCanonicalTypedFieldR349}from'./system/wovenHardwareFieldR349';
-import{evolveTemporalTimelineR350,proveTimelineReplayR350,timelineFramesR350}from'./system/temporalCheckpointReplayR350';
+import{compileTemporalBudgetFromR193R350,evolveTemporalTimelineR350,proveTimelineReplayR350,timelineFramesR350}from'./system/temporalCheckpointReplayR350';
 import'./omegaTemporalCheckpointR350.css';
 
 const short=(x:string)=>x.slice(0,8);
 export default function OmegaTemporalCheckpointR350(){
  const model=useMemo(()=>{
   const source=compileCanonicalTypedFieldR349(0);
-  const timeline=evolveTemporalTimelineR350(source,{steps:8,checkpointEvery:2,orientations:[1,-1,1,0],transportRate:.125,nowTick:4,budget:{source:'R185_R193_DECLARED_PLAN',targetHz:12,workingSetResolution:20736,addressScale:20736,proofDepth:'MODEL_REPLAY_RECEIPT',referenceFrame:'PRESERVE_DECLARED_FRAME'}});
+  const compiled=compileTemporalBudgetFromR193R350({run:{id:'r350-convergence-surface',contract:{executionDomain:'LOCAL',routeId:'CONVERGENCE_R350'}},hint:{motion:.35,residual:.22,temporalError:.18,truthGap:.12,coherenceGap:.14,combined:.24,priority:.5},predictedPressure:.28,input:{observerPressure:.2},history:{maturity:.5}});
+  const timeline=evolveTemporalTimelineR350(source,{steps:8,checkpointEvery:2,orientations:[1,-1,1,0],transportRate:.125,nowTick:4,budget:compiled.budget});
   return{timeline,proof:proveTimelineReplayR350(timeline),frames:timelineFramesR350(timeline,4)};
  },[]);
  return <section className='r350-time' data-r350-temporal-checkpoint='OMEGA_TEMPORAL_CHECKPOINT_REPLAY_R350'>
