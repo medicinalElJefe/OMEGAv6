@@ -21,6 +21,7 @@ export type PacketMirrorR351={
 
 const fnv=(view:ArrayBufferView)=>{const bytes=new Uint8Array(view.buffer,view.byteOffset,view.byteLength);let h=2166136261;for(const b of bytes){h^=b;h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
 const finite=(n:number)=>Number.isFinite(n)?n:0;
+const bounded=async<T>(promise:Promise<T>,ms:number,label:string):Promise<T>=>{let timer:any;try{return await Promise.race([promise,new Promise<T>((_,reject)=>{timer=setTimeout(()=>reject(new Error(`${label} exceeded ${ms}ms bound`)),ms)})])}finally{clearTimeout(timer)}};
 
 export function compilePacketMirrorR351(field:TypedFieldR349):PacketMirrorR351{
  if(field?.schema!==R349_SCHEMA||field.resolution!==R349_RESOLUTION)throw new Error('R351 requires canonical R349 typed field');
@@ -67,7 +68,7 @@ export async function probeGpuR351(){
  const gpu=nav?.gpu;
  if(!gpu)return{available:false,state:'GPU_API_UNAVAILABLE',adapterInfo:null,limits:null,features:[],boundary:R351_BOUNDARY};
  try{
-  const adapter=await gpu.requestAdapter({powerPreference:'high-performance'});
+  const adapter=await bounded(gpu.requestAdapter({powerPreference:'high-performance'}),4000,'GPU adapter probe');
   if(!adapter)return{available:false,state:'NO_GPU_ADAPTER_RETURNED',adapterInfo:null,limits:null,features:[],boundary:R351_BOUNDARY};
   const info=adapter.info?{vendor:String(adapter.info.vendor||''),architecture:String(adapter.info.architecture||''),device:String(adapter.info.device||''),description:String(adapter.info.description||'')}:null;
   const limits=adapter.limits?Object.fromEntries(Object.entries(adapter.limits).filter(([,v])=>typeof v==='number')):null;
@@ -82,13 +83,13 @@ export async function gpuUploadReadbackProofR351(mirror:PacketMirrorR351){
  if(!gpu||!usage||!mapMode)return{state:'GPU_EXECUTION_UNAVAILABLE',cpuHash,gpuHash:null,correspondence:null,deviceExecutionProved:false,boundary:R351_BOUNDARY};
  let device:any=null;
  try{
-  const adapter=await gpu.requestAdapter({powerPreference:'high-performance'});if(!adapter)throw new Error('no adapter');device=await adapter.requestDevice();
+  const adapter=await bounded(gpu.requestAdapter({powerPreference:'high-performance'}),4000,'GPU adapter request');if(!adapter)throw new Error('no adapter');device=await bounded(adapter.requestDevice(),6000,'GPU device request');
   const bytes=new Uint8Array(mirror.packets.buffer,mirror.packets.byteOffset,mirror.packets.byteLength);
   const src=device.createBuffer({size:bytes.byteLength,usage:usage.COPY_SRC|usage.COPY_DST,mappedAtCreation:true});
   new Uint8Array(src.getMappedRange()).set(bytes);src.unmap();
   const dst=device.createBuffer({size:bytes.byteLength,usage:usage.COPY_DST|usage.MAP_READ});
   const encoder=device.createCommandEncoder();encoder.copyBufferToBuffer(src,0,dst,0,bytes.byteLength);device.queue.submit([encoder.finish()]);
-  await dst.mapAsync(mapMode.READ);const copy=new Uint8Array(dst.getMappedRange()).slice();dst.unmap();src.destroy?.();dst.destroy?.();
+  await bounded(dst.mapAsync(mapMode.READ),6000,'GPU readback map');const copy=new Uint8Array(dst.getMappedRange()).slice();dst.unmap();src.destroy?.();dst.destroy?.();
   const gpuHash=fnv(copy);return{state:'GPU_UPLOAD_READBACK_RETURNED',cpuHash,gpuHash,correspondence:cpuHash===gpuHash,deviceExecutionProved:true,byteCount:bytes.byteLength,boundary:R351_BOUNDARY};
  }catch(error){return{state:'GPU_EXECUTION_FAILED',cpuHash,gpuHash:null,correspondence:false,deviceExecutionProved:false,error:error instanceof Error?error.message:String(error),boundary:R351_BOUNDARY}}
  finally{device?.destroy?.()}
