@@ -1,7 +1,8 @@
 import assert from'node:assert/strict';import fs from'node:fs';
 import{compileCanonicalTypedFieldR349}from'../src/system/wovenHardwareFieldR349';
 import{compileHdrOffscreenR351,compilePacketMirrorR351,deterministicFrameReceiptR351,packetMirrorReceiptR351,rendererRestartProofR351,R351_EDGE_COUNT,R351_SCALE_LAWS}from'../src/system/gpuPacketMirrorR351';
-const field=compileCanonicalTypedFieldR349(0),mirror=compilePacketMirrorR351(field),receipt=packetMirrorReceiptR351(mirror);
+const sampler=(a:number)=>({continuity:(a%144)/143,plasticity:(a%12)/11,burden:((a>>1)%12)/11,contradiction:((a>>2)%12)/11,scar:(a%5)/20,evidence:.8,invariantCarry:.25+(a%17)/68,motionRate:(a%9)/8,support:.5,orientation:1 as const});
+const field=compileCanonicalTypedFieldR349(0,sampler),mirror=compilePacketMirrorR351(field),receipt=packetMirrorReceiptR351(mirror);
 assert.equal(mirror.packetCount,20736);assert.equal(mirror.packets.length,20736*9);assert.equal(R351_EDGE_COUNT,20735);assert.equal(mirror.edges.length,20735*2);assert.equal(receipt.exactCounts,true);
 for(let i=0;i<20735;i++){assert.equal(mirror.edges[i*2],i);assert.equal(mirror.edges[i*2+1],i+1)}
 assert.equal(mirror.parent1728[20735],1727);assert.equal(mirror.parent144[20735],143);assert.equal(mirror.parent12[20735],11);assert.equal(mirror.local12[20735],11);
