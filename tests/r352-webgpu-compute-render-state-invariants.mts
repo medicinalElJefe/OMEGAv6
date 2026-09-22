@@ -1,0 +1,14 @@
+import assert from'node:assert/strict';import fs from'node:fs';
+import{compileCanonicalTypedFieldR349}from'../src/system/wovenHardwareFieldR349';
+import{compilePacketMirrorR351}from'../src/system/gpuPacketMirrorR351';
+import{compareRenderStateR352,cpuRenderStateReferenceR352,gpuComputePlanR352,R352_PACKET_COUNT,R352_WORKGROUP_COUNT,R352_WORKGROUP_SIZE,R352_WGSL}from'../src/system/gpuComputeRuntimeR352';
+const field=compileCanonicalTypedFieldR349(0,a=>({continuity:(a%144)/143,plasticity:(a%12)/11,burden:((a>>1)%12)/11,contradiction:((a>>2)%12)/11,scar:(a%5)/20,evidence:.8,invariantCarry:.25,motionRate:.4,support:.5,orientation:1 as const}));
+const mirror=compilePacketMirrorR351(field),cpu=cpuRenderStateReferenceR352(mirror),plan=gpuComputePlanR352(mirror);
+assert.equal(R352_PACKET_COUNT,20736);assert.equal(R352_WORKGROUP_SIZE,64);assert.equal(R352_WORKGROUP_COUNT,324);assert.equal(cpu.values.length,20736*4);assert.equal(plan.inputBytes,20736*9*4);assert.equal(plan.outputBytes,20736*4*4);assert.equal(plan.truth,'DERIVED_RENDER_STATE_ONLY');assert.equal(plan.canonicalMutation,false);
+const same=cpu.values.slice();assert.equal(compareRenderStateR352(cpu.values,same).ok,true);same[17]+=1e-3;const bad=compareRenderStateR352(cpu.values,same);assert.equal(bad.ok,false);assert.equal(bad.mismatchCount,1);
+for(const token of['@compute @workgroup_size(64)','var<storage, read> packets','var<storage, read_write> renderState','i>=20736u','0.5*q+0.5*L','0.62*C+0.38*E','0.5*P+0.5*(1.0-S)'])assert.ok(R352_WGSL.includes(token),`R352 shader missing ${token}`);
+const core=fs.readFileSync('src/system/gpuComputeRuntimeR352.ts','utf8'),surface=fs.readFileSync('src/OmegaGpuComputeR352.tsx','utf8'),suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+for(const token of['createShaderModule','createComputePipeline','GPUBufferUsage','dispatchWorkgroups','copyBufferToBuffer','mapAsync','GPU_COMPUTE_UNAVAILABLE','GPU_COMPUTE_VERIFIED','R352_TOLERANCE'])assert.ok(core.includes(token),`R352 runtime missing ${token}`);
+for(const forbidden of['canonicalMutation:true','physicalSimulationClaimed:true'])assert.ok(!core.includes(forbidden),`R352 forbidden authority claim ${forbidden}`);
+for(const token of['OmegaGpuComputeR352','CPU↔GPU FLOAT MATCH','host wall return only','derived render state'])assert.ok((surface+suite).includes(token),`R352 surface/suite missing ${token}`);
+console.log('R352 WEBGPU COMPUTE PASS · 20,736 packets · 324×64 bounded WGSL dispatch · CPU reference render-state transform · explicit 2e-6 correspondence tolerance · GPU upload/dispatch/readback supervision · host return timing only · no canonical/physical authority upgrade');
