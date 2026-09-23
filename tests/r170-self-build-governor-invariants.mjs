@@ -5,6 +5,7 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 
 const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
+const terminalCandidate=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-candidate.json','utf8'));
 const enginePath=path.resolve('scripts/r170-selfbuild-engine.mjs');
 const engine=fs.readFileSync(enginePath,'utf8');
 const collector=fs.readFileSync('scripts/collect_selfbuild_residual_gate_r170.mjs','utf8');
@@ -44,6 +45,18 @@ assert.equal(new Set(admitted).size,admitted.length,'admitted source capsules mu
 for(const id of admitted)assert.ok(roadmapIds.has(id),`unknown admitted capsule ${id}`);
 assert.ok(admitted.length<=state.generation,'admitted capsule count cannot exceed generation');
 if(state.currentCapsuleId){assert.ok(roadmapIds.has(state.currentCapsuleId));assert.ok(!admitted.includes(state.currentCapsuleId))}
+const allRoadmapTargetsPresent=state.roadmap.every(x=>fs.existsSync(x.target));
+if(state.generation===state.maxAutonomousGenerations&&allRoadmapTargetsPresent){
+ assert.equal(admitted.length,state.roadmap.length,'exhausted bounded roadmap must have every generated capsule admitted');
+ assert.equal(state.currentCapsuleId,null,'exhausted bounded roadmap cannot retain a pending capsule');
+ for(const id of roadmapIds)assert.ok(admitted.includes(id),`exhausted roadmap missing admitted capsule ${id}`);
+ const terminalReceipt=(state.receipts||[]).find(x=>x.capsuleId===terminalCandidate.capsule?.id);
+ assert.equal(terminalReceipt?.status,'SOURCE_MERGE_OBSERVED','terminal receipt must preserve observed source merge');
+ assert.ok(terminalReceipt?.sourceMergedAt,'terminal receipt must retain source observation timestamp');
+ assert.equal(terminalCandidate.status,'SOURCE_MERGE_OBSERVED','terminal candidate surface cannot remain pending after bounded roadmap exhaustion');
+ assert.equal(terminalCandidate.receipt?.status,'SOURCE_MERGE_OBSERVED','terminal candidate receipt cannot remain pending after bounded roadmap exhaustion');
+ assert.ok(terminalCandidate.receipt?.sourceMergedAt,'terminal candidate must retain source observation timestamp');
+}
 for(const receipt of state.receipts||[]){assert.equal(receipt.canonicalAdmission,false);assert.ok(roadmapIds.has(receipt.capsuleId));assert.ok(Number(receipt.generation)>=1&&Number(receipt.generation)<=state.maxAutonomousGenerations)}
 for(const law of ['EXACT_CURRENT_MAIN_REQUIRES_SUCCESSFUL_CANONICAL_PRODUCTION_PROOF','UNPROVEN_OR_RED_PRODUCTION_HEAD_FORCES_OBSERVE_ONLY','AUTONOMOUS_BUILD_MAY_GENERATE_ONLY_BOUNDED_ROADMAP_SOURCE','R240_PLANNING_FANOUT_NEVER_EQUALS_PARALLEL_SOURCE_MUTATION','R164_RETURNED_RESIDUAL_EVIDENCE_DRIVES_PRESSURE_WITHOUT_INFERRED_USER_VALUE','R240_EXACT_SOURCE_PROMOTION_REQUIRES_UNCHANGED_BASE_EXPECTED_HEAD_ALLOWLIST_AND_ALL_GREEN_PROOF','R240_SOURCE_PROMOTION_MUST_DISPATCH_SOLE_CANONICAL_CI_AND_REQUIRE_EXACT_PRODUCTION_SUCCESS','R240_RED_PRODUCTION_STOPS_FUTURE_AUTONOMOUS_GENERATIONS_AND_REQUIRES_FORWARD_REPAIR','R239_HYBRID_RESOURCE_GOVERNOR_REMAINS_SEPARATE_AND_PRESERVED','R125_REMAINS_SOLE_CANONSTATE_ADMISSION_AUTHORITY','ONE_OPEN_AUTONOMOUS_CANDIDATE_FENCE_COVERS_R170_AND_CLOUD01','R170_AND_CLOUD01_SHARE_ONE_RESIDUAL_POLICY_ONE_R240_R243_SELECTION_LAW_AND_ONE_CAPSULE_GENERATOR'])assert.ok(state.laws.includes(law),`missing ${law}`);
 for(const capsule of state.roadmap){assert.match(capsule.id,/^SG00[1-5]$/);assert.match(capsule.target,/^src\/generated\/selfbuildR170\//);assert.ok(['LOW','MEDIUM'].includes(capsule.risk))}
