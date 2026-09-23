@@ -31,6 +31,8 @@ for(let n=1;n<=18;n++){
 
 for(const law of [
  'BUILD_PROGRESS_REQUIRES_EVIDENCED_RESIDUAL_REDUCTION',
+ 'SUCCESSOR_MUST_NOT_REDUCE_PREDECESSOR_CAPABILITY_FLOOR',
+ 'SUCCESSOR_MUST_PRESERVE_PREDECESSOR_PROOF_AND_AUTHORITY_SURFACES',
  'NO_REVISION_ONLY_PROGRESS',
  'NO_REPEAT_WITHOUT_NEW_EVIDENCE_OR_A_CHANGED_REPAIR_HYPOTHESIS',
  'AUTONOMOUS_SOURCE_MUTATION_IS_BRANCH_ISOLATED_ALLOWLISTED_AND_PROOF_GATED',
@@ -43,6 +45,8 @@ if(!master.includes('675-row Implementation Canon reconciliation'))throw new Err
 if(!master.includes('GPU hierarchical renderer and host runtime'))throw new Error('R314 lacks GPU/host convergence stage');
 if(!master.includes('SAI / PSC / AGI-QTI governed intelligence'))throw new Error('R314 lacks governed intelligence convergence stage');
 if(!master.includes('Full-system acceptance and continuous advancement'))throw new Error('R314 lacks terminal acceptance/continuous advancement stage');
+if(!master.includes('monotonic predecessor capability floor'))throw new Error('R314 B18 lacks monotonic predecessor capability floor');
+if(!master.includes('no predecessor route/capability/proof coverage loss'))throw new Error('R314 B18 lacks explicit predecessor coverage-loss proof');
 
 for(const token of ['Chart 1 · What OMEGAv6 has now','Chart 2 · What remains incomplete','Chart 3 · Exact build sequence','data-r314-convergence-master'])if(!ui.includes(token))throw new Error(`R314 operator chart surface missing ${token}`);
 if(!suite.includes("panel==='Consolidation'" )||!suite.includes('<OmegaConvergenceMasterR314/>'))throw new Error('R314 convergence master is not wired into Consolidation');
