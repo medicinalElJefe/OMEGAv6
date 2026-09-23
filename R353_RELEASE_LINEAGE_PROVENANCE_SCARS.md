@@ -24,9 +24,11 @@ The live slot requires all three first-hand bindings:
 
 If any binding is absent or contradictory, the live slot is HOLD. External post-deploy verification is not inferred from the public Worker.
 
-## Provenance scar
+## Decision parser and provenance scar
 
-Each canonical release retains an append-only semantic scar describing what authority/capability boundary changed. The scar is historical provenance; it cannot mutate canonical state or revive superseded behavior.
+R353 includes a bounded Markdown decision parser and a sanitized AG-012/B058 decision excerpt grounded in the connected correspondence ledger. It retains four historical repair decisions: one renderer packet, one canonical Field authority, exact immutable NOAA frame binding, and the authenticated-execution boundary. Every parsed decision is `HISTORICAL_ONLY` and `currentAuthority=false`.
+
+Each canonical release also retains an append-only semantic scar describing what authority/capability boundary changed. Scars and decision records are historical provenance; they cannot mutate canonical state or revive superseded behavior.
 
 ## Preserved authorities
 
