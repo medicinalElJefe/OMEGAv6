@@ -13,9 +13,10 @@ export type ReleaseNodeR353=ReleaseSeedR353&{
 };
 export type ReleaseEdgeR353={from:string;to:string;kind:'GIT_PARENT'|'CANONICAL_SUPERSESSION'|'RUNTIME_ROLLBACK_PARENT'};
 export type ProvenanceScarR353={at:string;revision:string;sourceSha:string;kind:'AUTHORITY_CHANGE'|'RECOVERY'|'COMPUTE'|'RENDER'|'TEMPORAL'|'PROOF';summary:string;currentAuthority:boolean};
+export type HistoricalDecisionR353={source:string;section:string;decision:string;authority:'HISTORICAL_ONLY';currentAuthority:false};
 export type ReleaseLineageR353={
  schema:typeof R353_SCHEMA;revision:typeof R353_REVISION;state:'CURRENT_BOUND'|'HOLD';currentSha:string|null;currentWorkerVersion:string|null;
- nodes:ReleaseNodeR353[];edges:ReleaseEdgeR353[];scars:ProvenanceScarR353[];donors:typeof HISTORICAL_PROVENANCE_DONORS_R353;
+ nodes:ReleaseNodeR353[];edges:ReleaseEdgeR353[];scars:ProvenanceScarR353[];historicalDecisions:HistoricalDecisionR353[];donors:typeof HISTORICAL_PROVENANCE_DONORS_R353;
  receiptBinding:{releaseSha:string|null;attestationSha:string|null;receiptSha256:string|null;workerVersion:string|null;sourceMatch:boolean;workerMatch:boolean;receiptMatch:boolean;externalPostDeployVerificationClaimed:false};
  boundary:typeof R353_BOUNDARY;
 };
@@ -35,6 +36,21 @@ export const CANONICAL_RELEASES_R353:readonly ReleaseSeedR353[]=Object.freeze([
  {revision:'R350.1',sha:'fe2e2fdb5b9c2fda69c099862cd24332bc19a00c',date:'2026-09-22T04:37:43Z',title:'SHA-256 temporal replay hardening',parents:['adfa3dd8df337365adbdcd4d7eefff27428da72a','4cc73a41a886c6aed78fbf91cd62dcbc6eca8704'],productionRunId:35687602402,scar:'Temporal state fingerprints were strengthened to SHA-256 and replay budget compilation was bound to the actual R193 multi-axis engine.',evidenceClass:'CANONICAL_RELEASE'},
  {revision:'R352',sha:'3aafd7d0aacbcc08dc9a53925435b0e84229d2b7',date:'2026-09-23T00:26:04Z',title:'Proof-bound WebGPU compute/render state',parents:['fe2e2fdb5b9c2fda69c099862cd24332bc19a00c','241339fd011551cfa6f2fa44d65c3edbc2139e45'],productionRunId:35802041605,scar:'WebGPU compute upload/dispatch/readback gained CPU correspondence proof while canonical state remained CPU/R349/R350 authoritative.',evidenceClass:'CANONICAL_RELEASE'}
 ]);
+
+export function parseHistoricalDecisionRecordsR353(markdown:string,source='Historical correspondence'):HistoricalDecisionR353[]{
+ const out:HistoricalDecisionR353[]=[];let section='UNSECTIONED';
+ for(const raw of String(markdown||'').split(/\\r?\\n/)){const line=raw.trim();const heading=line.match(/^#{2,4}\\s+(.+)$/);if(heading){section=heading[1].trim();continue}const bullet=line.match(/^[-*]\\s+(.+)$/);if(!bullet)continue;const decision=bullet[1].replace(/\\s+/g,' ').trim();if(decision)out.push({source,section,decision,authority:'HISTORICAL_ONLY',currentAuthority:false})}
+ return out;
+}
+export const B058_DECISION_EXCERPT_R353=`## One renderer packet
+- Bind rendering to one packet phase and remove duplicate phase re-scaling.
+## One canonical Field authority
+- Remove editable shadow metrics so Field and traversal resolve from the same source address.
+## Exact NOAA frame evidence
+- Bind observation timestamps to immutable timestamped frames rather than mutable latest aliases.
+## Remaining authenticated boundary
+- Do not claim account-bound canonical execution until an authenticated return receipt exists.`;
+export const HISTORICAL_DECISIONS_R353=Object.freeze(parseHistoricalDecisionRecordsR353(B058_DECISION_EXCERPT_R353,'OMEGA B058 Correspondence Ledger (AG-012)'));
 
 export const HISTORICAL_PROVENANCE_DONORS_R353=Object.freeze([
  {source:'Sovereign build proof history (AG-011)',class:'HISTORICAL_RECEIPT',role:'manifest / continuity / test-receipt normalization',authority:'HISTORICAL_ONLY'},
@@ -81,7 +97,7 @@ export function compileReleaseLineageR353(evidence:CurrentRuntimeEvidenceR353={}
  for(let i=1;i<ordered.length;i++)edges.push({from:ordered[i-1].sha,to:ordered[i].sha,kind:'CANONICAL_SUPERSESSION'});
  if(currentSha&&binding.rollbackSha&&binding.rollbackSha!==currentSha&&!edges.some(e=>e.from===binding.rollbackSha&&e.to===currentSha&&e.kind==='RUNTIME_ROLLBACK_PARENT'))edges.push({from:binding.rollbackSha,to:currentSha,kind:'RUNTIME_ROLLBACK_PARENT'});
  const scars:ProvenanceScarR353[]=nodes.map(n=>({at:n.date,revision:n.revision,sourceSha:n.sha,kind:scarKind(n.revision),summary:n.scar,currentAuthority:n.currentLive}));
- return{schema:R353_SCHEMA,revision:R353_REVISION,state:currentSha?'CURRENT_BOUND':'HOLD',currentSha,currentWorkerVersion:binding.workerVersion,nodes,edges,scars,donors:HISTORICAL_PROVENANCE_DONORS_R353,
+ return{schema:R353_SCHEMA,revision:R353_REVISION,state:currentSha?'CURRENT_BOUND':'HOLD',currentSha,currentWorkerVersion:binding.workerVersion,nodes,edges,scars,historicalDecisions:[...HISTORICAL_DECISIONS_R353],donors:HISTORICAL_PROVENANCE_DONORS_R353,
   receiptBinding:{releaseSha:binding.releaseSha,attestationSha:binding.attestationSha,receiptSha256:binding.buildReceiptSha||binding.releaseReceiptSha||binding.attestationReceiptSha,workerVersion:binding.workerVersion,sourceMatch:binding.sourceMatch,workerMatch:binding.workerMatch,receiptMatch:binding.receiptMatch,externalPostDeployVerificationClaimed:false},boundary:R353_BOUNDARY};
 }
 
@@ -93,7 +109,7 @@ function stable(value:any):string{
 export async function releaseLineageSha256R353(lineage:ReleaseLineageR353){
  const payload={schema:lineage.schema,revision:lineage.revision,state:lineage.state,currentSha:lineage.currentSha,currentWorkerVersion:lineage.currentWorkerVersion,
   nodes:lineage.nodes.map(n=>({revision:n.revision,sha:n.sha,date:n.date,parents:n.parents,productionRunId:n.productionRunId,authority:n.authority,supersededBy:n.supersededBy,currentLive:n.currentLive})),
-  edges:lineage.edges,scars:lineage.scars,donors:lineage.donors,receiptBinding:lineage.receiptBinding,boundary:lineage.boundary};
+  edges:lineage.edges,scars:lineage.scars,historicalDecisions:lineage.historicalDecisions,donors:lineage.donors,receiptBinding:lineage.receiptBinding,boundary:lineage.boundary};
  const bytes=new TextEncoder().encode(stable(payload));
  if(!globalThis.crypto?.subtle)throw new Error('R353 SHA-256 requires Web Crypto');
  const digest=await globalThis.crypto.subtle.digest('SHA-256',bytes);
