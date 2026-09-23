@@ -79,7 +79,7 @@ export function compileReleaseLineageR353(evidence:CurrentRuntimeEvidenceR353={}
  const edges:ReleaseEdgeR353[]=[];
  for(const node of ordered)for(const parent of node.parents)if(SHA.test(parent))edges.push({from:parent,to:node.sha,kind:'GIT_PARENT'});
  for(let i=1;i<ordered.length;i++)edges.push({from:ordered[i-1].sha,to:ordered[i].sha,kind:'CANONICAL_SUPERSESSION'});
- if(currentSha&&binding.rollbackSha&&binding.rollbackSha!==currentSha&&!edges.some(e=>e.from===binding.rollbackSha&&e.to===currentSha))edges.push({from:binding.rollbackSha,to:currentSha,kind:'RUNTIME_ROLLBACK_PARENT'});
+ if(currentSha&&binding.rollbackSha&&binding.rollbackSha!==currentSha&&!edges.some(e=>e.from===binding.rollbackSha&&e.to===currentSha&&e.kind==='RUNTIME_ROLLBACK_PARENT'))edges.push({from:binding.rollbackSha,to:currentSha,kind:'RUNTIME_ROLLBACK_PARENT'});
  const scars:ProvenanceScarR353[]=nodes.map(n=>({at:n.date,revision:n.revision,sourceSha:n.sha,kind:scarKind(n.revision),summary:n.scar,currentAuthority:n.currentLive}));
  return{schema:R353_SCHEMA,revision:R353_REVISION,state:currentSha?'CURRENT_BOUND':'HOLD',currentSha,currentWorkerVersion:binding.workerVersion,nodes,edges,scars,donors:HISTORICAL_PROVENANCE_DONORS_R353,
   receiptBinding:{releaseSha:binding.releaseSha,attestationSha:binding.attestationSha,receiptSha256:binding.buildReceiptSha||binding.releaseReceiptSha||binding.attestationReceiptSha,workerVersion:binding.workerVersion,sourceMatch:binding.sourceMatch,workerMatch:binding.workerMatch,receiptMatch:binding.receiptMatch,externalPostDeployVerificationClaimed:false},boundary:R353_BOUNDARY};
