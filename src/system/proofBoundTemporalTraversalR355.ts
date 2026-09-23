@@ -4,7 +4,7 @@ import{type CurrentRuntimeEvidenceR353}from'./releaseLineageR353';
 
 export const R355_SCHEMA='OMEGA_PROOF_BOUND_TEMPORAL_SCENE_TRAVERSAL_R355' as const;
 export const R355_REVISION='R355' as const;
-export const R355_BOUNDARY='R355 indexes and digest-chains R354 proof-bound model scenes across integer R350 model-time addresses. It adds no observation, physical-time, CanonState, durable execution-history, dispatch or production authority. R125/R141/R146/R147 and ci.yml remain authoritative; HISTORY/NOW/FORECAST remain model relations, not observational claims.' as const;
+export const R355_BOUNDARY='R355 indexes and digest-chains R354 proof-bound model scenes across integer R350 model-time addresses. R355 is accepted only as a monotonic successor: the R354 capability floor, all R347-through-R354 proof gates, the current route/capability authority and established convergence/runtime layers must remain present. It adds no observation, physical-time, CanonState, durable execution-history, dispatch or production authority. R125/R141/R146/R147 and ci.yml remain authoritative; HISTORY/NOW/FORECAST remain model relations, not observational claims.' as const;
 export const R355_LAWS=[
  'EVERY_TRAVERSAL_NODE_IS_AN_R354_SCENE_RECEIPT',
  'TRAVERSAL_ORDER_IS_INTEGER_MODEL_TIME_ORDER',
@@ -13,7 +13,11 @@ export const R355_LAWS=[
  'HISTORY_NOW_FORECAST_RELATIONS_MUST_REMAIN_EXPLICIT',
  'MODEL_HISTORY_IS_NOT_OBSERVED_HISTORY',
  'MODEL_FORECAST_IS_NOT_OBSERVATION',
- 'NO_NEW_PHYSICAL_PRIMITIVE'
+ 'NO_NEW_PHYSICAL_PRIMITIVE',
+ 'SUCCESSOR_MUST_PRESERVE_R354_CAPABILITY_FLOOR',
+ 'SUCCESSOR_MUST_RETAIN_ALL_R347_THROUGH_R354_PROOF_GATES',
+ 'SUCCESSOR_MUST_RETAIN_CURRENT_ROUTE_AND_CAPABILITY_AUTHORITY',
+ 'SUCCESSOR_FEATURES_ARE_ADDITIVE_NOT_REPLACEMENT'
 ]as const;
 
 export type TemporalSceneNodeR355={tick:number;relation:ProofBoundSceneReceiptR354['relation'];sceneDigest:string;fieldHash:string;frameReceiptHash:string;state:ProofBoundSceneReceiptR354['state'];releaseLineageSha256:string;previousLinkDigest:string;linkDigest:string};
