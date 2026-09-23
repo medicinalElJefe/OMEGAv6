@@ -39,7 +39,7 @@ export const CANONICAL_RELEASES_R353:readonly ReleaseSeedR353[]=Object.freeze([
 
 export function parseHistoricalDecisionRecordsR353(markdown:string,source='Historical correspondence'):HistoricalDecisionR353[]{
  const out:HistoricalDecisionR353[]=[];let section='UNSECTIONED';
- for(const raw of String(markdown||'').split(/\\r?\\n/)){const line=raw.trim();const heading=line.match(/^#{2,4}\\s+(.+)$/);if(heading){section=heading[1].trim();continue}const bullet=line.match(/^[-*]\\s+(.+)$/);if(!bullet)continue;const decision=bullet[1].replace(/\\s+/g,' ').trim();if(decision)out.push({source,section,decision,authority:'HISTORICAL_ONLY',currentAuthority:false})}
+ for(const raw of String(markdown||'').split(/\r?\n/)){const line=raw.trim();const heading=line.match(/^#{2,4}\s+(.+)$/);if(heading){section=heading[1].trim();continue}const bullet=line.match(/^[-*]\s+(.+)$/);if(!bullet)continue;const decision=bullet[1].replace(/\s+/g,' ').trim();if(decision)out.push({source,section,decision,authority:'HISTORICAL_ONLY',currentAuthority:false})}
  return out;
 }
 export const B058_DECISION_EXCERPT_R353=`## One renderer packet
