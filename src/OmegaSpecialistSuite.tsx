@@ -22,6 +22,7 @@ import OmegaHardwareFieldR349 from './OmegaHardwareFieldR349';
 import OmegaTemporalCheckpointR350 from './OmegaTemporalCheckpointR350';
 import OmegaGpuPacketMirrorR351 from './OmegaGpuPacketMirrorR351';
 import OmegaGpuComputeR352 from './OmegaGpuComputeR352';
+import OmegaReleaseLineageR353 from './OmegaReleaseLineageR353';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -48,7 +49,7 @@ export default function OmegaSpecialistSuite(props:Props){
   <details className='r121-legacy-convergence'><summary>Retained continuity / convergence field instrument</summary><OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
  </div>);
  if(panel==='Field'||panel==='Data Motion')return wrap(<OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>);
- if(panel==='Evidence & Proof')return wrap(<div><OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/><SingmasterProofWorkbenchR290 record={record}/></div>);
+ if(panel==='Evidence & Proof')return wrap(<div><OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/><OmegaReleaseLineageR353/><SingmasterProofWorkbenchR290 record={record}/></div>);
  if(panel==='Memory')return wrap(<OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/>);
  if(panel==='Canon Evolution'||panel==='Governance')return wrap(<div><CalculusAddressFabricR240 record={record}/><RecursiveSelfBuildR240/><OmegaGovernanceProjectMediaR29 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/></div>);
  if(panel==='Projects'||panel==='Assets'||panel==='Render Queue')return wrap(<OmegaGovernanceProjectMediaR29 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>);
