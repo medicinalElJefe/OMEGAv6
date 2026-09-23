@@ -27,7 +27,7 @@ export default function OmegaReleaseLineageR353(){
   <div className='r353-timeline' aria-label='R353 canonical release lineage'>{lineage.nodes.map(node=><article key={node.sha} className={node.currentLive?'current':'historical'}>
     <div className='r353-node-head'><span>{node.revision}</span><strong>{node.authority}</strong></div><b>{node.title}</b><code>{node.sha}</code><small>{when(node.date)} · production run {node.productionRunId??'dynamic'}</small><p>{node.scar}</p>{node.supersededBy&&<em>superseded by {short(node.supersededBy,14)}</em>}
    </article>)}</div>
-  <div className='r353-donors'><h4>Historical provenance donors</h4>{lineage.donors.map(d=><article key={d.source}><b>{d.source}</b><span>{d.role}</span><strong>{d.authority}</strong></article>)}</div>
+  <div className='r353-decisions'><h4>Historical decision scars</h4>{lineage.historicalDecisions.map((d,i)=><article key={`${d.section}-${i}`}><b>{d.section}</b><span>{d.decision}</span><strong>{d.authority}</strong></article>)}</div><div className='r353-donors'><h4>Historical provenance donors</h4>{lineage.donors.map(d=><article key={d.source}><b>{d.source}</b><span>{d.role}</span><strong>{d.authority}</strong></article>)}</div>
   <footer><ShieldCheck/><span>{R353_BOUNDARY}</span></footer>
  </section>;
 }
