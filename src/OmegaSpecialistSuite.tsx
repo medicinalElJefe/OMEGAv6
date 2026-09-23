@@ -23,6 +23,7 @@ import OmegaTemporalCheckpointR350 from './OmegaTemporalCheckpointR350';
 import OmegaGpuPacketMirrorR351 from './OmegaGpuPacketMirrorR351';
 import OmegaGpuComputeR352 from './OmegaGpuComputeR352';
 import OmegaReleaseLineageR353 from './OmegaReleaseLineageR353';
+import OmegaProofBoundSceneR354 from './OmegaProofBoundSceneR354';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -40,6 +41,7 @@ export default function OmegaSpecialistSuite(props:Props){
   <OmegaTemporalCheckpointR350/>
   <OmegaGpuPacketMirrorR351/>
   <OmegaGpuComputeR352/>
+  <OmegaProofBoundSceneR354/>
   <FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/>
   <OmegaMaximumCockpitR126 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>
   <details className='r121-legacy-convergence' open><summary>R164 returned reflex → autonomic swarm · replay / residual carry / governed recruitment</summary><ReflexAutonomicR164/></details>
