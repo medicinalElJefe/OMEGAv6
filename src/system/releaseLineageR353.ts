@@ -69,7 +69,7 @@ export function compileReleaseLineageR353(evidence:CurrentRuntimeEvidenceR353={}
  const ordered=CANONICAL_RELEASES_R353.map(x=>({...x}));
  const bySha=new Map(ordered.map(x=>[x.sha,x]));
  if(currentSha&&!bySha.has(currentSha)){
-  ordered.push({revision:'CURRENT',sha:currentSha,date:text(evidence.runtimeAttestation?.returnedAt)||text(evidence.releaseEvidence?.returnedAt)||new Date(0).toISOString(),title:'Current packaged runtime outside the static R353 historical seed',parents:binding.rollbackSha?[binding.rollbackSha]:[],productionRunId:null,scar:'Current first-hand runtime entered after the static historical seed; retained dynamically so lineage never freezes stale live authority.',evidenceClass:'DYNAMIC_CURRENT_RUNTIME'});
+  ordered.push({revision:'CURRENT',sha:currentSha,date:text(evidence.runtimeAttestation?.returnedAt)||text(evidence.releaseEvidence?.returnedAt)||new Date(0).toISOString(),title:'Current packaged runtime outside the static R353 historical seed',parents:[],productionRunId:null,scar:'Current first-hand runtime entered after the static historical seed; retained dynamically so lineage never freezes stale live authority.',evidenceClass:'DYNAMIC_CURRENT_RUNTIME'});
  }
  const nodes:ReleaseNodeR353[]=ordered.map((x,i)=>{
   const isCurrent=currentSha===x.sha;
