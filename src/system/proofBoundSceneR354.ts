@@ -1,4 +1,5 @@
 import{compileCanonicalTypedFieldR349,type TypedFieldR349}from'./wovenHardwareFieldR349';
+import{initCorpusPack}from'../corpusRuntime';
 import{evolveTemporalTimelineR350,proveTimelineReplayR350,seekTemporalStateR350,type TimelineR350}from'./temporalCheckpointReplayR350';
 import{compilePacketMirrorR351,deterministicFrameReceiptR351,packetMirrorReceiptR351,type PacketMirrorR351}from'./gpuPacketMirrorR351';
 import{cpuRenderStateReferenceR352}from'./gpuComputeRuntimeR352';
@@ -72,6 +73,7 @@ export async function compileProofBoundSceneR354({
  steps?:number;checkpointEvery?:number;targetTick?:number;nowTick?:number;orientations?:number[];transportRate?:number;
 }={}):Promise<ProofBoundSceneBuildR354>{
  const stepCount=clampInt(steps,0,64),now=clampInt(nowTick,0,stepCount),target=clampInt(targetTick,0,stepCount);
+ if(!sourceField)await initCorpusPack();
  const source=sourceField||compileCanonicalTypedFieldR349(0);
  const timeline=evolveTemporalTimelineR350(source,{steps:stepCount,checkpointEvery,orientations,transportRate,nowTick:now});
  const replay=seekTemporalStateR350(timeline,target),timelineProof=proveTimelineReplayR350(timeline);
