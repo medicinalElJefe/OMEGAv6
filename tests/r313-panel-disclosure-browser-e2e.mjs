@@ -208,7 +208,7 @@ try{
   for(const [viewportName,viewport] of viewports){
     const context=await browser.newContext({viewport,deviceScaleFactor:1});
     const page=await context.newPage();
-    const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+    const errors=[];page.on('pageerror',e=>errors.push(e?.stack||String(e)));
     await page.goto(`${base}/?r313-panel-disclosure=${Date.now()}-${viewportName}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
     for(const route of routes){
