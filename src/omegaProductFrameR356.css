@@ -52,3 +52,13 @@
    below independently clipped render stages. The outer shell must not become a hidden
    programmatic scroll membrane; canvases/stages retain their own clipping authority. */
 .omega-workstation-v2[data-product-design='R356'][data-panel='Visual Instrument'] .r356-primary-stage .r36-living-surface{overflow:visible!important}
+
+
+/* R356.7 · explicit desktop product-column authority.
+   Legacy specialist layout rules may reorder descendants, but they may never place the
+   canonical primary instrument in the bounded context rail. Grid ownership is explicit:
+   primary = flexible track 1, context = bounded track 2. */
+@media(min-width:901px){
+ .r356-workspace-grid>.r356-primary-stage{grid-column:1!important;grid-row:1!important;justify-self:stretch!important;inline-size:100%!important;max-inline-size:100%!important}
+ .r356-workspace-grid>.r356-context-rail{grid-column:2!important;grid-row:1!important;justify-self:stretch!important;inline-size:100%!important;max-inline-size:100%!important}
+}
