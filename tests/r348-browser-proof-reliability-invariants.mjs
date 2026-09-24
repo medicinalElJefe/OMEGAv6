@@ -34,11 +34,12 @@ assert.ok(r313ShardRunner.includes('for ((j=0;j<${#pids[@]};j++)); do')&&r313Sha
 assert.ok(r286ShardRunner.includes('status=1')&&r286ShardRunner.includes('if [ "$status" -ne 0 ]'),'R286 partition recombination must remain fail-closed if any shard fails');
 assert.ok(r286Browser.includes('profileIndex*expected.length+routeIndex'),'R286 partition law must deterministically cover profile × route address space');
 assert.ok(r313ShardRunner.includes('status=1')&&r313ShardRunner.includes('if [ "$status" -ne 0 ]'),'R313 partition recombination must remain fail-closed if any shard fails');
-assert.ok(r313Browser.includes('profileIndex*surfaces.length+surfaceIndex'),'R313 partition law must deterministically cover profile × route address space');
+assert.ok(r313Browser.includes('partitionInteractionCasesR355')&&r313Browser.includes('interactionPartition[shardIndex].cases'),'R313 partition law must use deterministic measured-workload balancing over the complete profile × route address space');
+assert.ok(!r313Browser.includes('profileIndex*surfaces.length+surfaceIndex)%shardCount'),'R313 must not regress to blind modulo workload partitioning');
 
 assert.ok(runner.includes('reusing healthy shared preview'),'R241 runner must reuse the already healthy preview');
 assert.ok(runner.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC:-300'),'R241 runner must default every child proof to a finite wall-clock budget');
 assert.ok(runner.includes('timeout --signal=TERM --kill-after=15s'),'R241 runner must terminate hung children fail-closed');
 assert.ok(runner.includes('R241 browser proof timeout'),'R241 timeout must produce an explicit diagnostic annotation');
 
-console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286/R313 exhaustive 88-case contracts partitioned and recombined across eight bounded shards in two four-way waves · evidence-calibrated 360s child / 780s parent ceilings · every child proof bounded · fail-closed diagnostics retained');
+console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286 exhaustive modulo partition retained · R313 exhaustive 88-case interaction proof now uses deterministic R286-census workload balancing across eight bounded shards in two four-way waves · evidence-calibrated 360s child / 780s parent ceilings · every child proof bounded · fail-closed diagnostics retained');
