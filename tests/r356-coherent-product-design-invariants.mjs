@@ -14,6 +14,8 @@ const r355=read('tests/r355-monotonic-successor-invariants.mjs');
 const disclosure=read('tests/r313-panel-disclosure-browser-e2e.mjs');
 const membrane=read('src/CanonicalMembraneR95.tsx');
 const membraneCss=read('src/canonicalMembraneR95.css');
+const calculusField=read('src/CalculusFieldR37.tsx');
+const calculusFieldCss=read('src/calculusFieldR37.css');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
@@ -88,6 +90,11 @@ assert.ok(membraneCss.includes(".r95-membrane-stage{position:relative;min-height
 assert.ok(css.includes(".omega-workstation-v2[data-product-design='R356'][data-panel='Visual Instrument'] .r356-primary-stage .r36-living-surface{overflow:visible!important}"),'R356 Visual Instrument outer shell must not become a hidden vertical scroll membrane');
 assert.ok(css.includes(".r356-workspace-grid>.r356-primary-stage{grid-column:1!important;grid-row:1!important;justify-self:stretch!important;inline-size:100%!important;max-inline-size:100%!important}"),'R356 desktop primary instrument must explicitly own flexible grid track 1');
 assert.ok(css.includes(".r356-workspace-grid>.r356-context-rail{grid-column:2!important;grid-row:1!important;justify-self:stretch!important;inline-size:100%!important;max-inline-size:100%!important}"),'R356 desktop context rail must explicitly own bounded grid track 2');
+const calculusDraw=(calculusField.match(/const draw=\(now:number\)=>\{([\s\S]*?)raf=requestAnimationFrame\(draw\)\}/)||[])[1]||'';
+assert.ok(calculusDraw&&!calculusDraw.includes('applyCanvasResolutionR119'),'R356 calculus animation may paint every frame but may not rewrite canvas resolution/layout every frame');
+assert.ok(calculusField.includes("const observer=new ResizeObserver(()=>{resize();if(reduce)draw(performance.now())})"),'R356 calculus backing resolution must be bound to actual stage resize observation');
+assert.ok(calculusFieldCss.includes(".cfr37-stage{position:relative;min-height:500px")&&calculusFieldCss.includes("overflow:hidden"),'R356 calculus stage must remain the stable layout owner');
+assert.ok(calculusFieldCss.includes(".calculus-field-r37 canvas{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0"),'R356 calculus canvas backing size may not participate in document-flow geometry');
 
 assert.ok(navigation.includes("export const OMEGA_NAVIGATION")&&navigation.includes("OMEGA_NAV_GROUPS"),'R356 must preserve the existing canonical navigation registry');
 
