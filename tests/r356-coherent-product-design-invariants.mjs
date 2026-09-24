@@ -13,6 +13,7 @@ const capability=read('src/capabilityAuthority.ts');
 const r355=read('tests/r355-monotonic-successor-invariants.mjs');
 const disclosure=read('tests/r313-panel-disclosure-browser-e2e.mjs');
 const membrane=read('src/CanonicalMembraneR95.tsx');
+const membraneCss=read('src/canonicalMembraneR95.css');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
@@ -82,6 +83,8 @@ assert.ok(disclosure.includes('scrollLocatorForContinuity(control)')&&disclosure
 const membraneDraw=(membrane.match(/const draw=\(time=0\)=>\{([\s\S]*?)if\(!reduced\)raf=requestAnimationFrame\(draw\)/)||[])[1]||'';
 assert.ok(membraneDraw&&!membraneDraw.includes('resize()'),'R356 membrane animation may paint every frame but may not rewrite canvas resolution/layout every frame');
 assert.ok(membrane.includes("const observer=new ResizeObserver(()=>{resize();if(reduced)draw(performance.now())})"),'R356 membrane resolution writes must remain bound to actual resize observation');
+assert.ok(membraneCss.includes(".r95-membrane-stage canvas{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0"),'R356 canvas backing resolution may not participate in membrane document-flow geometry');
+assert.ok(membraneCss.includes(".r95-membrane-stage{position:relative;min-height:620px"),'R356 membrane stage must remain the stable layout owner');
 
 assert.ok(navigation.includes("export const OMEGA_NAVIGATION")&&navigation.includes("OMEGA_NAV_GROUPS"),'R356 must preserve the existing canonical navigation registry');
 
