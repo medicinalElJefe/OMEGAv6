@@ -31,3 +31,16 @@
 @media(max-width:900px){.r356-route-header{grid-template-columns:1fr;padding:14px 12px}.r356-header-actions{justify-content:space-between}.r356-state-ribbon{grid-template-columns:repeat(2,minmax(0,1fr))}.r356-state-ribbon>span:last-child{grid-column:1/-1}.r356-workspace-grid{grid-template-columns:1fr}.r356-context-rail{position:static;grid-template-columns:repeat(2,minmax(0,1fr))}.r356-context-rail>footer,.r356-context-routes{grid-column:1/-1}}
 @media(max-width:560px){.r356-route-identity h1{font-size:27px}.r356-state-ribbon{grid-template-columns:1fr}.r356-state-ribbon>span:last-child{grid-column:auto}.r356-context-rail{grid-template-columns:1fr}.r356-context-rail>footer,.r356-context-routes{grid-column:auto}.r356-route-identity p{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.r356-product-frame *{scroll-behavior:auto!important;transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}}
+
+/* Global product surfaces: R356 owns chrome while legacy CSS remains module-local compatibility. */
+.r71-home{--line:var(--r356-line);--line-strong:var(--r356-line-strong);--gold:var(--r356-gold);color:var(--r356-text)!important;background:radial-gradient(circle at 16% 8%,rgba(85,159,147,.075),transparent 28%),linear-gradient(180deg,#05090c,#071015 54%,#05090c)!important}
+.r71-home .r96-topbar{border-color:var(--r356-line)!important;background:rgba(6,14,18,.94)!important;backdrop-filter:blur(18px);box-shadow:0 12px 34px rgba(0,0,0,.18)}
+.r71-home :where(.r96-workspace-card,.r96-command-dock,.r96-inspector,.r96-engine-spine article,.r132-primary-strip){border-color:var(--r356-line)!important;background:linear-gradient(145deg,rgba(11,23,28,.9),rgba(6,13,17,.94))!important;box-shadow:none!important}
+.r71-home :where(button,[role='button']){border-radius:8px!important}.r71-home :where(h1,h2,h3){letter-spacing:-.025em}.r71-home :where(p,small){color:var(--r356-muted)}
+.r356-canonical-nav .r94-nav-rail{background:#050b0e!important;border-right:1px solid var(--r356-line)!important;box-shadow:8px 0 28px rgba(0,0,0,.18)!important}
+.r356-canonical-nav .r94-nav-panel{background:linear-gradient(180deg,#081116,#050b0e)!important;border-right:1px solid var(--r356-line-strong)!important;box-shadow:18px 0 46px rgba(0,0,0,.28)!important}
+.r356-canonical-nav .r94-rail-action,.r356-canonical-nav .r88-navigator-trigger,.r356-canonical-nav .r120-rail-width-toggle{border-radius:8px!important}
+.r356-canonical-nav .r94-rail-action.active{background:rgba(111,205,188,.12)!important;color:var(--r356-text)!important;box-shadow:inset 2px 0 var(--r356-accent)!important}
+.r356-canonical-nav .r89-flat-route{border-radius:8px!important}.r356-canonical-nav .r89-flat-route.active{background:rgba(111,205,188,.10)!important;box-shadow:inset 2px 0 var(--r356-accent)!important}
+.r356-canonical-nav .r333-filter-stack,.r356-canonical-nav .r88-search{background:rgba(5,13,17,.9)!important;border-color:var(--r356-line)!important}
+.r356-canonical-nav .r100-navigator-head{background:rgba(7,16,20,.96)!important;border-bottom-color:var(--r356-line)!important}
