@@ -75,6 +75,10 @@ async function hiddenSummaryDiagnostic(details){
   });
 }
 
+async function scrollLocatorForContinuity(locator){
+  await locator.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest'}));
+}
+
 async function waitForStableLocator(page,locator,label){
   let prior=null,stable=0;
   for(let i=0;i<30;i++){
