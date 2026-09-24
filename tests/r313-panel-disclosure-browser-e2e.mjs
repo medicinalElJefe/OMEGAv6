@@ -113,7 +113,7 @@ async function testDetails(page,viewport,route){
       const beforeState=await directContentState(details);
       if(!before&&beforeState.visible>0)throw new Error(`${viewport}/${route}: closed details #${i} leaks ${beforeState.visible}/${beforeState.count} direct content regions`);
       if(before&&beforeState.text>0&&beforeState.visible===0)throw new Error(`${viewport}/${route}: open details #${i} hides all meaningful direct content`);
-      await summary.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
+      await scrollLocatorForContinuity(summary);
       await waitForStableLocator(page,summary,`${viewport}/${route}: details #${i} before toggle`);
       await summary.click({timeout:10000});
       await page.waitForTimeout(35);
@@ -122,7 +122,7 @@ async function testDetails(page,viewport,route){
       const afterState=await directContentState(details);
       if(after&&afterState.text>0&&afterState.visible===0){const diag=await detailsDiagnostic(details);throw new Error(`${viewport}/${route}: opened details #${i} exposes no meaningful direct content · ${JSON.stringify(diag)}`)}
       if(!after&&afterState.visible>0)throw new Error(`${viewport}/${route}: closed details #${i} still exposes ${afterState.visible} direct content regions`);
-      await summary.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
+      await scrollLocatorForContinuity(summary);
       await waitForStableLocator(page,summary,`${viewport}/${route}: details #${i} before restore`);
       await summary.click({timeout:10000});
       await page.waitForTimeout(35);
