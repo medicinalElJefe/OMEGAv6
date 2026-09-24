@@ -44,3 +44,11 @@
 .r356-canonical-nav .r89-flat-route{border-radius:8px!important}.r356-canonical-nav .r89-flat-route.active{background:rgba(111,205,188,.10)!important;box-shadow:inset 2px 0 var(--r356-accent)!important}
 .r356-canonical-nav .r333-filter-stack,.r356-canonical-nav .r88-search{background:rgba(5,13,17,.9)!important;border-color:var(--r356-line)!important}
 .r356-canonical-nav .r100-navigator-head{background:rgba(7,16,20,.96)!important;border-bottom-color:var(--r356-line)!important}
+
+
+/* R356.5 · Visual Instrument keeps one vertical scroll owner.
+   R203's global special-app overflow:hidden is appropriate for bounded modules, but the
+   outer R36 Visual Instrument is a document-flow composition containing disclosures
+   below independently clipped render stages. The outer shell must not become a hidden
+   programmatic scroll membrane; canvases/stages retain their own clipping authority. */
+.omega-workstation-v2[data-product-design='R356'][data-panel='Visual Instrument'] .r356-primary-stage .r36-living-surface{overflow:visible!important}
