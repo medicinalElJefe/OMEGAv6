@@ -3,6 +3,7 @@ import {Home,Menu,ShieldCheck,SlidersHorizontal} from 'lucide-react';
 import {omegaMasterMenuForRouteR289,omegaNavItem} from './navigationRegistry';
 import {workspaceForRouteR82} from './omegaExperienceRegistryR82';
 import {capabilityExecutionContract} from './operationalCapabilityRuntimeR45';
+import {operationContractForRouteR143} from './authoritativeOperationChainR143';
 import {LayoutModeSwitch,type OmegaUiMode} from './SingleFrameRuntimeShellR27';
 import './omegaProductFrameR356.css';
 
@@ -15,7 +16,7 @@ type Props={
 const f=(v:any,d=3)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'—';
 
 export default function OmegaProductFrameR356({panel,record,address,coords,reality,uiMode,onUiMode,onNavigate,appliedModes,gatedModes,catalogCount,workflowSlot,children}:Props){
- const nav=omegaNavItem(panel),workspace=workspaceForRouteR82(panel as any),master=omegaMasterMenuForRouteR289(panel),contract=capabilityExecutionContract(panel),metrics=record?.metrics||{};
+ const nav=omegaNavItem(panel),workspace=workspaceForRouteR82(panel as any),master=omegaMasterMenuForRouteR289(panel),contract=capabilityExecutionContract(panel),operation=operationContractForRouteR143(panel),metrics=record?.metrics||{};
  const openMenu=()=>window.dispatchEvent(new CustomEvent('omega-r88-open-navigator',{detail:{layer:'APPLICATIONS',workspace:workspace?.id}}));
  return <section className='r356-product-frame' data-r356-product='COHERENT_PRODUCT_FRAME' data-route={panel} data-route-reality={reality}>
   <header className='r356-route-header'>
@@ -54,7 +55,7 @@ export default function OmegaProductFrameR356({panel,record,address,coords,reali
     <section>
      <span>ROUTE CONTRACT</span>
      <b>{nav?.effect||'READ'} · {nav?.authority||'CANONICAL'}</b>
-     <small>{contract.executionDomain} · {contract.persistence} persistence · {contract.performance} workload</small>
+     <small>{operation.executionDomain} · {contract.persistence} persistence · {contract.performance} workload</small>
     </section>
     <section className='r356-metric-grid'>
      <div><small>CΩ</small><b>{f(metrics?.continuity)}</b></div>
