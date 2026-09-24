@@ -75,6 +75,21 @@ async function hiddenSummaryDiagnostic(details){
   });
 }
 
+async function waitForStableLocator(page,locator,label){
+  let prior=null,stable=0;
+  for(let i=0;i<30;i++){
+    const box=await locator.boundingBox().catch(()=>null);
+    if(box&&prior){
+      const delta=Math.max(Math.abs(box.x-prior.x),Math.abs(box.y-prior.y),Math.abs(box.width-prior.width),Math.abs(box.height-prior.height));
+      stable=delta<=0.5?stable+1:0;
+      if(stable>=2)return;
+    }else stable=0;
+    prior=box;
+    await page.waitForTimeout(34);
+  }
+  throw new Error(`${label}: disclosure geometry did not reach two-frame continuity`);
+}
+
 async function testDetails(page,viewport,route){
   const list=page.locator('.workstation-main .omega-surface-r81 details');
   const count=await list.count();
@@ -94,6 +109,8 @@ async function testDetails(page,viewport,route){
       const beforeState=await directContentState(details);
       if(!before&&beforeState.visible>0)throw new Error(`${viewport}/${route}: closed details #${i} leaks ${beforeState.visible}/${beforeState.count} direct content regions`);
       if(before&&beforeState.text>0&&beforeState.visible===0)throw new Error(`${viewport}/${route}: open details #${i} hides all meaningful direct content`);
+      await summary.scrollIntoViewIfNeeded();
+      await waitForStableLocator(page,summary,`${viewport}/${route}: details #${i} before toggle`);
       await summary.click({timeout:10000});
       await page.waitForTimeout(35);
       const after=await details.evaluate(el=>el.open);
@@ -101,6 +118,8 @@ async function testDetails(page,viewport,route){
       const afterState=await directContentState(details);
       if(after&&afterState.text>0&&afterState.visible===0){const diag=await detailsDiagnostic(details);throw new Error(`${viewport}/${route}: opened details #${i} exposes no meaningful direct content · ${JSON.stringify(diag)}`)}
       if(!after&&afterState.visible>0)throw new Error(`${viewport}/${route}: closed details #${i} still exposes ${afterState.visible} direct content regions`);
+      await summary.scrollIntoViewIfNeeded();
+      await waitForStableLocator(page,summary,`${viewport}/${route}: details #${i} before restore`);
       await summary.click({timeout:10000});
       await page.waitForTimeout(35);
       const restored=await details.evaluate(el=>el.open);
