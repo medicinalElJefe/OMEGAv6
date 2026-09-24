@@ -157,7 +157,8 @@ async function testAriaExpanded(page,viewport,route){
     if(before!=='true'&&before!=='false')throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} has invalid state ${before}`);
     const id=await control.getAttribute('aria-controls');
     if(id){const state=await targetState(page,id);if(!state.exists)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} controls missing #${id}`)}
-    await control.scrollIntoViewIfNeeded();
+    await scrollLocatorForContinuity(control);
+    await waitForStableLocator(page,control,`${viewport}/${route}: ${label||`aria-expanded #${i}`} before toggle`);
     await control.click({timeout:10000});
     await page.waitForTimeout(50);
     const after=await control.getAttribute('aria-expanded');
@@ -167,6 +168,8 @@ async function testAriaExpanded(page,viewport,route){
       if(after==='true'&&!state.visible)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} says expanded but #${id} is not visible`);
       if(after==='false'&&state.visible)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} says collapsed but #${id} remains visible`);
     }
+    await scrollLocatorForContinuity(control);
+    await waitForStableLocator(page,control,`${viewport}/${route}: ${label||`aria-expanded #${i}`} before restore`);
     await control.click({timeout:10000});
     await page.waitForTimeout(35);
     const restored=await control.getAttribute('aria-expanded');
