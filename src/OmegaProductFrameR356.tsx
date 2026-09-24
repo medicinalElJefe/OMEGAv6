@@ -22,7 +22,7 @@ export default function OmegaProductFrameR356({panel,record,address,coords,reali
   <header className='r356-route-header'>
    <div className='r356-route-identity'>
     <div className='r356-breadcrumb'>
-     <button type='button' onClick={()=>window.dispatchEvent(new CustomEvent('omega-home-request'))}><Home aria-hidden='true'/>OMEGA</button>
+     <button type='button' data-r356-global-navigation='true' onClick={()=>window.dispatchEvent(new CustomEvent('omega-home-request'))}><Home aria-hidden='true'/>OMEGA</button>
      <i/>
      <span>{workspace?.label||nav?.group||'WORKSPACE'}</span>
      {master&&<><i/><span>{master.id} · {master.label}</span></>}
@@ -31,7 +31,7 @@ export default function OmegaProductFrameR356({panel,record,address,coords,reali
     <p>{nav?.hint||contract.output}</p>
    </div>
    <div className='r356-header-actions'>
-    <button type='button' className='r356-systems' onClick={openMenu}><Menu aria-hidden='true'/><span>Systems</span></button>
+    <button type='button' className='r356-systems' data-r356-global-navigation='true' onClick={openMenu}><Menu aria-hidden='true'/><span>Systems</span></button>
     <LayoutModeSwitch value={uiMode} onChange={onUiMode} compact/>
    </div>
   </header>
@@ -70,7 +70,7 @@ export default function OmegaProductFrameR356({panel,record,address,coords,reali
      <b>{appliedModes} applied · {gatedModes} gated</b>
      <small>{catalogCount} catalog contracts remain addressable; missing authority stays gated.</small>
     </section>
-    <nav className='r356-context-routes' aria-label='Related system routes'>
+    <nav className='r356-context-routes' data-r356-global-navigation='true' aria-label='Related system routes'>
      {['Evidence & Proof','Convergence','System'].filter(x=>x!==panel).map(route=><button type='button' key={route} onClick={()=>onNavigate(route)}>{route}</button>)}
     </nav>
     <footer><ShieldCheck aria-hidden='true'/><span>One route authority · one canonical state · secondary instrumentation never replaces the active tool.</span></footer>
