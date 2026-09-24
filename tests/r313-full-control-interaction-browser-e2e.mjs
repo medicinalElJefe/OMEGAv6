@@ -21,7 +21,7 @@ const assignedSurfaces=profileIndex=>interactionPartition[shardIndex].cases.filt
 
 const MUTATING=/\b(run|execute|deploy|dispatch|authorize|train|build|delete|remove|revoke|promote|merge|send|submit|commit|write|save|create|launch|pair|connect|reconnect|repair|apply|acquire|upload|import|install|trigger|start mission|queue)\b/i;
 const PASSIVE_NETWORK=/\b(refresh|reload|sync|probe|scan|fetch|load|inspect live|check live|update status)\b/i;
-const NAV_SELECTOR='.omega-global-nav,.r89-side-navigator,.r239-user-nav';
+const NAV_SELECTOR='.omega-global-nav,.r89-side-navigator,.r239-user-nav,[data-r356-global-navigation="true"]';
 
 function clean(v=''){return String(v).replace(/\s+/g,' ').trim()}
 
