@@ -44,3 +44,20 @@ R355 creates no observed history, physical-time truth, CanonState admission, dur
 - `ci.yml` remains production promotion authority.
 - 20,736 remains computational/address resolution, not a literal physical dimension.
 - `NO_NEW_PHYSICAL_PRIMITIVE` remains enforced.
+
+
+## Continuity / interaction repair
+
+R355 no longer recomputes a complete R350 timeline once per displayed tick. The corrected execution graph is:
+
+`one R349 parent field → one R350 temporal evolution → per-tick replay → R351 packet/frame receipt → R352 render-state receipt → R354 scene receipt → R355 digest chain`.
+
+The traversal compiler runs in a dedicated module Worker. The Convergence UI consumes the returned traversal receipt and does not execute the full traversal compiler on the browser UI thread.
+
+Instructions navigation now compiles an explicit R355 route-transition receipt before calling the workstation route authority. That receipt applies the continuity operator:
+
+`partition → exact-identity transform → invariant carry → scar/residual carry → re-contextualize/commit`
+
+and binds exact route identity, capability authority, R143 execution domain, capability reality, residual state, and the no-Canon-mutation boundary.
+
+R313 interaction proof now waits for the same SurfaceIntegrity readiness condition used by the exhaustive R286 reachability proof and requires two-frame control-geometry continuity before pointer actuation. This does not force-click, bypass actionability, extend a broken route indefinitely, or convert a red interaction into green.
