@@ -11,6 +11,7 @@ const app=read('src/App.tsx');
 const navigation=read('src/navigationRegistry.ts');
 const capability=read('src/capabilityAuthority.ts');
 const r355=read('tests/r355-monotonic-successor-invariants.mjs');
+const disclosure=read('tests/r313-panel-disclosure-browser-e2e.mjs');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
@@ -69,6 +70,13 @@ for(const token of[
 ])assert.ok(suite.includes(token),`R356 specialist composition lost ${token}`);
 assert.ok(!suite.includes("className='r121-legacy-convergence' open"),'R356 historical compatibility bodies must no longer auto-open over current convergence');
 assert.ok(r355.includes('44/44 routes + capability authorities preserved'),'R356 must inherit the R355 monotonic successor floor');
+const disclosureScroll=disclosure.indexOf("scrollLocatorForContinuity(summary)");
+const disclosureStable=disclosure.indexOf("waitForStableLocator(page,summary");
+const disclosureClick=disclosure.indexOf("summary.click({timeout:10000})");
+assert.ok(disclosure.includes("el.scrollIntoView({block:'center',inline:'nearest'})"),'R356 disclosure proof must use non-actuating DOM scroll before geometry proof');
+assert.ok(!disclosure.includes('summary.scrollIntoViewIfNeeded()'),'R356 disclosure proof may not require Playwright actionability before geometry continuity is established');
+assert.ok(disclosureScroll>=0&&disclosureStable>disclosureScroll&&disclosureClick>disclosureStable,'R356 disclosure continuity repair must order scroll → stable geometry → real click');
+
 assert.ok(navigation.includes("export const OMEGA_NAVIGATION")&&navigation.includes("OMEGA_NAV_GROUPS"),'R356 must preserve the existing canonical navigation registry');
 
 console.log('R356 COHERENT PRODUCT DESIGN PASS · 44/44 route+capability authority preserved · one ready-state product frame owns header/state/context geometry · Home+navigator share the same visual grammar · capability topology is contextual · Convergence is grouped by current/compute/governance/restored/history without deleting inherited engines');
