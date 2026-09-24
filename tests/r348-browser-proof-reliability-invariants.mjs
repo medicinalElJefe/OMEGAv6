@@ -20,11 +20,12 @@ assert.ok(r241.includes('Start one shared R241 preview server'),'R241 must start
 assert.ok(r241.includes("node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173"),'R241 shared preview must use the installed Vite binary directly');
 assert.ok(r241.includes("echo 'OMEGA_E2E_URL=http://127.0.0.1:4173' >> \"$GITHUB_ENV\""),'R241 shared preview URL must propagate to later proof steps');
 assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=480'),'R313 panel disclosure must have an explicit bounded budget');
-assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=780'),'deep R286/R313 control sweeps must have an evidence-calibrated explicit bounded budget');
+assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=780'),'deep R286 control sweep must have an evidence-calibrated explicit bounded budget');
+assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1020'),'R313 exhaustive interaction sweep must allow four bounded workload waves without weakening child ceilings');
 assert.ok(r241.includes('Stop shared R241 preview server')&&r241.includes('if: always()'),'R241 shared preview must always clean up');
 
 assert.ok(r241.includes('R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=360'),'R286 exhaustive browser audit must run as eight deterministic shards in bounded four-way waves');
-assert.ok(r241.includes('R313_PROOF_SHARDS=8 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=360'),'R313 safe-control sweep must run as eight deterministic shards in bounded four-way waves');
+assert.ok(r241.includes('R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=360'),'R313 safe-control sweep must run as sixteen deterministic shards in bounded four-way waves');
 assert.ok(r286ShardRunner.includes('R286_SHARD_COUNT="$shards" R286_SHARD_INDEX="$i"'),'R286 shard runner must bind every child to an explicit partition identity');
 assert.ok(r286ShardRunner.includes('for ((wave_start=0; wave_start<shards; wave_start+=max_parallel))'),'R286 shard runner must cover the complete shard set in bounded waves');
 assert.ok(r286ShardRunner.includes('for ((j=0;j<${#pids[@]};j++)); do')&&r286ShardRunner.includes('if wait "${pids[$j]}"'),'R286 shard runner must recombine every child in each bounded wave before advancing');
@@ -42,4 +43,4 @@ assert.ok(runner.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC:-300'),'R241 runner m
 assert.ok(runner.includes('timeout --signal=TERM --kill-after=15s'),'R241 runner must terminate hung children fail-closed');
 assert.ok(runner.includes('R241 browser proof timeout'),'R241 timeout must produce an explicit diagnostic annotation');
 
-console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286 exhaustive modulo partition retained · R313 exhaustive 88-case interaction proof now uses deterministic R286-census workload balancing across eight bounded shards in two four-way waves · evidence-calibrated 360s child / 780s parent ceilings · every child proof bounded · fail-closed diagnostics retained');
+console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286 exhaustive modulo partition retained · R313 exhaustive 88-case interaction proof uses deterministic R286-census workload balancing across sixteen bounded shards in four four-way waves · evidence-calibrated 360s child / 780s parent ceilings · every child proof bounded · fail-closed diagnostics retained');
