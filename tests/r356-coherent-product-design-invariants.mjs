@@ -53,6 +53,7 @@ for(const token of[
 ])assert.ok(css.includes(token),`R356 visual grammar missing ${token}`);
 assert.ok(app.includes("import './omegaProductFrameR356.css'"),'R356 must be the final global product visual authority');
 assert.ok(nav.includes('r356-canonical-nav')&&nav.includes("data-product-design='R356'"),'global navigator must participate in R356 product design');
+for(const token of[".r356-workspace-grid{display:flex!important;flex-direction:column!important;align-items:stretch!important","inline-size:100%!important;max-inline-size:100%!important",".r356-primary-stage :where(.r36-living-surface,.r43-workspace-stage,.visual-instrument-app,.special-app,.panel)"])assert.ok(css.includes(token),`R356 mobile width ownership missing ${token}`);
 
 for(const token of[
  "className='r356-capability-context'",
