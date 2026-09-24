@@ -23,6 +23,48 @@ const NAV_SELECTOR='.omega-global-nav,.r89-side-navigator,.r239-user-nav';
 
 function clean(v=''){return String(v).replace(/\s+/g,' ').trim()}
 
+async function twoFrames(page){
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+}
+
+async function waitForSurfaceReady(page,name){
+ await page.waitForFunction(route=>{
+  const main=document.querySelector('.workstation-main');
+  const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(route)}"]`);
+  if(!main||!surface)return false;
+  const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
+  const children=[...surface.children].filter(visible);
+  const rich=[...surface.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible);
+  const loader=[...surface.querySelectorAll('.r109-specialist-loading')].some(visible);
+  return visible(surface)&&!loader&&!surface.querySelector('.panel-failure')&&children.length>0&&(((surface.textContent||'').replace(/\s+/g,' ').trim().length>=8)||rich.length>0);
+ },name,{timeout:30000});
+ await twoFrames(page);
+}
+
+async function waitForStableControl(page,id){
+ const stable=await page.evaluate(async probeId=>{
+  const sample=()=>{
+   const el=document.querySelector(`[data-r313-probe-id="${CSS.escape(probeId)}"]`);
+   if(!el)return null;
+   const r=el.getBoundingClientRect(),s=getComputedStyle(el);
+   if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)===0||r.width<=1||r.height<=1)return null;
+   return[r.left,r.top,r.width,r.height];
+  };
+  let prior=sample(),consecutive=0;
+  for(let frame=0;frame<12;frame++){
+   await new Promise(resolve=>requestAnimationFrame(resolve));
+   const next=sample();
+   if(!prior||!next){prior=next;consecutive=0;continue}
+   const delta=Math.max(...next.map((v,i)=>Math.abs(v-prior[i])));
+   if(delta<=0.5)consecutive++;else consecutive=0;
+   if(consecutive>=2)return true;
+   prior=next;
+  }
+  return false;
+ },id);
+ if(!stable)throw new Error(`control geometry did not reach two-frame continuity: ${id}`);
+}
+
 async function openNavigator(page){
  if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
  const b=page.locator('button[aria-label="Expand OMEGA navigator"]');
@@ -41,6 +83,7 @@ async function activateSurface(page,name){
   await routes.nth(i).scrollIntoViewIfNeeded();
   await routes.nth(i).click();
   await page.waitForFunction(route=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===route,name,{timeout:20000});
+  await waitForSurfaceReady(page,name);
   return;
  }
  throw new Error(`R313 route missing ${name}`);
@@ -97,6 +140,7 @@ async function actuateSafeControl(page,item,profile,surface){
  const current=await resolveControl(page,item);
  if(!current)return;
  await current.scrollIntoViewIfNeeded().catch(()=>{});
+ await waitForStableControl(page,item.id);
  try{
   if(item.native){
    await current.click({timeout:7000});
