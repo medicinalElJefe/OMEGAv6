@@ -21,7 +21,8 @@ assert.ok(r241.includes("node node_modules/vite/bin/vite.js preview --host 127.0
 assert.ok(r241.includes("echo 'OMEGA_E2E_URL=http://127.0.0.1:4173' >> \"$GITHUB_ENV\""),'R241 shared preview URL must propagate to later proof steps');
 assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=480'),'R313 panel disclosure must have an explicit bounded budget');
 assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=780'),'deep R286 control sweep must have an evidence-calibrated explicit bounded budget');
-assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1020'),'R313 exhaustive interaction sweep must allow four bounded workload waves without weakening child ceilings');
+assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1020'),'R313 exhaustive interaction sweep must retain a finite parent ceiling for four bounded workload waves without weakening child ceilings');
+assert.ok(r241.includes('Build exact candidate for interaction proof')&&r241.includes('npm run build'),'isolated R313 job must build the exact candidate before browser interaction proof');
 assert.ok(r241.includes('Stop shared R241 preview server')&&r241.includes('if: always()'),'R241 shared preview must always clean up');
 
 assert.ok(r241.includes('R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=360'),'R286 exhaustive browser audit must run as eight deterministic shards in bounded four-way waves');
