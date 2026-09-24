@@ -86,6 +86,8 @@ assert.ok(membrane.includes("const observer=new ResizeObserver(()=>{resize();if(
 assert.ok(membraneCss.includes(".r95-membrane-stage canvas{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0"),'R356 canvas backing resolution may not participate in membrane document-flow geometry');
 assert.ok(membraneCss.includes(".r95-membrane-stage{position:relative;min-height:620px"),'R356 membrane stage must remain the stable layout owner');
 assert.ok(css.includes(".omega-workstation-v2[data-product-design='R356'][data-panel='Visual Instrument'] .r356-primary-stage .r36-living-surface{overflow:visible!important}"),'R356 Visual Instrument outer shell must not become a hidden vertical scroll membrane');
+assert.ok(css.includes(".r356-workspace-grid>.r356-primary-stage{grid-column:1!important;grid-row:1!important;justify-self:stretch!important;inline-size:100%!important;max-inline-size:100%!important}"),'R356 desktop primary instrument must explicitly own flexible grid track 1');
+assert.ok(css.includes(".r356-workspace-grid>.r356-context-rail{grid-column:2!important;grid-row:1!important;justify-self:stretch!important;inline-size:100%!important;max-inline-size:100%!important}"),'R356 desktop context rail must explicitly own bounded grid track 2');
 
 assert.ok(navigation.includes("export const OMEGA_NAVIGATION")&&navigation.includes("OMEGA_NAV_GROUPS"),'R356 must preserve the existing canonical navigation registry');
 
