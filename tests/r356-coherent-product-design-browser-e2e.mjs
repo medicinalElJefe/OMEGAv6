@@ -46,6 +46,12 @@ try{
    if(await page.locator('.omega-workstation-v2>.workstation-topbar').count())throw new Error(profile+'/'+name+': obsolete ready-state topbar still mounted');
    if(await frame.locator('.r356-state-ribbon').count()!==1)throw new Error(profile+'/'+name+': state ribbon missing or duplicated');
    if(await frame.locator('.r356-context-rail').count()!==1)throw new Error(profile+'/'+name+': context rail missing or duplicated');
+   if(profile==='mobile'){
+    const geometry=await frame.evaluate(el=>{const g=s=>{const n=el.querySelector(s);if(!n)return null;const r=n.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,top:r.top,bottom:r.bottom}};return{frame:g('.r356-product-frame'),workspace:g('.r356-workspace-grid'),primary:g('.r356-primary-stage'),context:g('.r356-context-rail')}});
+    if(!geometry.primary||!geometry.workspace||geometry.primary.width<280)throw new Error(profile+'/'+name+': primary product stage too narrow '+JSON.stringify(geometry));
+    if(Math.abs(geometry.primary.width-geometry.workspace.width)>2)throw new Error(profile+'/'+name+': primary stage no longer owns full mobile workspace width '+JSON.stringify(geometry));
+    if(geometry.context&&geometry.context.top<geometry.primary.bottom-2)throw new Error(profile+'/'+name+': context rail overlaps primary mobile instrument '+JSON.stringify(geometry));
+   }
    const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
    if(overflow>24)throw new Error(profile+'/'+name+': viewport overflow '+overflow+'px');
    const headers=await frame.locator(':scope > .r356-route-header').count();
