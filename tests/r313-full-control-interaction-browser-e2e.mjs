@@ -1,5 +1,6 @@
 import {chromium} from 'playwright';
 import fs from 'node:fs';
+import {partitionInteractionCasesR355} from '../src/system/r313InteractionWorkloadR355.js';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
@@ -15,13 +16,56 @@ const shardCount=Number(process.env.R313_SHARD_COUNT||'1');
 const shardIndex=Number(process.env.R313_SHARD_INDEX||'0');
 if(!Number.isInteger(shardCount)||shardCount<1||shardCount>16)throw new Error(`R313_SHARD_COUNT must be an integer 1..16, received ${process.env.R313_SHARD_COUNT||'unset'}`);
 if(!Number.isInteger(shardIndex)||shardIndex<0||shardIndex>=shardCount)throw new Error(`R313_SHARD_INDEX must be an integer 0..${shardCount-1}, received ${process.env.R313_SHARD_INDEX||'unset'}`);
-const assignedSurfaces=profileIndex=>surfaces.filter((_,surfaceIndex)=>((profileIndex*surfaces.length+surfaceIndex)%shardCount)===shardIndex);
+const interactionPartition=partitionInteractionCasesR355({surfaces,shardCount});
+const assignedSurfaces=profileIndex=>interactionPartition[shardIndex].cases.filter(x=>x.profileIndex===profileIndex).map(x=>x.surface);
 
 const MUTATING=/\b(run|execute|deploy|dispatch|authorize|train|build|delete|remove|revoke|promote|merge|send|submit|commit|write|save|create|launch|pair|connect|reconnect|repair|apply|acquire|upload|import|install|trigger|start mission|queue)\b/i;
 const PASSIVE_NETWORK=/\b(refresh|reload|sync|probe|scan|fetch|load|inspect live|check live|update status)\b/i;
 const NAV_SELECTOR='.omega-global-nav,.r89-side-navigator,.r239-user-nav';
 
 function clean(v=''){return String(v).replace(/\s+/g,' ').trim()}
+
+async function twoFrames(page){
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+}
+
+async function waitForSurfaceReady(page,name){
+ await page.waitForFunction(route=>{
+  const main=document.querySelector('.workstation-main');
+  const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(route)}"]`);
+  if(!main||!surface)return false;
+  const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
+  const children=[...surface.children].filter(visible);
+  const rich=[...surface.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible);
+  const loader=[...surface.querySelectorAll('.r109-specialist-loading')].some(visible);
+  return visible(surface)&&!loader&&!surface.querySelector('.panel-failure')&&children.length>0&&(((surface.textContent||'').replace(/\s+/g,' ').trim().length>=8)||rich.length>0);
+ },name,{timeout:30000});
+ await twoFrames(page);
+}
+
+async function waitForStableControl(page,id){
+ const stable=await page.evaluate(async probeId=>{
+  const sample=()=>{
+   const el=document.querySelector(`[data-r313-probe-id="${CSS.escape(probeId)}"]`);
+   if(!el)return null;
+   const r=el.getBoundingClientRect(),s=getComputedStyle(el);
+   if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)===0||r.width<=1||r.height<=1)return null;
+   return[r.left,r.top,r.width,r.height];
+  };
+  let prior=sample(),consecutive=0;
+  for(let frame=0;frame<12;frame++){
+   await new Promise(resolve=>requestAnimationFrame(resolve));
+   const next=sample();
+   if(!prior||!next){prior=next;consecutive=0;continue}
+   const delta=Math.max(...next.map((v,i)=>Math.abs(v-prior[i])));
+   if(delta<=0.5)consecutive++;else consecutive=0;
+   if(consecutive>=2)return true;
+   prior=next;
+  }
+  return false;
+ },id);
+ if(!stable)throw new Error(`control geometry did not reach two-frame continuity: ${id}`);
+}
 
 async function openNavigator(page){
  if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
@@ -41,6 +85,7 @@ async function activateSurface(page,name){
   await routes.nth(i).scrollIntoViewIfNeeded();
   await routes.nth(i).click();
   await page.waitForFunction(route=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===route,name,{timeout:20000});
+  await waitForSurfaceReady(page,name);
   return;
  }
  throw new Error(`R313 route missing ${name}`);
@@ -97,6 +142,7 @@ async function actuateSafeControl(page,item,profile,surface){
  const current=await resolveControl(page,item);
  if(!current)return;
  await current.scrollIntoViewIfNeeded().catch(()=>{});
+ await waitForStableControl(page,item.id);
  try{
   if(item.native){
    await current.click({timeout:7000});
@@ -170,9 +216,9 @@ try{
   if(pageErrors.length)throw new Error(`${profile}: page errors ${pageErrors.join(' | ').slice(0,2500)}`);
   const seriousConsole=consoleErrors.filter(x=>!/favicon|Failed to load resource.*404/i.test(x));
   if(seriousConsole.length)throw new Error(`${profile}: console errors ${seriousConsole.join(' | ').slice(0,2500)}`);
-  console.log(`R313 ${profile.toUpperCase()} SHARD ${shardIndex+1}/${shardCount} CONTROL SWEEP PASS · ${assigned.length} deterministic panels · ${total} visible controls inventoried · ${actionable} enabled controls verified · ${nativeActuated} safe native controls click-exercised · ${roleActuated} safe role buttons keyboard-exercised · mutating/network controls held behind declared proof/authorization semantics · no page errors · no material overflow`);
+  console.log(`R313 ${profile.toUpperCase()} SHARD ${shardIndex+1}/${shardCount} CONTROL SWEEP PASS · workload ${interactionPartition[shardIndex].weight}ms census · ${assigned.length} deterministic panels · ${total} visible controls inventoried · ${actionable} enabled controls verified · ${nativeActuated} safe native controls click-exercised · ${roleActuated} safe role buttons keyboard-exercised · mutating/network controls held behind declared proof/authorization semantics · no page errors · no material overflow`);
   await context.close();
  }
  const shardCases=profiles.reduce((sum,_,profileIndex)=>sum+assignedSurfaces(profileIndex).length,0);
- console.log(`R313 SHARD ${shardIndex+1}/${shardCount} PASS · ${shardCases} deterministic route/viewport cases · all assigned visible panel buttons received accessibility/reachability/geometry classification; safe native controls were pointer-actuated; non-native role buttons were keyboard-actuated through their explicit accessibility contract; state-changing/network controls remained explicitly gated; zero browser page errors.`);
+ console.log(`R313 SHARD ${shardIndex+1}/${shardCount} PASS · workload ${interactionPartition[shardIndex].weight}ms census · ${shardCases} deterministic route/viewport cases · all assigned visible panel buttons received accessibility/reachability/geometry classification; safe native controls were pointer-actuated; non-native role buttons were keyboard-actuated through their explicit accessibility contract; state-changing/network controls remained explicitly gated; zero browser page errors.`);
 }finally{await browser.close()}

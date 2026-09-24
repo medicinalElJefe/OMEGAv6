@@ -14,6 +14,7 @@ export const R354_LAWS=[
  'GPU_RETURN_MAY_STRENGTHEN_DEVICE_EXECUTION_EVIDENCE_BUT_MAY_NOT_MUTATE_CANONICAL_STATE',
  'CURRENT_RUNTIME_AUTHORITY_REQUIRES_R353_SOURCE_WORKER_PACKAGE_BINDING',
  'MODEL_HISTORY_AND_FORECAST_REMAIN_DISTINCT_FROM_OBSERVATION',
+ 'R354_SCENE_RECOMPOSITION_MAY_REUSE_ONE_PROVED_R350_TIMELINE_WITHOUT_REEVOLVING_THE_PARENT_FIELD',
  'NO_NEW_PHYSICAL_PRIMITIVE'
 ]as const;
 
@@ -58,24 +59,10 @@ async function sha256(text:string){
 function digestable(scene:ProofBoundSceneReceiptR354){const{sceneDigest,...rest}=scene;return rest}
 async function digestScene(scene:ProofBoundSceneReceiptR354){return sha256(stable(digestable(scene)))}
 
-export async function compileProofBoundSceneR354({
- sourceField,
- evidence={},
- steps=8,
- checkpointEvery=2,
- targetTick=4,
- nowTick=4,
- orientations=[1,-1,1,0],
- transportRate=.125
-}:{
- sourceField?:TypedFieldR349;
- evidence?:CurrentRuntimeEvidenceR353;
- steps?:number;checkpointEvery?:number;targetTick?:number;nowTick?:number;orientations?:number[];transportRate?:number;
-}={}):Promise<ProofBoundSceneBuildR354>{
- const stepCount=clampInt(steps,0,64),now=clampInt(nowTick,0,stepCount),target=clampInt(targetTick,0,stepCount);
- if(!sourceField)await initCorpusPack();
- const source=sourceField||compileCanonicalTypedFieldR349(0);
- const timeline=evolveTemporalTimelineR350(source,{steps:stepCount,checkpointEvery,orientations,transportRate,nowTick:now});
+export async function compileProofBoundSceneFromTimelineR354({
+ timeline,evidence={},targetTick=4,nowTick=4
+}:{timeline:TimelineR350;evidence?:CurrentRuntimeEvidenceR353;targetTick?:number;nowTick?:number}):Promise<ProofBoundSceneBuildR354>{
+ const stepCount=timeline.stepReceipts.length,now=clampInt(nowTick,0,stepCount),target=clampInt(targetTick,0,stepCount);
  const replay=seekTemporalStateR350(timeline,target),timelineProof=proveTimelineReplayR350(timeline);
  const mirror=compilePacketMirrorR351(replay.field),packet=packetMirrorReceiptR351(mirror),frame=deterministicFrameReceiptR351(replay.field,target),cpu=cpuRenderStateReferenceR352(mirror);
  const lineage=compileReleaseLineageR353(evidence),releaseLineageSha256=await releaseLineageSha256R353(lineage);
@@ -95,6 +82,27 @@ export async function compileProofBoundSceneR354({
  };
  scene={...scene,sceneDigest:await digestScene(scene)};
  return{scene,timeline,replay,mirror,lineage};
+}
+
+export async function compileProofBoundSceneR354({
+ sourceField,
+ evidence={},
+ steps=8,
+ checkpointEvery=2,
+ targetTick=4,
+ nowTick=4,
+ orientations=[1,-1,1,0],
+ transportRate=.125
+}:{
+ sourceField?:TypedFieldR349;
+ evidence?:CurrentRuntimeEvidenceR353;
+ steps?:number;checkpointEvery?:number;targetTick?:number;nowTick?:number;orientations?:number[];transportRate?:number;
+}={}):Promise<ProofBoundSceneBuildR354>{
+ const stepCount=clampInt(steps,0,64),now=clampInt(nowTick,0,stepCount);
+ if(!sourceField)await initCorpusPack();
+ const source=sourceField||compileCanonicalTypedFieldR349(0);
+ const timeline=evolveTemporalTimelineR350(source,{steps:stepCount,checkpointEvery,orientations,transportRate,nowTick:now});
+ return compileProofBoundSceneFromTimelineR354({timeline,evidence,targetTick,nowTick:now});
 }
 
 export async function bindGpuCorrespondenceR354(scene:ProofBoundSceneReceiptR354,gpuResult:any):Promise<ProofBoundSceneReceiptR354>{
