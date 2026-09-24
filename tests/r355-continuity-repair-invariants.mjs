@@ -44,7 +44,7 @@ for(const token of[
  'data-r355-transition={transition.schema}',
  'data-route-target={transition.target}',
  'data-route-decision={transition.decision}',
- 'aria-label={`Open ${x.name}`}'
+ 'aria-label={`Instructions route · ${x.name}`}'
 ])assert.ok(instructions.includes(token),`Instructions route map missing continuity binding ${token}`);
 assert.ok(css.includes(".r30-instruction-list button[data-r355-transition]")&&css.includes('contain:layout paint')&&css.includes('transition:none!important'),'R355 route controls must have stable bounded geometry');
 
@@ -57,3 +57,5 @@ for(const token of[
 ])assert.ok(r313.includes(token),`R313 continuity proof missing ${token}`);
 
 console.log('R355 CONTINUITY REPAIR PASS · one parent timeline · worker-isolated traversal calculus · exact route/capability/operation transition receipts · stable Instructions geometry · R313 waits for mounted/stable continuity rather than racing data-panel state');
+
+assert.ok(!instructions.includes('aria-label={`Open ${x.name}`}'),'Instructions route controls must not shadow persistent global navigator accessible names');
