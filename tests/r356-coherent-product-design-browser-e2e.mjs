@@ -33,6 +33,10 @@ try{
   if(await page.locator('main.r71-home').count()){
    const home=await page.locator('main.r71-home').evaluate(el=>({bg:getComputedStyle(el).backgroundImage||getComputedStyle(el).backgroundColor,width:el.getBoundingClientRect().width}));
    if(!home.bg||home.width<220)throw new Error(profile+': R356 Home product grammar not applied');
+   const enter=page.getByRole('button',{name:/Open specialist/i}).first();
+   if(!await enter.count())throw new Error(profile+': Home has no specialist entry control');
+   await enter.click({timeout:10000});
+   await page.waitForSelector('.omega-workstation-v2',{timeout:30000});
   }
   for(const name of routes){
    await route(page,name);
