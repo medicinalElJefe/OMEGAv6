@@ -92,7 +92,7 @@ assert.ok(css.includes(".r356-workspace-grid>.r356-primary-stage{grid-column:1!i
 assert.ok(css.includes(".r356-workspace-grid>.r356-context-rail{grid-column:2!important;grid-row:1!important;justify-self:stretch!important;inline-size:100%!important;max-inline-size:100%!important}"),'R356 desktop context rail must explicitly own bounded grid track 2');
 const calculusDraw=(calculusField.match(/const draw=\(now:number\)=>\{([\s\S]*?)raf=requestAnimationFrame\(draw\)\}/)||[])[1]||'';
 assert.ok(calculusDraw&&!calculusDraw.includes('applyCanvasResolutionR119'),'R356 calculus animation may paint every frame but may not rewrite canvas resolution/layout every frame');
-assert.ok(calculusField.includes("const observer=new ResizeObserver(()=>{resize();if(reduce)draw(performance.now())})"),'R356 calculus backing resolution must be bound to actual stage resize observation');
+assert.ok(calculusField.includes("const resizeObserver=new ResizeObserver(()=>{resize();if(reduce)draw(performance.now())})"),'R356 calculus backing resolution must be bound to actual stage resize observation');
 assert.ok(calculusFieldCss.includes(".cfr37-stage{position:relative;min-height:500px")&&calculusFieldCss.includes("overflow:hidden"),'R356 calculus stage must remain the stable layout owner');
 assert.ok(calculusFieldCss.includes(".calculus-field-r37 canvas{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0"),'R356 calculus canvas backing size may not participate in document-flow geometry');
 
