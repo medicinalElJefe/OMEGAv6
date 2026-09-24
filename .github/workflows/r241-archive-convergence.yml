@@ -91,7 +91,7 @@ jobs:
             echo '## R313 exact-SHA exhaustive interaction proof'
             echo "- Candidate: $GITHUB_SHA"
             echo '- All 88 desktop/mobile route cases remain assigned exactly once through the R355 measured-workload partition.'
-            echo '- Sixteen deterministic shards execute in four bounded four-way waves; each child remains capped at 360s and the parent at 1020s.'
+            echo '- Sixteen deterministic shards execute in four bounded four-way waves; each child remains capped at 360s and the parent at 1320s.'
             echo '- This job is blocking and fail-closed. Cancellation, timeout, missing shard, duplicate case, dead control, page error, overflow, or actionability failure remains red.'
             echo '- This job has no deployment or CanonState mutation authority.'
           } >> "$GITHUB_STEP_SUMMARY"
