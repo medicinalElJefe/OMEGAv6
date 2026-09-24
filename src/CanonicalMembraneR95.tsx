@@ -42,7 +42,7 @@ export default function CanonicalMembraneR95({address,onAddress,initialProjectio
   const resize=()=>{const rect=el.getBoundingClientRect(),res=applyCanvasResolutionR119(el,Math.max(1,rect.width),Math.max(1,rect.height),'AUTO');w=res.backingWidth;h=res.backingHeight;dpr=res.dpr;if(base.width!==w||base.height!==h)paintBase(w,h)};
   const draw=(time=0)=>{
    if(!reduced&&time-lastFrame<34){raf=requestAnimationFrame(draw);return}lastFrame=time;
-   resize();ctx.setTransform(w/1000,0,0,h/1000,0,0);ctx.clearRect(0,0,1000,1000);ctx.drawImage(base,0,0,1000,1000);
+   ctx.setTransform(w/1000,0,0,h/1000,0,0);ctx.clearRect(0,0,1000,1000);ctx.drawImage(base,0,0,1000,1000);
    if(routePoints.length>1){
     ctx.save();ctx.strokeStyle='rgba(222,186,111,.78)';ctx.lineWidth=2.1;ctx.setLineDash([8,10]);ctx.lineDashOffset=-(time/32)%18;ctx.beginPath();routePoints.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();ctx.restore();
     routePoints.forEach((p,i)=>{if(i%Math.max(1,Math.floor(routePoints.length/9))===0){ctx.fillStyle='rgba(222,186,111,.9)';ctx.beginPath();ctx.arc(p.x,p.y,3.4,0,Math.PI*2);ctx.fill()}});
