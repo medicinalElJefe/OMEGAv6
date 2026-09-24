@@ -85,6 +85,7 @@ assert.ok(membraneDraw&&!membraneDraw.includes('resize()'),'R356 membrane animat
 assert.ok(membrane.includes("const observer=new ResizeObserver(()=>{resize();if(reduced)draw(performance.now())})"),'R356 membrane resolution writes must remain bound to actual resize observation');
 assert.ok(membraneCss.includes(".r95-membrane-stage canvas{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0"),'R356 canvas backing resolution may not participate in membrane document-flow geometry');
 assert.ok(membraneCss.includes(".r95-membrane-stage{position:relative;min-height:620px"),'R356 membrane stage must remain the stable layout owner');
+assert.ok(css.includes(".omega-workstation-v2[data-product-design='R356'][data-panel='Visual Instrument'] .r356-primary-stage .r36-living-surface{overflow:visible!important}"),'R356 Visual Instrument outer shell must not become a hidden vertical scroll membrane');
 
 assert.ok(navigation.includes("export const OMEGA_NAVIGATION")&&navigation.includes("OMEGA_NAV_GROUPS"),'R356 must preserve the existing canonical navigation registry');
 
