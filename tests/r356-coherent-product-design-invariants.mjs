@@ -12,6 +12,7 @@ const navigation=read('src/navigationRegistry.ts');
 const capability=read('src/capabilityAuthority.ts');
 const r355=read('tests/r355-monotonic-successor-invariants.mjs');
 const disclosure=read('tests/r313-panel-disclosure-browser-e2e.mjs');
+const membrane=read('src/CanonicalMembraneR95.tsx');
 
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
@@ -78,6 +79,9 @@ assert.ok(!disclosure.includes('summary.scrollIntoViewIfNeeded()'),'R356 disclos
 assert.ok(disclosureScroll>=0&&disclosureStable>disclosureScroll&&disclosureClick>disclosureStable,'R356 disclosure continuity repair must order scroll → stable geometry → real click');
 assert.ok(!disclosure.includes('control.scrollIntoViewIfNeeded()'),'R356 aria-expanded disclosure proof may not require Playwright actionability before geometry continuity');
 assert.ok(disclosure.includes('scrollLocatorForContinuity(control)')&&disclosure.includes('waitForStableLocator(page,control'),'R356 aria-expanded disclosure controls must follow the same geometry-first pointer law');
+const membraneDraw=(membrane.match(/const draw=\(time=0\)=>\{([\s\S]*?)if\(!reduced\)raf=requestAnimationFrame\(draw\)/)||[])[1]||'';
+assert.ok(membraneDraw&&!membraneDraw.includes('resize()'),'R356 membrane animation may paint every frame but may not rewrite canvas resolution/layout every frame');
+assert.ok(membrane.includes("const observer=new ResizeObserver(()=>{resize();if(reduced)draw(performance.now())})"),'R356 membrane resolution writes must remain bound to actual resize observation');
 
 assert.ok(navigation.includes("export const OMEGA_NAVIGATION")&&navigation.includes("OMEGA_NAV_GROUPS"),'R356 must preserve the existing canonical navigation registry');
 
