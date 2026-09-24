@@ -48,7 +48,7 @@ const additiveR130=wrangler.includes('"main": "src/workerR130.js"')&&r130.includ
 assert.ok(directR116||additiveR130,'production entrypoint must be the proven R116 spine directly or an additive successor that imports and re-exports it');
 
 for(const layer of ['OmegaMaximumCockpitR126','OmegaAutonomicR125','OmegaOrganismR123','OmegaSwarmR121','OmegaFieldMotionConvergenceR28'])assert.ok(suite.includes(layer),`convergence layer missing ${layer}`);
-assert.ok(suite.indexOf('OmegaMaximumCockpitR126')<suite.indexOf("<details className='r121-legacy-convergence' open"),'maximum cockpit must remain top-level before lower execution layers');
+assert.ok(suite.indexOf('OmegaMaximumCockpitR126')<suite.indexOf("<details className='r121-legacy-convergence'"),'maximum cockpit must remain in the primary restored-execution group before lower historical compatibility layers');assert.ok(!suite.includes("className='r121-legacy-convergence' open"),'R356 must keep inherited lower execution bodies reachable without auto-opening them over current convergence');
 assert.ok(cockpit.includes('R126 · TOTAL MAXIMUM BUILD'));
 assert.ok(cockpit.includes('ALL MODES AVAILABLE'));
 assert.ok(cockpit.includes('61,917,364,224'));
