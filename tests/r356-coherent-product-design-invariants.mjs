@@ -76,6 +76,8 @@ const disclosureClick=disclosure.indexOf("summary.click({timeout:10000})");
 assert.ok(disclosure.includes("el.scrollIntoView({block:'center',inline:'nearest'})"),'R356 disclosure proof must use non-actuating DOM scroll before geometry proof');
 assert.ok(!disclosure.includes('summary.scrollIntoViewIfNeeded()'),'R356 disclosure proof may not require Playwright actionability before geometry continuity is established');
 assert.ok(disclosureScroll>=0&&disclosureStable>disclosureScroll&&disclosureClick>disclosureStable,'R356 disclosure continuity repair must order scroll → stable geometry → real click');
+assert.ok(!disclosure.includes('control.scrollIntoViewIfNeeded()'),'R356 aria-expanded disclosure proof may not require Playwright actionability before geometry continuity');
+assert.ok(disclosure.includes('scrollLocatorForContinuity(control)')&&disclosure.includes('waitForStableLocator(page,control'),'R356 aria-expanded disclosure controls must follow the same geometry-first pointer law');
 
 assert.ok(navigation.includes("export const OMEGA_NAVIGATION")&&navigation.includes("OMEGA_NAV_GROUPS"),'R356 must preserve the existing canonical navigation registry');
 
