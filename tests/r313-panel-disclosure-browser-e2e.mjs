@@ -94,6 +94,22 @@ async function waitForStableLocator(page,locator,label){
   throw new Error(`${label}: disclosure geometry did not reach two-frame continuity`);
 }
 
+async function assertLocatorViewportReachability(locator,label){
+  const diag=await locator.evaluate(el=>{
+    const rect=el.getBoundingClientRect(),root=document.scrollingElement;
+    const inside=rect.right>0&&rect.left<window.innerWidth&&rect.bottom>0&&rect.top<window.innerHeight;
+    const ancestors=[];let p=el.parentElement;
+    while(p&&ancestors.length<12){
+      const cs=getComputedStyle(p),r=p.getBoundingClientRect();
+      ancestors.push({tag:p.tagName,className:String(p.className||''),x:Number(r.x.toFixed(2)),y:Number(r.y.toFixed(2)),width:Number(r.width.toFixed(2)),height:Number(r.height.toFixed(2)),overflowX:cs.overflowX,overflowY:cs.overflowY,position:cs.position,scrollTop:Number(p.scrollTop||0),scrollHeight:Number(p.scrollHeight||0),clientHeight:Number(p.clientHeight||0)});
+      p=p.parentElement;
+    }
+    return{inside,rect:{x:Number(rect.x.toFixed(2)),y:Number(rect.y.toFixed(2)),top:Number(rect.top.toFixed(2)),bottom:Number(rect.bottom.toFixed(2)),left:Number(rect.left.toFixed(2)),right:Number(rect.right.toFixed(2)),width:Number(rect.width.toFixed(2)),height:Number(rect.height.toFixed(2))},viewport:{width:window.innerWidth,height:window.innerHeight,scrollX:window.scrollX,scrollY:window.scrollY},document:root?{scrollTop:root.scrollTop,scrollHeight:root.scrollHeight,clientHeight:root.clientHeight,scrollLeft:root.scrollLeft,scrollWidth:root.scrollWidth,clientWidth:root.clientWidth}:null,ancestors};
+  });
+  if(!diag.inside)throw new Error(`${label}: stable control remains outside viewport · ${JSON.stringify(diag)}`);
+  return diag;
+}
+
 async function testDetails(page,viewport,route){
   const list=page.locator('.workstation-main .omega-surface-r81 details');
   const count=await list.count();
@@ -115,6 +131,7 @@ async function testDetails(page,viewport,route){
       if(before&&beforeState.text>0&&beforeState.visible===0)throw new Error(`${viewport}/${route}: open details #${i} hides all meaningful direct content`);
       await scrollLocatorForContinuity(summary);
       await waitForStableLocator(page,summary,`${viewport}/${route}: details #${i} before toggle`);
+      await assertLocatorViewportReachability(summary,`${viewport}/${route}: details #${i} before toggle`);
       await summary.click({timeout:10000});
       await page.waitForTimeout(35);
       const after=await details.evaluate(el=>el.open);
@@ -124,6 +141,7 @@ async function testDetails(page,viewport,route){
       if(!after&&afterState.visible>0)throw new Error(`${viewport}/${route}: closed details #${i} still exposes ${afterState.visible} direct content regions`);
       await scrollLocatorForContinuity(summary);
       await waitForStableLocator(page,summary,`${viewport}/${route}: details #${i} before restore`);
+      await assertLocatorViewportReachability(summary,`${viewport}/${route}: details #${i} before restore`);
       await summary.click({timeout:10000});
       await page.waitForTimeout(35);
       const restored=await details.evaluate(el=>el.open);
@@ -159,6 +177,7 @@ async function testAriaExpanded(page,viewport,route){
     if(id){const state=await targetState(page,id);if(!state.exists)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} controls missing #${id}`)}
     await scrollLocatorForContinuity(control);
     await waitForStableLocator(page,control,`${viewport}/${route}: ${label||`aria-expanded #${i}`} before toggle`);
+    await assertLocatorViewportReachability(control,`${viewport}/${route}: ${label||`aria-expanded #${i}`} before toggle`);
     await control.click({timeout:10000});
     await page.waitForTimeout(50);
     const after=await control.getAttribute('aria-expanded');
@@ -170,6 +189,7 @@ async function testAriaExpanded(page,viewport,route){
     }
     await scrollLocatorForContinuity(control);
     await waitForStableLocator(page,control,`${viewport}/${route}: ${label||`aria-expanded #${i}`} before restore`);
+    await assertLocatorViewportReachability(control,`${viewport}/${route}: ${label||`aria-expanded #${i}`} before restore`);
     await control.click({timeout:10000});
     await page.waitForTimeout(35);
     const restored=await control.getAttribute('aria-expanded');
