@@ -256,6 +256,9 @@ jobs:
       - name: Browser proof · R289 live master menu
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r289-live-master-menu-browser-e2e.mjs'
 
+      - name: Browser proof · R356 coherent product design
+        run: bash scripts/run_r241_browser_proof.sh 'node tests/r356-coherent-product-design-browser-e2e.mjs'
+
       - name: Browser proof · R286 canonical all-surface routes
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r286-all-surface-browser-e2e.mjs'
 
