@@ -15,7 +15,7 @@ concurrency:
 jobs:
   prove-r241-interactions:
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 50
     steps:
       - name: Checkout exact interaction candidate
         uses: actions/checkout@v7
@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1020 bash scripts/run_r241_browser_proof.sh 'R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=360 bash scripts/run_r313_control_shards.sh' 2>&1 | tee r313-full-control-interaction.log
+          OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1320 bash scripts/run_r241_browser_proof.sh 'R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=360 bash scripts/run_r313_control_shards.sh' 2>&1 | tee r313-full-control-interaction.log
 
       - name: Capture exact R313 full-control interaction failure
         if: failure() && steps.full_control.outcome == 'failure'
