@@ -1,12 +1,15 @@
-import{compileProofBoundSceneR354,type ProofBoundSceneReceiptR354}from'./proofBoundSceneR354';
-import{type TypedFieldR349}from'./wovenHardwareFieldR349';
+import{initCorpusPack}from'../corpusRuntime';
+import{compileCanonicalTypedFieldR349,type TypedFieldR349}from'./wovenHardwareFieldR349';
+import{evolveTemporalTimelineR350}from'./temporalCheckpointReplayR350';
+import{compileProofBoundSceneFromTimelineR354,type ProofBoundSceneReceiptR354}from'./proofBoundSceneR354';
 import{type CurrentRuntimeEvidenceR353}from'./releaseLineageR353';
 
 export const R355_SCHEMA='OMEGA_PROOF_BOUND_TEMPORAL_SCENE_TRAVERSAL_R355' as const;
 export const R355_REVISION='R355' as const;
-export const R355_BOUNDARY='R355 indexes and digest-chains R354 proof-bound model scenes across integer R350 model-time addresses. R355 is accepted only as a monotonic successor: the R354 capability floor, all R347-through-R354 proof gates, the current route/capability authority and established convergence/runtime layers must remain present. It adds no observation, physical-time, CanonState, durable execution-history, dispatch or production authority. R125/R141/R146/R147 and ci.yml remain authoritative; HISTORY/NOW/FORECAST remain model relations, not observational claims.' as const;
+export const R355_BOUNDARY='R355 indexes and digest-chains R354 proof-bound model scenes across integer R350 model-time addresses. R355 is accepted only as a monotonic successor: the R354 capability floor, all R347-through-R354 proof gates, the current route/capability authority and established convergence/runtime layers must remain present. One parent field evolves into one shared R350 timeline; per-tick scene receipts are derived from that single timeline rather than re-evolving duplicate parents. It adds no observation, physical-time, CanonState, durable execution-history, dispatch or production authority. R125/R141/R146/R147 and ci.yml remain authoritative; HISTORY/NOW/FORECAST remain model relations, not observational claims.' as const;
 export const R355_LAWS=[
  'EVERY_TRAVERSAL_NODE_IS_AN_R354_SCENE_RECEIPT',
+ 'ONE_PARENT_FIELD_ONE_R350_TIMELINE_MANY_TICK_RECEIPTS',
  'TRAVERSAL_ORDER_IS_INTEGER_MODEL_TIME_ORDER',
  'EACH_LINK_BINDS_PREVIOUS_LINK_TICK_AND_SCENE_DIGEST',
  'RELEASE_LINEAGE_MUST_REMAIN_IDENTICAL_ACROSS_ONE_TRAVERSAL',
@@ -24,7 +27,7 @@ export type TemporalSceneNodeR355={tick:number;relation:ProofBoundSceneReceiptR3
 export type ProofBoundTemporalTraversalR355={
  schema:typeof R355_SCHEMA;revision:typeof R355_REVISION;steps:number;nowTick:number;
  nodes:TemporalSceneNodeR355[];scenes:ProofBoundSceneReceiptR354[];
- proof:{ordered:boolean;sceneDigestsUnique:boolean;lineageStable:boolean;linkIntegrity:boolean;allTimelineDeterministic:boolean;allPacketExact:boolean;canonicalMutation:false;observedHistoryClaimed:false;physicalTimeClaimed:false;durableHistoryClaimed:false};
+ proof:{ordered:boolean;sceneDigestsUnique:boolean;lineageStable:boolean;linkIntegrity:boolean;allTimelineDeterministic:boolean;allPacketExact:boolean;singleTimelineReused:true;canonicalMutation:false;observedHistoryClaimed:false;physicalTimeClaimed:false;durableHistoryClaimed:false};
  traversalDigest:string;boundary:typeof R355_BOUNDARY;
 };
 
@@ -34,9 +37,13 @@ async function sha256(text:string){if(!globalThis.crypto?.subtle)throw new Error
 export async function compileProofBoundTemporalTraversalR355({
  sourceField,evidence={},steps=8,checkpointEvery=2,nowTick=4,orientations=[1,-1,1,0],transportRate=.125
 }:{sourceField?:TypedFieldR349;evidence?:CurrentRuntimeEvidenceR353;steps?:number;checkpointEvery?:number;nowTick?:number;orientations?:number[];transportRate?:number}={}):Promise<ProofBoundTemporalTraversalR355>{
- const count=clampInt(steps,0,32),now=clampInt(nowTick,0,count),scenes:ProofBoundSceneReceiptR354[]=[];
+ const count=clampInt(steps,0,32),now=clampInt(nowTick,0,count);
+ if(!sourceField)await initCorpusPack();
+ const source=sourceField||compileCanonicalTypedFieldR349(0);
+ const timeline=evolveTemporalTimelineR350(source,{steps:count,checkpointEvery,nowTick:now,orientations,transportRate});
+ const scenes:ProofBoundSceneReceiptR354[]=[];
  for(let tick=0;tick<=count;tick++){
-  const build=await compileProofBoundSceneR354({sourceField,evidence,steps:count,checkpointEvery,targetTick:tick,nowTick:now,orientations,transportRate});
+  const build=await compileProofBoundSceneFromTimelineR354({timeline,evidence,targetTick:tick,nowTick:now});
   scenes.push(build.scene);
  }
  let previous='R355-GENESIS';const nodes:TemporalSceneNodeR355[]=[];
@@ -48,7 +55,7 @@ export async function compileProofBoundTemporalTraversalR355({
  const ordered=nodes.every((n,i)=>n.tick===i),sceneDigestsUnique=new Set(nodes.map(n=>n.sceneDigest)).size===nodes.length,lineageStable=new Set(nodes.map(n=>n.releaseLineageSha256)).size<=1;
  let prior='R355-GENESIS',linkIntegrity=true;for(const n of nodes){const expected=await sha256([prior,n.tick,n.sceneDigest].join('|'));if(expected!==n.linkDigest||n.previousLinkDigest!==prior)linkIntegrity=false;prior=n.linkDigest}
  return{schema:R355_SCHEMA,revision:R355_REVISION,steps:count,nowTick:now,nodes,scenes,
-  proof:{ordered,sceneDigestsUnique,lineageStable,linkIntegrity,allTimelineDeterministic:scenes.every(s=>s.proof.timelineDeterministic),allPacketExact:scenes.every(s=>s.proof.packetExact&&s.proof.packetInputBound),canonicalMutation:false,observedHistoryClaimed:false,physicalTimeClaimed:false,durableHistoryClaimed:false},
+  proof:{ordered,sceneDigestsUnique,lineageStable,linkIntegrity,allTimelineDeterministic:scenes.every(s=>s.proof.timelineDeterministic),allPacketExact:scenes.every(s=>s.proof.packetExact&&s.proof.packetInputBound),singleTimelineReused:true,canonicalMutation:false,observedHistoryClaimed:false,physicalTimeClaimed:false,durableHistoryClaimed:false},
   traversalDigest:previous,boundary:R355_BOUNDARY};
 }
 
