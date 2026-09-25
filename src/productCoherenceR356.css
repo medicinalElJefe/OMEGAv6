@@ -151,6 +151,12 @@ body{margin:0;background-image:radial-gradient(circle at 18% 0%,rgba(77,139,128,
  .workstation-main{padding:7px!important}
 }
 @media(max-width:520px){
+ .omega-workstation-v2[data-panel='Earth Now'] .workstation-main{padding-inline:1px!important}
+ .r356-product-surface[data-r356-route='Earth Now']{padding-inline:1px;border-left-width:0;border-right-width:0;border-radius:8px}
+ .r356-product-surface[data-r356-route='Earth Now'] .r356-surface-content{width:100%;min-width:0}
+ .r356-product-surface[data-r356-route='Earth Now'] .earth-r72,
+ .r356-product-surface[data-r356-route='Earth Now'] .earth-r72-workspace,
+ .r356-product-surface[data-r356-route='Earth Now'] .earth-r72-stage{width:100%;max-width:100%;min-width:0}
  .r356-surface-identity h1{font-size:22px}
  .r356-surface-identity p{font-size:11px}
  .r356-product-surface :where(.special-head,.section-head,.panel-head){padding:8px 9px!important}
