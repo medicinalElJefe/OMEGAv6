@@ -1,3 +1,5 @@
+/* R356.12: R257 owns global navigator reservation. The nested R356 workstation must never reserve the same rail/panel a second time, regardless of later navigator stylesheet load order. */
+html[data-omega-nav-present='true'] .r257-shell .omega-workstation-v2[data-product-design='R356']{margin-left:0!important;width:100%!important;max-width:100%!important}
 /* R356 — canonical product frame. Presentation ownership only; no route, proof, execution or Canon authority. */
 .r356-product-frame{
  --r356-bg:#05090c;--r356-surface:#081116;--r356-surface-2:#0b171c;--r356-line:rgba(132,194,184,.16);
