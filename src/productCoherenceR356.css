@@ -1,0 +1,160 @@
+/* R356 — canonical product coherence authority.
+   Presentation only. Capability, evidence, execution, CanonState and production authority remain elsewhere. */
+:root{
+ --r356-bg:#05090c;
+ --r356-surface:#091116;
+ --r356-surface-2:#0d171c;
+ --r356-surface-3:#111d22;
+ --r356-line:rgba(137,181,174,.18);
+ --r356-line-strong:rgba(151,205,195,.34);
+ --r356-text:#e5eeeb;
+ --r356-muted:#879994;
+ --r356-dim:#60716c;
+ --r356-accent:#8dc9bd;
+ --r356-gold:#cbb47a;
+ --r356-danger:#bb6c76;
+ --r356-radius:14px;
+ --r356-radius-sm:9px;
+ --r356-shadow:0 18px 48px rgba(0,0,0,.26);
+ --r356-gap:12px;
+ font-synthesis:none;
+}
+html,body,#root{min-height:100%;background:var(--r356-bg);color:var(--r356-text)}
+body{margin:0;background-image:radial-gradient(circle at 18% 0%,rgba(77,139,128,.08),transparent 32%),linear-gradient(180deg,#05090c,#071015 52%,#05090c)}
+.r317-product-root{min-height:100vh;background:transparent;color:var(--r356-text)}
+.r317-product-root *{box-sizing:border-box}
+.r317-product-root :where(button,input,select,textarea){font:inherit}
+.r317-product-root :where(button,[role='button']){touch-action:manipulation}
+.r317-product-root :where(button,a,input,select,textarea,[role='button']):focus-visible{outline:2px solid rgba(141,201,189,.78);outline-offset:2px}
+.r317-product-root :where(button:not(:disabled),[role='button']:not([aria-disabled='true'])){cursor:pointer}
+
+/* One surface frame, all 44 routes. */
+.r356-product-surface{
+ display:grid;
+ gap:var(--r356-gap);
+ width:100%;
+ min-width:0;
+ padding:clamp(8px,1.2vw,14px);
+ border:1px solid var(--r356-line);
+ border-radius:var(--r356-radius);
+ background:linear-gradient(155deg,rgba(12,23,28,.97),rgba(5,11,14,.985));
+ box-shadow:var(--r356-shadow);
+}
+.r356-surface-frame{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto;
+ gap:18px;
+ align-items:end;
+ padding:clamp(12px,1.6vw,20px);
+ border:1px solid var(--r356-line);
+ border-radius:12px;
+ background:linear-gradient(135deg,rgba(18,34,39,.88),rgba(8,17,21,.92));
+}
+.r356-surface-identity{display:grid;gap:4px;min-width:0}
+.r356-surface-identity>span,.r356-surface-truth>span{
+ color:var(--r356-accent);
+ font:600 10px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;
+ letter-spacing:.1em;
+ text-transform:uppercase;
+}
+.r356-surface-identity h1{margin:0;font-size:clamp(21px,2.2vw,31px);line-height:1.05;letter-spacing:-.03em}
+.r356-surface-identity p{margin:2px 0 0;max-width:76ch;color:var(--r356-muted);font-size:12px;line-height:1.45}
+.r356-surface-truth{display:grid;justify-items:end;gap:3px;text-align:right}
+.r356-surface-truth b{font:700 12px/1 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--r356-text)}
+.r356-surface-truth small{max-width:34ch;color:var(--r356-dim);font:9px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace}
+.r356-surface-provenance{border:1px solid var(--r356-line);border-radius:9px;background:rgba(5,12,15,.62)}
+.r356-surface-provenance>summary{padding:8px 10px;color:var(--r356-muted);font:600 9px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.r356-surface-provenance[open]>summary{border-bottom:1px solid var(--r356-line)}
+.r356-surface-content{display:grid;gap:var(--r356-gap);min-width:0}
+
+/* Unified descendant grammar. Old component markup survives, but presentation resolves here. */
+.r356-product-surface :where(.special-app,.panel,.card,article,.r138-capability-first>*,[class*='-grid']>*){
+ min-width:0;
+}
+.r356-product-surface :where(.special-app,.panel){
+ border-color:var(--r356-line)!important;
+ border-radius:var(--r356-radius-sm)!important;
+ background:linear-gradient(145deg,rgba(13,25,30,.9),rgba(7,14,18,.96))!important;
+ box-shadow:none!important;
+}
+.r356-product-surface :where(.special-head,.section-head,.panel-head){
+ min-height:auto!important;
+ padding:10px 12px!important;
+ border-bottom:1px solid var(--r356-line)!important;
+ background:rgba(8,17,21,.76)!important;
+}
+.r356-product-surface :where(.special-head h1,.special-head h2,.section-head h1,.section-head h2,.panel-head h1,.panel-head h2){margin:0;letter-spacing:-.02em}
+.r356-product-surface :where(button){
+ border-radius:8px;
+ border-color:var(--r356-line)!important;
+ background-color:rgba(9,19,23,.88);
+ color:var(--r356-text);
+}
+.r356-product-surface :where(button:not(:disabled):hover){border-color:var(--r356-line-strong)!important;background-color:rgba(115,185,172,.09);transform:none!important}
+.r356-product-surface :where(input,textarea,select){
+ border:1px solid var(--r356-line)!important;
+ border-radius:8px!important;
+ background:rgba(4,10,13,.84)!important;
+ color:var(--r356-text)!important;
+}
+.r356-product-surface :where(.metric,.card,.proof-card,.status-card,.instrument-card){
+ border-color:var(--r356-line)!important;
+ background:rgba(8,18,22,.78)!important;
+ box-shadow:none!important;
+}
+
+/* Workspace archetypes alter emphasis without creating alternate visual systems. */
+.r356-product-surface[data-r356-archetype='COMMAND']{--r356-accent:#a7d6cc}
+.r356-product-surface[data-r356-archetype='EXPLORATION']{--r356-accent:#8dc9bd}
+.r356-product-surface[data-r356-archetype='INTELLIGENCE']{--r356-accent:#b7b5d4}
+.r356-product-surface[data-r356-archetype='EVIDENCE']{--r356-accent:#d1c28f}
+.r356-product-surface[data-r356-archetype='BUILD']{--r356-accent:#a7c9d6}
+.r356-product-surface[data-r356-archetype='SYSTEM']{--r356-accent:#b8c6c1}
+
+/* Global navigation is visually subordinate to the active surface. */
+.r317-product-root .r94-nav-rail{background:rgba(5,11,14,.985)!important;border-right:1px solid var(--r356-line)!important;box-shadow:none!important}
+.r317-product-root .r94-nav-panel{background:rgba(6,13,16,.99)!important;border-right:1px solid var(--r356-line-strong)!important}
+.r317-product-root .r89-flat-route{border-radius:8px!important}
+.r317-product-root .r89-flat-route.active{background:rgba(125,196,183,.1)!important;box-shadow:inset 2px 0 var(--r356-accent)!important}
+
+/* Current convergence is primary; compatibility/history is explicit. */
+.r356-convergence-primary,.r356-convergence-compute,.r356-convergence-lineage{display:grid;gap:10px}
+.r356-convergence-section{
+ display:grid;
+ gap:10px;
+ padding:10px;
+ border:1px solid var(--r356-line);
+ border-radius:11px;
+ background:rgba(5,12,15,.58);
+}
+.r356-convergence-section>header{display:flex;justify-content:space-between;gap:12px;align-items:end;padding:2px 2px 7px;border-bottom:1px solid var(--r356-line)}
+.r356-convergence-section>header div{display:grid;gap:3px}
+.r356-convergence-section>header span{color:var(--r356-accent);font:700 9px ui-monospace,monospace;letter-spacing:.1em}
+.r356-convergence-section>header b{font-size:14px}
+.r356-convergence-section>header small{color:var(--r356-muted);font-size:9px}
+.r356-compatibility-stack{display:grid;gap:6px}
+.r356-compatibility-stack>details{border:1px solid var(--r356-line);border-radius:8px;background:rgba(6,13,16,.66)}
+.r356-compatibility-stack>details>summary{padding:9px 10px;color:var(--r356-muted);font-size:10px;cursor:pointer}
+.r356-compatibility-stack>details[open]>summary{color:var(--r356-text);border-bottom:1px solid var(--r356-line)}
+
+/* Diagnostics should not compete with primary experience. */
+.r318-system-diagnostics{margin:6px 10px;border:1px solid var(--r356-line);border-radius:9px;background:rgba(5,11,14,.75)}
+.r318-system-diagnostics>summary{padding:7px 10px;color:var(--r356-dim);font:600 9px ui-monospace,monospace;cursor:pointer}
+
+/* Responsive coherence. */
+@media(max-width:900px){
+ :root{--r356-radius:11px;--r356-gap:9px}
+ .r356-product-surface{padding:7px}
+ .r356-surface-frame{grid-template-columns:1fr;align-items:start;gap:9px;padding:12px}
+ .r356-surface-truth{justify-items:start;text-align:left}
+ .r356-surface-truth small{max-width:none}
+ .workstation-main{padding:7px!important}
+}
+@media(max-width:520px){
+ .r356-surface-identity h1{font-size:22px}
+ .r356-surface-identity p{font-size:11px}
+ .r356-product-surface :where(.special-head,.section-head,.panel-head){padding:8px 9px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .r317-product-root *{scroll-behavior:auto!important;transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}
+}
