@@ -17,8 +17,8 @@ const assert=(ok,msg)=>{if(!ok)throw new Error(`R59/R71/R239 invariant failed: $
 const r71Mounted=app.includes("import OmegaHomeR71 from './OmegaHomeR71'")||app.includes("lazy(()=>import('./OmegaHomeR71'))");
 assert(r71Mounted,'R71 direct workspace successor must be mounted eagerly or through an explicit React lazy boundary');
 assert(!app.includes("import OmegaHome from './OmegaHome'"),'R56 home must not remain mounted beside current authority');
-assert(app.includes("import './sovereignDesignR59.css'"),'shared R59 design lineage must remain mounted');
-assert(app.includes("import './instrumentOSR62.css'"),'viewport repair CSS must be globally mounted before lazy workstation load');
+assert(!app.includes("import './sovereignDesignR59.css'")&&!app.includes("import './instrumentOSR62.css'"),'R59/R62 presentation lineage must remain provenance rather than live root authority');
+assert(app.includes("import './productCoherenceR356.css'"),'R356 canonical product grammar must be globally mounted before lazy workstation load');
 for(const x of ['WORK','EXPLORE','INTELLIGENCE','EVIDENCE','SYSTEM'])assert(home.includes(x),`R59 lineage home domain ${x} missing`);
 for(const x of ['Command Center','Matter Traversal','Earth Now','Visual Instrument','SAI Lab','Evidence & Proof','Hybrid Link','System Atlas'])assert(home.includes(x),`R59 lineage primary route ${x} missing`);
 for(const x of ['Unified Field','Matter','Motion','Forecast','Relativity','Atlas','Reality','Proof'])assert(home.includes(x),`R59 display universe ${x} missing`);
