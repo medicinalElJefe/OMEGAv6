@@ -63,8 +63,10 @@ body{margin:0;background-image:radial-gradient(circle at 18% 0%,rgba(77,139,128,
 .r356-surface-truth b{font:700 12px/1 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--r356-text)}
 .r356-surface-truth small{max-width:34ch;color:var(--r356-dim);font:9px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace}
 .r356-surface-provenance{border:1px solid var(--r356-line);border-radius:9px;background:rgba(5,12,15,.62)}
-.r356-surface-provenance>summary{padding:8px 10px;color:var(--r356-muted);font:600 9px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
-.r356-surface-provenance[open]>summary{border-bottom:1px solid var(--r356-line)}
+.r356-proof-toggle{width:100%;min-height:40px;padding:8px 10px!important;border:0!important;border-radius:8px!important;background:transparent!important;color:var(--r356-muted)!important;text-align:left;font:600 9px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace!important;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;contain:layout paint}
+.r356-proof-toggle[aria-expanded='true']{border-bottom:1px solid var(--r356-line)!important;border-bottom-left-radius:0!important;border-bottom-right-radius:0!important;color:var(--r356-text)!important}
+.r356-proof-region[hidden]{display:none!important}
+.r356-proof-region{display:grid;gap:8px}
 .r356-surface-content{display:grid;gap:var(--r356-gap);min-width:0}
 
 /* Unified descendant grammar. Old component markup survives, but presentation resolves here. */
