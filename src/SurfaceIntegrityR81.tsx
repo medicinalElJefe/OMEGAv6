@@ -1,4 +1,4 @@
-import {useEffect,type ReactNode} from 'react';
+import {useEffect,useState,type ReactNode} from 'react';
 import PanelBoundary from './PanelBoundary';
 import SurfaceProvenanceR94 from './SurfaceProvenanceR94';
 import FullCalculusFabricR107 from './FullCalculusFabricR107';
@@ -11,6 +11,9 @@ type Props={panel:string;children:ReactNode;onRecover:()=>void;record?:any};
 function slug(panel:string){return panel.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'unknown'}
 
 export default function SurfaceIntegrityR81({panel,children,onRecover,record}:Props){
+ const[proofOpen,setProofOpen]=useState(false),[proofDeep,setProofDeep]=useState(false);
+ useEffect(()=>{setProofOpen(false);setProofDeep(false)},[panel]);
+ useEffect(()=>{if(!proofOpen){setProofDeep(false);return}const id=window.setTimeout(()=>setProofDeep(true),120);return()=>window.clearTimeout(id)},[proofOpen,panel]);
  useEffect(()=>{
   document.documentElement.dataset.omegaSurface=slug(panel);
   return()=>{delete document.documentElement.dataset.omegaSurface};
@@ -25,7 +28,7 @@ export default function SurfaceIntegrityR81({panel,children,onRecover,record}:Pr
     <div className='r356-surface-truth'><span>{presentation.family}</span><b>{presentation.realityLabel}</b><small>{presentation.boundary} · {presentation.tier}</small></div>
    </header>
    <div className='r82-surface-vital' aria-hidden='true'><i style={{transform:`scaleX(${vital.c})`}}/><i style={{transform:`scaleX(${vital.phi})`}}/><i style={{transform:`scaleX(${vital.q})`}}/><i style={{transform:`scaleX(${vital.e})`}}/></div>
-   <details className='r356-surface-provenance'><summary>Proof & lineage</summary><SurfaceProvenanceR94 surface={panel}/>{record&&<FullCalculusFabricR107 surface={panel} record={record}/>}</details>
+   <details key={panel} className='r356-surface-provenance' onToggle={e=>setProofOpen(e.currentTarget.open)} data-r356-proof-state={proofOpen?(proofDeep?'DEEP_READY':'PROVENANCE_READY'):'CLOSED'}><summary>Proof & lineage</summary>{proofOpen&&<div className='r356-proof-lineage-summary'><SurfaceProvenanceR94 surface={panel}/></div>}{proofDeep&&record&&<div className='r356-proof-lineage-deep'><FullCalculusFabricR107 surface={panel} record={record}/></div>}</details>
    <div className='r356-surface-content'>{children}</div>
   </section>
  </PanelBoundary>
