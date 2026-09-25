@@ -45,3 +45,12 @@
  .r138-health{width:100%;max-width:none;min-width:0}
  .r138-action-stack>button{min-height:84px}
 }
+
+
+/* R356.1 browser-return repair: async R147/R154 telemetry may repaint content but must not
+   move the interaction coordinate system. Contain the stage and action ledger as independent
+   layout/paint domains; this preserves the real controls and assertions rather than relaxing proof. */
+.r317-product-root .r138-live-stage{contain:layout paint}
+.r317-product-root .r138-action-stack{contain:layout}
+.r317-product-root .r356-native-node-controls{contain:layout paint}
+.r317-product-root .r356-native-node-control{transition:none!important;animation:none!important}
