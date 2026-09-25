@@ -1,5 +1,6 @@
 import {chromium} from 'playwright';
 import fs from 'node:fs';
+import {partitionInteractionCasesR355} from '../src/system/r313InteractionWorkloadR355.js';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
@@ -8,6 +9,11 @@ const routes=[...block.matchAll(/'([^']+)'/g)].map(m=>m[1]);
 if(routes.length!==44||new Set(routes).size!==44)throw new Error(`R313 expected 44 unique canonical surfaces, received ${routes.length}`);
 
 const viewports=[['desktop',{width:1440,height:960}],['mobile',{width:390,height:844}]];
+const shardCount=Math.max(1,Math.min(16,Number(process.env.R313_DISCLOSURE_SHARD_COUNT||1)|0));
+const shardIndex=Math.max(0,Math.min(shardCount-1,Number(process.env.R313_DISCLOSURE_SHARD_INDEX||0)|0));
+const disclosurePartition=partitionInteractionCasesR355({surfaces:routes,shardCount});
+const assignedCases=disclosurePartition[shardIndex].cases;
+if(!assignedCases.length)throw new Error(`R313 disclosure shard ${shardIndex+1}/${shardCount} has no assigned cases`);
 const risky=/run|execute|deploy|dispatch|delete|remove|apply patch|write|commit|submit|train|authorize|queue|mission|promote/i;
 let detailsExercised=0,ariaExercised=0;
 
@@ -159,13 +165,16 @@ async function testAriaExpanded(page,viewport,route){
 
 const browser=await chromium.launch({headless:true});
 try{
-  for(const [viewportName,viewport] of viewports){
+  for(let profileIndex=0;profileIndex<viewports.length;profileIndex++){
+    const [viewportName,viewport]=viewports[profileIndex];
+    const assignedRoutes=assignedCases.filter(x=>x.profileIndex===profileIndex).map(x=>x.surface);
+    if(!assignedRoutes.length)continue;
     const context=await browser.newContext({viewport,deviceScaleFactor:1});
     const page=await context.newPage();
     const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-    await page.goto(`${base}/?r313-panel-disclosure=${Date.now()}-${viewportName}`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(`${base}/?r313-panel-disclosure=${Date.now()}-${viewportName}-s${shardIndex+1}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
-    for(const route of routes){
+    for(const route of assignedRoutes){
       await openRoute(page,route);
       await testDetails(page,viewportName,route);
       await testAriaExpanded(page,viewportName,route);
@@ -173,5 +182,5 @@ try{
     }
     await context.close();
   }
-  console.log(`R313 ALL-PANEL DISCLOSURE PASS · 44/44 canonical surfaces × desktop/mobile · ${detailsExercised} native details disclosures recursively revealed, pointer-toggled, direct-content visibility verified and restored · ${ariaExercised} safe aria-expanded controls toggled and restored · closed panels may not leak author-CSS content · missing aria-controls targets fail closed · no execution/deploy/dispatch/authorization controls invoked · no page errors.`);
+  console.log(`R313 PANEL DISCLOSURE SHARD ${shardIndex+1}/${shardCount} PASS · workload ${disclosurePartition[shardIndex].weight}ms census · ${assignedCases.length} deterministic route/viewport cases · ${detailsExercised} native details disclosures recursively revealed, pointer-toggled, direct-content visibility verified and restored · ${ariaExercised} safe aria-expanded controls toggled and restored · closed panels may not leak author-CSS content · missing aria-controls targets fail closed · no execution/deploy/dispatch/authorization controls invoked · no page errors.`);
 }finally{await browser.close()}
