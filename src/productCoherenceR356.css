@@ -164,3 +164,7 @@ body{margin:0;background-image:radial-gradient(circle at 18% 0%,rgba(77,139,128,
 @media(prefers-reduced-motion:reduce){
  .r317-product-root *{scroll-behavior:auto!important;transition:none!important;animation-duration:.001ms!important;animation-iteration-count:1!important}
 }
+
+.r356-proof-lineage-summary{display:grid;gap:6px;padding:10px}
+.r356-proof-lineage-summary>span{color:var(--r356-muted);font:10px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace}
+.r356-load-deep-proof{justify-self:start;min-height:40px;padding:8px 11px!important;contain:layout paint}
