@@ -144,7 +144,7 @@ body{margin:0;background-image:radial-gradient(circle at 18% 0%,rgba(77,139,128,
 /* Responsive coherence. */
 @media(max-width:900px){
  :root{--r356-radius:11px;--r356-gap:9px}
- .r356-product-surface{padding:7px}
+ .r356-product-surface{padding:6px}
  .r356-surface-frame{grid-template-columns:1fr;align-items:start;gap:9px;padding:12px}
  .r356-surface-truth{justify-items:start;text-align:left}
  .r356-surface-truth small{max-width:none}
