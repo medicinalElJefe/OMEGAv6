@@ -6,6 +6,7 @@ const surface=fs.readFileSync('src/SurfaceIntegrityR81.tsx','utf8');
 const authority=fs.readFileSync('src/system/productPresentationAuthorityR356.ts','utf8');
 const css=fs.readFileSync('src/productCoherenceR356.css','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const capabilityField=fs.readFileSync('src/OmegaCapabilityFieldR138.tsx','utf8');
 const registry=fs.readFileSync('src/omegaExperienceRegistryR82.ts','utf8');
 const capabilities=fs.readFileSync('src/capabilityAuthority.ts','utf8');
 
@@ -53,5 +54,7 @@ const routeBlock=(registry.match(/OMEGA_ALL_ROUTES_R82=OMEGA_WORKSPACES_R82\.fla
 assert.ok(routeBlock,'R356 must derive presentation from canonical route registry');
 assert.ok(capabilities.includes('OMEGA_CAPABILITY_AUTHORITY'),'R356 must preserve capability authority');
 assert.ok(!css.includes('display:none!important}.r94-rail-action'),'R356 may not erase canonical navigation');
+assert.ok(capabilityField.includes("width='120' height='120' rx='60'")&&capabilityField.includes("data-r356-touch-envelope='120'"),'R356 must preserve the enlarged SVG capability interaction envelope required by the 44px mobile touch contract');
+assert.ok(css.includes("@media(max-width:900px){\n :root{--r356-radius:11px;--r356-gap:9px}\n .r356-product-surface{padding:6px}"),'R356 mobile surface inset must preserve the proven 240px deep-workbench width floor');
 
-console.log('R356 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · legacy presentation preserved as provenance only');
+console.log('R356 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor preserved · legacy presentation preserved as provenance only');
