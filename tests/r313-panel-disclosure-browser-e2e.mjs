@@ -41,6 +41,7 @@ async function openRoute(page,route){
   await page.waitForFunction(name=>{
     const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
     if(!surface||surface.querySelector('.panel-failure'))return false;
+    if(surface.getAttribute('data-r356-interaction-ready')!=='true')return false;
     const loader=[...surface.querySelectorAll('.r109-specialist-loading')].some(el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>1&&r.height>1});
     return !loader;
   },route,{timeout:30000});
