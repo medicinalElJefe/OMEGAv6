@@ -55,7 +55,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
  const navigationLemma=useMemo(()=>compileNavigationLemmaR242({routes:routeRecords,query,workspaceFilter,currentRoute:currentPanel}),[routeRecords,query,workspaceFilter,currentPanel]);
  const lemmaRows=useMemo(()=>navigationLemma.routes.map((route:any)=>route.name as string),[navigationLemma]);
  const rows=useMemo(()=>lemmaRows.filter(route=>masterMenu==='ALL'||omegaMasterMenuForRouteR289(route)?.id===masterMenu),[lemmaRows,masterMenu]);
- const go=(panel:string)=>{const resolved=resolveExactRouteR242(routeRecords,panel);if(!resolved){setNavigationScar(`UNRESOLVED_ROUTE_IDENTITY:${panel}`);setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setMasterMenu('ALL');setQuery(panel);setExpanded(true);return}setNavigationScar('');document.documentElement.dataset.omegaNavExpanded='false';setExpanded(false);onNavigate(resolved.name);setQuery('')};
+ const go=(panel:string)=>{const resolved=resolveExactRouteR242(routeRecords,panel);if(!resolved){setNavigationScar(`UNRESOLVED_ROUTE_IDENTITY:${panel}`);setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setMasterMenu('ALL');setQuery(panel);setExpanded(true);return}setNavigationScar('');document.documentElement.dataset.omegaNavExpanded='false';onNavigate(resolved.name);setExpanded(false);setQuery('')};
  const open=(next:BrowserLayer)=>{setLayer(next);setNavigationScar('');setExpanded(true)};
  const currentWorkspace=currentPanel?workspaceForRouteR82(currentPanel as any):null,currentOrganization=currentPanel?organizationForRouteR132(currentPanel):null,routeCount=OMEGA_ROUTE_INVENTORY_R107.currentCount;
  const residualCount=navigationLemma.residualCount+(navigationScar?1:0);
