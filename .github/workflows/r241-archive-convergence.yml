@@ -219,9 +219,12 @@ jobs:
           echo 'OMEGA_E2E_URL=http://127.0.0.1:4173' >> "$GITHUB_ENV"
           echo "R241 shared preview ready pid=$pid"
 
-      - name: Browser proof · R313 panel disclosure contract · fail fast
+      - name: Browser proof · R313 panel disclosure contract · exhaustive partition
         id: panel_disclosure
-        run: OMEGA_BROWSER_PROOF_TIMEOUT_SEC=480 bash scripts/run_r241_browser_proof.sh 'node tests/r313-panel-disclosure-ci-wrapper.mjs'
+        shell: bash
+        run: |
+          set -o pipefail
+          OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1320 bash scripts/run_r241_browser_proof.sh 'R313_DISCLOSURE_SHARDS=16 R313_DISCLOSURE_MAX_PARALLEL=4 R313_DISCLOSURE_SHARD_TIMEOUT_SEC=360 bash scripts/run_r313_disclosure_shards.sh && node tests/r318-viewport-ownership-browser-e2e.mjs'
 
       - name: Capture exact R313 panel disclosure failure
         if: failure() && steps.panel_disclosure.outcome == 'failure'
@@ -317,7 +320,7 @@ jobs:
           {
             echo '## R241 accumulated interface-integrity, Woven compute and R316 research-advancement proof'
             echo "- Candidate: $GITHUB_SHA"
-            echo '- R313 disclosure is fail-fast and diagnostic-transport only: the unchanged strict child acceptance remains authoritative; failure capture does not convert a red gate to green.'
+            echo '- R313 disclosure preserves the unchanged strict child acceptance across all 88 route/viewport cases, partitioned by the same measured workload field into sixteen deterministic shards and recombined fail-closed; R318 viewport/reload ownership runs once after recombination.'
             echo '- R313 full safe-control output is retained on failure as diagnostic transport only; the unchanged interaction assertions remain authoritative and red still blocks promotion.'
             echo '- R314 numerical evaluation and R315 Woven field/traversal invariants are explicit proof gates, including frame-relative 12^k source/target continuity and recoverable scar/history carry.'
             echo '- R316 fabrication-transform/tolerance, optical-field polarization, relational identity, experiment residual, spectral observation, acquisition provenance and topology-aware scheduler contracts are proved here without adding a workflow authority.'
