@@ -24,14 +24,14 @@ assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=480'),'R313 panel discl
 assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=780'),'deep R286 control sweep must have an evidence-calibrated explicit bounded budget');
 assert.ok(interactionJob,'R313 isolated blocking job must be structurally parseable');
 assert.ok(interactionJob.includes('timeout-minutes: 50'),'R313 isolated interaction job must retain the evidence-calibrated 50-minute fail-closed ceiling');
-assert.ok(interactionJob.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1320'),'R313 isolated interaction parent must retain the bounded 1320s four-wave envelope');
-assert.ok(interactionJob.includes('R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=360'),'R313 isolated interaction job must retain 16 measured-workload shards with unchanged 360s child ceilings');
+assert.ok(interactionJob.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1680'),'R313 isolated interaction parent must retain the bounded 1320s four-wave envelope');
+assert.ok(interactionJob.includes('R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=480'),'R313 isolated interaction job must retain 16 measured-workload shards with 480s child ceilings after exact-head shard 13 exceeded the stale R355 census budget');
 assert.ok(interactionJob.includes('Build exact candidate for interaction proof')&&interactionJob.includes('npm run build'),'isolated R313 job must build the exact candidate before browser interaction proof');
 assert.ok(r241.includes('Stop shared R241 preview server')&&r241.includes('if: always()'),'R241 shared preview must always clean up');
 
 assert.ok(r241.includes('R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=360'),'R286 exhaustive browser audit must run as eight deterministic shards in bounded four-way waves');
-assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1320'),'R313 four-wave parent proof must have a bounded 22-minute envelope derived from observed exact-head runtime');
-assert.ok(r241.includes('R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=360'),'R313 safe-control sweep must run as sixteen deterministic shards in bounded four-way waves');
+assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1680'),'R313 four-wave parent proof must have a bounded 28-minute envelope preserving fail-closed exhaustive execution');
+assert.ok(r241.includes('R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=480'),'R313 safe-control sweep must run as sixteen deterministic shards in bounded four-way waves');
 assert.ok(r286ShardRunner.includes('R286_SHARD_COUNT="$shards" R286_SHARD_INDEX="$i"'),'R286 shard runner must bind every child to an explicit partition identity');
 assert.ok(r286ShardRunner.includes('for ((wave_start=0; wave_start<shards; wave_start+=max_parallel))'),'R286 shard runner must cover the complete shard set in bounded waves');
 assert.ok(r286ShardRunner.includes('for ((j=0;j<${#pids[@]};j++)); do')&&r286ShardRunner.includes('if wait "${pids[$j]}"'),'R286 shard runner must recombine every child in each bounded wave before advancing');
@@ -49,4 +49,4 @@ assert.ok(runner.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC:-300'),'R241 runner m
 assert.ok(runner.includes('timeout --signal=TERM --kill-after=15s'),'R241 runner must terminate hung children fail-closed');
 assert.ok(runner.includes('R241 browser proof timeout'),'R241 timeout must produce an explicit diagnostic annotation');
 
-console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286 exhaustive modulo partition retained · R313 exhaustive 88-case interaction proof uses deterministic R286-census workload balancing across sixteen bounded shards in four four-way waves · R313 360s child / 1320s parent ceilings + R241 50-minute job ceiling are evidence-calibrated and fail closed · every child proof bounded · diagnostics retained');
+console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286 exhaustive modulo partition retained · R313 exhaustive 88-case interaction proof uses deterministic R286-census workload balancing across sixteen bounded shards in four four-way waves · R313 480s child / 1680s parent ceilings + R241 50-minute job ceiling are evidence-calibrated and fail closed · every child proof bounded · diagnostics retained');
