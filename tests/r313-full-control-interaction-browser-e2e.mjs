@@ -143,7 +143,7 @@ async function actuateSafeControl(page,item,profile,surface){
  const current=await resolveControl(page,item);
  if(!current)return;
  await current.scrollIntoViewIfNeeded().catch(()=>{});
- await waitForStableControl(page,item.id);
+ if(item.native)await waitForStableControl(page,item.id);
  try{
   if(item.native){
    await current.click({timeout:7000});
