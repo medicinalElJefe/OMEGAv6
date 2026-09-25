@@ -34,6 +34,7 @@ async function waitForSurfaceReady(page,name){
   const main=document.querySelector('.workstation-main');
   const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(route)}"]`);
   if(!main||!surface)return false;
+  if(surface.getAttribute('data-r356-interaction-ready')!=='true')return false;
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
   const children=[...surface.children].filter(visible);
   const rich=[...surface.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible);
