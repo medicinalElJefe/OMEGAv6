@@ -57,6 +57,8 @@ for(const token of[
  '.r356-module-group'
 ])assert.ok(css.includes(token),`R356 visual grammar missing ${token}`);
 assert.ok(app.includes("import './omegaProductFrameR356.css'"),'R356 must be the final global product visual authority');
+assert.ok(css.includes("html[data-omega-nav-present='true'] .r257-shell .omega-workstation-v2[data-product-design='R356']{margin-left:0!important;width:100%!important;max-width:100%!important}"),'R356 nested workstation must be neutral to navigator reservation because R257 is the sole outer reservation owner');
+
 assert.ok(nav.includes('r356-canonical-nav')&&nav.includes("data-product-design='R356'"),'global navigator must participate in R356 product design');
 const navCommit=nav.indexOf("document.documentElement.dataset.omegaNavExpanded='false'"),navRoute=nav.indexOf('onNavigate(resolved.name)');
 assert.ok(navCommit>=0&&navRoute>navCommit,'R356 route commit must collapse the reserved navigation width synchronously before mounting the next product frame');
