@@ -26,7 +26,7 @@ body{margin:0;background-image:radial-gradient(circle at 18% 0%,rgba(77,139,128,
 /* R356 interaction continuity: programmatic proof/user navigation must settle immediately; legacy smooth-scroll rules caused controls to remain geometrically in motion after they were brought into view. */
 .r317-product-root,.r317-product-root .workstation-main,.r317-product-root .r356-product-surface{scroll-behavior:auto!important}
 .r317-product-root :where(button,input,select,textarea){font:inherit}
-.r317-product-root :where(button,[role='button']){touch-action:manipulation;transition-property:background-color,border-color,color,opacity!important;transform:none!important}
+.r317-product-root :where(button,[role='button']){touch-action:manipulation;transition-property:background-color,border-color,color,opacity!important;transform:none!important;animation:none!important}
 .r317-product-root :where(button,a,input,select,textarea,[role='button']):focus-visible{outline:2px solid rgba(141,201,189,.78);outline-offset:2px}
 .r317-product-root :where(button:not(:disabled),[role='button']:not([aria-disabled='true'])){cursor:pointer}
 
