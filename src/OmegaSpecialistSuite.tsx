@@ -32,25 +32,39 @@ export default function OmegaSpecialistSuite(props:Props){
  const {panel,record,state,address,onAddress,onNavigate,status,restore}=props;
  const capability=<OmegaCapabilityFieldR138 panel={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>;
  const wrap=(content:any)=><div className='r138-capability-first'>{capability}{content}</div>;
- if(panel==='Convergence')return wrap(<div>
-  <AppliedCalculusR168/>
-  <CalculusAddressFabricR240 record={record}/>
-  <OmegaResearchAdvancementR316/>
-  <RecursiveSelfBuildR240/>
-  <OmegaUnifiedConvergenceR348 record={record} status={status}/>
-  <OmegaHardwareFieldR349 address={address}/>
-  <OmegaTemporalCheckpointR350/>
-  <OmegaGpuPacketMirrorR351/>
-  <OmegaGpuComputeR352/>
-  <OmegaProofBoundSceneR354/>
-  <OmegaProofBoundTemporalTraversalR355/>
-  <FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/>
-  <OmegaMaximumCockpitR126 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>
-  <details className='r121-legacy-convergence' open><summary>R164 returned reflex → autonomic swarm · replay / residual carry / governed recruitment</summary><ReflexAutonomicR164/></details>
-  <details className='r121-legacy-convergence' open><summary>R126 autonomic execution · scope / detach / checkpoint / rejoin</summary><OmegaAutonomicR125/></details>
-  <details className='r121-legacy-convergence'><summary>R123 organism body · seed / organ / branch / cell hierarchy</summary><OmegaOrganismR123/></details>
-  <details className='r121-legacy-convergence'><summary>R121 direct swarm body · compatibility / independent-cell control</summary><OmegaSwarmR121 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
-  <details className='r121-legacy-convergence'><summary>Retained continuity / convergence field instrument</summary><OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
+ if(panel==='Convergence')return wrap(<div className='r356-convergence-primary'>
+  <section className='r356-convergence-section'>
+   <header><div><span>CURRENT AUTHORITY</span><b>Unified convergence</b><small>Current relational field, exact address fabric, research state and governed self-build.</small></div></header>
+   <OmegaUnifiedConvergenceR348 record={record} status={status}/>
+   <AppliedCalculusR168/>
+   <CalculusAddressFabricR240 record={record}/>
+   <OmegaResearchAdvancementR316/>
+   <RecursiveSelfBuildR240/>
+  </section>
+  <section className='r356-convergence-section r356-convergence-compute'>
+   <header><div><span>COMPUTE / REPLAY</span><b>Hardware → temporal → packet → render</b><small>One model state path; execution correspondence does not create physical or Canon authority.</small></div></header>
+   <OmegaHardwareFieldR349 address={address}/>
+   <OmegaTemporalCheckpointR350/>
+   <OmegaGpuPacketMirrorR351/>
+   <OmegaGpuComputeR352/>
+  </section>
+  <section className='r356-convergence-section r356-convergence-lineage'>
+   <header><div><span>PROOF-BOUND SCENE</span><b>Release → scene → traversal</b><small>R354/R355 receipts bind current lineage, deterministic replay and temporal scene continuity.</small></div></header>
+   <OmegaProofBoundSceneR354/>
+   <OmegaProofBoundTemporalTraversalR355/>
+  </section>
+  <section className='r356-convergence-section'>
+   <header><div><span>RETAINED CAPABILITY</span><b>Recovery and autonomic lineage</b><small>Still available, no longer allowed to visually compete with the current convergence authority.</small></div></header>
+   <div className='r356-compatibility-stack'>
+    <details><summary>R168 full restoration convergence</summary><FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/></details>
+    <details><summary>R126 maximum cockpit / execution topology</summary><OmegaMaximumCockpitR126 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
+    <details><summary>R164 returned reflex → autonomic swarm</summary><ReflexAutonomicR164/></details>
+    <details><summary>R125 autonomic execution / checkpoint / rejoin</summary><OmegaAutonomicR125/></details>
+    <details><summary>R123 organism hierarchy</summary><OmegaOrganismR123/></details>
+    <details><summary>R121 direct swarm compatibility</summary><OmegaSwarmR121 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
+    <details><summary>R28 retained continuity / convergence instrument</summary><OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
+   </div>
+  </section>
  </div>);
  if(panel==='Field'||panel==='Data Motion')return wrap(<OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>);
  if(panel==='Evidence & Proof')return wrap(<div><OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/><OmegaReleaseLineageR353/><SingmasterProofWorkbenchR290 record={record}/></div>);
