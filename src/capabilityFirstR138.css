@@ -68,3 +68,12 @@
  will-change:auto!important;
  contain:layout paint size;
 }
+
+
+/* R356.3 returned interaction scar: the topology is an interactive coordinate field, not
+   document-flow content. Bind its screen-space box to the declared 640x460 geometry so
+   asynchronous capacity/evidence text can repaint without moving pointer targets. */
+.r317-product-root .r138-live-stage{height:460px;min-height:460px}
+.r317-product-root .r138-live-stage>svg{height:100%;min-height:0}
+@media(max-width:900px){.r317-product-root .r138-live-stage{height:360px;min-height:360px}}
+@media(max-width:580px){.r317-product-root .r138-live-stage{height:310px;min-height:310px}}
