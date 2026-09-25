@@ -1,4 +1,4 @@
-import {useEffect,useState,type ReactNode} from 'react';
+import {useEffect,useRef,useState,type ReactNode} from 'react';
 import PanelBoundary from './PanelBoundary';
 import SurfaceProvenanceR94 from './SurfaceProvenanceR94';
 import FullCalculusFabricR107 from './FullCalculusFabricR107';
@@ -11,9 +11,10 @@ type Props={panel:string;children:ReactNode;onRecover:()=>void;record?:any};
 function slug(panel:string){return panel.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'unknown'}
 
 export default function SurfaceIntegrityR81({panel,children,onRecover,record}:Props){
- const[proofOpen,setProofOpen]=useState(false),[proofDeep,setProofDeep]=useState(false);
- useEffect(()=>{setProofOpen(false);setProofDeep(false)},[panel]);
- useEffect(()=>{if(!proofOpen){setProofDeep(false);return}const id=window.setTimeout(()=>setProofDeep(true),120);return()=>window.clearTimeout(id)},[proofOpen,panel]);
+ const[proofOpen,setProofOpen]=useState(false),[proofDeep,setProofDeep]=useState(false),proofDetailsRef=useRef<HTMLDetailsElement|null>(null),proofOpenTimer=useRef<number|undefined>(undefined),proofDeepTimer=useRef<number|undefined>(undefined);
+ const clearProofTimers=()=>{if(proofOpenTimer.current!==undefined)window.clearTimeout(proofOpenTimer.current);if(proofDeepTimer.current!==undefined)window.clearTimeout(proofDeepTimer.current);proofOpenTimer.current=undefined;proofDeepTimer.current=undefined};
+ const onProofToggle=(open:boolean)=>{clearProofTimers();if(!open){setProofOpen(false);setProofDeep(false);return}proofOpenTimer.current=window.setTimeout(()=>{if(!proofDetailsRef.current?.open)return;setProofOpen(true)},240);proofDeepTimer.current=window.setTimeout(()=>{if(!proofDetailsRef.current?.open)return;setProofOpen(true);setProofDeep(true)},900)};
+ useEffect(()=>{clearProofTimers();setProofOpen(false);setProofDeep(false);return clearProofTimers},[panel]);
  useEffect(()=>{
   document.documentElement.dataset.omegaSurface=slug(panel);
   return()=>{delete document.documentElement.dataset.omegaSurface};
@@ -28,7 +29,7 @@ export default function SurfaceIntegrityR81({panel,children,onRecover,record}:Pr
     <div className='r356-surface-truth'><span>{presentation.family}</span><b>{presentation.realityLabel}</b><small>{presentation.boundary} · {presentation.tier}</small></div>
    </header>
    <div className='r82-surface-vital' aria-hidden='true'><i style={{transform:`scaleX(${vital.c})`}}/><i style={{transform:`scaleX(${vital.phi})`}}/><i style={{transform:`scaleX(${vital.q})`}}/><i style={{transform:`scaleX(${vital.e})`}}/></div>
-   <details key={panel} className='r356-surface-provenance' onToggle={e=>{const open=e.currentTarget.open;window.setTimeout(()=>setProofOpen(open),0)}} data-r356-proof-state={proofOpen?(proofDeep?'DEEP_READY':'PROVENANCE_READY'):'CLOSED'}><summary>Proof & lineage</summary>{proofOpen&&<div className='r356-proof-lineage-summary' data-r356-lightweight-proof='true'><span><b>PRIMARY</b> {provenance.primary}</span><span><b>LAYER</b> {layer.primary}</span><span><b>BINDINGS</b> {layer.layers.join(' · ')}</span><span><b>CANON</b> presentation does not mutate CanonState</span></div>}{proofDeep&&<div className='r356-proof-lineage-deep'><SurfaceProvenanceR94 surface={panel}/>{record&&<FullCalculusFabricR107 surface={panel} record={record}/>}</div>}</details>
+   <details key={panel} ref={proofDetailsRef} className='r356-surface-provenance' onToggle={e=>onProofToggle(e.currentTarget.open)} data-r356-proof-state={proofOpen?(proofDeep?'DEEP_READY':'PROVENANCE_READY'):'CLOSED'}><summary>Proof & lineage</summary>{proofOpen&&<div className='r356-proof-lineage-summary' data-r356-lightweight-proof='true'><span><b>PRIMARY</b> {provenance.primary}</span><span><b>LAYER</b> {layer.primary}</span><span><b>BINDINGS</b> {layer.layers.join(' · ')}</span><span><b>CANON</b> presentation does not mutate CanonState</span></div>}{proofDeep&&<div className='r356-proof-lineage-deep'><SurfaceProvenanceR94 surface={panel}/>{record&&<FullCalculusFabricR107 surface={panel} record={record}/>}</div>}</details>
    <div className='r356-surface-content'>{children}</div>
   </section>
  </PanelBoundary>
