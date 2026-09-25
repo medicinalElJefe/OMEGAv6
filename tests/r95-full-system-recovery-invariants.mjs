@@ -57,7 +57,7 @@ must(membrane.includes('compileSourceTraversal(address,routeDepth)'),'membrane r
 must(membrane.includes('record.autoPing.previous')&&membrane.includes('record.autoPing.dataNext'),'membrane must distinguish previous/current/admitted-next');
 must(membraneCss.includes('.r95-membrane-stage canvas')&&membraneCss.includes('@media(max-width:900px)'),'membrane must have desktop/mobile containment');
 must(!membrane.includes("<aside>\n    <div><span>PREVIOUS"),'canonical membrane telemetry may not be mounted inside the visual stage');
-must(membrane.includes("<details className='r98-membrane-data'>")&&membraneCss.includes('.r98-membrane-data-grid'),'membrane telemetry must remain reachable as progressive data outside the visual stage');
+must(membrane.includes("className='r98-membrane-data-toggle'")&&membrane.includes('aria-expanded={dataOpen}')&&membrane.includes('aria-controls={`r98-membrane-data-${record.stateId}`}')&&membraneCss.includes('.r98-membrane-data-grid'),'membrane telemetry must remain progressively reachable through explicit accessible disclosure outside the visual stage');
 must(!membraneCss.includes('.r95-membrane-stage aside{'),'membrane CSS may not restore a blocking stage overlay');
 
 must(home.includes('<CanonicalMembraneR95 address={address} onAddress={setAddress}'),'Home must expose the canonical membrane, not a generic plot');
