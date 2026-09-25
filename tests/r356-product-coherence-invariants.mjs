@@ -58,5 +58,7 @@ for(const token of ["data-r356-interaction-ready={interactionReady?'true':'false
 for(const token of ["className='r356-native-node-controls'","type='button' className='r356-native-node-control'","aria-hidden='true' pointerEvents='none'","startTransition(()=>onNavigate(action.route!))"])assert.ok(capabilityField.includes(token),`R356 native capability interaction boundary missing ${token}`);
 assert.ok(!capabilityField.includes("role='button' tabIndex={0}")&&!capabilityField.includes('onKeyDown={e=>runKey(e,n)}'),'R356 must not regress to SVG pseudo-buttons');
 assert.ok(css.includes("@media(max-width:900px){\n :root{--r356-radius:11px;--r356-gap:9px}\n .r356-product-surface{padding:6px}"),'R356 mobile surface inset must preserve the proven 240px deep-workbench width floor');
+assert.ok(css.includes(".omega-workstation-v2[data-panel='Earth Now'] .workstation-main{padding-inline:1px!important}")&&css.includes(".r356-product-surface[data-r356-route='Earth Now']{padding-inline:1px"),'R356 mobile Earth must retain viewport-first instrument geometry without horizontal overflow');
+
 
 console.log('R356 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor + non-blocking proof-lineage disclosure preserved · legacy presentation preserved as provenance only');
