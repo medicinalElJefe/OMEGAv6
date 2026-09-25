@@ -26,7 +26,7 @@ must(field.includes('compileUnifiedCapabilityRuntimeR139')&&field.includes('rank
 must(field.includes("data-operation-fabric='R140'")&&field.includes("CANDIDATE_AUTHORITY='PROJECTION_NOT_CANON_ADMISSION'")&&field.includes("data-canonical-mutation='false'"),'field authority boundary missing');
 must(field.includes('Ranked projected next')&&!field.includes("label:i===0?'Admitted next'"),'candidate projection label must remain distinct from canonical admission');
 for(const signal of ['routeStrength','unifiedCoherence','?.C','?.Phi','evidence','contradictionPressure','Lambda','uncertainty','scar'])must(field.includes(signal),'full candidate rank missing '+signal);
-for(const token of ["role='group'","role='button'",'tabIndex={0}','onClick={()=>runAction(n)}','onKeyDown={e=>runKey(e,n)}'])must(field.includes(token),'spatial capability node is not directly operable '+token);
+for(const token of ["role='group'","className='r356-native-node-controls'","type='button' className='r356-native-node-control'",'onClick={()=>runAction(n)}',"aria-hidden='true' pointerEvents='none'"])must(field.includes(token),'R356 capability topology is not natively operable '+token);must(!field.includes("role='button' tabIndex={0}")&&!field.includes('onKeyDown={e=>runKey(e,n)}'),'SVG pseudo-button operation must stay retired');
 must(!field.includes("<button className='r138-live-stage'"),'whole topology must not act as one catch-all button');
 must(field.includes('mode coverage')&&field.includes('PROJECTION ≠ ADMISSION'),'operator telemetry must expose mode execution coverage and authority boundary');
 
