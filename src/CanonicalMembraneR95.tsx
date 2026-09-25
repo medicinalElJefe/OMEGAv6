@@ -12,7 +12,7 @@ const clamp=(n:number,a:number,b:number)=>Math.max(a,Math.min(b,n));
 
 export default function CanonicalMembraneR95({address,onAddress,initialProjection='MANDALA',initialView='SOURCE_COLOR',projection:controlledProjection,view:controlledView,showControls=true,compact=false,label='20,736-CELL CANONICAL MEMBRANE'}:Props){
  const canvas=useRef<HTMLCanvasElement|null>(null);
- const [projectionState,setProjection]=useState<Projection>(initialProjection),[viewState,setView]=useState<ViewMode>(initialView),[routeDepth,setRouteDepth]=useState(compact?18:42);
+ const [projectionState,setProjection]=useState<Projection>(initialProjection),[viewState,setView]=useState<ViewMode>(initialView),[routeDepth,setRouteDepth]=useState(compact?18:42),[dataOpen,setDataOpen]=useState(false);
  const projection=controlledProjection??projectionState,view=controlledView??viewState;
  const record=useMemo(()=>corpusState(address),[address]);
  const route=useMemo(()=>compileSourceTraversal(address,routeDepth),[address,routeDepth]);
@@ -84,9 +84,9 @@ export default function CanonicalMembraneR95({address,onAddress,initialProjectio
   </div>}
   {homeComposite&&<OmegaWovenRelativityContinuumR134 address={address} onAddress={onAddress} projection={projection} view={view}/>} 
   {homeComposite?<details className='r121-home-membrane'><summary>CANONICAL SOURCE MEMBRANE · OPEN 20,736-CELL INSPECTION SURFACE</summary>{membraneStage}</details>:membraneStage}
-  <details className='r98-membrane-data'>
-   <summary>DATA · STATE {record.stateId} · {record.metrics.decision}</summary>
-   <div className='r98-membrane-data-grid'>
+  <section className='r98-membrane-data'>
+   <button type='button' className='r98-membrane-data-toggle' aria-expanded={dataOpen} aria-controls={`r98-membrane-data-${record.stateId}`} onClick={()=>setDataOpen(v=>!v)}>DATA · STATE {record.stateId} · {record.metrics.decision}</button>
+   <div id={`r98-membrane-data-${record.stateId}`} className='r98-membrane-data-grid' hidden={!dataOpen}>
     <div><span>PREVIOUS</span><b>{record.autoPing.previous+1}</b></div>
     <div><span>CURRENT</span><b>{record.stateId}</b></div>
     <div><span>ADMITTED NEXT</span><b>{record.autoPing.dataNext+1}</b></div>
@@ -94,7 +94,7 @@ export default function CanonicalMembraneR95({address,onAddress,initialProjectio
     <div><span>CΩ / Φ</span><b>{Number(record.metrics.continuity).toFixed(3)} / {Number(record.metrics.plasticity).toFixed(3)}</b></div>
     <div><span>q / Λ</span><b>{Number(record.metrics.contradiction).toFixed(3)} / {Number(record.metrics.burden).toFixed(3)}</b></div>
    </div>
-  </details>
+  </section>
   <footer><span><i className='previous'/>previous packet</span><span><i className='current'/>current packet</span><span><i className='next'/>admitted route</span><b>{projection} position + {view} color are deterministic functions of the canonical corpus · {R119_RESOLUTION_BOUNDARY}</b></footer>
  </section>
 }
