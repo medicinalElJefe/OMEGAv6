@@ -54,3 +54,17 @@
 .r317-product-root .r138-action-stack{contain:layout}
 .r317-product-root .r356-native-node-controls{contain:layout paint}
 .r317-product-root .r356-native-node-control{transition:none!important;animation:none!important}
+
+
+/* R356.2 returned-browser scar repair: topology hit targets are screen-space controls.
+   Anchor their percentage coordinates to the live stage padding box and remove inherited
+   button transform competition so telemetry/content repaint cannot perturb their box. */
+.r317-product-root .r138-live-stage{isolation:isolate}
+.r317-product-root .r356-native-node-control{
+ margin:0!important;
+ box-sizing:border-box!important;
+ translate:-50% -50%;
+ transform:none!important;
+ will-change:auto!important;
+ contain:layout paint size;
+}
