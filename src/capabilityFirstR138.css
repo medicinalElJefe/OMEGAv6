@@ -77,3 +77,13 @@
 .r317-product-root .r138-live-stage>svg{height:100%;min-height:0}
 @media(max-width:900px){.r317-product-root .r138-live-stage{height:360px;min-height:360px}}
 @media(max-width:580px){.r317-product-root .r138-live-stage{height:310px;min-height:310px}}
+
+/* R356 returned interaction scar repair: keep the capability topology coordinate frame
+   invariant while asynchronous R154/R146 evidence updates repaint the adjacent ledger.
+   The topology remains responsive at declared breakpoints, but within a frame its grid
+   track and pointer-target transform no longer inherit changing sibling intrinsic width. */
+@media(min-width:901px){
+ .r317-product-root .r138-capability-layout{grid-template-columns:minmax(0,calc(100% - 374px)) 360px;align-items:start}
+}
+.r317-product-root .r138-live-stage{width:100%;max-width:100%;min-width:0}
+.r317-product-root .r356-native-node-control{transform:translate(-50%,-50%)!important;contain:layout paint;will-change:auto}
