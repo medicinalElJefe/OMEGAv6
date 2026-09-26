@@ -15,8 +15,10 @@ const living=read('src/OmegaR36LivingSurfaces.tsx');
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical surface universe must remain 44/44 unique');
-must(workstation.includes("import './surfaceHierarchyR90.css';"),'R90 hierarchy authority must load after R89');
-must(workstation.indexOf("surfaceHierarchyR90.css")>workstation.indexOf("mobileVisualFirstR89.css"),'R90 must be final workstation presentation authority');
+const canonical=read('src/workstationPresentationR356.css');
+must(workstation.includes("import './workstationPresentationR356.css';"),'R356 canonical workstation authority must load');
+must(!workstation.includes("import './surfaceHierarchyR90.css';"),'R90 must not remain a separate live authority');
+must(canonical.indexOf(read('src/mobileVisualFirstR89.css'))<canonical.indexOf(css),'R356 must preserve R89→R90 source order exactly');
 must(shell.includes('OmegaSideNavigatorR88')&&!shell.includes("className='r62-rail'"),'active shell must remain the shared flat navigator, not a legacy rail');
 must(nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'flat 44-route navigation must remain intact');
 
