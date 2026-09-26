@@ -25,6 +25,7 @@ import OmegaGpuComputeR352 from './OmegaGpuComputeR352';
 import OmegaReleaseLineageR353 from './OmegaReleaseLineageR353';
 import OmegaProofBoundSceneR354 from './OmegaProofBoundSceneR354';
 import OmegaProofBoundTemporalTraversalR355 from './OmegaProofBoundTemporalTraversalR355';
+import OmegaAtlas360R356 from './OmegaAtlas360R356';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -44,6 +45,7 @@ export default function OmegaSpecialistSuite(props:Props){
   <section className='r356-convergence-section r356-convergence-compute'>
    <header><div><span>COMPUTE / REPLAY</span><b>Hardware → temporal → packet → render</b><small>One model state path; execution correspondence does not create physical or Canon authority.</small></div></header>
    <OmegaHardwareFieldR349 address={address}/>
+   <OmegaAtlas360R356 address={address}/>
    <OmegaTemporalCheckpointR350/>
    <OmegaGpuPacketMirrorR351/>
    <OmegaGpuComputeR352/>
@@ -66,8 +68,8 @@ export default function OmegaSpecialistSuite(props:Props){
    </div>
   </section>
  </div>);
- if(panel==='Field'||panel==='Data Motion')return wrap(<OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/>);
- if(panel==='Evidence & Proof')return wrap(<div><OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/><OmegaReleaseLineageR353/><SingmasterProofWorkbenchR290 record={record}/></div>);
+ if(panel==='Field'||panel==='Data Motion')return wrap(<div><OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/><OmegaAtlas360R356 address={address}/></div>);
+ if(panel==='Evidence & Proof')return wrap(<div><OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/><OmegaReleaseLineageR353/><OmegaAtlas360R356 address={address} compact/><SingmasterProofWorkbenchR290 record={record}/></div>);
  if(panel==='Memory')return wrap(<OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/>);
  if(panel==='Canon Evolution'||panel==='Governance')return wrap(<div><CalculusAddressFabricR240 record={record}/><RecursiveSelfBuildR240/><OmegaGovernanceProjectMediaR29 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/></div>);
  if(panel==='Projects'||panel==='Assets'||panel==='Render Queue')return wrap(<OmegaGovernanceProjectMediaR29 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>);
