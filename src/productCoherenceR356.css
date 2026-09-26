@@ -187,7 +187,7 @@ body{margin:0;background-image:radial-gradient(circle at 18% 0%,rgba(77,139,128,
 /* R356.4 stable viewport geometry.
    Reserve scrollbar geometry and disable scroll anchoring in the canonical interaction frame
    so first-hand telemetry repaint cannot shift controls after they have been targeted. */
-html{scrollbar-gutter:stable}
+@media(min-width:901px){html{scrollbar-gutter:stable}}
 .r317-product-root,
 .r317-product-root .workstation-main,
 .r317-product-root .r356-product-surface,
