@@ -182,3 +182,14 @@ body{margin:0;background-image:radial-gradient(circle at 18% 0%,rgba(77,139,128,
 .r317-product-root .r356-atlas360-grid b{font-size:13px;overflow-wrap:anywhere}.r317-product-root .r356-atlas360-grid small,.r317-product-root .r356-atlas360-foot,.r317-product-root .r356-atlas360-head small{font-size:11px;line-height:1.4;opacity:.72}
 .r317-product-root .r356-atlas360-bearing{display:grid;grid-template-columns:auto minmax(120px,1fr) auto;gap:10px;align-items:center;margin-top:10px;font-size:12px}.r317-product-root .r356-atlas360-bearing input{width:100%}.r317-product-root .r356-atlas360-foot{margin-top:9px}.r317-product-root .r356-atlas360.is-compact .r356-atlas360-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:760px){.r317-product-root .r356-atlas360-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:480px){.r317-product-root .r356-atlas360-grid,.r317-product-root .r356-atlas360.is-compact .r356-atlas360-grid{grid-template-columns:1fr}.r317-product-root .r356-atlas360-bearing{grid-template-columns:1fr auto}.r317-product-root .r356-atlas360-bearing input{grid-column:1/-1}}
+
+
+/* R356.4 stable viewport geometry.
+   Reserve scrollbar geometry and disable scroll anchoring in the canonical interaction frame
+   so first-hand telemetry repaint cannot shift controls after they have been targeted. */
+html{scrollbar-gutter:stable}
+.r317-product-root,
+.r317-product-root .workstation-main,
+.r317-product-root .r356-product-surface,
+.r317-product-root .r356-surface-content,
+.r317-product-root .r138-capability-first{overflow-anchor:none}
