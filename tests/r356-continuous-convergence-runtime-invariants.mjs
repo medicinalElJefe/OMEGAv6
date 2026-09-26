@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {R356_ATLAS_LEVELS,R356_STAGES,R356_LAWS,compileRelativeStateR356,mandalaGateR356,scarR356,admissionR356,convergeR356} from '../src/system/continuousConvergenceRuntimeR356.js';
+import {R356_ATLAS_LEVELS,R356_STAGES,R356_LAWS,compileRelativeStateR356,mandalaGateR356,scarR356,admissionR356,atlas360AdviceR356,convergeR356} from '../src/system/continuousConvergenceRuntimeR356.js';
 const sha='6a1cebcb09f4432ae711ff28b0af4cbc304a3912', cand='d82ea398f536395d454b1512780ee9841548ae7b';
 assert.deepEqual(R356_ATLAS_LEVELS,[12,144,1728,20736,248832]);
 assert.equal(R356_STAGES[0],'OBSERVE'); assert.equal(R356_STAGES.at(-1),'OBSERVE');
@@ -15,4 +15,6 @@ assert.equal(admissionR356({parentSha:sha,candidateSha:cand,relativeState:rel,ev
 assert.equal(admissionR356({parentSha:sha,candidateSha:cand,relativeState:{...rel,converged:false},evidence}).allow,false);
 const out=convergeR356({observations:obs,candidate:{parentSha:sha,candidateSha:cand,evidence,metrics:{continuity:1,futurePlasticity:1,contradiction:0,burden:.1}},scarLedger:[scar]});
 assert.equal(out.next,'ADMIT'); assert.equal(out.continuous,true); assert.equal(out.productionWriter,'.github/workflows/ci.yml');
+assert.equal(out.atlas360.executionPlan.fullTensorMaterialized,false);assert.equal(out.atlas360.triangle.gateState,'HOLD');assert.equal(out.atlas360.canonicalMutation,false);
+const a360=atlas360AdviceR356({leafIndex:20735,theta:359,execution:{activeAddresses:[20735]}});assert.equal(a360.selection.hierarchy.address,'11.11.11.11');assert.equal(a360.selection.bearing.antipode,179);assert.equal(a360.advisoryOnly,true);
 console.log('R356 continuous convergence runtime invariants PASS');
