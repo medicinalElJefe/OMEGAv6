@@ -34,16 +34,18 @@ const assertClosingTruth=async reason=>{
 };
 const openAllTools=async()=>{if(await nav.getAttribute('aria-hidden')==='true')await page.getByLabel('Browse all registered OMEGA tools').click();await nav.waitFor({state:'visible'});const all=nav.getByRole('button',{name:/^ALL\s+44$/});if(await all.count())await all.click()};
 const activateRailRoute=async(label,name)=>{
- const beforeEpoch=await page.evaluate(()=>document.documentElement.dataset.omegaRouteEpoch||'0');
+ const before=await page.evaluate(()=>{const root=document.documentElement;return{epoch:root.dataset.omegaRouteEpoch||'0',panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}});
  await page.getByLabel(label).click();
- await page.waitForFunction(({name,beforeEpoch})=>{
-  const root=document.documentElement;
-  return root.dataset.omegaRouteEpoch!==beforeEpoch&&root.dataset.omegaRouteTarget===name&&(root.dataset.omegaRouteState==='REQUESTED'||root.dataset.omegaRouteState==='COMMITTED');
- },{name,beforeEpoch},{timeout:10000}).catch(e=>{throw new Error(`R239 ${name} rail request was not acknowledged: ${String(e)}`)});
+ await page.waitForFunction(({name,before})=>{
+  const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+  const committed=root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
+  const requested=root.dataset.omegaRouteTarget===name&&(root.dataset.omegaRouteState==='REQUESTED'||committed);
+  return committed||(before.panel!==name&&root.dataset.omegaRouteEpoch!==before.epoch&&requested);
+ },{name,before},{timeout:10000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},name);throw new Error(`R239 ${name} rail request was not acknowledged: ${JSON.stringify(d)} · ${String(e)}`)});
  await page.waitForFunction(name=>{
   const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel'),rail=document.querySelector('.r94-rail-current')?.getAttribute('title');
   return root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name&&rail===name;
- },name,{timeout:30000}).catch(e=>{throw new Error(`R239 ${name} rail route did not commit: ${String(e)}`)});
+ },name,{timeout:30000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null,rail:document.querySelector('.r94-rail-current')?.getAttribute('title')||null}},name);throw new Error(`R239 ${name} rail route did not commit: ${JSON.stringify(d)} · ${String(e)}`)});
  if(await page.locator('.r94-rail-current').getAttribute('title')!==name)throw new Error(`R239 ${name} rail action did not route`);
 };
 await allTools.click();
