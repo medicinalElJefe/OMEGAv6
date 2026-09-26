@@ -108,8 +108,9 @@ async function activateSurface(page,name){
   await page.waitForFunction(({name,before})=>{
    const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
    const committed=root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
-   const requested=root.dataset.omegaRouteTarget===name&&(root.dataset.omegaRouteState==='REQUESTED'||committed);
-   return committed||(before.panel!==name&&root.dataset.omegaRouteEpoch!==before.epoch&&requested);
+   const requested=root.dataset.omegaRouteState==='REQUESTED'&&root.dataset.omegaRouteTarget===name&&panel===name;
+   const advancedRequest=before.panel!==name&&root.dataset.omegaRouteEpoch!==before.epoch&&requested;
+   return committed||requested||advancedRequest;
   },{name,before},{timeout:10000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},name);throw new Error(`R313 ${name} navigation request was not acknowledged: ${JSON.stringify(d)} · ${String(e)}`)});
   await page.waitForFunction(name=>{
    const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
