@@ -11,6 +11,8 @@ const registry=fs.readFileSync('src/omegaExperienceRegistryR82.ts','utf8');
 const capabilities=fs.readFileSync('src/capabilityAuthority.ts','utf8');
 const interactionBinding=fs.readFileSync('src/system/interactionBindingR356.ts','utf8');
 const interactionProof=fs.readFileSync('tests/r313-full-control-interaction-browser-e2e.mjs','utf8');
+const navigationProof=fs.readFileSync('tests/r239-user-navigation-browser-e2e.mjs','utf8');
+const disclosureProof=fs.readFileSync('tests/r313-panel-disclosure-browser-e2e.mjs','utf8');
 
 const legacy=[
  './coherenceRepairR35.css','./specialistDepthR38_3.css','./mobileMatterR42.css','./sovereignDesignR59.css',
@@ -82,6 +84,8 @@ assert.ok(workstation.includes('startTransition(()=>setPanel(next))'),'R356 work
 assert.ok(interactionProof.includes('surfaceContinuityState')&&interactionProof.includes('afterContinuity.stateKey!==beforeContinuity.stateKey'),'R356 interaction proof must distinguish canonical state change from local same-state UI change');
 assert.ok(interactionProof.includes('local interaction broke same-state surface continuity'),'R356 local interaction continuity must remain fail-closed');
 assert.ok(capabilityCss.includes('min-height:46px')&&capabilityCss.includes('-webkit-line-clamp:2'),'R356 live capability telemetry must not move topology controls during async repaint');
+assert.ok(navigationProof.includes('activateRailRoute')&&navigationProof.includes("root.dataset.omegaRouteState==='COMMITTED'")&&navigationProof.includes('root.dataset.omegaRouteCurrent===name'),'R356 persistent navigation proof must wait for exact committed route lifecycle');
+assert.ok(disclosureProof.includes('beforeEpoch')&&disclosureProof.includes("root.dataset.omegaRouteState==='COMMITTED'")&&disclosureProof.includes('root.dataset.omegaRouteCurrent===name'),'R356 disclosure proof must bind navigation to exact committed route lifecycle');
 
 
 console.log('R356 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor + non-blocking proof-lineage disclosure preserved · legacy presentation preserved as provenance only');
