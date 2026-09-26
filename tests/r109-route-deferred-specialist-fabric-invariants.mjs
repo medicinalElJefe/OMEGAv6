@@ -3,6 +3,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R109 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const loader=read('src/specialistLoaderR109.tsx');
 const loaderCss=read('src/specialistLoaderR109.css');
 const vite=read('vite.config.ts');
@@ -12,8 +13,8 @@ const r103=read('tests/r103-intent-capability-router-invariants.mjs');
 const r108=read('src/ultimateCapabilityRuntimeR108.ts');
 
 // Route/state authority remains one workstation router; performance work may not create a second router.
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length>0&&new Set(surfaces).size===surfaces.length,'current registered surface inventory must remain non-empty, unique, and intact');
 must(workstation.includes('function normalizePanel(v:any):Panel')&&workstation.includes('const go=(name:string)=>'),'single workstation normalize/go authority missing');
 must(loader.includes("routeBoundary:'OMEGA_SURFACES + normalizePanel + go remain the only workstation routing authority"),'loader must declare itself non-routing authority');
