@@ -9,6 +9,7 @@ import {auditAuthoritativeOperationChainR143,operationContractForRouteR143} from
 import {createAuthorizedOperationRunR146} from './durableExecutionClientR146';
 import {availableExecutorsR147,executorDirectoryR147 as fetchExecutorDirectoryR147,R147_EXECUTION_BOUNDARY} from './executorFabricClientR147';
 import {compileLiveRelativeCapacityR154} from './relativeCapacityClientR154';
+import {interactionBindingKeyR356} from './system/interactionBindingR356';
 import './capabilityFirstR138.css';
 
 type Props={panel:string;record:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status?:any;restore?:any};
@@ -28,7 +29,7 @@ function compactCapacity(capacity:any,route:string){const plan=capacity?.plans?.
 export default function OmegaCapabilityFieldR138({panel,record,address,onAddress,onNavigate,status,restore}:Props){
  const[durableRun,setDurableRun]=useState<any>(null),[executorDirectory,setExecutorDirectory]=useState<any>(null),[relativeCapacity,setRelativeCapacity]=useState<any>(null),[relativeCapacityKey,setRelativeCapacityKey]=useState('');
  const law=useMemo(()=>calculusVisualLaw(record),[record]);
- const capacityKey=`${panel}:${String(record?.stateId??address)}`;
+ const capacityKey=interactionBindingKeyR356(panel,record,address);
  const runtime=useMemo(()=>compileUnifiedCapabilityRuntimeR139(record,panel,''),[record,panel]);
  const operation=useMemo(()=>rankUnifiedCapabilityActionsR140(runtime,record),[runtime,record]);
  const fusion=operation.allModesFusion;
