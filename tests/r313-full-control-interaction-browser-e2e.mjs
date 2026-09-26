@@ -103,8 +103,16 @@ async function activateSurface(page,name){
   const label=clean(await routes.nth(i).locator('b').first().textContent().catch(()=>''));
   if(label!==name)continue;
   await routes.nth(i).scrollIntoViewIfNeeded();
+  const beforeEpoch=await page.evaluate(()=>document.documentElement.dataset.omegaRouteEpoch||'0');
   await routes.nth(i).click();
-  await page.waitForFunction(route=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===route,name,{timeout:20000});
+  await page.waitForFunction(({name,beforeEpoch})=>{
+   const root=document.documentElement;
+   return root.dataset.omegaRouteEpoch!==beforeEpoch&&root.dataset.omegaRouteTarget===name&&(root.dataset.omegaRouteState==='REQUESTED'||root.dataset.omegaRouteState==='COMMITTED');
+  },{name,beforeEpoch},{timeout:10000}).catch(e=>{throw new Error(`R313 ${name} navigation request was not acknowledged: ${String(e)}`)});
+  await page.waitForFunction(name=>{
+   const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+   return root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
+  },name,{timeout:30000}).catch(e=>{throw new Error(`R313 ${name} navigation did not commit after acknowledged request: ${String(e)}`)});
   await waitForSurfaceReady(page,name);
   return;
  }
