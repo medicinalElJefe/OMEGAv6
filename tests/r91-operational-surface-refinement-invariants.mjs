@@ -14,8 +14,10 @@ const evidence=read('src/OmegaEvidenceMemoryR28.tsx');
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical surface universe must remain 44/44');
-must(workstation.includes("import './operationalSurfaceRefinementR91.css';"),'R91 stylesheet must be mounted');
-must(workstation.indexOf('operationalSurfaceRefinementR91.css')>workstation.indexOf('surfaceHierarchyR90.css'),'R91 presentation authority must load after R90');
+const canonical=read('src/workstationPresentationR356.css');
+must(workstation.includes("import './workstationPresentationR356.css';"),'R356 canonical workstation authority must be mounted');
+must(!workstation.includes("import './operationalSurfaceRefinementR91.css';"),'R91 must remain provenance rather than separate live authority');
+must(canonical.indexOf(r90)<canonical.indexOf(css),'R356 must preserve R90→R91 source order exactly');
 must(nav.includes('r89-flat-scroll')&&nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'flat global navigator must remain intact');
 
 for(const panel of ['Command Center','Workspace','Cockpit','Projects','Governance','Assets','Render Queue','Canon Evolution','Instructions','Settings','System','Consolidation','Memory','Create','Development'])
