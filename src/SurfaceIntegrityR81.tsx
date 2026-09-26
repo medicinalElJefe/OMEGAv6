@@ -5,6 +5,7 @@ import FullCalculusFabricR107 from './FullCalculusFabricR107';
 import {provenanceForSurfaceR94} from './surfaceProvenanceR94';
 import {surfaceLayerBindingR104} from './surfaceLayerContractR104';
 import {productPresentationForRouteR356} from './system/productPresentationAuthorityR356';
+import {interactionBindingKeyR356} from './system/interactionBindingR356';
 
 type Props={panel:string;children:ReactNode;onRecover:()=>void;record?:any};
 
@@ -12,7 +13,7 @@ function slug(panel:string){return panel.toLowerCase().replace(/[^a-z0-9]+/g,'-'
 
 export default function SurfaceIntegrityR81({panel,children,onRecover,record}:Props){
  const[proofOpen,setProofOpen]=useState(false),[proofDeep,setProofDeep]=useState(false),[interactionReady,setInteractionReady]=useState(false),surfaceRef=useRef<HTMLElement|null>(null);
- const stateKey=`${panel}:${String(record?.stateId??'UNBOUND')}`;
+ const stateKey=interactionBindingKeyR356(panel,record);
  const setProofDisclosure=(open:boolean)=>{setProofOpen(open);if(!open)setProofDeep(false)};
  useEffect(()=>{setProofOpen(false);setProofDeep(false)},[panel]);
  useEffect(()=>{
