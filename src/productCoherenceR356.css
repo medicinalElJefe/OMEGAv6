@@ -172,3 +172,13 @@ body{margin:0;background-image:radial-gradient(circle at 18% 0%,rgba(77,139,128,
 .r356-proof-lineage-summary{display:grid;gap:6px;padding:10px}
 .r356-proof-lineage-summary>span{color:var(--r356-muted);font:10px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace}
 .r356-load-deep-proof{justify-self:start;min-height:40px;padding:8px 11px!important;contain:layout paint}
+
+
+/* R356 Atlas360 additive proof surface: inherits the current product grammar and never creates a competing root. */
+.r317-product-root .r356-atlas360{margin:12px 0;padding:12px;border:1px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:12px;background:color-mix(in srgb,currentColor 4%,transparent);min-width:0}
+.r317-product-root .r356-atlas360-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.r317-product-root .r356-atlas360-head>div{display:grid;gap:2px}.r317-product-root .r356-atlas360-head span,.r317-product-root .r356-atlas360-grid span{font-size:10px;letter-spacing:.11em;opacity:.64}.r317-product-root .r356-atlas360-head b{font-size:14px}
+.r317-product-root .r356-atlas360-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}.r317-product-root .r356-atlas360-grid>div{display:grid;gap:3px;min-width:0;padding:8px;border-radius:9px;background:color-mix(in srgb,currentColor 3%,transparent)}
+.r317-product-root .r356-atlas360-grid b{font-size:13px;overflow-wrap:anywhere}.r317-product-root .r356-atlas360-grid small,.r317-product-root .r356-atlas360-foot,.r317-product-root .r356-atlas360-head small{font-size:11px;line-height:1.4;opacity:.72}
+.r317-product-root .r356-atlas360-bearing{display:grid;grid-template-columns:auto minmax(120px,1fr) auto;gap:10px;align-items:center;margin-top:10px;font-size:12px}.r317-product-root .r356-atlas360-bearing input{width:100%}.r317-product-root .r356-atlas360-foot{margin-top:9px}.r317-product-root .r356-atlas360.is-compact .r356-atlas360-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:760px){.r317-product-root .r356-atlas360-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:480px){.r317-product-root .r356-atlas360-grid,.r317-product-root .r356-atlas360.is-compact .r356-atlas360-grid{grid-template-columns:1fr}.r317-product-root .r356-atlas360-bearing{grid-template-columns:1fr auto}.r317-product-root .r356-atlas360-bearing input{grid-column:1/-1}}
