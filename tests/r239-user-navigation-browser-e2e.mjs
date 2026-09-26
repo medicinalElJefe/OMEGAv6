@@ -33,6 +33,15 @@ const assertClosingTruth=async reason=>{
  await nav.waitFor({state:'hidden'});
 };
 const openAllTools=async()=>{if(await nav.getAttribute('aria-hidden')==='true')await page.getByLabel('Browse all registered OMEGA tools').click();await nav.waitFor({state:'visible'});const all=nav.getByRole('button',{name:/^ALL\s+44$/});if(await all.count())await all.click()};
+const activateRailRoute=async(label,name)=>{
+ const beforeEpoch=await page.evaluate(()=>document.documentElement.dataset.omegaRouteEpoch||'0');
+ await page.getByLabel(label).click();
+ await page.waitForFunction(({name,beforeEpoch})=>{
+  const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel'),rail=document.querySelector('.r94-rail-current')?.getAttribute('title');
+  return root.dataset.omegaRouteEpoch!==beforeEpoch&&root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&panel===name&&rail===name;
+ },{name,beforeEpoch},{timeout:20000});
+ if(await page.locator('.r94-rail-current').getAttribute('title')!==name)throw new Error(`R239 ${name} rail action did not route`);
+};
 await allTools.click();
 await nav.waitFor({state:'visible'});
 const contextualText=await nav.innerText();
@@ -121,14 +130,10 @@ for(const {routeName,routeId} of routeIdentities){
 }
 
 // Universal rail destinations and the system map remain directly operable after the exhaustive route sweep.
-await page.getByLabel('Open Command Center').click();
-if(await page.locator('.r94-rail-current').getAttribute('title')!=='Command Center')throw new Error('R239 Command rail action did not route');
-await page.getByLabel('Open Hybrid Link').click();
-if(await page.locator('.r94-rail-current').getAttribute('title')!=='Hybrid Link')throw new Error('R239 Hybrid rail action did not route');
-await page.getByLabel('Open Earth Now').click();
-if(await page.locator('.r94-rail-current').getAttribute('title')!=='Earth Now')throw new Error('R239 Earth rail action did not route');
-await page.getByLabel('Open Evidence and Proof').click();
-if(await page.locator('.r94-rail-current').getAttribute('title')!=='Evidence & Proof')throw new Error('R239 Proof rail action did not route');
+await activateRailRoute('Open Command Center','Command Center');
+await activateRailRoute('Open Hybrid Link','Hybrid Link');
+await activateRailRoute('Open Earth Now','Earth Now');
+await activateRailRoute('Open Evidence and Proof','Evidence & Proof');
 await page.getByLabel('Browse full software and capability map').click();
 await nav.waitFor({state:'visible'});
 if(!(await nav.getByText('System map',{exact:true}).count()))throw new Error('R239 System map rail action did not expose the software/capability layer');
