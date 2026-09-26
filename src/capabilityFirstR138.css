@@ -149,3 +149,19 @@
   min-height:72px!important;
  }
 }
+
+
+/* R356.5 telemetry-independent interaction geometry.
+   R154/R147 remain live, but their changing values are contained inside fixed presentation
+   regions so telemetry freshness cannot move or rename safe controls during actuation. */
+.r317-product-root .r138-capability-ledger{
+ height:68px;
+ min-height:68px;
+ max-height:68px;
+ overflow:auto;
+ scrollbar-gutter:stable;
+ contain:layout paint size;
+}
+.r317-product-root .r138-health{
+ contain:layout paint;
+}
