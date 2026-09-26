@@ -3,6 +3,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R95 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const membrane=read('src/CanonicalMembraneR95.tsx');
 const membraneCss=read('src/canonicalMembraneR95.css');
 const visual=read('src/VisualCompositorR65.tsx');
@@ -22,8 +23,8 @@ const infinity=read('src/OmegaInfinityPanel.tsx');
 const earth=read('src/EarthObservatoryR8.tsx');
 const living=read('src/OmegaR36LivingSurfaces.tsx');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'44 application routes must remain reachable');
 
 must(ledger.includes('reviewedSystemRows:100'),'100-system source ledger must remain authoritative');
