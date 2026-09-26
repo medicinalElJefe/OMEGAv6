@@ -36,17 +36,19 @@ async function openRoute(page,route){
   }
   if(hit<0)throw new Error(`R313 route missing: ${route}`);
   await buttons.nth(hit).scrollIntoViewIfNeeded();
-  const beforeEpoch=await page.evaluate(()=>document.documentElement.dataset.omegaRouteEpoch||'0');
+  const before=await page.evaluate(()=>{const root=document.documentElement;return{epoch:root.dataset.omegaRouteEpoch||'0',panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,state:root.dataset.omegaRouteState||'IDLE'}});
   await buttons.nth(hit).click({timeout:10000});
-  await page.waitForFunction(({name,beforeEpoch})=>{
-    const root=document.documentElement;
-    return root.dataset.omegaRouteEpoch!==beforeEpoch&&root.dataset.omegaRouteTarget===name&&(root.dataset.omegaRouteState==='REQUESTED'||root.dataset.omegaRouteState==='COMMITTED');
-  },{name:route,beforeEpoch},{timeout:10000}).catch(e=>{throw new Error(`R313 ${route} navigation request was not acknowledged: ${String(e)}`)});
+  await page.waitForFunction(({name,before})=>{
+    const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+    const committed=root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
+    const requested=root.dataset.omegaRouteTarget===name&&(root.dataset.omegaRouteState==='REQUESTED'||committed);
+    return committed||(before.panel!==name&&root.dataset.omegaRouteEpoch!==before.epoch&&requested);
+  },{name:route,before},{timeout:10000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},route);throw new Error(`R313 ${route} navigation request was not acknowledged: ${JSON.stringify(d)} · ${String(e)}`)});
   await page.waitForFunction(name=>{
     const root=document.documentElement;
     const panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
     return root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
-  },route,{timeout:30000}).catch(e=>{throw new Error(`R313 ${route} navigation did not commit after acknowledged request: ${String(e)}`)});
+  },route,{timeout:30000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},route);throw new Error(`R313 ${route} navigation did not commit: ${JSON.stringify(d)} · ${String(e)}`)});
   await page.waitForFunction(name=>{
     const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
     if(!surface||surface.querySelector('.panel-failure'))return false;
