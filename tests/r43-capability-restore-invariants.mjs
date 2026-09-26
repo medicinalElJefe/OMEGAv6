@@ -29,7 +29,10 @@ requireText(living,'<MatterTraversal state={state}','Deep Matter engine is no lo
 requireText(living,'<OmegaVisualInstrument address={address}','Deep Visual engine is no longer first-class');
 requireText(living,'<OmegaTraversalStudio variant={variant}','Deep Traversal engine is no longer first-class');
 if(living.includes("<details className='r36-advanced'"))throw new Error('R43 regression: deep specialist authority was buried back under Advanced details');
-requireText(app,"import './mobileMatterR42.css';",'Mobile deep-workspace containment not inherited');
+if(app.includes("import './mobileMatterR42.css';"))throw new Error('R356 regression: R42 donor presentation regained live root authority');
+requireText(app,"import './productCoherenceR356.css';",'R356 canonical mobile/product containment missing');
+requireText(fs.readFileSync('src/surfaceIntegrityR81.css','utf8'),'@media(max-width:900px)','Current mobile surface containment missing');
+if(!fs.existsSync('src/mobileMatterR42.css'))throw new Error('R42 retained mobile containment provenance missing');
 requireText(workstation,"export const OMEGA_SURFACES=['Command Center'",'Workstation surface authority missing');
 const surfaceLiteral=workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const;/s)?.[1]||'';
 if(count(surfaceLiteral,/'[^']+'/g)!==44)throw new Error(`Expected 44 registered workstation surfaces, found ${count(surfaceLiteral,/'[^']+'/g)}`);

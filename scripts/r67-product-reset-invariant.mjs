@@ -5,8 +5,8 @@ const home=fs.readFileSync('src/OmegaHomeR59.tsx','utf8');
 const shell=fs.readFileSync('src/InstrumentOSShellR62.tsx','utf8');
 const navigator=fs.readFileSync('src/OmegaSideNavigatorR88.tsx','utf8');
 const req=[
- [app.includes("import './productResetR67.css';"),'final product reset is imported'],
- [app.indexOf("productResetR67.css")>app.indexOf("instrumentOSR62.css"),'reset owns final cascade authority'],
+ [!app.includes("import './productResetR67.css';")&&app.includes("import './productCoherenceR356.css';"),'R67 reset retained as provenance while R356 owns live product styling'],
+ [fs.existsSync('src/productResetR67.css')&&fs.existsSync('src/instrumentOSR62.css'),'R67/R62 presentation sources remain recoverable provenance'],
  [css.includes('.r59-home>.r59-rail{display:none!important}'),'duplicate home rail removed'],
  [css.includes('.r59-display-deck,.r59-primary{display:none!important}'),'duplicate home card inventories demoted'],
  [css.includes('min-height:calc(100dvh - 72px)'),'first viewport is command + living field'],

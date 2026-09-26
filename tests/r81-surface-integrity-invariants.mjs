@@ -37,7 +37,7 @@ const directContainment=workstation.includes("<SurfaceIntegrityR81 panel={panel}
 const deferredContainment=workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}><Suspense fallback={specialistFallback}>{content}</Suspense></SurfaceIntegrityR81>")&&deferred.includes("schema:'OMEGA_ROUTE_DEFERRED_SPECIALIST_FABRIC_R109'");
 must(directContainment||deferredContainment,'every active surface must mount inside R81 containment with canonical state context; R109 may add a bounded Suspense child');
 must(integrity.includes('<PanelBoundary panel={panel}'),'surface failure must be isolated without crashing the whole build');
-must(integrity.includes("className='omega-surface-r81'"),'R81 surface wrapper missing');
+must(integrity.includes("className='omega-surface-r81 r356-product-surface'"),'R81/R356 canonical surface wrapper missing');
 must(integrityCss.includes('overflow-x:clip')&&integrityCss.includes("table){\n display:block")&&integrityCss.includes('overflow-x:auto'),'surface content must stay contained while wide tables/tabs remain viewable');
 must(integrityCss.includes('.r43-workspace-tabs')&&integrityCss.includes('overflow-x:auto'),'deep-workspace tabs must remain reachable on narrow screens');
 must(integrityCss.includes('@media(max-width:900px)'),'R81 mobile containment missing');
@@ -60,7 +60,7 @@ for(const token of [
 ])must(living.includes(token),`restored deep donor view is no longer reachable: ${token}`);
 
 must(app.includes("import './surfaceIntegrityR81.css';"),'R81 integrity stylesheet must be loaded');
-must(app.indexOf("surfaceIntegrityR81.css")>app.indexOf("productResetR67.css"),'R81 containment must resolve later donor layout conflicts without reskinning the product');
+must(app.includes("import './productCoherenceR356.css';")&&app.indexOf("productCoherenceR356.css")>app.indexOf("surfaceIntegrityR81.css"),'R356 product authority must load after containment without mounting donor reset layers');
 must(!integrityCss.includes('.omega-surface-r81{display:none')&&!integrityCss.includes('.omega-surface-r81>*{display:none'),'surface-integrity layer may not hide application content');
 must(!integrityCss.match(/position\s*:\s*fixed/),'surface-integrity layer may not create another fixed shell');
 

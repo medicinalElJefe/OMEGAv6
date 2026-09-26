@@ -1,5 +1,6 @@
 import {chromium} from 'playwright';
 import fs from 'node:fs';
+import {partitionInteractionCasesR355} from '../src/system/r313InteractionWorkloadR355.js';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
@@ -8,6 +9,11 @@ const routes=[...block.matchAll(/'([^']+)'/g)].map(m=>m[1]);
 if(routes.length!==44||new Set(routes).size!==44)throw new Error(`R313 expected 44 unique canonical surfaces, received ${routes.length}`);
 
 const viewports=[['desktop',{width:1440,height:960}],['mobile',{width:390,height:844}]];
+const shardCount=Math.max(1,Math.min(16,Number(process.env.R313_DISCLOSURE_SHARD_COUNT||1)|0));
+const shardIndex=Math.max(0,Math.min(shardCount-1,Number(process.env.R313_DISCLOSURE_SHARD_INDEX||0)|0));
+const disclosurePartition=partitionInteractionCasesR355({surfaces:routes,shardCount});
+const assignedCases=disclosurePartition[shardIndex].cases;
+if(!assignedCases.length)throw new Error(`R313 disclosure shard ${shardIndex+1}/${shardCount} has no assigned cases`);
 const risky=/run|execute|deploy|dispatch|delete|remove|apply patch|write|commit|submit|train|authorize|queue|mission|promote/i;
 let detailsExercised=0,ariaExercised=0;
 
@@ -30,11 +36,23 @@ async function openRoute(page,route){
   }
   if(hit<0)throw new Error(`R313 route missing: ${route}`);
   await buttons.nth(hit).scrollIntoViewIfNeeded();
+  const before=await page.evaluate(()=>{const root=document.documentElement;return{epoch:root.dataset.omegaRouteEpoch||'0',panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,state:root.dataset.omegaRouteState||'IDLE'}});
   await buttons.nth(hit).click({timeout:10000});
-  await page.waitForFunction(name=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===name,route,{timeout:20000});
+  await page.waitForFunction(({name,before})=>{
+    const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+    const committed=root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
+    const requested=root.dataset.omegaRouteTarget===name&&(root.dataset.omegaRouteState==='REQUESTED'||committed);
+    return committed||(before.panel!==name&&root.dataset.omegaRouteEpoch!==before.epoch&&requested);
+  },{name:route,before},{timeout:10000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},route);throw new Error(`R313 ${route} navigation request was not acknowledged: ${JSON.stringify(d)} · ${String(e)}`)});
+  await page.waitForFunction(name=>{
+    const root=document.documentElement;
+    const panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+    return root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
+  },route,{timeout:30000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},route);throw new Error(`R313 ${route} navigation did not commit: ${JSON.stringify(d)} · ${String(e)}`)});
   await page.waitForFunction(name=>{
     const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
     if(!surface||surface.querySelector('.panel-failure'))return false;
+    if(surface.getAttribute('data-r356-interaction-ready')!=='true')return false;
     const loader=[...surface.querySelectorAll('.r109-specialist-loading')].some(el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>1&&r.height>1});
     return !loader;
   },route,{timeout:30000});
@@ -159,13 +177,16 @@ async function testAriaExpanded(page,viewport,route){
 
 const browser=await chromium.launch({headless:true});
 try{
-  for(const [viewportName,viewport] of viewports){
+  for(let profileIndex=0;profileIndex<viewports.length;profileIndex++){
+    const [viewportName,viewport]=viewports[profileIndex];
+    const assignedRoutes=assignedCases.filter(x=>x.profileIndex===profileIndex).map(x=>x.surface);
+    if(!assignedRoutes.length)continue;
     const context=await browser.newContext({viewport,deviceScaleFactor:1});
     const page=await context.newPage();
     const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-    await page.goto(`${base}/?r313-panel-disclosure=${Date.now()}-${viewportName}`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(`${base}/?r313-panel-disclosure=${Date.now()}-${viewportName}-s${shardIndex+1}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
-    for(const route of routes){
+    for(const route of assignedRoutes){
       await openRoute(page,route);
       await testDetails(page,viewportName,route);
       await testAriaExpanded(page,viewportName,route);
@@ -173,5 +194,5 @@ try{
     }
     await context.close();
   }
-  console.log(`R313 ALL-PANEL DISCLOSURE PASS · 44/44 canonical surfaces × desktop/mobile · ${detailsExercised} native details disclosures recursively revealed, pointer-toggled, direct-content visibility verified and restored · ${ariaExercised} safe aria-expanded controls toggled and restored · closed panels may not leak author-CSS content · missing aria-controls targets fail closed · no execution/deploy/dispatch/authorization controls invoked · no page errors.`);
+  console.log(`R313 PANEL DISCLOSURE SHARD ${shardIndex+1}/${shardCount} PASS · workload ${disclosurePartition[shardIndex].weight}ms census · ${assignedCases.length} deterministic route/viewport cases · ${detailsExercised} native details disclosures recursively revealed, pointer-toggled, direct-content visibility verified and restored · ${ariaExercised} safe aria-expanded controls toggled and restored · closed panels may not leak author-CSS content · missing aria-controls targets fail closed · no execution/deploy/dispatch/authorization controls invoked · no page errors.`);
 }finally{await browser.close()}

@@ -34,6 +34,7 @@ async function waitForSurfaceReady(page,name){
   const main=document.querySelector('.workstation-main');
   const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(route)}"]`);
   if(!main||!surface)return false;
+  if(surface.getAttribute('data-r356-interaction-ready')!=='true')return false;
   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1};
   const children=[...surface.children].filter(visible);
   const rich=[...surface.querySelectorAll('canvas,svg,img,video,input,textarea,select,button,[role="button"]')].filter(visible);
@@ -41,6 +42,25 @@ async function waitForSurfaceReady(page,name){
   return visible(surface)&&!loader&&!surface.querySelector('.panel-failure')&&children.length>0&&(((surface.textContent||'').replace(/\s+/g,' ').trim().length>=8)||rich.length>0);
  },name,{timeout:30000});
  await twoFrames(page);
+}
+
+async function surfaceContinuityState(page,surface){
+ return page.evaluate(name=>{
+  const shell=document.querySelector('.omega-workstation-v2');
+  const node=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
+  const html=document.documentElement;
+  return{
+   panel:shell?.getAttribute('data-panel')||null,
+   exists:Boolean(node),
+   stateKey:node?.getAttribute('data-r356-interaction-state-key')||null,
+   ready:node?.getAttribute('data-r356-interaction-ready')==='true',
+   failed:Boolean(node?.querySelector('.panel-failure')),
+   routeEpoch:html.dataset.omegaRouteEpoch||'0',
+   routeState:html.dataset.omegaRouteState||'IDLE',
+   routeTarget:html.dataset.omegaRouteTarget||null,
+   routeCurrent:html.dataset.omegaRouteCurrent||shell?.getAttribute('data-panel')||null
+  };
+ },surface);
 }
 
 async function waitForStableControl(page,id){
@@ -64,7 +84,7 @@ async function waitForStableControl(page,id){
   }
   return false;
  },id);
- if(!stable)throw new Error(`control geometry did not reach two-frame continuity: ${id}`);
+ if(!stable){const label=await page.locator(`[data-r313-probe-id="${id}"]`).first().getAttribute('aria-label').catch(()=>null)||await page.locator(`[data-r313-probe-id="${id}"]`).first().getAttribute('title').catch(()=>null)||clean(await page.locator(`[data-r313-probe-id="${id}"]`).first().textContent().catch(()=>''));throw new Error(`control geometry did not reach two-frame continuity: ${id} · ${label||'UNLABELED'}`)}
 }
 
 async function openNavigator(page){
@@ -83,8 +103,18 @@ async function activateSurface(page,name){
   const label=clean(await routes.nth(i).locator('b').first().textContent().catch(()=>''));
   if(label!==name)continue;
   await routes.nth(i).scrollIntoViewIfNeeded();
+  const before=await page.evaluate(()=>{const root=document.documentElement;return{epoch:root.dataset.omegaRouteEpoch||'0',panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}});
   await routes.nth(i).click();
-  await page.waitForFunction(route=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===route,name,{timeout:20000});
+  await page.waitForFunction(({name,before})=>{
+   const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+   const committed=root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
+   const requested=root.dataset.omegaRouteTarget===name&&(root.dataset.omegaRouteState==='REQUESTED'||committed);
+   return committed||(before.panel!==name&&root.dataset.omegaRouteEpoch!==before.epoch&&requested);
+  },{name,before},{timeout:10000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},name);throw new Error(`R313 ${name} navigation request was not acknowledged: ${JSON.stringify(d)} · ${String(e)}`)});
+  await page.waitForFunction(name=>{
+   const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+   return root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
+  },name,{timeout:30000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},name);throw new Error(`R313 ${name} navigation did not commit: ${JSON.stringify(d)} · ${String(e)}`)});
   await waitForSurfaceReady(page,name);
   return;
  }
@@ -176,6 +206,7 @@ async function clickSafeControls(page,surface,profile,pageErrors){
    continue;
   }
 
+  const beforeContinuity=await surfaceContinuityState(page,surface);
   await actuateSafeControl(page,item,profile,surface);
   await page.waitForTimeout(40);
   if(pageErrors.length)throw new Error(`${profile}/${surface}: page error after activating ${item.label}: ${pageErrors.at(-1)}`);
@@ -183,8 +214,23 @@ async function clickSafeControls(page,surface,profile,pageErrors){
   if(!await shell.count()){
    throw new Error(`${profile}/${surface}: canonical workstation shell missing after activating ${item.label}; url=${page.url()}`);
   }
-  const panel=await shell.first().getAttribute('data-panel',{timeout:3000}).catch(()=>null);
-  if(panel!==surface)await activateSurface(page,surface);
+  let afterContinuity=await surfaceContinuityState(page,surface);
+  if(afterContinuity.routeEpoch!==beforeContinuity.routeEpoch){
+   await page.waitForFunction(({epoch})=>{
+    const root=document.documentElement;
+    return root.dataset.omegaRouteEpoch!==epoch&&root.dataset.omegaRouteState==='COMMITTED';
+   },{epoch:beforeContinuity.routeEpoch},{timeout:10000});
+   afterContinuity=await surfaceContinuityState(page,surface);
+  }
+  if(afterContinuity.panel!==surface){
+   await activateSurface(page,surface);
+  }else if(afterContinuity.stateKey!==beforeContinuity.stateKey){
+   await waitForSurfaceReady(page,surface);
+  }else{
+   await twoFrames(page);
+   const stable=await surfaceContinuityState(page,surface);
+   if(!stable.exists||stable.failed||stable.panel!==surface)throw new Error(`${profile}/${surface}: local interaction broke same-state surface continuity after ${item.label}`);
+  }
  }
  return before;
 }

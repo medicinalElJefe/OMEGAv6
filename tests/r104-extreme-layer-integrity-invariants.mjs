@@ -83,7 +83,7 @@ must(css.includes('>aside{display:none!important}'),'direct stage asides must no
 for(const selector of ['.r99-stage','.r95-membrane-stage','.mt-stage','.visual-stage','.atlas-r36-stage','.earth-now-stage'])must(css.includes(selector),'stage containment missing '+selector);
 must(css.includes('min-height:clamp(620px,72dvh,940px)')&&css.includes('min-height:72dvh!important'),'desktop/mobile stage must own meaningful viewport');
 must(!membrane.includes("<aside>\n    <div><span>PREVIOUS"),'canonical membrane telemetry may not re-enter canvas stage');
-must(membrane.includes("<details className='r98-membrane-data'>")&&membraneCss.includes('.r98-membrane-data-grid'),'canonical membrane data must stay reachable outside stage');
+must(membrane.includes("className='r98-membrane-data-toggle'")&&membrane.includes('aria-expanded={dataOpen}')&&membrane.includes('aria-controls={`r98-membrane-data-${record.stateId}`}')&&membraneCss.includes('.r98-membrane-data-grid'),'canonical membrane data must stay progressively reachable outside stage through explicit accessible disclosure');
 must(!membraneCss.includes('.r95-membrane-stage aside{'),'membrane CSS may not restore blocking overlay');
 
 // Eight selectable design depictions must remain source-driven and actually distinct.

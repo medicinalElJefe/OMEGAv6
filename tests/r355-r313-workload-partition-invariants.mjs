@@ -17,5 +17,5 @@ for(const shards of [8,12,16]){
  assert.equal(new Set(keys).size,88);
 }
 const audit8=auditInteractionPartitionR355({surfaces,shardCount:8});
-assert.ok(Math.max(...audit8.weights)<220000,'8-shard measured load should stay well below the 360s child wall using the proven R286 census');
+assert.ok(Math.max(...audit8.weights)<220000,'8-shard measured load should stay well below the 480s child wall using the proven R286 census');
 console.log('R355 R313 WORKLOAD PARTITION PASS · 88/88 desktop/mobile route cases conserved exactly once · measured R286 workload greedily balanced across deterministic fail-closed shards · no assertion or control coverage reduction');

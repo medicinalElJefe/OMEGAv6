@@ -1,4 +1,29 @@
-.r138-capability-field{position:relative;display:grid;gap:14px;padding:16px;border:1px solid color-mix(in srgb,var(--omega-line,#92a4c0) 34%,transparent);border-radius:22px;background:radial-gradient(circle at 30% 20%,rgba(126,93,255,.14),transparent 34%),linear-gradient(180deg,rgba(8,13,24,.94),rgba(5,9,18,.97));overflow:hidden}.r138-capability-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.r138-capability-head span{font-size:11px;letter-spacing:.18em;opacity:.68}.r138-capability-head h2{margin:4px 0 2px;font-size:clamp(22px,3vw,36px)}.r138-capability-head p{margin:0;max-width:920px;line-height:1.5;opacity:.76}.r138-health{display:grid;gap:4px;text-align:right;white-space:nowrap}.r138-health b{font-size:11px;letter-spacing:.1em}.r138-health small{opacity:.58}.r138-capability-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);gap:14px;min-height:420px}.r138-live-stage{position:relative;min-height:420px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:radial-gradient(circle at center,rgba(108,82,255,.11),transparent 45%),rgba(255,255,255,.015);overflow:hidden;color:inherit;padding:0}.r138-live-stage svg{width:100%;height:100%;display:block;min-height:420px}.r138-shell{fill:none;stroke:rgba(210,220,255,.18);stroke-width:1.1;stroke-dasharray:4 8;transform-origin:320px 230px;animation:r138spin 34s linear infinite;pointer-events:none}.r138-shell:nth-of-type(even){animation-direction:reverse;animation-duration:48s}.r138-node{cursor:pointer;outline:none}.r138-node line{stroke:rgba(170,190,255,.16);stroke-width:1;pointer-events:none}.r138-node circle{fill:rgba(12,20,36,.9);stroke:rgba(166,185,255,.72);stroke-width:1.5;transition:stroke-width .14s ease,stroke .14s ease,fill .14s ease}.r138-node:hover circle{stroke-width:2.4;fill:rgba(18,30,52,.96)}.r138-node:focus-visible circle{stroke:rgba(255,255,255,.98);stroke-width:3}.r138-node text{fill:rgba(236,242,255,.88);font-size:10px;letter-spacing:.05em;pointer-events:none}.r138-node-sub{fill:rgba(158,177,216,.72)!important;font-size:8px!important}.r138-core-halo{filter:blur(18px);pointer-events:none}.r138-core{fill:rgba(12,17,31,.98);stroke:rgba(232,238,255,.88);stroke-width:1.8;pointer-events:none}.r138-core-label{fill:#fff;font-size:13px;font-weight:700;pointer-events:none}.r138-core-value{fill:rgba(210,222,255,.9);font-size:10px;pointer-events:none}.r138-core-sub{fill:rgba(170,190,225,.75);font-size:9px;pointer-events:none}.r138-stage-hint{position:absolute;left:14px;right:14px;bottom:12px;font-size:11px;letter-spacing:.04em;opacity:.58;pointer-events:none}.r138-action-stack{display:grid;align-content:start;gap:9px;max-height:460px;overflow:auto;padding-right:2px}.r138-action-stack>button{display:grid;grid-template-columns:28px minmax(0,1fr) 18px;align-items:center;gap:10px;text-align:left;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.025);color:inherit}.r138-action-stack>button:hover{background:rgba(255,255,255,.065);transform:translateX(2px)}.r138-action-stack svg{width:18px;height:18px}.r138-action-stack b{display:block;font-size:13px}.r138-action-stack small{display:block;margin-top:3px;opacity:.62;line-height:1.25}.r138-action-stack [data-kind='EXECUTE']{border-color:rgba(110,210,255,.28)}.r138-action-stack [data-kind='PROVE']{border-color:rgba(255,224,122,.25)}.r138-action-stack [data-kind='BUILD']{border-color:rgba(186,143,255,.28)}.r138-action-stack [data-kind='STATE']{border-color:rgba(130,255,181,.22)}.r138-action-stack [data-kind='INTELLIGENCE']{border-color:rgba(128,190,255,.24)}.r138-action-stack [data-kind='GOVERN']{border-color:rgba(255,184,120,.22)}.r138-action-stack [data-kind='SYSTEM']{border-color:rgba(170,185,210,.2)}.r138-capability-ledger{display:flex;flex-wrap:wrap;gap:8px}.r138-capability-ledger span{padding:7px 9px;border-radius:999px;background:rgba(255,255,255,.035);font-size:11px;opacity:.72}.r138-capability-ledger b{opacity:1}.r138-capability-first{display:grid;gap:14px}
+.r138-capability-field{position:relative;display:grid;gap:14px;padding:16px;border:1px solid color-mix(in srgb,var(--omega-line,#92a4c0) 34%,transparent);border-radius:22px;background:radial-gradient(circle at 30% 20%,rgba(126,93,255,.14),transparent 34%),linear-gradient(180deg,rgba(8,13,24,.94),rgba(5,9,18,.97));overflow:hidden}.r138-capability-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.r138-capability-head>div:first-child{min-width:0}.r138-health{flex:0 0 clamp(240px,28vw,420px);min-width:240px;min-height:46px;align-content:start}.r138-health b{min-height:14px}.r138-health small{display:-webkit-box;min-height:28px;max-height:28px;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:14px}.r138-capability-head span{font-size:11px;letter-spacing:.18em;opacity:.68}.r138-capability-head h2{margin:4px 0 2px;font-size:clamp(22px,3vw,36px)}.r138-capability-head p{margin:0;max-width:920px;line-height:1.5;opacity:.76}.r138-health{display:grid;gap:4px;text-align:right;white-space:nowrap}.r138-health b{font-size:11px;letter-spacing:.1em}.r138-health small{opacity:.58}.r138-capability-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);gap:14px;min-height:420px}.r138-live-stage{position:relative;min-height:420px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:radial-gradient(circle at center,rgba(108,82,255,.11),transparent 45%),rgba(255,255,255,.015);overflow:hidden;color:inherit;padding:0}.r138-live-stage svg{width:100%;height:100%;display:block;min-height:420px}.r138-shell{fill:none;stroke:rgba(210,220,255,.18);stroke-width:1.1;stroke-dasharray:4 8;transform-origin:320px 230px;animation:r138spin 34s linear infinite;pointer-events:none}.r138-shell:nth-of-type(even){animation-direction:reverse;animation-duration:48s}.r138-node{cursor:pointer;outline:none}.r138-node line{stroke:rgba(170,190,255,.16);stroke-width:1;pointer-events:none}.r138-node circle{fill:rgba(12,20,36,.9);stroke:rgba(166,185,255,.72);stroke-width:1.5;transition:stroke-width .14s ease,stroke .14s ease,fill .14s ease}.r138-node:hover circle{stroke-width:2.4;fill:rgba(18,30,52,.96)}.r138-node:focus-visible circle{stroke:rgba(255,255,255,.98);stroke-width:3}.r138-node text{fill:rgba(236,242,255,.88);font-size:10px;letter-spacing:.05em;pointer-events:none}.r138-node-sub{fill:rgba(158,177,216,.72)!important;font-size:8px!important}.r138-core-halo{filter:blur(18px);pointer-events:none}.r138-core{fill:rgba(12,17,31,.98);stroke:rgba(232,238,255,.88);stroke-width:1.8;pointer-events:none}.r138-core-label{fill:#fff;font-size:13px;font-weight:700;pointer-events:none}.r138-core-value{fill:rgba(210,222,255,.9);font-size:10px;pointer-events:none}.r138-core-sub{fill:rgba(170,190,225,.75);font-size:9px;pointer-events:none}
+.r356-native-node-controls{position:absolute;inset:0;pointer-events:none}
+.r356-native-node-control{
+ position:absolute;
+ translate:-50% -50%;
+ transform:none;
+ width:clamp(48px,12vw,120px);
+ min-width:48px;
+ height:clamp(48px,12vw,120px);
+ min-height:48px;
+ border:1px solid transparent!important;
+ border-radius:999px!important;
+ background:transparent!important;
+ color:transparent!important;
+ pointer-events:auto;
+ touch-action:manipulation;
+ padding:0!important;
+ margin:0!important;
+ z-index:4;
+ box-shadow:none!important;
+}
+.r356-native-node-control>span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.r356-native-node-control:hover,.r356-native-node-control:focus-visible{background:rgba(141,201,189,.06)!important;border-color:rgba(141,201,189,.38)!important}
+.r356-native-node-control:focus-visible{outline:2px solid rgba(229,238,235,.92)!important;outline-offset:2px}
+
+.r138-stage-hint{position:absolute;left:14px;right:14px;bottom:12px;font-size:11px;letter-spacing:.04em;opacity:.58;pointer-events:none}.r138-action-stack{display:grid;align-content:start;gap:9px;max-height:460px;overflow:auto;padding-right:2px}.r138-action-stack>button{display:grid;grid-template-columns:28px minmax(0,1fr) 18px;align-items:center;gap:10px;text-align:left;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.025);color:inherit}.r138-action-stack>button:hover{background:rgba(255,255,255,.065);transform:translateX(2px)}.r138-action-stack svg{width:18px;height:18px}.r138-action-stack b{display:block;font-size:13px}.r138-action-stack small{display:block;margin-top:3px;opacity:.62;line-height:1.25}.r138-action-stack [data-kind='EXECUTE']{border-color:rgba(110,210,255,.28)}.r138-action-stack [data-kind='PROVE']{border-color:rgba(255,224,122,.25)}.r138-action-stack [data-kind='BUILD']{border-color:rgba(186,143,255,.28)}.r138-action-stack [data-kind='STATE']{border-color:rgba(130,255,181,.22)}.r138-action-stack [data-kind='INTELLIGENCE']{border-color:rgba(128,190,255,.24)}.r138-action-stack [data-kind='GOVERN']{border-color:rgba(255,184,120,.22)}.r138-action-stack [data-kind='SYSTEM']{border-color:rgba(170,185,210,.2)}.r138-capability-ledger{display:flex;flex-wrap:wrap;gap:8px}.r138-capability-ledger span{padding:7px 9px;border-radius:999px;background:rgba(255,255,255,.035);font-size:11px;opacity:.72}.r138-capability-ledger b{opacity:1}.r138-capability-first{display:grid;gap:14px}
 
 /* R140 hierarchy law: proof plots stay out of primary operation, but exact transition evidence is reachable in explicit proof contexts. */
 .r93-truth-plot.r93-mode-trace,.r93-truth-plot.r93-infinity-source,.r93-truth-plot.r93-transition,.r93-truth-plot.r93-scale{display:none!important}.r93-packet,.r95-canonical-manifold,.r95-state-mandala{display:block}.r43-workspace-stage[data-view='ROUTE'] .r93-truth-plot.r93-transition{display:grid!important}
@@ -6,6 +31,137 @@
 .r95-secondary-inspector[open]>.r93-truth-plot.r93-mode-trace,.r95-secondary-inspector[open]>.r93-truth-plot.r93-transition{display:grid!important}
 
 @keyframes r138spin{to{transform:rotate(360deg)}}
-@media(max-width:900px){.r138-capability-layout{grid-template-columns:1fr}.r138-action-stack{max-height:none;grid-template-columns:repeat(2,minmax(0,1fr))}.r138-capability-head{display:grid}.r138-health{text-align:left}.r138-live-stage,.r138-live-stage svg{min-height:360px}}
-@media(max-width:580px){.r138-capability-field{padding:10px;border-radius:16px}.r138-action-stack{grid-template-columns:1fr}.r138-live-stage,.r138-live-stage svg{min-height:310px}.r138-capability-head p{font-size:12px}.r138-capability-ledger{gap:6px}.r138-capability-ledger span{font-size:10px;padding:6px 8px}.r138-stage-hint{font-size:9px}}
+@media(max-width:900px){.r138-capability-layout{grid-template-columns:1fr}.r138-action-stack{max-height:none;grid-template-columns:repeat(2,minmax(0,1fr))}.r138-capability-head{display:grid}.r138-health{width:100%;min-width:0;max-width:none;min-height:46px;text-align:left}.r138-live-stage,.r138-live-stage svg{min-height:360px}}
+@media(max-width:580px){.r356-native-node-control{width:56px;height:56px;min-width:56px;min-height:56px}.r138-capability-field{padding:10px;border-radius:16px}.r138-action-stack{grid-template-columns:1fr}.r138-live-stage,.r138-live-stage svg{min-height:310px}.r138-capability-head p{font-size:12px}.r138-capability-ledger{gap:6px}.r138-capability-ledger span{font-size:10px;padding:6px 8px}.r138-stage-hint{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.r138-shell{animation:none}.r138-node circle{transition:none}.r138-action-stack>button:hover{transform:none}}
+
+/* R356 interaction continuity: live R154/executor telemetry may update content, not outer control geometry. */
+.r138-capability-head>div:first-child{min-width:0}
+.r138-health{width:min(360px,34vw);min-width:220px;max-width:360px}
+.r138-health small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em;max-height:2.5em;white-space:normal}
+.r138-action-stack>button{min-height:78px;contain:layout paint}
+.r138-action-stack>button small{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:3.75em;max-height:3.75em}
+.r138-capability-ledger{min-height:68px;align-content:flex-start}
+@media(max-width:900px){
+ .r138-health{width:100%;max-width:none;min-width:0}
+ .r138-action-stack>button{min-height:84px}
+}
+
+
+/* R356.1 browser-return repair: async R147/R154 telemetry may repaint content but must not
+   move the interaction coordinate system. Contain the stage and action ledger as independent
+   layout/paint domains; this preserves the real controls and assertions rather than relaxing proof. */
+.r317-product-root .r138-live-stage{contain:layout paint}
+.r317-product-root .r138-action-stack{contain:layout}
+.r317-product-root .r356-native-node-controls{contain:layout paint}
+.r317-product-root .r356-native-node-control{transition:none!important;animation:none!important}
+
+
+/* R356.2 returned-browser scar repair: topology hit targets are screen-space controls.
+   Anchor their percentage coordinates to the live stage padding box and remove inherited
+   button transform competition so telemetry/content repaint cannot perturb their box. */
+.r317-product-root .r138-live-stage{isolation:isolate}
+.r317-product-root .r356-native-node-control{
+ margin:0!important;
+ box-sizing:border-box!important;
+ translate:-50% -50%;
+ transform:none!important;
+ will-change:auto!important;
+ contain:layout paint size;
+}
+
+
+/* R356.3 returned interaction scar: the topology is an interactive coordinate field, not
+   document-flow content. Bind its screen-space box to the declared 640x460 geometry so
+   asynchronous capacity/evidence text can repaint without moving pointer targets. */
+.r317-product-root .r138-live-stage{height:460px;min-height:460px}
+.r317-product-root .r138-live-stage>svg{height:100%;min-height:0}
+@media(max-width:900px){.r317-product-root .r138-live-stage{height:360px;min-height:360px}}
+@media(max-width:580px){.r317-product-root .r138-live-stage{height:310px;min-height:310px}}
+
+/* R356 returned interaction scar repair: keep the capability topology coordinate frame
+   invariant while asynchronous R154/R146 evidence updates repaint the adjacent ledger.
+   The topology remains responsive at declared breakpoints, but within a frame its grid
+   track and pointer-target transform no longer inherit changing sibling intrinsic width. */
+@media(min-width:901px){
+ .r317-product-root .r138-capability-layout{grid-template-columns:minmax(0,calc(100% - 374px)) 360px;align-items:start}
+}
+.r317-product-root .r138-live-stage{width:100%;max-width:100%;min-width:0}
+.r317-product-root .r356-native-node-control{translate:-50% -50%;transform:none!important;contain:layout paint;will-change:auto}
+
+
+/* R356.4 exact interaction-coordinate continuity.
+   R313 proved that live R154/R147 repaint could still move real controls by subpixel/scroll
+   geometry after scrollIntoView. Preserve the controls; eliminate the moving coordinate frame. */
+.r317-product-root .r138-capability-field,
+.r317-product-root .r138-capability-layout,
+.r317-product-root .r138-action-stack,
+.r317-product-root .r138-live-stage{overflow-anchor:none}
+.r317-product-root .r138-action-stack{
+ grid-auto-rows:84px;
+ scrollbar-gutter:stable;
+}
+.r317-product-root .r138-action-stack>button{
+ height:84px!important;
+ min-height:84px!important;
+ max-height:84px!important;
+ overflow:hidden;
+ contain:layout paint size;
+}
+.r317-product-root .r138-action-stack>button>span{
+ min-width:0;
+ overflow:hidden;
+}
+.r317-product-root .r138-action-stack>button b{
+ display:block;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap;
+}
+.r317-product-root .r138-action-stack>button small{
+ min-height:3.75em;
+ max-height:3.75em;
+ overflow:hidden;
+}
+@media(max-width:900px){
+ .r317-product-root .r138-action-stack{grid-auto-rows:84px}
+ .r317-product-root .r138-action-stack>button{height:84px!important;min-height:84px!important;max-height:84px!important}
+}
+
+
+/* R356.5 single translation authority.
+   Percentage left/top owns node location; CSS translate performs the single centering transform.
+   A second transform translation double-shifts hit geometry and is therefore forbidden. */
+.r317-product-root .r356-native-node-control{
+ translate:-50% -50%;
+ transform:none!important;
+}
+
+
+/* R356.5 topology pointer separation.
+   The SVG nodes are smaller than the legacy 120px invisible desktop hit circles. Keep a generous
+   accessible target without allowing neighboring transparent controls to overlap/intercept. */
+@media(min-width:901px){
+ .r317-product-root .r356-native-node-control{
+  width:72px!important;
+  min-width:72px!important;
+  height:72px!important;
+  min-height:72px!important;
+ }
+}
+
+
+/* R356.5 telemetry-independent interaction geometry.
+   R154/R147 remain live, but their changing values are contained inside fixed presentation
+   regions so telemetry freshness cannot move or rename safe controls during actuation. */
+.r317-product-root .r138-capability-ledger{
+ height:68px;
+ min-height:68px;
+ max-height:68px;
+ overflow:auto;
+ scrollbar-gutter:stable;
+ contain:layout paint size;
+}
+.r317-product-root .r138-health{
+ contain:layout paint;
+}

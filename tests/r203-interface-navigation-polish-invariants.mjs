@@ -7,8 +7,8 @@ const nav=fs.readFileSync('src/OmegaSideNavigatorR88.tsx','utf8');
 const workstation=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const r120=fs.readFileSync('src/omegaSideNavigatorR120.css','utf8');
 
-assert.ok(app.includes("import './interfacePolishR203.css';"),'R203 polish must load from the canonical application root');
-for(const retained of ["import './surfaceIntegrityR81.css';","import './capabilityFirstR138.css';","<LivingWorldPulseR174 onNavigate={navigate}/>","<LivingSceneEvidenceBandR2023 onNavigate={navigate}/>"])assert.ok(app.includes(retained),`R203 must preserve inherited root surface ${retained}`);
+assert.ok(!app.includes("import './interfacePolishR203.css';")&&app.includes("import './productCoherenceR356.css';"),'R203 polish must remain retained provenance while R356 owns the canonical application root');
+for(const retained of ["import './surfaceIntegrityR81.css';","<LivingWorldPulseR174 onNavigate={navigate}/>","<LivingSceneEvidenceBandR2023 onNavigate={navigate}/>"])assert.ok(app.includes(retained),`R203 behavior must preserve inherited root surface ${retained}`);
 
 for(const token of ['.r120-adaptive-nav .r94-nav-rail','.r120-adaptive-nav .r94-nav-panel','.r89-flat-route.active','.workstation-main',':where(.panel,.special-app)',':focus-visible','@media(max-width:900px)','@media(max-width:520px)','@media(prefers-reduced-motion:reduce)'])assert.ok(css.includes(token),`R203 polish coverage missing ${token}`);
 assert.ok(css.includes('Visual-only: no route, execution, proof, Canon, or persistence authority.'),'R203 must declare visual-only truth boundary');

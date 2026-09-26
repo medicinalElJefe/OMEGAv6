@@ -12,8 +12,8 @@ const polish=fs.readFileSync('src/responsivePolishR88.css','utf8');
 const workstation=fs.readFileSync('src/workstationV2.css','utf8');
 const registry=fs.readFileSync('src/omegaExperienceRegistryR82.ts','utf8');
 
-assert(app.includes("import './instrumentOSR62.css'"),'retained Instrument OS donor styling must stay mounted for specialist lineage');
-assert(app.includes("import './productResetR67.css'"),'product reset must remain mounted');
+assert(!app.includes("import './instrumentOSR62.css'")&&!app.includes("import './productResetR67.css'"),'R62/R67 donor presentation must remain provenance rather than live root authority');
+assert(app.includes("import './productCoherenceR356.css'"),'R356 must own live product styling');
 assert(!app.includes("import './omegaProfessionalR13.css'"),'superseded R13 global composition must not override current product authority');
 assert(shell.includes('OmegaSideNavigatorR88'),'mounted shell must delegate navigation to the shared R88 side navigator');
 assert(nav.includes('workspaceForRouteR82')&&nav.includes('OMEGA_ALL_ROUTES_R82'),'navigator must consume the shared application registry without rendering competing product shells');

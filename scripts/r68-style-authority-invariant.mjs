@@ -1,10 +1,9 @@
 import fs from 'node:fs';
 const app=fs.readFileSync('src/App.tsx','utf8');
-const required=['./index.css','./workstation.css','./sovereignDesignR59.css','./instrumentOSR62.css','./productResetR67.css'];
-const forbidden=['./surpass.css','./surfacePolish.css','./omegaVisualIdentity.css','./uxSurpassR2.css','./uxSurpassR3.css','./experienceR4.css','./runtimeRailR4.css','./omegaSovereignVisualR10.css','./navigationButtonPolishR11.css','./omegaProfessionalR13.css','./omegaInterfaceR16.css','./omegaHomeR17.css','./interfaceRepairR34.css','./interfaceImproveR34_1.css','./surfaceRelativityR38_2.css','./deepInteractionR39_2.css'];
-for(const x of required) if(!app.includes(`import '${x}'`)) throw new Error(`R70 missing current style authority ${x}`);
-for(const x of forbidden) if(app.includes(`import '${x}'`)) throw new Error(`R70 legacy global style authority reintroduced ${x}`);
-if(!app.includes("import './coherenceRepairR35.css'")) throw new Error('R70 lost motion/coherence compatibility layer');
-if(!app.includes("import './specialistDepthR38_3.css'")) throw new Error('R70 lost deep specialist compatibility layer');
-if(!app.includes("import './mobileMatterR42.css'")) throw new Error('R70 lost mobile deep-surface containment');
-console.log('R70 style authority invariant PASS');
+const canonical=['./index.css','./workstation.css','./surfaceIntegrityR81.css','./productCoherenceR356.css'];
+const retired=['./coherenceRepairR35.css','./specialistDepthR38_3.css','./mobileMatterR42.css','./sovereignDesignR59.css','./instrumentOSR62.css','./productResetR67.css','./capabilityFirstR138.css','./interfacePolishR203.css'];
+for(const x of canonical)if(!app.includes(`import '${x}'`))throw new Error(`R356 missing canonical live style authority ${x}`);
+for(const x of retired)if(app.includes(`import '${x}'`))throw new Error(`R356 legacy presentation still mounted globally ${x}`);
+for(const file of retired.map(x=>'src/'+x.slice(2)))if(!fs.existsSync(file))throw new Error(`R356 lost retained presentation provenance ${file}`);
+if(!app.includes("data-r356-product='CANONICAL_PRODUCT_GRAMMAR'"))throw new Error('R356 canonical product marker missing');
+console.log('R70/R356 style authority invariant PASS · legacy presentation retained as provenance, one R356 live root authority');

@@ -68,6 +68,9 @@ assert.ok(master.includes("R328 SOURCE-EXACT CANON")&&master.includes("3,743-row
 assert.ok(implementation.includes('R314_IMPLEMENTATION_CANON_EXPECTED_ROWS=675'),'R328 must not overwrite the distinct 675-row implementation canon');
 assert.ok(audit.includes('R328-SOURCE-CANON-HASH')&&audit.includes('R328-SOURCE-CANON-CENSUS')&&audit.includes("sourceCanonRecords!==3743"),'convergence audit must fail closed on R328 source corruption');
 assert.ok(!suite.includes("if(panel==='Convergence')return wrap(<div>\n  <OmegaConvergenceMasterR314/>"),'R328 source authority must not duplicate the Convergence master inside the Convergence route');
-assert.ok(suite.includes("if(panel==='Convergence')return wrap(<div>\n  <AppliedCalculusR168/>\n  <CalculusAddressFabricR240 record={record}/>\n  <OmegaResearchAdvancementR316/>\n  <RecursiveSelfBuildR240/>"),'Convergence route must retain the established calculus → address → research → self-build stack');
+for(const token of ['<AppliedCalculusR168/>','<CalculusAddressFabricR240 record={record}/>','<OmegaResearchAdvancementR316/>','<RecursiveSelfBuildR240/>'])assert.ok(suite.includes(token),`Convergence route lost established retained capability ${token}`);
+const current=['<OmegaUnifiedConvergenceR348','<OmegaHardwareFieldR349','<OmegaTemporalCheckpointR350','<OmegaGpuPacketMirrorR351','<OmegaGpuComputeR352','<OmegaProofBoundSceneR354','<OmegaProofBoundTemporalTraversalR355'].map(token=>suite.indexOf(token));
+assert.ok(current.every(index=>index>=0)&&current.every((index,i)=>i===0||index>current[i-1]),'R356 Convergence current authority chain must preserve R348→R355 order');
+assert.ok(suite.indexOf("className='r356-compatibility-stack'")>current.at(-1),'retained convergence lineage must follow current authorities rather than compete with them');
 
 console.log('R328 SOURCE-EXACT CANON PASS · 3,743 exact records · 495 concepts · 173 properties · 45 computation heads · 463 conflict groups / 405 multivariant · original + normalized SHA/census gated · 675-row implementation canon remains separate · no symbolic auto-execution');
