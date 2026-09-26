@@ -3,8 +3,9 @@ import fs from'node:fs';
 import {auditInteractionPartitionR355,R313_R286_OBSERVED_ELAPSED_MS_R355} from '../src/system/r313InteractionWorkloadR355.js';
 
 const workstation=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
-const block=(workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...block.matchAll(/'([^']+)'/g)].map(m=>m[1]);
+const navigation=fs.readFileSync('src/navigationRegistry.ts','utf8');
+const surfaces=[...navigation.matchAll(/name:'([^']+)'/g)].map(m=>m[1]);
+assert.ok(workstation.includes('export const OMEGA_SURFACES=OMEGA_NAV_NAMES;'),'R355 workload proof must consume canonical route authority');
 assert.equal(surfaces.length,44);
 assert.equal(Object.keys(R313_R286_OBSERVED_ELAPSED_MS_R355).length,88,'R355 interaction census must cover every desktop/mobile route case');
 for(const shards of [8,12,16]){
