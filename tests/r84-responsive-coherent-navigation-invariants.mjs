@@ -9,6 +9,7 @@ const polish=read('src/responsivePolishR88.css');
 const inventoryCss=read('src/systemInventoryR83.css');
 const registry=read('src/omegaExperienceRegistryR82.ts');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const living=read('src/OmegaR36LivingSurfaces.tsx');
 
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
@@ -37,8 +38,8 @@ must(polish.includes('grid-template-columns:repeat(auto-fit,minmax(min(230px,100
 must(inventoryCss.includes('.r83-inventory.compact{grid-template-rows:auto auto auto minmax(0,1fr) auto;min-height:0}'),'compact software inventory must keep one deliberate scroll owner');
 must(inventoryCss.includes('.r83-inventory.compact .r83-inventory-kpis{display:flex'),'mobile inventory KPIs must compress horizontally');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length,'responsive navigation must not remove or duplicate application surfaces');
 for(const route of routes)must(surfaces.includes(route),`workstation missing registered destination ${route}`);
 for(const token of ["view==='DEEP'&&<MatterTraversal","view==='DEEP'&&<OmegaVisualInstrument","view==='DEEP'&&<OmegaTraversalStudio"])must(living.includes(token),`deep donor surface lost: ${token}`);

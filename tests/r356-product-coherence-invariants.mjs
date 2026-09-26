@@ -55,7 +55,7 @@ assert.ok(compat>currentOrder.at(-1),'retained compatibility must render after c
 for(const token of ['FullRestorationConvergenceR168','OmegaMaximumCockpitR126','ReflexAutonomicR164','OmegaAutonomicR125','OmegaOrganismR123','OmegaSwarmR121','OmegaFieldMotionConvergenceR28'])
  assert.ok(suite.includes(token),`retained capability lineage missing ${token}`);
 
-const routeBlock=(registry.match(/OMEGA_ALL_ROUTES_R82=OMEGA_WORKSPACES_R82\.flatMap/)||[])[0];
+const routeBlock=(registry.match(/OMEGA_ALL_ROUTES_R82=OMEGA_NAV_NAMES/)||[])[0];
 assert.ok(routeBlock,'R356 must derive presentation from canonical route registry');
 assert.ok(capabilities.includes('OMEGA_CAPABILITY_AUTHORITY'),'R356 must preserve capability authority');
 assert.ok(!css.includes('display:none!important}.r94-rail-action'),'R356 may not erase canonical navigation');

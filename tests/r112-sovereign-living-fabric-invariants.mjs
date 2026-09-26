@@ -2,6 +2,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R112/R118 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const hybridRoute=read('src/HybridLinkR32.tsx');
 const hybridMount=read('src/HybridConnectBarR111.tsx');
 const sovereign112=read('src/SovereignConnectionR112.tsx');
@@ -13,8 +14,8 @@ const federation=read('src/FederationRunR97.tsx');
 const field=read('src/FederationLivingFieldR112.tsx');
 const law=read('src/calculusVisualLawR37.ts');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'44-route capability universe must remain intact');
 
 must(hybridRoute.includes('<SovereignConnectionR117/>'),'Hybrid Link must put the R117 clean PC connection successor on the ordinary surface');

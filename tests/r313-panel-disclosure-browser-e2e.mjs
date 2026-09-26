@@ -4,8 +4,9 @@ import {partitionInteractionCasesR355} from '../src/system/r313InteractionWorklo
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
-const block=(source.match(/export const OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const routes=[...block.matchAll(/'([^']+)'/g)].map(m=>m[1]);
+const navigation=fs.readFileSync('src/navigationRegistry.ts','utf8');
+const block=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const routes=[...block.matchAll(/name:'([^']+)'/g)].map(m=>m[1]);
 if(routes.length!==44||new Set(routes).size!==44)throw new Error(`R313 expected 44 unique canonical surfaces, received ${routes.length}`);
 
 const viewports=[['desktop',{width:1440,height:960}],['mobile',{width:390,height:844}]];
@@ -37,12 +38,13 @@ async function openRoute(page,route){
   if(hit<0)throw new Error(`R313 route missing: ${route}`);
   await buttons.nth(hit).scrollIntoViewIfNeeded();
   const before=await page.evaluate(()=>{const root=document.documentElement;return{epoch:root.dataset.omegaRouteEpoch||'0',panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,state:root.dataset.omegaRouteState||'IDLE'}});
-  await buttons.nth(hit).click({timeout:10000});
+  await buttons.nth(hit).click({timeout:10000,noWaitAfter:true});
   await page.waitForFunction(({name,before})=>{
     const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
     const committed=root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
-    const requested=root.dataset.omegaRouteTarget===name&&(root.dataset.omegaRouteState==='REQUESTED'||committed);
-    return committed||(before.panel!==name&&root.dataset.omegaRouteEpoch!==before.epoch&&requested);
+    const requested=root.dataset.omegaRouteState==='REQUESTED'&&root.dataset.omegaRouteTarget===name&&panel===name;
+    const advancedRequest=before.panel!==name&&root.dataset.omegaRouteEpoch!==before.epoch&&requested;
+    return committed||requested||advancedRequest;
   },{name:route,before},{timeout:10000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},route);throw new Error(`R313 ${route} navigation request was not acknowledged: ${JSON.stringify(d)} · ${String(e)}`)});
   await page.waitForFunction(name=>{
     const root=document.documentElement;

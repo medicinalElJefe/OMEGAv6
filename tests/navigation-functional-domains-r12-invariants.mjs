@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const launcher=fs.readFileSync('src/OmegaLauncher.tsx','utf8');
 const registry=fs.readFileSync('src/navigationRegistry.ts','utf8');
 const atlas=fs.readFileSync('src/systemAtlasRuntime.ts','utf8');
-const navBlock=(registry.match(/export const OMEGA_NAVIGATION:OmegaNavItem\[\]=\[(.*?)\];/s)||[])[1]||'';
+const navBlock=registry.slice(registry.indexOf('export const OMEGA_NAVIGATION=['),registry.indexOf('export const OMEGA_NAV_GROUPS'));
 const navNames=[...navBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 assert.equal(navNames.length,44,'canonical navigation registry must remain 44 real destinations');
 assert.equal(new Set(navNames).size,44,'canonical navigation destinations must remain unique');

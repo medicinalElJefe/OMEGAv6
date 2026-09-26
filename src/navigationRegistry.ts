@@ -3,7 +3,7 @@ import {MASTER_MENUS} from './systemAtlasRuntime';
 export type OmegaNavGroup='STUDIO'|'OPERATIONS'|'WORK'|'INTELLIGENCE'|'GOVERNANCE'|'SYSTEM';
 export type OmegaNavItem={id:string;group:OmegaNavGroup;name:string;hint:string;effect:'READ'|'COMPUTE'|'GOVERN'|'BUILD'|'EXTERNAL_GATE';authority:'CANONICAL'|'DERIVED'|'EVIDENCE_GATED'|'HOST_GATED'|'GOVERNANCE'};
 
-export const OMEGA_NAVIGATION:OmegaNavItem[]=[
+export const OMEGA_NAVIGATION=[
 {id:'01',group:'STUDIO',name:'Command Center',hint:'Ask OMEGA, route intent, inspect the current packet and continue governed work.',effect:'COMPUTE',authority:'CANONICAL'},
 {id:'02',group:'STUDIO',name:'Hybrid Link',hint:'Prepare and inspect proof-gated PC/device missions without faking native execution.',effect:'EXTERNAL_GATE',authority:'HOST_GATED'},
 {id:'03',group:'STUDIO',name:'Workspace',hint:'General sovereign workspace for active OMEGA work and source-bound context.',effect:'READ',authority:'CANONICAL'},
@@ -48,7 +48,8 @@ export const OMEGA_NAVIGATION:OmegaNavItem[]=[
 {id:'42',group:'SYSTEM',name:'System Atlas',hint:'24-family software atlas and subsystem relationship map.',effect:'READ',authority:'GOVERNANCE'},
 {id:'43',group:'SYSTEM',name:'Scale Compiler',hint:'Recursive-scale compiler and representational hierarchy inspection.',effect:'COMPUTE',authority:'DERIVED'},
 {id:'44',group:'SYSTEM',name:'Control Matrix',hint:'System Atlas control matrix for routing, family relationships and system control.',effect:'GOVERN',authority:'GOVERNANCE'}
-];
+] as const satisfies readonly OmegaNavItem[];
+export type OmegaRouteName=(typeof OMEGA_NAVIGATION)[number]['name'];
 
 export const OMEGA_NAV_GROUPS:OmegaNavGroup[]=['STUDIO','OPERATIONS','WORK','INTELLIGENCE','GOVERNANCE','SYSTEM'];
 export const OMEGA_NAV_NAMES=OMEGA_NAVIGATION.map(x=>x.name);

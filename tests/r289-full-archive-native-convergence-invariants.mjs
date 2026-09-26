@@ -3,6 +3,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(`R289 full convergence invariant failed: ${msg}`)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const archiveNative=read('src/archiveNativeConvergenceR288.ts');
 const archiveUi=read('src/ArchiveNativeConvergenceR288.tsx');
 const genomeA=read('src/archiveGenomeLedgerR288.ts');
@@ -15,8 +16,8 @@ const bioModeProof=read('tests/r284-bio-mode-experience-invariants.mts');
 const interaction=read('tests/r286-ui-interaction-integrity-invariants.mjs');
 const r241=read('.github/workflows/r241-archive-convergence.yml');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44,`expected exact 44-route authority, got ${surfaces.length}`);
 must(new Set(surfaces).size===44,'canonical surface registry must remain unique');
 for(const name of ['Matter Traversal','Archive Census','Archive Operators','Relativity','Modes','System Atlas'])must(surfaces.includes(name),`required convergence surface missing ${name}`);

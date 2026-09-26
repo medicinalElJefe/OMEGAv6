@@ -63,7 +63,7 @@ for(const token of ['activeProofCarrySnapshotR292','proofCarry:{','proofGlow=cl(
 for(const token of ['activeProofCarrySnapshotR292',"key=`${op.from}:${op.to}:${proofCarry.fingerprint}`",'contextualProof=proofCarry.bound?cl(op.proof)*proofCarry.routingSupport:cl(op.proof)',"id:'proof-carry'",'promotionEligible:proofCarry.promotionEligible'])assert(allModes.includes(token),`ALL MODES convergence missing ${token}`);
 for(const token of ['activeProofCarrySnapshotR292','affectsCanonicalRoute:false','cannot override the source autoPing route','R292 proof-carry context may inform proof-aware scoring but never changes the canonical source route'])assert(transition.includes(token),`transition receipt boundary missing ${token}`);
 assert(suite.includes("import './proofCarryR292.css'"),'proof-carry visual layer not loaded');
-const routeBlock=(navigation.match(/export const OMEGA_NAVIGATION:OmegaNavItem\[\]=\[(.*?)\];/s)||[])[1]||'';
+const routeBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
 const routes=[...routeBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 assert.equal(routes.length,44,'R292/R293 must not inflate the 44-route authority');
 assert.equal(new Set(routes).size,44,'R292/R293 must preserve unique route authority');

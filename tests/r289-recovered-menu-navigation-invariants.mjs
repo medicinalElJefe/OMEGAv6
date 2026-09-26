@@ -12,7 +12,7 @@ const dataTruthNavCss=read('src/dataTruthNavigationR105.css');
 const atlas=read('src/systemAtlasRuntime.ts');
 const archive=read('src/archiveNativeConvergenceR288.ts');
 
-const navBlock=(nav.match(/export const OMEGA_NAVIGATION:OmegaNavItem\[\]=\[(.*?)\];/s)||[])[1]||'';
+const navBlock=nav.slice(nav.indexOf('export const OMEGA_NAVIGATION=['),nav.indexOf('export const OMEGA_NAV_GROUPS'));
 const routeNames=[...navBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 const mapBlock=(nav.match(/OMEGA_MASTER_MENU_ROUTE_MAP_R289:[^=]+=\{(.*?)\n\};/s)||[])[1]||'';
 const routeMap=[...mapBlock.matchAll(/'([^']+)':'(\d\d)'/g)].map(x=>({route:x[1],menu:x[2]}));

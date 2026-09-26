@@ -33,9 +33,10 @@ if(app.includes("import './mobileMatterR42.css';"))throw new Error('R356 regress
 requireText(app,"import './productCoherenceR356.css';",'R356 canonical mobile/product containment missing');
 requireText(fs.readFileSync('src/surfaceIntegrityR81.css','utf8'),'@media(max-width:900px)','Current mobile surface containment missing');
 if(!fs.existsSync('src/mobileMatterR42.css'))throw new Error('R42 retained mobile containment provenance missing');
-requireText(workstation,"export const OMEGA_SURFACES=['Command Center'",'Workstation surface authority missing');
-const surfaceLiteral=workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const;/s)?.[1]||'';
-if(count(surfaceLiteral,/'[^']+'/g)!==44)throw new Error(`Expected 44 registered workstation surfaces, found ${count(surfaceLiteral,/'[^']+'/g)}`);
+const navigation=read('src/navigationRegistry.ts');
+requireText(workstation,'export const OMEGA_SURFACES=OMEGA_NAV_NAMES;','Workstation must consume canonical route authority');
+const canonicalSurfaces=[...navigation.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
+if(canonicalSurfaces.length!==44||new Set(canonicalSurfaces).size!==44)throw new Error(`Expected 44 unique canonical workstation surfaces, found ${canonicalSurfaces.length}`);
 requireText(corpus,'patterns[c.d*12+c.p]','144-domain PSC pattern authority missing');
 requireText(corpus,'roots[c.r]','12-root PSC authority missing');
 requireText(corpus,'operators[c.l]','12-function/operator PSC authority missing');

@@ -3,8 +3,9 @@ import fs from 'node:fs';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const source=fs.readFileSync(new URL('../src/OmegaWorkstationFullV2.tsx',import.meta.url),'utf8');
-const surfaceBlock=(source.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const routes=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const navigation=fs.readFileSync(new URL('../src/navigationRegistry.ts',import.meta.url),'utf8');
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const routes=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 if(routes.length!==44||new Set(routes).size!==44)throw new Error(`R118 expected 44 unique routes, found ${routes.length}`);
 
 const criticalVisual=new Set(['Matter Traversal','Visual Instrument','Immersive Traversal','Extreme Traversal','Traversal','Forecast','Relativity','Earth Now','Atlas','Infinity','Scale Compiler','Reality Lab','Field','Data Motion','Convergence']);

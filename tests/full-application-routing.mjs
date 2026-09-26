@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 const v2=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const navigation=fs.readFileSync('src/navigationRegistry.ts','utf8');
 const deferred=fs.existsSync('src/specialistLoaderR109.tsx')?fs.readFileSync('src/specialistLoaderR109.tsx','utf8'):'';
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 const utility=fs.readFileSync('src/OmegaUtilityAuthorityR26.tsx','utf8');
@@ -8,8 +9,8 @@ const bridge=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
 const shell=fs.readFileSync('src/SingleFrameRuntimeShellR27.tsx','utf8');
 const app=fs.readFileSync('src/App.tsx','utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
-const m=v2.match(/OMEGA_SURFACES=\[(.*?)\] as const;/s);must(m,'missing canonical V2 capability registry');
-const surfaces=[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]);must(surfaces.length===44,`expected 44 registered V2 capabilities, got ${surfaces.length}`);must(new Set(surfaces).size===44,'registered V2 capability names must be unique');
+const navBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...navBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);must(v2.includes('export const OMEGA_SURFACES=OMEGA_NAV_NAMES;'),'missing canonical V2 route alias');must(surfaces.length===44,`expected 44 registered V2 capabilities, got ${surfaces.length}`);must(new Set(surfaces).size===44,'registered V2 capability names must be unique');
 for(const file of ['OmegaVisualInstrument','OmegaTraversalStudio','OmegaSpecialistSuite','EarthObservatoryR8','ForecastSovereignPanel','IntelligenceFabricPanel','SAISovereignControl','RelativityLab','AtlasCalculatorPanel','OmegaInfinityPanel','RecursiveScalePanel','AppliedRealityLab','WovenBuildOutPanel','MatterTraversal','HybridMissionControlR8'])must(v2.includes(`./${file}`)||deferred.includes(`./${file}`),`missing active/deferred specialist binding ${file}`);
 must(suite.includes('OmegaFieldMotionConvergenceR28')&&suite.includes('OmegaEvidenceMemoryR28')&&suite.includes('OmegaUtilityAuthorityR26')&&suite.includes('OmegaSystemConsolidationR30'),'specialist suite must preserve R28/R29 utility lineage and promote R30 system/consolidation specialists');
 for(const panel of ['Hybrid Link','Archive Census','Archive Operators','Quality Compiler','Validation','System Atlas','Control Matrix','Cockpit','Workspace'])must(v2.includes(`case '${panel}'`)||v2.includes(`panel==='${panel}'`),`missing dedicated operational route ${panel}`);

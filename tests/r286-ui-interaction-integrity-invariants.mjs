@@ -33,8 +33,9 @@ must(compat.includes('min-width:44px!important')&&compat.includes('min-height:44
 must(compat.includes('#root .omega-workstation-v2 input:not([disabled])')&&compat.includes('#root .omega-workstation-v2 select:not([disabled])')&&compat.includes('#root .omega-workstation-v2 textarea:not([disabled])'),'coarse-pointer form floor must cover enabled inputs, selects and textareas');
 must(compat.includes('touch-action:manipulation'),'coarse-pointer actions must retain direct manipulation semantics');
 
-const surfaceBlock=(workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(m=>m[1]);
+const navigation=read('src/navigationRegistry.ts');
+const surfaces=[...navigation.matchAll(/name:'([^']+)'/g)].map(m=>m[1]);
+must(workstation.includes('export const OMEGA_SURFACES=OMEGA_NAV_NAMES;'),'workstation must consume canonical route identity authority');
 must(surfaces.length===44,'workstation must expose all 44 canonical surfaces');
 must(new Set(surfaces).size===44,'canonical workstation surfaces must be unique');
 must(workstation.includes('const go=(name:string)=>'),'canonical go() route path must remain wired');

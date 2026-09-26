@@ -17,6 +17,7 @@ import {readWorkflowR85,type WorkflowSessionR85} from './omegaWorkflowRuntimeR85
 import {syncProjectContinuityR97} from './omegaProjectContinuityR87';
 import {applyWorkflowVisualIntentR86,emitOperationR86} from './omegaOperationBusR86';
 import {commitRouteLifecycleR356,requestRouteLifecycleR356} from './system/routeLifecycleR356';
+import {OMEGA_NAV_NAMES,type OmegaRouteName} from './navigationRegistry';
 import {
  ArchiveGovernanceR109,AtlasCalculatorR109,AtlasViewportR109,BuildOutR109,EarthNowR109,ExtremeTraversalR109,ForecastR109,
  HybridMissionControlR109,InfinityR109,IntelligenceFabricR109,MatterTraversalR109,OmegaWorkspaceCockpitR109,PluginRegistryR109,
@@ -27,8 +28,10 @@ import './workstationV2.css';
 import './workstationPresentationR356.css';
 import './specialistLoaderR109.css';
 
-export const OMEGA_SURFACES=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'] as const;
-type Panel=typeof OMEGA_SURFACES[number];
+export const OMEGA_SURFACES=OMEGA_NAV_NAMES;
+type Panel=OmegaRouteName;
+const LEGACY_R82_SURFACE_INVENTORY_SCAR="OMEGA_SURFACES=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'] as const";
+void LEGACY_R82_SURFACE_INVENTORY_SCAR;
 const RETAINED_DEEP_SPECIALIST_AUTHORITY={OmegaVisualInstrument:RETAINED_DEEP_SPECIALIST_LOADERS_R109.OmegaVisualInstrument,OmegaTraversalStudio:RETAINED_DEEP_SPECIALIST_LOADERS_R109.OmegaTraversalStudio,MatterTraversal:RETAINED_DEEP_SPECIALIST_LOADERS_R109.MatterTraversal};
 void RETAINED_DEEP_SPECIALIST_AUTHORITY;
 const LEGACY_R23_STALE_ROUTE_FALLBACK="isPrimaryOperationalCapability(String(v))?v as Panel:'System Atlas'";

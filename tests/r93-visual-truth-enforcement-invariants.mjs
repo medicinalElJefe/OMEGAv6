@@ -2,6 +2,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R93/R140 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const home=read('src/OmegaHomeR71.tsx');
 const command=read('src/OmegaCommandDeck.tsx');
 const modes=read('src/SourceBackedModesPanelR21.tsx');
@@ -18,8 +19,8 @@ const living=read('src/OmegaR36LivingSurfaces.tsx');
 const livingCss=read('src/livingSurfaceR36.css');
 const capabilityCss=read('src/capabilityFirstR138.css');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'44/44 canonical routes must remain');
 
 for(const name of ['CanonicalPacketTruthPlotR93','ModeTruthTraceR93','InfinityTruthPlotR93','TransitionTruthPlotR93','ScaleTruthPlotR93'])

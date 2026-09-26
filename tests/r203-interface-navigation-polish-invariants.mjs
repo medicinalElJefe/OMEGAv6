@@ -20,7 +20,7 @@ assert.ok(nav.includes("if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')"),
 assert.ok(/if\(e\.key==='Escape'\)\s*\{?\s*setExpanded\(false\)/.test(nav),'R203 must retain navigator escape behavior across later accessibility/navigation convergence');
 assert.ok(nav.includes("onClick={()=>go(route)}"),'R203 must keep every registered route directly navigable');
 
-assert.ok(workstation.includes("export const OMEGA_SURFACES=['Command Center'"),'R203 must preserve complete workstation surface authority');
+assert.ok(workstation.includes('export const OMEGA_SURFACES=OMEGA_NAV_NAMES;'),'R203 must preserve complete workstation surface authority through canonical route identity');
 assert.ok(workstation.includes("const go=(name:string)=>"),'R203 must preserve the existing route/go execution path');
 assert.ok(r120.includes('calc(100vw - var(--r94-nav-rail) - 224px)'),'R203 must preserve the R155 mobile instrument-space floor');
 

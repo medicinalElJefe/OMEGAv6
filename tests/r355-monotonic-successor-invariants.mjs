@@ -4,12 +4,13 @@ import fs from'node:fs';
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 const workstation=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const navigation=fs.readFileSync('src/navigationRegistry.ts','utf8');
 const capability=fs.readFileSync('src/capabilityAuthority.ts','utf8');
 const app=fs.readFileSync('src/App.tsx','utf8');
 const core=fs.readFileSync('src/system/proofBoundTemporalTraversalR355.ts','utf8');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 const capabilityBlock=(capability.match(/OMEGA_CAPABILITY_AUTHORITY:readonly CapabilityContract\[]=\[(.*?)\] as const;/s)||[])[1]||'';
 const capabilities=[...capabilityBlock.matchAll(/\{name:'([^']+)'/g)].map(x=>x[1]);
 

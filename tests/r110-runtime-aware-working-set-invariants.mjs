@@ -12,6 +12,7 @@ const must=(ok,msg)=>{if(!ok)throw new Error('R110 '+msg)};
 const loader=read('src/specialistLoaderR109.tsx');
 const policySource=read('src/specialistWorkingSetPolicyR110.js');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const accepted=read('src/acceptedProductionContractR95.ts');
 const r109=read('tests/r109-route-deferred-specialist-fabric-invariants.mjs');
 const app=read('src/App.tsx');
@@ -47,8 +48,8 @@ must(loader.includes("state:'SUPPRESSED'")&&loader.includes('specialistWorkingSe
 must(!policySource.includes('fetch(')&&!policySource.includes('/api/')&&!policySource.includes('WebSocket')&&!policySource.includes('localStorage'),'pure working-set policy may not contact backends or persist shadow state');
 must(!loader.includes('Math.random')&&!policySource.includes('Math.random'),'working-set policy/loading must remain deterministic');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length>0&&new Set(surfaces).size===surfaces.length,'R110 must preserve the complete non-empty unique registered destination inventory');
 must(workstation.includes('function normalizePanel(v:any):Panel')&&workstation.includes('const go=(name:string)=>'),'R110 must preserve one workstation route authority');
 must(workstation.includes('prefetchSpecialistPanelsR109([next,...capabilityRoutes])'),'existing workflow/capability continuity hook must remain the R110 integration point');
