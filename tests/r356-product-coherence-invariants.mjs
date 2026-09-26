@@ -13,6 +13,7 @@ const interactionBinding=fs.readFileSync('src/system/interactionBindingR356.ts',
 const interactionProof=fs.readFileSync('tests/r313-full-control-interaction-browser-e2e.mjs','utf8');
 const navigationProof=fs.readFileSync('tests/r239-user-navigation-browser-e2e.mjs','utf8');
 const disclosureProof=fs.readFileSync('tests/r313-panel-disclosure-browser-e2e.mjs','utf8');
+const routeLifecycle=fs.readFileSync('src/system/routeLifecycleR356.ts','utf8');
 
 const legacy=[
  './coherenceRepairR35.css','./specialistDepthR38_3.css','./mobileMatterR42.css','./sovereignDesignR59.css',
@@ -81,6 +82,8 @@ assert.ok(!workstation.includes("scrollTo({top:0,behavior:'smooth'})"),'R356 rou
 assert.ok(interactionBinding.includes('interactionBindingKeyR356'),'R356 one interaction-binding function missing');
 assert.ok(surface.includes('interactionBindingKeyR356(panel,record)')&&capabilityField.includes('interactionBindingKeyR356(panel,record,address)'),'R356 surface/capability identity must share one binding-key authority');
 assert.ok(workstation.includes('startTransition(()=>setPanel(next))'),'R356 workstation route commits must be transition-scheduled');
+assert.ok(routeLifecycle.includes('requestRouteLifecycleR356')&&routeLifecycle.includes('commitRouteLifecycleR356')&&routeLifecycle.includes("omega-r356-route-requested")&&routeLifecycle.includes("omega-r356-route-committed"),'R356 must own one shared REQUESTED→COMMITTED route lifecycle authority');
+assert.ok(app.includes("requestRouteLifecycleR356(home?'Home'")&&workstation.includes('requestRouteLifecycleR356(panel,next)')&&workstation.includes('commitRouteLifecycleR356(panel)'),'R356 Home and Workstation navigation must converge on the same lifecycle authority');
 assert.ok(interactionProof.includes('surfaceContinuityState')&&interactionProof.includes('afterContinuity.stateKey!==beforeContinuity.stateKey'),'R356 interaction proof must distinguish canonical state change from local same-state UI change');
 assert.ok(interactionProof.includes('local interaction broke same-state surface continuity'),'R356 local interaction continuity must remain fail-closed');
 assert.ok(capabilityCss.includes('min-height:46px')&&capabilityCss.includes('-webkit-line-clamp:2'),'R356 live capability telemetry must not move topology controls during async repaint');
