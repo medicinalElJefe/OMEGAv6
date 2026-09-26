@@ -63,7 +63,8 @@ assert.ok(css.includes("@media(max-width:900px){\n :root{--r356-radius:11px;--r3
 assert.ok(css.includes(".omega-workstation-v2[data-panel='Earth Now'] .workstation-main{padding-inline:1px!important}")&&css.includes(".r356-product-surface[data-r356-route='Earth Now']{padding-inline:1px"),'R356 mobile Earth must retain viewport-first instrument geometry without horizontal overflow');
 const capabilityCss=fs.readFileSync('src/capabilityFirstR138.css','utf8');
 for(const token of ['scrollbar-gutter:stable','overflow-anchor:none'])assert.ok((css+capabilityCss).includes(token),`R356 stable interaction coordinate contract missing ${token}`);
-for(const token of ['grid-auto-rows:84px','height:84px!important','contain:layout paint size'])assert.ok(capabilityCss.includes(token),`R356 fixed capability-control geometry missing ${token}`);
+for(const token of ['grid-auto-rows:84px','height:84px!important','contain:layout paint size','translate:-50% -50%'])assert.ok(capabilityCss.includes(token),`R356 fixed capability-control geometry missing ${token}`);
+assert.ok(!capabilityCss.includes('transform:translate(-50%,-50%)!important'),'R356 native topology control must not be double-translated');
 
 
 console.log('R356 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor + non-blocking proof-lineage disclosure preserved · legacy presentation preserved as provenance only');
