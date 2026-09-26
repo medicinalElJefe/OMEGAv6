@@ -136,3 +136,16 @@
  translate:-50% -50%;
  transform:none!important;
 }
+
+
+/* R356.5 topology pointer separation.
+   The SVG nodes are smaller than the legacy 120px invisible desktop hit circles. Keep a generous
+   accessible target without allowing neighboring transparent controls to overlap/intercept. */
+@media(min-width:901px){
+ .r317-product-root .r356-native-node-control{
+  width:72px!important;
+  min-width:72px!important;
+  height:72px!important;
+  min-height:72px!important;
+ }
+}
