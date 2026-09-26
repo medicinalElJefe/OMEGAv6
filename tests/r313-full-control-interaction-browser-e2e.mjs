@@ -44,6 +44,20 @@ async function waitForSurfaceReady(page,name){
  await twoFrames(page);
 }
 
+async function surfaceContinuityState(page,surface){
+ return page.evaluate(name=>{
+  const shell=document.querySelector('.omega-workstation-v2');
+  const node=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
+  return{
+   panel:shell?.getAttribute('data-panel')||null,
+   exists:Boolean(node),
+   stateKey:node?.getAttribute('data-r356-interaction-state-key')||null,
+   ready:node?.getAttribute('data-r356-interaction-ready')==='true',
+   failed:Boolean(node?.querySelector('.panel-failure'))
+  };
+ },surface);
+}
+
 async function waitForStableControl(page,id){
  const stable=await page.evaluate(async probeId=>{
   const sample=()=>{
@@ -177,6 +191,7 @@ async function clickSafeControls(page,surface,profile,pageErrors){
    continue;
   }
 
+  const beforeContinuity=await surfaceContinuityState(page,surface);
   await actuateSafeControl(page,item,profile,surface);
   await page.waitForTimeout(40);
   if(pageErrors.length)throw new Error(`${profile}/${surface}: page error after activating ${item.label}: ${pageErrors.at(-1)}`);
@@ -184,9 +199,16 @@ async function clickSafeControls(page,surface,profile,pageErrors){
   if(!await shell.count()){
    throw new Error(`${profile}/${surface}: canonical workstation shell missing after activating ${item.label}; url=${page.url()}`);
   }
-  const panel=await shell.first().getAttribute('data-panel',{timeout:3000}).catch(()=>null);
-  if(panel!==surface)await activateSurface(page,surface);
-  else{await twoFrames(page);await waitForSurfaceReady(page,surface)};
+  const afterContinuity=await surfaceContinuityState(page,surface);
+  if(afterContinuity.panel!==surface){
+   await activateSurface(page,surface);
+  }else if(afterContinuity.stateKey!==beforeContinuity.stateKey){
+   await waitForSurfaceReady(page,surface);
+  }else{
+   await twoFrames(page);
+   const stable=await surfaceContinuityState(page,surface);
+   if(!stable.exists||stable.failed||stable.panel!==surface)throw new Error(`${profile}/${surface}: local interaction broke same-state surface continuity after ${item.label}`);
+  }
  }
  return before;
 }
