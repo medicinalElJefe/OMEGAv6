@@ -104,7 +104,7 @@ async function activateSurface(page,name){
   if(label!==name)continue;
   await routes.nth(i).scrollIntoViewIfNeeded();
   const before=await page.evaluate(()=>{const root=document.documentElement;return{epoch:root.dataset.omegaRouteEpoch||'0',panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}});
-  await routes.nth(i).click();
+  await routes.nth(i).click({noWaitAfter:true});
   await page.waitForFunction(({name,before})=>{
    const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
    const committed=root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
