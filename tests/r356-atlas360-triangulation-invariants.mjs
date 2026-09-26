@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {R356_ATLAS360_COUNTS,R356_ATLAS360_LEVELS,encodeAtlasAddressR356,decodeAtlasAddressR356,projectLeafHierarchyR356,bearingGeometryR356,compileAddressSweepR356,createAtlas360SliceCacheR356,compileAtlas360ExecutionPlanR356,triangleClosureR356,carryScarR356,evaluateTriangleR356,compileAtlas360ConvergenceR356} from '../src/system/atlas360TriangulationR356.js';
+assert.deepEqual(R356_ATLAS360_LEVELS,[12,144,1728,20736]);
+assert.equal(R356_ATLAS360_COUNTS.leafAddressBearingRows,20736*360);
+assert.equal(R356_ATLAS360_COUNTS.allLevelAddressBearingRows,(12+144+1728+20736)*360);
+assert.equal(R356_ATLAS360_COUNTS.logicalEvaluationSlots,R356_ATLAS360_COUNTS.allLevelAddressBearingRows*3*3);
+assert.equal(R356_ATLAS360_COUNTS.logicalEvaluationSlotsWithSigma,R356_ATLAS360_COUNTS.logicalEvaluationSlots*3);
+for(const i of [0,1,11,12,143,144,1727,1728,20735]){const d=decodeAtlasAddressR356(i,20736),e=encodeAtlasAddressR356(d.digits);assert.equal(e.index,i)}
+const h=projectLeafHierarchyR356(20735);assert.equal(h.L1.index,11);assert.equal(h.L2.index,143);assert.equal(h.L3.index,1727);assert.equal(h.L4.local12,11);assert.equal(h.address,'11.11.11.11');
+const b0=bearingGeometryR356(0),b180=bearingGeometryR356(180);assert.equal(b0.antipode,180);assert.equal(b180.antipode,0);assert(Math.abs(b0.radial[0]+b180.radial[0])<1e-12);assert(Math.abs(b0.radial[1]+b180.radial[1])<1e-12);
+const sweep=compileAddressSweepR356(42);assert.equal(sweep.count,360);assert.equal(sweep.values.length,360*8);assert.equal(sweep.fullTensorMaterialized,false);
+const cache=createAtlas360SliceCacheR356(2),c1=cache.get(42),c2=cache.get(42);assert.equal(c1,c2);cache.get(43);cache.get(44);assert.equal(cache.size,2);
+const plan=compileAtlas360ExecutionPlanR356({activeAddresses:[42,42,43],logicalCores:8,deviceMemoryGB:8,workerAvailable:true});assert.deepEqual(plan.activeAddresses,[42,43]);assert.equal(plan.pairCount,720);assert.equal(plan.fullTensorMaterialized,false);assert(plan.geometryBytes<100000);
+const rot=d=>{const r=d*Math.PI/180,c=Math.cos(r),s=Math.sin(r);return[[c,-s],[s,c]]};
+const good=triangleClosureR356({T_AB:rot(30),T_BC:rot(50),T_CA:rot(-80)});assert(good.norm<1e-12);assert.equal(good.forcedClosure,false);
+const bad=triangleClosureR356({T_AB:rot(30),T_BC:rot(50),T_CA:rot(-70)});assert(bad.norm>0.1);
+assert.deepEqual(carryScarR356({transportedScar:[1,2],residual:[.5,-.25],gamma:.5}),[1.25,1.875]);
+const noData=evaluateTriangleR356();assert.equal(noData.gateState,'HOLD');assert(noData.reasons.includes('THREE_REAL_ANCHORS_REQUIRED'));assert(noData.reasons.includes('EXPLICIT_TRANSFORMS_REQUIRED'));
+const pass=evaluateTriangleR356({triangleClass:'TEMPORAL',anchors:[{id:'P'},{id:'O'},{id:'F'}],transforms:{T_AB:rot(30),T_BC:rot(50),T_CA:rot(-80)},threshold:1e-9});assert.equal(pass.gateState,'PASS');assert.equal(pass.measurementFabricated,false);
+const out=compileAtlas360ConvergenceR356({leafIndex:20735,theta:359,execution:{activeAddresses:[20735],bearingStep:1}});assert.equal(out.selection.hierarchy.address,'11.11.11.11');assert.equal(out.selection.bearing.antipode,179);assert.equal(out.triangle.gateState,'HOLD');assert.equal(out.canonicalMutation,false);assert.equal(out.productionAuthorityChanged,false);
+console.log('R356 Atlas360 triangulation invariants PASS');
