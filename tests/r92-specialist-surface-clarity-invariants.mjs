@@ -18,8 +18,10 @@ const r91=read('src/operationalSurfaceRefinementR91.css');
 const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
 const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical surface universe must remain 44/44');
-must(workstation.includes("import './specialistSurfaceClarityR92.css';"),'R92 stylesheet must be mounted');
-must(workstation.indexOf('specialistSurfaceClarityR92.css')>workstation.indexOf('operationalSurfaceRefinementR91.css'),'R92 must load after R91');
+const canonical=read('src/workstationPresentationR356.css');
+must(workstation.includes("import './workstationPresentationR356.css';"),'R356 canonical workstation authority must be mounted');
+must(!workstation.includes("import './specialistSurfaceClarityR92.css';"),'R92 must remain provenance rather than separate live authority');
+must(canonical.indexOf(r91)<canonical.indexOf(css),'R356 must preserve R91→R92 source order exactly');
 must(workstation.includes("'Reality Lab','Field','Data Motion','Convergence'"),'Reality Lab must join explicit visual-first authority');
 
 for(const panel of ['Forecast','Relativity','Infinity','Atlas','Scale Compiler','Reality Lab','Field','Data Motion','Convergence','Archive Census','Archive Operators'])
