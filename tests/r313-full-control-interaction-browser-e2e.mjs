@@ -186,6 +186,7 @@ async function clickSafeControls(page,surface,profile,pageErrors){
   }
   const panel=await shell.first().getAttribute('data-panel',{timeout:3000}).catch(()=>null);
   if(panel!==surface)await activateSurface(page,surface);
+  else{await twoFrames(page);await waitForSurfaceReady(page,surface)};
  }
  return before;
 }
