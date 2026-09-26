@@ -4,8 +4,9 @@ import {partitionInteractionCasesR355} from '../src/system/r313InteractionWorklo
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
-const block=(source.match(/export const OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...block.matchAll(/'([^']+)'/g)].map(m=>m[1]);
+const navigation=fs.readFileSync('src/navigationRegistry.ts','utf8');
+const block=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...block.matchAll(/name:'([^']+)'/g)].map(m=>m[1]);
 if(surfaces.length!==44||new Set(surfaces).size!==44)throw new Error(`R313 expected 44 canonical surfaces, got ${surfaces.length}/${new Set(surfaces).size}`);
 
 const profiles=[
