@@ -5,7 +5,7 @@ const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,''
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const navigation=fs.readFileSync('src/navigationRegistry.ts','utf8');
 const block=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
-const expected=[...block.matchAll(/'([^']+)'/g)].map(m=>m[1]);
+const expected=[...block.matchAll(/name:'([^']+)'/g)].map(m=>m[1]);
 if(expected.length!==44||new Set(expected).size!==44)throw new Error(`R286/R307 expected 44 unique canonical surfaces, received ${expected.length}/${new Set(expected).size}`);
 
 const profiles=[
