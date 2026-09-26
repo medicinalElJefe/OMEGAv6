@@ -67,4 +67,12 @@ for(const token of ['grid-auto-rows:84px','height:84px!important','contain:layou
 assert.ok(!capabilityCss.includes('transform:translate(-50%,-50%)!important'),'R356 native topology control must not be double-translated');
 
 
+const workstation=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+assert.ok(capabilityField.includes("data-r356-capability-layout-ready='true'"),'R356 deterministic capability layout readiness missing');
+assert.ok(surface.includes("cap.dataset.r356CapabilityLayoutReady==='true'"),'R356 surface readiness must use deterministic layout truth');
+assert.ok(surface.includes("cap.dataset.r356CapabilityBindingKey===stateKey"),'R356 surface readiness must bind exact state identity');
+assert.ok(workstation.includes("scrollTo({top:0,behavior:'auto'})"),'R356 route coordinate commit must be immediate');
+assert.ok(!workstation.includes("scrollTo({top:0,behavior:'smooth'})"),'R356 route commit may not leave controls moving under interaction proof');
+
+
 console.log('R356 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor + non-blocking proof-lineage disclosure preserved · legacy presentation preserved as provenance only');
