@@ -16,8 +16,8 @@ const living=read('src/OmegaR36LivingSurfaces.tsx');
 const navigation=read('src/navigationRegistry.ts');
 const deferred=fs.existsSync('src/specialistLoaderR109.tsx')?read('src/specialistLoaderR109.tsx'):'';
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'R81 requires all 44 canonical surfaces, unique');
 
 const existingBlock=(workstation.match(/SPECIALIST_EXISTING=new Set<Panel>\(\[(.*?)\]\)/s)||[])[1]||'';

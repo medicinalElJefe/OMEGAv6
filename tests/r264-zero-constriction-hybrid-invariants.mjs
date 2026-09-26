@@ -10,6 +10,7 @@ const nav=read('src/OmegaSideNavigatorR88.tsx');
 const navCss=read('src/omegaSideNavigatorR88.css');
 const registry=read('src/omegaExperienceRegistryR82.ts');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const wrangler=read('wrangler.jsonc');
 
 assert.ok(wrangler.includes('"main": "src/workerR116.js"'),'R264 must preserve proven R116 production entrypoint');
@@ -54,8 +55,8 @@ assert.ok(shell.includes("document.documentElement.dataset.omegaFrame=frame"),'R
 assert.ok(nav.includes('OMEGA_ALL_ROUTES_R82')&&!nav.includes('rows.slice('),'R264 must preserve all global routes without truncation');
 assert.ok(navCss.includes("@media(max-width:900px)")&&navCss.includes('--r94-nav-panel:min(42vw,220px)'),'R264 must preserve mobile non-covering global navigation');
 const routes=[...registry.matchAll(/routes:\[(.*?)\]/gs)].flatMap(m=>[...m[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 assert.ok(routes.length>0&&surfaces.length===routes.length&&new Set(surfaces).size===surfaces.length,'R264 must preserve complete unique application surface inventory');
 for(const route of routes)assert.ok(surfaces.includes(route),`R264 workstation missing registered route ${route}`);
 assert.ok(!fs.existsSync('src/workerR264.js'),'R264 must not create another Worker or Durable Object authority');

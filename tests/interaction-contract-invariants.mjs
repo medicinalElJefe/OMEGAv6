@@ -29,8 +29,7 @@ if(semanticNativeControls){
 assert.match(launcher,/omega-nexus-fav/,'favorite control must remain independently actionable');
 assert.match(launcher,/OMEGA_NAVIGATION/,'launcher donor must retain the shared navigation registry even though the duplicate global floating mount is retired');
 const launcherNames=[...navigation.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
-const routeBlock=(workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const;/s)||[])[1]||'';
-const routeNames=[...routeBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const routeNames=launcherNames;
 assert.equal(launcherNames.length,44,'shared navigation registry must expose exactly 44 routes');
 assert.equal(routeNames.length,44,'active workstation must expose exactly 44 routes');
 assert.deepEqual(new Set(launcherNames),new Set(routeNames),'shared navigation registry and active workstation routes must match exactly');

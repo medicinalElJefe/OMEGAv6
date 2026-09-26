@@ -10,6 +10,7 @@ const baseAgent=fs.existsSync('public/omega-hybrid-agent-base-r205.py')?read('pu
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const css=read('src/omegaSideNavigatorR88.css');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const ci=read('.github/workflows/ci.yml');
 
 const canonical='https://omegav6.jeffdeweyeljefe.workers.dev';
@@ -34,8 +35,8 @@ must(baseAgent.includes('probe_server(server)')&&baseAgent.includes('/api/hybrid
 must(agent.includes("VERSION='R207'")&&agent.includes("BASE_PATH='/omega-hybrid-agent-base-r205.py'")&&agent.includes("FINGERPRINT_SCHEMA='OMEGA_AGENT_RETURN_FINGERPRINT_R141'"),'canonical R207 wrapper must bind frozen executor and exact R141 return proof');
 must(![hybrid,hybridLink,agent,baseAgent,worker].join('\n').includes('omega-sovereign-convergence.foundasound.chatgpt.site')&&!launcher.includes('https://omega-sovereign-convergence.foundasound.chatgpt.site'),'obsolete Hybrid host must not exist as an active Hybrid transport path');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical 44-route universe must remain intact');
 
 must(nav.includes("className={'r94-side-toolbar '")&&nav.includes("className='r94-nav-rail'"),'global navigator must expose persistent slim side rail');

@@ -12,8 +12,8 @@ must(new Set(items.map(x=>x.name)).size===44,'navigation names must be unique');
 for(const x of items){must(x.hint.length>=28,`navigation hint is too weak for ${x.name}`);must(['STUDIO','OPERATIONS','WORK','INTELLIGENCE','GOVERNANCE','SYSTEM'].includes(x.group),`invalid group ${x.group}`)}
 must(launcher.includes('OMEGA_NAVIGATION')&&launcher.includes('LAUNCHER_SURFACES=OMEGA_NAVIGATION'),'NEXUS donor must use the shared navigation authority');
 must(launcher.includes('data-authority={x.authority}')&&launcher.includes('data-effect={x.effect}'),'NEXUS donor must expose route truth classes');
-const workBlock=(workstation.match(/export const OMEGA_SURFACES=\[(.*?)\] as const;/s)||[])[1]||'';
-const workNames=[...workBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const workNames=items.map(x=>x.name);
+must(workstation.includes('export const OMEGA_SURFACES=OMEGA_NAV_NAMES;'),'active workstation must consume canonical navigation route authority');
 must(workNames.length===44,'active workstation must still register exactly 44 surfaces');
 for(const x of items)must(workNames.includes(x.name),`shared navigation route missing from workstation registry: ${x.name}`);
 const shellBlock=(shell.match(/R27_REGISTERED_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';

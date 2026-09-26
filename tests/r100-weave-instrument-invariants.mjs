@@ -3,6 +3,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R100/R242 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
 const navLemma=read('src/navigationLemmaCalculusR242.js');
 const navCss=read('src/omegaSideNavigatorR100.css');
@@ -12,8 +13,8 @@ const weave=read('src/weaveStateR100.ts');
 const weaveCss=read('src/weaveGeometryR100.css');
 const accepted=read('src/acceptedProductionContractR95.ts');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical 44-route universe must remain intact');
 
 must(weave.includes('ATLAS_RESOLUTION_LEVELS_R100=[12,144,1728,20736]'),'nested atlas resolution registry missing');

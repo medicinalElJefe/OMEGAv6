@@ -2,6 +2,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R92 '+msg)};
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const css=read('src/specialistSurfaceClarityR92.css');
 const reality=read('src/AppliedRealityLab.tsx');
 const forecast=read('src/ForecastSovereignPanel.tsx');
@@ -15,8 +16,8 @@ const restore=read('src/ExtremeRestorationR46.tsx');
 const r90=read('src/surfaceHierarchyR90.css');
 const r91=read('src/operationalSurfaceRefinementR91.css');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical surface universe must remain 44/44');
 const canonical=read('src/workstationPresentationR356.css');
 must(workstation.includes("import './workstationPresentationR356.css';"),'R356 canonical workstation authority must be mounted');

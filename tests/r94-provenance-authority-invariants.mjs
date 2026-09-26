@@ -3,6 +3,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R94 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const provenance=read('src/surfaceProvenanceR94.ts');
 const surface=read('src/SurfaceIntegrityR81.tsx');
 const strip=read('src/SurfaceProvenanceR94.tsx');
@@ -15,8 +16,8 @@ const modes=read('src/SourceBackedModesPanelR21.tsx');
 const reality=read('src/AppliedRealityLab.tsx');
 const infinity=read('src/OmegaInfinityPanel.tsx');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const routes=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const routes=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 const provenanceRows=[...provenance.matchAll(/P\('([^']+)'/g)].map(x=>x[1]);
 must(routes.length===44&&new Set(routes).size===44,'canonical route universe must remain 44/44');
 must(provenanceRows.length===44&&new Set(provenanceRows).size===44,'provenance authority must contain 44 unique surface contracts');
