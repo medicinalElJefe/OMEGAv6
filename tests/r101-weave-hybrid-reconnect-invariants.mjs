@@ -3,6 +3,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error('R101/R242 '+msg)};
 
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const navigation=read('src/navigationRegistry.ts');
 const worker=read('src/workerR101.js');
 const worker34=read('src/workerR34.js');
 const worker111=fs.existsSync('src/workerR111.js')?read('src/workerR111.js'):'';
@@ -27,8 +28,8 @@ const accepted=read('src/acceptedProductionContractR95.ts');
 const css=read('src/designModesR99.css');
 const wrangler=read('wrangler.jsonc');
 
-const surfaceBlock=(workstation.match(/OMEGA_SURFACES=\[(.*?)\] as const/s)||[])[1]||'';
-const surfaces=[...surfaceBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+const surfaceBlock=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
 must(surfaces.length===44&&new Set(surfaces).size===44,'canonical 44-route universe must remain intact');
 for(const route of ['Extreme Traversal','Matter Traversal','Forecast','Relativity','Evidence & Proof','Visual Instrument','Hybrid Link'])must(surfaces.includes(route),'critical specialist route missing: '+route);
 
