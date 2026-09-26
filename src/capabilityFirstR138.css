@@ -87,3 +87,42 @@
 }
 .r317-product-root .r138-live-stage{width:100%;max-width:100%;min-width:0}
 .r317-product-root .r356-native-node-control{transform:translate(-50%,-50%)!important;contain:layout paint;will-change:auto}
+
+
+/* R356.4 exact interaction-coordinate continuity.
+   R313 proved that live R154/R147 repaint could still move real controls by subpixel/scroll
+   geometry after scrollIntoView. Preserve the controls; eliminate the moving coordinate frame. */
+.r317-product-root .r138-capability-field,
+.r317-product-root .r138-capability-layout,
+.r317-product-root .r138-action-stack,
+.r317-product-root .r138-live-stage{overflow-anchor:none}
+.r317-product-root .r138-action-stack{
+ grid-auto-rows:84px;
+ scrollbar-gutter:stable;
+}
+.r317-product-root .r138-action-stack>button{
+ height:84px!important;
+ min-height:84px!important;
+ max-height:84px!important;
+ overflow:hidden;
+ contain:layout paint size;
+}
+.r317-product-root .r138-action-stack>button>span{
+ min-width:0;
+ overflow:hidden;
+}
+.r317-product-root .r138-action-stack>button b{
+ display:block;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap;
+}
+.r317-product-root .r138-action-stack>button small{
+ min-height:3.75em;
+ max-height:3.75em;
+ overflow:hidden;
+}
+@media(max-width:900px){
+ .r317-product-root .r138-action-stack{grid-auto-rows:84px}
+ .r317-product-root .r138-action-stack>button{height:84px!important;min-height:84px!important;max-height:84px!important}
+}
