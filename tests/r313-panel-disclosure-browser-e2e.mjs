@@ -36,8 +36,13 @@ async function openRoute(page,route){
   }
   if(hit<0)throw new Error(`R313 route missing: ${route}`);
   await buttons.nth(hit).scrollIntoViewIfNeeded();
+  const beforeEpoch=await page.evaluate(()=>document.documentElement.dataset.omegaRouteEpoch||'0');
   await buttons.nth(hit).click({timeout:10000});
-  await page.waitForFunction(name=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===name,route,{timeout:20000});
+  await page.waitForFunction(({name,beforeEpoch})=>{
+    const root=document.documentElement;
+    const panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+    return root.dataset.omegaRouteEpoch!==beforeEpoch&&root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&panel===name;
+  },{name:route,beforeEpoch},{timeout:20000});
   await page.waitForFunction(name=>{
     const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
     if(!surface||surface.querySelector('.panel-failure'))return false;
