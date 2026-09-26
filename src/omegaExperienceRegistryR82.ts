@@ -44,7 +44,7 @@ export const OMEGA_ROUTE_INVENTORY_R107={
  authority:'INVENTORY_TELEMETRY_NOT_ARCHITECTURE',
  boundary:'The historical R82 build happened to expose 44 registered destinations. Route count is a non-regression/inventory signal only; it is not a calculus primitive, capability ceiling, mode count, or fixed architectural law.'
 } as const;
-export function workspaceForRouteR82(route:string){return OMEGA_WORKSPACES_R82.find(x=>x.routes.includes(route))||OMEGA_WORKSPACES_R82[0]}
+export function workspaceForRouteR82(route:string){return OMEGA_WORKSPACES_R82.find(x=>x.routes.some(name=>name===route))||OMEGA_WORKSPACES_R82[0]}
 export function projectionForR82(id:OmegaFieldProjectionR82){return OMEGA_FIELD_PROJECTIONS_R82.find(x=>x.id===id)||OMEGA_FIELD_PROJECTIONS_R82[0]}
 export function validateExperienceRegistryR82(){
  const routes=OMEGA_ALL_ROUTES_R82,unique=new Set(routes),workspaceRoutes=OMEGA_WORKSPACE_ROUTES_R82,workspaceUnique=new Set(workspaceRoutes),workspaceIds=new Set(OMEGA_WORKSPACES_R82.map(x=>x.id)),projectionIds=new Set(OMEGA_FIELD_PROJECTIONS_R82.map(x=>x.id)),emptyWorkspaces=OMEGA_WORKSPACES_R82.filter(x=>x.routes.length===0).map(x=>x.id),workspaceMissing=routes.filter(x=>!workspaceUnique.has(x)),workspaceExtra=workspaceRoutes.filter(x=>!unique.has(x));
