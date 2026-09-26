@@ -18,10 +18,10 @@ export default function SurfaceIntegrityR81({panel,children,onRecover,record}:Pr
  useEffect(()=>{
   setInteractionReady(false);
   let cancelled=false,raf1=0,raf2=0,timer=0,observer:MutationObserver|null=null;
-  const capabilityReady=()=>{const cap=surfaceRef.current?.querySelector<HTMLElement>('.r138-capability-field');return !cap||(cap.dataset.r356CapabilityLayoutReady==='true'&&cap.dataset.r356CapabilityBindingKey===stateKey&&cap.dataset.r356CapabilityReady==='true'&&cap.dataset.r356CapabilityReadyKey===stateKey)};
+  const capabilityReady=()=>{const cap=surfaceRef.current?.querySelector<HTMLElement>('.r138-capability-field');return !cap||(cap.dataset.r356CapabilityLayoutReady==='true'&&cap.dataset.r356CapabilityBindingKey===stateKey)};
   const attempt=()=>{if(cancelled)return;if(!capabilityReady()){timer=window.setTimeout(attempt,60);return}raf1=window.requestAnimationFrame(()=>{raf2=window.requestAnimationFrame(()=>{if(!cancelled&&capabilityReady())setInteractionReady(true);else if(!cancelled)timer=window.setTimeout(attempt,60)})})};
   const root=surfaceRef.current;
-  if(root){observer=new MutationObserver(()=>{if(!interactionReady&&capabilityReady())attempt()});observer.observe(root,{subtree:true,attributes:true,attributeFilter:['data-r356-capability-layout-ready','data-r356-capability-binding-key','data-r356-capability-ready','data-r356-capability-ready-key']})}
+  if(root){observer=new MutationObserver(()=>{if(!interactionReady&&capabilityReady())attempt()});observer.observe(root,{subtree:true,attributes:true,attributeFilter:['data-r356-capability-layout-ready','data-r356-capability-binding-key']})}
   attempt();
   return()=>{cancelled=true;observer?.disconnect();window.cancelAnimationFrame(raf1);window.cancelAnimationFrame(raf2);if(timer)window.clearTimeout(timer)};
  },[panel,stateKey]);
