@@ -28,7 +28,8 @@ must(workstation.includes("from './specialistLoaderR109'"),'workstation must con
 must(loader.includes("OmegaVisualInstrument:()=>import('./OmegaVisualInstrument')")&&loader.includes("OmegaTraversalStudio:()=>import('./OmegaTraversalStudio')")&&loader.includes("MatterTraversal:()=>import('./MatterTraversal')"),'deep donor loaders must remain recoverable without eager-loading them');
 
 // Suspense/fallback preserves current packet orientation and does not cover the visual stage.
-must(workstation.includes("import {Suspense,useEffect,useMemo,useRef,useState} from 'react'"),'React Suspense authority missing');
+must(/import\s*\{[^}]*\bSuspense\b[^}]*\}\s*from\s*'react'/.test(workstation),'React Suspense authority missing');
+must(workstation.includes('startTransition(()=>setPanel(next))'),'R356 route transition scheduling must coexist with R109 Suspense authority');
 must(workstation.includes("<Suspense fallback={specialistFallback}>{content}</Suspense>"),'route-deferred modules require bounded loading containment');
 must(workstation.includes('Loading this instrument\'s module bytes for STATE')&&workstation.includes('does not execute the capability, contact an external backend, mutate CanonState, or create proof'),'loading truth boundary missing');
 must(loaderCss.includes('.r109-specialist-loading')&&loaderCss.includes('@media(max-width:760px)'),'loading state must remain responsive');
