@@ -37,9 +37,13 @@ const activateRailRoute=async(label,name)=>{
  const beforeEpoch=await page.evaluate(()=>document.documentElement.dataset.omegaRouteEpoch||'0');
  await page.getByLabel(label).click();
  await page.waitForFunction(({name,beforeEpoch})=>{
+  const root=document.documentElement;
+  return root.dataset.omegaRouteEpoch!==beforeEpoch&&root.dataset.omegaRouteTarget===name&&(root.dataset.omegaRouteState==='REQUESTED'||root.dataset.omegaRouteState==='COMMITTED');
+ },{name,beforeEpoch},{timeout:10000}).catch(e=>{throw new Error(`R239 ${name} rail request was not acknowledged: ${String(e)}`)});
+ await page.waitForFunction(name=>{
   const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel'),rail=document.querySelector('.r94-rail-current')?.getAttribute('title');
-  return root.dataset.omegaRouteEpoch!==beforeEpoch&&root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&panel===name&&rail===name;
- },{name,beforeEpoch},{timeout:20000});
+  return root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name&&rail===name;
+ },name,{timeout:30000}).catch(e=>{throw new Error(`R239 ${name} rail route did not commit: ${String(e)}`)});
  if(await page.locator('.r94-rail-current').getAttribute('title')!==name)throw new Error(`R239 ${name} rail action did not route`);
 };
 await allTools.click();
