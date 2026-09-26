@@ -20,7 +20,9 @@ must(nav.includes("workspaceForRouteR82(route)"),'workspace identity may remain 
 must(navCss.includes('.r89-flat-scroll{min-height:0;overflow:auto')&&navCss.includes('.r89-flat-route{width:100%'),'flat side banner must have one scroll owner');
 must(navCss.includes('.r84-home-launchpad{display:none!important}'),'redundant basic Home navigation panel must be removed');
 must(workstation.includes("data-visual-first={VISUAL_FIRST_SURFACES.has(panel)?'true':'false'}"),'visual-first surfaces must be explicit');
-must(workstation.includes("import './mobileVisualFirstR89.css';"),'R89 mobile visual authority must own final workstation cascade');
+must(workstation.includes("import './workstationPresentationR356.css';"),'R356 canonical workstation presentation authority must be mounted');
+must(!workstation.includes("import './mobileVisualFirstR89.css';"),'R89 must remain provenance rather than live presentation authority');
+must(read('src/workstationPresentationR356.css').includes(mobile),'R356 workstation authority must carry the full R89 source without loss');
 must(field.includes("className='cfr37-data-drawer'")&&field.includes("setDataOpen"),'calculus telemetry must be a real user-controlled drawer');
 must(fieldCss.includes('.cfr37-operator-key{display:none!important}')&&fieldCss.includes('68dvh'),'phone calculus renderer must not be covered by operator legend');
 must(mobile.includes(".r65-state-ribbon{display:none!important}")&&mobile.includes(".r65-lens-nav{display:flex!important"),'Visual compositor must prioritize visual lens controls over telemetry cards');
