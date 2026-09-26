@@ -1,3 +1,4 @@
+import {compileAtlas360ConvergenceR356,R356_ATLAS360_COUNTS} from './atlas360TriangulationR356.js';
 export const R356_CCR_SCHEMA='OMEGA_CONTINUOUS_CONVERGENCE_RUNTIME_R356';
 export const R356_ATLAS_LEVELS=Object.freeze([12,144,1728,20736,248832]);
 export const R356_STAGES=Object.freeze(['OBSERVE','NORMALIZE','RELATE','PARTITION','CARRY','CONSTRUCT','PRUNE','TEST','FALSIFY','PROVE','ADMIT','OBSERVE']);
@@ -8,7 +9,8 @@ export const R356_LAWS=Object.freeze([
  'AUTONOMOUS_GENERATION_IS_NOT_AUTONOMOUS_AUTHORITY','NO_DIRECT_PRODUCTION_MUTATION',
  'EXACT_PARENT_REQUIRED','INVARIANTS_CARRY','SCARS_CARRY','CONTRADICTIONS_ARE_EVIDENCE',
  'FAILED_CANDIDATES_NEVER_DISAPPEAR','RETURN_PROOF_REQUIRED','ROLLBACK_PARENT_RETAINED',
- 'ATLAS_LEVELS_ARE_ADDRESS_RESOLUTION_NOT_PHYSICAL_DIMENSIONS'
+ 'ATLAS_LEVELS_ARE_ADDRESS_RESOLUTION_NOT_PHYSICAL_DIMENSIONS',
+ 'ATLAS360_IS_DERIVED_RELATIONAL_PROOF_NOT_PHYSICAL_PRIMITIVE','ATLAS360_REAL_ANCHORS_NOT_FABRICATED','ATLAS360_ACTIVE_SLICES_PREFERRED_OVER_FULL_TENSOR_MATERIALIZATION'
 ]);
 const upper=v=>String(v??'').trim().toUpperCase();
 const finite=(v,d=0)=>Number.isFinite(Number(v))?Number(v):d;
@@ -54,6 +56,8 @@ export function scarR356({parent,candidate,intent,transform,failurePoint,contrad
  const core={parent:String(parent||''),candidate:String(candidate||''),intent:String(intent||''),transform:String(transform||''),failurePoint:String(failurePoint||''),contradiction:String(contradiction||''),evidence:evidence??null,recovery:String(recovery||'')};
  return {schema:'OMEGA_R356_SCAR',...core,fingerprint:fingerprintR356(core)};
 }
+export function atlas360AdviceR356(input={}){return compileAtlas360ConvergenceR356(input)}
+export {R356_ATLAS360_COUNTS};
 export function admissionR356({parentSha,candidateSha,relativeState,evidence={},scarLedger=[]}={}){
  const gate=mandalaGateR356({shell:'CANONICAL',evidence});
  const reasons=[...gate.missing];
@@ -70,5 +74,6 @@ export function convergeR356({observations=[],candidate={},scarLedger=[]}={}){
  const relativeState=compileRelativeStateR356(observations);
  const motion=decideMotionR356(candidate.metrics||{});
  const admissionReceipt=admissionR356({parentSha:candidate.parentSha,candidateSha:candidate.candidateSha,relativeState,evidence:candidate.evidence||{},scarLedger});
- return {schema:R356_CCR_SCHEMA,stages:R356_STAGES,relativeState,motion,admissionReceipt,next:admissionReceipt.allow?'ADMIT':motion.motion==='ESCALATE'?'ESCALATE':'ITERATE',productionWriter:'.github/workflows/ci.yml',canonAdmissionAuthority:'R125',continuous:true};
+ const atlas360=compileAtlas360ConvergenceR356(candidate.atlas360||{});
+ return {schema:R356_CCR_SCHEMA,stages:R356_STAGES,relativeState,motion,admissionReceipt,atlas360,next:admissionReceipt.allow?'ADMIT':motion.motion==='ESCALATE'?'ESCALATE':'ITERATE',productionWriter:'.github/workflows/ci.yml',canonAdmissionAuthority:'R125',continuous:true};
 }
