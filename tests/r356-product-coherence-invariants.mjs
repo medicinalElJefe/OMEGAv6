@@ -9,6 +9,8 @@ const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 const capabilityField=fs.readFileSync('src/OmegaCapabilityFieldR138.tsx','utf8');
 const registry=fs.readFileSync('src/omegaExperienceRegistryR82.ts','utf8');
 const capabilities=fs.readFileSync('src/capabilityAuthority.ts','utf8');
+const interactionBinding=fs.readFileSync('src/system/interactionBindingR356.ts','utf8');
+const interactionProof=fs.readFileSync('tests/r313-full-control-interaction-browser-e2e.mjs','utf8');
 
 const legacy=[
  './coherenceRepairR35.css','./specialistDepthR38_3.css','./mobileMatterR42.css','./sovereignDesignR59.css',
@@ -74,6 +76,12 @@ assert.ok(surface.includes("cap.dataset.r356CapabilityLayoutReady==='true'"),'R3
 assert.ok(surface.includes("cap.dataset.r356CapabilityBindingKey===stateKey"),'R356 surface readiness must bind exact state identity');
 assert.ok(workstation.includes("scrollTo({top:0,behavior:'auto'})"),'R356 route coordinate commit must be immediate');
 assert.ok(!workstation.includes("scrollTo({top:0,behavior:'smooth'})"),'R356 route commit may not leave controls moving under interaction proof');
+assert.ok(interactionBinding.includes('interactionBindingKeyR356'),'R356 one interaction-binding function missing');
+assert.ok(surface.includes('interactionBindingKeyR356(panel,record)')&&capabilityField.includes('interactionBindingKeyR356(panel,record,address)'),'R356 surface/capability identity must share one binding-key authority');
+assert.ok(workstation.includes('startTransition(()=>setPanel(next))'),'R356 workstation route commits must be transition-scheduled');
+assert.ok(interactionProof.includes('surfaceContinuityState')&&interactionProof.includes('afterContinuity.stateKey!==beforeContinuity.stateKey'),'R356 interaction proof must distinguish canonical state change from local same-state UI change');
+assert.ok(interactionProof.includes('local interaction broke same-state surface continuity'),'R356 local interaction continuity must remain fail-closed');
+assert.ok(capabilityCss.includes('min-height:46px')&&capabilityCss.includes('-webkit-line-clamp:2'),'R356 live capability telemetry must not move topology controls during async repaint');
 
 
 console.log('R356 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor + non-blocking proof-lineage disclosure preserved · legacy presentation preserved as provenance only');
