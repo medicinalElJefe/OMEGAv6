@@ -48,12 +48,17 @@ async function surfaceContinuityState(page,surface){
  return page.evaluate(name=>{
   const shell=document.querySelector('.omega-workstation-v2');
   const node=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
+  const html=document.documentElement;
   return{
    panel:shell?.getAttribute('data-panel')||null,
    exists:Boolean(node),
    stateKey:node?.getAttribute('data-r356-interaction-state-key')||null,
    ready:node?.getAttribute('data-r356-interaction-ready')==='true',
-   failed:Boolean(node?.querySelector('.panel-failure'))
+   failed:Boolean(node?.querySelector('.panel-failure')),
+   routeEpoch:html.dataset.omegaRouteEpoch||'0',
+   routeState:html.dataset.omegaRouteState||'IDLE',
+   routeTarget:html.dataset.omegaRouteTarget||null,
+   routeCurrent:html.dataset.omegaRouteCurrent||shell?.getAttribute('data-panel')||null
   };
  },surface);
 }
@@ -79,7 +84,7 @@ async function waitForStableControl(page,id){
   }
   return false;
  },id);
- if(!stable)throw new Error(`control geometry did not reach two-frame continuity: ${id}`);
+ if(!stable){const label=await page.locator(`[data-r313-probe-id="${id}"]`).first().getAttribute('aria-label').catch(()=>null)||await page.locator(`[data-r313-probe-id="${id}"]`).first().getAttribute('title').catch(()=>null)||clean(await page.locator(`[data-r313-probe-id="${id}"]`).first().textContent().catch(()=>''));throw new Error(`control geometry did not reach two-frame continuity: ${id} · ${label||'UNLABELED'}`)}
 }
 
 async function openNavigator(page){
@@ -199,7 +204,14 @@ async function clickSafeControls(page,surface,profile,pageErrors){
   if(!await shell.count()){
    throw new Error(`${profile}/${surface}: canonical workstation shell missing after activating ${item.label}; url=${page.url()}`);
   }
-  const afterContinuity=await surfaceContinuityState(page,surface);
+  let afterContinuity=await surfaceContinuityState(page,surface);
+  if(afterContinuity.routeEpoch!==beforeContinuity.routeEpoch){
+   await page.waitForFunction(({epoch})=>{
+    const root=document.documentElement;
+    return root.dataset.omegaRouteEpoch!==epoch&&root.dataset.omegaRouteState==='COMMITTED';
+   },{epoch:beforeContinuity.routeEpoch},{timeout:10000});
+   afterContinuity=await surfaceContinuityState(page,surface);
+  }
   if(afterContinuity.panel!==surface){
    await activateSurface(page,surface);
   }else if(afterContinuity.stateKey!==beforeContinuity.stateKey){
