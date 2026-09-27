@@ -18,7 +18,7 @@ trap cleanup EXIT
 
 npx wrangler deployments status --name "$WORKER_NAME" --json > "$tmp"
 
-decision="$(node scripts/deployment-ownership-r365.mjs "$tmp" "$CANDIDATE_VERSION_ID" "$PREVIOUS_VERSION_ID")"
+decision="$(node scripts/deployment-ownership-r366.mjs "$tmp" "$CANDIDATE_VERSION_ID" "$PREVIOUS_VERSION_ID")"
 
 case "$decision" in
   ALREADY_PREVIOUS)
