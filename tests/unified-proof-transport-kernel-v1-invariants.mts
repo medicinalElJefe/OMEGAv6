@@ -46,6 +46,8 @@ assert.equal(toyPass.stages.length,7);
 assert.equal(await verifyUnifiedProofTransportV1(toyPass),true);
 assert.match(toyPass.proof.proofDigest,/^[0-9a-f]{64}$/);
 assert.match(toyPass.proof.stageChainDigest,/^[0-9a-f]{64}$/);
+assert.match(toyPass.seal.packetDigest,/^[0-9a-f]{64}$/);
+assert.match(toyPass.seal.envelopeDigest,/^[0-9a-f]{64}$/);
 
 const toyHold=await executeUnifiedProofTransportV1(toy,{address:13,x:[1,2,3],evidence:false});
 assert.equal(toyHold.promotionEligible,false);
@@ -100,5 +102,8 @@ assert.equal(await verifyUnifiedProofTransportV1(unifiedQubitHeld),true);
 const tampered=structuredClone(toyPass);
 tampered.proof.decision='TURN';
 assert.equal(await verifyUnifiedProofTransportV1(tampered),false);
+const packetTampered=structuredClone(toyPass);
+(packetTampered.packet as any).q=99;
+assert.equal(await verifyUnifiedProofTransportV1(packetTampered),false);
 
-console.log('UNIFIED PCWD KERNEL PASS · one seven-stage/eight-gate proof contract across generic state, R349 woven field and standard-QM unitary specialization · SHA-256 stage/proof chaining · tamper rejection · fail-closed evidence/invariant gates · no authority inflation');
+console.log('UNIFIED PCWD KERNEL PASS · one seven-stage/eight-gate proof contract across generic state, R349 woven field and standard-QM unitary specialization · SHA-256 stage/proof/packet envelope chaining · proof + packet tamper rejection · fail-closed evidence/invariant gates · no authority inflation');
