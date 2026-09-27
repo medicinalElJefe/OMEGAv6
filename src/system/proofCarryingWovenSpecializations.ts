@@ -30,6 +30,59 @@ export function sparseAtlasChildrenV1(address:SparseAtlasAddressV1){
  return Array.from({length:12},(_,digit)=>sparseAtlasAddressV1(address.index*12+digit,childLevel));
 }
 
+export type ResolutionLensV1={
+ schema:'OMEGA_PCWD_RESOLUTION_LENS_v1';
+ sourceCount:number;
+ targetCount:number;
+ binSize:number;
+ coarse:number[];
+ residual:number[];
+ recoveryError:number;
+ residualMax:number;
+ residualRms:number;
+ exactRecovery:boolean;
+ physicalDimensionsClaimed:false;
+ boundary:typeof PCWD_SPECIALIZATION_BOUNDARY;
+};
+export function compileResolutionLensV1(input:number[],targetCount:number):ResolutionLensV1{
+ const sourceCount=input.length,target=Math.max(1,Math.floor(Number(targetCount)||1));
+ if(sourceCount<1||sourceCount%target!==0)throw new Error('PCWD resolution lens requires sourceCount divisible by targetCount');
+ const binSize=sourceCount/target,coarse=Array(target).fill(0);
+ for(let i=0;i<sourceCount;i++)coarse[Math.floor(i/binSize)]+=Number(input[i])||0;
+ for(let j=0;j<target;j++)coarse[j]/=binSize;
+ const residual=input.map((v,i)=>(Number(v)||0)-coarse[Math.floor(i/binSize)]);
+ const recovered=residual.map((r,i)=>coarse[Math.floor(i/binSize)]+r);
+ const recoveryError=maxDiff(input,recovered);
+ const residualMax=residual.reduce((m,v)=>Math.max(m,Math.abs(v)),0);
+ const residualRms=Math.sqrt(residual.reduce((s,v)=>s+v*v,0)/Math.max(1,residual.length));
+ return{schema:'OMEGA_PCWD_RESOLUTION_LENS_v1',sourceCount,targetCount:target,binSize,coarse,residual,recoveryError,residualMax,residualRms,exactRecovery:recoveryError<=1e-12,physicalDimensionsClaimed:false,boundary:PCWD_SPECIALIZATION_BOUNDARY};
+}
+export function recoverResolutionLensV1(lens:ResolutionLensV1){
+ return lens.residual.map((r,i)=>lens.coarse[Math.floor(i/lens.binSize)]+r);
+}
+
+export type CovarianceReceiptV1={
+ schema:'OMEGA_PCWD_COVARIANCE_TRANSPORT_v1';
+ input:number[][];
+ jacobian:number[][];
+ output:number[][];
+ symmetric:boolean;
+ finite:boolean;
+ uncertaintyCollapsed:false;
+ boundary:typeof PCWD_SPECIALIZATION_BOUNDARY;
+};
+export function propagateCovarianceV1(input:number[][],jacobian:number[][]):CovarianceReceiptV1{
+ const n=input.length;
+ if(!n||input.some(r=>r.length!==n))throw new Error('PCWD covariance must be square');
+ if(jacobian.some(r=>r.length!==n)||jacobian.length!==n)throw new Error('PCWD Jacobian must match covariance size');
+ const mul=(a:number[][],b:number[][])=>a.map(row=>b[0].map((_,j)=>row.reduce((s,v,k)=>s+v*b[k][j],0)));
+ const transpose=(a:number[][])=>a[0].map((_,j)=>a.map(r=>r[j]));
+ const output=mul(mul(jacobian,input),transpose(jacobian));
+ const finite=output.every(r=>r.every(Number.isFinite));
+ let symmetric=true;for(let i=0;i<n;i++)for(let j=0;j<n;j++)if(Math.abs(output[i][j]-output[j][i])>1e-10)symmetric=false;
+ return{schema:'OMEGA_PCWD_COVARIANCE_TRANSPORT_v1',input:input.map(r=>[...r]),jacobian:jacobian.map(r=>[...r]),output,symmetric,finite,uncertaintyCollapsed:false,boundary:PCWD_SPECIALIZATION_BOUNDARY};
+}
+
 export type LemmaMorphismV1={
  id:string;
  domain:string;
