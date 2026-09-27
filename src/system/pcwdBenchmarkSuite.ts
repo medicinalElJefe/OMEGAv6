@@ -261,6 +261,65 @@ async function benchmarkForecastRetention():Promise<BenchmarkResultV1>{
   };
 }
 
+
+type LorenzInput={state:[number,number,number];candidate:[number,number,number];expected:[number,number,number];evidence:boolean;id:string};
+const lorenz63=(x:[number,number,number],[sigma,rho,beta]=[10,28,8/3] as [number,number,number]):[number,number,number]=>[
+ sigma*(x[1]-x[0]),
+ x[0]*(rho-x[2])-x[1],
+ x[0]*x[1]-beta*x[2],
+];
+const add3=(a:[number,number,number],b:[number,number,number],scale=1):[number,number,number]=>[a[0]+scale*b[0],a[1]+scale*b[1],a[2]+scale*b[2]];
+const lorenzRk4=(x:[number,number,number],dt=.01):[number,number,number]=>{
+ const k1=lorenz63(x),k2=lorenz63(add3(x,k1,dt/2)),k3=lorenz63(add3(x,k2,dt/2)),k4=lorenz63(add3(x,k3,dt));
+ return[
+  x[0]+dt*(k1[0]+2*k2[0]+2*k3[0]+k4[0])/6,
+  x[1]+dt*(k1[1]+2*k2[1]+2*k3[1]+k4[1])/6,
+  x[2]+dt*(k1[2]+2*k2[2]+2*k3[2]+k4[2])/6,
+ ];
+};
+const lorenzContract:UnifiedDomainContractV1<LorenzInput,[number,number,number],[number,number,number],{projected:[number,number,number];residual:[number,number,number]},{state:[number,number,number]},[number,number,number],[number,number,number]>={
+ id:'PCWD_LORENZ63_DYNAMICS_BENCH',
+ version:'1',
+ address:i=>i.id,
+ sense:i=>i.state,
+ normalize:x=>x,
+ decompose:x=>({projected:x,residual:[0,0,0]}),
+ lemma:d=>({state:d.projected}),
+ transport:(_l,i)=>i.candidate,
+ recover:t=>t,
+ measures:({input,transported,recovered})=>{
+  const dyn=rmse(transported,input.expected);
+  const representation=rmse(transported,recovered);
+  return{
+   continuity:1,futurePlasticity:1,contradiction:0,burden:.01,
+   errors:{recovery:representation,dynamics:dyn,observables:0,path:representation,invariants:0},
+   tolerances:{recovery:1e-12,dynamics:1e-8,observables:0,path:1e-12,invariants:0,continuity:.5},
+   scarRetained:true,evidenceAdmissible:input.evidence,pathRecoverable:true,
+  };
+ },
+ packet:ctx=>({A_t:ctx.input.id,x_t:ctx.sensed,P_G_x_t:ctx.decomposed.projected,r_t:ctx.decomposed.residual,C_omega:1,Phi:1,q:0,Lambda:.01,Sigma_t:{dynamicsResidual:ctx.proof.errors.dynamics},Gamma_t:{kind:'LORENZ63_ONE_STEP'},L_t:ctx.lemma,E_t:{admissible:ctx.input.evidence},Pi_t:ctx.proof,candidate:ctx.transported,expected:ctx.input.expected}),
+ boundary:'Classical Lorenz-63 one-step correspondence benchmark. PCWD checks a declared numerical reference; it does not improve the integrator or predict the physical atmosphere.',
+};
+
+async function benchmarkLorenzDynamics():Promise<BenchmarkResultV1>{
+ const state:[number,number,number]=[1,1,1],expected=lorenzRk4(state,.01);
+ const correct=await executeUnifiedProofTransportV1(lorenzContract,{state,candidate:expected,expected,evidence:true,id:'L63:CORRECT'});
+ const perturbed:[number,number,number]=[expected[0]+.05,expected[1]-.025,expected[2]+.01];
+ const wrong=await executeUnifiedProofTransportV1(lorenzContract,{state,candidate:perturbed,expected,evidence:true,id:'L63:PERTURBED'});
+ return{
+  id:'LORENZ63_DYNAMICS_CORRESPONDENCE',
+  problem:'Lorenz-63 one-step numerical dynamics correspondence',
+  baseline:'UNCHECKED_NEXT_STATE_ACCEPTANCE',
+  verdict:correct.promotionEligible&&!wrong.promotionEligible?'WIN':'TIE',
+  pcwdPass:correct.promotionEligible&&!wrong.promotionEligible&&wrong.decision==='TURN',
+  baselinePass:true,
+  metrics:{correctDynamicsError:correct.proof.errors.dynamics,perturbedDynamicsError:wrong.proof.errors.dynamics,correctDecision:correct.decision,perturbedDecision:wrong.decision},
+  retainedByPCWD:['declared dynamics residual','dynamics tolerance','promotion consequence'],
+  discardedByBaseline:['model-correspondence error'],
+  interpretation:'PCWD does not solve Lorenz-63 better than RK4; it makes correspondence to the declared reference a promotion gate and exposes the residual when a candidate deviates.',
+ };
+}
+
 type LossyInput={values:number[];evidence:boolean};
 const lossyContract:UnifiedDomainContractV1<LossyInput,number[],number[],{projected:number[];residual:number[]},{coarse:number[]},number[],number[]>={
   id:'PCWD_LOSS_WITHOUT_RESIDUAL_BENCH',
@@ -328,6 +387,7 @@ export async function runPcwdBenchmarkSuiteV1():Promise<BenchmarkSuiteV1>{
     benchmarkQuantumValidity(),
     benchmarkCovarianceCarry(),
     benchmarkForecastRetention(),
+    benchmarkLorenzDynamics(),
     benchmarkNoResidualLimit(),
     benchmarkProofOverhead(),
   ]);
