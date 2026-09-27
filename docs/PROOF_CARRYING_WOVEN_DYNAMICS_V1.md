@@ -201,6 +201,6 @@ The kernel then owns the common proof semantics:
 - tamper rejection;
 - explicit domain and global truth boundaries.
 
-The current executable adapters prove that the same kernel can govern both the established R349 woven typed field and a standard-quantum-mechanics 2×2 unitary density-matrix specialization without conflating their meanings or authorities.
+The current executable adapters prove that the same kernel can govern the established R349 woven typed field, a recoverable micro/macro resolution lens, and a standard-quantum-mechanics 2×2 unitary density-matrix specialization without conflating their meanings or authorities.
 
 This is the architectural point of PCWD: domains may have radically different state representations and mathematics, but they enter OMEGA through one proof-carrying transport contract rather than one-off promotion logic.
