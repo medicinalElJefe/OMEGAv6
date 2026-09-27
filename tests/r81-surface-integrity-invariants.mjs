@@ -36,7 +36,7 @@ for(const s of surfaces)must(workspaceRoutes.includes(s),`application browser om
 const directContainment=workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}>{content}</SurfaceIntegrityR81>");
 const deferredContainment=workstation.includes("<SurfaceIntegrityR81 panel={panel} record={record} onRecover={()=>go('System')}><Suspense fallback={specialistFallback}>{content}</Suspense></SurfaceIntegrityR81>")&&deferred.includes("schema:'OMEGA_ROUTE_DEFERRED_SPECIALIST_FABRIC_R109'");
 must(directContainment||deferredContainment,'every active surface must mount inside R81 containment with canonical state context; R109 may add a bounded Suspense child');
-must(integrity.includes('<PanelBoundary panel={panel}'),'surface failure must be isolated without crashing the whole build');
+must(!integrity.includes('PanelBoundary'),'R382 canonical surfaces must not be replaced by a blocking panel-level failure wall');
 must(integrity.includes("className='omega-surface-r81 r356-product-surface'"),'R81/R356 canonical surface wrapper missing');
 must(integrityCss.includes('overflow-x:clip')&&integrityCss.includes("table){\n display:block")&&integrityCss.includes('overflow-x:auto'),'surface content must stay contained while wide tables/tabs remain viewable');
 must(integrityCss.includes('.r43-workspace-tabs')&&integrityCss.includes('overflow-x:auto'),'deep-workspace tabs must remain reachable on narrow screens');
