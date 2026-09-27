@@ -40,4 +40,7 @@ if(promoted){
  const earthSar=spawnSync(process.execPath,['tests/r370-live-earth-sar-closure-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
  if(earthSar.error)throw earthSar.error;
  if(earthSar.status!==0)throw new Error(`R370 exact-production Earth/SAR closure proof failed with exit ${earthSar.status}`);
+ const earthTotal=spawnSync(process.execPath,['tests/r372-live-earth-total-interaction-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+ if(earthTotal.error)throw earthTotal.error;
+ if(earthTotal.status!==0)throw new Error(`R372 exact-production Earth total interaction proof failed with exit ${earthTotal.status}`);
 }

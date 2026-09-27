@@ -44,3 +44,52 @@
 .r3565-mini-lemma i{min-width:0;min-height:0}
 .r284-lens-card[data-r3565-lemma='true']{border-color:rgba(97,211,197,.34)!important;background:linear-gradient(180deg,#091a1c,#041114)!important}
 .r284-lens-card[data-r3565-lemma='true'] header span{color:#8ce2d7}
+
+
+/* R373 · legible analytical previews + inspector-yield focus mode. */
+.r280-workbench.focus-display{grid-template-columns:minmax(0,1fr)}
+.r280-workbench.focus-display>.r280-left,.r280-workbench.focus-display>.r280-right{display:none}
+.r280-workbench.focus-display>.r280-center{grid-column:1/-1}
+.r280-workbench.focus-display .r280-screen{min-height:min(72vh,900px)}
+.r284-lens-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.r284-lens-card{grid-template-rows:auto auto auto}
+.r284-mini-grid,.r3565-mini-lemma,.r3564-mini-preview{grid-template-rows:repeat(8,minmax(0,1fr));aspect-ratio:13/8;min-height:0}
+.r3564-mini-preview img{min-height:0;aspect-ratio:13/8;object-fit:cover}
+@media(max-width:1280px){.r284-lens-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.r284-lens-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.r284-lens-grid{grid-template-columns:1fr}.r284-lens-card{max-width:none}}
+
+
+/* R374 · unobstructed SAR result viewport.
+   The visual field is primary by default; provenance/details remain in DOM and can be restored explicitly. */
+.r280-screen.clean-view .r3565-lemma-badge,
+.r280-screen.clean-view .r280-grid,
+.r280-screen.clean-view .r280-crosshair,
+.r280-screen.clean-view .r280-range-labels,
+.r280-screen.clean-view .r284-scale,
+.r280-screen.clean-view .r280-geometry-overlay,
+.r280-screen.clean-view .r284-geometry-hud,
+.r280-screen.clean-view .r284-view-readout{display:none!important}
+.r280-screen.clean-view .r280-canvas,
+.r280-screen.clean-view .r3565-lemma-canvas{inset:0}
+.r280-screen.clean-view{border-color:rgba(112,214,205,.26);box-shadow:inset 0 0 0 1px rgba(112,214,205,.04)}
+.r280-workbench.focus-display .r280-screen.clean-view{min-height:min(82vh,1080px)}
+
+
+/* R375 · structural no-obstruction contract for every SAR view.
+   In clean mode, no status card, proof badge, readout, grid, scale, crosshair, or geometry text is allowed inside the raster/lemma viewport. */
+.r374-below-canvas-status{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 9px;border:1px solid rgba(128,174,186,.14);border-radius:8px;background:#031015;min-width:0}
+.r374-below-canvas-status b{font:800 9px ui-monospace,monospace;color:#d9f5f0}
+.r374-below-canvas-status span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 8px ui-monospace,monospace;color:#8fb1b5}
+.r374-below-canvas-status small{font:700 7px ui-monospace,monospace;color:#6f8f95;white-space:nowrap}
+.r280-screen.clean-view>.r285-field-empty,
+.r280-screen.clean-view>.r284-view-readout,
+.r280-screen.clean-view>.r280-geometry-overlay,
+.r280-screen.clean-view>.r284-geometry-hud,
+.r280-screen.clean-view .r3565-lemma-badge,
+.r280-screen.clean-view .r280-grid,
+.r280-screen.clean-view .r280-crosshair,
+.r280-screen.clean-view .r280-range-labels,
+.r280-screen.clean-view .r284-scale,
+.r280-screen.clean-view .r284-swath{display:none!important}
+@media(max-width:620px){.r374-below-canvas-status{grid-template-columns:1fr}.r374-below-canvas-status span{white-space:normal}.r374-below-canvas-status small{white-space:normal}}
