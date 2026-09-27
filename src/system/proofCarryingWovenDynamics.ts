@@ -314,7 +314,18 @@ export async function executeProofCarryingWovenStepV1(field:TypedFieldR349,opts:
 export async function verifyProofReceiptV1(packet:WovenStatePacketV1){
   const p=packet.Pi_t;
   const core={schema:p.schema,previousProofDigest:p.previousProofDigest,gates:p.gates,errors:p.errors,tolerances:p.tolerances,decisionScore:p.decisionScore,decision:p.decision,promotionEligible:p.promotionEligible,canonicalMutation:p.canonicalMutation,observedHistoryClaimed:p.observedHistoryClaimed,physicalPrimitiveAdded:p.physicalPrimitiveAdded,boundary:p.boundary};
-  return(await sha256(core))===p.proofDigest;
+  const digestValid=(await sha256(core))===p.proofDigest;
+  const allGates=Object.values(p.gates).every(Boolean);
+  const expectedDecision:Decision=allGates?'STAY':(!p.gates.continuityValid||!p.gates.invariantsPreserved||!p.gates.evidenceAdmissible||!p.gates.pathRecoverable)?'ESCALATE':'TURN';
+  const semanticValid=
+    p.schema==='OMEGA_PCWD_PROOF_RECEIPT_v1'&&
+    p.promotionEligible===allGates&&
+    p.decision===expectedDecision&&
+    p.canonicalMutation===false&&
+    p.observedHistoryClaimed===false&&
+    p.physicalPrimitiveAdded===false&&
+    p.boundary===PCWD_BOUNDARY;
+  return digestValid&&semanticValid;
 }
 
 export async function compileTemporalChainV1(field:TypedFieldR349,opts:{
