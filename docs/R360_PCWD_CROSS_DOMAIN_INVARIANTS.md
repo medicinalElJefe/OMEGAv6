@@ -85,6 +85,8 @@ R360 proves the common structural contract across three materially different ada
 2. recoverable micro/macro resolution lens;
 3. standard-QM 2×2 unitary density-matrix adapter.
 
+Each Domain Semantics Profile is SHA-256 bound, and each cross-domain structural projection carries its own projection digest bound to the profile digest plus the source proof/packet/envelope digests. Profile or projection mutation therefore fails verification.
+
 All three share:
 
 - seven stages;
