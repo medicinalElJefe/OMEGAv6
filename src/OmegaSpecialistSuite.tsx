@@ -31,6 +31,7 @@ import OmegaPcwdBenchmarkLab from './OmegaPcwdBenchmarkLab';
 import OmegaPcwdReferenceBenchmarksR359 from './OmegaPcwdReferenceBenchmarksR359';
 import OmegaPcwdSemanticInvariantR360 from './OmegaPcwdSemanticInvariantR360';
 import OmegaPcwdInterDomainBridgeR361 from './OmegaPcwdInterDomainBridgeR361';
+import OmegaPcwdBridgeCompositionR362 from './OmegaPcwdBridgeCompositionR362';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -62,6 +63,7 @@ export default function OmegaSpecialistSuite(props:Props){
    <OmegaPcwdReferenceBenchmarksR359/>
    <OmegaPcwdSemanticInvariantR360/>
    <OmegaPcwdInterDomainBridgeR361/>
+   <OmegaPcwdBridgeCompositionR362/>
    <OmegaProofBoundSceneR354/>
    <OmegaProofBoundTemporalTraversalR355/>
   </section>
