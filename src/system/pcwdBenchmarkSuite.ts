@@ -364,7 +364,7 @@ async function benchmarkProofOverhead():Promise<BenchmarkResultV1>{
   const r=await executeUnifiedProofTransportV1(pathContract,{start:[0,0],steps:[],evidence:true,id:'OVERHEAD'});
   const baseline={state:[0,0]};
   const compact=compileCompactProofIndexV1(r);
-  const compactVerified=await verifyCompactProofIndexV1(compact,r);
+  const compactIndexVerified=await verifyCompactProofIndexV1(compact,r);
   const baselineBytes=bytes(baseline),pcwdBytes=bytes(r),compactIndexBytes=bytes(compact);
   return{
     id:'PROOF_OVERHEAD',
