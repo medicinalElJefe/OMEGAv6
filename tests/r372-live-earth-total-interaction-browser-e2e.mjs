@@ -144,6 +144,8 @@ try{
    const card=cards.nth(i);names.add((await card.locator('header b').innerText()).trim());await card.click();
    await page.waitForFunction(index=>document.querySelectorAll('.r284-lens-card')[index]?.getAttribute('data-active')==='true',i,{timeout:10000});
    const canvas=page.locator('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]');await canvas.waitFor({state:'visible',timeout:10000});
+   const blockers=await sarInstrument.locator('.r280-screen').locator('.r3565-lemma-badge,.r284-view-readout,.r285-field-empty,.r280-geometry-overlay,.r284-geometry-hud,.r280-range-labels,.r284-scale').evaluateAll(els=>els.filter(el=>getComputedStyle(el).display!=='none'&&getComputedStyle(el).visibility!=='hidden').length);if(blockers!==0)throw new Error(`${label}: ${LENS_IDS[i]} clean SAR view still has ${blockers} obstructing overlay(s)`);
+   const status=await sarInstrument.locator('.r374-below-canvas-status').boundingBox();const screen=await sarInstrument.locator('.r280-screen').boundingBox();if(!status||!screen||status.y<screen.y+screen.height-1)throw new Error(`${label}: ${LENS_IDS[i]} status is not outside the SAR viewport`);
    if(await canvas.getAttribute('data-lemma-view')!==LENS_IDS[i])throw new Error(`${label}: lens ${i+1} selection did not bind ${LENS_IDS[i]}`);
    if(await canvas.locator(':scope > i').count()<4096)throw new Error(`${label}: lens ${i+1} lacks its derived field`);
    const thumb=card.locator('.r3565-mini-lemma');const thumbBox=await thumb.boundingBox();if(!thumbBox||Math.abs((thumbBox.width/thumbBox.height)-(13/8))>.18)throw new Error(`${label}: lens ${i+1} preview aspect is not proportional ${JSON.stringify(thumbBox)}`);
