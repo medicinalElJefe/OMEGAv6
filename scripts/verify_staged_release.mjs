@@ -83,7 +83,10 @@ const childEnv={...process.env,NODE_OPTIONS:[process.env.NODE_OPTIONS,helper].fi
 // candidate is promoted to 100%, where canonical CI already requires R202,
 // R237 and R238 and can roll back only to an independently proved-usable
 // baseline.  Do not let pre-promotion proof mutate shared Durable state.
-execFileSync(process.execPath,['scripts/verify_federation_live_r1681.mjs'],{stdio:'inherit',env:childEnv});
+execFileSync(process.execPath,['scripts/verify_federation_live_r1681.mjs'],{
+  stdio:'inherit',
+  env:{...childEnv,OMEGA_STAGED_READ_ONLY:'1'}
+});
 execFileSync(process.execPath,['scripts/verify_live_operational_source_authority_r202.mjs'],{
   stdio:'inherit',
   env:{...childEnv,OMEGA_PROMOTED_SHA:'',OMEGA_STAGED_READ_ONLY:'1'}
