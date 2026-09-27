@@ -16,8 +16,9 @@ assert.equal(candidate.metrics.authorityConflict,false);
 assert.equal(candidate.metrics.invariantFailure,false);
 assert.equal(candidate.metrics.proofConflict,false);
 
-const admitted=convergeProofCarryingR356V1({observations,packet:good.packet,identity:{parentSha,candidateSha,evidence:inheritedEvidence}});
+const admitted=await convergeProofCarryingR356V1({observations,packet:good.packet,identity:{parentSha,candidateSha,evidence:inheritedEvidence}});
 assert.equal(admitted.pcwdGate,true);
+assert.equal(admitted.receiptVerified,true);
 assert.equal(admitted.inherited.admissionReceipt.allow,true);
 assert.equal(admitted.allow,true);
 assert.equal(admitted.next,'ADMIT');
@@ -26,13 +27,14 @@ assert.equal(admitted.productionMutation,false);
 assert.match(PCWD_R356_BRIDGE_BOUNDARY,/additive gate/);
 
 const held=await executeProofCarryingWovenStepV1(source,{tick:1,address:73,orientation:1,transportRate:.125,evidence:{admissible:false,sources:[],support:0,authority:'UNBOUND',observedClaim:false}});
-const blocked=convergeProofCarryingR356V1({observations,packet:held.packet,identity:{parentSha,candidateSha,evidence:inheritedEvidence}});
+const blocked=await convergeProofCarryingR356V1({observations,packet:held.packet,identity:{parentSha,candidateSha,evidence:inheritedEvidence}});
 assert.equal(blocked.pcwdGate,false);
+assert.equal(blocked.receiptVerified,true);
 assert.equal(blocked.allow,false);
 assert.equal(blocked.next,'ESCALATE');
 assert.ok(blocked.reasons.includes('PCWD_PROMOTION_GATES_HELD'));
 
-const diverged=convergeProofCarryingR356V1({observations:observations.map((x,i)=>i===1?{...x,artifactHash:'artifact-B'}:x),packet:good.packet,identity:{parentSha,candidateSha,evidence:inheritedEvidence}});
+const diverged=await convergeProofCarryingR356V1({observations:observations.map((x,i)=>i===1?{...x,artifactHash:'artifact-B'}:x),packet:good.packet,identity:{parentSha,candidateSha,evidence:inheritedEvidence}});
 assert.equal(diverged.pcwdGate,true);
 assert.equal(diverged.inherited.admissionReceipt.allow,false);
 assert.equal(diverged.allow,false);
