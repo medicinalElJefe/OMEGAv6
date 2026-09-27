@@ -41,6 +41,7 @@ export async function convergeProofCarryingR356V1(args:{observations:R356Observa
  if(!proofDigestValid)reasons.push('PCWD_PROOF_DIGEST_INVALID');
  if(proofDigestValid&&!receiptVerified)reasons.push('PCWD_PROOF_RECEIPT_INVALID');
  if(!proofLinked)reasons.push('PCWD_PROOF_LINK_MISSING');
+ if(!proofAuthentic)reasons.push('PCWD_PROOF_RECEIPT_INVALID');
  if(!inheritedAdmit)reasons.push(...(inherited?.admissionReceipt?.reasons||[]).map((x:unknown)=>String(x)));
  return{
   schema:PCWD_R356_BRIDGE_SCHEMA,
