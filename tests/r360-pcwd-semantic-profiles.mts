@@ -6,7 +6,7 @@ import{runQubitThroughUnifiedKernelV1,runR349PacketThroughUnifiedKernelV1,runRes
 import{
  PCWD_PROFILE_BUILDERS,PCWD_SEMANTIC_BOUNDARY,
  compileCrossDomainInvariantProjectionV1,compareCrossDomainInvariantShapeV1,metricCompatibilityV1,
- verifyDomainSemanticsProfileV1,
+ verifyCrossDomainInvariantProjectionV1,verifyDomainSemanticsProfileV1,
 }from'../src/system/pcwdSemanticProfiles';
 
 const field=compileCanonicalTypedFieldR349(0,a=>({
@@ -42,6 +42,8 @@ const[pjR349,pjLens,pjQubit]=await Promise.all([
 
 for(const projection of[pjR349,pjLens,pjQubit]){
  assert.equal(projection.integrityVerified,true);
+ assert.match(projection.projectionDigest,/^[0-9a-f]{64}$/);
+ assert.equal(await verifyCrossDomainInvariantProjectionV1(projection),true);
  assert.equal(projection.structural.stageOrderValid,true);
  assert.equal(projection.structural.allGateNamesPresent,true);
  assert.equal(projection.structural.promotionDerivedFromAllGates,true);
@@ -78,6 +80,11 @@ assert.equal(sharedCompatibility.reason,'EXPLICITLY_COMPATIBLE');
 
 
 await assert.rejects(()=>compileCrossDomainInvariantProjectionV1(qubit,pLens),/domain\/version mismatch/);
+
+
+const projectionTampered=structuredClone(pjLens);
+projectionTampered.gateMask=0;
+assert.equal(await verifyCrossDomainInvariantProjectionV1(projectionTampered),false);
 
 const tampered=structuredClone(pQubit);
 tampered.stateSpace='tampered state space';
