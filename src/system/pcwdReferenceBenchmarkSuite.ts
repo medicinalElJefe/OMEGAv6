@@ -133,8 +133,9 @@ async function benchProcessNoiseFixed():Promise<ReferenceBenchmarkResultV1>{
 async function benchEventSourcing():Promise<ReferenceBenchmarkResultV1>{
  const eventsA=['R','U','L','D'],eventsB=['U','R','D','L'];
  const referenceDistinct=JSON.stringify(eventsA)!==JSON.stringify(eventsB);
- const a=await executeUnifiedProofChainV1(chainContract,eventsA.map((_,i)=>({id:'A:'+i,value:i,evidence:true})));
- const b=await executeUnifiedProofChainV1(chainContract,eventsB.map((_,i)=>({id:'B:'+i,value:i,evidence:true})));
+ const code=(e:string)=>({R:1,U:2,L:3,D:4} as Record<string,number>)[e]??0;
+ const a=await executeUnifiedProofChainV1(chainContract,eventsA.map((e,i)=>({id:'A:'+i,value:code(e),evidence:true})));
+ const b=await executeUnifiedProofChainV1(chainContract,eventsB.map((e,i)=>({id:'B:'+i,value:code(e),evidence:true})));
  const pcwdDistinct=a.chainDigest!==b.chainDigest;
  return{
   id:'EVENT_SOURCING_PATH_HISTORY',reference:'append-only event sourcing',problem:'ordered path/history retention',
