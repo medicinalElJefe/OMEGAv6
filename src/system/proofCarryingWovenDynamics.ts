@@ -230,7 +230,7 @@ export async function executeProofCarryingWovenStepV1(field:TypedFieldR349,opts:
 }={}):Promise<{packet:WovenStatePacketV1;targetField:TypedFieldR349}>{
   if(field?.schema!==R349_SCHEMA||field.resolution!==R349_RESOLUTION)throw new Error('PCWD step requires canonical R349 typed field');
   const tick=Math.max(0,Math.floor(Number(opts.tick)||0));
-  const address=Math.max(0,Math.min(R349_RESOLUTION-1,Math.floor(Number(opts.address)||0));
+  const address=Math.max(0,Math.min(R349_RESOLUTION-1,Math.floor(Number(opts.address)||0)));
   const orientation=sig(Number(opts.orientation));
   const transportRate=orientation===0?0:Math.max(0,Math.min(.5,Number(opts.transportRate??.125)||0));
   const tolerances:ErrorTolerancesV1={recovery:1e-6,dynamics:1e-6,observables:1e-6,continuity:1e-7,...opts.tolerances};
