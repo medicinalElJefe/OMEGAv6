@@ -7,7 +7,8 @@ const staged=fs.readFileSync('scripts/staged-cloudflare-release.sh','utf8');
 assert.ok(ci.includes('group: omega-canonical-production-deploy'),'R367 canonical deploy job must use one shared production concurrency group');
 assert.ok(ci.includes('cancel-in-progress: false'),'R367 must serialize rather than asynchronously cancel a production mutation already in flight');
 assert.ok(ci.includes('Verify this run still owns current main'),'R367 must reject a queued deployment if main has advanced');
-assert.ok(ci.includes('git fetch origin main --depth=1')&&ci.includes('current_main="$(git rev-parse origin/main)"'),'R367 current-main guard must use first-hand remote branch state');
+assert.ok(ci.includes('git fetch origin main\n')&&ci.includes('current_main="$(git rev-parse origin/main)"'),'R367 current-main guard must use first-hand remote branch state without re-shallowing ancestry');
+assert.ok(!ci.includes('git fetch origin main --depth=1'),'R367 current-main ownership refresh must preserve full merge ancestry for downstream lineage binding');
 assert.ok(ci.includes('SUPERSEDED RELEASE'),'R367 must visibly distinguish superseded release from product failure');
 
 assert.ok(staged.includes('assert_current_main_owner(){'),'R367 staged release must independently verify main ownership');
