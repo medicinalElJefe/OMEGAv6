@@ -41,6 +41,7 @@ export type InterDomainBridgeContractV1<S,T,R>={
  canonicalMutation:false;
  physicalLawClaimed:false;
 };
+export type InterDomainBridgeExecutionV1<T,R>={target:T;recovered:R;receipt:InterDomainBridgeReceiptV1};
 export type InterDomainBridgeReceiptV1={
  schema:typeof PCWD_BRIDGE_SCHEMA;
  bridgeId:string;
@@ -93,7 +94,7 @@ async function sha256(v:any){
 }
 const finiteNonnegative=(n:unknown)=>Number.isFinite(Number(n))?Math.max(0,Number(n)):Number.POSITIVE_INFINITY;
 
-export async function executeInterDomainBridgeV1<S,T,R>(contract:InterDomainBridgeContractV1<S,T,R>,source:S):Promise<InterDomainBridgeReceiptV1>{
+export async function executeInterDomainBridgeWithArtifactsV1<S,T,R>(contract:InterDomainBridgeContractV1<S,T,R>,source:S):Promise<InterDomainBridgeExecutionV1<T,R>>{
  const[sourceProfileValid,targetProfileValid]=await Promise.all([
   verifyDomainSemanticsProfileV1(contract.sourceProfile),
   verifyDomainSemanticsProfileV1(contract.targetProfile),
@@ -128,7 +129,12 @@ export async function executeInterDomainBridgeV1<S,T,R>(contract:InterDomainBrid
   sourceMeaning:contract.sourceMeaning,targetMeaning:contract.targetMeaning,translationMeaning:contract.translationMeaning,recoveryMeaning:contract.recoveryMeaning,
   semanticProfileBoundary:PCWD_SEMANTIC_BOUNDARY,boundary:PCWD_BRIDGE_BOUNDARY,
  };
- return{...core,receiptDigest:await sha256(core)};
+ const receipt={...core,receiptDigest:await sha256(core)};
+ return{target,recovered,receipt};
+}
+
+export async function executeInterDomainBridgeV1<S,T,R>(contract:InterDomainBridgeContractV1<S,T,R>,source:S):Promise<InterDomainBridgeReceiptV1>{
+ return(await executeInterDomainBridgeWithArtifactsV1(contract,source)).receipt;
 }
 
 export async function verifyInterDomainBridgeReceiptV1(receipt:InterDomainBridgeReceiptV1){
