@@ -137,7 +137,18 @@ orientation
 
 PCWD therefore formalizes the state already present rather than inventing another state authority.
 
-## Next adapters
+## Executable specializations now included
+
+PCWD v1 also includes:
+
+- sparse 12^n atlas addressing across 12 → 144 → 1,728 → 20,736 → 248,832 without materializing the whole address space;
+- composable lemma morphisms with domain/codomain checks, inverse recovery, invariant checks, identity and composition;
+- an eight-phase Relational Skin Calculus receipt: Parent → Interaction → Scar → Continuity → Compression → Skin → Interpretation → Behavior;
+- a finite 2×2 density-matrix unitary specialization using standard quantum mechanics with density validity, unitary validity, recovery error, transformed-observable preservation and qubit fidelity checks.
+
+The quantum adapter is explicitly a specialization of the common transport/proof interface. It does not replace quantum mechanics or establish new physics.
+
+## Further adapters
 
 The kernel is deliberately adapter-oriented. Additional domains can bind only by declaring:
 
