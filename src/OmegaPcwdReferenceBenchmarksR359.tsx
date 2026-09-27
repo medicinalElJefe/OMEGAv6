@@ -10,7 +10,7 @@ export default function OmegaPcwdReferenceBenchmarksR359(){
  const run=async()=>{if(state==='running')return;setState('running');setError('');try{setSuite(await runPcwdReferenceBenchmarkSuiteV1());setState('done')}catch(e){setError(e instanceof Error?e.message:String(e));setState('error')}};
  return <section className='r359-reference' data-r359-reference-benchmarks='OMEGA_PCWD_REFERENCE_BENCHMARKS_v1'>
   <header><div><span>R359 · COMPETENT REFERENCES</span><h3>PCWD against methods that already solve the subproblem well</h3><p>Match, tradeoff, failure, and benchmark-driven repair remain visible. Numerical parity is not presented as novelty.</p></div><FlaskConical/></header>
-  <button type='button' onClick={run} disabled={state==='running'}><Play/>{state==='running'?'Running reference suite…':'Run competent reference suite'}</button>
+  <button type='button' onClick={run} disabled={state==='running'}><Play/>{state==='running'?'Running reference suite…':'Evaluate competent reference suite'}</button>
   {error&&<p className='r359-error'>{error}</p>}
   {suite&&<div className='r359-body'>
    <div className='r359-summary'><b>{suite.summary.matches} MATCH</b><b>{suite.summary.tradeoffs} TRADEOFF</b><b>{suite.summary.fails} FAIL</b><b>{suite.summary.fixed} FIXED</b></div>
