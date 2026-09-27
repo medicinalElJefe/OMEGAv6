@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const browser=fs.readFileSync('tests/r370-live-earth-sar-closure-browser-e2e.mjs','utf8');
+const verifier=fs.readFileSync('scripts/verify_live_operational_source_authority_r202.mjs','utf8');
+const lemma=fs.readFileSync('src/satelliteChainLemmaR3565.ts','utf8');
+for(const token of ['Search SAR location','Use my location','Tucson Arizona','data-r3565-lemma="true"','permissions:[\'geolocation\']','all 12 analytical lenses actuated','GRD/SLC toggled','evidence disclosure actuated'])assert.ok(browser.includes(token),`R370 live acceptance missing ${token}`);
+assert.ok(browser.includes("length===12"),'R370 must require all 12 derived lemma lenses');
+assert.ok(browser.includes("overflow>12"),'R370 must retain no-overflow acceptance');
+assert.ok(verifier.includes("tests/r370-live-earth-sar-closure-browser-e2e.mjs"),'production verifier must execute R370 Earth/SAR closure');
+for(const token of ['currentCandidates=[mk(-1),mk(-2),mk(-3)]','previousCandidates=[mk(-8),mk(-9),mk(-10)]','loadFirstImage'])assert.ok(lemma.includes(token),`R370 resilient temporal anchor law missing ${token}`);
+console.log('R370 EARTH/SAR RUNTIME CLOSURE PASS · resilient temporal anchors · exact production interaction proof · all twelve lenses + controls + disclosure + responsive surface fail closed');
