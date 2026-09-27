@@ -16,3 +16,17 @@
 .earth-r372-exact-coords>summary{cursor:pointer;padding:8px 10px;font:750 8px ui-monospace,monospace;letter-spacing:.08em;color:#77939c}
 .earth-r372-exact-coords[open]>summary{border-bottom:1px solid rgba(135,173,187,.12)}
 .earth-r372-exact-coords>.earth-r72-coords{padding:8px}.earth-r372-exact-coords>.earth-r72-apply{margin:0 8px 8px}
+
+
+/* R373 · display-first viewing: panels can yield without deleting any evidence controls. */
+.earth-r372-display-menu{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.earth-r372-display-menu button{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.earth-r372-display-menu svg,.earth-r372-expanded-bar svg{width:16px;height:16px}
+.earth-r72-workspace.display-focus{grid-template-columns:minmax(0,1fr)}
+.earth-r72-workspace.display-focus>.earth-r72-console{display:none}
+.earth-r372-stage-expanded{position:fixed!important;inset:0!important;z-index:2147483000!important;width:100vw!important;height:100vh!important;min-height:100vh!important;max-height:none!important;border-radius:0!important;background:#01070b!important;overflow:auto!important;padding:52px 10px 10px}
+.earth-r372-stage-expanded>.earth-r372-expanded-bar{position:fixed;z-index:2147483001;left:0;right:0;top:0;height:44px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 12px;border-bottom:1px solid rgba(112,214,205,.24);background:rgba(2,10,15,.96);backdrop-filter:blur(8px)}
+.earth-r372-expanded-bar b{font:800 10px ui-monospace,monospace;letter-spacing:.1em;color:#d9f5f0}
+.earth-r372-expanded-bar button{display:inline-flex;align-items:center;gap:6px}
+.earth-r372-stage-expanded>.earth-r279-satellite,.earth-r372-stage-expanded>.earth-r283-sar,.earth-r372-stage-expanded>.earth-r279-ground,.earth-r372-stage-expanded>.earth-r279-calculus,.earth-r372-stage-expanded>.earth-r281-globe,.earth-r372-stage-expanded>.earth-r279-instrument{min-height:calc(100vh - 70px)!important;height:auto!important}
+@media(max-width:760px){.earth-r372-display-menu{display:grid;grid-template-columns:1fr 1fr;width:100%}.earth-r372-display-menu .primary{grid-column:1/-1}.earth-r372-display-menu button{width:100%}.earth-r372-stage-expanded{padding-left:4px;padding-right:4px}}
