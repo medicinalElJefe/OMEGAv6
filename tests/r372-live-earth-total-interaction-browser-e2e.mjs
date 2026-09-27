@@ -67,6 +67,15 @@ try{
   await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',{timeout:30000});
   await page.waitForSelector('.earth-r279',{state:'visible',timeout:30000});
 
+  const displayMenu=page.locator('.earth-r372-display-menu');await displayMenu.waitFor({state:'visible',timeout:10000});
+  const focusDisplay=displayMenu.getByRole('button',{name:'Focus display',exact:true});
+  const fullScreen=displayMenu.getByRole('button',{name:'Full screen display',exact:true});
+  await focusDisplay.click();if(await page.locator('.earth-r72-console').isVisible())throw new Error(`${label}: focus display did not yield Earth console`);await displayMenu.getByRole('button',{name:'Restore panels',exact:true}).click();
+  await fullScreen.click();await page.waitForFunction(()=>document.querySelector('.earth-r279-stage')?.getAttribute('data-display-expanded')==='true',{timeout:10000});
+  const expanded=await page.locator('.earth-r279-stage').boundingBox();if(!expanded||expanded.width<viewport.width-8||expanded.height<viewport.height-8)throw new Error(`${label}: full screen display did not occupy viewport ${JSON.stringify(expanded)}`);
+  await page.locator('.earth-r372-expanded-bar').getByRole('button',{name:'Exit full screen',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.earth-r279-stage')?.getAttribute('data-display-expanded')==='false',{timeout:10000});
+
   const exact=page.locator('.earth-r372-exact-coords');
   if(!(await exact.count()))throw new Error(`${label}: R372 exact-coordinate advanced control missing`);
   if(await exact.evaluate(el=>el.hasAttribute('open')))throw new Error(`${label}: R372 exact coordinates must default collapsed`);
@@ -126,6 +135,7 @@ try{
   await searchTarget(page,{input:page.getByLabel('Search SAR location'),find:sar.getByRole('button',{name:'Find location',exact:true}),results:page.locator('.r3564-sar-results button'),query:'Tucson Arizona'});
   await bindTarget(page,()=>sar.getByRole('button',{name:'Use my location',exact:true}).click(),32.2226,-110.9747);
   await page.waitForFunction(()=>document.querySelectorAll('.r284-lens-card[data-r3565-lemma="true"]').length===12,{timeout:45000});
+  const sarFocus=sar.getByRole('button',{name:'FOCUS FIELD',exact:true});await sarFocus.click();if(await sar.locator('.r280-left').isVisible()||await sar.locator('.r280-right').isVisible())throw new Error(`${label}: SAR focus field did not yield inspectors`);await sar.getByRole('button',{name:'RESTORE INSPECTORS',exact:true}).click();
   const cards=page.locator('.r284-lens-card');
   if(await cards.count()!==12)throw new Error(`${label}: expected exactly 12 chain-lemma lenses`);
   const names=new Set();
@@ -135,6 +145,7 @@ try{
    const canvas=page.locator('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]');await canvas.waitFor({state:'visible',timeout:10000});
    if(await canvas.getAttribute('data-lemma-view')!==LENS_IDS[i])throw new Error(`${label}: lens ${i+1} selection did not bind ${LENS_IDS[i]}`);
    if(await canvas.locator(':scope > i').count()<4096)throw new Error(`${label}: lens ${i+1} lacks its derived field`);
+   const thumb=card.locator('.r3565-mini-lemma');const thumbBox=await thumb.boundingBox();if(!thumbBox||Math.abs((thumbBox.width/thumbBox.height)-(13/8))>.18)throw new Error(`${label}: lens ${i+1} preview aspect is not proportional ${JSON.stringify(thumbBox)}`);
    await contained(page,`${label} SAR lens ${i+1}`);
   }
   if(names.size!==12)throw new Error(`${label}: duplicate lens identities`);
