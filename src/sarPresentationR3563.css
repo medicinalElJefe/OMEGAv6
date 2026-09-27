@@ -32,3 +32,15 @@
 .r3564-preview-law{display:block;color:#e0ba69!important;font:700 8px/1.35 ui-monospace,monospace}
 .r3564-mini-preview{min-height:74px;overflow:hidden;border:1px solid rgba(128,174,186,.15);background:#02080b}.r3564-mini-preview img{display:block;width:100%;height:100%;min-height:74px;object-fit:cover;filter:grayscale(1) contrast(1.08);opacity:.72}
 .r3564-lens-held{display:grid;place-content:center;gap:4px;min-height:74px;padding:7px;border:1px solid rgba(128,174,186,.1);background:linear-gradient(180deg,#031015,#02090d);text-align:center}.r3564-lens-held b{font:800 7px ui-monospace,monospace;color:#c6a956}.r3564-lens-held span{font-size:7px;line-height:1.25;color:#6f858d}
+
+/* R356.5 · immediate satellite chain-lemma fields.
+   These visuals are DERIVED_TRIANGULATED from NASA GIBS temporal anchors + returned evidence.
+   They never upgrade into native Sentinel-1 measurement authority. */
+.r3565-lemma-canvas{position:absolute;inset:0;display:grid;grid-template-columns:repeat(64,minmax(0,1fr));grid-template-rows:repeat(64,minmax(0,1fr));overflow:hidden;background:#02080b}
+.r3565-lemma-canvas>i{min-width:0;min-height:0}
+.r3565-lemma-badge{position:absolute;z-index:6;left:10px;top:10px;display:grid;gap:2px;padding:7px 8px;border:1px solid rgba(100,220,204,.3);border-radius:7px;background:rgba(1,9,12,.82);backdrop-filter:blur(5px)}
+.r3565-lemma-badge b{font:800 8px ui-monospace,monospace;color:#8ce2d7;letter-spacing:.08em}.r3565-lemma-badge span{font:7px ui-monospace,monospace;color:#8da4aa}
+.r3565-mini-lemma{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));grid-template-rows:repeat(13,minmax(0,1fr));min-height:74px;overflow:hidden;border:1px solid rgba(104,203,191,.18);background:#02090d}
+.r3565-mini-lemma i{min-width:0;min-height:0}
+.r284-lens-card[data-r3565-lemma='true']{border-color:rgba(97,211,197,.34)!important;background:linear-gradient(180deg,#091a1c,#041114)!important}
+.r284-lens-card[data-r3565-lemma='true'] header span{color:#8ce2d7}
