@@ -58,3 +58,19 @@
 @media(max-width:1280px){.r284-lens-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:900px){.r284-lens-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.r284-lens-grid{grid-template-columns:1fr}.r284-lens-card{max-width:none}}
+
+
+/* R374 · unobstructed SAR result viewport.
+   The visual field is primary by default; provenance/details remain in DOM and can be restored explicitly. */
+.r280-screen.clean-view .r3565-lemma-badge,
+.r280-screen.clean-view .r280-grid,
+.r280-screen.clean-view .r280-crosshair,
+.r280-screen.clean-view .r280-range-labels,
+.r280-screen.clean-view .r284-scale,
+.r280-screen.clean-view .r280-geometry-overlay,
+.r280-screen.clean-view .r284-geometry-hud,
+.r280-screen.clean-view .r284-view-readout{display:none!important}
+.r280-screen.clean-view .r280-canvas,
+.r280-screen.clean-view .r3565-lemma-canvas{inset:0}
+.r280-screen.clean-view{border-color:rgba(112,214,205,.26);box-shadow:inset 0 0 0 1px rgba(112,214,205,.04)}
+.r280-workbench.focus-display .r280-screen.clean-view{min-height:min(82vh,1080px)}
