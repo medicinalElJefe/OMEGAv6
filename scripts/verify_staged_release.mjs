@@ -82,8 +82,16 @@ const childEnv={...process.env,NODE_OPTIONS:[process.env.NODE_OPTIONS,helper].fi
 // Those stateful transport proofs are therefore deferred until after the exact
 // candidate is promoted to 100%, where canonical CI already requires R202,
 // R237 and R238 and can roll back only to an independently proved-usable
-// baseline.  Do not let pre-promotion proof mutate shared Durable state.
-execFileSync(process.execPath,['scripts/verify_federation_live_r1681.mjs'],{stdio:'inherit',env:childEnv});
+// baseline. R168.1 also chains R199 whenever OMEGA_PROMOTED_SHA is present; suppress
+// that promoted-only source/runtime attestation branch while the candidate is addressed
+// through a 0%-traffic version override because Worker-internal ASSETS fetches can still
+// resolve the currently serving asset binding. Exact R199 source binding is therefore
+// proved only after 100% promotion by canonical CI. Do not let pre-promotion proof mutate
+// shared Durable state or misclassify production assets as candidate lineage.
+execFileSync(process.execPath,['scripts/verify_federation_live_r1681.mjs'],{
+  stdio:'inherit',
+  env:{...childEnv,OMEGA_PROMOTED_SHA:'',OMEGA_STAGED_READ_ONLY:'1'}
+});
 execFileSync(process.execPath,['scripts/verify_live_operational_source_authority_r202.mjs'],{
   stdio:'inherit',
   env:{...childEnv,OMEGA_PROMOTED_SHA:'',OMEGA_STAGED_READ_ONLY:'1'}
