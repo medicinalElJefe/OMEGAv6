@@ -8,7 +8,7 @@ const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
 for(const token of[
  'R360 · SEMANTIC SEPARATION',
- 'Run cross-domain semantic proof',
+ 'Evaluate cross-domain semantic proof',
  'STRUCTURAL CONTRACT',
  'RAW METRIC COMPARISON',
  'Same slot name ≠ same quantity.',
