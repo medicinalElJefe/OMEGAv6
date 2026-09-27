@@ -2,8 +2,6 @@ name: R170 Governed Self-Build
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '47 * * * *'
 
 permissions:
   contents: write
