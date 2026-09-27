@@ -86,7 +86,7 @@ const childEnv={...process.env,NODE_OPTIONS:[process.env.NODE_OPTIONS,helper].fi
 // R199, R202, R237 and R238 against the exact canonical live version.
 execFileSync(process.execPath,['scripts/verify_federation_live_r1681.mjs'],{
   stdio:'inherit',
-  env:{...childEnv,OMEGA_STAGED_READ_ONLY:'1'}
+  env:{...childEnv,OMEGA_PROMOTED_SHA:'',OMEGA_STAGED_READ_ONLY:'1'}
 });
 execFileSync(process.execPath,['scripts/verify_live_operational_source_authority_r202.mjs'],{
   stdio:'inherit',
