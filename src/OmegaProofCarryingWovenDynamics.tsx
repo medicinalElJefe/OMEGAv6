@@ -61,8 +61,8 @@ export default function OmegaProofCarryingWovenDynamics({address,compact=false}:
      <div><dt>scar Δ</dt><dd>{fmt(p.Sigma_t.scarDelta)}</dd></div>
     </dl></section>
    </div>
-   <section className='pcwd-rsc'><header><GitBranch/><div><b>Relational Skin Calculus receipt</b><small>same proof digest carried through the eight-phase loop</small></div></header><div>{state.rsc.phases.map(x=><span key={x.phase}><b>{x.index}</b><em>{x.phase}</em></span>)}</div></section>
-   <details className='pcwd-details'><summary>Mathematical specialization proof</summary><div className='pcwd-quantum'><b>2×2 unitary density-matrix adapter</b><span>{state.quantum.promotionEligible?'PASS':'HOLD'} · recovery {fmt(state.quantum.recoveryError)} · observable {fmt(state.quantum.observableError)} · fidelity {fmt(state.quantum.fidelity)}</span><small>Standard quantum mechanics specialization only; this is a software/mathematical self-test and is not a claim of new physics.</small></div></details>
+   <section className='pcwd-rsc'><header><GitBranch/><div><b>Relational Skin Calculus receipt</b><small>same proof digest carried through the eight-phase loop</small></div></header><div>{state!.rsc.phases.map(x=><span key={x.phase}><b>{x.index}</b><em>{x.phase}</em></span>)}</div></section>
+   <details className='pcwd-details'><summary>Mathematical specialization proof</summary><div className='pcwd-quantum'><b>2×2 unitary density-matrix adapter</b><span>{state!.quantum.promotionEligible?'PASS':'HOLD'} · recovery {fmt(state!.quantum.recoveryError)} · observable {fmt(state!.quantum.observableError)} · fidelity {fmt(state!.quantum.fidelity)}</span><small>Standard quantum mechanics specialization only; this is a software/mathematical self-test and is not a claim of new physics.</small></div></details>
   </div>}
   <footer><b>Truth boundary</b><span>{p?.boundary||'PCWD adds no physical primitive and cannot mutate CanonState or production authority.'}</span></footer>
  </section>;
