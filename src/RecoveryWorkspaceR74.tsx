@@ -6,7 +6,6 @@ import TargetActivationR48 from './TargetActivationR48';
 type Props={record:any;address:number;onNavigate:(name:string)=>void};
 
 export default function RecoveryWorkspaceR74({record,address,onNavigate}:Props){
-  const [expert,setExpert]=useState(false);
   const [restoreOpen,setRestoreOpen]=useState(false);
   return <section className='panel'>
     <div className='section-head'>
@@ -43,7 +42,7 @@ export default function RecoveryWorkspaceR74({record,address,onNavigate}:Props){
 
     {restoreOpen&&<div style={{marginTop:16}}><TargetActivationR48/></div>}
 
-    <details className='drawer' open={expert} onToggle={e=>setExpert((e.currentTarget as HTMLDetailsElement).open)}>
+    <details className='drawer'>
       <summary><Wrench size={15}/> Technical recovery & package controls</summary>
       <p className='muted'>Checksums, patch staging, browser recovery exports, manifests and package internals are retained for expert use without occupying the primary workflow.</p>
       <RecoveryPackagingR47 record={record} address={address}/>
