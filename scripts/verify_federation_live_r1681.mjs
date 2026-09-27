@@ -73,6 +73,9 @@ for(const target of files)await verifyArtifact(target);
 await verifyFederation();
 console.log('R168.1 FEDERATION + RCWA PROPAGATION ATTESTATION PASS');
 
-if(String(process.env.OMEGA_PROMOTED_SHA||'').trim()){
+const stagedReadOnly=String(process.env.OMEGA_STAGED_READ_ONLY||'').trim()==='1';
+if(String(process.env.OMEGA_PROMOTED_SHA||'').trim()&&!stagedReadOnly){
   await import('./verify_live_execution_control_r199.mjs');
+}else if(stagedReadOnly){
+  console.log('R168.1 STAGED BOUNDARY · R199 release-evidence/runtime-attestation proof deferred until promoted live because a 0%-traffic Worker override does not own the canonical production asset binding.');
 }
