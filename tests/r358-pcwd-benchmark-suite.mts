@@ -4,13 +4,13 @@ import{runPcwdBenchmarkSuiteV1,PCWD_BENCHMARK_SCHEMA,PCWD_BENCHMARK_BOUNDARY}fro
 const suite=await runPcwdBenchmarkSuiteV1();
 assert.equal(suite.schema,PCWD_BENCHMARK_SCHEMA);
 assert.equal(suite.revision,'R358');
-assert.equal(suite.results.length,9);
-assert.equal(suite.summary.total,9);
-assert.equal(suite.summary.wins,7);
+assert.equal(suite.results.length,10);
+assert.equal(suite.summary.total,10);
+assert.equal(suite.summary.wins,8);
 assert.equal(suite.summary.costs,1);
 assert.equal(suite.summary.limits,1);
 assert.equal(suite.summary.ties,0);
-assert.equal(suite.summary.pcwdPassCount,9);
+assert.equal(suite.summary.pcwdPassCount,10);
 assert.match(PCWD_BENCHMARK_BOUNDARY,/explicit minimal baselines/i);
 assert.match(PCWD_BENCHMARK_BOUNDARY,/does not establish scientific novelty/i);
 
@@ -60,6 +60,13 @@ assert.equal(forecast.metrics.baselineRetainedBranches,1);
 assert.ok(Number(forecast.metrics.baselineDiscardedWeight)>0);
 assert.ok(Math.abs(Number(forecast.metrics.weightsSum)-1)<1e-12);
 
+const lorenz=by('LORENZ63_DYNAMICS_CORRESPONDENCE');
+assert.equal(lorenz.verdict,'WIN');
+assert.ok(Number(lorenz.metrics.correctDynamicsError)<=1e-12);
+assert.ok(Number(lorenz.metrics.perturbedDynamicsError)>1e-3);
+assert.equal(lorenz.metrics.correctDecision,'STAY');
+assert.equal(lorenz.metrics.perturbedDecision,'TURN');
+
 const limit=by('NO_RESIDUAL_NEGATIVE_CONTROL');
 assert.equal(limit.verdict,'LIMIT');
 assert.ok(Number(limit.metrics.recoveryError)>0);
@@ -82,7 +89,7 @@ for(const result of suite.results){
 for(const required of[
  'within-bin residual','high-frequency/impulse detail','route/order history','mutation evidence',
  'evidence provenance/admissibility','validity proof for the supplied transform','input correlation/cross-covariance',
- 'non-argmax admissible futures','discarded branch weight',
+ 'non-argmax admissible futures','discarded branch weight','model-correspondence error',
 ])assert.ok(suite.summary.additionalInformationCategories.includes(required),`missing information category: ${required}`);
 
 console.log(JSON.stringify({
@@ -94,4 +101,4 @@ console.log(JSON.stringify({
  })),
  boundary:suite.boundary,
 },null,2));
-console.log('R358 PCWD BENCHMARK PASS · 7 explicit-baseline wins · 1 measured proof-overhead cost · 1 negative-control recovery limit correctly held · no novelty claim');
+console.log('R358 PCWD BENCHMARK PASS · 8 explicit-baseline wins · 1 measured proof-overhead cost · 1 negative-control recovery limit correctly held · no novelty claim');
