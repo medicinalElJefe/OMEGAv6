@@ -1,4 +1,5 @@
 import {compileAtlas360ConvergenceR356,R356_ATLAS360_COUNTS} from './atlas360TriangulationR356.js';
+import {compileStatePacketPCWD,PCWD_PROMOTION_GATES} from './proofCarryingWovenDynamics.js';
 export const R356_CCR_SCHEMA='OMEGA_CONTINUOUS_CONVERGENCE_RUNTIME_R356';
 export const R356_ATLAS_LEVELS=Object.freeze([12,144,1728,20736,248832]);
 export const R356_STAGES=Object.freeze(['OBSERVE','NORMALIZE','RELATE','PARTITION','CARRY','CONSTRUCT','PRUNE','TEST','FALSIFY','PROVE','ADMIT','OBSERVE']);
@@ -10,7 +11,8 @@ export const R356_LAWS=Object.freeze([
  'EXACT_PARENT_REQUIRED','INVARIANTS_CARRY','SCARS_CARRY','CONTRADICTIONS_ARE_EVIDENCE',
  'FAILED_CANDIDATES_NEVER_DISAPPEAR','RETURN_PROOF_REQUIRED','ROLLBACK_PARENT_RETAINED',
  'ATLAS_LEVELS_ARE_ADDRESS_RESOLUTION_NOT_PHYSICAL_DIMENSIONS',
- 'ATLAS360_IS_DERIVED_RELATIONAL_PROOF_NOT_PHYSICAL_PRIMITIVE','ATLAS360_REAL_ANCHORS_NOT_FABRICATED','ATLAS360_ACTIVE_SLICES_PREFERRED_OVER_FULL_TENSOR_MATERIALIZATION'
+ 'ATLAS360_IS_DERIVED_RELATIONAL_PROOF_NOT_PHYSICAL_PRIMITIVE','ATLAS360_REAL_ANCHORS_NOT_FABRICATED','ATLAS360_ACTIVE_SLICES_PREFERRED_OVER_FULL_TENSOR_MATERIALIZATION',
+ 'PROOF_CARRYING_WOVEN_DYNAMICS_EIGHT_GATE_PROMOTION','NO_NEW_PHYSICAL_PRIMITIVE'
 ]);
 const upper=v=>String(v??'').trim().toUpperCase();
 const finite=(v,d=0)=>Number.isFinite(Number(v))?Number(v):d;
@@ -57,8 +59,9 @@ export function scarR356({parent,candidate,intent,transform,failurePoint,contrad
  return {schema:'OMEGA_R356_SCAR',...core,fingerprint:fingerprintR356(core)};
 }
 export function atlas360AdviceR356(input={}){return compileAtlas360ConvergenceR356(input)}
-export {R356_ATLAS360_COUNTS};
-export function admissionR356({parentSha,candidateSha,relativeState,evidence={},scarLedger=[]}={}){
+export function proofDynamicsR356(input={}){return compileStatePacketPCWD(input)}
+export {R356_ATLAS360_COUNTS,PCWD_PROMOTION_GATES};
+export function admissionR356({parentSha,candidateSha,relativeState,evidence={},scarLedger=[],proofDynamics=null}={}){
  const gate=mandalaGateR356({shell:'CANONICAL',evidence});
  const reasons=[...gate.missing];
  if(!/^[0-9a-f]{40}$/i.test(String(parentSha||'')))reasons.push('INVALID_PARENT_SHA');
@@ -66,14 +69,23 @@ export function admissionR356({parentSha,candidateSha,relativeState,evidence={},
  if(!relativeState?.converged)reasons.push('RELATIVE_FRAMES_NOT_CONVERGED');
  if(evidence.directProductionMutation===true)reasons.push('DIRECT_PRODUCTION_MUTATION_FORBIDDEN');
  if(evidence.returnProof!==true)reasons.push('RETURN_PROOF_REQUIRED');
+ if(proofDynamics!==null){
+  if(proofDynamics?.schema!=='OMEGA_PROOF_CARRYING_WOVEN_DYNAMICS_V1')reasons.push('INVALID_PROOF_CARRYING_WOVEN_DYNAMICS_RECEIPT');
+  else if(proofDynamics?.promotion?.allow!==true)reasons.push('PROOF_CARRYING_WOVEN_DYNAMICS_GATE_FAILED');
+ }
  const allow=reasons.length===0;
- const receipt={schema:'OMEGA_R356_ADMISSION_RECEIPT',parentSha:String(parentSha||''),candidateSha:String(candidateSha||''),allow,reasons:[...new Set(reasons)].sort(),relativeFingerprint:String(relativeState?.fingerprint||''),scarCount:Array.isArray(scarLedger)?scarLedger.length:0,canonicalAdmission:allow,directProductionMutation:false};
+ const receipt={schema:'OMEGA_R356_ADMISSION_RECEIPT',parentSha:String(parentSha||''),candidateSha:String(candidateSha||''),allow,reasons:[...new Set(reasons)].sort(),relativeFingerprint:String(relativeState?.fingerprint||''),scarCount:Array.isArray(scarLedger)?scarLedger.length:0,proofDynamicsBound:proofDynamics!==null,proofDynamicsFingerprint:String(proofDynamics?.proof?.proofFingerprint||''),canonicalAdmission:allow,directProductionMutation:false};
  return {...receipt,fingerprint:fingerprintR356(receipt)};
 }
 export function convergeR356({observations=[],candidate={},scarLedger=[]}={}){
  const relativeState=compileRelativeStateR356(observations);
- const motion=decideMotionR356(candidate.metrics||{});
- const admissionReceipt=admissionR356({parentSha:candidate.parentSha,candidateSha:candidate.candidateSha,relativeState,evidence:candidate.evidence||{},scarLedger});
+ const controlMotion=decideMotionR356(candidate.metrics||{});
+ const proofDynamics=candidate.proofDynamics?compileStatePacketPCWD(candidate.proofDynamics):null;
+ const severity={STAY:0,TURN:1,ESCALATE:2};
+ const proofMotion=proofDynamics?.promotion?.motion||'STAY';
+ const selected=severity[proofMotion]>severity[controlMotion.motion]?proofMotion:controlMotion.motion;
+ const motion={...controlMotion,motion:selected,controlMotion:controlMotion.motion,proofDynamicsMotion:proofDynamics?proofMotion:null,proofDynamicsScore:proofDynamics?.proof?.score??null};
+ const admissionReceipt=admissionR356({parentSha:candidate.parentSha,candidateSha:candidate.candidateSha,relativeState,evidence:candidate.evidence||{},scarLedger,proofDynamics});
  const atlas360=compileAtlas360ConvergenceR356(candidate.atlas360||{});
- return {schema:R356_CCR_SCHEMA,stages:R356_STAGES,relativeState,motion,admissionReceipt,atlas360,next:admissionReceipt.allow?'ADMIT':motion.motion==='ESCALATE'?'ESCALATE':'ITERATE',productionWriter:'.github/workflows/ci.yml',canonAdmissionAuthority:'R125',continuous:true};
+ return {schema:R356_CCR_SCHEMA,stages:R356_STAGES,relativeState,motion,proofDynamics,admissionReceipt,atlas360,next:admissionReceipt.allow?'ADMIT':motion.motion==='ESCALATE'?'ESCALATE':'ITERATE',productionWriter:'.github/workflows/ci.yml',canonAdmissionAuthority:'R125',continuous:true};
 }
