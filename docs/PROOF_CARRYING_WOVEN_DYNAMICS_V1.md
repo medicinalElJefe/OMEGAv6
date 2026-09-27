@@ -34,7 +34,7 @@ K_t = [
 - `Gamma_t` — active transport path.
 - `L_t` — active lemma/equivalence certificate.
 - `E_t` — evidence/admissibility packet.
-- `Pi_t` — cryptographic proof receipt.
+- `Pi_t` — SHA-256 integrity receipt.
 
 ## Executable evolution
 
@@ -194,9 +194,10 @@ The kernel then owns the common proof semantics:
 - the same STAY / TURN / ESCALATE derivation;
 - the same bounded error categories;
 - SHA-256 fingerprints for every pre-proof stage;
-- a SHA-256 proof receipt bound to the complete stage chain;
+- a SHA-256 integrity receipt bound to the complete stage chain;
+- a second envelope seal binding the complete domain packet to that proof/stage chain, so packet or receipt mutation fails verification;
 - previous-proof binding for temporal chains;
-- semantic verification in addition to digest verification;
+- semantic verification in addition to digest verification; the digest is tamper-evident integrity, not a secret-key signature;
 - tamper rejection;
 - explicit domain and global truth boundaries.
 
