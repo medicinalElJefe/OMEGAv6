@@ -3,7 +3,7 @@ import{compileCanonicalTypedFieldR349}from'../src/system/wovenHardwareFieldR349'
 import{executeProofCarryingWovenStepV1}from'../src/system/proofCarryingWovenDynamics';
 import{
  PCWD_ATLAS_LEVELS,RSC_LOOP_V1,QUBIT,
- applyUnitaryQubitLemmaV1,certifyLemmaMorphismV1,compileRscLoopReceiptV1,
+ applyUnitaryQubitLemmaV1,certifyLemmaMorphismV1,compileRscLoopReceiptV1,compileResolutionLensV1,recoverResolutionLensV1,propagateCovarianceV1,
  composeLemmaMorphismsV1,identityLemmaMorphismV1,
  sparseAtlasAddressV1,sparseAtlasChildrenV1,sparseAtlasParentV1,
  type LemmaMorphismV1,type Matrix2V1,
@@ -21,6 +21,22 @@ const children=sparseAtlasChildrenV1(parent);
 assert.equal(children.length,12);
 assert.ok(children.some(x=>x.index===4242));
 assert.equal(sparseAtlasChildrenV1(sparseAtlasAddressV1(0,5)).length,0);
+
+
+const fine=[1,1,1,1,2,3,4,5,10,10,10,10];
+const lens=compileResolutionLensV1(fine,3);
+assert.deepEqual(lens.coarse,[1,3.5,10]);
+assert.deepEqual(recoverResolutionLensV1(lens),fine);
+assert.equal(lens.exactRecovery,true);
+assert.equal(lens.physicalDimensionsClaimed,false);
+assert.ok(lens.residualMax>0);
+
+const covariance=propagateCovarianceV1([[4,0],[0,1]],[[0,-1],[1,0]]);
+assert.equal(covariance.symmetric,true);
+assert.equal(covariance.finite,true);
+assert.equal(covariance.uncertaintyCollapsed,false);
+assert.ok(Math.abs(covariance.output[0][0]-1)<1e-12);
+assert.ok(Math.abs(covariance.output[1][1]-4)<1e-12);
 
 const AtoB:LemmaMorphismV1={id:'AtoB',domain:'A',codomain:'B',forward:x=>x.map(v=>v+1),recover:y=>y.map(v=>v-1),invariants:[x=>x.reduce((s,v)=>s+v,0)]};
 const BtoC:LemmaMorphismV1={id:'BtoC',domain:'B',codomain:'C',forward:x=>x.map(v=>v*2),recover:y=>y.map(v=>v/2)};
@@ -69,4 +85,4 @@ const bad=await applyUnitaryQubitLemmaV1(rho,badU,[Z],1e-9);
 assert.equal(bad.gates.unitaryValid,false);
 assert.equal(bad.promotionEligible,false);
 
-console.log('PCWD SPECIALIZATIONS v1 PASS · sparse 12^n atlas addressing · composable/recoverable lemma morphisms · eight-phase RSC receipt · finite qubit unitary density-channel specialization with recovery/fidelity/observable proof · no new physical or Canon authority');
+console.log('PCWD SPECIALIZATIONS v1 PASS · sparse 12^n atlas addressing · recoverable micro/macro lens · covariance transport · composable/recoverable lemma morphisms · eight-phase RSC receipt · finite qubit unitary density-channel specialization with recovery/fidelity/observable proof · no new physical or Canon authority');
