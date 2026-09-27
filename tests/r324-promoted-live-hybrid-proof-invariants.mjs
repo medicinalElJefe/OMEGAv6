@@ -8,6 +8,7 @@ const policy=JSON.parse(readFileSync(new URL('../public/omega-r240-recursive-exa
 
 assert.ok(stagedVerifier.includes("OMEGA_PROMOTED_SHA:''"),'staged R202 proof must suppress promoted-only stateful Hybrid transport branch');
 assert.ok(stagedVerifier.includes("OMEGA_STAGED_READ_ONLY:'1'"),'staged proof must declare read-only candidate authority');
+assert.ok(stagedVerifier.includes("['scripts/verify_federation_live_r1681.mjs'],{\n  stdio:'inherit',\n  env:{...childEnv,OMEGA_PROMOTED_SHA:'',OMEGA_STAGED_READ_ONLY:'1'}"),'staged R168.1 proof must suppress its promoted-only R199 source/runtime branch while candidate assets are version-overridden');
 assert.ok(!stagedVerifier.includes("'scripts/verify_live_hybrid_command_authority_r237.mjs'"),'staged verifier must not run R237 stateful transport proof');
 assert.ok(!stagedVerifier.includes("'scripts/verify_live_hybrid_host_intelligence_r238.mjs'"),'staged verifier must not run R238 promoted-live stateful proof');
 assert.ok(r202.includes("const promoted=String(process.env.OMEGA_PROMOTED_SHA||'').trim();"),'R202 must retain explicit promoted-live gate');
