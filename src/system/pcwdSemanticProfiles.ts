@@ -63,6 +63,7 @@ export type CrossDomainInvariantProjectionV1={
  proofDigest:string;
  packetDigest:string;
  envelopeDigest:string;
+ projectionDigest:string;
  structural:{
   stageOrderValid:boolean;
   allGateNamesPresent:boolean;
@@ -132,7 +133,7 @@ export async function compileCrossDomainInvariantProjectionV1(result:any,profile
  let gateMask=0;gates.forEach((v,i)=>{if(v)gateMask|=(1<<i)});
  const all=gates.every(Boolean);
  const expectedDecision:UnifiedDecisionV1=all?'STAY':(!gates[0]||!gates[1]||!gates[6]||!gates[7])?'ESCALATE':'TURN';
- return{
+ const core={
   schema:PCWD_CROSS_DOMAIN_PROJECTION_SCHEMA,
   domain:profile.domain,domainVersion:profile.domainVersion,address:result.address,
   stageTopology:[...UNIFIED_PCWD_STAGES],gateTopology:[...UNIFIED_PCWD_GATES],gateMask,gateVector:gates,
@@ -148,7 +149,22 @@ export async function compileCrossDomainInvariantProjectionV1(result:any,profile
   },
   excludedRawFields:[...profile.rawDomainFieldsNeverCompared],
   boundary:PCWD_SEMANTIC_BOUNDARY,
+ } as const;
+ return{...core,projectionDigest:await sha256(core)};
+}
+
+
+export async function verifyCrossDomainInvariantProjectionV1(projection:CrossDomainInvariantProjectionV1){
+ if(projection?.schema!==PCWD_CROSS_DOMAIN_PROJECTION_SCHEMA||projection?.boundary!==PCWD_SEMANTIC_BOUNDARY)return false;
+ const core={
+  schema:projection.schema,domain:projection.domain,domainVersion:projection.domainVersion,address:projection.address,
+  stageTopology:projection.stageTopology,gateTopology:projection.gateTopology,gateMask:projection.gateMask,gateVector:projection.gateVector,
+  decision:projection.decision,promotionEligible:projection.promotionEligible,integrityVerified:projection.integrityVerified,
+  profileDigest:projection.profileDigest,stageChainDigest:projection.stageChainDigest,proofDigest:projection.proofDigest,
+  packetDigest:projection.packetDigest,envelopeDigest:projection.envelopeDigest,structural:projection.structural,
+  excludedRawFields:projection.excludedRawFields,boundary:projection.boundary,
  };
+ return(await sha256(core))===projection.projectionDigest;
 }
 
 export function compareCrossDomainInvariantShapeV1(a:CrossDomainInvariantProjectionV1,b:CrossDomainInvariantProjectionV1){
