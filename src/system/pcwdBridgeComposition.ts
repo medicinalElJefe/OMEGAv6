@@ -56,7 +56,8 @@ async function sha256(v:any){
 }
 const finiteNonnegative=(n:unknown)=>Number.isFinite(Number(n))?Math.max(0,Number(n)):Number.POSITIVE_INFINITY;
 
-const sameLoss=(a:BridgeLossEntryV1,b:BridgeLossEntryV1)=>stable(a)===stable(b);
+const lossCore=(x:BridgeLossEntryV1)=>({kind:x.kind,declared:x.declared,magnitude:x.magnitude,detail:x.detail});
+const sameLoss=(a:BridgeLossEntryV1,b:BridgeLossEntryV1)=>stable(lossCore(a))===stable(lossCore(b));
 
 export async function executeComposedInterDomainBridgeV1<A,B,C,AR>(
  first:InterDomainBridgeContractV1<A,B,AR>,
@@ -64,6 +65,7 @@ export async function executeComposedInterDomainBridgeV1<A,B,C,AR>(
  source:A,
 ):Promise<BridgeCompositionReceiptV1>{
  const profileChainCompatible=first.targetProfile.profileDigest===second.sourceProfile.profileDigest;
+ if(!profileChainCompatible)throw new Error('R362 bridge composition rejected incompatible intermediate semantic profiles');
  const firstExec=await executeInterDomainBridgeWithArtifactsV1(first,source);
  const secondExec=await executeInterDomainBridgeWithArtifactsV1(second,firstExec.target);
  const recoveredSource=await first.recover(secondExec.recovered);
