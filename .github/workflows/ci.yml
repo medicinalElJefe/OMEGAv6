@@ -81,6 +81,9 @@ jobs:
 
   deploy-main:
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    concurrency:
+      group: omega-production-deploy-main
+      cancel-in-progress: false
     needs: verify
     runs-on: ubuntu-latest
     environment: production
@@ -358,7 +361,11 @@ jobs:
         if: failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible == 'true'
         id: rollback_worker
         shell: bash
-        run: npx wrangler rollback "${{ steps.deploy_worker.outputs.previous_version_id }}" --name omegav6 --message "OMEGA automatic rollback after live proof failure for $GITHUB_SHA"
+        run: |
+          OMEGA_WORKER_NAME=omegav6 bash scripts/guarded-cloudflare-rollback.sh \
+            "${{ steps.deploy_worker.outputs.candidate_version_id }}" \
+            "${{ steps.deploy_worker.outputs.previous_version_id }}" \
+            "OMEGA guarded post-promotion rollback after $GITHUB_SHA"
       - name: Refuse rollback to an unproved or known-bad baseline
         if: failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible != 'true'
         shell: bash
