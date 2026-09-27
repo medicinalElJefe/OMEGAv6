@@ -74,3 +74,22 @@
 .r280-screen.clean-view .r3565-lemma-canvas{inset:0}
 .r280-screen.clean-view{border-color:rgba(112,214,205,.26);box-shadow:inset 0 0 0 1px rgba(112,214,205,.04)}
 .r280-workbench.focus-display .r280-screen.clean-view{min-height:min(82vh,1080px)}
+
+
+/* R375 · structural no-obstruction contract for every SAR view.
+   In clean mode, no status card, proof badge, readout, grid, scale, crosshair, or geometry text is allowed inside the raster/lemma viewport. */
+.r374-below-canvas-status{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 9px;border:1px solid rgba(128,174,186,.14);border-radius:8px;background:#031015;min-width:0}
+.r374-below-canvas-status b{font:800 9px ui-monospace,monospace;color:#d9f5f0}
+.r374-below-canvas-status span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 8px ui-monospace,monospace;color:#8fb1b5}
+.r374-below-canvas-status small{font:700 7px ui-monospace,monospace;color:#6f8f95;white-space:nowrap}
+.r280-screen.clean-view>.r285-field-empty,
+.r280-screen.clean-view>.r284-view-readout,
+.r280-screen.clean-view>.r280-geometry-overlay,
+.r280-screen.clean-view>.r284-geometry-hud,
+.r280-screen.clean-view .r3565-lemma-badge,
+.r280-screen.clean-view .r280-grid,
+.r280-screen.clean-view .r280-crosshair,
+.r280-screen.clean-view .r280-range-labels,
+.r280-screen.clean-view .r284-scale,
+.r280-screen.clean-view .r284-swath{display:none!important}
+@media(max-width:620px){.r374-below-canvas-status{grid-template-columns:1fr}.r374-below-canvas-status span{white-space:normal}.r374-below-canvas-status small{white-space:normal}}
