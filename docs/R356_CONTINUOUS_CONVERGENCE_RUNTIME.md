@@ -48,3 +48,47 @@ Integration is monotonic:
 - R125 CanonState admission, R141 return proof, R146 durable history, R147 dispatch and ci.yml production authority are unchanged.
 
 The capability is visible in Convergence, Field/Data Motion and Evidence & Proof through one shared R356 surface derived from the current product authority rather than a new competing UI root.
+
+
+## Proof-Carrying Woven Dynamics
+
+The Continuous Convergence Runtime now has an executable proof-carrying state-transport kernel in `src/system/proofCarryingWovenDynamics.js`. It formalizes the next-generation state packet
+
+[
+K_t=[A_t,x_t,P_Gx_t,r_t,C_\Omega,\Phi,q,\Lambda,\Sigma_t,\Gamma_t,L_t,E_t,\Pi_t].
+]
+
+The executable stage order is:
+
+`SENSE → NORMALIZE → DECOMPOSE → LEMMA → TRANSPORT → RECOVER → PROVE`.
+
+The implementation is deliberately fail-closed and representation-aware:
+
+- **SENSE** accepts a finite numeric state vector and binds its address/context without promoting that address into a physical dimension.
+- **NORMALIZE** performs only an explicitly declared identity, centering, max-absolute, or affine frame transform.
+- **DECOMPOSE** computes a declared finite-transform average (P_Gx), the directional residual (r=x-P_Gx), and an idempotence residual. It does not claim a symmetry group that was not supplied.
+- **LEMMA** supplies an identity or block-mean reduction with an explicit reconstruction and (epsilon_{rec}). Reduction loss remains visible as scar/residual evidence.
+- **TRANSPORT** composes invertible SHIFT, PERMUTE, and AFFINE frame transforms into (Gamma_t), emits per-step receipts, constructs the inverse path, and measures round-trip recovery. A reference path may be supplied to compute (Sigma_t=T_{\Gamma}(z)-T_{\Gamma_{ref}}(z)). Closed paths additionally expose a holonomy residual.
+- **RECOVER** lifts the transported reduced state back through the declared lemma rather than silently treating a reduced representation as the full state.
+- **PROVE** compares declared invariants and observables, evaluates reduction/dynamics/path error, validates evidence admissibility, retains scar records, and emits (Pi_t).
+
+A PCWD packet is promotion-eligible only when all eight gates pass:
+
+1. continuity valid;
+2. invariants preserved;
+3. scar retained;
+4. recovery bounded;
+5. dynamics bounded;
+6. observables bounded;
+7. evidence admissible;
+8. path recoverable.
+
+The augmented continuity score is computed from (C_\Omega\Phi) against contradiction, burden, reconstruction error, dynamics error, and observable error. A failed continuity/evidence/path gate escalates; other bounded proof failures turn; a fully proven packet stays. These STAY/TURN/ESCALATE results are proof-context decisions, not direct Canon admission.
+
+R356 now accepts an optional `candidate.proofDynamics` packet. When supplied, the eight-gate PCWD result is bound into the R356 admission receipt. A failing PCWD packet cannot pass R356 admission. Legacy candidates that have not yet migrated to PCWD retain their existing R356 contract so this phase-boundary addition does not retroactively fabricate missing numerical evidence or break the established authority spine.
+
+Forecast Mode is represented as an explicit branch set whose model futures remain retained until a separate admissibility rule prunes them. Probability mass is recorded and normalized for inspection; branch retention is not treated as observation.
+
+A bounded pure-state quantum adapter is also provided. It maps caller-supplied complex amplitudes into real software coordinates and declares only norm preservation as an invariant/observable. It does **not** replace quantum mechanics, infer measurement outcomes, validate a physical experiment, or create new physical authority.
+
+This layer therefore unifies micro/macro representation, symmetry/asymmetry decomposition, lemma reduction, temporal/path transport, scar/holonomy carry, forecast branches, evidence, and proof receipts under one software state-transport formalism while preserving the existing `NO NEW PHYSICAL PRIMITIVE` boundary.
