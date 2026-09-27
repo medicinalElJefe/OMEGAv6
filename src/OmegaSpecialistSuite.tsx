@@ -26,6 +26,7 @@ import OmegaReleaseLineageR353 from './OmegaReleaseLineageR353';
 import OmegaProofBoundSceneR354 from './OmegaProofBoundSceneR354';
 import OmegaProofBoundTemporalTraversalR355 from './OmegaProofBoundTemporalTraversalR355';
 import OmegaAtlas360R356 from './OmegaAtlas360R356';
+import OmegaProofCarryingWovenDynamics from './OmegaProofCarryingWovenDynamics';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -52,6 +53,7 @@ export default function OmegaSpecialistSuite(props:Props){
   </section>
   <section className='r356-convergence-section r356-convergence-lineage'>
    <header><div><span>PROOF-BOUND SCENE</span><b>Release → scene → traversal</b><small>R354/R355 receipts bind current lineage, deterministic replay and temporal scene continuity.</small></div></header>
+   <OmegaProofCarryingWovenDynamics address={address}/>
    <OmegaProofBoundSceneR354/>
    <OmegaProofBoundTemporalTraversalR355/>
   </section>
@@ -69,7 +71,7 @@ export default function OmegaSpecialistSuite(props:Props){
   </section>
  </div>);
  if(panel==='Field'||panel==='Data Motion')return wrap(<div><OmegaFieldMotionConvergenceR28 variant={panel} record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/><OmegaAtlas360R356 address={address}/></div>);
- if(panel==='Evidence & Proof')return wrap(<div><OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/><OmegaReleaseLineageR353/><OmegaAtlas360R356 address={address} compact/><SingmasterProofWorkbenchR290 record={record}/></div>);
+ if(panel==='Evidence & Proof')return wrap(<div><OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/><OmegaReleaseLineageR353/><OmegaProofCarryingWovenDynamics address={address} compact/><OmegaAtlas360R356 address={address} compact/><SingmasterProofWorkbenchR290 record={record}/></div>);
  if(panel==='Memory')return wrap(<OmegaEvidenceMemoryR28 variant={panel} record={record} address={address} onAddress={onAddress} status={status} restore={restore}/>);
  if(panel==='Canon Evolution'||panel==='Governance')return wrap(<div><CalculusAddressFabricR240 record={record}/><RecursiveSelfBuildR240/><OmegaGovernanceProjectMediaR29 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/></div>);
  if(panel==='Projects'||panel==='Assets'||panel==='Render Queue')return wrap(<OmegaGovernanceProjectMediaR29 variant={panel} record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>);
