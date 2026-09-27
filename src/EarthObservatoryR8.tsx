@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {Activity,ChevronLeft,ChevronRight,CloudSun,Crosshair,Globe2,Layers3,Map,MapPin,Mountain,Pause,Play,Radio,RefreshCw,Search,Satellite,ShieldCheck,Wind} from 'lucide-react';
 import EarthNowInstrument,{type EarthInstrumentMode} from './EarthNowInstrument';
 import EarthObservedGlobeR281 from './EarthObservedGlobeR281';
@@ -31,7 +31,9 @@ export default function EarthObservatoryR8({address}:Props){
  const coords=useMemo(()=>decodeAddress(address),[address]);
  const initial=useMemo(()=>({lat:-90+(coords.d+.5)/12*180,lon:-180+(coords.p*12+coords.r+.5)/144*360}),[coords]);
  const[lat,setLat]=useState(initial.lat),[lon,setLon]=useState(initial.lon),[evidence,setEvidence]=useState<any>(null),[catalog,setCatalog]=useState<Coverage[]>([]),[selected,setSelected]=useState('G19-FD'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[playing,setPlaying]=useState(false),[focus,setFocus]=useState<Focus>('ALL'),[view,setView]=useState<EarthView>(savedView),[placeQuery,setPlaceQuery]=useState(''),[placeBusy,setPlaceBusy]=useState(false),[placeError,setPlaceError]=useState(''),[placeResults,setPlaceResults]=useState<any[]>([]);
- const queryAt=async(qLat=lat,qLon=lon)=>{setBusy(true);setError('');try{const[e,c]=await Promise.all([api.get<any>(`/api/earth/evidence?lat=${qLat.toFixed(5)}&lon=${qLon.toFixed(5)}`),api.get<any>('/api/earth/noaa/catalog')]);setEvidence(e.data);const rows=(c.data?.coverages||[]) as Coverage[];setCatalog(rows);if(rows.length&&!rows.some(x=>x.id===selected))setSelected(rows.some(x=>x.id==='G19-FD')?'G19-FD':rows[0].id)}catch(x:any){setError(x?.message||String(x))}finally{setBusy(false)}};
+ const evidenceRequest=useRef(0);
+ const queryAt=async(qLat=lat,qLon=lon)=>{const request=++evidenceRequest.current;setBusy(true);setError('');setEvidence(null);try{const[e,c]=await Promise.all([api.get<any>(`/api/earth/evidence?lat=${qLat.toFixed(5)}&lon=${qLon.toFixed(5)}`),api.get<any>('/api/earth/noaa/catalog')]);if(request!==evidenceRequest.current)return;const target=e.data?.target;if(!target||Math.abs(Number(target.lat)-qLat)>0.000011||Math.abs(Number(target.lon)-qLon)>0.000011||!Number.isFinite(Number(target.lat))||!Number.isFinite(Number(target.lon)))throw new Error('Returned Earth evidence does not match the selected target.');setEvidence(e.data);const rows=(c.data?.coverages||[]) as Coverage[];setCatalog(rows);if(rows.length&&!rows.some(x=>x.id===selected))setSelected(rows.some(x=>x.id==='G19-FD')?'G19-FD':rows[0].id)}catch(x:any){if(request===evidenceRequest.current)setError(x?.message||String(x))}finally{if(request===evidenceRequest.current)setBusy(false)}};
+ useEffect(()=>()=>{evidenceRequest.current++},[]);
  useEffect(()=>{setLat(initial.lat);setLon(initial.lon);void queryAt(initial.lat,initial.lon)},[initial.lat,initial.lon]);
  useEffect(()=>{try{localStorage.setItem('omega.earth.r279.view',view)}catch{}},[view]);
  useEffect(()=>{if(!playing||!catalog.length)return;const id=window.setInterval(()=>setSelected(v=>{const i=Math.max(0,catalog.findIndex(x=>x.id===v));return catalog[(i+1)%catalog.length]?.id||v}),6000);return()=>window.clearInterval(id)},[playing,catalog]);
