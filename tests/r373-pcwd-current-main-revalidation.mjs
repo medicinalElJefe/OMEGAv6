@@ -12,8 +12,8 @@ const r313=read('tests/r313-full-control-interaction-browser-e2e.mjs');
 
 const phaseScripts=['test:r359','test:r360','test:r361','test:r362','test:r363','test:r364','test:r365','test:r366','test:r367','test:r370','test:r371'];
 for(const script of phaseScripts){
-  assert.ok(pkg.scripts?.[script],\`R373 missing inherited phase script \${script}\`);
-  assert.ok(String(pkg.scripts.check||'').includes(\`npm run \${script}\`),\`R373 canonical check does not execute \${script}\`);
+  assert.ok(pkg.scripts?.[script],`R373 missing inherited phase script ${script}`);
+  assert.ok(String(pkg.scripts.check||'').includes(`npm run ${script}`),`R373 canonical check does not execute ${script}`);
 }
 
 for(const file of[
@@ -29,7 +29,7 @@ for(const file of[
  'tests/r362-pcwd-bridge-composition.mts',
  'tests/r363-pcwd-path-equivalence.mts',
  'tests/r364-pcwd-full-stack-validation.mjs',
-])assert.ok(fs.existsSync(file),\`R373 current main lost PCWD file \${file}\`);
+])assert.ok(fs.existsSync(file),`R373 current main lost PCWD file ${file}`);
 
 const r359=read('tests/r359-pcwd-reference-benchmarks.mts');
 for(const token of[
@@ -42,7 +42,7 @@ for(const token of[
  'LORENZ63_RK4_REFERENCE',
  'QUBIT_UNITARY_REFERENCE',
  'ARNOLD_CAT_MAP_REVERSIBILITY',
-])assert.ok(r359.includes(token),\`R373 benchmark ledger lost \${token}\`);
+])assert.ok(r359.includes(token),`R373 benchmark ledger lost ${token}`);
 
 const semantic=read('src/system/pcwdSemanticProfiles.ts');
 assert.ok(semantic.includes('DOMAIN_SEMANTICS_DIFFER'),'R373 semantic-profile mismatch must remain fail-closed');
@@ -51,7 +51,7 @@ assert.ok(semantic.includes('verifyCrossDomainInvariantProjectionV1'),'R373 stru
 
 const bridge=read('src/system/pcwdInterDomainBridge.ts');
 for(const token of['SEMANTIC_NON_TRANSFER','AUTHORITY_NON_TRANSFER','UNMODELED_LOSS','semanticEquivalenceClaimed:false','physicalLawClaimed:false'])
-  assert.ok(bridge.includes(token),\`R373 bridge truth boundary lost \${token}\`);
+  assert.ok(bridge.includes(token),`R373 bridge truth boundary lost ${token}`);
 
 const compose=read('src/system/pcwdBridgeComposition.ts');
 assert.ok(compose.includes('lossLedgerMonotone'),'R373 composed bridge loss monotonicity missing');
@@ -72,7 +72,7 @@ assert.equal(typedFieldButtons,fieldButtons,'R373 every R28 Field control must b
 assert.ok(r313.includes('noWaitAfter:true'),'R373 R313 safe-control actuation must not block on phantom navigation');
 assert.ok(r313.includes('__r313MainFrameNavigations'),'R373 R313 must independently fail on actual main-frame navigation');
 
-assert.ok(ci.includes('ref: \${{ github.sha }}'),'R373 production checkout must remain exact-SHA pinned');
+assert.ok(ci.includes('ref: ${{ github.sha }}'),'R373 production checkout must remain exact-SHA pinned');
 assert.ok(ci.includes('fetch-depth: 0'),'R373 production checkout must retain merge ancestry');
 assert.ok(ci.includes('Verify exact deployment checkout'),'R373 exact deployment checkout gate missing');
 assert.ok(ci.includes('Promoted main commit must be an exact two-parent merge commit'),'R373 two-parent promoted-lineage gate missing');
