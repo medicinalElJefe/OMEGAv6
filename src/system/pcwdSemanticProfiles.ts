@@ -100,6 +100,20 @@ export async function compileDomainSemanticsProfileV1(input:Omit<DomainSemantics
  return{...core,profileDigest:await sha256(core)};
 }
 
+
+export async function verifyDomainSemanticsProfileV1(profile:DomainSemanticsProfileV1){
+ if(profile?.schema!==PCWD_SEMANTIC_PROFILE_SCHEMA||profile?.boundary!==PCWD_SEMANTIC_BOUNDARY)return false;
+ const core={
+  schema:profile.schema,domain:profile.domain,domainVersion:profile.domainVersion,stateSpace:profile.stateSpace,
+  transportMeaning:profile.transportMeaning,recoveryMeaning:profile.recoveryMeaning,evidenceMeaning:profile.evidenceMeaning,
+  scarMeaning:profile.scarMeaning,pathMeaning:profile.pathMeaning,observablesMeaning:profile.observablesMeaning,
+  governanceMetrics:profile.governanceMetrics,errorMetrics:profile.errorMetrics,
+  structuralComparableFields:profile.structuralComparableFields,rawDomainFieldsNeverCompared:profile.rawDomainFieldsNeverCompared,
+  boundary:profile.boundary,
+ };
+ return(await sha256(core))===profile.profileDigest;
+}
+
 export function metricCompatibilityV1(a:MetricDescriptorV1,b:MetricDescriptorV1){
  const sameIdentity=a.id===b.id;
  const sameUnit=a.unit===b.unit;
@@ -111,6 +125,7 @@ export function metricCompatibilityV1(a:MetricDescriptorV1,b:MetricDescriptorV1)
 
 export async function compileCrossDomainInvariantProjectionV1(result:any,profile:DomainSemanticsProfileV1):Promise<CrossDomainInvariantProjectionV1>{
  if(result?.schema!==UNIFIED_PCWD_SCHEMA)throw new Error('R360 projection requires a unified PCWD result');
+ if(!await verifyDomainSemanticsProfileV1(profile))throw new Error('R360 semantic profile digest invalid');
  if(result?.domain!==profile.domain||result?.domainVersion!==profile.domainVersion)throw new Error('R360 semantic profile domain/version mismatch');
  const integrityVerified=await verifyUnifiedProofTransportV1(result);
  const gates=UNIFIED_PCWD_GATES.map(k=>Boolean(result.proof?.gates?.[k]));
