@@ -134,7 +134,7 @@ async function inventory(page,surface){
    const label=(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').replace(/\s+/g,' ').trim();
    const id=`r313-${surface.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${index}`;
    el.setAttribute('data-r313-probe-id',id);
-   return{id,index,label,tag:el.tagName,native:el.tagName==='BUTTON',role:el.getAttribute('role')||'',tabIndex:el.tabIndex,disabled:Boolean(el.disabled||el.getAttribute('aria-disabled')==='true'),width:r.width,height:r.height,pointer:getComputedStyle(el).pointerEvents,navTarget:el.getAttribute('data-r313-nav-target')||''};
+   return{id,index,label,tag:el.tagName,native:el.tagName==='BUTTON',role:el.getAttribute('role')||'',tabIndex:el.tabIndex,disabled:Boolean(el.disabled||el.getAttribute('aria-disabled')==='true'),width:r.width,height:r.height,pointer:getComputedStyle(el).pointerEvents,navTarget:el.getAttribute('data-r313-nav-target')||'',transientToggle:el.getAttribute('data-r313-transient-toggle')==='true',restoreLabel:el.getAttribute('data-r313-restore-label')||'',ariaPressed:el.getAttribute('aria-pressed')||''};
   });
  },{navSel:NAV_SELECTOR,surface});
 }
@@ -189,6 +189,14 @@ async function actuateSafeControl(page,item,profile,surface){
     await page.mouse.click(x,y);
    }else{
     await current.click({timeout:7000,noWaitAfter:true});
+    if(item.transientToggle&&item.restoreLabel){
+     await page.waitForFunction(({id})=>document.querySelector(`[data-r313-probe-id="${CSS.escape(id)}"]`)?.getAttribute('aria-pressed')==='true',{id:item.id},{timeout:5000}).catch(()=>{});
+     const restore=page.getByRole('button',{name:item.restoreLabel,exact:true}).first();
+     await restore.waitFor({state:'visible',timeout:5000});
+     await restore.scrollIntoViewIfNeeded().catch(()=>{});
+     await restore.click({timeout:7000,noWaitAfter:true});
+     await page.waitForFunction(({label})=>![...document.querySelectorAll('button')].some(el=>(el.getAttribute('aria-label')||el.textContent||'').replace(/\s+/g,' ').trim()===label&&el.getAttribute('aria-pressed')==='true'),{label:item.restoreLabel},{timeout:5000}).catch(()=>{});
+    }
    }
   }else{
    // Animated SVG role-buttons may intentionally never satisfy pointer-stability.
