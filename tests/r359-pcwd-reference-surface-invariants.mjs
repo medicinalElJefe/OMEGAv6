@@ -8,7 +8,7 @@ const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
 for(const token of[
  'R359 · COMPETENT REFERENCES',
- 'Run competent reference suite',
+ 'Evaluate competent reference suite',
  'MATCH',
  'TRADEOFF',
  'FAIL',
