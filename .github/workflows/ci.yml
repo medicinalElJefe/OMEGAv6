@@ -83,6 +83,9 @@ jobs:
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: verify
     runs-on: ubuntu-latest
+    concurrency:
+      group: omega-canonical-production-deploy
+      cancel-in-progress: false
     environment: production
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
@@ -90,10 +93,30 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
+      - name: Verify exact deployment checkout
+        shell: bash
+        run: |
+          checked_out_sha="$(git rev-parse HEAD)"
+          if [ "$checked_out_sha" != "$GITHUB_SHA" ]; then
+            echo "::error title=DEPLOY CHECKOUT DRIFT::Expected workflow SHA $GITHUB_SHA but checkout resolved to $checked_out_sha."
+            exit 1
+          fi
+          echo "Exact deployment checkout bound to $checked_out_sha."
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - name: Verify this run still owns current main
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          current_main="$(git rev-parse origin/main)"
+          if [ "$current_main" != "$GITHUB_SHA" ]; then
+            echo "::error title=SUPERSEDED RELEASE::This run targets $GITHUB_SHA but current main is $current_main. Refusing production deployment."
+            exit 1
+          fi
+          echo "Exact current-main ownership confirmed for $GITHUB_SHA."
       - name: Bind promoted merge lineage
         shell: bash
         run: |
@@ -358,7 +381,32 @@ jobs:
         if: failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible == 'true'
         id: rollback_worker
         shell: bash
-        run: npx wrangler rollback "${{ steps.deploy_worker.outputs.previous_version_id }}" --name omegav6 --message "OMEGA automatic rollback after live proof failure for $GITHUB_SHA"
+        run: |
+          status_json="$(mktemp)"
+          npx wrangler deployments status --name omegav6 --json > "$status_json"
+          node - "$status_json" "${{ steps.deploy_worker.outputs.candidate_version_id }}" <<'NODE'
+          const fs=require('fs');
+          const data=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          const candidate=process.argv[3],rows=[];
+          function walk(value){
+            if(!value||typeof value!=='object')return;
+            if(Array.isArray(value)){for(const x of value)walk(x);return}
+            const id=typeof value.version_id==='string'?value.version_id:(typeof value.versionId==='string'?value.versionId:null);
+            const raw=value.percentage??value.traffic_percentage??value.trafficPercentage;
+            const pct=Number(raw);
+            if(id&&Number.isFinite(pct)&&pct>0.001)rows.push({id,pct});
+            for(const x of Object.values(value))walk(x);
+          }
+          walk(data);
+          const serving=[...new Map(rows.map(x=>[x.id,x])).values()];
+          if(serving.length!==1||serving[0].id!==candidate||serving[0].pct<99.999){
+            console.error(`ROLLBACK OWNERSHIP LOST: candidate=${candidate} serving=${JSON.stringify(serving)}`);
+            process.exit(1);
+          }
+          console.log(`Rollback ownership confirmed: exact candidate ${candidate} still owns 100% traffic.`);
+          NODE
+          rm -f "$status_json"
+          npx wrangler rollback "${{ steps.deploy_worker.outputs.previous_version_id }}" --name omegav6 --message "OMEGA automatic rollback after live proof failure for $GITHUB_SHA"
       - name: Refuse rollback to an unproved or known-bad baseline
         if: failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible != 'true'
         shell: bash
@@ -375,6 +423,7 @@ jobs:
             echo "- Runtime: $OMEGA_PUBLIC_URL"
             echo "- Private SAI doorway: $OMEGA_SAI_DOOR_URL"
             echo "- Trigger: ${{ github.event_name }}"
+            echo "- Production deployment concurrency: serialized · no in-progress cancellation"
             echo "- Verify job: ${{ needs.verify.result }}"
             echo "- Deployment job: ${{ job.status }}"
             echo "- Canonical Worker staged proof + promotion: ${{ steps.deploy_worker.outcome }}"

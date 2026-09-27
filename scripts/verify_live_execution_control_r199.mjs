@@ -1,5 +1,5 @@
 const base=String(process.env.OMEGA_PUBLIC_URL||'').replace(/\/$/,'');
-const expected=String(process.env.GITHUB_SHA||process.env.OMEGA_PROMOTED_SHA||'').trim();
+const expected=String(process.env.OMEGA_PROMOTED_SHA||process.env.GITHUB_SHA||'').trim();
 if(!/^https:\/\//.test(base)) throw new Error(`R199 canonical runtime URL unavailable: ${base}`);
 if(!/^[a-f0-9]{40}$/i.test(expected)) throw new Error(`R199 invalid expected promoted SHA: ${expected}`);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
