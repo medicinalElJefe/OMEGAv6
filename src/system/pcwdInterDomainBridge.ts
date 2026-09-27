@@ -192,3 +192,20 @@ export function qubitToResolutionLensBridgeV1(sourceProfile:DomainSemanticsProfi
   semanticAuthorityTransferred:false,canonicalMutation:false,physicalLawClaimed:false,
  };
 }
+
+
+export function qubitToLossyResolutionLensBridgeV1(sourceProfile:DomainSemanticsProfileV1,targetProfile:DomainSemanticsProfileV1,tolerance=1e-12):InterDomainBridgeContractV1<Matrix2V1,ResolutionLensV1,Matrix2V1>{
+ const base=qubitToResolutionLensBridgeV1(sourceProfile,targetProfile,tolerance);
+ return{
+  ...base,
+  id:'OMEGA_QUBIT_TO_LOSSY_LENS_NEGATIVE_CONTROL',
+  translate:source=>{
+   const lens=compileResolutionLensV1(flattenMatrix2(source),4);
+   return{...lens,residual:lens.residual.map(()=>0),exactRecovery:false,recoveryError:1};
+  },
+  losses:()=>[
+   {kind:'UNMODELED_LOSS',declared:false,magnitude:.5,detail:'negative control intentionally deletes the residual sidecar'},
+  ],
+  translationMeaning:'negative control: flatten complex coefficients, coarse-grain, then intentionally delete the residual sidecar',
+ };
+}
