@@ -14,6 +14,7 @@ const interactionProof=fs.readFileSync('tests/r313-full-control-interaction-brow
 const navigationProof=fs.readFileSync('tests/r239-user-navigation-browser-e2e.mjs','utf8');
 const disclosureProof=fs.readFileSync('tests/r313-panel-disclosure-browser-e2e.mjs','utf8');
 const routeLifecycle=fs.readFileSync('src/system/routeLifecycleR356.ts','utf8');
+const fieldMotion=fs.readFileSync('src/OmegaFieldMotionConvergenceR28.tsx','utf8');
 
 const legacy=[
  './coherenceRepairR35.css','./specialistDepthR38_3.css','./mobileMatterR42.css','./sovereignDesignR59.css',
@@ -82,6 +83,8 @@ assert.ok(!workstation.includes("scrollTo({top:0,behavior:'smooth'})"),'R356 rou
 assert.ok(interactionBinding.includes('interactionBindingKeyR356'),'R356 one interaction-binding function missing');
 assert.ok(surface.includes('interactionBindingKeyR356(panel,record)')&&capabilityField.includes('interactionBindingKeyR356(panel,record,address)'),'R356 surface/capability identity must share one binding-key authority');
 assert.ok(workstation.includes('startTransition(()=>setPanel(next))'),'R356 workstation route commits must be transition-scheduled');
+assert.ok(workstation.includes('routeDeferred=specialistLoadersForPanelR109(next).length>0')&&workstation.includes('if(routeDeferred)setPanel(next);else startTransition(()=>setPanel(next))'),'R356 deferred specialist routes must commit the shell urgently so Suspense can expose a truthful loading surface before heavy module materialization');
+assert.ok(workstation.includes("useLayoutEffect(()=>{commitRouteLifecycleR356(panel)},[panel])"),'R356 route COMMITTED receipt must publish synchronously with the committed panel DOM so heavy specialist effects cannot leave REQUESTED stale');
 assert.ok(routeLifecycle.includes('requestRouteLifecycleR356')&&routeLifecycle.includes('commitRouteLifecycleR356')&&routeLifecycle.includes("omega-r356-route-requested")&&routeLifecycle.includes("omega-r356-route-committed"),'R356 must own one shared REQUESTED→COMMITTED route lifecycle authority');
 assert.ok(workstation.includes("window.setTimeout(()=>{const root=document.documentElement;if(root.dataset.omegaRouteEpoch===routeLifecycle.epoch&&root.dataset.omegaRouteState==='REQUESTED'&&root.dataset.omegaRouteTarget===next&&root.dataset.omegaRouteCurrent!==next)setPanel(next)},240)"),'R356 route lifecycle must escalate a starved transition on the same epoch/target instead of remaining REQUESTED indefinitely');
 assert.ok(app.includes("requestRouteLifecycleR356(home?'Home'")&&workstation.includes('requestRouteLifecycleR356(panel,next)')&&workstation.includes('commitRouteLifecycleR356(panel)'),'R356 Home and Workstation navigation must converge on the same lifecycle authority');
@@ -90,6 +93,11 @@ assert.ok(interactionProof.includes('local interaction broke same-state surface 
 assert.ok(capabilityCss.includes('min-height:46px')&&capabilityCss.includes('-webkit-line-clamp:2'),'R356 live capability telemetry must not move topology controls during async repaint');
 assert.ok(navigationProof.includes('activateRailRoute')&&navigationProof.includes('before.panel!==name')&&navigationProof.includes("root.dataset.omegaRouteState==='COMMITTED'")&&navigationProof.includes('root.dataset.omegaRouteCurrent===name')&&navigationProof.includes('root.dataset.omegaRouteTarget===name'),'R356 persistent navigation proof must accept an already-committed same-route identity while requiring lifecycle movement for a different route');
 assert.ok(disclosureProof.includes('before.panel!==name')&&disclosureProof.includes("root.dataset.omegaRouteState==='COMMITTED'")&&disclosureProof.includes('root.dataset.omegaRouteCurrent===name')&&disclosureProof.includes('root.dataset.omegaRouteTarget===name'),'R356 disclosure proof must accept already-committed same-route identity while proving exact committed lifecycle for route changes');
+const r28ButtonCount=(fieldMotion.match(/<button /g)||[]).length;
+const r28TypedButtonCount=(fieldMotion.match(/<button type='button'/g)||[]).length;
+assert.equal(r28TypedButtonCount,r28ButtonCount,'R356 Field/Data Motion/Convergence buttons must be explicit non-submit controls so nested form context cannot trigger browser navigation');
+assert.ok(fieldMotion.includes("data-r313-nav-target='Data Motion'")&&fieldMotion.includes("data-r313-nav-target='Convergence'"),'R356 R28 internal route controls must expose exact interaction-proof targets');
+assert.ok(interactionProof.includes("navTarget:el.getAttribute('data-r313-nav-target')")&&interactionProof.includes('await page.mouse.click(x,y);')&&interactionProof.includes('internal route control failed to commit'),'R356 exhaustive interaction proof must pointer-actuate declared internal routes and verify exact lifecycle commit without delegating document navigation to Playwright');
 
 
 console.log('R356 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor + non-blocking proof-lineage disclosure preserved · legacy presentation preserved as provenance only');

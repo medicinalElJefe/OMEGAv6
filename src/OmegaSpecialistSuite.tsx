@@ -28,6 +28,10 @@ import OmegaProofBoundTemporalTraversalR355 from './OmegaProofBoundTemporalTrave
 import OmegaAtlas360R356 from './OmegaAtlas360R356';
 import OmegaProofCarryingWovenDynamics from './OmegaProofCarryingWovenDynamics';
 import OmegaPcwdBenchmarkLab from './OmegaPcwdBenchmarkLab';
+import OmegaPcwdReferenceBenchmarksR359 from './OmegaPcwdReferenceBenchmarksR359';
+import OmegaPcwdSemanticInvariantR360 from './OmegaPcwdSemanticInvariantR360';
+import OmegaPcwdInterDomainBridgeR361 from './OmegaPcwdInterDomainBridgeR361';
+import OmegaPcwdBridgeCompositionR362 from './OmegaPcwdBridgeCompositionR362';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -56,6 +60,10 @@ export default function OmegaSpecialistSuite(props:Props){
    <header><div><span>PROOF-BOUND SCENE</span><b>Release → scene → traversal</b><small>R354/R355 receipts bind current lineage, deterministic replay and temporal scene continuity.</small></div></header>
    <OmegaProofCarryingWovenDynamics address={address}/>
    <OmegaPcwdBenchmarkLab/>
+   <OmegaPcwdReferenceBenchmarksR359/>
+   <OmegaPcwdSemanticInvariantR360/>
+   <OmegaPcwdInterDomainBridgeR361/>
+   <OmegaPcwdBridgeCompositionR362/>
    <OmegaProofBoundSceneR354/>
    <OmegaProofBoundTemporalTraversalR355/>
   </section>

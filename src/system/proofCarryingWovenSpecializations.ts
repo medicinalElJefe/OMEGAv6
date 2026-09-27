@@ -83,6 +83,27 @@ export function propagateCovarianceV1(input:number[][],jacobian:number[][]):Cova
  return{schema:'OMEGA_PCWD_COVARIANCE_TRANSPORT_v1',input:input.map(r=>[...r]),jacobian:jacobian.map(r=>[...r]),output,symmetric,finite,uncertaintyCollapsed:false,boundary:PCWD_SPECIALIZATION_BOUNDARY};
 }
 
+
+export type AffineCovarianceReceiptV1={
+ schema:'OMEGA_PCWD_AFFINE_COVARIANCE_TRANSPORT_v1';
+ input:number[][];
+ jacobian:number[][];
+ processNoise:number[][];
+ output:number[][];
+ symmetric:boolean;
+ finite:boolean;
+ uncertaintyCollapsed:false;
+ boundary:typeof PCWD_SPECIALIZATION_BOUNDARY;
+};
+export function propagateAffineCovarianceV1(input:number[][],jacobian:number[][],processNoise:number[][]):AffineCovarianceReceiptV1{
+ const base=propagateCovarianceV1(input,jacobian),n=input.length;
+ if(processNoise.length!==n||processNoise.some(r=>r.length!==n))throw new Error('PCWD process-noise covariance must match state size');
+ const output=base.output.map((row,i)=>row.map((v,j)=>v+(Number(processNoise[i][j])||0)));
+ const finite=output.every(r=>r.every(Number.isFinite));
+ let symmetric=true;for(let i=0;i<n;i++)for(let j=0;j<n;j++)if(Math.abs(output[i][j]-output[j][i])>1e-10)symmetric=false;
+ return{schema:'OMEGA_PCWD_AFFINE_COVARIANCE_TRANSPORT_v1',input:input.map(r=>[...r]),jacobian:jacobian.map(r=>[...r]),processNoise:processNoise.map(r=>[...r]),output,symmetric,finite,uncertaintyCollapsed:false,boundary:PCWD_SPECIALIZATION_BOUNDARY};
+}
+
 export type LemmaMorphismV1={
  id:string;
  domain:string;

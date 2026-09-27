@@ -134,7 +134,7 @@ async function inventory(page,surface){
    const label=(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').replace(/\s+/g,' ').trim();
    const id=`r313-${surface.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${index}`;
    el.setAttribute('data-r313-probe-id',id);
-   return{id,index,label,tag:el.tagName,native:el.tagName==='BUTTON',role:el.getAttribute('role')||'',tabIndex:el.tabIndex,disabled:Boolean(el.disabled||el.getAttribute('aria-disabled')==='true'),width:r.width,height:r.height,pointer:getComputedStyle(el).pointerEvents};
+   return{id,index,label,tag:el.tagName,native:el.tagName==='BUTTON',role:el.getAttribute('role')||'',tabIndex:el.tabIndex,disabled:Boolean(el.disabled||el.getAttribute('aria-disabled')==='true'),width:r.width,height:r.height,pointer:getComputedStyle(el).pointerEvents,navTarget:el.getAttribute('data-r313-nav-target')||''};
   });
  },{navSel:NAV_SELECTOR,surface});
 }
@@ -177,7 +177,19 @@ async function actuateSafeControl(page,item,profile,surface){
  await waitForStableControl(page,item.id);
  try{
   if(item.native){
-   await current.click({timeout:7000});
+   if(item.navTarget){
+    const box=await current.boundingBox();
+    if(!box)throw new Error(`${profile}/${surface}: navigation control has no pointer box: ${item.label}`);
+    const x=box.x+box.width/2,y=box.y+box.height/2;
+    const hit=await page.evaluate(({x,y,id})=>{
+     const target=document.querySelector(`[data-r313-probe-id="${CSS.escape(id)}"]`),top=document.elementFromPoint(x,y);
+     return Boolean(target&&top&&(top===target||target.contains(top)));
+    },{x,y,id:item.id});
+    if(!hit)throw new Error(`${profile}/${surface}: navigation control is not the pointer hit target: ${item.label}`);
+    await page.mouse.click(x,y);
+   }else{
+    await current.click({timeout:7000,noWaitAfter:true});
+   }
   }else{
    // Animated SVG role-buttons may intentionally never satisfy pointer-stability.
    // Exercise their required semantic keyboard contract instead of weakening liveness.
@@ -209,14 +221,29 @@ async function clickSafeControls(page,surface,profile,pageErrors){
   }
 
   const beforeContinuity=await surfaceContinuityState(page,surface);
+  const beforeNavigationCount=page.__r313MainFrameNavigations||0;
   await actuateSafeControl(page,item,profile,surface);
   await page.waitForTimeout(40);
+  if((page.__r313MainFrameNavigations||0)!==beforeNavigationCount)throw new Error(`${profile}/${surface}: safe control caused a document navigation: ${item.label} url=${page.url()}`);
   if(pageErrors.length)throw new Error(`${profile}/${surface}: page error after activating ${item.label}: ${pageErrors.at(-1)}`);
   const shell=page.locator('.omega-workstation-v2');
   if(!await shell.count()){
    throw new Error(`${profile}/${surface}: canonical workstation shell missing after activating ${item.label}; url=${page.url()}`);
   }
   let afterContinuity=await surfaceContinuityState(page,surface);
+  if(item.navTarget){
+   await page.waitForFunction(target=>{
+    const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+    return root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===target&&root.dataset.omegaRouteTarget===target&&panel===target;
+   },item.navTarget,{timeout:30000}).catch(async e=>{
+    const d=await page.evaluate(target=>{const root=document.documentElement;return{target,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,routeTarget:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null,url:location.href}},item.navTarget);
+    throw new Error(`${profile}/${surface}: internal route control failed to commit ${item.navTarget}: ${JSON.stringify(d)} · ${String(e)}`);
+   });
+   if((page.__r313MainFrameNavigations||0)!==beforeNavigationCount)throw new Error(`${profile}/${surface}: internal route control caused document navigation: ${item.label} url=${page.url()}`);
+   await waitForSurfaceReady(page,item.navTarget);
+   await activateSurface(page,surface);
+   continue;
+  }
   if(afterContinuity.routeEpoch!==beforeContinuity.routeEpoch){
    await page.waitForFunction(({epoch})=>{
     const root=document.documentElement;
@@ -244,6 +271,8 @@ try{
   if(!assigned.length)continue;
   const context=await browser.newContext(options);
   const page=await context.newPage();
+  page.__r313MainFrameNavigations=0;
+  page.on('framenavigated',frame=>{if(frame===page.mainFrame())page.__r313MainFrameNavigations++});
   const pageErrors=[];
   const consoleErrors=[];
   page.on('pageerror',e=>pageErrors.push(String(e)));
