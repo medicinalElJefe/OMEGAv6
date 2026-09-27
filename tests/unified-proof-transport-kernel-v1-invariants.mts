@@ -6,7 +6,7 @@ import{
  UNIFIED_PCWD_GATES,UNIFIED_PCWD_STAGES,executeUnifiedProofChainV1,executeUnifiedProofTransportV1,verifyUnifiedProofTransportV1,
  type UnifiedDomainContractV1,
 }from'../src/system/unifiedProofTransportKernel';
-import{runQubitThroughUnifiedKernelV1,runR349PacketThroughUnifiedKernelV1}from'../src/system/unifiedProofTransportAdapters';
+import{runQubitThroughUnifiedKernelV1,runR349PacketThroughUnifiedKernelV1,runResolutionLensThroughUnifiedKernelV1}from'../src/system/unifiedProofTransportAdapters';
 
 type ToyInput={address:number;x:number[];evidence:boolean};
 const toy:UnifiedDomainContractV1<ToyInput,number[],number[],{projected:number[];residual:number[]},{reduced:number[]},{state:number[]},{state:number[]}>={
@@ -82,6 +82,17 @@ assert.equal(unifiedR349.decision,'STAY');
 assert.equal(await verifyUnifiedProofTransportV1(unifiedR349),true);
 assert.equal((unifiedR349.packet as any).sourceProofDigest,r349.packet.Pi_t.proofDigest);
 
+const unifiedLens=await runResolutionLensThroughUnifiedKernelV1({
+ values:[1,1,1,1,2,3,4,5,10,10,10,10],targetCount:3,evidenceAdmissible:true,address:'LENS:12->3',
+});
+assert.equal(unifiedLens.promotionEligible,true);
+assert.equal(unifiedLens.decision,'STAY');
+assert.equal(await verifyUnifiedProofTransportV1(unifiedLens),true);
+assert.equal((unifiedLens.packet as any).L_t.sourceCount,12);
+assert.equal((unifiedLens.packet as any).L_t.targetCount,3);
+assert.equal((unifiedLens.packet as any).L_t.exactRecovery,true);
+assert.ok((unifiedLens.packet as any).Sigma_t.residualMax>0);
+
 const s=1/Math.sqrt(2),z=QUBIT.c(0),one=QUBIT.c(1);
 const rho:Matrix2V1=[one,z,z,z];
 const H:Matrix2V1=[QUBIT.c(s),QUBIT.c(s),QUBIT.c(s),QUBIT.c(-s)];
@@ -106,4 +117,4 @@ const packetTampered=structuredClone(toyPass);
 (packetTampered.packet as any).q=99;
 assert.equal(await verifyUnifiedProofTransportV1(packetTampered),false);
 
-console.log('UNIFIED PCWD KERNEL PASS · one seven-stage/eight-gate proof contract across generic state, R349 woven field and standard-QM unitary specialization · SHA-256 stage/proof/packet envelope chaining · proof + packet tamper rejection · fail-closed evidence/invariant gates · no authority inflation');
+console.log('UNIFIED PCWD KERNEL PASS · one seven-stage/eight-gate proof contract across generic state, R349 woven field, recoverable micro/macro lens and standard-QM unitary specialization · SHA-256 stage/proof/packet envelope chaining · proof + packet tamper rejection · fail-closed evidence/invariant gates · no authority inflation');
