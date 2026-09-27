@@ -134,3 +134,36 @@ This is a more useful question than “is PCWD better?” because it is falsifia
 R358 is allowed to advance only after the exact PR head passes the canonical application check and the full benchmark/governor suite.
 
 The next phase should then use the measured failures and costs to improve PCWD, not merely add more benchmark wins.
+
+
+## Benchmark-guided continuation: proof-index compaction
+
+The first measured cost is full-envelope representation overhead on a trivial state. R358 does not hide or reclassify that cost.
+
+Instead, the unified kernel now exposes a compact content-addressed proof index containing:
+
+- domain and address;
+- decision and promotion status;
+- eight gates packed into a bit mask;
+- error and tolerance vectors;
+- previous-proof digest;
+- stage-chain digest;
+- proof digest;
+- packet digest;
+- envelope digest.
+
+The compact index is a projection, not a replacement for the complete packet. It explicitly declares:
+
+`requiresFullEnvelopeForSemanticVerification = true`.
+
+Verification therefore remains:
+
+[
+	ext{compact index}
+longleftrightarrow
+	ext{complete sealed envelope}
+longleftrightarrow
+	ext{stage/proof semantics}.
+]
+
+R358 requires the compact index to be less than half the serialized size of the full proof envelope in the trivial-overhead benchmark. The state-only baseline is still expected to remain smaller; compaction reduces a real cost rather than pretending the cost disappeared.
