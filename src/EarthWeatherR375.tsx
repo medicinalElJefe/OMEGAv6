@@ -43,7 +43,7 @@ export default function EarthWeatherR375({lat,lon}:Props){
    <article><ThermometerSun/><span>Feels like</span><b>{num(current.apparentC,1)} °C</b><small>air {num(current.temperatureC,1)} °C</small></article>
    <article><Droplets/><span>Humidity / cloud</span><b>{pct(current.humidityPct)} · {pct(current.cloudPct)}</b><small>precip {num(current.precipMm,1)} mm</small></article>
    <article><Wind/><span>Wind / gust</span><b>{num(current.windKph,0)} / {num(current.gustKph,0)} km/h</b><small>{num(current.windDirectionDeg,0)}°</small></article>
-   <article><Gauge/><span>Pressure</span><b>{num(current.surfacePressureHpa,0)} hPa</b><small>visibility {num((current.visibilityM||0)/1000,1)} km</small></article>
+   <article><Gauge/><span>Pressure</span><b>{num(current.surfacePressureHpa,0)} hPa</b><small>visibility {num(current.visibilityM==null?null:current.visibilityM/1000,1)} km</small></article>
   </div>
 
   <div className='earth-r375-proofbar'>
