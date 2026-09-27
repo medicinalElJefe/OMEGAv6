@@ -30,7 +30,7 @@ export default function EarthWeatherR375({lat,lon}:Props){
  const request=useRef(0);
  const load=async()=>{const id=++request.current;setBusy(true);setError('');try{const r=await api.get<any>('/api/earth/weather?lat='+lat.toFixed(5)+'&lon='+lon.toFixed(5));if(id!==request.current)return;const target=r.data?.target;if(!target||Math.abs(Number(target.lat)-lat)>0.000011||Math.abs(Number(target.lon)-lon)>0.000011)throw new Error('Returned weather target does not match the selected Earth location.');setData(r.data)}catch(e:any){if(id===request.current)setError(e?.message||String(e))}finally{if(id===request.current)setBusy(false)}};
  useEffect(()=>{void load();return()=>{request.current++}},[lat,lon]);
- const hourly=useMemo(()=>Array.isArray(data?.hourly)?data.hourly.slice(0,48):[],[data]);
+ const hourly=useMemo(()=>{const all=Array.isArray(data?.hourly)?data.hourly:[],floor=Date.now()-60*60*1000,future=all.filter((row:any)=>{const t=Date.parse(row?.isoTime||'');return Number.isFinite(t)&&t>=floor});return(future.length?future:all).slice(0,48)},[data]);
  const daily=useMemo(()=>Array.isArray(data?.daily)?data.daily.slice(0,7):[],[data]);
  const q=data?.quality||{},sat=data?.satellite||{},current=data?.current||{},derived=data?.derived||{},scars=Array.isArray(data?.scarLedger)?data.scarLedger:[];
  return <section className='earth-r375-weather' data-earth-view='WEATHER' data-weather-state={busy?'LOADING':error?'ERROR':data?'READY':'IDLE'}>
