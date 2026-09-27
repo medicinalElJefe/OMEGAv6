@@ -1,4 +1,4 @@
-import {Suspense,startTransition,useEffect,useMemo,useRef,useState} from 'react';
+import {Suspense,startTransition,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {BrainCircuit,Home,Orbit,ShieldCheck,Sparkles} from 'lucide-react';
 import OmegaCommandDeck from './OmegaCommandDeck';
 import ResponsiveRuntimeShell,{LayoutModeSwitch,type OmegaUiMode} from './ResponsiveRuntimeShell';
@@ -52,7 +52,7 @@ export default function OmegaWorkstationFullV2(){
  const[response,setResponse]=useState<any>(null),[busy,setBusy]=useState(''),[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null);const seq=useRef(0);
  useEffect(()=>{initCorpusPack().then(()=>setReady(true)).catch(e=>setBootError(e instanceof Error?e.message:String(e)))},[]);
  useEffect(()=>{void syncProjectContinuityR97()},[]);
- useEffect(()=>{localState.write('omega.v6.panel',panel)},[panel]);useEffect(()=>{commitRouteLifecycleR356(panel)},[panel]);useEffect(()=>{localState.write('omega.v6.address',address)},[address]);useEffect(()=>{localState.write('omega.v6.modePolicy',modePolicy)},[modePolicy]);
+ useEffect(()=>{localState.write('omega.v6.panel',panel)},[panel]);useLayoutEffect(()=>{commitRouteLifecycleR356(panel)},[panel]);useEffect(()=>{localState.write('omega.v6.address',address)},[address]);useEffect(()=>{localState.write('omega.v6.modePolicy',modePolicy)},[modePolicy]);
  useEffect(()=>{const sync=(e:Event)=>setWorkflow((e as CustomEvent).detail??readWorkflowR85());window.addEventListener('omega-r85-workflow-changed',sync as EventListener);return()=>window.removeEventListener('omega-r85-workflow-changed',sync as EventListener)},[]);
  useEffect(()=>{if(!workflow)return;const next=workflow.steps?.[Math.min(workflow.steps.length-1,workflow.currentStep+1)]?.route||'';const capabilityRoutes=Array.isArray(workflow.capabilityPlan?.next?.routes)?workflow.capabilityPlan.next.routes.slice(0,2):[];void prefetchSpecialistPanelsR109([next,...capabilityRoutes])},[workflow?.id,workflow?.currentStep]);
  const refresh=async()=>{try{const[s,r]=await Promise.all([api.get<any>('/api/status'),api.get<any>('/api/restoration')]);setStatus(s.data);setRestore(r.data)}catch(e:any){setStatus({error:e?.message||String(e)});setRestore({error:e?.message||String(e)})}};useEffect(()=>{let live=true;const poll=()=>{if(live)void refresh()};poll();const id=window.setInterval(poll,30000);return()=>{live=false;window.clearInterval(id)}},[]);
