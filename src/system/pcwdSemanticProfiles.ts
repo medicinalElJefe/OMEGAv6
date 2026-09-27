@@ -232,6 +232,31 @@ export const PCWD_PROFILE_BUILDERS={
    },
   });
  },
+ async vector8(){
+  return compileDomainSemanticsProfileV1({
+   domain:'OMEGA_REAL_VECTOR8_BRIDGE_DOMAIN',domainVersion:'1',
+   stateSpace:'ordered length-8 real coefficient vector',
+   transportMeaning:'identity ordering of eight declared real coefficients',
+   recoveryMeaning:'the ordered vector is itself the recoverable target representation',
+   evidenceMeaning:'software representation evidence only; no physical or experimental authority',
+   scarMeaning:'declared representation residuals only',
+   pathMeaning:'typed coefficient-order translation path',
+   observablesMeaning:'declared coefficient sums/norms only when a bridge names them',
+   governanceMetrics:{
+    continuity:descriptor('VECTOR8_CONTINUITY','representation continuity policy scalar','ratio','RATIO','ORDER',false),
+    futurePlasticity:descriptor('VECTOR8_FUTURE_PLASTICITY','representation policy scalar','ratio','RATIO','ORDER',false),
+    contradiction:descriptor('VECTOR8_CONTRADICTION','representation contradiction scalar','ratio','NONNEGATIVE','ORDER',false),
+    burden:descriptor('VECTOR8_BURDEN','representation burden scalar','ratio','NONNEGATIVE','ORDER',false),
+   },
+   errorMetrics:{
+    recovery:descriptor('VECTOR8_RECOVERY_ERROR','ordered coefficient round-trip maximum error','coefficient units','NORM','ORDER',false),
+    dynamics:descriptor('VECTOR8_DYNAMICS_ERROR','no independent dynamics in the identity coefficient domain','coefficient units','NORM','ORDER',false),
+    observables:descriptor('VECTOR8_OBSERVABLE_ERROR','declared coefficient observable mismatch','coefficient units','NORM','ORDER',false),
+    path:descriptor('VECTOR8_PATH_ERROR','coefficient-order path mismatch','coefficient units','NORM','ORDER',false),
+    invariants:descriptor('VECTOR8_INVARIANT_ERROR','declared coefficient invariant mismatch','coefficient units','NORM','ORDER',false),
+   },
+  });
+ },
  async qubit(){
   return compileDomainSemanticsProfileV1({
    domain:'OMEGA_QUBIT_UNITARY_PCWD_ADAPTER',domainVersion:'1',
