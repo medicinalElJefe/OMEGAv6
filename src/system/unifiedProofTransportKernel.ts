@@ -20,6 +20,25 @@ export type UnifiedMeasuresV1={
 export type UnifiedGateSetV1={continuityValid:boolean;invariantsPreserved:boolean;scarRetained:boolean;recoveryBounded:boolean;dynamicsBounded:boolean;observablesBounded:boolean;evidenceAdmissible:boolean;pathRecoverable:boolean};
 export type UnifiedStageReceiptV1={stage:(typeof UNIFIED_PCWD_STAGES)[number];fingerprint:string;detail:string};
 export type UnifiedEnvelopeSealV1={schema:'OMEGA_UNIFIED_PCWD_ENVELOPE_SEAL_v1';packetDigest:string;proofDigest:string;stageChainDigest:string;envelopeDigest:string};
+export type UnifiedCompactProofIndexV1={
+ schema:'OMEGA_UNIFIED_PCWD_COMPACT_INDEX_v1';
+ domain:string;
+ domainVersion:string;
+ address:unknown;
+ decision:UnifiedDecisionV1;
+ promotionEligible:boolean;
+ gateMask:number;
+ errors:[number,number,number,number,number];
+ tolerances:[number,number,number,number,number,number];
+ previousProofDigest:string;
+ stageChainDigest:string;
+ proofDigest:string;
+ packetDigest:string;
+ envelopeDigest:string;
+ requiresFullEnvelopeForSemanticVerification:true;
+ boundary:typeof UNIFIED_PCWD_BOUNDARY;
+};
+
 export type UnifiedDomainContractV1<Input,Sensed,Normalized,Decomposed,LemmaState,Transported,Recovered>={
  id:string;
  version:string;
@@ -196,6 +215,30 @@ export async function verifyUnifiedProofTransportV1(result:any){
  if(packetDigest!==result.seal.packetDigest)return false;
  const sealCore={schema:result.seal.schema,packetDigest:result.seal.packetDigest,proofDigest:p.proofDigest,stageChainDigest:p.stageChainDigest};
  return result.seal.proofDigest===p.proofDigest&&result.seal.stageChainDigest===p.stageChainDigest&&await sha256(sealCore)===result.seal.envelopeDigest;
+}
+
+
+export function compileCompactProofIndexV1(result:any):UnifiedCompactProofIndexV1{
+ if(result?.schema!==UNIFIED_PCWD_SCHEMA||result?.proof?.schema!=='OMEGA_UNIFIED_PCWD_PROOF_RECEIPT_v1'||result?.seal?.schema!=='OMEGA_UNIFIED_PCWD_ENVELOPE_SEAL_v1')throw new Error('Compact PCWD index requires a complete unified proof envelope');
+ const p=result.proof as UnifiedProofReceiptV1,s=result.seal as UnifiedEnvelopeSealV1;
+ let gateMask=0;UNIFIED_PCWD_GATES.forEach((k,i)=>{if(p.gates[k])gateMask|=(1<<i)});
+ return{
+  schema:'OMEGA_UNIFIED_PCWD_COMPACT_INDEX_v1',
+  domain:p.domain,domainVersion:p.domainVersion,address:result.address,
+  decision:p.decision,promotionEligible:p.promotionEligible,gateMask,
+  errors:[p.errors.recovery,p.errors.dynamics,p.errors.observables,p.errors.path,p.errors.invariants],
+  tolerances:[p.tolerances.recovery,p.tolerances.dynamics,p.tolerances.observables,p.tolerances.path,p.tolerances.invariants,p.tolerances.continuity],
+  previousProofDigest:p.previousProofDigest,stageChainDigest:p.stageChainDigest,proofDigest:p.proofDigest,
+  packetDigest:s.packetDigest,envelopeDigest:s.envelopeDigest,
+  requiresFullEnvelopeForSemanticVerification:true,
+  boundary:UNIFIED_PCWD_BOUNDARY,
+ };
+}
+export async function verifyCompactProofIndexV1(index:UnifiedCompactProofIndexV1,result:any){
+ if(index?.schema!=='OMEGA_UNIFIED_PCWD_COMPACT_INDEX_v1'||index.requiresFullEnvelopeForSemanticVerification!==true)return false;
+ if(!await verifyUnifiedProofTransportV1(result))return false;
+ const expected=compileCompactProofIndexV1(result);
+ return stable(index)===stable(expected);
 }
 
 export async function executeUnifiedProofChainV1<I,S,N,D,L,T,R>(
