@@ -110,13 +110,16 @@ jobs:
       - name: Verify this run still owns current main
         shell: bash
         run: |
-          git fetch origin main --depth=1
-          current_main="$(git rev-parse origin/main)"
+          current_main="$(git ls-remote origin refs/heads/main | awk 'NR==1{print $1}')"
+          if [[ ! "$current_main" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error title=MAIN OWNERSHIP UNKNOWN::Could not resolve current origin/main without mutating local Git ancestry."
+            exit 1
+          fi
           if [ "$current_main" != "$GITHUB_SHA" ]; then
             echo "::error title=SUPERSEDED RELEASE::This run targets $GITHUB_SHA but current main is $current_main. Refusing production deployment."
             exit 1
           fi
-          echo "Exact current-main ownership confirmed for $GITHUB_SHA."
+          echo "Exact current-main ownership confirmed for $GITHUB_SHA without shallow-fetching the checked-out merge."
       - name: Bind promoted merge lineage
         shell: bash
         run: |
