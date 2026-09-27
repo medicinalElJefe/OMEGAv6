@@ -93,7 +93,7 @@ assert.ok(interactionProof.includes('local interaction broke same-state surface 
 assert.ok(capabilityCss.includes('min-height:46px')&&capabilityCss.includes('-webkit-line-clamp:2'),'R356 live capability telemetry must not move topology controls during async repaint');
 assert.ok(navigationProof.includes('activateRailRoute')&&navigationProof.includes('before.panel!==name')&&navigationProof.includes("root.dataset.omegaRouteState==='COMMITTED'")&&navigationProof.includes('root.dataset.omegaRouteCurrent===name')&&navigationProof.includes('root.dataset.omegaRouteTarget===name'),'R356 persistent navigation proof must accept an already-committed same-route identity while requiring lifecycle movement for a different route');
 assert.ok(disclosureProof.includes('before.panel!==name')&&disclosureProof.includes("root.dataset.omegaRouteState==='COMMITTED'")&&disclosureProof.includes('root.dataset.omegaRouteCurrent===name')&&disclosureProof.includes('root.dataset.omegaRouteTarget===name'),'R356 disclosure proof must accept already-committed same-route identity while proving exact committed lifecycle for route changes');
-const r28ButtonCount=(fieldMotion.match(/<button\\b/g)||[]).length;
+const r28ButtonCount=(fieldMotion.match(/<button /g)||[]).length;
 const r28TypedButtonCount=(fieldMotion.match(/<button type='button'/g)||[]).length;
 assert.equal(r28TypedButtonCount,r28ButtonCount,'R356 Field/Data Motion/Convergence buttons must be explicit non-submit controls so nested form context cannot trigger browser navigation');
 
