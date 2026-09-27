@@ -48,7 +48,7 @@ export default function OmegaPcwdSemanticInvariantR360(){
  };
  return <section className='r360-semantic' data-r360-semantic-layer='OMEGA_PCWD_DOMAIN_SEMANTICS_PROFILE_v1'>
   <header><div><span>R360 · SEMANTIC SEPARATION</span><h3>Common proof topology without false numerical equivalence</h3><p>Structural invariants may cross domains. Raw state, continuity, burden, error, evidence, scar, path and observable values stay domain-local unless their semantic profiles explicitly match.</p></div><GitCompareArrows/></header>
-  <button type='button' onClick={run} disabled={state==='running'}><Play/>{state==='running'?'Running structural proof…':'Run cross-domain semantic proof'}</button>
+  <button type='button' onClick={run} disabled={state==='running'}><Play/>{state==='running'?'Running structural proof…':'Evaluate cross-domain semantic proof'}</button>
   {error&&<p className='r360-error'>{error}</p>}
   {result&&<div className='r360-body'>
    <div className='r360-summary'>
