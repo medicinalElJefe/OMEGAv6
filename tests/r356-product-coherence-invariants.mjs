@@ -96,6 +96,8 @@ assert.ok(disclosureProof.includes('before.panel!==name')&&disclosureProof.inclu
 const r28ButtonCount=(fieldMotion.match(/<button /g)||[]).length;
 const r28TypedButtonCount=(fieldMotion.match(/<button type='button'/g)||[]).length;
 assert.equal(r28TypedButtonCount,r28ButtonCount,'R356 Field/Data Motion/Convergence buttons must be explicit non-submit controls so nested form context cannot trigger browser navigation');
+assert.ok(fieldMotion.includes("data-r313-nav-target='Data Motion'")&&fieldMotion.includes("data-r313-nav-target='Convergence'"),'R356 R28 internal route controls must expose exact interaction-proof targets');
+assert.ok(interactionProof.includes("navTarget:el.getAttribute('data-r313-nav-target')")&&interactionProof.includes('await page.mouse.click(x,y);')&&interactionProof.includes('internal route control failed to commit'),'R356 exhaustive interaction proof must pointer-actuate declared internal routes and verify exact lifecycle commit without delegating document navigation to Playwright');
 
 
 console.log('R356 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor + non-blocking proof-lineage disclosure preserved · legacy presentation preserved as provenance only');
