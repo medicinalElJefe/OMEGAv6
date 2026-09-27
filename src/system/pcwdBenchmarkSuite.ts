@@ -5,7 +5,7 @@ import{
   type Matrix2V1,
 }from'./proofCarryingWovenSpecializations';
 import{
-  executeUnifiedProofTransportV1,verifyUnifiedProofTransportV1,
+  compileCompactProofIndexV1,executeUnifiedProofTransportV1,verifyCompactProofIndexV1,verifyUnifiedProofTransportV1,
   type UnifiedDomainContractV1,
 }from'./unifiedProofTransportKernel';
 import{runQubitThroughUnifiedKernelV1}from'./unifiedProofTransportAdapters';
@@ -363,7 +363,9 @@ async function benchmarkNoResidualLimit():Promise<BenchmarkResultV1>{
 async function benchmarkProofOverhead():Promise<BenchmarkResultV1>{
   const r=await executeUnifiedProofTransportV1(pathContract,{start:[0,0],steps:[],evidence:true,id:'OVERHEAD'});
   const baseline={state:[0,0]};
-  const baselineBytes=bytes(baseline),pcwdBytes=bytes(r);
+  const compact=compileCompactProofIndexV1(r);
+  const compactVerified=await verifyCompactProofIndexV1(compact,r);
+  const baselineBytes=bytes(baseline),pcwdBytes=bytes(r),compactIndexBytes=bytes(compact);
   return{
     id:'PROOF_OVERHEAD',
     problem:'Representation and integrity overhead on a trivial identity state',
@@ -371,10 +373,10 @@ async function benchmarkProofOverhead():Promise<BenchmarkResultV1>{
     verdict:'COST',
     pcwdPass:await verifyUnifiedProofTransportV1(r),
     baselinePass:true,
-    metrics:{baselineBytes,pcwdBytes,byteOverhead:pcwdBytes-baselineBytes,overheadRatio:pcwdBytes/Math.max(1,baselineBytes)},
-    retainedByPCWD:['stage receipts','proof gates','history/evidence fields','packet seal'],
+    metrics:{baselineBytes,pcwdBytes,compactIndexBytes,byteOverhead:pcwdBytes-baselineBytes,overheadRatio:pcwdBytes/Math.max(1,baselineBytes),compactVsFullRatio:compactIndexBytes/Math.max(1,pcwdBytes),compactIndexVerified},
+    retainedByPCWD:['stage receipts','proof gates','history/evidence fields','packet seal','compact content-addressed proof index'],
     discardedByBaseline:[],
-    interpretation:'For trivial state transport, PCWD is materially heavier. The additional bytes pay for traceability and proof semantics; this is a real cost, not a win.',
+    interpretation:'For trivial state transport, the full PCWD envelope is materially heavier. R358 therefore also measures a compact content-addressed proof index; the index reduces wire/index size but still requires the full envelope for semantic verification. The state-only baseline remains cheaper.',
   };
 }
 
