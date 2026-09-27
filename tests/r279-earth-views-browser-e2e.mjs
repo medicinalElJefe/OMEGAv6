@@ -80,24 +80,16 @@ try{
     for(const token of ['SAR','source','truth'])if(!text.toLowerCase().includes(token.toLowerCase()))throw new Error(`${label}: R283/R285 SAR surface missing truth-context token ${token}`);
     const workspace=page.locator('.earth-r72-workspace');
     if(!(await workspace.evaluate(el=>el.classList.contains('sar-active'))))throw new Error(`${label}: SAR Truth did not enter explicit sar-active workspace state`);
-    const continuity=page.locator('.earth-r72-console');
-    if(!(await continuity.isVisible()))throw new Error(`${label}: SAR target continuity console is not visible`);
-    if(!(await page.getByRole('button',{name:'Query target'}).isVisible()))throw new Error(`${label}: dedicated Sentinel-1 target query control is not visible`);
-    if(!(await page.getByRole('button',{name:'Return + query model-mapped target'}).isVisible()))throw new Error(`${label}: inherited model-target continuity control is not visible in SAR`);
+    if(!(await page.getByLabel('Search SAR location').isVisible()))throw new Error(`${label}: place-first SAR location search is not visible`);
+    if(!(await page.getByRole('button',{name:'Find location'}).isVisible()))throw new Error(`${label}: SAR place lookup action is not visible`);
+    if(!(await page.getByRole('button',{name:'Use my location'}).isVisible()))throw new Error(`${label}: SAR device-location action is not visible`);
+    if(!(await page.getByRole('button',{name:'Re-query exact coordinates'}).isVisible()))throw new Error(`${label}: exact WGS84 re-query action is not visible`);
    }
   }
-  const reset=page.getByRole('button',{name:'Return + query model-mapped target'});
-  await reset.waitFor({state:'visible',timeout:10000});
-  const lat=page.getByLabel('Latitude'),lon=page.getByLabel('Longitude');
-  await lat.fill('12.34');await lon.fill('56.78');
-  await reset.click();
-  await page.waitForTimeout(100);
-  const resetLat=Number(await lat.inputValue()),resetLon=Number(await lon.inputValue());
-  if(Math.abs(resetLat-12.34)<.001&&Math.abs(resetLon-56.78)<.001)throw new Error(`${label}: reset/query control did not restore the model-mapped target`);
   const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
   if(overflow>12)throw new Error(`${label}: Earth workspace introduced ${overflow}px horizontal overflow`);
   if(pageErrors.length)throw new Error(`${label}: Earth view browser errors: ${pageErrors.join(' | ')}`);
   await context.close();
  }
- console.log('R279/R281/R283/R285/R287 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth · R281/R284 Planet source identity/CRS/bbox/truth contract exact · observed-source recovery actively exercises Reload observed texture when needed · varied returned-source pixels preserved · live SAR owns full-width stage while dedicated + inherited target controls remain usable · reset/query continuity works · no page errors or viewport overflow');
+ console.log('R279/R281/R283/R285/R287 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth · R281/R284 Planet source identity/CRS/bbox/truth contract exact · observed-source recovery actively exercises Reload observed texture when needed · varied returned-source pixels preserved · live SAR owns full-width stage with place-first search + device location + exact WGS84 re-query · no page errors or viewport overflow');
 }finally{await browser.close()}

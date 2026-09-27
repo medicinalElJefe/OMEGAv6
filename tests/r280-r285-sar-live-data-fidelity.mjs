@@ -4,7 +4,7 @@ const earth=read('src/EarthObservatoryR8.tsx'),live=read('src/SARLiveTruthR285.t
 
 // Earth owns one live-data wrapper; the R280 analytical instrument remains its truth renderer.
 must(earth.includes("import SARLiveTruthR285 from './SARLiveTruthR285'"),'Earth must import live SAR wrapper');
-must(earth.includes("data-earth-view='SAR'")&&earth.includes('<SARLiveTruthR285 lat={lat} lon={lon} onTargetChange={setSarTarget}/>'),'Earth SAR view must mount live wrapper with WGS84 target');
+must(earth.includes("data-earth-view='SAR'")&&earth.includes('<SARLiveTruthR285 lat={lat} lon={lon} evidence={evidence} onTargetChange={setSarTarget}/>'),'Earth SAR view must mount live wrapper with WGS84 target and returned evidence for triangulated chain-lemma derivation');
 must(live.includes("import SARTruthInstrumentR280 from'./SARTruthInstrumentR280Surface'"),'live wrapper must delegate analytical rendering to R280 instrument');
 must(live.includes('catalogBound={!!picked}')&&live.includes('allowDemonstration={false}'),'live wrapper must disable demonstration pixels for catalog data');
 
