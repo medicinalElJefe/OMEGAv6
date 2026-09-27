@@ -7,6 +7,7 @@ import{
 import{rasterCoverageR283,rasterVisualValueR283,type SarRasterFieldR283}from'./sarRasterR283';
 import{sarFieldPlanR325,type SarFieldPlanRowR325}from'./sarFieldPlanR325';
 import{materializeSarSafeDerivationsR336,resolveAllSarFieldsR336,type SarFieldResultR336}from'./sarDerivationR336';
+import'./sarPresentationR3563.css';
 
 type View='SOURCE'|'AMPLITUDE'|'PHASE'|'COHERENCE'|'INTERFEROGRAM'|'DEFORMATION'|'ELEVATION'|'POLARIMETRY'|'MULTI_BAND'|'TIME_STACK'|'SCAR_UNCERTAINTY'|'PROOF';
 const VIEWS:View[]=['SOURCE','AMPLITUDE','PHASE','COHERENCE','INTERFEROGRAM','DEFORMATION','ELEVATION','POLARIMETRY','MULTI_BAND','TIME_STACK','SCAR_UNCERTAINTY','PROOF'];
