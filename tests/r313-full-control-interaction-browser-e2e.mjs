@@ -191,7 +191,9 @@ async function actuateSafeControl(page,item,profile,surface){
     await current.click({timeout:7000,noWaitAfter:true});
     if(item.transientToggle&&item.restoreLabel){
      await page.waitForFunction(({id})=>document.querySelector(`[data-r313-probe-id="${CSS.escape(id)}"]`)?.getAttribute('aria-pressed')==='true',{id:item.id},{timeout:5000}).catch(()=>{});
-     const restore=page.getByRole('button',{name:item.restoreLabel,exact:true}).first();
+     const restore=item.restoreLabel==='Exit full screen'
+      ?page.locator('[data-r313-transient-restore="fullscreen"]').first()
+      :page.getByRole('button',{name:item.restoreLabel,exact:true}).first();
      await restore.waitFor({state:'visible',timeout:5000});
      await restore.scrollIntoViewIfNeeded().catch(()=>{});
      await restore.click({timeout:7000,noWaitAfter:true});
