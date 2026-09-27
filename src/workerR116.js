@@ -71,6 +71,18 @@ function withCorsR116(response,request){
  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }
 function preflightR116(request){const headers=corsHeadersR116(request);return headers?new Response(null,{status:204,headers:{...headers,'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION,'x-omega-executor-fabric':R147_REVISION,'x-omega-sovereign-mission':R152_REVISION}}):new Response(null,{status:403,headers:{'x-omega-runtime-successor':REVISION,'x-omega-connector-revision':CONNECTOR_REVISION,'x-omega-proof-closure':R141_REVISION,'x-omega-durable-execution':R146_REVISION,'x-omega-executor-fabric':R147_REVISION,'x-omega-sovereign-mission':R152_REVISION}})}
+async function earthGeocodeR3563(request){
+ const url=new URL(request.url),q=text(url.searchParams.get('q')).replace(/\s+/g,' ').slice(0,180);
+ if(q.length<2)return json({ok:false,schema:'OMEGA_EARTH_GEOCODE_R3563',code:'QUERY_REQUIRED',results:[]},400);
+ const upstream=new URL('https://nominatim.openstreetmap.org/search');upstream.searchParams.set('q',q);upstream.searchParams.set('format','jsonv2');upstream.searchParams.set('addressdetails','1');upstream.searchParams.set('limit','8');upstream.searchParams.set('dedupe','1');
+ try{
+  const response=await fetch(upstream.toString(),{headers:{'user-agent':'OMEGAv6/1.0 (canonical Earth location picker)','accept':'application/json'}});
+  if(!response.ok)return json({ok:false,schema:'OMEGA_EARTH_GEOCODE_R3563',code:'GEOCODER_UNAVAILABLE',upstreamStatus:response.status,results:[]},503);
+  const rows=await response.json().catch(()=>[]);
+  const results=(Array.isArray(rows)?rows:[]).map((x,i)=>({id:String(x.place_id||i),name:String(x.name||x.display_name||q).slice(0,180),displayName:String(x.display_name||x.name||q).slice(0,360),lat:Number(x.lat),lon:Number(x.lon),type:String(x.type||''),category:String(x.category||''),address:x.address&&typeof x.address==='object'?x.address:null,boundingBox:Array.isArray(x.boundingbox)?x.boundingbox.map(Number):null})).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)&&x.lat>=-90&&x.lat<=90&&x.lon>=-180&&x.lon<=180);
+  return json({ok:true,schema:'OMEGA_EARTH_GEOCODE_R3563',provider:'OpenStreetMap Nominatim',query:q,results,canonicalMutation:false,truthBoundary:'Returned geocoder candidates only. Selecting a result changes the Earth evidence query target; it does not admit or mutate CanonState.'},200,{'x-omega-earth-geocode':'R356.3'});
+ }catch(error){return json({ok:false,schema:'OMEGA_EARTH_GEOCODE_R3563',code:'GEOCODER_FETCH_FAILED',detail:error instanceof Error?error.message:String(error),results:[]},503)}
+}
 async function readJsonResponse(response){return response.clone().json().catch(()=>null)}
 async function sha256TextR141(source){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source));return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function inheritedStatusR116(request,env){
@@ -175,8 +187,9 @@ async function probeFetchR130(request,env){
 }
 
 async function fetchR116(request,env){
- const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path.startsWith('/api/intelligence/r331/')||path.startsWith('/api/intelligence/r332/qti/')||path==='/api/chat'||path==='/api/health'||path==='/api/core-health'||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
+ const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path.startsWith('/api/intelligence/r331/')||path.startsWith('/api/intelligence/r332/qti/')||path==='/api/earth/geocode'||path==='/api/chat'||path==='/api/health'||path==='/api/core-health'||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
+ if(path==='/api/earth/geocode'&&request.method==='GET')return withCorsR116(await earthGeocodeR3563(request),request);
  const qtiR332=await publicQtiR332(request);if(qtiR332)return withCorsR116(qtiR332,request);
  const learningR331=await publicLearningR331(request,env,r115.fetch.bind(r115));if(learningR331)return withCorsR116(learningR331,request);
  if((path==='/api/health'||path==='/api/core-health')&&request.method==='GET')return withCorsR116(coreHealthR163(request,env),request);
