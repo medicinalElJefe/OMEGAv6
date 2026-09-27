@@ -110,7 +110,7 @@ jobs:
       - name: Verify this run still owns current main
         shell: bash
         run: |
-          git fetch origin main --depth=1
+          git fetch origin main
           current_main="$(git rev-parse origin/main)"
           if [ "$current_main" != "$GITHUB_SHA" ]; then
             echo "::error title=SUPERSEDED RELEASE::This run targets $GITHUB_SHA but current main is $current_main. Refusing production deployment."
@@ -120,7 +120,11 @@ jobs:
       - name: Bind promoted merge lineage
         shell: bash
         run: |
-          parents="$(git show -s --format=%P "$GITHUB_SHA")"
+          if git rev-parse --is-shallow-repository | grep -qx true; then
+            echo "::error title=SHALLOW LINEAGE UNSAFE::Deployment checkout became shallow before merge-parent binding."
+            exit 1
+          fi
+          parents="$(git cat-file -p "$GITHUB_SHA" | awk '/^parent /{print $2}')"
           set -- $parents
           if [ "$#" -ne 2 ]; then
             echo "::error title=LINEAGE REQUIRED::Promoted main commit must be an exact two-parent merge commit before release lineage can be bound."
