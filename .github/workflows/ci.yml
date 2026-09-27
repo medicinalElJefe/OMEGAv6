@@ -90,7 +90,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
+      - name: Verify exact deployment checkout
+        shell: bash
+        run: |
+          checked_out_sha="$(git rev-parse HEAD)"
+          if [ "$checked_out_sha" != "$GITHUB_SHA" ]; then
+            echo "::error title=DEPLOY CHECKOUT DRIFT::Expected workflow SHA $GITHUB_SHA but checkout resolved to $checked_out_sha."
+            exit 1
+          fi
+          echo "Exact deployment checkout bound to $checked_out_sha."
       - uses: actions/setup-node@v7
         with:
           node-version: 22
