@@ -37,4 +37,7 @@ if(promoted){
  const visual=spawnSync(process.execPath,['tests/r284-live-earth-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
  if(visual.error)throw visual.error;
  if(visual.status!==0)throw new Error(`R284 exact-production live Earth browser proof failed with exit ${visual.status}`);
+ const earthSar=spawnSync(process.execPath,['tests/r3566-live-earth-sar-acceptance-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+ if(earthSar.error)throw earthSar.error;
+ if(earthSar.status!==0)throw new Error(`R356.6 exact-production Earth/SAR acceptance proof failed with exit ${earthSar.status}`);
 }
