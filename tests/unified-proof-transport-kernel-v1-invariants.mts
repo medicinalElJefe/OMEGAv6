@@ -3,7 +3,7 @@ import{compileCanonicalTypedFieldR349}from'../src/system/wovenHardwareFieldR349'
 import{executeProofCarryingWovenStepV1}from'../src/system/proofCarryingWovenDynamics';
 import{QUBIT,type Matrix2V1}from'../src/system/proofCarryingWovenSpecializations';
 import{
- UNIFIED_PCWD_GATES,UNIFIED_PCWD_STAGES,executeUnifiedProofChainV1,executeUnifiedProofTransportV1,verifyUnifiedProofTransportV1,
+ UNIFIED_PCWD_GATES,UNIFIED_PCWD_STAGES,compileCompactProofIndexV1,executeUnifiedProofChainV1,executeUnifiedProofTransportV1,verifyCompactProofIndexV1,verifyUnifiedProofTransportV1,
  type UnifiedDomainContractV1,
 }from'../src/system/unifiedProofTransportKernel';
 import{runQubitThroughUnifiedKernelV1,runR349PacketThroughUnifiedKernelV1,runResolutionLensThroughUnifiedKernelV1}from'../src/system/unifiedProofTransportAdapters';
@@ -44,6 +44,14 @@ assert.equal(toyPass.promotionEligible,true);
 assert.equal(toyPass.decision,'STAY');
 assert.equal(toyPass.stages.length,7);
 assert.equal(await verifyUnifiedProofTransportV1(toyPass),true);
+const compactIndex=compileCompactProofIndexV1(toyPass);
+assert.equal(compactIndex.requiresFullEnvelopeForSemanticVerification,true);
+assert.match(compactIndex.packetDigest,/^[0-9a-f]{64}$/);
+assert.match(compactIndex.envelopeDigest,/^[0-9a-f]{64}$/);
+assert.equal(await verifyCompactProofIndexV1(compactIndex,toyPass),true);
+const compactTampered=structuredClone(compactIndex);
+compactTampered.decision='TURN';
+assert.equal(await verifyCompactProofIndexV1(compactTampered,toyPass),false);
 assert.match(toyPass.proof.proofDigest,/^[0-9a-f]{64}$/);
 assert.match(toyPass.proof.stageChainDigest,/^[0-9a-f]{64}$/);
 assert.match(toyPass.seal.packetDigest,/^[0-9a-f]{64}$/);
@@ -117,4 +125,4 @@ const packetTampered=structuredClone(toyPass);
 (packetTampered.packet as any).q=99;
 assert.equal(await verifyUnifiedProofTransportV1(packetTampered),false);
 
-console.log('UNIFIED PCWD KERNEL PASS · one seven-stage/eight-gate proof contract across generic state, R349 woven field, recoverable micro/macro lens and standard-QM unitary specialization · SHA-256 stage/proof/packet envelope chaining · proof + packet tamper rejection · fail-closed evidence/invariant gates · no authority inflation');
+console.log('UNIFIED PCWD KERNEL PASS · one seven-stage/eight-gate proof contract across generic state, R349 woven field, recoverable micro/macro lens and standard-QM unitary specialization · SHA-256 stage/proof/packet envelope chaining · compact proof index verification · proof + packet tamper rejection · fail-closed evidence/invariant gates · no authority inflation');
