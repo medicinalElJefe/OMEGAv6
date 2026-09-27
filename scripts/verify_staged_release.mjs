@@ -76,14 +76,18 @@ if(chat?.ok!==true||chat?.modelInvoked!==true||!String(chat?.provider||'').start
 const helper='--import=./scripts/cloudflare-version-override-fetch.mjs';
 const childEnv={...process.env,NODE_OPTIONS:[process.env.NODE_OPTIONS,helper].filter(Boolean).join(' ')};
 
-// R324 platform boundary: a 0%-traffic Worker version can be addressed by
-// Cloudflare version override for read-only/execution-free semantic proof, but
-// Hybrid register/heartbeat/poll mutates the Durable Object execution plane.
-// Those stateful transport proofs are therefore deferred until after the exact
-// candidate is promoted to 100%, where canonical CI already requires R202,
-// R237 and R238 and can roll back only to an independently proved-usable
-// baseline.  Do not let pre-promotion proof mutate shared Durable state.
-execFileSync(process.execPath,['scripts/verify_federation_live_r1681.mjs'],{stdio:'inherit',env:childEnv});
+// R324/R365 platform boundary: a 0%-traffic Worker version can be addressed by
+// Cloudflare version override for direct read-only candidate proof. Durable
+// register/heartbeat/poll is promoted-live only, and R199 release-evidence /
+// runtime-attestation proof is also promoted-live only because those Worker
+// endpoints resolve their governed receipt through the canonical ASSETS binding.
+// A version override pins Worker code but does not grant the 0%-traffic version
+// ownership of canonical production assets. Post-promotion CI reruns R168.1,
+// R199, R202, R237 and R238 against the exact canonical live version.
+execFileSync(process.execPath,['scripts/verify_federation_live_r1681.mjs'],{
+  stdio:'inherit',
+  env:{...childEnv,OMEGA_STAGED_READ_ONLY:'1'}
+});
 execFileSync(process.execPath,['scripts/verify_live_operational_source_authority_r202.mjs'],{
   stdio:'inherit',
   env:{...childEnv,OMEGA_PROMOTED_SHA:'',OMEGA_STAGED_READ_ONLY:'1'}
