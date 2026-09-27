@@ -1,9 +1,8 @@
 import assert from'node:assert/strict';
 import{PCWD_PROFILE_BUILDERS}from'../src/system/pcwdSemanticProfiles';
-import{compileResolutionLensV1,QUBIT,type Matrix2V1}from'../src/system/proofCarryingWovenSpecializations';
+import{QUBIT,type Matrix2V1}from'../src/system/proofCarryingWovenSpecializations';
 import{
- executeInterDomainBridgeV1,qubitToResolutionLensBridgeV1,verifyInterDomainBridgeReceiptV1,
- type InterDomainBridgeContractV1,
+ executeInterDomainBridgeV1,qubitToLossyResolutionLensBridgeV1,qubitToResolutionLensBridgeV1,verifyInterDomainBridgeReceiptV1,
 }from'../src/system/pcwdInterDomainBridge';
 
 const[pQubit,pLens]=await Promise.all([PCWD_PROFILE_BUILDERS.qubit(),PCWD_PROFILE_BUILDERS.lens()]);
@@ -39,18 +38,7 @@ const tampered=structuredClone(receipt);
 tampered.targetMeaning='pretend the lens itself is a quantum state';
 assert.equal(await verifyInterDomainBridgeReceiptV1(tampered),false);
 
-const bad:InterDomainBridgeContractV1<Matrix2V1,ReturnType<typeof compileResolutionLensV1>,Matrix2V1>={
- ...bridge,
- id:'OMEGA_QUBIT_TO_LOSSY_LENS_NEGATIVE_CONTROL',
- translate:source=>{
-  const flat=source.flatMap(z=>[z.re,z.im]);
-  const lens=compileResolutionLensV1(flat,4);
-  return{...lens,residual:lens.residual.map(()=>0),exactRecovery:false,recoveryError:1};
- },
- losses:()=>[
-  {kind:'UNMODELED_LOSS',declared:false,magnitude:.5,detail:'negative control intentionally deletes the residual sidecar'},
- ],
-};
+const bad=qubitToLossyResolutionLensBridgeV1(pQubit,pLens,1e-12);
 const held=await executeInterDomainBridgeV1(bad,rho);
 assert.equal(held.bridgeEligible,false);
 assert.equal(held.gates.recoveryBounded,false);
