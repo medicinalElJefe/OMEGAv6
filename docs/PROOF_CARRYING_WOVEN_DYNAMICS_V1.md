@@ -142,6 +142,8 @@ PCWD therefore formalizes the state already present rather than inventing anothe
 PCWD v1 also includes:
 
 - sparse 12^n atlas addressing across 12 → 144 → 1,728 → 20,736 → 248,832 without materializing the whole address space;
+- a recoverable micro/macro resolution lens that stores a coarse representative plus an explicit residual sidecar and measures reconstruction error;
+- covariance transport under a declared Jacobian so uncertainty is carried rather than silently collapsed;
 - composable lemma morphisms with domain/codomain checks, inverse recovery, invariant checks, identity and composition;
 - an eight-phase Relational Skin Calculus receipt: Parent → Interaction → Scar → Continuity → Compression → Skin → Interpretation → Behavior;
 - a finite 2×2 density-matrix unitary specialization using standard quantum mechanics with density validity, unitary validity, recovery error, transformed-observable preservation and qubit fidelity checks.
@@ -162,3 +164,17 @@ The kernel is deliberately adapter-oriented. Additional domains can bind only by
 - truth boundary.
 
 That is the required interface for micro/macro lenses, empirical domains, quantum density-channel experiments, Earth observation, and future solver/runtime integrations.
+
+
+## Runtime convergence binding
+
+`proofCarryingConvergenceBridge.ts` binds a PCWD packet to the inherited R356 Continuous Convergence Runtime. A bridge result can recommend `ADMIT` only when both conditions hold:
+
+1. the PCWD packet passes its eight promotion gates and has a linked SHA-256 receipt;
+2. inherited R356 relative-frame convergence and admission requirements independently pass.
+
+The bridge is fail-closed. It has no CanonState mutation, dispatch, durable-history or production-write authority.
+
+## Operational surface
+
+The Convergence workspace now renders the full PCWD packet/gate/path receipt for the selected canonical address. Evidence & Proof renders a compact proof status. The surface exposes the seven-stage pipeline, eight promotion gates, error/holonomy receipt, RSC loop and bounded quantum specialization self-test while preserving the same truth boundary.
