@@ -177,7 +177,7 @@ async function actuateSafeControl(page,item,profile,surface){
  await waitForStableControl(page,item.id);
  try{
   if(item.native){
-   await current.click({timeout:7000});
+   await current.click({timeout:7000,noWaitAfter:true});
   }else{
    // Animated SVG role-buttons may intentionally never satisfy pointer-stability.
    // Exercise their required semantic keyboard contract instead of weakening liveness.
@@ -209,8 +209,10 @@ async function clickSafeControls(page,surface,profile,pageErrors){
   }
 
   const beforeContinuity=await surfaceContinuityState(page,surface);
+  const beforeNavigationCount=page.__r313MainFrameNavigations||0;
   await actuateSafeControl(page,item,profile,surface);
   await page.waitForTimeout(40);
+  if((page.__r313MainFrameNavigations||0)!==beforeNavigationCount)throw new Error(`${profile}/${surface}: safe control caused a document navigation: ${item.label} url=${page.url()}`);
   if(pageErrors.length)throw new Error(`${profile}/${surface}: page error after activating ${item.label}: ${pageErrors.at(-1)}`);
   const shell=page.locator('.omega-workstation-v2');
   if(!await shell.count()){
@@ -244,6 +246,8 @@ try{
   if(!assigned.length)continue;
   const context=await browser.newContext(options);
   const page=await context.newPage();
+  page.__r313MainFrameNavigations=0;
+  page.on('framenavigated',frame=>{if(frame===page.mainFrame())page.__r313MainFrameNavigations++});
   const pageErrors=[];
   const consoleErrors=[];
   page.on('pageerror',e=>pageErrors.push(String(e)));
