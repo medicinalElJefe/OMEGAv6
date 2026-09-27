@@ -27,6 +27,7 @@ import OmegaProofBoundSceneR354 from './OmegaProofBoundSceneR354';
 import OmegaProofBoundTemporalTraversalR355 from './OmegaProofBoundTemporalTraversalR355';
 import OmegaAtlas360R356 from './OmegaAtlas360R356';
 import OmegaProofCarryingWovenDynamics from './OmegaProofCarryingWovenDynamics';
+import OmegaPcwdBenchmarkLab from './OmegaPcwdBenchmarkLab';
 
 type Props={panel:string;record:any;state:any;address:number;onAddress:(n:number)=>void;onNavigate:(p:string)=>void;status:any;restore:any;uiMode:any;onUiMode:(m:any)=>void};
 
@@ -54,6 +55,7 @@ export default function OmegaSpecialistSuite(props:Props){
   <section className='r356-convergence-section r356-convergence-lineage'>
    <header><div><span>PROOF-BOUND SCENE</span><b>Release → scene → traversal</b><small>R354/R355 receipts bind current lineage, deterministic replay and temporal scene continuity.</small></div></header>
    <OmegaProofCarryingWovenDynamics address={address}/>
+   <OmegaPcwdBenchmarkLab/>
    <OmegaProofBoundSceneR354/>
    <OmegaProofBoundTemporalTraversalR355/>
   </section>
