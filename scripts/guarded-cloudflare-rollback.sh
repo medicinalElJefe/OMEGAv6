@@ -18,34 +18,7 @@ trap cleanup EXIT
 
 npx wrangler deployments status --name "$WORKER_NAME" --json > "$tmp"
 
-decision="$(node - "$tmp" "$CANDIDATE_VERSION_ID" "$PREVIOUS_VERSION_ID" <<'NODE'
-const fs=require('fs');
-const data=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-const candidate=process.argv[3],previous=process.argv[4];
-const rows=[];
-function walk(v){
-  if(!v||typeof v!=='object')return;
-  if(Array.isArray(v)){for(const x of v)walk(x);return}
-  const id=typeof v.version_id==='string'?v.version_id:(typeof v.versionId==='string'?v.versionId:null);
-  const raw=v.percentage??v.traffic_percentage??v.trafficPercentage;
-  const pct=Number(raw);
-  if(id&&Number.isFinite(pct))rows.push({id,pct});
-  for(const x of Object.values(v))walk(x);
-}
-walk(data);
-const serving=rows.filter(x=>x.pct>0.001);
-const stable=serving.filter(x=>x.pct>=99.999);
-const unique=[...new Map(serving.map(x=>[`${x.id}:${x.pct}`,x])).values()];
-if(stable.length===1&&unique.length===1){
-  const id=stable[0].id;
-  if(id===previous){process.stdout.write('ALREADY_PREVIOUS');process.exit(0)}
-  if(id===candidate){process.stdout.write('ROLLBACK_CANDIDATE');process.exit(0)}
-  process.stdout.write('NEWER_OR_FOREIGN');
-  process.exit(0);
-}
-process.stdout.write('AMBIGUOUS_DEPLOYMENT');
-NODE
-)"
+decision="$(node scripts/deployment-ownership-r365.mjs "$tmp" "$CANDIDATE_VERSION_ID" "$PREVIOUS_VERSION_ID")"
 
 case "$decision" in
   ALREADY_PREVIOUS)
