@@ -1,5 +1,5 @@
 import{convergeR356}from'./continuousConvergenceRuntimeR356.js';
-import type{WovenStatePacketV1}from'./proofCarryingWovenDynamics';
+import{verifyProofReceiptV1,type WovenStatePacketV1}from'./proofCarryingWovenDynamics';
 
 export const PCWD_R356_BRIDGE_SCHEMA='OMEGA_PCWD_R356_CONVERGENCE_BRIDGE_v1' as const;
 export const PCWD_R356_BRIDGE_BOUNDARY='This bridge requires both inherited R356 convergence/admission evidence and a valid PCWD proof packet before it can recommend ADMIT. It is an additive gate and does not itself mutate CanonState, dispatch work, write production, or replace R125/R141/R146/R147/ci.yml.' as const;
@@ -27,17 +27,19 @@ export function compilePcwdR356CandidateV1(packet:WovenStatePacketV1,identity:R3
   atlas360:identity.atlas360||{},
  };
 }
-export function convergeProofCarryingR356V1(args:{observations:R356ObservationV1[];packet:WovenStatePacketV1;identity:R356CandidateIdentityV1;scarLedger?:unknown[]}){
+export async function convergeProofCarryingR356V1(args:{observations:R356ObservationV1[];packet:WovenStatePacketV1;identity:R356CandidateIdentityV1;scarLedger?:unknown[]}){
  const candidate=compilePcwdR356CandidateV1(args.packet,args.identity);
  const inherited=convergeR356({observations:args.observations,candidate,scarLedger:args.scarLedger||[]});
  const proofDigestValid=/^[0-9a-f]{64}$/i.test(String(args.packet.Pi_t.proofDigest||''));
+ const receiptVerified=proofDigestValid&&await verifyProofReceiptV1(args.packet);
  const proofLinked=String(args.packet.Pi_t.previousProofDigest||'').length>0;
- const pcwdGate=args.packet.Pi_t.promotionEligible===true&&proofDigestValid&&proofLinked;
+ const pcwdGate=args.packet.Pi_t.promotionEligible===true&&receiptVerified&&proofLinked;
  const inheritedAdmit=inherited?.admissionReceipt?.allow===true;
  const allow=pcwdGate&&inheritedAdmit;
  const reasons:string[]=[];
  if(!args.packet.Pi_t.promotionEligible)reasons.push('PCWD_PROMOTION_GATES_HELD');
  if(!proofDigestValid)reasons.push('PCWD_PROOF_DIGEST_INVALID');
+ if(proofDigestValid&&!receiptVerified)reasons.push('PCWD_PROOF_RECEIPT_INVALID');
  if(!proofLinked)reasons.push('PCWD_PROOF_LINK_MISSING');
  if(!inheritedAdmit)reasons.push(...(inherited?.admissionReceipt?.reasons||[]).map((x:unknown)=>String(x)));
  return{
@@ -46,6 +48,7 @@ export function convergeProofCarryingR356V1(args:{observations:R356ObservationV1
   pcwdDecision:args.packet.Pi_t.decision,
   pcwdDecisionScore:finite(args.packet.Pi_t.decisionScore),
   pcwdGate,
+  receiptVerified,
   inherited,
   allow,
   next:allow?'ADMIT':args.packet.Pi_t.decision==='ESCALATE'||inherited?.motion?.motion==='ESCALATE'?'ESCALATE':'ITERATE',
