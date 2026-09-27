@@ -11,7 +11,7 @@ assert.ok(stagedVerifier.includes("OMEGA_PROMOTED_SHA:''"),'staged R202 proof mu
 assert.ok(stagedVerifier.includes("OMEGA_STAGED_READ_ONLY:'1'"),'staged proof must declare read-only candidate authority');
 assert.ok(!stagedVerifier.includes("'scripts/verify_live_hybrid_command_authority_r237.mjs'"),'staged verifier must not run R237 stateful transport proof');
 assert.ok(!stagedVerifier.includes("'scripts/verify_live_hybrid_host_intelligence_r238.mjs'"),'staged verifier must not run R238 promoted-live stateful proof');
-assert.ok(stagedVerifier.includes("env:{...childEnv,OMEGA_STAGED_READ_ONLY:'1'}"),'staged R168.1 proof must carry the explicit read-only boundary');
+assert.ok(stagedVerifier.includes("env:{...childEnv,OMEGA_PROMOTED_SHA:'',OMEGA_STAGED_READ_ONLY:'1'}"),'staged R168.1 proof must suppress promoted-only lineage and carry the explicit read-only boundary');
 assert.ok(r1681.includes("const stagedReadOnly=String(process.env.OMEGA_STAGED_READ_ONLY||'').trim()==='1'"),'R168.1 must detect staged read-only authority explicitly');
 assert.ok(r1681.includes("String(process.env.OMEGA_PROMOTED_SHA||'').trim()&&!stagedReadOnly"),'R199 must run only for promoted-live R168.1, never the 0%-traffic staged candidate');
 assert.ok(r1681.includes("verify_live_execution_control_r199.mjs"),'R168.1 must retain promoted-live R199 exact execution-control proof');
