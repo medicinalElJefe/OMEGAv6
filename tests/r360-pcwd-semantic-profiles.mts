@@ -70,6 +70,13 @@ assert.equal(c2.reason,'DOMAIN_SEMANTICS_DIFFER');
 assert.notEqual(pR349.governanceMetrics.continuity.id,pLens.governanceMetrics.continuity.id);
 assert.notEqual(pLens.governanceMetrics.continuity.id,pQubit.governanceMetrics.continuity.id);
 
+const sharedMetricA={id:'SHARED_PROBABILITY',meaning:'explicitly shared probability',unit:'probability',scale:'PROBABILITY' as const,comparison:'DISTANCE' as const,crossDomainComparable:true};
+const sharedMetricB={...sharedMetricA};
+const sharedCompatibility=metricCompatibilityV1(sharedMetricA,sharedMetricB);
+assert.equal(sharedCompatibility.comparable,true);
+assert.equal(sharedCompatibility.reason,'EXPLICITLY_COMPATIBLE');
+
+
 await assert.rejects(()=>compileCrossDomainInvariantProjectionV1(qubit,pLens),/domain\/version mismatch/);
 
 const tampered=structuredClone(pQubit);
