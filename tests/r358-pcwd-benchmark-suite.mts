@@ -78,6 +78,9 @@ const overhead=by('PROOF_OVERHEAD');
 assert.equal(overhead.verdict,'COST');
 assert.ok(Number(overhead.metrics.pcwdBytes)>Number(overhead.metrics.baselineBytes));
 assert.ok(Number(overhead.metrics.overheadRatio)>1);
+assert.equal(overhead.metrics.compactIndexVerified,true);
+assert.ok(Number(overhead.metrics.compactIndexBytes)<Number(overhead.metrics.pcwdBytes));
+assert.ok(Number(overhead.metrics.compactVsFullRatio)<.5);
 assert.equal(overhead.pcwdPass,true);
 
 for(const result of suite.results){
