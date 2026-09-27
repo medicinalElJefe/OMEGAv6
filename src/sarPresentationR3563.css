@@ -44,3 +44,17 @@
 .r3565-mini-lemma i{min-width:0;min-height:0}
 .r284-lens-card[data-r3565-lemma='true']{border-color:rgba(97,211,197,.34)!important;background:linear-gradient(180deg,#091a1c,#041114)!important}
 .r284-lens-card[data-r3565-lemma='true'] header span{color:#8ce2d7}
+
+
+/* R373 · legible analytical previews + inspector-yield focus mode. */
+.r280-workbench.focus-display{grid-template-columns:minmax(0,1fr)}
+.r280-workbench.focus-display>.r280-left,.r280-workbench.focus-display>.r280-right{display:none}
+.r280-workbench.focus-display>.r280-center{grid-column:1/-1}
+.r280-workbench.focus-display .r280-screen{min-height:min(72vh,900px)}
+.r284-lens-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.r284-lens-card{grid-template-rows:auto auto auto}
+.r284-mini-grid,.r3565-mini-lemma,.r3564-mini-preview{grid-template-rows:repeat(8,minmax(0,1fr));aspect-ratio:13/8;min-height:0}
+.r3564-mini-preview img{min-height:0;aspect-ratio:13/8;object-fit:cover}
+@media(max-width:1280px){.r284-lens-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.r284-lens-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.r284-lens-grid{grid-template-columns:1fr}.r284-lens-card{max-width:none}}
