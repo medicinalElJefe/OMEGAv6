@@ -178,3 +178,28 @@ The bridge is fail-closed. It has no CanonState mutation, dispatch, durable-hist
 ## Operational surface
 
 The Convergence workspace now renders the full PCWD packet/gate/path receipt for the selected canonical address. Evidence & Proof renders a compact proof status. The surface exposes the seven-stage pipeline, eight promotion gates, error/holonomy receipt, RSC loop and bounded quantum specialization self-test while preserving the same truth boundary.
+
+
+## One domain-neutral transport kernel
+
+The phase boundary now includes `unifiedProofTransportKernel.ts`, which makes the seven-stage/eight-gate topology itself domain-neutral instead of duplicating proof logic per subsystem.
+
+Every admitted domain supplies a contract for:
+
+`Sense → Normalize → Decompose → Lemma → Transport → Recover → Measures`
+
+The kernel then owns the common proof semantics:
+
+- the same eight promotion gates;
+- the same STAY / TURN / ESCALATE derivation;
+- the same bounded error categories;
+- SHA-256 fingerprints for every pre-proof stage;
+- a SHA-256 proof receipt bound to the complete stage chain;
+- previous-proof binding for temporal chains;
+- semantic verification in addition to digest verification;
+- tamper rejection;
+- explicit domain and global truth boundaries.
+
+The current executable adapters prove that the same kernel can govern both the established R349 woven typed field and a standard-quantum-mechanics 2×2 unitary density-matrix specialization without conflating their meanings or authorities.
+
+This is the architectural point of PCWD: domains may have radically different state representations and mathematics, but they enter OMEGA through one proof-carrying transport contract rather than one-off promotion logic.
