@@ -16,8 +16,12 @@ restore_previous_on_error(){
   trap - ERR
   set +e
   if [[ -n "$PREVIOUS_VERSION_ID" && "${BASELINE_USABLE:-0}" == "1" ]]; then
-    echo "Staged release failed; restoring verified-usable previous production version $PREVIOUS_VERSION_ID to 100% traffic."
-    npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA fail-closed staged release restore after $GITHUB_SHA" -y
+    if [[ -n "$CANDIDATE_VERSION_ID" ]]; then
+      echo "Staged release failed; guarded rollback will restore the verified previous version only if this run still owns production traffic."
+      OMEGA_WORKER_NAME="$WORKER_NAME" bash scripts/guarded-cloudflare-rollback.sh "$CANDIDATE_VERSION_ID" "$PREVIOUS_VERSION_ID" "OMEGA fail-closed staged release restore after $GITHUB_SHA"
+    else
+      echo "Staged release failed before a candidate Worker version was uploaded; production was not mutated by this run."
+    fi
   elif [[ -n "$PREVIOUS_VERSION_ID" ]]; then
     echo "::error title=ROLLBACK REFUSED::Previous version $PREVIOUS_VERSION_ID did not prove usable and cannot regain production authority. Cloudflare traffic is left on the current forward state for explicit repair rather than resurrecting the application-withholding baseline."
   fi
