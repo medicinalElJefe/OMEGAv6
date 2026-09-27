@@ -11,9 +11,10 @@ if(served!==expectedSha)throw new Error(`R356.6 SHA mismatch expected ${expected
 
 const browser=await chromium.launch({headless:true});
 try{
- const context=await browser.newContext({viewport:{width:1440,height:960}});
+ for(const [label,viewport,dpr] of [['desktop',{width:1440,height:960},1],['mobile',{width:390,height:844},2]]){
+ const context=await browser.newContext({viewport,deviceScaleFactor:dpr});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
- await page.goto(`${base}/?r3566-live=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45000});
+ await page.goto(`${base}/?r3566-live=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
  await page.getByLabel('Open Earth Now').waitFor({state:'visible',timeout:20000});
  await page.getByLabel('Open Earth Now').click();
  await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',{timeout:30000});
@@ -28,14 +29,17 @@ try{
  if(await page.locator('.r285-querybar label').filter({hasText:/^LON$/}).count())throw new Error('R356.6 manual LON remains primary SAR control');
  if(!(await page.getByRole('button',{name:'Use my location'}).isVisible()))throw new Error('R356.6 device-location control missing');
 
- // Search a real place through the canonical geocoder bridge and select a returned result.
- await search.fill('Tucson Arizona');
- await page.getByRole('button',{name:'Find location'}).click();
- await page.waitForSelector('.r3564-sar-results button',{state:'visible',timeout:20000});
- const first=page.locator('.r3564-sar-results button').first();
- const resultText=(await first.innerText()).trim();
- if(!/Tucson/i.test(resultText))throw new Error(`R356.6 place picker returned unexpected first result: ${resultText.slice(0,240)}`);
- await first.click();
+ // Search a real place through the canonical geocoder bridge and select a returned result on desktop;
+ // mobile reuses the canonical target and proves the responsive operational surface.
+ if(label==='desktop'){
+  await search.fill('Tucson Arizona');
+  await page.getByRole('button',{name:'Find location'}).click();
+  await page.waitForSelector('.r3564-sar-results button',{state:'visible',timeout:20000});
+  const first=page.locator('.r3564-sar-results button').first();
+  const resultText=(await first.innerText()).trim();
+  if(!/Tucson/i.test(resultText))throw new Error(`R356.6 place picker returned unexpected first result: ${resultText.slice(0,240)}`);
+  await first.click();
+ }
  await page.waitForFunction(()=>document.querySelector('.r285-source-ribbon')?.textContent?.includes('WGS84'),{timeout:10000});
 
  // Chain-lemma fields must render from already-bound satellite/evidence anchors without native SAR closure.
@@ -53,10 +57,11 @@ try{
  for(const token of ['Find location','Use my location','CHAIN LEMMA','DERIVED'])if(!text.includes(token))throw new Error(`R356.6 live SAR missing ${token}`);
  const advancedOpen=await page.locator('.r309-sar-assets[open]').count();
  if(advancedOpen>0)throw new Error(`R356.6 advanced SAR evidence stacks should default collapsed, found ${advancedOpen} open`);
- const rect=await main.boundingBox();if(!rect||rect.width<500||rect.height<300)throw new Error(`R356.6 main analytical surface unusable ${JSON.stringify(rect)}`);
+ const rect=await main.boundingBox();const minWidth=label==='desktop'?500:300;if(!rect||rect.width<minWidth||rect.height<300)throw new Error(`R356.6 ${label} main analytical surface unusable ${JSON.stringify(rect)}`);
  const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
- if(overflow>12)throw new Error(`R356.6 introduced ${overflow}px horizontal overflow`);
- if(errors.length)throw new Error(`R356.6 browser errors ${errors.join(' | ')}`);
+ if(overflow>12)throw new Error(`R356.6 ${label} introduced ${overflow}px horizontal overflow`);
+ if(errors.length)throw new Error(`R356.6 ${label} browser errors ${errors.join(' | ')}`);
  await context.close();
- console.log(`R356.6 LIVE EARTH/SAR ACCEPTANCE PASS · exact promoted SHA ${expectedSha} · human place selection works · device-location control present · 12-lens deck · chain-lemma satellite fields render before native SAR closure · advanced evidence collapsed · no page errors/overflow`);
+ }
+ console.log(`R356.6 LIVE EARTH/SAR ACCEPTANCE PASS · exact promoted SHA ${expectedSha} · desktop + 2×DPR mobile · human place selection works · device-location control present · 12-lens deck · chain-lemma satellite fields render before native SAR closure · advanced evidence collapsed · no page errors/overflow`);
 }finally{await browser.close()}
