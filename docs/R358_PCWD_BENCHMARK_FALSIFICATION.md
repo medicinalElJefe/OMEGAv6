@@ -1,0 +1,136 @@
+# R358 · PCWD Benchmark & Falsification Boundary
+
+R358 is the first phase after the R357 Proof-Carrying Woven Dynamics merge whose purpose is **not** to add another conceptual layer. Its purpose is to try to break PCWD with explicit benchmark problems, expose costs, and record what information a simpler baseline discards.
+
+The benchmark suite lives in:
+
+- `src/system/pcwdBenchmarkSuite.ts`
+- `src/system/pcwdBenchmarkGovernor.ts`
+- `tests/r358-pcwd-benchmark-suite.mts`
+- `tests/r358-pcwd-benchmark-governor.mts`
+
+## Benchmark rule
+
+Each case declares an explicit baseline. The suite does **not** use “conventional methods” as a vague comparison class.
+
+A result is only interpreted relative to the named baseline in that row.
+
+The benchmark boundary is:
+
+> Internal success does not prove novelty, scientific validity, or superiority over methods that were not explicitly implemented and compared.
+
+## Cases
+
+| ID | Classical problem | Explicit baseline | What is measured |
+|---|---|---|---|
+| RECOVERABLE_RESOLUTION_LENS | lossy coarse-graining / round-trip reconstruction | coarse block means only | RMSE, retained residual energy, storage overhead |
+| CLOSED_PATH_HISTORY | path dependence with identical endpoint | final state only | endpoint collision vs path/proof distinguishability |
+| PACKET_TAMPER | integrity after state mutation | unsealed object acceptance | mutation detection |
+| EVIDENCE_ADMISSIBILITY | numerically valid state with missing evidence | numeric-only acceptance | whether missing evidence blocks promotion |
+| QUBIT_UNITARY_VALIDITY | 2×2 density-matrix unitary round trip | unchecked matrix transform | unitary/density validity, recovery, observable error, fidelity |
+| COVARIANCE_CARRY | correlated linear covariance propagation | diagonal variance only | Frobenius error from discarded cross-covariance |
+| FORECAST_BRANCH_RETENTION | multi-hypothesis future retention | single argmax branch | branch count and discarded branch weight |
+| LORENZ63_DYNAMICS_CORRESPONDENCE | Lorenz-63 one-step dynamics correspondence | unchecked next-state acceptance | declared dynamics residual and gate response |
+| NO_RESIDUAL_NEGATIVE_CONTROL | recovery after real information deletion | lossy block mean without residual | reconstruction failure and fail-closed behavior |
+| PROOF_OVERHEAD | trivial identity state | state only | serialized representation overhead |
+
+## What counts as a success
+
+R358 deliberately separates several outcome classes.
+
+### WIN
+
+PCWD demonstrates a measurable property that the exact baseline does not retain or check.
+
+Examples:
+
+- exact recovery because the residual sidecar is explicitly retained;
+- path identity despite endpoint collision;
+- tamper-evident packet/proof binding;
+- evidence admissibility as a separate gate;
+- preservation of cross-covariance;
+- retention of non-argmax future branches.
+
+### COST
+
+PCWD is worse on a measured resource axis.
+
+The first required cost benchmark is representation overhead. A trivial state-only baseline is necessarily smaller than a seven-stage proof packet with receipts and integrity seals.
+
+R358 treats that as evidence, not as an inconvenience to hide.
+
+### LIMIT
+
+PCWD cannot produce information that was actually destroyed.
+
+The negative-control adapter performs lossy block averaging **without retaining the residual**. Recovery must fail. PCWD passes this benchmark only by detecting the failure and refusing promotion.
+
+That distinction is central:
+
+[
+	ext{proof of recoverability} 
+eq 	ext{manufacture of missing information}.
+]
+
+## Lorenz-63 interpretation
+
+Lorenz-63 is used as a classical nonlinear dynamics correspondence test. The suite computes a declared RK4 one-step reference at the standard parameter set
+
+[
+sigma=10,qquad ho=28,qquad eta=rac83.
+]
+
+PCWD does not claim to improve RK4, solve chaos, or extend forecast horizons. It checks whether a candidate state corresponds to the declared reference within tolerance and exposes the residual when it does not.
+
+The benchmark therefore tests **proof-governed model correspondence**, not new dynamics.
+
+## Quantum interpretation
+
+The 2×2 unitary benchmark uses ordinary density-matrix quantum mechanics. A valid unitary case should pass; an intentionally non-unitary matrix should fail the invariant gate.
+
+This tests whether the same domain-neutral PCWD proof topology can wrap a mathematically different domain without changing the meaning of that domain.
+
+It is not evidence of new quantum physics.
+
+## Falsification governor
+
+The R358 benchmark governor will not recommend advancement merely because the suite has wins.
+
+Its default policy requires:
+
+- at least 10 classified cases;
+- at least 6 explicit-baseline wins;
+- at least one measured cost;
+- at least one measured limit / negative control;
+- every PCWD case to exhibit its expected behavior;
+- at least 8 distinct information-loss categories measured;
+- no unclassified result.
+
+A success-only or cherry-picked report therefore fails closed.
+
+The governor has no CanonState or production authority. Its receipt is benchmark evidence only.
+
+## Information-delta ledger
+
+Across the cases, R358 explicitly measures whether the baseline discards:
+
+- within-bin residual;
+- high-frequency / impulse detail;
+- route or order history;
+- mutation evidence;
+- evidence provenance / admissibility;
+- validity proof for a supplied transform;
+- cross-covariance;
+- non-argmax admissible futures;
+- discarded branch weight;
+- model-correspondence error.
+
+This is a more useful question than “is PCWD better?” because it is falsifiable:
+
+> **Which exact information survives, which exact information disappears, and what does retaining it cost?**
+
+## Advancement rule
+
+R358 is allowed to advance only after the exact PR head passes the canonical application check and the full benchmark/governor suite.
+
+The next phase should then use the measured failures and costs to improve PCWD, not merely add more benchmark wins.
