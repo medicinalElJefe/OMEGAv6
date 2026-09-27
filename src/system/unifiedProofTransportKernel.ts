@@ -19,6 +19,7 @@ export type UnifiedMeasuresV1={
 };
 export type UnifiedGateSetV1={continuityValid:boolean;invariantsPreserved:boolean;scarRetained:boolean;recoveryBounded:boolean;dynamicsBounded:boolean;observablesBounded:boolean;evidenceAdmissible:boolean;pathRecoverable:boolean};
 export type UnifiedStageReceiptV1={stage:(typeof UNIFIED_PCWD_STAGES)[number];fingerprint:string;detail:string};
+export type UnifiedEnvelopeSealV1={schema:'OMEGA_UNIFIED_PCWD_ENVELOPE_SEAL_v1';packetDigest:string;proofDigest:string;stageChainDigest:string;envelopeDigest:string};
 export type UnifiedDomainContractV1<Input,Sensed,Normalized,Decomposed,LemmaState,Transported,Recovered>={
  id:string;
  version:string;
@@ -162,6 +163,9 @@ export async function executeUnifiedProofTransportV1<I,S,N,D,L,T,R>(
  const proof:UnifiedProofReceiptV1={...core,proofDigest};
  stages.push(await receipt('Prove',proof,detail('Prove',proof)));
  const packet=contract.packet({input,sensed,normalized,decomposed,lemma,transported,recovered,proof,stages});
+ const packetDigest=await sha256(packet);
+ const sealCore={schema:'OMEGA_UNIFIED_PCWD_ENVELOPE_SEAL_v1',packetDigest,proofDigest:proof.proofDigest,stageChainDigest:proof.stageChainDigest} as const;
+ const seal:UnifiedEnvelopeSealV1={...sealCore,envelopeDigest:await sha256(sealCore)};
  return{
   schema:UNIFIED_PCWD_SCHEMA,
   address:contract.address(input),
@@ -170,6 +174,7 @@ export async function executeUnifiedProofTransportV1<I,S,N,D,L,T,R>(
   packet,
   proof,
   stages,
+  seal,
   promotionEligible,
   decision,
   boundary:UNIFIED_PCWD_BOUNDARY,
@@ -178,7 +183,7 @@ export async function executeUnifiedProofTransportV1<I,S,N,D,L,T,R>(
 }
 
 export async function verifyUnifiedProofTransportV1(result:any){
- if(result?.schema!==UNIFIED_PCWD_SCHEMA||result?.proof?.schema!=='OMEGA_UNIFIED_PCWD_PROOF_RECEIPT_v1')return false;
+ if(result?.schema!==UNIFIED_PCWD_SCHEMA||result?.proof?.schema!=='OMEGA_UNIFIED_PCWD_PROOF_RECEIPT_v1'||result?.seal?.schema!=='OMEGA_UNIFIED_PCWD_ENVELOPE_SEAL_v1')return false;
  const p=result.proof as UnifiedProofReceiptV1;
  const all=UNIFIED_PCWD_GATES.every(k=>p.gates[k]);
  if(p.promotionEligible!==all||p.decision!==decideUnifiedProofV1(p.gates))return false;
@@ -186,7 +191,11 @@ export async function verifyUnifiedProofTransportV1(result:any){
  const core={schema:p.schema,domain:p.domain,domainVersion:p.domainVersion,previousProofDigest:p.previousProofDigest,gates:p.gates,errors:p.errors,tolerances:p.tolerances,decisionScore:p.decisionScore,decision:p.decision,promotionEligible:p.promotionEligible,stageChainDigest:p.stageChainDigest,canonicalMutation:p.canonicalMutation,observedHistoryClaimed:p.observedHistoryClaimed,physicalPrimitiveAdded:p.physicalPrimitiveAdded,boundary:p.boundary,domainBoundary:p.domainBoundary};
  if(await sha256(core)!==p.proofDigest)return false;
  const preProofStages=(result.stages||[]).filter((s:any)=>s.stage!=='Prove');
- return await sha256(preProofStages)===p.stageChainDigest;
+ if(await sha256(preProofStages)!==p.stageChainDigest)return false;
+ const packetDigest=await sha256(result.packet);
+ if(packetDigest!==result.seal.packetDigest)return false;
+ const sealCore={schema:result.seal.schema,packetDigest:result.seal.packetDigest,proofDigest:p.proofDigest,stageChainDigest:p.stageChainDigest};
+ return result.seal.proofDigest===p.proofDigest&&result.seal.stageChainDigest===p.stageChainDigest&&await sha256(sealCore)===result.seal.envelopeDigest;
 }
 
 export async function executeUnifiedProofChainV1<I,S,N,D,L,T,R>(
