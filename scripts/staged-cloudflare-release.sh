@@ -10,14 +10,60 @@ WRANGLER_NDJSON="$TMP_DIR/wrangler-output.ndjson"
 PREVIOUS_VERSION_ID=''
 CANDIDATE_VERSION_ID=''
 
+assert_current_main_owner(){
+  if [[ "${GITHUB_REF:-}" != "refs/heads/main" ]]; then return 0; fi
+  local current_main
+  current_main="$(git ls-remote origin refs/heads/main | awk 'NR==1{print $1}')"
+  if [[ ! "$current_main" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "::error title=MAIN OWNERSHIP UNKNOWN::Could not resolve the current origin/main SHA before production mutation."
+    return 1
+  fi
+  if [[ "$current_main" != "$GITHUB_SHA" ]]; then
+    echo "::error title=SUPERSEDED RELEASE::This deployment run owns $GITHUB_SHA but origin/main is now $current_main. Refusing any further production mutation."
+    return 1
+  fi
+  echo "Production ownership confirmed for current main $GITHUB_SHA."
+}
+
+release_owns_current_deployment(){
+  [[ -n "$PREVIOUS_VERSION_ID" ]] || return 1
+  npx wrangler deployments status --name "$WORKER_NAME" --json > "$STATUS_JSON" || return 1
+  node - "$STATUS_JSON" "$PREVIOUS_VERSION_ID" "$CANDIDATE_VERSION_ID" <<'NODE'
+const fs=require('fs');
+const data=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+const previous=process.argv[3],candidate=process.argv[4],rows=[];
+function walk(value){
+  if(!value||typeof value!=='object')return;
+  if(Array.isArray(value)){for(const x of value)walk(x);return}
+  const id=typeof value.version_id==='string'?value.version_id:(typeof value.versionId==='string'?value.versionId:null);
+  const raw=value.percentage??value.traffic_percentage??value.trafficPercentage;
+  const pct=Number(raw);
+  if(id&&Number.isFinite(pct)&&pct>0.001)rows.push({id,pct});
+  for(const x of Object.values(value))walk(x);
+}
+walk(data);
+const allowed=new Set([previous,candidate].filter(Boolean));
+const serving=[...new Map(rows.map(x=>[x.id,x])).values()];
+if(!serving.length||serving.some(x=>!allowed.has(x.id))){
+  console.error(`release ownership mismatch: serving=${JSON.stringify(serving)} allowed=${JSON.stringify([...allowed])}`);
+  process.exit(1);
+}
+NODE
+}
+
+
 cleanup(){ rm -rf "$TMP_DIR"; }
 restore_previous_on_error(){
   local rc=$?
   trap - ERR
   set +e
   if [[ -n "$PREVIOUS_VERSION_ID" && "${BASELINE_USABLE:-0}" == "1" ]]; then
-    echo "Staged release failed; restoring verified-usable previous production version $PREVIOUS_VERSION_ID to 100% traffic."
-    npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA fail-closed staged release restore after $GITHUB_SHA" -y
+    if release_owns_current_deployment; then
+      echo "Staged release failed; restoring verified-usable previous production version $PREVIOUS_VERSION_ID to 100% traffic."
+      npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA fail-closed staged release restore after $GITHUB_SHA" -y
+    else
+      echo "::error title=ROLLBACK OWNERSHIP LOST::Current Worker traffic is no longer owned by this release's previous/candidate versions. Refusing to overwrite a newer or external production deployment."
+    fi
   elif [[ -n "$PREVIOUS_VERSION_ID" ]]; then
     echo "::error title=ROLLBACK REFUSED::Previous version $PREVIOUS_VERSION_ID did not prove usable and cannot regain production authority. Cloudflare traffic is left on the current forward state for explicit repair rather than resurrecting the application-withholding baseline."
   fi
@@ -26,6 +72,8 @@ restore_previous_on_error(){
 }
 trap restore_previous_on_error ERR
 trap cleanup EXIT
+
+assert_current_main_owner
 
 npx wrangler deployments status --name "$WORKER_NAME" --json > "$STATUS_JSON"
 PREVIOUS_VERSION_ID="$(node - "$STATUS_JSON" <<'NODE'
@@ -81,6 +129,7 @@ else
 fi
 
 rm -f "$WRANGLER_NDJSON"
+assert_current_main_owner
 WRANGLER_OUTPUT_FILE_PATH="$WRANGLER_NDJSON" npx wrangler versions upload --name "$WORKER_NAME" --message "OMEGA staged candidate $GITHUB_SHA"
 CANDIDATE_VERSION_ID="$(node - "$WRANGLER_NDJSON" <<'NODE'
 const fs=require('fs');
@@ -204,9 +253,11 @@ OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME"
 OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node tests/r200-current-browser-proof-e2e.mjs
 
 if [[ "$STAGING_MODE" == "ZERO_PERCENT_OVERRIDE" ]]; then
+  assert_current_main_owner
   echo "Off-traffic semantic + browser proof passed; promoting exact candidate to 100%."
   npx wrangler versions deploy "${CANDIDATE_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA exact proved promotion $GITHUB_SHA" -y
 else
+  assert_current_main_owner
   echo "R322 forward-recovery semantic + browser proof passed on the exact 100% candidate."
 fi
 
