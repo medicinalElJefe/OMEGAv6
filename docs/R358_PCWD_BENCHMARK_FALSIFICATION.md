@@ -167,3 +167,42 @@ longleftrightarrow
 ]
 
 R358 requires the compact index to be less than half the serialized size of the full proof envelope in the trivial-overhead benchmark. The state-only baseline is still expected to remain smaller; compaction reduces a real cost rather than pretending the cost disappeared.
+
+
+## Measured R358 CI result
+
+The exact R358 benchmark code passed the canonical application check on the PR head after the compact-index continuation. The measured suite result was:
+
+- **10 total cases**
+- **8 explicit-baseline wins**
+- **0 ties**
+- **1 measured cost**
+- **1 measured limit**
+- **10 / 10 expected PCWD behaviors**
+- **11 named information-loss categories**
+
+Measured values:
+
+| Case | PCWD | Explicit baseline / negative control |
+|---|---:|---:|
+| Recoverable resolution lens | mean RMSE **0** | coarse-only mean RMSE **1.4408828033** |
+| Resolution storage | 326 serialized bytes with residual | 129 bytes coarse-only; **2.5271×** storage ratio |
+| Closed path | same endpoint, path identity retained | same endpoint, route/order lost |
+| Packet mutation | mutated envelope rejected | unsealed baseline has no mutation check |
+| Missing evidence | **ESCALATE**, promotion blocked | numeric-only state remains numerically acceptable |
+| Valid qubit unitary | recovery error **3.33×10^-16**, fidelity **0.9999999999999997** | unchecked transform has no validity proof |
+| Correlated covariance | cross-covariance retained | diagonal-only Frobenius error **2.1213203436** |
+| Forecast branching | **3** branches retained | argmax retains **1**, discarding **0.5** model weight |
+| Lorenz-63 reference | exact candidate residual **0** | perturbed candidate residual **0.0327871926** |
+| Missing residual negative control | promotion held; recovery error **1.5811388301** | discarded information cannot be reconstructed |
+| Full proof envelope overhead | **4,937 bytes** | state-only baseline **15 bytes** |
+| Compact proof index continuation | **1,025 bytes**, verified | **0.207616×** the full PCWD envelope |
+
+The compact index therefore materially reduces the measured proof-index footprint, but it does **not** erase the underlying cost: even the compact index remains much larger than the trivial 15-byte state-only baseline and requires the full envelope for semantic verification.
+
+The useful result is not “PCWD wins everything.” The measured result is more specific:
+
+1. PCWD retained information that each named minimal baseline intentionally discarded.
+2. PCWD correctly refused recovery when the residual was actually destroyed.
+3. PCWD imposed substantial proof/storage overhead.
+4. The first benchmark-guided continuation reduced index/wire proof overhead while keeping the full semantic envelope recoverable by content address.
