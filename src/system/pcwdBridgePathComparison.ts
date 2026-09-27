@@ -23,6 +23,7 @@ export type BridgePathComparisonReceiptV1={
  sourceRecoveryPathDifference:number;
  directRecoveryError:number;
  indirectRecoveryError:number;
+ comparisonTolerance:number;
  directLossKinds:string[];
  indirectLossKinds:string[];
  gates:{
@@ -126,7 +127,7 @@ export async function compareDirectAndLensBridgePathsV1(
   directBridgeId:direct.id,indirectCompositionId:indirectComposition.compositionId,
   directReceiptDigest:directExec.receipt.receiptDigest,indirectReceiptDigest:indirectComposition.receiptDigest,
   endpointMaxError,sourceRecoveryPathDifference,
-  directRecoveryError:directExec.receipt.recoveryError,indirectRecoveryError:indirectComposition.endToEndRecoveryError,
+  directRecoveryError:directExec.receipt.recoveryError,indirectRecoveryError:indirectComposition.endToEndRecoveryError,comparisonTolerance:tolerance,
   directLossKinds,indirectLossKinds,gates,pathEquivalent,numericallyFlatLoop,semanticScarRetained,
   physicalHolonomyClaimed:false as const,semanticEquivalenceClaimed:false as const,boundary:PCWD_PATH_COMPARISON_BOUNDARY,
  };
@@ -137,7 +138,7 @@ export async function verifyBridgePathComparisonReceiptV1(receipt:BridgePathComp
  if(receipt?.schema!==PCWD_PATH_COMPARISON_SCHEMA||receipt?.boundary!==PCWD_PATH_COMPARISON_BOUNDARY)return false;
  const expectedPathEquivalent=receipt.gates.sameTypedEndpoints&&receipt.gates.directEligible&&receipt.gates.indirectEligible&&receipt.gates.endpointEquivalent&&receipt.gates.sourceRecoveryEquivalent;
  if(receipt.pathEquivalent!==expectedPathEquivalent)return false;
- if(receipt.numericallyFlatLoop!==(receipt.pathEquivalent&&receipt.sourceRecoveryPathDifference<=1e-12))return false;
+ if(receipt.numericallyFlatLoop!==(receipt.pathEquivalent&&receipt.sourceRecoveryPathDifference<=receipt.comparisonTolerance))return false;
  if(receipt.semanticScarRetained!==(receipt.numericallyFlatLoop&&receipt.gates.pathReceiptsDistinct&&receipt.gates.semanticScarDistinct))return false;
  if(receipt.physicalHolonomyClaimed!==false||receipt.semanticEquivalenceClaimed!==false)return false;
  const core={
@@ -145,7 +146,7 @@ export async function verifyBridgePathComparisonReceiptV1(receipt:BridgePathComp
   directBridgeId:receipt.directBridgeId,indirectCompositionId:receipt.indirectCompositionId,
   directReceiptDigest:receipt.directReceiptDigest,indirectReceiptDigest:receipt.indirectReceiptDigest,
   endpointMaxError:receipt.endpointMaxError,sourceRecoveryPathDifference:receipt.sourceRecoveryPathDifference,
-  directRecoveryError:receipt.directRecoveryError,indirectRecoveryError:receipt.indirectRecoveryError,
+  directRecoveryError:receipt.directRecoveryError,indirectRecoveryError:receipt.indirectRecoveryError,comparisonTolerance:receipt.comparisonTolerance,
   directLossKinds:receipt.directLossKinds,indirectLossKinds:receipt.indirectLossKinds,gates:receipt.gates,
   pathEquivalent:receipt.pathEquivalent,numericallyFlatLoop:receipt.numericallyFlatLoop,semanticScarRetained:receipt.semanticScarRetained,
   physicalHolonomyClaimed:receipt.physicalHolonomyClaimed,semanticEquivalenceClaimed:receipt.semanticEquivalenceClaimed,boundary:receipt.boundary,
