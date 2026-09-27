@@ -12,7 +12,7 @@ if(served!==expectedSha)throw new Error(`R356.6 SHA mismatch expected ${expected
 const browser=await chromium.launch({headless:true});
 try{
  for(const [label,viewport,dpr] of [['desktop',{width:1440,height:960},1],['mobile',{width:390,height:844},2]]){
- const context=await browser.newContext({viewport,deviceScaleFactor:dpr});
+ const context=await browser.newContext({viewport,deviceScaleFactor:dpr,permissions:['geolocation'],geolocation:{latitude:32.2226,longitude:-110.9747}});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
  await page.goto(`${base}/?r3566-live=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
  await page.getByLabel('Open Earth Now').waitFor({state:'visible',timeout:20000});
@@ -28,6 +28,10 @@ try{
  if(await page.locator('.r285-querybar label').filter({hasText:/^LAT$/}).count())throw new Error('R356.6 manual LAT remains primary SAR control');
  if(await page.locator('.r285-querybar label').filter({hasText:/^LON$/}).count())throw new Error('R356.6 manual LON remains primary SAR control');
  if(!(await page.getByRole('button',{name:'Use my location'}).isVisible()))throw new Error('R356.6 device-location control missing');
+ await page.getByRole('button',{name:'Use my location'}).click();
+ await page.waitForFunction(()=>document.querySelector('.r3564-sar-coords code')?.textContent?.includes('32.22260')&&document.querySelector('.r3564-sar-coords code')?.textContent?.includes('-110.97470'),{timeout:12000});
+ const deviceCoords=(await page.locator('.r3564-sar-coords code').innerText()).trim();
+ if(!deviceCoords.includes('32.22260')||!deviceCoords.includes('-110.97470'))throw new Error(`R356.6 device geolocation did not become exact target: ${deviceCoords}`);
 
  // Search a real place through the canonical geocoder bridge and select a returned result on desktop;
  // mobile reuses the canonical target and proves the responsive operational surface.
@@ -57,11 +61,18 @@ try{
  for(const token of ['Find location','Use my location','CHAIN LEMMA','DERIVED'])if(!text.includes(token))throw new Error(`R356.6 live SAR missing ${token}`);
  const advancedOpen=await page.locator('.r309-sar-assets[open]').count();
  if(advancedOpen>0)throw new Error(`R356.6 advanced SAR evidence stacks should default collapsed, found ${advancedOpen} open`);
+ const evidenceStack=page.locator('.r309-sar-assets').first();
+ if(await evidenceStack.count()){await evidenceStack.locator('summary').click();if(!(await evidenceStack.getAttribute('open'))&&!(await evidenceStack.evaluate(el=>el.hasAttribute('open'))))throw new Error('R356.6 advanced evidence stack did not open on operator action');await evidenceStack.locator('summary').click();if(await evidenceStack.evaluate(el=>el.hasAttribute('open')))throw new Error('R356.6 advanced evidence stack did not close on operator action');}
+ const allLensCards=page.locator('.r284-lens-card');
+ for(let i=0;i<12;i++){const card=allLensCards.nth(i);await card.click();await page.waitForFunction(index=>document.querySelectorAll('.r284-lens-card')[index]?.getAttribute('data-active')==='true',i,{timeout:5000});if(!(await page.locator('.r3565-lemma-canvas').isVisible()))throw new Error(`R356.6 analytical lens ${i+1} lost chain-lemma field after selection`);}
+ const slc=page.locator('.r285-mode button').filter({hasText:'SLC'}).first(),grd=page.locator('.r285-mode button').filter({hasText:'GRD'}).first();
+ await slc.click();if(await slc.getAttribute('aria-pressed')!=='true')throw new Error('R356.6 SLC mode control did not activate');
+ await grd.click();if(await grd.getAttribute('aria-pressed')!=='true')throw new Error('R356.6 GRD mode control did not reactivate');
  const rect=await main.boundingBox();const minWidth=label==='desktop'?500:300;if(!rect||rect.width<minWidth||rect.height<300)throw new Error(`R356.6 ${label} main analytical surface unusable ${JSON.stringify(rect)}`);
  const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
  if(overflow>12)throw new Error(`R356.6 ${label} introduced ${overflow}px horizontal overflow`);
  if(errors.length)throw new Error(`R356.6 ${label} browser errors ${errors.join(' | ')}`);
  await context.close();
  }
- console.log(`R356.6 LIVE EARTH/SAR ACCEPTANCE PASS · exact promoted SHA ${expectedSha} · desktop + 2×DPR mobile · human place selection works · device-location control present · 12-lens deck · chain-lemma satellite fields render before native SAR closure · advanced evidence collapsed · no page errors/overflow`);
+ console.log(`R365 LIVE EARTH/SAR ACCEPTANCE PASS · exact promoted SHA ${expectedSha} · desktop + 2×DPR mobile · human place search selectable · device geolocation actuated · exact WGS84 target updated · all 12 analytical lenses clickable · GRD/SLC mode controls actuated · chain-lemma fields remain materially rendered · evidence stacks open/close correctly · no page errors/overflow`);
 }finally{await browser.close()}
