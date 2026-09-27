@@ -4,6 +4,7 @@ import fs from'node:fs';
 const surface=fs.readFileSync('src/OmegaProofCarryingWovenDynamics.tsx','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
 const css=fs.readFileSync('src/proofCarryingWovenDynamics.css','utf8');
+const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
 for(const token of[
  'OMEGA_PROOF_CARRYING_WOVEN_DYNAMICS_v1',
@@ -23,5 +24,7 @@ assert.ok(suite.includes('<OmegaProofCarryingWovenDynamics address={address} com
 
 for(const token of['.pcwd-pipeline','.pcwd-gates','.pcwd-rsc','@media(max-width:560px)'])assert.ok(css.includes(token),`PCWD responsive presentation missing ${token}`);
 assert.equal(/physical law established|new physics proved|physical dimensions claimed/i.test(surface),false);
+assert.ok(String(pkg.scripts?.check||'').includes('npm run test:pcwd'),'canonical check must include PCWD proof suite');
+assert.ok(String(pkg.scripts?.['test:pcwd']||'').includes('proof-carrying-convergence-bridge-v1-invariants.mts'),'PCWD suite must include R356 bridge proof');
 
 console.log('PCWD SURFACE PASS · Convergence + Evidence & Proof mounts · seven-stage pipeline · eight gates · RSC receipt · bounded quantum specialization disclosure · responsive containment');
