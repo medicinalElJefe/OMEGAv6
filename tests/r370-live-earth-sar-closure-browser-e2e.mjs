@@ -53,8 +53,18 @@ try{
   await details.waitFor({state:'visible',timeout:10000});
   await details.click();
   if(await screen.getAttribute('data-clean-view')!=='false')throw new Error('R370 VIEW DETAILS did not restore analytical overlays');
-  const badge=await sarInstrument.locator('.r3565-lemma-badge').innerText();
-  if(!badge.includes('CHAIN LEMMA')||!badge.includes('NASA GIBS'))throw new Error(`R370 derived-field truth badge incomplete in detail view: ${badge}`);
+  const detailState=await sarInstrument.evaluate(el=>({
+    lemma:Boolean(el.querySelector('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]')),
+    native:Boolean(el.querySelector('.r280-canvas')),
+    badge:el.querySelector('.r3565-lemma-badge')?.textContent||'',
+    grid:Boolean(el.querySelector('.r280-grid')),
+    readout:el.querySelector('.r284-view-readout')?.textContent||''
+  }));
+  if(detailState.lemma){
+   if(!detailState.badge.includes('CHAIN LEMMA')||!detailState.badge.includes('NASA GIBS'))throw new Error(`R370 derived-field truth badge incomplete in detail view: ${detailState.badge}`);
+  }else if(detailState.native){
+   if(!detailState.grid||!detailState.readout.trim())throw new Error('R370 async source upgrade reached native measurement field without detail overlays/readout');
+  }else throw new Error('R370 detail view has neither derived triangulated nor bound native analytical field');
   await sarInstrument.getByRole('button',{name:'CLEAN VIEW',exact:true}).click();
   if(await screen.getAttribute('data-clean-view')!=='true')throw new Error('R370 CLEAN VIEW did not restore unobstructed field');
 
@@ -62,7 +72,8 @@ try{
   for(let i=0;i<12;i++){
    const card=allLensCards.nth(i);await card.click();
    await page.waitForFunction(index=>document.querySelectorAll('.r284-lens-card')[index]?.getAttribute('data-active')==='true',i,{timeout:5000});
-   if(!(await page.locator('.r3565-lemma-canvas').isVisible()))throw new Error(`R370 analytical lens ${i+1} lost chain-lemma field after selection`);
+   const visibleField=await sarInstrument.evaluate(el=>Boolean([...el.querySelectorAll('.r3565-lemma-canvas,.r280-canvas')].find(x=>{const s=getComputedStyle(x);const r=x.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0})));
+   if(!visibleField)throw new Error(`R370 analytical lens ${i+1} lost both derived and native field after selection`);
   }
 
   const slc=page.locator('.r285-mode button').filter({hasText:'SLC'}).first(),grd=page.locator('.r285-mode button').filter({hasText:'GRD'}).first();
@@ -78,9 +89,13 @@ try{
    if(await first.evaluate(el=>el.hasAttribute('open')))throw new Error('R370 evidence stack did not close');
   }
 
-  const canvas=page.locator('.r3565-lemma-canvas');
-  const rendered=await canvas.evaluate(el=>({count:el.querySelectorAll(':scope > i').length,unique:new Set([...el.querySelectorAll(':scope > i')].slice(0,1500).map(x=>getComputedStyle(x).backgroundColor)).size}));
-  if(rendered.count<4096||rendered.unique<8)throw new Error(`R370 chain-lemma field materially insufficient ${JSON.stringify(rendered)}`);
+  const rendered=await sarInstrument.evaluate(el=>{
+   const field=[...el.querySelectorAll('.r3565-lemma-canvas,.r280-canvas')].find(x=>{const s=getComputedStyle(x);const r=x.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0});
+   if(!field)return{count:0,unique:0,kind:'NONE'};
+   const cells=[...field.querySelectorAll(':scope > i')];
+   return{count:cells.length,unique:new Set(cells.slice(0,1500).map(x=>getComputedStyle(x).backgroundColor)).size,kind:field.classList.contains('r3565-lemma-canvas')?'DERIVED_TRIANGULATED':'BOUND_NATIVE'};
+  });
+  if(rendered.count<4096||rendered.unique<8)throw new Error(`R370 analytical field materially insufficient ${JSON.stringify(rendered)}`);
   const rect=await page.locator('.r280-screen').boundingBox(),minWidth=label==='desktop'?500:300;
   if(!rect||rect.width<minWidth||rect.height<300)throw new Error(`R370 ${label} analytical surface unusable ${JSON.stringify(rect)}`);
   const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
