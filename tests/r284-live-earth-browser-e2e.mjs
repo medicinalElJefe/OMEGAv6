@@ -15,7 +15,7 @@ async function enterEarth(page,label){
  await railEarth.click();
  await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',{timeout:30000});
  await page.waitForSelector('.earth-r279',{state:'visible',timeout:30000});
- const tabs=page.locator('.earth-r279-view-tabs button'),count=await tabs.count();if(count!==8)throw new Error(`${label}: live Earth expected eight surfaces including SAR Truth, found ${count}`);
+ const tabs=page.locator('.earth-r279-view-tabs button'),count=await tabs.count();if(count!==9)throw new Error(`${label}: live Earth expected nine surfaces including Weather and SAR Truth, found ${count}`);
 }
 
 const browser=await chromium.launch({headless:true});

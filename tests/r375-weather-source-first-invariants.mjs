@@ -6,6 +6,7 @@ const weather=fs.readFileSync('src/EarthWeatherR375.tsx','utf8');
 const css=fs.readFileSync('src/earthWeatherR375.css','utf8');
 const worker=fs.readFileSync('src/workerR8.js','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+const liveEarth=fs.readFileSync('tests/r284-live-earth-browser-e2e.mjs','utf8');
 
 for(const token of ["'WEATHER'","label:'Weather'","<EarthWeatherR375 lat={lat} lon={lon}/>","Weather forecast"])assert.ok(earth.includes(token),'R375 Earth integration missing '+token);
 assert.ok(earth.includes("copy:'current conditions · seismic · events · space'")&&!earth.includes("copy:'weather · seismic · events · space'"),'R375 must keep Weather navigation text unambiguous from Evidence');
@@ -19,5 +20,6 @@ assert.ok(css.includes('.earth-r375-hourly')&&css.includes('overflow-x:auto'),'R
 assert.ok(css.includes('@media(max-width:620px)')&&css.includes('.earth-r375-weekly{grid-template-columns:1fr}'),'R375 weekly forecast must retain a single-column small-phone mode');
 assert.equal(pkg.scripts['test:r375'],'node tests/r375-weather-source-first-invariants.mjs','R375 invariant must be registered');
 assert.ok(String(pkg.scripts.check||'').includes('npm run test:r375'),'R375 invariant must remain part of canonical npm check');
+assert.ok(liveEarth.includes('count!==9')&&liveEarth.includes('including Weather and SAR Truth'),'R375 live production Earth proof must require all nine surfaces including Weather and SAR Truth');
 
 console.log('R375 WEATHER PASS · ninth Earth view · 48 h hourly + 7 day weekly · Open-Meteo primary returned forecast · NWS hourly cross-check · NOAA/GOES freshness gate · continuity/transition/scar diagnostics remain derived · CanonState mutation denied · responsive containment retained');
