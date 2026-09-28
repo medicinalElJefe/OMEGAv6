@@ -32,7 +32,7 @@ assert.match(cloud,/workflow_dispatch:/);
 assert.doesNotMatch(cloud,/^\s*push\s*:/m,'CLOUD-01 must remain ancillary and never become a push-triggered production writer');
 assert.ok(cloud.includes('Canonical OMEGA production remains exclusively deployed by ci.yml deploy-main.'),'R392 must preserve canonical production authority');
 
-for(const token of ['ensureNoCompetingCandidate','runAutonomousCycle','maxOpenCandidatePrs','R388_BACKLOG_AI_BUILD'])assert.ok(machine.includes(token),`R392 must reuse existing governed CLOUD-01 candidate fence/policy: ${token}`);
+for(const token of ['ensureNoCompetingCandidate','runAutonomousCycle','multiple open governed autonomous candidate PRs require review','R388_BACKLOG_AI_BUILD'])assert.ok(machine.includes(token),`R392 must reuse existing governed CLOUD-01 candidate fence/policy: ${token}`);
 assert.ok(!r170.includes('gh workflow run r223-cloudflare-evolution.yml'),'R392 must not widen R170 workflow-dispatch authority; canonical ci.yml owns the phase handoff');
 
 console.log('R392 EVENT-DRIVEN HYPER-CONVERGENCE PASS · exact production success chooses unfinished R170 static roadmap or immediate R388/CLOUD-01 continuation · one-candidate fence preserved · ci.yml remains sole production writer');
