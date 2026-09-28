@@ -10,7 +10,7 @@ for(const token of [
   'STATIC_EXHAUSTED=true',
   'public/omega-r170-selfbuild-state.json?ref=$GITHUB_SHA',
   'contents/$TARGET?ref=$GITHUB_SHA',
-  'gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r223-cloudflare-evolution.yml/dispatches" -f ref=main -f 'inputs[immediate_cycle]=true'',
+  `gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r223-cloudflare-evolution.yml/dispatches" -f ref=main -f 'inputs[immediate_cycle]=true'`,
   'actions/workflows/r170-governed-selfbuild.yml/dispatches',
   'SG001–SG005 source targets are all present'
 ])assert.ok(ci.includes(token),`R392 canonical continuation missing ${token}`);
