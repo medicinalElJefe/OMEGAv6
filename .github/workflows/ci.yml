@@ -481,10 +481,10 @@ jobs:
               break
             fi
           done < <(node - "$STATE_JSON" <<'NODE'
-const fs=require('fs');
-const state=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-for(const row of Array.isArray(state.roadmap)?state.roadmap:[])if(row?.target)console.log(row.target);
-NODE
+          const fs=require('fs');
+          const state=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          for(const row of Array.isArray(state.roadmap)?state.roadmap:[])if(row?.target)console.log(row.target);
+          NODE
           )
           rm -f "$STATE_JSON"
 
