@@ -489,8 +489,8 @@ NODE
           rm -f "$STATE_JSON"
 
           if [ "$STATIC_EXHAUSTED" = true ]; then
-            gh workflow run r223-cloudflare-evolution.yml --repo "$GITHUB_REPOSITORY" --ref main -f immediate_cycle=true
-            echo "R391 event-driven continuation dispatched to CLOUD-01/R388 after canonical production proof for $GITHUB_SHA; SG001–SG005 source targets are all present."
+            gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r223-cloudflare-evolution.yml/dispatches" -f ref=main -f 'inputs[immediate_cycle]=true'
+            echo "R392 event-driven continuation dispatched to CLOUD-01/R388 after canonical production proof for $GITHUB_SHA; SG001–SG005 source targets are all present."
           else
             gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r170-governed-selfbuild.yml/dispatches" -f ref=main
             echo "R330 event-driven continuation dispatched to R170 after canonical production proof for $GITHUB_SHA; bounded static roadmap remains incomplete."
