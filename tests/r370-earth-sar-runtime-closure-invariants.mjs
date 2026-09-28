@@ -13,6 +13,7 @@ assert.ok(browser.includes(".r3565-mini-lemma,.r284-mini-grid"),'R391 R370 must 
 assert.ok(browser.includes('count<4096')&&browser.includes('unique<8'),'R391 R370 must retain material-render acceptance for either truth state');
 for(const token of ['paddingLeft','paddingRight','contentWidth','rect.width<centerMetrics.contentWidth-2','rect.width>centerMetrics.rect.width+2'])assert.ok(browser.includes(token),`R393 R370 responsive content-box proof missing ${token}`);
 assert.ok(!browser.includes('rect.width<centerRect.width-2'),'R393 R370 must not compare a child border box to the padded parent border box');
+assert.ok(browser.includes("document.querySelectorAll('.r309-sar-assets[open]').length>0")&&browser.includes("document.querySelectorAll('.r309-sar-assets[open]').length===0"),'R394 R370 evidence disclosure must wait for real open and close DOM state');
 assert.ok(browser.includes('overflow>12'),'R391 R370 must retain no-overflow acceptance');
 assert.ok(earthLive.includes('R356.5 analytical state did not settle across all 12 lenses')&&earthLive.includes("kind:lemma?'DERIVED_TRIANGULATED':'BOUND_NATIVE'"),'R391 R284 live proof must atomically accept the derived-to-native source transition');
 assert.ok(earthLive.includes("name==='desktop'?260:viewport.width*.60"),'R391 R284 mobile analytical geometry must remain viewport-relative');
@@ -21,4 +22,4 @@ assert.match(ci,/id:\s*live_r237\s*\n\s*if:\s*always\(\) && steps\.deploy_worker
 assert.ok(verifier.includes("tests/r370-live-earth-sar-closure-browser-e2e.mjs"),'production verifier must execute R370 Earth/SAR closure');
 for(const token of ['currentCandidates=[mk(-1),mk(-2),mk(-3)]','previousCandidates=[mk(-8),mk(-9),mk(-10)]','loadFirstImage'])assert.ok(lemma.includes(token),`R370 resilient temporal anchor law missing ${token}`);
 for(const token of ['data-current-anchor-date','data-previous-anchor-date','lemma.anchors.currentDate','lemma.anchors.previousDate'])assert.ok(instrument.includes(token),`R370 resolved anchor disclosure missing ${token}`);
-console.log('R393/R391/R370 EARTH/SAR RUNTIME CLOSURE PASS · resilient temporal anchors · derived-to-native transition-safe live proofs · twelve materially populated lenses · computed parent content-box responsive geometry · independent R237 observation · no authority widening');
+console.log('R394/R393/R391/R370 EARTH/SAR RUNTIME CLOSURE PASS · transition-safe evidence disclosure · resilient temporal anchors · derived-to-native transition-safe live proofs · twelve materially populated lenses · computed parent content-box responsive geometry · independent R237 observation · no authority widening');

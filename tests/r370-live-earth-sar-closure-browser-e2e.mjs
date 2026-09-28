@@ -87,9 +87,9 @@ try{
   if(await page.locator('.r309-sar-assets[open]').count())throw new Error('R370 advanced evidence stacks must default collapsed');
   if(await advanced.count()){
    const first=advanced.first();await first.locator('summary').click();
-   if(!(await first.evaluate(el=>el.hasAttribute('open'))))throw new Error('R370 evidence stack did not open');
-   await first.locator('summary').click();
-   if(await first.evaluate(el=>el.hasAttribute('open')))throw new Error('R370 evidence stack did not close');
+   await page.waitForFunction(()=>document.querySelectorAll('.r309-sar-assets[open]').length>0,{timeout:5000}).catch(()=>{throw new Error('R370 evidence stack did not open')});
+   const opened=page.locator('.r309-sar-assets[open]').first();await opened.locator('summary').click();
+   await page.waitForFunction(()=>document.querySelectorAll('.r309-sar-assets[open]').length===0,{timeout:5000}).catch(()=>{throw new Error('R370 evidence stack did not close')});
   }
 
   const rendered=await analyticalState(sarInstrument);
