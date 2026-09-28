@@ -111,7 +111,7 @@ jobs:
             cat "$RESULT"
             rm -f "$RESULT"
             [ "$OK" = true ] || { echo '::error title=CLOUD-01 immediate cycle failed::Provisioned Worker did not return a governed cycle result.'; exit 1; }
-            echo 'R391 immediate CLOUD-01 convergence cycle returned successfully.'
+            echo 'R392 immediate CLOUD-01 convergence cycle returned successfully.'
           fi
           unset CRON_SECRET
       - name: Record provisioning boundary
