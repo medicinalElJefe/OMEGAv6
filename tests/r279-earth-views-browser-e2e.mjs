@@ -8,6 +8,7 @@ const EXPECT=[
  ['Planet','.earth-r281-globe[data-earth-view="PLANET"]'],
  ['Global motion','.earth-r279-instrument[data-earth-mode="MOTION"]'],
  ['Evidence','.earth-r279-instrument[data-earth-mode="EVIDENCE"]'],
+ ['Weather','.earth-r375-weather[data-earth-view="WEATHER"]'],
  ['Earth / space','.earth-r279-instrument[data-earth-mode="SPACE"]'],
  ['Ground','.earth-r279-ground'],
  ['Calculus','.earth-r279-calculus'],
@@ -91,5 +92,5 @@ try{
   if(pageErrors.length)throw new Error(`${label}: Earth view browser errors: ${pageErrors.join(' | ')}`);
   await context.close();
  }
- console.log('R279/R281/R283/R285/R287 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact seven established Earth views plus SAR Truth · R281/R284 Planet source identity/CRS/bbox/truth contract exact · observed-source recovery actively exercises Reload observed texture when needed · varied returned-source pixels preserved · live SAR owns full-width stage with place-first search + device location + exact WGS84 re-query · no page errors or viewport overflow');
+ console.log('R279/R281/R283/R285/R287 EARTH VIEW BROWSER PASS · desktop/mobile route to Earth Now · exact eight established Earth views plus SAR Truth · R281/R284 Planet source identity/CRS/bbox/truth contract exact · observed-source recovery actively exercises Reload observed texture when needed · varied returned-source pixels preserved · live SAR owns full-width stage with place-first search + device location + exact WGS84 re-query · no page errors or viewport overflow');
 }finally{await browser.close()}

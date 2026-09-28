@@ -50,6 +50,7 @@ const VIEW_EXPECTATIONS=[
  ['Planet','.earth-r281-globe'],
  ['Global motion','.earth-r279-instrument[data-earth-mode="MOTION"]'],
  ['Evidence','.earth-r279-instrument[data-earth-mode="EVIDENCE"]'],
+ ['Weather','.earth-r375-weather[data-earth-view="WEATHER"]'],
  ['Earth / space','.earth-r279-instrument[data-earth-mode="SPACE"]'],
  ['Ground','.earth-r279-ground'],
  ['Calculus','.earth-r279-calculus'],
@@ -89,7 +90,7 @@ try{
   await bindTarget(page,()=>page.locator('.earth-r72-console').getByRole('button',{name:'Use my location',exact:true}).click(),32.2226,-110.9747);
 
   const tabs=page.locator('.earth-r279-view-tabs button');
-  if(await tabs.count()!==8)throw new Error(`${label}: R372 expected 8 Earth views, found ${await tabs.count()}`);
+  if(await tabs.count()!==9)throw new Error(`${label}: R375 expected 9 Earth views, found ${await tabs.count()}`);
   for(const [name,selector] of VIEW_EXPECTATIONS){
    const tab=tabs.filter({hasText:name}).first();await tab.click();
    if(await tab.getAttribute('aria-pressed')!=='true')throw new Error(`${label}: ${name} tab did not activate`);
@@ -98,6 +99,21 @@ try{
    if(!stage||stage.width<(label==='desktop'?500:300)||stage.height<300)throw new Error(`${label}: ${name} stage unusable ${JSON.stringify(stage)}`);
    await contained(page,`${label} ${name}`);
   }
+
+  const weatherTab=tabs.filter({hasText:'Weather'}).first();
+  const weatherReturn=page.waitForResponse(r=>targetResponse(r,'/api/earth/weather',32.2226,-110.9747),{timeout:30000});
+  await weatherTab.click();const weatherResponse=await weatherReturn;
+  if(!weatherResponse.ok())throw new Error(`${label}: weather HTTP ${weatherResponse.status()}`);
+  const weather=await weatherResponse.json();verifyTarget(weather,32.2226,-110.9747,'Weather');
+  if(weather?.schema!=='OMEGA_EARTH_WEATHER_R375'||weather?.canonicalMutation!==false)throw new Error(`${label}: R375 weather schema/authority mismatch`);
+  if(!Array.isArray(weather?.hourly)||weather.hourly.length<24||!Array.isArray(weather?.daily)||weather.daily.length<7)throw new Error(`${label}: R375 weather horizon incomplete`);
+  if(!weather?.sources?.openMeteo?.ok||!weather?.derived?.truth?.includes('RELATIONAL_FORECAST_STRUCTURE_ONLY'))throw new Error(`${label}: R375 weather provenance/derived boundary missing`);
+  await page.waitForSelector('.earth-r375-hourly-card',{state:'visible',timeout:15000});
+  if(await page.locator('.earth-r375-hourly-card').count()<24)throw new Error(`${label}: R375 hourly surface has fewer than 24 returned points`);
+  await page.getByRole('button',{name:'Weekly · 7 day',exact:true}).click();
+  await page.waitForSelector('.earth-r375-day-card',{state:'visible',timeout:10000});
+  if(await page.locator('.earth-r375-day-card').count()<7)throw new Error(`${label}: R375 weekly surface has fewer than 7 returned days`);
+  await contained(page,`${label} Weather hourly/weekly`);
 
   const satTab=tabs.filter({hasText:'Satellite'}).first();await satTab.click();
   const satImg=page.locator('.earth-r279-sat-main figure img').first();await satImg.waitFor({state:'visible',timeout:20000});
@@ -163,5 +179,5 @@ try{
   await context.close();
  }
  verifyReceipt(await fetch(base+'/omega-build-receipt.json',{headers:{'cache-control':'no-cache'}}).then(r=>{if(!r.ok)throw new Error(`final receipt HTTP ${r.status}`);return r.json()}));
- console.log(`R372 LIVE EARTH TOTAL INTERACTION PASS · exact source + promoted SHA ${expectedSha} before/after · place/address/device target + returned evidence hash · all 8 Earth views · loaded NOAA pixels · motion pause/resume + returned refresh · ground target/hash refresh · SAR targeting + 12 unique lenses actuated · GRD/SLC · desktop/mobile containment per view/lens · no page errors`);
+ console.log(`R372 LIVE EARTH TOTAL INTERACTION PASS · exact source + promoted SHA ${expectedSha} before/after · place/address/device target + returned evidence hash · all 9 Earth views · loaded NOAA pixels · motion pause/resume + returned refresh · ground target/hash refresh · SAR targeting + 12 unique lenses actuated · GRD/SLC · desktop/mobile containment per view/lens · no page errors`);
 }finally{await browser.close()}
