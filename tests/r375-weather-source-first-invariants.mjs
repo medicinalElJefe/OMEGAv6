@@ -8,6 +8,7 @@ const worker=fs.readFileSync('src/workerR8.js','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
 for(const token of ["'WEATHER'","label:'Weather'","<EarthWeatherR375 lat={lat} lon={lon}/>","Weather forecast"])assert.ok(earth.includes(token),'R375 Earth integration missing '+token);
+assert.ok(earth.includes("copy:'current conditions · seismic · events · space'")&&!earth.includes("copy:'weather · seismic · events · space'"),'R375 must keep Weather navigation text unambiguous from Evidence');
 for(const token of ['R375 · SOURCE-FIRST WEATHER','Hourly · 48 h','Weekly · 7 day','earth-r375-hourly-card','earth-r375-day-card','Forecast evidence + scar ledger','agreement is not a skill probability','cannot mutate CanonState'])assert.ok(weather.includes(token),'R375 Weather surface missing '+token);
 assert.ok(weather.includes("Date.now()-60*60*1000")&&weather.includes("future.length?future:all"),'R375 hourly surface must begin at the current forecast hour rather than local midnight');
 for(const token of ["url.pathname==='/api/earth/weather'","OMEGA_EARTH_WEATHER_R375","forecast_days=8&timezone=auto","api.weather.gov/points/","satelliteWeatherContext","openMeteoNwsAgreement","FORECAST_SOURCE_DISAGREEMENT","canonicalMutation:false","RELATIONAL_FORECAST_STRUCTURE_ONLY_NOT_A_CALIBRATED_SKILL_SCORE"])assert.ok(worker.includes(token),'R375 weather endpoint missing '+token);
