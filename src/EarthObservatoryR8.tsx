@@ -20,7 +20,7 @@ const VIEWS:{id:EarthView;label:string;copy:string}[]=[
  {id:'SATELLITE',label:'Satellite',copy:'latest returned NOAA/CIRA imagery'},
  {id:'PLANET',label:'Planet',copy:'global observed texture + true projection'},
  {id:'MOTION',label:'Global motion',copy:'returned winds + derived continuity'},
- {id:'EVIDENCE',label:'Evidence',copy:'weather · seismic · events · space'},
+ {id:'EVIDENCE',label:'Evidence',copy:'current conditions · seismic · events · space'},
  {id:'WEATHER',label:'Weather',copy:'hourly · 7 day · source agreement · continuity'},
  {id:'SPACE',label:'Earth / space',copy:'solar geometry + near-space frame'},
  {id:'GROUND',label:'Ground',copy:'region → city → street → ground evidence'},
