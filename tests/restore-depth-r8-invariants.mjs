@@ -9,6 +9,7 @@ const wrangler=fs.readFileSync('wrangler.jsonc','utf8');
 for(const x of ['/api/earth/evidence','/api/earth/noaa/catalog','/api/earth/noaa/image','USGS','EONET','swpc','open-meteo','evidenceHash'])must(worker.toLowerCase().includes(x.toLowerCase()),`Earth R8 worker contract missing ${x}`);
 must(worker.includes('EXTERNAL_JSON_TIMEOUT_MS=8000'),'external JSON provider deadline must remain bounded below the 20s browser authority deadline');
 must(worker.includes('signal:AbortSignal.timeout(timeoutMs)'),'external JSON requests must fail closed instead of stalling Earth evidence');
+must(worker.includes('Promise.race([pending,deadline])')&&worker.includes('PROVIDER_DEADLINE_${timeoutMs}MS'),'Earth evidence must settle on an independent promise deadline even if provider abort signaling stalls');
 for(const x of ['G19-CONUS','G19-FD','G18-FD','G19-CAR','G19-CAM','G19-TAW','G19-CAN','G18-WUS','G18-TPW'])must(worker.includes(x),`NOAA coverage missing ${x}`);
 for(const x of ['INDEX','READ_TEXT','SEARCH_TEXT','HASH_TREE','SAFE_IMPORT','WORKBOOK_AUDIT','BUILD','TEST','PACKAGE','SUPPORT_BUNDLE','APPLY_PATCH','OPEN_URL','WAIT','CLICK','KEY','TYPE_TEXT','SCROLL','ASSERT_WINDOW','READ_VISIBLE_TEXT','RECORD_MACRO','REPLAY_MACRO','TRAIN_LOCAL'])must(worker.includes(`'${x}'`),`V90 operation missing ${x}`);
 for(const x of ['/api/hybrid/capabilities','/api/hybrid/plan','/api/hybrid/validate','DRAFT_ONLY_NOT_QUEUED','DEVICE_PROOF_REQUIRED','foundationWeightsChanged:false','sourceFiles:25000','changedFiles:80'])must(worker.includes(x),`Hybrid R8 contract missing ${x}`);
