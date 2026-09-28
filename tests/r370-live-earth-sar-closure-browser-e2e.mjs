@@ -45,8 +45,18 @@ try{
   const totalCards=await page.locator('.r284-lens-card').count();
   if(totalCards!==12)throw new Error(`R370 expected 12 analytical lenses, found ${totalCards}`);
   await page.waitForSelector('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]',{state:'visible',timeout:20000});
-  const badge=await page.locator('.r3565-lemma-badge').innerText();
-  if(!badge.includes('CHAIN LEMMA')||!badge.includes('NASA GIBS'))throw new Error(`R370 derived-field truth badge incomplete: ${badge}`);
+  const sarInstrument=page.locator('.sar-r285-live .sar-r280');
+  const screen=sarInstrument.locator('.r280-screen');
+  if(await screen.getAttribute('data-clean-view')!=='true')throw new Error('R370 clean SAR view must default active');
+  if(await sarInstrument.locator('.r3565-lemma-badge').isVisible().catch(()=>false))throw new Error('R370 clean SAR view must not overlay the chain-lemma badge');
+  const details=sarInstrument.getByRole('button',{name:'VIEW DETAILS',exact:true});
+  await details.waitFor({state:'visible',timeout:10000});
+  await details.click();
+  if(await screen.getAttribute('data-clean-view')!=='false')throw new Error('R370 VIEW DETAILS did not restore analytical overlays');
+  const badge=await sarInstrument.locator('.r3565-lemma-badge').innerText();
+  if(!badge.includes('CHAIN LEMMA')||!badge.includes('NASA GIBS'))throw new Error(`R370 derived-field truth badge incomplete in detail view: ${badge}`);
+  await sarInstrument.getByRole('button',{name:'CLEAN VIEW',exact:true}).click();
+  if(await screen.getAttribute('data-clean-view')!=='true')throw new Error('R370 CLEAN VIEW did not restore unobstructed field');
 
   const allLensCards=page.locator('.r284-lens-card');
   for(let i=0;i<12;i++){
@@ -78,5 +88,5 @@ try{
   if(errors.length)throw new Error(`R370 ${label} browser errors ${errors.join(' | ')}`);
   await context.close();
  }
- console.log(`R370 LIVE EARTH/SAR CLOSURE PASS · exact promoted SHA ${expectedSha} · place search + device geolocation · all 12 analytical lenses actuated · GRD/SLC toggled · chain-lemma fields materially rendered · evidence disclosure actuated · desktop/mobile · no page errors/overflow`);
+ console.log(`R370 LIVE EARTH/SAR CLOSURE PASS · exact promoted SHA ${expectedSha} · place search + device geolocation · all 12 analytical lenses actuated · GRD/SLC toggled · chain-lemma fields materially rendered · clean/detail overlay contract proved · evidence disclosure actuated · desktop/mobile · no page errors/overflow`);
 }finally{await browser.close()}
