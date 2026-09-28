@@ -472,5 +472,27 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r170-governed-selfbuild.yml/dispatches" -f ref=main
-          echo "R330 event-driven continuation dispatched after canonical production proof for $GITHUB_SHA."
+          STATE_JSON="$(mktemp)"
+          gh api "repos/$GITHUB_REPOSITORY/contents/public/omega-r170-selfbuild-state.json?ref=$GITHUB_SHA" --jq .content | tr -d '\n' | base64 -d > "$STATE_JSON"
+          STATIC_EXHAUSTED=true
+          while IFS= read -r TARGET; do
+            [ -n "$TARGET" ] || continue
+            if ! gh api "repos/$GITHUB_REPOSITORY/contents/$TARGET?ref=$GITHUB_SHA" >/dev/null 2>&1; then
+              STATIC_EXHAUSTED=false
+              break
+            fi
+          done < <(node - "$STATE_JSON" <<'NODE'
+          const fs=require('fs');
+          const state=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          for(const row of Array.isArray(state.roadmap)?state.roadmap:[])if(row?.target)console.log(row.target);
+          NODE
+          )
+          rm -f "$STATE_JSON"
+
+          if [ "$STATIC_EXHAUSTED" = true ]; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r223-cloudflare-evolution.yml/dispatches" -f ref=main -f 'inputs[immediate_cycle]=true'
+            echo "R392 event-driven continuation dispatched to CLOUD-01/R388 after canonical production proof for $GITHUB_SHA; SG001–SG005 source targets are all present."
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r170-governed-selfbuild.yml/dispatches" -f ref=main
+            echo "R330 event-driven continuation dispatched to R170 after canonical production proof for $GITHUB_SHA; bounded static roadmap remains incomplete."
+          fi
