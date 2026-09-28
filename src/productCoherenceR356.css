@@ -155,6 +155,9 @@ body{margin:0;background-image:radial-gradient(circle at 18% 0%,rgba(77,139,128,
  .workstation-main{padding:7px!important}
 }
 @media(max-width:520px){
+ /* R403: the global mobile main rule also matches the nested product root. Remove only
+    that duplicate Earth inset so the operational stage retains its 300px usability floor. */
+ .r317-product-root:has(.omega-workstation-v2[data-panel='Earth Now']){padding-inline:4px}
  .omega-workstation-v2[data-panel='Earth Now'] .workstation-main{padding-inline:1px!important}
  .r356-product-surface[data-r356-route='Earth Now']{padding-inline:1px;border-left-width:0;border-right-width:0;border-radius:8px}
  .r356-product-surface[data-r356-route='Earth Now'] .r356-surface-content{width:100%;min-width:0}
