@@ -356,6 +356,7 @@ jobs:
         run: node scripts/verify_live_operational_source_authority_r202.mjs
       - name: Verify live R237 authenticated Hybrid command authority
         id: live_r237
+        if: always() && steps.deploy_worker.outcome == 'success'
         continue-on-error: true
         run: node scripts/verify_live_hybrid_command_authority_r237.mjs
       - name: Verify live R238 Hybrid host intelligence
