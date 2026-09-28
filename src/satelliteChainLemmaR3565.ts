@@ -8,7 +8,7 @@ export interface SatelliteLemmaResultR3565{
  state:SatelliteLemmaStateR3565;
  resolution:number;
  fields:Partial<Record<SatelliteLemmaViewR3565,number[]>>;
- anchors:{current:string;previous:string;currentDate?:string;previousDate?:string;evidenceBound:boolean;lat:number;lon:number};
+ anchors:{current:string;previous:string;currentDate?:string;previousDate?:string;evidenceBound:boolean;evidenceHash:string;lat:number;lon:number};
  metrics:{temporalResidual:number;meanGradient:number;meanCoherence:number;scar:number;support:number;cloudPenalty:number};
  operator:string;
  truthClass:'DERIVED_TRIANGULATED';
@@ -26,9 +26,10 @@ const idx=(x:number,y:number,n:number)=>Math.max(0,Math.min(n-1,y))*n+Math.max(0
 const sample=(a:number[],x:number,y:number,n:number)=>a[idx(x,y,n)]||0;
 
 export function useSatelliteChainLemmaR3565(lat:number,lon:number,evidence?:any,resolution=64){
- const[result,setResult]=useState<SatelliteLemmaResultR3565>(()=>({schema:'OMEGA_SATELLITE_CHAIN_LEMMA_R3565',state:'LOADING',resolution,fields:{},anchors:{current:'',previous:'',evidenceBound:false,lat,lon},metrics:{temporalResidual:0,meanGradient:0,meanCoherence:0,scar:1,support:0,cloudPenalty:0},operator:'PARTITION → TRANSFORM/EXCHANGE → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE',truthClass:'DERIVED_TRIANGULATED',boundary:'Derived triangulation only; no SAR measurement authority is claimed.'}));
+ const evidenceHash=String(evidence?.evidenceHash||'');
+ const[result,setResult]=useState<SatelliteLemmaResultR3565>(()=>({schema:'OMEGA_SATELLITE_CHAIN_LEMMA_R3565',state:'LOADING',resolution,fields:{},anchors:{current:'',previous:'',evidenceBound:false,evidenceHash,lat,lon},metrics:{temporalResidual:0,meanGradient:0,meanCoherence:0,scar:1,support:0,cloudPenalty:0},operator:'PARTITION → TRANSFORM/EXCHANGE → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE',truthClass:'DERIVED_TRIANGULATED',boundary:'Derived triangulation only; no SAR measurement authority is claimed.'}));
  useEffect(()=>{let alive=true;const n=Math.max(24,Math.min(96,Math.floor(resolution))),mk=(offset:number)=>({date:day(offset),src:`/api/earth/gibs/image?lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&date=${day(offset)}&span=2.5`}),currentCandidates=[mk(-1),mk(-2),mk(-3)],previousCandidates=[mk(-8),mk(-9),mk(-10)];
-  setResult(r=>({...r,state:'LOADING',anchors:{current:currentCandidates[0].src,previous:previousCandidates[0].src,currentDate:currentCandidates[0].date,previousDate:previousCandidates[0].date,evidenceBound:Boolean(evidence?.evidenceHash),lat,lon},error:undefined}));
+  setResult(r=>({...r,state:'LOADING',fields:{},anchors:{current:currentCandidates[0].src,previous:previousCandidates[0].src,currentDate:currentCandidates[0].date,previousDate:previousCandidates[0].date,evidenceBound:Boolean(evidenceHash),evidenceHash,lat,lon},error:undefined}));
   (async()=>{try{
    const[aAnchor,bAnchor]=await Promise.all([loadFirstImage(currentCandidates),loadFirstImage(previousCandidates)]),aPix=pixels(aAnchor.img,n),bPix=pixels(bAnchor.img,n),N=n*n;
    const L0=new Array<number>(N),L1=new Array<number>(N),spread=new Array<number>(N);
@@ -42,7 +43,8 @@ export function useSatelliteChainLemmaR3565(lat:number,lon:number,evidence?:any,
     fields.SOURCE[i]=l;fields.AMPLITUDE[i]=clamp(.35*l+.65*g*3);fields.PHASE[i]=phase;fields.COHERENCE[i]=coherence;fields.INTERFEROGRAM[i]=residual;fields.DEFORMATION[i]=deform;fields.ELEVATION[i]=terrain;fields.POLARIMETRY[i]=clamp(spread[i]*1.5);fields.MULTI_BAND[i]=multi;fields.TIME_STACK[i]=clamp(temporal*2.4);fields.SCAR_UNCERTAINTY[i]=scar;fields.PROOF[i]=support;
     temporalSum+=temporal;gradSum+=g;cohSum+=coherence;scarSum+=scar;supportSum+=support;
    }
-   if(!alive)return;setResult({schema:'OMEGA_SATELLITE_CHAIN_LEMMA_R3565',state:'READY',resolution:n,fields,anchors:{current:aAnchor.src,previous:bAnchor.src,currentDate:aAnchor.date,previousDate:bAnchor.date,evidenceBound:Boolean(evidence?.evidenceHash),lat,lon},metrics:{temporalResidual:temporalSum/N,meanGradient:gradSum/N,meanCoherence:cohSum/N,scar:scarSum/N,support:supportSum/N,cloudPenalty},operator:'PARTITION → TRANSFORM/EXCHANGE → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE',truthClass:'DERIVED_TRIANGULATED',boundary:'NASA GIBS current/previous true-color anchors (resolved from bounded recent-date fallback sets) plus returned local evidence are transformed into relational proxy fields immediately. SOURCE pixels are observed optical context. AMPLITUDE/PHASE/COHERENCE/INTERFEROGRAM/DEFORMATION/ELEVATION/POLARIMETRY/MULTI_BAND/TIME_STACK/SCAR/PROOF outputs are chain-lemma derived proxies, not native Sentinel-1 SAR measurements, interferometric phase, metric displacement, calibrated backscatter, DEM, or polarimetric products.'});
-  }catch(error){if(!alive)return;setResult(r=>({...r,state:'UNAVAILABLE',fields:{},error:error instanceof Error?error.message:String(error)}))}})();return()=>{alive=false}},[lat,lon,evidence?.evidenceHash,resolution]);
- return result;
+   if(!alive)return;setResult({schema:'OMEGA_SATELLITE_CHAIN_LEMMA_R3565',state:'READY',resolution:n,fields,anchors:{current:aAnchor.src,previous:bAnchor.src,currentDate:aAnchor.date,previousDate:bAnchor.date,evidenceBound:Boolean(evidenceHash),evidenceHash,lat,lon},metrics:{temporalResidual:temporalSum/N,meanGradient:gradSum/N,meanCoherence:cohSum/N,scar:scarSum/N,support:supportSum/N,cloudPenalty},operator:'PARTITION → TRANSFORM/EXCHANGE → INVARIANT CARRY → SCAR/RESIDUAL CARRY → RE-CONTEXTUALIZE',truthClass:'DERIVED_TRIANGULATED',boundary:'NASA GIBS current/previous true-color anchors (resolved from bounded recent-date fallback sets) plus returned local evidence are transformed into relational proxy fields immediately. SOURCE pixels are observed optical context. AMPLITUDE/PHASE/COHERENCE/INTERFEROGRAM/DEFORMATION/ELEVATION/POLARIMETRY/MULTI_BAND/TIME_STACK/SCAR/PROOF outputs are chain-lemma derived proxies, not native Sentinel-1 SAR measurements, interferometric phase, metric displacement, calibrated backscatter, DEM, or polarimetric products.'});
+  }catch(error){if(!alive)return;setResult(r=>({...r,state:'UNAVAILABLE',fields:{},error:error instanceof Error?error.message:String(error)}))}})();return()=>{alive=false}},[lat,lon,evidenceHash,resolution]);
+ const current=result.anchors.lat===lat&&result.anchors.lon===lon&&result.anchors.evidenceHash===evidenceHash;
+ return current?result:{...result,state:'LOADING',fields:{},anchors:{...result.anchors,evidenceBound:Boolean(evidenceHash),evidenceHash,lat,lon}};
 }
