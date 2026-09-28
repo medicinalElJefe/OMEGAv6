@@ -2,6 +2,12 @@ name: R223 Cloudflare Evolution Authority
 
 on:
   workflow_dispatch:
+    inputs:
+      immediate_cycle:
+        description: Run one governed CLOUD-01 cycle immediately after provisioning
+        required: false
+        default: false
+        type: boolean
   pull_request:
     branches: [main]
 
@@ -40,6 +46,7 @@ jobs:
           node tests/r245-governed-selfbuild-convergence-invariants.mjs
           node tests/r314-cloud-autonomous-repair-invariants.mjs
           node tests/r388-convergence-selfbuild-invariants.mjs
+          node tests/r391-event-driven-r388-continuation-invariants.mjs
       - name: Prove ancillary Worker package without deployment
         run: npx wrangler deploy --config wrangler.evolution-machine-r223.jsonc --dry-run --outdir .wrangler-r223-cloud-01
 
@@ -64,17 +71,49 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN" || { echo '::error title=Cloudflare token required::OMEGA_CLOUDFLARE_TOKEN is unavailable.'; exit 1; }
           test -n "$OMEGA_EVOLUTION_GITHUB_TOKEN" || { echo '::error title=Evolution GitHub credential required::Create the production environment secret OMEGA_EVOLUTION_GITHUB_TOKEN with narrowly scoped medicinalElJefe/OMEGAv6 branch, pull-request, actions-read, and merge permissions.'; exit 1; }
       - name: Deploy CLOUD-01 ancillary evolution Worker
-        run: npx wrangler deploy --config wrangler.evolution-machine-r223.jsonc
+        id: deploy_cloud01
+        shell: bash
+        run: |
+          set -o pipefail
+          LOG="$(mktemp)"
+          npx wrangler deploy --config wrangler.evolution-machine-r223.jsonc | tee "$LOG"
+          URL="$(grep -Eo 'https://[A-Za-z0-9.-]+\.workers\.dev' "$LOG" | tail -1 || true)"
+          rm -f "$LOG"
+          if [ -n "$URL" ]; then echo "url=$URL" >> "$GITHUB_OUTPUT"; fi
       - name: Bind CLOUD-01 GitHub credential as encrypted Worker secret
         shell: bash
         run: printf '%s' "$OMEGA_EVOLUTION_GITHUB_TOKEN" | npx wrangler secret put OMEGA_GITHUB_TOKEN --config wrangler.evolution-machine-r223.jsonc
-      - name: Generate and bind manual-trigger secret
+      - name: Generate, bind, and optionally exercise manual-trigger secret
         shell: bash
         run: |
           CRON_SECRET="$(openssl rand -hex 32)"
+          echo "::add-mask::$CRON_SECRET"
           printf '%s' "$CRON_SECRET" | npx wrangler secret put OMEGA_CRON_SECRET --config wrangler.evolution-machine-r223.jsonc
-          unset CRON_SECRET
           echo 'CLOUD-01 manual-trigger secret generated and stored only in Cloudflare encrypted secret state.'
+          if [ "${{ inputs.immediate_cycle }}" = "true" ]; then
+            URL='${{ steps.deploy_cloud01.outputs.url }}'
+            test -n "$URL" || { echo '::error title=CLOUD-01 URL unavailable::Wrangler deployment did not expose a workers.dev URL for immediate cycle proof.'; exit 1; }
+            RESULT="$(mktemp)"
+            OK=false
+            for attempt in $(seq 1 12); do
+              CODE="$(curl -sS -o "$RESULT" -w '%{http_code}' -H "authorization: Bearer $CRON_SECRET" -H 'cache-control: no-cache' "$URL?mode=cycle" || true)"
+              if [ "$CODE" = "200" ] && node - "$RESULT" <<'NODE'
+              const fs=require('fs');
+              const body=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+              if(body.ok===false)process.exit(1);
+              const state=String(body.state||body.proposal?.state||body.promotion?.action||'');
+              if(!state)process.exit(1);
+              console.log(JSON.stringify({machineId:body.machineId||null,state,proposal:body.proposal?.mutation||null,itemId:body.proposal?.itemId||null,prNumber:body.proposal?.prNumber||null}));
+              NODE
+              then OK=true; break; fi
+              sleep 5
+            done
+            cat "$RESULT"
+            rm -f "$RESULT"
+            [ "$OK" = true ] || { echo '::error title=CLOUD-01 immediate cycle failed::Provisioned Worker did not return a governed cycle result.'; exit 1; }
+            echo 'R392 immediate CLOUD-01 convergence cycle returned successfully.'
+          fi
+          unset CRON_SECRET
       - name: Record provisioning boundary
         run: |
           echo 'CLOUD-01 provisioned as ancillary Cloudflare evolution compute.'
@@ -82,4 +121,5 @@ jobs:
           echo 'CLOUD-01 shares the R245 residual/selection/generator/candidate-fence contract with R170 and may merge only exact-head fully green governed source candidates.'
           echo 'R314 residual/target/Workers-AI repair is restricted to exact-SHA allowlisted product source and cannot edit its own governance or proof gates.'
           echo 'R388 compiles the explicit full-spectrum convergence matrix into bounded source-improvement work after the static SG001–SG005 roadmap is exhausted; governance/self-build authority items remain non-self-editable and external/device completion still requires first-hand proof.'
+          echo 'R391 may request one immediate post-production CLOUD-01 cycle after idempotent ancillary provisioning; the one-open-candidate fence is rechecked inside the Worker before mutation.'
           echo 'CLOUD-01 cannot deploy canonical OMEGA directly; R125 remains sole CanonState admission authority.'
