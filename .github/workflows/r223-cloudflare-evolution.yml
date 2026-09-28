@@ -98,13 +98,13 @@ jobs:
             for attempt in $(seq 1 12); do
               CODE="$(curl -sS -o "$RESULT" -w '%{http_code}' -H "authorization: Bearer $CRON_SECRET" -H 'cache-control: no-cache' "$URL?mode=cycle" || true)"
               if [ "$CODE" = "200" ] && node - "$RESULT" <<'NODE'
-const fs=require('fs');
-const body=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-if(body.ok===false)process.exit(1);
-const state=String(body.state||body.proposal?.state||body.promotion?.action||'');
-if(!state)process.exit(1);
-console.log(JSON.stringify({machineId:body.machineId||null,state,proposal:body.proposal?.mutation||null,itemId:body.proposal?.itemId||null,prNumber:body.proposal?.prNumber||null}));
-NODE
+              const fs=require('fs');
+              const body=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+              if(body.ok===false)process.exit(1);
+              const state=String(body.state||body.proposal?.state||body.promotion?.action||'');
+              if(!state)process.exit(1);
+              console.log(JSON.stringify({machineId:body.machineId||null,state,proposal:body.proposal?.mutation||null,itemId:body.proposal?.itemId||null,prNumber:body.proposal?.prNumber||null}));
+              NODE
               then OK=true; break; fi
               sleep 5
             done
