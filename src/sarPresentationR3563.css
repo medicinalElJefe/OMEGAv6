@@ -93,3 +93,20 @@
 .r280-screen.clean-view .r284-scale,
 .r280-screen.clean-view .r284-swath{display:none!important}
 @media(max-width:620px){.r374-below-canvas-status{grid-template-columns:1fr}.r374-below-canvas-status span{white-space:normal}.r374-below-canvas-status small{white-space:normal}}
+
+
+/* R383 · field-first SAR semantics.
+   The analytical field owns the workspace by default; interpretation stays below it. */
+.r381-view-guide{display:grid;grid-template-columns:minmax(220px,1fr) auto minmax(90px,220px) auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid rgba(128,174,186,.14);border-radius:8px;background:#041015;min-width:0}
+.r381-view-guide b{font:800 9px ui-monospace,monospace;color:#d9f5f0;letter-spacing:.02em}
+.r381-view-guide span{font:700 7px ui-monospace,monospace;color:#78989f;white-space:nowrap}
+.r381-view-guide i{display:block;height:5px;min-width:90px;border-radius:999px;background:linear-gradient(90deg,rgba(73,111,124,.22),rgba(188,224,216,.82))}
+.r280-workbench.focus-display .r280-center{min-width:0}
+.r280-workbench.focus-display .r280-screen{width:100%;min-height:min(78vh,980px)}
+@media(max-width:620px){.r381-view-guide{grid-template-columns:1fr}.r381-view-guide i{width:100%}.r381-view-guide span{white-space:normal}}
+
+
+/* R385 · bounded paint/layout cost for deep SAR surfaces. */
+.r280-screen,.r280-canvas,.r3565-lemma-canvas{contain:layout paint style}
+.r284-lens-dock,.r280-bottom{content-visibility:auto;contain-intrinsic-size:900px}
+.r284-lens-card{contain:layout paint style}

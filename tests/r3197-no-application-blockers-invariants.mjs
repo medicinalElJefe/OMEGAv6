@@ -16,6 +16,8 @@ for(const file of files){
 const app=readFileSync(new URL('../src/App.tsx',import.meta.url),'utf8');
 assert.ok(app.includes('r319-bounded-surface-error'),'App route failures must remain bounded inside the canonical shell');
 assert.ok(app.includes('r319-bounded-loading'),'route loading must remain bounded inside the canonical shell');
+const surface=readFileSync(new URL('../src/SurfaceIntegrityR81.tsx',import.meta.url),'utf8');
+assert.ok(!surface.includes('PanelBoundary'),'canonical product surfaces must never be replaced by panel-blocking error walls');
 const v2=readFileSync(new URL('../src/OmegaWorkstationFullV2.tsx',import.meta.url),'utf8');
 assert.ok(v2.includes('NON-BLOCKING INITIALIZATION'),'canonical workspace initialization must explicitly remain non-blocking');
 for(const file of ['src/OmegaWorkstation.tsx','src/OmegaWorkstationFull.tsx']){

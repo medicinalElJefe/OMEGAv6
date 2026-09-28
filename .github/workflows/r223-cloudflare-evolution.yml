@@ -27,6 +27,7 @@ jobs:
           node --check src/system/governedSelfBuildContractR245.js
           node --check src/system/autonomousConvergenceR314.js
           node --check src/system/autonomousRepairPolicyR314.js
+          node --check src/system/convergenceBacklogR388.js
           node --check scripts/lib/r245-governed-selfbuild-selection.mjs
           node --check cloudflare/lib/evolution-policy.mjs
           node --check cloudflare/lib/generated-capsules.mjs
@@ -38,6 +39,7 @@ jobs:
           node tests/r223-cloudflare-evolution-invariants.mjs
           node tests/r245-governed-selfbuild-convergence-invariants.mjs
           node tests/r314-cloud-autonomous-repair-invariants.mjs
+          node tests/r388-convergence-selfbuild-invariants.mjs
       - name: Prove ancillary Worker package without deployment
         run: npx wrangler deploy --config wrangler.evolution-machine-r223.jsonc --dry-run --outdir .wrangler-r223-cloud-01
 
@@ -79,4 +81,5 @@ jobs:
           echo 'Canonical OMEGA production remains exclusively deployed by ci.yml deploy-main.'
           echo 'CLOUD-01 shares the R245 residual/selection/generator/candidate-fence contract with R170 and may merge only exact-head fully green governed source candidates.'
           echo 'R314 residual/target/Workers-AI repair is restricted to exact-SHA allowlisted product source and cannot edit its own governance or proof gates.'
+          echo 'R388 compiles the explicit full-spectrum convergence matrix into bounded source-improvement work after the static SG001–SG005 roadmap is exhausted; governance/self-build authority items remain non-self-editable and external/device completion still requires first-hand proof.'
           echo 'CLOUD-01 cannot deploy canonical OMEGA directly; R125 remains sole CanonState admission authority.'

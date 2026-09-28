@@ -23,5 +23,9 @@ assert.match(orchestrator,/const readableMissionSummary=/,'Command Center must n
 assert.match(orchestrator,/summary\.resultFingerprint/,'returned mission receipt fingerprints must remain visible when summary is structured data');
 assert.match(orchestrator,/<p>\{readableMissionSummary\(mission\.summary,mission\.objective\)\}<\/p>/,'mission surface must never render an arbitrary summary object directly');
 assert.doesNotMatch(orchestrator,/<p>\{mission\.summary\|\|mission\.objective\}<\/p>/,'raw object-valued mission summary render would reintroduce React error #31');
+assert.match(orchestrator,/const displayScalar=/,'R381 must normalize object-valued SAI\/Hybrid status payloads before JSX rendering');
+assert.match(orchestrator,/displayScalar\(job\.returnPacket\?\.evaluation\?\.status/,'R381 must not render structured training evaluation status objects as React children');
+assert.match(orchestrator,/displayScalar\(job\.returnPacket\?\.promotion\?\.status/,'R381 must not render structured training promotion status objects as React children');
+assert.match(orchestrator,/displayScalar\(x\.status,'UNKNOWN'\)/,'R381 must normalize structured step status payloads before JSX rendering');
 
 console.log('R308 portability invariants PASS · portable transport retained · structured mission receipts render safely');
