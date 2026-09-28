@@ -81,12 +81,12 @@ try{
   const canvas=page.locator('.r3565-lemma-canvas');
   const rendered=await canvas.evaluate(el=>({count:el.querySelectorAll(':scope > i').length,unique:new Set([...el.querySelectorAll(':scope > i')].slice(0,1500).map(x=>getComputedStyle(x).backgroundColor)).size}));
   if(rendered.count<4096||rendered.unique<8)throw new Error(`R370 chain-lemma field materially insufficient ${JSON.stringify(rendered)}`);
-  const rect=await page.locator('.r280-screen').boundingBox(),minWidth=label==='desktop'?500:300;
-  if(!rect||rect.width<minWidth||rect.height<300)throw new Error(`R370 ${label} analytical surface unusable ${JSON.stringify(rect)}`);
+  const screenBox=page.locator('.r280-screen'),centerBox=page.locator('.r280-center'),rect=await screenBox.boundingBox(),centerRect=await centerBox.boundingBox(),minWidth=label==='desktop'?500:viewport.width*.60;
+  if(!rect||!centerRect||rect.width<minWidth||rect.height<300||rect.width<centerRect.width-2)throw new Error(`R370 ${label} analytical surface unusable ${JSON.stringify({rect,centerRect,minWidth})}`);
   const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
   if(overflow>12)throw new Error(`R370 ${label} introduced ${overflow}px horizontal overflow`);
   if(errors.length)throw new Error(`R370 ${label} browser errors ${errors.join(' | ')}`);
   await context.close();
  }
- console.log(`R370 LIVE EARTH/SAR CLOSURE PASS · exact promoted SHA ${expectedSha} · place search + device geolocation · all 12 analytical lenses actuated · GRD/SLC toggled · chain-lemma fields materially rendered · clean/detail overlay contract proved · evidence disclosure actuated · desktop/mobile · no page errors/overflow`);
+ console.log(`R370 LIVE EARTH/SAR CLOSURE PASS · exact promoted SHA ${expectedSha} · place search + device geolocation · all 12 analytical lenses actuated · GRD/SLC toggled · chain-lemma fields materially rendered · clean/detail overlay contract proved · evidence disclosure actuated · desktop/mobile relative field geometry · no page errors/overflow`);
 }finally{await browser.close()}
