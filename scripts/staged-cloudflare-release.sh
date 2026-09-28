@@ -130,6 +130,20 @@ fi
 
 rm -f "$WRANGLER_NDJSON"
 assert_current_main_owner
+
+# Rebuild the exact checked-out source immediately before packaging so the
+# staged Worker cannot inherit tracked or runner-stale dist assets/receipts.
+npm run build
+node - "$GITHUB_SHA" <<'NODE'
+const fs=require('fs');
+const expected=process.argv[2];
+const path='dist/omega-build-receipt.json';
+const receipt=JSON.parse(fs.readFileSync(path,'utf8'));
+const actual=String(receipt?.source?.sha||'');
+if(actual!==expected)throw new Error(`exact staged build receipt mismatch ${actual||'NONE'} != ${expected}`);
+console.log(`Exact staged build receipt bound to ${actual}.`);
+NODE
+
 WRANGLER_OUTPUT_FILE_PATH="$WRANGLER_NDJSON" npx wrangler versions upload --name "$WORKER_NAME" --message "OMEGA staged candidate $GITHUB_SHA"
 CANDIDATE_VERSION_ID="$(node - "$WRANGLER_NDJSON" <<'NODE'
 const fs=require('fs');
