@@ -94,8 +94,8 @@ try{
 
   const rendered=await analyticalState(sarInstrument);
   if(rendered.kind==='PENDING'||rendered.count<4096||rendered.unique<8)throw new Error(`R370 analytical field materially insufficient ${JSON.stringify(rendered)}`);
-  const screenBox=page.locator('.r280-screen'),centerBox=page.locator('.r280-center'),rect=await screenBox.boundingBox(),centerRect=await centerBox.boundingBox(),minWidth=label==='desktop'?500:viewport.width*.60;
-  if(!rect||!centerRect||rect.width<minWidth||rect.height<300||rect.width<centerRect.width-2)throw new Error(`R370 ${label} analytical surface unusable ${JSON.stringify({rect,centerRect,minWidth})}`);
+  const screenBox=page.locator('.r280-screen'),centerBox=page.locator('.r280-center'),rect=await screenBox.boundingBox(),centerMetrics=await centerBox.evaluate(el=>{const rect=el.getBoundingClientRect(),style=getComputedStyle(el),paddingLeft=Number.parseFloat(style.paddingLeft)||0,paddingRight=Number.parseFloat(style.paddingRight)||0;return{rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},paddingLeft,paddingRight,contentWidth:rect.width-paddingLeft-paddingRight}}),minWidth=label==='desktop'?500:viewport.width*.60;
+  if(!rect||!centerMetrics||rect.width<minWidth||rect.height<300||rect.width<centerMetrics.contentWidth-2||rect.width>centerMetrics.rect.width+2)throw new Error(`R370 ${label} analytical surface unusable ${JSON.stringify({rect,centerMetrics,minWidth})}`);
   const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
   if(overflow>12)throw new Error(`R370 ${label} introduced ${overflow}px horizontal overflow`);
   if(errors.length)throw new Error(`R370 ${label} browser errors ${errors.join(' | ')}`);
