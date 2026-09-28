@@ -1,13 +1,22 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const browser=fs.readFileSync('tests/r370-live-earth-sar-closure-browser-e2e.mjs','utf8');
+const earthLive=fs.readFileSync('tests/r284-live-earth-browser-e2e.mjs','utf8');
+const totalLive=fs.readFileSync('tests/r372-live-earth-total-interaction-browser-e2e.mjs','utf8');
 const verifier=fs.readFileSync('scripts/verify_live_operational_source_authority_r202.mjs','utf8');
 const lemma=fs.readFileSync('src/satelliteChainLemmaR3565.ts','utf8');
 const instrument=fs.readFileSync('src/SARTruthInstrumentR280.tsx','utf8');
-for(const token of ['Search SAR location','Use my location','Tucson Arizona','data-r3565-lemma="true"','permissions:[\'geolocation\']','all 12 analytical lenses actuated','GRD/SLC toggled','evidence disclosure actuated'])assert.ok(browser.includes(token),`R370 live acceptance missing ${token}`);
-assert.ok(browser.includes("length===12"),'R370 must require all 12 derived lemma lenses');
-assert.ok(browser.includes("overflow>12"),'R370 must retain no-overflow acceptance');
+const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+
+for(const token of ['Search SAR location','Use my location','Tucson Arizona','waitAnalytical(page)','DERIVED_TRIANGULATED','BOUND_NATIVE','all 12 analytical lenses actuated','GRD/SLC toggled','evidence disclosure actuated','viewport.width*.60'])assert.ok(browser.includes(token),`R391/R370 live acceptance missing ${token}`);
+assert.ok(browser.includes(".r3565-mini-lemma,.r284-mini-grid"),'R391 R370 must accept only materially populated derived/native lens previews');
+assert.ok(browser.includes('count<4096')&&browser.includes('unique<8'),'R391 R370 must retain material-render acceptance for either truth state');
+assert.ok(browser.includes('overflow>12'),'R391 R370 must retain no-overflow acceptance');
+assert.ok(earthLive.includes('R356.5 analytical state did not settle across all 12 lenses')&&earthLive.includes("kind:lemma?'DERIVED_TRIANGULATED':'BOUND_NATIVE'"),'R391 R284 live proof must atomically accept the derived-to-native source transition');
+assert.ok(earthLive.includes("name==='desktop'?260:viewport.width*.60"),'R391 R284 mobile analytical geometry must remain viewport-relative');
+assert.ok(totalLive.includes('waitSarAnalytical(page)')&&totalLive.includes('.r3565-mini-lemma,.r284-mini-grid')&&totalLive.includes('derived/native transition-safe lenses actuated'),'R391 R372 total-interaction proof must preserve all 12 lenses across the derived/native transition');
+assert.match(ci,/id:\s*live_r237\s*\n\s*if:\s*always\(\) && steps\.deploy_worker\.outcome == 'success'/,'R391 R237 live proof must remain independently observable after a sibling post-promotion proof fails');
 assert.ok(verifier.includes("tests/r370-live-earth-sar-closure-browser-e2e.mjs"),'production verifier must execute R370 Earth/SAR closure');
 for(const token of ['currentCandidates=[mk(-1),mk(-2),mk(-3)]','previousCandidates=[mk(-8),mk(-9),mk(-10)]','loadFirstImage'])assert.ok(lemma.includes(token),`R370 resilient temporal anchor law missing ${token}`);
 for(const token of ['data-current-anchor-date','data-previous-anchor-date','lemma.anchors.currentDate','lemma.anchors.previousDate'])assert.ok(instrument.includes(token),`R370 resolved anchor disclosure missing ${token}`);
-console.log('R370 EARTH/SAR RUNTIME CLOSURE PASS · resilient temporal anchors · exact production interaction proof · all twelve lenses + controls + disclosure + responsive surface fail closed');
+console.log('R391/R370 EARTH/SAR RUNTIME CLOSURE PASS · resilient temporal anchors · derived-to-native transition-safe live proofs · twelve materially populated lenses · responsive geometry · independent R237 observation · no authority widening');

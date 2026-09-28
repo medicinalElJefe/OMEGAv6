@@ -44,6 +44,12 @@ async function searchTarget(page,{input,find,results,query}){
  if(!shown.includes(String(row.name||row.displayName)))throw new Error(`Place picker differs from returned geocoder result: ${query}`);
  await bindTarget(page,()=>first.click(),Number(row.lat),Number(row.lon));
 }
+async function waitSarAnalytical(page,timeout=45000){
+ await page.waitForFunction(()=>{const el=document.querySelector('.sar-r285-live .sar-r280');if(!el)return false;const cards=[...el.querySelectorAll('.r284-lens-card')],head=el.querySelector('.r280-screen-head b')?.textContent||'',lemma=el.querySelector('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]'),native=head.includes('BOUND MEASUREMENT FIELD')?el.querySelector('.r280-canvas'):null;return cards.length===12&&cards.every(card=>card.querySelector('.r3565-mini-lemma,.r284-mini-grid'))&&Boolean(lemma||native)},{timeout});
+}
+async function sarAnalyticalState(sarInstrument){
+ return sarInstrument.evaluate(el=>{const visible=node=>{if(!node)return false;const s=getComputedStyle(node),r=node.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0},head=el.querySelector('.r280-screen-head b')?.textContent||'',lemma=el.querySelector('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]'),native=head.includes('BOUND MEASUREMENT FIELD')?el.querySelector('.r280-canvas'):null,field=visible(lemma)?lemma:visible(native)?native:null,cells=field?[...field.querySelectorAll(':scope > i')]:[],status=el.querySelector('.r374-below-canvas-status');return{kind:field===lemma?'DERIVED_TRIANGULATED':field===native?'BOUND_NATIVE':'PENDING',count:cells.length,unique:new Set(cells.slice(0,1500).map(x=>getComputedStyle(x).backgroundColor)).size,view:status?.getAttribute('data-view-status')||'',head}});
+}
 
 const VIEW_EXPECTATIONS=[
  ['Satellite','.earth-r279-satellite'],
@@ -146,25 +152,25 @@ try{
 
   const sarTab=tabs.filter({hasText:'SAR Truth'}).first();await sarTab.click();
   await page.waitForSelector('.sar-r285-live',{state:'visible',timeout:30000});
-  await page.waitForFunction(()=>document.querySelectorAll('.r284-lens-card[data-r3565-lemma="true"]').length===12,{timeout:45000});
+  await waitSarAnalytical(page);
   const sar=page.locator('.sar-r285-live');
   await searchTarget(page,{input:page.getByLabel('Search SAR location'),find:sar.getByRole('button',{name:'Find location',exact:true}),results:page.locator('.r3564-sar-results button'),query:'Tucson Arizona'});
   await bindTarget(page,()=>sar.getByRole('button',{name:'Use my location',exact:true}).click(),32.2226,-110.9747);
-  await page.waitForFunction(()=>document.querySelectorAll('.r284-lens-card[data-r3565-lemma="true"]').length===12,{timeout:45000});
+  await waitSarAnalytical(page);
   const sarInstrument=sar.locator('.sar-r280');const cleanToggle=sarInstrument.getByRole('button',{name:'VIEW DETAILS',exact:true});await cleanToggle.waitFor({state:'visible',timeout:10000});if(await sarInstrument.locator('.r280-screen').getAttribute('data-clean-view')!=='true')throw new Error(`${label}: SAR result viewport must default unobstructed`);if(await sarInstrument.locator('.r3565-lemma-badge').isVisible())throw new Error(`${label}: SAR clean view still overlays chain-lemma badge`);await cleanToggle.click();if(await sarInstrument.locator('.r280-screen').getAttribute('data-clean-view')!=='false')throw new Error(`${label}: SAR detail overlay restore failed`);await sarInstrument.getByRole('button',{name:'CLEAN VIEW',exact:true}).click();
   if(await sar.locator('.r280-left').isVisible()||await sar.locator('.r280-right').isVisible())throw new Error(`${label}: SAR must default field-first with inspectors yielded`);const restored=sar.getByRole('button',{name:'RESTORE INSPECTORS',exact:true});await restored.waitFor({state:'visible',timeout:10000});await restored.click();if(!(await sar.locator('.r280-left').isVisible())||!(await sar.locator('.r280-right').isVisible()))throw new Error(`${label}: SAR inspectors did not restore on request`);await sar.getByRole('button',{name:'FOCUS FIELD',exact:true}).click();if(await sar.locator('.r280-left').isVisible()||await sar.locator('.r280-right').isVisible())throw new Error(`${label}: SAR focus field did not yield inspectors`);
   const cards=page.locator('.r284-lens-card');
-  if(await cards.count()!==12)throw new Error(`${label}: expected exactly 12 chain-lemma lenses`);
+  if(await cards.count()!==12)throw new Error(`${label}: expected exactly 12 analytical lenses`);
   const names=new Set();
   for(let i=0;i<12;i++){
    const card=cards.nth(i);names.add((await card.locator('header b').innerText()).trim());await card.click();
    await page.waitForFunction(index=>document.querySelectorAll('.r284-lens-card')[index]?.getAttribute('data-active')==='true',i,{timeout:10000});
-   const canvas=page.locator('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]');await canvas.waitFor({state:'visible',timeout:10000});
+   await waitSarAnalytical(page,10000);
+   const field=await sarAnalyticalState(sarInstrument);if(field.kind==='PENDING'||field.count<4096||field.unique<8)throw new Error(`${label}: ${LENS_IDS[i]} lacks a material derived/native analytical field ${JSON.stringify(field)}`);
    const blockers=await sarInstrument.locator('.r280-screen').locator('.r3565-lemma-badge,.r284-view-readout,.r285-field-empty,.r280-geometry-overlay,.r284-geometry-hud,.r280-range-labels,.r284-scale').evaluateAll(els=>els.filter(el=>getComputedStyle(el).display!=='none'&&getComputedStyle(el).visibility!=='hidden').length);if(blockers!==0)throw new Error(`${label}: ${LENS_IDS[i]} clean SAR view still has ${blockers} obstructing overlay(s)`);
-   const status=await sarInstrument.locator('.r374-below-canvas-status').boundingBox();const screen=await sarInstrument.locator('.r280-screen').boundingBox();if(!status||!screen||status.y<screen.y+screen.height-1)throw new Error(`${label}: ${LENS_IDS[i]} status is not outside the SAR viewport`);
-   if(await canvas.getAttribute('data-lemma-view')!==LENS_IDS[i])throw new Error(`${label}: lens ${i+1} selection did not bind ${LENS_IDS[i]}`);const guide=await sarInstrument.locator('.r381-view-guide').innerText();if(!guide||guide.length<24)throw new Error(`${label}: ${LENS_IDS[i]} lacks an external semantic guide`);
-   if(await canvas.locator(':scope > i').count()<4096)throw new Error(`${label}: lens ${i+1} lacks its derived field`);
-   const thumb=card.locator('.r3565-mini-lemma');const thumbBox=await thumb.boundingBox();if(!thumbBox||Math.abs((thumbBox.width/thumbBox.height)-(13/8))>.18)throw new Error(`${label}: lens ${i+1} preview aspect is not proportional ${JSON.stringify(thumbBox)}`);
+   const statusNode=sarInstrument.locator('.r374-below-canvas-status'),status=await statusNode.boundingBox(),screen=await sarInstrument.locator('.r280-screen').boundingBox();if(!status||!screen||status.y<screen.y+screen.height-1)throw new Error(`${label}: ${LENS_IDS[i]} status is not outside the SAR viewport`);
+   if(await statusNode.getAttribute('data-view-status')!==LENS_IDS[i]||field.view!==LENS_IDS[i])throw new Error(`${label}: lens ${i+1} selection did not bind ${LENS_IDS[i]}`);const guide=await sarInstrument.locator('.r381-view-guide').innerText();if(!guide||guide.length<24)throw new Error(`${label}: ${LENS_IDS[i]} lacks an external semantic guide`);
+   const lemmaThumb=card.locator('.r3565-mini-lemma');if(await lemmaThumb.count()){const thumbBox=await lemmaThumb.boundingBox();if(!thumbBox||Math.abs((thumbBox.width/thumbBox.height)-(13/8))>.18)throw new Error(`${label}: lens ${i+1} derived preview aspect is not proportional ${JSON.stringify(thumbBox)}`)}else{const nativeThumb=card.locator('.r284-mini-grid');if(await nativeThumb.locator(':scope > i').count()<104)throw new Error(`${label}: lens ${i+1} native preview is not materially populated`)}
    await contained(page,`${label} SAR lens ${i+1}`);
   }
   if(names.size!==12)throw new Error(`${label}: duplicate lens identities`);
@@ -179,5 +185,5 @@ try{
   await context.close();
  }
  verifyReceipt(await fetch(base+'/omega-build-receipt.json',{headers:{'cache-control':'no-cache'}}).then(r=>{if(!r.ok)throw new Error(`final receipt HTTP ${r.status}`);return r.json()}));
- console.log(`R372 LIVE EARTH TOTAL INTERACTION PASS · exact source + promoted SHA ${expectedSha} before/after · place/address/device target + returned evidence hash · all 9 Earth views · loaded NOAA pixels · motion pause/resume + returned refresh · ground target/hash refresh · SAR targeting + 12 unique lenses actuated · GRD/SLC · desktop/mobile containment per view/lens · no page errors`);
+ console.log(`R372 LIVE EARTH TOTAL INTERACTION PASS · exact source + promoted SHA ${expectedSha} before/after · place/address/device target + returned evidence hash · all 9 Earth views · loaded NOAA pixels · motion pause/resume + returned refresh · ground target/hash refresh · SAR targeting + 12 unique derived/native transition-safe lenses actuated · GRD/SLC · desktop/mobile containment per view/lens · no page errors`);
 }finally{await browser.close()}
