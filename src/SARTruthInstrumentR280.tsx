@@ -68,7 +68,7 @@ function color(view:View,v:number,x:number,y:number){
 }
 function valueAt(view:View,x:number,y:number,time:number,raster?:SarRasterFieldR283,allowDemo=true){const source=raster?rasterVisualValueR283(raster,view,x,y):null;return{v:source??(allowDemo?fieldValue(view,x,y,time):null),source:source!=null}}
 function SarCanvas({view,time,raster,allowDemo,showOverlays}:{view:View;time:number;raster?:SarRasterFieldR283;allowDemo:boolean;showOverlays:boolean}){
- const N=78,cells=useMemo(()=>Array.from({length:N*N},(_,i)=>{const x=(i%N)/(N-1),y=Math.floor(i/N)/(N-1),q=valueAt(view,x,y,time,raster,allowDemo);return{i,c:q.v==null?'#051015':color(view,q.v,x,y),source:q.source,missing:q.v==null}}),[view,time,raster,allowDemo]);
+ const N=64,cells=useMemo(()=>Array.from({length:N*N},(_,i)=>{const x=(i%N)/(N-1),y=Math.floor(i/N)/(N-1),q=valueAt(view,x,y,time,raster,allowDemo);return{i,c:q.v==null?'#051015':color(view,q.v,x,y),source:q.source,missing:q.v==null}}),[view,time,raster,allowDemo]);
  const sourceCells=cells.filter(x=>x.source).length,missingCells=cells.filter(x=>x.missing).length;
  return <div className="r280-canvas" aria-label={`${view} ${sourceCells?'source-bound raster':allowDemo?'deterministic demonstration':'unbound measurement field'} visualization surface`} data-source-cells={sourceCells} data-missing-cells={missingCells}>
   {cells.map(c=><i key={c.i} style={{background:c.c}} data-source={c.source?'true':'false'} data-missing={c.missing?'true':'false'}/>)}
