@@ -130,8 +130,12 @@ try{
   const motionCanvas=page.getByLabel('Interactive motion Earth view');await motionCanvas.waitFor({state:'visible',timeout:15000});
   const motion=page.locator('.earth-r279-instrument[data-earth-mode="MOTION"]');
   await motion.getByRole('button',{name:'Pause motion',exact:true}).click();
-  await motion.getByRole('button',{name:'Resume motion',exact:true}).waitFor({state:'visible'});
-  await motion.getByRole('button',{name:'Resume motion',exact:true}).click();
+  const resumeMotion=motion.getByRole('button',{name:'Resume motion',exact:true});
+  await resumeMotion.waitFor({state:'visible'});
+  // The control is rendered inside the intentionally animated globe. Preserve a
+  // real pointer activation without requiring its moving box to become stable;
+  // the semantic state transition below remains the acceptance condition.
+  await resumeMotion.click({force:true});
   await motion.getByRole('button',{name:'Pause motion',exact:true}).waitFor({state:'visible'});
   const refresh=motion.getByRole('button',{name:'Refresh global field',exact:true});await refresh.waitFor({state:'visible',timeout:30000});
   const refreshed=page.waitForResponse(r=>new URL(r.url()).hostname==='api.open-meteo.com'&&new URL(r.url()).pathname==='/v1/forecast',{timeout:30000});
