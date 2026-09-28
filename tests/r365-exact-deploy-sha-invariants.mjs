@@ -17,6 +17,8 @@ assert.ok(live.includes("process.env.OMEGA_PROMOTED_SHA||process.env.GITHUB_SHA"
 assert.ok(!live.includes("process.env.GITHUB_SHA||process.env.OMEGA_PROMOTED_SHA"),'R365 must not let ambient GITHUB_SHA override explicit promoted-lineage authority');
 
 assert.ok(staged.includes('OMEGA staged candidate $GITHUB_SHA'),'staged upload remains labeled by the exact workflow SHA after pinned checkout');
+assert.ok(staged.includes('npm run build'),'R401 staged release must rebuild the exact checked-out source immediately before Worker upload');
+assert.ok(staged.includes("dist/omega-build-receipt.json")&&staged.includes("exact staged build receipt mismatch"),'R401 staged release must fail closed if the packaged build receipt source SHA differs from GITHUB_SHA');
 assert.ok(vite.includes("sha:String(process.env.GITHUB_SHA||'UNAVAILABLE')"),'packaged source receipt must remain bound to exact checked-out workflow SHA');
 assert.ok(vite.includes("promotedMergeSha=String(process.env.OMEGA_PROMOTED_SHA||'').trim()||null"),'packaged receipt must retain independently bound promoted merge lineage');
 
