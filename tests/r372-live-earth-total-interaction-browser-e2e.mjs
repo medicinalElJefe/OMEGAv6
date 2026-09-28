@@ -22,9 +22,14 @@ function targetResponse(response,path,lat,lon){
 function verifyTarget(data,lat,lon,label){
  if(!Number.isFinite(data?.target?.lat)||!Number.isFinite(data?.target?.lon)||Math.abs(data.target.lat-lat)>0.000011||Math.abs(data.target.lon-lon)>0.000011||!/^[0-9a-f]{64}$/i.test(data?.evidenceHash||''))throw new Error(`${label}: returned evidence target/hash mismatch`);
 }
-async function bindTarget(page,action,lat,lon){
- const waiting=page.waitForResponse(r=>targetResponse(r,'/api/earth/evidence',lat,lon),{timeout:30000});
- await action();const response=await waiting;
+async function bindTarget(page,action,lat,lon,{attempts=1,settleMs=30000}={}){
+ let response=null,lastError=null;
+ for(let attempt=1;attempt<=attempts&&!response;attempt++){
+  const waiting=page.waitForResponse(r=>targetResponse(r,'/api/earth/evidence',lat,lon),{timeout:settleMs});
+  await action();
+  try{response=await waiting}catch(error){lastError=error;if(attempt===attempts)throw error}
+ }
+ if(!response)throw lastError||new Error('Earth evidence target did not settle');
  if(!response.ok())throw new Error(`Earth evidence HTTP ${response.status()}`);
  const evidence=await response.json();verifyTarget(evidence,lat,lon,'Earth');
  await page.waitForFunction(({lat,lon,hash})=>{
@@ -159,7 +164,7 @@ try{
   await waitSarAnalytical(page);
   const sar=page.locator('.sar-r285-live');
   await searchTarget(page,{input:page.getByLabel('Search SAR location'),find:sar.getByRole('button',{name:'Find location',exact:true}),results:page.locator('.r3564-sar-results button'),query:'Tucson Arizona'});
-  await bindTarget(page,()=>sar.getByRole('button',{name:'Use my location',exact:true}).click(),32.2226,-110.9747);
+  await bindTarget(page,()=>sar.getByLabel('Use device location for SAR').click(),32.2226,-110.9747,{attempts:3,settleMs:12000});
   await waitSarAnalytical(page);
   const sarInstrument=sar.locator('.sar-r280');const cleanToggle=sarInstrument.getByRole('button',{name:'VIEW DETAILS',exact:true});await cleanToggle.waitFor({state:'visible',timeout:10000});if(await sarInstrument.locator('.r280-screen').getAttribute('data-clean-view')!=='true')throw new Error(`${label}: SAR result viewport must default unobstructed`);if(await sarInstrument.locator('.r3565-lemma-badge').isVisible())throw new Error(`${label}: SAR clean view still overlays chain-lemma badge`);await cleanToggle.click();if(await sarInstrument.locator('.r280-screen').getAttribute('data-clean-view')!=='false')throw new Error(`${label}: SAR detail overlay restore failed`);await sarInstrument.getByRole('button',{name:'CLEAN VIEW',exact:true}).click();
   if(await sar.locator('.r280-left').isVisible()||await sar.locator('.r280-right').isVisible())throw new Error(`${label}: SAR must default field-first with inspectors yielded`);const restored=sar.getByRole('button',{name:'RESTORE INSPECTORS',exact:true});await restored.waitFor({state:'visible',timeout:10000});await restored.click();if(!(await sar.locator('.r280-left').isVisible())||!(await sar.locator('.r280-right').isVisible()))throw new Error(`${label}: SAR inspectors did not restore on request`);await sar.getByRole('button',{name:'FOCUS FIELD',exact:true}).click();if(await sar.locator('.r280-left').isVisible()||await sar.locator('.r280-right').isVisible())throw new Error(`${label}: SAR focus field did not yield inspectors`);
