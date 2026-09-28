@@ -10,6 +10,7 @@ const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
 
 for(const token of ['Search SAR location','Use my location','Tucson Arizona','waitAnalytical(page)','DERIVED_TRIANGULATED','BOUND_NATIVE','all 12 analytical lenses actuated','GRD/SLC toggled','evidence disclosure actuated','viewport.width*.60'])assert.ok(browser.includes(token),`R391/R370 live acceptance missing ${token}`);
 assert.ok(browser.includes(".r3565-mini-lemma,.r284-mini-grid"),'R391 R370 must accept only materially populated derived/native lens previews');
+for(const token of ['data-target-lat','data-target-lon','targetBound','field&&field===lemma'])assert.ok(browser.includes(token),`R398 R370 exact-target transition proof missing ${token}`);
 assert.ok(browser.includes('count<4096')&&browser.includes('unique<8'),'R391 R370 must retain material-render acceptance for either truth state');
 for(const token of ['paddingLeft','paddingRight','contentWidth','rect.width<centerMetrics.contentWidth-2','rect.width>centerMetrics.rect.width+2'])assert.ok(browser.includes(token),`R393 R370 responsive content-box proof missing ${token}`);
 assert.ok(!browser.includes('rect.width<centerRect.width-2'),'R393 R370 must not compare a child border box to the padded parent border box');
