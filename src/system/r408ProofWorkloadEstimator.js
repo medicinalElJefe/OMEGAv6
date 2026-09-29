@@ -37,16 +37,17 @@ export function estimateProofShardsR408({surfaces,shardCount,proofClass,scar}){
   return{index:bin.index,baselineMs:bin.weight,predictedMs,cases:bin.cases};
  }).sort((a,b)=>b.predictedMs-a.predictedMs||a.index-b.index);
 }
-export function recordProofShardObservationR408({scar,proofClass,shardCount,shardIndex,predictedMs,observedMs,runId,sha,at}){
+export function recordProofShardObservationR408({scar,proofClass,shardCount,shardIndex,predictedMs,observedMs,runId,sha,at,success=true}){
  validClass(proofClass);
  const state=normalizeProofWorkloadScarR408(scar);
  const cls=state.classes[proofClass]||{priorSource:R313_WORKLOAD_CENSUS_SOURCE_R355,history:[],ewmaByShard:{}};
  const key=String(shardCount)+':'+String(shardIndex);
  const prev=finitePositive(cls.ewmaByShard?.[key]?.ewmaMs,NaN),obs=finitePositive(observedMs,1);
- const ewmaMs=Number.isFinite(prev)?(1-R408_EWMA_ALPHA)*prev+R408_EWMA_ALPHA*obs:obs;
- const record={proofClass,shardCount,shardIndex,predictedMs:finitePositive(predictedMs,null),observedMs:obs,runId:runId||null,sha:sha||null,at:at||new Date().toISOString()};
+ const ok=success!==false;
+ const ewmaMs=ok?(Number.isFinite(prev)?(1-R408_EWMA_ALPHA)*prev+R408_EWMA_ALPHA*obs:obs):prev;
+ const record={proofClass,shardCount,shardIndex,predictedMs:finitePositive(predictedMs,null),observedMs:obs,success:ok,runId:runId||null,sha:sha||null,at:at||new Date().toISOString()};
  cls.history=[...(cls.history||[]),record];
- cls.ewmaByShard={...(cls.ewmaByShard||{}),[key]:{ewmaMs,observations:(Number(cls.ewmaByShard?.[key]?.observations)||0)+1,lastObservedMs:obs,lastAt:record.at}};
+ if(ok)cls.ewmaByShard={...(cls.ewmaByShard||{}),[key]:{ewmaMs,observations:(Number(cls.ewmaByShard?.[key]?.observations)||0)+1,lastObservedMs:obs,lastAt:record.at}};
  state.classes[proofClass]=cls;
  return state;
 }
