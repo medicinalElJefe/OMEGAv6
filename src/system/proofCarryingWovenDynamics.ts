@@ -5,6 +5,7 @@ import {
   R349_SCHEMA,
   type TypedFieldR349,
 } from './wovenHardwareFieldR349';
+import {exactAtlasAddressV3,type ExactAtlasAddressV3} from './omegaExactCanonV3';
 
 export const PCWD_SCHEMA='OMEGA_PROOF_CARRYING_WOVEN_DYNAMICS_v1' as const;
 export const PCWD_PACKET_SCHEMA='OMEGA_WOVEN_STATE_PACKET_v1' as const;
@@ -34,6 +35,7 @@ export type AtlasAddressV1={
   digits:[number,number,number,number];
   radix:12;
   physicalDimensionsClaimed:false;
+  canonicalV3:ExactAtlasAddressV3;
 };
 export type EvidenceV1={
   admissible:boolean;
@@ -143,7 +145,7 @@ function digits12(address:number):[number,number,number,number]{
 }
 export function atlasAddressV1(address:number):AtlasAddressV1{
   const a=Math.max(0,Math.min(R349_RESOLUTION-1,Math.floor(Number(address)||0)));
-  return{resolution:R349_RESOLUTION,level:4,address:a,digits:digits12(a),radix:12,physicalDimensionsClaimed:false};
+  return{resolution:R349_RESOLUTION,level:4,address:a,digits:digits12(a),radix:12,physicalDimensionsClaimed:false,canonicalV3:exactAtlasAddressV3(a)};
 }
 function addResidual(p:LocalStateV1,r:LocalResidualV1):LocalStateV1{
   return normalizeState({
