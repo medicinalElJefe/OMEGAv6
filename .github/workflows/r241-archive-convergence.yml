@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: r241-archive-convergence-${{ github.ref }}
+  group: r241-archive-convergence-${{ github.event.pull_request.number || github.ref }}-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
