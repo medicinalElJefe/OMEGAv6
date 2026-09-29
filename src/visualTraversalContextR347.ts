@@ -3,6 +3,7 @@ import{unifiedFromRecord}from'./unifiedCalculus';
 import{computeLensScore,LENS_CALCULUS,type OmegaLens}from'./lensCalculus';
 import{calibratedState,type VisualCalibration}from'./visualCalibration';
 import{SCALE_DOMAINS}from'./motionDomainRuntime';
+import{exactAtlasAddressV3}from'./system/omegaExactCanonV3';
 
 export const R347_REVISION='R347' as const;
 export const R347_SCHEMA='OMEGA_HUMAN_VISUAL_TRAVERSAL_COCKPIT_R347' as const;
@@ -21,8 +22,17 @@ export const R347_VISUAL_GRAMMAR=Object.freeze([
 
 const cl=(x:number)=>Math.max(0,Math.min(1,Number.isFinite(x)?x:0));
 export function modelMappedWgs84R347(address:number){
- const c=decodeAddress(Math.max(0,Math.min(STATE_COUNT-1,Math.floor(address))));
- return{lat:-90+(c.d+.5)/12*180,lon:-180+(c.p*12+c.r+.5)/144*360,boundary:'Address→WGS84 is a deterministic query mapping only; it does not make the atlas address a physical Earth coordinate.'};
+ const index0=Math.max(0,Math.min(STATE_COUNT-1,Math.floor(address)));
+ const c=decodeAddress(index0),exactAddress=exactAtlasAddressV3(index0);
+ return{
+  lat:-90+(c.d+.5)/12*180,
+  lon:-180+(c.p*12+c.r+.5)/144*360,
+  exactAddress,
+  provenance:'DER' as const,
+  physicalEarthCoordinateClaimed:false as const,
+  observationClaimed:false as const,
+  boundary:'Address→WGS84 is a deterministic query mapping only; it does not make the atlas address a physical Earth coordinate.'
+ };
 }
 export function routeR347(address:number,count=48){
  const rows=[] as any[];let a=Math.max(0,Math.min(STATE_COUNT-1,Math.floor(address)));

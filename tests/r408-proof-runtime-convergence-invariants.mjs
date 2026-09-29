@@ -68,7 +68,7 @@ assert.ok(scheduler.includes('if(failed)process.exit(1)'));
 for(const [file,proofClass,cost] of[
  ['scripts/run_r313_control_shards.sh','interaction',2],
  ['scripts/run_r313_disclosure_shards.sh','disclosure',2],
- ['scripts/run_r286_control_shards.sh','no_dead_control',1],
+ ['scripts/run_r286_control_shards.sh','no_dead_control',2],
 ]){
  const src=fs.readFileSync(file,'utf8');
  assert.ok(src.includes('run_work_conserving_shards_r408.mjs'));
@@ -90,4 +90,4 @@ assert.ok(workflow.includes('Restore R408 main proof workload scar'));
 assert.ok(workflow.includes('Retain R408 interaction workload scar'));
 assert.ok(workflow.includes('Retain R408 main browser workload scar'));
 
-console.log('R408 PROOF RUNTIME CONVERGENCE PASS · 88 route/viewport cases remain complete and unique · disclosure/interaction/no-dead-control estimators are isolated · failed transport samples remain in scar history but do not train timing EWMA · longest predicted shards launch first · scheduler refills capacity on first completion with no wave barrier · heavy browser shards consume 2/4 resource units while lighter no-dead-control shards consume 1/4 · all child/parent ceilings and fail-closed recombination remain intact');
+console.log('R408 PROOF RUNTIME CONVERGENCE PASS · 88 route/viewport cases remain complete and unique · disclosure/interaction/no-dead-control estimators are isolated · failed transport samples remain in scar history but do not train timing EWMA · longest predicted shards launch first · scheduler refills capacity on first completion with no wave barrier · heavy browser shards consume 2/4 resource units while no-dead-control browser shards consume 2/4 · all child/parent ceilings and fail-closed recombination remain intact');

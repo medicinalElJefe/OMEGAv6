@@ -35,7 +35,7 @@ GitHub Actions cache restores the latest job-scoped scar ledger when available. 
 
 - R313 full interaction remains 16 deterministic shards, hard cap 4, resource cost 2/4 per heavy browser shard (effective at most 2 simultaneously), 480s child ceiling, 1500s parent ceiling.
 - R313 disclosure remains 16 deterministic shards, hard cap 4, resource cost 2/4 per heavy browser shard (effective at most 2 simultaneously), 360s child ceiling, 1320s parent ceiling, followed by the unchanged R318 viewport/reload proof.
-- R286 no-dead-control remains 8 deterministic shards, hard cap 4, resource cost 1/4 per lighter shard (up to 4 simultaneously), 360s child ceiling, 780s parent ceiling.
+- R286 no-dead-control remains 8 deterministic shards, hard cap 4, resource cost 2/4 per browser shard (effective at most 2 simultaneously), 360s child ceiling, 780s parent ceiling.
 - The complete 44-route × desktop/mobile address space remains 88 unique cases.
 - Existing browser assertions, route/state checks, accessibility, overflow, page-error, guard and mutation boundaries remain unchanged.
 - No source authority, CanonState, Worker deployment, proof-return or physical-claim boundary changes.
@@ -48,4 +48,4 @@ R408 is intentionally limited to proof-runtime convergence. The preserved Exact-
 
 ## R408.1 evidence correction
 
-The first real R408 browser run proved the wave-barrier removal but also exposed a separate contention scar: four heavy disclosure shards concurrently hitting one preview caused Playwright click timeouts on controls that were already reported visible, enabled and stable. The correction is resource-aware rather than a retreat to fixed waves. Heavy browser proof classes now consume two units of a four-unit preview/browser budget, so the scheduler remains work-conserving while preventing overload-induced false red outcomes. The lighter no-dead-control class remains eligible for four-way concurrency.
+The first real R408 browser run proved the wave-barrier removal but also exposed a separate contention scar: four heavy disclosure shards concurrently hitting one preview caused Playwright click timeouts on controls that were already reported visible, enabled and stable. The correction is resource-aware rather than a retreat to fixed waves. Heavy browser proof classes now consume two units of a four-unit preview/browser budget, so the scheduler remains work-conserving while preventing overload-induced false red outcomes. The initial R408 proof allowed no-dead-control at 1/4 cost. R409 exact-head evidence later showed the same shared-preview contention class there: a navigator click completed but timed out waiting for scheduled navigation while four R286 shards were active. The inherited correction therefore assigns no-dead-control the same 2/4 browser-resource cost, preserving work conservation with at most two browser shards concurrently.
