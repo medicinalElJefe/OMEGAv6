@@ -33,7 +33,9 @@ async function openNavigator(page){
   await expand.click({timeout:10000,noWaitAfter:true});
   await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
   if(page.url()!==beforeUrl)throw new Error(`R286/R313 navigator expansion unexpectedly navigated from ${beforeUrl} to ${page.url()}`);
-  if(await expand.getAttribute('aria-expanded')!=='true')throw new Error('R286/R313 navigator expansion state did not bind aria-expanded=true');
+  const stableToggle=page.locator('button[aria-controls="omega-global-navigator"]').first();
+  if(!await stableToggle.count())throw new Error('R286/R313 stable navigator toggle identity missing after expansion');
+  if(await stableToggle.getAttribute('aria-expanded')!=='true')throw new Error('R286/R313 navigator expansion state did not bind aria-expanded=true');
   await page.locator('#omega-global-navigator').waitFor({state:'visible',timeout:10000});
 }
 
