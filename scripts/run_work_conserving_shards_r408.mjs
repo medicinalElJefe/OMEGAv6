@@ -13,6 +13,7 @@ const countEnv=String(process.env.R408_COUNT_ENV||'').trim();
 const indexEnv=String(process.env.R408_INDEX_ENV||'').trim();
 const logPrefix=String(process.env.R408_LOG_PREFIX||'omega-r408-shard');
 const scarPath=String(process.env.R408_SCAR_PATH||'.omega/proof-workload/r408-scar.json');
+const failureLedger=String(process.env.R408_FAILURE_LEDGER||'').trim();
 
 if(!Number.isInteger(shardCount)||shardCount<1||shardCount>16)throw new Error('R408_SHARD_COUNT must be integer 1..16');
 if(!Number.isInteger(maxParallel)||maxParallel<1||maxParallel>shardCount)throw new Error('R408_MAX_PARALLEL must be integer 1..R408_SHARD_COUNT');
@@ -37,15 +38,20 @@ fs.mkdirSync(path.dirname(scarPath),{recursive:true});
 
 function launch(spec){
  const log=path.join('/tmp',`${logPrefix}-${spec.index}.log`);
- const stream=fs.createWriteStream(log,{flags:'w'});
+ const fd=fs.openSync(log,'w');
  const started=Date.now();
  const env={...process.env,[countEnv]:String(shardCount),[indexEnv]:String(spec.index)};
- const child=spawn('timeout',['--signal=TERM','--kill-after=15s',`${childTimeoutSec}s`,'bash','-lc',childCommand],{env,stdio:['ignore','pipe','pipe']});
- child.stdout.pipe(stream,{end:false});child.stderr.pipe(stream,{end:false});
+ const child=spawn('timeout',['--signal=TERM','--kill-after=15s',`${childTimeoutSec}s`,'bash','-lc',childCommand],{env,stdio:['ignore',fd,fd]});
  console.log(`R408 ${proofClass} shard ${spec.index+1}/${shardCount} started pid=${child.pid} predicted=${Math.round(spec.predictedMs)}ms active=${running.size+1}/${maxParallel}`);
  const done=new Promise(resolve=>{
-  child.on('error',error=>resolve({spec,log,started,ended:Date.now(),code:1,signal:null,error:String(error)}));
-  child.on('close',(code,signal)=>resolve({spec,log,started,ended:Date.now(),code:code??1,signal,error:null}));
+  let finalized=false;
+  const finish=(code,signal,error)=>{
+   if(finalized)return;finalized=true;
+   try{fs.closeSync(fd)}catch{}
+   resolve({spec,log,started,ended:Date.now(),code,signal,error});
+  };
+  child.on('error',error=>finish(1,null,String(error)));
+  child.on('close',(code,signal)=>finish(code??1,signal,null));
  });
  running.set(spec.index,done);
 }
@@ -60,6 +66,10 @@ async function settleOne(){
   failed=true;
   console.error(`::error title=R408 ${proofClass} shard ${result.spec.index+1}/${shardCount} failed::Exit ${result.code}${result.signal?` signal ${result.signal}`:''}; exact shard log follows.`);
   process.stderr.write(logText);
+  if(failureLedger){
+   fs.mkdirSync(path.dirname(failureLedger),{recursive:true});
+   fs.appendFileSync(failureLedger,`R408 ${proofClass} shard ${result.spec.index+1}/${shardCount} failed rc=${result.code}${result.signal?` signal=${result.signal}`:''}\n${logText}\n`);
+  }
  }
  scar=recordProofShardObservationR408({
   scar,proofClass,shardCount,shardIndex:result.spec.index,
