@@ -10,6 +10,7 @@ env \
  R408_COUNT_ENV=R313_DISCLOSURE_SHARD_COUNT \
  R408_INDEX_ENV=R313_DISCLOSURE_SHARD_INDEX \
  R408_LOG_PREFIX=omega-r313-disclosure-shard \
+ R408_FAILURE_LEDGER=r313-panel-disclosure-failure.txt \
  R408_CHILD_COMMAND='node tests/r313-panel-disclosure-browser-e2e.mjs' \
  node scripts/run_work_conserving_shards_r408.mjs
 rc=$?
