@@ -9,6 +9,8 @@ const shardCount=Number(process.env.R408_SHARD_COUNT||0);
 const maxParallel=Number(process.env.R408_MAX_PARALLEL||0);
 const childTimeoutSec=Number(process.env.R408_CHILD_TIMEOUT_SEC||0);
 const childCommand=String(process.env.R408_CHILD_COMMAND||'').trim();
+const resourceCapacity=Number(process.env.R408_RESOURCE_CAPACITY||maxParallel);
+const shardResourceCost=Number(process.env.R408_SHARD_RESOURCE_COST||1);
 const countEnv=String(process.env.R408_COUNT_ENV||'').trim();
 const indexEnv=String(process.env.R408_INDEX_ENV||'').trim();
 const logPrefix=String(process.env.R408_LOG_PREFIX||'omega-r408-shard');
@@ -18,6 +20,8 @@ const failureLedger=String(process.env.R408_FAILURE_LEDGER||'').trim();
 if(!Number.isInteger(shardCount)||shardCount<1||shardCount>16)throw new Error('R408_SHARD_COUNT must be integer 1..16');
 if(!Number.isInteger(maxParallel)||maxParallel<1||maxParallel>shardCount)throw new Error('R408_MAX_PARALLEL must be integer 1..R408_SHARD_COUNT');
 if(!Number.isInteger(childTimeoutSec)||childTimeoutSec<1)throw new Error('R408_CHILD_TIMEOUT_SEC must be positive integer');
+if(!Number.isFinite(resourceCapacity)||resourceCapacity<=0)throw new Error('R408_RESOURCE_CAPACITY must be positive');
+if(!Number.isFinite(shardResourceCost)||shardResourceCost<=0||shardResourceCost>resourceCapacity)throw new Error('R408_SHARD_RESOURCE_COST must be positive and <= capacity');
 if(!childCommand||!countEnv||!indexEnv)throw new Error('R408 child command and shard env names are required');
 
 const navigation=fs.readFileSync('src/navigationRegistry.ts','utf8');
@@ -33,6 +37,7 @@ const predictedByIndex=new Map(queue.map(x=>[x.index,x.predictedMs]));
 const running=new Map();
 const results=[];
 let next=0,failed=false;
+const activeResourceCost=()=>running.size*shardResourceCost;
 
 fs.mkdirSync(path.dirname(scarPath),{recursive:true});
 
@@ -74,6 +79,7 @@ async function settleOne(){
  scar=recordProofShardObservationR408({
   scar,proofClass,shardCount,shardIndex:result.spec.index,
   predictedMs:predictedByIndex.get(result.spec.index),observedMs,
+  success:result.code===0,
   runId:process.env.GITHUB_RUN_ID||null,sha:process.env.GITHUB_SHA||null,
  });
  fs.writeFileSync(scarPath,JSON.stringify(scar,null,2));
@@ -82,8 +88,9 @@ async function settleOne(){
 }
 
 while(next<queue.length||running.size){
- while(next<queue.length&&running.size<maxParallel)launch(queue[next++]);
+ while(next<queue.length&&running.size<maxParallel&&(activeResourceCost()+shardResourceCost)<=resourceCapacity)launch(queue[next++]);
  if(running.size)await settleOne();
+ else if(next<queue.length)throw new Error('R408 resource scheduler deadlock');
 }
 
 const unique=new Set(results.map(x=>x.spec.index));
@@ -91,4 +98,4 @@ if(results.length!==shardCount||unique.size!==shardCount)throw new Error(`R408 i
 if(failed)process.exit(1);
 
 const totalObserved=results.reduce((s,x)=>s+x.observedMs,0),maxObserved=Math.max(...results.map(x=>x.observedMs));
-console.log(`R408 WORK-CONSERVING ${proofClass.toUpperCase()} PASS · ${shardCount} deterministic shards · maxParallel=${maxParallel} · no wave barrier · every shard assigned exactly once · total child runtime=${totalObserved}ms · slowest child=${maxObserved}ms · scar ledger updated at ${scarPath}`);
+console.log(`R408 WORK-CONSERVING ${proofClass.toUpperCase()} PASS · ${shardCount} deterministic shards · maxParallel=${maxParallel} · resourceCapacity=${resourceCapacity} · shardResourceCost=${shardResourceCost} · no wave barrier · every shard assigned exactly once · total child runtime=${totalObserved}ms · slowest child=${maxObserved}ms · scar ledger updated at ${scarPath}`);
