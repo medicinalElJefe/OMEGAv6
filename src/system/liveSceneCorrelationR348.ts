@@ -42,7 +42,7 @@ export function compileLiveSceneCorrelationR348(address:number,earth:any,status:
  return{
   schema:OMEGA_LIVE_SCENE_CORRELATION_R348,
   address,stateId:record.stateId,
-  query:{lat:target.lat,lon:target.lon,authority:'QUERY_MAPPING_ONLY',boundary:target.boundary},
+  query:{lat:target.lat,lon:target.lon,authority:'QUERY_MAPPING_ONLY',provenance:target.provenance,exactAddress:target.exactAddress,physicalEarthCoordinateClaimed:target.physicalEarthCoordinateClaimed,observationClaimed:target.observationClaimed,boundary:target.boundary},
   calibration:calibration?{stateCount:calibration.stateCount,channelCount:calibration.channelCount,passed:calibration.passed,boundary:calibration.boundary}:null,
   calibrated,
   scalars,clocks,completeness,
