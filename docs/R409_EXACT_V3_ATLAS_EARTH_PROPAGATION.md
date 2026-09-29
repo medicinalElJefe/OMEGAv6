@@ -51,3 +51,8 @@ Bind Exact Canon v3 address identity into the existing Atlas360 geometry and Ear
 ## Preserved authorities
 
 R409 does not change weather values, SAR values, forecast models, Earth providers, CanonState admission, proof-return authority, durable history, dispatch, deployment routing, PCWD proof authority, or the R408 workload-scar scheduler. 20,736 remains an address/state resolution, not a physical dimension.
+## R409.1 inherited proof-runtime correction
+
+The first R409 exact-head run passed the new Exact-v3 traversal proof, canonical build, disclosure proof, full safe-control interaction proof, and every main browser sequence before R286 no-dead-control. One R286 shard then timed out after the navigator click had completed while waiting for scheduled navigation; the log showed four no-dead-control shards active on the same preview. All other completed shards passed.
+
+That failure is retained as contention scar evidence. R286 no-dead-control now consumes 2/4 browser-resource units per shard, matching the already-proven resource law for R313 disclosure and interaction. The hard shard cap remains 4, but effective browser concurrency is two. All eight R286 shards, the 88 route/viewport address space, child assertions, 360s child ceiling, 780s parent ceiling, and fail-closed recombination remain unchanged. Failed transport samples remain in scar history and do not train timing EWMA.
