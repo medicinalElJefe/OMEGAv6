@@ -27,6 +27,14 @@ jobs:
         with:
           node-version: 24
 
+      - name: Restore R408 interaction workload scar
+        uses: actions/cache@v4
+        with:
+          path: .omega/proof-workload
+          key: r408-proof-workload-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          restore-keys: |
+            r408-proof-workload-${{ runner.os }}-${{ github.job }}-
+
       - name: Install exact locked interaction graph
         run: npm install
 
@@ -62,6 +70,15 @@ jobs:
         run: |
           set -o pipefail
           OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1500 bash scripts/run_r241_browser_proof.sh 'R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=480 bash scripts/run_r313_control_shards.sh' 2>&1 | tee r313-full-control-interaction.log
+
+      - name: Retain R408 interaction workload scar
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r408-interaction-workload-scar-${{ github.run_id }}
+          path: .omega/proof-workload/r408-scar.json
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Capture exact R313 full-control interaction failure
         if: failure() && steps.full_control.outcome == 'failure'
@@ -109,6 +126,14 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24
+
+      - name: Restore R408 main proof workload scar
+        uses: actions/cache@v4
+        with:
+          path: .omega/proof-workload
+          key: r408-proof-workload-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          restore-keys: |
+            r408-proof-workload-${{ runner.os }}-${{ github.job }}-
 
       - name: Install locked application dependencies
         run: npm install
@@ -273,6 +298,15 @@ jobs:
 
       - name: Browser proof · R286 accumulated no-dead-control contract
         run: OMEGA_BROWSER_PROOF_TIMEOUT_SEC=780 bash scripts/run_r241_browser_proof.sh 'R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=360 bash scripts/run_r286_control_shards.sh'
+
+      - name: Retain R408 main browser workload scar
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r408-main-workload-scar-${{ github.run_id }}
+          path: .omega/proof-workload/r408-scar.json
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Prove R240.1 semantic verifier against exact served runtime
         if: github.event_name == 'workflow_dispatch'
