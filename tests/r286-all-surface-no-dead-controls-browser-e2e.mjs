@@ -26,11 +26,17 @@ async function twoFrames(page){
 
 async function openNavigator(page){
   if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
-  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
+  const expand=page.locator('button[aria-label="Expand OMEGA navigator"]').first();
   if(!await expand.count())throw new Error('R286/R313 global navigator expand control missing');
-  await expand.first().scrollIntoViewIfNeeded();
-  await expand.first().click({timeout:10000});
+  const beforeUrl=page.url();
+  await expand.scrollIntoViewIfNeeded();
+  await expand.click({timeout:10000,noWaitAfter:true});
   await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
+  if(page.url()!==beforeUrl)throw new Error(`R286/R313 navigator expansion unexpectedly navigated from ${beforeUrl} to ${page.url()}`);
+  const stableToggle=page.locator('button[aria-controls="omega-global-navigator"]').first();
+  if(!await stableToggle.count())throw new Error('R286/R313 stable navigator toggle identity missing after expansion');
+  if(await stableToggle.getAttribute('aria-expanded')!=='true')throw new Error('R286/R313 navigator expansion state did not bind aria-expanded=true');
+  await page.locator('#omega-global-navigator').waitFor({state:'visible',timeout:10000});
 }
 
 async function verifyWorkspaceSubmenus(page,viewportName){

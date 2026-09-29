@@ -21,6 +21,7 @@ assert.ok(r237.includes('timeout --signal=TERM --kill-after=15s 150s'),'R243 mot
 assert.ok(r237.includes('timeout-minutes: 12'),'R237 local browser job needs a job-level fail-closed ceiling');
 
 assert.ok(r241.includes('timeout-minutes: 50'),'R241 exhaustive sweep needs the evidence-calibrated 50-minute job ceiling');
+assert.ok(r241.includes('group: r241-archive-convergence-${{ github.event.pull_request.number || github.ref }}-${{ github.event.pull_request.head.sha || github.sha }}'),'R241 concurrency must be exact-head scoped so a stale-head rerun cannot cancel the current candidate proof');
 assert.ok(r241.includes('Start one shared R241 preview server'),'R241 must start one shared preview for the sweep');
 assert.ok(r241.includes("node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173"),'R241 shared preview must use the installed Vite binary directly');
 assert.ok(r241.includes("echo 'OMEGA_E2E_URL=http://127.0.0.1:4173' >> \"$GITHUB_ENV\""),'R241 shared preview URL must propagate to later proof steps');
@@ -63,6 +64,7 @@ assert.ok(r408Estimator.includes('if(ok)cls.ewmaByShard'),'failed transport/brow
 assert.ok(r241.includes('Restore R408 interaction workload scar')&&r241.includes('Restore R408 main proof workload scar'),'R241 must restore proof-runtime scar state independently per job');
 assert.ok(r241.includes('Retain R408 interaction workload scar')&&r241.includes('Retain R408 main browser workload scar'),'R241 must retain updated proof-runtime scar evidence after execution');
 
+assert.ok(r286Browser.includes("click({timeout:10000,noWaitAfter:true})")&&r286Browser.includes('navigator expansion unexpectedly navigated')&&r286Browser.includes("aria-expanded')!=='true'"),'R286 navigator setup must avoid irrelevant navigation auto-wait while proving no URL mutation, expanded state and visible navigator semantics');
 assert.ok(r313Disclosure.includes('partitionInteractionCasesR355')&&r313Disclosure.includes('assignedCases'),'R313 disclosure must reuse the measured 88-case workload partition rather than sequentially scanning the whole field in one browser process');
 assert.ok(r313Disclosure.includes('testDetails(page,viewportName,route)')&&r313Disclosure.includes('testAriaExpanded(page,viewportName,route)'),'R313 disclosure shards must retain both strict disclosure and aria-expanded child contracts');
 assert.ok(r313Browser.includes('partitionInteractionCasesR355')&&r313Browser.includes('interactionPartition[shardIndex].cases'),'R313 partition law must use deterministic measured-workload balancing over the complete profile × route address space');
