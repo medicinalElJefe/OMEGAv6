@@ -4,6 +4,7 @@
   "name": "omega-evolution-machine-r223",
   "main": "cloudflare/workerR223.js",
   "compatibility_date": "2026-08-28",
+  "compatibility_flags": ["global_fetch_strictly_public"],
   "workers_dev": true,
   "preview_urls": true,
   "triggers": {
