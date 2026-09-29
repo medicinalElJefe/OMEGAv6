@@ -8,5 +8,7 @@ exec env \
  R408_COUNT_ENV=R313_SHARD_COUNT \
  R408_INDEX_ENV=R313_SHARD_INDEX \
  R408_LOG_PREFIX=omega-r313-shard \
+ R408_RESOURCE_CAPACITY=4 \
+ R408_SHARD_RESOURCE_COST=2 \
  R408_CHILD_COMMAND='node tests/r313-full-control-interaction-browser-e2e.mjs' \
  node scripts/run_work_conserving_shards_r408.mjs
