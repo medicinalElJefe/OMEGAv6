@@ -42,6 +42,11 @@ const learned2=scar.classes.interaction.ewmaByShard['16:3'].ewmaMs;
 assert.ok(learned2<120000&&learned2>80000);
 assert.equal(scar.classes.interaction.history.length,2);
 assert.deepEqual(scar.classes.interaction.history.map(x=>x.observedMs),[120000,80000]);
+const beforeFailedEwma=scar.classes.interaction.ewmaByShard['16:3'].ewmaMs;
+scar=recordProofShardObservationR408({scar,proofClass:'interaction',shardCount:16,shardIndex:3,predictedMs:beforeFailedEwma,observedMs:17000,success:false,runId:'r3',sha:'ghi'});
+assert.equal(scar.classes.interaction.history.length,3);
+assert.equal(scar.classes.interaction.history.at(-1).success,false);
+assert.equal(scar.classes.interaction.ewmaByShard['16:3'].ewmaMs,beforeFailedEwma);
 
 const interactionPlan=estimateProofShardsR408({surfaces,shardCount:16,proofClass:'interaction',scar});
 const learnedShard=interactionPlan.find(x=>x.index===3);
@@ -52,6 +57,7 @@ assert.equal(disclosurePlan.find(x=>x.index===3).predictedMs,disclosurePlan.find
 const scheduler=fs.readFileSync('scripts/run_work_conserving_shards_r408.mjs','utf8');
 assert.ok(scheduler.includes('Promise.race([...running.values()])'));
 assert.ok(scheduler.includes('running.size<maxParallel'));
+assert.ok(scheduler.includes('activeResourceCost()+shardResourceCost')&&scheduler.includes('resourceCapacity'));
 assert.ok(scheduler.includes('launch(queue[next++])'));
 assert.ok(!scheduler.includes('wave_start'));
 assert.ok(scheduler.includes("spawn('timeout'"));
@@ -59,14 +65,16 @@ assert.ok(scheduler.includes("'--kill-after=15s'"));
 assert.ok(scheduler.includes('results.length!==shardCount||unique.size!==shardCount'));
 assert.ok(scheduler.includes('if(failed)process.exit(1)'));
 
-for(const [file,proofClass] of[
- ['scripts/run_r313_control_shards.sh','interaction'],
- ['scripts/run_r313_disclosure_shards.sh','disclosure'],
- ['scripts/run_r286_control_shards.sh','no_dead_control'],
+for(const [file,proofClass,cost] of[
+ ['scripts/run_r313_control_shards.sh','interaction',2],
+ ['scripts/run_r313_disclosure_shards.sh','disclosure',2],
+ ['scripts/run_r286_control_shards.sh','no_dead_control',1],
 ]){
  const src=fs.readFileSync(file,'utf8');
  assert.ok(src.includes('run_work_conserving_shards_r408.mjs'));
  assert.ok(src.includes('R408_PROOF_CLASS='+proofClass));
+ assert.ok(src.includes('R408_RESOURCE_CAPACITY=4'));
+ assert.ok(src.includes('R408_SHARD_RESOURCE_COST='+cost));
  assert.ok(!src.includes('wave_start'));
 }
 
@@ -82,4 +90,4 @@ assert.ok(workflow.includes('Restore R408 main proof workload scar'));
 assert.ok(workflow.includes('Retain R408 interaction workload scar'));
 assert.ok(workflow.includes('Retain R408 main browser workload scar'));
 
-console.log('R408 PROOF RUNTIME CONVERGENCE PASS · 88 route/viewport cases remain complete and unique · disclosure/interaction/no-dead-control estimators are isolated · scar history appends with bounded EWMA · longest predicted shards launch first · scheduler refills capacity on first completion with no wave barrier · all existing child/parent time ceilings and fail-closed recombination remain intact');
+console.log('R408 PROOF RUNTIME CONVERGENCE PASS · 88 route/viewport cases remain complete and unique · disclosure/interaction/no-dead-control estimators are isolated · failed transport samples remain in scar history but do not train timing EWMA · longest predicted shards launch first · scheduler refills capacity on first completion with no wave barrier · heavy browser shards consume 2/4 resource units while lighter no-dead-control shards consume 1/4 · all child/parent ceilings and fail-closed recombination remain intact');
