@@ -47,6 +47,7 @@ for(const [label,wrapper,proofClass] of[
 }
 assert.ok(r408Scheduler.includes('while(next<queue.length||running.size)'),'R408 scheduler must continue until queued and active shards are both exhausted');
 assert.ok(r408Scheduler.includes('running.size<maxParallel')&&r408Scheduler.includes('launch(queue[next++])'),'R408 scheduler must immediately refill available bounded capacity');
+assert.ok(r408Scheduler.includes('activeResourceCost()+shardResourceCost')&&r408Scheduler.includes('resourceCapacity'),'R408 scheduler must enforce proof-class resource cost inside the concurrency ceiling');
 assert.ok(r408Scheduler.includes('Promise.race([...running.values()])'),'R408 scheduler must advance on the first completed child rather than wait for a whole wave');
 assert.ok(r408Scheduler.includes("spawn('timeout'")&&r408Scheduler.includes("'--kill-after=15s'"),'R408 child proofs must remain hard-bounded');
 assert.ok(r408Scheduler.includes('recordProofShardObservationR408'),'R408 scheduler must write observed runtimes into the scar estimator');
@@ -55,6 +56,10 @@ assert.ok(r408Scheduler.includes('if(failed)process.exit(1)'),'R408 recombinatio
 assert.ok(r408Estimator.includes("['disclosure','interaction','no_dead_control']"),'R408 estimator must keep separate disclosure/interaction/no-dead-control namespaces');
 assert.ok(r408Estimator.includes('history=[...(cls.history||[]),record]'),'R408 estimator must append observations instead of erasing scar/history');
 assert.ok(r408Estimator.includes('R408_EWMA_ALPHA=0.35'),'R408 estimator must retain explicit bounded scar weighting');
+assert.ok(r313ShardRunner.includes('R408_RESOURCE_CAPACITY=4')&&r313ShardRunner.includes('R408_SHARD_RESOURCE_COST=2'),'R313 full-control proof must consume 2/4 browser resource units per shard');
+assert.ok(r313DisclosureRunner.includes('R408_RESOURCE_CAPACITY=4')&&r313DisclosureRunner.includes('R408_SHARD_RESOURCE_COST=2'),'R313 disclosure proof must consume 2/4 browser resource units per shard');
+assert.ok(r286ShardRunner.includes('R408_RESOURCE_CAPACITY=4')&&r286ShardRunner.includes('R408_SHARD_RESOURCE_COST=1'),'R286 no-dead-control proof may use all four light resource slots');
+assert.ok(r408Estimator.includes('if(ok)cls.ewmaByShard'),'failed transport/browser samples must remain in history without training the timing EWMA');
 assert.ok(r241.includes('Restore R408 interaction workload scar')&&r241.includes('Restore R408 main proof workload scar'),'R241 must restore proof-runtime scar state independently per job');
 assert.ok(r241.includes('Retain R408 interaction workload scar')&&r241.includes('Retain R408 main browser workload scar'),'R241 must retain updated proof-runtime scar evidence after execution');
 
@@ -68,4 +73,4 @@ assert.ok(runner.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC:-300'),'R241 runner m
 assert.ok(runner.includes('timeout --signal=TERM --kill-after=15s'),'R241 runner must terminate hung children fail-closed');
 assert.ok(runner.includes('R241 browser proof timeout'),'R241 timeout must produce an explicit diagnostic annotation');
 
-console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286/R313 complete deterministic partitions retained · R408 work-conserving bounded scheduler refills capacity on first child completion · disclosure, interaction and no-dead-control workload scar namespaces remain separate · observations append without erasing prior history · child/parent ceilings remain fail closed · R318 still runs once after disclosure recombination · diagnostics retained');
+console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286/R313 complete deterministic partitions retained · R408 scheduler refills on first completion but is resource-aware: heavy disclosure/interaction shards consume 2/4 units and lighter no-dead-control shards consume 1/4 · failed transport samples remain in scar history without training timing EWMA · child/parent ceilings remain fail closed · R318 still runs once after disclosure recombination · diagnostics retained');
