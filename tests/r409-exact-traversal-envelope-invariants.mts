@@ -54,7 +54,9 @@ assert.ok(liveScene.includes("physicalEarthCoordinateClaimed:target.physicalEart
 
 const scheduler=fs.readFileSync('scripts/run_work_conserving_shards_r408.mjs','utf8');
 assert.ok(scheduler.includes('activeResourceCost()+shardResourceCost'),'R409 must preserve R408 resource-aware proof scheduling');
+const r286Runner=fs.readFileSync('scripts/run_r286_control_shards.sh','utf8');
+assert.ok(r286Runner.includes('R408_RESOURCE_CAPACITY=4')&&r286Runner.includes('R408_SHARD_RESOURCE_COST=2'),'R409.1 must preserve the evidence-corrected 2/4 R286 browser resource cost');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 assert.ok(String(pkg.scripts.check||'').includes('npm run test:r408'),'R409 must preserve R408 proof-runtime gate');
 
-console.log('R409 EXACT TRAVERSAL PASS · exhaustive 20,736 exact-v3↔Atlas360 address congruence · atlas→WGS84 remains DERIVED query mapping · returned source clocks remain OBS/GAP provenance · live scene carries exact address without model→observation promotion · CanonState/source/SAR/weather/deployment authority unchanged · R408 resource-aware proof scheduler preserved');
+console.log('R409 EXACT TRAVERSAL PASS · exhaustive 20,736 exact-v3↔Atlas360 address congruence · atlas→WGS84 remains DERIVED query mapping · returned source clocks remain OBS/GAP provenance · live scene carries exact address without model→observation promotion · CanonState/source/SAR/weather/deployment authority unchanged · R408 resource-aware proof scheduler preserved · R409.1 R286 contention scar corrected to 2/4 resource cost');
