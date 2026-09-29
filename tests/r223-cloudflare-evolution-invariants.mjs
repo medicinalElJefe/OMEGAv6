@@ -63,6 +63,7 @@ assert.match(worker,/async scheduled/,'Cloudflare machine must run from a native
 assert.match(worker,/OMEGA_GITHUB_TOKEN_REQUIRED/,'GitHub write credential remains secret-bound');
 assert.match(worker,/OMEGA_CRON_SECRET/,'manual trigger surface must be secret-bound');
 assert.match(config,/"name": "omega-evolution-machine-r223"/);
+assert.match(config,/"compatibility_flags": \["global_fetch_strictly_public"\]/,'CLOUD-01 must reach canonical OMEGA through Cloudflare public routing instead of same-zone error 1042');
 assert.match(config,/"crons": \["17 \* \* \* \*"\]/);
 assert.equal(manifest.singleton,true);
 assert.equal(manifest.id,'CLOUD-01');
@@ -74,5 +75,7 @@ assert.match(workflow,/r245-governed-selfbuild-convergence-invariants\.mjs/);
 assert.match(workflow,/OMEGA_EVOLUTION_GITHUB_TOKEN/,'Cloudflare Worker GitHub credential must remain external secret state');
 assert.match(workflow,/wrangler secret put OMEGA_GITHUB_TOKEN/,'provisioning must bind GitHub credential as encrypted Worker secret');
 assert.match(workflow,/openssl rand -hex 32/,'manual-trigger secret must be generated, not committed');
+assert.match(workflow,/state==='PROPOSED'.*state==='OBSERVE_ONLY'/s,'immediate autonomous proof must accept only a legitimate governed candidate or OBSERVE_ONLY');
+assert.match(workflow,/R388_BACKLOG_BRANCH_AND_PR_CREATED/,'R388 candidate terminal must be explicitly recognized by the proof gate');
 
 console.log('R223/R245 CLOUDFLARE EVOLUTION PASS · CLOUD-01 singleton · shared R164 residual policy · shared R240/R243 selection · shared deterministic generator · cross-machine one-candidate fence · exact-head proof-gated merge · ci.yml sole canonical production writer · R125/R147/R146/R141 preserved');
