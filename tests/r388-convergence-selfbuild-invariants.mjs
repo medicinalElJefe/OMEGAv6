@@ -7,8 +7,12 @@ import {decideCycle} from '../cloudflare/lib/evolution-policy.mjs';
 const markdown=fs.readFileSync('docs/OMEGA_MISSING_CAPABILITY_CONVERGENCE_R386.md','utf8');
 const items=parseConvergenceBacklogR388(markdown);
 assert.equal(R388_CONVERGENCE_BACKLOG_SCHEMA,'OMEGA_CONVERGENCE_BACKLOG_R388');
-assert.ok(items.length>=100,`R388 expected full-spectrum backlog, found only ${items.length} items`);
+assert.equal(items.length,155,'R417 must retain all 155 convergence rows, including completed rows, so identities never shift');
 assert.equal(new Set(items.map(x=>x.id)).size,items.length,'R388 item ids must be deterministic and unique');
+const completedIds=items.filter(x=>x.completed).map(x=>x.id);
+for(const id of ['R388-B-01','R388-D-01','R388-G-01','R388-G-05','R388-I-05','R388-U-05'])assert.ok(completedIds.includes(id),`R417 proof-backed completion missing stable row ${id}`);
+assert.equal(items.find(x=>x.id==='R388-B-02')?.objective,'Every route proves functional inheritance, not menu presence alone: usable controls, state/output, proof, failure/recovery path.','checking B-01 must never renumber B-02');
+assert.equal(items.find(x=>x.id==='R388-D-02')?.objective,'Native complex SAR acquisition binding and real source rasters where provider/data access permits.','checking D-01 must never renumber D-02');
 for(const item of items){
  assert.equal(item.canonicalAdmission,false);
  assert.match(item.id,/^R388-[A-Y]-\d{2}$/);
@@ -26,9 +30,16 @@ assert.ok(items.some(x=>x.externalProofRequired),'R388 must preserve external/de
 
 const selected=selectNextConvergenceItemR388({markdown,advancedItemIds:[]});
 assert.equal(selected.schema,R388_CONVERGENCE_BACKLOG_SCHEMA);
+assert.equal(selected.completed,6,'R417 reconciliation must expose proof-backed completed-row count without deleting history');
+assert.equal(selected.remaining,149,'R417 must leave only genuinely unresolved/unadvanced rows in remaining count');
+assert.equal(selected.selected?.id,'R388-A-01','first unresolved absolute row must remain stable after unrelated completions');
 assert.ok(selected.selected?.selfEditable,'R388 must select a real self-editable backlog item');
 const next=selectNextConvergenceItemR388({markdown,advancedItemIds:[selected.selected.id]});
 assert.notEqual(next.selected?.id,selected.selected.id,'advanced item must not be selected again');
+const additionalCompletion=markdown.replace('- [ ] One launcher/runtime/state authority across cloud, browser, Hybrid and native-host surfaces.','- [x] One launcher/runtime/state authority across cloud, browser, Hybrid and native-host surfaces.');
+const afterCompletion=selectNextConvergenceItemR388({markdown:additionalCompletion,advancedItemIds:[]});
+assert.equal(afterCompletion.selected?.id,'R388-A-02','checking A-01 must advance selection without renumbering A-02');
+assert.equal(parseConvergenceBacklogR388(additionalCompletion).find(x=>x.id==='R388-A-02')?.index,2,'absolute row index must survive completion filtering');
 
 const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
 const exhausted={...state,currentCapsuleId:null,admittedSourceCapsules:state.roadmap.map(x=>x.id)};
@@ -48,4 +59,4 @@ assert.ok(machine.includes("repairAttemptLedger:repair.attempts||[]"),'R388 gove
 assert.ok(machine.includes("rejectionScars:repair.rejectionHistory||[]"),'R388 governed receipt must preserve validator rejection scars after compliant reformulation');
 
 
-console.log(`R388 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · deterministic section→source targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · bounded compliant reformulation only · all 8 exact-head workflow families required for autonomous promotion`);
+console.log(`R417/R388 CONVERGENCE RECONCILIATION PASS · ${items.length} stable absolute rows · checked-row identity preservation · deterministic section→source targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · bounded compliant reformulation only · all 8 exact-head workflow families required for autonomous promotion`);
