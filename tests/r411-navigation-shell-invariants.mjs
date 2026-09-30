@@ -22,6 +22,9 @@ assert.ok(workstation.includes("import './omegaNavigationShellR411.css';")&&work
 assert.ok(home.includes("import './omegaNavigationShellR411.css';")&&home.indexOf("omegaNavigationShellR411.css")>home.indexOf("wholeSystemExperienceR132.css"),'Home must load R411 after its presentation authority');
 assert.ok(nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'R411 must preserve complete direct route reachability');
 assert.ok(!nav.includes("document.body.style.overflow='hidden'"),'R411 must not lock application scrolling');
+assert.ok(nav.includes('useLayoutEffect')&&nav.includes('useId'),'R411 remount state must use synchronous per-instance ownership');
+assert.ok(nav.includes('dataset.omegaNavOwner=navOwnerId'),'R411 navigator must claim shared layout state with a stable owner id');
+assert.ok(nav.includes("if(root.dataset.omegaNavOwner!==navOwnerId)return"),'unmounting navigator must not erase a newer remounted navigator state');
 
 assert.ok(css.includes('R411 · CANONICAL NAVIGATION SHELL REBUILD'),'R411 canonical shell declaration missing');
 assert.ok(css.includes('.r411-navigation-shell .r94-nav-panel.r88-navigator'),'R411 must own the expanded browser geometry');
@@ -41,4 +44,4 @@ assert.ok(css.includes('z-index:2147483647!important;pointer-events:auto!importa
 assert.ok(css.includes("@media(min-width:901px)")&&css.includes('margin-left:calc(var(--r411-rail) + var(--r411-panel))!important'),'desktop expanded navigation must reserve a real layout column');
 assert.ok(css.includes('.r89-flat-scroll')&&css.includes('flex:1 1 auto!important')&&css.includes('overflow:auto!important'),'R411 route list must be the single flexible scroll owner');
 
-console.log('R411.2 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · compact directly reachable master-menu strip · obsolete mobile rail reservation closed · fullscreen chrome suppression · 44 routes preserved');
+console.log('R411.7 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · single-owner synchronous remount state · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · compact directly reachable master-menu strip · fullscreen chrome suppression · 44 routes preserved');
