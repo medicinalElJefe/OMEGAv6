@@ -3,7 +3,7 @@ import fs from'node:fs';
 
 const lab=fs.readFileSync('src/OmegaPcwdBenchmarkLab.tsx','utf8');
 const css=fs.readFileSync('src/pcwdBenchmarkLab.css','utf8');
-const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
 for(const token of[
@@ -17,9 +17,9 @@ for(const token of[
 
 assert.ok(lab.includes("runPcwdBenchmarkSuiteV1"));
 assert.ok(lab.includes("governPcwdBenchmarkSuiteV1"));
-assert.ok(suite.includes("import OmegaPcwdBenchmarkLab from './OmegaPcwdBenchmarkLab';"));
-assert.ok(suite.includes('<OmegaPcwdBenchmarkLab/>'));
-assert.ok(suite.indexOf('<OmegaPcwdBenchmarkLab/>')>suite.indexOf('<OmegaProofCarryingWovenDynamics address={address}/>'));
+assert.ok(convergence.includes("import OmegaPcwdBenchmarkLab from './OmegaPcwdBenchmarkLab';"));
+assert.ok(convergence.includes('<OmegaPcwdBenchmarkLab/>'));
+assert.ok(convergence.indexOf('<OmegaPcwdBenchmarkLab/>')>convergence.indexOf('<OmegaProofCarryingWovenDynamics address={address}/>'));
 
 for(const token of['.r358-grid','.r358-score','@media(max-width:760px)'])assert.ok(css.includes(token),`R358 responsive benchmark CSS missing ${token}`);
 
