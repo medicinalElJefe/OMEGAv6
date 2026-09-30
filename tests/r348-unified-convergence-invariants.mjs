@@ -6,7 +6,7 @@ const deweyKernel=fs.readFileSync('src/system/deweyReferenceKernelR348.ts','utf8
 const liveScene=fs.readFileSync('src/system/liveSceneCorrelationR348.ts','utf8');
 const donorContext=fs.readFileSync('src/visualTraversalContextR347.ts','utf8');
 const ui=fs.readFileSync('src/OmegaUnifiedConvergenceR348.tsx','utf8');
-const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8');
 const accepted=fs.readFileSync('src/acceptedProductionContractR95.ts','utf8');
 const manifest=JSON.parse(fs.readFileSync('public/canon/omega-r348-source-manifest.json','utf8'));
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
@@ -76,8 +76,8 @@ for(const token of[
  'packet.truthBoundary'
 ])assert.ok(ui.includes(token),'R348 operational convergence surface missing '+token);
 
-assert.ok(suite.includes("import OmegaUnifiedConvergenceR348 from './OmegaUnifiedConvergenceR348'"),'R348 must be wired into the current specialist suite');
-assert.ok(suite.includes('<OmegaUnifiedConvergenceR348 record={record} status={status}/>'),'R348 must be mounted on Convergence');
+assert.ok(convergence.includes("import OmegaUnifiedConvergenceR348 from './OmegaUnifiedConvergenceR348'"),'R348 must be wired into the dedicated Convergence surface');
+assert.ok(convergence.includes('<OmegaUnifiedConvergenceR348 record={record} status={status}/>'),'R348 must be mounted on Convergence');
 assert.ok(accepted.includes("id:'UNIFIED_SCENE_PACKET_CONVERGENCE'"),'accepted production contract must preserve R348');
 assert.ok(accepted.includes("'R348 unified scene-packet convergence authority'"),'preserved layer list must include R348');
 assert.ok(pkg.scripts['test:r348']?.includes('tests/r348-unified-convergence-invariants.mjs')&&pkg.scripts['test:r348']?.includes('tests/r348-dewey-reference-kernel.mts'),'R348 static + executable kernel proofs must be registered');
