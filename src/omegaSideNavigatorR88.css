@@ -373,8 +373,8 @@ html[data-omega-nav-present='true'] body{overflow-x:hidden}
  left:var(--r411-rail)!important;top:0!important;bottom:0!important;right:auto!important;
  width:var(--r411-panel)!important;max-width:var(--r411-panel)!important;min-width:0!important;
  height:100dvh!important;max-height:100dvh!important;
- display:grid!important;
- grid-template-rows:auto auto auto auto minmax(0,1fr) auto!important;
+ display:flex!important;
+ flex-direction:column!important;
  overflow:hidden!important;
  background:linear-gradient(180deg,#081319 0%,#03080b 100%)!important;
  border:0!important;border-right:1px solid var(--r411-line)!important;
@@ -401,6 +401,7 @@ html[data-omega-nav-present='true'] body{overflow-x:hidden}
 .r411-navigation-shell .r89-nav-mode{padding:8px 10px!important;background:var(--r411-surface)!important}
 .r411-navigation-shell .r100-active-route{margin:0 10px 6px!important;padding:8px 10px!important}
 .r411-navigation-shell .r111-output-ribbon{margin:0 10px 6px!important}
+.r411-navigation-shell[data-technical='false'] .r111-output-ribbon{display:none!important}
 .r411-navigation-shell .r88-search{
  margin:6px 10px 8px!important;min-height:46px!important;
  background:#061116!important;border-color:var(--r411-line)!important;
@@ -423,7 +424,7 @@ html[data-omega-nav-present='true'] body{overflow-x:hidden}
 .r411-navigation-shell .r210-nav-status{margin:0 10px 7px!important}
 .r411-navigation-shell .r89-flat-scroll,
 .r411-navigation-shell .r104-route-scroll{
- min-height:0!important;overflow:auto!important;overflow-x:hidden!important;
+ flex:1 1 auto!important;min-height:0!important;overflow:auto!important;overflow-x:hidden!important;
  overscroll-behavior:contain!important;scrollbar-gutter:stable!important;
  padding:0 8px calc(12px + env(safe-area-inset-bottom,0px))!important;
 }
