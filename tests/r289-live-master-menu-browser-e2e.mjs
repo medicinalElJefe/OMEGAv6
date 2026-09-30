@@ -53,18 +53,22 @@ async function prove(viewportName,contextOptions){
   const shell=page.locator('#omega-global-navigator');
   if(await shell.getAttribute('data-master-menu-presentation-revision')==='')throw new Error(`${viewportName}: live navigator missing R289 presentation revision`);
   const master=page.getByRole('navigation',{name:'Recovered OMEGA master menus'});
-  await master.waitFor({state:'visible',timeout:10000});
-  const masterButtons=master.locator('button');
-  if(await masterButtons.count()!==13)throw new Error(`${viewportName}: expected ALL + 12 recovered master-menu controls`);
   const workspace=page.getByRole('navigation',{name:'Application workspace submenu'});
   const workspaceButtons=workspace.locator('button');
   if(await workspaceButtons.count()!==7)throw new Error(`${viewportName}: existing ALL + six workspace controls were not preserved`);
 
   const coarse=viewportName==='mobile';
+  const tech=page.locator('.r239-tech-toggle:visible');
+  if(await tech.count()!==1)throw new Error(`${viewportName}: R411 Technical toggle must remain uniquely visible`);
+  await assertControlIntegrity(tech,`${viewportName}:technical-toggle`,{minHeight:coarse?44:38,minFont:9.5});
+  if(await master.isVisible())throw new Error(`${viewportName}: R411 Simple view must not expose recovered master-menu density by default`);
+  await tech.click();
+  await master.waitFor({state:'visible',timeout:10000});
+  if(await tech.getAttribute('aria-pressed')!=='true')throw new Error(`${viewportName}: Technical toggle did not enter the explicit advanced-navigation state`);
+  const masterButtons=master.locator('button');
+  if(await masterButtons.count()!==13)throw new Error(`${viewportName}: expected ALL + 12 recovered master-menu controls after Technical opt-in`);
   await assertControlIntegrity(masterButtons,`${viewportName}:master-menu`,{minHeight:coarse?44:40,minFont:coarse?10:10.5});
   await assertControlIntegrity(workspaceButtons,`${viewportName}:workspace-filter`,{minHeight:coarse?44:40,minFont:10});
-  const tech=page.locator('.r239-tech-toggle:visible');
-  if(await tech.count())await assertControlIntegrity(tech,`${viewportName}:technical-toggle`,{minHeight:coarse?44:38,minFont:9.5});
 
   await masterButtons.first().click();
   await page.waitForFunction(()=>document.querySelector('#omega-global-navigator')?.getAttribute('data-master-menu')==='ALL',undefined,{timeout:10000});
