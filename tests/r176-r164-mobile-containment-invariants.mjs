@@ -3,7 +3,7 @@ import fs from 'node:fs';
 
 const css=fs.readFileSync('src/reflexAutonomicR164.css','utf8');
 const browser=fs.readFileSync('tests/r164-reflex-autonomic-browser-e2e.mjs','utf8');
-const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8');
 const workflow=fs.readFileSync('.github/workflows/r176-r164-mobile-containment-proof.yml','utf8');
 
 for(const token of [
@@ -25,9 +25,9 @@ for(const token of [
   'actual mobile edges contained inside viewport',
 ])assert.ok(browser.includes(token),`R176 browser admission missing actual containment proof: ${token}`);
 
-assert.ok(suite.includes("panel==='Convergence'"),'R176 Convergence route authority missing');
-assert.ok(suite.includes('<ReflexAutonomicR164/>'),'R176 R164 returned-reflex surface no longer mounted');
-assert.ok(suite.includes('<OmegaAutonomicR125/>'),'R176 existing R125 autonomic authority must remain mounted');
+assert.ok(convergence.includes("R416_DEDICATED_CONVERGENCE_CHUNK"),'R176 dedicated Convergence route surface missing');
+assert.ok(convergence.includes('<ReflexAutonomicR164/>'),'R176 R164 returned-reflex surface no longer mounted');
+assert.ok(convergence.includes('<OmegaAutonomicR125/>'),'R176 existing R125 autonomic authority must remain mounted');
 
 for(const token of [
   'permissions:\n  contents: read',
