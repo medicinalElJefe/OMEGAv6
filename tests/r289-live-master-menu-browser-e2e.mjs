@@ -8,11 +8,19 @@ const viewports=[
 ];
 
 async function openNavigator(page){
- if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
- const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
+ const ownedOpen=await page.locator('.r411-navigation-shell[data-navigation-owner]').evaluateAll((nodes)=>{
+  const owner=document.documentElement.dataset.omegaNavOwner||'';
+  return nodes.filter(node=>node.getAttribute('data-navigation-owner')===owner&&node.classList.contains('expanded')).length;
+ });
+ if(ownedOpen===1)return;
+ const expand=page.locator('.r411-navigation-shell[data-navigation-owner] button[aria-label="Expand OMEGA navigator"]:visible');
  await expand.first().waitFor({state:'visible',timeout:15000});
  await expand.first().click();
- await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',undefined,{timeout:10000});
+ await page.waitForFunction(()=>{
+  const root=document.documentElement,owner=root.dataset.omegaNavOwner||'';
+  const shell=[...document.querySelectorAll('.r411-navigation-shell[data-navigation-owner]')].find(node=>node.getAttribute('data-navigation-owner')===owner);
+  return root.dataset.omegaNavExpanded==='true'&&Boolean(shell?.classList.contains('expanded'));
+ },undefined,{timeout:10000});
 }
 
 async function visibleRouteSnapshot(page){
@@ -119,12 +127,18 @@ async function prove(viewportName,contextOptions){
   await workspaceButtons.first().click();
   await page.waitForFunction(()=>document.querySelectorAll('.r89-flat-route').length===44,undefined,{timeout:10000});
   const route=page.locator('.r89-flat-route').first();
+  const priorNavOwner=await page.evaluate(()=>document.documentElement.dataset.omegaNavOwner||'');
   const routeName=await route.getAttribute('data-route-name');if(!routeName)throw new Error(`${viewportName}: canonical route identity missing`);
   await route.scrollIntoViewIfNeeded();
   const routeStyle=await route.locator('span>b').first().evaluate(el=>({font:parseFloat(getComputedStyle(el).fontSize)||0}));
   if(routeStyle.font<12)throw new Error(`${viewportName}: route title regressed to ${routeStyle.font}px`);
   await route.click();
   await page.waitForFunction(name=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===name,routeName,{timeout:20000});
+  await page.waitForFunction(previous=>{
+   const root=document.documentElement,owner=root.dataset.omegaNavOwner||'';
+   const owners=[...document.querySelectorAll('.r411-navigation-shell[data-navigation-owner]')].map(node=>node.getAttribute('data-navigation-owner')||'');
+   return Boolean(owner&&owner!==previous&&owners.filter(value=>value===owner).length===1);
+  },priorNavOwner,{timeout:20000});
 
   await openNavigator(page);
   const remountedTech=page.locator('.r239-tech-toggle:visible');
@@ -143,4 +157,4 @@ async function prove(viewportName,contextOptions){
 }
 
 for(const [name,options] of viewports)await prove(name,options);
-console.log('R289/R311/R411.4 LIVE MASTER-MENU BROWSER PASS · clean Simple view · Technical opt-in exposes ALL + 12 recovered master menus in one contained strip · ALL + six workspace filters · readable controls · real coarse-pointer 44px geometry · center-point occlusion proof · master/workspace/search composition · canonical route activation + clean remount + Technical re-entry · desktop/mobile containment · no page errors');
+console.log('R289/R311/R411.9 LIVE MASTER-MENU BROWSER PASS · clean Simple view · Technical opt-in exposes ALL + 12 recovered master menus in one contained strip · ALL + six workspace filters · readable controls · real coarse-pointer 44px geometry · center-point occlusion proof · master/workspace/search composition · canonical route activation + clean remount + Technical re-entry · desktop/mobile containment · no page errors');
