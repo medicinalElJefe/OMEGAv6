@@ -29,6 +29,7 @@ assert.ok(nav.includes("if(root.dataset.omegaNavOwner!==navOwnerId)return"),'unm
 
 assert.ok(css.includes('R411 · CANONICAL NAVIGATION SHELL REBUILD'),'R411 canonical shell declaration missing');
 assert.ok(css.includes('.r411-navigation-shell .r94-nav-panel.r88-navigator'),'R411 must own the expanded browser geometry');
+assert.ok(css.includes('transition:opacity .16s ease!important;')&&!css.includes('transition:opacity .16s ease,visibility .16s ease!important;'),'R411 expanded shell must expose visibility immediately; only opacity may animate');
 assert.ok(css.includes('background:#02080b!important'),'mobile browser must be opaque rather than showing live content through the menu');
 assert.ok(css.includes('R411.1 · PHONE COMMAND DOCK'),'R411 phone command-dock authority missing');
 assert.ok(css.includes('grid-template-columns:repeat(7,minmax(0,1fr))!important'),'mobile command dock must expose seven bounded global actions');
@@ -47,4 +48,4 @@ assert.ok(css.includes('z-index:2147483647!important;pointer-events:auto!importa
 assert.ok(css.includes("@media(min-width:901px)")&&css.includes('margin-left:calc(var(--r411-rail) + var(--r411-panel))!important'),'desktop expanded navigation must reserve a real layout column');
 assert.ok(css.includes('.r89-flat-scroll')&&css.includes('flex:1 1 auto!important')&&css.includes('overflow:auto!important'),'R411 route list must be the single flexible scroll owner');
 
-console.log('R411.9 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · single-owner synchronous remount state · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · compact directly reachable master-menu strip · fullscreen chrome suppression · 44 routes preserved');
+console.log('R411.10 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · single-owner synchronous remount state · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · compact directly reachable master-menu strip · fullscreen chrome suppression · 44 routes preserved');

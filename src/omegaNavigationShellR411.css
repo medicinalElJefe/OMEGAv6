@@ -68,7 +68,7 @@
  box-shadow:24px 0 56px rgba(0,0,0,.48)!important;
  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
  transform:translateX(0)!important;
- transition:opacity .16s ease,visibility .16s ease!important;
+ transition:opacity .16s ease!important;
  z-index:1!important;
 }
 .r411-navigation-shell.collapsed .r94-nav-panel.r88-navigator{
