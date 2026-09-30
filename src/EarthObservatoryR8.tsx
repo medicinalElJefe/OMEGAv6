@@ -38,7 +38,7 @@ export default function EarthObservatoryR8({address}:Props){
  useEffect(()=>()=>{evidenceRequest.current++},[]);
  useEffect(()=>{setLat(initial.lat);setLon(initial.lon);void queryAt(initial.lat,initial.lon)},[initial.lat,initial.lon]);
  useEffect(()=>{try{localStorage.setItem('omega.earth.r279.view',view)}catch{}},[view]);
- useEffect(()=>{if(!displayExpanded)return;const previous=document.body.style.overflow;document.body.style.overflow='hidden';const onKey=(e:KeyboardEvent)=>{if(e.key==='Escape')setDisplayExpanded(false)};document.addEventListener('keydown',onKey);return()=>{document.body.style.overflow=previous;document.removeEventListener('keydown',onKey)}},[displayExpanded]);
+ useEffect(()=>{if(!displayExpanded){delete document.documentElement.dataset.omegaPresentationFullscreen;return}const previous=document.body.style.overflow;document.documentElement.dataset.omegaPresentationFullscreen='true';document.body.style.overflow='hidden';const onKey=(e:KeyboardEvent)=>{if(e.key==='Escape')setDisplayExpanded(false)};document.addEventListener('keydown',onKey);return()=>{delete document.documentElement.dataset.omegaPresentationFullscreen;document.body.style.overflow=previous;document.removeEventListener('keydown',onKey)}},[displayExpanded]);
  useEffect(()=>{if(!playing||!catalog.length)return;const id=window.setInterval(()=>setSelected(v=>{const i=Math.max(0,catalog.findIndex(x=>x.id===v));return catalog[(i+1)%catalog.length]?.id||v}),6000);return()=>window.clearInterval(id)},[playing,catalog]);
  const current=catalog.find(x=>x.id===selected)||catalog[0];
  const fullDisks=['G19-FD','G18-FD'].map(id=>catalog.find(x=>x.id===id)).filter(Boolean) as Coverage[];
