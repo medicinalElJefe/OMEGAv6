@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {buildCloudResidualStateR314,R314_CLOUD_RESIDUAL_ADAPTER_SCHEMA} from '../cloudflare/lib/r314-residual-adapter.mjs';
 import {classifyRepairTargetR314,selectRepairTargetR314,R314_CLOUD_TARGET_REGISTRY_SCHEMA} from '../cloudflare/lib/r314-target-registry.mjs';
-import {prepareAiRepairR314,R314_CLOUD_AI_REPAIR_SCHEMA} from '../cloudflare/lib/r314-ai-repair.mjs';
-import {R314_AUTONOMOUS_REPAIR_SCHEMA,repairPathPolicyR314} from '../src/system/autonomousRepairPolicyR314.js';
+import {prepareAiRepairR314,proposeAiRepairR314,R314_CLOUD_AI_REPAIR_SCHEMA} from '../cloudflare/lib/r314-ai-repair.mjs';
+import {R314_AUTONOMOUS_REPAIR_SCHEMA,R314_AI_MAX_ATTEMPTS,repairPathPolicyR314} from '../src/system/autonomousRepairPolicyR314.js';
 
 assert.equal(R314_CLOUD_RESIDUAL_ADAPTER_SCHEMA,'OMEGA_CLOUD_R314_RESIDUAL_ADAPTER');
 assert.equal(R314_CLOUD_TARGET_REGISTRY_SCHEMA,'OMEGA_CLOUD_R314_TARGET_REGISTRY');
@@ -42,6 +42,40 @@ assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(wrongSha),residual:
 const declined={...proposal,files:[]};
 assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(declined),residual:safeResidual,contextFiles}).state,'NO_SAFE_PATCH','model refusal must become no mutation');
 
+assert.equal(R314_AI_MAX_ATTEMPTS,3,'validator-driven reformulation budget must remain hard bounded');
+const retryPrompts=[];
+const rejectedOnce=structuredClone(proposal);rejectedOnce.files[0].preimageSha='wrong';
+const ai={
+ calls:0,
+ async run(_model,input){
+  this.calls++;
+  retryPrompts.push(input.messages.at(-1).content);
+  return{response:JSON.stringify(this.calls===1?rejectedOnce:proposal)};
+ }
+};
+const retried=await proposeAiRepairR314({ai,residual:safeResidual,stage:{id:'R413-TEST',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
+assert.equal(retried.ok,true,'a validator-rejected proposal may be reformulated into a compliant patch');
+assert.equal(retried.reformulated,true);
+assert.equal(retried.attempts.length,2);
+assert.equal(retried.rejectionHistory.length,1);
+assert.ok(retried.rejectionHistory[0].reasons.includes('FILE_1_SHA_MISMATCH'),'exact validator rejection code must survive into the scar ledger');
+assert.ok(retryPrompts[1].includes('FILE_1_SHA_MISMATCH'),'the next model attempt must receive the exact rejection evidence');
+assert.ok(retryPrompts[1].includes('"sha":"blob123"'),'reformulation must retain the same exact source SHA');
+assert.ok(retryPrompts[1].includes('"path":"src/components/Example.jsx"'),'reformulation must retain the same source membrane');
+
+const alwaysRejectedAi={calls:0,async run(){this.calls++;return{response:JSON.stringify(rejectedOnce)}}};
+const exhausted=await proposeAiRepairR314({ai:alwaysRejectedAi,residual:safeResidual,stage:{id:'R413-TEST',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
+assert.equal(exhausted.ok,false);
+assert.equal(exhausted.state,'REJECTED_BY_R314_POLICY');
+assert.equal(exhausted.attempts.length,R314_AI_MAX_ATTEMPTS,'reformulation may never exceed its bounded attempt budget');
+assert.equal(alwaysRejectedAi.calls,R314_AI_MAX_ATTEMPTS);
+
+const malformedAi={calls:0,async run(){this.calls++;return{response:this.calls===1?'not json':JSON.stringify(proposal)}}};
+const recoveredMalformed=await proposeAiRepairR314({ai:malformedAi,residual:safeResidual,stage:{id:'R413-TEST',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
+assert.equal(recoveredMalformed.ok,true,'malformed model output may be corrected once without widening policy');
+assert.match(recoveredMalformed.rejectionHistory[0].reasons[0],/^AI_RESPONSE_PARSE_ERROR:/);
+
+
 const machine=fs.readFileSync('cloudflare/lib/github-machine.mjs','utf8');
 const worker=fs.readFileSync('cloudflare/workerR223.js','utf8');
 const config=fs.readFileSync('wrangler.evolution-machine-r223.jsonc','utf8');
@@ -50,10 +84,13 @@ assert.match(machine,/selectRepairTargetR314/);
 assert.match(machine,/proposeAiRepairR314/);
 assert.match(machine,/getRepoTextFile\(token,repo,path,mainSha\)/,'AI source envelope must bind exact main SHA');
 assert.match(machine,/R314_AI_BRANCH_AND_PR_CREATED/);
+assert.match(machine,/repairAttemptLedger:repair\.attempts\|\|\[\]/,'accepted R314 candidates must retain the bounded attempt ledger');
+assert.match(machine,/rejectionScars:repair\.rejectionHistory\|\|\[\]/,'accepted candidates must retain exact prior validator scars');
+assert.match(machine,/attempts:proposal\.repair\.attempts\|\|\[\]/,'OBSERVE_ONLY must return exact validator attempt evidence instead of collapsing it');
 assert.match(machine,/R241 Archive Convergence Visual Intelligence/,'AI candidates must inherit the full interface matrix before promotion');
 assert.match(worker,/env\.AI\|\|null/,'Workers AI binding must be passed explicitly and remain optional/fail-closed');
 assert.match(config,/"ai"\s*:\s*\{\s*"binding"\s*:\s*"AI"/s);
 assert.match(config,/OMEGA_WORKERS_AI_MODEL/);
 assert.doesNotMatch(machine,/wrangler\s+deploy|CLOUDFLARE_API_TOKEN/,'CLOUD-01 still may not deploy production directly');
 
-console.log('R314 CLOUD AUTONOMOUS REPAIR PASS · R164/R125 residual adapter · bounded target registry · exact-SHA source envelope · Workers AI proposal · R314 policy validation · branch-only mutation · inherited R241 promotion gate');
+console.log('R314 CLOUD AUTONOMOUS REPAIR PASS · R164/R125 residual adapter · bounded target registry · exact-SHA source envelope · Workers AI proposal · exact validator feedback · bounded reformulation scar ledger · R314 policy validation · branch-only mutation · inherited R241 promotion gate');
