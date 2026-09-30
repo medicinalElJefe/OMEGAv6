@@ -536,3 +536,116 @@ html:has(.earth-r372-stage-expanded) .earth-r372-expanded-bar{
 @media(prefers-reduced-motion:reduce){
  .r411-navigation-shell,.r411-navigation-shell *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 }
+
+
+/* R411.1 · PHONE COMMAND DOCK
+   On narrow/coarse layouts the persistent left rail is retired from presentation.
+   The same canonical navigator becomes a bottom command dock; the expanded browser
+   owns the viewport above it as one opaque sheet. Route authority is unchanged. */
+@media(max-width:900px){
+ :root{--r411-mobile-dock:64px}
+ .r411-navigation-shell{
+  inset:auto 0 0 0!important;
+  width:100vw!important;
+  height:var(--r411-mobile-dock)!important;
+  pointer-events:none!important;
+ }
+ .r411-navigation-shell.expanded{
+  inset:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+ }
+ .r411-navigation-shell .r94-nav-rail{
+  pointer-events:auto!important;
+  position:fixed!important;
+  left:0!important;right:0!important;top:auto!important;bottom:0!important;
+  width:100vw!important;height:var(--r411-mobile-dock)!important;
+  display:grid!important;
+  grid-template-columns:repeat(7,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:3px!important;
+  padding:5px max(5px,env(safe-area-inset-right,0px)) calc(5px + env(safe-area-inset-bottom,0px)) max(5px,env(safe-area-inset-left,0px))!important;
+  overflow:hidden!important;
+  border-right:0!important;border-top:1px solid var(--r411-line)!important;
+  background:#02090d!important;
+  z-index:3!important;
+ }
+ .r411-navigation-shell .r88-navigator-trigger,
+ .r411-navigation-shell .r94-rail-action{
+  display:grid!important;
+  place-items:center!important;
+  align-content:center!important;
+  gap:2px!important;
+  width:100%!important;min-width:0!important;max-width:none!important;
+  min-height:48px!important;height:auto!important;
+  padding:4px 2px!important;
+  border:1px solid transparent!important;border-radius:9px!important;
+  background:transparent!important;color:#78908b!important;
+ }
+ .r411-navigation-shell .r88-navigator-trigger small,
+ .r411-navigation-shell .r94-rail-action span{
+  display:block!important;
+  max-width:100%!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+  font:750 6px/1 ui-monospace,monospace!important;letter-spacing:.04em!important;
+ }
+ .r411-navigation-shell .r88-navigator-trigger .r100-omega-mark{font-size:18px!important;line-height:1!important}
+ .r411-navigation-shell .r94-rail-action svg{width:18px!important;height:18px!important}
+ .r411-navigation-shell .r94-rail-action.active,
+ .r411-navigation-shell .r88-navigator-trigger[aria-expanded='true']{
+  border-color:rgba(101,208,191,.34)!important;background:rgba(101,208,191,.08)!important;color:#e5f5f1!important;
+ }
+ .r411-navigation-shell .r120-rail-width-toggle,
+ .r411-navigation-shell .r100-rail-divider,
+ .r411-navigation-shell .r94-rail-current,
+ .r411-navigation-shell .r94-rail-action[title='All tools']{display:none!important}
+
+ .r411-navigation-shell .r94-nav-panel.r88-navigator{
+  position:fixed!important;
+  left:0!important;right:0!important;top:0!important;bottom:var(--r411-mobile-dock)!important;
+  width:100vw!important;max-width:100vw!important;min-width:0!important;
+  height:calc(100dvh - var(--r411-mobile-dock))!important;max-height:calc(100dvh - var(--r411-mobile-dock))!important;
+  border:0!important;border-bottom:1px solid var(--r411-line)!important;border-radius:0!important;
+  background:#02080b!important;
+  box-shadow:none!important;
+  z-index:2!important;
+ }
+ .r411-navigation-shell.collapsed .r94-nav-panel.r88-navigator{
+  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+ }
+ .r411-navigation-shell.expanded .r94-nav-panel.r88-navigator{
+  opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+ }
+
+ html[data-omega-nav-present='true'] :where(.omega-workstation-v2,.r71-home),
+ html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home){
+  margin-left:0!important;width:100%!important;max-width:100%!important;
+ }
+ .omega-workstation-v2 .workstation-main{
+  padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important;
+ }
+ .r71-home{
+  padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))!important;
+ }
+
+ .r411-navigation-shell .r88-navigator-head{padding-left:12px!important;padding-right:10px!important}
+ .r411-navigation-shell .r105-workspace-filter{
+  display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;
+  padding-inline:8px!important;scrollbar-width:thin!important;
+ }
+ .r411-navigation-shell .r105-workspace-filter button{
+  flex:0 0 auto!important;min-width:96px!important;min-height:44px!important;
+ }
+ .r411-navigation-shell .r89-flat-route{min-height:62px!important}
+}
+@media(max-width:520px){
+ :root{--r411-mobile-dock:62px}
+ .r411-navigation-shell .r94-nav-rail{height:var(--r411-mobile-dock)!important}
+ .r411-navigation-shell .r94-nav-panel.r88-navigator{
+  bottom:var(--r411-mobile-dock)!important;
+  height:calc(100dvh - var(--r411-mobile-dock))!important;
+  max-height:calc(100dvh - var(--r411-mobile-dock))!important;
+ }
+ .r411-navigation-shell .r94-rail-action span,
+ .r411-navigation-shell .r88-navigator-trigger small{font-size:5.5px!important}
+}
