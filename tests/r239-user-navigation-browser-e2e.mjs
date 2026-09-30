@@ -171,12 +171,19 @@ await page.locator('.r96-now').click();
 await assertClosingTruth('outside click');
 
 await page.setViewportSize({width:390,height:844});
-await page.getByLabel('Browse all registered OMEGA tools').click();
+// R411 mobile contract: redundant rail shortcuts intentionally disappear. The one
+// visible MENU trigger must still open the complete canonical All Tools registry.
+const mobileMenu=page.getByLabel('Expand OMEGA navigator');
+if(await mobileMenu.count()!==1||!(await mobileMenu.isVisible()))throw new Error('R411 mobile canonical MENU trigger is not uniquely visible');
+await mobileMenu.click();
 await nav.waitFor({state:'visible'});
+const mobileRoutes=nav.locator('.r89-flat-route');
+if(await mobileRoutes.count()!==44)throw new Error(`R411 mobile MENU did not expose the complete 44-route registry: ${await mobileRoutes.count()}`);
 const box=await nav.boundingBox();
-if(!box||box.width>365)throw new Error(`R239 mobile navigator too wide: ${box?.width}`);
+const railBox=await page.locator('.r94-nav-rail').boundingBox();
+if(!box||!railBox||Math.abs(box.width-(390-railBox.width))>5)throw new Error(`R411 mobile navigator must own the full viewport remainder: panel=${box?.width} rail=${railBox?.width}`);
 if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error('R239 mobile product introduces horizontal viewport overflow');
 if(pageErrors.length)throw new Error(`R239 page errors: ${pageErrors.join(' | ')}`);
 
-console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · unique R143 machine route identity + presentation binding · active-workstation/ancestor-aware visible-canvas sanity · universal rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · mobile containment');
+console.log('R239 BUILT BROWSER PASS · contextual Home→workspace All Tools · explicit global ALL recovery · focus/deep density · all 6 workspace filters · complete registry search · exhaustive 44-route activation sweep · unique R143 machine route identity + presentation binding · active-workstation/ancestor-aware visible-canvas sanity · universal desktop rail · system map · technical detail opt-in · immediate inert close + transition-complete hidden state · Escape/outside close · rail width · R411 single-trigger mobile 44-route reachability + full-remainder containment');
 await browser.close();
