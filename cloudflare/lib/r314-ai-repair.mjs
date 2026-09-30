@@ -23,52 +23,39 @@ function responsePayload(result){
  return result??{};
 }
 
-export function repairResponseFormatR314({residual,contextFiles=[]}={}){
- const exactFiles=(contextFiles||[]).map(file=>({path:String(file.path||''),sha:String(file.sha||'')}));
- const allowedPaths=exactFiles.map(file=>file.path);
- const allowedShas=exactFiles.map(file=>file.sha);
- const expectedProofs=[...new Set((Array.isArray(residual?.expectedProofs)?residual.expectedProofs:[]).map(String).filter(Boolean))];
- const fileItems={
-  type:'object',
-  additionalProperties:false,
-  properties:{
-   path:{type:'string',enum:allowedPaths},
-   preimageSha:{type:'string',enum:allowedShas},
-   replacements:{
-    type:'array',
-    minItems:1,
-    maxItems:R314_AI_MAX_REPLACEMENTS_PER_FILE,
-    items:{
-     type:'object',
-     additionalProperties:false,
-     properties:{
-      before:{type:'string',minLength:1},
-      after:{type:'string'},
-     },
-     required:['before','after'],
-    },
-   },
-  },
-  required:['path','preimageSha','replacements'],
- };
+export function repairResponseFormatR314(){
  return{
   type:'json_schema',
   json_schema:{
    type:'object',
-   additionalProperties:false,
    properties:{
-    schema:{type:'string',enum:['OMEGA_AUTONOMOUS_REPAIR_POLICY_R314']},
-    residualId:{type:'string',enum:[String(residual?.id||'')]},
-    files:{type:'array',minItems:0,maxItems:Math.min(R314_AI_MAX_FILES,exactFiles.length),items:fileItems},
-    canonicalAdmission:{type:'boolean',enum:[false]},
-    directProductionMutation:{type:'boolean',enum:[false]},
-    expectedProofs:{
+    schema:{type:'string'},
+    residualId:{type:'string'},
+    files:{
      type:'array',
-     minItems:1,
-     maxItems:8,
-     uniqueItems:true,
-     items:expectedProofs.length?{type:'string',enum:expectedProofs}:{type:'string',minLength:1},
+     items:{
+      type:'object',
+      properties:{
+       path:{type:'string'},
+       preimageSha:{type:'string'},
+       replacements:{
+        type:'array',
+        items:{
+         type:'object',
+         properties:{
+          before:{type:'string'},
+          after:{type:'string'},
+         },
+         required:['before','after'],
+        },
+       },
+      },
+      required:['path','preimageSha','replacements'],
+     },
     },
+    canonicalAdmission:{type:'boolean'},
+    directProductionMutation:{type:'boolean'},
+    expectedProofs:{type:'array',items:{type:'string'}},
    },
    required:['schema','residualId','files','canonicalAdmission','directProductionMutation','expectedProofs'],
   },
