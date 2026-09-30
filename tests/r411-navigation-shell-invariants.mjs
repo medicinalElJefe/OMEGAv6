@@ -36,6 +36,10 @@ assert.ok(css.includes('grid-template-columns:repeat(7,minmax(0,1fr))!important'
 assert.ok(css.includes(".r411-navigation-shell .r94-rail-action[title='All tools']{display:none!important}"),'mobile command dock must not duplicate the menu launcher');
 assert.ok(css.includes('width:100vw!important;max-width:100vw!important;min-width:0!important'),'mobile browser must own full viewport width above the dock');
 assert.ok(css.includes('bottom:var(--r411-mobile-dock)!important'),'mobile browser must reserve the command dock rather than cover it');
+assert.ok(css.includes('R411.11 · MOBILE USABLE VIEWPORT OWNERSHIP'),'R411 mobile usable-viewport authority missing');
+assert.ok(css.includes('height:calc(100dvh - var(--r411-mobile-dock))!important')&&css.includes('grid-template-rows:auto minmax(0,1fr)!important'),'mobile workstation must end its layout viewport above the fixed command dock');
+assert.ok(css.includes('overflow-y:auto!important')&&css.includes('overscroll-behavior-y:contain!important')&&css.includes('scroll-padding-bottom:20px!important'),'mobile workstation/home must expose a bounded vertical scroll owner that can move controls clear of the dock');
+assert.ok(css.includes("html:has(.earth-r372-stage-expanded) .omega-workstation-v2{")&&css.includes('height:100dvh!important'),'fullscreen Earth must recover the complete viewport after mobile dock exclusion');
 assert.ok(css.includes("html[data-omega-nav-present='true'] .r257-shell")&&css.includes("html[data-omega-nav-expanded='true'] .r257-shell")&&css.includes('margin-left:0!important;width:100%!important;max-width:100%!important'),'mobile bottom-dock mode must release the headless R257 shell from inherited side-rail reservation');
 assert.ok(nav.includes("showTechnical&&<div className='r333-filter-row r411-master-row'>"),'Simple view must structurally omit recovered master-menu density until explicit Technical opt-in');
 assert.ok(nav.includes("className='r333-filter-row r411-workspace-row'"),'ALL + six workspace controls must remain structurally mounted in Simple and Technical views');
@@ -48,4 +52,4 @@ assert.ok(css.includes('z-index:2147483647!important;pointer-events:auto!importa
 assert.ok(css.includes("@media(min-width:901px)")&&css.includes('margin-left:calc(var(--r411-rail) + var(--r411-panel))!important'),'desktop expanded navigation must reserve a real layout column');
 assert.ok(css.includes('.r89-flat-scroll')&&css.includes('flex:1 1 auto!important')&&css.includes('overflow:auto!important'),'R411 route list must be the single flexible scroll owner');
 
-console.log('R411.10 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · single-owner synchronous remount state · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · compact directly reachable master-menu strip · fullscreen chrome suppression · 44 routes preserved');
+console.log('R411.11 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · single-owner synchronous remount state · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · compact directly reachable master-menu strip · fullscreen chrome suppression · 44 routes preserved');
