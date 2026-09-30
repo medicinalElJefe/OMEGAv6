@@ -6,6 +6,7 @@ const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const navigation=read('src/navigationRegistry.ts');
 const loader=read('src/specialistLoaderR109.tsx');
 const loaderCss=read('src/specialistLoaderR109.css');
+const convergenceR416=read('src/OmegaConvergenceSurfaceR416.tsx');
 const vite=read('vite.config.ts');
 const accepted=read('src/acceptedProductionContractR95.ts');
 const pkg=read('package.json');
@@ -21,12 +22,17 @@ must(loader.includes("routeBoundary:'OMEGA_SURFACES + normalizePanel + go remain
 must(!loader.includes('setPanel(')&&!loader.includes('localState.write('),'loader registry may not mutate route or canonical browser state');
 
 // Heavy specialist modules are true dynamic imports rather than eager imports or arbitrary cross-import manual chunks.
-for(const module of ['HybridMissionControlR8','OmegaWorkspaceCockpitR18','ArchiveGovernanceControl','UniversalQualityControl','SystemAtlasControl','OmegaR36LivingSurfaces','RelativityLab','EarthObservatoryR8','ForecastSovereignPanel','AtlasViewport','AppliedRealityLab','AtlasCalculatorPanel','OmegaInfinityPanel','RecursiveScalePanel','WovenBuildOutPanel','SAISovereignControl','IntelligenceFabricPanel','ExtremeTraversalUnionR60','OmegaSpecialistSuite','PluginRegistryR45','SourceBackedModesPanelR21'])
+for(const module of ['HybridMissionControlR8','OmegaWorkspaceCockpitR18','ArchiveGovernanceControl','UniversalQualityControl','SystemAtlasControl','OmegaR36LivingSurfaces','RelativityLab','EarthObservatoryR8','ForecastSovereignPanel','AtlasViewport','AppliedRealityLab','AtlasCalculatorPanel','OmegaInfinityPanel','RecursiveScalePanel','WovenBuildOutPanel','SAISovereignControl','IntelligenceFabricPanel','ExtremeTraversalUnionR60','OmegaSpecialistSuite','OmegaConvergenceSurfaceR416','PluginRegistryR45','SourceBackedModesPanelR21'])
  must(loader.includes(`import('./${module}')`),'dynamic specialist loader missing '+module);
-for(const eager of ['EarthObservatoryR8','ForecastSovereignPanel','IntelligenceFabricPanel','SAISovereignControl','RelativityLab','AtlasCalculatorPanel','OmegaInfinityPanel','RecursiveScalePanel','AppliedRealityLab','WovenBuildOutPanel','OmegaR36LivingSurfaces','ExtremeTraversalUnionR60','OmegaSpecialistSuite','OmegaWorkspaceCockpitR18','HybridMissionControlR8','ArchiveGovernanceControl','UniversalQualityControl','SystemAtlasControl','PluginRegistryR45','SourceBackedModesPanelR21'])
+for(const eager of ['EarthObservatoryR8','ForecastSovereignPanel','IntelligenceFabricPanel','SAISovereignControl','RelativityLab','AtlasCalculatorPanel','OmegaInfinityPanel','RecursiveScalePanel','AppliedRealityLab','WovenBuildOutPanel','OmegaR36LivingSurfaces','ExtremeTraversalUnionR60','OmegaSpecialistSuite','OmegaConvergenceSurfaceR416','OmegaWorkspaceCockpitR18','HybridMissionControlR8','ArchiveGovernanceControl','UniversalQualityControl','SystemAtlasControl','PluginRegistryR45','SourceBackedModesPanelR21'])
  must(!new RegExp(`import\\s+(?:\\{[^}]*\\}|[^;]+)\\s+from\\s+['\"]\\./${eager}['\"]`).test(workstation),'heavy specialist remains eagerly imported: '+eager);
 must(workstation.includes("from './specialistLoaderR109'"),'workstation must consume one deferred module registry');
 must(loader.includes("OmegaVisualInstrument:()=>import('./OmegaVisualInstrument')")&&loader.includes("OmegaTraversalStudio:()=>import('./OmegaTraversalStudio')")&&loader.includes("MatterTraversal:()=>import('./MatterTraversal')"),'deep donor loaders must remain recoverable without eager-loading them');
+must(loader.includes("OmegaConvergenceSurfaceR416:()=>import('./OmegaConvergenceSurfaceR416')"),'R416 dedicated Convergence deferred chunk missing');
+must(loader.includes("Convergence:[LOADERS.OmegaConvergenceSurfaceR416]"),'Convergence must resolve through its dedicated loader instead of the shared specialist suite');
+must(!/const SUITE_ROUTES=new Set\(\[[^\]]*'Convergence'/.test(loader),'Convergence may not regress into the oversized shared suite loader');
+must(workstation.includes("panel==='Convergence')content=<ConvergenceR416"),'workstation must mount the dedicated Convergence deferred surface');
+must(convergenceR416.includes("R416_DEDICATED_CONVERGENCE_CHUNK")&&convergenceR416.includes('<OmegaUnifiedConvergenceR348')&&convergenceR416.includes('<OmegaProofBoundTemporalTraversalR355'),'dedicated Convergence chunk must preserve current convergence and proof-bound traversal content');
 
 // Suspense/fallback preserves current packet orientation and does not cover the visual stage.
 must(/import\s*\{[^}]*\bSuspense\b[^}]*\}\s*from\s*'react'/.test(workstation),'React Suspense authority missing');
