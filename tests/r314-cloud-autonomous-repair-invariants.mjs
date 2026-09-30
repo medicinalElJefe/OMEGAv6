@@ -39,8 +39,13 @@ assert.equal(objectPrepared.ok,true,'Workers AI JSON mode object responses must 
 assert.equal(prepared.ok,true);
 assert.equal(prepared.patches.length,1);
 assert.equal(prepared.patches[0].content,'export const value = 2;\n');
+const missingSha=structuredClone(proposal);missingSha.files[0].preimageSha='';
+const reboundMissingSha=prepareAiRepairR314({rawResponse:JSON.stringify(missingSha),residual:safeResidual,contextFiles});
+assert.equal(reboundMissingSha.ok,true,'missing model SHA must be rebound only from the exact fetched source context before unchanged R314 validation');
+assert.equal(reboundMissingSha.proposal.files[0].preimageSha,'blob123','authoritative SHA binding must come from exact context, never model inference');
 const wrongSha=structuredClone(proposal);wrongSha.files[0].preimageSha='wrong';
-assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(wrongSha),residual:safeResidual,contextFiles}).ok,false,'preimage drift must reject the patch');
+assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(wrongSha),residual:safeResidual,contextFiles}).ok,false,'non-empty preimage drift must still reject the patch');
+assert.ok(prepareAiRepairR314({rawResponse:JSON.stringify(wrongSha),residual:safeResidual,contextFiles}).reasons.includes('FILE_1_SHA_MISMATCH'),'R417 must not weaken exact-SHA mismatch rejection');
 const declined={...proposal,files:[]};
 assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(declined),residual:safeResidual,contextFiles}).state,'NO_SAFE_PATCH','model refusal must become no mutation');
 
@@ -154,6 +159,8 @@ assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/respon
 assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/return\{type:'json_object'\}/,'R415 must avoid unsupported XGrammar JSON-schema features');
 assert.doesNotMatch(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/type:'json_schema'/,'R415 must not reintroduce the rejected XGrammar schema boundary');
 assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/if\(result\?\.response!==undefined\)return result\.response/,'object-form Workers AI structured responses must be unwrapped before R314 validation');
+assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/bindMissingPreimageShaR417/,'R417 must normalize only immutable missing SHA metadata before semantic validation');
+assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/if\(current\|\|!context\)return file/,'R417 must preserve any non-empty model SHA so unchanged R314 can reject mismatches');
 assert.match(config,/@cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/,'CLOUD-01 config must match the structured-output R314 model');
 assert.doesNotMatch(machine,/wrangler\s+deploy|CLOUDFLARE_API_TOKEN/,'CLOUD-01 still may not deploy production directly');
 
