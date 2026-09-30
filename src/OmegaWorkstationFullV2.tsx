@@ -27,6 +27,7 @@ import {
 import './workstationV2.css';
 import './workstationPresentationR356.css';
 import './specialistLoaderR109.css';
+import './omegaNavigationShellR411.css';
 
 export const OMEGA_SURFACES=OMEGA_NAV_NAMES;
 type Panel=OmegaRouteName;
