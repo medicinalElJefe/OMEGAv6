@@ -48,7 +48,7 @@ const api=fs.readFileSync('src/swarm/swarmApiR121.js','utf8');
 const auto=fs.readFileSync('src/swarm/swarmAutonomicR125.js','utf8');
 const wrangler=fs.readFileSync('wrangler.jsonc','utf8');
 const ui=fs.readFileSync('src/OmegaAutonomicR125.tsx','utf8');
-const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8');
 assert.ok(worker.includes('OmegaSwarmAutonomicCoordinator'));
 assert.ok(wrangler.includes('OMEGA_SWARM_AUTONOMIC'));
 assert.ok(auto.includes("AUTONOMIC_REVISION='R125'"),'autonomic runtime provenance must remain R125 after Cloudflare lifecycle reconciliation');
@@ -61,5 +61,5 @@ assert.ok(auto.includes("this.env.OMEGA_SWARM_ORGANISM"),'rejoin must route thro
 assert.ok(auto.includes('allowFullAuto===true'),'full-auto must require explicit opt in');
 assert.ok(ui.includes('Route the body. Detach a limb. Rejoin with receipts.'));
 assert.ok(ui.includes('PREVIEW ROUTE')&&ui.includes('EXECUTE ROUTE')&&ui.includes('CHECKPOINT')&&ui.includes('REJOIN BODY'));
-assert.ok(suite.includes('OmegaAutonomicR125'));
+assert.ok(convergence.includes('OmegaAutonomicR125'));
 console.log('R125 autonomic swarm invariants PASS · R125 provenance preserved under declarative SQLite lifecycle exports');
