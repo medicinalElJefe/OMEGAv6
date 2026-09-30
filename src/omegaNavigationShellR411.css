@@ -93,7 +93,6 @@
  background:#061116!important;border-color:var(--r411-line)!important;
 }
 .r411-navigation-shell .r333-filter-stack{min-height:0!important;overflow:visible!important}
-.r411-navigation-shell[data-technical='false'] .r333-filter-row:first-child{display:none!important}
 .r411-navigation-shell .r105-workspace-filter{
  display:flex!important;flex-wrap:wrap!important;gap:5px!important;
  overflow:visible!important;padding:6px 10px 7px!important;white-space:normal!important;
