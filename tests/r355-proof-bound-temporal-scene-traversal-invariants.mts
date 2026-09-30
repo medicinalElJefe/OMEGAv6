@@ -12,9 +12,9 @@ assert.deepEqual(traversal.nodes.map(n=>n.relation),['HISTORY','HISTORY','NOW','
 assert.equal(traversal.nodes[0].previousLinkDigest,'R355-GENESIS');assert.match(traversal.traversalDigest,/^[0-9a-f]{64}$/);assert.equal(new Set(traversal.nodes.map(n=>n.linkDigest)).size,5);
 const selected=selectTemporalSceneR355(traversal,3);assert.equal(selected.scene.tick,3);assert.equal(selected.scene.relation,'FORECAST');assert.equal(selected.node.sceneDigest,selected.scene.sceneDigest);
 assert.equal(traversal.proof.canonicalMutation,false);assert.equal(traversal.proof.observedHistoryClaimed,false);assert.equal(traversal.proof.physicalTimeClaimed,false);assert.equal(traversal.proof.durableHistoryClaimed,false);
-const core=fs.readFileSync('src/system/proofBoundTemporalTraversalR355.ts','utf8'),surface=fs.readFileSync('src/OmegaProofBoundTemporalTraversalR355.tsx','utf8'),suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8'),pkg=fs.readFileSync('package.json','utf8'),doc=fs.readFileSync('R355_PROOF_BOUND_TEMPORAL_SCENE_TRAVERSAL.md','utf8');
+const core=fs.readFileSync('src/system/proofBoundTemporalTraversalR355.ts','utf8'),surface=fs.readFileSync('src/OmegaProofBoundTemporalTraversalR355.tsx','utf8'),convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8'),pkg=fs.readFileSync('package.json','utf8'),doc=fs.readFileSync('R355_PROOF_BOUND_TEMPORAL_SCENE_TRAVERSAL.md','utf8');
 for(const token of['R354','HISTORY','NOW','FORECAST','NO_NEW_PHYSICAL_PRIMITIVE','traversalDigest'])assert.ok(core.includes(token),`R355 core missing ${token}`);
-for(const token of['OmegaProofBoundTemporalTraversalR355','R355 model-time address'])assert.ok((surface+suite).includes(token),`R355 integration missing ${token}`);
+for(const token of['OmegaProofBoundTemporalTraversalR355','R355 model-time address'])assert.ok((surface+convergence).includes(token),`R355 integration missing ${token}`);
 assert.ok(pkg.includes('"test:r355"'));assert.ok(pkg.includes('npm run test:r354 && npm run test:r355'));
 for(const forbidden of['canonicalMutation:true','observedHistoryClaimed:true','physicalTimeClaimed:true','durableHistoryClaimed:true'])assert.ok(!(core+surface+doc).includes(forbidden),`R355 forbidden claim ${forbidden}`);
 assert.ok(R355_BOUNDARY.includes('R125')&&R355_BOUNDARY.includes('R141')&&R355_BOUNDARY.includes('ci.yml'));
