@@ -34,6 +34,18 @@ assert.equal(classifyRepairTargetR314({...safeResidual,affected:['src/generated/
 const contextFiles=[{path:'src/components/Example.jsx',sha:'blob123',text:'export const value = 1;\n'}];
 const proposal={schema:R314_AUTONOMOUS_REPAIR_SCHEMA,residualId:'R314-TEST-SAFE',files:[{path:'src/components/Example.jsx',preimageSha:'blob123',replacements:[{before:'export const value = 1;',after:'export const value = 2;'}]}],canonicalAdmission:false,directProductionMutation:false,expectedProofs:['R241 Archive Convergence Visual Intelligence']};
 const prepared=prepareAiRepairR314({rawResponse:JSON.stringify(proposal),residual:safeResidual,contextFiles});
+const objectPrepared=prepareAiRepairR314({rawResponse:proposal,residual:safeResidual,contextFiles});
+assert.equal(objectPrepared.ok,true,'Workers AI JSON mode object responses must enter R314 directly without wrapper corruption');
+const format=repairResponseFormatR314({residual:{...safeResidual,expectedProofs:['R241 Archive Convergence Visual Intelligence']},contextFiles});
+assert.equal(format.type,'json_schema');
+assert.equal(format.json_schema.properties.schema.enum[0],R314_AUTONOMOUS_REPAIR_SCHEMA);
+assert.equal(format.json_schema.properties.residualId.enum[0],safeResidual.id);
+assert.equal(format.json_schema.properties.files.items.properties.path.enum[0],'src/components/Example.jsx');
+assert.equal(format.json_schema.properties.files.items.properties.preimageSha.enum[0],'blob123');
+assert.deepEqual(format.json_schema.properties.canonicalAdmission.enum,[false]);
+assert.deepEqual(format.json_schema.properties.directProductionMutation.enum,[false]);
+assert.deepEqual(format.json_schema.properties.expectedProofs.items.enum,['R241 Archive Convergence Visual Intelligence']);
+assert.equal(R314_AI_REPAIR_MODEL_DEFAULT,'@cf/meta/llama-3.3-70b-instruct-fp8-fast','CLOUD-01 must use a Workers AI JSON-mode-supported model');
 assert.equal(prepared.ok,true);
 assert.equal(prepared.patches.length,1);
 assert.equal(prepared.patches[0].content,'export const value = 2;\n');
@@ -76,7 +88,9 @@ const retryPrompts=[];
 const rejectedOnce=structuredClone(proposal);rejectedOnce.files[0].preimageSha='wrong';
 const ai={
  calls:0,
+ requests:[],
  async run(_model,input){
+  this.requests.push(input);
   this.calls++;
   retryPrompts.push(input.messages.at(-1).content);
   return{response:JSON.stringify(this.calls===1?rejectedOnce:proposal)};
@@ -87,6 +101,10 @@ assert.equal(retried.ok,true,'a validator-rejected proposal may be reformulated 
 assert.equal(retried.reformulated,true);
 assert.equal(retried.attempts.length,2);
 assert.equal(retried.rejectionHistory.length,1);
+assert.equal(ai.requests.length,2);
+assert.equal(ai.requests[0].response_format.type,'json_schema','every Workers AI attempt must request structured JSON');
+assert.equal(ai.requests[1].response_format.type,'json_schema','validator-informed correction must remain schema-constrained');
+assert.equal(ai.requests[0].seed,314,'structured proposal generation must stay reproducible within the bounded model path');
 assert.ok(retried.rejectionHistory[0].reasons.includes('FILE_1_SHA_MISMATCH'),'exact validator rejection code must survive into the scar ledger');
 assert.ok(retryPrompts[1].includes('FILE_1_SHA_MISMATCH'),'the next model attempt must receive the exact rejection evidence');
 assert.ok(retryPrompts[1].includes('Copy the supplied exact source SHA for that file without modification.'),'validator code must carry deterministic correction guidance');
@@ -123,6 +141,9 @@ assert.match(machine,/R241 Archive Convergence Visual Intelligence/,'AI candidat
 assert.match(worker,/env\.AI\|\|null/,'Workers AI binding must be passed explicitly and remain optional/fail-closed');
 assert.match(config,/"ai"\s*:\s*\{\s*"binding"\s*:\s*"AI"/s);
 assert.match(config,/OMEGA_WORKERS_AI_MODEL/);
+assert.match(config,/@cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/,'CLOUD-01 config must bind the documented JSON-mode model');
+assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/response_format:repairResponseFormatR314/,'Workers AI call must use the exact dynamic R314 JSON schema');
+assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/if\(result\?\.response!==undefined\)return result\.response/,'object-form Workers AI structured responses must be unwrapped before R314 validation');
 assert.match(config,/@cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/,'CLOUD-01 config must match the structured-output R314 model');
 assert.doesNotMatch(machine,/wrangler\s+deploy|CLOUDFLARE_API_TOKEN/,'CLOUD-01 still may not deploy production directly');
 
