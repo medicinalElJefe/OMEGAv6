@@ -48,13 +48,14 @@ assert.equal(R314_AI_REPAIR_MODEL_DEFAULT,'@cf/meta/llama-3.3-70b-instruct-fp8-f
 const structuredResidual={...safeResidual,expectedProofs:['R241 Archive Convergence Visual Intelligence','OMEGA Cloud Bridge CI']};
 const responseFormat=repairResponseFormatR314({residual:structuredResidual,contextFiles});
 assert.equal(responseFormat.type,'json_schema');
-assert.equal(responseFormat.json_schema.properties.schema.enum[0],R314_AUTONOMOUS_REPAIR_SCHEMA);
-assert.equal(responseFormat.json_schema.properties.residualId.enum[0],safeResidual.id);
-assert.equal(responseFormat.json_schema.properties.files.maxItems,1);
-assert.equal(responseFormat.json_schema.properties.files.items.properties.path.enum[0],contextFiles[0].path);
-assert.equal(responseFormat.json_schema.properties.files.items.properties.preimageSha.enum[0],contextFiles[0].sha);
-assert.deepEqual(responseFormat.json_schema.properties.canonicalAdmission.enum,[false]);
-assert.ok(responseFormat.json_schema.properties.expectedProofs.items.enum.includes('OMEGA Cloud Bridge CI'));
+assert.equal(responseFormat.json_schema.type,'object');
+assert.deepEqual(responseFormat.json_schema.required,['schema','residualId','files','canonicalAdmission','directProductionMutation','expectedProofs']);
+assert.equal(responseFormat.json_schema.properties.files.type,'array');
+assert.equal(responseFormat.json_schema.properties.files.items.properties.replacements.type,'array');
+assert.deepEqual(responseFormat.json_schema.properties.files.items.properties.replacements.items.required,['before','after']);
+const grammarText=JSON.stringify(responseFormat.json_schema);
+for(const unsupported of ['"enum"','"additionalProperties"','"minItems"','"maxItems"','"uniqueItems"','"minLength"','"oneOf"','"anyOf"','"$ref"'])assert.ok(!grammarText.includes(unsupported),`R415 generation grammar must not use xgrammar-incompatible keyword ${unsupported}`);
+
 
 const duplicateProposal={...proposal,files:[proposal.files[0],structuredClone(proposal.files[0])]};
 const duplicatePrepared=prepareAiRepairR314({rawResponse:duplicateProposal,residual:safeResidual,contextFiles});
@@ -139,9 +140,9 @@ assert.match(worker,/env\.AI\|\|null/,'Workers AI binding must be passed explici
 assert.match(config,/"ai"\s*:\s*\{\s*"binding"\s*:\s*"AI"/s);
 assert.match(config,/OMEGA_WORKERS_AI_MODEL/);
 assert.match(config,/@cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/,'CLOUD-01 config must bind the documented JSON-mode model');
-assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/response_format:repairResponseFormatR314/,'Workers AI call must use the exact dynamic R314 JSON schema');
+assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/response_format:repairResponseFormatR314/,'Workers AI call must use the R415 xgrammar-compatible structural JSON schema');
 assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/if\(result\?\.response!==undefined\)return result\.response/,'object-form Workers AI structured responses must be unwrapped before R314 validation');
 assert.match(config,/@cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/,'CLOUD-01 config must match the structured-output R314 model');
 assert.doesNotMatch(machine,/wrangler\s+deploy|CLOUDFLARE_API_TOKEN/,'CLOUD-01 still may not deploy production directly');
 
-console.log('R314 CLOUD AUTONOMOUS REPAIR PASS · R164/R125 residual adapter · bounded target registry · exact-SHA source envelope · Workers AI proposal · structured Workers AI JSON schema · object-response unwrap · exact validator feedback · bounded reformulation scar ledger · R314 policy validation · branch-only mutation · inherited R241 promotion gate');
+console.log('R314 CLOUD AUTONOMOUS REPAIR PASS · R164/R125 residual adapter · bounded target registry · exact-SHA source envelope · Workers AI proposal · xgrammar-compatible Workers AI structural JSON schema · unchanged semantic R314 validation · object-response unwrap · exact validator feedback · bounded reformulation scar ledger · R314 policy validation · branch-only mutation · inherited R241 promotion gate');
