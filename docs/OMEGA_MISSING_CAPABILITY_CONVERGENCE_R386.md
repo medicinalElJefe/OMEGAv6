@@ -49,11 +49,11 @@ This matrix is a recovery/convergence authority for capabilities already request
 - [ ] Native packaging/launcher and local renderer path converge with cloud continuity rather than forming a separate product.
 
 ## G. Autonomous self-building / self-improvement
-- [ ] CLOUD-01 first-hand provisioning/deployment receipt.
+- [x] CLOUD-01 first-hand provisioning/deployment receipt.
 - [ ] Deployed Worker identity/version proven.
 - [ ] Hourly cron observed executing after provisioning.
 - [ ] GitHub mutation credential proven by a real inspect/propose/repair cycle without secret exposure.
-- [ ] One-candidate fence, exact-base lineage, exact-head proof and governed promotion remain intact.
+- [x] One-candidate fence, exact-base lineage, exact-head proof and governed promotion remain intact.
 - [ ] Autonomous changes prioritize measurable capability/UX/performance/reliability gain; reject status churn and test-only advancement.
 - [ ] Autonomous repair is able to diagnose and correct bounded failures while preserving source/evidence/CanonState authority.
 
@@ -69,7 +69,7 @@ This matrix is a recovery/convergence authority for capabilities already request
 - [ ] State + Intelligence + Memory + Relation + Computation + Action + Observation + Proof remain one canonical packet/runtime topology.
 - [ ] History/scar ledger and contradictions persist across repair/promotion rather than being erased by replacement states.
 - [ ] Multiple admissible futures and forecast branches remain distinguishable from observations and from Canon admission.
-- [ ] 12→144→1728→20,736→248,832 and higher atlas levels remain representational/address resolutions, never silently promoted to physical dimensions.
+- [x] 12→144→1728→20,736→248,832 and higher atlas levels remain representational/address resolutions, never silently promoted to physical dimensions.
 
 ## J. Heavy domain work still requiring convergence
 - [ ] Heavy Bio ingestion / measurement and the 241-channel analytical fabric are integrated and live-usable.
@@ -177,7 +177,7 @@ A checked source item is not automatically a completed product item. Completion 
 - [ ] Proposal → simulation → verification → authorization → execution → returned proof remains explicit across cloud, PC and autonomous self-build.
 - [ ] Reversible and irreversible actions are classified before dispatch.
 - [ ] Postconditions are measured from returned state rather than assumed from command submission.
-- [ ] Autonomous development cannot expand its own authority, permissions, deployment scope or Canon admission rules.
+- [x] Autonomous development cannot expand its own authority, permissions, deployment scope or Canon admission rules.
 - [ ] Multiple candidate repairs may be explored in isolation, but only one proven successor may enter the promotion path.
 
 ## V. Application-generation / creation capabilities
@@ -210,3 +210,6 @@ A checked source item is not automatically a completed product item. Completion 
 - [ ] Any capability present in a stronger historical build but absent from current runtime becomes an explicit convergence item with donor source, proof requirement and current owner.
 - [ ] No capability is considered intentionally retired without a documented supersession reason and proof that the successor is functionally stronger.
 - [ ] Missing historical behavior must not be hidden merely because a newer menu or route exists.
+
+## R417 reconciliation notes
+R417 treats row position within each A–Y section as stable identity whether a checkbox is open or checked. Completion no longer renumbers later R388 items. The additional closures above are limited to claims already supported by current proof/source boundaries: CLOUD-01 provisioning/deployment evidence; the R245/R223 one-open-candidate + exact-base/exact-head promotion fence; the R265/R266 non-physical address-resolution invariant; and the R314/R245 prohibition on autonomous authority expansion. Rows requiring a live semantic repair, external provider/device evidence, or broader end-to-end product behavior remain open.

@@ -63,15 +63,17 @@ export function parseConvergenceBacklogR388(markdown=''){
  for(const raw of String(markdown||'').split(/\r?\n/)){
   const heading=raw.match(/^##\s+([A-Y])\.\s+(.+)$/);
   if(heading){section=heading[1];index=0;continue}
-  const item=raw.match(/^- \[ \]\s+(.+)$/);
+  const item=raw.match(/^- \[([ xX])\]\s+(.+)$/);
   if(!item||!section)continue;
   index++;
-  const objective=clean(item[1]);
+  const completed=String(item[1]).toLowerCase()==='x';
+  const objective=clean(item[2]);
   const affected=[...(TARGETS[section]||[])];
   rows.push(Object.freeze({
    id:`R388-${section}-${String(index).padStart(2,'0')}`,
    section,
    index,
+   completed,
    objective,
    affected,
    expectedProofs:[...(PROOFS[section]||['OMEGA Cloud Bridge CI'])],
@@ -86,16 +88,18 @@ export function parseConvergenceBacklogR388(markdown=''){
 export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[]}={}){
  const advanced=new Set(Array.isArray(advancedItemIds)?advancedItemIds:[]);
  const items=parseConvergenceBacklogR388(markdown);
- const selected=items.find(x=>x.selfEditable&&!advanced.has(x.id))||null;
- const held=items.filter(x=>!x.selfEditable&&!advanced.has(x.id)).map(x=>x.id);
+ const unresolved=items.filter(x=>!x.completed&&!advanced.has(x.id));
+ const selected=unresolved.find(x=>x.selfEditable)||null;
+ const held=unresolved.filter(x=>!x.selfEditable).map(x=>x.id);
  return Object.freeze({
   schema:R388_CONVERGENCE_BACKLOG_SCHEMA,
   total:items.length,
+  completed:items.filter(x=>x.completed).length,
   advanced:items.filter(x=>advanced.has(x.id)).length,
-  remaining:items.filter(x=>!advanced.has(x.id)).length,
+  remaining:unresolved.length,
   heldGovernance:held,
   selected,
   canonicalAdmission:false,
-  boundary:'R388 converts the explicit convergence matrix into deterministic source-improvement work. It may advance allowlisted product source only; governance/self-build authority items remain non-self-editable and external/device claims remain pending first-hand proof.',
+  boundary:'R388 assigns stable absolute row identities before completion filtering. Checked rows remain addressable history, advanced rows remain scar/receipt history, governance/self-build authority rows remain non-self-editable, and external/device claims remain pending first-hand proof.',
  });
 }
