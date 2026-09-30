@@ -8,6 +8,7 @@ const css=read('src/omegaNavigationShellR411.css');
 const workstation=read('src/OmegaWorkstationFullV2.tsx');
 const home=read('src/OmegaHomeR71.tsx');
 const registry=read('src/navigationRegistry.ts');
+const rootCss=read('src/index.css');
 
 const surfaceBlock=registry.slice(registry.indexOf('export const OMEGA_NAVIGATION=['),registry.indexOf('export const OMEGA_NAV_GROUPS'));
 const routes=[...surfaceBlock.matchAll(/name:'([^']+)'/g)].map(x=>x[1]);
@@ -51,5 +52,9 @@ assert.ok(css.includes("html:has(.earth-r372-stage-expanded) .r411-navigation-sh
 assert.ok(css.includes('z-index:2147483647!important;pointer-events:auto!important'),'fullscreen Earth exit control must retain top interaction authority');
 assert.ok(css.includes("@media(min-width:901px)")&&css.includes('margin-left:calc(var(--r411-rail) + var(--r411-panel))!important'),'desktop expanded navigation must reserve a real layout column');
 assert.ok(css.includes('.r89-flat-scroll')&&css.includes('flex:1 1 auto!important')&&css.includes('overflow:auto!important'),'R411 route list must be the single flexible scroll owner');
+assert.ok(rootCss.includes('R411.12: legacy studio structural layout is explicitly scoped to .studio'),'R411 legacy studio containment receipt missing');
+for(const token of ['.studio>aside{grid-row:3;grid-column:1;','.studio>main{grid-row:3;grid-column:2;','.studio>footer{grid-column:1/-1;','.studio>main{grid-row:4;grid-column:1;','.studio>footer{grid-row:5;'])
+ assert.ok(rootCss.includes(token),`R411 legacy studio structural selector must remain scoped: ${token}`);
+assert.ok(!/(^|[}\s])aside\{/.test(rootCss)&&!/(^|[}\s])main\{/.test(rootCss)&&!/(^|[}\s])footer\{/.test(rootCss),'legacy studio structural element selectors must not leak grid/sticky ownership into current OMEGA');
 
-console.log('R411.11 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · single-owner synchronous remount state · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · compact directly reachable master-menu strip · fullscreen chrome suppression · 44 routes preserved');
+console.log('R411.12 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · single-owner synchronous remount state · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · compact directly reachable master-menu strip · fullscreen chrome suppression · 44 routes preserved');
