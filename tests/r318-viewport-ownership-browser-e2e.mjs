@@ -44,6 +44,10 @@ try{
   }else{
    if(Math.abs(expandedShell.left-collapsedShell.left)>3||Math.abs(expandedShell.width-collapsedShell.width)>3)fail(name,'mobile navigator changed underlying shell geometry instead of using its bounded drawer contract',{collapsedShell,expandedShell});
    if(expandedPanel.left<railRect.right-3||expandedPanel.right>viewport.width+2)fail(name,'mobile navigator drawer escapes its bounded viewport region',{expandedPanel,railRect,viewport});
+   if(expandedPanel.width<viewport.width-railRect.width-5)fail(name,'R411 mobile navigation does not own the full viewport remainder',{expandedPanel,railRect,viewport});
+   const panelStyle=await panel.evaluate(el=>{const s=getComputedStyle(el);return{backgroundColor:s.backgroundColor,opacity:Number(s.opacity),pointerEvents:s.pointerEvents}});
+   const alpha=Number((panelStyle.backgroundColor.match(/rgba?\([^)]*?(?:,\s*([\d.]+))?\)$/)||[])[1]||1);
+   if(panelStyle.opacity<.99||alpha<.99||panelStyle.pointerEvents==='none')fail(name,'R411 mobile navigation is translucent or non-interactive instead of an opaque owned sheet',{panelStyle});
   }
   await page.keyboard.press('Escape');
   await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='false',{timeout:10000});
@@ -65,5 +69,5 @@ try{
   if(pageErrors.length)fail(name,'page errors occurred',pageErrors.slice(0,8));
   await context.close();
  }
- console.log('R318/R317.1 VIEWPORT OWNERSHIP BROWSER PASS · desktop/mobile R257 authority retained headlessly · R71/R82/R88 remains sole visible navigation · diagnostics default closed and normal-flow only · desktop expanded navigator reserves space · mobile drawer preserves bounded shell · no duplicate R257 chrome · reload stable · no page errors');
+ console.log('R318/R411 VIEWPORT OWNERSHIP BROWSER PASS · desktop/mobile R257 authority retained headlessly · R71/R82/R88/R411 remains sole visible navigation · desktop expanded navigator reserves space · mobile menu owns one opaque full-remainder sheet without changing underlying geometry · reload stable · no page errors');
 }finally{await browser.close()}
