@@ -25,12 +25,28 @@ export function repairResponseFormatR314(){
  return{type:'json_object'};
 }
 
+function bindMissingPreimageShaR417(proposal,{contextFiles=[]}={}){
+ if(!proposal||!Array.isArray(proposal.files)||proposal.files.length===0)return proposal;
+ const supplied=new Map((contextFiles||[]).map(file=>[String(file?.path||'').trim().replace(/\\/g,'/').replace(/^\.\//,''),file]));
+ return{
+  ...proposal,
+  files:proposal.files.map(file=>{
+   const path=String(file?.path||'').trim().replace(/\\/g,'/').replace(/^\.\//,'');
+   const current=String(file?.preimageSha||'').trim();
+   const context=supplied.get(path);
+   if(current||!context)return file;
+   return{...file,preimageSha:String(context.sha||'')};
+  }),
+ };
+}
+
 export function prepareAiRepairR314({rawResponse,residual,contextFiles=[]}={}){
  let proposal;
  try{proposal=parseAiJsonR314(rawResponse)}
  catch(error){
   return{ok:false,state:'MALFORMED_AI_RESPONSE',proposal:null,reasons:[`AI_RESPONSE_PARSE_ERROR:${error instanceof Error?error.message:String(error)}`],patches:[]};
  }
+ proposal=bindMissingPreimageShaR417(proposal,{contextFiles});
  if(Array.isArray(proposal?.files)&&proposal.files.length===0){
   return{ok:false,state:'NO_SAFE_PATCH',proposal,reasons:['MODEL_DECLINED_BOUNDED_PATCH'],patches:[]};
  }
