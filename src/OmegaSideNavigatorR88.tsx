@@ -1,4 +1,4 @@
-import {Fragment,useEffect,useMemo,useRef,useState} from 'react';
+import {Fragment,useEffect,useId,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {ChevronLeft,ChevronRight,Command,Earth,Home,Layers3,Link2,Menu,Search,ShieldCheck} from 'lucide-react';
 import {CAPABILITY_REALITY_LABEL} from './capabilityAuthority';
 import {effectiveCapabilityReality} from './operationalCapabilityRuntimeR45';
@@ -40,6 +40,7 @@ const TIER_COPY={PRIMARY:'Start here',SUPPORT:'Common supporting tools',EXPERT:'
 export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome}:Props){
  const[expanded,setExpanded]=useState(false),[railWide,setRailWide]=useState(storedRailWide),[layer,setLayer]=useState<BrowserLayer>('EVERYWHERE'),[query,setQuery]=useState(''),[workspaceFilter,setWorkspaceFilter]=useState<WorkspaceFilter>('ALL'),[masterMenu,setMasterMenu]=useState<MasterMenuFilterR289>('ALL'),[showTechnical,setShowTechnical]=useState(false),[navigationScar,setNavigationScar]=useState('');
  const shellRef=useRef<HTMLElement|null>(null),searchRef=useRef<HTMLInputElement|null>(null);
+ const navOwnerId=useId();
  const operationAudit=useMemo(()=>auditAuthoritativeOperationChainR143(),[]);
  const routeRecords=useMemo(()=>OMEGA_ALL_ROUTES_R82.map((route,index)=>{const workspace=workspaceForRouteR82(route),org=organizationForRouteR132(route),chain=operationContractForRouteR143(route);return{name:route,index,workspaceId:workspace.id,workspaceLabel:workspace.label,workspaceCopy:workspace.copy,tier:org.tier,surfaceClass:org.surfaceClass,layout:org.layout,searchable:`${chain.routeId} ${chain.capabilityId} ${chain.executionDomain} ${chain.state}`}}),[]);
  useEffect(()=>{
@@ -49,7 +50,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
   return()=>{window.removeEventListener('omega-r88-open-navigator',openNavigator as EventListener);window.removeEventListener('omega-r356-route-committed',routeCommitted as EventListener);window.removeEventListener('keydown',key)};
  },[]);
  useEffect(()=>{if(!expanded)return;const id=requestAnimationFrame(()=>searchRef.current?.focus({preventScroll:true}));const outside=(e:PointerEvent)=>{const target=e.target as Node|null;if(target&&!shellRef.current?.contains(target))setExpanded(false)};document.addEventListener('pointerdown',outside);return()=>{cancelAnimationFrame(id);document.removeEventListener('pointerdown',outside)}},[expanded,layer]);
- useEffect(()=>{document.documentElement.dataset.omegaNavPresent='true';document.documentElement.dataset.omegaNavExpanded=expanded?'true':'false';return()=>{delete document.documentElement.dataset.omegaNavPresent;delete document.documentElement.dataset.omegaNavExpanded}},[expanded]);
+ useLayoutEffect(()=>{const root=document.documentElement;root.dataset.omegaNavOwner=navOwnerId;root.dataset.omegaNavPresent='true';root.dataset.omegaNavExpanded=expanded?'true':'false';return()=>{if(root.dataset.omegaNavOwner!==navOwnerId)return;delete root.dataset.omegaNavOwner;delete root.dataset.omegaNavPresent;delete root.dataset.omegaNavExpanded}},[expanded,navOwnerId]);
  useEffect(()=>{document.documentElement.dataset.omegaNavWide=railWide?'true':'false';try{localStorage.setItem('omega.r120.navWide',String(railWide))}catch{}return()=>{delete document.documentElement.dataset.omegaNavWide}},[railWide]);
  const activeWorkspace=workspaceFilter==='ALL'?null:OMEGA_WORKSPACES_R82.find(w=>w.id===workspaceFilter)||null;
  const activeMasterMenu=masterMenu==='ALL'?null:OMEGA_MASTER_MENU_NAVIGATION_R289.find(m=>m.id===masterMenu)||null;
