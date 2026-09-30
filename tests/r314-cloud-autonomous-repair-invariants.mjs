@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import {buildCloudResidualStateR314,R314_CLOUD_RESIDUAL_ADAPTER_SCHEMA} from '../cloudflare/lib/r314-residual-adapter.mjs';
 import {classifyRepairTargetR314,selectRepairTargetR314,R314_CLOUD_TARGET_REGISTRY_SCHEMA} from '../cloudflare/lib/r314-target-registry.mjs';
 import {prepareAiRepairR314,proposeAiRepairR314,R314_CLOUD_AI_REPAIR_SCHEMA} from '../cloudflare/lib/r314-ai-repair.mjs';
-import {R314_AUTONOMOUS_REPAIR_SCHEMA,R314_AI_MAX_ATTEMPTS,repairPathPolicyR314} from '../src/system/autonomousRepairPolicyR314.js';
+import {R314_AUTONOMOUS_REPAIR_SCHEMA,R314_AI_MAX_ATTEMPTS,R314_AI_MAX_OUTPUT_TOKENS,repairPathPolicyR314} from '../src/system/autonomousRepairPolicyR314.js';
 
 assert.equal(R314_CLOUD_RESIDUAL_ADAPTER_SCHEMA,'OMEGA_CLOUD_R314_RESIDUAL_ADAPTER');
 assert.equal(R314_CLOUD_TARGET_REGISTRY_SCHEMA,'OMEGA_CLOUD_R314_TARGET_REGISTRY');
@@ -42,7 +42,8 @@ assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(wrongSha),residual:
 const declined={...proposal,files:[]};
 assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(declined),residual:safeResidual,contextFiles}).state,'NO_SAFE_PATCH','model refusal must become no mutation');
 
-assert.equal(R314_AI_MAX_ATTEMPTS,3,'validator-driven reformulation budget must remain hard bounded');
+assert.equal(R314_AI_MAX_ATTEMPTS,2,'validator-driven reformulation budget must remain one initial proposal plus one correction');
+assert.equal(R314_AI_MAX_OUTPUT_TOKENS,3500,'bounded repair output must remain compact enough for operational autonomous cycles');
 const retryPrompts=[];
 const rejectedOnce=structuredClone(proposal);rejectedOnce.files[0].preimageSha='wrong';
 const ai={
