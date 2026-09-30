@@ -90,7 +90,7 @@ export function prepareAiRepairR314({rawResponse,residual,contextFiles=[]}={}){
  return{ok:true,state:'VALIDATED_BOUNDED_PATCH',proposal,validation,patches};
 }
 
-const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE';
+const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR';
 const attemptReceipt=(attempt,prepared)=>({
  attempt,
  state:prepared.state,
@@ -113,11 +113,16 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
   const prompt=attempt===1
    ?autonomousRepairPromptR314({residual,stage,contextFiles})
    :autonomousRepairCorrectionPromptR314({residual,stage,contextFiles,rejection,attempt});
-  const result=await ai.run(model,{messages:[
-   {role:'system',content:'Return only the bounded JSON repair object requested by the user prompt. Do not use markdown.'},
-   {role:'user',content:prompt},
-  ],response_format:repairResponseFormatR314({residual,contextFiles}),temperature:attempt===1?0.1:0,max_tokens:R314_AI_MAX_OUTPUT_TOKENS,seed:314});
-  const prepared=prepareAiRepairR314({rawResponse:responsePayload(result),residual,contextFiles});
+  let prepared;
+  try{
+   const result=await ai.run(model,{messages:[
+    {role:'system',content:'Return only the bounded JSON repair object requested by the user prompt. Do not use markdown.'},
+    {role:'user',content:prompt},
+   ],response_format:repairResponseFormatR314({residual,contextFiles}),temperature:attempt===1?0.1:0,max_tokens:R314_AI_MAX_OUTPUT_TOKENS,seed:314});
+   prepared=prepareAiRepairR314({rawResponse:responsePayload(result),residual,contextFiles});
+  }catch(error){
+   prepared={ok:false,state:'AI_GENERATION_ERROR',proposal:null,reasons:[`AI_RUN_ERROR:${error instanceof Error?error.message:String(error)}`],patches:[]};
+  }
   const receipt=attemptReceipt(attempt,prepared);
   attempts.push(receipt);
   if(prepared.ok)return{model,promptSchema:'R314',reformulated:attempt>1,rejectionHistory:attempts.slice(0,-1),attempts,...prepared};
