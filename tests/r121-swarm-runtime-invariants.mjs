@@ -30,7 +30,7 @@ const cell=fs.readFileSync(path.join(root,'src/swarm/swarmCellR121.js'),'utf8');
 const coordinator=fs.readFileSync(path.join(root,'src/swarm/swarmCoordinatorR121.js'),'utf8');
 const wrangler=fs.readFileSync(path.join(root,'wrangler.jsonc'),'utf8');
 const ui=fs.readFileSync(path.join(root,'src/OmegaSwarmR121.tsx'),'utf8');
-const suite=fs.readFileSync(path.join(root,'src/OmegaSpecialistSuite.tsx'),'utf8');
+const convergence=fs.readFileSync(path.join(root,'src/OmegaConvergenceSurfaceR416.tsx'),'utf8');
 assert.match(worker,/swarmApiR121/);
 assert.match(worker,/OmegaSwarmCell/);
 assert.match(worker,/OmegaSwarmCoordinator/);
@@ -49,6 +49,6 @@ assert.ok(wrangler.includes('"OmegaSwarmCoordinator": {"type": "durable-object",
 assert.match(ui,/1,728/);
 assert.match(ui,/20,736/);
 assert.match(ui,/CAPACITY GOVERNOR/);
-assert.match(suite,/OmegaSwarmR121/);
-assert.match(suite,/Retained continuity \/ convergence field instrument/);
+assert.match(convergence,/OmegaSwarmR121/);
+assert.match(convergence,/OmegaFieldMotionConvergenceR28/);
 console.log('R121 swarm runtime invariants PASS · R121 provenance preserved · SQLite declarative exports live');
