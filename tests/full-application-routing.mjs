@@ -3,6 +3,7 @@ const v2=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
 const navigation=fs.readFileSync('src/navigationRegistry.ts','utf8');
 const deferred=fs.existsSync('src/specialistLoaderR109.tsx')?fs.readFileSync('src/specialistLoaderR109.tsx','utf8'):'';
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8');
 const utility=fs.readFileSync('src/OmegaUtilityAuthorityR26.tsx','utf8');
 const authority=fs.readFileSync('src/capabilityAuthority.ts','utf8');
 const bridge=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
@@ -15,7 +16,8 @@ for(const file of ['OmegaVisualInstrument','OmegaTraversalStudio','OmegaSpeciali
 must(suite.includes('OmegaFieldMotionConvergenceR28')&&suite.includes('OmegaEvidenceMemoryR28')&&suite.includes('OmegaUtilityAuthorityR26')&&suite.includes('OmegaSystemConsolidationR30'),'specialist suite must preserve R28/R29 utility lineage and promote R30 system/consolidation specialists');
 for(const panel of ['Hybrid Link','Archive Census','Archive Operators','Quality Compiler','Validation','System Atlas','Control Matrix','Cockpit','Workspace'])must(v2.includes(`case '${panel}'`)||v2.includes(`panel==='${panel}'`),`missing dedicated operational route ${panel}`);
 for(const panel of ['Governance','Canon Evolution','Projects','Render Queue','Assets'])must(utility.includes(`case '${panel}'`),`missing retained R26 utility authority route ${panel}`);
-for(const panel of ['Field','Data Motion','Convergence','Evidence & Proof','Memory','Instructions','Settings','System','Consolidation'])must(suite.includes(panel),`restored specialist route missing ${panel}`);
+for(const panel of ['Field','Data Motion','Evidence & Proof','Memory','Instructions','Settings','System','Consolidation'])must(suite.includes(panel),`restored specialist route missing ${panel}`);
+must(convergence.includes("R416_DEDICATED_CONVERGENCE_CHUNK")&&deferred.includes("Convergence:[LOADERS.OmegaConvergenceSurfaceR416]"),'dedicated Convergence route/deferred binding missing');
 for(const token of ["'Immersive Traversal':'SOURCE_ACTIVE'","'Extreme Traversal':'SOURCE_ACTIVE'","'Build Out':'LOCAL_ACTIVE'","'Plugins':'LOCAL_ACTIVE'","'Consolidation':'LOCAL_ACTIVE'"])must(authority.includes(token),`R168 current route truth missing ${token}`);
 must(authority.includes('CAPABILITY_PREDECESSOR_REALITY_R23')&&authority.includes("'Plugins':'DONOR_ONLY'"),'Plugin donor lineage must remain predecessor evidence rather than current routing truth');
 must(authority.includes("name:'Consolidation',family:'Recovery / Packaging',implementation:'SPECIALIST'"),'Consolidation specialist authority missing');
