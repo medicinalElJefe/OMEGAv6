@@ -9,7 +9,6 @@ import {organizationForRouteR132} from './experienceOrganizationR132';
 import {compileNavigationLemmaR242,resolveExactRouteR242,R242_NAVIGATION_LEMMA_REVISION} from './navigationLemmaCalculusR242.js';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import RouteOutputRibbonR111 from './RouteOutputRibbonR111';
-import './omegaSideNavigatorR88.css';
 import './omegaSideNavigatorR100.css';
 import './extremeLayerIntegrityR104.css';
 import './dataTruthNavigationR105.css';
@@ -19,6 +18,9 @@ import './omegaSideNavigatorR210.css';
 import './omegaSideNavigatorR239.css';
 import './omegaSideNavigatorR289.css';
 import './omegaSideNavigatorR333.css';
+/* R411 is the final geometry/presentation owner. Earlier files remain active for
+   retained component vocabulary and provenance, but may not own viewport geometry. */
+import './omegaSideNavigatorR88.css';
 
 type BrowserLayer='EVERYWHERE'|'SOFTWARE';
 type WorkspaceFilter='ALL'|OmegaWorkspaceIdR82;
@@ -30,6 +32,7 @@ export const R210_NAV_REVISION='R210';
 export const R239_USER_NAV_REVISION='R239';
 export const R289_MASTER_MENU_PRESENTATION_REVISION='R289';
 export const R333_NAVIGATION_CLEANUP_REVISION='R333';
+export const R411_NAVIGATION_SHELL_REVISION='R411';
 const routeMark=(name:string)=>{const words=name.split(/\s+/).filter(Boolean);return words.map((x,i)=>i<2?x[0]:'').join('').toUpperCase()||'Ω'};
 const validWorkspace=(value:any):value is OmegaWorkspaceIdR82=>OMEGA_WORKSPACES_R82.some(w=>w.id===value);
 const storedWorkspace=():WorkspaceFilter=>{try{const value=localStorage.getItem('omega.r82.workspace');return validWorkspace(value)?value:'ALL'}catch{return'ALL'}};
@@ -59,7 +62,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
  const open=(next:BrowserLayer)=>{setLayer(next);setNavigationScar('');setExpanded(true)};
  const currentWorkspace=currentPanel?workspaceForRouteR82(currentPanel as any):null,currentOrganization=currentPanel?organizationForRouteR132(currentPanel):null,routeCount=OMEGA_ROUTE_INVENTORY_R107.currentCount;
  const residualCount=navigationLemma.residualCount+(navigationScar?1:0);
- return <aside ref={shellRef} className={'r94-side-toolbar '+(expanded?'expanded':'collapsed')+' '+(railWide?'rail-wide':'rail-compact')+' r100-professional-nav r104-readable-nav r105-context-nav r120-adaptive-nav r132-organized-nav r210-converged-nav r239-user-nav r289-master-menu-nav r333-clean-nav'} aria-label='OMEGA global navigation toolbar' data-operation-chain='R143' data-operation-chain-pass={operationAudit.pass?'true':'false'} data-navigation-revision={R239_USER_NAV_REVISION} data-navigation-lemma-revision={R242_NAVIGATION_LEMMA_REVISION} data-master-menu-presentation-revision={R289_MASTER_MENU_PRESENTATION_REVISION} data-navigation-cleanup-revision={R333_NAVIGATION_CLEANUP_REVISION} data-technical={showTechnical?'true':'false'}>
+ return <aside ref={shellRef} className={'r94-side-toolbar r411-navigation-shell '+(expanded?'expanded':'collapsed')+' '+(railWide?'rail-wide':'rail-compact')+' r100-professional-nav r104-readable-nav r105-context-nav r120-adaptive-nav r132-organized-nav r210-converged-nav r239-user-nav r289-master-menu-nav r333-clean-nav'} aria-label='OMEGA global navigation toolbar' data-operation-chain='R143' data-operation-chain-pass={operationAudit.pass?'true':'false'} data-navigation-revision={R239_USER_NAV_REVISION} data-navigation-lemma-revision={R242_NAVIGATION_LEMMA_REVISION} data-master-menu-presentation-revision={R289_MASTER_MENU_PRESENTATION_REVISION} data-navigation-cleanup-revision={R333_NAVIGATION_CLEANUP_REVISION} data-navigation-shell-revision={R411_NAVIGATION_SHELL_REVISION} data-technical={showTechnical?'true':'false'}>
   <div className='r94-nav-rail'>
    <button className='r88-navigator-trigger r100-rail-cap' onClick={()=>{setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setMasterMenu('ALL');setNavigationScar('');setExpanded(v=>!v)}} aria-label={expanded?'Collapse OMEGA navigator':'Expand OMEGA navigator'} aria-expanded={expanded} aria-controls='omega-global-navigator'>
     <span className='r100-omega-mark'>Ω</span><small>MENU</small><b>{routeCount}</b>
