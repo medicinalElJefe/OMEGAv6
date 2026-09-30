@@ -32,11 +32,12 @@ assert.ok(css.includes(".r411-navigation-shell .r94-rail-action[title='All tools
 assert.ok(css.includes('width:100vw!important;max-width:100vw!important;min-width:0!important'),'mobile browser must own full viewport width above the dock');
 assert.ok(css.includes('bottom:var(--r411-mobile-dock)!important'),'mobile browser must reserve the command dock rather than cover it');
 assert.ok(css.includes("html[data-omega-nav-present='true'] .r257-shell")&&css.includes("html[data-omega-nav-expanded='true'] .r257-shell")&&css.includes('margin-left:0!important;width:100%!important;max-width:100%!important'),'mobile bottom-dock mode must release the headless R257 shell from inherited side-rail reservation');
-assert.ok(css.includes("[data-technical='false'] .r333-filter-row:first-child{display:none!important}"),'simple navigation must hide recovered-menu complexity until technical view is requested');
+assert.ok(!css.includes("[data-technical='false'] .r333-filter-row:first-child{display:none!important}"),'recovered master menus are navigation authority and must not disappear in simple view');
+assert.ok(css.includes('.r411-navigation-shell .r289-master-menu-filter')&&css.includes('overflow-x:auto!important')&&css.includes('flex-wrap:nowrap!important'),'recovered master menus must remain directly reachable in one contained horizontal strip');
 assert.ok(css.includes("[data-technical='false'] .r111-output-ribbon{display:none!important}"),'simple navigation must not let route-contract diagnostics dominate the menu');
 assert.ok(css.includes("html:has(.earth-r372-stage-expanded) .r411-navigation-shell")&&css.includes("html:has(.earth-r372-stage-expanded) .workstation-topbar"),'fullscreen Earth must suppress global/workstation chrome');
 assert.ok(css.includes('z-index:2147483647!important;pointer-events:auto!important'),'fullscreen Earth exit control must retain top interaction authority');
 assert.ok(css.includes("@media(min-width:901px)")&&css.includes('margin-left:calc(var(--r411-rail) + var(--r411-panel))!important'),'desktop expanded navigation must reserve a real layout column');
 assert.ok(css.includes('.r89-flat-scroll')&&css.includes('flex:1 1 auto!important')&&css.includes('overflow:auto!important'),'R411 route list must be the single flexible scroll owner');
 
-console.log('R411.2 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · obsolete mobile rail reservation closed · fullscreen chrome suppression · 44 routes preserved');
+console.log('R411.2 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · compact directly reachable master-menu strip · obsolete mobile rail reservation closed · fullscreen chrome suppression · 44 routes preserved');
