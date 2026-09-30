@@ -97,6 +97,23 @@ assert.ok(retryPrompts[1].includes('"preimageSha":"wrong"'),'correction prompt m
 assert.ok(retryPrompts[1].includes('"sha":"blob123"'),'reformulation must retain the same exact source SHA');
 assert.ok(retryPrompts[1].includes('"path":"src/components/Example.jsx"'),'reformulation must retain the same source membrane');
 
+const declinedThenPatchAi={calls:0,prompts:[],async run(_model,input){this.calls++;this.prompts.push(input.messages.at(-1).content);return{response:this.calls===1?declined:proposal}}};
+const recoveredDecline=await proposeAiRepairR314({ai:declinedThenPatchAi,residual:safeResidual,stage:{id:'R416-DECLINE-RECOVERY',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
+assert.equal(recoveredDecline.ok,true,'a first bounded files:[] decline must receive the existing second reformulation attempt before OBSERVE_ONLY');
+assert.equal(recoveredDecline.reformulated,true);
+assert.equal(recoveredDecline.attempts.length,2);
+assert.equal(declinedThenPatchAi.calls,2);
+assert.ok(recoveredDecline.rejectionHistory[0].reasons.includes('MODEL_DECLINED_BOUNDED_PATCH'),'model decline must survive as exact reformulation evidence');
+assert.ok(declinedThenPatchAi.prompts[1].includes('MODEL_DECLINED_BOUNDED_PATCH'),'second attempt must receive the exact first-decline reason');
+assert.ok(declinedThenPatchAi.prompts[1].includes('attempt the smallest material compliant patch'),'decline reformulation must guide a bounded material retry without widening authority');
+
+const alwaysDeclinesAi={calls:0,async run(){this.calls++;return{response:declined}}};
+const terminalDecline=await proposeAiRepairR314({ai:alwaysDeclinesAi,residual:safeResidual,stage:{id:'R416-DECLINE-TERMINAL',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
+assert.equal(terminalDecline.ok,false);
+assert.equal(terminalDecline.state,'NO_SAFE_PATCH','a second bounded files:[] result must still terminate without mutation');
+assert.equal(alwaysDeclinesAi.calls,R314_AI_MAX_ATTEMPTS,'decline reformulation may never exceed the existing bounded attempt budget');
+assert.equal(terminalDecline.attempts.length,R314_AI_MAX_ATTEMPTS);
+
 const alwaysRejectedAi={calls:0,async run(){this.calls++;return{response:JSON.stringify(rejectedOnce)}}};
 const exhausted=await proposeAiRepairR314({ai:alwaysRejectedAi,residual:safeResidual,stage:{id:'R413-TEST',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
 assert.equal(exhausted.ok,false);
