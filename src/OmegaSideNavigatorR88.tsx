@@ -9,6 +9,7 @@ import {organizationForRouteR132} from './experienceOrganizationR132';
 import {compileNavigationLemmaR242,resolveExactRouteR242,R242_NAVIGATION_LEMMA_REVISION} from './navigationLemmaCalculusR242.js';
 import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import RouteOutputRibbonR111 from './RouteOutputRibbonR111';
+import './omegaSideNavigatorR88.css';
 import './omegaSideNavigatorR100.css';
 import './extremeLayerIntegrityR104.css';
 import './dataTruthNavigationR105.css';
@@ -18,9 +19,6 @@ import './omegaSideNavigatorR210.css';
 import './omegaSideNavigatorR239.css';
 import './omegaSideNavigatorR289.css';
 import './omegaSideNavigatorR333.css';
-/* R411 is the final geometry/presentation owner. Earlier files remain active for
-   retained component vocabulary and provenance, but may not own viewport geometry. */
-import './omegaSideNavigatorR88.css';
 
 type BrowserLayer='EVERYWHERE'|'SOFTWARE';
 type WorkspaceFilter='ALL'|OmegaWorkspaceIdR82;
