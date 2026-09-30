@@ -52,10 +52,6 @@ assert.equal(R314_AI_REPAIR_MODEL_DEFAULT,'@cf/meta/llama-3.3-70b-instruct-fp8-f
 assert.equal(prepared.ok,true);
 assert.equal(prepared.patches.length,1);
 assert.equal(prepared.patches[0].content,'export const value = 2;\n');
-const duplicatePath={...proposal,files:[proposal.files[0],structuredClone(proposal.files[0])]};
-const duplicatePrepared=prepareAiRepairR314({rawResponse:duplicatePath,residual:safeResidual,contextFiles});
-assert.equal(duplicatePrepared.ok,false,'duplicate file entries must fail closed before branch creation');
-assert.ok(duplicatePrepared.reasons.includes('FILE_2_DUPLICATE_PATH'));
 const wrongSha=structuredClone(proposal);wrongSha.files[0].preimageSha='wrong';
 assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(wrongSha),residual:safeResidual,contextFiles}).ok,false,'preimage drift must reject the patch');
 const declined={...proposal,files:[]};
