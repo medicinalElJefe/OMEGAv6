@@ -115,6 +115,13 @@ const recoveredMalformed=await proposeAiRepairR314({ai:malformedAi,residual:safe
 assert.equal(recoveredMalformed.ok,true,'malformed model output may be corrected once without widening policy');
 assert.match(recoveredMalformed.rejectionHistory[0].reasons[0],/^AI_RESPONSE_PARSE_ERROR:/);
 
+const transientAi={calls:0,async run(_model,input){this.calls++;if(this.calls===1)throw new Error('JSON Mode could not be met');return{response:proposal}}};
+const recoveredRunError=await proposeAiRepairR314({ai:transientAi,residual:structuredResidual,stage:{id:'R414-RUN-ERROR',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
+assert.equal(recoveredRunError.ok,true,'one structured-output generation failure may consume the bounded correction attempt');
+assert.equal(recoveredRunError.reformulated,true);
+assert.match(recoveredRunError.rejectionHistory[0].reasons[0],/^AI_RUN_ERROR:/);
+assert.equal(transientAi.calls,2);
+
 
 const machine=fs.readFileSync('cloudflare/lib/github-machine.mjs','utf8');
 const worker=fs.readFileSync('cloudflare/workerR223.js','utf8');
