@@ -46,8 +46,10 @@ export function validateAiRepairProposalR314(proposal,{contextFiles=[],residualI
  if(files.length<1||files.length>R314_AI_MAX_FILES)reasons.push('FILE_COUNT_OUT_OF_BOUNDS');
  const supplied=new Map((contextFiles||[]).map(file=>[pathText(file.path),file]));
  let changedChars=0;
+ const seenPaths=new Set();
  for(const [index,file] of files.entries()){
   const path=pathText(file?.path),policy=repairPathPolicyR314(path),context=supplied.get(path);
+  if(seenPaths.has(path))reasons.push(`FILE_${index+1}_DUPLICATE_PATH`);else seenPaths.add(path);
   if(!policy.allowed)reasons.push(`FILE_${index+1}_PATH_FORBIDDEN`);
   if(!context)reasons.push(`FILE_${index+1}_NOT_IN_CONTEXT`);
   if(context&&String(file?.preimageSha||'')!==String(context.sha||''))reasons.push(`FILE_${index+1}_SHA_MISMATCH`);
@@ -116,6 +118,7 @@ const validatorGuidanceR314=reason=>{
  if(r==='RESIDUAL_BINDING_MISMATCH')return 'Set residualId exactly to the supplied residual id.';
  if(r==='FILE_COUNT_OUT_OF_BOUNDS')return `Return between 1 and ${R314_AI_MAX_FILES} files, unless explicitly declining with files:[].`;
  if(/_PATH_FORBIDDEN$/.test(r)||/_NOT_IN_CONTEXT$/.test(r))return 'Use only paths present in EXACT SOURCE CONTEXT; do not substitute adjacent governance/test/deployment files.';
+ if(/_DUPLICATE_PATH$/.test(r))return 'Return each exact source path at most once; combine replacements for the same file into one file entry.';
  if(/_SHA_MISMATCH$/.test(r))return 'Copy the supplied exact source SHA for that file without modification.';
  if(/_REPLACEMENT_COUNT$/.test(r))return `Use 1..${R314_AI_MAX_REPLACEMENTS_PER_FILE} replacements for each proposed file.`;
  if(/_NOOP$/.test(r))return 'Make before and after materially different, or remove that replacement.';
