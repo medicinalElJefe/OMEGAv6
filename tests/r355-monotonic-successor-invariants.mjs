@@ -51,7 +51,6 @@ for(const token of[
  "import OmegaTemporalCheckpointR350 from './OmegaTemporalCheckpointR350'",
  "import OmegaGpuPacketMirrorR351 from './OmegaGpuPacketMirrorR351'",
  "import OmegaGpuComputeR352 from './OmegaGpuComputeR352'",
- "import OmegaReleaseLineageR353 from './OmegaReleaseLineageR353'",
  "import OmegaProofBoundSceneR354 from './OmegaProofBoundSceneR354'",
  "import OmegaProofBoundTemporalTraversalR355 from './OmegaProofBoundTemporalTraversalR355'",
  '<OmegaUnifiedConvergenceR348 record={record} status={status}/>',
@@ -69,7 +68,7 @@ for(const token of[
  '<OmegaSwarmR121'
 ])assert.ok(convergence.includes(token),`R355 successor lost predecessor convergence layer: ${token}`);
 
-assert.ok(suite.includes("if(panel==='Evidence & Proof')")&&suite.includes('<OmegaReleaseLineageR353/>'),'R353 provenance must remain directly reachable after R355');
+assert.ok(suite.includes("import OmegaReleaseLineageR353 from './OmegaReleaseLineageR353'")&&suite.includes("if(panel==='Evidence & Proof')")&&suite.includes('<OmegaReleaseLineageR353/>'),'R353 provenance must remain directly reachable after R355');
 for(const token of['installLivingWorldOperationBridgeR140','installRuntimeAttestationWorldScarR145','installDurableWorldHeadContinuityR149','installReflexOperationIngressR160','installMissionWorldHeadBindingR208','installFederationLedgerWorldObserverR173','installLivingWorldProofMembraneR1901','installLivingWorldIntelligenceProofR196','installEvidenceBoundSceneIngressR2022'])assert.ok(app.includes(token),`R355 successor lost runtime bridge ${token}`);
 
 for(const law of['SUCCESSOR_MUST_PRESERVE_R354_CAPABILITY_FLOOR','SUCCESSOR_MUST_RETAIN_ALL_R347_THROUGH_R354_PROOF_GATES','SUCCESSOR_MUST_RETAIN_CURRENT_ROUTE_AND_CAPABILITY_AUTHORITY','SUCCESSOR_FEATURES_ARE_ADDITIVE_NOT_REPLACEMENT'])assert.ok(core.includes(law),`R355 missing monotonic successor law ${law}`);
