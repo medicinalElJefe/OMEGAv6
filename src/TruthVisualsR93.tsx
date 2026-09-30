@@ -139,7 +139,7 @@ export function ScaleTruthPlotR93({nodes}:{nodes:any[]}){
  const count=Math.max(1,nodes.length),cx=500,cy=330,ringStep=210/Math.max(1,count-1);
  return <section className='r93-truth-plot r93-scale r95-scale-manifold'>
   <header><div><span>COMPILER NODE MANIFOLD</span><b>Recursive scale hierarchy</b></div><code>{nodes.length} evaluated nodes</code></header>
-  <svg viewBox='0 0 1000 680' role='img' aria-label='Recursive compiler nodes mapped as concentric evaluated scale states'>
+  <svg viewBox='0 0 1000 680' role='img' aria-label='Recursive compiler nodes mapped as concentric evaluated scale states' data-scale-visual-ready='true' style={{display:'block',width:'100%',minHeight:'360px',height:'auto'}}>
    {nodes.map((n,i)=>{const r=70+i*ringStep,a=-Math.PI/2+Number(n.Phi||0)*Math.PI*2,p=polar(cx,cy,r,a),weight=cl(Number(n.weight)||0),C=cl(Number(n.C)||0),q=cl(Number(n.q)||0);return <g key={n.scale} className='r95-scale-node'>
     <circle cx={cx} cy={cy} r={r} className='r95-scale-ring'/>
     <line x1={cx} y1={cy} x2={p.x} y2={p.y} className='r95-scale-spoke'/>
