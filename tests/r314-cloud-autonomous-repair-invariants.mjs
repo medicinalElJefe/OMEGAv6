@@ -60,6 +60,9 @@ assert.equal(retried.attempts.length,2);
 assert.equal(retried.rejectionHistory.length,1);
 assert.ok(retried.rejectionHistory[0].reasons.includes('FILE_1_SHA_MISMATCH'),'exact validator rejection code must survive into the scar ledger');
 assert.ok(retryPrompts[1].includes('FILE_1_SHA_MISMATCH'),'the next model attempt must receive the exact rejection evidence');
+assert.ok(retryPrompts[1].includes('Copy the supplied exact source SHA for that file without modification.'),'validator code must carry deterministic correction guidance');
+assert.ok(retryPrompts[1].includes('"preimageSha":"wrong"'),'correction prompt must expose the rejected proposal detail needed to repair it');
+
 assert.ok(retryPrompts[1].includes('"sha":"blob123"'),'reformulation must retain the same exact source SHA');
 assert.ok(retryPrompts[1].includes('"path":"src/components/Example.jsx"'),'reformulation must retain the same source membrane');
 
