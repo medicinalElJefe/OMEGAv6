@@ -129,6 +129,7 @@ const validatorGuidanceR314=reason=>{
  if(r==='CANON_ADMISSION_MUST_BE_FALSE')return 'Set canonicalAdmission to false.';
  if(r==='DIRECT_PRODUCTION_MUTATION_MUST_BE_FALSE')return 'Set directProductionMutation to false.';
  if(r==='EXPECTED_PROOFS_REQUIRED')return 'Name at least one existing independent proof family in expectedProofs.';
+ if(r==='MODEL_DECLINED_BOUNDED_PATCH')return 'Reassess the supplied exact source against the residual and attempt the smallest material compliant patch; return files:[] again only if no such patch exists.';
  if(r.startsWith('AI_RESPONSE_PARSE_ERROR:'))return 'Return one valid JSON object only, with no prose or markdown.';
  if(r.startsWith('AI_RUN_ERROR:'))return 'Retry the same bounded task under the unchanged structured-output schema; do not widen scope or authority.';
  return 'Correct only the stated validator defect; do not widen paths, authority, or claims.';

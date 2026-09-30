@@ -24,6 +24,7 @@ const LOADERS={
  IntelligenceFabricPanel:()=>import('./IntelligenceFabricPanel'),
  ExtremeTraversalUnionR60:()=>import('./ExtremeTraversalUnionR60'),
  OmegaSpecialistSuite:()=>import('./OmegaSpecialistSuite'),
+ OmegaConvergenceSurfaceR416:()=>import('./OmegaConvergenceSurfaceR416'),
  PluginRegistryR45:()=>import('./PluginRegistryR45'),
  SourceBackedModesPanelR21:()=>import('./SourceBackedModesPanelR21'),
  ModeCompletionWorkspaceR140:()=>import('./ModeCompletionWorkspaceR140')
@@ -50,6 +51,7 @@ export const SAIControlR109=lazy(LOADERS.SAISovereignControl);
 export const IntelligenceFabricR109=lazy(LOADERS.IntelligenceFabricPanel);
 export const ExtremeTraversalR109=lazy(LOADERS.ExtremeTraversalUnionR60);
 export const SpecialistSuiteR109=lazy(LOADERS.OmegaSpecialistSuite);
+export const ConvergenceR416=lazy(LOADERS.OmegaConvergenceSurfaceR416);
 export const PluginRegistryR109=lazy(LOADERS.PluginRegistryR45);
 // R140 preserves the R109 export name so the workstation router stays single-authority,
 // while the Modes route now opens the completion workspace which embeds the R21 instrument.
@@ -73,9 +75,9 @@ const ROUTE_LOADERS:Record<string,readonly (()=>Promise<any>)[]>={
  'Reality Lab':[LOADERS.AppliedRealityLab],'Atlas Calculator':[LOADERS.AtlasCalculatorPanel],Infinity:[LOADERS.OmegaInfinityPanel],'Scale Compiler':[LOADERS.RecursiveScalePanel],
  'Build Out':[LOADERS.WovenBuildOutPanel],Development:[LOADERS.WovenBuildOutPanel],
  'SAI Lab':[LOADERS.SAISovereignControl,LOADERS.IntelligenceFabricPanel],'Kernel Intelligence':[LOADERS.SAISovereignControl],
- 'Extreme Traversal':[LOADERS.ExtremeTraversalUnionR60],Modes:[LOADERS.ModeCompletionWorkspaceR140],Plugins:[LOADERS.PluginRegistryR45]
+ 'Extreme Traversal':[LOADERS.ExtremeTraversalUnionR60],Convergence:[LOADERS.OmegaConvergenceSurfaceR416],Modes:[LOADERS.ModeCompletionWorkspaceR140],Plugins:[LOADERS.PluginRegistryR45]
 };
-const SUITE_ROUTES=new Set(['Field','Data Motion','Convergence','Projects','Render Queue','Assets','Evidence & Proof','Memory','Canon Evolution','Governance','Consolidation','Instructions','Settings','System']);
+const SUITE_ROUTES=new Set(['Field','Data Motion','Projects','Render Queue','Assets','Evidence & Proof','Memory','Canon Evolution','Governance','Consolidation','Instructions','Settings','System']);
 
 export function specialistLoadersForPanelR109(panel:string){return ROUTE_LOADERS[panel]|| (SUITE_ROUTES.has(panel)?[LOADERS.OmegaSpecialistSuite]:[])}
 

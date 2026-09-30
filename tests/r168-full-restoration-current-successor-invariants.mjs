@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 const read=p=>fs.readFileSync(p,'utf8');
 const panel=read('src/FullRestorationConvergenceR168.tsx');
-const suite=read('src/OmegaSpecialistSuite.tsx');
+const convergence=read('src/OmegaConvergenceSurfaceR416.tsx');
 const potential=read('src/buildPotentialRuntimeR133.ts');
 const potentialUi=read('src/OmegaBuildPotentialR133.tsx');
 const proof137=read('src/familyOperationalProofR137.ts');
@@ -27,8 +27,8 @@ must(proof137.includes('R48_R153_CURRENT_SUCCESSOR_STATUS_MAY_CLASSIFY_THE_PRESE
 must(potentialUi.includes('familyOperationalProofR137(x.family,operational,hybrid,x.effectiveStatus)')&&potentialUi.includes('familyOperationalProofR137(row.family,operational,hybrid,row.effectiveStatus)'),'Build Potential proof counts and row proof must use effective successor status');
 must(potentialUi.includes("PROVE_NEXT:'REVIEW'")&&potentialUi.includes('button opens the operator route only'),'gated Build Potential routes must be labeled as review navigation rather than implied execution');
 
-must(suite.includes("import FullRestorationConvergenceR168 from './FullRestorationConvergenceR168'"),'Convergence must import the restoration surface');
-must(suite.includes('<FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/>'),'Convergence must visibly mount the restoration surface');
+must(convergence.includes("import FullRestorationConvergenceR168 from './FullRestorationConvergenceR168'"),'Convergence must import the restoration surface');
+must(convergence.includes('<FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/>'),'Convergence must visibly mount the restoration surface');
 must(panel.includes('R48_COMPLETION_FAMILIES')&&panel.includes('R48_COMPLETION_SUMMARY'),'restoration surface must use the current successor ledger');
 must(panel.includes('assembleDevelopmentResidualWorldLensR166')&&panel.includes('/omega-r125-accuracy-state.json')&&panel.includes('/api/core-health')&&panel.includes('/api/release-evidence')&&panel.includes('/api/runtime-attestation')&&panel.includes('/api/hybrid/status'),'R166 residual world must be bound to current runtime evidence');
 must(panel.includes("import {manifestR169} from './world/federationAttestationWorldLensR169.js'")&&panel.includes('/omega-genesis-attestation-r168.json'),'R169 federation world-scar lineage and attestation expectation must be visible in restoration convergence');

@@ -10,7 +10,7 @@ const master=fs.readFileSync('src/convergenceMasterR314.ts','utf8');
 const convergenceUi=fs.readFileSync('src/OmegaConvergenceMasterR314.tsx','utf8');
 const implementation=fs.readFileSync('src/system/implementationCanonCompilerR314.ts','utf8');
 const audit=fs.readFileSync('scripts/r314-convergence-audit.mjs','utf8');
-const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8');
 
 function parseCsv(source){
  const rows=[],row=[],field=[];let quoted=false;
@@ -67,10 +67,10 @@ assert.ok(!convergenceUi.includes('SourceExactCanonR328')&&!convergenceUi.includ
 assert.ok(master.includes("R328 SOURCE-EXACT CANON")&&master.includes("3,743-row semantic registry"),'R314 build stage must consume R328 source canon');
 assert.ok(implementation.includes('R314_IMPLEMENTATION_CANON_EXPECTED_ROWS=675'),'R328 must not overwrite the distinct 675-row implementation canon');
 assert.ok(audit.includes('R328-SOURCE-CANON-HASH')&&audit.includes('R328-SOURCE-CANON-CENSUS')&&audit.includes("sourceCanonRecords!==3743"),'convergence audit must fail closed on R328 source corruption');
-assert.ok(!suite.includes("if(panel==='Convergence')return wrap(<div>\n  <OmegaConvergenceMasterR314/>"),'R328 source authority must not duplicate the Convergence master inside the Convergence route');
-for(const token of ['<AppliedCalculusR168/>','<CalculusAddressFabricR240 record={record}/>','<OmegaResearchAdvancementR316/>','<RecursiveSelfBuildR240/>'])assert.ok(suite.includes(token),`Convergence route lost established retained capability ${token}`);
-const current=['<OmegaUnifiedConvergenceR348','<OmegaHardwareFieldR349','<OmegaTemporalCheckpointR350','<OmegaGpuPacketMirrorR351','<OmegaGpuComputeR352','<OmegaProofBoundSceneR354','<OmegaProofBoundTemporalTraversalR355'].map(token=>suite.indexOf(token));
+assert.ok(!convergence.includes('<OmegaConvergenceMasterR314/>'),'R328 source authority must not duplicate the Convergence master inside the Convergence route');
+for(const token of ['<AppliedCalculusR168/>','<CalculusAddressFabricR240 record={record}/>','<OmegaResearchAdvancementR316/>','<RecursiveSelfBuildR240/>'])assert.ok(convergence.includes(token),`Convergence route lost established retained capability ${token}`);
+const current=['<OmegaUnifiedConvergenceR348','<OmegaHardwareFieldR349','<OmegaTemporalCheckpointR350','<OmegaGpuPacketMirrorR351','<OmegaGpuComputeR352','<OmegaProofBoundSceneR354','<OmegaProofBoundTemporalTraversalR355'].map(token=>convergence.indexOf(token));
 assert.ok(current.every(index=>index>=0)&&current.every((index,i)=>i===0||index>current[i-1]),'R356 Convergence current authority chain must preserve R348→R355 order');
-assert.ok(suite.indexOf("className='r356-compatibility-stack'")>current.at(-1),'retained convergence lineage must follow current authorities rather than compete with them');
+assert.ok(convergence.indexOf("className='r356-compatibility-stack'")>current.at(-1),'retained convergence lineage must follow current authorities rather than compete with them');
 
 console.log('R328 SOURCE-EXACT CANON PASS · 3,743 exact records · 495 concepts · 173 properties · 45 computation heads · 463 conflict groups / 405 multivariant · original + normalized SHA/census gated · 675-row implementation canon remains separate · no symbolic auto-execution');

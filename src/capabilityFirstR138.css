@@ -27,6 +27,8 @@
 
 /* R140 hierarchy law: proof plots stay out of primary operation, but exact transition evidence is reachable in explicit proof contexts. */
 .r93-truth-plot.r93-mode-trace,.r93-truth-plot.r93-infinity-source,.r93-truth-plot.r93-transition,.r93-truth-plot.r93-scale{display:none!important}.r93-packet,.r95-canonical-manifold,.r95-state-mandala{display:block}.r43-workspace-stage[data-view='ROUTE'] .r93-truth-plot.r93-transition{display:grid!important}
+/* R416.3: Scale Compiler's evaluated recursive-scale manifold is its primary truth surface, not a retired secondary chart. */
+.omega-surface-r81[data-surface-name='Scale Compiler'] .r93-truth-plot.r93-scale{display:grid!important}
 /* R313.41 disclosure law: the secondary inspector is itself an explicit proof context. Keep retired plots subordinate while closed, then restore their native grid geometry only after the user deliberately opens the inspector. */
 .r95-secondary-inspector[open]>.r93-truth-plot.r93-mode-trace,.r95-secondary-inspector[open]>.r93-truth-plot.r93-transition{display:grid!important}
 

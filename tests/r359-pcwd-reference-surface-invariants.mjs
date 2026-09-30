@@ -3,7 +3,7 @@ import fs from'node:fs';
 
 const ui=fs.readFileSync('src/OmegaPcwdReferenceBenchmarksR359.tsx','utf8');
 const css=fs.readFileSync('src/pcwdReferenceBenchmarksR359.css','utf8');
-const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
 for(const token of[
@@ -16,9 +16,9 @@ for(const token of[
  'Numerical parity is not presented as novelty.',
 ])assert.ok(ui.includes(token),`R359 reference surface missing ${token}`);
 
-assert.ok(suite.includes("import OmegaPcwdReferenceBenchmarksR359 from './OmegaPcwdReferenceBenchmarksR359';"));
-assert.ok(suite.includes('<OmegaPcwdReferenceBenchmarksR359/>'));
-assert.ok(suite.indexOf('<OmegaPcwdReferenceBenchmarksR359/>')>suite.indexOf('<OmegaPcwdBenchmarkLab/>'));
+assert.ok(convergence.includes("import OmegaPcwdReferenceBenchmarksR359 from './OmegaPcwdReferenceBenchmarksR359';"));
+assert.ok(convergence.includes('<OmegaPcwdReferenceBenchmarksR359/>'));
+assert.ok(convergence.indexOf('<OmegaPcwdReferenceBenchmarksR359/>')>convergence.indexOf('<OmegaPcwdBenchmarkLab/>'));
 
 for(const token of['.r359-grid','.r359-summary','min-height:44px','@media(max-width:760px)'])assert.ok(css.includes(token),`R359 CSS missing ${token}`);
 assert.ok(String(pkg.scripts?.['test:r359']||'').includes('r359-pcwd-reference-benchmarks.mts'));

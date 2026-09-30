@@ -26,9 +26,9 @@ const hold=await compileProofBoundSceneR354({sourceField:source,steps:2,checkpoi
 assert.equal(hold.scene.state,'MODEL_ONLY_HOLD');assert.equal(hold.scene.proof.currentRuntimeBound,false);assert.equal(hold.scene.proof.timelineDeterministic,true);
 const defaultCorpusBuild=await compileProofBoundSceneR354({steps:0,checkpointEvery:1,targetTick:0,nowTick:0});assert.equal(defaultCorpusBuild.scene.proof.timelineDeterministic,true);assert.equal(defaultCorpusBuild.scene.packetCount,20736);
 
-const core=fs.readFileSync('src/system/proofBoundSceneR354.ts','utf8'),surface=fs.readFileSync('src/OmegaProofBoundSceneR354.tsx','utf8'),suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8'),pkg=fs.readFileSync('package.json','utf8'),doc=fs.readFileSync('R354_PROOF_BOUND_SCENE_CONVERGENCE.md','utf8');
+const core=fs.readFileSync('src/system/proofBoundSceneR354.ts','utf8'),surface=fs.readFileSync('src/OmegaProofBoundSceneR354.tsx','utf8'),convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8'),pkg=fs.readFileSync('package.json','utf8'),doc=fs.readFileSync('R354_PROOF_BOUND_SCENE_CONVERGENCE.md','utf8');
 for(const token of['R349','R350','R351','R352','R353','NO_NEW_PHYSICAL_PRIMITIVE','sceneDigest'])assert.ok(core.includes(token),`R354 core missing ${token}`);
-for(const token of['/api/release-evidence','/api/runtime-attestation','/omega-build-receipt.json','OmegaProofBoundSceneR354'])assert.ok((surface+suite).includes(token),`R354 integration missing ${token}`);
+for(const token of['/api/release-evidence','/api/runtime-attestation','/omega-build-receipt.json','OmegaProofBoundSceneR354'])assert.ok((surface+convergence).includes(token),`R354 integration missing ${token}`);
 assert.ok(pkg.includes('"test:r354"'));assert.ok(pkg.includes('npm run test:r353 && npm run test:r354'));
 for(const forbidden of['canonicalMutation:true','observedHistoryClaimed:true','physicalSimulationClaimed:true','durableHistoryClaimed:true'])assert.ok(!(core+surface+doc).includes(forbidden),`R354 forbidden claim ${forbidden}`);
 assert.ok(R354_BOUNDARY.includes('R125')&&R354_BOUNDARY.includes('R141')&&R354_BOUNDARY.includes('ci.yml'));

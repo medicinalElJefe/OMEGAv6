@@ -37,7 +37,7 @@ const api=fs.readFileSync('src/swarm/swarmApiR121.js','utf8');
 const cell=fs.readFileSync('src/swarm/swarmCellR121.js','utf8');
 const wrangler=fs.readFileSync('wrangler.jsonc','utf8');
 const ui=fs.readFileSync('src/OmegaOrganismR123.tsx','utf8');
-const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8');
 
 for(const klass of ['OmegaSwarmBranch','OmegaSwarmOrgan','OmegaSwarmOrganismCoordinator'])assert.ok(worker.includes(klass),`worker export missing ${klass}`);
 assert.ok(worker.includes("path.startsWith('/api/swarm/')"));
@@ -58,5 +58,5 @@ assert.ok(cell.includes('evidencePackets'));
 assert.ok(ui.includes('Seed → 12 Organs → 144 Branches → 1,728 Cells'));
 assert.ok(ui.includes('LAUNCH ORGANISM'));
 assert.ok(ui.includes('PAUSE')&&ui.includes('RESUME')&&ui.includes('CANCEL')&&ui.includes('REPLAY'));
-assert.ok(suite.includes('OmegaOrganismR123'));
+assert.ok(convergence.includes('OmegaOrganismR123'));
 console.log('R123 organism swarm invariants PASS · R123 provenance preserved · three SQLite declarative exports live');
