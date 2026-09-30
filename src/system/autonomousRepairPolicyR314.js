@@ -1,5 +1,5 @@
 export const R314_AUTONOMOUS_REPAIR_SCHEMA='OMEGA_AUTONOMOUS_REPAIR_POLICY_R314';
-export const R314_AI_REPAIR_MODEL_DEFAULT='@cf/google/gemma-4-26b-a4b-it';
+export const R314_AI_REPAIR_MODEL_DEFAULT='@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 export const R314_AI_MAX_FILES=2;
 export const R314_AI_MAX_REPLACEMENTS_PER_FILE=8;
 export const R314_AI_MAX_CHANGED_CHARS=12000;
