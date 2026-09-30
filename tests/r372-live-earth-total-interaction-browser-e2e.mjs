@@ -51,6 +51,26 @@ async function sarAnalyticalState(sarInstrument){
  return sarInstrument.evaluate(el=>{const visible=node=>{if(!node)return false;const s=getComputedStyle(node),r=node.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0},head=el.querySelector('.r280-screen-head b')?.textContent||'',lemma=el.querySelector('.r3565-lemma-canvas[data-truth-class="DERIVED_TRIANGULATED"]'),native=head.includes('BOUND MEASUREMENT FIELD')?el.querySelector('.r280-canvas'):null,field=visible(lemma)?lemma:visible(native)?native:null,cells=field?[...field.querySelectorAll(':scope > i')]:[],status=el.querySelector('.r374-below-canvas-status');return{kind:field===lemma?'DERIVED_TRIANGULATED':field===native?'BOUND_NATIVE':'PENDING',count:cells.length,unique:new Set(cells.slice(0,1500).map(x=>getComputedStyle(x).backgroundColor)).size,view:status?.getAttribute('data-view-status')||'',head}});
 }
 
+async function stableSarStatusGeometry(sarInstrument,expectedView,timeout=5000){
+ const deadline=Date.now()+timeout;
+ let previous=null,last=null;
+ while(Date.now()<deadline){
+  await sarInstrument.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  const sample=await sarInstrument.evaluate((el,view)=>{
+   const status=el.querySelector('.r374-below-canvas-status'),screen=el.querySelector('.r280-screen');
+   if(!status||!screen)return null;
+   const s=status.getBoundingClientRect(),r=screen.getBoundingClientRect();
+   return{view:status.getAttribute('data-view-status')||'',statusTop:s.top,screenTop:r.top,screenBottom:r.bottom,screenHeight:r.height,gap:s.top-r.bottom};
+  },expectedView);
+  last=sample;
+  const valid=sample&&sample.view===expectedView&&sample.statusTop>=sample.screenBottom-1;
+  const stable=valid&&previous&&Math.abs(sample.statusTop-previous.statusTop)<.5&&Math.abs(sample.screenBottom-previous.screenBottom)<.5&&Math.abs(sample.screenHeight-previous.screenHeight)<.5;
+  if(stable)return sample;
+  previous=valid?sample:null;
+ }
+ throw new Error(`SAR ${expectedView} status/screen geometry did not settle into two consecutive unobstructed frames · ${JSON.stringify(last)}`);
+}
+
 const VIEW_EXPECTATIONS=[
  ['Satellite','.earth-r279-satellite'],
  ['Planet','.earth-r281-globe'],
@@ -172,7 +192,8 @@ try{
    await waitSarAnalytical(page,10000);
    const field=await sarAnalyticalState(sarInstrument);if(field.kind==='PENDING'||field.count<4096||field.unique<8)throw new Error(`${label}: ${LENS_IDS[i]} lacks a material derived/native analytical field ${JSON.stringify(field)}`);
    const blockers=await sarInstrument.locator('.r280-screen').locator('.r3565-lemma-badge,.r284-view-readout,.r285-field-empty,.r280-geometry-overlay,.r284-geometry-hud,.r280-range-labels,.r284-scale').evaluateAll(els=>els.filter(el=>getComputedStyle(el).display!=='none'&&getComputedStyle(el).visibility!=='hidden').length);if(blockers!==0)throw new Error(`${label}: ${LENS_IDS[i]} clean SAR view still has ${blockers} obstructing overlay(s)`);
-   const statusNode=sarInstrument.locator('.r374-below-canvas-status'),status=await statusNode.boundingBox(),screen=await sarInstrument.locator('.r280-screen').boundingBox();if(!status||!screen||status.y<screen.y+screen.height-1)throw new Error(`${label}: ${LENS_IDS[i]} status is not outside the SAR viewport`);
+   const statusNode=sarInstrument.locator('.r374-below-canvas-status'),geometry=await stableSarStatusGeometry(sarInstrument,LENS_IDS[i]);
+   if(geometry.statusTop<geometry.screenBottom-1)throw new Error(`${label}: ${LENS_IDS[i]} status is not outside the SAR viewport · ${JSON.stringify(geometry)}`);
    if(await statusNode.getAttribute('data-view-status')!==LENS_IDS[i]||field.view!==LENS_IDS[i])throw new Error(`${label}: lens ${i+1} selection did not bind ${LENS_IDS[i]}`);const guide=await sarInstrument.locator('.r381-view-guide').innerText();if(!guide||guide.length<24)throw new Error(`${label}: ${LENS_IDS[i]} lacks an external semantic guide`);
    const lemmaThumb=card.locator('.r3565-mini-lemma');if(await lemmaThumb.count()){const thumbBox=await lemmaThumb.boundingBox();if(!thumbBox||Math.abs((thumbBox.width/thumbBox.height)-(13/8))>.18)throw new Error(`${label}: lens ${i+1} derived preview aspect is not proportional ${JSON.stringify(thumbBox)}`)}else{const nativeThumb=card.locator('.r284-mini-grid');if(await nativeThumb.locator(':scope > i').count()<104)throw new Error(`${label}: lens ${i+1} native preview is not materially populated`)}
    await contained(page,`${label} SAR lens ${i+1}`);
@@ -189,5 +210,5 @@ try{
   await context.close();
  }
  verifyReceipt(await fetch(base+'/omega-build-receipt.json',{headers:{'cache-control':'no-cache'}}).then(r=>{if(!r.ok)throw new Error(`final receipt HTTP ${r.status}`);return r.json()}));
- console.log(`R372 LIVE EARTH TOTAL INTERACTION PASS · exact source + promoted SHA ${expectedSha} before/after · place/address/device target + returned evidence hash · all 9 Earth views · loaded NOAA pixels · motion pause/resume + returned refresh · ground target/hash refresh · SAR targeting + 12 unique derived/native transition-safe lenses actuated · GRD/SLC · desktop/mobile containment per view/lens · no page errors`);
+ console.log(`R372 LIVE EARTH TOTAL INTERACTION PASS · exact source + promoted SHA ${expectedSha} before/after · place/address/device target + returned evidence hash · all 9 Earth views · loaded NOAA pixels · motion pause/resume + returned refresh · ground target/hash refresh · SAR targeting + 12 unique derived/native transition-safe lenses actuated + atomic two-frame status/viewport geometry · GRD/SLC · desktop/mobile containment per view/lens · no page errors`);
 }finally{await browser.close()}
