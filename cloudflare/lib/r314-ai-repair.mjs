@@ -1,6 +1,7 @@
 import {
   R314_AI_REPAIR_MODEL_DEFAULT,
   R314_AI_MAX_ATTEMPTS,
+  R314_AI_MAX_OUTPUT_TOKENS,
   applyAiRepairProposalR314,
   autonomousRepairPromptR314,
   autonomousRepairCorrectionPromptR314,
@@ -61,7 +62,7 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
   const result=await ai.run(model,{messages:[
    {role:'system',content:'Return only the bounded JSON repair object requested by the user prompt. Do not use markdown.'},
    {role:'user',content:prompt},
-  ],temperature:attempt===1?0.1:0,max_tokens:6000});
+  ],temperature:attempt===1?0.1:0,max_tokens:R314_AI_MAX_OUTPUT_TOKENS});
   const prepared=prepareAiRepairR314({rawResponse:responseText(result),residual,contextFiles});
   const receipt=attemptReceipt(attempt,prepared);
   attempts.push(receipt);
