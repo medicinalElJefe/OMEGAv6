@@ -2,8 +2,6 @@ import {
   R314_AI_REPAIR_MODEL_DEFAULT,
   R314_AI_MAX_ATTEMPTS,
   R314_AI_MAX_OUTPUT_TOKENS,
-  R314_AI_MAX_FILES,
-  R314_AI_MAX_REPLACEMENTS_PER_FILE,
   applyAiRepairProposalR314,
   autonomousRepairPromptR314,
   autonomousRepairCorrectionPromptR314,
@@ -23,56 +21,8 @@ function responsePayload(result){
  return result??{};
 }
 
-export function repairResponseFormatR314({residual,contextFiles=[]}={}){
- const exactFiles=(contextFiles||[]).map(file=>({path:String(file.path||''),sha:String(file.sha||'')}));
- const allowedPaths=exactFiles.map(file=>file.path);
- const allowedShas=exactFiles.map(file=>file.sha);
- const expectedProofs=[...new Set((Array.isArray(residual?.expectedProofs)?residual.expectedProofs:[]).map(String).filter(Boolean))];
- const fileItems={
-  type:'object',
-  additionalProperties:false,
-  properties:{
-   path:{type:'string',enum:allowedPaths},
-   preimageSha:{type:'string',enum:allowedShas},
-   replacements:{
-    type:'array',
-    minItems:1,
-    maxItems:R314_AI_MAX_REPLACEMENTS_PER_FILE,
-    items:{
-     type:'object',
-     additionalProperties:false,
-     properties:{
-      before:{type:'string',minLength:1},
-      after:{type:'string'},
-     },
-     required:['before','after'],
-    },
-   },
-  },
-  required:['path','preimageSha','replacements'],
- };
- return{
-  type:'json_schema',
-  json_schema:{
-   type:'object',
-   additionalProperties:false,
-   properties:{
-    schema:{type:'string',enum:['OMEGA_AUTONOMOUS_REPAIR_POLICY_R314']},
-    residualId:{type:'string',enum:[String(residual?.id||'')]},
-    files:{type:'array',minItems:0,maxItems:Math.min(R314_AI_MAX_FILES,exactFiles.length),items:fileItems},
-    canonicalAdmission:{type:'boolean',enum:[false]},
-    directProductionMutation:{type:'boolean',enum:[false]},
-    expectedProofs:{
-     type:'array',
-     minItems:1,
-     maxItems:8,
-     uniqueItems:true,
-     items:expectedProofs.length?{type:'string',enum:expectedProofs}:{type:'string',minLength:1},
-    },
-   },
-   required:['schema','residualId','files','canonicalAdmission','directProductionMutation','expectedProofs'],
-  },
- };
+export function repairResponseFormatR314(){
+ return{type:'json_object'};
 }
 
 export function prepareAiRepairR314({rawResponse,residual,contextFiles=[]}={}){
@@ -116,7 +66,7 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
   let prepared;
   try{
    const result=await ai.run(model,{messages:[
-    {role:'system',content:'Return only the bounded JSON repair object requested by the user prompt. Do not use markdown.'},
+    {role:'system',content:'Return exactly one valid JSON object and no markdown. Required top-level keys: schema,residualId,files,canonicalAdmission,directProductionMutation,expectedProofs. The unchanged R314 validator will reject any value outside the supplied exact source membrane.'},
     {role:'user',content:prompt},
    ],response_format:repairResponseFormatR314({residual,contextFiles}),temperature:attempt===1?0.1:0,max_tokens:R314_AI_MAX_OUTPUT_TOKENS,seed:314});
    prepared=prepareAiRepairR314({rawResponse:responsePayload(result),residual,contextFiles});

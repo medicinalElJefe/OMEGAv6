@@ -47,14 +47,8 @@ assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(declined),residual:
 assert.equal(R314_AI_REPAIR_MODEL_DEFAULT,'@cf/meta/llama-3.3-70b-instruct-fp8-fast','R414 must use the documented structured-output Workers AI model');
 const structuredResidual={...safeResidual,expectedProofs:['R241 Archive Convergence Visual Intelligence','OMEGA Cloud Bridge CI']};
 const responseFormat=repairResponseFormatR314({residual:structuredResidual,contextFiles});
-assert.equal(responseFormat.type,'json_schema');
-assert.equal(responseFormat.json_schema.properties.schema.enum[0],R314_AUTONOMOUS_REPAIR_SCHEMA);
-assert.equal(responseFormat.json_schema.properties.residualId.enum[0],safeResidual.id);
-assert.equal(responseFormat.json_schema.properties.files.maxItems,1);
-assert.equal(responseFormat.json_schema.properties.files.items.properties.path.enum[0],contextFiles[0].path);
-assert.equal(responseFormat.json_schema.properties.files.items.properties.preimageSha.enum[0],contextFiles[0].sha);
-assert.deepEqual(responseFormat.json_schema.properties.canonicalAdmission.enum,[false]);
-assert.ok(responseFormat.json_schema.properties.expectedProofs.items.enum.includes('OMEGA Cloud Bridge CI'));
+assert.deepEqual(responseFormat,{type:'json_object'},'R415 must use the XGrammar-compatible valid-JSON object boundary and leave semantic authority to R314');
+assert.equal('json_schema' in responseFormat,false,'unsupported decoder-schema features must not block Workers AI before R314 validation');
 
 const duplicateProposal={...proposal,files:[proposal.files[0],structuredClone(proposal.files[0])]};
 const duplicatePrepared=prepareAiRepairR314({rawResponse:duplicateProposal,residual:safeResidual,contextFiles});
@@ -68,7 +62,7 @@ const objectResponseAi={
 const objectStructured=await proposeAiRepairR314({ai:objectResponseAi,residual:structuredResidual,stage:{id:'R414-OBJECT',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles,maxAttempts:1});
 assert.equal(objectStructured.ok,true,'object-form Workers AI structured response must unwrap directly into R314 validation');
 assert.equal(objectResponseAi.seen.model,R314_AI_REPAIR_MODEL_DEFAULT);
-assert.equal(objectResponseAi.seen.input.response_format.type,'json_schema');
+assert.equal(objectResponseAi.seen.input.response_format.type,'json_object');
 assert.equal(objectResponseAi.seen.input.seed,314);
 
 
@@ -92,8 +86,8 @@ assert.equal(retried.reformulated,true);
 assert.equal(retried.attempts.length,2);
 assert.equal(retried.rejectionHistory.length,1);
 assert.equal(ai.requests.length,2);
-assert.equal(ai.requests[0].response_format.type,'json_schema','every Workers AI attempt must request structured JSON');
-assert.equal(ai.requests[1].response_format.type,'json_schema','validator-informed correction must remain schema-constrained');
+assert.equal(ai.requests[0].response_format.type,'json_object','every Workers AI attempt must require one valid JSON object');
+assert.equal(ai.requests[1].response_format.type,'json_object','validator-informed correction must remain JSON-object constrained');
 assert.equal(ai.requests[0].seed,314,'structured proposal generation must stay reproducible within the bounded model path');
 assert.ok(retried.rejectionHistory[0].reasons.includes('FILE_1_SHA_MISMATCH'),'exact validator rejection code must survive into the scar ledger');
 assert.ok(retryPrompts[1].includes('FILE_1_SHA_MISMATCH'),'the next model attempt must receive the exact rejection evidence');
@@ -139,9 +133,11 @@ assert.match(worker,/env\.AI\|\|null/,'Workers AI binding must be passed explici
 assert.match(config,/"ai"\s*:\s*\{\s*"binding"\s*:\s*"AI"/s);
 assert.match(config,/OMEGA_WORKERS_AI_MODEL/);
 assert.match(config,/@cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/,'CLOUD-01 config must bind the documented JSON-mode model');
-assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/response_format:repairResponseFormatR314/,'Workers AI call must use the exact dynamic R314 JSON schema');
+assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/response_format:repairResponseFormatR314/,'Workers AI call must retain the JSON-object generation boundary');
+assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/return\{type:'json_object'\}/,'R415 must avoid unsupported XGrammar JSON-schema features');
+assert.doesNotMatch(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/type:'json_schema'/,'R415 must not reintroduce the rejected XGrammar schema boundary');
 assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/if\(result\?\.response!==undefined\)return result\.response/,'object-form Workers AI structured responses must be unwrapped before R314 validation');
 assert.match(config,/@cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/,'CLOUD-01 config must match the structured-output R314 model');
 assert.doesNotMatch(machine,/wrangler\s+deploy|CLOUDFLARE_API_TOKEN/,'CLOUD-01 still may not deploy production directly');
 
-console.log('R314 CLOUD AUTONOMOUS REPAIR PASS · R164/R125 residual adapter · bounded target registry · exact-SHA source envelope · Workers AI proposal · structured Workers AI JSON schema · object-response unwrap · exact validator feedback · bounded reformulation scar ledger · R314 policy validation · branch-only mutation · inherited R241 promotion gate');
+console.log('R314 CLOUD AUTONOMOUS REPAIR PASS · R164/R125 residual adapter · bounded target registry · exact-SHA source envelope · Workers AI proposal · XGrammar-compatible JSON-object generation · unchanged semantic R314 validation · object-response unwrap · exact validator feedback · bounded reformulation scar ledger · R314 policy validation · branch-only mutation · inherited R241 promotion gate');
