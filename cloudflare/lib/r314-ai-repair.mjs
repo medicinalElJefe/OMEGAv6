@@ -40,7 +40,7 @@ export function prepareAiRepairR314({rawResponse,residual,contextFiles=[]}={}){
  return{ok:true,state:'VALIDATED_BOUNDED_PATCH',proposal,validation,patches};
 }
 
-const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR';
+const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR'||state==='NO_SAFE_PATCH';
 const attemptReceipt=(attempt,prepared)=>({
  attempt,
  state:prepared.state,
@@ -76,7 +76,6 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
   const receipt=attemptReceipt(attempt,prepared);
   attempts.push(receipt);
   if(prepared.ok)return{model,promptSchema:'R314',reformulated:attempt>1,rejectionHistory:attempts.slice(0,-1),attempts,...prepared};
-  if(prepared.state==='NO_SAFE_PATCH')return{model,promptSchema:'R314',reformulated:attempt>1,rejectionHistory:attempts.slice(0,-1),attempts,...prepared};
   if(!retryableState(prepared.state)||attempt===boundedAttempts)return{model,promptSchema:'R314',reformulated:attempt>1,rejectionHistory:attempts,attempts,...prepared};
   rejection={state:prepared.state,reasons:prepared.reasons||[],validation:prepared.validation||null,proposal:prepared.proposal||null};
  }
