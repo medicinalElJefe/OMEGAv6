@@ -75,7 +75,7 @@ export default function OmegaConvergenceSurfaceR416({record,state,address,onAddr
     <div className='r356-compatibility-stack'>
      <details><summary>R168 full restoration convergence</summary><FullRestorationConvergenceR168 record={record} address={address} onNavigate={onNavigate}/></details>
      <details><summary>R126 maximum cockpit / execution topology</summary><OmegaMaximumCockpitR126 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
-     <details><summary>R164 returned reflex → autonomic swarm</summary><ReflexAutonomicR164/></details>
+     <div className='r416-r164-retained-visible' data-retained-capability='R164'><ReflexAutonomicR164/></div>
      <details><summary>R125 autonomic execution / checkpoint / rejoin</summary><OmegaAutonomicR125/></details>
      <details><summary>R123 organism hierarchy</summary><OmegaOrganismR123/></details>
      <details><summary>R121 direct swarm compatibility</summary><OmegaSwarmR121 record={record} state={state} address={address} onAddress={onAddress} onNavigate={onNavigate}/></details>
