@@ -61,14 +61,22 @@ async function prove(viewportName,contextOptions){
   const tech=page.locator('.r239-tech-toggle:visible');
   if(await tech.count()!==1)throw new Error(`${viewportName}: R411 Technical toggle must remain uniquely visible`);
   await assertControlIntegrity(tech,`${viewportName}:technical-toggle`,{minHeight:coarse?44:38,minFont:9.5});
-  if(await master.isVisible())throw new Error(`${viewportName}: R411 Simple view must not expose recovered master-menu density by default`);
-  await tech.click();
+
+  // R411.3: recovered master menus are navigation authority, not technical
+  // diagnostics. They remain directly reachable in Simple view inside one
+  // horizontally-contained strip; Technical only reveals execution metadata.
   await master.waitFor({state:'visible',timeout:10000});
-  if(await tech.getAttribute('aria-pressed')!=='true')throw new Error(`${viewportName}: Technical toggle did not enter the explicit advanced-navigation state`);
   const masterButtons=master.locator('button');
-  if(await masterButtons.count()!==13)throw new Error(`${viewportName}: expected ALL + 12 recovered master-menu controls after Technical opt-in`);
+  if(await masterButtons.count()!==13)throw new Error(`${viewportName}: expected ALL + 12 directly reachable recovered master-menu controls`);
   await assertControlIntegrity(masterButtons,`${viewportName}:master-menu`,{minHeight:coarse?44:40,minFont:coarse?10:10.5});
   await assertControlIntegrity(workspaceButtons,`${viewportName}:workspace-filter`,{minHeight:coarse?44:40,minFont:10});
+  const simpleMenuGeometry=await master.evaluate(el=>({clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,overflowX:getComputedStyle(el).overflowX}));
+  if(!['auto','scroll'].includes(simpleMenuGeometry.overflowX))throw new Error(`${viewportName}: Simple-view recovered-menu authority is not horizontally contained`);
+  await tech.click();
+  if(await tech.getAttribute('aria-pressed')!=='true')throw new Error(`${viewportName}: Technical toggle did not expose execution metadata`);
+  if(!(await master.isVisible())||await master.locator('button').count()!==13)throw new Error(`${viewportName}: Technical metadata toggle changed recovered-menu reachability`);
+  await tech.click();
+  if(await tech.getAttribute('aria-pressed')!=='false')throw new Error(`${viewportName}: Technical metadata toggle did not restore Simple view`);
 
   await masterButtons.first().click();
   await page.waitForFunction(()=>document.querySelector('#omega-global-navigator')?.getAttribute('data-master-menu')==='ALL',undefined,{timeout:10000});
@@ -131,4 +139,4 @@ async function prove(viewportName,contextOptions){
 }
 
 for(const [name,options] of viewports)await prove(name,options);
-console.log('R289/R311 LIVE MASTER-MENU BROWSER PASS · actual R88/R239 navigator · ALL + 12 recovered master menus · ALL + six workspace filters · readable controls · real coarse-pointer 44px geometry · center-point occlusion proof · master/workspace/search composition · canonical route activation · desktop/mobile containment · no page errors');
+console.log('R289/R311/R411 LIVE MASTER-MENU BROWSER PASS · actual canonical navigator · ALL + 12 recovered master menus directly reachable in Simple view · Technical changes metadata only · ALL + six workspace filters · readable controls · real coarse-pointer 44px geometry · center-point occlusion proof · master/workspace/search composition · canonical route activation · desktop/mobile containment · no page errors');
