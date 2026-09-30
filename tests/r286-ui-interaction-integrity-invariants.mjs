@@ -9,6 +9,7 @@ await import('./r203-interface-navigation-polish-invariants.mjs');
 await import('./r257-adaptive-experience-shell-invariants.mjs');
 await import('./r279-earth-truth-navigation-invariants.mjs');
 await import('./r280-sar-truth-invariants.mjs');
+await import('./r411-navigation-shell-invariants.mjs');
 
 const index=read('index.html');
 const compat=read('src/r286InteractionIntegrity.css');
