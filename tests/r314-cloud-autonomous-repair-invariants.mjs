@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {buildCloudResidualStateR314,R314_CLOUD_RESIDUAL_ADAPTER_SCHEMA} from '../cloudflare/lib/r314-residual-adapter.mjs';
 import {classifyRepairTargetR314,selectRepairTargetR314,R314_CLOUD_TARGET_REGISTRY_SCHEMA} from '../cloudflare/lib/r314-target-registry.mjs';
-import {prepareAiRepairR314,proposeAiRepairR314,R314_CLOUD_AI_REPAIR_SCHEMA} from '../cloudflare/lib/r314-ai-repair.mjs';
-import {R314_AUTONOMOUS_REPAIR_SCHEMA,R314_AI_MAX_ATTEMPTS,R314_AI_MAX_OUTPUT_TOKENS,repairPathPolicyR314} from '../src/system/autonomousRepairPolicyR314.js';
+import {prepareAiRepairR314,proposeAiRepairR314,repairResponseFormatR314,R314_CLOUD_AI_REPAIR_SCHEMA} from '../cloudflare/lib/r314-ai-repair.mjs';
+import {R314_AUTONOMOUS_REPAIR_SCHEMA,R314_AI_REPAIR_MODEL_DEFAULT,R314_AI_MAX_ATTEMPTS,R314_AI_MAX_OUTPUT_TOKENS,repairPathPolicyR314} from '../src/system/autonomousRepairPolicyR314.js';
 
 assert.equal(R314_CLOUD_RESIDUAL_ADAPTER_SCHEMA,'OMEGA_CLOUD_R314_RESIDUAL_ADAPTER');
 assert.equal(R314_CLOUD_TARGET_REGISTRY_SCHEMA,'OMEGA_CLOUD_R314_TARGET_REGISTRY');
@@ -34,6 +34,8 @@ assert.equal(classifyRepairTargetR314({...safeResidual,affected:['src/generated/
 const contextFiles=[{path:'src/components/Example.jsx',sha:'blob123',text:'export const value = 1;\n'}];
 const proposal={schema:R314_AUTONOMOUS_REPAIR_SCHEMA,residualId:'R314-TEST-SAFE',files:[{path:'src/components/Example.jsx',preimageSha:'blob123',replacements:[{before:'export const value = 1;',after:'export const value = 2;'}]}],canonicalAdmission:false,directProductionMutation:false,expectedProofs:['R241 Archive Convergence Visual Intelligence']};
 const prepared=prepareAiRepairR314({rawResponse:JSON.stringify(proposal),residual:safeResidual,contextFiles});
+const objectPrepared=prepareAiRepairR314({rawResponse:proposal,residual:safeResidual,contextFiles});
+assert.equal(objectPrepared.ok,true,'Workers AI JSON mode object responses must enter R314 directly without wrapper corruption');
 assert.equal(prepared.ok,true);
 assert.equal(prepared.patches.length,1);
 assert.equal(prepared.patches[0].content,'export const value = 2;\n');
@@ -42,13 +44,43 @@ assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(wrongSha),residual:
 const declined={...proposal,files:[]};
 assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(declined),residual:safeResidual,contextFiles}).state,'NO_SAFE_PATCH','model refusal must become no mutation');
 
+assert.equal(R314_AI_REPAIR_MODEL_DEFAULT,'@cf/meta/llama-3.3-70b-instruct-fp8-fast','R414 must use the documented structured-output Workers AI model');
+const structuredResidual={...safeResidual,expectedProofs:['R241 Archive Convergence Visual Intelligence','OMEGA Cloud Bridge CI']};
+const responseFormat=repairResponseFormatR314({residual:structuredResidual,contextFiles});
+assert.equal(responseFormat.type,'json_schema');
+assert.equal(responseFormat.json_schema.properties.schema.enum[0],R314_AUTONOMOUS_REPAIR_SCHEMA);
+assert.equal(responseFormat.json_schema.properties.residualId.enum[0],safeResidual.id);
+assert.equal(responseFormat.json_schema.properties.files.maxItems,1);
+assert.equal(responseFormat.json_schema.properties.files.items.properties.path.enum[0],contextFiles[0].path);
+assert.equal(responseFormat.json_schema.properties.files.items.properties.preimageSha.enum[0],contextFiles[0].sha);
+assert.deepEqual(responseFormat.json_schema.properties.canonicalAdmission.enum,[false]);
+assert.ok(responseFormat.json_schema.properties.expectedProofs.items.enum.includes('OMEGA Cloud Bridge CI'));
+
+const duplicateProposal={...proposal,files:[proposal.files[0],structuredClone(proposal.files[0])]};
+const duplicatePrepared=prepareAiRepairR314({rawResponse:duplicateProposal,residual:safeResidual,contextFiles});
+assert.equal(duplicatePrepared.ok,false);
+assert.ok(duplicatePrepared.reasons.includes('FILE_2_DUPLICATE_PATH'),'duplicate source paths must fail closed before branch mutation');
+
+const objectResponseAi={
+ seen:null,
+ async run(model,input){this.seen={model,input};return{response:proposal}}
+};
+const objectStructured=await proposeAiRepairR314({ai:objectResponseAi,residual:structuredResidual,stage:{id:'R414-OBJECT',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles,maxAttempts:1});
+assert.equal(objectStructured.ok,true,'object-form Workers AI structured response must unwrap directly into R314 validation');
+assert.equal(objectResponseAi.seen.model,R314_AI_REPAIR_MODEL_DEFAULT);
+assert.equal(objectResponseAi.seen.input.response_format.type,'json_schema');
+assert.equal(objectResponseAi.seen.input.seed,314);
+
+
 assert.equal(R314_AI_MAX_ATTEMPTS,2,'validator-driven reformulation budget must remain one initial proposal plus one correction');
 assert.equal(R314_AI_MAX_OUTPUT_TOKENS,3500,'bounded repair output must remain compact enough for operational autonomous cycles');
 const retryPrompts=[];
 const rejectedOnce=structuredClone(proposal);rejectedOnce.files[0].preimageSha='wrong';
 const ai={
  calls:0,
+ requests:[],
  async run(_model,input){
+  this.requests.push(input);
   this.calls++;
   retryPrompts.push(input.messages.at(-1).content);
   return{response:JSON.stringify(this.calls===1?rejectedOnce:proposal)};
@@ -59,6 +91,10 @@ assert.equal(retried.ok,true,'a validator-rejected proposal may be reformulated 
 assert.equal(retried.reformulated,true);
 assert.equal(retried.attempts.length,2);
 assert.equal(retried.rejectionHistory.length,1);
+assert.equal(ai.requests.length,2);
+assert.equal(ai.requests[0].response_format.type,'json_schema','every Workers AI attempt must request structured JSON');
+assert.equal(ai.requests[1].response_format.type,'json_schema','validator-informed correction must remain schema-constrained');
+assert.equal(ai.requests[0].seed,314,'structured proposal generation must stay reproducible within the bounded model path');
 assert.ok(retried.rejectionHistory[0].reasons.includes('FILE_1_SHA_MISMATCH'),'exact validator rejection code must survive into the scar ledger');
 assert.ok(retryPrompts[1].includes('FILE_1_SHA_MISMATCH'),'the next model attempt must receive the exact rejection evidence');
 assert.ok(retryPrompts[1].includes('Copy the supplied exact source SHA for that file without modification.'),'validator code must carry deterministic correction guidance');
@@ -79,6 +115,13 @@ const recoveredMalformed=await proposeAiRepairR314({ai:malformedAi,residual:safe
 assert.equal(recoveredMalformed.ok,true,'malformed model output may be corrected once without widening policy');
 assert.match(recoveredMalformed.rejectionHistory[0].reasons[0],/^AI_RESPONSE_PARSE_ERROR:/);
 
+const transientAi={calls:0,async run(_model,input){this.calls++;if(this.calls===1)throw new Error('JSON Mode could not be met');return{response:proposal}}};
+const recoveredRunError=await proposeAiRepairR314({ai:transientAi,residual:structuredResidual,stage:{id:'R414-RUN-ERROR',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
+assert.equal(recoveredRunError.ok,true,'one structured-output generation failure may consume the bounded correction attempt');
+assert.equal(recoveredRunError.reformulated,true);
+assert.match(recoveredRunError.rejectionHistory[0].reasons[0],/^AI_RUN_ERROR:/);
+assert.equal(transientAi.calls,2);
+
 
 const machine=fs.readFileSync('cloudflare/lib/github-machine.mjs','utf8');
 const worker=fs.readFileSync('cloudflare/workerR223.js','utf8');
@@ -95,6 +138,10 @@ assert.match(machine,/R241 Archive Convergence Visual Intelligence/,'AI candidat
 assert.match(worker,/env\.AI\|\|null/,'Workers AI binding must be passed explicitly and remain optional/fail-closed');
 assert.match(config,/"ai"\s*:\s*\{\s*"binding"\s*:\s*"AI"/s);
 assert.match(config,/OMEGA_WORKERS_AI_MODEL/);
+assert.match(config,/@cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/,'CLOUD-01 config must bind the documented JSON-mode model');
+assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/response_format:repairResponseFormatR314/,'Workers AI call must use the exact dynamic R314 JSON schema');
+assert.match(fs.readFileSync('cloudflare/lib/r314-ai-repair.mjs','utf8'),/if\(result\?\.response!==undefined\)return result\.response/,'object-form Workers AI structured responses must be unwrapped before R314 validation');
+assert.match(config,/@cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/,'CLOUD-01 config must match the structured-output R314 model');
 assert.doesNotMatch(machine,/wrangler\s+deploy|CLOUDFLARE_API_TOKEN/,'CLOUD-01 still may not deploy production directly');
 
-console.log('R314 CLOUD AUTONOMOUS REPAIR PASS · R164/R125 residual adapter · bounded target registry · exact-SHA source envelope · Workers AI proposal · exact validator feedback · bounded reformulation scar ledger · R314 policy validation · branch-only mutation · inherited R241 promotion gate');
+console.log('R314 CLOUD AUTONOMOUS REPAIR PASS · R164/R125 residual adapter · bounded target registry · exact-SHA source envelope · Workers AI proposal · structured Workers AI JSON schema · object-response unwrap · exact validator feedback · bounded reformulation scar ledger · R314 policy validation · branch-only mutation · inherited R241 promotion gate');
