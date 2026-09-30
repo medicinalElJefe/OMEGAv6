@@ -54,6 +54,7 @@ must(!infinity.includes('<canvas ref={canvas}/>'),'Infinity production return mu
 must(infinity.includes('toroidal particle renderer is retained in source lineage but is no longer mounted'),'Infinity legacy renderer status must be explicit');
 
 must(scale.indexOf('<ScaleTruthPlotR93 nodes={audit.compiler.nodes}/>')>=0&&scale.indexOf('<ScaleTruthPlotR93 nodes={audit.compiler.nodes}/>')<scale.indexOf("<CalculusFieldR37 address={address}"),'Scale Compiler node outputs must precede optional renderer');
+must(truth.includes("data-scale-visual-ready='true'")&&truth.includes("minHeight:'360px'")&&truth.includes("width:'100%'"),'Scale Compiler primary SVG must materialize usable geometry without depending on deferred stylesheet timing');
 
 must(field.includes('<CanonicalMembraneR95 address={address} onAddress={onAddress}'),'Field must use the canonical 20,736-cell membrane as primary');
 must((field.match(/<TransitionTruthPlotR93/g)||[]).length>=2,'Data Motion and Convergence must use direct transition plots');
