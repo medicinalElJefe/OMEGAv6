@@ -43,5 +43,9 @@ for(const token of ['selectNextConvergenceItemR388','R388_BACKLOG_AI_BUILD','R38
 for(const workflow of ['OMEGA R237 Hybrid Command Authority Proof','OMEGA R238 Woven Hybrid Continuity Convergence'])assert.ok(machine.includes(workflow),`CLOUD-01 autonomous promotion must require ${workflow}`);
 assert.ok(machine.includes("externalProofRequired:item.externalProofRequired===true"),'R388 must carry external proof obligations into receipts');
 assert.ok(machine.includes('This is one bounded source-improvement step, not a claim that the entire section or any external/device condition is complete.'),'R388 PR truth boundary missing');
+assert.ok(machine.includes("repair:{state:repair.state,reasons:repair.reasons||repair.validation?.reasons||[],attempts:repair.attempts||[]"),'R388 must retain exact rejected-attempt evidence when no candidate is emitted');
+assert.ok(machine.includes("repairAttemptLedger:repair.attempts||[]"),'R388 governed receipt must carry bounded AI attempt history');
+assert.ok(machine.includes("rejectionScars:repair.rejectionHistory||[]"),'R388 governed receipt must preserve validator rejection scars after compliant reformulation');
 
-console.log(`R388 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · deterministic section→source targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · all 8 exact-head workflow families required for autonomous promotion`);
+
+console.log(`R388 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · deterministic section→source targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · bounded compliant reformulation only · all 8 exact-head workflow families required for autonomous promotion`);
