@@ -3,7 +3,10 @@ import fs from 'node:fs';
 
 const read=p=>fs.readFileSync(p,'utf8');
 const nav=read('src/OmegaSideNavigatorR88.tsx');
-const css=read('src/omegaSideNavigatorR88.css');
+const legacyCss=read('src/omegaSideNavigatorR88.css');
+const css=read('src/omegaNavigationShellR411.css');
+const workstation=read('src/OmegaWorkstationFullV2.tsx');
+const home=read('src/OmegaHomeR71.tsx');
 const registry=read('src/navigationRegistry.ts');
 
 const surfaceBlock=registry.slice(registry.indexOf('export const OMEGA_NAVIGATION=['),registry.indexOf('export const OMEGA_NAV_GROUPS'));
@@ -14,7 +17,9 @@ assert.equal(new Set(routes).size,44,'R411 route inventory must remain unique');
 assert.ok(nav.includes("R411_NAVIGATION_SHELL_REVISION='R411'"),'R411 shell revision missing');
 assert.ok(nav.includes('r411-navigation-shell'),'R411 shell class missing');
 assert.ok(nav.includes('data-navigation-shell-revision={R411_NAVIGATION_SHELL_REVISION}'),'R411 shell receipt missing');
-assert.ok(nav.lastIndexOf("import './omegaSideNavigatorR88.css';")>nav.indexOf("import './omegaSideNavigatorR333.css';"),'R411 canonical geometry owner must load after retained navigation provenance layers');
+assert.ok(!legacyCss.includes('R411 · CANONICAL NAVIGATION SHELL REBUILD'),'legacy R88 stylesheet must not also own final R411 geometry');
+assert.ok(workstation.includes("import './omegaNavigationShellR411.css';")&&workstation.indexOf("omegaNavigationShellR411.css")>workstation.indexOf("workstationPresentationR356.css"),'Workstation must load R411 after its presentation authority');
+assert.ok(home.includes("import './omegaNavigationShellR411.css';")&&home.indexOf("omegaNavigationShellR411.css")>home.indexOf("wholeSystemExperienceR132.css"),'Home must load R411 after its presentation authority');
 assert.ok(nav.includes('rows.map(route=>')&&!nav.includes('rows.slice('),'R411 must preserve complete direct route reachability');
 assert.ok(!nav.includes("document.body.style.overflow='hidden'"),'R411 must not lock application scrolling');
 
@@ -34,4 +39,4 @@ assert.ok(css.includes('z-index:2147483647!important;pointer-events:auto!importa
 assert.ok(css.includes("@media(min-width:901px)")&&css.includes('margin-left:calc(var(--r411-rail) + var(--r411-panel))!important'),'desktop expanded navigation must reserve a real layout column');
 assert.ok(css.includes('.r89-flat-scroll')&&css.includes('flex:1 1 auto!important')&&css.includes('overflow:auto!important'),'R411 route list must be the single flexible scroll owner');
 
-console.log('R411.1 NAVIGATION SHELL PASS · one shared route authority · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · simplified default menu · fullscreen chrome suppression · 44 routes preserved');
+console.log('R411.2 NAVIGATION SHELL PASS · one final shell stylesheet after Home/Workstation presentation · desktop reserved column · phone bottom command dock + opaque full-width menu sheet · obsolete mobile rail reservation closed · fullscreen chrome suppression · 44 routes preserved');
