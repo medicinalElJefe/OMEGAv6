@@ -26,6 +26,8 @@
 .earth-r72-workspace.display-focus>.earth-r72-console{display:none}
 .earth-r372-stage-expanded{position:fixed!important;inset:0!important;z-index:2147483000!important;width:100vw!important;height:100vh!important;min-height:100vh!important;max-height:none!important;border-radius:0!important;background:#01070b!important;overflow:auto!important;padding:52px 10px 10px}
 .earth-r372-stage-expanded>.earth-r372-expanded-bar{position:fixed;z-index:2147483001;left:0;right:0;top:0;height:44px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 12px;border-bottom:1px solid rgba(112,214,205,.24);background:rgba(2,10,15,.96);backdrop-filter:blur(8px)}
+/* R411 · true Earth full-screen ownership: the global sticky workstation bar is a sibling stacking context and must yield while the fixed Earth stage owns the viewport. Hiding it prevents visual/pointer occlusion without changing any Earth or global control authority; it restores automatically when the expanded stage unmounts. */
+.omega-workstation-v2:has(.earth-r372-stage-expanded) .workstation-topbar{visibility:hidden!important;pointer-events:none!important}
 .earth-r372-expanded-bar b{font:800 10px ui-monospace,monospace;letter-spacing:.1em;color:#d9f5f0}
 .earth-r372-expanded-bar button{display:inline-flex;align-items:center;gap:6px}
 .earth-r372-stage-expanded>.earth-r279-satellite,.earth-r372-stage-expanded>.earth-r283-sar,.earth-r372-stage-expanded>.earth-r279-ground,.earth-r372-stage-expanded>.earth-r279-calculus,.earth-r372-stage-expanded>.earth-r281-globe,.earth-r372-stage-expanded>.earth-r279-instrument{min-height:calc(100vh - 70px)!important;height:auto!important}

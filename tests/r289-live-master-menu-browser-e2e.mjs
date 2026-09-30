@@ -8,11 +8,19 @@ const viewports=[
 ];
 
 async function openNavigator(page){
- if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
- const expand=page.locator('button[aria-label="Expand OMEGA navigator"]');
+ const ownedOpen=await page.locator('.r411-navigation-shell[data-navigation-owner]').evaluateAll((nodes)=>{
+  const owner=document.documentElement.dataset.omegaNavOwner||'';
+  return nodes.filter(node=>node.getAttribute('data-navigation-owner')===owner&&node.classList.contains('expanded')).length;
+ });
+ if(ownedOpen===1)return;
+ const expand=page.locator('.r411-navigation-shell[data-navigation-owner] button[aria-label="Expand OMEGA navigator"]:visible');
  await expand.first().waitFor({state:'visible',timeout:15000});
  await expand.first().click();
- await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',undefined,{timeout:10000});
+ await page.waitForFunction(()=>{
+  const root=document.documentElement,owner=root.dataset.omegaNavOwner||'';
+  const shell=[...document.querySelectorAll('.r411-navigation-shell[data-navigation-owner]')].find(node=>node.getAttribute('data-navigation-owner')===owner);
+  return root.dataset.omegaNavExpanded==='true'&&Boolean(shell?.classList.contains('expanded'));
+ },undefined,{timeout:10000});
 }
 
 async function visibleRouteSnapshot(page){
@@ -53,18 +61,28 @@ async function prove(viewportName,contextOptions){
   const shell=page.locator('#omega-global-navigator');
   if(await shell.getAttribute('data-master-menu-presentation-revision')==='')throw new Error(`${viewportName}: live navigator missing R289 presentation revision`);
   const master=page.getByRole('navigation',{name:'Recovered OMEGA master menus'});
-  await master.waitFor({state:'visible',timeout:10000});
-  const masterButtons=master.locator('button');
-  if(await masterButtons.count()!==13)throw new Error(`${viewportName}: expected ALL + 12 recovered master-menu controls`);
   const workspace=page.getByRole('navigation',{name:'Application workspace submenu'});
   const workspaceButtons=workspace.locator('button');
   if(await workspaceButtons.count()!==7)throw new Error(`${viewportName}: existing ALL + six workspace controls were not preserved`);
 
   const coarse=viewportName==='mobile';
+  const tech=page.locator('.r239-tech-toggle:visible');
+  if(await tech.count()!==1)throw new Error(`${viewportName}: R411 Technical toggle must remain uniquely visible`);
+  await assertControlIntegrity(tech,`${viewportName}:technical-toggle`,{minHeight:coarse?44:38,minFont:9.5});
+
+  // R411.4: Simple is intentionally clean. Recovered master menus retain full
+  // navigation authority behind explicit Technical opt-in, where they remain
+  // directly reachable in one horizontally-contained strip.
+  if(await master.isVisible())throw new Error(`${viewportName}: R411 Simple view exposes recovered master-menu density before Technical opt-in`);
+  await tech.click();
+  await master.waitFor({state:'visible',timeout:10000});
+  if(await tech.getAttribute('aria-pressed')!=='true')throw new Error(`${viewportName}: Technical toggle did not expose recovered navigation`);
+  const masterButtons=master.locator('button');
+  if(await masterButtons.count()!==13)throw new Error(`${viewportName}: expected ALL + 12 recovered master-menu controls after Technical opt-in`);
   await assertControlIntegrity(masterButtons,`${viewportName}:master-menu`,{minHeight:coarse?44:40,minFont:coarse?10:10.5});
   await assertControlIntegrity(workspaceButtons,`${viewportName}:workspace-filter`,{minHeight:coarse?44:40,minFont:10});
-  const tech=page.locator('.r239-tech-toggle:visible');
-  if(await tech.count())await assertControlIntegrity(tech,`${viewportName}:technical-toggle`,{minHeight:coarse?44:38,minFont:9.5});
+  const technicalMenuGeometry=await master.evaluate(el=>({clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,overflowX:getComputedStyle(el).overflowX}));
+  if(!['auto','scroll'].includes(technicalMenuGeometry.overflowX))throw new Error(`${viewportName}: Technical recovered-menu strip is not horizontally contained`);
 
   await masterButtons.first().click();
   await page.waitForFunction(()=>document.querySelector('#omega-global-navigator')?.getAttribute('data-master-menu')==='ALL',undefined,{timeout:10000});
@@ -109,22 +127,34 @@ async function prove(viewportName,contextOptions){
   await workspaceButtons.first().click();
   await page.waitForFunction(()=>document.querySelectorAll('.r89-flat-route').length===44,undefined,{timeout:10000});
   const route=page.locator('.r89-flat-route').first();
+  const priorNavOwner=await page.evaluate(()=>document.documentElement.dataset.omegaNavOwner||'');
   const routeName=await route.getAttribute('data-route-name');if(!routeName)throw new Error(`${viewportName}: canonical route identity missing`);
   await route.scrollIntoViewIfNeeded();
   const routeStyle=await route.locator('span>b').first().evaluate(el=>({font:parseFloat(getComputedStyle(el).fontSize)||0}));
   if(routeStyle.font<12)throw new Error(`${viewportName}: route title regressed to ${routeStyle.font}px`);
   await route.click();
   await page.waitForFunction(name=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===name,routeName,{timeout:20000});
+  await page.waitForFunction(previous=>{
+   const root=document.documentElement,owner=root.dataset.omegaNavOwner||'';
+   const owners=[...document.querySelectorAll('.r411-navigation-shell[data-navigation-owner]')].map(node=>node.getAttribute('data-navigation-owner')||'');
+   return Boolean(owner&&owner!==previous&&owners.filter(value=>value===owner).length===1);
+  },priorNavOwner,{timeout:20000});
 
   await openNavigator(page);
+  const remountedTech=page.locator('.r239-tech-toggle:visible');
+  if(await remountedTech.count()!==1)throw new Error(`${viewportName}: remounted navigator lost its unique Technical opt-in`);
+  if(await remountedTech.getAttribute('aria-pressed')!=='false')throw new Error(`${viewportName}: newly mounted navigator did not return to clean Simple state`);
+  await remountedTech.click();
+  const remountedMaster=page.getByRole('navigation',{name:'Recovered OMEGA master menus'});
+  await remountedMaster.waitFor({state:'visible',timeout:10000});
   const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
   if(overflow>10)throw new Error(`${viewportName}: live master-menu presentation causes ${overflow}px document overflow`);
-  const menuGeometry=await master.evaluate(el=>({clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,overflowX:getComputedStyle(el).overflowX}));
-  if(!['auto','scroll'].includes(menuGeometry.overflowX))throw new Error(`${viewportName}: recovered-menu row is not horizontally scroll-contained`);
+  const menuGeometry=await remountedMaster.evaluate(el=>({clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,overflowX:getComputedStyle(el).overflowX}));
+  if(!['auto','scroll'].includes(menuGeometry.overflowX))throw new Error(`${viewportName}: recovered-menu row is not horizontally scroll-contained after real route remount`);
   if(errors.length)throw new Error(`${viewportName}: browser page errors ${errors.join(' | ').slice(0,3000)}`);
   console.log(`R311 ${viewportName.toUpperCase()} PASS · 12 recovered menus + 7 workspace controls · readable typography · ${coarse?'44px coarse-pointer targets':'40px desktop targets'} · center-point reachability · ${[...perMenu.entries()].map(([id,count])=>`${id}:${count}`).join(' ')} · 44-route ALL restore · search intersection · native route activation · overflow ${overflow}px`);
  }finally{await context.close();await browser.close()}
 }
 
 for(const [name,options] of viewports)await prove(name,options);
-console.log('R289/R311 LIVE MASTER-MENU BROWSER PASS · actual R88/R239 navigator · ALL + 12 recovered master menus · ALL + six workspace filters · readable controls · real coarse-pointer 44px geometry · center-point occlusion proof · master/workspace/search composition · canonical route activation · desktop/mobile containment · no page errors');
+console.log('R289/R311/R411.9 LIVE MASTER-MENU BROWSER PASS · clean Simple view · Technical opt-in exposes ALL + 12 recovered master menus in one contained strip · ALL + six workspace filters · readable controls · real coarse-pointer 44px geometry · center-point occlusion proof · master/workspace/search composition · canonical route activation + clean remount + Technical re-entry · desktop/mobile containment · no page errors');

@@ -17,6 +17,7 @@ import {CANON_AUTHORITY_COUNT} from './allModesAuthority';
 import OmegaIntentWorkbenchR85 from './OmegaIntentWorkbenchR85';
 import './omegaHomeR71.css';
 import './wholeSystemExperienceR132.css';
+import './omegaNavigationShellR411.css';
 
 type Props={onEnter:(panel:string)=>void};
 type DomainId=OmegaWorkspaceIdR82;

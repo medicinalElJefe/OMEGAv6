@@ -15,6 +15,7 @@ const navigationProof=fs.readFileSync('tests/r239-user-navigation-browser-e2e.mj
 const disclosureProof=fs.readFileSync('tests/r313-panel-disclosure-browser-e2e.mjs','utf8');
 const routeLifecycle=fs.readFileSync('src/system/routeLifecycleR356.ts','utf8');
 const fieldMotion=fs.readFileSync('src/OmegaFieldMotionConvergenceR28.tsx','utf8');
+const membraneCss=fs.readFileSync('src/canonicalMembraneR95.css','utf8');
 
 const legacy=[
  './coherenceRepairR35.css','./specialistDepthR38_3.css','./mobileMatterR42.css','./sovereignDesignR59.css',
@@ -72,6 +73,9 @@ const capabilityCss=fs.readFileSync('src/capabilityFirstR138.css','utf8');
 for(const token of ['scrollbar-gutter:stable','overflow-anchor:none'])assert.ok((css+capabilityCss).includes(token),`R356 stable interaction coordinate contract missing ${token}`);
 for(const token of ['grid-auto-rows:84px','height:84px!important','contain:layout paint size','translate:-50% -50%'])assert.ok(capabilityCss.includes(token),`R356 fixed capability-control geometry missing ${token}`);
 assert.ok(!capabilityCss.includes('transform:translate(-50%,-50%)!important'),'R356 native topology control must not be double-translated');
+assert.ok(membraneCss.includes('height:620px;min-height:620px')&&membraneCss.includes('contain:layout paint size'),'R356 canonical membrane must own a fixed CSS layout box so backing-store resize cannot move downstream controls');
+assert.ok(membraneCss.includes('.r95-membrane-stage canvas{display:block;width:100%;height:100%;min-height:0'),'R356 canvas backing dimensions must remain independent of membrane CSS geometry');
+assert.ok(membraneCss.includes('height:68dvh;min-height:68dvh')&&membraneCss.includes('height:72dvh;min-height:72dvh'),'R356 membrane geometry must remain explicitly bounded at mobile breakpoints');
 
 
 const workstation=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
@@ -100,4 +104,4 @@ assert.ok(fieldMotion.includes("data-r313-nav-target='Data Motion'")&&fieldMotio
 assert.ok(interactionProof.includes("navTarget:el.getAttribute('data-r313-nav-target')")&&interactionProof.includes('await page.mouse.click(x,y);')&&interactionProof.includes('internal route control failed to commit'),'R356 exhaustive interaction proof must pointer-actuate declared internal routes and verify exact lifecycle commit without delegating document navigation to Playwright');
 
 
-console.log('R356 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor + non-blocking proof-lineage disclosure preserved · legacy presentation preserved as provenance only');
+console.log('R356.6 PRODUCT COHERENCE PASS · one live root visual authority · canonical surface frame · 44-route authority-derived presentation · current convergence precedes retained lineage · 44px mobile capability interaction envelope + R188 width floor + non-blocking proof-lineage disclosure preserved · legacy presentation preserved as provenance only');

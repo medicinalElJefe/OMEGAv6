@@ -29,7 +29,8 @@ try{
   if(await visibleChildren(diagnostics)!==0)fail(name,'closed system diagnostics leak visible content');
 
   const collapsedShell=await rect(shell),railRect=await rect(rail);
-  if(collapsedShell.left<railRect.right-2)fail(name,'canonical shell overlaps persistent navigation rail',{collapsedShell,railRect});
+  if(name==='desktop'&&collapsedShell.left<railRect.right-2)fail(name,'canonical shell overlaps persistent navigation rail',{collapsedShell,railRect});
+  if(name==='mobile'&&(railRect.left>2||railRect.right<viewport.width-2||railRect.bottom<viewport.height-2||railRect.height<54))fail(name,'R411 mobile command dock does not own the viewport bottom edge',{collapsedShell,railRect,viewport});
   if(collapsedShell.right>viewport.width+2)fail(name,'canonical shell escapes viewport',{collapsedShell,viewport});
   const trigger=page.locator('button[aria-label="Expand OMEGA navigator"]');
   if(await trigger.count()!==1)fail(name,'global navigator trigger missing',{count:await trigger.count()});
@@ -42,8 +43,12 @@ try{
    if(expandedShell.left<expandedPanel.right-3)fail(name,'expanded desktop navigator covers canonical shell',{expandedShell,expandedPanel});
    if(expandedShell.right>viewport.width+2)fail(name,'expanded desktop shell escapes viewport',{expandedShell,viewport});
   }else{
-   if(Math.abs(expandedShell.left-collapsedShell.left)>3||Math.abs(expandedShell.width-collapsedShell.width)>3)fail(name,'mobile navigator changed underlying shell geometry instead of using its bounded drawer contract',{collapsedShell,expandedShell});
-   if(expandedPanel.left<railRect.right-3||expandedPanel.right>viewport.width+2)fail(name,'mobile navigator drawer escapes its bounded viewport region',{expandedPanel,railRect,viewport});
+   if(Math.abs(expandedShell.left-collapsedShell.left)>3||Math.abs(expandedShell.width-collapsedShell.width)>3)fail(name,'mobile navigator changed underlying shell geometry instead of using its command-dock sheet contract',{collapsedShell,expandedShell});
+   if(expandedPanel.left>2||expandedPanel.right<viewport.width-2)fail(name,'R411 mobile navigation does not own full viewport width',{expandedPanel,viewport});
+   if(expandedPanel.top>2||Math.abs(expandedPanel.bottom-railRect.top)>4)fail(name,'R411 mobile navigation does not terminate exactly above the command dock',{expandedPanel,railRect,viewport});
+   const panelStyle=await panel.evaluate(el=>{const s=getComputedStyle(el);return{backgroundColor:s.backgroundColor,opacity:Number(s.opacity),pointerEvents:s.pointerEvents}});
+   const alpha=Number((panelStyle.backgroundColor.match(/rgba?\([^)]*?(?:,\s*([\d.]+))?\)$/)||[])[1]||1);
+   if(panelStyle.opacity<.99||alpha<.99||panelStyle.pointerEvents==='none')fail(name,'R411 mobile navigation is translucent or non-interactive instead of an opaque owned sheet',{panelStyle});
   }
   await page.keyboard.press('Escape');
   await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='false',{timeout:10000});
@@ -61,9 +66,11 @@ try{
   if(await page.locator('.r257-shell').getAttribute('data-r257-presentation')!=='HEADLESS_CANONICAL_NAV')fail(name,'headless canonical-nav presentation did not survive reload');
   if(await page.locator('.r257-immersive-dock').count()!==0)fail(name,'obsolete R257 immersive dock rendered after reload');
   const reloadedShell=await rect(page.locator('.r257-shell')),reloadedRail=await rect(page.locator('.r94-nav-rail'));
-  if(reloadedShell.left<reloadedRail.right-2||reloadedShell.right>viewport.width+2)fail(name,'reload broke canonical shell/nav ownership',{reloadedShell,reloadedRail,viewport});
+  if(name==='desktop'&&reloadedShell.left<reloadedRail.right-2)fail(name,'reload broke desktop shell/nav ownership',{reloadedShell,reloadedRail,viewport});
+  if(name==='mobile'&&(reloadedRail.left>2||reloadedRail.right<viewport.width-2||reloadedRail.bottom<viewport.height-2))fail(name,'reload broke mobile bottom command-dock ownership',{reloadedShell,reloadedRail,viewport});
+  if(reloadedShell.right>viewport.width+2)fail(name,'reload broke canonical viewport containment',{reloadedShell,reloadedRail,viewport});
   if(pageErrors.length)fail(name,'page errors occurred',pageErrors.slice(0,8));
   await context.close();
  }
- console.log('R318/R317.1 VIEWPORT OWNERSHIP BROWSER PASS · desktop/mobile R257 authority retained headlessly · R71/R82/R88 remains sole visible navigation · diagnostics default closed and normal-flow only · desktop expanded navigator reserves space · mobile drawer preserves bounded shell · no duplicate R257 chrome · reload stable · no page errors');
+ console.log('R318/R411 VIEWPORT OWNERSHIP BROWSER PASS · desktop/mobile R257 authority retained headlessly · R71/R82/R88/R411 remains sole visible navigation · desktop expanded navigator reserves space · mobile bottom command dock + opaque full-width sheet preserve underlying geometry · reload stable · no page errors');
 }finally{await browser.close()}
