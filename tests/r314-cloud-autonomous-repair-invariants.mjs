@@ -36,6 +36,9 @@ const proposal={schema:R314_AUTONOMOUS_REPAIR_SCHEMA,residualId:'R314-TEST-SAFE'
 const prepared=prepareAiRepairR314({rawResponse:JSON.stringify(proposal),residual:safeResidual,contextFiles});
 const objectPrepared=prepareAiRepairR314({rawResponse:proposal,residual:safeResidual,contextFiles});
 assert.equal(objectPrepared.ok,true,'Workers AI JSON mode object responses must enter R314 directly without wrapper corruption');
+const objectResponseAi={async run(){return{response:proposal}}};
+const objectResponseRepair=await proposeAiRepairR314({ai:objectResponseAi,residual:safeResidual,stage:{id:'R414-OBJECT',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles,maxAttempts:1});
+assert.equal(objectResponseRepair.ok,true,'env.AI.run JSON-mode {response:<object>} must validate without becoming {response:{...}} schema drift');
 const format=repairResponseFormatR314({residual:{...safeResidual,expectedProofs:['R241 Archive Convergence Visual Intelligence']},contextFiles});
 assert.equal(format.type,'json_schema');
 assert.equal(format.json_schema.properties.schema.enum[0],R314_AUTONOMOUS_REPAIR_SCHEMA);
@@ -49,6 +52,10 @@ assert.equal(R314_AI_REPAIR_MODEL_DEFAULT,'@cf/meta/llama-3.3-70b-instruct-fp8-f
 assert.equal(prepared.ok,true);
 assert.equal(prepared.patches.length,1);
 assert.equal(prepared.patches[0].content,'export const value = 2;\n');
+const duplicatePath={...proposal,files:[proposal.files[0],structuredClone(proposal.files[0])]};
+const duplicatePrepared=prepareAiRepairR314({rawResponse:duplicatePath,residual:safeResidual,contextFiles});
+assert.equal(duplicatePrepared.ok,false,'duplicate file entries must fail closed before branch creation');
+assert.ok(duplicatePrepared.reasons.includes('FILE_2_DUPLICATE_PATH'));
 const wrongSha=structuredClone(proposal);wrongSha.files[0].preimageSha='wrong';
 assert.equal(prepareAiRepairR314({rawResponse:JSON.stringify(wrongSha),residual:safeResidual,contextFiles}).ok,false,'preimage drift must reject the patch');
 const declined={...proposal,files:[]};
