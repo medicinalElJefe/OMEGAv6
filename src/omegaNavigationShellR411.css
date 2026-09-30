@@ -93,7 +93,6 @@
  background:#061116!important;border-color:var(--r411-line)!important;
 }
 .r411-navigation-shell .r333-filter-stack{min-height:0!important;overflow:visible!important}
-.r411-navigation-shell[data-technical='false'] .r333-filter-row:first-child{display:none!important}
 .r411-navigation-shell .r105-workspace-filter{
  display:flex!important;flex-wrap:wrap!important;gap:5px!important;
  overflow:visible!important;padding:6px 10px 7px!important;white-space:normal!important;
@@ -102,11 +101,18 @@
  flex:1 1 92px!important;min-width:0!important;min-height:36px!important;
  white-space:normal!important;line-height:1.15!important;
 }
+/* R411.3 · recovered master menus are navigation authority, not technical diagnostics.
+   Keep all 12 directly reachable, but compress them into one horizontally-contained strip
+   so they do not recreate the stacked menu wall that R411 replaces. */
 .r411-navigation-shell .r289-master-menu-filter{
- display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
- gap:5px!important;overflow:visible!important;padding:6px 10px!important;
+ display:flex!important;flex-wrap:nowrap!important;
+ gap:5px!important;overflow-x:auto!important;overflow-y:hidden!important;
+ padding:6px 10px!important;white-space:nowrap!important;scrollbar-width:thin!important;
 }
-.r411-navigation-shell .r289-master-menu-filter button{min-width:0!important;white-space:normal!important}
+.r411-navigation-shell .r289-master-menu-filter button{
+ flex:0 0 auto!important;min-width:104px!important;min-height:40px!important;
+ white-space:nowrap!important;font-size:10.5px!important;line-height:1.15!important;
+}
 .r411-navigation-shell .r210-nav-status{margin:0 10px 7px!important}
 .r411-navigation-shell .r89-flat-scroll,
 .r411-navigation-shell .r104-route-scroll{
@@ -325,6 +331,9 @@ html:has(.earth-r372-stage-expanded) .earth-r372-expanded-bar{
  }
  .r411-navigation-shell .r105-workspace-filter button{
   flex:0 0 auto!important;min-width:96px!important;min-height:44px!important;
+ }
+ .r411-navigation-shell .r289-master-menu-filter button{
+  min-height:44px!important;font-size:10px!important;
  }
  .r411-navigation-shell .r89-flat-route{min-height:62px!important}
 }
