@@ -29,6 +29,17 @@ try{
   assert.equal(await page.locator('.earth-r72-proof code').innerText(),'2'.repeat(64),`${label}: older target overwrote current evidence`);
   const coords=await page.locator('.earth-r72-coords input').evaluateAll(inputs=>inputs.map(x=>Number(x.value)));
   assert.deepEqual(coords,[target.lat,target.lon],`${label}: selected device target changed`);
+  const fullScreen=page.locator('.earth-r372-display-menu').getByRole('button',{name:'Full screen display',exact:true});
+  await fullScreen.click();
+  await page.waitForFunction(()=>document.querySelector('.earth-r279-stage')?.getAttribute('data-display-expanded')==='true',{timeout:10000});
+  const topbar=page.locator('.workstation-topbar').first();
+  assert.equal(await topbar.evaluate(el=>getComputedStyle(el).visibility),'hidden',`${label}: global workstation topbar did not yield to Earth full screen`);
+  const exitFull=page.locator('.earth-r372-expanded-bar').getByRole('button',{name:'Exit full screen',exact:true});
+  await exitFull.waitFor({state:'visible',timeout:10000});
+  assert.equal(await exitFull.evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return hit===el||el.contains(hit)}),true,`${label}: Earth exit-full-screen control is occluded at its hit target`);
+  await exitFull.click();
+  await page.waitForFunction(()=>document.querySelector('.earth-r279-stage')?.getAttribute('data-display-expanded')==='false',{timeout:10000});
+  assert.notEqual(await topbar.evaluate(el=>getComputedStyle(el).visibility),'hidden',`${label}: global workstation topbar did not restore after Earth full screen exit`);
   mismatch=true;
   await page.getByRole('button',{name:'Refresh returned evidence',exact:true}).click();
   await page.getByText('Returned Earth evidence does not match the selected target.',{exact:true}).waitFor({state:'visible',timeout:15000});
@@ -37,5 +48,5 @@ try{
   assert.deepEqual(errors,[],`${label}: page errors`);
   await context.close();
  }
- console.log('R372 TARGET BINDING REGRESSION PASS · synthetic responses only · desktop/mobile · late older response rejected · mismatched returned target rejected · no source or CanonState admission claimed');
+ console.log('R372 TARGET/FULLSCREEN REGRESSION PASS · synthetic responses only · desktop/mobile · late older response rejected · mismatched returned target rejected · Earth full-screen hit ownership proved · no source or CanonState admission claimed');
 }finally{await browser.close()}
