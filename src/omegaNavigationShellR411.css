@@ -1,0 +1,363 @@
+/* R411 · CANONICAL NAVIGATION SHELL REBUILD
+   Presentation/layout authority only. No route, execution, proof, evidence,
+   persistence, or CanonState authority is added here.
+   The historical R88/R100/R104/R120/R210/R239/R289/R333 class vocabulary is
+   retained for proof continuity, but this final block owns viewport geometry. */
+
+:root{
+ --r411-rail:56px;
+ --r411-panel:clamp(360px,30vw,440px);
+ --r411-surface:#02080b;
+ --r411-surface-2:#061116;
+ --r411-line:rgba(121,178,170,.20);
+ --r411-text:#e8f2ef;
+ --r411-muted:#80938f;
+ --r411-accent:#65d0bf;
+}
+
+.r411-navigation-shell{
+ position:fixed!important;
+ inset:0 auto 0 0!important;
+ width:var(--r411-rail)!important;
+ height:100dvh!important;
+ z-index:2147481800!important;
+ pointer-events:none!important;
+ contain:layout style;
+}
+.r411-navigation-shell.expanded{width:calc(var(--r411-rail) + var(--r411-panel))!important}
+.r411-navigation-shell .r94-nav-rail{
+ pointer-events:auto!important;
+ position:absolute!important;
+ inset:0 auto 0 0!important;
+ width:var(--r411-rail)!important;
+ height:100dvh!important;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:stretch!important;
+ gap:5px!important;
+ padding:calc(8px + env(safe-area-inset-top,0px)) 6px calc(8px + env(safe-area-inset-bottom,0px))!important;
+ overflow:hidden!important;
+ background:#02090d!important;
+ border-right:1px solid var(--r411-line)!important;
+ box-shadow:none!important;
+ z-index:2!important;
+}
+.r411-navigation-shell .r88-navigator-trigger{
+ position:relative!important;inset:auto!important;width:100%!important;min-width:0!important;
+ min-height:58px!important;height:auto!important;border:1px solid var(--r411-line)!important;
+ border-radius:10px!important;background:#061318!important;box-shadow:none!important;backdrop-filter:none!important;
+}
+.r411-navigation-shell .r94-rail-action,
+.r411-navigation-shell .r120-rail-width-toggle,
+.r411-navigation-shell .r94-rail-current{
+ position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;
+ border-radius:9px!important;box-shadow:none!important;
+}
+.r411-navigation-shell .r94-nav-panel.r88-navigator{
+ pointer-events:auto!important;
+ position:absolute!important;
+ left:var(--r411-rail)!important;top:0!important;bottom:0!important;right:auto!important;
+ width:var(--r411-panel)!important;max-width:var(--r411-panel)!important;min-width:0!important;
+ height:100dvh!important;max-height:100dvh!important;
+ display:flex!important;
+ flex-direction:column!important;
+ overflow:hidden!important;
+ background:linear-gradient(180deg,#081319 0%,#03080b 100%)!important;
+ border:0!important;border-right:1px solid var(--r411-line)!important;
+ border-radius:0!important;
+ box-shadow:24px 0 56px rgba(0,0,0,.48)!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+ transform:translateX(0)!important;
+ transition:opacity .16s ease,visibility .16s ease!important;
+ z-index:1!important;
+}
+.r411-navigation-shell.collapsed .r94-nav-panel.r88-navigator{
+ opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+.r411-navigation-shell.expanded .r94-nav-panel.r88-navigator{
+ opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+}
+.r411-navigation-shell .r88-navigator-head{
+ position:sticky!important;top:0!important;z-index:5!important;
+ padding:calc(12px + env(safe-area-inset-top,0px)) 12px 10px!important;
+ background:#061116!important;border-bottom:1px solid var(--r411-line)!important;
+}
+.r411-navigation-shell .r88-navigator-head>div:first-child>b{font-size:18px!important}
+.r411-navigation-shell .r88-navigator-head>div:first-child>small{font-size:9px!important;line-height:1.35!important}
+.r411-navigation-shell .r89-nav-mode{padding:8px 10px!important;background:var(--r411-surface)!important}
+.r411-navigation-shell .r100-active-route{margin:0 10px 6px!important;padding:8px 10px!important}
+.r411-navigation-shell .r111-output-ribbon{margin:0 10px 6px!important}
+.r411-navigation-shell[data-technical='false'] .r111-output-ribbon{display:none!important}
+.r411-navigation-shell .r88-search{
+ margin:6px 10px 8px!important;min-height:46px!important;
+ background:#061116!important;border-color:var(--r411-line)!important;
+}
+.r411-navigation-shell .r333-filter-stack{min-height:0!important;overflow:visible!important}
+.r411-navigation-shell[data-technical='false'] .r333-filter-row:first-child{display:none!important}
+.r411-navigation-shell .r105-workspace-filter{
+ display:flex!important;flex-wrap:wrap!important;gap:5px!important;
+ overflow:visible!important;padding:6px 10px 7px!important;white-space:normal!important;
+}
+.r411-navigation-shell .r105-workspace-filter button{
+ flex:1 1 92px!important;min-width:0!important;min-height:36px!important;
+ white-space:normal!important;line-height:1.15!important;
+}
+.r411-navigation-shell .r289-master-menu-filter{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:5px!important;overflow:visible!important;padding:6px 10px!important;
+}
+.r411-navigation-shell .r289-master-menu-filter button{min-width:0!important;white-space:normal!important}
+.r411-navigation-shell .r210-nav-status{margin:0 10px 7px!important}
+.r411-navigation-shell .r89-flat-scroll,
+.r411-navigation-shell .r104-route-scroll{
+ flex:1 1 auto!important;min-height:0!important;overflow:auto!important;overflow-x:hidden!important;
+ overscroll-behavior:contain!important;scrollbar-gutter:stable!important;
+ padding:0 8px calc(12px + env(safe-area-inset-bottom,0px))!important;
+}
+.r411-navigation-shell .r89-flat-route{
+ width:100%!important;min-width:0!important;max-width:100%!important;
+ grid-template-columns:26px minmax(0,1fr) 16px!important;
+ min-height:58px!important;padding:8px 9px!important;
+ border-radius:9px!important;margin:0 0 4px!important;
+ background:#071217!important;border:1px solid rgba(121,178,170,.10)!important;
+}
+.r411-navigation-shell .r89-flat-route.active{
+ background:#0b1c20!important;border-color:rgba(101,208,191,.44)!important;
+ box-shadow:inset 3px 0 var(--r411-accent)!important;
+}
+.r411-navigation-shell .r89-flat-route>span{min-width:0!important}
+.r411-navigation-shell .r89-flat-route>span>b{font-size:12px!important;line-height:1.2!important}
+.r411-navigation-shell .r89-flat-route>span>em{
+ display:block!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;
+ font-size:9px!important;line-height:1.35!important;color:#718681!important;
+}
+.r411-navigation-shell .r239-route-group{
+ position:sticky!important;top:0!important;z-index:2!important;
+ background:#030a0d!important;backdrop-filter:none!important;
+}
+.r411-navigation-shell .r88-navigator-foot{
+ padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))!important;
+ background:#061116!important;border-top:1px solid var(--r411-line)!important;
+}
+.r411-navigation-shell .r88-software-layer{min-height:0!important;overflow:auto!important;overflow-x:hidden!important}
+
+/* Desktop: rail and expanded browser are layout columns, never overlays. */
+@media(min-width:901px){
+ :root{--r94-nav-rail:62px;--r94-nav-panel:clamp(420px,34vw,520px)}
+ .r411-navigation-shell{--r411-rail:62px;--r411-panel:clamp(400px,31vw,448px)}
+ html[data-omega-nav-present='true'] :where(.omega-workstation-v2,.r71-home){
+  margin-left:var(--r411-rail)!important;width:calc(100% - var(--r411-rail))!important;max-width:calc(100% - var(--r411-rail))!important
+ }
+ html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home){
+  margin-left:calc(var(--r411-rail) + var(--r411-panel))!important;
+  width:calc(100% - var(--r411-rail) - var(--r411-panel))!important;
+  max-width:calc(100% - var(--r411-rail) - var(--r411-panel))!important
+ }
+ .r411-navigation-shell.rail-wide{--r411-rail:166px}
+ .r411-navigation-shell.rail-wide .r94-rail-action span,
+ .r411-navigation-shell.rail-wide .r120-rail-width-toggle span,
+ .r411-navigation-shell.rail-wide .r120-rail-width-toggle kbd{display:block!important}
+}
+
+/* Mobile/tablet: keep the product at full usable width behind a single opaque sheet.
+   Historical fallback variables remain declared for inherited tests, but R411 owns
+   the actual panel width below. */
+@media(max-width:900px){
+ :root{--r94-nav-rail:44px;--r94-nav-panel:min(42vw,220px)}
+ .r411-navigation-shell{--r411-rail:48px;--r411-panel:calc(100vw - 48px)}
+ .r411-navigation-shell.expanded{width:100vw!important}
+ .r411-navigation-shell .r94-nav-rail{width:48px!important;padding-left:4px!important;padding-right:4px!important}
+ .r411-navigation-shell .r94-nav-panel.r88-navigator{
+  left:48px!important;right:0!important;width:calc(100vw - 48px)!important;
+  min-width:0!important;max-width:none!important;
+  background:#02080b!important;box-shadow:none!important;border-right:0!important;
+ }
+ html[data-omega-nav-present='true'] :where(.omega-workstation-v2,.r71-home),
+ html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home){
+  margin-left:48px!important;width:calc(100% - 48px)!important;max-width:calc(100% - 48px)!important
+ }
+ .r411-navigation-shell .r120-rail-width-toggle{display:none!important}
+ .r411-navigation-shell .r94-rail-action{display:none!important}
+ .r411-navigation-shell .r100-rail-home{display:grid!important}
+ .r411-navigation-shell .r94-rail-current{margin-top:auto!important}
+ .r411-navigation-shell .r88-navigator-head{padding-left:12px!important;padding-right:10px!important}
+ .r411-navigation-shell .r239-tech-toggle{min-width:78px!important}
+ .r411-navigation-shell .r105-workspace-filter{padding-inline:8px!important}
+ .r411-navigation-shell .r105-workspace-filter button{flex:1 1 calc(50% - 5px)!important;min-height:44px!important}
+ .r411-navigation-shell .r89-flat-route{min-height:62px!important}
+ .r411-navigation-shell .r88-navigator-foot{font-size:8px!important}
+ .r71-topbar .r71-domains{display:none!important}
+ .r84-home-launchpad{display:none!important}
+}
+@media(max-width:520px){
+ :root{--r94-nav-panel:min(40vw,190px)}
+ .r411-navigation-shell{--r411-rail:46px;--r411-panel:calc(100vw - 46px)}
+ .r411-navigation-shell .r94-nav-rail{width:46px!important}
+ .r411-navigation-shell .r94-nav-panel.r88-navigator{left:46px!important;width:calc(100vw - 46px)!important}
+ html[data-omega-nav-present='true'] :where(.omega-workstation-v2,.r71-home),
+ html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home){
+  margin-left:46px!important;width:calc(100% - 46px)!important;max-width:calc(100% - 46px)!important
+ }
+}
+
+/* Fullscreen instruments own the whole viewport. Global and workstation chrome may
+   not intercept their controls or remain visible above them. */
+html:has(.earth-r372-stage-expanded) .r411-navigation-shell,
+html:has(.earth-r372-stage-expanded) .workstation-topbar{
+ opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+html:has(.earth-r372-stage-expanded) :where(.omega-workstation-v2,.r71-home){
+ margin-left:0!important;width:100%!important;max-width:100%!important;
+}
+html:has(.earth-r372-stage-expanded) .earth-r372-stage-expanded{
+ z-index:2147483646!important;isolation:isolate!important;
+}
+html:has(.earth-r372-stage-expanded) .earth-r372-expanded-bar{
+ z-index:2147483647!important;pointer-events:auto!important;
+}
+
+@media(any-pointer:coarse){
+ .r411-navigation-shell :where(button,[role='button']){touch-action:manipulation;min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+ .r411-navigation-shell,.r411-navigation-shell *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+
+
+/* R411.1 · PHONE COMMAND DOCK
+   On narrow/coarse layouts the persistent left rail is retired from presentation.
+   The same canonical navigator becomes a bottom command dock; the expanded browser
+   owns the viewport above it as one opaque sheet. Route authority is unchanged. */
+@media(max-width:900px){
+ :root{--r411-mobile-dock:64px}
+ .r411-navigation-shell{
+  inset:auto 0 0 0!important;
+  width:100vw!important;
+  height:var(--r411-mobile-dock)!important;
+  pointer-events:none!important;
+ }
+ .r411-navigation-shell.expanded{
+  inset:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+ }
+ .r411-navigation-shell .r94-nav-rail{
+  pointer-events:auto!important;
+  position:fixed!important;
+  left:0!important;right:0!important;top:auto!important;bottom:0!important;
+  width:100vw!important;height:var(--r411-mobile-dock)!important;
+  display:grid!important;
+  grid-template-columns:repeat(7,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:3px!important;
+  padding:5px max(5px,env(safe-area-inset-right,0px)) calc(5px + env(safe-area-inset-bottom,0px)) max(5px,env(safe-area-inset-left,0px))!important;
+  overflow:hidden!important;
+  border-right:0!important;border-top:1px solid var(--r411-line)!important;
+  background:#02090d!important;
+  z-index:3!important;
+ }
+ .r411-navigation-shell .r88-navigator-trigger,
+ .r411-navigation-shell .r94-rail-action{
+  display:grid!important;
+  place-items:center!important;
+  align-content:center!important;
+  gap:2px!important;
+  width:100%!important;min-width:0!important;max-width:none!important;
+  min-height:48px!important;height:auto!important;
+  padding:4px 2px!important;
+  border:1px solid transparent!important;border-radius:9px!important;
+  background:transparent!important;color:#78908b!important;
+ }
+ .r411-navigation-shell .r88-navigator-trigger small,
+ .r411-navigation-shell .r94-rail-action span{
+  display:block!important;
+  max-width:100%!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+  font:750 6px/1 ui-monospace,monospace!important;letter-spacing:.04em!important;
+ }
+ .r411-navigation-shell .r88-navigator-trigger .r100-omega-mark{font-size:18px!important;line-height:1!important}
+ .r411-navigation-shell .r94-rail-action svg{width:18px!important;height:18px!important}
+ .r411-navigation-shell .r94-rail-action.active,
+ .r411-navigation-shell .r88-navigator-trigger[aria-expanded='true']{
+  border-color:rgba(101,208,191,.34)!important;background:rgba(101,208,191,.08)!important;color:#e5f5f1!important;
+ }
+ .r411-navigation-shell .r120-rail-width-toggle,
+ .r411-navigation-shell .r100-rail-divider,
+ .r411-navigation-shell .r94-rail-current,
+ .r411-navigation-shell .r94-rail-action[title='All tools']{display:none!important}
+
+ .r411-navigation-shell .r94-nav-panel.r88-navigator{
+  position:fixed!important;
+  left:0!important;right:0!important;top:0!important;bottom:var(--r411-mobile-dock)!important;
+  width:100vw!important;max-width:100vw!important;min-width:0!important;
+  height:calc(100dvh - var(--r411-mobile-dock))!important;max-height:calc(100dvh - var(--r411-mobile-dock))!important;
+  border:0!important;border-bottom:1px solid var(--r411-line)!important;border-radius:0!important;
+  background:#02080b!important;
+  box-shadow:none!important;
+  z-index:2!important;
+ }
+ .r411-navigation-shell.collapsed .r94-nav-panel.r88-navigator{
+  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+ }
+ .r411-navigation-shell.expanded .r94-nav-panel.r88-navigator{
+  opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+ }
+
+ html[data-omega-nav-present='true'] :where(.omega-workstation-v2,.r71-home),
+ html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home){
+  margin-left:0!important;width:100%!important;max-width:100%!important;
+ }
+ html[data-omega-nav-present='true'] .r257-shell,
+ html[data-omega-nav-expanded='true'] .r257-shell{
+  margin-left:0!important;width:100%!important;max-width:100%!important;
+ }
+ .omega-workstation-v2 .workstation-main{
+  padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important;
+ }
+ .r71-home{
+  padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))!important;
+ }
+
+ .r411-navigation-shell .r88-navigator-head{padding-left:12px!important;padding-right:10px!important}
+ .r411-navigation-shell .r105-workspace-filter{
+  display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;
+  padding-inline:8px!important;scrollbar-width:thin!important;
+ }
+ .r411-navigation-shell .r105-workspace-filter button{
+  flex:0 0 auto!important;min-width:96px!important;min-height:44px!important;
+ }
+ .r411-navigation-shell .r89-flat-route{min-height:62px!important}
+}
+@media(max-width:520px){
+ :root{--r411-mobile-dock:62px}
+ .r411-navigation-shell .r94-nav-rail{height:var(--r411-mobile-dock)!important}
+ .r411-navigation-shell .r94-nav-panel.r88-navigator{
+  bottom:var(--r411-mobile-dock)!important;
+  height:calc(100dvh - var(--r411-mobile-dock))!important;
+  max-height:calc(100dvh - var(--r411-mobile-dock))!important;
+ }
+ .r411-navigation-shell .r94-rail-action span,
+ .r411-navigation-shell .r88-navigator-trigger small{font-size:5.5px!important}
+}
+
+/* R411.2 · endpoint precedence closure.
+   This file is imported after Home/Workstation presentation CSS so no historical
+   side-rail reservation can reappear after the phone command dock owns navigation. */
+@media(max-width:900px){
+ html[data-omega-nav-present='true'] .omega-workstation-v2,
+ html[data-omega-nav-expanded='true'] .omega-workstation-v2,
+ html[data-omega-nav-present='true'] .r71-home,
+ html[data-omega-nav-expanded='true'] .r71-home{
+  box-sizing:border-box!important;
+  margin-left:0!important;
+  margin-inline-start:0!important;
+  width:100%!important;
+  max-width:100%!important;
+ }
+ html[data-omega-frame='mobile'][data-omega-nav-present='true'] .omega-workstation-v2 .workstation-main{
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin-inline:0!important;
+ }
+}
