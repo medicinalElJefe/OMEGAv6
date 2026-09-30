@@ -181,7 +181,9 @@ const mobileRoutes=nav.locator('.r89-flat-route');
 if(await mobileRoutes.count()!==44)throw new Error(`R411 mobile MENU did not expose the complete 44-route registry: ${await mobileRoutes.count()}`);
 const box=await nav.boundingBox();
 const railBox=await page.locator('.r94-nav-rail').boundingBox();
-if(!box||!railBox||Math.abs(box.width-(390-railBox.width))>5)throw new Error(`R411 mobile navigator must own the full viewport remainder: panel=${box?.width} rail=${railBox?.width}`);
+if(!box||Math.abs(box.width-390)>5||box.left>2)throw new Error(`R411 mobile navigator must own the full viewport width: panel=${box?.width} left=${box?.left}`);
+if(!railBox||railBox.left>2||railBox.right<388||railBox.bottom<842||railBox.height<54)throw new Error(`R411 mobile command dock must own the viewport bottom edge: ${JSON.stringify(railBox)}`);
+if(Math.abs(box.bottom-railBox.top)>5)throw new Error(`R411 mobile menu must terminate immediately above the command dock: panelBottom=${box.bottom} dockTop=${railBox.top}`);
 if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2))throw new Error('R239 mobile product introduces horizontal viewport overflow');
 if(pageErrors.length)throw new Error(`R239 page errors: ${pageErrors.join(' | ')}`);
 
