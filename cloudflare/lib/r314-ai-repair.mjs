@@ -25,12 +25,15 @@ function responsePayload(result){
 
 export function repairResponseFormatR314({residual,contextFiles=[]}={}){
  const exactFiles=(contextFiles||[]).map(file=>({path:String(file.path||''),sha:String(file.sha||'')}));
- const variants=exactFiles.map(file=>({
+ const allowedPaths=exactFiles.map(file=>file.path);
+ const allowedShas=exactFiles.map(file=>file.sha);
+ const expectedProofs=[...new Set((Array.isArray(residual?.expectedProofs)?residual.expectedProofs:[]).map(String).filter(Boolean))];
+ const fileItems={
   type:'object',
   additionalProperties:false,
   properties:{
-   path:{type:'string',enum:[file.path]},
-   preimageSha:{type:'string',enum:[file.sha]},
+   path:{type:'string',enum:allowedPaths},
+   preimageSha:{type:'string',enum:allowedShas},
    replacements:{
     type:'array',
     minItems:1,
@@ -47,9 +50,7 @@ export function repairResponseFormatR314({residual,contextFiles=[]}={}){
    },
   },
   required:['path','preimageSha','replacements'],
- }));
- const expectedProofs=[...new Set((Array.isArray(residual?.expectedProofs)?residual.expectedProofs:[]).map(String).filter(Boolean))];
- const fileItems=variants.length===1?variants[0]:variants.length>1?{oneOf:variants}:{type:'object',additionalProperties:false};
+ };
  return{
   type:'json_schema',
   json_schema:{
