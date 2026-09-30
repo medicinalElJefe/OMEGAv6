@@ -3,6 +3,7 @@ import fs from'node:fs';
 
 const surface=fs.readFileSync('src/OmegaProofCarryingWovenDynamics.tsx','utf8');
 const suite=fs.readFileSync('src/OmegaSpecialistSuite.tsx','utf8');
+const convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8');
 const css=fs.readFileSync('src/proofCarryingWovenDynamics.css','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
@@ -21,7 +22,7 @@ for(const token of[
 ])assert.ok(surface.includes(token),`PCWD surface missing ${token}`);
 
 assert.ok(suite.includes("import OmegaProofCarryingWovenDynamics from './OmegaProofCarryingWovenDynamics';"));
-assert.ok(suite.includes('<OmegaProofCarryingWovenDynamics address={address}/>'),'Convergence must expose the full PCWD proof surface');
+assert.ok(convergence.includes('<OmegaProofCarryingWovenDynamics address={address}/>'),'Convergence must expose the full PCWD proof surface');
 assert.ok(suite.includes('<OmegaProofCarryingWovenDynamics address={address} compact/>'),'Evidence & Proof must expose compact PCWD receipt status');
 
 for(const token of['.pcwd-pipeline','.pcwd-gates','.pcwd-rsc','@media(max-width:560px)'])assert.ok(css.includes(token),`PCWD responsive presentation missing ${token}`);
