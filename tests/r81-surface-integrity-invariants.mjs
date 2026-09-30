@@ -25,7 +25,9 @@ const suiteBlock=(workstation.match(/SPECIALIST_SUITE=new Set<Panel>\(\[(.*?)\]\
 const existing=[...existingBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 const suite=[...suiteBlock.matchAll(/'([^']+)'/g)].map(x=>x[1]);
 const inline=['Command Center','Create','Development','Modes','Plugins'];
-const mounted=[...existing,...suite,...inline];
+const dedicated=['Convergence'];
+const mounted=[...existing,...suite,...inline,...dedicated];
+must(workstation.includes("panel==='Convergence')content=<ConvergenceR416"),'Convergence must have one explicit dedicated R416 mount owner');
 must(mounted.length===44&&new Set(mounted).size===44,'every canonical surface must have one and only one mount owner');
 for(const s of surfaces)must(mounted.includes(s),`surface has no explicit mount owner: ${s}`);
 
