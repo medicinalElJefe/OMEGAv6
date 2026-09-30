@@ -3,6 +3,7 @@ export const R314_AI_REPAIR_MODEL_DEFAULT='@cf/google/gemma-4-26b-a4b-it';
 export const R314_AI_MAX_FILES=2;
 export const R314_AI_MAX_REPLACEMENTS_PER_FILE=8;
 export const R314_AI_MAX_CHANGED_CHARS=12000;
+export const R314_AI_MAX_ATTEMPTS=3;
 
 const ALLOWED_PREFIXES=Object.freeze(['src/']);
 const FORBIDDEN_PREFIXES=Object.freeze([
@@ -87,6 +88,33 @@ export function autonomousRepairPromptR314({residual,stage,contextFiles}){
  return `You are the bounded OMEGAv6 R314 product-source repair proposer. Return JSON only.\n\nRules:\n- Schema must be ${R314_AUTONOMOUS_REPAIR_SCHEMA}.\n- Repair only the supplied files and bind every file to its supplied preimage SHA.\n- Maximum ${R314_AI_MAX_FILES} files and ${R314_AI_MAX_REPLACEMENTS_PER_FILE} exact replacements per file.\n- Use replacements [{before,after}] where before occurs exactly once in the supplied source.\n- Do not edit tests, workflows, deployment, cloud evolution, self-build governance, authentication, secrets, Canon admission, workers, or generated projections.\n- Do not claim scientific, device, runtime, deployment or Canon truth.\n- canonicalAdmission and directProductionMutation must both be false.\n- expectedProofs must name existing independent proof families that should validate the change.\n- No safe patch is a valid outcome: if the residual cannot be safely improved using only supplied source, return files:[]; the governor will reject it rather than fabricate progress.\n\nRESIDUAL\n${JSON.stringify(residual)}\n\nBUILD STAGE\n${JSON.stringify(stage)}\n\nEXACT SOURCE CONTEXT\n${JSON.stringify(context)}`;
 }
 
+export function summarizeAiProposalR314(proposal){
+ const files=Array.isArray(proposal?.files)?proposal.files:[];
+ return{
+  schema:proposal?.schema||null,
+  residualId:proposal?.residualId||null,
+  files:files.map(file=>({path:pathText(file?.path),preimageSha:String(file?.preimageSha||''),replacementCount:Array.isArray(file?.replacements)?file.replacements.length:0})),
+  canonicalAdmission:proposal?.canonicalAdmission,
+  directProductionMutation:proposal?.directProductionMutation,
+  expectedProofs:Array.isArray(proposal?.expectedProofs)?proposal.expectedProofs.slice(0,16):[],
+ };
+}
+
+export function autonomousRepairCorrectionPromptR314({residual,stage,contextFiles,rejection,attempt}){
+ const context=contextFiles.map(file=>({path:file.path,sha:file.sha,text:file.text}));
+ const rejectionEvidence={
+  attempt:Number(attempt||0),
+  state:String(rejection?.state||'REJECTED_BY_R314_POLICY'),
+  reasons:Array.isArray(rejection?.reasons)?rejection.reasons.map(String):[],
+  validation:rejection?.validation?{
+   changedChars:Number(rejection.validation.changedChars||0),
+   fileCount:Number(rejection.validation.fileCount||0),
+  }:null,
+  proposal:summarizeAiProposalR314(rejection?.proposal),
+ };
+ return `You are correcting a previously rejected bounded OMEGAv6 R314 product-source proposal. Return JSON only. This is a correction under the SAME authority membrane, not permission to widen it.\n\nImmutable rules:\n- Schema must be ${R314_AUTONOMOUS_REPAIR_SCHEMA}.\n- Repair only the supplied files and bind every file to its supplied preimage SHA.\n- Maximum ${R314_AI_MAX_FILES} files and ${R314_AI_MAX_REPLACEMENTS_PER_FILE} exact replacements per file.\n- Every before string must occur exactly once in the supplied exact source.\n- Do not edit tests, workflows, deployment, cloud evolution, self-build governance, authentication, secrets, Canon admission, workers, or generated projections.\n- Do not claim scientific, device, runtime, deployment or Canon truth.\n- canonicalAdmission and directProductionMutation must both be false.\n- expectedProofs must name existing independent proof families.\n- Never work around a rejection code. Correct the proposal so the unchanged validator accepts it.\n- If no compliant patch exists, return files:[].\n\nVALIDATOR REJECTION EVIDENCE\n${JSON.stringify(rejectionEvidence)}\n\nRESIDUAL\n${JSON.stringify(residual)}\n\nBUILD STAGE\n${JSON.stringify(stage)}\n\nEXACT SOURCE CONTEXT\n${JSON.stringify(context)}`;
+}
+
 export const R314_AUTONOMOUS_REPAIR_LAWS=Object.freeze([
  'AI_NEVER_EDITS_ITS_OWN_GOVERNANCE',
  'AI_NEVER_EDITS_TESTS_OR_PROOF_GATES',
@@ -95,4 +123,6 @@ export const R314_AUTONOMOUS_REPAIR_LAWS=Object.freeze([
  'AI_PATCH_USES_EXACT_UNIQUE_REPLACEMENTS',
  'AI_PATCH_IS_BRANCH_ONLY_AND_PROOF_GATED',
  'AI_NO_SAFE_PATCH_MEANS_NO_MUTATION',
+ 'AI_VALIDATOR_REJECTIONS_MAY_ONLY_NARROW_AND_REFORMULATE_WITHIN_THE_SAME_EXACT_SOURCE_MEMBRANE',
+ 'AI_REFORMULATION_BUDGET_IS_BOUNDED_AND_EVERY_ATTEMPT_REVALIDATES_FROM_SCRATCH',
 ]);
