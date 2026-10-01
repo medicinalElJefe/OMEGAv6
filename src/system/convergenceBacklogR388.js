@@ -83,19 +83,30 @@ export function parseConvergenceBacklogR388(markdown=''){
  return Object.freeze(rows);
 }
 
-export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[]}={}){
+export const R388_BACKLOG_CANDIDATE_LIMIT=3;
+
+export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],heldItemIds=[],candidateLimit=R388_BACKLOG_CANDIDATE_LIMIT}={}){
  const advanced=new Set(Array.isArray(advancedItemIds)?advancedItemIds:[]);
+ const recentHeld=new Set(Array.isArray(heldItemIds)?heldItemIds:[]);
  const items=parseConvergenceBacklogR388(markdown);
- const selected=items.find(x=>x.selfEditable&&!advanced.has(x.id))||null;
- const held=items.filter(x=>!x.selfEditable&&!advanced.has(x.id)).map(x=>x.id);
+ const selfEditable=items.filter(x=>x.selfEditable&&!advanced.has(x.id));
+ const eligible=selfEditable.filter(x=>!recentHeld.has(x.id));
+ const pool=eligible.length?eligible:selfEditable;
+ const limit=Math.max(1,Math.min(R388_BACKLOG_CANDIDATE_LIMIT,Number(candidateLimit)||R388_BACKLOG_CANDIDATE_LIMIT));
+ const candidates=pool.slice(0,limit);
+ const selected=candidates[0]||null;
+ const heldGovernance=items.filter(x=>!x.selfEditable&&!advanced.has(x.id)).map(x=>x.id);
+ const heldRecentDeclines=selfEditable.filter(x=>recentHeld.has(x.id)).map(x=>x.id);
  return Object.freeze({
   schema:R388_CONVERGENCE_BACKLOG_SCHEMA,
   total:items.length,
   advanced:items.filter(x=>advanced.has(x.id)).length,
   remaining:items.filter(x=>!advanced.has(x.id)).length,
-  heldGovernance:held,
+  heldGovernance,
+  heldRecentDeclines,
+  candidates:Object.freeze(candidates.slice()),
   selected,
   canonicalAdmission:false,
-  boundary:'R388 converts the explicit convergence matrix into deterministic source-improvement work. It may advance allowlisted product source only; governance/self-build authority items remain non-self-editable and external/device claims remain pending first-hand proof.',
+  boundary:'R388 converts the explicit convergence matrix into deterministic source-improvement work. It may advance allowlisted product source only; governance/self-build authority items remain non-self-editable, recent model-declined items may be temporarily bypassed without being marked advanced, and external/device claims remain pending first-hand proof.',
  });
 }
