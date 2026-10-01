@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {parseConvergenceBacklogR388,selectNextConvergenceItemR388,R388_CONVERGENCE_BACKLOG_SCHEMA} from '../src/system/convergenceBacklogR388.js';
+import {parseConvergenceBacklogR388,selectNextConvergenceItemR388,R388_CONVERGENCE_BACKLOG_SCHEMA,R388_BACKLOG_CANDIDATE_LIMIT} from '../src/system/convergenceBacklogR388.js';
 import {repairPathPolicyR314} from '../src/system/autonomousRepairPolicyR314.js';
 import {decideCycle} from '../cloudflare/lib/evolution-policy.mjs';
 
@@ -29,6 +29,13 @@ assert.equal(selected.schema,R388_CONVERGENCE_BACKLOG_SCHEMA);
 assert.ok(selected.selected?.selfEditable,'R388 must select a real self-editable backlog item');
 const next=selectNextConvergenceItemR388({markdown,advancedItemIds:[selected.selected.id]});
 assert.notEqual(next.selected?.id,selected.selected.id,'advanced item must not be selected again');
+assert.equal(R388_BACKLOG_CANDIDATE_LIMIT,3,'R421 bounded backlog queue must remain compact');
+assert.ok(selected.candidates.length>=2&&selected.candidates.length<=R388_BACKLOG_CANDIDATE_LIMIT,'R421 must expose a small deterministic candidate queue');
+assert.equal(selected.candidates[0].id,selected.selected.id,'R421 selected item must remain the first queued candidate');
+const held=selectNextConvergenceItemR388({markdown,advancedItemIds:[],heldItemIds:[selected.selected.id]});
+assert.notEqual(held.selected?.id,selected.selected.id,'recently declined R388 item must be temporarily bypassable without false advancement');
+assert.ok(held.heldRecentDeclines.includes(selected.selected.id),'R421 must report recently declined held items explicitly');
+assert.equal(held.advanced,0,'temporary decline hold must never increment advanced completion');
 
 const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
 const exhausted={...state,currentCapsuleId:null,admittedSourceCapsules:state.roadmap.map(x=>x.id)};
@@ -39,13 +46,17 @@ assert.equal(decision.strategy,'R388_BACKLOG_AI_BUILD');
 assert.equal(decision.repairTarget.item.id,selected.selected.id);
 
 const machine=fs.readFileSync('cloudflare/lib/github-machine.mjs','utf8');
-for(const token of ['selectNextConvergenceItemR388','R388_BACKLOG_AI_BUILD','R388_BACKLOG_BRANCH_AND_PR_CREATED','r388AdvancedItemIds','OMEGA_CLOUDFLARE_R388_CONVERGENCE_RECEIPT'])assert.ok(machine.includes(token),`CLOUD-01 missing R388 token ${token}`);
+for(const token of ['selectNextConvergenceItemR388','R388_BACKLOG_AI_BUILD','R388_BACKLOG_BRANCH_AND_PR_CREATED','r388AdvancedItemIds','OMEGA_CLOUDFLARE_R388_CONVERGENCE_RECEIPT','backlogTargets','recentDeclinedItemIds','declinedItemScars'])assert.ok(machine.includes(token),`CLOUD-01 missing R388 token ${token}`);
 for(const workflow of ['OMEGA R237 Hybrid Command Authority Proof','OMEGA R238 Woven Hybrid Continuity Convergence'])assert.ok(machine.includes(workflow),`CLOUD-01 autonomous promotion must require ${workflow}`);
 assert.ok(machine.includes("externalProofRequired:item.externalProofRequired===true"),'R388 must carry external proof obligations into receipts');
 assert.ok(machine.includes('This is one bounded source-improvement step, not a claim that the entire section or any external/device condition is complete.'),'R388 PR truth boundary missing');
 assert.ok(machine.includes("repair:{state:repair.state,reasons:repair.reasons||repair.validation?.reasons||[],attempts:repair.attempts||[]"),'R388 must retain exact rejected-attempt evidence when no candidate is emitted');
 assert.ok(machine.includes("repairAttemptLedger:repair.attempts||[]"),'R388 governed receipt must carry bounded AI attempt history');
 assert.ok(machine.includes("rejectionScars:repair.rejectionHistory||[]"),'R388 governed receipt must preserve validator rejection scars after compliant reformulation');
+assert.ok(machine.includes("if(repair.state!=='NO_SAFE_PATCH')"),'R421 may continue past only an explicit safe model decline; malformed/policy/generation failures must still terminate fail-closed');
+assert.ok(machine.includes("declinedItemScars,createdAt"),'R421 accepted successor receipt must carry prior declined-item scars');
+assert.ok(machine.includes("r388AdvancedItemIds:[...new Set([...(state.r388AdvancedItemIds||[]),item.id])]"),'R421 must advance only the item that actually produced the governed source candidate');
+assert.ok(machine.includes("Prior bounded item declines carried without false advancement"),'R421 PR truth boundary must disclose skipped model-declined items');
 
 
 console.log(`R388 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · deterministic section→source targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · bounded compliant reformulation only · all 8 exact-head workflow families required for autonomous promotion`);
