@@ -2,6 +2,7 @@ import {
   R314_AI_REPAIR_MODEL_DEFAULT,
   R314_AI_MAX_ATTEMPTS,
   R314_AI_MAX_OUTPUT_TOKENS,
+  R314_AI_CORRECTION_MAX_OUTPUT_TOKENS,
   applyAiRepairProposalR314,
   autonomousRepairPromptR314,
   autonomousRepairCorrectionPromptR314,
@@ -84,7 +85,7 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
    const result=await ai.run(model,{messages:[
     {role:'system',content:'Return exactly one valid JSON object and no markdown. Required top-level keys: schema,residualId,files,canonicalAdmission,directProductionMutation,expectedProofs. The unchanged R314 validator will reject any value outside the supplied exact source membrane.'},
     {role:'user',content:prompt},
-   ],response_format:repairResponseFormatR314({residual,contextFiles}),temperature:attempt===1?0.1:0,max_tokens:R314_AI_MAX_OUTPUT_TOKENS,seed:314});
+   ],response_format:repairResponseFormatR314({residual,contextFiles}),temperature:attempt===1?0.1:0,max_tokens:attempt===1?R314_AI_MAX_OUTPUT_TOKENS:R314_AI_CORRECTION_MAX_OUTPUT_TOKENS,seed:314});
    prepared=prepareAiRepairR314({rawResponse:responsePayload(result),residual,contextFiles});
   }catch(error){
    prepared={ok:false,state:'AI_GENERATION_ERROR',proposal:null,reasons:[`AI_RUN_ERROR:${error instanceof Error?error.message:String(error)}`],patches:[]};
