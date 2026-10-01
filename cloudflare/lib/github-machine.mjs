@@ -117,6 +117,24 @@ async function proposeR388BacklogCycle({inspection,token,repo,ai,model}){
   }
   if(!chosen){
     const repair=lastRepair||{state:'NO_SAFE_PATCH',reasons:['R388_BOUNDED_CANDIDATE_QUEUE_DECLINED'],attempts:[],rejectionHistory:[],reformulated:false};
+    if(declinedItemScars.length){
+      await ensureNoCompetingCandidate(token,repo,state,mainSha);
+      const observationGeneration=Number(state.r388ObservationGeneration||0)+1;
+      const branch=`cloud/evolution-r388-scar-${observationGeneration}-${mainSha.slice(0,8)}`;
+      await gh(token,`/repos/${repo}/git/refs`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({ref:`refs/heads/${branch}`,sha:mainSha})});
+      const expectedProofs=['R241 Archive Convergence Visual Intelligence','OMEGA Cloud Bridge CI'];
+      const receipt={schema:'OMEGA_CLOUDFLARE_R388_DECLINE_SCAR_RECEIPT',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R388_DECLINE_SCAR_CARRY',observationGeneration,baseSha:mainSha,branch,status:'DECLINE_SCARS_PENDING_PROOF',sourceAdvance:false,advancedItemIdsChanged:false,canonicalAdmission:false,directProductionMutation:false,expectedProofs,declinedItemScars,createdAt:new Date().toISOString(),authorityBoundaries:AUTHORITY_BOUNDARIES};
+      const branchState=await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch);
+      const nextState={...state,r388ObservationGeneration:observationGeneration,r388Receipts:[...(state.r388Receipts||[]),receipt].slice(-256)};
+      await putRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch,`Carry CLOUD-01 R388 decline scars observation ${observationGeneration}`,`${JSON.stringify(nextState,null,2)}\n`,branchState.sha);
+      const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388',revision:'R388.1',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R388_DECLINE_SCAR_CARRY',item:null,repair:{paths:[],expectedProofs,reformulated:false,rejectionScars:[],declinedItemScars},receipt,status:'DECLINE_SCARS_PENDING_PROOF',sourceAdvance:false,canonicalAdmission:false,directProductionMutation:false};
+      let candidateSha=null;try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
+      await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record CLOUD-01 R388 decline-scar observation ${observationGeneration}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
+      await ensureNoCompetingCandidate(token,repo,state,mainSha);
+      const declinedSummary=declinedItemScars.map(row=>`${row.itemId}:${row.state}`).join(', ');
+      const pr=await gh(token,`/repos/${repo}/pulls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:`R388 CLOUD-01 decline-scar carry · observation ${observationGeneration}`,head:branch,base:'main',draft:false,body:`CLOUD-01 is carrying bounded R388 decline scars into canonical self-build state without advancing any convergence item.\n\nExact base: ${mainSha}\nDeclined items: ${declinedSummary}\nProduct-source changes: NONE\nr388AdvancedItemIds changed: NO\nExpected independent proofs: ${expectedProofs.join(', ')}\n\nThis state-only governed candidate exists only so later cycles can retain exact decline history and bypass recently declined items without false advancement. It does not widen source mutation, deployment, CanonState, evidence or production authority. R125 remains sole CanonState admission authority and ci.yml remains sole production writer.`})});
+      return{...inspection,mutation:'R388_BACKLOG_BRANCH_AND_PR_CREATED',branch,prNumber:pr.number,prUrl:pr.html_url,itemId:lastItem?.id||targets[0]?.item?.id||null,reason:'R388_DECLINE_SCARS_PENDING_PROOF',changedPaths:['public/omega-r170-selfbuild-state.json','public/omega-r170-selfbuild-candidate.json'],declinedItemScars};
+    }
     return{...inspection,mutation:'NONE',reason:repair.state||'NO_SAFE_PATCH',repair:{state:repair.state||'NO_SAFE_PATCH',reasons:repair.reasons||repair.validation?.reasons||[],attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true},itemId:lastItem?.id||targets[0]?.item?.id||null,declinedItemScars};
   }
   const{target,item,repair}=chosen;
@@ -169,7 +187,8 @@ export async function promoteGreenCloudPr({token,repo='medicinalElJefe/OMEGAv6',
   const headSha=pr.head.sha;const runs=await gh(token,`/repos/${repo}/actions/runs?head_sha=${headSha}&event=pull_request&per_page=100`);const byName=new Map((runs.workflow_runs||[]).map(r=>[r.name,r]));const missing=requiredWorkflows.filter(name=>!byName.has(name));const red=requiredWorkflows.filter(name=>{const r=byName.get(name);return r&&!(r.status==='completed'&&r.conclusion==='success')});
   if(missing.length||red.length)return{action:'NONE',reason:'exact candidate proof stack not fully green',missing,notGreen:red,headSha,currentMain};
   const recheck=(await gh(token,`/repos/${repo}/branches/main`)).commit.sha;if(recheck!==expectedBase)return{action:'NONE',reason:'main drifted during promotion gate',expectedBase,currentMain:recheck};
-  const merge=await gh(token,`/repos/${repo}/pulls/${prNumber}/merge`,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({sha:headSha,merge_method:'merge',commit_title:`Promote ${pr.title}`,commit_message:`Expected-head-locked CLOUD-01 source promotion. ci.yml remains sole production deployment authority. R125/R147/R146/R141 preserved; R201/R203 tombstones remain retired.`})});
+  const stateOnly=candidate?.sourceAdvance===false||candidate?.status==='DECLINE_SCARS_PENDING_PROOF';
+  const merge=await gh(token,`/repos/${repo}/pulls/${prNumber}/merge`,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({sha:headSha,merge_method:'merge',commit_title:`Promote ${pr.title}`,commit_message:stateOnly?`Expected-head-locked CLOUD-01 governed state-receipt promotion; no product source advancement. ci.yml remains sole production deployment authority. R125/R147/R146/R141 preserved; R201/R203 tombstones remain retired.`:`Expected-head-locked CLOUD-01 source promotion. ci.yml remains sole production deployment authority. R125/R147/R146/R141 preserved; R201/R203 tombstones remain retired.`})});
   return{action:'MERGED_GREEN_EXACT_HEAD',headSha,baseSha:expectedBase,mergeSha:merge.sha,merged:merge.merged===true};
 }
 

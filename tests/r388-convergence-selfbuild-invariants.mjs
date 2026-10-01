@@ -57,6 +57,19 @@ assert.ok(machine.includes("if(repair.state!=='NO_SAFE_PATCH')"),'R421 may conti
 assert.ok(machine.includes("declinedItemScars,createdAt"),'R421 accepted successor receipt must carry prior declined-item scars');
 assert.ok(machine.includes("r388AdvancedItemIds:[...new Set([...(state.r388AdvancedItemIds||[]),item.id])]"),'R421 must advance only the item that actually produced the governed source candidate');
 assert.ok(machine.includes("Prior bounded item declines carried without false advancement"),'R421 PR truth boundary must disclose skipped model-declined items');
+assert.ok(machine.includes("OMEGA_CLOUDFLARE_R388_DECLINE_SCAR_RECEIPT"),'R423 all-decline cycles must have a governed durable scar receipt');
+assert.ok(machine.includes("generatorContract:'R388_DECLINE_SCAR_CARRY'"),'R423 scar carry must be explicitly distinct from product-source advancement');
+assert.ok(machine.includes("sourceAdvance:false,advancedItemIdsChanged:false"),'R423 scar receipt must explicitly deny source advancement and advanced-item mutation');
+assert.ok(machine.includes("r388ObservationGeneration"),'R423 scar-only receipts need an observation generation independent of convergence advancement');
+assert.ok(machine.includes("R388_DECLINE_SCARS_PENDING_PROOF"),'R423 scar carry must remain proof-gated before becoming durable on main');
+assert.ok(machine.includes("Product-source changes: NONE"),'R423 scar-carry PR must disclose that it changes no product source');
+assert.ok(machine.includes("r388AdvancedItemIds changed: NO"),'R423 scar-carry PR must disclose that no convergence item is advanced');
+const scarStart=machine.indexOf("if(declinedItemScars.length){");
+const scarEnd=machine.indexOf("return{...inspection,mutation:'NONE'",scarStart);
+assert.ok(scarStart>=0&&scarEnd>scarStart,'R423 durable scar-carry branch must exist inside the all-decline boundary');
+const scarCarryBlock=machine.slice(scarStart,scarEnd);
+assert.ok(scarCarryBlock.includes("r388Receipts:[...(state.r388Receipts||[]),receipt]"),'R423 must persist decline scars only through the existing governed R388 receipt ledger');
+assert.equal(scarCarryBlock.includes("r388AdvancedItemIds:"),false,'R423 scar-only state candidate must never mutate advanced completion');
+assert.ok(machine.includes("stateOnly=candidate?.sourceAdvance===false||candidate?.status==='DECLINE_SCARS_PENDING_PROOF'"),'R423 promotion receipt must distinguish state-only scar carry from source advancement');
 
-
-console.log(`R388 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · deterministic section→source targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · bounded compliant reformulation only · all 8 exact-head workflow families required for autonomous promotion`);
+console.log(`R388 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · deterministic section→source targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · bounded compliant reformulation only · durable all-decline scar carry without false advancement · all 8 exact-head workflow families required for autonomous promotion`);
