@@ -14,6 +14,8 @@ assert.ok(lemma.includes("q.opaque>=256&&(q.bins>=4||q.span>=.025)"),'R419 must 
 assert.ok(lemma.includes("continue}return{...candidate,img,quality}"),'R419 must preserve bounded fallback ordering after rejecting a non-material candidate');
 assert.ok(lemma.includes('after R419 materiality admission'),'R419 truth boundary must disclose materiality admission of GIBS anchors');
 for(const token of ['evidenceHash:string','result.anchors.lat===lat','result.anchors.lon===lon','result.anchors.evidenceHash===evidenceHash','state:\'LOADING\',fields:{}'])assert.ok(lemma.includes(token),`R398 chain-lemma target/evidence transition guard missing ${token}`);
+assert.ok(lemma.includes("if(!evidenceHash)return()=>{alive=false}"),'R420 must not admit a target-only GIBS lemma before returned Earth evidence identity is bound');
+assert.ok(lemma.indexOf("if(!evidenceHash)return()=>{alive=false}")<lemma.indexOf("(async()=>{try{"),'R420 evidence admission gate must execute before any bounded GIBS anchor fetch/derivation');
 
 assert.ok(earth.includes('evidence={evidence}'),'Earth must pass returned evidence into SAR triangulation');
 assert.ok(live.includes('useSatelliteChainLemmaR3565(lat,lon,evidence)'),'SAR must compile immediate satellite lemma fields from current target/evidence');
