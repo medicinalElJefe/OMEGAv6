@@ -19,7 +19,21 @@ export interface SatelliteLemmaResultR3565{
 const clamp=(v:number)=>Math.max(0,Math.min(1,Number.isFinite(v)?v:0));
 const day=(offset:number)=>new Date(Date.now()+offset*86400000).toISOString().slice(0,10);
 const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Satellite anchor image unavailable'));img.src=src});
-const loadFirstImage=async(sources:{src:string;date:string}[])=>{let last:unknown=null;for(const candidate of sources)try{return{...candidate,img:await loadImage(candidate.src)}}catch(e){last=e}throw(last instanceof Error?last:new Error('Satellite anchor image unavailable across bounded fallback dates'))};
+function materialAnchorSignalR419(img:HTMLImageElement){
+ const n=16,canvas=document.createElement('canvas');canvas.width=n;canvas.height=n;
+ const ctx=canvas.getContext('2d',{willReadFrequently:true});if(!ctx)throw new Error('Canvas unavailable');
+ ctx.drawImage(img,0,0,n,n);const data=ctx.getImageData(0,0,n,n).data,tones=new Set<number>();
+ let opaque=0,min=1,max=0;
+ for(let i=0;i<data.length;i+=4){
+  if(data[i+3]<16)continue;
+  opaque++;
+  const l=(.2126*data[i]+.7152*data[i+1]+.0722*data[i+2])/255;
+  min=Math.min(min,l);max=Math.max(max,l);
+  tones.add((Math.round(data[i]/32)<<6)|(Math.round(data[i+1]/32)<<3)|Math.round(data[i+2]/32));
+ }
+ return{ok:opaque>=n*n*.5&&tones.size>=8&&(max-min)>=.03,opaque,tones:tones.size,range:max-min};
+}
+const loadFirstImage=async(sources:{src:string;date:string}[])=>{let last:unknown=null;for(const candidate of sources)try{const img=await loadImage(candidate.src),signal=materialAnchorSignalR419(img);if(!signal.ok)throw new Error(`Satellite anchor loaded without material image signal · ${candidate.date} · opaque ${signal.opaque} · tones ${signal.tones} · range ${signal.range.toFixed(4)}`);return{...candidate,img}}catch(e){last=e}throw(last instanceof Error?last:new Error('Satellite anchor image unavailable across bounded fallback dates'))};
 const pixels=(img:HTMLImageElement,n:number)=>{const canvas=document.createElement('canvas');canvas.width=n;canvas.height=n;const ctx=canvas.getContext('2d',{willReadFrequently:true});if(!ctx)throw new Error('Canvas unavailable');ctx.drawImage(img,0,0,n,n);return ctx.getImageData(0,0,n,n).data};
 const lum=(p:Uint8ClampedArray,i:number)=>(.2126*p[i]+.7152*p[i+1]+.0722*p[i+2])/255;
 const idx=(x:number,y:number,n:number)=>Math.max(0,Math.min(n-1,y))*n+Math.max(0,Math.min(n-1,x));
