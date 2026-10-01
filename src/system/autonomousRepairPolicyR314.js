@@ -5,6 +5,7 @@ export const R314_AI_MAX_REPLACEMENTS_PER_FILE=8;
 export const R314_AI_MAX_CHANGED_CHARS=12000;
 export const R314_AI_MAX_ATTEMPTS=2;
 export const R314_AI_MAX_OUTPUT_TOKENS=3500;
+export const R314_AI_CORRECTION_MAX_OUTPUT_TOKENS=5000;
 
 const ALLOWED_PREFIXES=Object.freeze(['src/']);
 const FORBIDDEN_PREFIXES=Object.freeze([
@@ -148,7 +149,7 @@ export function autonomousRepairCorrectionPromptR314({residual,stage,contextFile
   }:null,
   proposal:correctionProposalR314(rejection?.proposal),
  };
- return `You are correcting a previously rejected bounded OMEGAv6 R314 product-source proposal. Return JSON only. This is a correction under the SAME authority membrane, not permission to widen it.\n\nImmutable rules:\n- Schema must be ${R314_AUTONOMOUS_REPAIR_SCHEMA}.\n- Repair only the supplied files and bind every file to its supplied preimage SHA.\n- Maximum ${R314_AI_MAX_FILES} files and ${R314_AI_MAX_REPLACEMENTS_PER_FILE} exact replacements per file.\n- Every before string must occur exactly once in the supplied exact source.\n- Prefer the smallest correction that resolves the listed validator defects; do not expand scope.\n- Do not edit tests, workflows, deployment, cloud evolution, self-build governance, authentication, secrets, Canon admission, workers, or generated projections.\n- Do not claim scientific, device, runtime, deployment or Canon truth.\n- canonicalAdmission and directProductionMutation must both be false.\n- expectedProofs must name existing independent proof families.\n- Never work around a rejection code. Correct the proposal so the unchanged validator accepts it.\n- If no compliant patch exists, return files:[].\n\nVALIDATOR REJECTION EVIDENCE\n${JSON.stringify(rejectionEvidence)}\n\nRESIDUAL\n${JSON.stringify(residual)}\n\nBUILD STAGE\n${JSON.stringify(stage)}\n\nEXACT SOURCE CONTEXT\n${JSON.stringify(context)}`;
+ return `You are correcting a previously rejected bounded OMEGAv6 R314 product-source proposal. Return JSON only. This is a correction under the SAME authority membrane, not permission to widen it.\n\nImmutable rules:\n- Schema must be ${R314_AUTONOMOUS_REPAIR_SCHEMA}.\n- Repair only the supplied files and bind every file to its supplied preimage SHA.\n- Maximum ${R314_AI_MAX_FILES} files and ${R314_AI_MAX_REPLACEMENTS_PER_FILE} exact replacements per file.\n- Every before string must occur exactly once in the supplied exact source.\n- Prefer the smallest correction that resolves the listed validator defects; do not expand scope.\n- Keep the correction response compact enough to complete as one JSON object: prefer one file, no more than 3 replacements, and short exact local before/after fragments rather than whole functions or files.\n- Do not emit a replacement whose before or after text exceeds 1600 characters. If the only conceivable change would require a larger response, return files:[] instead of risking a truncated proposal.\n- Do not edit tests, workflows, deployment, cloud evolution, self-build governance, authentication, secrets, Canon admission, workers, or generated projections.\n- Do not claim scientific, device, runtime, deployment or Canon truth.\n- canonicalAdmission and directProductionMutation must both be false.\n- expectedProofs must name existing independent proof families.\n- Never work around a rejection code. Correct the proposal so the unchanged validator accepts it.\n- If no compliant patch exists, return files:[].\n\nVALIDATOR REJECTION EVIDENCE\n${JSON.stringify(rejectionEvidence)}\n\nRESIDUAL\n${JSON.stringify(residual)}\n\nBUILD STAGE\n${JSON.stringify(stage)}\n\nEXACT SOURCE CONTEXT\n${JSON.stringify(context)}`;
 }
 
 export const R314_AUTONOMOUS_REPAIR_LAWS=Object.freeze([
@@ -161,5 +162,6 @@ export const R314_AUTONOMOUS_REPAIR_LAWS=Object.freeze([
  'AI_NO_SAFE_PATCH_MEANS_NO_MUTATION',
  'AI_VALIDATOR_REJECTIONS_MAY_ONLY_NARROW_AND_REFORMULATE_WITHIN_THE_SAME_EXACT_SOURCE_MEMBRANE',
  'AI_REFORMULATION_BUDGET_IS_BOUNDED_AND_EVERY_ATTEMPT_REVALIDATES_FROM_SCRATCH',
+ 'AI_CORRECTION_TRANSPORT_HEADROOM_DOES_NOT_WIDEN_SEMANTIC_PATCH_AUTHORITY',
  'AI_DECODER_GUARANTEES_JSON_OBJECT_ONLY_R314_REMAINS_SOLE_SEMANTIC_PATCH_VALIDATOR',
 ]);
