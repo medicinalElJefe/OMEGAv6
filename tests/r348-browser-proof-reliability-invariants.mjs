@@ -69,10 +69,18 @@ assert.ok(r313Disclosure.includes('partitionInteractionCasesR355')&&r313Disclosu
 assert.ok(r313Disclosure.includes('testDetails(page,viewportName,route)')&&r313Disclosure.includes('testAriaExpanded(page,viewportName,route)'),'R313 disclosure shards must retain both strict disclosure and aria-expanded child contracts');
 assert.ok(r313Browser.includes('partitionInteractionCasesR355')&&r313Browser.includes('interactionPartition[shardIndex].cases'),'R313 partition law must use deterministic measured-workload balancing over the complete profile × route address space');
 assert.ok(!r313Browser.includes('profileIndex*surfaces.length+surfaceIndex)%shardCount'),'R313 must not regress to blind modulo workload partitioning');
+assert.ok(r313Browser.includes('function representativeSafeActuationIds(items)'),'R425 R313 must separate exhaustive classification from bounded behavioral actuation');
+assert.ok(r313Browser.includes('if(item.navTarget||item.transientToggle)selected.add(item.id)'),'R425 every internal-navigation and transient-toggle control must remain mandatory behavioral actuation');
+assert.ok(r313Browser.includes('Math.floor((rows.length-1)/2)'),'R425 local safe-control actuation must retain deterministic spread representatives rather than first-only sampling');
+assert.ok(r313Browser.includes('if(!actuationIds.has(item.id))continue'),'R425 R313 must classify every visible control before selecting bounded behavioral representatives');
+assert.ok(r313Browser.includes('R286 remains the exhaustive action-binding/reachability proof'),'R425 R313 must explicitly bind its representative behavior proof to exhaustive R286 liveness');
+assert.ok(r286Browser.includes('if(shardIndex===0){')&&r286Browser.includes('verifyWorkspaceSubmenus(page,name)'),'R425 global navigator/submenu behavior must be proved once per viewport rather than redundantly in every shard');
+assert.ok(r286Browser.includes('for(const route of routes)'),'R425 every R286 shard must still exhaustively audit its assigned route set');
+
 
 assert.ok(runner.includes('reusing healthy shared preview'),'R241 runner must reuse the already healthy preview');
 assert.ok(runner.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC:-300'),'R241 runner must default every child proof to a finite wall-clock budget');
 assert.ok(runner.includes('timeout --signal=TERM --kill-after=15s'),'R241 runner must terminate hung children fail-closed');
 assert.ok(runner.includes('R241 browser proof timeout'),'R241 timeout must produce an explicit diagnostic annotation');
 
-console.log('R348 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · R286/R313 complete deterministic partitions retained · R408 scheduler refills on first completion but is resource-aware: heavy disclosure/interaction shards consume 2/4 units and no-dead-control shards consume 2/6 units after measured navigator-stall evidence · failed transport samples remain in scar history without training timing EWMA · child/parent ceilings remain fail closed · R318 still runs once after disclosure recombination · diagnostics retained');
+console.log('R348/R425 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · complete 88-case deterministic structural partitions retained · R286 remains exhaustive for action binding/reachability/occlusion while R313 performs bounded deterministic representative behavior plus all navigation/transient actuation · redundant global navigator/submenu repetition removed · R408 scheduler remains resource-aware and fail-closed · failed transport samples remain scar evidence · diagnostics retained');
