@@ -35,9 +35,9 @@ const LEGACY_R82_SURFACE_INVENTORY_SCAR="OMEGA_SURFACES=['Command Center','Hybri
 void LEGACY_R82_SURFACE_INVENTORY_SCAR;
 const RETAINED_DEEP_SPECIALIST_AUTHORITY: { [key: string]: any } ={OmegaVisualInstrument:RETAINED_DEEP_SPECIALIST_LOADERS_R109.OmegaVisualInstrument,OmegaTraversalStudio:RETAINED_DEEP_SPECIALIST_LOADERS_R109.OmegaTraversalStudio,MatterTraversal:RETAINED_DEEP_SPECIALIST_LOADERS_R109.MatterTraversal};
 void RETAINED_DEEP_SPECIALIST_AUTHORITY;
-const LEGACY_R23_STALE_ROUTE_FALLBACK: string = "isPrimaryOperationalCapability(String(v))?v as Panel:'System Atlas'";"isPrimaryOperationalCapability(String(v))?v as Panel:'System Atlas'";
+const LEGACY_R23_STALE_ROUTE_FALLBACK: string ="isPrimaryOperationalCapability(String(v))?v as Panel:'System Atlas'";
 void LEGACY_R23_STALE_ROUTE_FALLBACK;
-const SPECIALIST_EXISTING=new Set<Panel>(['Hybrid Link','Workspace','Cockpit','Matter Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Reality Lab','Atlas Calculator','Infinity','Scale Compiler','Build Out','SAI Lab','Kernel Intelligence','Immersive Traversal','Extreme Traversal','Traversal','Archive Census','Archive Operators','Quality Compiler','Validation','System Atlas','Control Matrix','Convergence']);
+const SPECIALIST_EXISTING=new Set<Panel>(['Hybrid Link','Workspace','Cockpit','Matter Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Reality Lab','Atlas Calculator','Infinity','Scale Compiler','Build Out','SAI Lab','Kernel Intelligence','Immersive Traversal','Extreme Traversal','Traversal','Archive Census','Archive Operators','Quality Compiler','Validation','System Atlas','Control Matrix']);
 const SPECIALIST_SUITE=new Set<Panel>(['Field','Data Motion','Projects','Render Queue','Assets','Evidence & Proof','Memory','Canon Evolution','Governance','Consolidation','Instructions','Settings','System']);
 const VISUAL_FIRST_SURFACES=new Set<Panel>(['Matter Traversal','Visual Instrument','Immersive Traversal','Extreme Traversal','Traversal','Forecast','Relativity','Earth Now','Atlas','Infinity','Scale Compiler','Reality Lab','Field','Data Motion','Convergence']);
 function normalizePanel(v:any):Panel{if(!OMEGA_SURFACES.includes(v as Panel))return 'System Atlas';return capabilityExecutionContract(String(v)).routable?v as Panel:'System Atlas'}
