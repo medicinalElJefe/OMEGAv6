@@ -16,10 +16,16 @@ for(const token of ["url.pathname==='/api/earth/weather'","OMEGA_EARTH_WEATHER_R
 assert.ok(worker.includes('temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability'),'R375 hourly forecast must retain the core returned meteorological vector');
 assert.ok(worker.includes('HEMISPHERIC_OBSERVATION_FRESHNESS_ONLY_NO_LOCAL_PIXEL_ASSIMILATION'),'R375 satellite context must not be relabeled as local pixel assimilation');
 assert.ok(worker.includes("Target is outside the bounded GOES-18/19 weather-context footprint")&&worker.includes("forwardHourly=hourly.filter"),'R375 must bound GOES context geographically and anchor quality/continuity to forward forecast hours');
+assert.ok(worker.includes('async function fetchPrimaryWeatherJson(url)')&&worker.includes('attempt<=2')&&worker.includes('setTimeout(resolve,250)'),'R424 primary weather transport must use exactly one bounded retry');
+assert.ok(worker.includes('fetchPrimaryWeatherJson(source)'),'R424 weather forecast must use the bounded primary-source retry helper');
+assert.ok(worker.includes("error:last?.error||'PRIMARY_FORECAST_UNAVAILABLE'")&&worker.includes('attemptCount:attempts.length')&&worker.includes('attempts}'),'R424 must retain exact primary-provider attempt scars when both attempts fail');
+assert.ok(worker.includes('attemptCount:om.attemptCount||1')&&worker.includes('retried:om.retried===true'),'R424 successful weather evidence must disclose whether bounded retry was required');
+assert.ok(worker.includes("if(!om.ok)return{ok:false,schema:'OMEGA_EARTH_WEATHER_R375'"),'R424 must still fail closed when both primary weather attempts fail');
+assert.equal(worker.includes('fallbackWeather'),false,'R424 must not introduce synthetic or alternate fallback weather');
 assert.ok(css.includes('.earth-r375-hourly')&&css.includes('overflow-x:auto'),'R375 hourly forecast must scroll inside its own stage rather than overflow the viewport');
 assert.ok(css.includes('@media(max-width:620px)')&&css.includes('.earth-r375-weekly{grid-template-columns:1fr}'),'R375 weekly forecast must retain a single-column small-phone mode');
 assert.equal(pkg.scripts['test:r375'],'node tests/r375-weather-source-first-invariants.mjs','R375 invariant must be registered');
 assert.ok(String(pkg.scripts.check||'').includes('npm run test:r375'),'R375 invariant must remain part of canonical npm check');
 assert.ok(liveEarth.includes('count!==9')&&liveEarth.includes('including Weather and SAR Truth'),'R375 live production Earth proof must require all nine surfaces including Weather and SAR Truth');
 
-console.log('R375 WEATHER PASS · ninth Earth view · 48 h hourly + 7 day weekly · Open-Meteo primary returned forecast · NWS hourly cross-check · NOAA/GOES freshness gate · continuity/transition/scar diagnostics remain derived · CanonState mutation denied · responsive containment retained');
+console.log('R375/R424 WEATHER PASS · ninth Earth view · 48 h hourly + 7 day weekly · Open-Meteo remains required primary returned forecast · one bounded primary retry with exact attempt scars · NWS hourly cross-check · NOAA/GOES freshness gate · continuity/transition/scar diagnostics remain derived · CanonState mutation denied · responsive containment retained');
