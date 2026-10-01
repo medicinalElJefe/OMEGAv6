@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import {buildCloudResidualStateR314,R314_CLOUD_RESIDUAL_ADAPTER_SCHEMA} from '../cloudflare/lib/r314-residual-adapter.mjs';
 import {classifyRepairTargetR314,selectRepairTargetR314,R314_CLOUD_TARGET_REGISTRY_SCHEMA} from '../cloudflare/lib/r314-target-registry.mjs';
 import {prepareAiRepairR314,proposeAiRepairR314,repairResponseFormatR314,R314_CLOUD_AI_REPAIR_SCHEMA} from '../cloudflare/lib/r314-ai-repair.mjs';
-import {R314_AUTONOMOUS_REPAIR_SCHEMA,R314_AI_REPAIR_MODEL_DEFAULT,R314_AI_MAX_ATTEMPTS,R314_AI_MAX_OUTPUT_TOKENS,repairPathPolicyR314} from '../src/system/autonomousRepairPolicyR314.js';
+import {R314_AUTONOMOUS_REPAIR_SCHEMA,R314_AI_REPAIR_MODEL_DEFAULT,R314_AI_MAX_ATTEMPTS,R314_AI_MAX_OUTPUT_TOKENS,R314_AI_CORRECTION_MAX_OUTPUT_TOKENS,repairPathPolicyR314} from '../src/system/autonomousRepairPolicyR314.js';
 
 assert.equal(R314_CLOUD_RESIDUAL_ADAPTER_SCHEMA,'OMEGA_CLOUD_R314_RESIDUAL_ADAPTER');
 assert.equal(R314_CLOUD_TARGET_REGISTRY_SCHEMA,'OMEGA_CLOUD_R314_TARGET_REGISTRY');
@@ -72,7 +72,8 @@ assert.equal(objectResponseAi.seen.input.seed,314);
 
 
 assert.equal(R314_AI_MAX_ATTEMPTS,2,'validator-driven reformulation budget must remain one initial proposal plus one correction');
-assert.equal(R314_AI_MAX_OUTPUT_TOKENS,3500,'bounded repair output must remain compact enough for operational autonomous cycles');
+assert.equal(R314_AI_MAX_OUTPUT_TOKENS,3500,'bounded initial repair output must remain compact enough for operational autonomous cycles');
+assert.equal(R314_AI_CORRECTION_MAX_OUTPUT_TOKENS,5000,'R422 correction transport gets bounded JSON-completion headroom without adding an attempt or widening R314 semantic validation');
 const retryPrompts=[];
 const rejectedOnce=structuredClone(proposal);rejectedOnce.files[0].preimageSha='wrong';
 const ai={
@@ -93,6 +94,8 @@ assert.equal(retried.rejectionHistory.length,1);
 assert.equal(ai.requests.length,2);
 assert.equal(ai.requests[0].response_format.type,'json_object','every Workers AI attempt must require one valid JSON object');
 assert.equal(ai.requests[1].response_format.type,'json_object','validator-informed correction must remain JSON-object constrained');
+assert.equal(ai.requests[0].max_tokens,R314_AI_MAX_OUTPUT_TOKENS,'initial generation must retain the compact R314 transport budget');
+assert.equal(ai.requests[1].max_tokens,R314_AI_CORRECTION_MAX_OUTPUT_TOKENS,'correction generation may use bounded transport headroom so a valid JSON object can finish before unchanged R314 validation');
 assert.equal(ai.requests[0].seed,314,'structured proposal generation must stay reproducible within the bounded model path');
 assert.ok(retried.rejectionHistory[0].reasons.includes('FILE_1_SHA_MISMATCH'),'exact validator rejection code must survive into the scar ledger');
 assert.ok(retryPrompts[1].includes('FILE_1_SHA_MISMATCH'),'the next model attempt must receive the exact rejection evidence');
@@ -111,6 +114,9 @@ assert.equal(declinedThenPatchAi.calls,2);
 assert.ok(recoveredDecline.rejectionHistory[0].reasons.includes('MODEL_DECLINED_BOUNDED_PATCH'),'model decline must survive as exact reformulation evidence');
 assert.ok(declinedThenPatchAi.prompts[1].includes('MODEL_DECLINED_BOUNDED_PATCH'),'second attempt must receive the exact first-decline reason');
 assert.ok(declinedThenPatchAi.prompts[1].includes('attempt the smallest material compliant patch'),'decline reformulation must guide a bounded material retry without widening authority');
+assert.ok(declinedThenPatchAi.prompts[1].includes('response compact enough to complete as one JSON object'),'R422 correction prompt must explicitly prevent transport-sized rewrites');
+assert.ok(declinedThenPatchAi.prompts[1].includes('exceeds 1600 characters'),'R422 correction prompt must bound individual replacement payloads');
+assert.ok(declinedThenPatchAi.prompts[1].includes('return files:[] instead of risking a truncated proposal'),'R422 must prefer an honest no-safe-patch result over a truncated oversized JSON proposal');
 
 const alwaysDeclinesAi={calls:0,async run(){this.calls++;return{response:declined}}};
 const terminalDecline=await proposeAiRepairR314({ai:alwaysDeclinesAi,residual:safeResidual,stage:{id:'R416-DECLINE-TERMINAL',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
