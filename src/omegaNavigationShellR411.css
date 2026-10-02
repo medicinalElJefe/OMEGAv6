@@ -486,6 +486,43 @@ html:has(.earth-r372-stage-expanded) .r257-shell-headless .r318-system-diagnosti
    viewport geometry. This selector deliberately outranks route-local R313 presentation
    rules that preserve vertical document flow inside specialist content. Those inner
    surfaces may remain overflow-visible; only workstation-main owns route scrolling. */
+.r257-shell-headless{
+ height:100dvh!important;
+ max-height:100dvh!important;
+ min-height:0!important;
+ overflow:hidden!important;
+}
+.r257-shell-headless>.r257-stage{
+ height:100%!important;
+ max-height:100%!important;
+ min-height:0!important;
+ overflow:hidden!important;
+}
+.r257-shell-headless .r317-product-root{
+ height:100%!important;
+ max-height:100%!important;
+ min-height:0!important;
+ display:grid!important;
+ grid-template-rows:auto minmax(0,1fr)!important;
+ overflow:hidden!important;
+}
+.r257-shell-headless .r317-product-root>.r318-system-diagnostics{
+ min-height:0!important;
+ max-height:min(40dvh,360px)!important;
+ overflow:auto!important;
+}
+.r257-shell-headless .r317-product-root>:is(.omega-workstation-v2,.r71-home){
+ height:100%!important;
+ max-height:100%!important;
+ min-height:0!important;
+}
+@media(max-width:900px){
+ .r257-shell-headless{
+  height:calc(100dvh - var(--r411-mobile-dock))!important;
+  max-height:calc(100dvh - var(--r411-mobile-dock))!important;
+ }
+}
+
 .r257-shell-headless .r317-product-root>.omega-workstation-v2[data-panel]{
  height:100%!important;
  max-height:100%!important;
