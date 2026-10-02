@@ -148,6 +148,22 @@ async function guardEvidence(page,item){
  },{id:item.id});
 }
 
+function representativeSafeActuationIds(items){
+ const selected=new Set();
+ const safe=items.filter(item=>!item.disabled&&!MUTATING.test(item.label)&&!PASSIVE_NETWORK.test(item.label));
+ for(const item of safe)if(item.navTarget||item.transientToggle)selected.add(item.id);
+ const spread=rows=>{
+  if(!rows.length)return;
+  for(const index of [...new Set([0,Math.floor((rows.length-1)/2),rows.length-1])]){
+   const item=rows[index];
+   if(item)selected.add(item.id);
+  }
+ };
+ spread(safe.filter(item=>item.native&&!item.navTarget&&!item.transientToggle));
+ spread(safe.filter(item=>!item.native&&!item.navTarget&&!item.transientToggle));
+ return selected;
+}
+
 async function resolveControl(page,item){
  const probe=`[data-r313-probe-id="${item.id}"]`;
  let current=page.locator(probe);
@@ -213,6 +229,7 @@ async function actuateSafeControl(page,item,profile,surface){
 
 async function clickSafeControls(page,surface,profile,pageErrors){
  const before=await inventory(page,surface);
+ const actuationIds=representativeSafeActuationIds(before);
  for(const item of before){
   if(!item.label)throw new Error(`${profile}/${surface}: enabled visible control has no accessible name at ${item.id}`);
   if(!item.disabled&&(item.width<8||item.height<8||item.pointer==='none'))throw new Error(`${profile}/${surface}: unusable control ${item.label} ${item.width.toFixed(1)}x${item.height.toFixed(1)} pointer=${item.pointer}`);
@@ -229,6 +246,7 @@ async function clickSafeControls(page,surface,profile,pageErrors){
    }
    continue;
   }
+  if(!actuationIds.has(item.id))continue;
 
   const beforeContinuity=await surfaceContinuityState(page,surface);
   const beforeNavigationCount=page.__r313MainFrameNavigations||0;
@@ -271,7 +289,7 @@ async function clickSafeControls(page,surface,profile,pageErrors){
    if(!stable.exists||stable.failed||stable.panel!==surface)throw new Error(`${profile}/${surface}: local interaction broke same-state surface continuity after ${item.label}`);
   }
  }
- return before;
+ return before.map(item=>({...item,actuated:actuationIds.has(item.id)}));
 }
 
 const browser=await chromium.launch({headless:true});
@@ -295,17 +313,17 @@ try{
    const list=await clickSafeControls(page,surface,profile,pageErrors);
    total+=list.length;
    actionable+=list.filter(x=>!x.disabled).length;
-   nativeActuated+=list.filter(x=>!x.disabled&&x.native&&!MUTATING.test(x.label)&&!PASSIVE_NETWORK.test(x.label)).length;
-   roleActuated+=list.filter(x=>!x.disabled&&!x.native&&!MUTATING.test(x.label)&&!PASSIVE_NETWORK.test(x.label)).length;
+   nativeActuated+=list.filter(x=>x.actuated&&x.native).length;
+   roleActuated+=list.filter(x=>x.actuated&&!x.native).length;
    const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
    if(overflow>24)throw new Error(`${profile}/${surface}: viewport overflow ${overflow}px after interaction sweep`);
   }
   if(pageErrors.length)throw new Error(`${profile}: page errors ${pageErrors.join(' | ').slice(0,2500)}`);
   const seriousConsole=consoleErrors.filter(x=>!/favicon|Failed to load resource.*404/i.test(x));
   if(seriousConsole.length)throw new Error(`${profile}: console errors ${seriousConsole.join(' | ').slice(0,2500)}`);
-  console.log(`R313 ${profile.toUpperCase()} SHARD ${shardIndex+1}/${shardCount} CONTROL SWEEP PASS · workload ${interactionPartition[shardIndex].weight}ms census · ${assigned.length} deterministic panels · ${total} visible controls inventoried · ${actionable} enabled controls verified · ${nativeActuated} safe native controls click-exercised · ${roleActuated} safe role buttons keyboard-exercised · mutating/network controls held behind declared proof/authorization semantics · no page errors · no material overflow`);
+  console.log(`R313 ${profile.toUpperCase()} SHARD ${shardIndex+1}/${shardCount} CONTROL SWEEP PASS · workload ${interactionPartition[shardIndex].weight}ms census · ${assigned.length} deterministic panels · ${total} visible controls exhaustively classified · ${actionable} enabled controls verified · ${nativeActuated} representative/special native controls click-exercised · ${roleActuated} representative role buttons keyboard-exercised · every internal-navigation and transient-toggle control actuated · mutating/network controls held behind declared proof/authorization semantics · no page errors · no material overflow`);
   await context.close();
  }
  const shardCases=profiles.reduce((sum,_,profileIndex)=>sum+assignedSurfaces(profileIndex).length,0);
- console.log(`R313 SHARD ${shardIndex+1}/${shardCount} PASS · workload ${interactionPartition[shardIndex].weight}ms census · ${shardCases} deterministic route/viewport cases · all assigned visible panel buttons received accessibility/reachability/geometry classification; safe native controls were pointer-actuated; non-native role buttons were keyboard-actuated through their explicit accessibility contract; state-changing/network controls remained explicitly gated; zero browser page errors.`);
+ console.log(`R313 SHARD ${shardIndex+1}/${shardCount} PASS · workload ${interactionPartition[shardIndex].weight}ms census · ${shardCases} deterministic route/viewport cases · all assigned visible panel controls received accessibility/geometry/guard classification; R286 remains the exhaustive action-binding/reachability proof; R313 actuated deterministic representative local controls plus every internal-navigation and transient-toggle control through their real pointer/keyboard contract; state-changing/network controls remained explicitly gated; zero browser page errors.`);
 }finally{await browser.close()}
