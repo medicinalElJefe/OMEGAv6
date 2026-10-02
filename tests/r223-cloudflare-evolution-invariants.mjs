@@ -75,7 +75,10 @@ assert.match(workflow,/r245-governed-selfbuild-convergence-invariants\.mjs/);
 assert.match(workflow,/OMEGA_EVOLUTION_GITHUB_TOKEN/,'Cloudflare Worker GitHub credential must remain external secret state');
 assert.match(workflow,/wrangler secret put OMEGA_GITHUB_TOKEN/,'provisioning must bind GitHub credential as encrypted Worker secret');
 assert.match(workflow,/openssl rand -hex 32/,'manual-trigger secret must be generated, not committed');
-assert.match(workflow,/state==='PROPOSED'.*state==='OBSERVE_ONLY'/s,'immediate autonomous proof must accept only a legitimate governed candidate or OBSERVE_ONLY');
+assert.match(workflow,/state==='PROPOSED'.*state==='OBSERVE_ONLY'.*state==='HELD_FOR_PROOF'/s,'immediate autonomous proof must recognize candidate, observe-only, and explicitly bounded stale-base hold terminals');
+assert.match(workflow,/expectedBase\.length===40.*currentMain\.length===40.*expectedBase!==currentMain.*main drifted/s,'HELD_FOR_PROOF may pass immediate-cycle proof only for an explicit stale-base/current-main mismatch');
+assert.match(workflow,/String\(promotion\.action\|\|''\)==='NONE'/,'stale-base HELD_FOR_PROOF must prove zero promotion action');
+assert.match(workflow,/STALE_BASE_HELD/,'stale-base terminal must be named explicitly in proof output');
 assert.match(workflow,/R388_BACKLOG_BRANCH_AND_PR_CREATED/,'R388 candidate terminal must be explicitly recognized by the proof gate');
 
 console.log('R223/R245 CLOUDFLARE EVOLUTION PASS · CLOUD-01 singleton · shared R164 residual policy · shared R240/R243 selection · shared deterministic generator · cross-machine one-candidate fence · exact-head proof-gated merge · ci.yml sole canonical production writer · R125/R147/R146/R141 preserved');
