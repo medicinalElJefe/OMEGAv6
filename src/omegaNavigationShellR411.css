@@ -471,6 +471,16 @@ html:has(.earth-r372-stage-expanded) .r257-shell-headless .r318-system-diagnosti
  display:none!important;
 }
 
+/* R427 · RETIRE DUPLICATE LEGACY WORKSTATION CHROME.
+   ResponsiveRuntimeShell/R27 remains mounted for compatibility state and frame sensing,
+   but R411 is the sole visible global navigator. Fixed R27 chrome may not cover route
+   content or create a second navigation/scroll boundary. */
+.omega-workstation-v2>:is(.r27-desktop-frame,.r27-mobile-head,.r27-mobile-bottom,.r27-mobile-drawer){
+ display:none!important;
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+
 /* R427 · GLOBAL WORKSTATION SCROLL OWNERSHIP.
    The canonical product shell owns viewport height; workstation-main owns vertical
    route scrolling for every canonical surface. Home uses the same bounded viewport
