@@ -5,10 +5,10 @@
   "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
   "generatorContract": "R388_BACKLOG_AI_BUILD",
   "item": {
-    "id": "R388-A-01",
+    "id": "R388-A-02",
     "section": "A",
-    "index": 1,
-    "objective": "One launcher/runtime/state authority across cloud, browser, Hybrid and native-host surfaces.",
+    "index": 2,
+    "objective": "One renderer contract spanning FIELD, SURFACE, SKIN, GRAPH, ASSEMBLY, MATERIAL, EVIDENCE, CANON and TRAVERSAL views without duplicate renderers or shadow viewports.",
     "affected": [
       "src/OmegaWorkstationFullV2.tsx",
       "src/systemAtlasRuntime.ts"
@@ -41,7 +41,7 @@
         "validation": null,
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-02",
           "files": [],
           "canonicalAdmission": false,
           "directProductionMutation": false,
@@ -51,23 +51,24 @@
           ]
         }
       }
-    ]
+    ],
+    "declinedItemScars": []
   },
   "receipt": {
     "schema": "OMEGA_CLOUDFLARE_R388_CONVERGENCE_RECEIPT",
     "machineId": "CLOUD-01",
     "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
     "generatorContract": "R388_BACKLOG_AI_BUILD",
-    "convergenceGeneration": 1,
-    "itemId": "R388-A-01",
+    "convergenceGeneration": 2,
+    "itemId": "R388-A-02",
     "section": "A",
-    "objective": "One launcher/runtime/state authority across cloud, browser, Hybrid and native-host surfaces.",
+    "objective": "One renderer contract spanning FIELD, SURFACE, SKIN, GRAPH, ASSEMBLY, MATERIAL, EVIDENCE, CANON and TRAVERSAL views without duplicate renderers or shadow viewports.",
     "externalProofRequired": false,
     "targetPaths": [
       "src/OmegaWorkstationFullV2.tsx"
     ],
-    "baseSha": "7579bd02b2fc6ebb8935acdb005f4f9886a9b913",
-    "branch": "cloud/evolution-r388-r388-a-01-7579bd02",
+    "baseSha": "6fb3d3a698904cc4f770d7da698dc6bbf4091dfa",
+    "branch": "cloud/evolution-r388-r388-a-02-6fb3d3a6",
     "status": "SOURCE_ADVANCED_PENDING_PROOF",
     "canonicalAdmission": false,
     "directProductionMutation": false,
@@ -88,7 +89,7 @@
         "validation": null,
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-02",
           "files": [],
           "canonicalAdmission": false,
           "directProductionMutation": false,
@@ -105,16 +106,16 @@
         "reasons": [],
         "validation": {
           "valid": true,
-          "changedChars": 226,
+          "changedChars": 1110,
           "fileCount": 1
         },
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-02",
           "files": [
             {
               "path": "src/OmegaWorkstationFullV2.tsx",
-              "preimageSha": "3be2b7623250dd89ab409f1fdc49df97ad95657e",
+              "preimageSha": "ba7493d16b2cc24e50b7cad9fe8af8c809b0cfd5",
               "replacementCount": 2
             }
           ],
@@ -138,7 +139,7 @@
         "validation": null,
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-02",
           "files": [],
           "canonicalAdmission": false,
           "directProductionMutation": false,
@@ -149,7 +150,8 @@
         }
       }
     ],
-    "createdAt": "2026-10-01T00:47:49.011Z",
+    "declinedItemScars": [],
+    "createdAt": "2026-10-02T00:41:07.289Z",
     "authorityBoundaries": {
       "canonAdmission": "R125",
       "dispatch": "R147",
