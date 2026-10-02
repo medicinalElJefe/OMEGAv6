@@ -71,5 +71,22 @@ const scarCarryBlock=machine.slice(scarStart,scarEnd);
 assert.ok(scarCarryBlock.includes("r388Receipts:[...(state.r388Receipts||[]),receipt]"),'R423 must persist decline scars only through the existing governed R388 receipt ledger');
 assert.equal(scarCarryBlock.includes("r388AdvancedItemIds:"),false,'R423 scar-only state candidate must never mutate advanced completion');
 assert.ok(machine.includes("stateOnly=candidate?.sourceAdvance===false||candidate?.status==='DECLINE_SCARS_PENDING_PROOF'"),'R423 promotion receipt must distinguish state-only scar carry from source advancement');
+assert.ok(machine.includes('async function gitBlobShaR430(value)')&&machine.includes("crypto.subtle.digest('SHA-1',framed)")&&machine.includes("blob ${body.byteLength}\\0"),'R430 rejected-patch memory must derive exact Git blob SHA-1 identity from Git blob framing, not fuzzy text');
+assert.ok(machine.includes("schema:'OMEGA_R430_PRODUCT_PATCH_IDENTITY'")&&machine.includes("rows.map(row=>\`\${row.path}:\${row.blobSha}\`).join('|')"),'R430 product patch identity must bind sorted product paths to exact resulting blob SHAs');
+assert.ok(machine.includes("/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=100")&&machine.includes("!pr.merged_at")&&machine.includes("startsWith('cloud/evolution-r388-')"),'R430 memory search must be restricted to closed unmerged CLOUD-01 R388 history');
+assert.ok(machine.includes("/pulls/\${pr.number}/commits?per_page=100")&&machine.includes("prior.key!==proposed.key"),'R430 must inspect historical PR commits so a later repair/revert cannot erase the originally rejected exact patch identity');
+assert.ok(machine.includes('GOVERNED_REJECTION_COMMENT')&&machine.includes('FAILED_EXACT_HEAD_PROOF'),'R430 must require explicit rejection evidence rather than treating every closed PR as proof-invalid');
+assert.ok(machine.includes('R430_REQUIRED_PROOF_WORKFLOWS=new Set')&&machine.includes("R430_REQUIRED_PROOF_WORKFLOWS.has(run.name)"),'R430 failed-workflow rejection evidence must be limited to the authoritative eight-family promotion proof stack');
+assert.ok(machine.includes('const itemSlug=slug(itemId)')&&machine.includes('branch.includes(itemSlug)'),'R430 must still identify the convergence item if a closed autonomous PR title was later edited');
+assert.ok(machine.includes("state:'PROOF_REJECTED_PATCH_REPEAT'"),'R430 must record exact known-bad patch recurrence as a distinct decline scar');
+assert.ok(machine.includes('patchIdentity:rejectedRepeat.proposed')&&machine.includes('matchedClosedPr:{number:rejectedRepeat.prNumber'),'R430 decline scar must preserve exact patch identity and closed-PR rejection provenance');
+const repeatStart=machine.indexOf("if(rejectedRepeat.matched){");
+const chooseStart=machine.indexOf("chosen={target,item,repair,patchIdentity:rejectedRepeat.proposed};break",repeatStart);
+assert.ok(repeatStart>=0&&chooseStart>repeatStart,'R430 must check exact rejected-patch memory before choosing a source candidate');
+const repeatBlock=machine.slice(repeatStart,chooseStart);
+assert.ok(repeatBlock.includes('declinedItemScars.push(scar)')&&repeatBlock.includes('continue;'),'R430 exact repeat must become a decline scar and continue to the next bounded backlog candidate');
+assert.equal(repeatBlock.includes('/git/refs'),false,'R430 exact repeat must be rejected before candidate branch creation');
+assert.ok(machine.includes('productPatchIdentity:patchIdentity')&&machine.includes('Product patch identity: ${patchIdentity.key}'),'R430 accepted non-repeat candidate must carry its exact product patch identity into receipt/candidate/PR evidence');
 
-console.log(`R388 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · deterministic section→source targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · bounded compliant reformulation only · durable all-decline scar carry without false advancement · all 8 exact-head workflow families required for autonomous promotion`);
+
+console.log(`R388/R430 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · deterministic section→source targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · exact Git-blob proof-rejected patch memory · bounded compliant reformulation only · durable all-decline scar carry without false advancement · all 8 exact-head workflow families required for autonomous promotion`);
