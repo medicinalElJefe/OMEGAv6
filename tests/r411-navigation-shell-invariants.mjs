@@ -62,6 +62,8 @@ assert.ok(css.includes(".r317-product-root>:is(.omega-workstation-v2,.r71-home)"
 assert.ok(css.includes(".r317-product-root>.r318-system-diagnostics")&&css.includes('max-height:40dvh!important')&&css.includes('overflow:auto!important'),'explicitly opened diagnostics must remain bounded inside the headless viewport');
 assert.ok(css.includes("html:has(.earth-r372-stage-expanded) .r257-shell-headless")&&css.includes("html:has(.earth-r372-stage-expanded) .r257-shell-headless .r318-system-diagnostics"),'fullscreen Earth must recover the full viewport and suppress headless diagnostics chrome');
 assert.ok(css.includes('R427 · GLOBAL WORKSTATION SCROLL OWNERSHIP'),'R427 global route scroll ownership law missing');
+assert.ok(css.includes('R427 · RETIRE DUPLICATE LEGACY WORKSTATION CHROME')&&css.includes('.omega-workstation-v2>:is(.r27-desktop-frame,.r27-mobile-head,.r27-mobile-bottom,.r27-mobile-drawer)'),'R427 must keep R27 compatibility state mounted but retire its duplicate fixed navigation chrome under R411');
+
 assert.ok(css.includes("html[data-omega-nav-present='true'] .r257-shell-headless")&&css.includes('height:100dvh!important'),'desktop/headless canonical product shell must own the viewport rather than expand with route content');
 assert.ok(css.includes("html[data-omega-nav-present='true'] .omega-workstation-v2 .workstation-main")&&css.includes('overflow-y:auto!important'),'every routed workstation surface must share workstation-main as the canonical vertical scroll owner');
 assert.ok(css.includes('scrollbar-gutter:stable!important')&&css.includes('overscroll-behavior-y:contain!important'),'canonical route scrolling must remain stable and bounded');
