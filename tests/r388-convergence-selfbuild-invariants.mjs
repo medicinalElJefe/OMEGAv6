@@ -76,6 +76,8 @@ assert.ok(machine.includes("schema:'OMEGA_R430_PRODUCT_PATCH_IDENTITY'")&&machin
 assert.ok(machine.includes("/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=100")&&machine.includes("!pr.merged_at")&&machine.includes("startsWith('cloud/evolution-r388-')"),'R430 memory search must be restricted to closed unmerged CLOUD-01 R388 history');
 assert.ok(machine.includes("/pulls/\${pr.number}/commits?per_page=100")&&machine.includes("prior.key!==proposed.key"),'R430 must inspect historical PR commits so a later repair/revert cannot erase the originally rejected exact patch identity');
 assert.ok(machine.includes('GOVERNED_REJECTION_COMMENT')&&machine.includes('FAILED_EXACT_HEAD_PROOF'),'R430 must require explicit rejection evidence rather than treating every closed PR as proof-invalid');
+assert.ok(machine.includes('R430_REQUIRED_PROOF_WORKFLOWS=new Set')&&machine.includes("R430_REQUIRED_PROOF_WORKFLOWS.has(run.name)"),'R430 failed-workflow rejection evidence must be limited to the authoritative eight-family promotion proof stack');
+assert.ok(machine.includes('const itemSlug=slug(itemId)')&&machine.includes('branch.includes(itemSlug)'),'R430 must still identify the convergence item if a closed autonomous PR title was later edited');
 assert.ok(machine.includes("state:'PROOF_REJECTED_PATCH_REPEAT'"),'R430 must record exact known-bad patch recurrence as a distinct decline scar');
 assert.ok(machine.includes('patchIdentity:rejectedRepeat.proposed')&&machine.includes('matchedClosedPr:{number:rejectedRepeat.prNumber'),'R430 decline scar must preserve exact patch identity and closed-PR rejection provenance');
 const repeatStart=machine.indexOf("if(rejectedRepeat.matched){");
