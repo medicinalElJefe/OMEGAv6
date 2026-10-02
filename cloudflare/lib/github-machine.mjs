@@ -20,6 +20,63 @@ async function putRepoFile(token,repo,path,branch,message,content,sha){const pay
 async function liveJson(base,path){const r=await fetch(`${base.replace(/\/$/,'')}${path}?cloud01_cycle=${Date.now()}`,{headers:{'cache-control':'no-cache'}});const text=await r.text();if(!r.ok)throw new Error(`${path} HTTP ${r.status}: ${text.slice(0,300)}`);return JSON.parse(text)}
 const slug=value=>String(value||'repair').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48)||'repair';
 
+async function gitBlobShaR430(value){
+  const body=new TextEncoder().encode(String(value));
+  const header=new TextEncoder().encode(`blob ${body.byteLength}\0`);
+  const framed=new Uint8Array(header.byteLength+body.byteLength);
+  framed.set(header,0);framed.set(body,header.byteLength);
+  const digest=new Uint8Array(await crypto.subtle.digest('SHA-1',framed));
+  return[...digest].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+}
+
+async function productPatchIdentityR430(patches){
+  const rows=[];
+  for(const patch of [...(patches||[])].sort((a,b)=>String(a.path).localeCompare(String(b.path)))){
+    rows.push({path:String(patch.path),blobSha:await gitBlobShaR430(patch.content)});
+  }
+  return{schema:'OMEGA_R430_PRODUCT_PATCH_IDENTITY',rows,key:rows.map(row=>`${row.path}:${row.blobSha}`).join('|')};
+}
+
+async function commitProductPatchIdentityR430(token,repo,commitSha,paths){
+  const rows=[];
+  for(const path of [...paths].sort()){
+    try{const file=await getRepoTextFile(token,repo,path,commitSha);rows.push({path,blobSha:file.sha})}
+    catch{return null}
+  }
+  return{schema:'OMEGA_R430_PRODUCT_PATCH_IDENTITY',rows,key:rows.map(row=>`${row.path}:${row.blobSha}`).join('|')};
+}
+
+const R430_REJECTION_COMMENT=/(governed rejection|proof[- ]invalid|proof[- ]backed rejection|known[- ]invalid repeat|must not be promoted|proof[- ]rejected)/i;
+
+async function findClosedProofRejectedPatchRepeatR430({token,repo,itemId,patches}){
+  const proposed=await productPatchIdentityR430(patches);
+  if(!proposed.rows.length)return{matched:false,proposed};
+  const closed=await gh(token,`/repos/${repo}/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=100`);
+  const relevant=(closed||[]).filter(pr=>!pr.merged_at&&String(pr.head?.ref||'').startsWith('cloud/evolution-r388-')&&String(pr.title||'').includes(String(itemId))).slice(0,24);
+  for(const pr of relevant){
+    let comments=[];try{comments=await gh(token,`/repos/${repo}/issues/${pr.number}/comments?per_page=100`)}catch{}
+    const commentRejected=(comments||[]).some(comment=>R430_REJECTION_COMMENT.test(String(comment?.body||'')));
+    let commits=[];try{commits=await gh(token,`/repos/${repo}/pulls/${pr.number}/commits?per_page=100`)}catch{}
+    for(const commit of [...(commits||[])].reverse()){
+      const commitSha=String(commit?.sha||'');if(!/^[0-9a-f]{40}$/i.test(commitSha))continue;
+      const prior=await commitProductPatchIdentityR430(token,repo,commitSha,proposed.rows.map(row=>row.path));
+      if(!prior||prior.key!==proposed.key)continue;
+      let failedWorkflows=[];
+      if(!commentRejected){
+        try{
+          const runs=await gh(token,`/repos/${repo}/actions/runs?head_sha=${commitSha}&event=pull_request&per_page=100`);
+          failedWorkflows=(runs.workflow_runs||[]).filter(run=>run.status==='completed'&&run.conclusion==='failure').map(run=>run.name);
+        }catch{}
+      }
+      if(commentRejected||failedWorkflows.length){
+        return{matched:true,proposed,prNumber:pr.number,prHeadSha:pr.head?.sha||null,matchedCommitSha:commitSha,rejectionEvidence:commentRejected?'GOVERNED_REJECTION_COMMENT':'FAILED_EXACT_HEAD_PROOF',failedWorkflows:[...new Set(failedWorkflows)],closedAt:pr.closed_at||null};
+      }
+    }
+  }
+  return{matched:false,proposed};
+}
+
+
 async function collectCandidates(token,repo,policy){
   const candidates=[];
   for(const prefix of autonomousCandidatePrefixesR245(policy)){
@@ -110,7 +167,16 @@ async function proposeR388BacklogCycle({inspection,token,repo,ai,model}){
     const stage={id:'CLOUD-01-R388-CONVERGENCE-BUILD',baseSha:mainSha,itemId:item.id,section:item.section,paths:target.paths,externalProofRequired:item.externalProofRequired===true};
     const repair=await proposeAiRepairR314({ai,model:model||R314_AI_REPAIR_MODEL_DEFAULT,residual:target.residual,stage,contextFiles});
     lastRepair=repair;
-    if(repair.ok){chosen={target,item,repair};break}
+    if(repair.ok){
+      const rejectedRepeat=await findClosedProofRejectedPatchRepeatR430({token,repo,itemId:item.id,patches:repair.patches});
+      if(rejectedRepeat.matched){
+        const scar={itemId:item.id,section:item.section,state:'PROOF_REJECTED_PATCH_REPEAT',reasons:[`exact product patch identity already proof-rejected by closed unmerged CLOUD-01 PR #${rejectedRepeat.prNumber}`],attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true,patchIdentity:rejectedRepeat.proposed,matchedClosedPr:{number:rejectedRepeat.prNumber,headSha:rejectedRepeat.prHeadSha,matchedCommitSha:rejectedRepeat.matchedCommitSha,rejectionEvidence:rejectedRepeat.rejectionEvidence,failedWorkflows:rejectedRepeat.failedWorkflows,closedAt:rejectedRepeat.closedAt}};
+        declinedItemScars.push(scar);
+        lastRepair={...repair,state:'PROOF_REJECTED_PATCH_REPEAT',reasons:scar.reasons,proofRejectedPatchRepeat:scar.matchedClosedPr,patchIdentity:scar.patchIdentity};
+        continue;
+      }
+      chosen={target,item,repair,patchIdentity:rejectedRepeat.proposed};break
+    }
     const scar={itemId:item.id,section:item.section,state:repair.state,reasons:repair.reasons||repair.validation?.reasons||[],attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true};
     declinedItemScars.push(scar);
     if(repair.state!=='NO_SAFE_PATCH')return{...inspection,mutation:'NONE',reason:repair.state,repair:{state:repair.state,reasons:scar.reasons,attempts:scar.attempts,rejectionHistory:scar.rejectionHistory,reformulated:scar.reformulated},itemId:item.id,declinedItemScars};
@@ -137,21 +203,21 @@ async function proposeR388BacklogCycle({inspection,token,repo,ai,model}){
     }
     return{...inspection,mutation:'NONE',reason:repair.state||'NO_SAFE_PATCH',repair:{state:repair.state||'NO_SAFE_PATCH',reasons:repair.reasons||repair.validation?.reasons||[],attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true},itemId:lastItem?.id||targets[0]?.item?.id||null,declinedItemScars};
   }
-  const{target,item,repair}=chosen;
+  const{target,item,repair,patchIdentity}=chosen;
   await ensureNoCompetingCandidate(token,repo,state,mainSha);
   const convergenceGeneration=Number(state.r388Generation||0)+1,branch=`cloud/evolution-r388-${slug(item.id)}-${mainSha.slice(0,8)}`;
   await gh(token,`/repos/${repo}/git/refs`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({ref:`refs/heads/${branch}`,sha:mainSha})});
   for(const patch of repair.patches)await putRepoFile(token,repo,patch.path,branch,`CLOUD-01 R388 convergence ${item.id}: ${patch.path}`,patch.content,patch.preimageSha);
-  const receipt={schema:'OMEGA_CLOUDFLARE_R388_CONVERGENCE_RECEIPT',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R388_BACKLOG_AI_BUILD',convergenceGeneration,itemId:item.id,section:item.section,objective:item.objective,externalProofRequired:item.externalProofRequired===true,targetPaths:repair.patches.map(p=>p.path),baseSha:mainSha,branch,status:'SOURCE_ADVANCED_PENDING_PROOF',canonicalAdmission:false,directProductionMutation:false,model:repair.model,expectedProofs:repair.proposal.expectedProofs,reformulated:repair.reformulated===true,repairAttemptLedger:repair.attempts||[],rejectionScars:repair.rejectionHistory||[],declinedItemScars,createdAt:new Date().toISOString(),authorityBoundaries:AUTHORITY_BOUNDARIES};
+  const receipt={schema:'OMEGA_CLOUDFLARE_R388_CONVERGENCE_RECEIPT',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R388_BACKLOG_AI_BUILD',convergenceGeneration,itemId:item.id,section:item.section,objective:item.objective,externalProofRequired:item.externalProofRequired===true,targetPaths:repair.patches.map(p=>p.path),productPatchIdentity:patchIdentity,baseSha:mainSha,branch,status:'SOURCE_ADVANCED_PENDING_PROOF',canonicalAdmission:false,directProductionMutation:false,model:repair.model,expectedProofs:repair.proposal.expectedProofs,reformulated:repair.reformulated===true,repairAttemptLedger:repair.attempts||[],rejectionScars:repair.rejectionHistory||[],declinedItemScars,createdAt:new Date().toISOString(),authorityBoundaries:AUTHORITY_BOUNDARIES};
   const branchState=await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch);
   const nextState={...state,r388Generation:convergenceGeneration,r388AdvancedItemIds:[...new Set([...(state.r388AdvancedItemIds||[]),item.id])],r388Receipts:[...(state.r388Receipts||[]),receipt].slice(-256)};
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch,`Bind CLOUD-01 R388 convergence receipt ${item.id}`,`${JSON.stringify(nextState,null,2)}\n`,branchState.sha);
-  const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388',revision:'R388',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R388_BACKLOG_AI_BUILD',item,repair:{paths:repair.patches.map(p=>p.path),expectedProofs:repair.proposal.expectedProofs,reformulated:repair.reformulated===true,rejectionScars:repair.rejectionHistory||[],declinedItemScars},receipt,status:'SOURCE_ADVANCED_PENDING_PROOF',canonicalAdmission:false,directProductionMutation:false};
+  const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388',revision:'R388',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R388_BACKLOG_AI_BUILD',item,repair:{paths:repair.patches.map(p=>p.path),productPatchIdentity:patchIdentity,expectedProofs:repair.proposal.expectedProofs,reformulated:repair.reformulated===true,rejectionScars:repair.rejectionHistory||[],declinedItemScars},receipt,status:'SOURCE_ADVANCED_PENDING_PROOF',canonicalAdmission:false,directProductionMutation:false};
   let candidateSha=null;try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record CLOUD-01 R388 candidate ${item.id}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
   await ensureNoCompetingCandidate(token,repo,state,mainSha);
   const priorDeclines=declinedItemScars.length?declinedItemScars.map(row=>`${row.itemId}:${row.state}`).join(', '):'none';
-  const pr=await gh(token,`/repos/${repo}/pulls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:`R388 CLOUD-01 convergence — ${item.id}`,head:branch,base:'main',draft:false,body:`CLOUD-01 advanced one explicit item from the R387 convergence matrix.\n\nExact base: ${mainSha}\nItem: ${item.id} — ${item.objective}\nPaths: ${repair.patches.map(p=>p.path).join(', ')}\nPrior bounded item declines carried without false advancement: ${priorDeclines}\nExternal/device proof still required: ${item.externalProofRequired===true?'YES':'NO'}\nExpected independent proofs: ${(repair.proposal.expectedProofs||[]).join(', ')}\n\nThis is one bounded source-improvement step, not a claim that the entire section or any external/device condition is complete. Declined items remain open. The AI cannot edit its own governance, workflows, tests, secrets, workers, deployment authority or Canon admission. R125 remains sole CanonState admission authority and ci.yml remains sole production writer.`})});
+  const pr=await gh(token,`/repos/${repo}/pulls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:`R388 CLOUD-01 convergence — ${item.id}`,head:branch,base:'main',draft:false,body:`CLOUD-01 advanced one explicit item from the R387 convergence matrix.\n\nExact base: ${mainSha}\nItem: ${item.id} — ${item.objective}\nPaths: ${repair.patches.map(p=>p.path).join(', ')}\nProduct patch identity: ${patchIdentity.key}\nPrior bounded item declines carried without false advancement: ${priorDeclines}\nExternal/device proof still required: ${item.externalProofRequired===true?'YES':'NO'}\nExpected independent proofs: ${(repair.proposal.expectedProofs||[]).join(', ')}\n\nThis is one bounded source-improvement step, not a claim that the entire section or any external/device condition is complete. Declined items remain open. The AI cannot edit its own governance, workflows, tests, secrets, workers, deployment authority or Canon admission. R125 remains sole CanonState admission authority and ci.yml remains sole production writer.`})});
   return{...inspection,mutation:'R388_BACKLOG_BRANCH_AND_PR_CREATED',branch,prNumber:pr.number,prUrl:pr.html_url,convergenceGeneration,itemId:item.id,changedPaths:repair.patches.map(p=>p.path),declinedItemScars};
 }
 
