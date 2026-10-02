@@ -47,12 +47,14 @@ async function commitProductPatchIdentityR430(token,repo,commitSha,paths){
 }
 
 const R430_REJECTION_COMMENT=/(governed rejection|proof[- ]invalid|proof[- ]backed rejection|known[- ]invalid repeat|must not be promoted|proof[- ]rejected)/i;
+const R430_REQUIRED_PROOF_WORKFLOWS=new Set(['OMEGA Cloud Bridge CI','R170 Current Convergence','R202 Operational Source Authority','R210 Release Controller','R223 Cloudflare Evolution Authority','OMEGA R237 Hybrid Command Authority Proof','OMEGA R238 Woven Hybrid Continuity Convergence','R241 Archive Convergence Visual Intelligence']);
 
 async function findClosedProofRejectedPatchRepeatR430({token,repo,itemId,patches}){
   const proposed=await productPatchIdentityR430(patches);
   if(!proposed.rows.length)return{matched:false,proposed};
   const closed=await gh(token,`/repos/${repo}/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=100`);
-  const relevant=(closed||[]).filter(pr=>!pr.merged_at&&String(pr.head?.ref||'').startsWith('cloud/evolution-r388-')&&String(pr.title||'').includes(String(itemId))).slice(0,24);
+  const itemSlug=slug(itemId);
+  const relevant=(closed||[]).filter(pr=>{const branch=String(pr.head?.ref||'');return!pr.merged_at&&branch.startsWith('cloud/evolution-r388-')&&(String(pr.title||'').includes(String(itemId))||branch.includes(itemSlug))}).slice(0,24);
   for(const pr of relevant){
     let comments=[];try{comments=await gh(token,`/repos/${repo}/issues/${pr.number}/comments?per_page=100`)}catch{}
     const commentRejected=(comments||[]).some(comment=>R430_REJECTION_COMMENT.test(String(comment?.body||'')));
@@ -65,7 +67,7 @@ async function findClosedProofRejectedPatchRepeatR430({token,repo,itemId,patches
       if(!commentRejected){
         try{
           const runs=await gh(token,`/repos/${repo}/actions/runs?head_sha=${commitSha}&event=pull_request&per_page=100`);
-          failedWorkflows=(runs.workflow_runs||[]).filter(run=>run.status==='completed'&&run.conclusion==='failure').map(run=>run.name);
+          failedWorkflows=(runs.workflow_runs||[]).filter(run=>R430_REQUIRED_PROOF_WORKFLOWS.has(run.name)&&run.status==='completed'&&run.conclusion==='failure').map(run=>run.name);
         }catch{}
       }
       if(commentRejected||failedWorkflows.length){
