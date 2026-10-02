@@ -238,7 +238,15 @@ async function runtimeControlAudit(page,route){
   const frame=await page.evaluate(name=>{
     const main=document.querySelector('.workstation-main'),r=main?.getBoundingClientRect();
     const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
-    return{width:r?.width||0,height:r?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,textLength:(surface?.textContent||'').replace(/\s+/g,' ').trim().length};
+    if(!main)return{width:0,height:0,overflow:0,textLength:0,scrollOverflowY:'MISSING',maxScroll:0,scrollProbe:0};
+    const style=getComputedStyle(main);
+    const maxScroll=Math.max(0,main.scrollHeight-main.clientHeight);
+    main.scrollTop=0;
+    if(maxScroll>1)main.scrollTop=maxScroll;
+    const scrollProbe=main.scrollTop;
+    main.scrollTop=0;
+    const legacyChromeVisible=[...document.querySelectorAll('.omega-workstation-v2>.r27-desktop-frame,.omega-workstation-v2>.r27-mobile-head,.omega-workstation-v2>.r27-mobile-bottom,.omega-workstation-v2>.r27-mobile-drawer')].filter(el=>{const cs=getComputedStyle(el);const rr=el.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&rr.width>1&&rr.height>1}).length;
+    return{width:r?.width||0,height:r?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,textLength:(surface?.textContent||'').replace(/\s+/g,' ').trim().length,scrollOverflowY:style.overflowY,maxScroll,scrollProbe,legacyChromeVisible};
   },route);
   return{count:probes.length,disabled,failures:[...new Set(failures)],...frame};
 }
@@ -335,6 +343,9 @@ try{
       const audit=await runtimeControlAudit(page,route);
       if(audit.width<220||audit.height<80)throw new Error(`${name}/${route}: workstation unusable ${JSON.stringify(audit)}`);
       if(audit.overflow>24)throw new Error(`${name}/${route}: viewport overflow ${audit.overflow}px`);
+      if(!['auto','scroll'].includes(audit.scrollOverflowY))throw new Error(`${name}/${route}: workstation-main is not the canonical vertical scroll owner: ${audit.scrollOverflowY}`);
+      if(audit.maxScroll>2&&audit.scrollProbe<1)throw new Error(`${name}/${route}: content exceeds the route viewport by ${Math.round(audit.maxScroll)}px but workstation-main cannot scroll`);
+      if(audit.legacyChromeVisible!==0)throw new Error(`${name}/${route}: duplicate legacy R27 fixed navigation remains visible over canonical R411 content (${audit.legacyChromeVisible})`);
       if(audit.textLength<8&&audit.count<1)throw new Error(`${name}/${route}: no visible meaningful route content`);
       if(audit.failures.length)throw new Error(`${name}/${route}: dead/misbound/occluded control contract failure:\n${audit.failures.join('\n')}`);
       totals[name]+=audit.count;
@@ -344,7 +355,7 @@ try{
       totals[name==='desktop'?'disclosuresDesktop':'disclosuresMobile']+=disclosures;
       if(route==='SAR Truth')await verifySarGeometry(page,name);
       if(pageErrors.length)throw new Error(`${name}/${route}: browser page errors ${pageErrors.join(' | ').slice(0,4000)}`);
-      console.log(`R286 SHARD ${shardIndex+1}/${shardCount} ROUTE PASS · ${name}/${route} · controls=${audit.count} · panels=${structure.panelCount} · disclosures=${disclosures} · elapsedMs=${Math.round(performance.now()-routeStarted)}`);
+      console.log(`R286 SHARD ${shardIndex+1}/${shardCount} ROUTE PASS · ${name}/${route} · controls=${audit.count} · panels=${structure.panelCount} · scroll=${audit.scrollOverflowY}/${Math.round(audit.maxScroll)}px · disclosures=${disclosures} · elapsedMs=${Math.round(performance.now()-routeStarted)}`);
     }
 
     if(shardIndex===0){

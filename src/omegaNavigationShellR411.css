@@ -470,3 +470,110 @@ html:has(.earth-r372-stage-expanded) .r257-shell-headless .r317-product-root{
 html:has(.earth-r372-stage-expanded) .r257-shell-headless .r318-system-diagnostics{
  display:none!important;
 }
+
+/* R427 · RETIRE DUPLICATE LEGACY WORKSTATION CHROME.
+   ResponsiveRuntimeShell/R27 remains mounted for compatibility state and frame sensing,
+   but R411 is the sole visible global navigator. Fixed R27 chrome may not cover route
+   content or create a second navigation/scroll boundary. */
+.omega-workstation-v2>:is(.r27-desktop-frame,.r27-mobile-head,.r27-mobile-bottom,.r27-mobile-drawer){
+ display:none!important;
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+
+/* R427 · GLOBAL WORKSTATION SCROLL OWNERSHIP.
+   The mounted canonical product composition, not a transient nav dataset, owns route
+   viewport geometry. This selector deliberately outranks route-local R313 presentation
+   rules that preserve vertical document flow inside specialist content. Those inner
+   surfaces may remain overflow-visible; only workstation-main owns route scrolling. */
+.r257-shell-headless{
+ height:100dvh!important;
+ max-height:100dvh!important;
+ min-height:0!important;
+ overflow:hidden!important;
+}
+.r257-shell-headless>.r257-stage{
+ height:100%!important;
+ max-height:100%!important;
+ min-height:0!important;
+ overflow:hidden!important;
+}
+.r257-shell-headless .r317-product-root{
+ height:100%!important;
+ max-height:100%!important;
+ min-height:0!important;
+ display:grid!important;
+ grid-template-rows:auto minmax(0,1fr)!important;
+ overflow:hidden!important;
+}
+.r257-shell-headless .r317-product-root>.r318-system-diagnostics{
+ min-height:0!important;
+ max-height:min(40dvh,360px)!important;
+ overflow:auto!important;
+}
+.r257-shell-headless .r317-product-root>:is(.omega-workstation-v2,.r71-home){
+ height:100%!important;
+ max-height:100%!important;
+ min-height:0!important;
+}
+@media(max-width:900px){
+ .r257-shell-headless{
+  height:calc(100dvh - var(--r411-mobile-dock))!important;
+  max-height:calc(100dvh - var(--r411-mobile-dock))!important;
+ }
+}
+
+.r257-shell-headless .r317-product-root>.omega-workstation-v2[data-panel]{
+ height:100%!important;
+ max-height:100%!important;
+ min-height:0!important;
+ display:grid!important;
+ grid-template-rows:auto minmax(0,1fr)!important;
+ overflow:hidden!important;
+}
+.r257-shell-headless .r317-product-root>.omega-workstation-v2[data-panel]>.workstation-main{
+ min-height:0!important;
+ height:auto!important;
+ max-height:none!important;
+ overflow-x:hidden!important;
+ overflow-y:auto!important;
+ overscroll-behavior-y:contain!important;
+ scrollbar-gutter:stable!important;
+ scroll-padding-block:16px 24px!important;
+ -webkit-overflow-scrolling:touch;
+}
+/* Keep Home independently scrollable under the same canonical product shell. */
+html[data-omega-nav-present='true'] .r71-home,
+html[data-omega-nav-expanded='true'] .r71-home{
+ min-height:0!important;
+ overflow-x:hidden!important;
+ overflow-y:auto!important;
+ overscroll-behavior-y:contain!important;
+ scrollbar-gutter:stable!important;
+ scroll-padding-block:16px 24px!important;
+ -webkit-overflow-scrolling:touch;
+}
+/* R257 owns the outer viewport; its existing R411.14 desktop/mobile rules remain
+   authoritative for 100dvh vs mobile dock-excluded height. */
+
+html:has(.earth-r372-stage-expanded) .r257-shell-headless,
+html:has(.earth-r372-stage-expanded) .r257-shell-headless .r257-stage,
+html:has(.earth-r372-stage-expanded) .r257-shell-headless .r317-product-root,
+html:has(.earth-r372-stage-expanded) .omega-workstation-v2{
+ height:100dvh!important;
+ max-height:100dvh!important;
+ min-height:0!important;
+ overflow:visible!important;
+}
+html:has(.earth-r372-stage-expanded) .r257-shell-headless .r317-product-root>.omega-workstation-v2[data-panel]{
+ height:100dvh!important;
+ max-height:100dvh!important;
+ min-height:0!important;
+ overflow:visible!important;
+}
+html:has(.earth-r372-stage-expanded) .r257-shell-headless .r317-product-root>.omega-workstation-v2[data-panel]>.workstation-main{
+ height:auto!important;
+ max-height:none!important;
+ overflow:visible!important;
+}
+
