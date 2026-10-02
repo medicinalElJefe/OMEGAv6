@@ -245,7 +245,8 @@ async function runtimeControlAudit(page,route){
     if(maxScroll>1)main.scrollTop=maxScroll;
     const scrollProbe=main.scrollTop;
     main.scrollTop=0;
-    return{width:r?.width||0,height:r?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,textLength:(surface?.textContent||'').replace(/\s+/g,' ').trim().length,scrollOverflowY:style.overflowY,maxScroll,scrollProbe};
+    const legacyChromeVisible=[...document.querySelectorAll('.omega-workstation-v2>.r27-desktop-frame,.omega-workstation-v2>.r27-mobile-head,.omega-workstation-v2>.r27-mobile-bottom,.omega-workstation-v2>.r27-mobile-drawer')].filter(el=>{const cs=getComputedStyle(el);const rr=el.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&rr.width>1&&rr.height>1}).length;
+    return{width:r?.width||0,height:r?.height||0,overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth,textLength:(surface?.textContent||'').replace(/\s+/g,' ').trim().length,scrollOverflowY:style.overflowY,maxScroll,scrollProbe,legacyChromeVisible};
   },route);
   return{count:probes.length,disabled,failures:[...new Set(failures)],...frame};
 }
@@ -344,6 +345,7 @@ try{
       if(audit.overflow>24)throw new Error(`${name}/${route}: viewport overflow ${audit.overflow}px`);
       if(!['auto','scroll'].includes(audit.scrollOverflowY))throw new Error(`${name}/${route}: workstation-main is not the canonical vertical scroll owner: ${audit.scrollOverflowY}`);
       if(audit.maxScroll>2&&audit.scrollProbe<1)throw new Error(`${name}/${route}: content exceeds the route viewport by ${Math.round(audit.maxScroll)}px but workstation-main cannot scroll`);
+      if(audit.legacyChromeVisible!==0)throw new Error(`${name}/${route}: duplicate legacy R27 fixed navigation remains visible over canonical R411 content (${audit.legacyChromeVisible})`);
       if(audit.textLength<8&&audit.count<1)throw new Error(`${name}/${route}: no visible meaningful route content`);
       if(audit.failures.length)throw new Error(`${name}/${route}: dead/misbound/occluded control contract failure:\n${audit.failures.join('\n')}`);
       totals[name]+=audit.count;
