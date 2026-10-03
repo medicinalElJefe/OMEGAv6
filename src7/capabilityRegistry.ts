@@ -156,13 +156,15 @@ export function omega7CapabilitiesForDomain(domain:Omega7Domain){
  return OMEGA7_CAPABILITIES.filter(x=>x.domain===domain);
 }
 
+const normalizeSearch=(value:string)=>value.toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
+
 export function searchOmega7Capabilities(query:string){
- const q=query.trim().toLowerCase();
+ const q=normalizeSearch(query);
  if(!q)return OMEGA7_CAPABILITIES;
  const terms=q.split(/\s+/).filter(Boolean);
  return OMEGA7_CAPABILITIES
   .map(cap=>({cap,score:terms.reduce((n,t)=>{
-   const label=cap.label.toLowerCase(),route=cap.legacyRoute.toLowerCase(),desc=cap.description.toLowerCase(),family=cap.family.toLowerCase();
+   const label=normalizeSearch(cap.label),route=normalizeSearch(cap.legacyRoute),desc=normalizeSearch(cap.description),family=normalizeSearch(cap.family);
    return n+(label===t?12:0)+(label.includes(t)?7:0)+(route.includes(t)?5:0)+(family.includes(t)?3:0)+(desc.includes(t)?2:0);
   },0)}))
   .filter(x=>x.score>0)
