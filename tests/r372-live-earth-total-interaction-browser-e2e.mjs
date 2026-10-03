@@ -160,12 +160,17 @@ try{
   const refresh=motion.getByRole('button',{name:'Refresh global field',exact:true});await refresh.waitFor({state:'visible',timeout:30000});
   await page.waitForFunction(()=>{const el=document.querySelector('.earth-r279-instrument[data-earth-mode="MOTION"]');return el?.getAttribute('data-motion-state')==='RETURNED'&&Boolean(el.getAttribute('data-motion-observed-at'))&&String(el.getAttribute('data-motion-provider')||'').includes('Open-Meteo')},{timeout:30000});
   const beforeMotionObservedAt=await motion.getAttribute('data-motion-observed-at');
+  const beforeRefreshGeneration=Number(await motion.getAttribute('data-motion-refresh-generation')||0);
   await refresh.click();
-  await page.waitForFunction(before=>{const el=document.querySelector('.earth-r279-instrument[data-earth-mode="MOTION"]'),observed=el?.getAttribute('data-motion-observed-at')||'',provider=el?.getAttribute('data-motion-provider')||'';return el?.getAttribute('data-motion-state')==='RETURNED'&&Boolean(observed)&&observed!==before&&provider.includes('Open-Meteo')},beforeMotionObservedAt,{timeout:30000});
+  await page.waitForFunction(before=>{const el=document.querySelector('.earth-r279-instrument[data-earth-mode="MOTION"]');if(!el)return false;const state=el.getAttribute('data-motion-state')||'',generation=Number(el.getAttribute('data-motion-refresh-generation')||0),provider=el.getAttribute('data-motion-provider')||'';return state==='ERROR'||(state==='RETURNED'&&generation>before&&provider.includes('Open-Meteo'))},beforeRefreshGeneration,{timeout:30000});
+  const refreshedState=await motion.getAttribute('data-motion-state');
+  if(refreshedState==='ERROR')throw new Error(`${label}: global motion refresh failed: ${(await page.locator('.earth-r279-motion-error').textContent())||'provider error'}`);
   await motion.getByRole('button',{name:'Refresh global field',exact:true}).waitFor({state:'visible',timeout:30000});
   if(!/\b[1-9]\d*\/\d+ RETURNED\b/.test(await motion.locator('.earth-kpi').first().innerText()))throw new Error(`${label}: refreshed global field has no fully returned samples`);
   const refreshedMotionObservedAt=await motion.getAttribute('data-motion-observed-at');
-  if(!refreshedMotionObservedAt||refreshedMotionObservedAt===beforeMotionObservedAt)throw new Error(`${label}: global motion refresh did not advance returned observation state`);
+  const refreshedGeneration=Number(await motion.getAttribute('data-motion-refresh-generation')||0);
+  if(!refreshedMotionObservedAt)throw new Error(`${label}: refreshed global motion returned without observation timestamp`);
+  if(refreshedGeneration<=beforeRefreshGeneration)throw new Error(`${label}: successful manual motion refresh did not advance refresh receipt`);
 
   const groundTab=tabs.filter({hasText:'Ground'}).first();await groundTab.click();
   const groundRefresh=page.getByRole('button',{name:'Refresh ground evidence',exact:true});await groundRefresh.waitFor({state:'visible',timeout:30000});
