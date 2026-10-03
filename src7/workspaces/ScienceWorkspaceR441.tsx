@@ -69,6 +69,6 @@ export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
     route==='Atlas Calculator'?<AtlasCalculatorPanel record={record} onCommit={commit}/>:
     route==='Scale Compiler'?<RecursiveScalePanel address={address} onAddress={commit}/>:
     <OmegaInfinityPanel record={record}/>}
-  </div>
+  </div>}
  </section>;
 }
