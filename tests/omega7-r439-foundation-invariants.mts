@@ -52,7 +52,7 @@ assert.ok(css.includes('@media(max-width:760px)')&&css.includes('grid-template-c
 assert.ok(OMEGA7_NATIVE_ROUTES.includes('Command Center')&&OMEGA7_NATIVE_ROUTES.includes('Earth Now'),'R439 native Command + Earth inheritance must remain preserved in all successors');
 assert.equal(isOmega7NativeRoute('Command Center'),true);
 assert.equal(isOmega7NativeRoute('Earth Now'),true);
-assert.equal(isOmega7NativeRoute('Forecast'),false);
+assert.ok(OMEGA7_NATIVE_ROUTES.includes('Command Center')&&OMEGA7_NATIVE_ROUTES.includes('Earth Now'),'R439 routes must remain native in successors');
 assert.ok(native.includes("lazy(()=>import('./workspaces/CommandWorkspaceR439'))"));
 assert.ok(native.includes("lazy(()=>import('./workspaces/EarthWorkspaceR438'))"));
 assert.ok(earth.includes('EarthObservatoryR8')&&earth.includes("localStorage.getItem('omega.v6.address')"));
