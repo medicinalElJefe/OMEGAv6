@@ -1,7 +1,7 @@
 import {compileUnifiedCapabilityRuntimeR139} from './unifiedCapabilityEngineR139';
 import {rankUnifiedCapabilityActionsR140,type OperationActionR140} from './unifiedOperationFabricR140';
 import {operationContractForRouteR143} from './authoritativeOperationChainR143';
-import {compileLemmaMotionNowR153,type R153Input} from './lemmaMotionNowContinuityR153';
+import {compileCanonicalLemmaMotionNowR436,type R153Input} from './lemmaMotionNowContinuityR153';
 
 export const R154_SCHEMA='OMEGA_RELATIVE_CAPACITY_FABRIC_R154' as const;
 export const R154_LAWS=Object.freeze([
@@ -95,7 +95,7 @@ function solverFidelity(route:string,kind:string,pressure:number,truth:any):Rela
 function viewResolution(score:number):12|144|1728|20736|248832{return choose(score,[[.24,12],[.42,144],[.60,1728],[.78,20736]],248832)}
 
 export function compileRelativeCapacityFabricR154(record:any,input:R153Input&{panel?:string;intent?:string}){
-  const now=compileLemmaMotionNowR153(input);
+  const now=compileCanonicalLemmaMotionNowR436(input);
   if(Number(record?.address)!==now.canonical.address||Number(record?.stateId)!==now.canonical.stateId){
     throw new Error(`R154 source packet mismatch: record address/state ${record?.address}/${record?.stateId} != R153 ${now.canonical.address}/${now.canonical.stateId}`);
   }
