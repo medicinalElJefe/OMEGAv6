@@ -10,16 +10,17 @@ import {r43RelativityCoordinates} from '../../src/capabilityAtlasR43';
 import {emitSpectralResolutionR436} from '../../src/system/canonicalDomainResolutionR436';
 import {atomicChemistrySourceGateR436} from '../../src/system/scienceDomainResolutionR436';
 import {presentR436ForHumans} from '../resolutionPresentationR438';
+import type {Omega7Depth} from '../capabilityRegistry';
 
 export type Omega7ScienceRoute='Relativity'|'Reality Lab'|'Atlas'|'Atlas Calculator'|'Scale Compiler'|'Infinity';
-type Props={route:Omega7ScienceRoute;onNavigate:(route:string)=>void};
+type Props={route:Omega7ScienceRoute;onNavigate:(route:string)=>void;depth:Omega7Depth};
 
 const clamp=(n:number)=>Math.max(0,Math.min(20735,Number.isFinite(n)?Math.floor(n):11498));
 const readAddress=()=>{try{return clamp(Number(localStorage.getItem('omega.v6.address')||11498))}catch{return 11498}};
 const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('omega.v6.address',String(next));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:next}}))}catch{}return next};
 const fromCoords=(c:{d:number;p:number;r:number;l:number})=>clamp(1728*c.d+144*c.p+12*c.r+c.l);
 
-export default function ScienceWorkspaceR441({route,onNavigate}:Props){
+export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
  const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
  useEffect(()=>{const sync=()=>setAddress(current=>{const next=readAddress();return current===next?current:next});const id=window.setInterval(sync,850);window.addEventListener('storage',sync);window.addEventListener('omega7-address-changed',sync as EventListener);return()=>{window.clearInterval(id);window.removeEventListener('storage',sync);window.removeEventListener('omega7-address-changed',sync as EventListener)}},[]);
@@ -43,8 +44,9 @@ export default function ScienceWorkspaceR441({route,onNavigate}:Props){
 
   <section className='o7-science-status' aria-label='Scientific evidence status'>
    <article><span>Spectral state</span><b>{spectralHuman?.headline}</b><small>{spectral.temperatureK.toFixed(1)} K · {spectral.wavelengthNm.toFixed(1)} nm · {spectral.spectralRegion}</small></article>
-   <article><span>Planck / Wien</span><b>{spectralResolution?.node.authority}</b><small>standard derived physics · address placement remains representational</small></article>
+   <article><span>Planck / Wien</span><b>{depth==='STANDARD'?'CALCULATED FROM STANDARD PHYSICS':spectralResolution?.node.authority}</b><small>standard derived physics · address placement remains representational</small></article>
    <article data-state={atomicGate.sourceReady?'ready':'held'}><span>Atomic / chemistry source</span><b>{atomicGate.sourceReady?'SOURCE READY':'MORE EVIDENCE NEEDED'}</b><small>{atomicGate.boundary}</small></article>
+   {depth!=='STANDARD'&&spectralResolution&&<article><span>Technical resolution</span><b>{spectralResolution.node.proofClass}</b><small>{spectralResolution.branch.status} · ledger {spectralResolution.ledgerHash}</small></article>}
   </section>
 
   <div className='o7-native-surface'>
