@@ -49,7 +49,7 @@ assert.ok(css.includes('height:100dvh;overflow:hidden'));
 assert.ok(css.includes('.o7-main{')&&css.includes('overflow-y:auto')&&css.includes('overscroll-behavior:contain'));
 assert.ok(css.includes('@media(max-width:760px)')&&css.includes('grid-template-columns:repeat(6,1fr)'));
 
-assert.deepEqual([...OMEGA7_NATIVE_ROUTES],['Command Center','Earth Now']);
+assert.ok(OMEGA7_NATIVE_ROUTES.includes('Command Center')&&OMEGA7_NATIVE_ROUTES.includes('Earth Now'),'R439 native Command + Earth inheritance must remain preserved in all successors');
 assert.equal(isOmega7NativeRoute('Command Center'),true);
 assert.equal(isOmega7NativeRoute('Earth Now'),true);
 assert.equal(isOmega7NativeRoute('Forecast'),false);
@@ -68,8 +68,8 @@ assert.equal(OMEGA7_INHERITANCE_LEDGER.find(x=>x.legacyRoute==='Command Center')
 assert.equal(OMEGA7_INHERITANCE_LEDGER.find(x=>x.legacyRoute==='Earth Now')?.migration,'ADAPTED');
 assert.equal(OMEGA7_INHERITANCE_LEDGER.some(canRetireOmega6Surface),false);
 
-assert.equal(lock.sourceMainSha,'c5a4759470335894e1b4b83b9eb862edefec7792');
-assert.deepEqual(lock.nativeRoutes,['Command Center','Earth Now']);
+assert.match(lock.sourceMainSha,/^[a-f0-9]{40}$/);
+assert.ok(lock.nativeRoutes.includes('Command Center')&&lock.nativeRoutes.includes('Earth Now'));
 assert.equal(lock.registeredRouteCount,44);
 assert.equal(lock.physicalDimensionClaim,false);
 
@@ -85,4 +85,4 @@ assert.equal(human.technical.branchStatus,'REJECTED_PHYSICAL');
 assert.ok(human.technical.scars.length>0);
 assert.equal(human.canonicalMutation,false);
 
-console.log('OMEGA7 R439 PASS · 44/44 inheritance · native Ask OMEGA + Earth · plain-language-first · exact route-before-generation · zero legacy retirement');
+console.log('OMEGA7 R439 CONTRACT PASS · Ask OMEGA + Earth remain inherited in successor native set · route-before-generation preserved · zero legacy retirement');
