@@ -1,16 +1,16 @@
 import {useEffect,useMemo,useState} from 'react';
 import {ShieldCheck,Triangle,Activity,Database,Zap} from 'lucide-react';
 import {compileRuntimeDerivedRepresentationR435} from './system/runtimeDerivedRepresentationR435';
-import {readRuntimeEvidenceR435,R435_EVIDENCE_EVENT} from './system/representationEvidenceBusR435';
+import {readRuntimeEvidenceR435,readProofReceiptsR435,R435_EVIDENCE_EVENT} from './system/representationEvidenceBusR435';
 import './runtimeDerivedRepresentationR435.css';
 
 type Props={address:number;record:any;surface?:string;compact?:boolean;theta?:number};
 const f=(n:any)=>Number.isFinite(Number(n))?Number(n).toFixed(3):'—';
 
 export default function OmegaRuntimeDerivedRepresentationR435({address,record,surface='Convergence',compact=false,theta=0}:Props){
- const[evidence,setEvidence]=useState(()=>readRuntimeEvidenceR435());
- useEffect(()=>{const sync=(e:Event)=>setEvidence(((e as CustomEvent).detail?.packets||readRuntimeEvidenceR435()).slice());window.addEventListener(R435_EVIDENCE_EVENT,sync as EventListener);return()=>window.removeEventListener(R435_EVIDENCE_EVENT,sync as EventListener)},[]);
- const receipt=useMemo(()=>compileRuntimeDerivedRepresentationR435({address,theta,surface,record,evidence,hardware:{logicalCores:typeof navigator!=='undefined'?navigator.hardwareConcurrency||1:1,deviceMemoryGB:typeof navigator!=='undefined'?Number((navigator as any).deviceMemory)||null:null,workerAvailable:typeof Worker!=='undefined'}}),[address,theta,surface,record,evidence]);
+ const[evidence,setEvidence]=useState(()=>readRuntimeEvidenceR435()),[proofs,setProofs]=useState(()=>readProofReceiptsR435());
+ useEffect(()=>{const sync=(e:Event)=>{setEvidence(((e as CustomEvent).detail?.packets||readRuntimeEvidenceR435()).slice());setProofs(((e as CustomEvent).detail?.proofReceipts||readProofReceiptsR435()).slice())};window.addEventListener(R435_EVIDENCE_EVENT,sync as EventListener);return()=>window.removeEventListener(R435_EVIDENCE_EVENT,sync as EventListener)},[]);
+ const receipt=useMemo(()=>compileRuntimeDerivedRepresentationR435({address,theta,surface,record,evidence,proofReceipts:proofs,hardware:{logicalCores:typeof navigator!=='undefined'?navigator.hardwareConcurrency||1:1,deviceMemoryGB:typeof navigator!=='undefined'?Number((navigator as any).deviceMemory)||null:null,workerAvailable:typeof Worker!=='undefined'}}),[address,theta,surface,record,evidence]);
  const p=receipt.permissions,t=receipt.truth,s=receipt.field,b=receipt.atlas.bearing;
  return <section className={'r435-representation'+(compact?' is-compact':'')} data-r435-representation={receipt.representationState} data-r435-claim-ceiling={receipt.claimCeiling}>
   <header><div><span>R435 · RUNTIME-DERIVED REPRESENTATION</span><h3>Display only what the current state can prove</h3><p>Canonical packet → returned evidence/proof → truth envelope → typed field → Atlas360 → representation receipt.</p></div><ShieldCheck/></header>
@@ -27,6 +27,7 @@ export default function OmegaRuntimeDerivedRepresentationR435({address,record,su
    <span className={p.renderReturnedEvidence?'pass':'hold'}>returned evidence {p.renderReturnedEvidence?'BOUND':'HOLD'}</span>
    <span className={p.renderEmpiricalClaim?'pass':'hold'}>empirical claim {p.renderEmpiricalClaim?'ALLOWED':'HELD'}</span>
    <span className={p.renderTriangleClosure?'pass':'hold'}>triangle closure {p.renderTriangleClosure?'BOUND':'HOLD'}</span>
+   <span className={p.renderProofClaim?'pass':'hold'}>proof lineage {p.renderProofClaim?`${receipt.proofLineage.verified} VERIFIED`:'HOLD'}</span>
    <span className='hold'>forecast as observation FORBIDDEN</span>
   </div>
   <footer><b>{t.nextAction}</b><span>{receipt.reasons.length?receipt.reasons.join(' · '):receipt.provenance.proof}</span></footer>
