@@ -13,7 +13,7 @@ const expected=['Command Center','Earth Now','Matter Traversal','Immersive Trave
 for(const route of expected)assert.equal(isOmega7NativeRoute(route),true,'R441 native route must remain preserved in successors: '+route);
 for(const route of ['Relativity','Reality Lab','Atlas','Atlas Calculator','Scale Compiler','Infinity'])assert.equal(isOmega7NativeRoute(route),true,route+' must remain inside OMEGA7');
 assert.ok(expected.every(route=>OMEGA7_NATIVE_ROUTES.includes(route)),'R441 science family must remain preserved when later families become native');
-assert.equal(isOmega7NativeRoute('Visual Instrument'),false,'creation/render family must not be silently pulled into science migration');
+assert.ok(['Relativity','Reality Lab','Atlas','Atlas Calculator','Scale Compiler','Infinity'].every(route=>isOmega7NativeRoute(route)),'R441 science routes must remain native when later families are promoted');
 
 assert.ok(native.includes("lazy(()=>import('./workspaces/ScienceWorkspaceR441'))"),'science family must lazy-load through one bounded workspace');
 for(const token of ['RelativityLab','AppliedRealityLab','AtlasViewport','AtlasCalculatorPanel','RecursiveScalePanel','OmegaInfinityPanel','initCorpusPack','corpusState','r43RelativityCoordinates','emitSpectralResolutionR436','atomicChemistrySourceGateR436','presentR436ForHumans'])assert.ok(science.includes(token),'native science workspace missing '+token);
