@@ -56,20 +56,28 @@ assert.ok(css.includes('z-index:60')&&css.includes('z-index:50')&&css.includes('
 assert.ok(css.includes('.o7-main{')&&css.includes('overflow-y:auto')&&css.includes('overscroll-behavior:contain'),'OMEGA7 main workspace must own page scrolling');
 assert.ok(css.includes('height:100dvh;overflow:hidden'),'OMEGA7 shell must contain document-level scroll drift');
 
-assert.deepEqual([...OMEGA7_NATIVE_ROUTES],['Earth Now'],'R438 first native slice must be Earth only');
+assert.deepEqual([...OMEGA7_NATIVE_ROUTES],['Earth Now','Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal'],'R439 native set must contain Earth plus the coherent traversal family');
 assert.equal(isOmega7NativeRoute('Earth Now'),true);
 assert.equal(isOmega7NativeRoute('Forecast'),false);
+for(const route of ['Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal'])assert.equal(isOmega7NativeRoute(route),true,route+' must remain inside OMEGA7');
 assert.equal(OMEGA7_INHERITANCE_LEDGER.length,44,'inheritance ledger must still cover every OMEGAv6 capability');
 assert.equal(OMEGA7_INHERITANCE_LEDGER.find(x=>x.legacyRoute==='Earth Now')?.migration,'ADAPTED');
+for(const route of ['Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal'])assert.equal(OMEGA7_INHERITANCE_LEDGER.find(x=>x.legacyRoute===route)?.migration,'ADAPTED',route+' inheritance row must be adapted, not retired');
 assert.equal(OMEGA7_INHERITANCE_LEDGER.some(canRetireOmega6Surface),false,'no legacy surface may retire before parity+rollback proof');
 
 const native=fs.readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
 const earthNative=fs.readFileSync('src7/workspaces/EarthWorkspaceR438.tsx','utf8');
+const traversalNative=fs.readFileSync('src7/workspaces/TraversalWorkspaceR439.tsx','utf8');
 const lock=JSON.parse(fs.readFileSync('src7/omega7.lock.json','utf8'));
 assert.ok(root.includes('isOmega7NativeRoute')&&root.includes('Omega7NativeSurface'),'OMEGA7 root must keep native capabilities inside the OMEGA7 shell');
 assert.ok(earthNative.includes('EarthObservatoryR8')&&earthNative.includes("localStorage.getItem('omega.v6.address')"),'native Earth must reuse the accepted Earth engine and current canonical address instead of forking them');
 assert.ok(native.includes("lazy(()=>import('./workspaces/EarthWorkspaceR438'))"),'native Earth must lazy-load as a bounded vertical slice');
-assert.equal(lock.sourceMainSha,'a680d69e004141ad750a1efbdeb6e2954930713f');
+assert.ok(native.includes("lazy(()=>import('./workspaces/TraversalWorkspaceR439'))"),'traversal family must lazy-load through one bounded family workspace');
+for(const token of ['MatterTraversalR36','TraversalR36','ExtremeTraversalUnionR60','initCorpusPack','corpusState','omega7-address-changed'])assert.ok(traversalNative.includes(token),'native traversal family missing '+token);
+assert.ok(traversalNative.includes("localStorage.setItem('omega.v6.address'")&&traversalNative.includes("localStorage.getItem('omega.v6.address'"),'native traversal must preserve the accepted canonical address lineage rather than fork state');
+assert.ok(root.includes("omega7-route-request")&&root.includes('if(!isOmega7NativeRoute(cap.legacyRoute))onOpenLegacyRoute'),'native cross-navigation must remain in OMEGA7 while bridged routes preserve rollback path');
+assert.equal(lock.sourceMainSha,'c5a4759470335894e1b4b83b9eb862edefec7792');
+assert.deepEqual(lock.nativeFamilies,['EARTH_WEATHER','MOTION_TRAVERSAL']);
 assert.equal(lock.registeredRouteCount,44);
 assert.equal(lock.physicalDimensionClaim,false);
 
@@ -85,4 +93,4 @@ assert.equal(human.technical.branchStatus,'REJECTED_PHYSICAL');
 assert.ok(human.technical.scars.length>0,'human translation must retain rejection scars');
 assert.equal(human.canonicalMutation,false,'human translation may not mutate canonical state');
 
-console.log('OMEGA7 R438 PASS · 44/44 inheritance · six human domains · native Earth vertical slice · one scroll owner · R436 human translation · zero legacy retirement');
+console.log('OMEGA7 R439 PASS · 44/44 inheritance · Earth + traversal native families · shared canonical address lineage · one shell · zero legacy retirement');
