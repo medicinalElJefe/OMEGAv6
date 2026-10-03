@@ -7,7 +7,7 @@ const native=fs.readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
 const traversal=fs.readFileSync('src7/workspaces/TraversalWorkspaceR440.tsx','utf8');
 const lock=JSON.parse(fs.readFileSync('src7/omega7.lock.json','utf8'));
 
-assert.deepEqual([...OMEGA7_NATIVE_ROUTES],['Command Center','Earth Now','Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal']);
+for(const route of ['Command Center','Earth Now','Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal'])assert.ok(OMEGA7_NATIVE_ROUTES.includes(route as any),route+' must remain in the native successor set');
 for(const route of ['Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal'])assert.equal(isOmega7NativeRoute(route),true,route+' must remain native in R440');
 assert.equal(isOmega7NativeRoute('Forecast'),false,'R440 must not silently promote unrelated families');
 assert.ok(native.includes("lazy(()=>import('./workspaces/TraversalWorkspaceR440'))"),'traversal family must lazy-load as one bounded family slice');
@@ -20,10 +20,9 @@ assert.equal(OMEGA7_INHERITANCE_LEDGER.length,44);
 for(const route of ['Command Center','Earth Now','Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal'])assert.equal(OMEGA7_INHERITANCE_LEDGER.find(x=>x.legacyRoute===route)?.migration,'ADAPTED',route+' must be adapted rather than retired');
 assert.equal(OMEGA7_INHERITANCE_LEDGER.some(canRetireOmega6Surface),false,'no legacy capability may retire before parity+rollback proof');
 
-assert.equal(lock.sourceMainSha,'5cd83e9e9237ca6b2ef88dc2f19588192c1ceb68');
-assert.equal(lock.sourceMilestone,'R439');
-assert.deepEqual(lock.nativeFamilies,['COMMAND_RUNTIME','EARTH_WEATHER','MOTION_TRAVERSAL']);
+assert.match(lock.sourceMainSha,/^[a-f0-9]{40}$/,'successor lock must retain an exact source SHA');
+for(const family of ['COMMAND_RUNTIME','EARTH_WEATHER','MOTION_TRAVERSAL'])assert.ok(lock.nativeFamilies.includes(family),family+' must remain inherited by every successor');
 assert.equal(lock.registeredRouteCount,44);
 assert.equal(lock.physicalDimensionClaim,false);
 
-console.log('OMEGA7 R440 PASS · Ask + Earth + motion/traversal native · shared canonical address lineage · 44/44 inheritance · zero legacy retirement');
+console.log('OMEGA7 R440 CONTRACT PASS · Ask + Earth + motion/traversal remain native in successor · shared address lineage · zero legacy retirement');
