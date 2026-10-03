@@ -5,13 +5,21 @@ import {sourceBackedModeSummary} from '../../src/sourceBackedModeRuntimeR21';
 import {compileFullOverallModePlanR79,compactModePlanR79} from '../../src/fullOverallModeOrchestratorR79';
 import {unifiedFromRecord} from '../../src/unifiedCalculus';
 import {OmegaCommandDeck} from '../../src/OmegaCommandDeck';
+import OmegaRichText from '../../src/OmegaRichText';
+import type {Omega7Depth} from '../capabilityRegistry';
 
-type Props={onNavigate:(route:string)=>void};
+type Props={onNavigate:(route:string)=>void;depth:Omega7Depth};
+const QUICK_TASKS=[
+ ['Explain this','Explain the current state in plain language. Separate observations, derived results, projections, and uncertainty.'],
+ ['Analyze evidence','Review the current evidence, contradictions, uncertainty, and strongest next observation.'],
+ ['Build or repair','Inspect the current project state, identify the smallest safe change, then build and prove it without weakening existing authority.'],
+ ['Explore Earth','Open Earth and weather using the current source-backed state.']
+] as const;
 
 const clamp=(n:number)=>Math.max(0,Math.min(20735,Math.floor(Number(n)||0)));
 const readAddress=()=>clamp(Number(localState.read('omega.v6.address',11498)));
 
-export default function CommandWorkspaceR439({onNavigate}:Props){
+export default function CommandWorkspaceR439({onNavigate,depth}:Props){
  const[address,setAddress]=useState(readAddress);
  const[ready,setReady]=useState(false);
  const[bootError,setBootError]=useState('');
@@ -118,11 +126,26 @@ export default function CommandWorkspaceR439({onNavigate}:Props){
 
  return <section className='o7-native-workspace o7-command-workspace' data-omega7-native='command.center' data-address={address} data-applied-modes={modes.appliedCount} data-gated-modes={modes.gatedCount}>
   <header className='o7-native-head'>
-   <div><span>Home · Ask OMEGA</span><h1>Ask OMEGA</h1><p>One governed task surface for questions, analysis, building, repair, and capability routing. The machinery remains available without being forced into the first explanation.</p></div>
-   <aside><b>{modes.appliedCount} source-backed modes available</b><small>{modes.gatedCount} gated by missing inputs · state {record.stateId.toLocaleString()}</small></aside>
+   <div><span>Home · Ask OMEGA</span><h1>{depth==='STANDARD'?'What do you want to do?':'Ask OMEGA'}</h1><p>{depth==='STANDARD'?'Ask a question, analyze something, continue a project, or start a build. OMEGA chooses the underlying capabilities and keeps evidence, execution, and proof separate.':'One governed task surface for questions, analysis, building, repair, and capability routing.'}</p></div>
+   <aside><b>{depth==='STANDARD'?'Analysis ready':`${modes.appliedCount} source-backed modes available`}</b><small>{depth==='STANDARD'?'${modes.gatedCount} capabilities currently gated by missing inputs':`${modes.gatedCount} gated · state ${record.stateId.toLocaleString()}`}</small></aside>
   </header>
-  <div className='o7-native-surface o7-command-native-surface'>
-   <OmegaCommandDeck record={record} state={state} prompt={prompt} onPrompt={setPrompt} onRun={run} response={response} busy={busy} onNavigate={onNavigate}/>
-  </div>
+  {depth==='STANDARD'?
+   <div className='o7-native-surface o7-command-simple'>
+    <section className='o7-command-compose'>
+     <textarea value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void run()}}} placeholder='Ask OMEGA anything or describe what you want done…' aria-label='Ask OMEGA'/>
+     <div className='o7-command-compose-actions'><span>{busy?busy==='routing'?'Choosing the right path…':'Working…':'Enter to run · Shift+Enter for a new line'}</span><button onClick={()=>void run()} disabled={!prompt.trim()||Boolean(busy)}>{busy?'Working…':'Run OMEGA'}</button></div>
+    </section>
+    <div className='o7-command-suggestions'>{QUICK_TASKS.map(([label,value])=><button key={label} onClick={()=>label==='Explore Earth'?onNavigate('Earth Now'):setPrompt(value)}><b>{label}</b><span>{label==='Explore Earth'?'Open live Earth, weather, satellite, motion, and ground evidence.':value}</span></button>)}</div>
+    {response&&<section className='o7-command-result' data-status={response.evidenceStatus||'RETURNED'}>
+     <header><div><span>Result</span><b>{response.modelSucceeded===false?'OMEGA could not complete this path':'OMEGA response'}</b></div><small>{response.evidenceStatus||'RETURNED'}</small></header>
+     <OmegaRichText text={String(response.answer||'')}/>
+     {response.nextAction&&<div className='o7-command-next'><b>Next useful action</b><span>{response.nextAction}</span></div>}
+     <details><summary>Why this result?</summary><dl><div><dt>Route</dt><dd>{response.responsePath||'ROUTED'}</dd></div><div><dt>Evidence state</dt><dd>{response.evidenceStatus||'UNKNOWN'}</dd></div><div><dt>Current state</dt><dd>{record.stateId.toLocaleString()}</dd></div><div><dt>Applied modes</dt><dd>{modes.appliedCount}</dd></div><div><dt>Gated modes</dt><dd>{modes.gatedCount}</dd></div></dl><p>{response.uncertainty}</p></details>
+    </section>}
+    <footer className='o7-command-capability-links'><button onClick={()=>onNavigate('Projects')}>Projects</button><button onClick={()=>onNavigate('Earth Now')}>Earth & Weather</button><button onClick={()=>onNavigate('Development')}>Build Software</button><button onClick={()=>onNavigate('Evidence & Proof')}>Evidence</button></footer>
+   </div>:
+   <div className='o7-native-surface o7-command-native-surface'>
+    <OmegaCommandDeck record={record} state={state} prompt={prompt} onPrompt={setPrompt} onRun={run} response={response} busy={busy} onNavigate={onNavigate}/>
+   </div>}
  </section>;
 }
