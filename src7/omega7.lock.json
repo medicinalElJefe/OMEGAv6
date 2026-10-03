@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "5cd83e9e9237ca6b2ef88dc2f19588192c1ceb68",
-  "sourceMilestone": "R439",
+  "sourceMainSha": "46b70ea353d07409f4dac0fcbd7430538169e5f4",
+  "sourceMilestone": "R440_CANDIDATE",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -13,7 +13,13 @@
     "Matter Traversal",
     "Immersive Traversal",
     "Extreme Traversal",
-    "Traversal"
+    "Traversal",
+    "Relativity",
+    "Reality Lab",
+    "Atlas",
+    "Atlas Calculator",
+    "Scale Compiler",
+    "Infinity"
   ],
   "addressResolution": [
     12,
@@ -31,6 +37,8 @@
   "nativeFamilies": [
     "COMMAND_RUNTIME",
     "EARTH_WEATHER",
-    "MOTION_TRAVERSAL"
-  ]
+    "MOTION_TRAVERSAL",
+    "SCIENCE_RELATIVITY_ATLAS"
+  ],
+  "atomicScienceRule": "TYPED_SOURCE_REQUIRED_BEFORE_ATOMIC_CHEMISTRY_PROMOTION"
 }
