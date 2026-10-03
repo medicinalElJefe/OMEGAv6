@@ -1,20 +1,20 @@
 import {useEffect,useMemo,useState} from 'react';
 import {R356_ATLAS360_COUNTS,R356_ATLAS360_SOURCE} from './system/atlas360TriangulationR356.js';
 import {compileRuntimeDerivedRepresentationR435} from './system/runtimeDerivedRepresentationR435';
-import {readRuntimeEvidenceR435,R435_EVIDENCE_EVENT} from './system/representationEvidenceBusR435';
+import {readRuntimeEvidenceR435,readProofReceiptsR435,R435_EVIDENCE_EVENT} from './system/representationEvidenceBusR435';
 
 type Props={address:number;compact?:boolean;record?:any;surface?:string};
 const fmt=(n:number)=>new Intl.NumberFormat('en-US').format(n);
 const f=(n:any)=>Number.isFinite(Number(n))?Number(n).toFixed(3):'—';
 
 export default function OmegaAtlas360R356({address,compact=false,record,surface='Convergence'}:Props){
- const[theta,setTheta]=useState(0),[evidence,setEvidence]=useState(()=>readRuntimeEvidenceR435());
- useEffect(()=>{const sync=(e:Event)=>setEvidence(((e as CustomEvent).detail?.packets||readRuntimeEvidenceR435()).slice());window.addEventListener(R435_EVIDENCE_EVENT,sync as EventListener);return()=>window.removeEventListener(R435_EVIDENCE_EVENT,sync as EventListener)},[]);
+ const[theta,setTheta]=useState(0),[evidence,setEvidence]=useState(()=>readRuntimeEvidenceR435()),[proofs,setProofs]=useState(()=>readProofReceiptsR435());
+ useEffect(()=>{const sync=(e:Event)=>{setEvidence(((e as CustomEvent).detail?.packets||readRuntimeEvidenceR435()).slice());setProofs(((e as CustomEvent).detail?.proofReceipts||readProofReceiptsR435()).slice())};window.addEventListener(R435_EVIDENCE_EVENT,sync as EventListener);return()=>window.removeEventListener(R435_EVIDENCE_EVENT,sync as EventListener)},[]);
  const leaf=Math.max(0,Math.min(20735,Math.floor(Number(address)||0)));
  const receipt=useMemo(()=>compileRuntimeDerivedRepresentationR435({
-  address:leaf,theta,surface,record,evidence,
+  address:leaf,theta,surface,record,evidence,proofReceipts:proofs,
   hardware:{logicalCores:typeof navigator!=='undefined'?navigator.hardwareConcurrency||1:1,deviceMemoryGB:typeof navigator!=='undefined'?Number((navigator as any).deviceMemory)||null:null,workerAvailable:typeof Worker!=='undefined'}
- }),[leaf,theta,surface,record,evidence]);
+ }),[leaf,theta,surface,record,evidence,proofs]);
  const h=receipt.atlas.hierarchy,b=receipt.atlas.bearing,s=receipt.field,t=receipt.truth,p=receipt.permissions;
  return <div className={'r356-atlas360'+(compact?' is-compact':'')} data-omega-atlas360-r356='true' data-r435-representation={receipt.representationState} data-r435-receipt={receipt.receipt}>
   <div className='r356-atlas360-head'>
