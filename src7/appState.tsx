@@ -53,7 +53,7 @@ const initial:Omega7AppState={
 
 function reducer(state:Omega7AppState,action:Action):Omega7AppState{
  switch(action.type){
-  case'DOMAIN':return{...state,domain:action.domain,query:''};
+  case'DOMAIN':return{...state,domain:action.domain,query:'',selectedRoute:null};
   case'DEPTH':return{...state,depth:action.depth};
   case'QUERY':return{...state,query:action.query};
   case'SELECT_ROUTE':return{...state,selectedRoute:action.route};
