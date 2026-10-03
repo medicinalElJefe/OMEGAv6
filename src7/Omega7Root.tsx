@@ -25,7 +25,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const results=useMemo(()=>state.query?searchOmega7Capabilities(state.query):domainCaps,[state.query,domainCaps]);
  const healthRows=Object.entries(state.health);
  const ready=healthRows.filter(([,v])=>v==='READY').length;
- const held=healthRows.filter(([,v])=>v==='HELD'||v==='DEGRADED').length;
+ const held=healthRows.filter(([,v])=>v==='HELD'||v==='DEGRADED'||v==='UNKNOWN').length;
  const failed=healthRows.filter(([,v])=>v==='FAILED').length;
 
  useEffect(()=>{
