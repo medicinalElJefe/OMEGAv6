@@ -1,7 +1,7 @@
 export const R436_CLOUD_SCHEMA='OMEGA_CLOUD_CANDIDATE_RESOLUTION_R436';
 const GENESIS='00000000';
 const fnv=input=>{let h=2166136261;for(let i=0;i<input.length;i++){h^=input.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
-const stable=value=>JSON.stringify(value,Object.keys(value||{}).sort());
+const stable=value=>{const norm=v=>v===null||typeof v!=='object'?v:Array.isArray(v)?v.map(norm):Object.fromEntries(Object.keys(v).sort().map(k=>[k,norm(v[k])]));return JSON.stringify(norm(value))};
 const hash=value=>fnv(stable(value));
 
 function chain(events){
