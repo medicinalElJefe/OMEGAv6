@@ -45,6 +45,12 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   if(!isOmega7NativeRoute(cap.legacyRoute))onOpenLegacyRoute(cap.legacyRoute);
  };
 
+ useEffect(()=>{
+  const handler=(event:Event)=>{const route=String((event as CustomEvent)?.detail?.route||'');if(route)open(route)};
+  window.addEventListener('omega7-route-request',handler as EventListener);
+  return()=>window.removeEventListener('omega7-route-request',handler as EventListener);
+ },[]);
+
  return <div className='o7-app' data-omega7='true' data-depth={state.depth.toLowerCase()}>
   <header className='o7-topbar'>
    <button className='o7-brand' onClick={()=>dispatch({type:'DOMAIN',domain:'HOME'})}><b>OMEGA</b><span>7</span></button>
