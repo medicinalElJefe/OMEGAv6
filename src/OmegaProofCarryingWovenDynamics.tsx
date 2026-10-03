@@ -5,6 +5,7 @@ import{compileCanonicalTypedFieldR349}from'./system/wovenHardwareFieldR349';
 import{executeProofCarryingWovenStepV1,type WovenStatePacketV1}from'./system/proofCarryingWovenDynamics';
 import{compileRscLoopReceiptV1,QUBIT,type Matrix2V1}from'./system/proofCarryingWovenSpecializations';
 import{runQubitThroughUnifiedKernelV1,runR349PacketThroughUnifiedKernelV1}from'./system/unifiedProofTransportAdapters';
+import{publishProofReceiptR435}from'./system/representationEvidenceBusR435';
 import'./proofCarryingWovenDynamics.css';
 
 type Props={address:number;compact?:boolean};
@@ -38,6 +39,7 @@ export default function OmegaProofCarryingWovenDynamics({address,compact=false}:
   return()=>{disposed=true};
  },[address]);
  const p=state?.packet;
+ useEffect(()=>{if(!p)return;const gates=Object.values(p.Pi_t.gates),verified=gates.length===8&&gates.every(Boolean)&&/^[a-f0-9]{64}$/i.test(String(p.Pi_t.proofDigest||''));publishProofReceiptR435({id:String(p.Pi_t.proofDigest),proofClass:'MODEL_PROOF',verified,source:'PCWD-v1',detail:`${p.Pi_t.decision} · ${gates.filter(Boolean).length}/8 gates`})},[p?.Pi_t.proofDigest]);
  const gates=p?Object.entries(p.Pi_t.gates):[];
  if(compact)return <section className='pcwd pcwd-compact' data-pcwd='OMEGA_PROOF_CARRYING_WOVEN_DYNAMICS_v1'>
   <header><Workflow/><div><span>PCWD · PROOF-CARRYING WOVEN DYNAMICS</span><b>{p?(p.Pi_t.decision+' · '+gates.filter(([,v])=>v).length+'/8 gates'):'compiling state packet'}</b><small>{p?('Kₜ address '+p.A_t.address+' · proof '+p.Pi_t.proofDigest.slice(0,16)+'…'):'Sense → Normalize → Decompose → Lemma → Transport → Recover → Prove'}</small></div></header>
