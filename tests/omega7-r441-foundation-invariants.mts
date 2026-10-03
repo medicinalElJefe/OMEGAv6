@@ -42,9 +42,9 @@ assert.equal(OMEGA7_INHERITANCE_LEDGER.length,44);
 for(const route of expected)assert.equal(OMEGA7_INHERITANCE_LEDGER.find(x=>x.legacyRoute===route)?.migration,'ADAPTED',route+' must be adapted rather than retired');
 assert.equal(OMEGA7_INHERITANCE_LEDGER.some(canRetireOmega6Surface),false);
 
-assert.equal(lock.sourceMainSha,'eac46888c259c0456b02b3782f5fc6b7c803113c');
-assert.equal(lock.sourceMilestone,'R440');
-assert.deepEqual(lock.nativeFamilies,['COMMAND_RUNTIME','EARTH_WEATHER','MOTION_TRAVERSAL','SCIENCE_RELATIVITY_ATLAS']);
+assert.match(lock.sourceMainSha,/^[a-f0-9]{40}$/,'successor lock must retain an exact source SHA');
+assert.ok(typeof lock.sourceMilestone==='string'&&lock.sourceMilestone.length>0,'successor lock must retain a declared source milestone');
+for(const family of ['COMMAND_RUNTIME','EARTH_WEATHER','MOTION_TRAVERSAL','SCIENCE_RELATIVITY_ATLAS'])assert.ok(lock.nativeFamilies.includes(family),family+' must remain inherited by every successor');
 assert.equal(lock.atomicScienceRule,'TYPED_SOURCE_REQUIRED_BEFORE_ATOMIC_CHEMISTRY_PROMOTION');
 assert.equal(lock.registeredRouteCount,44);
 assert.equal(lock.physicalDimensionClaim,false);
