@@ -18,6 +18,7 @@ assert.equal(isOmega7NativeRoute('Visual Instrument'),false,'creation/render fam
 assert.ok(native.includes("lazy(()=>import('./workspaces/ScienceWorkspaceR441'))"),'science family must lazy-load through one bounded workspace');
 for(const token of ['RelativityLab','AppliedRealityLab','AtlasViewport','AtlasCalculatorPanel','RecursiveScalePanel','OmegaInfinityPanel','initCorpusPack','corpusState','r43RelativityCoordinates','emitSpectralResolutionR436','atomicChemistrySourceGateR436','presentR436ForHumans'])assert.ok(science.includes(token),'native science workspace missing '+token);
 assert.ok(science.includes("localStorage.getItem('omega.v6.address'")&&science.includes("localStorage.setItem('omega.v6.address'"),'science family must use accepted canonical address lineage');
+assert.ok(science.includes("(spectral as any).canonicalResolution||emitSpectralResolutionR436"),'science presentation must reuse the R43 canonical spectral packet before any fallback re-emission');
 assert.ok(science.includes("atomicChemistrySourceGateR436({})"),'atomic/chemistry status must fail closed until a typed source is supplied');
 assert.ok(science.includes("MORE EVIDENCE NEEDED"),'held atomic source must be expressed in human language');
 assert.ok(science.includes('standard derived physics · address placement remains representational'),'spectral physics and atlas representation must remain separated');
