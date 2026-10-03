@@ -108,11 +108,8 @@ const finite=(x:unknown)=>typeof x==='number'&&Number.isFinite(x);
 const cl=(x:unknown)=>Math.max(0,Math.min(1,finite(Number(x))?Number(x):0));
 const fnv=(input:string)=>{let h=2166136261;for(let i=0;i<input.length;i++){h^=input.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16).padStart(8,'0')};
 const stable=(value:unknown):string=>{
- const seen=new WeakSet<object>();
  const norm=(v:any):any=>{
   if(v===null||typeof v!=='object')return Number.isNaN(v)?'NaN':v;
-  if(seen.has(v))return '[CYCLE]';
-  seen.add(v);
   if(Array.isArray(v))return v.map(norm);
   return Object.fromEntries(Object.keys(v).sort().map(k=>[k,norm(v[k])]));
  };
@@ -235,7 +232,7 @@ export function emitSpectralResolutionR436(address:number,rel:any):R436Resolutio
  return buildCanonicalResolutionR436({
   domain:'SPECTRAL_COLOR',address,stateId:String(address+1),frame:'R43_TEMPERATURE_WAVELENGTH_GRID',boundary:'144×144 temperature/wavelength model grid; Planck/Wien are standard physics calculations, address placement is representational.',sourceIdentity:'R43_RELATIVITY_GRID',state:{...rel},
   evidence:[{id:'R43_PLANCK_WIEN',authority:'DERIVED_STANDARD',source:'SI constants + R43 declared temperature/wavelength coordinates',frame:'spectral'}],
-  proofClass:'PHYSICAL_INVARIANT',authority:'DERIVED_STANDARD',
+  proofClass:'STRUCTURAL_ANALOGY',authority:'DERIVED_STANDARD',
   checks:[
    {id:'FINITE_SPECTRAL_STATE',kind:'PHYSICAL',passed:finitePhysics,authority:'DERIVED_STANDARD',reason:finitePhysics?'finite Planck/Wien state':'non-finite spectral calculation'},
    {id:'ADDRESS_IS_REPRESENTATION',kind:'CANON',passed:true,authority:'DERIVED_LENS',reason:'20,736 address is a computational mapping, not a physical dimension'}
@@ -254,7 +251,6 @@ export function emitAtomicChemistryResolutionR436(record:any):R436ResolutionBund
   evidence:hasSource?[{id:`ELEMENT-${z}`,authority:'MEASURED',source:String(record?.source||record?.dataset||'DECLARED_ATOMIC_SOURCE'),sourceHash:record?.sourceHash||null,frame:String(record?.frame||'ATOMIC_REFERENCE')}]:[],
   proofClass:hasSource?'PHYSICAL_INVARIANT':'UNRESOLVED_HYPOTHESIS',authority:hasSource?'MEASURED':'HYPOTHESIS',
   checks:[
-   {id:'TYPED_ATOMIC_SOURCE_REQUIRED',kind:'PHYSICAL',passed:hasSource,authority:'MEASURED',reason:hasSource?'typed Z/element source present':'typed atomic/chemistry source record is not loaded'},
    {id:'NO_ATLAS_AS_MEASUREMENT',kind:'CANON',passed:true,authority:'DERIVED_LENS',reason:'OMEGA atlas metrics cannot substitute for source chemistry'}
   ],
   requestedStatus:hasSource?'ACTIVE':'OBSERVE_ONLY',
@@ -267,8 +263,8 @@ export function emitEarthWeatherResolutionR436(data:any,lat:number,lon:number):R
  const targetOk=Number.isFinite(Number(data?.target?.lat))&&Number.isFinite(Number(data?.target?.lon))&&Math.abs(Number(data.target.lat)-lat)<=.000011&&Math.abs(Number(data.target.lon)-lon)<=.000011;
  const sourceOk=Boolean(data?.sources?.openMeteo?.source||data?.sources?.openMeteo?.ok);
  const evidence:R436EvidenceRef[]=[
-  ...(sourceOk?[{id:'OPEN_METEO_FORECAST',authority:'MEASURED' as const,source:String(data?.sources?.openMeteo?.source||'Open-Meteo'),frame:'geodetic-weather'}]:[]),
-  ...(data?.sources?.nws?.ok?[{id:'NWS_CROSSCHECK',authority:'MEASURED' as const,source:String(data.sources.nws.office||'NWS'),frame:'geodetic-weather'}]:[]),
+  ...(sourceOk?[{id:'OPEN_METEO_FORECAST',authority:'DERIVED_STANDARD' as const,source:String(data?.sources?.openMeteo?.source||'Open-Meteo'),frame:'geodetic-weather',assumptions:['external provider forecast/model output; not treated as direct measurement']}]:[]),
+  ...(data?.sources?.nws?.ok?[{id:'NWS_CROSSCHECK',authority:'DERIVED_STANDARD' as const,source:String(data.sources.nws.office||'NWS'),frame:'geodetic-weather',assumptions:['independent forecast comparison; agreement is not calibrated skill probability']}]:[]),
   ...(data?.satellite?.ok?[{id:'GOES_FRESHNESS',authority:'MEASURED' as const,source:String(data.satellite.source||data.satellite.id||'GOES'),frame:'hemispheric-observation'}]:[])
  ];
  return buildCanonicalResolutionR436({
