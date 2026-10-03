@@ -9,6 +9,10 @@ import {
  searchOmega7Capabilities
 } from '../src7/capabilityRegistry.ts';
 import {OMEGA_NAVIGATION} from '../src/navigationRegistry.ts';
+import {buildCanonicalResolutionR436} from '../src/system/canonicalDomainResolutionR436.ts';
+import {OMEGA7_NATIVE_ROUTES,isOmega7NativeRoute} from '../src7/nativeCapabilityRegistry.tsx';
+import {OMEGA7_INHERITANCE_LEDGER,canRetireOmega6Surface} from '../src7/inheritanceLedgerR438.ts';
+import {presentR436ForHumans} from '../src7/resolutionPresentationR438.ts';
 
 assert.equal(OMEGA7_CAPABILITIES.length,OMEGA_NAVIGATION.length,'OMEGA7 must inherit every canonical OMEGAv6 route');
 assert.equal(OMEGA7_CAPABILITIES.length,44,'current inherited route census must remain 44 until canonical OMEGAv6 inventory changes');
@@ -49,5 +53,36 @@ assert.ok(state.includes('OMEGA7_APP_STATE_SCHEMA')&&state.includes("commandOpen
 assert.ok(boundary.includes('Your OMEGA state was not discarded.'),'OMEGA7 failures must be contained without implying state loss');
 assert.ok(css.includes('@media(max-width:760px)')&&css.includes('grid-template-columns:repeat(6,1fr)'),'OMEGA7 must provide an intentional mobile navigation layout');
 assert.ok(css.includes('z-index:60')&&css.includes('z-index:50')&&css.includes('z-index:40'),'OMEGA7 overlay layers must be explicitly bounded');
+assert.ok(css.includes('.o7-main{')&&css.includes('overflow-y:auto')&&css.includes('overscroll-behavior:contain'),'OMEGA7 main workspace must own page scrolling');
+assert.ok(css.includes('height:100dvh;overflow:hidden'),'OMEGA7 shell must contain document-level scroll drift');
 
-console.log('OMEGA7 foundation PASS · 44/44 capability inheritance · six human domains · opt-in zero-loss bridge · single shell state · failure containment · responsive presentation');
+assert.deepEqual([...OMEGA7_NATIVE_ROUTES],['Earth Now'],'R438 first native slice must be Earth only');
+assert.equal(isOmega7NativeRoute('Earth Now'),true);
+assert.equal(isOmega7NativeRoute('Forecast'),false);
+assert.equal(OMEGA7_INHERITANCE_LEDGER.length,44,'inheritance ledger must still cover every OMEGAv6 capability');
+assert.equal(OMEGA7_INHERITANCE_LEDGER.find(x=>x.legacyRoute==='Earth Now')?.migration,'ADAPTED');
+assert.equal(OMEGA7_INHERITANCE_LEDGER.some(canRetireOmega6Surface),false,'no legacy surface may retire before parity+rollback proof');
+
+const native=fs.readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
+const earthNative=fs.readFileSync('src7/workspaces/EarthWorkspaceR438.tsx','utf8');
+const lock=JSON.parse(fs.readFileSync('src7/omega7.lock.json','utf8'));
+assert.ok(root.includes('isOmega7NativeRoute')&&root.includes('Omega7NativeSurface'),'OMEGA7 root must keep native capabilities inside the OMEGA7 shell');
+assert.ok(earthNative.includes('EarthObservatoryR8')&&earthNative.includes("localStorage.getItem('omega.v6.address')"),'native Earth must reuse the accepted Earth engine and current canonical address instead of forking them');
+assert.ok(native.includes("lazy(()=>import('./workspaces/EarthWorkspaceR438'))"),'native Earth must lazy-load as a bounded vertical slice');
+assert.equal(lock.sourceMainSha,'a680d69e004141ad750a1efbdeb6e2954930713f');
+assert.equal(lock.registeredRouteCount,44);
+assert.equal(lock.physicalDimensionClaim,false);
+
+const rejected=buildCanonicalResolutionR436({
+ domain:'MOTION_TRAVERSAL',stateId:'omega7-r438-test',frame:'test',boundary:'test',sourceIdentity:'test',state:{},
+ proofClass:'STRUCTURAL_ANALOGY',
+ checks:[{id:'PHYS',kind:'PHYSICAL',passed:false,authority:'DERIVED_STANDARD',reason:'known constraint'}],
+ truthBoundary:'test'
+});
+const human=presentR436ForHumans(rejected);
+assert.equal(human.state,'REJECTED');
+assert.equal(human.technical.branchStatus,'REJECTED_PHYSICAL');
+assert.ok(human.technical.scars.length>0,'human translation must retain rejection scars');
+assert.equal(human.canonicalMutation,false,'human translation may not mutate canonical state');
+
+console.log('OMEGA7 R438 PASS · 44/44 inheritance · six human domains · native Earth vertical slice · one scroll owner · R436 human translation · zero legacy retirement');
