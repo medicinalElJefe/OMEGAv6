@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "eac46888c259c0456b02b3782f5fc6b7c803113c",
-  "sourceMilestone": "R440",
+  "sourceMainSha": "e1d949b45bcf959637000cb65fc5c6e8e94a0d52",
+  "sourceMilestone": "R441_CANDIDATE",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -19,7 +19,12 @@
     "Atlas",
     "Atlas Calculator",
     "Scale Compiler",
-    "Infinity"
+    "Infinity",
+    "Forecast",
+    "Visual Instrument",
+    "Field",
+    "Data Motion",
+    "Convergence"
   ],
   "addressResolution": [
     12,
@@ -38,7 +43,10 @@
     "COMMAND_RUNTIME",
     "EARTH_WEATHER",
     "MOTION_TRAVERSAL",
-    "SCIENCE_RELATIVITY_ATLAS"
+    "SCIENCE_RELATIVITY_ATLAS",
+    "FORECAST_VISUAL_FIELD"
   ],
-  "atomicScienceRule": "TYPED_SOURCE_REQUIRED_BEFORE_ATOMIC_CHEMISTRY_PROMOTION"
+  "atomicScienceRule": "TYPED_SOURCE_REQUIRED_BEFORE_ATOMIC_CHEMISTRY_PROMOTION",
+  "forecastTruthRule": "MODEL_FUTURES_ARE_NOT_FUTURE_OBSERVATIONS",
+  "motionTruthRule": "ADDRESS_SPACE_MOTION_IS_NOT_PHYSICAL_VELOCITY"
 }
