@@ -86,11 +86,14 @@ assert.ok(science.activeFrontier.some(x=>x.id==='science.resolve'),'science.lab 
 const motion=fs.readFileSync('src/lemmaMotionNowContinuityR153.ts','utf8');
 const capacity=fs.readFileSync('src/relativeCapacityFabricR154.ts','utf8');
 const weatherSurface=fs.readFileSync('src/EarthWeatherR375.tsx','utf8');
+const capabilityField=fs.readFileSync('src/OmegaCapabilityFieldR138.tsx','utf8');
 const cloudMachine=fs.readFileSync('cloudflare/lib/github-machine.mjs','utf8');
 const atlas=fs.readFileSync('src/capabilityAtlasR43.ts','utf8');
 
 for(const token of ['compileCanonicalLemmaMotionNowR436','emitMotionResolutionR436(packet)','canonicalResolution'])assert.ok(motion.includes(token),'R436 motion wiring missing '+token);
 assert.ok(capacity.includes('compileCanonicalLemmaMotionNowR436(input)'),'R154 live capacity path must consume canonical motion packet');
+assert.ok(capacity.includes('canonicalResolution:now.canonicalResolution'),'R154 must carry canonical resolution to downstream live consumers');
+assert.ok(capabilityField.includes("data-r436-resolution={relativeCapacity?.canonicalResolution?.branch?.status||'PENDING'}")&&capabilityField.includes("data-r436-ledger={relativeCapacity?.canonicalResolution?.ledgerHash||''}"),'R138 live capability field must expose R436 branch and ledger state');
 assert.ok(atlas.includes('emitSpectralResolutionR436(a,rel)'),'R43 spectral engine must emit canonical resolution');
 assert.ok(weatherSurface.includes('emitEarthWeatherResolutionR436(data,lat,lon)')&&weatherSurface.includes('data-r436-resolution'),'Earth weather must emit/display canonical resolution state');
 assert.ok(cloudMachine.includes("import {cloudCandidateResolutionR436} from './canonical-resolution-r436.mjs'"),'CLOUD-01 machine must import R436 candidate adapter');
