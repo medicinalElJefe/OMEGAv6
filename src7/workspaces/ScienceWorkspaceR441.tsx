@@ -28,7 +28,7 @@ export default function ScienceWorkspaceR441({route,onNavigate}:Props){
  const coords=useMemo(()=>decodeAddress(address),[address]);
  const state=useMemo(()=>({atlas:{address},modePolicy:'CONTEXTUAL',frozen:false,d:coords.d,p:coords.p,r:coords.r,l:coords.l,workflow:'LAW',preset:'SOVEREIGN',timeAuthority:'NOW',viewportMode:'CANON_FIELD',instrumentView:'LIVE',workspace:'LAW',embodimentIndex:4}),[address,coords]);
  const spectral=useMemo(()=>ready?r43RelativityCoordinates(address):null,[ready,address]);
- const spectralResolution=useMemo(()=>spectral?emitSpectralResolutionR436(address,spectral):null,[address,spectral]);
+ const spectralResolution=useMemo(()=>spectral?((spectral as any).canonicalResolution||emitSpectralResolutionR436(address,spectral)):null,[address,spectral]);
  const spectralHuman=useMemo(()=>spectralResolution?presentR436ForHumans(spectralResolution):null,[spectralResolution]);
  const atomicGate=useMemo(()=>atomicChemistrySourceGateR436({}),[]);
 
