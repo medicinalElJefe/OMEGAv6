@@ -5,7 +5,7 @@ export const OMEGA7_SCHEMA='OMEGA7_CAPABILITY_INHERITANCE_V1' as const;
 export const OMEGA7_DOMAINS=['HOME','WORK','EXPLORE','CREATE','DEVELOP','SYSTEM'] as const;
 export type Omega7Domain=typeof OMEGA7_DOMAINS[number];
 export type Omega7Depth='STANDARD'|'ADVANCED'|'CANON';
-export type Omega7Health='READY'|'DEGRADED'|'HELD'|'OFFLINE'|'FAILED';
+export type Omega7Health='READY'|'DEGRADED'|'HELD'|'OFFLINE'|'FAILED'|'UNKNOWN';
 
 export type Omega7Capability={
  id:string;
