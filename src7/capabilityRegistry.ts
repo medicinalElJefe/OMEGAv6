@@ -156,7 +156,7 @@ export function omega7CapabilitiesForDomain(domain:Omega7Domain){
  return OMEGA7_CAPABILITIES.filter(x=>x.domain===domain);
 }
 
-const normalizeSearch=(value:string)=>value.toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
+const normalizeSearch=(value:string)=>value.toLowerCase().replace(/(\d),(?=\d)/g,'$1').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
 
 export function searchOmega7Capabilities(query:string){
  const q=normalizeSearch(query);
