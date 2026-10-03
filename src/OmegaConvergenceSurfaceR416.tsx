@@ -18,6 +18,7 @@ import OmegaGpuComputeR352 from './OmegaGpuComputeR352';
 import OmegaProofBoundSceneR354 from './OmegaProofBoundSceneR354';
 import OmegaProofBoundTemporalTraversalR355 from './OmegaProofBoundTemporalTraversalR355';
 import OmegaAtlas360R356 from './OmegaAtlas360R356';
+import OmegaRuntimeDerivedRepresentationR435 from './OmegaRuntimeDerivedRepresentationR435';
 import OmegaProofCarryingWovenDynamics from './OmegaProofCarryingWovenDynamics';
 import OmegaPcwdBenchmarkLab from './OmegaPcwdBenchmarkLab';
 import OmegaPcwdReferenceBenchmarksR359 from './OmegaPcwdReferenceBenchmarksR359';
@@ -53,8 +54,9 @@ export default function OmegaConvergenceSurfaceR416({record,state,address,onAddr
    </section>
    <section className='r356-convergence-section r356-convergence-compute'>
     <header><div><span>COMPUTE / REPLAY</span><b>Hardware → temporal → packet → render</b><small>One model state path; execution correspondence does not create physical or Canon authority.</small></div></header>
+    <OmegaRuntimeDerivedRepresentationR435 address={address} record={record} surface='Convergence'/>
     <OmegaHardwareFieldR349 address={address}/>
-    <OmegaAtlas360R356 address={address}/>
+    <OmegaAtlas360R356 address={address} record={record} surface='Convergence'/>
     <OmegaTemporalCheckpointR350/>
     <OmegaGpuPacketMirrorR351/>
     <OmegaGpuComputeR352/>
