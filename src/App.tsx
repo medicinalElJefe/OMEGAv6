@@ -22,11 +22,7 @@ function App(){
  const[home,setHome]=useState(true);
  const[omega7,setOmega7]=useState(()=>{try{return new URLSearchParams(window.location.search).get('omega7')==='1'||window.localStorage.getItem('omega7.enabled')==='true'}catch{return false}});
 
- useEffect(()=>{
-  installLivingWorldOperationBridgeR140();installRuntimeAttestationWorldScarR145();installDurableWorldHeadContinuityR149();installReflexOperationIngressR160();
-  const stopMissionWorldBinding=installMissionWorldHeadBindingR208(),stopFederationObserver=installFederationLedgerWorldObserverR173(),stopProofMembrane=installLivingWorldProofMembraneR1901(),stopIntelligenceProof=installLivingWorldIntelligenceProofR196(),stopEvidenceScene=installEvidenceBoundSceneIngressR2022();
-  return()=>{stopEvidenceScene();stopIntelligenceProof();stopProofMembrane();stopFederationObserver();stopMissionWorldBinding()};
- },[]);
+ useEffect(()=>{installLivingWorldOperationBridgeR140();installRuntimeAttestationWorldScarR145();installDurableWorldHeadContinuityR149();installReflexOperationIngressR160();const stopMissionWorldBinding=installMissionWorldHeadBindingR208();const stopFederationObserver=installFederationLedgerWorldObserverR173();const stopProofMembrane=installLivingWorldProofMembraneR1901();const stopIntelligenceProof=installLivingWorldIntelligenceProofR196();const stopEvidenceScene=installEvidenceBoundSceneIngressR2022();return()=>{stopEvidenceScene();stopIntelligenceProof();stopProofMembrane();stopFederationObserver();stopMissionWorldBinding()}},[]);
 
  useEffect(()=>{const open=()=>setHome(true);window.addEventListener('omega-home-request',open as EventListener);return()=>window.removeEventListener('omega-home-request',open as EventListener)},[]);
 
