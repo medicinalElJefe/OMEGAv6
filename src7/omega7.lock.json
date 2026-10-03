@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "25e98d1040704c897541db73370616b5f2b47928",
-  "sourceMilestone": "R441",
+  "sourceMainSha": "e175dc0179d481ad7e5a17aecd949aac0c0862e3",
+  "sourceMilestone": "R442_CANDIDATE",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -24,7 +24,13 @@
     "Visual Instrument",
     "Field",
     "Data Motion",
-    "Convergence"
+    "Convergence",
+    "Workspace",
+    "Projects",
+    "Memory",
+    "Create",
+    "Render Queue",
+    "Assets"
   ],
   "addressResolution": [
     12,
@@ -44,9 +50,12 @@
     "EARTH_WEATHER",
     "MOTION_TRAVERSAL",
     "SCIENCE_RELATIVITY_ATLAS",
-    "FORECAST_VISUAL_FIELD"
+    "FORECAST_VISUAL_FIELD",
+    "WORK_CREATE_CONTINUITY"
   ],
   "atomicScienceRule": "TYPED_SOURCE_REQUIRED_BEFORE_ATOMIC_CHEMISTRY_PROMOTION",
   "forecastTruthRule": "MODEL_FUTURES_ARE_NOT_FUTURE_OBSERVATIONS",
-  "motionTruthRule": "ADDRESS_SPACE_MOTION_IS_NOT_PHYSICAL_VELOCITY"
+  "motionTruthRule": "ADDRESS_SPACE_MOTION_IS_NOT_PHYSICAL_VELOCITY",
+  "workTruthRule": "LOCAL_PROJECT_MEMORY_AND_WORKSPACE_CONTINUITY_DO_NOT_IMPLY_CANONSTATE_OR_EXTERNAL_PERSISTENCE",
+  "createTruthRule": "ORCHESTRATION_AND_RENDER_OUTPUT_DO_NOT_PROVE_EXTERNAL_OR_NATIVE_EXECUTION"
 }
