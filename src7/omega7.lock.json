@@ -1,0 +1,16 @@
+{
+  "schema": "OMEGA7_INHERITANCE_LOCK_V1",
+  "sourceRepository": "medicinalElJefe/OMEGAv6",
+  "sourceMainSha": "8667f86ca954a1ff8092a4fd1c3aaf79ef0bfe19",
+  "sourceMilestone": "R436",
+  "registeredRouteCount": 44,
+  "canonicalAdmissionAuthority": "R125",
+  "domainResolutionAuthority": "R436",
+  "sourcePromotionAuthority": "R240_EXACT_HEAD_GOVERNED_PROOF",
+  "productionAuthority": "GOVERNED_PRODUCTION_WORKFLOW",
+  "addressResolution": [12, 144, 1728, 20736, 248832],
+  "physicalDimensionClaim": false,
+  "retirementRule": "NO_OMEGAV6_CAPABILITY_RETIRES_UNTIL_OMEGA7_FUNCTIONAL_MOBILE_FAILURE_AND_PERFORMANCE_PARITY_ARE_PROVED",
+  "presentationRule": "HUMAN_PRESENTATION_MAY_CHANGE_WITHOUT_CHANGING_CANONICAL_STATE_OR_CAPABILITY_IDENTITY",
+  "failureRule": "CAPABILITY_FAILURE_MUST_BE_CONTAINED_AND_LAST_GOOD_STATE_PRESERVED_WHEN_SAFE"
+}
