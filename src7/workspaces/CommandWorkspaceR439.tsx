@@ -1,12 +1,12 @@
 import {useEffect,useMemo,useState} from 'react';
 import {api,localState} from '../../src/platformAdapter';
-import {corpusState,decodeAddress,initCorpusPack} from '../../src/corpusRuntime';
 import {sourceBackedModeSummary} from '../../src/sourceBackedModeRuntimeR21';
 import {compileFullOverallModePlanR79,compactModePlanR79} from '../../src/fullOverallModeOrchestratorR79';
 import {unifiedFromRecord} from '../../src/unifiedCalculus';
 import {OmegaCommandDeck} from '../../src/OmegaCommandDeck';
 import OmegaRichText from '../../src/OmegaRichText';
 import type {Omega7Depth} from '../capabilityRegistry';
+import {useOmega7NativeRuntimeR440} from '../runtime/Omega7NativeRuntimeR440';
 
 type Props={onNavigate:(route:string)=>void;depth:Omega7Depth};
 const QUICK_TASKS=[
@@ -17,48 +17,16 @@ const QUICK_TASKS=[
 ] as const;
 
 const clamp=(n:number)=>Math.max(0,Math.min(20735,Math.floor(Number(n)||0)));
-const readAddress=()=>clamp(Number(localState.read('omega.v6.address',11498)));
-
 export default function CommandWorkspaceR439({onNavigate,depth}:Props){
- const[address,setAddress]=useState(readAddress);
- const[ready,setReady]=useState(false);
- const[bootError,setBootError]=useState('');
+ const{address,ready,bootError,record,coords,state,retry}=useOmega7NativeRuntimeR440();
  const[prompt,setPrompt]=useState(()=>String(localState.read('omega.b015.chatDraft.v1','')));
  const[response,setResponse]=useState<any>(null);
  const[busy,setBusy]=useState('');
-
- const boot=async()=>{
-  setBootError('');
-  try{await initCorpusPack();setReady(true);setAddress(readAddress())}
-  catch(error:any){setReady(false);setBootError(error?.message||String(error))}
- };
- useEffect(()=>{void boot()},[]);
- useEffect(()=>{
-  const sync=()=>setAddress(current=>{const next=readAddress();return next===current?current:next});
-  const id=window.setInterval(sync,850);
-  window.addEventListener('storage',sync);
-  return()=>{window.clearInterval(id);window.removeEventListener('storage',sync)};
- },[]);
  useEffect(()=>{localState.write('omega.b015.chatDraft.v1',prompt)},[prompt]);
 
- const record=useMemo(()=>ready?corpusState(address):null,[ready,address]);
- const coords=useMemo(()=>decodeAddress(address),[address]);
  const modes=useMemo(()=>record?sourceBackedModeSummary(record):null,[record]);
  const unified=useMemo(()=>record?unifiedFromRecord(record):null,[record]);
  const modePlan=useMemo(()=>record?compileFullOverallModePlanR79(record,'Command Center',prompt):null,[record,prompt]);
-
- const state=useMemo(()=>({
-  atlas:{address},
-  modePolicy:'SOURCE_BACKED_ALL_AVAILABLE',
-  frozen:false,
-  d:coords.d,p:coords.p,r:coords.r,l:coords.l,
-  workflow:'LAW',
-  preset:'SOVEREIGN',
-  timeAuthority:'NOW',
-  viewportMode:'CANON_FIELD',
-  instrumentView:'LIVE',
-  workspace:'COMMAND'
- }),[address,coords]);
 
  const run=async()=>{
   if(!record||!modes||!modePlan||!prompt.trim()||busy)return;
@@ -116,7 +84,7 @@ export default function CommandWorkspaceR439({onNavigate,depth}:Props){
  if(bootError)return <section className='o7-command-native-state' role='alert'>
   <b>OMEGA could not load the source corpus.</b>
   <p>{bootError}</p>
-  <button onClick={()=>void boot()}>Retry source runtime</button>
+  <button onClick={()=>void retry()}>Retry source runtime</button>
  </section>;
 
  if(!ready||!record||!modes||!modePlan)return <section className='o7-command-native-state' role='status' aria-live='polite' aria-busy='true'>
