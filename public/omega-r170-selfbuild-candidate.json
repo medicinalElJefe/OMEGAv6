@@ -5,10 +5,10 @@
   "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
   "generatorContract": "R388_BACKLOG_AI_BUILD",
   "item": {
-    "id": "R388-A-01",
+    "id": "R388-A-03",
     "section": "A",
-    "index": 1,
-    "objective": "One launcher/runtime/state authority across cloud, browser, Hybrid and native-host surfaces.",
+    "index": 3,
+    "objective": "Capability states normalized as READY / AVAILABLE_NOT_CONFIGURED / OPTIONAL_NOT_INSTALLED / DEGRADED / FAILED instead of hidden replacement surfaces.",
     "affected": [
       "src/OmegaWorkstationFullV2.tsx",
       "src/systemAtlasRuntime.ts"
@@ -25,6 +25,16 @@
     "paths": [
       "src/OmegaWorkstationFullV2.tsx"
     ],
+    "productPatchIdentity": {
+      "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
+      "rows": [
+        {
+          "path": "src/OmegaWorkstationFullV2.tsx",
+          "blobSha": "79917128089513b08f913ec83c4673ff282b486b"
+        }
+      ],
+      "key": "src/OmegaWorkstationFullV2.tsx:79917128089513b08f913ec83c4673ff282b486b"
+    },
     "expectedProofs": [
       "R241 Archive Convergence Visual Intelligence",
       "OMEGA Cloud Bridge CI"
@@ -41,7 +51,7 @@
         "validation": null,
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-03",
           "files": [],
           "canonicalAdmission": false,
           "directProductionMutation": false,
@@ -51,6 +61,114 @@
           ]
         }
       }
+    ],
+    "declinedItemScars": [
+      {
+        "itemId": "R388-A-02",
+        "section": "A",
+        "state": "PROOF_REJECTED_PATCH_REPEAT",
+        "reasons": [
+          "exact product patch identity already proof-rejected by closed unmerged CLOUD-01 PR #851"
+        ],
+        "attempts": [
+          {
+            "attempt": 1,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-A-02",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R241 Archive Convergence Visual Intelligence",
+                "OMEGA Cloud Bridge CI"
+              ]
+            }
+          },
+          {
+            "attempt": 2,
+            "state": "VALIDATED_BOUNDED_PATCH",
+            "accepted": true,
+            "reasons": [],
+            "validation": {
+              "valid": true,
+              "changedChars": 1110,
+              "fileCount": 1
+            },
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-A-02",
+              "files": [
+                {
+                  "path": "src/OmegaWorkstationFullV2.tsx",
+                  "preimageSha": "ba7493d16b2cc24e50b7cad9fe8af8c809b0cfd5",
+                  "replacementCount": 2
+                }
+              ],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R241 Archive Convergence Visual Intelligence",
+                "OMEGA Cloud Bridge CI"
+              ]
+            }
+          }
+        ],
+        "rejectionHistory": [
+          {
+            "attempt": 1,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-A-02",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R241 Archive Convergence Visual Intelligence",
+                "OMEGA Cloud Bridge CI"
+              ]
+            }
+          }
+        ],
+        "reformulated": true,
+        "patchIdentity": {
+          "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
+          "rows": [
+            {
+              "path": "src/OmegaWorkstationFullV2.tsx",
+              "blobSha": "79917128089513b08f913ec83c4673ff282b486b"
+            }
+          ],
+          "key": "src/OmegaWorkstationFullV2.tsx:79917128089513b08f913ec83c4673ff282b486b"
+        },
+        "matchedClosedPr": {
+          "number": 851,
+          "headSha": "2aac836c40543100a849750c510144eb83c431fd",
+          "matchedCommitSha": "2aac836c40543100a849750c510144eb83c431fd",
+          "rejectionEvidence": "FAILED_EXACT_HEAD_PROOF",
+          "failedWorkflows": [
+            "R202 Operational Source Authority",
+            "R170 Current Convergence",
+            "OMEGA R238 Woven Hybrid Continuity Convergence",
+            "OMEGA Cloud Bridge CI",
+            "OMEGA R237 Hybrid Command Authority Proof",
+            "R241 Archive Convergence Visual Intelligence"
+          ],
+          "closedAt": "2026-10-03T03:00:34Z"
+        }
+      }
     ]
   },
   "receipt": {
@@ -58,16 +176,26 @@
     "machineId": "CLOUD-01",
     "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
     "generatorContract": "R388_BACKLOG_AI_BUILD",
-    "convergenceGeneration": 1,
-    "itemId": "R388-A-01",
+    "convergenceGeneration": 2,
+    "itemId": "R388-A-03",
     "section": "A",
-    "objective": "One launcher/runtime/state authority across cloud, browser, Hybrid and native-host surfaces.",
+    "objective": "Capability states normalized as READY / AVAILABLE_NOT_CONFIGURED / OPTIONAL_NOT_INSTALLED / DEGRADED / FAILED instead of hidden replacement surfaces.",
     "externalProofRequired": false,
     "targetPaths": [
       "src/OmegaWorkstationFullV2.tsx"
     ],
-    "baseSha": "7579bd02b2fc6ebb8935acdb005f4f9886a9b913",
-    "branch": "cloud/evolution-r388-r388-a-01-7579bd02",
+    "productPatchIdentity": {
+      "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
+      "rows": [
+        {
+          "path": "src/OmegaWorkstationFullV2.tsx",
+          "blobSha": "79917128089513b08f913ec83c4673ff282b486b"
+        }
+      ],
+      "key": "src/OmegaWorkstationFullV2.tsx:79917128089513b08f913ec83c4673ff282b486b"
+    },
+    "baseSha": "0d75c8104f262871b34a28e6ea53c7c7092485df",
+    "branch": "cloud/evolution-r388-r388-a-03-0d75c810",
     "status": "SOURCE_ADVANCED_PENDING_PROOF",
     "canonicalAdmission": false,
     "directProductionMutation": false,
@@ -88,7 +216,7 @@
         "validation": null,
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-03",
           "files": [],
           "canonicalAdmission": false,
           "directProductionMutation": false,
@@ -105,16 +233,16 @@
         "reasons": [],
         "validation": {
           "valid": true,
-          "changedChars": 226,
+          "changedChars": 1110,
           "fileCount": 1
         },
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-03",
           "files": [
             {
               "path": "src/OmegaWorkstationFullV2.tsx",
-              "preimageSha": "3be2b7623250dd89ab409f1fdc49df97ad95657e",
+              "preimageSha": "ba7493d16b2cc24e50b7cad9fe8af8c809b0cfd5",
               "replacementCount": 2
             }
           ],
@@ -138,7 +266,7 @@
         "validation": null,
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-03",
           "files": [],
           "canonicalAdmission": false,
           "directProductionMutation": false,
@@ -149,7 +277,115 @@
         }
       }
     ],
-    "createdAt": "2026-10-01T00:47:49.011Z",
+    "declinedItemScars": [
+      {
+        "itemId": "R388-A-02",
+        "section": "A",
+        "state": "PROOF_REJECTED_PATCH_REPEAT",
+        "reasons": [
+          "exact product patch identity already proof-rejected by closed unmerged CLOUD-01 PR #851"
+        ],
+        "attempts": [
+          {
+            "attempt": 1,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-A-02",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R241 Archive Convergence Visual Intelligence",
+                "OMEGA Cloud Bridge CI"
+              ]
+            }
+          },
+          {
+            "attempt": 2,
+            "state": "VALIDATED_BOUNDED_PATCH",
+            "accepted": true,
+            "reasons": [],
+            "validation": {
+              "valid": true,
+              "changedChars": 1110,
+              "fileCount": 1
+            },
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-A-02",
+              "files": [
+                {
+                  "path": "src/OmegaWorkstationFullV2.tsx",
+                  "preimageSha": "ba7493d16b2cc24e50b7cad9fe8af8c809b0cfd5",
+                  "replacementCount": 2
+                }
+              ],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R241 Archive Convergence Visual Intelligence",
+                "OMEGA Cloud Bridge CI"
+              ]
+            }
+          }
+        ],
+        "rejectionHistory": [
+          {
+            "attempt": 1,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-A-02",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R241 Archive Convergence Visual Intelligence",
+                "OMEGA Cloud Bridge CI"
+              ]
+            }
+          }
+        ],
+        "reformulated": true,
+        "patchIdentity": {
+          "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
+          "rows": [
+            {
+              "path": "src/OmegaWorkstationFullV2.tsx",
+              "blobSha": "79917128089513b08f913ec83c4673ff282b486b"
+            }
+          ],
+          "key": "src/OmegaWorkstationFullV2.tsx:79917128089513b08f913ec83c4673ff282b486b"
+        },
+        "matchedClosedPr": {
+          "number": 851,
+          "headSha": "2aac836c40543100a849750c510144eb83c431fd",
+          "matchedCommitSha": "2aac836c40543100a849750c510144eb83c431fd",
+          "rejectionEvidence": "FAILED_EXACT_HEAD_PROOF",
+          "failedWorkflows": [
+            "R202 Operational Source Authority",
+            "R170 Current Convergence",
+            "OMEGA R238 Woven Hybrid Continuity Convergence",
+            "OMEGA Cloud Bridge CI",
+            "OMEGA R237 Hybrid Command Authority Proof",
+            "R241 Archive Convergence Visual Intelligence"
+          ],
+          "closedAt": "2026-10-03T03:00:34Z"
+        }
+      }
+    ],
+    "createdAt": "2026-10-03T03:01:56.265Z",
     "authorityBoundaries": {
       "canonAdmission": "R125",
       "dispatch": "R147",
