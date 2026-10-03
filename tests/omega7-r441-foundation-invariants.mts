@@ -22,6 +22,7 @@ assert.ok(science.includes("(spectral as any).canonicalResolution||emitSpectralR
 assert.ok(science.includes("atomicChemistrySourceGateR436({})"),'atomic/chemistry status must fail closed until a typed source is supplied');
 assert.ok(science.includes("MORE EVIDENCE NEEDED"),'held atomic source must be expressed in human language');
 assert.ok(science.includes("depth==='STANDARD'?'CALCULATED FROM STANDARD PHYSICS'")&&science.includes("depth!=='STANDARD'&&spectralResolution"),'Standard science view must translate authority jargon while Advanced/Canon retain technical resolution');
+assert.ok(science.includes("useState(depth!=='STANDARD')")&&science.includes("setInstrumentOpen(depth!=='STANDARD')")&&science.includes('Open full {route} instrument'),'Standard science must lead with plain-language summary while Advanced/Canon expose the inherited instrument directly');
 assert.ok(native.includes('depth={depth}'),'native science registry must receive the same interface-depth authority as the shell');
 assert.ok(science.includes('standard derived physics · address placement remains representational'),'spectral physics and atlas representation must remain separated');
 
