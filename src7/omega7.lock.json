@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "46b70ea353d07409f4dac0fcbd7430538169e5f4",
-  "sourceMilestone": "R440_CANDIDATE",
+  "sourceMainSha": "eac46888c259c0456b02b3782f5fc6b7c803113c",
+  "sourceMilestone": "R440",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
