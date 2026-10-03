@@ -51,6 +51,9 @@ assert.match(machine,/main drifted during promotion gate/,'main must be rechecke
 assert.match(machine,/isAutonomousCandidateBranchR245/,'CLOUD-01 must enforce the shared cross-machine candidate fence');
 assert.match(machine,/HELD_FOR_R170_CANDIDATE/,'CLOUD-01 must hold when the GitHub R170 machine owns the one candidate slot');
 assert.match(machine,/multiple open governed autonomous candidate PRs/);
+assert.match(machine,/pulls\?state=open&base=main&per_page=100/,'held-candidate discovery must be scoped to open main-targeting PRs');
+assert.match(machine,/heldBranches=new Set/,'held-candidate discovery must derive an explicit open-PR branch set');
+assert.match(machine,/if\(!heldBranches\.has\(branch\)\)continue/,'closed/unmerged autonomous branch refs must remain historical evidence without blocking the live candidate slot');
 assert.doesNotMatch(machine,/wrangler\s+deploy|CLOUDFLARE_API_TOKEN/,'evolution machine may not possess production deployment credentials');
 assert.match(policy,/buildDevelopmentResidualGraphR164/);
 assert.match(policy,/deriveResidualGateR245/);
