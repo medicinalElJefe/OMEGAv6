@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import {OMEGA7_NATIVE_ROUTES,isOmega7NativeRoute} from '../src7/nativeCapabilityRegistry.tsx';
 import {OMEGA7_INHERITANCE_LEDGER,canRetireOmega6Surface} from '../src7/inheritanceLedgerR438.ts';
 import {buildForecastPlan} from '../src/forecastRuntime.ts';
+import {initCorpusPack} from '../src/corpusRuntime.ts';
 
 const native=fs.readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
 const workspace=fs.readFileSync('src7/workspaces/ForecastVisualWorkspaceR442.tsx','utf8');
@@ -17,6 +18,7 @@ assert.ok(workspace.includes("depth!=='STANDARD'")&&workspace.includes('Open ful
 assert.ok(workspace.includes('future observations are not used or invented'));
 assert.ok(workspace.includes('address-space motion remains distinct from physical motion'));
 
+await initCorpusPack();
 const forecast=buildForecastPlan(0,12,'CANON_PHASE');
 assert.ok(forecast.corridors.length>1);
 assert.match(forecast.boundary,/not observations from the future/i);
