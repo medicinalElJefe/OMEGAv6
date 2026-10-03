@@ -22,7 +22,7 @@ export const R435_BOUNDARY='R435 makes presentation a compiled consequence of ca
 
 export type RepresentationStateR435='EMPIRICAL_BOUND'|'SOURCE_BOUND'|'RUNTIME_BOUND'|'MODEL_BOUND'|'HELD_CONTRADICTION'|'HELD_UNKNOWN';
 export type RepresentationInputR435={
- address:number;theta?:number;surface?:string;record?:any;evidence?:UniversalEvidencePacketR152[];
+ address:number;theta?:number;surface?:string;record?:any;evidence?:UniversalEvidencePacketR152[];claimId?:string;claim?:string;intent?:string;proofReceipts?:Array<{id:string;proofClass:string;verified:boolean;source:string;detail?:string;at?:string}>;
  executionProof?:{state?:string;verified?:boolean;receiptId?:string;fingerprint?:string}|null;
  triangle?:any;hardware?:{logicalCores?:number;deviceMemoryGB?:number|null;workerAvailable?:boolean};
 };
@@ -34,6 +34,7 @@ const fnv=(text:string)=>{let h=2166136261;for(let i=0;i<text.length;i++){h^=tex
 function stateFromTruth(t:any):RepresentationStateR435{
  if(t.evidenceStatus==='CONTRADICTED_EVIDENCE')return'HELD_CONTRADICTION';
  if(t.evidenceStatus==='EMPIRICAL_STRONG'||t.evidenceStatus==='EMPIRICAL_PARTIAL')return'EMPIRICAL_BOUND';
+ if(t.evidence.runtimeReceiptCount>0)return'RUNTIME_BOUND';
  if(t.evidenceStatus==='SOURCE_BOUND')return'SOURCE_BOUND';
  if(t.evidenceStatus==='RUNTIME_BOUND')return'RUNTIME_BOUND';
  if(t.evidenceStatus==='MODEL_ONLY')return'MODEL_BOUND';
@@ -55,14 +56,14 @@ export function compileRuntimeDerivedRepresentationR435(input:RepresentationInpu
  const provenance=provenanceForSurfaceR94(surface);
  const fusion=compileAllModesTruthFusionR151(record);
  const truth=compileUniversalTruthEnvelopeR152({
-  address,evidence:input.evidence||[],executionProof:input.executionProof||null,
+  address,claimId:input.claimId,claim:input.claim,intent:input.intent,evidence:input.evidence||[],executionProof:input.executionProof||null,
   scar:{priorUncertainty:cl(record?.metrics?.uncertainty),priorContradiction:cl(record?.metrics?.contradiction)}
  });
  const typed=field(),sample=sampleR349FieldAtBearingR356(typed,address,theta),antipode=compareAntipodalFieldR356(typed,address,theta);
  const atlas=addressBearingSampleR356(address,theta);
  const plan=compileAtlas360ExecutionPlanR356({activeAddresses:[address],bearingStep:1,logicalCores:input.hardware?.logicalCores??1,deviceMemoryGB:input.hardware?.deviceMemoryGB??null,workerAvailable:input.hardware?.workerAvailable===true});
  const triangle=input.triangle?evaluateTriangleR356(input.triangle):{schema:'OMEGA_ATLAS360_TRIANGLE_EVALUATION_R356',gateState:'HOLD',reasons:['REAL_ANCHOR_TRIANGLE_NOT_SUPPLIED'],measurementDependent:true,measurementFabricated:false,canonicalMutation:false};
- const representationState=stateFromTruth(truth),ceiling=claimCeiling(representationState);
+ const representationState=stateFromTruth(truth),ceiling=claimCeiling(representationState),proofReceipts=(input.proofReceipts||[]).slice(-32),verifiedProofs=proofReceipts.filter(x=>x.verified);
  const permissions={
   renderCanonicalAddress:true,
   renderAtlasGeometry:true,
@@ -72,6 +73,7 @@ export function compileRuntimeDerivedRepresentationR435(input:RepresentationInpu
   renderRuntimeClaim:representationState==='RUNTIME_BOUND'||representationState==='EMPIRICAL_BOUND',
   renderSourceClaim:['SOURCE_BOUND','RUNTIME_BOUND','EMPIRICAL_BOUND'].includes(representationState),
   renderTriangleClosure:triangle.gateState==='PASS',
+  renderProofClaim:verifiedProofs.length>0,
   renderForecastAsForecast:truth.evidenceStatus!=='CONTRADICTED_EVIDENCE',
   renderForecastAsObserved:false,
   renderPhysicalMeasurement:representationState==='EMPIRICAL_BOUND'&&truth.evidence.empiricalCount>0,
@@ -83,7 +85,7 @@ export function compileRuntimeDerivedRepresentationR435(input:RepresentationInpu
   ...(triangle.gateState!=='PASS'?triangle.reasons||[]:[]),
   ...(truth.uncertainty>.45?['HIGH_UNCERTAINTY']:[])
  ];
- const compact={address,theta,surface,state:representationState,ceiling,truth:truth.fingerprint,fusion:fusion.fingerprint,field:sample.state,antipode:antipode.invariantDelta,triangle:triangle.gateState,evidence:truth.evidence.packets.map((x:any)=>x.id)};
+ const compact={address,theta,surface,state:representationState,ceiling,truth:truth.fingerprint,fusion:fusion.fingerprint,field:sample.state,antipode:antipode.invariantDelta,triangle:triangle.gateState,evidence:truth.evidence.packets.map((x:any)=>x.id),proofs:proofReceipts.map(x=>[x.id,x.proofClass,x.verified])};
  const receipt=fnv(JSON.stringify(compact));
  return{
   schema:R435_SCHEMA,laws:R435_LAWS,boundary:R435_BOUNDARY,receipt,
@@ -93,6 +95,6 @@ export function compileRuntimeDerivedRepresentationR435(input:RepresentationInpu
   fusion:{channels:fusion.channelCount,truthConfidence:fusion.consensus.truthConfidence,agreement:fusion.consensus.agreement,fingerprint:fusion.fingerprint,canonicalOperator:fusion.operator.canonical,advisoryOperator:fusion.operator.advisory},
   field:{...sample.state,relativeMotionVector:sample.relativeMotionVector,source:sample.measurementSource},
   atlas:{hierarchy:atlas.hierarchy,bearing:atlas.bearing,source:R356_ATLAS360_SOURCE,execution:{pairCount:plan.pairCount,geometryBytes:plan.geometryBytes,workerCount:plan.workerCount,fullTensorMaterialized:plan.fullTensorMaterialized},antipode},
-  triangle,permissions,canonicalMutation:false,productionAuthorityChanged:false
+  triangle,proofLineage:{count:proofReceipts.length,verified:verifiedProofs.length,receipts:proofReceipts},permissions,canonicalMutation:false,productionAuthorityChanged:false
  };
 }
