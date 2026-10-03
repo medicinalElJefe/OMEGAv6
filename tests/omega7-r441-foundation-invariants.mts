@@ -21,6 +21,8 @@ assert.ok(science.includes("localStorage.getItem('omega.v6.address'")&&science.i
 assert.ok(science.includes("(spectral as any).canonicalResolution||emitSpectralResolutionR436"),'science presentation must reuse the R43 canonical spectral packet before any fallback re-emission');
 assert.ok(science.includes("atomicChemistrySourceGateR436({})"),'atomic/chemistry status must fail closed until a typed source is supplied');
 assert.ok(science.includes("MORE EVIDENCE NEEDED"),'held atomic source must be expressed in human language');
+assert.ok(science.includes("depth==='STANDARD'?'CALCULATED FROM STANDARD PHYSICS'")&&science.includes("depth!=='STANDARD'&&spectralResolution"),'Standard science view must translate authority jargon while Advanced/Canon retain technical resolution');
+assert.ok(native.includes('depth={depth}'),'native science registry must receive the same interface-depth authority as the shell');
 assert.ok(science.includes('standard derived physics · address placement remains representational'),'spectral physics and atlas representation must remain separated');
 
 const rel=r43RelativityCoordinates(0);
