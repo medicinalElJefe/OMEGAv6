@@ -28,6 +28,7 @@ export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Pro
  const commit=(next:number)=>setAddress(writeAddress(next));
  const record=useMemo(()=>ready?corpusState(address):null,[ready,address]);
  const coords=useMemo(()=>decodeAddress(address),[address]);
+ const state=useMemo(()=>({atlas:{address},modePolicy:'CONTEXTUAL',frozen:false,d:coords.d,p:coords.p,r:coords.r,l:coords.l,workflow:'LAW',preset:'SOVEREIGN',timeAuthority:'NOW',viewportMode:'CANON_FIELD',instrumentView:'LIVE',workspace:'LAW',embodimentIndex:4}),[address,coords]);
  const modeSummary=useMemo(()=>record?sourceBackedModeSummary(record):null,[record]);
 
  if(error)return <section className='o7-native-failure' role='alert'><b>System/evidence runtime is unavailable.</b><p>{error}</p><button onClick={()=>location.reload()}>Retry runtime</button></section>;
@@ -64,7 +65,7 @@ export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Pro
   </section>}
 
   {instrumentOpen&&<div className='o7-native-surface'>
-   {route==='Cockpit'?<OmegaWorkspaceCockpitR18 variant='Cockpit' record={record} state={{atlas:{address}}} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} modeCount={modeSummary.appliedCount}/>:
+   {route==='Cockpit'?<OmegaWorkspaceCockpitR18 variant='Cockpit' record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} modeCount={modeSummary.appliedCount}/>:
     route==='Modes'?<SourceBackedModesPanelR21 record={record} address={address} onAddress={commit} onNavigate={onNavigate}/>:
     route==='Archive Census'?<ArchiveGovernanceControl onNavigate={onNavigate}/>:
     route==='Archive Operators'?<ArchiveGovernanceControl operators onNavigate={onNavigate}/>:
@@ -72,7 +73,7 @@ export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Pro
     route==='Validation'?<UniversalQualityControl record={record} status={status} restore={restore} modeCount={modeSummary.appliedCount} catalogCount={modeSummary.catalogCount}/>:
     route==='System Atlas'?<SystemAtlasControl record={record} onNavigate={onNavigate}/>:
     route==='Control Matrix'?<SystemAtlasControl record={record} onNavigate={onNavigate} control/>:
-    <OmegaSpecialistSuite panel={route} record={record} state={{atlas:{address}}} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} uiMode={uiMode} onUiMode={setUiMode}/>}
+    <OmegaSpecialistSuite panel={route} record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} uiMode={uiMode} onUiMode={setUiMode}/>}
   </div>}
  </section>;
 }
