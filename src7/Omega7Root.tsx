@@ -2,6 +2,7 @@ import {useEffect,useMemo,useRef} from 'react';
 import {OMEGA7_CAPABILITIES,OMEGA7_DOMAINS,omega7CapabilitiesForDomain,searchOmega7Capabilities,type Omega7Domain} from './capabilityRegistry';
 import {Omega7AppStateProvider,useOmega7AppState} from './appState';
 import {Omega7Boundary} from './Omega7Boundary';
+import {isOmega7NativeRoute,Omega7NativeSurface} from './nativeCapabilityRegistry';
 import './omega7.css';
 
 type Props={onOpenLegacyRoute:(route:string)=>void;onExitToV6:()=>void};
@@ -41,7 +42,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   if(!cap)return;
   dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
   dispatch({type:'COMMAND',open:false});
-  onOpenLegacyRoute(cap.legacyRoute);
+  if(!isOmega7NativeRoute(cap.legacyRoute))onOpenLegacyRoute(cap.legacyRoute);
  };
 
  return <div className='o7-app' data-omega7='true' data-depth={state.depth.toLowerCase()}>
@@ -63,30 +64,37 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    {OMEGA7_DOMAINS.map(domain=><button key={domain} className={state.domain===domain?'active':''} onClick={()=>dispatch({type:'DOMAIN',domain})}><span>{DOMAIN_LABEL[domain]}</span></button>)}
   </aside>
 
-  <main className='o7-main'>
-   <section className='o7-intro'>
-    <p>OMEGA7</p>
-    <h1>{state.domain==='HOME'?'What do you want to do?':DOMAIN_LABEL[state.domain]}</h1>
-    <span>{DOMAIN_COPY[state.domain]}</span>
-   </section>
+  <main className='o7-main' data-native-route={state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?state.selectedRoute:''}>
+   {state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?
+    <section className='o7-native-host'>
+     <div className='o7-native-toolbar'><button onClick={()=>dispatch({type:'SELECT_ROUTE',route:null})}>← Back to {DOMAIN_LABEL[state.domain]}</button><span>OMEGA7 native · OMEGAv6 engine preserved</span></div>
+     <Omega7NativeSurface route={state.selectedRoute}/>
+    </section>:
+    <>
+     <section className='o7-intro'>
+      <p>OMEGA7</p>
+      <h1>{state.domain==='HOME'?'What do you want to do?':DOMAIN_LABEL[state.domain]}</h1>
+      <span>{DOMAIN_COPY[state.domain]}</span>
+     </section>
 
-   {state.domain==='HOME'&&<section className='o7-home-actions'>
-    <button onClick={()=>open('Command Center')}><b>Ask OMEGA</b><span>Start with a question or task</span></button>
-    <button onClick={()=>open('Projects')}><b>Projects</b><span>Continue active work</span></button>
-    <button onClick={()=>open('Earth Now')}><b>Earth & Weather</b><span>Explore current Earth data</span></button>
-    <button onClick={()=>open('Development')}><b>Build Software</b><span>Develop, repair and validate</span></button>
-   </section>}
+     {state.domain==='HOME'&&<section className='o7-home-actions'>
+      <button onClick={()=>open('Command Center')}><b>Ask OMEGA</b><span>Start with a question or task</span></button>
+      <button onClick={()=>open('Projects')}><b>Projects</b><span>Continue active work</span></button>
+      <button onClick={()=>open('Earth Now')}><b>Earth & Weather</b><span>Explore current Earth data</span></button>
+      <button onClick={()=>open('Development')}><b>Build Software</b><span>Develop, repair and validate</span></button>
+     </section>}
 
-   <section className='o7-capability-section'>
-    <header><div><b>{state.domain==='HOME'?'Capabilities':'Available tools'}</b><span>{results.length} shown · {OMEGA7_CAPABILITIES.length} inherited from OMEGAv6</span></div>{state.domain!=='HOME'&&<button onClick={()=>dispatch({type:'COMMAND',open:true})}>Find anything</button>}</header>
-    <div className='o7-capability-grid'>
-     {results.map(cap=><article key={cap.id} data-health={cap.availability.toLowerCase()}>
-      <div><small>{cap.domain}</small><b>{cap.label}</b><p>{cap.description}</p></div>
-      <footer><span>{cap.availability==='READY'?'Ready':cap.availability==='HELD'?'Requires evidence or connection':cap.availability}</span><button onClick={()=>open(cap.legacyRoute)}>{cap.primaryAction}</button></footer>
-      {state.depth!=='STANDARD'&&<details><summary>Technical details</summary><dl><div><dt>Legacy route</dt><dd>{cap.legacyRoute}</dd></div><div><dt>Family</dt><dd>{cap.family}</dd></div><div><dt>Authority</dt><dd>{cap.authority}</dd></div><div><dt>Boundary</dt><dd>{cap.sourceBoundary}</dd></div><div><dt>Reality</dt><dd>{cap.reality}</dd></div></dl></details>}
-     </article>)}
-    </div>
-   </section>
+     <section className='o7-capability-section'>
+      <header><div><b>{state.domain==='HOME'?'Capabilities':'Available tools'}</b><span>{results.length} shown · {OMEGA7_CAPABILITIES.length} inherited from OMEGAv6</span></div>{state.domain!=='HOME'&&<button onClick={()=>dispatch({type:'COMMAND',open:true})}>Find anything</button>}</header>
+      <div className='o7-capability-grid'>
+       {results.map(cap=><article key={cap.id} data-health={cap.availability.toLowerCase()} data-native={isOmega7NativeRoute(cap.legacyRoute)?'true':'false'}>
+        <div><small>{cap.domain}{isOmega7NativeRoute(cap.legacyRoute)?' · OMEGA7 NATIVE':''}</small><b>{cap.label}</b><p>{cap.description}</p></div>
+        <footer><span>{cap.availability==='READY'?'Ready':cap.availability==='HELD'?'Requires evidence or connection':cap.availability}</span><button onClick={()=>open(cap.legacyRoute)}>{cap.primaryAction}</button></footer>
+        {state.depth!=='STANDARD'&&<details><summary>Technical details</summary><dl><div><dt>Legacy route</dt><dd>{cap.legacyRoute}</dd></div><div><dt>Family</dt><dd>{cap.family}</dd></div><div><dt>Authority</dt><dd>{cap.authority}</dd></div><div><dt>Boundary</dt><dd>{cap.sourceBoundary}</dd></div><div><dt>Reality</dt><dd>{cap.reality}</dd></div></dl></details>}
+       </article>)}
+      </div>
+     </section>
+    </>}
   </main>
 
   {state.statusOpen&&<section className='o7-status' role='dialog' aria-label='System status'>
