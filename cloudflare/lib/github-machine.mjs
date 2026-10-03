@@ -80,10 +80,17 @@ async function findClosedProofRejectedPatchRepeatR430({token,repo,itemId,patches
 
 
 async function collectCandidates(token,repo,policy){
+  const open=await gh(token,`/repos/${repo}/pulls?state=open&base=main&per_page=100`);
+  const heldBranches=new Set((open||[]).filter(pr=>isAutonomousCandidateBranchR245(pr.head?.ref,policy)).map(pr=>String(pr.head?.ref||'')));
   const candidates=[];
   for(const prefix of autonomousCandidatePrefixesR245(policy)){
     let refs=[];try{refs=await gh(token,`/repos/${repo}/git/matching-refs/heads/${prefix}`)}catch{}
-    for(const ref of refs||[]){const branch=String(ref.ref||'').replace(/^refs\/heads\//,'');try{const candidate=await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch);candidates.push({...candidate.json,branch,headSha:ref.object?.sha||null})}catch(error){candidates.push({branch,headSha:ref.object?.sha||null,unreadable:true,error:String(error)})}}
+    for(const ref of refs||[]){
+      const branch=String(ref.ref||'').replace(/^refs\/heads\//,'');
+      if(!heldBranches.has(branch))continue;
+      try{const candidate=await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch);candidates.push({...candidate.json,branch,headSha:ref.object?.sha||null})}
+      catch(error){candidates.push({branch,headSha:ref.object?.sha||null,unreadable:true,error:String(error)})}
+    }
   }
   return candidates;
 }
