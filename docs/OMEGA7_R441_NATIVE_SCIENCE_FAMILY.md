@@ -96,3 +96,12 @@ Address-resolution levels are computational representation scales.
 They are not asserted as additional physical dimensions.
 
 Cross-scale similarities remain structural analogies unless a standard or measured physical relation independently establishes otherwise.
+
+
+## Baseline authority
+
+R441 is proved only against merged R440 main:
+
+`eac46888c259c0456b02b3782f5fc6b7c803113c`
+
+The science-family delta may not promote against the earlier stacked candidate identity.
