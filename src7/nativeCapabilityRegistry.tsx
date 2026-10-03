@@ -21,7 +21,7 @@ export function Omega7NativeSurface({route,onNavigate,depth}:{route:Omega7Native
   case'Command Center':surface=<CommandWorkspaceR439 onNavigate={onNavigate} depth={depth}/>;break;
   case'Earth Now':surface=<EarthWorkspaceR438/>;break;
   case'Matter Traversal':case'Immersive Traversal':case'Extreme Traversal':case'Traversal':surface=<TraversalWorkspaceR440 route={route} onNavigate={onNavigate}/>;break;
-  case'Relativity':case'Reality Lab':case'Atlas':case'Atlas Calculator':case'Scale Compiler':case'Infinity':surface=<ScienceWorkspaceR441 route={route} onNavigate={onNavigate}/>;break;
+  case'Relativity':case'Reality Lab':case'Atlas':case'Atlas Calculator':case'Scale Compiler':case'Infinity':surface=<ScienceWorkspaceR441 route={route} onNavigate={onNavigate} depth={depth}/>;break;
  }
  return <Omega7Boundary label={`OMEGA7 ${route}`}><Suspense fallback={<section className='o7-native-loading' role='status' aria-live='polite'>Opening {route}…</section>}>{surface}</Suspense></Omega7Boundary>;
 }
