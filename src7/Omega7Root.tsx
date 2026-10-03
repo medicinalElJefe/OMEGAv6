@@ -2,6 +2,7 @@ import {useEffect,useMemo,useRef} from 'react';
 import {OMEGA7_CAPABILITIES,OMEGA7_DOMAINS,omega7CapabilitiesForDomain,searchOmega7Capabilities,type Omega7Domain} from './capabilityRegistry';
 import {Omega7AppStateProvider,useOmega7AppState} from './appState';
 import {Omega7Boundary} from './Omega7Boundary';
+import {Omega7NativeRuntimeProviderR440} from './runtime/Omega7NativeRuntimeR440';
 import {isOmega7NativeRoute,Omega7NativeSurface} from './nativeCapabilityRegistry';
 import './omega7.css';
 
@@ -113,5 +114,5 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
 }
 
 export default function Omega7Root(props:Props){
- return <Omega7Boundary label='OMEGA7 shell'><Omega7AppStateProvider><Omega7Shell {...props}/></Omega7AppStateProvider></Omega7Boundary>;
+ return <Omega7Boundary label='OMEGA7 shell'><Omega7AppStateProvider><Omega7NativeRuntimeProviderR440><Omega7Shell {...props}/></Omega7NativeRuntimeProviderR440></Omega7AppStateProvider></Omega7Boundary>;
 }
