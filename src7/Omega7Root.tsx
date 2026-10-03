@@ -87,7 +87,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
      <section className='o7-capability-section'>
       <header><div><b>{state.domain==='HOME'?'Capabilities':'Available tools'}</b><span>{results.length} shown · {OMEGA7_CAPABILITIES.length} inherited from OMEGAv6</span></div>{state.domain!=='HOME'&&<button onClick={()=>dispatch({type:'COMMAND',open:true})}>Find anything</button>}</header>
       <div className='o7-capability-grid'>
-       {results.map(cap=><article key={cap.id} data-health={cap.availability.toLowerCase()} data-native={isOmega7NativeRoute(cap.legacyRoute)?'true':'false'}>
+       {results.map(cap=><article key={cap.id} data-health={cap.availability.toLowerCase()} data-native={isOmega7NativeRoute(cap.legacyRoute)?'true':'false'} data-capability-route={cap.legacyRoute}>
         <div><small>{cap.domain}{isOmega7NativeRoute(cap.legacyRoute)?' · OMEGA7 NATIVE':''}</small><b>{cap.label}</b><p>{cap.description}</p></div>
         <footer><span>{cap.availability==='READY'?'Ready':cap.availability==='HELD'?'Requires evidence or connection':cap.availability}</span><button onClick={()=>open(cap.legacyRoute)}>{cap.primaryAction}</button></footer>
         {state.depth!=='STANDARD'&&<details><summary>Technical details</summary><dl><div><dt>Legacy route</dt><dd>{cap.legacyRoute}</dd></div><div><dt>Family</dt><dd>{cap.family}</dd></div><div><dt>Authority</dt><dd>{cap.authority}</dd></div><div><dt>Boundary</dt><dd>{cap.sourceBoundary}</dd></div><div><dt>Reality</dt><dd>{cap.reality}</dd></div></dl></details>}
@@ -106,7 +106,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   {state.commandOpen&&<div className='o7-command-backdrop' onMouseDown={e=>{if(e.currentTarget===e.target)dispatch({type:'COMMAND',open:false})}}>
    <section className='o7-command' role='dialog' aria-modal='true' aria-label='Search OMEGA'>
     <input ref={inputRef} value={state.query} onChange={e=>dispatch({type:'QUERY',query:e.target.value})} placeholder='Search capabilities or type what you want to do…'/>
-    <div>{(state.query?searchOmega7Capabilities(state.query):OMEGA7_CAPABILITIES.slice(0,12)).slice(0,20).map(cap=><button key={cap.id} onClick={()=>open(cap.legacyRoute)}><span><b>{cap.label}</b><small>{cap.description}</small></span><em>{cap.availability}</em></button>)}</div>
+    <div>{(state.query?searchOmega7Capabilities(state.query):OMEGA7_CAPABILITIES.slice(0,12)).slice(0,20).map(cap=><button key={cap.id} data-command-route={cap.legacyRoute} onClick={()=>open(cap.legacyRoute)}><span><b>{cap.label}</b><small>{cap.description}</small></span><em>{cap.availability}</em></button>)}</div>
    </section>
   </div>}
  </div>;
