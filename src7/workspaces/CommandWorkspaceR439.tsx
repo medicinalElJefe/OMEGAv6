@@ -127,7 +127,7 @@ export default function CommandWorkspaceR439({onNavigate,depth}:Props){
  return <section className='o7-native-workspace o7-command-workspace' data-omega7-native='command.center' data-address={address} data-applied-modes={modes.appliedCount} data-gated-modes={modes.gatedCount}>
   <header className='o7-native-head'>
    <div><span>Home · Ask OMEGA</span><h1>{depth==='STANDARD'?'What do you want to do?':'Ask OMEGA'}</h1><p>{depth==='STANDARD'?'Ask a question, analyze something, continue a project, or start a build. OMEGA chooses the underlying capabilities and keeps evidence, execution, and proof separate.':'One governed task surface for questions, analysis, building, repair, and capability routing.'}</p></div>
-   <aside><b>{depth==='STANDARD'?'Analysis ready':`${modes.appliedCount} source-backed modes available`}</b><small>{depth==='STANDARD'?'${modes.gatedCount} capabilities currently gated by missing inputs':`${modes.gatedCount} gated · state ${record.stateId.toLocaleString()}`}</small></aside>
+   <aside><b>{depth==='STANDARD'?'Analysis ready':`${modes.appliedCount} source-backed modes available`}</b><small>{depth==='STANDARD'?`${modes.gatedCount} capabilities currently gated by missing inputs`:`${modes.gatedCount} gated · state ${record.stateId.toLocaleString()}`}</small></aside>
   </header>
   {depth==='STANDARD'?
    <div className='o7-native-surface o7-command-simple'>
