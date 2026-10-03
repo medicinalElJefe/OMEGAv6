@@ -46,8 +46,8 @@ const initial:Omega7AppState={
   capabilityRegistry:'READY',
   compatibilityBridge:'READY',
   canonicalState:'READY',
-  cloud:'DEGRADED',
-  device:'OFFLINE'
+  cloud:'UNKNOWN',
+  device:'UNKNOWN'
  }
 };
 
