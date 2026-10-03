@@ -1,16 +1,32 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "a680d69e004141ad750a1efbdeb6e2954930713f",
-  "sourceMilestone": "R437",
+  "sourceMainSha": "c5a4759470335894e1b4b83b9eb862edefec7792",
+  "sourceMilestone": "R438",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
   "primaryHumanDomains": 6,
-  "nativeRoutes": ["Earth Now"],
-  "addressResolution": [12, 144, 1728, 20736, 248832],
+  "nativeRoutes": [
+    "Earth Now",
+    "Matter Traversal",
+    "Immersive Traversal",
+    "Extreme Traversal",
+    "Traversal"
+  ],
+  "addressResolution": [
+    12,
+    144,
+    1728,
+    20736,
+    248832
+  ],
   "physicalDimensionClaim": false,
   "retirementRule": "NO_OMEGAV6_CAPABILITY_RETIRES_UNTIL_OMEGA7_PARITY_AND_ROLLBACK_ARE_PROVED",
   "scrollRule": "OMEGA7_MAIN_IS_THE_SINGLE_PAGE_SCROLL_OWNER",
-  "failureRule": "CAPABILITY_FAILURE_MUST_BE_CONTAINED_WITHOUT_DISCARDING_CANONICAL_OR_LAST_GOOD_STATE"
+  "failureRule": "CAPABILITY_FAILURE_MUST_BE_CONTAINED_WITHOUT_DISCARDING_CANONICAL_OR_LAST_GOOD_STATE",
+  "nativeFamilies": [
+    "EARTH_WEATHER",
+    "MOTION_TRAVERSAL"
+  ]
 }
