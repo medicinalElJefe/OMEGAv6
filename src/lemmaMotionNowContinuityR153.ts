@@ -3,6 +3,7 @@ import {unifiedFromRecord} from './unifiedCalculus';
 import {ATLAS_RESOLUTION_LEVELS_R101,deriveWeaveStateR100,WOVEN_CONTINUITY_OPERATOR_R100} from './weaveStateR100';
 import {allModesTruthFusionAtAddressR151,scanCanonicalModeAtlasR151} from './allModesTruthFusionR151';
 import {compileUniversalTruthEnvelopeR152,type UniversalTruthInputR152} from './universalTruthEnvelopeR152';
+import {emitMotionResolutionR436} from './system/canonicalDomainResolutionR436';
 
 export const R153_SCHEMA='OMEGA_LEMMA_MOTION_NOW_CONTINUITY_R153' as const;
 export const R153_LAWS=Object.freeze([
@@ -249,3 +250,9 @@ export function compileLemmaMotionNowR153(input:R153Input){
 }
 
 export function compileDeepLemmaMotionNowR153(input:R153Input){return compileLemmaMotionNowR153({...input,deepAtlas:true})}
+
+
+export function compileCanonicalLemmaMotionNowR436(input:R153Input){
+  const packet=compileLemmaMotionNowR153(input);
+  return {...packet,canonicalResolution:emitMotionResolutionR436(packet)};
+}

@@ -7,6 +7,7 @@ import {canAttemptRepairR314,recordRepairAttemptR314} from '../../src/system/aut
 import {R314_AI_REPAIR_MODEL_DEFAULT,repairPathPolicyR314} from '../../src/system/autonomousRepairPolicyR314.js';
 import {selectNextConvergenceItemR388} from '../../src/system/convergenceBacklogR388.js';
 import {autonomousCandidatePrefixesR245,isAutonomousCandidateBranchR245,validateAutonomousCandidatePolicyR245,R245_CAPSULE_GENERATOR_REVISION,R245_GOVERNED_SELFBUILD_CONTRACT} from '../../src/system/governedSelfBuildContractR245.js';
+import {cloudCandidateResolutionR436} from './canonical-resolution-r436.mjs';
 
 const API='https://api.github.com';
 function utf8ToBase64(value){const bytes=new TextEncoder().encode(String(value));let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s)}
@@ -157,6 +158,7 @@ async function proposeR314AiCycle({inspection,token,repo,ai,model}){
   const nextState={...state,generation,r314RepairHistory:history,receipts:[...(state.receipts||[]),receipt].slice(-64)};
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch,`Bind CLOUD-01 R314 repair receipt g${generation}`,`${JSON.stringify(nextState,null,2)}\n`,branchState.sha);
   const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R314',revision:'R314.1',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R314_AI_REPAIR',residualPolicy:state.residualPolicy?.schema||null,candidatePolicy:state.autonomousCandidatePolicy?.schema||null,repair:{residualId:target.residualId,residualFingerprint:r314.residualState.vector.fingerprint,repairId:target.repairId,paths:repair.patches.map(p=>p.path),expectedProofs:repair.proposal.expectedProofs,reformulated:repair.reformulated===true,rejectionScars:repair.rejectionHistory||[]},receipt,status:'GENERATED_PENDING_PROOF',canonicalAdmission:false,directProductionMutation:false};
+  candidate.canonicalResolution=cloudCandidateResolutionR436(candidate);
   let candidateSha=null;try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record CLOUD-01 R314 candidate g${generation}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
   await ensureNoCompetingCandidate(token,repo,state,mainSha);
@@ -203,6 +205,7 @@ async function proposeR388BacklogCycle({inspection,token,repo,ai,model}){
       const nextState={...state,r388ObservationGeneration:observationGeneration,r388Receipts:[...(state.r388Receipts||[]),receipt].slice(-256)};
       await putRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch,`Carry CLOUD-01 R388 decline scars observation ${observationGeneration}`,`${JSON.stringify(nextState,null,2)}\n`,branchState.sha);
       const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388',revision:'R388.1',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R388_DECLINE_SCAR_CARRY',item:null,repair:{paths:[],expectedProofs,reformulated:false,rejectionScars:[],declinedItemScars},receipt,status:'DECLINE_SCARS_PENDING_PROOF',sourceAdvance:false,canonicalAdmission:false,directProductionMutation:false};
+  candidate.canonicalResolution=cloudCandidateResolutionR436(candidate);
       let candidateSha=null;try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
       await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record CLOUD-01 R388 decline-scar observation ${observationGeneration}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
       await ensureNoCompetingCandidate(token,repo,state,mainSha);
@@ -222,6 +225,7 @@ async function proposeR388BacklogCycle({inspection,token,repo,ai,model}){
   const nextState={...state,r388Generation:convergenceGeneration,r388AdvancedItemIds:[...new Set([...(state.r388AdvancedItemIds||[]),item.id])],r388Receipts:[...(state.r388Receipts||[]),receipt].slice(-256)};
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch,`Bind CLOUD-01 R388 convergence receipt ${item.id}`,`${JSON.stringify(nextState,null,2)}\n`,branchState.sha);
   const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388',revision:'R388',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:'R388_BACKLOG_AI_BUILD',item,repair:{paths:repair.patches.map(p=>p.path),productPatchIdentity:patchIdentity,expectedProofs:repair.proposal.expectedProofs,reformulated:repair.reformulated===true,rejectionScars:repair.rejectionHistory||[],declinedItemScars},receipt,status:'SOURCE_ADVANCED_PENDING_PROOF',canonicalAdmission:false,directProductionMutation:false};
+  candidate.canonicalResolution=cloudCandidateResolutionR436(candidate);
   let candidateSha=null;try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record CLOUD-01 R388 candidate ${item.id}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
   await ensureNoCompetingCandidate(token,repo,state,mainSha);
@@ -240,6 +244,7 @@ async function proposeStaticCapsuleCycle({inspection,token,repo}){
   const nextState={...state,generation,currentCapsuleId:capsule.id,receipts:[...(state.receipts||[]),receipt].slice(-64)};
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch,`Bind CLOUD-01 evolution receipt g${generation}`,`${JSON.stringify(nextState,null,2)}\n`,branchState.sha);
   const candidate={schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R223',revision:'R223',machineId:MACHINE_ID,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,candidatePolicy:state.autonomousCandidatePolicy?.schema||null,capsule,receipt,status:'GENERATED_PENDING_PROOF',canonicalAdmission:false};
+  candidate.canonicalResolution=cloudCandidateResolutionR436(candidate);
   let candidateSha=null;try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
   await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record CLOUD-01 candidate g${generation}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
   await ensureNoCompetingCandidate(token,repo,state,mainSha);

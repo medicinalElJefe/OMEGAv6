@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {CalendarDays,Clock3,Droplets,Gauge,RefreshCw,Satellite,ShieldCheck,ThermometerSun,Wind} from 'lucide-react';
 import {api} from './platformAdapter';
+import {emitEarthWeatherResolutionR436} from './system/canonicalDomainResolutionR436';
 import './earthWeatherR375.css';
 
 type Props={lat:number;lon:number};
@@ -32,8 +33,9 @@ export default function EarthWeatherR375({lat,lon}:Props){
  useEffect(()=>{void load();return()=>{request.current++}},[lat,lon]);
  const hourly=useMemo(()=>{const all=Array.isArray(data?.hourly)?data.hourly:[],floor=Date.now()-60*60*1000,future=all.filter((row:any)=>{const t=Date.parse(row?.isoTime||'');return Number.isFinite(t)&&t>=floor});return(future.length?future:all).slice(0,48)},[data]);
  const daily=useMemo(()=>Array.isArray(data?.daily)?data.daily.slice(0,7):[],[data]);
+ const resolution=useMemo(()=>data?emitEarthWeatherResolutionR436(data,lat,lon):null,[data,lat,lon]);
  const q=data?.quality||{},sat=data?.satellite||{},current=data?.current||{},derived=data?.derived||{},scars=Array.isArray(data?.scarLedger)?data.scarLedger:[];
- return <section className='earth-r375-weather' data-earth-view='WEATHER' data-weather-state={busy?'LOADING':error?'ERROR':data?'READY':'IDLE'}>
+ return <section className='earth-r375-weather' data-earth-view='WEATHER' data-weather-state={busy?'LOADING':error?'ERROR':data?'READY':'IDLE'} data-r436-resolution={resolution?.branch.status||'UNBOUND'}>
   <header className='earth-r375-head'>
    <div><span>R375 · SOURCE-FIRST WEATHER</span><h3>{num(current.temperatureC,1)} °C · {codeLabel(current.weatherCode)}</h3><small>{num(lat,4)}°, {num(lon,4)}° · {data?.timezone||'local timezone pending'} · returned meteorology first, derived continuity second</small></div>
    <button type='button' onClick={()=>void load()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Refreshing…':'Refresh weather'}</button>
@@ -81,6 +83,7 @@ export default function EarthWeatherR375({lat,lon}:Props){
    <div><b>Primary returned forecast</b><span>{data?.sources?.openMeteo?.source||'unavailable'}</span></div>
    <div><b>Independent U.S. cross-check</b><span>{data?.sources?.nws?.ok?(data.sources.nws.office||'NWS grid forecast'):(data?.sources?.nws?.error||'not available for this target')}</span></div>
    <div><b>Satellite observation context</b><span>{sat.ok?(sat.source+' · '+(sat.lastModified||'timestamp unavailable')):(sat.error||'unavailable')}</span></div>
+   {resolution&&<div><b>R436 canonical resolution</b><span>{resolution.branch.status} · {resolution.node.authority} · ledger {resolution.ledgerHash} · CanonState mutation {String(resolution.canonicalMutation)}</span></div>}
    {scars.map((x:any,i:number)=><div key={i}><b>{x.code||'SCAR'}</b><span>{x.detail||String(x)}</span></div>)}
   </details>
 

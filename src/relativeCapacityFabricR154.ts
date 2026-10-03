@@ -1,7 +1,7 @@
 import {compileUnifiedCapabilityRuntimeR139} from './unifiedCapabilityEngineR139';
 import {rankUnifiedCapabilityActionsR140,type OperationActionR140} from './unifiedOperationFabricR140';
 import {operationContractForRouteR143} from './authoritativeOperationChainR143';
-import {compileLemmaMotionNowR153,type R153Input} from './lemmaMotionNowContinuityR153';
+import {compileCanonicalLemmaMotionNowR436,type R153Input} from './lemmaMotionNowContinuityR153';
 
 export const R154_SCHEMA='OMEGA_RELATIVE_CAPACITY_FABRIC_R154' as const;
 export const R154_LAWS=Object.freeze([
@@ -95,7 +95,7 @@ function solverFidelity(route:string,kind:string,pressure:number,truth:any):Rela
 function viewResolution(score:number):12|144|1728|20736|248832{return choose(score,[[.24,12],[.42,144],[.60,1728],[.78,20736]],248832)}
 
 export function compileRelativeCapacityFabricR154(record:any,input:R153Input&{panel?:string;intent?:string}){
-  const now=compileLemmaMotionNowR153(input);
+  const now=compileCanonicalLemmaMotionNowR436(input);
   if(Number(record?.address)!==now.canonical.address||Number(record?.stateId)!==now.canonical.stateId){
     throw new Error(`R154 source packet mismatch: record address/state ${record?.address}/${record?.stateId} != R153 ${now.canonical.address}/${now.canonical.stateId}`);
   }
@@ -113,7 +113,7 @@ export function compileRelativeCapacityFabricR154(record:any,input:R153Input&{pa
     };
   }).sort((a,b)=>b.relativePriority-a.relativePriority||a.route.localeCompare(b.route));
   const summary={plannedRoutes:plans.length,maxLogicalLanes:Math.max(1,...plans.map(x=>x.capacity.logicalLanes)),maxViewResolution:Math.max(12,...plans.map(x=>x.capacity.viewResolution)),maxTemporalHz:Math.max(1,...plans.map(x=>x.capacity.temporalHz)),meanCombinedPressure:mean(plans.map(x=>x.pressures.combined)),deviceProofRequired:plans.filter(x=>x.readiness==='DEVICE_PROOF_REQUIRED').length,evidenceRequired:plans.filter(x=>x.readiness==='EVIDENCE_REQUIRED').length,proofRequired:plans.filter(x=>x.readiness==='PROOF_REQUIRED').length,sandboxOnly:plans.filter(x=>x.readiness==='SANDBOX_ONLY').length,routeUnavailable:plans.filter(x=>x.readiness==='ROUTE_UNAVAILABLE').length};
-  return{schema:R154_SCHEMA,laws:R154_LAWS,canonical:now.canonical,now:now.now,motion:now.motion,atlasCoherence:now.atlasCoherence,lemma:{exchangeCount:now.lemma.exchangeCount,fingerprint:now.selfModel.currentLemmaFingerprint},truth:{status:truth.evidenceStatus,confidence:truth.truthConfidence,uncertainty:truth.uncertainty,responsePath:truth.responsePath,fingerprint:truth.fingerprint},plans,summary,canonicalMutation:false,canonicalAdmissionAuthority:'R125',truthBoundary:'R154 applies motion, dimensional relativity, Woven Continuity and compounded atlas coherence to software capacity allocation across every registered operation. Whole/part and inner/outer are declared frame roles. 12/144/1,728/20,736/248,832 remain representational or scheduling resolution levels, not literal physical dimensions. Capacity planning is not execution proof, and coherence is not empirical replication.'};
+  return{schema:R154_SCHEMA,laws:R154_LAWS,canonical:now.canonical,canonicalResolution:now.canonicalResolution,now:now.now,motion:now.motion,atlasCoherence:now.atlasCoherence,lemma:{exchangeCount:now.lemma.exchangeCount,fingerprint:now.selfModel.currentLemmaFingerprint},truth:{status:truth.evidenceStatus,confidence:truth.truthConfidence,uncertainty:truth.uncertainty,responsePath:truth.responsePath,fingerprint:truth.fingerprint},plans,summary,canonicalMutation:false,canonicalAdmissionAuthority:'R125',truthBoundary:'R154 applies motion, dimensional relativity, Woven Continuity and compounded atlas coherence to software capacity allocation across every registered operation. Whole/part and inner/outer are declared frame roles. 12/144/1,728/20,736/248,832 remain representational or scheduling resolution levels, not literal physical dimensions. Capacity planning is not execution proof, and coherence is not empirical replication.'};
 }
 
 export function relativeCapacityManifestR154(){return{schema:R154_SCHEMA,laws:R154_LAWS,inputs:['canonical packet','R153 causal NOW','R152 truth envelope','R151 all-mode fusion','R140 registered operation ranking','R143 route/capability/execution-domain authority'],outputs:['relative operation priority','logical compute lanes','logical swarm fanout','temporal sampling','history/scar depth','view resolution','solver fidelity','readiness gate','lineage receipt context'],topology:{addressLevels:[12,144,1728,20736,248832],logicalExecutionLevels:[1,12,144,1728,20736]},authority:{canonicalMutation:false,admission:'R125',nativeExecution:'R146/R147 receipt-gated',routeIdentity:'R143',truth:'R152 external-evidence precedence'},boundary:'Manifest describes implemented R154 planning semantics. It does not claim planned lanes, clouds, solvers or Hybrid operations executed until their own first-hand receipts exist.'}}

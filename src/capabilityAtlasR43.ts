@@ -1,3 +1,4 @@
+import {emitSpectralResolutionR436} from './system/canonicalDomainResolutionR436';
 // R43 — capability authority distilled from the user-supplied OMEGA CSV atlases.
 // Framework quantities remain model/state-space constructs unless independently established.
 // 20,736 is a representation/state-space size, not a claim of physical dimensionality.
@@ -108,5 +109,6 @@ export function r43QuestionSet(domain:string,root:string,fn:string){return[
 export function r43RelativityCoordinates(address:number){
  const a=Math.max(0,Math.min(20735,Math.floor(Number(address)||0))),d=Math.floor(a/1728),p=Math.floor((a%1728)/144),r=Math.floor((a%144)/12),l=a%12;
  const temperatureIndex=d*12+p,wavelengthIndex=r*12+l,ratio=Math.pow(15000/500,1/143),temperatureK=500*Math.pow(ratio,temperatureIndex),wavelengthNm=200+(2500-200)*(wavelengthIndex/143),h=6.62607015e-34,c=299792458,k=1.380649e-23,lambda=wavelengthNm*1e-9,x=h*c/(lambda*k*temperatureK),planckRadiance=(2*h*c*c)/Math.pow(lambda,5)/(Math.exp(Math.min(700,x))-1),wienPeakNm=2.897771955e6/temperatureK,spectralRegion=wavelengthNm<380?'UV':wavelengthNm<=750?'VISIBLE':'IR';
- return{temperatureIndex:temperatureIndex+1,wavelengthIndex:wavelengthIndex+1,temperatureK,wavelengthNm,dimensionlessHcOverLambdaKT:x,planckRadiance,wienPeakNm,spectralRegion}
+ const rel={temperatureIndex:temperatureIndex+1,wavelengthIndex:wavelengthIndex+1,temperatureK,wavelengthNm,dimensionlessHcOverLambdaKT:x,planckRadiance,wienPeakNm,spectralRegion};
+ return{...rel,canonicalResolution:emitSpectralResolutionR436(a,rel)}
 }
