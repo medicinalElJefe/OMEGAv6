@@ -39,7 +39,7 @@ assert.equal(rejected.branch.physicalVeto,true);
 assert.ok(rejected.ledger.some(x=>x.kind==='SCAR'));
 
 const atomicHeld=emitAtomicChemistryResolutionR436({});
-assert.equal(atomicHeld.branch.status,'REJECTED_PHYSICAL');
+assert.equal(atomicHeld.branch.status,'OBSERVE_ONLY');
 assert.equal(atomicHeld.node.authority,'HYPOTHESIS');
 assert.equal(atomicChemistrySourceGateR436({}).sourceReady,false);
 
@@ -61,7 +61,7 @@ const weather=emitEarthWeatherResolutionR436({
   canonicalMutation:false
 },32.1,-110.9);
 assert.equal(weather.branch.status,'ACTIVE');
-assert.equal(weather.node.authority,'MEASURED');
+assert.equal(weather.node.authority,'DERIVED_STANDARD');
 assert.equal(weather.canonicalMutation,false);
 assert.ok(weather.ledgerHash.length>0);
 
