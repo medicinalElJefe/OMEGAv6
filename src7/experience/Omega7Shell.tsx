@@ -1,4 +1,4 @@
-import {useMemo,useReducer,useState} from 'react';
+import {useMemo,useReducer,useState,type ReactNode} from 'react';
 import {Command,Search,Activity,Settings2,PanelRight,Home,Briefcase,Compass,Sparkles,Code2,ShieldCheck} from 'lucide-react';
 import {OMEGA7_CAPABILITIES,OMEGA7_CAPABILITY_BY_ID,OMEGA7_PRIMARY_DOMAINS,capabilitiesForDomain} from '../kernel/capabilityRegistry';
 import {initialOmega7State,omega7Reducer} from '../kernel/appState';
@@ -7,7 +7,7 @@ import {Omega7CapabilityBoundary} from './Omega7CapabilityBoundary';
 import './omega7.css';
 
 type Props={
- renderLegacySurface:(legacyRoute:string)=>React.ReactNode;
+ renderLegacySurface:(legacyRoute:string)=>ReactNode;
  onLegacyNavigate?:(legacyRoute:string)=>void;
 };
 
