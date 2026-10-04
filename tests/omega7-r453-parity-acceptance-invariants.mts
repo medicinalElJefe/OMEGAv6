@@ -60,7 +60,7 @@ for(const row of OMEGA7_ACCEPTED_INHERITANCE_LEDGER){
 
 const root=fs.readFileSync('src7/Omega7Root.tsx','utf8');
 const lock=JSON.parse(fs.readFileSync('src7/omega7.lock.json','utf8'));
-for(const token of ['OMEGA7_ACCEPTED_PARITY_SUMMARY','acceptedParityForRoute','data-r453-parity','Family failure isolation','Rollback proved','OMEGA7_PARITY_SUMMARY','parityEvidenceForRoute','data-r451-parity'])assert.ok(root.includes(token),'R453 status UI must expose accepted parity and retain historical audit token '+token);
+for(const token of ['OMEGA7_ACCEPTED_PARITY_SUMMARY','acceptedParityForRoute','data-r453-parity','Failure/recovery proved','family isolation','Rollback proved','OMEGA7_PARITY_SUMMARY','parityEvidenceForRoute','data-r451-parity'])assert.ok(root.includes(token),'R453 status UI must expose accepted parity and retain historical audit token '+token);
 assert.equal(lock.sourceMainSha,'e472d2f23f4e3d214662d096e7d57697e9da8d15','R451 historical source identity must remain immutable');
 assert.equal(lock.sourceMilestone,'R450_WITH_R449_ROLLBACK');
 assert.equal(lock.parityEvidencePhase,'R451_PARITY_EVIDENCE_MATERIALIZATION');
