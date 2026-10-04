@@ -123,7 +123,7 @@ try{
     const page=await context.newPage();
     const pageErrors=[];
     page.on('pageerror',e=>pageErrors.push(String(e)));
-    await page.goto(`${base}/?r307=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(`${base}/?omega6=1&r307=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
     await openNavigator(page);
     await verifyNavigatorModeTouchTargets(page,name);
