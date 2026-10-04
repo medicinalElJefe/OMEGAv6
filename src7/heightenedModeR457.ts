@@ -206,6 +206,12 @@ export type HeightenedDevelopmentalVectorR457={
  scarPressure:number;
 };
 
+export type HeightenedDevelopmentalEvidenceR457={
+ sourceHead:string;
+ metricRefs:Partial<Record<keyof HeightenedDevelopmentalMetricsR457,string>>;
+ proofRefs:readonly string[];
+};
+
 export type HeightenedDevelopmentalTransitionInputR457={
  parent:HeightenedDevelopmentalMetricsR457;
  candidate:HeightenedDevelopmentalMetricsR457;
@@ -216,6 +222,7 @@ export type HeightenedDevelopmentalTransitionInputR457={
  rollbackAvailable:boolean;
  dependencyOrderPreserved:boolean;
  canonicalMutation?:boolean;
+ evidence:HeightenedDevelopmentalEvidenceR457;
 };
 
 const R457_EPSILON=1e-9;
@@ -265,7 +272,14 @@ export function evaluateDevelopmentalTransitionR457(input:HeightenedDevelopmenta
  const acceleration=mapVectorR457(growthVector,previousGrowth,(x,y)=>x-y);
  const jerk=mapVectorR457(acceleration,previousAcceleration,(x,y)=>x-y);
  const parentScore=deweyScoreR457(parent),candidateScore=deweyScoreR457(candidate);
+ const metricKeys=(Object.keys(parent) as (keyof HeightenedDevelopmentalMetricsR457)[]);
+ const missingMetricEvidence=metricKeys.filter(key=>!String(input.evidence?.metricRefs?.[key]||'').trim());
+ const sourceHead=String(input.evidence?.sourceHead||'').trim();
+ const proofRefs=Array.isArray(input.evidence?.proofRefs)?input.evidence.proofRefs.map(String).filter(Boolean):[];
  const hardVetoes:string[]=[];
+ if(!sourceHead)hardVetoes.push('SOURCE_HEAD_UNBOUND');
+ if(missingMetricEvidence.length)hardVetoes.push('METRIC_EVIDENCE_INCOMPLETE:'+missingMetricEvidence.join(','));
+ if(!proofRefs.length)hardVetoes.push('PROOF_REFERENCE_REQUIRED');
  if(!input.authorityClosed)hardVetoes.push('AUTHORITY_NOT_CLOSED');
  if(!input.proofSurvives)hardVetoes.push('PROOF_DID_NOT_SURVIVE_TRANSPORT');
  if(!input.rollbackAvailable)hardVetoes.push('ROLLBACK_NOT_AVAILABLE');
@@ -308,12 +322,13 @@ export function evaluateDevelopmentalTransitionR457(input:HeightenedDevelopmenta
   developmentalScar,
   continuityCone,
   dewey:Object.freeze({parentScore,candidateScore,continuity:candidate.continuity,futurePlasticity:candidate.futurePlasticity,contradiction:candidate.contradiction,burden:candidate.burden}),
+  evidence:Object.freeze({sourceHead,metricRefs:Object.freeze({...input.evidence.metricRefs}),proofRefs:Object.freeze([...proofRefs]),missingMetricEvidence:Object.freeze(missingMetricEvidence)}),
   growthNet,
   hardVetoes:Object.freeze(hardVetoes),
   decision,
   promotionAllowed:decision==='TURN'&&hardVetoes.length===0,
   canonicalMutation:false,
-  truthBoundary:'R457 developmental metrics are normalized software-governance telemetry. They do not create empirical evidence, physical dimensions, or CanonState authority; exact proof and R125 admission remain external gates.'
+  truthBoundary:'R457 developmental metrics are normalized software-governance telemetry and require explicit per-metric evidence plus exact source-head/proof references. They do not create empirical evidence, physical dimensions, or CanonState authority; exact proof and R125 admission remain external gates.'
  });
 }
 
