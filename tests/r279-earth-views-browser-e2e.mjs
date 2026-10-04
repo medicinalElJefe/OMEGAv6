@@ -39,7 +39,7 @@ try{
   const page=await context.newPage();
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
   await page.route('**/api/earth/gibs/global*',route=>route.fulfill({status:200,contentType:'image/png',body:R281_TEXTURE,headers:{'x-omega-source':'NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL','x-omega-date':'2026-09-09','x-omega-crs':'EPSG:4326','x-omega-bbox':'-180,-90,180,90','x-omega-truth':'RETURNED_GLOBAL_OBSERVATION'}}));
-  await page.goto(`${base}/?r287=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?omega6=1&r287=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   await enterEarth(page,label);
   for(const [name,selector] of EXPECT){
