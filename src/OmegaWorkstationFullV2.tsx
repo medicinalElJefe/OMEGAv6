@@ -29,7 +29,7 @@ import './workstationPresentationR356.css';
 import './specialistLoaderR109.css';
 import './omegaNavigationShellR411.css';
 
-export const OMEGA_SURFACES=OMEGA_NAV_NAMES;
+export const OMEGA_SURFACES: readonly OmegaRouteName[] = OMEGA_NAV_NAMES;
 type Panel=OmegaRouteName;
 const LEGACY_R82_SURFACE_INVENTORY_SCAR="OMEGA_SURFACES=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'] as const";
 void LEGACY_R82_SURFACE_INVENTORY_SCAR;
