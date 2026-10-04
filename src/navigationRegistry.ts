@@ -3,7 +3,7 @@ import {MASTER_MENUS} from './systemAtlasRuntime';
 export type OmegaNavGroup='STUDIO'|'OPERATIONS'|'WORK'|'INTELLIGENCE'|'GOVERNANCE'|'SYSTEM';
 export type OmegaNavItem={id:string;group:OmegaNavGroup;name:string;hint:string;effect:'READ'|'COMPUTE'|'GOVERN'|'BUILD'|'EXTERNAL_GATE';authority:'CANONICAL'|'DERIVED'|'EVIDENCE_GATED'|'HOST_GATED'|'GOVERNANCE'};
 
-export const OMEGA_NAVIGATION=[
+export const OMEGA_NAVIGATION: readonly OmegaNavItem[] = [
 {id:'01',group:'STUDIO',name:'Command Center',hint:'Ask OMEGA, route intent, inspect the current packet and continue governed work.',effect:'COMPUTE',authority:'CANONICAL'},
 {id:'02',group:'STUDIO',name:'Hybrid Link',hint:'Prepare and inspect proof-gated PC/device missions without faking native execution.',effect:'EXTERNAL_GATE',authority:'HOST_GATED'},
 {id:'03',group:'STUDIO',name:'Workspace',hint:'General sovereign workspace for active OMEGA work and source-bound context.',effect:'READ',authority:'CANONICAL'},
