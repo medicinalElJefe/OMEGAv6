@@ -5,7 +5,7 @@ async function openRoute(page,name){const trigger=page.locator('button[aria-labe
 async function prove(viewport,label){
  const browser=await chromium.launch({headless:true});const context=await browser.newContext({viewport});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  try{
-  await page.goto(`${base}/?r284=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});await openRoute(page,'Matter Traversal');
+  await page.goto(`${base}/?omega6=1&r284=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});await openRoute(page,'Matter Traversal');
   const deep=page.getByRole('button',{name:/DEEP MATTER/});await deep.first().waitFor({state:'visible',timeout:20000});await deep.first().click();await page.waitForFunction(()=>document.querySelector('.r43-workspace-stage')?.getAttribute('data-view')==='DEEP',undefined,{timeout:20000});
   const workbench=page.locator('.bio284');await workbench.waitFor({state:'visible',timeout:20000});const initial=await workbench.innerText();
   for(const token of ['241-Channel Mode Workbench','MEASUREMENT AUTHORITY 0','ALL 241','SOURCE 179','CANON 62','EVIDENCE → AUTHORITY LADDER'])if(!initial.includes(token))throw new Error(`${label}: R284 workbench missing ${token}`);
