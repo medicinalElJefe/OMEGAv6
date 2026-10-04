@@ -83,6 +83,8 @@ assert.equal(R457_DEWEY_KERNEL.pruneLaw,'PRUNE_TRANSLATE_PROVE');
 
 const parentMetrics={continuity:.80,futurePlasticity:.70,contradiction:.18,burden:.24,recoverability:.82,proofCoverage:.90,capabilityCoverage:1,humanComprehension:.62,futureTopologyRetention:1,scarPressure:.16};
 const developmentalEvidence={
+ parentStateRef:'main:parent',
+ candidateStateRef:'pr:head',
  sourceHead:'a'.repeat(40),
  metricRefs:Object.fromEntries(Object.keys(parentMetrics).map(key=>[key,'proof:'+key])),
  proofRefs:['R210','R223','R202','CLOUD_BRIDGE','R170','R237','R238','R241']
@@ -101,6 +103,7 @@ assert.ok(improved.dewey.candidateScore>improved.dewey.parentScore);
 assert.ok(improved.growthVector.humanComprehension>0);
 assert.ok(improved.growthVector.contradiction>0,'lower contradiction must be positive developmental growth');
 assert.ok(Number.isFinite(improved.developmentalCurvature));
+assert.equal(improved.derivativeBasis,'DISCRETE_DEVELOPMENTAL_STEP_NOT_PHYSICAL_TIME');
 assert.equal(improved.developmentalScar.retained,true);
 
 const vocabularyOnly=evaluateDevelopmentalTransitionR457({
@@ -134,9 +137,11 @@ const unboundMetrics=evaluateDevelopmentalTransitionR457({
  parent:parentMetrics,
  candidate:{...parentMetrics,humanComprehension:.90},
  authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false,
- evidence:{sourceHead:'',metricRefs:{continuity:'proof:continuity'},proofRefs:[]}
+ evidence:{parentStateRef:'',candidateStateRef:'',sourceHead:'',metricRefs:{continuity:'proof:continuity'},proofRefs:[]}
 });
 assert.equal(unboundMetrics.decision,'ESCALATE','developmental numbers without evidence provenance must never become promotion authority');
+assert.ok(unboundMetrics.hardVetoes.includes('PARENT_STATE_UNBOUND'));
+assert.ok(unboundMetrics.hardVetoes.includes('CANDIDATE_STATE_UNBOUND'));
 assert.ok(unboundMetrics.hardVetoes.includes('SOURCE_HEAD_UNBOUND'));
 assert.ok(unboundMetrics.hardVetoes.some(x=>x.startsWith('METRIC_EVIDENCE_INCOMPLETE:')));
 assert.ok(unboundMetrics.hardVetoes.includes('PROOF_REFERENCE_REQUIRED'));
