@@ -31,8 +31,9 @@ assert.equal(OMEGA7_INHERITANCE_LEDGER.length,44);
 for(const row of OMEGA7_INHERITANCE_LEDGER)assert.equal(row.migration,'ADAPTED',row.legacyRoute+' must be adapted after full R445 coverage');
 assert.equal(OMEGA7_INHERITANCE_LEDGER.some(canRetireOmega6Surface),false,'44/44 adapted does not authorize legacy retirement');
 
-assert.equal(lock.sourceMainSha,'e537476c94a4616a0fcb2f36e2d2d392a490f702');
-assert.equal(lock.sourceMilestone,'R444');
+assert.match(lock.sourceMainSha,/^[a-f0-9]{40}$/,'successors must retain an exact 40-character source baseline SHA');
+const sourceRevision=Number((String(lock.sourceMilestone).match(/^R(\d+)/)||[])[1]||0);
+assert.ok(sourceRevision>=444,'R445 successor lock cannot regress behind the R444 baseline');
 assert.equal(lock.nativeCoverage,'44_OF_44_ADAPTED');
 assert.equal(lock.retirementState,'ZERO_LEGACY_SURFACES_RETIRED');
 assert.ok(lock.nativeFamilies.includes('SYSTEM_EVIDENCE_GOVERNANCE'));
