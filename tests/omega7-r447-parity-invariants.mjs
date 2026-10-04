@@ -14,7 +14,8 @@ for(const token of ['ROUTE_BUDGET_MS=8000','SHELL_BUDGET_MS=4000','P95_BUDGET_MS
 assert.ok(vite.includes('R1991_ENTRY_BUDGET_BYTES=500*1024'),'R447 must preserve the 500 KiB initial-entry build budget');
 assert.ok(workflow.startsWith('name: OMEGA Cloud Bridge CI')&&workflow.includes('omega7-user-parity:')&&workflow.includes('playwright@1.63.0'),'R447 must reuse the governed Cloud Bridge browser-proof job');
 assert.ok(workflow.includes('omega7-r447-failure-recovery-e2e.mjs')&&workflow.includes('omega7-r447-performance-e2e.mjs'));
-assert.equal(lock.parityPhase,'R447_FAILURE_RECOVERY_PERFORMANCE_CANDIDATE');
+const parityRevision=Number((String(lock.parityPhase).match(/^R(\d+)/)||[])[1]||0);
+assert.ok(parityRevision>=447,'R447 failure/performance proof must remain present in successor phases');
 assert.equal(lock.performanceBudgets.initialEntryBytes,512000);
 assert.equal(lock.performanceBudgets.shellReadyMs,4000);
 assert.equal(lock.performanceBudgets.representativeRouteMs,8000);
