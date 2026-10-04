@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const workflow=fs.readFileSync('.github/workflows/r241-archive-convergence.yml','utf8');
+const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+assert.ok(workflow.includes('stale-head-preflight'),'R460 stale-head preflight job missing');
+assert.ok(workflow.includes('git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/pull/${PR_NUMBER}/head"'),'R460 must resolve current PR head live');
+assert.ok(workflow.includes('observed_head=$observed'),'R460 must retain observed current head in proof output');
+assert.ok(workflow.includes('current=false'),'R460 must explicitly classify superseded exact heads as obsolete');
+assert.ok(workflow.includes('expensive proof is skipped'),'R460 must prune obsolete computation without deleting lineage');
+const gates=(workflow.match(/if: needs\.stale-head-preflight\.outputs\.current == 'true'/g)||[]).length;
+assert.equal(gates,2,'R460 must gate both heavy R241 jobs and only those jobs');
+assert.equal(pkg.scripts['test:r460'],'node tests/r460-r241-stale-head-preflight-invariants.mjs');
+assert.ok(pkg.scripts.check.includes('npm run test:r460'),'R460 invariant must remain in canonical check');
+console.log('R460 R241 STALE-HEAD PREFLIGHT PASS · exact-head history retained · obsolete proof compute pruned · current-head proof semantics unchanged');
