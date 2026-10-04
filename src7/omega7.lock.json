@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "e2ed41ae1712a6f279cfc9862383357360a146ec",
-  "sourceMilestone": "R452_MERGED_FULL_FAMILY_PARITY",
+  "sourceMainSha": "e472d2f23f4e3d214662d096e7d57697e9da8d15",
+  "sourceMilestone": "R450_WITH_R449_ROLLBACK",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -111,23 +111,20 @@
   "rollbackProof": "OMEGA7_TO_OMEGA6_TO_OMEGA7_WITH_CANONICAL_ADDRESS_CONTINUITY_REQUIRED",
   "parityEvidence": {
     "interaction": "R446_44_ROUTE_DESKTOP_MOBILE_BROWSER_PROOF",
-    "routeSpecificFailureRecovery": "R447_WORKSPACE_EARTH_HYBRID_FAILURE_RECOVERY_PROOF",
-    "familyFailureIsolation": "R452_8_OF_8_LAZY_FAMILY_BOUNDARY_FAILURE_ISOLATION",
-    "performance": "R452_44_ROUTE_BUILT_PRODUCT_PERFORMANCE",
+    "failureRecovery": "R447_WORKSPACE_EARTH_HYBRID_FAILURE_RECOVERY_PROOF",
+    "performance": "R447_8_ROUTE_REPRESENTATIVE_PERFORMANCE_PROOF",
     "rollback": "R449_DESKTOP_PHONE_REVERSIBILITY_PROOF"
   },
   "parityCounts": {
     "routes": 44,
     "functionalDesktopMobile": 44,
-    "familyFailureIsolation": 44,
-    "routeSpecificFailureRecovery": 3,
-    "performance": 44,
-    "rollback": 44,
-    "fullProductParity": 44,
+    "failureRecovery": 3,
+    "performance": 8,
+    "fullRouteEvidence": 3,
     "legacyRetired": 0
   },
-  "nextParityWork": "CUT_OVER_OMEGA7_AS_DEFAULT_WITH_OMEGA6_ROLLBACK_PRESERVED_AND_PROVE_DEFAULT_STARTUP",
-  "parityEvidencePhase": "R453_ACCEPTED_FULL_FAMILY_PARITY_RECEIPTS",
+  "nextParityWork": "EXPAND_FAILURE_RECOVERY_AND_PERFORMANCE_PROOF_TO_REMAINING_ROUTES_BEFORE_ANY_LEGACY_RETIREMENT",
+  "parityEvidencePhase": "R451_PARITY_EVIDENCE_MATERIALIZATION",
   "parityExpansionPhase": "R452_FULL_FAMILY_PARITY_CANDIDATE",
   "familyParityCandidate": {
     "families": 8,
@@ -139,8 +136,29 @@
     "workflowAuthority": "OMEGA Cloud Bridge CI"
   },
   "parityExpansionBaseSha": "4058ee07002dc78bba952711969afb33951a8b01",
-  "parityExpansionNextWork": "R452_ACCEPTED_AND_MATERIALIZED_BY_R453",
-  "parityAcceptance": {
+  "parityExpansionNextWork": "R452_BROWSER_EXECUTION_MUST_PASS_BEFORE_MATERIALIZING_FULL_FAMILY_PARITY",
+  "defaultProduct": "OMEGAV6_UNTIL_R454_DEFAULT_CUTOVER_PROVES_REVERSIBLE_STARTUP",
+  "acceptedParitySourceMainSha": "e2ed41ae1712a6f279cfc9862383357360a146ec",
+  "acceptedParitySourceMilestone": "R452_MERGED_FULL_FAMILY_PARITY",
+  "acceptedParityPhase": "R453_ACCEPTED_FULL_FAMILY_PARITY_RECEIPTS",
+  "acceptedParityEvidence": {
+    "interaction": "R446_44_ROUTE_DESKTOP_MOBILE_BROWSER_PROOF",
+    "routeSpecificFailureRecovery": "R447_WORKSPACE_EARTH_HYBRID_FAILURE_RECOVERY_PROOF",
+    "familyFailureIsolation": "R452_8_OF_8_LAZY_FAMILY_BOUNDARY_FAILURE_ISOLATION",
+    "performance": "R452_44_ROUTE_BUILT_PRODUCT_PERFORMANCE",
+    "rollback": "R449_DESKTOP_PHONE_REVERSIBILITY_PROOF"
+  },
+  "acceptedParityCounts": {
+    "routes": 44,
+    "functionalDesktopMobile": 44,
+    "familyFailureIsolation": 44,
+    "routeSpecificFailureRecovery": 3,
+    "performance": 44,
+    "rollback": 44,
+    "fullProductParity": 44,
+    "legacyRetired": 0
+  },
+  "acceptedParityReceipt": {
     "exactCandidateHead": "e9084f885b7fd3b76273a54111e1d8d0e5e182fd",
     "mergeCommit": "e2ed41ae1712a6f279cfc9862383357360a146ec",
     "cloudBridgeRun": 37179533741,
@@ -154,5 +172,5 @@
     "full44RoutePerformance": "PASS",
     "fullGovernedMatrix": "PASS"
   },
-  "defaultProduct": "OMEGAV6_UNTIL_R454_DEFAULT_CUTOVER_PROVES_REVERSIBLE_STARTUP"
+  "acceptedParityNextWork": "CUT_OVER_OMEGA7_AS_DEFAULT_WITH_OMEGA6_ROLLBACK_PRESERVED_AND_PROVE_DEFAULT_STARTUP"
 }
