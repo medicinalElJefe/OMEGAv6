@@ -28,6 +28,14 @@ const TARGETS=Object.freeze({
  Y:['src/hostBuildLedgerR83.ts','src/softwareMasterLedgerR83.ts'],
 });
 
+const ITEM_TARGETS=Object.freeze({
+ 'A-01':['src/runtimeIdentity.ts','src/operationalCapabilityRuntimeR45.ts'],
+ 'A-02':['src/capabilityAuthority.ts','src/OmegaViewAuthorityBar.tsx'],
+ 'A-03':['src/capabilityAuthority.ts','src/operationalCapabilityRuntimeR45.ts'],
+ 'A-04':[],
+ 'A-05':['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],
+});
+
 const PROOFS=Object.freeze({
  A:['R241 Archive Convergence Visual Intelligence','OMEGA Cloud Bridge CI'],
  B:['R241 Archive Convergence Visual Intelligence','OMEGA R237 Hybrid Command Authority Proof'],
@@ -55,7 +63,7 @@ const PROOFS=Object.freeze({
 });
 
 const NON_SELF_EDITABLE=new Set(['G','U']);
-const EXTERNAL=/\b(live[- ]?verified|physical|provider|external|satellite|cloudflare|worker identity|heartbeat|device|native execution|street imagery|source adapter|deployment receipt|hourly cron|github mutation credential)\b/i;
+const EXTERNAL=/\b(live[- ]?verified|physical|provider|external|satellite|cloudflare|worker identity|heartbeat|device|native(?:[- ]?host| execution)?|opengl|gpu|cpu fallback|street imagery|source adapter|deployment receipt|hourly cron|github mutation credential)\b/i;
 const clean=v=>String(v??'').trim();
 
 export function parseConvergenceBacklogR388(markdown=''){
@@ -67,9 +75,10 @@ export function parseConvergenceBacklogR388(markdown=''){
   if(!item||!section)continue;
   index++;
   const objective=clean(item[1]);
-  const affected=[...(TARGETS[section]||[])];
+  const itemKey=`${section}-${String(index).padStart(2,'0')}`;
+  const affected=[...(Object.prototype.hasOwnProperty.call(ITEM_TARGETS,itemKey)?ITEM_TARGETS[itemKey]:(TARGETS[section]||[]))];
   rows.push(Object.freeze({
-   id:`R388-${section}-${String(index).padStart(2,'0')}`,
+   id:`R388-${itemKey}`,
    section,
    index,
    objective,
@@ -107,6 +116,7 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
   candidates:Object.freeze(candidates.slice()),
   selected,
   canonicalAdmission:false,
-  boundary:'R388 converts the explicit convergence matrix into deterministic source-improvement work. It may advance allowlisted product source only; governance/self-build authority items remain non-self-editable, recent model-declined items may be temporarily bypassed without being marked advanced, and external/device claims remain pending first-hand proof.',
+  targetingRevision:'R448',
+  boundary:'R448 preserves the R388 convergence authority while binding known backlog items to semantic subsystem owners instead of coarse section-wide files. It may advance allowlisted product source only; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists, recent model-declined items may be temporarily bypassed without being marked advanced, and external/device claims remain pending first-hand proof.',
  });
 }
