@@ -152,6 +152,171 @@ export function composeHeightenedR457(routes:readonly string[],presentationDepth
  };
 }
 
+
+export const R457_DEVELOPMENTAL_SEQUENCE=Object.freeze([
+ 'CANONICAL_STATE',
+ 'NORMALIZED_RELATIONAL_DIFFERENCE',
+ 'GROWTH_VECTOR',
+ 'GROWTH_TRANSPORT',
+ 'DEVELOPMENTAL_ACCELERATION',
+ 'DEVELOPMENTAL_JERK',
+ 'ORDER_SENSITIVITY',
+ 'DEVELOPMENTAL_CURVATURE',
+ 'DEVELOPMENTAL_SCAR',
+ 'CONTINUITY_CONE',
+ 'RECOVERABILITY',
+ 'VIABILITY',
+ 'GOVERNANCE_PROMOTION',
+ 'GROWTH_LAW_UPDATE'
+] as const);
+
+export const R457_DEWEY_KERNEL=Object.freeze({
+ workflow:'SENSE_NORMALIZE_SCORE_GATE_ACT_LEDGER',
+ decisionLaw:'STAY_TURN_ESCALATE',
+ score:'S=(CΩ·Φ)/(q+Λ+ε)',
+ pruneLaw:'PRUNE_TRANSLATE_PROVE',
+ scarLaw:'RETAIN_NEGATIVE_KNOWLEDGE',
+ authorityLaw:'PROOF_AND_AUTHORITY_BEFORE_PROMOTION',
+ physicalPrimitiveClaim:false
+});
+
+export type HeightenedDevelopmentalMetricsR457={
+ continuity:number;
+ futurePlasticity:number;
+ contradiction:number;
+ burden:number;
+ recoverability:number;
+ proofCoverage:number;
+ capabilityCoverage:number;
+ humanComprehension:number;
+ futureTopologyRetention:number;
+ scarPressure:number;
+};
+
+export type HeightenedDevelopmentalVectorR457={
+ continuity:number;
+ futurePlasticity:number;
+ contradiction:number;
+ burden:number;
+ recoverability:number;
+ proofCoverage:number;
+ capabilityCoverage:number;
+ humanComprehension:number;
+ futureTopologyRetention:number;
+ scarPressure:number;
+};
+
+export type HeightenedDevelopmentalTransitionInputR457={
+ parent:HeightenedDevelopmentalMetricsR457;
+ candidate:HeightenedDevelopmentalMetricsR457;
+ previousGrowth?:Partial<HeightenedDevelopmentalVectorR457>;
+ previousAcceleration?:Partial<HeightenedDevelopmentalVectorR457>;
+ authorityClosed:boolean;
+ proofSurvives:boolean;
+ rollbackAvailable:boolean;
+ dependencyOrderPreserved:boolean;
+ canonicalMutation?:boolean;
+};
+
+const R457_EPSILON=1e-9;
+const clamp01=(value:number)=>Math.max(0,Math.min(1,Number.isFinite(value)?value:0));
+const normalizeDevelopmentalMetricsR457=(row:HeightenedDevelopmentalMetricsR457):HeightenedDevelopmentalMetricsR457=>({
+ continuity:clamp01(row.continuity),
+ futurePlasticity:clamp01(row.futurePlasticity),
+ contradiction:clamp01(row.contradiction),
+ burden:clamp01(row.burden),
+ recoverability:clamp01(row.recoverability),
+ proofCoverage:clamp01(row.proofCoverage),
+ capabilityCoverage:clamp01(row.capabilityCoverage),
+ humanComprehension:clamp01(row.humanComprehension),
+ futureTopologyRetention:clamp01(row.futureTopologyRetention),
+ scarPressure:clamp01(row.scarPressure)
+});
+const zeroDevelopmentalVectorR457=():HeightenedDevelopmentalVectorR457=>({continuity:0,futurePlasticity:0,contradiction:0,burden:0,recoverability:0,proofCoverage:0,capabilityCoverage:0,humanComprehension:0,futureTopologyRetention:0,scarPressure:0});
+const vectorFromPartialR457=(row?:Partial<HeightenedDevelopmentalVectorR457>):HeightenedDevelopmentalVectorR457=>({...zeroDevelopmentalVectorR457(),...(row||{})});
+const mapVectorR457=(a:HeightenedDevelopmentalVectorR457,b:HeightenedDevelopmentalVectorR457,fn:(x:number,y:number)=>number):HeightenedDevelopmentalVectorR457=>({
+ continuity:fn(a.continuity,b.continuity),futurePlasticity:fn(a.futurePlasticity,b.futurePlasticity),contradiction:fn(a.contradiction,b.contradiction),burden:fn(a.burden,b.burden),recoverability:fn(a.recoverability,b.recoverability),proofCoverage:fn(a.proofCoverage,b.proofCoverage),capabilityCoverage:fn(a.capabilityCoverage,b.capabilityCoverage),humanComprehension:fn(a.humanComprehension,b.humanComprehension),futureTopologyRetention:fn(a.futureTopologyRetention,b.futureTopologyRetention),scarPressure:fn(a.scarPressure,b.scarPressure)
+});
+const vectorNormR457=(row:HeightenedDevelopmentalVectorR457)=>Math.sqrt(Object.values(row).reduce((sum,value)=>sum+value*value,0));
+const deweyScoreR457=(row:HeightenedDevelopmentalMetricsR457)=>(row.continuity*row.futurePlasticity)/(row.contradiction+row.burden+R457_EPSILON);
+
+export function evaluateDevelopmentalTransitionR457(input:HeightenedDevelopmentalTransitionInputR457){
+ const parent=normalizeDevelopmentalMetricsR457(input.parent),candidate=normalizeDevelopmentalMetricsR457(input.candidate);
+ const relationalDifference:HeightenedDevelopmentalVectorR457={
+  continuity:candidate.continuity-parent.continuity,
+  futurePlasticity:candidate.futurePlasticity-parent.futurePlasticity,
+  contradiction:candidate.contradiction-parent.contradiction,
+  burden:candidate.burden-parent.burden,
+  recoverability:candidate.recoverability-parent.recoverability,
+  proofCoverage:candidate.proofCoverage-parent.proofCoverage,
+  capabilityCoverage:candidate.capabilityCoverage-parent.capabilityCoverage,
+  humanComprehension:candidate.humanComprehension-parent.humanComprehension,
+  futureTopologyRetention:candidate.futureTopologyRetention-parent.futureTopologyRetention,
+  scarPressure:candidate.scarPressure-parent.scarPressure
+ };
+ const growthVector:HeightenedDevelopmentalVectorR457={
+  ...relationalDifference,
+  contradiction:-relationalDifference.contradiction,
+  burden:-relationalDifference.burden,
+  scarPressure:-relationalDifference.scarPressure
+ };
+ const transportedGrowth={frame:'NORMALIZED_SOFTWARE_ACCEPTANCE_R457' as const,vector:growthVector,invariantCarry:['CAPABILITY_IDENTITY','PROOF_AUTHORITY','R125_ADMISSION','ROLLBACK','SCAR_HISTORY'] as const};
+ const previousGrowth=vectorFromPartialR457(input.previousGrowth),previousAcceleration=vectorFromPartialR457(input.previousAcceleration);
+ const acceleration=mapVectorR457(growthVector,previousGrowth,(x,y)=>x-y);
+ const jerk=mapVectorR457(acceleration,previousAcceleration,(x,y)=>x-y);
+ const parentScore=deweyScoreR457(parent),candidateScore=deweyScoreR457(candidate);
+ const hardVetoes:string[]=[];
+ if(!input.authorityClosed)hardVetoes.push('AUTHORITY_NOT_CLOSED');
+ if(!input.proofSurvives)hardVetoes.push('PROOF_DID_NOT_SURVIVE_TRANSPORT');
+ if(!input.rollbackAvailable)hardVetoes.push('ROLLBACK_NOT_AVAILABLE');
+ if(!input.dependencyOrderPreserved)hardVetoes.push('DEPENDENCY_ORDER_VIOLATION');
+ if(input.canonicalMutation===true)hardVetoes.push('UNAUTHORIZED_CANONICAL_MUTATION');
+ if(candidate.capabilityCoverage+R457_EPSILON<parent.capabilityCoverage)hardVetoes.push('CAPABILITY_COVERAGE_REGRESSED');
+ if(candidate.proofCoverage+R457_EPSILON<parent.proofCoverage)hardVetoes.push('PROOF_COVERAGE_REGRESSED');
+ if(candidate.futureTopologyRetention+R457_EPSILON<parent.futureTopologyRetention)hardVetoes.push('FUTURE_TOPOLOGY_COLLAPSED');
+ if(candidate.recoverability+R457_EPSILON<parent.recoverability)hardVetoes.push('RECOVERABILITY_REGRESSED');
+ const growthNet=Object.values(growthVector).reduce((sum,value)=>sum+value,0);
+ const scoreNonRegressed=candidateScore+R457_EPSILON>=parentScore;
+ const decision=hardVetoes.length?'ESCALATE':growthNet>R457_EPSILON&&scoreNonRegressed?'TURN':'STAY';
+ const developmentalScar=Object.freeze({
+  pressure:candidate.scarPressure,
+  contradiction:candidate.contradiction,
+  retained:true,
+  clearedByPresentation:false
+ });
+ const continuityCone=Object.freeze({
+  reachable:hardVetoes.length===0,
+  futureTopologyRetention:candidate.futureTopologyRetention,
+  recoverability:candidate.recoverability,
+  rollbackAvailable:input.rollbackAvailable,
+  authorityClosed:input.authorityClosed,
+  proofSurvives:input.proofSurvives,
+  dependencyOrderPreserved:input.dependencyOrderPreserved
+ });
+ return Object.freeze({
+  schema:'OMEGA7_HEIGHTENED_DEVELOPMENTAL_TRANSITION_R457',
+  sequence:R457_DEVELOPMENTAL_SEQUENCE,
+  parent,
+  candidate,
+  normalizedRelationalDifference:Object.freeze(relationalDifference),
+  growthVector:Object.freeze(growthVector),
+  transportedGrowth:Object.freeze(transportedGrowth),
+  developmentalAcceleration:Object.freeze(acceleration),
+  developmentalJerk:Object.freeze(jerk),
+  orderSensitivity:Object.freeze({dependencyOrderPreserved:input.dependencyOrderPreserved,violation:input.dependencyOrderPreserved?0:1}),
+  developmentalCurvature:vectorNormR457(acceleration)/(vectorNormR457(growthVector)+R457_EPSILON),
+  developmentalScar,
+  continuityCone,
+  dewey:Object.freeze({parentScore,candidateScore,continuity:candidate.continuity,futurePlasticity:candidate.futurePlasticity,contradiction:candidate.contradiction,burden:candidate.burden}),
+  growthNet,
+  hardVetoes:Object.freeze(hardVetoes),
+  decision,
+  promotionAllowed:decision==='TURN'&&hardVetoes.length===0,
+  canonicalMutation:false,
+  truthBoundary:'R457 developmental metrics are normalized software-governance telemetry. They do not create empirical evidence, physical dimensions, or CanonState authority; exact proof and R125 admission remain external gates.'
+ });
+}
+
 export type HeightenedRetirementRequestR457={
  legacyRoute:string;
  replacementRoutes:readonly string[];
