@@ -98,5 +98,7 @@
     "PERFORMANCE",
     "ROLLBACK"
   ],
-  "browserProof": "44_ROUTES_DESKTOP_AND_MOBILE_REQUIRED"
+  "browserProof": "44_ROUTES_DESKTOP_AND_MOBILE_REQUIRED",
+  "browserProofWorkflowAuthority": "OMEGA Cloud Bridge CI",
+  "activeWorkflowAuthorityIncrease": 0
 }
