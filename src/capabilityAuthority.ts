@@ -2,7 +2,7 @@ export const OMEGA_VIEW_LENSES=['FIELD','SURFACE','SKIN','GRAPH','ASSEMBLY','MAT
 export type OmegaViewLens=typeof OMEGA_VIEW_LENSES[number];
 export type CapabilityImplementation='INLINE'|'SPECIALIST'|'SHARED_SUITE';
 export type CapabilityBoundary='SOURCE_PACKET'|'EVIDENCE_BOUND'|'DEVICE_PROOF'|'PROVIDER_BOUND'|'LOCAL_ARTIFACT';
-export type CapabilityReality='RUNTIME_ACTIVE'|'SOURCE_ACTIVE'|'LOCAL_ACTIVE'|'EVIDENCE_GATED'|'DEVICE_GATED'|'PROVIDER_GATED'|'RESTORATION_DEBT'|'DONOR_ONLY';
+export type CapabilityReality='RUNTIME_ACTIVE'|'SOURCE_ACTIVE'|'LOCAL_ACTIVE'|'EVIDENCE_GATED'|'DEVICE_GATED'|'PROVIDER_GATED'|'RESTORATION_DEBT'|'DONOR_ONLY'|'FAILED';
 export type CapabilityContract={name:string;family:string;implementation:CapabilityImplementation;views:readonly OmegaViewLens[];boundary:CapabilityBoundary;purpose:string};
 const V=(...x:OmegaViewLens[])=>x;
 export const OMEGA_CAPABILITY_AUTHORITY:readonly CapabilityContract[]=[
