@@ -79,7 +79,8 @@ assert.equal(lock.acceptedParityCounts.rollback,44);
 assert.equal(lock.acceptedParityCounts.fullProductParity,44);
 assert.equal(lock.acceptedParityCounts.legacyRetired,0);
 assert.equal(lock.acceptedParityReceipt.fullGovernedMatrix,'PASS');
-assert.equal(lock.defaultProduct,'OMEGAV6_UNTIL_R454_DEFAULT_CUTOVER_PROVES_REVERSIBLE_STARTUP');
+assert.ok(['OMEGAV6_UNTIL_R454_DEFAULT_CUTOVER_PROVES_REVERSIBLE_STARTUP','OMEGA7_CANDIDATE'].includes(lock.defaultProduct),'R453 accepted parity may transition only into the governed R454 default-cutover candidate');
+if(lock.defaultProduct==='OMEGA7_CANDIDATE')assert.equal(lock.defaultCutoverPhase,'R454_DEFAULT_CUTOVER_CANDIDATE');
 assert.equal(lock.acceptedParityNextWork,'CUT_OVER_OMEGA7_AS_DEFAULT_WITH_OMEGA6_ROLLBACK_PRESERVED_AND_PROVE_DEFAULT_STARTUP');
 
 console.log('OMEGA7 R453 PASS · accepted R452 receipts materialized · 44/44 full product parity · family-vs-route failure evidence kept exact · 44 rollback envelopes · zero legacy retirement · default cutover eligible');
