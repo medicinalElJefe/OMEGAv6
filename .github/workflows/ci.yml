@@ -96,6 +96,10 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/omega7-r447-performance-e2e.mjs
+      - name: Prove OMEGA7 to OMEGA6 rollback and re-entry
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/omega7-r449-rollback-e2e.mjs
       - name: Stop OMEGA7 parity preview
         if: always()
         shell: bash

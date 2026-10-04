@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "466e306b18bf7b9d1b82ef122fbc94b982cdac3a",
-  "sourceMilestone": "R446",
+  "sourceMainSha": "2399b2d366e6767545fc032982be7fa4cc5c0c1f",
+  "sourceMilestone": "R450",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -89,7 +89,7 @@
   "evidenceTruthRule": "PASS_REQUIRES_RETURNED_OR_CANONICALLY_DERIVABLE_EVIDENCE; MISSING_EXTERNAL_OR_DEVICE_AUTHORITY_REMAINS_HOLD",
   "pluginTruthRule": "REGISTERED_OR_ENABLED_ADAPTER_IS_NOT_EXECUTED_OR_VERIFIED",
   "archiveTruthRule": "HISTORICAL_ARCHIVE_COUNTS_ARE_NOT_LIVE_ENUMERATION",
-  "parityPhase": "R447_FAILURE_RECOVERY_PERFORMANCE_CANDIDATE",
+  "parityPhase": "R449_ROLLBACK_REVERSIBILITY_CANDIDATE",
   "parityRequired": [
     "FUNCTIONAL",
     "DESKTOP",
@@ -107,5 +107,6 @@
     "shellReadyMs": 4000,
     "representativeRouteMs": 8000,
     "representativeP95Ms": 6000
-  }
+  },
+  "rollbackProof": "OMEGA7_TO_OMEGA6_TO_OMEGA7_WITH_CANONICAL_ADDRESS_CONTINUITY_REQUIRED"
 }
