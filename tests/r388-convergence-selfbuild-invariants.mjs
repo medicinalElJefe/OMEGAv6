@@ -46,6 +46,7 @@ const strongA03=validateConvergenceRepairR450({item:a03,proposal:{files:[{replac
 assert.equal(strongA03.valid,true,'R450 semantic gate must admit a materially sized proposal that carries the full declared A-03 contract');
 
 const b02=byId('R388-B-02');
+assert.deepEqual(b02?.affected,['src/authoritativeOperationChainR143.ts','src/OmegaWorkstationFullV2.tsx'],'R458 B-02 must target operation authority plus the mounted workstation rather than route-list typing');
 assert.equal(b02?.acceptanceContract?.revision,'R458','R458 must attach semantic acceptance to route-functional inheritance');
 const rejectedB02=validateConvergenceRepairR450({item:b02,proposal:{files:[
  {path:'src/navigationRegistry.ts',replacements:[{before:'export const OMEGA_NAVIGATION=[',after:'export const OMEGA_NAVIGATION: readonly OmegaNavItem[] = ['}]},
@@ -54,16 +55,32 @@ const rejectedB02=validateConvergenceRepairR450({item:b02,proposal:{files:[
 assert.equal(rejectedB02.valid,false,'R458 must reject the exact shallow readonly-annotation patch class from governed-rejected PR #899');
 assert.ok(rejectedB02.reasons.some(x=>x.startsWith('SEMANTIC_PATCH_TOO_SHALLOW_')),'R458 B-02 must require material functional work');
 assert.ok(rejectedB02.reasons.some(x=>x.includes('OMEGA_ROUTE_FUNCTIONAL_INHERITANCE')),'R458 B-02 must require explicit functional-inheritance semantics');
-const strongB02=validateConvergenceRepairR450({item:b02,proposal:{files:[{path:'src/navigationRegistry.ts',replacements:[{before:'legacy route metadata '.repeat(50),after:[
- 'export const OMEGA_ROUTE_FUNCTIONAL_INHERITANCE=OMEGA_NAV_NAMES.map(route=>{',
- ' const operation=R143_OPERATION_CONTRACTS.find(row=>row.route===route);',
- " return {route,usableControl:true,stateOutput:'ROUTE_STATE_AND_OUTPUT',proof:'R142',failureRecovery:'EXPLICIT_ROUTE_FAILURE_RECOVERY',admissionAuthority:'R125'};",
- '});',
- "if(OMEGA_ROUTE_FUNCTIONAL_INHERITANCE.length!==OMEGA_NAV_NAMES.length)throw new Error('route inheritance incomplete');",
- 'R143_OPERATION_CONTRACTS; R142; R125; usableControl; stateOutput; proof; failureRecovery; OMEGA_NAV_NAMES;',
- 'functional route inheritance proof binding '.repeat(55)
-].join('\n')}]}]}});
-assert.equal(strongB02.valid,true,'R458 semantic gate must admit a materially sized B-02 proposal carrying the complete declared functional-inheritance vocabulary');
+const strongB02=validateConvergenceRepairR450({item:b02,proposal:{files:[
+ {path:'src/authoritativeOperationChainR143.ts',replacements:[{before:'legacy route operation authority '.repeat(45),after:[
+  "export const OMEGA_ROUTE_FUNCTIONAL_INHERITANCE=OMEGA_ALL_ROUTES_R82.map(route=>{",
+  " const operation=R143_OPERATION_CONTRACTS.find(row=>row.route===route);",
+  " if(!operation)throw new Error('missing R143 operation contract '+route);",
+  " return {route,routeId:operation.routeId,usableControl:true,stateOutput:'ROUTE_STATE_AND_OUTPUT',proof:'R142',receiptAuthority:'R142',admissionAuthority:'R125',failureRecovery:'VISIBLE_FAILURE_AND_RETRY',degradeTo:'System Atlas',canonicalMutation:false};",
+  "});",
+  "OMEGA_ALL_ROUTES_R82.map; R143_OPERATION_CONTRACTS; R142; R125; usableControl; stateOutput; proof; failureRecovery; degradeTo; canonicalMutation:false;",
+  'functional inheritance authority binding '.repeat(45)
+ ].join('\n')}]},
+ {path:'src/OmegaWorkstationFullV2.tsx',replacements:[{before:'legacy mounted route surface '.repeat(35),after:[
+  "const functionalInheritance=OMEGA_ROUTE_FUNCTIONAL_INHERITANCE.find(row=>row.route===panel);",
+  "if(!functionalInheritance)throw new Error('route functional inheritance missing '+panel);",
+  "const usableControl=functionalInheritance.usableControl;",
+  "const stateOutput=functionalInheritance.stateOutput;",
+  "const proof=functionalInheritance.proof;",
+  "const failureRecovery=functionalInheritance.failureRecovery;",
+  "const degradeTo=functionalInheritance.degradeTo;",
+  "const canonicalMutation=false;",
+  'mounted functional inheritance continuity '.repeat(35)
+ ].join('\n')}]}]}});
+assert.equal(strongB02.valid,true,'R458 semantic gate must admit a materially sized B-02 proposal carrying authority + mounted-surface + proof + recovery transition semantics');
+assert.equal(strongB02.transition.authoritySurfaceBound,true);
+assert.equal(strongB02.transition.proofTransportBound,true);
+assert.equal(strongB02.transition.recoveryBound,true);
+assert.equal(strongB02.transition.canonicalBoundaryPreserved,true);
 
 assert.deepEqual(byId('R388-A-05')?.affected,['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],'R448 cumulative proof-surface work must target build/system validation');
 for(const id of ['R388-A-01','R388-A-02','R388-A-03','R388-A-05'])assert.equal(byId(id)?.affected.includes('src/OmegaWorkstationFullV2.tsx'),false,`${id} must not fall back to the coarse workstation mount owner target`);
