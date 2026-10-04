@@ -173,12 +173,15 @@ try{
   if(refreshedGeneration<=beforeRefreshGeneration)throw new Error(`${label}: successful manual motion refresh did not advance refresh receipt`);
 
   const groundTab=tabs.filter({hasText:'Ground'}).first();await groundTab.click();
+  const groundReceipt=page.locator('.earth-ground-r9');
   const groundRefresh=page.getByRole('button',{name:'Refresh ground evidence',exact:true});await groundRefresh.waitFor({state:'visible',timeout:30000});
+  const beforeGroundGeneration=Number(await groundReceipt.getAttribute('data-ground-refresh-generation')||0);
   const groundReturn=page.waitForResponse(r=>targetResponse(r,'/api/earth/ground/evidence',32.2226,-110.9747),{timeout:30000});
   await groundRefresh.click();const groundResponse=await groundReturn;
   if(!groundResponse.ok())throw new Error(`${label}: ground refresh HTTP ${groundResponse.status()}`);
   const ground=await groundResponse.json();verifyTarget(ground,32.2226,-110.9747,'Ground');
-  await page.waitForFunction(hash=>document.querySelector('.earth-ground-r9 footer code')?.textContent===hash,ground.evidenceHash,{timeout:20000});
+  await page.waitForFunction(({hash,before,target})=>{const el=document.querySelector('.earth-ground-r9');return el?.getAttribute('data-ground-evidence-hash')===hash&&Number(el.getAttribute('data-ground-refresh-generation')||0)>before&&el.getAttribute('data-ground-target')===target},{hash:ground.evidenceHash,before:beforeGroundGeneration,target:'32.222600,-110.974700'},{timeout:30000});
+  if(await groundReceipt.locator('footer code').textContent()!==ground.evidenceHash)throw new Error(`${label}: rendered ground hash differs from correlated refresh receipt`);
   await groundRefresh.waitFor({state:'visible',timeout:20000});
   await contained(page,`${label} refreshed ground`);
 
