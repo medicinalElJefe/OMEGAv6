@@ -20,7 +20,12 @@ class AppBoundary extends Component<{children:ReactNode;onHome:()=>void},Boundar
 
 function App(){
  const[home,setHome]=useState(true);
- const[omega7,setOmega7]=useState(()=>{try{return new URLSearchParams(window.location.search).get('omega7')==='1'||window.localStorage.getItem('omega7.enabled')==='true'}catch{return false}});
+ const[omega7,setOmega7]=useState(()=>{try{
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('omega6')==='1')return false;
+  if(params.get('omega7')==='1')return true;
+  return window.localStorage.getItem('omega.product.shell')!=='OMEGA6';
+ }catch{return true}});
 
  useEffect(()=>{installLivingWorldOperationBridgeR140();installRuntimeAttestationWorldScarR145();installDurableWorldHeadContinuityR149();installReflexOperationIngressR160();const stopMissionWorldBinding=installMissionWorldHeadBindingR208();const stopFederationObserver=installFederationLedgerWorldObserverR173();const stopProofMembrane=installLivingWorldProofMembraneR1901();const stopIntelligenceProof=installLivingWorldIntelligenceProofR196();const stopEvidenceScene=installEvidenceBoundSceneIngressR2022();return()=>{stopEvidenceScene();stopIntelligenceProof();stopProofMembrane();stopFederationObserver();stopMissionWorldBinding()}},[]);
 
@@ -31,12 +36,13 @@ function App(){
   requestRouteLifecycleR356(home?'Home':(document.documentElement.dataset.omegaRouteCurrent||'Workstation'),panel);
   safeStore('omega.v6.panel',JSON.stringify(panel));setHome(false);
  };
- const openLegacyFromOmega7=(name:string)=>{safeStore('omega7.lastRoute',name);setOmega7(false);navigate(name)};
- const exitOmega7=()=>{try{window.localStorage.removeItem('omega7.enabled')}catch{}setOmega7(false);setHome(true)};
+ const openLegacyFromOmega7=(name:string)=>{safeStore('omega7.lastRoute',name);safeStore('omega.product.shell','OMEGA6');setOmega7(false);navigate(name)};
+ const exitOmega7=()=>{try{window.localStorage.removeItem('omega7.enabled')}catch{}safeStore('omega.product.shell','OMEGA6');setOmega7(false);setHome(true)};
+ const enterOmega7=()=>{safeStore('omega.product.shell','OMEGA7');setOmega7(true)};
  const fallback=<div className='r319-bounded-loading' role='status' aria-live='polite' aria-busy='true'><span>{home?'Starting OMEGA…':'Opening workspace…'}</span></div>;
 
  if(omega7)return <Omega7Root onOpenLegacyRoute={openLegacyFromOmega7} onExitToV6={exitOmega7}/>;
 
- return <OmegaExperienceProviderR257><OmegaExperienceShellR257 chrome={false} onNavigate={navigate} onHome={()=>setHome(true)} home={home}><main className='r317-product-root' data-r317-composition='SINGLE_CANONICAL_NAVIGATOR' data-r356-product='CANONICAL_PRODUCT_GRAMMAR'><style>{`.r319-bounded-loading,.r319-bounded-surface-error{position:relative;inset:auto;min-height:0;height:auto;padding:12px 16px;margin:10px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(8,12,18,.82);z-index:auto}.r319-bounded-surface-error{display:grid;gap:8px}.r319-bounded-surface-error div{display:flex;gap:8px;flex-wrap:wrap}`}</style><details className='r318-system-diagnostics'><summary>System status</summary><LivingWorldPulseR174 onNavigate={navigate}/><LivingSceneEvidenceBandR2023 onNavigate={navigate}/><MissionWorldContinuityR206 onNavigate={navigate}/><LivingTerrainSurfaceR225/></details><AppBoundary onHome={()=>setHome(true)}><Suspense fallback={fallback}>{home?<OmegaHomeR71 onEnter={navigate}/>:<HybridRuntimeSnapshotProviderR238><OmegaWorkstation/></HybridRuntimeSnapshotProviderR238>}</Suspense></AppBoundary></main></OmegaExperienceShellR257></OmegaExperienceProviderR257>;
+ return <><button type='button' className='omega7-return-control' onClick={enterOmega7} aria-label='Return to OMEGA7'>Return to OMEGA7</button><OmegaExperienceProviderR257><OmegaExperienceShellR257 chrome={false} onNavigate={navigate} onHome={()=>setHome(true)} home={home}><main className='r317-product-root' data-r317-composition='SINGLE_CANONICAL_NAVIGATOR' data-r356-product='CANONICAL_PRODUCT_GRAMMAR'><style>{`.r319-bounded-loading,.r319-bounded-surface-error{position:relative;inset:auto;min-height:0;height:auto;padding:12px 16px;margin:10px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(8,12,18,.82);z-index:auto}.r319-bounded-surface-error{display:grid;gap:8px}.r319-bounded-surface-error div{display:flex;gap:8px;flex-wrap:wrap}`}</style><details className='r318-system-diagnostics'><summary>System status</summary><LivingWorldPulseR174 onNavigate={navigate}/><LivingSceneEvidenceBandR2023 onNavigate={navigate}/><MissionWorldContinuityR206 onNavigate={navigate}/><LivingTerrainSurfaceR225/></details><AppBoundary onHome={()=>setHome(true)}><Suspense fallback={fallback}>{home?<OmegaHomeR71 onEnter={navigate}/>:<HybridRuntimeSnapshotProviderR238><OmegaWorkstation/></HybridRuntimeSnapshotProviderR238>}</Suspense></AppBoundary></main></OmegaExperienceShellR257></OmegaExperienceProviderR257></>;
 }
 export default App;
