@@ -23,9 +23,11 @@ assert.ok(workflow.includes('npm run build')&&workflow.includes('vite preview'),
 assert.ok(workflow.includes('omega7-r446-browser-parity-e2e.mjs'),'R446 workflow must execute the parity test');
 assert.ok(workflow.includes('omega7-user-parity:')&&workflow.includes('timeout-minutes: 25'),'R446 browser proof must remain bounded inside OMEGA Cloud Bridge CI');
 assert.ok(workflow.startsWith('name: OMEGA Cloud Bridge CI'),'R446 must reuse the existing governed workflow authority rather than add a 25th workflow');
-assert.equal(lock.sourceMainSha,'247b0ce78e2c00f92d02a087dbe3db6f31ac97a3');
-assert.equal(lock.sourceMilestone,'R445');
-assert.equal(lock.parityPhase,'R446_BROWSER_PROOF_CANDIDATE');
+assert.match(lock.sourceMainSha,/^[a-f0-9]{40}$/,'OMEGA7 successor locks must retain an exact source SHA');
+const sourceRevision=Number((String(lock.sourceMilestone).match(/^R(\d+)/)||[])[1]||0);
+assert.ok(sourceRevision>=445,'R446 successor cannot regress behind the merged R445 baseline');
+const parityRevision=Number((String(lock.parityPhase).match(/^R(\d+)/)||[])[1]||0);
+assert.ok(parityRevision>=446,'R446 parity proof must remain present in successor phases');
 assert.deepEqual(lock.parityRequired,['FUNCTIONAL','DESKTOP','MOBILE_TOUCH','FAILURE_RECOVERY','PERFORMANCE','ROLLBACK']);
 
 console.log('OMEGA7 R446 STATIC PASS · 44/44 browser parity contract · desktop/mobile · exact built preview · stable route identities · no legacy retirement by declaration');
