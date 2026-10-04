@@ -14,7 +14,7 @@ export const OMEGA_NAVIGATION=[
 {id:'08',group:'STUDIO',name:'Visual Instrument',hint:'Source-bound renderer for phase, continuity, burden, contradiction, proof and route.',effect:'COMPUTE',authority:'DERIVED'},
 {id:'09',group:'STUDIO',name:'Relativity',hint:'Observer frame, motion relativity, phase, carry and reference-context analysis.',effect:'COMPUTE',authority:'DERIVED'},
 {id:'10',group:'STUDIO',name:'Earth Now',hint:'Real returned-source Earth evidence kept separate from canonical OMEGA state.',effect:'EXTERNAL_GATE',authority:'EVIDENCE_GATED'},
-{id:'11',group:'STUDIO',name:'Forecast',hint:'Frozen-prior, bounded future-state corridors with uncertainty and no future leakage.',effect:'COMPUTE',authority:'CANONICAL'},
+{id:'11',group:'STUDIO',name:'Forecast',hint:'Frozen-prior, bounded future-state corridors with uncertainty and no future leakage.',effect:'COMPUTE',authority:'DERIVED'},
 {id:'12',group:'STUDIO',name:'Atlas',hint:'Executable 20,736-state atlas and address-space inspection.',effect:'READ',authority:'CANONICAL'},
 {id:'13',group:'STUDIO',name:'Traversal',hint:'General state-space traversal across the same canonical packet authority.',effect:'COMPUTE',authority:'DERIVED'},
 {id:'14',group:'STUDIO',name:'Create',hint:'Seed → translate → build → render → forecast → prove from one governed entry.',effect:'BUILD',authority:'GOVERNANCE'},
@@ -81,4 +81,31 @@ export const OMEGA_NAVIGATION_CONTRACT_R289=Object.freeze({
  orphanRoutes:OMEGA_NAVIGATION.filter(item=>!OMEGA_MASTER_MENU_ROUTE_MAP_R289[item.name]).map(item=>item.name),
  emptyMenus:OMEGA_MASTER_MENU_NAVIGATION_R289.filter(menu=>menu.routes.length===0).map(menu=>menu.id),
  rule:'ONE_44_ROUTE_AUTHORITY_PRESENTED_THROUGH_12_RECOVERED_MASTER_MENUS'
+});
+
+
+export const OMEGA_CONTROL_RECONCILIATION='R466';
+const duplicateValuesR466=(values:readonly string[])=>[...new Set(values.filter((value,index)=>values.indexOf(value)!==index))];
+const routeIdsR466=OMEGA_NAVIGATION.map(item=>item.id);
+const routeNamesR466=OMEGA_NAVIGATION.map(item=>item.name);
+const mappedRouteNamesR466=Object.keys(OMEGA_MASTER_MENU_ROUTE_MAP_R289);
+const duplicateRouteIdsR466=duplicateValuesR466(routeIdsR466);
+const duplicateRouteAuthoritiesR466=duplicateValuesR466(routeNamesR466);
+const hiddenUnreachableRoutesR466=OMEGA_NAVIGATION.filter(item=>!omegaMasterMenuForRouteR289(item.name)).map(item=>item.name);
+const unknownMappedRoutesR466=mappedRouteNamesR466.filter(name=>!OMEGA_NAV_NAMES.includes(name as OmegaRouteName));
+
+export const OMEGA_CONTROL_RECONCILIATION_R466=Object.freeze({
+ schema:'OMEGA_CONTROL_RECONCILIATION_R466',
+ revision:'R466',
+ recoveredControlCount:OMEGA_NAVIGATION.length,
+ recoveredControls:Object.freeze([...OMEGA_NAV_NAMES]),
+ duplicateRouteIds:Object.freeze(duplicateRouteIdsR466),
+ duplicateRouteAuthorities:Object.freeze(duplicateRouteAuthoritiesR466),
+ hiddenUnreachableRoutes:Object.freeze(hiddenUnreachableRoutesR466),
+ unknownMappedRoutes:Object.freeze(unknownMappedRoutesR466),
+ declaredAuthority:Object.freeze(OMEGA_NAVIGATION.map(item=>Object.freeze({route:item.name,authority:item.authority}))),
+ oneMasterMenuOwnerPerRoute:OMEGA_NAVIGATION.every(item=>Boolean(omegaMasterMenuForRouteR289(item.name))),
+ pass:duplicateRouteIdsR466.length===0&&duplicateRouteAuthoritiesR466.length===0&&hiddenUnreachableRoutesR466.length===0&&unknownMappedRoutesR466.length===0&&OMEGA_NAVIGATION.length===OMEGA_NAV_NAMES.length,
+ canonicalMutation:false,
+ rule:'ONE_REGISTERED_ROUTE_IDENTITY_ONE_DECLARED_AUTHORITY_ONE_REACHABLE_MASTER_MENU_OWNER'
 });
