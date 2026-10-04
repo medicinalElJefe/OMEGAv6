@@ -46,7 +46,7 @@ const strongA03=validateConvergenceRepairR450({item:a03,proposal:{files:[{replac
 assert.equal(strongA03.valid,true,'R450 semantic gate must admit a materially sized proposal that carries the full declared A-03 contract');
 
 const b02=byId('R388-B-02');
-assert.deepEqual(b02?.affected,['src/authoritativeOperationChainR143.ts','src/OmegaWorkstationFullV2.tsx'],'R458 B-02 must target operation authority plus the mounted workstation rather than route-list typing');
+assert.deepEqual(b02?.affected,['src/OmegaSideNavigatorR88.tsx','src/OmegaWorkstationFullV2.tsx'],'R458 B-02 must preserve R143 authority and target its navigator + mounted-workstation consumers rather than route-list typing');
 assert.equal(b02?.acceptanceContract?.revision,'R458','R458 must attach semantic acceptance to route-functional inheritance');
 const rejectedB02=validateConvergenceRepairR450({item:b02,proposal:{files:[
  {path:'src/navigationRegistry.ts',replacements:[{before:'export const OMEGA_NAVIGATION=[',after:'export const OMEGA_NAVIGATION: readonly OmegaNavItem[] = ['}]},
@@ -56,14 +56,13 @@ assert.equal(rejectedB02.valid,false,'R458 must reject the exact shallow readonl
 assert.ok(rejectedB02.reasons.some(x=>x.startsWith('SEMANTIC_PATCH_TOO_SHALLOW_')),'R458 B-02 must require material functional work');
 assert.ok(rejectedB02.reasons.some(x=>x.includes('OMEGA_ROUTE_FUNCTIONAL_INHERITANCE')),'R458 B-02 must require explicit functional-inheritance semantics');
 const strongB02=validateConvergenceRepairR450({item:b02,proposal:{files:[
- {path:'src/authoritativeOperationChainR143.ts',replacements:[{before:'legacy route operation authority '.repeat(45),after:[
-  "export const OMEGA_ROUTE_FUNCTIONAL_INHERITANCE=OMEGA_ALL_ROUTES_R82.map(route=>{",
-  " const operation=R143_OPERATION_CONTRACTS.find(row=>row.route===route);",
-  " if(!operation)throw new Error('missing R143 operation contract '+route);",
+ {path:'src/OmegaSideNavigatorR88.tsx',replacements:[{before:'legacy route navigation consumer '.repeat(45),after:[
+  "const OMEGA_ROUTE_FUNCTIONAL_INHERITANCE=OMEGA_ALL_ROUTES_R82.map(route=>{",
+  " const operation=operationContractForRouteR143(route);",
   " return {route,routeId:operation.routeId,usableControl:true,stateOutput:'ROUTE_STATE_AND_OUTPUT',proof:'R142',receiptAuthority:'R142',admissionAuthority:'R125',failureRecovery:'VISIBLE_FAILURE_AND_RETRY',degradeTo:'System Atlas',canonicalMutation:false};",
   "});",
-  "OMEGA_ALL_ROUTES_R82.map; R143_OPERATION_CONTRACTS; R142; R125; usableControl; stateOutput; proof; failureRecovery; degradeTo; canonicalMutation:false;",
-  'functional inheritance authority binding '.repeat(45)
+  "OMEGA_ALL_ROUTES_R82; operationContractForRouteR143; R142; R125; usableControl; stateOutput; proof; failureRecovery; degradeTo; canonicalMutation:false;",
+  'functional inheritance navigator binding '.repeat(45)
  ].join('\n')}]},
  {path:'src/OmegaWorkstationFullV2.tsx',replacements:[{before:'legacy mounted route surface '.repeat(35),after:[
   "const functionalInheritance=OMEGA_ROUTE_FUNCTIONAL_INHERITANCE.find(row=>row.route===panel);",
