@@ -5,7 +5,7 @@ import {selectRepairTargetR314} from './r314-target-registry.mjs';
 import {proposeAiRepairR314} from './r314-ai-repair.mjs';
 import {canAttemptRepairR314,recordRepairAttemptR314} from '../../src/system/autonomousConvergenceR314.js';
 import {R314_AI_REPAIR_MODEL_DEFAULT,repairPathPolicyR314} from '../../src/system/autonomousRepairPolicyR314.js';
-import {selectNextConvergenceItemR388} from '../../src/system/convergenceBacklogR388.js';
+import {selectNextConvergenceItemR388,validateConvergenceRepairR450} from '../../src/system/convergenceBacklogR388.js';
 import {autonomousCandidatePrefixesR245,isAutonomousCandidateBranchR245,validateAutonomousCandidatePolicyR245,R245_CAPSULE_GENERATOR_REVISION,R245_GOVERNED_SELFBUILD_CONTRACT} from '../../src/system/governedSelfBuildContractR245.js';
 import {cloudCandidateResolutionR436} from './canonical-resolution-r436.mjs';
 
@@ -175,10 +175,17 @@ async function proposeR388BacklogCycle({inspection,token,repo,ai,model}){
   for(const target of targets){
     const item=target.item;lastItem=item;
     const contextFiles=[];for(const path of target.paths)contextFiles.push(await getRepoTextFile(token,repo,path,mainSha));
-    const stage={id:'CLOUD-01-R388-CONVERGENCE-BUILD',baseSha:mainSha,itemId:item.id,section:item.section,paths:target.paths,externalProofRequired:item.externalProofRequired===true};
+    const stage={id:'CLOUD-01-R388-CONVERGENCE-BUILD',baseSha:mainSha,itemId:item.id,section:item.section,paths:target.paths,externalProofRequired:item.externalProofRequired===true,semanticAcceptanceContract:item.acceptanceContract||null};
     const repair=await proposeAiRepairR314({ai,model:model||R314_AI_REPAIR_MODEL_DEFAULT,residual:target.residual,stage,contextFiles});
     lastRepair=repair;
     if(repair.ok){
+      const semantic=validateConvergenceRepairR450({item,proposal:repair.proposal});
+      if(!semantic.valid){
+        const scar={itemId:item.id,section:item.section,state:'SEMANTIC_ACCEPTANCE_REJECTED',reasons:semantic.reasons,attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true,semanticAcceptance:{changedChars:semantic.changedChars,missingTokens:semantic.missingTokens||[],contract:semantic.contract}};
+        declinedItemScars.push(scar);
+        lastRepair={...repair,state:'SEMANTIC_ACCEPTANCE_REJECTED',reasons:semantic.reasons,semanticAcceptance:scar.semanticAcceptance};
+        continue;
+      }
       const rejectedRepeat=await findClosedProofRejectedPatchRepeatR430({token,repo,itemId:item.id,patches:repair.patches});
       if(rejectedRepeat.matched){
         const scar={itemId:item.id,section:item.section,state:'PROOF_REJECTED_PATCH_REPEAT',reasons:[`exact product patch identity already proof-rejected by closed unmerged CLOUD-01 PR #${rejectedRepeat.prNumber}`],attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true,patchIdentity:rejectedRepeat.proposed,matchedClosedPr:{number:rejectedRepeat.prNumber,headSha:rejectedRepeat.prHeadSha,matchedCommitSha:rejectedRepeat.matchedCommitSha,rejectionEvidence:rejectedRepeat.rejectionEvidence,failedWorkflows:rejectedRepeat.failedWorkflows,closedAt:rejectedRepeat.closedAt}};
