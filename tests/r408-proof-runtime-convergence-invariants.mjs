@@ -78,6 +78,18 @@ for(const [file,proofClass,capacity,cost] of[
  assert.ok(!src.includes('wave_start'));
 }
 
+const r286Browser=fs.readFileSync('tests/r286-all-surface-no-dead-controls-browser-e2e.mjs','utf8');
+assert.ok(r286Browser.includes("import {partitionInteractionCasesR355} from '../src/system/r313InteractionWorkloadR355.js';"),'R462 R286 browser child must consume the same weighted R355 partition as the R408 scheduler');
+assert.ok(r286Browser.includes('const r286Partition=partitionInteractionCasesR355({surfaces:expected,shardCount});'),'R462 R286 must construct the exact weighted partition locally from the same canonical surface order');
+assert.ok(r286Browser.includes('const assignedCases=r286Partition[shardIndex].cases;'),'R462 R286 shard identity must select the weighted bin directly');
+assert.ok(r286Browser.includes('assignedCases.filter(item=>item.profileIndex===profileIndex).map(item=>item.surface)'),'R462 R286 viewport execution must derive from weighted case membership');
+assert.ok(!r286Browser.includes('%shardCount'),'R462 must remove the divergent modulo partition from R286 execution');
+for(const shardCount of[1,2,4,8,16]){
+ const bins=estimateProofShardsR408({surfaces,shardCount,proofClass:'no_dead_control',scar:emptyProofWorkloadScarR408()});
+ const all=bins.flatMap(bin=>bin.cases);
+ assert.equal(all.length,88,`R462 weighted R286 partition must retain all 88 cases at ${shardCount} shards`);
+ assert.equal(new Set(all.map(row=>row.key)).size,88,`R462 weighted R286 partition must assign every case exactly once at ${shardCount} shards`);
+}
 const workflow=fs.readFileSync('.github/workflows/r241-archive-convergence.yml','utf8');
 assert.ok(workflow.includes('stale-head-preflight'),'R460 R241 must preflight current PR head before expensive proof');
 assert.ok(workflow.includes('git ls-remote')&&workflow.includes('refs/pull/${PR_NUMBER}/head'),'R460 preflight must resolve the live PR head rather than trust stale event payload');

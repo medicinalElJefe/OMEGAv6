@@ -1,5 +1,6 @@
 import {chromium} from 'playwright';
 import fs from 'node:fs';
+import {partitionInteractionCasesR355} from '../src/system/r313InteractionWorkloadR355.js';
 
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
@@ -18,7 +19,9 @@ const shardCount=Number(process.env.R286_SHARD_COUNT||'1');
 const shardIndex=Number(process.env.R286_SHARD_INDEX||'0');
 if(!Number.isInteger(shardCount)||shardCount<1||shardCount>16)throw new Error(`R286_SHARD_COUNT must be an integer 1..16, received ${process.env.R286_SHARD_COUNT||'unset'}`);
 if(!Number.isInteger(shardIndex)||shardIndex<0||shardIndex>=shardCount)throw new Error(`R286_SHARD_INDEX must be an integer 0..${shardCount-1}, received ${process.env.R286_SHARD_INDEX||'unset'}`);
-const assignedRoutes=profileIndex=>expected.filter((_,routeIndex)=>((profileIndex*expected.length+routeIndex)%shardCount)===shardIndex);
+const r286Partition=partitionInteractionCasesR355({surfaces:expected,shardCount});
+const assignedCases=r286Partition[shardIndex].cases;
+const assignedRoutes=profileIndex=>assignedCases.filter(item=>item.profileIndex===profileIndex).map(item=>item.surface);
 
 async function twoFrames(page){
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
@@ -367,6 +370,6 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,4000)}`);
     await context.close();
   }
-  const shardCases=profiles.reduce((sum,_,profileIndex)=>sum+assignedRoutes(profileIndex).length,0);
-  console.log(`R286/R313 SHARD ${shardIndex+1}/${shardCount} PASS · ${shardCases} deterministic route/viewport cases · canonical 44-route navigator and ALL + six workspace submenus verified once per viewport on deterministic shard 1/8 while every shard still proves its assigned routes · active SurfaceIntegrity identity and PanelBoundary health proven · route-deferred loaders resolve · ${totals.panelsDesktop+totals.panelsMobile} visible panel/region structures geometry-audited · ${totals.disclosuresDesktop+totals.disclosuresMobile} safe disclosures exercised and restored · ALL + six workspace submenus exercised · ${totals.desktop} desktop + ${totals.mobile} mobile visible controls audited on live browser nodes · ${totals.disabledDesktop+totals.disabledMobile} honestly disabled controls exempted · every enabled control requires an accessible name, real runtime action binding, finite usable geometry, pointer events and an unobscured elementFromPoint hit after browser-native scrollIntoView · role buttons require keyboard activation · aria-controls targets exist · SAR geometry is checked in the shard owning SAR Truth · no material viewport overflow · navigator Escape/reopen · no page errors.`);
+  const shardCases=assignedCases.length;
+  console.log(`R286/R313 SHARD ${shardIndex+1}/${shardCount} PASS · workload ${r286Partition[shardIndex].weight}ms census · ${shardCases} deterministic route/viewport cases · canonical 44-route navigator and ALL + six workspace submenus verified once per viewport on deterministic shard 1/8 while every shard still proves its assigned routes · active SurfaceIntegrity identity and PanelBoundary health proven · route-deferred loaders resolve · ${totals.panelsDesktop+totals.panelsMobile} visible panel/region structures geometry-audited · ${totals.disclosuresDesktop+totals.disclosuresMobile} safe disclosures exercised and restored · ALL + six workspace submenus exercised · ${totals.desktop} desktop + ${totals.mobile} mobile visible controls audited on live browser nodes · ${totals.disabledDesktop+totals.disabledMobile} honestly disabled controls exempted · every enabled control requires an accessible name, real runtime action binding, finite usable geometry, pointer events and an unobscured elementFromPoint hit after browser-native scrollIntoView · role buttons require keyboard activation · aria-controls targets exist · SAR geometry is checked in the shard owning SAR Truth · no material viewport overflow · navigator Escape/reopen · no page errors.`);
 }finally{await browser.close()}
