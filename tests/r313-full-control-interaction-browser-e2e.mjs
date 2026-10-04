@@ -305,7 +305,7 @@ try{
   const consoleErrors=[];
   page.on('pageerror',e=>pageErrors.push(String(e)));
   page.on('console',msg=>{if(msg.type()==='error')consoleErrors.push(msg.text())});
-  await page.goto(`${base}/?r313=${Date.now()}-${profile}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?omega6=1&r313=${Date.now()}-${profile}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   let total=0,actionable=0,nativeActuated=0,roleActuated=0;
   for(const surface of assigned){
