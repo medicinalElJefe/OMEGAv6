@@ -123,7 +123,7 @@
     "fullRouteEvidence": 3,
     "legacyRetired": 0
   },
-  "nextParityWork": "R452_BROWSER_EXECUTION_MUST_PASS_BEFORE_MATERIALIZING_FULL_FAMILY_PARITY",
+  "nextParityWork": "EXPAND_FAILURE_RECOVERY_AND_PERFORMANCE_PROOF_TO_REMAINING_ROUTES_BEFORE_ANY_LEGACY_RETIREMENT",
   "parityEvidencePhase": "R451_PARITY_EVIDENCE_MATERIALIZATION",
   "parityExpansionPhase": "R452_FULL_FAMILY_PARITY_CANDIDATE",
   "familyParityCandidate": {
@@ -135,5 +135,6 @@
     "p95BudgetMs": 6000,
     "workflowAuthority": "OMEGA Cloud Bridge CI"
   },
-  "parityExpansionBaseSha": "4058ee07002dc78bba952711969afb33951a8b01"
+  "parityExpansionBaseSha": "4058ee07002dc78bba952711969afb33951a8b01",
+  "parityExpansionNextWork": "R452_BROWSER_EXECUTION_MUST_PASS_BEFORE_MATERIALIZING_FULL_FAMILY_PARITY"
 }
