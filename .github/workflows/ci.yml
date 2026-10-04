@@ -96,6 +96,14 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/omega7-r447-performance-e2e.mjs
+      - name: Prove OMEGA7 all-family chunk failure recovery
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/omega7-r452-family-failure-recovery-e2e.mjs
+      - name: Prove OMEGA7 all-route performance budgets
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/omega7-r452-all-route-performance-e2e.mjs
       - name: Prove OMEGA7 to OMEGA6 rollback and re-entry
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
