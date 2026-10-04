@@ -49,6 +49,12 @@ const ITEM_ACCEPTANCE=Object.freeze({
   requiredChangedTokens:Object.freeze(['CapabilityAvailabilityState','READY','AVAILABLE_NOT_CONFIGURED','OPTIONAL_NOT_INSTALLED','DEGRADED','FAILED']),
   rationale:'A-03 requires a real normalized capability-availability contract and mapping, not adding one label to the predecessor reality vocabulary.'
  }),
+ 'B-02':Object.freeze({
+  revision:'R458',
+  minChangedChars:1200,
+  requiredChangedTokens:Object.freeze(['OMEGA_ROUTE_FUNCTIONAL_INHERITANCE','R143_OPERATION_CONTRACTS','R142','R125','usableControl','stateOutput','proof','failureRecovery','OMEGA_NAV_NAMES']),
+  rationale:'B-02 requires a route-complete functional-inheritance contract that binds all canonical routes to usable control, state/output, execution-proof authority, and explicit failure/recovery semantics. Type annotations, menu enumeration, route-count aliases, or presentation-only metadata are not completion.'
+ }),
 });
 
 const PROOFS=Object.freeze({
@@ -150,7 +156,7 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
   candidates:Object.freeze(candidates.slice()),
   selected,
   canonicalAdmission:false,
-  targetingRevision:'R450',
+  targetingRevision:'R458',
   boundary:'R450 preserves stable absolute A-Y row identity across checked/open rows, keeps R448 semantic subsystem targeting, and allows item-specific semantic acceptance contracts to reject shallow source churn before candidate branch creation. Checked rows remain history; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists; external/device completion still requires first-hand proof.',
  });
 }
