@@ -70,6 +70,7 @@ const strongB02=validateConvergenceRepairR450({item:b02,proposal:{files:[
   "const usableControl=functionalInheritance.usableControl;",
   "const stateOutput=functionalInheritance.stateOutput;",
   "const proof=functionalInheritance.proof;",
+  "const receiptAuthority='R142';",
   "const failureRecovery=functionalInheritance.failureRecovery;",
   "const degradeTo=functionalInheritance.degradeTo;",
   "const canonicalMutation=false;",
