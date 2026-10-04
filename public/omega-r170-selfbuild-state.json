@@ -2013,5 +2013,33 @@
         ]
       }
     }
+  ],
+  "r388CanonicalAdvancements": [
+    {
+      "schema": "OMEGA_R388_CANONICAL_ADVANCEMENT_R465",
+      "itemId": "R388-B-02",
+      "sourceRevision": "R464",
+      "candidateHead": "854ebc20eb2049c32194ea106b9296cc6b4e2caa",
+      "mergeSha": "7a3531b9ab8a84c5be2a98dc3a6a1212993f3430",
+      "productionRunId": 37239405261,
+      "status": "RELEASE_CLEAN",
+      "expectedProofs": [
+        "R241 Archive Convergence Visual Intelligence",
+        "OMEGA R237 Hybrid Command Authority Proof",
+        "OMEGA Cloud Bridge CI"
+      ],
+      "evidence": [
+        "8/8 exact-head governed proof green",
+        "canonical Worker deployment success",
+        "deployed R200 browser proof success",
+        "live R202/R237/R238 success",
+        "complete Hybrid live-proof closure success",
+        "deployment receipt success",
+        "governed self-build continuation success"
+      ],
+      "historicalMarkdownMutated": false,
+      "canonicalAdmission": false,
+      "directProductionMutation": false
+    }
   ]
 }
