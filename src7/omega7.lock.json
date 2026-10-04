@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "e175dc0179d481ad7e5a17aecd949aac0c0862e3",
-  "sourceMilestone": "R442_CANDIDATE",
+  "sourceMainSha": "af585532957eae9d3f087c3665772eba317a6a8d",
+  "sourceMilestone": "R443",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -30,7 +30,13 @@
     "Memory",
     "Create",
     "Render Queue",
-    "Assets"
+    "Assets",
+    "Hybrid Link",
+    "Quality Compiler",
+    "Build Out",
+    "Development",
+    "Kernel Intelligence",
+    "SAI Lab"
   ],
   "addressResolution": [
     12,
@@ -51,11 +57,15 @@
     "MOTION_TRAVERSAL",
     "SCIENCE_RELATIVITY_ATLAS",
     "FORECAST_VISUAL_FIELD",
-    "WORK_CREATE_CONTINUITY"
+    "WORK_CREATE_CONTINUITY",
+    "DEVELOPMENT_COMPUTE"
   ],
   "atomicScienceRule": "TYPED_SOURCE_REQUIRED_BEFORE_ATOMIC_CHEMISTRY_PROMOTION",
   "forecastTruthRule": "MODEL_FUTURES_ARE_NOT_FUTURE_OBSERVATIONS",
   "motionTruthRule": "ADDRESS_SPACE_MOTION_IS_NOT_PHYSICAL_VELOCITY",
   "workTruthRule": "LOCAL_PROJECT_MEMORY_AND_WORKSPACE_CONTINUITY_DO_NOT_IMPLY_CANONSTATE_OR_EXTERNAL_PERSISTENCE",
-  "createTruthRule": "ORCHESTRATION_AND_RENDER_OUTPUT_DO_NOT_PROVE_EXTERNAL_OR_NATIVE_EXECUTION"
+  "createTruthRule": "ORCHESTRATION_AND_RENDER_OUTPUT_DO_NOT_PROVE_EXTERNAL_OR_NATIVE_EXECUTION",
+  "hybridTruthRule": "BROWSER_PAIRING_IS_NOT_PC_EXECUTION; CURRENT_AUTHENTICATED_HEARTBEAT_REQUIRED",
+  "intelligenceTruthRule": "SAI_MAY_PROPOSE_AND_LEDGER_BUT_BROWSER_CANNOT_SILENTLY_MUTATE_GITHUB_PRODUCTION_OR_CANONSTATE",
+  "qualityTruthRule": "CATALOG_PRESENCE_AND_UI_AVAILABILITY_ARE_NOT_EXECUTION_PROOF"
 }
