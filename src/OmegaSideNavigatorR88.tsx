@@ -36,6 +36,22 @@ const validWorkspace=(value:any):value is OmegaWorkspaceIdR82=>OMEGA_WORKSPACES_
 const storedWorkspace=():WorkspaceFilter=>{try{const value=localStorage.getItem('omega.r82.workspace');return validWorkspace(value)?value:'ALL'}catch{return'ALL'}};
 const storedRailWide=()=>{try{return localStorage.getItem('omega.r120.navWide')==='true'}catch{return false}};
 const TIER_COPY={PRIMARY:'Start here',SUPPORT:'Common supporting tools',EXPERT:'Advanced and specialist tools'} as const;
+export const OMEGA_ROUTE_FUNCTIONAL_INHERITANCE='R464';
+type RouteFunctionalInheritanceR464={
+ route:string;
+ usableControl:boolean;
+ stateOutput:string;
+ proof:{operationAuthority:'R143';executionProof:'R142';canonAdmission:'R125'};
+ failureRecovery:{state:'READY'|'DEGRADED';degradeTo:'System Atlas';preserveRequestedRoute:boolean};
+ canonicalMutation:false;
+};
+const routeFunctionalInheritanceR464=(route:string):RouteFunctionalInheritanceR464=>{
+ const registered=OMEGA_ALL_ROUTES_R82.includes(route as any);
+ if(!registered)return{route,usableControl:false,stateOutput:'UNRESOLVED_ROUTE',proof:{operationAuthority:'R143',executionProof:'R142',canonAdmission:'R125'},failureRecovery:{state:'DEGRADED',degradeTo:'System Atlas',preserveRequestedRoute:true},canonicalMutation:false};
+ const chain=operationContractForRouteR143(route);
+ const usableControl=Boolean(chain?.routeId&&chain?.capabilityId&&chain?.executionDomain);
+ return{route,usableControl,stateOutput:`${chain.state}:${chain.capabilityId}`,proof:{operationAuthority:'R143',executionProof:'R142',canonAdmission:'R125'},failureRecovery:{state:usableControl?'READY':'DEGRADED',degradeTo:'System Atlas',preserveRequestedRoute:true},canonicalMutation:false};
+};
 
 export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome}:Props){
  const[expanded,setExpanded]=useState(false),[railWide,setRailWide]=useState(storedRailWide),[layer,setLayer]=useState<BrowserLayer>('EVERYWHERE'),[query,setQuery]=useState(''),[workspaceFilter,setWorkspaceFilter]=useState<WorkspaceFilter>('ALL'),[masterMenu,setMasterMenu]=useState<MasterMenuFilterR289>('ALL'),[showTechnical,setShowTechnical]=useState(false),[navigationScar,setNavigationScar]=useState('');
@@ -57,7 +73,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
  const navigationLemma=useMemo(()=>compileNavigationLemmaR242({routes:routeRecords,query,workspaceFilter,currentRoute:currentPanel}),[routeRecords,query,workspaceFilter,currentPanel]);
  const lemmaRows=useMemo(()=>navigationLemma.routes.map((route:any)=>route.name as string),[navigationLemma]);
  const rows=useMemo(()=>lemmaRows.filter(route=>masterMenu==='ALL'||omegaMasterMenuForRouteR289(route)?.id===masterMenu),[lemmaRows,masterMenu]);
- const go=(panel:string)=>{const resolved=resolveExactRouteR242(routeRecords,panel);if(!resolved){setNavigationScar(`UNRESOLVED_ROUTE_IDENTITY:${panel}`);setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setMasterMenu('ALL');setQuery(panel);setExpanded(true);return}setNavigationScar('');onNavigate(resolved.name);setExpanded(false);setQuery('')};
+ const go=(panel:string)=>{const inheritance=routeFunctionalInheritanceR464(panel);const resolved=resolveExactRouteR242(routeRecords,panel);if(!resolved||!inheritance.usableControl){setNavigationScar(`FUNCTIONAL_INHERITANCE_DEGRADED:${panel}->${inheritance.failureRecovery.degradeTo}`);setLayer('EVERYWHERE');setWorkspaceFilter('ALL');setMasterMenu('ALL');setQuery(panel);setExpanded(true);return}setNavigationScar('');onNavigate(resolved.name);setExpanded(false);setQuery('')};
  const open=(next:BrowserLayer)=>{setLayer(next);setNavigationScar('');setExpanded(true)};
  const currentWorkspace=currentPanel?workspaceForRouteR82(currentPanel as any):null,currentOrganization=currentPanel?organizationForRouteR132(currentPanel):null,routeCount=OMEGA_ROUTE_INVENTORY_R107.currentCount;
  const residualCount=navigationLemma.residualCount+(navigationScar?1:0);
@@ -101,7 +117,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
     </div>
     <div className='r210-nav-status' role='status' aria-live='polite'>{rows.length} of {routeCount} destinations visible{activeMasterMenu?` in ${activeMasterMenu.id} ${activeMasterMenu.label}`:''}{query.trim()?` for “${query.trim()}”`:''}{navigationScar?` · ${navigationScar}`:residualCount?` · ${residualCount} calculus residual${residualCount===1?'':'s'} carried`:''}.</div>
     <div className='r89-flat-scroll r104-route-scroll' aria-label={activeWorkspace?`${activeWorkspace.label} OMEGA applications`:'All registered OMEGA applications'}>
-     {rows.map(route=>{const index=OMEGA_ALL_ROUTES_R82.indexOf(route)+1,workspace=workspaceForRouteR82(route),reality=effectiveCapabilityReality(route),org=organizationForRouteR132(route),chain=operationContractForRouteR143(route),master=omegaMasterMenuForRouteR289(route),firstOfTier=!navigationLemma.searching&&rows.find(candidate=>organizationForRouteR132(candidate).tier===org.tier)===route;return <Fragment key={route}>{firstOfTier&&<div className='r239-route-group' data-tier={org.tier}><span>{org.tier}</span><small>{TIER_COPY[org.tier]}</small></div>}<button title={`${workspace.copy} · ${org.layout.replaceAll('_',' ')}`} className={'r89-flat-route r104-route '+(currentPanel===route?'active':'')} aria-current={currentPanel===route?'page':undefined} onClick={()=>go(route)} data-route-name={route} data-route-id={chain.routeId} data-capability-id={chain.capabilityId} data-execution-domain={chain.executionDomain} data-execution-state={chain.state} data-master-menu={master?.id||''}>
+     {rows.map(route=>{const index=OMEGA_ALL_ROUTES_R82.indexOf(route)+1,workspace=workspaceForRouteR82(route),reality=effectiveCapabilityReality(route),org=organizationForRouteR132(route),chain=operationContractForRouteR143(route),inheritance=routeFunctionalInheritanceR464(route),master=omegaMasterMenuForRouteR289(route),firstOfTier=!navigationLemma.searching&&rows.find(candidate=>organizationForRouteR132(candidate).tier===org.tier)===route;return <Fragment key={route}>{firstOfTier&&<div className='r239-route-group' data-tier={org.tier}><span>{org.tier}</span><small>{TIER_COPY[org.tier]}</small></div>}<button title={`${workspace.copy} · ${org.layout.replaceAll('_',' ')}`} className={'r89-flat-route r104-route '+(currentPanel===route?'active':'')} aria-current={currentPanel===route?'page':undefined} onClick={()=>go(route)} data-route-name={route} data-route-id={chain.routeId} data-capability-id={chain.capabilityId} data-execution-domain={chain.executionDomain} data-execution-state={chain.state} data-functional-inheritance={OMEGA_ROUTE_FUNCTIONAL_INHERITANCE} data-usable-control={inheritance.usableControl?'true':'false'} data-state-output={inheritance.stateOutput} data-proof-authority={`${inheritance.proof.operationAuthority}/${inheritance.proof.executionProof}/${inheritance.proof.canonAdmission}`} data-failure-recovery={inheritance.failureRecovery.state} data-degrade-to={inheritance.failureRecovery.degradeTo} data-canonical-mutation={String(inheritance.canonicalMutation)} data-master-menu={master?.id||''}>
       <i>{String(index).padStart(2,'0')}</i><span><b>{route}</b><small className='r132-route-meta'><span className='r132-route-tier' data-tier={org.tier}>{org.tier}</span><span>{workspace.label}</span>{showTechnical&&master&&<span> · {master.id} {master.label}</span>}{showTechnical&&<span> · {org.surfaceClass} · {org.layout.replaceAll('_',' ')}</span>}</small><em>{showTechnical?`${chain.executionDomain}/${chain.state} · ${CAPABILITY_REALITY_LABEL[reality]}`:workspace.copy}</em></span><ChevronRight/>
      </button></Fragment>})}
      {rows.length===0&&<div className='r88-empty'>No tool matches that recovered-menu/workspace/search combination. The query is preserved as a residual; no destination is fabricated.</div>}
