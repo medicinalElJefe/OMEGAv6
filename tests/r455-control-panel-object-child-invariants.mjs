@@ -23,7 +23,8 @@ for(const token of [
  "const r455CycleReceipt={cycle:1,jobId:'r455-returned-job',status:'COMPLETE',resultFingerprint:'f'.repeat(64),completedAt:Date.now()-1000}",
  "cycles:[r455CycleReceipt]",
  "summary:r455CycleReceipt",
- "/(?:1|0)\\/8 cycles/.test(commandText)",
+ "page.locator('.prompt-orchestrator .mission-live').waitFor({state:'visible',timeout:10000})",
+ "commandText.includes('1/8 cycles')",
  "commandText.includes('cycle 1')",
  "commandText.includes('job r455-returned-job')"
 ])assert.ok(browser.includes(token),'R455 browser reproduction missing '+token);
