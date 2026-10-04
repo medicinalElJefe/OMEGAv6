@@ -143,6 +143,34 @@ const stalePreimageRecoveryR461=({rejection,contextFiles=[]}={})=>{
  }
  return{schema:'OMEGA_R461_STALE_PREIMAGE_RECOVERY',anchors};
 };
+const currentSourceAnchorsR463=({residual,stage,contextFiles=[]}={})=>{
+ const semanticText=JSON.stringify({residual,stage});
+ const tokens=[...new Set((semanticText.match(/[A-Za-z_$][A-Za-z0-9_$]{3,}/g)||[]).filter(token=>!/^(schema|state|stage|false|true|null|undefined|source|repair|residual|expected|proofs|current|exact|files|file|path|target|objective|section|item|canonical|admission|production|mutation)$/i.test(token)))].slice(0,32);
+ const files=[];
+ for(const context of contextFiles||[]){
+  const source=String(context?.text??'');if(!source)continue;
+  const anchors=[];
+  for(const token of tokens){
+   let from=0;
+   while(anchors.length<8){
+    const at=source.indexOf(token,from);if(at<0)break;
+    let start=source.lastIndexOf('\n',Math.max(0,at-1));start=start<0?0:start+1;
+    let end=source.indexOf('\n',at+token.length);end=end<0?source.length:end;
+    if(end-start<48){
+     const next=source.indexOf('\n',Math.min(source.length,end+1));
+     if(next>0)end=next;
+    }
+    const exact=source.slice(start,end);
+    const occurrences=exact?source.split(exact).length-1:0;
+    if(exact&&occurrences===1&&!anchors.some(row=>row.exact===exact))anchors.push({id:`A${anchors.length+1}`,token,start,end,exact});
+    from=at+token.length;
+   }
+   if(anchors.length>=8)break;
+  }
+  if(anchors.length)files.push({path:pathText(context.path),currentSha:String(context.sha||''),anchors});
+ }
+ return{schema:'OMEGA_R463_CURRENT_SOURCE_ANCHORS',files};
+};
 const correctionProposalR314=proposal=>({
  ...summarizeAiProposalR314(proposal),
  files:(Array.isArray(proposal?.files)?proposal.files:[]).map(file=>({
@@ -188,10 +216,11 @@ export function autonomousRepairCorrectionPromptR314({residual,stage,contextFile
   }:null,
   proposal:correctionProposalR314(rejection?.proposal),
   stalePreimageRecovery,
+  currentSourceAnchors:currentSourceAnchorsR463({residual,stage,contextFiles}),
  };
  return `You are correcting a previously rejected bounded OMEGAv6 R314 product-source proposal. Return JSON only. This is a correction under the SAME authority membrane, not permission to widen it.\n\nImmutable rules:\n- Schema must be ${R314_AUTONOMOUS_REPAIR_SCHEMA}.\n- Repair only the supplied files and bind every file to its supplied preimage SHA.\n- Maximum ${R314_AI_MAX_FILES} files and ${R314_AI_MAX_REPLACEMENTS_PER_FILE} exact replacements per file.\n- Every before string must occur exactly once in the supplied exact source.
 - If stalePreimageRecovery is present, rebuild the rejected replacement from one of its exactCurrentAnchors or another exact unique fragment copied from CURRENT source. Do not reuse rejectedBefore unless its current occurrence count is exactly 1.
-- Treat currentSha and CURRENT source text as authoritative; stale rejected proposal text is evidence only, never a source of truth.\n- Prefer the smallest correction that resolves the listed validator defects; do not expand scope.\n- Keep the correction response compact enough to complete as one JSON object: prefer one file, no more than 3 replacements, and short exact local before/after fragments rather than whole functions or files.\n- Do not emit a replacement whose before or after text exceeds 1600 characters. If the only conceivable change would require a larger response, return files:[] instead of risking a truncated proposal.\n- Do not edit tests, workflows, deployment, cloud evolution, self-build governance, authentication, secrets, Canon admission, workers, or generated projections.\n- Do not claim scientific, device, runtime, deployment or Canon truth.\n- canonicalAdmission and directProductionMutation must both be false.\n- expectedProofs must name existing independent proof families.\n- Never work around a rejection code. Correct the proposal so the unchanged validator accepts it.\n- If no compliant patch exists, return files:[].\n\nVALIDATOR REJECTION EVIDENCE\n${JSON.stringify(rejectionEvidence)}\n\nRESIDUAL\n${JSON.stringify(residual)}\n\nBUILD STAGE\n${JSON.stringify(stage)}\n\nEXACT SOURCE CONTEXT\n${JSON.stringify(context)}`;
+- Treat currentSha and CURRENT source text as authoritative; stale rejected proposal text is evidence only, never a source of truth.\n- If the previous attempt was NO_SAFE_PATCH, currentSourceAnchors is the machine-derived re-entry surface: choose a semantically relevant anchor and copy its exact text verbatim as before. Do not reconstruct before from memory, the residual narrative, or an older proposal.\n- currentSourceAnchors contain only exact fragments that occur once in the CURRENT supplied blob; using one does not waive any unchanged R314 validator rule.\n- Prefer the smallest correction that resolves the listed validator defects; do not expand scope.\n- Keep the correction response compact enough to complete as one JSON object: prefer one file, no more than 3 replacements, and short exact local before/after fragments rather than whole functions or files.\n- Do not emit a replacement whose before or after text exceeds 1600 characters. If the only conceivable change would require a larger response, return files:[] instead of risking a truncated proposal.\n- Do not edit tests, workflows, deployment, cloud evolution, self-build governance, authentication, secrets, Canon admission, workers, or generated projections.\n- Do not claim scientific, device, runtime, deployment or Canon truth.\n- canonicalAdmission and directProductionMutation must both be false.\n- expectedProofs must name existing independent proof families.\n- Never work around a rejection code. Correct the proposal so the unchanged validator accepts it.\n- If no compliant patch exists, return files:[].\n\nVALIDATOR REJECTION EVIDENCE\n${JSON.stringify(rejectionEvidence)}\n\nRESIDUAL\n${JSON.stringify(residual)}\n\nBUILD STAGE\n${JSON.stringify(stage)}\n\nEXACT SOURCE CONTEXT\n${JSON.stringify(context)}`;
 }
 
 export const R314_AUTONOMOUS_REPAIR_LAWS=Object.freeze([
@@ -206,5 +235,6 @@ export const R314_AUTONOMOUS_REPAIR_LAWS=Object.freeze([
  'AI_REFORMULATION_BUDGET_IS_BOUNDED_AND_EVERY_ATTEMPT_REVALIDATES_FROM_SCRATCH',
  'AI_CORRECTION_TRANSPORT_HEADROOM_DOES_NOT_WIDEN_SEMANTIC_PATCH_AUTHORITY',
  'AI_ZERO_OCCURRENCE_PREIMAGE_MUST_REANCHOR_TO_CURRENT_EXACT_SOURCE_BEFORE_RETRY',
+ 'AI_DECLINED_FIRST_ATTEMPT_MUST_RECEIVE_MACHINE_DERIVED_CURRENT_SOURCE_ANCHORS_BEFORE_FINAL_REFORMULATION',
  'AI_DECODER_GUARANTEES_JSON_OBJECT_ONLY_R314_REMAINS_SOLE_SEMANTIC_PATCH_VALIDATOR',
 ]);
