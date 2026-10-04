@@ -104,6 +104,20 @@ assert.ok(retryPrompts[1].includes('"preimageSha":"wrong"'),'correction prompt m
 
 assert.ok(retryPrompts[1].includes('"sha":"blob123"'),'reformulation must retain the same exact source SHA');
 assert.ok(retryPrompts[1].includes('"path":"src/components/Example.jsx"'),'reformulation must retain the same source membrane');
+const staleProposal=structuredClone(proposal);
+staleProposal.files[0].replacements=[{before:'export const staleValue = 1;',after:'export const staleValue = 2;'}];
+const stalePrompts=[];
+const staleAi={calls:0,async run(_model,input){this.calls++;stalePrompts.push(input.messages.at(-1).content);return{response:this.calls===1?staleProposal:proposal}}};
+const staleRecovered=await proposeAiRepairR314({ai:staleAi,residual:safeResidual,stage:{id:'R461-STALE-PREIMAGE',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
+assert.equal(staleRecovered.ok,true,'R461 zero-occurrence preimage may recover on the unchanged second bounded attempt');
+assert.equal(staleRecovered.attempts.length,2);
+assert.ok(staleRecovered.rejectionHistory[0].reasons.includes('FILE_1_REPLACEMENT_1_PREIMAGE_OCCURRENCES_0'));
+assert.ok(stalePrompts[1].includes('OMEGA_R461_STALE_PREIMAGE_RECOVERY'),'R461 correction prompt must carry deterministic stale-preimage recovery evidence');
+assert.ok(stalePrompts[1].includes('"currentSha":"blob123"'),'R461 recovery must bind the current exact blob SHA');
+assert.ok(stalePrompts[1].includes('"rejectedBeforeCurrentOccurrences":0'),'R461 must prove the rejected fragment is absent from current source');
+assert.ok(stalePrompts[1].includes('Do not reuse rejectedBefore unless its current occurrence count is exactly 1.'),'R461 must explicitly forbid stale fragment reuse');
+assert.ok(stalePrompts[1].includes('currentSha and CURRENT source text as authoritative'),'R461 must make current source authoritative over rejected proposal text');
+
 
 const declinedThenPatchAi={calls:0,prompts:[],async run(_model,input){this.calls++;this.prompts.push(input.messages.at(-1).content);return{response:this.calls===1?declined:proposal}}};
 const recoveredDecline=await proposeAiRepairR314({ai:declinedThenPatchAi,residual:safeResidual,stage:{id:'R416-DECLINE-RECOVERY',baseSha:'A',paths:['src/components/Example.jsx']},contextFiles});
