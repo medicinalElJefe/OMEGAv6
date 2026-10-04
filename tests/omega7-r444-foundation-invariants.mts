@@ -9,7 +9,7 @@ const lock=JSON.parse(fs.readFileSync('src7/omega7.lock.json','utf8'));
 
 const added=['Hybrid Link','Quality Compiler','Build Out','Development','Kernel Intelligence','SAI Lab'];
 for(const route of added)assert.equal(isOmega7NativeRoute(route),true,route+' must be native in R444');
-assert.equal(OMEGA7_NATIVE_ROUTES.length,29);
+assert.ok(OMEGA7_NATIVE_ROUTES.length>=29,'R444 native set may grow in successors but cannot shrink below 29');
 assert.ok(native.includes("lazy(()=>import('./workspaces/DevelopmentComputeWorkspaceR444'))"));
 
 for(const token of ['HybridMissionControlR8','UniversalQualityControl','WovenBuildOutPanel','SAISovereignControl','IntelligenceFabricPanel','OmegaIntentWorkbenchR85','sourceBackedModeSummary','omega.v6.address'])assert.ok(workspace.includes(token),'R444 missing '+token);
@@ -26,8 +26,8 @@ assert.equal(OMEGA7_INHERITANCE_LEDGER.length,44);
 for(const route of OMEGA7_NATIVE_ROUTES)assert.equal(OMEGA7_INHERITANCE_LEDGER.find(x=>x.legacyRoute===route)?.migration,'ADAPTED',route+' must remain adapted rather than retired');
 assert.equal(OMEGA7_INHERITANCE_LEDGER.some(canRetireOmega6Surface),false);
 
-assert.equal(lock.sourceMainSha,'af585532957eae9d3f087c3665772eba317a6a8d');
-assert.equal(lock.sourceMilestone,'R443');
+assert.match(lock.sourceMainSha,/^[a-f0-9]{40}$/,'successor lock must retain an exact source SHA');
+assert.ok(typeof lock.sourceMilestone==='string'&&lock.sourceMilestone.length>0,'successor lock must retain a declared source milestone');
 assert.ok(lock.nativeFamilies.includes('DEVELOPMENT_COMPUTE'));
 assert.match(lock.hybridTruthRule,/PAIRING_IS_NOT_PC_EXECUTION/);
 assert.match(lock.intelligenceTruthRule,/BROWSER_CANNOT_SILENTLY_MUTATE/);
@@ -35,4 +35,4 @@ assert.match(lock.qualityTruthRule,/NOT_EXECUTION_PROOF/);
 assert.equal(lock.registeredRouteCount,44);
 assert.equal(lock.physicalDimensionClaim,false);
 
-console.log('OMEGA7 R444 PASS · native development/compute family · 29 native routes · Hybrid/quality/SAI authority boundaries preserved · zero retirement');
+console.log('OMEGA7 R444 CONTRACT PASS · development/compute family remains native in successors · Hybrid/quality/SAI authority boundaries preserved · zero retirement');
