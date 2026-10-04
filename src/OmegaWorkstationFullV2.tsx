@@ -19,7 +19,7 @@ import {applyWorkflowVisualIntentR86,emitOperationR86} from './omegaOperationBus
 import {commitRouteLifecycleR356,requestRouteLifecycleR356} from './system/routeLifecycleR356';
 import {OMEGA_ALL_ROUTES_R82} from './omegaExperienceRegistryR82';
 import {operationContractForRouteR143} from './authoritativeOperationChainR143';
-import {OMEGA_NAV_NAMES,type OmegaRouteName} from './navigationRegistry';
+import {OMEGA_CONTROL_RECONCILIATION_R466,OMEGA_NAV_NAMES,omegaMasterMenuForRouteR289,omegaNavItem,type OmegaRouteName} from './navigationRegistry';
 import {
  ArchiveGovernanceR109,AtlasCalculatorR109,AtlasViewportR109,BuildOutR109,EarthNowR109,ExtremeTraversalR109,ForecastR109,
  HybridMissionControlR109,InfinityR109,IntelligenceFabricR109,MatterTraversalR109,OmegaWorkspaceCockpitR109,PluginRegistryR109,
@@ -42,6 +42,52 @@ void LEGACY_R23_STALE_ROUTE_FALLBACK;
 const SPECIALIST_EXISTING=new Set<Panel>(['Hybrid Link','Workspace','Cockpit','Matter Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Reality Lab','Atlas Calculator','Infinity','Scale Compiler','Build Out','SAI Lab','Kernel Intelligence','Immersive Traversal','Extreme Traversal','Traversal','Archive Census','Archive Operators','Quality Compiler','Validation','System Atlas','Control Matrix']);
 const SPECIALIST_SUITE=new Set<Panel>(['Field','Data Motion','Projects','Render Queue','Assets','Evidence & Proof','Memory','Canon Evolution','Governance','Consolidation','Instructions','Settings','System']);
 const VISUAL_FIRST_SURFACES=new Set<Panel>(['Matter Traversal','Visual Instrument','Immersive Traversal','Extreme Traversal','Traversal','Forecast','Relativity','Earth Now','Atlas','Infinity','Scale Compiler','Reality Lab','Field','Data Motion','Convergence']);
+export const OMEGA_WORKSTATION_CONTROL_RECONCILIATION='R466';
+const DIRECT_WORKSTATION_SURFACES_R466=new Set<Panel>(['Command Center','Create','Development','Modes','Plugins','Convergence']);
+type WorkstationControlAuditR466={
+ route:Panel;
+ declaredAuthority:string|null;
+ registeredExactlyOnce:boolean;
+ experienceExactlyOnce:boolean;
+ masterMenuReachable:boolean;
+ mountClaims:number;
+ mountedExactlyOnce:boolean;
+ operationBound:boolean;
+ routable:boolean;
+ hiddenUnreachable:boolean;
+ duplicateAuthority:boolean;
+ canonicalMutation:false;
+};
+const workstationMountClaimsR466=(route:Panel)=>Number(DIRECT_WORKSTATION_SURFACES_R466.has(route))+Number(SPECIALIST_EXISTING.has(route))+Number(SPECIALIST_SUITE.has(route));
+export const OMEGA_WORKSTATION_CONTROL_AUDIT_R466=Object.freeze(OMEGA_ALL_ROUTES_R82.map(route=>{
+ const panel=route as Panel;
+ const navItem=omegaNavItem(route);
+ const registeredExactlyOnce=OMEGA_NAV_NAMES.filter(name=>name===route).length===1;
+ const experienceExactlyOnce=OMEGA_ALL_ROUTES_R82.filter(name=>name===route).length===1;
+ const masterMenuReachable=Boolean(omegaMasterMenuForRouteR289(route));
+ const mountClaims=workstationMountClaimsR466(panel);
+ const mountedExactlyOnce=mountClaims===1;
+ const chain=operationContractForRouteR143(route);
+ const operationBound=Boolean(chain?.routeId&&chain?.capabilityId&&chain?.executionDomain);
+ const routable=Boolean(capabilityExecutionContract(route).routable);
+ const duplicateAuthority=!registeredExactlyOnce;
+ const hiddenUnreachable=!(registeredExactlyOnce&&experienceExactlyOnce&&masterMenuReachable&&mountedExactlyOnce&&operationBound&&routable);
+ return Object.freeze({route:panel,declaredAuthority:navItem?.authority||null,registeredExactlyOnce,experienceExactlyOnce,masterMenuReachable,mountClaims,mountedExactlyOnce,operationBound,routable,hiddenUnreachable,duplicateAuthority,canonicalMutation:false}) satisfies WorkstationControlAuditR466;
+}));
+export const OMEGA_WORKSTATION_CONTROL_SUMMARY_R466=Object.freeze({
+ schema:'OMEGA_WORKSTATION_CONTROL_RECONCILIATION_R466',
+ revision:'R466',
+ routeCount:OMEGA_WORKSTATION_CONTROL_AUDIT_R466.length,
+ recoveredControls:Object.freeze(OMEGA_WORKSTATION_CONTROL_AUDIT_R466.filter(row=>!row.hiddenUnreachable).map(row=>row.route)),
+ hiddenUnreachableRoutes:Object.freeze(OMEGA_WORKSTATION_CONTROL_AUDIT_R466.filter(row=>row.hiddenUnreachable).map(row=>row.route)),
+ duplicateAuthorityRoutes:Object.freeze(OMEGA_WORKSTATION_CONTROL_AUDIT_R466.filter(row=>row.duplicateAuthority).map(row=>row.route)),
+ nonUniqueMountRoutes:Object.freeze(OMEGA_WORKSTATION_CONTROL_AUDIT_R466.filter(row=>!row.mountedExactlyOnce).map(row=>row.route)),
+ navigationRegistryPass:OMEGA_CONTROL_RECONCILIATION_R466.pass,
+ pass:OMEGA_CONTROL_RECONCILIATION_R466.pass&&OMEGA_WORKSTATION_CONTROL_AUDIT_R466.every(row=>!row.hiddenUnreachable&&!row.duplicateAuthority&&row.mountedExactlyOnce),
+ proof:{routeAuthority:'navigationRegistry',operationAuthority:'R143',executionProof:'R142',canonAdmission:'R125'},
+ canonicalMutation:false,
+ rule:'RECOVER_EVERY_REGISTERED_CONTROL_WITH_EXACTLY_ONE_MOUNT_AND_NO_SHADOW_ROUTE_AUTHORITY'
+});
 export const OMEGA_ROUTE_FUNCTIONAL_INHERITANCE='R464';
 type RouteFunctionalInheritanceR464={
  route:string;
