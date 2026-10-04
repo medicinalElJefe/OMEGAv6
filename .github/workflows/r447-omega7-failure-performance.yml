@@ -1,0 +1,61 @@
+name: R447 OMEGA7 Failure Recovery Performance Proof
+
+on:
+  pull_request:
+    paths:
+      - "src7/**"
+      - "tests/omega7-r447-failure-recovery-e2e.mjs"
+      - "tests/omega7-r447-performance-e2e.mjs"
+      - "tests/omega7-r447-parity-invariants.mjs"
+      - ".github/workflows/r447-omega7-failure-performance.yml"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  failure-performance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - name: Use Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install application dependencies
+        run: npm install
+      - name: Build exact OMEGA7 candidate
+        run: npm run build
+      - name: Install pinned browser proof harness
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Start exact built preview
+        shell: bash
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/omega7-r447-vite.log 2>&1 &
+          echo $! > /tmp/omega7-r447-vite.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4173/?omega7=1 >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega7-r447-vite.log
+          exit 1
+      - name: Prove failure containment and recovery
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/omega7-r447-failure-recovery-e2e.mjs
+      - name: Prove bounded shell and route performance
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/omega7-r447-performance-e2e.mjs
+      - name: Stop preview
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/omega7-r447-vite.pid ]; then kill "$(cat /tmp/omega7-r447-vite.pid)" || true; fi

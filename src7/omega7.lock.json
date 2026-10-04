@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "7c7ffda2891e7651efba6f48082d7586760de3cf",
-  "sourceMilestone": "R445_CANDIDATE",
+  "sourceMainSha": "1defc57ca70914a0cebcc00e5f687cfc71b6d809",
+  "sourceMilestone": "R446_CANDIDATE",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -89,7 +89,7 @@
   "evidenceTruthRule": "PASS_REQUIRES_RETURNED_OR_CANONICALLY_DERIVABLE_EVIDENCE; MISSING_EXTERNAL_OR_DEVICE_AUTHORITY_REMAINS_HOLD",
   "pluginTruthRule": "REGISTERED_OR_ENABLED_ADAPTER_IS_NOT_EXECUTED_OR_VERIFIED",
   "archiveTruthRule": "HISTORICAL_ARCHIVE_COUNTS_ARE_NOT_LIVE_ENUMERATION",
-  "parityPhase": "R446_BROWSER_PROOF_CANDIDATE",
+  "parityPhase": "R447_FAILURE_RECOVERY_PERFORMANCE_CANDIDATE",
   "parityRequired": [
     "FUNCTIONAL",
     "DESKTOP",
@@ -98,5 +98,12 @@
     "PERFORMANCE",
     "ROLLBACK"
   ],
-  "browserProof": "44_ROUTES_DESKTOP_AND_MOBILE_REQUIRED"
+  "browserProof": "44_ROUTES_DESKTOP_AND_MOBILE_REQUIRED",
+  "failureRecoveryProof": "LAZY_CHUNK_FAILURE_ISOLATION_AND_API_FAIL_CLOSED_REQUIRED",
+  "performanceBudgets": {
+    "initialEntryBytes": 512000,
+    "shellReadyMs": 4000,
+    "representativeRouteMs": 8000,
+    "representativeP95Ms": 6000
+  }
 }
