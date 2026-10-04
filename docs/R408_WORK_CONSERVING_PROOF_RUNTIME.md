@@ -35,10 +35,16 @@ GitHub Actions cache restores the latest job-scoped scar ledger when available. 
 
 - R313 full interaction remains 16 deterministic shards, hard cap 4, resource cost 2/4 per heavy browser shard (effective at most 2 simultaneously), 480s child ceiling, 1500s parent ceiling.
 - R313 disclosure remains 16 deterministic shards, hard cap 4, resource cost 2/4 per heavy browser shard (effective at most 2 simultaneously), 360s child ceiling, 1320s parent ceiling, followed by the unchanged R318 viewport/reload proof.
-- R286 no-dead-control remains 8 deterministic shards, hard cap 4, resource cost 1/4 per lighter shard (up to 4 simultaneously), 360s child ceiling, 780s parent ceiling.
+- R286 no-dead-control remains 8 deterministic shards, hard cap 4, resource cost 2/6 after measured navigator-stall evidence (effective at most 3 simultaneous consumers), 360s child ceiling, 780s parent ceiling.
 - The complete 44-route × desktop/mobile address space remains 88 unique cases.
 - Existing browser assertions, route/state checks, accessibility, overflow, page-error, guard and mutation boundaries remain unchanged.
 - No source authority, CanonState, Worker deployment, proof-return or physical-claim boundary changes.
+
+## R460 stale-head admission boundary
+
+Before either expensive R241 browser job starts, a lightweight preflight resolves the PR's live `refs/pull/<number>/head` directly from GitHub and compares it with the exact workflow SHA. A superseded exact head remains in GitHub history and the scar/provenance record, but it is no longer compute-active. Both heavy R241 jobs are skipped for obsolete heads. Manual `workflow_dispatch` remains exact-request eligible. This changes compute admission only; it does not remove any assertion from a current-head proof.
+
+This repairs the prior burden where concurrency was keyed by PR + exact SHA: exact-head isolation was correct, but superseded heads could continue consuming exhaustive browser capacity after a newer PR head existed.
 
 ## Expected effect
 
