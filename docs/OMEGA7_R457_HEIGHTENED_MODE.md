@@ -116,6 +116,8 @@ Promotion is comparative rather than revision-count based:
 
 Presentation improvement cannot compensate for lost capability, proof, future paths, or recovery. A green source patch is therefore not developmental growth until the transition survives its authority and proof transport.
 
+Every normalized developmental metric must also carry an explicit evidence reference and the transition must bind the exact source head plus proof references. Unbound scores are not treated as knowledge and force ESCALATE rather than promotion.
+
 ## Contradictions and scars
 
 R457 carries the developmental rule:
