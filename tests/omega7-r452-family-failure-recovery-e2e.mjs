@@ -51,7 +51,10 @@ async function proveFamily(browser,route,family){
  const recover=failure.locator('button');
  const recoverText=await recover.innerText();
  if(recoverText!=='Recover')throw new Error(`R452 ${family} chunk failure did not offer deterministic Recover action`);
- await recover.click();
+ await Promise.all([
+  page.waitForEvent('framenavigated',{predicate:frame=>frame===page.mainFrame(),timeout:30000}),
+  recover.click()
+ ]);
  await page.waitForLoadState('domcontentloaded',{timeout:30000});
  await page.locator('.o7-app').waitFor({state:'visible',timeout:30000});
  await page.waitForFunction(r=>document.querySelector('.o7-main')?.getAttribute('data-native-route')===r,route,{timeout:20000});
