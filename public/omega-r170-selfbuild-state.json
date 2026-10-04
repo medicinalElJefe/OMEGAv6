@@ -2033,14 +2033,14 @@
         "rows": [
           {
             "path": "src/OmegaWorkstationFullV2.tsx",
-            "blobSha": "a75414dbebd1a8f1b7bb924596e5e2d875d8f295"
+            "blobSha": "d7cf94619e14d626e1687a8bc74c7176011e4853"
           },
           {
             "path": "src/navigationRegistry.ts",
             "blobSha": "33d73b82fb6fba915af8336386a6883c8a266aa3"
           }
         ],
-        "key": "src/OmegaWorkstationFullV2.tsx:a75414dbebd1a8f1b7bb924596e5e2d875d8f295|src/navigationRegistry.ts:33d73b82fb6fba915af8336386a6883c8a266aa3"
+        "key": "src/OmegaWorkstationFullV2.tsx:d7cf94619e14d626e1687a8bc74c7176011e4853|src/navigationRegistry.ts:33d73b82fb6fba915af8336386a6883c8a266aa3"
       },
       "baseSha": "a9e075fce6f18cc50f050cebcea7c2fc981f6e9e",
       "branch": "cloud/evolution-r388-r388-b-03-a9e075fc",
