@@ -7,7 +7,10 @@ import {
  OMEGA7_HEIGHTENED_CAPABILITIES,
  OMEGA7_HEIGHTENED_SUMMARY,
  composeHeightenedR457,
- evaluateRetirementR457
+ evaluateRetirementR457,
+ R457_DEVELOPMENTAL_SEQUENCE,
+ R457_DEWEY_KERNEL,
+ evaluateDevelopmentalTransitionR457
 } from '../src7/heightenedModeR457.ts';
 
 assert.equal(OMEGA7_HEIGHTENED_CAPABILITIES.length,44,'R457 must preserve the complete accepted OMEGA7 capability universe');
@@ -71,6 +74,57 @@ assert.equal(OMEGA7_HEIGHTENED_SUMMARY.noNewPhysicalPrimitive,true);
 assert.equal(OMEGA7_HEIGHTENED_SUMMARY.physicalDimensionClaim,false);
 assert.equal(OMEGA7_HEIGHTENED_SUMMARY.canonicalMutation,false);
 
+assert.deepEqual(R457_DEVELOPMENTAL_SEQUENCE,[
+ 'CANONICAL_STATE','NORMALIZED_RELATIONAL_DIFFERENCE','GROWTH_VECTOR','GROWTH_TRANSPORT','DEVELOPMENTAL_ACCELERATION','DEVELOPMENTAL_JERK','ORDER_SENSITIVITY','DEVELOPMENTAL_CURVATURE','DEVELOPMENTAL_SCAR','CONTINUITY_CONE','RECOVERABILITY','VIABILITY','GOVERNANCE_PROMOTION','GROWTH_LAW_UPDATE'
+]);
+assert.equal(R457_DEWEY_KERNEL.score,'S=(CΩ·Φ)/(q+Λ+ε)');
+assert.equal(R457_DEWEY_KERNEL.decisionLaw,'STAY_TURN_ESCALATE');
+assert.equal(R457_DEWEY_KERNEL.pruneLaw,'PRUNE_TRANSLATE_PROVE');
+
+const parentMetrics={continuity:.80,futurePlasticity:.70,contradiction:.18,burden:.24,recoverability:.82,proofCoverage:.90,capabilityCoverage:1,humanComprehension:.62,futureTopologyRetention:1,scarPressure:.16};
+const improved=evaluateDevelopmentalTransitionR457({
+ parent:parentMetrics,
+ candidate:{...parentMetrics,continuity:.86,futurePlasticity:.78,contradiction:.12,burden:.20,recoverability:.90,proofCoverage:.96,humanComprehension:.80,scarPressure:.12},
+ previousGrowth:{humanComprehension:.05,proofCoverage:.01},
+ previousAcceleration:{humanComprehension:.01},
+ authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false
+});
+assert.equal(improved.decision,'TURN','R457 must TURN toward a proof-preserving developmental improvement rather than merely count revisions');
+assert.equal(improved.promotionAllowed,true);
+assert.equal(improved.continuityCone.reachable,true);
+assert.ok(improved.dewey.candidateScore>improved.dewey.parentScore);
+assert.ok(improved.growthVector.humanComprehension>0);
+assert.ok(improved.growthVector.contradiction>0,'lower contradiction must be positive developmental growth');
+assert.ok(Number.isFinite(improved.developmentalCurvature));
+assert.equal(improved.developmentalScar.retained,true);
+
+const vocabularyOnly=evaluateDevelopmentalTransitionR457({
+ parent:parentMetrics,
+ candidate:{...parentMetrics},
+ authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false
+});
+assert.equal(vocabularyOnly.decision,'STAY','no measured developmental change must not be promoted as growth');
+assert.equal(vocabularyOnly.promotionAllowed,false);
+
+const collapsed=evaluateDevelopmentalTransitionR457({
+ parent:parentMetrics,
+ candidate:{...parentMetrics,humanComprehension:.90,futureTopologyRetention:.70,recoverability:.70},
+ authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false
+});
+assert.equal(collapsed.decision,'ESCALATE','cleaner presentation cannot compensate for collapsed future topology or recoverability');
+assert.ok(collapsed.hardVetoes.includes('FUTURE_TOPOLOGY_COLLAPSED'));
+assert.ok(collapsed.hardVetoes.includes('RECOVERABILITY_REGRESSED'));
+assert.equal(collapsed.promotionAllowed,false);
+
+const proofBroken=evaluateDevelopmentalTransitionR457({
+ parent:parentMetrics,
+ candidate:{...parentMetrics,humanComprehension:.90},
+ authorityClosed:true,proofSurvives:false,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false
+});
+assert.equal(proofBroken.decision,'ESCALATE');
+assert.ok(proofBroken.hardVetoes.includes('PROOF_DID_NOT_SURVIVE_TRANSPORT'));
+assert.equal(proofBroken.canonicalMutation,false);
+
 const source=fs.readFileSync('src7/heightenedModeR457.ts','utf8');
 const root=fs.readFileSync('src7/Omega7Root.tsx','utf8');
 for(const token of [
@@ -78,7 +132,11 @@ for(const token of [
  "pruneAuthority:'EXPLICIT_PARITY_AND_REPLACEMENT_PROOF_REQUIRED'",
  "authority:'PRESENTATION_ONLY'",
  "contradictionAndScarPolicy:'RETAIN_DO_NOT_NORMALIZE_AWAY'",
- "futureTopologyPolicy:'PRESERVE_CAPABILITY_UNTIL_EXPLICIT_REPLACEMENT_PROOF'"
+ "futureTopologyPolicy:'PRESERVE_CAPABILITY_UNTIL_EXPLICIT_REPLACEMENT_PROOF'",
+ "R457_DEVELOPMENTAL_SEQUENCE",
+ "evaluateDevelopmentalTransitionR457",
+ "S=(CΩ·Φ)/(q+Λ+ε)",
+ "PRUNE_TRANSLATE_PROVE"
 ])assert.ok(source.includes(token),'R457 source contract missing '+token);
 assert.ok(root.includes("import {OMEGA7_HEIGHTENED_SUMMARY} from './heightenedModeR457'"),'OMEGA7 status must bind the Heightened Mode architecture summary');
 assert.ok(root.includes('OMEGA7_HEIGHTENED_SUMMARY.capabilityCount')&&root.includes('OMEGA7_HEIGHTENED_SUMMARY.familyCount'),'System status must expose capability/composition separation without changing authority');
