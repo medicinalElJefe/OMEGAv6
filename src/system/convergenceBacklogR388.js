@@ -181,6 +181,6 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
   selected,
   canonicalAdmission:false,
   targetingRevision:'R458',
-  boundary:'R450 preserves stable absolute A-Y row identity across checked/open rows, keeps R448 semantic subsystem targeting, and allows item-specific semantic acceptance contracts to reject shallow source churn before candidate branch creation. Checked rows remain history; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists; external/device completion still requires first-hand proof.',
+  boundary:'R458 preserves R450 stable absolute A-Y row identity and R448 subsystem targeting, while extending item-specific acceptance from shallow lexical change toward bounded transition evidence: required product surfaces, substantive changed code, R143 consumer binding, R142 proof transport, R125 admission boundary, failure/recovery/degrade semantics, and Canon non-mutation for B-02. Checked rows remain history; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists; external/device completion still requires first-hand proof.',
  });
 }
