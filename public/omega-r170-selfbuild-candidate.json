@@ -5,13 +5,13 @@
   "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
   "generatorContract": "R388_BACKLOG_AI_BUILD",
   "item": {
-    "id": "R388-A-01",
+    "id": "R388-A-02",
     "section": "A",
-    "index": 1,
-    "objective": "One launcher/runtime/state authority across cloud, browser, Hybrid and native-host surfaces.",
+    "index": 2,
+    "objective": "One renderer contract spanning FIELD, SURFACE, SKIN, GRAPH, ASSEMBLY, MATERIAL, EVIDENCE, CANON and TRAVERSAL views without duplicate renderers or shadow viewports.",
     "affected": [
-      "src/OmegaWorkstationFullV2.tsx",
-      "src/systemAtlasRuntime.ts"
+      "src/capabilityAuthority.ts",
+      "src/OmegaViewAuthorityBar.tsx"
     ],
     "expectedProofs": [
       "R241 Archive Convergence Visual Intelligence",
@@ -23,8 +23,18 @@
   },
   "repair": {
     "paths": [
-      "src/OmegaWorkstationFullV2.tsx"
+      "src/capabilityAuthority.ts"
     ],
+    "productPatchIdentity": {
+      "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
+      "rows": [
+        {
+          "path": "src/capabilityAuthority.ts",
+          "blobSha": "d8b61596b44ce16be607abc1f922126f642a9b7d"
+        }
+      ],
+      "key": "src/capabilityAuthority.ts:d8b61596b44ce16be607abc1f922126f642a9b7d"
+    },
     "expectedProofs": [
       "R241 Archive Convergence Visual Intelligence",
       "OMEGA Cloud Bridge CI"
@@ -41,7 +51,7 @@
         "validation": null,
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-02",
           "files": [],
           "canonicalAdmission": false,
           "directProductionMutation": false,
@@ -51,23 +61,34 @@
           ]
         }
       }
-    ]
+    ],
+    "declinedItemScars": []
   },
   "receipt": {
     "schema": "OMEGA_CLOUDFLARE_R388_CONVERGENCE_RECEIPT",
     "machineId": "CLOUD-01",
     "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
     "generatorContract": "R388_BACKLOG_AI_BUILD",
-    "convergenceGeneration": 1,
-    "itemId": "R388-A-01",
+    "convergenceGeneration": 2,
+    "itemId": "R388-A-02",
     "section": "A",
-    "objective": "One launcher/runtime/state authority across cloud, browser, Hybrid and native-host surfaces.",
+    "objective": "One renderer contract spanning FIELD, SURFACE, SKIN, GRAPH, ASSEMBLY, MATERIAL, EVIDENCE, CANON and TRAVERSAL views without duplicate renderers or shadow viewports.",
     "externalProofRequired": false,
     "targetPaths": [
-      "src/OmegaWorkstationFullV2.tsx"
+      "src/capabilityAuthority.ts"
     ],
-    "baseSha": "7579bd02b2fc6ebb8935acdb005f4f9886a9b913",
-    "branch": "cloud/evolution-r388-r388-a-01-7579bd02",
+    "productPatchIdentity": {
+      "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
+      "rows": [
+        {
+          "path": "src/capabilityAuthority.ts",
+          "blobSha": "d8b61596b44ce16be607abc1f922126f642a9b7d"
+        }
+      ],
+      "key": "src/capabilityAuthority.ts:d8b61596b44ce16be607abc1f922126f642a9b7d"
+    },
+    "baseSha": "37a38b65854b5dab573237839b75ea920d5d048c",
+    "branch": "cloud/evolution-r388-r388-a-02-37a38b65",
     "status": "SOURCE_ADVANCED_PENDING_PROOF",
     "canonicalAdmission": false,
     "directProductionMutation": false,
@@ -88,7 +109,7 @@
         "validation": null,
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-02",
           "files": [],
           "canonicalAdmission": false,
           "directProductionMutation": false,
@@ -105,17 +126,17 @@
         "reasons": [],
         "validation": {
           "valid": true,
-          "changedChars": 226,
+          "changedChars": 358,
           "fileCount": 1
         },
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-02",
           "files": [
             {
-              "path": "src/OmegaWorkstationFullV2.tsx",
-              "preimageSha": "3be2b7623250dd89ab409f1fdc49df97ad95657e",
-              "replacementCount": 2
+              "path": "src/capabilityAuthority.ts",
+              "preimageSha": "746e631107b09714aa183cdf075bd424de93bd9f",
+              "replacementCount": 1
             }
           ],
           "canonicalAdmission": false,
@@ -138,7 +159,7 @@
         "validation": null,
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-A-01",
+          "residualId": "R388-A-02",
           "files": [],
           "canonicalAdmission": false,
           "directProductionMutation": false,
@@ -149,7 +170,8 @@
         }
       }
     ],
-    "createdAt": "2026-10-01T00:47:49.011Z",
+    "declinedItemScars": [],
+    "createdAt": "2026-10-04T03:37:06.112Z",
     "authorityBoundaries": {
       "canonAdmission": "R125",
       "dispatch": "R147",
@@ -165,5 +187,131 @@
   },
   "status": "SOURCE_ADVANCED_PENDING_PROOF",
   "canonicalAdmission": false,
-  "directProductionMutation": false
+  "directProductionMutation": false,
+  "canonicalResolution": {
+    "schema": "OMEGA_CLOUD_CANDIDATE_RESOLUTION_R436",
+    "revision": "R436.0",
+    "domain": "CLOUD_CANDIDATE",
+    "node": {
+      "schema": "OMEGA_CLOUD_CANDIDATE_RESOLUTION_R436",
+      "revision": "R436.0",
+      "domain": "CLOUD_CANDIDATE",
+      "machineId": "CLOUD-01",
+      "candidateSchema": "OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388",
+      "candidateRevision": "R388",
+      "generatorContract": "R388_BACKLOG_AI_BUILD",
+      "itemId": "R388-A-02",
+      "paths": [
+        "src/capabilityAuthority.ts"
+      ],
+      "expectedProofs": [
+        "R241 Archive Convergence Visual Intelligence",
+        "OMEGA Cloud Bridge CI"
+      ],
+      "status": "SOURCE_ADVANCED_PENDING_PROOF",
+      "sourceAdvance": true,
+      "canonicalAdmission": false,
+      "directProductionMutation": false,
+      "authority": "DERIVED_STANDARD",
+      "proofClass": "STRUCTURAL_ANALOGY",
+      "nodeId": "NODE-373d0f55"
+    },
+    "transition": null,
+    "branch": {
+      "nodeId": "NODE-373d0f55",
+      "status": "BOUNDED",
+      "authority": "DERIVED_STANDARD",
+      "proofClass": "STRUCTURAL_ANALOGY",
+      "paths": [
+        "src/capabilityAuthority.ts"
+      ],
+      "rejectionScarCount": 1,
+      "canonicalAdmissionAuthority": "R125",
+      "sourcePromotionAuthority": "R240/exact-head governed proof",
+      "productionAuthority": "GOVERNED_PRODUCTION_WORKFLOW",
+      "canonicalMutation": false,
+      "branchId": "BRANCH-b89323b3"
+    },
+    "checks": [
+      {
+        "id": "NO_DIRECT_CANON_ADMISSION",
+        "kind": "CANON",
+        "passed": true,
+        "reason": "CLOUD-01 proposal cannot directly admit CanonState"
+      },
+      {
+        "id": "NO_DIRECT_PRODUCTION_MUTATION",
+        "kind": "CANON",
+        "passed": true,
+        "reason": "production authority remains the governed deployment workflow"
+      },
+      {
+        "id": "PROOF_REQUIRED_FOR_SOURCE_ADVANCE",
+        "kind": "CANON",
+        "passed": true,
+        "reason": "source-advance candidates remain proof-bound"
+      }
+    ],
+    "ledger": [
+      {
+        "index": 0,
+        "kind": "NODE",
+        "previousHash": "00000000",
+        "payload": {
+          "nodeId": "NODE-373d0f55",
+          "status": "SOURCE_ADVANCED_PENDING_PROOF",
+          "paths": [
+            "src/capabilityAuthority.ts"
+          ],
+          "itemId": "R388-A-02"
+        },
+        "hash": "42d6d68f"
+      },
+      {
+        "index": 1,
+        "kind": "BRANCH",
+        "previousHash": "42d6d68f",
+        "payload": {
+          "branchId": "BRANCH-b89323b3",
+          "status": "BOUNDED",
+          "sourceAdvance": true,
+          "canonicalAdmission": false
+        },
+        "hash": "91acd9fd"
+      },
+      {
+        "index": 2,
+        "kind": "SCAR",
+        "previousHash": "91acd9fd",
+        "payload": {
+          "branchId": "BRANCH-b89323b3",
+          "index": 0,
+          "scar": {
+            "attempt": 1,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-A-02",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R241 Archive Convergence Visual Intelligence",
+                "OMEGA Cloud Bridge CI"
+              ]
+            }
+          }
+        },
+        "hash": "e4595817"
+      }
+    ],
+    "ledgerHash": "e4595817",
+    "truthBoundary": "CLOUD-01 may propose bounded source candidates and carry rejection scars, but it cannot directly admit CanonState or mutate production. Exact-head proof and existing governed promotion/deployment authorities remain unchanged.",
+    "canonicalMutation": false
+  }
 }
