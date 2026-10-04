@@ -6,7 +6,7 @@ import {OMEGA7_INHERITANCE_LEDGER,canRetireOmega6Surface} from '../src7/inherita
 
 const root=fs.readFileSync('src7/Omega7Root.tsx','utf8');
 const browser=fs.readFileSync('tests/omega7-r446-browser-parity-e2e.mjs','utf8');
-const workflow=fs.readFileSync('.github/workflows/r446-omega7-user-parity.yml','utf8');
+const workflow=fs.readFileSync('.github/workflows/ci.yml','utf8');
 const lock=JSON.parse(fs.readFileSync('src7/omega7.lock.json','utf8'));
 
 assert.equal(OMEGA_NAVIGATION.length,44);
@@ -21,7 +21,8 @@ for(const token of ["desktop',{width:1440,height:960}","mobile',{width:390,heigh
 assert.ok(workflow.includes('playwright@1.63.0'),'R446 must pin the accepted browser harness');
 assert.ok(workflow.includes('npm run build')&&workflow.includes('vite preview'),'R446 must test the exact built product, not source-only rendering');
 assert.ok(workflow.includes('omega7-r446-browser-parity-e2e.mjs'),'R446 workflow must execute the parity test');
-assert.ok(workflow.includes('timeout-minutes: 25'),'R446 browser proof must remain bounded');
+assert.ok(workflow.includes('omega7-user-parity:')&&workflow.includes('timeout-minutes: 25'),'R446 browser proof must remain bounded inside OMEGA Cloud Bridge CI');
+assert.ok(workflow.startsWith('name: OMEGA Cloud Bridge CI'),'R446 must reuse the existing governed workflow authority rather than add a 25th workflow');
 assert.equal(lock.sourceMainSha,'247b0ce78e2c00f92d02a087dbe3db6f31ac97a3');
 assert.equal(lock.sourceMilestone,'R445');
 assert.equal(lock.parityPhase,'R446_BROWSER_PROOF_CANDIDATE');
