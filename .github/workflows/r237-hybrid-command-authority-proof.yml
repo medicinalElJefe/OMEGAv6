@@ -93,7 +93,7 @@ jobs:
           await page.route('**/api/hybrid/status',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(hybridStatus)}));
           await page.route('**/api/missions',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(missionStatus)}));
           const openHybrid=async()=>{
-            await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:30000});
+            await page.goto('http://127.0.0.1:4173/?omega6=1',{waitUntil:'domcontentloaded',timeout:30000});
             await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:20000});
             await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
             const entry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid'}).first();
