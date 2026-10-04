@@ -22,7 +22,7 @@ const browser=await chromium.launch({headless:true});
 try{
  for(const [name,viewport,dpr] of [['desktop',{width:1440,height:960},1],['mobile',{width:390,height:844},2]]){
   const context=await browser.newContext({viewport,deviceScaleFactor:dpr});const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
-  await page.goto(`${base}/?r284-live=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});await enterEarth(page,name);
+  await page.goto(`${base}/?omega6=1&r284-live=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});await enterEarth(page,name);
   const planetButton=page.locator('.earth-r279-view-tabs button').filter({hasText:'Planet'}).first();await planetButton.click();await page.waitForSelector('.earth-r281-globe[data-earth-view="PLANET"]',{state:'visible',timeout:20000});
   let observed=false;for(let attempt=1;attempt<=3;attempt++){
    try{await page.waitForFunction(()=>document.querySelector('.earth-r281-globe')?.getAttribute('data-source-state')==='OBSERVED',{timeout:25000});observed=true;break}catch{const reload=page.getByRole('button',{name:'Reload observed texture'});if(await reload.isVisible())await reload.click()}
