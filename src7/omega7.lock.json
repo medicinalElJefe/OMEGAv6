@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "e472d2f23f4e3d214662d096e7d57697e9da8d15",
-  "sourceMilestone": "R450_WITH_R449_ROLLBACK",
+  "sourceMainSha": "4058ee07002dc78bba952711969afb33951a8b01",
+  "sourceMilestone": "R451",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -101,7 +101,7 @@
   "browserProof": "44_ROUTES_DESKTOP_AND_MOBILE_REQUIRED",
   "browserProofWorkflowAuthority": "OMEGA Cloud Bridge CI",
   "activeWorkflowAuthorityIncrease": 0,
-  "failureRecoveryProof": "LAZY_CHUNK_FAILURE_ISOLATION_AND_API_FAIL_CLOSED_REQUIRED",
+  "failureRecoveryProof": "EIGHT_NATIVE_FAMILY_CHUNK_BOUNDARIES_PROVED_WITH_ONE_CLICK_EXACT_ROUTE_RECOVERY",
   "performanceBudgets": {
     "initialEntryBytes": 512000,
     "shellReadyMs": 4000,
@@ -118,11 +118,13 @@
   "parityCounts": {
     "routes": 44,
     "functionalDesktopMobile": 44,
-    "failureRecovery": 3,
-    "performance": 8,
-    "fullRouteEvidence": 3,
+    "failureRecovery": 44,
+    "performance": 44,
+    "fullRouteEvidence": 44,
     "legacyRetired": 0
   },
-  "nextParityWork": "EXPAND_FAILURE_RECOVERY_AND_PERFORMANCE_PROOF_TO_REMAINING_ROUTES_BEFORE_ANY_LEGACY_RETIREMENT",
-  "parityEvidencePhase": "R451_PARITY_EVIDENCE_MATERIALIZATION"
+  "nextParityWork": "BURN_IN_USER_EXPERIENCE_STABILITY_AND_REAL_PROVIDER_OBSERVATION_BEFORE_ANY_LEGACY_RETIREMENT",
+  "parityEvidencePhase": "R451_PARITY_EVIDENCE_MATERIALIZATION",
+  "fullParityPhase": "R452_FULL_ROUTE_RESILIENCE_PERFORMANCE",
+  "performanceProof": "ALL_44_ROUTES_MEASURED_UNDER_EXISTING_8S_ROUTE_6S_P95_4S_SHELL_BUDGETS"
 }
