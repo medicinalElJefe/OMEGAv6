@@ -77,6 +77,45 @@ Presentation authority is therefore explicitly:
 
 `PRESENTATION_ONLY`
 
+## Developmental transition calculus
+
+Capability → Composition → Presentation describes the architecture, but it is not by itself Heightened Mode. R457 also evaluates the **developmental transition** between accepted states.
+
+The canonical sequence is:
+
+```
+canonical state
+→ normalized relational difference
+→ growth vector
+→ growth transport
+→ developmental acceleration
+→ developmental jerk
+→ order sensitivity
+→ developmental curvature
+→ developmental scar
+→ Continuity Cone
+→ recoverability
+→ viability
+→ governance/promotion
+→ growth-law update
+```
+
+The Dewey regulator remains:
+
+`S = (CΩ · Φ) / (q + Λ + ε)`
+
+with **Sense → Normalize → Score → Gate → Act → Ledger**, **PRUNE → TRANSLATE → PROVE**, and **STAY / TURN / ESCALATE**.
+
+For software development, the normalized frame includes continuity, future plasticity, contradiction, burden, recoverability, proof coverage, capability coverage, human comprehension, future-topology retention, and scar pressure.
+
+Promotion is comparative rather than revision-count based:
+
+- **TURN** only when the candidate produces positive net developmental growth without regressing the Dewey score and all hard gates survive.
+- **STAY** when a candidate is merely different, lexical, cosmetic, or does not measurably improve the normalized developmental state.
+- **ESCALATE** when proof transport breaks, authority is not closed, rollback disappears, dependency order is violated, Canon mutation is attempted, capability/proof coverage regresses, future topology collapses, or recoverability regresses.
+
+Presentation improvement cannot compensate for lost capability, proof, future paths, or recovery. A green source patch is therefore not developmental growth until the transition survives its authority and proof transport.
+
 ## Contradictions and scars
 
 R457 carries the developmental rule:
