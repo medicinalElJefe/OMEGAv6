@@ -19,7 +19,8 @@ import {applyWorkflowVisualIntentR86,emitOperationR86} from './omegaOperationBus
 import {commitRouteLifecycleR356,requestRouteLifecycleR356} from './system/routeLifecycleR356';
 import {OMEGA_ALL_ROUTES_R82} from './omegaExperienceRegistryR82';
 import {operationContractForRouteR143} from './authoritativeOperationChainR143';
-import {OMEGA_CONTROL_RECONCILIATION_R466,OMEGA_NAV_NAMES,omegaMasterMenuForRouteR289,omegaNavItem,type OmegaRouteName} from './navigationRegistry';
+import {OMEGA_NAV_NAMES,type OmegaRouteName} from './navigationRegistry';
+import {OMEGA_CONTROL_RECONCILIATION_R466,omegaMasterMenuForRouteR289,omegaNavItem} from './navigationRegistry';
 import {
  ArchiveGovernanceR109,AtlasCalculatorR109,AtlasViewportR109,BuildOutR109,EarthNowR109,ExtremeTraversalR109,ForecastR109,
  HybridMissionControlR109,InfinityR109,IntelligenceFabricR109,MatterTraversalR109,OmegaWorkspaceCockpitR109,PluginRegistryR109,
