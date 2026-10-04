@@ -72,6 +72,7 @@ assert.equal(OMEGA7_HEIGHTENED_SUMMARY.physicalDimensionClaim,false);
 assert.equal(OMEGA7_HEIGHTENED_SUMMARY.canonicalMutation,false);
 
 const source=fs.readFileSync('src7/heightenedModeR457.ts','utf8');
+const root=fs.readFileSync('src7/Omega7Root.tsx','utf8');
 for(const token of [
  "futureRetention:'PRESERVE_CAPABILITY'",
  "pruneAuthority:'EXPLICIT_PARITY_AND_REPLACEMENT_PROOF_REQUIRED'",
@@ -79,5 +80,7 @@ for(const token of [
  "contradictionAndScarPolicy:'RETAIN_DO_NOT_NORMALIZE_AWAY'",
  "futureTopologyPolicy:'PRESERVE_CAPABILITY_UNTIL_EXPLICIT_REPLACEMENT_PROOF'"
 ])assert.ok(source.includes(token),'R457 source contract missing '+token);
+assert.ok(root.includes("import {OMEGA7_HEIGHTENED_SUMMARY} from './heightenedModeR457'"),'OMEGA7 status must bind the Heightened Mode architecture summary');
+assert.ok(root.includes('OMEGA7_HEIGHTENED_SUMMARY.capabilityCount')&&root.includes('OMEGA7_HEIGHTENED_SUMMARY.familyCount'),'System status must expose capability/composition separation without changing authority');
 
 console.log('R457 HEIGHTENED MODE PASS · 44 capabilities · 8 compositions · 6 human domains · capability/composition/presentation separated · future topology retained · legacy retired 0');
