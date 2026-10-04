@@ -37,7 +37,8 @@ for(const token of ['COMMAND_RUNTIME','EARTH_WEATHER','MOTION_TRAVERSAL','SCIENC
 for(const token of ["page.route('**/assets/*.js'","requestRoute.abort('failed')","Your OMEGA state was not discarded.","alternate native route recovers"])assert.ok(failure.includes(token),'R452 family failure proof missing '+token);
 for(const token of ['routes.length!==44','ROUTE_BUDGET_MS=8000','P95_BUDGET_MS=6000','for(const route of routes)'])assert.ok(perf.includes(token),'R452 full performance proof missing '+token);
 
-assert.equal(lock.sourceMainSha,'4058ee07002dc78bba952711969afb33951a8b01');
+assert.equal(lock.sourceMainSha,'e472d2f23f4e3d214662d096e7d57697e9da8d15','R452 must preserve the accepted R451 source identity field');
+assert.equal(lock.parityExpansionBaseSha,'4058ee07002dc78bba952711969afb33951a8b01','R452 must record its exact expansion base additively');
 assert.equal(lock.parityExpansionPhase,'R452_FULL_FAMILY_PARITY_CANDIDATE');
 assert.equal(lock.activeWorkflowAuthorityIncrease,0);
 assert.equal(lock.retirementState,'ZERO_LEGACY_SURFACES_RETIRED');
