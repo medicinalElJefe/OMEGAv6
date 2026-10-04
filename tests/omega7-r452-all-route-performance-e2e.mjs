@@ -16,6 +16,8 @@ async function mocks(page){
  await page.route('**/api/earth/noaa/catalog',r=>fulfill(r,{schema:'OMEGA_EARTH_NOAA_CATALOG_V1',coverages:[{id:'R452_PERF'}]}));
  await page.route('**/api/route-preview',r=>fulfill(r,{route:'FAST_DETERMINISTIC'}));
  await page.route('**/api/chat',r=>fulfill(r,{reply:'R452 deterministic performance fixture',provider:'R452_FIXTURE',modelInvoked:false}));
+ await page.route('**/api/plugins**',r=>fulfill(r,{plugins:[],status:'RETURNED',truthBoundary:'R452 performance transport fixture only'}));
+ await page.route('**/api/archive**',r=>fulfill(r,{items:[],count:0,status:'RETURNED',truthBoundary:'R452 performance transport fixture only'}));
 }
 
 async function open(page,route){
@@ -28,7 +30,10 @@ async function open(page,route){
  await result.click();
  await page.waitForFunction(r=>document.querySelector('.o7-main')?.getAttribute('data-native-route')===r,route,{timeout:ROUTE_BUDGET_MS});
  await page.locator('.o7-native-host').waitFor({state:'visible',timeout:ROUTE_BUDGET_MS});
- await page.waitForFunction(()=>!document.querySelector('.o7-native-loading')&&!document.querySelector('[data-omega7-failure]'),{timeout:ROUTE_BUDGET_MS});
+ await page.waitForFunction(()=>{
+  const host=document.querySelector('.o7-native-host');
+  return Boolean(host?.querySelector('.o7-native-workspace'))&&!host?.querySelector('.o7-native-loading')&&!host?.querySelector('[data-omega7-failure]');
+ },{timeout:ROUTE_BUDGET_MS});
  const elapsed=performance.now()-start;
  const back=page.locator('.o7-native-toolbar button');
  if(await back.count())await back.click();
