@@ -39,4 +39,25 @@ try{
 
  console.log('OMEGA7 R449 ROLLBACK PASS · OMEGA7 → accepted OMEGA6 → OMEGA7 reversible · canonical address preserved · persistent opt-in cleared on exit · no unhandled page errors');
  await context.close();
+
+ const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ await mobile.addInitScript(address=>{
+  localStorage.setItem('omega.v6.address',String(address));
+  localStorage.setItem('omega7.enabled','true');
+ },expectedAddress);
+ const phone=await mobile.newPage();
+ await phone.goto(base+'/?omega7=1',{waitUntil:'domcontentloaded',timeout:30000});
+ await phone.locator('.o7-app').waitFor({state:'visible',timeout:30000});
+ const rollback=phone.locator('.o7-v6');
+ await rollback.waitFor({state:'visible',timeout:15000});
+ const box=await rollback.boundingBox();
+ if(!box||box.width<44||box.height<44)throw new Error(`R449 phone rollback target is not touch-safe: ${JSON.stringify(box)}`);
+ if(await phone.locator('.o7-nav').count()!==1)throw new Error('R449 phone shell lost single bottom navigation authority');
+ await rollback.click();
+ await phone.waitForSelector('main.r71-home,.r317-product-root',{timeout:30000});
+ if(await phone.locator('.o7-app').count())throw new Error('R449 phone rollback left OMEGA7 mounted');
+ if(Number(await phone.evaluate(()=>localStorage.getItem('omega.v6.address')))!==expectedAddress)throw new Error('R449 phone rollback changed canonical address');
+ if(await phone.evaluate(()=>localStorage.getItem('omega7.enabled'))!==null)throw new Error('R449 phone rollback failed to clear persistent OMEGA7 opt-in');
+ console.log('OMEGA7 R449 PHONE ROLLBACK PASS · explicit V6 escape remains visible and >=44px · single bottom nav preserved · canonical address continuous');
+ await mobile.close();
 }finally{await browser.close()}
