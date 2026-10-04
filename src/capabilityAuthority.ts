@@ -52,6 +52,7 @@ export const OMEGA_CAPABILITY_AUTHORITY:readonly CapabilityContract[]=[
 {name:'Control Matrix',family:'Control Planes',implementation:'SPECIALIST',views:V('GRAPH','ASSEMBLY','EVIDENCE','CANON'),boundary:'SOURCE_PACKET',purpose:'inspect capability/control topology'}
 ] as const;
 export const CAPABILITY_BY_NAME=new Map(OMEGA_CAPABILITY_AUTHORITY.map(x=>[x.name,x]));
+export const CAPABILITY_BY_FAMILY=new Map(OMEGA_CAPABILITY_AUTHORITY.map(x=>[x.family,x]));
 export const SHARED_SUITE_DEBT=OMEGA_CAPABILITY_AUTHORITY.filter(x=>x.implementation==='SHARED_SUITE');
 
 // R23/V24 predecessor interpretation is retained as evidence only. It is never the current routing authority.
