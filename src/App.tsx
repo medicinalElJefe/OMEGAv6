@@ -37,7 +37,7 @@ function App(){
   safeStore('omega.v6.panel',JSON.stringify(panel));setHome(false);
  };
  const openLegacyFromOmega7=(name:string)=>{safeStore('omega7.lastRoute',name);safeStore('omega.product.shell','OMEGA6');setOmega7(false);navigate(name)};
- const exitOmega7=()=>{safeStore('omega.product.shell','OMEGA6');setOmega7(false);setHome(true)};
+ const exitOmega7=()=>{try{window.localStorage.removeItem('omega7.enabled')}catch{}safeStore('omega.product.shell','OMEGA6');setOmega7(false);setHome(true)};
  const enterOmega7=()=>{safeStore('omega.product.shell','OMEGA7');setOmega7(true)};
  const fallback=<div className='r319-bounded-loading' role='status' aria-live='polite' aria-busy='true'><span>{home?'Starting OMEGA…':'Opening workspace…'}</span></div>;
 
