@@ -10,6 +10,7 @@ import {
  evaluateRetirementR457,
  R457_DEVELOPMENTAL_SEQUENCE,
  R457_DEWEY_KERNEL,
+ R457_AUTHORITATIVE_PROOF_FAMILIES,
  evaluateDevelopmentalTransitionR457
 } from '../src7/heightenedModeR457.ts';
 
@@ -87,7 +88,7 @@ const developmentalEvidence={
  candidateStateRef:'pr:head',
  sourceHead:'a'.repeat(40),
  metricRefs:Object.fromEntries(Object.keys(parentMetrics).map(key=>[key,'proof:'+key])),
- proofRefs:['R210','R223','R202','CLOUD_BRIDGE','R170','R237','R238','R241']
+ proofRefs:[...R457_AUTHORITATIVE_PROOF_FAMILIES]
 };
 const improved=evaluateDevelopmentalTransitionR457({
  parent:parentMetrics,
@@ -142,10 +143,28 @@ const unboundMetrics=evaluateDevelopmentalTransitionR457({
 assert.equal(unboundMetrics.decision,'ESCALATE','developmental numbers without evidence provenance must never become promotion authority');
 assert.ok(unboundMetrics.hardVetoes.includes('PARENT_STATE_UNBOUND'));
 assert.ok(unboundMetrics.hardVetoes.includes('CANDIDATE_STATE_UNBOUND'));
-assert.ok(unboundMetrics.hardVetoes.includes('SOURCE_HEAD_UNBOUND'));
+assert.ok(unboundMetrics.hardVetoes.includes('SOURCE_HEAD_NOT_EXACT_GIT_SHA'));
 assert.ok(unboundMetrics.hardVetoes.some(x=>x.startsWith('METRIC_EVIDENCE_INCOMPLETE:')));
-assert.ok(unboundMetrics.hardVetoes.includes('PROOF_REFERENCE_REQUIRED'));
+assert.ok(unboundMetrics.hardVetoes.some(x=>x.startsWith('AUTHORITATIVE_PROOF_SET_INCOMPLETE:')));
 assert.equal(unboundMetrics.promotionAllowed,false);
+
+const partialProofSet=evaluateDevelopmentalTransitionR457({
+ parent:parentMetrics,
+ candidate:{...parentMetrics,humanComprehension:.90},
+ authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false,
+ evidence:{...developmentalEvidence,proofRefs:['R210 Release Controller']}
+});
+assert.equal(partialProofSet.decision,'ESCALATE');
+assert.ok(partialProofSet.hardVetoes.some(x=>x.startsWith('AUTHORITATIVE_PROOF_SET_INCOMPLETE:')));
+
+const identityCollision=evaluateDevelopmentalTransitionR457({
+ parent:parentMetrics,
+ candidate:{...parentMetrics,humanComprehension:.90},
+ authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false,
+ evidence:{...developmentalEvidence,parentStateRef:'same-state',candidateStateRef:'same-state'}
+});
+assert.equal(identityCollision.decision,'ESCALATE');
+assert.ok(identityCollision.hardVetoes.includes('STATE_TRANSITION_IDENTITY_COLLISION'));
 
 const source=fs.readFileSync('src7/heightenedModeR457.ts','utf8');
 const root=fs.readFileSync('src7/Omega7Root.tsx','utf8');
@@ -156,6 +175,7 @@ for(const token of [
  "contradictionAndScarPolicy:'RETAIN_DO_NOT_NORMALIZE_AWAY'",
  "futureTopologyPolicy:'PRESERVE_CAPABILITY_UNTIL_EXPLICIT_REPLACEMENT_PROOF'",
  "R457_DEVELOPMENTAL_SEQUENCE",
+ "R457_AUTHORITATIVE_PROOF_FAMILIES",
  "evaluateDevelopmentalTransitionR457",
  "S=(CΩ·Φ)/(q+Λ+ε)",
  "PRUNE_TRANSLATE_PROVE"
