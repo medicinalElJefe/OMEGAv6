@@ -48,11 +48,14 @@ async function proveFamily(browser,route,family){
  if(!text.includes('Your OMEGA state was not discarded.'))throw new Error(`R452 ${family} lost state-preservation contract`);
 
  await page.unroute('**/assets/*.js');
- await page.reload({waitUntil:'domcontentloaded',timeout:30000});
+ const recover=failure.locator('button');
+ const recoverText=await recover.innerText();
+ if(recoverText!=='Recover')throw new Error(`R452 ${family} chunk failure did not offer deterministic Recover action`);
+ await recover.click();
+ await page.waitForLoadState('domcontentloaded',{timeout:30000});
  await page.locator('.o7-app').waitFor({state:'visible',timeout:30000});
- await openExact(page,route);
- await page.waitForFunction(r=>document.querySelector('.o7-main')?.getAttribute('data-native-route')===r,route,{timeout:15000});
- await page.waitForFunction(()=>Boolean(document.querySelector('.o7-native-host'))&&!document.querySelector('[data-omega7-failure]'),{timeout:20000});
+ await page.waitForFunction(r=>document.querySelector('.o7-main')?.getAttribute('data-native-route')===r,route,{timeout:20000});
+ await page.waitForFunction(()=>Boolean(document.querySelector('.o7-native-host'))&&!document.querySelector('[data-omega7-failure]')&&!document.querySelector('.o7-native-loading'),{timeout:25000});
  if(errors.length>2)throw new Error(`R452 ${family} unexpected repeated page errors: ${errors.join(' | ').slice(0,1800)}`);
  await context.close();
 }
