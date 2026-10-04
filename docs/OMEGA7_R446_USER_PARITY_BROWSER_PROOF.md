@@ -6,7 +6,9 @@ It does **not** retire OMEGAv6.
 
 ## Exact built-product proof
 
-R446 builds the exact candidate, serves the Vite preview, installs a pinned Playwright 1.63.0 harness, and exercises OMEGA7 through its real shell.
+R446 deliberately does **not** add another active GitHub Actions workflow. The proof is a job inside the already-governed Cloud Bridge workflow so the R170 active-workflow bound remains intact.
+
+R446 runs inside the existing **OMEGA Cloud Bridge CI** authority. It builds the exact candidate, serves the Vite preview, installs a pinned Playwright 1.63.0 harness, and exercises OMEGA7 through its real shell.
 
 The proof runs at:
 
