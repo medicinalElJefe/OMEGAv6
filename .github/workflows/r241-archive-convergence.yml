@@ -13,14 +13,65 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  stale-head-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    outputs:
+      current: ${{ steps.head.outputs.current }}
+      observed_head: ${{ steps.head.outputs.observed_head }}
+      candidate_head: ${{ steps.head.outputs.candidate_head }}
+    steps:
+      - name: Verify candidate is still the PR head before expensive proof
+        id: head
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+            echo "observed_head=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            echo "candidate_head=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            echo "R241 stale-head preflight: manual run, exact requested SHA remains eligible."
+            exit 0
+          fi
+          observed="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/pull/${PR_NUMBER}/head" | awk 'NR==1{print $1}')"
+          if [ -z "$observed" ]; then
+            echo "::error title=R241 HEAD LOOKUP FAILED::Could not resolve current head for PR #${PR_NUMBER}."
+            exit 1
+          fi
+          echo "observed_head=$observed" >> "$GITHUB_OUTPUT"
+          echo "candidate_head=$EVENT_HEAD_SHA" >> "$GITHUB_OUTPUT"
+          if [ "$observed" = "$EVENT_HEAD_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+            echo "R241 stale-head preflight PASS · PR #${PR_NUMBER} current head $observed matches exact event head $EVENT_HEAD_SHA."
+          else
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "R241 stale-head preflight OBSOLETE · event head $EVENT_HEAD_SHA is retained as history but current PR #${PR_NUMBER} head is $observed; synthetic workflow SHA $GITHUB_SHA is not used as candidate identity; expensive proof is skipped."
+          fi
+
   prove-r241-interactions:
+    needs: stale-head-preflight
+    if: needs.stale-head-preflight.outputs.current == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
       - name: Checkout exact interaction candidate
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
+
+      - name: Verify exact interaction head identity
+        shell: bash
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_HEAD_SHA" || { echo "::error title=R241 INTERACTION CHECKOUT DRIFT::Expected $EXPECTED_HEAD_SHA but got $actual"; exit 1; }
 
       - name: Use Node 24 for interaction proof
         uses: actions/setup-node@v7
@@ -114,13 +165,25 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   prove-r241:
+    needs: stale-head-preflight
+    if: needs.stale-head-preflight.outputs.current == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
       - name: Checkout exact candidate
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
+
+      - name: Verify exact candidate head identity
+        shell: bash
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_HEAD_SHA" || { echo "::error title=R241 CHECKOUT DRIFT::Expected $EXPECTED_HEAD_SHA but got $actual"; exit 1; }
 
       - name: Use Node 24
         uses: actions/setup-node@v7
