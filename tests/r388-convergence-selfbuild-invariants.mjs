@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {parseConvergenceBacklogR388,selectNextConvergenceItemR388,R388_CONVERGENCE_BACKLOG_SCHEMA,R388_BACKLOG_CANDIDATE_LIMIT} from '../src/system/convergenceBacklogR388.js';
+import {parseConvergenceBacklogR388,selectNextConvergenceItemR388,validateConvergenceRepairR450,R388_CONVERGENCE_BACKLOG_SCHEMA,R388_BACKLOG_CANDIDATE_LIMIT} from '../src/system/convergenceBacklogR388.js';
 import {repairPathPolicyR314} from '../src/system/autonomousRepairPolicyR314.js';
 import {decideCycle} from '../cloudflare/lib/evolution-policy.mjs';
 
@@ -9,6 +9,11 @@ const items=parseConvergenceBacklogR388(markdown);
 assert.equal(R388_CONVERGENCE_BACKLOG_SCHEMA,'OMEGA_CONVERGENCE_BACKLOG_R388');
 assert.ok(items.length>=100,`R388 expected full-spectrum backlog, found only ${items.length} items`);
 assert.equal(new Set(items.map(x=>x.id)).size,items.length,'R388 item ids must be deterministic and unique');
+assert.equal(items.length,155,'R450 must retain all 155 absolute convergence rows including checked rows');
+assert.deepEqual(items.filter(x=>x.completed).map(x=>x.id),['R388-B-01','R388-D-01'],'R450 checked rows must retain stable absolute identities');
+assert.equal(items.find(x=>x.id==='R388-B-02')?.objective,'Every route proves functional inheritance, not menu presence alone: usable controls, state/output, proof, failure/recovery path.','B-01 completion must never renumber B-02');
+assert.equal(items.find(x=>x.id==='R388-D-02')?.objective,'Native complex SAR acquisition binding and real source rasters where provider/data access permits.','D-01 completion must never renumber D-02');
+
 for(const item of items){
  assert.equal(item.canonicalAdmission,false);
  assert.match(item.id,/^R388-[A-Y]-\d{2}$/);
@@ -29,6 +34,17 @@ assert.deepEqual(byId('R388-A-02')?.affected,['src/capabilityAuthority.ts','src/
 assert.deepEqual(byId('R388-A-03')?.affected,['src/capabilityAuthority.ts','src/operationalCapabilityRuntimeR45.ts'],'R448 capability-state normalization must target capability truth, not mount ownership');
 assert.equal(byId('R388-A-04')?.selfEditable,false,'R448 native OpenGL→CPU fallback must remain device-gated until a real native executor target exists');
 assert.equal(byId('R388-A-04')?.externalProofRequired,true,'R448 native renderer fallback must retain first-hand external/device proof');
+const a02=byId('R388-A-02'),a03=byId('R388-A-03');
+assert.equal(a02?.acceptanceContract?.revision,'R450');
+assert.equal(a03?.acceptanceContract?.revision,'R450');
+const shallowA02=validateConvergenceRepairR450({item:a02,proposal:{files:[{replacements:[{before:'export const X=1',after:'export const CAPABILITY_BY_FAMILY=new Map()'}]}]}});
+assert.equal(shallowA02.valid,false,'R450 must reject the exact class of shallow A-02 family-map churn exposed by PR #887');
+assert.ok(shallowA02.reasons.some(x=>x.startsWith('SEMANTIC_REQUIRED_CHANGED_TOKENS_MISSING:')));
+const shallowA03=validateConvergenceRepairR450({item:a03,proposal:{files:[{replacements:[{before:"type CapabilityReality='A'",after:"type CapabilityReality='A'|'FAILED'"}]}]}});
+assert.equal(shallowA03.valid,false,'R450 must reject the exact class of shallow A-03 FAILED-only churn exposed by PR #888');
+const strongA03=validateConvergenceRepairR450({item:a03,proposal:{files:[{replacements:[{before:'legacy capability state adapter '.repeat(12),after:"export type CapabilityAvailabilityState='READY'|'AVAILABLE_NOT_CONFIGURED'|'OPTIONAL_NOT_INSTALLED'|'DEGRADED'|'FAILED';\nexport function capabilityAvailabilityState(){ return 'READY' as CapabilityAvailabilityState }\n"+'normalized capability availability mapping '.repeat(12)}]}]}});
+assert.equal(strongA03.valid,true,'R450 semantic gate must admit a materially sized proposal that carries the full declared A-03 contract');
+
 assert.deepEqual(byId('R388-A-05')?.affected,['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],'R448 cumulative proof-surface work must target build/system validation');
 for(const id of ['R388-A-01','R388-A-02','R388-A-03','R388-A-05'])assert.equal(byId(id)?.affected.includes('src/OmegaWorkstationFullV2.tsx'),false,`${id} must not fall back to the coarse workstation mount owner target`);
 
@@ -63,6 +79,12 @@ assert.ok(machine.includes("repair:{state:repair.state,reasons:repair.reasons||r
 assert.ok(machine.includes("repairAttemptLedger:repair.attempts||[]"),'R388 governed receipt must carry bounded AI attempt history');
 assert.ok(machine.includes("rejectionScars:repair.rejectionHistory||[]"),'R388 governed receipt must preserve validator rejection scars after compliant reformulation');
 assert.ok(machine.includes("if(repair.state!=='NO_SAFE_PATCH')"),'R421 may continue past only an explicit safe model decline; malformed/policy/generation failures must still terminate fail-closed');
+assert.ok(machine.includes('validateConvergenceRepairR450({item,proposal:repair.proposal})'),'R450 CLOUD-01 must run semantic acceptance before selecting a repair candidate');
+assert.ok(machine.includes("state:'SEMANTIC_ACCEPTANCE_REJECTED'")&&machine.includes('semanticAcceptanceContract:item.acceptanceContract||null'),'R450 must feed the item contract to the model and retain semantic rejection scars');
+const semanticGateIndex=machine.indexOf('validateConvergenceRepairR450({item,proposal:repair.proposal})');
+const branchCreateIndex=machine.indexOf("/git/refs",semanticGateIndex);
+assert.ok(semanticGateIndex>=0&&branchCreateIndex>semanticGateIndex,'R450 semantic acceptance must execute before candidate branch creation');
+
 assert.ok(machine.includes("declinedItemScars,createdAt"),'R421 accepted successor receipt must carry prior declined-item scars');
 assert.ok(machine.includes("r388AdvancedItemIds:[...new Set([...(state.r388AdvancedItemIds||[]),item.id])]"),'R421 must advance only the item that actually produced the governed source candidate');
 assert.ok(machine.includes("Prior bounded item declines carried without false advancement"),'R421 PR truth boundary must disclose skipped model-declined items');
@@ -98,4 +120,4 @@ assert.equal(repeatBlock.includes('/git/refs'),false,'R430 exact repeat must be 
 assert.ok(machine.includes('productPatchIdentity:patchIdentity')&&machine.includes('Product patch identity: ${patchIdentity.key}'),'R430 accepted non-repeat candidate must carry its exact product patch identity into receipt/candidate/PR evidence');
 
 
-console.log(`R388/R430 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · semantic item→subsystem targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · exact Git-blob proof-rejected patch memory · bounded compliant reformulation only · durable all-decline scar carry without false advancement · all 8 exact-head workflow families required for autonomous promotion`);
+console.log(`R388/R430 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · stable row identity · semantic item→subsystem targeting · pre-branch semantic acceptance · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · exact Git-blob proof-rejected patch memory · bounded compliant reformulation only · durable all-decline scar carry without false advancement · all 8 exact-head workflow families required for autonomous promotion`);
