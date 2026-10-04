@@ -88,6 +88,14 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/omega7-r446-browser-parity-e2e.mjs
+      - name: Prove OMEGA7 failure containment and recovery
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/omega7-r447-failure-recovery-e2e.mjs
+      - name: Prove OMEGA7 shell and representative-route performance budgets
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/omega7-r447-performance-e2e.mjs
       - name: Stop OMEGA7 parity preview
         if: always()
         shell: bash
