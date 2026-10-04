@@ -36,6 +36,21 @@ const ITEM_TARGETS=Object.freeze({
  'A-05':['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],
 });
 
+const ITEM_ACCEPTANCE=Object.freeze({
+ 'A-02':Object.freeze({
+  revision:'R450',
+  minChangedChars:320,
+  requiredChangedTokens:Object.freeze(['OMEGA_RENDERER_CONTRACT','FIELD','SURFACE','SKIN','GRAPH','ASSEMBLY','MATERIAL','EVIDENCE','CANON','TRAVERSAL']),
+  rationale:'A-02 requires an explicit one-authority renderer/view contract covering every canonical view lens; an index/map alias or isolated type addition is not completion.'
+ }),
+ 'A-03':Object.freeze({
+  revision:'R450',
+  minChangedChars:320,
+  requiredChangedTokens:Object.freeze(['CapabilityAvailabilityState','READY','AVAILABLE_NOT_CONFIGURED','OPTIONAL_NOT_INSTALLED','DEGRADED','FAILED']),
+  rationale:'A-03 requires a real normalized capability-availability contract and mapping, not adding one label to the predecessor reality vocabulary.'
+ }),
+});
+
 const PROOFS=Object.freeze({
  A:['R241 Archive Convergence Visual Intelligence','OMEGA Cloud Bridge CI'],
  B:['R241 Archive Convergence Visual Intelligence','OMEGA R237 Hybrid Command Authority Proof'],
@@ -71,10 +86,11 @@ export function parseConvergenceBacklogR388(markdown=''){
  for(const raw of String(markdown||'').split(/\r?\n/)){
   const heading=raw.match(/^##\s+([A-Y])\.\s+(.+)$/);
   if(heading){section=heading[1];index=0;continue}
-  const item=raw.match(/^- \[ \]\s+(.+)$/);
+  const item=raw.match(/^- \[([ xX])\]\s+(.+)$/);
   if(!item||!section)continue;
   index++;
-  const objective=clean(item[1]);
+  const completed=String(item[1]).toLowerCase()==='x';
+  const objective=clean(item[2]);
   const itemKey=`${section}-${String(index).padStart(2,'0')}`;
   const affected=[...(Object.prototype.hasOwnProperty.call(ITEM_TARGETS,itemKey)?ITEM_TARGETS[itemKey]:(TARGETS[section]||[]))];
   rows.push(Object.freeze({
@@ -82,7 +98,9 @@ export function parseConvergenceBacklogR388(markdown=''){
    section,
    index,
    objective,
+   completed,
    affected,
+   acceptanceContract:ITEM_ACCEPTANCE[itemKey]||null,
    expectedProofs:[...(PROOFS[section]||['OMEGA Cloud Bridge CI'])],
    selfEditable:!NON_SELF_EDITABLE.has(section)&&affected.length>0,
    externalProofRequired:EXTERNAL.test(objective),
@@ -92,31 +110,47 @@ export function parseConvergenceBacklogR388(markdown=''){
  return Object.freeze(rows);
 }
 
+export function validateConvergenceRepairR450({item,proposal}={}){
+ const contract=item?.acceptanceContract||null;
+ if(!contract)return Object.freeze({valid:true,state:'NO_ITEM_SEMANTIC_CONTRACT',reasons:[],changedChars:0,contract:null});
+ const files=Array.isArray(proposal?.files)?proposal.files:[];
+ const replacements=files.flatMap(file=>Array.isArray(file?.replacements)?file.replacements:[]);
+ const changedText=replacements.map(row=>String(row?.after??'')).join('\n');
+ const changedChars=replacements.reduce((n,row)=>n+String(row?.before??'').length+String(row?.after??'').length,0);
+ const missing=(contract.requiredChangedTokens||[]).filter(token=>!changedText.includes(token));
+ const reasons=[];
+ if(changedChars<Number(contract.minChangedChars||0))reasons.push(`SEMANTIC_PATCH_TOO_SHALLOW_${changedChars}_LT_${contract.minChangedChars}`);
+ if(missing.length)reasons.push(`SEMANTIC_REQUIRED_CHANGED_TOKENS_MISSING:${missing.join(',')}`);
+ return Object.freeze({valid:reasons.length===0,state:reasons.length?'SEMANTIC_ACCEPTANCE_REJECTED':'SEMANTIC_ACCEPTANCE_PASSED',reasons,changedChars,missingTokens:Object.freeze(missing),contract});
+}
+
 export const R388_BACKLOG_CANDIDATE_LIMIT=3;
 
 export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],heldItemIds=[],candidateLimit=R388_BACKLOG_CANDIDATE_LIMIT}={}){
  const advanced=new Set(Array.isArray(advancedItemIds)?advancedItemIds:[]);
  const recentHeld=new Set(Array.isArray(heldItemIds)?heldItemIds:[]);
  const items=parseConvergenceBacklogR388(markdown);
- const selfEditable=items.filter(x=>x.selfEditable&&!advanced.has(x.id));
+ const unresolved=items.filter(x=>!x.completed&&!advanced.has(x.id));
+ const selfEditable=unresolved.filter(x=>x.selfEditable);
  const eligible=selfEditable.filter(x=>!recentHeld.has(x.id));
  const pool=eligible.length?eligible:selfEditable;
  const limit=Math.max(1,Math.min(R388_BACKLOG_CANDIDATE_LIMIT,Number(candidateLimit)||R388_BACKLOG_CANDIDATE_LIMIT));
  const candidates=pool.slice(0,limit);
  const selected=candidates[0]||null;
- const heldGovernance=items.filter(x=>!x.selfEditable&&!advanced.has(x.id)).map(x=>x.id);
+ const heldGovernance=unresolved.filter(x=>!x.selfEditable).map(x=>x.id);
  const heldRecentDeclines=selfEditable.filter(x=>recentHeld.has(x.id)).map(x=>x.id);
  return Object.freeze({
   schema:R388_CONVERGENCE_BACKLOG_SCHEMA,
   total:items.length,
+  completed:items.filter(x=>x.completed).length,
   advanced:items.filter(x=>advanced.has(x.id)).length,
-  remaining:items.filter(x=>!advanced.has(x.id)).length,
+  remaining:unresolved.length,
   heldGovernance,
   heldRecentDeclines,
   candidates:Object.freeze(candidates.slice()),
   selected,
   canonicalAdmission:false,
-  targetingRevision:'R448',
-  boundary:'R448 preserves the R388 convergence authority while binding known backlog items to semantic subsystem owners instead of coarse section-wide files. It may advance allowlisted product source only; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists, recent model-declined items may be temporarily bypassed without being marked advanced, and external/device claims remain pending first-hand proof.',
+  targetingRevision:'R450',
+  boundary:'R450 preserves stable absolute A-Y row identity across checked/open rows, keeps R448 semantic subsystem targeting, and allows item-specific semantic acceptance contracts to reject shallow source churn before candidate branch creation. Checked rows remain history; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists; external/device completion still requires first-hand proof.',
  });
 }
