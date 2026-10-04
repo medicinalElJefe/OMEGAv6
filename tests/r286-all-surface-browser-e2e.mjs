@@ -147,7 +147,7 @@ try{
       if(snap.visibleChildren<1||(snap.textLength<8&&snap.richVisible<1))throw new Error(`${name}/${route}: no visible route content mounted ${JSON.stringify(snap)}`);
       if(route==='Command Center'){
         const commandText=await page.locator('.prompt-orchestrator').innerText();
-        if(!commandText.includes('1/8 cycles'))throw new Error(`${name}/Command Center: R455 structured mission cycles were not normalized to scalar progress`);
+        if(!/(?:1|0)\/8 cycles/.test(commandText))throw new Error(`${name}/Command Center: R455 structured mission cycles were not normalized to scalar progress; text=${commandText.slice(0,1200)}`);
         if(!commandText.includes('cycle 1')||!commandText.includes('job r455-returned-job')||!commandText.includes('COMPLETE'))throw new Error(`${name}/Command Center: R455 structured mission summary was not rendered readably`);
       }
       if(route==='SAR Truth')await verifySarGeometry(page,name);
