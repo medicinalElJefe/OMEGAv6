@@ -102,6 +102,17 @@ async function reconcileMainState(token,repo,mainSha,state){
   return reconcileObservedSource(state,presentTargets);
 }
 
+export function canonicalAdvancedItemIdsR465(state={}){
+ const rows=Array.isArray(state?.r388CanonicalAdvancements)?state.r388CanonicalAdvancements:[];
+ return rows.filter(row=>
+  /^R388-[A-Y]-\d{2}$/.test(String(row?.itemId||''))&&
+  row?.status==='RELEASE_CLEAN'&&
+  /^[0-9a-f]{40}$/.test(String(row?.mergeSha||''))&&
+  Number.isInteger(Number(row?.productionRunId))&&Number(row.productionRunId)>0&&
+  row?.canonicalAdmission===false
+ ).map(row=>String(row.itemId));
+}
+
 function workflowEvidenceForSha(runs,sha){
   return (runs||[]).filter(run=>run?.head_sha===sha).map(run=>({databaseId:run.id,workflowName:run.name||'OMEGA Cloud Bridge CI',status:run.status,conclusion:run.conclusion,url:run.html_url,headSha:run.head_sha}));
 }
@@ -117,7 +128,9 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   let accuracyState={};try{accuracyState=(await getRepoFile(token,repo,'public/omega-r125-accuracy-state.json',mainSha)).json}catch{}
   let convergenceMarkdown='';try{convergenceMarkdown=(await getRepoTextFile(token,repo,'docs/OMEGA_MISSING_CAPABILITY_CONVERGENCE_R386.md',mainSha)).text}catch{}
   const recentDeclinedItemIds=[...new Set((state.r388Receipts||[]).slice(-8).flatMap(receipt=>(Array.isArray(receipt?.declinedItemScars)?receipt.declinedItemScars:[]).map(row=>String(row?.itemId||'')).filter(Boolean)))];
-  const backlog=selectNextConvergenceItemR388({markdown:convergenceMarkdown,advancedItemIds:state.r388AdvancedItemIds||[],heldItemIds:recentDeclinedItemIds});
+  const canonicalAdvancedItemIds=canonicalAdvancedItemIdsR465(state);
+  const reconciledAdvancedItemIds=[...new Set([...(state.r388AdvancedItemIds||[]),...canonicalAdvancedItemIds])];
+  const backlog=selectNextConvergenceItemR388({markdown:convergenceMarkdown,advancedItemIds:reconciledAdvancedItemIds,heldItemIds:recentDeclinedItemIds});
   const backlogTargets=[];
   for(const item of backlog.candidates||[]){
     const paths=[];
@@ -133,7 +146,7 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const retry=repairId?canAttemptRepairR314({history:state.r314RepairHistory||[],fingerprint:residualState.vector.fingerprint,repairId}):null;
   const repairTarget=selectedTarget.targetable&&retry&&!retry.allow?{...selectedTarget,targetable:false,reasons:[...selectedTarget.reasons,'R314_RETRY_BUDGET_EXHAUSTED']}:{...selectedTarget,repairId};
   const decision=candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence,repairTarget,backlogTarget}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
-  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds},decision};
+  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},decision};
 }
 
 async function ensureNoCompetingCandidate(token,repo,state,mainSha){
