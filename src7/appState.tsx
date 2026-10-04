@@ -1,6 +1,6 @@
-import {createContext,useContext,useMemo,useReducer,type ReactNode} from 'react';
+import {createContext,useContext,useEffect,useMemo,useReducer,type ReactNode} from 'react';
 import type {OmegaRouteName} from '../src/navigationRegistry';
-import type {Omega7Depth,Omega7Domain,Omega7Health} from './capabilityRegistry';
+import {OMEGA7_CAPABILITY_BY_ROUTE,OMEGA7_DOMAINS,type Omega7Depth,type Omega7Domain,type Omega7Health} from './capabilityRegistry';
 
 export const OMEGA7_APP_STATE_SCHEMA='OMEGA7_APP_STATE_V1' as const;
 
@@ -33,7 +33,9 @@ type Action=
  |{type:'STATUS';open:boolean}
  |{type:'HEALTH';key:keyof Omega7RuntimeHealth;value:Omega7Health};
 
-const initial:Omega7AppState={
+const OMEGA7_SESSION_KEY='omega7.session.v1';
+
+const baseInitial:Omega7AppState={
  schema:OMEGA7_APP_STATE_SCHEMA,
  domain:'HOME',
  depth:'STANDARD',
@@ -51,6 +53,19 @@ const initial:Omega7AppState={
  }
 };
 
+function initialState():Omega7AppState{
+ if(typeof window==='undefined')return baseInitial;
+ try{
+  const raw=window.sessionStorage.getItem(OMEGA7_SESSION_KEY);
+  if(!raw)return baseInitial;
+  const saved=JSON.parse(raw);
+  const domain=OMEGA7_DOMAINS.includes(saved?.domain)?saved.domain:'HOME';
+  const depth=['STANDARD','ADVANCED','CANON'].includes(saved?.depth)?saved.depth:'STANDARD';
+  const selectedRoute=typeof saved?.selectedRoute==='string'&&OMEGA7_CAPABILITY_BY_ROUTE.has(saved.selectedRoute)?saved.selectedRoute:null;
+  return{...baseInitial,domain,depth,selectedRoute};
+ }catch{return baseInitial}
+}
+
 function reducer(state:Omega7AppState,action:Action):Omega7AppState{
  switch(action.type){
   case'DOMAIN':return{...state,domain:action.domain,query:'',selectedRoute:null};
@@ -67,7 +82,10 @@ function reducer(state:Omega7AppState,action:Action):Omega7AppState{
 const Ctx=createContext<{state:Omega7AppState;dispatch:React.Dispatch<Action>}|null>(null);
 
 export function Omega7AppStateProvider({children}:{children:ReactNode}){
- const[state,dispatch]=useReducer(reducer,initial);
+ const[state,dispatch]=useReducer(reducer,undefined,initialState);
+ useEffect(()=>{
+  try{window.sessionStorage.setItem(OMEGA7_SESSION_KEY,JSON.stringify({domain:state.domain,depth:state.depth,selectedRoute:state.selectedRoute}))}catch{}
+ },[state.domain,state.depth,state.selectedRoute]);
  const value=useMemo(()=>({state,dispatch}),[state]);
  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
