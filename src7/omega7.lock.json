@@ -173,8 +173,8 @@
     "fullGovernedMatrix": "PASS"
   },
   "acceptedParityNextWork": "CUT_OVER_OMEGA7_AS_DEFAULT_WITH_OMEGA6_ROLLBACK_PRESERVED_AND_PROVE_DEFAULT_STARTUP",
-  "defaultCutoverPhase": "R454_DEFAULT_CUTOVER_CANDIDATE",
-  "defaultCutoverBaseSha": "9c9d3b4b2da39093e61fd664f5f42c04223283f1",
+  "defaultCutoverPhase": "R455_REPAIRED_DEFAULT_CUTOVER_CANDIDATE",
+  "defaultCutoverBaseSha": "3ccd795014ee620926c7a9f75894c7dd8d9e0d2c",
   "defaultCutoverRules": {
     "cleanSession": "OMEGA7",
     "explicitRollback": "OMEGA6",
@@ -188,5 +188,11 @@
     "canonicalMutation": false
   },
   "defaultCutoverProof": "DESKTOP_AND_MOBILE_DEFAULT_STARTUP_ROLLBACK_REENTRY_REQUIRED",
-  "defaultCutoverNextWork": "MERGE_ONLY_AFTER_FULL_GOVERNED_MATRIX_AND_BROWSER_CUTOVER_PROOF_PASS"
+  "defaultCutoverNextWork": "MERGE_ONLY_AFTER_FULL_GOVERNED_MATRIX_AND_DEFAULT_STARTUP_BROWSER_PROOF_PASS_ON_R455_HEAD",
+  "defaultCutoverRepair": {
+    "sourceCandidate": "R454",
+    "dependencyLock": "UNDICI_7_29_1_PACKAGE_AND_LOCK_SYNC",
+    "legacyProofSelection": "R118_AND_R318_EXPLICIT_OMEGA6",
+    "preservedCutoverProof": "R454_DEFAULT_STARTUP_ROLLBACK_REENTRY"
+  }
 }
