@@ -4,6 +4,7 @@ import {Omega7AppStateProvider,useOmega7AppState} from './appState';
 import {Omega7Boundary} from './Omega7Boundary';
 import {isOmega7NativeRoute,Omega7NativeSurface} from './nativeCapabilityRegistry';
 import {OMEGA7_PARITY_SUMMARY,parityEvidenceForRoute} from './parityLedgerR451';
+import {OMEGA7_R452_SUMMARY,r452ParityForRoute} from './parityLedgerR452';
 import './omega7.css';
 
 type Props={onOpenLegacyRoute:(route:string)=>void;onExitToV6:()=>void};
@@ -27,6 +28,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const results=useMemo(()=>state.query?searchOmega7Capabilities(state.query):domainCaps,[state.query,domainCaps]);
  const healthRows=Object.entries(state.health);
  const selectedParity=state.selectedRoute?parityEvidenceForRoute(state.selectedRoute):null;
+ const selectedR452=state.selectedRoute?r452ParityForRoute(state.selectedRoute):null;
  const ready=healthRows.filter(([,v])=>v==='READY').length;
  const held=healthRows.filter(([,v])=>v==='HELD'||v==='DEGRADED'||v==='UNKNOWN').length;
  const failed=healthRows.filter(([,v])=>v==='FAILED').length;
@@ -102,8 +104,8 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   {state.statusOpen&&<section className='o7-status' role='dialog' aria-label='System status'>
    <header><div><b>System status</b><span>{ready} ready · {held} limited · {failed} failed</span></div><button onClick={()=>dispatch({type:'STATUS',open:false})}>Close</button></header>
    <div>{healthRows.map(([key,value])=><article key={key} data-health={String(value).toLowerCase()}><span>{key.replaceAll(/([A-Z])/g,' $1')}</span><b>{value}</b></article>)}</div>
-   <div className='o7-parity-summary' data-r451-parity='true'><article><span>Routes browser-proved</span><b>{OMEGA7_PARITY_SUMMARY.functionalDesktopMobile}/{OMEGA7_PARITY_SUMMARY.total}</b></article><article><span>Failure/recovery proved</span><b>{OMEGA7_PARITY_SUMMARY.failureRecovery}/{OMEGA7_PARITY_SUMMARY.total}</b></article><article><span>Performance proved</span><b>{OMEGA7_PARITY_SUMMARY.performance}/{OMEGA7_PARITY_SUMMARY.total}</b></article><article><span>Legacy retired</span><b>{OMEGA7_PARITY_SUMMARY.legacyRetired}</b></article>{selectedParity&&<article><span>Selected route proof</span><b>{selectedParity.parityLevel.replaceAll('_',' ')}</b></article>}</div>
-   <p>Availability, execution, parity proof, and Canon authority are separate. OMEGAv6 remains available until the remaining per-route failure/recovery and performance evidence is closed.</p>
+   <div className='o7-parity-summary' data-r451-parity='true' data-r452-full-parity='true'><article><span>Routes browser-proved</span><b>{OMEGA7_PARITY_SUMMARY.functionalDesktopMobile}/{OMEGA7_PARITY_SUMMARY.total}</b></article><article><span>Failure/recovery proved</span><b>{OMEGA7_R452_SUMMARY.familyFailureRecovery}/{OMEGA7_R452_SUMMARY.total}</b></article><article><span>Performance proved</span><b>{OMEGA7_R452_SUMMARY.performance}/{OMEGA7_R452_SUMMARY.total}</b></article><article><span>Full parity evidence</span><b>{OMEGA7_R452_SUMMARY.fullParityEvidence}/{OMEGA7_R452_SUMMARY.total}</b></article><article><span>Legacy retired</span><b>{OMEGA7_R452_SUMMARY.legacyRetired}</b></article>{selectedParity&&<article><span>R451 selected proof</span><b>{selectedParity.parityLevel.replaceAll('_',' ')}</b></article>}{selectedR452&&<article><span>Selected route recovery family</span><b>{selectedR452.recoveryFamily.replaceAll('_',' ')}</b></article>}</div>
+   <p>Availability, execution, parity proof, and Canon authority are separate. R452 closes the defined route-level interaction, family-boundary recovery, performance, and rollback evidence gates, while OMEGAv6 remains available during burn-in; zero legacy surfaces are retired here.</p>
   </section>}
 
   {state.commandOpen&&<div className='o7-command-backdrop' onMouseDown={e=>{if(e.currentTarget===e.target)dispatch({type:'COMMAND',open:false})}}>
