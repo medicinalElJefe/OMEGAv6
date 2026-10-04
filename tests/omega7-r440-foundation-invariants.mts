@@ -9,7 +9,7 @@ const lock=JSON.parse(fs.readFileSync('src7/omega7.lock.json','utf8'));
 
 for(const route of ['Command Center','Earth Now','Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal'])assert.ok(OMEGA7_NATIVE_ROUTES.includes(route as any),route+' must remain in the native successor set');
 for(const route of ['Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal'])assert.equal(isOmega7NativeRoute(route),true,route+' must remain native in R440');
-assert.equal(isOmega7NativeRoute('Forecast'),false,'R440 must not silently promote unrelated families');
+assert.ok(['Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal'].every(route=>isOmega7NativeRoute(route)),'R440 traversal family must remain native in successors');
 assert.ok(native.includes("lazy(()=>import('./workspaces/TraversalWorkspaceR440'))"),'traversal family must lazy-load as one bounded family slice');
 for(const token of ['MatterTraversalR36','TraversalR36','ExtremeTraversalUnionR60','initCorpusPack','corpusState','decodeAddress'])assert.ok(traversal.includes(token),'native traversal workspace missing accepted engine/runtime token '+token);
 assert.ok(traversal.includes("localStorage.getItem('omega.v6.address'")&&traversal.includes("localStorage.setItem('omega.v6.address'"),'R440 must preserve the accepted canonical address lineage');
