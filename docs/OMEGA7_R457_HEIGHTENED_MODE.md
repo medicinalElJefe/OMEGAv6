@@ -116,7 +116,7 @@ Promotion is comparative rather than revision-count based:
 
 Presentation improvement cannot compensate for lost capability, proof, future paths, or recovery. A green source patch is therefore not developmental growth until the transition survives its authority and proof transport.
 
-Every normalized developmental metric must also carry an explicit evidence reference and the transition must bind the exact source head plus proof references. Unbound scores are not treated as knowledge and force ESCALATE rather than promotion.
+Every normalized developmental metric must also carry an explicit evidence reference and the transition must bind the parent state, candidate state, exact source head, and proof references. Unbound scores are not treated as knowledge and force ESCALATE rather than promotion. Developmental acceleration and jerk are finite differences over discrete developmental transitions, not physical-time derivatives.
 
 ## Contradictions and scars
 
