@@ -123,6 +123,8 @@ try{
     const page=await context.newPage();
     const pageErrors=[];
     page.on('pageerror',e=>pageErrors.push(String(e)));
+    const r455CycleReceipt={cycle:1,jobId:'r455-returned-job',status:'COMPLETE',resultFingerprint:'f'.repeat(64),completedAt:Date.now()-1000};
+    await page.route('**/api/missions',route=>route.request().method()==='GET'?route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,missions:[{id:'r455-legacy-mission',status:'COMPLETE',maxCycles:8,cycles:[r455CycleReceipt],summary:r455CycleReceipt,objective:'R455 structured mission receipt render proof'}]})}):route.continue());
     await page.goto(`${base}/?r307=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
     await openNavigator(page);
@@ -143,6 +145,12 @@ try{
       if(name==='mobile'&&snap.undersizedTouchActions.length)throw new Error(`${name}/${route}: coarse-pointer action controls below 44×44px ${snap.undersizedTouchActions.join(' | ')}`);
       if(name==='mobile'&&snap.undersizedTouchForms.length)throw new Error(`${name}/${route}: coarse-pointer form controls below 44px high ${snap.undersizedTouchForms.join(' | ')}`);
       if(snap.visibleChildren<1||(snap.textLength<8&&snap.richVisible<1))throw new Error(`${name}/${route}: no visible route content mounted ${JSON.stringify(snap)}`);
+      if(route==='Command Center'){
+        await page.locator('.prompt-orchestrator .mission-live').waitFor({state:'visible',timeout:10000});
+        const commandText=await page.locator('.prompt-orchestrator').innerText();
+        if(!commandText.includes('1/8 cycles'))throw new Error(`${name}/Command Center: R455 structured mission cycles were not normalized to exact scalar progress; text=${commandText.slice(0,1200)}`);
+        if(!commandText.includes('cycle 1')||!commandText.includes('job r455-returned-job')||!commandText.includes('COMPLETE'))throw new Error(`${name}/Command Center: R455 structured mission summary was not rendered readably`);
+      }
       if(route==='SAR Truth')await verifySarGeometry(page,name);
     }
 
@@ -154,5 +162,5 @@ try{
     if(pageErrors.length)throw new Error(`${name}: browser page errors ${pageErrors.join(' | ').slice(0,3000)}`);
     await context.close();
   }
-  console.log('R286/R307 ALL-SURFACE BROWSER PASS · exact active SurfaceIntegrity route readiness proven before each audit · mobile navigator-mode controls browser-proven at >=44×44px under coarse-pointer emulation · every visible enabled action on all 44 canonical routes browser-proven at >=44×44px and every enabled form control >=44px high on 390px touch mobile · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + mobile · exact data-panel transitions · route-agnostic visible-content proof · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
+  console.log('R286/R307/R455 ALL-SURFACE BROWSER PASS · structured durable mission cycle receipt object normalized without React #31 · exact active SurfaceIntegrity route readiness proven before each audit · mobile navigator-mode controls browser-proven at >=44×44px under coarse-pointer emulation · every visible enabled action on all 44 canonical routes browser-proven at >=44×44px and every enabled form control >=44px high on 390px touch mobile · ALL + six contextual workspace submenus pointer-verified · 44/44 canonical route buttons pointer-clicked on desktop + mobile · exact data-panel transitions · route-agnostic visible-content proof · no material viewport overflow · navigator Escape/reopen proof · exact 78×78/6084-cell SAR geometry · no page errors.');
 }finally{await browser.close()}
