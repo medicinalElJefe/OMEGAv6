@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "4058ee07002dc78bba952711969afb33951a8b01",
-  "sourceMilestone": "R451",
+  "sourceMainSha": "e472d2f23f4e3d214662d096e7d57697e9da8d15",
+  "sourceMilestone": "R450_WITH_R449_ROLLBACK",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -134,5 +134,6 @@
     "routeBudgetMs": 8000,
     "p95BudgetMs": 6000,
     "workflowAuthority": "OMEGA Cloud Bridge CI"
-  }
+  },
+  "parityExpansionBaseSha": "4058ee07002dc78bba952711969afb33951a8b01"
 }
