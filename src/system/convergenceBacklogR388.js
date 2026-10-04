@@ -34,7 +34,7 @@ const ITEM_TARGETS=Object.freeze({
  'A-03':['src/capabilityAuthority.ts','src/operationalCapabilityRuntimeR45.ts'],
  'A-04':[],
  'A-05':['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],
- 'B-02':['src/authoritativeOperationChainR143.ts','src/OmegaWorkstationFullV2.tsx'],
+ 'B-02':['src/OmegaSideNavigatorR88.tsx','src/OmegaWorkstationFullV2.tsx'],
 });
 
 const ITEM_ACCEPTANCE=Object.freeze({
@@ -56,11 +56,11 @@ const ITEM_ACCEPTANCE=Object.freeze({
   minFiles:2,
   minSubstantiveLines:16,
   requiredChangedPathGroups:Object.freeze([
-   Object.freeze(['src/authoritativeOperationChainR143.ts']),
+   Object.freeze(['src/OmegaSideNavigatorR88.tsx']),
    Object.freeze(['src/OmegaWorkstationFullV2.tsx'])
   ]),
-  requiredChangedTokens:Object.freeze(['OMEGA_ROUTE_FUNCTIONAL_INHERITANCE','OMEGA_ALL_ROUTES_R82.map','R143_OPERATION_CONTRACTS','R142','R125','usableControl','stateOutput','proof','failureRecovery','degradeTo','canonicalMutation:false']),
-  rationale:'B-02 requires a route-complete functional-inheritance transition across operation authority and the mounted workstation: usable control, state/output, execution-proof authority, explicit failure/recovery/degrade semantics, and preserved Canon boundary. Type annotations, menu enumeration, route-count aliases, comments, or presentation-only metadata are not completion.'
+  requiredChangedTokens:Object.freeze(['OMEGA_ROUTE_FUNCTIONAL_INHERITANCE','OMEGA_ALL_ROUTES_R82','operationContractForRouteR143','R142','R125','usableControl','stateOutput','proof','failureRecovery','degradeTo','canonicalMutation:false']),
+  rationale:'B-02 requires a route-complete functional-inheritance transition across the R143-consuming navigator and mounted workstation while preserving R143 itself as authority: usable control, state/output, execution-proof authority, explicit failure/recovery/degrade semantics, and preserved Canon boundary. Type annotations, menu enumeration, route-count aliases, comments, or presentation-only metadata are not completion.'
  }),
 });
 
