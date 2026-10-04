@@ -14,7 +14,7 @@ export const OMEGA_NAVIGATION=[
 {id:'08',group:'STUDIO',name:'Visual Instrument',hint:'Source-bound renderer for phase, continuity, burden, contradiction, proof and route.',effect:'COMPUTE',authority:'DERIVED'},
 {id:'09',group:'STUDIO',name:'Relativity',hint:'Observer frame, motion relativity, phase, carry and reference-context analysis.',effect:'COMPUTE',authority:'DERIVED'},
 {id:'10',group:'STUDIO',name:'Earth Now',hint:'Real returned-source Earth evidence kept separate from canonical OMEGA state.',effect:'EXTERNAL_GATE',authority:'EVIDENCE_GATED'},
-{id:'11',group:'STUDIO',name:'Forecast',hint:'Frozen-prior, bounded future-state corridors with uncertainty and no future leakage.',effect:'COMPUTE',authority:'DERIVED'},
+{id:'11',group:'STUDIO',name:'Forecast',hint:'Frozen-prior, bounded future-state corridors with uncertainty and no future leakage.',effect:'COMPUTE',authority:'CANONICAL'},
 {id:'12',group:'STUDIO',name:'Atlas',hint:'Executable 20,736-state atlas and address-space inspection.',effect:'READ',authority:'CANONICAL'},
 {id:'13',group:'STUDIO',name:'Traversal',hint:'General state-space traversal across the same canonical packet authority.',effect:'COMPUTE',authority:'DERIVED'},
 {id:'14',group:'STUDIO',name:'Create',hint:'Seed → translate → build → render → forecast → prove from one governed entry.',effect:'BUILD',authority:'GOVERNANCE'},
