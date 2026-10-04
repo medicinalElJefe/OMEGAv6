@@ -15,6 +15,7 @@ assert.equal(lock.parityPhase,'R449_ROLLBACK_REVERSIBILITY_CANDIDATE');
 assert.equal(lock.rollbackProof,'OMEGA7_TO_OMEGA6_TO_OMEGA7_WITH_CANONICAL_ADDRESS_CONTINUITY_REQUIRED');
 for(const token of ["viewport:{width:390,height:844}","isMobile:true","hasTouch:true","box.width<44||box.height<44","phone.locator('.o7-v6')","phone.locator('.o7-nav')"])assert.ok(browser.includes(token),'R449 phone rollback proof missing '+token);
 assert.ok(!css.includes('.o7-search-trigger kbd,.o7-v6{display:none}'),'R449 must never hide the rollback control on phone');
-for(const token of [".o7-v6{display:block;min-width:44px;width:44px","grid-template-rows:44px 44px","height:calc(100dvh - 164px)"])assert.ok(css.includes(token),'R449 phone shell touch/scroll contract missing '+token);
+for(const token of [".o7-v6{display:block;min-width:44px;width:44px","grid-template-rows:44px 44px","height:calc(104px + env(safe-area-inset-top))","height:calc(60px + env(safe-area-inset-bottom))","height:calc(100dvh - 164px - env(safe-area-inset-top) - env(safe-area-inset-bottom))","-webkit-overflow-scrolling:touch"])assert.ok(css.includes(token),'R449 phone shell touch/safe-area/scroll contract missing '+token);
+for(const inset of ["safe-area-inset-top","safe-area-inset-bottom","safe-area-inset-left","safe-area-inset-right"])assert.ok(css.includes(inset),'R449 phone shell missing '+inset);
 
 console.log('OMEGA7 R449 STATIC PASS · explicit OMEGA6 rollback remains wired · desktop + phone rollback, >=44px phone escape, canonical address preservation and OMEGA7 re-entry are browser-proved');
