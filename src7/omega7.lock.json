@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "2399b2d366e6767545fc032982be7fa4cc5c0c1f",
-  "sourceMilestone": "R450",
+  "sourceMainSha": "e472d2f23f4e3d214662d096e7d57697e9da8d15",
+  "sourceMilestone": "R450_WITH_R449_ROLLBACK",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -108,5 +108,21 @@
     "representativeRouteMs": 8000,
     "representativeP95Ms": 6000
   },
-  "rollbackProof": "OMEGA7_TO_OMEGA6_TO_OMEGA7_WITH_CANONICAL_ADDRESS_CONTINUITY_REQUIRED"
+  "rollbackProof": "OMEGA7_TO_OMEGA6_TO_OMEGA7_WITH_CANONICAL_ADDRESS_CONTINUITY_REQUIRED",
+  "parityEvidence": {
+    "interaction": "R446_44_ROUTE_DESKTOP_MOBILE_BROWSER_PROOF",
+    "failureRecovery": "R447_WORKSPACE_EARTH_HYBRID_FAILURE_RECOVERY_PROOF",
+    "performance": "R447_8_ROUTE_REPRESENTATIVE_PERFORMANCE_PROOF",
+    "rollback": "R449_DESKTOP_PHONE_REVERSIBILITY_PROOF"
+  },
+  "parityCounts": {
+    "routes": 44,
+    "functionalDesktopMobile": 44,
+    "failureRecovery": 3,
+    "performance": 8,
+    "fullRouteEvidence": 3,
+    "legacyRetired": 0
+  },
+  "nextParityWork": "EXPAND_FAILURE_RECOVERY_AND_PERFORMANCE_PROOF_TO_REMAINING_ROUTES_BEFORE_ANY_LEGACY_RETIREMENT",
+  "parityEvidencePhase": "R451_PARITY_EVIDENCE_MATERIALIZATION"
 }
