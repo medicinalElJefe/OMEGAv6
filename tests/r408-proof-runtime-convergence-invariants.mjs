@@ -81,8 +81,12 @@ for(const [file,proofClass,capacity,cost] of[
 const workflow=fs.readFileSync('.github/workflows/r241-archive-convergence.yml','utf8');
 assert.ok(workflow.includes('stale-head-preflight'),'R460 R241 must preflight current PR head before expensive proof');
 assert.ok(workflow.includes('git ls-remote')&&workflow.includes('refs/pull/${PR_NUMBER}/head'),'R460 preflight must resolve the live PR head rather than trust stale event payload');
+assert.ok(workflow.includes('EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}'),'R460 must distinguish PR head identity from synthetic GITHUB_SHA');
+assert.ok(workflow.includes('if [ "$observed" = "$EVENT_HEAD_SHA" ]'),'R460 current-head decision must compare live PR ref to event head SHA');
+assert.ok((workflow.match(/ref: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/g)||[]).length===2,'R460 both heavy R241 jobs must checkout exact candidate head, not PR merge ref');
+assert.ok(workflow.includes('Verify exact candidate head identity')&&workflow.includes('Verify exact interaction head identity'),'R460 exact-head checkout must be asserted before proof');
 assert.ok(workflow.includes("if: needs.stale-head-preflight.outputs.current == 'true'"),'R460 both expensive R241 jobs must be gated by the stale-head preflight');
-assert.ok(workflow.includes('workflow SHA $GITHUB_SHA is retained as history'),'R460 stale exact heads must remain explicit provenance instead of being silently erased');
+assert.ok(workflow.includes('event head $EVENT_HEAD_SHA is retained as history'),'R460 stale exact heads must remain explicit provenance instead of being silently erased');
 assert.ok(workflow.includes('R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=480'));
 assert.ok(workflow.includes('R313_DISCLOSURE_SHARDS=16 R313_DISCLOSURE_MAX_PARALLEL=4 R313_DISCLOSURE_SHARD_TIMEOUT_SEC=360'));
 assert.ok(workflow.includes('R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=360'));
