@@ -58,7 +58,7 @@ const routeFunctionalInheritanceR464=(route:string):RouteFunctionalInheritanceR4
  const usableControl=Boolean(chain?.routeId&&chain?.capabilityId&&chain?.executionDomain);
  return{route,usableControl,stateOutput:`${chain.state}:${chain.capabilityId}`,proof:{operationAuthority:'R143',executionProof:'R142',canonAdmission:'R125'},failureRecovery:{state:usableControl?'READY':'DEGRADED',degradeTo:'System Atlas',preserveRequestedRoute:true},canonicalMutation:false};
 };
-function normalizePanel(v:any):Panel{const route=String(v);if(!OMEGA_SURFACES.includes(v as Panel))return 'System Atlas';const inheritance=routeFunctionalInheritanceR464(route);return inheritance.usableControl&&capabilityExecutionContract(route).routable?v as Panel:inheritance.failureRecovery.degradeTo}
+function normalizePanel(v:any):Panel{const route=String(v);if(!OMEGA_SURFACES.includes(v as Panel))return 'System Atlas';const inheritance=routeFunctionalInheritanceR464(route);return inheritance.usableControl&&capabilityExecutionContract(String(v)).routable?v as Panel:inheritance.failureRecovery.degradeTo}
 
 export default function OmegaWorkstationFullV2(){
  const[ready,setReady]=useState(false),[bootError,setBootError]=useState('');
