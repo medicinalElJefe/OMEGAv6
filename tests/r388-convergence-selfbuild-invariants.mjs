@@ -23,6 +23,15 @@ for(const item of items){
 assert.ok(items.some(x=>x.section==='G'&&!x.selfEditable),'autonomous-governance section must not be self-editable');
 assert.ok(items.some(x=>x.section==='U'&&!x.selfEditable),'action-governance section must not be self-editable');
 assert.ok(items.some(x=>x.externalProofRequired),'R388 must preserve external/device proof obligations instead of calling source work complete');
+const byId=id=>items.find(x=>x.id===id);
+assert.deepEqual(byId('R388-A-01')?.affected,['src/runtimeIdentity.ts','src/operationalCapabilityRuntimeR45.ts'],'R448 one-runtime convergence must target runtime identity/operational authority rather than the workstation mount tree');
+assert.deepEqual(byId('R388-A-02')?.affected,['src/capabilityAuthority.ts','src/OmegaViewAuthorityBar.tsx'],'R448 renderer-contract convergence must target view/capability authority');
+assert.deepEqual(byId('R388-A-03')?.affected,['src/capabilityAuthority.ts','src/operationalCapabilityRuntimeR45.ts'],'R448 capability-state normalization must target capability truth, not mount ownership');
+assert.equal(byId('R388-A-04')?.selfEditable,false,'R448 native OpenGL→CPU fallback must remain device-gated until a real native executor target exists');
+assert.equal(byId('R388-A-04')?.externalProofRequired,true,'R448 native renderer fallback must retain first-hand external/device proof');
+assert.deepEqual(byId('R388-A-05')?.affected,['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],'R448 cumulative proof-surface work must target build/system validation');
+for(const id of ['R388-A-01','R388-A-02','R388-A-03','R388-A-05'])assert.equal(byId(id)?.affected.includes('src/OmegaWorkstationFullV2.tsx'),false,`${id} must not fall back to the coarse workstation mount owner target`);
+
 
 const selected=selectNextConvergenceItemR388({markdown,advancedItemIds:[]});
 assert.equal(selected.schema,R388_CONVERGENCE_BACKLOG_SCHEMA);
@@ -89,4 +98,4 @@ assert.equal(repeatBlock.includes('/git/refs'),false,'R430 exact repeat must be 
 assert.ok(machine.includes('productPatchIdentity:patchIdentity')&&machine.includes('Product patch identity: ${patchIdentity.key}'),'R430 accepted non-repeat candidate must carry its exact product patch identity into receipt/candidate/PR evidence');
 
 
-console.log(`R388/R430 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · deterministic section→source targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · exact Git-blob proof-rejected patch memory · bounded compliant reformulation only · durable all-decline scar carry without false advancement · all 8 exact-head workflow families required for autonomous promotion`);
+console.log(`R388/R430 CONVERGENCE SELF-BUILD PASS · ${items.length} explicit backlog items · semantic item→subsystem targeting · governance self-edit fence · external proof carry · CLOUD-01 continues beyond SG001–SG005 · validator-feedback scars preserved · exact Git-blob proof-rejected patch memory · bounded compliant reformulation only · durable all-decline scar carry without false advancement · all 8 exact-head workflow families required for autonomous promotion`);
