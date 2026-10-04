@@ -227,6 +227,17 @@ export type HeightenedDevelopmentalTransitionInputR457={
  evidence:HeightenedDevelopmentalEvidenceR457;
 };
 
+export const R457_AUTHORITATIVE_PROOF_FAMILIES=Object.freeze([
+ 'R210 Release Controller',
+ 'R223 Cloudflare Evolution Authority',
+ 'R202 Operational Source Authority',
+ 'OMEGA Cloud Bridge CI',
+ 'R170 Current Convergence',
+ 'OMEGA R237 Hybrid Command Authority Proof',
+ 'OMEGA R238 Woven Hybrid Continuity Convergence',
+ 'R241 Archive Convergence Visual Intelligence'
+] as const);
+
 const R457_EPSILON=1e-9;
 const clamp01=(value:number)=>Math.max(0,Math.min(1,Number.isFinite(value)?value:0));
 const normalizeDevelopmentalMetricsR457=(row:HeightenedDevelopmentalMetricsR457):HeightenedDevelopmentalMetricsR457=>({
@@ -279,13 +290,15 @@ export function evaluateDevelopmentalTransitionR457(input:HeightenedDevelopmenta
  const parentStateRef=String(input.evidence?.parentStateRef||'').trim();
  const candidateStateRef=String(input.evidence?.candidateStateRef||'').trim();
  const sourceHead=String(input.evidence?.sourceHead||'').trim();
- const proofRefs=Array.isArray(input.evidence?.proofRefs)?input.evidence.proofRefs.map(String).filter(Boolean):[];
+ const proofRefs=Array.isArray(input.evidence?.proofRefs)?input.evidence.proofRefs.map(String).map(x=>x.trim()).filter(Boolean):[];
+ const missingAuthoritativeProofs=R457_AUTHORITATIVE_PROOF_FAMILIES.filter(name=>!proofRefs.includes(name));
  const hardVetoes:string[]=[];
  if(!parentStateRef)hardVetoes.push('PARENT_STATE_UNBOUND');
  if(!candidateStateRef)hardVetoes.push('CANDIDATE_STATE_UNBOUND');
- if(!sourceHead)hardVetoes.push('SOURCE_HEAD_UNBOUND');
+ if(parentStateRef&&candidateStateRef&&parentStateRef===candidateStateRef)hardVetoes.push('STATE_TRANSITION_IDENTITY_COLLISION');
+ if(!/^[0-9a-f]{40}$/i.test(sourceHead))hardVetoes.push('SOURCE_HEAD_NOT_EXACT_GIT_SHA');
  if(missingMetricEvidence.length)hardVetoes.push('METRIC_EVIDENCE_INCOMPLETE:'+missingMetricEvidence.join(','));
- if(!proofRefs.length)hardVetoes.push('PROOF_REFERENCE_REQUIRED');
+ if(missingAuthoritativeProofs.length)hardVetoes.push('AUTHORITATIVE_PROOF_SET_INCOMPLETE:'+missingAuthoritativeProofs.join(','));
  if(!input.authorityClosed)hardVetoes.push('AUTHORITY_NOT_CLOSED');
  if(!input.proofSurvives)hardVetoes.push('PROOF_DID_NOT_SURVIVE_TRANSPORT');
  if(!input.rollbackAvailable)hardVetoes.push('ROLLBACK_NOT_AVAILABLE');
@@ -329,13 +342,13 @@ export function evaluateDevelopmentalTransitionR457(input:HeightenedDevelopmenta
   developmentalScar,
   continuityCone,
   dewey:Object.freeze({parentScore,candidateScore,continuity:candidate.continuity,futurePlasticity:candidate.futurePlasticity,contradiction:candidate.contradiction,burden:candidate.burden}),
-  evidence:Object.freeze({parentStateRef,candidateStateRef,sourceHead,metricRefs:Object.freeze({...input.evidence.metricRefs}),proofRefs:Object.freeze([...proofRefs]),missingMetricEvidence:Object.freeze(missingMetricEvidence)}),
+  evidence:Object.freeze({parentStateRef,candidateStateRef,sourceHead,metricRefs:Object.freeze({...input.evidence.metricRefs}),proofRefs:Object.freeze([...proofRefs]),missingMetricEvidence:Object.freeze(missingMetricEvidence),missingAuthoritativeProofs:Object.freeze([...missingAuthoritativeProofs])}),
   growthNet,
   hardVetoes:Object.freeze(hardVetoes),
   decision,
   promotionAllowed:decision==='TURN'&&hardVetoes.length===0,
   canonicalMutation:false,
-  truthBoundary:'R457 developmental metrics are normalized software-governance telemetry and require explicit per-metric evidence plus exact source-head/proof references. They do not create empirical evidence, physical dimensions, or CanonState authority; exact proof and R125 admission remain external gates.'
+  truthBoundary:'R457 developmental metrics are normalized software-governance telemetry and require explicit per-metric evidence, distinct parent/candidate identities, an exact Git head, and the complete eight-family proof-reference set. References remain pointers rather than self-authenticating evidence; exact proof results and R125 admission remain external gates. No empirical evidence, physical dimension, or CanonState authority is created here.'
  });
 }
 
