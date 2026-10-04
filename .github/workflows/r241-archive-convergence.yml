@@ -13,7 +13,44 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  stale-head-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    outputs:
+      current: ${{ steps.head.outputs.current }}
+      observed_head: ${{ steps.head.outputs.observed_head }}
+    steps:
+      - name: Verify candidate is still the PR head before expensive proof
+        id: head
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+            echo "observed_head=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            echo "R241 stale-head preflight: manual run, exact requested SHA remains eligible."
+            exit 0
+          fi
+          observed="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/pull/${PR_NUMBER}/head" | awk 'NR==1{print $1}')"
+          if [ -z "$observed" ]; then
+            echo "::error title=R241 HEAD LOOKUP FAILED::Could not resolve current head for PR #${PR_NUMBER}."
+            exit 1
+          fi
+          echo "observed_head=$observed" >> "$GITHUB_OUTPUT"
+          if [ "$observed" = "$GITHUB_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+            echo "R241 stale-head preflight PASS · PR #${PR_NUMBER} current head $observed matches exact workflow SHA."
+          else
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "R241 stale-head preflight OBSOLETE · workflow SHA $GITHUB_SHA is retained as history but current PR #${PR_NUMBER} head is $observed; expensive proof is skipped."
+          fi
+
   prove-r241-interactions:
+    needs: stale-head-preflight
+    if: needs.stale-head-preflight.outputs.current == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
@@ -114,6 +151,8 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   prove-r241:
+    needs: stale-head-preflight
+    if: needs.stale-head-preflight.outputs.current == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
