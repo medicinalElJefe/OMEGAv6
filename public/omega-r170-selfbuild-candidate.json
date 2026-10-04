@@ -1,6 +1,6 @@
 {
   "schema": "OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388",
-  "revision": "R388",
+  "revision": "R388+R466",
   "machineId": "CLOUD-01",
   "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
   "generatorContract": "R388_BACKLOG_AI_BUILD",
@@ -14,7 +14,33 @@
       "src/navigationRegistry.ts",
       "src/OmegaWorkstationFullV2.tsx"
     ],
-    "acceptanceContract": null,
+    "acceptanceContract": {
+      "revision": "R466",
+      "minChangedChars": 1200,
+      "minFiles": 2,
+      "minSubstantiveLines": 16,
+      "requiredChangedPathGroups": [
+        [
+          "src/navigationRegistry.ts"
+        ],
+        [
+          "src/OmegaWorkstationFullV2.tsx"
+        ]
+      ],
+      "requiredChangedTokens": [
+        "OMEGA_CONTROL_RECONCILIATION_R466",
+        "OMEGA_WORKSTATION_CONTROL_AUDIT_R466",
+        "duplicateRouteAuthorities",
+        "hiddenUnreachableRoutes",
+        "mountedExactlyOnce",
+        "omegaMasterMenuForRouteR289",
+        "OMEGA_ALL_ROUTES_R82",
+        "operationContractForRouteR143",
+        "capabilityExecutionContract",
+        "canonicalMutation:false"
+      ],
+      "rationale": "B-03 requires explicit reconciliation of recovered controls across the canonical navigation registry and mounted workstation: unique route identity/authority, one reachable master-menu owner, exactly one workstation mount, R143 operation binding, routability, zero hidden unreachable routes, and no Canon mutation. Changing an authority label, route count, hint, or presentation metadata is not completion."
+    },
     "expectedProofs": [
       "R241 Archive Convergence Visual Intelligence",
       "OMEGA R237 Hybrid Command Authority Proof"
@@ -25,17 +51,22 @@
   },
   "repair": {
     "paths": [
-      "src/navigationRegistry.ts"
+      "src/navigationRegistry.ts",
+      "src/OmegaWorkstationFullV2.tsx"
     ],
     "productPatchIdentity": {
       "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
       "rows": [
         {
+          "path": "src/OmegaWorkstationFullV2.tsx",
+          "blobSha": "a75414dbebd1a8f1b7bb924596e5e2d875d8f295"
+        },
+        {
           "path": "src/navigationRegistry.ts",
-          "blobSha": "3852fda33824e0e0337c12d7559cd5bcd8dcf7c5"
+          "blobSha": "33d73b82fb6fba915af8336386a6883c8a266aa3"
         }
       ],
-      "key": "src/navigationRegistry.ts:3852fda33824e0e0337c12d7559cd5bcd8dcf7c5"
+      "key": "src/OmegaWorkstationFullV2.tsx:a75414dbebd1a8f1b7bb924596e5e2d875d8f295|src/navigationRegistry.ts:33d73b82fb6fba915af8336386a6883c8a266aa3"
     },
     "expectedProofs": [
       "R241 Archive Convergence Visual Intelligence",
@@ -64,7 +95,22 @@
         }
       }
     ],
-    "declinedItemScars": []
+    "declinedItemScars": [],
+    "governedCorrection": {
+      "revision": "R466",
+      "state": "GOVERNED_SEMANTIC_CORRECTION_PENDING_PROOF",
+      "rejectedAutonomousHead": "70f6038bd3a34666e557e8ea2540af5bebf878ad",
+      "rejectedAutonomousChange": "Forecast authority DERIVED -> CANONICAL",
+      "rejectionReason": "Authority inflation does not recover controls or reconcile duplicate/unreachable route authority; Forecast must remain a derived bounded future projection.",
+      "correctedProductPaths": [
+        "src/navigationRegistry.ts",
+        "src/OmegaWorkstationFullV2.tsx"
+      ],
+      "preservesForecastAuthority": "DERIVED",
+      "acceptanceRevision": "R466",
+      "canonicalAdmission": false,
+      "directProductionMutation": false
+    }
   },
   "receipt": {
     "schema": "OMEGA_CLOUDFLARE_R388_CONVERGENCE_RECEIPT",
@@ -77,17 +123,22 @@
     "objective": "All previously buried/lost controls recovered and reconciled; no duplicate authorities or hidden unreachable functions.",
     "externalProofRequired": false,
     "targetPaths": [
-      "src/navigationRegistry.ts"
+      "src/navigationRegistry.ts",
+      "src/OmegaWorkstationFullV2.tsx"
     ],
     "productPatchIdentity": {
       "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
       "rows": [
         {
+          "path": "src/OmegaWorkstationFullV2.tsx",
+          "blobSha": "a75414dbebd1a8f1b7bb924596e5e2d875d8f295"
+        },
+        {
           "path": "src/navigationRegistry.ts",
-          "blobSha": "3852fda33824e0e0337c12d7559cd5bcd8dcf7c5"
+          "blobSha": "33d73b82fb6fba915af8336386a6883c8a266aa3"
         }
       ],
-      "key": "src/navigationRegistry.ts:3852fda33824e0e0337c12d7559cd5bcd8dcf7c5"
+      "key": "src/OmegaWorkstationFullV2.tsx:a75414dbebd1a8f1b7bb924596e5e2d875d8f295|src/navigationRegistry.ts:33d73b82fb6fba915af8336386a6883c8a266aa3"
     },
     "baseSha": "a9e075fce6f18cc50f050cebcea7c2fc981f6e9e",
     "branch": "cloud/evolution-r388-r388-b-03-a9e075fc",
@@ -185,6 +236,21 @@
         "R201",
         "R203"
       ]
+    },
+    "governedCorrection": {
+      "revision": "R466",
+      "state": "GOVERNED_SEMANTIC_CORRECTION_PENDING_PROOF",
+      "rejectedAutonomousHead": "70f6038bd3a34666e557e8ea2540af5bebf878ad",
+      "rejectedAutonomousChange": "Forecast authority DERIVED -> CANONICAL",
+      "rejectionReason": "Authority inflation does not recover controls or reconcile duplicate/unreachable route authority; Forecast must remain a derived bounded future projection.",
+      "correctedProductPaths": [
+        "src/navigationRegistry.ts",
+        "src/OmegaWorkstationFullV2.tsx"
+      ],
+      "preservesForecastAuthority": "DERIVED",
+      "acceptanceRevision": "R466",
+      "canonicalAdmission": false,
+      "directProductionMutation": false
     }
   },
   "status": "SOURCE_ADVANCED_PENDING_PROOF",
