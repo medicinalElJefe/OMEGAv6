@@ -119,12 +119,15 @@ LEGACY_RETIRED is forbidden unless parity proof is current and rollback remains 
 
 ## Activation
 
-The current foundation is opt-in while it is being proved:
+As of the R454 cutover candidate, OMEGA7 is the default product shell after accepted full-product parity.
 
-- query: `?omega7=1`
-- local preference: `omega7.enabled=true`
+Explicit selection remains reversible:
 
-The existing OMEGAv6 product remains the default until OMEGA7 completes the parity and reliability gates.
+- `?omega7=1` forces OMEGA7
+- `?omega6=1` forces OMEGAv6
+- the product-shell preference is stored in `omega.product.shell`
+
+OMEGAv6 remains intact as the explicit rollback product. R454 changes startup preference only; it does not delete or retire the accepted OMEGAv6 surfaces.
 
 ## Release gates before OMEGA7 becomes default
 
