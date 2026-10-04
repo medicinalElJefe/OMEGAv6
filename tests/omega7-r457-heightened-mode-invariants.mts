@@ -82,12 +82,17 @@ assert.equal(R457_DEWEY_KERNEL.decisionLaw,'STAY_TURN_ESCALATE');
 assert.equal(R457_DEWEY_KERNEL.pruneLaw,'PRUNE_TRANSLATE_PROVE');
 
 const parentMetrics={continuity:.80,futurePlasticity:.70,contradiction:.18,burden:.24,recoverability:.82,proofCoverage:.90,capabilityCoverage:1,humanComprehension:.62,futureTopologyRetention:1,scarPressure:.16};
+const developmentalEvidence={
+ sourceHead:'a'.repeat(40),
+ metricRefs:Object.fromEntries(Object.keys(parentMetrics).map(key=>[key,'proof:'+key])),
+ proofRefs:['R210','R223','R202','CLOUD_BRIDGE','R170','R237','R238','R241']
+};
 const improved=evaluateDevelopmentalTransitionR457({
  parent:parentMetrics,
  candidate:{...parentMetrics,continuity:.86,futurePlasticity:.78,contradiction:.12,burden:.20,recoverability:.90,proofCoverage:.96,humanComprehension:.80,scarPressure:.12},
  previousGrowth:{humanComprehension:.05,proofCoverage:.01},
  previousAcceleration:{humanComprehension:.01},
- authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false
+ authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false,evidence:developmentalEvidence
 });
 assert.equal(improved.decision,'TURN','R457 must TURN toward a proof-preserving developmental improvement rather than merely count revisions');
 assert.equal(improved.promotionAllowed,true);
@@ -101,7 +106,7 @@ assert.equal(improved.developmentalScar.retained,true);
 const vocabularyOnly=evaluateDevelopmentalTransitionR457({
  parent:parentMetrics,
  candidate:{...parentMetrics},
- authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false
+ authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false,evidence:developmentalEvidence
 });
 assert.equal(vocabularyOnly.decision,'STAY','no measured developmental change must not be promoted as growth');
 assert.equal(vocabularyOnly.promotionAllowed,false);
@@ -109,7 +114,7 @@ assert.equal(vocabularyOnly.promotionAllowed,false);
 const collapsed=evaluateDevelopmentalTransitionR457({
  parent:parentMetrics,
  candidate:{...parentMetrics,humanComprehension:.90,futureTopologyRetention:.70,recoverability:.70},
- authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false
+ authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false,evidence:developmentalEvidence
 });
 assert.equal(collapsed.decision,'ESCALATE','cleaner presentation cannot compensate for collapsed future topology or recoverability');
 assert.ok(collapsed.hardVetoes.includes('FUTURE_TOPOLOGY_COLLAPSED'));
@@ -119,11 +124,23 @@ assert.equal(collapsed.promotionAllowed,false);
 const proofBroken=evaluateDevelopmentalTransitionR457({
  parent:parentMetrics,
  candidate:{...parentMetrics,humanComprehension:.90},
- authorityClosed:true,proofSurvives:false,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false
+ authorityClosed:true,proofSurvives:false,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false,evidence:developmentalEvidence
 });
 assert.equal(proofBroken.decision,'ESCALATE');
 assert.ok(proofBroken.hardVetoes.includes('PROOF_DID_NOT_SURVIVE_TRANSPORT'));
 assert.equal(proofBroken.canonicalMutation,false);
+
+const unboundMetrics=evaluateDevelopmentalTransitionR457({
+ parent:parentMetrics,
+ candidate:{...parentMetrics,humanComprehension:.90},
+ authorityClosed:true,proofSurvives:true,rollbackAvailable:true,dependencyOrderPreserved:true,canonicalMutation:false,
+ evidence:{sourceHead:'',metricRefs:{continuity:'proof:continuity'},proofRefs:[]}
+});
+assert.equal(unboundMetrics.decision,'ESCALATE','developmental numbers without evidence provenance must never become promotion authority');
+assert.ok(unboundMetrics.hardVetoes.includes('SOURCE_HEAD_UNBOUND'));
+assert.ok(unboundMetrics.hardVetoes.some(x=>x.startsWith('METRIC_EVIDENCE_INCOMPLETE:')));
+assert.ok(unboundMetrics.hardVetoes.includes('PROOF_REFERENCE_REQUIRED'));
+assert.equal(unboundMetrics.promotionAllowed,false);
 
 const source=fs.readFileSync('src7/heightenedModeR457.ts','utf8');
 const root=fs.readFileSync('src7/Omega7Root.tsx','utf8');
