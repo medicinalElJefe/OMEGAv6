@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "e537476c94a4616a0fcb2f36e2d2d392a490f702",
-  "sourceMilestone": "R444",
+  "sourceMainSha": "247b0ce78e2c00f92d02a087dbe3db6f31ac97a3",
+  "sourceMilestone": "R445",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -88,5 +88,15 @@
   "retirementState": "ZERO_LEGACY_SURFACES_RETIRED",
   "evidenceTruthRule": "PASS_REQUIRES_RETURNED_OR_CANONICALLY_DERIVABLE_EVIDENCE; MISSING_EXTERNAL_OR_DEVICE_AUTHORITY_REMAINS_HOLD",
   "pluginTruthRule": "REGISTERED_OR_ENABLED_ADAPTER_IS_NOT_EXECUTED_OR_VERIFIED",
-  "archiveTruthRule": "HISTORICAL_ARCHIVE_COUNTS_ARE_NOT_LIVE_ENUMERATION"
+  "archiveTruthRule": "HISTORICAL_ARCHIVE_COUNTS_ARE_NOT_LIVE_ENUMERATION",
+  "parityPhase": "R446_BROWSER_PROOF_CANDIDATE",
+  "parityRequired": [
+    "FUNCTIONAL",
+    "DESKTOP",
+    "MOBILE_TOUCH",
+    "FAILURE_RECOVERY",
+    "PERFORMANCE",
+    "ROLLBACK"
+  ],
+  "browserProof": "44_ROUTES_DESKTOP_AND_MOBILE_REQUIRED"
 }
