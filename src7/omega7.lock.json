@@ -1,8 +1,8 @@
 {
   "schema": "OMEGA7_INHERITANCE_LOCK_V1",
   "sourceRepository": "medicinalElJefe/OMEGAv6",
-  "sourceMainSha": "e472d2f23f4e3d214662d096e7d57697e9da8d15",
-  "sourceMilestone": "R450_WITH_R449_ROLLBACK",
+  "sourceMainSha": "4058ee07002dc78bba952711969afb33951a8b01",
+  "sourceMilestone": "R451",
   "canonicalAdmissionAuthority": "R125",
   "domainResolutionAuthority": "R436",
   "registeredRouteCount": 44,
@@ -123,6 +123,16 @@
     "fullRouteEvidence": 3,
     "legacyRetired": 0
   },
-  "nextParityWork": "EXPAND_FAILURE_RECOVERY_AND_PERFORMANCE_PROOF_TO_REMAINING_ROUTES_BEFORE_ANY_LEGACY_RETIREMENT",
-  "parityEvidencePhase": "R451_PARITY_EVIDENCE_MATERIALIZATION"
+  "nextParityWork": "R452_BROWSER_EXECUTION_MUST_PASS_BEFORE_MATERIALIZING_FULL_FAMILY_PARITY",
+  "parityEvidencePhase": "R451_PARITY_EVIDENCE_MATERIALIZATION",
+  "parityExpansionPhase": "R452_FULL_FAMILY_PARITY_CANDIDATE",
+  "familyParityCandidate": {
+    "families": 8,
+    "routes": 44,
+    "failureBoundary": "ONE_LAZY_FAMILY_BOUNDARY_PROOF_PER_NATIVE_FAMILY",
+    "performanceBoundary": "ALL_44_ROUTES_MEASURED_IN_ONE_BUILT_PRODUCT_SESSION",
+    "routeBudgetMs": 8000,
+    "p95BudgetMs": 6000,
+    "workflowAuthority": "OMEGA Cloud Bridge CI"
+  }
 }
