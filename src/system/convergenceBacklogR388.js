@@ -34,6 +34,7 @@ const ITEM_TARGETS=Object.freeze({
  'A-03':['src/capabilityAuthority.ts','src/operationalCapabilityRuntimeR45.ts'],
  'A-04':[],
  'A-05':['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],
+ 'B-02':['src/authoritativeOperationChainR143.ts','src/OmegaWorkstationFullV2.tsx'],
 });
 
 const ITEM_ACCEPTANCE=Object.freeze({
@@ -52,8 +53,14 @@ const ITEM_ACCEPTANCE=Object.freeze({
  'B-02':Object.freeze({
   revision:'R458',
   minChangedChars:1200,
-  requiredChangedTokens:Object.freeze(['OMEGA_ROUTE_FUNCTIONAL_INHERITANCE','R143_OPERATION_CONTRACTS','R142','R125','usableControl','stateOutput','proof','failureRecovery','OMEGA_NAV_NAMES']),
-  rationale:'B-02 requires a route-complete functional-inheritance contract that binds all canonical routes to usable control, state/output, execution-proof authority, and explicit failure/recovery semantics. Type annotations, menu enumeration, route-count aliases, or presentation-only metadata are not completion.'
+  minFiles:2,
+  minSubstantiveLines:16,
+  requiredChangedPathGroups:Object.freeze([
+   Object.freeze(['src/authoritativeOperationChainR143.ts']),
+   Object.freeze(['src/OmegaWorkstationFullV2.tsx'])
+  ]),
+  requiredChangedTokens:Object.freeze(['OMEGA_ROUTE_FUNCTIONAL_INHERITANCE','OMEGA_ALL_ROUTES_R82.map','R143_OPERATION_CONTRACTS','R142','R125','usableControl','stateOutput','proof','failureRecovery','degradeTo','canonicalMutation:false']),
+  rationale:'B-02 requires a route-complete functional-inheritance transition across operation authority and the mounted workstation: usable control, state/output, execution-proof authority, explicit failure/recovery/degrade semantics, and preserved Canon boundary. Type annotations, menu enumeration, route-count aliases, comments, or presentation-only metadata are not completion.'
  }),
 });
 
@@ -120,14 +127,31 @@ export function validateConvergenceRepairR450({item,proposal}={}){
  const contract=item?.acceptanceContract||null;
  if(!contract)return Object.freeze({valid:true,state:'NO_ITEM_SEMANTIC_CONTRACT',reasons:[],changedChars:0,contract:null});
  const files=Array.isArray(proposal?.files)?proposal.files:[];
+ const paths=files.map(file=>String(file?.path||'')).filter(Boolean);
  const replacements=files.flatMap(file=>Array.isArray(file?.replacements)?file.replacements:[]);
  const changedText=replacements.map(row=>String(row?.after??'')).join('\n');
+ const semanticText=changedText.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,'');
+ const substantiveLines=semanticText.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).length;
  const changedChars=replacements.reduce((n,row)=>n+String(row?.before??'').length+String(row?.after??'').length,0);
- const missing=(contract.requiredChangedTokens||[]).filter(token=>!changedText.includes(token));
+ const missing=(contract.requiredChangedTokens||[]).filter(token=>!semanticText.includes(token));
+ const pathGroups=Array.isArray(contract.requiredChangedPathGroups)?contract.requiredChangedPathGroups:[];
+ const missingPathGroups=pathGroups.filter(group=>!group.some(path=>paths.includes(path)));
  const reasons=[];
  if(changedChars<Number(contract.minChangedChars||0))reasons.push(`SEMANTIC_PATCH_TOO_SHALLOW_${changedChars}_LT_${contract.minChangedChars}`);
+ if(paths.length<Number(contract.minFiles||0))reasons.push(`SEMANTIC_FILE_COVERAGE_TOO_NARROW_${paths.length}_LT_${contract.minFiles}`);
+ if(substantiveLines<Number(contract.minSubstantiveLines||0))reasons.push(`SEMANTIC_SUBSTANTIVE_LINES_TOO_FEW_${substantiveLines}_LT_${contract.minSubstantiveLines}`);
+ if(missingPathGroups.length)reasons.push(`SEMANTIC_REQUIRED_PATH_GROUPS_MISSING:${missingPathGroups.map(group=>group.join('|')).join(',')}`);
  if(missing.length)reasons.push(`SEMANTIC_REQUIRED_CHANGED_TOKENS_MISSING:${missing.join(',')}`);
- return Object.freeze({valid:reasons.length===0,state:reasons.length?'SEMANTIC_ACCEPTANCE_REJECTED':'SEMANTIC_ACCEPTANCE_PASSED',reasons,changedChars,missingTokens:Object.freeze(missing),contract});
+ const transition=Object.freeze({
+  normalized:true,
+  authoritySurfaceBound:missingPathGroups.length===0,
+  proofTransportBound:semanticText.includes('R142')&&semanticText.includes('R125'),
+  recoveryBound:semanticText.includes('failureRecovery')&&semanticText.includes('degradeTo'),
+  canonicalBoundaryPreserved:semanticText.includes('canonicalMutation:false'),
+  burdenBounded:paths.length<=Math.max(Number(contract.minFiles||1)+1,3),
+  contradictionFree:missing.length===0
+ });
+ return Object.freeze({valid:reasons.length===0,state:reasons.length?'SEMANTIC_ACCEPTANCE_REJECTED':'SEMANTIC_ACCEPTANCE_PASSED',reasons,changedChars,substantiveLines,paths:Object.freeze(paths),missingPathGroups:Object.freeze(missingPathGroups.map(group=>Object.freeze([...group]))),missingTokens:Object.freeze(missing),transition,contract});
 }
 
 export const R388_BACKLOG_CANDIDATE_LIMIT=3;
