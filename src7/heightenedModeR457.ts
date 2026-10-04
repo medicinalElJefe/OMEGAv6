@@ -207,6 +207,8 @@ export type HeightenedDevelopmentalVectorR457={
 };
 
 export type HeightenedDevelopmentalEvidenceR457={
+ parentStateRef:string;
+ candidateStateRef:string;
  sourceHead:string;
  metricRefs:Partial<Record<keyof HeightenedDevelopmentalMetricsR457,string>>;
  proofRefs:readonly string[];
@@ -274,9 +276,13 @@ export function evaluateDevelopmentalTransitionR457(input:HeightenedDevelopmenta
  const parentScore=deweyScoreR457(parent),candidateScore=deweyScoreR457(candidate);
  const metricKeys=(Object.keys(parent) as (keyof HeightenedDevelopmentalMetricsR457)[]);
  const missingMetricEvidence=metricKeys.filter(key=>!String(input.evidence?.metricRefs?.[key]||'').trim());
+ const parentStateRef=String(input.evidence?.parentStateRef||'').trim();
+ const candidateStateRef=String(input.evidence?.candidateStateRef||'').trim();
  const sourceHead=String(input.evidence?.sourceHead||'').trim();
  const proofRefs=Array.isArray(input.evidence?.proofRefs)?input.evidence.proofRefs.map(String).filter(Boolean):[];
  const hardVetoes:string[]=[];
+ if(!parentStateRef)hardVetoes.push('PARENT_STATE_UNBOUND');
+ if(!candidateStateRef)hardVetoes.push('CANDIDATE_STATE_UNBOUND');
  if(!sourceHead)hardVetoes.push('SOURCE_HEAD_UNBOUND');
  if(missingMetricEvidence.length)hardVetoes.push('METRIC_EVIDENCE_INCOMPLETE:'+missingMetricEvidence.join(','));
  if(!proofRefs.length)hardVetoes.push('PROOF_REFERENCE_REQUIRED');
@@ -317,12 +323,13 @@ export function evaluateDevelopmentalTransitionR457(input:HeightenedDevelopmenta
   transportedGrowth:Object.freeze(transportedGrowth),
   developmentalAcceleration:Object.freeze(acceleration),
   developmentalJerk:Object.freeze(jerk),
+  derivativeBasis:'DISCRETE_DEVELOPMENTAL_STEP_NOT_PHYSICAL_TIME',
   orderSensitivity:Object.freeze({dependencyOrderPreserved:input.dependencyOrderPreserved,violation:input.dependencyOrderPreserved?0:1}),
   developmentalCurvature:vectorNormR457(acceleration)/(vectorNormR457(growthVector)+R457_EPSILON),
   developmentalScar,
   continuityCone,
   dewey:Object.freeze({parentScore,candidateScore,continuity:candidate.continuity,futurePlasticity:candidate.futurePlasticity,contradiction:candidate.contradiction,burden:candidate.burden}),
-  evidence:Object.freeze({sourceHead,metricRefs:Object.freeze({...input.evidence.metricRefs}),proofRefs:Object.freeze([...proofRefs]),missingMetricEvidence:Object.freeze(missingMetricEvidence)}),
+  evidence:Object.freeze({parentStateRef,candidateStateRef,sourceHead,metricRefs:Object.freeze({...input.evidence.metricRefs}),proofRefs:Object.freeze([...proofRefs]),missingMetricEvidence:Object.freeze(missingMetricEvidence)}),
   growthNet,
   hardVetoes:Object.freeze(hardVetoes),
   decision,
