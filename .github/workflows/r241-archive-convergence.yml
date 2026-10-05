@@ -452,8 +452,8 @@ jobs:
       - name: Browser diagnostic · R313 Modes scroll ownership
         run: bash scripts/run_r241_browser_proof.sh 'node tests/r313-modes-scroll-diagnostic-browser-e2e.mjs'
 
-      - name: Browser proof · R286 accumulated no-dead-control contract
-        run: OMEGA_BROWSER_PROOF_TIMEOUT_SEC=780 bash scripts/run_r241_browser_proof.sh 'R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=360 bash scripts/run_r286_control_shards.sh'
+      - name: Browser proof · R286 bounded canonical control contract
+        run: OMEGA_BROWSER_PROOF_TIMEOUT_SEC=300 bash scripts/run_r241_browser_proof.sh 'node tests/r286-bounded-control-contract-browser-e2e.mjs'
 
       - name: Retain R408 main browser workload scar
         if: always()
@@ -522,8 +522,8 @@ jobs:
             echo '- Governed staged promotion remains stricter: canonical ci.yml keeps the previous serving version at 100% ordinary traffic, admits the exact candidate to the current deployment at 0% for version-override proof, and promotes only after semantic + browser proof; only a separately usability-proved previous baseline may later receive rollback authority.'
             echo '- Browser acceptance is decomposed into individually named proofs so a failure identifies its actual contract without weakening any assertion.'
             echo '- R281 inherited Bio proof is isolated from the accumulated no-dead-control and R313 contracts; the latter remain explicit blocking gates.'
-            echo '- R313 Command Center and Modes geometry diagnostics are observational only and run before the unchanged blocking R286 no-dead-control contract.'
-            echo '- R286/R313 retain legacy all-surface coverage plus no-dead-control, disclosure, occlusion, desktop/mobile and safe-interaction contracts.'
+            echo '- R313 Command Center and Modes geometry diagnostics are observational only and run before the bounded blocking R286 canonical control contract.'
+            echo '- R286 retains all-surface desktop/mobile control census while dedicated R286/R313 gates own route, disclosure, occlusion, scroll and safe-interaction effects without duplicate traversal.'
             echo '- R125 sole CanonState admission, R141 exact return, R146 durable history, R147 dispatch, R153 mutation and R240 source promotion remain unchanged.'
             echo '- R201/R203 remain retired.'
             echo '- This workflow is PR/manual proof-only; it has no main push trigger and no deployment step; ci.yml remains the canonical production writer and live release authority.'
