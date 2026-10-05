@@ -164,6 +164,7 @@ try{
   await page.waitForFunction(()=>{const el=document.querySelector('.earth-r279-instrument[data-earth-mode="MOTION"]');return ['RETURNED','ERROR'].includes(el?.getAttribute('data-motion-state')||'')},{timeout:30000});
   const initialMotionState=await motion.getAttribute('data-motion-state');
   const beforeMotionObservedAt=await motion.getAttribute('data-motion-observed-at');
+  const beforeMotionProvider=await motion.getAttribute('data-motion-provider');
   const beforeRefreshGeneration=Number(await motion.getAttribute('data-motion-refresh-generation')||0);
   if(initialMotionState==='RETURNED'){
    if(!beforeMotionObservedAt||!String(await motion.getAttribute('data-motion-provider')||'').includes('Open-Meteo'))throw new Error(`${label}: returned global motion is missing Open-Meteo provenance/timestamp`);
@@ -186,7 +187,13 @@ try{
   }else{
    const refreshedError=((await page.locator('.earth-r279-motion-error').textContent())||'').trim();
    if(!refreshedError)throw new Error(`${label}: provider-gated motion refresh failed without explicit error truth`);
-   if(await motion.getAttribute('data-motion-provider')||await motion.getAttribute('data-motion-observed-at'))throw new Error(`${label}: failed motion refresh fabricated returned-provider evidence`);
+   const failedProvider=await motion.getAttribute('data-motion-provider'),failedObservedAt=await motion.getAttribute('data-motion-observed-at'),failedGeneration=Number(await motion.getAttribute('data-motion-refresh-generation')||0);
+   if(initialMotionState==='RETURNED'){
+    if(failedProvider!==beforeMotionProvider||failedObservedAt!==beforeMotionObservedAt)throw new Error(`${label}: failed refresh did not preserve last-known returned motion evidence`);
+    if(failedGeneration!==beforeRefreshGeneration)throw new Error(`${label}: failed motion refresh incorrectly advanced successful-refresh receipt`);
+   }else if(failedProvider||failedObservedAt){
+    throw new Error(`${label}: provider-unavailable motion fabricated returned-provider evidence`);
+   }
   }
 
   const groundTab=tabs.filter({hasText:'Ground'}).first();await groundTab.click();
