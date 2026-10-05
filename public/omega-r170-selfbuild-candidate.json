@@ -10,23 +10,18 @@
     "index": 4,
     "objective": "Ground/street imagery providers and source fallback behavior live-verified without generated substitute imagery.",
     "completed": false,
-    "affected": [
-      "src/EarthObservatoryR8.tsx",
-      "src/EarthGroundTraversalR9.tsx"
-    ],
+    "affected": [],
     "acceptanceContract": null,
     "expectedProofs": [
       "R202 Operational Source Authority",
       "R241 Archive Convergence Visual Intelligence"
     ],
-    "selfEditable": true,
+    "selfEditable": false,
     "externalProofRequired": true,
     "canonicalAdmission": false
   },
   "repair": {
-    "paths": [
-      "src/EarthObservatoryR8.tsx"
-    ],
+    "paths": [],
     "productPatchIdentity": {
       "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
       "rows": [
@@ -79,7 +74,102 @@
         }
       }
     ],
-    "declinedItemScars": []
+    "declinedItemScars": [
+      {
+        "itemId": "R388-C-04",
+        "section": "C",
+        "state": "NO_SAFE_PATCH",
+        "reasons": [
+          "MODEL_DECLINED_BOUNDED_PATCH"
+        ],
+        "attempts": [
+          {
+            "attempt": 1,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-C-04",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R202 Operational Source Authority",
+                "R241 Archive Convergence Visual Intelligence"
+              ]
+            }
+          },
+          {
+            "attempt": 2,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-C-04",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R202 Operational Source Authority",
+                "R241 Archive Convergence Visual Intelligence"
+              ]
+            }
+          }
+        ],
+        "rejectionHistory": [
+          {
+            "attempt": 1,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-C-04",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R202 Operational Source Authority",
+                "R241 Archive Convergence Visual Intelligence"
+              ]
+            }
+          },
+          {
+            "attempt": 2,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-C-04",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R202 Operational Source Authority",
+                "R241 Archive Convergence Visual Intelligence"
+              ]
+            }
+          }
+        ],
+        "reformulated": true
+      }
+    ],
+    "truthDisposition": "OBSERVE_ONLY_UNTIL_RETURNED_PROVIDER_PROOF"
   },
   "receipt": {
     "schema": "OMEGA_CLOUDFLARE_R388_CONVERGENCE_RECEIPT",
@@ -230,9 +320,12 @@
         "R201",
         "R203"
       ]
-    }
+    },
+    "effective": false,
+    "supersededBy": "R476-C04-TRUTH-RECONCILIATION",
+    "supersessionReason": "FALSE_ADVANCEMENT_PRODUCT_PATCH_DID_NOT_IMPLEMENT_GROUND_STREET_PROVIDER_OR_FALLBACK_OBJECTIVE"
   },
-  "status": "SOURCE_ADVANCED_PENDING_PROOF",
+  "status": "FALSE_ADVANCEMENT_SUPERSEDED",
   "canonicalAdmission": false,
   "directProductionMutation": false,
   "canonicalResolution": {
@@ -374,6 +467,128 @@
     ],
     "ledgerHash": "add18c0f",
     "truthBoundary": "CLOUD-01 may propose bounded source candidates and carry rejection scars, but it cannot directly admit CanonState or mutate production. Exact-head proof and existing governed promotion/deployment authorities remain unchanged.",
-    "canonicalMutation": false
+    "canonicalMutation": false,
+    "effective": false,
+    "supersededBy": "R476-C04-TRUTH-RECONCILIATION"
+  },
+  "truthCorrection": {
+    "schema": "OMEGA_R388_TRUTH_CORRECTION_R476",
+    "correctionId": "R476-C04-TRUTH-RECONCILIATION",
+    "itemId": "R388-C-04",
+    "section": "C",
+    "state": "NO_SAFE_PATCH",
+    "reasons": [
+      "MODEL_DECLINED_BOUNDED_PATCH"
+    ],
+    "effectiveAdvanced": false,
+    "externalProofRequired": true,
+    "sourceAdvance": false,
+    "canonicalAdmission": false,
+    "directProductionMutation": false,
+    "recoveredScar": {
+      "itemId": "R388-C-04",
+      "section": "C",
+      "state": "NO_SAFE_PATCH",
+      "reasons": [
+        "MODEL_DECLINED_BOUNDED_PATCH"
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "state": "NO_SAFE_PATCH",
+          "accepted": false,
+          "reasons": [
+            "MODEL_DECLINED_BOUNDED_PATCH"
+          ],
+          "validation": null,
+          "proposal": {
+            "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+            "residualId": "R388-C-04",
+            "files": [],
+            "canonicalAdmission": false,
+            "directProductionMutation": false,
+            "expectedProofs": [
+              "R202 Operational Source Authority",
+              "R241 Archive Convergence Visual Intelligence"
+            ]
+          }
+        },
+        {
+          "attempt": 2,
+          "state": "NO_SAFE_PATCH",
+          "accepted": false,
+          "reasons": [
+            "MODEL_DECLINED_BOUNDED_PATCH"
+          ],
+          "validation": null,
+          "proposal": {
+            "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+            "residualId": "R388-C-04",
+            "files": [],
+            "canonicalAdmission": false,
+            "directProductionMutation": false,
+            "expectedProofs": [
+              "R202 Operational Source Authority",
+              "R241 Archive Convergence Visual Intelligence"
+            ]
+          }
+        }
+      ],
+      "rejectionHistory": [
+        {
+          "attempt": 1,
+          "state": "NO_SAFE_PATCH",
+          "accepted": false,
+          "reasons": [
+            "MODEL_DECLINED_BOUNDED_PATCH"
+          ],
+          "validation": null,
+          "proposal": {
+            "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+            "residualId": "R388-C-04",
+            "files": [],
+            "canonicalAdmission": false,
+            "directProductionMutation": false,
+            "expectedProofs": [
+              "R202 Operational Source Authority",
+              "R241 Archive Convergence Visual Intelligence"
+            ]
+          }
+        },
+        {
+          "attempt": 2,
+          "state": "NO_SAFE_PATCH",
+          "accepted": false,
+          "reasons": [
+            "MODEL_DECLINED_BOUNDED_PATCH"
+          ],
+          "validation": null,
+          "proposal": {
+            "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+            "residualId": "R388-C-04",
+            "files": [],
+            "canonicalAdmission": false,
+            "directProductionMutation": false,
+            "expectedProofs": [
+              "R202 Operational Source Authority",
+              "R241 Archive Convergence Visual Intelligence"
+            ]
+          }
+        }
+      ],
+      "reformulated": true
+    },
+    "supersedes": {
+      "falseReceiptBaseSha": "fff519c9812cc0a2571bccff374b637fe4b06c0b",
+      "falseProductPatchIdentity": "src/EarthObservatoryR8.tsx:e1f8fc1078a7ba324e1efb902149033a7b161eca",
+      "falsePr": 924
+    },
+    "evidence": {
+      "declineCarrierPr": 921,
+      "releaseCleanC05Pr": 922,
+      "releaseCleanC05Merge": "fff519c9812cc0a2571bccff374b637fe4b06c0b",
+      "releaseCleanC05ProductionRunId": 37263700788
+    },
+    "disposition": "OBSERVE_ONLY_UNTIL_RETURNED_PROVIDER_PROOF"
   }
 }
