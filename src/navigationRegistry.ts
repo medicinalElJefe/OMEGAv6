@@ -82,3 +82,30 @@ export const OMEGA_NAVIGATION_CONTRACT_R289=Object.freeze({
  emptyMenus:OMEGA_MASTER_MENU_NAVIGATION_R289.filter(menu=>menu.routes.length===0).map(menu=>menu.id),
  rule:'ONE_44_ROUTE_AUTHORITY_PRESENTED_THROUGH_12_RECOVERED_MASTER_MENUS'
 });
+
+
+export const OMEGA_CONTROL_RECONCILIATION='R466';
+const duplicateValuesR466=(values:readonly string[])=>[...new Set(values.filter((value,index)=>values.indexOf(value)!==index))];
+const routeIdsR466=OMEGA_NAVIGATION.map(item=>item.id);
+const routeNamesR466=OMEGA_NAVIGATION.map(item=>item.name);
+const mappedRouteNamesR466=Object.keys(OMEGA_MASTER_MENU_ROUTE_MAP_R289);
+const duplicateRouteIdsR466=duplicateValuesR466(routeIdsR466);
+const duplicateRouteAuthoritiesR466=duplicateValuesR466(routeNamesR466);
+const hiddenUnreachableRoutesR466=OMEGA_NAVIGATION.filter(item=>!omegaMasterMenuForRouteR289(item.name)).map(item=>item.name);
+const unknownMappedRoutesR466=mappedRouteNamesR466.filter(name=>!OMEGA_NAV_NAMES.includes(name as OmegaRouteName));
+
+export const OMEGA_CONTROL_RECONCILIATION_R466=Object.freeze({
+ schema:'OMEGA_CONTROL_RECONCILIATION_R466',
+ revision:'R466',
+ recoveredControlCount:OMEGA_NAVIGATION.length,
+ recoveredControls:Object.freeze([...OMEGA_NAV_NAMES]),
+ duplicateRouteIds:Object.freeze(duplicateRouteIdsR466),
+ duplicateRouteAuthorities:Object.freeze(duplicateRouteAuthoritiesR466),
+ hiddenUnreachableRoutes:Object.freeze(hiddenUnreachableRoutesR466),
+ unknownMappedRoutes:Object.freeze(unknownMappedRoutesR466),
+ declaredAuthority:Object.freeze(OMEGA_NAVIGATION.map(item=>Object.freeze({route:item.name,authority:item.authority}))),
+ oneMasterMenuOwnerPerRoute:OMEGA_NAVIGATION.every(item=>Boolean(omegaMasterMenuForRouteR289(item.name))),
+ pass:duplicateRouteIdsR466.length===0&&duplicateRouteAuthoritiesR466.length===0&&hiddenUnreachableRoutesR466.length===0&&unknownMappedRoutesR466.length===0&&OMEGA_NAVIGATION.length===OMEGA_NAV_NAMES.length,
+ canonicalMutation:false,
+ rule:'ONE_REGISTERED_ROUTE_IDENTITY_ONE_DECLARED_AUTHORITY_ONE_REACHABLE_MASTER_MENU_OWNER'
+});

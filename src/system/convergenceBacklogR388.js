@@ -62,6 +62,18 @@ const ITEM_ACCEPTANCE=Object.freeze({
   requiredChangedTokens:Object.freeze(['OMEGA_ROUTE_FUNCTIONAL_INHERITANCE','OMEGA_ALL_ROUTES_R82','operationContractForRouteR143','R142','R125','usableControl','stateOutput','proof','failureRecovery','degradeTo','canonicalMutation:false']),
   rationale:'B-02 requires a route-complete functional-inheritance transition across the R143-consuming navigator and mounted workstation while preserving R143 itself as authority: usable control, state/output, execution-proof authority, explicit failure/recovery/degrade semantics, and preserved Canon boundary. Type annotations, menu enumeration, route-count aliases, comments, or presentation-only metadata are not completion.'
  }),
+ 'B-03':Object.freeze({
+  revision:'R466',
+  minChangedChars:1200,
+  minFiles:2,
+  minSubstantiveLines:16,
+  requiredChangedPathGroups:Object.freeze([
+   Object.freeze(['src/navigationRegistry.ts']),
+   Object.freeze(['src/OmegaWorkstationFullV2.tsx'])
+  ]),
+  requiredChangedTokens:Object.freeze(['OMEGA_CONTROL_RECONCILIATION_R466','OMEGA_WORKSTATION_CONTROL_AUDIT_R466','duplicateRouteAuthorities','hiddenUnreachableRoutes','mountedExactlyOnce','omegaMasterMenuForRouteR289','OMEGA_ALL_ROUTES_R82','operationContractForRouteR143','capabilityExecutionContract','canonicalMutation:false']),
+  rationale:'B-03 requires explicit reconciliation of recovered controls across the canonical navigation registry and mounted workstation: unique route identity/authority, one reachable master-menu owner, exactly one workstation mount, R143 operation binding, routability, zero hidden unreachable routes, and no Canon mutation. Changing an authority label, route count, hint, or presentation metadata is not completion.'
+ }),
 });
 
 const PROOFS=Object.freeze({
