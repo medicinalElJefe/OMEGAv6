@@ -411,6 +411,20 @@ jobs:
           if(String(chat.reply||'').trim().length<12) throw new Error('live AI returned an empty/insufficient reply');
           console.log(`OMEGA LIVE AI PASS · ${chat.provider} · route ${route.route}`);
           NODE
+      - name: Record exact live production observability
+        id: production_observability_r471
+        if: always() && steps.deploy_worker.outcome == 'success'
+        env:
+          OMEGA_WORKER_VERSION_ID: ${{ steps.deploy_worker.outputs.candidate_version_id }}
+        run: node scripts/verify_production_observability_r471.mjs
+      - name: Upload exact live production observability receipt
+        if: always() && steps.production_observability_r471.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-production-observability-${{ github.sha }}
+          path: artifacts/omega-production-observability-r471.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Verify deployed R200 total-experience browser on exact promoted SHA
         id: browser_r200
         shell: bash

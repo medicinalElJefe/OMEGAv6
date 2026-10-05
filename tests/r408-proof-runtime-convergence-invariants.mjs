@@ -68,7 +68,6 @@ assert.ok(scheduler.includes('if(failed)process.exit(1)'));
 for(const [file,proofClass,capacity,cost] of[
  ['scripts/run_r313_control_shards.sh','interaction',4,2],
  ['scripts/run_r313_disclosure_shards.sh','disclosure',4,2],
- ['scripts/run_r286_control_shards.sh','no_dead_control',6,2],
 ]){
  const src=fs.readFileSync(file,'utf8');
  assert.ok(src.includes('run_work_conserving_shards_r408.mjs'));
@@ -78,18 +77,10 @@ for(const [file,proofClass,capacity,cost] of[
  assert.ok(!src.includes('wave_start'));
 }
 
-const r286Browser=fs.readFileSync('tests/r286-all-surface-no-dead-controls-browser-e2e.mjs','utf8');
-assert.ok(r286Browser.includes("import {partitionInteractionCasesR355} from '../src/system/r313InteractionWorkloadR355.js';"),'R462 R286 browser child must consume the same weighted R355 partition as the R408 scheduler');
-assert.ok(r286Browser.includes('const r286Partition=partitionInteractionCasesR355({surfaces:expected,shardCount});'),'R462 R286 must construct the exact weighted partition locally from the same canonical surface order');
-assert.ok(r286Browser.includes('const assignedCases=r286Partition[shardIndex].cases;'),'R462 R286 shard identity must select the weighted bin directly');
-assert.ok(r286Browser.includes('assignedCases.filter(item=>item.profileIndex===profileIndex).map(item=>item.surface)'),'R462 R286 viewport execution must derive from weighted case membership');
-assert.ok(!r286Browser.includes('%shardCount'),'R462 must remove the divergent modulo partition from R286 execution');
-for(const shardCount of[1,2,4,8,16]){
- const bins=estimateProofShardsR408({surfaces,shardCount,proofClass:'no_dead_control',scar:emptyProofWorkloadScarR408()});
- const all=bins.flatMap(bin=>bin.cases);
- assert.equal(all.length,88,`R462 weighted R286 partition must retain all 88 cases at ${shardCount} shards`);
- assert.equal(new Set(all.map(row=>row.key)).size,88,`R462 weighted R286 partition must assign every case exactly once at ${shardCount} shards`);
-}
+const r286Bounded=fs.readFileSync('tests/r286-bounded-control-contract-browser-e2e.mjs','utf8');
+assert.ok(r286Bounded.includes('for(const route of routes)'),'R471 bounded R286 must retain every canonical surface');
+assert.ok(r286Bounded.includes("['desktop'")&&r286Bounded.includes("['mobile'"),'R471 bounded R286 must retain desktop/mobile census');
+assert.ok(r286Bounded.includes("pointerEvents==='none'")&&r286Bounded.includes("aria-controls target missing"),'R471 bounded R286 must retain structural liveness checks');
 const workflow=fs.readFileSync('.github/workflows/r241-archive-convergence.yml','utf8');
 assert.ok(workflow.includes('stale-head-preflight'),'R460 R241 must preflight current PR head before expensive proof');
 assert.ok(workflow.includes('git ls-remote')&&workflow.includes('refs/pull/${PR_NUMBER}/head'),'R460 preflight must resolve the live PR head rather than trust stale event payload');
@@ -101,13 +92,12 @@ assert.ok(workflow.includes("if: needs.stale-head-preflight.outputs.current == '
 assert.ok(workflow.includes('event head $EVENT_HEAD_SHA is retained as history'),'R460 stale exact heads must remain explicit provenance instead of being silently erased');
 assert.ok(workflow.includes('R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=480'));
 assert.ok(workflow.includes('R313_DISCLOSURE_SHARDS=16 R313_DISCLOSURE_MAX_PARALLEL=4 R313_DISCLOSURE_SHARD_TIMEOUT_SEC=360'));
-assert.ok(workflow.includes('R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=360'));
 assert.ok(workflow.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1500'));
 assert.ok(workflow.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1320'));
-assert.ok(workflow.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=780'));
+assert.ok(workflow.includes("OMEGA_BROWSER_PROOF_TIMEOUT_SEC=300 bash scripts/run_r241_browser_proof.sh 'node tests/r286-bounded-control-contract-browser-e2e.mjs'"));
 assert.ok(workflow.includes('Restore R408 interaction workload scar'));
 assert.ok(workflow.includes('Restore R408 main proof workload scar'));
 assert.ok(workflow.includes('Retain R408 interaction workload scar'));
 assert.ok(workflow.includes('Retain R408 main browser workload scar'));
 
-console.log('R408 PROOF RUNTIME CONVERGENCE PASS · 88 route/viewport cases remain complete and unique · disclosure/interaction/no-dead-control estimators are isolated · failed transport samples remain in scar history but do not train timing EWMA · longest predicted shards launch first · scheduler refills capacity on first completion with no wave barrier · heavy disclosure/interaction shards consume 2/4 resource units while no-dead-control shards consume 2/6 after measured navigator-stall evidence · all child/parent ceilings and fail-closed recombination remain intact');
+console.log('R408 PROOF RUNTIME CONVERGENCE PASS · 88 route/viewport cases remain complete and unique · disclosure/interaction/no-dead-control estimators are isolated · failed transport samples remain in scar history but do not train timing EWMA · longest predicted shards launch first · scheduler refills capacity on first completion with no wave barrier · heavy disclosure/interaction shards retain R408 resource governance while R286 uses its bounded all-surface structural census outside the retired shard scheduler · all active child/parent ceilings and fail-closed recombination remain intact');
