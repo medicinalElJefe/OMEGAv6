@@ -49,6 +49,12 @@ export default function EarthObservatoryR8({address}:Props){
   {id:'WEATHER' as Focus,icon:<Wind/>,label:'Weather',value:`${fmt(evidence?.localConditions?.temperatureC)} °C · ${fmt(evidence?.localConditions?.windKph)} km/h`,detail:`cloud ${fmt(evidence?.localConditions?.cloudPct,0)}%`},
   {id:'SEISMIC' as Focus,icon:<Activity/>,label:'Seismic',value:`${evidence?.seismic?.count??'—'} / 24h`,detail:`Mmax ${fmt(evidence?.seismic?.maxMagnitude)}`},
   {id:'EVENTS' as Focus,icon:<Layers3/>,label:'Natural events',value:`${evidence?.naturalEvents?.count??'—'} open`,detail:evidence?.naturalEvents?.nearest?.category||'none returned'},
+  {id:'SPACE' as Focus,icon:<Radio/>,label:'Space weather',value:`Kp ${fmt(evidence?.spaceWeather?.kp)}`,detail:evidence?.spaceWeather?.observationTime||'unavailable'},
+  {id:'CALCULUS' as Focus,icon:<Mountain/>,label:'Representational calculus',value:`${fmt(evidence?.derivedContext?.index,4)}`,detail:'display summary only · not physical proof'}
+];
+  {id:'WEATHER' as Focus,icon:<Wind/>,label:'Weather',value:`${fmt(evidence?.localConditions?.temperatureC)} °C · ${fmt(evidence?.localConditions?.windKph)} km/h`,detail:`cloud ${fmt(evidence?.localConditions?.cloudPct,0)}%`},
+  {id:'SEISMIC' as Focus,icon:<Activity/>,label:'Seismic',value:`${evidence?.seismic?.count??'—'} / 24h`,detail:`Mmax ${fmt(evidence?.seismic?.maxMagnitude)}`},
+  {id:'EVENTS' as Focus,icon:<Layers3/>,label:'Natural events',value:`${evidence?.naturalEvents?.count??'—'} open`,detail:evidence?.naturalEvents?.nearest?.category||'none returned'},
   {id:'SPACE' as Focus,icon:<Radio/>,label:'Space weather',value:`Kp ${fmt(evidence?.spaceWeather?.kp)}`,detail:evidence?.spaceWeather?.observationTime||'unavailable'}
  ];
  const resetTarget=()=>{setLat(initial.lat);setLon(initial.lon);void queryAt(initial.lat,initial.lon)};
