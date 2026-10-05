@@ -1539,11 +1539,12 @@
       "sourceSchema": "OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164"
     }
   ],
-  "r388Generation": 3,
+  "r388Generation": 4,
   "r388AdvancedItemIds": [
     "R388-A-01",
     "R388-A-05",
-    "R388-B-03"
+    "R388-B-03",
+    "R388-C-01"
   ],
   "r388Receipts": [
     {
@@ -2454,6 +2455,127 @@
         }
       ],
       "createdAt": "2026-10-05T00:41:04.759Z",
+      "authorityBoundaries": {
+        "canonAdmission": "R125",
+        "dispatch": "R147",
+        "durableHistory": "R146",
+        "hybridReturnProof": "R141",
+        "productionDeploymentWorkflow": "ci.yml",
+        "evolutionHost": "CLOUDFLARE_WORKER",
+        "retiredDurableObjects": [
+          "R201",
+          "R203"
+        ]
+      }
+    },
+    {
+      "schema": "OMEGA_CLOUDFLARE_R388_CONVERGENCE_RECEIPT",
+      "machineId": "CLOUD-01",
+      "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
+      "generatorContract": "R388_BACKLOG_AI_BUILD",
+      "convergenceGeneration": 4,
+      "itemId": "R388-C-01",
+      "section": "C",
+      "objective": "Full multi-resolution Earth fusion beyond the current bounded provider field: satellite/radar/ocean/lightning/precipitation/fire/aerosol/seismic/space-weather/orbital evidence.",
+      "externalProofRequired": true,
+      "targetPaths": [
+        "src/EarthObservatoryR8.tsx"
+      ],
+      "productPatchIdentity": {
+        "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
+        "rows": [
+          {
+            "path": "src/EarthObservatoryR8.tsx",
+            "blobSha": "14065cbcf5b20be6b2f4a7ba9aba37fbd2763b8d"
+          }
+        ],
+        "key": "src/EarthObservatoryR8.tsx:14065cbcf5b20be6b2f4a7ba9aba37fbd2763b8d"
+      },
+      "baseSha": "623b01ee0758522327d880891cf486af4a8630b3",
+      "branch": "cloud/evolution-r388-r388-c-01-623b01ee",
+      "status": "SOURCE_ADVANCED_PENDING_PROOF",
+      "canonicalAdmission": false,
+      "directProductionMutation": false,
+      "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "expectedProofs": [
+        "R202 Operational Source Authority",
+        "R241 Archive Convergence Visual Intelligence"
+      ],
+      "reformulated": true,
+      "repairAttemptLedger": [
+        {
+          "attempt": 1,
+          "state": "NO_SAFE_PATCH",
+          "accepted": false,
+          "reasons": [
+            "MODEL_DECLINED_BOUNDED_PATCH"
+          ],
+          "validation": null,
+          "proposal": {
+            "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+            "residualId": "R388-C-01",
+            "files": [],
+            "canonicalAdmission": false,
+            "directProductionMutation": false,
+            "expectedProofs": [
+              "R202 Operational Source Authority",
+              "R241 Archive Convergence Visual Intelligence"
+            ]
+          }
+        },
+        {
+          "attempt": 2,
+          "state": "VALIDATED_BOUNDED_PATCH",
+          "accepted": true,
+          "reasons": [],
+          "validation": {
+            "valid": true,
+            "changedChars": 106,
+            "fileCount": 1
+          },
+          "proposal": {
+            "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+            "residualId": "R388-C-01",
+            "files": [
+              {
+                "path": "src/EarthObservatoryR8.tsx",
+                "preimageSha": "36a6478d2890ae08289905624f7a4cba4e5bec4d",
+                "replacementCount": 1
+              }
+            ],
+            "canonicalAdmission": false,
+            "directProductionMutation": false,
+            "expectedProofs": [
+              "R202 Operational Source Authority",
+              "R241 Archive Convergence Visual Intelligence"
+            ]
+          }
+        }
+      ],
+      "rejectionScars": [
+        {
+          "attempt": 1,
+          "state": "NO_SAFE_PATCH",
+          "accepted": false,
+          "reasons": [
+            "MODEL_DECLINED_BOUNDED_PATCH"
+          ],
+          "validation": null,
+          "proposal": {
+            "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+            "residualId": "R388-C-01",
+            "files": [],
+            "canonicalAdmission": false,
+            "directProductionMutation": false,
+            "expectedProofs": [
+              "R202 Operational Source Authority",
+              "R241 Archive Convergence Visual Intelligence"
+            ]
+          }
+        }
+      ],
+      "declinedItemScars": [],
+      "createdAt": "2026-10-05T03:25:55.612Z",
       "authorityBoundaries": {
         "canonAdmission": "R125",
         "dispatch": "R147",
