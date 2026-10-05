@@ -1,4 +1,5 @@
-import {Cloud,Database,ExternalLink,Gauge,Layers3,MonitorUp,Route,ShieldCheck,Waypoints} from 'lucide-react';
+import {useMemo,useState} from 'react';
+import {Cloud,Database,ExternalLink,Gauge,Layers3,MonitorUp,Route,Search,ShieldCheck,Waypoints} from 'lucide-react';
 import {ALL_MODES_BOUNDARY} from './allModesAuthority';
 import {FEDERATION_NODE_ORDER_R102,FEDERATION_NODES_R102,type FederationNodeKey} from './federation/federationExperienceR102';
 import {R119_RENDER_RESOLUTION_AUTHORITY} from './renderResolutionR119';
@@ -14,6 +15,9 @@ const CONVERGENCE_PIPELINE=['INPUT / OBSERVATION','INTENT / PROJECT','CANONICAL 
 const TRUTH_CLASSES=['OBSERVED','DERIVED','SIMULATED','PROPOSED','SCREENED','SOLVED','ADMITTED','HISTORICAL','GATED'] as const;
 const SCALE_LEVELS=[12,144,1728,20736,248832,61917364224] as const;
 const LOCAL_NODE_ROUTE:Record<FederationNodeKey,string>={genesis:'Canon Evolution',optical:'Convergence',sovereign:'Hybrid Link',omegaV6:'Evidence & Proof'};
+const MENU_ROUTE:Record<string,string>={'01':'System','02':'Evidence & Proof','03':'Traversal','04':'Visual Instrument','05':'Cockpit','06':'SAI Lab','07':'Atlas','08':'System Atlas','09':'Earth Now','10':'Build Out','11':'Archive Operators','12':'Command Center'};
+const menuRoute=(menu:string)=>MENU_ROUTE[String(menu||'').match(/^\d{2}/)?.[0]||'']||'System Atlas';
+
 const RETIRED_SOVEREIGN_SURFACE={
  url:'https://omega-sovereign-convergence.foundasound.chatgpt.site/',
  label:'Historical Sovereign web surface',
@@ -25,6 +29,8 @@ function compact(n:number){return n>=1_000_000_000?`${(n/1_000_000_000).toFixed(
 export default function UltraSystemFabricR119({onNavigate}:Props){
  const audit=sourceCorpusCorrelationAuditR107(),fabric=ULTIMATE_DEVELOPMENT_FABRIC_R107;
  const dispositions=MASTER_SYSTEMS_R83.reduce<Record<string,number>>((a,row)=>{a[row.disposition]=(a[row.disposition]||0)+1;return a},{});
+ const[systemQuery,setSystemQuery]=useState(''),[disposition,setDisposition]=useState('ALL');
+ const systemRows=useMemo(()=>MASTER_SYSTEMS_R83.filter(row=>{const q=systemQuery.trim().toLowerCase();return(disposition==='ALL'||row.disposition===disposition)&&(!q||`${row.id} ${row.family} ${row.artifact} ${row.role} ${row.menuSetting} ${row.capability} ${row.wiring} ${row.menu}`.toLowerCase().includes(q))}),[systemQuery,disposition]);
  return <section className='r119-ultra-fabric' aria-label='OMEGA R119 ultra system convergence fabric'>
   <header className='r119-ultra-head'>
    <div><span>R119 · FULL-RESOLUTION SYSTEM CONVERGENCE</span><h3>One machine from the complete corpus</h3><p>Drive design ledgers, recovered software, source-backed calculus, all lawful modes, federation specialists, proof, native execution and rendering remain distinct authorities inside one CanonState lineage instead of becoming competing applications.</p></div>
@@ -39,6 +45,18 @@ export default function UltraSystemFabricR119({onNavigate}:Props){
    <article><b>{SOURCE_CORPUS_AUTHORITIES_R107.length}</b><span>source authority classes</span><small>Drive · calculus · validation · cloud fabric</small></article>
    <article><b>{R119_RENDER_RESOLUTION_AUTHORITY.profiles.FULL.targetDpr}×</b><span>full display DPR target</span><small>{compact(R119_RENDER_RESOLUTION_AUTHORITY.profiles.FULL.maxBackingPixels)} bounded backing pixels</small></article>
   </div>
+
+  <section className='r119-system-browser' aria-label='Recovered OMEGA system browser'>
+   <header><Database/><div><b>Recovered system browser</b><small>Every reviewed historical system stays visible. KEEP/MERGE/DONOR is archive disposition, not proof of current execution. Open routes point to the strongest current executor or truth-gated control surface.</small></div></header>
+   <div className='r119-system-browser-controls'><label><Search/><input value={systemQuery} onChange={e=>setSystemQuery(e.target.value)} placeholder='Search 100 recovered systems, artifacts, roles, wiring…'/></label><div>{['ALL','KEEP','MERGE','DONOR'].map(x=><button key={x} className={disposition===x?'active':''} onClick={()=>setDisposition(x)}>{x}</button>)}</div><strong>{systemRows.length}/{MASTER_SYSTEMS_R83.length}</strong></div>
+   <div className='r119-system-browser-grid'>{systemRows.map(row=><article key={row.id} data-disposition={row.disposition}>
+    <header><code>{row.id}</code><span>{row.disposition}</span></header>
+    <b>{row.artifact}</b><small>{row.family} · {row.role}</small><p>{row.capability}</p>
+    <dl><div><dt>Wiring</dt><dd>{row.wiring}</dd></div><div><dt>Input</dt><dd>{row.inputContract}</dd></div><div><dt>Output</dt><dd>{row.outputContract}</dd></div><div><dt>Menu</dt><dd>{row.menu}</dd></div></dl>
+    <button onClick={()=>onNavigate(menuRoute(row.menu))}>Open current executor <Waypoints/></button>
+   </article>)}</div>
+   <footer><ShieldCheck/><span>{MASTER_SYSTEM_SOURCE_R83.boundary}</span></footer>
+  </section>
 
   <section className='r119-resolution-law'>
    <header><MonitorUp/><div><b>Resolution is hierarchical, not brute-force pixels</b><small>Every level is an address/representation resolution unless independently bound to physical measurement.</small></div></header>
