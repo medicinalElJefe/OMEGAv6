@@ -1500,6 +1500,15 @@
       "evidenceClass": "RETURNED_RESIDUAL",
       "carried": true,
       "carryIndex": 0
+    },
+    {
+      "scarId": "R476-C04-FALSE-ADVANCEMENT",
+      "severity": "HIGH",
+      "mode": "OBSERVE_ONLY",
+      "summary": "R388-C-04 was falsely advanced by an unrelated bounded Earth UI patch after an earlier exact NO_SAFE_PATCH decline. Effective completion is revoked; the original false receipt remains as superseded forensic evidence.",
+      "provenance": "PR #921 retained R388-C-04:NO_SAFE_PATCH; PR #922 preserved that scar; PR #924 later falsely advanced C-04.",
+      "evidenceClass": "RETURNED_GITHUB_LINEAGE",
+      "carried": true
     }
   ],
   "adaptiveCoherenceHistoryR266": [
@@ -1545,7 +1554,7 @@
     "R388-A-05",
     "R388-B-03",
     "R388-C-02",
-    "R388-C-04"
+    "R388-C-05"
   ],
   "r388Receipts": [
     {
@@ -2739,7 +2748,10 @@
           "R201",
           "R203"
         ]
-      }
+      },
+      "effective": false,
+      "supersededBy": "R476-C04-TRUTH-RECONCILIATION",
+      "supersessionReason": "FALSE_ADVANCEMENT_PRODUCT_PATCH_DID_NOT_IMPLEMENT_GROUND_STREET_PROVIDER_OR_FALLBACK_OBJECTIVE"
     }
   ],
   "r388CanonicalAdvancements": [
@@ -2790,7 +2802,153 @@
       "historicalMarkdownMutated": false,
       "canonicalAdmission": false,
       "directProductionMutation": false
+    },
+    {
+      "schema": "OMEGA_R388_CANONICAL_ADVANCEMENT_R465",
+      "itemId": "R388-C-05",
+      "sourceRevision": "R388-C-05/#922",
+      "candidateHead": "b8451b49000e8dc8d8200157acd352f0aaaad79e",
+      "mergeSha": "fff519c9812cc0a2571bccff374b637fe4b06c0b",
+      "productionRunId": 37263700788,
+      "status": "RELEASE_CLEAN",
+      "expectedProofs": [
+        "R202 Operational Source Authority",
+        "R241 Archive Convergence Visual Intelligence",
+        "OMEGA Cloud Bridge CI"
+      ],
+      "evidence": [
+        "PR #922 exact repaired head passed the governed proof stack",
+        "canonical Worker deployment and exact live-SHA observability succeeded",
+        "deployed R200 browser proof succeeded",
+        "live R202/R237/R238 and complete Hybrid closure succeeded",
+        "source pixels and provenance were preserved"
+      ],
+      "historicalMarkdownMutated": false,
+      "canonicalAdmission": false,
+      "directProductionMutation": false
     }
   ],
-  "r388ObservationGeneration": 1
+  "r388ObservationGeneration": 1,
+  "r388TruthCorrections": [
+    {
+      "schema": "OMEGA_R388_TRUTH_CORRECTION_R476",
+      "correctionId": "R476-C04-TRUTH-RECONCILIATION",
+      "itemId": "R388-C-04",
+      "section": "C",
+      "state": "NO_SAFE_PATCH",
+      "reasons": [
+        "MODEL_DECLINED_BOUNDED_PATCH"
+      ],
+      "effectiveAdvanced": false,
+      "externalProofRequired": true,
+      "sourceAdvance": false,
+      "canonicalAdmission": false,
+      "directProductionMutation": false,
+      "recoveredScar": {
+        "itemId": "R388-C-04",
+        "section": "C",
+        "state": "NO_SAFE_PATCH",
+        "reasons": [
+          "MODEL_DECLINED_BOUNDED_PATCH"
+        ],
+        "attempts": [
+          {
+            "attempt": 1,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-C-04",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R202 Operational Source Authority",
+                "R241 Archive Convergence Visual Intelligence"
+              ]
+            }
+          },
+          {
+            "attempt": 2,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-C-04",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R202 Operational Source Authority",
+                "R241 Archive Convergence Visual Intelligence"
+              ]
+            }
+          }
+        ],
+        "rejectionHistory": [
+          {
+            "attempt": 1,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-C-04",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R202 Operational Source Authority",
+                "R241 Archive Convergence Visual Intelligence"
+              ]
+            }
+          },
+          {
+            "attempt": 2,
+            "state": "NO_SAFE_PATCH",
+            "accepted": false,
+            "reasons": [
+              "MODEL_DECLINED_BOUNDED_PATCH"
+            ],
+            "validation": null,
+            "proposal": {
+              "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+              "residualId": "R388-C-04",
+              "files": [],
+              "canonicalAdmission": false,
+              "directProductionMutation": false,
+              "expectedProofs": [
+                "R202 Operational Source Authority",
+                "R241 Archive Convergence Visual Intelligence"
+              ]
+            }
+          }
+        ],
+        "reformulated": true
+      },
+      "supersedes": {
+        "falseReceiptBaseSha": "fff519c9812cc0a2571bccff374b637fe4b06c0b",
+        "falseProductPatchIdentity": "src/EarthObservatoryR8.tsx:e1f8fc1078a7ba324e1efb902149033a7b161eca",
+        "falsePr": 924
+      },
+      "evidence": {
+        "declineCarrierPr": 921,
+        "releaseCleanC05Pr": 922,
+        "releaseCleanC05Merge": "fff519c9812cc0a2571bccff374b637fe4b06c0b",
+        "releaseCleanC05ProductionRunId": 37263700788
+      },
+      "disposition": "OBSERVE_ONLY_UNTIL_RETURNED_PROVIDER_PROOF"
+    }
+  ]
 }

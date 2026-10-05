@@ -34,6 +34,9 @@ assert.deepEqual(byId('R388-A-02')?.affected,['src/capabilityAuthority.ts','src/
 assert.deepEqual(byId('R388-A-03')?.affected,['src/capabilityAuthority.ts','src/operationalCapabilityRuntimeR45.ts'],'R448 capability-state normalization must target capability truth, not mount ownership');
 assert.equal(byId('R388-A-04')?.selfEditable,false,'R448 native OpenGL→CPU fallback must remain device-gated until a real native executor target exists');
 assert.equal(byId('R388-A-04')?.externalProofRequired,true,'R448 native renderer fallback must retain first-hand external/device proof');
+assert.deepEqual(byId('R388-C-04')?.affected,[],'R476 C-04 provider/live-proof objective must not expose an autonomous product-source mutation membrane');
+assert.equal(byId('R388-C-04')?.selfEditable,false,'R476 C-04 must remain proof-only until returned provider evidence closes the external obligation');
+assert.equal(byId('R388-C-04')?.externalProofRequired,true,'R476 C-04 must retain first-hand provider proof rather than source-change inference');
 const a02=byId('R388-A-02'),a03=byId('R388-A-03');
 assert.equal(a02?.acceptanceContract?.revision,'R450');
 assert.equal(a03?.acceptanceContract?.revision,'R450');
@@ -100,6 +103,9 @@ assert.ok(held.heldRecentDeclines.includes(selected.selected.id),'R421 must repo
 assert.equal(held.advanced,0,'temporary decline hold must never increment advanced completion');
 
 const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
+assert.equal(state.r388AdvancedItemIds.includes('R388-C-04'),false,'R476 must remove false C-04 advancement from the effective advanced set');
+assert.equal(state.r388AdvancedItemIds.includes('R388-C-05'),true,'R476 must retain the release-clean C-05 adaptive LOD advancement');
+assert.ok((state.r388TruthCorrections||[]).some(x=>x.itemId==='R388-C-04'&&x.state==='NO_SAFE_PATCH'&&x.reasons?.includes('MODEL_DECLINED_BOUNDED_PATCH')),'R476 must restore the exact C-04 NO_SAFE_PATCH scar');
 const exhausted={...state,currentCapsuleId:null,admittedSourceCapsules:state.roadmap.map(x=>x.id)};
 const backlogTarget={targetable:true,item:selected.selected,residualId:selected.selected.id,paths:selected.selected.affected,residual:{id:selected.selected.id,severity:'MEDIUM',mode:'AUTO_REPAIR',confidence:1,reproducible:true,affected:selected.selected.affected,summary:selected.selected.objective}};
 const decision=decideCycle({currentMainSha:'A',productionProofGreen:true,state:exhausted,candidates:[],evidence:{schema:'OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164',state:'HEALTHY',summary:{blocking:0,review:0,observe:0},residuals:[]},repairTarget:{targetable:false},backlogTarget});
