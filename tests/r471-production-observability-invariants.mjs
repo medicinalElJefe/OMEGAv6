@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const s=fs.readFileSync('scripts/verify_production_observability_r471.mjs','utf8');
+const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+assert.match(s,/LIVE SHA MISMATCH/);
+assert.match(s,/omega-build-receipt\.json/);
+assert.match(s,/api\/runtime-attestation/);
+assert.match(s,/authority:'OBSERVATION_ONLY'/);
+assert.match(s,/canonicalMutation:false/);
+assert.match(ci,/deploy-main:/);
+assert.match(ci,/Verify deployed R200 total-experience browser on exact promoted SHA/);
+console.log('R471 production observability invariants: PASS');
