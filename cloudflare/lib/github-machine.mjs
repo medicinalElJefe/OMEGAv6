@@ -113,6 +113,45 @@ export function canonicalAdvancedItemIdsR465(state={}){
  ).map(row=>String(row.itemId));
 }
 
+export function observedCanonicalAdvancedItemIdsR465({pulls=[],runs=[],mainSha='',ancestorMergeShas=[]}={}){
+ const cleanPushShas=new Set((Array.isArray(runs)?runs:[]).filter(run=>
+  run?.event==='push'&&
+  run?.head_branch==='main'&&
+  run?.status==='completed'&&
+  run?.conclusion==='success'&&
+  /^[0-9a-f]{40}$/.test(String(run?.head_sha||''))
+ ).map(run=>String(run.head_sha)));
+ const ancestors=new Set([String(mainSha||''),...(Array.isArray(ancestorMergeShas)?ancestorMergeShas:[]).map(String)]);
+ return [...new Set((Array.isArray(pulls)?pulls:[]).flatMap(pr=>{
+  const match=String(pr?.title||'').match(/^R388 CLOUD-01 convergence — (R388-[A-Y]-\d{2})$/);
+  const mergeSha=String(pr?.merge_commit_sha||'');
+  if(!match||!pr?.merged_at||!cleanPushShas.has(mergeSha)||!ancestors.has(mergeSha))return[];
+  return[match[1]];
+ }))];
+}
+
+async function observedRepositoryAdvancedItemIdsR465(token,repo,mainSha,runs=[]){
+ const closed=await gh(token,`/repos/${repo}/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=100`);
+ const cleanPushShas=new Set((Array.isArray(runs)?runs:[]).filter(run=>
+  run?.event==='push'&&run?.head_branch==='main'&&run?.status==='completed'&&run?.conclusion==='success'
+ ).map(run=>String(run?.head_sha||'')).filter(sha=>/^[0-9a-f]{40}$/.test(sha)));
+ const candidates=(Array.isArray(closed)?closed:[]).filter(pr=>{
+  const title=String(pr?.title||'');
+  const mergeSha=String(pr?.merge_commit_sha||'');
+  return /^R388 CLOUD-01 convergence — R388-[A-Y]-\d{2}$/.test(title)&&Boolean(pr?.merged_at)&&cleanPushShas.has(mergeSha);
+ });
+ const ancestorMergeShas=[];
+ for(const pr of candidates){
+  const mergeSha=String(pr.merge_commit_sha||'');
+  if(mergeSha===mainSha){ancestorMergeShas.push(mergeSha);continue}
+  try{
+   const cmp=await gh(token,`/repos/${repo}/compare/${mergeSha}...${mainSha}`);
+   if(cmp?.status==='ahead'&&Number(cmp?.behind_by||0)===0)ancestorMergeShas.push(mergeSha);
+  }catch{}
+ }
+ return observedCanonicalAdvancedItemIdsR465({pulls:closed,runs,mainSha,ancestorMergeShas});
+}
+
 function workflowEvidenceForSha(runs,sha){
   return (runs||[]).filter(run=>run?.head_sha===sha).map(run=>({databaseId:run.id,workflowName:run.name||'OMEGA Cloud Bridge CI',status:run.status,conclusion:run.conclusion,url:run.html_url,headSha:run.head_sha}));
 }
@@ -128,7 +167,9 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   let accuracyState={};try{accuracyState=(await getRepoFile(token,repo,'public/omega-r125-accuracy-state.json',mainSha)).json}catch{}
   let convergenceMarkdown='';try{convergenceMarkdown=(await getRepoTextFile(token,repo,'docs/OMEGA_MISSING_CAPABILITY_CONVERGENCE_R386.md',mainSha)).text}catch{}
   const recentDeclinedItemIds=[...new Set((state.r388Receipts||[]).slice(-8).flatMap(receipt=>(Array.isArray(receipt?.declinedItemScars)?receipt.declinedItemScars:[]).map(row=>String(row?.itemId||'')).filter(Boolean)))];
-  const canonicalAdvancedItemIds=canonicalAdvancedItemIdsR465(state);
+  const durableCanonicalAdvancedItemIds=canonicalAdvancedItemIdsR465(state);
+  const observedCanonicalAdvancedItemIds=await observedRepositoryAdvancedItemIdsR465(token,repo,mainSha,runs.workflow_runs||[]);
+  const canonicalAdvancedItemIds=[...new Set([...durableCanonicalAdvancedItemIds,...observedCanonicalAdvancedItemIds])];
   const reconciledAdvancedItemIds=[...new Set([...(state.r388AdvancedItemIds||[]),...canonicalAdvancedItemIds])];
   const backlog=selectNextConvergenceItemR388({markdown:convergenceMarkdown,advancedItemIds:reconciledAdvancedItemIds,heldItemIds:recentDeclinedItemIds});
   const backlogTargets=[];
@@ -146,7 +187,7 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const retry=repairId?canAttemptRepairR314({history:state.r314RepairHistory||[],fingerprint:residualState.vector.fingerprint,repairId}):null;
   const repairTarget=selectedTarget.targetable&&retry&&!retry.allow?{...selectedTarget,targetable:false,reasons:[...selectedTarget.reasons,'R314_RETRY_BUDGET_EXHAUSTED']}:{...selectedTarget,repairId};
   const decision=candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence,repairTarget,backlogTarget}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
-  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},decision};
+  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,durableCanonicalAdvancedItemIds,observedCanonicalAdvancedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},decision};
 }
 
 async function ensureNoCompetingCandidate(token,repo,state,mainSha){
