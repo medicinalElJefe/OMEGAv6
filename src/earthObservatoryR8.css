@@ -32,3 +32,10 @@
 .earth-r372-expanded-bar button{display:inline-flex;align-items:center;gap:6px}
 .earth-r372-stage-expanded>.earth-r279-satellite,.earth-r372-stage-expanded>.earth-r283-sar,.earth-r372-stage-expanded>.earth-r279-ground,.earth-r372-stage-expanded>.earth-r279-calculus,.earth-r372-stage-expanded>.earth-r281-globe,.earth-r372-stage-expanded>.earth-r279-instrument{min-height:calc(100vh - 70px)!important;height:auto!important}
 @media(max-width:760px){.earth-r372-display-menu{display:grid;grid-template-columns:1fr 1fr;width:100%}.earth-r372-display-menu .primary{grid-column:1/-1}.earth-r372-display-menu button{width:100%}.earth-r372-stage-expanded{padding-left:4px;padding-right:4px}}
+
+/* R388-C-05 · adaptive Earth render budget changes concurrency/cadence only; source pixels remain source pixels. */
+.earth-r388-lod{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:5px}
+.earth-r388-lod b{padding:3px 6px;border:1px solid rgba(112,214,205,.24);border-radius:999px;background:rgba(112,214,205,.055);font:800 8px ui-monospace,monospace;letter-spacing:.08em;color:#9fe3da}
+.earth-r388-lod small{font-size:8px;color:#76909a}
+.earth-r8[data-render-tier='CONSTRAINED'] .earth-r279-global-pair>div{grid-template-columns:1fr}
+.earth-r8[data-render-tier='CONSTRAINED'] .earth-r279-global-pair img{max-height:520px}
