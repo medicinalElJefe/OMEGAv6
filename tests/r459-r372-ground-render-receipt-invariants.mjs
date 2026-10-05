@@ -17,8 +17,8 @@ for(const token of [
 for(const token of [
   "beforeGroundGeneration",
   "Ground mounts with an automatic source request",
-  "data-ground-refresh-generation')||0)>0",
-  "data-ground-evidence-hash')||'')",
+  "Number(el?.getAttribute('data-ground-refresh-generation')||0)>0",
+  "/^[0-9a-f]{64}$/i.test(el?.getAttribute('data-ground-evidence-hash')||'')",
   "data-ground-evidence-hash",
   "data-ground-refresh-generation",
   "data-ground-target",
