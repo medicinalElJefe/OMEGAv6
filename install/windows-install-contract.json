@@ -34,5 +34,9 @@
     "uninstall_failure",
     "reinstall_failure"
   ],
-  "note": "Cloud CI may validate the contract and package structure, but only an archived paired Windows target-machine execution may close the installer gate."
+  "note": "Desktop-only deployment gate. Cloud/Workers and Hybrid Link continue independently. Only an archived paired Windows desktop execution may close the desktop installer gate.",
+  "scope": "DESKTOP_TARGET_ONLY",
+  "blocksCloudWorkers": false,
+  "blocksHybridLink": false,
+  "blocksCanonicalCloudPromotion": false
 }
