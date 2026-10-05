@@ -199,6 +199,12 @@ try{
   const groundTab=tabs.filter({hasText:'Ground'}).first();await groundTab.click();
   const groundReceipt=page.locator('.earth-ground-r9');
   const groundRefresh=page.getByRole('button',{name:'Refresh ground evidence',exact:true});await groundRefresh.waitFor({state:'visible',timeout:30000});
+  // Ground mounts with an automatic source request. Close that request/commit
+  // boundary before arming the manual-refresh response listener, otherwise the
+  // listener can bind the auto-load response while the UI commits the newer
+  // manual response and make an exact hash receipt look falsely stale.
+  await page.waitForFunction(()=>{const el=document.querySelector('.earth-ground-r9');return Number(el?.getAttribute('data-ground-refresh-generation')||0)>0&&/^[0-9a-f]{64}$/i.test(el?.getAttribute('data-ground-evidence-hash')||'')&&el?.getAttribute('data-ground-target')==='32.222600,-110.974700'},{timeout:30000});
+  await groundRefresh.waitFor({state:'visible',timeout:30000});
   const beforeGroundGeneration=Number(await groundReceipt.getAttribute('data-ground-refresh-generation')||0);
   const groundReturn=page.waitForResponse(r=>targetResponse(r,'/api/earth/ground/evidence',32.2226,-110.9747),{timeout:30000});
   await groundRefresh.click();const groundResponse=await groundReturn;
