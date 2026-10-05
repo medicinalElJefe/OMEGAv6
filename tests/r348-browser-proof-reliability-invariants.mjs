@@ -4,13 +4,12 @@ import fs from 'node:fs';
 const r237=fs.readFileSync('.github/workflows/r237-hybrid-command-authority-proof.yml','utf8');
 const r241=fs.readFileSync('.github/workflows/r241-archive-convergence.yml','utf8');
 const runner=fs.readFileSync('scripts/run_r241_browser_proof.sh','utf8');
-const r286ShardRunner=fs.readFileSync('scripts/run_r286_control_shards.sh','utf8');
 const r313ShardRunner=fs.readFileSync('scripts/run_r313_control_shards.sh','utf8');
 const r313DisclosureRunner=fs.readFileSync('scripts/run_r313_disclosure_shards.sh','utf8');
 const r408Scheduler=fs.readFileSync('scripts/run_work_conserving_shards_r408.mjs','utf8');
 const r408Estimator=fs.readFileSync('src/system/r408ProofWorkloadEstimator.js','utf8');
 const r313Disclosure=fs.readFileSync('tests/r313-panel-disclosure-browser-e2e.mjs','utf8');
-const r286Browser=fs.readFileSync('tests/r286-all-surface-no-dead-controls-browser-e2e.mjs','utf8');
+const r286Bounded=fs.readFileSync('tests/r286-bounded-control-contract-browser-e2e.mjs','utf8');
 const r313Browser=fs.readFileSync('tests/r313-full-control-interaction-browser-e2e.mjs','utf8');
 const interactionJob=(r241.match(/  prove-r241-interactions:\n([\s\S]*?)(?=\n  prove-r241:\n)/)||[])[1]||'';
 
@@ -34,11 +33,9 @@ assert.ok(interactionJob.includes('R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=
 assert.ok(interactionJob.includes('Build exact candidate for interaction proof')&&interactionJob.includes('npm run build'),'isolated R313 job must build the exact candidate before browser interaction proof');
 assert.ok(r241.includes('Stop shared R241 preview server')&&r241.includes('if: always()'),'R241 shared preview must always clean up');
 
-assert.ok(r241.includes('R286_PROOF_SHARDS=8 R286_SHARD_MAX_PARALLEL=4 R286_SHARD_TIMEOUT_SEC=360'),'R286 exhaustive browser audit must retain eight deterministic shards with bounded four-worker concurrency');
 assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1500'),'R313 parent proof must retain a bounded 25-minute envelope');
 assert.ok(r241.includes('R313_PROOF_SHARDS=16 R313_SHARD_MAX_PARALLEL=4 R313_SHARD_TIMEOUT_SEC=480'),'R313 safe-control sweep must retain sixteen deterministic shards and four-worker bounded concurrency');
 for(const [label,wrapper,proofClass] of[
- ['R286',r286ShardRunner,'no_dead_control'],
  ['R313',r313ShardRunner,'interaction'],
  ['R313 disclosure',r313DisclosureRunner,'disclosure'],
 ]){
@@ -59,7 +56,6 @@ assert.ok(r408Estimator.includes('history=[...(cls.history||[]),record]'),'R408 
 assert.ok(r408Estimator.includes('R408_EWMA_ALPHA=0.35'),'R408 estimator must retain explicit bounded scar weighting');
 assert.ok(r313ShardRunner.includes('R408_RESOURCE_CAPACITY=4')&&r313ShardRunner.includes('R408_SHARD_RESOURCE_COST=2'),'R313 full-control proof must consume 2/4 browser resource units per shard');
 assert.ok(r313DisclosureRunner.includes('R408_RESOURCE_CAPACITY=4')&&r313DisclosureRunner.includes('R408_SHARD_RESOURCE_COST=2'),'R313 disclosure proof must consume 2/4 browser resource units per shard');
-assert.ok(r286ShardRunner.includes('R408_RESOURCE_CAPACITY=6')&&r286ShardRunner.includes('R408_SHARD_RESOURCE_COST=2'),'R286 no-dead-control proof must retain all eight shards while resource-capping Chromium pressure to three simultaneous consumers');
 assert.ok(r408Estimator.includes('if(ok)cls.ewmaByShard'),'failed transport/browser samples must remain in history without training the timing EWMA');
 assert.ok(r241.includes('Restore R408 interaction workload scar')&&r241.includes('Restore R408 main proof workload scar'),'R241 must restore proof-runtime scar state independently per job');
 assert.ok(r241.includes('Retain R408 interaction workload scar')&&r241.includes('Retain R408 main browser workload scar'),'R241 must retain updated proof-runtime scar evidence after execution');
@@ -73,9 +69,11 @@ assert.ok(r313Browser.includes('function representativeSafeActuationIds(items)')
 assert.ok(r313Browser.includes('if(item.navTarget||item.transientToggle)selected.add(item.id)'),'R425 every internal-navigation and transient-toggle control must remain mandatory behavioral actuation');
 assert.ok(r313Browser.includes('Math.floor((rows.length-1)/2)'),'R425 local safe-control actuation must retain deterministic spread representatives rather than first-only sampling');
 assert.ok(r313Browser.includes('if(!actuationIds.has(item.id))continue'),'R425 R313 must classify every visible control before selecting bounded behavioral representatives');
-assert.ok(r313Browser.includes('R286 remains the exhaustive action-binding/reachability proof'),'R425 R313 must explicitly bind its representative behavior proof to exhaustive R286 liveness');
-assert.ok(r286Browser.includes('if(shardIndex===0){')&&r286Browser.includes('verifyWorkspaceSubmenus(page,name)'),'R425 global navigator/submenu behavior must be proved once per viewport rather than redundantly in every shard');
-assert.ok(r286Browser.includes('for(const route of routes)'),'R425 every R286 shard must still exhaustively audit its assigned route set');
+assert.ok(r313Browser.includes('every internal-navigation and transient-toggle control actuated'),'R425 R313 must retain behavioral actuation ownership for navigation and transient controls');
+assert.ok(r286Bounded.includes('for(const route of routes)'),'R471 bounded R286 must census every canonical surface in each representative viewport');
+assert.ok(r286Bounded.includes("['desktop'")&&r286Bounded.includes("['mobile'"),'R471 bounded R286 must retain desktop/mobile representative profiles');
+assert.ok(r286Bounded.includes("pointerEvents==='none'")&&r286Bounded.includes("aria-controls target missing"),'R471 bounded R286 must retain structural liveness and relationship checks');
+assert.ok(r286Bounded.includes("page.on('pageerror'"),'R471 bounded R286 must fail closed on browser page errors');
 
 
 assert.ok(runner.includes('reusing healthy shared preview'),'R241 runner must reuse the already healthy preview');
@@ -83,4 +81,4 @@ assert.ok(runner.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC:-300'),'R241 runner m
 assert.ok(runner.includes('timeout --signal=TERM --kill-after=15s'),'R241 runner must terminate hung children fail-closed');
 assert.ok(runner.includes('R241 browser proof timeout'),'R241 timeout must produce an explicit diagnostic annotation');
 
-console.log('R348/R425 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · complete 88-case deterministic structural partitions retained · R286 remains exhaustive for action binding/reachability/occlusion while R313 performs bounded deterministic representative behavior plus all navigation/transient actuation · redundant global navigator/submenu repetition removed · R408 scheduler remains resource-aware and fail-closed · failed transport samples remain scar evidence · diagnostics retained');
+console.log('R348/R425 BROWSER PROOF RELIABILITY PASS · R237 networkidle removed · R237/R243 wall-clock bounded · R241 single shared preview · complete 88-case deterministic structural partitions retained · R286 owns bounded exhaustive structural control census while R313 owns bounded deterministic representative behavior plus all navigation/transient actuation · redundant global navigator/submenu repetition removed · R408 scheduler remains resource-aware and fail-closed · failed transport samples remain scar evidence · diagnostics retained');
