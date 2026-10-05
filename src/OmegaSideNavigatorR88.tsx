@@ -105,10 +105,10 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
    {layer==='EVERYWHERE'?<>
     <label className='r88-search r100-search r104-search r333-search'><Search/><input ref={searchRef} value={query} onChange={e=>{setQuery(e.target.value);setNavigationScar('')}} placeholder='Search tools, surfaces, or workflows' aria-label={activeWorkspace?`Search ${activeWorkspace.label} tools within the shared application registry`:'Search all registered OMEGA applications'}/><kbd>⌘K</kbd></label>
     <div className='r333-filter-stack' aria-label='Navigation filters'>
-     {showTechnical&&<div className='r333-filter-row r411-master-row'>
+     <div className='r333-filter-row r411-master-row'>
       <div className='r333-filter-label'><b>MENU</b><small>Function</small></div>
       <nav className='r289-master-menu-filter' aria-label='Recovered OMEGA master menus'><button aria-pressed={masterMenu==='ALL'} className={masterMenu==='ALL'?'active':''} onClick={()=>{setMasterMenu('ALL');setNavigationScar('')}}>ALL MENUS <b>{routeCount}</b></button>{OMEGA_MASTER_MENU_NAVIGATION_R289.map(menu=><button key={menu.id} aria-pressed={masterMenu===menu.id} className={masterMenu===menu.id?'active':''} onClick={()=>{setMasterMenu(menu.id as MasterMenuFilterR289);setNavigationScar('')}} title={menu.purpose}><span>{menu.id}</span>{menu.label}<b>{menu.routes.length}</b></button>)}</nav>
-     </div>}
+     </div>
      <div className='r333-filter-row r411-workspace-row'>
       <div className='r333-filter-label'><b>SPACE</b><small>Workspace</small></div>
       <nav className='r105-workspace-filter' aria-label='Application workspace submenu'><button className={workspaceFilter==='ALL'?'active':''} onClick={()=>{setWorkspaceFilter('ALL');setNavigationScar('')}}>ALL <b>{routeCount}</b></button>{OMEGA_WORKSPACES_R82.map(workspace=><button key={workspace.id} className={workspaceFilter===workspace.id?'active':''} onClick={()=>{setWorkspaceFilter(workspace.id);setNavigationScar('')}} title={workspace.copy}>{workspace.label} <b>{workspace.routes.length}</b></button>)}</nav>

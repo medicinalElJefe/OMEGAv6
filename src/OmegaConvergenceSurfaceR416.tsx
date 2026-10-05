@@ -25,6 +25,7 @@ import OmegaPcwdReferenceBenchmarksR359 from './OmegaPcwdReferenceBenchmarksR359
 import OmegaPcwdSemanticInvariantR360 from './OmegaPcwdSemanticInvariantR360';
 import OmegaPcwdInterDomainBridgeR361 from './OmegaPcwdInterDomainBridgeR361';
 import OmegaPcwdBridgeCompositionR362 from './OmegaPcwdBridgeCompositionR362';
+import YearCorpusConvergenceR473 from './YearCorpusConvergenceR473';
 import './proofCarryR292.css';
 
 type Props={
@@ -43,6 +44,7 @@ export default function OmegaConvergenceSurfaceR416({record,state,address,onAddr
  const capability=<OmegaCapabilityFieldR138 panel='Convergence' record={record} address={address} onAddress={onAddress} onNavigate={onNavigate} status={status} restore={restore}/>;
  return <div className='r138-capability-first' data-convergence-route-split={R416_CONVERGENCE_ROUTE_SPLIT}>
   {capability}
+  <YearCorpusConvergenceR473 onNavigate={onNavigate}/>
   <div className='r356-convergence-primary'>
    <section className='r356-convergence-section'>
     <header><div><span>CURRENT AUTHORITY</span><b>Unified convergence</b><small>Current relational field, exact address fabric, research state and governed self-build.</small></div></header>

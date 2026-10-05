@@ -70,19 +70,19 @@ async function prove(viewportName,contextOptions){
   if(await tech.count()!==1)throw new Error(`${viewportName}: R411 Technical toggle must remain uniquely visible`);
   await assertControlIntegrity(tech,`${viewportName}:technical-toggle`,{minHeight:coarse?44:38,minFont:9.5});
 
-  // R411.4: Simple is intentionally clean. Recovered master menus retain full
-  // navigation authority behind explicit Technical opt-in, where they remain
-  // directly reachable in one horizontally-contained strip.
-  if(await master.isVisible())throw new Error(`${viewportName}: R411 Simple view exposes recovered master-menu density before Technical opt-in`);
-  await tech.click();
+  // R473 successor rule: recovered master menus are part of normal Simple-view
+  // reachability. Technical opt-in may reveal technical metadata, but it may not
+  // decide whether restored tools exist or are reachable.
   await master.waitFor({state:'visible',timeout:10000});
-  if(await tech.getAttribute('aria-pressed')!=='true')throw new Error(`${viewportName}: Technical toggle did not expose recovered navigation`);
   const masterButtons=master.locator('button');
-  if(await masterButtons.count()!==13)throw new Error(`${viewportName}: expected ALL + 12 recovered master-menu controls after Technical opt-in`);
+  if(await masterButtons.count()!==13)throw new Error(`${viewportName}: expected ALL + 12 recovered master-menu controls in Simple view`);
   await assertControlIntegrity(masterButtons,`${viewportName}:master-menu`,{minHeight:coarse?44:40,minFont:coarse?10:10.5});
   await assertControlIntegrity(workspaceButtons,`${viewportName}:workspace-filter`,{minHeight:coarse?44:40,minFont:10});
-  const technicalMenuGeometry=await master.evaluate(el=>({clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,overflowX:getComputedStyle(el).overflowX}));
-  if(!['auto','scroll'].includes(technicalMenuGeometry.overflowX))throw new Error(`${viewportName}: Technical recovered-menu strip is not horizontally contained`);
+  const simpleMenuGeometry=await master.evaluate(el=>({clientWidth:el.clientWidth,scrollWidth:el.scrollWidth,overflowX:getComputedStyle(el).overflowX}));
+  if(!['auto','scroll'].includes(simpleMenuGeometry.overflowX))throw new Error(`${viewportName}: recovered-menu strip is not horizontally contained in Simple view`);
+  await tech.click();
+  if(await tech.getAttribute('aria-pressed')!=='true')throw new Error(`${viewportName}: Technical toggle did not enable technical metadata`);
+  if(!await master.isVisible())throw new Error(`${viewportName}: Technical mode incorrectly hid recovered navigation`);
 
   await masterButtons.first().click();
   await page.waitForFunction(()=>document.querySelector('#omega-global-navigator')?.getAttribute('data-master-menu')==='ALL',undefined,{timeout:10000});
