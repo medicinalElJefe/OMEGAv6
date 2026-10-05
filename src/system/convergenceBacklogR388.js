@@ -35,6 +35,7 @@ const ITEM_TARGETS=Object.freeze({
  'A-04':[],
  'A-05':['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],
  'B-02':['src/OmegaSideNavigatorR88.tsx','src/OmegaWorkstationFullV2.tsx'],
+ 'C-04':[],
 });
 
 const ITEM_ACCEPTANCE=Object.freeze({
