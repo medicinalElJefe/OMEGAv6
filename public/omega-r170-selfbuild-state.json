@@ -2494,6 +2494,28 @@
       "historicalMarkdownMutated": false,
       "canonicalAdmission": false,
       "directProductionMutation": false
+    },
+    {
+      "schema": "OMEGA_R388_CANONICAL_ADVANCEMENT_R465",
+      "itemId": "R388-C-01",
+      "sourceRevision": "R388-C-01/#913",
+      "candidateHead": "0bf3f967068df40682f4c6cfcdc8c8574cf00cf1",
+      "mergeSha": "b59a00baa70f9b4faeb2b75114aff576b68b004e",
+      "productionRunId": 37258201690,
+      "status": "RELEASE_CLEAN",
+      "expectedProofs": [
+        "R202 Operational Source Authority",
+        "R241 Archive Convergence Visual Intelligence",
+        "OMEGA Cloud Bridge CI"
+      ],
+      "evidence": [
+        "PR #913 merged the bounded R388-C-01 Earth source improvement",
+        "main push production run 37258201690 completed successfully",
+        "later R471 exact live observability proved descendant main 623b01ee0758522327d880891cf486af4a8630b3 serving its exact canonical source"
+      ],
+      "historicalMarkdownMutated": false,
+      "canonicalAdmission": false,
+      "directProductionMutation": false
     }
   ],
   "r388ObservationGeneration": 1
