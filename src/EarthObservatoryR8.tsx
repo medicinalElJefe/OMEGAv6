@@ -46,7 +46,7 @@ export default function EarthObservatoryR8({address}:Props){
  const renderBudget=RENDER_BUDGET[renderTier];
  useEffect(()=>{if(!playing||!catalog.length)return;const id=window.setInterval(()=>{if(document.visibilityState!=='visible')return;setSelected(v=>{const i=Math.max(0,catalog.findIndex(x=>x.id===v));return catalog[(i+1)%catalog.length]?.id||v})},renderBudget.cycleMs);return()=>window.clearInterval(id)},[playing,catalog,renderBudget.cycleMs]);
  const current=catalog.find(x=>x.id===selected)||catalog[0];
- const fullDisks=['G19-FD','G18-FD','G17-FD'].map(id=>catalog.find(x=>x.id===id)).filter(Boolean) as Coverage[];
+ const fullDisks=['G19-FD','G18-FD','G17-FD','G16-FD'].map(id=>catalog.find(x=>x.id===id)).filter(Boolean) as Coverage[];
  const fullDiskPreviews=fullDisks.slice(0,renderBudget.previewCount);
  const move=(delta:number)=>{if(!catalog.length)return;const i=Math.max(0,catalog.findIndex(x=>x.id===selected));setSelected(catalog[(i+delta+catalog.length)%catalog.length].id)};
  const chooseView=(next:EarthView)=>{setView(next);setPlaying(false)};
