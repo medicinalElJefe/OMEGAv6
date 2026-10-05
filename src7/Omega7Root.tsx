@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useRef} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {OMEGA7_CAPABILITIES,OMEGA7_DOMAINS,omega7CapabilitiesForDomain,searchOmega7Capabilities,type Omega7Domain} from './capabilityRegistry';
 import {Omega7AppStateProvider,useOmega7AppState} from './appState';
 import {Omega7Boundary} from './Omega7Boundary';
@@ -6,6 +6,7 @@ import {isOmega7NativeRoute,Omega7NativeSurface} from './nativeCapabilityRegistr
 import {OMEGA7_PARITY_SUMMARY,parityEvidenceForRoute} from './parityLedgerR451';
 import {OMEGA7_ACCEPTED_PARITY_SUMMARY,acceptedParityForRoute} from './parityLedgerR453';
 import {OMEGA7_HEIGHTENED_SUMMARY} from './heightenedModeR457';
+import {R468_EVENT,developmentalStateBusSnapshotR468,type R468Snapshot} from './developmentalStateBusR468';
 import './omega7.css';
 
 type Props={onOpenLegacyRoute:(route:string)=>void;onExitToV6:()=>void};
@@ -25,6 +26,7 @@ const DOMAIN_COPY:Record<Omega7Domain,string>={
 function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const{state,dispatch}=useOmega7AppState();
  const inputRef=useRef<HTMLInputElement|null>(null);
+ const [development,setDevelopment]=useState<R468Snapshot|null>(null);
  const domainCaps=useMemo(()=>state.domain==='HOME'?OMEGA7_CAPABILITIES:omega7CapabilitiesForDomain(state.domain),[state.domain]);
  const results=useMemo(()=>state.query?searchOmega7Capabilities(state.query):domainCaps,[state.query,domainCaps]);
  const healthRows=Object.entries(state.health);
@@ -41,6 +43,13 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   };
   window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);
  },[dispatch]);
+ useEffect(()=>{
+  let live=true;
+  const refresh=()=>void developmentalStateBusSnapshotR468().then(x=>{if(live)setDevelopment(x)});
+  refresh();
+  window.addEventListener(R468_EVENT,refresh as EventListener);
+  return()=>{live=false;window.removeEventListener(R468_EVENT,refresh as EventListener)};
+ },[]);
 
  const open=(route:string)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route);
@@ -105,7 +114,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   {state.statusOpen&&<section className='o7-status' role='dialog' aria-label='System status'>
    <header><div><b>System status</b><span>{ready} ready · {held} limited · {failed} failed</span></div><button onClick={()=>dispatch({type:'STATUS',open:false})}>Close</button></header>
    <div>{healthRows.map(([key,value])=><article key={key} data-health={String(value).toLowerCase()}><span>{key.replaceAll(/([A-Z])/g,' $1')}</span><b>{value}</b></article>)}</div>
-   <div className='o7-parity-summary' data-r451-parity='historical' data-r451-total={OMEGA7_PARITY_SUMMARY.total} data-r451-selected={historicalParity?.parityLevel||''} data-r453-parity='accepted'><article><span>Routes browser-proved</span><b>{OMEGA7_ACCEPTED_PARITY_SUMMARY.functionalDesktopMobile}/{OMEGA7_ACCEPTED_PARITY_SUMMARY.total}</b></article><article><span>Failure/recovery proved · family isolation</span><b>{OMEGA7_ACCEPTED_PARITY_SUMMARY.familyFailureIsolation}/{OMEGA7_ACCEPTED_PARITY_SUMMARY.total}</b></article><article><span>Performance proved</span><b>{OMEGA7_ACCEPTED_PARITY_SUMMARY.performance}/{OMEGA7_ACCEPTED_PARITY_SUMMARY.total}</b></article><article><span>Rollback proved</span><b>{OMEGA7_ACCEPTED_PARITY_SUMMARY.rollback}/{OMEGA7_ACCEPTED_PARITY_SUMMARY.total}</b></article><article><span>Legacy retired</span><b>{OMEGA7_ACCEPTED_PARITY_SUMMARY.legacyRetired}</b></article><article><span>Architecture</span><b>{OMEGA7_HEIGHTENED_SUMMARY.capabilityCount} capabilities · {OMEGA7_HEIGHTENED_SUMMARY.familyCount} compositions</b></article>{selectedParity&&<article><span>Selected route proof</span><b>{selectedParity.parityLevel.replaceAll('_',' ')}</b></article>}</div>
+   <div className='o7-parity-summary' data-r451-parity='historical' data-r451-total={OMEGA7_PARITY_SUMMARY.total} data-r451-selected={historicalParity?.parityLevel||''} data-r453-parity='accepted'><article><span>Routes browser-proved</span><b>{OMEGA7_ACCEPTED_PARITY_SUMMARY.functionalDesktopMobile}/{OMEGA7_ACCEPTED_PARITY_SUMMARY.total}</b></article><article><span>Failure/recovery proved · family isolation</span><b>{OMEGA7_ACCEPTED_PARITY_SUMMARY.familyFailureIsolation}/{OMEGA7_ACCEPTED_PARITY_SUMMARY.total}</b></article><article><span>Performance proved</span><b>{OMEGA7_ACCEPTED_PARITY_SUMMARY.performance}/{OMEGA7_ACCEPTED_PARITY_SUMMARY.total}</b></article><article><span>Rollback proved</span><b>{OMEGA7_ACCEPTED_PARITY_SUMMARY.rollback}/{OMEGA7_ACCEPTED_PARITY_SUMMARY.total}</b></article><article><span>Legacy retired</span><b>{OMEGA7_ACCEPTED_PARITY_SUMMARY.legacyRetired}</b></article><article><span>Architecture</span><b>{OMEGA7_HEIGHTENED_SUMMARY.capabilityCount} capabilities · {OMEGA7_HEIGHTENED_SUMMARY.familyCount} compositions</b></article>{development&&<article data-r468-developmental-state={development.status.toLowerCase()}><span>Developmental ledger</span><b>{development.status} · {development.recordCount} records{development.headDecision?` · ${development.headDecision}`:''}</b></article>}{selectedParity&&<article><span>Selected route proof</span><b>{selectedParity.parityLevel.replaceAll('_',' ')}</b></article>}</div>
    <p>Availability, execution, parity proof, and Canon authority remain separate. Full product parity is accepted across the 44 inherited routes, while route-specific provider/device failure modes remain scoped to the evidence actually exercised. OMEGAv6 is still retained as rollback.</p>
   </section>}
 
