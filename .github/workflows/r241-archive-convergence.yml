@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: r241-archive-convergence-${{ github.event.pull_request.number || github.ref }}-${{ github.event.pull_request.head.sha || github.sha }}
@@ -15,11 +16,13 @@ concurrency:
 jobs:
   stale-head-preflight:
     runs-on: ubuntu-24.04
-    timeout-minutes: 2
+    timeout-minutes: 3
     outputs:
       current: ${{ steps.head.outputs.current }}
       observed_head: ${{ steps.head.outputs.observed_head }}
       candidate_head: ${{ steps.head.outputs.candidate_head }}
+      inherit: ${{ steps.inherit.outputs.inherit }}
+      inheritance_reason: ${{ steps.inherit.outputs.reason }}
     steps:
       - name: Verify candidate is still the PR head before expensive proof
         id: head
@@ -52,9 +55,99 @@ jobs:
             echo "R241 stale-head preflight OBSOLETE · event head $EVENT_HEAD_SHA is retained as history but current PR #${PR_NUMBER} head is $observed; synthetic workflow SHA $GITHUB_SHA is not used as candidate identity; expensive proof is skipped."
           fi
 
+      - name: Evaluate exact-base proof inheritance
+        id: inherit
+        if: steps.head.outputs.current == 'true'
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+
+          const out=(key,value)=>fs.appendFileSync(process.env.GITHUB_OUTPUT,`${key}=${String(value).replaceAll('\n',' ')}\n`);
+          if(process.env.EVENT_NAME!=='pull_request'){
+            out('inherit','false');
+            out('reason','manual dispatch requires direct exact-head proof');
+            process.exit(0);
+          }
+
+          const repo=process.env.REPOSITORY;
+          const base=process.env.BASE_SHA;
+          const head=process.env.HEAD_SHA;
+          const token=process.env.GH_TOKEN;
+          const headers={
+            accept:'application/vnd.github+json',
+            authorization:`Bearer ${token}`,
+            'x-github-api-version':'2022-11-28'
+          };
+          const get=async path=>{
+            const r=await fetch(`https://api.github.com/repos/${repo}${path}`,{headers});
+            const raw=await r.text();
+            if(!r.ok)throw new Error(`GitHub ${path} HTTP ${r.status}: ${raw.slice(0,300)}`);
+            return JSON.parse(raw);
+          };
+
+          const comparison=await get(`/compare/${base}...${head}`);
+          const files=(comparison.files||[]).map(x=>String(x.filename||'')).filter(Boolean);
+          const docsOnly=files.length>0&&files.every(file=>file.startsWith('docs/')&&file.endsWith('.md'));
+          if(!docsOnly){
+            out('inherit','false');
+            out('reason',`runtime-or-proof-affecting diff requires direct proof (${files.length} changed files)`);
+            process.exit(0);
+          }
+
+          const runs=await get(`/actions/runs?head_sha=${base}&event=pull_request&per_page=100`);
+          const proof=(runs.workflow_runs||[]).find(run=>
+            run.name==='R241 Archive Convergence Visual Intelligence'&&
+            run.status==='completed'&&
+            run.conclusion==='success'&&
+            String(run.head_sha||'')===base
+          );
+          if(!proof){
+            out('inherit','false');
+            out('reason','exact base SHA has no successful R241 proof to inherit');
+            process.exit(0);
+          }
+
+          out('inherit','true');
+          out('reason',`documentation-only successor of exact R241-proved base ${base}; inherited run ${proof.id}`);
+          console.log(`R469 R241 PROOF INHERITANCE PASS · head ${head} changes documentation only · exact base ${base} is R241-proved by run ${proof.id} · runtime and proof harness are unchanged.`);
+          NODE
+
+  inherit-r241-proof:
+    needs: stale-head-preflight
+    if: needs.stale-head-preflight.outputs.current == 'true' && needs.stale-head-preflight.outputs.inherit == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Carry exact-base R241 proof across documentation-only successor
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REASON: ${{ needs.stale-head-preflight.outputs.inheritance_reason }}
+        run: |
+          set -euo pipefail
+          echo "R469 inherited R241 proof: $REASON"
+          {
+            echo '## R469 exact-base proof inheritance'
+            echo "- Candidate head: $HEAD_SHA"
+            echo "- Exact proved base: $BASE_SHA"
+            echo "- $REASON"
+            echo '- Inheritance is allowed only for docs/*.md-only diffs from an exact base SHA whose own pull-request R241 workflow completed successfully.'
+            echo '- Any runtime, workflow, test, script, package, configuration or other non-documentation change forces the unchanged direct R241 proof jobs.'
+            echo '- This carries proof across a representation-only successor; it does not create deployment, source-promotion or CanonState authority.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
   prove-r241-interactions:
     needs: stale-head-preflight
-    if: needs.stale-head-preflight.outputs.current == 'true'
+    if: needs.stale-head-preflight.outputs.current == 'true' && needs.stale-head-preflight.outputs.inherit != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
@@ -166,7 +259,7 @@ jobs:
 
   prove-r241:
     needs: stale-head-preflight
-    if: needs.stale-head-preflight.outputs.current == 'true'
+    if: needs.stale-head-preflight.outputs.current == 'true' && needs.stale-head-preflight.outputs.inherit != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:

@@ -11,8 +11,10 @@ assert.equal((workflow.match(/ref: \$\{\{ github\.event\.pull_request\.head\.sha
 assert.ok(workflow.includes('Verify exact candidate head identity')&&workflow.includes('Verify exact interaction head identity'),'R460 must fail closed on checkout drift');
 assert.ok(workflow.includes('current=false'),'R460 must explicitly classify superseded exact heads as obsolete');
 assert.ok(workflow.includes('expensive proof is skipped'),'R460 must prune obsolete computation without deleting lineage');
-const gates=(workflow.match(/if: needs\.stale-head-preflight\.outputs\.current == 'true'/g)||[]).length;
-assert.equal(gates,2,'R460 must gate both heavy R241 jobs and only those jobs');
+const directHeavyGates=(workflow.match(/if: needs\.stale-head-preflight\.outputs\.current == 'true' && needs\.stale-head-preflight\.outputs\.inherit != 'true'/g)||[]).length;
+assert.equal(directHeavyGates,2,'R460 must gate both heavy R241 direct-proof jobs and only those jobs');
+const inheritanceGate=(workflow.match(/if: needs\.stale-head-preflight\.outputs\.current == 'true' && needs\.stale-head-preflight\.outputs\.inherit == 'true'/g)||[]).length;
+assert.equal(inheritanceGate,1,'R460/R469 may add exactly one lightweight inherited-proof gate without widening heavy proof execution');
 assert.equal(pkg.scripts['test:r460'],'node tests/r460-r241-stale-head-preflight-invariants.mjs');
 assert.ok(pkg.scripts.check.includes('npm run test:r460'),'R460 invariant must remain in canonical check');
-console.log('R460 R241 STALE-HEAD PREFLIGHT PASS · exact-head history retained · obsolete proof compute pruned · current-head proof semantics unchanged');
+console.log('R460/R469 R241 STALE-HEAD PREFLIGHT PASS · exact-head history retained · obsolete proof compute pruned · two heavy direct-proof jobs remain exact-head gated · one lightweight inherited-proof gate permitted');
