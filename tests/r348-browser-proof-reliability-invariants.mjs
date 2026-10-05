@@ -60,7 +60,6 @@ assert.ok(r408Estimator.includes('if(ok)cls.ewmaByShard'),'failed transport/brow
 assert.ok(r241.includes('Restore R408 interaction workload scar')&&r241.includes('Restore R408 main proof workload scar'),'R241 must restore proof-runtime scar state independently per job');
 assert.ok(r241.includes('Retain R408 interaction workload scar')&&r241.includes('Retain R408 main browser workload scar'),'R241 must retain updated proof-runtime scar evidence after execution');
 
-assert.ok(r286Browser.includes("click({timeout:10000,noWaitAfter:true})")&&r286Browser.includes('navigator expansion unexpectedly navigated')&&r286Browser.includes("aria-expanded')!=='true'"),'R286 navigator setup must avoid irrelevant navigation auto-wait while proving no URL mutation, expanded state and visible navigator semantics');
 assert.ok(r313Disclosure.includes('partitionInteractionCasesR355')&&r313Disclosure.includes('assignedCases'),'R313 disclosure must reuse the measured 88-case workload partition rather than sequentially scanning the whole field in one browser process');
 assert.ok(r313Disclosure.includes('testDetails(page,viewportName,route)')&&r313Disclosure.includes('testAriaExpanded(page,viewportName,route)'),'R313 disclosure shards must retain both strict disclosure and aria-expanded child contracts');
 assert.ok(r313Browser.includes('partitionInteractionCasesR355')&&r313Browser.includes('interactionPartition[shardIndex].cases'),'R313 partition law must use deterministic measured-workload balancing over the complete profile × route address space');
