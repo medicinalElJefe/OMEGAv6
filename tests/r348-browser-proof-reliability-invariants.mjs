@@ -26,7 +26,7 @@ assert.ok(r241.includes('Start one shared R241 preview server'),'R241 must start
 assert.ok(r241.includes("node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173"),'R241 shared preview must use the installed Vite binary directly');
 assert.ok(r241.includes("echo 'OMEGA_E2E_URL=http://127.0.0.1:4173' >> \"$GITHUB_ENV\""),'R241 shared preview URL must propagate to later proof steps');
 assert.ok(r241.includes("OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1320 bash scripts/run_r241_browser_proof.sh 'R313_DISCLOSURE_SHARDS=16 R313_DISCLOSURE_MAX_PARALLEL=4 R313_DISCLOSURE_SHARD_TIMEOUT_SEC=360 bash scripts/run_r313_disclosure_shards.sh && node tests/r318-viewport-ownership-browser-e2e.mjs'"),'R313 panel disclosure must retain its proven 1320s/360s bounded partitioned 16-shard proof followed by one R318 viewport/reload proof');
-assert.ok(r241.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=780'),'deep R286 control sweep must have an evidence-calibrated explicit bounded budget');
+assert.ok(r241.includes("Browser proof · R286 bounded canonical control contract")&&r241.includes("OMEGA_BROWSER_PROOF_TIMEOUT_SEC=300")&&r241.includes("node tests/r286-bounded-control-contract-browser-e2e.mjs"),'R286 must retain a bounded all-surface desktop/mobile control census without duplicating dedicated route/scroll/disclosure/action-effect proofs');
 assert.ok(interactionJob,'R313 isolated blocking job must be structurally parseable');
 assert.ok(interactionJob.includes('timeout-minutes: 50'),'R313 isolated interaction job must retain the evidence-calibrated 50-minute fail-closed ceiling');
 assert.ok(interactionJob.includes('OMEGA_BROWSER_PROOF_TIMEOUT_SEC=1500'),'R313 isolated interaction parent must retain the bounded 1500s work-conserving envelope');
