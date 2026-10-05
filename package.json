@@ -165,7 +165,7 @@
     "test:r473": "npx --yes tsx tests/r473-year-corpus-execution-invariants.mts",
     "test:r474": "npx --yes tsx tests/r474-year-corpus-capability-graph-invariants.mts",
     "test:r475": "node tests/r475-earth-motion-provider-truth-gate-invariants.mjs",
-    "test:r478": "npx --yes tsx tests/r478-presentation-conservation-invariants.mts"
+    "test:r478": "npx --yes tsx tests/r478-presentation-conservation-invariants.mts && npx --yes tsx tests/r478-workstation-presentation-invariants.mts"
   },
   "dependencies": {
     "fflate": "^0.8.2",
