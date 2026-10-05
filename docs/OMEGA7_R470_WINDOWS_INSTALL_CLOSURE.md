@@ -1,10 +1,10 @@
-# R470 — Windows installation closure contract
+# R470 — Desktop-only Windows installation closure
 
-R470 converts the existing native Windows installer target gate into an explicit fail-closed proof contract.
+R470 scopes the existing Windows installer target gate to the native **Desktop Target only**.
 
-It does **not** claim that cloud CI installed OMEGA on a physical Windows PC. Installation closes only when the paired target machine archives receipts for the exact canonical source SHA and installer artifact.
+It is **not** a prerequisite for Cloud/Workers, Hybrid Link, or canonical cloud promotion. Those surfaces continue under their existing authorities and proof chains.
 
-Required order:
+The Windows installer is needed when the native desktop platform is packaged for delivery. Only that desktop deployment gate requires the paired target-machine sequence:
 
 1. package exact canonical SHA
 2. clean install
@@ -16,6 +16,6 @@ Required order:
 8. clean reinstall
 9. exact installed version/source-SHA verification
 
-Any missing receipt, SHA mismatch, launch failure, upgrade state loss, uninstall failure, or reinstall failure leaves the target gate open.
+Cloud CI may validate this contract and package structure but cannot claim a physical desktop installation occurred.
 
-This preserves the existing R386 rule that native packaging/launcher converges with cloud continuity instead of becoming a separate product.
+This preserves R386: the desktop launcher/runtime converges with the same canonical OMEGA and Hybrid Link rather than becoming a separate product.
