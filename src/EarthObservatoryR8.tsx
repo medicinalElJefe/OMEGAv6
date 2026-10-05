@@ -17,6 +17,16 @@ type Focus='ALL'|'WEATHER'|'SEISMIC'|'EVENTS'|'SPACE';
 type EarthView='SATELLITE'|'PLANET'|'MOTION'|'EVIDENCE'|'WEATHER'|'SPACE'|'GROUND'|'CALCULUS'|'SAR';
 const fmt=(v:any,d=1)=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(d):'—';
 const VIEWS:{id:EarthView;label:string;copy:string}[]=[
+  {id:'SATELLITE',label:'Satellite',copy:'latest returned NOAA/CIRA imagery'},
+  {id:'PLANET',label:'Planet',copy:'global observed texture + true projection'},
+  {id:'MOTION',label:'Global motion',copy:'returned winds + derived continuity'},
+  {id:'EVIDENCE',label:'Evidence',copy:'current conditions · seismic · events · space'},
+  {id:'WEATHER',label:'Weather',copy:'hourly · 7 day · source agreement · continuity'},
+  {id:'SPACE',label:'Earth / space',copy:'solar geometry + near-space frame'},
+  {id:'GROUND',label:'Ground',copy:'region → city → street → ground evidence'},
+  {id:'CALCULUS',label:'Calculus',copy:'representational comparison only'},
+  {id:'SAR',label:'SAR Truth',copy:'live Sentinel-1 catalogue · bound arrays only'}
+];[
  {id:'SATELLITE',label:'Satellite',copy:'latest returned NOAA/CIRA imagery'},
  {id:'PLANET',label:'Planet',copy:'global observed texture + true projection'},
  {id:'MOTION',label:'Global motion',copy:'returned winds + derived continuity'},
