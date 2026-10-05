@@ -9,6 +9,10 @@ assert.equal(mission.conservation.pass,true);
 assert.equal(mission.blockingResiduals.length,0);
 assert.equal(mission.promotionEligible,true);
 assert.equal(mission.completionEligible,mission.residuals.length===0);
+assert.equal(mission.residualSummary.total,mission.residuals.length);
+assert.equal(mission.residualSummary.truthGated,YEAR_CORPUS_CAPABILITY_GRAPH_R474.filter(x=>x.strongestImplementation.state==='TRUTH_GATED').length);
+assert.equal(mission.residualSummary.adapterGaps,YEAR_CORPUS_CAPABILITY_GRAPH_R474.filter(x=>x.strongestImplementation.state==='EXECUTES_AS_ADAPTER').length);
+assert.ok(mission.nextResiduals.length<=12);
 assert.equal(mission.canonicalAdmissionAuthority,'R125');
 assert.equal(mission.canonicalMutation,false);
 
