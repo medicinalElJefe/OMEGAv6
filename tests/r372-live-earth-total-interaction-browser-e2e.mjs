@@ -158,19 +158,36 @@ try{
   await resumeMotion.click({force:true});
   await motion.getByRole('button',{name:'Pause motion',exact:true}).waitFor({state:'visible'});
   const refresh=motion.getByRole('button',{name:'Refresh global field',exact:true});await refresh.waitFor({state:'visible',timeout:30000});
-  await page.waitForFunction(()=>{const el=document.querySelector('.earth-r279-instrument[data-earth-mode="MOTION"]');return el?.getAttribute('data-motion-state')==='RETURNED'&&Boolean(el.getAttribute('data-motion-observed-at'))&&String(el.getAttribute('data-motion-provider')||'').includes('Open-Meteo')},{timeout:30000});
+  // Open-Meteo is an external source, not canonical OMEGA infrastructure.
+  // A provider outage must remain explicit ERROR truth rather than trigger fake
+  // fallback data or roll back unrelated source/runtime capabilities.
+  await page.waitForFunction(()=>{const el=document.querySelector('.earth-r279-instrument[data-earth-mode="MOTION"]');return ['RETURNED','ERROR'].includes(el?.getAttribute('data-motion-state')||'')},{timeout:30000});
+  const initialMotionState=await motion.getAttribute('data-motion-state');
   const beforeMotionObservedAt=await motion.getAttribute('data-motion-observed-at');
   const beforeRefreshGeneration=Number(await motion.getAttribute('data-motion-refresh-generation')||0);
+  if(initialMotionState==='RETURNED'){
+   if(!beforeMotionObservedAt||!String(await motion.getAttribute('data-motion-provider')||'').includes('Open-Meteo'))throw new Error(`${label}: returned global motion is missing Open-Meteo provenance/timestamp`);
+   if(!/\b[1-9]\d*\/\d+ RETURNED\b/.test(await motion.locator('.earth-kpi').first().innerText()))throw new Error(`${label}: initial global field has no fully returned samples`);
+  }else{
+   const initialError=((await page.locator('.earth-r279-motion-error').textContent())||'').trim();
+   if(!initialError)throw new Error(`${label}: global motion entered ERROR without an explicit provider error surface`);
+   if(beforeMotionObservedAt||await motion.getAttribute('data-motion-provider'))throw new Error(`${label}: unavailable global motion fabricated provider/timestamp evidence`);
+  }
   await refresh.click();
   await page.waitForFunction(before=>{const el=document.querySelector('.earth-r279-instrument[data-earth-mode="MOTION"]');if(!el)return false;const state=el.getAttribute('data-motion-state')||'',generation=Number(el.getAttribute('data-motion-refresh-generation')||0),provider=el.getAttribute('data-motion-provider')||'';return state==='ERROR'||(state==='RETURNED'&&generation>before&&provider.includes('Open-Meteo'))},beforeRefreshGeneration,{timeout:30000});
   const refreshedState=await motion.getAttribute('data-motion-state');
-  if(refreshedState==='ERROR')throw new Error(`${label}: global motion refresh failed: ${(await page.locator('.earth-r279-motion-error').textContent())||'provider error'}`);
   await motion.getByRole('button',{name:'Refresh global field',exact:true}).waitFor({state:'visible',timeout:30000});
-  if(!/\b[1-9]\d*\/\d+ RETURNED\b/.test(await motion.locator('.earth-kpi').first().innerText()))throw new Error(`${label}: refreshed global field has no fully returned samples`);
-  const refreshedMotionObservedAt=await motion.getAttribute('data-motion-observed-at');
-  const refreshedGeneration=Number(await motion.getAttribute('data-motion-refresh-generation')||0);
-  if(!refreshedMotionObservedAt)throw new Error(`${label}: refreshed global motion returned without observation timestamp`);
-  if(refreshedGeneration<=beforeRefreshGeneration)throw new Error(`${label}: successful manual motion refresh did not advance refresh receipt`);
+  if(refreshedState==='RETURNED'){
+   if(!/\b[1-9]\d*\/\d+ RETURNED\b/.test(await motion.locator('.earth-kpi').first().innerText()))throw new Error(`${label}: refreshed global field has no fully returned samples`);
+   const refreshedMotionObservedAt=await motion.getAttribute('data-motion-observed-at');
+   const refreshedGeneration=Number(await motion.getAttribute('data-motion-refresh-generation')||0);
+   if(!refreshedMotionObservedAt)throw new Error(`${label}: refreshed global motion returned without observation timestamp`);
+   if(refreshedGeneration<=beforeRefreshGeneration)throw new Error(`${label}: successful manual motion refresh did not advance refresh receipt`);
+  }else{
+   const refreshedError=((await page.locator('.earth-r279-motion-error').textContent())||'').trim();
+   if(!refreshedError)throw new Error(`${label}: provider-gated motion refresh failed without explicit error truth`);
+   if(await motion.getAttribute('data-motion-provider')||await motion.getAttribute('data-motion-observed-at'))throw new Error(`${label}: failed motion refresh fabricated returned-provider evidence`);
+  }
 
   const groundTab=tabs.filter({hasText:'Ground'}).first();await groundTab.click();
   const groundReceipt=page.locator('.earth-ground-r9');
