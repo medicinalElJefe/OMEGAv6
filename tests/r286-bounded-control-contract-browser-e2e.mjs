@@ -27,7 +27,10 @@ async function go(page,route){
    const label=((await buttons.nth(i).locator('b').first().textContent().catch(()=>''))||'').trim();
    if(label!==route)continue;
    await buttons.nth(i).click({timeout:10000});
-   await page.waitForFunction(name=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')===name,route,{timeout:15000});
+   await page.waitForFunction(name=>{
+     const active=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
+     return Boolean(active);
+   },route,{timeout:15000});
    await page.waitForFunction(name=>{
      const s=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
      return Boolean(s&&!s.querySelector('.panel-failure')&&![...s.querySelectorAll('.r109-specialist-loading')].some(x=>getComputedStyle(x).display!=='none'));
@@ -44,7 +47,10 @@ try{
    const page=await context.newPage();
    const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
    await page.goto(`${base}/?r286-bounded=${Date.now()}-${profile}`,{waitUntil:'domcontentloaded',timeout:45000});
-   await page.waitForSelector('.omega-workstation-v2',{timeout:30000});
+   await page.waitForFunction(()=>Boolean(
+     document.querySelector('button[aria-label="Expand OMEGA navigator"]') ||
+     document.querySelector('.r89-flat-route')
+   ),{timeout:30000});
    for(const route of routes){
      await go(page,route);
      const audit=await page.evaluate(name=>{
