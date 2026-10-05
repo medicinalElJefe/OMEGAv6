@@ -1,0 +1,38 @@
+{
+  "id": "R470",
+  "platform": "windows",
+  "authority": "TARGET_MACHINE_PROOF_REQUIRED",
+  "canonicalMutation": false,
+  "cloudCiMayClaimInstalled": false,
+  "requiredSequence": [
+    "PACKAGE_EXACT_CANONICAL_SHA",
+    "CLEAN_INSTALL",
+    "FIRST_LAUNCH",
+    "RUNTIME_HEALTH",
+    "STATE_PRESERVING_UPGRADE",
+    "RELAUNCH",
+    "UNINSTALL",
+    "CLEAN_REINSTALL",
+    "EXACT_VERSION_SHA_VERIFY"
+  ],
+  "receipts": [
+    "package_sha256",
+    "source_commit_sha",
+    "installer_version",
+    "install_exit_code",
+    "launch_health_receipt",
+    "upgrade_state_receipt",
+    "uninstall_exit_code",
+    "reinstall_health_receipt",
+    "installed_source_sha"
+  ],
+  "failClosed": [
+    "missing_receipt",
+    "sha_mismatch",
+    "launch_failure",
+    "state_loss_on_upgrade",
+    "uninstall_failure",
+    "reinstall_failure"
+  ],
+  "note": "Cloud CI may validate the contract and package structure, but only an archived paired Windows target-machine execution may close the installer gate."
+}
