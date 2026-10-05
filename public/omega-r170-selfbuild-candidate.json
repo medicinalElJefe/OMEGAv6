@@ -5,10 +5,10 @@
   "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
   "generatorContract": "R388_BACKLOG_AI_BUILD",
   "item": {
-    "id": "R388-C-02",
+    "id": "R388-C-04",
     "section": "C",
-    "index": 2,
-    "objective": "Weather workspace/tab with location targeting, hourly + weekly views, source-return provenance, satellite/context integration and bounded forecast uncertainty.",
+    "index": 4,
+    "objective": "Ground/street imagery providers and source fallback behavior live-verified without generated substitute imagery.",
     "completed": false,
     "affected": [
       "src/EarthObservatoryR8.tsx",
@@ -32,10 +32,10 @@
       "rows": [
         {
           "path": "src/EarthObservatoryR8.tsx",
-          "blobSha": "bc708b1ab4f74f1fc8dc6c694135da8d0f126acb"
+          "blobSha": "e1f8fc1078a7ba324e1efb902149033a7b161eca"
         }
       ],
-      "key": "src/EarthObservatoryR8.tsx:bc708b1ab4f74f1fc8dc6c694135da8d0f126acb"
+      "key": "src/EarthObservatoryR8.tsx:e1f8fc1078a7ba324e1efb902149033a7b161eca"
     },
     "expectedProofs": [
       "R202 Operational Source Authority",
@@ -45,16 +45,31 @@
     "rejectionScars": [
       {
         "attempt": 1,
-        "state": "NO_SAFE_PATCH",
+        "state": "REJECTED_BY_R314_POLICY",
         "accepted": false,
         "reasons": [
-          "MODEL_DECLINED_BOUNDED_PATCH"
+          "FILE_2_REPLACEMENT_1_PREIMAGE_OCCURRENCES_0"
         ],
-        "validation": null,
+        "validation": {
+          "valid": false,
+          "changedChars": 156,
+          "fileCount": 2
+        },
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-C-02",
-          "files": [],
+          "residualId": "R388-C-04",
+          "files": [
+            {
+              "path": "src/EarthObservatoryR8.tsx",
+              "preimageSha": "017ef3ae0971506c2950c1573f2ea9531f73a717",
+              "replacementCount": 1
+            },
+            {
+              "path": "src/EarthGroundTraversalR9.tsx",
+              "preimageSha": "3f05e773e878e7df29c6580c9a0f3323f978c5fe",
+              "replacementCount": 1
+            }
+          ],
           "canonicalAdmission": false,
           "directProductionMutation": false,
           "expectedProofs": [
@@ -71,10 +86,10 @@
     "machineId": "CLOUD-01",
     "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
     "generatorContract": "R388_BACKLOG_AI_BUILD",
-    "convergenceGeneration": 4,
-    "itemId": "R388-C-02",
+    "convergenceGeneration": 5,
+    "itemId": "R388-C-04",
     "section": "C",
-    "objective": "Weather workspace/tab with location targeting, hourly + weekly views, source-return provenance, satellite/context integration and bounded forecast uncertainty.",
+    "objective": "Ground/street imagery providers and source fallback behavior live-verified without generated substitute imagery.",
     "externalProofRequired": true,
     "targetPaths": [
       "src/EarthObservatoryR8.tsx"
@@ -84,13 +99,13 @@
       "rows": [
         {
           "path": "src/EarthObservatoryR8.tsx",
-          "blobSha": "bc708b1ab4f74f1fc8dc6c694135da8d0f126acb"
+          "blobSha": "e1f8fc1078a7ba324e1efb902149033a7b161eca"
         }
       ],
-      "key": "src/EarthObservatoryR8.tsx:bc708b1ab4f74f1fc8dc6c694135da8d0f126acb"
+      "key": "src/EarthObservatoryR8.tsx:e1f8fc1078a7ba324e1efb902149033a7b161eca"
     },
-    "baseSha": "08ae40e277deb32d837df79504fa175cc490d065",
-    "branch": "cloud/evolution-r388-r388-c-02-08ae40e2",
+    "baseSha": "fff519c9812cc0a2571bccff374b637fe4b06c0b",
+    "branch": "cloud/evolution-r388-r388-c-04-fff519c9",
     "status": "SOURCE_ADVANCED_PENDING_PROOF",
     "canonicalAdmission": false,
     "directProductionMutation": false,
@@ -103,16 +118,31 @@
     "repairAttemptLedger": [
       {
         "attempt": 1,
-        "state": "NO_SAFE_PATCH",
+        "state": "REJECTED_BY_R314_POLICY",
         "accepted": false,
         "reasons": [
-          "MODEL_DECLINED_BOUNDED_PATCH"
+          "FILE_2_REPLACEMENT_1_PREIMAGE_OCCURRENCES_0"
         ],
-        "validation": null,
+        "validation": {
+          "valid": false,
+          "changedChars": 156,
+          "fileCount": 2
+        },
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-C-02",
-          "files": [],
+          "residualId": "R388-C-04",
+          "files": [
+            {
+              "path": "src/EarthObservatoryR8.tsx",
+              "preimageSha": "017ef3ae0971506c2950c1573f2ea9531f73a717",
+              "replacementCount": 1
+            },
+            {
+              "path": "src/EarthGroundTraversalR9.tsx",
+              "preimageSha": "3f05e773e878e7df29c6580c9a0f3323f978c5fe",
+              "replacementCount": 1
+            }
+          ],
           "canonicalAdmission": false,
           "directProductionMutation": false,
           "expectedProofs": [
@@ -128,16 +158,16 @@
         "reasons": [],
         "validation": {
           "valid": true,
-          "changedChars": 1880,
+          "changedChars": 106,
           "fileCount": 1
         },
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-C-02",
+          "residualId": "R388-C-04",
           "files": [
             {
               "path": "src/EarthObservatoryR8.tsx",
-              "preimageSha": "36a6478d2890ae08289905624f7a4cba4e5bec4d",
+              "preimageSha": "017ef3ae0971506c2950c1573f2ea9531f73a717",
               "replacementCount": 1
             }
           ],
@@ -153,16 +183,31 @@
     "rejectionScars": [
       {
         "attempt": 1,
-        "state": "NO_SAFE_PATCH",
+        "state": "REJECTED_BY_R314_POLICY",
         "accepted": false,
         "reasons": [
-          "MODEL_DECLINED_BOUNDED_PATCH"
+          "FILE_2_REPLACEMENT_1_PREIMAGE_OCCURRENCES_0"
         ],
-        "validation": null,
+        "validation": {
+          "valid": false,
+          "changedChars": 156,
+          "fileCount": 2
+        },
         "proposal": {
           "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-          "residualId": "R388-C-02",
-          "files": [],
+          "residualId": "R388-C-04",
+          "files": [
+            {
+              "path": "src/EarthObservatoryR8.tsx",
+              "preimageSha": "017ef3ae0971506c2950c1573f2ea9531f73a717",
+              "replacementCount": 1
+            },
+            {
+              "path": "src/EarthGroundTraversalR9.tsx",
+              "preimageSha": "3f05e773e878e7df29c6580c9a0f3323f978c5fe",
+              "replacementCount": 1
+            }
+          ],
           "canonicalAdmission": false,
           "directProductionMutation": false,
           "expectedProofs": [
@@ -173,7 +218,7 @@
       }
     ],
     "declinedItemScars": [],
-    "createdAt": "2026-10-05T03:43:20.744Z",
+    "createdAt": "2026-10-05T08:17:41.372Z",
     "authorityBoundaries": {
       "canonAdmission": "R125",
       "dispatch": "R147",
@@ -202,7 +247,7 @@
       "candidateSchema": "OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388",
       "candidateRevision": "R388",
       "generatorContract": "R388_BACKLOG_AI_BUILD",
-      "itemId": "R388-C-02",
+      "itemId": "R388-C-04",
       "paths": [
         "src/EarthObservatoryR8.tsx"
       ],
@@ -216,11 +261,11 @@
       "directProductionMutation": false,
       "authority": "DERIVED_STANDARD",
       "proofClass": "STRUCTURAL_ANALOGY",
-      "nodeId": "NODE-9fa62843"
+      "nodeId": "NODE-b170f115"
     },
     "transition": null,
     "branch": {
-      "nodeId": "NODE-9fa62843",
+      "nodeId": "NODE-b170f115",
       "status": "BOUNDED",
       "authority": "DERIVED_STANDARD",
       "proofClass": "STRUCTURAL_ANALOGY",
@@ -232,7 +277,7 @@
       "sourcePromotionAuthority": "R240/exact-head governed proof",
       "productionAuthority": "GOVERNED_PRODUCTION_WORKFLOW",
       "canonicalMutation": false,
-      "branchId": "BRANCH-2df2c324"
+      "branchId": "BRANCH-c07f8a5a"
     },
     "checks": [
       {
@@ -260,46 +305,61 @@
         "kind": "NODE",
         "previousHash": "00000000",
         "payload": {
-          "nodeId": "NODE-9fa62843",
+          "nodeId": "NODE-b170f115",
           "status": "SOURCE_ADVANCED_PENDING_PROOF",
           "paths": [
             "src/EarthObservatoryR8.tsx"
           ],
-          "itemId": "R388-C-02"
+          "itemId": "R388-C-04"
         },
-        "hash": "4349348c"
+        "hash": "0c090d3c"
       },
       {
         "index": 1,
         "kind": "BRANCH",
-        "previousHash": "4349348c",
+        "previousHash": "0c090d3c",
         "payload": {
-          "branchId": "BRANCH-2df2c324",
+          "branchId": "BRANCH-c07f8a5a",
           "status": "BOUNDED",
           "sourceAdvance": true,
           "canonicalAdmission": false
         },
-        "hash": "5f7ff625"
+        "hash": "b300e728"
       },
       {
         "index": 2,
         "kind": "SCAR",
-        "previousHash": "5f7ff625",
+        "previousHash": "b300e728",
         "payload": {
-          "branchId": "BRANCH-2df2c324",
+          "branchId": "BRANCH-c07f8a5a",
           "index": 0,
           "scar": {
             "attempt": 1,
-            "state": "NO_SAFE_PATCH",
+            "state": "REJECTED_BY_R314_POLICY",
             "accepted": false,
             "reasons": [
-              "MODEL_DECLINED_BOUNDED_PATCH"
+              "FILE_2_REPLACEMENT_1_PREIMAGE_OCCURRENCES_0"
             ],
-            "validation": null,
+            "validation": {
+              "valid": false,
+              "changedChars": 156,
+              "fileCount": 2
+            },
             "proposal": {
               "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
-              "residualId": "R388-C-02",
-              "files": [],
+              "residualId": "R388-C-04",
+              "files": [
+                {
+                  "path": "src/EarthObservatoryR8.tsx",
+                  "preimageSha": "017ef3ae0971506c2950c1573f2ea9531f73a717",
+                  "replacementCount": 1
+                },
+                {
+                  "path": "src/EarthGroundTraversalR9.tsx",
+                  "preimageSha": "3f05e773e878e7df29c6580c9a0f3323f978c5fe",
+                  "replacementCount": 1
+                }
+              ],
               "canonicalAdmission": false,
               "directProductionMutation": false,
               "expectedProofs": [
@@ -309,10 +369,10 @@
             }
           }
         },
-        "hash": "10bd478e"
+        "hash": "add18c0f"
       }
     ],
-    "ledgerHash": "10bd478e",
+    "ledgerHash": "add18c0f",
     "truthBoundary": "CLOUD-01 may propose bounded source candidates and carry rejection scars, but it cannot directly admit CanonState or mutate production. Exact-head proof and existing governed promotion/deployment authorities remain unchanged.",
     "canonicalMutation": false
   }
