@@ -32,7 +32,7 @@ try{
   const pageErrors=[],traffic=[];
   page.on('pageerror',error=>pageErrors.push(String(error)));
   page.on('request',request=>traffic.push({method:request.method(),url:request.url(),path:pathOf(request.url())}));
-  await page.goto(`${base}/?r245=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?omega6=1&r245=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
 
   const openingStart=traffic.length;
