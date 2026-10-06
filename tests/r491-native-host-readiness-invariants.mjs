@@ -4,6 +4,7 @@ import fs from 'node:fs';
 const native=fs.readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
 const root=fs.readFileSync('src7/Omega7Root.tsx','utf8');
 const live=fs.readFileSync('tests/r489-live-visible-capability-browser-e2e.mjs','utf8');
+const local=fs.readFileSync('tests/r496-local-omega7-candidate-browser-e2e.mjs','utf8');
 const staged=fs.readFileSync('scripts/staged-cloudflare-release.sh','utf8');
 const coherence=fs.readFileSync('scripts/verify_omega7_asset_coherence_r491.mjs','utf8');
 const convergence=fs.readFileSync('scripts/verify_promotion_convergence_r491.mjs','utf8');
@@ -28,10 +29,12 @@ for(const token of [
 ])assert.ok(live.includes(token),`R491 live executor/asset proof missing ${token}`);
 
 for(const token of [
- 'verify_omega7_asset_coherence_r491.mjs staged',
+ 'node tests/r496-local-omega7-candidate-browser-e2e.mjs',
  'verify_promotion_convergence_r491.mjs',
  'verify_omega7_asset_coherence_r491.mjs promoted'
-])assert.ok(staged.includes(token),`R491 staged release gate missing ${token}`);
+])assert.ok(staged.includes(token),`R491/R496 release gate missing ${token}`);
+assert.ok(!staged.includes('verify_omega7_asset_coherence_r491.mjs staged'),'0%-traffic release path must not claim version override owns canonical static assets');
+assert.ok(local.includes('OMEGA_GOVERNED_BUILD_RECEIPT_V1')&&local.includes('data-r495-operational-truth'),'local package proof must bind exact receipt and canonical OMEGA7 Home before upload');
 
 for(const token of [
  "['staged','promoted']",
@@ -53,4 +56,4 @@ for(const token of [
 assert.ok(r202.includes("tests/r489-live-visible-capability-browser-e2e.mjs"),'R491 must keep visible/native proof inside post-promotion R202 acceptance');
 assert.ok(r202.includes('R489 exact-production visible capability proof failed'),'R491 post-promotion visible failure must remain release-blocking');
 
-console.log('R491 NATIVE ASSET COHERENCE PASS · one native host · terminal failure diagnostics · version-affine staged OMEGA7 proof · sole-100% promotion convergence · promoted visible/executor proof · R202 authority retained');
+console.log('R491/R496 NATIVE ASSET COHERENCE PASS · one native host · exact package browser proof before upload · no false staged ASSETS claim · sole-100% promotion convergence · promoted visible/executor proof · R202 authority retained');
