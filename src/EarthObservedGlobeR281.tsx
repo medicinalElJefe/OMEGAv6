@@ -41,7 +41,54 @@ export default function EarthObservedGlobeR281({address,targetLat,targetLon,evid
  useEffect(()=>{const c=canvas.current;if(!c||typeof ResizeObserver==='undefined')return;const ro=new ResizeObserver(()=>setLayoutRevision(v=>v+1));ro.observe(c);return()=>ro.disconnect()},[]);
  useEffect(()=>{const id=window.setInterval(()=>setNow(new Date()),30000);return()=>window.clearInterval(id)},[]);
  useEffect(()=>{if(!rotating)return;rotationBase.current={time:Date.now(),lon:centerLonRef.current};const tick=()=>{const base=rotationBase.current;setCenterLon(wrapLon(base.lon+(Date.now()-base.time)*15/3600000))};tick();const id=window.setInterval(tick,1000);return()=>window.clearInterval(id)},[rotating]);
- const load=async()=>{fetchController.current?.abort();const controller=new AbortController();fetchController.current=controller;setState('LOADING');setError('');try{const r=await fetch(`/api/earth/gibs/global?date=${encodeURIComponent(date)}&width=2048&height=1024`,{signal:controller.signal,cache:'no-store',headers:{accept:'image/*'}});if(!r.ok)throw new Error(`global observed image HTTP ${r.status}`);const ct=r.headers.get('content-type')||'';if(!ct.startsWith('image/'))throw new Error(`global observed image returned ${ct||'unknown content type'}`);const source=r.headers.get('x-omega-source')||'',returnedDate=r.headers.get('x-omega-date')||date,crs=r.headers.get('x-omega-crs')||'',bbox=r.headers.get('x-omega-bbox')||'',truth=r.headers.get('x-omega-truth')||'';if(source!==EXPECTED_SOURCE)throw new Error(`global source identity mismatch: ${source||'missing'}`);if(crs!==EXPECTED_CRS)throw new Error(`global source CRS mismatch: ${crs||'missing'}`);if(bbox!==EXPECTED_BBOX)throw new Error(`global source bbox mismatch: ${bbox||'missing'}`);if(truth!==EXPECTED_TRUTH)throw new Error(`global source truth mismatch: ${truth||'missing'}`);const blob=await r.blob(),bitmap=await createImageBitmap(blob);if(Math.abs(bitmap.width/Math.max(1,bitmap.height)-2)>.025){bitmap.close?.();throw new Error(`global source aspect mismatch ${bitmap.width}×${bitmap.height}`)}const off=document.createElement('canvas');off.width=bitmap.width;off.height=bitmap.height;const ctx=off.getContext('2d',{willReadFrequently:true});if(!ctx){bitmap.close?.();throw new Error('2D texture decoder unavailable')}ctx.drawImage(bitmap,0,0);const pixels=ctx.getImageData(0,0,off.width,off.height);bitmap.close?.();if(controller.signal.aborted)return;texture.current={width:off.width,height:off.height,data:pixels.data,date:returnedDate,source,crs,bbox,truth};setMeta({source,crs,date:returnedDate,bbox,truth,width:off.width,height:off.height});setState('OBSERVED');setRevision(v=>v+1)}catch(e:any){if(controller.signal.aborted)return;texture.current=null;setState('UNAVAILABLE');setError(e?.message||String(e));setRevision(v=>v+1)}};
+ const GLOBAL_TEXTURE_DEADLINE_MS_R488=18000;
+ const load=async()=>{
+  fetchController.current?.abort();
+  const controller=new AbortController();
+  fetchController.current=controller;
+  setState('LOADING');
+  setError('');
+  let deadline=0;
+  try{
+   const decoded=await Promise.race([
+    (async()=>{
+     const r=await fetch(`/api/earth/gibs/global?date=${encodeURIComponent(date)}&width=2048&height=1024`,{signal:controller.signal,cache:'no-store',headers:{accept:'image/*'}});
+     if(!r.ok)throw new Error(`global observed image HTTP ${r.status}`);
+     const ct=r.headers.get('content-type')||'';
+     if(!ct.startsWith('image/'))throw new Error(`global observed image returned ${ct||'unknown content type'}`);
+     const source=r.headers.get('x-omega-source')||'',returnedDate=r.headers.get('x-omega-date')||date,crs=r.headers.get('x-omega-crs')||'',bbox=r.headers.get('x-omega-bbox')||'',truth=r.headers.get('x-omega-truth')||'';
+     if(source!==EXPECTED_SOURCE)throw new Error(`global source identity mismatch: ${source||'missing'}`);
+     if(crs!==EXPECTED_CRS)throw new Error(`global source CRS mismatch: ${crs||'missing'}`);
+     if(bbox!==EXPECTED_BBOX)throw new Error(`global source bbox mismatch: ${bbox||'missing'}`);
+     if(truth!==EXPECTED_TRUTH)throw new Error(`global source truth mismatch: ${truth||'missing'}`);
+     const blob=await r.blob(),bitmap=await createImageBitmap(blob);
+     if(Math.abs(bitmap.width/Math.max(1,bitmap.height)-2)>.025){bitmap.close?.();throw new Error(`global source aspect mismatch ${bitmap.width}×${bitmap.height}`)}
+     const off=document.createElement('canvas');off.width=bitmap.width;off.height=bitmap.height;
+     const ctx=off.getContext('2d',{willReadFrequently:true});
+     if(!ctx){bitmap.close?.();throw new Error('2D texture decoder unavailable')}
+     ctx.drawImage(bitmap,0,0);
+     const pixels=ctx.getImageData(0,0,off.width,off.height);
+     bitmap.close?.();
+     return{texture:{width:off.width,height:off.height,data:pixels.data,date:returnedDate,source,crs,bbox,truth} as Texture,meta:{source,crs,date:returnedDate,bbox,truth,width:off.width,height:off.height}};
+    })(),
+    new Promise<never>((_,reject)=>{deadline=window.setTimeout(()=>{controller.abort();reject(new Error(`global observed texture deadline exceeded after ${GLOBAL_TEXTURE_DEADLINE_MS_R488} ms`))},GLOBAL_TEXTURE_DEADLINE_MS_R488)})
+   ]);
+   if(fetchController.current!==controller||controller.signal.aborted)return;
+   texture.current=decoded.texture;
+   setMeta(decoded.meta);
+   setState('OBSERVED');
+   setRevision(v=>v+1);
+  }catch(e:any){
+   if(fetchController.current!==controller)return;
+   texture.current=null;
+   setState('UNAVAILABLE');
+   setError(e?.message||String(e));
+   setRevision(v=>v+1);
+  }finally{
+   if(deadline)window.clearTimeout(deadline);
+   if(fetchController.current===controller)fetchController.current=null;
+  }
+ };
  useEffect(()=>{void load();return()=>fetchController.current?.abort()},[date]);
  useEffect(()=>{const c=canvas.current;if(!c)return;const rect=c.getBoundingClientRect(),dpr=Math.min(2.25,window.devicePixelRatio||1),W=Math.max(320,Math.round(rect.width)),H=Math.max(470,Math.round(rect.height));c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);const ctx=c.getContext('2d');if(!ctx)return;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);const bg=ctx.createRadialGradient(W*.5,H*.43,28,W*.5,H*.46,Math.max(W,H)*.72);bg.addColorStop(0,'#081920');bg.addColorStop(.56,'#02080d');bg.addColorStop(1,'#000205');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);const cssDiameter=Math.min(W*.90,H*.78)*zoom,qualityCap=interacting?640:rotating?960:1440,renderSize=Math.round(clamp(cssDiameter*dpr,420,qualityCap)),sphere=renderEllipsoid(texture.current,renderSize,centerLat,centerLon,solarShade,now),cx=W/2,cy=H*.44,R=cssDiameter/2,x=cx-R,y=cy-R,projection=createWgs84Orthographic(centerLat,centerLon);c.dataset.surfaceRender=String(renderSize);c.dataset.devicePixelRatio=dpr.toFixed(2);ctx.drawImage(sphere,x,y,cssDiameter,cssDiameter);
   ctx.save();ctx.beginPath();ctx.arc(cx,cy,R*1.01,0,Math.PI*2);ctx.clip();if(showGrid){ctx.strokeStyle='rgba(177,224,232,.20)';ctx.lineWidth=.65;for(const lat of[-60,-30,0,30,60]){ctx.globalAlpha=lat===0?.9:.56;geoPath(ctx,latLine(lat),projection,cx,cy,R)}for(let lon=-150;lon<=180;lon+=30){ctx.globalAlpha=.48;geoPath(ctx,lonLine(lon),projection,cx,cy,R)}ctx.globalAlpha=1}if(showTerminator){ctx.strokeStyle='rgba(255,208,112,.72)';ctx.lineWidth=1.05;ctx.setLineDash([5,5]);geoPath(ctx,terminatorGeodetic(now,300),projection,cx,cy,R);ctx.setLineDash([]);const sun=solarPoint(now),sp=projection.forward(sun.lat,sun.lon);if(sp.z>0){const sx=cx+sp.x*R,sy=cy-sp.y*R;ctx.strokeStyle='rgba(255,222,137,.86)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(sx,sy,5.5,0,Math.PI*2);ctx.stroke();ctx.fillStyle='rgba(255,222,137,.95)';ctx.beginPath();ctx.arc(sx,sy,1.8,0,Math.PI*2);ctx.fill()}}ctx.restore();
