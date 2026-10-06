@@ -17,11 +17,15 @@ async function parse(response){const raw=await response.text();let body=null;try
 async function get(path){const row=await parse(await fetch(base+path,{headers:headers()}));if(!row.response.ok)throw new Error(`${path} HTTP ${row.response.status}: ${row.raw.slice(0,500)}`);return row}
 async function post(path,body){const row=await parse(await fetch(base+path,{method:'POST',headers:headers({'content-type':'application/json'}),body:JSON.stringify(body)}));if(!row.response.ok)throw new Error(`${path} HTTP ${row.response.status}: ${row.raw.slice(0,500)}`);return row}
 
-const receipt=(await get(`/omega-build-receipt.json?staged=${Date.now()}`)).body;
-if(receipt?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1')throw new Error(`staged receipt schema mismatch ${receipt?.schema}`);
-if(receipt?.source?.sha!==expected)throw new Error(`staged source SHA mismatch ${receipt?.source?.sha} != ${expected}`);
-if(receipt?.promotion?.promotedMergeSha!==expected)throw new Error(`staged promoted SHA mismatch ${receipt?.promotion?.promotedMergeSha} != ${expected}`);
-if(receipt?.promotion?.authority!=='GITHUB_MERGE_PARENTS')throw new Error(`staged receipt authority mismatch ${receipt?.promotion?.authority}`);
+// R496 Cloudflare asset boundary: version overrides pin Worker code, but a
+// 0%-traffic Worker does not own the canonical ASSETS binding. Prove the exact
+// packaged receipt from dist here; canonical HTTP receipt equality is a
+// post-promotion requirement and is re-proved by R491/R493 on the live route.
+const receipt=JSON.parse(readFileSync('dist/omega-build-receipt.json','utf8'));
+if(receipt?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1')throw new Error(`packaged staged receipt schema mismatch ${receipt?.schema}`);
+if(receipt?.source?.sha!==expected)throw new Error(`packaged staged source SHA mismatch ${receipt?.source?.sha} != ${expected}`);
+if(receipt?.promotion?.promotedMergeSha!==expected)throw new Error(`packaged staged promoted SHA mismatch ${receipt?.promotion?.promotedMergeSha} != ${expected}`);
+if(receipt?.promotion?.authority!=='GITHUB_MERGE_PARENTS')throw new Error(`packaged staged receipt authority mismatch ${receipt?.promotion?.authority}`);
 
 await get('/');
 for(const path of ['/api/health','/api/core-health']){
