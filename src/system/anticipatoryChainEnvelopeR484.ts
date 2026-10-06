@@ -10,7 +10,8 @@ export const R484_CHAIN_STAGES:readonly R484ChainStage[]=Object.freeze([
  {id:'BROWSER_RUNTIME',dependsOn:['PROOF_FANOUT'],predictable:true,blocking:true,evidence:'browser return proof'},
  {id:'MERGE_ADMISSION',dependsOn:['BROWSER_RUNTIME'],predictable:true,blocking:true,evidence:'expected-head merge receipt'},
  {id:'DEPLOYMENT',dependsOn:['MERGE_ADMISSION'],predictable:true,blocking:false,evidence:'deployment receipt when configured'},
- {id:'RETURN_PROOF',dependsOn:['DEPLOYMENT'],predictable:true,blocking:false,evidence:'observed deployed state / authenticated return'},
+ {id:'OBSERVER_COVERAGE',dependsOn:['DEPLOYMENT'],predictable:true,blocking:false,evidence:'observer identity + visible event classes + filters + completeness + blind spots'},
+ {id:'RETURN_PROOF',dependsOn:['OBSERVER_COVERAGE'],predictable:true,blocking:false,evidence:'observed deployed state / authenticated return through coverage-declared observer'},
  {id:'RECOVERY_ROLLBACK',dependsOn:['RETURN_PROOF'],predictable:true,blocking:false,evidence:'rollback/recovery path retained'}
 ]);
 export function anticipatoryChainR484(input:{dependencyChanged:boolean;securityAuditPassed:boolean;canonicalCheckPassed:boolean;proofFamiliesPassed:readonly string[];browserProofPassed:boolean;deploymentExpected:boolean;returnProofPassed:boolean;rollbackAvailable:boolean}){
@@ -22,5 +23,5 @@ export function anticipatoryChainR484(input:{dependencyChanged:boolean;securityA
  if(input.deploymentExpected&&!input.returnProofPassed)missing.push('RETURN_PROOF');
  if(!input.rollbackAvailable)missing.push('RECOVERY_ROLLBACK');
  return Object.freeze({schema:R484_CHAIN_SCHEMA,developmentalSequence:R457_DEVELOPMENTAL_SEQUENCE,stages:R484_CHAIN_STAGES,missing:Object.freeze(missing),readyForAdmission:missing.length===0,canonicalMutation:false as const,
- truthBoundary:'This envelope anticipates deterministic/reasonably foreseeable downstream chain stages before admission. It cannot predict unknown future advisories or external outages; those become scar evidence and trigger re-evaluation rather than being silently bypassed.'});
+ truthBoundary:'This envelope anticipates deterministic/reasonably foreseeable downstream chain stages before admission. Absence from a partial observer is UNKNOWN, never proof that the downstream event did not occur. It cannot predict unknown future advisories or external outages; those become scar evidence and trigger re-evaluation rather than being silently bypassed.'});
 }
