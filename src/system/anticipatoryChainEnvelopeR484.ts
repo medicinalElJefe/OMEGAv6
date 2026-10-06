@@ -11,7 +11,8 @@ export const R484_CHAIN_STAGES:readonly R484ChainStage[]=Object.freeze([
  {id:'MERGE_ADMISSION',dependsOn:['BROWSER_RUNTIME'],predictable:true,blocking:true,evidence:'expected-head merge receipt'},
  {id:'DEPLOYMENT',dependsOn:['MERGE_ADMISSION'],predictable:true,blocking:false,evidence:'deployment receipt when configured'},
  {id:'OBSERVER_COVERAGE',dependsOn:['DEPLOYMENT'],predictable:true,blocking:false,evidence:'observer identity + visible event classes + filters + completeness + blind spots'},
- {id:'RETURN_PROOF',dependsOn:['OBSERVER_COVERAGE'],predictable:true,blocking:false,evidence:'observed deployed state / authenticated return through coverage-declared observer'},
+ {id:'EVIDENCE_RESOLUTION',dependsOn:['OBSERVER_COVERAGE'],predictable:true,blocking:false,evidence:'coverage + exact identity + freshness + authority + contradiction retention'},
+ {id:'RETURN_PROOF',dependsOn:['EVIDENCE_RESOLUTION'],predictable:true,blocking:false,evidence:'resolved deployed state / authenticated return with unresolved contradictions preserved'},
  {id:'RECOVERY_ROLLBACK',dependsOn:['RETURN_PROOF'],predictable:true,blocking:false,evidence:'rollback/recovery path retained'}
 ]);
 export function anticipatoryChainR484(input:{dependencyChanged:boolean;securityAuditPassed:boolean;canonicalCheckPassed:boolean;proofFamiliesPassed:readonly string[];browserProofPassed:boolean;deploymentExpected:boolean;returnProofPassed:boolean;rollbackAvailable:boolean}){
