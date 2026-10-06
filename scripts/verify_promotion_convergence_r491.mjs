@@ -38,6 +38,7 @@ async function canonicalReceipt(attempt){
  }
 }
 
+// R492 production scar: deployment metadata reached candidate@100 before the canonical edge receipt exposed the same exact merge SHA.
 let lastMetadata='UNOBSERVED',lastReceipt='UNOBSERVED';
 for(let attempt=1;attempt<=15;attempt++){
  const proc=spawnSync('npx',['wrangler','deployments','status','--name',worker,'--json'],{cwd:process.cwd(),encoding:'utf8'});
