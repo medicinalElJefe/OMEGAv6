@@ -106,7 +106,7 @@ try{
   const context=await browser.newContext({viewport,deviceScaleFactor:1});
   const page=await context.newPage();
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
-  await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});
+  await page.goto(base+'/?omega6=1',{waitUntil:'domcontentloaded',timeout:30000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   for(const route of visualRoutes){await openRoute(page,route);await globalVisualIntegrity(page,route,name)}
   await r158RelativityIntegrity(page,name);
