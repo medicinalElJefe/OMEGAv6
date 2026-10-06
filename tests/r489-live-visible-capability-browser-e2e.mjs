@@ -3,7 +3,8 @@ import {chromium} from 'playwright';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'').replace(/\/$/,'');
 const expectedSha=String(process.env.OMEGA_EXPECTED_SHA||process.env.OMEGA_PROMOTED_SHA||'').trim();
 const overrideVersion=String(process.env.OMEGA_WORKER_VERSION_ID||'').trim(),overrideWorker=String(process.env.OMEGA_WORKER_NAME||'omegav6').trim();
-const overrideHeaders=overrideVersion?{'Cloudflare-Workers-Version-Overrides':`${overrideWorker}="${overrideVersion}"`}:{};
+const affinityKey=String(process.env.OMEGA_VERSION_AFFINITY_KEY||`omega-r489-${expectedSha.slice(0,12)}`).trim();
+const overrideHeaders={'Cloudflare-Workers-Version-Key':affinityKey,...(overrideVersion?{'Cloudflare-Workers-Version-Overrides':`${overrideWorker}="${overrideVersion}"`}:{})};
 if(!base)throw new Error('OMEGA_E2E_URL or OMEGA_PUBLIC_URL required');
 if(!/^[0-9a-f]{40}$/i.test(expectedSha))throw new Error('OMEGA_EXPECTED_SHA or OMEGA_PROMOTED_SHA must be the exact promoted SHA');
 
@@ -20,8 +21,11 @@ const browser=await chromium.launch({headless:true});
 try{
  for(const [label,viewport,dpr] of [['desktop',{width:1440,height:960},1],['mobile',{width:390,height:844},2]]){
   const context=await browser.newContext({viewport,deviceScaleFactor:dpr,extraHTTPHeaders:overrideHeaders});
-  const page=await context.newPage(),pageErrors=[];
+  const page=await context.newPage(),pageErrors=[],requestFailures=[],assetFailures=[],boundaryErrors=[];
   page.on('pageerror',e=>pageErrors.push(String(e)));
+  page.on('requestfailed',request=>{const url=request.url();if(/\/assets\/.*\.(?:js|css)(?:\?|$)/i.test(url))requestFailures.push(`${request.method()} ${url} :: ${request.failure()?.errorText||'FAILED'}`)});
+  page.on('response',response=>{const url=response.url();if(response.status()>=400&&/\/assets\/.*\.(?:js|css)(?:\?|$)/i.test(url))assetFailures.push(`${response.status()} ${url}`)});
+  page.on('console',message=>{if(message.type()==='error'&&/OMEGA7_BOUNDARY|dynamically imported module|Loading chunk|Failed to fetch/i.test(message.text()))boundaryErrors.push(message.text())});
   await page.goto(`${base}/?r489-live=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
   const app=page.locator('.o7-app[data-omega7="true"]');
   await app.waitFor({state:'visible',timeout:30000});
@@ -73,11 +77,19 @@ try{
    if(!(await recovered.getByRole('button',{name:`Open ${route}`,exact:true}).count()))throw new Error(`${label}: recovered capability has no executor button for ${route}`);
    await recovered.getByRole('button',{name:`Open ${route}`,exact:true}).first().click();
    await page.waitForFunction(r=>document.querySelector('.o7-main')?.getAttribute('data-native-route')===r,route,{timeout:20000});
-   const host=page.locator(`.o7-native-readiness-host[data-native-host-route="${route}"]`);
+   const host=page.locator(`.o7-native-host[data-native-host-route="${route}"]`);
    await host.waitFor({state:'visible',timeout:10000});
-   await page.waitForFunction(r=>{const host=document.querySelector(`.o7-native-readiness-host[data-native-host-route="${CSS.escape(r)}"]`);return Boolean(host)&&!host.querySelector('.o7-native-loading')&&!host.querySelector('.o7-native-failure')&&!host.querySelector('.o7-failure')&&Boolean(host.querySelector('.o7-native-workspace'))},route,{timeout:45000});
-   if(await host.locator('.o7-native-failure,.o7-failure').count())throw new Error(`${label}: recovered executor ${route} entered failure state`);
-   if(!(await host.locator('.o7-native-workspace').count()))throw new Error(`${label}: recovered executor ${route} did not reach native ready workspace`);
+   try{
+    await page.waitForFunction(r=>{const host=document.querySelector(`.o7-native-host[data-native-host-route="${CSS.escape(r)}"]`);return Boolean(host?.querySelector('.o7-native-workspace,.o7-native-failure,.o7-failure'))},route,{timeout:30000});
+   }catch(error){
+    const state=await host.evaluate(el=>({text:(el.textContent||'').slice(0,1600),loading:Boolean(el.querySelector('.o7-native-loading')),workspace:Boolean(el.querySelector('.o7-native-workspace')),failure:Boolean(el.querySelector('.o7-native-failure,.o7-failure'))})).catch(()=>null);
+    throw new Error(`${label}: recovered executor ${route} never reached a terminal native state; state=${JSON.stringify(state)} assetFailures=${assetFailures.slice(-8).join(' | ')||'NONE'} requestFailures=${requestFailures.slice(-8).join(' | ')||'NONE'} boundaryErrors=${boundaryErrors.slice(-4).join(' | ')||'NONE'} cause=${error instanceof Error?error.message:String(error)}`);
+   }
+   const failure=host.locator('.o7-native-failure,.o7-failure');
+   if(await failure.count())throw new Error(`${label}: recovered executor ${route} entered failure state: ${(await failure.first().innerText()).slice(0,1200)} · assetFailures=${assetFailures.slice(-8).join(' | ')||'NONE'} · requestFailures=${requestFailures.slice(-8).join(' | ')||'NONE'} · boundaryErrors=${boundaryErrors.slice(-4).join(' | ')||'NONE'}`);
+   const workspace=host.locator('.o7-native-workspace');
+   await workspace.waitFor({state:'visible',timeout:5000});
+   if(route==='Earth Now')await host.locator('.earth-r279').waitFor({state:'visible',timeout:20000});
   }
   await page.locator('.o7-brand').click();
   await recovered.waitFor({state:'visible',timeout:10000});
@@ -85,6 +97,7 @@ try{
   const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
   if(overflow>12)throw new Error(`${label}: R489 OMEGA7 recovered surface introduced ${overflow}px horizontal overflow`);
   if(pageErrors.length)throw new Error(`${label}: R489 browser page errors ${pageErrors.join(' | ').slice(0,2400)}`);
+  if(assetFailures.length||requestFailures.length)throw new Error(`${label}: R489 native asset delivery failures: ${[...assetFailures,...requestFailures].join(' | ').slice(0,3000)}`);
   await context.close();
  }
  console.log(`R489 LIVE VISIBLE CAPABILITY PASS · exact promoted SHA ${expectedSha} · plain canonical URL defaults OMEGA7 · R486 recovered fabric counts/states match · all seven groups visible/nonempty · R142/R125 lineage proof exposed · Earth/Workspace/System Atlas executors navigate · desktop/mobile no overflow/page errors`);
