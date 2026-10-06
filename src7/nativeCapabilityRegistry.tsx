@@ -31,5 +31,5 @@ export function Omega7NativeSurface({route,onNavigate,depth}:{route:Omega7Native
   case'Hybrid Link':case'Quality Compiler':case'Build Out':case'Development':case'Kernel Intelligence':case'SAI Lab':surface=<DevelopmentComputeWorkspaceR444 route={route} onNavigate={onNavigate} depth={depth}/>;break;
   case'Cockpit':case'Modes':case'Evidence & Proof':case'Archive Census':case'Archive Operators':case'Canon Evolution':case'Governance':case'Consolidation':case'Instructions':case'Plugins':case'Settings':case'System':case'Validation':case'System Atlas':case'Control Matrix':surface=<SystemEvidenceWorkspaceR445 route={route} onNavigate={onNavigate} depth={depth}/>;break;
  }
- return <section className='o7-native-host' data-native-host-route={route}><Omega7Boundary label={`OMEGA7 ${route}`}><Suspense fallback={<section className='o7-native-loading' role='status' aria-live='polite'>Opening {route}…</section>}>{surface}</Suspense></Omega7Boundary></section>;
+ return <section className='o7-native-readiness-host' data-native-host-route={route}><Omega7Boundary label={`OMEGA7 ${route}`}><Suspense fallback={<section className='o7-native-loading' role='status' aria-live='polite'>Opening {route}…</section>}>{surface}</Suspense></Omega7Boundary></section>;
 }
