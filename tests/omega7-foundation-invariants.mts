@@ -43,7 +43,7 @@ const state=fs.readFileSync('src7/appState.tsx','utf8');
 const boundary=fs.readFileSync('src7/Omega7Boundary.tsx','utf8');
 const css=fs.readFileSync('src7/omega7.css','utf8');
 
-assert.ok(app.includes("new URLSearchParams(window.location.search).get('omega7')==='1'"),'OMEGA7 must be opt-in while successor shell is proving');
+for(const token of ["params.get('omega6')==='1'","explicit==='1'","window.localStorage.getItem('omega7.enabled')!=='false'","catch{return true}"])assert.ok(app.includes(token),'OMEGA7 canonical-default/rollback contract missing '+token);
 assert.ok(app.includes("import Omega7Root from '../src7/Omega7Root'")&&app.includes('openLegacyFromOmega7'),'OMEGA7 must preserve an explicit compatibility route without adding a second inherited Suspense boundary');
 assert.ok(root.includes("['HOME','WORK','EXPLORE','CREATE','DEVELOP','SYSTEM']")||root.includes('OMEGA7_DOMAINS'),'OMEGA7 must present bounded human domains rather than the raw 44-route universe');
 assert.ok(root.includes('Standard')&&root.includes('Advanced')&&root.includes('Canon'),'OMEGA7 must support progressive disclosure without deleting technical depth');
