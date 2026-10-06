@@ -17,7 +17,7 @@ try{
    if(!oldRequest){oldRequest={route,lat,lon};return;}
    await route.fulfill({json:mismatch?envelope(0,0,'f'.repeat(64)):envelope(lat,lon,'2'.repeat(64))});
   });
-  await page.goto(base,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(base+'/?omega6=1',{waitUntil:'domcontentloaded',timeout:45000});
   const firstRequest=page.waitForRequest(r=>new URL(r.url()).pathname==='/api/earth/evidence',{timeout:30000});
   await page.getByLabel('Open Earth Now',{exact:true}).click();await firstRequest;
   await page.waitForSelector('.earth-r372-exact-coords',{timeout:30000});
