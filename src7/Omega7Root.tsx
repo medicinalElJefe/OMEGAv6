@@ -84,7 +84,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
 
   <main className='o7-main' data-native-route={state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?state.selectedRoute:''}>
    {state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?
-    <section className='o7-native-host'>
+    <section className='o7-native-host' data-native-host-route={state.selectedRoute}>
      <div className='o7-native-toolbar'><button onClick={()=>dispatch({type:'SELECT_ROUTE',route:null})}>← Back to {DOMAIN_LABEL[state.domain]}</button><span>OMEGA7 native · OMEGAv6 engine preserved</span></div>
      <Omega7NativeSurface route={state.selectedRoute} onNavigate={open} depth={state.depth}/>
     </section>:
