@@ -73,7 +73,11 @@ try{
    if(!(await recovered.getByRole('button',{name:`Open ${route}`,exact:true}).count()))throw new Error(`${label}: recovered capability has no executor button for ${route}`);
    await recovered.getByRole('button',{name:`Open ${route}`,exact:true}).first().click();
    await page.waitForFunction(r=>document.querySelector('.o7-main')?.getAttribute('data-native-route')===r,route,{timeout:20000});
-   await page.waitForSelector('.o7-native-workspace',{state:'visible',timeout:30000});
+   const host=page.locator(`.o7-native-host[data-native-host-route="${route}"]`);
+   await host.waitFor({state:'visible',timeout:10000});
+   await page.waitForFunction(r=>{const host=document.querySelector(`.o7-native-host[data-native-host-route="${CSS.escape(r)}"]`);return Boolean(host)&&!host.querySelector('.o7-native-loading')&&!host.querySelector('.o7-native-failure')&&!host.querySelector('.o7-failure')&&Boolean(host.querySelector('.o7-native-workspace'))},route,{timeout:45000});
+   if(await host.locator('.o7-native-failure,.o7-failure').count())throw new Error(`${label}: recovered executor ${route} entered failure state`);
+   if(!(await host.locator('.o7-native-workspace').count()))throw new Error(`${label}: recovered executor ${route} did not reach native ready workspace`);
   }
   await page.locator('.o7-brand').click();
   await recovered.waitFor({state:'visible',timeout:10000});
