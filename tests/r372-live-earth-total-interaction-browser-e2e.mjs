@@ -22,6 +22,27 @@ function targetResponse(response,path,lat,lon){
 function verifyTarget(data,lat,lon,label){
  if(!Number.isFinite(data?.target?.lat)||!Number.isFinite(data?.target?.lon)||Math.abs(data.target.lat-lat)>0.000011||Math.abs(data.target.lon-lon)>0.000011||!/^[0-9a-f]{64}$/i.test(data?.evidenceHash||''))throw new Error(`${label}: returned evidence target/hash mismatch`);
 }
+function verifyWeatherUnavailable(data,lat,lon,label){
+ const target=data?.target,om=data?.sources?.openMeteo;
+ if(data?.ok!==false||data?.schema!=='OMEGA_EARTH_WEATHER_R375'||data?.state!=='ERROR'||data?.canonicalMutation!==false)throw new Error(`${label}: R494 provider-unavailable weather truth packet malformed`);
+ if(!Number.isFinite(Number(target?.lat))||!Number.isFinite(Number(target?.lon))||Math.abs(Number(target.lat)-lat)>0.000011||Math.abs(Number(target.lon)-lon)>0.000011)throw new Error(`${label}: R494 provider-unavailable weather target mismatch`);
+ if(om?.ok!==false||Number(om?.attemptCount)!==2||om?.retried!==true||!Array.isArray(om?.attempts)||om.attempts.length!==2)throw new Error(`${label}: R494 weather provider attempt scars incomplete`);
+ if(data?.current||Array.isArray(data?.hourly)||Array.isArray(data?.daily))throw new Error(`${label}: R494 unavailable weather fabricated returned forecast data`);
+ if(!String(data?.truthBoundary||'').includes('No forecast is fabricated'))throw new Error(`${label}: R494 unavailable weather truth boundary missing`);
+}
+async function decodeWeatherResponse(response,lat,lon,label){
+ const raw=await response.text();let data=null;try{data=JSON.parse(raw)}catch{}
+ if(response.ok()){
+  verifyTarget(data,lat,lon,'Weather');
+  if(data?.schema!=='OMEGA_EARTH_WEATHER_R375'||data?.canonicalMutation!==false)throw new Error(`${label}: R375 weather schema/authority mismatch`);
+  if(!Array.isArray(data?.hourly)||data.hourly.length<24||!Array.isArray(data?.daily)||data.daily.length<7)throw new Error(`${label}: R375 weather horizon incomplete`);
+  if(!data?.sources?.openMeteo?.ok||!data?.derived?.truth?.includes('RELATIONAL_FORECAST_STRUCTURE_ONLY'))throw new Error(`${label}: R375 weather provenance/derived boundary missing`);
+  return{state:'RETURNED',data};
+ }
+ if(response.status()!==502)throw new Error(`${label}: weather unexpected HTTP ${response.status()} ${raw.slice(0,240)}`);
+ verifyWeatherUnavailable(data,lat,lon,label);
+ return{state:'ERROR',data};
+}
 async function bindTarget(page,action,lat,lon){
  const waiting=page.waitForResponse(r=>targetResponse(r,'/api/earth/evidence',lat,lon),{timeout:30000});
  await action();const response=await waiting;
@@ -126,20 +147,31 @@ try{
    await contained(page,`${label} ${name}`);
   }
 
-  const weatherTab=tabs.filter({hasText:'Weather'}).first();
-  const weatherReturn=page.waitForResponse(r=>targetResponse(r,'/api/earth/weather',32.2226,-110.9747),{timeout:30000});
-  await weatherTab.click();const weatherResponse=await weatherReturn;
-  if(!weatherResponse.ok())throw new Error(`${label}: weather HTTP ${weatherResponse.status()}`);
-  const weather=await weatherResponse.json();verifyTarget(weather,32.2226,-110.9747,'Weather');
-  if(weather?.schema!=='OMEGA_EARTH_WEATHER_R375'||weather?.canonicalMutation!==false)throw new Error(`${label}: R375 weather schema/authority mismatch`);
-  if(!Array.isArray(weather?.hourly)||weather.hourly.length<24||!Array.isArray(weather?.daily)||weather.daily.length<7)throw new Error(`${label}: R375 weather horizon incomplete`);
-  if(!weather?.sources?.openMeteo?.ok||!weather?.derived?.truth?.includes('RELATIONAL_FORECAST_STRUCTURE_ONLY'))throw new Error(`${label}: R375 weather provenance/derived boundary missing`);
-  await page.waitForSelector('.earth-r375-hourly-card',{state:'visible',timeout:15000});
-  if(await page.locator('.earth-r375-hourly-card').count()<24)throw new Error(`${label}: R375 hourly surface has fewer than 24 returned points`);
-  await page.getByRole('button',{name:'Weekly · 7 day',exact:true}).click();
-  await page.waitForSelector('.earth-r375-day-card',{state:'visible',timeout:10000});
-  if(await page.locator('.earth-r375-day-card').count()<7)throw new Error(`${label}: R375 weekly surface has fewer than 7 returned days`);
-  await contained(page,`${label} Weather hourly/weekly`);
+  const weatherTab=tabs.filter({hasText:'Weather'}).first(),weatherPath='/api/earth/weather',weatherLat=32.2226,weatherLon=-110.9747;
+  const waitWeather=()=>page.waitForResponse(r=>targetResponse(r,weatherPath,weatherLat,weatherLon),{timeout:30000});
+  let weatherReturn=waitWeather();await weatherTab.click();let weatherResult=await decodeWeatherResponse(await weatherReturn,weatherLat,weatherLon,label);
+  if(weatherResult.state==='ERROR'){
+   await page.waitForSelector('.earth-r375-weather[data-weather-state="ERROR"]',{state:'visible',timeout:10000});
+   const providerError=((await page.locator('.earth-r375-error').textContent())||'').trim();
+   if(!providerError)throw new Error(`${label}: R494 provider-unavailable weather has no explicit ERROR surface`);
+   if(await page.locator('.earth-r375-hourly-card,.earth-r375-day-card').count())throw new Error(`${label}: R494 provider-unavailable weather rendered fabricated forecast cards`);
+   await page.waitForTimeout(750);
+   weatherReturn=waitWeather();await page.getByRole('button',{name:'Refresh weather',exact:true}).click();weatherResult=await decodeWeatherResponse(await weatherReturn,weatherLat,weatherLon,label);
+  }
+  if(weatherResult.state==='RETURNED'){
+   await page.waitForSelector('.earth-r375-weather[data-weather-state="READY"]',{state:'visible',timeout:15000});
+   await page.waitForSelector('.earth-r375-hourly-card',{state:'visible',timeout:15000});
+   if(await page.locator('.earth-r375-hourly-card').count()<24)throw new Error(`${label}: R375 hourly surface has fewer than 24 returned points`);
+   await page.getByRole('button',{name:'Weekly · 7 day',exact:true}).click();
+   await page.waitForSelector('.earth-r375-day-card',{state:'visible',timeout:10000});
+   if(await page.locator('.earth-r375-day-card').count()<7)throw new Error(`${label}: R375 weekly surface has fewer than 7 returned days`);
+  }else{
+   await page.waitForSelector('.earth-r375-weather[data-weather-state="ERROR"]',{state:'visible',timeout:10000});
+   const retryError=((await page.locator('.earth-r375-error').textContent())||'').trim();
+   if(!retryError)throw new Error(`${label}: R494 bounded weather refresh failed without explicit provider error truth`);
+   if(await page.locator('.earth-r375-hourly-card,.earth-r375-day-card').count())throw new Error(`${label}: R494 repeated provider outage fabricated forecast cards`);
+  }
+  await contained(page,`${label} Weather returned-or-provider-unavailable truth`);
 
   const satTab=tabs.filter({hasText:'Satellite'}).first();await satTab.click();
   const satImg=page.locator('.earth-r279-sat-main figure img').first();await satImg.waitFor({state:'visible',timeout:20000});
@@ -251,5 +283,5 @@ try{
   await context.close();
  }
  verifyReceipt(await fetch(base+'/omega-build-receipt.json',{headers:{'cache-control':'no-cache'}}).then(r=>{if(!r.ok)throw new Error(`final receipt HTTP ${r.status}`);return r.json()}));
- console.log(`R372 LIVE EARTH TOTAL INTERACTION PASS · exact source + promoted SHA ${expectedSha} before/after · place/address/device target + returned evidence hash · all 9 Earth views · loaded NOAA pixels · motion pause/resume + returned refresh · ground target/hash refresh · SAR targeting + 12 unique derived/native transition-safe lenses actuated + atomic two-frame status/viewport geometry · GRD/SLC · desktop/mobile containment per view/lens · no page errors`);
+ console.log(`R372 LIVE EARTH TOTAL INTERACTION PASS · exact source + promoted SHA ${expectedSha} before/after · place/address/device target + returned evidence hash · all 9 Earth views · loaded NOAA pixels · weather returned or explicit provider-unavailable + one bounded refresh · motion pause/resume + returned/error refresh · ground target/hash refresh · SAR targeting + 12 unique derived/native transition-safe lenses actuated + atomic two-frame status/viewport geometry · GRD/SLC · desktop/mobile containment per view/lens · no page errors`);
 }finally{await browser.close()}
