@@ -314,6 +314,12 @@ OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME"
 node scripts/verify_promoted_asset_convergence_r497.mjs
 OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_omega7_asset_coherence_r491.mjs promoted
 
+# R499: canonical OMEGA7 readiness is not yet compatibility-bridge readiness.
+# Prove the exact deferred OMEGA6 Home/workstation dependency graph byte-for-byte,
+# then prove the reversible OMEGA7 → OMEGA6 → OMEGA7 transition on the same promoted artifact.
+node scripts/verify_promoted_bridge_continuity_r499.mjs
+OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$GITHUB_SHA" node tests/r499-sequential-bridge-browser-e2e.mjs
+
 ROLLBACK_ELIGIBLE=false
 if [[ "$BASELINE_USABLE" == "1" ]]; then ROLLBACK_ELIGIBLE=true; fi
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
