@@ -4,16 +4,20 @@ import fs from 'node:fs';
 const native=fs.readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
 const live=fs.readFileSync('tests/r489-live-visible-capability-browser-e2e.mjs','utf8');
 const r202=fs.readFileSync('scripts/verify_live_operational_source_authority_r202.mjs','utf8');
+const root=fs.readFileSync('src7/Omega7Root.tsx','utf8');
+
+assert.ok(root.includes("<section className='o7-native-host'>"),'R491 must preserve the accepted single outer native host used by 44-route parity');
+assert.equal((native.match(/className='o7-native-host'/g)||[]).length,0,'R491 inner readiness boundary must not collide with accepted outer .o7-native-host');
 
 for(const token of [
- "className='o7-native-host'",
+ "className='o7-native-readiness-host'",
  'data-native-host-route={route}',
  '<Omega7Boundary label={`OMEGA7 ${route}`}>',
  "className='o7-native-loading'"
 ])assert.ok(native.includes(token),`R491 stable native host contract missing ${token}`);
 
 for(const token of [
- '.o7-native-host[data-native-host-route="',
+ '.o7-native-readiness-host[data-native-host-route="',
  "host.waitFor({state:'visible'",
  "!host.querySelector('.o7-native-loading')",
  "!host.querySelector('.o7-native-failure')",
