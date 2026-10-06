@@ -20,7 +20,7 @@ assert.ok(worker.includes('async function fetchPrimaryWeatherJson(url)')&&worker
 assert.ok(worker.includes('fetchPrimaryWeatherJson(source)'),'R424 weather forecast must use the bounded primary-source retry helper');
 assert.ok(worker.includes("error:last?.error||'PRIMARY_FORECAST_UNAVAILABLE'")&&worker.includes('attemptCount:attempts.length')&&worker.includes('attempts}'),'R424 must retain exact primary-provider attempt scars when both attempts fail');
 assert.ok(worker.includes('attemptCount:om.attemptCount||1')&&worker.includes('retried:om.retried===true'),'R424 successful weather evidence must disclose whether bounded retry was required');
-assert.ok(worker.includes("if(!om.ok)return{ok:false,schema:'OMEGA_EARTH_WEATHER_R375'"),'R424 must still fail closed when both primary weather attempts fail');
+assert.ok(worker.includes("if(!om.ok){const payload={ok:false,schema:'OMEGA_EARTH_WEATHER_R375'")&&worker.includes("state:'PROVIDER_UNAVAILABLE'")&&worker.includes("canonicalMutation:false")&&worker.includes("payload.evidenceHash=await sha256(payload);return payload"),'R494 must fail closed as an explicit hashed non-canonical provider-unavailable truth envelope when both primary weather attempts fail');
 assert.equal(worker.includes('fallbackWeather'),false,'R424 must not introduce synthetic or alternate fallback weather');
 assert.ok(css.includes('.earth-r375-hourly')&&css.includes('overflow-x:auto'),'R375 hourly forecast must scroll inside its own stage rather than overflow the viewport');
 assert.ok(css.includes('@media(max-width:620px)')&&css.includes('.earth-r375-weekly{grid-template-columns:1fr}'),'R375 weekly forecast must retain a single-column small-phone mode');
