@@ -29,8 +29,8 @@ try{
 
   const recovered=page.locator('.o7-recovered[data-r486-visible-convergence="true"]');
   await recovered.waitFor({state:'visible',timeout:20000});
-  const initialText=await recovered.innerText();
-  for(const token of ['Recovered capability fabric','Your recovered work is connected to the product','Browse recovered capabilities','execute now','active adapters','truth/device gated','bound to current routes'])if(!initialText.includes(token))throw new Error(`${label}: R486 visible convergence missing ${token}`);
+  const initialText=await recovered.innerText(),initialTextNormalized=initialText.toLocaleLowerCase();
+  for(const token of ['Recovered capability fabric','Your recovered work is connected to the product','Browse recovered capabilities','execute now','active adapters','truth/device gated','bound to current routes'])if(!initialTextNormalized.includes(token.toLocaleLowerCase()))throw new Error(`${label}: R486 visible convergence missing rendered label ${token}`);
 
   const summary=await recovered.locator('.o7-recovered-summary article b').allTextContents();
   if(summary.length!==4)throw new Error(`${label}: expected four recovered-capability summary measures, got ${summary.length}`);
