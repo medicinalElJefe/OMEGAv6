@@ -21,7 +21,7 @@ try{
  for(const [label,viewport,dpr] of [['desktop',{width:1440,height:960},1],['mobile',{width:390,height:844},2]]){
   const context=await browser.newContext({viewport,deviceScaleFactor:dpr,permissions:['geolocation'],geolocation:{latitude:32.2226,longitude:-110.9747}});
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
-  await page.goto(`${base}/?r370-live=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?omega6=1&r370-live=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.getByLabel('Open Earth Now').waitFor({state:'visible',timeout:20000});
   await page.getByLabel('Open Earth Now').click();
   await page.waitForFunction(()=>document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')==='Earth Now',{timeout:30000});
