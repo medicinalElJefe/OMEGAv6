@@ -19,6 +19,7 @@ for(const token of [
 
 assert.ok(script.indexOf('if(edge.exact)')<script.indexOf('process.exit(0)'),'R493 success must remain downstream of exact canonical receipt proof');
 assert.ok(script.includes('source===expected&&promoted===expected'),'R493 must require both receipt source and promoted merge SHA to equal the exact target');
+assert.ok(script.includes('R491 PROMOTION CONVERGENCE PASS'),'R493 must preserve inherited R491 success identity while strengthening convergence');
 assert.ok(script.includes('attempt<=15')&&script.includes('await sleep(2000)'),'R493 must remain bounded rather than wait indefinitely');
 assert.ok(pkg.includes('npm run test:r493'),'R493 invariant must remain release-blocking through npm run check');
 assert.ok(pkg.includes('"test:r493": "node tests/r493-promotion-edge-receipt-convergence-invariants.mjs"'),'R493 package entry missing');
