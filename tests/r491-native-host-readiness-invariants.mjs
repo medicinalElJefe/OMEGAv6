@@ -18,7 +18,7 @@ for(const token of [
  "'Cloudflare-Workers-Version-Key'",
  "'Cloudflare-Workers-Version-Overrides'",
  '.o7-native-host[data-native-host-route="',
- "host.querySelector('.o7-native-workspace,.o7-native-failure,.o7-failure')",
+ "host?.querySelector('.o7-native-workspace,.o7-native-failure,.o7-failure')",
  'never reached a terminal native state',
  'assetFailures=',
  'requestFailures=',
