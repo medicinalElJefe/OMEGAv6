@@ -8,12 +8,37 @@ const overrideHeaders={'Cloudflare-Workers-Version-Key':affinityKey,...(override
 if(!base)throw new Error('OMEGA_E2E_URL or OMEGA_PUBLIC_URL required');
 if(!/^[0-9a-f]{40}$/i.test(expectedSha))throw new Error('OMEGA_EXPECTED_SHA or OMEGA_PROMOTED_SHA must be the exact promoted SHA');
 
-const receiptResponse=await fetch(`${base}/omega-build-receipt.json?r489=${Date.now()}`,{headers:{'cache-control':'no-cache',...overrideHeaders}});
-const receiptRaw=await receiptResponse.text();
-if(!receiptResponse.ok)throw new Error(`R489 promoted build receipt HTTP ${receiptResponse.status}: ${receiptRaw.slice(0,400)}`);
-const receipt=JSON.parse(receiptRaw);
-if(receipt?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1')throw new Error(`R489 unexpected build receipt schema ${receipt?.schema}`);
-if(receipt?.source?.sha!==expectedSha||receipt?.promotion?.promotedMergeSha!==expectedSha)throw new Error(`R489 exact-SHA mismatch expected ${expectedSha} source ${receipt?.source?.sha||'NONE'} promoted ${receipt?.promotion?.promotedMergeSha||'NONE'}`);
+const receiptAttempts=Math.max(1,Number.parseInt(process.env.OMEGA_R498_RECEIPT_ATTEMPTS||'30',10)||30);
+const receiptDelayMs=Math.max(250,Number.parseInt(process.env.OMEGA_R498_RECEIPT_DELAY_MS||'1000',10)||1000);
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+let receipt=null,lastReceipt='UNOBSERVED';
+for(let attempt=1;attempt<=receiptAttempts;attempt++){
+ try{
+  const receiptResponse=await fetch(`${base}/omega-build-receipt.json?r489=${Date.now()}-${attempt}`,{headers:{'cache-control':'no-cache','pragma':'no-cache','accept-encoding':'identity',...overrideHeaders}});
+  const receiptRaw=await receiptResponse.text();
+  if(receiptResponse.ok){
+   let candidate;
+   try{candidate=JSON.parse(receiptRaw)}catch(error){
+    lastReceipt=`JSON ${error instanceof Error?error.message:String(error)}`;
+    candidate=null;
+   }
+   if(candidate){
+    const source=String(candidate?.source?.sha||'').trim(),promoted=String(candidate?.promotion?.promotedMergeSha||'').trim();
+    lastReceipt=`source ${source||'NONE'} promoted ${promoted||'NONE'}`;
+    if(candidate?.schema==='OMEGA_GOVERNED_BUILD_RECEIPT_V1'&&source===expectedSha&&promoted===expectedSha){
+     receipt=candidate;
+     console.log(`R498 R489 EDGE RECEIPT PASS · exact SHA ${expectedSha} · attempt ${attempt}/${receiptAttempts}`);
+     break;
+    }
+   }
+  }else lastReceipt=`HTTP ${receiptResponse.status} ${receiptRaw.slice(0,180)}`;
+ }catch(error){lastReceipt=`fetch ${error instanceof Error?error.message:String(error)}`}
+ if(attempt<receiptAttempts){
+  console.log(`R498 R489 receipt pending · attempt ${attempt}/${receiptAttempts} · ${lastReceipt}`);
+  await sleep(receiptDelayMs);
+ }
+}
+if(!receipt)throw new Error(`R498 R489 exact promoted receipt did not converge within bounded window · expected ${expectedSha} · last ${lastReceipt}`);
 
 const groups=['All','Understand','Explore','Create','Build','Work','Recover'];
 const routes=['Earth Now','Workspace','System Atlas'];
@@ -110,5 +135,5 @@ try{
   if(assetFailures.length||requestFailures.length)throw new Error(`${label}: R489 native asset delivery failures: ${[...assetFailures,...requestFailures].join(' | ').slice(0,3000)}`);
   await context.close();
  }
- console.log(`R489 LIVE VISIBLE CAPABILITY PASS · exact promoted SHA ${expectedSha} · plain canonical URL defaults OMEGA7 · R486 recovered fabric counts/states match · all seven groups visible/nonempty · R142/R125 lineage proof exposed · R495 live operational truth terminal/readable · Earth/Workspace/System Atlas executors navigate · desktop/mobile no overflow/page errors`);
+ console.log(`R489/R498 LIVE VISIBLE CAPABILITY PASS · exact promoted SHA ${expectedSha} · plain canonical URL defaults OMEGA7 · R486 recovered fabric counts/states match · all seven groups visible/nonempty · R142/R125 lineage proof exposed · R495 live operational truth terminal/readable · Earth/Workspace/System Atlas executors navigate · desktop/mobile no overflow/page errors`);
 }finally{await browser.close()}
