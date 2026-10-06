@@ -15,11 +15,12 @@ assert.ok(staged.includes('assert_current_main_owner(){'),'R367 staged release m
 assert.ok((staged.match(/assert_current_main_owner/g)||[]).length>=4,'R367 staged release must verify ownership before mutation and again before promotion');
 const upload=staged.indexOf('npx wrangler versions upload');
 const firstGuard=staged.indexOf('assert_current_main_owner',staged.indexOf('trap cleanup EXIT'));
-const proof=staged.indexOf('node tests/r200-current-browser-proof-e2e.mjs');
-const promoteGuard=staged.indexOf('assert_current_main_owner',proof);
-const promote=staged.indexOf('npx wrangler versions deploy "\${CANDIDATE_VERSION_ID}@100%"',proof);
-assert.ok(firstGuard>=0&&firstGuard<upload,'R367 must prove current-main ownership before candidate upload');
-assert.ok(promoteGuard>proof&&promoteGuard<promote,'R367 must re-prove current-main ownership after candidate proof and before 100% promotion');
+const localProof=staged.indexOf('node tests/r496-local-omega7-candidate-browser-e2e.mjs');
+const semantic=staged.indexOf('node scripts/verify_staged_release.mjs');
+const promoteGuard=staged.indexOf('assert_current_main_owner',semantic);
+const normalPromote=staged.indexOf('OMEGA exact proved promotion $GITHUB_SHA',semantic);
+assert.ok(firstGuard>=0&&firstGuard<localProof&&localProof<upload,'R367 must prove current-main ownership before exact packaged proof/upload mutation');
+assert.ok(promoteGuard>semantic&&normalPromote>promoteGuard,'R367 normal path must re-prove current-main ownership after staged Worker proof and before 100% promotion');
 
 assert.ok(staged.includes('release_owns_current_deployment(){'),'R367 ERR trap must verify Worker ownership before restoring a baseline');
 assert.ok(staged.includes('if release_owns_current_deployment; then'),'R367 fail-closed restore must require deployment ownership');
@@ -32,4 +33,4 @@ assert.ok(ci.includes('Production deployment concurrency: serialized · no in-pr
 assert.ok(ci.includes('needs: deploy-main'),'governed continuation must remain downstream of successful deployment');
 assert.ok(!ci.includes('cancel-in-progress: true\n    environment: production'),'canonical production deployment must never cancel an in-flight mutation');
 
-console.log('R367 PRODUCTION RACE GUARD PASS · canonical deploy serialized · superseded main rejected · ownership rechecked before promotion · stale/foreign rollback refused · exact candidate must own 100% before post-proof rollback');
+console.log('R367/R496 PRODUCTION RACE GUARD PASS · canonical deploy serialized · superseded main rejected · ownership proved before packaged/upload mutation and rechecked after Worker proof before normal promotion · stale/foreign rollback refused · exact candidate must own 100% before post-proof rollback');
