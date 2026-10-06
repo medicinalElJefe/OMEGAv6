@@ -45,19 +45,49 @@ const routes=['Earth Now','Workspace','System Atlas'];
 const browser=await chromium.launch({headless:true});
 try{
  for(const [label,viewport,dpr] of [['desktop',{width:1440,height:960},1],['mobile',{width:390,height:844},2]]){
-  const context=await browser.newContext({viewport,deviceScaleFactor:dpr,extraHTTPHeaders:overrideHeaders});
+  const context=await browser.newContext({viewport,deviceScaleFactor:dpr,extraHTTPHeaders:{'cache-control':'no-cache','pragma':'no-cache',...overrideHeaders}});
   const page=await context.newPage(),pageErrors=[],requestFailures=[],assetFailures=[],boundaryErrors=[];
   page.on('pageerror',e=>pageErrors.push(String(e)));
   page.on('requestfailed',request=>{const url=request.url();if(/\/assets\/.*\.(?:js|css)(?:\?|$)/i.test(url))requestFailures.push(`${request.method()} ${url} :: ${request.failure()?.errorText||'FAILED'}`)});
   page.on('response',response=>{const url=response.url();if(response.status()>=400&&/\/assets\/.*\.(?:js|css)(?:\?|$)/i.test(url))assetFailures.push(`${response.status()} ${url}`)});
   page.on('console',message=>{if(message.type()==='error'&&/OMEGA7_BOUNDARY|dynamically imported module|Loading chunk|Failed to fetch/i.test(message.text()))boundaryErrors.push(message.text())});
-  await page.goto(`${base}/?r489-live=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
   const app=page.locator('.o7-app[data-omega7="true"]');
-  await app.waitFor({state:'visible',timeout:30000});
-  if(await page.locator('main.r71-home').count())throw new Error(`${label}: plain canonical URL still mounted OMEGAv6 instead of OMEGA7`);
-
   const operational=page.locator('.o7-operational-truth[data-r495-operational-truth="true"]');
-  await operational.waitFor({state:'visible',timeout:20000});
+  const browserAttempts=Math.max(1,Number.parseInt(process.env.OMEGA_R499_BROWSER_ATTEMPTS||'20',10)||20);
+  const browserDelayMs=Math.max(250,Number.parseInt(process.env.OMEGA_R499_BROWSER_DELAY_MS||'1000',10)||1000);
+  let browserConverged=false,lastBrowserState='UNOBSERVED';
+  for(let attempt=1;attempt<=browserAttempts;attempt++){
+   pageErrors.length=0;requestFailures.length=0;assetFailures.length=0;boundaryErrors.length=0;
+   try{
+    await page.goto(`${base}/?r499-browser=${Date.now()}-${label}-${attempt}`,{waitUntil:'domcontentloaded',timeout:45000});
+    await app.waitFor({state:'visible',timeout:10000});
+    const legacy=await page.locator('main.r71-home').count();
+    const marker=await operational.count();
+    const laneReceipt=await page.evaluate(async expected=>{
+     try{
+      const response=await fetch(`/omega-build-receipt.json?r499=${Date.now()}`,{cache:'no-store',headers:{'cache-control':'no-cache','pragma':'no-cache'}});
+      const raw=await response.text();
+      if(!response.ok)return{exact:false,detail:`HTTP ${response.status} ${raw.slice(0,120)}`};
+      const receipt=JSON.parse(raw);
+      const source=String(receipt?.source?.sha||'').trim(),promoted=String(receipt?.promotion?.promotedMergeSha||'').trim();
+      return{exact:receipt?.schema==='OMEGA_GOVERNED_BUILD_RECEIPT_V1'&&source===expected&&promoted===expected,detail:`source ${source||'NONE'} promoted ${promoted||'NONE'}`};
+     }catch(error){return{exact:false,detail:`fetch ${error instanceof Error?error.message:String(error)}`}}
+    },expectedSha);
+    lastBrowserState=`legacy=${legacy} marker=${marker} receipt=${laneReceipt.detail}`;
+    if(!legacy&&marker>0&&laneReceipt.exact){
+     browserConverged=true;
+     console.log(`R499 R489 BROWSER EDGE PASS · ${label} · exact SHA ${expectedSha} · attempt ${attempt}/${browserAttempts}`);
+     break;
+    }
+    console.log(`R499 R489 browser pending · ${label} · attempt ${attempt}/${browserAttempts} · ${lastBrowserState}`);
+   }catch(error){
+    lastBrowserState=error instanceof Error?error.message:String(error);
+    console.log(`R499 R489 browser pending · ${label} · attempt ${attempt}/${browserAttempts} · ${lastBrowserState}`);
+   }
+   if(attempt<browserAttempts)await page.waitForTimeout(browserDelayMs);
+  }
+  if(!browserConverged)throw new Error(`${label}: R499 canonical browser lane did not converge to exact promoted shell within bounded window · ${lastBrowserState}`);
+  await operational.waitFor({state:'visible',timeout:5000});
   await page.waitForFunction(()=>{const el=document.querySelector('.o7-operational-truth[data-r495-operational-truth="true"]');return Boolean(el&&el.getAttribute('data-r495-state')!=='loading')},{timeout:20000});
   const operationalText=(await operational.innerText()).toLocaleLowerCase();
   for(const token of ['live operational truth','what is actually running right now','production','source','worker','device','evidence & proof','system'])if(!operationalText.includes(token))throw new Error(`${label}: R495 operational truth missing rendered label ${token}`);
@@ -135,5 +165,5 @@ try{
   if(assetFailures.length||requestFailures.length)throw new Error(`${label}: R489 native asset delivery failures: ${[...assetFailures,...requestFailures].join(' | ').slice(0,3000)}`);
   await context.close();
  }
- console.log(`R489/R498 LIVE VISIBLE CAPABILITY PASS · exact promoted SHA ${expectedSha} · plain canonical URL defaults OMEGA7 · R486 recovered fabric counts/states match · all seven groups visible/nonempty · R142/R125 lineage proof exposed · R495 live operational truth terminal/readable · Earth/Workspace/System Atlas executors navigate · desktop/mobile no overflow/page errors`);
+ console.log(`R489/R498/R499 LIVE VISIBLE CAPABILITY PASS · exact promoted SHA ${expectedSha} · plain canonical URL defaults OMEGA7 · R486 recovered fabric counts/states match · all seven groups visible/nonempty · R142/R125 lineage proof exposed · R495 live operational truth terminal/readable · Earth/Workspace/System Atlas executors navigate · desktop/mobile no overflow/page errors`);
 }finally{await browser.close()}

@@ -36,7 +36,8 @@ for(const token of [
  "omega-build-receipt.json",
  ".o7-app[data-omega7=\"true\"]",
  ".o7-recovered[data-r486-visible-convergence=\"true\"]",
- 'plain canonical URL still mounted OMEGAv6',
+ "const legacy=await page.locator('main.r71-home').count()",
+ 'marker>0&&laneReceipt.exact',
  "['All','Understand','Explore','Create','Build','Work','Recover']",
  'executes_now',
  'executes_as_adapter',
@@ -57,4 +58,4 @@ const r489Index=r202.indexOf("tests/r489-live-visible-capability-browser-e2e.mjs
 assert.ok(r284Index>=0&&r370Index>r284Index&&r372Index>r370Index&&r489Index>r372Index,'R489 visible acceptance must run only after R284/R370/R372 promoted live truth gates');
 assert.ok(r202.includes('R489 exact-production visible capability proof failed'),'R489 production failure must fail the canonical R202 deployment membrane');
 
-console.log('R489 CANONICAL DEFAULT + VISIBLE CONVERGENCE PASS · plain URL OMEGA7 · explicit OMEGA6 rollback · recovered fabric retained · exact-SHA desktop/mobile live proof wired after R284/R370/R372');
+console.log('R489/R499 CANONICAL DEFAULT + VISIBLE CONVERGENCE PASS · plain URL OMEGA7 only after browser-lane exact receipt + promoted-shell marker · explicit OMEGA6 rollback retained · recovered fabric retained · exact-SHA desktop/mobile live proof wired after R284/R370/R372');
