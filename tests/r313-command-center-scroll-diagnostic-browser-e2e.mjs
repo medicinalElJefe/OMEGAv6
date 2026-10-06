@@ -18,7 +18,7 @@ const browser=await chromium.launch({headless:true});
 try{
   const context=await browser.newContext({viewport:{width:1440,height:960},deviceScaleFactor:1});
   const page=await context.newPage();
-  await page.goto(`${base}/?r313-scroll-diagnostic=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?omega6=1&r313-scroll-diagnostic=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45000});
 
   // Enter the workstation through the canonical navigator from whatever initial
   // surface the product mounts. Do not assume the workstation exists on Home.
