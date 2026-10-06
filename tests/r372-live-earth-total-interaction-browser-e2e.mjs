@@ -126,34 +126,54 @@ try{
    await contained(page,`${label} ${name}`);
   }
 
-  const weatherTab=tabs.filter({hasText:'Weather'}).first();
-  const weatherReturn=page.waitForResponse(r=>targetResponse(r,'/api/earth/weather',32.2226,-110.9747),{timeout:30000});
-  await weatherTab.click();const weatherResponse=await weatherReturn;
-  const weather=await weatherResponse.json();
-  if(weatherResponse.ok()){
-   verifyTarget(weather,32.2226,-110.9747,'Weather');
-   if(weather?.schema!=='OMEGA_EARTH_WEATHER_R375'||weather?.canonicalMutation!==false)throw new Error(`${label}: R375 weather schema/authority mismatch`);
-   if(!Array.isArray(weather?.hourly)||weather.hourly.length<24||!Array.isArray(weather?.daily)||weather.daily.length<7)throw new Error(`${label}: R375 weather horizon incomplete`);
-   if(!weather?.sources?.openMeteo?.ok||!weather?.derived?.truth?.includes('RELATIONAL_FORECAST_STRUCTURE_ONLY'))throw new Error(`${label}: R375 weather provenance/derived boundary missing`);
+  const weatherTab=tabs.filter({hasText:'Weather'}).first(),weatherPath='/api/earth/weather',weatherLat=32.2226,weatherLon=-110.9747;
+  const waitWeather=()=>page.waitForResponse(r=>targetResponse(r,weatherPath,weatherLat,weatherLon),{timeout:30000});
+  const decodeWeather=async(response,phase)=>{
+   const weather=await response.json();
+   if(response.ok()){
+    verifyTarget(weather,weatherLat,weatherLon,'Weather');
+    if(weather?.schema!=='OMEGA_EARTH_WEATHER_R375'||weather?.canonicalMutation!==false)throw new Error(`${label}: R375 weather schema/authority mismatch after ${phase}`);
+    if(!Array.isArray(weather?.hourly)||weather.hourly.length<24||!Array.isArray(weather?.daily)||weather.daily.length<7)throw new Error(`${label}: R375 weather horizon incomplete after ${phase}`);
+    if(!weather?.sources?.openMeteo?.ok||!weather?.derived?.truth?.includes('RELATIONAL_FORECAST_STRUCTURE_ONLY'))throw new Error(`${label}: R375 weather provenance/derived boundary missing after ${phase}`);
+    return{state:'RETURNED',weather};
+   }
+   if(response.status()!==502)throw new Error(`${label}: unexpected weather HTTP ${response.status()} after ${phase}`);
+   verifyTarget(weather,weatherLat,weatherLon,'Weather provider outage');
+   const om=weather?.sources?.openMeteo;
+   if(weather?.schema!=='OMEGA_EARTH_WEATHER_R375'||weather?.ok!==false||weather?.state!=='PROVIDER_UNAVAILABLE'||weather?.canonicalMutation!==false)throw new Error(`${label}: R494 weather provider-error truth envelope invalid after ${phase}`);
+   if(om?.ok!==false||Number(om?.attemptCount)!==2||om?.retried!==true||!Array.isArray(om?.attempts)||om.attempts.length!==2)throw new Error(`${label}: R494 weather provider-error exact two-attempt scars missing after ${phase}`);
+   if(weather?.current!==null||!Array.isArray(weather?.hourly)||weather.hourly.length!==0||!Array.isArray(weather?.daily)||weather.daily.length!==0)throw new Error(`${label}: R494 weather provider failure fabricated forecast payload after ${phase}`);
+   if(!String(weather?.truthBoundary||'').includes('No forecast values or derived continuity are emitted'))throw new Error(`${label}: R494 weather provider-error no-fabrication boundary missing after ${phase}`);
+   return{state:'ERROR',weather};
+  };
+
+  let weatherReturn=waitWeather();
+  await weatherTab.click();
+  let weatherResult=await decodeWeather(await weatherReturn,'initial request');
+  if(weatherResult.state==='ERROR'){
+   await page.waitForFunction(()=>document.querySelector('.earth-r375-weather')?.getAttribute('data-weather-state')==='ERROR',{timeout:15000});
+   const providerError=((await page.locator('.earth-r375-error').textContent())||'').trim();
+   if(!providerError)throw new Error(`${label}: R494 weather provider failure has no explicit UI error`);
+   if(await page.locator('.earth-r375-hourly-card,.earth-r375-day-card').count())throw new Error(`${label}: R494 weather provider failure fabricated forecast cards`);
+   await page.waitForTimeout(750);
+   weatherReturn=waitWeather();
+   await page.getByRole('button',{name:'Refresh weather',exact:true}).click();
+   weatherResult=await decodeWeather(await weatherReturn,'bounded refresh');
+  }
+  if(weatherResult.state==='RETURNED'){
+   await page.waitForSelector('.earth-r375-weather[data-weather-state="READY"]',{state:'visible',timeout:15000});
    await page.waitForSelector('.earth-r375-hourly-card',{state:'visible',timeout:15000});
    if(await page.locator('.earth-r375-hourly-card').count()<24)throw new Error(`${label}: R375 hourly surface has fewer than 24 returned points`);
    await page.getByRole('button',{name:'Weekly · 7 day',exact:true}).click();
    await page.waitForSelector('.earth-r375-day-card',{state:'visible',timeout:10000});
    if(await page.locator('.earth-r375-day-card').count()<7)throw new Error(`${label}: R375 weekly surface has fewer than 7 returned days`);
-   await contained(page,`${label} Weather hourly/weekly`);
-  }else if(weatherResponse.status()===502){
-   verifyTarget(weather,32.2226,-110.9747,'Weather provider outage');
-   if(weather?.schema!=='OMEGA_EARTH_WEATHER_R375'||weather?.ok!==false||weather?.state!=='PROVIDER_UNAVAILABLE'||weather?.canonicalMutation!==false)throw new Error(`${label}: R494 weather provider-error truth envelope invalid`);
-   if(weather?.sources?.openMeteo?.ok!==false||!Array.isArray(weather?.sources?.openMeteo?.attempts)||weather.sources.openMeteo.attempts.length<1)throw new Error(`${label}: R494 weather provider-error attempt scars missing`);
-   if(!String(weather?.truthBoundary||'').includes('No forecast values or derived continuity are emitted'))throw new Error(`${label}: R494 weather provider-error no-fabrication boundary missing`);
-   await page.waitForFunction(()=>document.querySelector('.earth-r375-weather')?.getAttribute('data-weather-state')==='ERROR',{timeout:15000});
-   const providerError=((await page.locator('.earth-r375-error').textContent())||'').trim();
-   if(!providerError)throw new Error(`${label}: R494 weather provider failure has no explicit UI error`);
-   if(await page.locator('.earth-r375-hourly-card,.earth-r375-day-card').count())throw new Error(`${label}: R494 weather provider failure fabricated forecast cards`);
-   await contained(page,`${label} Weather provider unavailable`);
   }else{
-   throw new Error(`${label}: unexpected weather HTTP ${weatherResponse.status()}`);
+   await page.waitForFunction(()=>document.querySelector('.earth-r375-weather')?.getAttribute('data-weather-state')==='ERROR',{timeout:15000});
+   const retryError=((await page.locator('.earth-r375-error').textContent())||'').trim();
+   if(!retryError)throw new Error(`${label}: R494 repeated provider outage has no explicit UI error`);
+   if(await page.locator('.earth-r375-hourly-card,.earth-r375-day-card').count())throw new Error(`${label}: R494 repeated provider outage fabricated forecast cards`);
   }
+  await contained(page,`${label} Weather returned-or-provider-unavailable truth`);
 
   const satTab=tabs.filter({hasText:'Satellite'}).first();await satTab.click();
   const satImg=page.locator('.earth-r279-sat-main figure img').first();await satImg.waitFor({state:'visible',timeout:20000});
