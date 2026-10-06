@@ -279,9 +279,13 @@ else
   echo "R322 forward-recovery semantic + browser proof passed on the exact 100% candidate."
 fi
 
-# R491: wait until deployment metadata reports exactly one serving version,
-# then prove the same OMEGA7 executor graph through ordinary public routing.
+# R491/R493: promotion is not converged merely because Worker traffic is 100%.
+# First prove the exact candidate is the sole serving Worker, then prove the
+# canonical static build receipt has converged to the same source/merge SHA.
+# Only after both identities agree may the ordinary-routing OMEGA7 executor
+# graph be accepted.
 OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_promotion_convergence_r491.mjs
+OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_public_build_receipt_convergence_r493.mjs
 OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_omega7_asset_coherence_r491.mjs promoted
 
 ROLLBACK_ELIGIBLE=false
