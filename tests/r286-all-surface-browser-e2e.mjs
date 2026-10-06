@@ -125,7 +125,7 @@ try{
     page.on('pageerror',e=>pageErrors.push(String(e)));
     const r455CycleReceipt={cycle:1,jobId:'r455-returned-job',status:'COMPLETE',resultFingerprint:'f'.repeat(64),completedAt:Date.now()-1000};
     await page.route('**/api/missions',route=>route.request().method()==='GET'?route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,missions:[{id:'r455-legacy-mission',status:'COMPLETE',maxCycles:8,cycles:[r455CycleReceipt],summary:r455CycleReceipt,objective:'R455 structured mission receipt render proof'}]})}):route.continue());
-    await page.goto(`${base}/?r307=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(`${base}/?omega6=1&r307=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
     await openNavigator(page);
     await verifyNavigatorModeTouchTargets(page,name);
