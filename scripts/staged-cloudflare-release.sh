@@ -266,6 +266,10 @@ OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME"
 
 OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node tests/r200-current-browser-proof-e2e.mjs
 
+# R491: prove the canonical-default OMEGA7 shell and its content-hashed lazy
+# executor graph while the candidate is still isolated at 0% ordinary traffic.
+OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_omega7_asset_coherence_r491.mjs staged
+
 if [[ "$STAGING_MODE" == "ZERO_PERCENT_OVERRIDE" ]]; then
   assert_current_main_owner
   echo "Off-traffic semantic + browser proof passed; promoting exact candidate to 100%."
@@ -274,6 +278,11 @@ else
   assert_current_main_owner
   echo "R322 forward-recovery semantic + browser proof passed on the exact 100% candidate."
 fi
+
+# R491: wait until deployment metadata reports exactly one serving version,
+# then prove the same OMEGA7 executor graph through ordinary public routing.
+OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_promotion_convergence_r491.mjs
+OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_omega7_asset_coherence_r491.mjs promoted
 
 ROLLBACK_ELIGIBLE=false
 if [[ "$BASELINE_USABLE" == "1" ]]; then ROLLBACK_ELIGIBLE=true; fi
