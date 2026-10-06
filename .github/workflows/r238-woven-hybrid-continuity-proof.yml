@@ -74,7 +74,7 @@ jobs:
           let hybridGets=0,missionGets=0;
           await page.route('**/api/hybrid/status',route=>{hybridGets++;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(hybrid)})});
           await page.route('**/api/missions',route=>{missionGets++;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(missions)})});
-          await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+          await page.goto('http://127.0.0.1:4173/?omega6=1',{waitUntil:'networkidle'});
           await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
           const hybridEntry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid'}).first();
           await hybridEntry.waitFor({state:'visible'});await hybridEntry.click();
