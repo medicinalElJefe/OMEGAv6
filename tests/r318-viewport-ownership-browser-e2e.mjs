@@ -12,7 +12,7 @@ try{
   const context=await browser.newContext({viewport,deviceScaleFactor:1});
   const page=await context.newPage();
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
-  await page.goto(`${base}/?r318-viewport=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?omega6=1&r318-viewport=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('.r257-shell',{timeout:30000});
   await page.waitForFunction(()=>document.documentElement.dataset.omegaNavPresent==='true',{timeout:10000});
 
