@@ -308,6 +308,10 @@ fi
 # R491: wait until deployment metadata reports exactly one serving version,
 # then prove the same OMEGA7 executor graph through ordinary public routing.
 OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_promotion_convergence_r491.mjs
+# R497: receipt convergence and entry-asset convergence are distinct edge states.
+# Wait until the canonical root references the exact promoted dist entry assets
+# and those bytes match before starting the full promoted OMEGA7 browser proof.
+node scripts/verify_promoted_asset_convergence_r497.mjs
 OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_omega7_asset_coherence_r491.mjs promoted
 
 ROLLBACK_ELIGIBLE=false

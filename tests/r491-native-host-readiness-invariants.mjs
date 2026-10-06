@@ -31,9 +31,12 @@ for(const token of [
 for(const token of [
  'node tests/r496-local-omega7-candidate-browser-e2e.mjs',
  'verify_promotion_convergence_r491.mjs',
+ 'verify_promoted_asset_convergence_r497.mjs',
  'verify_omega7_asset_coherence_r491.mjs promoted'
 ])assert.ok(staged.includes(token),`R491/R496 release gate missing ${token}`);
 assert.ok(!staged.includes('verify_omega7_asset_coherence_r491.mjs staged'),'0%-traffic release path must not claim version override owns canonical static assets');
+const receiptConvergence=staged.indexOf('verify_promotion_convergence_r491.mjs'),entryAssetConvergence=staged.indexOf('verify_promoted_asset_convergence_r497.mjs'),promotedBrowser=staged.indexOf('verify_omega7_asset_coherence_r491.mjs promoted');
+assert.ok(receiptConvergence>=0&&entryAssetConvergence>receiptConvergence&&promotedBrowser>entryAssetConvergence,'R497 exact entry-asset convergence must separate receipt convergence from promoted R489 browser proof');
 assert.ok(local.includes('OMEGA_GOVERNED_BUILD_RECEIPT_V1')&&local.includes('data-r495-operational-truth'),'local package proof must bind exact receipt and canonical OMEGA7 Home before upload');
 
 for(const token of [
@@ -56,4 +59,4 @@ for(const token of [
 assert.ok(r202.includes("tests/r489-live-visible-capability-browser-e2e.mjs"),'R491 must keep visible/native proof inside post-promotion R202 acceptance');
 assert.ok(r202.includes('R489 exact-production visible capability proof failed'),'R491 post-promotion visible failure must remain release-blocking');
 
-console.log('R491/R496 NATIVE ASSET COHERENCE PASS · one native host · exact package browser proof before upload · no false staged ASSETS claim · sole-100% promotion convergence · promoted visible/executor proof · R202 authority retained');
+console.log('R491/R496/R497 NATIVE ASSET COHERENCE PASS · one native host · exact package browser proof before upload · no false staged ASSETS claim · sole-100% promotion convergence · promoted visible/executor proof · R202 authority retained');
