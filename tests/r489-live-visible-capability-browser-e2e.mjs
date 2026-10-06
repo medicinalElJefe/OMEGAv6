@@ -31,6 +31,16 @@ try{
   await app.waitFor({state:'visible',timeout:30000});
   if(await page.locator('main.r71-home').count())throw new Error(`${label}: plain canonical URL still mounted OMEGAv6 instead of OMEGA7`);
 
+  const operational=page.locator('.o7-operational-truth[data-r495-operational-truth="true"]');
+  await operational.waitFor({state:'visible',timeout:20000});
+  await page.waitForFunction(()=>{const el=document.querySelector('.o7-operational-truth[data-r495-operational-truth="true"]');return Boolean(el&&el.getAttribute('data-r495-state')!=='loading')},{timeout:20000});
+  const operationalText=(await operational.innerText()).toLocaleLowerCase();
+  for(const token of ['live operational truth','what is actually running right now','production','source','worker','device','evidence & proof','system'])if(!operationalText.includes(token))throw new Error(`${label}: R495 operational truth missing rendered label ${token}`);
+  const operationalState=await operational.getAttribute('data-r495-state');
+  if(!['ready','partial'].includes(operationalState||''))throw new Error(`${label}: R495 operational truth did not reach bounded terminal state: ${operationalState||'NONE'}`);
+  await operational.getByRole('button',{name:'Refresh',exact:true}).click();
+  await page.waitForFunction(()=>{const button=[...document.querySelectorAll('.o7-operational-truth button')].find(x=>x.textContent?.trim()==='Refresh');return Boolean(button&&!button.hasAttribute('disabled'))},{timeout:20000});
+
   const recovered=page.locator('.o7-recovered[data-r486-visible-convergence="true"]');
   await recovered.waitFor({state:'visible',timeout:20000});
   const initialText=await recovered.innerText(),initialTextNormalized=initialText.toLocaleLowerCase();
@@ -100,5 +110,5 @@ try{
   if(assetFailures.length||requestFailures.length)throw new Error(`${label}: R489 native asset delivery failures: ${[...assetFailures,...requestFailures].join(' | ').slice(0,3000)}`);
   await context.close();
  }
- console.log(`R489 LIVE VISIBLE CAPABILITY PASS · exact promoted SHA ${expectedSha} · plain canonical URL defaults OMEGA7 · R486 recovered fabric counts/states match · all seven groups visible/nonempty · R142/R125 lineage proof exposed · Earth/Workspace/System Atlas executors navigate · desktop/mobile no overflow/page errors`);
+ console.log(`R489 LIVE VISIBLE CAPABILITY PASS · exact promoted SHA ${expectedSha} · plain canonical URL defaults OMEGA7 · R486 recovered fabric counts/states match · all seven groups visible/nonempty · R142/R125 lineage proof exposed · R495 live operational truth terminal/readable · Earth/Workspace/System Atlas executors navigate · desktop/mobile no overflow/page errors`);
 }finally{await browser.close()}
