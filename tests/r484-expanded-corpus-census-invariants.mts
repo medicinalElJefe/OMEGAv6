@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {expandedCorpusCensusR484,auditExpandedCorpusCensusR484} from '../src/system/expandedCorpusCensusR484';
+const rows=expandedCorpusCensusR484(),a=auditExpandedCorpusCensusR484(rows);
+assert.equal(a.exhaustive,false);assert.equal(a.archiveListingComplete,false);
+assert.equal(a.registeredArchiveFamilies,22);assert.equal(a.softwareLedgerDeclaredRows,100);
+assert.ok(a.recoveredSoftwareRows>a.registeredArchiveFamilies,'software recovery ledger must demonstrate corpus breadth beyond AG registry');
+assert.ok(a.visibleArchiveListingRows>=100,'known incomplete archive listing must remain represented');
+assert.ok(a.unresolved.length>0,'unresolved discoveries must be retained');
+assert.ok(rows.some(x=>x.identity==='Omega Sovereign Runtime'&&x.retention==='RETAIN'));
+assert.ok(rows.some(x=>x.identity==='OMEGA_ALPHA_MICRO_BUILD_v1'&&x.retention==='RETAIN'));
+assert.ok(rows.some(x=>x.identity==='Echo-Chamber / SOMA Audio Engine'&&x.retention==='RETAIN'));
+assert.ok(rows.some(x=>x.identity==='OMEGA_GENERATIVE_PATH_TRACED_4K_WORKSTATION_v16.zip'&&x.retention==='RETAIN_UNRESOLVED'));
+assert.ok(a.laws.includes('NEWLY_RECOVERED_TRUE_IDENTITY_IS_RETAINED'));
+assert.ok(rows.every(x=>x.canonicalMutation===false));
+console.log(`R484 EXPANDED CORPUS CENSUS PASS · ${a.totalRecords} records · ${a.registeredArchiveFamilies} AG families · ${a.recoveredSoftwareRows} recovered systems · ${a.visibleArchiveListingRows} visible archive items · exhaustive=false`);
