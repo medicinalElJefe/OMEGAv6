@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {corpusExpansionAuditR484,corpusAuthoritiesR484,discoveredSoftwareRowsR484} from '../src/system/corpusExpansionAuditR484';
+const a=corpusExpansionAuditR484(),auth=corpusAuthoritiesR484(),rows=discoveredSoftwareRowsR484();
+assert.equal(a.exhaustiveCorpusKnown,false);assert.equal(a.coveragePercentage,null);
+assert.equal(a.known.agFamilies,22);assert.equal(a.known.softwareLedgerRows,100);
+assert.ok(a.known.visibleArchiveItems>=100);assert.ok(a.known.sourceAuthorities>=4);
+assert.ok(auth.some(x=>x.id==='R83_SOFTWARE2_VISIBLE'&&!x.exhaustive));
+assert.equal(rows.length,100);
+assert.ok(a.unresolved.softwareRowsOutsideAg.length>0,'100-row software ledger must expose unresolved material beyond AG registry');
+assert.ok(a.unresolved.visibleItemsNotExactAgArtifacts.length>0,'incomplete visible archive listing must remain independent evidence');
+assert.ok(a.laws.includes('NO_CORPUS_COMPLETION_PERCENTAGE_WITHOUT_EXHAUSTIVE_DENOMINATOR'));
+assert.equal(a.canonicalMutation,false);
+console.log(`R484 CORPUS EXPANSION AUDIT PASS · 22 AG families vs 100 recovered software rows · ${a.unresolved.softwareRowsOutsideAg.length} software rows unresolved outside AG · exhaustive denominator intentionally unknown`);
