@@ -8,7 +8,7 @@ async function openRoute(page,name){
 }
 async function desktop(browser){
  const context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage();
- await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
+ await page.goto(base+'/?omega6=1',{waitUntil:'domcontentloaded',timeout:30000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
  await openRoute(page,'Convergence');await page.waitForSelector('.r168-restoration',{timeout:20000});
  const text=await page.locator('.r168-restoration').innerText();
  for(const token of ['R168 · FULL RESTORATION / CURRENT EXECUTION CONVERGENCE','CURRENT SUCCESSOR EXECUTION · R48/R153/R168','TRUTH GATED','R166 DEVELOPMENT RESIDUAL → LIVING WORLD','R169 FEDERATION ATTESTATION → R136/R134 WORLD SCAR','12 MASTER OPERATIONAL INTENTS'])if(!text.includes(token))throw new Error(`R168 desktop missing ${token}`);
@@ -23,7 +23,7 @@ async function desktop(browser){
 }
 async function mobile(browser){
  const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage();
- await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
+ await page.goto(base+'/?omega6=1',{waitUntil:'domcontentloaded',timeout:30000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
  await openRoute(page,'Convergence');await page.waitForSelector('.r168-restoration',{timeout:20000});
  const rect=await page.locator('.r168-restoration').boundingBox();if(!rect||rect.width<280||rect.width>390)throw new Error(`R168 mobile containment bad ${JSON.stringify(rect)}`);
  if(await page.locator('.r168-menus button').count()!==12)throw new Error('R168 mobile master intent count changed');
