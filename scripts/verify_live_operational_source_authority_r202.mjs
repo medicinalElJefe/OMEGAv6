@@ -43,4 +43,7 @@ if(promoted){
  const earthTotal=spawnSync(process.execPath,['tests/r372-live-earth-total-interaction-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
  if(earthTotal.error)throw earthTotal.error;
  if(earthTotal.status!==0)throw new Error(`R372 exact-production Earth total interaction proof failed with exit ${earthTotal.status}`);
+ const visible=spawnSync(process.execPath,['tests/r489-live-visible-capability-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+ if(visible.error)throw visible.error;
+ if(visible.status!==0)throw new Error(`R489 exact-production visible capability proof failed with exit ${visible.status}`);
 }
