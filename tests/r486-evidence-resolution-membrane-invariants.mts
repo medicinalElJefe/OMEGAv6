@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';import {resolveEvidenceR486,R486_LAWS} from '../src/system/evidenceResolutionMembraneR486';
+const now='2026-10-06T04:10:00Z',target='sha:52540986c75fe564ea968f85585aa71e7c178670';
+const obs=(result:'OBSERVED'|'NOT_OBSERVED',complete:'EXHAUSTIVE_FOR_DECLARED_SCOPE'|'PARTIAL',ids:string[]=[] )=>({observerId:'o',source:'s',eventClassesVisible:['push'],filters:['exact target'],completeness:complete,result,evidenceIds:ids,blindSpots:complete==='PARTIAL'?['workflow_dispatch']:[]});
+const base={targetIdentity:target,observedAt:'2026-10-06T04:09:00Z',maxAgeMs:300000,available:true} as const;
+assert.equal(resolveEvidenceR486({targetIdentity:target,now,channels:[{...base,id:'live',authority:'RUNTIME_RECEIPT',observer:obs('OBSERVED','EXHAUSTIVE_FOR_DECLARED_SCOPE',['receipt'])}]}).state,'RESOLVED_PRESENT');
+assert.equal(resolveEvidenceR486({targetIdentity:target,now,channels:[{...base,id:'partial',authority:'RUNTIME_RECEIPT',observer:obs('NOT_OBSERVED','PARTIAL')}]}).state,'UNRESOLVED');
+assert.equal(resolveEvidenceR486({targetIdentity:target,now,channels:[{...base,id:'absent',authority:'SIGNED_SOURCE',observer:obs('NOT_OBSERVED','EXHAUSTIVE_FOR_DECLARED_SCOPE')}]}).state,'RESOLVED_ABSENT');
+assert.equal(resolveEvidenceR486({targetIdentity:target,now,channels:[{...base,id:'p',authority:'RUNTIME_RECEIPT',observer:obs('OBSERVED','EXHAUSTIVE_FOR_DECLARED_SCOPE',['x'])},{...base,id:'n',authority:'SIGNED_SOURCE',observer:obs('NOT_OBSERVED','EXHAUSTIVE_FOR_DECLARED_SCOPE')}]}).state,'CONTRADICTED');
+assert.equal(resolveEvidenceR486({targetIdentity:target,now,channels:[{...base,id:'stale',authority:'EMPIRICAL',observedAt:'2026-10-06T03:00:00Z',observer:obs('OBSERVED','EXHAUSTIVE_FOR_DECLARED_SCOPE',['old'])}]}).state,'STALE');
+assert.equal(resolveEvidenceR486({targetIdentity:target,now,channels:[{...base,id:'wrong',authority:'EMPIRICAL',targetIdentity:'sha:wrong',observer:obs('OBSERVED','EXHAUSTIVE_FOR_DECLARED_SCOPE',['x'])}]}).state,'UNRESOLVED');
+assert.ok(R486_LAWS.includes('RESOLUTION_IS_NOT_CANONICAL_ADMISSION'));console.log('R486 EVIDENCE RESOLUTION PASS');
