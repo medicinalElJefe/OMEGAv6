@@ -95,7 +95,7 @@ async function runViewport(browser,name,viewport){
  const badResponses=[];
  page.on('pageerror',e=>pageErrors.push(`${activeRoute} :: ${String(e)}`));
  page.on('response',response=>{if(response.status()>=400)badResponses.push(`${activeRoute} :: HTTP ${response.status()} ${new URL(response.url()).pathname}`)});
- await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});
+ await page.goto(base+'/?omega6=1',{waitUntil:'domcontentloaded',timeout:30000});
  await page.waitForSelector('main.r71-home, .omega-workstation-v2',{timeout:30000});
  for(const route of routes){
   activeRoute=route;

@@ -324,7 +324,7 @@ try{
       };
       globalThis.__omegaR286HasListener=(el,type)=>registry.get(el)?.has(String(type))===true;
     });
-    await page.goto(`${base}/?r313-panels=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(`${base}/?omega6=1&r313-panels=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
     await openNavigator(page);
     if(shardIndex===0){

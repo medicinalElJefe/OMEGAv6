@@ -33,7 +33,7 @@ await page.route('**/api/hybrid/status',route=>route.fulfill({status:200,content
 await page.route('**/api/missions',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,state:'VERIFIED_DEVICE_ONLINE',missions:[]})}));
 await page.addInitScript(()=>localStorage.setItem('omega:hybrid:selectedDeviceId','dev-a'));
 
-await page.goto(base,{waitUntil:'networkidle'});
+await page.goto(base+'/?omega6=1',{waitUntil:'networkidle'});
 await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
 const hybridEntry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid'}).first();
 await hybridEntry.waitFor({state:'visible'});await hybridEntry.click();

@@ -20,7 +20,8 @@ class AppBoundary extends Component<{children:ReactNode;onHome:()=>void},Boundar
 
 function App(){
  const[home,setHome]=useState(true);
- const[omega7,setOmega7]=useState(()=>{try{return new URLSearchParams(window.location.search).get('omega7')==='1'||window.localStorage.getItem('omega7.enabled')==='true'}catch{return false}});
+ const[omega7,setOmega7]=useState(()=>{try{const params=new URLSearchParams(window.location.search),explicit=params.get('omega7');if(params.get('omega6')==='1'||explicit==='0')return false;if(explicit==='1')return true;return window.localStorage.getItem('omega7.enabled')!=='false'}catch{return true}});
+ useEffect(()=>{if(omega7)safeStore('omega7.enabled','true')},[omega7]);
 
  useEffect(()=>{installLivingWorldOperationBridgeR140();installRuntimeAttestationWorldScarR145();installDurableWorldHeadContinuityR149();installReflexOperationIngressR160();const stopMissionWorldBinding=installMissionWorldHeadBindingR208();const stopFederationObserver=installFederationLedgerWorldObserverR173();const stopProofMembrane=installLivingWorldProofMembraneR1901();const stopIntelligenceProof=installLivingWorldIntelligenceProofR196();const stopEvidenceScene=installEvidenceBoundSceneIngressR2022();return()=>{stopEvidenceScene();stopIntelligenceProof();stopProofMembrane();stopFederationObserver();stopMissionWorldBinding()}},[]);
 
@@ -32,7 +33,7 @@ function App(){
   safeStore('omega.v6.panel',JSON.stringify(panel));setHome(false);
  };
  const openLegacyFromOmega7=(name:string)=>{safeStore('omega7.lastRoute',name);setOmega7(false);navigate(name)};
- const exitOmega7=()=>{try{window.localStorage.removeItem('omega7.enabled')}catch{}setOmega7(false);setHome(true)};
+ const exitOmega7=()=>{safeStore('omega7.enabled','false');setOmega7(false);setHome(true)};
  const fallback=<div className='r319-bounded-loading' role='status' aria-live='polite' aria-busy='true'><span>{home?'Starting OMEGA…':'Opening workspace…'}</span></div>;
 
  if(omega7)return <Omega7Root onOpenLegacyRoute={openLegacyFromOmega7} onExitToV6={exitOmega7}/>;

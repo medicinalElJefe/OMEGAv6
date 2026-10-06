@@ -9,7 +9,7 @@ await page.route('**/api/status',route=>route.fulfill({status:200,contentType:'a
 await page.route('**/api/hybrid/status',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({state:'DEVICE_PROOF_REQUIRED',nativeExecutionClaimed:false,paired:false,devices:[],jobs:[],missions:[]})}));
 await page.route('**/omega-federation.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({schema:'OMEGA_TEST',nodes:[]})}));
 
-await page.goto(base,{waitUntil:'networkidle'});
+await page.goto(base+'/?omega6=1',{waitUntil:'networkidle'});
 for(const text of ['All tools','System map','FOCUS','DEEP'])if(!(await page.getByText(text,{exact:true}).count()))throw new Error(`R239 Home missing ${text}`);
 const initialStartHere=page.locator('.r132-primary-strip');
 await initialStartHere.waitFor({state:'visible'});

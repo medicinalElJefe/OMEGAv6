@@ -54,7 +54,7 @@ async function prove(viewportName,contextOptions){
  const page=await context.newPage();
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  try{
-  await page.goto(`${base}/?r311menus=${Date.now()}-${viewportName}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?omega6=1&r311menus=${Date.now()}-${viewportName}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   await openNavigator(page);
 

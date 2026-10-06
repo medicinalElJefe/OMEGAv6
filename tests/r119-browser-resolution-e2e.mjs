@@ -65,7 +65,7 @@ async function runViewport(browser,name,viewport,deviceScaleFactor){
  const context=await browser.newContext({viewport,deviceScaleFactor});
  const page=await context.newPage();
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
- await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});
+ await page.goto(base+'/?omega6=1',{waitUntil:'domcontentloaded',timeout:30000});
  await page.waitForSelector('main.r71-home',{timeout:30000});
  const home=await assertR119Canvas(page,'.r71-home');
  console.log(`R119 ${name} HOME · ${home.profile} · ${home.w}x${home.h} backing · ${home.backing} pixels`);

@@ -119,14 +119,16 @@ LEGACY_RETIRED is forbidden unless parity proof is current and rollback remains 
 
 ## Activation
 
-The current foundation is opt-in while it is being proved:
+OMEGA7 is the canonical default product shell.
 
-- query: `?omega7=1`
-- local preference: `omega7.enabled=true`
+- plain canonical URL: OMEGA7
+- explicit compatibility rollback: the OMEGA7 **OMEGA6** control persists `omega7.enabled=false`
+- one-shot compatibility URL: `?omega6=1`
+- explicit successor re-entry: `?omega7=1`, which restores `omega7.enabled=true`
 
-The existing OMEGAv6 product remains the default until OMEGA7 completes the parity and reliability gates.
+OMEGAv6 remains available as the accepted compatibility and rollback surface; it no longer silently defines the plain production entrypoint.
 
-## Release gates before OMEGA7 becomes default
+## Release gates retained for OMEGA7 default
 
 1. 44/44 capability inheritance accounted for.
 2. No primary control without an observable result or explicit held state.

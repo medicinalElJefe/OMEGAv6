@@ -17,7 +17,7 @@ async function prove(viewport,label){
  const page=await context.newPage();
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  try{
-  await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});
+  await page.goto(base+'/?omega6=1',{waitUntil:'domcontentloaded',timeout:30000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   await openRoute(page,'Matter Traversal');
   const deep=page.getByRole('button',{name:/DEEP MATTER/});

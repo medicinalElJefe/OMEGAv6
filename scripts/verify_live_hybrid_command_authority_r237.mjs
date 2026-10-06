@@ -102,7 +102,7 @@ const browser=await chromium.launch({headless:true});
 const context=await browser.newContext({viewport:{width:1440,height:1100},extraHTTPHeaders:versionOverrideHeaders});
 const page=await context.newPage();
 const pageErrors=[];page.on('pageerror',error=>pageErrors.push(String(error)));
-await page.goto(base+'/',{waitUntil:'domcontentloaded'});
+await page.goto(base+'/?omega6=1',{waitUntil:'domcontentloaded'});
 await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).waitFor({state:'visible'});
 await page.locator('.r132-inspector-tabs').getByRole('button',{name:'TOOLS',exact:true}).click();
 const hybridEntry=page.locator('.r96-quick-card button').filter({hasText:'Hybrid'}).first();

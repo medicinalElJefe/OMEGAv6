@@ -12,7 +12,7 @@ try{
     hasTouch:true
   });
   const page=await context.newPage();
-  await page.goto(`${base}/?r313-modes-scroll-diagnostic=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?omega6=1&r313-modes-scroll-diagnostic=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45000});
 
   await page.waitForSelector('.r94-side-navigator,button[aria-label="Expand OMEGA navigator"],.r89-flat-route',{timeout:30000});
   if(!(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))){

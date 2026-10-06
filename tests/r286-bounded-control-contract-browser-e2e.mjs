@@ -46,7 +46,7 @@ try{
    const context=await browser.newContext(options);
    const page=await context.newPage();
    const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
-   await page.goto(`${base}/?r286-bounded=${Date.now()}-${profile}`,{waitUntil:'domcontentloaded',timeout:45000});
+   await page.goto(`${base}/?omega6=1&r286-bounded=${Date.now()}-${profile}`,{waitUntil:'domcontentloaded',timeout:45000});
    await page.waitForFunction(()=>Boolean(
      document.querySelector('button[aria-label="Expand OMEGA navigator"]') ||
      document.querySelector('.r89-flat-route')

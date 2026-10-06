@@ -29,7 +29,7 @@ try{
   page.on('pageerror',e=>pageErrors.push(String(e)));
   page.on('requestfailed',r=>failed.push(`${r.method()} ${r.url()} :: ${r.failure()?.errorText||'failed'}`));
   let observeMutation=false;page.on('request',r=>{if(observeMutation&&['POST','PUT','PATCH','DELETE'].includes(r.method()))mutating.push(`${r.method()} ${r.url()}`)});
-  await page.goto(`${base}/?r241=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
+  await page.goto(`${base}/?omega6=1&r241=${Date.now()}-${name}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
   observeMutation=true;
   await openDeepVisual(page,name);

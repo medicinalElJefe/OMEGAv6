@@ -13,7 +13,7 @@ const sample={id:'R282-BROWSER-SAMPLE',domain:2,layer:5,variable:'pressure_fixtu
 async function prove(viewport,label){
  const browser=await chromium.launch({headless:true});const context=await browser.newContext({viewport});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  try{
-  await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});await openRoute(page,'Matter Traversal');
+  await page.goto(base+'/?omega6=1',{waitUntil:'domcontentloaded',timeout:30000});await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});await openRoute(page,'Matter Traversal');
   const deep=page.getByRole('button',{name:/DEEP MATTER/});await deep.first().waitFor({state:'visible',timeout:20000});await deep.first().click();await page.waitForFunction(()=>document.querySelector('.r43-workspace-stage')?.getAttribute('data-view')==='DEEP',{timeout:20000});
   await page.waitForSelector('.r46-bio .bio281 .bio282',{state:'visible',timeout:20000});
   const medical=page.locator('.bio282'),surface=page.locator('.bio281'),release=medical.locator('.bio282-release');

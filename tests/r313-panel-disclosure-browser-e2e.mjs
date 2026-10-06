@@ -186,7 +186,7 @@ try{
     const context=await browser.newContext({viewport,deviceScaleFactor:1});
     const page=await context.newPage();
     const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-    await page.goto(`${base}/?r313-panel-disclosure=${Date.now()}-${viewportName}-s${shardIndex+1}`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(`${base}/?omega6=1&r313-panel-disclosure=${Date.now()}-${viewportName}-s${shardIndex+1}`,{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
     for(const route of assignedRoutes){
       await openRoute(page,route);
