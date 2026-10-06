@@ -9,6 +9,7 @@ STATUS_JSON="$TMP_DIR/deployment-status.json"
 WRANGLER_NDJSON="$TMP_DIR/wrangler-output.ndjson"
 PREVIOUS_VERSION_ID=''
 CANDIDATE_VERSION_ID=''
+LOCAL_PREVIEW_PID=''
 
 assert_current_main_owner(){
   if [[ "${GITHUB_REF:-}" != "refs/heads/main" ]]; then return 0; fi
@@ -52,7 +53,14 @@ NODE
 }
 
 
-cleanup(){ rm -rf "$TMP_DIR"; }
+cleanup(){
+  if [[ -n "${LOCAL_PREVIEW_PID:-}" ]]; then
+    kill "$LOCAL_PREVIEW_PID" >/dev/null 2>&1 || true
+    wait "$LOCAL_PREVIEW_PID" >/dev/null 2>&1 || true
+    LOCAL_PREVIEW_PID=''
+  fi
+  rm -rf "$TMP_DIR"
+}
 restore_previous_on_error(){
   local rc=$?
   trap - ERR
@@ -143,6 +151,34 @@ const actual=String(receipt?.source?.sha||'');
 if(actual!==expected)throw new Error(`exact staged build receipt mismatch ${actual||'NONE'} != ${expected}`);
 console.log(`Exact staged build receipt bound to ${actual}.`);
 NODE
+
+# R496: Cloudflare's version override selects Worker code, not the canonical
+# ASSETS binding. Prove the exact packaged browser surface locally from the
+# same dist directory that will be uploaded; do not mislabel old production
+# assets as the 0%-traffic candidate.
+npm install --no-save playwright@1.63.0
+npx playwright install --with-deps chromium
+npx vite preview --host 127.0.0.1 --port 4173 > "$TMP_DIR/r496-local-preview.log" 2>&1 &
+LOCAL_PREVIEW_PID=$!
+LOCAL_PREVIEW_READY=0
+for attempt in $(seq 1 40); do
+  if curl -fsS "http://127.0.0.1:4173/?r496=$attempt" >/dev/null; then
+    LOCAL_PREVIEW_READY=1
+    break
+  fi
+  sleep 1
+done
+if [[ "$LOCAL_PREVIEW_READY" != "1" ]]; then
+  cat "$TMP_DIR/r496-local-preview.log" || true
+  echo "::error title=LOCAL CANDIDATE PREVIEW FAILED::Exact packaged candidate did not become browser-readable."
+  false
+fi
+OMEGA_E2E_URL="http://127.0.0.1:4173" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" node tests/r200-current-browser-proof-e2e.mjs
+OMEGA_E2E_URL="http://127.0.0.1:4173" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" node tests/r496-local-omega7-candidate-browser-e2e.mjs
+kill "$LOCAL_PREVIEW_PID" >/dev/null 2>&1 || true
+wait "$LOCAL_PREVIEW_PID" >/dev/null 2>&1 || true
+LOCAL_PREVIEW_PID=''
+echo "R496 exact packaged browser proof passed before candidate upload."
 
 WRANGLER_OUTPUT_FILE_PATH="$WRANGLER_NDJSON" npx wrangler versions upload --name "$WORKER_NAME" --message "OMEGA staged candidate $GITHUB_SHA"
 CANDIDATE_VERSION_ID="$(node - "$WRANGLER_NDJSON" <<'NODE'
@@ -255,28 +291,18 @@ NODE
   fi
 fi
 
-# verify_staged_release.mjs invokes R202, which itself executes the R284
-# browser proof.  The Playwright package and Chromium executable therefore
-# must exist before the semantic verifier begins, not only before the later
-# R200 browser proof.
-npm install --no-save playwright@1.63.0
-npx playwright install --with-deps chromium
-
+# R496: the 0%-traffic remote phase proves only Worker-addressable semantics.
+# Canonical static assets remain owned by the serving production deployment
+# until promotion, so remote browser/receipt claims are deliberately deferred.
 OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_staged_release.mjs
-
-OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node tests/r200-current-browser-proof-e2e.mjs
-
-# R491: prove the canonical-default OMEGA7 shell and its content-hashed lazy
-# executor graph while the candidate is still isolated at 0% ordinary traffic.
-OMEGA_WORKER_VERSION_ID="$CANDIDATE_VERSION_ID" OMEGA_WORKER_NAME="$WORKER_NAME" node scripts/verify_omega7_asset_coherence_r491.mjs staged
 
 if [[ "$STAGING_MODE" == "ZERO_PERCENT_OVERRIDE" ]]; then
   assert_current_main_owner
-  echo "Off-traffic semantic + browser proof passed; promoting exact candidate to 100%."
+  echo "Exact packaged browser proof + off-traffic Worker semantic proof passed; promoting exact candidate to 100%."
   npx wrangler versions deploy "${CANDIDATE_VERSION_ID}@100%" --name "$WORKER_NAME" --message "OMEGA exact proved promotion $GITHUB_SHA" -y
 else
   assert_current_main_owner
-  echo "R322 forward-recovery semantic + browser proof passed on the exact 100% candidate."
+  echo "R322 forward-recovery packaged-browser + Worker-semantic proof passed on the exact 100% candidate."
 fi
 
 # R491: wait until deployment metadata reports exactly one serving version,
