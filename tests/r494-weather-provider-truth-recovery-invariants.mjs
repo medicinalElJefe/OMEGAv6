@@ -5,6 +5,9 @@ const r372=fs.readFileSync('tests/r372-live-earth-total-interaction-browser-e2e.
 const worker=fs.readFileSync('src/workerR8.js','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 
+// R493 production scar: exact promoted OMEGA passed canonical deployment and Hybrid proof,
+// then R372 received an external Open-Meteo 502 and the whole release rolled back.
+
 for(const token of [
  "function verifyWeatherUnavailable",
  "response.status()!==502",
