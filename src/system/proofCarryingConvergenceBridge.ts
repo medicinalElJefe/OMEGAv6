@@ -24,7 +24,7 @@ export function compilePcwdR356CandidateV1(packet:WovenStatePacketV1,identity:R3
    invariantFailure:p.gates.invariantsPreserved!==true||p.gates.continuityValid!==true,
    proofConflict:p.gates.recoveryBounded!==true||p.gates.dynamicsBounded!==true||p.gates.observablesBounded!==true||p.gates.pathRecoverable!==true,
   },
-  atlas360:identity.atlas360||{},
+  atlas360:identity.atlas360||{leafIndex:packet.A_t.address,theta:0,execution:{activeAddresses:[packet.A_t.address],bearingStep:1},observerBearingSource:'NEUTRAL_REFERENCE_FRAME_NOT_MEASUREMENT'},
  };
 }
 export async function convergeProofCarryingR356V1(args:{observations:R356ObservationV1[];packet:WovenStatePacketV1;identity:R356CandidateIdentityV1;scarLedger?:unknown[]}){
