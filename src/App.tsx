@@ -20,7 +20,8 @@ class AppBoundary extends Component<{children:ReactNode;onHome:()=>void},Boundar
 
 function App(){
  const[home,setHome]=useState(true);
- const[omega7,setOmega7]=useState(()=>{try{const params=new URLSearchParams(window.location.search),explicit=params.get('omega7');if(params.get('omega6')==='1'||explicit==='0')return false;if(explicit==='1')return true;return window.localStorage.getItem('omega7.enabled')!=='false'}catch{return true}});\n useEffect(()=>{if(omega7)safeStore('omega7.enabled','true')},[omega7]);
+ const[omega7,setOmega7]=useState(()=>{try{const params=new URLSearchParams(window.location.search),explicit=params.get('omega7');if(params.get('omega6')==='1'||explicit==='0')return false;if(explicit==='1')return true;return window.localStorage.getItem('omega7.enabled')!=='false'}catch{return true}});
+ useEffect(()=>{if(omega7)safeStore('omega7.enabled','true')},[omega7]);
 
  useEffect(()=>{installLivingWorldOperationBridgeR140();installRuntimeAttestationWorldScarR145();installDurableWorldHeadContinuityR149();installReflexOperationIngressR160();const stopMissionWorldBinding=installMissionWorldHeadBindingR208();const stopFederationObserver=installFederationLedgerWorldObserverR173();const stopProofMembrane=installLivingWorldProofMembraneR1901();const stopIntelligenceProof=installLivingWorldIntelligenceProofR196();const stopEvidenceScene=installEvidenceBoundSceneIngressR2022();return()=>{stopEvidenceScene();stopIntelligenceProof();stopProofMembrane();stopFederationObserver();stopMissionWorldBinding()}},[]);
 
