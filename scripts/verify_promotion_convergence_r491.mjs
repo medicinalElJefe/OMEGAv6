@@ -51,7 +51,7 @@ for(let attempt=1;attempt<=15;attempt++){
     const edge=await canonicalReceipt(attempt);
     lastReceipt=edge.detail;
     if(edge.exact){
-     console.log(`R493 PROMOTION EDGE CONVERGENCE PASS · attempt ${attempt} · exact candidate ${candidate} alone at ${rows[0].pct}% · canonical receipt ${expected}`);
+     console.log(`R491 PROMOTION CONVERGENCE PASS · R493 EDGE RECEIPT BOUND · attempt ${attempt} · exact candidate ${candidate} alone at ${rows[0].pct}% · canonical receipt ${expected}`);
      process.exit(0);
     }
     console.log(`R493 promotion metadata ready on attempt ${attempt}, canonical receipt pending: ${edge.detail}`);
