@@ -15,7 +15,7 @@ for(const token of [
 ])assert.ok(worker.includes(token),`R494 worker provider-error envelope missing ${token}`);
 
 for(const token of [
- "weatherResponse.status()===502",
+ "response.status()!==502",
  "Weather provider outage",
  "R494 weather provider-error truth envelope invalid",
  "R494 weather provider-error exact two-attempt scars missing",
@@ -27,7 +27,7 @@ for(const token of [
 ])assert.ok(live.includes(token),`R494 live proof missing truthful degradation token ${token}`);
 
 assert.equal(live.includes("if(!weatherResponse.ok())throw new Error"),false,'R494 must not equate a truthful upstream weather 502 with OMEGA runtime failure');
-assert.ok(live.includes("if(weatherResponse.ok())")&&live.includes("weather.hourly.length<24")&&live.includes("weather.daily.length<7"),'R494 must preserve full returned-weather acceptance when the provider succeeds');
+assert.ok(live.includes("if(response.ok())")&&live.includes("weather.hourly.length<24")&&live.includes("weather.daily.length<7"),'R494 must preserve full returned-weather acceptance when the provider succeeds');
 assert.ok(worker.includes("fetchPrimaryWeatherJson(source)")&&worker.includes("attempt<=2"),'R494 must preserve the bounded primary-source retry before admitting provider unavailable');
 assert.ok(live.includes("Number(om?.attemptCount)!==2")&&live.includes("om?.retried!==true")&&live.includes("om.attempts.length!==2"),'R494 provider-unavailable live proof must require the exact two-attempt primary-source scars');
 assert.ok(live.includes("waitForTimeout(750)")&&live.includes("name:'Refresh weather'"),'R494 must exercise exactly one bounded operator-style weather refresh after an outage');
