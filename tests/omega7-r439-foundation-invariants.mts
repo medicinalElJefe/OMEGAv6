@@ -40,7 +40,7 @@ const earth=fs.readFileSync('src7/workspaces/EarthWorkspaceR438.tsx','utf8');
 const command=fs.readFileSync('src7/workspaces/CommandWorkspaceR439.tsx','utf8');
 const lock=JSON.parse(fs.readFileSync('src7/omega7.lock.json','utf8'));
 
-assert.ok(app.includes("new URLSearchParams(window.location.search).get('omega7')==='1'"));
+for(const token of ["params.get('omega6')==='1'","explicit==='1'","window.localStorage.getItem('omega7.enabled')!=='false'","catch{return true}"])assert.ok(app.includes(token),`R489 canonical-default contract missing ${token}`);
 assert.ok(root.includes('OMEGA7_DOMAINS')&&root.includes('Standard')&&root.includes('Advanced')&&root.includes('Canon'));
 assert.ok(root.includes('isOmega7NativeRoute')&&root.includes('Omega7NativeSurface'));
 assert.ok(state.includes('OMEGA7_APP_STATE_SCHEMA'));
