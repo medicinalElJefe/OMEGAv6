@@ -49,6 +49,11 @@ try{
   const host=page.locator('.o7-native-host[data-native-host-route="Convergence"]');
   await host.waitFor({state:'visible',timeout:15000});
   await host.locator('.o7-native-workspace').waitFor({state:'visible',timeout:30000});
+  const opener=host.locator('.o7-open-instrument');
+  if(await opener.count()){
+   await opener.waitFor({state:'visible',timeout:10000});
+   await opener.click();
+  }
   const panel=host.locator('[data-r501-exact-traversal="true"]');
   await panel.waitFor({state:'visible',timeout:30000});
 
