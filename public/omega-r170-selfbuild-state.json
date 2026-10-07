@@ -1548,13 +1548,14 @@
       "sourceSchema": "OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164"
     }
   ],
-  "r388Generation": 5,
+  "r388Generation": 6,
   "r388AdvancedItemIds": [
     "R388-A-01",
     "R388-A-05",
     "R388-B-03",
     "R388-C-02",
-    "R388-C-05"
+    "R388-C-05",
+    "R388-C-03"
   ],
   "r388Receipts": [
     {
@@ -2752,6 +2753,108 @@
       "effective": false,
       "supersededBy": "R476-C04-TRUTH-RECONCILIATION",
       "supersessionReason": "FALSE_ADVANCEMENT_PRODUCT_PATCH_DID_NOT_IMPLEMENT_GROUND_STREET_PROVIDER_OR_FALLBACK_OBJECTIVE"
+    },
+    {
+      "schema": "OMEGA_CLOUDFLARE_R388_CONVERGENCE_RECEIPT",
+      "machineId": "CLOUD-01",
+      "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
+      "generatorContract": "R388_BACKLOG_AI_BUILD",
+      "convergenceGeneration": 6,
+      "itemId": "R388-C-03",
+      "section": "C",
+      "objective": "Seamless Earth → region → city → street → ground traversal with returned evidence where available.",
+      "externalProofRequired": false,
+      "targetPaths": [
+        "src/EarthObservatoryR8.tsx"
+      ],
+      "productPatchIdentity": {
+        "schema": "OMEGA_R430_PRODUCT_PATCH_IDENTITY",
+        "rows": [
+          {
+            "path": "src/EarthObservatoryR8.tsx",
+            "blobSha": "075ff2dc38f7634b923fe0d5430717f2777889a1"
+          }
+        ],
+        "key": "src/EarthObservatoryR8.tsx:075ff2dc38f7634b923fe0d5430717f2777889a1"
+      },
+      "baseSha": "9613c61c8257fcb81d893e22d45473aa51691b27",
+      "branch": "cloud/evolution-r388-r388-c-03-9613c61c",
+      "status": "SOURCE_ADVANCED_PENDING_PROOF",
+      "canonicalAdmission": false,
+      "directProductionMutation": false,
+      "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "expectedProofs": [
+        "R202 Operational Source Authority",
+        "R241 Archive Convergence Visual Intelligence"
+      ],
+      "reformulated": false,
+      "repairAttemptLedger": [
+        {
+          "attempt": 1,
+          "state": "VALIDATED_BOUNDED_PATCH",
+          "accepted": true,
+          "reasons": [],
+          "validation": {
+            "valid": true,
+            "changedChars": 124,
+            "fileCount": 1
+          },
+          "proposal": {
+            "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+            "residualId": "R388-C-03",
+            "files": [
+              {
+                "path": "src/EarthObservatoryR8.tsx",
+                "preimageSha": "e1f8fc1078a7ba324e1efb902149033a7b161eca",
+                "replacementCount": 1
+              }
+            ],
+            "canonicalAdmission": false,
+            "directProductionMutation": false,
+            "expectedProofs": [
+              "R202 Operational Source Authority",
+              "R241 Archive Convergence Visual Intelligence"
+            ],
+            "workerContextId": "R503:9613c61c8257fcb81d893e22d45473aa51691b27:R457:R170.2:R240:72",
+            "calculusContextId": "R503:9613c61c8257fcb81d893e22d45473aa51691b27:R457:R170.2:R240:72",
+            "appliedCalculus": [
+              "SENSE",
+              "NORMALIZE",
+              "PARTITION"
+            ],
+            "selectedAlternative": "Improve ground evidence traversal",
+            "decision": "TURN",
+            "decisionRationale": "The selected alternative improves the ground evidence traversal, which is a key aspect of the Earth Observatory feature.",
+            "developmentalDelta": {
+              "authorityFragmentationRisk": 0.005,
+              "autonomyGain": 0.05,
+              "capabilityGain": 0.2,
+              "coherenceGain": 0.1,
+              "duplicationRisk": 0.005,
+              "intendedResidual": "R388-C-03",
+              "recoverabilityGain": 0.05,
+              "regressionRisk": 0.01,
+              "targetCapability": "EarthGroundTraversalR9",
+              "usabilityGain": 0.1
+            }
+          }
+        }
+      ],
+      "rejectionScars": [],
+      "declinedItemScars": [],
+      "createdAt": "2026-10-07T04:56:37.480Z",
+      "authorityBoundaries": {
+        "canonAdmission": "R125",
+        "dispatch": "R147",
+        "durableHistory": "R146",
+        "hybridReturnProof": "R141",
+        "productionDeploymentWorkflow": "ci.yml",
+        "evolutionHost": "CLOUDFLARE_WORKER",
+        "retiredDurableObjects": [
+          "R201",
+          "R203"
+        ]
+      }
     }
   ],
   "r388CanonicalAdvancements": [
