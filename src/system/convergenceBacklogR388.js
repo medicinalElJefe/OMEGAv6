@@ -172,7 +172,7 @@ export function parseConvergenceBacklogR388(markdown=''){
    completed,
    affected,
    acceptanceContract,
-   expectedProofs:[...(PROOFS[section]||['OMEGA Cloud Bridge CI'])],
+   expectedProofs:[...((Array.isArray(acceptanceContract?.requiredProofs)&&acceptanceContract.requiredProofs.length)?acceptanceContract.requiredProofs:(PROOFS[section]||['OMEGA Cloud Bridge CI']))],
    selfEditable:!NON_SELF_EDITABLE.has(section)&&affected.length>0,
    externalProofRequired:EXTERNAL.test(objective),
    canonicalAdmission:false,
