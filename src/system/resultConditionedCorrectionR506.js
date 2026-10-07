@@ -39,12 +39,15 @@ function anchorWindow(source,at,token){
  return{start,end,exact};
 }
 
-export function buildResultConditionedAnchorSurfaceR506({residual,stage,contextFiles=[],rejection}={}){
+export function buildResultConditionedAnchorSurfaceR506({residual,stage,contextFiles=[],rejection,proposal=null}={}){
  const rejectedText=(Array.isArray(rejection?.proposal?.files)?rejection.proposal.files:[])
   .flatMap(file=>(Array.isArray(file?.replacements)?file.replacements:[]).flatMap(row=>[row?.before,row?.after]))
   .join('\n');
+ const correctionText=(Array.isArray(proposal?.files)?proposal.files:[])
+  .flatMap(file=>(Array.isArray(file?.replacements)?file.replacements:[]).flatMap(row=>[row?.before,row?.after]))
+  .join('\n');
  const semanticText=JSON.stringify({residual,stage});
- const orderedTokens=[...new Set([...tokens(rejectedText),...tokens(semanticText)])].slice(0,64);
+ const orderedTokens=[...new Set([...tokens(rejectedText),...tokens(correctionText),...tokens(semanticText)])].slice(0,64);
  const files=[];
  for(const [fileIndex,context] of (contextFiles||[]).entries()){
   const source=String(context?.text??'');if(!source)continue;
@@ -105,7 +108,7 @@ export function bindResultConditionedCorrectionR506(proposal,{residual,stage,con
  if(!requiresResultConditionedReanchorR506(rejection)){
   return{schema:R506_RESULT_CONDITIONED_SOURCE_RECONCILIATION,activated:false,valid:true,reasons:[],proposal,surface:null,bindings:[]};
  }
- const surface=buildResultConditionedAnchorSurfaceR506({residual,stage,contextFiles,rejection});
+ const surface=buildResultConditionedAnchorSurfaceR506({residual,stage,contextFiles,rejection,proposal});
  const contexts=new Map((contextFiles||[]).map(file=>[pathText(file.path),file]));
  const rejectedFiles=new Map((Array.isArray(rejection?.proposal?.files)?rejection.proposal.files:[]).map(file=>[pathText(file.path),file]));
  const reasons=[],bindings=[];
@@ -145,6 +148,7 @@ export function bindResultConditionedCorrectionR506(proposal,{residual,stage,con
 
 export const R506_RESULT_CHANNEL_LAWS=Object.freeze([
  'REJECTION_RESULT_CHANGES_NEXT_CORRECTION_INPUT',
+ 'CORRECTION_RESULT_TOKENS_MAY_REANCHOR_TO_EXACT_CURRENT_SOURCE_WHEN_REJECTED_TOKEN_IS_STALE',
  'ZERO_OCCURRENCE_PREIMAGE_REQUIRES_CURRENT_SOURCE_REANCHOR',
  'CURRENT_SOURCE_SHA_IS_MACHINE_BOUND_NOT_MODEL_RECALLED',
  'EXPLICIT_ANCHOR_ID_OR_UNIQUE_TOKEN_MATCH_ONLY',
