@@ -8,6 +8,7 @@ import {R314_AI_REPAIR_MODEL_DEFAULT,repairPathPolicyR314} from '../../src/syste
 import {selectNextConvergenceItemR388,validateConvergenceRepairR450} from '../../src/system/convergenceBacklogR388.js';
 import {autonomousCandidatePrefixesR245,isAutonomousCandidateBranchR245,validateAutonomousCandidatePolicyR245,R245_CAPSULE_GENERATOR_REVISION,R245_GOVERNED_SELFBUILD_CONTRACT} from '../../src/system/governedSelfBuildContractR245.js';
 import {cloudCandidateResolutionR436} from './canonical-resolution-r436.mjs';
+import {buildCalculusNativeWorkerPacketR503} from '../../src/system/calculusNativeAutonomyR503.js';
 
 const API='https://api.github.com';
 function utf8ToBase64(value){const bytes=new TextEncoder().encode(String(value));let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s)}
@@ -162,6 +163,27 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const productionProof=(runs.workflow_runs||[]).find(r=>r.head_sha===mainSha&&r.status==='completed'&&r.conclusion==='success')||null;
   const stateFile=await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',mainSha);
   const state=await reconcileMainState(token,repo,mainSha,stateFile.json);
+  const [capabilityR503,executionR503,heightenedR503,governedR503]=await Promise.all([
+    getRepoTextFile(token,repo,'src/yearCorpusCapabilityGraphR474.ts',mainSha),
+    getRepoTextFile(token,repo,'src/yearCorpusExecutionR473.ts',mainSha),
+    getRepoFile(token,repo,'src7/heightenedModeR457.ledger.json',mainSha),
+    getRepoTextFile(token,repo,'src/system/governedSelfBuildContractR245.js',mainSha),
+  ]);
+  const workerContextR503=buildCalculusNativeWorkerPacketR503({
+    baseSha:mainSha,
+    capabilitySource:capabilityR503.text,
+    executionSource:executionR503.text,
+    heightenedLedger:heightenedR503.json,
+    selfBuildState:state,
+    governedSource:governedR503.text,
+    sourceRefs:{
+      'src/yearCorpusCapabilityGraphR474.ts':capabilityR503.sha,
+      'src/yearCorpusExecutionR473.ts':executionR503.sha,
+      'src7/heightenedModeR457.ledger.json':heightenedR503.sha,
+      'src/system/governedSelfBuildContractR245.js':governedR503.sha,
+      'public/omega-r170-selfbuild-state.json':stateFile.sha,
+    },
+  });
   const candidatePolicy=validateAutonomousCandidatePolicyR245(state.autonomousCandidatePolicy);
   const candidates=candidatePolicy.valid?await collectCandidates(token,repo,candidatePolicy.policy):[];
   let accuracyState={};try{accuracyState=(await getRepoFile(token,repo,'public/omega-r125-accuracy-state.json',mainSha)).json}catch{}
@@ -186,8 +208,8 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const repairId=selectedTarget.targetable?`R314-AI:${selectedTarget.residualId}:${selectedTarget.paths.join('|')}`:null;
   const retry=repairId?canAttemptRepairR314({history:state.r314RepairHistory||[],fingerprint:residualState.vector.fingerprint,repairId}):null;
   const repairTarget=selectedTarget.targetable&&retry&&!retry.allow?{...selectedTarget,targetable:false,reasons:[...selectedTarget.reasons,'R314_RETRY_BUDGET_EXHAUSTED']}:{...selectedTarget,repairId};
-  const decision=candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence,repairTarget,backlogTarget}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
-  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,durableCanonicalAdvancedItemIds,observedCanonicalAdvancedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},decision};
+  const decision=!workerContextR503.valid?{action:'OBSERVE_ONLY',reason:`R503 calculus-native worker packet invalid: ${workerContextR503.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}:candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence,repairTarget,backlogTarget}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
+  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,workerContextR503,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,durableCanonicalAdvancedItemIds,observedCanonicalAdvancedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},decision};
 }
 
 async function ensureNoCompetingCandidate(token,repo,state,mainSha){
@@ -199,7 +221,7 @@ async function proposeR314AiCycle({inspection,token,repo,ai,model}){
   const{mainSha,state,decision,r314}=inspection;const target=decision.repairTarget;
   if(!target?.targetable)return{...inspection,mutation:'NONE',reason:'R314 repair target is not targetable'};
   const contextFiles=[];for(const path of target.paths)contextFiles.push(await getRepoTextFile(token,repo,path,mainSha));
-  const stage={id:'CLOUD-01-R314-AI-REPAIR',baseSha:mainSha,residualFingerprint:r314.residualState.vector.fingerprint,repairId:target.repairId,paths:target.paths};
+  const stage={id:'CLOUD-01-R314-AI-REPAIR',baseSha:mainSha,residualFingerprint:r314.residualState.vector.fingerprint,repairId:target.repairId,paths:target.paths,calculusWorkerPacket:inspection.workerContextR503?.packet||null};
   const repair=await proposeAiRepairR314({ai,model:model||R314_AI_REPAIR_MODEL_DEFAULT,residual:target.residual,stage,contextFiles});
   if(!repair.ok)return{...inspection,mutation:'NONE',reason:repair.state,repair:{state:repair.state,reasons:repair.reasons||repair.validation?.reasons||[],attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true}};
   await ensureNoCompetingCandidate(token,repo,state,mainSha);
@@ -229,7 +251,7 @@ async function proposeR388BacklogCycle({inspection,token,repo,ai,model}){
   for(const target of targets){
     const item=target.item;lastItem=item;
     const contextFiles=[];for(const path of target.paths)contextFiles.push(await getRepoTextFile(token,repo,path,mainSha));
-    const stage={id:'CLOUD-01-R388-CONVERGENCE-BUILD',baseSha:mainSha,itemId:item.id,section:item.section,paths:target.paths,externalProofRequired:item.externalProofRequired===true,semanticAcceptanceContract:item.acceptanceContract||null};
+    const stage={id:'CLOUD-01-R388-CONVERGENCE-BUILD',baseSha:mainSha,itemId:item.id,section:item.section,paths:target.paths,externalProofRequired:item.externalProofRequired===true,semanticAcceptanceContract:item.acceptanceContract||null,calculusWorkerPacket:inspection.workerContextR503?.packet||null};
     const repair=await proposeAiRepairR314({ai,model:model||R314_AI_REPAIR_MODEL_DEFAULT,residual:target.residual,stage,contextFiles});
     lastRepair=repair;
     if(repair.ok){
