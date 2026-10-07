@@ -59,8 +59,9 @@ for(const token of [
  'contractReady=selfEditable.filter(x=>Boolean(x.acceptanceContract))',
  'heldNeedsAcceptanceContract',
  'needsAcceptanceContractCount',
- "targetingRevision:'R508'",
+ "targetingRevision:'R509'",
 ])assert.ok(source.includes(token),`R508 scheduler source missing ${token}`);
 assert.equal(source.includes('const eligible=selfEditable.filter'),false,'self-editability alone must never define autonomous eligibility again');
+assert.ok(source.includes('contractReady=selfEditable.filter(x=>Boolean(x.acceptanceContract))'),'R509 successor must preserve the R508 contract-readiness gate');
 
 console.log('R508 CONTRACT-READY CONVERGENCE PASS · uncontracted objectives are contract debt · D-02 excluded before AI · truthful mutation budget reaches zero');
