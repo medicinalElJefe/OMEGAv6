@@ -11,6 +11,7 @@ import {
   validateAiRepairProposalR314,
 } from '../../src/system/autonomousRepairPolicyR314.js';
 import {validateReasoningWorkerProposalR503} from '../../src/system/calculusNativeAutonomyR503.js';
+import {validateReasoningWorkerDecisionR504} from '../../src/system/calculusDecisionContinuityR504.js';
 
 export const R314_CLOUD_AI_REPAIR_SCHEMA='OMEGA_CLOUD_R314_AI_REPAIR';
 
@@ -58,7 +59,7 @@ export function prepareAiRepairR314({rawResponse,residual,contextFiles=[]}={}){
  return{ok:true,state:'VALIDATED_BOUNDED_PATCH',proposal,validation,patches};
 }
 
-const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR'||state==='NO_SAFE_PATCH';
+const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR'||state==='NO_SAFE_PATCH'||state==='BLOCKED_BY_R503_CALCULUS_LITERACY'||state==='BLOCKED_BY_R504_CALCULUS_DECISION';
 const attemptReceipt=(attempt,prepared)=>({
  attempt,
  state:prepared.state,
@@ -84,7 +85,7 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
   let prepared;
   try{
    const result=await ai.run(model,{messages:[
-    {role:'system',content:`Return exactly one valid JSON object and no markdown. Required top-level keys: schema,residualId,files,canonicalAdmission,directProductionMutation,expectedProofs${stage?.calculusWorkerPacket?',workerAttestation,developmentalDelta,alternativesConsidered,residualEvidenceIds':''}. The unchanged R314 mutation membrane and R503 calculus-literacy gate reject any value outside the supplied exact source and authority context.`},
+    {role:'system',content:`Return exactly one valid JSON object and no markdown. Required top-level keys: schema,residualId,files,canonicalAdmission,directProductionMutation,expectedProofs${stage?.calculusWorkerPacket?',workerAttestation,developmentalDelta,alternativesConsidered,residualEvidenceIds,selectedAlternative,decision,decisionRationale':''}. The unchanged R314 mutation membrane and R503 calculus-literacy gate reject any value outside the supplied exact source and authority context.`},
     {role:'user',content:prompt},
    ],response_format:repairResponseFormatR314({residual,contextFiles}),temperature:attempt===1?0.1:0,max_tokens:attempt===1?R314_AI_MAX_OUTPUT_TOKENS:R314_AI_CORRECTION_MAX_OUTPUT_TOKENS,seed:314});
    prepared=prepareAiRepairR314({rawResponse:responsePayload(result),residual,contextFiles});
@@ -93,8 +94,16 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
   }
   if(prepared.ok&&stage?.calculusWorkerPacket){
    const literacy=validateReasoningWorkerProposalR503(stage.calculusWorkerPacket,prepared.proposal);
-   if(!literacy.valid)prepared={...prepared,ok:false,state:'BLOCKED_BY_R503_CALCULUS_LITERACY',reasons:literacy.reasons,workerLiteracy:literacy,patches:[]};
-   else prepared={...prepared,workerLiteracy:literacy};
+   if(!literacy.valid){
+    prepared={...prepared,ok:false,state:'BLOCKED_BY_R503_CALCULUS_LITERACY',reasons:literacy.reasons,workerLiteracy:literacy,patches:[]};
+   }else{
+    const decision=validateReasoningWorkerDecisionR504(stage.calculusWorkerPacket,prepared.proposal,{
+     residualId:residual?.id||null,
+     mutationProposed:Array.isArray(prepared.proposal?.files)&&prepared.proposal.files.length>0,
+    });
+    if(!decision.valid)prepared={...prepared,ok:false,state:'BLOCKED_BY_R504_CALCULUS_DECISION',reasons:decision.reasons,workerLiteracy:literacy,workerDecision:decision,patches:[]};
+    else prepared={...prepared,workerLiteracy:literacy,workerDecision:decision};
+   }
   }
   const receipt=attemptReceipt(attempt,prepared);
   attempts.push(receipt);
