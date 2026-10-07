@@ -91,18 +91,20 @@ export function calculusNativeRepairInstructionsR504(stage){
  const packet=stage?.calculusWorkerPacket;
  if(!packet)return '';
  return `
-R503/R504 CALCULUS-NATIVE WORKER ADMISSION AND DECISION CONTINUITY
-- The supplied calculusWorkerPacket is governing context, not product source. Carry this exact contract through EVERY initial or correction attempt.
-- Return workerAttestation with workerClass exactly REASONING_DEVELOPER, exact contextId/baseSha, reconstructed R125/R142/R164/R240/ci.yml authority, CAPABILITY_LINEAGE_NOT_ROUTE, HEIGHTENED_MODE, STAY/TURN/ESCALATE, PRUNE/TRANSLATE/PROVE, and every false veto required by the packet.
+R503/R504/R505 CALCULUS-NATIVE WORKER APPLICATION CONTRACT
+- The supplied calculusWorkerPacket is an exact-base governing envelope. Do not rewrite or invent its immutable authority law.
+- Return calculusContextId exactly equal to calculusWorkerPacket.contextId.
+- The system deterministically binds the immutable R503 workerAttestation from that exact packet. Your job is to APPLY the calculus, not recite boilerplate.
 - Return alternativesConsidered with at least two distinct admissible options and selectedAlternative equal to exactly one member of alternativesConsidered.
-- Return decision as exactly STAY, TURN, or ESCALATE and decisionRationale as a concise explanation grounded in the supplied residual and exact source.
+- Return appliedCalculus with at least two distinct operators/laws actually used in the decision. Values must come from the supplied packet calculus/decision/proof/relational law or CAPABILITY_LINEAGE_NOT_ROUTE / HEIGHTENED_MODE.
+- Return decision as exactly STAY, TURN, or ESCALATE and decisionRationale as a concise explanation grounded in the supplied residual, evidence and exact source.
 - Return residualEvidenceIds with at least one bound evidence id.
 - Return developmentalDelta with EXACTLY these required [0,1] numeric fields in addition to targetCapability and intendedResidual: capabilityGain, coherenceGain, autonomyGain, usabilityGain, recoverabilityGain, regressionRisk, duplicationRisk, authorityFragmentationRisk.
 - developmentalDelta.intendedResidual must equal the supplied residual id.
-- Copy developmentalDelta, alternativesConsidered and residualEvidenceIds exactly into workerAttestation.
 - A source mutation requires decision TURN and a positive R503 ΔΩ score. STAY or ESCALATE must not fabricate a source mutation.
 - A claimed positive delta is planning evidence only and never proof of runtime, production, scientific or Canon truth.
-- If correcting a rejected patch, preserve this calculus attestation and decision structure while correcting only the rejected defect. Never drop workerAttestation or replace the R503 delta fields with a different scoring vocabulary.
+- If correcting a rejected patch, preserve calculusContextId, appliedCalculus, alternatives, evidence, delta and decision continuity while correcting only the rejected defect.
+- Never drop workerAttestation semantics: R505 binds the immutable attestation deterministically after your applied-reasoning payload is returned.
 `;
 }
 
@@ -122,7 +124,12 @@ export function summarizeAiProposalR314(proposal){
   canonicalAdmission:proposal?.canonicalAdmission,
   directProductionMutation:proposal?.directProductionMutation,
   expectedProofs:Array.isArray(proposal?.expectedProofs)?proposal.expectedProofs.slice(0,16):[],
-  workerContextId:proposal?.workerAttestation?.contextId||null,
+  workerContextId:proposal?.workerAttestation?.contextId||proposal?.calculusContextId||null,
+  calculusContextId:proposal?.calculusContextId||null,
+  appliedCalculus:Array.isArray(proposal?.appliedCalculus)?proposal.appliedCalculus.slice(0,12):[],
+  selectedAlternative:proposal?.selectedAlternative||null,
+  decision:proposal?.decision||null,
+  decisionRationale:proposal?.decisionRationale||null,
   developmentalDelta:proposal?.developmentalDelta||null,
  };
 }
