@@ -201,12 +201,88 @@ const currentSourceAnchorsR463=({residual,stage,contextFiles=[]}={})=>{
  }
  return{schema:'OMEGA_R463_CURRENT_SOURCE_ANCHORS',files};
 };
+export const R506_PREIMAGE_ANCHOR_SCHEMA='OMEGA_R506_DETERMINISTIC_PREIMAGE_ANCHORS';
+
+export function deterministicPreimageAnchorsR506({rejection,contextFiles=[]}={}){
+ const reasons=Array.isArray(rejection?.reasons)?rejection.reasons.map(String):[];
+ const active=reasons.some(reason=>/_PREIMAGE_OCCURRENCES_0$/.test(reason));
+ if(!active)return{schema:R506_PREIMAGE_ANCHOR_SCHEMA,active:false,anchors:[]};
+ const supplied=new Map((contextFiles||[]).map(file=>[pathText(file?.path),file]));
+ const anchors=[];
+ let fileOrdinal=0;
+ for(const file of Array.isArray(rejection?.proposal?.files)?rejection.proposal.files:[]){
+  const path=pathText(file?.path),context=supplied.get(path);if(!context)continue;
+  fileOrdinal++;
+  const source=String(context?.text??'');
+  const seen=new Set();
+  let anchorOrdinal=0;
+  for(const replacement of Array.isArray(file?.replacements)?file.replacements:[]){
+   const tokens=stalePreimageTokensR461(replacement?.before);
+   for(const token of tokens){
+    let from=0;
+    while(true){
+     const at=source.indexOf(token,from);if(at<0)break;
+     let start=source.lastIndexOf('\n',Math.max(0,at-1));start=start<0?0:start+1;
+     let end=source.indexOf('\n',at+token.length);end=end<0?source.length:end;
+     let exact=source.slice(start,end);
+     if(exact.length<24){
+      const next=source.indexOf('\n',Math.min(source.length,end+1));
+      if(next>0)exact=source.slice(start,next);
+     }
+     const occurrences=exact?source.split(exact).length-1:0;
+     if(exact&&exact.length<=1600&&occurrences===1&&!seen.has(exact)){
+      seen.add(exact);anchorOrdinal++;
+      anchors.push({
+       id:`R506-F${fileOrdinal}-A${anchorOrdinal}`,
+       path,
+       currentSha:String(context?.sha||''),
+       token,
+       exact,
+      });
+     }
+     from=at+token.length;
+    }
+   }
+  }
+ }
+ return{schema:R506_PREIMAGE_ANCHOR_SCHEMA,active:true,anchors};
+}
+
+export function bindDeterministicPreimageAnchorsR506(proposal,{rejection,contextFiles=[]}={}){
+ const recovery=deterministicPreimageAnchorsR506({rejection,contextFiles});
+ if(!recovery.active)return{valid:true,reasons:[],proposal,recovery,boundCount:0};
+ const reasons=[];
+ const supplied=new Map((contextFiles||[]).map(file=>[pathText(file?.path),file]));
+ const byId=new Map(recovery.anchors.map(row=>[String(row.id),row]));
+ let boundCount=0;
+ const files=(Array.isArray(proposal?.files)?proposal.files:[]).map((file,fileIndex)=>{
+  const path=pathText(file?.path),context=supplied.get(path);
+  const replacements=(Array.isArray(file?.replacements)?file.replacements:[]).map((row,replacementIndex)=>{
+   const label=`FILE_${fileIndex+1}_REPLACEMENT_${replacementIndex+1}`;
+   const anchorId=String(row?.anchorId||'').trim();
+   if(!anchorId){reasons.push(`R506_${label}_ANCHOR_ID_REQUIRED`);return row}
+   const anchorRow=byId.get(anchorId);
+   if(!anchorRow){reasons.push(`R506_${label}_ANCHOR_ID_UNKNOWN`);return row}
+   if(anchorRow.path!==path){reasons.push(`R506_${label}_ANCHOR_PATH_MISMATCH`);return row}
+   if(!context||String(context?.sha||'')!==String(anchorRow.currentSha||'')){reasons.push(`R506_${label}_ANCHOR_SHA_MISMATCH`);return row}
+   const source=String(context?.text??''),exact=String(anchorRow.exact||'');
+   const occurrences=exact?source.split(exact).length-1:0;
+   if(occurrences!==1){reasons.push(`R506_${label}_ANCHOR_NOT_EXACT_UNIQUE`);return row}
+   boundCount++;
+   return{before:exact,after:String(row?.after??'')};
+  });
+  return{...file,replacements};
+ });
+ if(boundCount===0&&files.length)reasons.push('R506_NO_PREIMAGE_ANCHOR_BOUND');
+ return{valid:reasons.length===0,reasons,proposal:{...proposal,files},recovery,boundCount};
+}
+
 const correctionProposalR314=proposal=>({
  ...summarizeAiProposalR314(proposal),
  files:(Array.isArray(proposal?.files)?proposal.files:[]).map(file=>({
   path:pathText(file?.path),
   preimageSha:String(file?.preimageSha||''),
-  replacements:(Array.isArray(file?.replacements)?file.replacements:[]).slice(0,R314_AI_MAX_REPLACEMENTS_PER_FILE).map(row=>({before:clipFeedback(row?.before),after:clipFeedback(row?.after)})),
+  replacements:(Array.isArray(file?.replacements)?file.replacements:[]).slice(0,R314_AI_MAX_REPLACEMENTS_PER_FILE).map(row=>({anchorId:String(row?.anchorId||''),before:clipFeedback(row?.before),after:clipFeedback(row?.after)})),
  })),
 });
 const validatorGuidanceR314=reason=>{
@@ -220,7 +296,7 @@ const validatorGuidanceR314=reason=>{
  if(/_REPLACEMENT_COUNT$/.test(r))return `Use 1..${R314_AI_MAX_REPLACEMENTS_PER_FILE} replacements for each proposed file.`;
  if(/_NOOP$/.test(r))return 'Make before and after materially different, or remove that replacement.';
  if(/_CONTROL_OR_SECRET_PATTERN$/.test(r))return 'Remove control-plane, credential, deployment, Canon-admission, or secret-like content; keep the patch product-source only.';
- if(/_PREIMAGE_OCCURRENCES_0$/.test(r))return 'Choose a before string copied exactly from supplied source.';
+ if(/_PREIMAGE_OCCURRENCES_0$/.test(r))return 'Use one R506 deterministic anchorId from the correction evidence and return anchorId + after; the runtime binds before from the exact current source.';
  if(/_PREIMAGE_OCCURRENCES_[2-9]\d*$/.test(r))return 'Make the before string more specific until it occurs exactly once in supplied source.';
  if(r==='PATCH_SIZE_OUT_OF_BOUNDS')return `Narrow the patch below the unchanged ${R314_AI_MAX_CHANGED_CHARS}-character validator limit.`;
  if(r==='CANON_ADMISSION_MUST_BE_FALSE')return 'Set canonicalAdmission to false.';
@@ -236,6 +312,7 @@ const validatorGuidanceR314=reason=>{
 export function autonomousRepairCorrectionPromptR314({residual,stage,contextFiles,rejection,attempt}){
  const context=contextFiles.map(file=>({path:file.path,sha:file.sha,text:file.text}));
  const stalePreimageRecovery=stalePreimageRecoveryR461({rejection,contextFiles});
+ const deterministicPreimageAnchors=deterministicPreimageAnchorsR506({rejection,contextFiles});
  const rejectionEvidence={
   attempt:Number(attempt||0),
   state:String(rejection?.state||'REJECTED_BY_R314_POLICY'),
@@ -247,10 +324,12 @@ export function autonomousRepairCorrectionPromptR314({residual,stage,contextFile
   }:null,
   proposal:correctionProposalR314(rejection?.proposal),
   stalePreimageRecovery,
+  deterministicPreimageAnchors,
   currentSourceAnchors:currentSourceAnchorsR463({residual,stage,contextFiles}),
  };
  return `You are correcting a previously rejected bounded OMEGAv6 R314 product-source proposal. Return JSON only. This is a correction under the SAME authority membrane, not permission to widen it.\n\nImmutable rules:\n- Schema must be ${R314_AUTONOMOUS_REPAIR_SCHEMA}.\n- Repair only the supplied files and bind every file to its supplied preimage SHA.\n- Maximum ${R314_AI_MAX_FILES} files and ${R314_AI_MAX_REPLACEMENTS_PER_FILE} exact replacements per file.\n- Every before string must occur exactly once in the supplied exact source.
-- If stalePreimageRecovery is present, rebuild the rejected replacement from one of its exactCurrentAnchors or another exact unique fragment copied from CURRENT source. Do not reuse rejectedBefore unless its current occurrence count is exactly 1.
+- If deterministicPreimageAnchors.active is true, EVERY replacement must use {anchorId,after}. Choose anchorId only from deterministicPreimageAnchors.anchors for the SAME file path. Do not return or reconstruct before; the runtime resolves anchorId to the exact unique CURRENT-source bytes before the unchanged R314 validator runs.
+- If stalePreimageRecovery is present, it is diagnostic evidence only. R506 deterministicPreimageAnchors is the mutation binding authority for this correction; never reuse rejectedBefore from memory.
 - Treat currentSha and CURRENT source text as authoritative; stale rejected proposal text is evidence only, never a source of truth.\n- If the previous attempt was NO_SAFE_PATCH, currentSourceAnchors is the machine-derived re-entry surface: choose a semantically relevant anchor and copy its exact text verbatim as before. Do not reconstruct before from memory, the residual narrative, or an older proposal.\n- currentSourceAnchors contain only exact fragments that occur once in the CURRENT supplied blob; using one does not waive any unchanged R314 validator rule.
 ${calculusNativeRepairInstructionsR504(stage)}
 - Prefer the smallest correction that resolves the listed validator defects; do not expand scope.\n- Keep the correction response compact enough to complete as one JSON object: prefer one file, no more than 3 replacements, and short exact local before/after fragments rather than whole functions or files.\n- Do not emit a replacement whose before or after text exceeds 1600 characters. If the only conceivable change would require a larger response, return files:[] instead of risking a truncated proposal.\n- Do not edit tests, workflows, deployment, cloud evolution, self-build governance, authentication, secrets, Canon admission, workers, or generated projections.\n- Do not claim scientific, device, runtime, deployment or Canon truth.\n- canonicalAdmission and directProductionMutation must both be false.\n- expectedProofs must name existing independent proof families.\n- Never work around a rejection code. Correct the proposal so the unchanged validator accepts it.\n- If no compliant patch exists, return files:[].\n\nVALIDATOR REJECTION EVIDENCE\n${JSON.stringify(rejectionEvidence)}\n\nRESIDUAL\n${JSON.stringify(residual)}\n\nBUILD STAGE\n${JSON.stringify(stage)}\n\nEXACT SOURCE CONTEXT\n${JSON.stringify(context)}`;
@@ -268,6 +347,7 @@ export const R314_AUTONOMOUS_REPAIR_LAWS=Object.freeze([
  'AI_REFORMULATION_BUDGET_IS_BOUNDED_AND_EVERY_ATTEMPT_REVALIDATES_FROM_SCRATCH',
  'AI_CORRECTION_TRANSPORT_HEADROOM_DOES_NOT_WIDEN_SEMANTIC_PATCH_AUTHORITY',
  'AI_ZERO_OCCURRENCE_PREIMAGE_MUST_REANCHOR_TO_CURRENT_EXACT_SOURCE_BEFORE_RETRY',
+ 'AI_R506_ZERO_OCCURRENCE_CORRECTION_BINDS_MACHINE_DERIVED_EXACT_UNIQUE_ANCHOR_ID_BEFORE_R314_VALIDATION',
  'AI_DECLINED_FIRST_ATTEMPT_MUST_RECEIVE_MACHINE_DERIVED_CURRENT_SOURCE_ANCHORS_BEFORE_FINAL_REFORMULATION',
  'AI_DECODER_GUARANTEES_JSON_OBJECT_ONLY_R314_REMAINS_SOLE_SEMANTIC_PATCH_VALIDATOR',
 ]);
