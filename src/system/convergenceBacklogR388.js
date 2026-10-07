@@ -180,7 +180,7 @@ export function parseConvergenceBacklogR388(markdown=''){
 
 export function validateConvergenceRepairR450({item,proposal}={}){
  const contract=item?.acceptanceContract||null;
- if(!contract)return Object.freeze({valid:true,state:'NO_ITEM_SEMANTIC_CONTRACT',reasons:[],changedChars:0,contract:null});
+ if(!contract)return Object.freeze({valid:false,state:'SEMANTIC_ACCEPTANCE_CONTRACT_REQUIRED',reasons:['ITEM_ACCEPTANCE_CONTRACT_REQUIRED'],changedChars:0,substantiveLines:0,paths:Object.freeze([]),missingPathGroups:Object.freeze([]),missingTokens:Object.freeze([]),transition:Object.freeze({normalized:false,authoritySurfaceBound:false,proofTransportBound:false,recoveryBound:false,canonicalBoundaryPreserved:false,burdenBounded:true,contradictionFree:false}),contract:null});
  const files=Array.isArray(proposal?.files)?proposal.files:[];
  const paths=files.map(file=>String(file?.path||'')).filter(Boolean);
  const replacements=files.flatMap(file=>Array.isArray(file?.replacements)?file.replacements:[]);
