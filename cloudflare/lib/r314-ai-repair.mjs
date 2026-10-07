@@ -13,6 +13,7 @@ import {
 import {validateReasoningWorkerProposalR503} from '../../src/system/calculusNativeAutonomyR503.js';
 import {validateReasoningWorkerDecisionR504} from '../../src/system/calculusDecisionContinuityR504.js';
 import {bindAppliedReasoningWorkerR505} from '../../src/system/appliedCalculusReasoningR505.js';
+import {bindResultConditionedCorrectionR506} from '../../src/system/resultConditionedCorrectionR506.js';
 
 export const R314_CLOUD_AI_REPAIR_SCHEMA='OMEGA_CLOUD_R314_AI_REPAIR';
 
@@ -60,7 +61,7 @@ export function prepareAiRepairR314({rawResponse,residual,contextFiles=[]}={}){
  return{ok:true,state:'VALIDATED_BOUNDED_PATCH',proposal,validation,patches};
 }
 
-const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR'||state==='NO_SAFE_PATCH'||state==='BLOCKED_BY_R503_CALCULUS_LITERACY'||state==='BLOCKED_BY_R504_CALCULUS_DECISION'||state==='BLOCKED_BY_R505_APPLIED_CALCULUS';
+const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR'||state==='NO_SAFE_PATCH'||state==='BLOCKED_BY_R503_CALCULUS_LITERACY'||state==='BLOCKED_BY_R504_CALCULUS_DECISION'||state==='BLOCKED_BY_R505_APPLIED_CALCULUS'||state==='BLOCKED_BY_R506_RESULT_RECONCILIATION';
 const attemptReceipt=(attempt,prepared)=>({
  attempt,
  state:prepared.state,
@@ -89,7 +90,20 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
     {role:'system',content:`Return exactly one valid JSON object and no markdown. Required top-level keys: schema,residualId,files,canonicalAdmission,directProductionMutation,expectedProofs${stage?.calculusWorkerPacket?',calculusContextId,appliedCalculus,developmentalDelta,alternativesConsidered,residualEvidenceIds,selectedAlternative,decision,decisionRationale':''}. Immutable workerAttestation is system-bound from the exact calculus packet and must not be invented by the model. The unchanged R314 mutation membrane and R503 calculus-literacy gate reject any value outside the supplied exact source and authority context.`},
     {role:'user',content:prompt},
    ],response_format:repairResponseFormatR314({residual,contextFiles}),temperature:attempt===1?0.1:0,max_tokens:attempt===1?R314_AI_MAX_OUTPUT_TOKENS:R314_AI_CORRECTION_MAX_OUTPUT_TOKENS,seed:314});
-   prepared=prepareAiRepairR314({rawResponse:responsePayload(result),residual,contextFiles});
+   let rawResponse=responsePayload(result);
+   if(attempt>1&&rejection){
+    let parsed=null;
+    try{parsed=parseAiJsonR314(rawResponse)}catch{}
+    if(parsed){
+     const reconciled=bindResultConditionedCorrectionR506(parsed,{residual,stage,contextFiles,rejection});
+     if(reconciled.activated&&!reconciled.valid){
+      prepared={ok:false,state:'BLOCKED_BY_R506_RESULT_RECONCILIATION',proposal:parsed,reasons:reconciled.reasons,patches:[],resultReconciliation:reconciled};
+     }else if(reconciled.activated){
+      rawResponse=reconciled.proposal;
+     }
+    }
+   }
+   if(!prepared)prepared=prepareAiRepairR314({rawResponse,residual,contextFiles});
   }catch(error){
    prepared={ok:false,state:'AI_GENERATION_ERROR',proposal:null,reasons:[`AI_RUN_ERROR:${error instanceof Error?error.message:String(error)}`],patches:[]};
   }

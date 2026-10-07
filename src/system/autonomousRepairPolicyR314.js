@@ -1,3 +1,5 @@
+import {buildResultConditionedAnchorSurfaceR506,requiresResultConditionedReanchorR506} from './resultConditionedCorrectionR506.js';
+
 export const R314_AUTONOMOUS_REPAIR_SCHEMA='OMEGA_AUTONOMOUS_REPAIR_POLICY_R314';
 export const R314_AI_REPAIR_MODEL_DEFAULT='@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 export const R314_AI_MAX_FILES=2;
@@ -220,7 +222,7 @@ const validatorGuidanceR314=reason=>{
  if(/_REPLACEMENT_COUNT$/.test(r))return `Use 1..${R314_AI_MAX_REPLACEMENTS_PER_FILE} replacements for each proposed file.`;
  if(/_NOOP$/.test(r))return 'Make before and after materially different, or remove that replacement.';
  if(/_CONTROL_OR_SECRET_PATTERN$/.test(r))return 'Remove control-plane, credential, deployment, Canon-admission, or secret-like content; keep the patch product-source only.';
- if(/_PREIMAGE_OCCURRENCES_0$/.test(r))return 'Choose a before string copied exactly from supplied source.';
+ if(/_PREIMAGE_OCCURRENCES_0$/.test(r))return 'R506 result channel: select anchorId from resultConditionedAnchorsR506. The runtime binds before and current preimage SHA from that exact current-source anchor; do not freehand or reuse the stale before string.';
  if(/_PREIMAGE_OCCURRENCES_[2-9]\d*$/.test(r))return 'Make the before string more specific until it occurs exactly once in supplied source.';
  if(r==='PATCH_SIZE_OUT_OF_BOUNDS')return `Narrow the patch below the unchanged ${R314_AI_MAX_CHANGED_CHARS}-character validator limit.`;
  if(r==='CANON_ADMISSION_MUST_BE_FALSE')return 'Set canonicalAdmission to false.';
@@ -236,6 +238,9 @@ const validatorGuidanceR314=reason=>{
 export function autonomousRepairCorrectionPromptR314({residual,stage,contextFiles,rejection,attempt}){
  const context=contextFiles.map(file=>({path:file.path,sha:file.sha,text:file.text}));
  const stalePreimageRecovery=stalePreimageRecoveryR461({rejection,contextFiles});
+ const resultConditionedAnchorsR506=requiresResultConditionedReanchorR506(rejection)
+  ?buildResultConditionedAnchorSurfaceR506({residual,stage,contextFiles,rejection})
+  :null;
  const rejectionEvidence={
   attempt:Number(attempt||0),
   state:String(rejection?.state||'REJECTED_BY_R314_POLICY'),
@@ -247,10 +252,12 @@ export function autonomousRepairCorrectionPromptR314({residual,stage,contextFile
   }:null,
   proposal:correctionProposalR314(rejection?.proposal),
   stalePreimageRecovery,
+  resultConditionedAnchorsR506,
   currentSourceAnchors:currentSourceAnchorsR463({residual,stage,contextFiles}),
  };
  return `You are correcting a previously rejected bounded OMEGAv6 R314 product-source proposal. Return JSON only. This is a correction under the SAME authority membrane, not permission to widen it.\n\nImmutable rules:\n- Schema must be ${R314_AUTONOMOUS_REPAIR_SCHEMA}.\n- Repair only the supplied files and bind every file to its supplied preimage SHA.\n- Maximum ${R314_AI_MAX_FILES} files and ${R314_AI_MAX_REPLACEMENTS_PER_FILE} exact replacements per file.\n- Every before string must occur exactly once in the supplied exact source.
 - If stalePreimageRecovery is present, rebuild the rejected replacement from one of its exactCurrentAnchors or another exact unique fragment copied from CURRENT source. Do not reuse rejectedBefore unless its current occurrence count is exactly 1.
+- R506 RESULT CHANNEL: when resultConditionedAnchorsR506 is present, every corrected replacement MUST set anchorId to one exact anchor id from the matching file. You may omit before or leave it stale: the runtime will replace before and preimageSha with the exact current-source anchor and current SHA before the unchanged R314 validator runs. Prefer the anchor whose token and exact text best match the intended change. If no supplied anchor safely expresses the intended change, return files:[].
 - Treat currentSha and CURRENT source text as authoritative; stale rejected proposal text is evidence only, never a source of truth.\n- If the previous attempt was NO_SAFE_PATCH, currentSourceAnchors is the machine-derived re-entry surface: choose a semantically relevant anchor and copy its exact text verbatim as before. Do not reconstruct before from memory, the residual narrative, or an older proposal.\n- currentSourceAnchors contain only exact fragments that occur once in the CURRENT supplied blob; using one does not waive any unchanged R314 validator rule.
 ${calculusNativeRepairInstructionsR504(stage)}
 - Prefer the smallest correction that resolves the listed validator defects; do not expand scope.\n- Keep the correction response compact enough to complete as one JSON object: prefer one file, no more than 3 replacements, and short exact local before/after fragments rather than whole functions or files.\n- Do not emit a replacement whose before or after text exceeds 1600 characters. If the only conceivable change would require a larger response, return files:[] instead of risking a truncated proposal.\n- Do not edit tests, workflows, deployment, cloud evolution, self-build governance, authentication, secrets, Canon admission, workers, or generated projections.\n- Do not claim scientific, device, runtime, deployment or Canon truth.\n- canonicalAdmission and directProductionMutation must both be false.\n- expectedProofs must name existing independent proof families.\n- Never work around a rejection code. Correct the proposal so the unchanged validator accepts it.\n- If no compliant patch exists, return files:[].\n\nVALIDATOR REJECTION EVIDENCE\n${JSON.stringify(rejectionEvidence)}\n\nRESIDUAL\n${JSON.stringify(residual)}\n\nBUILD STAGE\n${JSON.stringify(stage)}\n\nEXACT SOURCE CONTEXT\n${JSON.stringify(context)}`;
