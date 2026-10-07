@@ -18,12 +18,17 @@ assert.equal(b04.acceptanceContract?.supersedesLegacyDeclines,true);
 assert.ok(b04.acceptanceContract?.currentSourceProof,'B-04 must prefer exact current-source proof before mutation');
 assert.deepEqual(b04.affected,[
  'src/OmegaWorkstationFullV2.tsx',
+ 'src/omegaNavigationShellR411.css',
+],'B-04 AI mutation authority must remain inside the inherited two-file R314 membrane');
+
+const proofPaths=b04.acceptanceContract.currentSourceProof.requiredPathTokens.map(row=>row.path);
+assert.deepEqual(proofPaths,[
+ 'src/OmegaWorkstationFullV2.tsx',
  'src/InstrumentOSShellR62.tsx',
  'src/omegaSideNavigatorR88.css',
  'src/omegaNavigationShellR411.css',
-]);
-
-const exactSources=b04.affected.map((path,index)=>({
+],'B-04 read-only proof scope may inspect all four responsive authorities without widening mutation authority');
+const exactSources=proofPaths.map((path,index)=>({
  path,
  sha:String(index+1).repeat(40),
  text:fs.readFileSync(path,'utf8'),
@@ -92,6 +97,7 @@ for(const token of [
  "acceptanceContractRevision:item.acceptanceContract?.revision||null,state:'SEMANTIC_ACCEPTANCE_REJECTED'",
  "acceptanceContractRevision:item.acceptanceContract?.revision||null,state:'PROOF_REJECTED_PATCH_REPEAT'",
  'R507_CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF',
+ 'const proofPaths=[...new Set((item.acceptanceContract?.currentSourceProof?.requiredPathTokens||[])',
 ])assert.ok(machine.includes(token),`R509 machine transport missing ${token}`);
 
 console.log('R509 CONTRACT-EPOCH B-04 PASS · legacy scar superseded once · same-revision scar holds · exact responsive source satisfies B-04 pending full R241 proof');
