@@ -38,6 +38,7 @@ const ITEM_TARGETS=Object.freeze({
  'A-04':[],
  'A-05':['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],
  'B-02':['src/OmegaSideNavigatorR88.tsx','src/OmegaWorkstationFullV2.tsx'],
+ 'B-04':['src/OmegaWorkstationFullV2.tsx','src/omegaNavigationShellR411.css'],
  'C-04':[],
 });
 
@@ -163,7 +164,7 @@ export function parseConvergenceBacklogR388(markdown=''){
   const itemKey=`${section}-${String(index).padStart(2,'0')}`;
   const acceptanceContract=capabilityContractR509(itemKey)||ITEM_ACCEPTANCE[itemKey]||null;
   const defaultAffected=Object.prototype.hasOwnProperty.call(ITEM_TARGETS,itemKey)?ITEM_TARGETS[itemKey]:(TARGETS[section]||[]);
-  const affected=[...((Array.isArray(acceptanceContract?.sourcePaths)&&acceptanceContract.sourcePaths.length)?acceptanceContract.sourcePaths:defaultAffected)];
+  const affected=[...defaultAffected];
   rows.push(Object.freeze({
    id:`R388-${itemKey}`,
    section,
