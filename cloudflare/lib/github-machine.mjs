@@ -189,12 +189,17 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const candidates=candidatePolicy.valid?await collectCandidates(token,repo,candidatePolicy.policy):[];
   let accuracyState={};try{accuracyState=(await getRepoFile(token,repo,'public/omega-r125-accuracy-state.json',mainSha)).json}catch{}
   let convergenceMarkdown='';try{convergenceMarkdown=(await getRepoTextFile(token,repo,'docs/OMEGA_MISSING_CAPABILITY_CONVERGENCE_R386.md',mainSha)).text}catch{}
-  const recentDeclinedItemIds=[...new Set((state.r388Receipts||[]).slice(-8).flatMap(receipt=>(Array.isArray(receipt?.declinedItemScars)?receipt.declinedItemScars:[]).map(row=>String(row?.itemId||'')).filter(Boolean)))];
+  const recentDeclinedItemScars=(state.r388Receipts||[]).slice(-8).flatMap(receipt=>(Array.isArray(receipt?.declinedItemScars)?receipt.declinedItemScars:[])).map(row=>({
+    itemId:String(row?.itemId||''),
+    acceptanceContractRevision:row?.acceptanceContractRevision?String(row.acceptanceContractRevision):null,
+    state:row?.state?String(row.state):null,
+  })).filter(row=>row.itemId);
+  const recentDeclinedItemIds=[...new Set(recentDeclinedItemScars.map(row=>row.itemId))];
   const durableCanonicalAdvancedItemIds=canonicalAdvancedItemIdsR465(state);
   const observedCanonicalAdvancedItemIds=await observedRepositoryAdvancedItemIdsR465(token,repo,mainSha,runs.workflow_runs||[]);
   const canonicalAdvancedItemIds=[...new Set([...durableCanonicalAdvancedItemIds,...observedCanonicalAdvancedItemIds])];
   const reconciledAdvancedItemIds=[...new Set([...(state.r388AdvancedItemIds||[]),...canonicalAdvancedItemIds])];
-  const backlog=selectNextConvergenceItemR388({markdown:convergenceMarkdown,advancedItemIds:reconciledAdvancedItemIds,heldItemIds:recentDeclinedItemIds});
+  const backlog=selectNextConvergenceItemR388({markdown:convergenceMarkdown,advancedItemIds:reconciledAdvancedItemIds,heldItemEvidence:recentDeclinedItemScars});
   const backlogTargets=[];
   for(const item of backlog.candidates||[]){
     const paths=[],sourceFiles=[];
@@ -239,7 +244,7 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const decision=rawDecision.action==='PROPOSE'&&finiteConvergence.mutationBudget<=0
     ?{action:'OBSERVE_ONLY',reason:'R507_ZERO_MUTATION_BUDGET · fixed evidence epoch is quiescent; require independently returned new evidence or a changed bounded repair hypothesis',finiteConvergence,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}
     :{...rawDecision,finiteConvergence};
-  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,workerContextR503,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,durableCanonicalAdvancedItemIds,observedCanonicalAdvancedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},r507:finiteConvergence,decision};
+  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,workerContextR503,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,recentDeclinedItemScars,durableCanonicalAdvancedItemIds,observedCanonicalAdvancedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},r507:finiteConvergence,decision};
 }
 
 async function ensureNoCompetingCandidate(token,repo,state,mainSha){
@@ -298,7 +303,9 @@ async function proposeR507CurrentSourceProofCycle({inspection,token,repo}){
     status:'CURRENT_SOURCE_SATISFIED_PENDING_PROOF',
     sourceAdvance:false,
     advancedItemIdsChanged:true,
+    acceptanceContractRevision:item.acceptanceContract?.revision||null,
     currentSourceProof:{
+      acceptanceContractRevision:item.acceptanceContract?.revision||null,
       state:proof.state,
       sourceRefs:proof.sourceRefs,
       truthBoundary:proof.contract?.truthBoundary||null,
@@ -361,21 +368,21 @@ async function proposeR388BacklogCycle({inspection,token,repo,ai,model}){
     if(repair.ok){
       const semantic=validateConvergenceRepairR450({item,proposal:repair.proposal});
       if(!semantic.valid){
-        const scar={itemId:item.id,section:item.section,state:'SEMANTIC_ACCEPTANCE_REJECTED',reasons:semantic.reasons,attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true,semanticAcceptance:{changedChars:semantic.changedChars,missingTokens:semantic.missingTokens||[],contract:semantic.contract}};
+        const scar={itemId:item.id,section:item.section,acceptanceContractRevision:item.acceptanceContract?.revision||null,state:'SEMANTIC_ACCEPTANCE_REJECTED',reasons:semantic.reasons,attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true,semanticAcceptance:{changedChars:semantic.changedChars,missingTokens:semantic.missingTokens||[],contract:semantic.contract}};
         declinedItemScars.push(scar);
         lastRepair={...repair,state:'SEMANTIC_ACCEPTANCE_REJECTED',reasons:semantic.reasons,semanticAcceptance:scar.semanticAcceptance};
         continue;
       }
       const rejectedRepeat=await findClosedProofRejectedPatchRepeatR430({token,repo,itemId:item.id,patches:repair.patches});
       if(rejectedRepeat.matched){
-        const scar={itemId:item.id,section:item.section,state:'PROOF_REJECTED_PATCH_REPEAT',reasons:[`exact product patch identity already proof-rejected by closed unmerged CLOUD-01 PR #${rejectedRepeat.prNumber}`],attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true,patchIdentity:rejectedRepeat.proposed,matchedClosedPr:{number:rejectedRepeat.prNumber,headSha:rejectedRepeat.prHeadSha,matchedCommitSha:rejectedRepeat.matchedCommitSha,rejectionEvidence:rejectedRepeat.rejectionEvidence,failedWorkflows:rejectedRepeat.failedWorkflows,closedAt:rejectedRepeat.closedAt}};
+        const scar={itemId:item.id,section:item.section,acceptanceContractRevision:item.acceptanceContract?.revision||null,state:'PROOF_REJECTED_PATCH_REPEAT',reasons:[`exact product patch identity already proof-rejected by closed unmerged CLOUD-01 PR #${rejectedRepeat.prNumber}`],attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true,patchIdentity:rejectedRepeat.proposed,matchedClosedPr:{number:rejectedRepeat.prNumber,headSha:rejectedRepeat.prHeadSha,matchedCommitSha:rejectedRepeat.matchedCommitSha,rejectionEvidence:rejectedRepeat.rejectionEvidence,failedWorkflows:rejectedRepeat.failedWorkflows,closedAt:rejectedRepeat.closedAt}};
         declinedItemScars.push(scar);
         lastRepair={...repair,state:'PROOF_REJECTED_PATCH_REPEAT',reasons:scar.reasons,proofRejectedPatchRepeat:scar.matchedClosedPr,patchIdentity:scar.patchIdentity};
         continue;
       }
       chosen={target,item,repair,patchIdentity:rejectedRepeat.proposed};break
     }
-    const scar={itemId:item.id,section:item.section,state:repair.state,reasons:repair.reasons||repair.validation?.reasons||[],attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true};
+    const scar={itemId:item.id,section:item.section,acceptanceContractRevision:item.acceptanceContract?.revision||null,state:repair.state,reasons:repair.reasons||repair.validation?.reasons||[],attempts:repair.attempts||[],rejectionHistory:repair.rejectionHistory||[],reformulated:repair.reformulated===true};
     declinedItemScars.push(scar);
     if(repair.state!=='NO_SAFE_PATCH')return{...inspection,mutation:'NONE',reason:repair.state,repair:{state:repair.state,reasons:scar.reasons,attempts:scar.attempts,rejectionHistory:scar.rejectionHistory,reformulated:scar.reformulated},itemId:item.id,declinedItemScars};
   }
