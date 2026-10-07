@@ -61,7 +61,7 @@ export function prepareAiRepairR314({rawResponse,residual,contextFiles=[],reject
  const validation=validateAiRepairProposalR314(proposal,{contextFiles,residualId:residual?.id||null});
  if(!validation.valid)return{ok:false,state:'REJECTED_BY_R314_POLICY',proposal,validation,reasons:validation.reasons,patches:[]};
  const patches=applyAiRepairProposalR314(proposal,{contextFiles,residualId:residual?.id||null});
- return{ok:true,state:'VALIDATED_BOUNDED_PATCH',proposal,validation,patches};
+ return{ok:true,state:'VALIDATED_BOUNDED_PATCH',proposal,validation,preimageBinding:r506,patches};
 }
 
 const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR'||state==='NO_SAFE_PATCH'||state==='BLOCKED_BY_R503_CALCULUS_LITERACY'||state==='BLOCKED_BY_R504_CALCULUS_DECISION'||state==='BLOCKED_BY_R505_APPLIED_CALCULUS'||state==='BLOCKED_BY_R506_PREIMAGE_BINDING';
@@ -76,6 +76,11 @@ const attemptReceipt=(attempt,prepared)=>({
   fileCount:Number(prepared.validation.fileCount||0),
  }:null,
  proposal:summarizeAiProposalR314(prepared.proposal),
+ preimageBinding:prepared.preimageBinding?{
+  active:prepared.preimageBinding.recovery?.active===true,
+  boundCount:Number(prepared.preimageBinding.boundCount||0),
+  reasons:Array.isArray(prepared.preimageBinding.reasons)?prepared.preimageBinding.reasons.map(String):[],
+ }:null,
 });
 
 export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT,residual,stage,contextFiles=[],maxAttempts=R314_AI_MAX_ATTEMPTS}={}){
