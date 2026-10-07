@@ -46,4 +46,7 @@ if(promoted){
  const visible=spawnSync(process.execPath,['tests/r489-live-visible-capability-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
  if(visible.error)throw visible.error;
  if(visible.status!==0)throw new Error(`R489 exact-production visible capability proof failed with exit ${visible.status}`);
+ const exactTraversal=spawnSync(process.execPath,['tests/r501-live-exact-traversal-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+ if(exactTraversal.error)throw exactTraversal.error;
+ if(exactTraversal.status!==0)throw new Error(`R501 exact-production live traversal binding proof failed with exit ${exactTraversal.status}`);
 }
