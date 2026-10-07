@@ -34,7 +34,8 @@ for(const token of[
  'probability:null'
 ])assert.ok(engine.includes(token),'R348 convergence engine missing '+token);
 
-for(const token of['OMEGA_LIVE_SCENE_CORRELATION_R348','compileLiveSceneCorrelationR348','WGS84_QUERY_CONTEXT','EARTH_SPACE_WEATHER_CONTEXT','evidenceHash','physicalObservations','sourceClocksR347','contextCompletenessR347'])assert.ok(liveScene.includes(token),'R348 live scene correlation missing '+token);
+for(const token of['OMEGA_LIVE_SCENE_CORRELATION_R348','compileLiveSceneCorrelationR348','WGS84_QUERY_CONTEXT','EARTH_SPACE_WEATHER_CONTEXT','evidenceHash','physicalObservations','compileExactTraversalEnvelopeR500','exactTraversal.sourceEvidence','contextCompletenessR347'])assert.ok(liveScene.includes(token),'R348 live scene correlation missing '+token);
+assert.ok(!liveScene.includes('const clocks=sourceClocksR347(earth)'),'R501 successor must not restore parallel live source-clock derivation outside the R500 envelope');
 for(const token of['R347_VISUAL_GRAMMAR','modelMappedWgs84R347','admitPhysicalQuantityR347','sourceClocksR347','contextCompletenessR347','R347_PHYSICAL_QUANTITY_REGISTRY'])assert.ok(donorContext.includes(token),'R347 calibrated context donor missing '+token);
 
 for(const token of['DEWEY_REFERENCE_KERNEL_R348','compileB0StandardR348','compileB3CanonicalStateR348','compileB4MotionR348','compileB5ParentR348','compileB6GateR348','compileGravityMotionAddressR348','executeDeweyReferenceKernelR348','B4'||'B5'])assert.ok(deweyKernel.includes(token),'R348 executable Dewey kernel missing '+token);
