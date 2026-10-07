@@ -1555,7 +1555,8 @@
     "R388-B-03",
     "R388-C-02",
     "R388-C-05",
-    "R388-C-03"
+    "R388-C-03",
+    "R388-B-04"
   ],
   "r388Receipts": [
     {
@@ -2793,6 +2794,72 @@
       "canonicalAdmission": false,
       "directProductionMutation": false,
       "createdAt": "2026-10-07T05:27:52.922Z",
+      "authorityBoundaries": {
+        "canonAdmission": "R125",
+        "dispatch": "R147",
+        "durableHistory": "R146",
+        "hybridReturnProof": "R141",
+        "productionDeploymentWorkflow": "ci.yml",
+        "evolutionHost": "CLOUDFLARE_WORKER",
+        "retiredDurableObjects": [
+          "R201",
+          "R203"
+        ]
+      }
+    },
+    {
+      "schema": "OMEGA_R507_CURRENT_SOURCE_SATISFACTION_RECEIPT",
+      "revision": "R507",
+      "machineId": "CLOUD-01",
+      "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
+      "generatorContract": "R507_CURRENT_SOURCE_PROOF",
+      "itemId": "R388-B-04",
+      "section": "B",
+      "objective": "Mobile + desktop parity for every route, submenu, disclosure, overlay and visual layer.",
+      "baseSha": "e89db04d38bce91446b91ca109b808c3db37f8ca",
+      "branch": "cloud/evolution-r507-source-proof-r388-b-04-e89db04d",
+      "status": "CURRENT_SOURCE_SATISFIED_PENDING_PROOF",
+      "sourceAdvance": false,
+      "advancedItemIdsChanged": true,
+      "acceptanceContractRevision": "R509",
+      "currentSourceProof": {
+        "acceptanceContractRevision": "R509",
+        "state": "CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF",
+        "sourceRefs": [
+          {
+            "path": "src/OmegaWorkstationFullV2.tsx",
+            "sha": "d2c7e90daab8c44b03b03beeaf5615444b5f47a9",
+            "requiredTokens": 3,
+            "missingTokens": []
+          },
+          {
+            "path": "src/InstrumentOSShellR62.tsx",
+            "sha": "05e0cf6ad0fe379abc6a7691f47ebfa76c230983",
+            "requiredTokens": 3,
+            "missingTokens": []
+          },
+          {
+            "path": "src/omegaSideNavigatorR88.css",
+            "sha": "15f7b4d953c1e354442223d08c64b4aff4a03b83",
+            "requiredTokens": 3,
+            "missingTokens": []
+          },
+          {
+            "path": "src/omegaNavigationShellR411.css",
+            "sha": "4fdd0a31703b6c7a28d2d4590978e2980ea4ce85",
+            "requiredTokens": 6,
+            "missingTokens": []
+          }
+        ],
+        "truthBoundary": "Exact source establishes one responsive frame authority, desktop non-covering navigation reservation and mobile usable-viewport/scroll ownership. Final completion still requires exact-head R241 browser proof across routes, submenus, disclosures, overlays and visual surfaces."
+      },
+      "expectedProofs": [
+        "R241 Archive Convergence Visual Intelligence",
+        "OMEGA Cloud Bridge CI"
+      ],
+      "canonicalAdmission": false,
+      "directProductionMutation": false,
+      "createdAt": "2026-10-07T12:29:53.773Z",
       "authorityBoundaries": {
         "canonAdmission": "R125",
         "dispatch": "R147",
