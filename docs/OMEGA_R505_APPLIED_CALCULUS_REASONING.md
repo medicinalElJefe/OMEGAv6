@@ -28,3 +28,7 @@ R505 then binds those worker-derived fields into the deterministic R503 attestat
 This makes the hierarchy explicit: **R503 defines immutable literacy law; R504 defines decision continuity; R505 proves applied calculus under a deterministic constitutional envelope.**
 
 No gate is weakened. A worker cannot mutate source without exact context binding, valid applied calculus, R503 admission, R504 TURN decision, positive ΔΩ, the existing R314 mutation membrane, independent proof, source promotion, deployment and returned execution evidence.
+
+## Candidate-collision scar
+
+During R505 acceptance, the release controller detected competing PR #960 with the same R505 revision identity and correctly blocked promotion. #960 was closed unmerged as the weaker competing implementation; PR #959 remains the selected exact-base convergence path. The collision is retained as evidence that one-candidate ownership is functioning rather than silently overwritten.
