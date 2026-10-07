@@ -90,6 +90,18 @@ export function applyAiRepairProposalR314(proposal,{contextFiles=[],residualId=n
 export function calculusNativeRepairInstructionsR504(stage){
  const packet=stage?.calculusWorkerPacket;
  if(!packet)return '';
+ if(stage?.calculusDecisionR505){
+  const d=stage.calculusDecisionR505;
+  return `
+R505 RESULT-CONDITIONED CALCULUS DECISION IS ALREADY BOUND
+- The decision stage has already reconstructed and validated the R503 calculus/authority contract before source generation.
+- Exact decision: ${String(d.decision||'')} · selectedAlternative: ${String(d.selectedAlternative||'')} · contextId: ${String(d.contextId||'')}.
+- This source-patch phase may implement only that selected TURN. It may not replace, weaken, reinterpret, or invent the decision.
+- Return the ordinary bounded R314 patch object only; the runtime deterministically reattaches the exact R505 capsule as workerAttestation and re-runs R503 plus R504 before accepting the patch.
+- canonicalAdmission and directProductionMutation remain false. The patch still requires independent proof and ci.yml remains the sole production writer.
+- If the selected TURN cannot be implemented safely in the supplied exact source, return files:[] rather than changing the decision or widening scope.
+`;
+ }
  return `
 R503/R504 CALCULUS-NATIVE WORKER ADMISSION AND DECISION CONTINUITY
 - The supplied calculusWorkerPacket is governing context, not product source. Carry this exact contract through EVERY initial or correction attempt.
