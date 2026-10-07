@@ -34,6 +34,7 @@ jobs:
           node --check src/system/autonomousConvergenceR314.js
           node --check src/system/autonomousRepairPolicyR314.js
           node --check src/system/convergenceBacklogR388.js
+          node --check src/system/finiteConvergenceGovernorR507.js
           node --check scripts/lib/r245-governed-selfbuild-selection.mjs
           node --check cloudflare/lib/evolution-policy.mjs
           node --check cloudflare/lib/generated-capsules.mjs
@@ -47,6 +48,7 @@ jobs:
           node tests/r314-cloud-autonomous-repair-invariants.mjs
           node tests/r388-convergence-selfbuild-invariants.mjs
           node tests/r391-event-driven-r388-continuation-invariants.mjs
+          node tests/r507-finite-convergence-governor-invariants.mjs
       - name: Prove ancillary Worker package without deployment
         run: npx wrangler deploy --config wrangler.evolution-machine-r223.jsonc --dry-run --outdir .wrangler-r223-cloud-01
 
