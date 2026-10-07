@@ -25,11 +25,14 @@ function exactOccurrences(source,exact){
 function anchorWindow(source,at,token){
  let start=source.lastIndexOf('\n',Math.max(0,at-1));start=start<0?0:start+1;
  let end=source.indexOf('\n',at+token.length);end=end<0?source.length:end;
- if(end-start<40){
-  const next=source.indexOf('\n',Math.min(source.length,end+1));
-  if(next>0)end=next;
- }
  let exact=source.slice(start,end);
+ // Preserve the smallest exact current-source unit. Widen only when the
+ // single line is not unique; never consume an adjacent line merely
+ // because the target line is short.
+ if(exact&&exactOccurrences(source,exact)!==1){
+  const next=source.indexOf('\n',Math.min(source.length,end+1));
+  if(next>0){end=next;exact=source.slice(start,end)}
+ }
  if(exact.length>1500){
   const half=700;
   start=Math.max(0,at-half);
@@ -77,11 +80,22 @@ export function buildResultConditionedAnchorSurfaceR506({residual,stage,contextF
  return{schema:R506_RESULT_CONDITIONED_SOURCE_RECONCILIATION,files};
 }
 
-function scoreAnchor(anchor,semanticTokens){
- let score=0;
+const normalizedText=value=>String(value??'').replace(/\s+/g,' ').trim();
+function trigrams(value){
+ const s=normalizedText(value);if(s.length<3)return new Set(s?[s]:[]);
+ const out=new Set();for(let i=0;i<=s.length-3;i++)out.add(s.slice(i,i+3));return out;
+}
+function textSimilarity(a,b){
+ const A=trigrams(a),B=trigrams(b);if(!A.size||!B.size)return 0;
+ let intersection=0;for(const gram of A)if(B.has(gram))intersection++;
+ return intersection/(A.size+B.size-intersection);
+}
+function scoreAnchor(anchor,semanticTokens,semanticTexts){
+ let tokenScore=0;
  const exactTokens=new Set(tokens(anchor.exact));
- for(const token of semanticTokens)if(exactTokens.has(token))score+=token===anchor.token?4:1;
- return score;
+ for(const token of semanticTokens)if(exactTokens.has(token))tokenScore+=token===anchor.token?4:1;
+ const similarity=Math.max(0,...semanticTexts.map(text=>textSimilarity(anchor.exact,text)));
+ return tokenScore*1000+Math.round(similarity*999);
 }
 
 function chooseAnchor({row,rejectedRow,fileSurface}){
@@ -90,13 +104,9 @@ function chooseAnchor({row,rejectedRow,fileSurface}){
   const anchor=fileSurface?.anchors?.find(a=>a.id===explicit)||null;
   return anchor?{anchor,selection:'EXPLICIT_ANCHOR_ID'}:{anchor:null,selection:'INVALID_EXPLICIT_ANCHOR_ID'};
  }
- const semanticTokens=[...new Set([
-  ...tokens(rejectedRow?.before),
-  ...tokens(rejectedRow?.after),
-  ...tokens(row?.before),
-  ...tokens(row?.after),
- ])];
- const ranked=(fileSurface?.anchors||[]).map(anchor=>({anchor,score:scoreAnchor(anchor,semanticTokens)}))
+ const semanticTexts=[rejectedRow?.before,rejectedRow?.after,row?.before,row?.after].map(String).filter(Boolean);
+ const semanticTokens=[...new Set(semanticTexts.flatMap(tokens))];
+ const ranked=(fileSurface?.anchors||[]).map(anchor=>({anchor,score:scoreAnchor(anchor,semanticTokens,semanticTexts)}))
   .filter(row=>row.score>0)
   .sort((a,b)=>b.score-a.score||a.anchor.id.localeCompare(b.anchor.id));
  if(!ranked.length)return{anchor:null,selection:'NO_TOKEN_MATCH'};
@@ -119,12 +129,26 @@ export function bindResultConditionedCorrectionR506(proposal,{residual,stage,con
   const rejectedFile=rejectedFiles.get(path);
   const replacements=(Array.isArray(file?.replacements)?file.replacements:[]).map((row,rowIndex)=>{
    const rejectedRow=Array.isArray(rejectedFile?.replacements)?rejectedFile.replacements[rowIndex]:null;
+   const after=String(row?.after??'');
+   const suppliedBefore=String(row?.before??'');
+   // Existing R461 behavior remains valid: if the correction already
+   // copied one exact unique current-source fragment, preserve it and
+   // machine-bind only the current SHA. R506 is a consequence channel,
+   // not a requirement to replace a correction that is already exact.
+   if(suppliedBefore&&exactOccurrences(String(context.text??''),suppliedBefore)===1){
+    if(!after||after===suppliedBefore){
+     reasons.push(`R506_FILE_${fileIndex+1}_REPLACEMENT_${rowIndex+1}_AFTER_INVALID`);
+     return row;
+    }
+    bindings.push({path,replacement:rowIndex+1,anchorId:null,selection:'EXACT_CURRENT_BEFORE',token:null,currentSha:String(context.sha||'')});
+    const {anchorId,...rest}=row||{};
+    return{...rest,before:suppliedBefore,after};
+   }
    const chosen=chooseAnchor({row,rejectedRow,fileSurface});
    if(!chosen.anchor){
     reasons.push(`R506_FILE_${fileIndex+1}_REPLACEMENT_${rowIndex+1}_${chosen.selection}`);
     return row;
    }
-   const after=String(row?.after??'');
    if(!after||after===chosen.anchor.exact){
     reasons.push(`R506_FILE_${fileIndex+1}_REPLACEMENT_${rowIndex+1}_AFTER_INVALID`);
     return row;
