@@ -1554,7 +1554,8 @@
     "R388-A-05",
     "R388-B-03",
     "R388-C-02",
-    "R388-C-05"
+    "R388-C-05",
+    "R388-C-03"
   ],
   "r388Receipts": [
     {
@@ -2752,6 +2753,58 @@
       "effective": false,
       "supersededBy": "R476-C04-TRUTH-RECONCILIATION",
       "supersessionReason": "FALSE_ADVANCEMENT_PRODUCT_PATCH_DID_NOT_IMPLEMENT_GROUND_STREET_PROVIDER_OR_FALLBACK_OBJECTIVE"
+    },
+    {
+      "schema": "OMEGA_R507_CURRENT_SOURCE_SATISFACTION_RECEIPT",
+      "revision": "R507",
+      "machineId": "CLOUD-01",
+      "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
+      "generatorContract": "R507_CURRENT_SOURCE_PROOF",
+      "itemId": "R388-C-03",
+      "section": "C",
+      "objective": "Seamless Earth → region → city → street → ground traversal with returned evidence where available.",
+      "baseSha": "11713cf3d92fd95f6a96b0725edb8fdaa6f804e1",
+      "branch": "cloud/evolution-r507-source-proof-r388-c-03-11713cf3",
+      "status": "CURRENT_SOURCE_SATISFIED_PENDING_PROOF",
+      "sourceAdvance": false,
+      "advancedItemIdsChanged": true,
+      "currentSourceProof": {
+        "state": "CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF",
+        "sourceRefs": [
+          {
+            "path": "src/EarthObservatoryR8.tsx",
+            "sha": "e1f8fc1078a7ba324e1efb902149033a7b161eca",
+            "requiredTokens": 5,
+            "missingTokens": []
+          },
+          {
+            "path": "src/EarthGroundTraversalR9.tsx",
+            "sha": "3f05e773e878e7df29c6580c9a0f3323f978c5fe",
+            "requiredTokens": 8,
+            "missingTokens": []
+          }
+        ],
+        "truthBoundary": "Current-source satisfaction proves that the declared product capability already exists in exact source. It does not prove provider availability, a current external observation, CanonState admission, or production deployment; exact-head independent workflows remain required."
+      },
+      "expectedProofs": [
+        "R202 Operational Source Authority",
+        "R241 Archive Convergence Visual Intelligence"
+      ],
+      "canonicalAdmission": false,
+      "directProductionMutation": false,
+      "createdAt": "2026-10-07T05:27:52.922Z",
+      "authorityBoundaries": {
+        "canonAdmission": "R125",
+        "dispatch": "R147",
+        "durableHistory": "R146",
+        "hybridReturnProof": "R141",
+        "productionDeploymentWorkflow": "ci.yml",
+        "evolutionHost": "CLOUDFLARE_WORKER",
+        "retiredDurableObjects": [
+          "R201",
+          "R203"
+        ]
+      }
     }
   ],
   "r388CanonicalAdvancements": [
