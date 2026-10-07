@@ -58,36 +58,54 @@ export function repairBudgetR507({
 export function backlogPotentialR507({
  remaining=0,
  selfEditableCount=0,
+ contractReadyCount=0,
+ needsAcceptanceContractCount=0,
  eligibleCount=0,
  heldRecentDeclinesCount=0,
  heldGovernanceCount=0,
 }={}){
  const unresolved=finiteInt(remaining);
  const selfEditable=finiteInt(selfEditableCount);
+ const contractReady=finiteInt(contractReadyCount);
+ const needsAcceptanceContract=finiteInt(needsAcceptanceContractCount);
  const eligible=finiteInt(eligibleCount);
  const heldRecentDeclines=finiteInt(heldRecentDeclinesCount);
  const heldGovernance=finiteInt(heldGovernanceCount);
  let state='ACTIVE';
  if(unresolved===0)state='COMPLETE';
+ else if(eligible>0)state='ACTIVE';
+ else if(contractReady>0&&heldRecentDeclines>=contractReady)state='HELD_UNTIL_NEW_EVIDENCE';
+ else if(needsAcceptanceContract>0)state='AWAIT_ACCEPTANCE_CONTRACT';
  else if(selfEditable===0)state='AWAIT_EXTERNAL_OR_GOVERNANCE_EVIDENCE';
- else if(eligible===0)state='HELD_UNTIL_NEW_EVIDENCE';
+ else state='QUIESCENT';
  return Object.freeze({
   schema:R507_FINITE_CONVERGENCE_SCHEMA,
   state,
   remaining:unresolved,
   selfEditable,
+  contractReady,
+  needsAcceptanceContract,
   eligible,
   heldRecentDeclines,
   heldGovernance,
+  blockers:Object.freeze([
+   ...(needsAcceptanceContract>0?['ACCEPTANCE_CONTRACT_REQUIRED']:[]),
+   ...(heldRecentDeclines>0?['RETURNED_DECLINE_EVIDENCE']:[]),
+   ...(heldGovernance>0?['EXTERNAL_OR_GOVERNANCE_EVIDENCE']:[]),
+  ]),
   mutationBudget:eligible,
   terminalForCurrentEvidence:state!=='ACTIVE',
   reason:state==='ACTIVE'
-   ?'at least one unresolved self-editable convergence item remains eligible'
+   ?'at least one unresolved acceptance-contracted convergence item remains mutation-ready'
    :state==='COMPLETE'
     ?'all convergence backlog items are completed or independently advanced'
     :state==='HELD_UNTIL_NEW_EVIDENCE'
-     ?'all unresolved self-editable items are held by returned decline evidence; retries are forbidden until the evidence state changes'
-     :'remaining obligations are external/governance-only and cannot be honestly self-mutated',
+     ?'all acceptance-contracted unresolved items are held by returned decline evidence; retries are forbidden until the evidence state changes'
+     :state==='AWAIT_ACCEPTANCE_CONTRACT'
+      ?'unresolved self-editable objectives remain, but none has an explicit acceptance contract; autonomous mutation is forbidden until proof criteria are defined'
+      :state==='AWAIT_EXTERNAL_OR_GOVERNANCE_EVIDENCE'
+       ?'remaining obligations are external/governance-only and cannot be honestly self-mutated'
+       :'no mutation-ready work exists for the current evidence epoch',
  });
 }
 
@@ -131,5 +149,6 @@ export const R507_FINITE_CONVERGENCE_LAWS=Object.freeze([
  'ONE_OPEN_AUTONOMOUS_CANDIDATE_SERIALIZES_MUTATION',
  'ZERO_MUTATION_BUDGET_MEANS_QUIESCENT_NOT_RETRY',
  'EXTERNAL_OR_GOVERNANCE_OBLIGATION_NEVER_FORCES_FAKE_SELF_MUTATION',
+ 'UNCONTRACTED_OBJECTIVE_IS_CONTRACT_DEBT_NOT_MUTATION_BUDGET',
  'R125_CANON_ADMISSION_AND_CI_PRODUCTION_AUTHORITY_REMAIN_UNCHANGED',
 ]);
