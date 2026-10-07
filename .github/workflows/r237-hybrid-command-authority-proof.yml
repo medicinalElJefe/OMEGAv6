@@ -1,4 +1,5 @@
 name: OMEGA R237 Hybrid Command Authority Proof
+# R501 TOTAL GITHUB ACCEPTANCE · semantic no-op touch to force current-lineage GitHub proof.
 
 on:
   pull_request:
