@@ -1556,7 +1556,8 @@
     "R388-C-02",
     "R388-C-05",
     "R388-C-03",
-    "R388-B-04"
+    "R388-B-04",
+    "R388-D-05"
   ],
   "r388Receipts": [
     {
@@ -2860,6 +2861,66 @@
       "canonicalAdmission": false,
       "directProductionMutation": false,
       "createdAt": "2026-10-07T12:29:53.773Z",
+      "authorityBoundaries": {
+        "canonAdmission": "R125",
+        "dispatch": "R147",
+        "durableHistory": "R146",
+        "hybridReturnProof": "R141",
+        "productionDeploymentWorkflow": "ci.yml",
+        "evolutionHost": "CLOUDFLARE_WORKER",
+        "retiredDurableObjects": [
+          "R201",
+          "R203"
+        ]
+      }
+    },
+    {
+      "schema": "OMEGA_R507_CURRENT_SOURCE_SATISFACTION_RECEIPT",
+      "revision": "R507",
+      "machineId": "CLOUD-01",
+      "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
+      "generatorContract": "R507_CURRENT_SOURCE_PROOF",
+      "itemId": "R388-D-05",
+      "section": "D",
+      "objective": "Multi-geometry 3-D inference only with independently sufficient geometries; no 3-D claim from one LOS.",
+      "baseSha": "49ebb7b85344e5309e53d0b73165cc28f339c365",
+      "branch": "cloud/evolution-r507-source-proof-r388-d-05-49ebb7b8",
+      "status": "CURRENT_SOURCE_SATISFIED_PENDING_PROOF",
+      "sourceAdvance": false,
+      "advancedItemIdsChanged": true,
+      "acceptanceContractRevision": "R509",
+      "currentSourceProof": {
+        "acceptanceContractRevision": "R509",
+        "state": "CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF",
+        "sourceRefs": [
+          {
+            "path": "src/sarEstablishmentR342.ts",
+            "sha": "8c59b66400e01ffde1becf5fd20fec310396e8a8",
+            "requiredTokens": 5,
+            "missingTokens": []
+          },
+          {
+            "path": "src/sarHostClosureR344.ts",
+            "sha": "789f297f282e39e516b3363d39aaa26eb07b3910",
+            "requiredTokens": 5,
+            "missingTokens": []
+          },
+          {
+            "path": "src/sarClosureFrontierR346.ts",
+            "sha": "d269a8f530e0fa442505612d232d696cda8e6870",
+            "requiredTokens": 3,
+            "missingTokens": []
+          }
+        ],
+        "truthBoundary": "This source proof establishes the software veto and rank-conditioned admission law. It does not claim that a real 3-D deformation product currently exists."
+      },
+      "expectedProofs": [
+        "R170 Current Convergence",
+        "R202 Operational Source Authority"
+      ],
+      "canonicalAdmission": false,
+      "directProductionMutation": false,
+      "createdAt": "2026-10-07T13:28:36.340Z",
       "authorityBoundaries": {
         "canonAdmission": "R125",
         "dispatch": "R147",
