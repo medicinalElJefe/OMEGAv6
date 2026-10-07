@@ -4,6 +4,7 @@ import {
   R314_AI_MAX_OUTPUT_TOKENS,
   R314_AI_CORRECTION_MAX_OUTPUT_TOKENS,
   applyAiRepairProposalR314,
+  bindDeterministicPreimageAnchorsR506,
   autonomousRepairPromptR314,
   autonomousRepairCorrectionPromptR314,
   parseAiJsonR314,
@@ -44,13 +45,16 @@ function bindMissingPreimageShaR417(proposal,{contextFiles=[]}={}){
  };
 }
 
-export function prepareAiRepairR314({rawResponse,residual,contextFiles=[]}={}){
+export function prepareAiRepairR314({rawResponse,residual,contextFiles=[],rejection=null}={}){
  let proposal;
  try{proposal=parseAiJsonR314(rawResponse)}
  catch(error){
   return{ok:false,state:'MALFORMED_AI_RESPONSE',proposal:null,reasons:[`AI_RESPONSE_PARSE_ERROR:${error instanceof Error?error.message:String(error)}`],patches:[]};
  }
  proposal=bindMissingPreimageShaR417(proposal,{contextFiles});
+ const r506=bindDeterministicPreimageAnchorsR506(proposal,{rejection,contextFiles});
+ if(!r506.valid)return{ok:false,state:'BLOCKED_BY_R506_PREIMAGE_BINDING',proposal:r506.proposal||proposal,reasons:r506.reasons,preimageBinding:r506,patches:[]};
+ proposal=r506.proposal;
  if(Array.isArray(proposal?.files)&&proposal.files.length===0){
   return{ok:false,state:'NO_SAFE_PATCH',proposal,reasons:['MODEL_DECLINED_BOUNDED_PATCH'],patches:[]};
  }
@@ -60,7 +64,7 @@ export function prepareAiRepairR314({rawResponse,residual,contextFiles=[]}={}){
  return{ok:true,state:'VALIDATED_BOUNDED_PATCH',proposal,validation,patches};
 }
 
-const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR'||state==='NO_SAFE_PATCH'||state==='BLOCKED_BY_R503_CALCULUS_LITERACY'||state==='BLOCKED_BY_R504_CALCULUS_DECISION'||state==='BLOCKED_BY_R505_APPLIED_CALCULUS';
+const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR'||state==='NO_SAFE_PATCH'||state==='BLOCKED_BY_R503_CALCULUS_LITERACY'||state==='BLOCKED_BY_R504_CALCULUS_DECISION'||state==='BLOCKED_BY_R505_APPLIED_CALCULUS'||state==='BLOCKED_BY_R506_PREIMAGE_BINDING';
 const attemptReceipt=(attempt,prepared)=>({
  attempt,
  state:prepared.state,
@@ -86,10 +90,10 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
   let prepared;
   try{
    const result=await ai.run(model,{messages:[
-    {role:'system',content:`Return exactly one valid JSON object and no markdown. Required top-level keys: schema,residualId,files,canonicalAdmission,directProductionMutation,expectedProofs${stage?.calculusWorkerPacket?',calculusContextId,appliedCalculus,developmentalDelta,alternativesConsidered,residualEvidenceIds,selectedAlternative,decision,decisionRationale':''}. Immutable workerAttestation is system-bound from the exact calculus packet and must not be invented by the model. The unchanged R314 mutation membrane and R503 calculus-literacy gate reject any value outside the supplied exact source and authority context.`},
+    {role:'system',content:`Return exactly one valid JSON object and no markdown. Required top-level keys: schema,residualId,files,canonicalAdmission,directProductionMutation,expectedProofs${stage?.calculusWorkerPacket?',calculusContextId,appliedCalculus,developmentalDelta,alternativesConsidered,residualEvidenceIds,selectedAlternative,decision,decisionRationale':''}. Immutable workerAttestation is system-bound from the exact calculus packet and must not be invented by the model. On a zero-occurrence correction, use the R506 anchorId supplied in validator evidence instead of inventing before text; the runtime binds exact current-source bytes before R314 validation. The unchanged R314 mutation membrane and R503 calculus-literacy gate reject any value outside the supplied exact source and authority context.`},
     {role:'user',content:prompt},
    ],response_format:repairResponseFormatR314({residual,contextFiles}),temperature:attempt===1?0.1:0,max_tokens:attempt===1?R314_AI_MAX_OUTPUT_TOKENS:R314_AI_CORRECTION_MAX_OUTPUT_TOKENS,seed:314});
-   prepared=prepareAiRepairR314({rawResponse:responsePayload(result),residual,contextFiles});
+   prepared=prepareAiRepairR314({rawResponse:responsePayload(result),residual,contextFiles,rejection});
   }catch(error){
    prepared={ok:false,state:'AI_GENERATION_ERROR',proposal:null,reasons:[`AI_RUN_ERROR:${error instanceof Error?error.message:String(error)}`],patches:[]};
   }
