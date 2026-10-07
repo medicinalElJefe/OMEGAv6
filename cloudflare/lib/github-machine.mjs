@@ -210,7 +210,12 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
         sourceFiles.push(await getRepoTextFile(token,repo,policy.path,mainSha));
       }
     }
-    const currentSourceProof=evaluateCurrentConvergenceSourceR507({item,sourceFiles});
+    const proofPaths=[...new Set((item.acceptanceContract?.currentSourceProof?.requiredPathTokens||[]).map(row=>String(row?.path||'')).filter(Boolean))];
+    const proofSourceFiles=[];
+    for(const proofPath of proofPaths){
+      if(await repoPathExists(token,repo,proofPath,mainSha))proofSourceFiles.push(await getRepoTextFile(token,repo,proofPath,mainSha));
+    }
+    const currentSourceProof=evaluateCurrentConvergenceSourceR507({item,sourceFiles:proofPaths.length?proofSourceFiles:sourceFiles});
     if(currentSourceProof.applicable&&currentSourceProof.satisfied){
       backlogTargets.push({
         targetable:true,
