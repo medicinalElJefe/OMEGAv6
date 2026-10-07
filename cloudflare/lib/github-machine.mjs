@@ -196,7 +196,8 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const reconciledAdvancedItemIds=[...new Set([...(state.r388AdvancedItemIds||[]),...canonicalAdvancedItemIds])];
   const backlog=selectNextConvergenceItemR388({markdown:convergenceMarkdown,advancedItemIds:reconciledAdvancedItemIds,heldItemIds:recentDeclinedItemIds});
   const backlogTargets=[];
-  for(const item of backlog.candidates||[]){
+  const backlogWork=[...(backlog.proofCandidates||[]),...(backlog.candidates||[])];
+  for(const item of backlogWork){
     const paths=[],sourceFiles=[];
     for(const candidate of item.affected||[]){
       const policy=repairPathPolicyR314(candidate);
@@ -219,9 +220,14 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
       });
       continue;
     }
+    const sourceMutationAuthorized=item?.acceptanceContract?.schema!=='OMEGA_FALSIFIABLE_CAPABILITY_CONTRACT_R509'||item?.acceptanceContract?.mutationAdmission===true;
+    if(!sourceMutationAuthorized){
+      backlogTargets.push({targetable:false,sourceSatisfied:false,reason:'R509_QUALIFIED_NON_MUTATION_CONTRACT_NOT_YET_SATISFIED',item,paths:[],currentSourceProof,admissionLane:item?.acceptanceContract?.admissionLane||null});
+      continue;
+    }
     backlogTargets.push(paths.length?{targetable:true,sourceSatisfied:false,residualId:item.id,paths:paths.slice(0,2),item,currentSourceProof,residual:{id:item.id,severity:'MEDIUM',mode:'AUTO_REPAIR',confidence:1,reproducible:true,affected:paths.slice(0,2),summary:`Advance one bounded source step for convergence backlog item ${item.id}: ${item.objective}. The full item remains open until independently proved. Make the smallest material current-runtime improvement inside the supplied target source only; do not claim external/device completion without returned proof.`,evidenceId:'R387_CONVERGENCE_MATRIX',source:'R388',externalProofRequired:item.externalProofRequired===true,expectedProofs:item.expectedProofs||[]},reason:'R388_CONVERGENCE_ITEM_READY'}:{targetable:false,sourceSatisfied:false,reason:'R388_ITEM_HAS_NO_EXISTING_ALLOWED_PRODUCT_SOURCE_TARGET',item,paths:[],currentSourceProof});
   }
-  const backlogTarget=backlogTargets.find(target=>target.targetable)||{targetable:false,reason:'NO_SELF_EDITABLE_CONVERGENCE_ITEM',item:backlog.selected||null,paths:[]};
+  const backlogTarget=backlogTargets.find(target=>target.targetable)||{targetable:false,reason:'NO_ACTION_READY_CONVERGENCE_ITEM',item:backlog.selectedProof||backlog.selected||null,paths:[]};
   const [coreHealth,releaseEvidence,runtimeAttestation,hybrid]=await Promise.all([liveJson(runtimeBase,'/api/core-health'),liveJson(runtimeBase,'/api/release-evidence'),liveJson(runtimeBase,'/api/runtime-attestation'),liveJson(runtimeBase,'/api/hybrid/status')]);
   const evidence={coreHealth,releaseEvidence,runtimeAttestation,hybrid};
   const residualState=buildCloudResidualStateR314({accuracyState,runtimeEvidence:evidence,workflowEvidence:workflowEvidenceForSha(runs.workflow_runs,mainSha)});
@@ -236,8 +242,8 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
     openAutonomousCandidates:candidates.length,
   });
   const rawDecision=!workerContextR503.valid?{action:'OBSERVE_ONLY',reason:`R503 calculus-native worker packet invalid: ${workerContextR503.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}:candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence,repairTarget,backlogTarget}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
-  const decision=rawDecision.action==='PROPOSE'&&finiteConvergence.mutationBudget<=0
-    ?{action:'OBSERVE_ONLY',reason:'R507_ZERO_MUTATION_BUDGET · fixed evidence epoch is quiescent; require independently returned new evidence or a changed bounded repair hypothesis',finiteConvergence,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}
+  const decision=rawDecision.action==='PROPOSE'&&finiteConvergence.actionBudget<=0
+    ?{action:'OBSERVE_ONLY',reason:'R509_ZERO_ACTION_BUDGET · fixed evidence epoch has no mutation-ready or proof-ready contracted work; require new evidence, a newly qualified contract, or a changed bounded repair hypothesis',finiteConvergence,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}
     :{...rawDecision,finiteConvergence};
   return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,workerContextR503,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,durableCanonicalAdvancedItemIds,observedCanonicalAdvancedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},r507:finiteConvergence,decision};
 }
