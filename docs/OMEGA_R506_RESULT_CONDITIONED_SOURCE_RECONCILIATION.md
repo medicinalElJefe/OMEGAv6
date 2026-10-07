@@ -26,3 +26,7 @@ Thus:
 `REJECTION -> CURRENT-SOURCE REANCHOR -> CORRECTION -> R314 -> R505 -> R503 -> R504 -> PROOF`
 
 R506 adds no Canon, deployment, source-promotion, or execution authority. Ambiguous re-anchoring fails closed.
+
+## Acceptance
+
+The exact PR head must pass the full current GitHub acceptance chain before merge; production acceptance additionally requires the canonical push-to-main deploy path and returned live proof.
