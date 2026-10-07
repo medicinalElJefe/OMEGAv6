@@ -35,6 +35,7 @@ jobs:
           node --check src/system/autonomousRepairPolicyR314.js
           node --check src/system/convergenceBacklogR388.js
           node --check src/system/finiteConvergenceGovernorR507.js
+          node --check src/system/capabilityContractsR509.js
           node --check scripts/lib/r245-governed-selfbuild-selection.mjs
           node --check cloudflare/lib/evolution-policy.mjs
           node --check cloudflare/lib/generated-capsules.mjs
@@ -50,6 +51,7 @@ jobs:
           node tests/r391-event-driven-r388-continuation-invariants.mjs
           node tests/r507-finite-convergence-governor-invariants.mjs
           node tests/r508-contract-ready-convergence-invariants.mjs
+          node tests/r509-falsifiable-capability-contracts-invariants.mjs
       - name: Prove ancillary Worker package without deployment
         run: npx wrangler deploy --config wrangler.evolution-machine-r223.jsonc --dry-run --outdir .wrangler-r223-cloud-01
 
@@ -119,6 +121,6 @@ jobs:
           echo 'Canonical OMEGA production remains exclusively deployed by ci.yml deploy-main.'
           echo 'CLOUD-01 shares the R245 residual/selection/generator/candidate-fence contract with R170 and may merge only exact-head fully green governed source candidates.'
           echo 'R314 residual/target/Workers-AI repair is restricted to exact-SHA allowlisted product source and cannot edit its own governance or proof gates.'
-          echo 'R388/R508 compiles the explicit convergence matrix into contract-ready bounded work after the static roadmap is exhausted; uncontracted objectives are contract debt, governance/self-build authority items remain non-self-editable, and external/device completion still requires first-hand proof.'
+          echo 'R388/R509 compiles the convergence matrix into qualified contract lanes: bounded source, current-source proof, live-browser proof, external evidence, or Hybrid-host evidence. Uncontracted objectives remain debt and no non-mutation lane can leak into product-source repair.'
           echo 'R391 may request one immediate post-production CLOUD-01 cycle after idempotent ancillary provisioning; the one-open-candidate fence is rechecked inside the Worker before mutation.'
           echo 'CLOUD-01 cannot deploy canonical OMEGA directly; R125 remains sole CanonState admission authority.'

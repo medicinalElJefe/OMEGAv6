@@ -1,4 +1,5 @@
 import {backlogPotentialR507} from './finiteConvergenceGovernorR507.js';
+import {capabilityContractR509,contractLaneR509} from './capabilityContractsR509.js';
 
 export const R388_CONVERGENCE_BACKLOG_SCHEMA='OMEGA_CONVERGENCE_BACKLOG_R388';
 
@@ -37,6 +38,7 @@ const ITEM_TARGETS=Object.freeze({
  'A-04':[],
  'A-05':['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],
  'B-02':['src/OmegaSideNavigatorR88.tsx','src/OmegaWorkstationFullV2.tsx'],
+ 'B-04':['src/OmegaWorkstationFullV2.tsx','src/omegaNavigationShellR411.css'],
  'C-04':[],
 });
 
@@ -160,7 +162,9 @@ export function parseConvergenceBacklogR388(markdown=''){
   const completed=String(item[1]).toLowerCase()==='x';
   const objective=clean(item[2]);
   const itemKey=`${section}-${String(index).padStart(2,'0')}`;
-  const affected=[...(Object.prototype.hasOwnProperty.call(ITEM_TARGETS,itemKey)?ITEM_TARGETS[itemKey]:(TARGETS[section]||[]))];
+  const acceptanceContract=capabilityContractR509(itemKey)||ITEM_ACCEPTANCE[itemKey]||null;
+  const defaultAffected=Object.prototype.hasOwnProperty.call(ITEM_TARGETS,itemKey)?ITEM_TARGETS[itemKey]:(TARGETS[section]||[]);
+  const affected=[...defaultAffected];
   rows.push(Object.freeze({
    id:`R388-${itemKey}`,
    section,
@@ -168,8 +172,8 @@ export function parseConvergenceBacklogR388(markdown=''){
    objective,
    completed,
    affected,
-   acceptanceContract:ITEM_ACCEPTANCE[itemKey]||null,
-   expectedProofs:[...(PROOFS[section]||['OMEGA Cloud Bridge CI'])],
+   acceptanceContract,
+   expectedProofs:[...((Array.isArray(acceptanceContract?.requiredProofs)&&acceptanceContract.requiredProofs.length)?acceptanceContract.requiredProofs:(PROOFS[section]||['OMEGA Cloud Bridge CI']))],
    selfEditable:!NON_SELF_EDITABLE.has(section)&&affected.length>0,
    externalProofRequired:EXTERNAL.test(objective),
    canonicalAdmission:false,
@@ -181,6 +185,8 @@ export function parseConvergenceBacklogR388(markdown=''){
 export function validateConvergenceRepairR450({item,proposal}={}){
  const contract=item?.acceptanceContract||null;
  if(!contract)return Object.freeze({valid:false,state:'SEMANTIC_ACCEPTANCE_CONTRACT_REQUIRED',reasons:['ITEM_ACCEPTANCE_CONTRACT_REQUIRED'],changedChars:0,substantiveLines:0,paths:Object.freeze([]),missingPathGroups:Object.freeze([]),missingTokens:Object.freeze([]),transition:Object.freeze({normalized:false,authoritySurfaceBound:false,proofTransportBound:false,recoveryBound:false,canonicalBoundaryPreserved:false,burdenBounded:true,contradictionFree:false}),contract:null});
+ const lane=contractLaneR509(item);
+ if(contract?.schema==='OMEGA_FALSIFIABLE_CAPABILITY_CONTRACT_R509'&&!lane.mutationReady)return Object.freeze({valid:false,state:'R509_CONTRACT_NOT_SOURCE_MUTATION',reasons:['R509_SOURCE_MUTATION_NOT_AUTHORIZED_FOR_'+String(lane.admissionLane||'UNKNOWN')],changedChars:0,substantiveLines:0,paths:Object.freeze([]),missingPathGroups:Object.freeze([]),missingTokens:Object.freeze([]),transition:Object.freeze({normalized:true,authoritySurfaceBound:true,proofTransportBound:false,recoveryBound:false,canonicalBoundaryPreserved:true,burdenBounded:true,contradictionFree:true}),contract});
  const files=Array.isArray(proposal?.files)?proposal.files:[];
  const paths=files.map(file=>String(file?.path||'')).filter(Boolean);
  const replacements=files.flatMap(file=>Array.isArray(file?.replacements)?file.replacements:[]);
@@ -236,29 +242,76 @@ export function evaluateCurrentConvergenceSourceR507({item,sourceFiles=[]}={}){
  });
 }
 
+export function declineHoldDispositionR509(item,heldItemEvidence=[]){
+ const currentRevision=String(item?.acceptanceContract?.revision||'');
+ const supersedesLegacy=item?.acceptanceContract?.supersedesLegacyDeclines===true;
+ const relevant=(Array.isArray(heldItemEvidence)?heldItemEvidence:[])
+  .filter(row=>String(row?.itemId||'')===String(item?.id||''))
+  .map(row=>Object.freeze({
+   itemId:String(row?.itemId||''),
+   acceptanceContractRevision:row?.acceptanceContractRevision?String(row.acceptanceContractRevision):null,
+   state:row?.state?String(row.state):null,
+  }));
+ const active=[],superseded=[];
+ for(const row of relevant){
+  if(row.acceptanceContractRevision){
+   (row.acceptanceContractRevision===currentRevision?active:superseded).push(row);
+  }else{
+   (supersedesLegacy?superseded:active).push(row);
+  }
+ }
+ return Object.freeze({
+  held:active.length>0,
+  currentRevision:currentRevision||null,
+  supersedesLegacy,
+  active:Object.freeze(active),
+  superseded:Object.freeze(superseded),
+ });
+}
+
 export const R388_BACKLOG_CANDIDATE_LIMIT=3;
 
-export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],heldItemIds=[],candidateLimit=R388_BACKLOG_CANDIDATE_LIMIT}={}){
+export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],heldItemIds=[],heldItemEvidence=[],candidateLimit=R388_BACKLOG_CANDIDATE_LIMIT}={}){
  const advanced=new Set(Array.isArray(advancedItemIds)?advancedItemIds:[]);
- const recentHeld=new Set(Array.isArray(heldItemIds)?heldItemIds:[]);
+ const legacyEvidence=(Array.isArray(heldItemIds)?heldItemIds:[]).map(itemId=>({itemId:String(itemId),acceptanceContractRevision:null,state:'LEGACY_DECLINE'}));
+ const evidence=[...(Array.isArray(heldItemEvidence)?heldItemEvidence:[]),...legacyEvidence];
  const items=parseConvergenceBacklogR388(markdown);
  const unresolved=items.filter(x=>!x.completed&&!advanced.has(x.id));
  const selfEditable=unresolved.filter(x=>x.selfEditable);
- const contractReady=selfEditable.filter(x=>Boolean(x.acceptanceContract));
+ const contracted=selfEditable.filter(x=>Boolean(x.acceptanceContract));
+ const lanes=contracted.map(item=>Object.freeze({item,lane:contractLaneR509(item),hold:declineHoldDispositionR509(item,evidence)}));
+ const validContracted=lanes.filter(row=>row.lane.state!=='INVALID_CAPABILITY_CONTRACT');
+ const invalidContracts=lanes.filter(row=>row.lane.state==='INVALID_CAPABILITY_CONTRACT').map(row=>row.item.id);
+ const mutationReady=validContracted.filter(row=>row.lane.mutationReady).map(row=>row.item);
+ const currentSourceProofReady=validContracted.filter(row=>row.lane.currentSourceProofReady).map(row=>row.item);
+ const liveBrowserProofDebt=validContracted.filter(row=>row.lane.liveBrowserProofReady).map(row=>row.item.id);
+ const externalEvidenceDebt=validContracted.filter(row=>row.lane.externalEvidenceReady).map(row=>row.item.id);
  const heldNeedsAcceptanceContract=selfEditable.filter(x=>!x.acceptanceContract).map(x=>x.id);
- const eligible=contractReady.filter(x=>!recentHeld.has(x.id));
+ const heldSet=new Set(validContracted.filter(row=>row.hold.held).map(row=>row.item.id));
+ const eligible=mutationReady.filter(x=>!heldSet.has(x.id));
+ const proofEligible=currentSourceProofReady.filter(x=>!heldSet.has(x.id));
  const limit=Math.max(1,Math.min(R388_BACKLOG_CANDIDATE_LIMIT,Number(candidateLimit)||R388_BACKLOG_CANDIDATE_LIMIT));
  const candidates=eligible.slice(0,limit);
+ const proofCandidates=proofEligible.slice(0,limit);
  const selected=candidates[0]||null;
+ const selectedProof=proofCandidates[0]||null;
  const heldGovernance=unresolved.filter(x=>!x.selfEditable).map(x=>x.id);
- const heldRecentDeclines=contractReady.filter(x=>recentHeld.has(x.id)).map(x=>x.id);
+ const heldRecentDeclines=mutationReady.filter(x=>heldSet.has(x.id)).map(x=>x.id);
+ const heldProofDeclines=currentSourceProofReady.filter(x=>heldSet.has(x.id)).map(x=>x.id);
+ const supersededDeclineEvidence=validContracted
+  .filter(row=>row.hold.superseded.length)
+  .map(row=>Object.freeze({itemId:row.item.id,currentRevision:row.hold.currentRevision,superseded:row.hold.superseded}));
  const potential=backlogPotentialR507({
   remaining:unresolved.length,
   selfEditableCount:selfEditable.length,
-  contractReadyCount:contractReady.length,
+  contractReadyCount:validContracted.length,
   needsAcceptanceContractCount:heldNeedsAcceptanceContract.length,
   eligibleCount:eligible.length,
-  heldRecentDeclinesCount:heldRecentDeclines.length,
+  proofReadyCount:proofEligible.length,
+  liveBrowserProofDebtCount:liveBrowserProofDebt.length,
+  externalEvidenceDebtCount:externalEvidenceDebt.length,
+  invalidContractCount:invalidContracts.length,
+  heldRecentDeclinesCount:heldRecentDeclines.length+heldProofDeclines.length,
   heldGovernanceCount:heldGovernance.length,
  });
  return Object.freeze({
@@ -269,16 +322,24 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
   remaining:unresolved.length,
   heldGovernance,
   heldRecentDeclines,
+  heldProofDeclines,
   heldNeedsAcceptanceContract,
+  supersededDeclineEvidence:Object.freeze(supersededDeclineEvidence),
+  invalidContracts,
+  liveBrowserProofDebt,
+  externalEvidenceDebt,
   eligibleCount:eligible.length,
-  contractReadyCount:contractReady.length,
+  proofReadyCount:proofEligible.length,
+  contractReadyCount:validContracted.length,
   needsAcceptanceContractCount:heldNeedsAcceptanceContract.length,
   selfEditableCount:selfEditable.length,
   potential,
   candidates:Object.freeze(candidates.slice()),
+  proofCandidates:Object.freeze(proofCandidates.slice()),
   selected,
+  selectedProof,
   canonicalAdmission:false,
-  targetingRevision:'R508',
-  boundary:'R508 makes acceptance-contract readiness a prerequisite for autonomous mutation. Uncontracted objectives are classified as contract debt and excluded from mutation potential before any AI generation. R507 removes the held-item fallback so returned decline evidence cannot silently regenerate the same repair loop. R458 preserves R450 stable absolute A-Y row identity and R448 subsystem targeting, while extending item-specific acceptance from shallow lexical change toward bounded transition evidence: required product surfaces, substantive changed code, R143 consumer binding, R142 proof transport, R125 admission boundary, failure/recovery/degrade semantics, and Canon non-mutation for B-02. Checked rows remain history; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists; external/device completion still requires first-hand proof.',
+  targetingRevision:'R509',
+  boundary:'R509 makes contract qualification explicit and falsifiable, and scopes decline authority to the acceptance-contract revision that produced it. A newly explicit contract may supersede legacy pre-contract declines once; any decline recorded under the same revision holds again. Product mutation is limited to BOUNDED_SOURCE contracts; CURRENT_SOURCE_PROOF contracts may only generate state/proof candidates; live-browser, external-provider and Hybrid-host evidence contracts remain visible debt without source-mutation authority. R508 contract debt and R507 finite-convergence bounds remain in force.',
  });
 }
