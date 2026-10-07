@@ -35,7 +35,9 @@ broken.proposal.selectedAlternative='NOT_CONSIDERED';
 assert.equal(buildDurableCalculusDecisionR506(broken,{residualId:'SIM_RESIDUAL'}).valid,false);
 
 const machine=fs.readFileSync('cloudflare/lib/github-machine.mjs','utf8');
-for(const needle of ['buildDurableCalculusDecisionR506','calculusDecisionR506','PREDICTED_PENDING_RETURNED_PROOF']){
+for(const needle of ['buildDurableCalculusDecisionR506','calculusDecisionR506']){
  assert.ok(machine.includes(needle),'CLOUD-01 missing durable calculus decision binding: '+needle);
 }
+const source=fs.readFileSync('src/system/durableCalculusDecisionR506.js','utf8');
+assert.ok(source.includes('PREDICTED_PENDING_RETURNED_PROOF'),'R506 result condition must remain prediction until returned proof');
 console.log('R506 DURABLE CALCULUS DECISION PASS · applied reasoning survives proposal boundary as exact residual-bound developmental evidence');
