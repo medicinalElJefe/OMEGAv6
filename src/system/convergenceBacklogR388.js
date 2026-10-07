@@ -53,6 +53,46 @@ const ITEM_ACCEPTANCE=Object.freeze({
   requiredChangedTokens:Object.freeze(['CapabilityAvailabilityState','READY','AVAILABLE_NOT_CONFIGURED','OPTIONAL_NOT_INSTALLED','DEGRADED','FAILED']),
   rationale:'A-03 requires a real normalized capability-availability contract and mapping, not adding one label to the predecessor reality vocabulary.'
  }),
+ 'C-03':Object.freeze({
+  revision:'R507',
+  minChangedChars:600,
+  minFiles:1,
+  minSubstantiveLines:8,
+  requiredChangedPathGroups:Object.freeze([
+   Object.freeze(['src/EarthObservatoryR8.tsx','src/EarthGroundTraversalR9.tsx'])
+  ]),
+  requiredChangedTokens:Object.freeze(['GROUND','evidence','traversal']),
+  currentSourceProof:Object.freeze({
+   revision:'R507',
+   requiredPathTokens:Object.freeze([
+    Object.freeze({
+     path:'src/EarthObservatoryR8.tsx',
+     tokens:Object.freeze([
+      "import EarthGroundTraversalR9 from './EarthGroundTraversalR9'",
+      "{id:'GROUND',label:'Ground',copy:'region → city → street → ground evidence'}",
+      "view==='GROUND'",
+      '<EarthGroundTraversalR9 lat={lat} lon={lon}/>',
+      'Earth → Region → City → Street → Ground remains source-backed'
+     ])
+    }),
+    Object.freeze({
+     path:'src/EarthGroundTraversalR9.tsx',
+     tokens:Object.freeze([
+      "type Level='EARTH'|'REGION'|'CITY'|'STREET'|'GROUND'",
+      "const LEVELS:Level[]=['EARTH','REGION','CITY','STREET','GROUND']",
+      '/api/earth/ground/evidence',
+      'data-ground-evidence-hash',
+      'KartaView',
+      'USGS',
+      'NASA GIBS',
+      'Provider reachability and evidence return are separate states'
+     ])
+    })
+   ]),
+   truthBoundary:'Current-source satisfaction proves that the declared product capability already exists in exact source. It does not prove provider availability, a current external observation, CanonState admission, or production deployment; exact-head independent workflows remain required.'
+  }),
+  rationale:'C-03 is a cross-scale Earth traversal capability. If exact current R8/R9 source already contains the complete source-backed Earth→region→city→street→ground contract, OMEGA must prove and reconcile that fact without manufacturing an unrelated product mutation. Otherwise any repair must be materially traversal/evidence-related rather than a cosmetic satellite-list edit.'
+ }),
  'B-02':Object.freeze({
   revision:'R458',
   minChangedChars:1200,
@@ -167,6 +207,33 @@ export function validateConvergenceRepairR450({item,proposal}={}){
   contradictionFree:missing.length===0
  });
  return Object.freeze({valid:reasons.length===0,state:reasons.length?'SEMANTIC_ACCEPTANCE_REJECTED':'SEMANTIC_ACCEPTANCE_PASSED',reasons,changedChars,substantiveLines,paths:Object.freeze(paths),missingPathGroups:Object.freeze(missingPathGroups.map(group=>Object.freeze([...group]))),missingTokens:Object.freeze(missing),transition,contract});
+}
+
+export function evaluateCurrentConvergenceSourceR507({item,sourceFiles=[]}={}){
+ const contract=item?.acceptanceContract?.currentSourceProof||null;
+ if(!contract)return Object.freeze({applicable:false,satisfied:false,state:'NO_CURRENT_SOURCE_PROOF_CONTRACT',reasons:[],sourceRefs:[],contract:null});
+ const supplied=new Map((Array.isArray(sourceFiles)?sourceFiles:[]).map(file=>[String(file?.path||''),file]));
+ const reasons=[],sourceRefs=[];
+ for(const row of contract.requiredPathTokens||[]){
+  const file=supplied.get(String(row.path||''));
+  if(!file){reasons.push(`SOURCE_PATH_MISSING:${row.path}`);continue}
+  const text=String(file.text||'');
+  const missing=(row.tokens||[]).filter(token=>!text.includes(String(token)));
+  if(missing.length)reasons.push(`SOURCE_TOKENS_MISSING:${row.path}:${missing.join('|')}`);
+  sourceRefs.push(Object.freeze({path:String(row.path),sha:String(file.sha||''),requiredTokens:(row.tokens||[]).length,missingTokens:Object.freeze(missing)}));
+ }
+ const satisfied=reasons.length===0&&sourceRefs.length===(contract.requiredPathTokens||[]).length&&sourceRefs.every(row=>/^[0-9a-f]{40}$/i.test(row.sha));
+ if(reasons.length===0&&!satisfied)reasons.push('SOURCE_SHA_PROOF_INCOMPLETE');
+ return Object.freeze({
+  applicable:true,
+  satisfied,
+  state:satisfied?'CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF':'CURRENT_SOURCE_DOES_NOT_YET_SATISFY_OBJECTIVE',
+  reasons:Object.freeze(reasons),
+  sourceRefs:Object.freeze(sourceRefs),
+  contract,
+  canonicalAdmission:false,
+  directProductionMutation:false,
+ });
 }
 
 export const R388_BACKLOG_CANDIDATE_LIMIT=3;
