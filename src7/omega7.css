@@ -43,3 +43,55 @@
 .o7-operational-truth{margin:0 0 22px;padding:17px;border:1px solid var(--o7-line);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.01));display:grid;gap:13px}.o7-operational-truth>header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}.o7-operational-truth>header>div{max-width:820px}.o7-operational-truth>header span{color:var(--o7-accent);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}.o7-operational-truth h2{margin:4px 0 6px;font-size:20px}.o7-operational-truth>header p{margin:0;color:var(--o7-muted);font-size:12px;line-height:1.5}.o7-operational-truth button{font:inherit;cursor:pointer}.o7-operational-truth>header>button{min-height:36px;border:1px solid var(--o7-line);border-radius:9px;background:var(--o7-surface);color:var(--o7-text);padding:0 12px;white-space:nowrap}.o7-operational-truth>header>button:disabled{opacity:.55;cursor:wait}.o7-operational-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.o7-operational-grid article{min-width:0;display:grid;gap:3px;padding:11px 12px;border:1px solid var(--o7-line);border-radius:10px;background:rgba(0,0,0,.14)}.o7-operational-grid article[data-state=ready]{border-color:rgba(120,200,145,.25)}.o7-operational-grid article[data-state=hold]{border-color:rgba(217,182,111,.25)}.o7-operational-grid span{color:var(--o7-muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.o7-operational-grid b{font-size:13px;overflow-wrap:anywhere}.o7-operational-grid small{color:var(--o7-muted);font-size:10px;line-height:1.35;overflow-wrap:anywhere}.o7-operational-truth>footer{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid var(--o7-line);padding-top:11px}.o7-operational-truth>footer>div{display:grid;gap:2px}.o7-operational-truth>footer>div span{font-size:10px}.o7-operational-truth>footer>div small{color:var(--o7-muted);font-size:10px}.o7-operational-truth>footer nav{display:flex;gap:7px}.o7-operational-truth>footer button{border:1px solid var(--o7-line);border-radius:999px;background:transparent;color:var(--o7-muted);padding:7px 10px;font-size:10px}.o7-operational-truth>footer button:hover{color:var(--o7-text);background:var(--o7-surface)}.o7-operational-truth details{border-top:1px solid var(--o7-line);padding-top:9px}.o7-operational-truth summary{cursor:pointer;color:var(--o7-muted);font-size:10px}.o7-operational-truth dl{display:grid;gap:5px;margin:9px 0 0}.o7-operational-truth dl div{display:grid;grid-template-columns:100px 1fr;gap:8px;font-size:10px}.o7-operational-truth dt{color:var(--o7-muted)}.o7-operational-truth dd{margin:0;overflow-wrap:anywhere}
 @media(max-width:900px){.o7-operational-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.o7-operational-truth{padding:14px}.o7-operational-truth>header,.o7-operational-truth>footer{display:grid}.o7-operational-truth>header>button{justify-self:start}.o7-operational-grid{grid-template-columns:1fr}.o7-operational-truth>footer nav{flex-wrap:wrap}}
+
+
+/* R510 · VISUAL + FUNCTIONAL PRODUCTION CONVERGENCE
+   OMEGA7 HOME is the current R71 visual instrument, not a button board.
+   OMEGA7 remains the shell/navigation authority; embedded R71 contributes the
+   current visual workbench without mounting a second global navigator. */
+.o7-home-visual{position:relative;display:grid;gap:0;margin-bottom:22px}
+.o7-home-established{
+ margin:-34px calc(clamp(18px,4vw,52px)*-1) 22px;
+ background:#020608;
+ border-bottom:1px solid rgba(255,255,255,.07);
+ box-shadow:0 28px 90px rgba(0,0,0,.28);
+}
+.o7-home-established>.r71-home{
+ min-height:calc(100dvh - 58px);
+ width:100%!important;
+ max-width:none!important;
+ margin:0!important;
+ border-radius:0!important;
+}
+.o7-home-established .r96-topbar{top:0;z-index:18}
+.o7-home-established .r96-workbench{min-height:min(780px,calc(100dvh - 260px))}
+.o7-home-established .r71-field .r95-membrane-stage{min-height:clamp(460px,58dvh,760px)}
+.o7-home-stage-loading{
+ min-height:calc(100dvh - 58px);
+ display:grid;
+ place-items:center;
+ background:radial-gradient(circle at 42% 18%,rgba(50,156,139,.12),transparent 38%),#020608;
+ color:var(--o7-muted);
+ font-size:11px;
+ font-weight:700;
+ letter-spacing:.09em;
+ text-transform:uppercase;
+}
+.o7-home-established+.o7-operational-truth,
+.o7-home-established~.o7-recovered,
+.o7-home-established~.o7-capability-section{max-width:1500px;margin-left:auto;margin-right:auto}
+.o7-home-established+.o7-operational-truth{margin-top:16px}
+.o7-app[data-depth=standard] .o7-home-established~.o7-recovered,
+.o7-app[data-depth=standard] .o7-home-established~.o7-capability-section{display:none}
+.o7-app[data-depth=standard] .o7-home-established+.o7-operational-truth{margin-bottom:0}
+.o7-home-established [data-r510-embedded='true']{isolation:isolate}
+@media(max-width:760px){
+ .o7-home-established{
+  margin:-24px calc(max(14px,env(safe-area-inset-right))*-1) 12px calc(max(14px,env(safe-area-inset-left))*-1);
+ }
+ .o7-home-established>.r71-home{min-height:calc(100dvh - 164px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+ .o7-home-established .r96-topbar{position:relative!important;top:auto!important}
+ .o7-home-established .r96-workbench{min-height:0}
+ .o7-home-established .r71-field .r95-membrane-stage{min-height:58dvh}
+ .o7-home-stage-loading{min-height:calc(100dvh - 164px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+}
