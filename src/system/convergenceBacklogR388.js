@@ -244,15 +244,19 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
  const items=parseConvergenceBacklogR388(markdown);
  const unresolved=items.filter(x=>!x.completed&&!advanced.has(x.id));
  const selfEditable=unresolved.filter(x=>x.selfEditable);
- const eligible=selfEditable.filter(x=>!recentHeld.has(x.id));
+ const contractReady=selfEditable.filter(x=>Boolean(x.acceptanceContract));
+ const heldNeedsAcceptanceContract=selfEditable.filter(x=>!x.acceptanceContract).map(x=>x.id);
+ const eligible=contractReady.filter(x=>!recentHeld.has(x.id));
  const limit=Math.max(1,Math.min(R388_BACKLOG_CANDIDATE_LIMIT,Number(candidateLimit)||R388_BACKLOG_CANDIDATE_LIMIT));
  const candidates=eligible.slice(0,limit);
  const selected=candidates[0]||null;
  const heldGovernance=unresolved.filter(x=>!x.selfEditable).map(x=>x.id);
- const heldRecentDeclines=selfEditable.filter(x=>recentHeld.has(x.id)).map(x=>x.id);
+ const heldRecentDeclines=contractReady.filter(x=>recentHeld.has(x.id)).map(x=>x.id);
  const potential=backlogPotentialR507({
   remaining:unresolved.length,
   selfEditableCount:selfEditable.length,
+  contractReadyCount:contractReady.length,
+  needsAcceptanceContractCount:heldNeedsAcceptanceContract.length,
   eligibleCount:eligible.length,
   heldRecentDeclinesCount:heldRecentDeclines.length,
   heldGovernanceCount:heldGovernance.length,
@@ -265,13 +269,16 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
   remaining:unresolved.length,
   heldGovernance,
   heldRecentDeclines,
+  heldNeedsAcceptanceContract,
   eligibleCount:eligible.length,
+  contractReadyCount:contractReady.length,
+  needsAcceptanceContractCount:heldNeedsAcceptanceContract.length,
   selfEditableCount:selfEditable.length,
   potential,
   candidates:Object.freeze(candidates.slice()),
   selected,
   canonicalAdmission:false,
-  targetingRevision:'R507',
-  boundary:'R507 removes the held-item fallback so returned decline evidence cannot silently regenerate the same repair loop. R458 preserves R450 stable absolute A-Y row identity and R448 subsystem targeting, while extending item-specific acceptance from shallow lexical change toward bounded transition evidence: required product surfaces, substantive changed code, R143 consumer binding, R142 proof transport, R125 admission boundary, failure/recovery/degrade semantics, and Canon non-mutation for B-02. Checked rows remain history; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists; external/device completion still requires first-hand proof.',
+  targetingRevision:'R508',
+  boundary:'R508 makes acceptance-contract readiness a prerequisite for autonomous mutation. Uncontracted objectives are classified as contract debt and excluded from mutation potential before any AI generation. R507 removes the held-item fallback so returned decline evidence cannot silently regenerate the same repair loop. R458 preserves R450 stable absolute A-Y row identity and R448 subsystem targeting, while extending item-specific acceptance from shallow lexical change toward bounded transition evidence: required product surfaces, substantive changed code, R143 consumer binding, R142 proof transport, R125 admission boundary, failure/recovery/degrade semantics, and Canon non-mutation for B-02. Checked rows remain history; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists; external/device completion still requires first-hand proof.',
  });
 }
