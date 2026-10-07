@@ -81,3 +81,19 @@
  .o7-home-visual>.o7-home-actions{overflow-x:auto}.o7-home-visual>.o7-home-actions button{white-space:nowrap}
  .o7-capability-grid{grid-template-columns:1fr}
 }
+
+
+/* R502.2 — established OMEGA instrument owns HOME; OMEGA7 shell becomes framing chrome. */
+.o7-home-established{margin:-10px calc(clamp(16px,2.4vw,34px)*-1) 22px}
+.o7-home-established>.omega-home{min-height:auto}
+.o7-home-established .r56-topbar{position:sticky;top:0}
+.o7-home-established+.o7-operational-truth,
+.o7-home-established~.o7-recovered,
+.o7-home-established~.o7-capability-section{max-width:1500px;margin-left:auto;margin-right:auto}
+.o7-app[data-depth=standard] .o7-home-established~.o7-capability-section{display:none}
+.o7-app[data-depth=standard] .o7-home-established~.o7-recovered{display:none}
+.o7-app[data-depth=standard] .o7-home-established+.o7-operational-truth{margin-top:14px}
+@media(max-width:760px){
+ .o7-home-established{margin:-12px calc(max(10px,env(safe-area-inset-right))*-1) 12px}
+ .o7-home-established .r56-topbar{top:0}
+}
