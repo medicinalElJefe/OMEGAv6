@@ -9,6 +9,41 @@ export const R509_ADMISSION_LANES=Object.freeze([
 ]);
 
 const CONTRACTS=Object.freeze({
+ 'B-04':Object.freeze({
+  schema:R509_CAPABILITY_CONTRACT_SCHEMA,
+  revision:'R509',
+  itemKey:'B-04',
+  objectiveExact:'Mobile + desktop parity for every route, submenu, disclosure, overlay and visual layer.',
+  qualification:'QUALIFIED',
+  admissionLane:'CURRENT_SOURCE_PROOF',
+  mutationAdmission:false,
+  supersedesLegacyDeclines:true,
+  sourcePaths:Object.freeze(['src/OmegaWorkstationFullV2.tsx','src/InstrumentOSShellR62.tsx','src/omegaSideNavigatorR88.css','src/omegaNavigationShellR411.css']),
+  requiredProofs:Object.freeze(['R241 Archive Convergence Visual Intelligence','OMEGA Cloud Bridge CI']),
+  currentSourceProof:Object.freeze({
+   revision:'R509',
+   requiredPathTokens:Object.freeze([
+    Object.freeze({path:'src/OmegaWorkstationFullV2.tsx',tokens:Object.freeze(["localStorage.getItem('omega-ui-mode')","x==='DESKTOP'||x==='MOBILE'?x:'AUTO'","<ResponsiveRuntimeShell uiMode={uiMode} onUiMode={setUiMode}"])}),
+    Object.freeze({path:'src/InstrumentOSShellR62.tsx',tokens:Object.freeze(["window.matchMedia('(max-width: 900px)')","uiMode==='MOBILE'?'mobile':uiMode==='DESKTOP'?'desktop':media.matches?'mobile':'desktop'","document.documentElement.dataset.omegaFrame=frame"])}),
+    Object.freeze({path:'src/omegaSideNavigatorR88.css',tokens:Object.freeze(["html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home)","margin-left:calc(var(--r94-nav-rail) + var(--r94-nav-panel))!important","@media(max-width:900px)"])}),
+    Object.freeze({path:'src/omegaNavigationShellR411.css',tokens:Object.freeze(['R411.11 · MOBILE USABLE VIEWPORT OWNERSHIP','width:100vw!important;max-width:100vw!important;min-width:0!important','bottom:var(--r411-mobile-dock)!important','height:calc(100dvh - var(--r411-mobile-dock))!important','overflow-y:auto!important','scroll-padding-bottom:20px!important'])}),
+   ]),
+   truthBoundary:'Exact source establishes one responsive frame authority, desktop non-covering navigation reservation and mobile usable-viewport/scroll ownership. Final completion still requires exact-head R241 browser proof across routes, submenus, disclosures, overlays and visual surfaces.'
+  }),
+  evidencePredicates:Object.freeze([
+   'AUTO/DESKTOP/MOBILE resolves through one frame authority rather than duplicate viewport products.',
+   'Desktop navigation reserves layout width instead of covering the active product surface.',
+   'Mobile owns a bounded usable viewport above the command dock with explicit scroll ownership.',
+   'The exact-head R241 browser suite exercises route, submenu, disclosure, overlay and visual reachability in the promoted lineage.',
+  ]),
+  falsifiers:Object.freeze([
+   'Desktop or mobile uses a second independent route/view authority.',
+   'Navigation overlays canonical content without reserved or bounded geometry.',
+   'A route, disclosure, overlay or visual layer becomes unreachable in one frame mode.',
+   'Source token presence is treated as rendered parity without R241 browser proof.',
+  ]),
+  truthBoundary:'B-04 is a proof-first responsive parity contract. It may supersede its pre-contract legacy decline exactly once, but any R509 decline holds the same contract epoch. It grants no gratuitous UI mutation authority.',
+ }),
  'D-02':Object.freeze({
   schema:R509_CAPABILITY_CONTRACT_SCHEMA,
   revision:'R509',
