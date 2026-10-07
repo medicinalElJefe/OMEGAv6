@@ -43,6 +43,9 @@ async function proveFamilyFailure(browser,family,route,recovery){
  await mocks(page);
  await page.goto(base+'/?omega7=1',{waitUntil:'domcontentloaded',timeout:30000});
  await page.locator('.o7-app').waitFor({state:'visible',timeout:30000});
+ // R502 HOME now intentionally preloads the Earth visual family. Failure injection must
+ // target the requested family's next lazy script, not a family already admitted by HOME.
+ await page.waitForTimeout(800);
 
  let injected=false;
  await page.route('**/assets/*.js',async requestRoute=>{
