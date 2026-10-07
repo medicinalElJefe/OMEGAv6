@@ -66,6 +66,7 @@ export function decideCycle({currentMainSha,productionProofGreen,state,candidate
   }
   const plan=planGovernedCandidateR245({state,evidence:graph});
   if(plan.state==='PROPOSE'&&plan.capsule)return{action:'PROPOSE',strategy:'STATIC_CAPSULE',capsule:plan.capsule,score:plan.score,frontier:plan.frontier,woven:plan.woven,selectionLaw:plan.selectionLaw,gate,held,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,canonicalAdmission:false,deploymentAuthority:AUTHORITY_BOUNDARIES.productionDeploymentWorkflow,machineId:MACHINE_ID};
+  if(backlogTarget?.targetable===true&&backlogTarget?.sourceSatisfied===true)return{action:'PROPOSE',strategy:'R507_CURRENT_SOURCE_PROOF',repairTarget:backlogTarget,gate,held,plan,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,canonicalAdmission:false,deploymentAuthority:AUTHORITY_BOUNDARIES.productionDeploymentWorkflow,machineId:MACHINE_ID};
   if(backlogTarget?.targetable===true)return{action:'PROPOSE',strategy:'R388_BACKLOG_AI_BUILD',repairTarget:backlogTarget,gate,held,plan,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,canonicalAdmission:false,deploymentAuthority:AUTHORITY_BOUNDARIES.productionDeploymentWorkflow,machineId:MACHINE_ID};
   return{action:'OBSERVE_ONLY',reason:backlogTarget?.reason||plan.reason||plan.state||'bounded roadmap exhausted and no convergence backlog item is safely targetable',gate,held,plan,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
 }
