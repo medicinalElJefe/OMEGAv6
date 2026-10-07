@@ -1,6 +1,9 @@
 import assert from'node:assert/strict';
 import fs from'node:fs';
+import{initCorpusPack}from'../src/corpusRuntime';
 import{compileLiveSceneCorrelationR348}from'../src/system/liveSceneCorrelationR348';
+
+await initCorpusPack();
 
 const empty=compileLiveSceneCorrelationR348(4242,null,null,null,null);
 assert.equal(empty.exactTraversal.verified,true);
