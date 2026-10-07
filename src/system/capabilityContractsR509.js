@@ -137,13 +137,13 @@ const CONTRACTS=Object.freeze({
   qualification:'QUALIFIED',
   admissionLane:'CURRENT_SOURCE_PROOF',
   mutationAdmission:false,
-  sourcePaths:Object.freeze(['src/SARTruthInstrumentR280.tsx','src/SARLiveTruthR285.tsx','tests/r370-live-earth-sar-closure-browser-e2e.mjs']),
+  sourcePaths:Object.freeze(['src/SARTruthInstrumentR280.tsx','src/SARLiveTruthR285.tsx']),
   requiredProofs:Object.freeze(['R241 Archive Convergence Visual Intelligence','R202 Operational Source Authority']),
   currentSourceProof:Object.freeze({
    revision:'R509',
    requiredPathTokens:Object.freeze([
-    Object.freeze({path:'src/SARTruthInstrumentR280.tsx',tokens:Object.freeze(['focusDisplay','cleanView','FOCUS FIELD','CLEAN VIEW','r280-center','allowDemonstration={false}'])}),
-    Object.freeze({path:'tests/r370-live-earth-sar-closure-browser-e2e.mjs',tokens:Object.freeze(['waitAnalytical(page)','all 12 analytical lenses actuated','viewport.width*.60'])}),
+    Object.freeze({path:'src/SARTruthInstrumentR280.tsx',tokens:Object.freeze(['focusDisplay','cleanView','FOCUS FIELD','CLEAN VIEW','r280-center'])}),
+    Object.freeze({path:'src/SARLiveTruthR285.tsx',tokens:Object.freeze(['allowDemonstration={false}','SARTruthInstrumentR280','R344 full-resolution closure receipt'])}),
    ]),
    truthBoundary:'Exact source proves the field-first controls and browser acceptance contract exist. The required R241/R202 exact-head workflows must still pass after promotion before the item can be reconciled.'
   }),
