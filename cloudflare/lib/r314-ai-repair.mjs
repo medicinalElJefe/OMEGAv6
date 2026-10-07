@@ -10,6 +10,7 @@ import {
   summarizeAiProposalR314,
   validateAiRepairProposalR314,
 } from '../../src/system/autonomousRepairPolicyR314.js';
+import {validateReasoningWorkerProposalR503} from '../../src/system/calculusNativeAutonomyR503.js';
 import {validateReasoningWorkerDecisionR504} from '../../src/system/calculusDecisionContinuityR504.js';
 
 export const R314_CLOUD_AI_REPAIR_SCHEMA='OMEGA_CLOUD_R314_AI_REPAIR';
@@ -58,7 +59,7 @@ export function prepareAiRepairR314({rawResponse,residual,contextFiles=[]}={}){
  return{ok:true,state:'VALIDATED_BOUNDED_PATCH',proposal,validation,patches};
 }
 
-const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR'||state==='NO_SAFE_PATCH'||state==='BLOCKED_BY_R504_CALCULUS_DECISION';
+const retryableState=state=>state==='REJECTED_BY_R314_POLICY'||state==='MALFORMED_AI_RESPONSE'||state==='AI_GENERATION_ERROR'||state==='NO_SAFE_PATCH'||state==='BLOCKED_BY_R503_CALCULUS_LITERACY'||state==='BLOCKED_BY_R504_CALCULUS_DECISION';
 const attemptReceipt=(attempt,prepared)=>({
  attempt,
  state:prepared.state,
@@ -92,12 +93,17 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
    prepared={ok:false,state:'AI_GENERATION_ERROR',proposal:null,reasons:[`AI_RUN_ERROR:${error instanceof Error?error.message:String(error)}`],patches:[]};
   }
   if(prepared.ok&&stage?.calculusWorkerPacket){
-   const literacy=validateReasoningWorkerDecisionR504(stage.calculusWorkerPacket,prepared.proposal,{
-    residualId:residual?.id||null,
-    mutationProposed:Array.isArray(prepared.proposal?.files)&&prepared.proposal.files.length>0,
-   });
-   if(!literacy.valid)prepared={...prepared,ok:false,state:'BLOCKED_BY_R504_CALCULUS_DECISION',reasons:literacy.reasons,workerLiteracy:literacy,patches:[]};
-   else prepared={...prepared,workerLiteracy:literacy};
+   const literacy=validateReasoningWorkerProposalR503(stage.calculusWorkerPacket,prepared.proposal);
+   if(!literacy.valid){
+    prepared={...prepared,ok:false,state:'BLOCKED_BY_R503_CALCULUS_LITERACY',reasons:literacy.reasons,workerLiteracy:literacy,patches:[]};
+   }else{
+    const decision=validateReasoningWorkerDecisionR504(stage.calculusWorkerPacket,prepared.proposal,{
+     residualId:residual?.id||null,
+     mutationProposed:Array.isArray(prepared.proposal?.files)&&prepared.proposal.files.length>0,
+    });
+    if(!decision.valid)prepared={...prepared,ok:false,state:'BLOCKED_BY_R504_CALCULUS_DECISION',reasons:decision.reasons,workerLiteracy:literacy,workerDecision:decision,patches:[]};
+    else prepared={...prepared,workerLiteracy:literacy,workerDecision:decision};
+   }
   }
   const receipt=attemptReceipt(attempt,prepared);
   attempts.push(receipt);
