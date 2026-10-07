@@ -1,3 +1,5 @@
+import {backlogPotentialR507} from './finiteConvergenceGovernorR507.js';
+
 export const R388_CONVERGENCE_BACKLOG_SCHEMA='OMEGA_CONVERGENCE_BACKLOG_R388';
 
 const TARGETS=Object.freeze({
@@ -50,6 +52,46 @@ const ITEM_ACCEPTANCE=Object.freeze({
   minChangedChars:320,
   requiredChangedTokens:Object.freeze(['CapabilityAvailabilityState','READY','AVAILABLE_NOT_CONFIGURED','OPTIONAL_NOT_INSTALLED','DEGRADED','FAILED']),
   rationale:'A-03 requires a real normalized capability-availability contract and mapping, not adding one label to the predecessor reality vocabulary.'
+ }),
+ 'C-03':Object.freeze({
+  revision:'R507',
+  minChangedChars:600,
+  minFiles:1,
+  minSubstantiveLines:8,
+  requiredChangedPathGroups:Object.freeze([
+   Object.freeze(['src/EarthObservatoryR8.tsx','src/EarthGroundTraversalR9.tsx'])
+  ]),
+  requiredChangedTokens:Object.freeze(['GROUND','evidence','traversal']),
+  currentSourceProof:Object.freeze({
+   revision:'R507',
+   requiredPathTokens:Object.freeze([
+    Object.freeze({
+     path:'src/EarthObservatoryR8.tsx',
+     tokens:Object.freeze([
+      "import EarthGroundTraversalR9 from './EarthGroundTraversalR9'",
+      "{id:'GROUND',label:'Ground',copy:'region → city → street → ground evidence'}",
+      "view==='GROUND'",
+      '<EarthGroundTraversalR9 lat={lat} lon={lon}/>',
+      'Earth → Region → City → Street → Ground remains source-backed'
+     ])
+    }),
+    Object.freeze({
+     path:'src/EarthGroundTraversalR9.tsx',
+     tokens:Object.freeze([
+      "type Level='EARTH'|'REGION'|'CITY'|'STREET'|'GROUND'",
+      "const LEVELS:Level[]=['EARTH','REGION','CITY','STREET','GROUND']",
+      '/api/earth/ground/evidence',
+      'data-ground-evidence-hash',
+      'KartaView',
+      'USGS',
+      'NASA GIBS',
+      'Provider reachability and evidence return are separate states'
+     ])
+    })
+   ]),
+   truthBoundary:'Current-source satisfaction proves that the declared product capability already exists in exact source. It does not prove provider availability, a current external observation, CanonState admission, or production deployment; exact-head independent workflows remain required.'
+  }),
+  rationale:'C-03 is a cross-scale Earth traversal capability. If exact current R8/R9 source already contains the complete source-backed Earth→region→city→street→ground contract, OMEGA must prove and reconcile that fact without manufacturing an unrelated product mutation. Otherwise any repair must be materially traversal/evidence-related rather than a cosmetic satellite-list edit.'
  }),
  'B-02':Object.freeze({
   revision:'R458',
@@ -138,7 +180,7 @@ export function parseConvergenceBacklogR388(markdown=''){
 
 export function validateConvergenceRepairR450({item,proposal}={}){
  const contract=item?.acceptanceContract||null;
- if(!contract)return Object.freeze({valid:true,state:'NO_ITEM_SEMANTIC_CONTRACT',reasons:[],changedChars:0,contract:null});
+ if(!contract)return Object.freeze({valid:false,state:'SEMANTIC_ACCEPTANCE_CONTRACT_REQUIRED',reasons:['ITEM_ACCEPTANCE_CONTRACT_REQUIRED'],changedChars:0,substantiveLines:0,paths:Object.freeze([]),missingPathGroups:Object.freeze([]),missingTokens:Object.freeze([]),transition:Object.freeze({normalized:false,authoritySurfaceBound:false,proofTransportBound:false,recoveryBound:false,canonicalBoundaryPreserved:false,burdenBounded:true,contradictionFree:false}),contract:null});
  const files=Array.isArray(proposal?.files)?proposal.files:[];
  const paths=files.map(file=>String(file?.path||'')).filter(Boolean);
  const replacements=files.flatMap(file=>Array.isArray(file?.replacements)?file.replacements:[]);
@@ -167,6 +209,33 @@ export function validateConvergenceRepairR450({item,proposal}={}){
  return Object.freeze({valid:reasons.length===0,state:reasons.length?'SEMANTIC_ACCEPTANCE_REJECTED':'SEMANTIC_ACCEPTANCE_PASSED',reasons,changedChars,substantiveLines,paths:Object.freeze(paths),missingPathGroups:Object.freeze(missingPathGroups.map(group=>Object.freeze([...group]))),missingTokens:Object.freeze(missing),transition,contract});
 }
 
+export function evaluateCurrentConvergenceSourceR507({item,sourceFiles=[]}={}){
+ const contract=item?.acceptanceContract?.currentSourceProof||null;
+ if(!contract)return Object.freeze({applicable:false,satisfied:false,state:'NO_CURRENT_SOURCE_PROOF_CONTRACT',reasons:[],sourceRefs:[],contract:null});
+ const supplied=new Map((Array.isArray(sourceFiles)?sourceFiles:[]).map(file=>[String(file?.path||''),file]));
+ const reasons=[],sourceRefs=[];
+ for(const row of contract.requiredPathTokens||[]){
+  const file=supplied.get(String(row.path||''));
+  if(!file){reasons.push(`SOURCE_PATH_MISSING:${row.path}`);continue}
+  const text=String(file.text||'');
+  const missing=(row.tokens||[]).filter(token=>!text.includes(String(token)));
+  if(missing.length)reasons.push(`SOURCE_TOKENS_MISSING:${row.path}:${missing.join('|')}`);
+  sourceRefs.push(Object.freeze({path:String(row.path),sha:String(file.sha||''),requiredTokens:(row.tokens||[]).length,missingTokens:Object.freeze(missing)}));
+ }
+ const satisfied=reasons.length===0&&sourceRefs.length===(contract.requiredPathTokens||[]).length&&sourceRefs.every(row=>/^[0-9a-f]{40}$/i.test(row.sha));
+ if(reasons.length===0&&!satisfied)reasons.push('SOURCE_SHA_PROOF_INCOMPLETE');
+ return Object.freeze({
+  applicable:true,
+  satisfied,
+  state:satisfied?'CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF':'CURRENT_SOURCE_DOES_NOT_YET_SATISFY_OBJECTIVE',
+  reasons:Object.freeze(reasons),
+  sourceRefs:Object.freeze(sourceRefs),
+  contract,
+  canonicalAdmission:false,
+  directProductionMutation:false,
+ });
+}
+
 export const R388_BACKLOG_CANDIDATE_LIMIT=3;
 
 export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],heldItemIds=[],candidateLimit=R388_BACKLOG_CANDIDATE_LIMIT}={}){
@@ -176,12 +245,18 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
  const unresolved=items.filter(x=>!x.completed&&!advanced.has(x.id));
  const selfEditable=unresolved.filter(x=>x.selfEditable);
  const eligible=selfEditable.filter(x=>!recentHeld.has(x.id));
- const pool=eligible.length?eligible:selfEditable;
  const limit=Math.max(1,Math.min(R388_BACKLOG_CANDIDATE_LIMIT,Number(candidateLimit)||R388_BACKLOG_CANDIDATE_LIMIT));
- const candidates=pool.slice(0,limit);
+ const candidates=eligible.slice(0,limit);
  const selected=candidates[0]||null;
  const heldGovernance=unresolved.filter(x=>!x.selfEditable).map(x=>x.id);
  const heldRecentDeclines=selfEditable.filter(x=>recentHeld.has(x.id)).map(x=>x.id);
+ const potential=backlogPotentialR507({
+  remaining:unresolved.length,
+  selfEditableCount:selfEditable.length,
+  eligibleCount:eligible.length,
+  heldRecentDeclinesCount:heldRecentDeclines.length,
+  heldGovernanceCount:heldGovernance.length,
+ });
  return Object.freeze({
   schema:R388_CONVERGENCE_BACKLOG_SCHEMA,
   total:items.length,
@@ -190,10 +265,13 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
   remaining:unresolved.length,
   heldGovernance,
   heldRecentDeclines,
+  eligibleCount:eligible.length,
+  selfEditableCount:selfEditable.length,
+  potential,
   candidates:Object.freeze(candidates.slice()),
   selected,
   canonicalAdmission:false,
-  targetingRevision:'R458',
-  boundary:'R458 preserves R450 stable absolute A-Y row identity and R448 subsystem targeting, while extending item-specific acceptance from shallow lexical change toward bounded transition evidence: required product surfaces, substantive changed code, R143 consumer binding, R142 proof transport, R125 admission boundary, failure/recovery/degrade semantics, and Canon non-mutation for B-02. Checked rows remain history; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists; external/device completion still requires first-hand proof.',
+  targetingRevision:'R507',
+  boundary:'R507 removes the held-item fallback so returned decline evidence cannot silently regenerate the same repair loop. R458 preserves R450 stable absolute A-Y row identity and R448 subsystem targeting, while extending item-specific acceptance from shallow lexical change toward bounded transition evidence: required product surfaces, substantive changed code, R143 consumer binding, R142 proof transport, R125 admission boundary, failure/recovery/degrade semantics, and Canon non-mutation for B-02. Checked rows remain history; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists; external/device completion still requires first-hand proof.',
  });
 }

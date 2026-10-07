@@ -1,5 +1,7 @@
+import {repairBudgetR507,R507_MAX_SAME_FINGERPRINT_ATTEMPTS} from './finiteConvergenceGovernorR507.js';
+
 export const R314_AUTONOMOUS_CONVERGENCE_SCHEMA='OMEGA_AUTONOMOUS_CONVERGENCE_R314';
-export const R314_MAX_SAME_REPAIR_ATTEMPTS=2;
+export const R314_MAX_SAME_REPAIR_ATTEMPTS=R507_MAX_SAME_FINGERPRINT_ATTEMPTS;
 
 const SEVERITY_WEIGHT=Object.freeze({LOW:1,MEDIUM:3,HIGH:8,CRITICAL:16});
 const MODE_WEIGHT=Object.freeze({OBSERVE_ONLY:0,QUEUE_FOR_REVIEW:2,BLOCK:8});
@@ -50,13 +52,26 @@ export function repairAttemptKeyR314({fingerprint,repairId}){
 }
 
 export function repairAttemptCountR314(history=[],key){
- return (Array.isArray(history)?history:[]).filter(row=>row?.key===key&&['FAILED','NO_GAIN','REJECTED'].includes(upper(row?.outcome))).length;
+ return (Array.isArray(history)?history:[]).filter(row=>row?.key===key&&['PROPOSED','FAILED','NO_GAIN','REJECTED'].includes(upper(row?.outcome))).length;
 }
 
 export function canAttemptRepairR314({history=[],fingerprint,repairId,maxAttempts=R314_MAX_SAME_REPAIR_ATTEMPTS}={}){
  const key=repairAttemptKeyR314({fingerprint,repairId});
- const failedAttempts=repairAttemptCountR314(history,key);
- return {allow:failedAttempts<maxAttempts,key,failedAttempts,maxAttempts,reason:failedAttempts<maxAttempts?'repair hypothesis remains inside bounded retry budget':'same residual fingerprint + repair hypothesis exhausted; require new evidence or a changed repair hypothesis'};
+ const budget=repairBudgetR507({history,fingerprint,repairId,maxSameFingerprint:maxAttempts});
+ return {
+  allow:budget.allow,
+  key,
+  failedAttempts:budget.sameFingerprintAttempts,
+  attempts:budget.sameFingerprintAttempts,
+  maxAttempts:budget.maxSameFingerprint,
+  hypothesisAttempts:budget.hypothesisAttempts,
+  maxHypothesisAttempts:budget.maxHypothesis,
+  remainingSameFingerprint:budget.remainingSameFingerprint,
+  remainingHypothesis:budget.remainingHypothesis,
+  remaining:budget.remaining,
+  reason:budget.reason,
+  finiteConvergence:budget,
+ };
 }
 
 export function recordRepairAttemptR314(history=[],entry={}){
@@ -80,6 +95,8 @@ export function decideCandidateAdmissionR314({before,after,risk=0,complexity=0,c
 
 export const R314_AUTONOMOUS_LAWS=Object.freeze([
  'SAME_RESIDUAL_PLUS_SAME_REPAIR_IS_BOUNDED',
+ 'PROPOSED_REPAIR_CONSUMES_BUDGET_BEFORE_ANOTHER_CAN_BE_CREATED',
+ 'SAME_REPAIR_HYPOTHESIS_IS_BOUNDED_ACROSS_FINGERPRINT_CHURN',
  'NO_GAIN_MEANS_NO_PROMOTION',
  'NEW_BLOCKING_RESIDUAL_MEANS_NO_PROMOTION',
  'EXACT_BASE_AND_ALLOWLISTED_DIFF_REQUIRED',

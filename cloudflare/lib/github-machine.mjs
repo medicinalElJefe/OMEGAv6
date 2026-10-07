@@ -5,10 +5,11 @@ import {selectRepairTargetR314} from './r314-target-registry.mjs';
 import {proposeAiRepairR314} from './r314-ai-repair.mjs';
 import {canAttemptRepairR314,recordRepairAttemptR314} from '../../src/system/autonomousConvergenceR314.js';
 import {R314_AI_REPAIR_MODEL_DEFAULT,repairPathPolicyR314} from '../../src/system/autonomousRepairPolicyR314.js';
-import {selectNextConvergenceItemR388,validateConvergenceRepairR450} from '../../src/system/convergenceBacklogR388.js';
+import {selectNextConvergenceItemR388,validateConvergenceRepairR450,evaluateCurrentConvergenceSourceR507} from '../../src/system/convergenceBacklogR388.js';
 import {autonomousCandidatePrefixesR245,isAutonomousCandidateBranchR245,validateAutonomousCandidatePolicyR245,R245_CAPSULE_GENERATOR_REVISION,R245_GOVERNED_SELFBUILD_CONTRACT} from '../../src/system/governedSelfBuildContractR245.js';
 import {cloudCandidateResolutionR436} from './canonical-resolution-r436.mjs';
 import {buildCalculusNativeWorkerPacketR503} from '../../src/system/calculusNativeAutonomyR503.js';
+import {finiteConvergencePotentialR507} from '../../src/system/finiteConvergenceGovernorR507.js';
 
 const API='https://api.github.com';
 function utf8ToBase64(value){const bytes=new TextEncoder().encode(String(value));let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s)}
@@ -196,9 +197,29 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const backlog=selectNextConvergenceItemR388({markdown:convergenceMarkdown,advancedItemIds:reconciledAdvancedItemIds,heldItemIds:recentDeclinedItemIds});
   const backlogTargets=[];
   for(const item of backlog.candidates||[]){
-    const paths=[];
-    for(const candidate of item.affected||[]){const policy=repairPathPolicyR314(candidate);if(policy.allowed&&await repoPathExists(token,repo,policy.path,mainSha))paths.push(policy.path)}
-    backlogTargets.push(paths.length?{targetable:true,residualId:item.id,paths:paths.slice(0,2),item,residual:{id:item.id,severity:'MEDIUM',mode:'AUTO_REPAIR',confidence:1,reproducible:true,affected:paths.slice(0,2),summary:`Advance one bounded source step for convergence backlog item ${item.id}: ${item.objective}. The full item remains open until independently proved. Make the smallest material current-runtime improvement inside the supplied target source only; do not claim external/device completion without returned proof.`,evidenceId:'R387_CONVERGENCE_MATRIX',source:'R388',externalProofRequired:item.externalProofRequired===true,expectedProofs:item.expectedProofs||[]},reason:'R388_CONVERGENCE_ITEM_READY'}:{targetable:false,reason:'R388_ITEM_HAS_NO_EXISTING_ALLOWED_PRODUCT_SOURCE_TARGET',item,paths:[]});
+    const paths=[],sourceFiles=[];
+    for(const candidate of item.affected||[]){
+      const policy=repairPathPolicyR314(candidate);
+      if(policy.allowed&&await repoPathExists(token,repo,policy.path,mainSha)){
+        paths.push(policy.path);
+        sourceFiles.push(await getRepoTextFile(token,repo,policy.path,mainSha));
+      }
+    }
+    const currentSourceProof=evaluateCurrentConvergenceSourceR507({item,sourceFiles});
+    if(currentSourceProof.applicable&&currentSourceProof.satisfied){
+      backlogTargets.push({
+        targetable:true,
+        sourceSatisfied:true,
+        residualId:item.id,
+        paths:[],
+        sourceFiles:currentSourceProof.sourceRefs,
+        currentSourceProof,
+        item,
+        reason:'R507_CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF',
+      });
+      continue;
+    }
+    backlogTargets.push(paths.length?{targetable:true,sourceSatisfied:false,residualId:item.id,paths:paths.slice(0,2),item,currentSourceProof,residual:{id:item.id,severity:'MEDIUM',mode:'AUTO_REPAIR',confidence:1,reproducible:true,affected:paths.slice(0,2),summary:`Advance one bounded source step for convergence backlog item ${item.id}: ${item.objective}. The full item remains open until independently proved. Make the smallest material current-runtime improvement inside the supplied target source only; do not claim external/device completion without returned proof.`,evidenceId:'R387_CONVERGENCE_MATRIX',source:'R388',externalProofRequired:item.externalProofRequired===true,expectedProofs:item.expectedProofs||[]},reason:'R388_CONVERGENCE_ITEM_READY'}:{targetable:false,sourceSatisfied:false,reason:'R388_ITEM_HAS_NO_EXISTING_ALLOWED_PRODUCT_SOURCE_TARGET',item,paths:[],currentSourceProof});
   }
   const backlogTarget=backlogTargets.find(target=>target.targetable)||{targetable:false,reason:'NO_SELF_EDITABLE_CONVERGENCE_ITEM',item:backlog.selected||null,paths:[]};
   const [coreHealth,releaseEvidence,runtimeAttestation,hybrid]=await Promise.all([liveJson(runtimeBase,'/api/core-health'),liveJson(runtimeBase,'/api/release-evidence'),liveJson(runtimeBase,'/api/runtime-attestation'),liveJson(runtimeBase,'/api/hybrid/status')]);
@@ -206,10 +227,19 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const residualState=buildCloudResidualStateR314({accuracyState,runtimeEvidence:evidence,workflowEvidence:workflowEvidenceForSha(runs.workflow_runs,mainSha)});
   const selectedTarget=selectRepairTargetR314(residualState);
   const repairId=selectedTarget.targetable?`R314-AI:${selectedTarget.residualId}:${selectedTarget.paths.join('|')}`:null;
-  const retry=repairId?canAttemptRepairR314({history:state.r314RepairHistory||[],fingerprint:residualState.vector.fingerprint,repairId}):null;
+  const retry=repairId?canAttemptRepairR314({history:state.r314RepairHistory||[],fingerprint:residualState.vector.fingerprint,repairId,evidenceId:selectedTarget.residual?.evidenceId||null}):null;
   const repairTarget=selectedTarget.targetable&&retry&&!retry.allow?{...selectedTarget,targetable:false,reasons:[...selectedTarget.reasons,'R314_RETRY_BUDGET_EXHAUSTED']}:{...selectedTarget,repairId};
-  const decision=!workerContextR503.valid?{action:'OBSERVE_ONLY',reason:`R503 calculus-native worker packet invalid: ${workerContextR503.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}:candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence,repairTarget,backlogTarget}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
-  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,workerContextR503,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,durableCanonicalAdvancedItemIds,observedCanonicalAdvancedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},decision};
+  const finiteConvergence=finiteConvergencePotentialR507({
+    selfBuildState:state,
+    retry,
+    backlog,
+    openAutonomousCandidates:candidates.length,
+  });
+  const rawDecision=!workerContextR503.valid?{action:'OBSERVE_ONLY',reason:`R503 calculus-native worker packet invalid: ${workerContextR503.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}:candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence,repairTarget,backlogTarget}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
+  const decision=rawDecision.action==='PROPOSE'&&finiteConvergence.mutationBudget<=0
+    ?{action:'OBSERVE_ONLY',reason:'R507_ZERO_MUTATION_BUDGET · fixed evidence epoch is quiescent; require independently returned new evidence or a changed bounded repair hypothesis',finiteConvergence,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}
+    :{...rawDecision,finiteConvergence};
+  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,workerContextR503,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,durableCanonicalAdvancedItemIds,observedCanonicalAdvancedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},r507:finiteConvergence,decision};
 }
 
 async function ensureNoCompetingCandidate(token,repo,state,mainSha){
@@ -240,6 +270,80 @@ async function proposeR314AiCycle({inspection,token,repo,ai,model}){
   await ensureNoCompetingCandidate(token,repo,state,mainSha);
   const pr=await gh(token,`/repos/${repo}/pulls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:`R314 CLOUD-01 repair g${generation} — ${target.residualId}`,head:branch,base:'main',draft:false,body:`CLOUD-01 generated a bounded R314 product-source repair from an explicit residual.\n\nExact base: ${mainSha}\nResidual: ${target.residualId}\nResidual fingerprint: ${r314.residualState.vector.fingerprint}\nRepair hypothesis: ${target.repairId}\nPaths: ${repair.patches.map(p=>p.path).join(', ')}\nExpected independent proofs: ${(repair.proposal.expectedProofs||[]).join(', ')}\n\nThe model was supplied only exact-base allowlisted product source. R314 rejected governance/tests/deployment/secrets/Canon/Worker mutation. This PR is source proposal only: R125 Canon admission remains separate and ci.yml remains sole production deployment authority.`})});
   return{...inspection,mutation:'R314_AI_BRANCH_AND_PR_CREATED',branch,prNumber:pr.number,prUrl:pr.html_url,generation,residualId:target.residualId,residualFingerprint:r314.residualState.vector.fingerprint,changedPaths:repair.patches.map(p=>p.path)};
+}
+
+async function proposeR507CurrentSourceProofCycle({inspection,token,repo}){
+  const{mainSha,state,decision}=inspection;
+  const target=decision.repairTarget;
+  const item=target?.item||null;
+  const proof=target?.currentSourceProof||null;
+  if(!item||target?.sourceSatisfied!==true||proof?.satisfied!==true){
+    return{...inspection,mutation:'NONE',reason:'R507 current-source proof target is not satisfied'};
+  }
+  await ensureNoCompetingCandidate(token,repo,state,mainSha);
+  const branch=`cloud/evolution-r507-source-proof-${slug(item.id)}-${mainSha.slice(0,8)}`;
+  await gh(token,`/repos/${repo}/git/refs`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({ref:`refs/heads/${branch}`,sha:mainSha})});
+  const expectedProofs=[...(item.expectedProofs||[])];
+  const receipt={
+    schema:'OMEGA_R507_CURRENT_SOURCE_SATISFACTION_RECEIPT',
+    revision:'R507',
+    machineId:MACHINE_ID,
+    governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,
+    generatorContract:'R507_CURRENT_SOURCE_PROOF',
+    itemId:item.id,
+    section:item.section,
+    objective:item.objective,
+    baseSha:mainSha,
+    branch,
+    status:'CURRENT_SOURCE_SATISFIED_PENDING_PROOF',
+    sourceAdvance:false,
+    advancedItemIdsChanged:true,
+    currentSourceProof:{
+      state:proof.state,
+      sourceRefs:proof.sourceRefs,
+      truthBoundary:proof.contract?.truthBoundary||null,
+    },
+    expectedProofs,
+    canonicalAdmission:false,
+    directProductionMutation:false,
+    createdAt:new Date().toISOString(),
+    authorityBoundaries:AUTHORITY_BOUNDARIES,
+  };
+  const branchState=await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch);
+  const nextState={
+    ...state,
+    r388AdvancedItemIds:[...new Set([...(state.r388AdvancedItemIds||[]),item.id])],
+    r388Receipts:[...(state.r388Receipts||[]),receipt].slice(-256),
+  };
+  await putRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch,`R507 prove exact current-source satisfaction ${item.id}`,`${JSON.stringify(nextState,null,2)}\n`,branchState.sha);
+  const candidate={
+    schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388',
+    revision:'R507',
+    machineId:MACHINE_ID,
+    governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,
+    generatorContract:'R507_CURRENT_SOURCE_PROOF',
+    item,
+    repair:{paths:[],expectedProofs,currentSourceProof:receipt.currentSourceProof,rejectionScars:[],declinedItemScars:[]},
+    receipt,
+    status:'CURRENT_SOURCE_SATISFIED_PENDING_PROOF',
+    sourceAdvance:false,
+    canonicalAdmission:false,
+    directProductionMutation:false,
+  };
+  candidate.canonicalResolution=cloudCandidateResolutionR436(candidate);
+  let candidateSha=null;
+  try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
+  await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record R507 current-source proof ${item.id}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
+  await ensureNoCompetingCandidate(token,repo,state,mainSha);
+  const refs=(proof.sourceRefs||[]).map(row=>`${row.path}@${row.sha}`).join('\n');
+  const pr=await gh(token,`/repos/${repo}/pulls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+    title:`R507 current-source proof — ${item.id}`,
+    head:branch,
+    base:'main',
+    draft:false,
+    body:`R507 found that the exact current product source already satisfies the declared convergence objective, so this candidate carries proof/state only and makes no product-source mutation.\n\nExact base: ${mainSha}\nItem: ${item.id} — ${item.objective}\nExact source refs:\n${refs}\nProduct-source changes: NONE\nAdvanced item change is conditional on this exact-head PR passing the full governed workflow stack.\nExpected domain proofs: ${expectedProofs.join(', ')}\n\nThis is source-existence proof, not external-provider availability, current observation, CanonState admission, or production proof. R125 remains sole CanonState admission authority and ci.yml remains sole production writer.`
+  })});
+  return{...inspection,mutation:'R507_SOURCE_PROOF_BRANCH_AND_PR_CREATED',branch,prNumber:pr.number,prUrl:pr.html_url,itemId:item.id,changedPaths:['public/omega-r170-selfbuild-state.json','public/omega-r170-selfbuild-candidate.json'],currentSourceProof:receipt.currentSourceProof};
 }
 
 async function proposeR388BacklogCycle({inspection,token,repo,ai,model}){
@@ -339,6 +443,7 @@ export async function proposeCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const inspection=await inspectCycle({token,repo,runtimeBase});
   if(inspection.decision.action!=='PROPOSE')return{...inspection,mutation:'NONE'};
   if(inspection.decision.strategy==='R314_AI_REPAIR')return proposeR314AiCycle({inspection,token,repo,ai,model});
+  if(inspection.decision.strategy==='R507_CURRENT_SOURCE_PROOF')return proposeR507CurrentSourceProofCycle({inspection,token,repo});
   if(inspection.decision.strategy==='R388_BACKLOG_AI_BUILD')return proposeR388BacklogCycle({inspection,token,repo,ai,model});
   return proposeStaticCapsuleCycle({inspection,token,repo});
 }
@@ -361,5 +466,5 @@ export async function runAutonomousCycle({token,repo='medicinalElJefe/OMEGAv6',r
   const open=await gh(token,`/repos/${repo}/pulls?state=open&base=main&per_page=100`);const autonomous=(open||[]).filter(pr=>isAutonomousCandidateBranchR245(pr.head?.ref,candidatePolicy.policy)).sort((a,b)=>a.number-b.number);
   if(autonomous.length>1)return{ok:false,state:'BLOCKED',reason:'multiple open governed autonomous candidate PRs require review',prs:autonomous.map(x=>x.number),branches:autonomous.map(x=>x.head?.ref)};
   if(autonomous.length===1){const held=autonomous[0];if(String(held.head?.ref||'').startsWith('cloud/evolution-')){const promotion=await promoteGreenCloudPr({token,repo,prNumber:held.number});return{ok:true,state:promotion.action==='MERGED_GREEN_EXACT_HEAD'?'PROMOTED':'HELD_FOR_PROOF',promotion}}return{ok:true,state:'HELD_FOR_R170_CANDIDATE',reason:'shared one-open-autonomous-candidate fence holds CLOUD-01 while the R170 candidate exists',prNumber:held.number,branch:held.head?.ref}}
-  const proposal=await proposeCycle({token,repo,runtimeBase,ai,model});return{ok:true,state:['BRANCH_AND_PR_CREATED','R314_AI_BRANCH_AND_PR_CREATED','R388_BACKLOG_BRANCH_AND_PR_CREATED'].includes(proposal.mutation)?'PROPOSED':'OBSERVE_ONLY',proposal:{mainSha:proposal.mainSha,mutation:proposal.mutation,decision:proposal.decision,branch:proposal.branch||null,prNumber:proposal.prNumber||null,prUrl:proposal.prUrl||null,capsuleId:proposal.capsuleId||null,residualId:proposal.residualId||null,residualFingerprint:proposal.residualFingerprint||null,itemId:proposal.itemId||null,reason:proposal.reason||null,repair:proposal.repair?{state:proposal.repair.state||null,reasons:proposal.repair.reasons||[],attempts:proposal.repair.attempts||[],rejectionHistory:proposal.repair.rejectionHistory||[],reformulated:proposal.repair.reformulated===true}:null,declinedItemScars:proposal.declinedItemScars||[]}}
+  const proposal=await proposeCycle({token,repo,runtimeBase,ai,model});return{ok:true,state:['BRANCH_AND_PR_CREATED','R314_AI_BRANCH_AND_PR_CREATED','R388_BACKLOG_BRANCH_AND_PR_CREATED','R507_SOURCE_PROOF_BRANCH_AND_PR_CREATED'].includes(proposal.mutation)?'PROPOSED':'OBSERVE_ONLY',proposal:{mainSha:proposal.mainSha,mutation:proposal.mutation,decision:proposal.decision,branch:proposal.branch||null,prNumber:proposal.prNumber||null,prUrl:proposal.prUrl||null,capsuleId:proposal.capsuleId||null,residualId:proposal.residualId||null,residualFingerprint:proposal.residualFingerprint||null,itemId:proposal.itemId||null,reason:proposal.reason||null,repair:proposal.repair?{state:proposal.repair.state||null,reasons:proposal.repair.reasons||[],attempts:proposal.repair.attempts||[],rejectionHistory:proposal.repair.rejectionHistory||[],reformulated:proposal.repair.reformulated===true}:null,declinedItemScars:proposal.declinedItemScars||[]}}
 }

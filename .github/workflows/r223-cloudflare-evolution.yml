@@ -34,6 +34,7 @@ jobs:
           node --check src/system/autonomousConvergenceR314.js
           node --check src/system/autonomousRepairPolicyR314.js
           node --check src/system/convergenceBacklogR388.js
+          node --check src/system/finiteConvergenceGovernorR507.js
           node --check scripts/lib/r245-governed-selfbuild-selection.mjs
           node --check cloudflare/lib/evolution-policy.mjs
           node --check cloudflare/lib/generated-capsules.mjs
@@ -47,6 +48,7 @@ jobs:
           node tests/r314-cloud-autonomous-repair-invariants.mjs
           node tests/r388-convergence-selfbuild-invariants.mjs
           node tests/r391-event-driven-r388-continuation-invariants.mjs
+          node tests/r507-finite-convergence-governor-invariants.mjs
       - name: Prove ancillary Worker package without deployment
         run: npx wrangler deploy --config wrangler.evolution-machine-r223.jsonc --dry-run --outdir .wrangler-r223-cloud-01
 
@@ -97,7 +99,7 @@ jobs:
             OK=false
             for attempt in $(seq 1 12); do
               CODE="$(curl -sS -o "$RESULT" -w '%{http_code}' -H "authorization: Bearer $CRON_SECRET" -H 'cache-control: no-cache' "$URL?mode=cycle" || true)"
-              if [ "$CODE" = "200" ] && node -e "const fs=require('fs');const body=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));if(body.ok===false)process.exit(1);const state=String(body.state||'');const mutation=String(body.proposal?.mutation||'');const prNumber=Number(body.proposal?.prNumber||0);const proposed=state==='PROPOSED'&&['BRANCH_AND_PR_CREATED','R314_AI_BRANCH_AND_PR_CREATED','R388_BACKLOG_BRANCH_AND_PR_CREATED'].includes(mutation)&&Number.isInteger(prNumber)&&prNumber>0;const observed=state==='OBSERVE_ONLY';const promotion=body.promotion||{};const expectedBase=String(promotion.expectedBase||'');const currentMain=String(promotion.currentMain||'');const heldStale=state==='HELD_FOR_PROOF'&&String(promotion.action||'')==='NONE'&&expectedBase.length===40&&currentMain.length===40&&expectedBase!==currentMain&&/main drifted/i.test(String(promotion.reason||''));if(!proposed&&!observed&&!heldStale)process.exit(1);console.log(JSON.stringify({machineId:body.machineId||null,state,proposal:mutation||null,itemId:body.proposal?.itemId||null,prNumber:prNumber||null,expectedBase:heldStale?expectedBase:null,currentMain:heldStale?currentMain:null,proofTerminal:proposed?'LEGITIMATE_GOVERNED_CANDIDATE':observed?'OBSERVE_ONLY':'STALE_BASE_HELD'}));" "$RESULT"; then
+              if [ "$CODE" = "200" ] && node -e "const fs=require('fs');const body=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));if(body.ok===false)process.exit(1);const state=String(body.state||'');const mutation=String(body.proposal?.mutation||'');const prNumber=Number(body.proposal?.prNumber||0);const proposed=state==='PROPOSED'&&['BRANCH_AND_PR_CREATED','R314_AI_BRANCH_AND_PR_CREATED','R388_BACKLOG_BRANCH_AND_PR_CREATED','R507_SOURCE_PROOF_BRANCH_AND_PR_CREATED'].includes(mutation)&&Number.isInteger(prNumber)&&prNumber>0;const observed=state==='OBSERVE_ONLY';const promotion=body.promotion||{};const expectedBase=String(promotion.expectedBase||'');const currentMain=String(promotion.currentMain||'');const heldStale=state==='HELD_FOR_PROOF'&&String(promotion.action||'')==='NONE'&&expectedBase.length===40&&currentMain.length===40&&expectedBase!==currentMain&&/main drifted/i.test(String(promotion.reason||''));if(!proposed&&!observed&&!heldStale)process.exit(1);console.log(JSON.stringify({machineId:body.machineId||null,state,proposal:mutation||null,itemId:body.proposal?.itemId||null,prNumber:prNumber||null,expectedBase:heldStale?expectedBase:null,currentMain:heldStale?currentMain:null,proofTerminal:proposed?'LEGITIMATE_GOVERNED_CANDIDATE':observed?'OBSERVE_ONLY':'STALE_BASE_HELD'}));" "$RESULT"; then
                 OK=true
                 break
               fi
