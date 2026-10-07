@@ -5,10 +5,10 @@
   "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
   "generatorContract": "R507_CURRENT_SOURCE_PROOF",
   "item": {
-    "id": "R388-D-05",
+    "id": "R388-D-06",
     "section": "D",
-    "index": 5,
-    "objective": "Multi-geometry 3-D inference only with independently sufficient geometries; no 3-D claim from one LOS.",
+    "index": 6,
+    "objective": "Field-first unobstructed visual composition live-proven after promotion.",
     "completed": false,
     "affected": [
       "src/SARTruthInstrumentR280.tsx",
@@ -17,68 +17,57 @@
     "acceptanceContract": {
       "schema": "OMEGA_FALSIFIABLE_CAPABILITY_CONTRACT_R509",
       "revision": "R509",
-      "itemKey": "D-05",
-      "objectiveExact": "Multi-geometry 3-D inference only with independently sufficient geometries; no 3-D claim from one LOS.",
+      "itemKey": "D-06",
+      "objectiveExact": "Field-first unobstructed visual composition live-proven after promotion.",
       "qualification": "QUALIFIED",
       "admissionLane": "CURRENT_SOURCE_PROOF",
       "mutationAdmission": false,
       "sourcePaths": [
-        "src/sarEstablishmentR342.ts",
-        "src/sarHostClosureR344.ts",
-        "src/sarClosureFrontierR346.ts"
+        "src/SARTruthInstrumentR280.tsx",
+        "src/SARLiveTruthR285.tsx"
       ],
       "requiredProofs": [
-        "R170 Current Convergence",
+        "R241 Archive Convergence Visual Intelligence",
         "R202 Operational Source Authority"
       ],
       "currentSourceProof": {
         "revision": "R509",
         "requiredPathTokens": [
           {
-            "path": "src/sarEstablishmentR342.ts",
+            "path": "src/SARTruthInstrumentR280.tsx",
             "tokens": [
-              "FULL_3D_DEFORMATION",
-              "ADDITIONAL_VIEWING_GEOMETRY_REQUIRED",
-              "independent>=3",
-              "NOT_DERIVABLE_SINGLE_LOS",
-              "FULL_3D_REQUIRES_INDEPENDENT_GEOMETRY"
+              "focusDisplay",
+              "cleanView",
+              "FOCUS FIELD",
+              "CLEAN VIEW",
+              "r280-center"
             ]
           },
           {
-            "path": "src/sarHostClosureR344.ts",
+            "path": "src/SARLiveTruthR285.tsx",
             "tokens": [
-              "rank=matrixRank3(independent)",
-              "rank>=3",
-              "ADDITIONAL_VIEWING_GEOMETRY_REQUIRED",
-              "rank-independent look vectors",
-              "Full 3-D remains held unless the look-geometry matrix has rank 3"
-            ]
-          },
-          {
-            "path": "src/sarClosureFrontierR346.ts",
-            "tokens": [
-              "R346_FULL_3D_VETO='ADDITIONAL_VIEWING_GEOMETRY_REQUIRED'",
-              "Ordering cannot manufacture Sentinel-1 measurements",
-              "independent viewing geometry"
+              "allowDemonstration={false}",
+              "SARTruthInstrumentR280",
+              "R344 full-resolution closure receipt"
             ]
           }
         ],
-        "truthBoundary": "This source proof establishes the software veto and rank-conditioned admission law. It does not claim that a real 3-D deformation product currently exists."
+        "truthBoundary": "Exact source proves the field-first controls and browser acceptance contract exist. The required R241/R202 exact-head workflows must still pass after promotion before the item can be reconciled."
       },
       "evidencePredicates": [
-        "One LOS never satisfies FULL_3D_DEFORMATION.",
-        "At least three rank-independent look vectors or equivalent constraints are required.",
-        "The inversion carries rank/conditioning/residual proof and identified artifacts."
+        "The analytical field remains the dominant visual surface at desktop and mobile widths.",
+        "Focus/clean-view controls remove obstructing inspector detail without replacing the field.",
+        "The exact promoted build passes the SAR browser interaction proof."
       ],
       "falsifiers": [
-        "A single LOS can set full3dDeformationBound=true.",
-        "Rank < 3 can establish FULL_3D_DEFORMATION.",
-        "A 3-D display can bypass independent geometry and artifact proof."
+        "A panel/failure wall obscures or replaces the analytical field.",
+        "The field composition passes only locally but fails exact-head promoted browser proof.",
+        "Mobile geometry collapses or hides the analytical field."
       ],
-      "truthBoundary": "The capability claim is the enforced 3-D admission/veto law, not the existence of a current 3-D observation."
+      "truthBoundary": "Source structure alone is insufficient; completion requires exact-head browser proof on the promoted lineage."
     },
     "expectedProofs": [
-      "R170 Current Convergence",
+      "R241 Archive Convergence Visual Intelligence",
       "R202 Operational Source Authority"
     ],
     "selfEditable": true,
@@ -88,7 +77,7 @@
   "repair": {
     "paths": [],
     "expectedProofs": [
-      "R170 Current Convergence",
+      "R241 Archive Convergence Visual Intelligence",
       "R202 Operational Source Authority"
     ],
     "currentSourceProof": {
@@ -96,25 +85,19 @@
       "state": "CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF",
       "sourceRefs": [
         {
-          "path": "src/sarEstablishmentR342.ts",
-          "sha": "8c59b66400e01ffde1becf5fd20fec310396e8a8",
+          "path": "src/SARTruthInstrumentR280.tsx",
+          "sha": "b144cdbf6f0d24a82149abdb3dac40e6f26c06a3",
           "requiredTokens": 5,
           "missingTokens": []
         },
         {
-          "path": "src/sarHostClosureR344.ts",
-          "sha": "789f297f282e39e516b3363d39aaa26eb07b3910",
-          "requiredTokens": 5,
-          "missingTokens": []
-        },
-        {
-          "path": "src/sarClosureFrontierR346.ts",
-          "sha": "d269a8f530e0fa442505612d232d696cda8e6870",
+          "path": "src/SARLiveTruthR285.tsx",
+          "sha": "625954fdf749b8a352c050e141e382d1f7bba589",
           "requiredTokens": 3,
           "missingTokens": []
         }
       ],
-      "truthBoundary": "This source proof establishes the software veto and rank-conditioned admission law. It does not claim that a real 3-D deformation product currently exists."
+      "truthBoundary": "Exact source proves the field-first controls and browser acceptance contract exist. The required R241/R202 exact-head workflows must still pass after promotion before the item can be reconciled."
     },
     "rejectionScars": [],
     "declinedItemScars": []
@@ -125,11 +108,11 @@
     "machineId": "CLOUD-01",
     "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
     "generatorContract": "R507_CURRENT_SOURCE_PROOF",
-    "itemId": "R388-D-05",
+    "itemId": "R388-D-06",
     "section": "D",
-    "objective": "Multi-geometry 3-D inference only with independently sufficient geometries; no 3-D claim from one LOS.",
-    "baseSha": "49ebb7b85344e5309e53d0b73165cc28f339c365",
-    "branch": "cloud/evolution-r507-source-proof-r388-d-05-49ebb7b8",
+    "objective": "Field-first unobstructed visual composition live-proven after promotion.",
+    "baseSha": "6da357062bdfec1ef698ec1457b8449389abfb7d",
+    "branch": "cloud/evolution-r507-source-proof-r388-d-06-6da35706",
     "status": "CURRENT_SOURCE_SATISFIED_PENDING_PROOF",
     "sourceAdvance": false,
     "advancedItemIdsChanged": true,
@@ -139,33 +122,27 @@
       "state": "CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF",
       "sourceRefs": [
         {
-          "path": "src/sarEstablishmentR342.ts",
-          "sha": "8c59b66400e01ffde1becf5fd20fec310396e8a8",
+          "path": "src/SARTruthInstrumentR280.tsx",
+          "sha": "b144cdbf6f0d24a82149abdb3dac40e6f26c06a3",
           "requiredTokens": 5,
           "missingTokens": []
         },
         {
-          "path": "src/sarHostClosureR344.ts",
-          "sha": "789f297f282e39e516b3363d39aaa26eb07b3910",
-          "requiredTokens": 5,
-          "missingTokens": []
-        },
-        {
-          "path": "src/sarClosureFrontierR346.ts",
-          "sha": "d269a8f530e0fa442505612d232d696cda8e6870",
+          "path": "src/SARLiveTruthR285.tsx",
+          "sha": "625954fdf749b8a352c050e141e382d1f7bba589",
           "requiredTokens": 3,
           "missingTokens": []
         }
       ],
-      "truthBoundary": "This source proof establishes the software veto and rank-conditioned admission law. It does not claim that a real 3-D deformation product currently exists."
+      "truthBoundary": "Exact source proves the field-first controls and browser acceptance contract exist. The required R241/R202 exact-head workflows must still pass after promotion before the item can be reconciled."
     },
     "expectedProofs": [
-      "R170 Current Convergence",
+      "R241 Archive Convergence Visual Intelligence",
       "R202 Operational Source Authority"
     ],
     "canonicalAdmission": false,
     "directProductionMutation": false,
-    "createdAt": "2026-10-07T13:28:36.340Z",
+    "createdAt": "2026-10-07T14:17:56.774Z",
     "authorityBoundaries": {
       "canonAdmission": "R125",
       "dispatch": "R147",
@@ -195,10 +172,10 @@
       "candidateSchema": "OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388",
       "candidateRevision": "R507",
       "generatorContract": "R507_CURRENT_SOURCE_PROOF",
-      "itemId": "R388-D-05",
+      "itemId": "R388-D-06",
       "paths": [],
       "expectedProofs": [
-        "R170 Current Convergence",
+        "R241 Archive Convergence Visual Intelligence",
         "R202 Operational Source Authority"
       ],
       "status": "CURRENT_SOURCE_SATISFIED_PENDING_PROOF",
@@ -207,11 +184,11 @@
       "directProductionMutation": false,
       "authority": "DERIVED_STANDARD",
       "proofClass": "STRUCTURAL_ANALOGY",
-      "nodeId": "NODE-6986e10c"
+      "nodeId": "NODE-d9de0f4c"
     },
     "transition": null,
     "branch": {
-      "nodeId": "NODE-6986e10c",
+      "nodeId": "NODE-d9de0f4c",
       "status": "BOUNDED",
       "authority": "DERIVED_STANDARD",
       "proofClass": "STRUCTURAL_ANALOGY",
@@ -221,7 +198,7 @@
       "sourcePromotionAuthority": "R240/exact-head governed proof",
       "productionAuthority": "GOVERNED_PRODUCTION_WORKFLOW",
       "canonicalMutation": false,
-      "branchId": "BRANCH-980310fc"
+      "branchId": "BRANCH-3000578b"
     },
     "checks": [
       {
@@ -249,27 +226,27 @@
         "kind": "NODE",
         "previousHash": "00000000",
         "payload": {
-          "nodeId": "NODE-6986e10c",
+          "nodeId": "NODE-d9de0f4c",
           "status": "CURRENT_SOURCE_SATISFIED_PENDING_PROOF",
           "paths": [],
-          "itemId": "R388-D-05"
+          "itemId": "R388-D-06"
         },
-        "hash": "4458bc81"
+        "hash": "cc6b78f5"
       },
       {
         "index": 1,
         "kind": "BRANCH",
-        "previousHash": "4458bc81",
+        "previousHash": "cc6b78f5",
         "payload": {
-          "branchId": "BRANCH-980310fc",
+          "branchId": "BRANCH-3000578b",
           "status": "BOUNDED",
           "sourceAdvance": false,
           "canonicalAdmission": false
         },
-        "hash": "71c89427"
+        "hash": "e818ca2f"
       }
     ],
-    "ledgerHash": "71c89427",
+    "ledgerHash": "e818ca2f",
     "truthBoundary": "CLOUD-01 may propose bounded source candidates and carry rejection scars, but it cannot directly admit CanonState or mutate production. Exact-head proof and existing governed promotion/deployment authorities remain unchanged.",
     "canonicalMutation": false
   }
