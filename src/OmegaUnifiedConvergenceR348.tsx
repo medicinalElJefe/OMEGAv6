@@ -22,6 +22,7 @@ export default function OmegaUnifiedConvergenceR348({record,status}:Props){
  const packet=useMemo(()=>compileUnifiedConvergenceR348(record,liveStatus??status,live.physicalObservations),[record,liveStatus,status,live.physicalObservations]);
  const canon=packet.scene.find(x=>x.layer==='Canon')!,world=packet.scene.find(x=>x.layer==='World')!,system=packet.scene.find(x=>x.layer==='System')!;
  const rawMetrics=(canon.payload as any).metrics||{},cal=live.calibrated,metrics=cal?{continuity:cal.C,plasticity:cal.Phi,contradiction:cal.q,burden:cal.Lambda,scar:cal.scar,evidence:cal.evidence}:rawMetrics;
+ const exact=live.exactTraversal;
  return <section className='r348-unified' data-r348-convergence={packet.schema}>
   <header className='r348-head'><div><span>R348 · UNIFIED CONVERGENCE ENGINE · ONE STATE / THREE FRAMES / SEVEN SCENE LAYERS</span><h2>Canonical Scene Packet</h2><p>All recovered calculus, corpus, traversal, evidence and runtime capability now meet through one explicit packet contract. Correlation is allowed; silent conversion between model state, physical observation and system execution is not.</p></div><div className='r348-seal'><ShieldCheck/><b>BOUND</b><small>state {packet.stateId} · address {packet.address+1}/20,736 · world {world?.state??'HELD'}</small></div></header>
 
@@ -34,6 +35,17 @@ export default function OmegaUnifiedConvergenceR348({record,status}:Props){
    <button onClick={()=>void refreshLive()} title='Read-only refresh of Earth/runtime/Hybrid evidence'><RefreshCw/>Refresh live scene</button>
   </div>
   {liveError&&<div className='r348-live-error'>{liveError}</div>}
+
+  <section className='r348-r501-exact' data-r501-exact-traversal='true' data-r501-verified={exact.verified?'true':'false'} data-r501-provenance={exact.earthQuery.provenance}>
+   <header><div><span>R501 · LIVE EXACT TRAVERSAL BINDING</span><b>R500 envelope is now consumed by Convergence</b></div><strong>{exact.verified?'VERIFIED':'HELD'}</strong></header>
+   <div className='r348-r501-grid'>
+    <article><small>EXACT CANON ADDRESS</small><b>{exact.exactAddress.index0}</b><em>D{exact.exactAddress.coordinate.D_domain} · P{exact.exactAddress.coordinate.P_phase} · R{exact.exactAddress.coordinate.R_reg} · L{exact.exactAddress.coordinate.L_lens}</em></article>
+    <article><small>ATLAS360 MODEL FRAME</small><b>{exact.atlas360.bearing.theta}°</b><em>{pretty(exact.atlas360.bearingSource)} · DER · not measured physical bearing</em></article>
+    <article><small>EARTH QUERY CONTEXT</small><b>{exact.earthQuery.provenance} · {exact.earthQuery.lat.toFixed(3)}°, {exact.earthQuery.lon.toFixed(3)}°</b><em>query mapping only · physical coordinate claim NO</em></article>
+    <article><small>SOURCE CLOCK EVIDENCE</small><b>{exact.evidenceSummary.sourceObservationCount} OBS · {exact.evidenceSummary.sourceGapCount} GAP</b><em>returned clocks only; model time remains separate</em></article>
+   </div>
+   <footer>canonical mutation NO · production authority changed NO · observation from model claimed NO</footer>
+  </section>
 
   <div className='r348-machine-spine'>{R348_MACHINE_LAYERS.map((x,i)=><span key={x}><small>{String(i+1).padStart(2,'0')}</small><b>{x}</b></span>)}</div>
 

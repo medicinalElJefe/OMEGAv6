@@ -24,7 +24,7 @@ must(!chain.includes('historicalR82Baseline:44'),'R143 operation authority must 
 must(nav.includes("from './authoritativeOperationChainR143'"),'global navigator must consume R143 contracts');
 for(const attr of ['data-operation-chain','data-operation-chain-pass','data-route-id','data-capability-id','data-execution-domain','data-execution-state'])must(nav.includes(attr),`navigator missing ${attr}`);
 must(nav.includes('operationContractForRouteR143(route)'),'navigator rows must resolve through the authoritative route contract');
-must(nav.includes('navigation never claims execution proof or R125 admission'),'navigator truth boundary missing');
+must(nav.includes('navigation has no execution or R125 admission authority.')||nav.includes('navigation never claims execution proof or R125 admission'),'navigator truth boundary missing');
 
 must(field.includes("from './authoritativeOperationChainR143'"),'capability field must consume R143 contracts');
 for(const attr of ['data-ui-operation-chain','data-operation-chain-pass','data-route-id','data-capability-id','data-execution-domain','data-execution-state'])must(field.includes(attr),`capability field missing ${attr}`);
