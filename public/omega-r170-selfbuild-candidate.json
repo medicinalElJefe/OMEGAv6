@@ -5,65 +5,92 @@
   "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
   "generatorContract": "R507_CURRENT_SOURCE_PROOF",
   "item": {
-    "id": "R388-C-03",
-    "section": "C",
-    "index": 3,
-    "objective": "Seamless Earth → region → city → street → ground traversal with returned evidence where available.",
+    "id": "R388-B-04",
+    "section": "B",
+    "index": 4,
+    "objective": "Mobile + desktop parity for every route, submenu, disclosure, overlay and visual layer.",
     "completed": false,
     "affected": [
-      "src/EarthObservatoryR8.tsx",
-      "src/EarthGroundTraversalR9.tsx"
+      "src/OmegaWorkstationFullV2.tsx",
+      "src/omegaNavigationShellR411.css"
     ],
     "acceptanceContract": {
-      "revision": "R507",
-      "minChangedChars": 600,
-      "minFiles": 1,
-      "minSubstantiveLines": 8,
-      "requiredChangedPathGroups": [
-        [
-          "src/EarthObservatoryR8.tsx",
-          "src/EarthGroundTraversalR9.tsx"
-        ]
+      "schema": "OMEGA_FALSIFIABLE_CAPABILITY_CONTRACT_R509",
+      "revision": "R509",
+      "itemKey": "B-04",
+      "objectiveExact": "Mobile + desktop parity for every route, submenu, disclosure, overlay and visual layer.",
+      "qualification": "QUALIFIED",
+      "admissionLane": "CURRENT_SOURCE_PROOF",
+      "mutationAdmission": false,
+      "supersedesLegacyDeclines": true,
+      "sourcePaths": [
+        "src/OmegaWorkstationFullV2.tsx",
+        "src/InstrumentOSShellR62.tsx",
+        "src/omegaSideNavigatorR88.css",
+        "src/omegaNavigationShellR411.css"
       ],
-      "requiredChangedTokens": [
-        "GROUND",
-        "evidence",
-        "traversal"
+      "requiredProofs": [
+        "R241 Archive Convergence Visual Intelligence",
+        "OMEGA Cloud Bridge CI"
       ],
       "currentSourceProof": {
-        "revision": "R507",
+        "revision": "R509",
         "requiredPathTokens": [
           {
-            "path": "src/EarthObservatoryR8.tsx",
+            "path": "src/OmegaWorkstationFullV2.tsx",
             "tokens": [
-              "import EarthGroundTraversalR9 from './EarthGroundTraversalR9'",
-              "{id:'GROUND',label:'Ground',copy:'region → city → street → ground evidence'}",
-              "view==='GROUND'",
-              "<EarthGroundTraversalR9 lat={lat} lon={lon}/>",
-              "Earth → Region → City → Street → Ground remains source-backed"
+              "localStorage.getItem('omega-ui-mode')",
+              "x==='DESKTOP'||x==='MOBILE'?x:'AUTO'",
+              "<ResponsiveRuntimeShell uiMode={uiMode} onUiMode={setUiMode}"
             ]
           },
           {
-            "path": "src/EarthGroundTraversalR9.tsx",
+            "path": "src/InstrumentOSShellR62.tsx",
             "tokens": [
-              "type Level='EARTH'|'REGION'|'CITY'|'STREET'|'GROUND'",
-              "const LEVELS:Level[]=['EARTH','REGION','CITY','STREET','GROUND']",
-              "/api/earth/ground/evidence",
-              "data-ground-evidence-hash",
-              "KartaView",
-              "USGS",
-              "NASA GIBS",
-              "Provider reachability and evidence return are separate states"
+              "window.matchMedia('(max-width: 900px)')",
+              "uiMode==='MOBILE'?'mobile':uiMode==='DESKTOP'?'desktop':media.matches?'mobile':'desktop'",
+              "document.documentElement.dataset.omegaFrame=frame"
+            ]
+          },
+          {
+            "path": "src/omegaSideNavigatorR88.css",
+            "tokens": [
+              "html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home)",
+              "margin-left:calc(var(--r94-nav-rail) + var(--r94-nav-panel))!important",
+              "@media(max-width:900px)"
+            ]
+          },
+          {
+            "path": "src/omegaNavigationShellR411.css",
+            "tokens": [
+              "R411.11 · MOBILE USABLE VIEWPORT OWNERSHIP",
+              "width:100vw!important;max-width:100vw!important;min-width:0!important",
+              "bottom:var(--r411-mobile-dock)!important",
+              "height:calc(100dvh - var(--r411-mobile-dock))!important",
+              "overflow-y:auto!important",
+              "scroll-padding-bottom:20px!important"
             ]
           }
         ],
-        "truthBoundary": "Current-source satisfaction proves that the declared product capability already exists in exact source. It does not prove provider availability, a current external observation, CanonState admission, or production deployment; exact-head independent workflows remain required."
+        "truthBoundary": "Exact source establishes one responsive frame authority, desktop non-covering navigation reservation and mobile usable-viewport/scroll ownership. Final completion still requires exact-head R241 browser proof across routes, submenus, disclosures, overlays and visual surfaces."
       },
-      "rationale": "C-03 is a cross-scale Earth traversal capability. If exact current R8/R9 source already contains the complete source-backed Earth→region→city→street→ground contract, OMEGA must prove and reconcile that fact without manufacturing an unrelated product mutation. Otherwise any repair must be materially traversal/evidence-related rather than a cosmetic satellite-list edit."
+      "evidencePredicates": [
+        "AUTO/DESKTOP/MOBILE resolves through one frame authority rather than duplicate viewport products.",
+        "Desktop navigation reserves layout width instead of covering the active product surface.",
+        "Mobile owns a bounded usable viewport above the command dock with explicit scroll ownership.",
+        "The exact-head R241 browser suite exercises route, submenu, disclosure, overlay and visual reachability in the promoted lineage."
+      ],
+      "falsifiers": [
+        "Desktop or mobile uses a second independent route/view authority.",
+        "Navigation overlays canonical content without reserved or bounded geometry.",
+        "A route, disclosure, overlay or visual layer becomes unreachable in one frame mode.",
+        "Source token presence is treated as rendered parity without R241 browser proof."
+      ],
+      "truthBoundary": "B-04 is a proof-first responsive parity contract. It may supersede its pre-contract legacy decline exactly once, but any R509 decline holds the same contract epoch. It grants no gratuitous UI mutation authority."
     },
     "expectedProofs": [
-      "R202 Operational Source Authority",
-      "R241 Archive Convergence Visual Intelligence"
+      "R241 Archive Convergence Visual Intelligence",
+      "OMEGA Cloud Bridge CI"
     ],
     "selfEditable": true,
     "externalProofRequired": false,
@@ -72,26 +99,39 @@
   "repair": {
     "paths": [],
     "expectedProofs": [
-      "R202 Operational Source Authority",
-      "R241 Archive Convergence Visual Intelligence"
+      "R241 Archive Convergence Visual Intelligence",
+      "OMEGA Cloud Bridge CI"
     ],
     "currentSourceProof": {
+      "acceptanceContractRevision": "R509",
       "state": "CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF",
       "sourceRefs": [
         {
-          "path": "src/EarthObservatoryR8.tsx",
-          "sha": "e1f8fc1078a7ba324e1efb902149033a7b161eca",
-          "requiredTokens": 5,
+          "path": "src/OmegaWorkstationFullV2.tsx",
+          "sha": "d2c7e90daab8c44b03b03beeaf5615444b5f47a9",
+          "requiredTokens": 3,
           "missingTokens": []
         },
         {
-          "path": "src/EarthGroundTraversalR9.tsx",
-          "sha": "3f05e773e878e7df29c6580c9a0f3323f978c5fe",
-          "requiredTokens": 8,
+          "path": "src/InstrumentOSShellR62.tsx",
+          "sha": "05e0cf6ad0fe379abc6a7691f47ebfa76c230983",
+          "requiredTokens": 3,
+          "missingTokens": []
+        },
+        {
+          "path": "src/omegaSideNavigatorR88.css",
+          "sha": "15f7b4d953c1e354442223d08c64b4aff4a03b83",
+          "requiredTokens": 3,
+          "missingTokens": []
+        },
+        {
+          "path": "src/omegaNavigationShellR411.css",
+          "sha": "4fdd0a31703b6c7a28d2d4590978e2980ea4ce85",
+          "requiredTokens": 6,
           "missingTokens": []
         }
       ],
-      "truthBoundary": "Current-source satisfaction proves that the declared product capability already exists in exact source. It does not prove provider availability, a current external observation, CanonState admission, or production deployment; exact-head independent workflows remain required."
+      "truthBoundary": "Exact source establishes one responsive frame authority, desktop non-covering navigation reservation and mobile usable-viewport/scroll ownership. Final completion still requires exact-head R241 browser proof across routes, submenus, disclosures, overlays and visual surfaces."
     },
     "rejectionScars": [],
     "declinedItemScars": []
@@ -102,39 +142,53 @@
     "machineId": "CLOUD-01",
     "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
     "generatorContract": "R507_CURRENT_SOURCE_PROOF",
-    "itemId": "R388-C-03",
-    "section": "C",
-    "objective": "Seamless Earth → region → city → street → ground traversal with returned evidence where available.",
-    "baseSha": "11713cf3d92fd95f6a96b0725edb8fdaa6f804e1",
-    "branch": "cloud/evolution-r507-source-proof-r388-c-03-11713cf3",
+    "itemId": "R388-B-04",
+    "section": "B",
+    "objective": "Mobile + desktop parity for every route, submenu, disclosure, overlay and visual layer.",
+    "baseSha": "e89db04d38bce91446b91ca109b808c3db37f8ca",
+    "branch": "cloud/evolution-r507-source-proof-r388-b-04-e89db04d",
     "status": "CURRENT_SOURCE_SATISFIED_PENDING_PROOF",
     "sourceAdvance": false,
     "advancedItemIdsChanged": true,
+    "acceptanceContractRevision": "R509",
     "currentSourceProof": {
+      "acceptanceContractRevision": "R509",
       "state": "CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF",
       "sourceRefs": [
         {
-          "path": "src/EarthObservatoryR8.tsx",
-          "sha": "e1f8fc1078a7ba324e1efb902149033a7b161eca",
-          "requiredTokens": 5,
+          "path": "src/OmegaWorkstationFullV2.tsx",
+          "sha": "d2c7e90daab8c44b03b03beeaf5615444b5f47a9",
+          "requiredTokens": 3,
           "missingTokens": []
         },
         {
-          "path": "src/EarthGroundTraversalR9.tsx",
-          "sha": "3f05e773e878e7df29c6580c9a0f3323f978c5fe",
-          "requiredTokens": 8,
+          "path": "src/InstrumentOSShellR62.tsx",
+          "sha": "05e0cf6ad0fe379abc6a7691f47ebfa76c230983",
+          "requiredTokens": 3,
+          "missingTokens": []
+        },
+        {
+          "path": "src/omegaSideNavigatorR88.css",
+          "sha": "15f7b4d953c1e354442223d08c64b4aff4a03b83",
+          "requiredTokens": 3,
+          "missingTokens": []
+        },
+        {
+          "path": "src/omegaNavigationShellR411.css",
+          "sha": "4fdd0a31703b6c7a28d2d4590978e2980ea4ce85",
+          "requiredTokens": 6,
           "missingTokens": []
         }
       ],
-      "truthBoundary": "Current-source satisfaction proves that the declared product capability already exists in exact source. It does not prove provider availability, a current external observation, CanonState admission, or production deployment; exact-head independent workflows remain required."
+      "truthBoundary": "Exact source establishes one responsive frame authority, desktop non-covering navigation reservation and mobile usable-viewport/scroll ownership. Final completion still requires exact-head R241 browser proof across routes, submenus, disclosures, overlays and visual surfaces."
     },
     "expectedProofs": [
-      "R202 Operational Source Authority",
-      "R241 Archive Convergence Visual Intelligence"
+      "R241 Archive Convergence Visual Intelligence",
+      "OMEGA Cloud Bridge CI"
     ],
     "canonicalAdmission": false,
     "directProductionMutation": false,
-    "createdAt": "2026-10-07T05:27:52.922Z",
+    "createdAt": "2026-10-07T12:29:53.773Z",
     "authorityBoundaries": {
       "canonAdmission": "R125",
       "dispatch": "R147",
@@ -164,11 +218,11 @@
       "candidateSchema": "OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388",
       "candidateRevision": "R507",
       "generatorContract": "R507_CURRENT_SOURCE_PROOF",
-      "itemId": "R388-C-03",
+      "itemId": "R388-B-04",
       "paths": [],
       "expectedProofs": [
-        "R202 Operational Source Authority",
-        "R241 Archive Convergence Visual Intelligence"
+        "R241 Archive Convergence Visual Intelligence",
+        "OMEGA Cloud Bridge CI"
       ],
       "status": "CURRENT_SOURCE_SATISFIED_PENDING_PROOF",
       "sourceAdvance": false,
@@ -176,11 +230,11 @@
       "directProductionMutation": false,
       "authority": "DERIVED_STANDARD",
       "proofClass": "STRUCTURAL_ANALOGY",
-      "nodeId": "NODE-095be34c"
+      "nodeId": "NODE-b1f263e9"
     },
     "transition": null,
     "branch": {
-      "nodeId": "NODE-095be34c",
+      "nodeId": "NODE-b1f263e9",
       "status": "BOUNDED",
       "authority": "DERIVED_STANDARD",
       "proofClass": "STRUCTURAL_ANALOGY",
@@ -190,7 +244,7 @@
       "sourcePromotionAuthority": "R240/exact-head governed proof",
       "productionAuthority": "GOVERNED_PRODUCTION_WORKFLOW",
       "canonicalMutation": false,
-      "branchId": "BRANCH-11492011"
+      "branchId": "BRANCH-f4660704"
     },
     "checks": [
       {
@@ -218,27 +272,27 @@
         "kind": "NODE",
         "previousHash": "00000000",
         "payload": {
-          "nodeId": "NODE-095be34c",
+          "nodeId": "NODE-b1f263e9",
           "status": "CURRENT_SOURCE_SATISFIED_PENDING_PROOF",
           "paths": [],
-          "itemId": "R388-C-03"
+          "itemId": "R388-B-04"
         },
-        "hash": "b260c227"
+        "hash": "c4a4946a"
       },
       {
         "index": 1,
         "kind": "BRANCH",
-        "previousHash": "b260c227",
+        "previousHash": "c4a4946a",
         "payload": {
-          "branchId": "BRANCH-11492011",
+          "branchId": "BRANCH-f4660704",
           "status": "BOUNDED",
           "sourceAdvance": false,
           "canonicalAdmission": false
         },
-        "hash": "9c5bacb3"
+        "hash": "cd82aa4f"
       }
     ],
-    "ledgerHash": "9c5bacb3",
+    "ledgerHash": "cd82aa4f",
     "truthBoundary": "CLOUD-01 may propose bounded source candidates and carry rejection scars, but it cannot directly admit CanonState or mutate production. Exact-head proof and existing governed promotion/deployment authorities remain unchanged.",
     "canonicalMutation": false
   }
