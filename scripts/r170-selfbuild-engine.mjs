@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {planGovernedCandidateR245} from './lib/r245-governed-selfbuild-selection.mjs';
 import {capsuleBodyR245,deriveResidualGateR245,R245_GOVERNED_SELFBUILD_CONTRACT,R245_CAPSULE_GENERATOR_REVISION} from '../src/system/governedSelfBuildContractR245.js';
+import {validateWorkerAttestationR503} from '../src/system/calculusNativeAutonomyR503.js';
 
 const STATE_PATH='public/omega-r170-selfbuild-state.json';
 const CANDIDATE_PATH='public/omega-r170-selfbuild-candidate.json';
@@ -14,6 +15,26 @@ function emitProposal(payload,pretty=false){
 }
 const state=JSON.parse(fs.readFileSync(STATE_PATH,'utf8'));
 const roadmap=Array.isArray(state.roadmap)?state.roadmap:[];
+const REQUIRE_R503=process.env.OMEGA_R503_REQUIRE_WORKER_ADMISSION==='1';
+const R503_PACKET_PATH=String(process.env.OMEGA_R503_WORKER_PACKET_PATH||'').trim();
+const R503_ATTESTATION_PATH=String(process.env.OMEGA_R503_WORKER_ATTESTATION_PATH||'').trim();
+let workerAdmissionR503={valid:!REQUIRE_R503,reasons:REQUIRE_R503?['R503_ADMISSION_NOT_EVALUATED']:[],contextId:null,workerClass:null};
+if(REQUIRE_R503){
+ try{
+  if(!R503_PACKET_PATH||!R503_ATTESTATION_PATH)throw new Error('R503 worker packet and attestation paths are required');
+  const packet=JSON.parse(fs.readFileSync(R503_PACKET_PATH,'utf8'));
+  const attestation=JSON.parse(fs.readFileSync(R503_ATTESTATION_PATH,'utf8'));
+  workerAdmissionR503=validateWorkerAttestationR503(packet,attestation);
+  if(!workerAdmissionR503.valid){
+   emitProposal({status:'BLOCKED_BY_CALCULUS_LITERACY_GATE',generation:state.generation,workerAdmissionR503},true);
+   process.exit(0);
+  }
+ }catch(error){
+  workerAdmissionR503={valid:false,reasons:['R503_ADMISSION_IO_OR_PARSE_FAILURE',error instanceof Error?error.message:String(error)],contextId:null,workerClass:null};
+  emitProposal({status:'BLOCKED_BY_CALCULUS_LITERACY_GATE',generation:state.generation,workerAdmissionR503},true);
+  process.exit(0);
+ }
+}
 
 function reconcileMergedSourceCandidates(){
  const admitted=new Set(state.admittedSourceCapsules||[]);let changed=false;
@@ -59,7 +80,7 @@ if(plan.state!=='PROPOSE'||!plan.capsule){
 const capsule=plan.capsule;
 const generation=Number(state.generation||0)+1;
 if(!APPLY){
- emitProposal({status:'PROPOSE',generation,capsuleId:capsule.id,title:capsule.title,target:capsule.target,score:plan.score,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,gate,frontier:plan.frontier,fabric:plan.woven,...cycleContext,selectionLaw:plan.selectionLaw},true);process.exit(0);
+ emitProposal({status:'PROPOSE',generation,capsuleId:capsule.id,title:capsule.title,target:capsule.target,score:plan.score,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,gate,frontier:plan.frontier,fabric:plan.woven,...cycleContext,selectionLaw:plan.selectionLaw,workerAdmissionR503},true);process.exit(0);
 }
 
 const body=capsuleBodyR245(capsule.id);
@@ -69,7 +90,7 @@ fs.writeFileSync(capsule.target,body,'utf8');
 
 const wovenPlan=plan.woven;
 const wovenSummary={schema:wovenPlan.schema,revision:wovenPlan.revision,state:wovenPlan.state,addressSpace:wovenPlan.addressSpace,activeCells:wovenPlan.activeCells.map(c=>({id:c.id,address:c.address.address,score:c.score,roleCount:c.rolePackets.length,state:c.state})),packetCount:wovenPlan.packets.length,scarCount:wovenPlan.scars.length,sourceMutationCandidateId:wovenPlan.sourceMutationCandidateId,parallelPlanning:wovenPlan.parallelPlanning,parallelEvaluation:wovenPlan.parallelEvaluation,parallelSourceMutation:wovenPlan.parallelSourceMutation,authority:wovenPlan.authority,canonicalAdmission:false};
-const receipt={schema:'OMEGA_SELFBUILD_CANDIDATE_RECEIPT_R170',generation,capsuleId:capsule.id,target:capsule.target,startedAt:new Date().toISOString(),baseSha:process.env.GITHUB_SHA||'UNKNOWN',branch:null,candidateSha:null,residualGate:'PASS',residualEvidence:gate,residualPolicy:state.residualPolicy?.schema||null,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,recursiveFrontierR240:plan.frontier,wovenFabricR243:wovenSummary,wovenDimensionalRelativityR265:r265Summary,adaptiveCoherenceR266:r266Summary,pressureProvenance:'R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DEPENDENCY_TOPOLOGY',tests:{},status:'SANDBOX',canonicalAdmission:false,notes:['Generated deterministically from bounded R170 roadmap through the shared R245 governed self-build contract.','R170 and CLOUD-01 share one R164 residual policy, R240/R243 selection law and capsule generator.','R243 activated typed dependency-ready planning/evaluation cells and carried returned residual scars without granting mutation authority.','R265 applies Water transport → Woven path/correspondence → Violet re-expression → proof/carry/recontextualization while preserving structure/orientation separation and provenance.','R265 may influence bounded planning capacity through R249 computation coherence but cannot block a capability merely because it is new or uses a new skin.','R266 closes returned proof/carry into bounded next-cycle context; cold start remains exactly R265 and calibration is confidence-gated and bounded.','R266 accepts only explicit operator outcomes, observed transitions or returned proof and never treats unchosen candidates as failures.','R266 foundationWeightsChanged remains false and adds no source-mutation, deployment or CanonState authority.','R240 retained exactly one source-mutation/promotion candidate.','R239 Hybrid resource governor remains separate and preserved.','R125 remains sole CanonState admission authority.']};
+const receipt={schema:'OMEGA_SELFBUILD_CANDIDATE_RECEIPT_R170',generation,capsuleId:capsule.id,target:capsule.target,startedAt:new Date().toISOString(),baseSha:process.env.GITHUB_SHA||'UNKNOWN',branch:null,candidateSha:null,residualGate:'PASS',residualEvidence:gate,residualPolicy:state.residualPolicy?.schema||null,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,workerAdmissionR503,recursiveFrontierR240:plan.frontier,wovenFabricR243:wovenSummary,wovenDimensionalRelativityR265:r265Summary,adaptiveCoherenceR266:r266Summary,pressureProvenance:'R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DEPENDENCY_TOPOLOGY',tests:{},status:'SANDBOX',canonicalAdmission:false,notes:['Generated deterministically from bounded R170 roadmap through the shared R245 governed self-build contract.','R170 and CLOUD-01 share one R164 residual policy, R240/R243 selection law and capsule generator.','R243 activated typed dependency-ready planning/evaluation cells and carried returned residual scars without granting mutation authority.','R265 applies Water transport → Woven path/correspondence → Violet re-expression → proof/carry/recontextualization while preserving structure/orientation separation and provenance.','R265 may influence bounded planning capacity through R249 computation coherence but cannot block a capability merely because it is new or uses a new skin.','R266 closes returned proof/carry into bounded next-cycle context; cold start remains exactly R265 and calibration is confidence-gated and bounded.','R266 accepts only explicit operator outcomes, observed transitions or returned proof and never treats unchosen candidates as failures.','R266 foundationWeightsChanged remains false and adds no source-mutation, deployment or CanonState authority.','R240 retained exactly one source-mutation/promotion candidate.','R239 Hybrid resource governor remains separate and preserved.','R125 remains sole CanonState admission authority.']};
 const returnedRow=returnedAdaptiveRowR266(evidence);
 state.generation=generation;state.currentCapsuleId=capsule.id;state.selfBuildScars=wovenPlan.scars;state.receipts=[...(state.receipts||[]),receipt].slice(-64);if(returnedRow)state.adaptiveCoherenceHistoryR266=[...(state.adaptiveCoherenceHistoryR266||[]),returnedRow].slice(-64);
 fs.writeFileSync(STATE_PATH,JSON.stringify(state,null,2)+'\n','utf8');
