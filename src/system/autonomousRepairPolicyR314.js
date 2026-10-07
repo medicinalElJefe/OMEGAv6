@@ -87,8 +87,6 @@ export function applyAiRepairProposalR314(proposal,{contextFiles=[],residualId=n
  });
 }
 
-export function autonomousRepairPromptR314({residual,stage,contextFiles}){
- const context=contextFiles.map(file=>({path:file.path,sha:file.sha,text:file.text}));
 export function calculusNativeRepairInstructionsR504(stage){
  const packet=stage?.calculusWorkerPacket;
  if(!packet)return '';
@@ -107,6 +105,10 @@ R503/R504 CALCULUS-NATIVE WORKER ADMISSION AND DECISION CONTINUITY
 - If correcting a rejected patch, preserve this calculus attestation and decision structure while correcting only the rejected defect. Never drop workerAttestation or replace the R503 delta fields with a different scoring vocabulary.
 `;
 }
+
+export function autonomousRepairPromptR314({residual,stage,contextFiles}){
+ const context=contextFiles.map(file=>({path:file.path,sha:file.sha,text:file.text}));
+
 
  return `You are the bounded OMEGAv6 R314 product-source repair proposer. Return JSON only.\n\nRules:\n- Schema must be ${R314_AUTONOMOUS_REPAIR_SCHEMA}.\n- Repair only the supplied files and bind every file to its supplied preimage SHA.\n- Maximum ${R314_AI_MAX_FILES} files and ${R314_AI_MAX_REPLACEMENTS_PER_FILE} exact replacements per file.\n- Use replacements [{before,after}] where before occurs exactly once in the supplied source.\n- Prefer the smallest material patch: one file when sufficient and 1-3 replacements per file when possible.\n- Do not edit tests, workflows, deployment, cloud evolution, self-build governance, authentication, secrets, Canon admission, workers, or generated projections.\n- Do not claim scientific, device, runtime, deployment or Canon truth.\n- canonicalAdmission and directProductionMutation must both be false.\n- expectedProofs must name existing independent proof families that should validate the change.\n- No safe patch is a valid outcome: if the residual cannot be safely improved using only supplied source, return files:[]; the governor will reject it rather than fabricate progress.\n${calculusNativeRepairInstructionsR504(stage)}\nRESIDUAL\n${JSON.stringify(residual)}\n\nBUILD STAGE\n${JSON.stringify(stage)}\n\nEXACT SOURCE CONTEXT\n${JSON.stringify(context)}`;
 }
