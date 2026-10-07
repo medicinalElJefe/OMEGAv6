@@ -5,7 +5,7 @@ import {selectRepairTargetR314} from './r314-target-registry.mjs';
 import {proposeAiRepairR314} from './r314-ai-repair.mjs';
 import {canAttemptRepairR314,recordRepairAttemptR314} from '../../src/system/autonomousConvergenceR314.js';
 import {R314_AI_REPAIR_MODEL_DEFAULT,repairPathPolicyR314} from '../../src/system/autonomousRepairPolicyR314.js';
-import {selectNextConvergenceItemR388,validateConvergenceRepairR450} from '../../src/system/convergenceBacklogR388.js';
+import {selectNextConvergenceItemR388,validateConvergenceRepairR450,evaluateCurrentConvergenceSourceR507} from '../../src/system/convergenceBacklogR388.js';
 import {autonomousCandidatePrefixesR245,isAutonomousCandidateBranchR245,validateAutonomousCandidatePolicyR245,R245_CAPSULE_GENERATOR_REVISION,R245_GOVERNED_SELFBUILD_CONTRACT} from '../../src/system/governedSelfBuildContractR245.js';
 import {cloudCandidateResolutionR436} from './canonical-resolution-r436.mjs';
 import {buildCalculusNativeWorkerPacketR503} from '../../src/system/calculusNativeAutonomyR503.js';
@@ -197,9 +197,29 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const backlog=selectNextConvergenceItemR388({markdown:convergenceMarkdown,advancedItemIds:reconciledAdvancedItemIds,heldItemIds:recentDeclinedItemIds});
   const backlogTargets=[];
   for(const item of backlog.candidates||[]){
-    const paths=[];
-    for(const candidate of item.affected||[]){const policy=repairPathPolicyR314(candidate);if(policy.allowed&&await repoPathExists(token,repo,policy.path,mainSha))paths.push(policy.path)}
-    backlogTargets.push(paths.length?{targetable:true,residualId:item.id,paths:paths.slice(0,2),item,residual:{id:item.id,severity:'MEDIUM',mode:'AUTO_REPAIR',confidence:1,reproducible:true,affected:paths.slice(0,2),summary:`Advance one bounded source step for convergence backlog item ${item.id}: ${item.objective}. The full item remains open until independently proved. Make the smallest material current-runtime improvement inside the supplied target source only; do not claim external/device completion without returned proof.`,evidenceId:'R387_CONVERGENCE_MATRIX',source:'R388',externalProofRequired:item.externalProofRequired===true,expectedProofs:item.expectedProofs||[]},reason:'R388_CONVERGENCE_ITEM_READY'}:{targetable:false,reason:'R388_ITEM_HAS_NO_EXISTING_ALLOWED_PRODUCT_SOURCE_TARGET',item,paths:[]});
+    const paths=[],sourceFiles=[];
+    for(const candidate of item.affected||[]){
+      const policy=repairPathPolicyR314(candidate);
+      if(policy.allowed&&await repoPathExists(token,repo,policy.path,mainSha)){
+        paths.push(policy.path);
+        sourceFiles.push(await getRepoTextFile(token,repo,policy.path,mainSha));
+      }
+    }
+    const currentSourceProof=evaluateCurrentConvergenceSourceR507({item,sourceFiles});
+    if(currentSourceProof.applicable&&currentSourceProof.satisfied){
+      backlogTargets.push({
+        targetable:true,
+        sourceSatisfied:true,
+        residualId:item.id,
+        paths:[],
+        sourceFiles:currentSourceProof.sourceRefs,
+        currentSourceProof,
+        item,
+        reason:'R507_CURRENT_SOURCE_SATISFIES_OBJECTIVE_PENDING_INDEPENDENT_PROOF',
+      });
+      continue;
+    }
+    backlogTargets.push(paths.length?{targetable:true,sourceSatisfied:false,residualId:item.id,paths:paths.slice(0,2),item,currentSourceProof,residual:{id:item.id,severity:'MEDIUM',mode:'AUTO_REPAIR',confidence:1,reproducible:true,affected:paths.slice(0,2),summary:`Advance one bounded source step for convergence backlog item ${item.id}: ${item.objective}. The full item remains open until independently proved. Make the smallest material current-runtime improvement inside the supplied target source only; do not claim external/device completion without returned proof.`,evidenceId:'R387_CONVERGENCE_MATRIX',source:'R388',externalProofRequired:item.externalProofRequired===true,expectedProofs:item.expectedProofs||[]},reason:'R388_CONVERGENCE_ITEM_READY'}:{targetable:false,sourceSatisfied:false,reason:'R388_ITEM_HAS_NO_EXISTING_ALLOWED_PRODUCT_SOURCE_TARGET',item,paths:[],currentSourceProof});
   }
   const backlogTarget=backlogTargets.find(target=>target.targetable)||{targetable:false,reason:'NO_SELF_EDITABLE_CONVERGENCE_ITEM',item:backlog.selected||null,paths:[]};
   const [coreHealth,releaseEvidence,runtimeAttestation,hybrid]=await Promise.all([liveJson(runtimeBase,'/api/core-health'),liveJson(runtimeBase,'/api/release-evidence'),liveJson(runtimeBase,'/api/runtime-attestation'),liveJson(runtimeBase,'/api/hybrid/status')]);
