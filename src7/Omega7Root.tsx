@@ -11,7 +11,7 @@ import {R486_VISIBLE_CAPABILITIES,R486_VISIBLE_SUMMARY,type VisibleFamilyR486} f
 import OperationalTruthR495 from './OperationalTruthR495';
 import './omega7.css';
 
-const EarthWorkspaceR438=lazy(()=>import('./workspaces/EarthWorkspaceR438'));
+const OmegaHome=lazy(()=>import('../src/OmegaHome'));
 
 type Props={onOpenLegacyRoute:(route:string)=>void;onExitToV6:()=>void};
 
@@ -98,22 +98,8 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
       <span>{DOMAIN_COPY[state.domain]}</span>
      </section>
 
-     {state.domain==='HOME'&&<section className='o7-home-visual' data-r502-visual-restoration='true'>
-      <div className='o7-home-stage'>
-       <Suspense fallback={<div className='o7-home-stage-loading'>Restoring OMEGA visual field…</div>}><EarthWorkspaceR438/></Suspense>
-      </div>
-      <nav className='o7-visual-dock' aria-label='Primary visual instruments'>
-       {[
-        ['Earth Now','Earth'],['Matter Traversal','Matter'],['Relativity','Relativity'],['Visual Instrument','Field'],
-        ['Atlas','Atlas'],['Forecast','Forecast'],['Optical','Optics'],['Simulation','Simulation']
-       ].map(([route,label])=><button key={route} onClick={()=>open(route)}><b>{label}</b><span>{route}</span></button>)}
-      </nav>
-      <div className='o7-home-actions'>
-       <button onClick={()=>open('Command Center')}><b>Ask OMEGA</b><span>Command</span></button>
-       <button onClick={()=>open('Projects')}><b>Projects</b><span>Continue</span></button>
-       <button onClick={()=>open('Development')}><b>Build</b><span>Develop</span></button>
-       <button onClick={()=>dispatch({type:'COMMAND',open:true})}><b>All capabilities</b><span>Search</span></button>
-      </div>
+     {state.domain==='HOME'&&<section className='o7-home-visual o7-home-established' data-r502-visual-restoration='established-instrument-authority'>
+      <Suspense fallback={<div className='o7-home-stage-loading'>Materializing OMEGA visual system…</div>}><OmegaHome onEnter={open}/></Suspense>
      </section>}
      {state.domain==='HOME'&&<OperationalTruthR495 depth={state.depth} onNavigate={open}/>}\n     {state.domain==='HOME'&&<section className='o7-recovered' data-r486-visible-convergence='true'>
       <header><div><span>Recovered capability fabric</span><h2>Your recovered work is connected to the product</h2><p>{R486_VISIBLE_SUMMARY.total} recovered capability lineages now resolve through their current OMEGA executors. Open the function you need; lineage, gate and authority stay attached underneath.</p></div><button onClick={()=>setRecoveredOpen(x=>!x)}>{recoveredOpen?'Hide recovered capabilities':'Browse recovered capabilities'}</button></header>
