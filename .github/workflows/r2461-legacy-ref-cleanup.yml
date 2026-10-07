@@ -1,4 +1,5 @@
 name: R246.1 Legacy Autonomous Ref Cleanup
+# R501 TOTAL GITHUB ACCEPTANCE · semantic no-op touch to force current-lineage GitHub proof.
 
 on:
   pull_request:
