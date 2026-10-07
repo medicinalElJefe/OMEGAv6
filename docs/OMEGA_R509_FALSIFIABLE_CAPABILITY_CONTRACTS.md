@@ -31,6 +31,17 @@ CURRENT_SOURCE_PROOF contributes proof action budget but zero mutation budget.
 
 LIVE_BROWSER_PROOF, LIVE_EXTERNAL_EVIDENCE and HYBRID_HOST_EVIDENCE remain visible qualified debt until their specified evidence returns.
 
+## Contract epochs
+
+A decline scar is evidence, but its scheduling authority is scoped to the acceptance contract that produced it.
+
+- A decline recorded under the same contract revision holds another attempt.
+- A decline from an older explicit revision is preserved as history but does not veto a newer qualified contract.
+- A legacy pre-contract decline remains active unless the new contract explicitly sets `supersedesLegacyDeclines:true`.
+- That supersession creates one bounded new evidence epoch; a new decline under the same revision holds again.
+
+B-04 is the first migrated example. Its R509 contract explicitly supersedes the old pre-contract decline and enters CURRENT_SOURCE_PROOF, not UI mutation. Exact source must prove the shared AUTO/DESKTOP/MOBILE frame and bounded desktop/mobile navigation geometry; exact-head R241 still decides rendered parity.
+
 ## First systematic qualification batch: SAR / remote sensing
 
 R509 explicitly qualifies the remaining D-section obligations:
