@@ -158,8 +158,8 @@ function decisionPrompt(packet,residual,stage,rejection=null){
     developmentalContinuity:packet?.developmentalContinuity,
     workerContract:packet?.workerContract,
   };
-  const correction=rejection?\`\nPREVIOUS DECISION REJECTION\n${JSON.stringify(rejection)}\nCorrect exactly these defects without widening authority or changing the residual.\n\`:'';
-  return \`You are the OMEGAv6 R505 result-conditioned calculus decision stage. Decide what the returned residual permits BEFORE any source patch is generated.
+  const correction=rejection?`\nPREVIOUS DECISION REJECTION\n${JSON.stringify(rejection)}\nCorrect exactly these defects without widening authority or changing the residual.\n`:'';
+  return `You are the OMEGAv6 R505 result-conditioned calculus decision stage. Decide what the returned residual permits BEFORE any source patch is generated.
 
 Return exactly one JSON object with:
 - schema exactly ${R505_DECISION_CAPSULE_SCHEMA}
@@ -188,7 +188,7 @@ RESIDUAL
 ${JSON.stringify(residual)}
 
 STAGE IDENTITY
-${JSON.stringify({id:stage?.id||null,paths:stage?.paths||[],itemId:stage?.itemId||null,section:stage?.section||null})}\`;
+${JSON.stringify({id:stage?.id||null,paths:stage?.paths||[],itemId:stage?.itemId||null,section:stage?.section||null})}`;
 }
 
 export async function proposeCalculusDecisionR505({ai,model,packet,residual,stage,maxAttempts=2}={}){
@@ -204,7 +204,7 @@ export async function proposeCalculusDecisionR505({ai,model,packet,residual,stag
       ],response_format:{type:'json_object'},temperature:0,max_tokens:2400,seed:505});
       capsule=parseObject(responsePayload(result));
     }catch(error){
-      const reasons=[\`R505_DECISION_PARSE_OR_RUN_ERROR:${error instanceof Error?error.message:String(error)}\`];
+      const reasons=[`R505_DECISION_PARSE_OR_RUN_ERROR:${error instanceof Error?error.message:String(error)}`];
       attempts.push({attempt,accepted:false,reasons});
       rejection={reasons};
       continue;
