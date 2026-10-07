@@ -15,6 +15,9 @@ concurrency:
 env:
   OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
   OMEGA_R170_RESIDUAL_EVIDENCE_PATH: /tmp/omega-r170-residual-evidence.json
+  OMEGA_R503_REQUIRE_WORKER_ADMISSION: '1'
+  OMEGA_R503_WORKER_PACKET_PATH: /tmp/omega-r503-worker-packet.json
+  OMEGA_R503_WORKER_ATTESTATION_PATH: /tmp/omega-r503-worker-attestation.json
 
 jobs:
   propose-one-governed-candidate:
@@ -29,6 +32,10 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - name: Admit calculus-native self-build worker
+        run: |
+          node scripts/r503-build-calculus-worker-packet.mjs --packet "$OMEGA_R503_WORKER_PACKET_PATH" --attestation "$OMEGA_R503_WORKER_ATTESTATION_PATH"
+          node tests/r503-calculus-native-autonomy-invariants.mjs
       - name: Prove cheap self-build control-plane invariants
         run: |
           node scripts/verify_workflow_topology_r170.mjs
@@ -37,6 +44,7 @@ jobs:
           node tests/r240-recursive-exact-self-promotion-invariants.mjs
           node tests/r245-governed-selfbuild-convergence-invariants.mjs
           node tests/r246-autonomous-candidate-lifecycle-invariants.mjs
+          node tests/r503-calculus-native-autonomy-invariants.mjs
       - name: Require successful canonical production proof for this exact main SHA
         id: production
         env:
@@ -367,6 +375,7 @@ jobs:
           echo "- Exact two-parent source merge: ${{ steps.merge.outputs.sha || 'not-promoted' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Canonical production proof: ${{ steps.deployment.outputs.status || 'not-proven' }} / ${{ steps.deployment.outputs.run_id || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- R246 candidate lifecycle: ${{ steps.lifecycle.outputs.action || 'not-needed' }} / ${{ steps.lifecycle.outputs.reason || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- R503 worker literacy: exact-base calculus packet + cold-start attestation required before autonomous selection" >> "$GITHUB_STEP_SUMMARY"
           echo "- Residual gate: one canonical R164 policy shared by R170 and CLOUD-01" >> "$GITHUB_STEP_SUMMARY"
           echo "- Planning: one shared R240/R243 sparse frontier and Woven selection law; one source mutation candidate per pulse" >> "$GITHUB_STEP_SUMMARY"
           echo "- Generator: one deterministic R245 SG001–SG005 source body shared by R170 and CLOUD-01" >> "$GITHUB_STEP_SUMMARY"
