@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { capabilityContractR509, contractLaneR509, r509ContractKeys, validateCapabilityContractR509, R509_CAPABILITY_CONTRACT_SCHEMA } from '../src/system/capabilityContractsR509.js';
-import { parseConvergenceBacklogR388, selectNextConvergenceItemR388, evaluateCurrentConvergenceSourceR507, validateConvergenceRepairR450 } from '../src/system/convergenceBacklogR388.js';
+import { parseConvergenceBacklogR388, selectNextConvergenceItemR388, evaluateCurrentConvergenceSourceR507, validateConvergenceRepairR450, declineHoldDispositionR509 } from '../src/system/convergenceBacklogR388.js';
 import { finiteConvergencePotentialR507 } from '../src/system/finiteConvergenceGovernorR507.js';
 
 const markdown=fs.readFileSync('docs/OMEGA_MISSING_CAPABILITY_CONVERGENCE_R386.md','utf8');
@@ -11,7 +11,7 @@ assert.equal(rows.length,155,'R509 must qualify against the complete 155-row con
 const dRows=rows.filter(row=>row.section==='D');
 assert.equal(dRows.length,7,'SAR section identity drifted');
 assert.equal(dRows[0].completed,true,'D-01 remains historical completed context');
-assert.deepEqual(r509ContractKeys(),['D-02','D-03','D-04','D-05','D-06','D-07']);
+assert.deepEqual(r509ContractKeys(),['B-04','D-02','D-03','D-04','D-05','D-06','D-07']);
 
 for(const key of r509ContractKeys()){
  const item=rows.find(row=>row.id==='R388-'+key);
@@ -27,6 +27,19 @@ for(const key of r509ContractKeys()){
  assert.ok(contract.requiredProofs.length>=1,key+' needs independent proof families');
  assert.ok(contract.truthBoundary.length>=80,key+' needs a concrete truth boundary');
 }
+
+const b04=rows.find(row=>row.id==='R388-B-04');
+const b04Lane=contractLaneR509(b04);
+assert.equal(b04Lane.currentSourceProofReady,true);
+assert.equal(b04Lane.mutationReady,false,'B-04 contract epoch must prefer proof over gratuitous UI mutation');
+const b04Files=b04.acceptanceContract.currentSourceProof.requiredPathTokens.map(spec=>({path:spec.path,sha:'b'.repeat(40),text:fs.readFileSync(spec.path,'utf8')}));
+const b04Proof=evaluateCurrentConvergenceSourceR507({item:b04,sourceFiles:b04Files});
+assert.equal(b04Proof.satisfied,true,b04Proof.reasons.join(','));
+const b04Legacy=declineHoldDispositionR509(b04,[{itemId:'R388-B-04',acceptanceContractRevision:null,state:'NO_SAFE_PATCH'}]);
+assert.equal(b04Legacy.held,false,'new explicit R509 B-04 contract may supersede its pre-contract decline once');
+assert.equal(b04Legacy.superseded.length,1);
+const b04Same=declineHoldDispositionR509(b04,[{itemId:'R388-B-04',acceptanceContractRevision:'R509',state:'NO_SAFE_PATCH'}]);
+assert.equal(b04Same.held,true,'same-revision B-04 decline must hold another attempt');
 
 for(const key of ['D-02','D-03','D-04']){
  const item=rows.find(row=>row.id==='R388-'+key);
@@ -59,7 +72,7 @@ assert.ok(forbiddenMutation.reasons.some(x=>x.includes('R509_SOURCE_MUTATION_NOT
 
 const currentEpoch=selectNextConvergenceItemR388({
  markdown,
- advancedItemIds:['R388-A-01','R388-A-05','R388-B-02','R388-B-03','R388-C-02','R388-C-03','R388-C-05'],
+ advancedItemIds:['R388-A-01','R388-A-05','R388-B-02','R388-B-03','R388-B-04','R388-C-02','R388-C-03','R388-C-05'],
  heldItemIds:['R388-A-02','R388-A-03'],
 });
 assert.equal(currentEpoch.candidates.length,0,'no R509 SAR evidence/proof contract may leak into product mutation');
@@ -86,7 +99,7 @@ assert.equal(finite.terminalForCurrentEvidence,false,'qualified proof-only work 
 
 const afterProofs=selectNextConvergenceItemR388({
  markdown,
- advancedItemIds:['R388-A-01','R388-A-05','R388-B-02','R388-B-03','R388-C-02','R388-C-03','R388-C-05','R388-D-05','R388-D-06'],
+ advancedItemIds:['R388-A-01','R388-A-05','R388-B-02','R388-B-03','R388-B-04','R388-C-02','R388-C-03','R388-C-05','R388-D-05','R388-D-06'],
  heldItemIds:['R388-A-02','R388-A-03'],
 });
 assert.equal(afterProofs.proofReadyCount,0);
@@ -98,6 +111,6 @@ assert.deepEqual(afterProofs.externalEvidenceDebt,['R388-D-02','R388-D-03','R388
 assert.deepEqual(afterProofs.liveBrowserProofDebt,['R388-D-07']);
 
 const machine=fs.readFileSync('cloudflare/lib/github-machine.mjs','utf8');
-for(const token of ['backlog.proofCandidates','R509_QUALIFIED_NON_MUTATION_CONTRACT_NOT_YET_SATISFIED','finiteConvergence.actionBudget<=0','R509_ZERO_ACTION_BUDGET']) assert.ok(machine.includes(token),'R509 production scheduler missing '+token);
+for(const token of ['backlog.proofCandidates','R509_QUALIFIED_NON_MUTATION_CONTRACT_NOT_YET_SATISFIED','finiteConvergence.actionBudget<=0','R509_ZERO_ACTION_BUDGET','recentDeclinedItemScars','acceptanceContractRevision:item.acceptanceContract?.revision||null']) assert.ok(machine.includes(token),'R509 production scheduler missing '+token);
 
-console.log('R509 FALSIFIABLE CAPABILITY CONTRACTS PASS · SAR D-02…D-07 explicitly qualified · external/host proof held · D-05/D-06 proof-only · D-07 non-text live proof debt · zero source-mutation leakage');
+console.log('R509 FALSIFIABLE CAPABILITY CONTRACTS PASS · B-04 contract epoch + SAR D-02…D-07 explicit falsifiability · proof lanes separated from mutation · same-revision declines hold · zero source-mutation leakage');
