@@ -241,16 +241,44 @@ export function evaluateCurrentConvergenceSourceR507({item,sourceFiles=[]}={}){
  });
 }
 
+export function declineHoldDispositionR509(item,heldItemEvidence=[]){
+ const currentRevision=String(item?.acceptanceContract?.revision||'');
+ const supersedesLegacy=item?.acceptanceContract?.supersedesLegacyDeclines===true;
+ const relevant=(Array.isArray(heldItemEvidence)?heldItemEvidence:[])
+  .filter(row=>String(row?.itemId||'')===String(item?.id||''))
+  .map(row=>Object.freeze({
+   itemId:String(row?.itemId||''),
+   acceptanceContractRevision:row?.acceptanceContractRevision?String(row.acceptanceContractRevision):null,
+   state:row?.state?String(row.state):null,
+  }));
+ const active=[],superseded=[];
+ for(const row of relevant){
+  if(row.acceptanceContractRevision){
+   (row.acceptanceContractRevision===currentRevision?active:superseded).push(row);
+  }else{
+   (supersedesLegacy?superseded:active).push(row);
+  }
+ }
+ return Object.freeze({
+  held:active.length>0,
+  currentRevision:currentRevision||null,
+  supersedesLegacy,
+  active:Object.freeze(active),
+  superseded:Object.freeze(superseded),
+ });
+}
+
 export const R388_BACKLOG_CANDIDATE_LIMIT=3;
 
-export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],heldItemIds=[],candidateLimit=R388_BACKLOG_CANDIDATE_LIMIT}={}){
+export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],heldItemIds=[],heldItemEvidence=[],candidateLimit=R388_BACKLOG_CANDIDATE_LIMIT}={}){
  const advanced=new Set(Array.isArray(advancedItemIds)?advancedItemIds:[]);
- const recentHeld=new Set(Array.isArray(heldItemIds)?heldItemIds:[]);
+ const legacyEvidence=(Array.isArray(heldItemIds)?heldItemIds:[]).map(itemId=>({itemId:String(itemId),acceptanceContractRevision:null,state:'LEGACY_DECLINE'}));
+ const evidence=[...(Array.isArray(heldItemEvidence)?heldItemEvidence:[]),...legacyEvidence];
  const items=parseConvergenceBacklogR388(markdown);
  const unresolved=items.filter(x=>!x.completed&&!advanced.has(x.id));
  const selfEditable=unresolved.filter(x=>x.selfEditable);
  const contracted=selfEditable.filter(x=>Boolean(x.acceptanceContract));
- const lanes=contracted.map(item=>Object.freeze({item,lane:contractLaneR509(item)}));
+ const lanes=contracted.map(item=>Object.freeze({item,lane:contractLaneR509(item),hold:declineHoldDispositionR509(item,evidence)}));
  const validContracted=lanes.filter(row=>row.lane.state!=='INVALID_CAPABILITY_CONTRACT');
  const invalidContracts=lanes.filter(row=>row.lane.state==='INVALID_CAPABILITY_CONTRACT').map(row=>row.item.id);
  const mutationReady=validContracted.filter(row=>row.lane.mutationReady).map(row=>row.item);
@@ -258,16 +286,20 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
  const liveBrowserProofDebt=validContracted.filter(row=>row.lane.liveBrowserProofReady).map(row=>row.item.id);
  const externalEvidenceDebt=validContracted.filter(row=>row.lane.externalEvidenceReady).map(row=>row.item.id);
  const heldNeedsAcceptanceContract=selfEditable.filter(x=>!x.acceptanceContract).map(x=>x.id);
- const eligible=mutationReady.filter(x=>!recentHeld.has(x.id));
- const proofEligible=currentSourceProofReady.filter(x=>!recentHeld.has(x.id));
+ const heldSet=new Set(validContracted.filter(row=>row.hold.held).map(row=>row.item.id));
+ const eligible=mutationReady.filter(x=>!heldSet.has(x.id));
+ const proofEligible=currentSourceProofReady.filter(x=>!heldSet.has(x.id));
  const limit=Math.max(1,Math.min(R388_BACKLOG_CANDIDATE_LIMIT,Number(candidateLimit)||R388_BACKLOG_CANDIDATE_LIMIT));
  const candidates=eligible.slice(0,limit);
  const proofCandidates=proofEligible.slice(0,limit);
  const selected=candidates[0]||null;
  const selectedProof=proofCandidates[0]||null;
  const heldGovernance=unresolved.filter(x=>!x.selfEditable).map(x=>x.id);
- const heldRecentDeclines=mutationReady.filter(x=>recentHeld.has(x.id)).map(x=>x.id);
- const heldProofDeclines=currentSourceProofReady.filter(x=>recentHeld.has(x.id)).map(x=>x.id);
+ const heldRecentDeclines=mutationReady.filter(x=>heldSet.has(x.id)).map(x=>x.id);
+ const heldProofDeclines=currentSourceProofReady.filter(x=>heldSet.has(x.id)).map(x=>x.id);
+ const supersededDeclineEvidence=validContracted
+  .filter(row=>row.hold.superseded.length)
+  .map(row=>Object.freeze({itemId:row.item.id,currentRevision:row.hold.currentRevision,superseded:row.hold.superseded}));
  const potential=backlogPotentialR507({
   remaining:unresolved.length,
   selfEditableCount:selfEditable.length,
@@ -291,6 +323,7 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
   heldRecentDeclines,
   heldProofDeclines,
   heldNeedsAcceptanceContract,
+  supersededDeclineEvidence:Object.freeze(supersededDeclineEvidence),
   invalidContracts,
   liveBrowserProofDebt,
   externalEvidenceDebt,
@@ -306,6 +339,6 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
   selectedProof,
   canonicalAdmission:false,
   targetingRevision:'R509',
-  boundary:'R509 makes contract qualification itself explicit and falsifiable. Only contracts whose objective identity, evidence predicates, falsifiers, proof families and truth boundary validate may re-enter autonomous work. Product mutation is limited to BOUNDED_SOURCE contracts; CURRENT_SOURCE_PROOF contracts may only generate state/proof candidates; live-browser, external-provider and Hybrid-host evidence contracts remain visible debt without source-mutation authority. R508 contract debt and R507 finite-convergence bounds remain in force.',
+  boundary:'R509 makes contract qualification explicit and falsifiable, and scopes decline authority to the acceptance-contract revision that produced it. A newly explicit contract may supersede legacy pre-contract declines once; any decline recorded under the same revision holds again. Product mutation is limited to BOUNDED_SOURCE contracts; CURRENT_SOURCE_PROOF contracts may only generate state/proof candidates; live-browser, external-provider and Hybrid-host evidence contracts remain visible debt without source-mutation authority. R508 contract debt and R507 finite-convergence bounds remain in force.',
  });
 }
