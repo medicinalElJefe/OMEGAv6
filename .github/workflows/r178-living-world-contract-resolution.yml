@@ -1,4 +1,5 @@
 name: R178 Living World Contract Resolution
+# R501 TOTAL GITHUB ACCEPTANCE · semantic no-op touch to force current-lineage GitHub proof.
 
 on:
   pull_request:
