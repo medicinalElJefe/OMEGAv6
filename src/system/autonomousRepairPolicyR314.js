@@ -91,7 +91,7 @@ export function calculusNativeRepairInstructionsR504(stage){
  const packet=stage?.calculusWorkerPacket;
  if(!packet)return '';
  return `
-R503/R504/R505 CALCULUS-NATIVE WORKER APPLICATION CONTRACT
+R503/R504 CALCULUS-NATIVE WORKER ADMISSION AND DECISION CONTINUITY\nR505 APPLIED CALCULUS REASONING LAYER
 - The supplied calculusWorkerPacket is an exact-base governing envelope. Do not rewrite or invent its immutable authority law.
 - Return calculusContextId exactly equal to calculusWorkerPacket.contextId.
 - The system deterministically binds the immutable R503 workerAttestation from that exact packet. Your job is to APPLY the calculus, not recite boilerplate.
