@@ -12,6 +12,7 @@ import {
 } from '../../src/system/autonomousRepairPolicyR314.js';
 import {validateReasoningWorkerProposalR503} from '../../src/system/calculusNativeAutonomyR503.js';
 import {validateReasoningWorkerDecisionR504} from '../../src/system/calculusDecisionContinuityR504.js';
+import {bindCalculusDecisionCapsuleR505,proposeCalculusDecisionR505} from './r505-result-conditioned-calculus.mjs';
 
 export const R314_CLOUD_AI_REPAIR_SCHEMA='OMEGA_CLOUD_R314_AI_REPAIR';
 
@@ -75,6 +76,17 @@ const attemptReceipt=(attempt,prepared)=>({
 
 export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT,residual,stage,contextFiles=[],maxAttempts=R314_AI_MAX_ATTEMPTS}={}){
  if(!ai||typeof ai.run!=='function')return{ok:false,state:'AI_BINDING_UNAVAILABLE',reasons:['CLOUD-01 AI binding is unavailable'],patches:[],attempts:[]};
+ let decisionR505=null;
+ if(stage?.calculusWorkerPacket){
+  const decided=await proposeCalculusDecisionR505({ai,model,packet:stage.calculusWorkerPacket,residual,stage});
+  if(!decided.ok)return{model,promptSchema:'R505',ok:false,state:decided.state,reasons:decided.reasons||[],patches:[],attempts:[],decisionAttempts:decided.attempts||[]};
+  decisionR505=decided.capsule;
+  const consequence=decided.validation?.consequence||null;
+  if(decisionR505.decision!=='TURN'){
+   return{model,promptSchema:'R505',ok:false,state:`R505_DECISION_${decisionR505.decision}`,reasons:[`R505 consequence ${consequence||'NONE'} forbids source mutation for this cycle`],patches:[],attempts:[],decisionAttempts:decided.attempts||[],decisionR505};
+  }
+  stage={...stage,calculusDecisionR505:decisionR505};
+ }
  const boundedAttempts=Math.max(1,Math.min(R314_AI_MAX_ATTEMPTS,Number(maxAttempts)||R314_AI_MAX_ATTEMPTS));
  const attempts=[];
  let rejection=null;
@@ -85,7 +97,7 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
   let prepared;
   try{
    const result=await ai.run(model,{messages:[
-    {role:'system',content:`Return exactly one valid JSON object and no markdown. Required top-level keys: schema,residualId,files,canonicalAdmission,directProductionMutation,expectedProofs${stage?.calculusWorkerPacket?',workerAttestation,developmentalDelta,alternativesConsidered,residualEvidenceIds,selectedAlternative,decision,decisionRationale':''}. The unchanged R314 mutation membrane and R503 calculus-literacy gate reject any value outside the supplied exact source and authority context.`},
+    {role:'system',content:`Return exactly one valid JSON object and no markdown. Required top-level keys: schema,residualId,files,canonicalAdmission,directProductionMutation,expectedProofs${stage?.calculusWorkerPacket&&!stage?.calculusDecisionR505?',workerAttestation,developmentalDelta,alternativesConsidered,residualEvidenceIds,selectedAlternative,decision,decisionRationale':''}. The unchanged R314 mutation membrane rejects unsafe source edits; when R505 is bound, its already-validated decision capsule is attached by the runtime before R503/R504 validation.`},
     {role:'user',content:prompt},
    ],response_format:repairResponseFormatR314({residual,contextFiles}),temperature:attempt===1?0.1:0,max_tokens:attempt===1?R314_AI_MAX_OUTPUT_TOKENS:R314_AI_CORRECTION_MAX_OUTPUT_TOKENS,seed:314});
    prepared=prepareAiRepairR314({rawResponse:responsePayload(result),residual,contextFiles});
@@ -93,6 +105,16 @@ export async function proposeAiRepairR314({ai,model=R314_AI_REPAIR_MODEL_DEFAULT
    prepared={ok:false,state:'AI_GENERATION_ERROR',proposal:null,reasons:[`AI_RUN_ERROR:${error instanceof Error?error.message:String(error)}`],patches:[]};
   }
   if(prepared.ok&&stage?.calculusWorkerPacket){
+   if(decisionR505){
+    const bound=bindCalculusDecisionCapsuleR505(stage.calculusWorkerPacket,prepared.proposal,decisionR505,{residualId:residual?.id||null});
+    if(!bound.valid)prepared={...prepared,ok:false,state:'BLOCKED_BY_R505_CALCULUS_DECISION_BINDING',reasons:bound.reasons,patches:[]};
+    else prepared={...prepared,proposal:bound.proposal,decisionR505};
+   }
+   if(!prepared.ok){
+    const receipt=attemptReceipt(attempt,prepared);
+    attempts.push(receipt);
+    return{model,promptSchema:'R505→R314',reformulated:attempt>1,rejectionHistory:attempts,attempts,decisionR505,...prepared};
+   }
    const literacy=validateReasoningWorkerProposalR503(stage.calculusWorkerPacket,prepared.proposal);
    if(!literacy.valid){
     prepared={...prepared,ok:false,state:'BLOCKED_BY_R503_CALCULUS_LITERACY',reasons:literacy.reasons,workerLiteracy:literacy,patches:[]};
