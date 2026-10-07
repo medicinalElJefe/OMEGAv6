@@ -37,6 +37,7 @@ const ITEM_TARGETS=Object.freeze({
  'A-04':[],
  'A-05':['src/buildGovernance.ts','src/OmegaSystemConsolidationR30.tsx'],
  'B-02':['src/OmegaSideNavigatorR88.tsx','src/OmegaWorkstationFullV2.tsx'],
+ 'B-04':['src/OmegaWorkstationFullV2.tsx','src/InstrumentOSShellR62.tsx','src/omegaSideNavigatorR88.css','src/omegaNavigationShellR411.css'],
  'C-04':[],
 });
 
@@ -116,6 +117,60 @@ const ITEM_ACCEPTANCE=Object.freeze({
   ]),
   requiredChangedTokens:Object.freeze(['OMEGA_CONTROL_RECONCILIATION_R466','OMEGA_WORKSTATION_CONTROL_AUDIT_R466','duplicateRouteAuthorities','hiddenUnreachableRoutes','mountedExactlyOnce','omegaMasterMenuForRouteR289','OMEGA_ALL_ROUTES_R82','operationContractForRouteR143','capabilityExecutionContract','canonicalMutation:false']),
   rationale:'B-03 requires explicit reconciliation of recovered controls across the canonical navigation registry and mounted workstation: unique route identity/authority, one reachable master-menu owner, exactly one workstation mount, R143 operation binding, routability, zero hidden unreachable routes, and no Canon mutation. Changing an authority label, route count, hint, or presentation metadata is not completion.'
+ }),
+ 'B-04':Object.freeze({
+  revision:'R509',
+  supersedesLegacyDeclines:true,
+  minChangedChars:900,
+  minFiles:2,
+  minSubstantiveLines:12,
+  requiredChangedPathGroups:Object.freeze([
+   Object.freeze(['src/OmegaWorkstationFullV2.tsx','src/InstrumentOSShellR62.tsx']),
+   Object.freeze(['src/omegaSideNavigatorR88.css','src/omegaNavigationShellR411.css'])
+  ]),
+  requiredChangedTokens:Object.freeze(['MOBILE','DESKTOP','AUTO','omegaFrame','data-omega-nav-expanded','100dvh','overflow-y']),
+  currentSourceProof:Object.freeze({
+   revision:'R509',
+   requiredPathTokens:Object.freeze([
+    Object.freeze({
+     path:'src/OmegaWorkstationFullV2.tsx',
+     tokens:Object.freeze([
+      "localStorage.getItem('omega-ui-mode')",
+      "x==='DESKTOP'||x==='MOBILE'?x:'AUTO'",
+      '<ResponsiveRuntimeShell uiMode={uiMode} onUiMode={setUiMode}',
+     ])
+    }),
+    Object.freeze({
+     path:'src/InstrumentOSShellR62.tsx',
+     tokens:Object.freeze([
+      "window.matchMedia('(max-width: 900px)')",
+      "uiMode==='MOBILE'?'mobile':uiMode==='DESKTOP'?'desktop':media.matches?'mobile':'desktop'",
+      'document.documentElement.dataset.omegaFrame=frame',
+     ])
+    }),
+    Object.freeze({
+     path:'src/omegaSideNavigatorR88.css',
+     tokens:Object.freeze([
+      "html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home)",
+      'margin-left:calc(var(--r94-nav-rail) + var(--r94-nav-panel))!important',
+      '@media(max-width:900px)',
+     ])
+    }),
+    Object.freeze({
+     path:'src/omegaNavigationShellR411.css',
+     tokens:Object.freeze([
+      'R411.11 · MOBILE USABLE VIEWPORT OWNERSHIP',
+      'width:100vw!important;max-width:100vw!important;min-width:0!important',
+      'bottom:var(--r411-mobile-dock)!important',
+      'height:calc(100dvh - var(--r411-mobile-dock))!important',
+      'overflow-y:auto!important',
+      'scroll-padding-bottom:20px!important',
+     ])
+    }),
+   ]),
+   truthBoundary:'Exact-source satisfaction proves one responsive frame authority, desktop non-covering navigation reservation, and mobile usable-viewport/scroll ownership. Final B-04 closure still requires the exact-head R241 browser suite to exercise canonical routes, submenus, disclosures, overlays and visual surfaces; source tokens alone do not prove rendered parity, external state, CanonState admission or production deployment.'
+  }),
+  rationale:'B-04 is a whole-interface responsive parity obligation. Current source already contains a unified AUTO/DESKTOP/MOBILE frame authority and bounded desktop/mobile navigation geometry, so OMEGA must prefer exact-source proof plus R241 browser acceptance over gratuitous UI mutation. Any future source repair must materially preserve route, disclosure, overlay and visual reachability across both frame modes.'
  }),
 });
 
@@ -236,22 +291,54 @@ export function evaluateCurrentConvergenceSourceR507({item,sourceFiles=[]}={}){
  });
 }
 
+export function declineHoldDispositionR509(item,heldItemEvidence=[]){
+ const currentRevision=String(item?.acceptanceContract?.revision||'');
+ const supersedesLegacy=item?.acceptanceContract?.supersedesLegacyDeclines===true;
+ const relevant=(Array.isArray(heldItemEvidence)?heldItemEvidence:[])
+  .filter(row=>String(row?.itemId||'')===String(item?.id||''))
+  .map(row=>Object.freeze({
+   itemId:String(row?.itemId||''),
+   acceptanceContractRevision:row?.acceptanceContractRevision?String(row.acceptanceContractRevision):null,
+   state:row?.state?String(row.state):null,
+  }));
+ const active=[],superseded=[];
+ for(const row of relevant){
+  if(row.acceptanceContractRevision){
+   (row.acceptanceContractRevision===currentRevision?active:superseded).push(row);
+  }else{
+   (supersedesLegacy?superseded:active).push(row);
+  }
+ }
+ return Object.freeze({
+  held:active.length>0,
+  currentRevision:currentRevision||null,
+  supersedesLegacy,
+  active:Object.freeze(active),
+  superseded:Object.freeze(superseded),
+ });
+}
+
 export const R388_BACKLOG_CANDIDATE_LIMIT=3;
 
-export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],heldItemIds=[],candidateLimit=R388_BACKLOG_CANDIDATE_LIMIT}={}){
+export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],heldItemIds=[],heldItemEvidence=[],candidateLimit=R388_BACKLOG_CANDIDATE_LIMIT}={}){
  const advanced=new Set(Array.isArray(advancedItemIds)?advancedItemIds:[]);
- const recentHeld=new Set(Array.isArray(heldItemIds)?heldItemIds:[]);
+ const legacyEvidence=(Array.isArray(heldItemIds)?heldItemIds:[]).map(itemId=>({itemId:String(itemId),acceptanceContractRevision:null,state:'LEGACY_DECLINE'}));
+ const evidence=[...(Array.isArray(heldItemEvidence)?heldItemEvidence:[]),...legacyEvidence];
  const items=parseConvergenceBacklogR388(markdown);
  const unresolved=items.filter(x=>!x.completed&&!advanced.has(x.id));
  const selfEditable=unresolved.filter(x=>x.selfEditable);
  const contractReady=selfEditable.filter(x=>Boolean(x.acceptanceContract));
  const heldNeedsAcceptanceContract=selfEditable.filter(x=>!x.acceptanceContract).map(x=>x.id);
- const eligible=contractReady.filter(x=>!recentHeld.has(x.id));
+ const holdDispositions=contractReady.map(item=>({item,hold:declineHoldDispositionR509(item,evidence)}));
+ const eligible=holdDispositions.filter(row=>!row.hold.held).map(row=>row.item);
  const limit=Math.max(1,Math.min(R388_BACKLOG_CANDIDATE_LIMIT,Number(candidateLimit)||R388_BACKLOG_CANDIDATE_LIMIT));
  const candidates=eligible.slice(0,limit);
  const selected=candidates[0]||null;
  const heldGovernance=unresolved.filter(x=>!x.selfEditable).map(x=>x.id);
- const heldRecentDeclines=contractReady.filter(x=>recentHeld.has(x.id)).map(x=>x.id);
+ const heldRecentDeclines=holdDispositions.filter(row=>row.hold.held).map(row=>row.item.id);
+ const supersededDeclineEvidence=holdDispositions
+  .filter(row=>row.hold.superseded.length)
+  .map(row=>Object.freeze({itemId:row.item.id,currentRevision:row.hold.currentRevision,superseded:row.hold.superseded}));
  const potential=backlogPotentialR507({
   remaining:unresolved.length,
   selfEditableCount:selfEditable.length,
@@ -270,6 +357,7 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
   heldGovernance,
   heldRecentDeclines,
   heldNeedsAcceptanceContract,
+  supersededDeclineEvidence:Object.freeze(supersededDeclineEvidence),
   eligibleCount:eligible.length,
   contractReadyCount:contractReady.length,
   needsAcceptanceContractCount:heldNeedsAcceptanceContract.length,
@@ -278,7 +366,7 @@ export function selectNextConvergenceItemR388({markdown='',advancedItemIds=[],he
   candidates:Object.freeze(candidates.slice()),
   selected,
   canonicalAdmission:false,
-  targetingRevision:'R508',
-  boundary:'R508 makes acceptance-contract readiness a prerequisite for autonomous mutation. Uncontracted objectives are classified as contract debt and excluded from mutation potential before any AI generation. R507 removes the held-item fallback so returned decline evidence cannot silently regenerate the same repair loop. R458 preserves R450 stable absolute A-Y row identity and R448 subsystem targeting, while extending item-specific acceptance from shallow lexical change toward bounded transition evidence: required product surfaces, substantive changed code, R143 consumer binding, R142 proof transport, R125 admission boundary, failure/recovery/degrade semantics, and Canon non-mutation for B-02. Checked rows remain history; governance/self-build/device-only items remain non-self-editable where no honest product-source target exists; external/device completion still requires first-hand proof.',
+  targetingRevision:'R509',
+  boundary:'R509 scopes decline holds to the acceptance-contract revision that produced them. A newly explicit contract may supersede legacy pre-contract declines once; any decline recorded under that same revision holds again. R508 contract readiness still excludes uncontracted objectives before AI. R507 finite convergence and no-held-fallback laws remain intact. Checked rows remain history; external/device completion still requires returned proof.',
  });
 }
