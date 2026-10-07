@@ -44,6 +44,15 @@ const regressed=evaluateCurrentConvergenceSourceR507({
 });
 assert.equal(regressed.satisfied,false,'missing traversal transport must invalidate source-satisfaction proof');
 
+const uncontracted=parseConvergenceBacklogR388(realMarkdown).find(row=>row.id==='R388-C-02');
+assert.ok(uncontracted&&!uncontracted.acceptanceContract,'test requires an uncontracted backlog item');
+const noContract=validateConvergenceRepairR450({
+ item:uncontracted,
+ proposal:{files:[{path:'src/EarthObservatoryR8.tsx',replacements:[{before:'x',after:'material-looking change'}]}]},
+});
+assert.equal(noContract.valid,false,'uncontracted broad objectives must fail closed instead of accepting arbitrary mutations');
+assert.ok(noContract.reasons.includes('ITEM_ACCEPTANCE_CONTRACT_REQUIRED'));
+
 const cosmetic=validateConvergenceRepairR450({
  item:c03,
  proposal:{files:[{path:'src/EarthObservatoryR8.tsx',replacements:[{before:"['G19-FD','G18-FD']",after:"['G19-FD','G18-FD','G15-FD']"}]}]},
