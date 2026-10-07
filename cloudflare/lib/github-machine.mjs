@@ -9,6 +9,7 @@ import {selectNextConvergenceItemR388,validateConvergenceRepairR450} from '../..
 import {autonomousCandidatePrefixesR245,isAutonomousCandidateBranchR245,validateAutonomousCandidatePolicyR245,R245_CAPSULE_GENERATOR_REVISION,R245_GOVERNED_SELFBUILD_CONTRACT} from '../../src/system/governedSelfBuildContractR245.js';
 import {cloudCandidateResolutionR436} from './canonical-resolution-r436.mjs';
 import {buildCalculusNativeWorkerPacketR503} from '../../src/system/calculusNativeAutonomyR503.js';
+import {finiteConvergencePotentialR507} from '../../src/system/finiteConvergenceGovernorR507.js';
 
 const API='https://api.github.com';
 function utf8ToBase64(value){const bytes=new TextEncoder().encode(String(value));let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s)}
@@ -206,10 +207,19 @@ export async function inspectCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const residualState=buildCloudResidualStateR314({accuracyState,runtimeEvidence:evidence,workflowEvidence:workflowEvidenceForSha(runs.workflow_runs,mainSha)});
   const selectedTarget=selectRepairTargetR314(residualState);
   const repairId=selectedTarget.targetable?`R314-AI:${selectedTarget.residualId}:${selectedTarget.paths.join('|')}`:null;
-  const retry=repairId?canAttemptRepairR314({history:state.r314RepairHistory||[],fingerprint:residualState.vector.fingerprint,repairId}):null;
+  const retry=repairId?canAttemptRepairR314({history:state.r314RepairHistory||[],fingerprint:residualState.vector.fingerprint,repairId,evidenceId:selectedTarget.residual?.evidenceId||null}):null;
   const repairTarget=selectedTarget.targetable&&retry&&!retry.allow?{...selectedTarget,targetable:false,reasons:[...selectedTarget.reasons,'R314_RETRY_BUDGET_EXHAUSTED']}:{...selectedTarget,repairId};
-  const decision=!workerContextR503.valid?{action:'OBSERVE_ONLY',reason:`R503 calculus-native worker packet invalid: ${workerContextR503.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}:candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence,repairTarget,backlogTarget}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
-  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,workerContextR503,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,durableCanonicalAdvancedItemIds,observedCanonicalAdvancedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},decision};
+  const finiteConvergence=finiteConvergencePotentialR507({
+    selfBuildState:state,
+    retry,
+    backlog,
+    openAutonomousCandidates:candidates.length,
+  });
+  const rawDecision=!workerContextR503.valid?{action:'OBSERVE_ONLY',reason:`R503 calculus-native worker packet invalid: ${workerContextR503.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}:candidatePolicy.valid?decideCycle({currentMainSha:mainSha,productionProofGreen:Boolean(productionProof),state,candidates,evidence,repairTarget,backlogTarget}):{action:'OBSERVE_ONLY',reason:`canonical autonomous candidate policy invalid: ${candidatePolicy.reasons.join(',')}`,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT};
+  const decision=rawDecision.action==='PROPOSE'&&finiteConvergence.mutationBudget<=0
+    ?{action:'OBSERVE_ONLY',reason:'R507_ZERO_MUTATION_BUDGET · fixed evidence epoch is quiescent; require independently returned new evidence or a changed bounded repair hypothesis',finiteConvergence,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT}
+    :{...rawDecision,finiteConvergence};
+  return{machineId:MACHINE_ID,mainSha,productionProof,state,candidatePolicy,candidates,evidence,workerContextR503,r314:{residualState,repairTarget,retry},r388:{backlog,backlogTarget,backlogTargets,recentDeclinedItemIds,durableCanonicalAdvancedItemIds,observedCanonicalAdvancedItemIds,canonicalAdvancedItemIds,reconciledAdvancedItemIds},r507:finiteConvergence,decision};
 }
 
 async function ensureNoCompetingCandidate(token,repo,state,mainSha){
