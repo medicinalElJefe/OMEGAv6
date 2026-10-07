@@ -34,6 +34,7 @@ const currentEpoch=selectNextConvergenceItemR388({
  markdown,
  advancedItemIds:['R388-B-02','R388-B-03','R388-C-03'],
  heldItemIds:['R388-A-02','R388-A-03'],
+ heldItemEvidence:[{itemId:'R388-B-04',acceptanceContractRevision:'R509',state:'SYNTHETIC_R508_ZERO_READY_FIXTURE'}],
 });
 assert.equal(currentEpoch.selected,null,'current contracted frontier must become quiescent when remaining contracted work is held/advanced');
 assert.equal(currentEpoch.eligibleCount,0,'uncontracted rows must not inflate the mutation-ready count');
