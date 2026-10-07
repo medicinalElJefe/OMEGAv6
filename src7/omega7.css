@@ -97,3 +97,8 @@
  .o7-home-established{margin:-12px calc(max(10px,env(safe-area-inset-right))*-1) 12px}
  .o7-home-established .r56-topbar{top:0}
 }
+
+
+/* R502.3 — one sticky chrome owner. Embedded established HOME must not occlude OMEGA7 health/search controls. */
+.o7-home-established .r56-topbar{position:relative!important;top:auto!important;z-index:1!important}
+.o7-home-established .r56-overlay{z-index:120}
