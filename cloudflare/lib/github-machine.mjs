@@ -272,6 +272,80 @@ async function proposeR314AiCycle({inspection,token,repo,ai,model}){
   return{...inspection,mutation:'R314_AI_BRANCH_AND_PR_CREATED',branch,prNumber:pr.number,prUrl:pr.html_url,generation,residualId:target.residualId,residualFingerprint:r314.residualState.vector.fingerprint,changedPaths:repair.patches.map(p=>p.path)};
 }
 
+async function proposeR507CurrentSourceProofCycle({inspection,token,repo}){
+  const{mainSha,state,decision}=inspection;
+  const target=decision.repairTarget;
+  const item=target?.item||null;
+  const proof=target?.currentSourceProof||null;
+  if(!item||target?.sourceSatisfied!==true||proof?.satisfied!==true){
+    return{...inspection,mutation:'NONE',reason:'R507 current-source proof target is not satisfied'};
+  }
+  await ensureNoCompetingCandidate(token,repo,state,mainSha);
+  const branch=`cloud/evolution-r507-source-proof-${slug(item.id)}-${mainSha.slice(0,8)}`;
+  await gh(token,`/repos/${repo}/git/refs`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({ref:`refs/heads/${branch}`,sha:mainSha})});
+  const expectedProofs=[...(item.expectedProofs||[])];
+  const receipt={
+    schema:'OMEGA_R507_CURRENT_SOURCE_SATISFACTION_RECEIPT',
+    revision:'R507',
+    machineId:MACHINE_ID,
+    governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,
+    generatorContract:'R507_CURRENT_SOURCE_PROOF',
+    itemId:item.id,
+    section:item.section,
+    objective:item.objective,
+    baseSha:mainSha,
+    branch,
+    status:'CURRENT_SOURCE_SATISFIED_PENDING_PROOF',
+    sourceAdvance:false,
+    advancedItemIdsChanged:true,
+    currentSourceProof:{
+      state:proof.state,
+      sourceRefs:proof.sourceRefs,
+      truthBoundary:proof.contract?.truthBoundary||null,
+    },
+    expectedProofs,
+    canonicalAdmission:false,
+    directProductionMutation:false,
+    createdAt:new Date().toISOString(),
+    authorityBoundaries:AUTHORITY_BOUNDARIES,
+  };
+  const branchState=await getRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch);
+  const nextState={
+    ...state,
+    r388AdvancedItemIds:[...new Set([...(state.r388AdvancedItemIds||[]),item.id])],
+    r388Receipts:[...(state.r388Receipts||[]),receipt].slice(-256),
+  };
+  await putRepoFile(token,repo,'public/omega-r170-selfbuild-state.json',branch,`R507 prove exact current-source satisfaction ${item.id}`,`${JSON.stringify(nextState,null,2)}\n`,branchState.sha);
+  const candidate={
+    schema:'OMEGA_CLOUDFLARE_EVOLUTION_CANDIDATE_R388',
+    revision:'R507',
+    machineId:MACHINE_ID,
+    governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,
+    generatorContract:'R507_CURRENT_SOURCE_PROOF',
+    item,
+    repair:{paths:[],expectedProofs,currentSourceProof:receipt.currentSourceProof,rejectionScars:[],declinedItemScars:[]},
+    receipt,
+    status:'CURRENT_SOURCE_SATISFIED_PENDING_PROOF',
+    sourceAdvance:false,
+    canonicalAdmission:false,
+    directProductionMutation:false,
+  };
+  candidate.canonicalResolution=cloudCandidateResolutionR436(candidate);
+  let candidateSha=null;
+  try{candidateSha=(await getRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch)).sha}catch{}
+  await putRepoFile(token,repo,'public/omega-r170-selfbuild-candidate.json',branch,`Record R507 current-source proof ${item.id}`,`${JSON.stringify(candidate,null,2)}\n`,candidateSha);
+  await ensureNoCompetingCandidate(token,repo,state,mainSha);
+  const refs=(proof.sourceRefs||[]).map(row=>`${row.path}@${row.sha}`).join('\n');
+  const pr=await gh(token,`/repos/${repo}/pulls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+    title:`R507 current-source proof — ${item.id}`,
+    head:branch,
+    base:'main',
+    draft:false,
+    body:`R507 found that the exact current product source already satisfies the declared convergence objective, so this candidate carries proof/state only and makes no product-source mutation.\n\nExact base: ${mainSha}\nItem: ${item.id} — ${item.objective}\nExact source refs:\n${refs}\nProduct-source changes: NONE\nAdvanced item change is conditional on this exact-head PR passing the full governed workflow stack.\nExpected domain proofs: ${expectedProofs.join(', ')}\n\nThis is source-existence proof, not external-provider availability, current observation, CanonState admission, or production proof. R125 remains sole CanonState admission authority and ci.yml remains sole production writer.`
+  })});
+  return{...inspection,mutation:'R507_SOURCE_PROOF_BRANCH_AND_PR_CREATED',branch,prNumber:pr.number,prUrl:pr.html_url,itemId:item.id,changedPaths:['public/omega-r170-selfbuild-state.json','public/omega-r170-selfbuild-candidate.json'],currentSourceProof:receipt.currentSourceProof};
+}
+
 async function proposeR388BacklogCycle({inspection,token,repo,ai,model}){
   const{mainSha,state,decision,r388}=inspection;
   const targets=(Array.isArray(r388?.backlogTargets)&&r388.backlogTargets.length?r388.backlogTargets:[decision.repairTarget]).filter(target=>target?.targetable&&target?.item).slice(0,3);
@@ -369,6 +443,7 @@ export async function proposeCycle({token,repo='medicinalElJefe/OMEGAv6',runtime
   const inspection=await inspectCycle({token,repo,runtimeBase});
   if(inspection.decision.action!=='PROPOSE')return{...inspection,mutation:'NONE'};
   if(inspection.decision.strategy==='R314_AI_REPAIR')return proposeR314AiCycle({inspection,token,repo,ai,model});
+  if(inspection.decision.strategy==='R507_CURRENT_SOURCE_PROOF')return proposeR507CurrentSourceProofCycle({inspection,token,repo});
   if(inspection.decision.strategy==='R388_BACKLOG_AI_BUILD')return proposeR388BacklogCycle({inspection,token,repo,ai,model});
   return proposeStaticCapsuleCycle({inspection,token,repo});
 }
@@ -391,5 +466,5 @@ export async function runAutonomousCycle({token,repo='medicinalElJefe/OMEGAv6',r
   const open=await gh(token,`/repos/${repo}/pulls?state=open&base=main&per_page=100`);const autonomous=(open||[]).filter(pr=>isAutonomousCandidateBranchR245(pr.head?.ref,candidatePolicy.policy)).sort((a,b)=>a.number-b.number);
   if(autonomous.length>1)return{ok:false,state:'BLOCKED',reason:'multiple open governed autonomous candidate PRs require review',prs:autonomous.map(x=>x.number),branches:autonomous.map(x=>x.head?.ref)};
   if(autonomous.length===1){const held=autonomous[0];if(String(held.head?.ref||'').startsWith('cloud/evolution-')){const promotion=await promoteGreenCloudPr({token,repo,prNumber:held.number});return{ok:true,state:promotion.action==='MERGED_GREEN_EXACT_HEAD'?'PROMOTED':'HELD_FOR_PROOF',promotion}}return{ok:true,state:'HELD_FOR_R170_CANDIDATE',reason:'shared one-open-autonomous-candidate fence holds CLOUD-01 while the R170 candidate exists',prNumber:held.number,branch:held.head?.ref}}
-  const proposal=await proposeCycle({token,repo,runtimeBase,ai,model});return{ok:true,state:['BRANCH_AND_PR_CREATED','R314_AI_BRANCH_AND_PR_CREATED','R388_BACKLOG_BRANCH_AND_PR_CREATED'].includes(proposal.mutation)?'PROPOSED':'OBSERVE_ONLY',proposal:{mainSha:proposal.mainSha,mutation:proposal.mutation,decision:proposal.decision,branch:proposal.branch||null,prNumber:proposal.prNumber||null,prUrl:proposal.prUrl||null,capsuleId:proposal.capsuleId||null,residualId:proposal.residualId||null,residualFingerprint:proposal.residualFingerprint||null,itemId:proposal.itemId||null,reason:proposal.reason||null,repair:proposal.repair?{state:proposal.repair.state||null,reasons:proposal.repair.reasons||[],attempts:proposal.repair.attempts||[],rejectionHistory:proposal.repair.rejectionHistory||[],reformulated:proposal.repair.reformulated===true}:null,declinedItemScars:proposal.declinedItemScars||[]}}
+  const proposal=await proposeCycle({token,repo,runtimeBase,ai,model});return{ok:true,state:['BRANCH_AND_PR_CREATED','R314_AI_BRANCH_AND_PR_CREATED','R388_BACKLOG_BRANCH_AND_PR_CREATED','R507_SOURCE_PROOF_BRANCH_AND_PR_CREATED'].includes(proposal.mutation)?'PROPOSED':'OBSERVE_ONLY',proposal:{mainSha:proposal.mainSha,mutation:proposal.mutation,decision:proposal.decision,branch:proposal.branch||null,prNumber:proposal.prNumber||null,prUrl:proposal.prUrl||null,capsuleId:proposal.capsuleId||null,residualId:proposal.residualId||null,residualFingerprint:proposal.residualFingerprint||null,itemId:proposal.itemId||null,reason:proposal.reason||null,repair:proposal.repair?{state:proposal.repair.state||null,reasons:proposal.repair.reasons||[],attempts:proposal.repair.attempts||[],rejectionHistory:proposal.repair.rejectionHistory||[],reformulated:proposal.repair.reformulated===true}:null,declinedItemScars:proposal.declinedItemScars||[]}}
 }
