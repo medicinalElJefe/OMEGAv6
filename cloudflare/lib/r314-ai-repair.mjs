@@ -11,7 +11,8 @@ import {
   validateAiRepairProposalR314,
 } from '../../src/system/autonomousRepairPolicyR314.js';
 import {validateReasoningWorkerProposalR503} from '../../src/system/calculusNativeAutonomyR503.js';
-import {validateReasoningWorkerDecisionR504} from '../../src/system/calculusDecisionContinuityR504.js';\nimport {bindAppliedReasoningWorkerR505} from '../../src/system/appliedCalculusReasoningR505.js';
+import {validateReasoningWorkerDecisionR504} from '../../src/system/calculusDecisionContinuityR504.js';
+import {bindAppliedReasoningWorkerR505} from '../../src/system/appliedCalculusReasoningR505.js';
 
 export const R314_CLOUD_AI_REPAIR_SCHEMA='OMEGA_CLOUD_R314_AI_REPAIR';
 
