@@ -1,6 +1,7 @@
 import{corpusState}from'../corpusRuntime';
 import{calibratedState,type VisualCalibration}from'../visualCalibration';
-import{admitScalarChannelR347,contextCompletenessR347,modelMappedWgs84R347,sourceClocksR347}from'../visualTraversalContextR347';
+import{admitScalarChannelR347,contextCompletenessR347}from'../visualTraversalContextR347';
+import{compileExactTraversalEnvelopeR500,verifyExactTraversalEnvelopeR500}from'./exactTraversalEnvelopeR500';
 import type{PhysicalObservationR348}from'./unifiedConvergenceR348';
 
 export const OMEGA_LIVE_SCENE_CORRELATION_R348='OMEGA_LIVE_SCENE_CORRELATION_R348';
@@ -19,7 +20,9 @@ function observation(input:{id:string;quantity:string;value:any;unit:string;fram
 }
 
 export function compileLiveSceneCorrelationR348(address:number,earth:any,status:any,hybrid:any,calibration:VisualCalibration|null){
- const target=modelMappedWgs84R347(address);
+ const exactTraversal=compileExactTraversalEnvelopeR500({address,earth});
+ const exactTraversalVerified=verifyExactTraversalEnvelopeR500(exactTraversal);
+ const target=exactTraversal.earthQuery;
  const weatherSource=earth?.sources?.openMeteo,usgsSource=earth?.sources?.usgs,swpcSource=earth?.sources?.swpc;
  const scalars=[
   admitScalarChannelR347({id:'temperature',label:'Temperature',value:earth?.localConditions?.temperatureC,unit:'°C',source:sourceName(weatherSource),observedAt:earth?.localConditions?.time,truth:'OBSERVED'}),
@@ -27,7 +30,7 @@ export function compileLiveSceneCorrelationR348(address:number,earth:any,status:
   admitScalarChannelR347({id:'seismic',label:'Seismic events',value:earth?.seismic?.count,unit:'events/24h',source:sourceName(usgsSource),observedAt:usgsSource?.verifiedAt,truth:'OBSERVED'}),
   admitScalarChannelR347({id:'kp',label:'Kp index',value:earth?.spaceWeather?.kp,unit:'index',source:sourceName(swpcSource),observedAt:earth?.spaceWeather?.observationTime,truth:'OBSERVED'})
  ];
- const clocks=sourceClocksR347(earth);
+ const clocks=exactTraversal.sourceEvidence;
  const completeness=contextCompletenessR347(scalars,clocks);
  const physicalObservations=[
   observation({id:'earth.temperature',quantity:'AIR_TEMPERATURE',value:earth?.localConditions?.temperatureC,unit:'°C',frame:'WGS84_QUERY_CONTEXT',eventTime:earth?.localConditions?.time,source:weatherSource,earth,provenance:['/api/earth/evidence','Open-Meteo returned observation','R348 source-bound scene adapter']}),
@@ -46,10 +49,12 @@ export function compileLiveSceneCorrelationR348(address:number,earth:any,status:
   calibration:calibration?{stateCount:calibration.stateCount,channelCount:calibration.channelCount,passed:calibration.passed,boundary:calibration.boundary}:null,
   calibrated,
   scalars,clocks,completeness,
+  exactTraversal:{...exactTraversal,verified:exactTraversalVerified},
   physicalObservations,
   evidence:{hash:sha(earth?.evidenceHash)||null,verifiedAt:validIso(earth?.verifiedAt)?new Date(earth.verifiedAt).toISOString():null},
   system:{runtimeState,hybridState,hybridPaired:Boolean(hybrid?.paired??hybrid?.bridge?.paired),deviceCount:Number(hybrid?.devices?.length??hybrid?.deviceCount??0)||0,nativeExecutionClaimed:Boolean(hybrid?.nativeExecutionClaimed)},
   truthBoundary:[
+   'R501 binds the verified R500 exact traversal envelope into the live scene without creating a second state or source authority.',
    'Address→WGS84 is a query correlation only; it does not make a canonical address a physical Earth coordinate.',
    'Live values enter World only when value, unit, source, source time and SHA-256 evidence binding are present.',
    'Source observation time and snapshot verification time remain separate from model-route time.',
