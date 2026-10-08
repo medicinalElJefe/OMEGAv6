@@ -69,9 +69,9 @@ export const R512_EXECUTABLE_SOFTWARE:readonly R512SoftwareBinding[]=R486_VISIBL
 const normalize=(value:string)=>value
  .toLowerCase()
  .replace(/ω/g,'omega')
- .replace(/(d),(?=d)/g,'$1')
+ .replace(/(\\d),(?=\\d)/g,'$1')
  .replace(/[^a-z0-9]+/g,' ')
- .replace(/s+/g,' ')
+ .replace(/\\s+/g,' ')
  .trim();
 
 const words=(value:string)=>normalize(value).split(' ').filter(Boolean);
