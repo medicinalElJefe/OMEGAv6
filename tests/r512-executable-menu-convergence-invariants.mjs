@@ -25,6 +25,8 @@ assert.ok(menu.includes("R512_EXECUTABLE_SOFTWARE"));
 assert.ok(menu.includes("searchExecutableMenuR512"));
 assert.ok(menu.includes("menuSectionsForDomainR512"));
 assert.ok(menu.includes("Historical names")||menu.includes("aliases"));
+assert.ok(menu.includes(".replace(/(\\\\d),(?=\\\\d)/g,'$1')")||menu.includes(".replace(/(\\d),(?=\\d)/g,'$1')"),'R512 query normalization must preserve numeric commas');
+assert.ok(menu.includes(".replace(/\\\\s+/g,' ')")||menu.includes(".replace(/\\s+/g,' ')"),'R512 query normalization must collapse whitespace');
 
 for(const token of [
  "softwareLaunch:Omega7SoftwareLaunchContext|null",
@@ -35,6 +37,7 @@ for(const token of [
 for(const token of [
  "launchSoftware=(software:R512SoftwareBinding)",
  "data-command-software",
+ "data-command-route={result.software.route}",
  "Previous software · current executors",
  "Launch current executor",
  "Launch adapted successor",
