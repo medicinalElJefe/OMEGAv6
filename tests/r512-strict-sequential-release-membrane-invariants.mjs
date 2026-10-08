@@ -24,8 +24,8 @@ for(const token of [
  '/actions/runs?head_sha=',
  '/actions/runs/${run.id}/jobs?per_page=100',
  "j.name==='deploy-main'",
- "j.status==='completed'",
- "j.conclusion==='success'",
+ "deploy?.status==='completed'",
+ "deploy?.conclusion==='success'",
  'BASE_PRODUCTION_PROVEN'
 ])assert.ok(guard.includes(token),`R512 R210 base-production gate missing ${token}`);
 
