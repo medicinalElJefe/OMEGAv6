@@ -135,7 +135,7 @@ jobs:
       actions: read
       pull-requests: read
     concurrency:
-      group: omega-r512-candidate-preview
+      group: omega-r512-candidate-preview-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
       cancel-in-progress: false
     environment: production
     env:
