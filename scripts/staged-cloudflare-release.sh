@@ -20,8 +20,8 @@ assert_current_main_owner(){
     return 1
   fi
   if [[ "$current_main" != "$GITHUB_SHA" ]]; then
-    echo "::error title=SUPERSEDED RELEASE::This deployment run owns $GITHUB_SHA but origin/main is now $current_main. Refusing any further production mutation."
-    return 1
+    echo "::notice title=SUPERSEDED RELEASE RETIRED::This deployment run owns $GITHUB_SHA but origin/main is now $current_main. Refusing any further production mutation without treating legitimate supersession as a product failure."
+    return 75
   fi
   echo "Production ownership confirmed for current main $GITHUB_SHA."
 }
@@ -65,6 +65,11 @@ restore_previous_on_error(){
   local rc=$?
   trap - ERR
   set +e
+  local superseded=0
+  if [[ "$rc" == "75" ]]; then
+    superseded=1
+    echo "OMEGA_RELEASE_SUPERSEDED=1" >> "${GITHUB_ENV:-/dev/null}" 2>/dev/null || true
+  fi
   if [[ -n "$PREVIOUS_VERSION_ID" && "${BASELINE_USABLE:-0}" == "1" ]]; then
     if release_owns_current_deployment; then
       echo "Staged release failed; restoring verified-usable previous production version $PREVIOUS_VERSION_ID to 100% traffic."
@@ -76,6 +81,10 @@ restore_previous_on_error(){
     echo "::error title=ROLLBACK REFUSED::Previous version $PREVIOUS_VERSION_ID did not prove usable and cannot regain production authority. Cloudflare traffic is left on the current forward state for explicit repair rather than resurrecting the application-withholding baseline."
   fi
   cleanup
+  if [[ "$superseded" == "1" ]]; then
+    echo "Superseded release retired cleanly after restoring/retaining the last verified production authority."
+    exit 0
+  fi
   exit "$rc"
 }
 trap restore_previous_on_error ERR
