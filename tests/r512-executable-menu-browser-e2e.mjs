@@ -30,7 +30,11 @@ async function launchSoftware(page,query,binding,route,operation,launchState){
  if(!text.includes(operation))throw new Error(`${binding}: operation context was lost: ${text.slice(0,500)}`);
  if(!text.includes(route))throw new Error(`${binding}: current executor route missing from context`);
 
- await host.locator('.o7-native-surface').waitFor({state:'visible',timeout:30000});
+ const terminal=host.locator('.o7-native-surface,.o7-native-failure').first();
+ await terminal.waitFor({state:'visible',timeout:60000});
+ const failure=host.locator('.o7-native-failure');
+ if(await failure.count()&&await failure.isVisible())throw new Error(`${binding}: current executor reported failure: ${(await failure.innerText()).slice(0,800)}`);
+ await host.locator('.o7-native-surface').waitFor({state:'visible',timeout:5000});
  const intro=host.locator('.o7-open-instrument');
  if(await intro.count()&&await intro.isVisible())throw new Error(`${binding}: previous software stopped at intro instead of opening the full executor`);
 }
