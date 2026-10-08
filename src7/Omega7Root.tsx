@@ -169,7 +169,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
       return <button key={result.id} data-command-route={cap.legacyRoute} onClick={()=>open(cap.legacyRoute)}><span><small>Current tool · {cap.domain}</small><b>{cap.label}</b><em>{cap.description}</em></span><strong>{cap.availability}</strong></button>;
      }
      const software=result.software;
-     return <button key={result.id} data-command-software={software.id} data-command-route={software.route} onClick={()=>launchSoftware(software)}><span><small>Previous software · {software.launchState}</small><b>{software.name}</b><em>{software.operation} → {software.route}</em></span><strong>{software.launchState==='GATED'?'OPEN GATE':'LAUNCH'}</strong></button>;
+     return <button key={result.id} data-command-software={software.id} data-command-software-route={software.route} onClick={()=>launchSoftware(software)}><span><small>Previous software · {software.launchState}</small><b>{software.name}</b><em>{software.operation} → {software.route}</em></span><strong>{software.launchState==='GATED'?'OPEN GATE':'LAUNCH'}</strong></button>;
     })}</div>
    </section>
   </div>}
