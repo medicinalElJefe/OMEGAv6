@@ -13,12 +13,27 @@ export type Omega7RuntimeHealth={
  device:Omega7Health;
 };
 
+export type Omega7SoftwareLaunchContext={
+ bindingId:string;
+ name:string;
+ route:OmegaRouteName;
+ operation:string;
+ state:'EXECUTES_NOW'|'EXECUTES_AS_ADAPTER'|'TRUTH_GATED';
+ launchState:'LIVE'|'ADAPTER'|'GATED';
+ aliases:readonly string[];
+ truth:string;
+ capabilityReality:string;
+ receiptAuthority:string;
+ admissionAuthority:string;
+};
+
 export type Omega7AppState={
  schema:typeof OMEGA7_APP_STATE_SCHEMA;
  domain:Omega7Domain;
  depth:Omega7Depth;
  query:string;
  selectedRoute:OmegaRouteName|null;
+ softwareLaunch:Omega7SoftwareLaunchContext|null;
  commandOpen:boolean;
  statusOpen:boolean;
  health:Omega7RuntimeHealth;
@@ -29,6 +44,7 @@ type Action=
  |{type:'DEPTH';depth:Omega7Depth}
  |{type:'QUERY';query:string}
  |{type:'SELECT_ROUTE';route:OmegaRouteName|null}
+ |{type:'LAUNCH_SOFTWARE';launch:Omega7SoftwareLaunchContext}
  |{type:'COMMAND';open:boolean}
  |{type:'STATUS';open:boolean}
  |{type:'HEALTH';key:keyof Omega7RuntimeHealth;value:Omega7Health};
@@ -39,6 +55,7 @@ const initial:Omega7AppState={
  depth:'STANDARD',
  query:'',
  selectedRoute:null,
+ softwareLaunch:null,
  commandOpen:false,
  statusOpen:false,
  health:{
@@ -53,10 +70,11 @@ const initial:Omega7AppState={
 
 function reducer(state:Omega7AppState,action:Action):Omega7AppState{
  switch(action.type){
-  case'DOMAIN':return{...state,domain:action.domain,query:'',selectedRoute:null};
+  case'DOMAIN':return{...state,domain:action.domain,query:'',selectedRoute:null,softwareLaunch:null};
   case'DEPTH':return{...state,depth:action.depth};
   case'QUERY':return{...state,query:action.query};
-  case'SELECT_ROUTE':return{...state,selectedRoute:action.route};
+  case'SELECT_ROUTE':return{...state,selectedRoute:action.route,softwareLaunch:null};
+  case'LAUNCH_SOFTWARE':return{...state,selectedRoute:action.launch.route,softwareLaunch:action.launch,commandOpen:false,query:''};
   case'COMMAND':return{...state,commandOpen:action.open};
   case'STATUS':return{...state,statusOpen:action.open};
   case'HEALTH':return{...state,health:{...state.health,[action.key]:action.value}};
