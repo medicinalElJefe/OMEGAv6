@@ -439,12 +439,12 @@ jobs:
           NODE
       - name: Record exact live production observability
         id: production_observability_r471
-        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true' && (always() && steps.deploy_worker.outcome == 'success')
+        if: always() && steps.deploy_worker.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         env:
           OMEGA_WORKER_VERSION_ID: ${{ steps.deploy_worker.outputs.candidate_version_id }}
         run: node scripts/verify_production_observability_r471.mjs
       - name: Upload exact live production observability receipt
-        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true' && (always() && steps.production_observability_r471.outcome == 'success')
+        if: always() && steps.production_observability_r471.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: omega-production-observability-${{ github.sha }}
@@ -467,16 +467,16 @@ jobs:
         run: node scripts/verify_live_operational_source_authority_r202.mjs
       - name: Verify live R237 authenticated Hybrid command authority
         id: live_r237
-        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true' && (always() && steps.deploy_worker.outcome == 'success')
+        if: always() && steps.deploy_worker.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         continue-on-error: true
         run: node scripts/verify_live_hybrid_command_authority_r237.mjs
       - name: Verify live R238 Hybrid host intelligence
         id: live_r238
-        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true' && (always() && steps.deploy_worker.outcome == 'success')
+        if: always() && steps.deploy_worker.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         continue-on-error: true
         run: node scripts/verify_live_hybrid_host_intelligence_r238.mjs
       - name: Enforce complete Hybrid live-proof closure
-        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true' && (always() && steps.deploy_worker.outcome == 'success')
+        if: always() && steps.deploy_worker.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         shell: bash
         run: |
           failed=0
@@ -494,7 +494,7 @@ jobs:
           fi
           echo "R240.1 production truth closure PASS: R237 and R238 live proofs both succeeded."
       - name: Roll back canonical OMEGA Worker on post-promotion proof failure
-        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true' && (failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible == 'true')
+        if: failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible == 'true' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: rollback_worker
         shell: bash
         run: |
@@ -524,11 +524,11 @@ jobs:
           rm -f "$status_json"
           npx wrangler rollback "${{ steps.deploy_worker.outputs.previous_version_id }}" --name omegav6 --message "OMEGA automatic rollback after live proof failure for $GITHUB_SHA"
       - name: Refuse rollback to an unproved or known-bad baseline
-        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true' && (failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible != 'true')
+        if: failure() && steps.deploy_worker.outputs.previous_version_id != '' && steps.deploy_worker.outputs.rollback_eligible != 'true' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         shell: bash
         run: echo "::warning title=ROLLBACK REFUSED::Post-promotion proof failed, but the previous Worker did not prove usable and cannot regain production authority."
       - name: Record deployment receipt
-        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true' && (always())
+        if: always() && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         shell: bash
         run: |
           {
