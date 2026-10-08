@@ -28,6 +28,9 @@ async function prove(browser,label,viewport){
  await visibleStage.locator('canvas[aria-label="GPU woven 4-coordinate relational continuum"]').waitFor({state:'visible',timeout:30000});
 
  if(await page.locator('.o7-home-actions').count())throw new Error(`${label}: old OMEGA7 button-board HOME still exists`);
+ const recovered=page.locator('.o7-recovered[data-r486-visible-convergence="true"]');
+ await recovered.waitFor({state:'visible',timeout:15000});
+ if(!(await recovered.getByRole('button',{name:'Browse recovered capabilities',exact:true}).isVisible()))throw new Error(`${label}: recovered capability fabric is not visibly reachable below visual HOME`);
  if(await home.locator('.r411-navigation-shell,.r94-side-toolbar').count())throw new Error(`${label}: embedded R71 mounted a duplicate global navigator`);
  if(await page.locator('.o7-nav button').count()!==6)throw new Error(`${label}: OMEGA7 framing navigation regressed`);
 
