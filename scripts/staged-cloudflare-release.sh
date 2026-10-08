@@ -69,6 +69,7 @@ restore_previous_on_error(){
   if [[ "$rc" == "75" ]]; then
     superseded=1
     echo "OMEGA_RELEASE_SUPERSEDED=1" >> "${GITHUB_ENV:-/dev/null}" 2>/dev/null || true
+    echo "superseded=true" >> "${GITHUB_OUTPUT:-/dev/null}" 2>/dev/null || true
   fi
   if [[ -n "$PREVIOUS_VERSION_ID" && "${BASELINE_USABLE:-0}" == "1" ]]; then
     if release_owns_current_deployment; then
