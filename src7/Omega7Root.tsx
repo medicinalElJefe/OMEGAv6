@@ -163,9 +163,14 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    <section className='o7-command' role='dialog' aria-modal='true' aria-label='Search OMEGA'>
     <header><div><b>Find a tool or previous software</b><span>Historical names resolve to their current working executor.</span></div><kbd>Esc</kbd></header>
     <input ref={inputRef} value={state.query} onChange={e=>dispatch({type:'QUERY',query:e.target.value})} placeholder='Try “Omega Atlas OS”, “Mode 188”, “Earth”, “build”, “proof”…'/>
-    <div>{commandResults.map(result=>result.kind==='CAPABILITY'
-     ?<button key={result.id} data-command-route={result.capability.legacyRoute} onClick={()=>open(result.capability.legacyRoute)}><span><small>Current tool · {result.capability.domain}</small><b>{result.capability.label}</b><em>{result.capability.description}</em></span><strong>{result.capability.availability}</strong></button>
-     :<button key={result.id} data-command-software={result.software.id} data-command-route={result.software.route} onClick={()=>launchSoftware(result.software)}><span><small>Previous software · {result.software.launchState}</small><b>{result.software.name}</b><em>{result.software.operation} → {result.software.route}</em></span><strong>{result.software.launchState==='GATED'?'OPEN GATE':'LAUNCH'}</strong></button>)}</div>
+    <div>{commandResults.map(result=>{
+     if(result.kind==='CAPABILITY'){
+      const cap=result.capability;
+      return <button key={result.id} data-command-route={cap.legacyRoute} onClick={()=>open(cap.legacyRoute)}><span><small>Current tool · {cap.domain}</small><b>{cap.label}</b><em>{cap.description}</em></span><strong>{cap.availability}</strong></button>;
+     }
+     const software=result.software;
+     return <button key={result.id} data-command-software={software.id} data-command-route={software.route} onClick={()=>launchSoftware(software)}><span><small>Previous software · {software.launchState}</small><b>{software.name}</b><em>{software.operation} → {software.route}</em></span><strong>{software.launchState==='GATED'?'OPEN GATE':'LAUNCH'}</strong></button>;
+    })}</div>
    </section>
   </div>}
  </div>;
