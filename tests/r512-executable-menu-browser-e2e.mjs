@@ -58,6 +58,9 @@ try{
  // Historical name -> live current executor with preserved operation.
  await launchSoftware(page,'Omega Atlas OS','RUNTIME','System','RUN_CANONICAL_RUNTIME','LIVE');
 
+ // Ledger-only historical system -> current proved successor.
+ await launchSoftware(page,'Omega Atlas Desktop','SYS-002','System','CONTINUE_CORE_RUNTIME','LIVE');
+
  // Historical mode name -> current Modes executor.
  await launchSoftware(page,'Mode 188','MODE188','Modes','RUN_MODE_188_STACK','LIVE');
 
@@ -67,9 +70,12 @@ try{
  // Device-gated historical software opens the real current executor/gate, never fake ACTIVE state.
  await launchSoftware(page,'native GPU v12.1','GPU_NATIVE_V12','Visual Instrument','RUN_NATIVE_GPU_IF_PROVEN','GATED');
 
+ // Archive donor remains inspectable lineage, never a false live executor.
+ await launchSoftware(page,'CanonConsoleOmega_v32_Final_Complete_Package','SYS-012','Archive Operators','INSPECT_ARCHIVE_LINEAGE','ARCHIVE');
+
  if(errors.length)throw new Error('R512 unhandled page errors: '+errors.join(' | ').slice(0,1800));
  await context.close();
- console.log('R512 EXECUTABLE MENU BROWSER PASS · grouped intent menus render · Omega Atlas OS + Mode188 launch full live successors · JST launches adapter successor · native GPU opens truthful device gate · operation context survives navigation');
+ console.log('R512 EXECUTABLE MENU BROWSER PASS · grouped intent menus render · 72 capability bindings + 100-system ledger search · Omega Atlas OS/Desktop + Mode188 launch current successors · JST launches adapter · native GPU opens truthful device gate · donor package opens archive lineage only · operation context survives navigation');
 }finally{
  await browser.close();
 }
