@@ -165,7 +165,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
     <input ref={inputRef} value={state.query} onChange={e=>dispatch({type:'QUERY',query:e.target.value})} placeholder='Try “Omega Atlas OS”, “Mode 188”, “Earth”, “build”, “proof”…'/>
     <div>{commandResults.map(result=>result.kind==='CAPABILITY'
      ?<button key={result.id} data-command-route={result.capability.legacyRoute} onClick={()=>open(result.capability.legacyRoute)}><span><small>Current tool · {result.capability.domain}</small><b>{result.capability.label}</b><em>{result.capability.description}</em></span><strong>{result.capability.availability}</strong></button>
-     :<button key={result.id} data-command-software={result.software.id} onClick={()=>launchSoftware(result.software)}><span><small>Previous software · {result.software.launchState}</small><b>{result.software.name}</b><em>{result.software.operation} → {result.software.route}</em></span><strong>{result.software.launchState==='GATED'?'OPEN GATE':'LAUNCH'}</strong></button>)}</div>
+     :<button key={result.id} data-command-software={result.software.id} data-command-route={result.software.route} onClick={()=>launchSoftware(result.software)}><span><small>Previous software · {result.software.launchState}</small><b>{result.software.name}</b><em>{result.software.operation} → {result.software.route}</em></span><strong>{result.software.launchState==='GATED'?'OPEN GATE':'LAUNCH'}</strong></button>)}</div>
    </section>
   </div>}
  </div>;
