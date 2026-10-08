@@ -13,7 +13,7 @@ const revisionOf=title=>(String(title||'').match(/\bR\d+(?:\.\d+)?\b/i)||[])[0]?
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function proveBaseProductionReady(baseSha){
  let last='NO_CANONICAL_CI_RUN';
- for(let attempt=1;attempt<=12;attempt++){
+ for(let attempt=1;attempt<=120;attempt++){
   const runs=await api(`/actions/runs?head_sha=${baseSha}&per_page=100`);
   const candidates=(runs.workflow_runs||[])
    .filter(run=>run.name==='OMEGA Cloud Bridge CI'&&['push','workflow_dispatch'].includes(run.event))
@@ -27,7 +27,7 @@ async function proveBaseProductionReady(baseSha){
     return{runId:run.id,deployJobId:deploy.id,event:run.event};
    }
   }
-  if(attempt<12)await sleep(5000);
+  if(attempt<120)await sleep(10000);
  }
  throw new Error(`R512 base ${baseSha} is not production-proven by successful canonical deploy-main after bounded wait · ${last}`);
 }
@@ -57,7 +57,7 @@ if(mode==='PUSH'){
  if(exact.length!==1)throw new Error(`R210 promoted merge must correlate to exactly one merged main PR with candidate ${candidate}; found ${exact.length}`);
  const pr=exact[0],revision=revisionOf(pr.title);
  const runs=await api(`/actions/runs?head_sha=${candidate}&event=pull_request&status=completed&per_page=100`);
- const required=['OMEGA Cloud Bridge CI','R170 Current Convergence','R202 Operational Source Authority'];
+ const required=['OMEGA Cloud Bridge CI','R170 Current Convergence','R202 Operational Source Authority','R210 Release Controller','R223 Cloudflare Evolution Authority','OMEGA R237 Hybrid Command Authority Proof','OMEGA R238 Woven Hybrid Continuity Convergence','R241 Archive Convergence Visual Intelligence'];
  for(const name of required){const ok=(runs.workflow_runs||[]).some(r=>r.name===name&&r.conclusion==='success');if(!ok)throw new Error(`R210 exact candidate ${candidate} lacks successful required PR workflow: ${name}`)}
  console.log(`R210 PROMOTION FENCE PASS · ${revision||'REVISION'} · PR #${pr.number} · rollback ${rollback} · candidate ${candidate} · promoted ${sha} · exact PR/head correlation + required green workflows`);
  process.exit(0);
