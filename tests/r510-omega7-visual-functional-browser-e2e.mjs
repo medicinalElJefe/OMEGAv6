@@ -23,6 +23,16 @@ async function prove(browser,label,viewport){
  const home=page.locator('.o7-home-established[data-r510-visual-restoration="CURRENT_R71_CANONICAL_HOME"]');
  await home.waitFor({state:'visible',timeout:30000});
  await home.locator('.r71-home[data-r510-embedded="true"]').waitFor({state:'visible',timeout:30000});
+ const recovered=page.locator('.o7-recovered[data-r486-visible-convergence="true"]');
+ await recovered.waitFor({state:'visible',timeout:30000});
+ const visualVsRecovered=await page.evaluate(()=>{
+  const home=document.querySelector('.o7-home-established');
+  const recovered=document.querySelector('.o7-recovered[data-r486-visible-convergence="true"]');
+  if(!home||!recovered)return null;
+  const h=home.getBoundingClientRect(),r=recovered.getBoundingClientRect();
+  return{homeBottom:h.bottom,recoveredTop:r.top};
+ });
+ if(!visualVsRecovered||visualVsRecovered.recoveredTop<visualVsRecovered.homeBottom-8)throw new Error(`${label}: recovered fabric overlaps or replaces the visual-first HOME ${JSON.stringify(visualVsRecovered)}`);
  const visibleStage=home.locator('.r134-stage');
  await visibleStage.waitFor({state:'visible',timeout:30000});
  await visibleStage.locator('canvas[aria-label="GPU woven 4-coordinate relational continuum"]').waitFor({state:'visible',timeout:30000});
@@ -83,7 +93,7 @@ const browser=await chromium.launch({headless:true});
 try{
  await prove(browser,'desktop',{width:1440,height:960});
  await prove(browser,'mobile',{width:390,height:844});
- console.log('R510 OMEGA7 VISUAL-FUNCTIONAL BROWSER PASS · visible R134 woven continuum dominates desktop + mobile · raw 20,736 membrane remains reachable · old button board absent · one navigator · projection control actuates · All tools + System Atlas bridges work');
+ console.log('R510 OMEGA7 VISUAL-FUNCTIONAL BROWSER PASS · visible R134 woven continuum dominates desktop + mobile · recovered capability fabric remains visible below it · raw 20,736 membrane remains reachable · old button board absent · one navigator · projection control actuates · All tools + System Atlas bridges work');
 }finally{
  await browser.close();
 }
