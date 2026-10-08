@@ -97,7 +97,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   </header>
 
   <aside className='o7-nav o7-nav-r512' aria-label='OMEGA7 capability-first navigation' data-navigation-revision='R512' data-canonical-domain-count={OMEGA7_DOMAINS.length}>
-   {R512_DOMAIN_MENU.map(menu=><button key={menu.id} className={state.domain===menu.id?'active':''} onClick={()=>dispatch({type:'DOMAIN',domain:menu.id})} title={menu.purpose}><span>{menu.shortLabel}</span><small>{menu.id==='HOME'?'start':menuSectionsR512(menu.id).ready.length+' ready'}</small></button>)}
+   {R512_DOMAIN_MENU.map(menu=><button key={menu.id} className={state.domain===menu.id?'active':''} onClick={()=>dispatch({type:'DOMAIN',domain:menu.id})} title={menu.purpose} aria-label={DOMAIN_LABEL[menu.id]}><span>{menu.shortLabel}</span><small>{menu.id==='HOME'?'start':menuSectionsR512(menu.id).ready.length+' ready'}</small></button>)}
   </aside>
 
   <main className='o7-main' data-native-route={state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?state.selectedRoute:''}>
