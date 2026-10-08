@@ -64,6 +64,34 @@ async function prove(browser,label,viewport){
  const parsed=JSON.parse(persisted);
  if(parsed.recoveredId!=='RUNTIME'||parsed.route!=='System'||parsed.operation!=='RUN_CANONICAL_RUNTIME')throw new Error(`${label}: recovered execution identity drift ${persisted.slice(0,800)}`);
 
+ await page.locator('.o7-native-toolbar button').first().click();
+ await page.waitForFunction(()=>!document.querySelector('.o7-main')?.getAttribute('data-native-route'),{timeout:10000});
+ const previousSearch=recovered.getByRole('textbox',{name:'Search previous software'});
+ await previousSearch.fill('Omega Atlas Desktop');
+ const desktopRow=recovered.locator('[data-r512-system-launch="SYS-002"]');
+ await desktopRow.waitFor({state:'visible',timeout:15000});
+ if(!(await desktopRow.innerText()).toLowerCase().includes('run current successor'))throw new Error(`${label}: Omega Atlas Desktop is still listed without a working successor action`);
+ await desktopRow.click();
+ await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='System',{timeout:20000});
+ const desktopCapsule=page.locator('.o7-executor-capsule[data-r512-executor="SYS-002"]');
+ await desktopCapsule.waitFor({state:'visible',timeout:15000});
+ const desktopCapsuleText=(await desktopCapsule.innerText()).toLowerCase();
+ if(!desktopCapsuleText.includes('continue_core_runtime')||!desktopCapsuleText.includes('system ledger'))throw new Error(`${label}: Omega Atlas Desktop did not carry its current successor execution identity`);
+ if(await page.locator('[data-omega7-failure],.o7-native-failure').count())throw new Error(`${label}: Omega Atlas Desktop current successor failed to open`);
+
+ await page.locator('.o7-native-toolbar button').first().click();
+ await page.waitForFunction(()=>!document.querySelector('.o7-main')?.getAttribute('data-native-route'),{timeout:10000});
+ await previousSearch.fill('CanonConsoleOmega_v32_Final_Complete_Package');
+ const donorRow=recovered.locator('[data-r512-system-launch="SYS-012"]');
+ await donorRow.waitFor({state:'visible',timeout:15000});
+ if(!(await donorRow.innerText()).toLowerCase().includes('inspect lineage'))throw new Error(`${label}: donor package is being misrepresented as executable software`);
+ await donorRow.click();
+ await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Archive Operators',{timeout:20000});
+ const donorCapsule=page.locator('.o7-executor-capsule[data-r512-executor="SYS-012"]');
+ await donorCapsule.waitFor({state:'visible',timeout:15000});
+ const donorCapsuleText=(await donorCapsule.innerText()).toLowerCase();
+ if(!donorCapsuleText.includes('archive only')||!donorCapsuleText.includes('inspect_archive_lineage'))throw new Error(`${label}: donor archive truth boundary was lost`);
+
  const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-window.innerWidth);
  if(overflow>8)throw new Error(`${label}: R512 navigation/executor UI creates horizontal overflow ${overflow}px`);
  if(errors.length)throw new Error(`${label}: unhandled page errors ${errors.join(' | ').slice(0,1800)}`);
@@ -74,5 +102,5 @@ const browser=await chromium.launch({headless:true});
 try{
  await prove(browser,'desktop',{width:1440,height:960});
  await prove(browser,'mobile',{width:390,height:844});
- console.log('R512 CAPABILITY MENU + RECOVERED EXECUTION BROWSER PASS · six organized menus · quick actions + readiness grouping · historical RUNTIME launches concrete RUN_CANONICAL_RUNTIME executor capsule on desktop + mobile');
+ console.log('R512 CAPABILITY MENU + RECOVERED EXECUTION BROWSER PASS · organized menus · RUNTIME executor · Omega Atlas Desktop working successor · donor package archive-only truth · desktop + mobile');
 }finally{await browser.close()}
