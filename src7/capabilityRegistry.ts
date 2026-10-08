@@ -172,6 +172,45 @@ export function searchOmega7Capabilities(query:string){
   .map(x=>x.cap);
 }
 
+
+export type Omega7StartMenuGroupR512={
+ id:string;
+ label:string;
+ copy:string;
+ routes:readonly OmegaRouteName[];
+};
+
+export const OMEGA7_START_MENU_R512:Readonly<Record<Omega7Domain,readonly Omega7StartMenuGroupR512[]>>=Object.freeze({
+ HOME:Object.freeze([]),
+ WORK:Object.freeze([
+  Object.freeze({id:'CONTINUE',label:'Continue work',copy:'projects · workspace · memory',routes:Object.freeze(['Projects','Workspace','Memory'])}),
+ ]),
+ EXPLORE:Object.freeze([
+  Object.freeze({id:'LIVE',label:'Live world',copy:'earth · forecast · motion',routes:Object.freeze(['Earth Now','Forecast','Data Motion'])}),
+  Object.freeze({id:'TRAVERSE',label:'Traverse',copy:'matter · scale · recursion',routes:Object.freeze(['Matter Traversal','Immersive Traversal','Extreme Traversal','Traversal','Scale Compiler','Infinity'])}),
+  Object.freeze({id:'MODEL',label:'Model & compare',copy:'relativity · atlas · field · science',routes:Object.freeze(['Relativity','Atlas','Field','Reality Lab','Atlas Calculator','Convergence'])}),
+ ]),
+ CREATE:Object.freeze([
+  Object.freeze({id:'MAKE',label:'Make',copy:'visuals · media · assets',routes:Object.freeze(['Visual Instrument','Create','Assets'])}),
+  Object.freeze({id:'OUTPUT',label:'Output',copy:'queue · render · export',routes:Object.freeze(['Render Queue'])}),
+ ]),
+ DEVELOP:Object.freeze([
+  Object.freeze({id:'BUILD',label:'Build & repair',copy:'development · packages · quality',routes:Object.freeze(['Development','Build Out','Quality Compiler'])}),
+  Object.freeze({id:'AI',label:'AI & intelligence',copy:'SAI · runtime · reasoning',routes:Object.freeze(['SAI Lab','Kernel Intelligence'])}),
+  Object.freeze({id:'CONNECT',label:'Connect compute',copy:'desktop · device · sovereign host',routes:Object.freeze(['Hybrid Link'])}),
+ ]),
+ SYSTEM:Object.freeze([
+  Object.freeze({id:'PROOF',label:'Proof & validation',copy:'evidence · validation · governance',routes:Object.freeze(['Evidence & Proof','Validation','Governance'])}),
+  Object.freeze({id:'SYSTEM',label:'System control',copy:'map · control · health',routes:Object.freeze(['System Atlas','Control Matrix','System'])}),
+  Object.freeze({id:'ARCHIVE',label:'Recovery & archive',copy:'census · operators · consolidation',routes:Object.freeze(['Archive Census','Archive Operators','Consolidation'])}),
+  Object.freeze({id:'EXTEND',label:'Modes & extensions',copy:'modes · evolution · plugins · settings',routes:Object.freeze(['Modes','Canon Evolution','Plugins','Settings','Instructions'])}),
+ ]),
+});
+
+export function omega7StartMenuForDomainR512(domain:Omega7Domain){
+ return OMEGA7_START_MENU_R512[domain]||[];
+}
+
 export const OMEGA7_INHERITANCE_CONTRACT=Object.freeze({
  schema:OMEGA7_SCHEMA,
  inheritedRouteCount:OMEGA7_CAPABILITIES.length,
