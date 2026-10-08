@@ -8,6 +8,7 @@ import {auditAuthoritativeOperationChainR143,operationContractForRouteR143} from
 import {organizationForRouteR132} from './experienceOrganizationR132';
 import {compileNavigationLemmaR242,resolveExactRouteR242,R242_NAVIGATION_LEMMA_REVISION} from './navigationLemmaCalculusR242.js';
 import SoftwareLibraryR512 from './SoftwareLibraryR512';
+import OmegaSystemInventoryR83 from './OmegaSystemInventoryR83';
 import RouteOutputRibbonR111 from './RouteOutputRibbonR111';
 import './omegaSideNavigatorR88.css';
 import './omegaSideNavigatorR100.css';
@@ -124,7 +125,7 @@ export default function OmegaSideNavigatorR88({currentPanel='',onNavigate,onHome
      {rows.length===0&&<div className='r88-empty'>No tool matches that recovered-menu/workspace/search combination. The query is preserved as a residual; no destination is fabricated.</div>}
     </div>
     <footer className='r88-navigator-foot r100-navigator-foot r104-navigator-foot'><ShieldCheck/><span>{showTechnical?`R242 lemma navigation ${navigationLemma.structuralPass?'PASS':'HOLD'} · R289 recovered-menu presentation downstream of lemma · residuals ${residualCount} · R143 operation-chain ${operationAudit.pass?'PASS':'HOLD'} · ${operationAudit.mappedRoutes}/${operationAudit.totalRoutes} routes mapped · R239 presentation preserved · navigation has no execution or R125 admission authority.`:'Every registered tool remains reachable. Recovered menus, workspaces and search only filter the same 44-route authority; exact route identity is preserved and navigation does not execute work or change CanonState.'}</span></footer>
-   </>:<div className='r88-software-layer'><SoftwareLibraryR512 onNavigate={go}/></div>}
+   </>:<div className='r88-software-layer'><SoftwareLibraryR512 onNavigate={go}/>{showTechnical&&<OmegaSystemInventoryR83 compact onNavigate={go}/>}</div>}
   </section>
  </aside>;
 }
