@@ -62,7 +62,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const open=(route:string)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route);
   if(!cap)return;
-  dispatch({type:'DOMAIN',domain:cap.domain});
+  // Preserve the originating task/domain while the executor is open so Back returns where the user came from.
   dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
   dispatch({type:'COMMAND',open:false});
   if(!isOmega7NativeRoute(cap.legacyRoute))onOpenLegacyRoute(cap.legacyRoute);
@@ -70,7 +70,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const launchSoftware=(software:R512SoftwareBinding)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===software.route);
   if(!cap||!isOmega7NativeRoute(cap.legacyRoute))return;
-  dispatch({type:'DOMAIN',domain:cap.domain});
+  // A previous-software launch preserves the originating task/domain and carries its own executor context.
   dispatch({type:'LAUNCH_SOFTWARE',launch:{
    bindingId:software.id,
    name:software.name,
