@@ -50,7 +50,7 @@ export function Omega7NativeSurface({route,onNavigate,depth,softwareLaunch}:{rou
   case'Matter Traversal':case'Immersive Traversal':case'Extreme Traversal':case'Traversal':surface=<TraversalWorkspaceR440 key={route} route={route} onNavigate={onNavigate}/>;break;
   case'Relativity':case'Reality Lab':case'Atlas':case'Atlas Calculator':case'Scale Compiler':case'Infinity':surface=<ScienceWorkspaceR441 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
   case'Forecast':case'Visual Instrument':case'Field':case'Data Motion':case'Convergence':surface=<ForecastVisualWorkspaceR442 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
-  case'Workspace':case'Projects':case'Memory':case'Create':case'Render Queue':case'Assets':surface=<WorkCreateWorkspaceR443 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Workspace':case'Projects':case'Memory':case'Create':case'Render Queue':case'Assets':surface=<WorkCreateWorkspaceR443 key={route} route={route} onNavigate={onNavigate} depth={depth} autoOpen={Boolean(softwareLaunch&&softwareLaunch.route===route)}/>;break;
   case'Hybrid Link':case'Quality Compiler':case'Build Out':case'Development':case'Kernel Intelligence':case'SAI Lab':surface=<DevelopmentComputeWorkspaceR444 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
   case'Cockpit':case'Modes':case'Evidence & Proof':case'Archive Census':case'Archive Operators':case'Canon Evolution':case'Governance':case'Consolidation':case'Instructions':case'Plugins':case'Settings':case'System':case'Validation':case'System Atlas':case'Control Matrix':surface=<SystemEvidenceWorkspaceR445 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
  }
