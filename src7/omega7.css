@@ -98,3 +98,11 @@
  .o7-home-established .r121-home-membrane .r95-membrane-stage{min-height:58dvh}
  .o7-home-stage-loading{min-height:calc(100dvh - 164px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 }
+
+
+/* R512 · WORKING SOFTWARE LIBRARY */
+.o7-r512-software-library{margin-top:14px;border-top:1px solid rgba(255,255,255,.08);padding-top:14px}
+.o7-r512-software-library .r512-software-library{height:auto;max-height:76dvh;border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden}
+.o7-command [data-command-software]{border-left:2px solid rgba(81,170,145,.55)}
+.o7-command [data-command-software] em{color:#9fd0c2}
+@media(max-width:760px){.o7-r512-software-library .r512-software-library{max-height:82dvh}}
