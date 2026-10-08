@@ -10,17 +10,41 @@ if(!repo||!token||!mode)throw new Error('R210 release guard requires repository,
 const headers={accept:'application/vnd.github+json',authorization:`Bearer ${token}`,'x-github-api-version':'2022-11-28'};
 async function api(path){const r=await fetch(`https://api.github.com/repos/${repo}${path}`,{headers});const text=await r.text();if(!r.ok)throw new Error(`${path} HTTP ${r.status}: ${text.slice(0,300)}`);return text?JSON.parse(text):null}
 const revisionOf=title=>(String(title||'').match(/\bR\d+(?:\.\d+)?\b/i)||[])[0]?.toUpperCase()||'';
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function proveBaseProductionReady(baseSha){
+ let last='NO_CANONICAL_CI_RUN';
+ for(let attempt=1;attempt<=12;attempt++){
+  const runs=await api(`/actions/runs?head_sha=${baseSha}&per_page=100`);
+  const candidates=(runs.workflow_runs||[])
+   .filter(run=>run.name==='OMEGA Cloud Bridge CI'&&['push','workflow_dispatch'].includes(run.event))
+   .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
+  for(const run of candidates){
+   const jobs=await api(`/actions/runs/${run.id}/jobs?per_page=100`);
+   const deploy=(jobs.jobs||[]).find(j=>j.name==='deploy-main');
+   last=`run ${run.id} ${run.status}/${run.conclusion||'NONE'} deploy ${deploy?.status||'MISSING'}/${deploy?.conclusion||'NONE'}`;
+   if(deploy?.status==='completed'&&deploy?.conclusion==='success'){
+    console.log(`R512 BASE_PRODUCTION_PROVEN · base ${baseSha} · canonical run ${run.id} · deploy-main ${deploy.id}`);
+    return{runId:run.id,deployJobId:deploy.id,event:run.event};
+   }
+  }
+  if(attempt<12)await sleep(5000);
+ }
+ throw new Error(`R512 base ${baseSha} is not production-proven by successful canonical deploy-main after bounded wait · ${last}`);
+}
 
 if(mode==='PR'){
  const pr=await api(`/pulls/${prNumber}`);
  if(pr.state!=='open'||pr.base?.ref!=='main')throw new Error('R210 candidate fence requires an open PR targeting main');
  if(expectedBase&&pr.base?.sha!==expectedBase)throw new Error(`R210 base SHA moved: expected ${expectedBase}, PR now sees ${pr.base?.sha}`);
+ const baseProof=await proveBaseProductionReady(pr.base?.sha);
+ const refreshed=await api(`/pulls/${prNumber}`);
+ if(refreshed.base?.sha!==pr.base?.sha)throw new Error(`R512 base moved while waiting for production proof: ${pr.base?.sha} -> ${refreshed.base?.sha}`);
  const revision=revisionOf(pr.title);
  if(!revision)throw new Error('R210 candidate PR title must carry an explicit revision identity such as R210');
  const open=await api('/pulls?state=open&base=main&per_page=100');
  const collisions=open.filter(x=>x.number!==pr.number&&revisionOf(x.title)===revision);
  if(collisions.length)throw new Error(`duplicate revision identity ${revision}: competing PR(s) ${collisions.map(x=>`#${x.number}`).join(', ')}`);
- console.log(`R210 CANDIDATE FENCE PASS · ${revision} · PR #${pr.number} · base ${pr.base.sha} · head ${pr.head.sha} · no duplicate open revision identity`);
+ console.log(`R210 CANDIDATE FENCE PASS · ${revision} · PR #${pr.number} · base ${pr.base.sha} · head ${pr.head.sha} · BASE_PRODUCTION_PROVEN run ${baseProof.runId} · no duplicate open revision identity`);
  process.exit(0);
 }
 
