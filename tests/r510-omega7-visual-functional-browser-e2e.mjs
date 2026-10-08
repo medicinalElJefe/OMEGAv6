@@ -23,7 +23,9 @@ async function prove(browser,label,viewport){
  const home=page.locator('.o7-home-established[data-r510-visual-restoration="CURRENT_R71_CANONICAL_HOME"]');
  await home.waitFor({state:'visible',timeout:30000});
  await home.locator('.r71-home[data-r510-embedded="true"]').waitFor({state:'visible',timeout:30000});
- await home.locator('.r95-membrane-stage').waitFor({state:'visible',timeout:30000});
+ const visibleStage=home.locator('.r134-stage');
+ await visibleStage.waitFor({state:'visible',timeout:30000});
+ await visibleStage.locator('canvas[aria-label="GPU woven 4-coordinate relational continuum"]').waitFor({state:'visible',timeout:30000});
 
  if(await page.locator('.o7-home-actions').count())throw new Error(`${label}: old OMEGA7 button-board HOME still exists`);
  if(await home.locator('.r411-navigation-shell,.r94-side-toolbar').count())throw new Error(`${label}: embedded R71 mounted a duplicate global navigator`);
@@ -31,7 +33,7 @@ async function prove(browser,label,viewport){
 
  const geometry=await page.evaluate(()=>{
   const home=document.querySelector('.o7-home-established');
-  const field=document.querySelector('.o7-home-established .r95-membrane-stage');
+  const field=document.querySelector('.o7-home-established .r134-stage');
   const workbench=document.querySelector('.o7-home-established .r96-workbench');
   const main=document.querySelector('.o7-main');
   if(!home||!field||!workbench||!main)return null;
@@ -48,6 +50,12 @@ async function prove(browser,label,viewport){
  if(geometry.fieldHeight<Math.min(360,geometry.viewportHeight*.42))throw new Error(`${label}: canonical visual field is too small ${JSON.stringify(geometry)}`);
  if(label==='desktop'&&geometry.fieldWidth<geometry.homeWidth*.48)throw new Error(`${label}: visual field is not compositionally dominant ${JSON.stringify(geometry)}`);
  if(label==='mobile'&&geometry.fieldWidth<geometry.homeWidth*.82)throw new Error(`${label}: phone visual field does not use available width ${JSON.stringify(geometry)}`);
+
+ const forensic=home.locator('details.r121-home-membrane');
+ if(await forensic.count()!==1)throw new Error(`${label}: raw 20,736-cell membrane forensic surface is missing`);
+ await forensic.locator('summary').click();
+ await forensic.locator('.r95-membrane-stage').waitFor({state:'visible',timeout:10000});
+ await forensic.locator('summary').click();
 
  const matter=home.locator('.r71-modes button').filter({hasText:'Matter'}).first();
  await matter.click();
@@ -75,7 +83,7 @@ const browser=await chromium.launch({headless:true});
 try{
  await prove(browser,'desktop',{width:1440,height:960});
  await prove(browser,'mobile',{width:390,height:844});
- console.log('R510 OMEGA7 VISUAL-FUNCTIONAL BROWSER PASS · current R71 visual field dominates desktop + mobile · old button board absent · one navigator · projection control actuates · All tools + System Atlas bridges work');
+ console.log('R510 OMEGA7 VISUAL-FUNCTIONAL BROWSER PASS · visible R134 woven continuum dominates desktop + mobile · raw 20,736 membrane remains reachable · old button board absent · one navigator · projection control actuates · All tools + System Atlas bridges work');
 }finally{
  await browser.close();
 }
