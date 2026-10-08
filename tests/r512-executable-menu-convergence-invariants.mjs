@@ -56,6 +56,9 @@ for(const token of [
  "querySelector<HTMLButtonElement>('.o7-open-instrument')",
 ])assert.ok(native.includes(token),'R512 native executor bridge missing '+token);
 
+const routeRemounts=(native.match(/key=\{route\}/g)||[]).length;
+assert.ok(routeRemounts>=8,'R512 native workspace families must remount on canonical route changes so stale open/closed state cannot satisfy the next software launch');
+
 for(const token of [
  'R512 · EXECUTABLE MENU CONVERGENCE',
  '.o7-menu-groups',
