@@ -97,6 +97,12 @@ try{
   await page.waitForFunction(()=>{const button=[...document.querySelectorAll('.o7-operational-truth button')].find(x=>x.textContent?.trim()==='Refresh');return Boolean(button&&!button.hasAttribute('disabled'))},{timeout:20000});
 
   const recovered=page.locator('.o7-recovered[data-r486-visible-convergence="true"]');
+  const visualHome=page.locator('.o7-home-established[data-r510-visual-restoration="CURRENT_R71_CANONICAL_HOME"]');
+  await visualHome.waitFor({state:'visible',timeout:20000});
+  const depth=page.getByLabel('Interface depth');
+  if(await depth.inputValue()!=='STANDARD')throw new Error(`${label}: canonical OMEGA7 did not start in STANDARD visual-first depth`);
+  if(await recovered.isVisible())throw new Error(`${label}: R510 regression · recovered capability fabric must not dominate STANDARD visual-first HOME`);
+  await depth.selectOption('ADVANCED');
   await recovered.waitFor({state:'visible',timeout:20000});
   const initialText=await recovered.innerText(),initialTextNormalized=initialText.toLocaleLowerCase();
   for(const token of ['Recovered capability fabric','Your recovered work is connected to the product','Browse recovered capabilities','execute now','active adapters','truth/device gated','bound to current routes'])if(!initialTextNormalized.includes(token.toLocaleLowerCase()))throw new Error(`${label}: R486 visible convergence missing rendered label ${token}`);
@@ -129,7 +135,7 @@ try{
   }
   await nav.getByRole('button',{name:'All',exact:true}).click();
 
-  await page.getByLabel('Interface depth').selectOption('ADVANCED');
+  if(await depth.inputValue()!=='ADVANCED')throw new Error(`${label}: recovered capability proof lost ADVANCED depth before lineage inspection`);
   const proof=recovered.locator('.o7-recovered-grid details').first();
   await proof.locator('summary').click();
   const proofText=await proof.innerText();
@@ -165,5 +171,5 @@ try{
   if(assetFailures.length||requestFailures.length)throw new Error(`${label}: R489 native asset delivery failures: ${[...assetFailures,...requestFailures].join(' | ').slice(0,3000)}`);
   await context.close();
  }
- console.log(`R489/R498/R499 LIVE VISIBLE CAPABILITY PASS · exact promoted SHA ${expectedSha} · plain canonical URL defaults OMEGA7 · R486 recovered fabric counts/states match · all seven groups visible/nonempty · R142/R125 lineage proof exposed · R495 live operational truth terminal/readable · Earth/Workspace/System Atlas executors navigate · desktop/mobile no overflow/page errors`);
+ console.log(`R489/R498/R499 LIVE VISIBLE CAPABILITY PASS · exact promoted SHA ${expectedSha} · STANDARD depth is R510 visual-first with recovered fabric non-dominant · ADVANCED depth exposes R486 recovered fabric counts/states · all seven groups visible/nonempty · R142/R125 lineage proof exposed · R495 live operational truth terminal/readable · Earth/Workspace/System Atlas executors navigate · desktop/mobile no overflow/page errors`);
 }finally{await browser.close()}
