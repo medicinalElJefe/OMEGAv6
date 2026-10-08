@@ -11,6 +11,7 @@ for(const token of [
  "ref: ${{ github.event.pull_request.head.sha }}",
  'wrangler@4.148.0 preview',
  'wrangler.preview-r512.jsonc',
+ 'omega-r512-candidate-preview-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}',
  'OMEGA_CANDIDATE_SHA',
  'tests/r512-cloudflare-candidate-preview-browser-e2e.mjs',
  'tests/r512-executable-menu-browser-e2e.mjs',
