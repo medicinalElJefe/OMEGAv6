@@ -9,6 +9,8 @@ import {OMEGA7_HEIGHTENED_SUMMARY} from './heightenedModeR457';
 import {R468_EVENT,developmentalStateBusSnapshotR468,type R468Snapshot} from './developmentalStateBusR468';
 import {R486_VISIBLE_CAPABILITIES,R486_VISIBLE_SUMMARY,type VisibleFamilyR486} from './visibleCapabilityConvergenceR486';
 import OperationalTruthR495 from './OperationalTruthR495';
+import SoftwareLibraryR512 from '../src/SoftwareLibraryR512';
+import {SOFTWARE_LAUNCH_ROWS_R512} from '../src/softwareLaunchRegistryR512';
 import './omega7.css';
 
 const OmegaHomeR71=lazy(()=>import('../src/OmegaHomeR71'));
@@ -42,6 +44,11 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const held=healthRows.filter(([,v])=>v==='HELD'||v==='DEGRADED'||v==='UNKNOWN').length;
  const failed=healthRows.filter(([,v])=>v==='FAILED').length;
  const recovered=useMemo(()=>R486_VISIBLE_CAPABILITIES.filter(x=>recoveredFamily==='ALL'||x.family===recoveredFamily),[recoveredFamily]);
+ const softwareMatches=useMemo(()=>{
+  const q=state.query.trim().toLowerCase();
+  if(!q)return[];
+  return SOFTWARE_LAUNCH_ROWS_R512.filter(row=>[row.id,row.name,row.route,row.operation,row.contribution,...row.aliases].join(' ').toLowerCase().includes(q)).slice(0,10);
+ },[state.query]);
 
  useEffect(()=>{
   const key=(event:KeyboardEvent)=>{
@@ -111,7 +118,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
      {state.domain==='HOME'&&<OperationalTruthR495 depth={state.depth} onNavigate={open}/>}\n     {state.domain==='HOME'&&<section className='o7-recovered' data-r486-visible-convergence='true'>
       <header><div><span>Recovered capability fabric</span><h2>Your recovered work is connected to the product</h2><p>{R486_VISIBLE_SUMMARY.total} recovered capability lineages now resolve through their current OMEGA executors. Open the function you need; lineage, gate and authority stay attached underneath.</p></div><button onClick={()=>setRecoveredOpen(x=>!x)}>{recoveredOpen?'Hide recovered capabilities':'Browse recovered capabilities'}</button></header>
       <div className='o7-recovered-summary'><article><b>{R486_VISIBLE_SUMMARY.executesNow}</b><span>execute now</span></article><article><b>{R486_VISIBLE_SUMMARY.adapters}</b><span>active adapters</span></article><article><b>{R486_VISIBLE_SUMMARY.truthGated}</b><span>truth/device gated</span></article><article><b>{R486_VISIBLE_SUMMARY.routable}/{R486_VISIBLE_SUMMARY.total}</b><span>bound to current routes</span></article></div>
-      {recoveredOpen&&<><nav aria-label='Recovered capability groups'>{(['ALL','UNDERSTAND','EXPLORE','CREATE','BUILD','WORK','RECOVER'] as const).map(x=><button key={x} className={recoveredFamily===x?'active':''} onClick={()=>setRecoveredFamily(x)}>{x==='ALL'?'All':x[0]+x.slice(1).toLowerCase()}</button>)}</nav><div className='o7-recovered-grid'>{recovered.map(x=><article key={x.id} data-state={x.state.toLowerCase()}><header><span>{x.family} · {x.state==='EXECUTES_NOW'?'LIVE':x.state==='EXECUTES_AS_ADAPTER'?'ADAPTER':'GATED'}</span><b>{x.name}</b></header><p>{x.contribution}</p><footer><small>{x.operation}</small><button onClick={()=>open(x.route)}>Open {x.route}</button></footer>{state.depth!=='STANDARD'&&<details><summary>Lineage & proof</summary><p>{x.aliases.join(' · ')}</p><dl><div><dt>Reality</dt><dd>{x.capabilityReality}</dd></div><div><dt>Receipt</dt><dd>{x.receiptAuthority}</dd></div><div><dt>Admission</dt><dd>{x.admissionAuthority}</dd></div><div><dt>Boundary</dt><dd>{x.truth}</dd></div></dl></details>}</article>)}</div></>}
+      {recoveredOpen&&<><nav aria-label='Recovered capability groups'>{(['ALL','UNDERSTAND','EXPLORE','CREATE','BUILD','WORK','RECOVER'] as const).map(x=><button key={x} className={recoveredFamily===x?'active':''} onClick={()=>setRecoveredFamily(x)}>{x==='ALL'?'All':x[0]+x.slice(1).toLowerCase()}</button>)}</nav><div className='o7-recovered-grid'>{recovered.map(x=><article key={x.id} data-state={x.state.toLowerCase()}><header><span>{x.family} · {x.state==='EXECUTES_NOW'?'LIVE':x.state==='EXECUTES_AS_ADAPTER'?'ADAPTER':'GATED'}</span><b>{x.name}</b></header><p>{x.contribution}</p><footer><small>{x.operation}</small><button onClick={()=>open(x.route)}>Open {x.route}</button></footer>{state.depth!=='STANDARD'&&<details><summary>Lineage & proof</summary><p>{x.aliases.join(' · ')}</p><dl><div><dt>Reality</dt><dd>{x.capabilityReality}</dd></div><div><dt>Receipt</dt><dd>{x.receiptAuthority}</dd></div><div><dt>Admission</dt><dd>{x.admissionAuthority}</dd></div><div><dt>Boundary</dt><dd>{x.truth}</dd></div></dl></details>}</article>)}</div><div className='o7-r512-software-library'><SoftwareLibraryR512 onNavigate={open}/></div></>}
      </section>}
 
      <section className='o7-capability-section'>
@@ -137,7 +144,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   {state.commandOpen&&<div className='o7-command-backdrop' onMouseDown={e=>{if(e.currentTarget===e.target)dispatch({type:'COMMAND',open:false})}}>
    <section className='o7-command' role='dialog' aria-modal='true' aria-label='Search OMEGA'>
     <input ref={inputRef} value={state.query} onChange={e=>dispatch({type:'QUERY',query:e.target.value})} placeholder='Search capabilities or type what you want to do…'/>
-    <div>{(state.query?searchOmega7Capabilities(state.query):OMEGA7_CAPABILITIES.slice(0,12)).slice(0,20).map(cap=><button key={cap.id} data-command-route={cap.legacyRoute} onClick={()=>open(cap.legacyRoute)}><span><b>{cap.label}</b><small>{cap.description}</small></span><em>{cap.availability}</em></button>)}</div>
+    <div>{softwareMatches.map(row=><button key={'software-'+row.id} data-command-software={row.id} data-command-route={row.route} onClick={()=>open(row.route)}><span><b>{row.name}</b><small>{row.aliases.slice(0,4).join(' · ')} · runs through {row.route}</small></span><em>{row.launchClass==='WORKS_NOW'?'READY':row.launchClass==='SUCCESSOR_ADAPTER'?'ADAPTER':'GATED'}</em></button>)}{(state.query?searchOmega7Capabilities(state.query):OMEGA7_CAPABILITIES.slice(0,12)).slice(0,20).map(cap=><button key={cap.id} data-command-route={cap.legacyRoute} onClick={()=>open(cap.legacyRoute)}><span><b>{cap.label}</b><small>{cap.description}</small></span><em>{cap.availability}</em></button>)}</div>
    </section>
   </div>}
  </div>;
