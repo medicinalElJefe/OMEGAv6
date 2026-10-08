@@ -231,7 +231,7 @@ jobs:
             echo "::notice title=Cloudflare account discovery::CLOUDFLARE_ACCOUNT_ID is not set; Wrangler will attempt account discovery from the API token."
           fi
       - name: Stage, prove, and Deploy canonical OMEGA Worker
-        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        if: steps.ownership.outputs.current == 'true'
         id: deploy_worker
         env:
           OMEGA_WORKER_NAME: omegav6
