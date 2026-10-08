@@ -43,7 +43,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const domainRecovered=useMemo(()=>recoveredForDomainR512(state.domain),[state.domain]);
  const domainMenu=R512_DOMAIN_MENU.find(x=>x.id===state.domain)||R512_DOMAIN_MENU[0];
  useEffect(()=>{let live=true;const q=previousSoftwareQuery.trim();if(!q){setPreviousSoftwareResults([]);return()=>{live=false}};void import('./recoveredSystemSearchR512').then(m=>{if(live)setPreviousSoftwareResults(m.searchRecoveredSystemsR512(q).slice(0,12))});return()=>{live=false}},[previousSoftwareQuery]);
- useEffect(()=>{let live=true;const q=state.query.trim();if(!q){setCommandPreviousSoftware([]);return()=>{live=false}};void import('./recoveredSystemSearchR512').then(m=>{if(live)setCommandPreviousSoftware(m.searchRecoveredSystemsR512(q).slice(0,8))});return()=>{live=false}},[state.query]);
+ useEffect(()=>{let live=true;const raw=state.query.trim();const match=raw.match(/^(?:previous|old)\s*:\s*(.+)$/i);if(!match){setCommandPreviousSoftware([]);return()=>{live=false}};const q=match[1].trim();if(!q){setCommandPreviousSoftware([]);return()=>{live=false}};void import('./recoveredSystemSearchR512').then(m=>{if(live)setCommandPreviousSoftware(m.searchRecoveredSystemsR512(q).slice(0,8))});return()=>{live=false}},[state.query]);
 
  useEffect(()=>{
   const key=(event:KeyboardEvent)=>{
