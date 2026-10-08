@@ -45,14 +45,14 @@ export function Omega7NativeSurface({route,onNavigate,depth,softwareLaunch}:{rou
  },[route,softwareLaunch?.bindingId]);
  let surface:ReactNode=null;
  switch(route){
-  case'Command Center':surface=<CommandWorkspaceR439 onNavigate={onNavigate} depth={depth}/>;break;
-  case'Earth Now':surface=<EarthWorkspaceR438/>;break;
-  case'Matter Traversal':case'Immersive Traversal':case'Extreme Traversal':case'Traversal':surface=<TraversalWorkspaceR440 route={route} onNavigate={onNavigate}/>;break;
-  case'Relativity':case'Reality Lab':case'Atlas':case'Atlas Calculator':case'Scale Compiler':case'Infinity':surface=<ScienceWorkspaceR441 route={route} onNavigate={onNavigate} depth={depth}/>;break;
-  case'Forecast':case'Visual Instrument':case'Field':case'Data Motion':case'Convergence':surface=<ForecastVisualWorkspaceR442 route={route} onNavigate={onNavigate} depth={depth}/>;break;
-  case'Workspace':case'Projects':case'Memory':case'Create':case'Render Queue':case'Assets':surface=<WorkCreateWorkspaceR443 route={route} onNavigate={onNavigate} depth={depth}/>;break;
-  case'Hybrid Link':case'Quality Compiler':case'Build Out':case'Development':case'Kernel Intelligence':case'SAI Lab':surface=<DevelopmentComputeWorkspaceR444 route={route} onNavigate={onNavigate} depth={depth}/>;break;
-  case'Cockpit':case'Modes':case'Evidence & Proof':case'Archive Census':case'Archive Operators':case'Canon Evolution':case'Governance':case'Consolidation':case'Instructions':case'Plugins':case'Settings':case'System':case'Validation':case'System Atlas':case'Control Matrix':surface=<SystemEvidenceWorkspaceR445 route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Command Center':surface=<CommandWorkspaceR439 key={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Earth Now':surface=<EarthWorkspaceR438 key={route}/>;break;
+  case'Matter Traversal':case'Immersive Traversal':case'Extreme Traversal':case'Traversal':surface=<TraversalWorkspaceR440 key={route} route={route} onNavigate={onNavigate}/>;break;
+  case'Relativity':case'Reality Lab':case'Atlas':case'Atlas Calculator':case'Scale Compiler':case'Infinity':surface=<ScienceWorkspaceR441 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Forecast':case'Visual Instrument':case'Field':case'Data Motion':case'Convergence':surface=<ForecastVisualWorkspaceR442 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Workspace':case'Projects':case'Memory':case'Create':case'Render Queue':case'Assets':surface=<WorkCreateWorkspaceR443 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Hybrid Link':case'Quality Compiler':case'Build Out':case'Development':case'Kernel Intelligence':case'SAI Lab':surface=<DevelopmentComputeWorkspaceR444 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Cockpit':case'Modes':case'Evidence & Proof':case'Archive Census':case'Archive Operators':case'Canon Evolution':case'Governance':case'Consolidation':case'Instructions':case'Plugins':case'Settings':case'System':case'Validation':case'System Atlas':case'Control Matrix':surface=<SystemEvidenceWorkspaceR445 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
  }
  return <div ref={hostRef} className='o7-executor-host' data-r512-executor-route={route} data-r512-binding={softwareLaunch?.bindingId||''}>
   {softwareLaunch&&softwareLaunch.route===route&&<section className='o7-software-executor-context' data-launch-state={softwareLaunch.launchState.toLowerCase()} aria-label='Previous software executor context'>
