@@ -34,7 +34,8 @@ for(const token of [
  "R510 · VISUAL + FUNCTIONAL PRODUCTION CONVERGENCE",
  ".o7-home-established>.r71-home",
  ".o7-home-established .r96-workbench",
- ".o7-home-established .r71-field .r95-membrane-stage",
+ ".o7-home-established .r71-field .r134-stage",
+ ".o7-home-established .r121-home-membrane .r95-membrane-stage",
  ".o7-app[data-depth=standard] .o7-home-established~.o7-recovered",
  ".o7-app[data-depth=standard] .o7-home-established~.o7-capability-section",
 ])assert.ok(css.includes(token),'R510 visual hierarchy CSS missing '+token);
