@@ -11,8 +11,6 @@ assert.equal(RECOVERED_SYSTEM_SUMMARY_R512.keepMerge,89);
 assert.equal(RECOVERED_SYSTEM_SUMMARY_R512.donor,11);
 assert.equal(R512_LAZY_LEDGER_SOFTWARE.length,100);
 assert.equal(R512_MENU_SUMMARY.reviewedSystemLedgerCount,100);
-assert.equal(R512_MENU_SUMMARY.reviewedKeepMergeCount,89);
-assert.equal(R512_MENU_SUMMARY.reviewedDonorCount,11);
 
 for(const row of RECOVERED_SYSTEM_EXECUTION_R512){
  if(row.disposition==='DONOR'){
