@@ -18,8 +18,8 @@ export type Omega7SoftwareLaunchContext={
  name:string;
  route:OmegaRouteName;
  operation:string;
- state:'EXECUTES_NOW'|'EXECUTES_AS_ADAPTER'|'TRUTH_GATED';
- launchState:'LIVE'|'ADAPTER'|'GATED';
+ state:'EXECUTES_NOW'|'EXECUTES_AS_ADAPTER'|'TRUTH_GATED'|'ARCHIVE_ONLY';
+ launchState:'LIVE'|'ADAPTER'|'GATED'|'ARCHIVE';
  aliases:readonly string[];
  truth:string;
  capabilityReality:string;
