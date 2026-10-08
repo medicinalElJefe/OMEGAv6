@@ -198,7 +198,7 @@
     "test:r508": "node tests/r508-contract-ready-convergence-invariants.mjs",
     "test:r509": "node tests/r509-falsifiable-capability-contracts-invariants.mjs",
     "test:r510": "node tests/r510-omega7-visual-functional-restoration-invariants.mjs",
-    "test:r512": "node tests/r512-executable-menu-convergence-invariants.mjs",
+    "test:r512": "node tests/r512-executable-menu-convergence-invariants.mjs && npx --yes tsx tests/r512-full-recovered-software-ledger-invariants.mts",
     "test:r512:release": "node tests/r512-strict-sequential-release-membrane-invariants.mjs"
   },
   "dependencies": {
