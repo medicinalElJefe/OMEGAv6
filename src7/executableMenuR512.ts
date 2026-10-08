@@ -84,7 +84,11 @@ export function menuSectionForCapabilityR512(cap:Omega7Capability):R512MenuSecti
 }
 
 export function menuSectionsForDomainR512(domain:Omega7Domain){
- const caps=domain==='HOME'?OMEGA7_CAPABILITIES:OMEGA7_CAPABILITIES.filter(x=>x.domain===domain);
+ if(domain==='HOME'){
+  const primary=(START.HOME||[]).map(route=>OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route)).filter(Boolean) as Omega7Capability[];
+  return [Object.freeze({id:'START' as const,...SECTION_COPY.START,capabilities:Object.freeze(primary)})];
+ }
+ const caps=OMEGA7_CAPABILITIES.filter(x=>x.domain===domain);
  return (['START','TOOLS','ADVANCED'] as const).map(id=>Object.freeze({
   id,
   ...SECTION_COPY[id],
