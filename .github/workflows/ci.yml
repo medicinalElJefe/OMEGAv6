@@ -125,6 +125,10 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
     concurrency:
       group: omega-r512-candidate-preview
       cancel-in-progress: false
@@ -144,6 +148,13 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-fund
+      - name: Wait for production-proven base before Preview
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          OMEGA_RELEASE_GUARD_MODE: PR
+          OMEGA_PR_NUMBER: ${{ github.event.pull_request.number }}
+          OMEGA_EXPECTED_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/releaseCandidateGuardR210.mjs
       - name: Install pinned candidate browser proof runtime
         run: |
           npm install --no-save playwright@1.63.0
@@ -239,6 +250,10 @@ jobs:
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
     concurrency:
       group: omega-canonical-production-deploy
       cancel-in-progress: false
@@ -290,6 +305,11 @@ jobs:
           echo "OMEGA_CANDIDATE_SHA=$2" >> "$GITHUB_ENV"
           echo "OMEGA_PROMOTED_SHA=$GITHUB_SHA" >> "$GITHUB_ENV"
           echo "Bound governed release lineage without exposing credentials."
+      - name: Refuse production unless exact candidate passed full acceptance sequence
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          OMEGA_RELEASE_GUARD_MODE: PUSH
+        run: node scripts/releaseCandidateGuardR210.mjs
       - run: npm install
       - name: Install pinned browser proof runtime
         run: npm install --no-save playwright@1.63.0
