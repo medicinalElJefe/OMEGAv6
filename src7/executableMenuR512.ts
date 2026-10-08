@@ -1,6 +1,5 @@
 import {OMEGA7_CAPABILITIES,OMEGA7_CAPABILITY_BY_ROUTE,type Omega7Capability,type Omega7Domain} from './capabilityRegistry';
 import {R486_VISIBLE_CAPABILITIES,type VisibleFamilyR486} from './visibleCapabilityConvergenceR486';
-import {RECOVERED_SYSTEM_EXECUTION_R512,RECOVERED_SYSTEM_SUMMARY_R512} from '../src/recoveredSoftwareExecutionR512';
 
 export const R512_MENU_SCHEMA='OMEGA7_EXECUTABLE_MENU_R512' as const;
 export type R512MenuSectionId='START'|'TOOLS'|'ADVANCED';
@@ -67,37 +66,6 @@ export const R512_EXECUTABLE_SOFTWARE:readonly R512SoftwareBinding[]=R486_VISIBL
  });
 });
 
-const domainFamily=(domain:Omega7Domain):VisibleFamilyR486=>domain==='WORK'?'WORK':domain==='EXPLORE'?'EXPLORE':domain==='CREATE'?'CREATE':domain==='DEVELOP'?'BUILD':domain==='SYSTEM'?'RECOVER':'UNDERSTAND';
-
-export const R512_LEDGER_SOFTWARE:readonly R512SoftwareBinding[]=RECOVERED_SYSTEM_EXECUTION_R512.map(row=>{
- const cap=OMEGA7_CAPABILITY_BY_ROUTE.get(row.route as any);
- const domain=cap?.domain||'SYSTEM';
- return Object.freeze({
-  id:row.systemId,
-  name:row.artifact,
-  family:domainFamily(domain),
-  domain,
-  route:row.route,
-  operation:row.state==='ARCHIVE_ONLY'?'INSPECT_ARCHIVE_LINEAGE':`CONTINUE_${row.role}`,
-  contribution:row.capability,
-  aliases:Object.freeze([row.artifact,row.family,row.role,row.systemId]),
-  truth:row.truth,
-  state:row.state==='WORKING_SUCCESSOR'?'EXECUTES_NOW':row.state==='ARCHIVE_ONLY'?'ARCHIVE_ONLY':'TRUTH_GATED',
-  launchState:row.state==='WORKING_SUCCESSOR'?'LIVE':row.state==='ARCHIVE_ONLY'?'ARCHIVE':'GATED',
-  routable:row.state!=='RESTORATION_REQUIRED',
-  capabilityReality:row.executorReality,
-  receiptAuthority:'R142_EXECUTION_RECEIPT',
-  admissionAuthority:'R125_CANON_ADMISSION_SEPARATE',
- });
-});
-
-const canonicalSoftwareName=(value:string)=>value.toLowerCase().replace(/ω/g,'omega').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
-const existingSoftwareNames=new Set(R512_EXECUTABLE_SOFTWARE.flatMap(row=>[row.name,...row.aliases]).map(canonicalSoftwareName));
-export const R512_ALL_PREVIOUS_SOFTWARE:readonly R512SoftwareBinding[]=Object.freeze([
- ...R512_EXECUTABLE_SOFTWARE,
- ...R512_LEDGER_SOFTWARE.filter(row=>!existingSoftwareNames.has(canonicalSoftwareName(row.name)))
-]);
-
 const normalize=(value:string)=>value
  .toLowerCase()
  .replace(/ω/g,'omega')
@@ -129,7 +97,7 @@ export function menuSectionsForDomainR512(domain:Omega7Domain){
 }
 
 export function softwareForDomainR512(domain:Omega7Domain){
- return R512_ALL_PREVIOUS_SOFTWARE.filter(x=>domain==='HOME'||x.domain===domain);
+ return R512_EXECUTABLE_SOFTWARE.filter(x=>domain==='HOME'||x.domain===domain);
 }
 
 function capabilityScore(cap:Omega7Capability,q:string,terms:string[]){
@@ -160,25 +128,23 @@ export function searchExecutableMenuR512(query:string,domain:Omega7Domain='HOME'
  const capRows=OMEGA7_CAPABILITIES
   .map(cap=>({kind:'CAPABILITY' as const,id:'cap:'+cap.id,score:capabilityScore(cap,q,terms),capability:cap}))
   .filter(x=>x.score>0);
- const softwareRows=R512_ALL_PREVIOUS_SOFTWARE
+ const softwareRows=R512_EXECUTABLE_SOFTWARE
   .map(software=>({kind:'SOFTWARE' as const,id:'software:'+software.id,score:softwareScore(software,q,terms),software}))
   .filter(x=>x.score>0);
  return [...softwareRows,...capRows].sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
 }
 
-export function softwareBindingR512(id:string){return R512_ALL_PREVIOUS_SOFTWARE.find(x=>x.id===id)||null}
+export function softwareBindingR512(id:string){return R512_EXECUTABLE_SOFTWARE.find(x=>x.id===id)||null}
 
 export const R512_MENU_SUMMARY=Object.freeze({
  schema:R512_MENU_SCHEMA,
  routeCount:OMEGA7_CAPABILITIES.length,
- recoveredSoftwareCount:R512_ALL_PREVIOUS_SOFTWARE.length,
- reviewedSystemLedgerCount:RECOVERED_SYSTEM_SUMMARY_R512.total,
- reviewedKeepMergeCount:RECOVERED_SYSTEM_SUMMARY_R512.keepMerge,
- reviewedDonorCount:RECOVERED_SYSTEM_SUMMARY_R512.donor,
+ recoveredSoftwareCount:R512_EXECUTABLE_SOFTWARE.length,
+ reviewedSystemLedgerCount:100,
  liveSoftwareCount:R512_EXECUTABLE_SOFTWARE.filter(x=>x.launchState==='LIVE').length,
  adapterSoftwareCount:R512_EXECUTABLE_SOFTWARE.filter(x=>x.launchState==='ADAPTER').length,
- gatedSoftwareCount:R512_ALL_PREVIOUS_SOFTWARE.filter(x=>x.launchState==='GATED').length,
- archiveSoftwareCount:R512_ALL_PREVIOUS_SOFTWARE.filter(x=>x.launchState==='ARCHIVE').length,
+ gatedSoftwareCount:R512_EXECUTABLE_SOFTWARE.filter(x=>x.launchState==='GATED').length,
+ archiveSoftwareCount:0,
  unroutableSoftwareCount:R512_EXECUTABLE_SOFTWARE.filter(x=>!x.routable).length,
  rule:'INTENT_TO_CAPABILITY_TO_EXECUTOR_WITH_HISTORICAL_ALIASES_AS_EXECUTABLE_CONTEXT_NOT_DEAD_MENU_ROWS',
  canonicalMutation:false,
