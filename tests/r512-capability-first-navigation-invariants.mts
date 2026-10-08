@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
- R512_DOMAIN_MENU,R512_MENU_SUMMARY,menuSectionsR512,recoveredForDomainR512,recoveredExecutionCapsuleR512,recoveredSystemExecutionCapsuleR512,searchRecoveredSystemsR512
+ R512_DOMAIN_MENU,R512_MENU_SUMMARY,menuSectionsR512,recoveredForDomainR512,recoveredExecutionCapsuleR512
 } from '../src7/capabilityMenuR512.ts';
 import {OMEGA7_CAPABILITIES} from '../src7/capabilityRegistry.ts';
 import {R486_VISIBLE_CAPABILITIES} from '../src7/visibleCapabilityConvergenceR486.ts';
 import {RECOVERED_SYSTEM_EXECUTION_R512,RECOVERED_SYSTEM_SUMMARY_R512} from '../src/recoveredSoftwareExecutionR512.ts';
+import {recoveredSystemExecutionCapsuleR512,searchRecoveredSystemsR512} from '../src7/recoveredSystemSearchR512.ts';
 
 assert.equal(R512_DOMAIN_MENU.length,6,'R512 must preserve six simple human navigation areas');
 assert.deepEqual(R512_DOMAIN_MENU.map(x=>x.id),['HOME','WORK','EXPLORE','CREATE','DEVELOP','SYSTEM']);
@@ -83,6 +84,7 @@ for(const token of [
 
 assert.equal(root.includes("button onClick={()=>open(x.route)}>Open {x.route}</button>"),false,'recovered software must not fall back to a generic route-only button');
 assert.ok(root.includes("launchRecovered(x)"),'recovered software must use the resolved execution launcher');
+assert.ok(root.includes("import('./recoveredSystemSearchR512')"),'100-system ledger must stay deferred from the initial shell bundle');
 
 const native=fs.readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
 for(const token of [
