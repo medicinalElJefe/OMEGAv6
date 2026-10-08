@@ -76,7 +76,7 @@ async function prove(browser,label,viewport){
  const desktopCapsule=page.locator('.o7-executor-capsule[data-r512-executor="SYS-002"]');
  await desktopCapsule.waitFor({state:'visible',timeout:15000});
  const desktopCapsuleText=(await desktopCapsule.innerText()).toLowerCase();
- if(!desktopCapsuleText.includes('continue_core_runtime')||!desktopCapsuleText.includes('system ledger')||!desktopCapsuleText.includes('evidence gated'))throw new Error(`${label}: Omega Atlas Desktop did not carry its current gated-successor execution identity`);
+ if(!desktopCapsuleText.includes('continue_core_runtime')||!desktopCapsuleText.includes('system ledger')||!desktopCapsuleText.includes('truth gated')||!desktopCapsuleText.includes('evidence gate'))throw new Error(`${label}: Omega Atlas Desktop did not carry its current gated-successor execution identity`);
  if(await page.locator('[data-omega7-failure],.o7-native-failure').count())throw new Error(`${label}: Omega Atlas Desktop current successor failed to open`);
 
  await page.locator('.o7-native-toolbar button').first().click();
