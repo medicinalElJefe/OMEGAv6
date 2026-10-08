@@ -61,7 +61,7 @@ for(const row of RECOVERED_SYSTEM_EXECUTION_R512){
 }
 
 const atlasDesktop=searchRecoveredSystemsR512('Omega Atlas Desktop');
-assert.ok(atlasDesktop.some(x=>x.systemId==='SYS-002'&&x.route==='System'&&x.state==='WORKING_SUCCESSOR'),'Omega Atlas Desktop must resolve directly to the current System executor');
+assert.ok(atlasDesktop.some(x=>x.systemId==='SYS-002'&&x.route==='System'&&x.state==='GATED_SUCCESSOR'&&x.launchable),'Omega Atlas Desktop must resolve to the real current System executor while preserving its R168 evidence gate');
 const donorSearch=searchRecoveredSystemsR512('CanonConsoleOmega_v32_Final_Complete_Package');
 assert.ok(donorSearch.some(x=>x.systemId==='SYS-012'&&x.state==='ARCHIVE_ONLY'),'donor-only package must remain searchable as archive lineage without a false execution claim');
 
