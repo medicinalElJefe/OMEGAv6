@@ -139,8 +139,14 @@ try{
   for(const route of exercise){
    await page.locator('.o7-brand').click();
    await recovered.waitFor({state:'visible',timeout:10000});
-   if(!(await recovered.getByRole('button',{name:`Open ${route}`,exact:true}).count()))throw new Error(`${label}: recovered capability has no executor button for ${route}`);
-   await recovered.getByRole('button',{name:`Open ${route}`,exact:true}).first().click();
+   const launch=recovered.locator(`button[data-r512-recovered-route="${route}"][data-r512-recovered-launch]`).first();
+   await launch.waitFor({state:'visible',timeout:10000});
+   const recoveredId=await launch.getAttribute('data-r512-recovered-launch');
+   await launch.click();
+   const capsule=page.locator(`.o7-executor-capsule[data-r512-executor="${recoveredId}"]`);
+   await capsule.waitFor({state:'visible',timeout:15000});
+   const carried=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('omega.r512.executionCapsule')||'null'));
+   if(carried?.recoveredId!==recoveredId||carried?.route!==route||carried?.receiptAuthority!=='R142'||carried?.admissionAuthority!=='R125'||carried?.canonicalMutation!==false)throw new Error(`${label}: recovered executor ${route} lost R512 identity or R142/R125 boundary`);
    await page.waitForFunction(r=>document.querySelector('.o7-main')?.getAttribute('data-native-route')===r,route,{timeout:20000});
    const host=page.locator(`.o7-native-host[data-native-host-route="${route}"]`);
    await host.waitFor({state:'visible',timeout:10000});
