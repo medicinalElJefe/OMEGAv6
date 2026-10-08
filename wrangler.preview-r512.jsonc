@@ -1,0 +1,79 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "omegav6",
+  "main": "src/workerR116.js",
+  "compatibility_date": "2026-08-28",
+  "workers_dev": true,
+  "preview_urls": true,
+  "build": {
+    "command": "npm run build"
+  },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "version_metadata": {
+    "binding": "CF_VERSION_METADATA"
+  },
+  "services": [
+    {"binding":"OMEGA_GENESIS","service":"omega-genesis-v1"},
+    {"binding":"OMEGA_GENESIS_MACHINE","service":"omega-genesis-machine-r115"},
+    {"binding":"OMEGA_OPTICAL_MACHINE","service":"omega-optical-machine-r1532"}
+  ],
+  "durable_objects": {
+    "bindings": [
+      {"name": "OMEGA_RUNTIME", "class_name": "OmegaRuntime"},
+      {"name": "OMEGA_SWARM_CELL", "class_name": "OmegaSwarmCell"},
+      {"name": "OMEGA_SWARM_COORDINATOR", "class_name": "OmegaSwarmCoordinator"},
+      {"name": "OMEGA_SWARM_BRANCH", "class_name": "OmegaSwarmBranch"},
+      {"name": "OMEGA_SWARM_ORGAN", "class_name": "OmegaSwarmOrgan"},
+      {"name": "OMEGA_SWARM_ORGANISM", "class_name": "OmegaSwarmOrganismCoordinator"},
+      {"name": "OMEGA_SWARM_AUTONOMIC", "class_name": "OmegaSwarmAutonomicCoordinator"}
+    ]
+  },
+  "exports": {
+    "OmegaRuntime": {"type": "durable-object", "storage": "sqlite"},
+    "OmegaSwarmCell": {"type": "durable-object", "storage": "sqlite"},
+    "OmegaSwarmCoordinator": {"type": "durable-object", "storage": "sqlite"},
+    "OmegaSwarmBranch": {"type": "durable-object", "storage": "sqlite"},
+    "OmegaSwarmOrgan": {"type": "durable-object", "storage": "sqlite"},
+    "OmegaSwarmOrganismCoordinator": {"type": "durable-object", "storage": "sqlite"},
+    "OmegaSwarmAutonomicCoordinator": {"type": "durable-object", "storage": "sqlite"},
+    "OmegaMissionLedgerR201": {"type": "durable-object", "state": "deleted"},
+    "OmegaHybridMissionLedgerR203": {"type": "durable-object", "state": "deleted"}
+  },
+  "observability": {
+    "enabled": true
+  },
+  "previews": {
+    "ai": {
+      "binding": "AI"
+    },
+    "version_metadata": {
+      "binding": "CF_VERSION_METADATA"
+    },
+    "services": [
+      {"binding":"OMEGA_GENESIS","service":"omega-genesis-v1"},
+      {"binding":"OMEGA_GENESIS_MACHINE","service":"omega-genesis-machine-r115"},
+      {"binding":"OMEGA_OPTICAL_MACHINE","service":"omega-optical-machine-r1532"}
+    ],
+    "durable_objects": {
+      "bindings": [
+        {"name": "OMEGA_RUNTIME", "class_name": "OmegaRuntime"},
+        {"name": "OMEGA_SWARM_CELL", "class_name": "OmegaSwarmCell"},
+        {"name": "OMEGA_SWARM_COORDINATOR", "class_name": "OmegaSwarmCoordinator"},
+        {"name": "OMEGA_SWARM_BRANCH", "class_name": "OmegaSwarmBranch"},
+        {"name": "OMEGA_SWARM_ORGAN", "class_name": "OmegaSwarmOrgan"},
+        {"name": "OMEGA_SWARM_ORGANISM", "class_name": "OmegaSwarmOrganismCoordinator"},
+        {"name": "OMEGA_SWARM_AUTONOMIC", "class_name": "OmegaSwarmAutonomicCoordinator"}
+      ]
+    },
+    "observability": {
+      "enabled": true
+    }
+  }
+}
