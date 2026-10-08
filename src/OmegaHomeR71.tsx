@@ -19,7 +19,7 @@ import './omegaHomeR71.css';
 import './wholeSystemExperienceR132.css';
 import './omegaNavigationShellR411.css';
 
-type Props={onEnter:(panel:string)=>void};
+type Props={onEnter:(panel:string)=>void;embedded?:boolean;onOpenAllTools?:()=>void;onOpenSystemMap?:()=>void};
 type DomainId=OmegaWorkspaceIdR82;
 type FieldMode=OmegaFieldProjectionR82;
 type SurfaceDepth='FOCUS'|'DEEP';
@@ -45,7 +45,7 @@ const clamp=(n:number)=>Math.max(0,Math.min(20735,Math.floor(Number(n)||0)));
 const fmt=(n:any)=>Number.isFinite(Number(n))?Number(n).toFixed(3):'—';
 function forwardRoute(start:number,steps=20){const out:number[]=[];let a=clamp(start);for(let i=0;i<steps;i++){out.push(a);const next=corpusState(a).autoPing?.dataNext;a=Number.isFinite(next)?clamp(Number(next)):a}return [...new Set(out)]}
 
-export default function OmegaHomeR71({onEnter}:Props){
+export default function OmegaHomeR71({onEnter,embedded=false,onOpenAllTools,onOpenSystemMap}:Props){
  const[address,setAddress]=useState(()=>clamp(Number(localState.read('omega.v6.address',11498))));
  const[ready,setReady]=useState(false),[domain,setDomain]=useState<DomainId>(()=>{try{const x=localStorage.getItem('omega.r82.workspace') as DomainId|null;return x&&OMEGA_WORKSPACES_R82.some(w=>w.id===x)?x:'EXPLORE'}catch{return'EXPLORE'}});
  const[mode,setMode]=useState<FieldMode>(()=>{try{const x=localStorage.getItem('omega.r82.homeProjection') as FieldMode|null;return x&&OMEGA_FIELD_PROJECTIONS_R82.some(m=>m.id===x)?x:'FIELD'}catch{return'FIELD'}}),[selectedRole,setSelectedRole]=useState<OperatorColorRole>('OMEGA');
@@ -83,8 +83,8 @@ export default function OmegaHomeR71({onEnter}:Props){
  const nextAddress=record?clamp(Number(record.autoPing?.dataNext??address)):address;
  const allRoutes=useMemo(()=>[...OMEGA_ALL_ROUTES_R82],[]),activeWorkspace=OMEGA_WORKSPACES_R82.find(x=>x.id===domain)||OMEGA_WORKSPACES_R82[0],primaryRoutes=primaryRoutesForWorkspaceR132(domain);
  const enter=(panel:string)=>{if(!allRoutes.includes(panel))return;localState.write('omega.v6.panel',panel);localState.write('omega.v6.modePolicy','SOURCE_BACKED');onEnter(panel)};
- const openApplications=(workspace:DomainId=domain)=>{setDomain(workspace);window.dispatchEvent(new CustomEvent('omega-r88-open-navigator',{detail:{layer:'APPLICATIONS',workspace}}))};
- const openSoftware=()=>window.dispatchEvent(new CustomEvent('omega-r88-open-navigator',{detail:{layer:'SOFTWARE'}}));
+ const openApplications=(workspace:DomainId=domain)=>{setDomain(workspace);if(embedded){onOpenAllTools?.();return}window.dispatchEvent(new CustomEvent('omega-r88-open-navigator',{detail:{layer:'APPLICATIONS',workspace}}))};
+ const openSoftware=()=>{if(embedded){if(onOpenSystemMap)onOpenSystemMap();else enter('System Atlas');return}window.dispatchEvent(new CustomEvent('omega-r88-open-navigator',{detail:{layer:'SOFTWARE'}}))};
  const targetRole=(role:OperatorColorRole)=>{if(!ready||!route.length)return;let best=address,bestWeight=-1;for(const a of route){const candidate=corpusState(a),weight=calculusVisualLaw(candidate).operatorWeights[role];if(weight>bestWeight){bestWeight=weight;best=a}}setSelectedRole(role);setAddress(best)};
  const ask=async()=>{if(!record||!modes||!modePlan||!prompt.trim()||busy)return;setBusy(true);setReply('');try{const context={address,stateId:record.stateId,coords,decision:record.metrics.decision,metrics:record.metrics,nextAddress,modePolicy:'SOURCE_BACKED_ALL_AVAILABLE',appliedModeCount:modes.appliedCount,gatedModeCount:modes.gatedCount,fullOverallModePlan:compactModePlanR79(modePlan),unified:{coherence:unified?.unifiedCoherence,motionRelativity:unified?.motionRelativity},responseContract:{plainLanguageFirst:true,showRouteBeforeGeneration:true,doNotInventMissingEvidence:true,preserveTruthBoundary:true}};await api.post('/api/route-preview',{text:prompt,context});const r=await api.post<any>('/api/chat',{text:prompt,context});setReply(String(r.data?.reply||'No response returned.'))}catch(e:any){setReply(e?.message||'No answer fabricated; provider/runtime path failed.')}finally{setBusy(false)}};
  const nativeOnline=Boolean(hybrid?.nativeExecutionClaimed===true&&(hybrid?.authenticatedHeartbeat===true||hybrid?.heartbeatAuthenticated===true||String(hybrid?.connectionState||hybrid?.state||'').toUpperCase()==='PC ONLINE'||String(hybrid?.state||'').toUpperCase()==='VERIFIED_DEVICE_ONLINE'));
@@ -93,8 +93,8 @@ export default function OmegaHomeR71({onEnter}:Props){
  const engineState=(id:string)=>id==='omega-v6'?(status?'LIVE':'UNVERIFIED'):id==='omega-sovereign'?(nativeOnline?'PC ONLINE':'DEVICE_PROOF_REQUIRED'):(federationNodes.get(id)?.availability||'REGISTERED · EXTERNAL GATE');
  const showState=depth==='DEEP'||inspectorTab==='STATE',showOperators=depth==='DEEP'||inspectorTab==='OPERATORS',showTools=depth==='DEEP'||inspectorTab==='TOOLS';
 
- return <main className='r71-home r96-home r132-home r239-home' data-color-authority='ALPHA BASE CONSTRUCT PRUNE OMEGA' data-r132-depth={depth} data-navigation-revision='R239'>
-  <OmegaSideNavigatorR88 onNavigate={enter}/>
+ return <main className='r71-home r96-home r132-home r239-home' data-color-authority='ALPHA BASE CONSTRUCT PRUNE OMEGA' data-r132-depth={depth} data-navigation-revision='R239' data-r510-embedded={embedded?'true':'false'}>
+  {!embedded&&<OmegaSideNavigatorR88 onNavigate={enter}/>}
   <header className='r96-topbar'>
    <button className='r96-brand' onClick={()=>setDomain('EXPLORE')}><span className='r96-mark'/><span><b>OMEGA</b><small>{RUNTIME_IDENTITY.hostedBuild} · ONE CANONICAL RUNTIME</small></span></button>
    <div className='r96-now' aria-live='polite'><span>NOW</span><b>{record?`STATE ${record.stateId.toLocaleString()}`:'MATERIALIZING'}</b><small>{record?`${record.metrics.decision} · D${coords.d+1} P${coords.p+1} R${coords.r+1} L${coords.l+1}`:'source-bound corpus'}</small></div>

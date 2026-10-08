@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useRef,useState} from 'react';
+import {lazy,Suspense,useEffect,useMemo,useRef,useState} from 'react';
 import {OMEGA7_CAPABILITIES,OMEGA7_DOMAINS,omega7CapabilitiesForDomain,searchOmega7Capabilities,type Omega7Domain} from './capabilityRegistry';
 import {Omega7AppStateProvider,useOmega7AppState} from './appState';
 import {Omega7Boundary} from './Omega7Boundary';
@@ -10,6 +10,8 @@ import {R468_EVENT,developmentalStateBusSnapshotR468,type R468Snapshot} from './
 import {R486_VISIBLE_CAPABILITIES,R486_VISIBLE_SUMMARY,type VisibleFamilyR486} from './visibleCapabilityConvergenceR486';
 import OperationalTruthR495 from './OperationalTruthR495';
 import './omega7.css';
+
+const OmegaHomeR71=lazy(()=>import('../src/OmegaHomeR71'));
 
 type Props={onOpenLegacyRoute:(route:string)=>void;onExitToV6:()=>void};
 
@@ -90,17 +92,21 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
      <Omega7NativeSurface route={state.selectedRoute} onNavigate={open} depth={state.depth}/>
     </section>:
     <>
-     <section className='o7-intro'>
+     {state.domain!=='HOME'&&<section className='o7-intro'>
       <p>OMEGA7</p>
-      <h1>{state.domain==='HOME'?'What do you want to do?':DOMAIN_LABEL[state.domain]}</h1>
+      <h1>{DOMAIN_LABEL[state.domain]}</h1>
       <span>{DOMAIN_COPY[state.domain]}</span>
-     </section>
+     </section>}
 
-     {state.domain==='HOME'&&<section className='o7-home-actions'>
-      <button onClick={()=>open('Command Center')}><b>Ask OMEGA</b><span>Start with a question or task</span></button>
-      <button onClick={()=>open('Projects')}><b>Projects</b><span>Continue active work</span></button>
-      <button onClick={()=>open('Earth Now')}><b>Earth & Weather</b><span>Explore current Earth data</span></button>
-      <button onClick={()=>open('Development')}><b>Build Software</b><span>Develop, repair and validate</span></button>
+     {state.domain==='HOME'&&<section className='o7-home-visual o7-home-established' data-r510-visual-restoration='CURRENT_R71_CANONICAL_HOME'>
+      <Suspense fallback={<div className='o7-home-stage-loading'>Materializing current OMEGA visual system…</div>}>
+       <OmegaHomeR71
+        embedded
+        onEnter={open}
+        onOpenAllTools={()=>{dispatch({type:'COMMAND',open:true});queueMicrotask(()=>inputRef.current?.focus())}}
+        onOpenSystemMap={()=>open('System Atlas')}
+       />
+      </Suspense>
      </section>}
      {state.domain==='HOME'&&<OperationalTruthR495 depth={state.depth} onNavigate={open}/>}\n     {state.domain==='HOME'&&<section className='o7-recovered' data-r486-visible-convergence='true'>
       <header><div><span>Recovered capability fabric</span><h2>Your recovered work is connected to the product</h2><p>{R486_VISIBLE_SUMMARY.total} recovered capability lineages now resolve through their current OMEGA executors. Open the function you need; lineage, gate and authority stay attached underneath.</p></div><button onClick={()=>setRecoveredOpen(x=>!x)}>{recoveredOpen?'Hide recovered capabilities':'Browse recovered capabilities'}</button></header>
