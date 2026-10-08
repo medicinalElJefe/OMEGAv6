@@ -41,6 +41,15 @@ export function menuSectionsR512(domain:Omega7Domain){
  });
 }
 
+export function quickActionsR512(domain:Omega7Domain){
+ const meta=R512_DOMAIN_MENU.find(x=>x.id===domain)||R512_DOMAIN_MENU[0];
+ const byRoute=new Map(OMEGA7_CAPABILITIES.map(x=>[x.legacyRoute,x]));
+ const primary=meta.primaryRoutes.map(route=>byRoute.get(route)).filter(Boolean) as Omega7Capability[];
+ const primaryIds=new Set(primary.map(x=>x.id));
+ const fill=menuCapabilitiesR512(domain).filter(x=>!primaryIds.has(x.id));
+ return Object.freeze([...primary,...fill].slice(0,6));
+}
+
 export function recoveredForDomainR512(domain:Omega7Domain){
  const routeDomain=new Map(OMEGA7_CAPABILITIES.map(x=>[x.legacyRoute,x.domain]));
  return R486_VISIBLE_CAPABILITIES
