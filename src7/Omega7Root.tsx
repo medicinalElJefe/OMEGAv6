@@ -8,7 +8,7 @@ import {OMEGA7_ACCEPTED_PARITY_SUMMARY,acceptedParityForRoute} from './parityLed
 import {OMEGA7_HEIGHTENED_SUMMARY} from './heightenedModeR457';
 import {R468_EVENT,developmentalStateBusSnapshotR468,type R468Snapshot} from './developmentalStateBusR468';
 import {R486_VISIBLE_CAPABILITIES,R486_VISIBLE_SUMMARY,type VisibleFamilyR486} from './visibleCapabilityConvergenceR486';
-import {R512_DOMAIN_MENU,menuSectionsR512,recoveredForDomainR512,recoveredExecutionCapsuleR512,type RecoveredExecutionCapsuleR512} from './capabilityMenuR512';
+import {R512_DOMAIN_MENU,R512_MENU_SUMMARY,menuSectionsR512,recoveredForDomainR512,recoveredExecutionCapsuleR512,recoveredSystemExecutionCapsuleR512,searchRecoveredSystemsR512,type RecoveredExecutionCapsuleR512} from './capabilityMenuR512';
 import OperationalTruthR495 from './OperationalTruthR495';
 import './omega7.css';
 
@@ -25,6 +25,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const [development,setDevelopment]=useState<R468Snapshot|null>(null);
  const [recoveredOpen,setRecoveredOpen]=useState(false);
  const [recoveredFamily,setRecoveredFamily]=useState<VisibleFamilyR486|'ALL'>('ALL');
+ const [previousSoftwareQuery,setPreviousSoftwareQuery]=useState('');
  const [activeRecovered,setActiveRecovered]=useState<RecoveredExecutionCapsuleR512|null>(()=>{try{const raw=sessionStorage.getItem('omega.r512.executionCapsule');return raw?JSON.parse(raw):null}catch{return null}});
  const domainCaps=useMemo(()=>state.domain==='HOME'?OMEGA7_CAPABILITIES:omega7CapabilitiesForDomain(state.domain),[state.domain]);
  const results=useMemo(()=>state.query?searchOmega7Capabilities(state.query):domainCaps,[state.query,domainCaps]);
@@ -38,6 +39,8 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const menuSections=useMemo(()=>menuSectionsR512(state.domain),[state.domain]);
  const domainRecovered=useMemo(()=>recoveredForDomainR512(state.domain),[state.domain]);
  const domainMenu=R512_DOMAIN_MENU.find(x=>x.id===state.domain)||R512_DOMAIN_MENU[0];
+ const previousSoftwareResults=useMemo(()=>searchRecoveredSystemsR512(previousSoftwareQuery).slice(0,12),[previousSoftwareQuery]);
+ const commandPreviousSoftware=useMemo(()=>state.query?searchRecoveredSystemsR512(state.query).slice(0,8):[],[state.query]);
 
  useEffect(()=>{
   const key=(event:KeyboardEvent)=>{
@@ -62,13 +65,14 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   if(!isOmega7NativeRoute(cap.legacyRoute))onOpenLegacyRoute(cap.legacyRoute);
  };
 
- const launchRecovered=(entry:(typeof R486_VISIBLE_CAPABILITIES)[number])=>{
-  const capsule=recoveredExecutionCapsuleR512(entry);
+ const launchCapsule=(capsule:RecoveredExecutionCapsuleR512)=>{
   setActiveRecovered(capsule);
   try{sessionStorage.setItem('omega.r512.executionCapsule',JSON.stringify(capsule))}catch{}
   window.dispatchEvent(new CustomEvent('omega-r512-execute-capability',{detail:capsule}));
-  open(entry.route);
+  open(capsule.route);
  };
+ const launchRecovered=(entry:(typeof R486_VISIBLE_CAPABILITIES)[number])=>launchCapsule(recoveredExecutionCapsuleR512(entry));
+ const launchRecoveredSystem=(entry:ReturnType<typeof searchRecoveredSystemsR512>[number])=>launchCapsule(recoveredSystemExecutionCapsuleR512(entry));
  const clearRecoveredExecution=()=>{
   setActiveRecovered(null);
   try{sessionStorage.removeItem('omega.r512.executionCapsule')}catch{}
@@ -99,7 +103,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
      <div className='o7-native-toolbar'><button onClick={()=>dispatch({type:'SELECT_ROUTE',route:null})}>← Back to {DOMAIN_LABEL[state.domain]}</button><span>OMEGA7 native · OMEGAv6 engine preserved</span></div>
      {activeRecovered&&activeRecovered.route===state.selectedRoute&&<aside className='o7-executor-capsule' data-r512-executor={activeRecovered.recoveredId} data-state={activeRecovered.state.toLowerCase()}>
       <div><span>Resolved historical software</span><b>{activeRecovered.recoveredName}</b><small>{activeRecovered.operation} → {activeRecovered.route}</small></div>
-      <dl><div><dt>Executor</dt><dd>{activeRecovered.capabilityId}</dd></div><div><dt>Domain</dt><dd>{activeRecovered.executionDomain}</dd></div><div><dt>State</dt><dd>{activeRecovered.state.replaceAll('_',' ')}</dd></div><div><dt>Proof</dt><dd>{activeRecovered.receiptAuthority} / {activeRecovered.admissionAuthority}</dd></div></dl>
+      <dl><div><dt>Executor</dt><dd>{activeRecovered.capabilityId}</dd></div><div><dt>Domain</dt><dd>{activeRecovered.executionDomain}</dd></div><div><dt>State</dt><dd>{activeRecovered.state.replaceAll('_',' ')}</dd></div><div><dt>Action</dt><dd>{activeRecovered.launchKind.replaceAll('_',' ')}</dd></div><div><dt>Source</dt><dd>{activeRecovered.sourceKind.replaceAll('_',' ')}</dd></div><div><dt>Proof</dt><dd>{activeRecovered.receiptAuthority} / {activeRecovered.admissionAuthority}</dd></div></dl>
       <button onClick={clearRecoveredExecution}>Clear focus</button>
      </aside>}
      <Omega7NativeSurface route={state.selectedRoute} onNavigate={open} depth={state.depth}/>
@@ -127,8 +131,16 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
      </section>}
      {state.domain==='HOME'&&<OperationalTruthR495 depth={state.depth} onNavigate={open}/>}\n     {state.domain==='HOME'&&<section className='o7-recovered' data-r486-visible-convergence='true'>
       <header><div><span>Recovered capability fabric</span><h2>Your recovered work is connected to the product</h2><p>{R486_VISIBLE_SUMMARY.total} recovered capability lineages now resolve through their current OMEGA executors. Open the function you need; lineage, gate and authority stay attached underneath.</p></div><button onClick={()=>setRecoveredOpen(x=>!x)}>{recoveredOpen?'Hide recovered capabilities':'Browse recovered capabilities'}</button></header>
-      <div className='o7-recovered-summary'><article><b>{R486_VISIBLE_SUMMARY.executesNow}</b><span>execute now</span></article><article><b>{R486_VISIBLE_SUMMARY.adapters}</b><span>active adapters</span></article><article><b>{R486_VISIBLE_SUMMARY.truthGated}</b><span>truth/device gated</span></article><article><b>{R486_VISIBLE_SUMMARY.routable}/{R486_VISIBLE_SUMMARY.total}</b><span>bound to current routes</span></article></div>
-      {recoveredOpen&&<><nav aria-label='Recovered capability groups'>{(['ALL','UNDERSTAND','EXPLORE','CREATE','BUILD','WORK','RECOVER'] as const).map(x=><button key={x} className={recoveredFamily===x?'active':''} onClick={()=>setRecoveredFamily(x)}>{x==='ALL'?'All':x[0]+x.slice(1).toLowerCase()}</button>)}</nav><div className='o7-recovered-grid'>{recovered.map(x=><article key={x.id} data-state={x.state.toLowerCase()}><header><span>{x.family} · {x.state==='EXECUTES_NOW'?'LIVE':x.state==='EXECUTES_AS_ADAPTER'?'ADAPTER':'GATED'}</span><b>{x.name}</b></header><p>{x.contribution}</p><footer><small>{x.operation}</small><button onClick={()=>launchRecovered(x)} data-r512-recovered-launch={x.id}>{x.state==='TRUTH_GATED'?'Open evidence gate':x.state==='EXECUTES_AS_ADAPTER'?'Run current adapter':'Run recovered software'}</button></footer>{state.depth!=='STANDARD'&&<details><summary>Lineage & proof</summary><p>{x.aliases.join(' · ')}</p><dl><div><dt>Reality</dt><dd>{x.capabilityReality}</dd></div><div><dt>Receipt</dt><dd>{x.receiptAuthority}</dd></div><div><dt>Admission</dt><dd>{x.admissionAuthority}</dd></div><div><dt>Boundary</dt><dd>{x.truth}</dd></div></dl></details>}</article>)}</div></>}
+      <div className='o7-recovered-summary'><article><b>{R486_VISIBLE_SUMMARY.executesNow}</b><span>execute now</span></article><article><b>{R486_VISIBLE_SUMMARY.adapters}</b><span>active adapters</span></article><article><b>{R512_MENU_SUMMARY.workingSystems}/{R512_MENU_SUMMARY.reviewedSystems}</b><span>historical systems with working successors</span></article><article><b>{R512_MENU_SUMMARY.archiveSystems}</b><span>donor/archive only</span></article></div>
+      {recoveredOpen&&<>
+       <section className='o7-previous-software-search' aria-label='Previous software search'>
+        <header><div><span>Previous software</span><b>Find an old system by the name you remember</b><small>{R512_MENU_SUMMARY.reviewedSystems} reviewed systems · working successors launch current executors · donors stay archive-only</small></div></header>
+        <input value={previousSoftwareQuery} onChange={e=>setPreviousSoftwareQuery(e.target.value)} placeholder='Search old software names, packages, families or roles…' aria-label='Search previous software'/>
+        {previousSoftwareQuery.trim()&&<div>{previousSoftwareResults.map(row=><button key={row.systemId} onClick={()=>launchRecoveredSystem(row)} data-r512-system-launch={row.systemId} data-state={row.state.toLowerCase()}><span><b>{row.artifact}</b><small>{row.family} · {row.capability}</small></span><em>{row.state==='WORKING_SUCCESSOR'?'Run current successor':row.state==='GATED_SUCCESSOR'?'Open evidence gate':row.state==='ARCHIVE_ONLY'?'Inspect lineage':'Open restoration status'}</em></button>)}</div>}
+       </section>
+       <nav aria-label='Recovered capability groups'>{(['ALL','UNDERSTAND','EXPLORE','CREATE','BUILD','WORK','RECOVER'] as const).map(x=><button key={x} className={recoveredFamily===x?'active':''} onClick={()=>setRecoveredFamily(x)}>{x==='ALL'?'All':x[0]+x.slice(1).toLowerCase()}</button>)}</nav>
+       <div className='o7-recovered-grid'>{recovered.map(x=><article key={x.id} data-state={x.state.toLowerCase()}><header><span>{x.family} · {x.state==='EXECUTES_NOW'?'LIVE':x.state==='EXECUTES_AS_ADAPTER'?'ADAPTER':'GATED'}</span><b>{x.name}</b></header><p>{x.contribution}</p><footer><small>{x.operation}</small><button onClick={()=>launchRecovered(x)} data-r512-recovered-launch={x.id}>{x.state==='TRUTH_GATED'?'Open evidence gate':x.state==='EXECUTES_AS_ADAPTER'?'Run current adapter':'Run recovered software'}</button></footer>{state.depth!=='STANDARD'&&<details><summary>Lineage & proof</summary><p>{x.aliases.join(' · ')}</p><dl><div><dt>Reality</dt><dd>{x.capabilityReality}</dd></div><div><dt>Receipt</dt><dd>{x.receiptAuthority}</dd></div><div><dt>Admission</dt><dd>{x.admissionAuthority}</dd></div><div><dt>Boundary</dt><dd>{x.truth}</dd></div></dl></details>}</article>)}</div>
+      </>}
      </section>}
 
      {state.domain!=='HOME'&&domainRecovered.length>0&&<section className='o7-domain-recovered' data-r512-domain-recovered={state.domain}>
@@ -159,7 +171,11 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   {state.commandOpen&&<div className='o7-command-backdrop' onMouseDown={e=>{if(e.currentTarget===e.target)dispatch({type:'COMMAND',open:false})}}>
    <section className='o7-command' role='dialog' aria-modal='true' aria-label='Search OMEGA'>
     <input ref={inputRef} value={state.query} onChange={e=>dispatch({type:'QUERY',query:e.target.value})} placeholder='Search capabilities or type what you want to do…'/>
-    <div>{(state.query?searchOmega7Capabilities(state.query):OMEGA7_CAPABILITIES.slice(0,12)).slice(0,20).map(cap=><button key={cap.id} data-command-route={cap.legacyRoute} onClick={()=>open(cap.legacyRoute)}><span><b>{cap.label}</b><small>{cap.description}</small></span><em>{cap.availability}</em></button>)}</div>
+    <div>
+     {(state.query?searchOmega7Capabilities(state.query):OMEGA7_CAPABILITIES.slice(0,12)).slice(0,16).map(cap=><button key={cap.id} data-command-route={cap.legacyRoute} onClick={()=>open(cap.legacyRoute)}><span><b>{cap.label}</b><small>{cap.description}</small></span><em>{cap.availability}</em></button>)}
+     {state.query&&commandPreviousSoftware.length>0&&<div className='o7-command-divider'>Previous software → current successor</div>}
+     {state.query&&commandPreviousSoftware.map(row=><button key={'system-'+row.systemId} data-command-system={row.systemId} onClick={()=>launchRecoveredSystem(row)}><span><b>{row.artifact}</b><small>{row.family} · {row.route}</small></span><em>{row.state==='WORKING_SUCCESSOR'?'LIVE':row.state==='GATED_SUCCESSOR'?'GATED':row.state==='ARCHIVE_ONLY'?'ARCHIVE':'RESTORE'}</em></button>)}
+    </div>
    </section>
   </div>}
  </div>;
