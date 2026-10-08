@@ -2,7 +2,8 @@ import {useMemo,useState} from 'react';
 import {Archive,Blocks,BrainCircuit,ChevronRight,Grid3X3,Layers3,Search,Settings2,ShieldCheck} from 'lucide-react';
 import {FAMILIES} from './systemAtlasRuntime';
 import {R48_COMPLETION_FAMILIES} from './completionRuntimeR48';
-import {MASTER_CAPABILITIES_R83,MASTER_MENU_OPTIONS_R83,MASTER_SYSTEMS_R83,routeForCapabilityR83,routeForMenuOptionR83,routeForSystemR83} from './softwareMasterLedgerR83';
+import {MASTER_CAPABILITIES_R83,MASTER_MENU_OPTIONS_R83,MASTER_SYSTEMS_R83,routeForCapabilityR83,routeForMenuOptionR83} from './softwareMasterLedgerR83';
+import {RECOVERED_SOFTWARE_EXECUTION_R512,RECOVERED_SOFTWARE_SUMMARY_R512,recoveredSoftwareByIdR512} from './recoveredSoftwareExecutionR512';
 import {V77_BINS_R83} from './v77BinLedgerR83';
 import {ARCHIVE_COLLECTIONS_R83,B043_ARCHIVE_R83,SOFTWARE2_VISIBLE_R83,routeForArchiveArtifactR83} from './archiveDonorIndexR83';
 import {HOST_BUILD_ROWS_R83,HOST_BUILD_SOURCE_R83,routeForHostBuildR83} from './hostBuildLedgerR83';
@@ -11,10 +12,11 @@ import {OMEGA_ROUTE_INVENTORY_R107,OMEGA_WORKSPACES_R82} from './omegaExperience
 import OmegaBuildPotentialR133 from './OmegaBuildPotentialR133';
 import './systemInventoryR83.css';
 
-type Tab='FABRIC'|'POTENTIAL'|'SYSTEMS'|'FAMILIES'|'HOST_BUILD'|'MENUS'|'CAPABILITIES'|'ARCHIVES'|'V77';
+type Tab='RUNNING'|'FABRIC'|'POTENTIAL'|'SYSTEMS'|'FAMILIES'|'HOST_BUILD'|'MENUS'|'CAPABILITIES'|'ARCHIVES'|'V77';
 type Props={onNavigate:(panel:string)=>void;compact?:boolean;initialTab?:Tab};
 const TABS:readonly {id:Tab;label:string;count:number}[]=[
- {id:'FABRIC',label:'Full fabric',count:8},
+ {id:'RUNNING',label:'Software now',count:RECOVERED_SOFTWARE_SUMMARY_R512.launchable},
+ {id:'FABRIC',label:'Architecture',count:8},
  {id:'POTENTIAL',label:'Build potential',count:FAMILIES.length},
  {id:'SYSTEMS',label:'Software systems',count:MASTER_SYSTEMS_R83.length},
  {id:'FAMILIES',label:'Runtime families',count:FAMILIES.length},
@@ -42,10 +44,11 @@ const match=(q:string,...v:any[])=>!q||v.join(' ').toLowerCase().includes(q);
 const currentByFamily=new Map(R48_COMPLETION_FAMILIES.map(x=>[x.id,x]));
 const currentRouteOf=(surface:string|undefined,fallback:string)=>String(surface||fallback||'System Atlas').split('/')[0].trim()||fallback||'System Atlas';
 
-export default function OmegaSystemInventoryR83({onNavigate,compact=false,initialTab='FABRIC'}:Props){
+export default function OmegaSystemInventoryR83({onNavigate,compact=false,initialTab='RUNNING'}:Props){
  const[tab,setTab]=useState<Tab>(initialTab),[query,setQuery]=useState('');
  const q=query.trim().toLowerCase();
  const systems=useMemo(()=>MASTER_SYSTEMS_R83.filter(x=>match(q,x.id,x.family,x.artifact,x.role,x.menuSetting,x.capability,x.disposition,x.menu)),[q]);
+ const running=useMemo(()=>RECOVERED_SOFTWARE_EXECUTION_R512.filter(x=>x.launchable&&match(q,x.systemId,x.artifact,x.family,x.state,x.route,x.executorReality,x.currentMeaning)),[q]);
  const families=useMemo(()=>FAMILIES.filter(x=>{const now=currentByFamily.get(x.id);return match(q,x.id,x.name,x.invariant,x.role,x.status,x.statusNote,x.inventoryPurpose,x.target,now?.successor,now?.surface,now?.proof,now?.remaining)}),[q]);
  const hostBuild=useMemo(()=>HOST_BUILD_ROWS_R83.filter(x=>match(q,x.id,x.name,x.module,x.function,x.disposition,x.menu,x.stateSpace,x.authority)),[q]);
  const options=useMemo(()=>MASTER_MENU_OPTIONS_R83.filter(x=>match(q,x.menuId,x.topMenu,x.optionId,x.label,x.roles,x.output,x.stateSpace,x.proofGate,x.risk)),[q]);
@@ -54,13 +57,22 @@ export default function OmegaSystemInventoryR83({onNavigate,compact=false,initia
  const bins=useMemo(()=>V77_BINS_R83.filter(x=>match(q,x.id,x.direction,x.name,x.sourceTitle)),[q]);
  const fabric=useMemo(()=>FABRIC.filter(x=>match(q,x.id,x.name,x.detail,x.route)),[q]);
  const go=(route:string,key:string,value:string)=>{try{localStorage.setItem(key,value)}catch{}onNavigate(route)};
+ const launchSystem=(systemId:string)=>{
+  const resolution=recoveredSoftwareByIdR512(systemId),row=MASTER_SYSTEMS_R83.find(x=>x.id===systemId);
+  if(!resolution||!row)return;
+  const detail={schema:'OMEGA_RECOVERED_SOFTWARE_LAUNCH_R512',systemId,artifact:row.artifact,family:row.family,capability:row.capability,state:resolution.state,route:resolution.route,executorReality:resolution.executorReality,executorProof:resolution.executorProof,currentMeaning:resolution.currentMeaning,canonicalMutation:false};
+  try{localStorage.setItem('omega.r83.systemFocus',systemId);localStorage.setItem('omega.r512.legacyLaunch',JSON.stringify(detail))}catch{}
+  window.dispatchEvent(new CustomEvent('omega-r512-software-launch',{detail}));
+  onNavigate(resolution.launchable?resolution.route:'Archive Operators');
+ };
  return <section className={'r83-inventory '+(compact?'compact':'full')}>
-  <header className='r83-inventory-head'><div><span>OMEGA COMPLETE SOFTWARE + CALCULUS INDEX · PRESERVE BEFORE PRUNE</span><h3>Integrated capability fabric navigator</h3><p>Application destinations are an interface inventory only. The full machine is canonical state + calculus/modes + eight functional layers + software/runtime families + controls + federation + proof. R168 resolves Runtime families from the current R48/R153 successor ledger while retaining V24 status/targets as lineage evidence; R133 turns the same current ledger into build potential.</p></div><div className='r83-inventory-kpis'><b>{MASTER_SYSTEMS_R83.length}</b><small>systems</small><b>{FAMILIES.length}</b><small>families</small><b>{ALL_MODES_BOUNDARY.sourceModeEvaluations}</b><small>source modes</small><b>{ALL_MODES_BOUNDARY.canonAuthorities}</b><small>canon lenses</small><b>{MASTER_CAPABILITIES_R83.length}</b><small>capabilities</small></div></header>
+  <header className='r83-inventory-head'><div><span>OMEGA SOFTWARE · CURRENT EXECUTION + RECOVERED LINEAGE</span><h3>Software that works now, with history preserved</h3><p>R512 resolves every recovered software row to its current executor before presenting it as runnable. KEEP/MERGE systems launch their proved current successor; device/provider/evidence work stays visibly gated; DONOR artifacts remain archive lineage instead of pretending to run.</p></div><div className='r83-inventory-kpis'><b>{RECOVERED_SOFTWARE_SUMMARY_R512.working}</b><small>working successors</small><b>{RECOVERED_SOFTWARE_SUMMARY_R512.gated}</b><small>gated successors</small><b>{RECOVERED_SOFTWARE_SUMMARY_R512.archiveOnly}</b><small>archive-only</small><b>{MASTER_SYSTEMS_R83.length}</b><small>recovered systems</small><b>{FAMILIES.length}</b><small>runtime families</small></div></header>
   <nav className='r83-inventory-tabs' aria-label='Software inventory layers'>{TABS.map(x=><button key={x.id} className={tab===x.id?'active':''} onClick={()=>setTab(x.id)} aria-pressed={tab===x.id}><span>{x.label}</span><b>{x.count}</b></button>)}</nav>
-  {tab!=='POTENTIAL'&&<label className='r83-inventory-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Search full fabric, systems, families, local-host lineage, menus, capabilities, archive builds or V77 bins…'/></label>}
+  {tab!=='POTENTIAL'&&<label className='r83-inventory-search'><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={tab==='RUNNING'?'Search software that runs now…':'Search architecture, recovered systems, families, menus, capabilities or archives…'}/></label>}
   {tab==='POTENTIAL'?<OmegaBuildPotentialR133 compact={compact} onNavigate={onNavigate}/>:<div className='r83-inventory-grid' data-tab={tab}>
+   {tab==='RUNNING'&&running.map(x=><button key={x.systemId} onClick={()=>launchSystem(x.systemId)} data-r512-software-state={x.state} data-r512-executor={x.route}><code>{x.systemId}</code><span><b>{x.artifact}</b><small>{x.family} · {x.state==='WORKING_SUCCESSOR'?'working now':'proof-gated'}</small><em>{x.currentMeaning}</em></span><strong>{x.state==='WORKING_SUCCESSOR'?'RUN':'OPEN GATED'}<small>{x.route} · {x.executorReality}</small></strong><ChevronRight/></button>)}
    {tab==='FABRIC'&&fabric.map(x=><button key={x.id} onClick={()=>go(x.route,'omega.r107.fabricFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>R107 full-build authority</small><em>{x.detail}</em></span><strong>OPEN<small>{x.route}</small></strong><ChevronRight/></button>)}
-   {tab==='SYSTEMS'&&systems.map(x=>{const route=routeForSystemR83(x);return <button key={x.id} onClick={()=>go(route,'omega.r83.systemFocus',x.id)}><code>{x.id}</code><span><b>{x.artifact}</b><small>{x.family} · {x.role}</small><em>{x.capability}</em></span><strong>{x.disposition}<small>{route}</small></strong><ChevronRight/></button>})}
+   {tab==='SYSTEMS'&&systems.map(x=>{const r=recoveredSoftwareByIdR512(x.id);return <button key={x.id} onClick={()=>launchSystem(x.id)} data-r512-software-state={r?.state||'UNRESOLVED'}><code>{x.id}</code><span><b>{x.artifact}</b><small>{x.family} · {x.role} · {x.disposition}</small><em>{x.capability}</em></span><strong>{r?.launchable?(r.state==='WORKING_SUCCESSOR'?'RUN SUCCESSOR':'GATED SUCCESSOR'):'LINEAGE'}<small>{r?.route||'System Atlas'} · {r?.executorReality||'UNRESOLVED'}</small></strong><ChevronRight/></button>})}
    {tab==='FAMILIES'&&families.map(x=>{const now=currentByFamily.get(x.id),route=currentRouteOf(now?.surface,x.target);return <button key={x.id} onClick={()=>go(route,'omega.r83.familyFocus',x.id)} title={`Current ${now?.successor||'UNMAPPED'} · ${now?.surface||x.target} · V24 ${x.status} → ${x.target}`}><code>{x.id}</code><span><b>{x.name}</b><small>{x.invariant} · {x.role}</small><em>{x.inventoryPurpose}</em></span><strong>{now?.successor||x.status}<small>{route} · V24 {x.status}</small></strong><ChevronRight/></button>})}
    {tab==='HOST_BUILD'&&hostBuild.map(x=>{const route=routeForHostBuildR83(x);return <button key={x.id} onClick={()=>go(route,'omega.r83.hostBuildFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.module} · {x.disposition} · {x.stateSpace}</small><em>{x.function}</em></span><strong>HOST LINEAGE<small>{route}</small></strong><ChevronRight/></button>})}
    {tab==='MENUS'&&options.map(x=>{const route=routeForMenuOptionR83(x);return <button key={x.optionId} onClick={()=>go(route,'omega.r83.menuOptionFocus',x.optionId)}><code>{x.optionId}</code><span><b>{x.label}</b><small>{x.topMenu} · default {x.default}</small><em>{x.output}</em></span><strong>{x.risk||'—'}<small>{route}</small></strong><ChevronRight/></button>})}
@@ -68,6 +80,6 @@ export default function OmegaSystemInventoryR83({onNavigate,compact=false,initia
    {tab==='ARCHIVES'&&archives.map((x,i)=>{const route=routeForArchiveArtifactR83(x.title);return <button key={x.collection+'-'+x.title+'-'+i} onClick={()=>go(route,'omega.r83.archiveFocus',x.title)}><code>{x.collection==='B043'?'B043':'ARC'}</code><span><b>{x.title}</b><small>{x.collection} · {x.kind} · {x.size||'size —'}</small><em>Reviewed archive donor/build artifact · presence ≠ execution</em></span><strong>ARCHIVE<small>{route}</small></strong><ChevronRight/></button>})}
    {tab==='V77'&&bins.map(x=>{const route=BIN_ROUTE[x.bin]||'System Atlas';return <button key={x.id} onClick={()=>go(route,'omega.r83.binFocus',x.id)}><code>{x.id}</code><span><b>{x.name}</b><small>{x.direction} · V77 donor lineage</small><em>{x.sourceTitle}</em></span><strong>DONOR<small>{route}</small></strong><ChevronRight/></button>})}
   </div>}
-  <footer><ShieldCheck/><span><b>Truth boundary:</b> historical family registration/target, current successor status/surface, operator route, source-backed execution, current runtime execution, donor presence and design-ledger intent remain separate statuses. Nothing here promotes a catalog mode, archive donor, registered control, or route merely because it is visible.</span><div><BrainCircuit/>{ALL_MODES_BOUNDARY.sourceModeEvaluations}+{ALL_MODES_BOUNDARY.canonAuthorities} mode/lens authority<Blocks/>{MASTER_SYSTEMS_R83.length}-system ledger<Archive/>{ARCHIVE_COLLECTIONS_R83.map(x=>x.count).reduce((a,b)=>a+b,0)} indexed archive items<Grid3X3/>{FAMILIES.length} source families<Settings2/>{HOST_BUILD_ROWS_R83.length} local-host rows · {HOST_BUILD_SOURCE_R83.autoPingCells} auto-ping cells</div></footer>
+  <footer><ShieldCheck/><span><b>Truth boundary:</b> a recovered software name is not treated as execution. R512 launches the current proved successor while preserving historical identity. Gated successors may open but cannot claim returned external/device/provider work without evidence; DONOR rows remain lineage only.</span><div><BrainCircuit/>{ALL_MODES_BOUNDARY.sourceModeEvaluations}+{ALL_MODES_BOUNDARY.canonAuthorities} mode/lens authority<Blocks/>{MASTER_SYSTEMS_R83.length}-system ledger<Archive/>{ARCHIVE_COLLECTIONS_R83.map(x=>x.count).reduce((a,b)=>a+b,0)} indexed archive items<Grid3X3/>{FAMILIES.length} source families<Settings2/>{HOST_BUILD_ROWS_R83.length} local-host rows · {HOST_BUILD_SOURCE_R83.autoPingCells} auto-ping cells</div></footer>
  </section>;
 }
