@@ -199,7 +199,7 @@
     "test:r509": "node tests/r509-falsifiable-capability-contracts-invariants.mjs",
     "test:r510": "node tests/r510-omega7-visual-functional-restoration-invariants.mjs",
     "test:r511": "node tests/r511-sequential-release-closure-invariants.mjs",
-    "test:r513": "node tests/r513-exact-phase-turn-invariants.mts"
+    "test:r513": "npx --yes tsx tests/r513-exact-phase-turn-invariants.mts"
   },
   "dependencies": {
     "fflate": "^0.8.2",
