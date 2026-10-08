@@ -12,7 +12,8 @@ const family=(x:CorpusBindingR473):VisibleFamilyR486=>{
 export const R486_VISIBLE_CAPABILITIES=YEAR_CORPUS_EXECUTION_R473.map(binding=>{
  const plan=compileCorpusExecutionPlanR473(binding);
  return Object.freeze({id:binding.id,name:binding.name,family:family(binding),route:binding.route,operation:binding.operation,state:binding.state,
-  contribution:binding.contribution,aliases:binding.aliases,truth:binding.truth,routable:plan.routable,capabilityReality:plan.capabilityReality,
+  contribution:binding.contribution,aliases:binding.aliases,truth:binding.truth,routable:plan.routable,capabilityId:plan.capabilityId,
+  executionDomain:plan.executionDomain,capabilityReality:plan.capabilityReality,truthBoundary:plan.truthBoundary,
   receiptAuthority:plan.receiptAuthority,admissionAuthority:plan.admissionAuthority,canonicalMutation:false as const});
 });
 export const R486_VISIBLE_SUMMARY=Object.freeze({
