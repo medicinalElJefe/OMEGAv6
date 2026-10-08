@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {decodeAddress,encodeAddress} from '../src/corpusRuntime.ts';
+// Node's bare TS runner cannot load corpusRuntime's Vite-only extensionless corpusPack import.
+// Independently check the authoritative address layout in source and test its integer formula.
+const corpusSource=readFileSync('src/corpusRuntime.ts','utf8');
+assert.ok(corpusSource.includes('export function encodeAddress(d:number,p:number,r:number,l:number){return 1728*d+144*p+12*r+l}'),'R513 cannot run against a changed source-address convention');
+assert.ok(corpusSource.includes('export function decodeAddress(a:number)'),'R513 canonical decoder must remain present');
+const encodeAddress=(d:number,p:number,r:number,l:number)=>1728*d+144*p+12*r+l;
+const decodeAddress=(address:number)=>{const d=Math.floor(address/1728),p=Math.floor(address%1728/144),r=Math.floor(address%144/12),l=address%12;return{d,p,r,l}};
 import {R513_ATLAS_SIZE,R513_PHASE_SCHEMA,phaseOfAddressR513,phaseClassR513,quarterTurnAddressR513,inverseTurnR513,phaseOrbitR513,verifyQuarterTurnR513} from '../src/phaseGeometryR513.ts';
 
 assert.equal(R513_ATLAS_SIZE,12**4);
