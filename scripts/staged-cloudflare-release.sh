@@ -185,6 +185,9 @@ if [[ "$LOCAL_PREVIEW_READY" != "1" ]]; then
 fi
 OMEGA_E2E_URL="http://127.0.0.1:4173" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" node tests/r200-current-browser-proof-e2e.mjs
 OMEGA_E2E_URL="http://127.0.0.1:4173" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" node tests/r496-local-omega7-candidate-browser-e2e.mjs
+# Exercise the same recovered-summary and capsule launch contract before any upload/promotion.
+OMEGA_E2E_URL="http://127.0.0.1:4173" OMEGA_EXPECTED_SHA="${OMEGA_PROMOTED_SHA:-$GITHUB_SHA}" node tests/r489-live-visible-capability-browser-e2e.mjs
+OMEGA_E2E_URL="http://127.0.0.1:4173" OMEGA_R512_USE_FIXTURES=1 node tests/r512-capability-menu-execution-browser-e2e.mjs
 kill "$LOCAL_PREVIEW_PID" >/dev/null 2>&1 || true
 wait "$LOCAL_PREVIEW_PID" >/dev/null 2>&1 || true
 LOCAL_PREVIEW_PID=''
