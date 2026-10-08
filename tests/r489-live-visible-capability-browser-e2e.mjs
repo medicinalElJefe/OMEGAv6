@@ -97,7 +97,15 @@ try{
   await page.waitForFunction(()=>{const button=[...document.querySelectorAll('.o7-operational-truth button')].find(x=>x.textContent?.trim()==='Refresh');return Boolean(button&&!button.hasAttribute('disabled'))},{timeout:20000});
 
   const recovered=page.locator('.o7-recovered[data-r486-visible-convergence="true"]');
-  await recovered.waitFor({state:'visible',timeout:20000});
+  if(await recovered.count()!==1)throw new Error(`${label}: R486 recovered capability fabric is missing from the canonical HOME DOM`);
+  // R510 deliberately makes Standard depth visual-first and hides the advanced
+  // recovered/capability sections. Exercise the actual disclosure control
+  // before proving R486 instead of requiring a superseded always-visible HOME.
+  if((await app.getAttribute('data-depth'))==='standard'){
+   await page.getByLabel('Interface depth').selectOption('ADVANCED');
+   await page.waitForFunction(()=>document.querySelector('.o7-app[data-omega7="true"]')?.getAttribute('data-depth')==='advanced',{timeout:10000});
+  }
+  await recovered.waitFor({state:'visible',timeout:10000});
   const initialText=await recovered.innerText(),initialTextNormalized=initialText.toLocaleLowerCase();
   for(const token of ['Recovered capability fabric','Your recovered work is connected to the product','Browse recovered capabilities','execute now','active adapters','truth/device gated','bound to current routes'])if(!initialTextNormalized.includes(token.toLocaleLowerCase()))throw new Error(`${label}: R486 visible convergence missing rendered label ${token}`);
 
@@ -129,7 +137,6 @@ try{
   }
   await nav.getByRole('button',{name:'All',exact:true}).click();
 
-  await page.getByLabel('Interface depth').selectOption('ADVANCED');
   const proof=recovered.locator('.o7-recovered-grid details').first();
   await proof.locator('summary').click();
   const proofText=await proof.innerText();
