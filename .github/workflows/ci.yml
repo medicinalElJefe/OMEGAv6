@@ -113,6 +113,11 @@ jobs:
           OMEGA_E2E_URL: http://127.0.0.1:4173
           OMEGA_R510_USE_FIXTURES: '1'
         run: node tests/r510-omega7-visual-functional-browser-e2e.mjs
+      - name: Prove R512 task-first menu and executable recovered software on exact built candidate
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+          OMEGA_R512_USE_FIXTURES: '1'
+        run: node tests/r512-executable-software-menu-browser-e2e.mjs
       - name: Stop OMEGA7 parity preview
         if: always()
         shell: bash
@@ -438,6 +443,10 @@ jobs:
         id: browser_r510
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r510-omega7-visual-functional-browser-e2e.mjs
+      - name: Verify deployed R512 task-first menu and executable recovered software
+        id: browser_r512
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r512-executable-software-menu-browser-e2e.mjs
       - name: Verify live R202 operational source-authority surface
         id: live_r202
         run: node scripts/verify_live_operational_source_authority_r202.mjs
