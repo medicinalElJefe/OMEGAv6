@@ -8,7 +8,7 @@ import {OMEGA7_ACCEPTED_PARITY_SUMMARY,acceptedParityForRoute} from './parityLed
 import {OMEGA7_HEIGHTENED_SUMMARY} from './heightenedModeR457';
 import {R468_EVENT,developmentalStateBusSnapshotR468,type R468Snapshot} from './developmentalStateBusR468';
 import {R486_VISIBLE_CAPABILITIES,R486_VISIBLE_SUMMARY,type VisibleFamilyR486} from './visibleCapabilityConvergenceR486';
-import {R512_DOMAIN_MENU,R512_MENU_SUMMARY,menuSectionsR512,recoveredForDomainR512,recoveredExecutionCapsuleR512,type RecoveredExecutionCapsuleR512} from './capabilityMenuR512';
+import {R512_DOMAIN_MENU,R512_MENU_SUMMARY,menuSectionsR512,quickActionsR512,recoveredForDomainR512,recoveredExecutionCapsuleR512,type RecoveredExecutionCapsuleR512} from './capabilityMenuR512';
 import type {R512RecoveredSystemResolution} from '../src/recoveredSoftwareExecutionR512';
 import OperationalTruthR495 from './OperationalTruthR495';
 import './omega7.css';
@@ -40,6 +40,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const failed=healthRows.filter(([,v])=>v==='FAILED').length;
  const recovered=useMemo(()=>R486_VISIBLE_CAPABILITIES.filter(x=>recoveredFamily==='ALL'||x.family===recoveredFamily),[recoveredFamily]);
  const menuSections=useMemo(()=>menuSectionsR512(state.domain),[state.domain]);
+ const quickActions=useMemo(()=>quickActionsR512(state.domain),[state.domain]);
  const domainRecovered=useMemo(()=>recoveredForDomainR512(state.domain),[state.domain]);
  const domainMenu=R512_DOMAIN_MENU.find(x=>x.id===state.domain)||R512_DOMAIN_MENU[0];
  useEffect(()=>{let live=true;const q=previousSoftwareQuery.trim();if(!q){setPreviousSoftwareResults([]);return()=>{live=false}};void import('./recoveredSystemSearchR512').then(m=>{if(live)setPreviousSoftwareResults(m.searchRecoveredSystemsR512(q).slice(0,12))});return()=>{live=false}},[previousSoftwareQuery]);
@@ -117,8 +118,8 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
       <h1>{domainMenu.label}</h1>
       <span>{domainMenu.purpose}</span>
       <div className='o7-quick-menu' aria-label={domainMenu.label+' quick actions'}>
-       {menuSections.ready.slice(0,6).map(cap=><button key={cap.id} onClick={()=>open(cap.legacyRoute)} data-health='ready'><b>{cap.label}</b><small>{cap.primaryAction}</small></button>)}
-       {menuSections.ready.length===0&&<em>No immediately executable tools in this area.</em>}
+       {quickActions.map(cap=><button key={cap.id} onClick={()=>open(cap.legacyRoute)} data-health={cap.availability.toLowerCase()}><b>{cap.label}</b><small>{cap.primaryAction} · {cap.availability==='READY'?'Ready':cap.availability==='HELD'?'Needs evidence / connection':cap.availability}</small></button>)}
+       {quickActions.length===0&&<em>No qualified tools in this area.</em>}
       </div>
      </section>}
 
