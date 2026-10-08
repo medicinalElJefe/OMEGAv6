@@ -37,7 +37,6 @@ for(const token of [
 for(const token of [
  "launchSoftware=(software:R512SoftwareBinding)",
  "data-command-software",
- "data-command-route={result.software.route}",
  "Previous software · current executors",
  "Launch current executor",
  "Launch adapted successor",
@@ -46,6 +45,7 @@ for(const token of [
  "data-r512-menu='intent-capability-executor'",
 ])assert.ok(root.includes(token),'R512 menu/executor wiring missing '+token);
 
+assert.ok(root.includes("data-command-route={software.route}")||root.includes("data-command-route={result.software.route}"),'previous-software command results must preserve stable canonical route identity for parity automation');
 assert.equal(root.includes("onClick={()=>open(x.route)}"),false,'recovered software must not degrade to a generic route bookmark');
 
 for(const token of [
