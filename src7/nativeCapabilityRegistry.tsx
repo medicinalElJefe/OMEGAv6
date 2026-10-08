@@ -25,12 +25,20 @@ export function Omega7NativeSurface({route,onNavigate,depth,softwareLaunch}:{rou
  const hostRef=useRef<HTMLDivElement|null>(null);
  useEffect(()=>{
   if(!softwareLaunch||softwareLaunch.route!==route)return;
-  const id=window.setTimeout(()=>{
+  let completed=false;
+  const actuate=()=>{
+   if(completed)return true;
+   const surface=hostRef.current?.querySelector<HTMLElement>('.o7-native-surface');
+   if(surface){completed=true;surface.scrollIntoView({block:'start',behavior:'smooth'});return true}
    const button=hostRef.current?.querySelector<HTMLButtonElement>('.o7-open-instrument');
-   if(button&&!button.disabled)button.click();
-   hostRef.current?.querySelector<HTMLElement>('.o7-native-surface')?.scrollIntoView({block:'start',behavior:'smooth'});
-  },60);
-  return()=>window.clearTimeout(id);
+   if(button&&!button.disabled){button.click();return false}
+   return false;
+  };
+  if(actuate())return;
+  const observer=new MutationObserver(()=>{if(actuate())observer.disconnect()});
+  if(hostRef.current)observer.observe(hostRef.current,{childList:true,subtree:true,attributes:true});
+  const timeout=window.setTimeout(()=>observer.disconnect(),15000);
+  return()=>{observer.disconnect();window.clearTimeout(timeout)};
  },[route,softwareLaunch?.bindingId]);
  let surface:ReactNode=null;
  switch(route){
