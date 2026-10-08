@@ -31,6 +31,14 @@ async function prove(browser,label,viewport){
  const recovered=page.locator('.o7-recovered[data-r486-visible-convergence="true"]');
  await recovered.waitFor({state:'visible',timeout:15000});
  if(!(await recovered.getByRole('button',{name:'Browse recovered capabilities',exact:true}).isVisible()))throw new Error(`${label}: recovered capability fabric is not visibly reachable below visual HOME`);
+ const visualVsRecovered=await page.evaluate(()=>{
+  const home=document.querySelector('.o7-home-established');
+  const recovered=document.querySelector('.o7-recovered[data-r486-visible-convergence="true"]');
+  if(!home||!recovered)return null;
+  const h=home.getBoundingClientRect(),r=recovered.getBoundingClientRect();
+  return{homeBottom:h.bottom,recoveredTop:r.top,homeHeight:h.height,recoveredHeight:r.height};
+ });
+ if(!visualVsRecovered||visualVsRecovered.recoveredTop<visualVsRecovered.homeBottom-8)throw new Error(`${label}: recovered capability fabric overlaps or replaces visual-first HOME ${JSON.stringify(visualVsRecovered)}`);
  if(await home.locator('.r411-navigation-shell,.r94-side-toolbar').count())throw new Error(`${label}: embedded R71 mounted a duplicate global navigator`);
  if(await page.locator('.o7-nav button').count()!==6)throw new Error(`${label}: OMEGA7 framing navigation regressed`);
 
@@ -86,7 +94,7 @@ const browser=await chromium.launch({headless:true});
 try{
  await prove(browser,'desktop',{width:1440,height:960});
  await prove(browser,'mobile',{width:390,height:844});
- console.log('R510 OMEGA7 VISUAL-FUNCTIONAL BROWSER PASS · visible R134 woven continuum dominates desktop + mobile · raw 20,736 membrane remains reachable · old button board absent · one navigator · projection control actuates · All tools + System Atlas bridges work');
+ console.log('R510 OMEGA7 VISUAL-FUNCTIONAL BROWSER PASS · visible R134 woven continuum dominates desktop + mobile · recovered capability fabric remains visible below it · raw 20,736 membrane remains reachable · old button board absent · one navigator · projection control actuates · All tools + System Atlas bridges work');
 }finally{
  await browser.close();
 }
