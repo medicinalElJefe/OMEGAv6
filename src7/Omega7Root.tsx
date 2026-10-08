@@ -1,5 +1,5 @@
 import {Fragment,lazy,Suspense,useEffect,useMemo,useRef,useState} from 'react';
-import {OMEGA7_CAPABILITIES,omega7CapabilitiesForDomain,searchOmega7Capabilities,type Omega7Domain} from './capabilityRegistry';
+import {OMEGA7_CAPABILITIES,OMEGA7_DOMAINS,omega7CapabilitiesForDomain,searchOmega7Capabilities,type Omega7Domain} from './capabilityRegistry';
 import {Omega7AppStateProvider,useOmega7AppState} from './appState';
 import {Omega7Boundary} from './Omega7Boundary';
 import {isOmega7NativeRoute,Omega7NativeSurface} from './nativeCapabilityRegistry';
@@ -96,7 +96,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    </div>
   </header>
 
-  <aside className='o7-nav o7-nav-r512' aria-label='OMEGA7 capability-first navigation' data-navigation-revision='R512'>
+  <aside className='o7-nav o7-nav-r512' aria-label='OMEGA7 capability-first navigation' data-navigation-revision='R512' data-canonical-domain-count={OMEGA7_DOMAINS.length}>
    {R512_DOMAIN_MENU.map(menu=><button key={menu.id} className={state.domain===menu.id?'active':''} onClick={()=>dispatch({type:'DOMAIN',domain:menu.id})} title={menu.purpose}><span>{menu.shortLabel}</span><small>{menu.id==='HOME'?'start':menuSectionsR512(menu.id).ready.length+' ready'}</small></button>)}
   </aside>
 
