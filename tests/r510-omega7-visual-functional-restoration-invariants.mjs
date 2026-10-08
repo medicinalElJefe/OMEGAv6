@@ -36,10 +36,11 @@ for(const token of [
  ".o7-home-established .r96-workbench",
  ".o7-home-established .r71-field .r134-stage",
  ".o7-home-established .r121-home-membrane .r95-membrane-stage",
- ".o7-app[data-depth=standard] .o7-home-established~.o7-recovered",
  ".o7-app[data-depth=standard] .o7-home-established~.o7-capability-section",
+ ".o7-app[data-depth=standard] .o7-home-established~.o7-recovered{display:grid}",
 ])assert.ok(css.includes(token),'R510 visual hierarchy CSS missing '+token);
 
+assert.ok(css.includes(".o7-app[data-depth=standard] .o7-home-established~.o7-recovered{display:grid}"),'R510 Standard depth must keep recovered capability fabric visible below the visual stage');
 assert.ok(ci.includes('r510-omega7-visual-functional-browser-e2e.mjs'),'R510 browser proof must be wired into governed CI/deployment');
 
 console.log('R510 VISUAL-FUNCTIONAL SOURCE PASS · current R71 visual workbench owns OMEGA7 HOME · old button board removed · duplicate navigator suppressed · deployed browser proof required');

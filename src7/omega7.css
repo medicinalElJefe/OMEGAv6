@@ -82,8 +82,9 @@
 .o7-home-established~.o7-recovered,
 .o7-home-established~.o7-capability-section{max-width:1500px;margin-left:auto;margin-right:auto}
 .o7-home-established+.o7-operational-truth{margin-top:16px}
-.o7-app[data-depth=standard] .o7-home-established~.o7-recovered,
 .o7-app[data-depth=standard] .o7-home-established~.o7-capability-section{display:none}
+.o7-app[data-depth=standard] .o7-home-established~.o7-recovered{display:grid}
+.o7-app[data-depth=standard] .o7-home-established~.o7-recovered>.o7-recovered-summary{display:grid}
 .o7-app[data-depth=standard] .o7-home-established+.o7-operational-truth{margin-bottom:0}
 .o7-home-established [data-r510-embedded='true']{isolation:isolate}
 @media(max-width:760px){
