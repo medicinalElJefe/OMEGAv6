@@ -1,5 +1,5 @@
 import {Fragment,lazy,Suspense,useEffect,useMemo,useRef,useState} from 'react';
-import {OMEGA7_CAPABILITIES,OMEGA7_DOMAINS,omega7CapabilitiesForDomain,searchOmega7Capabilities,type Omega7Domain} from './capabilityRegistry';
+import {OMEGA7_CAPABILITIES,omega7CapabilitiesForDomain,searchOmega7Capabilities,type Omega7Domain} from './capabilityRegistry';
 import {Omega7AppStateProvider,useOmega7AppState} from './appState';
 import {Omega7Boundary} from './Omega7Boundary';
 import {isOmega7NativeRoute,Omega7NativeSurface} from './nativeCapabilityRegistry';
@@ -19,15 +19,6 @@ type Props={onOpenLegacyRoute:(route:string)=>void;onExitToV6:()=>void};
 const DOMAIN_LABEL:Record<Omega7Domain,string>={
  HOME:'Home',WORK:'Work',EXPLORE:'Explore',CREATE:'Create',DEVELOP:'Develop',SYSTEM:'System'
 };
-const DOMAIN_COPY:Record<Omega7Domain,string>={
- HOME:'Start a task, continue recent work, or search every OMEGA capability.',
- WORK:'Projects, workspace, memory and active work.',
- EXPLORE:'Earth, science, matter, motion, forecasting and state exploration.',
- CREATE:'Visual work, rendering, assets and generation.',
- DEVELOP:'Software, AI runtime, quality, build and connected compute.',
- SYSTEM:'Evidence, governance, settings, archives and diagnostics.'
-};
-
 function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const{state,dispatch}=useOmega7AppState();
  const inputRef=useRef<HTMLInputElement|null>(null);
