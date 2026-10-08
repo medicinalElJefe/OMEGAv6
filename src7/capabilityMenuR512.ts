@@ -123,7 +123,7 @@ export function recoveredSystemExecutionCapsuleR512(row:R512RecoveredSystemResol
   schema:'OMEGA_RECOVERED_EXECUTION_CAPSULE_R512',
   recoveredId:row.systemId,recoveredName:row.artifact,route:row.route,
   operation:row.state==='ARCHIVE_ONLY'?'INSPECT_ARCHIVE_LINEAGE':row.state==='RESTORATION_REQUIRED'?'INSPECT_RESTORATION_DEBT':`CONTINUE_${row.role}`,
-  capabilityId:`R512_SYSTEM_${row.systemId}`,executionDomain:'RECOVERED_SYSTEM',state,
+  capabilityId:row.executorCapabilityId,executionDomain:row.executionDomain,state,
   capabilityReality:row.executorReality,receiptAuthority:'R142',admissionAuthority:'R125',
   truthBoundary:row.truth,sourceKind:'SYSTEM_LEDGER',launchKind,createdAt,canonicalMutation:false
  });
