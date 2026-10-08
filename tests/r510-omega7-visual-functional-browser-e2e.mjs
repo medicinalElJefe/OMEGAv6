@@ -1,6 +1,7 @@
 import {chromium} from 'playwright';
 
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
+const useFixtures=process.env.OMEGA_R510_USE_FIXTURES==='1';
 
 async function mocks(page){
  const json=(route,body)=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(body)});
@@ -14,7 +15,7 @@ async function prove(browser,label,viewport){
  const page=await context.newPage();
  const errors=[];
  page.on('pageerror',e=>errors.push(String(e)));
- await mocks(page);
+ if(useFixtures)await mocks(page);
  await page.goto(base+`/?omega7=1&r510=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
 
  const app=page.locator('.o7-app[data-omega7="true"]');
