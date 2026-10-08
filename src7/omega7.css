@@ -65,7 +65,8 @@
 }
 .o7-home-established .r96-topbar{top:0;z-index:18}
 .o7-home-established .r96-workbench{min-height:min(780px,calc(100dvh - 260px))}
-.o7-home-established .r71-field .r95-membrane-stage{min-height:clamp(460px,58dvh,760px)}
+.o7-home-established .r71-field .r134-stage,.o7-home-established .r71-field .r134-stage canvas{min-height:clamp(620px,72dvh,900px)}
+.o7-home-established .r121-home-membrane .r95-membrane-stage{min-height:clamp(460px,58dvh,760px)}
 .o7-home-stage-loading{
  min-height:calc(100dvh - 58px);
  display:grid;
@@ -92,6 +93,7 @@
  .o7-home-established>.r71-home{min-height:calc(100dvh - 164px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
  .o7-home-established .r96-topbar{position:relative!important;top:auto!important}
  .o7-home-established .r96-workbench{min-height:0}
- .o7-home-established .r71-field .r95-membrane-stage{min-height:58dvh}
+ .o7-home-established .r71-field .r134-stage,.o7-home-established .r71-field .r134-stage canvas{min-height:62dvh}
+ .o7-home-established .r121-home-membrane .r95-membrane-stage{min-height:58dvh}
  .o7-home-stage-loading{min-height:calc(100dvh - 164px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 }
