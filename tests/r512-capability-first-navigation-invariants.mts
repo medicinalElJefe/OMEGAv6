@@ -77,11 +77,22 @@ for(const token of [
  "Needs evidence / connection",
  "Search previous software",
  "data-r512-system-launch",
- "working successors"
+ "working successors",
+ "softwareLaunch={activeRecovered}"
 ])assert.ok(root.includes(token),'R512 UI integration missing '+token);
 
 assert.equal(root.includes("button onClick={()=>open(x.route)}>Open {x.route}</button>"),false,'recovered software must not fall back to a generic route-only button');
 assert.ok(root.includes("launchRecovered(x)"),'recovered software must use the resolved execution launcher');
+
+const native=fs.readFileSync('src7/nativeCapabilityRegistry.tsx','utf8');
+for(const token of [
+ "softwareLaunch?:RecoveredExecutionCapsuleR512|null",
+ "data-r512-executor-route",
+ "data-r512-binding",
+ "MutationObserver",
+ "querySelector<HTMLButtonElement>('.o7-open-instrument')",
+ "autoOpen={Boolean(softwareLaunch&&softwareLaunch.route===route)}"
+])assert.ok(native.includes(token),'R512 native executor actuation missing '+token);
 
 const css=fs.readFileSync('src7/omega7.css','utf8');
 for(const token of [
