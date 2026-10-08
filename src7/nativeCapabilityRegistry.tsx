@@ -1,6 +1,7 @@
-import {lazy,Suspense,type ReactNode} from 'react';
+import {lazy,Suspense,useEffect,useRef,type ReactNode} from 'react';
 import type {OmegaRouteName} from '../src/navigationRegistry';
 import type {Omega7Depth} from './capabilityRegistry';
+import type {RecoveredExecutionCapsuleR512} from './capabilityMenuR512';
 import {Omega7Boundary} from './Omega7Boundary';
 import {HybridRuntimeSnapshotProviderR238} from '../src/HybridRuntimeSnapshotR238';
 
@@ -20,17 +21,39 @@ export function isOmega7NativeRoute(route:string):route is Omega7NativeRoute{
  return (OMEGA7_NATIVE_ROUTES as readonly string[]).includes(route);
 }
 
-export function Omega7NativeSurface({route,onNavigate,depth}:{route:Omega7NativeRoute;onNavigate:(route:string)=>void;depth:Omega7Depth}):ReactNode{
+export function Omega7NativeSurface({route,onNavigate,depth,softwareLaunch}:{route:Omega7NativeRoute;onNavigate:(route:string)=>void;depth:Omega7Depth;softwareLaunch?:RecoveredExecutionCapsuleR512|null}):ReactNode{
+ const hostRef=useRef<HTMLDivElement|null>(null);
+ useEffect(()=>{
+  if(!softwareLaunch||softwareLaunch.route!==route)return;
+  let complete=false,clicked=false;
+  const actuate=()=>{
+   if(complete)return true;
+   if(hostRef.current?.querySelector('.o7-native-failure')){complete=true;return true}
+   const full=hostRef.current?.querySelector<HTMLElement>('.o7-native-surface');
+   if(full){complete=true;full.scrollIntoView({block:'start',behavior:'smooth'});return true}
+   const button=hostRef.current?.querySelector<HTMLButtonElement>('.o7-open-instrument');
+   if(button&&!button.disabled&&!clicked){clicked=true;button.click()}
+   return false;
+  };
+  if(actuate())return;
+  const observer=new MutationObserver(()=>{if(actuate())observer.disconnect()});
+  if(hostRef.current)observer.observe(hostRef.current,{childList:true,subtree:true,attributes:true});
+  const interval=window.setInterval(()=>{if(actuate()){observer.disconnect();window.clearInterval(interval)}},350);
+  const timeout=window.setTimeout(()=>{observer.disconnect();window.clearInterval(interval)},30000);
+  return()=>{observer.disconnect();window.clearInterval(interval);window.clearTimeout(timeout)};
+ },[route,softwareLaunch?.recoveredId]);
  let surface:ReactNode=null;
  switch(route){
-  case'Command Center':surface=<CommandWorkspaceR439 onNavigate={onNavigate} depth={depth}/>;break;
-  case'Earth Now':surface=<EarthWorkspaceR438/>;break;
-  case'Matter Traversal':case'Immersive Traversal':case'Extreme Traversal':case'Traversal':surface=<TraversalWorkspaceR440 route={route} onNavigate={onNavigate}/>;break;
-  case'Relativity':case'Reality Lab':case'Atlas':case'Atlas Calculator':case'Scale Compiler':case'Infinity':surface=<ScienceWorkspaceR441 route={route} onNavigate={onNavigate} depth={depth}/>;break;
-  case'Forecast':case'Visual Instrument':case'Field':case'Data Motion':case'Convergence':surface=<ForecastVisualWorkspaceR442 route={route} onNavigate={onNavigate} depth={depth}/>;break;
-  case'Workspace':case'Projects':case'Memory':case'Create':case'Render Queue':case'Assets':surface=<WorkCreateWorkspaceR443 route={route} onNavigate={onNavigate} depth={depth}/>;break;
-  case'Hybrid Link':case'Quality Compiler':case'Build Out':case'Development':case'Kernel Intelligence':case'SAI Lab':surface=<DevelopmentComputeWorkspaceR444 route={route} onNavigate={onNavigate} depth={depth}/>;break;
-  case'Cockpit':case'Modes':case'Evidence & Proof':case'Archive Census':case'Archive Operators':case'Canon Evolution':case'Governance':case'Consolidation':case'Instructions':case'Plugins':case'Settings':case'System':case'Validation':case'System Atlas':case'Control Matrix':surface=<SystemEvidenceWorkspaceR445 route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Command Center':surface=<CommandWorkspaceR439 key={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Earth Now':surface=<EarthWorkspaceR438 key={route}/>;break;
+  case'Matter Traversal':case'Immersive Traversal':case'Extreme Traversal':case'Traversal':surface=<TraversalWorkspaceR440 key={route} route={route} onNavigate={onNavigate}/>;break;
+  case'Relativity':case'Reality Lab':case'Atlas':case'Atlas Calculator':case'Scale Compiler':case'Infinity':surface=<ScienceWorkspaceR441 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Forecast':case'Visual Instrument':case'Field':case'Data Motion':case'Convergence':surface=<ForecastVisualWorkspaceR442 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Workspace':case'Projects':case'Memory':case'Create':case'Render Queue':case'Assets':surface=<WorkCreateWorkspaceR443 key={route} route={route} onNavigate={onNavigate} depth={depth} autoOpen={Boolean(softwareLaunch&&softwareLaunch.route===route)}/>;break;
+  case'Hybrid Link':case'Quality Compiler':case'Build Out':case'Development':case'Kernel Intelligence':case'SAI Lab':surface=<DevelopmentComputeWorkspaceR444 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
+  case'Cockpit':case'Modes':case'Evidence & Proof':case'Archive Census':case'Archive Operators':case'Canon Evolution':case'Governance':case'Consolidation':case'Instructions':case'Plugins':case'Settings':case'System':case'Validation':case'System Atlas':case'Control Matrix':surface=<SystemEvidenceWorkspaceR445 key={route} route={route} onNavigate={onNavigate} depth={depth}/>;break;
  }
- return <HybridRuntimeSnapshotProviderR238><Omega7Boundary label={`OMEGA7 ${route}`}><Suspense fallback={<section className='o7-native-loading' role='status' aria-live='polite'>Opening {route}…</section>}>{surface}</Suspense></Omega7Boundary></HybridRuntimeSnapshotProviderR238>;
+ return <div ref={hostRef} className='o7-executor-host' data-r512-executor-route={route} data-r512-binding={softwareLaunch?.recoveredId||''}>
+  <HybridRuntimeSnapshotProviderR238><Omega7Boundary label={`OMEGA7 ${route}`}><Suspense fallback={<section className='o7-native-loading' role='status' aria-live='polite'>Opening {route}…</section>}>{surface}</Suspense></Omega7Boundary></HybridRuntimeSnapshotProviderR238>
+ </div>;
 }
