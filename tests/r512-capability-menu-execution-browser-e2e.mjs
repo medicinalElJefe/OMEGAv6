@@ -70,13 +70,13 @@ async function prove(browser,label,viewport){
  await previousSearch.fill('Omega Atlas Desktop');
  const desktopRow=recovered.locator('[data-r512-system-launch="SYS-002"]');
  await desktopRow.waitFor({state:'visible',timeout:15000});
- if(!(await desktopRow.innerText()).toLowerCase().includes('run current successor'))throw new Error(`${label}: Omega Atlas Desktop is still listed without a working successor action`);
+ if(!(await desktopRow.innerText()).toLowerCase().includes('open evidence gate'))throw new Error(`${label}: Omega Atlas Desktop must open its real System successor with the R168 evidence gate preserved`);
  await desktopRow.click();
  await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='System',{timeout:20000});
  const desktopCapsule=page.locator('.o7-executor-capsule[data-r512-executor="SYS-002"]');
  await desktopCapsule.waitFor({state:'visible',timeout:15000});
  const desktopCapsuleText=(await desktopCapsule.innerText()).toLowerCase();
- if(!desktopCapsuleText.includes('continue_core_runtime')||!desktopCapsuleText.includes('system ledger'))throw new Error(`${label}: Omega Atlas Desktop did not carry its current successor execution identity`);
+ if(!desktopCapsuleText.includes('continue_core_runtime')||!desktopCapsuleText.includes('system ledger')||!desktopCapsuleText.includes('evidence gated'))throw new Error(`${label}: Omega Atlas Desktop did not carry its current gated-successor execution identity`);
  if(await page.locator('[data-omega7-failure],.o7-native-failure').count())throw new Error(`${label}: Omega Atlas Desktop current successor failed to open`);
 
  await page.locator('.o7-native-toolbar button').first().click();
