@@ -25,20 +25,23 @@ export function Omega7NativeSurface({route,onNavigate,depth,softwareLaunch}:{rou
  const hostRef=useRef<HTMLDivElement|null>(null);
  useEffect(()=>{
   if(!softwareLaunch||softwareLaunch.route!==route)return;
-  let completed=false;
+  let completed=false,clicked=false;
   const actuate=()=>{
    if(completed)return true;
+   const failure=hostRef.current?.querySelector<HTMLElement>('.o7-native-failure');
+   if(failure){completed=true;return true}
    const surface=hostRef.current?.querySelector<HTMLElement>('.o7-native-surface');
    if(surface){completed=true;surface.scrollIntoView({block:'start',behavior:'smooth'});return true}
    const button=hostRef.current?.querySelector<HTMLButtonElement>('.o7-open-instrument');
-   if(button&&!button.disabled){button.click();return false}
+   if(button&&!button.disabled&&!clicked){clicked=true;button.click()}
    return false;
   };
   if(actuate())return;
   const observer=new MutationObserver(()=>{if(actuate())observer.disconnect()});
   if(hostRef.current)observer.observe(hostRef.current,{childList:true,subtree:true,attributes:true});
-  const timeout=window.setTimeout(()=>observer.disconnect(),15000);
-  return()=>{observer.disconnect();window.clearTimeout(timeout)};
+  const interval=window.setInterval(()=>{if(actuate()){observer.disconnect();window.clearInterval(interval)}},500);
+  const timeout=window.setTimeout(()=>{observer.disconnect();window.clearInterval(interval)},60000);
+  return()=>{observer.disconnect();window.clearInterval(interval);window.clearTimeout(timeout)};
  },[route,softwareLaunch?.bindingId]);
  let surface:ReactNode=null;
  switch(route){
