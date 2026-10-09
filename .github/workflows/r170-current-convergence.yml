@@ -131,3 +131,45 @@ jobs:
           echo 'R175 world truth → R176 intent → R177 mission → R178 contract → R179 authorization → R180 dispatch → R182/R186 verified-return continuity remains proved.'
           echo 'Hybrid/Build native execution, trained weights, factual truth, Earth truth, federation closure, solver validity, deployment and computed-photoreal reality remain separately proof-gated.'
           echo 'R170.3 remains low-cost OBSERVE/PROPOSE control; canonical deployment remains exclusively governed by ci.yml two-parent merge law.'
+
+  r517-phase-browser-candidate-proof:
+    if: github.event_name == 'pull_request'
+    needs: prove-current-authority-chain
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout exact PR candidate
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install and build exact candidate
+        run: |
+          npm install --no-fund
+          npm run build
+      - name: Install pinned browser proof harness
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Start exact candidate preview
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/r517-preview.log 2>&1 &
+          echo $! > /tmp/r517-preview.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4173/?omega7=1 >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/r517-preview.log
+          exit 1
+      - name: Prove R513 011/01-1 phase turns on desktop and mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r517-phase-turn-browser-e2e.mjs
+      - name: Stop preview
+        if: always()
+        run: |
+          if [ -f /tmp/r517-preview.pid ]; then kill "$(cat /tmp/r517-preview.pid)" || true; fi
