@@ -2988,6 +2988,319 @@
           "R203"
         ]
       }
+    },
+    {
+      "schema": "OMEGA_CLOUDFLARE_R388_DECLINE_SCAR_RECEIPT",
+      "machineId": "CLOUD-01",
+      "governedContract": "OMEGA_GOVERNED_SELFBUILD_CONTRACT_R245",
+      "generatorContract": "R388_DECLINE_SCAR_CARRY",
+      "observationGeneration": 2,
+      "baseSha": "cff3a614c8bc8d6d6d351491c905619c78d8fbd9",
+      "branch": "cloud/evolution-r388-scar-2-cff3a614",
+      "status": "DECLINE_SCARS_PENDING_PROOF",
+      "sourceAdvance": false,
+      "advancedItemIdsChanged": false,
+      "canonicalAdmission": false,
+      "directProductionMutation": false,
+      "expectedProofs": [
+        "R241 Archive Convergence Visual Intelligence",
+        "OMEGA Cloud Bridge CI"
+      ],
+      "declinedItemScars": [
+        {
+          "itemId": "R388-A-02",
+          "section": "A",
+          "acceptanceContractRevision": "R450",
+          "state": "SEMANTIC_ACCEPTANCE_REJECTED",
+          "reasons": [
+            "SEMANTIC_REQUIRED_CHANGED_TOKENS_MISSING:OMEGA_RENDERER_CONTRACT,ASSEMBLY"
+          ],
+          "attempts": [
+            {
+              "attempt": 1,
+              "state": "VALIDATED_BOUNDED_PATCH",
+              "accepted": true,
+              "reasons": [],
+              "validation": {
+                "valid": true,
+                "changedChars": 672,
+                "fileCount": 1
+              },
+              "proposal": {
+                "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+                "residualId": "R388-A-02",
+                "files": [
+                  {
+                    "path": "src/capabilityAuthority.ts",
+                    "preimageSha": "746e631107b09714aa183cdf075bd424de93bd9f",
+                    "replacementCount": 1
+                  }
+                ],
+                "canonicalAdmission": false,
+                "directProductionMutation": false,
+                "expectedProofs": [
+                  "R241 Archive Convergence Visual Intelligence",
+                  "OMEGA Cloud Bridge CI"
+                ],
+                "workerContextId": "R503:cff3a614c8bc8d6d6d351491c905619c78d8fbd9:R457:R170.2:R240:72",
+                "calculusContextId": "R503:cff3a614c8bc8d6d6d351491c905619c78d8fbd9:R457:R170.2:R240:72",
+                "appliedCalculus": [
+                  "SENSE",
+                  "NORMALIZE",
+                  "PARTITION"
+                ],
+                "selectedAlternative": "Alternative 2: Modify an existing capability contract",
+                "decision": "TURN",
+                "decisionRationale": "The selected alternative modifies an existing capability contract to improve render continuity and reduce burden, which aligns with the residual's purpose and expected proofs.",
+                "developmentalDelta": {
+                  "authorityFragmentationRisk": 0.05,
+                  "autonomyGain": 0.1,
+                  "capabilityGain": 0.2,
+                  "coherenceGain": 0.1,
+                  "duplicationRisk": 0.05,
+                  "intendedResidual": "R388-A-02",
+                  "recoverabilityGain": 0.1,
+                  "regressionRisk": 0.05,
+                  "targetCapability": "R388-A-02",
+                  "usabilityGain": 0.1
+                }
+              }
+            }
+          ],
+          "rejectionHistory": [],
+          "reformulated": false,
+          "semanticAcceptance": {
+            "changedChars": 407,
+            "missingTokens": [
+              "OMEGA_RENDERER_CONTRACT",
+              "ASSEMBLY"
+            ],
+            "contract": {
+              "revision": "R450",
+              "minChangedChars": 320,
+              "requiredChangedTokens": [
+                "OMEGA_RENDERER_CONTRACT",
+                "FIELD",
+                "SURFACE",
+                "SKIN",
+                "GRAPH",
+                "ASSEMBLY",
+                "MATERIAL",
+                "EVIDENCE",
+                "CANON",
+                "TRAVERSAL"
+              ],
+              "rationale": "A-02 requires an explicit one-authority renderer/view contract covering every canonical view lens; an index/map alias or isolated type addition is not completion."
+            }
+          }
+        },
+        {
+          "itemId": "R388-A-03",
+          "section": "A",
+          "acceptanceContractRevision": "R450",
+          "state": "SEMANTIC_ACCEPTANCE_REJECTED",
+          "reasons": [
+            "SEMANTIC_PATCH_TOO_SHALLOW_100_LT_320",
+            "SEMANTIC_REQUIRED_CHANGED_TOKENS_MISSING:CapabilityAvailabilityState,READY,AVAILABLE_NOT_CONFIGURED,OPTIONAL_NOT_INSTALLED,DEGRADED,FAILED"
+          ],
+          "attempts": [
+            {
+              "attempt": 1,
+              "state": "REJECTED_BY_R314_POLICY",
+              "accepted": false,
+              "reasons": [
+                "FILE_1_REPLACEMENT_1_PREIMAGE_OCCURRENCES_0"
+              ],
+              "validation": {
+                "valid": false,
+                "changedChars": 54,
+                "fileCount": 1
+              },
+              "proposal": {
+                "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+                "residualId": "R388-A-03",
+                "files": [
+                  {
+                    "path": "src/capabilityAuthority.ts",
+                    "preimageSha": "746e631107b09714aa183cdf075bd424de93bd9f",
+                    "replacementCount": 1
+                  }
+                ],
+                "canonicalAdmission": false,
+                "directProductionMutation": false,
+                "expectedProofs": [
+                  "R241 Archive Convergence Visual Intelligence",
+                  "OMEGA Cloud Bridge CI"
+                ],
+                "workerContextId": "R503:cff3a614c8bc8d6d6d351491c905619c78d8fbd9:R457:R170.2:R240:72",
+                "calculusContextId": "R503:cff3a614c8bc8d6d6d351491c905619c78d8fbd9:R457:R170.2:R240:72",
+                "appliedCalculus": [
+                  "SENSE",
+                  "NORMALIZE",
+                  "PARTITION"
+                ],
+                "selectedAlternative": "CapabilityStatesNormalized",
+                "decision": "TURN",
+                "decisionRationale": "The proposed change normalizes capability states, improving coherence and usability.",
+                "developmentalDelta": {
+                  "authorityFragmentationRisk": 0.05,
+                  "autonomyGain": 0.1,
+                  "capabilityGain": 0.2,
+                  "coherenceGain": 0.1,
+                  "duplicationRisk": 0.05,
+                  "intendedResidual": "R388-A-03",
+                  "recoverabilityGain": 0.1,
+                  "regressionRisk": 0.05,
+                  "targetCapability": "CapabilityStatesNormalized",
+                  "usabilityGain": 0.1
+                }
+              }
+            },
+            {
+              "attempt": 2,
+              "state": "VALIDATED_BOUNDED_PATCH",
+              "accepted": true,
+              "reasons": [],
+              "validation": {
+                "valid": true,
+                "changedChars": 148,
+                "fileCount": 1
+              },
+              "proposal": {
+                "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+                "residualId": "R388-A-03",
+                "files": [
+                  {
+                    "path": "src/capabilityAuthority.ts",
+                    "preimageSha": "746e631107b09714aa183cdf075bd424de93bd9f",
+                    "replacementCount": 1
+                  }
+                ],
+                "canonicalAdmission": false,
+                "directProductionMutation": false,
+                "expectedProofs": [
+                  "R241 Archive Convergence Visual Intelligence",
+                  "OMEGA Cloud Bridge CI"
+                ],
+                "workerContextId": "R503:cff3a614c8bc8d6d6d351491c905619c78d8fbd9:R457:R170.2:R240:72",
+                "calculusContextId": "R503:cff3a614c8bc8d6d6d351491c905619c78d8fbd9:R457:R170.2:R240:72",
+                "appliedCalculus": [
+                  "SENSE",
+                  "NORMALIZE",
+                  "PARTITION"
+                ],
+                "selectedAlternative": "CapabilityStatesNormalized",
+                "decision": "TURN",
+                "decisionRationale": "The proposed change normalizes capability states, improving coherence and usability.",
+                "developmentalDelta": {
+                  "authorityFragmentationRisk": 0.05,
+                  "autonomyGain": 0.1,
+                  "capabilityGain": 0.2,
+                  "coherenceGain": 0.1,
+                  "duplicationRisk": 0.05,
+                  "intendedResidual": "R388-A-03",
+                  "recoverabilityGain": 0.1,
+                  "regressionRisk": 0.05,
+                  "targetCapability": "CapabilityStatesNormalized",
+                  "usabilityGain": 0.1
+                }
+              }
+            }
+          ],
+          "rejectionHistory": [
+            {
+              "attempt": 1,
+              "state": "REJECTED_BY_R314_POLICY",
+              "accepted": false,
+              "reasons": [
+                "FILE_1_REPLACEMENT_1_PREIMAGE_OCCURRENCES_0"
+              ],
+              "validation": {
+                "valid": false,
+                "changedChars": 54,
+                "fileCount": 1
+              },
+              "proposal": {
+                "schema": "OMEGA_AUTONOMOUS_REPAIR_POLICY_R314",
+                "residualId": "R388-A-03",
+                "files": [
+                  {
+                    "path": "src/capabilityAuthority.ts",
+                    "preimageSha": "746e631107b09714aa183cdf075bd424de93bd9f",
+                    "replacementCount": 1
+                  }
+                ],
+                "canonicalAdmission": false,
+                "directProductionMutation": false,
+                "expectedProofs": [
+                  "R241 Archive Convergence Visual Intelligence",
+                  "OMEGA Cloud Bridge CI"
+                ],
+                "workerContextId": "R503:cff3a614c8bc8d6d6d351491c905619c78d8fbd9:R457:R170.2:R240:72",
+                "calculusContextId": "R503:cff3a614c8bc8d6d6d351491c905619c78d8fbd9:R457:R170.2:R240:72",
+                "appliedCalculus": [
+                  "SENSE",
+                  "NORMALIZE",
+                  "PARTITION"
+                ],
+                "selectedAlternative": "CapabilityStatesNormalized",
+                "decision": "TURN",
+                "decisionRationale": "The proposed change normalizes capability states, improving coherence and usability.",
+                "developmentalDelta": {
+                  "authorityFragmentationRisk": 0.05,
+                  "autonomyGain": 0.1,
+                  "capabilityGain": 0.2,
+                  "coherenceGain": 0.1,
+                  "duplicationRisk": 0.05,
+                  "intendedResidual": "R388-A-03",
+                  "recoverabilityGain": 0.1,
+                  "regressionRisk": 0.05,
+                  "targetCapability": "CapabilityStatesNormalized",
+                  "usabilityGain": 0.1
+                }
+              }
+            }
+          ],
+          "reformulated": true,
+          "semanticAcceptance": {
+            "changedChars": 100,
+            "missingTokens": [
+              "CapabilityAvailabilityState",
+              "READY",
+              "AVAILABLE_NOT_CONFIGURED",
+              "OPTIONAL_NOT_INSTALLED",
+              "DEGRADED",
+              "FAILED"
+            ],
+            "contract": {
+              "revision": "R450",
+              "minChangedChars": 320,
+              "requiredChangedTokens": [
+                "CapabilityAvailabilityState",
+                "READY",
+                "AVAILABLE_NOT_CONFIGURED",
+                "OPTIONAL_NOT_INSTALLED",
+                "DEGRADED",
+                "FAILED"
+              ],
+              "rationale": "A-03 requires a real normalized capability-availability contract and mapping, not adding one label to the predecessor reality vocabulary."
+            }
+          }
+        }
+      ],
+      "createdAt": "2026-10-09T06:18:49.416Z",
+      "authorityBoundaries": {
+        "canonAdmission": "R125",
+        "dispatch": "R147",
+        "durableHistory": "R146",
+        "hybridReturnProof": "R141",
+        "productionDeploymentWorkflow": "ci.yml",
+        "evolutionHost": "CLOUDFLARE_WORKER",
+        "retiredDurableObjects": [
+          "R201",
+          "R203"
+        ]
+      }
     }
   ],
   "r388CanonicalAdvancements": [
@@ -3064,7 +3377,7 @@
       "directProductionMutation": false
     }
   ],
-  "r388ObservationGeneration": 1,
+  "r388ObservationGeneration": 2,
   "r388TruthCorrections": [
     {
       "schema": "OMEGA_R388_TRUTH_CORRECTION_R476",
