@@ -53,6 +53,10 @@ jobs:
       - name: Prove bounded active workflow topology and R170.3 self-build governance
         run: |
           node scripts/verify_workflow_topology_r170.mjs
+          node --check scripts/r515-cloud01-cycle-diagnostics.mjs
+          node tests/r516-cloud01-diagnostics-truth-invariants.mjs
+          node tests/r516-cloud01-scheduler-boundary-invariants.mjs
+          node scripts/r515-cloud01-cycle-diagnostics.mjs
           node tests/r170-self-build-governor-invariants.mjs
       - name: Prove current R180 living-world execution chain
         run: |
