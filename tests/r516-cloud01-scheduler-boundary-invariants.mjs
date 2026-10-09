@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const read=path=>fs.readFileSync(path,'utf8');
+const config=read('wrangler.evolution-machine-r223.jsonc');
+const worker=read('cloudflare/workerR223.js');
+const canonical=read('src/workerR116.js');
+const workflow=read('.github/workflows/r223-cloudflare-evolution.yml');
+assert.match(config,/"main": "cloudflare\/workerR223.js"/);
+assert.match(config,/"crons": \["17 \* \* \* \*"\]/);
+assert.match(worker,/async scheduled\(/);
+assert.match(worker,/ctx\.waitUntil/);
+assert.match(worker,/console\.error/);
+assert.doesNotMatch(canonical,/async scheduled\(/);
+assert.match(workflow,/workflow_dispatch:/);
+assert.doesNotMatch(workflow,/^\s*push:/m);
+console.log('R516 CLOUD-01 scheduler source contract PASS; deployed cron invocation remains unverified.');
