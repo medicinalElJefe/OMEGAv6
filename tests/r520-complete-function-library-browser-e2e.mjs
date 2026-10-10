@@ -25,7 +25,15 @@ async function check(browser,label,viewport){
   await trigger.click();
   const pane=page.locator('.o7-r520-library[aria-label="OMEGA complete function library"]');
   await pane.waitFor({state:'visible',timeout:15000});
-  if(!(await pane.innerText()).includes('44 Current tools')||!(await pane.innerText()).includes('72 Recovered lineages')||!(await pane.innerText()).includes('100 Historical systems'))throw new Error(label+': one or more source-inventory counts are hidden');
+  // A responsive tab may put its number and label on separate lines; verify the actual
+  // visible tab and its exact count instead of relying on an incidental whitespace layout.
+  for(const [id,count,name] of [['ROUTES','44','Current tools'],['RECOVERED','72','Recovered lineages'],['HISTORY','100','Historical systems'],['OPTIONS','36','Menu definitions'],['CONTRACTS','18','Capability contracts']]){
+    const tab=pane.locator('button[data-r520-tab="'+id+'"]');
+    if(!(await tab.isVisible()))throw new Error(label+': inventory tab is not visible: '+id);
+    const countText=(await tab.locator('strong').innerText()).trim();
+    const visibleText=(await tab.innerText()).replace(/\s+/g,' ').trim();
+    if(countText!==count||!visibleText.includes(name))throw new Error(label+': incorrect source inventory label/count for '+id+': '+visibleText);
+  }
   async function expandAll(){
    const toggles=pane.locator('.o7-r520-group-title');
    const n=await toggles.count();
