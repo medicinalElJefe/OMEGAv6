@@ -61,6 +61,9 @@ try{
    try{
     await page.goto(`${base}/?r499-browser=${Date.now()}-${label}-${attempt}`,{waitUntil:'domcontentloaded',timeout:45000});
     await app.waitFor({state:'visible',timeout:10000});
+    const r71WaitMs=attempt===1?12000:3500;
+    let r71Wait='ATTACHED';
+    try{await page.locator('.o7-home-established main.r71-home[data-r510-embedded="true"]').waitFor({state:'attached',timeout:r71WaitMs})}catch{r71Wait='NOT_ATTACHED'};
     // R510 intentionally embeds the historical R71 visual instrument within OMEGA7.
     // Reject an independent OMEGA6 home, never the lawful R71 descendant.
     const legacy=await page.locator('main.r71-home').evaluateAll(nodes=>nodes.filter(node=>!node.closest('.o7-app[data-omega7="true"]')).length);
@@ -76,7 +79,7 @@ try{
       return{exact:receipt?.schema==='OMEGA_GOVERNED_BUILD_RECEIPT_V1'&&source===expected&&promoted===expected,detail:`source ${source||'NONE'} promoted ${promoted||'NONE'}`};
      }catch(error){return{exact:false,detail:`fetch ${error instanceof Error?error.message:String(error)}`}}
     },expectedSha);
-    lastBrowserState=`standaloneLegacy=${legacy} embeddedR71=${embedded} marker=${marker} receipt=${laneReceipt.detail}`;
+    lastBrowserState=`standaloneLegacy=${legacy} embeddedR71=${embedded} marker=${marker} receipt=${laneReceipt.detail} r71Wait=${r71Wait} pageErrors=${pageErrors.slice(-2).join(' | ')||'NONE'} assetFailures=${assetFailures.slice(-2).join(' | ')||'NONE'} requestFailures=${requestFailures.slice(-2).join(' | ')||'NONE'} boundaryErrors=${boundaryErrors.slice(-2).join(' | ')||'NONE'}`;
     if(!legacy&&embedded>0&&marker>0&&laneReceipt.exact){
      browserConverged=true;
      console.log(`R499 R489 BROWSER EDGE PASS · ${label} · exact SHA ${expectedSha} · attempt ${attempt}/${browserAttempts}`);

@@ -128,6 +128,10 @@ jobs:
           OMEGA_E2E_URL: http://127.0.0.1:4173
           OMEGA_R520_USE_FIXTURES: '1'
         run: node tests/r520-complete-function-library-browser-e2e.mjs
+      - name: Prove R524 deferred R71 visual home with delayed real JS on desktop and mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r524-lazy-visual-home-browser-e2e.mjs
       - name: Stop OMEGA7 parity preview
         if: always()
         shell: bash
