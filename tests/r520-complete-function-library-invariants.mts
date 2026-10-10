@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import {OMEGA7_CAPABILITIES,OMEGA7_DOMAINS} from '../src7/capabilityRegistry.ts';
 import {R486_VISIBLE_CAPABILITIES} from '../src7/visibleCapabilityConvergenceR486.ts';
 import {RECOVERED_SYSTEM_EXECUTION_R512} from '../src/recoveredSoftwareExecutionR512.ts';
+import {MASTER_MENU_OPTIONS_R83,MASTER_CAPABILITIES_R83,routeForMenuOptionR83,routeForCapabilityR83} from '../src/softwareMasterLedgerR83.ts';
 import {R512_DOMAIN_MENU} from '../src7/capabilityMenuR512.ts';
 const root=readFileSync('src7/Omega7Root.tsx','utf8');
 const library=readFileSync('src7/capabilityLibraryR520.tsx','utf8');
@@ -12,16 +13,28 @@ assert.equal(R512_DOMAIN_MENU.length,OMEGA7_DOMAINS.length,'six canonical top-le
 assert.equal(OMEGA7_CAPABILITIES.length,44,'44 current tools cannot be reduced');
 assert.equal(R486_VISIBLE_CAPABILITIES.length,72,'72 source lineages cannot be hidden');
 assert.equal(RECOVERED_SYSTEM_EXECUTION_R512.length,100,'100 historical records cannot be collapsed into names-only search');
+assert.equal(MASTER_MENU_OPTIONS_R83.length,36,'36 original menu option definitions require a distinct truthful collection');
+assert.equal(MASTER_CAPABILITIES_R83.length,18,'18 historical capability contracts must remain discoverable');
+assert.equal(new Set(MASTER_MENU_OPTIONS_R83.map(x=>x.optionId)).size,36);
+assert.equal(new Set(MASTER_CAPABILITIES_R83.map(x=>x.id)).size,18);
 assert.equal(new Set(OMEGA7_CAPABILITIES.map(x=>x.legacyRoute)).size,44);
 assert.equal(new Set(R486_VISIBLE_CAPABILITIES.map(x=>x.id)).size,72);
 assert.equal(new Set(RECOVERED_SYSTEM_EXECUTION_R512.map(x=>x.systemId)).size,100);
 const routeSet=new Set(OMEGA7_CAPABILITIES.map(x=>x.legacyRoute));
 assert.ok(R486_VISIBLE_CAPABILITIES.every(x=>routeSet.has(x.route)),'recovered functions must have a currently named route');
 assert.ok(RECOVERED_SYSTEM_EXECUTION_R512.every(x=>routeSet.has(x.route)),'historical systems must map to declared successor or inspection route');
+assert.ok(MASTER_MENU_OPTIONS_R83.every(x=>routeSet.has(routeForMenuOptionR83(x))),'menu option inspection route cannot invent current executor');
+assert.ok(MASTER_CAPABILITIES_R83.every(x=>routeSet.has(routeForCapabilityR83(x))),'contract inspection route cannot invent current executor');
 for(const [needle,meaning] of [
  ['OMEGA7_CAPABILITIES.filter','source-registry route enumeration'],
  ['R486_VISIBLE_CAPABILITIES.filter','full recovered capability enumeration'],
  ['RECOVERED_SYSTEM_EXECUTION_R512.filter','full historical inventory enumeration'],
+ ['MASTER_MENU_OPTIONS_R83.filter','historic menu option inventory'],
+ ['MASTER_CAPABILITIES_R83.filter','historic capability contract inventory'],
+ ['data-r520-option={x.optionId}','individual menu option provenance'],
+ ['data-r520-contract={x.id}','individual historical contract provenance'],
+ ['Inspect associated workspace','a mapped workspace is explicitly not an operation executor'],
+ ["do not prove those functions execute",'missing implementation truth remains visible'],
  ['data-r520-route={x.legacyRoute}','route-specific open surface'],
  ['data-r520-recovered={x.id}','source identity of recovered capability'],
  ['data-r520-historical={x.systemId}','source identity of historical software'],
