@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const source=fs.readFileSync('src7/SourceExecutionWorkspaceR531.tsx','utf8');
+const science=fs.readFileSync('src7/workspaces/ScienceWorkspaceR441.tsx','utf8');
+for(const executor of ['VISUALIZATION','TRAVERSAL','FORECAST','SAI_HYBRID'])assert.ok(source.includes(executor),'executor option missing: '+executor);
+assert.ok(source.includes('executeSourceBoundR530({proposal,address})'),'R531 must invoke R530, not fabricate a receipt');
+assert.ok(source.includes('authorityClosed:false')&&source.includes('proofSurvives:false'),'UI cannot assert production proof from local click');
+assert.ok(source.includes('sourceHead:\'\''),'UI must not invent a tested SHA');
+assert.ok(science.includes('<SourceExecutionWorkspaceR531 address={address}/>'),'R531 must be mounted');
+assert.ok(science.includes('<FullSphereInstrumentR525 address={address} onAddress={commit}/>'),'Full Sphere must remain available');
+assert.ok(science.includes('<AtlasViewport state={state}'),'historical Atlas viewport must remain available');
+console.log('R531 source admission UI conservation PASS');
