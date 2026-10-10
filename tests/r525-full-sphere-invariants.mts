@@ -29,6 +29,10 @@ const now=selectSphereAddressR525(11498,'NOW',144),past=selectSphereAddressR525(
 assert.equal(now,11498);assert.equal(past,11497);assert.equal(future,144);
 assert.equal(selectSphereAddressR525(0,'HISTORY',5),20735);
 assert.equal(selectSphereAddressR525(400,'FORECAST',Infinity),0,'unproved forecasts must not silently select a random branch');
+for(const state of [0,1728,11498,20735])for(const yaw of [-180,-90,0,90,180])for(const fold of [0,.5,1]){
+ const mesh=fullSphereProjectionR525({address:state,...payload,yaw,fold,contradiction:1});
+ for(const shell of mesh.shells)for(const p of shell.points)assert.ok(p.x>=0&&p.x<=960&&p.y>=0&&p.y<=620,'full chamber geometry must remain inside the visual stage: '+JSON.stringify({state,yaw,fold,p}));
+}
 const frame=fullSphereProjectionR525({address:11498,...payload});
 assert.notDeepEqual(frame.shells[0].points,fullSphereProjectionR525({address:11498,...payload,yaw:72}).shells[0].points,'camera rotation must really alter geometry');
 assert.notDeepEqual(frame.shells[0].points,fullSphereProjectionR525({address:11498,...payload,fold:0}).shells[0].points,'fold control must really alter projected geometry');
