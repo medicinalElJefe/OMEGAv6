@@ -13,6 +13,22 @@ async function mockBoundedApis(page){
  await page.route('**/api/archive**',r=>json(r,{items:[],count:0,status:'RETURNED'}));
  await page.route('**/omega-federation.json',r=>json(r,{schema:'OMEGA_R520_TEST_TRANSPORT_FIXTURE',nodes:[]}));
 }
+async function assertHeaderHitboxes(page,label){
+ const result=await page.evaluate(()=>{
+  const brand=document.querySelector('.o7-brand'),library=document.querySelector('[data-r520-full-library="open"]');
+  if(!(brand instanceof HTMLElement)||!(library instanceof HTMLElement))return {missing:true};
+  const b=brand.getBoundingClientRect(),l=library.getBoundingClientRect();
+  const hit=r=>document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.closest('button');
+  return {width:innerWidth,brand:{x:b.left,width:b.width},library:{x:l.left,width:l.width},
+   brandHit:hit(b)===brand,libraryHit:hit(l)===library,
+   separated:b.right<=l.left||l.right<=b.left||b.bottom<=l.top||l.bottom<=b.top,
+   inViewport:b.left>=0&&l.right<=innerWidth&&b.right<=innerWidth};
+ });
+ if(result.missing||!result.brandHit||!result.libraryHit||!result.separated||!result.inViewport)
+  throw new Error(label+': mobile OMEGA home/function header click geometry regression: '+JSON.stringify(result));
+ await page.locator('.o7-brand').click({timeout:5000});
+ return result;
+}
 async function check(browser,label,viewport){
  const context=await browser.newContext({viewport,deviceScaleFactor:label==='mobile'?2:1,extraHTTPHeaders:{'cache-control':'no-cache','pragma':'no-cache'}});
  const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
@@ -22,6 +38,13 @@ async function check(browser,label,viewport){
   await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:30000});
   const trigger=page.locator('button[data-r520-full-library="open"]');
   await trigger.waitFor({state:'visible',timeout:20000});
+  await assertHeaderHitboxes(page,label+' initial');
+  if(label==='mobile'){
+   await page.setViewportSize({width:320,height:700});
+   await assertHeaderHitboxes(page,label+' narrow 320px');
+   await page.setViewportSize(viewport);
+   await assertHeaderHitboxes(page,label+' restored 390px');
+  }
   await trigger.click();
   const pane=page.locator('.o7-r520-library[aria-label="OMEGA complete function library"]');
   await pane.waitFor({state:'visible',timeout:15000});
@@ -79,6 +102,7 @@ async function check(browser,label,viewport){
   await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Atlas',{timeout:20000});
   if(await page.locator('.o7-r520-library').count())throw new Error(label+': drawer left open over running Atlas');
   await page.locator('.o7-native-host').waitFor({state:'visible',timeout:20000});
+  await assertHeaderHitboxes(page,label+' after lazy function library loaded');
   if(await page.locator('.o7-native-failure').count())throw new Error(label+': recovered menu route opens broken Atlas');
   if(errors.length)throw new Error(label+': uncaught browser error '+errors.join(' | ').slice(0,1200));
   console.log('R520 '+label+' COMPLETE FUNCTION LIBRARY PASS · 44 routes · 72 lineages · 100 historical records · source filters · archived donor disclosure · remembered-name search · real Atlas launch');
