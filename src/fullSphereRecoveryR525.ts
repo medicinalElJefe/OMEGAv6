@@ -41,7 +41,7 @@ export function fullSphereProjectionR525(input:{
  const C=clamp(input.continuity,0,1),P=clamp(input.plasticity,0,1),scar=clamp(input.scar,0,1),q=clamp(input.contradiction,0,1);
  const amplitude=input.lens==='CONTINUITY'?C:input.lens==='SCAR'?scar:input.lens==='CONTRADICTION'?q:fold;
  const deformation=fold*(.12+.16*q);
- const cosY=Math.cos(yaw),sinY=Math.sin(yaw),cosP=Math.cos(pitch),sinP=Math.sin(pitch);
+ const cosP=Math.cos(pitch),sinP=Math.sin(pitch);
  const shells=[.98,.69,.41].map((size,k)=>{
   const points=R525_DODECA_VERTICES.map(([x,y,z],i)=>{
    const phase=(R_reg-1)*Math.PI/36+(L_lens-1)*Math.PI/72+k*.2;
