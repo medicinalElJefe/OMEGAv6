@@ -16,6 +16,7 @@ import {R519VisualNavigation} from './visualNavigationR519';
 import './omega7.css';
 
 const OmegaHomeR71=lazy(()=>import('../src/OmegaHomeR71'));
+const R520CapabilityLibrary=lazy(()=>import('./capabilityLibraryR520').then(m=>({default:m.R520CapabilityLibrary})));
 
 type Props={onOpenLegacyRoute:(route:string)=>void;onExitToV6:()=>void};
 
@@ -28,6 +29,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const inputRef=useRef<HTMLInputElement|null>(null);
  const [development,setDevelopment]=useState<R468Snapshot|null>(null);
  const [recoveredOpen,setRecoveredOpen]=useState(false);
+ const [libraryOpen,setLibraryOpen]=useState(false);
  const [recoveredFamily,setRecoveredFamily]=useState<VisibleFamilyR486|'ALL'>('ALL');
  const [previousSoftwareQuery,setPreviousSoftwareQuery]=useState('');
  const [previousSoftwareResults,setPreviousSoftwareResults]=useState<readonly R512RecoveredSystemResolution[]>([]);
@@ -52,7 +54,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  useEffect(()=>{
   const key=(event:KeyboardEvent)=>{
    if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();dispatch({type:'COMMAND',open:true});queueMicrotask(()=>inputRef.current?.focus())}
-   if(event.key==='Escape'){dispatch({type:'COMMAND',open:false});dispatch({type:'STATUS',open:false})}
+   if(event.key==='Escape'){dispatch({type:'COMMAND',open:false});dispatch({type:'STATUS',open:false});setLibraryOpen(false)}
   };
   window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);
  },[dispatch]);
@@ -67,6 +69,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const open=(route:string)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route);
   if(!cap)return;
+  setLibraryOpen(false);
   dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
   dispatch({type:'COMMAND',open:false});
   if(!isOmega7NativeRoute(cap.legacyRoute))onOpenLegacyRoute(cap.legacyRoute);
@@ -90,6 +93,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    <button className='o7-brand' onClick={()=>dispatch({type:'DOMAIN',domain:'HOME'})}><b>OMEGA</b><span>7</span></button>
    <button className='o7-search-trigger' onClick={()=>{dispatch({type:'COMMAND',open:true});queueMicrotask(()=>inputRef.current?.focus())}}>Search or ask OMEGA <kbd>Ctrl K</kbd></button>
    <div className='o7-top-actions'>
+    <button type='button' className='o7-r520-toggle' data-r520-full-library='open' aria-label='All OMEGA functions' onClick={()=>setLibraryOpen(true)}><span aria-hidden='true'>◈</span><strong>All Functions</strong></button>
     <select aria-label='Interface depth' value={state.depth} onChange={e=>dispatch({type:'DEPTH',depth:e.target.value as any})}>
      <option value='STANDARD'>Standard</option><option value='ADVANCED'>Advanced</option><option value='CANON'>Canon</option>
     </select>
@@ -172,6 +176,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
     </>}
   </main>
 
+  {libraryOpen&&<Suspense fallback={<div className='o7-r520-backdrop'><section className='o7-native-loading' role='status'>Loading complete OMEGA function library…</section></div>}><R520CapabilityLibrary onClose={()=>setLibraryOpen(false)} onRoute={open} onRecovered={launchRecovered} onHistorical={launchRecoveredSystem}/></Suspense>}
   {state.statusOpen&&<section className='o7-status' role='dialog' aria-label='System status'>
    <header><div><b>System status</b><span>{ready} ready · {held} limited · {failed} failed</span></div><button onClick={()=>dispatch({type:'STATUS',open:false})}>Close</button></header>
    <div>{healthRows.map(([key,value])=><article key={key} data-health={String(value).toLowerCase()}><span>{key.replaceAll(/([A-Z])/g,' $1')}</span><b>{value}</b></article>)}</div>
