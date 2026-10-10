@@ -14,6 +14,8 @@ export default function FullSphereInstrumentR525({address,onAddress}:Props){
  const[yaw,setYaw]=useState(24);
  const[fold,setFold]=useState(.18);
  const[playing,setPlaying]=useState(false);
+ const[visibleShells,setVisibleShells]=useState<readonly boolean[]>([true,true,true]);
+ const toggleShell=(shell:number)=>setVisibleShells(current=>current.map((visible,i)=>i===shell?!visible:visible));
  useEffect(()=>{if(!playing)return;const id=window.setInterval(()=>setYaw(v=>v>=179?-179:v+1),62);return()=>window.clearInterval(id)},[playing]);
  const current=useMemo(()=>corpusState(address),[address]);
  const selected=useMemo(()=>selectSphereAddressR525(address,time,Number(current.autoPing.dataNext)),[address,time,current.autoPing.dataNext]);
@@ -21,7 +23,7 @@ export default function FullSphereInstrumentR525({address,onAddress}:Props){
  const frame=useMemo(()=>fullSphereProjectionR525({address:selected,continuity:packet.metrics.continuity,plasticity:packet.metrics.plasticity,scar:packet.metrics.scar,contradiction:packet.metrics.contradiction,yaw,fold,lens}),[selected,packet,yaw,fold,lens]);
  const color=lens==='SCAR'?'#d4a8ba':lens==='CONTRADICTION'?'#d3a67a':lens==='FOLD'?'#84cbd0':'#d5d4bb';
  const timeNote=time==='HISTORY'?'Previous address in the enumerated lattice. This is NOT an observation of historical time.':time==='FORECAST'?'Declared autoPing successor projected from the model. No external future measurement is claimed.':'Current loaded source-packet address. Observation is not inferred from address geometry.';
- const reset=()=>{setYaw(24);setFold(.18);setPlaying(false);setLens('CONTINUITY');setTime('NOW')};
+ const reset=()=>{setYaw(24);setFold(.18);setPlaying(false);setLens('CONTINUITY');setTime('NOW');setVisibleShells([true,true,true])};
  return <section className='r525-full-sphere' data-r525-sphere={R525_SPHERE_SCHEMA} data-r525-source-family={R525_ARCHIVE_FAMILY} data-r525-active-address={selected} aria-label='Full Sphere state-bound visual instrument'>
   <div className='r525-head'>
    <div><span className='r525-eyebrow'>AG-008 · Historical visual grammar recovery · R525</span><h2>Full Sphere <i>Instrument</i></h2><p>Exact 20,736-address antipodal topology, three nested dodecahedral projections and model-state-bound visual channels. The historical six-video grammar is the recovery reference—not a claim of pixel-equivalent reconstruction.</p></div>
@@ -38,7 +40,7 @@ export default function FullSphereInstrumentR525({address,onAddress}:Props){
      {Array.from({length:6},(_,i)=><ellipse key={'orbit'+i} cx='480' cy='310' rx={120+i*52} ry={34+i*23} fill='none' stroke='url(#r525-meridian)' strokeOpacity={.14+i*.025} strokeDasharray={i%2?'3 14':'none'} transform={'rotate('+(i*17-36)+' 480 310)'}/>)}
      <circle cx='480' cy='310' r='248' fill='none' stroke='#9bbcc1' strokeOpacity='.15'/>
      <path d='M480 62V558M232 310H728' stroke='#92aeb7' strokeOpacity='.13' strokeDasharray='5 16'/>
-     {frame.shells.map((shell)=><g key={shell.shell} data-r525-shell={shell.shell} stroke={color} strokeOpacity={shell.opacity} strokeWidth={shell.weight} fill='none' strokeLinejoin='round' strokeLinecap='round'>
+     {frame.shells.filter(shell=>visibleShells[shell.shell]).map((shell)=><g key={shell.shell} data-r525-shell={shell.shell} stroke={color} strokeOpacity={shell.opacity} strokeWidth={shell.weight} fill='none' strokeLinejoin='round' strokeLinecap='round'>
        {shell.edges.map(([a,b])=><line key={a+'-'+b} data-r525-edge={shell.shell+'-'+a+'-'+b} x1={shell.points[a].x} y1={shell.points[a].y} x2={shell.points[b].x} y2={shell.points[b].y}/>)}
        {shell.points.map(p=><circle key={p.index} cx={p.x} cy={p.y} r={shell.shell===0?1.85:1.1} fill={color} fillOpacity={.35+.55*frame.amplitude} stroke='none'/>)}
       </g>)}
@@ -57,6 +59,7 @@ export default function FullSphereInstrumentR525({address,onAddress}:Props){
      <div className='r525-segments'>{TEMPORAL.map(t=><button key={t} type='button' data-r525-time={t} aria-pressed={time===t} onClick={()=>setTime(t)}>{t}</button>)}</div>
      <p className='r525-note'>{timeNote}</p>
     </div>
+    <div className='r525-controls-block'><label>Visible geometric shells</label><div className='r525-lens-grid' data-r526-layer-controls='shell-isolation'>{visibleShells.map((visible,i)=><button key={i} type='button' data-r526-shell-toggle={i} aria-pressed={visible} onClick={()=>toggleShell(i)}>Shell {i+1} {visible?'on':'off'}</button>)}</div><small>Layer visibility changes the projection only; canonical state and source packet are unchanged.</small></div>
     <div className='r525-controls-block'><label>State projection lens</label><div className='r525-lens-grid'>{FIELDS.map(f=><button key={f} type='button' data-r525-lens={f} aria-pressed={lens===f} onClick={()=>setLens(f)}>{f}</button>)}</div></div>
     <div className='r525-controls-block'>
      <label htmlFor='r525-yaw'>Observer rotation <b>{Math.round(yaw)}°</b></label>
