@@ -30,6 +30,13 @@ async function prove(browser,label,viewport){
   await sphere.waitFor({state:'visible',timeout:20000});
   if(await sphere.locator('[data-r525-shell]').count()!==3||await sphere.locator('line[data-r525-edge]').count()!==90)throw new Error(label+': 3 genuine nested 20-vertex/30-edge shells not rendered');
   if(!(await native.locator('canvas').count()))throw new Error(label+': prior original AtlasViewport canvas was lost');
+  const shellToggle=sphere.locator('button[data-r526-shell-toggle="1"]');
+  if(await shellToggle.getAttribute('aria-pressed')!=='true')throw new Error(label+': middle shell initial visibility not enabled');
+  await shellToggle.click();
+  if(await sphere.locator('[data-r525-shell]').count()!==2||await sphere.locator('line[data-r525-edge]').count()!==60)throw new Error(label+': shell isolation did not remove exactly 30 actual edges');
+  if(await shellToggle.getAttribute('aria-pressed')!=='false')throw new Error(label+': shell control accessibility state did not update');
+  await shellToggle.click();
+  if(await sphere.locator('[data-r525-shell]').count()!==3||await sphere.locator('line[data-r525-edge]').count()!==90)throw new Error(label+': shell restoration did not recover 90 actual edges');
   const words=await sphere.innerText();
   if(!words.includes('not an observation')&& !words.includes('Observation is not inferred'))throw new Error(label+': epistemic projection disclosure missing');
   if(!words.includes('No physics units')||!words.includes('historical six-video grammar'))throw new Error(label+': false historical/source claims');
