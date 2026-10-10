@@ -8,6 +8,8 @@ if(!/^[0-9a-f]{40}$/i.test(expectedSha))throw new Error('R499 bridge browser pro
 const browser=await chromium.launch({headless:true});
 try{
  const context=await browser.newContext({viewport:{width:1280,height:900},extraHTTPHeaders:{'cache-control':'no-cache','pragma':'no-cache'}});
+ // Seed the authoritative address before application initialization, not after mount.
+ await context.addInitScript(()=>localStorage.setItem('omega.v6.address','12345'));
  const page=await context.newPage();
  const pageErrors=[],assetFailures=[];
  page.on('pageerror',error=>pageErrors.push(String(error)));
@@ -16,7 +18,8 @@ try{
 
  await page.goto(`${base}/?omega7=1&r499-canonical=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45000});
  await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:30000});
- await page.evaluate(()=>localStorage.setItem('omega.v6.address','12345'));
+ const entryAddress=await page.evaluate(()=>localStorage.getItem('omega.v6.address'));
+ if(Number(entryAddress)!==12345)throw new Error(`R499 OMEGA7 entry changed canonical address: ${entryAddress}`);
 
  const bridge=page.locator('.o7-v6');
  await bridge.waitFor({state:'visible',timeout:10000});
