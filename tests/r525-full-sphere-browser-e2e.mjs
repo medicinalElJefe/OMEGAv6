@@ -37,6 +37,16 @@ async function prove(browser,label,viewport){
   if(await shellToggle.getAttribute('aria-pressed')!=='false')throw new Error(label+': shell control accessibility state did not update');
   await shellToggle.click();
   if(await sphere.locator('[data-r525-shell]').count()!==3||await sphere.locator('line[data-r525-edge]').count()!==90)throw new Error(label+': shell restoration did not recover 90 actual edges');
+  const motionMode=sphere.locator('button[data-r527-motion-mode="FOLD"]');
+  await motionMode.click();
+  if(await motionMode.getAttribute('aria-pressed')!=='true')throw new Error(label+': fold motion selection failed');
+  const movingEdge=sphere.locator('line[data-r525-edge]').first();
+  const beforeMotion=await movingEdge.getAttribute('x1');
+  await sphere.locator('button[data-r525-motion="paused"]').click();
+  await page.waitForTimeout(240);
+  const afterMotion=await movingEdge.getAttribute('x1');
+  if(beforeMotion===afterMotion)throw new Error(label+': fold animation did not move rendered geometry');
+  await sphere.locator('button[data-r525-motion="playing"]').click();
   const words=await sphere.innerText();
   if(!words.includes('not an observation')&& !words.includes('Observation is not inferred'))throw new Error(label+': epistemic projection disclosure missing');
   if(!words.includes('No physics units')||!words.includes('historical six-video grammar'))throw new Error(label+': false historical/source claims');
