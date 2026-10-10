@@ -61,6 +61,7 @@ try{
    try{
     await page.goto(`${base}/?r499-browser=${Date.now()}-${label}-${attempt}`,{waitUntil:'domcontentloaded',timeout:45000});
     await app.waitFor({state:'visible',timeout:10000});
+    await page.locator('.o7-home-established main.r71-home[data-r510-embedded="true"]').waitFor({state:'attached',timeout:12000}).catch(()=>{});
     // R510 intentionally embeds the historical R71 visual instrument within OMEGA7.
     // Reject an independent OMEGA6 home, never the lawful R71 descendant.
     const legacy=await page.locator('main.r71-home').evaluateAll(nodes=>nodes.filter(node=>!node.closest('.o7-app[data-omega7="true"]')).length);
