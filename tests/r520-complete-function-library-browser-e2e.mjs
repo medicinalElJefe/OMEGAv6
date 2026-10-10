@@ -15,17 +15,19 @@ async function mockBoundedApis(page){
 }
 async function assertHeaderHitboxes(page,label){
  const result=await page.evaluate(()=>{
-  const brand=document.querySelector('.o7-brand'),library=document.querySelector('[data-r520-full-library="open"]');
-  if(!(brand instanceof HTMLElement)||!(library instanceof HTMLElement))return {missing:true};
-  const b=brand.getBoundingClientRect(),l=library.getBoundingClientRect();
+  const brand=document.querySelector('.o7-brand'),library=document.querySelector('[data-r520-full-library="open"]'),rollback=document.querySelector('.o7-v6');
+  if(!(brand instanceof HTMLElement)||!(library instanceof HTMLElement)||!(rollback instanceof HTMLElement))return {missing:true};
+  const b=brand.getBoundingClientRect(),l=library.getBoundingClientRect(),v=rollback.getBoundingClientRect();
   const hit=r=>document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.closest('button');
-  return {width:innerWidth,brand:{x:b.left,width:b.width},library:{x:l.left,width:l.width},
-   brandHit:hit(b)===brand,libraryHit:hit(l)===library,
-   separated:b.right<=l.left||l.right<=b.left||b.bottom<=l.top||l.bottom<=b.top,
-   inViewport:b.left>=0&&l.right<=innerWidth&&b.right<=innerWidth};
+  const disjoint=(x,y)=>x.right<=y.left||y.right<=x.left||x.bottom<=y.top||y.bottom<=x.top;
+  return {width:innerWidth,brand:{x:b.left,width:b.width,height:b.height},library:{x:l.left,width:l.width,height:l.height},rollback:{x:v.left,width:v.width,height:v.height},
+   brandHit:hit(b)===brand,libraryHit:hit(l)===library,rollbackHit:hit(v)===rollback,
+   separated:disjoint(b,l)&&disjoint(b,v)&&disjoint(l,v),
+   inViewport:b.left>=0&&l.left>=0&&v.left>=0&&b.right<=innerWidth&&l.right<=innerWidth&&v.right<=innerWidth,
+   touchSafe:[b,l,v].every(r=>r.width>=44&&r.height>=44)};
  });
- if(result.missing||!result.brandHit||!result.libraryHit||!result.separated||!result.inViewport)
-  throw new Error(label+': mobile OMEGA home/function header click geometry regression: '+JSON.stringify(result));
+ if(result.missing||!result.brandHit||!result.libraryHit||!result.rollbackHit||!result.separated||!result.inViewport||(label.startsWith('mobile')&&!result.touchSafe))
+  throw new Error(label+': OMEGA home/function/rollback header touch geometry regression: '+JSON.stringify(result));
  await page.locator('.o7-brand').click({timeout:5000});
  return result;
 }
