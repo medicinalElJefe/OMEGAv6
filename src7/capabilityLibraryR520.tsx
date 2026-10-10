@@ -6,6 +6,7 @@ import {RECOVERED_SYSTEM_EXECUTION_R512} from '../src/recoveredSoftwareExecution
 import {MASTER_MENU_OPTIONS_R83,MASTER_CAPABILITIES_R83,routeForMenuOptionR83,routeForCapabilityR83} from '../src/softwareMasterLedgerR83';
 import type {R512RecoveredSystemResolution} from '../src/recoveredSoftwareExecutionR512';
 import './capabilityLibraryR520.css';
+import './capabilityLibraryR520Ledger.css';
 
 export const R520_LIBRARY_SCHEMA='OMEGA_SOURCE_BACKED_COMPLETE_FUNCTION_LIBRARY_R520' as const;
 type LibraryTab='ROUTES'|'RECOVERED'|'HISTORY'|'OPTIONS'|'CONTRACTS';
@@ -61,7 +62,7 @@ export function R520CapabilityLibrary({onClose,onRoute,onRecovered,onHistorical}
      </div>}
     </section>)}
    </div>
-   <footer className='o7-r520-footer'><ShieldCheck size={15}/><span>Inventories overlap: historical record ≠ independently executable app. Source readiness, proof gates and canonical authority remain separate.</span><span className='o7-r520-source'><Database size={13}/> R512 · R486 · R83</span></footer>
+   <footer className='o7-r520-footer'><ShieldCheck size={15}/><span>Inventories overlap. Design options and capability contracts only link to associated workspaces; they do not prove those functions execute. Evidence gates and canonical authority remain separate.</span><span className='o7-r520-source'><Database size={13}/> R512 · R486 · R83 · R520</span></footer>
   </section>
  </div>;
 }
