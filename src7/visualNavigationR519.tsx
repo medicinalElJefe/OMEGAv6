@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
+import './visualNavigationR519.css';
 import {ArrowUpRight,Compass,Layers3,Orbit,Activity,ShieldCheck,Hexagon} from 'lucide-react';
 import {menuCapabilitiesR512,quickActionsR512} from './capabilityMenuR512';
 import {OMEGA7_CAPABILITIES,type Omega7Domain,type Omega7Capability} from './capabilityRegistry';
