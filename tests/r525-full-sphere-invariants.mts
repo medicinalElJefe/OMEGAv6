@@ -45,7 +45,7 @@ const browser=fs.readFileSync('tests/r525-full-sphere-browser-e2e.mjs','utf8');
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
 assert.ok(source.includes('<FullSphereInstrumentR525 address={address} onAddress={commit}/>'),'must use current Atlas executor and address state');
 assert.ok(source.includes('<AtlasViewport state={state}'),'strongest prior AtlasViewport must remain operational');
-for(const token of ["data-r525-shell={shell.shell}","data-r525-edge={shell.shell","data-r525-action='antipode'","data-r525-action='select-preview'","data-r525-motion={playing?'playing':'paused'}","not an observation of historical time","autoPing successor projected"])assert.ok(component.includes(token),'missing real source/interaction: '+token);
+for(const token of ["data-r525-shell={shell.shell}","data-r525-edge={shell.shell","data-r525-action='antipode'","data-r525-action='select-preview'","data-r525-motion={playing?'playing':'paused'}","NOT an observation of historical time","autoPing successor projected"])assert.ok(component.includes(token),'missing real source/interaction: '+token);
 assert.ok(browser.includes("await prove(browser,'desktop'")&&browser.includes("await prove(browser,'mobile'"),'desktop and mobile proof is mandatory');
 assert.ok(ci.includes('tests/r525-full-sphere-browser-e2e.mjs'),'actual browser test must be required by candidate parity');
 console.log('R525 SOURCE AND MATH PASS · 20 vertices / 30 edges × 3 exact state-bound shells · antipode involution · deterministic projection · honest history/forecast semantics · prior Atlas preserved');
