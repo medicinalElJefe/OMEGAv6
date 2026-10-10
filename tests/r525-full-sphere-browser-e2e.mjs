@@ -84,7 +84,7 @@ async function prove(browser,label,viewport){
   await sphere.locator('button[data-r525-motion="paused"]').click();
   await sphere.locator('button[data-r525-motion="playing"]').waitFor({state:'visible',timeout:3000});
   await sphere.locator('button[data-r525-motion="playing"]').click();
-  if(!(await sphere.locator('button[data-r525-motion="paused"]').count()))throw new Error(label+': source projection did not pause');
+  if(!(await sphere.locator('button[data-r525-motion="paused"]').count()))throw new Error(label+': source projection did not resume after pause');
   if(errors.length)throw new Error(label+': uncaught R525 browser errors '+errors.join(' | ').slice(0,700));
   console.log('R525 '+label+' FULL SPHERE OPERATION PASS · 3 nested 30-edge true meshes · rotation motion · exact antipode twice · history/forecast boundaries · prior Atlas preserved');
  }finally{await context.close()}
