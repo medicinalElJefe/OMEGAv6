@@ -6,9 +6,9 @@ export type R529Proposal={id:string;routes:readonly string[];executor:R529Execut
 export type R529Receipt={schema:typeof R529_SCHEMA;id:string;executor:R529Executor;status:'ADMISSIBLE_PROPOSAL'|'HELD';reasons:readonly string[];resolvedRoutes:readonly string[];growth:ReturnType<typeof evaluateDevelopmentalTransitionR457>;executionClaimed:false;canonicalMutation:false;sourceAuthority:'R125_ONLY'};
 const EXECUTOR_ROUTES:Readonly<Record<R529Executor,readonly string[]>>={
  VISUALIZATION:['Atlas','Relativity','Reality Lab'],
- TRAVERSAL:['Scale Compiler','Reality Lab','Atlas'],
+ TRAVERSAL:['Scale Compiler','Reality Lab','Atlas','Traversal','Extreme Traversal'],
  FORECAST:['Forecast','Relativity'],
- SAI_HYBRID:['Hybrid','SAI']
+ SAI_HYBRID:['Hybrid Link','SAI Lab']
 };
 export function evaluateExecutionProposalR529(proposal:R529Proposal):R529Receipt{
  const composition=composeHeightenedR457(proposal.routes);
