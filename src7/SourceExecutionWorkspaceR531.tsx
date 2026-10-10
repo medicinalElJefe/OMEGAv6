@@ -1,14 +1,13 @@
 import {useMemo,useState} from 'react';
 import {corpusState} from '../src/corpusRuntime';
 import {executeSourceBoundR530} from './sourceBoundExecutionR530';
-import {R457_AUTHORITATIVE_PROOF_FAMILIES} from './heightenedModeR457';
 import type {R529Executor,R529Proposal} from './developmentalExecutionFabricR529';
 
-type Props={address:number;onAddress:(address:number)=>void};
+type Props={address:number};
 const EXECUTORS:readonly R529Executor[]=['VISUALIZATION','TRAVERSAL','FORECAST','SAI_HYBRID'];
 const ROUTES:Record<R529Executor,string>={VISUALIZATION:'Atlas',TRAVERSAL:'Traversal',FORECAST:'Forecast',SAI_HYBRID:'Hybrid Link'};
 const keys=['continuity','futurePlasticity','contradiction','burden','recoverability','proofCoverage','capabilityCoverage','humanComprehension','futureTopologyRetention','scarPressure'] as const;
-export default function SourceExecutionWorkspaceR531({address,onAddress}:Props){
+export default function SourceExecutionWorkspaceR531({address}:Props){
  const[executor,setExecutor]=useState<R529Executor>('VISUALIZATION');
  const[receipt,setReceipt]=useState<ReturnType<typeof executeSourceBoundR530>|null>(null);
  const packet=useMemo(()=>corpusState(address),[address]);
