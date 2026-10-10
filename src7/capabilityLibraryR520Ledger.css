@@ -1,0 +1,1 @@
+.o7-r520-matrix{grid-template-columns:repeat(5,minmax(0,1fr))}.o7-r520-matrix button{gap:7px;padding:13px 10px}.o7-r520-matrix button strong{font-size:22px}@media(max-width:900px){.o7-r520-matrix{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:760px){.o7-r520-matrix button span{font-size:10px}.o7-r520-matrix button strong{font-size:17px}}

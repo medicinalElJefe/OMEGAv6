@@ -1,4 +1,5 @@
 import {Fragment,lazy,Suspense,useEffect,useMemo,useRef,useState} from 'react';
+import {House,BriefcaseBusiness,Orbit,Palette,Code2,ShieldCheck} from 'lucide-react';
 import {OMEGA7_CAPABILITIES,OMEGA7_DOMAINS,omega7CapabilitiesForDomain,searchOmega7Capabilities,type Omega7Domain} from './capabilityRegistry';
 import {Omega7AppStateProvider,useOmega7AppState} from './appState';
 import {Omega7Boundary} from './Omega7Boundary';
@@ -11,20 +12,24 @@ import {R486_VISIBLE_CAPABILITIES,R486_VISIBLE_SUMMARY,type VisibleFamilyR486} f
 import {R512_DOMAIN_MENU,R512_MENU_SUMMARY,menuSectionsR512,quickActionsR512,recoveredForDomainR512,recoveredExecutionCapsuleR512,type RecoveredExecutionCapsuleR512} from './capabilityMenuR512';
 import type {R512RecoveredSystemResolution} from '../src/recoveredSoftwareExecutionR512';
 import OperationalTruthR495 from './OperationalTruthR495';
+import {R519VisualNavigation} from './visualNavigationR519';
 import './omega7.css';
 
 const OmegaHomeR71=lazy(()=>import('../src/OmegaHomeR71'));
+const R520CapabilityLibrary=lazy(()=>import('./capabilityLibraryR520').then(m=>({default:m.R520CapabilityLibrary})));
 
 type Props={onOpenLegacyRoute:(route:string)=>void;onExitToV6:()=>void};
 
 const DOMAIN_LABEL:Record<Omega7Domain,string>={
  HOME:'Home',WORK:'Work',EXPLORE:'Explore',CREATE:'Create',DEVELOP:'Develop',SYSTEM:'System'
 };
+const R519_NAV_ICONS={HOME:House,WORK:BriefcaseBusiness,EXPLORE:Orbit,CREATE:Palette,DEVELOP:Code2,SYSTEM:ShieldCheck} as const;
 function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const{state,dispatch}=useOmega7AppState();
  const inputRef=useRef<HTMLInputElement|null>(null);
  const [development,setDevelopment]=useState<R468Snapshot|null>(null);
  const [recoveredOpen,setRecoveredOpen]=useState(false);
+ const [libraryOpen,setLibraryOpen]=useState(false);
  const [recoveredFamily,setRecoveredFamily]=useState<VisibleFamilyR486|'ALL'>('ALL');
  const [previousSoftwareQuery,setPreviousSoftwareQuery]=useState('');
  const [previousSoftwareResults,setPreviousSoftwareResults]=useState<readonly R512RecoveredSystemResolution[]>([]);
@@ -49,7 +54,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  useEffect(()=>{
   const key=(event:KeyboardEvent)=>{
    if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();dispatch({type:'COMMAND',open:true});queueMicrotask(()=>inputRef.current?.focus())}
-   if(event.key==='Escape'){dispatch({type:'COMMAND',open:false});dispatch({type:'STATUS',open:false})}
+   if(event.key==='Escape'){dispatch({type:'COMMAND',open:false});dispatch({type:'STATUS',open:false});setLibraryOpen(false)}
   };
   window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);
  },[dispatch]);
@@ -64,6 +69,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
  const open=(route:string)=>{
   const cap=OMEGA7_CAPABILITIES.find(x=>x.legacyRoute===route);
   if(!cap)return;
+  setLibraryOpen(false);
   dispatch({type:'SELECT_ROUTE',route:cap.legacyRoute});
   dispatch({type:'COMMAND',open:false});
   if(!isOmega7NativeRoute(cap.legacyRoute))onOpenLegacyRoute(cap.legacyRoute);
@@ -87,6 +93,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    <button className='o7-brand' onClick={()=>dispatch({type:'DOMAIN',domain:'HOME'})}><b>OMEGA</b><span>7</span></button>
    <button className='o7-search-trigger' onClick={()=>{dispatch({type:'COMMAND',open:true});queueMicrotask(()=>inputRef.current?.focus())}}>Search or ask OMEGA <kbd>Ctrl K</kbd></button>
    <div className='o7-top-actions'>
+    <button type='button' className='o7-r520-toggle' data-r520-full-library='open' aria-label='All OMEGA functions' onClick={()=>setLibraryOpen(true)}><span aria-hidden='true'>◈</span><strong>All Functions</strong></button>
     <select aria-label='Interface depth' value={state.depth} onChange={e=>dispatch({type:'DEPTH',depth:e.target.value as any})}>
      <option value='STANDARD'>Standard</option><option value='ADVANCED'>Advanced</option><option value='CANON'>Canon</option>
     </select>
@@ -97,8 +104,10 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
    </div>
   </header>
 
-  <aside className='o7-nav o7-nav-r512' aria-label='OMEGA7 capability-first navigation' data-navigation-revision='R512' data-canonical-domain-count={OMEGA7_DOMAINS.length}>
-   {R512_DOMAIN_MENU.map(menu=><button key={menu.id} className={state.domain===menu.id?'active':''} onClick={()=>dispatch({type:'DOMAIN',domain:menu.id})} title={menu.purpose} aria-label={DOMAIN_LABEL[menu.id]}><span>{menu.shortLabel}</span><small>{menu.id==='HOME'?'start':menuSectionsR512(menu.id).ready.length+' ready'}</small></button>)}
+  <aside className='o7-nav o7-nav-r512 o7-nav-r519' aria-label='OMEGA7 capability-first navigation' data-navigation-revision='R512' data-design-revision='R519' data-canonical-domain-count={OMEGA7_DOMAINS.length}>
+   <div className='o7-r519-nav-identity' aria-hidden='true'><span>Ω</span><div><strong>THE OMEGA FIELD</strong><small>EXPLORE · CREATE · PROVE</small></div></div>
+   {R512_DOMAIN_MENU.map(menu=>{const Icon=R519_NAV_ICONS[menu.id];return <button key={menu.id} type='button' className={state.domain===menu.id?'active':''} onClick={()=>dispatch({type:'DOMAIN',domain:menu.id})} title={menu.purpose} aria-label={DOMAIN_LABEL[menu.id]}><span className='o7-r519-nav-icon'><Icon size={20} strokeWidth={1.55} aria-hidden='true'/></span><span className='o7-r519-nav-text'><strong>{menu.shortLabel}</strong><small>{menu.id==='HOME'?'Field overview':menu.id==='EXPLORE'?'Atlas · traversal · Earth':menu.id==='CREATE'?'Render · compose · visualize':menu.id==='SYSTEM'?'Proof · Canon · recovery':menu.id==='DEVELOP'?'Intelligence · build · repair':'Projects · memory · spaces'}</small></span><span className='o7-r519-nav-count'>{menu.id==='HOME'?OMEGA7_CAPABILITIES.length:menuSectionsR512(menu.id).ready.length}</span></button>})}
+   <div className='o7-r519-nav-foot'><span>CANONICAL ACCESS</span><strong>{OMEGA7_CAPABILITIES.length} inherited routes</strong><small>Tools remain beneath their live source authority.</small></div>
   </aside>
 
   <main className='o7-main' data-native-route={state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?state.selectedRoute:''}>
@@ -113,10 +122,11 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
      <Omega7NativeSurface route={state.selectedRoute} onNavigate={open} depth={state.depth} softwareLaunch={activeRecovered}/>
     </section>:
     <>
-     {state.domain!=='HOME'&&<section className='o7-intro o7-intro-r512'>
+     {state.domain!=='HOME'&&<section className='o7-intro o7-intro-r512 o7-intro-r519'>
       <p>OMEGA7 · {domainMenu.label}</p>
       <h1>{domainMenu.label}</h1>
       <span>{domainMenu.purpose}</span>
+      <R519VisualNavigation domain={state.domain} onNavigate={open}/>
       <div className='o7-quick-menu' aria-label={domainMenu.label+' quick actions'}>
        {quickActions.map(cap=><button key={cap.id} onClick={()=>open(cap.legacyRoute)} data-health={cap.availability.toLowerCase()}><b>{cap.label}</b><small>{cap.primaryAction} · {cap.availability==='READY'?'Ready':cap.availability==='HELD'?'Needs evidence / connection':cap.availability}</small></button>)}
        {quickActions.length===0&&<em>No qualified tools in this area.</em>}
@@ -133,6 +143,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
        />
       </Suspense>
      </section>}
+     {state.domain==='HOME'&&<R519VisualNavigation domain='HOME' onNavigate={open}/>}
      {state.domain==='HOME'&&<OperationalTruthR495 depth={state.depth} onNavigate={open}/>}\n     {state.domain==='HOME'&&<section className='o7-recovered' data-r486-visible-convergence='true'>
       <header><div><span>Recovered capability fabric</span><h2>Your recovered work is connected to the product</h2><p>{R486_VISIBLE_SUMMARY.total} recovered capability lineages now resolve through their current OMEGA executors. Open the function you need; lineage, gate and authority stay attached underneath.</p></div><button onClick={()=>setRecoveredOpen(x=>!x)}>{recoveredOpen?'Hide recovered capabilities':'Browse recovered capabilities'}</button></header>
       <div className='o7-recovered-summary'><article><b>{R486_VISIBLE_SUMMARY.executesNow}</b><span>execute now</span></article><article><b>{R486_VISIBLE_SUMMARY.adapters}</b><span>active adapters</span></article><article><b>{R486_VISIBLE_SUMMARY.truthGated}</b><span>truth/device gated</span></article><article><b>{R486_VISIBLE_SUMMARY.routable}/{R486_VISIBLE_SUMMARY.total}</b><span>bound to current routes</span></article></div>
@@ -165,6 +176,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
     </>}
   </main>
 
+  {libraryOpen&&<Suspense fallback={<div className='o7-r520-backdrop'><section className='o7-native-loading' role='status'>Loading complete OMEGA function library…</section></div>}><R520CapabilityLibrary onClose={()=>setLibraryOpen(false)} onRoute={open} onRecovered={launchRecovered} onHistorical={launchRecoveredSystem}/></Suspense>}
   {state.statusOpen&&<section className='o7-status' role='dialog' aria-label='System status'>
    <header><div><b>System status</b><span>{ready} ready · {held} limited · {failed} failed</span></div><button onClick={()=>dispatch({type:'STATUS',open:false})}>Close</button></header>
    <div>{healthRows.map(([key,value])=><article key={key} data-health={String(value).toLowerCase()}><span>{key.replaceAll(/([A-Z])/g,' $1')}</span><b>{value}</b></article>)}</div>

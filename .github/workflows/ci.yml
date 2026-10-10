@@ -118,6 +118,16 @@ jobs:
           OMEGA_E2E_URL: http://127.0.0.1:4173
           OMEGA_R512_USE_FIXTURES: '1'
         run: node tests/r512-capability-menu-execution-browser-e2e.mjs
+      - name: Prove R519 actual visual navigation and native launches on desktop/mobile candidate
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+          OMEGA_R519_USE_FIXTURES: '1'
+        run: node tests/r519-visual-navigation-browser-e2e.mjs
+      - name: Prove R520 full 44/72/100 function library on actual desktop and mobile browser
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+          OMEGA_R520_USE_FIXTURES: '1'
+        run: node tests/r520-complete-function-library-browser-e2e.mjs
       - name: Stop OMEGA7 parity preview
         if: always()
         shell: bash
@@ -471,6 +481,16 @@ jobs:
         id: browser_r512
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r512-capability-menu-execution-browser-e2e.mjs
+      - name: Verify deployed R519 visual navigation and native execution paths on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r519
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r519-visual-navigation-browser-e2e.mjs
+      - name: Verify deployed R520 complete function library on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r520
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r520-complete-function-library-browser-e2e.mjs
       - name: Verify live R202 operational source-authority surface
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: live_r202
@@ -568,6 +588,8 @@ jobs:
             echo "- R9 Earth ground source hierarchy: ${{ steps.earth_r9.outcome }}"
             echo "- Workers AI route-before-generation + synthesis: ${{ steps.live_ai.outcome }}"
             echo "- R200.1 exact promoted-SHA desktop/mobile browser proof: ${{ steps.browser_r200.outcome }}"
+            echo "- R519 actual visual navigation and native executor desktop/mobile proof: ${{ steps.browser_r519.outcome }}"
+            echo "- R520 full 44/72/100 source inventory and current executor browser proof: ${{ steps.browser_r520.outcome }}"
             echo "- R202 operational source-authority live proof: ${{ steps.live_r202.outcome }}"
             echo "- R237 authenticated Hybrid command authority live proof: ${{ steps.live_r237.outcome }}"
             echo "- R238 Hybrid host intelligence live proof: ${{ steps.live_r238.outcome }}"
