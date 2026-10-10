@@ -57,6 +57,12 @@ async function check(browser,label,viewport){
   await selected.waitFor({state:'visible',timeout:10000});
   if(!(await selected.innerText()).includes('Omega Atlas Desktop'))throw new Error(label+': remembered historical name cannot be recovered');
   await search.fill('');
+  for(const [tab,attr,expected] of [['OPTIONS','data-r520-option',36],['CONTRACTS','data-r520-contract',18]]){
+    await pane.locator('button[data-r520-tab="'+tab+'"]').click();
+    await expandAll();
+    const ids=await pane.locator('['+attr+']').evaluateAll((nodes,key)=>nodes.map(n=>n.getAttribute(key)),attr);
+    if(ids.length!==expected||new Set(ids).size!==expected)throw new Error(label+': missing historical '+tab+' source entries: '+ids.length);
+  }
   await pane.locator('button[data-r520-tab="ROUTES"]').click();
   await pane.getByRole('combobox',{name:'Filter function group'}).selectOption('EXPLORE');
   await expandAll();
