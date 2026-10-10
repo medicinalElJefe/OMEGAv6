@@ -56,6 +56,11 @@ assert.ok(root.includes("data-r486-visible-convergence='true'"),'older recovered
 assert.ok(css.includes('@media(max-width:760px)'),'mobile inventory use required');
 assert.ok(shellCss.includes('.o7-topbar .o7-r520-toggle{flex:0 0 44px'),'mobile All Functions must have a bounded hitbox, not intercept Home');
 assert.ok(shellCss.includes('.o7-topbar .o7-r520-toggle strong{display:none}'),'mobile header must use accessible icon-size control');
+assert.ok(shellCss.includes('.o7-topbar .o7-v6{flex:0 0 44px;width:44px;min-width:44px;max-width:44px}'),'R449 phone rollback 44px width is mandatory at mobile 390px');
+assert.ok(shellCss.includes('.o7-topbar .o7-v6{flex-basis:44px;width:44px;min-width:44px;max-width:44px}'),'R449 phone rollback 44px width is mandatory at narrow mobile 320px');
+assert.ok(shellCss.includes('.o7-topbar .o7-r520-toggle{flex-basis:44px;width:44px;min-width:44px;max-width:44px}'),'R520 library control must also remain touch safe on narrow phones');
+assert.ok(browser.includes('rollbackHit:hit(v)===rollback')&&browser.includes('touchSafe:[b,l,v].every(r=>r.width>=44&&r.height>=44)'),'browser must independently hit-test and measure OMEGA6/Home/All Functions on mobile');
+
 assert.ok(browser.includes('assertHeaderHitboxes(page,label'),'browser must test real mobile hit testing and home click');
 assert.ok(browser.includes("width:320,height:700"),'narrow phone hitbox proof cannot be omitted');
 assert.ok(browser.includes('after lazy function library loaded'),'drawer CSS cannot later reintroduce header overlap');
