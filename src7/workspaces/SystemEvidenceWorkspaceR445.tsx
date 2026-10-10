@@ -73,7 +73,7 @@ export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth,soft
     route==='Archive Operators'?<ArchiveGovernanceControl operators onNavigate={onNavigate}/>:
     route==='Plugins'?<PluginRegistryR45 onNavigate={onNavigate}/>:
     route==='Validation'?<UniversalQualityControl record={record} status={status} restore={restore} modeCount={modeSummary.appliedCount} catalogCount={modeSummary.catalogCount}/>:
-    route==='System Atlas'?<SystemAtlasControl record={record} onNavigate={onNavigate}/>:
+    route==='System Atlas'?<SystemAtlasControl record={record} onNavigate={onNavigate} initialFamilyId={somaLaunch?'S17':undefined}/>:
     route==='Control Matrix'?<SystemAtlasControl record={record} onNavigate={onNavigate} control/>:
     <OmegaSpecialistSuite panel={route} record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} uiMode={uiMode} onUiMode={setUiMode}/>}
   </div>}
