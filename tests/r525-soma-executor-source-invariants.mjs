@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const read=p=>fs.readFileSync(p,'utf8');
+const native=read('src7/nativeCapabilityRegistry.tsx'),workspace=read('src7/workspaces/SystemEvidenceWorkspaceR445.tsx'),atlas=read('src/SystemAtlasControl.tsx'),audio=read('src/SomaAudioEngine.tsx');
+for(const token of ['softwareLaunch={softwareLaunch}','softwareLaunch?.recoveredId'])assert.ok(native.includes(token),'SOMA capsule not forwarded through native surface: '+token);
+for(const token of ["softwareLaunch?.recoveredId==='SOMA'","softwareLaunch.operation==='SONIFY_CANONICAL_PACKET'","softwareLaunch.state==='EXECUTES_NOW'","initialFamilyId={somaLaunch?'S17':undefined}"])assert.ok(workspace.includes(token),'SOMA identity or S17 deep link lost: '+token);
+for(const token of ['initialFamilyId','setFamily(i)',"cell.family.id==='S17'&&current?.successor==='LOCAL_ACTIVE'",'<SomaAudioEngine record={record}/>'])assert.ok(atlas.includes(token),'S17 local successor boundary lost: '+token);
+for(const token of ["ctx.state!=='running'","meter.getFloatTimeDomainData","OMEGA_SOMA_WEB_AUDIO_OPERATION_R525","outputDetected:rms>0.000001","deviceAuthority:false","if(!await start())return","data-soma-execution-receipt","data-soma-output-proven"])assert.ok(audio.includes(token),'Web Audio measured execution/receipt boundary lost: '+token);
+assert.ok(!audio.includes('autoplay'),'SOMA should not claim autoplay or initiate audio without explicit gesture');
+console.log('R525 SOMA SOURCE CONTRACT PASS · recovered identity → S17 · Web Audio running + measured signal receipt · no native-device authority');
