@@ -201,7 +201,7 @@
     "test:r511": "node tests/r511-sequential-release-closure-invariants.mjs",
     "test:r512": "npx --yes tsx tests/r512-capability-first-navigation-invariants.mts",
     "test:r513": "npx --yes tsx tests/r513-exact-phase-turn-invariants.mts",
-    "test:r519": "node tests/r519-visual-navigation-invariants.mts",
+    "test:r519": "npx --yes tsx tests/r519-visual-navigation-invariants.mts",
     "test:r519:browser": "node tests/r519-visual-navigation-browser-e2e.mjs"
   },
   "dependencies": {
