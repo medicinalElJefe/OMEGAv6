@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import RelativityLab from '../../src/RelativityLab';
 import AppliedRealityLab from '../../src/AppliedRealityLab';
 import AtlasViewport from '../../src/AtlasViewport';
+import FullSphereInstrumentR525 from '../../src/FullSphereInstrumentR525';
 import AtlasCalculatorPanel from '../../src/AtlasCalculatorPanel';
 import RecursiveScalePanel from '../../src/RecursiveScalePanel';
 import OmegaInfinityPanel from '../../src/OmegaInfinityPanel';
@@ -53,7 +54,7 @@ export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
   {!instrumentOpen&&<section className='o7-science-intro'>
    <span>Current view</span>
    <h2>{route}</h2>
-   <p>{route==='Relativity'?'See how the current state changes when the observer or frame changes—without confusing that projection with a change to the underlying state.':route==='Reality Lab'?'Load real CSV or TSV observations, map them into OMEGA state, test the mapping, and only commit a state when its empirical gate passes.':route==='Atlas'?'Explore the complete state map while keeping selection, representation, and canonical admission separate.':route==='Atlas Calculator'?'Change the four address coordinates and see exactly which state they select before committing anything.':route==='Scale Compiler'?'Inspect how the current state unfolds across representation scales and where measured scale bindings are still missing.':'Inspect current recurrence and archived donor material without presenting historical workbook samples as current observations.'}</p>
+   <p>{route==='Relativity'?'See how the current state changes when the observer or frame changes—without confusing that projection with a change to the underlying state.':route==='Reality Lab'?'Load real CSV or TSV observations, map them into OMEGA state, test the mapping, and only commit a state when its empirical gate passes.':route==='Atlas'?'Traverse the exact 20,736-address atlas and its restored Full Sphere dodecahedral projection; rotation, temporal topology and antipodes operate on declared model state without physical observation claims.':route==='Atlas Calculator'?'Change the four address coordinates and see exactly which state they select before committing anything.':route==='Scale Compiler'?'Inspect how the current state unfolds across representation scales and where measured scale bindings are still missing.':'Inspect current recurrence and archived donor material without presenting historical workbook samples as current observations.'}</p>
    <div className='o7-science-plain-grid'>
     <div><span>Current state</span><b>{record.stateId.toLocaleString()}</b><small>{record.metrics.decision}</small></div>
     <div><span>Spectral context</span><b>{spectral.wavelengthNm.toFixed(1)} nm</b><small>{spectral.spectralRegion} · {spectral.temperatureK.toFixed(1)} K coordinate</small></div>
@@ -65,7 +66,7 @@ export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Relativity'?<RelativityLab record={record} state={state} onNavigate={onNavigate}/>:
     route==='Reality Lab'?<AppliedRealityLab canonicalAddress={address} onCommitAddress={commit}/>:
-    route==='Atlas'?<AtlasViewport state={state} onSelect={c=>commit(fromCoords(c))}/>:
+    route==='Atlas'?<><FullSphereInstrumentR525 address={address} onAddress={commit}/><AtlasViewport state={state} onSelect={c=>commit(fromCoords(c))}/></>:
     route==='Atlas Calculator'?<AtlasCalculatorPanel record={record} onCommit={commit}/>:
     route==='Scale Compiler'?<RecursiveScalePanel address={address} onAddress={commit}/>:
     <OmegaInfinityPanel record={record}/>}
