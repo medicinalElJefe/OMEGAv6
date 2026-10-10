@@ -19,8 +19,8 @@ export default function FullSphereInstrumentR525({address,onAddress}:Props){
  const[visibleShells,setVisibleShells]=useState<readonly boolean[]>([true,true,true]);
  const toggleShell=(shell:number)=>setVisibleShells(current=>current.map((visible,i)=>i===shell?!visible:visible));
  useEffect(()=>{if(!playing)return;const id=window.setInterval(()=>setPhase(v=>(v+1)%360),62);return()=>window.clearInterval(id)},[playing]);
- const animatedYaw=yaw+(playing&&motionMode!=='FOLD'?phase:0);
- const animatedFold=playing&&motionMode!=='ROTATE'?Math.max(0,Math.min(1,fold+.24*Math.sin(phase*Math.PI/90))):fold;
+ const animatedYaw=yaw+(motionMode!=='FOLD'?phase:0);
+ const animatedFold=motionMode!=='ROTATE'?Math.max(0,Math.min(1,fold+.24*Math.sin(phase*Math.PI/90))):fold;
  const current=useMemo(()=>corpusState(address),[address]);
  const selected=useMemo(()=>selectSphereAddressR525(address,time,Number(current.autoPing.dataNext)),[address,time,current.autoPing.dataNext]);
  const packet=useMemo(()=>corpusState(selected),[selected]);
