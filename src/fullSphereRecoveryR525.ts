@@ -51,7 +51,7 @@ export function fullSphereProjectionR525(input:{
    const foldWeight=1+deformation*Math.sin((i+1)*Math.PI/10+phase);
    const yy=ry*cosP-rz*sinP,zz=ry*sinP+rz*cosP;
    const perspective=3.3/(3.3-zz*.22);
-   return{index:i,x:Number((480+rx*size*237*foldWeight*perspective).toFixed(4)),y:Number((310+yy*size*237*foldWeight*perspective).toFixed(4)),z:zz};
+   return{index:i,x:Number((480+rx*size*145*foldWeight*perspective).toFixed(4)),y:Number((310+yy*size*145*foldWeight*perspective).toFixed(4)),z:zz};
   });
   return{shell:k,points,edges:R525_DODECA_EDGES,opacity:Number(((.26+.58*amplitude)*(1-k*.21)).toFixed(3)),weight:Number((.9+1.9*C-(k*.21)).toFixed(3))};
  });
