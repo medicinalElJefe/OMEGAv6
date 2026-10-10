@@ -10,18 +10,20 @@ import {api} from '../../src/platformAdapter';
 import {corpusState,decodeAddress,initCorpusPack} from '../../src/corpusRuntime';
 import {sourceBackedModeSummary} from '../../src/sourceBackedModeRuntimeR21';
 import type {Omega7Depth} from '../capabilityRegistry';
+import type {RecoveredExecutionCapsuleR512} from '../capabilityMenuR512';
 
 export type Omega7SystemEvidenceRoute='Cockpit'|'Modes'|'Evidence & Proof'|'Archive Census'|'Archive Operators'|'Canon Evolution'|'Governance'|'Consolidation'|'Instructions'|'Plugins'|'Settings'|'System'|'Validation'|'System Atlas'|'Control Matrix';
-type Props={route:Omega7SystemEvidenceRoute;onNavigate:(route:string)=>void;depth:Omega7Depth};
+type Props={route:Omega7SystemEvidenceRoute;onNavigate:(route:string)=>void;depth:Omega7Depth;softwareLaunch?:RecoveredExecutionCapsuleR512|null};
 
 const clamp=(n:number)=>Math.max(0,Math.min(20735,Number.isFinite(n)?Math.floor(n):11498));
 const readAddress=()=>{try{return clamp(Number(localStorage.getItem('omega.v6.address')||11498))}catch{return 11498}};
 const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('omega.v6.address',String(next));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:next}}))}catch{}return next};
 
-export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Props){
- const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD');
+export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth,softwareLaunch}:Props){
+ const somaLaunch=route==='System Atlas'&&softwareLaunch?.recoveredId==='SOMA'&&softwareLaunch.operation==='SONIFY_CANONICAL_PACKET'&&softwareLaunch.state==='EXECUTES_NOW';
+ const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'||somaLaunch);
  const[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null),[uiMode,setUiMode]=useState('AUTO');
- useEffect(()=>setInstrumentOpen(depth!=='STANDARD'),[depth,route]);
+ useEffect(()=>setInstrumentOpen(depth!=='STANDARD'||somaLaunch),[depth,route,somaLaunch]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
  useEffect(()=>{let live=true;Promise.all([api.get<any>('/api/status'),api.get<any>('/api/restoration')]).then(([s,r])=>{if(live){setStatus(s.data);setRestore(r.data)}}).catch(()=>{});return()=>{live=false}},[]);
  useEffect(()=>{const sync=()=>setAddress(current=>{const next=readAddress();return current===next?current:next});const id=window.setInterval(sync,850);window.addEventListener('storage',sync);window.addEventListener('omega7-address-changed',sync as EventListener);return()=>{window.clearInterval(id);window.removeEventListener('storage',sync);window.removeEventListener('omega7-address-changed',sync as EventListener)}},[]);
@@ -71,7 +73,7 @@ export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Pro
     route==='Archive Operators'?<ArchiveGovernanceControl operators onNavigate={onNavigate}/>:
     route==='Plugins'?<PluginRegistryR45 onNavigate={onNavigate}/>:
     route==='Validation'?<UniversalQualityControl record={record} status={status} restore={restore} modeCount={modeSummary.appliedCount} catalogCount={modeSummary.catalogCount}/>:
-    route==='System Atlas'?<SystemAtlasControl record={record} onNavigate={onNavigate}/>:
+    route==='System Atlas'?<SystemAtlasControl record={record} onNavigate={onNavigate} focusFamily={somaLaunch?'S17':undefined}/>:
     route==='Control Matrix'?<SystemAtlasControl record={record} onNavigate={onNavigate} control/>:
     <OmegaSpecialistSuite panel={route} record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} uiMode={uiMode} onUiMode={setUiMode}/>}
   </div>}
