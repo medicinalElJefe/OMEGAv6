@@ -67,7 +67,7 @@ async function check(browser,label,viewport){
   await pane.getByRole('combobox',{name:'Filter function group'}).selectOption('EXPLORE');
   await expandAll();
   const atlas=pane.locator('[data-r520-route="Atlas"]');
-  await atlas.getByRole('button',{name:/Open instrument/i}).click();
+  await atlas.getByRole('button',{name:'Open State Atlas',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Atlas',{timeout:20000});
   if(await page.locator('.o7-r520-library').count())throw new Error(label+': drawer left open over running Atlas');
   await page.locator('.o7-native-host').waitFor({state:'visible',timeout:20000});
