@@ -1,4 +1,4 @@
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 import {Box,Download,Grid3X3,Layers3,Search,ShieldCheck,Waypoints} from 'lucide-react';
 import {EXPRESSION_PLANES,FAMILIES,GRID_CELLS,MASTER_MENUS,PHASE_COUNT,STREAM_COUNT,SUBSYSTEM_COUNT,SYSTEM_ATLAS_ID,SYSTEM_INVARIANT,atlasCell,expressionPlanesForFamily,systemAtlasReceipt} from './systemAtlasRuntime';
 import {R48_COMPLETION_FAMILIES,R48_COMPLETION_SUMMARY} from './completionRuntimeR48';
@@ -15,15 +15,16 @@ import './systemCapabilityR13.css';
 import './systemAtlasDepthR38_4.css';
 import './convergenceR45.css';
 
-type Props={record:any;onNavigate:(name:string)=>void;control?:boolean};
+type Props={record:any;onNavigate:(name:string)=>void;control?:boolean;initialFamilyId?:string};
 const dl=(name:string,x:any)=>{const u=URL.createObjectURL(new Blob([JSON.stringify(x,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)};
 const currentByFamily=new Map(R48_COMPLETION_FAMILIES.map(x=>[x.id,x]));
 const currentExecutable=new Set(['WEB_ACTIVE','SOURCE_ACTIVE','LOCAL_ACTIVE']);
 const currentRouteOf=(surface:string|undefined,fallback:string)=>String(surface||fallback||'System Atlas').split('/')[0].trim()||fallback||'System Atlas';
 const R45_SYSTEM_ATLAS_PREDECESSOR_MARKERS=['V24 INVENTORY-ALIGNED SOFTWARE UNIVERSE','OMEGA_SYSTEM_ATLAS_V24_TRUTH.json','R45 EXECUTION CONTRACT'] as const;void R45_SYSTEM_ATLAS_PREDECESSOR_MARKERS;
 
-export default function SystemAtlasControl({record,onNavigate,control=false}:Props){
- const[q,setQ]=useState(''),[family,setFamily]=useState(()=>{try{const id=localStorage.getItem('omega.r83.familyFocus');const i=FAMILIES.findIndex(x=>x.id===id);return i>=0?i:0}catch{return 0}}),[subsystem,setSubsystem]=useState(0),[phase,setPhase]=useState(0),[stream,setStream]=useState(0);
+export default function SystemAtlasControl({record,onNavigate,control=false,initialFamilyId}:Props){
+ const[q,setQ]=useState(''),[family,setFamily]=useState(()=>{try{const id=initialFamilyId||localStorage.getItem('omega.r83.familyFocus');const i=FAMILIES.findIndex(x=>x.id===id);return i>=0?i:0}catch{return 0}}),[subsystem,setSubsystem]=useState(0),[phase,setPhase]=useState(0),[stream,setStream]=useState(0);
+ useEffect(()=>{if(!initialFamilyId)return;const i=FAMILIES.findIndex(x=>x.id===initialFamilyId);if(i>=0)setFamily(i)},[initialFamilyId]);
  const rows=useMemo(()=>FAMILIES.filter(x=>{const now=currentByFamily.get(x.id);return(x.id+' '+x.name+' '+x.invariant+' '+x.role+' '+x.status+' '+x.statusNote+' '+x.inventoryPurpose+' '+(now?.successor||'')+' '+(now?.surface||'')+' '+(now?.proof||'')).toLowerCase().includes(q.toLowerCase())}),[q]);
  const cell=atlasCell(family,subsystem,phase,stream),current=currentByFamily.get(cell.family.id),receipt=systemAtlasReceipt(record.stateId),expressions=expressionPlanesForFamily(cell.family.id),currentRoute=currentRouteOf(current?.surface,cell.family.target),inlineLocal=cell.family.id==='S17'&&current?.successor==='LOCAL_ACTIVE',canOpen=Boolean(current&&currentExecutable.has(current.successor)&&currentRoute!=='System Atlas');
  const counts=R48_COMPLETION_SUMMARY.counts,audit=useMemo(()=>operationalCapabilityAudit(),[]);
