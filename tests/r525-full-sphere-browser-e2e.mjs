@@ -46,7 +46,13 @@ async function prove(browser,label,viewport){
   await page.waitForTimeout(240);
   const afterMotion=await movingEdge.getAttribute('x1');
   if(beforeMotion===afterMotion)throw new Error(label+': fold animation did not move rendered geometry');
+  const beforePause=await movingEdge.getAttribute('x1');
   await sphere.locator('button[data-r525-motion="playing"]').click();
+  const afterPause=await movingEdge.getAttribute('x1');
+  await page.waitForTimeout(180);
+  const settledPause=await movingEdge.getAttribute('x1');
+  if(afterPause!==settledPause)throw new Error(label+': paused geometry continued moving');
+  if(Math.abs(Number(afterPause)-Number(beforePause))>1.5)throw new Error(label+': paused geometry snapped back to static fold');
   const words=await sphere.innerText();
   if(!words.includes('not an observation')&& !words.includes('Observation is not inferred'))throw new Error(label+': epistemic projection disclosure missing');
   if(!words.includes('No physics units')||!words.includes('historical six-video grammar'))throw new Error(label+': false historical/source claims');
