@@ -14,16 +14,20 @@ export default function FullSphereInstrumentR525({address,onAddress}:Props){
  const[yaw,setYaw]=useState(24);
  const[fold,setFold]=useState(.18);
  const[playing,setPlaying]=useState(false);
+ const[motionMode,setMotionMode]=useState<'ROTATE'|'FOLD'|'ROTATE_FOLD'>('ROTATE');
+ const[phase,setPhase]=useState(0);
  const[visibleShells,setVisibleShells]=useState<readonly boolean[]>([true,true,true]);
  const toggleShell=(shell:number)=>setVisibleShells(current=>current.map((visible,i)=>i===shell?!visible:visible));
- useEffect(()=>{if(!playing)return;const id=window.setInterval(()=>setYaw(v=>v>=179?-179:v+1),62);return()=>window.clearInterval(id)},[playing]);
+ useEffect(()=>{if(!playing)return;const id=window.setInterval(()=>setPhase(v=>(v+1)%360),62);return()=>window.clearInterval(id)},[playing]);
+ const animatedYaw=yaw+(playing&&motionMode!=='FOLD'?phase:0);
+ const animatedFold=playing&&motionMode!=='ROTATE'?Math.max(0,Math.min(1,fold+.24*Math.sin(phase*Math.PI/90))):fold;
  const current=useMemo(()=>corpusState(address),[address]);
  const selected=useMemo(()=>selectSphereAddressR525(address,time,Number(current.autoPing.dataNext)),[address,time,current.autoPing.dataNext]);
  const packet=useMemo(()=>corpusState(selected),[selected]);
- const frame=useMemo(()=>fullSphereProjectionR525({address:selected,continuity:packet.metrics.continuity,plasticity:packet.metrics.plasticity,scar:packet.metrics.scar,contradiction:packet.metrics.contradiction,yaw,fold,lens}),[selected,packet,yaw,fold,lens]);
+ const frame=useMemo(()=>fullSphereProjectionR525({address:selected,continuity:packet.metrics.continuity,plasticity:packet.metrics.plasticity,scar:packet.metrics.scar,contradiction:packet.metrics.contradiction,yaw:animatedYaw,fold:animatedFold,lens}),[selected,packet,animatedYaw,animatedFold,lens]);
  const color=lens==='SCAR'?'#d4a8ba':lens==='CONTRADICTION'?'#d3a67a':lens==='FOLD'?'#84cbd0':'#d5d4bb';
  const timeNote=time==='HISTORY'?'Previous address in the enumerated lattice. This is NOT an observation of historical time.':time==='FORECAST'?'Declared autoPing successor projected from the model. No external future measurement is claimed.':'Current loaded source-packet address. Observation is not inferred from address geometry.';
- const reset=()=>{setYaw(24);setFold(.18);setPlaying(false);setLens('CONTINUITY');setTime('NOW');setVisibleShells([true,true,true])};
+ const reset=()=>{setYaw(24);setFold(.18);setPlaying(false);setLens('CONTINUITY');setTime('NOW');setVisibleShells([true,true,true]);setMotionMode('ROTATE');setPhase(0)};
  return <section className='r525-full-sphere' data-r525-sphere={R525_SPHERE_SCHEMA} data-r525-source-family={R525_ARCHIVE_FAMILY} data-r525-active-address={selected} aria-label='Full Sphere state-bound visual instrument'>
   <div className='r525-head'>
    <div><span className='r525-eyebrow'>AG-008 · Historical visual grammar recovery · R525</span><h2>Full Sphere <i>Instrument</i></h2><p>Exact 20,736-address antipodal topology, three nested dodecahedral projections and model-state-bound visual channels. The historical six-video grammar is the recovery reference—not a claim of pixel-equivalent reconstruction.</p></div>
@@ -66,6 +70,7 @@ export default function FullSphereInstrumentR525({address,onAddress}:Props){
      <input id='r525-yaw' aria-label='Full Sphere observer rotation' type='range' min='-180' max='180' step='1' value={yaw} onChange={e=>setYaw(Number(e.target.value))}/>
      <label htmlFor='r525-fold'>Projection fold <b>{Math.round(fold*100)}%</b></label>
      <input id='r525-fold' aria-label='Full Sphere projection fold' type='range' min='0' max='1' step='.01' value={fold} onChange={e=>setFold(Number(e.target.value))}/>
+     <div className='r525-lens-grid' data-r527-motion-modes='source-derived-projection'>{(['ROTATE','FOLD','ROTATE_FOLD'] as const).map(mode=><button key={mode} type='button' data-r527-motion-mode={mode} aria-pressed={motionMode===mode} onClick={()=>setMotionMode(mode)}>{mode.replace('_',' + ')}</button>)}</div>
      <div className='r525-transport'><button type='button' onClick={()=>setPlaying(p=>!p)} data-r525-motion={playing?'playing':'paused'}>{playing?<Pause size={15}/>:<Play size={15}/>} {playing?'Pause':'Animate'} projection</button><button type='button' onClick={reset}><RotateCcw size={15}/> Reset</button></div>
     </div>
     <div className='r525-controls-block r525-readout'><label>Computed packet channels</label>
