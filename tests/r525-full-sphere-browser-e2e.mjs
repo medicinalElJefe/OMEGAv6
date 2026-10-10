@@ -19,6 +19,8 @@ async function prove(browser,label,viewport){
   await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
   const portal=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"]');
   await portal.waitFor({state:'visible',timeout:18000});
+  await portal.locator('button[data-r519-node="Atlas"]').click();
+  await portal.locator('.o7-r519-inspector[data-r519-focus="Atlas"]').waitFor({state:'visible',timeout:10000});
   await portal.locator('button[data-r519-launch="Atlas"]').click();
   const native=page.locator('.o7-science-workspace[data-route="Atlas"]');
   await native.waitFor({state:'visible',timeout:28000});
