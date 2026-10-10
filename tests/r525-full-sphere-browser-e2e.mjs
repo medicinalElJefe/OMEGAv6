@@ -37,6 +37,10 @@ async function prove(browser,label,viewport){
   const before=await first.getAttribute('x1');
   await sphere.locator('input[aria-label="Full Sphere observer rotation"]').focus();
   await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(before=>{
+   const el=document.querySelector('line[data-r525-edge]');
+   return Boolean(el&&el.getAttribute('x1')!==before);
+  },before,{timeout:7000});
   const after=await first.getAttribute('x1');
   if(before===after)throw new Error(label+': rotation control did not change projected geometry');
   const start=Number(await sphere.getAttribute('data-r525-active-address'));
@@ -47,6 +51,7 @@ async function prove(browser,label,viewport){
   if(anti===start)throw new Error(label+': exact antipode did not actuate shared atlas state');
   if(Number(await native.getAttribute('data-address'))!==anti)throw new Error(label+': model update did not reach canonical Atlas address binding');
   await hit.click();
+  await page.waitForFunction(start=>Number(document.querySelector('[data-r525-sphere]')?.getAttribute('data-r525-active-address'))===start,start,{timeout:10000});
   if(Number(await sphere.getAttribute('data-r525-active-address'))!==start)throw new Error(label+': antipodal involution failed through real UI clicks');
   await sphere.locator('button[data-r525-time="HISTORY"]').click();
   const history=Number(await sphere.getAttribute('data-r525-active-address'));
