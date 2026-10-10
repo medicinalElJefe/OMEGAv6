@@ -8,6 +8,7 @@ import {R512_DOMAIN_MENU} from '../src7/capabilityMenuR512.ts';
 const root=readFileSync('src7/Omega7Root.tsx','utf8');
 const library=readFileSync('src7/capabilityLibraryR520.tsx','utf8');
 const css=readFileSync('src7/capabilityLibraryR520.css','utf8');
+const shellCss=readFileSync('src7/omega7.css','utf8');
 const browser=readFileSync('tests/r520-complete-function-library-browser-e2e.mjs','utf8');
 assert.equal(R512_DOMAIN_MENU.length,OMEGA7_DOMAINS.length,'six canonical top-level areas retained');
 assert.equal(OMEGA7_CAPABILITIES.length,44,'44 current tools cannot be reduced');
@@ -53,5 +54,10 @@ assert.ok(root.includes('onRoute={open} onRecovered={launchRecovered} onHistoric
 assert.ok(root.includes("data-r510-visual-restoration='CURRENT_R71_CANONICAL_HOME'"),'visual home not replaceable by function list');
 assert.ok(root.includes("data-r486-visible-convergence='true'"),'older recovered fabric preserved');
 assert.ok(css.includes('@media(max-width:760px)'),'mobile inventory use required');
+assert.ok(shellCss.includes('.o7-topbar .o7-r520-toggle{flex:0 0 44px'),'mobile All Functions must have a bounded hitbox, not intercept Home');
+assert.ok(shellCss.includes('.o7-topbar .o7-r520-toggle strong{display:none}'),'mobile header must use accessible icon-size control');
+assert.ok(browser.includes('assertHeaderHitboxes(page,label'),'browser must test real mobile hit testing and home click');
+assert.ok(browser.includes("width:320,height:700"),'narrow phone hitbox proof cannot be omitted');
+assert.ok(browser.includes('after lazy function library loaded'),'drawer CSS cannot later reintroduce header overlap');
 assert.ok(browser.includes("await check(browser,'desktop'")&&browser.includes("await check(browser,'mobile'"),'real dual viewport browser proof required');
 console.log('R520 COMPLETE FUNCTION INVENTORY PASS · 44 current routes · 72 recovered lineages · 100 historical records · 6 canonical areas · donor/gate boundaries explicit');
