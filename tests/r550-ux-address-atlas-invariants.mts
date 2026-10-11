@@ -15,4 +15,7 @@ assert.equal(result.executionProven,false);
 assert.equal(result.liveBehaviorProven,false);
 assert.equal(result.canonicalMutation,false);
 assert.ok(Array.isArray(result.capabilities));
+assert.equal(result.sourceModelExecutorBoundCount,result.capabilities.filter(x=>x.sourceModelExecutorBound).length);
+for(const cap of result.capabilities){assert.equal(cap.executionProof,'NOT_OBSERVED');assert.equal(typeof cap.sourceModelExecutorBound,'boolean')}
+for(let pillar=0;pillar<12;pillar++){const page=inspectUX20736(encodeUX20736({pillar,stage:0,interaction:0,evidence:11}));assert.equal(page.executionProven,false);assert.equal(page.liveBehaviorProven,false)}
 console.log('R550 reversible 20736 UX atlas and non-claim boundaries PASS');
