@@ -37,6 +37,7 @@ assert.equal(isAutonomousCandidateBranchR245('feature/unrelated',candidatePolicy
 assert.equal(deriveResidualGateR245(null,state.residualPolicy).allow,false,'missing residual evidence must fail closed');
 assert.equal(deriveResidualGateR245({schema:'UNKNOWN',state:'HEALTHY',residuals:[]},state.residualPolicy).allow,false,'untrusted evidence schema must not authorize autonomous source mutation');
 assert.equal(deriveResidualGateR245({schema:'OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164',state:'UNPROVEN',residuals:[]},state.residualPolicy).allow,false,'unknown R164 evidence state must fail closed');
+assert.equal(deriveResidualGateR245({schema:'OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164',state:'OBSERVED',residuals:[]},state.residualPolicy).allow,true,'authentic R164 OBSERVED nonblocking proof remains admissible');
 assert.equal(deriveResidualGateR245({schema:'OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164',state:'HEALTHY',residuals:'not-an-array'},state.residualPolicy).allow,false,'malformed residual rows must fail closed');
 
 assert.equal(deriveResidualGateR245({state:'HEALTHY',residuals:[]},{}).allow,false,'missing/invalid canonical residual policy must fail closed');
