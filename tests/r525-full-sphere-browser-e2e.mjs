@@ -31,6 +31,11 @@ async function prove(browser,label,viewport){
   if(await sphere.locator('[data-r525-shell]').count()!==3||await sphere.locator('line[data-r525-edge]').count()!==90)throw new Error(label+': 3 genuine nested 20-vertex/30-edge shells not rendered');
   const execution=native.locator('[data-r531-source-execution="true"]');
   await execution.waitFor({state:'visible',timeout:10000});
+  const inspect=execution.locator('[data-r533-inspect]');
+  await inspect.click();
+  let model=execution.locator('[data-r533-model-receipt="SOURCE_MODEL_EXECUTED"]');
+  await model.waitFor({state:'visible',timeout:5000});
+  if(!(await model.innerText()).includes('"edgeCount":90'))throw new Error(label+': source visualization did not compute 90 edges');
   const evaluate=execution.locator('[data-r531-evaluate]');
   await evaluate.click();
   let receipt=execution.locator('[data-r531-receipt="HELD"]');
@@ -41,6 +46,11 @@ async function prove(browser,label,viewport){
    await button.click();
    if(await button.getAttribute('aria-pressed')!=='true')throw new Error(label+': executor '+mode+' did not activate');
    if(await execution.locator('[data-r531-receipt]').count())throw new Error(label+': stale executor receipt remained after mode switch');
+   await inspect.click();
+   model=execution.locator('[data-r533-model-receipt="'+(mode==='SAI_HYBRID'?'EXTERNAL_HOST_PROOF_REQUIRED':'SOURCE_MODEL_EXECUTED')+'"]');
+   await model.waitFor({state:'visible',timeout:5000});
+   if(mode==='TRAVERSAL'&&!(await model.innerText()).includes('nextAddress'))throw new Error(label+': traversal model did not execute');
+   if(mode==='FORECAST'&&!(await model.innerText()).includes('modelNextAddress'))throw new Error(label+': forecast model did not execute');
    await evaluate.click();
    receipt=execution.locator('[data-r531-receipt="HELD"]');
    await receipt.waitFor({state:'visible',timeout:5000});
