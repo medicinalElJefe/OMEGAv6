@@ -33,8 +33,12 @@ async function prove(browser,label,viewport){
   const savedState=workflow.locator('.o7-r538-history section').first().getByRole('button',{name:/State [\d,]+/});
   await savedState.waitFor({state:'visible',timeout:5000});
   if((await workflow.locator('.o7-r538-history section').first().getByRole('button').count())!==1)throw new Error(label+': bookmark did not persist as one recoverable state');
+  // Address zero is valid: prove saved-state restoration survives an actual Atlas read.
+  await page.evaluate(()=>{localStorage.setItem('omega.v6.address','0');window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:0}}))});
+  await workflow.getByText('State 0',{exact:true}).first().waitFor({state:'visible',timeout:5000});
   const native=page.locator('.o7-science-workspace[data-route="Atlas"]');
   await native.waitFor({state:'visible',timeout:28000});
+  await page.waitForFunction(()=>document.querySelector('.o7-science-workspace[data-route="Atlas"]')?.getAttribute('data-address')==='0',{timeout:8000});
   const open=native.locator('.o7-open-instrument');
   if(await open.count())await open.click();
   const motion=native.locator('[data-r537-motion="source-model"]');
