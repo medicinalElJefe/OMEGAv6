@@ -152,3 +152,16 @@
  .o7-topbar .o7-health-button{flex-basis:56px;width:56px;max-width:56px}
  .o7-topbar .o7-v6{flex-basis:44px;width:44px;min-width:44px;max-width:44px}
 }
+
+/* R533.3: real source of mobile offset was horizontal scrolling of .o7-main
+   (its scrollWidth exceeded the 390px viewport after model receipt rendering).
+   Keep vertical scrolling, prevent nested workspace horizontal displacement,
+   and wrap long typed evidence instead of hiding it or shrinking controls. */
+.o7-science-workspace,.o7-native-surface,.o7-executor-host,.o7-native-host{min-width:0;max-width:100%}
+[data-r531-source-execution] article,[data-r531-source-execution] [data-r533-model-receipt],[data-r531-source-execution] [data-r531-receipt]{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+[data-r531-source-execution] [data-r533-model-receipt] small,[data-r531-source-execution] [data-r531-receipt] small{display:block;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:760px){
+ .o7-app{display:block;grid-template-columns:minmax(0,1fr)}
+ .o7-main{overflow-x:hidden;max-width:100%;min-width:0}
+ .o7-native-host,.o7-executor-host,.o7-science-workspace,.o7-native-surface{width:100%;min-width:0;max-width:100%}
+}
