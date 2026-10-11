@@ -10,7 +10,7 @@ export function parseSourceHistoryR553(raw:string|null):R553Entry[]{
  try{
   const data:unknown=JSON.parse(raw);
   if(!Array.isArray(data))return[];
-  return data.filter((x):x is R553Entry=>typeof x==='object'&&x!==null&&typeof x.id==='string'&&typeof x.at==='string'&&typeof x.capabilityId==='string'&&Number.isInteger(x.address)&&x.address>=0&&x.address<20736&&typeof x.status==='string'&&typeof x.executionClaimed==='boolean'&&typeof x.result==='object'&&x.result!==null&&x.result.canonicalMutation===false).slice(0,R553_HISTORY_LIMIT);
+  return data.filter((x):x is R553Entry=>{if(typeof x!=='object'||x===null)return false;const e=x as Record<string,unknown>;const r=e.result as Record<string,unknown>|null;return typeof e.id==='string'&&typeof e.at==='string'&&typeof e.capabilityId==='string'&&Number.isInteger(e.address)&&typeof e.address==='number'&&e.address>=0&&e.address<20736&&typeof e.status==='string'&&typeof e.executionClaimed==='boolean'&&typeof r==='object'&&r!==null&&r.canonicalMutation===false}).slice(0,R553_HISTORY_LIMIT);
  }catch{return[]}
 }
 export function runSourceHistoryR553(capabilityId:string,address:number,history:readonly R553Entry[],at:string,id:string){
