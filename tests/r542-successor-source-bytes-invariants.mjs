@@ -14,5 +14,14 @@ try{
  assert.deepEqual(verifySuccessorSourcesR542(manifest,{root}).reasons,['SOURCE_UNAVAILABLE:S1']);
  assert.equal(verifySuccessorSourcesR542({...manifest,capsules:[{id:'S1',target:'../outside.ts'}]},{root}).valid,false);
  assert.equal(verifySuccessorSourcesR542({capsules:[],sourceProofs:[]},{root}).valid,false);
- console.log('R542 successor real source-byte proof PASS');
+
+ // A source hash must not bless a symlinked parent directory or duplicate attestation.
+ fs.writeFileSync(full,'export const candidate=1;\n');
+ assert.equal(verifySuccessorSourcesR542({...manifest,sourceProofs:[...manifest.sourceProofs,...manifest.sourceProofs]},{root}).valid,false);
+ assert.equal(verifySuccessorSourcesR542({...manifest,sourceProofs:[...manifest.sourceProofs,{capsuleId:'ORPHAN',status:'SOURCE_HASH_VERIFIED',actualSha256:sha}]},{root}).valid,false);
+ assert.equal(verifySuccessorSourcesR542({...manifest,capsules:[...manifest.capsules,...manifest.capsules]},{root}).valid,false);
+ const moved=path.join(root,'real-source');fs.mkdirSync(moved);fs.renameSync(full,path.join(moved,'candidate.ts'));
+ fs.rmdirSync(path.dirname(full));fs.symlinkSync(moved,path.dirname(full),'dir');
+ assert.deepEqual(verifySuccessorSourcesR542(manifest,{root}).reasons,['SOURCE_UNAVAILABLE:S1']);
+ console.log('R542/R543 successor real source-byte proof PASS');
 }finally{fs.rmSync(root,{recursive:true,force:true})}
