@@ -1,5 +1,6 @@
 import {YEAR_CORPUS_CAPABILITY_GRAPH_R474,OMEGA_ARCHITECTURE_R474} from './yearCorpusCapabilityGraphR474';
 import {PRESENTATION_CONSERVATION_R478} from './presentationConservationR478';
+import {R534_EXECUTABLE_BINDING_IDS} from './accumulativeCapabilityExecutionR534';
 
 /** 12^4 UX address space. Addresses are representational coordinates, never physical dimensions or proof of execution. */
 export const UX20736_SCHEMA='OMEGA_UX_ADDRESS_ATLAS_R550';
@@ -23,8 +24,9 @@ export function inspectUX20736(address:number){
  const capabilities=YEAR_CORPUS_CAPABILITY_GRAPH_R474.filter(x=>x.pillar===pillar);
  const routes=[...new Set(capabilities.map(x=>x.presentationSurface.route))];
  const conserved=PRESENTATION_CONSERVATION_R478.filter(x=>routes.includes(x.route));
+ const bound=new Set<string>(R534_EXECUTABLE_BINDING_IDS);
  return{schema:UX20736_SCHEMA,address,coordinate:c,pillar,stage:UX20736_STAGES[c.stage],interaction:UX20736_INTERACTIONS[c.interaction],evidence:UX20736_EVIDENCE[c.evidence],
- capabilityCount:capabilities.length,capabilities:capabilities.map(x=>({id:x.identity.id,name:x.identity.name,route:x.presentationSurface.route,truthClass:x.evidence.truthClass,executionState:x.strongestImplementation.state,gap:x.remainingGap})),
- routes,conservedBindings:conserved.length,executionProven:false,liveBehaviorProven:false,canonicalMutation:false,
+ capabilityCount:capabilities.length,capabilities:capabilities.map(x=>({id:x.identity.id,name:x.identity.name,route:x.presentationSurface.route,truthClass:x.evidence.truthClass,executionState:x.strongestImplementation.state,sourceModelExecutorBound:bound.has(x.identity.id),executionProof:'NOT_OBSERVED',gap:x.remainingGap})),
+ routes,conservedBindings:conserved.length,sourceModelExecutorBoundCount:capabilities.filter(x=>bound.has(x.identity.id)).length,executionProven:false,liveBehaviorProven:false,canonicalMutation:false,
  truthBoundary:'Atlas coordinate and registry membership are not proof of actual execution, historic parity, or deployed browser behavior'};
 }
