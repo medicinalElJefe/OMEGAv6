@@ -29,6 +29,24 @@ async function prove(browser,label,viewport){
   const sphere=native.locator('[data-r525-sphere="OMEGA_FULL_SPHERE_ARCHIVE_GRAMMAR_R525"]');
   await sphere.waitFor({state:'visible',timeout:20000});
   if(await sphere.locator('[data-r525-shell]').count()!==3||await sphere.locator('line[data-r525-edge]').count()!==90)throw new Error(label+': 3 genuine nested 20-vertex/30-edge shells not rendered');
+  const execution=native.locator('[data-r531-source-execution="true"]');
+  await execution.waitFor({state:'visible',timeout:10000});
+  const evaluate=execution.locator('[data-r531-evaluate]');
+  await evaluate.click();
+  let receipt=execution.locator('[data-r531-receipt="HELD"]');
+  await receipt.waitFor({state:'visible',timeout:5000});
+  if(!(await receipt.innerText()).includes('SOURCE_HEAD_NOT_EXACT_GIT_SHA'))throw new Error(label+': unproven UI evaluation incorrectly passed exact source authority');
+  for(const mode of ['TRAVERSAL','FORECAST','SAI_HYBRID']){
+   const button=execution.locator('button[data-r531-executor="'+mode+'"]');
+   await button.click();
+   if(await button.getAttribute('aria-pressed')!=='true')throw new Error(label+': executor '+mode+' did not activate');
+   if(await execution.locator('[data-r531-receipt]').count())throw new Error(label+': stale executor receipt remained after mode switch');
+   await evaluate.click();
+   receipt=execution.locator('[data-r531-receipt="HELD"]');
+   await receipt.waitFor({state:'visible',timeout:5000});
+   if(!(await receipt.innerText()).includes('AUTHORITY_NOT_CLOSED'))throw new Error(label+': '+mode+' bypassed authority boundary');
+  }
+  if(!(await sphere.locator('line[data-r525-edge]').count()))throw new Error(label+': developmental UI destroyed Full Sphere geometry');
   if(!(await native.locator('canvas').count()))throw new Error(label+': prior original AtlasViewport canvas was lost');
   const shellToggle=sphere.locator('button[data-r526-shell-toggle="1"]');
   if(await shellToggle.getAttribute('aria-pressed')!=='true')throw new Error(label+': middle shell initial visibility not enabled');
