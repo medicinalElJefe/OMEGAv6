@@ -7,6 +7,7 @@ const deploymentProof={exactPromotedSha:'b'.repeat(40),liveRuntimeSha:'b'.repeat
 const input={priorState,capsules,sourceProofs,deploymentProof};
 const valid=evaluateSuccessorCycleR535(input);
 assert.equal(valid.status,'READY_FOR_SEPARATE_GOVERNED_REVIEW');
+assert.deepEqual(valid.executionOrder,['RG001']);
 assert.equal(valid.sourceMutationAuthorized,false);
 assert.equal(valid.productionAdmissionAuthorized,false);
 assert.equal(valid.canonicalMutation,false);
@@ -19,8 +20,12 @@ assert.equal(evaluateSuccessorCycleR535({...input,priorState:{...priorState,curr
 
 const forward=[{id:'RG002',target:'src/generated/selfbuildR535/second.ts',prerequisites:['RG001']},...capsules];
 const forwardProofs=[...sourceProofs,{capsuleId:'RG002',status:'SOURCE_HASH_VERIFIED',actualSha256:'c'.repeat(64),historicalParityClaimed:false}];
-assert.equal(evaluateSuccessorCycleR535({...input,capsules:forward,sourceProofs:forwardProofs}).status,'READY_FOR_SEPARATE_GOVERNED_REVIEW','valid forward dependencies should not depend on manifest ordering');
+const forwardReview=evaluateSuccessorCycleR535({...input,capsules:forward,sourceProofs:forwardProofs});
+assert.equal(forwardReview.status,'READY_FOR_SEPARATE_GOVERNED_REVIEW','valid forward dependencies should not depend on manifest ordering');
+assert.deepEqual(forwardReview.executionOrder,['RG001','RG002'],'execution order must honor dependencies even when manifest is reversed');
 const cyclic=[{...forward[0],prerequisites:['RG001']},{...forward[1],prerequisites:['RG002']}];
-assert.ok(evaluateSuccessorCycleR535({...input,capsules:cyclic,sourceProofs:forwardProofs}).reasons.some(x=>x.startsWith('SUCCESSOR_DEPENDENCY_CYCLE')));
+const cycleReview=evaluateSuccessorCycleR535({...input,capsules:cyclic,sourceProofs:forwardProofs});
+assert.ok(cycleReview.reasons.some(x=>x.startsWith('SUCCESSOR_DEPENDENCY_CYCLE')));
+assert.deepEqual(cycleReview.executionOrder,[],'held cycle must not expose executable order');
 assert.ok(evaluateSuccessorCycleR535({...input,capsules:[{...capsules[0],prerequisites:['RG001']}]}).reasons.includes('UNPROVEN_DEPENDENCY:RG001'));
 console.log('R535/R545 successor dependency proof invariants PASS');

@@ -27,15 +27,15 @@ export function evaluateSuccessorCycleR535({priorState={},capsules=[],sourceProo
   const proof=proofRows.find(p=>p.capsuleId===id);
   if(!proof||proof.status!=='SOURCE_HASH_VERIFIED'||proof.historicalParityClaimed!==false||!(/^[a-f0-9]{64}$/.test(String(proof.actualSha256||''))))reasons.push('SOURCE_PROOF_REQUIRED:'+id);
  }
- const visited=new Set(),active=new Set();
+ const visited=new Set(),active=new Set(),ordered=[];
  function visit(id){
   if(active.has(id)){reasons.push('SUCCESSOR_DEPENDENCY_CYCLE:'+id);return}
   if(visited.has(id))return;
   active.add(id);
   for(const parent of dependencyGraph.get(id)||[])visit(parent);
-  active.delete(id);visited.add(id);
+  active.delete(id);visited.add(id);ordered.push(id);
  }
  for(const id of successorIds)visit(id);
  if(!deploymentProof||deploymentProof.exactPromotedSha!==deploymentProof.liveRuntimeSha||!(/^[a-f0-9]{40}$/.test(String(deploymentProof.exactPromotedSha||'')))||deploymentProof.productionBrowserVerified!==true)reasons.push('PRIOR_PRODUCTION_PROOF_REQUIRED');
- return Object.freeze({schema:R535_SUCCESSOR_SCHEMA,status:reasons.length?'HELD':'READY_FOR_SEPARATE_GOVERNED_REVIEW',reasons:Object.freeze(reasons),priorAdmittedCount:admitted.size,successorCount:capsules.length,sourceMutationAuthorized:false,canonicalMutation:false,productionAdmissionAuthorized:false,requiresR245GeneratorExtension:true,requiresR503WorkerAdmission:true,requiresR164ResidualGate:true});
+ return Object.freeze({schema:R535_SUCCESSOR_SCHEMA,status:reasons.length?'HELD':'READY_FOR_SEPARATE_GOVERNED_REVIEW',reasons:Object.freeze(reasons),priorAdmittedCount:admitted.size,successorCount:capsules.length,executionOrder:Object.freeze(reasons.length?[]:ordered),sourceMutationAuthorized:false,canonicalMutation:false,productionAdmissionAuthorized:false,requiresR245GeneratorExtension:true,requiresR503WorkerAdmission:true,requiresR164ResidualGate:true});
 }
