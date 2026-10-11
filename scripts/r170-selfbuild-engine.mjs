@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import {evaluateSuccessorCycleR535} from '../src/system/selfBuildSuccessorAdmissionR535.js';
+import {verifySuccessorSourcesR542} from '../src/system/selfBuildSourceBytesProofR542.js';
 import path from 'node:path';
 import {planGovernedCandidateR245} from './lib/r245-governed-selfbuild-selection.mjs';
 import {capsuleBodyR245,deriveResidualGateR245,R245_GOVERNED_SELFBUILD_CONTRACT,R245_CAPSULE_GENERATOR_REVISION} from '../src/system/governedSelfBuildContractR245.js';
@@ -60,8 +61,9 @@ if((state.admittedSourceCapsules||[]).length>=Number(state.maxAutonomousGenerati
  if(successorManifestPath){
   try{
    const manifest=JSON.parse(fs.readFileSync(successorManifestPath,'utf8'));
-   const successor=evaluateSuccessorCycleR535({priorState:state,capsules:manifest.capsules,sourceProofs:manifest.sourceProofs,deploymentProof:manifest.deploymentProof});
-   emitProposal({status:'R535_SUCCESSOR_REVIEW',generation:state.generation,successor,sourceMutationAuthorized:false,canonicalAdmission:false},true);
+   const bytesProof=verifySuccessorSourcesR542(manifest);
+   const successor=bytesProof.valid?evaluateSuccessorCycleR535({priorState:state,capsules:manifest.capsules,sourceProofs:manifest.sourceProofs,deploymentProof:manifest.deploymentProof}):{status:'HELD',reasons:bytesProof.reasons,sourceMutationAuthorized:false};
+   emitProposal({status:'R535_SUCCESSOR_REVIEW',generation:state.generation,successor,sourceBytesProofR542:bytesProof,sourceMutationAuthorized:false,canonicalAdmission:false},true);
   }catch(error){
    emitProposal({status:'R535_SUCCESSOR_HELD',generation:state.generation,reasons:['INVALID_OR_UNREADABLE_SUCCESSOR_MANIFEST',error instanceof Error?error.message:String(error)],sourceMutationAuthorized:false,canonicalAdmission:false},true);
   }
