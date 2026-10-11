@@ -41,7 +41,7 @@ export function deriveResidualGateR245(evidence,policy){
  const p=checked.policy;
  if(!evidence&&p.requireEvidence)return{schema:'OMEGA_AUTONOMOUS_SOURCE_RESIDUAL_GATE_R245',contract:R245_GOVERNED_SELFBUILD_CONTRACT,state:'UNPROVEN',allow:false,reason:'current R164 residual evidence is required before autonomous generation',blocking:[],policy:p,policyValid:true};
  const evidenceState=upper(evidence?.state||'UNPROVEN');
- if(evidence?.schema!=='OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164'||!['HEALTHY','RESIDUALS_PRESENT','BLOCKED'].includes(evidenceState)||!Array.isArray(evidence?.residuals)){
+ if(evidence?.schema!=='OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164'||!['OBSERVED','HEALTHY','RESIDUALS_PRESENT','BLOCKED'].includes(evidenceState)||!Array.isArray(evidence?.residuals)){
   return{schema:'OMEGA_AUTONOMOUS_SOURCE_RESIDUAL_GATE_R245',contract:R245_GOVERNED_SELFBUILD_CONTRACT,state:'UNPROVEN',allow:false,reason:'unrecognized or malformed R164 residual evidence',blocking:[],policy:p,policyValid:true};
  }
  const residuals=evidence.residuals;
