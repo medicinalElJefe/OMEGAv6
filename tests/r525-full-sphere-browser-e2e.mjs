@@ -63,7 +63,10 @@ async function prove(browser,label,viewport){
    await model.waitFor({state:'visible',timeout:5000});
    if(mode==='TRAVERSAL'&&!(await model.innerText()).includes('nextAddress'))throw new Error(label+': traversal model did not execute');
    if(mode==='TRAVERSAL'){
-    const next=JSON.parse((await model.innerText()).replace(/^SOURCE_MODEL_EXECUTED/,'').trim()||'{}').nextAddress;
+    const nextText=await execution.locator('[data-r535-live-result="TRAVERSAL"] p').innerText();
+    const nextMatch=nextText.match(/Model address ([\\d,]+)/);
+    if(!nextMatch)throw new Error(label+': computed traversal address not presented');
+    const next=Number(nextMatch[1].replace(/,/g,''));
     const action=execution.locator('[data-r535-apply-next]');
     await action.waitFor({state:'visible',timeout:5000});
     await action.click();
