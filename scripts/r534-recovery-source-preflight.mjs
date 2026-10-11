@@ -18,7 +18,14 @@ export function verifyRecoverySourcesR534({root=process.cwd(),sources=[]}={}){
    try{
     const stat=fs.lstatSync(resolved);
     if(!stat.isFile()||stat.isSymbolicLink())reasons.push('SOURCE_NOT_REGULAR_FILE');
-    else actual=createHash('sha256').update(fs.readFileSync(resolved)).digest('hex');
+    else {
+     let cursor=path.dirname(resolved);
+     while(cursor!==path.resolve(root)&&cursor!==path.dirname(cursor)){
+      if(fs.lstatSync(cursor).isSymbolicLink()){reasons.push('SYMLINK_PARENT_NOT_ALLOWED');break}
+      cursor=path.dirname(cursor);
+     }
+     if(!reasons.length)actual=createHash('sha256').update(fs.readFileSync(resolved)).digest('hex');
+    }
    }catch{reasons.push('SOURCE_NOT_FOUND')}
   }
   if(actual&&expected!==actual)reasons.push('SOURCE_HASH_MISMATCH');
