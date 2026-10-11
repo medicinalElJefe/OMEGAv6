@@ -1,3 +1,4 @@
+import {auditAccumulativeBindingR534} from '../src/accumulativeBindingAuditR534';
 import assert from 'node:assert/strict';
 import {YEAR_CORPUS_CAPABILITY_GRAPH_R474,OMEGA_ARCHITECTURE_R474,auditYearCorpusCapabilityGraphR474,auditCapabilityConservationR474,resolveStrongestImplementationR474} from '../src/yearCorpusCapabilityGraphR474';
 
@@ -28,3 +29,11 @@ assert.equal(auditCapabilityConservationR474(YEAR_CORPUS_CAPABILITY_GRAPH_R474,c
 assert.equal(auditCapabilityConservationR474(YEAR_CORPUS_CAPABILITY_GRAPH_R474,candidate,{[lost.identity.id]:'REGRESSION'}).pass,false,'known regression must remain blocking');
 for(const id of ['HEIGHTENED','FIELD_RENDER','EARTH','SAR','BIO','LANGUAGE','SAI','HYBRID','ARCHIVE','CCR','COLLECTIONS','PROOF'])assert.ok(YEAR_CORPUS_CAPABILITY_GRAPH_R474.some(x=>x.identity.id===id),'missing cross-board lineage '+id);
 console.log('R474 YEAR-CORPUS CAPABILITY GRAPH PASS · '+audit.capabilities+' typed lineages · '+audit.pillars+' architecture pillars · strongest-valid resolution · capability-conservation gate active');
+
+const accumulated=auditAccumulativeBindingR534();
+assert.equal(accumulated.capabilityCount,YEAR_CORPUS_CAPABILITY_GRAPH_R474.length);
+assert.equal(accumulated.archiveExhaustive,false,'incomplete archive census cannot be marked exhaustive');
+assert.equal(accumulated.productionPromotionClaimed,false,'read-only binding is not production authority');
+assert.ok(accumulated.unresolvedListings.length>0,'unresolved archive listing must be retained');
+assert.ok(accumulated.bindings.every(x=>x.canonicalMutation===false&&x.sourceBindingId));
+console.log('R534 accumulated R474/R484 residual binding PASS');
