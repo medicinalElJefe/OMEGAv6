@@ -1,3 +1,4 @@
+import {measureAccumulativeConvergenceR534} from '../src/accumulativeConvergenceCoverageR534';
 import {executeAccumulatedCapabilityR534,R534_EXECUTABLE_BINDING_IDS} from '../src/accumulativeCapabilityExecutionR534';
 import {initCorpusPack} from '../src/corpusRuntime';
 import {auditAccumulativeBindingR534} from '../src/accumulativeBindingAuditR534';
@@ -52,3 +53,14 @@ assert.equal(executeAccumulatedCapabilityR534('NOT_A_CAPABILITY',11498).status,'
 assert.equal(executeAccumulatedCapabilityR534('SPHERE',20736).status,'HELD');
 assert.equal(executeAccumulatedCapabilityR534('RUNTIME',11498).status,'HELD','unmapped executor must never silently execute');
 console.log('R534 source-bound capability execution PASS');
+
+const coverage=measureAccumulativeConvergenceR534();
+assert.equal(coverage.totalCapabilities,YEAR_CORPUS_CAPABILITY_GRAPH_R474.length);
+assert.equal(coverage.fullRestorationClaimed,false);
+assert.equal(coverage.historicalParityProven,0);
+assert.equal(coverage.productionExecutionProvenByThisAudit,0);
+assert.equal(coverage.sourceModelExecutable,5);
+assert.equal(coverage.hostGated,1);
+assert.ok(coverage.notSourceModelExecutable>0,'source model subset must not be misreported as full corpus execution');
+assert.ok(coverage.unresolvedArchiveListings>0);
+console.log('R534 full-corpus coverage accounting PASS');
