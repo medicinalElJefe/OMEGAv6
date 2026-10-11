@@ -7,3 +7,17 @@
 @media(max-width:1070px){.r525-instrument-grid{grid-template-columns:1fr}.r525-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.r525-actions{align-items:start}}
 @media(max-width:620px){.r525-full-sphere{padding:10px;border-radius:11px}.r525-head{align-items:flex-start;flex-direction:column}.r525-head h2{font-size:30px}.r525-proof{display:flex;gap:10px;min-width:0;align-self:stretch;padding:9px 12px}.r525-stage-foot{font-size:9px;flex-wrap:wrap;padding:9px}.r525-panel{grid-template-columns:1fr}.r525-actions{grid-template-columns:1fr 1fr}.r525-actions button{font-size:10px}.r525-segments button{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.r525-full-sphere *{scroll-behavior:auto!important;transition:none!important}}
+
+/* R533.1: prevent the nested Full Sphere grid from retaining a wider intrinsic
+   min-content size than the mobile Atlas workspace. Preserve geometry and
+   controls; fix layout rather than weakening browser viewport assertions. */
+.r525-full-sphere{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.r525-head,.r525-head>div,.r525-instrument-grid,.r525-stage,.r525-panel,.r525-controls-block{min-width:0;max-width:100%}
+.r525-stage svg{max-width:100%}
+.r525-head p,.r525-stage-foot,.r525-controls-block,.r525-boundary{overflow-wrap:anywhere}
+@media(max-width:620px){
+ .r525-instrument-grid{grid-template-columns:minmax(0,1fr)}
+ .r525-panel{grid-template-columns:minmax(0,1fr)}
+ .r525-segments,.r525-lens-grid,.r525-actions,.r525-transport{min-width:0}
+ .r525-segments button,.r525-lens-grid button,.r525-actions button,.r525-transport button{min-width:0;overflow-wrap:anywhere}
+}

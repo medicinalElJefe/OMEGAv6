@@ -1,6 +1,7 @@
 import {useMemo,useState} from 'react';
 import {corpusState} from '../src/corpusRuntime';
 import {executeSourceBoundR530} from './sourceBoundExecutionR530';
+import {inspectSourceInstrumentR533} from './sourceInstrumentR533';
 import type {R529Executor,R529Proposal} from './developmentalExecutionFabricR529';
 
 type Props={address:number};
@@ -11,6 +12,7 @@ export default function SourceExecutionWorkspaceR531({address}:Props){
  const[executor,setExecutor]=useState<R529Executor>('VISUALIZATION');
  const[receipt,setReceipt]=useState<ReturnType<typeof executeSourceBoundR530>|null>(null);
  const packet=useMemo(()=>corpusState(address),[address]);
+ const[modelReceipt,setModelReceipt]=useState<ReturnType<typeof inspectSourceInstrumentR533>|null>(null);
  const run=()=>{
   const m=packet.metrics;
   const parent={continuity:m.continuity,futurePlasticity:m.plasticity,contradiction:m.contradiction,burden:m.burden,recoverability:.8,proofCoverage:.9,capabilityCoverage:1,humanComprehension:.6,futureTopologyRetention:1,scarPressure:m.scar};
@@ -22,12 +24,17 @@ export default function SourceExecutionWorkspaceR531({address}:Props){
  return <section className='o7-science-status' data-r531-source-execution='true' aria-label='Developmental source execution'>
   <article style={{flex:'1 1 100%'}}>
    <span>Developmental execution · evidence-gated</span>
-   <b>Source operations require verified promotion evidence</b>
-   <small>Inspect a candidate without fabricating exact-head proof or host execution. No canonical mutation.</small>
+   <b>Read-only source execution · promotion independently governed</b>
+   <small>Run existing local source models without modifying canonical state. Production promotion and host/device execution remain separately evidence-gated.</small>
    <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:10}}>
-    {EXECUTORS.map(x=><button type='button' key={x} data-r531-executor={x} aria-pressed={executor===x} onClick={()=>{setExecutor(x);setReceipt(null)}}>{x.replace('_',' / ')}</button>)}
-    <button type='button' data-r531-evaluate onClick={run}>Evaluate source admission</button>
+    {EXECUTORS.map(x=><button type='button' key={x} data-r531-executor={x} aria-pressed={executor===x} onClick={()=>{setExecutor(x);setReceipt(null);setModelReceipt(null)}}>{x.replace('_',' / ')}</button>)}
+    <button type='button' data-r533-inspect onClick={()=>setModelReceipt(inspectSourceInstrumentR533(executor,address))}>Run read-only model</button>
+    <button type='button' data-r531-evaluate onClick={run}>Evaluate promotion admission</button>
    </div>
+   {modelReceipt&&<div data-r533-model-receipt={modelReceipt.status} role='status' style={{marginTop:10}}>
+    <b>{modelReceipt.status}</b>
+    <small>{modelReceipt.status==='SOURCE_MODEL_EXECUTED'?JSON.stringify(modelReceipt):modelReceipt.reasons.join(' · ')}</small>
+   </div>}
    {receipt&&<div data-r531-receipt={receipt.status} role='status' style={{marginTop:10}}>
     <b>{receipt.status}</b>
     <small>{receipt.status==='HELD'?receipt.admission.reasons.join(' · '):'External proof required before execution'}</small>
