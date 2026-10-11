@@ -35,7 +35,7 @@ async function prove(browser,label,viewport){
   await executeBound.click();
   let bound=execution.locator('[data-r534-capability-receipt="SOURCE_MODEL_EXECUTED"]');
   await bound.waitFor({state:'visible',timeout:5000});
-  if(!(await bound.innerText()).includes('"capabilityId":"SPHERE"'))throw new Error(label+': SPHERE capability identity did not bind to source execution');
+  if(await bound.getAttribute('data-r534-capability-id')!=='SPHERE')throw new Error(label+': SPHERE capability identity did not bind to source execution');
   const inspect=execution.locator('[data-r533-inspect]');
   await inspect.click();
   let model=execution.locator('[data-r533-model-receipt="SOURCE_MODEL_EXECUTED"]');
@@ -55,7 +55,7 @@ async function prove(browser,label,viewport){
    bound=execution.locator('[data-r534-capability-receipt="'+(mode==='SAI_HYBRID'?'EXTERNAL_HOST_PROOF_REQUIRED':'SOURCE_MODEL_EXECUTED')+'"]');
    await bound.waitFor({state:'visible',timeout:5000});
    const capabilityId=mode==='FORECAST'?'FORECAST_LAE':mode==='SAI_HYBRID'?'HYBRID':mode;
-   if(!(await bound.innerText()).includes('"capabilityId":"'+capabilityId+'"'))throw new Error(label+': '+mode+' missing accumulated capability binding');
+   if(await bound.getAttribute('data-r534-capability-id')!==capabilityId)throw new Error(label+': '+mode+' missing accumulated capability binding');
    await inspect.click();
    model=execution.locator('[data-r533-model-receipt="'+(mode==='SAI_HYBRID'?'EXTERNAL_HOST_PROOF_REQUIRED':'SOURCE_MODEL_EXECUTED')+'"]');
    await model.waitFor({state:'visible',timeout:5000});
