@@ -1,3 +1,4 @@
+import {stageRecoveryCapsulesR535} from '../scripts/r535-stage-recovery-capsules.mjs';
 import {evaluateSuccessorCycleR535} from '../src/system/selfBuildSuccessorAdmissionR535.js';
 import {verifyRecoverySourcesR534} from '../scripts/r534-recovery-source-preflight.mjs';
 import {compileGovernedRecoveryHandoffR534} from '../scripts/r534-governed-recovery-handoff.mjs';
@@ -96,3 +97,9 @@ assert.ok(successor.reasons.includes('NO_NEW_CAPSULES'));
 assert.ok(successor.reasons.includes('PRIOR_PRODUCTION_PROOF_REQUIRED'));
 assert.equal(successor.sourceMutationAuthorized,false);
 console.log('R535 successor proof fail-closed conservation PASS');
+
+const emptyStaging=stageRecoveryCapsulesR535({priorState:{admittedSourceCapsules:['SG001'],maxAutonomousGenerations:1,roadmap:[{id:'SG001'}]},manifest:{capsules:[]},productionProof:null});
+assert.equal(emptyStaging.status,'HELD');
+assert.equal(emptyStaging.sourceMutation,false);
+assert.equal(emptyStaging.executionClaimed,false);
+console.log('R535 staging conservation PASS');

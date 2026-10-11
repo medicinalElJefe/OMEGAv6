@@ -14,6 +14,8 @@ import type {R512RecoveredSystemResolution} from '../src/recoveredSoftwareExecut
 import OperationalTruthR495 from './OperationalTruthR495';
 import {R519VisualNavigation} from './visualNavigationR519';
 import './omega7.css';
+import {OmegaUserJourneyR536} from './userJourneyR536';
+import {WorkflowSurfaceR538} from './WorkflowSurfaceR538';
 
 const OmegaHomeR71=lazy(()=>import('../src/OmegaHomeR71'));
 const R520CapabilityLibrary=lazy(()=>import('./capabilityLibraryR520').then(m=>({default:m.R520CapabilityLibrary})));
@@ -111,6 +113,8 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   </aside>
 
   <main className='o7-main' data-native-route={state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?state.selectedRoute:''}>
+   <OmegaUserJourneyR536 route={state.selectedRoute} onOpen={open}/>
+   <WorkflowSurfaceR538 onNavigate={open}/>
    {state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?
     <section className='o7-native-host' data-native-host-route={state.selectedRoute}>
      <div className='o7-native-toolbar'><button onClick={()=>dispatch({type:'SELECT_ROUTE',route:null})}>← Back to {DOMAIN_LABEL[state.domain]}</button><span>OMEGA7 native · OMEGAv6 engine preserved</span></div>

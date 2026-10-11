@@ -4,6 +4,7 @@ import AppliedRealityLab from '../../src/AppliedRealityLab';
 import AtlasViewport from '../../src/AtlasViewport';
 import FullSphereInstrumentR525 from '../../src/FullSphereInstrumentR525';
 import SourceExecutionWorkspaceR531 from '../SourceExecutionWorkspaceR531';
+import MotionSourceInstrumentR537 from '../MotionSourceInstrumentR537';
 import AtlasCalculatorPanel from '../../src/AtlasCalculatorPanel';
 import RecursiveScalePanel from '../../src/RecursiveScalePanel';
 import OmegaInfinityPanel from '../../src/OmegaInfinityPanel';
@@ -18,7 +19,7 @@ export type Omega7ScienceRoute='Relativity'|'Reality Lab'|'Atlas'|'Atlas Calcula
 type Props={route:Omega7ScienceRoute;onNavigate:(route:string)=>void;depth:Omega7Depth};
 
 const clamp=(n:number)=>Math.max(0,Math.min(20735,Number.isFinite(n)?Math.floor(n):11498));
-const readAddress=()=>{try{return clamp(Number(localStorage.getItem('omega.v6.address')||11498))}catch{return 11498}};
+const readAddress=()=>{try{const stored=localStorage.getItem('omega.v6.address');return stored===null?11498:clamp(Number(stored))}catch{return 11498}};
 const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('omega.v6.address',String(next));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:next}}))}catch{}return next};
 const fromCoords=(c:{d:number;p:number;r:number;l:number})=>clamp(1728*c.d+144*c.p+12*c.r+c.l);
 
@@ -67,7 +68,7 @@ export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Relativity'?<RelativityLab record={record} state={state} onNavigate={onNavigate}/>:
     route==='Reality Lab'?<AppliedRealityLab canonicalAddress={address} onCommitAddress={commit}/>:
-    route==='Atlas'?<><FullSphereInstrumentR525 address={address} onAddress={commit}/><SourceExecutionWorkspaceR531 address={address}/><AtlasViewport state={state} onSelect={c=>commit(fromCoords(c))}/></>:
+    route==='Atlas'?<><FullSphereInstrumentR525 address={address} onAddress={commit}/><SourceExecutionWorkspaceR531 address={address} onAddress={commit}/><MotionSourceInstrumentR537/><AtlasViewport state={state} onSelect={c=>commit(fromCoords(c))}/></>:
     route==='Atlas Calculator'?<AtlasCalculatorPanel record={record} onCommit={commit}/>:
     route==='Scale Compiler'?<RecursiveScalePanel address={address} onAddress={commit}/>:
     <OmegaInfinityPanel record={record}/>}
