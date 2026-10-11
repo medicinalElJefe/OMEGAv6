@@ -85,7 +85,18 @@ async function prove(browser,label,viewport){
   if(!words.includes('not an observation')&& !words.includes('Observation is not inferred'))throw new Error(label+': epistemic projection disclosure missing');
   if(!words.includes('No physics units')||!words.includes('historical six-video grammar'))throw new Error(label+': false historical/source claims');
   const rect=await sphere.boundingBox();
-  if(!rect||rect.width<245||rect.x<0||rect.x+rect.width>viewport.width+4)throw new Error(label+': responsive Full Sphere instrument geometry invalid '+JSON.stringify(rect));
+  if(!rect||rect.width<245||rect.x<0||rect.x+rect.width>viewport.width+4){
+   const layout=await page.evaluate(()=>{
+    const sphere=document.querySelector('[data-r525-sphere]');
+    const chain=[];
+    for(let el=sphere;el&&chain.length<14;el=el.parentElement){
+     const r=el.getBoundingClientRect(),cs=getComputedStyle(el);
+     chain.push({tag:el.tagName,cls:String(el.className).slice(0,120),x:Math.round(r.x*10)/10,width:Math.round(r.width*10)/10,scrollWidth:el.scrollWidth,minWidth:cs.minWidth,display:cs.display,gridTemplateColumns:cs.gridTemplateColumns,overflowX:cs.overflowX});
+    }
+    return {viewport:innerWidth,documentScrollWidth:document.documentElement.scrollWidth,chain};
+   });
+   throw new Error(label+': responsive Full Sphere instrument geometry invalid '+JSON.stringify(rect)+'; ancestor diagnostics '+JSON.stringify(layout));
+  }
   const first=sphere.locator('line[data-r525-edge]').first();
   const before=await first.getAttribute('x1');
   await sphere.locator('input[aria-label="Full Sphere observer rotation"]').focus();
