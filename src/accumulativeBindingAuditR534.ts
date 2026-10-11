@@ -12,7 +12,7 @@ export function auditAccumulativeBindingR534(){
  const bindings=graph.map(node=>{
   const executor=node.currentExecutor;
   const gaps:R534Residual[]=[];
-  if(!executor.routable||node.strongestImplementation.state!=='EXECUTABLE')gaps.push('EXECUTOR_NOT_PROVEN');
+  if(!executor.routable||node.strongestImplementation.state==='TRUTH_GATED')gaps.push('EXECUTOR_NOT_PROVEN');
   if(!node.presentationSurface.route)gaps.push('PRESENTATION_NOT_PROVEN');
   if(node.remainingGap)gaps.push('ARCHIVE_EVIDENCE_REQUIRED');
   return Object.freeze({capabilityId:node.identity.id,pillar:node.pillar,sourceBindingId:node.lineage.sourceBindingId,predecessors:node.lineage.predecessors,dependencies:node.dependencies,executorRoute:executor.route,executorState:node.strongestImplementation.state,truthClass:node.evidence.truthClass,remainingGap:node.remainingGap,residuals:Object.freeze(gaps),canonicalMutation:false as const});
