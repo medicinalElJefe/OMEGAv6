@@ -6,6 +6,9 @@ const first=transitionWorkflowR538(initialWorkflowR538,{type:'NAVIGATE',address:
 assert.equal(first.address,0);
 const saved=transitionWorkflowR538(first,{type:'BOOKMARK',address:0,source:'USER',at:t});
 assert.equal(saved.bookmarks.length,1);
+assert.equal(transitionWorkflowR538(first,{type:'RESTORE',address:0,source:'WORKFLOW_RESTORE',at:t}).history.length,first.history.length);
+const moved=transitionWorkflowR538(first,{type:'NAVIGATE',address:11498,source:'ATLAS',at:t});
+assert.equal(transitionWorkflowR538(moved,{type:'RESTORE',address:0,source:'WORKFLOW_RESTORE',at:t}).address,0);
 const repeat=transitionWorkflowR538(saved,{type:'BOOKMARK',address:0,source:'USER',at:t});
 assert.equal(repeat.bookmarks.length,1);
 assert.equal(normalizeWorkflowR538(JSON.parse(JSON.stringify(repeat))).bookmarks[0].address,0);
