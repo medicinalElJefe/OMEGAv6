@@ -9,7 +9,7 @@ const center=(n:number)=>n>0?n-1:n<0?n+1:0;
 export function motionStepR537(input:MotionPacketR537):MotionStepR537{
  const before={...input,face:clamp(Math.trunc(input.face),0,11),tier:clamp(Math.trunc(input.tier),-3,3)};
  if(![input.face,input.tier,input.stability,input.adaptation,input.harmony].every(Number.isFinite))throw new Error('NONFINITE_MOTION_INPUT');
- let after={...before},rule:MotionStepR537['rule']='HOLD',description='No donor rule triggered';
+ let after:MotionPacketR537={...before},rule:MotionStepR537['rule']='HOLD',description='No donor rule triggered';
  if(before.tier===0){rule='R5';after.highRisk=false;description='Center reset; risk cleared';}
  else if(before.harmony<50&&before.highRisk){rule='R3';after.tier=center(before.tier);after.face=(before.face+1)%12;description='High-risk diagonal neighbor; tier moves toward center';}
  else if(before.stability>75&&!before.highRisk){rule='R1';after.tier=before.tier+1;description='High stability; outward structural step';}
