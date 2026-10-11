@@ -1,3 +1,5 @@
+import {executeAccumulatedCapabilityR534,R534_EXECUTABLE_BINDING_IDS} from '../src/accumulativeCapabilityExecutionR534';
+import {initCorpusPack} from '../src/corpusRuntime';
 import {auditAccumulativeBindingR534} from '../src/accumulativeBindingAuditR534';
 import assert from 'node:assert/strict';
 import {YEAR_CORPUS_CAPABILITY_GRAPH_R474,OMEGA_ARCHITECTURE_R474,auditYearCorpusCapabilityGraphR474,auditCapabilityConservationR474,resolveStrongestImplementationR474} from '../src/yearCorpusCapabilityGraphR474';
@@ -37,3 +39,16 @@ assert.equal(accumulated.productionPromotionClaimed,false,'read-only binding is 
 assert.ok(accumulated.unresolvedListings.length>0,'unresolved archive listing must be retained');
 assert.ok(accumulated.bindings.every(x=>x.canonicalMutation===false&&x.sourceBindingId));
 console.log('R534 accumulated R474/R484 residual binding PASS');
+
+await initCorpusPack();
+for(const id of R534_EXECUTABLE_BINDING_IDS){
+ const result=executeAccumulatedCapabilityR534(id,11498);
+ assert.equal(result.capabilityId,id);
+ assert.equal(result.canonicalMutation,false);
+ if(id==='HYBRID'){assert.equal(result.status,'EXTERNAL_HOST_PROOF_REQUIRED');assert.equal(result.executionClaimed,false);}
+ else{assert.equal(result.status,'SOURCE_MODEL_EXECUTED');assert.equal(result.executionClaimed,true);}
+}
+assert.equal(executeAccumulatedCapabilityR534('NOT_A_CAPABILITY',11498).status,'HELD');
+assert.equal(executeAccumulatedCapabilityR534('SPHERE',20736).status,'HELD');
+assert.equal(executeAccumulatedCapabilityR534('RUNTIME',11498).status,'HELD','unmapped executor must never silently execute');
+console.log('R534 source-bound capability execution PASS');
