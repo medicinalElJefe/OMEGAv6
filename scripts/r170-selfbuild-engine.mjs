@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {evaluateSuccessorCycleR535} from '../src/system/selfBuildSuccessorAdmissionR535.js';
 import path from 'node:path';
 import {planGovernedCandidateR245} from './lib/r245-governed-selfbuild-selection.mjs';
 import {capsuleBodyR245,deriveResidualGateR245,R245_GOVERNED_SELFBUILD_CONTRACT,R245_CAPSULE_GENERATOR_REVISION} from '../src/system/governedSelfBuildContractR245.js';
@@ -54,7 +55,19 @@ function returnedAdaptiveRowR266(evidence){const s=String(evidence?.state||'').t
 const reconciled=reconcileMergedSourceCandidates();
 if(reconciled&&!APPLY)fs.writeFileSync(STATE_PATH,JSON.stringify(state,null,2)+'\n');
 if(!state.active){emitProposal({status:'IDLE',reason:'state inactive'});process.exit(0)}
-if((state.admittedSourceCapsules||[]).length>=Number(state.maxAutonomousGenerations||0)){emitProposal({status:'OBSERVE',reason:'bounded R170 roadmap exhausted',generation:state.generation});process.exit(0)}
+if((state.admittedSourceCapsules||[]).length>=Number(state.maxAutonomousGenerations||0)){
+ const successorManifestPath=String(process.env.OMEGA_R535_SUCCESSOR_MANIFEST_PATH||'').trim();
+ if(successorManifestPath){
+  try{
+   const manifest=JSON.parse(fs.readFileSync(successorManifestPath,'utf8'));
+   const successor=evaluateSuccessorCycleR535({priorState:state,capsules:manifest.capsules,sourceProofs:manifest.sourceProofs,deploymentProof:manifest.deploymentProof});
+   emitProposal({status:'R535_SUCCESSOR_REVIEW',generation:state.generation,successor,sourceMutationAuthorized:false,canonicalAdmission:false},true);
+  }catch(error){
+   emitProposal({status:'R535_SUCCESSOR_HELD',generation:state.generation,reasons:['INVALID_OR_UNREADABLE_SUCCESSOR_MANIFEST',error instanceof Error?error.message:String(error)],sourceMutationAuthorized:false,canonicalAdmission:false},true);
+  }
+ }else emitProposal({status:'OBSERVE',reason:'bounded R170 roadmap exhausted; supply independently proved R535 successor manifest for governed review',generation:state.generation});
+ process.exit(0);
+}
 if(state.currentCapsuleId){emitProposal({status:'WAITING_FOR_GOVERNED_MERGE',capsuleId:state.currentCapsuleId,generation:state.generation});process.exit(0)}
 
 const evidence=readResidualEvidence();
