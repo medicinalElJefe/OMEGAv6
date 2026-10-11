@@ -40,9 +40,12 @@ export function deriveResidualGateR245(evidence,policy){
  if(!checked.valid)return{schema:'OMEGA_AUTONOMOUS_SOURCE_RESIDUAL_GATE_R245',contract:R245_GOVERNED_SELFBUILD_CONTRACT,state:'UNPROVEN',allow:false,reason:`canonical residual policy invalid: ${checked.reasons.join(',')||'UNKNOWN'}`,blocking:[],policy:checked.policy,policyValid:false};
  const p=checked.policy;
  if(!evidence&&p.requireEvidence)return{schema:'OMEGA_AUTONOMOUS_SOURCE_RESIDUAL_GATE_R245',contract:R245_GOVERNED_SELFBUILD_CONTRACT,state:'UNPROVEN',allow:false,reason:'current R164 residual evidence is required before autonomous generation',blocking:[],policy:p,policyValid:true};
- const residuals=Array.isArray(evidence?.residuals)?evidence.residuals:[];
- const blockingRows=residuals.filter(row=>p.blockModes.includes(upper(row?.mode))||p.blockSeverities.includes(upper(row?.severity)));
  const evidenceState=upper(evidence?.state||'UNPROVEN');
+ if(evidence?.schema!=='OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164'||!['OBSERVED','HEALTHY','RESIDUALS_PRESENT','BLOCKED'].includes(evidenceState)||!Array.isArray(evidence?.residuals)){
+  return{schema:'OMEGA_AUTONOMOUS_SOURCE_RESIDUAL_GATE_R245',contract:R245_GOVERNED_SELFBUILD_CONTRACT,state:'UNPROVEN',allow:false,reason:'unrecognized or malformed R164 residual evidence',blocking:[],policy:p,policyValid:true};
+ }
+ const residuals=evidence.residuals;
+ const blockingRows=residuals.filter(row=>p.blockModes.includes(upper(row?.mode))||p.blockSeverities.includes(upper(row?.severity)));
  const stateBlocked=p.blockedEvidenceStates.includes(evidenceState);
  const blocked=stateBlocked||blockingRows.length>0;
  return{
