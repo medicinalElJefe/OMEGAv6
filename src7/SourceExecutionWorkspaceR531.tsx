@@ -2,16 +2,19 @@ import {useMemo,useState} from 'react';
 import {corpusState} from '../src/corpusRuntime';
 import {executeSourceBoundR530} from './sourceBoundExecutionR530';
 import {inspectSourceInstrumentR533} from './sourceInstrumentR533';
+import {executeAccumulatedCapabilityR534} from '../src/accumulativeCapabilityExecutionR534';
 import type {R529Executor,R529Proposal} from './developmentalExecutionFabricR529';
 
 type Props={address:number};
 const EXECUTORS:readonly R529Executor[]=['VISUALIZATION','TRAVERSAL','FORECAST','SAI_HYBRID'];
+const CAPABILITY_IDS:Record<R529Executor,string>={VISUALIZATION:'SPHERE',TRAVERSAL:'TRAVERSAL',FORECAST:'FORECAST_LAE',SAI_HYBRID:'HYBRID'};
 const ROUTES:Record<R529Executor,string>={VISUALIZATION:'Atlas',TRAVERSAL:'Traversal',FORECAST:'Forecast',SAI_HYBRID:'Hybrid Link'};
 const keys=['continuity','futurePlasticity','contradiction','burden','recoverability','proofCoverage','capabilityCoverage','humanComprehension','futureTopologyRetention','scarPressure'] as const;
 export default function SourceExecutionWorkspaceR531({address}:Props){
  const[executor,setExecutor]=useState<R529Executor>('VISUALIZATION');
  const[receipt,setReceipt]=useState<ReturnType<typeof executeSourceBoundR530>|null>(null);
  const packet=useMemo(()=>corpusState(address),[address]);
+ const[capabilityReceipt,setCapabilityReceipt]=useState<ReturnType<typeof executeAccumulatedCapabilityR534>|null>(null);
  const[modelReceipt,setModelReceipt]=useState<ReturnType<typeof inspectSourceInstrumentR533>|null>(null);
  const run=()=>{
   const m=packet.metrics;
@@ -27,10 +30,15 @@ export default function SourceExecutionWorkspaceR531({address}:Props){
    <b>Read-only source execution · promotion independently governed</b>
    <small>Run existing local source models without modifying canonical state. Production promotion and host/device execution remain separately evidence-gated.</small>
    <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:10}}>
-    {EXECUTORS.map(x=><button type='button' key={x} data-r531-executor={x} aria-pressed={executor===x} onClick={()=>{setExecutor(x);setReceipt(null);setModelReceipt(null)}}>{x.replace('_',' / ')}</button>)}
+    {EXECUTORS.map(x=><button type='button' key={x} data-r531-executor={x} aria-pressed={executor===x} onClick={()=>{setExecutor(x);setReceipt(null);setModelReceipt(null);setCapabilityReceipt(null)}}>{x.replace('_',' / ')}</button>)}
+    <button type='button' data-r534-execute onClick={()=>setCapabilityReceipt(executeAccumulatedCapabilityR534(CAPABILITY_IDS[executor],address))}>Execute bound capability</button>
     <button type='button' data-r533-inspect onClick={()=>setModelReceipt(inspectSourceInstrumentR533(executor,address))}>Run read-only model</button>
     <button type='button' data-r531-evaluate onClick={run}>Evaluate promotion admission</button>
    </div>
+   {capabilityReceipt&&<div data-r534-capability-receipt={capabilityReceipt.status} role='status' style={{marginTop:10}}>
+    <b>{capabilityReceipt.capabilityId} · {capabilityReceipt.status}</b>
+    <small>{JSON.stringify(capabilityReceipt)}</small>
+   </div>}
    {modelReceipt&&<div data-r533-model-receipt={modelReceipt.status} role='status' style={{marginTop:10}}>
     <b>{modelReceipt.status}</b>
     <small>{modelReceipt.status==='SOURCE_MODEL_EXECUTED'?JSON.stringify(modelReceipt):modelReceipt.reasons.join(' · ')}</small>
