@@ -1,3 +1,4 @@
+import {verifyRecoverySourcesR534} from '../scripts/r534-recovery-source-preflight.mjs';
 import {compileGovernedRecoveryHandoffR534} from '../scripts/r534-governed-recovery-handoff.mjs';
 import {planDevelopmentalBuildAssistR534} from '../src/developmentalBuildAssistR534';
 import {measureAccumulativeConvergenceR534} from '../src/accumulativeConvergenceCoverageR534';
@@ -82,3 +83,8 @@ assert.equal(governed.status,'HELD');
 assert.equal(governed.reason,'R170_BOUNDED_ROADMAP_EXHAUSTED');
 assert.equal(governed.sourceMutationAuthorized,false);
 console.log('R534 governed selfbuild bridge PASS');
+
+const preflight=verifyRecoverySourcesR534({sources:[]});
+assert.equal(preflight.status,'HELD');
+assert.equal(preflight.productionAdmissionClaimed,false);
+console.log('R534 source recovery proof boundary PASS');
