@@ -30,7 +30,9 @@ async function prove(browser,label,viewport){
   const workflow=page.locator('[data-r538-workflow="true"]');
   await workflow.locator('[data-r538-bookmark]').click();
   await workflow.getByRole('button',{name:'History & saved states'}).click();
-  if(!(await workflow.innerText()).includes('Saved states'))throw new Error(label+': workflow bookmark missing');
+  const savedState=workflow.locator('.o7-r538-history section').first().getByRole('button',{name:/State [\\d,]+/});
+  await savedState.waitFor({state:'visible',timeout:5000});
+  if((await workflow.locator('.o7-r538-history section').first().getByRole('button').count())!==1)throw new Error(label+': bookmark did not persist as one recoverable state');
   const native=page.locator('.o7-science-workspace[data-route="Atlas"]');
   await native.waitFor({state:'visible',timeout:28000});
   const open=native.locator('.o7-open-instrument');
