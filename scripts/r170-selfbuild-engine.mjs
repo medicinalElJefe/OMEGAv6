@@ -63,8 +63,9 @@ if((state.admittedSourceCapsules||[]).length>=Number(state.maxAutonomousGenerati
    const manifest=JSON.parse(fs.readFileSync(successorManifestPath,'utf8'));
    const bytesProof=verifySuccessorSourcesR542(manifest);
    const residualGate=deriveResidualGateR245(readResidualEvidence(),state.residualPolicy);
-   const successor=bytesProof.valid&&residualGate.allow?evaluateSuccessorCycleR535({priorState:state,capsules:manifest.capsules,sourceProofs:manifest.sourceProofs,deploymentProof:manifest.deploymentProof}):{status:'HELD',reasons:[...bytesProof.reasons,...(!residualGate.allow?['R164_RESIDUAL_GATE_NOT_PROVEN']:[])],executionOrder:[],sourceMutationAuthorized:false};
-   emitProposal({status:'R535_SUCCESSOR_REVIEW',generation:state.generation,successor,sourceBytesProofR542:bytesProof,residualGateR245:residualGate,sourceMutationAuthorized:false,canonicalAdmission:false},true);
+   const workerProofRequired=REQUIRE_R503&&workerAdmissionR503.valid;
+   const successor=bytesProof.valid&&residualGate.allow&&workerProofRequired?evaluateSuccessorCycleR535({priorState:state,capsules:manifest.capsules,sourceProofs:manifest.sourceProofs,deploymentProof:manifest.deploymentProof}):{status:'HELD',reasons:[...bytesProof.reasons,...(!residualGate.allow?['R164_RESIDUAL_GATE_NOT_PROVEN']:[]),...(!workerProofRequired?['R503_WORKER_ADMISSION_REQUIRED']:[])],executionOrder:[],sourceMutationAuthorized:false};
+   emitProposal({status:'R535_SUCCESSOR_REVIEW',generation:state.generation,successor,sourceBytesProofR542:bytesProof,residualGateR245:residualGate,workerAdmissionR503,sourceMutationAuthorized:false,canonicalAdmission:false},true);
   }catch(error){
    emitProposal({status:'R535_SUCCESSOR_HELD',generation:state.generation,reasons:['INVALID_OR_UNREADABLE_SUCCESSOR_MANIFEST',error instanceof Error?error.message:String(error)],sourceMutationAuthorized:false,canonicalAdmission:false},true);
   }

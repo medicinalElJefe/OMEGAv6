@@ -31,7 +31,10 @@ assert.deepEqual(cycleReview.executionOrder,[],'held cycle must not expose execu
 assert.ok(evaluateSuccessorCycleR535({...input,capsules:[{...capsules[0],prerequisites:['RG001']}]}).reasons.includes('UNPROVEN_DEPENDENCY:RG001'));
 const engine=fs.readFileSync('scripts/r170-selfbuild-engine.mjs','utf8');
 assert.match(engine,/const residualGate=deriveResidualGateR245\(readResidualEvidence\(\),state\.residualPolicy\)/,'exhausted successor review must evaluate current R164 evidence');
-assert.match(engine,/bytesProof\.valid&&residualGate\.allow\?evaluateSuccessorCycleR535/,'successor admission must require source bytes and residual gate');
+assert.match(engine,/bytesProof\.valid&&residualGate\.allow&&workerProofRequired\?evaluateSuccessorCycleR535/,'successor admission must require source bytes, residual gate and worker admission');
+assert.match(engine,/const workerProofRequired=REQUIRE_R503&&workerAdmissionR503\.valid/,'R503 must be explicitly enabled and valid for successor admission');
+assert.match(engine,/R503_WORKER_ADMISSION_REQUIRED/,'missing R503 proof must be carried as a hold reason');
+assert.match(engine,/workerAdmissionR503,sourceMutationAuthorized:false/,'successor review must expose worker admission evidence');
 assert.match(engine,/R164_RESIDUAL_GATE_NOT_PROVEN/,'missing or blocking R164 evidence must be carried into held reasons');
 assert.match(engine,/residualGateR245:residualGate/,'successor review must expose residual proof status');
 console.log('R535/R545/R547 successor dependency and residual proof invariants PASS');
