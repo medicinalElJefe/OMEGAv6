@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {auditAccumulativeBindingR534} from '../src/accumulativeBindingAuditR534.ts';
+import {YEAR_CORPUS_CAPABILITY_GRAPH_R474,auditCapabilityConservationR474} from '../src/yearCorpusCapabilityGraphR474.ts';
+import {auditExpandedCorpusCensusR484} from '../src/system/expandedCorpusCensusR484.ts';
+const result=auditAccumulativeBindingR534();
+assert.equal(result.schema,'OMEGA_ACCUMULATIVE_CAPABILITY_BINDING_AUDIT_R534');
+assert.equal(result.capabilityCount,YEAR_CORPUS_CAPABILITY_GRAPH_R474.length);
+assert.equal(result.censusRecordCount,auditExpandedCorpusCensusR484().totalRecords);
+assert.equal(result.archiveExhaustive,false);
+assert.equal(result.productionPromotionClaimed,false);
+assert.equal(result.canonicalMutation,false);
+assert.equal(result.conservationPass,true);
+assert.ok(result.unresolvedListings.length>0,'unresolved archive titles must not be silently discarded');
+assert.ok(result.bindings.every(x=>x.canonicalMutation===false&&x.capabilityId&&x.sourceBindingId));
+const first=YEAR_CORPUS_CAPABILITY_GRAPH_R474[0];
+assert.equal(auditCapabilityConservationR474(YEAR_CORPUS_CAPABILITY_GRAPH_R474,YEAR_CORPUS_CAPABILITY_GRAPH_R474.filter(x=>x.identity.id!==first.identity.id)).pass,false);
+console.log('R534 accumulative source binding audit PASS · '+result.capabilityCount+' identities · '+result.unresolvedListings.length+' unresolved archive listings · no false promotion');
