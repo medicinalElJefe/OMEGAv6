@@ -35,6 +35,10 @@ assert.ok(isAutonomousCandidateBranchR245('cloud/evolution-g1-sg001-deadbeef',ca
 assert.equal(isAutonomousCandidateBranchR245('feature/unrelated',candidatePolicy.policy),false);
 
 assert.equal(deriveResidualGateR245(null,state.residualPolicy).allow,false,'missing residual evidence must fail closed');
+assert.equal(deriveResidualGateR245({schema:'UNKNOWN',state:'HEALTHY',residuals:[]},state.residualPolicy).allow,false,'untrusted evidence schema must not authorize autonomous source mutation');
+assert.equal(deriveResidualGateR245({schema:'OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164',state:'UNPROVEN',residuals:[]},state.residualPolicy).allow,false,'unknown R164 evidence state must fail closed');
+assert.equal(deriveResidualGateR245({schema:'OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164',state:'HEALTHY',residuals:'not-an-array'},state.residualPolicy).allow,false,'malformed residual rows must fail closed');
+
 assert.equal(deriveResidualGateR245({state:'HEALTHY',residuals:[]},{}).allow,false,'missing/invalid canonical residual policy must fail closed');
 const medium={schema:'OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164',state:'RESIDUALS_PRESENT',summary:{blocking:0,review:0,observe:1},residuals:[{id:'MEDIUM',severity:'MEDIUM',mode:'OBSERVE_ONLY'}]};
 const high={schema:'OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164',state:'RESIDUALS_PRESENT',summary:{blocking:0,review:1,observe:0},residuals:[{id:'HIGH',severity:'HIGH',mode:'QUEUE_FOR_REVIEW'}]};
