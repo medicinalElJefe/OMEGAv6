@@ -1,3 +1,4 @@
+import {planDevelopmentalBuildAssistR534} from '../src/developmentalBuildAssistR534';
 import {measureAccumulativeConvergenceR534} from '../src/accumulativeConvergenceCoverageR534';
 import {executeAccumulatedCapabilityR534,R534_EXECUTABLE_BINDING_IDS} from '../src/accumulativeCapabilityExecutionR534';
 import {initCorpusPack} from '../src/corpusRuntime';
@@ -64,3 +65,13 @@ assert.equal(coverage.hostGated,1);
 assert.ok(coverage.notSourceModelExecutable>0,'source model subset must not be misreported as full corpus execution');
 assert.ok(coverage.unresolvedArchiveListings>0);
 console.log('R534 full-corpus coverage accounting PASS');
+
+const assist=planDevelopmentalBuildAssistR534();
+assert.equal(assist.total,YEAR_CORPUS_CAPABILITY_GRAPH_R474.length);
+assert.equal(assist.sourceMutationAuthorized,false);
+assert.equal(assist.productionAdmissionAuthorized,false);
+assert.ok(assist.tasks.every(x=>x.status==='PLANNED_UNPROVEN'&&x.deploymentPreconditions.includes('PRODUCTION_DEPLOY_PATH_VERIFIED')));
+assert.ok(assist.tasks.some(x=>x.capabilityId==='HEIGHTENED'));
+assert.ok(assist.tasks.some(x=>x.capabilityId==='HYBRID'&&x.kind==='PROVE_DEVICE'));
+assert.ok(assist.tasks.some(x=>x.capabilityId==='SPHERE'&&x.kind==='PROVE_VISUAL_PARITY'));
+console.log('R534 heightened deployment-first build assist PASS');
