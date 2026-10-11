@@ -137,7 +137,8 @@ export default function OmegaWorkstationFullV2(){
    if((!content||loading)&&attempts++<8){timer=window.setTimeout(inspect,300);return}
    const controls=content?Array.from(content.querySelectorAll<HTMLElement>('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[role="button"],a[href],[tabindex="0"]')).filter(el=>!el.closest('[hidden],[aria-hidden="true"]')&&el.getClientRects().length>0&&window.getComputedStyle(el).visibility!=='hidden'):[];
    const state=loading||!content?'DEFERRED':controls.length?'CONTROL_PRESENT':'NO_ACTIONABLE_CONTROL';
-   const row={route:panel,state,controlCount:controls.length,proof:{operationAuthority:'R143',executionProof:'R142',canonAdmission:'R125'},stateOutput:state+':'+panel,usableControl:controls.length>0,failureRecovery:{degradeTo:'System Atlas',preserveRequestedRoute:true},canonicalMutation:false};
+   const chain=operationContractForRouteR143(panel);
+   const row={route:panel,state,controlCount:controls.length,capabilityId:chain.capabilityId,functionalInheritance:OMEGA_ROUTE_FUNCTIONAL_INHERITANCE,proof:{operationAuthority:'R143',executionProof:'R142',canonAdmission:'R125'},stateOutput:state+':'+chain.capabilityId,usableControl:controls.length>0,failureRecovery:{degradeTo:'System Atlas',preserveRequestedRoute:true},canonicalMutation:false};
    setControlProof({route:panel,state,controlCount:controls.length});
    window.dispatchEvent(new CustomEvent('omega:r551-route-functional-proof',{detail:row}));
   };
