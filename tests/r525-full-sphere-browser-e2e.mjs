@@ -83,7 +83,7 @@ async function prove(browser,label,viewport){
    if(mode==='TRAVERSAL'&&!(await model.innerText()).includes('nextAddress'))throw new Error(label+': traversal model did not execute');
    if(mode==='TRAVERSAL'){
     const nextText=await execution.locator('[data-r535-live-result="TRAVERSAL"] p').innerText();
-    const nextMatch=nextText.match(/Model address ([\\d,]+)/);
+    const nextMatch=nextText.match(/Model address ([\d,]+)/);
     if(!nextMatch)throw new Error(label+': computed traversal address not presented');
     const next=Number(nextMatch[1].replace(/,/g,''));
     const action=execution.locator('[data-r535-apply-next]');
