@@ -14,5 +14,6 @@ export function transitionWorkflowR538(state:WorkflowR538,action:{type:'NAVIGATE
  if(!bounded(action.address))throw new Error('R538_ADDRESS_OUT_OF_RANGE');
  const item:WorkflowEntryR538={id:`${action.at}:${action.address}:${action.source}`,address:action.address,source:action.source.slice(0,80),note:(action.note||'').slice(0,240),createdAt:action.at};
  if(action.type==='BOOKMARK')return{...state,bookmarks:[item,...state.bookmarks.filter(x=>x.address!==action.address)].slice(0,48)};
- return{...state,address:action.address,history:[item,...state.history].slice(0,48)};
+ if(state.address===action.address)return state;
+ return{...state,address:action.address,history:[item,...state.history.filter(x=>x.address!==action.address)].slice(0,48)};
 }
