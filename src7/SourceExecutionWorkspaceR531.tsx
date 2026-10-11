@@ -35,7 +35,7 @@ export default function SourceExecutionWorkspaceR531({address}:Props){
     <button type='button' data-r533-inspect onClick={()=>setModelReceipt(inspectSourceInstrumentR533(executor,address))}>Run read-only model</button>
     <button type='button' data-r531-evaluate onClick={run}>Evaluate promotion admission</button>
    </div>
-   {capabilityReceipt&&<div data-r534-capability-receipt={capabilityReceipt.status} role='status' style={{marginTop:10}}>
+   {capabilityReceipt&&<div data-r534-capability-receipt={capabilityReceipt.status} data-r534-capability-id={capabilityReceipt.capabilityId} role='status' style={{marginTop:10}}>
     <b>{capabilityReceipt.capabilityId} · {capabilityReceipt.status}</b>
     <small>{capabilityReceipt.status==='SOURCE_MODEL_EXECUTED'?'Read-only source-model subset executed; historical renderer and full capability parity are not proven.':capabilityReceipt.status==='EXTERNAL_HOST_PROOF_REQUIRED'?'Authenticated native host receipt required.':'Capability execution held.'}</small>
     <details><summary>Typed source receipt</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',maxWidth:'100%',overflowX:'auto'}}>{JSON.stringify(capabilityReceipt,null,2)}</pre></details>
