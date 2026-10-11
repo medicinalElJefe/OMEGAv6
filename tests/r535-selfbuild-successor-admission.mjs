@@ -16,4 +16,11 @@ assert.ok(evaluateSuccessorCycleR535({...input,sourceProofs:[...sourceProofs,...
 assert.ok(evaluateSuccessorCycleR535({...input,capsules:[{...capsules[0],id:'SG001'}]}).reasons.some(x=>x.startsWith('DUPLICATE_OR_REUSED_CAPSULE')));
 assert.ok(evaluateSuccessorCycleR535({...input,capsules:[{...capsules[0],prerequisites:['UNKNOWN']}]}).reasons.some(x=>x.startsWith('UNPROVEN_DEPENDENCY')));
 assert.equal(evaluateSuccessorCycleR535({...input,priorState:{...priorState,currentCapsuleId:'SG002'}}).status,'HELD');
-console.log('R535 successor admission proof invariants PASS');
+
+const forward=[{id:'RG002',target:'src/generated/selfbuildR535/second.ts',prerequisites:['RG001']},...capsules];
+const forwardProofs=[...sourceProofs,{capsuleId:'RG002',status:'SOURCE_HASH_VERIFIED',actualSha256:'c'.repeat(64),historicalParityClaimed:false}];
+assert.equal(evaluateSuccessorCycleR535({...input,capsules:forward,sourceProofs:forwardProofs}).status,'READY_FOR_SEPARATE_GOVERNED_REVIEW','valid forward dependencies should not depend on manifest ordering');
+const cyclic=[{...forward[0],prerequisites:['RG001']},{...forward[1],prerequisites:['RG002']}];
+assert.ok(evaluateSuccessorCycleR535({...input,capsules:cyclic,sourceProofs:forwardProofs}).reasons.some(x=>x.startsWith('SUCCESSOR_DEPENDENCY_CYCLE')));
+assert.ok(evaluateSuccessorCycleR535({...input,capsules:[{...capsules[0],prerequisites:['RG001']}]}).reasons.includes('UNPROVEN_DEPENDENCY:RG001'));
+console.log('R535/R545 successor dependency proof invariants PASS');
