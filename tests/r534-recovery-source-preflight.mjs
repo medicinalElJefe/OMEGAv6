@@ -19,5 +19,9 @@ try{
  assert.equal(verifyRecoverySourcesR534({root,sources:[{path:'missing.svg',sha256}]}).results[0].status,'HELD');
  fs.symlinkSync(name,path.join(root,'alias.svg'));
  assert.equal(verifyRecoverySourcesR534({root,sources:[{path:'alias.svg',sha256}]}).results[0].status,'HELD');
+ fs.mkdirSync(path.join(root,'real'));
+ fs.writeFileSync(path.join(root,'real','source.svg'),bytes);
+ fs.symlinkSync('real',path.join(root,'linked'));
+ assert.equal(verifyRecoverySourcesR534({root,sources:[{path:'linked/source.svg',sha256}]}).results[0].status,'HELD');
 }finally{fs.rmSync(root,{recursive:true,force:true})}
 console.log('R534 source hash preflight PASS');
