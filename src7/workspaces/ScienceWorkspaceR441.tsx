@@ -19,7 +19,7 @@ export type Omega7ScienceRoute='Relativity'|'Reality Lab'|'Atlas'|'Atlas Calcula
 type Props={route:Omega7ScienceRoute;onNavigate:(route:string)=>void;depth:Omega7Depth};
 
 const clamp=(n:number)=>Math.max(0,Math.min(20735,Number.isFinite(n)?Math.floor(n):11498));
-const readAddress=()=>{try{return clamp(Number(localStorage.getItem('omega.v6.address')||11498))}catch{return 11498}};
+const readAddress=()=>{try{const stored=localStorage.getItem('omega.v6.address');return stored===null?11498:clamp(Number(stored))}catch{return 11498}};
 const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('omega.v6.address',String(next));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:next}}))}catch{}return next};
 const fromCoords=(c:{d:number;p:number;r:number;l:number})=>clamp(1728*c.d+144*c.p+12*c.r+c.l);
 
