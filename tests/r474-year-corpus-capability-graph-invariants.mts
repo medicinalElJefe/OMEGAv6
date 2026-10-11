@@ -1,3 +1,4 @@
+import {evaluateSuccessorCycleR535} from '../src/system/selfBuildSuccessorAdmissionR535.js';
 import {verifyRecoverySourcesR534} from '../scripts/r534-recovery-source-preflight.mjs';
 import {compileGovernedRecoveryHandoffR534} from '../scripts/r534-governed-recovery-handoff.mjs';
 import {planDevelopmentalBuildAssistR534} from '../src/developmentalBuildAssistR534';
@@ -88,3 +89,10 @@ const preflight=verifyRecoverySourcesR534({sources:[]});
 assert.equal(preflight.status,'HELD');
 assert.equal(preflight.productionAdmissionClaimed,false);
 console.log('R534 source recovery proof boundary PASS');
+
+const successor=evaluateSuccessorCycleR535({priorState:{admittedSourceCapsules:['SG001'],maxAutonomousGenerations:1,roadmap:[{id:'SG001'}]},capsules:[],sourceProofs:[],deploymentProof:null});
+assert.equal(successor.status,'HELD');
+assert.ok(successor.reasons.includes('NO_NEW_CAPSULES'));
+assert.ok(successor.reasons.includes('PRIOR_PRODUCTION_PROOF_REQUIRED'));
+assert.equal(successor.sourceMutationAuthorized,false);
+console.log('R535 successor proof fail-closed conservation PASS');
