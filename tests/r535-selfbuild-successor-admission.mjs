@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {evaluateSuccessorCycleR535} from '../src/system/selfBuildSuccessorAdmissionR535.js';
 const priorState={admittedSourceCapsules:['SG001','SG002'],maxAutonomousGenerations:2,roadmap:[{id:'SG001'},{id:'SG002'}],currentCapsuleId:null};
 const capsules=[{id:'RG001',target:'src/generated/selfbuildR535/recoveredAtlas.ts',prerequisites:['SG002']}];
@@ -28,4 +29,9 @@ const cycleReview=evaluateSuccessorCycleR535({...input,capsules:cyclic,sourcePro
 assert.ok(cycleReview.reasons.some(x=>x.startsWith('SUCCESSOR_DEPENDENCY_CYCLE')));
 assert.deepEqual(cycleReview.executionOrder,[],'held cycle must not expose executable order');
 assert.ok(evaluateSuccessorCycleR535({...input,capsules:[{...capsules[0],prerequisites:['RG001']}]}).reasons.includes('UNPROVEN_DEPENDENCY:RG001'));
-console.log('R535/R545 successor dependency proof invariants PASS');
+const engine=fs.readFileSync('scripts/r170-selfbuild-engine.mjs','utf8');
+assert.match(engine,/const residualGate=deriveResidualGateR245\(readResidualEvidence\(\),state\.residualPolicy\)/,'exhausted successor review must evaluate current R164 evidence');
+assert.match(engine,/bytesProof\.valid&&residualGate\.allow\?evaluateSuccessorCycleR535/,'successor admission must require source bytes and residual gate');
+assert.match(engine,/R164_RESIDUAL_GATE_NOT_PROVEN/,'missing or blocking R164 evidence must be carried into held reasons');
+assert.match(engine,/residualGateR245:residualGate/,'successor review must expose residual proof status');
+console.log('R535/R545/R547 successor dependency and residual proof invariants PASS');
