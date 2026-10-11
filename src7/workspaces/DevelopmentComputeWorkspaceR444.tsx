@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import HybridMissionControlR8 from '../../src/HybridMissionControlR8';
 import UniversalQualityControl from '../../src/UniversalQualityControl';
 import WovenBuildOutPanel from '../../src/WovenBuildOutPanel';
+import SelfBuildTruthR539 from '../SelfBuildTruthR539';
 import SAISovereignControl from '../../src/SAISovereignControl';
 import IntelligenceFabricPanel from '../../src/IntelligenceFabricPanel';
 import OmegaIntentWorkbenchR85 from '../../src/OmegaIntentWorkbenchR85';
@@ -61,7 +62,7 @@ export default function DevelopmentComputeWorkspaceR444({route,onNavigate,depth}
    {route==='Hybrid Link'?<HybridMissionControlR8 status={status} record={record}/>:
     route==='Quality Compiler'?<UniversalQualityControl record={record} status={status} restore={restore} modeCount={modeSummary.appliedCount} catalogCount={modeSummary.catalogCount}/>:
     route==='Build Out'?<WovenBuildOutPanel address={address} onNavigate={onNavigate}/>:
-    route==='Development'?<section className='o7-development-combined'><WovenBuildOutPanel address={address} onNavigate={onNavigate}/><OmegaIntentWorkbenchR85 record={record} address={address} currentPanel='Development' onAddress={commit} onNavigate={onNavigate}/></section>:
+    route==='Development'?<section className='o7-development-combined'><SelfBuildTruthR539/><WovenBuildOutPanel address={address} onNavigate={onNavigate}/><OmegaIntentWorkbenchR85 record={record} address={address} currentPanel='Development' onAddress={commit} onNavigate={onNavigate}/></section>:
     route==='Kernel Intelligence'?<SAISovereignControl record={record} modeCount={modeSummary.appliedCount} onNavigate={onNavigate}/>:
     <section className='o7-sai-combined'><IntelligenceFabricPanel address={address}/><SAISovereignControl record={record} modeCount={modeSummary.appliedCount} onNavigate={onNavigate}/></section>}
   </div>}
