@@ -1,3 +1,4 @@
+import {compileGovernedRecoveryHandoffR534} from '../scripts/r534-governed-recovery-handoff.mjs';
 import {planDevelopmentalBuildAssistR534} from '../src/developmentalBuildAssistR534';
 import {measureAccumulativeConvergenceR534} from '../src/accumulativeConvergenceCoverageR534';
 import {executeAccumulatedCapabilityR534,R534_EXECUTABLE_BINDING_IDS} from '../src/accumulativeCapabilityExecutionR534';
@@ -75,3 +76,9 @@ assert.ok(assist.tasks.some(x=>x.capabilityId==='HEIGHTENED'));
 assert.ok(assist.tasks.some(x=>x.capabilityId==='HYBRID'&&x.kind==='PROVE_DEVICE'));
 assert.ok(assist.tasks.some(x=>x.capabilityId==='SPHERE'&&x.kind==='PROVE_VISUAL_PARITY'));
 console.log('R534 heightened deployment-first build assist PASS');
+
+const governed=compileGovernedRecoveryHandoffR534({state:{roadmap:[],admittedSourceCapsules:['SG001'],maxAutonomousGenerations:1},recoveryTasks:assist.topPriority});
+assert.equal(governed.status,'HELD');
+assert.equal(governed.reason,'R170_BOUNDED_ROADMAP_EXHAUSTED');
+assert.equal(governed.sourceMutationAuthorized,false);
+console.log('R534 governed selfbuild bridge PASS');
