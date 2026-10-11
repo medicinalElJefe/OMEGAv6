@@ -14,8 +14,8 @@ export function compileGovernedRecoveryHandoffR534({state,recoveryTasks=[],evide
  const plan=planGovernedCandidateR245({state,evidence});
  const admitted=new Set(state?.admittedSourceCapsules||[]);
  const exhausted=admitted.size>=Number(state?.maxAutonomousGenerations||0);
- const held=invalid.length>0||exhausted||plan.state!=='PROPOSE';
- return Object.freeze({schema:R534_HANDOFF_SCHEMA,status:held?'HELD':'PLANNED_ONLY',reason:invalid.length?'INVALID_RECOVERY_TASKS':exhausted?'R170_BOUNDED_ROADMAP_EXHAUSTED':plan.state!=='PROPOSE'?'R245_NO_GOVERNED_CANDIDATE':'SOURCE_MUTATION_REQUIRES_INDEPENDENT_ADMISSION',recoveryTaskCount:tasks.length,invalid,selectedExistingCapsule:plan.state==='PROPOSE'?plan.capsule?.id||null:null,sourceMutationAuthorized:false,productionAdmissionAuthorized:false,canonicalMutation:false,truthBoundary:'Recovery task data informs observation only. No R170 generation-cap override, roadmap injection, unproved patch or admission bypass.'});
+ const held=invalid.length>0||tasks.length===0||exhausted||plan.state!=='PROPOSE';
+ return Object.freeze({schema:R534_HANDOFF_SCHEMA,status:held?'HELD':'PLANNED_ONLY',reason:invalid.length?'INVALID_RECOVERY_TASKS':tasks.length===0?'NO_RECOVERY_TASKS':exhausted?'R170_BOUNDED_ROADMAP_EXHAUSTED':plan.state!=='PROPOSE'?'R245_NO_GOVERNED_CANDIDATE':'SOURCE_MUTATION_REQUIRES_INDEPENDENT_ADMISSION',recoveryTaskCount:tasks.length,invalid,selectedExistingCapsule:plan.state==='PROPOSE'?plan.capsule?.id||null:null,sourceMutationAuthorized:false,productionAdmissionAuthorized:false,canonicalMutation:false,truthBoundary:'Recovery task data informs observation only. No R170 generation-cap override, roadmap injection, unproved patch or admission bypass.'});
 }
 if(process.argv[1]&&process.argv[1].endsWith('r534-governed-recovery-handoff.mjs')){
  const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
