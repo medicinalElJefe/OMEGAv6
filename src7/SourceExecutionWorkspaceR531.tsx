@@ -37,7 +37,8 @@ export default function SourceExecutionWorkspaceR531({address}:Props){
    </div>
    {capabilityReceipt&&<div data-r534-capability-receipt={capabilityReceipt.status} role='status' style={{marginTop:10}}>
     <b>{capabilityReceipt.capabilityId} · {capabilityReceipt.status}</b>
-    <small>{JSON.stringify(capabilityReceipt)}</small>
+    <small>{capabilityReceipt.status==='SOURCE_MODEL_EXECUTED'?'Read-only source-model subset executed; historical renderer and full capability parity are not proven.':capabilityReceipt.status==='EXTERNAL_HOST_PROOF_REQUIRED'?'Authenticated native host receipt required.':'Capability execution held.'}</small>
+    <details><summary>Typed source receipt</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',maxWidth:'100%',overflowX:'auto'}}>{JSON.stringify(capabilityReceipt,null,2)}</pre></details>
    </div>}
    {modelReceipt&&<div data-r533-model-receipt={modelReceipt.status} role='status' style={{marginTop:10}}>
     <b>{modelReceipt.status}</b>
