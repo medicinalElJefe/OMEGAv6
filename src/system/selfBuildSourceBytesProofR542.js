@@ -19,7 +19,7 @@ export function verifySuccessorSourcesR542(manifest,{root=process.cwd()}={}){
   if(!id||ids.has(id)){reasons.push('DUPLICATE_OR_INVALID_CAPSULE:'+id);continue}
   ids.add(id);
   const proof=proofs.find(p=>p?.capsuleId===id);
-  if(!/^src\\/generated\\/selfbuildR535\\/[A-Za-z0-9_-]+\\.(ts|js)$/.test(target)){
+  if(!target.startsWith('src/generated/selfbuildR535/') || !/^[A-Za-z0-9_-]+\.(ts|js)$/.test(target.slice('src/generated/selfbuildR535/'.length))){
    reasons.push('UNSAFE_TARGET:'+id);continue;
   }
   const absolute=path.resolve(trustedRoot,target);
