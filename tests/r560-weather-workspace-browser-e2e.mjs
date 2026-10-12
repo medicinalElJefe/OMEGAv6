@@ -17,7 +17,10 @@ try{
    await page.goto(base+'/?omega7=1&r560='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
    await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:30000});
    await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
-   await page.getByRole('button',{name:'Earth Now',exact:true}).first().click();
+   const earth=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"] button[data-r519-direct="Earth Now"]');
+   await earth.waitFor({state:'visible',timeout:20000});
+   await earth.click();
+   await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Earth Now',null,{timeout:20000});
    const workspace=page.locator('[data-omega7-native="earth.weather"]');
    await workspace.waitFor({state:'visible',timeout:30000});
    await workspace.locator('[data-r560-weather-open="true"]').click();
@@ -27,7 +30,10 @@ try{
    if(await weather.getAttribute('data-weather-state')!=='READY')throw Error(name+': weather source not READY: '+(await weather.innerText()).slice(0,900));
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
-   await page.getByRole('button',{name:'Earth Now',exact:true}).first().click();
+   const earth=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"] button[data-r519-direct="Earth Now"]');
+   await earth.waitFor({state:'visible',timeout:20000});
+   await earth.click();
+   await page.waitForFunction(()=>document.querySelector('.o7-main')?.getAttribute('data-native-route')==='Earth Now',null,{timeout:20000});
    await page.locator('[data-earth-view="WEATHER"]').waitFor({state:'visible',timeout:30000});
    await page.locator('[data-r560-satellite-open="true"]').click();
    await page.locator('[data-earth-view="WEATHER"]').waitFor({state:'hidden',timeout:30000});
