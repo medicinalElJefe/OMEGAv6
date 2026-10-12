@@ -33,7 +33,15 @@ try{
    await address.fill('0');
    const run=entry.getByRole('button',{name:/Run read-only source model/}).first();
    await run.click();
-   await entry.locator('[data-r552-execution-result="true"]').waitFor({state:'visible'});
+   try{
+    await entry.locator('[data-r552-execution-result="true"]').waitFor({state:'visible',timeout:12000});
+   }catch(error){
+    const diagnostic=await page.evaluate(()=>{
+     const root=document.querySelector('[data-r554-ux-entry="true"]');
+     return {workbenchMounted:!!document.querySelector('[data-r478-capability-surface="true"]'),atlasMounted:!!document.querySelector('#r550-ux-atlas'),resultMounted:!!document.querySelector('[data-r552-execution-result="true"]'),errorText:root?.querySelector('[role="alert"]')?.textContent||null,historyText:root?.querySelector('[data-r553-history]')?.textContent?.slice(0,500)||null,bodyText:root?.textContent?.slice(-900)||null};
+    });
+    throw Error(name+': source-model click produced no visible result; '+JSON.stringify({diagnostic,pageErrors:errors})+'; '+String(error));
+   }
    const history=entry.locator('[data-r553-history="true"]');
    if(!(await history.innerText()).includes('address 0'))throw Error(name+': history not updated');
    const resultText=await entry.locator('[data-r552-execution-result="true"]').innerText();
