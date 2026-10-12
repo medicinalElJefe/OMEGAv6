@@ -7,6 +7,7 @@ import './earthWeatherR375.css';
 type Props={lat:number;lon:number};
 type WeatherMode='HOURLY'|'WEEKLY';
 
+// Source values stay in Celsius; dual-unit formatting is a reversible presentation only.
 const temperature=(v:any,d=0)=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(d)+' °C / '+(v*9/5+32).toFixed(d)+' °F':'—';
 const num=(v:any,d=0)=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(d):'—';
 const pct=(v:any)=>typeof v==='number'&&Number.isFinite(v)?Math.round(v)+'%':'—';
