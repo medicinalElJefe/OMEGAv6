@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 import {api} from './platformAdapter';
 import EarthWeatherR375 from './EarthWeatherR375';
 import './weatherObservationStudioR563.css';
@@ -12,7 +12,7 @@ export default function WeatherObservationStudioR563({lat,lon}:{lat:number;lon:n
  const[revision,setRevision]=useState(0);
  const[playing,setPlaying]=useState(false);
  const[frame,setFrame]=useState(0);
- const observed=catalog.filter(x=>x.state!=='UNAVAILABLE');
+ const observed=useMemo(()=>catalog.filter(x=>x.state!=='UNAVAILABLE'),[catalog]);
  useEffect(()=>{if(!playing||observed.length<2)return;const timer=window.setInterval(()=>setFrame(n=>(n+1)%observed.length),2500);return()=>window.clearInterval(timer)},[playing,observed.length]);
  useEffect(()=>{if(playing&&observed[frame])setSelected(observed[frame].id)},[frame,playing,observed]);
  useEffect(()=>{let active=true;setLoading(true);setError('');api.get<any>('/api/earth/noaa/catalog').then(r=>{
