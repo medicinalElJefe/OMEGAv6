@@ -165,3 +165,34 @@
  .o7-main{overflow-x:hidden;max-width:100%;min-width:0}
  .o7-native-host,.o7-executor-host,.o7-science-workspace,.o7-native-surface{width:100%;min-width:0;max-width:100%}
 }
+
+
+/* R557 · source-model workbench belongs to the OMEGA7 layout, not a legacy
+   fixed-width desktop panel. Keep all evidence visible and controls usable. */
+.o7-r554-ux-entry{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.o7-r554-ux-entry .r478-capability-surface{min-width:0;max-width:100%;display:grid;gap:14px}
+.o7-r554-ux-entry .r478-capability-surface>header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;min-width:0}
+.o7-r554-ux-entry .r478-capability-surface>header>div{display:grid;gap:5px;min-width:0}
+.o7-r554-ux-entry .r478-capability-surface>header small{display:block;color:var(--o7-muted);overflow-wrap:anywhere}
+.o7-r554-ux-entry .r478-capability-surface input,.o7-r554-ux-entry .r478-capability-surface select{max-width:100%;min-width:0;box-sizing:border-box}
+.o7-r554-ux-entry .r478-capability-surface>header>input{flex:1 1 240px;max-width:480px}
+.o7-r554-ux-entry .r550-atlas-panel{min-width:0;display:grid;gap:12px}
+.o7-r554-ux-entry #r550-ux-atlas{min-width:0;display:grid;gap:12px}
+.o7-r554-ux-entry .r550-axis-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.o7-r554-ux-entry .r550-axis-controls label{min-width:0;display:grid;gap:6px}
+.o7-r554-ux-entry .r550-axis-controls select{width:100%;min-height:42px}
+.o7-r554-ux-entry .r550-atlas-capabilities{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.o7-r554-ux-entry .r550-atlas-capability{min-width:0;display:grid;align-content:start;gap:8px;padding:10px;border:1px solid var(--o7-line);border-radius:10px}
+.o7-r554-ux-entry .r550-atlas-capability button{white-space:normal;text-align:left;overflow-wrap:anywhere}
+.o7-r554-ux-entry [data-r553-history]{min-width:0;display:grid;gap:8px;max-height:360px;overflow-y:auto;overflow-x:hidden}
+.o7-r554-ux-entry [data-r553-history]>button{white-space:normal;text-align:left;overflow-wrap:anywhere}
+.o7-r554-ux-entry [data-r552-execution-result]{min-width:0;max-width:100%;overflow:hidden}
+.o7-r554-ux-entry [data-r552-execution-result] pre{max-width:100%;box-sizing:border-box}
+.o7-r554-ux-entry .r478-capability-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;min-width:0}
+.o7-r554-ux-entry .r478-capability-grid button{min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left}
+@media(max-width:760px){
+ .o7-r554-ux-entry{padding:12px!important}
+ .o7-r554-ux-entry .r550-axis-controls{grid-template-columns:minmax(0,1fr)}
+ .o7-r554-ux-entry .r478-capability-surface>header>input{flex-basis:100%;max-width:none}
+ .o7-r554-ux-entry button{min-height:42px}
+}
