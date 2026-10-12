@@ -14,7 +14,11 @@ try{
    await entry.locator('[data-r478-capability-surface="true"]').waitFor({state:'visible',timeout:20000});
    await entry.getByRole('button',{name:/20,736D UX atlas/}).click();
    await entry.locator('#r550-ux-atlas').waitFor({state:'visible'});
-   await entry.getByLabel('Capability family').selectOption({label:'Knowledge Atlases'});
+   const family=entry.getByLabel('Capability family');
+   const familyOptions=await family.locator('option').evaluateAll(nodes=>nodes.map(n=>({value:n.value,label:n.textContent})));
+   let runnable=false;
+   for(const option of familyOptions){await family.selectOption(option.value);if(await entry.getByRole('button',{name:/Run read-only source model/}).count()){runnable=true;break}}
+   if(!runnable)throw Error(name+': no registered runnable source-model capability in any of 12 families');
    const atlasText=await entry.locator('#r550-ux-atlas').innerText();
    if(!atlasText.includes('Address')||!atlasText.includes('source-model executor'))throw Error(name+': atlas evidence missing');
    const address=entry.getByLabel('Source-model execution address');
@@ -24,6 +28,8 @@ try{
    await entry.locator('[data-r552-execution-result="true"]').waitFor({state:'visible'});
    const history=entry.locator('[data-r553-history="true"]');
    if(!(await history.innerText()).includes('address 0'))throw Error(name+': history not updated');
+   const resultText=await entry.locator('[data-r552-execution-result="true"]').innerText();
+   if(!/SOURCE_MODEL_EXECUTED|EXTERNAL_HOST_PROOF_REQUIRED|HELD/.test(resultText))throw Error(name+': source-model run returned no typed result');
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('.o7-nav-r519').getByRole('button',{name:'System'}).click();
    await page.locator('[data-r554-ux-entry="true"]').getByRole('button',{name:'Open capability workbench'}).click();
