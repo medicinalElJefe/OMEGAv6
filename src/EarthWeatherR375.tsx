@@ -7,6 +7,7 @@ import './earthWeatherR375.css';
 type Props={lat:number;lon:number};
 type WeatherMode='HOURLY'|'WEEKLY';
 
+const temperature=(v:any,d=0)=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(d)+' °C / '+(v*9/5+32).toFixed(d)+' °F':'—';
 const num=(v:any,d=0)=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(d):'—';
 const pct=(v:any)=>typeof v==='number'&&Number.isFinite(v)?Math.round(v)+'%':'—';
 const codeLabel=(code:any)=>{
@@ -37,12 +38,12 @@ export default function EarthWeatherR375({lat,lon}:Props){
  const q=data?.quality||{},sat=data?.satellite||{},current=data?.current||{},derived=data?.derived||{},scars=Array.isArray(data?.scarLedger)?data.scarLedger:[];
  return <section className='earth-r375-weather' data-earth-view='WEATHER' data-weather-state={busy?'LOADING':error?'ERROR':data?'READY':'IDLE'} data-r436-resolution={resolution?.branch.status||'UNBOUND'}>
   <header className='earth-r375-head'>
-   <div><span>R375 · SOURCE-FIRST WEATHER</span><h3>{num(current.temperatureC,1)} °C · {codeLabel(current.weatherCode)}</h3><small>{num(lat,4)}°, {num(lon,4)}° · {data?.timezone||'local timezone pending'} · returned meteorology first, derived continuity second</small></div>
+   <div><span>R375 · SOURCE-FIRST WEATHER</span><h3>{temperature(current.temperatureC,1)} · {codeLabel(current.weatherCode)}</h3><small>{num(lat,4)}°, {num(lon,4)}° · {data?.timezone||'local timezone pending'} · returned meteorology first, derived continuity second</small></div>
    <button type='button' onClick={()=>void load()} disabled={busy}><RefreshCw className={busy?'spin':''}/>{busy?'Refreshing…':'Refresh weather'}</button>
   </header>
 
   <div className='earth-r375-now'>
-   <article><ThermometerSun/><span>Feels like</span><b>{num(current.apparentC,1)} °C</b><small>air {num(current.temperatureC,1)} °C</small></article>
+   <article><ThermometerSun/><span>Feels like</span><b>{temperature(current.apparentC,1)}</b><small>air {temperature(current.temperatureC,1)}</small></article>
    <article><Droplets/><span>Humidity / cloud</span><b>{pct(current.humidityPct)} · {pct(current.cloudPct)}</b><small>precip {num(current.precipMm,1)} mm</small></article>
    <article><Wind/><span>Wind / gust</span><b>{num(current.windKph,0)} / {num(current.gustKph,0)} km/h</b><small>{num(current.windDirectionDeg,0)}°</small></article>
    <article><Gauge/><span>Pressure</span><b>{num(current.surfacePressureHpa,0)} hPa</b><small>visibility {num(current.visibilityM==null?null:current.visibilityM/1000,1)} km</small></article>
@@ -66,15 +67,15 @@ export default function EarthWeatherR375({lat,lon}:Props){
   {mode==='HOURLY'&&<div className='earth-r375-hourly' aria-label='Hourly weather forecast'>
    {hourly.map((row:any,i:number)=><article className='earth-r375-hourly-card' key={row.time||i}>
     <header><b>{localHour(row.isoTime||row.time,data?.timezone)}</b><small>{i<24?'next 24 h':'24–48 h'}</small></header>
-    <strong>{num(row.temperatureC,0)}°</strong><span>{codeLabel(row.weatherCode)}</span>
-    <dl><div><dt>Feels</dt><dd>{num(row.apparentC,0)}°</dd></div><div><dt>Rain</dt><dd>{pct(row.precipProbabilityPct)}</dd></div><div><dt>Wind</dt><dd>{num(row.windKph,0)} km/h</dd></div><div><dt>Gust</dt><dd>{num(row.gustKph,0)} km/h</dd></div><div><dt>Cloud</dt><dd>{pct(row.cloudPct)}</dd></div><div><dt>CΩ</dt><dd>{pct((row.continuity||0)*100)}</dd></div></dl>
+    <strong>{temperature(row.temperatureC,0)}</strong><span>{codeLabel(row.weatherCode)}</span>
+    <dl><div><dt>Feels</dt><dd>{temperature(row.apparentC,0)}</dd></div><div><dt>Rain</dt><dd>{pct(row.precipProbabilityPct)}</dd></div><div><dt>Wind</dt><dd>{num(row.windKph,0)} km/h</dd></div><div><dt>Gust</dt><dd>{num(row.gustKph,0)} km/h</dd></div><div><dt>Cloud</dt><dd>{pct(row.cloudPct)}</dd></div><div><dt>CΩ</dt><dd>{pct((row.continuity||0)*100)}</dd></div></dl>
    </article>)}
   </div>}
 
   {mode==='WEEKLY'&&<div className='earth-r375-weekly' aria-label='Seven day weather forecast'>
    {daily.map((row:any,i:number)=><article className='earth-r375-day-card' key={row.date||i}>
     <header><b>{localDay(row.isoTime||row.date,data?.timezone)}</b><small>{codeLabel(row.weatherCode)}</small></header>
-    <div className='earth-r375-range'><strong>{num(row.tempMaxC,0)}°</strong><span>{num(row.tempMinC,0)}°</span></div>
+    <div className='earth-r375-range'><strong>{temperature(row.tempMaxC,0)}</strong><span>{temperature(row.tempMinC,0)}</span></div>
     <dl><div><dt>Precip</dt><dd>{pct(row.precipProbabilityMaxPct)}</dd></div><div><dt>Total</dt><dd>{num(row.precipitationMm,1)} mm</dd></div><div><dt>Wind max</dt><dd>{num(row.windMaxKph,0)} km/h</dd></div><div><dt>Gust max</dt><dd>{num(row.gustMaxKph,0)} km/h</dd></div><div><dt>Sunrise</dt><dd>{String(row.sunrise||'—').slice(11,16)}</dd></div><div><dt>Transition</dt><dd>{pct((row.transitionBurden||0)*100)}</dd></div></dl>
    </article>)}
   </div>}
