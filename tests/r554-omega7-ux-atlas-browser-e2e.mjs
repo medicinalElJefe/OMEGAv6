@@ -1,5 +1,13 @@
 import {chromium} from 'playwright';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
+const expectedSha=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
+if(expectedSha){
+ if(!/^[0-9a-f]{40}$/i.test(expectedSha))throw Error('R554 requires a full exact promoted SHA');
+ const response=await fetch(base+'/omega-build-receipt.json?r554='+Date.now(),{headers:{'cache-control':'no-cache'}});
+ if(!response.ok)throw Error('R554 promoted build receipt HTTP '+response.status);
+ const receipt=await response.json();
+ if(receipt?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'||receipt?.source?.sha!==expectedSha||receipt?.promotion?.promotedMergeSha!==expectedSha)throw Error('R554 exact promoted SHA mismatch');
+}
 const browser=await chromium.launch({headless:true});
 try{
  for(const [name,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
