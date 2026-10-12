@@ -20,6 +20,8 @@ const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('om
 export default function DevelopmentComputeWorkspaceR444({route,onNavigate,depth}:Props){
  const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD');
  const[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null);
+ const[selfbuild,setSelfbuild]=useState<any>(null),[selfbuildError,setSelfbuildError]=useState('');
+ useEffect(()=>{let live=true;fetch('/omega-r170-selfbuild-state.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json()}).then(data=>{if(live)setSelfbuild(data)}).catch(e=>{if(live)setSelfbuildError(String(e))});return()=>{live=false}},[]);
  useEffect(()=>setInstrumentOpen(depth!=='STANDARD'),[depth,route]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
  useEffect(()=>{let live=true;Promise.all([api.get<any>('/api/status'),api.get<any>('/api/restoration')]).then(([s,r])=>{if(live){setStatus(s.data);setRestore(r.data)}}).catch(()=>{});return()=>{live=false}},[]);
@@ -33,6 +35,7 @@ export default function DevelopmentComputeWorkspaceR444({route,onNavigate,depth}
  if(!ready||!record||!modeSummary)return <section className='o7-native-loading' role='status' aria-live='polite'>Preparing development and compute state…</section>;
 
  const deviceState=String(status?.hybridLink?.state||'DEVICE_PROOF_REQUIRED');
+ const selfbuildExhausted=!!selfbuild&&Number(selfbuild.generation)>=Number(selfbuild.maxAutonomousGenerations);
  const plain=route==='Hybrid Link'
   ?'Connect an authorized PC and distinguish browser pairing, authentication, heartbeat proof, and real device execution.'
   :route==='Quality Compiler'
@@ -42,6 +45,12 @@ export default function DevelopmentComputeWorkspaceR444({route,onNavigate,depth}
     :'Use source-grounded intelligence to inspect, reason, and propose bounded improvements without hidden browser mutation of source or production.';
 
  return <section className='o7-native-workspace o7-development-workspace' data-omega7-native='development.compute' data-route={route} data-address={address}>
+  <section data-r559-selfbuild-truth='true' aria-label='Autonomous development status' style={{border:'1px solid #60758c',borderRadius:10,padding:12,marginBottom:14}}>
+   <b>Autonomous development · verified scope</b>
+   <p>{selfbuildError?'Self-build state unavailable: '+selfbuildError:selfbuild?'R170 admitted generation '+selfbuild.generation+' / '+selfbuild.maxAutonomousGenerations+(selfbuildExhausted?' · bounded generation limit reached':' · capacity remaining'):'Loading published self-build state…'}</p>
+   <p>Published capsules: {Array.isArray(selfbuild?.admittedSourceCapsules)?selfbuild.admittedSourceCapsules.join(', '):'not verified'}. These are source generation records, not evidence of a running autonomous developer or a deployed capability.</p>
+   <a href='https://github.com/medicinalElJefe/OMEGAv6/actions/workflows/r170-governed-selfbuild.yml' target='_blank' rel='noreferrer'>Inspect governed self-build workflow and actual run results</a>
+  </section>
   <header className='o7-native-head'>
    <div><span>Develop · Governed Compute</span><h1>{route}</h1><p>{plain}</p></div>
    <aside><b>{route==='Hybrid Link'?deviceState:`State ${record.stateId.toLocaleString()}`}</b><small>{modeSummary.appliedCount} source-backed modes applied · {modeSummary.gatedCount} gated</small></aside>
