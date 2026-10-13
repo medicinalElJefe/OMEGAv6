@@ -29,7 +29,10 @@ try{
    await forecastPanel.waitFor({state:'visible'});
    await page.waitForFunction(()=>{const s=document.querySelector('[data-r563-weather-studio]');return !!s&&s.querySelectorAll('select option').length>0},null,{timeout:30000});
    await page.waitForFunction(()=>['READY','ERROR'].includes(document.querySelector('[data-r563-forecast-panel] [data-weather-state]')?.getAttribute('data-weather-state')),null,{timeout:30000});
-   if(await forecastPanel.locator('[data-weather-state]').getAttribute('data-weather-state')!=='READY')throw Error(name+': dedicated studio weather source not READY');
+   if(await forecastPanel.locator('[data-weather-state]').getAttribute('data-weather-state')!=='READY'){
+    const details=await forecastPanel.locator('[data-weather-state]').evaluate(el=>({state:el.getAttribute('data-weather-state'),error:el.querySelector('.earth-r375-error')?.textContent||'',text:(el.textContent||'').slice(0,1000)}));
+    throw Error(name+': dedicated studio weather source not READY: '+JSON.stringify(details));
+   }
    const observed=satPanel.locator('figure img');
    await observed.waitFor({state:'visible',timeout:30000});
    await page.waitForFunction(()=>{const img=document.querySelector('[data-r563-satellite-panel] figure img');return !!img&&img.complete},null,{timeout:30000});
