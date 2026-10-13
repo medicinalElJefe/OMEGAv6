@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 import {api} from './platformAdapter';
 import EarthWeatherR375 from './EarthWeatherR375';
 import './weatherObservationStudioR563.css';
@@ -10,6 +10,11 @@ export default function WeatherObservationStudioR563({lat,lon}:{lat:number;lon:n
  const[error,setError]=useState('');
  const[imageError,setImageError]=useState('');
  const[revision,setRevision]=useState(0);
+ const[playing,setPlaying]=useState(false);
+ const[frame,setFrame]=useState(0);
+ const observed=useMemo(()=>catalog.filter(x=>x.state!=='UNAVAILABLE'),[catalog]);
+ useEffect(()=>{if(!playing||observed.length<2)return;const timer=window.setInterval(()=>setFrame(n=>(n+1)%observed.length),2500);return()=>window.clearInterval(timer)},[playing,observed.length]);
+ useEffect(()=>{if(playing&&observed[frame])setSelected(observed[frame].id)},[frame,playing,observed]);
  useEffect(()=>{let active=true;setLoading(true);setError('');api.get<any>('/api/earth/noaa/catalog').then(r=>{
   if(!active)return;
   const rows=Array.isArray(r.data?.coverages)?r.data.coverages.filter((x:any)=>typeof x.id==='string'&&typeof x.label==='string') as Coverage[]:[];
@@ -26,9 +31,9 @@ export default function WeatherObservationStudioR563({lat,lon}:{lat:number;lon:n
     {loading&&<p role='status'>Loading NOAA coverage catalog…</p>}
     {error&&<p role='alert'>NOAA catalog unavailable: {error}</p>}
     {!loading&&!error&&!catalog.length&&<p role='status'>No verified satellite coverages returned. No substitute pixels are generated.</p>}
-    {catalog.length>0&&<><label htmlFor='r563-coverage'>Observed coverage</label><select id='r563-coverage' value={selected} onChange={e=>{setSelected(e.target.value);setImageError('')}}>{catalog.map(x=><option key={x.id} value={x.id}>{x.label} · {x.state||'unverified'}</option>)}</select>
+    {catalog.length>0&&<><div className='omega-weather-studio-playback' data-r570-observation-cycle='true'><button type='button' disabled={observed.length<2} aria-pressed={playing} onClick={()=>{setFrame(Math.max(0,observed.findIndex(x=>x.id===selected)));setPlaying(v=>!v)}}>{playing?'Pause coverage cycle':'Cycle observed coverages'}</button><small>{observed.length} source catalog coverages · cycles distinct coverage products, not chronological radar frames</small></div><label htmlFor='r563-coverage'>Observed coverage</label><select id='r563-coverage' value={selected} onChange={e=>{setPlaying(false);setSelected(e.target.value);setImageError('')}}>{catalog.map(x=><option key={x.id} value={x.id}>{x.label} · {x.state||'unverified'}</option>)}</select>
     {current&&<figure><img key={current.id} src={'/api/earth/noaa/image?coverage='+encodeURIComponent(current.id)} alt={'Returned NOAA satellite image: '+current.label} loading='eager' onError={()=>setImageError('Satellite image unavailable from current source')} onLoad={()=>setImageError('')}/><figcaption><b>{current.label}</b><span>{current.state||'UNVERIFIED'} · {current.lastModified||'source time unavailable'}</span>{imageError&&<small role='alert'>{imageError}</small>}</figcaption></figure>}
-    <div className='omega-weather-studio-coverage'>{catalog.map(x=><button type='button' key={x.id} aria-pressed={selected===x.id} onClick={()=>{setSelected(x.id);setImageError('')}}>{x.label}</button>)}</div></>}
+    <div className='omega-weather-studio-coverage'>{catalog.map(x=><button type='button' key={x.id} aria-pressed={selected===x.id} onClick={()=>{setPlaying(false);setSelected(x.id);setImageError('')}}>{x.label}</button>)}</div></>}
    </section>
    <section className='omega-weather-studio-panel' aria-label='Source-backed weather forecast panel' data-r563-forecast-panel='true'><EarthWeatherR375 lat={lat} lon={lon}/></section>
   </div>
