@@ -18,8 +18,16 @@ try{
    await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:30000});
    await page.locator('.o7-nav-r519').getByRole('button',{name:'System'}).click();
    const entry=page.locator('[data-r554-ux-entry="true"]');await entry.waitFor({state:'visible',timeout:20000});
-   await entry.getByRole('button',{name:'Open capability workbench'}).click();
-   await entry.locator('[data-r478-capability-surface="true"]').waitFor({state:'visible',timeout:20000});
+   const workbench=entry.locator('[data-r478-capability-surface="true"]');
+   const toggle=entry.getByRole('button',{name:/^(Open|Close) capability workbench$/});
+   // Do not assume a cold mount: route restoration or a delayed render can leave the workbench expanded.
+   if(!(await workbench.isVisible())){
+    if((await toggle.getAttribute('aria-expanded'))!=='true')await toggle.click();
+    try{await workbench.waitFor({state:'visible',timeout:20000})}catch(error){
+     const diagnostic=await page.evaluate(()=>({domain:document.querySelector('.o7-app')?.getAttribute('data-depth'),entry:!!document.querySelector('[data-r554-ux-entry]'),expanded:document.querySelector('[data-r554-ux-entry] button[aria-expanded]')?.getAttribute('aria-expanded'),loading:document.querySelector('[data-r554-ux-entry] [role=status]')?.textContent,error:document.querySelector('[data-r554-ux-entry] [role=alert]')?.textContent}));
+     throw Error(name+': capability workbench did not mount: '+JSON.stringify({diagnostic,pageErrors:errors})+'; '+String(error));
+    }
+   }
    await entry.getByRole('button',{name:/20,736D UX atlas/}).click();
    await entry.locator('#r550-ux-atlas').waitFor({state:'visible'});
    const family=entry.getByLabel('Capability family');
