@@ -656,6 +656,14 @@ jobs:
         shell: bash
         run: |
           git_sha="$GITHUB_SHA"
+          # An older release can finish its live deployment after main has advanced.
+          # Never dispatch an R223 run on a newer SHA and misattribute it to this release.
+          current_main="$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)"
+          if [ "$current_main" != "$git_sha" ]; then
+            echo "::notice title=SUPERSEDED POST-DEPLOY CLOSURE::Release $git_sha was superseded by $current_main; newer main owns R223 closure."
+            echo "closure=R223_SUPERSEDED" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/r223-cloudflare-evolution.yml/dispatches" -f ref=main -f 'inputs[immediate_cycle]=false'
           run_id=''
           for attempt in $(seq 1 36); do
@@ -664,7 +672,16 @@ jobs:
             [ -n "$run_id" ] && break
             sleep 5
           done
-          test -n "$run_id" || { echo '::error title=R223 EXACT-SHA CLOSURE MISSING::No R223 run bound to the deployed main SHA.'; exit 1; }
+          if [ -z "$run_id" ]; then
+            current_main="$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)"
+            if [ "$current_main" != "$git_sha" ]; then
+              echo "::notice title=SUPERSEDED POST-DEPLOY CLOSURE::Main advanced to $current_main before R223 bound to $git_sha; no false authority is claimed."
+              echo "closure=R223_SUPERSEDED" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo '::error title=R223 EXACT-SHA CLOSURE MISSING::No R223 run bound to the deployed main SHA.'
+            exit 1
+          fi
           gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
           run="$(gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --json headSha,status,conclusion,event,url)"
           GIT_SHA="$git_sha" RUN="$run" node -e "const r=JSON.parse(process.env.RUN);if(r.headSha!==process.env.GIT_SHA||r.event!=='workflow_dispatch'||r.status!=='completed'||r.conclusion!=='success')throw new Error('R223 post-deploy authority did not close on exact deployed SHA')"
