@@ -13,4 +13,9 @@ assert.equal(admitObservationTimeline([a,{...b,acquiredAt:'2026-10-13T03:00:00.0
 assert.equal(admitObservationTimeline([a,{...b,acquiredAt:a.acquiredAt}],{now}).state,'HELD');
 assert.equal(admitObservationTimeline([a,{...b,measurement:'RADAR_PRECIPITATION'}],{now}).state,'HELD');
 assert.equal(admitObservationTimeline([a,{...b,sourceUrl:'http://example.org'}],{now}).state,'HELD');
-console.log('R577 chronological observation admission invariants PASS');
+const incompatible=admitObservationTimeline([a,{...b,bounds:[-110,31,-109,33]}],{now});
+assert.deepEqual(incompatible.rejected,[{index:1,reason:'INCOMPATIBLE_PRODUCT_OR_GRID'}]);
+assert.equal(incompatible.frames[0].sourceIndex,undefined);
+const duplicate=admitObservationTimeline([a,{...b,acquiredAt:a.acquiredAt}],{now});
+assert.deepEqual(duplicate.rejected,[{index:1,reason:'DUPLICATE_ACQUISITION_TIME'}]);
+console.log('R577/R578 chronological observation admission and original-index evidence PASS');

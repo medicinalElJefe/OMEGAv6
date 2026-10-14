@@ -24,16 +24,16 @@ export function admitObservationTimeline(rows,{now=Date.now(),maxAgeMs=86400000,
   if(typeof r.sourceUrl!=='string'||!/^https:\/\//.test(r.sourceUrl))return reject('MISSING_HTTPS_SOURCE');
   if(typeof r.evidenceId!=='string'||!r.evidenceId.trim())return reject('MISSING_EVIDENCE_ID');
   if(r.timestampAuthority!=='ACQUISITION_METADATA')return reject('HTTP_METADATA_NOT_ACQUISITION');
-  admitted.push({...r,time});
+  admitted.push({...r,time,sourceIndex:index});
  });
  admitted.sort((a,b)=>a.time-b.time||a.evidenceId.localeCompare(b.evidenceId));
  const first=admitted[0],frames=[],gaps=[];
  for(const frame of admitted){
-  if(first&&(frame.provider!==first.provider||frame.product!==first.product||frame.instrument!==first.instrument||frame.measurement!==first.measurement||frame.resolutionMeters!==first.resolutionMeters||frame.bounds.some((v,i)=>v!==first.bounds[i]))){rejected.push({index:rows.indexOf(frame),reason:'INCOMPATIBLE_PRODUCT_OR_GRID'});continue}
-  if(frames.some(x=>x.time===frame.time)){rejected.push({index:rows.indexOf(frame),reason:'DUPLICATE_ACQUISITION_TIME'});continue}
+  if(first&&(frame.provider!==first.provider||frame.product!==first.product||frame.instrument!==first.instrument||frame.measurement!==first.measurement||frame.resolutionMeters!==first.resolutionMeters||frame.bounds.some((v,i)=>v!==first.bounds[i]))){rejected.push({index:frame.sourceIndex,reason:'INCOMPATIBLE_PRODUCT_OR_GRID'});continue}
+  if(frames.some(x=>x.time===frame.time)){rejected.push({index:frame.sourceIndex,reason:'DUPLICATE_ACQUISITION_TIME'});continue}
   if(frames.length&&frame.time-frames[frames.length-1].time>maxGapMs)gaps.push({from:frames[frames.length-1].acquiredAt,to:frame.acquiredAt,deltaMs:frame.time-frames[frames.length-1].time});
   frames.push(frame);
  }
- const safeFrames=frames.map(({time,...rest})=>rest);
+ const safeFrames=frames.map(({time,sourceIndex,...rest})=>rest);
  return {schema:OBSERVATION_TIMELINE_SCHEMA,state:safeFrames.length>=2&&gaps.length===0?'READY':'HELD',frames:safeFrames,rejected,gaps,reason:safeFrames.length<2?'INSUFFICIENT_CHRONOLOGICAL_OBSERVATIONS':gaps.length?'TEMPORAL_GAPS':'CHRONOLOGICAL_SOURCE_PROVEN'};
 }
