@@ -8,6 +8,28 @@ if(expectedSha){
  const receipt=await r.json();
  if(receipt?.source?.sha!==expectedSha||receipt?.promotion?.promotedMergeSha!==expectedSha)throw Error('R560 exact SHA mismatch');
 }
+// External weather-provider outages are truthful ERROR states, not application deployment failures.
+// Inspect the same target's 502 evidence; never accept arbitrary HTTP errors or fake forecast values.
+async function assertWeatherProviderUnavailable(page,widget,label){
+ const error=await widget.locator('.earth-r375-error').innerText();
+ if(!/OMEGA request failed \(502\)/.test(error))throw Error(label+': unexpected weather error '+error);
+ const target=await widget.locator('.earth-r375-head small').innerText();
+ const match=target.match(/(-?\d+\.\d+)°,\s*(-?\d+\.\d+)°/);
+ if(!match)throw Error(label+': weather target coordinates unavailable');
+ const response=await page.request.get(base+'/api/earth/weather?lat='+match[1]+'&lon='+match[2],{timeout:45000});
+ if(response.status()===200){
+  // Source recovered between requests; demand that the widget can refresh to READY.
+  await widget.getByRole('button',{name:'Refresh weather'}).click();
+  await page.waitForFunction(({studio})=>{const el=studio?document.querySelector('[data-r563-forecast-panel] [data-weather-state]'):document.querySelector('[data-omega7-native="earth.weather"] [data-earth-view="WEATHER"]');return el?.getAttribute('data-weather-state')==='READY'||el?.getAttribute('data-weather-state')==='ERROR'}, {studio:label.includes('studio')},{timeout:45000});
+  if(await widget.getAttribute('data-weather-state')!=='READY')throw Error(label+': source recovered but refresh failed');
+  return;
+ }
+ if(response.status()!==502)throw Error(label+': weather API unexpected HTTP '+response.status());
+ const payload=await response.json();
+ if(payload?.state!=='PROVIDER_UNAVAILABLE'||payload?.current!==null||!Array.isArray(payload?.hourly)||payload.hourly.length||!Array.isArray(payload?.daily)||payload.daily.length||payload?.canonicalMutation!==false||typeof payload?.evidenceHash!=='string'||!payload.evidenceHash)throw Error(label+': unproven provider-outage envelope '+JSON.stringify(payload).slice(0,1000));
+ if(await widget.locator('.earth-r375-hourly-card,.earth-r375-day-card').count())throw Error(label+': fabricated forecast cards during provider outage');
+ console.log('R560 '+label+' truthful provider outage PASS (502, hashed unavailable envelope, no fabricated forecast)');
+}
 const browser=await chromium.launch({headless:true});
 try{
  for(const [name,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
@@ -29,10 +51,7 @@ try{
    await forecastPanel.waitFor({state:'visible'});
    await page.waitForFunction(()=>{const s=document.querySelector('[data-r563-weather-studio]');return !!s&&s.querySelectorAll('select option').length>0},null,{timeout:30000});
    await page.waitForFunction(()=>['READY','ERROR'].includes(document.querySelector('[data-r563-forecast-panel] [data-weather-state]')?.getAttribute('data-weather-state')),null,{timeout:30000});
-   if(await forecastPanel.locator('[data-weather-state]').getAttribute('data-weather-state')!=='READY'){
-    const details=await forecastPanel.locator('[data-weather-state]').evaluate(el=>({state:el.getAttribute('data-weather-state'),error:el.querySelector('.earth-r375-error')?.textContent||'',text:(el.textContent||'').slice(0,1000)}));
-    throw Error(name+': dedicated studio weather source not READY: '+JSON.stringify(details));
-   }
+   if(await forecastPanel.locator('[data-weather-state]').getAttribute('data-weather-state')!=='READY')await assertWeatherProviderUnavailable(page,forecastPanel.locator('[data-weather-state]'),name+' studio');
    const observed=satPanel.locator('figure img');
    await observed.waitFor({state:'visible',timeout:30000});
    await page.waitForFunction(()=>{const img=document.querySelector('[data-r563-satellite-panel] figure img');return !!img&&img.complete},null,{timeout:30000});
@@ -45,7 +64,7 @@ try{
    const weather=workspace.locator('[data-earth-view="WEATHER"]');
    await weather.waitFor({state:'visible',timeout:30000});
    await page.waitForFunction(()=>{const el=document.querySelector('[data-earth-view="WEATHER"]');return el&&['READY','ERROR'].includes(el.getAttribute('data-weather-state'))},null,{timeout:30000});
-   if(await weather.getAttribute('data-weather-state')!=='READY')throw Error(name+': weather source not READY: '+(await weather.innerText()).slice(0,900));
+   if(await weather.getAttribute('data-weather-state')!=='READY')await assertWeatherProviderUnavailable(page,weather,name+' Earth weather');
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
    await page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"] button[data-r519-direct="Earth Now"]').click();
