@@ -48,6 +48,7 @@ jobs:
           node tests/r256-private-sai-doorway-protocol-e2e.mjs
           npx wrangler deploy --config wrangler.sai-door-r256.jsonc --dry-run --outdir .wrangler-r256-doorway
       - run: npm run check
+      - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
         run: node tests/r577-observation-timeline-invariants.mjs
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
