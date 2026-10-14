@@ -1,6 +1,8 @@
 import {useEffect,useMemo,useState} from 'react';
 import {api} from './platformAdapter';
 import EarthWeatherR375 from './EarthWeatherR375';
+import WeatherRadarMapR580 from './WeatherRadarMapR580';
+import './weatherRadarMapR580.css';
 import './weatherObservationStudioR563.css';
 type Coverage={id:string;label:string;state?:string;lastModified?:string;source?:string};
 export default function WeatherObservationStudioR563({lat,lon}:{lat:number;lon:number}){
@@ -30,7 +32,8 @@ export default function WeatherObservationStudioR563({lat,lon}:{lat:number;lon:n
  const timestampMeaning='HTTP/catalog last-modified metadata; not a verified satellite acquisition or scan timestamp';
  const coverageStatus=current?.state||'UNVERIFIED';
  return <section className='omega-weather-studio' data-r563-weather-studio='true'>
-  <header className='omega-weather-studio-head'><div><span>OMEGA WEATHER · DEDICATED OBSERVATION STUDIO</span><h2>Weather intelligence and observed imagery</h2><p>Separate forecast and satellite panels, using returned public-source data. Imagery is observational context, not a georeferenced precipitation or radar overlay.</p></div><button type='button' onClick={()=>setRevision(n=>n+1)} disabled={loading}>Refresh satellite catalog</button></header>
+  <header className='omega-weather-studio-head'><div><span>OMEGA WEATHER · DEDICATED OBSERVATION STUDIO</span><h2>Radar, satellite and forecast workspace</h2><p>Separate forecast and satellite panels, using returned public-source data. Imagery is observational context, not a georeferenced precipitation or radar overlay.</p></div><button type='button' onClick={()=>setRevision(n=>n+1)} disabled={loading}>Refresh satellite catalog</button></header>
+  <WeatherRadarMapR580 lat={lat} lon={lon}/>
   <div className='omega-weather-studio-grid'>
    <section className='omega-weather-studio-panel' aria-label='Weather satellite observation panel' data-r563-satellite-panel='true'>
     <header><span>PUBLIC SATELLITE OBSERVATIONS</span><h3>NOAA imagery catalog</h3><p>Available GOES coverages are returned by the existing OMEGA NOAA catalog endpoint. Coverage availability and image freshness are shown as received.</p></header>
