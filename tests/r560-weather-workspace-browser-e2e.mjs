@@ -20,7 +20,6 @@ async function assertWeatherProviderUnavailable(page,widget,label){
  if(response.status()===200){
   // Source recovered between requests; demand that the widget can refresh to READY.
   await widget.getByRole('button',{name:'Refresh weather'}).click();
-  await widget.locator('[data-weather-state="READY"]').count().catch(()=>0); // widget itself carries state
   await page.waitForFunction(({studio})=>{const el=studio?document.querySelector('[data-r563-forecast-panel] [data-weather-state]'):document.querySelector('[data-omega7-native="earth.weather"] [data-earth-view="WEATHER"]');return el?.getAttribute('data-weather-state')==='READY'||el?.getAttribute('data-weather-state')==='ERROR'}, {studio:label.includes('studio')},{timeout:45000});
   if(await widget.getAttribute('data-weather-state')!=='READY')throw Error(label+': source recovered but refresh failed');
   return;
