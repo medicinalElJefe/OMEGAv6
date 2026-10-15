@@ -29,8 +29,12 @@ async function bindTarget(page,action,lat,lon){
  const evidence=await response.json();verifyTarget(evidence,lat,lon,'Earth');
  await page.waitForFunction(({lat,lon,hash})=>{
   const coords=document.querySelectorAll('.earth-r72-coords input');
-  return coords.length===2&&Math.abs(Number(coords[0].value)-lat)<0.000011&&Math.abs(Number(coords[1].value)-lon)<0.000011&&document.querySelector('.earth-r72-proof code')?.textContent===hash;
- },{lat,lon,hash:evidence.evidenceHash},{timeout:20000});
+  const boundHash=document.querySelector('.earth-r72-proof code')?.textContent;
+  return coords.length===2&&Math.abs(Number(coords[0].value)-lat)<0.000011&&Math.abs(Number(coords[1].value)-lon)<0.000011&&boundHash===hash;
+ },{lat,lon,hash:evidence.evidenceHash},{timeout:45000}).catch(async error=>{
+  const rendered=await page.evaluate(()=>({coords:[...document.querySelectorAll('.earth-r72-coords input')].map(x=>x.value),hash:document.querySelector('.earth-r72-proof code')?.textContent,errors:[...document.querySelectorAll('.earth-r8-error')].map(x=>x.textContent)}));
+  throw new Error('R372 Earth target/evidence did not converge after API response: '+JSON.stringify({target:{lat,lon},expectedHash:evidence.evidenceHash,rendered})+'; '+String(error));
+ });
 }
 async function searchTarget(page,{input,find,results,query}){
  await input.fill(query);
