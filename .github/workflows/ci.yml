@@ -521,6 +521,10 @@ jobs:
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r560-weather-workspace-browser-e2e.mjs
+      - name: Verify live R583 radar tile pixels and chronological playback on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r583-radar-browser-e2e.mjs
       - name: Verify live R202 operational source-authority surface
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: live_r202
