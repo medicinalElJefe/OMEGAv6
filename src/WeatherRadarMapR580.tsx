@@ -24,7 +24,8 @@ export default function WeatherRadarMapR580({lat,lon}:{lat:number;lon:number}){
    <div className='omega-r580-attribution'>© OpenStreetMap contributors · Radar © RainViewer</div>
   </div>
   {loading&&<p role='status'>Retrieving real radar observation catalog…</p>}
-  {allFailed&&!error&&<p role='alert'>Radar tile images failed to decode. No synthetic radar substituted.</p>}\n  {error&&<p role='alert'>Radar source unavailable: {error}. No synthetic radar substituted.</p>}
+  {allFailed&&!error&&<p role='alert'>Radar tile images failed to decode. No synthetic radar substituted.</p>}
+  {error&&<p role='alert'>Radar source unavailable: {error}. No synthetic radar substituted.</p>}
   {frame&&<div className='omega-r580-timeline'><div><button disabled={frames.length<2} onClick={()=>setPlaying(v=>!v)}>{playing?'Pause':'Play radar history'}</button><button disabled={index===0} onClick={()=>{setPlaying(false);setIndex(i=>Math.max(0,i-1))}}>Previous</button><button disabled={index===frames.length-1} onClick={()=>{setPlaying(false);setIndex(i=>Math.min(frames.length-1,i+1))}}>Next</button></div><input aria-label='Radar observation timeline' type='range' min={0} max={Math.max(0,frames.length-1)} value={index} onChange={e=>{setPlaying(false);setIndex(Number(e.target.value))}}/><strong>{new Date(frame.time*1000).toLocaleString()} · {index+1}/{frames.length} verified provider frame identifiers</strong><small>Historical radar reflectivity, not forecast precipitation. Tiles are supplied by RainViewer. No velocity or rainfall rate is inferred.</small></div>}
  </section>;
 }
