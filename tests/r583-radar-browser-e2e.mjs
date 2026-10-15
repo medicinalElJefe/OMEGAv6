@@ -22,7 +22,7 @@ try{
    await page.locator('[data-r563-weather-open="true"]').click();
    const map=page.locator('[data-r580-radar-map="true"]');
    await map.waitFor({state:'visible',timeout:30000});
-   await page.waitForFunction(()=>['READY','ERROR','HELD'].includes(document.querySelector('[data-r580-radar-map]')?.getAttribute('data-radar-state')),null,{timeout:30000});
+   await page.waitForFunction(()=>['READY','ERROR'].includes(document.querySelector('[data-r580-radar-map]')?.getAttribute('data-radar-state')),null,{timeout:30000});
    const state=await map.getAttribute('data-radar-state');
    if(state!=='READY')throw Error(name+': radar not READY: '+state+' '+(await map.innerText()).slice(0,600));
    const radar=map.locator('img.omega-r580-radar');
