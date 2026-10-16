@@ -46,6 +46,24 @@ try{
    await studioButton.click();
    const studio=page.locator('[data-r563-weather-studio="true"]');
    await studio.waitFor({state:'visible',timeout:30000});
+   // R590: returned geocoding must change both forecast and radar target, not just search text.
+   const location=studio.locator('[data-r589-weather-location="true"]');
+   await location.waitFor({state:'visible'});
+   await location.getByRole('textbox',{name:'Search Weather Studio location'}).fill('Tucson, Arizona');
+   const responsePromise=page.waitForResponse(r=>r.url().includes('/api/earth/geocode?q=')&&r.request().method()==='GET',{timeout:45000});
+   await location.getByRole('button',{name:'Find location'}).click();
+   const geo=await responsePromise;
+   if(!geo.ok())throw Error(name+': weather geocode HTTP '+geo.status());
+   const payload=await geo.json();
+   const expected=(payload?.results||[])[0];
+   if(!expected||!Number.isFinite(Number(expected.lat))||!Number.isFinite(Number(expected.lon)))throw Error(name+': no valid returned location');
+   await location.getByRole('listbox',{name:'Weather location results'}).getByRole('button').first().click();
+   await page.waitForFunction(({lat,lon})=>{
+    const target=document.querySelector('[data-r589-weather-target]')?.textContent||'';
+    const forecast=document.querySelector('[data-r563-forecast-panel] .earth-r375-head small')?.textContent||'';
+    return target.includes(lat.toFixed(5))&&target.includes(lon.toFixed(5))&&forecast.includes(lat.toFixed(4))&&forecast.includes(lon.toFixed(4));
+   },{lat:Number(expected.lat),lon:Number(expected.lon)},{timeout:30000});
+   await location.getByRole('button',{name:'Return to Earth target'}).click();
    const satPanel=studio.locator('[data-r563-satellite-panel="true"]');
    const forecastPanel=studio.locator('[data-r563-forecast-panel="true"]');
    await satPanel.waitFor({state:'visible'});
