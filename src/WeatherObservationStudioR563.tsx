@@ -12,6 +12,10 @@ export default function WeatherObservationStudioR563({lat,lon}:{lat:number;lon:n
  const[error,setError]=useState('');
  const[imageError,setImageError]=useState('');
  const[revision,setRevision]=useState(0);
+ const[target,setTarget]=useState({lat,lon}),[placeQuery,setPlaceQuery]=useState(''),[placeResults,setPlaceResults]=useState<any[]>([]),[placeBusy,setPlaceBusy]=useState(false),[placeError,setPlaceError]=useState('');
+ useEffect(()=>setTarget({lat,lon}),[lat,lon]);
+ const searchPlaces=async()=>{const q=placeQuery.trim();if(q.length<2){setPlaceError('Enter a city, address, landmark, or ZIP code.');return}setPlaceBusy(true);setPlaceError('');setPlaceResults([]);try{const r=await api.get<any>('/api/earth/geocode?q='+encodeURIComponent(q));const rows=Array.isArray(r.data?.results)?r.data.results.filter((x:any)=>Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lon))):[];setPlaceResults(rows);if(!rows.length)setPlaceError('No matching locations returned.')}catch(e:any){setPlaceError(e?.message||String(e))}finally{setPlaceBusy(false)}};
+ const choosePlace=(row:any)=>{const la=Number(row.lat),lo=Number(row.lon);if(!Number.isFinite(la)||!Number.isFinite(lo)||Math.abs(la)>90||Math.abs(lo)>180)return;setTarget({lat:la,lon:lo});setPlaceQuery(String(row.displayName||row.name||''));setPlaceResults([]);setPlaceError('')};
  const[playing,setPlaying]=useState(false);
  const[frame,setFrame]=useState(0);
  const observed=useMemo(()=>catalog.filter(x=>x.state!=='UNAVAILABLE'),[catalog]);
@@ -33,7 +37,8 @@ export default function WeatherObservationStudioR563({lat,lon}:{lat:number;lon:n
  const coverageStatus=current?.state||'UNVERIFIED';
  return <section className='omega-weather-studio' data-r563-weather-studio='true'>
   <header className='omega-weather-studio-head'><div><span>OMEGA WEATHER · DEDICATED OBSERVATION STUDIO</span><h2>Radar, satellite and forecast workspace</h2><p>Separate forecast and satellite panels, using returned public-source data. Imagery is observational context, not a georeferenced precipitation or radar overlay.</p></div><button type='button' onClick={()=>setRevision(n=>n+1)} disabled={loading}>Refresh satellite catalog</button></header>
-  <WeatherRadarMapR580 lat={lat} lon={lon}/>
+  <div className='omega-weather-location' data-r589-weather-location='true'><form onSubmit={e=>{e.preventDefault();void searchPlaces()}}><label htmlFor='r589-weather-place'>Weather location</label><input id='r589-weather-place' aria-label='Search Weather Studio location' placeholder='City, address, landmark, ZIP code' value={placeQuery} onChange={e=>setPlaceQuery(e.target.value)}/><button type='submit' disabled={placeBusy}>{placeBusy?'Searching…':'Find location'}</button><button type='button' onClick={()=>{setTarget({lat,lon});setPlaceResults([]);setPlaceError('')}}>Return to Earth target</button></form><small data-r589-weather-target='true'>Selected WGS84 target: {target.lat.toFixed(5)}°, {target.lon.toFixed(5)}°</small>{placeError&&<p role='alert'>{placeError}</p>}{placeResults.length>0&&<div role='listbox' aria-label='Weather location results'>{placeResults.map((row:any,i:number)=><button type='button' key={row.id||i} onClick={()=>choosePlace(row)}>{row.displayName||row.name||`${row.lat}, ${row.lon}`}</button>)}</div>}</div>
+  <WeatherRadarMapR580 lat={target.lat} lon={target.lon}/>
   <div className='omega-weather-studio-grid'>
    <section className='omega-weather-studio-panel' aria-label='Weather satellite observation panel' data-r563-satellite-panel='true'>
     <header><span>PUBLIC SATELLITE OBSERVATIONS</span><h3>NOAA imagery catalog</h3><p>Available GOES coverages are returned by the existing OMEGA NOAA catalog endpoint. Coverage availability and image freshness are shown as received.</p></header>
@@ -45,7 +50,7 @@ export default function WeatherObservationStudioR563({lat,lon}:{lat:number;lon:n
     {current&&<figure><img key={current.id} src={'/api/earth/noaa/image?coverage='+encodeURIComponent(current.id)} alt={'Returned NOAA satellite image: '+current.label} loading='eager' onError={()=>setImageError('Satellite image unavailable from current source')} onLoad={()=>setImageError('')}/><figcaption><b>{current.label}</b><span>{current.state||'UNVERIFIED'} · {current.lastModified||'source time unavailable'}</span>{imageError&&<small role='alert'>{imageError}</small>}</figcaption></figure>}
     <div className='omega-weather-studio-coverage'>{catalog.map(x=><button type='button' key={x.id} aria-pressed={selected===x.id} onClick={()=>{setPlaying(false);setSelected(x.id);setImageError('')}}>{x.label}</button>)}</div></>}
    </section>
-   <section className='omega-weather-studio-panel' aria-label='Source-backed weather forecast panel' data-r563-forecast-panel='true'><EarthWeatherR375 lat={lat} lon={lon}/></section>
+   <section className='omega-weather-studio-panel' aria-label='Source-backed weather forecast panel' data-r563-forecast-panel='true'><EarthWeatherR375 lat={target.lat} lon={target.lon}/></section>
   </div>
   <footer><strong>Evidence boundary:</strong> NOAA image pixels are not synthetic weather layers. Forecasts and observed imagery may have different timestamps, resolutions and spatial footprints. Radar precipitation, multispectral cloud products, NEXRAD and quantitative satellite fusion require independent verified source adapters before being presented as operational maps.</footer>
  </section>;
