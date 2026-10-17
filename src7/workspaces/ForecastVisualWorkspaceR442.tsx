@@ -58,6 +58,7 @@ export default function ForecastVisualWorkspaceR442({route,onNavigate,depth}:Pro
    <button className='o7-open-instrument' onClick={()=>setInstrumentOpen(true)}>Open full {route} instrument</button>
   </section>}
 
+  {route==='Visual Instrument'&&<section data-r594-seven-star-entry='true'><button type='button' aria-expanded={sevenStarOpen} onClick={()=>setSevenStarOpen(v=>!v)}>{sevenStarOpen?'Close Seven-Star Color Traversal':'Open Seven-Star Color Traversal'}</button>{sevenStarOpen&&<SevenStarProjectionR594 address={address} onAddress={commit}/>}</section>}
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Forecast'?<ForecastSovereignPanel address={address}/>:
     route==='Visual Instrument'?<VisualInstrumentR36 address={address} onAddress={commit} onNavigate={onNavigate}/>:
