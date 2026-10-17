@@ -202,6 +202,7 @@
     "test:r512": "npx --yes tsx tests/r512-capability-first-navigation-invariants.mts",
     "test:r513": "npx --yes tsx tests/r513-exact-phase-turn-invariants.mts",
     "test:r519": "npx --yes tsx tests/r519-visual-navigation-invariants.mts",
+    "test:r599": "npx --yes tsx tests/r599-exchange-ledger.mts",
     "test:r598": "npx --yes tsx tests/r598-woven-morphogenesis.mts",
     "test:r597": "npx --yes tsx tests/r597-seven-star-geometry.mts",
     "test:r594:browser": "node tests/r594-seven-star-browser-e2e.mjs",
