@@ -1,3 +1,4 @@
+import {applyExchangeGraph,sevenSystemGraph,type ExchangeGraph} from './governedExchangeGraphR600';
 /**
  * R598: Seven-component conservative reaction/transport laboratory.
  * Represents modeled organization, not creation of physical matter.
@@ -20,7 +21,7 @@ export function wovenInitial(params:WovenParams):WovenState{
  }
  const state={params:p,free,bound,scar,step:0,initialMass:0,lastExchange:new Float64Array(N*N),lastBinding:new Float64Array(N),lastUnbinding:new Float64Array(N)};state.initialMass=wovenMass(state);return state;
 }
-export function wovenAdvance(s:WovenState):WovenState{
+export function wovenAdvance(s:WovenState,graph:ExchangeGraph=sevenSystemGraph):WovenState{
  const{width:w,height:h,diffusion:d,exchange:e,binding:b,unbinding:u,anisotropy:a}=s.params;
  const free=s.free.slice(),bound=s.bound.slice(),scar=s.scar.slice();
  const lastExchange=new Float64Array(N*N),lastBinding=new Float64Array(N),lastUnbinding=new Float64Array(N);
@@ -31,11 +32,15 @@ export function wovenAdvance(s:WovenState):WovenState{
   transfer(i,idx(y*w+(x+1)%w,k),d*(1+.5*a*Math.cos(k*2*Math.PI/N)));
   transfer(i,idx(((y+1)%h)*w+x,k),d*(1-.5*a*Math.cos(k*2*Math.PI/N)));
  }
- // Directed cyclic inter-system exchange; each transfer is exactly balanced.
- for(let site=0;site<w*h;site++)for(let k=0;k<N;k++){
-  const from=idx(site,k),to=idx(site,(k+1)%N);
-  const flux=e*free[from]*(1+a*Math.sin((k+1)*2*Math.PI/N+s.step*.07))*.5;
-  free[from]-=flux;free[to]+=flux;lastExchange[k*N+(k+1)%N]+=flux;
+ // Apply the same governed graph used by the inspector to each spatial cell.
+ // Every cell owns a separate seven-channel inventory and receives typed receipts.
+ for(let site=0;site<w*h;site++){
+  const local=new Float64Array(N);
+  for(let k=0;k<N;k++)local[k]=free[idx(site,k)];
+  const effective:ExchangeGraph={edges:graph.edges.map(edge=>({...edge,rate:Math.min(1,edge.rate*e/.1*(1+.25*a*Math.sin((edge.from+1)*2*Math.PI/N+s.step*.07)))}))};
+  const exchangeResult=applyExchangeGraph(local,effective);
+  for(let k=0;k<N;k++)free[idx(site,k)]=exchangeResult.next[k];
+  for(const receipt of exchangeResult.receipts)lastExchange[receipt.from*N+receipt.to]+=receipt.admitted;
  }
  // Binding and unbinding are explicit reservoir transfers, not sources/sinks.
  for(let site=0;site<w*h;site++){
