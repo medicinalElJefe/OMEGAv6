@@ -29,6 +29,25 @@ def traverse(donor,address,kind=None):
             'address':address,'edge_count':len(matching),'edges':matching,
             'boundary':'RH conceptual graph to SQLite state-row translation; not Time Mandala semantic identity or 10368 coupling-edge recovery'}
 
+
+def traverse_many(donor, addresses, kind=None):
+    """Batch query with one full source admission, never one 162MB verification per address."""
+    if kind is not None and kind not in ('antipode_state','prereq'):
+        raise ValueError('unsupported historical edge type')
+    if not isinstance(addresses,(list,tuple)) or len(addresses)>20736:
+        raise ValueError('addresses must be a bounded list or tuple')
+    if any(not isinstance(a,int) or isinstance(a,bool) or not 0<=a<20736 for a in addresses):
+        raise ValueError('invalid canonical address')
+    proof,edges=load_graph(donor)
+    grouped={a:[] for a in addresses}
+    for e in edges:
+        if e['source_address'] in grouped and (kind is None or e['kind']==kind):
+            grouped[e['source_address']].append(e)
+    return {'truth_class':'SOURCE_VERIFIED_V21_TYPED_GRAPH',
+            'source_sha256':proof['source_sha256'],
+            'results':[{'address':a,'edge_count':len(grouped[a]),'edges':grouped[a]} for a in addresses],
+            'boundary':'RH graph typed state-row projection; not inferred coupling edges or live UI proof'}
+
 if __name__=='__main__':
     if len(sys.argv) not in (3,4):raise SystemExit('usage: r616_historical_graph.py v21.zip address [antipode_state|prereq]')
     print(json.dumps(traverse(Path(sys.argv[1]),int(sys.argv[2]),sys.argv[3] if len(sys.argv)==4 else None),indent=2))
