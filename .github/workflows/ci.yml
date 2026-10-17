@@ -134,6 +134,8 @@ jobs:
         run: npm run test:r603
       - name: Prove R602 historical Seven-Star authority and address contract
         run: npm run test:r602
+      - name: Prove R606 original Time Mandala desktop/mobile browser execution
+        run: node tests/r606-historical-mandala-browser-e2e.mjs
       - name: Prove R594 Seven-Star visual controls and address traversal on desktop/mobile candidate
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
