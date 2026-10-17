@@ -7,7 +7,7 @@ for(const t of [0,1,1234,12345,43200,86399]){
  const counts=workbookDistributionR604(t);
  assert.equal(counts.length,7);
  assert.equal(counts.reduce((a,b)=>a+b,0),20736);
- assert.ok(Math.max(...counts)-Math.min(...counts)<=2);
+ assert.deepEqual([...counts].sort((a,b)=>a-b),[2960,2960,2961,2961,2964,2964,2966], 'exact original 12^4 modular star population multiset');
  for(let i=0;i<20736;i++){
   const r=replayWorkbookFrameR604(i,t);
   assert.equal(r.baseStar,((r.indices.reduce((a,b)=>a+b,0)-4)%7)+1);
@@ -21,7 +21,7 @@ const first=replayWorkbookFrameR604(0,0);
 assert.deepEqual(first.indices,[1,1,1,1]);
 assert.equal(first.baseStar,1);assert.equal(first.activeStar,1);
 assert.equal(first.operator,'Alpha / Potential');
-for(const [regulationIndex,expected] of [[3,'PRUNE'],[4,'TURN'],[5,'INTEGRATE'],[8,'PRUNE'],[9,'TURN'],[10,'INTEGRATE'],[11,'INTEGRATE']] as const){
+for(const [regulationIndex,expected] of [[2,'PRUNE'],[3,'TURN'],[5,'INTEGRATE'],[8,'PRUNE'],[9,'TURN'],[10,'INTEGRATE'],[11,'INTEGRATE']] as const){
  const address=regulationIndex*12;
  assert.equal(replayWorkbookFrameR604(address,0).mode188Gate,expected);
 }
