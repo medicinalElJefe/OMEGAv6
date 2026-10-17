@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useState} from 'react';
 import ForecastSovereignPanel from '../../src/ForecastSovereignPanel';
+import SevenStarProjectionR594 from './SevenStarProjectionR594';
 import CorpusAdapterWorkbenchR473 from '../../src/CorpusAdapterWorkbenchR473';
 import type {CorpusExecutionIntentR473} from '../../src/CorpusExecutionIntentR473';
 import {VisualInstrumentR36} from '../../src/OmegaR36LivingSurfaces';
@@ -18,7 +19,7 @@ const readAddress=()=>{try{return clamp(Number(localStorage.getItem('omega.v6.ad
 const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('omega.v6.address',String(next));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:next}}))}catch{}return next};
 
 export default function ForecastVisualWorkspaceR442({route,onNavigate,depth}:Props){
- const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'),[horoscopeOpen,setHoroscopeOpen]=useState(false);
+ const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'),[sevenStarOpen,setSevenStarOpen]=useState(false),[horoscopeOpen,setHoroscopeOpen]=useState(false);
  useEffect(()=>{setInstrumentOpen(depth!=='STANDARD')},[depth,route]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
  useEffect(()=>{const sync=()=>setAddress(current=>{const next=readAddress();return current===next?current:next});const id=window.setInterval(sync,850);window.addEventListener('storage',sync);window.addEventListener('omega7-address-changed',sync as EventListener);return()=>{window.clearInterval(id);window.removeEventListener('storage',sync);window.removeEventListener('omega7-address-changed',sync as EventListener)}},[]);
