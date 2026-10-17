@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:r603": "npx --yes tsx tests/r603-time-mandala-axes.mts",
     "test:r602": "npx --yes tsx tests/r602-seven-star-historical-authority.mts",
     "dev": "vite",
     "build": "vite build && node scripts/generate_bridge_continuity_r499.mjs",
