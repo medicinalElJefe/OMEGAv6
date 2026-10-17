@@ -3,22 +3,12 @@ const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127
 const expectedSha=process.env.OMEGA_EXPECTED_SHA?.trim()||'';
 if(expectedSha){
  if(!/^[a-f0-9]{40}$/.test(expectedSha))throw Error('R608 expected production SHA must be 40 lowercase hexadecimal characters');
- const urls=[base+'/api/health',base+'/api/status',base+'/'];
- let observed='';
- for(const url of urls){
-  try{
-   const response=await fetch(url,{headers:{'cache-control':'no-cache'},signal:AbortSignal.timeout(12000)});
-   if(!response.ok)continue;
-   const body=(await response.text()).slice(0,100000);
-   const header=response.headers.get('x-omega-sha')||response.headers.get('x-deployment-sha')||'';
-   const match=header.match(/[a-f0-9]{40}/)||body.match(/(?:commitSha|commit_sha|deployedSha|deploy_sha|buildSha|build_sha|sha)["'\\s:=]+["']?([a-f0-9]{40})/i);
-   const value=match?.[1]||match?.[0]||'';
-   if(value){observed=value.toLowerCase();break}
-  }catch{}
- }
- if(!observed)throw Error('R608 deployed SHA attestation unavailable; do not claim exact-SHA browser proof');
- if(observed!==expectedSha)throw Error('R608 deployed SHA mismatch: expected '+expectedSha+', observed '+observed);
- console.log('R608 deployed SHA attested: '+observed);
+ const response=await fetch(base+'/omega-build-receipt.json?r608='+Date.now(),{headers:{'cache-control':'no-cache'},signal:AbortSignal.timeout(12000)});
+ if(!response.ok)throw Error('R608 promoted build receipt HTTP '+response.status);
+ const receipt=await response.json();
+ if(receipt?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'||receipt?.source?.sha!==expectedSha||receipt?.promotion?.promotedMergeSha!==expectedSha)
+  throw Error('R608 production receipt does not attest exact promoted SHA');
+ console.log('R608 deployed SHA attested: '+expectedSha);
 }
 const browser=await chromium.launch({headless:true});
 try{
