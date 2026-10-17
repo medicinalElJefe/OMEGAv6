@@ -2,7 +2,7 @@
 """Source-backed R616 executor regression. Requires original v21 ZIP and openpyxl."""
 import sys
 from pathlib import Path
-from r616_historical_graph import traverse
+from r616_historical_graph import traverse, traverse_many
 
 def run(donor):
     first=traverse(donor,5990,'antipode_state')
@@ -25,6 +25,16 @@ def run(donor):
     try:traverse(donor,5990,'coupling')
     except ValueError:pass
     else:raise AssertionError('accepted nonexistent coupling edge type')
+    batch=traverse_many(donor,[5990,18086,5990],'antipode_state')
+    assert len(batch['results'])==3
+    assert batch['results'][0]['edges']==first['edges']
+    assert batch['results'][2]['edges']==first['edges']
+    assert any(e['id']=='E00002' for e in batch['results'][1]['edges'])
+    assert batch['source_sha256']==first['source_sha256']
+    for bad_addresses in ([5990,20736],[True],['5990'],list(range(20736))+[0]):
+        try:traverse_many(donor,bad_addresses)
+        except ValueError:pass
+        else:raise AssertionError('accepted invalid batch')
     print('R617 PASS: source E00001, typed filtering, translated addresses, invalid input controls')
 
 if __name__=='__main__':
