@@ -62,6 +62,20 @@ try{
   await slider.focus();await slider.press('End');
   await assertFrame(86399);
   await page.waitForFunction(()=>document.querySelector('[data-r605-sector]')?.textContent?.includes('Sector 7/7'),null,{timeout:10000});
+  // R610: sample the interior of every sector, not only first and last.
+  // Native range setter + input event exercises React's real controlled onChange.
+  for(let sector=1;sector<=7;sector++){
+   const seconds=Math.floor((sector-.5)*86400/7);
+   await slider.evaluate((element,value)=>{
+    const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')?.set;
+    if(!setter)throw Error('native range value setter unavailable');
+    setter.call(element,String(value));
+    element.dispatchEvent(new Event('input',{bubbles:true}));
+    element.dispatchEvent(new Event('change',{bubbles:true}));
+   },seconds);
+   await page.waitForFunction(expected=>document.querySelector('[data-r605-sector]')?.textContent?.includes('Sector '+expected+'/7'),sector,{timeout:10000});
+   await assertFrame(seconds);
+  }
   const checkbox=instrument.getByRole('checkbox',{name:'Live local clock'});
   await checkbox.check();
   if(!(await slider.isDisabled()))throw Error(label+': live clock did not disable manual clock');
