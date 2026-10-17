@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import ForecastSovereignPanel from '../../src/ForecastSovereignPanel';
 import SevenStarProjectionR594 from './SevenStarProjectionR594';
+import HistoricalTimeMandalaR605 from './HistoricalTimeMandalaR605';
 import CorpusAdapterWorkbenchR473 from '../../src/CorpusAdapterWorkbenchR473';
 import type {CorpusExecutionIntentR473} from '../../src/CorpusExecutionIntentR473';
 import {VisualInstrumentR36} from '../../src/OmegaR36LivingSurfaces';
@@ -58,7 +59,7 @@ export default function ForecastVisualWorkspaceR442({route,onNavigate,depth}:Pro
    <button className='o7-open-instrument' onClick={()=>setInstrumentOpen(true)}>Open full {route} instrument</button>
   </section>}
 
-  {route==='Visual Instrument'&&<section data-r594-seven-star-entry='true'><button type='button' aria-expanded={sevenStarOpen} onClick={()=>setSevenStarOpen(v=>!v)}>{sevenStarOpen?'Close Seven-Star Color Traversal':'Open Seven-Star Color Traversal'}</button>{sevenStarOpen&&<SevenStarProjectionR594 address={address} onAddress={commit}/>}</section>}
+  {route==='Visual Instrument'&&<section data-r594-seven-star-entry='true'><button type='button' aria-expanded={sevenStarOpen} onClick={()=>setSevenStarOpen(v=>!v)}>{sevenStarOpen?'Close Seven-Star Color Traversal':'Open Seven-Star Color Traversal'}</button>{sevenStarOpen&&<><HistoricalTimeMandalaR605 address={address} onAddress={commit}/><details><summary>R594 experimental successor projection (not historical source)</summary><SevenStarProjectionR594 address={address} onAddress={commit}/></details></>}</section>}
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Forecast'?<ForecastSovereignPanel address={address}/>:
     route==='Visual Instrument'?<VisualInstrumentR36 address={address} onAddress={commit} onNavigate={onNavigate}/>:

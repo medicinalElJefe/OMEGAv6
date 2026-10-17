@@ -11,6 +11,8 @@ try{
   await page.locator('.o7-r519-portal[data-r519-visual-navigation="CREATE"] button[data-r519-direct="Visual Instrument"]').click();
   await page.locator('[data-omega7-native="forecast.visual"][data-route="Visual Instrument"]').waitFor({state:'visible',timeout:30000});
   await page.locator('[data-r594-seven-star-entry] button').first().click();
+  const legacy=page.locator('[data-r594-seven-star-entry] details');
+  await legacy.locator('summary').click();
   const star=page.locator('[data-r594-seven-star="true"]');await star.waitFor({state:'visible',timeout:20000});
   const svg=star.locator('svg');const before=await svg.innerHTML();
   await star.getByRole('slider',{name:'Seven-Star rotation'}).fill('95');
