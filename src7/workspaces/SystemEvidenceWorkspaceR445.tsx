@@ -6,6 +6,7 @@ import ArchiveGovernanceControl from '../../src/ArchiveGovernanceControl';
 import PluginRegistryR45 from '../../src/PluginRegistryR45';
 import UniversalQualityControl from '../../src/UniversalQualityControl';
 import SystemAtlasControl from '../../src/SystemAtlasControl';
+import SomaAudioEngine from '../../src/SomaAudioEngine';
 import {api} from '../../src/platformAdapter';
 import {corpusState,decodeAddress,initCorpusPack} from '../../src/corpusRuntime';
 import {sourceBackedModeSummary} from '../../src/sourceBackedModeRuntimeR21';
@@ -19,7 +20,7 @@ const readAddress=()=>{try{return clamp(Number(localStorage.getItem('omega.v6.ad
 const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('omega.v6.address',String(next));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:next}}))}catch{}return next};
 
 export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Props){
- const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD');
+ const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'),[soundOpen,setSoundOpen]=useState(false);
  const[status,setStatus]=useState<any>(null),[restore,setRestore]=useState<any>(null),[uiMode,setUiMode]=useState('AUTO');
  useEffect(()=>setInstrumentOpen(depth!=='STANDARD'),[depth,route]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
@@ -64,6 +65,7 @@ export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Pro
    <button className='o7-open-instrument' onClick={()=>setInstrumentOpen(true)}>Open full {route} workspace</button>
   </section>}
 
+  {route==='System Atlas'&&<section data-r593-sound-temple='true' aria-label='Sound Temple'><h2>Sound Temple · SOMA</h2><p>Local 12-phase audio sonification. Sound begins only when you press Start audio. This is an audible model representation, not measured physical frequencies or a medical treatment.</p><button type='button' aria-expanded={soundOpen} onClick={()=>setSoundOpen(v=>!v)}>{soundOpen?'Close Sound Temple':'Open Sound Temple audio controls'}</button>{soundOpen&&<SomaAudioEngine record={record}/>}</section>}
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Cockpit'?<OmegaWorkspaceCockpitR18 variant='Cockpit' record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} modeCount={modeSummary.appliedCount}/>:
     route==='Modes'?<SourceBackedModesPanelR21 record={record} address={address} onAddress={commit} onNavigate={onNavigate}/>:
