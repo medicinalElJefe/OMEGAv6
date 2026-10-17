@@ -126,6 +126,8 @@ jobs:
           OMEGA_E2E_URL: http://127.0.0.1:4173
           OMEGA_R519_USE_FIXTURES: '1'
         run: node tests/r519-visual-navigation-browser-e2e.mjs
+      - name: Prove R602 historical Seven-Star authority and address contract
+        run: npm run test:r602
       - name: Prove R594 Seven-Star visual controls and address traversal on desktop/mobile candidate
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
