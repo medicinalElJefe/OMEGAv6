@@ -4,6 +4,7 @@
  * Each site holds seven free channels, seven bound channels and retained scar.
  * All internal exchanges are paired transfers; the total scalar budget is conserved.
  */
+import {applyExchangeGraph,type ExchangeGraph} from './governedExchangeGraphR600';
 export type WovenParams={width:number;height:number;seed:number;diffusion:number;exchange:number;binding:number;unbinding:number;anisotropy:number};
 export type WovenState={params:WovenParams;free:Float64Array;bound:Float64Array;scar:Float64Array;step:number;initialMass:number;lastExchange:Float64Array;lastBinding:Float64Array;lastUnbinding:Float64Array};
 const N=7;
@@ -20,7 +21,7 @@ export function wovenInitial(params:WovenParams):WovenState{
  }
  const state={params:p,free,bound,scar,step:0,initialMass:0,lastExchange:new Float64Array(N*N),lastBinding:new Float64Array(N),lastUnbinding:new Float64Array(N)};state.initialMass=wovenMass(state);return state;
 }
-export function wovenAdvance(s:WovenState):WovenState{
+export function wovenAdvance(s:WovenState,graph?:ExchangeGraph):WovenState{
  const{width:w,height:h,diffusion:d,exchange:e,binding:b,unbinding:u,anisotropy:a}=s.params;
  const free=s.free.slice(),bound=s.bound.slice(),scar=s.scar.slice();
  const lastExchange=new Float64Array(N*N),lastBinding=new Float64Array(N),lastUnbinding=new Float64Array(N);
@@ -31,11 +32,23 @@ export function wovenAdvance(s:WovenState):WovenState{
   transfer(i,idx(y*w+(x+1)%w,k),d*(1+.5*a*Math.cos(k*2*Math.PI/N)));
   transfer(i,idx(((y+1)%h)*w+x,k),d*(1-.5*a*Math.cos(k*2*Math.PI/N)));
  }
- // Directed cyclic inter-system exchange; each transfer is exactly balanced.
- for(let site=0;site<w*h;site++)for(let k=0;k<N;k++){
-  const from=idx(site,k),to=idx(site,(k+1)%N);
-  const flux=e*free[from]*(1+a*Math.sin((k+1)*2*Math.PI/N+s.step*.07))*.5;
-  free[from]-=flux;free[to]+=flux;lastExchange[k*N+(k+1)%N]+=flux;
+ // Optional governed graph is applied to each spatial cell using synchronous
+ // seven-channel snapshots. No cross-cell graph flow is invented.
+ if(graph){
+  const local=new Float64Array(N);
+  for(let site=0;site<w*h;site++){
+   for(let k=0;k<N;k++)local[k]=free[idx(site,k)];
+   const result=applyExchangeGraph(local,graph);
+   for(let k=0;k<N;k++)free[idx(site,k)]=result.next[k];
+   for(const receipt of result.receipts)lastExchange[receipt.from*N+receipt.to]+=receipt.admitted;
+  }
+ }else{
+  // Legacy cyclic mode remains available for lineage comparison.
+  for(let site=0;site<w*h;site++)for(let k=0;k<N;k++){
+   const from=idx(site,k),to=idx(site,(k+1)%N);
+   const flux=e*free[from]*(1+a*Math.sin((k+1)*2*Math.PI/N+s.step*.07))*.5;
+   free[from]-=flux;free[to]+=flux;lastExchange[k*N+(k+1)%N]+=flux;
+  }
  }
  // Binding and unbinding are explicit reservoir transfers, not sources/sinks.
  for(let site=0;site<w*h;site++){
