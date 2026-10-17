@@ -124,7 +124,7 @@ async function testDetails(page,viewport,route){
       await summary.click({timeout:10000});
       await page.waitForTimeout(35);
       const restored=await details.evaluate(el=>el.open);
-      if(restored!==before)throw new Error(`${viewport}/${route}: details #${i} did not restore original open=${before}`);
+      if(restored!==before){const diag=await detailsDiagnostic(details);throw new Error(`${viewport}/${route}: details #${i} did not restore original open=${before} · ${JSON.stringify(diag)}`)}
       const restoredState=await directContentState(details);
       if(!before&&restoredState.visible>0)throw new Error(`${viewport}/${route}: details #${i} leaks content again after close`);
       if(before&&restoredState.text>0&&restoredState.visible===0)throw new Error(`${viewport}/${route}: details #${i} failed to restore visible open content`);
