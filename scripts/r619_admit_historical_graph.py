@@ -10,8 +10,10 @@ from r617_graph_regression import run
 
 def admit(donor,receipt):
     donor=Path(donor);receipt=Path(receipt)
-    if not donor.is_file():raise FileNotFoundError('original v21 donor required')
     if donor.resolve()==receipt.resolve():raise ValueError('receipt cannot overwrite source')
+    # Invalidate any stale PASS before starting this attempt.
+    receipt.unlink(missing_ok=True)
+    if not donor.is_file():raise FileNotFoundError('original v21 donor required')
     proof=verify(donor)
     run(donor)
     # Receipt is emitted only AFTER the source integrity and executable golden regressions pass.
