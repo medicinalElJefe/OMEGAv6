@@ -15,6 +15,11 @@ try{
   const svg=star.locator('svg');const before=await svg.innerHTML();
   await star.getByRole('slider',{name:'Seven-Star rotation'}).fill('95');
   const after=await svg.innerHTML();if(before===after)throw Error(label+': rotation did not change rendered geometry');
+  await star.getByRole('button',{name:'Play Seven-Star motion'}).click();
+  const movingBefore=await svg.innerHTML();
+  await page.waitForTimeout(350);
+  const movingAfter=await svg.innerHTML();if(movingBefore===movingAfter)throw Error(label+': motion did not advance geometry');
+  await star.getByRole('button',{name:'Pause Seven-Star motion'}).click();
   await star.getByRole('slider',{name:'Seven-Star asymmetry'}).fill('0.8');
   const addressBefore=await page.locator('[data-omega7-native="forecast.visual"]').getAttribute('data-address');
   await star.getByRole('button',{name:'Traverse node 1'}).click();
