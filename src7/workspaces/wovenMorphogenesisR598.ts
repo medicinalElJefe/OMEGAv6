@@ -5,7 +5,7 @@
  * All internal exchanges are paired transfers; the total scalar budget is conserved.
  */
 export type WovenParams={width:number;height:number;seed:number;diffusion:number;exchange:number;binding:number;unbinding:number;anisotropy:number};
-export type WovenState={params:WovenParams;free:Float64Array;bound:Float64Array;scar:Float64Array;step:number;initialMass:number};
+export type WovenState={params:WovenParams;free:Float64Array;bound:Float64Array;scar:Float64Array;step:number;initialMass:number;lastExchange:Float64Array;lastBinding:Float64Array;lastUnbinding:Float64Array};
 const N=7;
 const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,Number.isFinite(v)?v:a));
 const idx=(site:number,channel:number)=>site*N+channel;
@@ -18,11 +18,12 @@ export function wovenInitial(params:WovenParams):WovenState{
   const site=y*p.width+x,r=Math.hypot((x+.5)/p.width-.5,(y+.5)/p.height-.5);
   for(let k=0;k<N;k++){const phase=Math.cos((k*2*Math.PI/N)+(x-y)*.08);free[idx(site,k)]=(.04+.13*Math.exp(-r*r*34))*(.7+.3*random())*(1+.2*phase)}
  }
- const state={params:p,free,bound,scar,step:0,initialMass:0};state.initialMass=wovenMass(state);return state;
+ const state={params:p,free,bound,scar,step:0,initialMass:0,lastExchange:new Float64Array(N*N),lastBinding:new Float64Array(N),lastUnbinding:new Float64Array(N)};state.initialMass=wovenMass(state);return state;
 }
 export function wovenAdvance(s:WovenState):WovenState{
  const{width:w,height:h,diffusion:d,exchange:e,binding:b,unbinding:u,anisotropy:a}=s.params;
  const free=s.free.slice(),bound=s.bound.slice(),scar=s.scar.slice();
+ const lastExchange=new Float64Array(N*N),lastBinding=new Float64Array(N),lastUnbinding=new Float64Array(N);
  // Diffusion is pairwise conservative across periodic x/y bonds.
  const transfer=(i:number,j:number,rate:number)=>{const delta=rate*(free[i]-free[j]);free[i]-=delta;free[j]+=delta};
  for(let y=0;y<h;y++)for(let x=0;x<w;x++)for(let k=0;k<N;k++){
@@ -34,7 +35,7 @@ export function wovenAdvance(s:WovenState):WovenState{
  for(let site=0;site<w*h;site++)for(let k=0;k<N;k++){
   const from=idx(site,k),to=idx(site,(k+1)%N);
   const flux=e*free[from]*(1+a*Math.sin((k+1)*2*Math.PI/N+s.step*.07))*.5;
-  free[from]-=flux;free[to]+=flux;
+  free[from]-=flux;free[to]+=flux;lastExchange[k*N+(k+1)%N]+=flux;
  }
  // Binding and unbinding are explicit reservoir transfers, not sources/sinks.
  for(let site=0;site<w*h;site++){
@@ -43,12 +44,12 @@ export function wovenAdvance(s:WovenState):WovenState{
    const i=idx(site,k),neighbor=idx(site,(k+1)%N);
    const affinity=.25+.75*free[neighbor]/(free[neighbor]+.08);
    const bind=b*affinity*free[i],release=u*bound[i];
-   free[i]+=release-bind;bound[i]+=bind-release;activity+=bind;
+   free[i]+=release-bind;bound[i]+=bind-release;activity+=bind;lastBinding[k]+=bind;lastUnbinding[k]+=release;
   }
   // Scar is historical evidence of cumulative binding, not extra conserved mass.
   scar[site]+=activity;
  }
- return{params:s.params,free,bound,scar,step:s.step+1,initialMass:s.initialMass};
+ return{params:s.params,free,bound,scar,step:s.step+1,initialMass:s.initialMass,lastExchange,lastBinding,lastUnbinding};
 }
 export function wovenObservables(s:WovenState){
  const cells=s.params.width*s.params.height,density=new Float64Array(cells);
@@ -58,4 +59,15 @@ export function wovenObservables(s:WovenState){
   density[site]=total;peak=Math.max(peak,total);if(total>.7)occupied++;
  }
  return{density,peak,occupied,boundFraction:boundMass/wovenMass(s),mass:wovenMass(s),residual:wovenMass(s)-s.initialMass};
+}
+
+export function wovenChannelLedger(s:WovenState){
+ const channels=Array.from({length:N},(_,k)=>{
+  let free=0,bound=0;for(let site=0;site<s.params.width*s.params.height;site++){free+=s.free[idx(site,k)];bound+=s.bound[idx(site,k)]}
+  const incoming=Array.from({length:N},(_,from)=>s.lastExchange[from*N+k]).reduce((a,b)=>a+b,0);
+  const outgoing=Array.from({length:N},(_,to)=>s.lastExchange[k*N+to]).reduce((a,b)=>a+b,0);
+  return{channel:k+1,free,bound,total:free+bound,incoming,outgoing,binding:s.lastBinding[k],unbinding:s.lastUnbinding[k]};
+ });
+ const total=channels.reduce((sum,c)=>sum+c.total,0);
+ return{channels,total,exchange:s.lastExchange,conservationResidual:total-s.initialMass,step:s.step};
 }
