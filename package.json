@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:r604": "npx --yes tsx tests/r604-time-mandala-formula-replay.mts",
     "test:r603": "npx --yes tsx tests/r603-time-mandala-axes.mts",
     "test:r602": "npx --yes tsx tests/r602-seven-star-historical-authority.mts",
     "dev": "vite",
