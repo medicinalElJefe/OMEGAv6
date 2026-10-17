@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
+import GovernedExchangeGraphR600 from './GovernedExchangeGraphR600';
 import {wovenAdvance,wovenInitial,wovenObservables,wovenChannelLedger,type WovenParams} from './wovenMorphogenesisR598';
 const initial:WovenParams={width:28,height:28,seed:42,diffusion:.12,exchange:.1,binding:.12,unbinding:.035,anisotropy:.5};
 export default function WovenMatterLabR598(){
@@ -25,6 +26,7 @@ export default function WovenMatterLabR598(){
  <details open><summary>Seven-system exchange ledger · per-step receipts</summary>
  <div style={{overflowX:'auto'}}><table><thead><tr><th>System</th><th>Free</th><th>Bound</th><th>Ingress</th><th>Egress</th><th>Binding</th><th>Unbinding</th></tr></thead><tbody>{ledger.channels.map(c=><tr key={c.channel}><th>S{c.channel}</th><td>{c.free.toFixed(4)}</td><td>{c.bound.toFixed(4)}</td><td>{c.incoming.toFixed(4)}</td><td>{c.outgoing.toFixed(4)}</td><td>{c.binding.toFixed(4)}</td><td>{c.unbinding.toFixed(4)}</td></tr>)}</tbody></table></div>
  <p data-r599-ledger-residual='true'>Channel budget residual: {ledger.conservationResidual.toExponential(3)} · directed receipts refer to the last simulated step; spatial transport is internal to each channel.</p></details>
+ <GovernedExchangeGraphR600/>
  <p>Changing an exchange parameter resets the experiment so distinct outcomes can be compared from identical seeded initial conditions. Scar memory records cumulative local binding without introducing extra mass.</p>
  </section>;
 }
