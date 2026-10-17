@@ -63,6 +63,18 @@ try{
     const forecast=document.querySelector('[data-r563-forecast-panel] .earth-r375-head small')?.textContent||'';
     return target.includes(lat.toFixed(5))&&target.includes(lon.toFixed(5))&&forecast.includes(lat.toFixed(4))&&forecast.includes(lon.toFixed(4));
    },{lat:Number(expected.lat),lon:Number(expected.lon)},{timeout:30000});
+   // R591: inspect real map tile URL coordinates after geocoded target change.
+   await page.waitForFunction(({lat,lon})=>{
+    const radar=document.querySelector('[data-r580-radar-map]');
+    const base=radar?.querySelector('.omega-r580-tile img:not(.omega-r580-radar)');
+    if(!base)return false;
+    const match=base.getAttribute('src')?.match(/\/(\d+)\/(\d+)\/(\d+)\.png$/);
+    if(!match)return false;
+    const z=Number(match[1]),x=Number(match[2]),y=Number(match[3]),n=2**z;
+    const latitude=Math.max(-85,Math.min(85,lat));
+    const tx=(lon+180)/360*n,ty=(1-Math.asinh(Math.tan(latitude*Math.PI/180))/Math.PI)/2*n;
+    return Math.abs(x-tx)<=3&&Math.abs(y-ty)<=3;
+   },{lat:Number(expected.lat),lon:Number(expected.lon)},{timeout:30000});
    await location.getByRole('button',{name:'Return to Earth target'}).click();
    const satPanel=studio.locator('[data-r563-satellite-panel="true"]');
    const forecastPanel=studio.locator('[data-r563-forecast-panel="true"]');
