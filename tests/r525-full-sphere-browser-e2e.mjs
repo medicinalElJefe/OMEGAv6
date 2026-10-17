@@ -22,6 +22,11 @@ async function prove(browser,label,viewport){
   await portal.locator('button[data-r519-node="Atlas"]').click();
   await portal.locator('.o7-r519-inspector[data-r519-focus="Atlas"]').waitFor({state:'visible',timeout:10000});
   await portal.locator('button[data-r519-launch="Atlas"]').click();
+  const workflow=page.locator('[data-r538-workflow="true"]');
+  await workflow.waitFor({state:'visible',timeout:10000});
+  await workflow.locator('[data-r538-bookmark]').click();
+  await workflow.getByRole('button',{name:'History & saved states'}).click();
+  if(!(await workflow.innerText()).includes('Saved states'))throw new Error(label+': user workflow bookmark failed');
   const native=page.locator('.o7-science-workspace[data-route="Atlas"]');
   await native.waitFor({state:'visible',timeout:28000});
   const open=native.locator('.o7-open-instrument');
