@@ -14,7 +14,7 @@ export const HISTORICAL_SEVEN_STAR_OPERATORS:readonly SevenStarOperator[]=[
 {sector:7,color:'Cyan',hex:'#00E5FF',operator:'Release / Return',matterAnalogy:'Dissolved / Recycled / Subtle',truth:'SYMBOLIC_MAPPING'}
 ] as const;
 export const SEVEN_STAR_HISTORICAL_SOURCES=[
-{id:'TIME_MANDALA_WORKBOOK',name:'Time_Mandala_of_Matter_20736D_Excel_Engine.xlsx',evidence:'SOURCE_CONTENT_INSPECTED',capabilities:['20736 address index','seven named operators','live time rotation','Mode 188 dispatch dashboard'],execution:'UNVERIFIED'},
+{id:'TIME_MANDALA_WORKBOOK',name:'Time_Mandala_of_Matter_20736D_Excel_Engine.xlsx',driveFileId:'1L4yQ8einYFoUsbNniz_JI0tNnt-ngKD6',evidence:'SOURCE_CONTENT_INSPECTED',capabilities:['20736 address index','seven named operators','live time rotation','Mode 188 dispatch dashboard'],execution:'UNVERIFIED'},
 {id:'TIME_MANDALA_GENERATOR',name:'create_time_mandala_engine.py',evidence:'SOURCE_CONTENT_INSPECTED',capabilities:['workbook formula generation','controls and modular sector calculation'],execution:'UNVERIFIED'},
 {id:'TIME_MANDALA_MOTION',name:'time_mandala_20736D_full_sequenced_motion.svg',evidence:'SOURCE_CONTENT_INSPECTED',capabilities:['sequenced animation','symmetry/asymmetry field','atlas representation'],execution:'UNVERIFIED'},
 {id:'MODE188_RUNTIME',name:'Mode188_Unified_Runtime_20736D_SYNCED.xlsx',evidence:'REPOSITORY_CONTRACT',capabilities:['20736 state atlas','Mode 188 decisions','graph/coupling source references'],execution:'UNVERIFIED',driveFileId:'1Q9hKgW6R7jxzDFnGoaj0BokJAHixp5OU'},
@@ -43,3 +43,15 @@ export function historicalActiveStar(baseStar:number,sectorOffset:number):number
 export const SEVEN_STAR_RECOVERY_GATE={
 sourceFormulaReplay:'REQUIRED',historicalVisualParity:'REQUIRED',runtimeStateAuthority:'REQUIRED',candidateCI:'REQUIRED',deployedBrowserProof:'REQUIRED',physicalClaims:'MEASUREMENT_REQUIRED',status:'NOT_ADMITTED'
 } as const;
+
+/** R603: source-backed axis labels read directly from the archived workbook. */
+export const TIME_MANDALA_AXES_R603={
+domain:['Cosmology','Physics','Chemistry','Geology','Biology','Psychology','Society','Economics','Technology','Governance','Art / Meaning','Symbolic / Spiritual'],
+phase:['Seed','Ignition','Expansion','Flow','Carrier','Growth','Stabilization','Precision','Saturation','Decay','Dissolution','Return'],
+regulation:['Stable','Accelerating','Constrained','Overloaded','Adaptive','Healing','Competitive','Oscillating','Locked','Collapsing','Rebuilding','Transcending'],
+scale:['Quantum','Atomic','Molecular','Material','Cellular','Organism','Group','Institutional','Planetary','Stellar','Galactic','Abstract / Informational']
+} as const;
+export function historicalNamedStateR603(address:number){
+ const [d,p,r,scale]=historicalAddressDigits(address);
+ return{address,domain:TIME_MANDALA_AXES_R603.domain[d],phase:TIME_MANDALA_AXES_R603.phase[p],regulation:TIME_MANDALA_AXES_R603.regulation[r],scale:TIME_MANDALA_AXES_R603.scale[scale],digits:[d+1,p+1,r+1,scale+1] as const};
+}
