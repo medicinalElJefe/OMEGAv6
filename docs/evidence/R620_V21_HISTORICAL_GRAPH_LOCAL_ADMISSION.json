@@ -1,0 +1,20 @@
+{
+  "production_deployment_verified": false,
+  "regressions": [
+    "R617:E00001",
+    "R618:E00002",
+    "R618:batch-and-input-controls"
+  ],
+  "rh_nodes": 320,
+  "schema": "omega.historical-rh-graph-admission.v1",
+  "source_sha256": "e2493bfee552322adf29a79a80a86d3a46aba84a4ccde01aa56b7e4e9c518c8c",
+  "sqlite_nodes": 20736,
+  "sqlite_states": 20736,
+  "status": "PASS",
+  "truth_class": "LOCAL_SOURCE_AND_EXECUTOR_VERIFIED",
+  "typed_edges": {
+    "antipode_state": 320,
+    "prereq": 96
+  },
+  "verified_at_utc": "2026-10-17T20:43:13.104269+00:00"
+}
