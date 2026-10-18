@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {generateKeyPairSync,sign} from 'node:crypto';
+import {DatabaseSync} from 'node:sqlite';
+import {mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {commitProposal} from '../genesis/executionBoundaryR609';
+import {decisionMessage,type SignedDecision} from '../genesis/independentProofR608';
+import {executionLeaseMessage,type SignedExecutionLease} from '../genesis/signedLeaseR613';
+import {initializeDurableAuthority,admitDurablyAuthorized} from '../genesis/durableAuthorityR616';
+const p={id:'p1',observationIds:['o1'],action:'propose',scope:'proposal:write',benefit:'clarity',risks:['mistake'],alternatives:['wait'],reversible:true,humanDecision:'PENDING' as const,evidenceIds:['e1']};
+const h=generateKeyPairSync('ed25519'),i=generateKeyPairSync('ed25519');
+const humanKey={keyId:'human',principal:'human',publicKeyPem:h.publicKey.export({format:'pem',type:'spki'}).toString(),allowedScopes:[p.scope],revoked:false};
+const issuerKey={keyId:'issuer',principal:'issuer',publicKeyPem:i.publicKey.export({format:'pem',type:'spki'}).toString(),allowedScopes:[p.scope],revoked:false};
+const now='2026-10-17T12:00:00Z',issuedAt='2026-10-17T11:00:00Z',expiresAt='2026-10-17T13:00:00Z';
+const decision:SignedDecision={proposalId:p.id+':'+commitProposal(p).contentHash,decision:'APPROVED',principal:'human',scope:p.scope,issuedAt,expiresAt,nonce:'human-nonce',keyId:humanKey.keyId,signatureBase64:''};
+const signedDecision={...decision,signatureBase64:sign(null,Buffer.from(decisionMessage(decision)),h.privateKey).toString('base64')};
+const makeLease=(nonce:string):SignedExecutionLease=>{const l:SignedExecutionLease={proposalId:p.id,proposalHash:commitProposal(p).contentHash,principal:'issuer',scope:p.scope,workerId:'w1',issuedAt,expiresAt,nonce,maxUses:1,issuerKeyId:issuerKey.keyId,signatureBase64:''};return {...l,signatureBase64:sign(null,Buffer.from(executionLeaseMessage(l)),i.privateKey).toString('base64')}};
+const dir=mkdtempSync(join(tmpdir(),'genesis-r616-'));const path=join(dir,'authority.sqlite');
+try{
+ const db=new DatabaseSync(path);db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL;');initializeDurableAuthority(db);
+ const proof={decision:signedDecision,humanKey,lease:makeLease('lease-1'),issuerKey};
+ assert.equal(admitDurablyAuthorized(db,p,{...proof,decision:{...signedDecision,signatureBase64:'invalid'}},'w1',now).admitted,false);
+ assert.equal(admitDurablyAuthorized(db,p,proof,'w1',now).admitted,true);
+ assert.equal(admitDurablyAuthorized(db,p,{...proof,lease:makeLease('lease-2')},'w1',now).admitted,false);
+ assert.equal(db.prepare('SELECT count(*) AS n FROM genesis_consumed_leases').get()?.n,1);
+ db.close();
+ const restarted=new DatabaseSync(path);
+ assert.equal(admitDurablyAuthorized(restarted,p,{...proof,lease:makeLease('lease-3')},'w1',now).admitted,false);
+ assert.equal(restarted.prepare('SELECT count(*) AS n FROM genesis_consumed_decisions').get()?.n,1);
+ assert.equal(restarted.prepare('SELECT count(*) AS n FROM genesis_consumed_leases').get()?.n,1);
+ restarted.close();
+ console.log('Genesis R616 signed dual nonce atomic admission and restart replay: PASS');
+}finally{rmSync(dir,{recursive:true,force:true})}
