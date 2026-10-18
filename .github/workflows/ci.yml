@@ -500,6 +500,21 @@ jobs:
           path: artifacts/omega-production-observability-r471.json
           if-no-files-found: error
           retention-days: 30
+      - name: R637 capture Genesis historical browser proof on promoted production SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: genesis_browser_r637
+        shell: bash
+        run: |
+          test -n "${OMEGA_PROMOTED_SHA:-}" || { echo "::error::Promoted SHA unavailable"; exit 1; }
+          OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_PUBLIC_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node scripts/run-genesis-browser-proof-r636.mjs historical-rh-traversal
+      - name: R637 retain Genesis production browser execution artifact
+        if: always() && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true' && steps.genesis_browser_r637.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-genesis-browser-${{ github.sha }}
+          path: artifacts/genesis-browser/historical-rh-traversal.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Verify deployed R200 total-experience browser on exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r200
