@@ -332,7 +332,7 @@ jobs:
           node tests/r283-sar-full-stack-invariants.mjs
           for f in tests/r280-*.mjs; do node "$f"; done
 
-      - name: Prove Genesis R606-R626 observation audit and capability lineage bridge
+      - name: Prove Genesis R606-R627 governed capability lineage import
         run: |
           npx tsx tests/r606-genesis-governance.mts
           npx tsx tests/r607-genesis-cycle.mts
@@ -355,6 +355,7 @@ jobs:
           npx tsx tests/r624-genesis-independent-observation.mts
           npx tsx tests/r625-genesis-observation-audit.mts
           npx tsx tests/r626-genesis-capability-bridge.mts
+          npx tsx tests/r627-genesis-governed-capability-import.mts
 
       - name: Prove R286 Heavy Bio medical-production, 241-mode and interaction boundaries
         run: |
