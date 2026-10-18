@@ -332,7 +332,7 @@ jobs:
           node tests/r283-sar-full-stack-invariants.mjs
           for f in tests/r280-*.mjs; do node "$f"; done
 
-      - name: Prove Genesis R606-R614 signed admission and SQLite recovery
+      - name: Prove Genesis R606-R615 dual-authority admission and SQLite recovery
         run: |
           npx tsx tests/r606-genesis-governance.mts
           npx tsx tests/r607-genesis-cycle.mts
@@ -343,6 +343,7 @@ jobs:
           npx tsx tests/r612-genesis-atomic-admission.mts
           npx tsx tests/r613-genesis-signed-lease.mts
           npx tsx tests/r614-genesis-verified-admission.mts
+          npx tsx tests/r615-genesis-dual-authority.mts
 
       - name: Prove R286 Heavy Bio medical-production, 241-mode and interaction boundaries
         run: |
