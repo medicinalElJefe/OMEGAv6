@@ -26,6 +26,6 @@ assert.equal(recordIndependentObservation(db,{...signedO,observedResultHash:'b'.
 assert.equal(recordIndependentObservation(db,{...signedO,signatureBase64:'invalid'},now).recorded,false);
 assert.equal(recordIndependentObservation(db,signedO,now).recorded,true);
 assert.equal(recordIndependentObservation(db,signedO,now).recorded,false);
-assert.equal(db.prepare('SELECT count(*) AS n FROM genesis_observation_evidence').get('')?.n,undefined);
+assert.equal((db.prepare('SELECT count(*) AS n FROM genesis_observation_evidence').get() as {n:number}).n,1);
 db.close();
 console.log('Genesis R624 independently signed observation, mismatch and replay veto: PASS');
