@@ -332,7 +332,7 @@ jobs:
           node tests/r283-sar-full-stack-invariants.mjs
           for f in tests/r280-*.mjs; do node "$f"; done
 
-      - name: Prove Genesis R606-R620 governed dispatch and signed completion
+      - name: Prove Genesis R606-R621 signed completion evidence and restart audit
         run: |
           npx tsx tests/r606-genesis-governance.mts
           npx tsx tests/r607-genesis-cycle.mts
@@ -349,6 +349,7 @@ jobs:
           npx tsx tests/r618-genesis-worker-capability.mts
           npx tsx tests/r619-genesis-authorized-dispatch.mts
           npx tsx tests/r620-genesis-completion-attestation.mts
+          npx tsx tests/r621-genesis-completion-evidence.mts
 
       - name: Prove R286 Heavy Bio medical-production, 241-mode and interaction boundaries
         run: |
