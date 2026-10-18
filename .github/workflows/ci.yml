@@ -525,6 +525,11 @@ jobs:
         id: browser_r606
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r606-historical-mandala-browser-e2e.mjs
+      - name: Verify deployed R622 historical RH graph desktop/mobile traversal on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r622
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r622-historical-rh-graph-browser-e2e.mjs
       - name: Verify deployed R594 Seven-Star interactive traversal on desktop/mobile
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r594
