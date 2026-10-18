@@ -2,9 +2,9 @@
 // trusted administrator; this module does not grant an API caller registration rights.
 import type {SqliteLike} from './leaseStoreR610';
 import type {KeyAuthority} from './independentProofR608';
-export type AuthorityRole='HUMAN_APPROVER'|'LEASE_ISSUER'|'COMPLETION_ATTESTOR';
+export type AuthorityRole='HUMAN_APPROVER'|'LEASE_ISSUER'|'COMPLETION_ATTESTOR'|'INDEPENDENT_OBSERVER';
 export function initializeAuthorityRegistry(db:SqliteLike):void{
- db.exec("CREATE TABLE IF NOT EXISTS genesis_trusted_keys (key_id TEXT PRIMARY KEY NOT NULL, role TEXT NOT NULL CHECK(role IN ('HUMAN_APPROVER','LEASE_ISSUER','COMPLETION_ATTESTOR')), principal TEXT NOT NULL, public_key_pem TEXT NOT NULL, allowed_scopes_json TEXT NOT NULL, revoked INTEGER NOT NULL DEFAULT 0 CHECK(revoked IN (0,1)))");
+ db.exec("CREATE TABLE IF NOT EXISTS genesis_trusted_keys (key_id TEXT PRIMARY KEY NOT NULL, role TEXT NOT NULL CHECK(role IN ('HUMAN_APPROVER','LEASE_ISSUER','COMPLETION_ATTESTOR','INDEPENDENT_OBSERVER')), principal TEXT NOT NULL, public_key_pem TEXT NOT NULL, allowed_scopes_json TEXT NOT NULL, revoked INTEGER NOT NULL DEFAULT 0 CHECK(revoked IN (0,1)))");
 }
 export function provisionAuthorityKey(db:SqliteLike,key:KeyAuthority,role:AuthorityRole):boolean{
  if(!key.keyId||!key.principal||!key.publicKeyPem||!key.allowedScopes.length||key.revoked)return false;
