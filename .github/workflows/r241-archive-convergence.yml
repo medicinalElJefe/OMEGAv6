@@ -340,6 +340,7 @@ jobs:
           npx tsx tests/r609-genesis-execution-boundary.mts
           npx tsx tests/r610-genesis-lease-store.mts
           npx tsx tests/r611-genesis-sqlite-recovery.mts
+          npx tsx tests/r612-genesis-atomic-admission.mts
 
       - name: Prove R286 Heavy Bio medical-production, 241-mode and interaction boundaries
         run: |
