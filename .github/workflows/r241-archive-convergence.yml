@@ -332,7 +332,7 @@ jobs:
           node tests/r283-sar-full-stack-invariants.mjs
           for f in tests/r280-*.mjs; do node "$f"; done
 
-      - name: Prove Genesis R606-R631 deployment promotion proof boundary
+      - name: Prove Genesis R606-R632 signed deployment controller
         run: |
           npx tsx tests/r606-genesis-governance.mts
           npx tsx tests/r607-genesis-cycle.mts
@@ -360,6 +360,7 @@ jobs:
           npx tsx tests/r629-genesis-proof-catalog.mts
           npx tsx tests/r630-genesis-github-run-evidence.mts
           npx tsx tests/r631-genesis-deployment-promotion.mts
+          npx tsx tests/r632-genesis-signed-promotion.mts
 
       - name: Prove R286 Heavy Bio medical-production, 241-mode and interaction boundaries
         run: |
