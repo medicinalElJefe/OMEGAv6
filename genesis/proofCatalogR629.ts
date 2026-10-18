@@ -12,9 +12,9 @@ export function recordProofClaim(db:SqliteLike,receipt:ProofReceipt,origin:Recei
  const result=db.prepare('INSERT OR IGNORE INTO genesis_proof_catalog(capability_id,source_digest,proof_digest,receipt_json,origin,recorded_at) VALUES (?,?,?,?,?,?)').run(receipt.capabilityId,receipt.sourceDigest,receipt.proofDigest,JSON.stringify(receipt),origin,now);
  return result.changes===1;
 }
-export function listProofClaims(db:SqliteLike,capabilityId:string,sourceDigest:string):{receipt:ProofReceipt;origin:ReceiptOrigin}[]{
- const rows=db.prepare('SELECT receipt_json,origin FROM genesis_proof_catalog WHERE capability_id=? AND source_digest=?').all(capabilityId,sourceDigest) as {receipt_json:string;origin:ReceiptOrigin}[];
- return rows.map(r=>({receipt:JSON.parse(r.receipt_json) as ProofReceipt,origin:r.origin}));
+export function getProofClaim(db:SqliteLike,capabilityId:string,sourceDigest:string,proofDigest:string):{receipt:ProofReceipt;origin:ReceiptOrigin}|null{
+ const row=db.prepare('SELECT receipt_json,origin FROM genesis_proof_catalog WHERE capability_id=? AND source_digest=? AND proof_digest=?').get(capabilityId,sourceDigest,proofDigest) as {receipt_json:string;origin:ReceiptOrigin}|undefined;
+ return row?{receipt:JSON.parse(row.receipt_json) as ProofReceipt,origin:row.origin}:null;
 }
 // This resolver is deliberately non-promoting: database rows alone cannot verify a deployment.
 export function untrustedCatalogResolver(_db:SqliteLike):TrustedProofResolver{
