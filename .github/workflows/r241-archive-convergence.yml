@@ -368,6 +368,7 @@ jobs:
           npx tsx tests/r637-genesis-production-browser-wiring.mts
           npx tsx tests/r638-genesis-live-receipt-gate.mts
           npx tsx tests/r639-genesis-browser-artifact-verification.mts
+          npx tsx tests/r644-genesis-browser-proof-dedup.mts
 
       - name: Prove R286 Heavy Bio medical-production, 241-mode and interaction boundaries
         run: |
