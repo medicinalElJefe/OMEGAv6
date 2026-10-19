@@ -15,6 +15,8 @@ if(a.receiptSnapshot?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'||a.receiptSnaps
 if(a.workflowSha!==expected)reasons.push('workflow SHA');
 if(!repository||a.workflowRepository!==repository)reasons.push('repository');
 if(a.workflowRef!=='refs/heads/main')reasons.push('production branch');
+if(!/^\\d+$/.test(String(a.workflowRunId||'')))reasons.push('workflow run id');
+if(a.targetId!=='historical-rh-traversal'||a.script!=='tests/r622-historical-rh-graph-browser-e2e.mjs')reasons.push('executor identity');
 if(a.environment!=='production'||a.exitCode!==0||a.signal)reasons.push('browser exit');
 if(!/^https:\/\//.test(a.receiptUrl||''))reasons.push('receipt origin');
 if(!/^[a-f0-9]{64}$/.test(a.receiptDigest||''))reasons.push('receipt digest');
