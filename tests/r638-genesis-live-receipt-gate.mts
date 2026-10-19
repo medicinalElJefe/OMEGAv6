@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+const s=readFileSync('scripts/run-genesis-browser-proof-r636.mjs','utf8');
+const receipt=s.indexOf("receiptUrl=new URL('/omega-build-receipt.json',base)");
+const browser=s.indexOf('spawnSync(process.execPath,[script]');
+assert(receipt>0&&browser>receipt,'production receipt must be checked before browser execution');
+assert.match(s,/receipt\?\.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'/);
+assert.match(s,/receipt\?\.source\?\.sha!==expected/);
+assert.match(s,/receipt\?\.promotion\?\.promotedMergeSha!==expected/);
+assert.match(s,/AbortSignal\.timeout\(15000\)/);
+assert.match(s,/receiptDigest,receiptUrl:/);
+const invalid=spawnSync(process.execPath,['scripts/run-genesis-browser-proof-r636.mjs','historical-rh-traversal'],{encoding:'utf8',env:{...process.env,OMEGA_EXPECTED_SHA:'a'.repeat(40),OMEGA_PUBLIC_URL:'http://example.org'}});
+assert.notEqual(invalid.status,0);
+console.log('Genesis R638 production receipt gate before browser execution: PASS');
