@@ -14,7 +14,7 @@ if(!/^[a-f0-9]{40}$/.test(expected)||a.expectedSha!==expected||a.receiptSourceSh
 if(a.receiptSnapshot?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'||a.receiptSnapshot?.sourceSha!==expected||a.receiptSnapshot?.promotedMergeSha!==expected)reasons.push('receipt snapshot');
 if(a.workflowSha!==expected)reasons.push('workflow SHA');
 if(!repository||a.workflowRepository!==repository)reasons.push('repository');
-if(a.workflowRef!=='refs/heads/main')reasons.push('production branch');
+if(a.workflowRef!=='refs/heads/main'||process.env.GITHUB_REF!=='refs/heads/main')reasons.push('production branch');
 if(!/^[0-9]+$/.test(String(a.workflowRunId||'')))reasons.push('workflow run id');
 const currentRunId=process.env.GITHUB_RUN_ID||'';
 if(!/^[0-9]+$/.test(currentRunId)||String(a.workflowRunId)!==currentRunId)reasons.push('current workflow run mismatch');
