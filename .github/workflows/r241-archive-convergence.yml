@@ -332,7 +332,7 @@ jobs:
           node tests/r283-sar-full-stack-invariants.mjs
           for f in tests/r280-*.mjs; do node "$f"; done
 
-      - name: Prove Genesis R606-R638 live production receipt gate
+      - name: Prove Genesis R606-R639 browser artifact verification
         run: |
           npx tsx tests/r606-genesis-governance.mts
           npx tsx tests/r607-genesis-cycle.mts
@@ -367,6 +367,7 @@ jobs:
           npx tsx tests/r636-genesis-browser-execution-wrapper.mts
           npx tsx tests/r637-genesis-production-browser-wiring.mts
           npx tsx tests/r638-genesis-live-receipt-gate.mts
+          npx tsx tests/r639-genesis-browser-artifact-verification.mts
 
       - name: Prove R286 Heavy Bio medical-production, 241-mode and interaction boundaries
         run: |
