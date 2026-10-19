@@ -12,5 +12,7 @@ assert.match(excerpt,/OMEGA_EXPECTED_SHA="\$OMEGA_PROMOTED_SHA"/);
 assert.match(excerpt,/run-genesis-browser-proof-r636\.mjs historical-rh-traversal/);
 assert.match(excerpt,/actions\/upload-artifact@v4/);
 assert.match(excerpt,/if-no-files-found: error/);
-assert.match(excerpt,/if: always\(\)/);
+assert.match(excerpt,/id: genesis_evidence_verify_r639/);
+assert.match(excerpt,/steps\.genesis_evidence_verify_r639\.outcome == 'success'/);
+assert.doesNotMatch(excerpt,/if: always\(\)/);
 console.log('R637 existing production workflow browser evidence integration: PASS');
