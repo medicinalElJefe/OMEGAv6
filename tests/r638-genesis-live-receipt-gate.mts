@@ -9,7 +9,7 @@ assert.match(s,/receipt\?\.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'/);
 assert.match(s,/receipt\?\.source\?\.sha!==expected/);
 assert.match(s,/receipt\?\.promotion\?\.promotedMergeSha!==expected/);
 assert.match(s,/AbortSignal\.timeout\(15000\)/);
-assert.match(s,/receiptDigest,receiptUrl:/);
+assert.match(s,/receiptDigest,receiptSnapshot,receiptUrl:/);
 const invalid=spawnSync(process.execPath,['scripts/run-genesis-browser-proof-r636.mjs','historical-rh-traversal'],{encoding:'utf8',env:{...process.env,OMEGA_EXPECTED_SHA:'a'.repeat(40),OMEGA_PUBLIC_URL:'http://example.org'}});
 assert.notEqual(invalid.status,0);
 console.log('Genesis R638 production receipt gate before browser execution: PASS');
