@@ -332,6 +332,44 @@ jobs:
           node tests/r283-sar-full-stack-invariants.mjs
           for f in tests/r280-*.mjs; do node "$f"; done
 
+      - name: Prove Genesis R606-R639 browser artifact verification
+        run: |
+          npx tsx tests/r606-genesis-governance.mts
+          npx tsx tests/r607-genesis-cycle.mts
+          npx tsx tests/r608-genesis-independent-proof.mts
+          npx tsx tests/r609-genesis-execution-boundary.mts
+          npx tsx tests/r610-genesis-lease-store.mts
+          npx tsx tests/r611-genesis-sqlite-recovery.mts
+          npx tsx tests/r612-genesis-atomic-admission.mts
+          npx tsx tests/r613-genesis-signed-lease.mts
+          npx tsx tests/r614-genesis-verified-admission.mts
+          npx tsx tests/r615-genesis-dual-authority.mts
+          npx tsx tests/r616-genesis-durable-authority.mts
+          npx tsx tests/r617-genesis-dispatch-claim.mts
+          npx tsx tests/r618-genesis-worker-capability.mts
+          npx tsx tests/r619-genesis-authorized-dispatch.mts
+          npx tsx tests/r620-genesis-completion-attestation.mts
+          npx tsx tests/r621-genesis-completion-evidence.mts
+          npx tsx tests/r622-genesis-registry-admission.mts
+          npx tsx tests/r623-genesis-registry-completion.mts
+          npx tsx tests/r624-genesis-independent-observation.mts
+          npx tsx tests/r625-genesis-observation-audit.mts
+          npx tsx tests/r626-genesis-capability-bridge.mts
+          npx tsx tests/r627-genesis-governed-capability-import.mts
+          npx tsx tests/r628-genesis-resolved-proof-import.mts
+          npx tsx tests/r629-genesis-proof-catalog.mts
+          npx tsx tests/r630-genesis-github-run-evidence.mts
+          npx tsx tests/r631-genesis-deployment-promotion.mts
+          npx tsx tests/r632-genesis-signed-promotion.mts
+          npx tsx tests/r633-genesis-promotion-ledger.mts
+          npx tsx tests/r634-genesis-runtime-observation.mts
+          npx tsx tests/r635-genesis-browser-proof-contract.mts
+          npx tsx tests/r636-genesis-browser-execution-wrapper.mts
+          npx tsx tests/r637-genesis-production-browser-wiring.mts
+          npx tsx tests/r638-genesis-live-receipt-gate.mts
+          npx tsx tests/r639-genesis-browser-artifact-verification.mts
+          npx tsx tests/r644-genesis-browser-proof-dedup.mts
+
       - name: Prove R286 Heavy Bio medical-production, 241-mode and interaction boundaries
         run: |
           npx --yes tsx tests/r282-bio-medical-production-invariants.mts

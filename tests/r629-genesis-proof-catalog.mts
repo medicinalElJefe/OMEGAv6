@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {initializeProofCatalog,recordProofClaim,getProofClaim,untrustedCatalogResolver,CATALOG_PROOF_BOUNDARY} from '../genesis/proofCatalogR629';
+import {importResolvedCapabilities} from '../genesis/resolvedProofImportR628';
+import type {CapabilityRecord} from '../genesis/capabilityBridgeR626';
+const db=new DatabaseSync(':memory:');initializeProofCatalog(db);
+const receipt={capabilityId:'core',sourceDigest:'a'.repeat(64),proofDigest:'b'.repeat(64),canonicalRegistryId:'registry',canonicalRevision:'rev1',deploymentId:'deploy',deployedSha:'c'.repeat(40),productionCheckId:'browser',status:'VERIFIED' as const};
+assert.equal(recordProofClaim(db,receipt,'GITHUB_CI_CLAIM','2026-10-18T12:00:00Z'),true);
+assert.equal(recordProofClaim(db,receipt,'EXTERNALLY_ATTESTED','2026-10-18T12:00:00Z'),false);
+assert.equal(getProofClaim(db,'core',receipt.sourceDigest,receipt.proofDigest)?.origin,'GITHUB_CI_CLAIM');
+assert.equal(getProofClaim(db,'other',receipt.sourceDigest,receipt.proofDigest),null);
+const record:CapabilityRecord={id:'core',lineage:'historical',function:'continuity',strongestImplementation:'candidate',evidenceIds:['e'],truthClass:'VERIFIED',dependencies:[],currentExecutor:null,presentationSurface:null,remainingGap:[],supersedes:[],sourceDigest:receipt.sourceDigest};
+const result=importResolvedCapabilities('catalog',[record],untrustedCatalogResolver(db),'2026-10-18T12:00:00Z','fixture','test-only');
+assert.equal(result.admitted.length,0);
+assert.equal(CATALOG_PROOF_BOUNDARY,'STORED_CLAIMS_NOT_AUTHENTICATED_DEPLOYMENT');
+db.close();
+console.log('Genesis R629 durable proof claims, duplicate veto and no authority laundering: PASS');

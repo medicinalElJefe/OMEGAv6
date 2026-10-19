@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const ci=readFileSync('.github/workflows/ci.yml','utf8');
+const genesis=ci.indexOf('R637 capture Genesis historical browser proof');
+const verified=ci.indexOf('R639 validate Genesis browser evidence');
+const legacy=ci.indexOf('Verify deployed R622 historical RH graph');
+const next=ci.indexOf('Verify deployed R594 Seven-Star',legacy);
+assert(genesis>=0&&verified>genesis&&legacy>verified&&next>legacy);
+const section=ci.slice(legacy,next);
+assert.match(section,/steps\.genesis_browser_r637\.outcome/);
+assert.match(section,/steps\.genesis_evidence_verify_r639\.outcome/);
+assert.match(section,/test -s artifacts\/genesis-browser\/historical-rh-traversal\.json/);
+assert.doesNotMatch(section,/node tests\/r622-historical-rh-graph-browser-e2e\.mjs/);
+const runner=readFileSync('scripts/run-genesis-browser-proof-r636.mjs','utf8');
+assert.match(runner,/\['historical-rh-traversal','tests\/r622-historical-rh-graph-browser-e2e\.mjs'\]/);
+console.log('R644 historical R622 browser proof inherited from same validated production execution: PASS');

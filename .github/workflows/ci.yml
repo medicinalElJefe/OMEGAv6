@@ -500,6 +500,26 @@ jobs:
           path: artifacts/omega-production-observability-r471.json
           if-no-files-found: error
           retention-days: 30
+      - name: R637 capture Genesis historical browser proof on promoted production SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: genesis_browser_r637
+        shell: bash
+        run: |
+          test -n "${OMEGA_PROMOTED_SHA:-}" || { echo "::error::Promoted SHA unavailable"; exit 1; }
+          OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_PUBLIC_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node scripts/run-genesis-browser-proof-r636.mjs historical-rh-traversal
+      - name: R639 validate Genesis browser evidence before retention
+        id: genesis_evidence_verify_r639
+        if: steps.genesis_browser_r637.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node scripts/verify-genesis-browser-artifact-r639.mjs artifacts/genesis-browser/historical-rh-traversal.json
+      - name: R637 retain Genesis production browser execution artifact
+        if: steps.genesis_evidence_verify_r639.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-genesis-browser-${{ github.sha }}
+          path: artifacts/genesis-browser/historical-rh-traversal.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Verify deployed R200 total-experience browser on exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r200
@@ -529,7 +549,13 @@ jobs:
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r622
         shell: bash
-        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r622-historical-rh-graph-browser-e2e.mjs
+        run: |
+          # R644: the R637 Genesis runner already executes this exact R622 Playwright proof.
+          # Its R639 validation is mandatory; do not run the same live browser test twice.
+          test "${{ steps.genesis_browser_r637.outcome }}" = "success" || { echo "::error::Genesis R622 browser execution did not pass"; exit 1; }
+          test "${{ steps.genesis_evidence_verify_r639.outcome }}" = "success" || { echo "::error::Genesis R622 artifact integrity did not pass"; exit 1; }
+          test -s artifacts/genesis-browser/historical-rh-traversal.json || { echo "::error::Genesis R622 evidence missing"; exit 1; }
+          echo "R622 historical desktop/mobile browser proof inherited from validated Genesis production execution"
       - name: Verify deployed R594 Seven-Star interactive traversal on desktop/mobile
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r594

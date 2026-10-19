@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {consumeLeaseOnce,initializeLeaseStore} from '../genesis/leaseStoreR610';
+import {initActionLedger,recordConsumed,transitionAction,reconcileInterrupted} from '../genesis/actionLedgerR611';
+const dir=mkdtempSync(join(tmpdir(),'genesis-r611-'));
+const path=join(dir,'genesis.sqlite');
+const now='2026-10-17T12:00:00Z';
+const lease={proposalId:'p1',proposalHash:'hash',principal:'trusted-issuer',scope:'proposal:write',workerId:'w1',issuedAt:'2026-10-17T11:00:00Z',expiresAt:'2026-10-17T13:00:00Z',nonce:'once-1',maxUses:1};
+try{
+ const a=new DatabaseSync(path);const b=new DatabaseSync(path);
+ a.exec('PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=FULL;');
+ b.exec('PRAGMA busy_timeout=5000;');
+ initializeLeaseStore(a);initActionLedger(a);
+ assert.equal(consumeLeaseOnce(a,lease,'w1',now,true).consumed,true);
+ assert.equal(consumeLeaseOnce(b,lease,'w1',now,true).consumed,false);
+ assert.equal(recordConsumed(a,lease.nonce,lease.proposalId,'w1',now),true);
+ assert.equal(recordConsumed(b,lease.nonce,lease.proposalId,'w1',now),false);
+ assert.equal(transitionAction(a,lease.nonce,'CONSUMED','COMPLETED',now,'a'.repeat(64)),false);
+ assert.equal(transitionAction(a,lease.nonce,'CONSUMED','DISPATCHED',now),true);
+ assert.equal(transitionAction(b,lease.nonce,'CONSUMED','DISPATCHED',now),false);
+ a.close();b.close();
+ const restarted=new DatabaseSync(path);
+ assert.equal(consumeLeaseOnce(restarted,lease,'w1',now,true).consumed,false);
+ assert.equal(reconcileInterrupted(restarted,now),1);
+ assert.equal(transitionAction(restarted,lease.nonce,'RECONCILE','DISPATCHED',now),false);
+ restarted.close();
+ console.log('Genesis R611 real SQLite multi-connection, persisted restart, reconciliation: PASS');
+}finally{rmSync(dir,{recursive:true,force:true})}
