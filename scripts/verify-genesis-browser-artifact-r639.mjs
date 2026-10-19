@@ -25,7 +25,7 @@ try{
  const live=JSON.parse(a.receiptRaw);
  if(live?.schema!==a.receiptSnapshot?.schema||live?.source?.sha!==expected||live?.promotion?.promotedMergeSha!==expected)reasons.push('receipt content');
 }catch{reasons.push('receipt JSON');}
-if(a.receiptUrl!==new URL('/omega-build-receipt.json',a.receiptUrl).href)reasons.push('receipt path');
+try{if(a.receiptUrl!==new URL('/omega-build-receipt.json',a.receiptUrl).href)reasons.push('receipt path');}catch{reasons.push('receipt URL');}
 if(createHash('sha256').update(String(a.output||'')).digest('hex')!==a.outputDigest)reasons.push('output digest');
 if(!Number.isFinite(Date.parse(a.startedAt))||!Number.isFinite(Date.parse(a.finishedAt))||Date.parse(a.finishedAt)<Date.parse(a.startedAt))reasons.push('time');
 if(reasons.length){console.error('R639 evidence veto: '+reasons.join(', '));process.exit(1);}
