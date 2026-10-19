@@ -20,6 +20,12 @@ if(a.targetId!=='historical-rh-traversal'||a.script!=='tests/r622-historical-rh-
 if(a.environment!=='production'||a.exitCode!==0||a.signal)reasons.push('browser exit');
 if(!/^https:\/\//.test(a.receiptUrl||''))reasons.push('receipt origin');
 if(!/^[a-f0-9]{64}$/.test(a.receiptDigest||''))reasons.push('receipt digest');
+if(typeof a.receiptRaw!=='string'||createHash('sha256').update(a.receiptRaw).digest('hex')!==a.receiptDigest)reasons.push('receipt bytes');
+try{
+ const live=JSON.parse(a.receiptRaw);
+ if(live?.schema!==a.receiptSnapshot?.schema||live?.source?.sha!==expected||live?.promotion?.promotedMergeSha!==expected)reasons.push('receipt content');
+}catch{reasons.push('receipt JSON');}
+if(a.receiptUrl!==new URL('/omega-build-receipt.json',a.receiptUrl).href)reasons.push('receipt path');
 if(createHash('sha256').update(String(a.output||'')).digest('hex')!==a.outputDigest)reasons.push('output digest');
 if(!Number.isFinite(Date.parse(a.startedAt))||!Number.isFinite(Date.parse(a.finishedAt))||Date.parse(a.finishedAt)<Date.parse(a.startedAt))reasons.push('time');
 if(reasons.length){console.error('R639 evidence veto: '+reasons.join(', '));process.exit(1);}
