@@ -24,12 +24,14 @@ let receipt;try{receipt=JSON.parse(receiptText)}catch{throw Error('R638 producti
 if(receipt?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'||receipt?.source?.sha!==expected||receipt?.promotion?.promotedMergeSha!==expected)
  throw Error('R638 live production source/promotion SHA mismatch');
 const receiptDigest=createHash('sha256').update(receiptText).digest('hex');
+// R639: retain a verifiable receipt snapshot and provenance, not only a digest.
+const receiptSnapshot={schema:receipt.schema,sourceSha:receipt.source.sha,promotedMergeSha:receipt.promotion.promotedMergeSha};
 const startedAt=new Date().toISOString();
 const run=spawnSync(process.execPath,[script],{encoding:'utf8',timeout:240000,maxBuffer:2*1024*1024,env:{...process.env,OMEGA_E2E_URL:base,OMEGA_PUBLIC_URL:base,OMEGA_EXPECTED_SHA:expected,OMEGA_PROMOTED_SHA:expected}});
 const finishedAt=new Date().toISOString();
 const output=(run.stdout||'')+'\n'+(run.stderr||'');
 const outputDigest=createHash('sha256').update(output).digest('hex');
-const artifact={schema:'OMEGA_BROWSER_EXECUTION_R636_V1',targetId:id,script,environment:'production',expectedSha:expected,exitCode:run.status??1,signal:run.signal||null,startedAt,finishedAt,outputDigest,receiptDigest,receiptUrl:receiptUrl.origin+receiptUrl.pathname,receiptSourceSha:receipt.source.sha,receiptPromotedSha:receipt.promotion.promotedMergeSha,workflowRunId:process.env.GITHUB_RUN_ID||null,workflowSha:process.env.GITHUB_SHA||null,runnerTrust:'UNVERIFIED_EXTERNAL_ATTESTATION_REQUIRED',output};
+const artifact={schema:'OMEGA_BROWSER_EXECUTION_R636_V1',targetId:id,script,environment:'production',expectedSha:expected,exitCode:run.status??1,signal:run.signal||null,startedAt,finishedAt,outputDigest,receiptDigest,receiptSnapshot,receiptUrl:receiptUrl.origin+receiptUrl.pathname,receiptSourceSha:receipt.source.sha,receiptPromotedSha:receipt.promotion.promotedMergeSha,workflowRunId:process.env.GITHUB_RUN_ID||null,workflowSha:process.env.GITHUB_SHA||null,workflowRepository:process.env.GITHUB_REPOSITORY||null,workflowRef:process.env.GITHUB_REF||null,runnerTrust:'UNVERIFIED_EXTERNAL_ATTESTATION_REQUIRED',output};
 const dir=resolve('artifacts','genesis-browser');mkdirSync(dir,{recursive:true});
 const path=resolve(dir,id+'.json');writeFileSync(path,JSON.stringify(artifact,null,2)+'\n');
 const stored=readFileSync(path);console.log('R636 evidence artifact: '+path+' sha256='+createHash('sha256').update(stored).digest('hex'));
