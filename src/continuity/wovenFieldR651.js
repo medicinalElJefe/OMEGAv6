@@ -15,7 +15,7 @@ export function evolveWovenField({nodes,edges,pressure={},step=0.1}={}){
   if(e.kind==='BLOCKED'){ledger.push({kind:'BLOCKED',from:e.from,to:e.to,carried:0});continue}
   const available=from.continuity*from.plasticity;
   const gradient=e.kind==='RETURN'?available-to.continuity:Math.max(0,available-to.continuity);
-  const carried=Math.min(from.continuity,Math.max(0,gradient)*e.weight*step);
+  const remaining=Math.max(0,from.continuity+Math.min(0,delta.get(e.from)));const carried=Math.min(remaining,Math.max(0,gradient)*e.weight*step);
   delta.set(e.from,delta.get(e.from)-carried);delta.set(e.to,delta.get(e.to)+carried);
   ledger.push({kind:e.kind,from:e.from,to:e.to,carried});
  }
@@ -25,4 +25,11 @@ export function evolveWovenField({nodes,edges,pressure={},step=0.1}={}){
  return Object.freeze({schema:'OMEGA_WOVEN_FIELD_STEP_R651',truthClass:'EXECUTABLE_MODEL_NOT_EMPIRICAL_PHYSICS',nodes:next,ledger,netContinuityDelta:next.reduce((a,s)=>a+s.continuity,0)-states.reduce((a,s)=>a+s.continuity,0)});
 }
 export function developmentalDifference(previous,current){const a=new Map(previous.map(normalizeState).map(x=>[x.id,x]));return current.map(normalizeState).map(s=>{const p=a.get(s.id);if(!p)throw Error('missing previous node '+s.id);return {id:s.id,continuity:s.continuity-p.continuity,burden:s.burden-p.burden,contradiction:s.contradiction-p.contradiction,plasticity:s.plasticity-p.plasticity,scar:s.scar-p.scar}})}
-export function heightenedSequence(frames,dt=1){finite(dt,'dt');if(dt<=0)throw Error('dt must be positive');if(!Array.isArray(frames)||frames.length<4)throw Error('four frames required for jerk');const vectors=[];for(let i=1;i<frames.length;i++)vectors.push(developmentalDifference(frames[i-1],frames[i]));const derivatives=[vectors];for(let order=2;order<=3;order++){const prev=derivatives.at(-1);derivatives.push(prev.slice(1).map((v,i)=>v.map((p,j)=>({id:p.id,continuity:(p.continuity-prev[i][j].continuity)/dt,burden:(p.burden-prev[i][j].burden)/dt,contradiction:(p.contradiction-prev[i][j].contradiction)/dt,plasticity:(p.plasticity-prev[i][j].plasticity)/dt,scar:(p.scar-prev[i][j].scar)/dt}))))}return {schema:'OMEGA_HEIGHTENED_SEQUENCE_R651',velocity:vectors.map(v=>v.map(x=>({...x,continuity:x.continuity/dt}))),acceleration:derivatives[1],jerk:derivatives[2],boundary:'finite-difference developmental diagnostics; not physical motion'};}
+export function heightenedSequence(frames,dt=1){
+ finite(dt,'dt');if(dt<=0)throw Error('dt must be positive');if(!Array.isArray(frames)||frames.length<4)throw Error('four frames required for jerk');
+ const keys=['continuity','burden','contradiction','plasticity','scar'];
+ const velocity=frames.slice(1).map((frame,i)=>developmentalDifference(frames[i],frame).map(v=>Object.fromEntries([['id',v.id],...keys.map(k=>[k,v[k]/dt])])));
+ const derivative=arr=>arr.slice(1).map((frame,i)=>frame.map((v,j)=>{const prior=arr[i][j];if(v.id!==prior.id)throw Error('node ordering changed');return Object.fromEntries([['id',v.id],...keys.map(k=>[k,(v[k]-prior[k])/dt])])}));
+ const acceleration=derivative(velocity),jerk=derivative(acceleration);
+ return {schema:'OMEGA_HEIGHTENED_SEQUENCE_R651',velocity,acceleration,jerk,boundary:'finite-difference developmental diagnostics; not physical motion'};
+}
