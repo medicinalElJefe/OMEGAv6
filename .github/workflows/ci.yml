@@ -53,6 +53,10 @@ jobs:
         run: node tests/r652-symmetry-asymmetry-modes.mjs
       - name: R651 executable woven continuity and Heightened Mode proof
         run: node tests/r651-woven-field-execution.mjs
+      - name: R655 state-derived intrinsic projection and R654 replay
+        run: |
+          node tests/r654-proven-continuity-replay.mjs
+          node tests/r655-intrinsic-field-projection.mjs
       - name: R650 year-corpus capability conservation truth gate
         run: node tests/r650-year-corpus-conservation-gate.mjs
       - run: npm run check
