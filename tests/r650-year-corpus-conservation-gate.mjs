@@ -15,3 +15,19 @@ for(const family of ledger.families){
 }
 for(const id of ['atlas-state','relational-continuity','developmental-continuity','native-runtime','renderer-traversal','observation','memory-intelligence','command-execution','federation','governance-proof','applications'])assert.ok(ids.has(id),'missing historical family '+id);
 console.log('R650 year-corpus conservation gate PASS; '+ledger.families.length+' families; '+unresolved+' without production proof (not falsely admitted)');
+
+const historical=JSON.parse(fs.readFileSync('canon/historical-donor-provenance-r650.json','utf8'));
+assert.equal(historical.schema,'OMEGA_HISTORICAL_DONOR_PROVENANCE_R650');
+assert.equal(historical.source.cumulativeDonors,18);
+assert.equal(historical.source.cumulativeIndexedFiles,2861);
+assert.equal(historical.donors.length,18);
+assert.equal(new Set(historical.donors.map(d=>d.name)).size,18);
+for(const donor of historical.donors){
+ assert.ok(donor.name.endsWith('.zip'));
+ assert.equal(donor.sourceBytesPresent,false,'historical source must not be asserted without bytes');
+ assert.equal(donor.sha256VerifiedNow,false,'historical prefix is not a current SHA verification');
+ assert.equal(donor.restoreStatus,'SOURCE_REQUIRED');
+ if(donor.sha256Prefix)assert.match(donor.sha256Prefix,/^[a-f0-9]{16}$/);
+}
+assert.equal(historical.donors.filter(d=>d.admission==='QUARANTINED_INVALID_ZIP').length,1);
+console.log('R650 historical donor provenance PASS: 18 distinct donors; original source bytes required');
