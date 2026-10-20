@@ -20,7 +20,7 @@ export function evolveWovenField({nodes,edges,pressure={},step=0.1}={}){
   ledger.push({kind:e.kind,from:e.from,to:e.to,carried});
  }
  const next=states.map(s=>{const external=pressure[s.id]??0;finite(external,'pressure');const c=clamp(s.continuity+delta.get(s.id)+external*step);
- const loss=Math.max(0,s.continuity+delta.get(s.id)+external*step-c);
+ const loss=Math.abs(s.continuity+delta.get(s.id)+external*step-c);
  return Object.freeze({...s,continuity:c,scar:s.scar+loss,contradiction:s.contradiction+loss,plasticity:clamp(s.plasticity-loss)})});
  return Object.freeze({schema:'OMEGA_WOVEN_FIELD_STEP_R651',truthClass:'EXECUTABLE_MODEL_NOT_EMPIRICAL_PHYSICS',nodes:next,ledger,netContinuityDelta:next.reduce((a,s)=>a+s.continuity,0)-states.reduce((a,s)=>a+s.continuity,0)});
 }
