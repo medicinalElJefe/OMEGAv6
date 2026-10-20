@@ -53,6 +53,8 @@ jobs:
         run: node tests/r652-symmetry-asymmetry-modes.mjs
       - name: R651 executable woven continuity and Heightened Mode proof
         run: node tests/r651-woven-field-execution.mjs
+      - name: R656 intrinsic SVG renderer provenance
+        run: node tests/r656-intrinsic-svg-renderer.mjs
       - name: R655 state-derived intrinsic projection and R654 replay
         run: |
           node tests/r654-proven-continuity-replay.mjs
