@@ -16,7 +16,7 @@ export function symmetryProjectionR652({nodes,edges,mode='TRANSPORT',alpha=0.5}=
  if(!Array.isArray(nodes)||!nodes.length||nodes.length>20736||!Array.isArray(edges))throw Error('bounded graph required');
  const states=nodes.map(normalizeState),ids=new Set(states.map(x=>x.id));if(ids.size!==states.length)throw Error('duplicate state');
  const links=edges.map(e=>normalizeEdge(e,ids));const byId=new Map(states.map(s=>[s.id,s]));
- const pairs=new Map();for(const e of links){if(e.kind==='BLOCKED')continue;const key=JSON.stringify([e.from,e.to].sort());if(!pairs.has(key))pairs.set(key,[]);pairs.get(key).push(e)}
+ const pairs=new Map();for(const e of links){if(e.kind==='BLOCKED'||e.kind==='RESIDUE'||e.from===e.to)continue;const key=JSON.stringify([e.from,e.to].sort());if(!pairs.has(key))pairs.set(key,[]);pairs.get(key).push(e)}
  let symmetricMass=0,asymmetricMass=0;const edgesProof=[];
  for(const [key,group] of pairs){const [a,b]=JSON.parse(key);const forward=group.filter(e=>e.from===a&&e.to===b).reduce((v,e)=>v+e.weight,0);const backward=group.filter(e=>e.from===b&&e.to===a).reduce((v,e)=>v+e.weight,0);
  const symmetry=Math.min(forward,backward),asymmetry=Math.abs(forward-backward);
