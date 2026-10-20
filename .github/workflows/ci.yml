@@ -47,6 +47,8 @@ jobs:
           node tests/r256-private-sai-doorway-invariants.mjs
           node tests/r256-private-sai-doorway-protocol-e2e.mjs
           npx wrangler deploy --config wrangler.sai-door-r256.jsonc --dry-run --outdir .wrangler-r256-doorway
+      - name: R651 executable woven continuity and Heightened Mode proof
+        run: node tests/r651-woven-field-execution.mjs
       - name: R650 year-corpus capability conservation truth gate
         run: node tests/r650-year-corpus-conservation-gate.mjs
       - run: npm run check
