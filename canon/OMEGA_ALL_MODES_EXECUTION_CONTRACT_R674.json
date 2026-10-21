@@ -1,0 +1,171 @@
+{
+  "schema": "OMEGA_ALL_MODES_EXECUTION_CONTRACT_R674",
+  "canonicalAuthority": {
+    "state": "src/corpusRuntime.ts",
+    "field": "src/mandala20736Runtime.ts",
+    "sourceModeCatalog": "src/sourceBackedModeRuntimeR21.ts",
+    "sourceModeCatalogCount": 179,
+    "sourceModeImplementedContracts": 20,
+    "catalogMembershipMeansExecuted": false,
+    "sourceModeProvenance": "dewey-canon workbook Mode Ledger and 20736D Full Canon atlas as recorded by R21",
+    "developmentalProof": "src7/heightenedModeR457.ts",
+    "developmentalLedger": "src7/canonicalDevelopmentalLedgerR467.ts",
+    "admission": "R125_EXTERNAL_ONLY",
+    "rollback": "OMEGAV6_RETAINED",
+    "noUnverifiedCanonicalMutation": true
+  },
+  "portability": {
+    "scope": "EXECUTABLE_SOFTWARE_CONTRACT_ACROSS_ASSISTANT_TIERS",
+    "independentOfLanguageModelTier": "The hosted deterministic operations and source/proof contracts do not change merely because the assistant reasoning model tier changes.",
+    "modelIntelligencePromotionClaim": false,
+    "note": "Named modes do not upgrade the language model's intrinsic inference capacity. They impose computations, constraints, tests, traceability, and fail-closed evidence rules on the surrounding OMEGA software."
+  },
+  "pipeline": [
+    "SENSE",
+    "NORMALIZE",
+    "RECOVER_SOURCE",
+    "BUILD_TYPED_RELATIONS",
+    "EXECUTE_SOURCE_OPERATOR",
+    "COMPUTE_DEVELOPMENTAL_DIFFERENCE",
+    "PRUNE",
+    "TRANSLATE",
+    "PROVE",
+    "RECORD_SCAR",
+    "MAINTAIN_FUTURE_TOPOLOGY",
+    "ADMISSION_GATE"
+  ],
+  "invariants": [
+    "CANONICAL_STATE_HAS_SINGLE_AUTHORITY",
+    "MULTI_PARENT_AND_CYCLIC_RELATIONS_ALLOWED",
+    "INGRESS_EGRESS_BLOCKED_RESIDUE_RETURN_PRESERVED",
+    "NEGATIVE_EVIDENCE_AND_CONTRADICTIONS_NOT_DISCARDED",
+    "MODE_PROJECTION_MUST_NOT_MUTATE_CANONICAL_SOURCE",
+    "SOURCE_EXISTENCE_IS_NOT_EXECUTION",
+    "LOCAL_TEST_IS_NOT_PRODUCTION_DEPLOYMENT",
+    "DEPLOYMENT_PROOF_REQUIRED_BEFORE_ADVANCEMENT",
+    "NO_NEW_PHYSICAL_PRIMITIVE",
+    "20736_IS_ADDRESS_SPACE_NOT_PHYSICAL_DIMENSIONS",
+    "MODEL_DERIVATIVES_NOT_MEASURED_PHYSICAL_TIME",
+    "ARCHIVE_COVERAGE_AND_CAPABILITY_CONSERVATION_REQUIRED"
+  ],
+  "modes": [
+    {
+      "name": "FULL_OVERALL_CANON",
+      "operation": "coherent source packets and R308 formal blend",
+      "authority": "src/sourceBackedModeRuntimeR21.ts",
+      "binding": "M020",
+      "class": "FORMAL_SOURCE_OPERATOR"
+    },
+    {
+      "name": "MODE_188",
+      "operation": "source gate, Dewey ratio and exact workbook Sratio decision",
+      "authority": "src/mode188DriveRuntimeR311.ts",
+      "binding": "M002/M003 + R311",
+      "class": "SOURCE_MODEL"
+    },
+    {
+      "name": "DEEP_MOTHER",
+      "operation": "water basin/compression blending",
+      "authority": "src/sourceBackedModeRuntimeR21.ts",
+      "binding": "M015",
+      "class": "FORMAL_SOURCE_OPERATOR"
+    },
+    {
+      "name": "HIGH_FATHER",
+      "operation": "structure/traversal blending",
+      "authority": "src/sourceBackedModeRuntimeR21.ts",
+      "binding": "M016",
+      "class": "FORMAL_SOURCE_OPERATOR"
+    },
+    {
+      "name": "UNIFIED_COHERENCE",
+      "operation": "coherence/Dewey S scoring",
+      "authority": "src/sourceBackedModeRuntimeR21.ts",
+      "binding": "M001/M020",
+      "class": "FORMAL_SOURCE_OPERATOR"
+    },
+    {
+      "name": "FORECAST",
+      "operation": "bounded source forecast signal and governance",
+      "authority": "src/sourceBackedModeRuntimeR21.ts",
+      "binding": "M004",
+      "class": "SOURCE_MODEL_NOT_FUTURE_OBSERVATION"
+    },
+    {
+      "name": "PRUNE",
+      "operation": "contradiction/burden pruning pressure; no silent deletion of source",
+      "authority": "src/sourceBackedModeRuntimeR21.ts",
+      "binding": "M005",
+      "class": "FORMAL_SOURCE_OPERATOR"
+    },
+    {
+      "name": "WOVEN_CONTINUITY",
+      "operation": "typed relation transport including return/cycles and blocked carry",
+      "authority": "src/continuity/wovenFieldR651.js",
+      "binding": "R651/R671",
+      "class": "EXECUTABLE_LOCAL_MODEL"
+    },
+    {
+      "name": "RELATIONAL_SKIN_CALCULUS",
+      "operation": "boundary exchange and scar carry: currently partial typed relation model",
+      "authority": "src/continuity/wovenFieldR651.js",
+      "binding": "R651",
+      "class": "PARTIAL_EXECUTION"
+    },
+    {
+      "name": "SYMMETRY_ASYMMETRY",
+      "operation": "nonmutating mode-relative projection",
+      "authority": "src/continuity/modeSymmetryR652.js",
+      "binding": "R652/R653/R671",
+      "class": "EXECUTABLE_LOCAL_MODEL"
+    },
+    {
+      "name": "HEIGHTENED_MODE",
+      "operation": "discrete developmental velocity, acceleration, jerk, curvature and acceptance constraints",
+      "authority": "src7/heightenedModeR457.ts",
+      "binding": "R457/R467/R651/R673",
+      "class": "EXECUTABLE_MODEL_WITH_EXTERNAL_PROOF_GATE"
+    },
+    {
+      "name": "GUIDANCE_FIELD",
+      "operation": "STAY/TURN/ESCALATE source packet decision",
+      "authority": "src/sourceBackedModeRuntimeR21.ts",
+      "binding": "M012",
+      "class": "SOURCE_PACKET_NOT_RECOMPUTED"
+    },
+    {
+      "name": "FULL_SPHERE",
+      "operation": "preserved native route and higher-order viewing; not claimed executed by R671",
+      "authority": "src7/nativeCapabilityRegistry.tsx",
+      "binding": "Full Sphere R525 workbench",
+      "class": "PRESERVED_ROUTE_NEEDS_OWN_PROOF"
+    },
+    {
+      "name": "MOTION_OBSERVER_RELATIVITY",
+      "operation": "historical observer navigation and source state reanchoring",
+      "authority": "src7/workspaces/historicalObserverR666.ts",
+      "binding": "R666",
+      "class": "EXECUTABLE_MODEL_NOT_PHYSICAL_COORDINATES"
+    },
+    {
+      "name": "NO_NOTHING_TRUTH",
+      "operation": "absence and missing evidence remain explicit vetoes",
+      "authority": "src7/heightenedModeR457.ts",
+      "binding": "R457/R673",
+      "class": "GOVERNANCE_GATE"
+    },
+    {
+      "name": "RECOVERY_AND_PROOF",
+      "operation": "source lineage, physical bounds, acceptance and regression",
+      "authority": "src7/workspaces/historicalConvergenceR665.ts",
+      "binding": "R665",
+      "class": "PROVENANCE_NO_PRODUCTION_CLAIM"
+    }
+  ],
+  "unavailableClaims": [
+    "Complete execution of all 179 historical modes is not established; R21 supplies 20 implemented source mode contracts and 159 other catalog members retained as metadata.",
+    "Full B053 native engine transplantation and nested archive donor arbitration remain unfinished.",
+    "No evidence that arbitrary ChatGPT model tiers change their trained capacities when a named mode is selected.",
+    "No verification of calibrated matter physics, native GPU shader parity, or browser deployment for newly added R671-R673 changes until CI and production proof complete."
+  ]
+}
