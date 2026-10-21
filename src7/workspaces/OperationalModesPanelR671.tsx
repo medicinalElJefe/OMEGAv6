@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala20736Runtime';
 import {evaluateOperationalModesR671,R671_MODES,R671_MODE_AUTHORITIES} from './operationalModesR671.js';
+import {evaluateLocalModeProposalR673} from './modelGovernanceR673';
 
 type Props={address:number;onAddress:(address:number)=>void;onNavigate:(route:string)=>void};
 const format=(n:number)=>Number.isFinite(n)?n.toFixed(6):'UNAVAILABLE';
@@ -13,6 +14,7 @@ export function OperationalModesPanelR671({address,onAddress,onNavigate}:Props){
  useEffect(()=>{let live=true;getMandala20736Field().then(f=>{if(live)setField(f)}).catch(e=>{if(live)setError(String(e))});return()=>{live=false}},[]);
  useEffect(()=>{setReceipt(null)},[address,mode,length,field]);
  const rows=useMemo(()=>receipt?.sourceTrace||[],[receipt]);
+ const governance=useMemo(()=>receipt?evaluateLocalModeProposalR673(receipt):null,[receipt]);
  const run=()=>{
   if(!field){setError('Canonical field is not loaded');return}
   try{const result=evaluateOperationalModesR671(field,address,mode,length);setReceipt(result);setError('')}
@@ -43,6 +45,12 @@ export function OperationalModesPanelR671({address,onAddress,onNavigate}:Props){
    </div>:<p>Heightened jerk held: four distinct ordered states were not available.</p>}
   <details><summary>Typed directed carry and retained contradictions</summary>{receipt.edges.map((e:any,k:number)=><div key={k}>{e.from} → {e.to} · {e.kind} · weight {format(e.weight)}</div>)}{receipt.typedResidue.map((e:any,k:number)=><div key={'r'+k}>Residue {e.from} → {e.to}: {e.reason}</div>)}</details>
   <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:12}} aria-label='Computed route source states'>{rows.map((row:any)=><button type='button' key={row.stateIndex} onClick={()=>onAddress(row.stateIndex)} title={'CΩ '+format(row.continuity)+'; q '+format(row.contradiction)+'; scar '+format(row.scar)}>{row.address}</button>)}</div>
+  {governance&&<section data-r673-governance='held' style={{padding:12,background:'rgba(85,104,125,.12)',border:'1px solid #49687b',borderRadius:8,marginTop:12}}>
+   <b>R457 Heightened Mode · advancement {governance.status}</b>
+   <p>Growth ΔCΩ {format(governance.growth.continuity)} · ΔΦ {format(governance.growth.futurePlasticity)} · Δq {format(governance.growth.contradiction)} · curvature {format(governance.curvature)}. Developmental values are calculated; production promotion is blocked.</p>
+   <p><b>{governance.hardVetoes.length} evidence/authority vetoes</b>. This model has not produced independently verified Git, deployment, capability-coverage, or rollback receipts.</p>
+   <details><summary>Inspect R457 vetoes and contradiction-preserving proof</summary><ul>{governance.hardVetoes.map((reason:string)=><li key={reason}>{reason}</li>)}</ul></details>
+  </section>}
   <p data-r671-proof-boundary='true'><b>Proof:</b> {receipt.executionProof.class}. This is a computed model result, not a physical observation, trained AI checkpoint, released executor, or production deployment. The underlying CanonState is unchanged.</p>
   <details><summary>Operational lineage / preserved software contracts</summary>{R671_MODE_AUTHORITIES.map(a=><p key={a.id}><b>{a.id}</b> · {a.operation} · {a.source}</p>)}</details>
  </div>}
