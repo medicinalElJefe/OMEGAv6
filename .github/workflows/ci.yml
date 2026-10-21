@@ -53,6 +53,8 @@ jobs:
         run: node tests/r652-symmetry-asymmetry-modes.mjs
       - name: R651 executable woven continuity and Heightened Mode proof
         run: node tests/r651-woven-field-execution.mjs
+      - name: R659 source-bound relational scene
+        run: node tests/r659-proven-relational-scene.mjs
       - name: R658 typed relational traversal
         run: node tests/r658-typed-relational-traversal.mjs
       - name: R657 proven address traversal
