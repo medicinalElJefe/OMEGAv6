@@ -1,6 +1,6 @@
 /** R663 OMEGA 7 bounded historical source reconciliation. No mutation of canonical state. */
-import {historicalAddressDigits,SEVEN_STAR_HISTORICAL_SOURCES} from './sevenStarHistoricalAuthorityR602';
-import {replayWorkbookFrameR604} from './timeMandalaFormulaReplayR604';
+import {historicalAddressDigits,SEVEN_STAR_HISTORICAL_SOURCES} from './sevenStarHistoricalAuthorityR602.ts';
+import {replayWorkbookFrameR604} from './timeMandalaFormulaReplayR604.ts';
 export type R663EvidenceRow={sourceId:string;row:number;address:number;digits?:readonly number[];baseStar?:number;activeStar?:number;mode188Gate?:string};
 export type R663Receipt={schema:'OMEGA7_SOURCE_RECONCILIATION_R663';truthClass:'LOCAL_SOURCE_REPLAY_COMPARISON';sourceId:string;offset:number;processed:number;accepted:number;discrepancies:readonly {row:number;address:number;field:string;expected:string;actual:string}[];nextOffset:number|null;dependency:'R602_ADDRESS_MAPPING + R604_FORMULA_REPLAY';immutable:true};
 export function reconcileHistoricalBatchR663(rows:readonly R663EvidenceRow[],{sourceId,seconds,offset=0,limit=256}:{sourceId:string;seconds:number;offset?:number;limit?:number}):R663Receipt{
