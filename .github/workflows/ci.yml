@@ -53,6 +53,8 @@ jobs:
         run: node tests/r652-symmetry-asymmetry-modes.mjs
       - name: R651 executable woven continuity and Heightened Mode proof
         run: node tests/r651-woven-field-execution.mjs
+      - name: R662 graph snapshot provenance
+        run: node tests/r662-graph-snapshot-provenance.mjs
       - name: R661 explicit relation kind
         run: node tests/r661-explicit-relation-kind.mjs
       - name: R660 zero-conductance edge veto
