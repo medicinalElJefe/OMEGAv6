@@ -53,6 +53,8 @@ jobs:
         run: node tests/r652-symmetry-asymmetry-modes.mjs
       - name: R651 executable woven continuity and Heightened Mode proof
         run: node tests/r651-woven-field-execution.mjs
+      - name: R663 OMEGA 7 source reconciliation
+        run: node --experimental-strip-types tests/r663-omega7-source-reconciliation.mts
       - name: R662 graph snapshot provenance
         run: node tests/r662-graph-snapshot-provenance.mjs
       - name: R661 explicit relation kind
