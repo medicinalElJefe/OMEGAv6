@@ -167,5 +167,22 @@
     "Full B053 native engine transplantation and nested archive donor arbitration remain unfinished.",
     "No evidence that arbitrary ChatGPT model tiers change their trained capacities when a named mode is selected.",
     "No verification of calibrated matter physics, native GPU shader parity, or browser deployment for newly added R671-R673 changes until CI and production proof complete."
+  ],
+  "negativeEvidence": [
+    {
+      "id": "HISTORICAL_DONOR_188_DECISION_HYSTERESIS_GUARD_CONTRADICTION",
+      "classification": "REPRODUCED_SOURCE_LEVEL_INVARIANT_CONTRADICTION",
+      "location": "OMEGA B053 > Dewey_Full_PC_Runtime_188.zip > CanonForge Workstation v2.2",
+      "donorFunctions": [
+        "src/engine/DecisionEngine.js:evaluateDecision",
+        "src/core/InvariantGuards.js:guardDecisionCoherence"
+      ],
+      "replay": "C=0.2, L=0.5, Q=0.4, lastDecision=STAY, heldMs=0, hysteresisMs=200, dt=10",
+      "observed": "Original hysteresis effectiveDecision=STAY while instantaneous guard requires ESCALATE and throws",
+      "verifiedVia": "isolated execution of original recovered source; R675 source-level reproduction regression",
+      "promotion": "QUARANTINED_NO_CANONICAL_ADMISSION",
+      "scarRetention": true,
+      "fixDirection": "Retain raw and effective decisions separately, record hysteresis conflict as evidence, never silence raw ESCALATE to clear a production gate"
+    }
   ]
 }
