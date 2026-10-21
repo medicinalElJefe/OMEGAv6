@@ -5,7 +5,7 @@
 export type AddressR666={d:number;p:number;r:number;l:number;node_id:string};
 export type MotionR666={continuity?:number;burden?:number;ledger?:number;contradiction?:number;scar?:number;future_plasticity?:number;future?:number;proof_strength?:number;evidence_weight?:number};
 const clamp=(x:number,a:number,b:number)=>Number.isFinite(x)?Math.min(b,Math.max(a,x)):a;
-const wrap12=(x:number)=>((Math.trunc(x)-1)%12+12)%12+1;
+const wrap12=(x:number)=>Number.isFinite(x)?((Math.trunc(x)-1)%12+12)%12+1:1;
 export function nodeIdR666(d:number,p:number,r:number,l:number){return 'node_'+String((((wrap12(d)-1)*12+(wrap12(p)-1))*12+(wrap12(r)-1))*12+wrap12(l)).padStart(6,'0')}
 export function normalizeAddressR666(input:Partial<AddressR666>={}):AddressR666{const d=wrap12(input.d??1),p=wrap12(input.p??1),r=wrap12(input.r??1),l=wrap12(input.l??1);return{d,p,r,l,node_id:nodeIdR666(d,p,r,l)}}
 export function reanchorR666(input:Partial<AddressR666>,delta:Partial<Record<'d'|'p'|'r'|'l',number>>){const a=normalizeAddressR666(input);return normalizeAddressR666({d:a.d+clamp(delta.d??0,-12,12),p:a.p+clamp(delta.p??0,-12,12),r:a.r+clamp(delta.r??0,-12,12),l:a.l+clamp(delta.l??0,-12,12)})}
