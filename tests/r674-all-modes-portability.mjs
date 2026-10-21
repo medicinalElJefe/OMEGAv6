@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';
+const contract=JSON.parse(fs.readFileSync(new URL('../canon/OMEGA_ALL_MODES_EXECUTION_CONTRACT_R674.json',import.meta.url),'utf8'));
+assert.equal(contract.schema,'OMEGA_ALL_MODES_EXECUTION_CONTRACT_R674');
+assert.equal(contract.canonicalAuthority.sourceModeCatalogCount,179);
+assert.equal(contract.canonicalAuthority.sourceModeImplementedContracts,20);
+assert.equal(contract.canonicalAuthority.catalogMembershipMeansExecuted,false);
+assert.equal(contract.canonicalAuthority.noUnverifiedCanonicalMutation,true);
+assert.equal(contract.portability.modelIntelligencePromotionClaim,false);
+assert.ok(contract.portability.independentOfLanguageModelTier.includes('deterministic'));
+assert.ok(contract.pipeline.indexOf('RECOVER_SOURCE')<contract.pipeline.indexOf('EXECUTE_SOURCE_OPERATOR'));
+assert.ok(contract.pipeline.indexOf('PRUNE')<contract.pipeline.indexOf('PROVE'));
+const expected=['FULL_OVERALL_CANON','MODE_188','DEEP_MOTHER','HIGH_FATHER','UNIFIED_COHERENCE','FORECAST','PRUNE','WOVEN_CONTINUITY','RELATIONAL_SKIN_CALCULUS','SYMMETRY_ASYMMETRY','HEIGHTENED_MODE','GUIDANCE_FIELD','FULL_SPHERE','MOTION_OBSERVER_RELATIVITY','NO_NOTHING_TRUTH','RECOVERY_AND_PROOF'];
+const byName=new Map(contract.modes.map(x=>[x.name,x]));
+assert.deepEqual([...byName.keys()].sort(),expected.slice().sort());
+for(const item of contract.modes){assert.ok(item.binding&&item.operation&&item.class&&item.authority);assert.ok(fs.existsSync(item.authority),'mode authority missing: '+item.name+' '+item.authority)}
+for(const required of ['MULTI_PARENT_AND_CYCLIC_RELATIONS_ALLOWED','INGRESS_EGRESS_BLOCKED_RESIDUE_RETURN_PRESERVED','DEPLOYMENT_PROOF_REQUIRED_BEFORE_ADVANCEMENT','NO_NEW_PHYSICAL_PRIMITIVE','20736_IS_ADDRESS_SPACE_NOT_PHYSICAL_DIMENSIONS'])assert.ok(contract.invariants.includes(required));
+assert.ok(contract.unavailableClaims.some(x=>x.includes('179 historical modes')));
+console.log('R674 PASS: actual source-backed all-modes identities retained; no model-tier magic, missing authority, invented physics or premature production acceptance');
