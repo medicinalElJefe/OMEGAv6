@@ -32,26 +32,36 @@ export function evaluateOperationalModesR671(field,address,mode='TRANSPORT',maxS
  }
  if(visited.has(cursor))cycleTo=cursor;
  const sourceNode=(i,id=String(i))=>({id,continuity:unit(Number(field.C[i]),'continuity'),plasticity:unit(Number(field.Phi[i]),'plasticity'),burden:Math.max(0,finite(Number(field.Lambda[i]),'burden')),contradiction:Math.max(0,finite(Number(field.q[i]),'contradiction')),scar:Math.max(0,finite(Number(field.scar[i]),'scar'))});
- const nodes=path.map(i=>sourceNode(i));
- const included=new Set(path),edges=[],typedResidue=[];
- for(const i of path){
+ // Recover bounded multi-parent ingress from the full canonical relation, not a fabricated radial tree.
+ // The ordered path remains the developmental time-like sequence; upstream nodes are topology only.
+ const included=new Set(path),upstream=[];
+ for(let j=0;j<field.count&&upstream.length<8;j++){
+  if(included.has(j))continue;
+  const to=Number(field.routeNext[j]);
+  if(included.has(to)){upstream.push(j);included.add(j)}
+ }
+ const nodes=[...path,...upstream].map(i=>sourceNode(i));
+ const edges=[],typedResidue=[],parents=new Map(path.map(i=>[i,[]]));
+ for(const i of [...path,...upstream]){
   const to=Number(field.routeNext[i]);
   const gate=unit(Number(field.continuityGate[i]),'continuity gate'),evidence=unit(Number(field.evidence[i]),'evidence');
   if(!included.has(to))continue;
   const weight=Math.min(gate,evidence);
-  const kind=gate===0?'BLOCKED':(path.indexOf(to)<=path.indexOf(i)?'RETURN':'INGRESS');
+  const kind=gate===0?'BLOCKED':upstream.includes(i)?'INGRESS':(path.indexOf(to)<=path.indexOf(i)?'RETURN':'EGRESS');
   edges.push({from:String(i),to:String(to),kind,weight});
+  if(parents.has(to))parents.get(to).push(i);
   if(kind==='BLOCKED')typedResidue.push({from:i,to,reason:'ZERO_CANONICAL_CONTINUITY_GATE',weight:0});
  }
+ const multiParentTargets=[...parents].filter(([,from])=>from.length>1).map(([to,from])=>({address:to,parents:from}));
  const frame=runContinuityFrameR653({nodes,edges,step:0.1,mode});
  const diagnosticFrames=path.map(i=>[sourceNode(i,'OBSERVED_ROUTE_POSITION')]);
  const heightened=diagnosticFrames.length>=4?heightenedSequence(diagnosticFrames,1):null;
  const terminal=heightened?{velocity:heightened.velocity.at(-1)[0],acceleration:heightened.acceleration.at(-1)[0],jerk:heightened.jerk.at(-1)[0]}:null;
  const refs=path.map(i=>({address:i+1,stateIndex:i,continuity:Number(field.C[i]),plasticity:Number(field.Phi[i]),contradiction:Number(field.q[i]),burden:Number(field.Lambda[i]),scar:Number(field.scar[i]),next:Number(field.routeNext[i])+1}));
  return Object.freeze({schema:R671_SCHEMA,source:'src/mandala20736Runtime.ts',address,mode,states:path,sourceTrace:refs,cycleTo,edges,typedResidue,
-  frame,developmental:{...terminal,derivativeBasis:'ORDERED_ROUTE_STEPS_NOT_PHYSICAL_TIME',status:terminal?'COMPUTED':'INSUFFICIENT_DISTINCT_STATES_FOR_JERK'},
+  upstream,multiParentTargets,frame,developmental:{...terminal,derivativeBasis:'ORDERED_ROUTE_STEPS_NOT_PHYSICAL_TIME',status:terminal?'COMPUTED':'INSUFFICIENT_DISTINCT_STATES_FOR_JERK'},
   conservationResidual:frame.receipt.netContinuityDelta,modeProjectionChangedCanonical:false,canonicalMutation:false,
   executionProof:{class:'LOCAL_SOURCE_MODEL_EXECUTED',productionVerified:false,physicalModelValidated:false,sourceEvidence:'CANONICAL_FIELD_PACKET',gate:'DEPLOYMENT_AND_BROWSER_PROOF_REQUIRED'},
-  orderRule:'READ_STATE -> TRACE_ADMITTED_ROUTE -> TYPED_CARRY -> NONMUTATING_MODE_PROJECTION -> HEIGHTENED_DIFFERENCE -> PROOF_GATE',
+  orderRule:'READ_STATE -> TRACE_ADMITTED_ROUTE -> TYPED_MULTI_PARENT_CARRY -> NONMUTATING_MODE_PROJECTION -> HEIGHTENED_DIFFERENCE -> PROOF_GATE',
   boundary:'Address transitions and finite differences are canonical model operations, not measured elapsed physical time. Mode lenses alter projection, never source canonical packets.'});
 }
