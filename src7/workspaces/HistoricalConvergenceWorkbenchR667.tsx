@@ -10,8 +10,9 @@ export function HistoricalConvergenceWorkbenchR667(){
  const i=index(observer),next=field?.routeNext[i]??i;
  const [density,setDensity]=useState(24);
  const [showProof,setShowProof]=useState(false);
+ const [routeCursor,setRouteCursor]=useState(0);
  const move=(forward:number,strafe:number,vertical=0)=>setObserver(s=>stepObserverR666(s,{dt:.1,forward,strafe,vertical}));
- const trace=()=>{if(!field)return;const seen=new Set<number>(),out:number[]=[];let at=i;for(let k=0;k<64&&!seen.has(at);k++){seen.add(at);out.push(at);at=field.routeNext[at]}setRoute(out)};
+ const trace=()=>{if(!field)return;const seen=new Set<number>(),out:number[]=[];let at=i;for(let k=0;k<64&&!seen.has(at);k++){seen.add(at);out.push(at);at=field.routeNext[at]}setRoute(out);setRouteCursor(0)};
  const select=(n:number)=>setObserver(s=>({...s,address:address(n),revision:s.revision+1}));
  const metrics=field?{continuity:field.C[i],plasticity:field.Phi[i],contradiction:field.q[i],burden:field.Lambda[i],scar:field.scar[i],evidence:field.evidence[i],geometry:field.geometry[i],motion:field.motion[i],velocity:field.velocity[i],acceleration:field.acceleration[i]}:null;
  return <section data-r667-historical-workbench='true' style={{margin:'18px 0',padding:18,border:'1px solid #56718a',borderRadius:12}}>
@@ -34,7 +35,7 @@ export function HistoricalConvergenceWorkbenchR667(){
  <text x='12' y='20' fill='#c8d9e8' fontSize='12'>MODEL XY PROJECTION · sampled canonical states · selected address outlined</text>
  </svg>}
  {metrics&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:8,marginTop:12}}>{Object.entries(metrics).map(([key,value])=><div key={key} style={{padding:10,border:'1px solid #47617a',borderRadius:8}}><small>{key}</small><div>{value.toFixed(5)}</div></div>)}</div>}
- {route.length>0&&<div><h3>Computed routeNext sequence</h3><div style={{display:'flex',flexWrap:'wrap',gap:5}}>{route.map((n,k)=><button key={k} onClick={()=>select(n)}>{n+1}</button>)}</div></div>}
+ {route.length>0&&<div><h3>Computed routeNext sequence</h3><p>Route playback position {routeCursor+1} / {route.length} · selected address {i+1}</p><button onClick={()=>{const k=Math.max(0,routeCursor-1);setRouteCursor(k);select(route[k])}}>Previous route state</button><button onClick={()=>{const k=Math.min(route.length-1,routeCursor+1);setRouteCursor(k);select(route[k])}}>Next route state</button><div style={{display:'flex',flexWrap:'wrap',gap:5}}>{route.map((n,k)=><button key={k} onClick={()=>{setRouteCursor(k);select(n)}}>{n+1}</button>)}</div></div>}
  <button type='button' aria-expanded={showProof} onClick={()=>setShowProof(x=>!x)}>{showProof?'Hide':'Show'} verification details</button>
  {showProof&&<p role='status'>Historical archive integrity is verified. CI verifies source checks; live visual fidelity and calibrated physical reconstruction remain unverified.</p>}
  <details><summary>Historical provenance and runtime admission</summary><p>B053: {B053_RECOVERY_R665.parts} verified archive parts; {B053_RECOVERY_R665.verifiedFiles} SHA-256 matches; {B053_RECOVERY_R665.nestedArchives} nested ZIPs.</p>{B053_CAPABILITIES_R665.map(c=><p key={c.id}><b>{c.id}</b> {c.archivePath}: {capabilityAdmissionR665(c.id,'RUNTIME_VERIFIED').admitted?'verified':'runtime not verified'}</p>)}</details>
