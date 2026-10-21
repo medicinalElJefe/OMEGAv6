@@ -78,6 +78,7 @@ jobs:
           npx --yes tsx tests/r665-historical-convergence.mts
           npx --yes tsx tests/r666-historical-observer.mts
           node tests/r671-operational-modes-execution.mjs
+          npx --yes tsx tests/r673-local-governance.mts
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
