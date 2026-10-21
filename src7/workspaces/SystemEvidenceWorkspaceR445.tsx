@@ -1,4 +1,5 @@
-import {useEffect,useMemo,useState} from 'react';
+import {lazy,Suspense,useEffect,useMemo,useState} from 'react';
+const OperationalModesPanelR671=lazy(()=>import('./OperationalModesPanelR671').then(m=>({default:m.OperationalModesPanelR671})));
 import OmegaWorkspaceCockpitR18 from '../../src/OmegaWorkspaceCockpitR18';
 import SourceBackedModesPanelR21 from '../../src/SourceBackedModesPanelR21';
 import OmegaSpecialistSuite from '../../src/OmegaSpecialistSuite';
@@ -68,7 +69,7 @@ export default function SystemEvidenceWorkspaceR445({route,onNavigate,depth}:Pro
   {route==='System Atlas'&&<section data-r593-sound-temple='true' aria-label='Sound Temple'><h2>Sound Temple · SOMA</h2><p>Local 12-phase audio sonification. Sound begins only when you press Start audio. This is an audible model representation, not measured physical frequencies or a medical treatment.</p><button type='button' aria-expanded={soundOpen} onClick={()=>setSoundOpen(v=>!v)}>{soundOpen?'Close Sound Temple':'Open Sound Temple audio controls'}</button>{soundOpen&&<SomaAudioEngine record={record}/>}</section>}
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Cockpit'?<OmegaWorkspaceCockpitR18 variant='Cockpit' record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} modeCount={modeSummary.appliedCount}/>:
-    route==='Modes'?<SourceBackedModesPanelR21 record={record} address={address} onAddress={commit} onNavigate={onNavigate}/>:
+    route==='Modes'?<><SourceBackedModesPanelR21 record={record} address={address} onAddress={commit} onNavigate={onNavigate}/><Suspense fallback={<p role='status'>Loading operational mode executors…</p>}><OperationalModesPanelR671 address={address} onAddress={commit} onNavigate={onNavigate}/></Suspense></>:
     route==='Archive Census'?<ArchiveGovernanceControl onNavigate={onNavigate}/>:
     route==='Archive Operators'?<ArchiveGovernanceControl operators onNavigate={onNavigate}/>:
     route==='Plugins'?<PluginRegistryR45 onNavigate={onNavigate}/>:
