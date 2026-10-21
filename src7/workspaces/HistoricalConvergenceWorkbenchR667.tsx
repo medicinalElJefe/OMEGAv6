@@ -25,6 +25,11 @@ export function HistoricalConvergenceWorkbenchR667(){
  <button onClick={()=>setObserver(s=>stepObserverR666(s,{dt:0,yawDelta:.15}))}>Turn right</button><button onClick={()=>setObserver(s=>stepObserverR666(s,{dt:0,yawDelta:-.15}))}>Turn left</button>
  <button disabled={!field} onClick={()=>select(next)}>Follow computed route</button><button disabled={!field} onClick={trace}>Trace 64 transitions</button><button onClick={()=>{setObserver(defaultObserverR666());setRoute([])}}>Reset</button>
  </div>
+ {field&&<svg role='img' aria-label='Canonical model-space XY projection sampled from the 20736-state field' viewBox='0 0 640 300' style={{width:'100%',background:'#07121d',borderRadius:8,marginTop:12}}>
+ {Array.from({length:864},(_,k)=>k*24).map(j=><circle key={j} cx={320+field.x[j]*235} cy={150-field.y[j]*115} r={1.1+field.evidence[j]*1.2} fill='#74cdd9' opacity={Math.max(.18,field.C[j])}/>)}
+ <circle cx={320+field.x[i]*235} cy={150-field.y[i]*115} r='7' fill='none' stroke='#ffca70' strokeWidth='2'/>
+ <text x='12' y='20' fill='#c8d9e8' fontSize='12'>MODEL XY PROJECTION · 864 sampled canonical states · selected address outlined</text>
+ </svg>}
  {metrics&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:8,marginTop:12}}>{Object.entries(metrics).map(([key,value])=><div key={key} style={{padding:10,border:'1px solid #47617a',borderRadius:8}}><small>{key}</small><div>{value.toFixed(5)}</div></div>)}</div>}
  {route.length>0&&<div><h3>Computed routeNext sequence</h3><div style={{display:'flex',flexWrap:'wrap',gap:5}}>{route.map((n,k)=><button key={k} onClick={()=>select(n)}>{n+1}</button>)}</div></div>}
  <details><summary>Historical provenance and runtime admission</summary><p>B053: {B053_RECOVERY_R665.parts} verified archive parts; {B053_RECOVERY_R665.verifiedFiles} SHA-256 matches; {B053_RECOVERY_R665.nestedArchives} nested ZIPs.</p>{B053_CAPABILITIES_R665.map(c=><p key={c.id}><b>{c.id}</b> {c.archivePath}: {capabilityAdmissionR665(c.id,'RUNTIME_VERIFIED').admitted?'verified':'runtime not verified'}</p>)}</details>
