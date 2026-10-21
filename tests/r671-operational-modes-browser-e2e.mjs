@@ -23,6 +23,9 @@ try{
    await panel.getByRole('button',{name:'Execute selected mode'}).click();
    const receipt=panel.locator('[data-r671-execution-receipt="true"]');
    await receipt.waitFor({state:'visible',timeout:20000});
+   const governance=panel.locator('[data-r673-governance="held"]');
+   await governance.waitFor({state:'visible',timeout:15000});
+   if(!(await governance.innerText()).includes('advancement HELD'))throw Error(kind+': R457 governance gate missing');
    const first=await receipt.innerText();
    if(!first.includes('STABILIZE')||!first.includes('Local source-model execution')||!first.includes('The underlying CanonState is unchanged'))throw Error(kind+': missing real execution and nonmutation proof');
    const source=panel.locator('[aria-label="Computed route source states"] button');
