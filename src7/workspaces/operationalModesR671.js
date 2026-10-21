@@ -34,11 +34,13 @@ export function evaluateOperationalModesR671(field,address,mode='TRANSPORT',maxS
  const sourceNode=(i,id=String(i))=>({id,continuity:unit(Number(field.C[i]),'continuity'),plasticity:unit(Number(field.Phi[i]),'plasticity'),burden:Math.max(0,finite(Number(field.Lambda[i]),'burden')),contradiction:Math.max(0,finite(Number(field.q[i]),'contradiction')),scar:Math.max(0,finite(Number(field.scar[i]),'scar'))});
  // Recover bounded multi-parent ingress from the full canonical relation, not a fabricated radial tree.
  // The ordered path remains the developmental time-like sequence; upstream nodes are topology only.
- const included=new Set(path),upstream=[];
+ const directPath=new Set(path),included=new Set(path),upstream=[];
  for(let j=0;j<field.count&&upstream.length<8;j++){
   if(included.has(j))continue;
   const to=Number(field.routeNext[j]);
-  if(included.has(to)){upstream.push(j);included.add(j)}
+  // Direct ingress only. Do not accidentally promote transitive upstream hops
+  // into multiple parents of the selected route while the set expands.
+  if(directPath.has(to)){upstream.push(j);included.add(j)}
  }
  const nodes=[...path,...upstream].map(i=>sourceNode(i));
  const edges=[],typedResidue=[],parents=new Map(path.map(i=>[i,[]]));
