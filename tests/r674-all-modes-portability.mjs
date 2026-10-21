@@ -15,4 +15,7 @@ assert.deepEqual([...byName.keys()].sort(),expected.slice().sort());
 for(const item of contract.modes){assert.ok(item.binding&&item.operation&&item.class&&item.authority);assert.ok(fs.existsSync(item.authority),'mode authority missing: '+item.name+' '+item.authority)}
 for(const required of ['MULTI_PARENT_AND_CYCLIC_RELATIONS_ALLOWED','INGRESS_EGRESS_BLOCKED_RESIDUE_RETURN_PRESERVED','DEPLOYMENT_PROOF_REQUIRED_BEFORE_ADVANCEMENT','NO_NEW_PHYSICAL_PRIMITIVE','20736_IS_ADDRESS_SPACE_NOT_PHYSICAL_DIMENSIONS'])assert.ok(contract.invariants.includes(required));
 assert.ok(contract.unavailableClaims.some(x=>x.includes('179 historical modes')));
+assert.equal(contract.negativeEvidence?.[0]?.classification,'REPRODUCED_SOURCE_LEVEL_INVARIANT_CONTRADICTION');
+assert.equal(contract.negativeEvidence?.[0]?.promotion,'QUARANTINED_NO_CANONICAL_ADMISSION');
+assert.equal(contract.negativeEvidence?.[0]?.scarRetention,true);
 console.log('R674 PASS: actual source-backed all-modes identities retained; no model-tier magic, missing authority, invented physics or premature production acceptance');
