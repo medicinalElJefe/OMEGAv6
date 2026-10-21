@@ -9,7 +9,7 @@ export function traverseRelationalFieldR658({nodes,edges,startId,steps=[]}={}){
  const path=[{id:current,kind:'ORIGIN',state:byId.get(current)}],evidence=[];
  for(const [i,step] of steps.entries()){
   if(!step||typeof step!=='object'||!ids.has(step.to))throw Error('invalid destination');
-  const candidates=links.filter(e=>e.from===current&&e.to===step.to&&e.kind!=='BLOCKED'&&(step.kind===undefined||e.kind===step.kind));
+  const candidates=links.filter(e=>e.from===current&&e.to===step.to&&e.kind!=='BLOCKED'&&e.weight>0&&(step.kind===undefined||e.kind===step.kind));
   if(candidates.length!==1)throw Error(candidates.length?'ambiguous relational transition':'unadmitted relational transition');
   const edge=candidates[0];evidence.push({step:i,from:current,to:step.to,kind:edge.kind,weight:edge.weight});current=step.to;
   path.push({id:current,kind:edge.kind,state:byId.get(current)});
