@@ -53,6 +53,8 @@ jobs:
         run: node tests/r652-symmetry-asymmetry-modes.mjs
       - name: R651 executable woven continuity and Heightened Mode proof
         run: node tests/r651-woven-field-execution.mjs
+      - name: R658 typed relational traversal
+        run: node tests/r658-typed-relational-traversal.mjs
       - name: R657 proven address traversal
         run: node tests/r657-proven-address-traversal.mjs
       - name: R656 intrinsic SVG renderer provenance
