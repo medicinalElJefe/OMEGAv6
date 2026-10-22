@@ -86,6 +86,8 @@ jobs:
           node tests/r679-source-session-replay.mjs
       - name: Prove R680 original source archive library restoration
         run: python3 tests/r680-native-archive-reconciliation.py
+      - name: Prove R681 native decision discrimination and preserved negative evidence
+        run: python3 tests/r681-native-decision-truth-audit.py
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
@@ -233,6 +235,7 @@ jobs:
         run: |
           python -m py_compile scripts/recover_b053_native_archive_r680.py
           python tests/r680-native-archive-reconciliation.py
+          python tests/r681-native-decision-truth-audit.py
 
   cloudflare-auth-probe:
     if: github.event_name == 'pull_request'
