@@ -9,6 +9,7 @@ wrapper parts. Python standard library only; Windows and Linux compatible.
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import io
 import json
@@ -110,8 +111,8 @@ def reconcile(release_path:Path,output:Path,report:Path,
             try:
                 with zipfile.ZipFile(temp,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=6,allowZip64=True) as repaired:
                     for member in originals:
-                        if member.is_dir():repaired.writestr(member,b'');continue
-                        with donor.open(member) as source,repaired.open(member,'w',force_zip64=True) as sink:
+                        if member.is_dir():repaired.writestr(copy.copy(member),b'');continue
+                        with donor.open(member) as source,repaired.open(copy.copy(member),'w',force_zip64=True) as sink:
                             shutil.copyfileobj(source,sink,1024*1024)
                     for new_name,blob,_ in adds:repaired.writestr(new_name,blob)
                 with zipfile.ZipFile(temp) as check:
