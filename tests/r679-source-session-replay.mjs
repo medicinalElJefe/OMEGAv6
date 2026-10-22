@@ -1,0 +1,74 @@
+import assert from 'node:assert/strict';
+import {R679_SCHEMA,R679_GENESIS,R679_MAX_EVENTS,R679_STORAGE_KEY,R679_TRUTH_BOUNDARY,
+ createSourceSessionR679,sourceDigestR679,appendSourceExecutionR679,executeSourceActionR679,
+ verifySourceSessionR679,serializeSourceSessionR679,parseSourceSessionR679,validateActionR679} from '../src7/workspaces/canonicalSessionReplayR679.js';
+
+const count=20736,Float=Float32Array;
+const field={count,routeNext:new Uint32Array(count),C:new Float(count),Phi:new Float(count),
+ q:new Float(count),Lambda:new Float(count),scar:new Float(count),evidence:new Float(count),continuityGate:new Float(count)};
+for(let i=0;i<count;i++){
+ field.routeNext[i]=i;field.C[i]=.3+(i%12)*.025;field.Phi[i]=.56;
+ field.q[i]=.12;field.Lambda[i]=.17;field.scar[i]=.08;
+ field.evidence[i]=.9;field.continuityGate[i]=.85;
+}
+for(const [a,b] of [[4,5],[5,6],[6,7],[7,4],[8,5]])field.routeNext[a]=b;
+const frozenSource={C:Array.from(field.C.slice(0,12)),route:Array.from(field.routeNext.slice(0,12))};
+const start=await createSourceSessionR679(field,{createdAt:'2026-10-22T00:00:00.000Z'});
+assert.equal(start.schema,R679_SCHEMA);
+assert.equal(start.head,R679_GENESIS);
+assert.equal(start.events.length,0);
+assert.ok(/^[0-9a-f]{64}$/.test(start.sourceSha256));
+assert.ok(R679_TRUTH_BOUNDARY.includes('read-only'));
+assert.equal(R679_MAX_EVENTS,128);
+assert.equal(R679_STORAGE_KEY,'omega.r679.model.session.v1');
+assert.equal((await verifySourceSessionR679(start,field)).valid,true,'empty initialized chain verifies');
+const mode={type:'MODE_RUN',address:4,mode:'STABILIZE',depth:10};
+const op={type:'OPERATOR_RUN',address:4,channel:'C',operation:'P_rw',iterations:3};
+const donor={type:'DONOR_REPLAY',effectiveUpdates:59};
+const s1=await appendSourceExecutionR679(start,field,mode);
+assert.equal(s1.events.length,1);
+assert.equal(s1.events[0].index,0);
+assert.equal(s1.events[0].previousHash,R679_GENESIS);
+assert.equal(s1.canonicalMutation,false);
+assert.equal(start.events.length,0,'source session must not be mutated');
+const s2=await appendSourceExecutionR679(s1,field,op);
+const s3=await appendSourceExecutionR679(s2,field,donor);
+assert.equal(s3.events.length,3);
+assert.equal(s3.events[2].proofAuthority,'SOURCE_DONOR_PARITY_R678');
+assert.equal(s3.events[2].outputHash,'5f2bed97e66c0fe0e0755d3c805ed591bd37a5100e099308c998f73280381ed5');
+assert.equal((await executeSourceActionR679(field,mode)).outputHash,s1.events[0].outputHash);
+assert.equal((await executeSourceActionR679(field,op)).outputHash,s2.events[1].outputHash);
+const verified=await verifySourceSessionR679(s3,field);
+assert.equal(verified.valid,true,JSON.stringify(verified.failures));
+assert.equal(verified.verifiedEvents,3);
+assert.equal(verified.head,s3.head);
+assert.equal(verified.productionDeploymentProved,false);
+assert.equal(verified.externalDeviceProved,false);
+assert.equal(verified.canonicalMutation,false);
+const json=serializeSourceSessionR679(s3);
+const restored=parseSourceSessionR679(json);
+assert.deepEqual(restored,s3,'export/import preserves exact session');
+assert.equal((await verifySourceSessionR679(restored,field)).valid,true,'restart/import replay reconstructs current exact source');
+const altered=structuredClone(restored);
+altered.events[0].action.mode='EXPLORE';
+const invalid=await verifySourceSessionR679(altered,field);
+assert.equal(invalid.valid,false);
+assert.ok(invalid.failures.some(v=>v.includes('CHAIN_HASH:0')||v.includes('REPLAY_OUTPUT:0')));
+await assert.rejects(()=>appendSourceExecutionR679(altered,field,op),/existing session hash\/replay failed/,'cannot append to altered historical record');
+const alteredOutput=structuredClone(restored);alteredOutput.events[1].outputHash='0'.repeat(64);
+assert.equal((await verifySourceSessionR679(alteredOutput,field)).valid,false);
+const alteredHead=structuredClone(restored);alteredHead.head='f'.repeat(64);
+assert.equal((await verifySourceSessionR679(alteredHead,field)).valid,false);
+const corruptedSource={...field,C:Float32Array.from(field.C)};corruptedSource.C[4]+=.125;
+assert.notEqual(await sourceDigestR679(corruptedSource),start.sourceSha256);
+const held=await verifySourceSessionR679(s3,corruptedSource);
+assert.ok(held.failures.includes('SOURCE_SHA_MISMATCH'));
+await assert.rejects(()=>appendSourceExecutionR679(s3,corruptedSource,mode),/source changed/);
+assert.deepEqual(Array.from(field.C.slice(0,12)),frozenSource.C);
+assert.deepEqual(Array.from(field.routeNext.slice(0,12)),frozenSource.route);
+assert.throws(()=>validateActionR679({type:'MODE_RUN',address:4,mode:'INVENTED',depth:10}));
+assert.throws(()=>validateActionR679({type:'OPERATOR_RUN',address:4,channel:'routeNext',operation:'P_rw',iterations:1}));
+assert.throws(()=>validateActionR679({type:'DONOR_REPLAY',effectiveUpdates:60}));
+assert.throws(()=>parseSourceSessionR679('x'.repeat(600000)));
+assert.throws(()=>parseSourceSessionR679(JSON.stringify({...restored,admission:'PRODUCTION'})));
+console.log('R679 PASS: original source fingerprint, 3 real executors, native donor output hash, chain replay across export/import, tamper detection, stale-source rejection and no CanonState mutation');
