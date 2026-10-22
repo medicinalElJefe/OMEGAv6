@@ -37,6 +37,16 @@ export function operatorNodeForAddressR676(address){
  const d=Math.floor(address/1728),p=Math.floor(address%1728/144),r=Math.floor(address%144/12),l=address%12;
  return {node:operatorNodeR676(d,p,r),layer:l,address};
 }
+/** Source-exact native disk coordinates: Nodes_v9.csv has theta=2πu/12,
+ * r=sqrt((v+0.5)/12), x=r cos(theta), y=r sin(theta).
+ * Local geometric projection only; domain D remains an independent address.
+ */
+export function operatorDiskPointR676(id){
+ const {d,p,r}=decodeOperatorNodeR676(id);
+ const theta=(2*Math.PI*p)/12;
+ const radius=Math.sqrt((r+0.5)/12);
+ return {node:id,d,p,r,theta,radius,x:radius*Math.cos(theta),y:radius*Math.sin(theta)};
+}
 export function edgesFromOperatorNodeR676(id){
  const {d,p,r}=decodeOperatorNodeR676(id),to=(D,P,R)=>operatorNodeR676(D,P,R);
  const edges=[];
