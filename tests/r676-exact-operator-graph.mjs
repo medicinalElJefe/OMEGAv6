@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {R676_DONOR_PROOF,R676_SCHEMA,edgesFromOperatorNodeR676,typedOperatorEdgesR676,operatorNodeR676,decodeOperatorNodeR676,operatorNodeForAddressR676,collapseCanonicalFieldR676,applyOperatorR676,propagateOperatorR676} from '../src7/workspaces/operatorGraphR676.js';
+import {R676_DONOR_PROOF,R676_SCHEMA,edgesFromOperatorNodeR676,typedOperatorEdgesR676,operatorNodeR676,decodeOperatorNodeR676,operatorNodeForAddressR676,operatorDiskPointR676,collapseCanonicalFieldR676,applyOperatorR676,propagateOperatorR676} from '../src7/workspaces/operatorGraphR676.js';
 const edges=[...typedOperatorEdgesR676()];
 assert.equal(R676_DONOR_PROOF.nodes,1728);
 assert.equal(R676_DONOR_PROOF.typedEdges,18144);
@@ -20,6 +20,18 @@ for(const n of [0,1,11,12,132,143,144,432,864,1727]){
  assert.ok(e.length>=8&&e.length<=11);
  for(const x of e){assert.equal(x.src,n);assert.ok(x.dst>=0&&x.dst<1728&&x.weight>0)}
 }
+let maxNativeDiskError=0;
+for(let id=0;id<1728;id++){
+ const point=operatorDiskPointR676(id);
+ const u=id%12,v=Math.floor(id%144/12);
+ assert.equal(point.p,u);
+ assert.equal(point.r,v);
+ assert.equal(point.node,id);
+ const theta=2*Math.PI*u/12,rad=Math.sqrt((v+.5)/12);
+ maxNativeDiskError=Math.max(maxNativeDiskError,Math.abs(point.theta-theta),Math.abs(point.radius-rad),Math.abs(point.x-rad*Math.cos(theta)),Math.abs(point.y-rad*Math.sin(theta)));
+}
+assert.ok(maxNativeDiskError<1e-14,'all 1728 original Nodes_v9.csv geometry positions agree with source law');
+assert.throws(()=>operatorDiskPointR676(-1),/invalid/);
 const basis=(at)=>{const x=new Float64Array(1728);x[at]=1;return x};
 const eps=1e-7;
 const pplus=applyOperatorR676(basis(1),'P_plus_011');
