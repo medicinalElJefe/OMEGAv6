@@ -73,6 +73,14 @@ jobs:
           node tests/r655-intrinsic-field-projection.mjs
       - name: R650 year-corpus capability conservation truth gate
         run: node tests/r650-year-corpus-conservation-gate.mjs
+      - name: Prove R665-R675 accumulated modes, evidence and source contracts
+        run: |
+          npx --yes tsx tests/r665-historical-convergence.mts
+          npx --yes tsx tests/r666-historical-observer.mts
+          node tests/r671-operational-modes-execution.mjs
+          npx --yes tsx tests/r673-local-governance.mts
+          node tests/r674-all-modes-portability.mjs
+          node tests/r675-historical-decision-contradiction.mjs
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
@@ -188,6 +196,10 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r554-omega7-ux-atlas-browser-e2e.mjs
+      - name: Prove R671 actual operational modes execution on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r671-operational-modes-browser-e2e.mjs
       - name: Stop OMEGA7 parity preview
         if: always()
         shell: bash
