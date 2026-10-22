@@ -73,7 +73,7 @@ jobs:
           node tests/r655-intrinsic-field-projection.mjs
       - name: R650 year-corpus capability conservation truth gate
         run: node tests/r650-year-corpus-conservation-gate.mjs
-      - name: Prove R665-R678 accumulated modes, exact geometry and historical donor replay
+      - name: Prove R665-R679 accumulated modes, original donor replay and native session continuity
         run: |
           npx --yes tsx tests/r665-historical-convergence.mts
           npx --yes tsx tests/r666-historical-observer.mts
@@ -83,6 +83,7 @@ jobs:
           node tests/r675-historical-decision-contradiction.mjs
           node tests/r676-exact-operator-graph.mjs
           node tests/r678-original-donor-full-vector-parity.mjs
+          node tests/r679-source-session-replay.mjs
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
@@ -206,6 +207,10 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r676-exact-operator-browser-e2e.mjs
+      - name: Prove R679 canonical execution sessions and tamper rejection on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r679-canonical-session-browser-e2e.mjs
       - name: Stop OMEGA7 parity preview
         if: always()
         shell: bash
@@ -625,6 +630,11 @@ jobs:
         id: live_original_operator_r678
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r676-exact-operator-browser-e2e.mjs
+      - name: Verify R679 deterministic session continuity, export/import and tamper refusal on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: live_canonical_session_r679
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r679-canonical-session-browser-e2e.mjs
       - name: Verify live R560 weather source, persisted view and satellite switch on exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         shell: bash
