@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useState} from 'react';
 import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala20736Runtime';
-import {collapseCanonicalFieldR676,decodeOperatorNodeR676,operatorNodeForAddressR676,propagateOperatorR676,applyOperatorR676,R676_DONOR_PROOF} from './operatorGraphR676.js';
+import {collapseCanonicalFieldR676,decodeOperatorNodeR676,operatorNodeForAddressR676,propagateOperatorR676,applyOperatorR676,operatorDiskPointR676,edgesFromOperatorNodeR676,R676_DONOR_PROOF} from './operatorGraphR676.js';
 
 type Props={address:number;onAddress:(next:number)=>void};
 const fmt=(x:number)=>Number.isFinite(x)?x.toFixed(7):'UNAVAILABLE';
@@ -13,6 +13,15 @@ export function OperatorGraphPanelR676({address,onAddress}:Props){
  useEffect(()=>{setResult(null)},[address,channel,iterations]);
  const location=operatorNodeForAddressR676(address);
  const top=useMemo(()=>{if(!result)return[];return Array.from(result.values,(value,node)=>({node,value})).sort((a,b)=>b.value-a.value||a.node-b.node).slice(0,12)},[result]);
+ const disk=useMemo(()=>{
+  if(!result)return null;
+  const domain=Math.floor(location.node/144);
+  const nodes=Array.from({length:144},(_,i)=>operatorDiskPointR676(domain*144+i));
+  const current=operatorDiskPointR676(location.node);
+  const localEdges=edgesFromOperatorNodeR676(location.node).filter(e=>Math.floor(e.dst/144)===domain).map(e=>({kind:e.type,weight:e.weight,dst:operatorDiskPointR676(e.dst)}));
+  const max=Math.max(1e-12,...nodes.map(n=>result.values[n.node]));
+  return {domain,nodes,current,localEdges,max};
+ },[result,location.node]);
  const run=(type:string)=>{
   try{
    if(!field)throw Error('Load source canonical field before executing');
@@ -46,6 +55,17 @@ export function OperatorGraphPanelR676({address,onAddress}:Props){
    {error&&<p role='alert'>{error}</p>}
    {result&&<div data-r676-operator-receipt='true'>
     <p><b>{result.type}</b> · {result.values.length} computed operator nodes · resulting sum {fmt(measure(result.values))} · {result.ledger.length} completed propagation iterations</p>
+    {disk&&<div data-r677-operator-disk='source-exact' style={{margin:'12px 0',maxWidth:540}}>
+      <h4>Original donor disk geometry · D{disk.domain+1}</h4>
+      <p>144 original phase/regulation coordinates: θ=2π(P−1)/12; radius=√((R−0.5)/12). Cyan intensity is the selected computed operator channel. Gold is the selected node. Connecting lines show only directly observed same-domain typed edges; cross-domain links remain active in the operator but are not falsely drawn inside this disk.</p>
+      <svg viewBox='0 0 360 360' role='img' aria-label={'Source-exact 144-node disk projection for domain '+(disk.domain+1)} style={{display:'block',width:'100%',height:'auto',background:'#071622',border:'1px solid #344a5e',borderRadius:8}}>
+      {[1,3,6,9,12].map(r=><circle key={r} cx={180} cy={180} r={Math.sqrt((r-.5)/12)*160} fill='none' stroke='#3e5b6c' strokeWidth='.7'/>)}
+      {disk.localEdges.map((e,k)=><line key={k} x1={180+disk.current.x*160} y1={180-disk.current.y*160} x2={180+e.dst.x*160} y2={180-e.dst.y*160} stroke={e.kind==='LOCAL'?'#9bafbc':'#d3a76a'} strokeOpacity='.65' strokeWidth={.7+e.weight}/>)}
+      {disk.nodes.map(n=><circle key={n.node} cx={180+n.x*160} cy={180-n.y*160} r={n.node===location.node?5:2.4} fill={n.node===location.node?'#ffd586':'#79d5e4'} opacity={n.node===location.node?1:Math.max(.2,Math.min(1,result.values[n.node]/disk.max))} stroke={n.node===location.node?'#fff3d5':'none'} strokeWidth={n.node===location.node?1.3:0}/>)}
+      <text x='10' y='20' fill='#d2deec' fontSize='12'>SOURCE MODEL · D{disk.domain+1} · 144/1728 NODES</text>
+      <text x='10' y='347' fill='#afc4d2' fontSize='11'>Selected {location.node} · Phase {disk.current.p+1} · Regulation {disk.current.r+1}</text>
+      </svg>
+     </div>}
     <h4>Strongest returned nodes</h4>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:8}}>
      {top.map(x=><button type='button' key={x.node} onClick={()=>pick(x.node)} title={'Select operator node '+x.node+' preserving current layer'} style={{padding:8,textAlign:'left',border:'1px solid #516e80',borderRadius:8}}><b>Node {x.node}</b><div>{fmt(x.value)}</div></button>)}
