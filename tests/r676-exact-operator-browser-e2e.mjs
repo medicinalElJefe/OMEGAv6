@@ -40,6 +40,12 @@ try{
    await run.click();
    const result=panel.locator('[data-r676-operator-receipt="true"]');
    await result.waitFor({state:'visible',timeout:20000});
+   const disk=panel.locator('[data-r677-operator-disk="source-exact"] svg');
+   await disk.waitFor({state:'visible',timeout:15000});
+   const dots=await disk.locator('circle[fill="#79d5e4"]').count();
+   if(dots!==143)throw Error(label+': native polar disk lost source nodes: '+dots+'/143 unselected');
+   const diskDescription=await disk.getAttribute('aria-label');
+   if(!diskDescription?.includes('144-node disk'))throw Error(label+': historical native geometry source boundary unavailable');
    let text=await result.innerText();
    if(!text.includes('P_plus_011')||!text.includes('1728')&&!text.includes('1,728'))throw Error(label+': restored construct operator not executed');
    await panel.getByRole('button',{name:'Prune 01−1'}).click();
