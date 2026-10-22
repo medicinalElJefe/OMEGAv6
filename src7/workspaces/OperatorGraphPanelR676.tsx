@@ -91,7 +91,7 @@ export function OperatorGraphPanelR676({address,onAddress}:Props){
      {top.map(x=><button type='button' key={x.node} onClick={()=>pick(x.node)} title={'Select operator node '+x.node+' preserving current layer'} style={{padding:8,textAlign:'left',border:'1px solid #516e80',borderRadius:8}}><b>Node {x.node}</b><div>{fmt(x.value)}</div></button>)}
     </div>
     {result.ledger.length>0&&<details><summary>Iteration ledger and clipping residuals</summary>{result.ledger.map(row=><div key={row.step}>Step {row.step}: retained mass {fmt(row.preNormalizationMass)}, clipped negative mass {fmt(row.clippedNegativeMass)}</div>)}</details>}
-    <p><b>Proof boundary:</b> B053 typed edge identities are independently matched to the original 18,144-edge donor. This interactive mathematical projection is source-model execution, not a calibrated physical model or automatic CanonState promotion. Full historical 60-step propagation numerical parity remains unverified.</p>
+    <p><b>Proof boundary:</b> B053 typed edge identities are independently matched to the original 18,144-edge donor. This interactive mathematical projection is source-model execution, not a calibrated physical model or automatic CanonState promotion. The historical source labels T=60, but its stored final distribution is reproduced by 59 effective updates (R678); this disagreement remains in the proof ledger.</p>
     <details><summary>Historical source authority</summary><p>{R676_DONOR_PROOF.zip} / {R676_DONOR_PROOF.source} · canonical edge digest {R676_DONOR_PROOF.canonicalSortedEdgeSha256}</p></details>
    </div>}
   </div>}
