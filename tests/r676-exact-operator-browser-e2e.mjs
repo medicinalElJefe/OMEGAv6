@@ -1,5 +1,15 @@
 import {chromium} from 'playwright';
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
+const expectedSha=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
+if(expectedSha){
+ if(!/^[0-9a-f]{40}$/i.test(expectedSha))throw Error('R676/R678 requires exact 40-character promoted SHA');
+ const response=await fetch(base+'/omega-build-receipt.json?r678='+Date.now(),{headers:{'cache-control':'no-cache'}});
+ if(!response.ok)throw Error('R676/R678 promoted build receipt HTTP '+response.status);
+ const receipt=await response.json();
+ if(receipt?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'||receipt?.source?.sha!==expectedSha||receipt?.promotion?.promotedMergeSha!==expectedSha)
+  throw Error('R676/R678 source candidate is not the exact promoted production SHA');
+}
+
 const browser=await chromium.launch({headless:true});
 try{
  for(const [label,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
