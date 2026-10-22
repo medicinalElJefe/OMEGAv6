@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala20736Runtime';
 import {collapseCanonicalFieldR676,decodeOperatorNodeR676,operatorNodeForAddressR676,propagateOperatorR676,applyOperatorR676,operatorDiskPointR676,edgesFromOperatorNodeR676,R676_DONOR_PROOF} from './operatorGraphR676.js';
+import {replayHistoricalDonorR678,verifyOriginalDonorReplayR678,R678_DONOR_REPLAY_PROOF} from './historicalOperatorReplayR678.js';
 
 type Props={address:number;onAddress:(next:number)=>void};
 const fmt=(x:number)=>Number.isFinite(x)?x.toFixed(7):'UNAVAILABLE';
@@ -9,8 +10,9 @@ export function OperatorGraphPanelR676({address,onAddress}:Props){
  const [open,setOpen]=useState(false),[field,setField]=useState<Mandala20736Field|null>(null);
  const [error,setError]=useState(''),[channel,setChannel]=useState('C'),[iterations,setIterations]=useState(12);
  const [result,setResult]=useState<{values:Float64Array;ledger:any[];type:string}|null>(null);
+ const [historicalParity,setHistoricalParity]=useState<{match:boolean;sha256:string;expectedSha256:string}|null>(null);
  useEffect(()=>{if(!open||field)return;let live=true;getMandala20736Field().then(f=>{if(live)setField(f)}).catch(e=>{if(live)setError(String(e))});return()=>{live=false}},[open,field]);
- useEffect(()=>{setResult(null)},[address,channel,iterations]);
+ useEffect(()=>{setResult(null);setHistoricalParity(null)},[address,channel,iterations]);
  const location=operatorNodeForAddressR676(address);
  const top=useMemo(()=>{if(!result)return[];return Array.from(result.values,(value,node)=>({node,value})).sort((a,b)=>b.value-a.value||a.node-b.node).slice(0,12)},[result]);
  const disk=useMemo(()=>{
@@ -23,6 +25,7 @@ export function OperatorGraphPanelR676({address,onAddress}:Props){
   return {domain,nodes,current,localEdges,max};
  },[result,location.node]);
  const run=(type:string)=>{
+  setHistoricalParity(null);
   try{
    if(!field)throw Error('Load source canonical field before executing');
    const seed=collapseCanonicalFieldR676(field,channel);
@@ -35,6 +38,16 @@ export function OperatorGraphPanelR676({address,onAddress}:Props){
    }
    setError('');
   }catch(e){setError(e instanceof Error?e.message:String(e));setResult(null)}
+ };
+ const replayOriginal=async()=>{
+  setHistoricalParity(null);
+  try{
+   const replay=replayHistoricalDonorR678(59);
+   const check=await verifyOriginalDonorReplayR678(replay.values);
+   setResult({values:replay.values,ledger:replay.ledger,type:'HISTORICAL_59_UPDATE_REPLAY'});
+   setHistoricalParity({match:check.match,sha256:check.sha256,expectedSha256:check.expectedSha256});
+   setError(check.match?'':'Original donor hash does not match. Replay held.');
+  }catch(e){setResult(null);setError(e instanceof Error?e.message:String(e))}
  };
  const pick=(node:number)=>{const c=decodeOperatorNodeR676(node);onAddress(c.d*1728+c.p*144+c.r*12+location.layer)};
  return <section data-r676-operator-panel='true' style={{padding:16,margin:'16px 0',border:'1px solid #536579',borderRadius:12}}>
@@ -51,6 +64,7 @@ export function OperatorGraphPanelR676({address,onAddress}:Props){
     <button type='button' disabled={!field} onClick={()=>run('P_minus_01m1')}>Prune 01−1</button>
     <button type='button' disabled={!field} onClick={()=>run('P_rw')}>Random walk</button>
     <button type='button' disabled={!field} onClick={()=>run('PROPAGATE')}>Propagate construct−prune</button>
+    <button type='button' onClick={replayOriginal}>Verify original donor CSV (59 updates)</button>
    </div>
    {error&&<p role='alert'>{error}</p>}
    {result&&<div data-r676-operator-receipt='true'>
@@ -66,6 +80,12 @@ export function OperatorGraphPanelR676({address,onAddress}:Props){
       <text x='10' y='347' fill='#afc4d2' fontSize='11'>Selected {location.node} · Phase {disk.current.p+1} · Regulation {disk.current.r+1}</text>
       </svg>
      </div>}
+    {historicalParity&&<div data-r678-historical-parity={historicalParity.match?'matched':'held'} style={{padding:10,border:'1px solid #687e8e',borderRadius:8,margin:'10px 0'}}>
+     <b>Original 1,728-value donor replay · {historicalParity.match?'SOURCE-MATCHED':'HELD'}</b>
+     <p>Source README says T={R678_DONOR_REPLAY_PROOF.claimedIterations}; original CSV actually matches {R678_DONOR_REPLAY_PROOF.matchedEffectiveUpdates} effective updates. The discrepancy is retained explicitly. Every output value is verified at seven-decimal precision against the archived distribution's SHA-256.</p>
+     <p style={{overflowWrap:'anywhere'}}>Computed source digest {historicalParity.sha256}; archived digest {historicalParity.expectedSha256}</p>
+     <p>Reconstructed source-model replay, not live physical observation, not a new physical primitive, and not CanonState promotion.</p>
+    </div>}
     <h4>Strongest returned nodes</h4>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:8}}>
      {top.map(x=><button type='button' key={x.node} onClick={()=>pick(x.node)} title={'Select operator node '+x.node+' preserving current layer'} style={{padding:8,textAlign:'left',border:'1px solid #516e80',borderRadius:8}}><b>Node {x.node}</b><div>{fmt(x.value)}</div></button>)}
