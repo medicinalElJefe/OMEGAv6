@@ -17,7 +17,7 @@ export const R678_DONOR_REPLAY_PROOF=Object.freeze({
  eta:.35,alpha:1,beta:.85,
  quantizationDecimals:7,
  fullVectorSha256:'5f2bed97e66c0fe0e0755d3c805ed591bd37a5100e099308c998f73280381ed5',
- sourceRelativeMatrixMaximumDifference:4.768371586472142e-8,
+ archivedMatrixMaximumAbsoluteDifference:4.768371586472142e-8,
  beforeRepairL1Difference:.2992606925725243,
  observed59StepL1Difference:2.5582838971047146e-8,
  noPhysicalAccuracyClaim:true,
