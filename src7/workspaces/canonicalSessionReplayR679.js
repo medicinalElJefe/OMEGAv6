@@ -83,14 +83,7 @@ export async function executeSourceActionR679(field,raw){
  const action=validateActionR679(raw);
  if(action.type==='MODE_RUN'){
   const receipt=evaluateOperationalModesR671(field,action.address,action.mode,action.depth);
-  const proof={schema:receipt.schema,mode:receipt.mode,states:receipt.states,cycleTo:receipt.cycleTo,
-   edges:receipt.edges,typedResidue:receipt.typedResidue,upstream:receipt.upstream,
-   multiParentTargets:receipt.multiParentTargets,
-   continuityResidual:receipt.conservationResidual,
-   development:receipt.developmental,
-   frameReceipt:receipt.frame.receipt,projectionTotals:receipt.frame.projection.totals,
-   canonicalMutation:receipt.canonicalMutation};
-  return Object.freeze({family:action.type,outputHash:await sha256TextR679(proof),
+  return Object.freeze({family:action.type,outputHash:await sha256TextR679(receipt),
    nodes:receipt.states.length,summary:'R651–R653 '+receipt.mode+'; '+receipt.states.length+' canonical route states; projection only',
    proofAuthority:'LOCAL_SOURCE_MODEL_R671'});
  }
