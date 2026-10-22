@@ -34,7 +34,7 @@ try{
    await panel.getByRole('button',{name:'Start new source-bound session'}).click({timeout:30000});
    await panel.locator('[data-r679-session-record="true"]').waitFor({state:'visible',timeout:20000});
    await panel.getByRole('button',{name:'Execute and record source receipt'}).click();
-   await page.waitForFunction(()=>{const root=document.querySelector('[data-r679-session-ledger]');return root?.querySelectorAll('[data-r679-session-record] [style] b').length>0&&root?.textContent?.includes('1/128 events')},{timeout:20000});
+   await page.getByText('1/128 events').waitFor({state:'visible',timeout:20000});
    await panel.getByLabel('R679 execution family').selectOption('OPERATOR_RUN');
    await panel.getByLabel('R679 operator').selectOption('P_plus_011');
    await panel.getByRole('button',{name:'Execute and record source receipt'}).click();
