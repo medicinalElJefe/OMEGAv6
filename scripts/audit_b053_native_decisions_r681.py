@@ -88,7 +88,9 @@ def audit_database(database: Path, *, expected_count: int = EXPECTED_COUNT,
             LEFT JOIN atlas_nodes AS a ON a.node_id=r.node_id
             ORDER BY r.node_id
         """).fetchall()
-        if len(rows) != expected_count or any(row[7] is None for row in rows):
+        if len(rows) != expected_count:
+            raise ValueError(f"R681 runtime cardinality mismatch: {len(rows)} != {expected_count}")
+        if any(row[7] is None for row in rows):
             raise ValueError("R681 missing/duplicated runtime-to-atlas node provenance")
         stored = Counter()
         computed = Counter()
