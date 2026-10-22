@@ -16,10 +16,24 @@ try{
    await page.locator('.o7-native-workspace[data-route="Modes"]').waitFor({state:'visible',timeout:30000});
    const openLegacy=page.getByRole('button',{name:'Open full Modes workspace'});
    if(await openLegacy.isVisible())await openLegacy.click();
-   if(!(await page.locator('.sbm21-app').isVisible()))throw Error(label+': original source-backed mode catalog disappeared');
-   if(!(await page.locator('[data-r671-operational-modes="true"]').isVisible()))throw Error(label+': R671 woven continuity kernel disappeared');
+   const catalog=page.locator('.sbm21-app');
+   const woven=page.locator('[data-r671-operational-modes="true"]');
    const panel=page.locator('[data-r676-operator-panel="true"]');
-   await panel.waitFor({state:'visible',timeout:30000});
+   // All three surfaces are asynchronously imported; navigation appearing does not
+   // imply the contained lazy modules have committed to the DOM.
+   for(const [name,node] of [['existing source-mode catalog',catalog],['R671 woven continuity executor',woven],['R676 exact graph operator',panel]]){
+    try{await node.waitFor({state:'visible',timeout:30000})}
+    catch(error){
+     const diagnostic=await page.evaluate(()=>({route:document.querySelector('.o7-native-workspace')?.getAttribute('data-route'),
+      instrumentOpen:!!document.querySelector('.o7-native-surface'),
+      loaders:[...document.querySelectorAll('[role=status]')].map(e=>e.textContent?.trim().slice(0,160)),
+      failures:[...document.querySelectorAll('[role=alert],.o7-native-failure')].map(e=>e.textContent?.trim().slice(0,400)),
+      sourceModeMounted:!!document.querySelector('.sbm21-app'),
+      wovenMounted:!!document.querySelector('[data-r671-operational-modes]'),
+      operatorMounted:!!document.querySelector('[data-r676-operator-panel]')}));
+     throw Error(label+': '+name+' did not mount: '+JSON.stringify({diagnostic,pageErrors:errors})+'; '+String(error))
+    }
+   }
    await panel.getByRole('button',{name:'Open historical construct/prune operator'}).click();
    const run=panel.getByRole('button',{name:'Construct 011'});
    await run.waitFor({state:'visible',timeout:30000});
