@@ -121,10 +121,11 @@ function requireEnvelope(session){
  if(!session||session.schema!==R679_SCHEMA||typeof session.sourceSha256!=='string'||!/^[a-f0-9]{64}$/.test(session.sourceSha256)
   ||!Array.isArray(session.events)||session.events.length>R679_MAX_EVENTS
   ||typeof session.head!=='string'||!/^([0-9a-f]{64})$/.test(session.head)
-  ||session.admission!=='LOCAL_MODEL_ONLY'||session.canonicalMutation!==false)throw Error('R679 invalid or untrusted session envelope');
+  ||session.admission!=='LOCAL_MODEL_ONLY'||session.canonicalMutation!==false
+  ||typeof session.createdAt!=='string'||!Number.isFinite(Date.parse(session.createdAt)))throw Error('R679 invalid or untrusted session envelope');
 }
-async function eventHash(previousHash,index,action,outputHash,sourceSha256){
- return sha256TextR679({previousHash,index,action,outputHash,sourceSha256});
+async function eventHash(previousHash,index,action,outputHash,sourceSha256,createdAt){
+ return sha256TextR679({previousHash,index,action,outputHash,sourceSha256,createdAt});
 }
 export async function appendSourceExecutionR679(session,field,action){
  requireEnvelope(session);
@@ -132,14 +133,12 @@ export async function appendSourceExecutionR679(session,field,action){
  const actualSource=await sourceDigestR679(field);
  if(actualSource!==session.sourceSha256)throw Error('R679 source changed; historical session must be held');
  // Reject mutation of earlier events before appending, not merely at manual replay.
- if(session.events.length){
-  const replay=await verifySourceSessionR679(session,field);
-  if(!replay.valid)throw Error('R679 existing session hash/replay failed: '+replay.failures.join(','));
- }
+ const replay=await verifySourceSessionR679(session,field);
+ if(!replay.valid)throw Error('R679 existing session hash/replay failed: '+replay.failures.join(','));
  const operation=validateActionR679(action);
  const result=await executeSourceActionR679(field,operation);
  const index=session.events.length,previousHash=session.head;
- const recordHash=await eventHash(previousHash,index,operation,result.outputHash,session.sourceSha256);
+ const recordHash=await eventHash(previousHash,index,operation,result.outputHash,session.sourceSha256,session.createdAt);
  const event=Object.freeze({index,previousHash,recordHash,action:operation,outputHash:result.outputHash,
   family:result.family,summary:result.summary,proofAuthority:result.proofAuthority,nodes:result.nodes});
  return Object.freeze({...session,head:recordHash,events:Object.freeze([...session.events,event])});
@@ -160,7 +159,7 @@ export async function verifySourceSessionR679(session,field){
    if(computed.outputHash!==entry.outputHash)failures.push('REPLAY_OUTPUT:'+i);
    if(computed.family!==entry.family||computed.summary!==entry.summary||computed.proofAuthority!==entry.proofAuthority||computed.nodes!==entry.nodes)
     failures.push('REPLAY_METADATA:'+i);
-   const expectedHash=await eventHash(previous,i,action,entry.outputHash,session.sourceSha256);
+   const expectedHash=await eventHash(previous,i,action,entry.outputHash,session.sourceSha256,session.createdAt);
    if(expectedHash!==entry.recordHash)failures.push('CHAIN_HASH:'+i);
    previous=entry.recordHash;
    verifiedEvents++;
