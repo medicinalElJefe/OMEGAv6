@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
+import {evaluateOperationalModesR671} from '../src7/workspaces/operationalModesR671.js';
 import {R679_SCHEMA,R679_GENESIS,R679_MAX_EVENTS,R679_STORAGE_KEY,R679_TRUTH_BOUNDARY,
- createSourceSessionR679,sourceDigestR679,appendSourceExecutionR679,executeSourceActionR679,
+ createSourceSessionR679,sourceDigestR679,appendSourceExecutionR679,executeSourceActionR679,sha256TextR679,
  verifySourceSessionR679,serializeSourceSessionR679,parseSourceSessionR679,validateActionR679} from '../src7/workspaces/canonicalSessionReplayR679.js';
 
 const count=20736,Float=Float32Array;
@@ -37,6 +38,7 @@ assert.equal(s3.events.length,3);
 assert.equal(s3.events[2].proofAuthority,'SOURCE_DONOR_PARITY_R678');
 assert.equal(s3.events[2].outputHash,'5f2bed97e66c0fe0e0755d3c805ed591bd37a5100e099308c998f73280381ed5');
 assert.equal((await executeSourceActionR679(field,mode)).outputHash,s1.events[0].outputHash);
+assert.equal(s1.events[0].outputHash,await sha256TextR679(evaluateOperationalModesR671(field,4,'STABILIZE',10)),'R679 mode receipt binds complete R671 canonical state, carry and projected output');
 assert.equal((await executeSourceActionR679(field,op)).outputHash,s2.events[1].outputHash);
 const verified=await verifySourceSessionR679(s3,field);
 assert.equal(verified.valid,true,JSON.stringify(verified.failures));
