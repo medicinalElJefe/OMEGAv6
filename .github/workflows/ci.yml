@@ -214,6 +214,21 @@ jobs:
         run: |
           if [ -f /tmp/omega7-r446-vite.pid ]; then kill "$(cat /tmp/omega7-r446-vite.pid)" || true; fi
 
+  r680-native-repair-windows:
+    if: github.event_name == 'pull_request'
+    needs: verify
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify R680 original B053 donor repair on Windows Python
+        shell: pwsh
+        run: |
+          python -m py_compile scripts/recover_b053_native_archive_r680.py
+          python tests/r680-native-archive-reconciliation.py
+
   cloudflare-auth-probe:
     if: github.event_name == 'pull_request'
     needs: verify
