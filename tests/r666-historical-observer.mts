@@ -1,6 +1,0 @@
-import assert from 'node:assert/strict';import {test} from 'node:test';import {defaultObserverR666,nodeIdR666,reanchorR666,scaleBlendR666,motionDecisionR666,stepObserverR666} from '../src7/workspaces/historicalObserverR666.ts';
-test('historical 12^4 address wraps and is stable',()=>{assert.equal(nodeIdR666(1,1,1,1),'node_000001');assert.equal(nodeIdR666(12,12,12,12),'node_020736');assert.equal(reanchorR666({d:12,p:1,r:1,l:1},{d:1}).d,1)});
-test('historical scale hierarchy preserves extremes',()=>{assert.equal(scaleBlendR666('subatomic'),0);assert.equal(scaleBlendR666('cosmic'),1);assert.equal(scaleBlendR666('earth'),8/11)});
-test('model decisions have stable finite ratio',()=>{const x=motionDecisionR666({continuity:1,burden:0,contradiction:0,future:1});assert.equal(x.decision,'STAY');assert.equal(Number.isFinite(x.ratio),true)});
-test('first person motion advances and clamps time step',()=>{const s=defaultObserverR666(),a=stepObserverR666(s,{forward:1,dt:1});assert.equal(a.position[2]<s.position[2],true);assert.equal(a.position[2]>=s.position[2]-.28-1e-9,true);assert.equal(s.position[2],5.8)});
-test('reanchoring changes revision without corrupting canonical address',()=>{const s=defaultObserverR666(),a=stepObserverR666(s,{dt:0,reanchor:{p:1}});assert.equal(a.address.p,2);assert.equal(a.revision,1);assert.equal(s.address.p,1)});

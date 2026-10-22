@@ -1,5 +1,0 @@
-# Genesis R611 — real SQLite and exact-head proof
-R611 adds a persistent action-state ledger with CAS transitions and conservative restart reconciliation. It never treats a consumed lease as proof of action completion. Incomplete DISPATCHED/CONSUMED work moves to RECONCILE, not automatic re-execution.
-`tests/r611-genesis-sqlite-recovery.mts` uses Node's real built-in SQLite, two connections to the same database, close/reopen persistence and interrupted-action reconciliation. This is a deterministic sequential contention test, **not** a parallel process stress test or power-failure durability proof.
-`.github/workflows/genesis-exact-head.yml` runs all R606–R611 suites on PR changes. Until the workflow completes, the new suite is not considered passed.
-Production gates still missing: signed independent lease issuer; trusted durable replay registry; transactional linkage between lease consumption and action ledger; worker sandbox and receipts; genuine device execution; deployment and browser proof.

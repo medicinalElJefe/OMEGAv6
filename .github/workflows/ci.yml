@@ -84,6 +84,8 @@ jobs:
           node tests/r676-exact-operator-graph.mjs
           node tests/r678-original-donor-full-vector-parity.mjs
           node tests/r679-source-session-replay.mjs
+      - name: Prove R680 original source archive library restoration
+        run: python3 tests/r680-native-archive-reconciliation.py
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
@@ -216,6 +218,21 @@ jobs:
         shell: bash
         run: |
           if [ -f /tmp/omega7-r446-vite.pid ]; then kill "$(cat /tmp/omega7-r446-vite.pid)" || true; fi
+
+  r680-native-repair-windows:
+    if: github.event_name == 'pull_request'
+    needs: verify
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify R680 original B053 donor repair on Windows Python
+        shell: pwsh
+        run: |
+          python -m py_compile scripts/recover_b053_native_archive_r680.py
+          python tests/r680-native-archive-reconciliation.py
 
   cloudflare-auth-probe:
     if: github.event_name == 'pull_request'
