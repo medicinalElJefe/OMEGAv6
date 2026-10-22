@@ -83,6 +83,8 @@ jobs:
           node tests/r675-historical-decision-contradiction.mjs
           node tests/r676-exact-operator-graph.mjs
           node tests/r678-original-donor-full-vector-parity.mjs
+      - name: Prove R680 original B053 archive reconciliation and reject modified donor material
+        run: python3 tests/r680-native-archive-reconciliation.py
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
