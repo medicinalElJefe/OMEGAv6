@@ -1,0 +1,1 @@
+import fs from'node:fs';import assert from'node:assert/strict';const s=fs.readFileSync('src/sarTruthIndexR280.ts','utf8');for(const t of ['sarTruthR280','sarMathR280','sarPolInSARR280','sarAccumulationR280','sarDataCubeR280','sarFusionR280','sarSourcePlannerR280'])assert.ok(s.includes(t),'R280 index missing '+t);console.log('R280 SAR truth index PASS');

@@ -1,0 +1,17 @@
+{
+  "schema":"omega.total-maximum.r126.v1",
+  "runtime":"OMEGA_R126_TOTAL_MAXIMUM_BUILD",
+  "canonicalAuthority":"OMEGAV6",
+  "hierarchy":{"seed":1,"organs":12,"branches":144,"cells":1728,"lanes":20736},
+  "scaleAtlas":{"residentStates":20736,"representationStates":248832,"virtualAddressCapacity":61917364224,"physicalDimensionClaim":false},
+  "modes":{"sourceCatalog":179,"hostedEvaluationContracts":20,"canonLenses":62,"rule":"ALL means every preserved source/canon authority is available to lawful routing and expression; catalog membership is never reported as execution."},
+  "projections":["FIELD","MATTER","TRAVERSAL","FORECAST","RELATIVITY","INFINITY","SCALE","CONVERGENCE","EARTH","OPTICAL","PROOF","BUILD"],
+  "executionScopes":["BODY","ORGAN","BRANCH","CELL"],
+  "stages":["PROPOSE","SCREEN","EXECUTE","VERIFY","RENDER","ADMIT"],
+  "systemFamilies":["CANONICAL_RUNTIME","MODE_CALCULUS","FIELD_VISUALIZATION","MATTER_TRAVERSAL","DIMENSIONAL_RELATIVITY","FORECAST_TRAJECTORY","EARTH_EVIDENCE","OPTICAL_MATERIAL","SOVEREIGN_COMPUTE","HYBRID_LINK","FEDERATION","GENESIS_PROPOSAL","PROOF_GOVERNANCE","EVIDENCE_MEMORY","ARCHIVE_DONOR_MEMORY","SELF_BUILD","ACCURACY_RESIDUAL","AUTONOMIC_SWARM","ORGANISM_SWARM","DIRECT_SWARM","UNIVERSAL_DATA","AUDIO_LIGHT_SPECTRUM","ECO_BIO_LIFE","OPERATOR_INTERFACE"],
+  "capacityPolicy":{"explicitFullCells":1728,"autoEscalationCapWithoutOptIn":288,"fullAutoRequiresExplicitOptIn":true,"workersAiCallsPerMissionMax":12,"machineBudgetsSeparatelyBounded":true},
+  "continuityLaw":"partition -> exchange/transform -> invariant carry -> scar/residual carry -> re-contextualize/repartition -> proof-gated admission",
+  "authorityBoundaries":["EXECUTION_QUORUM_NOT_TRUTH","AUTONOMIC_RECEIPT_NOT_CANON","SWARM_RECEIPT_RETURNED_NOT_ADMITTED","SELF_BUILD_CANDIDATE_NOT_ADMITTED","CATALOG_MEMBERSHIP_NOT_EXECUTION"],
+  "inherited":{"R121":"stateful direct swarm","R123":"organism hierarchy + living runtime","R124":"governed continuous self-build","R125":"accuracy-first residual engine","R126":"autonomic scope/rejoin + total maximum convergence"},
+  "truthBoundary":"20,736, 248,832 and 61,917,364,224 are computational address/representation capacities, not literal physical dimensions. Surface reachability, authenticated PC execution, solver validity, model synthesis, execution quorum, proof admission and empirical truth remain distinct states. OMEGAv6 proof/admission is the only canonical authority."
+}

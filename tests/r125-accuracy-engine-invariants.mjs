@@ -1,0 +1,59 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+
+const runtime=fs.readFileSync('src/accuracyResidualEngineR125.ts','utf8');
+const engine=fs.readFileSync('scripts/r125-accuracy-engine.mjs','utf8');
+const activeWorkflowPath='.github/workflows/r125-accuracy-first-engine.yml';
+const archivedWorkflowPath='.github/workflows-archive/r125-accuracy-first-engine.yml';
+const workflowPath=fs.existsSync(activeWorkflowPath)?activeWorkflowPath:archivedWorkflowPath;
+assert.equal(fs.existsSync(workflowPath),true,'R125 workflow evidence missing from active or archived topology');
+const workflow=fs.readFileSync(workflowPath,'utf8');
+const governor=JSON.parse(fs.readFileSync('public/omega-r170-self-build-governor.json','utf8'));
+if(workflowPath===archivedWorkflowPath){
+  assert.equal(fs.existsSync(activeWorkflowPath),false,'superseded R125 workflow must not be reactivated');
+  assert.equal(governor?.historicalWorkflowArchive?.historicalExecutionAuthority,false,'archived workflow history must remain non-executing evidence');
+}
+const r124=JSON.parse(fs.readFileSync('public/omega-r124-selfbuild-state.json','utf8'));
+
+assert.match(runtime,/NO_PROPOSAL_WITHOUT_EXPLICIT_EVIDENCE/);
+assert.match(runtime,/UNVERIFIED_EVIDENCE_CANNOT_AUTHORIZE_MUTATION/);
+assert.match(runtime,/AUTO_REPAIR_REQUIRES_REPRODUCIBLE_RESIDUAL_CONFIDENCE_GTE_0_92_AND_LOW_RISK_REGISTERED_RECIPE/);
+assert.match(runtime,/TRUTH_BOUNDARY_RISK_ALWAYS_BLOCKS_AUTONOMOUS_MUTATION/);
+assert.match(engine,/OMEGA_R125_APPLY/);
+assert.match(engine,/AUTO_REPAIR/);
+assert.match(engine,/QUEUE_FOR_REVIEW/);
+assert.match(engine,/OBSERVE_ONLY/);
+assert.match(engine,/Refuse index generation: missing admitted target/);
+assert.match(engine,/githubRunsObserved/);
+assert.match(engine,/evidence\('SOURCE'/);
+assert.match(engine,/evidence\('TEST'/);
+assert.match(engine,/evidence\('PROOF'/);
+assert.match(engine,/semanticFingerprint/);
+assert.match(engine,/observationOnlyNeverMutatesMain:true/);
+assert.match(engine,/UI_OPERATION_CHAIN_FAILURE/);
+assert.match(engine,/EXECUTION_LIFECYCLE_FAILURE/);
+assert.match(engine,/DEPLOYMENT_ATTESTATION_FAILURE/);
+assert.match(engine,/R-R143-OPERATION-CHAIN-MISSING/);
+assert.match(engine,/R-R144-DEPLOYMENT-ATTESTATION-MISSING/);
+assert.match(engine,/r143AuthorityComplete/);
+assert.match(engine,/r144AttestationComplete/);
+for(const token of ['ALL_MODES_FUSION_FAILURE','UNIVERSAL_TRUTH_FAILURE','CAUSAL_NOW_LEMMA_FAILURE','RELATIVE_CAPACITY_FAILURE','R-R151-ALL-MODES-FUSION-MISSING','R-R152-UNIVERSAL-TRUTH-MISSING','R-R153-LEMMA-NOW-MISSING','R-R154-RELATIVE-CAPACITY-MISSING','advancedAuthorityState','advancedTruthCapacityFailuresNeverAutoRepair:true'])assert.match(engine,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+for(const token of ['REFLEX_AUTONOMIC_FAILURE','RESIDUAL_WORLD_FAILURE','OPTICAL_CONVERGENCE_FAILURE','RESTORATION_CONVERGENCE_FAILURE','R-R164-REFLEX-AUTONOMIC-MISSING','R-R166-RESIDUAL-WORLD-MISSING','R-R167-OPTICAL-CONVERGENCE-MISSING','R-R168-RESTORATION-CONVERGENCE-MISSING','modernRestorationFailuresNeverAutoRepair:true'])assert.match(engine,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+for(const token of ['RCWA_PROPAGATION_ACCEPTANCE_FAILURE','R-R1681-PROPAGATION-ACCEPTANCE-MISSING','propagationAcceptanceFailuresNeverAutoRepair:true'])assert.match(engine,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+for(const token of ['FEDERATION_ATTESTATION_WORLD_FAILURE','R-R169-FEDERATION-WORLD-MISSING','federationWorldFailuresNeverAutoRepair:true'])assert.match(engine,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+assert.match(engine,/\/api\/runtime-now-r154/);
+assert.match(engine,/\/api\/relative-capacity-r154/);
+const recipeBlock=engine.slice(engine.indexOf('const recipes=['),engine.indexOf('function mode('));
+for(const forbidden of ['ALL_MODES_FUSION_FAILURE','UNIVERSAL_TRUTH_FAILURE','CAUSAL_NOW_LEMMA_FAILURE','RELATIVE_CAPACITY_FAILURE','REFLEX_AUTONOMIC_FAILURE','RESIDUAL_WORLD_FAILURE','OPTICAL_CONVERGENCE_FAILURE','RESTORATION_CONVERGENCE_FAILURE','RCWA_PROPAGATION_ACCEPTANCE_FAILURE','FEDERATION_ATTESTATION_WORLD_FAILURE'])assert.equal(recipeBlock.includes(forbidden),false,`${forbidden} must not receive an autonomous repair recipe`);
+for(const name of ['R169 Federation Attestation World Lens','R168.1 RCWA Propagation Acceptance','OMEGA R168 Whole-System Truth Performance Restoration','OMEGA R167 Active Optical R153.2 Convergence','OMEGA R166 Development Residual World Lens','OMEGA R164 Reflex Autonomic Swarm Convergence','OMEGA R154 Relative Capacity Fabric','OMEGA R153 Lemma Motion NOW Continuity','OMEGA R152 Universal Truth Envelope','OMEGA R151 All Modes Truth Fusion'])assert.match(workflow,new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+for(const test of ['diagnose_rcwa_live_r1681\\.mjs','verify_federation_live_r1681\\.mjs','r169-federation-attestation-world-lens-invariants\\.mjs','r168-genesis-r192-attestation-invariants\\.mjs','r168-full-restoration-current-successor-invariants\\.mjs','r168-whole-system-truth-performance-restoration-invariants\\.mjs','r167-active-optical-r1532-convergence-invariants\\.mjs','r166-development-residual-world-lens-invariants\\.mjs','r164-reflex-autonomic-swarm-convergence-invariants\\.mjs','r154-relative-capacity-fabric\\.mts','r153-lemma-motion-now-continuity\\.mts','r152-universal-truth-envelope\\.mts','r151-all-modes-truth-fusion-invariants\\.mjs','r144-runtime-deployment-attestation-invariants\\.mjs','r143-authoritative-ui-operation-chain-invariants\\.mjs','r142-proof-aware-capability-lifecycle-invariants\\.mjs'])assert.match(workflow,new RegExp(test));
+assert.match(workflow,/Observation only; no canonical mutation\./);
+assert.match(workflow,/if \[ -e src\/generated\/selfbuild\/index\.ts \]/);
+assert.match(workflow,/repairApplied===true/);
+assert.doesNotMatch(workflow,/git add src\/generated\/selfbuild\/index\.ts public/);
+assert.equal(r124.generation,8);
+assert.deepEqual(r124.admitted,['SB001','SB002','SB003','SB004','SB005','SB006','SB007','SB008']);
+for(const c of r124.roadmap)assert.equal(fs.existsSync(c.target),true,`admitted target missing: ${c.target}`);
+const receipts=new Map();for(const r of r124.receipts||[])receipts.set(r.capsuleId,r);
+for(const id of r124.admitted){const r=receipts.get(id);assert.ok(r,`receipt missing: ${id}`);assert.equal(r.status,'ADMIT');assert.equal(r.tests?.r124,true);assert.equal(r.tests?.r123,true);assert.equal(r.tests?.r122,true);assert.equal(r.tests?.r121,true);assert.equal(r.tests?.build,true);assert.ok(r.rollbackRef);}
+console.log(`R125.5 accuracy-first residual engine + R151-R154/R164/R166/R167/R168/R168.1/R169 + R144/R143/R142 sensors PASS · workflow evidence=${workflowPath} · propagation/federation/restoration/advanced failures review-gated and never auto-repaired`);

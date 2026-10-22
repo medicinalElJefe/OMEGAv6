@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+const runtime=fs.readFileSync('src/liveStateSpineR50.ts','utf8');
+const ui=fs.readFileSync('src/LiveStateSpineR50.tsx','utf8');
+const restore=fs.readFileSync('src/ExtremeRestorationR46.tsx','utf8');
+const css=fs.readFileSync('src/liveStateSpineR50.css','utf8');
+const required=['UNIVERSE_PULSE.json','PHASE_AWARENESS.json','GEOMETRY_FRAME.json','LEMMA_NET.json','CANON_AWARENESS.json','AWARENESS_STATE.json','PERFORMANCE_STATE.json','PROOF_STATE.json','PROVIDER_STATE.json','PROJECTION_STATE.json','EXECUTION_STATE.json','STATE_SPINE_CHECKPOINT.json','EVERYWHERE_HUB_STATUS.json','SELF_MONITOR_STATUS.json'];
+for(const name of required)if(!runtime.includes(name))throw new Error(`R50 missing B015 live state ${name}`);
+if(!runtime.includes('DEVICE_PROOF_REQUIRED'))throw new Error('R50 must preserve native device proof boundary');
+if(!runtime.includes('EXTERNAL_DEGRADED'))throw new Error('R50 must retain external degradation reality');
+if(!runtime.includes('not a claim of native watchdog execution'))throw new Error('R50 must not impersonate B015 native watchdog');
+if(!ui.includes("api.get<any>('/api/status')")||!ui.includes("api.get<any>('/api/restoration')"))throw new Error('R50 must reconcile worker status and restoration envelopes');
+if(!ui.includes("omega.r50.spine.deltas")||!ui.includes('Self-monitor delta ledger'))throw new Error('R50 must retain bounded self-monitor change history');
+if(!ui.includes("window.setInterval(()=>void refresh(),30000)"))throw new Error('R50 must refresh live proof state');
+if(!restore.includes("import LiveStateSpineR50 from './LiveStateSpineR50'" )||!restore.includes('<LiveStateSpineR50 record={record}/>'))throw new Error('R50 must be mounted in restoration/System Atlas execution stack');
+if(!css.includes('@media(max-width:720px)')||!css.includes('@media(prefers-reduced-motion:reduce)'))throw new Error('R50 must preserve mobile containment and reduced-motion support');
+console.log('R50 live-state spine invariants PASS');

@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+const visual=fs.readFileSync('src/OmegaVisualInstrument.tsx','utf8');
+const runtime=fs.readFileSync('src/semanticDepthRuntime.ts','utf8');
+const css=fs.readFileSync('src/semanticDepth.css','utf8');
+const app=fs.readFileSync('src/App.tsx','utf8');
+for(const token of ['12','144','1728','20736','groupSize:1728','groupSize:144','groupSize:12','groupSize:1','compileDepthNodes','semanticBreadcrumb','depthTruthBoundary'])if(!runtime.includes(token))throw new Error(`semantic depth runtime missing ${token}`);
+for(const token of ['PC-LINEAGE DEPTH CAMERA','depth-ribbon','onWheel','Zoom out level','Zoom in level','Camera −','Camera +','Yaw','Pitch','compileDepthNodes'])if(!visual.includes(token))throw new Error(`depth camera behavior missing ${token}`);
+for(const token of ['.semantic-depth-stage','.depth-hud','.depth-ribbon button.active','@media(max-width:760px)','@media(prefers-reduced-motion:reduce)'])if(!css.includes(token))throw new Error(`semantic depth style missing ${token}`);
+if(app.includes('<ArchiveContinuityAura')||app.includes('<GrowthSequenceRail'))throw new Error('global decorative archive overlays must not cover the runtime shell');
+if(!runtime.includes('145,152 Seven-Star')||!runtime.includes('61,917,364,224 capacity'))throw new Error('higher-capacity truth boundary missing');
+console.log('semantic depth traversal invariants PASS');

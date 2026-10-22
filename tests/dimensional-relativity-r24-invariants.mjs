@@ -1,0 +1,15 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const runtime=fs.readFileSync('src/dimensionalRelativityR24.ts','utf8'),panel=fs.readFileSync('src/DimensionalRelativityPanelR24.tsx','utf8'),lab=fs.readFileSync('src/RelativityLab.tsx','utf8');
+assert(runtime.includes("20736D_ALL_FULL_DIMENSION_RELATIVITY_ATLAS(2).xlsx"),'exact Drive donor source must remain explicit');
+for(const x of ['PRESERVATION_CORE=.7779','TRANSFORMATION_GENERATED=.2338','RECOVERED_CONTINUITY=1.1097','Ω = C/(1+Λ+ABS(q))','W = (C+Ω)/(1+Λ+q)','I = Λ+q-C','Skin(n+1)=Skin(n)×0.768904+Novelty×0.231096'])assert(runtime.includes(x),`missing donor formula/constant ${x}`);
+for(const x of ['0D','1D','2D','3D','4D','5D','6D','7D','8D','9D','10D','11D','12D'])assert(runtime.includes(`dimension:'${x}'`),`missing skin stage ${x}`);
+for(const x of ['Being','Identity','Change','Cause','Time','Space','Mind','Matter','Value','Law','Possibility','Absolute'])assert(runtime.includes(`'${x}'`),`missing donor domain ${x}`);
+assert(runtime.includes("state:'GATED_MISSING_INPUTS'"),'missing-input donor formulas must be gated');
+assert(runtime.includes("missing:['clarity','opportunity','risk']"),'Relative Truth must not invent missing workbook channels');
+assert(runtime.includes("missing:['authoritative current Skin(n)','Novelty']"),'skin recurrence must not invent novelty');
+assert(runtime.includes('not a claim that twelve extra physical spacetime dimensions were empirically established'),'physical-dimension boundary missing');
+assert(panel.includes('Formula execution ledger')&&panel.includes('0D → 12D WORKBOOK SKIN SEQUENCE'),'relativity donor instrument missing');
+assert(lab.includes("type Tab='FIELD'|'DIMENSIONAL'|'MOTION'|'CONTROLLER'|'VIOLET'|'EQUATIONS'"),'DIMENSIONAL tab missing');
+assert(lab.includes("useState<Tab>('DIMENSIONAL')"),'Drive-backed dimensional instrument should be default relativity view');
+assert(lab.includes('<DimensionalRelativityPanelR24 record={record}/>'),'Relativity route must mount Drive donor instrument');
+console.log('OMEGA R24 DIMENSIONAL RELATIVITY PASS · exact donor formulas + gated missing inputs + 0D→12D skin sequence');

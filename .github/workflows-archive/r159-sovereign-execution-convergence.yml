@@ -1,0 +1,111 @@
+name: OMEGA R159 Sovereign Execution Convergence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [r159-sovereign-execution-convergence]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r159-sovereign-convergence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  OMEGA_E2E_URL: http://127.0.0.1:4173
+
+jobs:
+  prove-r159:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install repository dependencies
+        run: npm install --no-fund
+
+      - name: Reject high-severity dependency regressions
+        run: npm audit --audit-level=high
+
+      - name: Prove R159 sovereign execution convergence
+        run: node tests/r159-sovereign-execution-convergence-invariants.mjs
+
+      - name: Preserve R158 live Hybrid truth and visual universe
+        shell: bash
+        run: |
+          node tests/r158-live-hybrid-execution-truth-invariants.mjs
+          node tests/r158-capability-universe-invariants.mjs
+
+      - name: Preserve R147 through R141 execution authority chain
+        shell: bash
+        run: |
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+          node tests/r145-runtime-attestation-world-scar-invariants.mjs
+          node tests/r144-runtime-deployment-attestation-invariants.mjs
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+
+      - name: Preserve PC zero-drift execution and R125 admission authority
+        shell: bash
+        run: |
+          python -m py_compile public/omega-hybrid-agent.py
+          python -m py_compile public/omega-hybrid-agent-r141.py
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+
+      - name: Preserve R157 living-world transition and R155 interface authority
+        shell: bash
+        run: |
+          node tests/r157-reflex-living-world-transition-invariants.mjs
+          node tests/r155-navigation-information-architecture-invariants.mjs
+          node tests/r155-whole-system-convergence-invariants.mjs
+          npm run test:navigation
+          npm run test:applications
+
+      - name: Full inherited regression and production build
+        run: npm run check
+
+      - name: Canonical Worker bundle dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r159-dry-run
+
+      - name: Install Chromium for all-route desktop/mobile proof
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start exact production build locally
+        shell: bash
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/omega-r159-preview.log 2>&1 &
+          echo $! >/tmp/omega-r159-preview.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r159-preview.log
+          exit 1
+
+      - name: Exercise all 44 routes on desktop and mobile
+        run: node tests/r118-browser-operational-e2e.mjs
+
+      - name: Browser diagnostics on failure
+        if: failure()
+        run: cat /tmp/omega-r159-preview.log || true

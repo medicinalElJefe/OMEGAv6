@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';import {evaluateObserverReceiptR485,reconcileObserversR485,R485_LAWS} from '../src/system/observerCoverageProofR485';
+const partial={observerId:'PR_ONLY_HELPER',source:'commit workflow helper',eventClassesVisible:['pull_request'],filters:['pull_request only'],completeness:'PARTIAL' as const,result:'NOT_OBSERVED' as const,evidenceIds:[],blindSpots:['push','workflow_dispatch']};
+assert.equal(evaluateObserverReceiptR485(partial).claim,'UNKNOWN');
+const push={observerId:'ACTIONS_RUN_COLLECTION',source:'GitHub Actions run collection',eventClassesVisible:['push','pull_request','workflow_dispatch'],filters:['head_sha exact'],completeness:'EXHAUSTIVE_FOR_DECLARED_SCOPE' as const,result:'OBSERVED' as const,evidenceIds:['37400384395'],blindSpots:[]};
+assert.equal(evaluateObserverReceiptR485(push).claim,'PRESENT');
+assert.equal(reconcileObserversR485([partial,push]).claim,'PRESENT');
+const exhaustiveMiss={...push,result:'NOT_OBSERVED' as const,evidenceIds:[]};
+assert.equal(evaluateObserverReceiptR485(exhaustiveMiss).claim,'ABSENT');
+assert.ok(R485_LAWS.includes('ABSENCE_FROM_PARTIAL_OBSERVER_IS_NOT_EVENT_ABSENCE'));
+console.log('R485 OBSERVER COVERAGE PASS · partial miss→UNKNOWN · positive exact evidence→PRESENT · exhaustive miss→ABSENT');

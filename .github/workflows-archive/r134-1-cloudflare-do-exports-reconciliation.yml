@@ -1,0 +1,48 @@
+name: OMEGA R138.1 Cloudflare DO Exports Reconciliation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r138-1-cloudflare-do-exports-current-main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r138-1-do-exports-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-do-exports:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove provisioned Durable Object lifecycle map
+        run: node tests/r134-1-cloudflare-do-exports-reconciliation.mjs
+      - name: Preserve current R138/R137/R136 experience layers
+        run: |
+          node tests/r138-capability-first-visual-runtime.mjs
+          node tests/r137-live-family-proof-fusion-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+      - name: Preserve enacted runtime and both R134 continuity layers
+        run: |
+          node tests/enacted-runtime-r32-invariants.mjs
+          node tests/r134-woven-relativity-continuum-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+      - name: Preserve Hybrid, swarm and admission authority
+        run: |
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Wrangler declarative-export dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r138-1-dry-run

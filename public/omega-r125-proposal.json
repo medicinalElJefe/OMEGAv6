@@ -1,0 +1,41 @@
+{
+  "schema": "omega.accuracy.proposal.r125.v2",
+  "observedAt": "2026-09-06T18:19:16.584Z",
+  "semanticFingerprint": "f43d8b56ce77709c000ab09318db88f1e14286a3bb5cf3b6c9b8527dc20a8826",
+  "selected": {
+    "id": "R-CAPABILITY-INDEX-MISSING",
+    "kind": "CAPABILITY_UNWIRED",
+    "mode": "AUTO_REPAIR",
+    "confidence": 1,
+    "summary": "All R124 capsules are admitted and physically present but no generated capability export index exists."
+  },
+  "repairApplied": true,
+  "repair": {
+    "changed": [
+      "src/generated/selfbuild/index.ts"
+    ],
+    "proof": {
+      "admittedIds": [
+        "SB001",
+        "SB002",
+        "SB003",
+        "SB004",
+        "SB005",
+        "SB006",
+        "SB007",
+        "SB008"
+      ],
+      "targets": [
+        "src/generated/selfbuild/persistentMissionContinuityR124.ts",
+        "src/generated/selfbuild/contextualCapabilitySurfaceR124.ts",
+        "src/generated/selfbuild/sourceTraceInspectorR124.ts",
+        "src/generated/selfbuild/adaptiveWorkingSetR124.ts",
+        "src/generated/selfbuild/archiveDonorMemoryR124.ts",
+        "src/generated/selfbuild/swarmMissionPlannerR124.ts",
+        "src/generated/selfbuild/computedWorldBridgeR124.ts",
+        "src/generated/selfbuild/selfBuildCapabilityRegistryR124.ts"
+      ],
+      "contentSha256": "fb166bf55c2480b63b9b8cd3c1a53fbdaa6789440f888a6d0e9488166229f370"
+    }
+  }
+}

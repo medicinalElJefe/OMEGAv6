@@ -1,0 +1,43 @@
+/* R31 human-first shell. This is an additive presentation layer: specialist runtimes remain intact. */
+:root{--r31-surface:#061116;--r31-panel:#09181d;--r31-line:#264149;--r31-text:#e8f2f1;--r31-muted:#8ca0a3;--r31-accent:#62cfc0;--r31-warm:#d8b36b}
+
+/* Remove the duplicate phase diagnostic that wrapped Command Center. Phase remains available in specialist/runtime surfaces. */
+.command-experience-r4>.command-phase-context{display:none!important}
+
+/* Desktop: a clear primary action before taxonomy. */
+.r31-ask{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:100%;min-height:54px;border:1px solid #41655f;border-radius:13px;background:linear-gradient(135deg,#0b2823,#0a1a1f);color:var(--r31-text);padding:10px 11px;text-align:left;box-shadow:0 8px 28px #0004}
+.r31-ask>span{display:grid;gap:2px}.r31-ask b{font-size:11px}.r31-ask small{font:7px ui-monospace,monospace;color:#86aaa5}.r31-ask>svg:first-child{color:var(--r31-accent)}.r31-ask>svg:last-child{color:#6f8d89}
+.r27-desktop-frame{grid-template-rows:auto auto auto auto minmax(0,1fr)!important}.r27-domains{grid-template-columns:repeat(5,minmax(0,1fr))!important}.r27-domains button{min-height:50px!important}.r27-domains button span{font-size:6px!important}
+
+/* Mobile chrome: one calm identity bar + five explicit actions. */
+.r27-mobile-head{height:56px!important;padding-top:max(7px,env(safe-area-inset-top))!important;background:linear-gradient(180deg,#061116fa,#061116f3)!important;border-bottom-color:#1d343a!important;box-shadow:0 8px 28px #0005!important}
+.r27-mobile-head>div b{font-size:13px!important;letter-spacing:.12em!important}.r27-mobile-head>div small{font-size:7px!important;color:#91a6a8!important}
+.r27-mobile-head>button{width:38px!important;height:38px!important;border-radius:12px!important}
+.r31-brand-button{border:0!important;background:transparent!important;box-shadow:none!important}
+.r31-orb{display:block;width:25px;height:25px;border-radius:50%;border:1px solid #5c7c77;background:radial-gradient(circle at 38% 34%,#e9d8a7 0 6%,#62cfc0 7% 19%,#123b38 20% 47%,#071318 48% 100%);box-shadow:0 0 0 5px #0b1c20,0 0 22px #62cfc033}
+.r27-mobile-bottom{height:60px!important;background:#061014f8!important;border-top-color:#233b42!important;box-shadow:0 -8px 28px #0007!important}.r27-mobile-bottom button{border-radius:12px!important;color:#84989c!important}.r27-mobile-bottom button span{font:7px system-ui,-apple-system,sans-serif!important;font-weight:600!important;letter-spacing:.01em!important}.r27-mobile-bottom button.active{background:#0d2824!important;color:#dff5ef!important}.r27-mobile-bottom button.active svg{color:var(--r31-accent)!important}
+
+/* Full menu is a destination drawer, not another dashboard. */
+.r27-mobile-drawer{background:linear-gradient(180deg,#071318 0%,#040b0f 100%)!important}.r27-mobile-drawer>header{padding:max(14px,env(safe-area-inset-top)) 14px 12px!important}.r27-mobile-drawer>header b{font-size:17px!important;letter-spacing:0!important}.r27-mobile-drawer>header small{font-size:7px!important}.r31-drawer-shortcuts{display:grid;gap:8px;padding:12px 12px 4px}.r31-drawer-shortcuts>button{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:10px;width:100%;min-height:62px;border:1px solid #29434a;border-radius:14px;background:linear-gradient(135deg,#0b1b21,#071318);color:#dfeceb;padding:10px 12px;text-align:left}.r31-drawer-shortcuts>button:first-child{border-color:#40665f;background:linear-gradient(135deg,#0b2924,#09191d)}.r31-drawer-shortcuts svg{width:22px;height:22px;color:#77b9af}.r31-drawer-shortcuts span{display:grid;gap:3px}.r31-drawer-shortcuts b{font-size:12px}.r31-drawer-shortcuts small{font-size:8px;color:#819699}.r27-mobile-drawer>.r27-search{margin:10px 12px!important}.r27-search label{height:44px!important;border-radius:12px!important}.r27-search input{font-size:12px!important}.r27-mobile-domains{gap:7px!important;padding:2px 12px 11px!important}.r27-mobile-domains button{flex:1 0 104px!important;min-height:44px!important;border-radius:12px!important}.r27-mobile-domains button span{font-size:9px!important}.r27-route{min-height:50px!important;border-radius:11px!important}.r27-route b{font-size:11px!important}.r27-route small{font-size:7px!important}.r27-route code{width:30px!important;height:30px!important}
+
+/* Command Center: conversation/task first, instrumentation second. */
+.command-deck-top{align-items:start!important}.command-composer{position:relative!important}.command-composer textarea{font-size:15px!important;line-height:1.5!important}.command-composer label,.command-composer .command-composer-label{font-size:10px!important}
+
+@media(max-width:900px){
+ html[data-omega-frame='mobile'] .omega-workstation-v2 .workstation-main{padding:64px 8px 12px!important}
+ .command-deck-top{display:flex!important;flex-direction:column!important;gap:10px!important}
+ .command-composer{order:1!important;width:100%!important}
+ .command-mandala-stage{order:2!important;display:none!important}
+ .command-diagnostic-strip{order:3!important;display:none!important}
+ .command-composer textarea{min-height:132px!important;padding:15px!important;border-radius:14px!important}
+ .command-composer button{min-height:44px!important;border-radius:12px!important}
+ .omega-command-deck{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+ .command-grid-2,.command-grid-3{grid-template-columns:1fr!important}
+ .command-assistant-card,.command-response-card{border-radius:14px!important}
+ .command-response-card{margin-top:10px!important}
+}
+
+@media(max-width:520px){
+ .r27-mobile-head{height:54px!important}.r27-mobile-bottom{height:58px!important}
+ .r27-mobile-head>div small{max-width:235px!important}.r31-drawer-shortcuts>button{min-height:58px!important}
+}

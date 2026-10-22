@@ -1,0 +1,18 @@
+import assert from'node:assert/strict';
+import fs from'node:fs';
+import{partitionInteractionCasesR355}from'../src/system/r313InteractionWorkloadR355.js';
+const nav=fs.readFileSync('src/navigationRegistry.ts','utf8');
+const block=nav.slice(nav.indexOf('export const OMEGA_NAVIGATION=['),nav.indexOf('export const OMEGA_NAV_GROUPS'));
+const surfaces=[...block.matchAll(/name:'([^']+)'/g)].map(m=>m[1]);
+assert.equal(surfaces.length,44);
+const source=fs.readFileSync('tests/r286-all-surface-no-dead-controls-browser-e2e.mjs','utf8');
+assert.ok(source.includes("partitionInteractionCasesR355({surfaces:expected,shardCount})"));
+assert.ok(source.includes('const assignedCases=r286Partition[shardIndex].cases;'));
+assert.ok(!source.includes('%shardCount'));
+const bins=partitionInteractionCasesR355({surfaces,shardCount:8});
+const all=bins.flatMap(x=>x.cases);
+assert.equal(all.length,88);
+assert.equal(new Set(all.map(x=>x.key)).size,88);
+const weights=bins.map(x=>x.weight);
+assert.ok(Math.max(...weights)/Math.min(...weights)<1.05,'R462 census partition should remain tightly balanced before learned runtime correction');
+console.log('R462 R286 PARTITION ALIGNMENT PASS · scheduler prediction and browser execution share one weighted 88-case partition · modulo drift removed · assertions/coverage unchanged');

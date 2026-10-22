@@ -1,0 +1,95 @@
+{
+  "schema": "OMEGA_ULTRA_CONVERGENCE_R119",
+  "revision": "R119",
+  "canonicalAuthority": "OMEGAv6",
+  "authorityNodeCount": 4,
+  "stateLaw": "partition -> exchange/transform -> invariant carry -> scar/residual carry -> re-contextualize/repartition",
+  "systemInvariant": "ONE FIELD / ONE PACKET / ONE CONTINUITY LAW / ONE TRAVERSAL SYSTEM",
+  "objective": "Correlate the complete recovered software and data corpus into one task-first, proof-governed computational instrument without creating shadow state, fake execution, fake observations, or competing canonical authorities.",
+  "sites": [
+    {
+      "id": "omega-genesis",
+      "verb": "PROPOSE",
+      "humanSurface": "https://omega-genesis-v1.jeffdeweyeljefe.workers.dev",
+      "role": "proposal-generation-exploration",
+      "mayMutateGlobalCanonState": false
+    },
+    {
+      "id": "omega-optical",
+      "verb": "SCREEN",
+      "humanSurface": "https://omega-living-light-etching-private-woven2.vercel.app",
+      "role": "optical-compiler-tier1-screen-tier2-queue",
+      "mayMutateGlobalCanonState": false,
+      "truthBoundary": "Scalar/reduced-order screening is routing evidence, not full-wave or fabrication validation."
+    },
+    {
+      "id": "omega-sovereign",
+      "verb": "SOLVE",
+      "humanSurface": null,
+      "machineTransport": "OMEGAv6 authenticated Hybrid/Sovereign queue and result-return transport",
+      "historicalHumanSurface": "https://omega-sovereign-convergence.foundasound.chatgpt.site/",
+      "historicalSurfacePolicy": "donor/historical human-surface reference only; retired as a machine origin",
+      "role": "authenticated-high-compute-execution",
+      "mayMutateGlobalCanonState": false,
+      "truthBoundary": "ONLINE requires a current authenticated heartbeat; historical pairing is not current execution proof."
+    },
+    {
+      "id": "omega-v6",
+      "verb": "ADMIT",
+      "humanSurface": "https://omegav6.jeffdeweyeljefe.workers.dev",
+      "role": "canonical-state-proof-operator",
+      "mayMutateGlobalCanonState": true
+    }
+  ],
+  "corpus": {
+    "reviewedSystems": 100,
+    "softwareFamilies": 24,
+    "menuOptions": 36,
+    "masterCapabilities": 18,
+    "masterMenus": 12,
+    "sourceModeEvaluations": 179,
+    "canonCalculusLenses": 62,
+    "functionalLayers": 8,
+    "sourceAuthorityClasses": 7,
+    "archiveDisposition": {
+      "KEEP": 63,
+      "MERGE": 26,
+      "DONOR": 11
+    },
+    "rule": "Archive/design presence is capability evidence and donor lineage, not automatic runtime execution authority."
+  },
+  "resolution": {
+    "recursiveLevels": [12, 144, 1728, 20736, 248832, 61917364224],
+    "residentCanonicalAnchors": 20736,
+    "expandedRepresentationalRows": 248832,
+    "virtualAddressCapacity": 61917364224,
+    "displayProfiles": {
+      "MOBILE": {"targetDpr": 2, "maxBackingPixels": 5000000},
+      "BALANCED": {"targetDpr": 2.75, "maxBackingPixels": 9000000},
+      "FULL": {"targetDpr": 3.5, "maxBackingPixels": 16000000}
+    },
+    "truthBoundary": "Atlas and virtual resolution are computational/address structures. Display backing pixels are bounded resources. None of these values is a claim of literal physical dimensions or measured external pixels."
+  },
+  "functionalLayers": ["STATE", "INTELLIGENCE", "MEMORY", "RELATION", "COMPUTATION", "ACTION", "OBSERVATION", "PROOF"],
+  "pipeline": ["INPUT_OR_OBSERVATION", "INTENT_AND_PROJECT", "CANONICAL_PACKET", "CALCULUS_AND_MODES", "PROPOSE_IF_NEEDED", "SCREEN_IF_NEEDED", "SOLVE_IF_NEEDED", "ADMIT_OR_HOLD", "SCAR_AND_MEMORY", "RENDER_EXPORT_FORECAST_NEXT_ACTION"],
+  "truthClasses": ["OBSERVED", "DERIVED", "SIMULATED", "PROPOSED", "SCREENED", "SOLVED", "ADMITTED", "HISTORICAL", "GATED"],
+  "modeLaw": "Mode selection must change applicable operators, geometry, routing, evidence/proof behavior, or output semantics. It must not be implemented as a theme/color-only switch.",
+  "renderLaw": "One source packet may have many lawful expressions, but render skins cannot mutate canonical state and cannot manufacture missing observations.",
+  "governance": {
+    "noShadowState": true,
+    "oneGlobalCanonState": true,
+    "hybridIsBridgeNotAuthority": true,
+    "workersReturnPacketsOnly": true,
+    "machineCredentialsNeverShipToBrowser": true,
+    "historicalPairingCannotSatisfyCurrentSovereignProof": true,
+    "manualUpstreamPacketsCannotCloseStrictFederationProof": true,
+    "failedSolverResultsReturnAsScarredEvidence": true,
+    "physicalDimensionClaim": false
+  },
+  "currentBuildTargets": [
+    "Finish R119 full-resolution migration across primary source-bound canvases without logical subsampling.",
+    "Preserve all R118 desktop/mobile 44-route operational guarantees.",
+    "Keep Drive/archive capability correlation visible through the existing System Atlas rather than creating a second router or state authority.",
+    "Close a fresh authenticated Sovereign execution proof only when a current PC heartbeat and returned solver receipt exist."
+  ]
+}

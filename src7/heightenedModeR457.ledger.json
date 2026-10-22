@@ -1,0 +1,146 @@
+{
+  "schema": "OMEGA7_HEIGHTENED_DEVELOPMENTAL_LEDGER_R457",
+  "revision": "R457",
+  "sourceBaseMain": "5355a5c4f3438052794f2e578baa5d8ff33e3739",
+  "inheritedRepair": {
+    "pullRequest": 896,
+    "exactHead": "6300f00b63d639a3a517b5aed7848eb22daf3de3",
+    "canonicalMerge": "5355a5c4f3438052794f2e578baa5d8ff33e3739",
+    "proofFamilies": "8_OF_8_SUCCESS"
+  },
+  "mode": {
+    "id": "HEIGHTENED_MODE",
+    "name": "Heightened Mode",
+    "classification": "DERIVED_WOVEN_DEVELOPMENTAL_CONTINUITY_LENS",
+    "replacesExistingWovenRscMachinery": false,
+    "newPhysicalPrimitive": false,
+    "physicalDimensionClaim": false
+  },
+  "resolutionBoundary": {
+    "levels": [
+      12,
+      144,
+      1728,
+      20736,
+      248832
+    ],
+    "classification": "REPRESENTATIONAL_ADDRESS_RESOLUTION_ONLY",
+    "canonicalAddressAuthority": "R125_CANONSTATE",
+    "domainResolutionAuthority": "R436_CANONICAL_DOMAIN_RESOLUTION",
+    "invariant": "NO_PHYSICAL_DIMENSION_INFLATION"
+  },
+  "architecture": {
+    "order": [
+      "CAPABILITY",
+      "COMPOSITION",
+      "PRESENTATION"
+    ],
+    "capabilityAuthority": "EXECUTION_AND_PROOF_CONTRACT",
+    "compositionAuthority": "BOUNDED_SELECTION_WITH_FUTURE_TOPOLOGY_RETENTION",
+    "presentationAuthority": "PRESENTATION_ONLY",
+    "invariant": "PRESENTATION_CANNOT_REWRITE_CAPABILITY_COMPOSITION_PROOF_OR_CANON_AUTHORITY"
+  },
+  "developmentalLaw": {
+    "stateObject": [
+      "OMEGA",
+      "TRANSITION_LAW",
+      "GROWTH",
+      "ACCELERATION",
+      "JERK",
+      "CURVATURE",
+      "STATE_SCAR",
+      "DEVELOPMENTAL_SCAR",
+      "CONTINUITY_CONE",
+      "GROWTH_GRAMMAR"
+    ],
+    "operators": [
+      "SENSE",
+      "NORMALIZE",
+      "PARTITION",
+      "INTERACT",
+      "TRANSFORM",
+      "CARRY",
+      "RECONTEXTUALIZE",
+      "SCORE",
+      "GATE",
+      "LEDGER",
+      "PRUNE",
+      "TRANSLATE",
+      "PROVE",
+      "PROMOTE"
+    ],
+    "decisionLaw": [
+      "STAY",
+      "TURN",
+      "ESCALATE"
+    ],
+    "deweyScore": "S=(CΩ*Phi)/(q+Lambda+epsilon)",
+    "viability": "D=(CΩ*PhiStar*Recoverability*NovelStructure)/(q+Lambda+HarmfulDevelopmentalScar+epsilon)",
+    "growthDefinition": "INCREASE_IN_REACHABLE_COHERENT_LAWFUL_POSSIBILITY",
+    "lawUpdateSelfAuthorizing": false
+  },
+  "developmentalEquivalence": {
+    "rule": "PRESENT_STATE_AND_RELEVANT_FUTURE_CONE_MUST_BOTH_BE_EQUIVALENT",
+    "currentStateDistanceRequired": true,
+    "futureConeDistanceRequired": true,
+    "visualSimilarityAloneSufficient": false,
+    "branchCountMayMasqueradeAsPlasticity": false,
+    "dominanceMayPruneActionBranch": true,
+    "dominatedOrContradictoryEvidenceRetained": true
+  },
+  "retirement": {
+    "legacyRetired": 0,
+    "defaultDecision": "HOLD",
+    "zeroLossRequired": true,
+    "replacementProofRequired": true,
+    "futureRoleEquivalenceRequired": true,
+    "desktopMobileParityRequired": true,
+    "failureRecoveryRequired": true,
+    "performanceRequired": true,
+    "rollbackAndReentryRequired": true,
+    "provenanceRequired": true,
+    "evidenceAndScarRetentionRequired": true
+  },
+  "acceptedBase": {
+    "milestone": "R453_ACCEPTED_FULL_PRODUCT_PARITY",
+    "capabilities": 44,
+    "functionalDesktopMobile": 44,
+    "familyFailureIsolation": 44,
+    "performance": 44,
+    "rollback": 44,
+    "fullProductParity": 44,
+    "legacyRetired": 0
+  },
+  "authority": {
+    "canonAdmission": "R125",
+    "domainResolution": "R436",
+    "sourcePromotion": "UNCHANGED",
+    "hybridExecution": "UNCHANGED",
+    "productionDeploymentWorkflow": "UNCHANGED",
+    "forecastingGrantsPromotion": false,
+    "canonicalMutation": false
+  },
+  "retention": {
+    "evidence": "IMMUTABLE_REFERENCE_REQUIRED",
+    "provenance": "RETAIN",
+    "contradictions": "RETAIN_AS_EVIDENCE_EXCLUDE_FROM_ACTION_WHEN_INADMISSIBLE",
+    "stateScars": "RETAIN",
+    "developmentalScars": "RETAIN",
+    "rejectedBranches": "RETAIN_NEGATIVE_KNOWLEDGE"
+  },
+  "proof": {
+    "exactHeadRequired": true,
+    "bypassAllowed": false,
+    "authoritativeFamilies": [
+      "R210 Release Controller",
+      "R223 Cloudflare Evolution Authority",
+      "R202 Operational Source Authority",
+      "OMEGA Cloud Bridge CI",
+      "R170 Current Convergence",
+      "OMEGA R237 Hybrid Command Authority Proof",
+      "OMEGA R238 Woven Hybrid Continuity Convergence",
+      "R241 Archive Convergence Visual Intelligence"
+    ]
+  },
+  "canonicalMutation": false
+}

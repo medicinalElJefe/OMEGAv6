@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {compileAdaptiveRenderAttemptR213,manifestR213} from '../src/world/adaptiveRenderAttemptR213.js';
+
+const lineage={state:'RENDER_INTENT_LINEAGE_READY',lineageSha256:'a'.repeat(64),missionId:'m-213',worldBindingOperationSha256:'b'.repeat(64),previousWorldHeadSha256:'c'.repeat(64),earthHash:'d'.repeat(64),groundHash:'e'.repeat(64)};
+const full=await compileAdaptiveRenderAttemptR213({lineage,performance:{continuity:.9,plasticity:.8,burden:.1,contradiction:.1}});
+assert.equal(full.state,'ADAPTIVE_RENDER_ATTEMPT_READY');assert.equal(full.profile,'FULL_FIELD');assert.equal(full.renderAttemptPlanned,true);assert.match(full.attemptSha256,/^[a-f0-9]{64}$/);
+const conservative=await compileAdaptiveRenderAttemptR213({lineage,performance:{continuity:.8,plasticity:.8,burden:.75,contradiction:.2}});
+assert.equal(conservative.profile,'CONSERVATIVE');assert.notEqual(conservative.attemptSha256,full.attemptSha256);
+const balanced=await compileAdaptiveRenderAttemptR213({lineage,performance:{continuity:.55,plasticity:.5,burden:.2,contradiction:.1}});assert.equal(balanced.profile,'BALANCED');
+const held=await compileAdaptiveRenderAttemptR213({lineage:{...lineage,state:'HELD_FOR_PROOF'},performance:{continuity:1}});assert.equal(held.state,'HELD_FOR_R211_LINEAGE');assert.equal(held.profile,'HELD');assert.equal(held.renderAttemptPlanned,false);
+for(const receipt of [full,conservative,balanced,held]){assert.equal(receipt.renderAttemptExecuted,false);assert.equal(receipt.renderedFrame,false);assert.equal(receipt.renderReceipt,false);assert.equal(receipt.computedPhotorealRealityProved,false);assert.equal(receipt.solverValidityProved,false);assert.equal(receipt.nativeExecutionClaimed,false);assert.equal(receipt.federationClosureProved,false);assert.equal(receipt.canonicalMutation,false);assert.equal(receipt.canonicalAdmissionAuthority,'R125');assert.equal(receipt.rendererAuthority,'R122_EXISTING_COMPUTED_REALITY');assert.equal(receipt.adaptivePerformanceAuthority,'R185_EXISTING_PERFORMANCE_LAYER')}
+const manifest=manifestR213();assert.equal(manifest.authority.newRenderer,false);assert.equal(manifest.authority.newExecutor,false);assert.equal(manifest.authority.newPersistenceAuthority,false);assert.equal(manifest.authority.newFederationAuthority,false);assert.equal(manifest.authority.newCanonAuthority,false);assert.equal(manifest.authority.computedReality,'R122');assert.equal(manifest.authority.adaptivePerformance,'R185');assert.equal(manifest.authority.canonicalAdmission,'R125');
+const source=fs.readFileSync('src/world/adaptiveRenderAttemptR213.js','utf8');for(const forbidden of ['renderAttemptExecuted:true','renderedFrame:true','renderReceipt:true','computedPhotorealRealityProved:true','solverValidityProved:true','nativeExecutionClaimed:true','federationClosureProved:true','canonicalMutation:true'])assert.ok(!source.includes(forbidden),`R213 must not overclaim ${forbidden}`);
+console.log('R213 ADAPTIVE RENDER ATTEMPT PASS · R211 lineage is bound to R185-adaptive R122 planning without renderer/frame/PC/federation/solver/photoreal/Canon overclaim');

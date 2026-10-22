@@ -1,0 +1,56 @@
+name: OMEGA R127 Evidence Execution Proof Fabric
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r127-proof-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r127:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Prove R127 evidence-to-execution semantics
+        run: node --experimental-strip-types tests/r127-evidence-execution-proof-fabric.mjs
+      - name: Preserve R126 causal and maximum runtime contracts
+        run: |
+          node --experimental-strip-types tests/r126-causal-interaction-relativity.mjs
+          node tests/r126-causal-interaction-invariants.mjs
+          node tests/r126-total-maximum-build-invariants.mjs
+      - name: Preserve R125 accuracy and autonomic authority
+        run: |
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+      - name: Preserve inherited R124-R121 truth boundaries
+        run: |
+          node tests/r124-self-contained-build-invariants.mjs
+          node tests/r123-organism-swarm-invariants.mjs
+          node tests/r123-living-total-experience-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r121-swarm-runtime-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: Preserve continuity, dimensional relativity, federation and SAI
+        run: |
+          node tests/r77-woven-continuity-invariants.mjs
+          node tests/dimensional-relativity-r24-invariants.mjs
+          node tests/r97-federation-run-invariants.mjs
+          node tests/sai-b059-invariants.mjs
+      - name: Production regression and build
+        run: npm run check
+      - name: Cloudflare Worker bundle dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r127-dry-run

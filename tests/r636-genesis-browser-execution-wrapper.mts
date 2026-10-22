@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+const script=readFileSync('scripts/run-genesis-browser-proof-r636.mjs','utf8');
+assert.match(script,/spawnSync\(process\.execPath/);
+assert.match(script,/OMEGA_EXPECTED_SHA/);
+assert.match(script,/outputDigest/);
+assert.match(script,/runnerTrust:'UNVERIFIED_EXTERNAL_ATTESTATION_REQUIRED'/);
+const run=(id:string,env:Record<string,string>)=>spawnSync(process.execPath,['scripts/run-genesis-browser-proof-r636.mjs',id],{encoding:'utf8',env:{...process.env,...env}});
+assert.notEqual(run('unknown',{}).status,0);
+assert.notEqual(run('historical-rh-traversal',{OMEGA_EXPECTED_SHA:'invalid',OMEGA_PUBLIC_URL:'https://example.org'}).status,0);
+assert.notEqual(run('historical-rh-traversal',{OMEGA_EXPECTED_SHA:'a'.repeat(40),OMEGA_PUBLIC_URL:'http://example.org'}).status,0);
+console.log('Genesis R636 browser execution wrapper: fail-closed configuration PASS');

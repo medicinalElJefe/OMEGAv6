@@ -1,0 +1,843 @@
+/* R92 — specialist surface clarity.
+   Presentation hierarchy only. Distinct specialist identities stay intact; truth/proof boundaries remain visible. */
+
+.omega-workstation-v2{
+ --r92-line:rgba(126,185,177,.13);
+ --r92-panel:#061014;
+}
+
+/* No data panel may sit on top of an Infinity visual. */
+.omega-workstation-v2[data-panel='Infinity'] .inf36-stage{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr) minmax(238px,300px)!important;
+ align-items:stretch!important;
+}
+.omega-workstation-v2[data-panel='Infinity'] .inf36-stage canvas{
+ min-width:0!important;
+}
+.omega-workstation-v2[data-panel='Infinity'] .inf36-stage aside{
+ position:static!important;
+ inset:auto!important;
+ width:auto!important;
+ margin:0!important;
+ border-radius:0!important;
+ border-width:0 0 0 1px!important;
+ backdrop-filter:none!important;
+ overflow:auto!important;
+}
+
+/* Atlas uses its canvas as the primary tool. */
+.omega-workstation-v2[data-panel='Atlas'] .atlas-r36-stage{
+ min-height:clamp(560px,72dvh,880px)!important;
+}
+.omega-workstation-v2[data-panel='Atlas'] .atlas-r36-stage canvas{
+ height:clamp(560px,72dvh,880px)!important;
+}
+
+/* Forecast and Relativity are computation surfaces, not dashboard headers. */
+.omega-workstation-v2[data-panel='Forecast'] .forecast-r36,
+.omega-workstation-v2[data-panel='Relativity'] .rel36,
+.omega-workstation-v2[data-panel='Infinity'] .infinity-r36{
+ gap:9px!important;
+}
+.omega-workstation-v2[data-panel='Forecast'] .fr36-head,
+.omega-workstation-v2[data-panel='Infinity'] .inf36-head{
+ padding-bottom:7px;
+ border-bottom:1px solid var(--r92-line);
+}
+.omega-workstation-v2[data-panel='Forecast'] .fr36-head h2,
+.omega-workstation-v2[data-panel='Infinity'] .inf36-head h2{
+ font-size:clamp(22px,2vw,30px)!important;
+}
+
+/* Archive density is data-rich but should remain scan-first. */
+.omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .forensic-donor-grid{
+ content-visibility:auto;
+ contain-intrinsic-size:700px;
+}
+.omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .donor-card{
+ min-width:0;
+}
+
+/* Restore surfaces are embedded descendants; lower sections may defer until approached. */
+.omega-workstation-v2 :where(.r46-family-status,.r46-data-language,.r46-bio,.r46-cinema,.r46-micro,.r47-recovery-packaging){
+ content-visibility:auto;
+ contain-intrinsic-size:460px;
+}
+
+@media(max-width:900px){
+ /* Shared specialist header discipline. */
+ .omega-workstation-v2:is(
+  [data-panel='Forecast'],
+  [data-panel='Relativity'],
+  [data-panel='Infinity'],
+  [data-panel='Scale Compiler'],
+  [data-panel='Reality Lab'],
+  [data-panel='Atlas'],
+  [data-panel='Field'],
+  [data-panel='Data Motion'],
+  [data-panel='Convergence'],
+  [data-panel='Archive Census'],
+  [data-panel='Archive Operators']
+ ) :where(.section-head,.fr36-head,.inf36-head,.rl-hero,.special-head){
+  min-height:0!important;
+  gap:5px!important;
+ }
+
+ /* FORECAST — field first, interpretation as swipeable evidence. */
+ .omega-workstation-v2[data-panel='Forecast'] .forecast-r36{
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-head{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-head .overline,
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-head p:not(.overline){
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-head h2{
+  margin:0!important;
+  font-size:17px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-count{
+  padding:5px 7px!important;
+  font-size:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-controls{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-controls label{
+  flex:1 0 min(72vw,360px)!important;
+  min-width:min(72vw,360px)!important;
+  padding:5px 7px!important;
+  border:1px solid var(--r92-line)!important;
+  border-radius:8px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-controls button{
+  flex:0 0 auto!important;
+  min-height:38px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .calculus-field-r37{
+  min-height:70dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .cfr37-stage{
+  min-height:64dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-summary{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scroll-snap-type:x proximity!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-summary article{
+  flex:0 0 min(66vw,260px)!important;
+  scroll-snap-align:start!important;
+  padding:7px 8px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-summary span,
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-summary small{font-size:7px!important}
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-summary b{font-size:13px!important;margin:2px 0!important}
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-scenarios{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-scenarios button{
+  flex:0 0 min(56vw,220px)!important;
+  min-height:50px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .gate-grid{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .gate-grid>div{
+  flex:0 0 120px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-advanced{
+  padding:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-advanced>summary{
+  min-height:40px!important;
+  display:flex!important;
+  align-items:center!important;
+  font-size:8px!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-map svg{
+  min-height:54dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Forecast'] .fr36-diagnostics article{
+  grid-template-columns:1fr!important;
+  padding:6px!important;
+ }
+
+ /* RELATIVITY — observer controls become a compact instrument ribbon. */
+ .omega-workstation-v2[data-panel='Relativity'] .section-head{
+  padding:4px 5px!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .section-head .overline,
+ .omega-workstation-v2[data-panel='Relativity'] .section-head .muted{
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .section-head h2{
+  margin:0!important;
+  font-size:17px!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .section-head .pill-row{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  overflow-x:auto!important;
+  gap:3px!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .section-head .pill{
+  flex:0 0 auto!important;
+  padding:4px 6px!important;
+  font-size:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel36-observer{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel36-observer>label{
+  flex:1 0 min(76vw,360px)!important;
+  grid-column:auto!important;
+  padding:6px 7px!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel36-observer>div{
+  flex:0 0 112px!important;
+  padding:6px 7px!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel-tabs{
+  position:sticky!important;
+  top:calc(44px + env(safe-area-inset-top,0px))!important;
+  z-index:34!important;
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:3px!important;
+  overflow-x:auto!important;
+  padding:3px!important;
+  border:1px solid var(--r92-line)!important;
+  border-radius:8px!important;
+  background:rgba(4,12,15,.96)!important;
+  backdrop-filter:blur(10px)!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel-tabs button{
+  flex:0 0 auto!important;
+  min-height:34px!important;
+  padding:5px 8px!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] :where(.rel36-reference,.rel36-field){
+  min-width:0!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel36-reference .calculus-field-r37,
+ .omega-workstation-v2[data-panel='Relativity'] .rel36> .calculus-field-r37{
+  min-height:70dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel36-reference>p{
+  font-size:7px!important;
+  line-height:1.45!important;
+  padding:6px 7px!important;
+  margin:4px 0!important;
+  border:1px solid var(--r92-line)!important;
+  border-radius:8px!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel36-field{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel36-field article{
+  flex:0 0 min(45vw,170px)!important;
+  padding:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .controller-grid,
+ .omega-workstation-v2[data-panel='Relativity'] .math-registry{
+  grid-template-columns:1fr!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel-footer,
+ .omega-workstation-v2[data-panel='Relativity'] .action-row{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Relativity'] .rel-footer>span,
+ .omega-workstation-v2[data-panel='Relativity'] .action-row button{
+  flex:0 0 auto!important;
+ }
+
+ /* INFINITY — canvas never has a data card sitting over it. */
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-head{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-head .overline,
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-head p:not(.overline){
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-head h2{
+  margin:0!important;
+  font-size:17px!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] :where(.inf36-pass,.inf36-hold){
+  padding:5px 7px!important;
+  font-size:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-toolbar{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-toolbar>button{
+  flex:0 0 auto!important;
+  min-height:38px!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-toolbar label{
+  flex:1 0 min(76vw,360px)!important;
+  margin-left:0!important;
+  min-width:min(76vw,360px)!important;
+  padding:5px 7px!important;
+  border:1px solid var(--r92-line)!important;
+  border-radius:8px!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-stage{
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:minmax(70dvh,1fr) auto!important;
+  border-radius:10px!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-stage canvas{
+  height:70dvh!important;
+  min-height:520px!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-stage aside{
+  display:grid!important;
+  grid-template-columns:auto 1fr!important;
+  gap:3px 8px!important;
+  max-height:none!important;
+  padding:7px 8px!important;
+  border-width:1px 0 0!important;
+  background:#041015!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-stage aside>strong,
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-stage aside>p{
+  grid-column:1/-1!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-stage aside p{
+  margin:2px 0!important;
+  font-size:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-stage aside div{
+  margin:2px 0!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-live{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scroll-snap-type:x proximity!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-live article{
+  flex:0 0 min(76vw,300px)!important;
+  scroll-snap-align:start!important;
+  padding:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-row-selector{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-row-selector button{
+  flex:0 0 min(44vw,170px)!important;
+  min-height:52px!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-advanced{
+  padding:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-advanced>summary{
+  min-height:40px!important;
+  display:flex!important;
+  align-items:center!important;
+  font-size:8px!important;
+ }
+
+ /* ATLAS — one canvas with compact projection/view/action rails. */
+ .omega-workstation-v2[data-panel='Atlas'] .special-head{
+  padding:4px 5px!important;
+ }
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-toolbar{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-toolbar>div{
+  flex:0 0 auto!important;
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:3px!important;
+ }
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-toolbar button{
+  flex:0 0 auto!important;
+  min-height:34px!important;
+  padding:5px 7px!important;
+ }
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-toolbar label{
+  flex:1 0 210px!important;
+  width:auto!important;
+  margin-left:0!important;
+  padding:5px 7px!important;
+  border:1px solid var(--r92-line)!important;
+  border-radius:8px!important;
+ }
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-stage{
+  min-height:72dvh!important;
+  border-radius:10px!important;
+ }
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-stage canvas{
+  height:72dvh!important;
+  min-height:520px!important;
+ }
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-actions{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-actions button{
+  flex:0 0 auto!important;
+  min-height:38px!important;
+ }
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-readout{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scroll-snap-type:x proximity!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-readout article{
+  flex:0 0 min(58vw,220px)!important;
+  scroll-snap-align:start!important;
+  padding:7px!important;
+ }
+
+ /* SCALE COMPILER — nested field first, diagnostics secondary. */
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child{
+  display:grid!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .section-head{
+  padding:4px 5px!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .section-head .overline,
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .section-head .muted{
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .section-head h2{
+  margin:0!important;
+  font-size:17px!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .pill-row{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:3px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .pill{
+  flex:0 0 auto!important;
+  padding:4px 6px!important;
+  font-size:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .calculus-field-r37{
+  min-height:72dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .cfr37-stage{
+  min-height:66dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .gate-grid{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .gate-grid>div{
+  flex:0 0 122px!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .system-grid{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scroll-snap-type:x proximity!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .system-card{
+  flex:0 0 min(76vw,300px)!important;
+  scroll-snap-align:start!important;
+ }
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child>details>summary,
+ .omega-workstation-v2[data-panel='Scale Compiler'] details.panel>summary{
+  min-height:40px!important;
+  display:flex!important;
+  align-items:center!important;
+ }
+
+ /* REALITY LAB — before analysis, ingestion leads; after analysis, mapped state leads. */
+ .omega-workstation-v2[data-panel='Reality Lab'] .reality-lab{
+  padding:4px!important;
+  gap:5px!important;
+  min-height:0!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl-hero{
+  padding:6px 7px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl-hero .eyebrow,
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl-hero p{
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl-hero h1{
+  margin:0!important;
+  font-size:18px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl-hero-status{
+  align-items:flex-end!important;
+  font-size:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-status{
+  padding:6px 7px!important;
+  gap:5px!important;
+  font-size:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-layout{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36[data-analysis='empty'] .rl36-input{order:0!important}
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36[data-analysis='empty'] .rl36-stage{order:1!important}
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36[data-analysis='ready'] .rl36-stage{order:0!important}
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36[data-analysis='ready'] .rl36-input{order:1!important}
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-input{
+  padding:7px!important;
+  gap:6px!important;
+  border:1px solid var(--r92-line)!important;
+  border-radius:10px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36[data-analysis='ready'] .rl36-input{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36[data-analysis='ready'] .rl36-drop{
+  min-height:74px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-input details,
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-input>small,
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-input>.rl-error{
+  grid-column:1/-1!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-kpis{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-kpis>div{
+  flex:0 0 128px!important;
+  padding:6px 7px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-stage .calculus-field-r37{
+  min-height:72dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-stage .cfr37-stage{
+  min-height:66dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-play{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr)!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-play span{
+  grid-column:1/-1!important;
+  font-size:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-proof{
+  padding:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-proof>summary{
+  min-height:40px!important;
+  display:flex!important;
+  align-items:center!important;
+  font-size:8px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl-actions{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  padding:6px!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl-actions>*{
+  flex:0 0 auto!important;
+ }
+
+ /* FIELD / DATA MOTION / CONVERGENCE — live field remains the first visual plane. */
+ .omega-workstation-v2[data-panel='Field'] .r28-field-stage{
+  min-height:72dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Field'] .r28-field-readout,
+ .omega-workstation-v2[data-panel='Data Motion'] :where(.r28-motion-kpis,.r28-derivative-grid),
+ .omega-workstation-v2[data-panel='Convergence'] .r28-convergence-summary{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:1px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Field'] .r28-field-readout .r28-metric,
+ .omega-workstation-v2[data-panel='Data Motion'] :where(.r28-motion-kpis,.r28-derivative-grid)>*,
+ .omega-workstation-v2[data-panel='Convergence'] .r28-convergence-summary .r28-metric{
+  flex:0 0 126px!important;
+ }
+ .omega-workstation-v2[data-panel='Field'] .r28-route-strip{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:1px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Field'] .r28-route-strip button{
+  flex:0 0 min(66vw,250px)!important;
+ }
+ .omega-workstation-v2[data-panel='Data Motion'] .r28-motion-hero{
+  grid-template-columns:1fr!important;
+  gap:4px!important;
+ }
+ .omega-workstation-v2[data-panel='Data Motion'] .calculus-field-r37,
+ .omega-workstation-v2[data-panel='Convergence'] .calculus-field-r37{
+  min-height:70dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Convergence'] .r28-convergence-layout{
+  grid-template-columns:1fr!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Convergence'] .r28-candidates{
+  max-height:44dvh!important;
+  overflow:auto!important;
+  padding:6px!important;
+ }
+
+ /* ARCHIVE — census/operations stay forensic but stop looking like a wall of cards. */
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .archive-governance-app{
+  gap:5px!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .special-head p{
+  display:none!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .archive-summary{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .archive-summary>div{
+  flex:0 0 126px!important;
+  padding:6px 7px!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .archive-summary b{
+  font-size:13px!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .archive-search{
+  grid-template-columns:auto minmax(0,1fr) auto!important;
+  padding:5px!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .archive-search select{
+  grid-column:auto!important;
+  width:auto!important;
+  max-width:36vw!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .archive-recovery-flow{
+  padding:6px!important;
+  gap:4px!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .recovery-rule-grid{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .recovery-rule-grid article{
+  flex:0 0 min(76vw,300px)!important;
+  padding:7px!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .forensic-donor-grid{
+  grid-template-columns:1fr!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .donor-card{
+  padding:8px!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .donor-evidence{
+  padding:6px!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .donor-metrics{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:3px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .donor-metrics span{
+  flex:0 0 86px!important;
+ }
+
+ /* Embedded restoration: one selected restored executor at a time. */
+ .omega-workstation-v2 .r46-restoration-matrix{
+  margin:6px 0!important;
+  padding:7px!important;
+  border-radius:10px!important;
+ }
+ .omega-workstation-v2 .r46-restoration-matrix>.special-head p{
+  display:none!important;
+ }
+ .omega-workstation-v2 .r46-family-status{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2 .r46-family-status article{
+  flex:0 0 min(68vw,270px)!important;
+  padding:7px!important;
+ }
+ .omega-workstation-v2 .r46-tabs{
+  position:sticky!important;
+  top:calc(44px + env(safe-area-inset-top,0px))!important;
+  z-index:25!important;
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:3px!important;
+  overflow-x:auto!important;
+  padding:3px!important;
+  background:rgba(5,10,13,.96)!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2 .r46-tabs button{
+  flex:0 0 auto!important;
+  min-height:36px!important;
+ }
+ .omega-workstation-v2 :where(.r46-data-language,.r46-bio,.r46-cinema,.r46-micro){
+  margin:5px 0!important;
+  padding:7px!important;
+  border-radius:10px!important;
+ }
+ .omega-workstation-v2 .r46-scale-rail{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2 .r46-scale-rail button{
+  flex:0 0 128px!important;
+ }
+ .omega-workstation-v2 .r46-cinema-metrics,
+ .omega-workstation-v2 .r46-seed-grid{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2 .r46-cinema-metrics span,
+ .omega-workstation-v2 .r46-seed-grid article{
+  flex:0 0 min(48vw,180px)!important;
+ }
+
+ .omega-workstation-v2 :where(
+  .fr36-controls,.fr36-summary,.fr36-scenarios,.forecast-r36 .gate-grid,
+  .rel36-observer,.rel-tabs,.rel36-field,.rel-footer,.action-row,
+  .inf36-toolbar,.inf36-live,.inf36-row-selector,
+  .atlas-r36-toolbar,.atlas-r36-actions,.atlas-r36-readout,
+  [data-panel='Scale Compiler'] .gate-grid,[data-panel='Scale Compiler'] .system-grid,
+  .rl36-kpis,.rl-actions,
+  .r28-field-readout,.r28-route-strip,.r28-motion-kpis,.r28-derivative-grid,.r28-convergence-summary,
+  .archive-summary,.archive-recovery-flow,.recovery-rule-grid,.donor-metrics,
+  .r46-family-status,.r46-tabs,.r46-scale-rail,.r46-cinema-metrics,.r46-seed-grid
+ )::-webkit-scrollbar{display:none}
+}
+
+@media(max-width:520px){
+ .omega-workstation-v2[data-panel='Forecast'] .calculus-field-r37,
+ .omega-workstation-v2[data-panel='Relativity'] .rel36-reference .calculus-field-r37,
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-stage,
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-stage,
+ .omega-workstation-v2[data-panel='Scale Compiler'] .panel:first-child .calculus-field-r37,
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36-stage .calculus-field-r37,
+ .omega-workstation-v2[data-panel='Data Motion'] .calculus-field-r37,
+ .omega-workstation-v2[data-panel='Convergence'] .calculus-field-r37{
+  min-height:72dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Infinity'] .inf36-stage canvas,
+ .omega-workstation-v2[data-panel='Atlas'] .atlas-r36-stage canvas{
+  height:72dvh!important;
+  min-height:500px!important;
+ }
+ .omega-workstation-v2[data-panel='Reality Lab'] .rl36[data-analysis='ready'] .rl36-input{
+  grid-template-columns:1fr!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .archive-search{
+  grid-template-columns:auto minmax(0,1fr)!important;
+ }
+ .omega-workstation-v2:is([data-panel='Archive Census'],[data-panel='Archive Operators']) .archive-search select{
+  grid-column:1/-1!important;
+  max-width:100%!important;
+  width:100%!important;
+ }
+}
+
+/* R92 may compact explanations, never erase the authoritative boundary itself. */
+.omega-workstation-v2 :where(.boundary,.special-boundary,.earth-proof,.sai-footer,.sbm21-expression-boundary,.r46-overlay-boundary){
+ display:flex;
+ visibility:visible!important;
+}

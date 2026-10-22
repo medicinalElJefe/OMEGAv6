@@ -1,0 +1,46 @@
+{
+  "schema": "OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164",
+  "revision": "R164",
+  "authority": "OMEGAV6",
+  "state": "AUTHORITY_GRAPH_PUBLISHED",
+  "canonicalMutation": false,
+  "autonomousMutationAuthority": false,
+  "canonicalAdmissionAuthority": "R125",
+  "runtimeLivenessAuthority": "R163",
+  "deploymentAuthority": "R144",
+  "returnProofAuthority": "R141",
+  "reflexRoutingAuthority": "R156",
+  "authorityChain": [
+    "R163 canonical first-hand core health",
+    "R144 deployment/runtime attestation",
+    "R143 route-to-capability authority",
+    "R142 execution lifecycle receipts",
+    "R141 exact Hybrid return proof",
+    "R159 post-return sovereign convergence",
+    "R160 reflex operation ingress",
+    "R161 durable mission handoff",
+    "R162 explicit authorization and dispatch",
+    "R147 executor fabric",
+    "R146 durable execution history",
+    "R156 residual/reflex routing",
+    "R125 bounded repair and CanonState admission",
+    "R124 proof-gated self-build"
+  ],
+  "evidenceSources": {
+    "accuracy": "/omega-r125-accuracy-state.json",
+    "coreHealth": "/api/core-health",
+    "releaseEvidence": "/api/release-evidence",
+    "runtimeAttestation": "/api/runtime-attestation",
+    "hybrid": "/api/hybrid/status",
+    "federation": "/api/federation/run/status"
+  },
+  "laws": [
+    "OBSERVATION_IS_NOT_MUTATION",
+    "RESIDUAL_CLASSIFICATION_IS_NOT_REPAIR_AUTHORIZATION",
+    "R125_REMAINS_SOLE_CANONSTATE_ADMISSION_AUTHORITY",
+    "PC_OFFLINE_DOES_NOT_MEAN_CANONICAL_WORKER_OFFLINE",
+    "WORKER_LIVE_DOES_NOT_MEAN_PC_ONLINE",
+    "HIGH_OR_CRITICAL_TRUTH_GAPS_NEVER_AUTO_REPAIR"
+  ],
+  "truthBoundary": "This public R164 artifact publishes the authority/evidence graph only. It does not claim a current PC heartbeat, solver validity, returned execution, deployment identity beyond R144 evidence, or CanonState admission. Runtime facts must be read from the referenced first-hand endpoints and classified by the R164 engine; R125 remains the sole CanonState admission authority."
+}

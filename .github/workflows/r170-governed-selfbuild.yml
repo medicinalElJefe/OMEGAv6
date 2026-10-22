@@ -1,0 +1,389 @@
+name: R170 Governed Self-Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: omega-r170-governed-selfbuild
+  cancel-in-progress: false
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+  OMEGA_R170_RESIDUAL_EVIDENCE_PATH: /tmp/omega-r170-residual-evidence.json
+  OMEGA_R503_REQUIRE_WORKER_ADMISSION: '1'
+  OMEGA_R503_WORKER_PACKET_PATH: /tmp/omega-r503-worker-packet.json
+  OMEGA_R503_WORKER_ATTESTATION_PATH: /tmp/omega-r503-worker-attestation.json
+
+jobs:
+  propose-one-governed-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Admit calculus-native self-build worker
+        run: |
+          node scripts/r503-build-calculus-worker-packet.mjs --packet "$OMEGA_R503_WORKER_PACKET_PATH" --attestation "$OMEGA_R503_WORKER_ATTESTATION_PATH"
+          node tests/r503-calculus-native-autonomy-invariants.mjs
+      - name: Prove cheap self-build control-plane invariants
+        run: |
+          node scripts/verify_workflow_topology_r170.mjs
+          node tests/r516-cloud01-diagnostics-truth-invariants.mjs
+          node tests/r516-cloud01-scheduler-boundary-invariants.mjs
+          node scripts/r515-cloud01-cycle-diagnostics.mjs
+          node tests/r170-self-build-governor-invariants.mjs
+          node tests/r2141-r170-pr-policy-failclose-invariants.mjs
+          node tests/r240-recursive-exact-self-promotion-invariants.mjs
+          node tests/r245-governed-selfbuild-convergence-invariants.mjs
+          node tests/r246-autonomous-candidate-lifecycle-invariants.mjs
+          node tests/r503-calculus-native-autonomy-invariants.mjs
+      - name: Require successful canonical production proof for this exact main SHA
+        id: production
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          BASE=$(git rev-parse HEAD)
+          RUNS=$(gh api --paginate -X GET "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs" -f branch=main -f head_sha="$BASE" -f status=completed -f per_page=100 --jq '.workflow_runs[] | {databaseId:.id,headSha:.head_sha,status:.status,conclusion:.conclusion,event:.event,url:.html_url}' | jq -s '.')
+          BASE="$BASE" RUNS="$RUNS" node <<'NODE' > /tmp/r170-production-proof.env
+          const runs=JSON.parse(process.env.RUNS||'[]');
+          const base=process.env.BASE;
+          const hit=runs.find(r=>r.headSha===base&&['push','workflow_dispatch'].includes(r.event)&&r.status==='completed'&&r.conclusion==='success');
+          process.stdout.write(`production_ready=${hit?'true':'false'}\nproduction_run_id=${hit?.databaseId||''}\nproduction_base=${base}\nproduction_event=${hit?.event||''}\n`);
+          NODE
+          cat /tmp/r170-production-proof.env >> "$GITHUB_OUTPUT"
+          if ! grep -q '^production_ready=true$' /tmp/r170-production-proof.env; then
+            echo "Exact current main SHA has no successful canonical production Cloud Bridge proof; pulse remains OBSERVE_ONLY."
+          fi
+      - name: Refuse parallel autonomous candidate PRs across R170 and CLOUD-01
+        if: steps.production.outputs.production_ready == 'true'
+        id: open_pr
+        env:
+          GH_TOKEN: ${{ secrets.OMEGA_EVOLUTION_GITHUB_TOKEN || github.token }}
+        shell: bash
+        run: |
+          OPEN=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --base main --limit 100 --json number,headRefName)
+          OPEN="$OPEN" node <<'NODE' > /tmp/r245-autonomous-pr-fence.env
+          const fs=require('fs');
+          const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
+          const policy=state.autonomousCandidatePolicy||{};
+          const prefixes=Array.isArray(policy.branchPrefixes)?policy.branchPrefixes:[];
+          if(policy.schema!=='OMEGA_R170_AUTONOMOUS_CANDIDATE_POLICY_V1'||policy.maxOpenCandidatePrs!==1||policy.crossMachineFence!==true)throw new Error('canonical autonomous candidate policy invalid');
+          if(!prefixes.includes('selfbuild/r170-')||!prefixes.includes('cloud/evolution-'))throw new Error('cross-machine branch fence is incomplete');
+          const prs=JSON.parse(process.env.OPEN||'[]');
+          const held=prs.filter(pr=>prefixes.some(prefix=>String(pr.headRefName||'').startsWith(prefix)));
+          process.stdout.write(`count=${held.length}\npr_count=${held.length}\nheld=${held.map(x=>`#${x.number}:${x.headRefName}`).join(',')}\n`);
+          NODE
+          cat /tmp/r245-autonomous-pr-fence.env >> "$GITHUB_OUTPUT"
+          PR_COUNT=$(sed -n 's/^count=//p' /tmp/r245-autonomous-pr-fence.env)
+          if [ "$PR_COUNT" -gt 0 ]; then echo "Existing governed autonomous candidate PR found across R170/CLOUD-01; OBSERVE_ONLY."; fi
+      - name: Collect current fail-closed residual evidence
+        if: steps.production.outputs.production_ready == 'true' && steps.open_pr.outputs.count == '0'
+        run: node scripts/collect_selfbuild_residual_gate_r170.mjs
+      - name: Select next bounded capsule
+        if: steps.production.outputs.production_ready == 'true' && steps.open_pr.outputs.count == '0'
+        id: select
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -f /tmp/r170-proposal.json
+          OMEGA_R170_PROPOSAL_PATH=/tmp/r170-proposal.json node scripts/r170-selfbuild-engine.mjs | tee /tmp/r170-engine-output.log
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='/tmp/r170-proposal.json';
+          if(!fs.existsSync(p))throw new Error('R338 selector emitted no clean proposal artifact');
+          const parsed=JSON.parse(fs.readFileSync(p,'utf8'));
+          if(!parsed||typeof parsed!=='object'||Array.isArray(parsed)||typeof parsed.status!=='string')throw new Error('R338 selector proposal artifact is not a valid status object');
+          process.stdout.write(JSON.stringify(parsed,null,2)+'\n');
+          NODE
+          STATUS=$(node -e "const x=require('/tmp/r170-proposal.json');process.stdout.write(x.status||'UNKNOWN')")
+          CAPSULE=$(node -e "const x=require('/tmp/r170-proposal.json');process.stdout.write(x.capsuleId||'')")
+          GENERATION=$(node -e "const x=require('/tmp/r170-proposal.json');process.stdout.write(String(x.generation||0))")
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "capsule=$CAPSULE" >> "$GITHUB_OUTPUT"
+          echo "generation=$GENERATION" >> "$GITHUB_OUTPUT"
+      - name: Prepare candidate proof dependencies
+        if: steps.select.outputs.status == 'PROPOSE'
+        run: npm ci --no-fund
+      - name: Prove current successor chain before generation
+        if: steps.select.outputs.status == 'PROPOSE'
+        run: |
+          node scripts/prove_successor_workflow_invariants_r175.mjs
+          node tests/r180-living-world-execution-dispatch-invariants.mjs
+          node tests/r179-living-world-durable-authorization-invariants.mjs
+          node tests/r175-multidomain-living-world-truth-invariants.mjs
+          node tests/r239-adaptive-hybrid-resource-governor-invariants.mjs
+          node tests/r240-recursive-exact-self-promotion-invariants.mjs
+      - name: Generate exactly one sandbox candidate
+        if: steps.select.outputs.status == 'PROPOSE'
+        env:
+          OMEGA_R170_SELFBUILD_APPLY: '1'
+        run: node scripts/r170-selfbuild-engine.mjs
+      - name: Prove candidate against current authority chain
+        if: steps.select.outputs.status == 'PROPOSE'
+        run: |
+          node tests/r170-self-build-governor-invariants.mjs
+          node tests/r2141-r170-pr-policy-failclose-invariants.mjs
+          node tests/r245-governed-selfbuild-convergence-invariants.mjs
+          node tests/r246-autonomous-candidate-lifecycle-invariants.mjs
+          node scripts/verify_workflow_topology_r170.mjs
+          node scripts/prove_successor_workflow_invariants_r175.mjs
+          node tests/r180-living-world-execution-dispatch-invariants.mjs
+          node tests/r179-living-world-durable-authorization-invariants.mjs
+          node tests/r175-multidomain-living-world-truth-invariants.mjs
+          node tests/r169-federation-attestation-world-lens-invariants.mjs
+          node tests/r168-genesis-r192-attestation-invariants.mjs
+          node tests/r167-active-optical-r1532-convergence-invariants.mjs
+          node tests/r166-development-residual-world-lens-invariants.mjs
+          node tests/r164-development-residual-graph-invariants.mjs
+          node tests/r163-canonical-core-health-truth-invariants.mjs
+          node tests/r1532-adaptive-external-search-invariants.mjs
+          node tests/r239-adaptive-hybrid-resource-governor-invariants.mjs
+          node tests/r240-recursive-exact-self-promotion-invariants.mjs
+          npm run check
+          npx wrangler deploy --config wrangler.jsonc --dry-run --outdir .wrangler-r170-selfbuild
+          npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r170-selfbuild-optical
+      - name: Refuse stale source admission proposal
+        if: steps.select.outputs.status == 'PROPOSE'
+        id: freshness
+        shell: bash
+        run: |
+          START=$(git rev-parse HEAD)
+          git fetch origin main
+          CURRENT=$(git rev-parse origin/main)
+          test "$START" = "$CURRENT" || { echo "main moved from $START to $CURRENT; refusing stale proposal"; exit 42; }
+          echo "base=$START" >> "$GITHUB_OUTPUT"
+      - name: Bind candidate branch and proof receipt
+        if: steps.select.outputs.status == 'PROPOSE'
+        id: candidate
+        shell: bash
+        run: |
+          CAPSULE='${{ steps.select.outputs.capsule }}'; GEN='${{ steps.select.outputs.generation }}'; BRANCH="selfbuild/r170-g${GEN}-${CAPSULE,,}-${GITHUB_RUN_ID}"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          BRANCH="$BRANCH" BASE='${{ steps.freshness.outputs.base }}' PRODUCTION_RUN='${{ steps.production.outputs.production_run_id }}' node <<'NODE'
+          const fs=require('fs');
+          const p='public/omega-r170-selfbuild-state.json';
+          const c='public/omega-r170-selfbuild-candidate.json';
+          const state=JSON.parse(fs.readFileSync(p));
+          const receipt=[...(state.receipts||[])].reverse().find(r=>r.capsuleId===state.currentCapsuleId&&r.status==='SANDBOX');
+          if(!receipt)throw new Error('sandbox receipt missing');
+          receipt.status='PROVED_PENDING_PR';
+          receipt.provedAt=new Date().toISOString();
+          receipt.branch=process.env.BRANCH;
+          receipt.baseSha=process.env.BASE;
+          receipt.productionRunId=process.env.PRODUCTION_RUN;
+          receipt.canonicalAdmission=false;
+          receipt.tests={r170:true,r180:true,r179:true,currentSuccessorChain:true,r175:true,r169:true,r168:true,r167:true,r166:true,r164:true,r163:true,r1532:true,r239:true,r240:true,r245SelfbuildConvergence:true,r246CandidateLifecycle:true,inherited:true,build:true,canonicalDryRun:true,opticalDryRun:true};
+          fs.writeFileSync(p,JSON.stringify(state,null,2)+'\n');
+          const candidate=JSON.parse(fs.readFileSync(c));
+          candidate.receipt=receipt;
+          candidate.status='PROVED_PENDING_PR';
+          fs.writeFileSync(c,JSON.stringify(candidate,null,2)+'\n');
+          NODE
+      - name: Commit proved candidate on isolated branch
+        if: steps.select.outputs.status == 'PROPOSE'
+        id: commit
+        shell: bash
+        run: |
+          git config user.name 'OMEGA R170 Governed Self Builder'
+          git config user.email 'actions@users.noreply.github.com'
+          git checkout -b '${{ steps.candidate.outputs.branch }}'
+          git add src/generated/selfbuildR170 public/omega-r170-selfbuild-state.json public/omega-r170-selfbuild-candidate.json
+          git diff --cached --check
+          git commit -m "R170/R240/R245 self-build generation ${{ steps.select.outputs.generation }}: ${{ steps.select.outputs.capsule }}"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          git push origin HEAD:'${{ steps.candidate.outputs.branch }}'
+      - name: Re-prove exact committed candidate and allowlisted diff
+        if: steps.select.outputs.status == 'PROPOSE'
+        id: exact_candidate
+        shell: bash
+        run: |
+          BASE='${{ steps.freshness.outputs.base }}'
+          CANDIDATE_SHA='${{ steps.commit.outputs.sha }}'
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          DIRTY_STATUS="$(git status --porcelain=v1 --untracked-files=all)"
+          if [[ -n "$DIRTY_STATUS" ]]; then
+            printf '%s\n' 'R170 exact-candidate worktree is dirty:' >&2
+            printf '%s\n' "$DIRTY_STATUS" >&2
+            exit 1
+          fi
+          node tests/r170-self-build-governor-invariants.mjs
+          node tests/r2141-r170-pr-policy-failclose-invariants.mjs
+          node tests/r245-governed-selfbuild-convergence-invariants.mjs
+          node tests/r246-autonomous-candidate-lifecycle-invariants.mjs
+          node scripts/verify_workflow_topology_r170.mjs
+          node scripts/prove_successor_workflow_invariants_r175.mjs
+          node tests/r239-adaptive-hybrid-resource-governor-invariants.mjs
+          node tests/r240-recursive-exact-self-promotion-invariants.mjs
+          npm run check
+          npx wrangler deploy --config wrangler.jsonc --dry-run --outdir .wrangler-r240-exact-candidate
+          BASE="$BASE" CANDIDATE_SHA="$CANDIDATE_SHA" node <<'NODE'
+          const {execFileSync}=require('child_process');
+          const fs=require('fs');
+          const candidate=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-candidate.json'));
+          const receipt=candidate.receipt||{};
+          if(candidate.status!=='PROVED_PENDING_PR'||receipt.status!=='PROVED_PENDING_PR')throw new Error('candidate receipt is not PROVED_PENDING_PR');
+          if(receipt.baseSha!==process.env.BASE)throw new Error(`candidate base mismatch ${receipt.baseSha} != ${process.env.BASE}`);
+          if(receipt.canonicalAdmission!==false)throw new Error('candidate receipt leaked Canon admission');
+          if(candidate.generatorContract!=='R245_SHARED_CANONICAL_GENERATOR'||receipt.generatorContract!=='R245_SHARED_CANONICAL_GENERATOR')throw new Error('candidate is not bound to shared R245 generator contract');
+          if(!receipt.tests||Object.values(receipt.tests).some(v=>v!==true))throw new Error('not every declared candidate test is true');
+          const target=candidate.capsule?.target;
+          if(!target||!/^src\/generated\/selfbuildR170\//.test(target))throw new Error(`candidate target not allowlisted: ${target}`);
+          const changed=execFileSync('git',['diff','--name-only',`${process.env.BASE}...${process.env.CANDIDATE_SHA}`],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean);
+          const allowed=new Set([target,'public/omega-r170-selfbuild-state.json','public/omega-r170-selfbuild-candidate.json']);
+          const forbidden=changed.filter(x=>!allowed.has(x));
+          if(forbidden.length)throw new Error(`R240 allowlisted diff violation: ${forbidden.join(', ')}`);
+          if(!changed.includes(target))throw new Error('generated target is absent from exact candidate diff');
+          console.log(`R240/R245 EXACT CANDIDATE PASS · ${process.env.CANDIDATE_SHA} · base ${process.env.BASE} · ${changed.length} allowlisted paths`);
+          NODE
+          echo "status=PASS" >> "$GITHUB_OUTPUT"
+      - name: Promote exact candidate as an atomic two-parent merge
+        if: steps.exact_candidate.outputs.status == 'PASS'
+        id: merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          BASE='${{ steps.freshness.outputs.base }}'
+          CANDIDATE_SHA='${{ steps.commit.outputs.sha }}'
+          git fetch origin main
+          CURRENT=$(git rev-parse origin/main)
+          test "$CURRENT" = "$BASE" || { echo "::error::main moved from exact base $BASE to $CURRENT; refusing R240 source promotion"; exit 42; }
+          TREE=$(git rev-parse "$CANDIDATE_SHA^{tree}")
+          export GIT_AUTHOR_NAME='OMEGA R170 Governed Self Builder'
+          export GIT_AUTHOR_EMAIL='actions@users.noreply.github.com'
+          export GIT_COMMITTER_NAME='OMEGA R170 Governed Self Builder'
+          export GIT_COMMITTER_EMAIL='actions@users.noreply.github.com'
+          MERGE_SHA=$(printf '%s\n\n%s\n%s\n' "R170/R240/R245 governed exact source promotion" "Base: $BASE" "Candidate: $CANDIDATE_SHA" | git commit-tree "$TREE" -p "$BASE" -p "$CANDIDATE_SHA")
+          PARENTS=$(git show -s --format=%P "$MERGE_SHA")
+          set -- $PARENTS
+          test "$#" -eq 2 || { echo "::error::R240 promoted source must be exactly two-parent merge"; exit 1; }
+          test "$1" = "$BASE" || { echo "::error::R240 first parent does not equal exact production base"; exit 1; }
+          test "$2" = "$CANDIDATE_SHA" || { echo "::error::R240 second parent does not equal exact proved candidate"; exit 1; }
+          test "$(git rev-parse "$MERGE_SHA^{tree}")" = "$TREE" || { echo "::error::R240 merge tree drifted from exact proved candidate"; exit 1; }
+          git push origin "$MERGE_SHA:refs/heads/main" --force-with-lease="refs/heads/main:$BASE"
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "$MERGE_SHA" || { echo "::error::main does not equal exact atomic merge SHA"; exit 1; }
+          echo "sha=$MERGE_SHA" >> "$GITHUB_OUTPUT"
+          echo "R240 exact two-parent source promotion PASS · $BASE + $CANDIDATE_SHA → $MERGE_SHA"
+
+      - name: Require sole canonical production writer for exact promoted merge
+        if: steps.merge.outputs.sha != ''
+        id: deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          MERGE_SHA='${{ steps.merge.outputs.sha }}'
+          RUN_ID=''
+          RUN_EVENT=''
+          for attempt in $(seq 1 6); do
+            RUNS=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --limit 40 --json databaseId,headSha,status,conclusion,event,url)
+            FOUND=$(MERGE_SHA="$MERGE_SHA" RUNS="$RUNS" node -e "const rs=JSON.parse(process.env.RUNS||'[]');const r=rs.find(x=>x.headSha===process.env.MERGE_SHA&&x.event==='push');process.stdout.write(r?JSON.stringify({id:r.databaseId,event:r.event}):'')")
+            if [ -n "$FOUND" ]; then
+              RUN_ID=$(FOUND="$FOUND" node -e "process.stdout.write(String(JSON.parse(process.env.FOUND).id))")
+              RUN_EVENT=push
+              break
+            fi
+            sleep 5
+          done
+          if [ -z "$RUN_ID" ]; then
+            git fetch origin main
+            test "$(git rev-parse origin/main)" = "$MERGE_SHA" || { echo "::error::main moved before canonical ci.yml dispatch"; exit 1; }
+            gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref main
+            for attempt in $(seq 1 24); do
+              RUNS=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --branch main --event workflow_dispatch --limit 40 --json databaseId,headSha,status,conclusion,event,url)
+              FOUND=$(MERGE_SHA="$MERGE_SHA" RUNS="$RUNS" node -e "const rs=JSON.parse(process.env.RUNS||'[]');const r=rs.find(x=>x.headSha===process.env.MERGE_SHA&&x.event==='workflow_dispatch');process.stdout.write(r?JSON.stringify({id:r.databaseId,event:r.event}):'')")
+              if [ -n "$FOUND" ]; then
+                RUN_ID=$(FOUND="$FOUND" node -e "process.stdout.write(String(JSON.parse(process.env.FOUND).id))")
+                RUN_EVENT=workflow_dispatch
+                break
+              fi
+              sleep 5
+            done
+          fi
+          test -n "$RUN_ID" || { echo '::error::Canonical ci.yml run did not bind the exact promoted merge by push or explicit main dispatch.'; exit 1; }
+          gh run watch "$RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
+          RUN=$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json headSha,status,conclusion,event,url)
+          MERGE_SHA="$MERGE_SHA" RUN="$RUN" node -e "const r=JSON.parse(process.env.RUN);if(r.headSha!==process.env.MERGE_SHA||!['push','workflow_dispatch'].includes(r.event)||r.status!=='completed'||r.conclusion!=='success')throw new Error('canonical production proof does not bind exact promoted merge')"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "event=$RUN_EVENT" >> "$GITHUB_OUTPUT"
+          echo "status=PRODUCTION_PROVEN" >> "$GITHUB_OUTPUT"
+          echo "R240 exact promoted merge is production-proven by canonical ci.yml · merge $MERGE_SHA · event $RUN_EVENT · run $RUN_ID"
+
+      - name: Clean promoted candidate branch only after production proof
+        if: steps.deployment.outputs.status == 'PRODUCTION_PROVEN'
+        env:
+          GH_TOKEN: ${{ secrets.OMEGA_EVOLUTION_GITHUB_TOKEN || github.token }}
+        shell: bash
+        run: |
+          BRANCH='${{ steps.candidate.outputs.branch }}'
+          git push origin --delete "$BRANCH" || gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH"
+          echo "Promoted candidate branch removed after exact canonical production proof."
+      - name: Reconcile unpromoted autonomous candidate lifecycle
+        if: always() && steps.candidate.outputs.branch != '' && steps.deployment.outputs.status != 'PRODUCTION_PROVEN'
+        id: lifecycle
+        env:
+          GH_TOKEN: ${{ secrets.OMEGA_EVOLUTION_GITHUB_TOKEN || github.token }}
+        shell: bash
+        run: |
+          BRANCH='${{ steps.candidate.outputs.branch }}'
+          BASE='${{ steps.freshness.outputs.base }}'
+          git fetch origin main
+          CURRENT=$(git rev-parse origin/main)
+          PR_JSON=$(gh pr list --repo "$GITHUB_REPOSITORY" --state all --head "$BRANCH" --limit 1 --json number,state,mergedAt,headRefName,baseRefName)
+          PR_NUMBER=$(PR_JSON="$PR_JSON" node -e "const x=JSON.parse(process.env.PR_JSON||'[]')[0];process.stdout.write(String(x?.number||''))")
+          PR_STATE=$(PR_JSON="$PR_JSON" node -e "const x=JSON.parse(process.env.PR_JSON||'[]')[0];process.stdout.write(x?(x.mergedAt?'MERGED':String(x.state||'').toUpperCase()):'NONE')")
+          INPUT=$(BRANCH="$BRANCH" BASE="$BASE" CURRENT="$CURRENT" PR_STATE="$PR_STATE" node -e "process.stdout.write(JSON.stringify({branch:process.env.BRANCH,baseSha:process.env.BASE,currentMainSha:process.env.CURRENT,prState:process.env.PR_STATE,productionProven:false,prCi:'${{ steps.pr_ci.outputs.status || 'NOT_ATTEMPTED' }}'}))")
+          DECISION=$(OMEGA_R246_LIFECYCLE_INPUT="$INPUT" node scripts/reconcile_autonomous_candidate_lifecycle_r246.mjs)
+          echo "$DECISION"
+          ACTION=$(DECISION="$DECISION" node -e "const x=JSON.parse(process.env.DECISION);process.stdout.write(x.action)")
+          REASON=$(DECISION="$DECISION" node -e "const x=JSON.parse(process.env.DECISION);process.stdout.write(x.reason)")
+          echo "action=$ACTION" >> "$GITHUB_OUTPUT"
+          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
+          if [ "$ACTION" = 'CLOSE_PR_DELETE_BRANCH' ]; then
+            test -n "$PR_NUMBER" && gh pr close "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --comment "R246 fail-closed lifecycle: STALE_BASE_AFTER_LEGITIMATE_MAIN_ADVANCEMENT. Candidate base $BASE is no longer current main $CURRENT; this is safe stale-head retirement, not a production failure."
+            git push origin --delete "$BRANCH" || gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" || true
+            exit 0
+          fi
+          if [ "$ACTION" = 'DELETE_BRANCH' ]; then
+            git push origin --delete "$BRANCH" || gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" || true
+            exit 0
+          fi
+          if [ "$ACTION" = 'PRESERVE' ]; then
+            echo "R246 preserves candidate evidence for attention or production recovery: $REASON"
+            exit 0
+          fi
+      - name: Record autonomous pulse receipt
+        if: always()
+        run: |
+          echo "## R170.5 / R240 / R245 / R246 governed recursive self-build pulse" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Observation cadence: event-driven after canonical production success" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Exact production head ready: ${{ steps.production.outputs.production_ready || 'false' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Production base proof run: ${{ steps.production.outputs.production_run_id || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Existing autonomous candidate PRs across R170/CLOUD-01: ${{ steps.open_pr.outputs.pr_count || 'not-checked' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Selection: ${{ steps.select.outputs.status || 'OBSERVE_ONLY' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Candidate exact re-proof: ${{ steps.exact_candidate.outputs.status || 'not-attempted' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Exact two-parent source merge: ${{ steps.merge.outputs.sha || 'not-promoted' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Canonical production proof: ${{ steps.deployment.outputs.status || 'not-proven' }} / ${{ steps.deployment.outputs.run_id || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- R246 candidate lifecycle: ${{ steps.lifecycle.outputs.action || 'not-needed' }} / ${{ steps.lifecycle.outputs.reason || 'none' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- R503 worker literacy: exact-base calculus packet + cold-start attestation required before autonomous selection" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Residual gate: one canonical R164 policy shared by R170 and CLOUD-01" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Planning: one shared R240/R243 sparse frontier and Woven selection law; one source mutation candidate per pulse" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Generator: one deterministic R245 SG001–SG005 source body shared by R170 and CLOUD-01" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Candidate fence: one open autonomous PR maximum across selfbuild/r170-* and cloud/evolution-*" >> "$GITHUB_STEP_SUMMARY"
+          echo "- GitHub Actions PR creation dependency: removed; exact atomic two-parent merge promotion follows full candidate proof" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Generator direct push to main: forbidden; only governed exact two-parent promotion may update main under unchanged-base lease" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Sole canonical production writer: ci.yml" >> "$GITHUB_STEP_SUMMARY"
+          echo "- CanonState admission authority: R125" >> "$GITHUB_STEP_SUMMARY"

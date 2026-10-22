@@ -1,0 +1,1 @@
+Primary inherited CI entrypoint: `tests/enacted-runtime-r32-invariants.mjs` imports `tests/r185-temporal-relativity-performance-invariants.mjs`, which now carries the R186 ctx.storage, dispatch-vs-terminal, failed-Hybrid, and R154 adaptive-context proofs. `tests/r186-runtime-performance-closure-invariants.mjs` is a direct focused entrypoint for manual or successor workflow use.

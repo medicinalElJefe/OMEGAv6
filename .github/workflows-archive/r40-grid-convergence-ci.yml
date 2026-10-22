@@ -1,0 +1,37 @@
+name: OMEGA R40 PB Grid Convergence
+on:
+  push:
+    branches: [r39-full-12-state-pb-ledger]
+  pull_request:
+    branches: [main]
+jobs:
+  grid-convergence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Build fixed geometry input
+        run: |
+          cat > /tmp/r40.json <<'JSON'
+          {"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"ci_r40","source_packet_id":"ci_r40_grid","geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":0},"polarization":"s","material_model":{"n_incident":"1.0","n_feature":"2.43","n_background":"1.0","n_substrate":"1.46"},"numerics":{"nx":32,"ny":32,"harmonics_low":25,"harmonics_high":49,"convergence_tolerance":0.08,"energy_tolerance":0.08},"proof":{"gate":"STAY","mode188_score":1.2}}
+          JSON
+      - name: Execute fixed-geometry 32/64/96 grid convergence
+        working-directory: sovereign
+        run: python omega_pb_grid_convergence_r40.py --input /tmp/r40.json --output /tmp/r40-result.json --grids 32,64,96
+      - name: Report numerical-convergence trend
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r40-result.json'))
+          print('R40 GRID CONVERGENCE')
+          for c in d['cases']:
+            print(c)
+          assert [c['grid'] for c in d['cases']]==[32,64,96]
+          assert all(c['basis_verified'] for c in d['cases'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r40-grid-convergence
+          path: /tmp/r40-result.json

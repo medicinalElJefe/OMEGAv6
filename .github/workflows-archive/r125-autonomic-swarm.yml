@@ -1,0 +1,65 @@
+name: OMEGA R125 Autonomic Swarm
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  verify-r125:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Verify scope, cost, quorum, rejoin, and authority invariants
+        run: node tests/r125-autonomic-swarm-invariants.mjs
+      - name: Verify autonomic Worker syntax
+        run: |
+          node --check src/swarm/swarmAutonomicR125.js
+          node --check src/swarm/swarmApiR121.js
+          node --check src/workerR116.js
+      - name: Run complete inherited OMEGA regression and production build
+        run: npm run check
+      - name: Verify R125 Durable Object migration and Worker bundle
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r125-dry-run
+
+  live-r125:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-r125
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for governed deployment and prove detach checkpoint rejoin
+        env:
+          OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function get(path){const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}}),j=await r.json();if(!r.ok)throw new Error(`${path} ${r.status} ${JSON.stringify(j).slice(0,500)}`);return j}
+          async function post(path,body){const r=await fetch(base+path,{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)}),j=await r.json();if(!r.ok)throw new Error(`${path} ${r.status} ${JSON.stringify(j).slice(0,500)}`);return j}
+          let manifest,last='';
+          for(let i=0;i<36;i++){
+            try{const j=await get('/api/swarm/autonomic/manifest');if(j.runtimeRevision==='R125'&&j.hierarchy?.cells===1728&&j.hierarchy?.lanes===20736){manifest=j;break}last=JSON.stringify(j).slice(0,300)}catch(e){last=String(e)}
+            await sleep(10000);
+          }
+          if(!manifest)throw new Error('R125 autonomic manifest not live: '+last);
+          const plan=await post('/api/swarm/autonomic/plan',{intent:'R125 deterministic detached cell live proof',scope:{type:'CELL',domain:10,phase:11,regulation:3},providerBudget:0});
+          if(plan.plan?.totalCells!==1||plan.plan?.detached!==true||plan.plan?.scope?.type!=='CELL')throw new Error('detached plan contract failed');
+          const created=await post('/api/swarm/autonomic/missions',{intent:'R125 deterministic detached cell live proof',scope:{type:'CELL',domain:10,phase:11,regulation:3},providerBudget:0,genesisBudget:0,opticalBudget:0,deadlineMs:120000});
+          const id=created.mission?.id;if(!id)throw new Error('autonomic mission id missing');
+          let final;
+          for(let i=0;i<40;i++){const j=await get('/api/swarm/autonomic/missions/'+id);if(['COMPLETE','FAILED','TIMED_OUT'].includes(j.mission?.status)){final=j.mission;break}await sleep(1500)}
+          if(!final||final.status!=='COMPLETE'||final.completedCells!==1||final.proofState!=='RETURNED_NOT_ADMITTED'||final.quorum?.authority!=='EXECUTION_QUORUM_NOT_TRUTH'||!/^[a-f0-9]{64}$/i.test(String(final.merkleRoot||'')))throw new Error('autonomic closure failed: '+JSON.stringify(final).slice(0,700));
+          const checkpoint=await get('/api/swarm/autonomic/missions/'+id+'/checkpoint');
+          if(!/^[a-f0-9]{64}$/i.test(String(checkpoint.checkpointSha256||''))||checkpoint.canonicalMutation!==false)throw new Error('checkpoint proof failed');
+          const rejoin=await post('/api/swarm/autonomic/missions/'+id+'/rejoin',{intent:'Rejoin R125 detached live proof into one-cell organism comparison',mode:'SOLO',requestedCells:1,providerBudget:0,genesisBudget:0,opticalBudget:0});
+          if(!rejoin.ok||rejoin.rejoinEvidence?.authority!=='SWARM_RECEIPT_RETURNED_NOT_ADMITTED'||!rejoin.data?.mission?.id)throw new Error('rejoin contract failed: '+JSON.stringify(rejoin).slice(0,700));
+          console.log(`R125 LIVE PASS · detached ${id} · checkpoint ${checkpoint.checkpointSha256} · rejoin ${rejoin.data.mission.id}`);
+          NODE

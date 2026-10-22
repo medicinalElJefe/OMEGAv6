@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {compileSpatialReconstructionEvidenceRequestR226} from '../src/world/spatialReconstructionEvidenceR226.js';
+
+const h=c=>c.repeat(64);
+const terrain={state:'LIVING_SOURCE_BACKED_TERRAIN_READY',experienceReady:true,missionId:'mission-r226',projectId:'project-r226',profile:'BALANCED',receiptSha256:h('a'),visualSha256:h('b'),r222GeometrySha256:h('c'),r219MeshSha256:h('d'),r218FieldSha256:h('e'),lineage:{r208WorldBindingOperationSha256:h('f')}};
+const a=await compileSpatialReconstructionEvidenceRequestR226({terrain});
+const b=await compileSpatialReconstructionEvidenceRequestR226({terrain});
+assert.equal(a.state,'SPATIAL_RECONSTRUCTION_EVIDENCE_REQUEST_READY');
+assert.match(a.requestSha256,/^[a-f0-9]{64}$/);
+assert.equal(a.requestSha256,b.requestSha256,'R226 request identity must be deterministic');
+assert.equal(a.r224ReceiptSha256,terrain.receiptSha256);
+assert.equal(a.r222GeometrySha256,terrain.r222GeometrySha256);
+assert.equal(a.r218FieldSha256,terrain.r218FieldSha256);
+assert.equal(a.evidenceRequirements.camera.acceptOnlySourceBacked,true);
+assert.equal(a.evidenceRequirements.camera.inferFromTerrain,false);
+assert.equal(a.evidenceRequirements.depth.acceptOnlyMeasuredOrSourceDerived,true);
+assert.equal(a.evidenceRequirements.depth.syntheticFill,false);
+assert.equal(a.evidenceRequirements.registration.mustBindSameWorld,true);
+for(const key of ['cameraEvidencePresent','depthEvidencePresent','spatialCalibrationProved','numerical3DReconstructionExecuted','renderedComputedRealityFrame','computedPhotorealRealityProved','solverValidityProved','nativeExecutionClaimed','pcOnlineClaimed','federationClosureProved','canonicalMutation'])assert.equal(a[key],false,`${key} must remain false`);
+const held=await compileSpatialReconstructionEvidenceRequestR226({terrain:{...terrain,receiptSha256:'bad'}});
+assert.equal(held.state,'HELD_FOR_R224_TERRAIN_PROOF');
+assert.ok(held.missing.includes('R224_RECEIPT_SHA'));
+console.log('R226 spatial reconstruction evidence invariants: PASS');

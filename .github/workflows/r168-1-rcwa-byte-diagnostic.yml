@@ -1,0 +1,54 @@
+# R502 CURRENT-LINEAGE FULL GITHUB GREEN SWEEP · verification-only touch; no semantic workflow change.
+name: R168.1 RCWA Propagation Acceptance
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [r168-1-rcwa-byte-attestation-repair]
+    paths:
+      - 'scripts/diagnose_rcwa_live_r1681.mjs'
+      - 'scripts/verify_federation_live_r1681.mjs'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/r168-1-rcwa-byte-diagnostic.yml'
+      - 'public/omega-rcwa-agent.py'
+      - 'public/omega-rcwa-worker.py'
+      - 'src/workerR34.js'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/diagnose_rcwa_live_r1681.mjs'
+      - 'scripts/verify_federation_live_r1681.mjs'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/r168-1-rcwa-byte-diagnostic.yml'
+      - 'public/omega-rcwa-agent.py'
+      - 'public/omega-rcwa-worker.py'
+      - 'src/workerR34.js'
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  prove-live-rcwa-propagation:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install --no-fund
+      - name: Build canonical assets
+        run: npm run build
+      - name: Prove candidate repository to dist RCWA byte identity
+        env:
+          OMEGA_RCWA_DIAGNOSTIC_SCOPE: CANDIDATE
+        run: node scripts/diagnose_rcwa_live_r1681.mjs
+      - name: Prove production acceptance only from main manual verification
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+        run: node scripts/verify_federation_live_r1681.mjs
+      - name: Syntax-check reusable verification tools
+        run: |
+          node --check scripts/diagnose_rcwa_live_r1681.mjs
+          node --check scripts/verify_federation_live_r1681.mjs

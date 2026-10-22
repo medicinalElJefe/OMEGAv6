@@ -1,0 +1,74 @@
+{
+  "schema": "OMEGA_WOVEN_DIMENSIONAL_RELATIVITY_R265",
+  "revision": "R265",
+  "state": "SOURCE_CANDIDATE_NOT_PRODUCTION_PROOF",
+  "inherits": {
+    "wovenPlanning": "R243",
+    "governedSelection": "R245",
+    "operationalConvergence": "R249",
+    "hybridResourceAdmission": "R239",
+    "sourceMutationAndPromotion": "R240_SINGLE_CANDIDATE_ONLY",
+    "dispatch": "R147",
+    "exactReturn": "R141",
+    "durableHistory": "R146",
+    "canonStateAdmission": "R125",
+    "productionWriter": ".github/workflows/ci.yml"
+  },
+  "operator": "FRAME/RESOLUTION/SKIN PARTITION → WATER TRANSPORT → WOVEN PATH/CORRESPONDENCE → VIOLET RE-EXPRESSION → INVARIANT + SCAR + ORIENTATION + PROVENANCE CARRY → RE-CONTEXTUALIZE/REPARTITION → PROVE",
+  "cycle": [
+    "OBSERVE",
+    "WATER_TRANSPORT",
+    "WOVEN_PATH",
+    "VIOLET_REEXPRESSION",
+    "PROVE",
+    "CARRY",
+    "RECONTEXTUALIZE"
+  ],
+  "semanticLock": {
+    "waterGeometry": "Flow × Boundary × Pressure × Memory is a deformation/state signature; Water transport also carries curvature, hysteresis and residual information. Water Geometry is not reduced to static shape.",
+    "wovenContinuity": "Identity is recoverable relational/path correspondence through transformation, not mere visual or coordinate similarity.",
+    "violet": "Violet is the software transfiguration/re-expression layer with future-preservation semantics. R265 does not claim one universal physical Violet equation.",
+    "dimensionalRelativity": "Whole/part, inner/outer, observer, resolution and representation are frame-relative roles. 12^k values are computational address/resolution levels unless independently established as physical quantities.",
+    "orientation": "Inverse/outverse sign/orientation is factored from structural state. Reversing orientation does not silently rewrite invariant structure.",
+    "scarHistory": "Scar/history is carried and provenance-bound; it is never silently reset during skin or frame translation.",
+    "proof": "Round-trip or commuting-transform proof requires measured residuals. Internal coherence never becomes external empirical proof automatically."
+  },
+  "addressLevels": [12, 144, 1728, 20736, 248832],
+  "physicalDimensionsClaimed": false,
+  "skins": {
+    "FUNCTION": "Preserve declared inputs/outputs, invariants and residuals.",
+    "COMPUTE": "Apply Water + Woven + Violet + frame translation as one state envelope.",
+    "ORGANIZE": "Partition and repartition by dependency, frame and active resolution.",
+    "LEARN": "Learn only from explicit outcomes or observed transitions; unchosen candidates are not failures.",
+    "RENDER": "Render projections without mutating CanonState or evidence.",
+    "EXECUTE": "Keep execution receipts separate from scientific truth and source promotion.",
+    "SELF_BUILD": "Use R265 for planning/evaluation cycles while R240 retains exact source mutation/promotion.",
+    "EVIDENCE": "Keep observed, returned, derived and inferred evidence classes distinct."
+  },
+  "healthyPromotion": {
+    "newCapabilityBlockedMerelyForBeingNew": false,
+    "newSkinBlockedMerelyForBeingNew": false,
+    "forwardCompatibleWhenInvariantContractPreserved": true,
+    "explicitVersionMigrationAllowed": true,
+    "versionMigrationMustBeReproved": true,
+    "r265AddsPromotionAuthority": false
+  },
+  "truthBoundaries": [
+    "NO_NEW_PHYSICAL_PRIMITIVE",
+    "SYMMETRY_AND_ASYMMETRY_ARE_INDEPENDENT_CHANNELS",
+    "STRUCTURE_AND_ORIENTATION_ARE_FACTORED",
+    "FOUNDATION_WEIGHTS_CHANGED_MUST_NOT_BE_CLAIMED_WITHOUT_ACTUAL_WEIGHT_TRAINING_PROOF",
+    "EXECUTION_SUCCESS_NEQ_SCIENTIFIC_TRUTH",
+    "R240_SOURCE_PROMOTION_R125_CANON_ADMISSION_AND_CI_PRODUCTION_AUTHORITY_REMAIN_UNCHANGED"
+  ],
+  "authority": {
+    "planningAndCrossSkinCompilation": "R265",
+    "sourceMutationAndPromotion": "R240_SINGLE_CANDIDATE_ONLY",
+    "dispatch": "R147",
+    "returnProof": "R141",
+    "durableHistory": "R146",
+    "canonAdmission": "R125",
+    "productionWriter": ".github/workflows/ci.yml",
+    "canonicalAdmissionClaimed": false
+  }
+}

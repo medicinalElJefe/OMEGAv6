@@ -1,0 +1,66 @@
+name: OMEGA R134 Woven Relativity Continuum
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r134-woven-relativity-continuum]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r134-woven-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r134:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R134 woven topology, observer relativity and adaptive resolution
+        run: node tests/r134-woven-relativity-continuum-invariants.mjs
+      - name: Preserve concurrent R134 canonical world scar/proof continuity
+        run: node tests/r134-canonical-world-continuity.mjs
+      - name: Preserve R132 relational physics and R121 Earth/source truth
+        run: |
+          node tests/r132-relational-physics-manifold-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: Preserve real Hybrid execution and root-safe transport
+        run: |
+          node tests/r132-hybrid-execution-plane-invariants.mjs
+          node tests/r127-hybrid-zero-drift-invariants.mjs
+          node tests/r120-root-safe-hybrid-nav-canon-invariants.mjs
+      - name: Preserve empirical evidence and causal proof chain
+        run: |
+          node --experimental-strip-types tests/r129-empirical-experiment-runtime.mjs
+          node --experimental-strip-types tests/r128-empirical-calibration-replay.mjs
+          node --experimental-strip-types tests/r127-evidence-execution-proof-fabric.mjs
+          node --experimental-strip-types tests/r126-causal-interaction-relativity.mjs
+          node tests/r126-causal-interaction-invariants.mjs
+          node tests/r126-total-maximum-build-invariants.mjs
+      - name: Preserve swarm, living-world and self-build execution layers
+        run: |
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r125-autonomic-swarm-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+          node tests/r123-organism-swarm-invariants.mjs
+          node tests/r123-living-total-experience-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r121-swarm-runtime-invariants.mjs
+      - name: Preserve simultaneous build organization, control, capacity and admission authority
+        run: |
+          node tests/r133-build-potential-map-invariants.mjs
+          node tests/r132-whole-system-experience-invariants.mjs
+          node tests/r131-capacity-governor.mjs
+          node tests/r130-operational-control-plane.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Cloudflare Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r134-dry-run

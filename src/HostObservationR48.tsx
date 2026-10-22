@@ -1,0 +1,27 @@
+import {useEffect,useRef,useState} from 'react';
+import {Camera,Download,ImagePlus,ShieldCheck,Square,Video} from 'lucide-react';
+import {localState} from './platformAdapter';
+import './completionR48.css';
+
+type Observation={id:string;at:number;source:'LIVE_CAMERA'|'CAPTURE_FILE';name:string;size:number;mime:string;width:number;height:number;sha256:string;boundary:string};
+const KEY='omega.r48.host.observations';
+const hex=(b:ArrayBuffer)=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
+async function digest(blob:Blob){return hex(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))}
+function download(name:string,data:any){const u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
+
+export default function HostObservationR48(){
+ const videoRef=useRef<HTMLVideoElement|null>(null),canvasRef=useRef<HTMLCanvasElement|null>(null),streamRef=useRef<MediaStream|null>(null);
+ const[running,setRunning]=useState(false),[message,setMessage]=useState('Camera is off. Start requires an explicit browser permission gesture.'),[rows,setRows]=useState<Observation[]>(()=>localState.read(KEY,[]));
+ useEffect(()=>()=>{streamRef.current?.getTracks().forEach(t=>t.stop())},[]);
+ const persist=(next:Observation[])=>{setRows(next);localState.write(KEY,next)};
+ const start=async()=>{try{if(!navigator.mediaDevices?.getUserMedia)throw Error('getUserMedia is unavailable in this browser.');const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});streamRef.current=stream;if(videoRef.current){videoRef.current.srcObject=stream;await videoRef.current.play()}setRunning(true);setMessage('LIVE_CAMERA permission granted locally. No frame leaves this browser unless you export it.') }catch(e:any){setMessage(e?.message||String(e));setRunning(false)}};
+ const stop=()=>{streamRef.current?.getTracks().forEach(t=>t.stop());streamRef.current=null;if(videoRef.current)videoRef.current.srcObject=null;setRunning(false);setMessage('Camera stopped. Previously recorded hashes remain browser-local.')};
+ const capture=async()=>{const v=videoRef.current,c=canvasRef.current;if(!v||!c||!running||!v.videoWidth||!v.videoHeight){setMessage('No live camera frame is available to capture.');return}c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d')?.drawImage(v,0,0,c.width,c.height);const blob=await new Promise<Blob|null>(r=>c.toBlob(r,'image/png'));if(!blob)return;const sha256=await digest(blob),row:Observation={id:crypto.randomUUID(),at:Date.now(),source:'LIVE_CAMERA',name:`camera-${Date.now()}.png`,size:blob.size,mime:blob.type,width:c.width,height:c.height,sha256,boundary:'Byte hash proves the captured local frame identity only. OMEGA does not infer location, object identity, health state or external facts from this capture.'};persist([row,...rows].slice(0,24));setMessage(`Captured ${c.width}×${c.height} frame · ${sha256.slice(0,16)}…`)};
+ const ingest=async(file:File)=>{const img=new Image(),url=URL.createObjectURL(file);await new Promise<void>((resolve,reject)=>{img.onload=()=>resolve();img.onerror=()=>reject(Error('Image decode failed.'));img.src=url});const sha256=await digest(file),row:Observation={id:crypto.randomUUID(),at:Date.now(),source:'CAPTURE_FILE',name:file.name,size:file.size,mime:file.type||'application/octet-stream',width:img.naturalWidth,height:img.naturalHeight,sha256,boundary:'User-selected image bytes are fingerprinted locally. File content is observation input, not automatic evidence of any semantic claim.'};URL.revokeObjectURL(url);persist([row,...rows].slice(0,24));setMessage(`Fingerprint recorded for ${file.name}.`)};
+ return <section className='r48-host'>
+  <header><div><span>S05 HOST INPUTS · REAL BROWSER OBSERVATION</span><h3>Camera / Image Observation</h3></div><ShieldCheck/></header>
+  <div className='r48-host-grid'><section className='r48-camera-stage'><video ref={videoRef} playsInline muted/><canvas ref={canvasRef}/><div className='r48-camera-actions'><button className='primary-action' onClick={()=>void start()} disabled={running}><Video/>Start camera</button><button onClick={()=>void capture()} disabled={!running}><Camera/>Capture + hash</button><button onClick={stop} disabled={!running}><Square/>Stop</button><label><ImagePlus/>Import image<input type='file' accept='image/*' capture='environment' onChange={e=>{const f=e.target.files?.[0];if(f)void ingest(f);e.currentTarget.value=''}}/></label></div><small>{message}</small></section>
+   <section className='r48-observations'><header><b>LOCAL OBSERVATION LEDGER</b><button onClick={()=>download('OMEGA_HOST_OBSERVATIONS_R48.json',{schema:'OMEGA_HOST_OBSERVATIONS_R48',observations:rows,boundary:'Hashes prove byte identity only; browser observation does not create external truth.'})}><Download/>Export</button></header>{rows.length===0?<p>No observations recorded.</p>:rows.map(x=><article key={x.id}><Camera/><div><b>{x.name}</b><small>{x.source} · {x.width}×{x.height} · {x.size.toLocaleString()} bytes</small><code>{x.sha256}</code><span>{x.boundary}</span></div></article>)}</section></div>
+  <footer><ShieldCheck/>Camera permission and capture happen on the local browser device. This restores a real host-input path without claiming native PC authority, remote surveillance, automatic recognition or hidden upload.</footer>
+ </section>;
+}

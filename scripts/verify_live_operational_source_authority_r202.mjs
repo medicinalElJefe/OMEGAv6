@@ -1,0 +1,52 @@
+import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {readFileSync} from 'node:fs';
+const base=(process.env.OMEGA_PUBLIC_URL||'https://omegav6.jeffdeweyeljefe.workers.dev').replace(/\/$/,'');
+const R205_BASE_SHA256='49a3be453b1e67e5eb7e8e29411e82f07d30d2fd45fa52fa0bf28ef57774a046';
+async function response(path){const r=await fetch(base+path,{headers:{'cache-control':'no-cache'}}),body=await r.text();if(!r.ok)throw new Error(`${path} HTTP ${r.status}: ${body.slice(0,240)}`);return{r,body}}
+async function text(path){return(await response(path)).body}
+async function observedEarth(){const path='/api/earth/gibs/global?width=720&height=360';const r=await fetch(base+path,{headers:{'cache-control':'no-cache','accept':'image/*'}});const body=new Uint8Array(await r.arrayBuffer());const ct=r.headers.get('content-type')||'',source=r.headers.get('x-omega-source')||'',date=r.headers.get('x-omega-date')||'',crs=r.headers.get('x-omega-crs')||'',truth=r.headers.get('x-omega-truth')||'',bbox=r.headers.get('x-omega-bbox')||'';if(!r.ok)throw new Error(`R282.1 global observed Earth ${path} HTTP ${r.status}: ${new TextDecoder().decode(body.slice(0,240))}`);if(!ct.startsWith('image/'))throw new Error(`R282.1 global observed Earth returned non-image ${ct||'NONE'}`);if(body.byteLength<12000)throw new Error(`R282.1 global observed Earth image too small: ${body.byteLength} bytes`);if(source!=='NASA-GIBS-VIIRS-SNPP-TRUECOLOR-GLOBAL')throw new Error(`R282.1 global source identity mismatch: ${source||'NONE'}`);if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error(`R282.1 global observation date missing: ${date||'NONE'}`);if(crs!=='EPSG:4326'||truth!=='RETURNED_GLOBAL_OBSERVATION'||bbox!=='-180,-90,180,90')throw new Error(`R282.1 global projection/truth headers invalid: crs=${crs} truth=${truth} bbox=${bbox}`);const sha=createHash('sha256').update(body).digest('hex');return{bytes:body.byteLength,sha,source,date,crs,truth,bbox}}
+const [html,core,client,health,r205html,r205client,r205contract,r2061html,r2061client,wrapperLive,baseLive,earthGlobal]=await Promise.all([
+ text('/omega-operational-source-authority-r202.html'),text('/omega-operational-source-authority-r202-core.js'),text('/omega-operational-source-authority-r202.js'),text('/api/core-health'),text('/omega-pc-proof-r205.html'),text('/omega-pc-proof-r205.js'),text('/omega-r205-pc-proof-contract.json'),text('/omega-host-evidence-r2061.html'),text('/omega-host-evidence-r2061.js'),response('/api/hybrid/agent-download?r117=1&r120=1&r127=1&validator=zero-drift'),response('/omega-hybrid-agent-base-r205.py'),observedEarth()
+]);
+if(!html.includes('OMEGA_OPERATIONAL_SOURCE_AUTHORITY_R202')||!html.includes('DRIVE/WORKBOOK ≠ RUNTIME TRUTH'))throw new Error('R202 live HTML truth surface missing');
+if(!core.includes("R202_REVISION='R202'")||!core.includes('R125_REMAINS_THE_ONLY_CANONSTATE_ADMISSION_AUTHORITY')||!core.includes('HOST_EVIDENCE_HISTORY')||!core.includes('HISTORICAL_VERIFIED_HOST_EVIDENCE_IS_NOT_CURRENT_PC_ONLINE')||!core.includes('OMEGA_DURABLE_HOST_EVIDENCE_PROJECTION_R206_1'))throw new Error('R202 live core missing R206.1 source/history authority law');
+if(!client.includes("get('/api/execution/runs',true)")||!client.includes('readHostEvidence()')||!client.includes("revision:'R206.1'")||/method:\s*['\"](?:POST|PUT|PATCH|DELETE)/.test(client))throw new Error('R202 live client is not read-only or is missing R206.1 history observation');
+const h=JSON.parse(health);if(h.schema!=='OMEGA_CANONICAL_CORE_HEALTH_R163'||h.state!=='LIVE'||h.ok!==true)throw new Error('R202 live console is not sitting above a first-hand live canonical core');
+const contract=JSON.parse(r205contract);if(contract.schema!=='OMEGA_PC_PROOF_CLOSURE_R205'||contract.revision!=='R205'||contract.proofClosureRevision!=='R141'||contract.hostEvidenceProjectionRevision!=='R206.1'||contract.authority?.r141FingerprintVerificationRequired!==true||contract.authority?.historicalEvidenceProvesCurrentPcOnline!==false||contract.authority?.canonicalAdmissionAuthority!=='R125')throw new Error('R205 live contract is missing exact R141/R206.1 truth boundary');
+for(const token of ['OMEGA_PC_PROOF_CLOSURE_R205','raw return ≠ R141 verification','R206.1 history'])if(!r205html.includes(token))throw new Error(`R205 live HTML missing ${token}`);
+for(const token of ['closureVerified()',"fingerprint?.verified===true",'RETURNED · R141 VERIFICATION REQUIRED','PASS · R141 VERIFIED','PASS · COMPLETE + R141 VERIFIED'])if(!r205client.includes(token))throw new Error(`R205 live client missing ${token}`);
+for(const token of ['R206.1','DURABLE HOST EVIDENCE','R141 DURABLE CLOSURE','HISTORICAL EVIDENCE','CURRENT PC ONLINE','R125 ONLY'])if(!r2061html.includes(token))throw new Error(`R206.1 live HTML missing ${token}`);
+for(const token of ["fingerprint?.verified===true",'Historical proof may still be valid without claiming PC ONLINE','Raw AT09 return exists','Raw AT10 return exists','R206 world-mission visual bridge preserved','/replay'])if(!r2061client.includes(token))throw new Error(`R206.1 live client missing ${token}`);
+if(r2061client.includes("post('/api/missions'")||r2061client.includes("op:'BUILD'")||r2061client.includes("op:'APPLY_PATCH'"))throw new Error('R206.1 live history projection gained execution/mutation authority');
+const expectedWrapper=readFileSync('public/omega-hybrid-agent-r141.py'),expectedWrapperSha=createHash('sha256').update(expectedWrapper).digest('hex'),servedWrapperSha=createHash('sha256').update(wrapperLive.body).digest('hex'),wrapperReceipt=wrapperLive.r.headers.get('x-omega-agent-sha256');
+if(servedWrapperSha!==expectedWrapperSha||wrapperReceipt!==expectedWrapperSha)throw new Error(`R141 wrapper SHA mismatch expected ${expectedWrapperSha} served ${servedWrapperSha} receipt ${wrapperReceipt}`);
+for(const token of ["PROOF_CLOSURE_REVISION='R141'","HOST_PROOF_EXTENSION='R205'","HOST_EVIDENCE_CONTINUITY_REVISION='R206.1'","R207_1_ASSET_COMPATIBILITY_REVISION='R207.1'","BASE_PATH='/omega-hybrid-agent-base-r205.py'",`EXPECTED_BASE_SHA256='${R205_BASE_SHA256}'`,"R205_PROOF_EXTENSION='R205'","'DESKTOP_HEALTH'","'FORENSIC_HASH_LEDGER'",'OMEGA_AGENT_RETURN_FINGERPRINT_R141'])if(!wrapperLive.body.includes(token))throw new Error(`live R141/R206.1/R207.1 wrapper contract missing ${token}`);
+const activeBaseAssignment=(wrapperLive.body.match(/^BASE_PATH='([^']+)'$/m)||[])[1];if(activeBaseAssignment!=='/omega-hybrid-agent-base-r205.py')throw new Error(`R141 active base path drifted: ${activeBaseAssignment||'MISSING'}`);
+if(wrapperLive.r.headers.get('x-omega-proof-closure')!=='R141'||wrapperLive.r.headers.get('x-omega-canonical-origin')!==base)throw new Error('live R141 wrapper proof headers missing');
+const expectedBase=readFileSync('public/omega-hybrid-agent-base-r205.py'),expectedBaseText=expectedBase.toString('utf8'),expectedBaseSha=createHash('sha256').update(expectedBase).digest('hex'),servedBaseSha=createHash('sha256').update(baseLive.body).digest('hex');
+if(expectedBaseSha!==R205_BASE_SHA256)throw new Error(`repository immutable R205 base drifted: ${expectedBaseSha}`);
+if(servedBaseSha!==R205_BASE_SHA256||baseLive.body!==expectedBaseText)throw new Error(`live immutable R205 base mismatch expected ${R205_BASE_SHA256} served ${servedBaseSha}`);
+for(const token of ["VERSION='R34.1'","CAPABILITY_REVISION='R132'","R205_PROOF_EXTENSION='R205'",'DESKTOP_HEALTH','FORENSIC_HASH_LEDGER','root-confined','shell=False',"'/api/hybrid/agent/heartbeat'", "'/api/hybrid/agent/result'"])if(!baseLive.body.includes(token))throw new Error(`live immutable R205 base contract missing ${token}`);
+await import('./verify_live_r300_at09_at10_handoff.mjs');
+console.log(`R202/R205/R206/R206.1/R207.2 LIVE PASS · R300 LIVE HANDOFF PASS · R282.1 GLOBAL OBSERVED EARTH PASS · ${base}/omega-operational-source-authority-r202.html · R141 wrapper sha256 ${servedWrapperSha} · immutable R205 base sha256 ${servedBaseSha} · global observed Earth ${earthGlobal.date} ${earthGlobal.bytes} bytes sha256 ${earthGlobal.sha} ${earthGlobal.crs} · exact-return truth gate · R206.1 read-only host evidence · armed AT09/AT10 handoff · R125 preserved`);
+const promoted=String(process.env.OMEGA_PROMOTED_SHA||'').trim();
+if(promoted){
+ await import('./verify_live_hybrid_direct_poll_r2074.mjs');
+ await import('./verify_live_hybrid_command_authority_r237.mjs');
+ const visual=spawnSync(process.execPath,['tests/r284-live-earth-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+ if(visual.error)throw visual.error;
+ if(visual.status!==0)throw new Error(`R284 exact-production live Earth browser proof failed with exit ${visual.status}`);
+ const earthSar=spawnSync(process.execPath,['tests/r370-live-earth-sar-closure-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+ if(earthSar.error)throw earthSar.error;
+ if(earthSar.status!==0)throw new Error(`R370 exact-production Earth/SAR closure proof failed with exit ${earthSar.status}`);
+ const earthTotal=spawnSync(process.execPath,['tests/r372-live-earth-total-interaction-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+ if(earthTotal.error)throw earthTotal.error;
+ if(earthTotal.status!==0)throw new Error(`R372 exact-production Earth total interaction proof failed with exit ${earthTotal.status}`);
+ const visible=spawnSync(process.execPath,['tests/r489-live-visible-capability-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+ if(visible.error)throw visible.error;
+ if(visible.status!==0)throw new Error(`R489 exact-production visible capability proof failed with exit ${visible.status}`);
+ const exactTraversal=spawnSync(process.execPath,['tests/r501-live-exact-traversal-browser-e2e.mjs'],{cwd:process.cwd(),env:{...process.env,OMEGA_E2E_URL:base,OMEGA_EXPECTED_SHA:promoted},stdio:'inherit'});
+ if(exactTraversal.error)throw exactTraversal.error;
+ if(exactTraversal.status!==0)throw new Error(`R501 exact-production live traversal binding proof failed with exit ${exactTraversal.status}`);
+}

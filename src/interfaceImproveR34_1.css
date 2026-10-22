@@ -1,0 +1,129 @@
+/* OMEGA R34.1 · progressive desktop navigation
+   Preserve every R33 action and live fact, but stop making navigation telemetry
+   visually compete with the specialist workspace. */
+
+@media(min-width:901px){
+  .r27-desktop-frame{
+    grid-template-rows:auto auto auto auto auto minmax(0,1fr);
+  }
+
+  /* Runtime pulse remains live and actionable, but becomes a compact status
+     instrument instead of a dashboard nested inside the navigation rail. */
+  .r27-desktop-frame .r33-runtime-pulse{
+    margin:0;
+    border-radius:9px;
+  }
+  .r27-desktop-frame .r33-runtime-pulse>header{
+    min-height:36px;
+    padding:6px 8px;
+    grid-template-columns:15px minmax(0,1fr) 8px;
+    gap:6px;
+  }
+  .r27-desktop-frame .r33-runtime-pulse>header svg{
+    width:13px;
+    height:13px;
+  }
+  .r27-desktop-frame .r33-runtime-pulse>header b{
+    font-size:8px;
+  }
+  .r27-desktop-frame .r33-runtime-pulse>header small{
+    font-size:6px;
+  }
+  .r27-desktop-frame .r33-runtime-facts{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .r27-desktop-frame .r33-runtime-facts button{
+    min-width:0;
+    min-height:34px;
+    padding:4px 3px;
+    gap:3px;
+  }
+  .r27-desktop-frame .r33-runtime-facts svg{
+    width:11px;
+    height:11px;
+  }
+  .r27-desktop-frame .r33-runtime-facts b{
+    font-size:9px;
+  }
+  .r27-desktop-frame .r33-runtime-facts small{
+    max-width:48px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:5.5px;
+  }
+  .r27-desktop-frame .r33-runtime-event{
+    min-height:28px;
+    padding:4px 7px;
+  }
+  .r27-desktop-frame .r33-runtime-event span{
+    font-size:6.5px;
+  }
+  .r27-desktop-frame .r33-runtime-event small{
+    font-size:5.5px;
+  }
+
+  /* Five always-available actions fit in two short rows. Explanatory copy is
+     unnecessary in permanent chrome; route names remain visible and semantic. */
+  .r27-desktop-frame .r32-desktop-actions{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:4px;
+    margin:0;
+    max-height:none;
+    overflow:visible;
+  }
+  .r27-desktop-frame .r32-desktop-actions button{
+    min-width:0;
+    min-height:43px;
+    display:grid;
+    grid-template-columns:1fr;
+    place-items:center;
+    gap:3px;
+    padding:5px 2px;
+    text-align:center;
+    border-radius:8px;
+  }
+  .r27-desktop-frame .r32-desktop-actions button:first-child,
+  .r27-desktop-frame .r32-desktop-actions button:nth-child(3){
+    grid-column:auto;
+  }
+  .r27-desktop-frame .r32-desktop-actions svg{
+    width:14px;
+    height:14px;
+  }
+  .r27-desktop-frame .r32-desktop-actions span{
+    display:block;
+    max-width:100%;
+  }
+  .r27-desktop-frame .r32-desktop-actions b{
+    display:block;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:6.5px;
+    line-height:1.15;
+  }
+  .r27-desktop-frame .r32-desktop-actions small{
+    display:none;
+  }
+
+  /* Search and domains are navigation controls, not visual cards. */
+  .r27-desktop-frame .r27-search label{
+    height:34px;
+    border-radius:8px;
+  }
+  .r27-desktop-frame .r27-domains button{
+    min-height:40px;
+    border-radius:7px;
+  }
+  .r27-desktop-frame .r27-route-pane{
+    border-radius:9px;
+  }
+
+  /* Give the actual application more room on ordinary laptop widths. */
+  @media(max-width:1280px){
+    :root{--r27-rail:212px}
+  }
+}

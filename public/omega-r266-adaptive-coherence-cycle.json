@@ -1,0 +1,53 @@
+{
+  "schema": "OMEGA_ADAPTIVE_COHERENCE_CYCLE_R266",
+  "revision": "R266",
+  "predecessor": "R265",
+  "purpose": "Close PROVE→CARRY→RECONTEXTUALIZE into bounded next-cycle adaptation using only explicit, observed, or returned evidence.",
+  "cycle": ["OBSERVE","WATER_TRANSPORT","WOVEN_PATH","VIOLET_REEXPRESSION","PROVE","CARRY","RECONTEXTUALIZE","ADAPT_NEXT_CONTEXT"],
+  "history": {
+    "maximumEntries": 64,
+    "fullConfidenceSamples": 12,
+    "acceptedProvenance": ["EXPLICIT_OPERATOR_OUTCOME","OBSERVED_TRANSITION","RETURNED_PROOF"],
+    "unchosenCandidatesAreFailures": false,
+    "unknownOrInferredOutcomesIgnored": true
+  },
+  "adaptation": {
+    "coldStartExactlyR265": true,
+    "maximumAbsoluteCalibrationDelta": 0.08,
+    "foundationWeightsChanged": false,
+    "mayAdaptSoftwareContext": true,
+    "mayRewriteScientificTruth": false,
+    "mayMutateCanonState": false,
+    "mayPromoteSource": false
+  },
+  "resolutionBridge": {
+    "levels": [12,144,1728,20736,248832],
+    "strategy": "SPARSE_NORMALIZED_ADDRESS_PROJECTION",
+    "bruteForceEnumerationRequired": false,
+    "roundTripResidualIsSoftwareProjectionResidualOnly": true,
+    "physicalDimensionsClaimed": false
+  },
+  "proof": {
+    "roundTripRequiresMeasuredSamples": true,
+    "commutationRequiresMeasuredSamples": true,
+    "internalCoherenceIsExternalScientificTruth": false,
+    "executionSuccessIsScientificTruth": false
+  },
+  "authority": {
+    "planning": "R249_SCHEDULING_ONLY",
+    "sourceMutationAndPromotion": "R240_SINGLE_CANDIDATE_ONLY",
+    "dispatch": "R147",
+    "returnProof": "R141",
+    "durableHistory": "R146",
+    "canonAdmission": "R125",
+    "productionWriter": ".github/workflows/ci.yml",
+    "r266AddsPromotionAuthority": false
+  },
+  "healthyPromotion": {
+    "newCapabilityBlockedMerelyForBeingNew": false,
+    "newSkinBlockedMerelyForBeingNew": false,
+    "adaptiveHistoryMayInfluencePlanningEvaluation": true,
+    "adaptiveHistoryMayDirectlyMutateSource": false
+  },
+  "truthBoundary": "R266 is bounded adaptive software context and sparse cross-resolution computation. It does not establish a new physical law, train foundation-model weights, fabricate outcomes, convert atlas cardinality to spacetime dimensions, or move existing OMEGA authority boundaries."
+}

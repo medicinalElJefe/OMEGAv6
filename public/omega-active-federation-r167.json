@@ -1,0 +1,79 @@
+{
+  "schema": "OMEGA_ACTIVE_FEDERATION_R167",
+  "revision": "R167",
+  "canonicalAuthority": "OMEGAv6",
+  "canonicalAdmissionAuthority": "R125",
+  "runtimeEntrypoint": "src/workerR116.js",
+  "state": "ACTIVE_GENERATION_DECLARED_NOT_YET_LIVE_PROMOTED",
+  "executionLaw": ["PROPOSE", "SCREEN", "SOLVE", "ADMIT"],
+  "truthLaw": "reachable != writable != executed != verified != promoted",
+  "active": {
+    "omegaV6": {
+      "role": "ADMIT",
+      "service": "omegav6",
+      "url": "https://omegav6.jeffdeweyeljefe.workers.dev/",
+      "canonicalMutationAuthority": "R125_ONLY"
+    },
+    "genesis": {
+      "role": "PROPOSE",
+      "surfaceService": "omega-genesis-v1",
+      "machineService": "omega-genesis-machine-r115",
+      "url": "https://omega-genesis-v1.jeffdeweyeljefe.workers.dev/",
+      "mayMutateGlobalCanonState": false
+    },
+    "optical": {
+      "role": "SCREEN",
+      "machineService": "omega-optical-machine-r1532",
+      "machineGeneration": "R153.2",
+      "machineVersion": "R153.2",
+      "toolVersion": "R153.2",
+      "authority": "SCREEN_ONLY",
+      "adaptiveCycle": true,
+      "canonicalMutation": false,
+      "fullwaveExecutionClaimed": false,
+      "fabricationValidationClaimed": false,
+      "physicalMeasurementClaimed": false,
+      "humanSurfaceTarget": "https://omega-living-light-etching-private-woven2.vercel.app/",
+      "sameUrlPromotionAuthorized": false
+    },
+    "sovereign": {
+      "role": "SOLVE",
+      "authority": "CURRENT_AUTHENTICATED_RETURN_RECEIPT_ONLY",
+      "pcOnlineClaimedWithoutHeartbeat": false,
+      "fullwaveValidClaimedWithoutReturnReceipt": false
+    }
+  },
+  "historicalOpticalLineage": [
+    {"revision":"R115","role":"INITIAL_MACHINE_ADAPTER","active":false},
+    {"revision":"R152","role":"OPERATIONAL_SCREEN_UI_AND_TIER2_PREPARATION","active":false},
+    {"revision":"R153.1","role":"EXTERNAL_AI_TOOL_PUSH","active":false},
+    {"revision":"R153.2","role":"ADAPTIVE_EXTERNAL_SCREEN_COPROCESSOR","active":true}
+  ],
+  "atlas": {
+    "addressLevels": [12, 144, 1728, 20736, 248832, 61917364224],
+    "physicalDimensionsClaimed": false,
+    "truthBoundary": "These values are atlas/address/composition resolution levels, not literal physical dimensions."
+  },
+  "orientation": {
+    "sigma": [-1, 0, 1],
+    "structureFactoredFromOrientation": true
+  },
+  "referenceKernel": {
+    "values": [37, 73],
+    "hardCodedSymmetryAsymmetryMeaning": false
+  },
+  "preserves": {
+    "workerSpine": "R116",
+    "canonicalAdmission": "R125",
+    "hybridReturnProof": "R141",
+    "durableExecution": "R146",
+    "executorFabric": "R147",
+    "adaptiveSovereignMission": "R152",
+    "postReturnConvergence": "R159",
+    "governedExecution": "R162",
+    "coreHealth": "R163",
+    "developmentResidualGraph": "R164",
+    "residualWorldLens": "R166"
+  },
+  "truthBoundary": "R167 promotes only the active Optical SCREEN transport to the independently live-proven R153.2 adaptive coprocessor. It does not make the protected Vercel surface writable, does not prove a PC online, does not create RCWA/FDTD/FEM or fabrication/measurement evidence, does not prove a full-wave return, and does not grant CanonState admission authority outside R125."
+}

@@ -1,0 +1,65 @@
+name: OMEGA R44 Recommended Optical Candidate
+on:
+  push:
+    branches: [r44-recommended-optical-candidate]
+  pull_request:
+    branches: [main]
+jobs:
+  reproduce-candidate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Build job from published candidate record
+        run: |
+          python - <<'PY'
+          import json
+          c=json.load(open('public/omega-optical-design-candidate.json'))
+          g=c['geometry_nm']
+          job={
+            'schema':'OMEGA_FULLWAVE_QUEUE_v1','solver':'rcwa','job_id':'ci_r44',
+            'source_packet_id':'ci_r44_recommended_candidate',
+            'geometry':{'pitch_nm':g['pitch'],'width_nm':g['width'],'length_nm':g['length'],'height_nm':g['height'],'theta_deg':0},
+            'polarization':'s','material_names':c['materials'],
+            'numerics':{'nx':96,'ny':96,'harmonics_low':25,'harmonics_high':49,'convergence_tolerance':0.08,'energy_tolerance':0.08},
+            'proof':{'gate':'STAY','mode188_score':1.2}
+          }
+          json.dump(job,open('/tmp/r44.json','w'))
+          PY
+      - name: Reproduce full 12-state x 2-helicity x 3-wavelength evidence
+        working-directory: sovereign
+        run: python omega_pb_ledger_r39.py --input /tmp/r44.json --output /tmp/r44-ledger.json --wavelengths 470,532,650
+      - name: Verify recommendation metrics and truth boundary
+        run: |
+          python - <<'PY'
+          import json,statistics,re
+          c=json.load(open('public/omega-optical-design-candidate.json'))
+          d=json.load(open('/tmp/r44-ledger.json'))
+          assert c['schema']=='OMEGA_OPTICAL_DESIGN_CANDIDATE_v1'
+          assert c['status']=='RECOMMENDED_NUMERICAL_CANDIDATE'
+          assert d['all_wavelengths_verified'] is True
+          assert len(d['rows'])==72 and len(d['proofs'])==3
+          assert all(p['pb_phase_verified'] for p in d['proofs'])
+          assert all(p['qualified_states']=={'LR':12,'RL':12} for p in d['proofs'])
+          worst=max(max(p['rms_phase_error_deg'].values()) for p in d['proofs'])
+          conv=[r['conversion'] for r in d['rows']]
+          red=[r['conversion'] for r in d['rows'] if r['wavelength_nm']==650.0]
+          got={'min':min(conv),'mean':statistics.fmean(conv),'red':statistics.fmean(red),'worst':worst}
+          exp=c['aggregate']
+          assert worst <= c['selection_policy']['pareto_phase_margin_deg']
+          assert abs(got['min']-exp['minimum_conversion_fraction']) < 1e-9
+          assert abs(got['mean']-exp['mean_conversion_fraction']) < 1e-9
+          assert abs(got['red']-exp['red_mean_conversion_fraction']) < 1e-9
+          assert abs(got['worst']-exp['worst_wavelength_rms_phase_error_deg']) < 1e-9
+          assert c['selection_policy']['not_a_physical_constant'] is True
+          assert 'not fabrication validation' in c['truth_boundary'].lower()
+          for k in ('r43_source_commit','main_merge_commit','r43_proof_sha256','r43_artifact_sha256'):
+              assert re.fullmatch(r'[a-f0-9]{40}' if 'commit' in k else r'[a-f0-9]{64}',c['provenance'][k])
+          print('R44 REPRODUCED',got)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-r44-reproduced-candidate
+          path: /tmp/r44-ledger.json

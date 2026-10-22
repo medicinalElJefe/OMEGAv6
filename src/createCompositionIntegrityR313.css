@@ -1,0 +1,94 @@
+/* R313.29 — Create embedded-command composition integrity.
+   Presentation only. Create intentionally composes the retained Command Deck beneath
+   its creation routes. The base deck has a two-column desktop minimum of 520px + 390px;
+   inside the accumulated workstation/navigation shell that can exceed the actual Create
+   surface width, creating clipped/occluded controls and hidden scroll state. Create is
+   not Command Center: its route choices remain primary and the assistant is a secondary
+   embedded instrument. Stack that retained instrument in canonical document flow and
+   keep every composed child shrinkable. No route, action, proof, source, execution,
+   Canon, Hybrid or deployment authority changes here. */
+
+.omega-workstation-v2[data-panel='Create'] .create-app,
+.omega-workstation-v2[data-panel='Create'] .create-app > *,
+.omega-workstation-v2[data-panel='Create'] .command-deck,
+.omega-workstation-v2[data-panel='Create'] .command-deck > *{
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+
+.omega-workstation-v2[data-panel='Create'] .command-deck{
+  position:relative!important;
+  isolation:isolate!important;
+  align-content:start!important;
+  overflow:visible!important;
+  margin-top:10px!important;
+  padding-top:10px!important;
+  border-top:1px solid var(--r91-line,rgba(126,185,177,.13))!important;
+}
+
+.omega-workstation-v2[data-panel='Create'] .command-stage{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+  contain:none!important;
+  clip-path:none!important;
+}
+
+.omega-workstation-v2[data-panel='Create'] .command-prompt{
+  order:1!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+  border-left:0!important;
+  border-top:1px solid #28444d!important;
+  box-sizing:border-box!important;
+}
+
+.omega-workstation-v2[data-panel='Create'] .command-visual{
+  order:2!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  min-height:420px!important;
+  height:clamp(420px,48dvh,560px)!important;
+  max-height:560px!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+
+.omega-workstation-v2[data-panel='Create'] :where(
+  .command-deck-head,
+  .command-proof-strip,
+  .command-response,
+  .prompt-orchestrator,
+  .quick-prompts,
+  .command-actions,
+  .create-paths
+){
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+
+@media(max-width:900px),(pointer:coarse){
+  .omega-workstation-v2[data-panel='Create'] .command-deck-head{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .omega-workstation-v2[data-panel='Create'] .command-visual{
+    min-height:42dvh!important;
+    height:42dvh!important;
+    max-height:520px!important;
+  }
+}

@@ -1,0 +1,51 @@
+name: OMEGA R111 Federated Capability Mesh
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/workerR111.js'
+      - 'src/federation/fabricMeshR111.js'
+      - 'src/capability/routeLayerOutputRegistryR111.ts'
+      - 'src/RouteOutputRibbonR111.tsx'
+      - 'src/routeOutputRibbonR111.css'
+      - 'src/HybridConnectBarR111.tsx'
+      - 'src/hybridConnectR111.css'
+      - 'src/HybridMissionControl.tsx'
+      - 'src/OmegaSideNavigatorR88.tsx'
+      - 'wrangler.jsonc'
+      - 'tests/r111-federated-capability-mesh-invariants.mjs'
+      - '.github/workflows/r111-fabric-mesh.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/workerR111.js'
+      - 'src/federation/fabricMeshR111.js'
+      - 'src/capability/routeLayerOutputRegistryR111.ts'
+      - 'src/RouteOutputRibbonR111.tsx'
+      - 'src/routeOutputRibbonR111.css'
+      - 'src/HybridConnectBarR111.tsx'
+      - 'src/hybridConnectR111.css'
+      - 'src/HybridMissionControl.tsx'
+      - 'src/OmegaSideNavigatorR88.tsx'
+      - 'wrangler.jsonc'
+      - 'tests/r111-federated-capability-mesh-invariants.mjs'
+      - '.github/workflows/r111-fabric-mesh.yml'
+
+jobs:
+  mesh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Verify R111 mesh/layers/Hybrid/sentinel invariants
+        run: node tests/r111-federated-capability-mesh-invariants.mjs
+      - name: Verify inherited R110 working-set gate
+        run: npm run test:r110
+      - name: Production build
+        run: npm run build
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r111-dry-run

@@ -1,0 +1,602 @@
+/* R91 — operational surface refinement.
+   Presentation-only. Primary actions lead; proof and truth stay reachable and visible. */
+
+.omega-workstation-v2{
+ --r91-line:rgba(126,185,177,.13);
+ --r91-panel:#071014;
+ --r91-panel-2:#091317;
+ --r91-muted:#7f9290;
+ --r91-accent:#d5b56f;
+}
+
+/* Desktop: operational tools use a common readable measure without imitating visual canvases. */
+@media(min-width:901px){
+ .omega-workstation-v2:is(
+  [data-panel='Command Center'],
+  [data-panel='Workspace'],
+  [data-panel='Cockpit'],
+  [data-panel='Projects'],
+  [data-panel='Governance'],
+  [data-panel='Assets'],
+  [data-panel='Render Queue'],
+  [data-panel='Canon Evolution'],
+  [data-panel='Instructions'],
+  [data-panel='Settings'],
+  [data-panel='System'],
+  [data-panel='Consolidation'],
+  [data-panel='Memory'],
+  [data-panel='Create'],
+  [data-panel='Development']
+ ) .omega-surface-r81{
+  width:min(100%,1540px);
+  margin-inline:auto;
+ }
+ .omega-workstation-v2:is(
+  [data-panel='Projects'],
+  [data-panel='Governance'],
+  [data-panel='Assets'],
+  [data-panel='Render Queue'],
+  [data-panel='Canon Evolution'],
+  [data-panel='Instructions'],
+  [data-panel='Settings'],
+  [data-panel='System'],
+  [data-panel='Consolidation'],
+  [data-panel='Memory']
+ ) .special-app{
+  gap:10px!important;
+ }
+ .omega-workstation-v2:is(
+  [data-panel='Projects'],
+  [data-panel='Governance'],
+  [data-panel='Assets'],
+  [data-panel='Render Queue'],
+  [data-panel='Canon Evolution'],
+  [data-panel='Instructions'],
+  [data-panel='Settings'],
+  [data-panel='System'],
+  [data-panel='Consolidation'],
+  [data-panel='Memory']
+ ) .special-head{
+  min-height:58px;
+  align-items:center;
+  border-bottom:1px solid var(--r91-line);
+  padding-block:8px!important;
+ }
+}
+
+/* COMMAND CENTER — one field, one prompt, one proof ribbon. */
+.omega-workstation-v2[data-panel='Command Center'] .command-deck{
+ display:grid;
+ gap:10px;
+}
+.omega-workstation-v2[data-panel='Command Center'] .command-stage{
+ min-width:0;
+}
+.omega-workstation-v2[data-panel='Command Center'] .command-visual,
+.omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+ min-width:0;
+}
+.omega-workstation-v2[data-panel='Command Center'] .command-proof-strip{
+ content-visibility:auto;
+ contain-intrinsic-size:90px;
+}
+
+/* WORKSPACE / COCKPIT — current work first; supporting proof doesn't dominate. */
+.omega-workstation-v2[data-panel='Workspace'] .r18-current,
+.omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit-hero{
+ border-radius:12px!important;
+}
+.omega-workstation-v2[data-panel='Workspace'] .r18-workspace-actions,
+.omega-workstation-v2[data-panel='Cockpit'] :where(.r18-health,.r18-capabilities,.r18-ledger){
+ min-width:0;
+}
+.omega-workstation-v2[data-panel='Cockpit'] .r18-ledger-list,
+.omega-workstation-v2[data-panel='Workspace'] .r18-snapshot-list{
+ content-visibility:auto;
+ contain-intrinsic-size:420px;
+}
+
+/* R29 governance/project/media family. */
+.omega-workstation-v2:is(
+ [data-panel='Projects'],
+ [data-panel='Governance'],
+ [data-panel='Assets'],
+ [data-panel='Render Queue'],
+ [data-panel='Canon Evolution']
+) :where(.r29-project-list,.r29-governance-ledger,.r29-asset-list,.r29-proposal-list,.r29-render-list){
+ content-visibility:auto;
+ contain-intrinsic-size:420px;
+}
+.omega-workstation-v2[data-panel='Render Queue'] .r29-render-preview{
+ min-height:clamp(360px,54dvh,720px)!important;
+}
+.omega-workstation-v2[data-panel='Assets'] .r29-asset-list pre{
+ max-height:150px!important;
+}
+.omega-workstation-v2[data-panel='Governance'] .r29-governance-route{
+ border-left:3px solid var(--r91-accent)!important;
+}
+
+/* R30 system family. */
+.omega-workstation-v2:is(
+ [data-panel='Instructions'],
+ [data-panel='Settings'],
+ [data-panel='System'],
+ [data-panel='Consolidation']
+) :where(.r30-instruction-list,.r30-system-checks,.r30-storage-list,.r30-family-table,.r30-debt-grid){
+ content-visibility:auto;
+ contain-intrinsic-size:440px;
+}
+.omega-workstation-v2[data-panel='Settings'] .r30-setting-grid{
+ max-width:1180px;
+}
+.omega-workstation-v2[data-panel='System'] .r30-coherence-banner,
+.omega-workstation-v2[data-panel='Consolidation'] .r30-coherence-banner{
+ border-radius:10px!important;
+}
+
+/* CREATE / DEVELOPMENT — route choices and build surface lead; embedded assistant is secondary. */
+.omega-workstation-v2[data-panel='Create'] .create-paths{
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:6px;
+}
+.omega-workstation-v2[data-panel='Create'] .create-paths button{
+ min-height:78px;
+ border:1px solid var(--r91-line);
+ border-radius:10px;
+ background:var(--r91-panel);
+}
+.omega-workstation-v2:is([data-panel='Create'],[data-panel='Development']) .embedded-command{
+ margin-top:10px;
+ border-top:1px solid var(--r91-line);
+ padding-top:10px;
+}
+
+/* Phone: one dominant task per screen; secondary data becomes swipe/reveal, never deleted. */
+@media(max-width:900px){
+ .omega-workstation-v2:is(
+  [data-panel='Command Center'],
+  [data-panel='Workspace'],
+  [data-panel='Cockpit'],
+  [data-panel='Projects'],
+  [data-panel='Governance'],
+  [data-panel='Assets'],
+  [data-panel='Render Queue'],
+  [data-panel='Canon Evolution'],
+  [data-panel='Instructions'],
+  [data-panel='Settings'],
+  [data-panel='System'],
+  [data-panel='Consolidation'],
+  [data-panel='Memory'],
+  [data-panel='Create'],
+  [data-panel='Development']
+ ) .special-head{
+  min-height:44px!important;
+  padding:5px 6px!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2:is(
+  [data-panel='Projects'],
+  [data-panel='Governance'],
+  [data-panel='Assets'],
+  [data-panel='Render Queue'],
+  [data-panel='Canon Evolution'],
+  [data-panel='Instructions'],
+  [data-panel='Settings'],
+  [data-panel='System'],
+  [data-panel='Consolidation'],
+  [data-panel='Memory']
+ ) .special-head>div>span{
+  display:none!important;
+ }
+ .omega-workstation-v2:is(
+  [data-panel='Projects'],
+  [data-panel='Governance'],
+  [data-panel='Assets'],
+  [data-panel='Render Queue'],
+  [data-panel='Canon Evolution'],
+  [data-panel='Instructions'],
+  [data-panel='Settings'],
+  [data-panel='System'],
+  [data-panel='Consolidation'],
+  [data-panel='Memory']
+ ) .special-head h2{
+  margin:0!important;
+  font-size:18px!important;
+ }
+
+ /* Command Center */
+ .omega-workstation-v2[data-panel='Command Center'] .command-deck-head{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:4px!important;
+  padding:4px 5px!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-deck-head h1{
+  margin:0!important;
+  font-size:20px!important;
+  line-height:1.05!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-deck-head p,
+ .omega-workstation-v2[data-panel='Command Center'] .command-deck-head .boot-sequence{
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-stage{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-visual{
+  min-height:48dvh!important;
+  height:48dvh!important;
+  border-radius:10px!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-prompt{
+  padding:7px!important;
+  border-radius:10px!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-prompt-title small{
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-prompt textarea{
+  min-height:116px!important;
+  max-height:36dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .quick-prompts,
+ .omega-workstation-v2[data-panel='Command Center'] .command-actions{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] :where(.quick-prompts,.command-actions) button{
+  flex:0 0 auto!important;
+  min-height:36px!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-proof-strip{
+  display:flex!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-proof-strip>div{
+  flex:0 0 min(72vw,280px)!important;
+  min-height:56px!important;
+  padding:6px 7px!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-response{
+  padding:8px!important;
+  border-radius:10px!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-response-meta{
+  display:flex!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  flex-wrap:nowrap!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Command Center'] .command-response-meta>span{
+  flex:0 0 auto!important;
+ }
+
+ /* Workspace */
+ .omega-workstation-v2[data-panel='Workspace'] .r18-workspace{
+  gap:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-workspace-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-current{
+  padding:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-metric-grid{
+  display:flex!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-metric{
+  flex:0 0 118px!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-note textarea{
+  min-height:88px!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-capture{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:4px!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-workspace-actions{
+  display:flex!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-workspace-actions>.r18-section-title{
+  flex:0 0 150px!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-workspace-actions>button{
+  flex:0 0 min(60vw,220px)!important;
+  min-height:54px!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-snapshot-list article{
+  grid-template-columns:minmax(0,1fr) auto!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-snapshot-list article>code{
+  display:none!important;
+ }
+
+ /* Cockpit */
+ .omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit{
+  gap:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit-hero{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr)!important;
+  gap:5px!important;
+  padding:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit-hero>section{
+  min-width:118px!important;
+ }
+ .omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit-hero .r18-metric-grid{
+  display:flex!important;
+  overflow-x:auto!important;
+  gap:3px!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit-hero .r18-metric{
+  flex:0 0 92px!important;
+ }
+ .omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit-columns{
+  display:flex!important;
+  gap:5px!important;
+  overflow-x:auto!important;
+  scroll-snap-type:x proximity!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit-columns>section{
+  flex:0 0 min(88vw,390px)!important;
+  scroll-snap-align:start!important;
+ }
+ .omega-workstation-v2[data-panel='Cockpit'] .r18-ledger-list{
+  max-height:260px!important;
+  overflow:auto!important;
+ }
+ .omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit-nav{
+  display:flex!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Cockpit'] .r18-cockpit-nav button{
+  flex:0 0 min(58vw,210px)!important;
+  min-height:50px!important;
+ }
+
+ /* Governance / Projects / Assets / Render Queue / Canon */
+ .omega-workstation-v2[data-panel='Projects'] .r29-project-create,
+ .omega-workstation-v2[data-panel='Canon Evolution'] .r29-canon-compose{
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:5px!important;
+  padding:7px!important;
+ }
+ .omega-workstation-v2:is([data-panel='Projects'],[data-panel='Canon Evolution']) :where(.r29-project-create,.r29-canon-compose)>svg{
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Projects'] .r29-project-list article{
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:5px!important;
+  padding:8px!important;
+ }
+ .omega-workstation-v2[data-panel='Projects'] .r29-project-list>article>svg{
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Projects'] .r29-project-actions{
+  display:flex!important;
+  gap:3px!important;
+ }
+ .omega-workstation-v2[data-panel='Governance'] .r29-governance-route{
+  grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr)!important;
+  gap:4px!important;
+  padding:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Governance'] .r29-governance-route>strong{
+  grid-column:1/-1!important;
+  justify-self:start!important;
+ }
+ .omega-workstation-v2[data-panel='Governance'] .r29-gates{
+  display:flex!important;
+  gap:1px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Governance'] .r29-gates article{
+  flex:0 0 min(70vw,280px)!important;
+  min-height:58px!important;
+ }
+ .omega-workstation-v2[data-panel='Governance'] .r29-governance-actions{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:4px!important;
+ }
+ .omega-workstation-v2[data-panel='Governance'] .r29-governance-ledger{
+  max-height:300px!important;
+  overflow:auto!important;
+ }
+ .omega-workstation-v2[data-panel='Assets'] .r29-asset-list article{
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:5px!important;
+  padding:8px!important;
+ }
+ .omega-workstation-v2[data-panel='Assets'] .r29-asset-list>article>svg{
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Assets'] .r29-asset-list pre{
+  max-height:92px!important;
+  font-size:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Render Queue'] .r29-render-actions{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Render Queue'] .r29-render-actions button{
+  flex:0 0 auto!important;
+ }
+ .omega-workstation-v2[data-panel='Render Queue'] .r29-render-preview{
+  min-height:58dvh!important;
+  padding:7px!important;
+ }
+ .omega-workstation-v2[data-panel='Render Queue'] .r29-render-list article{
+  grid-template-columns:minmax(0,1fr) auto!important;
+ }
+ .omega-workstation-v2[data-panel='Render Queue'] .r29-render-list>article>svg{
+  display:none!important;
+ }
+
+ /* Memory */
+ .omega-workstation-v2[data-panel='Memory'] .r28-memory-capture{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Memory'] .r28-memory-capture>svg{
+  display:none!important;
+ }
+ .omega-workstation-v2[data-panel='Memory'] .r28-memory-list article{
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Memory'] .r28-memory-state{
+  grid-column:1/-1!important;
+ }
+ .omega-workstation-v2[data-panel='Memory'] .r28-memory-body code{
+  display:block!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+ }
+
+ /* Instructions / Settings / System / Consolidation */
+ .omega-workstation-v2[data-panel='Instructions'] .r30-filter{
+  grid-template-columns:18px minmax(0,1fr)!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2[data-panel='Instructions'] .r30-filter select{
+  grid-column:2!important;
+  border-left:0!important;
+  border-top:1px solid var(--r91-line)!important;
+  padding-top:6px!important;
+ }
+ .omega-workstation-v2[data-panel='Instructions'] .r30-instruction-list button{
+  grid-template-columns:28px minmax(0,1fr)!important;
+  min-height:58px!important;
+ }
+ .omega-workstation-v2[data-panel='Instructions'] .r30-instruction-list strong{
+  grid-column:2!important;
+ }
+ .omega-workstation-v2[data-panel='Settings'] .r30-setting-grid,
+ .omega-workstation-v2[data-panel='System'] .r30-system-checks{
+  display:flex!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scroll-snap-type:x proximity!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Settings'] .r30-setting-grid article,
+ .omega-workstation-v2[data-panel='System'] .r30-system-checks article{
+  flex:0 0 min(82vw,350px)!important;
+  scroll-snap-align:start!important;
+ }
+ .omega-workstation-v2[data-panel='System'] .r30-system-kpis,
+ .omega-workstation-v2[data-panel='Consolidation'] .r30-consolidation-kpis{
+  display:flex!important;
+  gap:1px!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='System'] .r30-system-kpis>div,
+ .omega-workstation-v2[data-panel='Consolidation'] .r30-consolidation-kpis article{
+  flex:0 0 130px!important;
+ }
+ .omega-workstation-v2[data-panel='Consolidation'] .r30-debt-grid{
+  grid-template-columns:1fr!important;
+  gap:5px!important;
+ }
+ .omega-workstation-v2:is([data-panel='System'],[data-panel='Consolidation']) :where(.r30-storage-list,.r30-family-table){
+  grid-template-columns:1fr!important;
+ }
+
+ /* Create / Development */
+ .omega-workstation-v2[data-panel='Create'] .create-paths{
+  display:flex!important;
+  grid-template-columns:none!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  scroll-snap-type:x proximity!important;
+  scrollbar-width:none!important;
+ }
+ .omega-workstation-v2[data-panel='Create'] .create-paths button{
+  flex:0 0 min(58vw,210px)!important;
+  min-height:64px!important;
+  scroll-snap-align:start!important;
+ }
+ .omega-workstation-v2:is([data-panel='Create'],[data-panel='Development']) .embedded-command .command-deck-head p,
+ .omega-workstation-v2:is([data-panel='Create'],[data-panel='Development']) .embedded-command .boot-sequence{
+  display:none!important;
+ }
+ .omega-workstation-v2:is([data-panel='Create'],[data-panel='Development']) .embedded-command .command-stage{
+  grid-template-columns:minmax(0,1fr)!important;
+ }
+ .omega-workstation-v2:is([data-panel='Create'],[data-panel='Development']) .embedded-command .command-visual{
+  min-height:42dvh!important;
+  height:42dvh!important;
+ }
+
+ .omega-workstation-v2 :where(
+  .quick-prompts,
+  .command-actions,
+  .command-proof-strip,
+  .command-response-meta,
+  .r18-metric-grid,
+  .r18-workspace-actions,
+  .r18-cockpit-columns,
+  .r18-cockpit-nav,
+  .r29-gates,
+  .r29-render-actions,
+  .r30-setting-grid,
+  .r30-system-checks,
+  .r30-system-kpis,
+  .r30-consolidation-kpis,
+  .create-paths
+ )::-webkit-scrollbar{display:none}
+}
+
+@media(max-width:520px){
+ .omega-workstation-v2[data-panel='Command Center'] .command-visual{
+  min-height:52dvh!important;
+  height:52dvh!important;
+ }
+ .omega-workstation-v2[data-panel='Workspace'] .r18-capture{
+  grid-template-columns:1fr!important;
+ }
+ .omega-workstation-v2[data-panel='Governance'] .r29-governance-actions{
+  grid-template-columns:1fr!important;
+ }
+ .omega-workstation-v2[data-panel='Create'] .create-paths button{
+  flex-basis:68vw!important;
+ }
+}
+
+/* Never suppress truth boundaries in this refinement layer. */
+.omega-workstation-v2 :where(.special-boundary,.earth-proof,.sai-footer,.sbm21-expression-boundary){
+ visibility:visible!important;
+}

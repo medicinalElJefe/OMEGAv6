@@ -1,0 +1,129 @@
+/* R100 — Woven Continuity instrument surface.
+   The visual owns the stage. State, atlas hierarchy and proof-adjacent interpretation stay outside it. */
+.r100-weave-stage{
+ --r100-continuity:#65d0bf;
+ --r100-carry:#d9b66f;
+ --r100-scar:#ce5b72;
+ --r100-relative:#689fd2;
+ border-color:rgba(119,185,176,.14)!important;
+ border-radius:16px!important;
+ background:#020709!important;
+ box-shadow:inset 0 1px rgba(255,255,255,.012),0 16px 60px #0003;
+}
+.r100-weave-stage>header{
+ min-height:50px;
+ padding:8px 11px!important;
+ background:linear-gradient(180deg,rgba(9,24,29,.96),rgba(4,13,17,.96))!important;
+ border-bottom-color:rgba(117,182,174,.12)!important;
+}
+.r100-weave-stage>header span{font-size:5.5px!important;letter-spacing:.13em!important;color:color-mix(in srgb,var(--r99-mode) 82%,#d9b66f)!important}
+.r100-weave-stage>header b{font-size:12px!important;font-weight:670!important;letter-spacing:-.01em}
+.r100-weave-stage>header small{max-width:68vw!important;color:#6f8581!important}
+.r100-weave-stage>header code{padding:4px 6px;border:1px solid rgba(216,182,109,.11);border-radius:6px;background:#050d10;color:#b89d64!important}
+
+.r100-mode-nav{gap:3px!important;padding:4px 6px!important;border-bottom:1px solid rgba(113,181,172,.09);background:#030a0d!important}
+.r100-mode-nav button{
+ min-height:36px!important;
+ flex-basis:94px!important;
+ border-color:rgba(117,182,178,.075)!important;
+ border-radius:8px!important;
+ background:linear-gradient(180deg,#071317,#051014)!important;
+ color:#708783!important;
+ transition:border-color .13s ease,background .13s ease,color .13s ease;
+}
+.r100-mode-nav button b{font-size:6.7px!important;letter-spacing:.035em}
+.r100-mode-nav button small{font-size:4.7px!important;color:#506762}
+.r100-mode-nav button.active{
+ border-color:color-mix(in srgb,var(--r99-mode) 58%,transparent)!important;
+ background:linear-gradient(180deg,color-mix(in srgb,var(--r99-mode) 8%,#071317),#051014)!important;
+ box-shadow:inset 0 -2px color-mix(in srgb,var(--r99-mode) 52%,transparent),inset 0 0 24px color-mix(in srgb,var(--r99-mode) 3%,transparent)!important;
+}
+
+.r100-weave-canvas{
+ height:clamp(650px,76dvh,980px)!important;
+ min-height:650px!important;
+ background:
+  radial-gradient(circle at 50% 48%,rgba(53,132,120,.07),transparent 34%),
+  radial-gradient(circle at 50% 50%,rgba(216,182,109,.018),transparent 57%),
+  linear-gradient(180deg,#02080a,#010506)!important;
+}
+.r100-weave-canvas:before{
+ content:'';
+ pointer-events:none;
+ position:absolute;
+ inset:0;
+ opacity:.24;
+ background-image:
+  linear-gradient(rgba(107,171,162,.025) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(107,171,162,.025) 1px,transparent 1px);
+ background-size:48px 48px;
+ mask-image:radial-gradient(circle at center,#000 0 30%,transparent 78%);
+}
+.r100-weave-canvas:after{box-shadow:inset 0 0 130px #000a!important;border-color:rgba(255,255,255,.012)!important}
+.r100-weave-stage[data-orientation='-1'] .r100-weave-canvas{background:radial-gradient(circle at 50% 48%,rgba(86,116,172,.055),transparent 38%),linear-gradient(180deg,#02070a,#010506)!important}
+
+.r100-weave-output{
+ display:grid;
+ grid-template-columns:1.25fr 1.35fr 1.05fr repeat(3,minmax(130px,1fr));
+ gap:1px;
+ border-top:1px solid rgba(119,185,176,.11);
+ border-bottom:1px solid rgba(119,185,176,.09);
+ background:rgba(113,181,172,.055);
+ overflow-x:auto;
+ scrollbar-width:none;
+}
+.r100-weave-output::-webkit-scrollbar{display:none}
+.r100-weave-output>div{
+ min-width:0;
+ min-height:66px;
+ display:grid;
+ align-content:center;
+ gap:3px;
+ padding:8px 10px;
+ border-right:1px solid rgba(119,185,176,.075);
+ background:#030b0e;
+}
+.r100-weave-output>div:last-child{border-right:0}
+.r100-weave-output span{font:800 5px/1 ui-monospace,monospace;letter-spacing:.12em;color:#5f7873}
+.r100-weave-output b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d4e3df;font:720 8px/1.25 ui-monospace,monospace}
+.r100-weave-output>div:nth-child(1) b{color:#c8b07b}
+.r100-weave-output>div:nth-child(3) b{color:#84a9c9}
+.r100-weave-output>div:nth-child(4) b{color:#73c6b9}
+.r100-weave-output>div:nth-child(5) b{color:#d2af68}
+.r100-weave-output small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#657b77;font:620 5.5px/1.25 ui-monospace,monospace}
+
+.r100-stage-actions{background:#030a0d!important;border-top:0!important;padding:5px 6px!important;gap:4px!important}
+.r100-stage-actions button{min-height:35px!important;border-radius:8px!important}
+.r100-stage-actions label{flex-basis:158px!important;min-height:35px!important;padding-inline:7px!important}
+.r100-stage-actions label input{accent-color:#65b9ac}
+.r100-mode-data>div{grid-template-columns:82px minmax(0,1fr)!important}
+.r100-mode-data>div:nth-of-type(3) b{color:#9ec0ba}
+.r100-mode-data>div:nth-of-type(4) b{color:#a58e61}
+
+@media(max-width:1100px){
+ .r100-weave-output{grid-template-columns:repeat(6,minmax(165px,1fr))}
+ .r100-weave-canvas{height:72dvh!important;min-height:580px!important}
+}
+@media(max-width:900px){
+ .r100-weave-stage>header{min-height:44px;padding:6px 8px!important}
+ .r100-weave-stage>header small{display:none!important}
+ .r100-mode-nav button{flex-basis:80px!important;min-height:34px!important}
+ .r100-weave-canvas{height:73dvh!important;min-height:520px!important}
+ .r100-weave-output{grid-template-columns:repeat(6,minmax(150px,1fr))}
+ .r100-weave-output>div{min-height:58px;padding:7px 8px}
+ .r100-stage-actions label{flex-basis:150px!important}
+}
+@media(max-width:520px){
+ .r100-weave-stage{border-radius:11px!important}
+ .r100-weave-stage>header b{font-size:10px!important}
+ .r100-weave-stage>header code{font-size:5.5px!important;padding:3px 4px}
+ .r100-mode-nav{padding:3px!important}
+ .r100-mode-nav button{flex-basis:70px!important;min-height:32px!important}
+ .r100-mode-nav button small{display:none}
+ .r100-weave-canvas{height:74dvh!important;min-height:500px!important}
+ .r100-weave-output{grid-template-columns:repeat(6,minmax(138px,1fr))}
+ .r100-weave-output>div{min-height:54px;padding:6px 7px}
+ .r100-stage-actions label{flex-basis:138px!important}
+ .r100-mode-data>div{grid-template-columns:1fr!important}
+}
+@media(prefers-reduced-motion:reduce){.r100-mode-nav button{transition:none!important}}

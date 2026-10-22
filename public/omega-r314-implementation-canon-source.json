@@ -1,0 +1,43 @@
+{
+  "schema": "OMEGA_IMPLEMENTATION_CANON_SOURCE_R314",
+  "source": {
+    "name": "OMEGA_20736D_IMPLEMENTATION_CANON_INDEX.xlsx",
+    "driveFileId": "1qUin9VhnhLtj3hEavex3l04fYCNdjfKD",
+    "sizeBytes": 52697,
+    "sha256": "fdda75804ffb67136e6c547f5549bf2b2a26fd2e30ddfd86cd38dfc28f556e4e",
+    "modifiedTime": "2026-08-03T13:29:58.020Z"
+  },
+  "rowCount": 675,
+  "sourceStatus": {"LOCKED": 12, "PLANNED": 663},
+  "priority": {"P0": 653, "P1": 22},
+  "types": {
+    "HARD_INVARIANT": 12,
+    "MODULE": 94,
+    "SYMBOL": 408,
+    "SHADER_BINDING": 31,
+    "EVENT": 22,
+    "API_ROUTE": 22,
+    "DATABASE_TABLE": 12,
+    "CONFIG_KEY": 26,
+    "TEST": 23,
+    "BUILD_GATE": 25
+  },
+  "phases": {
+    "Governance": 12,
+    "Core and calculus": 26,
+    "Input, time and physics": 15,
+    "World reconstruction": 10,
+    "Runtime": 9,
+    "Intrinsic renderer": 18,
+    "Storage, UI and delivery": 16,
+    "Code contract": 408,
+    "GPU memory contract": 31,
+    "Runtime event protocol": 22,
+    "External control contract": 22,
+    "Persistence contract": 12,
+    "Configuration contract": 26,
+    "Verification canon": 23,
+    "Sequential construction": 25
+  },
+  "truthBoundary": "This receipt fingerprints and counts the exact source workbook loaded for R314. It does not mark PLANNED rows implemented. Row-by-row implementation state is determined only by the R314 reconciliation compiler using exact repository or explicit successor evidence."
+}

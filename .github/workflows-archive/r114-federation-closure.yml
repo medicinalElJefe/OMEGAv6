@@ -1,0 +1,60 @@
+name: OMEGA R114 Federation Closure
+
+on:
+  push:
+    branches: [main, r114-federation-closure]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["OMEGA Cloud Bridge CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  verify-r114:
+    if: github.event_name != 'workflow_run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Syntax-check R114 successor
+        run: node --check src/workerR114.js
+      - name: Verify federation closure invariants
+        run: node tests/r114-federation-closure-invariants.mjs
+      - name: Verify inherited federation invariants
+        run: node tests/r97-federation-run-invariants.mjs
+      - name: Production build
+        run: npm run build
+      - name: Wrangler dry-run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r114
+
+  live-after-cloud-bridge:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify deployed R114 ceremony truth surface
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base='https://omegav6.jeffdeweyeljefe.workers.dev';
+          const statusResponse=await fetch(base+'/api/federation/ceremony/status',{headers:{'cache-control':'no-cache','x-omega-session-id':'ci_r114_observer'}}),status=await statusResponse.json();
+          if(!statusResponse.ok||status.schema!=='OMEGA_FEDERATION_CEREMONY_STATUS_R114'||status.revision!=='R114')throw new Error(`R114 ceremony status unavailable: ${statusResponse.status} ${JSON.stringify(status).slice(0,800)}`);
+          const lawResponse=await fetch(base+'/api/federation/ceremony/law',{headers:{'cache-control':'no-cache'}}),law=await lawResponse.json();
+          if(!lawResponse.ok||law.schema!=='OMEGA_FEDERATION_CEREMONY_LAW_R114'||!String(law.fullClosure||'').includes('current authenticated Sovereign'))throw new Error('R114 ceremony truth law missing');
+          const queueResponse=await fetch(base+'/omega-fullwave-queue.schema.json',{headers:{'cache-control':'no-cache'}}),queue=await queueResponse.json();
+          const material=queue?.properties?.material_model;
+          if(!queueResponse.ok||material?.type!=='object'||!['n_incident','n_feature','n_background','n_substrate'].every(x=>material.required?.includes(x)))throw new Error('deployed full-wave material contract does not match R34 admission');
+          console.log(`OMEGA R114 LIVE PASS · ceremony ${status.schema} · runs ${status.runs?.length||0} · queue material contract aligned`);
+          NODE

@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const parent=fs.readFileSync('src/LivingTerrainSurfaceR225.tsx','utf8');
+const surface=fs.readFileSync('src/SourceSpatialEvidenceIntakeR227.tsx','utf8');
+assert.ok(parent.includes("import SourceSpatialEvidenceIntakeR227 from './SourceSpatialEvidenceIntakeR227'"),'R227 intake import missing');
+assert.ok(parent.includes('<SourceSpatialEvidenceIntakeR227/>'),'R227 intake not mounted in Living World terrain surface');
+for(const required of ['readSpatialReconstructionEvidenceRequestR226','bindSourceSpatialEvidenceBundleR227','persistSourceSpatialEvidenceBundleR227','SOURCE_SPATIAL_EVIDENCE_BUNDLE_BOUND','recordProjectOperationR87','R227 camera evidence JSON','R227 depth evidence JSON','Bind source 3-D evidence','spatialCalibrationProved:false','numerical3DReconstructionExecuted:false','computedPhotorealRealityProved:false','solverValidityProved:false','nativeExecutionClaimed:false','pcOnlineClaimed:false','federationClosureProved:false','canonicalMutation:false'])assert.ok(surface.includes(required),`R227 intake missing ${required}`);
+assert.ok(surface.includes("request?.state!=='SPATIAL_RECONSTRUCTION_EVIDENCE_REQUEST_READY'"),'R227 intake must fail closed without exact R226 request');
+assert.ok(surface.includes("receipt?.state!=='SOURCE_SPATIAL_EVIDENCE_BUNDLE_BOUND'"),'R227 intake must fail closed without validated evidence bundle');
+for(const forbidden of ['spatialCalibrationProved:true','numerical3DReconstructionExecuted:true','computedPhotorealRealityProved:true','solverValidityProved:true','nativeExecutionClaimed:true','pcOnlineClaimed:true','federationClosureProved:true','canonicalMutation:true'])assert.ok(!surface.includes(forbidden),`R227 forbidden overclaim ${forbidden}`);
+console.log('R227 Living World spatial evidence intake invariants PASS');

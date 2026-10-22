@@ -1,0 +1,97 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const policy=JSON.parse(fs.readFileSync('public/omega-r240-recursive-exact-self-promotion.json','utf8'));
+const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+const staged=fs.readFileSync('scripts/staged-cloudflare-release.sh','utf8');
+const verifier=fs.readFileSync('scripts/verify_staged_release.mjs','utf8');
+const override=fs.readFileSync('scripts/cloudflare-version-override-fetch.mjs','utf8');
+const localBrowser=fs.readFileSync('tests/r496-local-omega7-candidate-browser-e2e.mjs','utf8');
+
+assert.equal(policy.revision,'R240.2');
+assert.equal(policy.deploymentContractRevision,'R324');
+assert.equal(policy.deployment.assetProofBoundaryRevision,'R496');
+assert.equal(policy.deployment.soleCanonicalWriter,'.github/workflows/ci.yml');
+for(const key of [
+  'candidateVersionUploadedWithoutTraffic',
+  'previousVersionRetainsHundredPercentOrdinaryTrafficDuringCandidateProof',
+  'candidateAdmittedToCurrentDeploymentAtZeroPercent',
+  'versionOverrideSemanticProofRequiredBeforePromotion',
+  'exactPackagedBrowserProofRequiredBeforePromotion',
+  'postPromotionCanonicalAssetProofRequired',
+  'atomicHundredPercentPromotionAfterProof',
+  'automaticRollbackOnPostPromotionFailure',
+  'rollbackRequiresProvedUsablePreviousBaseline'
+])assert.equal(policy.deployment[key],true,`R240/R496 live continuity policy missing ${key}`);
+for(const key of [
+  'lastKnownGoodRemainsServingDuringCandidateProof',
+  'candidateRemainsUndeployedBeforeProof',
+  'mixedVersionTrafficSplitForbidden',
+  'unprovedCandidateReceivesOrdinaryTraffic',
+  'durableObjectLifecycleMutationAllowedInStagedVersionPath',
+  'durableObjectExportSetChangeCompatible',
+  'versionOverrideBrowserProofRequiredBeforePromotion',
+  'versionOverrideStaticAssetProofSupported'
+])assert.equal(policy.deployment[key],false,`R240/R496 policy must reject obsolete assumption ${key}`);
+
+assert.match(policy.truthLaw,/staged-live-proved/);
+assert.match(policy.truthBoundary,/previous version retains 100% ordinary traffic/i);
+assert.match(policy.truthBoundary,/candidate.*0%/i);
+assert.match(policy.truthBoundary,/version override is authoritative for Worker code semantics but not for the canonical ASSETS binding/i);
+assert.match(policy.truthBoundary,/no unproved candidate receives ordinary traffic/i);
+assert.match(policy.truthBoundary,/Cloudflare can reject a percentage split when Durable Object exports differ/i);
+assert.match(policy.truthBoundary,/positively identified.*application-withholding interlock/i);
+assert.match(policy.truthBoundary,/unknown or merely unproved baseline does not qualify/i);
+assert.match(policy.truthBoundary,/known-bad blocking baseline has no rollback authority/i);
+assert.match(policy.truthBoundary,/R201\/R203 remain deleted export tombstones/);
+
+for(const token of [
+  'npx wrangler deployments status',
+  'node tests/r496-local-omega7-candidate-browser-e2e.mjs',
+  'npx wrangler versions upload',
+  'npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%"',
+  'node scripts/verify_staged_release.mjs',
+  'npx wrangler versions deploy "${CANDIDATE_VERSION_ID}@100%"',
+  'verify_promotion_convergence_r491.mjs',
+  'verify_omega7_asset_coherence_r491.mjs promoted'
+])assert.ok(staged.includes(token),`staged release membrane missing ${token}`);
+
+const packagedBrowser=staged.indexOf('node tests/r496-local-omega7-candidate-browser-e2e.mjs');
+const upload=staged.indexOf('npx wrangler versions upload');
+const admit=staged.indexOf('"${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%"');
+const semanticProof=staged.indexOf('node scripts/verify_staged_release.mjs');
+const promote=staged.indexOf('"${CANDIDATE_VERSION_ID}@100%"',semanticProof);
+assert.ok(packagedBrowser>=0&&upload>packagedBrowser&&admit>upload&&semanticProof>admit&&promote>semanticProof,'candidate must pass exact packaged browser proof → upload → enter deployment at 0% → pass Worker semantic proof → promote to 100%');
+assert.match(staged,/STAGED_DEPLOYMENT_READY/);
+assert.match(staged,/previous 100%, candidate 0%/);
+assert.match(staged,/rollback_eligible=\$ROLLBACK_ELIGIBLE/);
+assert.match(staged,/BASELINE_USABLE/);
+assert.match(staged,/FORWARD_RECOVERY_EXPORT_SET/);
+assert.match(staged,/BASELINE_PROBE_RC.*42/);
+assert.match(staged,/identical .*exports|percentage-split deployment.*Durable Object/i);
+
+for(const token of [
+  'Cloudflare-Workers-Version-Overrides',
+  'OMEGA_WORKER_VERSION_ID',
+  'OMEGA_WORKER_NAME',
+  'verify_live_operational_source_authority_r202.mjs',
+  "OMEGA_STAGED_READ_ONLY:'1'"
+])assert.ok(verifier.includes(token)||override.includes(token),`staged exact-version semantic proof missing ${token}`);
+assert.ok(verifier.includes("readFileSync('dist/omega-build-receipt.json','utf8')"),'candidate package receipt must be proved locally during staged semantics');
+assert.ok(!verifier.includes('/omega-build-receipt.json?staged='),'staged semantic verifier must not claim canonical ASSETS are version-overridden');
+assert.ok(!verifier.includes("'scripts/verify_live_hybrid_command_authority_r237.mjs'"),'0%-traffic staged proof must not mutate Hybrid Durable Object state through R237');
+assert.ok(!verifier.includes("'scripts/verify_live_hybrid_host_intelligence_r238.mjs'"),'0%-traffic staged proof must not run promoted-live R238 stateful proof');
+assert.match(override,/targetOrigin!==canonicalOrigin/,'version override helper must not leak to non-canonical external providers');
+assert.ok(localBrowser.includes('.o7-operational-truth[data-r495-operational-truth="true"]'),'packaged OMEGA7 browser proof must include the R495 operational-truth surface');
+
+for(const token of [
+  'bash scripts/staged-cloudflare-release.sh',
+  'steps.deploy_worker.outputs.previous_version_id',
+  "steps.deploy_worker.outputs.rollback_eligible == 'true'",
+  'npx wrangler rollback',
+  'ROLLBACK REFUSED'
+])assert.ok(ci.includes(token),`canonical ci continuity repair missing ${token}`);
+assert.ok(!/name: Deploy canonical OMEGA Worker\s+id: deploy_worker\s+run: npx wrangler deploy\b/m.test(ci),'canonical Worker must not replace production before candidate proof');
+assert.ok(!ci.includes('workflow_run:'),'continuity repair must not create recursive workflow fanout');
+
+console.log('R240.1/R324/R496 LIVE CONTINUITY PROMOTION PASS · exact packaged browser proof + 0%-traffic Worker semantic proof precede promotion · canonical ASSETS are proved only locally before promotion and through canonical routing after promotion · stateful Hybrid proof remains promoted-live · usability-gated rollback preserved');

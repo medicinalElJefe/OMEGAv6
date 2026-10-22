@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const app=fs.readFileSync('src/App.tsx','utf8');
+const band=fs.readFileSync('src/MissionWorldContinuityR206.tsx','utf8');
+const hybrid=fs.readFileSync('src/HybridMissionControl.tsx','utf8');
+const css=fs.readFileSync('src/missionWorldContinuityR206.css','utf8');
+assert.ok(app.includes("import MissionWorldContinuityR206 from './MissionWorldContinuityR206'"),'R206 component import missing');
+assert.ok(app.includes('<LivingWorldPulseR174 onNavigate={navigate}/><LivingSceneEvidenceBandR2023 onNavigate={navigate}/><MissionWorldContinuityR206 onNavigate={navigate}/>'),'R206 must attach after existing living-world and R202.3 scene surfaces');
+for(const token of ['buildMissionContinuity','omega.v6.hybrid.missions','omega.r2023.livingSceneVisual','R2023_EVENT','R122','COMPUTED PHOTOREAL REALITY UNPROVEN','Canon R125 only','Federation receipt-gated'])assert.ok(band.includes(token),`R206 boundary token missing: ${token}`);
+assert.ok(hybrid.includes("window.dispatchEvent(new CustomEvent('omega-r206-mission-continuity'"),'Hybrid mission compiler must publish the read-only R206 refresh event');
+assert.ok(!band.includes('fetch('),'R206 visual projection must not create network execution');
+assert.ok(!band.includes('localStorage.setItem'),'R206 visual projection must not become a persistence authority');
+assert.ok(!band.includes('CanonState')&&!band.includes('/api/hybrid/command'),'R206 must not admit Canon or execute native Hybrid commands');
+assert.ok(css.includes('@media(max-width:760px)'),'R206 must preserve mobile containment');
+for(const retained of ["installLivingWorldOperationBridgeR140()","installFederationLedgerWorldObserverR173()","installLivingWorldProofMembraneR1901()","installLivingWorldIntelligenceProofR196()","installEvidenceBoundSceneIngressR2022()"] )assert.ok(app.includes(retained),`R206 must preserve inherited authority: ${retained}`);
+console.log('R206 world mission continuity invariants PASS');

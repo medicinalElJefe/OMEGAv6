@@ -1,0 +1,120 @@
+name: OMEGA R153.2 Adaptive External Search
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r153-2-adaptive-external-search]
+
+permissions:
+  contents: read
+
+env:
+  OPTICAL_R1532_URL: https://omega-optical-machine-r1532.jeffdeweyeljefe.workers.dev
+
+concurrency:
+  group: omega-r1532-adaptive-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  verify-r1532:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Syntax-check adaptive external computation services
+        run: |
+          node --check services/opticalMachineR152.js
+          node --check services/opticalExternalToolR1531.js
+          node --check services/opticalMachineR1531.js
+          node --check services/opticalExternalToolR1532.js
+          node --check services/opticalMachineR1532.js
+      - name: Prove R153.2 adaptive closed-loop invariants
+        run: node tests/r1532-adaptive-external-search-invariants.mjs
+      - name: Preserve R153.1 external push and optical truth boundaries
+        run: |
+          node tests/r1531-external-ai-tool-push-invariants.mjs
+          node tests/r152-optical-operational-convergence-invariants.mjs
+          node tests/r115-machine-adapters-invariants.mjs
+          node tests/r151-sovereign-build-execution-spine-invariants.mjs
+          node tests/r153-adaptive-sovereign-build-missions-invariants.mjs
+      - name: Full inherited production regression
+        run: npm run check
+      - name: R153.2 adaptive Worker dry run
+        run: npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r1532-adaptive
+
+  deploy-r1532:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-r1532
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Cloudflare authorization preflight
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error title=AUTH REQUIRED::OMEGA_CLOUDFLARE_TOKEN unavailable"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error title=ACCOUNT REQUIRED::CLOUDFLARE_ACCOUNT_ID unavailable"; exit 1; }
+      - name: Deploy isolated R153.2 adaptive optical coprocessor
+        run: npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc
+      - name: Live evidence-derived closed-loop proof
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OPTICAL_R1532_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+          async function request(path,{method='GET',body=null,attempts=15,predicate=null}={}){
+            let last=null;
+            for(let attempt=1;attempt<=attempts;attempt++){
+              const sep=path.includes('?')?'&':'?';
+              const url=base+path+sep+'omega_probe='+Date.now()+'_'+attempt;
+              try{
+                const response=await fetch(url,{method,headers:{'cache-control':'no-cache','x-omega-probe':'r1532-live-proof',...(body?{'content-type':'application/json'}:{})},body:body?JSON.stringify(body):null});
+                const text=await response.text();
+                let json=null;try{json=JSON.parse(text)}catch{}
+                last={attempt,status:response.status,ok:response.ok,url,contentType:response.headers.get('content-type')||'',bodyPrefix:text.slice(0,220).replace(/\s+/g,' ')};
+                if(response.ok&&json&&(!predicate||predicate(json)))return{response,json,text,url};
+              }catch(error){last={attempt,error:error?.message||String(error),url};}
+              console.log('R153.2 live retry',JSON.stringify(last));
+              if(attempt<attempts)await sleep(2000);
+            }
+            throw new Error(`R153.2 live probe exhausted: ${JSON.stringify(last)}`);
+          }
+          const health=(await request('/api/health',{predicate:j=>j.machineVersion==='R153.2'&&j.externalTool?.version==='R153.2'})).json;
+          if(health.authority!=='SCREEN_ONLY'||health.externalTool?.canonicalMutation!==false||health.externalTool?.adaptiveCycle!==true)throw new Error('R153.2 health authority contract failed');
+          const descriptor=(await request('/api/tool/descriptor',{predicate:j=>j.version==='R153.2'&&j.operations?.adaptive_cycle})).json;
+          if(!descriptor.call_schema?.properties?.operation?.enum?.includes('adaptive_cycle'))throw new Error('R153.2 discovery schema does not advertise adaptive_cycle');
+          const probe=(await request('/api/tool/probe',{predicate:j=>j.ready?.adaptive_cycle===true})).json;
+          if(probe.ready.fullwave_execution!==false||probe.ready.canonical_admission!==false)throw new Error('R153.2 readiness boundary failed');
+          const invoke=async body=>(await request('/api/tool/invoke',{method:'POST',body})).json;
+          const baseCall={schema:'OMEGA_EXTERNAL_TOOL_CALL_v1',caller:{id:'github-r1532-live-proof',kind:'test'},goal:'Use OMEGA as an external deterministic coprocessor: discover a winner, feed that returned evidence into bounded adaptive search, and preserve proof authority.'};
+          const rank=await invoke({...baseCall,request_id:'r1532-rank-live',operation:'rank_addresses',payload:{offset:0,limit:1728,wavelength_nm:532}});
+          if(rank.result?.count!==1728||rank.result?.top?.length!==12||rank.receipt?.tool_version!=='R153.2')throw new Error('R153.2 inherited rank failed');
+          const winner=rank.result.top[0];
+          console.log('R153.2 EXTERNAL PUSH · discovered winner',JSON.stringify({address:winner.address,score:winner.scalar_focus,gate:winner.gate,continuity:winner.continuity,contradiction:winner.contradiction,receipt:rank.receipt.receipt_id}));
+          const cycle=await invoke({...baseCall,request_id:'r1532-cycle-live',operation:'adaptive_cycle',payload:{seed_address:winner.address,wavelength_nm:532,radius:1,budget:128,rounds:4,beam_width:4,max_evaluations:192}});
+          if(cycle.receipt?.operation!=='adaptive_cycle'||cycle.receipt?.side_effects!=='none'||cycle.receipt?.canonical_mutation!==false)throw new Error('R153.2 adaptive receipt boundary failed');
+          if(cycle.result?.seed?.address!==winner.address)throw new Error('R153.2 did not refine the returned rank winner');
+          if(cycle.result?.cycle?.evaluations>192||cycle.result?.cycle?.rounds_completed>4)throw new Error('R153.2 bounded search limits failed');
+          if(!Array.isArray(cycle.result?.cycle?.trace)||!cycle.result.cycle.trace.length)throw new Error('R153.2 adaptive trace missing');
+          const first=cycle.result.cycle.trace[0],final=cycle.result.cycle.final;
+          if(final.utility+1e-9<first.utility)throw new Error('R153.2 regressed best utility during closed loop');
+          const g=final.geometry;if(!(g.width_nm<=g.pitch_nm&&g.length_nm<=g.pitch_nm))throw new Error('R153.2 final geometry violates pitch constraints');
+          if(cycle.result?.fullwave_handoff?.prepared&&cycle.result.fullwave_handoff.job?.state!=='PREPARED_NOT_SOLVED')throw new Error('R153.2 falsely promoted full-wave work');
+          const httpCycle=(await request(`/api/tool/cycle?seed_address=${winner.address}&wavelength_nm=532&rounds=2&beam_width=3&max_evaluations=96`,{predicate:j=>j.receipt?.tool_version==='R153.2'&&j.receipt?.operation==='adaptive_cycle'})).json;
+          if(httpCycle.result?.seed?.address!==winner.address)throw new Error('R153.2 HTTP cycle did not preserve dynamic winner');
+          console.log('R153.2 LIVE PASS',JSON.stringify({winner:winner.address,pressure:cycle.result.boundary_pressure?.map(x=>`${x.axis}:${x.side}`),start:{score:first.score,utility:first.utility},final:{score:final.score,utility:final.utility,gate:final.gate,geometry:final.geometry},rounds:cycle.result.cycle.rounds_completed,evaluations:cycle.result.cycle.evaluations,state:cycle.result.cycle.state,next:cycle.result.ai_context?.next_action,fullwave:cycle.result.fullwave_handoff?.prepared?'PREPARED_NOT_SOLVED':'NOT_PREPARED',receipt:cycle.receipt.receipt_id}));
+          NODE

@@ -1,0 +1,101 @@
+name: OMEGA R164 Development Residual Graph
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r164-development-residual-graph]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r164-development-residual-graph-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r164:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Reject high-severity dependency regressions
+        run: npm audit --audit-level=high
+      - name: Prove R164 development residual graph
+        run: node tests/r164-development-residual-graph-invariants.mjs
+      - name: Preserve R163 first-hand canonical core health
+        run: node tests/r163-canonical-core-health-truth-invariants.mjs
+      - name: Preserve R162 R161 R160 R159 governed execution chain
+        run: |
+          node tests/r162-governed-reflex-execution-invariants.mjs
+          node tests/r161-reflex-mission-durable-handoff-invariants.mjs
+          node tests/r160-reflex-operation-ingress-invariants.mjs
+          node tests/r159-sovereign-execution-convergence-invariants.mjs
+      - name: Preserve reflex durable execution and executor authorities
+        run: |
+          node tests/r156-organism-reflex-fabric-invariants.mjs
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+      - name: Preserve route lifecycle Hybrid proof and admission boundaries
+        run: |
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r142-proof-aware-capability-lifecycle-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Preserve one-world and computed-reality boundaries
+        run: |
+          node tests/r140-living-world-operation-bridge-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r149-durable-world-head-continuity-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run from preserved R116 entrypoint
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r164-dry-run
+
+  verify-live-r164:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: prove-r164
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+    steps:
+      - name: Bind exact promoted source to live R164 graph and R163 core health
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const expected=process.env.GITHUB_SHA;
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let last='';
+          for(let attempt=1;attempt<=180;attempt++){
+            try{
+              const [gRes,eRes,hRes]=await Promise.all([
+                fetch(base+'/omega-r164-development-residual-graph.json',{headers:{'cache-control':'no-cache'}}),
+                fetch(base+'/api/release-evidence',{headers:{'cache-control':'no-cache'}}),
+                fetch(base+'/api/core-health',{headers:{'cache-control':'no-cache'}})
+              ]);
+              if(!gRes.ok||!eRes.ok||!hRes.ok)throw new Error(`HTTP graph=${gRes.status} evidence=${eRes.status} core=${hRes.status}`);
+              const [g,e,h]=await Promise.all([gRes.json(),eRes.json(),hRes.json()]);
+              if(e?.source?.sha!==expected){last=`waiting for exact promoted source ${expected}; release=${e?.source?.sha||'NONE'}`;await sleep(5000);continue}
+              if(g?.schema!=='OMEGA_DEVELOPMENT_RESIDUAL_GRAPH_R164'||g?.revision!=='R164')throw new Error(`wrong R164 public graph ${g?.schema}/${g?.revision}`);
+              if(g?.canonicalMutation!==false||g?.autonomousMutationAuthority!==false||g?.canonicalAdmissionAuthority!=='R125')throw new Error('R164 authority boundary regressed');
+              if(h?.schema!=='OMEGA_CANONICAL_CORE_HEALTH_R163'||h?.revision!=='R163'||h?.state!=='LIVE'||h?.ok!==true)throw new Error(`R163 core health not live ${h?.schema}/${h?.revision}/${h?.state}`);
+              if(hRes.headers.get('x-omega-core-health')!=='R163-FIRST-HAND')throw new Error('R163 first-hand core-health header missing');
+              console.log(`OMEGA R164 LIVE VERIFIED · source ${expected} · graph ${g.schema} · core ${h.state} · admission ${g.canonicalAdmissionAuthority}`);
+              process.exit(0);
+            }catch(error){last=error instanceof Error?error.message:String(error)}
+            await sleep(5000);
+          }
+          throw new Error(`canonical R164 live verification failed: ${last}`);
+          NODE

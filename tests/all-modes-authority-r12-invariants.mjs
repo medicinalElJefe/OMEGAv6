@@ -1,0 +1,37 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+
+const authority=fs.readFileSync('src/allModesAuthority.ts','utf8');
+const dock=fs.readFileSync('src/OmegaModeAuthorityDock.tsx','utf8');
+const app=fs.readFileSync('src/App.tsx','utf8');
+const corpus=fs.readFileSync('src/corpusRuntime.ts','utf8');
+const runtime=fs.readFileSync('src/sourceBackedModeRuntimeR21.ts','utf8');
+const panel=fs.readFileSync('src/SourceBackedModesPanelR21.tsx','utf8');
+const visualLaw=fs.readFileSync('src/calculusVisualLawR37.ts','utf8');
+const visualBinding=fs.readFileSync('src/sourceModeVisualBindingR68.ts','utf8');
+
+const donorArray=authority.slice(authority.indexOf('const NAMES=['),authority.indexOf('] as const;'));
+const names=[...(donorArray.matchAll(/'([^']+)'/g))].map(x=>x[1]);
+assert.equal(names.length,62,'R12/R21 must retain all 62 repaired canon/calculus authority names');
+for(const required of ['OVERALL CANON MODE','Unified Coherence Mode','Mode 188','Deep Mother Mode','High Father Mode','Prune / Heavy Prune Mode','Guidance Field Mode','FULL SPHERE Mode','Dewey Calculus Mode','No-Nothing Truth Mode','Alpha Mode','Seven-Star Governance Layer','Future Plasticity Law','Ledger / Scar Persistence Law','Horizon Limits vs Execution Limits','Basin / Drain / Loop / Fracture Action Families'])assert(names.includes(required),`missing canon authority: ${required}`);
+assert(authority.includes('sourceModeEvaluations:179'),'must preserve the 179 source-mode registry as a separate count');
+assert(authority.includes('canonAuthorities:62'),'must preserve the 62 authority stack as a separate count');
+assert(authority.includes('not additional corpus rows')||authority.includes('NOT additional corpus rows'),'must prohibit false executor double-counting');
+assert(corpus.includes('m.count===179'),'canonical corpus validation must still require exactly 179 source modes');
+assert(dock.includes('179 SOURCE CATALOG RECORDS'),'retained dock donor must identify 179 entries as catalog records, not automatically executed modes');
+assert(dock.includes('legacy metric-affinity score is an inspection aid, not proof that each donor formula executed'),'retained dock must state its heuristic truth boundary');
+assert(dock.includes('62 DERIVED CANON / CALCULUS LENSES'),'62 canon entries must remain derived lenses rather than fake executors');
+for(const field of ['Operator','Algebra','Calculus','Update rule','Proof requirement','Ledger fields'])assert(dock.includes(field),`source contract inspector missing ${field}`);
+assert(dock.includes('selectedMode.updateRule')&&dock.includes('selectedMode.proof')&&dock.includes('selectedMode.ledger'),'source contract metadata must remain inspectable');
+assert(dock.includes("onNavigate('Modes')")&&dock.includes("onNavigate('System Atlas')"),'retained dock donor must route into real source-backed modes and system atlas');
+assert(!app.includes('<OmegaModeAuthorityDock'),'global fixed mode dock must remain unmounted to prevent right-side overlay collisions');
+assert(runtime.includes("state:'EXECUTED_EXACT'")&&runtime.includes('GATED_MISSING_INPUTS'),'active runtime must distinguish exact execution from missing-input gates');
+for(const formula of ['S=(CΩ·Φ)/(q+Λ+ε)','M188=(CΩ+Scar)/(1+q)','Prune=q+Λ-CΩ'])assert(runtime.includes(formula),`source-backed runtime missing donor formula ${formula}`);
+assert(panel.includes('179 catalog entries are loaded as source metadata, not automatically called'),'active Modes surface must explicitly separate catalog membership from execution');
+assert(visualLaw.includes("from './sourceBackedModeRuntimeR21'"),'living renderer law must consume source-backed mode execution rather than only labels');
+for(const id of ['M001','M002','M004','M005','M006','M007','M008','M009'])assert(visualLaw.includes(`'${id}'`),`renderer law missing executable mode influence ${id}`);
+assert(visualLaw.includes('GATED_MISSING_INPUTS'),'renderer influence must exclude gated formulas');
+assert(visualLaw.includes('sourceModeInfluence'),'renderer law must expose its mode influence receipt');
+assert(visualBinding.includes('representational renderer mapping'),'projection-specific mapping must state its representational boundary');
+assert(!authority.includes('@appdeploy/client')&&!dock.includes('@appdeploy/client')&&!runtime.includes('@appdeploy/client')&&!visualLaw.includes('@appdeploy/client'),'must remain sovereign-provider portable');
+console.log('PASS all-modes-authority-r12-invariants · 179 catalog + 62 canon lenses + source-backed execution + renderer binding');

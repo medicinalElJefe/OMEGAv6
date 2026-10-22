@@ -1,0 +1,52 @@
+name: OMEGA R167 Active Optical R153.2 Convergence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r167-active-optical-r1532-convergence]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r167-optical-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r167:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R167 active-generation invariants
+        run: node tests/r167-active-optical-r1532-convergence-invariants.mjs
+      - name: Preserve Optical lineage and adaptive truth
+        run: |
+          node tests/r1532-adaptive-external-search-invariants.mjs
+          node tests/r1531-external-ai-tool-push-invariants.mjs
+          node tests/r152-optical-operational-convergence-invariants.mjs
+          node tests/r115-machine-adapters-invariants.mjs
+      - name: Preserve R166 and R164 development truth layers
+        run: |
+          node tests/r166-development-residual-world-lens-invariants.mjs
+          node tests/r164-development-residual-graph-invariants.mjs
+      - name: Preserve canonical R163 core-health truth
+        run: node tests/r163-canonical-core-health-truth-invariants.mjs
+      - name: Full inherited production regression and build
+        run: npm run check
+      - name: Canonical Worker dry-run with promoted Optical binding
+        run: npx wrangler deploy --config wrangler.jsonc --dry-run --outdir .wrangler-r167
+      - name: R153.2 isolated Worker dry-run remains valid
+        run: npx wrangler deploy --config wrangler.optical-machine-r1532.jsonc --dry-run --outdir .wrangler-r167-optical
+      - name: Summarize promotion boundary
+        run: |
+          echo 'R167 candidate proof PASS.'
+          echo 'Active Optical service target: omega-optical-machine-r1532.'
+          echo 'Canonical deployment remains owned by the existing governed ci.yml exact-merge deploy path.'
+          echo 'No PC-online, RCWA/FDTD/FEM, fabrication, physical-measurement, Canon admission, or Vercel same-URL promotion is implied by this candidate gate.'

@@ -1,0 +1,52 @@
+name: OMEGA R153 Lemma Motion NOW Continuity
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r153-lemma-motion-now-continuity]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r153-lemma-motion-now-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r153:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove lemma motion NOW continuity
+        run: npx --yes tsx tests/r153-lemma-motion-now-continuity.mts
+      - name: Preserve R152 universal evidence precedence
+        run: npx --yes tsx tests/r152-universal-truth-envelope.mts
+      - name: Preserve R151 all-mode truth fusion and full atlas census
+        shell: bash
+        run: |
+          node tests/r151-all-modes-truth-fusion-invariants.mjs
+          npx --yes tsx scripts/r151-full-atlas-scan.ts
+      - name: Preserve woven continuity and causal time frame motion laws
+        shell: bash
+        run: |
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r126-causal-interaction-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+      - name: Preserve development execution and canonical admission boundaries
+        shell: bash
+        run: |
+          node tests/r124-self-contained-build-invariants.mjs
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r153-dry-run

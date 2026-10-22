@@ -1,0 +1,200 @@
+import {chromium} from 'playwright';
+import fs from 'node:fs';
+import {partitionInteractionCasesR355} from '../src/system/r313InteractionWorkloadR355.js';
+
+const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
+const source=fs.readFileSync('src/OmegaWorkstationFullV2.tsx','utf8');
+const navigation=fs.readFileSync('src/navigationRegistry.ts','utf8');
+const block=navigation.slice(navigation.indexOf('export const OMEGA_NAVIGATION=['),navigation.indexOf('export const OMEGA_NAV_GROUPS'));
+const routes=[...block.matchAll(/name:'([^']+)'/g)].map(m=>m[1]);
+if(routes.length!==44||new Set(routes).size!==44)throw new Error(`R313 expected 44 unique canonical surfaces, received ${routes.length}`);
+
+const viewports=[['desktop',{width:1440,height:960}],['mobile',{width:390,height:844}]];
+const shardCount=Math.max(1,Math.min(16,Number(process.env.R313_DISCLOSURE_SHARD_COUNT||1)|0));
+const shardIndex=Math.max(0,Math.min(shardCount-1,Number(process.env.R313_DISCLOSURE_SHARD_INDEX||0)|0));
+const disclosurePartition=partitionInteractionCasesR355({surfaces:routes,shardCount});
+const assignedCases=disclosurePartition[shardIndex].cases;
+if(!assignedCases.length)throw new Error(`R313 disclosure shard ${shardIndex+1}/${shardCount} has no assigned cases`);
+const risky=/run|execute|deploy|dispatch|delete|remove|apply patch|write|commit|submit|train|authorize|queue|mission|promote/i;
+let detailsExercised=0,ariaExercised=0;
+
+async function openNavigator(page){
+  if(await page.evaluate(()=>document.documentElement.dataset.omegaNavExpanded==='true'))return;
+  const trigger=page.locator('button[aria-label="Expand OMEGA navigator"]');
+  if(!await trigger.count())throw new Error('R313 global navigator trigger missing');
+  await trigger.first().click({timeout:10000});
+  await page.waitForFunction(()=>document.documentElement.dataset.omegaNavExpanded==='true',{timeout:10000});
+}
+
+async function openRoute(page,route){
+  await openNavigator(page);
+  const buttons=page.locator('.r89-flat-route');
+  const count=await buttons.count();
+  let hit=-1;
+  for(let i=0;i<count;i++){
+    const label=(await buttons.nth(i).locator('b').first().textContent().catch(()=>''))?.trim();
+    if(label===route){hit=i;break}
+  }
+  if(hit<0)throw new Error(`R313 route missing: ${route}`);
+  await buttons.nth(hit).scrollIntoViewIfNeeded();
+  const before=await page.evaluate(()=>{const root=document.documentElement;return{epoch:root.dataset.omegaRouteEpoch||'0',panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,state:root.dataset.omegaRouteState||'IDLE'}});
+  await buttons.nth(hit).click({timeout:10000,noWaitAfter:true});
+  await page.waitForFunction(({name,before})=>{
+    const root=document.documentElement,panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+    const committed=root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
+    const requested=root.dataset.omegaRouteState==='REQUESTED'&&root.dataset.omegaRouteTarget===name&&panel===name;
+    const advancedRequest=before.panel!==name&&root.dataset.omegaRouteEpoch!==before.epoch&&requested;
+    return committed||requested||advancedRequest;
+  },{name:route,before},{timeout:10000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},route);throw new Error(`R313 ${route} navigation request was not acknowledged: ${JSON.stringify(d)} · ${String(e)}`)});
+  await page.waitForFunction(name=>{
+    const root=document.documentElement;
+    const panel=document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel');
+    return root.dataset.omegaRouteState==='COMMITTED'&&root.dataset.omegaRouteCurrent===name&&root.dataset.omegaRouteTarget===name&&panel===name;
+  },route,{timeout:30000}).catch(async e=>{const d=await page.evaluate(name=>{const root=document.documentElement;return{name,epoch:root.dataset.omegaRouteEpoch||null,state:root.dataset.omegaRouteState||null,current:root.dataset.omegaRouteCurrent||null,target:root.dataset.omegaRouteTarget||null,panel:document.querySelector('.omega-workstation-v2')?.getAttribute('data-panel')||null}},route);throw new Error(`R313 ${route} navigation did not commit: ${JSON.stringify(d)} · ${String(e)}`)});
+  await page.waitForFunction(name=>{
+    const surface=document.querySelector(`.omega-surface-r81[data-surface-name="${CSS.escape(name)}"]`);
+    if(!surface||surface.querySelector('.panel-failure'))return false;
+    if(surface.getAttribute('data-r356-interaction-ready')!=='true')return false;
+    const loader=[...surface.querySelectorAll('.r109-specialist-loading')].some(el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>1&&r.height>1});
+    return !loader;
+  },route,{timeout:30000});
+}
+
+async function directContentState(details){
+  return details.evaluate(el=>{
+    const visible=node=>{const s=getComputedStyle(node),r=node.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0};
+    const content=[...el.children].filter(x=>x.tagName!=='SUMMARY');
+    return{count:content.length,visible:content.filter(visible).length,text:content.map(x=>(x.textContent||'').trim()).join(' ').length};
+  });
+}
+
+async function detailsDiagnostic(details){
+  return details.evaluate(el=>({
+    className:String(el.className||''),
+    summary:(el.querySelector(':scope > summary')?.textContent||'').replace(/\s+/g,' ').trim().slice(0,240),
+    open:Boolean(el.open),
+    ancestors:[...function*(){let p=el.parentElement?.closest('details')||null;while(p){yield String(p.className||p.tagName);p=p.parentElement?.closest('details')||null}}()],
+    children:[...el.children].filter(x=>x.tagName!=='SUMMARY').map(node=>{const s=getComputedStyle(node),r=node.getBoundingClientRect();return{tag:node.tagName,className:String(node.className||''),display:s.display,visibility:s.visibility,opacity:s.opacity,width:Number(r.width.toFixed(2)),height:Number(r.height.toFixed(2)),text:(node.textContent||'').replace(/\s+/g,' ').trim().slice(0,180)}})
+  }));
+}
+
+async function hiddenSummaryDiagnostic(details){
+  return details.evaluate(el=>{
+    const summary=el.querySelector(':scope > summary');
+    const es=getComputedStyle(el),er=el.getBoundingClientRect();
+    if(!summary)return{className:String(el.className||''),summary:null};
+    const s=getComputedStyle(summary),r=summary.getBoundingClientRect();
+    return{
+      className:String(el.className||''),
+      open:Boolean(el.open),
+      details:{display:es.display,visibility:es.visibility,opacity:es.opacity,width:Number(er.width.toFixed(2)),height:Number(er.height.toFixed(2)),overflow:es.overflow,position:es.position},
+      summary:{text:(summary.textContent||'').replace(/\s+/g,' ').trim().slice(0,240),display:s.display,visibility:s.visibility,opacity:s.opacity,width:Number(r.width.toFixed(2)),height:Number(r.height.toFixed(2)),overflow:s.overflow,position:s.position,contentVisibility:s.contentVisibility},
+      parent:summary.parentElement?{tag:summary.parentElement.tagName,className:String(summary.parentElement.className||'')}:null,
+      ancestors:[...function*(){let p=el.parentElement;while(p){const ps=getComputedStyle(p),pr=p.getBoundingClientRect();yield{tag:p.tagName,className:String(p.className||''),display:ps.display,visibility:ps.visibility,width:Number(pr.width.toFixed(2)),height:Number(pr.height.toFixed(2)),overflow:ps.overflow};p=p.parentElement}}()].slice(0,8)
+    };
+  });
+}
+
+async function testDetails(page,viewport,route){
+  const list=page.locator('.workstation-main .omega-surface-r81 details');
+  const count=await list.count();
+  for(let i=0;i<count;i++){
+    const details=list.nth(i);
+    const ancestorStates=await details.evaluate(el=>{
+      const states=[];let p=el.parentElement?.closest('details')||null;
+      while(p){states.push(p.open);p.open=true;p=p.parentElement?.closest('details')||null}
+      return states;
+    });
+    try{
+      if(!await details.isVisible().catch(()=>false))continue;
+      const summary=details.locator(':scope > summary');
+      if(await summary.count()!==1)throw new Error(`${viewport}/${route}: visible details #${i} does not own exactly one direct summary`);
+      if(!await summary.isVisible()){const diag=await hiddenSummaryDiagnostic(details);throw new Error(`${viewport}/${route}: details #${i} summary is not visible · ${JSON.stringify(diag)}`)}
+      const before=await details.evaluate(el=>el.open);
+      const beforeState=await directContentState(details);
+      if(!before&&beforeState.visible>0)throw new Error(`${viewport}/${route}: closed details #${i} leaks ${beforeState.visible}/${beforeState.count} direct content regions`);
+      if(before&&beforeState.text>0&&beforeState.visible===0)throw new Error(`${viewport}/${route}: open details #${i} hides all meaningful direct content`);
+      await summary.click({timeout:10000});
+      await page.waitForTimeout(35);
+      const after=await details.evaluate(el=>el.open);
+      if(after===before)throw new Error(`${viewport}/${route}: details #${i} summary did not toggle`);
+      const afterState=await directContentState(details);
+      if(after&&afterState.text>0&&afterState.visible===0){const diag=await detailsDiagnostic(details);throw new Error(`${viewport}/${route}: opened details #${i} exposes no meaningful direct content · ${JSON.stringify(diag)}`)}
+      if(!after&&afterState.visible>0)throw new Error(`${viewport}/${route}: closed details #${i} still exposes ${afterState.visible} direct content regions`);
+      await summary.click({timeout:10000});
+      await page.waitForTimeout(35);
+      const restored=await details.evaluate(el=>el.open);
+      if(restored!==before){const diag=await detailsDiagnostic(details);throw new Error(`${viewport}/${route}: details #${i} did not restore original open=${before} · ${JSON.stringify(diag)}`)}
+      const restoredState=await directContentState(details);
+      if(!before&&restoredState.visible>0)throw new Error(`${viewport}/${route}: details #${i} leaks content again after close`);
+      if(before&&restoredState.text>0&&restoredState.visible===0)throw new Error(`${viewport}/${route}: details #${i} failed to restore visible open content`);
+      detailsExercised++;
+    }finally{
+      await details.evaluate((el,states)=>{let p=el.parentElement?.closest('details')||null;let i=0;while(p){p.open=Boolean(states[i++]);p=p.parentElement?.closest('details')||null}},ancestorStates);
+    }
+  }
+}
+
+async function targetState(page,id){
+  return page.evaluate(targetId=>{
+    const el=document.getElementById(targetId);if(!el)return{exists:false,visible:false};
+    const s=getComputedStyle(el),r=el.getBoundingClientRect();return{exists:true,visible:s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0};
+  },id);
+}
+
+async function testAriaExpanded(page,viewport,route){
+  const controls=page.locator('.workstation-main .omega-surface-r81 [aria-expanded]');
+  const count=await controls.count();
+  for(let i=0;i<count;i++){
+    const control=controls.nth(i);
+    if(!await control.isVisible().catch(()=>false)||!await control.isEnabled().catch(()=>false))continue;
+    const label=((await control.getAttribute('aria-label'))||(await control.textContent())||'').replace(/\s+/g,' ').trim();
+    if(risky.test(label))continue;
+    const before=await control.getAttribute('aria-expanded');
+    if(before!=='true'&&before!=='false')throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} has invalid state ${before}`);
+    const id=await control.getAttribute('aria-controls');
+    if(id){const state=await targetState(page,id);if(!state.exists)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} controls missing #${id}`)}
+    await control.scrollIntoViewIfNeeded();
+    await control.click({timeout:10000});
+    await page.waitForTimeout(50);
+    const after=await control.getAttribute('aria-expanded');
+    if(after===before)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} did not toggle`);
+    if(id){
+      const state=await targetState(page,id);
+      if(after==='true'&&!state.visible)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} says expanded but #${id} is not visible`);
+      if(after==='false'&&state.visible)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} says collapsed but #${id} remains visible`);
+    }
+    await control.click({timeout:10000});
+    await page.waitForTimeout(35);
+    const restored=await control.getAttribute('aria-expanded');
+    if(restored!==before)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} failed to restore ${before}`);
+    if(id){
+      const state=await targetState(page,id);
+      if(restored==='true'&&!state.visible)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} restored expanded but target is hidden`);
+      if(restored==='false'&&state.visible)throw new Error(`${viewport}/${route}: ${label||`aria-expanded #${i}`} restored collapsed but target remains visible`);
+    }
+    ariaExercised++;
+  }
+}
+
+const browser=await chromium.launch({headless:true});
+try{
+  for(let profileIndex=0;profileIndex<viewports.length;profileIndex++){
+    const [viewportName,viewport]=viewports[profileIndex];
+    const assignedRoutes=assignedCases.filter(x=>x.profileIndex===profileIndex).map(x=>x.surface);
+    if(!assignedRoutes.length)continue;
+    const context=await browser.newContext({viewport,deviceScaleFactor:1});
+    const page=await context.newPage();
+    const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+    await page.goto(`${base}/?omega6=1&r313-panel-disclosure=${Date.now()}-${viewportName}-s${shardIndex+1}`,{waitUntil:'domcontentloaded',timeout:45000});
+    await page.waitForSelector('main.r71-home,.omega-workstation-v2',{timeout:30000});
+    for(const route of assignedRoutes){
+      await openRoute(page,route);
+      await testDetails(page,viewportName,route);
+      await testAriaExpanded(page,viewportName,route);
+      if(errors.length)throw new Error(`${viewportName}/${route}: page errors ${errors.join(' | ').slice(0,4000)}`);
+    }
+    await context.close();
+  }
+  console.log(`R313 PANEL DISCLOSURE SHARD ${shardIndex+1}/${shardCount} PASS · workload ${disclosurePartition[shardIndex].weight}ms census · ${assignedCases.length} deterministic route/viewport cases · ${detailsExercised} native details disclosures recursively revealed, pointer-toggled, direct-content visibility verified and restored · ${ariaExercised} safe aria-expanded controls toggled and restored · closed panels may not leak author-CSS content · missing aria-controls targets fail closed · no execution/deploy/dispatch/authorization controls invoked · no page errors.`);
+}finally{await browser.close()}

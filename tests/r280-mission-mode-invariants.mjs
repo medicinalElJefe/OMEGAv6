@@ -1,0 +1,1 @@
+import fs from'node:fs';import assert from'node:assert/strict';const s=fs.readFileSync('src/sarMissionModeR280.ts','utf8');for(const t of ['sentinel-1','IW','EW','nisar','L-SAR','S-SAR','SLC','GRD','exact product metadata is authoritative'])assert.ok(s.includes(t),'R280 mission mode missing '+t);console.log('R280 mission-mode invariants PASS');

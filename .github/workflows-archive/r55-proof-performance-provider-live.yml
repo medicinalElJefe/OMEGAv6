@@ -1,0 +1,41 @@
+name: OMEGA R55 Proof Performance Provider Live Verify
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OMEGA_PUBLIC_URL: https://omegav6.jeffdeweyeljefe.workers.dev
+
+jobs:
+  verify-proof-performance-provider:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for exact R55 measured proof supervision endpoint
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OMEGA_PUBLIC_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const packet={address:33,stateId:34,identity:{domain:'Structure'},metrics:{continuity:.77,plasticity:.64,contradiction:.12,burden:.21,decision:'STAY'},psc:{phase:1},predict:{score:.5},autoPing:{next:34}};
+          async function post(body){const r=await fetch(base+'/api/proof/performance',{method:'POST',headers:{'content-type':'application/json','cache-control':'no-cache'},body:JSON.stringify(body)});const raw=await r.text();let data={};try{data=JSON.parse(raw)}catch{}return{r,raw,data}}
+          let last='';
+          for(let attempt=1;attempt<=24;attempt++){
+            try{
+              const x=await post({packet,projection:{view:'FIELD',frameHash:'r55-live'}});
+              if(!x.r.ok)throw new Error(`HTTP ${x.r.status}: ${x.raw.slice(0,280)}`);
+              if(x.data.schema!=='OMEGA_PROOF_PERFORMANCE_PROVIDER_R55'||x.data.proofHealth!=='COHERENT')throw new Error(`old/missing R55 schema: ${x.raw.slice(0,320)}`);
+              for(const key of ['packetComputeMs','totalComputeMs'])if(!Number.isFinite(x.data.timing?.[key])||x.data.timing[key]<0)throw new Error(`${key} not finite/nonnegative`);
+              if(x.data.timing?.nativePcPerformanceMeasured!==false||x.data.timing?.browserRoundTripMeasured!==false)throw new Error('R55 Worker overclaimed PC/browser performance');
+              if(!['WORKERS_AI_BOUND','EXTERNAL_CONFIGURED','GROUNDED_RUNTIME_ONLY','UNKNOWN_PROVIDER_STATE'].includes(x.data.provider?.class))throw new Error(`bad provider class ${x.data.provider?.class}`);
+              if(x.data.provider?.recoveryAuthority!=='OBSERVATION_ONLY_NO_PROVIDER_MUTATION')throw new Error('provider recovery authority regressed');
+              if(!String(x.data.boundary||'').includes('does not measure native-PC performance')||!String(x.data.boundary||'').includes('silently recover/mutate a provider'))throw new Error('R55 truth boundary missing');
+              console.log(`R55 LIVE PROOF/PERFORMANCE/PROVIDER PASS · worker ${x.data.timing.totalComputeMs} ms · provider ${x.data.provider.class} · attempt ${attempt}`);
+              process.exit(0);
+            }catch(e){last=String(e);console.log(`R55 wait ${attempt}: ${last}`);await sleep(5000)}
+          }
+          throw new Error(`R55 public proof/performance/provider verification failed: ${last}`);
+          NODE

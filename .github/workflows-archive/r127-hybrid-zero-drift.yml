@@ -1,0 +1,35 @@
+name: OMEGA R127 Hybrid Zero Drift
+
+on:
+  push:
+    branches:
+      - r127-hybrid-link-zero-drift
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hybrid-zero-drift:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: R127 Hybrid zero-drift invariants
+        run: node tests/r127-hybrid-zero-drift-invariants.mjs
+      - name: Preserve R120/R121/R117 Hybrid invariants
+        run: |
+          node tests/r94-hybrid-navigation-invariants.mjs
+          node tests/r101-weave-hybrid-reconnect-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+      - name: Full inherited static and production build gate
+        run: npm run check
+      - name: Cloudflare Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r127-dry-run

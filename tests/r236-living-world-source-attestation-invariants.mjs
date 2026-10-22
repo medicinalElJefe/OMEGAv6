@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const parent=fs.readFileSync('src/SourceSpatialCalibrationSufficiencyR234.tsx','utf8');
+const ui=fs.readFileSync('src/SourceSpatialControlAttestationR236.tsx','utf8');
+const core=fs.readFileSync('src/world/sourceSpatialControlAttestationR236.js','utf8');
+assert.match(parent,/SourceSpatialControlAttestationR236/);
+assert.match(parent,/result\?\.calibrationSufficiencyEnvelopePassed&&<SourceSpatialControlAttestationR236/);
+for(const token of ['R234 → R236 · SOURCE ATTESTATION','Build attested payload','Verify source attestation','SIGNATURE VERIFIED · KEY NOT TRUSTED','code-pinned trust only','self-key ≠ authentication','SOURCE_SPATIAL_CONTROL_ATTESTATION_VERIFIED','R86','R87'])assert.ok(ui.includes(token),`missing R236 Living World token: ${token}`);
+for(const token of ['CODE_PINNED_FINGERPRINTS_ONLY','SELF_SUPPLIED_PUBLIC_KEY_IS_NOT_A_TRUST_ANCHOR','VALID_SIGNATURE_IS_NOT_SOURCE_AUTHENTICATION_WITHOUT_PINNED_TRUST','SOURCE_SIGNATURE_VERIFIED_UNTRUSTED_KEY','SOURCE_ATTESTATION_AUTHENTICATED','spatialCalibrationProved:false','globalPhysicalRegistrationProved:false','computedPhotorealRealityProved:false','solverValidityProved:false','nativeExecutionClaimed:false','pcOnlineClaimed:false','federationClosureProved:false','canonicalMutation:false'])assert.ok(core.includes(token),`missing R236 truth invariant: ${token}`);
+assert.ok(!core.includes("anchors:Object.freeze([{"),'R236 must not silently ship a fabricated production trust root');
+console.log('R236 LIVING WORLD SOURCE ATTESTATION PASS · R234 pass gates the surface · exact payload/signature/trust states exposed · R86/R87 continuity retained · self-supplied keys cannot authenticate source · stronger claims remain false');

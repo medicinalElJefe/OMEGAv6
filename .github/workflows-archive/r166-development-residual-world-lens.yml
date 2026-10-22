@@ -1,0 +1,59 @@
+name: OMEGA R166 Development Residual World Lens
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r166-development-residual-world-lens]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r166-development-residual-world-lens-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r166:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Reject high-severity dependency regressions
+        run: npm audit --audit-level=high
+      - name: Prove R166 residual-to-living-world lens
+        run: node tests/r166-development-residual-world-lens-invariants.mjs
+      - name: Preserve both R164 residual and autonomic authorities
+        run: |
+          node tests/r164-development-residual-graph-invariants.mjs
+          node tests/r164-reflex-autonomic-swarm-convergence-invariants.mjs
+      - name: Preserve governed execution and post-return chain
+        run: |
+          node tests/r163-canonical-core-health-truth-invariants.mjs
+          node tests/r162-governed-reflex-execution-invariants.mjs
+          node tests/r161-reflex-mission-durable-handoff-invariants.mjs
+          node tests/r160-reflex-operation-ingress-invariants.mjs
+          node tests/r159-sovereign-execution-convergence-invariants.mjs
+      - name: Preserve living world Hybrid Earth computed reality and admission boundaries
+        run: |
+          node tests/r156-organism-reflex-fabric-invariants.mjs
+          node tests/r147-unified-executor-fabric-invariants.mjs
+          node tests/r146-durable-operation-execution-invariants.mjs
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r140-living-world-operation-bridge-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run only
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r166-dry-run

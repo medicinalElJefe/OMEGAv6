@@ -1,0 +1,35 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+
+const app=fs.readFileSync('src/App.tsx','utf8');
+const shell=fs.readFileSync('src/InstrumentOSShellR62.tsx','utf8');
+const nav=fs.readFileSync('src/OmegaSideNavigatorR88.tsx','utf8');
+const navCss=fs.readFileSync('src/omegaSideNavigatorR88.css','utf8');
+const navCss210=fs.readFileSync('src/omegaSideNavigatorR210.css','utf8');
+const navCss239=fs.readFileSync('src/omegaSideNavigatorR239.css','utf8');
+const resetCss=fs.readFileSync('src/productResetR67.css','utf8');
+const polish=fs.readFileSync('src/responsivePolishR88.css','utf8');
+const workstation=fs.readFileSync('src/workstationV2.css','utf8');
+const registry=fs.readFileSync('src/omegaExperienceRegistryR82.ts','utf8');
+
+assert(!app.includes("import './instrumentOSR62.css'")&&!app.includes("import './productResetR67.css'"),'R62/R67 donor presentation must remain provenance rather than live root authority');
+assert(app.includes("import './productCoherenceR356.css'"),'R356 must own live product styling');
+assert(!app.includes("import './omegaProfessionalR13.css'"),'superseded R13 global composition must not override current product authority');
+assert(shell.includes('OmegaSideNavigatorR88'),'mounted shell must delegate navigation to the shared R88 side navigator');
+assert(nav.includes('workspaceForRouteR82')&&nav.includes('OMEGA_ALL_ROUTES_R82'),'navigator must consume the shared application registry without rendering competing product shells');
+assert(registry.includes('INVENTORY_TELEMETRY_NOT_ARCHITECTURE'),'route count must be inventory telemetry rather than professional-workspace architecture');
+assert(nav.includes("const[expanded,setExpanded]=useState(false)")&&nav.includes('setExpanded(true)'),'application browser must be collapsible while leaving a slim persistent toolbar visible');
+assert(nav.includes("placeholder='Search tools, surfaces, or workflows'")&&nav.includes('rows.map(route=>'),'professional navigator must provide global complete-registry search');
+assert(nav.includes("className={'r94-side-toolbar '")&&nav.includes("className='r94-nav-rail'")&&nav.includes('r94-rail-current'),'historical route reachability must remain governed by one persistent rail with visible active-route continuity');
+assert(nav.includes('OMEGA V6 · NAVIGATION')&&nav.includes('All tools')&&nav.includes('System map'),'navigation must expose readable product/all-tools/system-map labels');
+assert(nav.includes('R239_USER_NAV_REVISION')&&nav.includes('showTechnical')&&navCss239.includes('.r239-route-group'),'R239 user hierarchy and opt-in technical detail must remain mounted');
+assert(!nav.includes('r88-navigator-backdrop')&&navCss.includes('.r94-side-toolbar{')&&navCss.includes('.r94-nav-panel.r88-navigator{'),'application browser must remain anchored to the persistent edge toolbar rather than introducing a detached modal owner');
+assert(navCss.includes('@media(max-width:900px)')&&polish.includes('@media(max-width:900px)'),'navigator and active applications must have mobile-specific containment');
+assert(navCss.includes("html[data-omega-nav-present='true'] :where(.omega-workstation-v2,.r71-home)")&&navCss.includes("html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home)"),'base navigation must retain explicit collapsed/expanded layout ownership');
+assert(navCss210.includes("html[data-omega-nav-expanded='true'] :where(.omega-workstation-v2,.r71-home)")&&navCss210.includes('width:calc(100% - var(--r94-nav-rail))!important'),'R210.1 mobile navigation may visually overlay while preserving the underlying instrument width rather than crushing it');
+assert(nav.includes("aria-controls='omega-global-navigator'")&&nav.includes("role='status'")&&nav.includes("aria-live='polite'"),'route browser must retain explicit accessible control and live search-result feedback');
+assert(resetCss.includes('.r58-display-stage{min-height:calc(100dvh - 230px)'),'visual instruments must receive dominant viewport space');
+assert(resetCss.includes('.workstation-identity small{display:none!important}'),'legacy telemetry pressure must not dominate the workstation header');
+assert(!workstation.includes('padding-right:330px'),'obsolete donor right-padding must stay retired');
+assert(!app.includes('@appdeploy/client')&&!nav.includes('@appdeploy/client')&&!navCss.includes('@appdeploy/client'),'navigator must remain sovereign-provider portable');
+console.log('PASS professional-workspace invariant · R239 persistent user navigation + complete search + readable mobile overlay + viewport-first authority accepted');

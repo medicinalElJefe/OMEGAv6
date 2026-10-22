@@ -1,0 +1,12 @@
+import assert from'node:assert/strict';
+import fs from'node:fs';
+const workflow=fs.readFileSync('.github/workflows/r170-governed-selfbuild.yml','utf8');
+const governorTest=fs.readFileSync('tests/r170-self-build-governor-invariants.mjs','utf8');
+const topology=fs.readFileSync('scripts/verify_workflow_topology_r170.mjs','utf8');
+for(const token of ['gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref main','--event workflow_dispatch','gh run watch'])assert.ok(workflow.includes(token),`R339.4 canonical dispatch missing ${token}`);
+assert.ok(governorTest.includes("assert.deepEqual([...new Set(dispatches)],['ci.yml']"));
+assert.ok(governorTest.includes('self-builder may not recursively dispatch itself'));
+assert.ok(!governorTest.includes("'--event push'"));
+assert.ok(topology.includes("assert.deepEqual([...new Set(dispatches)],['ci.yml']"));
+assert.ok(topology.includes("'--event workflow_dispatch'"));
+console.log('R339.4 CANONICAL DISPATCH INVARIANT ALIGNMENT PASS');

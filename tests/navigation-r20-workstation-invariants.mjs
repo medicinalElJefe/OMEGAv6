@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const bridge=fs.readFileSync('src/ResponsiveRuntimeShell.tsx','utf8');
+const shell=fs.readFileSync('src/SingleFrameRuntimeShellR27.tsx','utf8');
+const css=fs.readFileSync('src/singleFrameR27.css','utf8');
+const routes=['Command Center','Hybrid Link','Workspace','Cockpit','Immersive Traversal','Matter Traversal','Extreme Traversal','Visual Instrument','Relativity','Earth Now','Forecast','Atlas','Traversal','Create','Field','Data Motion','Reality Lab','Atlas Calculator','Infinity','Convergence','Quality Compiler','Build Out','Projects','Render Queue','Assets','Modes','Kernel Intelligence','Evidence & Proof','Memory','Archive Census','Archive Operators','Development','Canon Evolution','SAI Lab','Governance','Consolidation','Instructions','Plugins','Settings','System','Validation','System Atlas','Scale Compiler','Control Matrix'];
+for(const r of routes)if(!shell.includes(`'${r}'`))throw new Error(`R27 missing registered route: ${r}`);
+for(const d of ['COMMAND','VISUALIZE','EARTH','INTELLIGENCE','BUILD','EVIDENCE','SYSTEM'])if(!shell.includes(`'${d}'`))throw new Error(`R27 missing domain ${d}`);
+if(!bridge.includes('SingleFrameRuntimeShellR27')||bridge.includes('nav20-desktop')||bridge.includes('useState('))throw new Error('legacy shell bridge still contains alternate runtime logic');
+for(const token of ['r27-desktop-frame','r27-mobile-head','r27-mobile-bottom','r27-mobile-drawer','SearchBox'])if(!shell.includes(token))throw new Error(`R27 single-frame shell incomplete: ${token}`);
+if(!shell.includes("window.matchMedia('(max-width: 900px)')")||!shell.includes('return compact?<MobileFrame'))throw new Error('single-frame responsive selection missing');
+if(!css.includes("padding-left:var(--r27-rail)!important")||!css.includes("padding:68px 10px 14px!important")||!css.includes('padding-bottom:66px!important'))throw new Error('content reflow contract missing');
+for(const old of ['nav20-context','nav20-breadcrumb','data-omega-focus'])if(shell.includes(old))throw new Error(`retired layered shell returned: ${old}`);
+console.log('R27 navigation PASS · 44 registered · 7 domains · one desktop/mobile frame · content reflow');

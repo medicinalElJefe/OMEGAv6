@@ -1,0 +1,21 @@
+{
+  "schema": "OMEGA_R2461_LEGACY_AUTONOMOUS_REF_CLEANUP_V1",
+  "revision": "R246.1",
+  "base": "107addb9b479cfb2229e262794daedfef8cb1c48",
+  "authority": "REPOSITORY_MAINTENANCE_ONLY",
+  "canonicalAdmission": false,
+  "productionWriterChanged": false,
+  "branches": [
+    "selfbuild/r170-g1-sg001-34173358679",
+    "selfbuild/r170-g1-sg001-34192823929",
+    "selfbuild/r170-g1-sg001-34317545058"
+  ],
+  "guards": {
+    "exactAllowlistOnly": true,
+    "mainNeverDeletable": true,
+    "productionProofRequiredBeforeDeletion": true,
+    "pullRequestRunsAreProofOnly": true,
+    "missingLegacyRefIsSuccess": true,
+    "futureCandidatesGovernedByR246": true
+  }
+}

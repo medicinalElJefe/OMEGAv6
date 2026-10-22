@@ -1,0 +1,49 @@
+name: R202 Operational Source Authority
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  prove-r202:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install --no-fund
+      - name: Prove R202.3 living-scene visual proof
+        run: |
+          node --check src/world/livingSceneVisualR2023.js
+          node tests/r2023-living-scene-visual-invariants.mjs
+      - name: Prove R202.2 evidence-bound living-world ingress
+        run: |
+          node tests/r2022-evidence-bound-living-world-ingress-invariants.mjs
+      - name: Prove R202.1 evidence-bound reality readiness
+        run: |
+          node --check public/omega-operational-source-authority-r202-core.js
+          node --check public/omega-operational-source-authority-r202.js
+          node tests/r2021-evidence-bound-reality-readiness-invariants.mjs
+      - name: Prove R202 focused convergence
+        run: |
+          node --check public/omega-operational-source-authority-r202-core.js
+          node --check public/omega-operational-source-authority-r202.js
+          node --check scripts/verify_live_operational_source_authority_r202.mjs
+          node tests/r202-operational-source-authority-invariants.mjs
+      - name: Prove R280 mode realization + Heavy Bio + continuity dynamics
+        run: npx --yes tsx tests/r280-mode-realization.mts
+      - name: Prove R281 Heavy Bio instrument accuracy + visualization boundaries
+        run: npx --yes tsx tests/r281-bio-instrument-invariants.mts
+      - name: Prove R281 recursive empirical convergence + holdout promotion law
+        run: npx --yes tsx tests/r281-bio-empirical-convergence-invariants.mts
+      - name: Prove R282 medical-production and clinical-authority boundaries
+        run: npx --yes tsx tests/r282-bio-medical-production-invariants.mts
+      - name: Prove R284 241-channel mode education and interaction boundaries
+        run: npx --yes tsx tests/r284-bio-mode-experience-invariants.mts
+      - name: Preserve R200.1 and inherited build
+        run: |
+          node tests/r2001-deployed-total-experience-proof-invariants.mjs
+          npm run check
+          npx wrangler deploy --dry-run --outdir .wrangler-r202

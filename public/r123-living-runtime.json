@@ -1,0 +1,14 @@
+{
+  "schema":"omega.r123.living-runtime.v1",
+  "runtime":"OMEGA_R123_LIVING_TOTAL_EXPERIENCE",
+  "canonicalAuthority":"OMEGAv6",
+  "continuityLaw":"partition -> transform/exchange -> invariant carry -> scar carry -> recontextualize -> admit",
+  "worldModel":{"principle":"one canonical world, many lawful projections","addressTopology":"12x12x12x12 = 20,736 canonical addresses","projectionDoesNotEraseState":true,"scarPersistsAcrossHiddenOrCulledState":true},
+  "experience":{"visualIsInterface":true,"progressiveDisclosure":[12,144,1728,20736],"adaptiveTiers":["PHONE","DESKTOP","SOVEREIGN","CLOUD"],"intentAssemblesMissionWorkspace":true,"federationHiddenBehindUnifiedRouting":true,"longComputationStreamsPartialStateAndProof":true,"contextualCapabilities":true,"globalSideRailMustNotCoverPrimaryField":true},
+  "missionRoute":["PROPOSE","SCREEN","EXECUTE","VERIFY","RENDER","ADMIT"],
+  "federationRoles":{"OMEGAv6":"canonical state, admission, proof, replay, user interaction","Genesis":"variation, proposal, exploration, branch generation","Optical":"screening, electromagnetic/material specialization, full-wave promotion","Sovereign":"heavy compute, hardware execution, private/local runtime","Federation":"typed exchange, routing, proof transport, continuity carry"},
+  "computedReality":{"requiredStages":21,"noGeneratedSceneFallback":true,"noDecorativeGeometryInClaimedComputedFrames":true,"everyVisiblePrimitiveRequiresSourceTrace":true,"observerProjectionMayChangeResolutionNotCanonicalExistence":true,"lensWeightsRequireHostCalibration":true},
+  "performance":{"principle":"spend compute where visual, causal, uncertainty, motion, proof and observer relevance demand it","phone":"visual-first, touch-native, condensed proof, remote control","desktop":"full workstation, inspectors, comparisons, trajectories","sovereign":"GPU/solver/archive/training/heavy execution","cloud":"coordination, public runtime, routing, synchronization"},
+  "selfBuild":{"mode":"GOVERNED_CONTINUOUS_BUILD","silentSelfModification":false,"loop":["OBSERVE_RESIDUAL","PROPOSE","SANDBOX","TEST","COMPARE","ADMIT_OR_REJECT","RETAIN_LINEAGE","ROLLBACK_READY"],"neverFlattenStrongCurrentLayers":true,"archiveRole":"active donor memory","mergeRule":"capability-level donor extraction only after tests and invariants","releaseRule":"green tests + preserved inherited gates + explicit truth boundary"},
+  "truthBoundary":"This manifest defines runtime and product law. Claimed live capabilities require runtime proof; computed-reality photoreal output remains unproven until end-to-end numerical execution and benchmark gates pass."
+}

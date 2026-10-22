@@ -1,0 +1,92 @@
+/* OMEGA R155 · navigation information architecture and progressive disclosure
+   Keep the proven slim R38 rail, but make the opened menu explain purpose, execution class,
+   authority and current context without burying the actual application routes. */
+
+.r155-navigation .r38-route-flyout{grid-template-rows:auto auto auto minmax(0,1fr) auto!important}
+.r155-navigation .r38-route-flyout>header{padding:17px 17px 13px!important}
+.r155-navigation .r38-route-flyout>header span{letter-spacing:.14em!important}
+.r155-navigation .r38-route-flyout>header b{font-size:15px!important;line-height:1.2!important}
+.r155-navigation .r38-route-flyout>header small{font-size:8px!important;line-height:1.45!important}
+
+.r155-current-route{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin:0 10px 7px!important;padding:10px 11px!important;border:1px solid rgba(89,193,181,.14);border-radius:11px;background:linear-gradient(135deg,rgba(70,183,170,.075),rgba(215,178,106,.025));min-width:0;overflow:visible!important}
+.r155-current-route>span{display:grid;gap:3px;min-width:0}
+.r155-current-route>span>small{color:#6d918d;font:600 6.5px/1.2 ui-monospace,monospace;letter-spacing:.13em}
+.r155-current-route>span>b{color:#e3eeee;font-size:11px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r155-current-route>span>em{color:#789094;font:8px/1.4 system-ui,sans-serif;font-style:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.r155-current-route>div{display:grid!important;gap:4px!important;padding:0!important;overflow:visible!important}
+.r155-current-route>div>i{padding:3px 5px;border:1px solid rgba(158,190,187,.13);border-radius:5px;color:#839b9d;background:rgba(255,255,255,.02);font:600 5.5px/1 ui-monospace,monospace;font-style:normal;white-space:nowrap}
+
+.r155-context-details{margin:0 10px 6px;border:1px solid rgba(126,164,164,.11);border-radius:9px;background:rgba(255,255,255,.012);overflow:hidden}
+.r155-context-details>summary{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;list-style:none;color:#9bafaf}
+.r155-context-details>summary::-webkit-details-marker{display:none}
+.r155-context-details>summary span{font-size:8px;font-weight:650}
+.r155-context-details>summary small{color:#60797c;font:6px ui-monospace,monospace;white-space:nowrap}
+.r155-context-details>summary:after{content:'+';color:#8ca5a2;font:11px/1 ui-monospace,monospace}
+.r155-context-details[open]>summary:after{content:'−'}
+.r155-context-details .r38-packet-readout{margin:0!important;border:0!important;border-top:1px solid rgba(126,164,164,.1)!important;border-radius:0!important;background:rgba(0,0,0,.13)!important}
+
+.r155-route-list{min-height:0!important;overflow:auto!important;padding:4px 8px 10px!important;overscroll-behavior:contain}
+.r155-route-list .r27-route{min-height:72px!important;align-items:start!important;padding:9px 9px!important}
+.r155-route-copy{display:grid!important;gap:4px!important;min-width:0!important;padding:0!important}
+.r155-route-copy>b{font-size:11px!important;line-height:1.18!important;white-space:normal!important}
+.r155-route-copy>small{font:8px/1.35 system-ui,sans-serif!important;color:#74898d!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.r155-route-copy>em{display:flex;flex-wrap:wrap;gap:3px;margin-top:1px;font-style:normal}
+.r155-route-copy>em>i{padding:2px 4px;border:1px solid rgba(137,173,171,.11);border-radius:4px;background:rgba(255,255,255,.018);color:#637c7e;font:600 5.3px/1 ui-monospace,monospace;font-style:normal;letter-spacing:.025em}
+.r27-route.active .r155-route-copy>em>i{border-color:rgba(85,203,187,.17);color:#8fb8b2}
+.r27-route[data-capability-reality='LIVE'] .r155-route-copy>em>i:nth-child(3){color:#72c6ba}
+.r27-route[data-performance-class='high'] .r155-route-copy>em>i:last-child{color:#d1ae69}
+
+.r155-specialist-routes{margin:5px 8px 9px!important;border:1px solid rgba(215,178,106,.1)!important;border-radius:9px!important;background:rgba(215,178,106,.018)!important;overflow:hidden}
+.r155-specialist-routes>summary{padding:8px 9px!important;color:#b7a77f!important;font-size:7px!important}
+.r155-specialist-routes>summary span{color:#786f59!important;font-size:6px!important}
+.r155-specialist-routes>div{padding:4px!important}
+
+.r155-search .r27-search-results .r27-route{min-height:66px!important}
+.r155-search .r27-search-results{scrollbar-width:thin;scrollbar-color:#294b49 transparent}
+
+/* The rail remains intentionally slim. Purpose appears only when the operator engages a rail control. */
+@media(min-width:901px){
+ .r155-navigation.r38-instrument-rail{width:86px!important}
+ .r155-navigation .r38-route-flyout{width:min(430px,calc(100vw - 104px))!important;left:76px!important}
+ .r155-navigation .r27-domains button,.r155-navigation .r32-desktop-actions button{position:relative!important}
+ .r155-navigation .r27-domains button:hover>span,.r155-navigation .r27-domains button:focus-visible>span{display:grid!important;position:absolute;left:62px;top:50%;transform:translateY(-50%);z-index:250;width:210px;padding:8px 10px;border:1px solid rgba(117,181,174,.18);border-radius:8px;background:rgba(3,11,14,.98);box-shadow:0 12px 36px rgba(0,0,0,.45);text-align:left;pointer-events:none}
+ .r155-navigation .r27-domains button:hover>span>b,.r155-navigation .r27-domains button:focus-visible>span>b{color:#d0dfdd;font-size:9px}
+ .r155-navigation .r27-domains button:hover>span>small,.r155-navigation .r27-domains button:focus-visible>span>small{display:block;color:#71898b;font-size:7px;line-height:1.35;white-space:normal}
+ .r155-navigation .r32-desktop-actions button:hover>span,.r155-navigation .r32-desktop-actions button:focus-visible>span{display:grid!important;position:absolute;left:62px;top:50%;transform:translateY(-50%);z-index:255;width:205px;gap:3px;padding:8px 10px;border:1px solid rgba(117,181,174,.16);border-radius:8px;background:rgba(3,11,14,.98);box-shadow:0 12px 36px rgba(0,0,0,.45);text-align:left;pointer-events:none}
+ .r155-navigation .r32-desktop-actions button:hover>span>b,.r155-navigation .r32-desktop-actions button:focus-visible>span>b{color:#d4e2e0;font-size:9px}
+ .r155-navigation .r32-desktop-actions button:hover>span>small,.r155-navigation .r32-desktop-actions button:focus-visible>span>small{display:block;color:#708789;font-size:7px;line-height:1.35;white-space:normal}
+}
+
+/* Mobile: purpose first, telemetry second. The drawer reads as a tool chooser rather than a diagnostics wall. */
+.r155-mobile-head>div b{font-size:11px!important;color:#e0eceb}
+.r155-mobile-head>div small{font-size:7px!important}
+.r155-mobile-drawer{grid-template-rows:auto auto auto auto auto minmax(0,1fr) auto!important}
+.r155-mobile-drawer>.r155-current-route{margin:9px 12px 2px!important}
+.r155-mobile-drawer>.r155-context-details{margin:0 12px 8px!important}
+.r155-mobile-drawer>.r155-context-details .r38-packet-readout{max-height:190px;overflow:auto}
+.r155-mobile-drawer [data-r155-all-tools]{min-height:0;overflow:hidden!important;margin:0 10px 10px!important}
+.r155-mobile-drawer [data-r155-all-tools][open]{display:grid!important;grid-template-rows:auto auto minmax(0,1fr)}
+.r155-mobile-drawer [data-r155-all-tools]>summary{padding:11px 12px!important;font-size:10px!important}
+.r155-mobile-drawer [data-r155-all-tools]>summary span{font-size:8px!important;color:#6f878a!important}
+.r155-mobile-drawer [data-r155-all-tools]>.r27-mobile-domains{grid-row:2}
+.r155-mobile-drawer [data-r155-all-tools]>section{min-height:0!important;overflow:auto!important}
+
+.r27-mobile-domains button{flex-basis:154px!important;display:grid!important;grid-template-columns:18px minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important;text-align:left!important}
+.r27-mobile-domains button>span{display:grid!important;gap:2px;min-width:0}
+.r27-mobile-domains button>span>b{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r27-mobile-domains button>span>small{font-size:7px;color:#667d80;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r27-mobile-domains button>i{margin-left:0!important}
+.r27-mobile-drawer>section .r27-route{min-height:76px!important;padding:9px 8px!important}
+.r27-mobile-drawer>section .r155-route-copy>small{-webkit-line-clamp:2!important;font-size:8.5px!important}
+.r27-mobile-drawer>section .r155-route-copy>em>i{font-size:5.7px!important}
+
+@media(max-width:520px){
+ .r155-current-route{grid-template-columns:1fr}
+ .r155-current-route>div{display:flex!important;flex-wrap:wrap!important}
+ .r155-context-details>summary{grid-template-columns:1fr auto}
+ .r155-context-details>summary small{display:none}
+ .r27-mobile-domains button{flex-basis:142px!important}
+ .r155-route-copy>em>i:nth-child(4){display:none}
+}
+
+@media(prefers-reduced-motion:reduce){.r155-navigation .r38-route-flyout{transition:none!important}}

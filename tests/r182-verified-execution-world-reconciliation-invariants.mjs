@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {reconcileVerifiedExecutionReturnsR182,manifestR182} from '../src/world/verifiedExecutionWorldReconcilerR182.js';
+const base={ok:true,schema:'OMEGA_LIVING_WORLD_EXECUTION_DISPATCH_R180',revision:'R180',state:'DISPATCHED_WITH_VERIFIED_RETURN',worldId:'OMEGA_CANONICAL_WORLD',sourceMissionId:'mission-r182',canonicalMutation:false,canonicalAdmissionAuthority:'R125',results:[]};
+const none=await reconcileVerifiedExecutionReturnsR182(null,{...base,results:[{runId:'run-returned',state:'RETURNED',executionInvoked:true,returned:true,verified:false,headSha256:'aaa'}]});
+assert.equal(none.ok,true);assert.equal(none.appended,0);assert.equal(none.world,null);assert.deepEqual(none.acceptedRunIds,[]);
+const verified={runId:'run-verified',executorId:'LOCAL',state:'VERIFIED',executionInvoked:true,returned:true,verified:true,headSha256:'abcdef0123456789'};
+const out=await reconcileVerifiedExecutionReturnsR182(null,{...base,results:[verified]},{eventTime:123});
+assert.equal(out.ok,true);assert.equal(out.appended,1);assert.equal(out.state,'VERIFIED_RETURNS_APPENDED_TO_WORLD_CONTINUITY');assert.equal(out.world.worldId,'OMEGA_CANONICAL_WORLD');assert.equal(out.world.count,1);assert.equal(out.world.proofCount,1);assert.equal(out.world.scarCount,1);assert.equal(out.world.lastEvent.kind,'PROOF');assert.deepEqual(out.acceptedRunIds,['run-verified']);assert.ok(out.world.lastEvent.proofIds.includes('r146-head:abcdef0123456789'));assert.ok(out.world.lastEvent.scarIds.includes('verified-run:run-verified'));assert.equal(out.world.lastEvent.canonicalMutation,false);assert.equal(out.canonicalAdmissionAuthority,'R125');for(const value of Object.values(out.claims))assert.equal(value,false);
+const mixed=await reconcileVerifiedExecutionReturnsR182(out.world,{...base,results:[verified,{runId:'run-held',state:'AUTHORIZED',executionInvoked:false,returned:false,verified:false,headSha256:'held'}]},{eventTime:124});
+assert.equal(mixed.appended,1);assert.equal(mixed.world.count,2);assert.deepEqual(mixed.rejectedRunIds,['run-held']);assert.equal(mixed.world.invariantCarry.previousHead,out.world.headSha256);
+const bad=await reconcileVerifiedExecutionReturnsR182(null,{...base,schema:'NOT_R180'});assert.equal(bad.ok,false);assert.equal(bad.code,'R182_VALID_R180_DISPATCH_RECEIPT_REQUIRED');
+const manifest=manifestR182();assert.equal(manifest.worldAuthority,'R134');assert.equal(manifest.executionLifecycleAuthority,'R146');assert.equal(manifest.canonicalAdmissionAuthority,'R125');assert.equal(manifest.canonicalMutation,false);
+console.log('R182 verified execution world reconciliation invariants: PASS');

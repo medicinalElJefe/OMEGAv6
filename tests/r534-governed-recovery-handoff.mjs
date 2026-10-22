@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {compileGovernedRecoveryHandoffR534} from '../scripts/r534-governed-recovery-handoff.mjs';
+const state=JSON.parse(fs.readFileSync('public/omega-r170-selfbuild-state.json','utf8'));
+const task={capabilityId:'SPHERE',status:'PLANNED_UNPROVEN',deploymentPreconditions:['PRODUCTION_DEPLOY_PATH_VERIFIED']};
+const result=compileGovernedRecoveryHandoffR534({state,recoveryTasks:[task]});
+assert.equal(result.status,'HELD');
+assert.equal(result.reason,'R170_BOUNDED_ROADMAP_EXHAUSTED');
+assert.equal(result.sourceMutationAuthorized,false);
+assert.equal(result.productionAdmissionAuthorized,false);
+assert.equal(result.canonicalMutation,false);
+const invalid=compileGovernedRecoveryHandoffR534({state,recoveryTasks:[task,task]});
+assert.equal(invalid.reason,'INVALID_RECOVERY_TASKS');
+const empty=compileGovernedRecoveryHandoffR534({state,recoveryTasks:[]});
+assert.equal(empty.sourceMutationAuthorized,false);
+console.log('R534 governed recovery handoff PASS');

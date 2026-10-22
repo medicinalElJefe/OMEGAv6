@@ -1,0 +1,161 @@
+name: OMEGA R152/R153.1 Optical Operational Convergence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r152-optical-operational-convergence, r153-1-external-ai-tool-push]
+
+permissions:
+  contents: read
+
+env:
+  OPTICAL_R152_URL: https://omega-optical-machine-r152.jeffdeweyeljefe.workers.dev
+
+concurrency:
+  group: omega-r1531-optical-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  verify-r1531:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Syntax-check R152/R153.1 services and Vercel exporter
+        run: |
+          node --check services/opticalMachineR152.js
+          node --check services/opticalUiR152.js
+          node --check services/opticalExternalToolR1531.js
+          node --check services/opticalMachineR1531.js
+          node --check apps/omega-optical-r152/build.mjs
+      - name: Prove R152 optical convergence invariants
+        run: node tests/r152-optical-operational-convergence-invariants.mjs
+      - name: Prove R153.1 external AI tool and UI interaction contracts
+        run: |
+          node tests/r1531-external-ai-tool-push-invariants.mjs
+          node tests/r1531-optical-ui-interaction-contract.mjs
+      - name: Export the single-source Vercel surface
+        working-directory: apps/omega-optical-r152
+        run: |
+          npm run build
+          test -s dist/index.html
+          grep -q "VOLUMETRIC ADDRESS FIELD" dist/index.html
+          grep -q "PREPARED_NOT_SOLVED" dist/index.html
+      - name: Preserve inherited optical and sovereign truth gates
+        run: |
+          node tests/r115-machine-adapters-invariants.mjs
+          node tests/r151-sovereign-build-execution-spine-invariants.mjs
+          node tests/r153-adaptive-sovereign-build-missions-invariants.mjs
+      - name: Full inherited production regression
+        run: npm run check
+      - name: R153.1 optical machine Worker dry run
+        run: npx wrangler deploy --config wrangler.optical-machine-r152.jsonc --dry-run --outdir .wrangler-r1531-optical
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omega-optical-r1531-vercel-surface
+          path: apps/omega-optical-r152/dist
+          if-no-files-found: error
+
+  deploy-r1531-machine:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-r1531
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.OMEGA_CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Cloudflare authorization preflight
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error title=AUTH REQUIRED::OMEGA_CLOUDFLARE_TOKEN unavailable"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error title=ACCOUNT REQUIRED::CLOUDFLARE_ACCOUNT_ID unavailable"; exit 1; }
+      - name: Deploy additive R153.1 external-tool wrapper on optical SCREEN worker
+        run: npx wrangler deploy --config wrangler.optical-machine-r152.jsonc
+      - name: Live-probe machine, UI, optical APIs and external AI tool loop
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base=process.env.OPTICAL_R152_URL.replace(/\/$/,'');
+          const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+          const describe=(response,text)=>({status:response.status,ok:response.ok,url:response.url,contentType:response.headers.get('content-type')||'',bodyPrefix:text.slice(0,240).replace(/\s+/g,' ')});
+          async function probe(path,{method='GET',headers={},body=null,expect='json',attempts=15,delayMs=2000}={}){
+            let last=null;
+            for(let attempt=1;attempt<=attempts;attempt++){
+              const separator=path.includes('?')?'&':'?';
+              const url=base+path+separator+'omega_probe='+Date.now()+'_'+attempt;
+              try{
+                const response=await fetch(url,{method,headers:{...headers,'cache-control':'no-cache','x-omega-probe':'r1531-live-proof'},body,redirect:'follow'});
+                const text=await response.text();
+                const meta=describe(response,text);
+                if(response.ok){
+                  if(expect==='text')return{response,text,meta};
+                  try{return{response,text,json:JSON.parse(text),meta}}catch(error){last={attempt,error:'NON_JSON_SUCCESS_RESPONSE',...meta}}
+                }else last={attempt,error:'HTTP_ERROR',...meta};
+              }catch(error){last={attempt,error:error?.message||String(error),url};}
+              console.log('R153.1 probe retry',JSON.stringify(last));
+              if(attempt<attempts)await sleep(delayMs);
+            }
+            throw new Error(`R153.1 probe exhausted: ${JSON.stringify(last)}`);
+          }
+          const invoke=call=>probe('/api/tool/invoke',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(call)});
+          const baseCall={schema:'OMEGA_EXTERNAL_TOOL_CALL_v1',caller:{id:'github-live-proof',kind:'test'},goal:'Exercise OMEGA as an external deterministic reasoning instrument without granting it canonical authority.'};
+
+          const healthProbe=await probe('/api/health');
+          const health=healthProbe.json;
+          if(health.ok!==true||health.version!=='R152.0'||health.authority!=='SCREEN_ONLY'||health.atlasSize!==20736||health.machineVersion!=='R153.1'||health.externalTool?.version!=='R153.1')throw new Error(`R153.1 health contract failed: ${JSON.stringify({health,meta:healthProbe.meta})}`);
+
+          const descriptorProbe=await probe('/api/tool/descriptor');
+          const descriptor=descriptorProbe.json;
+          if(descriptor.name!=='omega_optical_external_push'||descriptor.version!=='R153.1'||descriptor.authority!=='SCREEN_ONLY'||descriptor.canonical_mutation!==false)throw new Error(`tool descriptor contract failed: ${JSON.stringify(descriptor)}`);
+
+          const readinessProbe=await probe('/api/tool/probe');
+          const readiness=readinessProbe.json;
+          if(!readiness.ready?.rank_addresses||readiness.ready?.fullwave_execution!==false||readiness.ready?.canonical_admission!==false)throw new Error(`tool readiness boundary failed: ${JSON.stringify(readiness)}`);
+
+          const openapiProbe=await probe('/openapi.json');
+          if(openapiProbe.json.openapi!=='3.1.0'||!openapiProbe.json.paths?.['/api/tool/invoke'])throw new Error('OpenAPI external tool contract failed');
+
+          const atlasProbe=await probe('/api/optical/atlas?offset=0&limit=12&wavelength_nm=532');
+          const atlas=atlasProbe.json;
+          if(atlas.items?.length!==12||atlas.total!==20736)throw new Error(`R152 atlas contract failed: ${JSON.stringify({atlas,meta:atlasProbe.meta})}`);
+
+          const uiProbe=await probe('/',{expect:'text'});
+          const ui=uiProbe.text;
+          for(const token of ['VOLUMETRIC ADDRESS FIELD','20,736 Atlas','Candidate Lab','Tier‑2 Queue','Proof / Truth','PREPARED_NOT_SOLVED'])if(!ui.includes(token))throw new Error(`UI token missing: ${token}`);
+
+          const rankProbe=await invoke({...baseCall,request_id:'live-rank-1728',operation:'rank_addresses',payload:{offset:0,limit:1728,wavelength_nm:532}});
+          const rank=rankProbe.json;
+          if(rank.receipt?.schema!=='OMEGA_EXTERNAL_TOOL_RECEIPT_v1'||rank.receipt?.side_effects!=='none'||rank.result?.count!==1728||rank.result?.top?.length!==12)throw new Error(`external rank failed: ${JSON.stringify(rank).slice(0,1200)}`);
+          const top=rank.result.top[0];
+          console.log('OMEGA EXTERNAL PUSH · ranked 1,728 states · top',JSON.stringify({address:top.address,gate:top.gate,scalar_focus:top.scalar_focus,continuity:top.continuity,contradiction:top.contradiction,next:rank.decision_support?.next_action,receipt:rank.receipt.receipt_id}));
+
+          const inspectProbe=await invoke({...baseCall,request_id:'live-inspect-top',operation:'inspect_address',payload:{address:top.address,wavelength_nm:532}});
+          const inspect=inspectProbe.json;
+          if(inspect.result?.item?.address!==top.address||inspect.receipt?.operation!=='inspect_address')throw new Error('external inspect feedback loop failed');
+
+          const proposal={schema:'OMEGA_PACKET_v1',packet_id:'r1531_live_probe',source_node:'omega-external-tool',source_sha:'r1531_live_probe',wavelength_nm:532,target_phase_deg:150,geometry:{pitch_nm:330,width_nm:105,length_nm:290,height_nm:575,orientation_deg:75,material:'TIO2_DESIGN_NOMINAL_ON_SIO2_FUSED'},polarization:'circular',lineage:['r1531-live-probe']};
+          const screenProbe=await invoke({...baseCall,request_id:'live-screen-r44',operation:'screen_candidate',payload:{proposal}});
+          const screen=screenProbe.json;
+          if(screen.result?.screen?.authority!=='SCREEN_ONLY'||screen.result?.screen?.canonical_mutation!==false)throw new Error(`external screen failed: ${JSON.stringify(screen).slice(0,1200)}`);
+          if(screen.result.screen.tier2_job&&screen.result.screen.tier2_job.state!=='PREPARED_NOT_SOLVED')throw new Error('R153.1 Tier-2 truth boundary failed');
+
+          const compareProbe=await invoke({...baseCall,request_id:'live-compare',operation:'compare_candidates',payload:{proposals:[proposal,{...proposal,packet_id:'r1531_live_probe_b',geometry:{...proposal.geometry,width_nm:95,length_nm:275,height_nm:540},target_phase_deg:120},{...proposal,packet_id:'r1531_live_probe_c',geometry:{...proposal.geometry,width_nm:120,length_nm:300,height_nm:620},target_phase_deg:180}]}});
+          const compare=compareProbe.json;
+          if(compare.result?.count!==3||compare.result?.items?.length!==3)throw new Error('external compare failed');
+          console.log('OMEGA EXTERNAL PUSH · compare result · top',JSON.stringify({index:compare.result.items[0].index,score:compare.result.items[0].score,continuity:compare.result.items[0].continuity,contradiction:compare.result.items[0].contradiction,next:compare.decision_support?.next_action,receipt:compare.receipt.receipt_id}));
+
+          console.log(`R153.1 LIVE PASS · ${health.service} · UI + atlas + descriptor + OpenAPI + readiness + rank(1728) + inspect-feedback + screen + compare · ${healthProbe.meta.url}`);
+          NODE

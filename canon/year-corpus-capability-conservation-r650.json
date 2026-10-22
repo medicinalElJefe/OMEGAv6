@@ -1,0 +1,178 @@
+{
+  "schema": "OMEGA_YEAR_CORPUS_CAPABILITY_CONSERVATION_R650",
+  "revision": "R650",
+  "policy": {
+    "admission": "SOURCE_AND_RUNTIME_AND_PRODUCTION_PROOF",
+    "unknown": "UNVERIFIED",
+    "no_synthetic_legacy_recovery": true,
+    "physical_dimensions": "ADDRESS_SPACE_UNLESS_EMPIRICALLY_ESTABLISHED"
+  },
+  "families": [
+    {
+      "id": "canon-law",
+      "description": "Canon law, books, 188 governance and short lemmas",
+      "sourceHints": [
+        "src/workerR116.js"
+      ],
+      "truthClass": "SOURCE_PRESENT",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "atlas-state",
+      "description": "20,736 atlas state, address and typed graph",
+      "sourceHints": [
+        "scripts/r616_historical_graph.py"
+      ],
+      "truthClass": "SOURCE_PRESENT_DONOR_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "relational-continuity",
+      "description": "RSC, scars, contradiction, toroidal returns",
+      "sourceHints": [
+        "src/federation/README.md"
+      ],
+      "truthClass": "HISTORICAL_RECONCILIATION_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "developmental-continuity",
+      "description": "Heightened Mode growth transport, jerk, curvature, future topology",
+      "sourceHints": [],
+      "truthClass": "HISTORICAL_RECONCILIATION_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "native-runtime",
+      "description": "Omega Alpha, micro packet folding, standalone host",
+      "sourceHints": [
+        "sovereign"
+      ],
+      "truthClass": "HOST_PROOF_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "renderer-traversal",
+      "description": "Atlas-field native renderer and scale traversal",
+      "sourceHints": [
+        "src"
+      ],
+      "truthClass": "VISUAL_FIDELITY_PROOF_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "observation",
+      "description": "Satellite, sensor, weather, Earth observation",
+      "sourceHints": [
+        "src"
+      ],
+      "truthClass": "LIVE_SOURCE_PROOF_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "memory-intelligence",
+      "description": "Learning, memory, forecast and SAI",
+      "sourceHints": [
+        "src/workerR116.js"
+      ],
+      "truthClass": "END_TO_END_PROOF_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "command-execution",
+      "description": "Hybrid native action, macro and remote execution",
+      "sourceHints": [
+        "src/workerR116.js"
+      ],
+      "truthClass": "HOST_ACTION_PROOF_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "federation",
+      "description": "Genesis Optical Sovereign and canonical admission",
+      "sourceHints": [
+        "src/workerR114.js"
+      ],
+      "truthClass": "STRICT_RECEIPTS_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "governance-proof",
+      "description": "Release, replay, proof and recovery",
+      "sourceHints": [
+        "scripts/releaseCandidateGuardR210.mjs"
+      ],
+      "truthClass": "DEPLOYMENT_PROOF_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    },
+    {
+      "id": "applications",
+      "description": "Collections, workstations, music, domain apps",
+      "sourceHints": [
+        "apps"
+      ],
+      "truthClass": "APPLICATION_PARITY_PROOF_REQUIRED",
+      "productionProved": false,
+      "missingEvidence": [
+        "historical donor source fingerprint",
+        "executable successor parity",
+        "live production behavior"
+      ]
+    }
+  ]
+}

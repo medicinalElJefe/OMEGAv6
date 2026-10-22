@@ -1,0 +1,66 @@
+/* OMEGA UX SURPASS R3 — mobile-first containment and safe-area resilience. Visual/layout only. */
+:root{--omega-safe-top:env(safe-area-inset-top,0px);--omega-safe-right:env(safe-area-inset-right,0px);--omega-safe-bottom:env(safe-area-inset-bottom,0px);--omega-safe-left:env(safe-area-inset-left,0px)}
+html,body,#root{min-width:0;max-width:100%;overflow-x:hidden}
+*{min-width:0}
+img,svg,canvas,video{max-width:100%}
+
+/* Keep the workstation primary surface clear of floating controls. */
+.omega-home-launch{right:calc(14px + var(--omega-safe-right))!important;bottom:calc(14px + var(--omega-safe-bottom))!important}
+.omega-nexus-trigger{right:calc(14px + var(--omega-safe-right))!important;bottom:calc(76px + var(--omega-safe-bottom))!important}
+
+/* Prevent narrow screens from being covered by desktop chrome or rail remnants. */
+@media(max-width:980px){
+  .responsive-shell-rail{display:none!important}
+  .workstation-main{width:100%!important;max-width:100%!important;padding-left:max(10px,var(--omega-safe-left))!important;padding-right:max(10px,var(--omega-safe-right))!important;padding-bottom:calc(96px + var(--omega-safe-bottom))!important;overflow:visible!important}
+  .workstation-topbar{position:sticky!important;top:0!important;z-index:90!important;height:auto!important;min-height:58px;padding-top:calc(8px + var(--omega-safe-top))!important;padding-left:max(10px,var(--omega-safe-left))!important;padding-right:max(10px,var(--omega-safe-right))!important;flex-wrap:wrap!important;gap:8px!important}
+  .special-app,.mrc-menu-group,.rr-menu-universe,.rr-menu-universe button,.mrc-menu-grid,.mrc-menu-grid button{max-width:100%!important}
+  .special-app{overflow:hidden!important}
+  .rr-menu-tools{top:0!important}
+  .omega-nexus-backdrop{padding:calc(8px + var(--omega-safe-top)) max(8px,var(--omega-safe-right)) calc(8px + var(--omega-safe-bottom)) max(8px,var(--omega-safe-left))!important;align-items:stretch!important}
+  .omega-nexus{width:100%!important;max-width:100%!important;max-height:100%!important;border-radius:18px!important}
+}
+
+/* Phone layout: no covered controls, no forced off-screen content, touch-safe targets. */
+@media(max-width:620px){
+  .omega-home{padding-left:var(--omega-safe-left);padding-right:var(--omega-safe-right)}
+  .oh-top{padding-top:calc(10px + var(--omega-safe-top))!important}
+  .oh-stage{width:100%!important;max-width:100%!important;overflow:clip!important}
+  .oh-title{width:100%;padding-inline:4px}
+  .oh-title h1{font-size:clamp(38px,13vw,52px)!important;letter-spacing:.13em!important;text-indent:.13em!important;overflow-wrap:anywhere}
+  .oh-title p{max-width:94vw;padding:0 12px!important}
+  .oh-launch{max-width:28vw!important}
+  .oh-daily{max-width:calc(100vw - 24px - var(--omega-safe-left) - var(--omega-safe-right))!important;margin-left:auto!important;margin-right:auto!important}
+  .oh-command{max-width:calc(100vw - 20px - var(--omega-safe-left) - var(--omega-safe-right))!important}
+  .oh-prompt{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:9px!important}
+  .oh-enter{width:100%!important;justify-content:flex-end!important}
+  .oh-enter button{min-height:44px!important}
+  .workstation-identity{max-width:calc(100vw - 138px)!important}
+  .workstation-identity b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .special-head{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+  .special-head>*{max-width:100%!important}
+  .mrc-menu-grid,.rr-menu-universe{grid-template-columns:1fr!important}
+  .mrc-menu-grid button,.rr-menu-universe button,.omega-nexus-card{min-height:60px!important;touch-action:manipulation}
+  .omega-nexus>header{padding:14px!important}
+  .omega-nexus>header h2{font-size:23px!important}
+  .omega-nexus-search{margin:10px!important}
+  .omega-nexus-recents{padding:0 10px 8px!important}
+  .omega-nexus>main{padding:4px 10px 18px!important}
+  .omega-nexus>footer{padding:10px!important}
+  .omega-nexus-trigger{right:calc(10px + var(--omega-safe-right))!important;bottom:calc(70px + var(--omega-safe-bottom))!important}
+  .omega-home-launch{right:calc(10px + var(--omega-safe-right))!important;bottom:calc(10px + var(--omega-safe-bottom))!important}
+}
+
+@media(max-width:420px){
+  .oh-stage{min-height:960px!important}
+  .oh-launch{width:88px!important;height:66px!important}
+  .oh-title h1{font-size:40px!important}
+  .omega-nexus-card{grid-template-columns:32px minmax(0,1fr) 28px 16px!important;gap:7px!important}
+  .omega-nexus-card code{width:32px!important;height:32px!important}
+  .workstation-main{padding-bottom:calc(104px + var(--omega-safe-bottom))!important}
+}
+
+@media(orientation:landscape) and (max-height:540px) and (max-width:980px){
+  .workstation-topbar{position:relative!important}
+  .omega-nexus{max-height:calc(100dvh - var(--omega-safe-top) - var(--omega-safe-bottom) - 8px)!important}
+  .omega-nexus>header p,.omega-nexus-recents{display:none!important}
+}

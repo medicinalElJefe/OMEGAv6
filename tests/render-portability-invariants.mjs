@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+const runtime=fs.readFileSync('src/renderPortabilityRuntime.ts','utf8');
+const vector=fs.readFileSync('src/DriveVectorField.tsx','utf8');
+const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
+for(const token of ['QtSvg','QtSvgWidgets','svgLib','NATIVE_DONOR_IDENTIFIED','nativeQtExecutionVerified:false','OMEGA_RENDER_PORTABILITY_QTSVG_R1','Browser SVG export and DOM round-trip validation are hosted capabilities'])must(runtime.includes(token),`missing render portability invariant: ${token}`);
+for(const id of ['11i6qdBfycfmUklESHDNHZ3nLR40-KA8L','1CTNqmaNsYtqcSrGn0qrrM6xg4WQipxY3','1pgOTQaScm3fwEele8tkBgOF5DUfgd2L8','1UA1vx2A0dayGMRZTks4S-AUornaQMHZT','14m9oNeykDrUCNLwQyFlDy6oaDvod6gBu','1pX-qbyw4dv68bAmOOJKeuwfR3if9HDwJ'])must(runtime.includes(id),`missing exact Drive donor id ${id}`);
+must(vector.includes('validateOmegaSvg'),'Vector field must validate generated SVG before export');
+must(vector.includes('Validate + SVG'),'Vector field must expose validated export action');
+must(vector.includes('Portability receipt'),'Vector field must expose portability receipt');
+must(!runtime.includes('NATIVE_EXECUTION_VERIFIED'),'Native Qt execution must not be falsely claimed');
+console.log('render portability invariants PASS');

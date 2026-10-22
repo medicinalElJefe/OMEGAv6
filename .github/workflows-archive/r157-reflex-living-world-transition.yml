@@ -1,0 +1,51 @@
+name: OMEGA R157 Reflex Living World Transition
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r157-reflex-living-world-transition]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r157-reflex-world-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r157:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install repository dependencies
+        run: npm install --no-fund
+      - name: Syntax-check R157 adapter
+        run: node --check src/world/reflexWorldTransitionR157.js
+      - name: Prove R157 reflex-to-living-world invariants
+        run: node tests/r157-reflex-living-world-transition-invariants.mjs
+      - name: Preserve R156 and R155 organism ownership
+        run: |
+          node tests/r156-organism-reflex-fabric-invariants.mjs
+          node tests/r155-whole-system-convergence-invariants.mjs
+      - name: Preserve one-world visual/scar continuity
+        run: |
+          node tests/r140-living-world-operation-bridge-invariants.mjs
+          node tests/r136-living-world-frame-invariants.mjs
+          node tests/r134-canonical-world-continuity.mjs
+      - name: Preserve Hybrid, Earth, computed-reality and admission truth gates
+        run: |
+          node tests/r141-hybrid-proof-scar-replay-invariants.mjs
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-computed-reality-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r157-dry-run

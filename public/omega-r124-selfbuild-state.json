@@ -1,0 +1,458 @@
+{
+  "schema": "omega.selfbuild.r124.v1",
+  "authority": "OMEGAV6",
+  "generation": 8,
+  "maxAutonomousGenerations": 8,
+  "active": true,
+  "currentCapsuleId": null,
+  "admitted": [
+    "SB001",
+    "SB002",
+    "SB003",
+    "SB004",
+    "SB005",
+    "SB006",
+    "SB007",
+    "SB008"
+  ],
+  "rejected": [],
+  "blocked": [],
+  "receipts": [
+    {
+      "generation": 1,
+      "capsuleId": "SB001",
+      "startedAt": "2026-09-06T18:03:11.975Z",
+      "status": "ADMIT",
+      "tests": {
+        "r124": true,
+        "r123": true,
+        "r122": true,
+        "r121": true,
+        "build": true
+      },
+      "preserved": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "residualBefore": 1,
+      "rollbackRef": "f9c3cce4f8eed37655dad6ecd48b6d89d07efca4",
+      "notes": [
+        "Generated deterministically from versioned R124 capsule.",
+        "Not authoritative until test and merge admission.",
+        "Focused and inherited gates passed before admission.",
+        "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
+      ],
+      "completedAt": "2026-09-06T18:03:15.898Z",
+      "residualAfter": 0.9
+    },
+    {
+      "generation": 2,
+      "capsuleId": "SB002",
+      "startedAt": "2026-09-06T18:03:51.093Z",
+      "status": "ADMIT",
+      "tests": {
+        "r124": true,
+        "r123": true,
+        "r122": true,
+        "r121": true,
+        "build": true
+      },
+      "preserved": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "residualBefore": 1,
+      "rollbackRef": "6354b3a48cd26178104a265e2a0d0244dcf8ea40",
+      "notes": [
+        "Generated deterministically from versioned R124 capsule.",
+        "Not authoritative until test and merge admission.",
+        "Focused and inherited gates passed before admission.",
+        "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
+      ],
+      "completedAt": "2026-09-06T18:03:56.900Z",
+      "residualAfter": 0.9
+    },
+    {
+      "generation": 3,
+      "capsuleId": "SB003",
+      "startedAt": "2026-09-06T18:04:28.993Z",
+      "status": "ADMIT",
+      "tests": {
+        "r124": true,
+        "r123": true,
+        "r122": true,
+        "r121": true,
+        "build": true
+      },
+      "preserved": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "residualBefore": 1,
+      "rollbackRef": "0b244da684ec732dd0f2492b43f23c17af3c2e1e",
+      "notes": [
+        "Generated deterministically from versioned R124 capsule.",
+        "Not authoritative until test and merge admission.",
+        "Focused and inherited gates passed before admission.",
+        "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
+      ],
+      "completedAt": "2026-09-06T18:04:33.734Z",
+      "residualAfter": 0.9
+    },
+    {
+      "generation": 4,
+      "capsuleId": "SB004",
+      "startedAt": "2026-09-06T18:05:10.666Z",
+      "status": "ADMIT",
+      "tests": {
+        "r124": true,
+        "r123": true,
+        "r122": true,
+        "r121": true,
+        "build": true
+      },
+      "preserved": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "residualBefore": 1,
+      "rollbackRef": "79dad069373bb50caced622126fb8899d6070a67",
+      "notes": [
+        "Generated deterministically from versioned R124 capsule.",
+        "Not authoritative until test and merge admission.",
+        "Focused and inherited gates passed before admission.",
+        "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
+      ],
+      "completedAt": "2026-09-06T18:05:15.505Z",
+      "residualAfter": 0.9
+    },
+    {
+      "generation": 5,
+      "capsuleId": "SB005",
+      "startedAt": "2026-09-06T18:05:48.505Z",
+      "status": "ADMIT",
+      "tests": {
+        "r124": true,
+        "r123": true,
+        "r122": true,
+        "r121": true,
+        "build": true
+      },
+      "preserved": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "residualBefore": 1,
+      "rollbackRef": "275963f68d8d0d9c8a0545844686dc44debc9343",
+      "notes": [
+        "Generated deterministically from versioned R124 capsule.",
+        "Not authoritative until test and merge admission.",
+        "Focused and inherited gates passed before admission.",
+        "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
+      ],
+      "completedAt": "2026-09-06T18:05:54.035Z",
+      "residualAfter": 0.9
+    },
+    {
+      "generation": 6,
+      "capsuleId": "SB006",
+      "startedAt": "2026-09-06T18:06:32.337Z",
+      "status": "ADMIT",
+      "tests": {
+        "r124": true,
+        "r123": true,
+        "r122": true,
+        "r121": true,
+        "build": true
+      },
+      "preserved": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "residualBefore": 1,
+      "rollbackRef": "06327fdfb6abb39076bf763d3166900a8be06bef",
+      "notes": [
+        "Generated deterministically from versioned R124 capsule.",
+        "Not authoritative until test and merge admission.",
+        "Focused and inherited gates passed before admission.",
+        "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
+      ],
+      "completedAt": "2026-09-06T18:06:36.337Z",
+      "residualAfter": 0.9
+    },
+    {
+      "generation": 7,
+      "capsuleId": "SB007",
+      "startedAt": "2026-09-06T18:07:11.173Z",
+      "status": "ADMIT",
+      "tests": {
+        "r124": true,
+        "r123": true,
+        "r122": true,
+        "r121": true,
+        "build": true
+      },
+      "preserved": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "residualBefore": 1,
+      "rollbackRef": "a547bd6c24f8e23feb64155e88068722571bc671",
+      "notes": [
+        "Generated deterministically from versioned R124 capsule.",
+        "Not authoritative until test and merge admission.",
+        "Focused and inherited gates passed before admission.",
+        "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
+      ],
+      "completedAt": "2026-09-06T18:07:16.249Z",
+      "residualAfter": 0.9
+    },
+    {
+      "generation": 8,
+      "capsuleId": "SB008",
+      "startedAt": "2026-09-06T18:07:51.462Z",
+      "status": "ADMIT",
+      "tests": {
+        "r124": true,
+        "r123": true,
+        "r122": true,
+        "r121": true,
+        "build": true
+      },
+      "preserved": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "residualBefore": 1,
+      "rollbackRef": "06267ddc78a93e1c9a2792ac9caf003a534ff7b2",
+      "notes": [
+        "Generated deterministically from versioned R124 capsule.",
+        "Not authoritative until test and merge admission.",
+        "Focused and inherited gates passed before admission.",
+        "Admission method is explicit proof-gated fast-forward after a branch-isolated sandbox commit."
+      ],
+      "completedAt": "2026-09-06T18:07:56.538Z",
+      "residualAfter": 0.9
+    }
+  ],
+  "laws": [
+    "SELF_BUILD_IS_EVENT_DRIVEN_NOT_CHAT_SCHEDULE_DEPENDENT",
+    "ONE_CAPSULE_ONE_BRANCH_ONE_PROOF_RECEIPT",
+    "NO_SILENT_MAIN_MUTATION",
+    "NO_WHOLESALE_ARCHIVE_DONOR_REPLACEMENT",
+    "STRONG_CURRENT_AUTHORITY_ALWAYS_WINS_UNLESS_NEW_EVIDENCE_PROVES_SUPERIOR",
+    "EVERY_CANDIDATE_RUNS_FOCUSED_AND_INHERITED_GATES",
+    "FAILED_CANDIDATES_ARE_REJECTED_NOT_PATCHED_INTO_MAIN",
+    "EVERY_ADMISSION_HAS_ROLLBACK_REF_AND_LINEAGE",
+    "SELF_BUILD_MAY_ADVANCE_IMPLEMENTATION_BUT_MAY_NOT_RELAX_TRUTH_BOUNDARIES",
+    "NO_GENERATED_SCENE_FALLBACK_FOR_COMPUTED_REALITY",
+    "NO_FALSE_PC_ONLINE_OR_SOLVER_VALIDITY_CLAIMS",
+    "BACKLOG_EXHAUSTION_ENTERS_OBSERVE_MODE_RATHER_THAN_INVENTING_UNPROVEN_CAPABILITY"
+  ],
+  "roadmap": [
+    {
+      "id": "SB001",
+      "title": "Persistent mission continuity",
+      "objective": "Persist intent, mission plan, observer projection, proof references and recovery state across navigation and restart.",
+      "target": "src/generated/selfbuild/persistentMissionContinuityR124.ts",
+      "risk": "LOW",
+      "prerequisites": [],
+      "preserves": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "tests": [
+        "r124",
+        "build"
+      ],
+      "expectedGain": 0.96,
+      "complexity": 0.25,
+      "contradictionRisk": 0.08,
+      "operation": "GENERATE_MODULE"
+    },
+    {
+      "id": "SB002",
+      "title": "Contextual capability surface",
+      "objective": "Resolve relevant capabilities from current world state and intent so tools appear by context instead of menu overload.",
+      "target": "src/generated/selfbuild/contextualCapabilitySurfaceR124.ts",
+      "risk": "LOW",
+      "prerequisites": [
+        "SB001"
+      ],
+      "preserves": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "tests": [
+        "r124",
+        "build"
+      ],
+      "expectedGain": 0.92,
+      "complexity": 0.28,
+      "contradictionRisk": 0.09,
+      "operation": "GENERATE_MODULE"
+    },
+    {
+      "id": "SB003",
+      "title": "Source trace inspector",
+      "objective": "Represent pixel/primitive to canonical state to proof/source lineage as a typed traversable structure.",
+      "target": "src/generated/selfbuild/sourceTraceInspectorR124.ts",
+      "risk": "LOW",
+      "prerequisites": [
+        "SB001"
+      ],
+      "preserves": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "tests": [
+        "r124",
+        "r122",
+        "build"
+      ],
+      "expectedGain": 0.91,
+      "complexity": 0.31,
+      "contradictionRisk": 0.07,
+      "operation": "GENERATE_MODULE"
+    },
+    {
+      "id": "SB004",
+      "title": "Adaptive working-set scheduler",
+      "objective": "Allocate computation from observer relevance, causal relevance, uncertainty, motion, proof urgency and resource budget without mutating canonical state.",
+      "target": "src/generated/selfbuild/adaptiveWorkingSetR124.ts",
+      "risk": "MEDIUM",
+      "prerequisites": [
+        "SB001"
+      ],
+      "preserves": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "tests": [
+        "r124",
+        "r123",
+        "build"
+      ],
+      "expectedGain": 0.95,
+      "complexity": 0.46,
+      "contradictionRisk": 0.14,
+      "operation": "GENERATE_MODULE"
+    },
+    {
+      "id": "SB005",
+      "title": "Archive donor memory graph",
+      "objective": "Rank donor capabilities at symbol/module granularity while prohibiting whole-archive replacement.",
+      "target": "src/generated/selfbuild/archiveDonorMemoryR124.ts",
+      "risk": "MEDIUM",
+      "prerequisites": [
+        "SB002"
+      ],
+      "preserves": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "tests": [
+        "r124",
+        "build"
+      ],
+      "expectedGain": 0.86,
+      "complexity": 0.41,
+      "contradictionRisk": 0.16,
+      "operation": "GENERATE_MODULE"
+    },
+    {
+      "id": "SB006",
+      "title": "Swarm mission planner",
+      "objective": "Partition one mission 1→12→144→1728 and reconcile 1728→144→12→1 while retaining dissent, evidence and branch lineage.",
+      "target": "src/generated/selfbuild/swarmMissionPlannerR124.ts",
+      "risk": "MEDIUM",
+      "prerequisites": [
+        "SB001",
+        "SB002"
+      ],
+      "preserves": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "tests": [
+        "r124",
+        "r123",
+        "build"
+      ],
+      "expectedGain": 0.94,
+      "complexity": 0.55,
+      "contradictionRisk": 0.18,
+      "operation": "GENERATE_MODULE"
+    },
+    {
+      "id": "SB007",
+      "title": "Computed world bridge",
+      "objective": "Join Earth/source packets, trajectory, observer projection and computed-reality lineage into one persistent world contract.",
+      "target": "src/generated/selfbuild/computedWorldBridgeR124.ts",
+      "risk": "MEDIUM",
+      "prerequisites": [
+        "SB003",
+        "SB004"
+      ],
+      "preserves": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "tests": [
+        "r124",
+        "r122",
+        "r121",
+        "build"
+      ],
+      "expectedGain": 1,
+      "complexity": 0.62,
+      "contradictionRisk": 0.17,
+      "operation": "GENERATE_MODULE"
+    },
+    {
+      "id": "SB008",
+      "title": "Self-build capability registry",
+      "objective": "Expose admitted generated capabilities as a typed registry for later explicit integration into the canonical application without silent wiring.",
+      "target": "src/generated/selfbuild/selfBuildCapabilityRegistryR124.ts",
+      "risk": "LOW",
+      "prerequisites": [
+        "SB003",
+        "SB004",
+        "SB005",
+        "SB006",
+        "SB007"
+      ],
+      "preserves": [
+        "r123",
+        "r122",
+        "r121"
+      ],
+      "tests": [
+        "r124",
+        "r123",
+        "r122",
+        "r121",
+        "build"
+      ],
+      "expectedGain": 0.9,
+      "complexity": 0.34,
+      "contradictionRisk": 0.06,
+      "operation": "INTEGRATE_RUNTIME"
+    }
+  ]
+}

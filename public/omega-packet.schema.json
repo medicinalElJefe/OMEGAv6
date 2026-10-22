@@ -1,0 +1,25 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"OMEGA_PACKET_v1",
+  "title":"OMEGA Federation Packet v1",
+  "type":"object",
+  "required":["schema","packet_id","state_id","atlas_address","source_node","source_sha","geometry","wavelength_nm","sigma","target_phase_deg","proof","requested_solver","lineage","created_at"],
+  "properties":{
+    "schema":{"const":"OMEGA_PACKET_v1"},
+    "packet_id":{"type":"string"},
+    "state_id":{"type":"string"},
+    "atlas_address":{"type":"object","required":["domain","phase","regulation","seed"],"properties":{"domain":{"type":"integer","minimum":0,"maximum":11},"phase":{"type":"integer","minimum":0,"maximum":11},"regulation":{"type":"integer","minimum":0,"maximum":11},"seed":{"type":"integer","minimum":0,"maximum":11}}},
+    "source_node":{"enum":["omega-v6","omega-genesis","omega-optical","omega-sovereign"]},
+    "source_sha":{"type":"string"},
+    "geometry":{"type":"object"},
+    "wavelength_nm":{"type":"number","exclusiveMinimum":0},
+    "sigma":{"enum":[-1,0,1]},
+    "target_phase_deg":{"type":"number"},
+    "scalar_metrics":{"type":"object"},
+    "proof":{"type":"object","required":["gate","mode188_score","continuity","burden","contradiction","scar"]},
+    "requested_solver":{"enum":["scalar","rcwa","fdtd","fem"]},
+    "lineage":{"type":"array","items":{"type":"string"}},
+    "created_at":{"type":"string"}
+  },
+  "additionalProperties":true
+}

@@ -1,0 +1,25 @@
+name: OMEGA R122 Full Potential Convergence
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, r122-hybrid-shell-visual-overhaul]
+permissions:
+  contents: read
+jobs:
+  convergence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: R121/R122 regression gates
+        run: |
+          node tests/r121-spherical-earth-connector-invariants.mjs
+          node tests/r122-full-potential-convergence-invariants.mjs
+      - name: Full static/build regression
+        run: npm run check
+      - name: Cloudflare dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r122-dry-run

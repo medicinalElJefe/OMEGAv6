@@ -1,0 +1,115 @@
+import fs from 'node:fs';
+import {evaluateSuccessorCycleR535} from '../src/system/selfBuildSuccessorAdmissionR535.js';
+import {verifySuccessorSourcesR542} from '../src/system/selfBuildSourceBytesProofR542.js';
+import path from 'node:path';
+import {planGovernedCandidateR245} from './lib/r245-governed-selfbuild-selection.mjs';
+import {capsuleBodyR245,deriveResidualGateR245,R245_GOVERNED_SELFBUILD_CONTRACT,R245_CAPSULE_GENERATOR_REVISION} from '../src/system/governedSelfBuildContractR245.js';
+import {validateWorkerAttestationR503} from '../src/system/calculusNativeAutonomyR503.js';
+
+const STATE_PATH='public/omega-r170-selfbuild-state.json';
+const CANDIDATE_PATH='public/omega-r170-selfbuild-candidate.json';
+const APPLY=process.env.OMEGA_R170_SELFBUILD_APPLY==='1';
+const PROPOSAL_PATH=String(process.env.OMEGA_R170_PROPOSAL_PATH||'').trim();
+function emitProposal(payload,pretty=false){
+ const body=JSON.stringify(payload,null,pretty?2:undefined)+'\n';
+ if(PROPOSAL_PATH){fs.mkdirSync(path.dirname(PROPOSAL_PATH),{recursive:true});fs.writeFileSync(PROPOSAL_PATH,body,'utf8')}
+ process.stdout.write(body);
+}
+const state=JSON.parse(fs.readFileSync(STATE_PATH,'utf8'));
+const roadmap=Array.isArray(state.roadmap)?state.roadmap:[];
+const REQUIRE_R503=process.env.OMEGA_R503_REQUIRE_WORKER_ADMISSION==='1';
+const R503_PACKET_PATH=String(process.env.OMEGA_R503_WORKER_PACKET_PATH||'').trim();
+const R503_ATTESTATION_PATH=String(process.env.OMEGA_R503_WORKER_ATTESTATION_PATH||'').trim();
+let workerAdmissionR503={valid:!REQUIRE_R503,reasons:REQUIRE_R503?['R503_ADMISSION_NOT_EVALUATED']:[],contextId:null,workerClass:null};
+if(REQUIRE_R503){
+ try{
+  if(!R503_PACKET_PATH||!R503_ATTESTATION_PATH)throw new Error('R503 worker packet and attestation paths are required');
+  const packet=JSON.parse(fs.readFileSync(R503_PACKET_PATH,'utf8'));
+  const attestation=JSON.parse(fs.readFileSync(R503_ATTESTATION_PATH,'utf8'));
+  workerAdmissionR503=validateWorkerAttestationR503(packet,attestation);
+  if(!workerAdmissionR503.valid){
+   emitProposal({status:'BLOCKED_BY_CALCULUS_LITERACY_GATE',generation:state.generation,workerAdmissionR503},true);
+   process.exit(0);
+  }
+ }catch(error){
+  workerAdmissionR503={valid:false,reasons:['R503_ADMISSION_IO_OR_PARSE_FAILURE',error instanceof Error?error.message:String(error)],contextId:null,workerClass:null};
+  emitProposal({status:'BLOCKED_BY_CALCULUS_LITERACY_GATE',generation:state.generation,workerAdmissionR503},true);
+  process.exit(0);
+ }
+}
+
+function reconcileMergedSourceCandidates(){
+ const admitted=new Set(state.admittedSourceCapsules||[]);let changed=false;
+ for(const receipt of state.receipts||[]){
+  if(!['PROVED_PENDING_PR','SOURCE_PROMOTED_PENDING_PRODUCTION'].includes(receipt.status))continue;
+  const capsule=roadmap.find(x=>x.id===receipt.capsuleId);
+  if(!capsule||!fs.existsSync(capsule.target))continue;
+  receipt.status='SOURCE_MERGE_OBSERVED';receipt.sourceMergedAt=receipt.sourceMergedAt||new Date().toISOString();receipt.canonicalAdmission=false;admitted.add(receipt.capsuleId);changed=true;
+ }
+ state.admittedSourceCapsules=[...admitted];
+ if(state.currentCapsuleId&&admitted.has(state.currentCapsuleId)){state.currentCapsuleId=null;changed=true}
+ return changed;
+}
+function readResidualEvidence(){const p=process.env.OMEGA_R170_RESIDUAL_EVIDENCE_PATH;if(!p||!fs.existsSync(p))return null;return JSON.parse(fs.readFileSync(p,'utf8'))}
+function returnedAdaptiveRowR266(evidence){const s=String(evidence?.state||'').toUpperCase();if(!['HEALTHY','RESIDUALS_PRESENT','BLOCKED'].includes(s))return null;return{provenanceKind:'RETURNED_PROOF',outcomeScore:s==='HEALTHY'?1:s==='BLOCKED'?0:.5,residual:Number(evidence?.summary?.blocking||0)>0?1:Number(evidence?.summary?.review||0)>0?.5:0,recordedAt:new Date().toISOString(),sourceSchema:String(evidence?.schema||'RETURNED_RESIDUAL_EVIDENCE')}}
+
+const reconciled=reconcileMergedSourceCandidates();
+if(reconciled&&!APPLY)fs.writeFileSync(STATE_PATH,JSON.stringify(state,null,2)+'\n');
+if(!state.active){emitProposal({status:'IDLE',reason:'state inactive'});process.exit(0)}
+if((state.admittedSourceCapsules||[]).length>=Number(state.maxAutonomousGenerations||0)){
+ const successorManifestPath=String(process.env.OMEGA_R535_SUCCESSOR_MANIFEST_PATH||'').trim();
+ if(successorManifestPath){
+  try{
+   const manifest=JSON.parse(fs.readFileSync(successorManifestPath,'utf8'));
+   const bytesProof=verifySuccessorSourcesR542(manifest);
+   const residualGate=deriveResidualGateR245(readResidualEvidence(),state.residualPolicy);
+   const workerProofRequired=REQUIRE_R503&&workerAdmissionR503.valid;
+   const successor=bytesProof.valid&&residualGate.allow&&workerProofRequired?evaluateSuccessorCycleR535({priorState:state,capsules:manifest.capsules,sourceProofs:manifest.sourceProofs,deploymentProof:manifest.deploymentProof}):{status:'HELD',reasons:[...bytesProof.reasons,...(!residualGate.allow?['R164_RESIDUAL_GATE_NOT_PROVEN']:[]),...(!workerProofRequired?['R503_WORKER_ADMISSION_REQUIRED']:[])],executionOrder:[],sourceMutationAuthorized:false};
+   emitProposal({status:'R535_SUCCESSOR_REVIEW',generation:state.generation,successor,sourceBytesProofR542:bytesProof,residualGateR245:residualGate,workerAdmissionR503,sourceMutationAuthorized:false,canonicalAdmission:false},true);
+  }catch(error){
+   emitProposal({status:'R535_SUCCESSOR_HELD',generation:state.generation,reasons:['INVALID_OR_UNREADABLE_SUCCESSOR_MANIFEST',error instanceof Error?error.message:String(error)],sourceMutationAuthorized:false,canonicalAdmission:false},true);
+  }
+ }else emitProposal({status:'OBSERVE',reason:'bounded R170 roadmap exhausted; supply independently proved R535 successor manifest for governed review',generation:state.generation});
+ process.exit(0);
+}
+if(state.currentCapsuleId){emitProposal({status:'WAITING_FOR_GOVERNED_MERGE',capsuleId:state.currentCapsuleId,generation:state.generation});process.exit(0)}
+
+const evidence=readResidualEvidence();
+const gate=deriveResidualGateR245(evidence,state.residualPolicy);
+if(!gate.allow){emitProposal({status:'BLOCKED_BY_RESIDUAL_GATE',governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate},true);process.exit(0)}
+
+const plan=planGovernedCandidateR245({state,evidence:evidence||{}});
+const r265=plan.wovenDimensionalRelativityR265||null;
+const r265Summary=r265?{schema:r265.schema,revision:r265.revision,cycle:r265.cycle,decision:r265.metrics?.decision,computationCoherence:r265.metrics?.computationCoherence,waterTransportCoherence:r265.water?.transportCoherence,wovenContinuity:r265.woven?.continuity,violetFuturePreservingSoftwareScore:r265.violet?.futurePreservingSoftwareScore,promotionPosture:r265.development?.promotionPosture,blockedByR265:r265.development?.blockedByR265,sourceSkin:r265.dimensionalRelativity?.sourceSkin,targetSkin:r265.dimensionalRelativity?.targetSkin,sourceResolution:r265.dimensionalRelativity?.sourceResolution,targetResolution:r265.dimensionalRelativity?.targetResolution,physicalDimensionsClaimed:r265.dimensionalRelativity?.physicalDimensionsClaimed,orientation:r265.dimensionalRelativity?.orientation,provenanceState:r265.proof?.provenanceState,authority:r265.authority,externalScientificTruthClaimed:r265.proof?.externalScientificTruthClaimed}:null;
+const r266=plan.adaptiveCoherenceR266||null;
+const r266Summary=r266?{schema:r266.schema,revision:r266.revision,cycle:r266.cycle,sampleCount:r266.history?.sampleCount,confidence:r266.history?.confidence,trend:r266.history?.trend,calibrationDelta:r266.adaptation?.calibrationDelta,adaptiveCoherence:r266.adaptation?.adaptiveCoherence,adaptiveFuturePreservation:r266.adaptation?.adaptiveFuturePreservation,carriedScar:r266.adaptation?.carriedScar,residualMemory:r266.adaptation?.residualMemory,coldStartEquivalentToR265:r266.adaptation?.coldStartEquivalentToR265,foundationWeightsChanged:r266.adaptation?.foundationWeightsChanged,nextContext:r266.nextContext,proof:r266.proof,authority:r266.authority}:null;
+const cycleContext={dimensionalRelativityR265:r265Summary,adaptiveCoherenceR266:r266Summary};
+if(plan.state==='BLOCKED_BY_R243_FABRIC'){
+ emitProposal({status:'BLOCKED_BY_R243_FABRIC',generation:state.generation,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate,fabric:plan.woven,...cycleContext},true);process.exit(0);
+}
+if(plan.state==='BLOCKED_R243_R240_SELECTION_DIVERGENCE'){
+ emitProposal({status:'BLOCKED_BY_R243_R240_SELECTION_DIVERGENCE',generation:state.generation,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate,r240Candidate:plan.r240CandidateId,r243Candidate:plan.r243CandidateId,frontier:plan.frontier,fabric:plan.woven,...cycleContext},true);process.exit(0);
+}
+if(plan.state!=='PROPOSE'||!plan.capsule){
+ emitProposal({status:'OBSERVE',reason:plan.reason||'no dependency-ready predefined capsule',generation:state.generation,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,gate,frontier:plan.frontier,fabric:plan.woven,...cycleContext},true);process.exit(0);
+}
+
+const capsule=plan.capsule;
+const generation=Number(state.generation||0)+1;
+if(!APPLY){
+ emitProposal({status:'PROPOSE',generation,capsuleId:capsule.id,title:capsule.title,target:capsule.target,score:plan.score,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,gate,frontier:plan.frontier,fabric:plan.woven,...cycleContext,selectionLaw:plan.selectionLaw,workerAdmissionR503},true);process.exit(0);
+}
+
+const body=capsuleBodyR245(capsule.id);
+fs.mkdirSync(path.dirname(capsule.target),{recursive:true});
+if(fs.existsSync(capsule.target))throw new Error(`Refusing to overwrite existing generated target ${capsule.target}`);
+fs.writeFileSync(capsule.target,body,'utf8');
+
+const wovenPlan=plan.woven;
+const wovenSummary={schema:wovenPlan.schema,revision:wovenPlan.revision,state:wovenPlan.state,addressSpace:wovenPlan.addressSpace,activeCells:wovenPlan.activeCells.map(c=>({id:c.id,address:c.address.address,score:c.score,roleCount:c.rolePackets.length,state:c.state})),packetCount:wovenPlan.packets.length,scarCount:wovenPlan.scars.length,sourceMutationCandidateId:wovenPlan.sourceMutationCandidateId,parallelPlanning:wovenPlan.parallelPlanning,parallelEvaluation:wovenPlan.parallelEvaluation,parallelSourceMutation:wovenPlan.parallelSourceMutation,authority:wovenPlan.authority,canonicalAdmission:false};
+const receipt={schema:'OMEGA_SELFBUILD_CANDIDATE_RECEIPT_R170',generation,capsuleId:capsule.id,target:capsule.target,startedAt:new Date().toISOString(),baseSha:process.env.GITHUB_SHA||'UNKNOWN',branch:null,candidateSha:null,residualGate:'PASS',residualEvidence:gate,residualPolicy:state.residualPolicy?.schema||null,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,workerAdmissionR503,recursiveFrontierR240:plan.frontier,wovenFabricR243:wovenSummary,wovenDimensionalRelativityR265:r265Summary,adaptiveCoherenceR266:r266Summary,pressureProvenance:'R164_RETURNED_RESIDUAL_EVIDENCE_PLUS_DEPENDENCY_TOPOLOGY',tests:{},status:'SANDBOX',canonicalAdmission:false,notes:['Generated deterministically from bounded R170 roadmap through the shared R245 governed self-build contract.','R170 and CLOUD-01 share one R164 residual policy, R240/R243 selection law and capsule generator.','R243 activated typed dependency-ready planning/evaluation cells and carried returned residual scars without granting mutation authority.','R265 applies Water transport → Woven path/correspondence → Violet re-expression → proof/carry/recontextualization while preserving structure/orientation separation and provenance.','R265 may influence bounded planning capacity through R249 computation coherence but cannot block a capability merely because it is new or uses a new skin.','R266 closes returned proof/carry into bounded next-cycle context; cold start remains exactly R265 and calibration is confidence-gated and bounded.','R266 accepts only explicit operator outcomes, observed transitions or returned proof and never treats unchosen candidates as failures.','R266 foundationWeightsChanged remains false and adds no source-mutation, deployment or CanonState authority.','R240 retained exactly one source-mutation/promotion candidate.','R239 Hybrid resource governor remains separate and preserved.','R125 remains sole CanonState admission authority.']};
+const returnedRow=returnedAdaptiveRowR266(evidence);
+state.generation=generation;state.currentCapsuleId=capsule.id;state.selfBuildScars=wovenPlan.scars;state.receipts=[...(state.receipts||[]),receipt].slice(-64);if(returnedRow)state.adaptiveCoherenceHistoryR266=[...(state.adaptiveCoherenceHistoryR266||[]),returnedRow].slice(-64);
+fs.writeFileSync(STATE_PATH,JSON.stringify(state,null,2)+'\n','utf8');
+fs.writeFileSync(CANDIDATE_PATH,JSON.stringify({schema:'OMEGA_SELFBUILD_CANDIDATE_R170',revision:'R170.2',schedulerRevision:'R240',planningFabricRevision:'R243',dimensionalRelativityRevision:'R265',adaptiveCoherenceRevision:'R266',governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,residualPolicy:state.residualPolicy?.schema||null,capsule,score:plan.score,frontier:plan.frontier,wovenFabric:wovenSummary,wovenDimensionalRelativityR265:r265Summary,adaptiveCoherenceR266:r266Summary,receipt},null,2)+'\n','utf8');
+emitProposal({status:'SANDBOX',generation,capsuleId:capsule.id,target:capsule.target,score:plan.score,governedContract:R245_GOVERNED_SELFBUILD_CONTRACT,generatorContract:R245_CAPSULE_GENERATOR_REVISION,gate,frontier:plan.frontier,fabric:wovenSummary,...cycleContext},true);

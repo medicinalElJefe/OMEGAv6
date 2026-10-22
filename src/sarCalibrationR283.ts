@@ -1,0 +1,4 @@
+import type{SarCalibrationR280,SarObservationR280}from'./sarTruthR280';
+export function calibrationValidAtR283(c:SarCalibrationR280,at:string){const t=Date.parse(at),a=c.validFrom?Date.parse(c.validFrom):-Infinity,b=c.validTo?Date.parse(c.validTo):Infinity;return Number.isFinite(t)&&t>=a&&t<=b}
+export function quantitativeCalibrationAdmissionR283(obs:SarObservationR280){const reasons:string[]=[];if(!obs.calibration)reasons.push('CALIBRATION_RECORD_REQUIRED');else{if(!calibrationValidAtR283(obs.calibration,obs.provenance.acquiredAt))reasons.push('CALIBRATION_OUTSIDE_VALIDITY');if(!obs.calibration.units)reasons.push('CALIBRATED_UNITS_REQUIRED');if(!obs.calibration.method)reasons.push('CALIBRATION_METHOD_REQUIRED')}return{admitted:reasons.length===0,reasons}}
+export function calibrationTruthBoundaryR283(){return'Calibration is a versioned evidence object with validity, units, method and reference; calibrated display does not erase raw measurement lineage.'}

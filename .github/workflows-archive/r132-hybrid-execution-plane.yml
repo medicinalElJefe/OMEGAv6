@@ -1,0 +1,51 @@
+name: OMEGA R132 Hybrid Execution Plane
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r132-hybrid-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r132:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: npm install
+      - name: Parse canonical Hybrid agent
+        run: python -m py_compile public/omega-hybrid-agent.py
+      - name: Prove R132 execution plane
+        run: node tests/r132-hybrid-execution-plane-invariants.mjs
+      - name: Preserve enacted and living Hybrid transport
+        run: |
+          node tests/enacted-runtime-r32-invariants.mjs
+          node tests/living-runtime-r33-invariants.mjs
+          node tests/r94-hybrid-navigation-invariants.mjs
+          node tests/r101-weave-hybrid-reconnect-invariants.mjs
+          node tests/r117-real-sovereign-bootstrap-invariants.mjs
+          node tests/r120-root-safe-hybrid-nav-canon-invariants.mjs
+      - name: Preserve zero-drift and current system contracts
+        run: |
+          if [ -f tests/r127-hybrid-zero-drift-invariants.mjs ]; then node tests/r127-hybrid-zero-drift-invariants.mjs; fi
+          node tests/r130-operational-control-plane.mjs
+          node tests/r131-capacity-governor.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Worker bundle dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r132-dry-run

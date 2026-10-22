@@ -1,0 +1,50 @@
+name: OMEGA R154 Relative Capacity Fabric
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [r154-relative-capacity-fabric]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-r154-relative-capacity-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prove-r154:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Prove R154 relative capacity and authority boundaries
+        run: npx --yes tsx tests/r154-relative-capacity-fabric.mts
+      - name: Preserve R153 lemma motion NOW continuity
+        run: npx --yes tsx tests/r153-lemma-motion-now-continuity.mts
+      - name: Preserve R152 empirical truth precedence
+        run: npx --yes tsx tests/r152-universal-truth-envelope.mts
+      - name: Preserve R151 all-mode truth census and exact swarm partition
+        shell: bash
+        run: |
+          node tests/r151-all-modes-truth-fusion-invariants.mjs
+          npx --yes tsx scripts/r151-full-atlas-scan.ts
+      - name: Preserve route execution causal and admission authorities
+        shell: bash
+        run: |
+          node tests/r143-authoritative-ui-operation-chain-invariants.mjs
+          node tests/r140-unified-living-operation-fabric.mjs
+          node tests/r139-unified-capability-engine-invariants.mjs
+          node tests/r126-causal-interaction-invariants.mjs
+          node tests/r125-accuracy-engine-invariants.mjs
+          node tests/r124-self-contained-build-invariants.mjs
+      - name: Full inherited regression and production build
+        run: npm run check
+      - name: Canonical Worker dry run
+        run: npx wrangler deploy --dry-run --outdir .wrangler-r154-dry-run

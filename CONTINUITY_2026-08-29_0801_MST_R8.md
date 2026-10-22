@@ -1,0 +1,27 @@
+# OMEGA sovereign continuity — 2026-08-29 R8
+
+- RELEASE AUTHORITY / OWNER PUBLIC AUTHORIZATION: Drive local lineage remains authoritative; owner public-promotion authorization dated 2026-08-29 permits verified public-cloud promotion without weakening any OMEGA law, gate, truth boundary, rollback, portability, checksum, immutable-core, or canonical-runtime verification requirement.
+- DRIVE LOCAL LINEAGE: `.OMEGA_HYBRID_HUB/00_CONTROL` recovered; exact pointer filename was not returned by Drive search/listing in this run, but the B015 R1 checksum authority was recovered directly: `OMEGA_MATURE_B015_SELF_MONITORING_DELTA_MESH_HUB_R1.zip` SHA-256 `8be50fbe717679d8044714d1c4541f94061ac0c8d5f5d9201d76d8cb7421e379`. `RUN_OMEGA_LATEST_UPDATE.ps1` confirms pointer fields `update_file_name` and `update_sha256`, checksum-first install, evidence directory, and pointer-required activation semantics. Do not rewrite local pointer authority from cloud state.
+- DEVELOPMENT FRONTIER: R8 deep B058/V90 restoration — Earth returned-source evidence + NOAA 9 coverage identities + governed Hybrid V90 cloud contracts + sovereign SAI B059 activation.
+- EXACT BUILD: OMEGA R8 deep B058/V90 restoration.
+- MAIN BASE SHA / ROLLBACK TARGET: `7d5ee4116443585f9fc3b0ac89daa2629cd18a76` (R7).
+- PROMOTED MAIN SHA: `3390533ba04e582bc0536005c02d6e82577c0410`.
+- ACTIVE INTEGRATION BRANCH: `surpass-mainline`, fast-forwarded to promoted main before this continuity record.
+- PARENT(S): R7 main + verified R8 integration head `fb0f1d2626be5e92eceb309c336565e429787803`.
+- LINEAGE: B015 local release law -> B058 V78/V79 Earth donor semantics + V87-V90 Hybrid donor contracts -> B059 deterministic sovereign SAI donor -> R7 public Cloudflare/Workers AI base -> R8 restored public candidate.
+- SOFTWARE CHANGE: `workerR8.js` bounded gateway over prior Worker; `/api/earth/evidence`; `/api/earth/noaa/catalog`; `/api/hybrid/capabilities`; `/api/hybrid/plan`; `/api/hybrid/validate`; R8 Earth and Hybrid UI wrappers; SAI Sovereign Control activated in SAI Lab / Kernel Intelligence.
+- VISUAL CHANGE: Earth Now retains prior offline Natural Earth/UTC instrument and adds returned-source evidence observatory; Hybrid retains donor mission application and adds governed cloud contract inspection without fake native execution.
+- SURPASS DELTA: deployment workflow now requires live post-deploy proof for R8 Earth evidence schema/hash/WGS84 envelope, all nine NOAA coverage identities, Hybrid typed operations including TRAIN_LOCAL, broad-root discovery gate, draft-only non-queued semantics, validation success, route-before-generation, and real Workers AI invocation.
+- DONOR FILES MIGRATED EXACT/ADAPTED: B058 correspondence V78-V90 semantics adapted to standard Worker/React contracts; B059 SAI deterministic source/provenance/ledger/traversal control reused; prior Hybrid mission runtime retained under R8 wrapper. No `@appdeploy/client` runtime dependency restored.
+- NEW_SURPASS MODULES: `src/workerR8.js`, `src/EarthObservatoryR8.tsx`, `src/HybridMissionControlR8.tsx`, R8 restoration invariant suite, production R8 live contract gates.
+- STILL MISSING: immutable NOAA historical frame retrieval; NASA GIBS / OSM / KartaView / 3DEP exact ground traversal; actual paired Desktop Link transport; DPAPI-backed device identity; native keyboard/mouse/filesystem/process execution; local TRAIN_LOCAL execution receipts; installer parity; complete render-anything/media closure; remaining exact Archive/Governance/Consolidation/Instructions/Extreme/Immersive donor semantics.
+- BLOCKED EXTERNAL CAPABILITIES: native Hybrid execution remains `DEVICE_PROOF_REQUIRED`; external Earth feeds degrade truthfully; direct independent runtime verification from the automation execution host was blocked by DNS/tool access even though production GitHub Actions reached and validated the exact canonical Worker.
+- TEST RESULT: exact R8 head passed npm install, all OMEGA invariant suites, Vite production build, Wrangler dry-run, and production Cloudflare authorization probe. Main push run `33259261208` passed verify and deploy-main. Deployment passed canonical `/`, `/api/health`, `/api/status`, `/api/restoration`, R8 Earth/NOAA checks, Hybrid V90 plan/validation checks, and live Workers AI synthesis.
+- REGRESSIONS: stale test expectations were updated to assert R8 wrappers while retaining donor modules; no known runtime regression remained in the promoted exact head.
+- GITHUB SHA: `3390533ba04e582bc0536005c02d6e82577c0410`.
+- CLOUDFLARE STATUS: authoritative GitHub Actions production path PASS. Separate Cloudflare Git integration remains non-authoritative.
+- PUBLIC LINK EVIDENCE: deployment workflow reached `https://omegav6.jeffdeweyeljefe.workers.dev/` and required canonical endpoint/R8/live-AI proof. Independent automation-host GET was unavailable; therefore do not claim independent LIVE PASS from this record alone.
+- ROLLBACK TARGET: `7d5ee4116443585f9fc3b0ac89daa2629cd18a76` if canonical behavior later fails.
+- NEXT TURN: start from promoted R8 main; compare `main` vs `surpass-mainline` first; continue exact donor migration with Archive Census/Operators + Canon Governance/Evolution or Extreme/Immersive traversal, preserving all R8 gates and adding direct canonical verification when available.
+
+Truth boundary: this record does not claim FULL RESTORE, SUPERSEDE, SURPASS COMPLETE, native Hybrid execution, local training execution, or independent LIVE PASS.

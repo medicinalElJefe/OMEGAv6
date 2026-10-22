@@ -1,0 +1,38 @@
+name: OMEGA R37 Complex Field Basis
+on:
+  push:
+    branches: [r37-complex-field-basis]
+  pull_request:
+    branches: [main]
+jobs:
+  complex-field-basis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip numpy grcwa
+      - name: Build canonical anisotropic unit-cell job
+        run: |
+          cat > /tmp/omega_r37.json <<'JSON'
+          {"schema":"OMEGA_FULLWAVE_QUEUE_v1","solver":"rcwa","job_id":"ci_r37","source_packet_id":"ci_r37","proof":{"gate":"STAY","mode188_score":1.2},"geometry":{"pitch_nm":330,"width_nm":90,"length_nm":260,"height_nm":550,"theta_deg":0},"material_names":{"incident":"air","feature":"tio2_design","background":"air","substrate":"sio2_fused"},"numerics":{"nx":40,"ny":40,"harmonics_high":49},"lineage":["ci:r37"]}
+          JSON
+      - name: Execute complex zero-order field extraction and rotational basis proof
+        working-directory: sovereign
+        run: python omega_rcwa_complex.py --input /tmp/omega_r37.json --output /tmp/omega_r37_result.json --wavelength 532
+      - name: Verify proof boundaries and complex data
+        run: |
+          python - <<'PY'
+          import json, math
+          d=json.load(open('/tmp/omega_r37_result.json'))
+          assert d['schema']=='OMEGA_COMPLEX_BASIS_PROOF_v1'
+          assert d['passed'] is True
+          assert d['theta0']['basis_verified'] is True
+          for state in [d['theta0'],d['theta90']]:
+            for key in ['t_xx','t_xy','t_yx','t_yy']:
+              z=state['matrix'][key]
+              assert all(math.isfinite(float(z[k])) for k in ['re','im','abs','phase_deg'])
+          assert 'not fabrication validation' in d['truth_boundary'].lower()
+          print('R37 basis proof:',d['proof_sha256'])
+          PY
