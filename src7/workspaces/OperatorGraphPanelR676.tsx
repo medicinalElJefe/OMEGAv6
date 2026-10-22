@@ -1,0 +1,59 @@
+import {useEffect,useMemo,useState} from 'react';
+import {getMandala20736Field,type Mandala20736Field} from '../../src/mandala20736Runtime';
+import {collapseCanonicalFieldR676,decodeOperatorNodeR676,operatorNodeForAddressR676,propagateOperatorR676,applyOperatorR676,R676_DONOR_PROOF} from './operatorGraphR676.js';
+
+type Props={address:number;onAddress:(next:number)=>void};
+const fmt=(x:number)=>Number.isFinite(x)?x.toFixed(7):'UNAVAILABLE';
+const measure=(arr:Float64Array)=>{let s=0;for(const x of arr)s+=x;return s};
+export function OperatorGraphPanelR676({address,onAddress}:Props){
+ const [open,setOpen]=useState(false),[field,setField]=useState<Mandala20736Field|null>(null);
+ const [error,setError]=useState(''),[channel,setChannel]=useState('C'),[iterations,setIterations]=useState(12);
+ const [result,setResult]=useState<{values:Float64Array;ledger:any[];type:string}|null>(null);
+ useEffect(()=>{if(!open||field)return;let live=true;getMandala20736Field().then(f=>{if(live)setField(f)}).catch(e=>{if(live)setError(String(e))});return()=>{live=false}},[open,field]);
+ useEffect(()=>{setResult(null)},[address,channel,iterations]);
+ const location=operatorNodeForAddressR676(address);
+ const top=useMemo(()=>{if(!result)return[];return Array.from(result.values,(value,node)=>({node,value})).sort((a,b)=>b.value-a.value||a.node-b.node).slice(0,12)},[result]);
+ const run=(type:string)=>{
+  try{
+   if(!field)throw Error('Load source canonical field before executing');
+   const seed=collapseCanonicalFieldR676(field,channel);
+   if(type==='PROPAGATE'){
+    const q=propagateOperatorR676(seed,{iterations});
+    setResult({values:q.values,ledger:q.ledger,type});
+   }else{
+    const values=applyOperatorR676(seed,type);
+    setResult({values,ledger:[],type});
+   }
+   setError('');
+  }catch(e){setError(e instanceof Error?e.message:String(e));setResult(null)}
+ };
+ const pick=(node:number)=>{const c=decodeOperatorNodeR676(node);onAddress(c.d*1728+c.p*144+c.r*12+location.layer)};
+ return <section data-r676-operator-panel='true' style={{padding:16,margin:'16px 0',border:'1px solid #536579',borderRadius:12}}>
+  <header><h3 style={{margin:0}}>Recovered TRUE Operator Engine v9 · 1,728 nodes</h3>
+   <p>Actual B053 typed graph: 18,144 edges across phase, regulation, local, triad and antipode relationships. This donor is a 12×12×12 operator instrument, not an independently established physical 1,728-dimensional space.</p></header>
+  <button type='button' aria-expanded={open} onClick={()=>setOpen(x=>!x)}>{open?'Close':'Open'} historical construct/prune operator</button>
+  {open&&<div>
+   <p>Current 20,736-state address {address+1} → operator node {location.node} with original layer {location.layer+1}. Explicit layer-average projection is used; the canonical source remains unchanged.</p>
+   {!field&&!error&&<p role='status'>Loading canonical field…</p>}
+   <div style={{display:'flex',flexWrap:'wrap',alignItems:'end',gap:10}}>
+    <label>Canonical source channel <select aria-label='Operator source channel' value={channel} onChange={e=>setChannel(e.target.value)}>{[['C','Continuity CΩ'],['Phi','Plasticity Φ'],['evidence','Evidence weight'],['scar','Scar'],['q','Contradiction q']].map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label>
+    <label>Iteration count <select aria-label='Operator iteration count' value={iterations} onChange={e=>setIterations(Number(e.target.value))}>{[1,3,12,60].map(n=><option value={n} key={n}>{n}</option>)}</select></label>
+    <button type='button' disabled={!field} onClick={()=>run('P_plus_011')}>Construct 011</button>
+    <button type='button' disabled={!field} onClick={()=>run('P_minus_01m1')}>Prune 01−1</button>
+    <button type='button' disabled={!field} onClick={()=>run('P_rw')}>Random walk</button>
+    <button type='button' disabled={!field} onClick={()=>run('PROPAGATE')}>Propagate construct−prune</button>
+   </div>
+   {error&&<p role='alert'>{error}</p>}
+   {result&&<div data-r676-operator-receipt='true'>
+    <p><b>{result.type}</b> · {result.values.length} computed operator nodes · resulting sum {fmt(measure(result.values))} · {result.ledger.length} completed propagation iterations</p>
+    <h4>Strongest returned nodes</h4>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:8}}>
+     {top.map(x=><button type='button' key={x.node} onClick={()=>pick(x.node)} title={'Select operator node '+x.node+' preserving current layer'} style={{padding:8,textAlign:'left',border:'1px solid #516e80',borderRadius:8}}><b>Node {x.node}</b><div>{fmt(x.value)}</div></button>)}
+    </div>
+    {result.ledger.length>0&&<details><summary>Iteration ledger and clipping residuals</summary>{result.ledger.map(row=><div key={row.step}>Step {row.step}: retained mass {fmt(row.preNormalizationMass)}, clipped negative mass {fmt(row.clippedNegativeMass)}</div>)}</details>}
+    <p><b>Proof boundary:</b> B053 typed edge identities are independently matched to the original 18,144-edge donor. This interactive mathematical projection is source-model execution, not a calibrated physical model or automatic CanonState promotion. Full historical 60-step propagation numerical parity remains unverified.</p>
+    <details><summary>Historical source authority</summary><p>{R676_DONOR_PROOF.zip} / {R676_DONOR_PROOF.source} · canonical edge digest {R676_DONOR_PROOF.canonicalSortedEdgeSha256}</p></details>
+   </div>}
+  </div>}
+ </section>;
+}
