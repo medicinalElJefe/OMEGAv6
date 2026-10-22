@@ -1,5 +1,15 @@
 import {chromium} from 'playwright';
 const base=(process.env.OMEGA_E2E_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
+const expectedSha=String(process.env.OMEGA_EXPECTED_SHA||'').trim();
+if(expectedSha){
+ if(!/^[0-9a-f]{40}$/i.test(expectedSha))throw Error('R676/R678 requires exact 40-character promoted SHA');
+ const response=await fetch(base+'/omega-build-receipt.json?r678='+Date.now(),{headers:{'cache-control':'no-cache'}});
+ if(!response.ok)throw Error('R676/R678 promoted build receipt HTTP '+response.status);
+ const receipt=await response.json();
+ if(receipt?.schema!=='OMEGA_GOVERNED_BUILD_RECEIPT_V1'||receipt?.source?.sha!==expectedSha||receipt?.promotion?.promotedMergeSha!==expectedSha)
+  throw Error('R676/R678 source candidate is not the exact promoted production SHA');
+}
+
 const browser=await chromium.launch({headless:true});
 try{
  for(const [label,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
@@ -55,7 +65,12 @@ try{
    await panel.getByLabel('Operator iteration count').selectOption('3');
    await panel.getByRole('button',{name:'Propagate construct−prune'}).click();
    text=await result.innerText();if(!text.includes('3 completed propagation iterations'))throw Error(label+': iterative engine receipt missing');
-   if(!text.includes('Full historical 60-step propagation numerical parity remains unverified'))throw Error(label+': donor parity boundary missing');
+   if(!text.includes('its stored final distribution is reproduced by 59 effective updates'))throw Error(label+': original T60 discrepancy not preserved');
+   await panel.getByRole('button',{name:'Verify original donor CSV (59 updates)'}).click();
+   const parity=panel.locator('[data-r678-historical-parity="matched"]');
+   await parity.waitFor({state:'visible',timeout:20000});
+   const proofText=await parity.innerText();
+   if(!proofText.includes('SOURCE-MATCHED')||!proofText.includes('5f2bed97e66c0fe0e0755d3c805ed591bd37a5100e099308c998f73280381ed5'))throw Error(label+': original donor full-vector digest was not matched');
    const first=panel.getByRole('button',{name:/Node \d+/}).first();
    if(!(await first.isVisible()))throw Error(label+': donor node selection unavailable');
    await first.click();
