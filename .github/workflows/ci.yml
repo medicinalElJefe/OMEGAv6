@@ -73,7 +73,7 @@ jobs:
           node tests/r655-intrinsic-field-projection.mjs
       - name: R650 year-corpus capability conservation truth gate
         run: node tests/r650-year-corpus-conservation-gate.mjs
-      - name: Prove R665-R676 accumulated modes, evidence and exact donor graph contracts
+      - name: Prove R665-R678 accumulated modes, exact geometry and historical donor replay
         run: |
           npx --yes tsx tests/r665-historical-convergence.mts
           npx --yes tsx tests/r666-historical-observer.mts
@@ -82,6 +82,7 @@ jobs:
           node tests/r674-all-modes-portability.mjs
           node tests/r675-historical-decision-contradiction.mjs
           node tests/r676-exact-operator-graph.mjs
+          node tests/r678-original-donor-full-vector-parity.mjs
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
