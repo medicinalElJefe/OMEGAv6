@@ -13,7 +13,8 @@ assert.equal(operatorNodeR676(0,0,0),0);
 assert.equal(operatorNodeR676(11,11,11),1727);
 assert.deepEqual(decodeOperatorNodeR676(144),{d:1,p:0,r:0});
 assert.deepEqual(operatorNodeForAddressR676(20735),{node:1727,layer:11,address:20735});
-assert.deepEqual(operatorNodeForAddressR676(144),{node:12,layer:0,address:144},'historical node p/r layout is a permutation, not floor(address/12)');
+assert.deepEqual(operatorNodeForAddressR676(144),{node:1,layer:0,address:144},'historical D/P/R operator layout permutes P/R instead of floor(address/12)');
+assert.deepEqual(operatorNodeForAddressR676(12),{node:12,layer:0,address:12},'canonical regulation R=1 maps to historical operator row group v=1');
 for(const n of [0,1,11,12,132,143,144,432,864,1727]){
  const e=edgesFromOperatorNodeR676(n);
  assert.ok(e.length>=8&&e.length<=11);
