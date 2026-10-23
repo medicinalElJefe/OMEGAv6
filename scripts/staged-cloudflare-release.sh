@@ -193,6 +193,10 @@ wait "$LOCAL_PREVIEW_PID" >/dev/null 2>&1 || true
 LOCAL_PREVIEW_PID=''
 echo "R496 exact packaged browser proof passed before candidate upload."
 
+# Private archive provisioning remains under existing exact-main release ownership.
+assert_current_main_owner
+node scripts/provision-private-archive.mjs
+
 WRANGLER_OUTPUT_FILE_PATH="$WRANGLER_NDJSON" npx wrangler versions upload --name "$WORKER_NAME" --message "OMEGA staged candidate $GITHUB_SHA"
 CANDIDATE_VERSION_ID="$(node - "$WRANGLER_NDJSON" <<'NODE'
 const fs=require('fs');
