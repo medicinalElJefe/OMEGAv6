@@ -37,8 +37,34 @@ export default function EarthObservatoryR8({address}:Props){
  const initial=useMemo(()=>({lat:-90+(coords.d+.5)/12*180,lon:-180+(coords.p*12+coords.r+.5)/144*360}),[coords]);
  const[lat,setLat]=useState(initial.lat),[lon,setLon]=useState(initial.lon),[evidence,setEvidence]=useState<any>(null),[catalog,setCatalog]=useState<Coverage[]>([]),[selected,setSelected]=useState('G19-FD'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[playing,setPlaying]=useState(false),[focus,setFocus]=useState<Focus>('ALL'),[view,setView]=useState<EarthView>(savedView),[placeQuery,setPlaceQuery]=useState(''),[placeBusy,setPlaceBusy]=useState(false),[placeError,setPlaceError]=useState(''),[placeResults,setPlaceResults]=useState<any[]>([]),[focusDisplay,setFocusDisplay]=useState(false),[displayExpanded,setDisplayExpanded]=useState(false),[renderTier,setRenderTier]=useState<RenderTier>(detectRenderTier);
  const evidenceRequest=useRef(0),stageRef=useRef<HTMLDivElement>(null);
+ const [catalogState,setCatalogState]=useState<'LOADING'|'READY'|'ERROR'>('LOADING');
+ const [catalogError,setCatalogError]=useState('');
+ const [catalogGeneration,setCatalogGeneration]=useState(0);
+ const [satImageState,setSatImageState]=useState<'LOADING'|'READY'|'ERROR'>('LOADING');
  const queryAt=async(qLat=lat,qLon=lon)=>{const request=++evidenceRequest.current;setBusy(true);setError('');setEvidence(null);try{const e=await api.get<any>(`/api/earth/evidence?lat=${qLat.toFixed(5)}&lon=${qLon.toFixed(5)}`);if(request!==evidenceRequest.current)return;const target=e.data?.target;if(!target||Math.abs(Number(target.lat)-qLat)>0.000011||Math.abs(Number(target.lon)-qLon)>0.000011||!Number.isFinite(Number(target.lat))||!Number.isFinite(Number(target.lon)))throw new Error('Returned Earth evidence does not match the selected target.');setEvidence(e.data)}catch(x:any){if(request===evidenceRequest.current)setError(x?.message||String(x))}finally{if(request===evidenceRequest.current)setBusy(false)}};
- useEffect(()=>{let active=true;void api.get<any>('/api/earth/noaa/catalog').then(c=>{if(!active)return;const rows=(c.data?.coverages||[]) as Coverage[];setCatalog(rows);if(rows.length)setSelected(v=>rows.some(x=>x.id===v)?v:rows.some(x=>x.id==='G19-FD')?'G19-FD':rows[0].id)}).catch(()=>{if(active)setCatalog([])});return()=>{active=false}},[]);
+ useEffect(()=>{
+  let active=true;let retry:ReturnType<typeof setTimeout>|undefined;
+  setCatalogState('LOADING');setCatalogError('');
+  const request=async(attempt:number)=>{
+   try{
+    const response=await api.get<any>('/api/earth/noaa/catalog');
+    if(!active)return;
+    const rows=response.data?.coverages;
+    if(!Array.isArray(rows)||rows.length===0||!rows.every((x:any)=>x&&typeof x.id==='string'&&x.id.length>0&&typeof x.label==='string'))
+     throw Error('NOAA coverage catalog was empty or structurally invalid');
+    setCatalog(rows);setCatalogState('READY');setCatalogError('');
+    setSelected(v=>rows.some((x:any)=>x.id===v)?v:rows.some((x:any)=>x.id==='G19-FD')?'G19-FD':rows[0].id);
+   }catch(e){
+    if(!active)return;
+    const message=e instanceof Error?e.message:String(e);
+    setCatalogError(message);
+    if(attempt<3)retry=setTimeout(()=>void request(attempt+1),attempt*900);
+    else{setCatalog([]);setCatalogState('ERROR')}
+   }
+  };
+  void request(1);
+  return()=>{active=false;if(retry)clearTimeout(retry)};
+ },[catalogGeneration]);
  useEffect(()=>()=>{evidenceRequest.current++},[]);
  useEffect(()=>{setLat(initial.lat);setLon(initial.lon);void queryAt(initial.lat,initial.lon)},[initial.lat,initial.lon]);
  useEffect(()=>{try{localStorage.setItem('omega.earth.r279.view',view)}catch{}},[view]);
@@ -47,6 +73,7 @@ export default function EarthObservatoryR8({address}:Props){
  const renderBudget=RENDER_BUDGET[renderTier];
  useEffect(()=>{if(!playing||!catalog.length)return;const id=window.setInterval(()=>{if(document.visibilityState!=='visible')return;setSelected(v=>{const i=Math.max(0,catalog.findIndex(x=>x.id===v));return catalog[(i+1)%catalog.length]?.id||v})},renderBudget.cycleMs);return()=>window.clearInterval(id)},[playing,catalog,renderBudget.cycleMs]);
  const current=catalog.find(x=>x.id===selected)||catalog[0];
+ useEffect(()=>{setSatImageState('LOADING')},[current?.id]);
  const fullDisks=['G19-FD','G18-FD','G17-FD','G16-FD'].map(id=>catalog.find(x=>x.id===id)).filter(Boolean) as Coverage[];
  const fullDiskPreviews=fullDisks.slice(0,renderBudget.previewCount);
  const move=(delta:number)=>{if(!catalog.length)return;const i=Math.max(0,catalog.findIndex(x=>x.id===selected));setSelected(catalog[(i+delta+catalog.length)%catalog.length].id)};
@@ -68,7 +95,8 @@ export default function EarthObservatoryR8({address}:Props){
  const toggleExpanded=()=>setDisplayExpanded(v=>!v);
  const renderSatellite=()=> <section className='earth-r279-satellite' data-earth-view='SATELLITE'>
   <header><div><span>OBSERVED SATELLITE SURFACE</span><h3>Latest returned NOAA / CIRA GeoColor</h3><small>Source imagery is shown as imagery. OMEGA does not paint calculated pixels into unavailable satellite regions.</small><div className='earth-r388-lod' data-render-tier={renderTier}><b>ADAPTIVE LOD · {renderTier}</b><small>{renderBudget.previewCount}/3 concurrent full-disk previews · {Math.round(renderBudget.cycleMs/1000)}s cycle · source pixels unchanged</small></div></div><div className='earth-r279-sat-controls'><button type='button' onClick={()=>move(-1)} disabled={!catalog.length} aria-label='Previous satellite coverage'><ChevronLeft/></button><button type='button' onClick={()=>setPlaying(v=>!v)} disabled={!catalog.length}>{playing?<Pause/>:<Play/>}{playing?'Stop cycle':'Cycle coverage'}</button><button type='button' onClick={()=>move(1)} disabled={!catalog.length} aria-label='Next satellite coverage'><ChevronRight/></button></div></header>
-  <div className='earth-r279-sat-main'>{current?<figure><img loading='eager' decoding='async' src={`/api/earth/noaa/image?coverage=${encodeURIComponent(current.id)}`} alt={`${current.label} NOAA GeoColor latest returned image`}/><figcaption><b>{current.label}</b><span>{current.state||'UNVERIFIED'} · {current.lastModified||'timestamp unavailable'}</span></figcaption></figure>:<div className='earth-r279-sat-empty'><CloudSun/><b>No satellite coverage returned.</b><span>No substitute image is fabricated.</span></div>}<nav aria-label='Satellite coverage menu'>{catalog.map(x=><button type='button' key={x.id} onClick={()=>setSelected(x.id)} className={x.id===current?.id?'active':''}><span>{x.label}</span><small>{x.state}</small></button>)}</nav></div>
+  <div className='earth-r279-sat-main' data-catalog-state={catalogState} data-image-state={satImageState}>{current?<figure><img loading='eager' decoding='async' src={`/api/earth/noaa/image?coverage=${encodeURIComponent(current.id)}`} onLoad={e=>setSatImageState(e.currentTarget.naturalWidth>100&&e.currentTarget.naturalHeight>100?'READY':'ERROR')} onError={()=>setSatImageState('ERROR')} alt={`${current.label} NOAA GeoColor latest returned image`}/><figcaption><b>{current.label}</b><span>{current.state||'UNVERIFIED'} · {current.lastModified||'timestamp unavailable'}</span></figcaption></figure>:<div className='earth-r279-sat-empty' role='status'><CloudSun/><b>{catalogState==='LOADING'?'Loading source satellite coverage…':'No satellite coverage returned.'}</b><span>{catalogState==='ERROR'?`NOAA catalog unavailable after 3 bounded attempts: ${catalogError}`:'No substitute image is fabricated.'}</span>{catalogState==='ERROR'&&<button type='button' onClick={()=>setCatalogGeneration(n=>n+1)}>Retry satellite catalog</button>}</div>}<nav aria-label='Satellite coverage menu'>{catalog.map(x=><button type='button' key={x.id} onClick={()=>setSelected(x.id)} className={x.id===current?.id?'active':''}><span>{x.label}</span><small>{x.state}</small></button>)}</nav></div>
+  {current&&satImageState==='ERROR'&&<p role='alert'>Source image unavailable or invalid for {current.id}; imagery has not been synthesized. Select another coverage or retry the catalog.</p>}
   {fullDiskPreviews.length>0&&<div className='earth-r279-global-pair'><header><Satellite/><span><b>FULL-DISK OBSERVATION PAIR</b><small>{fullDiskPreviews.length} of {fullDisks.length} concurrently mounted at {renderTier.toLowerCase()} render tier · source geometries and returned pixels remain unchanged.</small></span></header><div>{fullDiskPreviews.map(x=><figure key={x.id}><img loading='lazy' decoding='async' src={`/api/earth/noaa/image?coverage=${encodeURIComponent(x.id)}`} alt={`${x.label} returned full-disk GeoColor`}/><figcaption><b>{x.label}</b><small>{x.lastModified||'timestamp unavailable'}</small></figcaption></figure>)}</div></div>}
  </section>;
  return <section className='earth-r8 earth-r72 earth-r279' data-render-tier={renderTier} data-render-preview-count={renderBudget.previewCount}>
