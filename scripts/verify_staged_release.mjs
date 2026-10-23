@@ -1,6 +1,7 @@
 import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
+import {stagedReadWithRetryR685} from './stagedReadRetryR685.mjs';
 
 const base=String(process.env.OMEGA_PUBLIC_URL||'').replace(/\/$/,'');
 const expected=String(process.env.OMEGA_PROMOTED_SHA||process.env.GITHUB_SHA||'').trim();
@@ -14,7 +15,7 @@ if(!base||!expected||!versionId)throw new Error('staged release proof requires O
 const override=`${workerName}="${versionId}"`;
 const headers=(extra={})=>({'cache-control':'no-cache','Cloudflare-Workers-Version-Overrides':override,...extra});
 async function parse(response){const raw=await response.text();let body=null;try{body=JSON.parse(raw)}catch{}return{response,raw,body}}
-async function get(path){const row=await parse(await fetch(base+path,{headers:headers()}));if(!row.response.ok)throw new Error(`${path} HTTP ${row.response.status}: ${row.raw.slice(0,500)}`);return row}
+async function get(path){const row=await parse(await stagedReadWithRetryR685(base+path,{headers:headers()}));if(!row.response.ok)throw new Error(`${path} HTTP ${row.response.status}: ${row.raw.slice(0,500)}`);return row}
 async function post(path,body){const row=await parse(await fetch(base+path,{method:'POST',headers:headers({'content-type':'application/json'}),body:JSON.stringify(body)}));if(!row.response.ok)throw new Error(`${path} HTTP ${row.response.status}: ${row.raw.slice(0,500)}`);return row}
 
 // R496 Cloudflare asset boundary: version overrides pin Worker code, but a
