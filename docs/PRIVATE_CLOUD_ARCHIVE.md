@@ -14,7 +14,7 @@ OMEGA 7 and OMEGA 6 share the **Private cloud files** viewer at Archive Census /
 
 ## Deployment
 
-The existing `ci.yml` production job remains the only production-write workflow. After its existing exact-main and local browser proofs, `staged-cloudflare-release.sh` invokes `scripts/provision-private-archive.mjs` to find/create the two named buckets using existing production credentials, then runs the existing staged deployment and live proof sequence. Missing R2 permission is a deployment blocker, never a reason to weaken a gate. No Cloudflare account/token is included in the source.
+The existing `ci.yml` production job remains the only production-write workflow. After its existing exact-main and local browser proofs, `staged-cloudflare-release.sh` invokes `scripts/provision-private-archive.mjs` to find/create the two named buckets using existing production credentials, then runs the existing staged deployment and live proof sequence using that readiness-derived configuration. Cloudflare account activation error 10042 holds only archive storage. The release derives a generated configuration that omits only the two new archive bucket bindings, preserves all existing core bindings and source identity, and exposes ACCOUNT_ACTIVATION_REQUIRED in the live health result and archive UI. Other authorization failures and public bucket exposure still fail closed. No deployment/browser acceptance gate is weakened. No Cloudflare account/token is included in the source.
 
 ## Transfer and proof
 
@@ -33,3 +33,7 @@ The first complete native file listing for this task contained **6,647 files tot
 ## Validation
 
 `npm run test:private-archive` runs actual local Workers/R2 execution using Miniflare. It tests anonymous non-disclosure, cross-origin rejection, secure login cookies, checksum rejection, missing-backup commit refusal, resumable repair, immutable records, primary/backup readback, cross-chunk/suffix/invalid byte ranges and denied deletion. It is included in `check:static`. Production and browser evidence remain separate requirements.
+
+## R683.1 activation prerequisite
+
+The actual R683 production attempt returned Cloudflare HTTP 403 / provider code 10042 before candidate upload. The previous proven runtime remained serving. This is account-level R2 activation, not missing application code or proof of a completed migration. Enabling the R2 subscription requires the account owner to complete Cloudflare dashboard setup; no credential or payment flow is embedded in OMEGA. After activation, a new governed deployment provisions and privately verifies both buckets before exposing storage as READY. The unchanged transfer/readback client then imports available originals. Native generated-image records whose provider returns no bytes remain unresolved, not silently reconstructed.

@@ -10,6 +10,7 @@ WRANGLER_NDJSON="$TMP_DIR/wrangler-output.ndjson"
 PREVIOUS_VERSION_ID=''
 CANDIDATE_VERSION_ID=''
 LOCAL_PREVIEW_PID=''
+ARCHIVE_RUNTIME_CONFIG="$PWD/wrangler.archive-runtime.generated.json"
 
 assert_current_main_owner(){
   if [[ "${GITHUB_REF:-}" != "refs/heads/main" ]]; then return 0; fi
@@ -59,6 +60,7 @@ cleanup(){
     wait "$LOCAL_PREVIEW_PID" >/dev/null 2>&1 || true
     LOCAL_PREVIEW_PID=''
   fi
+  rm -f "$ARCHIVE_RUNTIME_CONFIG"
   rm -rf "$TMP_DIR"
 }
 restore_previous_on_error(){
@@ -197,7 +199,7 @@ echo "R496 exact packaged browser proof passed before candidate upload."
 assert_current_main_owner
 node scripts/provision-private-archive.mjs
 
-WRANGLER_OUTPUT_FILE_PATH="$WRANGLER_NDJSON" npx wrangler versions upload --name "$WORKER_NAME" --message "OMEGA staged candidate $GITHUB_SHA"
+WRANGLER_OUTPUT_FILE_PATH="$WRANGLER_NDJSON" npx wrangler versions upload --name "$WORKER_NAME" --config "$ARCHIVE_RUNTIME_CONFIG" --message "OMEGA staged candidate $GITHUB_SHA"
 CANDIDATE_VERSION_ID="$(node - "$WRANGLER_NDJSON" <<'NODE'
 const fs=require('fs');
 const lines=fs.readFileSync(process.argv[2],'utf8').split(/\r?\n/).filter(Boolean);
