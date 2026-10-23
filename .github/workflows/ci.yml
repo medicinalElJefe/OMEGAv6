@@ -84,6 +84,7 @@ jobs:
           node tests/r676-exact-operator-graph.mjs
           node tests/r678-original-donor-full-vector-parity.mjs
           node tests/r679-source-session-replay.mjs
+          npx --yes tsx tests/r681-native-source-contract.mts
           node tests/r684-portable-session-bundle.mjs
       - name: Prove R680 original source archive library restoration
         run: python3 tests/r680-native-archive-reconciliation.py
@@ -91,6 +92,8 @@ jobs:
         run: npx --yes tsx tests/r682-noaa-catalogue-recovery.mts
       - name: Prove R685 staged GET transport remains bounded and fail-closed
         run: node tests/r685-staged-read-transport.mjs
+      - name: Prove R681 native decision discrimination and preserved negative evidence
+        run: python3 tests/r681-native-decision-truth-audit.py
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
@@ -263,6 +266,10 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r682-noaa-recovery-browser-e2e.mjs
+      - name: Prove R681 original B053 native decision census and proof veto on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r681-native-decision-browser-e2e.mjs
       - name: Stop OMEGA7 parity preview
         if: always()
         shell: bash
@@ -283,6 +290,7 @@ jobs:
         run: |
           python -m py_compile scripts/recover_b053_native_archive_r680.py
           python tests/r680-native-archive-reconciliation.py
+          python tests/r681-native-decision-truth-audit.py
 
   cloudflare-auth-probe:
     if: github.event_name == 'pull_request'
@@ -706,6 +714,10 @@ jobs:
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r682-noaa-recovery-browser-e2e.mjs
+      - name: Verify R681 native decision census and proof veto on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r681-native-decision-browser-e2e.mjs
       - name: Verify live R560 weather source, persisted view and satellite switch on exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         shell: bash
