@@ -67,7 +67,7 @@ try{
    const rejected=panel.locator('[data-r679-verification="held"]');
    await rejected.waitFor({state:'visible',timeout:20000});
    if(!(await rejected.innerText()).includes('CHAIN_HASH:0')&&!(await rejected.innerText()).includes('REPLAY_OUTPUT:0'))throw Error(label+': edit did not invalidate output chain');
-   await panel.locator('input[type=file]').setInputFiles({name:'omega-session.json',mimeType:'application/json',buffer:Buffer.from(persisted)});
+   await panel.locator('input[aria-label="Import session JSON file"]').setInputFiles({name:'omega-session.json',mimeType:'application/json',buffer:Buffer.from(persisted)});
    await page.getByText('IMPORTED_UNVERIFIED').waitFor({state:'visible',timeout:15000});
    await panel.getByRole('button',{name:'Replay and verify entire session'}).click();
    await panel.locator('[data-r679-verification="valid"]').waitFor({state:'visible',timeout:20000});
