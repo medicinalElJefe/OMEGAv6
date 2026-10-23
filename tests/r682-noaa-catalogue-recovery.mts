@@ -29,6 +29,6 @@ const cancelled=await loadNoaaCatalogR682(async()=>{cancelCount++;current=false;
 assert.equal(cancelled.state,'CANCELLED');
 assert.equal(cancelled.rows.length,0);
 assert.equal(cancelCount,1);
-assert.throws(()=>loadNoaaCatalogR682(async()=>coverage,{delaysMs:[-1]}),/invalid retry horizon/);
-assert.throws(()=>loadNoaaCatalogR682(async()=>coverage,{delaysMs:Array(6).fill(0)}),/invalid retry horizon/);
+await assert.rejects(()=>loadNoaaCatalogR682(async()=>coverage,{delaysMs:[-1]}),/invalid retry horizon/);
+await assert.rejects(()=>loadNoaaCatalogR682(async()=>coverage,{delaysMs:Array(6).fill(0)}),/invalid retry horizon/);
 console.log('R682 PASS: bounded real NOAA catalogue recovery, no fabricated imagery, duplicate/path rejection, cancellation and source failure truth');
