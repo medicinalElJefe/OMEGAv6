@@ -213,6 +213,10 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r679-canonical-session-browser-e2e.mjs
+      - name: Prove R681 NOAA coverage recovery with no fabricated image, desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r681-noaa-catalog-recovery-browser-e2e.mjs
       - name: Stop OMEGA7 parity preview
         if: always()
         shell: bash
