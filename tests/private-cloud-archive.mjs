@@ -1,3 +1,4 @@
+import {cloudArchive} from '../src/archive/cloudArchive.js';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import assert from 'node:assert/strict';
@@ -13,6 +14,7 @@ const bundle=await build({stdin:{contents:"import {cloudArchive} from './src/arc
 const mf=new Miniflare(convertV4MiniflareOptions({modules:true,script:bundle.outputFiles[0].text,compatibilityDate:'2026-08-28',r2Buckets:['OMEGA_ARCHIVE','OMEGA_ARCHIVE_BACKUP'],bindings:{OMEGA_ARCHIVE_TOKEN_SHA256:hash(key)},r2Persist:dir}));
 const call=(path,init={})=>mf.dispatchFetch('https://archive.test/api/archive/'+path,{...init,headers:{authorization:'Bearer '+key,...init.headers}});
 try{
+ const held=await cloudArchive(new Request('https://archive.test/api/archive/status',{headers:{authorization:'Bearer '+key}}),{OMEGA_ARCHIVE_TOKEN_SHA256:hash(key),OMEGA_ARCHIVE_STATE:'ACCOUNT_ACTIVATION_REQUIRED'});assert.equal(held.status,503);assert.equal((await held.json()).code,'ARCHIVE_ACCOUNT_ACTIVATION_REQUIRED');
  let r=await mf.dispatchFetch('https://archive.test/api/archive/status');assert.equal(r.status,401);assert.equal((await r.text()).includes('R2'),false);
  assert.equal((await call('status',{headers:{origin:'https://attacker.invalid'}})).status,403);
  r=await call('login',{method:'POST',body:JSON.stringify({token:key})});assert.equal(r.status,200);const cookie=r.headers.get('set-cookie');assert.match(cookie,/HttpOnly; Secure; SameSite=Strict/);

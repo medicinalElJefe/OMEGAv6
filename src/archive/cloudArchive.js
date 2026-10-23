@@ -28,7 +28,7 @@ export async function cloudArchive(request,env){
  }
  if(!await authorized(request,env))return json({ok:false,code:'ARCHIVE_AUTH_REQUIRED'},401);
  if(path===PREFIX+'/logout'&&request.method==='POST')return json({ok:true},200,{'set-cookie':cookie('',0)});
- const primary=env.OMEGA_ARCHIVE,backup=env.OMEGA_ARCHIVE_BACKUP;const bucket=url.searchParams.get('replica')==='backup'?backup:primary;if(!primary?.put||!backup?.put)return json({ok:false,code:'ARCHIVE_STORAGE_NOT_BOUND'},503);
+ const primary=env.OMEGA_ARCHIVE,backup=env.OMEGA_ARCHIVE_BACKUP;const bucket=url.searchParams.get('replica')==='backup'?backup:primary;if(!primary?.put||!backup?.put)return json({ok:false,code:env.OMEGA_ARCHIVE_STATE==='ACCOUNT_ACTIVATION_REQUIRED'?'ARCHIVE_ACCOUNT_ACTIVATION_REQUIRED':'ARCHIVE_STORAGE_NOT_BOUND'},503);
  try{
  if(path===PREFIX+'/status'&&request.method==='GET')return json({ok:true,schema:'OMEGA_PRIVATE_ARCHIVE_V1',storage:'R2',replicas:2,private:true,chunkBytes:CHUNK_BYTES,canonicalMutation:false});
  if(path===PREFIX+'/records'&&request.method==='GET'){

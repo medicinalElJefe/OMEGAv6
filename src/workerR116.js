@@ -36,6 +36,7 @@ function coreHealthR163(request,env){
   ok:ready,schema:CORE_HEALTH_SCHEMA,revision:CORE_HEALTH_REVISION,state:ready?'LIVE':'DEGRADED_REQUIRED_CORE_BINDING_MISSING',checkedAt:new Date().toISOString(),canonicalOrigin:CANONICAL_ORIGIN,canonicalRequest,
   runtimeVersion:metadata?{id:String(metadata.id||''),tag:metadata.tag?String(metadata.tag):null,timestamp:metadata.timestamp?String(metadata.timestamp):null}:null,
   requiredBindings,
+  cloudArchive:{ready:Boolean(env?.OMEGA_ARCHIVE&&env?.OMEGA_ARCHIVE_BACKUP),state:env?.OMEGA_ARCHIVE_STATE||(env?.OMEGA_ARCHIVE&&env?.OMEGA_ARCHIVE_BACKUP?'READY':'NOT_BOUND'),canonicalMutation:false},
   optionalCapabilities:{workersAI:Boolean(env?.AI),genesisService:Boolean(env?.OMEGA_GENESIS?.fetch),genesisMachine:Boolean(env?.OMEGA_GENESIS_MACHINE?.fetch),opticalMachine:Boolean(env?.OMEGA_OPTICAL_MACHINE?.fetch),versionMetadata:Boolean(metadata)},
   executionPlanes:{sovereignGateway:{requiredForCoreHealth:false,state:'SEPARATE_PROOF_GATED_EXECUTION_PLANE'},hybrid:{authority:'CURRENT_AUTHENTICATED_HEARTBEAT_ONLY',proofClosure:'R141',executionConvergence:'R159'},canonicalAdmission:{authority:'R125'}},
   evidence:{releaseEvidence:'/api/release-evidence',runtimeAttestation:'/api/runtime-attestation',systemOperational:'/api/system/operational'},
