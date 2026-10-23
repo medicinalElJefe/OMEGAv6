@@ -31,6 +31,11 @@ try{
   // then recover ONLY through a human-triggered retry using real returned source.
   exhaust=true;manualRelease=false;attempts=0;
   await page.reload({waitUntil:'domcontentloaded',timeout:45000});
+  const navAgain=page.locator('button[aria-label="Expand OMEGA navigator"]');
+  if(await navAgain.count()&&await navAgain.first().isVisible())await navAgain.first().click();
+  const earthAgain=page.locator('.r89-flat-route').filter({has:page.locator('b',{hasText:'Earth Now'})}).first();
+  await earthAgain.waitFor({state:'visible',timeout:20000});await earthAgain.click();
+  await page.locator('.earth-r279').waitFor({state:'visible',timeout:30000});
   await page.locator('.earth-r279-view-tabs button').filter({hasText:'Satellite'}).first().click();
   const retry=page.getByRole('button',{name:'Retry satellite catalog'});
   await retry.waitFor({state:'visible',timeout:18000});
