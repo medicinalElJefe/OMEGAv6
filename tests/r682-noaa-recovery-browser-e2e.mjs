@@ -18,7 +18,7 @@ try{
   await page.route('**/api/earth/noaa/catalog*',async route=>{
    attempts++;
    if(attempts<=3)await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:'Synthetic transport outage for TEST ONLY; no coverage or image bytes returned'})});
-   else await route.continue();
+   else await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({coverages:[{id:'G19-FD',label:'GOES-19 Full Disk',state:'RETURNED',lastModified:'2026-10-22T00:00:00Z'}]})});
   });
   try{
    await page.goto(base+'/?omega7=1&r682='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
@@ -35,7 +35,7 @@ try{
    if(!error.includes('3 verified requests'))throw Error(device+': false source-error evidence or missing bounded attempt count');
    await earth.getByRole('button',{name:'Retry satellite catalogue'}).click();
    await page.waitForFunction(()=>document.querySelector('.earth-r279-satellite')?.getAttribute('data-noaa-state')==='RETURNED',null,{timeout:30000});
-   if(attempts!==4)throw Error(device+': did not recover via exact fourth genuine source request '+attempts);
+   if(attempts!==4)throw Error(device+': did not recover via exact fourth source-fixture response '+attempts);
    const img=earth.locator('.earth-r279-sat-main figure img').first();
    await img.waitFor({state:'visible',timeout:15000});
    const src=await img.getAttribute('src');
@@ -43,7 +43,7 @@ try{
    if(errors.length)throw Error(device+': runtime errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(device+': layout overflow '+overflow);
-   console.log('R682 '+device+' PASS: three simulated source transport outages retain NO PIXELS, fourth real source request recovers satellite coverage, no forged image');
+   console.log('R682 '+device+' PASS: three simulated source transport outages retain NO PIXELS, fourth deterministic source response restores catalogue; real NOAA imagery remains a separate mandatory production proof');
   }finally{await context.close()}
  }
 }finally{await browser.close()}
