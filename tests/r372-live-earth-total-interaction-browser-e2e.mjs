@@ -180,7 +180,19 @@ try{
   await contained(page,`${label} Weather returned-or-provider-unavailable truth`);
 
   const satTab=tabs.filter({hasText:'Satellite'}).first();await satTab.click();
-  const satImg=page.locator('.earth-r279-sat-main figure img').first();await satImg.waitFor({state:'visible',timeout:20000});
+  const satPanel=page.locator('.earth-r279-sat-main');
+   await satPanel.waitFor({state:'visible',timeout:20000});
+   await page.waitForFunction(()=>['READY','ERROR'].includes(document.querySelector('.earth-r279-sat-main')?.getAttribute('data-catalog-state')||''),{timeout:20000});
+   if(await satPanel.getAttribute('data-catalog-state')==='ERROR'){
+    const reason=((await satPanel.innerText())||'').slice(0,500);
+    const retry=page.getByRole('button',{name:'Retry satellite catalog'});
+    await retry.waitFor({state:'visible',timeout:5000});
+    await retry.click();
+    await page.waitForFunction(()=>['READY','ERROR'].includes(document.querySelector('.earth-r279-sat-main')?.getAttribute('data-catalog-state')||''),{timeout:20000});
+    if(await satPanel.getAttribute('data-catalog-state')!=='READY')throw Error(`${label}: NOAA source catalog still unavailable after explicit bounded recovery; ${reason}`);
+   }
+   const satImg=satPanel.locator('figure img').first();
+   await satImg.waitFor({state:'visible',timeout:15000});
   await page.waitForFunction(()=>{const img=document.querySelector('.earth-r279-sat-main figure img');return img?.complete&&img.naturalWidth>100&&img.naturalHeight>100},{timeout:30000});
   if(!new URL(await satImg.getAttribute('src'),base).pathname.startsWith('/api/earth/noaa/image'))throw new Error(`${label}: satellite source path changed`);
 
