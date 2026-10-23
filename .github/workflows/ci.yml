@@ -89,6 +89,8 @@ jobs:
         run: python3 tests/r680-native-archive-reconciliation.py
       - name: Prove R682 recovered NOAA catalogue with bounded source-only retries
         run: npx --yes tsx tests/r682-noaa-catalogue-recovery.mts
+      - name: Prove R685 staged GET transport remains bounded and fail-closed
+        run: node tests/r685-staged-read-transport.mjs
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
