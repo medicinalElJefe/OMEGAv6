@@ -67,14 +67,39 @@ try{
    const rejected=panel.locator('[data-r679-verification="held"]');
    await rejected.waitFor({state:'visible',timeout:20000});
    if(!(await rejected.innerText()).includes('CHAIN_HASH:0')&&!(await rejected.innerText()).includes('REPLAY_OUTPUT:0'))throw Error(label+': edit did not invalidate output chain');
-   await panel.locator('input[type=file]').setInputFiles({name:'omega-session.json',mimeType:'application/json',buffer:Buffer.from(persisted)});
+   await panel.locator('input[aria-label="Import session JSON file"]').setInputFiles({name:'omega-session.json',mimeType:'application/json',buffer:Buffer.from(persisted)});
    await page.getByText('IMPORTED_UNVERIFIED').waitFor({state:'visible',timeout:15000});
+   await panel.getByRole('button',{name:'Replay and verify entire session'}).click();
+   await panel.locator('[data-r679-verification="valid"]').waitFor({state:'visible',timeout:20000});
+   const exported=page.waitForEvent('download');
+   await panel.getByRole('button',{name:'Export eight-channel execution source + session'}).click();
+   const bundleDownload=await exported;
+   if(!bundleDownload.suggestedFilename().startsWith('omega-r684-portable-proof-'))throw Error(label+': R684 portable export missing');
+   const stream=await bundleDownload.createReadStream(),pieces=[];
+   if(!stream)throw Error(label+': source snapshot download unreadable');
+   for await(const piece of stream)pieces.push(piece);
+   const portable=Buffer.concat(pieces);
+   if(portable.length<800000||portable.length>2*1024*1024)throw Error(label+': R684 bounded source snapshot size incorrect');
+   const payload=JSON.parse(portable.toString());
+   if(payload.sourceCount!==20736||payload.sourceKeys.length!==8||payload.session.events.length!==3)
+    throw Error(label+': missing full canonical source or original 3 receipts');
+   const good=panel.locator('[data-r684-portable-proof="verified"]');
+   await good.waitFor({state:'visible',timeout:30000});
+   if(!(await good.innerText()).includes('VERIFIED_LOCAL_REPLAY_AND_LIVE_SOURCE_MATCH'))throw Error(label+': original source not reverified');
+   const input=panel.locator('input[aria-label="Import R684 portable proof file"]');
+   const damaged=structuredClone(payload);damaged.session.events[0].action.mode='EXPLORE';
+   await input.setInputFiles({name:'tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(damaged))});
+   await panel.locator('[data-r684-portable-proof="held"]').waitFor({state:'visible',timeout:30000});
+   await input.setInputFiles({name:'original.json',mimeType:'application/json',buffer:portable});
+   await good.waitFor({state:'visible',timeout:30000});
+   await panel.getByRole('button',{name:'Restore verified portable session locally'}).click();
+   await page.getByText('PORTABLE_SOURCE_SESSION_RESTORED').waitFor({state:'visible',timeout:20000});
    await panel.getByRole('button',{name:'Replay and verify entire session'}).click();
    await panel.locator('[data-r679-verification="valid"]').waitFor({state:'visible',timeout:20000});
    if(errors.length)throw Error(label+': uncaught browser errors '+errors.join(' | ').slice(0,1000));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(label+': horizontal layout overflow '+overflow);
-   console.log('R679 '+label+' PASS: MODE/GRAPH/DONOR source executions, full 3-record replay, download, reload persistence, deliberate tamper rejection, verified import recovery and responsive layout');
+   console.log('R679/R684 '+label+' PASS: MODE/GRAPH/DONOR source executions, full 3-record replay, download, reload persistence, deliberate tamper rejection, verified import recovery and responsive layout');
   }finally{await context.close()}
  }
 }finally{await browser.close()}
