@@ -72,7 +72,7 @@ try{
    await panel.getByRole('button',{name:'Replay and verify entire session'}).click();
    await panel.locator('[data-r679-verification="valid"]').waitFor({state:'visible',timeout:20000});
    const exported=page.waitForEvent('download');
-   await panel.getByRole('button',{name:'Export full portable source + session'}).click();
+   await panel.getByRole('button',{name:'Export eight-channel execution source + session'}).click();
    const bundleDownload=await exported;
    if(!bundleDownload.suggestedFilename().startsWith('omega-r684-portable-proof-'))throw Error(label+': R684 portable export missing');
    const stream=await bundleDownload.createReadStream(),pieces=[];
