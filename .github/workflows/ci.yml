@@ -94,6 +94,47 @@ jobs:
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
 
 
+  r684-portable-browser-smoke:
+    if: github.event_name == 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact portable candidate
+        uses: actions/checkout@v7
+      - name: Use Node 22 for portable proof
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install and build exact candidate
+        run: |
+          npm install
+          npm run build
+      - name: Install pinned Chromium proof harness
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Start isolated portable evidence preview
+        shell: bash
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4175 > /tmp/omega-r684-preview.log 2>&1 &
+          echo $! > /tmp/omega-r684-preview.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4175/?omega7=1 >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r684-preview.log
+          exit 1
+      - name: Independently prove R679/R684 record, download, tamper refusal and source restore
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4175
+        run: node tests/r679-canonical-session-browser-e2e.mjs
+      - name: Stop isolated portable evidence preview
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/omega-r684-preview.pid ]; then kill "$(cat /tmp/omega-r684-preview.pid)" || true; fi
+
   omega7-user-parity:
     if: github.event_name == 'pull_request'
     needs: verify
