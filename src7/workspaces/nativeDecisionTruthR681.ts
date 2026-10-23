@@ -29,7 +29,7 @@ export const R681_DECISION_AUDIT = Object.freeze({
 type Label='STAY'|'TURN'|'ESCALATE';
 type Counts=Record<Label,number>;
 export type R681TruthReport={
- sourceSha256:string;rows:number;stored:Counts;recomputed:Counts;
+ snapshotSha256:string;rows:number;stored:Counts;recomputed:Counts;
  savedVsRecoveredKernel:{TURN_to_STAY:number;ESCALATE_to_TURN:number;ESCALATE_to_STAY:number};
  archivedStabilityRatioResidualRows:number;archivedTurnPressureResidualRows:number;
  empiricalOutcomeLabels:number;originalGeneratorVersionProven:boolean;physicalCalibrationProven:boolean;
@@ -39,7 +39,7 @@ const finite=(n:number)=>Number.isFinite(n)&&Number.isInteger(n)&&n>=0;
 const total=(r:Counts)=>r.STAY+r.TURN+r.ESCALATE;
 export function reviewNativeDecisionTruthR681(raw:R681TruthReport){
  const issues:string[]=[];
- if(raw?.sourceSha256!==R681_SOURCE_SHA)issues.push('ARCHIVE_SOURCE_HASH_NOT_VERIFIED');
+ if(raw?.snapshotSha256!==R681_SOURCE_SHA)issues.push('ARCHIVE_SOURCE_HASH_NOT_VERIFIED');
  if(raw?.rows!==20736)issues.push('CANONICAL_ADDRESS_COVERAGE_NOT_20736');
  const a=raw?.stored,b=raw?.recomputed,x=raw?.savedVsRecoveredKernel;
  if(!a||!b||!x||![a.STAY,a.TURN,a.ESCALATE,b.STAY,b.TURN,b.ESCALATE,x.TURN_to_STAY,x.ESCALATE_to_TURN,x.ESCALATE_to_STAY].every(finite)){
@@ -80,7 +80,7 @@ export function reviewNativeDecisionTruthR681(raw:R681TruthReport){
  return Object.freeze({
   schema:'OMEGA_NATIVE_DECISION_PROOF_GATE_R681',
   truth:'HISTORICAL_SOURCE_RECOMPUTED_NOT_LIVE',
-  snapshotVerified:raw?.sourceSha256===R681_SOURCE_SHA,
+  snapshotVerified:raw?.snapshotSha256===R681_SOURCE_SHA,
   dominantFraction:dominant,entropyBits:entropy,
   disagreements:x?x.TURN_to_STAY+x.ESCALATE_to_TURN+x.ESCALATE_to_STAY:null,
   vetoes:Object.freeze([...new Set(issues)]),
