@@ -1,3 +1,4 @@
+import {cloudArchive} from './archive/cloudArchive.js';
 import r115,{OmegaRuntime as OmegaRuntimeR115} from './workerR115.js';
 import {planIntentR103} from './federation/federationIntentRouterR103.js';
 import {swarmApiR121,withSwarmCorsR121} from './swarm/swarmApiR121.js';
@@ -187,6 +188,7 @@ async function probeFetchR130(request,env){
 }
 
 async function fetchR116(request,env){
+ const archive=await cloudArchive(request,env);if(archive)return archive;
  const url=new URL(request.url),path=url.pathname,corsPath=path.startsWith('/api/hybrid/')||path.startsWith('/api/federation/')||path.startsWith('/api/execution/')||path.startsWith('/api/intelligence/r331/')||path.startsWith('/api/intelligence/r332/qti/')||path==='/api/earth/geocode'||path==='/api/chat'||path==='/api/health'||path==='/api/core-health'||path==='/api/system/convergence'||path==='/api/system/manifest'||path==='/api/system/operational';
  if(request.method==='OPTIONS'&&corsPath)return preflightR116(request);
  if(path==='/api/earth/geocode'&&request.method==='GET')return withCorsR116(await earthGeocodeR3563(request),request);

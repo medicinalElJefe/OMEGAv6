@@ -15,6 +15,8 @@
     "binding": "ASSETS",
     "not_found_handling": "single-page-application"
   },
+  "r2_buckets": [{"binding":"OMEGA_ARCHIVE","bucket_name":"omegav6-private-archive"},{"binding":"OMEGA_ARCHIVE_BACKUP","bucket_name":"omegav6-private-archive-backup"}],
+  "vars": {"OMEGA_ARCHIVE_TOKEN_SHA256":"2daebb5e8798985fa63935ff34053257d5a3bc162310da39e6af2b83238d8737"},
   "ai": {
     "binding": "AI"
   },
