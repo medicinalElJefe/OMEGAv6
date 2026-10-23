@@ -96,7 +96,7 @@ export function CanonicalSessionReplayPanelR679({address,onAddress}:Props){
     <button type='button' disabled={busy||!field||!session||!session.events.length} onClick={verify}>Replay and verify entire session</button>
     <button type='button' disabled={!session} onClick={exportEvidence}>Export evidence JSON</button>
     <button type='button' disabled={busy} onClick={()=>file?.click()}>Import session JSON</button>
-    <button type='button' disabled={busy||!field||!session} onClick={exportPortable}>Export full portable source + session</button>
+    <button type='button' disabled={busy||!field||!session} onClick={exportPortable}>Export eight-channel execution source + session</button>
     <button type='button' disabled={busy} onClick={()=>portableFile?.click()}>Import portable source proof</button>
     <input type='file' aria-label='Import R684 portable proof file' accept='.json,application/json' ref={setPortableFile} style={{display:'none'}} onChange={e=>{const selected=e.target.files?.[0];if(selected)void importPortable(selected);e.target.value=''}}/>
     <input type='file' aria-label='Import session JSON file' accept='.json,application/json' ref={setFile} style={{display:'none'}} onChange={e=>{const imported=e.target.files?.[0];if(imported)void importEvidence(imported);e.target.value=''}}/>
