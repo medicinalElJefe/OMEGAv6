@@ -1,4 +1,8 @@
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {createSourceSessionR679,appendSourceExecutionR679,verifySourceSessionR679} from '../src7/workspaces/canonicalSessionReplayR679.js';
 import {R684_SCHEMA,R684_COUNT,R684_SOURCE_BYTES,R684_BOUNDARY,R684_MAX_BUNDLE_BYTES,
  exportPortableSessionBundleR684,parsePortableSessionBundleR684,verifyPortableSessionBundleR684,
@@ -76,4 +80,22 @@ assert.throws(()=>parsePortableSessionBundleR684(JSON.stringify(invalid)));
 await assert.rejects(()=>exportPortableSessionBundleR684(three,different),/refuses unverified session|source drift/);
 assert.deepEqual(Array.from(field.C.slice(0,12)),sourceBefore.c,'source immutable');
 assert.deepEqual(Array.from(field.routeNext.slice(0,12)),sourceBefore.route,'route immutable');
+const root=mkdtempSync(join(tmpdir(),'omega-r684-cli-'));
+try{
+ const file=join(root,'historical.json');
+ writeFileSync(file,text);
+ const good=spawnSync(process.execPath,['scripts/verify-portable-session-r684.mjs',file],{cwd:process.cwd(),encoding:'utf8',timeout:60000});
+ assert.equal(good.status,0,'offline CLI original source replay failed: '+good.stderr);
+ const proof=JSON.parse(good.stdout);
+ assert.equal(proof.valid,true);
+ assert.equal(proof.verifiedEvents,3);
+ assert.equal(proof.offline,true);
+ assert.equal(proof.liveSourceAttested,false);
+ assert.equal(proof.ownerAuthenticated,false);
+ writeFileSync(file,JSON.stringify(tampered));
+ const rejected=spawnSync(process.execPath,['scripts/verify-portable-session-r684.mjs',file],{cwd:process.cwd(),encoding:'utf8',timeout:60000});
+ assert.equal(rejected.status,1,'offline CLI accepted tampered source evidence');
+ const rejection=JSON.parse(rejected.stdout);
+ assert.equal(rejection.valid,false);
+}finally{rmSync(root,{recursive:true,force:true})}
 console.log('R684 PASS: source-complete 663552-byte export, actual 3-mode/donor replay, import, cryptographic integrity, historical source drift, tamper refusal and no CanonState promotion');
