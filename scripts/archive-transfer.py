@@ -14,7 +14,7 @@ class Archive:
         self.base=base.rstrip('/')+'/api/archive/'; self.token=token.strip()
     def request(self,path,method='GET',body=None):
         for attempt in range(5):
-            req=urllib.request.Request(self.base+path,data=body,method=method,headers={'Authorization':'Bearer '+self.token,**({'Content-Length':str(len(body)),'Content-Type':'application/octet-stream'} if body is not None else {})})
+            req=urllib.request.Request(self.base+path,data=body,method=method,headers={'User-Agent':'Mozilla/5.0','Authorization':'Bearer '+self.token,**({'Content-Length':str(len(body)),'Content-Type':'application/octet-stream'} if body is not None else {})})
             try: return urllib.request.urlopen(req,timeout=120)
             except urllib.error.HTTPError as e:
                 if e.code not in (429,500,502,503,504) or attempt==4: raise
