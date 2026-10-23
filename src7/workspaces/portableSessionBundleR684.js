@@ -20,7 +20,7 @@ export const R684_CHANNELS=8;
 export const R684_SOURCE_BYTES=R684_COUNT*R684_CHANNELS*4;
 export const R684_MAX_BUNDLE_BYTES=2*1024*1024;
 export const R684_ENCODING='FLOAT32_LE_8_CHANNELS_BASE64_V1';
-export const R684_BOUNDARY='Archived source-bound model replay only. This bundle has a SHA256 integrity digest, NOT an owner signature, trusted cloud receipt, current CanonState authority, device execution proof, empirical observation, or physical dimensional evidence. A party controlling all bytes can rehash a forged bundle.';
+export const R684_BOUNDARY='Archived eight-channel executor-input replay, not the entire OMEGA canonical corpus or physical geometry. This bundle has a SHA256 integrity digest, NOT an owner signature, trusted cloud receipt, current CanonState authority, device execution proof, empirical observation, or physical dimensional evidence. A party controlling all bytes can rehash a forged bundle.';
 
 function requireBytes(value){
  if(typeof value!=='string'||value.length!==R684_SOURCE_BYTES/3*4
