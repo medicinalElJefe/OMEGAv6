@@ -28,6 +28,16 @@ This is **not** a full copy of the OMEGA repository, all archives, all physical 
    - `HELD`: archive integrity, deterministic replay or source material is invalid; no historical proof admitted.
 6. Restore a portable session into browser-local active recording only if a **fresh** import/source verification still matches the current source. The restored session itself remains local model evidence.
 
+## Offline, network-free verification
+
+The ZIP/source repository carries a standalone verifier; a user who exported a portable evidence bundle does not need ChatGPT or an active R2 account to replay it:
+
+```bash
+node scripts/verify-portable-session-r684.mjs omega-r684-portable-proof-2026-10-22.json
+```
+
+Requires Node.js 22 or later and the OMEGA source checkout containing the original R671/R676/R678 executors. It outputs a JSON receipt and exits **0 only if** the eight-channel archived source digest, full session hash chain and every original model computation pass. Invalid or edited evidence exits **1**. The CLI intentionally reports `liveSourceAttested=false` because a downloaded artifact alone cannot establish the current production state or owner authenticity.
+
 ## Tamper and authenticity boundary
 
 The exported archive's SHA-256 protects against accidental editing, truncation, corrupted records and tampering **without updating the digest**. It is *not a digital signature or an immutable cloud witness*. Anyone who controls the source archive and all its digests can fabricate and rehash a new self-consistent model record. Such a self-consistent file is at most a reproducible model artifact, not evidence that a particular original provider, device or production executor generated it.
