@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {stagedReadWithRetryR685,isTransientStagedTransportR685} from '../scripts/stagedReadRetryR685.mjs';
+const issue=(code)=>Object.assign(new Error('transport '+code),{cause:Object.assign(new Error(code),{code})});
+assert.ok(isTransientStagedTransportR685(issue('ECONNRESET')));
+assert.ok(isTransientStagedTransportR685(issue('ETIMEDOUT')));
+assert.equal(isTransientStagedTransportR685(new Error('HTTP 503')),false);
+const opts={headers:{'Cloudflare-Workers-Version-Overrides':'omegav6="exact-candidate"'}};
+let calls=0;const waits=[];
+const request=async(url,options)=>{calls++;assert.equal(url,'https://example.test/api/health');assert.deepEqual(options,opts);if(calls<=2)throw issue('ECONNRESET');return{ok:true,status:200}};
+const r=await stagedReadWithRetryR685('https://example.test/api/health',opts,{fetcher:request,sleep:async(ms)=>waits.push(ms),attempts:4,delayMs:10});
+assert.equal(r.status,200);assert.equal(calls,3);assert.deepEqual(waits,[10,20]);
+calls=0;await assert.rejects(()=>stagedReadWithRetryR685('u',{}, {fetcher:async()=>{calls++;throw new Error('bad source SHA')},sleep:async()=>{},attempts:4}),/bad source SHA/);assert.equal(calls,1);
+calls=0;const http=await stagedReadWithRetryR685('u',{}, {fetcher:async()=>{calls++;return{ok:false,status:503}},sleep:async()=>{},attempts:4});assert.equal(http.status,503);assert.equal(calls,1,'HTTP status must not silently retry or be admitted');
+calls=0;await assert.rejects(()=>stagedReadWithRetryR685('u',{}, {fetcher:async()=>{calls++;throw issue('ETIMEDOUT')},sleep:async()=>{},attempts:3}),/transport/);assert.equal(calls,3,'bounded retries exhaust and fail');
+await assert.rejects(()=>stagedReadWithRetryR685('u',{}, {attempts:100}),/bounded/);
+console.log('R685 PASS: exact version headers preserved, transient reset retries bounded, HTTP/schema/source errors remain fail-closed');
