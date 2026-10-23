@@ -5,11 +5,11 @@ const catalog={coverages:[{id:'G19-FD',label:'GOES-19 Full Disk',state:'RETURNED
 const browser=await chromium.launch({headless:true});
 try{
  for(const [label,viewport] of [['desktop',{width:1440,height:900}],['mobile',{width:390,height:844}]]){
-  const context=await browser.newContext({viewport});const page=await context.newPage(),errors=[];let attempts=0;
+  const context=await browser.newContext({viewport});const page=await context.newPage(),errors=[];let attempts=0;let exhaust=false;let manualRelease=false;
   page.on('pageerror',e=>errors.push(String(e)));
   await page.route('**/api/earth/noaa/catalog*',async route=>{
    attempts++;
-   if(attempts<=2)return route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({ok:false,state:'SOURCE_UNAVAILABLE'})});
+   if((exhaust&&!manualRelease)||(!exhaust&&attempts<=2))return route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({ok:false,state:'SOURCE_UNAVAILABLE'})});
    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(catalog)});
   });
   await page.route('**/api/earth/noaa/image*',route=>route.fulfill({status:200,contentType:'image/svg+xml',body:iconSvg}));
@@ -27,6 +27,20 @@ try{
   await panel.locator('figure img').waitFor({state:'visible',timeout:10000});
   await page.waitForFunction(()=>document.querySelector('.earth-r279-sat-main')?.getAttribute('data-image-state')==='READY',{timeout:15000});
   if(await panel.locator('.earth-r279-sat-empty').count())throw Error(label+': stale empty state survived returned coverage');
+  // Fail all automatic attempts, assert explicit source error (no image),
+  // then recover ONLY through a human-triggered retry using real returned source.
+  exhaust=true;manualRelease=false;attempts=0;
+  await page.reload({waitUntil:'domcontentloaded',timeout:45000});
+  await page.locator('.earth-r279-view-tabs button').filter({hasText:'Satellite'}).first().click();
+  const retry=page.getByRole('button',{name:'Retry satellite catalog'});
+  await retry.waitFor({state:'visible',timeout:18000});
+  if(attempts!==3)throw Error(label+': catalog must have exactly three bounded failure attempts, got '+attempts);
+  const failedPanel=page.locator('.earth-r279-sat-main[data-catalog-state="ERROR"]');
+  if(!(await failedPanel.isVisible())||await failedPanel.locator('figure img').count())throw Error(label+': failed satellite source must remain visibly unavailable without fabricated image');
+  manualRelease=true;
+  await retry.click();
+  await page.waitForFunction(()=>document.querySelector('.earth-r279-sat-main')?.getAttribute('data-image-state')==='READY',{timeout:18000});
+  if(attempts!==4)throw Error(label+': manual retry must make one new source request, got '+attempts);
   if(errors.length)throw Error(label+': page errors '+errors.join(';'));
   console.log('R681 '+label+' PASS · bounded failed NOAA catalog requests recovered by third source request · real source binding required · no fabricated fallback');
   await context.close();
