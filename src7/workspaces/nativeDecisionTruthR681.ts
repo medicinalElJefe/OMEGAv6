@@ -80,7 +80,10 @@ export function reviewNativeDecisionTruthR681(raw:R681TruthReport){
  return Object.freeze({
   schema:'OMEGA_NATIVE_DECISION_PROOF_GATE_R681',
   truth:'HISTORICAL_SOURCE_RECOMPUTED_NOT_LIVE',
+  // This compares a supplied digest string to the archived reference. It does NOT hash source bytes in the browser.
   snapshotVerified:raw?.snapshotSha256===R681_SOURCE_SHA,
+  snapshotDigestMatchesReference:raw?.snapshotSha256===R681_SOURCE_SHA,
+  sourceBytesIndependentlyVerifiedInBrowser:false,
   dominantFraction:dominant,entropyBits:entropy,
   disagreements:x?x.TURN_to_STAY+x.ESCALATE_to_TURN+x.ESCALATE_to_STAY:null,
   vetoes:Object.freeze([...new Set(issues)]),
