@@ -38,6 +38,7 @@ export function NativeDecisionTruthPanelR681(){
      <p>Saved decision entropy: <b>{fmt(proof.entropyBits)} bits</b> · dominant class <b>{proof.dominantFraction===null?'N/A':(proof.dominantFraction*100).toFixed(3)+'%'}</b>.</p>
      <details><summary>Exact provenance and blocked release gates</summary>
       <p>Source: {audit.nativeOriginal}, snapshot {audit.originalObservedAt}. SHA-256: <code>{audit.snapshotSha256}</code>.</p>
+      <p>Reference digest match: {proof.snapshotDigestMatchesReference?'YES':'NO'}. Source bytes independently rehashed in this browser: {proof.sourceBytesIndependentlyVerifiedInBrowser?'YES':'NO'}. The separate Python source audit checks the archived bytes; this static interface does not repeat that verification.</p>
       <p>Comparison algorithm: {audit.recoveredKernelSource}. Its defaults are comparison authority only; the original generator version and empirical outcome labels have not been established.</p>
       <p>The historic source audit is an immutable snapshot, not an ongoing desktop-agent connection or a calibrated physical simulation.</p>
       <ul>{proof.vetoes.map(x=><li key={x}>{x}</li>)}</ul>
