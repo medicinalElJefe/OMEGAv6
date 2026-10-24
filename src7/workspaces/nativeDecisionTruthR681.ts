@@ -76,6 +76,14 @@ export function reviewNativeDecisionTruthR681(raw:R681TruthReport){
  // R686: malformed or partial reports must not produce authoritative-looking metrics.
  // Reject invalid counts before deriving any dashboard statistic.
  const validStored=Boolean(a&&[a.STAY,a.TURN,a.ESCALATE].every(finite)&&finite(raw?.rows)&&raw.rows===20736&&total(a)===raw.rows);
+ // R687: a contradiction count is meaningful only for complete, finite and conserved ledgers.
+ const validRecomputed=Boolean(b&&[b.STAY,b.TURN,b.ESCALATE].every(finite)&&finite(raw?.rows)&&total(b)===raw.rows);
+ const validLedger=Boolean(validStored&&validRecomputed&&x&&
+  [x.TURN_to_STAY,x.ESCALATE_to_TURN,x.ESCALATE_to_STAY].every(finite)&&
+  x.TURN_to_STAY+x.ESCALATE_to_TURN+x.ESCALATE_to_STAY<=raw.rows&&
+  b!.STAY===a!.STAY+x.TURN_to_STAY+x.ESCALATE_to_STAY&&
+  b!.TURN===a!.TURN-x.TURN_to_STAY+x.ESCALATE_to_TURN&&
+  b!.ESCALATE===a!.ESCALATE-x.ESCALATE_to_TURN-x.ESCALATE_to_STAY);
  const dominant=validStored?Math.max(a!.STAY,a!.TURN,a!.ESCALATE)/total(a!):null;
  const entropy=validStored?(['STAY','TURN','ESCALATE'] as Label[]).reduce((acc,k)=>{
   const p=a![k]/total(a!);return p>0?acc-p*Math.log2(p):acc;
@@ -88,7 +96,7 @@ export function reviewNativeDecisionTruthR681(raw:R681TruthReport){
   snapshotDigestMatchesReference:raw?.snapshotSha256===R681_SOURCE_SHA,
   sourceBytesIndependentlyVerifiedInBrowser:false,
   dominantFraction:dominant,entropyBits:entropy,
-  disagreements:x?x.TURN_to_STAY+x.ESCALATE_to_TURN+x.ESCALATE_to_STAY:null,
+  disagreements:validLedger?x!.TURN_to_STAY+x!.ESCALATE_to_TURN+x!.ESCALATE_to_STAY:null,
   vetoes:Object.freeze([...new Set(issues)]),
   canonicalStateMutation:false,
   useAsAutonomousNativePolicy:false,
