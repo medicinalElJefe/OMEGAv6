@@ -65,4 +65,26 @@ for(const token of ["HYBRID_STATUS_RUNTIME_UNREACHABLE","HYBRID_STATUS_UPSTREAM_
 }
 must(statusSource.indexOf('if(!response.ok)')<statusSource.indexOf('const devices='),'R691 upstream failure must veto derived online/offline status');
 
+// R692: execute the real production Worker route with a controlled Durable Object.
+// This proves negative HTTP and malformed bytes cannot be mislabeled as offline.
+const {default:hybridWorker}=await import('../src/workerR101.js');
+const hybridRequest=new Request('https://omegav6.jeffdeweyeljefe.workers.dev/api/hybrid/status',{headers:{'x-omega-bridge-id':'r692_fixture'}});
+async function exerciseHybridStatus(upstream){
+ const env={OMEGA_RUNTIME:{idFromName:name=>name,get:()=>({fetch:async()=>{if(upstream instanceof Error)throw upstream;return upstream}})}};
+ const response=await hybridWorker.fetch(hybridRequest,env);
+ return {status:response.status,body:await response.json()};
+}
+for(const [name,source,expectedCode] of [
+ ['upstream 500',new Response(JSON.stringify({state:'PAIRING_REQUIRED',devices:[]}),{status:500}),'HYBRID_STATUS_UPSTREAM_FAILURE'],
+ ['upstream transport error',new Error('runtime unavailable'),'HYBRID_STATUS_RUNTIME_UNREACHABLE'],
+ ['invalid JSON',new Response('not json',{status:200}),'HYBRID_STATUS_MALFORMED_UPSTREAM'],
+ ['missing device array',new Response(JSON.stringify({state:'PAIRING_REQUIRED'}),{status:200}),'HYBRID_STATUS_INVALID_UPSTREAM_SCHEMA']
+]){
+ const result=await exerciseHybridStatus(source);
+ must(result.status>=500&&result.body.code===expectedCode&&result.body.state==='RUNTIME_STATUS_UNKNOWN',`R692 ${name} must remain explicit non-success unknown runtime state`);
+ must(result.body.state!=='DEVICE_PROOF_REQUIRED'&&result.body.state!=='VERIFIED_DEVICE_ONLINE',`R692 ${name} cannot fabricate native-host status`);
+}
+const healthy=await exerciseHybridStatus(new Response(JSON.stringify({state:'PAIRING_REQUIRED',devices:[]}),{status:200}));
+must(healthy.status===200&&healthy.body.state==='DEVICE_PROOF_REQUIRED'&&healthy.body.nativeExecutionClaimed===false,'R692 healthy no-host status must preserve truthful offline projection');
+
 console.log('R300 AT09/AT10 PROOF HANDOFF PASS · explicit browser-local arm · offline remains non-execution · one-shot eligible-host submission through existing /api/missions authority · DESKTOP_HEALTH + FORENSIC_HASH_LEDGER only · durable identity before disarm · R141 verification and R125 Canon boundary preserved');
