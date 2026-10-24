@@ -74,6 +74,18 @@ def audit_database(database: Path, *, expected_count: int = EXPECTED_COUNT,
     if not isinstance(expected_count, int) or expected_count <= 0 or expected_count > EXPECTED_COUNT:
         raise ValueError("R681 invalid expected runtime cardinality")
     database = Path(database).resolve(strict=True)
+    # R688: independently bind every proof to the actual bounded SQLite bytes.
+    # Caller-provided digests and lengths are assertions, never proof by themselves.
+    size = database.stat().st_size
+    if size > MAX_SQLITE_BYTES:
+        raise ValueError("R688 source database exceeds bounded audit size")
+    actual_sha256 = digest(database.read_bytes())
+    if source_sha256 is not None and source_sha256 != actual_sha256:
+        raise ValueError("R688 claimed source digest does not match SQLite bytes")
+    if source_bytes is not None and source_bytes != size:
+        raise ValueError("R688 claimed source length does not match SQLite bytes")
+    source_sha256 = actual_sha256
+    source_bytes = size
     uri = "file:" + quote(str(database), safe="/:") + "?mode=ro&immutable=1"
     connection = sqlite3.connect(uri, uri=True)
     try:
@@ -123,7 +135,10 @@ def audit_database(database: Path, *, expected_count: int = EXPECTED_COUNT,
         n = len(rows)
         dominant = max(stored.values()) / n
         entropy = -sum((v/n)*math.log2(v/n) for v in stored.values() if v)
-        historical_source = source_sha256 == ORIGINAL_SHA256 and expected_count == EXPECTED_COUNT
+        # Detect concurrent source replacement even for a direct audit_database caller.
+        if database.stat().st_size != size or digest(database.read_bytes()) != actual_sha256:
+            raise ValueError("R688 source bytes changed during immutable audit")
+        historical_source = actual_sha256 == ORIGINAL_SHA256 and expected_count == EXPECTED_COUNT
         reasons = []
         if not historical_source: reasons.append("SOURCE_IDENTITY_NOT_ORIGINAL_B053")
         if stored["STAY"] == 0: reasons.append("STAY_CLASS_UNREPRESENTED")
