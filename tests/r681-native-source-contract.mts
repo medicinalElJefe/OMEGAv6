@@ -3,7 +3,9 @@ import {R681_DECISION_AUDIT,R681_SOURCE_SHA,reviewNativeDecisionTruthR681} from 
 
 const report=reviewNativeDecisionTruthR681(R681_DECISION_AUDIT);
 assert.equal(report.schema,'OMEGA_NATIVE_DECISION_PROOF_GATE_R681');
-assert.equal(report.snapshotVerified,true);
+assert.equal(report.snapshotVerified,true); // Historical compatibility: digest string equality only
+assert.equal(report.snapshotDigestMatchesReference,true);
+assert.equal(report.sourceBytesIndependentlyVerifiedInBrowser,false,'static UI cannot claim original SQLite byte validation');
 assert.equal(report.admission,'HELD');
 assert.equal(report.canonicalStateMutation,false);
 assert.equal(report.useAsAutonomousNativePolicy,false);
