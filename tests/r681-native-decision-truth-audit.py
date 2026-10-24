@@ -117,6 +117,21 @@ class NativeTruthTests(unittest.TestCase):
         self.assertFalse(actual['historical_source_hash_verified'])
         self.assertEqual(actual['production_admission'],'HELD')
 
+    def test_source_bound_report_receipt_detects_mutation(self):
+        report=audit.audit_source(self.db,from_zip=False,expected_count=24)
+        self.assertTrue(audit.verify_audit_receipt(report))
+        self.assertEqual(len(report['audit_receipt_sha256']),64)
+        changed=json.loads(json.dumps(report))
+        changed['stored']['STAY']+=1
+        self.assertFalse(audit.verify_audit_receipt(changed))
+        forged=json.loads(json.dumps(report))
+        forged['source_sha256']='0'*64
+        self.assertFalse(audit.verify_audit_receipt(forged))
+        missing=json.loads(json.dumps(report))
+        del missing['audit_receipt_sha256']
+        self.assertFalse(audit.verify_audit_receipt(missing))
+        self.assertEqual(report['production_admission'],'HELD')
+
     def test_wrong_cardinality_and_replay(self):
         with self.assertRaisesRegex(ValueError,'cardinality'):audit.audit_database(self.db,expected_count=25)
         a=audit.audit_source(self.db,from_zip=False,expected_count=24)
