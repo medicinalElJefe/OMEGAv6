@@ -56,4 +56,13 @@ for(const token of ["if(!r.ok)", "r.headers.get('cf-ray')", "r.headers.get('cont
 }
 must(!liveVerifier.includes('if(r.status===500)continue')&&!liveVerifier.includes('if(r.status===500)return'),'R690 cannot bypass an HTTP 500');
 
+const workerR101=read('src/workerR101.js');
+const statusStart=workerR101.indexOf('async function hybridStatusR101('),statusEnd=workerR101.indexOf('async function reconnectHybridR101(',statusStart);
+must(statusStart>=0&&statusEnd>statusStart,'R691 Hybrid status path not present');
+const statusSource=workerR101.slice(statusStart,statusEnd);
+for(const token of ["HYBRID_STATUS_RUNTIME_UNREACHABLE","HYBRID_STATUS_UPSTREAM_FAILURE","HYBRID_STATUS_MALFORMED_UPSTREAM","HYBRID_STATUS_INVALID_UPSTREAM_SCHEMA","RUNTIME_STATUS_UNKNOWN","if(!response.ok)","if(!data||typeof data!=='object'"]){
+ must(statusSource.includes(token),`R691 missing upstream error gate ${token}`);
+}
+must(statusSource.indexOf('if(!response.ok)')<statusSource.indexOf('const devices='),'R691 upstream failure must veto derived online/offline status');
+
 console.log('R300 AT09/AT10 PROOF HANDOFF PASS · explicit browser-local arm · offline remains non-execution · one-shot eligible-host submission through existing /api/missions authority · DESKTOP_HEALTH + FORENSIC_HASH_LEDGER only · durable identity before disarm · R141 verification and R125 Canon boundary preserved');
