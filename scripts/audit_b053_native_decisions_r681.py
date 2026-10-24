@@ -33,6 +33,20 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+
+def canonical_audit_bytes(report: dict) -> bytes:
+    """Deterministic report serialization; the receipt field cannot attest itself."""
+    body = {k:v for k,v in report.items() if k != "audit_receipt_sha256"}
+    return json.dumps(body,sort_keys=True,separators=(",",":"),allow_nan=False).encode("utf-8")
+
+
+def verify_audit_receipt(report: dict) -> bool:
+    """Verify report integrity only; source identity still requires hashing SQLite bytes."""
+    candidate = report.get("audit_receipt_sha256")
+    return (isinstance(candidate,str) and len(candidate)==64 and
+            candidate == hashlib.sha256(canonical_audit_bytes(report)).hexdigest())
+
+
 def source_decision(c: float, burden: float, q: float):
     """Unmodified historical backend/truth_spine/decision.py defaults."""
     if not all(math.isfinite(x) for x in (c, burden, q)) or min(c, burden, q) < 0:
@@ -148,7 +162,7 @@ def audit_database(database: Path, *, expected_count: int = EXPECTED_COUNT,
         # Independently calibrated ground truth, sensor validation, and downstream
         # action outcomes are absent. No threshold fitting to this same snapshot.
         reasons.append("EMPIRICAL_LABEL_AND_OUTCOME_CALIBRATION_MISSING")
-        return {
+        report = {
             "schema": "OMEGA_B053_NATIVE_DECISION_TRUTH_AUDIT_R681",
             "source": DB_MEMBER, "source_sha256": source_sha256,
             "source_bytes": source_bytes, "historical_source_hash_verified": historical_source,
@@ -172,6 +186,9 @@ def audit_database(database: Path, *, expected_count: int = EXPECTED_COUNT,
             "blocking_reasons": reasons,
             "truth_boundary": "Native source snapshot is historical; the recovered DecisionKernel is not proven to be the original generator or empirical ground truth. Differences are evidence, not an instruction to overwrite database rows."
         }
+        report["audit_receipt_sha256"] = hashlib.sha256(canonical_audit_bytes(report)).hexdigest()
+        assert verify_audit_receipt(report)
+        return report
     finally:
         connection.close()
 
