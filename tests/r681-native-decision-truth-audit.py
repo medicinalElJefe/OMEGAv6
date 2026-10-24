@@ -106,6 +106,17 @@ class NativeTruthTests(unittest.TestCase):
         with zipfile.ZipFile(other,'w') as z:z.write(self.db,'not-original/source.db')
         with self.assertRaisesRegex(ValueError,'missing or duplicate'):audit.audit_source(other,from_zip=True,expected_count=24)
 
+    def test_forged_digest_and_length_cannot_claim_original_source(self):
+        with self.assertRaisesRegex(ValueError,'claimed source digest'):
+            audit.audit_database(self.db,expected_count=24,source_sha256=audit.ORIGINAL_SHA256)
+        with self.assertRaisesRegex(ValueError,'claimed source length'):
+            audit.audit_database(self.db,expected_count=24,source_sha256=self.hash,source_bytes=1)
+        actual=audit.audit_database(self.db,expected_count=24)
+        self.assertEqual(actual['source_sha256'],self.hash)
+        self.assertEqual(actual['source_bytes'],self.db.stat().st_size)
+        self.assertFalse(actual['historical_source_hash_verified'])
+        self.assertEqual(actual['production_admission'],'HELD')
+
     def test_wrong_cardinality_and_replay(self):
         with self.assertRaisesRegex(ValueError,'cardinality'):audit.audit_database(self.db,expected_count=25)
         a=audit.audit_source(self.db,from_zip=False,expected_count=24)
