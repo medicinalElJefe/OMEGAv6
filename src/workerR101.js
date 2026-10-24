@@ -58,7 +58,7 @@ async function hybridStatusR101(request,env,id){
  let data;
  try{data=await response.clone().json()}catch{return json({ok:false,code:'HYBRID_STATUS_MALFORMED_UPSTREAM',state:'RUNTIME_STATUS_UNKNOWN',nativeExecutionClaimed:false},502)}
  if(!data||typeof data!=='object'||Array.isArray(data)||!Array.isArray(data.devices))return json({ok:false,code:'HYBRID_STATUS_INVALID_UPSTREAM_SCHEMA',state:'RUNTIME_STATUS_UNKNOWN',nativeExecutionClaimed:false},502);
- const devices=data.devices,at=Date.now(),online=devices.filter(x=>{const seen=Number(x?.lastSeen);return x?.online===true&&!x?.revoked&&Number.isFinite(seen)&&seen>0&&at>=seen&&at-seen<HEARTBEAT_FRESH_MS}),proved=devices.filter(x=>Number(x?.lastSeen)>0&&!x?.revoked);
+ const devices=data.devices,at=Date.now(),online=devices.filter(x=>{const seen=Number(x?.lastSeen);return x?.online===true&&!x?.revoked&&Number.isFinite(seen)&&seen>0&&at>=seen&&at-seen<HEARTBEAT_FRESH_MS}),proved=devices.filter(x=>{const seen=Number(x?.lastSeen);return !x?.revoked&&Number.isFinite(seen)&&seen>0&&seen<=at});
  const pairingState=data.state||'PAIRING_REQUIRED',lastAuthenticatedHeartbeat=proved.length?Math.max(...proved.map(x=>Number(x.lastSeen)||0)):null;
  return json({...data,
   state:online.length?'VERIFIED_DEVICE_ONLINE':'DEVICE_PROOF_REQUIRED',
