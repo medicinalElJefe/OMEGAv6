@@ -33,6 +33,14 @@ assert.equal(rejectedPartial.entropyBits,null,'incomplete census must not produc
 assert.ok(rejectedPartial.vetoes.includes('INCOMPLETE_NATIVE_DECISION_CENSUS'));
 const forgedConservation=copy();forgedConservation.savedVsRecoveredKernel.TURN_to_STAY=1;
 assert.ok(reviewNativeDecisionTruthR681({...forgedConservation,sourceSha256:R681_SOURCE_SHA}).vetoes.includes('CONTRADICTION_LEDGER_NOT_CONSERVED'));
+const brokenLedger=copy();brokenLedger.savedVsRecoveredKernel.TURN_to_STAY=Number.NaN;
+const invalidLedger=reviewNativeDecisionTruthR681(brokenLedger);
+assert.equal(invalidLedger.disagreements,null,'NaN contradiction ledger must not be displayed as numeric proof');
+assert.ok(invalidLedger.vetoes.includes('INVALID_NATIVE_DECISION_COUNTS'));
+const mismatchedLedger=copy();mismatchedLedger.savedVsRecoveredKernel.ESCALATE_to_TURN=59;
+const inconsistent=reviewNativeDecisionTruthR681(mismatchedLedger);
+assert.equal(inconsistent.disagreements,null,'unconserved contradiction ledger must not be displayed as proof');
+assert.ok(inconsistent.vetoes.includes('CONTRADICTION_LEDGER_NOT_CONSERVED'));
 const forgedNegatives=copy();forgedNegatives.recomputed.STAY=-1;
 assert.ok(reviewNativeDecisionTruthR681({...forgedNegatives,sourceSha256:R681_SOURCE_SHA}).vetoes.includes('INVALID_NATIVE_DECISION_COUNTS'));
 const seeminglyPerfect=copy();
