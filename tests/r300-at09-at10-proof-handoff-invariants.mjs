@@ -50,4 +50,10 @@ for(const token of [
  'aria-pressed="false"'
 ])must(html.includes(token),`visible truth/arming boundary missing: ${token}`);
 
+const liveVerifier=read('scripts/verify_live_r300_at09_at10_handoff.mjs');
+for(const token of ["if(!r.ok)", "r.headers.get('cf-ray')", "r.headers.get('content-type')", "OMEGA_STAGED_READ_ONLY", "body.slice(0,240)"]){
+ must(liveVerifier.includes(token),`R690 diagnostic source lost fail-closed HTTP evidence: ${token}`);
+}
+must(!liveVerifier.includes('if(r.status===500)continue')&&!liveVerifier.includes('if(r.status===500)return'),'R690 cannot bypass an HTTP 500');
+
 console.log('R300 AT09/AT10 PROOF HANDOFF PASS · explicit browser-local arm · offline remains non-execution · one-shot eligible-host submission through existing /api/missions authority · DESKTOP_HEALTH + FORENSIC_HASH_LEDGER only · durable identity before disarm · R141 verification and R125 Canon boundary preserved');
