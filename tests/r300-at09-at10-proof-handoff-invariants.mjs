@@ -87,4 +87,13 @@ for(const [name,source,expectedCode] of [
 const healthy=await exerciseHybridStatus(new Response(JSON.stringify({state:'PAIRING_REQUIRED',devices:[]}),{status:200}));
 must(healthy.status===200&&healthy.body.state==='DEVICE_PROOF_REQUIRED'&&healthy.body.nativeExecutionClaimed===false,'R692 healthy no-host status must preserve truthful offline projection');
 
+// R693: upstream online flags alone cannot establish current host execution proof.
+for(const [label,lastSeen] of [['absent',undefined],['stale',Date.now()-120000],['future',Date.now()+120000]]){
+ const source={state:'VERIFIED_DEVICE_ONLINE',devices:[{id:'fixture',online:true,lastSeen}]};
+ const result=await exerciseHybridStatus(new Response(JSON.stringify(source),{status:200}));
+ must(result.status===200&&result.body.state==='DEVICE_PROOF_REQUIRED'&&result.body.nativeExecutionClaimed===false,`R693 ${label} heartbeat cannot establish native online status`);
+}
+const fresh=await exerciseHybridStatus(new Response(JSON.stringify({state:'VERIFIED_DEVICE_ONLINE',devices:[{id:'fixture',online:true,revoked:false,lastSeen:Date.now()}]}),{status:200}));
+must(fresh.status===200&&fresh.body.state==='VERIFIED_DEVICE_ONLINE'&&fresh.body.nativeExecutionClaimed===true,'R693 current heartbeat must retain verified online claim');
+
 console.log('R300 AT09/AT10 PROOF HANDOFF PASS · explicit browser-local arm · offline remains non-execution · one-shot eligible-host submission through existing /api/missions authority · DESKTOP_HEALTH + FORENSIC_HASH_LEDGER only · durable identity before disarm · R141 verification and R125 Canon boundary preserved');
