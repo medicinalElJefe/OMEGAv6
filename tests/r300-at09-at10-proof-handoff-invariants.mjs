@@ -96,4 +96,11 @@ for(const [label,lastSeen] of [['absent',undefined],['stale',Date.now()-120000],
 const fresh=await exerciseHybridStatus(new Response(JSON.stringify({state:'VERIFIED_DEVICE_ONLINE',devices:[{id:'fixture',online:true,revoked:false,lastSeen:Date.now()}]}),{status:200}));
 must(fresh.status===200&&fresh.body.state==='VERIFIED_DEVICE_ONLINE'&&fresh.body.nativeExecutionClaimed===true,'R693 current heartbeat must retain verified online claim');
 
+// R694: future-dated heartbeat cannot pollute historical authenticated proof.
+const futureProof=await exerciseHybridStatus(new Response(JSON.stringify({state:'VERIFIED_DEVICE_ONLINE',devices:[{id:'future',online:true,lastSeen:Date.now()+120000}]}),{status:200}));
+must(futureProof.body.state==='DEVICE_PROOF_REQUIRED'&&futureProof.body.lastAuthenticatedHeartbeat===null,'R694 future heartbeat must not be asserted as historical authentication');
+const oldProofAt=Date.now()-120000;
+const oldProof=await exerciseHybridStatus(new Response(JSON.stringify({state:'PAIRING_REQUIRED',devices:[{id:'stale',online:false,lastSeen:oldProofAt}]}),{status:200}));
+must(oldProof.body.state==='DEVICE_PROOF_REQUIRED'&&oldProof.body.lastAuthenticatedHeartbeat===oldProofAt,'R694 valid stale authenticated proof must remain historical without implying current PC online');
+
 console.log('R300 AT09/AT10 PROOF HANDOFF PASS · explicit browser-local arm · offline remains non-execution · one-shot eligible-host submission through existing /api/missions authority · DESKTOP_HEALTH + FORENSIC_HASH_LEDGER only · durable identity before disarm · R141 verification and R125 Canon boundary preserved');
