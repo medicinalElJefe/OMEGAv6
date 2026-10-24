@@ -24,8 +24,6 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - name: Retrieve authoritative npm integrity metadata for R681 security lock repair
-        run: npm view undici@7.30.1 dist.integrity --json
       - name: Audit locked application dependency tree
         run: npm audit --audit-level=high
       - name: Prove R163 canonical core-health boundary
