@@ -103,4 +103,10 @@ const oldProofAt=Date.now()-120000;
 const oldProof=await exerciseHybridStatus(new Response(JSON.stringify({state:'PAIRING_REQUIRED',devices:[{id:'stale',online:false,lastSeen:oldProofAt}]}),{status:200}));
 must(oldProof.body.state==='DEVICE_PROOF_REQUIRED'&&oldProof.body.lastAuthenticatedHeartbeat===oldProofAt,'R694 valid stale authenticated proof must remain historical without implying current PC online');
 
+const stagedRelease=read('scripts/staged-cloudflare-release.sh');
+for(const token of ['stage_candidate_with_visibility_retry()',"'[code: 100146]'","'The requested Worker version could not be found'",'assert_current_main_owner || return $?','if [[ "$attempt" == "4" ]]','if stage_candidate_with_visibility_retry; then']){
+ must(stagedRelease.includes(token),`R695 bounded Cloudflare version visibility gate missing: ${token}`);
+}
+must(stagedRelease.includes('STAGED_DEPLOYMENT_READY=0')&&stagedRelease.includes('R322 forward deployment confirmed'),'R695 must retain 100/0 membership proof and exceptional R322 recovery gate');
+
 console.log('R300 AT09/AT10 PROOF HANDOFF PASS · explicit browser-local arm · offline remains non-execution · one-shot eligible-host submission through existing /api/missions authority · DESKTOP_HEALTH + FORENSIC_HASH_LEDGER only · durable identity before disarm · R141 verification and R125 Canon boundary preserved');
