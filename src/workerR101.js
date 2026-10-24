@@ -49,8 +49,15 @@ async function directHybridAgentRelayR2074(request,env,path){
 async function sha256(source){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source));return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 
 async function hybridStatusR101(request,env,id){
- const response=await runtimeFetch(env,id,'/status',request,'GET');
- const data=await response.clone().json().catch(()=>({}));
+ // R691: upstream Durable Object failures are not evidence that a PC is offline.
+ // Never collapse HTTP errors, network exceptions or malformed bodies into DEVICE_PROOF_REQUIRED.
+ let response;
+ try{response=await runtimeFetch(env,id,'/status',request,'GET')}
+ catch{return json({ok:false,code:'HYBRID_STATUS_RUNTIME_UNREACHABLE',state:'RUNTIME_STATUS_UNKNOWN',nativeExecutionClaimed:false,truthBoundary:'NO_NATIVE_STATUS_INFERRED_FROM_RUNTIME_FAILURE'},503)}
+ if(!response.ok)return json({ok:false,code:'HYBRID_STATUS_UPSTREAM_FAILURE',upstreamStatus:response.status,state:'RUNTIME_STATUS_UNKNOWN',nativeExecutionClaimed:false,truthBoundary:'NO_NATIVE_STATUS_INFERRED_FROM_RUNTIME_FAILURE'},response.status>=500?503:502);
+ let data;
+ try{data=await response.clone().json()}catch{return json({ok:false,code:'HYBRID_STATUS_MALFORMED_UPSTREAM',state:'RUNTIME_STATUS_UNKNOWN',nativeExecutionClaimed:false},502)}
+ if(!data||typeof data!=='object'||Array.isArray(data)||!Array.isArray(data.devices))return json({ok:false,code:'HYBRID_STATUS_INVALID_UPSTREAM_SCHEMA',state:'RUNTIME_STATUS_UNKNOWN',nativeExecutionClaimed:false},502);
  const devices=Array.isArray(data.devices)?data.devices:[],online=devices.filter(x=>x?.online&&!x?.revoked),proved=devices.filter(x=>Number(x?.lastSeen)>0&&!x?.revoked);
  const pairingState=data.state||'PAIRING_REQUIRED',lastAuthenticatedHeartbeat=proved.length?Math.max(...proved.map(x=>Number(x.lastSeen)||0)):null;
  return json({...data,
