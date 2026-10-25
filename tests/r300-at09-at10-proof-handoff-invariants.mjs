@@ -125,7 +125,7 @@ const fakeWrangler=[
 'COUNT_FILE="$(mktemp)"',
 'printf 0 > "$COUNT_FILE"',
 "trap 'rm -f \"$SPLIT_LOG\" \"$COUNT_FILE\"' EXIT",
-'assert_current_main_owner(){ if [[ "$TEST_SCENARIO" == "superseded" && "$(cat "$COUNT_FILE")" -ge 1 ]]; then return 75; fi; return 0; }',
+'assert_current_main_owner(){ if [[ "$TEST_SCENARIO" == "superseded_initial" ]] || [[ "$TEST_SCENARIO" == "superseded" && "$(cat "$COUNT_FILE")" -ge 1 ]]; then return 75; fi; return 0; }',
 'sleep(){ :; }',
 'npx(){',
 ' local count',
@@ -144,7 +144,7 @@ const fakeWrangler=[
 ' return 0',
 '}'
 ].join('\n');
-for(const [scenario,expectedCode,expectedAttempts] of [['transient',0,2],['persistent',1,4],['other',1,1],['superseded',75,1],['clean',0,1]]){
+for(const [scenario,expectedCode,expectedAttempts] of [['transient',0,2],['persistent',1,4],['other',1,1],['superseded',75,1],['superseded_initial',75,0],['clean',0,1]]){
  const output=spawnSync('bash',['-c',fakeWrangler+'\n'+retryFunction+'\nstage_candidate_with_visibility_retry'],{env:{...process.env,TEST_SCENARIO:scenario},encoding:'utf8',timeout:10000});
  must(!output.error&&output.status===expectedCode,'R696 '+scenario+' exit '+output.status+' stderr '+output.stderr);
  const attempts=(output.stdout.match(/mock staging success|The requested Worker version could not be found|Cloudflare credentials invalid/g)||[]).length;
@@ -152,6 +152,7 @@ for(const [scenario,expectedCode,expectedAttempts] of [['transient',0,2],['persi
  if(scenario==='persistent')must(output.stdout.includes('VERSION VISIBILITY EXHAUSTED'),'R696 persistent code 100146 must exhaust');
  if(scenario==='other')must(!output.stdout.includes('VERSION VISIBILITY PENDING'),'R696 other errors must not retry');
  if(scenario==='superseded')must(output.stdout.includes('VERSION VISIBILITY PENDING'),'R697 superseded run must reach second ownership gate after initial transient 100146');
+ if(scenario==='superseded_initial')must(!output.stdout.includes('VERSION VISIBILITY PENDING')&&!output.stdout.includes('mock staging success'),'R698 preflight supersession must veto staging before first attempt');
 }
 
 console.log('R300 AT09/AT10 PROOF HANDOFF PASS · explicit browser-local arm · offline remains non-execution · one-shot eligible-host submission through existing /api/missions authority · DESKTOP_HEALTH + FORENSIC_HASH_LEDGER only · durable identity before disarm · R141 verification and R125 Canon boundary preserved');
