@@ -49,6 +49,8 @@ jobs:
           node tests/r256-private-sai-doorway-invariants.mjs
           node tests/r256-private-sai-doorway-protocol-e2e.mjs
           npx wrangler deploy --config wrangler.sai-door-r256.jsonc --dry-run --outdir .wrangler-r256-doorway
+      - name: R608 source-bound woven capability journey replay and fail-closed proof
+        run: node tests/r608-woven-capability-journey.mjs
       - name: R653 unified canonical frame and deterministic replay
         run: node tests/r653-unified-continuity-frame.mjs
       - name: R652 symmetric/asymmetric mode invariants
