@@ -3,7 +3,7 @@
 import { createHash } from 'node:crypto';
 
 const HASH = /^[a-f0-9]{64}$/i;
-const ALLOWED = new Set(['DRIVE_FULL_READBACK_VERIFIED','DRIVE_SEGMENTED_FULL_READBACK_VERIFIED']);
+const ALLOWED = new Set(['DRIVE_FULL_READBACK_VERIFIED','DRIVE_SEGMENTED_FULL_READBACK_VERIFIED','DRIVE_RECOVERED_MANIFEST_FULL_READBACK_VERIFIED']);
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 
 export function compileArchiveCapabilityIntake(index, inventory = [], exceptions = []) {
