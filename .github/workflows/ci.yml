@@ -23,6 +23,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - name: R606 archive capability intake focused invariants
+        run: node --test tests/archive-capability-intake.test.mjs
       - run: npm install
       - name: Audit locked application dependency tree
         run: npm audit --audit-level=high
