@@ -49,6 +49,8 @@ jobs:
           node tests/r256-private-sai-doorway-invariants.mjs
           node tests/r256-private-sai-doorway-protocol-e2e.mjs
           npx wrangler deploy --config wrangler.sai-door-r256.jsonc --dry-run --outdir .wrangler-r256-doorway
+      - name: R610 ten-axis historical addressing roundtrip and evidence boundary
+        run: node tests/r610-corpus-addressing.mjs
       - name: R609 historical corpus lineage integrity and held-evidence proof
         run: node tests/r609-corpus-lineage-bridge.mjs
       - name: R608 source-bound woven capability journey replay and fail-closed proof
