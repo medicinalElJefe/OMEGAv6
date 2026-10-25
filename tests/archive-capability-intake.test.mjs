@@ -25,3 +25,9 @@ test('invalid member hash is rejected and reported',()=>{
  const i=valid();i.proofs[0].files[0].sha256='not-a-hash';
  const r=compileArchiveCapabilityIntake(i);assert(r.problems.some(x=>x.kind==='INVALID_FILE_PROOF'));assert.equal(r.verifiedCount,0);
 });
+
+test('recovered manifest with cloud readback remains backup indexed, never execution admitted',()=>{
+ const i=valid();i.proofs[0].status='DRIVE_RECOVERED_MANIFEST_FULL_READBACK_VERIFIED';
+ const r=compileArchiveCapabilityIntake(i);assert.equal(r.verifiedCount,1);
+ assert.equal(r.problems.length,0);assert.equal(mayPromoteArchiveIntake(r),false);
+});
