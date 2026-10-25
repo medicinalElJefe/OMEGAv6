@@ -109,4 +109,48 @@ for(const token of ['stage_candidate_with_visibility_retry()',"'[code: 100146]'"
 }
 must(stagedRelease.includes('STAGED_DEPLOYMENT_READY=0')&&stagedRelease.includes('R322 forward deployment confirmed'),'R695 must retain 100/0 membership proof and exceptional R322 recovery gate');
 
+
+const {spawnSync}=await import('node:child_process');
+const retryStart=stagedRelease.indexOf('stage_candidate_with_visibility_retry(){');
+const retryEnd=stagedRelease.indexOf('\nif stage_candidate_with_visibility_retry; then',retryStart);
+must(retryStart>=0&&retryEnd>retryStart,'R696 exact deploy retry function extraction');
+const retryFunction=stagedRelease.slice(retryStart,retryEnd);
+const fakeWrangler=[
+'set -Eeuo pipefail',
+'WORKER_NAME=omegav6',
+'GITHUB_SHA=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+'PREVIOUS_VERSION_ID=previous',
+'CANDIDATE_VERSION_ID=candidate',
+'SPLIT_LOG="$(mktemp)"',
+'COUNT_FILE="$(mktemp)"',
+'printf 0 > "$COUNT_FILE"',
+"trap 'rm -f \"$SPLIT_LOG\" \"$COUNT_FILE\"' EXIT",
+'assert_current_main_owner(){ return 0; }',
+'sleep(){ :; }',
+'npx(){',
+' local count',
+' count="$(cat "$COUNT_FILE")"',
+' count=$((count+1))',
+' printf "%s" "$count" > "$COUNT_FILE"',
+' if [[ "$TEST_SCENARIO" == "transient" && "$count" == "1" ]] || [[ "$TEST_SCENARIO" == "persistent" ]]; then',
+'  echo "The requested Worker version could not be found, please check the ID being passed and try again. [code: 100146]" >&2',
+'  return 1',
+' fi',
+' if [[ "$TEST_SCENARIO" == "other" ]]; then',
+'  echo "Cloudflare credentials invalid [code: 10000]" >&2',
+'  return 1',
+' fi',
+' echo "mock staging success"',
+' return 0',
+'}'
+].join('\n');
+for(const [scenario,expectedCode,expectedAttempts] of [['transient',0,2],['persistent',1,4],['other',1,1],['clean',0,1]]){
+ const output=spawnSync('bash',['-c',fakeWrangler+'\n'+retryFunction+'\nstage_candidate_with_visibility_retry'],{env:{...process.env,TEST_SCENARIO:scenario},encoding:'utf8',timeout:10000});
+ must(!output.error&&output.status===expectedCode,'R696 '+scenario+' exit '+output.status+' stderr '+output.stderr);
+ const attempts=(output.stdout.match(/mock staging success|The requested Worker version could not be found|Cloudflare credentials invalid/g)||[]).length;
+ must(attempts===expectedAttempts,'R696 '+scenario+' retry count '+attempts+' versus '+expectedAttempts);
+ if(scenario==='persistent')must(output.stdout.includes('VERSION VISIBILITY EXHAUSTED'),'R696 persistent code 100146 must exhaust');
+ if(scenario==='other')must(!output.stdout.includes('VERSION VISIBILITY PENDING'),'R696 other errors must not retry');
+}
+
 console.log('R300 AT09/AT10 PROOF HANDOFF PASS · explicit browser-local arm · offline remains non-execution · one-shot eligible-host submission through existing /api/missions authority · DESKTOP_HEALTH + FORENSIC_HASH_LEDGER only · durable identity before disarm · R141 verification and R125 Canon boundary preserved');
