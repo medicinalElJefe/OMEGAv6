@@ -20,7 +20,7 @@ export function buildWovenCapabilityJourneyR608({capability,frame,journey}={}){
  if(scene.sourceGraphSha256!==sourceGraphSha256)throw Error('source graph changed');
  if(scene.sourceStateSha256!==proof.proof.stateSha256)throw Error('rendered canonical state diverged from frame');
  const blocked=edges.filter(e=>e.kind==='BLOCKED').map(e=>({key:edgeKey(e),kind:e.kind,reason:'NO_ADMITTED_CARRY'}));
- const record={schema:'OMEGA_WOVEN_CAPABILITY_JOURNEY_R608',truthClass:'LOCAL_REPLAY_ONLY',admission:'NO_CANON_MUTATION_NO_PRODUCTION_PROOF',capability:structuredClone(capability),capabilitySha256:sha256R654(capability),sourceGraphSha256,canonicalStateSha256:proof.proof.stateSha256,frameReceiptSha256:sha256R654(proof),sceneSha256:scene.sceneSha256,routeSha256:scene.routeSha256,blocked,route:scene.route.map(x=>({id:x.id,step:x.step})),carried:proof.output.transportLedger,conservedEvidence:{blockedCount:blocked.length,scarTotal:proof.output.canonicalState.reduce((sum,n)=>sum+n.scar,0),contradictionTotal:proof.output.canonicalState.reduce((sum,n)=>sum+n.contradiction,0)},missingProof:['CURRENT_PRODUCTION_SHA','EXTERNAL_EMPIRICAL_ADMISSION']};
+ const record={schema:'OMEGA_WOVEN_CAPABILITY_JOURNEY_R608',truthClass:'LOCAL_REPLAY_ONLY',admission:'NO_CANON_MUTATION_NO_PRODUCTION_PROOF',capability:structuredClone(capability),journeyOptions:structuredClone(journey),capabilitySha256:sha256R654(capability),sourceGraphSha256,canonicalStateSha256:proof.proof.stateSha256,frameReceiptSha256:sha256R654(proof),sceneSha256:scene.sceneSha256,routeSha256:scene.routeSha256,blocked,route:scene.route.map(x=>({id:x.id,step:x.step})),carried:proof.output.transportLedger,conservedEvidence:{blockedCount:blocked.length,scarTotal:proof.output.canonicalState.reduce((sum,n)=>sum+n.scar,0),contradictionTotal:proof.output.canonicalState.reduce((sum,n)=>sum+n.contradiction,0)},missingProof:['CURRENT_PRODUCTION_SHA','EXTERNAL_EMPIRICAL_ADMISSION']};
  return {record:{...record,journeySha256:sha256R654(record)},frame:proof,scene};
 }
 export function verifyWovenCapabilityJourneyR608(bundle){
@@ -31,7 +31,7 @@ export function verifyWovenCapabilityJourneyR608(bundle){
   if(!verifyProvenFrameR654(frame).valid||sha256R654(frame)!==record.frameReceiptSha256||frame.proof.stateSha256!==record.canonicalStateSha256)return {valid:false};
   if(sha256R654(Object.fromEntries(Object.entries(scene).filter(([k])=>k!=='sceneSha256')))!==scene.sceneSha256||scene.sceneSha256!==record.sceneSha256||scene.routeSha256!==record.routeSha256)return {valid:false};
   if(sha256R654(record.capability)!==record.capabilitySha256)return {valid:false};
-  const rebuilt=buildWovenCapabilityJourneyR608({capability:record.capability,frame:frame.input,journey:{startId:scene.route[0]?.id,steps:scene.routeEvidence.map(e=>({to:e.to,kind:e.kind}))}});
+  const rebuilt=buildWovenCapabilityJourneyR608({capability:record.capability,frame:frame.input,journey:record.journeyOptions});
   return {valid:rebuilt.record.journeySha256===record.journeySha256&&rebuilt.scene.sceneSha256===scene.sceneSha256,truthClass:'LOCAL_DETERMINISTIC_REPLAY'};
  }catch{return {valid:false}}
 }
