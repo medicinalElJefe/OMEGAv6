@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {reconcileCorpusLineageR609,verifyCorpusLineageR609} from '../src/continuity/corpusLineageBridgeR609.js';
+const ledger=JSON.parse(readFileSync(new URL('../canon/year-corpus-capability-conservation-r650.json',import.meta.url)));
+const original=structuredClone(ledger),report=reconcileCorpusLineageR609(ledger);
+assert.deepEqual(ledger,original,'read-only source reconciliation');
+assert.equal(report.summary.families,ledger.families.length);
+assert.equal(report.summary.held,ledger.families.filter(x=>!x.productionProved).length);
+assert.equal(report.summary.productionProved,ledger.families.filter(x=>x.productionProved).length);
+assert.ok(report.families.every(f=>f.admission==='HELD_SOURCE_IS_NOT_EXECUTION'&&f.execution==='NOT_EVALUATED'));
+assert.ok(report.families.every(f=>f.sourceEvidence.every(s=>s.sourceStatus==='NOT_VERIFIED')));
+assert.deepEqual(report,reconcileCorpusLineageR609(ledger));
+assert.equal(verifyCorpusLineageR609(ledger,report).valid,true);
+const fake=structuredClone(report);fake.families[0].productionProved=true;assert.equal(verifyCorpusLineageR609(ledger,fake).valid,false);
+const dup=structuredClone(ledger);dup.families.push(dup.families[0]);assert.throws(()=>reconcileCorpusLineageR609(dup),/duplicate/);
+const forged=structuredClone(ledger);forged.families[0].productionProved=true;assert.throws(()=>reconcileCorpusLineageR609(forged),/unproven/);
+assert.throws(()=>reconcileCorpusLineageR609(ledger,{sourceMap:{[ledger.families[0].sourceHints[0]]:{sha256:'prefix'}}}),/full sha256/);
+console.log('R609 corpus lineage bridge PASS; '+report.summary.families+' historical families, '+report.summary.held+' held');
