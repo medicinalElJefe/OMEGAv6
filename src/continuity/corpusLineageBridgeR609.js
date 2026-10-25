@@ -1,7 +1,7 @@
 // R609: connect historical conservation inventory to the R608 executable proof substrate.
 // Report is a read-only lineage reconciliation, not a recovered executor or production attestation.
 import {sha256R654} from './provenFrameR654.js';
-const allowed=new Set(['SOURCE_PRESENT','SOURCE_PRESENT_DONOR_REQUIRED','HISTORICAL_RECONCILIATION_REQUIRED','HOST_PROOF_REQUIRED','VISUAL_FIDELITY_PROOF_REQUIRED','LIVE_SOURCE_PROOF_REQUIRED','END_TO_END_PROOF_REQUIRED','HOST_ACTION_PROOF_REQUIRED','SOURCE_REQUIRED','UNVERIFIED']);
+const allowed=new Set(['SOURCE_PRESENT','SOURCE_PRESENT_DONOR_REQUIRED','HISTORICAL_RECONCILIATION_REQUIRED','HOST_PROOF_REQUIRED','VISUAL_FIDELITY_PROOF_REQUIRED','LIVE_SOURCE_PROOF_REQUIRED','END_TO_END_PROOF_REQUIRED','HOST_ACTION_PROOF_REQUIRED','SOURCE_REQUIRED','UNVERIFIED','STRICT_RECEIPTS_REQUIRED','DEPLOYMENT_PROOF_REQUIRED','APPLICATION_PARITY_PROOF_REQUIRED']);
 const fingerprint=v=>sha256R654(v);
 export function reconcileCorpusLineageR609(ledger,{sourceMap={}}={}){
  if(!ledger||ledger.schema!=='OMEGA_YEAR_CORPUS_CAPABILITY_CONSERVATION_R650'||ledger.policy?.admission!=='SOURCE_AND_RUNTIME_AND_PRODUCTION_PROOF'||ledger.policy?.no_synthetic_legacy_recovery!==true||!Array.isArray(ledger.families))throw Error('invalid conservation authority');
