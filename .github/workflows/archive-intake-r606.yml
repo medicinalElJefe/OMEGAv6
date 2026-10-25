@@ -1,0 +1,24 @@
+name: R606 Archive Capability Intake Proof
+on:
+  pull_request:
+    paths:
+      - 'tools/archive-capability-intake.mjs'
+      - 'tests/archive-capability-intake.test.mjs'
+      - '.github/workflows/archive-intake-r606.yml'
+  workflow_dispatch:
+jobs:
+  archive-intake-proof:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run focused deterministic archive-intake tests
+        run: node --test tests/archive-capability-intake.test.mjs
+      - name: Verify archive compiler and tests parse
+        run: |
+          node --check tools/archive-capability-intake.mjs
+          node --check tests/archive-capability-intake.test.mjs
