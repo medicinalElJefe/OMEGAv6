@@ -37,7 +37,8 @@ export function traverseCorpusBandR618({address, offset, wrap = false} = {}) {
     wrapped: crossedBoundary,
     fromBand,
     toBand,
-    crossedBand: fromBand !== toBand,
+    crossedBand: raw < BigInt(fromBand * width) || raw >= BigInt((fromBand + 1) * width),
+    endpointBandChanged: fromBand !== toBand,
     fromDigits: decodeCorpusAddressR610(address),
     toDigits: decodeCorpusAddressR610(target),
   };
