@@ -10,6 +10,8 @@ const boundProof=(p,now)=>validNode(now)&&!!p&&LIVE.has(p.type)&&nonempty(p.evid
 const visible=x=>x?.presentationSurface?.generatedFromCapability===true&&!!x?.presentationSurface?.route;
 const unique=xs=>[...new Set(xs)].sort();
 const listKey=xs=>Array.isArray(xs)?JSON.stringify(unique(xs)):'MISSING';
+const changed=(a,b)=>a!==b;
+const listChanged=(a,b)=>listKey(a)!==listKey(b);
 export function auditCapabilityContinuityR620({previous,candidate,dispositions={},proofs={}}){
  if(!Array.isArray(previous)||!Array.isArray(candidate))throw new TypeError('Graphs must be arrays');
  if([...previous,...candidate].some(x=>!id(x)))throw new TypeError('Capability identity.id required');
@@ -17,7 +19,7 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
  const duplicateHistorical=duplicates(previous),duplicateCurrent=duplicates(candidate);
  const invalidHistorical=previous.filter(x=>!validNode(x)).map(id),invalidCurrent=candidate.filter(x=>!validNode(x)).map(id);
  const current=new Map(candidate.map(x=>[id(x),x]));
- const missing=[],executorLost=[],executionDowngraded=[],executionStateChanged=[],executionContractChanged=[],presentationLost=[],presentationRouteChanged=[],implementationChanged=[],executorRouteChanged=[],sourceBindingChanged=[],truthClassChanged=[],evidenceRequirementsChanged=[],dependenciesChanged=[],scarPolicyChanged=[],remainingGapChanged=[],truthGated=[],unproven=[],invalidResolutions=[],declaredResolutions=[];
+ const missing=[],executorLost=[],executionDowngraded=[],executionStateChanged=[],executionContractChanged=[],presentationLost=[],presentationRouteChanged=[],implementationChanged=[],executorRouteChanged=[],sourceBindingChanged=[],truthClassChanged=[],evidenceRequirementsChanged=[],dependenciesChanged=[],scarPolicyChanged=[],remainingGapChanged=[],capabilityDefinitionChanged=[],lineageStructureChanged=[],implementationSelectionChanged=[],truthGated=[],unproven=[],invalidResolutions=[],declaredResolutions=[];
  for(const old of previous){
   const key=id(old),now=current.get(key);
   if(!now){
@@ -42,19 +44,24 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
   if(listKey(old.dependencies)!==listKey(now.dependencies))dependenciesChanged.push(key);
   if(old.supersession?.scarPolicy!==now.supersession?.scarPolicy)scarPolicyChanged.push(key);
   if(old.remainingGap!==now.remainingGap)remainingGapChanged.push(key);
+  // Preserve the meaning and provenance of a capability, not merely its identifier and executor route.
+  if(['function','pillar','primaryKind'].some(field=>changed(old[field],now[field]))||listChanged(old.artifactKinds,now.artifactKinds))capabilityDefinitionChanged.push(key);
+  if(changed(old.lineage?.domain,now.lineage?.domain)||listChanged(old.lineage?.predecessors,now.lineage?.predecessors)||listChanged(old.lineage?.relations,now.lineage?.relations)||listChanged(old.supersession?.predecessors,now.supersession?.predecessors))lineageStructureChanged.push(key);
+  if(['route','selectionRule'].some(field=>changed(old.strongestImplementation?.[field],now.strongestImplementation?.[field])))implementationSelectionChanged.push(key);
   if(now.strongestImplementation?.state==='TRUTH_GATED')truthGated.push(key);
  }
  // New capabilities need proof references too: previous-only enumeration silently admitted additions.
  for(const now of candidate)if(!boundProof(proofs[id(now)],now))unproven.push(id(now));
  // A caller's supersession/deprecation declaration is not authenticated governance.
  // Missing historical identities therefore cannot pass conservation admission.
- const structurePass=!invalidHistorical.length&&!invalidCurrent.length&&!duplicateHistorical.length&&!duplicateCurrent.length&&!executorLost.length&&!executionDowngraded.length&&!executionStateChanged.length&&!executionContractChanged.length&&!evidenceRequirementsChanged.length&&!dependenciesChanged.length&&!scarPolicyChanged.length&&!remainingGapChanged.length&&!presentationLost.length&&!presentationRouteChanged.length&&!implementationChanged.length&&!executorRouteChanged.length&&!sourceBindingChanged.length&&!truthClassChanged.length&&!invalidResolutions.length&&!missing.length;
+ const structurePass=!invalidHistorical.length&&!invalidCurrent.length&&!duplicateHistorical.length&&!duplicateCurrent.length&&!executorLost.length&&!executionDowngraded.length&&!executionStateChanged.length&&!executionContractChanged.length&&!evidenceRequirementsChanged.length&&!dependenciesChanged.length&&!scarPolicyChanged.length&&!remainingGapChanged.length&&!capabilityDefinitionChanged.length&&!lineageStructureChanged.length&&!implementationSelectionChanged.length&&!presentationLost.length&&!presentationRouteChanged.length&&!implementationChanged.length&&!executorRouteChanged.length&&!sourceBindingChanged.length&&!truthClassChanged.length&&!invalidResolutions.length&&!missing.length;
  return Object.freeze({schema:'OMEGA_CAPABILITY_CONTINUITY_AUDIT_R620',baselineCount:previous.length,currentCount:candidate.length,
   invalidHistorical:unique(invalidHistorical),invalidCurrent:unique(invalidCurrent),duplicateHistorical,duplicateCurrent,missing:unique(missing),executorLost:unique(executorLost),
   executionDowngraded:unique(executionDowngraded),executionStateChanged:unique(executionStateChanged),executionContractChanged:unique(executionContractChanged),presentationLost:unique(presentationLost),
   presentationRouteChanged:unique(presentationRouteChanged),implementationChanged:unique(implementationChanged),executorRouteChanged:unique(executorRouteChanged),
   sourceBindingChanged:unique(sourceBindingChanged),truthClassChanged:unique(truthClassChanged),
   evidenceRequirementsChanged:unique(evidenceRequirementsChanged),dependenciesChanged:unique(dependenciesChanged),scarPolicyChanged:unique(scarPolicyChanged),remainingGapChanged:unique(remainingGapChanged),
+  capabilityDefinitionChanged:unique(capabilityDefinitionChanged),lineageStructureChanged:unique(lineageStructureChanged),implementationSelectionChanged:unique(implementationSelectionChanged),
   truthGated:unique(truthGated),unproven:unique(unproven),
   invalidResolutions:unique(invalidResolutions),declaredResolutions:unique(declaredResolutions),
   dispositionAuthority:'UNVERIFIED_CALLER_SUPPLIED_GOVERNANCE_REFERENCES',
