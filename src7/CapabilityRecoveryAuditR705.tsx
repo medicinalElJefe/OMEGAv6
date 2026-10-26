@@ -1,6 +1,7 @@
 import {useMemo,useState} from 'react';
 import {OMEGA7_CAPABILITIES} from './capabilityRegistry';
 import canonicalRecoveryR650 from '../canon/year-corpus-capability-conservation-r650.json';
+import {evaluateWovenExchangeR621} from '../src/wovenBoundaryExchangeR621.mjs';
 import {OMEGA_ARCHITECTURE_R474,YEAR_CORPUS_CAPABILITY_GRAPH_R474,auditYearCorpusCapabilityGraphR474,type OmegaArchitecturePillarR474} from '../src/yearCorpusCapabilityGraphR474';
 
 // R705: a source-lineage view and real OMEGA7 route launcher, not a live-execution attestation.
@@ -9,6 +10,7 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
  const [pillar,setPillar]=useState<OmegaArchitecturePillarR474|'ALL'>('ALL');
  const [filter,setFilter]=useState<FilterR705>('GAPPED');
  const [query,setQuery]=useState('');
+ const [exchangeResult,setExchangeResult]=useState<string>('Not executed');
  const audit=useMemo(()=>auditYearCorpusCapabilityGraphR474(),[]);
  const availableRoutes=useMemo(()=>new Set(OMEGA7_CAPABILITIES.map(c=>c.legacyRoute)),[]);
  const families=canonicalRecoveryR650.families;
@@ -21,6 +23,12 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
   <h2>Capability recovery audit</h2>
   <p>Historical corpus resolution, strongest known implementation and remaining restoration gaps. This is a source-derived audit, not a live production-health certificate.</p>
   <div role='status' data-r705-audit-summary>{audit.capabilities} resolved capability identities · {audit.gapped} recorded gaps · {audit.executing} modeled as executing · {audit.truthGated} truth-gated</div>
+  <section aria-label='Experimental woven continuity execution' data-r621-woven-execution='experimental'>
+   <h3>Woven continuity — bounded executable model</h3>
+   <p>Run a deterministic three-node example of multi-parent exchange and cyclic return. This is an abstract computational operator, not historical parity or physical simulation.</p>
+   <button type='button' data-r621-run-exchange onClick={()=>{try{const r=evaluateWovenExchangeR621({nodes:['a','b','c'],initial:{a:5,b:3,c:0},exchanges:[{kind:'EGRESS',from:'a',to:'c',amount:2},{kind:'INGRESS',from:'b',to:'c',amount:2},{kind:'EGRESS',from:'c',to:'a',amount:1},{kind:'RESIDUE',from:'a',to:'b',amount:1,residueType:'CONTRADICTION',direction:'RETURN'}]});setExchangeResult(JSON.stringify({stocks:r.stocks,parents:r.parents,residue:r.residues,invariant:r.invariant}));}catch(e){setExchangeResult(String(e));}}}>Execute example and inspect conserved result</button>
+   <pre data-r621-exchange-result style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{exchangeResult}</pre>
+  </section>
   <section aria-label='Canonical family restoration status' data-r620-canonical-family-report='source-bound'>
    <h3>Historical capability families — independent proof required</h3>
    <p>{families.length} canonical families · {families.length} require independent production proof. Source hints, in-ledger claims and graph registration are not executable parity.</p>
