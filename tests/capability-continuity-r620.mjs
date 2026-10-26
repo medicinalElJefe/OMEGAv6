@@ -175,3 +175,47 @@ test('executor operation and capability binding changes cannot silently preserve
  assert.deepEqual(r.executionContractChanged,['A']);
  assert.equal(r.structurePass,false);
 });
+
+test('unverified truth-gated executor promotion is a review gate, not automatic conservation',()=>{
+ const old=node('A',{state:'TRUTH_GATED'}),now=node('A',{state:'EXECUTES_NOW'});
+ const r=audit({previous:[old],candidate:[now],proofs:{A:proof('A')}});
+ assert.deepEqual(r.executionStateChanged,['A']);
+ assert.deepEqual(r.executorLost,[],'promotion is not an executor-loss regression');
+ assert.equal(r.structurePass,false,'caller receipt cannot authorize execution-state promotion');
+ assert.equal(r.proofReferencesComplete,false);
+ assert.equal(r.productionProven,false);
+});
+test('execution-state changes require review even when routes and implementation IDs match',()=>{
+ const old=node('A',{state:'EXECUTES_AS_ADAPTER'}),now=node('A',{state:'EXECUTES_NOW'});
+ const r=audit({previous:[old],candidate:[now]});
+ assert.deepEqual(r.executionStateChanged,['A']);
+ assert.equal(r.structurePass,false);
+});
+test('evidence requirements, dependencies, scar policy and unresolved gaps are conserved independently',()=>{
+ const old=node('A');
+ old.evidence.requirements=['R125','EXTERNAL_PROOF'];
+ old.dependencies=['R142','EXTERNAL_PROOF'];
+ old.supersession={scarPolicy:'RETAIN_REJECTIONS_AND_CONTRADICTIONS'};
+ old.remainingGap='DEVICE_PROOF_REQUIRED';
+ for(const [field,mutate] of [
+  ['evidenceRequirementsChanged',n=>{n.evidence.requirements=['R125'];}],
+  ['dependenciesChanged',n=>{n.dependencies=['R142'];}],
+  ['scarPolicyChanged',n=>{n.supersession.scarPolicy='DISCARD_SCARS';}],
+  ['remainingGapChanged',n=>{n.remainingGap=null;}]
+ ]){
+  const now=structuredClone(old);mutate(now);
+  const r=audit({previous:[old],candidate:[now],proofs:{A:proof('A')}});
+  assert.deepEqual(r[field],['A'],field+' must be explicit');
+  assert.equal(r.structurePass,false,field+' cannot silently pass');
+  assert.equal(r.productionProven,false);
+ }
+});
+test('reordering evidence requirement and dependency sets does not manufacture a semantic regression',()=>{
+ const old=node('A'),now=node('A');
+ old.evidence.requirements=['R142','R125'];now.evidence.requirements=['R125','R142'];
+ old.dependencies=['B','A'];now.dependencies=['A','B'];
+ const r=audit({previous:[old],candidate:[now]});
+ assert.deepEqual(r.evidenceRequirementsChanged,[]);
+ assert.deepEqual(r.dependenciesChanged,[]);
+ assert.equal(r.structurePass,true);
+});
