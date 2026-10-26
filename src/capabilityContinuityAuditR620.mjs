@@ -19,7 +19,7 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
  const duplicateHistorical=duplicates(previous),duplicateCurrent=duplicates(candidate);
  const invalidHistorical=previous.filter(x=>!validNode(x)).map(id),invalidCurrent=candidate.filter(x=>!validNode(x)).map(id);
  const current=new Map(candidate.map(x=>[id(x),x]));
- const missing=[],executorLost=[],executionDowngraded=[],executionStateChanged=[],executionContractChanged=[],presentationLost=[],presentationRouteChanged=[],implementationChanged=[],executorRouteChanged=[],sourceBindingChanged=[],truthClassChanged=[],evidenceRequirementsChanged=[],dependenciesChanged=[],scarPolicyChanged=[],remainingGapChanged=[],capabilityDefinitionChanged=[],lineageStructureChanged=[],implementationSelectionChanged=[],truthGated=[],unproven=[],invalidResolutions=[],declaredResolutions=[];
+ const missing=[],executorLost=[],executorRoutabilityChanged=[],presentationGenerationChanged=[],executionDowngraded=[],executionStateChanged=[],executionContractChanged=[],presentationLost=[],presentationRouteChanged=[],implementationChanged=[],executorRouteChanged=[],sourceBindingChanged=[],truthClassChanged=[],evidenceRequirementsChanged=[],dependenciesChanged=[],scarPolicyChanged=[],remainingGapChanged=[],capabilityDefinitionChanged=[],lineageStructureChanged=[],implementationSelectionChanged=[],truthGated=[],unproven=[],invalidResolutions=[],declaredResolutions=[];
  for(const old of previous){
   const key=id(old),now=current.get(key);
   if(!now){
@@ -30,6 +30,10 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
    continue;
   }
   if(runnable(old)&&!runnable(now))executorLost.push(key);
+  // A route's presence is not authority to make an executor newly runnable.
+  if(old.currentExecutor?.routable!==now.currentExecutor?.routable)executorRoutabilityChanged.push(key);
+  // Source-derived presentation authority is distinct from a matching URL.
+  if(old.presentationSurface?.generatedFromCapability!==now.presentationSurface?.generatedFromCapability)presentationGenerationChanged.push(key);
   if(old.strongestImplementation?.state==='EXECUTES_NOW'&&now.strongestImplementation?.state==='EXECUTES_AS_ADAPTER')executionDowngraded.push(key);
   // Even an apparent upgrade from TRUTH_GATED to EXECUTES_NOW requires a reviewed executor/proof transition.
   if(old.strongestImplementation?.state!==now.strongestImplementation?.state)executionStateChanged.push(key);
@@ -54,9 +58,9 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
  for(const now of candidate)if(!boundProof(proofs[id(now)],now))unproven.push(id(now));
  // A caller's supersession/deprecation declaration is not authenticated governance.
  // Missing historical identities therefore cannot pass conservation admission.
- const structurePass=!invalidHistorical.length&&!invalidCurrent.length&&!duplicateHistorical.length&&!duplicateCurrent.length&&!executorLost.length&&!executionDowngraded.length&&!executionStateChanged.length&&!executionContractChanged.length&&!evidenceRequirementsChanged.length&&!dependenciesChanged.length&&!scarPolicyChanged.length&&!remainingGapChanged.length&&!capabilityDefinitionChanged.length&&!lineageStructureChanged.length&&!implementationSelectionChanged.length&&!presentationLost.length&&!presentationRouteChanged.length&&!implementationChanged.length&&!executorRouteChanged.length&&!sourceBindingChanged.length&&!truthClassChanged.length&&!invalidResolutions.length&&!missing.length;
+ const structurePass=!invalidHistorical.length&&!invalidCurrent.length&&!duplicateHistorical.length&&!duplicateCurrent.length&&!executorLost.length&&!executorRoutabilityChanged.length&&!presentationGenerationChanged.length&&!executionDowngraded.length&&!executionStateChanged.length&&!executionContractChanged.length&&!evidenceRequirementsChanged.length&&!dependenciesChanged.length&&!scarPolicyChanged.length&&!remainingGapChanged.length&&!capabilityDefinitionChanged.length&&!lineageStructureChanged.length&&!implementationSelectionChanged.length&&!presentationLost.length&&!presentationRouteChanged.length&&!implementationChanged.length&&!executorRouteChanged.length&&!sourceBindingChanged.length&&!truthClassChanged.length&&!invalidResolutions.length&&!missing.length;
  return Object.freeze({schema:'OMEGA_CAPABILITY_CONTINUITY_AUDIT_R620',baselineCount:previous.length,currentCount:candidate.length,
-  invalidHistorical:unique(invalidHistorical),invalidCurrent:unique(invalidCurrent),duplicateHistorical,duplicateCurrent,missing:unique(missing),executorLost:unique(executorLost),
+  invalidHistorical:unique(invalidHistorical),invalidCurrent:unique(invalidCurrent),duplicateHistorical,duplicateCurrent,missing:unique(missing),executorLost:unique(executorLost),executorRoutabilityChanged:unique(executorRoutabilityChanged),presentationGenerationChanged:unique(presentationGenerationChanged),
   executionDowngraded:unique(executionDowngraded),executionStateChanged:unique(executionStateChanged),executionContractChanged:unique(executionContractChanged),presentationLost:unique(presentationLost),
   presentationRouteChanged:unique(presentationRouteChanged),implementationChanged:unique(implementationChanged),executorRouteChanged:unique(executorRouteChanged),
   sourceBindingChanged:unique(sourceBindingChanged),truthClassChanged:unique(truthClassChanged),
