@@ -2,6 +2,7 @@ import assert from'node:assert/strict';
 import fs from'node:fs';
 
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+const lineage=fs.readFileSync('scripts/r619-release-lineage.mjs','utf8');
 const live=fs.readFileSync('scripts/verify_live_execution_control_r199.mjs','utf8');
 const staged=fs.readFileSync('scripts/staged-cloudflare-release.sh','utf8');
 const vite=fs.readFileSync('vite.config.ts','utf8');
@@ -10,8 +11,9 @@ assert.ok(ci.includes("ref: ${{ github.sha }}"),'R365 deploy-main checkout must 
 assert.ok(ci.includes('Verify exact deployment checkout'),'R365 exact deployment checkout proof step missing');
 assert.ok(ci.includes('checked_out_sha="$(git rev-parse HEAD)"'),'R365 must inspect the actual checked-out commit');
 assert.ok(ci.includes('if [ "$checked_out_sha" != "$GITHUB_SHA" ]'),'R365 must fail closed when deployment checkout drifts from the triggering workflow SHA');
-assert.ok(ci.includes('OMEGA_PROMOTED_SHA=$GITHUB_SHA'),'R365 governed release lineage must bind promoted SHA to the exact triggering merge');
-assert.ok(ci.includes('Promoted main commit must be an exact two-parent merge commit'),'R365 two-parent promotion lineage boundary regressed');
+assert.ok(ci.includes('node scripts/r619-release-lineage.mjs'),'R365 must execute exact source-bound release lineage before deployment');
+assert.ok(lineage.includes('requireSha(process.env.GITHUB_SHA')&&lineage.includes("'OMEGA_PROMOTED_SHA=' + bound.promotedSha"),'R365 promoted SHA must be the checked-out workflow SHA');
+assert.ok(lineage.includes("lineageMode: 'EXACT_TWO_PARENT_MERGE'")&&lineage.includes("lineageMode: 'EXACT_SQUASH_PR_AND_TREE'"),'R365 two-parent and exact PR/tree squash ancestry must remain fail-closed');
 
 assert.ok(live.includes("process.env.OMEGA_PROMOTED_SHA||process.env.GITHUB_SHA"),'R365 live execution proof must prefer the explicitly bound promoted SHA over ambient workflow SHA');
 assert.ok(!live.includes("process.env.GITHUB_SHA||process.env.OMEGA_PROMOTED_SHA"),'R365 must not let ambient GITHUB_SHA override explicit promoted-lineage authority');

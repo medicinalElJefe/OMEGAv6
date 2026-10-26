@@ -49,6 +49,10 @@ jobs:
           node tests/r256-private-sai-doorway-invariants.mjs
           node tests/r256-private-sai-doorway-protocol-e2e.mjs
           npx wrangler deploy --config wrangler.sai-door-r256.jsonc --dry-run --outdir .wrangler-r256-doorway
+      - name: R619 exact merge/squash lineage and production CLI refusal controls
+        run: |
+          node tests/r619-release-lineage-proof.mjs
+          node tests/r619-release-lineage-cli-e2e.mjs
       - name: R617S historical 12^10 original source band partition negative controls
         run: node tests/r617s-original-workbook-band-proof.mjs
       - name: R618 deterministic bounded historical band traversal and refusal controls
@@ -342,6 +346,12 @@ jobs:
         run: npx wrangler whoami
 
   deploy-main:
+    # R619: squash lineage needs the GitHub commit-associated PR endpoint.
+    # Explicit job permissions preserve contents/actions grants and add PR read.
+    permissions:
+      contents: read
+      actions: write
+      pull-requests: read
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: verify
     runs-on: ubuntu-latest
@@ -386,24 +396,11 @@ jobs:
           fi
           echo "current=true" >> "$GITHUB_OUTPUT"
           echo "Exact current-main ownership confirmed for $GITHUB_SHA."
-      - name: Bind promoted merge lineage
+      - name: Bind promoted merge or exact-squash PR lineage
         if: steps.ownership.outputs.current == 'true'
-        shell: bash
-        run: |
-          if git rev-parse --is-shallow-repository | grep -qx true; then
-            echo "::error title=SHALLOW LINEAGE UNSAFE::Deployment checkout became shallow before merge-parent binding."
-            exit 1
-          fi
-          parents="$(git cat-file -p "$GITHUB_SHA" | awk '/^parent /{print $2}')"
-          set -- $parents
-          if [ "$#" -ne 2 ]; then
-            echo "::error title=LINEAGE REQUIRED::Promoted main commit must be an exact two-parent merge commit before release lineage can be bound."
-            exit 1
-          fi
-          echo "OMEGA_ROLLBACK_SHA=$1" >> "$GITHUB_ENV"
-          echo "OMEGA_CANDIDATE_SHA=$2" >> "$GITHUB_ENV"
-          echo "OMEGA_PROMOTED_SHA=$GITHUB_SHA" >> "$GITHUB_ENV"
-          echo "Bound governed release lineage without exposing credentials."
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/r619-release-lineage.mjs
       - run: npm install
         if: steps.ownership.outputs.current == 'true'
       - name: Install pinned browser proof runtime
