@@ -59,6 +59,8 @@ jobs:
         run: node tests/r618-source-bound-band-traversal.mjs
       - name: R620 authenticated R241 private PR head preflight regression
         run: node tests/r620-r241-private-head-preflight.mjs
+      - name: R622 historical capability recovery System UI audit
+        run: node tests/r622-capability-recovery-audit.mjs
       - name: R616 original private workbook proof command fail-closed tests
         run: node tests/r616-local-original-workbook-import.mjs
       - name: R613 real historical workbook fingerprint and coordinate manifest
