@@ -8,6 +8,7 @@ on:
 permissions:
   contents: read
   actions: read
+  pull-requests: read
 
 concurrency:
   group: r241-archive-convergence-${{ github.event.pull_request.number || github.ref }}-${{ github.event.pull_request.head.sha || github.sha }}
@@ -31,6 +32,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           if [ "$EVENT_NAME" != "pull_request" ]; then
@@ -40,7 +42,7 @@ jobs:
             echo "R241 stale-head preflight: manual run, exact requested SHA remains eligible."
             exit 0
           fi
-          observed="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/pull/${PR_NUMBER}/head" | awk 'NR==1{print $1}')"
+          observed="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.head.sha')"
           if [ -z "$observed" ]; then
             echo "::error title=R241 HEAD LOOKUP FAILED::Could not resolve current head for PR #${PR_NUMBER}."
             exit 1
