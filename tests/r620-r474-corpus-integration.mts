@@ -42,3 +42,23 @@ const downgradeAudit=auditCapabilityContinuityR620({previous,candidate:downgrade
 assert.deepEqual(downgradeAudit.executionDowngraded,[direct.identity.id]);
 assert.equal(downgradeAudit.structurePass,false,'actual direct-executor downgrade cannot pass');
 console.log('R620/R474 real year-corpus graph conservation and negative tamper tests PASS; no production proof asserted');
+
+const gated=previous.find(x=>x.strongestImplementation.state==='TRUTH_GATED');
+assert.ok(gated,'real R474 graph must preserve at least one truth-gated capability');
+const falselyPromoted=structuredClone(previous);
+falselyPromoted.find(x=>x.identity.id===gated.identity.id)!.strongestImplementation.state='EXECUTES_NOW';
+const promotionAudit=auditCapabilityContinuityR620({previous,candidate:falselyPromoted});
+assert.deepEqual(promotionAudit.executionStateChanged,[gated.identity.id]);
+assert.equal(promotionAudit.structurePass,false,'source graph truth-gated executor cannot be promoted by a field edit');
+
+const evidenceWeakened=structuredClone(previous);
+evidenceWeakened[0].evidence.requirements=[];
+const evidenceAudit=auditCapabilityContinuityR620({previous,candidate:evidenceWeakened});
+assert.deepEqual(evidenceAudit.evidenceRequirementsChanged,[lost.identity.id]);
+assert.equal(evidenceAudit.structurePass,false,'R474 source proof obligations cannot silently disappear');
+
+const scarsDiscarded=structuredClone(previous);
+scarsDiscarded[0].supersession.scarPolicy='DISCARD_SCARS' as never;
+const scarAudit=auditCapabilityContinuityR620({previous,candidate:scarsDiscarded});
+assert.deepEqual(scarAudit.scarPolicyChanged,[lost.identity.id]);
+assert.equal(scarAudit.structurePass,false,'historical contradiction/scar policy must be conserved');
