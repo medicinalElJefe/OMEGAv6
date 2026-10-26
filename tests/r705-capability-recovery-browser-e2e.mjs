@@ -29,7 +29,7 @@ try{
    const workbook=audit.locator('[data-r705-capability-id="WORKBOOK"]');
    await workbook.waitFor({state:'visible',timeout:10000});
    await pillar.selectOption('CALCULUS');
-   if(await workbook.count())throw Error(device+': pillar filter failed to remove non-calculus capability');
+   await workbook.waitFor({state:'detached',timeout:10000}).catch(()=>{throw Error(device+': pillar filter failed to remove non-calculus capability')});
    await pillar.selectOption('APPLICATIONS');
    await workbook.waitFor({state:'visible',timeout:10000});
    if(!(await workbook.innerText()).includes('live execution still requires independent proof')&&!(await workbook.innerText()).includes('Remaining gap:'))throw Error(device+': no source-gap or proof boundary');
