@@ -49,6 +49,8 @@ jobs:
           node tests/r256-private-sai-doorway-invariants.mjs
           node tests/r256-private-sai-doorway-protocol-e2e.mjs
           npx wrangler deploy --config wrangler.sai-door-r256.jsonc --dry-run --outdir .wrangler-r256-doorway
+      - name: R613 real historical workbook fingerprint and coordinate manifest
+        run: node tests/r613-original-workbook-parity.mjs
       - name: R612 source-byte-verified OOXML historical worksheet parser
         run: node tests/r612-ooxml-corpus-parser.mjs
       - name: R611 sparse source-byte coordinate intake provenance

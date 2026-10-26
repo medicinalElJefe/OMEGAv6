@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {HISTORICAL_WORKBOOK_PROOF_R613,verifyOriginalWorkbookR613} from '../src/continuity/originalWorkbookParityR613.js';
+const p=HISTORICAL_WORKBOOK_PROOF_R613;
+assert.equal(p.expectedRows,144);
+assert.equal(p.sizeBytes,149433);
+assert.match(p.sha256,/^[a-f0-9]{64}$/);
+assert.match(p.coordinateListSha256,/^[a-f0-9]{64}$/);
+assert.ok(p.lastAddress>p.firstAddress);
+assert.equal(p.truthClass,'INDEPENDENT_SOURCE_INVENTORY_NOT_PRODUCTION_INGESTION');
+assert.throws(()=>verifyOriginalWorkbookR613(new Uint8Array(10)),/length mismatch/);
+assert.throws(()=>verifyOriginalWorkbookR613(new Uint8Array(p.sizeBytes)),/SHA256 mismatch/);
+console.log('R613 original historical workbook manifest and strict byte gate PASS (original bytes not bundled)');
