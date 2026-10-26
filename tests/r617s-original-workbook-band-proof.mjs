@@ -18,7 +18,7 @@ assert.equal(result.representativeRows, 144);
 assert.equal(result.historicalGateCounts.PASS, 144);
 assert.equal(result.moduleCounts.Cinematic, 18);
 assert.match(result.bandLedgerSha256, /^[a-f0-9]{64}$/);
-assert.match(result.truthClass, /NOT_EXECUTOR/);
+assert.equal(result.truthClass, 'STRUCTURAL_PARTITION_ONLY_NOT_SOURCE_VERIFIED_NOT_EXECUTOR');
 const changed = (i, changes) => rows.map((row, j) => j === i ? {...row, ...changes} : row);
 const changedMetadata = (i, patch) => changed(i, {metadata: {...rows[i].metadata, ...patch}});
 assert.throws(() => prove(rows.slice(1)), /exactly 144/);
