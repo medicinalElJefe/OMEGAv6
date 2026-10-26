@@ -38,6 +38,12 @@ assert.equal(richRecord.engineeringRecords[0].metadata.Module,'Substrate');
 assert.equal(richRecord.engineeringRecords[0].metadata.Gate,'PASS');
 assert.equal(richRecord.engineeringRecords[0].metadata['Decoded Check'],'0|1|2|3|4|5|6|7|8|9');
 assert.equal(richRecord.engineeringRecords[0].truthClass,'VERIFIED_WORKSHEET_CELL_CONTENT_NOT_EXECUTOR');
+
+const badAddressXml=metadataXml.replace('<c r="K2" t="inlineStr"><is><t>'+encode([0,1,2,3,4,5,6,7,8,9])+'</t>','<c r="K2" t="inlineStr"><is><t>'+String(encode([0,1,2,3,4,5,6,7,8,9])+1)+'</t>');
+const badAddressZip=zipSync({'xl/workbook.xml':strToU8('<workbook><sheets><sheet name="619D_Addressing" r:id="rId1"/></sheets></workbook>'),'xl/_rels/workbook.xml.rels':strToU8('<Relationships><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'),'xl/worksheets/sheet1.xml':strToU8(badAddressXml)});
+assert.notEqual(badAddressXml,metadataXml,'fixture must alter declared address');
+assert.throws(()=>parseHistoricalWorkbookR612({...input,sourceBytes:badAddressZip,claimedSha256:createHash('sha256').update(badAddressZip).digest('hex')}),/source address differs/);
+
 const corruptXml=metadataXml.replace('Representative band row','Representative band row').replace('0|1|2|3|4|5|6|7|8|9','1|1|2|3|4|5|6|7|8|9');
 const corruptZip=zipSync({'xl/workbook.xml':strToU8('<workbook><sheets><sheet name="619D_Addressing" r:id="rId1"/></sheets></workbook>'),'xl/_rels/workbook.xml.rels':strToU8('<Relationships><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'),'xl/worksheets/sheet1.xml':strToU8(corruptXml)});
 assert.throws(()=>parseHistoricalWorkbookR612({...input,sourceBytes:corruptZip,claimedSha256:createHash('sha256').update(corruptZip).digest('hex')}),/decoded-check mismatch/);
