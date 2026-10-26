@@ -2,6 +2,7 @@ import {useMemo,useState} from 'react';
 import {OMEGA7_CAPABILITIES} from './capabilityRegistry';
 import canonicalRecoveryR650 from '../canon/year-corpus-capability-conservation-r650.json';
 import {evaluateWovenExchangeR621} from '../src/wovenBoundaryExchangeR621.mjs';
+import {traverseDevelopmentalContinuityR622} from '../src/developmentalTraversalR622.mjs';
 import {OMEGA_ARCHITECTURE_R474,YEAR_CORPUS_CAPABILITY_GRAPH_R474,auditYearCorpusCapabilityGraphR474,type OmegaArchitecturePillarR474} from '../src/yearCorpusCapabilityGraphR474';
 
 // R705: a source-lineage view and real OMEGA7 route launcher, not a live-execution attestation.
@@ -11,6 +12,7 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
  const [filter,setFilter]=useState<FilterR705>('GAPPED');
  const [query,setQuery]=useState('');
  const [exchangeResult,setExchangeResult]=useState<string>('Not executed');
+ const [developmentResult,setDevelopmentResult]=useState<string>('Not executed');
  const audit=useMemo(()=>auditYearCorpusCapabilityGraphR474(),[]);
  const availableRoutes=useMemo(()=>new Set(OMEGA7_CAPABILITIES.map(c=>c.legacyRoute)),[]);
  const families=canonicalRecoveryR650.families;
@@ -28,6 +30,12 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
    <p>Run a deterministic three-node example of multi-parent exchange and cyclic return. This is an abstract computational operator, not historical parity or physical simulation.</p>
    <button type='button' data-r621-run-exchange onClick={()=>{try{const r=evaluateWovenExchangeR621({nodes:['a','b','c'],initial:{a:5,b:3,c:0},exchanges:[{kind:'EGRESS',from:'a',to:'c',amount:2},{kind:'INGRESS',from:'b',to:'c',amount:2},{kind:'EGRESS',from:'c',to:'a',amount:1},{kind:'RESIDUE',from:'a',to:'b',amount:1,residueType:'CONTRADICTION',direction:'RETURN'}]});setExchangeResult(JSON.stringify({stocks:r.stocks,parents:r.parents,residue:r.residues,invariant:r.invariant}));}catch(e){setExchangeResult(String(e));}}}>Execute example and inspect conserved result</button>
    <pre data-r621-exchange-result style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{exchangeResult}</pre>
+  </section>
+  <section aria-label='Experimental developmental traversal' data-r622-developmental-traversal='experimental'>
+   <h3>Heightened Mode — developmental derivative instrument</h3>
+   <p>Discrete, conservation-checked traversal; the rates and curvature are abstract scalar differences, not physical dimensions or established historical parity.</p>
+   <button type='button' data-r622-run-traversal onClick={()=>{try{const frames=[1,2,3].map(amount=>({exchanges:[{kind:'EGRESS',from:'a',to:'b',amount}]}));const r=traverseDevelopmentalContinuityR622({nodes:['a','b'],initial:{a:10,b:0},frames,dt:1});setDevelopmentResult(JSON.stringify({timeline:r.timeline,velocity:r.velocity,acceleration:r.acceleration,jerk:r.jerk,curvature:r.curvature,conservation:r.invariants}));}catch(e){setDevelopmentResult(String(e));}}}>Execute developmental traversal</button>
+   <pre data-r622-traversal-result style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{developmentResult}</pre>
   </section>
   <section aria-label='Canonical family restoration status' data-r620-canonical-family-report='source-bound'>
    <h3>Historical capability families — independent proof required</h3>
