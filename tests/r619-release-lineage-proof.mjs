@@ -40,4 +40,7 @@ const deployJob = workflow.split(/\n  deploy-main:\s*\n/)[1]?.split(/\n  post-de
 assert.ok(deployJob, 'canonical production deploy job must exist');
 assert.match(deployJob, /\n    permissions:\s*\n      contents: read\s*\n      actions: write\s*\n      pull-requests: read/, 'squash provenance requires read-only pull request access');
 assert.match(deployJob, /GH_TOKEN: \$\{\{ github\.token \}\}/, 'lineage binder must receive workflow token');
+const releasePanel = readFileSync('src/GovernedBuildReceiptPanel.tsx', 'utf8');
+assert.match(releasePanel, /Previous main source \\(not live rollback\\)/, 'source lineage must not be represented as proven live rollback');
+assert.match(releasePanel, /state:lineage\\?\\.rollbackSha\\?'SOURCE_ONLY':'EXTERNAL'/, 'prior main SHA must remain source-only evidence');
 console.log('R619 two-parent and exact-squash release lineage, PR provenance, tree equality, fail-closed negatives PASS');
