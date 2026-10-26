@@ -95,3 +95,25 @@ test('blank disposition evidence and approver cannot manufacture governed supers
   assert.equal(r.productionProven,false);
  }
 });
+
+test('implementation identity substitution requires independent lineage review',()=>{
+ const old=node('A'),now=node('A');now.strongestImplementation.id='A:replacement';
+ const r=audit({previous:[old],candidate:[now],proofs:{A:{...proof('A'),implementationId:'A:replacement'}}});
+ assert.deepEqual(r.implementationChanged,['A']);
+ assert.equal(r.structurePass,false);
+ assert.equal(r.productionProven,false);
+});
+test('visible presentation route relocation is not silently conserved',()=>{
+ const old=node('A'),now=node('A');now.presentationSurface.route='/omega/relocated';
+ const r=audit({previous:[old],candidate:[now],proofs:{A:proof('A')}});
+ assert.deepEqual(r.presentationRouteChanged,['A']);
+ assert.equal(r.presentationLost.length,0);
+ assert.equal(r.structurePass,false);
+});
+test('executor route relocation is a distinct regression review gate',()=>{
+ const old=node('A'),now=node('A');old.currentExecutor.route='/executor/old';now.currentExecutor.route='/executor/new';
+ const r=audit({previous:[old],candidate:[now],proofs:{A:proof('A')}});
+ assert.deepEqual(r.executorRouteChanged,['A']);
+ assert.equal(r.structurePass,false);
+ assert.equal(r.productionProven,false);
+});
