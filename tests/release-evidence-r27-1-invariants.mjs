@@ -14,6 +14,7 @@ const config=fs.readFileSync('wrangler.jsonc','utf8');
 const panel=fs.readFileSync('src/GovernedBuildReceiptPanel.tsx','utf8');
 const vite=fs.readFileSync('vite.config.ts','utf8');
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+const lineage=fs.readFileSync('scripts/r619-release-lineage.mjs','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 function semverAtLeast(v,min){const a=v.split('.').map(Number),b=min.split('.').map(Number);for(let i=0;i<3;i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return true}
 const directR27=config.includes('"main": "src/workerR27.js"');
@@ -43,7 +44,8 @@ must(panel.includes("lineage?.authority==='GITHUB_MERGE_PARENTS'"),'Development 
 must(panel.includes('EXTERNAL_GITHUB_EVIDENCE_REQUIRED')&&panel.includes('EXTERNAL_FIRST_HAND_PROBE_REQUIRED')&&panel.includes('EXTERNAL_RELEASE_LEDGER_REQUIRED'),'timeline must preserve external QA, verification, and fallback rollback authority instead of synthesizing proof');
 must(vite.includes('OMEGA_GOVERNED_BUILD_RECEIPT_V1'),'R26.1 package receipt must remain inherited');
 must(vite.includes("role:'PACKAGED_SOURCE_SHA'")&&vite.includes("authority:candidateSha&&promotedMergeSha&&rollbackSha?'GITHUB_MERGE_PARENTS':'EXTERNAL_RELEASE_LEDGER_REQUIRED'"),'build receipt must distinguish packaged source from governed candidate/promoted/rollback lineage');
-must(ci.includes('Bind promoted merge lineage')&&ci.includes('OMEGA_CANDIDATE_SHA')&&ci.includes('OMEGA_PROMOTED_SHA')&&ci.includes('OMEGA_ROLLBACK_SHA'),'production workflow must bind receipt lineage from exact Git merge parents before deployment');
+must(ci.includes('node scripts/r619-release-lineage.mjs')&&lineage.includes('OMEGA_CANDIDATE_SHA=')&&lineage.includes('OMEGA_PROMOTED_SHA=')&&lineage.includes('OMEGA_ROLLBACK_SHA='),'production workflow must bind exact Git source lineage before deployment');
+must(lineage.includes("lineageMode: 'EXACT_TWO_PARENT_MERGE'")&&lineage.includes("lineageMode: 'EXACT_SQUASH_PR_AND_TREE'"),'production lineage must retain two-parent source promotion and fail-closed verified squash provenance');
 must(semverAtLeast(pkg.version,'27.1.0'),'package version must retain or advance beyond R27.1');
 for(const source of [worker,worker32,worker33,worker34,worker101,worker102,worker111,worker114,worker115,worker116,panel,config,vite,ci])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1+ must remain AppDeploy-free');
 console.log(`OMEGA R116 RELEASE EVIDENCE PASS · package ${pkg.version} · R31.2 merge-parent lineage preserved through R32/R33/R34/R101/R102/R111/R114/R115/R116 successor chain`);
