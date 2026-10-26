@@ -36,8 +36,8 @@ assert.throws(() => bind({...squash, associatedPulls: null}), /associated PR evi
 // Job-level permissions override workflow-level grants; keep both read and action scopes.
 const {readFileSync} = await import('node:fs');
 const workflow = readFileSync('.github/workflows/ci.yml', 'utf8');
-const deployJob = workflow.split(/\\n  deploy-main:\\s*\\n/)[1]?.split(/\\n  post-deploy-authority-closure:\\s*\\n/)[0];
+const deployJob = workflow.split(/\n  deploy-main:\s*\n/)[1]?.split(/\n  post-deploy-authority-closure:\s*\n/)[0];
 assert.ok(deployJob, 'canonical production deploy job must exist');
-assert.match(deployJob, /\\n    permissions:\\s*\\n      contents: read\\s*\\n      actions: write\\s*\\n      pull-requests: read/, 'squash provenance requires read-only pull request access');
-assert.match(deployJob, /GH_TOKEN: \\$\\{\\{ github\\.token \\$\\}\\}/, 'lineage binder must receive workflow token');
+assert.match(deployJob, /\n    permissions:\s*\n      contents: read\s*\n      actions: write\s*\n      pull-requests: read/, 'squash provenance requires read-only pull request access');
+assert.match(deployJob, /GH_TOKEN: \$\{\{ github\.token \}\}/, 'lineage binder must receive workflow token');
 console.log('R619 two-parent and exact-squash release lineage, PR provenance, tree equality, fail-closed negatives PASS');
