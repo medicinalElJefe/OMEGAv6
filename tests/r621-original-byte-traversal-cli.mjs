@@ -40,4 +40,15 @@ try {
   assert.match(result.stderr, /R621 ORIGINAL SOURCE TRAVERSAL REFUSED/);
   assert.ok(!result.stderr.includes(secret), 'failure must not leak source bytes');
 } finally { rmSync(dir, {recursive: true, force: true}); }
+// A failed filesystem open must not disclose the private workbook path or its filename.
+const privatePath = join(tmpdir(), 'SENTINEL_PRIVATE_WORKBOOK_PATH_DO_NOT_EMIT_' + process.pid + '.xlsx');
+const missing = spawnSync(process.execPath, [
+  'scripts/traverse_original_workbook_r621.mjs', privatePath, '--address', '0', '--offset', '1',
+], {cwd: process.cwd(), encoding: 'utf8'});
+assert.equal(missing.status, 1, 'missing original workbook must fail closed');
+assert.equal(missing.stdout, '', 'failure must not emit a receipt');
+assert.match(missing.stderr, /R621 ORIGINAL SOURCE TRAVERSAL REFUSED: SOURCE_OR_ARGUMENT_PROOF_FAILED/);
+assert.ok(!missing.stderr.includes(privatePath), 'refusal must not reveal the private source path');
+assert.ok(!missing.stderr.includes('SENTINEL_PRIVATE_WORKBOOK_PATH_DO_NOT_EMIT'), 'refusal must not reveal private basename');
+
 console.log('R621 original-byte CLI input, source refusal and privacy controls PASS');
