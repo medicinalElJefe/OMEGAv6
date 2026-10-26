@@ -15,7 +15,7 @@ The input `proofs` mapping must come from *independent real production observati
 
 Import: `import {auditCapabilityContinuityR620} from './src/capabilityContinuityAuditR620.mjs'`.
 
-Run unit regressions: `node --test tests/capability-continuity-r620.mjs`. The primary CI verify job now executes these tests; merely adding a test file is not an acceptance gate.
+Run unit regressions: `node --test tests/capability-continuity-r620.mjs tests/canonical-family-recovery-r620.mjs`. To inspect all 12 canonical R650 families and their unresolved source/proof gaps, run `node scripts/canonical-family-recovery-r620.mjs`. This reports repository ledger claims and does not fetch historical donors. The primary CI verify job now executes these tests; merely adding a test file is not an acceptance gate.
 
 Evidence hierarchy: repository source != executable behavior != green CI != merged revision != deployed artifact != live runtime proof != complete historical capability conservation.
 
