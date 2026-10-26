@@ -12,7 +12,6 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
  const audit=useMemo(()=>auditYearCorpusCapabilityGraphR474(),[]);
  const availableRoutes=useMemo(()=>new Set(OMEGA7_CAPABILITIES.map(c=>c.legacyRoute)),[]);
  const families=canonicalRecoveryR650.families;
- const unprovenFamilies=families.filter(f=>!f.productionProved||f.missingEvidence.length>0);
  const rows=useMemo(()=>YEAR_CORPUS_CAPABILITY_GRAPH_R474.filter(c=>
   (pillar==='ALL'||c.pillar===pillar)&&
   (filter==='ALL'||(filter==='GAPPED'?c.remainingGap!==null:c.strongestImplementation.state===filter))&&
@@ -24,9 +23,9 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
   <div role='status' data-r705-audit-summary>{audit.capabilities} resolved capability identities · {audit.gapped} recorded gaps · {audit.executing} modeled as executing · {audit.truthGated} truth-gated</div>
   <section aria-label='Canonical family restoration status' data-r620-canonical-family-report='source-bound'>
    <h3>Historical capability families — independent proof required</h3>
-   <p>{families.length} canonical families · {unprovenFamilies.length} without complete production proof. Source hints and graph registration are not executable parity.</p>
+   <p>{families.length} canonical families · {families.length} require independent production proof. Source hints, in-ledger claims and graph registration are not executable parity.</p>
    <div style={{display:'grid',gap:8,maxHeight:320,overflowY:'auto'}}>{families.map(f=><article key={f.id} data-r620-family-id={f.id} style={{border:'1px solid var(--o7-border, #606a80)',padding:8,borderRadius:6}}>
-    <strong>{f.id}</strong> <small>{f.truthClass} · {f.productionProved && f.missingEvidence.length===0?'Claims production proof (requires external verification)':'Not production proven'}</small>
+    <strong>{f.id}</strong> <small>{f.truthClass} · {f.productionProved?'Unverified in-ledger production claim':'Production proof not established'}</small>
     <p>{f.description}</p><small>Missing evidence: {f.missingEvidence.join('; ')||'No missing evidence recorded; verify independently'}</small>
    </article>)}</div>
   </section>

@@ -34,3 +34,7 @@ A missing historical capability always sets `structurePass: false`, even if a ca
 The source-bound tests specifically refuse caller-declared removal and empty visible-route admission. Passing those tests is candidate source/CI evidence only; it does not establish production runtime behavior.
 
 The primary CI gate also runs `npx --yes tsx tests/r620-r474-corpus-integration.mts` against the **actual R474 year-corpus capability graph**, not just synthetic fixtures. It checks unchanged-graph structural continuity, then deliberately removes a real capability with a forged supersession, blanks a real presentation route, substitutes a real source binding, and downgrades a direct executor. Each tamper must be refused. This integration does not claim live runtime proof, exhaustive external-donor recovery, or full executor conservation.
+
+## R650 source-claim hardening
+
+A canonical family ledger is not a production verifier. Even if a ledger row asserts `productionProved: true` and lists no missing evidence, the source-only R620 family report keeps that family unresolved and marks the assertion `UNVERIFIED_ATTESTATION`. `sourceHintsPresent` records a hint; `sourcePresent` remains false without independent byte readback. The OMEGA 7 family summary counts every family as requiring independent production proof, never subtracting families based on ledger flags. Primary CI now runs both the forged-ledger negative regression and OMEGA 7 display-invariant regression; these checks do not themselves establish deployed behavior.

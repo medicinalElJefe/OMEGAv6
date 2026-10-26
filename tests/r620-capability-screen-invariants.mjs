@@ -8,6 +8,9 @@ test('OMEGA7 renders all canonical R650 family restoration statuses without pret
  assert.match(source,/canonicalRecoveryR650\.families/);
  assert.match(source,/data-r620-canonical-family-report/);
  assert.match(source,/Missing evidence:/);
- assert.match(source,/Not production proven/);
+ assert.match(source,/Production proof not established/);
+ assert.match(source,/Unverified in-ledger production claim/);
+ assert.match(source,/families\.length\} require independent production proof/);
+ assert.doesNotMatch(source,/unprovenFamilies/);
  assert.ok(ledger.families.every(x=>!x.productionProved));
 });
