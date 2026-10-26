@@ -19,7 +19,8 @@ const negativeWrap=step({address:0,offset:-1,wrap:true});
 assert.equal(negativeWrap.toAddress,CORPUS_CAPACITY_R610-1);assert.equal(negativeWrap.wrapped,true);
 const positiveWrap=step({address:CORPUS_CAPACITY_R610-1,offset:1,wrap:true});
 assert.equal(positiveWrap.toAddress,0);assert.equal(positiveWrap.wrapped,true);
-assert.equal(step({address:0,offset:CORPUS_CAPACITY_R610*2+7,wrap:true}).toAddress,7);
+const multiTurn=step({address:0,offset:CORPUS_CAPACITY_R610*2+7,wrap:true});
+assert.equal(multiTurn.toAddress,7);assert.equal(multiTurn.crossedBand,true);assert.equal(multiTurn.endpointBandChanged,false);
 assert.equal(step({address:0,offset:-CORPUS_CAPACITY_R610*2-7,wrap:true}).toAddress,CORPUS_CAPACITY_R610-7);
 for(const address of [0,1,size-1,size,size*13+5,CORPUS_CAPACITY_R610-1]){
   const a=step({address,offset:19,wrap:true});
