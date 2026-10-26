@@ -29,7 +29,7 @@ export default function GovernedBuildReceiptPanel(){
   {label:'5 · Promoted merge',value:lineage?.promotedMergeSha||'EXTERNAL_RELEASE_LEDGER_REQUIRED',state:lineageBound?'BOUND':'EXTERNAL'},
   {label:'6 · Runtime version',value:version,state:version==='UNAVAILABLE'?'HOLD':'BOUND'},
   {label:'7 · Canonical verify',value:evidence?.externalGates?.postDeployVerification||'EXTERNAL_FIRST_HAND_PROBE_REQUIRED',state:canonicalBound?'TARGET_BOUND':'HOLD'},
-  {label:'8 · Rollback',value:lineage?.rollbackSha||evidence?.externalGates?.rollback||'EXTERNAL_RELEASE_LEDGER_REQUIRED',state:lineageBound?'BOUND':'EXTERNAL'}
+  {label:'8 · Previous main source (not live rollback)',value:lineage?.rollbackSha||'EXTERNAL_SOURCE_LINEAGE_REQUIRED',state:lineage?.rollbackSha?'SOURCE_ONLY':'EXTERNAL'}
  ];
  const lifecycleTimeline=[
   {label:'Implemented',value:attestation?.lifecycle?.implemented||'UNAVAILABLE',state:attestation?.lifecycle?.implemented==='IMPLEMENTED'?'BOUND':'HOLD'},
