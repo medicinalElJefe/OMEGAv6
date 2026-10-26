@@ -16,7 +16,7 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
  const duplicateHistorical=duplicates(previous),duplicateCurrent=duplicates(candidate);
  const invalidHistorical=previous.filter(x=>!validNode(x)).map(id),invalidCurrent=candidate.filter(x=>!validNode(x)).map(id);
  const current=new Map(candidate.map(x=>[id(x),x]));
- const missing=[],executorLost=[],executionDowngraded=[],presentationLost=[],sourceBindingChanged=[],truthClassChanged=[],truthGated=[],unproven=[],invalidResolutions=[],declaredResolutions=[];
+ const missing=[],executorLost=[],executionDowngraded=[],presentationLost=[],presentationRouteChanged=[],implementationChanged=[],executorRouteChanged=[],sourceBindingChanged=[],truthClassChanged=[],truthGated=[],unproven=[],invalidResolutions=[],declaredResolutions=[];
  for(const old of previous){
   const key=id(old),now=current.get(key);
   if(!now){
@@ -29,16 +29,20 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
   if(runnable(old)&&!runnable(now))executorLost.push(key);
   if(old.strongestImplementation?.state==='EXECUTES_NOW'&&now.strongestImplementation?.state==='EXECUTES_AS_ADAPTER')executionDowngraded.push(key);
   if(visible(old)&&!visible(now))presentationLost.push(key);
+  if(visible(old)&&visible(now)&&old.presentationSurface.route!==now.presentationSurface.route)presentationRouteChanged.push(key);
+  if(old.strongestImplementation?.id!==now.strongestImplementation?.id)implementationChanged.push(key);
+  if(old.currentExecutor?.route!==now.currentExecutor?.route)executorRouteChanged.push(key);
   if(old.lineage?.sourceBindingId!==now.lineage?.sourceBindingId)sourceBindingChanged.push(key);
   if(old.evidence?.truthClass!==now.evidence?.truthClass)truthClassChanged.push(key);
   if(now.strongestImplementation?.state==='TRUTH_GATED')truthGated.push(key);
  }
  // New capabilities need proof references too: previous-only enumeration silently admitted additions.
  for(const now of candidate)if(!boundProof(proofs[id(now)],now))unproven.push(id(now));
- const structurePass=!invalidHistorical.length&&!invalidCurrent.length&&!duplicateHistorical.length&&!duplicateCurrent.length&&!executorLost.length&&!executionDowngraded.length&&!presentationLost.length&&!sourceBindingChanged.length&&!truthClassChanged.length&&!invalidResolutions.length;
+ const structurePass=!invalidHistorical.length&&!invalidCurrent.length&&!duplicateHistorical.length&&!duplicateCurrent.length&&!executorLost.length&&!executionDowngraded.length&&!presentationLost.length&&!presentationRouteChanged.length&&!implementationChanged.length&&!executorRouteChanged.length&&!sourceBindingChanged.length&&!truthClassChanged.length&&!invalidResolutions.length;
  return Object.freeze({schema:'OMEGA_CAPABILITY_CONTINUITY_AUDIT_R620',baselineCount:previous.length,currentCount:candidate.length,
   invalidHistorical:unique(invalidHistorical),invalidCurrent:unique(invalidCurrent),duplicateHistorical,duplicateCurrent,missing:unique(missing),executorLost:unique(executorLost),
   executionDowngraded:unique(executionDowngraded),presentationLost:unique(presentationLost),
+  presentationRouteChanged:unique(presentationRouteChanged),implementationChanged:unique(implementationChanged),executorRouteChanged:unique(executorRouteChanged),
   sourceBindingChanged:unique(sourceBindingChanged),truthClassChanged:unique(truthClassChanged),
   truthGated:unique(truthGated),unproven:unique(unproven),
   invalidResolutions:unique(invalidResolutions),declaredResolutions:unique(declaredResolutions),
