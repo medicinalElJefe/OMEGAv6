@@ -7,7 +7,7 @@ test('graph membership alone is not live proof',()=>{const r=audit({previous:[no
 test('executor regression blocks acceptance',()=>{const r=audit({previous:[node('A')],candidate:[node('A',{run:false})],proofs:{A:proof('A')}});assert.deepEqual(r.executorLost,['A']);assert.equal(r.productionProven,false)});
 test('presentation regression independently blocks acceptance',()=>{const r=audit({previous:[node('A')],candidate:[node('A',{view:false})],proofs:{A:proof('A')}});assert.deepEqual(r.presentationLost,['A']);assert.equal(r.structurePass,false)});
 test('mere disposition label cannot excuse missing capability',()=>{const r=audit({previous:[node('A')],candidate:[],dispositions:{A:{status:'SUPERSEDED'}}});assert.deepEqual(r.invalidResolutions,['A'])});
-test('supersession requires replacement and governed evidence',()=>{const r=audit({previous:[node('A')],candidate:[node('B')],dispositions:{A:{status:'SUPERSEDED',replacementId:'B',evidenceId:'e',approver:'operator'}}});assert.deepEqual(r.provenResolutions,['A']);assert.equal(r.productionProven,false)});
+test('supersession requires replacement and governed evidence',()=>{const r=audit({previous:[node('A')],candidate:[node('B')],dispositions:{A:{status:'SUPERSEDED',replacementId:'B',evidenceId:'e',approver:'operator'}}});assert.deepEqual(r.declaredResolutions,['A']);assert.equal(r.dispositionAuthority,'UNVERIFIED_CALLER_SUPPLIED_GOVERNANCE_REFERENCES');assert.equal(r.productionProven,false)});
 test('CI success and archive inventory are not runtime receipts',()=>{const r=audit({previous:[node('A')],candidate:[node('A')],proofs:{A:{...proof('A'),type:'CI_PASS'}}});assert.deepEqual(r.unproven,['A'])});
 test('matching caller-provided references remain unverified until independent production readback',()=>{
  const r=audit({previous:[node('A')],candidate:[node('A')],proofs:{A:proof('A')}});
@@ -83,4 +83,15 @@ test('malformed historical baseline blocks conservation even if candidate looks 
  const r=audit({previous:[bad],candidate:[node('A')],proofs:{A:proof('A')}});
  assert.deepEqual(r.invalidHistorical,['A']);
  assert.equal(r.structurePass,false);
+});
+
+test('blank disposition evidence and approver cannot manufacture governed supersession',()=>{
+ for(const field of ['evidenceId','approver'])for(const value of ['', '   ']){
+  const disposition={status:'SUPERSEDED',replacementId:'B',evidenceId:'e',approver:'operator',[field]:value};
+  const r=audit({previous:[node('A')],candidate:[node('B')],dispositions:{A:disposition}});
+  assert.deepEqual(r.invalidResolutions,['A']);
+  assert.deepEqual(r.declaredResolutions,[]);
+  assert.equal(r.structurePass,false);
+  assert.equal(r.productionProven,false);
+ }
 });
