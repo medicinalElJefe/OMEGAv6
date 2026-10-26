@@ -7,7 +7,7 @@ test('graph membership alone is not live proof',()=>{const r=audit({previous:[no
 test('executor regression blocks acceptance',()=>{const r=audit({previous:[node('A')],candidate:[node('A',{run:false})],proofs:{A:proof('A')}});assert.deepEqual(r.executorLost,['A']);assert.equal(r.productionProven,false)});
 test('presentation regression independently blocks acceptance',()=>{const r=audit({previous:[node('A')],candidate:[node('A',{view:false})],proofs:{A:proof('A')}});assert.deepEqual(r.presentationLost,['A']);assert.equal(r.structurePass,false)});
 test('mere disposition label cannot excuse missing capability',()=>{const r=audit({previous:[node('A')],candidate:[],dispositions:{A:{status:'SUPERSEDED'}}});assert.deepEqual(r.invalidResolutions,['A'])});
-test('supersession requires replacement and governed evidence',()=>{const r=audit({previous:[node('A')],candidate:[node('B')],dispositions:{A:{status:'SUPERSEDED',replacementId:'B',evidenceId:'e',approver:'operator'}}});assert.deepEqual(r.declaredResolutions,['A']);assert.equal(r.dispositionAuthority,'UNVERIFIED_CALLER_SUPPLIED_GOVERNANCE_REFERENCES');assert.equal(r.productionProven,false)});
+test('supersession requires replacement and governed evidence',()=>{const r=audit({previous:[node('A')],candidate:[node('B')],dispositions:{A:{status:'SUPERSEDED',replacementId:'B',evidenceId:'e',approver:'operator'}}});assert.deepEqual(r.declaredResolutions,['A']);assert.equal(r.dispositionAuthority,'UNVERIFIED_CALLER_SUPPLIED_GOVERNANCE_REFERENCES');assert.equal(r.structurePass,false);assert.equal(r.productionProven,false)});
 test('CI success and archive inventory are not runtime receipts',()=>{const r=audit({previous:[node('A')],candidate:[node('A')],proofs:{A:{...proof('A'),type:'CI_PASS'}}});assert.deepEqual(r.unproven,['A'])});
 test('matching caller-provided references remain unverified until independent production readback',()=>{
  const r=audit({previous:[node('A')],candidate:[node('A')],proofs:{A:proof('A')}});
@@ -116,4 +116,26 @@ test('executor route relocation is a distinct regression review gate',()=>{
  assert.deepEqual(r.executorRouteChanged,['A']);
  assert.equal(r.structurePass,false);
  assert.equal(r.productionProven,false);
+});
+
+test('caller-declared disposition cannot silently conserve a removed historical capability',()=>{
+ for(const status of ['SUPERSEDED','INTENTIONALLY_DEPRECATED','PLATFORM_SPECIFIC','QUARANTINED']){
+  const disposition={status,replacementId:'B',evidenceId:'self-declared',approver:'self-declared'};
+  const r=audit({previous:[node('A')],candidate:[node('B')],dispositions:{A:disposition},proofs:{B:proof('B')}});
+  assert.deepEqual(r.missing,['A']);
+  assert.deepEqual(r.declaredResolutions,['A']);
+  assert.deepEqual(r.invalidResolutions,[]);
+  assert.equal(r.structurePass,false,'unverified '+status+' must not pass conservation');
+  assert.equal(r.proofReferencesComplete,false);
+  assert.equal(r.productionProven,false);
+ }
+});
+test('visible capability cannot declare an empty or whitespace-only route',()=>{
+ for(const route of ['', '  ']){
+  const candidate=node('A');candidate.presentationSurface.route=route;
+  const r=audit({previous:[node('A')],candidate:[candidate],proofs:{A:proof('A')}});
+  assert.deepEqual(r.invalidCurrent,['A']);
+  assert.equal(r.structurePass,false);
+  assert.equal(r.proofReferencesComplete,false);
+ }
 });
