@@ -2,7 +2,9 @@
 const VALID=new Set(['SUPERSEDED','INTENTIONALLY_DEPRECATED','PLATFORM_SPECIFIC','QUARANTINED']);
 const LIVE=new Set(['PRODUCTION_BEHAVIOR','TARGET_RUNTIME_READBACK']);
 const id=x=>x?.identity?.id;
-const runnable=x=>x?.currentExecutor?.routable===true&&x?.strongestImplementation?.state!=='TRUTH_GATED';
+const runnable=x=>x?.currentExecutor?.routable===true&&['EXECUTES_NOW','EXECUTES_AS_ADAPTER'].includes(x?.strongestImplementation?.state);
+const nonempty=x=>typeof x==='string'&&x.trim().length>0;
+const boundProof=(p,now)=>!!p&&LIVE.has(p.type)&&nonempty(p.evidenceId)&&p.implementationId===now.strongestImplementation?.id&&p.sourceBindingId===now.lineage?.sourceBindingId;
 const visible=x=>x?.presentationSurface?.generatedFromCapability===true&&!!x?.presentationSurface?.route;
 const unique=xs=>[...new Set(xs)].sort();
 export function auditCapabilityContinuityR620({previous,candidate,dispositions={},proofs={}}){
@@ -11,9 +13,9 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
  const duplicates=xs=>unique(xs.map(id).filter((v,i,a)=>a.indexOf(v)!==i));
  const duplicateHistorical=duplicates(previous),duplicateCurrent=duplicates(candidate);
  const current=new Map(candidate.map(x=>[id(x),x]));
- const missing=[],executorLost=[],presentationLost=[],truthGated=[],unproven=[],invalidResolutions=[],provenResolutions=[];
+ const missing=[],executorLost=[],executionDowngraded=[],presentationLost=[],sourceBindingChanged=[],truthClassChanged=[],truthGated=[],unproven=[],invalidResolutions=[],provenResolutions=[];
  for(const old of previous){
-  const key=id(old),now=current.get(key),p=proofs[key];
+  const key=id(old),now=current.get(key);
   if(!now){
    missing.push(key);
    const d=dispositions[key];
@@ -22,14 +24,20 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
    continue;
   }
   if(runnable(old)&&!runnable(now))executorLost.push(key);
+  if(old.strongestImplementation?.state==='EXECUTES_NOW'&&now.strongestImplementation?.state==='EXECUTES_AS_ADAPTER')executionDowngraded.push(key);
   if(visible(old)&&!visible(now))presentationLost.push(key);
+  if(old.lineage?.sourceBindingId!==now.lineage?.sourceBindingId)sourceBindingChanged.push(key);
+  if(old.evidence?.truthClass!==now.evidence?.truthClass)truthClassChanged.push(key);
   if(now.strongestImplementation?.state==='TRUTH_GATED')truthGated.push(key);
-  if(!p||!LIVE.has(p.type)||!p.evidenceId||p.implementationId!==now.strongestImplementation?.id||p.sourceBindingId!==now.lineage?.sourceBindingId)unproven.push(key);
  }
- const structurePass=!duplicateHistorical.length&&!duplicateCurrent.length&&!executorLost.length&&!presentationLost.length&&!invalidResolutions.length;
+ // New capabilities need proof references too: previous-only enumeration silently admitted additions.
+ for(const now of candidate)if(!boundProof(proofs[id(now)],now))unproven.push(id(now));
+ const structurePass=!duplicateHistorical.length&&!duplicateCurrent.length&&!executorLost.length&&!executionDowngraded.length&&!presentationLost.length&&!sourceBindingChanged.length&&!truthClassChanged.length&&!invalidResolutions.length;
  return Object.freeze({schema:'OMEGA_CAPABILITY_CONTINUITY_AUDIT_R620',baselineCount:previous.length,currentCount:candidate.length,
   duplicateHistorical,duplicateCurrent,missing:unique(missing),executorLost:unique(executorLost),
-  presentationLost:unique(presentationLost),truthGated:unique(truthGated),unproven:unique(unproven),
+  executionDowngraded:unique(executionDowngraded),presentationLost:unique(presentationLost),
+  sourceBindingChanged:unique(sourceBindingChanged),truthClassChanged:unique(truthClassChanged),
+  truthGated:unique(truthGated),unproven:unique(unproven),
   invalidResolutions:unique(invalidResolutions),provenResolutions:unique(provenResolutions),
   structurePass,proofReferencesComplete:structurePass&&!unproven.length&&!missing.length,
   productionProven:false,proofAuthority:'UNVERIFIED_CALLER_SUPPLIED_REFERENCES',
