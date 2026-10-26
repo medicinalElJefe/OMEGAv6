@@ -56,3 +56,10 @@ This is source-level conservation validation, **not** evidence that the referenc
 ## Follow-up: executor and presentation authority transitions
 
 The conservation audit now reports `executorRoutabilityChanged` and `presentationGenerationChanged`. A historical executor with `routable: false` cannot be made routable by a caller-edited flag while keeping the same route and implementation ID. Likewise, `presentationSurface.generatedFromCapability` cannot change without review even if the URL is unchanged. These are structural review gates, not independent execution or deployment proof. Focused synthetic tests and tampering of the actual R474 graph cover the transitions.
+
+
+## Follow-up: identity, evidence provenance and disposition integrity
+
+R620 also compares historical `identity.name` and the unordered `identity.aliases` set, `evidence.currentEvidence`, `supersession.status`, and the capability `schema`. The independent review gates are `identityMetadataChanged`, `evidenceProvenanceChanged`, `supersessionStatusChanged`, and `nodeSchemaChanged`. Without these gates, an unchanged ID, executor route and truth class could conceal a renamed historical capability, a fabricated evidence description, a self-declared disposition, or an incompatible schema. Tests mutate both synthetic nodes and the real R474 year-corpus graph. Reordering aliases alone is not a change.
+
+These gates reject silent substitutions at the **source structure** boundary. They neither authenticate the truth of unchanged evidence text nor establish target-runtime execution, native device presence, or production acceptance. Release evidence must remain independently verified against the exact promoted SHA.
