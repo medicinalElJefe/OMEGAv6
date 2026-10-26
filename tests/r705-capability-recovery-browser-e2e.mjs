@@ -30,8 +30,11 @@ try{
    await workbook.waitFor({state:'visible',timeout:10000});
    await pillar.selectOption('CALCULUS');
    await workbook.waitFor({state:'detached',timeout:10000}).catch(()=>{throw Error(device+': pillar filter failed to remove non-calculus capability')});
-   await pillar.selectOption('APPLICATIONS');
+   // WORKBOOK is classified by the R474 atlas precedence rule as KNOWLEDGE_ATLASES,
+   // even though its R473 domain is APPLICATIONS. Test the actual graph pillar.
+   await pillar.selectOption('KNOWLEDGE_ATLASES');
    await workbook.waitFor({state:'visible',timeout:10000});
+   if(!(await workbook.innerText()).includes('KNOWLEDGE ATLASES'))throw Error(device+': workbook R474 pillar classification drifted');
    if(!(await workbook.innerText()).includes('live execution still requires independent proof')&&!(await workbook.innerText()).includes('Remaining gap:'))throw Error(device+': no source-gap or proof boundary');
    await workbook.getByRole('button',{name:'Open current route: System Atlas'}).click();
    await page.locator('[data-native-host-route="System Atlas"]').waitFor({state:'visible',timeout:30000});
