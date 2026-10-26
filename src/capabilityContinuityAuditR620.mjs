@@ -52,5 +52,5 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
   structurePass,proofReferencesComplete:structurePass&&!unproven.length&&!missing.length,
   productionProven:false,proofAuthority:'UNVERIFIED_CALLER_SUPPLIED_REFERENCES',
   requiresIndependentProductionReadback:true,
-  rule:'Graph membership, CI, archive, route and target-runtime proof are separate evidence classes.'});
+  rule:'Caller-supplied proof references are untrusted until authenticated external runtime verification; graph presence and CI never prove deployment.'});
 }
