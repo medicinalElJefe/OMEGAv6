@@ -7,7 +7,7 @@ node scripts/traverse_original_workbook_r621.mjs /secure/path/OMEGA_61917364224D
 node scripts/traverse_original_workbook_r621.mjs /secure/path/OMEGA_61917364224D_BUILD_CHART_v18.xlsx --address 0 --offset -1 --wrap
 ```
 
-The CLI is deliberately **read-only**. It emits the source fingerprint, sheet name, coordinate digest, pinned band-ledger digest, bounded traversal receipt and outer digest. It does not emit the original rows, engineering notes, build interpretations or XLSX bytes. A non-original workbook, invalid coordinate, unauthorized wrap, malformed command or tampered ledger fails closed. The original XLSX is never added to this repository or GitHub Actions.
+The CLI redacts all underlying exception text on refusal, including filesystem paths that Node may otherwise disclose in file-open errors. The dedicated missing-file regression proves the private source basename is not emitted. The CLI is deliberately **read-only**. It emits the source fingerprint, sheet name, coordinate digest, pinned band-ledger digest, bounded traversal receipt and outer digest. It does not emit the original rows, engineering notes, build interpretations or XLSX bytes. A non-original workbook, invalid coordinate, unauthorized wrap, malformed command or tampered ledger fails closed. The original XLSX is never added to this repository or GitHub Actions.
 
 ## Evidence gates and limits
 
