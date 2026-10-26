@@ -59,6 +59,14 @@ jobs:
         run: node tests/r618-source-bound-band-traversal.mjs
       - name: R621 original-byte private workbook traversal CLI fail-closed controls
         run: node tests/r621-original-byte-traversal-cli.mjs
+      - name: R620 historical capability continuity and evidence boundary regression
+        run: node --test tests/capability-continuity-r620.mjs
+      - name: R620 real R474 year-corpus capability conservation and tamper regression
+        run: npx --yes tsx tests/r620-r474-corpus-integration.mts
+      - name: R620 canonical R650 family claim and unresolved-count refusal
+        run: node --test tests/canonical-family-recovery-r620.mjs
+      - name: R620 OMEGA7 source-claim display truth invariants
+        run: node --test tests/r620-capability-screen-invariants.mjs
       - name: R620 authenticated R241 private PR head preflight regression
         run: node tests/r620-r241-private-head-preflight.mjs
       - name: R705 historical capability recovery System UI audit
