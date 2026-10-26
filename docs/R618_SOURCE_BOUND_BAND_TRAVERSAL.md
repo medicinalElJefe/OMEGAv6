@@ -2,7 +2,7 @@
 
 This increment adds a **real, deterministic arithmetic executor** over the 12^10 historical *representational address space*. It does not execute historical Substrate/Traversal/Observer/Renderer modules, recover a physical spacetime simulation, instantiate 61,917,364,224 states, or mutate Canon.
 
-- `traverseCorpusBandR618({address, offset, wrap})` performs exact safe-integer input validation, BigInt addition/modulo, base-12 decode, 12x12 band identification, crossing detection and SHA-256 receipt construction. Out-of-capacity movement is rejected unless `wrap:true` is explicitly authorized. Negative offsets and multi-turn wraps are supported.
+- `traverseCorpusBandR618({address, offset, wrap})` performs exact safe-integer input validation, BigInt addition/modulo, base-12 decode, 12x12 band identification, path-crossing detection (distinct from endpoint-band change), and SHA-256 receipt construction. Out-of-capacity movement is rejected unless `wrap:true` is explicitly authorized. Negative offsets and multi-turn wraps are supported.
 - `verifyCorpusBandTraversalR618` re-executes the same input and checks the deterministic receipt, refusing tampered or mismatched results.
 - `traverseOriginalSourceBandR618({engineeringRecords, address, offset, wrap})` requires the **full original 144-row engineering record set** to pass R617S's independently pinned ledger before it produces a source-bound receipt. Its public receipt carries only the ledger fingerprint and source/destination module labels; it does not expose original Notes, Build Interpretation, rows, or source bytes.
 - `verifyOriginalSourceBandTraversalR618` re-executes the source-bound transition to reject altered receipts.
