@@ -69,3 +69,18 @@ test('empty or non-string receipt identifiers cannot satisfy proof reference com
   assert.equal(r.proofReferencesComplete,false);
  }
 });
+
+test('malformed new candidate cannot satisfy a crafted proof reference',()=>{
+ const bad=node('BAD');delete bad.strongestImplementation.id;
+ const r=audit({previous:[],candidate:[bad],proofs:{BAD:{type:'TARGET_RUNTIME_READBACK',evidenceId:'forged',sourceBindingId:'BAD'}}});
+ assert.deepEqual(r.invalidCurrent,['BAD']);
+ assert.deepEqual(r.unproven,['BAD']);
+ assert.equal(r.structurePass,false);
+ assert.equal(r.proofReferencesComplete,false);
+});
+test('malformed historical baseline blocks conservation even if candidate looks valid',()=>{
+ const bad=node('A');delete bad.lineage.sourceBindingId;
+ const r=audit({previous:[bad],candidate:[node('A')],proofs:{A:proof('A')}});
+ assert.deepEqual(r.invalidHistorical,['A']);
+ assert.equal(r.structurePass,false);
+});
