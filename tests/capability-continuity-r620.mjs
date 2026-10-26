@@ -264,3 +264,23 @@ test('reordering unordered lineage and artifact-kind memberships is not a false 
  assert.deepEqual(r.lineageStructureChanged,[]);
  assert.equal(r.structurePass,true);
 });
+
+
+test('new executor routability cannot be self-authorized by an unchanged route or state',()=>{
+ const old=node('A',{run:false}),now=node('A');
+ const r=audit({previous:[old],candidate:[now],proofs:{A:proof('A')}});
+ assert.deepEqual(r.executorRoutabilityChanged,['A']);
+ assert.deepEqual(r.executorLost,[],'a forged promotion is not a loss');
+ assert.equal(r.structurePass,false);
+ assert.equal(r.proofReferencesComplete,false);
+ assert.equal(r.productionProven,false);
+});
+test('presentation generation authority cannot change merely by retaining a route',()=>{
+ const old=node('A',{view:false});old.presentationSurface.route='/omega/A';
+ const now=structuredClone(old);now.presentationSurface.generatedFromCapability=true;
+ const r=audit({previous:[old],candidate:[now],proofs:{A:proof('A')}});
+ assert.deepEqual(r.presentationGenerationChanged,['A']);
+ assert.deepEqual(r.presentationLost,[]);
+ assert.equal(r.structurePass,false);
+ assert.equal(r.productionProven,false);
+});
