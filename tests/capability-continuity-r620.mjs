@@ -284,3 +284,40 @@ test('presentation generation authority cannot change merely by retaining a rout
  assert.equal(r.structurePass,false);
  assert.equal(r.productionProven,false);
 });
+
+test('historical identity name and aliases cannot be rewritten without a conservation review',()=>{
+ const old=node('A');old.identity.name='Historical Traversal';old.identity.aliases=['ARCHIVE','TRAVERSAL'];
+ for(const mutate of [n=>{n.identity.name='Unrelated Engine';},n=>{n.identity.aliases=['ARCHIVE'];}]){
+  const now=structuredClone(old);mutate(now);
+  const r=audit({previous:[old],candidate:[now],proofs:{A:proof('A')}});
+  assert.deepEqual(r.identityMetadataChanged,['A']);
+  assert.equal(r.structurePass,false);
+  assert.equal(r.productionProven,false);
+ }
+ const reordered=structuredClone(old);reordered.identity.aliases.reverse();
+ assert.deepEqual(audit({previous:[old],candidate:[reordered]}).identityMetadataChanged,[]);
+});
+test('source evidence description cannot be substituted while truth class and requirements stay fixed',()=>{
+ const old=node('A');old.evidence.currentEvidence='Original source readback still required';
+ const now=structuredClone(old);now.evidence.currentEvidence='Production proved';
+ const r=audit({previous:[old],candidate:[now],proofs:{A:proof('A')}});
+ assert.deepEqual(r.evidenceProvenanceChanged,['A']);
+ assert.deepEqual(r.truthClassChanged,[]);
+ assert.deepEqual(r.evidenceRequirementsChanged,[]);
+ assert.equal(r.structurePass,false);
+ assert.equal(r.productionProven,false);
+});
+test('supersession status and capability schema changes independently require review',()=>{
+ const old=node('A');old.schema='OMEGA_YEAR_CORPUS_CAPABILITY_NODE_R474';
+ old.supersession={status:'CURRENT_RESOLUTION',predecessors:[],scarPolicy:'RETAIN_REJECTIONS_AND_CONTRADICTIONS'};
+ for(const [field,mutate] of [
+  ['supersessionStatusChanged',n=>{n.supersession.status='INTENTIONALLY_DEPRECATED';}],
+  ['nodeSchemaChanged',n=>{n.schema='UNRELATED_SCHEMA';}]
+ ]){
+  const now=structuredClone(old);mutate(now);
+  const r=audit({previous:[old],candidate:[now],proofs:{A:proof('A')}});
+  assert.deepEqual(r[field],['A']);
+  assert.equal(r.structurePass,false);
+  assert.equal(r.productionProven,false);
+ }
+});
