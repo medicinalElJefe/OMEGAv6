@@ -35,12 +35,21 @@ export function parseHistoricalWorkbookR612({sourceBytes,claimedSha256,sheet='61
  });
  const head=rows.findIndex(row=>CORPUS_AXES_R610.every(axis=>row.includes(axis)));
  if(head<0)throw Error('ten axis header not found');
- const indices=CORPUS_AXES_R610.map(axis=>rows[head].indexOf(axis)),parsed=[];
+ const indices=CORPUS_AXES_R610.map(axis=>rows[head].indexOf(axis)),parsed=[],engineeringRecords=[];
+ const extraHeaders=['Address','Decoded Check','Band Start','Band End','Band Size','Build Interpretation','Module','Gate','Notes'];
+ const metaIndices=extraHeaders.map(name=>rows[head].indexOf(name));
  for(const row of rows.slice(head+1)){if(parsed.length>=4096)throw Error('too many coordinate rows');if(indices.every(i=>row[i]==null||row[i]===''))continue;
   const digits=indices.map(i=>{const raw=row[i];if(!/^(?:[0-9]|1[01])$/.test(String(raw??'')))throw Error('noncanonical axis digit');return Number(raw)});
+  const address=digits.reduce((n,x)=>n*12+x,0);
+  const declared=metaIndices[0]<0?null:row[metaIndices[0]];
+  if(declared!=null&&declared!==''&&(!/^\\d+$/.test(String(declared))||Number(declared)!==address))throw Error('source address differs from decoded coordinate');
+  const decoded=metaIndices[1]<0?null:row[metaIndices[1]];
+  if(decoded!=null&&decoded!==''&&String(decoded)!==digits.join('|'))throw Error('source decoded-check mismatch');
+  const metadata=Object.fromEntries(extraHeaders.map((name,i)=>[name,metaIndices[i]<0?null:row[metaIndices[i]]??null]));
+  engineeringRecords.push({rowIndex:head+parsed.length+2,address,digits:[...digits],metadata,truthClass:'VERIFIED_WORKSHEET_CELL_CONTENT_NOT_EXECUTOR'});
   parsed.push({familyId,digits});
  }
  if(!parsed.length)throw Error('no coordinate records');
  const intake=ingestHistoricalCoordinatesR611({sourceBytes,claimedSha256,sourceName:'SHA256:'+claimedSha256,sheet,rows:parsed});
- return {...intake,parsedBy:'R612_OOXML_EXACT_HEADER',rowMappingProof:'SOURCE_WORKSHEET_CELLS',sheetName:sheet};
+ return {...intake,engineeringRecords,parsedBy:'R612_OOXML_EXACT_HEADER',rowMappingProof:'SOURCE_WORKSHEET_CELLS',sheetName:sheet};
 }
