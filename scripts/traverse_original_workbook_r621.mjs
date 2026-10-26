@@ -69,7 +69,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1
     const {path, ...movement} = parseTraversalArgsR621(process.argv.slice(2));
     const receipt = proveOriginalByteTraversalR621(readFileSync(resolve(path)), movement);
     process.stdout.write(JSON.stringify(receipt, null, 2) + '\n');
-  } catch (error) {
+  } catch {
     // Do not emit workbook content, parsed rows, notes, or interpreter stack traces.
     // Never echo exception text: Node filesystem errors can include the private source path.
     // Proof rejection is deliberately opaque at the CLI boundary; no source bytes or paths escape.
