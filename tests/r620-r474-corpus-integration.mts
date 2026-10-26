@@ -92,3 +92,29 @@ generationTampered[0].presentationSurface.generatedFromCapability=(!lost.present
 const generationAudit=auditCapabilityContinuityR620({previous,candidate:generationTampered});
 assert.deepEqual(generationAudit.presentationGenerationChanged,[lost.identity.id]);
 assert.equal(generationAudit.structurePass,false,'R474 presentation generation authority cannot silently change');
+
+
+// The R474 source graph also carries names/aliases, current evidence text, supersession status and schema.
+const identityTampered=structuredClone(previous);
+identityTampered[0].identity.name='Unrelated Replacement';
+const identityAudit=auditCapabilityContinuityR620({previous,candidate:identityTampered});
+assert.deepEqual(identityAudit.identityMetadataChanged,[lost.identity.id]);
+assert.equal(identityAudit.structurePass,false,'historical capability display identity must not silently change');
+
+const evidenceTampered=structuredClone(previous);
+evidenceTampered[0].evidence.currentEvidence='UNVERIFIED_CLAIM_OF_LIVE_EXECUTION';
+const evidenceProvenanceAudit=auditCapabilityContinuityR620({previous,candidate:evidenceTampered});
+assert.deepEqual(evidenceProvenanceAudit.evidenceProvenanceChanged,[lost.identity.id]);
+assert.equal(evidenceProvenanceAudit.structurePass,false,'historical source evidence must not be replaced by prose');
+
+const dispositionTampered=structuredClone(previous);
+dispositionTampered[0].supersession.status='INTENTIONALLY_DEPRECATED' as never;
+const dispositionAudit=auditCapabilityContinuityR620({previous,candidate:dispositionTampered});
+assert.deepEqual(dispositionAudit.supersessionStatusChanged,[lost.identity.id]);
+assert.equal(dispositionAudit.structurePass,false,'historical disposition status cannot be self-authorized');
+
+const schemaTampered=structuredClone(previous);
+schemaTampered[0].schema='UNRELATED_SCHEMA' as never;
+const schemaAudit=auditCapabilityContinuityR620({previous,candidate:schemaTampered});
+assert.deepEqual(schemaAudit.nodeSchemaChanged,[lost.identity.id]);
+assert.equal(schemaAudit.structurePass,false,'capability schema substitutions require review');
