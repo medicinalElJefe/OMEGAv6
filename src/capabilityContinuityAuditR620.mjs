@@ -16,14 +16,14 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
  const duplicateHistorical=duplicates(previous),duplicateCurrent=duplicates(candidate);
  const invalidHistorical=previous.filter(x=>!validNode(x)).map(id),invalidCurrent=candidate.filter(x=>!validNode(x)).map(id);
  const current=new Map(candidate.map(x=>[id(x),x]));
- const missing=[],executorLost=[],executionDowngraded=[],presentationLost=[],sourceBindingChanged=[],truthClassChanged=[],truthGated=[],unproven=[],invalidResolutions=[],provenResolutions=[];
+ const missing=[],executorLost=[],executionDowngraded=[],presentationLost=[],sourceBindingChanged=[],truthClassChanged=[],truthGated=[],unproven=[],invalidResolutions=[],declaredResolutions=[];
  for(const old of previous){
   const key=id(old),now=current.get(key);
   if(!now){
    missing.push(key);
    const d=dispositions[key];
-   if(!d||!VALID.has(d.status)||!d.evidenceId||!d.approver||(d.status==='SUPERSEDED'&&(!d.replacementId||!current.has(d.replacementId))))invalidResolutions.push(key);
-   else provenResolutions.push(key);
+   if(!d||!VALID.has(d.status)||!nonempty(d.evidenceId)||!nonempty(d.approver)||(d.status==='SUPERSEDED'&&(!d.replacementId||!current.has(d.replacementId))))invalidResolutions.push(key);
+   else declaredResolutions.push(key);
    continue;
   }
   if(runnable(old)&&!runnable(now))executorLost.push(key);
@@ -41,7 +41,8 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
   executionDowngraded:unique(executionDowngraded),presentationLost:unique(presentationLost),
   sourceBindingChanged:unique(sourceBindingChanged),truthClassChanged:unique(truthClassChanged),
   truthGated:unique(truthGated),unproven:unique(unproven),
-  invalidResolutions:unique(invalidResolutions),provenResolutions:unique(provenResolutions),
+  invalidResolutions:unique(invalidResolutions),declaredResolutions:unique(declaredResolutions),
+  dispositionAuthority:'UNVERIFIED_CALLER_SUPPLIED_GOVERNANCE_REFERENCES',
   structurePass,proofReferencesComplete:structurePass&&!unproven.length&&!missing.length,
   productionProven:false,proofAuthority:'UNVERIFIED_CALLER_SUPPLIED_REFERENCES',
   requiresIndependentProductionReadback:true,
