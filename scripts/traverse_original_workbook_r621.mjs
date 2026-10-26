@@ -71,7 +71,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1
     process.stdout.write(JSON.stringify(receipt, null, 2) + '\n');
   } catch (error) {
     // Do not emit workbook content, parsed rows, notes, or interpreter stack traces.
-    console.error('R621 ORIGINAL SOURCE TRAVERSAL REFUSED:', error instanceof Error ? error.message : String(error));
+    // Never echo exception text: Node filesystem errors can include the private source path.
+    // Proof rejection is deliberately opaque at the CLI boundary; no source bytes or paths escape.
+    console.error('R621 ORIGINAL SOURCE TRAVERSAL REFUSED: SOURCE_OR_ARGUMENT_PROOF_FAILED');
     process.exitCode = 1;
   }
 }
