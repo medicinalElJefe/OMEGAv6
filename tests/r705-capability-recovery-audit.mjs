@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const root=readFileSync('src7/Omega7Root.tsx','utf8');
+const panel=readFileSync('src7/CapabilityRecoveryAuditR705.tsx','utf8');
+const ci=readFileSync('.github/workflows/ci.yml','utf8');
+assert.match(root,/CapabilityRecoveryAuditR705=lazy/);
+assert.match(root,/state.domain==='SYSTEM'&&<Suspense[^\n]*CapabilityRecoveryAuditR705 onNavigate=\{open\}/);
+for(const term of ['YEAR_CORPUS_CAPABILITY_GRAPH_R474','OMEGA_ARCHITECTURE_R474.pillars','auditYearCorpusCapabilityGraphR474','remainingGap','strongestImplementation','evidence.truthClass','currentExecutor.route','lineage.sourceBindingId','Filter capability pillar','Filter capability evidence state','availableRoutes.has(route)','onNavigate(route)'])assert.ok(panel.includes(term),term);
+assert.match(panel,/not a live production-health certificate/);
+assert.match(panel,/live execution still requires independent proof/);
+assert.match(ci,/node tests\/r705-capability-recovery-browser-e2e.mjs/);
+assert.doesNotMatch(root,/CapabilityRecoveryAuditR622/);
+console.log('R705 source-lineage audit and actual OMEGA7 navigation integration PASS');
