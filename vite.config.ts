@@ -12,12 +12,14 @@ function governedBuildReceipt(){
       const candidateSha=String(process.env.OMEGA_CANDIDATE_SHA||'').trim()||null;
       const promotedMergeSha=String(process.env.OMEGA_PROMOTED_SHA||'').trim()||null;
       const rollbackSha=String(process.env.OMEGA_ROLLBACK_SHA||'').trim()||null;
+      const declaredLineageMode=String(process.env.OMEGA_RELEASE_LINEAGE_MODE||'').trim();
+      const lineageMode=['EXACT_TWO_PARENT_MERGE','EXACT_SQUASH_PR_AND_TREE'].includes(declaredLineageMode)?declaredLineageMode:null;
       const payload={
         schema:'OMEGA_GOVERNED_BUILD_RECEIPT_V1',
         state:process.env.GITHUB_ACTIONS==='true'?'PACKAGE_BUILT_BY_GITHUB_ACTIONS':'LOCAL_BUILD_UNVERIFIED',
         generatedAt:new Date().toISOString(),
         source:{repository:'medicinalElJefe/OMEGAv6',sha:String(process.env.GITHUB_SHA||'UNAVAILABLE'),branch:String(process.env.GITHUB_REF_NAME||'UNKNOWN'),role:'PACKAGED_SOURCE_SHA'},
-        promotion:{candidateSha,promotedMergeSha,rollbackSha,authority:candidateSha&&promotedMergeSha&&rollbackSha?'GITHUB_MERGE_PARENTS':'EXTERNAL_RELEASE_LEDGER_REQUIRED'},
+        promotion:{candidateSha,promotedMergeSha,rollbackSha,authority:candidateSha&&promotedMergeSha&&rollbackSha?'GITHUB_MERGE_PARENTS':'EXTERNAL_RELEASE_LEDGER_REQUIRED',lineageMode},
         qa:{required:'npm install + npm run check + Vite production build + Wrangler dry-run',upstreamGate:process.env.GITHUB_ACTIONS==='true'?'WORKFLOW_VERIFY_REQUIRED':'LOCAL_BUILD_UNVERIFIED'},
         package:{builder:'Vite',output:'dist',portable:true,appDeploy:false,partition:'R109_ROUTE_DEFERRED_SPECIALISTS'},
         deployment:{authority:'GitHub Actions + Cloudflare Wrangler',canonicalUrl,publicWorkerMutationAuthority:false},
