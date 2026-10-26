@@ -9,7 +9,7 @@ OMEGA's unit of progress is **recovered and executable capability**, not a workf
 - proof deficit (no bound target runtime observation);
 - explicitly governed supersession (replacement exists, disposition and approver carry evidence).
 
-The input `proofs` mapping must come from *independent real production observations*. Its structure is a **receipt reference**, not a self-validating attestation: callers must authenticate, retrieve, and verify the cited observation separately. Fabricating a proof object makes the local function return success but does not establish production truth.
+The input `proofs` mapping must come from *independent real production observations*. Its structure is a **receipt reference**, not a self-validating attestation: callers must authenticate, retrieve, and verify the cited observation separately. The audit intentionally returns `productionProven: false` for **every** caller-supplied proof map, even when the references match. `proofReferencesComplete` only reports syntactic binding completeness. The separate production release authority must independently authenticate and read back the exact promoted SHA, deployed runtime behavior, and rollback eligibility before asserting live proof. No caller-created receipt can promote this audit to production truth.
 
 Import: `import {auditCapabilityContinuityR620} from './src/capabilityContinuityAuditR620.mjs'`.
 
