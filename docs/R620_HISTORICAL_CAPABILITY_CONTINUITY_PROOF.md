@@ -5,6 +5,8 @@ OMEGA's unit of progress is **recovered and executable capability**, not a workf
 `auditCapabilityContinuityR620` compares historical and current capability graphs, separating:
 - a missing capability (identity absent in the candidate);
 - executor regression (old executor runnable, new executor not runnable), including unknown executor states;
+- executor contract substitution (operation, capability binding, execution domain/reality, or strongest-implementation operation) even when the route stays unchanged;
+- invalid routable executor routes and attempts to replace R125 canonical admission, R142 receipt authority, or source-generated presentation with caller authority;
 - direct-executor downgrade to adapter-only operation;
 - interface regression (previous route exposed, new presentation missing);
 - source-binding or truth-class substitution requiring separate lineage/evidence review;
