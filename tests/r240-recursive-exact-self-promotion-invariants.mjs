@@ -10,6 +10,7 @@ const sharedSelection=fs.readFileSync('scripts/lib/r245-governed-selfbuild-selec
 const sharedContract=fs.readFileSync('src/system/governedSelfBuildContractR245.js','utf8');
 const workflow=fs.readFileSync('.github/workflows/r170-governed-selfbuild.yml','utf8');
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+const lineage=fs.readFileSync('scripts/r619-release-lineage.mjs','utf8');
 const verifier=fs.readFileSync('scripts/verify_live_hybrid_command_authority_r237.mjs','utf8');
 const r239=fs.readFileSync('src/hybridResourceGovernorR239.ts','utf8');
 const ui=fs.readFileSync('src/RecursiveSelfBuildR240.tsx','utf8');
@@ -112,7 +113,8 @@ assert.ok(!/^\s*schedule\s*:/m.test(workflow),'R330 must remove hourly self-buil
 
 assert.ok(ci.includes('workflow_dispatch:'),'canonical ci.yml remains manually dispatchable');
 assert.ok(ci.includes("github.ref == 'refs/heads/main'"),'canonical deploy must remain main-only');
-assert.ok(ci.includes('Promoted main commit must be an exact two-parent merge commit'),'canonical deployment must retain exact two-parent lineage');
+assert.ok(ci.includes('node scripts/r619-release-lineage.mjs'),'canonical deployment must invoke the fail-closed release lineage binder');
+assert.ok(lineage.includes("lineageMode: 'EXACT_TWO_PARENT_MERGE'")&&lineage.includes("lineageMode: 'EXACT_SQUASH_PR_AND_TREE'"),'canonical binder must retain exact two-parent promotion and PR/tree-verified squash semantics');
 assert.ok(ci.includes('continue-governed-selfbuild:'),'canonical production proof must own the next-cycle continuation');
 assert.ok(ci.includes('actions/workflows/r170-governed-selfbuild.yml/dispatches'),'canonical production proof must dispatch the next governed cycle');
 assert.ok(ci.includes('needs: deploy-main'),'continuation must require deploy-main success');
