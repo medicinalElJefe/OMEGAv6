@@ -75,7 +75,7 @@ export function proveOriginalWorkbookBandsR617S(engineeringRecords) {
   }
   return Object.freeze({
     schema: p.schema,
-    truthClass: 'SOURCE_VERIFIED_REPRESENTATIONAL_PARTITION_NOT_EXECUTOR',
+    truthClass: 'STRUCTURAL_PARTITION_ONLY_NOT_SOURCE_VERIFIED_NOT_EXECUTOR',
     admission: 'NO_EXECUTION_NO_CANON_MUTATION',
     addressCapacity: p.addressCapacity,
     coveredAddresses: p.addressCapacity,
@@ -92,5 +92,5 @@ export function verifyOriginalWorkbookBandLedgerR617S(engineeringRecords) {
   if (proof.bandLedgerSha256 !== ORIGINAL_BAND_PROOF_R617S.expectedBandLedgerSha256) {
     throw Error('original band proof: independent source ledger fingerprint mismatch');
   }
-  return proof;
+  return Object.freeze({...proof, truthClass: 'INDEPENDENT_LEDGER_MATCH_NOT_SOURCE_BYTES_VERIFIED_NOT_EXECUTOR'});
 }
