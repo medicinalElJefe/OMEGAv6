@@ -88,7 +88,7 @@ assert.deepEqual(routabilityAudit.executorRoutabilityChanged,[direct.identity.id
 assert.equal(routabilityAudit.structurePass,false,'real R474 executor routability is part of conserved execution authority');
 
 const generationTampered=structuredClone(previous);
-generationTampered[0].presentationSurface.generatedFromCapability=!lost.presentationSurface.generatedFromCapability;
+generationTampered[0].presentationSurface.generatedFromCapability=(!lost.presentationSurface.generatedFromCapability) as never;
 const generationAudit=auditCapabilityContinuityR620({previous,candidate:generationTampered});
 assert.deepEqual(generationAudit.presentationGenerationChanged,[lost.identity.id]);
 assert.equal(generationAudit.structurePass,false,'R474 presentation generation authority cannot silently change');
