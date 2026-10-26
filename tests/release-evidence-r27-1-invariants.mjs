@@ -46,6 +46,8 @@ must(vite.includes('OMEGA_GOVERNED_BUILD_RECEIPT_V1'),'R26.1 package receipt mus
 must(vite.includes("role:'PACKAGED_SOURCE_SHA'")&&vite.includes("authority:candidateSha&&promotedMergeSha&&rollbackSha?'GITHUB_MERGE_PARENTS':'EXTERNAL_RELEASE_LEDGER_REQUIRED'"),'build receipt must distinguish packaged source from governed candidate/promoted/rollback lineage');
 must(ci.includes('node scripts/r619-release-lineage.mjs')&&lineage.includes('OMEGA_CANDIDATE_SHA=')&&lineage.includes('OMEGA_PROMOTED_SHA=')&&lineage.includes('OMEGA_ROLLBACK_SHA='),'production workflow must bind exact Git source lineage before deployment');
 must(lineage.includes("lineageMode: 'EXACT_TWO_PARENT_MERGE'")&&lineage.includes("lineageMode: 'EXACT_SQUASH_PR_AND_TREE'"),'production lineage must retain two-parent source promotion and fail-closed verified squash provenance');
+must(vite.includes('OMEGA_RELEASE_LINEAGE_MODE')&&vite.includes('lineageMode},'),'build receipt must carry typed release lineage topology without claiming candidate QA');
+must(panel.includes('Lineage topology')&&panel.includes("lineage?.lineageMode||'LEGACY_UNTYPED'"),'R27 release surface must distinguish exact squash from two-parent merge and preserve legacy unknown');
 must(semverAtLeast(pkg.version,'27.1.0'),'package version must retain or advance beyond R27.1');
 for(const source of [worker,worker32,worker33,worker34,worker101,worker102,worker111,worker114,worker115,worker116,panel,config,vite,ci])must(!source.includes('@appdeploy/client')&&!source.includes('appdeploy.ai'),'R27.1+ must remain AppDeploy-free');
 console.log(`OMEGA R116 RELEASE EVIDENCE PASS · package ${pkg.version} · R31.2 merge-parent lineage preserved through R32/R33/R34/R101/R102/R111/R114/R115/R116 successor chain`);
