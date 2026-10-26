@@ -1,5 +1,6 @@
 import {useMemo,useState} from 'react';
 import {OMEGA7_CAPABILITIES} from './capabilityRegistry';
+import canonicalRecoveryR650 from '../canon/year-corpus-capability-conservation-r650.json';
 import {OMEGA_ARCHITECTURE_R474,YEAR_CORPUS_CAPABILITY_GRAPH_R474,auditYearCorpusCapabilityGraphR474,type OmegaArchitecturePillarR474} from '../src/yearCorpusCapabilityGraphR474';
 
 // R705: a source-lineage view and real OMEGA7 route launcher, not a live-execution attestation.
@@ -10,6 +11,8 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
  const [query,setQuery]=useState('');
  const audit=useMemo(()=>auditYearCorpusCapabilityGraphR474(),[]);
  const availableRoutes=useMemo(()=>new Set(OMEGA7_CAPABILITIES.map(c=>c.legacyRoute)),[]);
+ const families=canonicalRecoveryR650.families;
+ const unprovenFamilies=families.filter(f=>!f.productionProved||f.missingEvidence.length>0);
  const rows=useMemo(()=>YEAR_CORPUS_CAPABILITY_GRAPH_R474.filter(c=>
   (pillar==='ALL'||c.pillar===pillar)&&
   (filter==='ALL'||(filter==='GAPPED'?c.remainingGap!==null:c.strongestImplementation.state===filter))&&
@@ -19,6 +22,14 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
   <h2>Capability recovery audit</h2>
   <p>Historical corpus resolution, strongest known implementation and remaining restoration gaps. This is a source-derived audit, not a live production-health certificate.</p>
   <div role='status' data-r705-audit-summary>{audit.capabilities} resolved capability identities · {audit.gapped} recorded gaps · {audit.executing} modeled as executing · {audit.truthGated} truth-gated</div>
+  <section aria-label='Canonical family restoration status' data-r620-canonical-family-report='source-bound'>
+   <h3>Historical capability families — independent proof required</h3>
+   <p>{families.length} canonical families · {unprovenFamilies.length} without complete production proof. Source hints and graph registration are not executable parity.</p>
+   <div style={{display:'grid',gap:8,maxHeight:320,overflowY:'auto'}}>{families.map(f=><article key={f.id} data-r620-family-id={f.id} style={{border:'1px solid var(--o7-border, #606a80)',padding:8,borderRadius:6}}>
+    <strong>{f.id}</strong> <small>{f.truthClass} · {f.productionProved && f.missingEvidence.length===0?'Claims production proof (requires external verification)':'Not production proven'}</small>
+    <p>{f.description}</p><small>Missing evidence: {f.missingEvidence.join('; ')||'No missing evidence recorded; verify independently'}</small>
+   </article>)}</div>
+  </section>
   <div style={{display:'flex',flexWrap:'wrap',gap:12,margin:'12px 0'}}>
    <label>Pillar <select aria-label='Filter capability pillar' value={pillar} onChange={e=>setPillar(e.target.value as OmegaArchitecturePillarR474|'ALL')}><option value='ALL'>All 12 pillars</option>{OMEGA_ARCHITECTURE_R474.pillars.map(p=><option value={p} key={p}>{p.replaceAll('_',' ')}</option>)}</select></label>
    <label>Evidence state <select aria-label='Filter capability evidence state' value={filter} onChange={e=>setFilter(e.target.value as FilterR705)}><option value='GAPPED'>Remaining gaps</option><option value='ALL'>All</option><option value='EXECUTES_NOW'>Modeled as executing</option><option value='EXECUTES_AS_ADAPTER'>Adapters</option><option value='TRUTH_GATED'>Truth gated</option></select></label>
