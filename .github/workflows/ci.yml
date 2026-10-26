@@ -184,7 +184,9 @@ jobs:
     if: github.event_name == 'pull_request'
     needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # The 25-minute budget cancelled exact-head #40411937799 after R705 passed,
+    # during R520, leaving later browser gates unexecuted. Keep the full gate.
+    timeout-minutes: 45
     steps:
       - name: Checkout exact candidate
         uses: actions/checkout@v7

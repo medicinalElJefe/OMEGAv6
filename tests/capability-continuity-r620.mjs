@@ -321,3 +321,13 @@ test('supersession status and capability schema changes independently require re
   assert.equal(r.productionProven,false);
  }
 });
+
+
+test('a declared R474 schema cannot be admitted with an incomplete synthetic record',()=>{
+ const incomplete=node('A');incomplete.schema='OMEGA_YEAR_CORPUS_CAPABILITY_NODE_R474';
+ const r=audit({previous:[incomplete],candidate:[incomplete]});
+ assert.deepEqual(r.invalidHistorical,['A']);
+ assert.deepEqual(r.invalidCurrent,['A']);
+ assert.equal(r.structurePass,false);
+ assert.equal(r.productionProven,false);
+});

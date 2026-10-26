@@ -118,3 +118,29 @@ schemaTampered[0].schema='UNRELATED_SCHEMA' as never;
 const schemaAudit=auditCapabilityContinuityR620({previous,candidate:schemaTampered});
 assert.deepEqual(schemaAudit.nodeSchemaChanged,[lost.identity.id]);
 assert.equal(schemaAudit.structurePass,false,'capability schema substitutions require review');
+
+
+// Reject malformed *typed* R474 records even when unchanged routes and IDs make
+// the candidate appear conserved. This guards against poisoned baseline snapshots.
+for(const [label,mutate] of [
+ ['malformed dependency membership',(n:any)=>{n.dependencies=['R125','   '];}],
+ ['non-array evidence requirements',(n:any)=>{n.evidence.requirements='R125';}],
+ ['blank historical alias',(n:any)=>{n.identity.aliases=['  '];}],
+ ['missing source operation',(n:any)=>{n.currentExecutor.operation='';}],
+ ['unsupported source schema',(n:any)=>{n.schema='UNSUPPORTED_NODE_SCHEMA';}],
+ ['fabricated canonical mutation flag',(n:any)=>{n.canonicalMutation='false';}],
+ ['non-string remaining gap',(n:any)=>{n.remainingGap=42;}],
+] as const){
+ const malformed=structuredClone(previous);
+ mutate(malformed[0]);
+ const report=auditCapabilityContinuityR620({previous,candidate:malformed});
+ assert.deepEqual(report.invalidCurrent,[lost.identity.id],label+' must fail typed source validation');
+ assert.equal(report.structurePass,false,label+' cannot be accepted as conservation');
+ assert.equal(report.productionProven,false);
+}
+const poisonedBaseline=structuredClone(previous);
+(poisonedBaseline[0] as any).dependencies=['R125',null];
+const poisoned=auditCapabilityContinuityR620({previous:poisonedBaseline,candidate:poisonedBaseline});
+assert.deepEqual(poisoned.invalidHistorical,[lost.identity.id]);
+assert.deepEqual(poisoned.invalidCurrent,[lost.identity.id]);
+assert.equal(poisoned.structurePass,false,'identical malformed R474 snapshots cannot self-certify conservation');

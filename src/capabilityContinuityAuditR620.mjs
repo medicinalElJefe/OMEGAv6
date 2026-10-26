@@ -5,7 +5,21 @@ const id=x=>x?.identity?.id;
 const runnable=x=>x?.currentExecutor?.routable===true&&nonempty(x?.currentExecutor?.route)&&['EXECUTES_NOW','EXECUTES_AS_ADAPTER'].includes(x?.strongestImplementation?.state);
 const nonempty=x=>typeof x==='string'&&x.trim().length>0;
 const STATES=new Set(['EXECUTES_NOW','EXECUTES_AS_ADAPTER','TRUTH_GATED']);
-const validNode=x=>nonempty(id(x))&&nonempty(x?.lineage?.sourceBindingId)&&nonempty(x?.strongestImplementation?.id)&&STATES.has(x?.strongestImplementation?.state)&&nonempty(x?.evidence?.truthClass)&&typeof x?.currentExecutor?.routable==='boolean'&&(!x.currentExecutor.routable||nonempty(x.currentExecutor.route))&&x.currentExecutor.admissionAuthority==='R125'&&x.currentExecutor.receiptAuthority==='R142'&&x?.canonicalMutation!==true&&x?.presentationSurface?.definesCapability!==true&&typeof x?.presentationSurface?.generatedFromCapability==='boolean'&&typeof x?.presentationSurface?.route==='string'&&(!x.presentationSurface.generatedFromCapability||nonempty(x.presentationSurface.route));
+// R474 records carry a typed source contract. A malformed baseline must not pass
+// merely because an equally malformed candidate preserves the same fields.
+const R474_SCHEMA='OMEGA_YEAR_CORPUS_CAPABILITY_NODE_R474';
+const validStringList=xs=>Array.isArray(xs)&&xs.every(nonempty);
+const validR474Shape=x=>
+ [x?.identity?.aliases,x?.lineage?.predecessors,x?.lineage?.relations,x?.artifactKinds,x?.evidence?.requirements,x?.dependencies,x?.supersession?.predecessors].every(validStringList)&&
+ [x?.identity?.name,x?.lineage?.domain,x?.function,x?.pillar,x?.primaryKind,x?.strongestImplementation?.route,x?.strongestImplementation?.operation,x?.currentExecutor?.operation,x?.currentExecutor?.capabilityId,x?.currentExecutor?.executionDomain,x?.currentExecutor?.reality].every(nonempty)&&
+ typeof x?.evidence?.currentEvidence==='string'&&
+ x?.strongestImplementation?.selectionRule==='STRONGEST_VALID_NOT_NEWEST'&&
+ x?.supersession?.status==='CURRENT_RESOLUTION'&&
+ x?.supersession?.scarPolicy==='RETAIN_REJECTIONS_AND_CONTRADICTIONS'&&
+ x?.canonicalMutation===false&&
+ x?.presentationSurface?.generatedFromCapability===true&&x?.presentationSurface?.definesCapability===false&&
+ (x?.remainingGap===null||nonempty(x?.remainingGap));
+const validNode=x=>nonempty(id(x))&&nonempty(x?.lineage?.sourceBindingId)&&nonempty(x?.strongestImplementation?.id)&&STATES.has(x?.strongestImplementation?.state)&&nonempty(x?.evidence?.truthClass)&&typeof x?.currentExecutor?.routable==='boolean'&&(!x.currentExecutor.routable||nonempty(x.currentExecutor.route))&&x.currentExecutor.admissionAuthority==='R125'&&x.currentExecutor.receiptAuthority==='R142'&&x?.canonicalMutation!==true&&x?.presentationSurface?.definesCapability!==true&&typeof x?.presentationSurface?.generatedFromCapability==='boolean'&&typeof x?.presentationSurface?.route==='string'&&(!x.presentationSurface.generatedFromCapability||nonempty(x.presentationSurface.route))&&(x?.schema===undefined||(x.schema===R474_SCHEMA&&validR474Shape(x)));
 const boundProof=(p,now)=>validNode(now)&&!!p&&LIVE.has(p.type)&&nonempty(p.evidenceId)&&p.implementationId===now.strongestImplementation?.id&&p.sourceBindingId===now.lineage?.sourceBindingId;
 const visible=x=>x?.presentationSurface?.generatedFromCapability===true&&!!x?.presentationSurface?.route;
 const unique=xs=>[...new Set(xs)].sort();
