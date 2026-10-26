@@ -49,8 +49,10 @@ jobs:
           node tests/r256-private-sai-doorway-invariants.mjs
           node tests/r256-private-sai-doorway-protocol-e2e.mjs
           npx wrangler deploy --config wrangler.sai-door-r256.jsonc --dry-run --outdir .wrangler-r256-doorway
-      - name: R619 exact merge/squash production lineage negative controls
-        run: node tests/r619-release-lineage-proof.mjs
+      - name: R619 exact merge/squash lineage and production CLI refusal controls
+        run: |
+          node tests/r619-release-lineage-proof.mjs
+          node tests/r619-release-lineage-cli-e2e.mjs
       - name: R617S historical 12^10 original source band partition negative controls
         run: node tests/r617s-original-workbook-band-proof.mjs
       - name: R616 original private workbook proof command fail-closed tests
