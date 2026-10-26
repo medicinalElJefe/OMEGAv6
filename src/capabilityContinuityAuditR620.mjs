@@ -31,6 +31,8 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
   duplicateHistorical,duplicateCurrent,missing:unique(missing),executorLost:unique(executorLost),
   presentationLost:unique(presentationLost),truthGated:unique(truthGated),unproven:unique(unproven),
   invalidResolutions:unique(invalidResolutions),provenResolutions:unique(provenResolutions),
-  structurePass,productionProven:structurePass&&!unproven.length&&!missing.length,
+  structurePass,proofReferencesComplete:structurePass&&!unproven.length&&!missing.length,
+  productionProven:false,proofAuthority:'UNVERIFIED_CALLER_SUPPLIED_REFERENCES',
+  requiresIndependentProductionReadback:true,
   rule:'Graph membership, CI, archive, route and target-runtime proof are separate evidence classes.'});
 }
