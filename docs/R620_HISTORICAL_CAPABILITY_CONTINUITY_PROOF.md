@@ -24,3 +24,5 @@ Evidence hierarchy: repository source != executable behavior != green CI != merg
 The new module does not change CanonState admission, release workflow, secrets, production bindings, or authoritative runtime state.
 
 Changes to source binding or truth class are conservatively flagged for review rather than automatically accepted as equivalent. These are evidence-boundary changes, not necessarily proof of a functional regression. `structurePass` is a structural admission check only, not a production pass. Historical dispositions contain caller-declared evidence identifiers and approvers; their presence is not independent authentication.
+
+Malformed historical or candidate nodes (missing implementation ID, source binding, evidence class, recognized executor state, or presentation/executor fields) fail structural admission. Synthetic receipt references cannot compensate for an incomplete node.
