@@ -57,6 +57,8 @@ jobs:
         run: node tests/r617s-original-workbook-band-proof.mjs
       - name: R618 deterministic bounded historical band traversal and refusal controls
         run: node tests/r618-source-bound-band-traversal.mjs
+      - name: R620 historical capability continuity and evidence boundary regression
+        run: node --test tests/capability-continuity-r620.mjs
       - name: R620 authenticated R241 private PR head preflight regression
         run: node tests/r620-r241-private-head-preflight.mjs
       - name: R616 original private workbook proof command fail-closed tests
