@@ -5,7 +5,7 @@ const id=x=>x?.identity?.id;
 const runnable=x=>x?.currentExecutor?.routable===true&&['EXECUTES_NOW','EXECUTES_AS_ADAPTER'].includes(x?.strongestImplementation?.state);
 const nonempty=x=>typeof x==='string'&&x.trim().length>0;
 const STATES=new Set(['EXECUTES_NOW','EXECUTES_AS_ADAPTER','TRUTH_GATED']);
-const validNode=x=>nonempty(id(x))&&nonempty(x?.lineage?.sourceBindingId)&&nonempty(x?.strongestImplementation?.id)&&STATES.has(x?.strongestImplementation?.state)&&nonempty(x?.evidence?.truthClass)&&typeof x?.currentExecutor?.routable==='boolean'&&typeof x?.presentationSurface?.generatedFromCapability==='boolean'&&typeof x?.presentationSurface?.route==='string';
+const validNode=x=>nonempty(id(x))&&nonempty(x?.lineage?.sourceBindingId)&&nonempty(x?.strongestImplementation?.id)&&STATES.has(x?.strongestImplementation?.state)&&nonempty(x?.evidence?.truthClass)&&typeof x?.currentExecutor?.routable==='boolean'&&typeof x?.presentationSurface?.generatedFromCapability==='boolean'&&typeof x?.presentationSurface?.route==='string'&&(!x.presentationSurface.generatedFromCapability||nonempty(x.presentationSurface.route));
 const boundProof=(p,now)=>validNode(now)&&!!p&&LIVE.has(p.type)&&nonempty(p.evidenceId)&&p.implementationId===now.strongestImplementation?.id&&p.sourceBindingId===now.lineage?.sourceBindingId;
 const visible=x=>x?.presentationSurface?.generatedFromCapability===true&&!!x?.presentationSurface?.route;
 const unique=xs=>[...new Set(xs)].sort();
@@ -38,7 +38,9 @@ export function auditCapabilityContinuityR620({previous,candidate,dispositions={
  }
  // New capabilities need proof references too: previous-only enumeration silently admitted additions.
  for(const now of candidate)if(!boundProof(proofs[id(now)],now))unproven.push(id(now));
- const structurePass=!invalidHistorical.length&&!invalidCurrent.length&&!duplicateHistorical.length&&!duplicateCurrent.length&&!executorLost.length&&!executionDowngraded.length&&!presentationLost.length&&!presentationRouteChanged.length&&!implementationChanged.length&&!executorRouteChanged.length&&!sourceBindingChanged.length&&!truthClassChanged.length&&!invalidResolutions.length;
+ // A caller's supersession/deprecation declaration is not authenticated governance.
+ // Missing historical identities therefore cannot pass conservation admission.
+ const structurePass=!invalidHistorical.length&&!invalidCurrent.length&&!duplicateHistorical.length&&!duplicateCurrent.length&&!executorLost.length&&!executionDowngraded.length&&!presentationLost.length&&!presentationRouteChanged.length&&!implementationChanged.length&&!executorRouteChanged.length&&!sourceBindingChanged.length&&!truthClassChanged.length&&!invalidResolutions.length&&!missing.length;
  return Object.freeze({schema:'OMEGA_CAPABILITY_CONTINUITY_AUDIT_R620',baselineCount:previous.length,currentCount:candidate.length,
   invalidHistorical:unique(invalidHistorical),invalidCurrent:unique(invalidCurrent),duplicateHistorical,duplicateCurrent,missing:unique(missing),executorLost:unique(executorLost),
   executionDowngraded:unique(executionDowngraded),presentationLost:unique(presentationLost),
