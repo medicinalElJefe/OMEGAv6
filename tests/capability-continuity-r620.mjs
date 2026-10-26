@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {auditCapabilityContinuityR620 as audit} from '../src/capabilityContinuityAuditR620.mjs';
-const node=(id,opts={})=>({identity:{id},lineage:{sourceBindingId:opts.source||id},evidence:{truthClass:opts.truth||'FORMAL_MODEL'},strongestImplementation:{id:id+':v1',state:opts.state||(opts.gated?'TRUTH_GATED':'EXECUTES_NOW')},currentExecutor:{routable:opts.run!==false},presentationSurface:{generatedFromCapability:opts.view!==false,route:opts.view===false?'':'/omega/'+id}});
+const node=(id,opts={})=>({identity:{id},lineage:{sourceBindingId:opts.source||id},evidence:{truthClass:opts.truth||'FORMAL_MODEL'},strongestImplementation:{id:id+':v1',state:opts.state||(opts.gated?'TRUTH_GATED':'EXECUTES_NOW')},currentExecutor:{routable:opts.run!==false,route:'/executor/'+id,operation:'RUN',capabilityId:id+':execution',executionDomain:'OMEGA',reality:'MODELED',admissionAuthority:'R125',receiptAuthority:'R142'},presentationSurface:{generatedFromCapability:opts.view!==false,definesCapability:false,route:opts.view===false?'':'/omega/'+id},canonicalMutation:false});
 const proof=id=>({type:'PRODUCTION_BEHAVIOR',evidenceId:'receipt:'+id,implementationId:id+':v1',sourceBindingId:id});
 test('graph membership alone is not live proof',()=>{const r=audit({previous:[node('A')],candidate:[node('A')]});assert.equal(r.structurePass,true);assert.equal(r.productionProven,false)});
 test('executor regression blocks acceptance',()=>{const r=audit({previous:[node('A')],candidate:[node('A',{run:false})],proofs:{A:proof('A')}});assert.deepEqual(r.executorLost,['A']);assert.equal(r.productionProven,false)});
@@ -138,4 +138,40 @@ test('visible capability cannot declare an empty or whitespace-only route',()=>{
   assert.equal(r.structurePass,false);
   assert.equal(r.proofReferencesComplete,false);
  }
+});
+
+test('routable executor must have a nonblank route and cannot retain runnable status without it',()=>{
+ for(const route of ['', '  ', undefined]){
+  const now=node('A');now.currentExecutor.route=route;
+  const r=audit({previous:[node('A')],candidate:[now],proofs:{A:proof('A')}});
+  assert.deepEqual(r.invalidCurrent,['A']);
+  assert.deepEqual(r.executorLost,['A']);
+  assert.equal(r.structurePass,false);
+ }
+});
+test('canonical admission, receipt authority and source-derived presentation cannot be self-promoted',()=>{
+ for(const mutate of [
+  n=>{n.currentExecutor.admissionAuthority='CALLER';},
+  n=>{n.currentExecutor.receiptAuthority='CALLER';},
+  n=>{n.canonicalMutation=true;},
+  n=>{n.presentationSurface.definesCapability=true;}
+ ]){
+  const now=node('A');mutate(now);
+  const r=audit({previous:[node('A')],candidate:[now],proofs:{A:proof('A')}});
+  assert.deepEqual(r.invalidCurrent,['A']);
+  assert.equal(r.structurePass,false);
+  assert.equal(r.productionProven,false);
+ }
+});
+test('executor operation and capability binding changes cannot silently preserve a historical executor',()=>{
+ for(const field of ['operation','capabilityId','executionDomain','reality']){
+  const now=node('A');now.currentExecutor[field]='substituted';
+  const r=audit({previous:[node('A')],candidate:[now],proofs:{A:proof('A')}});
+  assert.deepEqual(r.executionContractChanged,['A']);
+  assert.equal(r.structurePass,false);
+ }
+ const now=node('A');now.strongestImplementation.operation='substituted';
+ const r=audit({previous:[node('A')],candidate:[now],proofs:{A:proof('A')}});
+ assert.deepEqual(r.executionContractChanged,['A']);
+ assert.equal(r.structurePass,false);
 });
