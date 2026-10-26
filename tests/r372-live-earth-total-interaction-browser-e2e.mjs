@@ -270,7 +270,25 @@ try{
   await groundRefresh.click();const groundResponse=await groundReturn;
   if(!groundResponse.ok())throw new Error(`${label}: ground refresh HTTP ${groundResponse.status()}`);
   const ground=await groundResponse.json();verifyTarget(ground,32.2226,-110.9747,'Ground');
-  await page.waitForFunction(({hash,before,target})=>{const el=document.querySelector('.earth-ground-r9');return el?.getAttribute('data-ground-evidence-hash')===hash&&Number(el.getAttribute('data-ground-refresh-generation')||0)>before&&el.getAttribute('data-ground-target')===target},{hash:ground.evidenceHash,before:beforeGroundGeneration,target:'32.222600,-110.974700'},{timeout:30000});
+  // Source replies may race a newer same-target React commit. Retry at most once,
+  // while still requiring exact response hash, generation increment and target.
+  const waitExactGround=(hash,before)=>page.waitForFunction(({hash,before,target})=>{
+   const el=document.querySelector('.earth-ground-r9');
+   return el?.getAttribute('data-ground-evidence-hash')===hash&&Number(el.getAttribute('data-ground-refresh-generation')||0)>before&&el.getAttribute('data-ground-target')===target;
+  },{hash,before,target:'32.222600,-110.974700'},{timeout:30000});
+  try{await waitExactGround(ground.evidenceHash,beforeGroundGeneration)}
+  catch(firstError){
+   const observed=await groundReceipt.evaluate(el=>({hash:el.getAttribute('data-ground-evidence-hash'),generation:Number(el.getAttribute('data-ground-refresh-generation')||0),target:el.getAttribute('data-ground-target')}));
+   if(observed.generation<=beforeGroundGeneration||observed.target!=='32.222600,-110.974700'||!/^[0-9a-f]{64}$/i.test(observed.hash||''))throw firstError;
+   await groundRefresh.waitFor({state:'visible',timeout:20000});
+   const pending=page.waitForResponse(r=>targetResponse(r,'/api/earth/ground/evidence',32.2226,-110.9747),{timeout:30000});
+   await groundRefresh.click();
+   const freshResponse=await pending;
+   if(!freshResponse.ok())throw new Error(`${label}: repeat ground refresh HTTP ${freshResponse.status()}`);
+   const latest=await freshResponse.json();verifyTarget(latest,32.2226,-110.9747,'Ground');
+   await waitExactGround(latest.evidenceHash,observed.generation);
+   ground.evidenceHash=latest.evidenceHash;
+  }
   if(await groundReceipt.locator('footer code').textContent()!==ground.evidenceHash)throw new Error(`${label}: rendered ground hash differs from correlated refresh receipt`);
   await groundRefresh.waitFor({state:'visible',timeout:20000});
   await contained(page,`${label} refreshed ground`);
