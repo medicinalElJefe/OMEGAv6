@@ -39,7 +39,7 @@ must(worker.includes("candidateQa:'EXTERNAL_GITHUB_EVIDENCE_REQUIRED'")&&worker.
 must(panel.includes("fetch('/api/release-evidence'"),'Development surface must read live release evidence');
 must(panel.includes('Receipt link')&&panel.includes('Worker version'),'Development surface must expose receipt/version binding');
 must(panel.includes("evidence?.packageReceipt?.receiptSha256===receipt.receiptSha256"),'Development surface must compare exact receipt SHA-256');
-for(const label of ['1 · Packaged source','2 · Candidate head','3 · Candidate QA','4 · Package receipt','5 · Promoted merge','6 · Runtime version','7 · Canonical verify','8 · Rollback']) must(panel.includes(label),`Development release timeline missing ${label}`);
+for(const label of ['1 · Packaged source','2 · Candidate head','3 · Candidate QA','4 · Package receipt','5 · Promoted merge','6 · Runtime version','7 · Canonical verify','8 · Previous main source (not live rollback)']) must(panel.includes(label),`Development release timeline missing ${label}`);
 must(panel.includes("lineage?.authority==='GITHUB_MERGE_PARENTS'"),'Development surface must distinguish governed merge ancestry from external/unavailable lineage');
 must(panel.includes('EXTERNAL_GITHUB_EVIDENCE_REQUIRED')&&panel.includes('EXTERNAL_FIRST_HAND_PROBE_REQUIRED')&&panel.includes('EXTERNAL_RELEASE_LEDGER_REQUIRED'),'timeline must preserve external QA, verification, and fallback rollback authority instead of synthesizing proof');
 must(vite.includes('OMEGA_GOVERNED_BUILD_RECEIPT_V1'),'R26.1 package receipt must remain inherited');
