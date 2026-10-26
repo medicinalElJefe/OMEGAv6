@@ -219,3 +219,48 @@ test('reordering evidence requirement and dependency sets does not manufacture a
  assert.deepEqual(r.dependenciesChanged,[]);
  assert.equal(r.structurePass,true);
 });
+
+test('capability function, architectural pillar, and artifact-kind substitutions require review',()=>{
+ const old=node('A');old.function='preserve reversible traversal';old.pillar='TRAVERSAL';old.primaryKind='ENGINE';old.artifactKinds=['ENGINE','MODEL'];
+ for(const mutate of [
+  n=>{n.function='render unrelated scenery';},
+  n=>{n.pillar='APPLICATIONS';},
+  n=>{n.primaryKind='DONOR';},
+  n=>{n.artifactKinds=['ENGINE'];}
+ ]){
+  const now=structuredClone(old);mutate(now);
+  const r=audit({previous:[old],candidate:[now]});
+  assert.deepEqual(r.capabilityDefinitionChanged,['A']);
+  assert.equal(r.structurePass,false);
+  assert.equal(r.productionProven,false);
+ }
+});
+test('lineage, supersession ancestry, and implementation selection cannot silently change',()=>{
+ const old=node('A');old.lineage.domain='TRAVERSAL';old.lineage.predecessors=['HISTORICAL_SOURCE'];
+ old.lineage.relations=['DERIVES_FROM','EXECUTES'];old.supersession={predecessors:['SOURCE_A'],scarPolicy:'RETAIN_REJECTIONS_AND_CONTRADICTIONS'};
+ old.strongestImplementation.route='/source/engine';old.strongestImplementation.selectionRule='STRONGEST_VALID_NOT_NEWEST';
+ for(const [field,mutate] of [
+  ['lineageStructureChanged',n=>{n.lineage.domain='UNRELATED';}],
+  ['lineageStructureChanged',n=>{n.lineage.predecessors=[];}],
+  ['lineageStructureChanged',n=>{n.lineage.relations=['EXECUTES'];}],
+  ['lineageStructureChanged',n=>{n.supersession.predecessors=[];}],
+  ['implementationSelectionChanged',n=>{n.strongestImplementation.route='/unrelated/engine';}],
+  ['implementationSelectionChanged',n=>{n.strongestImplementation.selectionRule='NEWEST_WINS';}]
+ ]){
+  const now=structuredClone(old);mutate(now);
+  const r=audit({previous:[old],candidate:[now]});
+  assert.deepEqual(r[field],['A']);
+  assert.equal(r.structurePass,false);
+ }
+});
+test('reordering unordered lineage and artifact-kind memberships is not a false regression',()=>{
+ const old=node('A'),now=node('A');
+ old.artifactKinds=['ENGINE','MODEL'];now.artifactKinds=['MODEL','ENGINE'];
+ old.lineage.predecessors=['A','B'];now.lineage.predecessors=['B','A'];
+ old.lineage.relations=['EXECUTES','DERIVES_FROM'];now.lineage.relations=['DERIVES_FROM','EXECUTES'];
+ old.supersession={predecessors:['P1','P2']};now.supersession={predecessors:['P2','P1']};
+ const r=audit({previous:[old],candidate:[now]});
+ assert.deepEqual(r.capabilityDefinitionChanged,[]);
+ assert.deepEqual(r.lineageStructureChanged,[]);
+ assert.equal(r.structurePass,true);
+});
