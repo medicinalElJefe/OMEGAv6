@@ -9,7 +9,7 @@ OMEGA's unit of progress is **recovered and executable capability**, not a workf
 - interface regression (previous route exposed, new presentation missing);
 - source-binding or truth-class substitution requiring separate lineage/evidence review;
 - proof-reference deficit for **every candidate capability**, including newly introduced identities (a complete previous-only subset is insufficient);
-- explicitly governed supersession (replacement exists, disposition and approver carry evidence).
+- caller-declared supersession/deprecation references (replacement, disposition and approver fields are recorded, **not** authenticated).
 
 The input `proofs` mapping must come from *independent real production observations*. Its structure is a **receipt reference**, not a self-validating attestation: callers must authenticate, retrieve, and verify the cited observation separately. The audit intentionally returns `productionProven: false` for **every** caller-supplied proof map, even when the references match. `proofReferencesComplete` only reports syntactic binding completeness. The separate production release authority must independently authenticate and read back the exact promoted SHA, deployed runtime behavior, and rollback eligibility before asserting live proof. No caller-created receipt can promote this audit to production truth.
 
@@ -26,3 +26,9 @@ The new module does not change CanonState admission, release workflow, secrets, 
 Changes to source binding or truth class are conservatively flagged for review rather than automatically accepted as equivalent. These are evidence-boundary changes, not necessarily proof of a functional regression. `structurePass` is a structural admission check only, not a production pass. Historical dispositions contain caller-declared evidence identifiers and approvers; their presence is not independent authentication.
 
 Malformed historical or candidate nodes (missing implementation ID, source binding, evidence class, recognized executor state, or presentation/executor fields) fail structural admission. Synthetic receipt references cannot compensate for an incomplete node.
+
+## Fail-closed conservation admission
+
+A missing historical capability always sets `structurePass: false`, even if a caller provides a syntactically complete `SUPERSEDED`, `INTENTIONALLY_DEPRECATED`, `PLATFORM_SPECIFIC`, or `QUARANTINED` disposition. The audit records such claims in `declaredResolutions` but has **no trusted governance resolver** that could independently authenticate them. Do not treat this structural refusal as a verdict that every removal is illegitimate; a separately governed, independently verified disposition is required before conservation admission. A presentation surface marked `generatedFromCapability: true` must have a nonblank route; an empty/whitespace-only route is invalid, not evidence of interface conservation.
+
+The source-bound tests specifically refuse caller-declared removal and empty visible-route admission. Passing those tests is candidate source/CI evidence only; it does not establish production runtime behavior.
