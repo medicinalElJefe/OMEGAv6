@@ -18,4 +18,11 @@ function encode(xs){return xs.reduce((n,x)=>n*12+x,0)}
 assert.deepEqual(record,parseHistoricalWorkbookR612(input));
 assert.throws(()=>parseHistoricalWorkbookR612({...input,claimedSha256:'f'.repeat(64)}),/fingerprint/);
 assert.throws(()=>parseHistoricalWorkbookR612({...input,sheet:'not real'}),/named sheet/);
+
+const prefixedXml=xml.replace(/<(\/?)(worksheet|sheetData|row|c|is|t)(\b)/g,'<$1x:$2$3');
+const prefixed=zipSync({'xl/workbook.xml':strToU8('<x:workbook xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><x:sheets><x:sheet name="619D_Addressing" r:id="rId1"/></x:sheets></x:workbook>'),'xl/_rels/workbook.xml.rels':strToU8('<Relationships><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="/xl/worksheets/sheet1.xml"/></Relationships>'),'xl/worksheets/sheet1.xml':strToU8(prefixedXml)});
+const prefixedRecord=parseHistoricalWorkbookR612({...input,sourceBytes:prefixed,claimedSha256:createHash('sha256').update(prefixed).digest('hex')});
+assert.equal(prefixedRecord.coordinates.length,2,'namespace-prefixed OOXML must parse like historic workbook');
+assert.deepEqual(prefixedRecord.coordinates.map(x=>x.address),record.coordinates.map(x=>x.address));
+
 console.log('R612 OOXML byte-bound worksheet axis extraction PASS');
