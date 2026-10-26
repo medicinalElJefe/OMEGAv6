@@ -42,7 +42,7 @@ export function parseHistoricalWorkbookR612({sourceBytes,claimedSha256,sheet='61
   const digits=indices.map(i=>{const raw=row[i];if(!/^(?:[0-9]|1[01])$/.test(String(raw??'')))throw Error('noncanonical axis digit');return Number(raw)});
   const address=digits.reduce((n,x)=>n*12+x,0);
   const declared=metaIndices[0]<0?null:row[metaIndices[0]];
-  if(declared!=null&&declared!==''&&(!/^\\d+$/.test(String(declared))||Number(declared)!==address))throw Error('source address differs from decoded coordinate');
+  if(declared!=null&&declared!==''&&(!/^\d+$/.test(String(declared))||Number(declared)!==address))throw Error('source address differs from decoded coordinate');
   const decoded=metaIndices[1]<0?null:row[metaIndices[1]];
   if(decoded!=null&&decoded!==''&&String(decoded)!==digits.join('|'))throw Error('source decoded-check mismatch');
   const metadata=Object.fromEntries(extraHeaders.map((name,i)=>[name,metaIndices[i]<0?null:row[metaIndices[i]]??null]));
