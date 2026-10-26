@@ -80,3 +80,15 @@ selectionTampered[0].strongestImplementation.selectionRule='NEWEST_WINS' as neve
 const selectionAudit=auditCapabilityContinuityR620({previous,candidate:selectionTampered});
 assert.deepEqual(selectionAudit.implementationSelectionChanged,[lost.identity.id]);
 assert.equal(selectionAudit.structurePass,false,'R474 strongest-valid selection cannot be replaced by newest-wins');
+
+const routabilityTampered=structuredClone(previous);
+routabilityTampered.find(x=>x.identity.id===direct.identity.id)!.currentExecutor.routable=false;
+const routabilityAudit=auditCapabilityContinuityR620({previous,candidate:routabilityTampered});
+assert.deepEqual(routabilityAudit.executorRoutabilityChanged,[direct.identity.id]);
+assert.equal(routabilityAudit.structurePass,false,'real R474 executor routability is part of conserved execution authority');
+
+const generationTampered=structuredClone(previous);
+generationTampered[0].presentationSurface.generatedFromCapability=!lost.presentationSurface.generatedFromCapability;
+const generationAudit=auditCapabilityContinuityR620({previous,candidate:generationTampered});
+assert.deepEqual(generationAudit.presentationGenerationChanged,[lost.identity.id]);
+assert.equal(generationAudit.structurePass,false,'R474 presentation generation authority cannot silently change');
