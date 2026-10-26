@@ -62,3 +62,21 @@ scarsDiscarded[0].supersession.scarPolicy='DISCARD_SCARS' as never;
 const scarAudit=auditCapabilityContinuityR620({previous,candidate:scarsDiscarded});
 assert.deepEqual(scarAudit.scarPolicyChanged,[lost.identity.id]);
 assert.equal(scarAudit.structurePass,false,'historical contradiction/scar policy must be conserved');
+
+const definitionTampered=structuredClone(previous);
+definitionTampered[0].pillar='APPLICATIONS' as never;
+const definitionAudit=auditCapabilityContinuityR620({previous,candidate:definitionTampered});
+assert.deepEqual(definitionAudit.capabilityDefinitionChanged,[lost.identity.id]);
+assert.equal(definitionAudit.structurePass,false,'R474 architectural pillar cannot be rewritten without review');
+
+const ancestryTampered=structuredClone(previous);
+ancestryTampered[0].lineage.predecessors=['UNRELATED_DONOR'];
+const ancestryAudit=auditCapabilityContinuityR620({previous,candidate:ancestryTampered});
+assert.deepEqual(ancestryAudit.lineageStructureChanged,[lost.identity.id]);
+assert.equal(ancestryAudit.structurePass,false,'R474 historical ancestry cannot silently change');
+
+const selectionTampered=structuredClone(previous);
+selectionTampered[0].strongestImplementation.selectionRule='NEWEST_WINS' as never;
+const selectionAudit=auditCapabilityContinuityR620({previous,candidate:selectionTampered});
+assert.deepEqual(selectionAudit.implementationSelectionChanged,[lost.identity.id]);
+assert.equal(selectionAudit.structurePass,false,'R474 strongest-valid selection cannot be replaced by newest-wins');
