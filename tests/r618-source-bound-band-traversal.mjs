@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {CORPUS_CAPACITY_R610} from '../src/continuity/corpusAddressR610.js';
+import {ORIGINAL_BAND_PROOF_R617S} from '../src/continuity/originalWorkbookBandProofR617S.js';
+import {traverseCorpusBandR618 as step,verifyCorpusBandTraversalR618 as verify,traverseOriginalSourceBandR618 as sourceStep} from '../src/continuity/sourceBoundBandTraversalR618.js';
+const size = ORIGINAL_BAND_PROOF_R617S.bandSize;
+const zero = step({address:0,offset:0});
+assert.equal(zero.toAddress,0);assert.equal(zero.crossedBand,false);assert.equal(zero.wrapped,false);
+assert.equal(zero.fromDigits.length,10);assert.equal(zero.fromDigits.join(','),'0,0,0,0,0,0,0,0,0,0');
+assert.equal(verify({address:0,offset:0},zero),true);
+assert.equal(verify({address:0,offset:1},zero),false);
+assert.equal(verify({address:0,offset:0},{...zero,toAddress:1}),false);
+const crossing=step({address:size-1,offset:1});
+assert.equal(crossing.toAddress,size);assert.equal(crossing.fromBand,0);assert.equal(crossing.toBand,1);assert.equal(crossing.crossedBand,true);
+const back=step({address:crossing.toAddress,offset:-1});
+assert.equal(back.toAddress,size-1);assert.equal(back.fromBand,1);assert.equal(back.toBand,0);
+assert.throws(()=>step({address:0,offset:-1}),/without wrap authority/);
+assert.throws(()=>step({address:CORPUS_CAPACITY_R610-1,offset:1}),/without wrap authority/);
+const negativeWrap=step({address:0,offset:-1,wrap:true});
+assert.equal(negativeWrap.toAddress,CORPUS_CAPACITY_R610-1);assert.equal(negativeWrap.wrapped,true);
+const positiveWrap=step({address:CORPUS_CAPACITY_R610-1,offset:1,wrap:true});
+assert.equal(positiveWrap.toAddress,0);assert.equal(positiveWrap.wrapped,true);
+const multiTurn=step({address:0,offset:CORPUS_CAPACITY_R610*2+7,wrap:true});
+assert.equal(multiTurn.toAddress,7);assert.equal(multiTurn.crossedBand,true);assert.equal(multiTurn.endpointBandChanged,false);
+assert.equal(step({address:0,offset:-CORPUS_CAPACITY_R610*2-7,wrap:true}).toAddress,CORPUS_CAPACITY_R610-7);
+for(const address of [0,1,size-1,size,size*13+5,CORPUS_CAPACITY_R610-1]){
+  const a=step({address,offset:19,wrap:true});
+  const b=step({address:a.toAddress,offset:-19,wrap:true});
+  assert.equal(b.toAddress,address);assert.equal(verify({address,offset:19,wrap:true},a),true);
+}
+for(const invalid of [NaN,Infinity,-1,1.5,Number.MAX_SAFE_INTEGER+1])assert.throws(()=>step({address:invalid,offset:0}));
+for(const invalid of [NaN,Infinity,0.5,Number.MAX_SAFE_INTEGER+1])assert.throws(()=>step({address:0,offset:invalid}));
+assert.throws(()=>step({address:0,offset:1,wrap:'yes'}),/boolean/);
+assert.throws(()=>sourceStep({engineeringRecords:[],address:0,offset:0}),/144 engineering records/);
+console.log('R618 deterministic 12^10 band traversal, wrap refusal, reversibility, source gate PASS');

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 const workflow=fs.readFileSync('.github/workflows/r241-archive-convergence.yml','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 assert.ok(workflow.includes('stale-head-preflight'),'R460 stale-head preflight job missing');
-assert.ok(workflow.includes('git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/pull/${PR_NUMBER}/head"'),'R460 must resolve current PR head live');
+assert.ok(workflow.includes('gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq')&&workflow.includes('GH_TOKEN: ${{ github.token }}')&&workflow.includes('pull-requests: read'),'R460 must resolve current private PR head live with authenticated read authority');
 assert.ok(workflow.includes('observed_head=$observed'),'R460 must retain observed current head in proof output');
 assert.ok(workflow.includes('EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}'),'R460 must use event PR head as candidate identity');
 assert.ok(workflow.includes('if [ "$observed" = "$EVENT_HEAD_SHA" ]'),'R460 live head must be compared to exact event head, never synthetic GITHUB_SHA');
