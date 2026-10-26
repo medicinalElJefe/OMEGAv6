@@ -21,7 +21,12 @@ for(const token of ["desktop',{width:1440,height:960}","mobile',{width:390,heigh
 assert.ok(workflow.includes('playwright@1.63.0'),'R446 must pin the accepted browser harness');
 assert.ok(workflow.includes('npm run build')&&workflow.includes('vite preview'),'R446 must test the exact built product, not source-only rendering');
 assert.ok(workflow.includes('omega7-r446-browser-parity-e2e.mjs'),'R446 workflow must execute the parity test');
-assert.ok(workflow.includes('omega7-user-parity:')&&workflow.includes('timeout-minutes: 25'),'R446 browser proof must remain bounded inside OMEGA Cloud Bridge CI');
+// Bind the bounded timeout to the actual parity job, not an unrelated workflow job.
+// The former 25-minute budget cancelled the full browser suite during R520 after R705 passed.
+const parityJob=workflow.split('\n  omega7-user-parity:\n')[1]?.split(/\n  [a-z][a-z0-9-]*:\n/)[0]||'';
+const parityBudget=Number(parityJob.match(/^\s+timeout-minutes:\s*(\d+)\s*$/m)?.[1]||0);
+assert.ok(parityJob.includes('omega7-r446-browser-parity-e2e.mjs')&&parityBudget>=40&&parityBudget<=45,
+ 'R446 full browser proof must retain its bounded 40-45 minute job budget in OMEGA Cloud Bridge CI');
 assert.ok(workflow.startsWith('name: OMEGA Cloud Bridge CI'),'R446 must reuse the existing governed workflow authority rather than add a 25th workflow');
 assert.match(lock.sourceMainSha,/^[a-f0-9]{40}$/,'OMEGA7 successor locks must retain an exact source SHA');
 const sourceRevision=Number((String(lock.sourceMilestone).match(/^R(\d+)/)||[])[1]||0);
