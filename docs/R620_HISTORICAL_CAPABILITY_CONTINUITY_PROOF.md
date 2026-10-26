@@ -40,3 +40,9 @@ The primary CI gate also runs `npx --yes tsx tests/r620-r474-corpus-integration.
 ## R650 source-claim hardening
 
 A canonical family ledger is not a production verifier. Even if a ledger row asserts `productionProved: true` and lists no missing evidence, the source-only R620 family report keeps that family unresolved and marks the assertion `UNVERIFIED_ATTESTATION`. `sourceHintsPresent` records a hint; `sourcePresent` remains false without independent byte readback. The OMEGA 7 family summary counts every family as requiring independent production proof, never subtracting families based on ledger flags. Primary CI now runs both the forged-ledger negative regression and OMEGA 7 display-invariant regression; these checks do not themselves establish deployed behavior.
+
+## Follow-up: semantic conservation across execution-state changes
+
+R620 now records `executionStateChanged`, `evidenceRequirementsChanged`, `dependenciesChanged`, `scarPolicyChanged`, and `remainingGapChanged` independently of route or implementation identity. A source-only `TRUTH_GATED` capability cannot become `EXECUTES_NOW` by changing a field while retaining the same implementation ID; such a transition requires independent executor and production evidence. Dropping source proof requirements, dependency bindings, contradiction/scar retention, or an unresolved external proof gap also blocks structural conservation until reviewed.
+
+Evidence requirement and dependency arrays are compared as sets so ordering alone is not treated as a regression. These checks preserve the R474 source graph's semantics but do not themselves authenticate evidence, execute native hosts, or establish production proof. `productionProven` remains false regardless of caller receipts. A passing PR test is not a live production claim.
