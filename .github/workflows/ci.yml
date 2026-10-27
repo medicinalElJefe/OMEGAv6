@@ -267,6 +267,10 @@ jobs:
       - name: Prove R602 historical Seven-Star authority and address contract
         run: npm run test:r602
       - name: Prove R606 original Time Mandala desktop/mobile browser execution
+        # Candidate browser proof must exercise the just-built local preview, not
+        # OMEGA_PUBLIC_URL (the already-deployed Worker on the previous main).
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r606-historical-mandala-browser-e2e.mjs
       - name: Prove R622 original RH graph desktop/mobile traversal and canonical persistence
         env:
