@@ -69,7 +69,17 @@ async function prove(browser,label,viewport){
     await trace.waitFor({state:'visible',timeout:5000});
     const parsed=JSON.parse(await trace.locator('[data-r627-trace-json]').textContent());
     if(parsed.executor!==mode||parsed.frames.length<1||parsed.frames.length>4||parsed.productionAdmissionClaimed!==false||parsed.historicalCapabilityRestored!==false||parsed.canonicalMutation!==false)throw new Error(label+': '+mode+' bounded source trace or proof boundary failed');
-    for(const frame of parsed.frames)if(!Number.isInteger(frame.address)||!Number.isInteger(frame.nextAddress)||frame.stateId!==frame.address+1)throw new Error(label+': source trace coordinate sequence malformed');
+    for(const [index,frame] of parsed.frames.entries()){
+     if(!Number.isInteger(frame.address)||!Number.isInteger(frame.nextAddress)||frame.stateId!==frame.address+1)throw new Error(label+': source trace coordinate sequence malformed');
+     const previous=parsed.frames[index-1],earlier=parsed.frames[index-2];
+     for(const [metric,velocityKey,accelerationKey] of [['continuity','continuityVelocity','continuityAcceleration'],['plasticity','plasticityVelocity','plasticityAcceleration'],['scar','scarVelocity','scarAcceleration']]){
+      const velocity=previous?frame[metric]-previous[metric]:null;
+      const acceleration=previous&&earlier?velocity-(previous[metric]-earlier[metric]):null;
+      if(frame.developmental?.[velocityKey]!==velocity||frame.developmental?.[accelerationKey]!==acceleration)throw new Error(label+': '+mode+' source developmental derivative mismatch');
+     }
+    }
+    const traceText=await trace.innerText();
+    if(!traceText.includes('Δcontinuity')||!traceText.includes('Δscar')||!traceText.includes('per model successor'))throw new Error(label+': bounded source derivatives not displayed with nonphysical truth label');
     const nextAddress=parsed.frames[0].nextAddress;
     await trace.locator('button[data-r627-continue-address]').first().click();
     await page.waitForFunction(expected=>Number(document.querySelector('.o7-science-workspace[data-route="Atlas"]')?.getAttribute('data-address'))===expected,nextAddress,{timeout:5000});
