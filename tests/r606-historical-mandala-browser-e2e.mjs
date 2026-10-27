@@ -1,5 +1,12 @@
 import {chromium} from 'playwright';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
+// R663: PR acceptance must never silently fall back to the already deployed
+// OMEGA_PUBLIC_URL when a candidate preview URL was omitted by CI.
+if(process.env.GITHUB_ACTIONS==='true'&&process.env.GITHUB_EVENT_NAME==='pull_request'){
+ if(!process.env.OMEGA_E2E_URL)throw Error('R663 PR candidate browser proof requires OMEGA_E2E_URL; refusing deployed Worker fallback');
+ const host=new URL(base).hostname;
+ if(!['127.0.0.1','localhost','[::1]'].includes(host))throw Error('R663 PR candidate browser proof must target local preview, not production: '+host);
+}
 const expectedSha=process.env.OMEGA_EXPECTED_SHA?.trim()||'';
 if(expectedSha){
  if(!/^[a-f0-9]{40}$/.test(expectedSha))throw Error('R608 expected production SHA must be 40 lowercase hexadecimal characters');
@@ -46,6 +53,52 @@ try{
   };
   await instrument.getByRole('button',{name:'Reset clock to sector 1'}).click();
   await assertFrame(0);
+  // R663: exercise real browser-side historical evidence comparison, discrepancy and refusal.
+  const recon=instrument.locator('[data-r663-reconciliation="true"]');
+  // The reconciliation tool is below the historical frame inside a scrollable
+  // OMEGA7 workspace. Verify it exists before scrolling it into the painted
+  // viewport, and report actual rendered content if an older bundle is served.
+  const reconCount=await recon.count();
+  if(reconCount!==1){
+   const rendered=(await instrument.innerText()).slice(-1800);
+   throw Error(label+': expected exactly one R663 reconciliation tool; found '+reconCount+'; historical instrument tail: '+rendered);
+  }
+  await recon.scrollIntoViewIfNeeded({timeout:10000});
+  await recon.waitFor({state:'visible',timeout:15000});
+  const evidence=recon.getByLabel('Reconciliation evidence JSON');
+  const addressForCompare=Number(await workspace.getAttribute('data-address'));
+  const digitsForCompare=[Math.floor(addressForCompare/1728),Math.floor(addressForCompare/144)%12,Math.floor(addressForCompare/12)%12,addressForCompare%12];
+  const baseForCompare=(digitsForCompare.reduce((a,b)=>a+b,0)%7)+1;
+  const good={sourceId:'STATE_COORDINATES',row:0,address:addressForCompare,digits:digitsForCompare,baseStar:baseForCompare,activeStar:baseForCompare};
+  await evidence.fill(JSON.stringify([good,{...good,row:1,activeStar:99}]));
+  await recon.locator('[data-r663-compare]').click();
+  const comparison=recon.locator('[data-r663-receipt="true"]');
+  await comparison.waitFor({state:'visible',timeout:5000});
+  if(!(await comparison.innerText()).includes('1 matching rows')||!(await comparison.innerText()).includes('1 field discrepancies'))throw Error(label+': R663 mismatch comparison not executed');
+  if(!(await comparison.innerText()).includes('Original source authenticated: no'))throw Error(label+': R663 source provenance inflated');
+  // R663: real local file intake must reach the same comparison executor without
+  // uploading private bytes or silently retaining a previous receipt.
+  const localFile=recon.getByLabel('Import local reconciliation JSON file');
+  const fileRows=[good,{...good,row:1,baseStar:99}];
+  await localFile.setInputFiles({name:'reconciliation.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(fileRows))});
+  await page.waitForFunction(expected=>document.querySelector('[aria-label="Reconciliation evidence JSON"]')?.value===expected,JSON.stringify(fileRows),{timeout:10000});
+  if(await comparison.count())throw Error(label+': R663 file import retained a stale comparison');
+  await recon.locator('[data-r663-compare]').click();
+  if(!(await comparison.innerText()).includes('1 matching rows')||!(await comparison.innerText()).includes('1 field discrepancies'))throw Error(label+': R663 local file did not execute formula comparison');
+  await localFile.setInputFiles({name:'too-large.json',mimeType:'application/json',buffer:Buffer.alloc(262145,32)});
+  await recon.locator('[data-r663-error="true"]').waitFor({state:'visible',timeout:5000});
+  if(!(await recon.locator('[data-r663-error]').innerText()).includes('INPUT_TOO_LARGE_256K'))throw Error(label+': R663 oversized local file was accepted');
+  if(await evidence.inputValue())throw Error(label+': R663 rejected file retained previous private evidence');
+  await evidence.fill(JSON.stringify(Array.from({length:257},(_,i)=>({...good,row:i}))));
+  if(await comparison.count())throw Error(label+': R663 stale receipt survived evidence change');
+  await recon.locator('[data-r663-compare]').click();
+  if(!(await comparison.innerText()).includes('Compared 256 rows'))throw Error(label+': R663 bounded batch failed');
+  await recon.locator('[data-r663-next]').click();
+  if(!(await comparison.innerText()).includes('Compared 1 rows'))throw Error(label+': R663 next batch failed');
+  await evidence.fill(JSON.stringify([{sourceId:'STATE_COORDINATES',row:0,address:addressForCompare}]));
+  await recon.locator('[data-r663-compare]').click();
+  await recon.locator('[data-r663-error="true"]').waitFor({state:'visible',timeout:5000});
+  if(!(await recon.locator('[data-r663-error]').innerText()).includes('UNTESTABLE_SOURCE_ROW'))throw Error(label+': R663 untestable evidence was accepted');
   const initialAddress=await workspace.getAttribute('data-address');
   const before=await instrument.locator('[data-r605-frame]').innerText();
   if(!before.includes('20,736'))throw Error(label+': historical state table missing');
@@ -87,5 +140,5 @@ try{
   if(errors.length)throw Error(label+': '+errors.join(' | '));
   await page.close();
  }
- console.log('R606 HISTORICAL MANDALA BROWSER PASS · desktop/mobile · original formulas, canonical traversal, 7 clock sectors, live/manual control, legacy access');
+ console.log('R606/R663 HISTORICAL MANDALA BROWSER PASS · desktop/mobile · original formulas, canonical traversal, 7 clock sectors, live/manual control, legacy access');
 }finally{await browser.close()}

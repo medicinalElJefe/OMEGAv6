@@ -2,7 +2,7 @@
  * Time_Mandala_of_Matter_20736D_Excel_Engine.xlsx (Drive 1L4yQ8einYFoUsbNniz_JI0tNnt-ngKD6).
  * Controls B4:B8; Engine_20736D J:V. Index semantics are model-space.
  */
-import {historicalAddressDigits,HISTORICAL_SEVEN_STAR_OPERATORS,TIME_MANDALA_AXES_R603} from './sevenStarHistoricalAuthorityR602';
+import {historicalAddressDigits,HISTORICAL_SEVEN_STAR_OPERATORS,TIME_MANDALA_AXES_R603} from './sevenStarHistoricalAuthorityR602.ts';
 export type HistoricalWorkbookFrame={address:number;indices:readonly[number,number,number,number];baseStar:number;liveSector:number;activeStar:number;activeColor:string;operator:string;matterAnalogy:string;alphaOmegaRole:string;thetaCenter:number;localBlendWeight:number;mode188Gate:'TURN'|'PRUNE'|'INTEGRATE'|'STAY';truthRank:'EXACT_INDEX + SYMBOLIC_MAPPING';deweyDispatch:'01-1'|'OMEGA'|'188-TURN'|'011/STAY'};
 export function workbookClockR604(seconds:number){
  if(!Number.isFinite(seconds)||seconds<0||seconds>=86400)throw Error('clock must be seconds since midnight in [0,86400)');
