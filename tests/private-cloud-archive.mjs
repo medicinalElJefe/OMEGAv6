@@ -42,5 +42,27 @@ try{
  await writeFile(join(dir,'inventory.json'),JSON.stringify({items:[{kind:'file',name:'real-source.bin',path:'/real-source.bin',size_bytes:bytes.length,mime_type:'application/octet-stream',library_file_id:'importer-source'}]}));
  await promisify(execFile)('python3',['scripts/archive-transfer.py','--base',String(await mf.ready),'--token-file',join(dir,'key'),'--inventory',join(dir,'inventory.json'),'--root',importRoot,'--receipts',join(dir,'proof.jsonl')],{timeout:30000});
  const proof=JSON.parse((await readFile(join(dir,'proof.jsonl'),'utf8')).trim());assert.equal(proof.status,'BOTH_REPLICAS_READBACK_VERIFIED');assert.equal(proof.sha256,hash(bytes));assert.equal(proof.replicas.length,2);
+ // Recover the provider ZIP rather than relying on any original attachment URL.
+ const python=promisify(execFile);
+ await python('python3',['-c',`import importlib.util,json,pathlib,sys
+s=importlib.util.spec_from_file_location('fixtures','tests/archive-restore.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+root=pathlib.Path(sys.argv[1]);index,parts=m.fixture(root,segmented=True);(root/'restore-index.json').write_text(json.dumps(index))
+`,dir],{timeout:30000});
+ const restoreArgs=['scripts/archive-restore.py','--base',String(await mf.ready),'--token-file',join(dir,'key'),'--index',join(dir,'restore-index.json'),'--proof-index','0','--part',join(dir,'one.zip.001'),'--part',join(dir,'one.zip.002'),'--receipts',join(dir,'restore-proof.jsonl')];
+ for(let attempt=0;attempt<2;attempt++){
+  const restored=await python('python3',restoreArgs,{timeout:30000});
+  const result=JSON.parse(restored.stdout);assert.equal(result.status,'BOTH_REPLICAS_READBACK_VERIFIED');assert.equal(result.files,2);
+ }
+ const restoredProofs=(await readFile(join(dir,'restore-proof.jsonl'),'utf8')).trim().split('\n').map(JSON.parse);
+ assert.equal(restoredProofs.length,4);assert.equal(restoredProofs[0].id,restoredProofs[2].id);
+ for(const restored of restoredProofs){
+  assert.equal(restored.replicas.length,2);assert.equal(restored.recovery.executionAdmission,'NOT_EVALUATED');
+  for(const replica of ['', '?replica=backup']){
+   const readback=await call('records/'+restored.id+'/content'+replica);
+   const content=Buffer.from(await readback.arrayBuffer());assert.equal(content.length,restored.bytes);assert.equal(hash(content),restored.sha256);
+  }
+ }
+ const listing=await (await call('records')).json();
+ const sameNames=listing.records.filter(x=>x.name==='same.txt');assert.equal(sameNames.length,2);assert.notEqual(sameNames[0].id,sameNames[1].id);
  console.log('PASS: real local R2 auth/cookie, checksum rejection, missing-backup veto, repair/resume, immutable commits, two-replica roundtrip, cross-chunk/suffix/invalid ranges, listing and no-delete boundary.');
 }finally{await mf.dispose();await rm(dir,{recursive:true,force:true})}
