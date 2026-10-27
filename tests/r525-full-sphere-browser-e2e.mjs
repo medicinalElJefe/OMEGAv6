@@ -55,7 +55,7 @@ async function prove(browser,label,viewport){
   await motion.waitFor({state:'visible',timeout:15000});
   await motion.getByLabel('Motion stability').fill('90');
   await motion.getByLabel('Motion harmony').fill('90');
-  await motion.getByLabel('Motion tier').fill('1');
+  await motion.getByRole('spinbutton',{name:'Motion tier',exact:true}).fill('1');
   await motion.getByLabel('Motion steps').fill('4');
   const motionRules=await motion.locator('[data-r537-step-rule]').evaluateAll(xs=>xs.map(x=>x.getAttribute('data-r537-step-rule')));
   if(motionRules.join(',')!=='R1,R1,R6,R6')throw new Error(label+': R537 actual model transition rules incorrect '+motionRules);
