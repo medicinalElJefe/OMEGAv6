@@ -3,7 +3,13 @@ import fs from 'node:fs';
 import {traceSourceInstrumentR533,inspectSourceInstrumentR533} from '../src7/sourceInstrumentR533.ts';
 import {executeAccumulatedCapabilityR534,R534_EXECUTABLE_BINDING_IDS} from '../src/accumulativeCapabilityExecutionR534.ts';
 const surface=fs.readFileSync('src/CapabilitySurfaceR478.tsx','utf8');
-assert.match(surface,/executeAccumulatedCapabilityR534\(cap\.id,runAddress\)/);
+// R553 owns execution plus bounded local history; the R478 UI delegates to it.
+// Preserve the R552 executor proof without requiring the obsolete direct-call shape.
+const historySource=fs.readFileSync('src/sourceModelHistoryR553.ts','utf8');
+assert.match(surface,/runSourceHistoryR553\(capabilityId,runAddress,runHistory,/);
+assert.match(historySource,/const result=executeAccumulatedCapabilityR534\(capabilityId,address\)/);
+assert.match(surface,/setRunReceipt\(record\.entry\.result\)/);
+assert.match(surface,/setRunHistory\(record\.history\)/);
 assert.match(surface,/data-r552-execution-result/);
 assert.match(surface,/Source-model execution address/);
 assert.match(surface,/runReceipt\.status/);
