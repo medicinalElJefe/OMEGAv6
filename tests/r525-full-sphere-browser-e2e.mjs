@@ -51,6 +51,25 @@ async function prove(browser,label,viewport){
   if(await open.count())await open.click();
   const sphere=native.locator('[data-r525-sphere="OMEGA_FULL_SPHERE_ARCHIVE_GRAMMAR_R525"]');
   await sphere.waitFor({state:'visible',timeout:20000});
+  const motion=native.locator('[data-r537-motion="source-model"]');
+  await motion.waitFor({state:'visible',timeout:15000});
+  await motion.getByLabel('Motion stability').fill('90');
+  await motion.getByLabel('Motion harmony').fill('90');
+  await motion.getByLabel('Motion tier').fill('1');
+  await motion.getByLabel('Motion steps').fill('4');
+  const motionRules=await motion.locator('[data-r537-step-rule]').evaluateAll(xs=>xs.map(x=>x.getAttribute('data-r537-step-rule')));
+  if(motionRules.join(',')!=='R1,R1,R6,R6')throw new Error(label+': R537 actual model transition rules incorrect '+motionRules);
+  await motion.getByRole('button',{name:'Export motion snapshot'}).click();
+  const motionText=motion.getByRole('textbox',{name:'Motion snapshot JSON'});
+  const motionSnapshot=await motionText.inputValue();
+  if(JSON.parse(motionSnapshot).canonicalMutation!==false)throw new Error(label+': R537 source model inflated canonical authority');
+  await motionText.fill('{"version":1,"steps":4,"packet":{"face":99}}');
+  await motion.getByRole('button',{name:'Import motion snapshot'}).click();
+  if(!(await motion.locator('[data-r537-snapshot-status]').innerText()).includes('REFUSED'))throw new Error(label+': R537 malformed snapshot accepted');
+  await motionText.fill(motionSnapshot);
+  await motion.getByRole('button',{name:'Import motion snapshot'}).click();
+  if(!(await motion.locator('[data-r537-snapshot-status]').innerText()).includes('LOCAL_MODEL_IMPORTED'))throw new Error(label+': R537 valid snapshot import failed');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('omega7.r537.motion.v1')||'{}').steps===4);
   if(await sphere.locator('[data-r525-shell]').count()!==3||await sphere.locator('line[data-r525-edge]').count()!==90)throw new Error(label+': 3 genuine nested 20-vertex/30-edge shells not rendered');
   const execution=native.locator('[data-r531-source-execution="true"]');
   await execution.waitFor({state:'visible',timeout:10000});
@@ -196,6 +215,20 @@ async function prove(browser,label,viewport){
   await sphere.locator('button[data-r525-motion="playing"]').waitFor({state:'visible',timeout:3000});
   await sphere.locator('button[data-r525-motion="playing"]').click();
   if(!(await sphere.locator('button[data-r525-motion="paused"]').count()))throw new Error(label+': source projection did not resume after pause');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
+  const resumedPortal=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"]');
+  await resumedPortal.waitFor({state:'visible',timeout:18000});
+  await resumedPortal.locator('button[data-r519-node="Atlas"]').click();
+  await resumedPortal.locator('button[data-r519-launch="Atlas"]').click();
+  const resumedNative=page.locator('.o7-science-workspace[data-route="Atlas"]');
+  await resumedNative.waitFor({state:'visible',timeout:28000});
+  const resumedOpen=resumedNative.locator('.o7-open-instrument');
+  if(await resumedOpen.count())await resumedOpen.click();
+  const restoredMotion=resumedNative.locator('[data-r537-motion="source-model"]');
+  await restoredMotion.waitFor({state:'visible',timeout:15000});
+  if(await restoredMotion.getByLabel('Motion steps').inputValue()!=='4'||await restoredMotion.getByLabel('Motion stability').inputValue()!=='90')
+   throw new Error(label+': R537 local motion state lost on browser reload');
   if(errors.length)throw new Error(label+': uncaught R525 browser errors '+errors.join(' | ').slice(0,700));
   console.log('R525 '+label+' FULL SPHERE OPERATION PASS · 3 nested 30-edge true meshes · rotation motion · exact antipode twice · history/forecast boundaries · prior Atlas preserved');
  }finally{await context.close()}
