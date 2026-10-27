@@ -1,3 +1,5 @@
+import './inherited-development-replay-r623.mjs';
+import './r624-inherited-development-ui.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {auditCapabilityContinuityR620 as audit} from '../src/capabilityContinuityAuditR620.mjs';
