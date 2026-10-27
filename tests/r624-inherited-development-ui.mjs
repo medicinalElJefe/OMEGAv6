@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
+test('OMEGA7 inherited developmental replay is wired and labeled local-only',async()=>{const s=await readFile(new URL('../src7/CapabilityRecoveryAuditR705.tsx',import.meta.url),'utf8');for(const marker of ['replayInheritedDevelopmentR623','data-r624-execute','data-r624-output','canonicalHistory:result.history','developmental:result.developmental'])assert.ok(s.includes(marker),marker);assert.match(s,/not live production or historical parity proof/);});

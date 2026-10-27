@@ -1,6 +1,7 @@
 import {useMemo,useState} from 'react';
 import {OMEGA7_CAPABILITIES} from './capabilityRegistry';
 import canonicalRecoveryR650 from '../canon/year-corpus-capability-conservation-r650.json';
+import {replayInheritedDevelopmentR623} from '../src/inheritedDevelopmentReplayR623.mjs';
 import {OMEGA_ARCHITECTURE_R474,YEAR_CORPUS_CAPABILITY_GRAPH_R474,auditYearCorpusCapabilityGraphR474,type OmegaArchitecturePillarR474} from '../src/yearCorpusCapabilityGraphR474';
 
 // R705: a source-lineage view and real OMEGA7 route launcher, not a live-execution attestation.
@@ -9,6 +10,7 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
  const [pillar,setPillar]=useState<OmegaArchitecturePillarR474|'ALL'>('ALL');
  const [filter,setFilter]=useState<FilterR705>('GAPPED');
  const [query,setQuery]=useState('');
+ const [replayOutput,setReplayOutput]=useState('Not executed');
  const audit=useMemo(()=>auditYearCorpusCapabilityGraphR474(),[]);
  const availableRoutes=useMemo(()=>new Set(OMEGA7_CAPABILITIES.map(c=>c.legacyRoute)),[]);
  const families=canonicalRecoveryR650.families;
@@ -21,6 +23,12 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
   <h2>Capability recovery audit</h2>
   <p>Historical corpus resolution, strongest known implementation and remaining restoration gaps. This is a source-derived audit, not a live production-health certificate.</p>
   <div role='status' data-r705-audit-summary>{audit.capabilities} resolved capability identities · {audit.gapped} recorded gaps · {audit.executing} modeled as executing · {audit.truthGated} truth-gated</div>
+  <section aria-label='Inherited developmental execution' data-r624-inherited-development='local-only'>
+   <h3>Inherited woven continuity and developmental replay</h3>
+   <p>Run the established R651/R653 canonical frame engine through R623 finite-difference Heightened Mode. The result is local model execution, not live production or historical parity proof.</p>
+   <button type='button' data-r624-execute onClick={()=>{try{const edges=[{from:'A',to:'B',kind:'INGRESS',weight:0.5},{from:'B',to:'A',kind:'RETURN',weight:0.3}];const result=replayInheritedDevelopmentR623({nodes:[{id:'A',continuity:0.8,scar:0.15,contradiction:0.1},{id:'B',continuity:0.2}],edgeFrames:[edges,edges,edges],step:0.2,mode:'STABILIZE'});setReplayOutput(JSON.stringify({canonicalHistory:result.history,developmental:result.developmental,proof:result.proof}));}catch(error){setReplayOutput(String(error));}}}>Execute inherited replay</button>
+   <pre data-r624-output style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{replayOutput}</pre>
+  </section>
   <section aria-label='Canonical family restoration status' data-r620-canonical-family-report='source-bound'>
    <h3>Historical capability families — independent proof required</h3>
    <p>{families.length} canonical families · {families.length} require independent production proof. Source hints, in-ledger claims and graph registration are not executable parity.</p>
