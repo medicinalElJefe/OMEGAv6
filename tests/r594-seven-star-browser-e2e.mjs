@@ -19,9 +19,11 @@ try{
   const after=await svg.innerHTML();if(before===after)throw Error(label+': rotation did not change rendered geometry');
   await star.getByRole('slider',{name:'Seven-Star motion speed'}).fill('30');
   await star.getByRole('button',{name:'Play Seven-Star motion'}).click();
+  if(await star.getByLabel('Seven-Star motion state').textContent()!=='Running')throw Error(label+': running state not exposed');
   const movingBefore=await svg.innerHTML();
   await page.waitForFunction(before=>document.querySelector('[data-r594-seven-star="true"] svg')?.innerHTML!==before,movingBefore,{timeout:5000});
   await star.getByRole('button',{name:'Pause Seven-Star motion'}).click();
+  if(await star.getByLabel('Seven-Star motion state').textContent()!=='Paused')throw Error(label+': pause state not exposed');
   await page.waitForTimeout(150);
   const paused=await svg.innerHTML();
   await page.waitForTimeout(300);
