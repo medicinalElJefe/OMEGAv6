@@ -23,3 +23,12 @@ test('insufficient frames and malformed edges fail closed',()=>{
  assert.throws(()=>replayInheritedDevelopmentR623({nodes,edgeFrames:[edges,edges]}),/three/);
  assert.throws(()=>replayInheritedDevelopmentR623({nodes,edgeFrames:[edges,[{from:'A',to:'Z',kind:'INGRESS'}],edges]}));
 });
+
+test('initial state is snapshotted rather than aliased',()=>{
+ const input=nodes.map(n=>({...n}));const r=replayInheritedDevelopmentR623({nodes:input,edgeFrames:[edges,edges,edges]});
+ input[0].continuity=0;
+ assert.equal(r.history[0][0].continuity,0.8);
+});
+test('rejects duplicate inherited identities before any frame advances',()=>{
+ assert.throws(()=>replayInheritedDevelopmentR623({nodes:[nodes[0],nodes[0]],edgeFrames:[edges,edges,edges]}),/duplicate inherited identity/);
+});
