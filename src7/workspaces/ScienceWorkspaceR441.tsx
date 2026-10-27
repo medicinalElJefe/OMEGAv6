@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import RelativityLab from '../../src/RelativityLab';
 import AppliedRealityLab from '../../src/AppliedRealityLab';
 import AtlasViewport from '../../src/AtlasViewport';
+import MotionSourceInstrumentR537 from '../MotionSourceInstrumentR537';
 import FullSphereInstrumentR525 from '../../src/FullSphereInstrumentR525';
 import SourceExecutionWorkspaceR531 from '../SourceExecutionWorkspaceR531';
 import AtlasCalculatorPanel from '../../src/AtlasCalculatorPanel';
@@ -67,7 +68,7 @@ export default function ScienceWorkspaceR441({route,onNavigate,depth}:Props){
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Relativity'?<RelativityLab record={record} state={state} onNavigate={onNavigate}/>:
     route==='Reality Lab'?<AppliedRealityLab canonicalAddress={address} onCommitAddress={commit}/>:
-    route==='Atlas'?<><FullSphereInstrumentR525 address={address} onAddress={commit}/><SourceExecutionWorkspaceR531 address={address} onAddress={commit}/><AtlasViewport state={state} onSelect={c=>commit(fromCoords(c))}/></>:
+    route==='Atlas'?<><FullSphereInstrumentR525 address={address} onAddress={commit}/><SourceExecutionWorkspaceR531 address={address} onAddress={commit}/><MotionSourceInstrumentR537/><AtlasViewport state={state} onSelect={c=>commit(fromCoords(c))}/></>:
     route==='Atlas Calculator'?<AtlasCalculatorPanel record={record} onCommit={commit}/>:
     route==='Scale Compiler'?<RecursiveScalePanel address={address} onAddress={commit}/>:
     <OmegaInfinityPanel record={record}/>}
