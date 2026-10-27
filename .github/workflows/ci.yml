@@ -57,6 +57,8 @@ jobs:
         run: node tests/r617s-original-workbook-band-proof.mjs
       - name: R618 deterministic bounded historical band traversal and refusal controls
         run: node tests/r618-source-bound-band-traversal.mjs
+      - name: R623 runnable historical address traversal in OMEGA7
+        run: node tests/r623-interactive-corpus-traversal.mjs
       - name: R621 original-byte private workbook traversal CLI fail-closed controls
         run: node tests/r621-original-byte-traversal-cli.mjs
       - name: R620 historical capability continuity and evidence boundary regression
