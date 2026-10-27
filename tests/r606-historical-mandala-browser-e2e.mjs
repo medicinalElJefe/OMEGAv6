@@ -69,6 +69,19 @@ try{
   await comparison.waitFor({state:'visible',timeout:5000});
   if(!(await comparison.innerText()).includes('1 matching rows')||!(await comparison.innerText()).includes('1 field discrepancies'))throw Error(label+': R663 mismatch comparison not executed');
   if(!(await comparison.innerText()).includes('Original source authenticated: no'))throw Error(label+': R663 source provenance inflated');
+  // R663: real local file intake must reach the same comparison executor without
+  // uploading private bytes or silently retaining a previous receipt.
+  const localFile=recon.getByLabel('Import local reconciliation JSON file');
+  const fileRows=[good,{...good,row:1,baseStar:99}];
+  await localFile.setInputFiles({name:'reconciliation.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(fileRows))});
+  await page.waitForFunction(expected=>document.querySelector('[aria-label="Reconciliation evidence JSON"]')?.value===expected,JSON.stringify(fileRows),{timeout:10000});
+  if(await comparison.count())throw Error(label+': R663 file import retained a stale comparison');
+  await recon.locator('[data-r663-compare]').click();
+  if(!(await comparison.innerText()).includes('1 matching rows')||!(await comparison.innerText()).includes('1 field discrepancies'))throw Error(label+': R663 local file did not execute formula comparison');
+  await localFile.setInputFiles({name:'too-large.json',mimeType:'application/json',buffer:Buffer.alloc(262145,32)});
+  await recon.locator('[data-r663-error="true"]').waitFor({state:'visible',timeout:5000});
+  if(!(await recon.locator('[data-r663-error]').innerText()).includes('INPUT_TOO_LARGE_256K'))throw Error(label+': R663 oversized local file was accepted');
+  if(await evidence.inputValue())throw Error(label+': R663 rejected file retained previous private evidence');
   await evidence.fill(JSON.stringify(Array.from({length:257},(_,i)=>({...good,row:i}))));
   if(await comparison.count())throw Error(label+': R663 stale receipt survived evidence change');
   await recon.locator('[data-r663-compare]').click();
