@@ -70,6 +70,12 @@ async function prove(browser,label,viewport){
     const parsed=JSON.parse(await trace.locator('[data-r627-trace-json]').textContent());
     if(parsed.executor!==mode||parsed.frames.length<1||parsed.frames.length>4||parsed.productionAdmissionClaimed!==false||parsed.historicalCapabilityRestored!==false||parsed.canonicalMutation!==false)throw new Error(label+': '+mode+' bounded source trace or proof boundary failed');
     for(const frame of parsed.frames)if(!Number.isInteger(frame.address)||!Number.isInteger(frame.nextAddress)||frame.stateId!==frame.address+1)throw new Error(label+': source trace coordinate sequence malformed');
+    const nextAddress=parsed.frames[0].nextAddress;
+    await trace.locator('button[data-r627-continue-address]').first().click();
+    await page.waitForFunction(expected=>Number(document.querySelector('.o7-science-workspace[data-route="Atlas"]')?.getAttribute('data-address'))===expected,nextAddress,{timeout:5000});
+    const savedAddress=await page.evaluate(()=>Number(localStorage.getItem('omega.v6.address')));
+    if(savedAddress!==nextAddress)throw new Error(label+': source continuation did not persist in shared Atlas state');
+    await trace.waitFor({state:'detached',timeout:5000});
     await stepInput.fill('13');
     await execution.locator('[data-r627-trace-run]').click();
     const held=execution.locator('[data-r627-trace-status="HELD"]');
