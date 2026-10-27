@@ -27,6 +27,26 @@ for(const address of [0,1,size-1,size,size*13+5,CORPUS_CAPACITY_R610-1]){
   const b=step({address:a.toAddress,offset:-19,wrap:true});
   assert.equal(b.toAddress,address);assert.equal(verify({address,offset:19,wrap:true},a),true);
 }
+// R626: signed R618 receipts must not permit post-execution coordinate rewriting.
+for (const input of [
+  {address:0,offset:0},
+  {address:size-1,offset:1},
+  {address:0,offset:-1,wrap:true},
+  {address:CORPUS_CAPACITY_R610-1,offset:CORPUS_CAPACITY_R610*2+7,wrap:true}
+]) {
+  const receipt=step(input);
+  assert.equal(Object.isFrozen(receipt),true,'receipt frozen');
+  assert.equal(Object.isFrozen(receipt.fromDigits),true,'origin digits frozen');
+  assert.equal(Object.isFrozen(receipt.toDigits),true,'destination digits frozen');
+  const from=[...receipt.fromDigits],to=[...receipt.toDigits],hash=receipt.receiptSha256;
+  assert.throws(()=>{receipt.fromDigits[0]=(receipt.fromDigits[0]+1)%12},TypeError);
+  assert.throws(()=>{receipt.toDigits[9]=(receipt.toDigits[9]+1)%12},TypeError);
+  assert.deepEqual(receipt.fromDigits,from);
+  assert.deepEqual(receipt.toDigits,to);
+  assert.equal(receipt.receiptSha256,hash);
+  assert.equal(verify(input,receipt),true,'original signed receipt remains verifiable');
+  assert.equal(verify(input,{...receipt,toDigits:[...to.slice(0,9),(to[9]+1)%12]}),false,'tampered snapshot rejected');
+}
 for(const invalid of [NaN,Infinity,-1,1.5,Number.MAX_SAFE_INTEGER+1])assert.throws(()=>step({address:invalid,offset:0}));
 for(const invalid of [NaN,Infinity,0.5,Number.MAX_SAFE_INTEGER+1])assert.throws(()=>step({address:0,offset:invalid}));
 assert.throws(()=>step({address:0,offset:1,wrap:'yes'}),/boolean/);

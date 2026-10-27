@@ -61,6 +61,39 @@ async function prove(browser,label,viewport){
    await model.waitFor({state:'visible',timeout:5000});
    if(mode==='TRAVERSAL'&&!(await model.innerText()).includes('nextAddress'))throw new Error(label+': traversal model did not execute');
    if(mode==='FORECAST'&&!(await model.innerText()).includes('modelNextAddress'))throw new Error(label+': forecast model did not execute');
+   if(mode==='TRAVERSAL'||mode==='FORECAST'){
+    const stepInput=execution.getByLabel('Source trace steps');
+    await stepInput.fill('4');
+    await execution.locator('[data-r627-trace-run]').click();
+    const trace=execution.locator('[data-r627-trace-status="SOURCE_MODEL_EXECUTED"]');
+    await trace.waitFor({state:'visible',timeout:5000});
+    const parsed=JSON.parse(await trace.locator('[data-r627-trace-json]').textContent());
+    if(parsed.executor!==mode||parsed.frames.length<1||parsed.frames.length>4||parsed.productionAdmissionClaimed!==false||parsed.historicalCapabilityRestored!==false||parsed.canonicalMutation!==false)throw new Error(label+': '+mode+' bounded source trace or proof boundary failed');
+    for(const [index,frame] of parsed.frames.entries()){
+     if(!Number.isInteger(frame.address)||!Number.isInteger(frame.nextAddress)||frame.stateId!==frame.address+1)throw new Error(label+': source trace coordinate sequence malformed');
+     const previous=parsed.frames[index-1],earlier=parsed.frames[index-2];
+     for(const [metric,velocityKey,accelerationKey] of [['continuity','continuityVelocity','continuityAcceleration'],['plasticity','plasticityVelocity','plasticityAcceleration'],['scar','scarVelocity','scarAcceleration']]){
+      const velocity=previous?frame[metric]-previous[metric]:null;
+      const acceleration=previous&&earlier?velocity-(previous[metric]-earlier[metric]):null;
+      if(frame.developmental?.[velocityKey]!==velocity||frame.developmental?.[accelerationKey]!==acceleration)throw new Error(label+': '+mode+' source developmental derivative mismatch');
+     }
+    }
+    const traceText=await trace.innerText();
+    if(!traceText.includes('Δcontinuity')||!traceText.includes('Δscar')||!traceText.includes('per model successor'))throw new Error(label+': bounded source derivatives not displayed with nonphysical truth label');
+    const nextAddress=parsed.frames[0].nextAddress;
+    await trace.locator('button[data-r627-continue-address]').first().click();
+    await page.waitForFunction(expected=>Number(document.querySelector('.o7-science-workspace[data-route="Atlas"]')?.getAttribute('data-address'))===expected,nextAddress,{timeout:5000});
+    const savedAddress=await page.evaluate(()=>Number(localStorage.getItem('omega.v6.address')));
+    if(savedAddress!==nextAddress)throw new Error(label+': source continuation did not persist in shared Atlas state');
+    await trace.waitFor({state:'detached',timeout:5000});
+    await stepInput.fill('13');
+    await execution.locator('[data-r627-trace-run]').click();
+    const held=execution.locator('[data-r627-trace-status="HELD"]');
+    await held.waitFor({state:'visible',timeout:5000});
+    if(!(await held.innerText()).includes('STEPS_MUST_BE_INTEGER_1_TO_12'))throw new Error(label+': out-of-range trace steps did not fail closed');
+   }else if(await execution.locator('[data-r627-trace-run]').count()||await execution.locator('[data-r627-trace-status]').count()){
+    throw new Error(label+': stale trace or unsupported native trace action survived executor switch');
+   }
    await evaluate.click();
    receipt=execution.locator('[data-r531-receipt="HELD"]');
    await receipt.waitFor({state:'visible',timeout:5000});

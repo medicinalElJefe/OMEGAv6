@@ -212,7 +212,7 @@
     "test:r520:browser": "node tests/r520-complete-function-library-browser-e2e.mjs",
     "test:r524": "node tests/r524-lazy-home-convergence-invariants.mjs",
     "test:r524:browser": "node tests/r524-lazy-visual-home-browser-e2e.mjs",
-    "test:r525": "npx --yes tsx tests/r525-full-sphere-invariants.mts",
+    "test:r525": "npx --yes tsx tests/r525-full-sphere-invariants.mts && npx --yes tsx tests/omega7-r531-source-workspace-conservation.mts && npx --yes tsx tests/r552-ux-source-execution-invariants.mts",
     "test:r525:browser": "node tests/r525-full-sphere-browser-e2e.mjs",
     "test:r542": "node tests/r542-successor-source-bytes-invariants.mjs",
     "test:r554:browser": "node tests/r554-omega7-ux-atlas-browser-e2e.mjs",
