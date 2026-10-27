@@ -25,7 +25,11 @@ export function traceSourceInstrumentR533(executor:R529Executor,address:number,s
  if(!Number.isInteger(steps)||steps<1||steps>12)return held('STEPS_MUST_BE_INTEGER_1_TO_12');
  if(executor!=='TRAVERSAL'&&executor!=='FORECAST')return held('ONLY_TRAVERSAL_OR_FORECAST_SOURCE_MODELS');
  if(!Number.isSafeInteger(address)||address<0||address>=STATE_COUNT)return held('ADDRESS_OUT_OF_RANGE');
- const frames:{index:number;address:number;stateId:number;decision:string;continuity:number;scar:number;contradiction:number;nextAddress:number}[]=[];
+ // R627 Heightened Mode: discrete derivatives per source-model successor,
+ // not temporal/physical velocities. A derivative is unavailable until enough
+ // actual source samples exist; never manufacture a zero at the boundary.
+ type Frame={index:number;address:number;stateId:number;decision:string;continuity:number;plasticity:number;scar:number;contradiction:number;nextAddress:number;developmental:Readonly<{continuityVelocity:number|null;continuityAcceleration:number|null;plasticityVelocity:number|null;plasticityAcceleration:number|null;scarVelocity:number|null;scarAcceleration:number|null}>};
+ const frames:Frame[]=[];
  const seen=new Set<number>();
  let cursor=address,termination='STEP_LIMIT_REACHED';
  for(let i=0;i<steps;i++){
@@ -35,7 +39,15 @@ export function traceSourceInstrumentR533(executor:R529Executor,address:number,s
   if(result.status!=='SOURCE_MODEL_EXECUTED')return held('SOURCE_MODEL_NOT_EXECUTABLE');
   const next='nextAddress' in result?result.nextAddress:'modelNextAddress' in result?result.modelNextAddress:NaN;
   if(!Number.isSafeInteger(next)||next<0||next>=STATE_COUNT)return held('INVALID_SOURCE_SUCCESSOR');
-  frames.push(Object.freeze({index:i,address:cursor,stateId:result.evidence.stateId,decision:result.evidence.decision,continuity:result.evidence.continuity,scar:result.evidence.scar,contradiction:result.evidence.contradiction,nextAddress:next}));
+  const prior=frames.length?frames[frames.length-1]:null;
+  const earlier=frames.length>1?frames[frames.length-2]:null;
+  const derivative=(key:'continuity'|'plasticity'|'scar')=>{
+   const velocity=prior===null?null:result.evidence[key]-prior[key];
+   const acceleration=velocity===null||earlier===null||prior===null?null:velocity-(prior[key]-earlier[key]);
+   return{velocity,acceleration};
+  };
+  const c=derivative('continuity'),p=derivative('plasticity'),scar=derivative('scar');
+  frames.push(Object.freeze({index:i,address:cursor,stateId:result.evidence.stateId,decision:result.evidence.decision,continuity:result.evidence.continuity,plasticity:result.evidence.plasticity,scar:result.evidence.scar,contradiction:result.evidence.contradiction,nextAddress:next,developmental:Object.freeze({continuityVelocity:c.velocity,continuityAcceleration:c.acceleration,plasticityVelocity:p.velocity,plasticityAcceleration:p.acceleration,scarVelocity:scar.velocity,scarAcceleration:scar.acceleration})}));
   if(seen.has(next)){termination='CYCLE_DETECTED';break}
   cursor=next;
  }
