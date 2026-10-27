@@ -5,12 +5,12 @@ import {inspectSourceInstrumentR533,traceSourceInstrumentR533} from './sourceIns
 import {executeAccumulatedCapabilityR534} from '../src/accumulativeCapabilityExecutionR534';
 import type {R529Executor,R529Proposal} from './developmentalExecutionFabricR529';
 
-type Props={address:number};
+type Props={address:number;onAddress:(next:number)=>void};
 const EXECUTORS:readonly R529Executor[]=['VISUALIZATION','TRAVERSAL','FORECAST','SAI_HYBRID'];
 const CAPABILITY_IDS:Record<R529Executor,string>={VISUALIZATION:'SPHERE',TRAVERSAL:'TRAVERSAL',FORECAST:'FORECAST_LAE',SAI_HYBRID:'HYBRID'};
 const ROUTES:Record<R529Executor,string>={VISUALIZATION:'Atlas',TRAVERSAL:'Traversal',FORECAST:'Forecast',SAI_HYBRID:'Hybrid Link'};
 const keys=['continuity','futurePlasticity','contradiction','burden','recoverability','proofCoverage','capabilityCoverage','humanComprehension','futureTopologyRetention','scarPressure'] as const;
-export default function SourceExecutionWorkspaceR531({address}:Props){
+export default function SourceExecutionWorkspaceR531({address,onAddress}:Props){
  const[executor,setExecutor]=useState<R529Executor>('VISUALIZATION');
  const[receipt,setReceipt]=useState<ReturnType<typeof executeSourceBoundR530>|null>(null);
  const packet=useMemo(()=>corpusState(address),[address]);
@@ -48,7 +48,7 @@ export default function SourceExecutionWorkspaceR531({address}:Props){
    {traceReceipt&&<div data-r627-trace-status={traceReceipt.status} role='status' style={{marginTop:10,maxWidth:'100%',overflowX:'auto'}}>
     <b>Bounded source trace · {traceReceipt.status}</b>
     <small>Corpus addresses only. No physical traversal, observed future, historical parity, canonical mutation or production proof.</small>
-    {traceReceipt.status==='HELD'?<p>{traceReceipt.reasons.join(' · ')}</p>:<><p>{traceReceipt.frames.length} model transitions · {traceReceipt.termination}</p><ol>{traceReceipt.frames.map(frame=><li key={frame.index}>Address {frame.address} → {frame.nextAddress} · {frame.decision} · continuity {frame.continuity.toFixed(3)} · scar {frame.scar.toFixed(3)} · contradiction {frame.contradiction.toFixed(3)}</li>)}</ol></>}
+    {traceReceipt.status==='HELD'?<p>{traceReceipt.reasons.join(' · ')}</p>:<><p>{traceReceipt.frames.length} model transitions · {traceReceipt.termination}</p><ol>{traceReceipt.frames.map(frame=><li key={frame.index}>Address {frame.address} → {frame.nextAddress} · {frame.decision} · continuity {frame.continuity.toFixed(3)} · scar {frame.scar.toFixed(3)} · contradiction {frame.contradiction.toFixed(3)} <button type='button' data-r627-continue-address={frame.nextAddress} onClick={()=>onAddress(frame.nextAddress)}>Continue at {frame.nextAddress}</button></li>)}</ol></>}
     <details><summary>Source trace receipt</summary><pre data-r627-trace-json style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',maxWidth:'100%'}}>{JSON.stringify(traceReceipt,null,2)}</pre></details>
    </div>}
    {modelReceipt&&<div data-r533-model-receipt={modelReceipt.status} role='status' style={{marginTop:10}}>
