@@ -1,5 +1,12 @@
 import {chromium} from 'playwright';
 const base=(process.env.OMEGA_E2E_URL||process.env.OMEGA_PUBLIC_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
+// R663: PR acceptance must never silently fall back to the already deployed
+// OMEGA_PUBLIC_URL when a candidate preview URL was omitted by CI.
+if(process.env.GITHUB_ACTIONS==='true'&&process.env.GITHUB_EVENT_NAME==='pull_request'){
+ if(!process.env.OMEGA_E2E_URL)throw Error('R663 PR candidate browser proof requires OMEGA_E2E_URL; refusing deployed Worker fallback');
+ const host=new URL(base).hostname;
+ if(!['127.0.0.1','localhost','[::1]'].includes(host))throw Error('R663 PR candidate browser proof must target local preview, not production: '+host);
+}
 const expectedSha=process.env.OMEGA_EXPECTED_SHA?.trim()||'';
 if(expectedSha){
  if(!/^[a-f0-9]{40}$/.test(expectedSha))throw Error('R608 expected production SHA must be 40 lowercase hexadecimal characters');
