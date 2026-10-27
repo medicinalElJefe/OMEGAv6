@@ -40,3 +40,38 @@ The primary CI gate also runs `npx --yes tsx tests/r620-r474-corpus-integration.
 ## R650 source-claim hardening
 
 A canonical family ledger is not a production verifier. Even if a ledger row asserts `productionProved: true` and lists no missing evidence, the source-only R620 family report keeps that family unresolved and marks the assertion `UNVERIFIED_ATTESTATION`. `sourceHintsPresent` records a hint; `sourcePresent` remains false without independent byte readback. The OMEGA 7 family summary counts every family as requiring independent production proof, never subtracting families based on ledger flags. Primary CI now runs both the forged-ledger negative regression and OMEGA 7 display-invariant regression; these checks do not themselves establish deployed behavior.
+
+## Follow-up: semantic conservation across execution-state changes
+
+R620 now records `executionStateChanged`, `evidenceRequirementsChanged`, `dependenciesChanged`, `scarPolicyChanged`, and `remainingGapChanged` independently of route or implementation identity. A source-only `TRUTH_GATED` capability cannot become `EXECUTES_NOW` by changing a field while retaining the same implementation ID; such a transition requires independent executor and production evidence. Dropping source proof requirements, dependency bindings, contradiction/scar retention, or an unresolved external proof gap also blocks structural conservation until reviewed.
+
+Evidence requirement and dependency arrays are compared as sets so ordering alone is not treated as a regression. These checks preserve the R474 source graph's semantics but do not themselves authenticate evidence, execute native hosts, or establish production proof. `productionProven` remains false regardless of caller receipts. A passing PR test is not a live production claim.
+
+## Follow-up: capability meaning and lineage conservation
+
+The R620 audit now separately reports `capabilityDefinitionChanged` (function, architectural pillar, primary artifact kind, artifact-kind memberships), `lineageStructureChanged` (source domain, predecessors, lineage relations, supersession ancestry), and `implementationSelectionChanged` (strongest implementation route and selection rule). These are review gates even when the capability ID, execution state and currently exposed executor route remain unchanged. Unordered membership arrays are compared as sets so ordering alone does not create a regression. Both synthetic regressions and real R474 corpus mutation tests exercise the boundaries.
+
+This is source-level conservation validation, **not** evidence that the referenced historical engine has been recovered or executed. No caller-supplied reference can establish production proof; live target-runtime readback and governed release verification remain independent requirements.
+
+## Follow-up: executor and presentation authority transitions
+
+The conservation audit now reports `executorRoutabilityChanged` and `presentationGenerationChanged`. A historical executor with `routable: false` cannot be made routable by a caller-edited flag while keeping the same route and implementation ID. Likewise, `presentationSurface.generatedFromCapability` cannot change without review even if the URL is unchanged. These are structural review gates, not independent execution or deployment proof. Focused synthetic tests and tampering of the actual R474 graph cover the transitions.
+
+
+## Follow-up: identity, evidence provenance and disposition integrity
+
+R620 also compares historical `identity.name` and the unordered `identity.aliases` set, `evidence.currentEvidence`, `supersession.status`, and the capability `schema`. The independent review gates are `identityMetadataChanged`, `evidenceProvenanceChanged`, `supersessionStatusChanged`, and `nodeSchemaChanged`. Without these gates, an unchanged ID, executor route and truth class could conceal a renamed historical capability, a fabricated evidence description, a self-declared disposition, or an incompatible schema. Tests mutate both synthetic nodes and the real R474 year-corpus graph. Reordering aliases alone is not a change.
+
+These gates reject silent substitutions at the **source structure** boundary. They neither authenticate the truth of unchanged evidence text nor establish target-runtime execution, native device presence, or production acceptance. Release evidence must remain independently verified against the exact promoted SHA.
+
+
+## Typed R474 graph validation and browser-proof budget (2026-10-26)
+
+The R620 audit now validates the declared R474 node contract, including typed membership arrays, nonblank source/execution fields, strongest-valid selection, R474 scar and disposition policies, presentation authority, and canonical mutation refusal. It rejects an identically malformed historical/candidate pair; unchanged bad data cannot certify its own conservation. Source-only synthetic test fixtures without a declared schema retain their existing lightweight test contract, while unknown declared schemas are refused until independently supported. These are structural checks, not original-source execution or production proofs.
+
+Exact-head Cloud Bridge CI run #40411937799 passed its source verification and the R705 desktop/mobile browser checks, but its `omega7-user-parity` job was cancelled at the existing 25-minute timeout during R520, before the remaining browser gates could execute. The job budget is raised to 45 minutes without skipping any tests, changing runtime authority, or changing deployment credentials. A full successful new-head browser run is required before merge; this change does not retroactively turn the cancelled run green.
+
+
+## R446 timeout-invariant reconciliation
+
+The inherited R446 static invariant previously hard-coded `timeout-minutes: 25`, causing the first 45-minute budget correction to fail primary CI and dependent R170/R238 source checks despite passing the new R620 focused tests. The invariant now extracts the actual `omega7-user-parity` job and requires the full R446 browser test plus a bounded 40–45-minute budget. This preserves an explicit finite ceiling and does not skip any browser gates. Candidate `0761aac1` failed inherited checks and is not admissible; a fresh exact-head CI is required after this repair.
