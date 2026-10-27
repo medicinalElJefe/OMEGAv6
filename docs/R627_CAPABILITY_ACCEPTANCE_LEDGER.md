@@ -1,45 +1,42 @@
-# OMEGA capability acceptance ledger — R626/R627
+# OMEGA capability acceptance ledger — observed checkpoint 2026-10-27
 
-This ledger separates source presence, candidate execution, exact-head CI, merged code, deployed code, live desktop/mobile operation, native-device proof, and full historical parity. It is **not** a completion certificate.
+This ledger follows the R474 year-corpus capability graph: **identity → lineage → function → strongest implementation → evidence → truth class → dependencies → executor → UI → gap → supersession**. It distinguishes source, tests, merged code, exact deployed behavior, native proof and historical parity. The previous R626/R627 *candidate* entries are superseded by the verified production evidence below.
 
-## Last independently verified production baseline
+## Verified production baseline: R626/R627
 
-- Main merge SHA: `be4b067009b413ac9766c43b6070e8fd59b3b281` (PR #1158).
-- Production workflow: https://github.com/medicinalElJefe/OMEGAv6/actions/runs/40455343295 — verify, deploy-main, post-deploy-authority-closure all succeeded.
-- Cloudflare Worker version: `347202ff-7cf1-4526-adfd-1f353ba0bc56`; prior version `26afc39a-c1bf-4241-b179-c1ed870b988b` is rollback-eligible per release log.
-- R223 exact-SHA authority closure: workflow `40456997306`; desktop/mobile R525, R623, R625, R705 and other named live steps passed.
-- Native Hybrid devices: **zero authenticated public devices** in live authority logs. No native execution claim.
+- PR [#1160](https://github.com/medicinalElJefe/OMEGAv6/pull/1160) merged to exact SHA `9ef3e814a659d5b131d4105c0648f65838ed6d5f` after eight exact-head workflow families passed.
+- Canonical [production workflow #40480965272](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/40480965272) completed `verify`, `deploy-main`, and `post-deploy-authority-closure` successfully.
+- Cloudflare Worker version `2bfeb280-a62b-43fe-9a0d-bc0c3fa40f2b`, previous version `347202ff-7cf1-4526-adfd-1f353ba0bc56`; previous version rollback eligibility confirmed. Automatic rollback was not required.
+- Live browser proof on the exact promoted SHA included R525/R627 bounded successor trace, finite differences, address continuation, refusal and persistence, plus R606 Time Mandala and other inherited desktop/mobile routes.
+- R237/R238 live authority passed, while reporting **zero authenticated public Hybrid devices**. R223 exact-SHA closure succeeded in [workflow #40483723934](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/40483723934).
+- **Scope:** source-model traversal and finite differences are verified operational representations, not physical time travel, original-workbook parity or full native-host execution.
 
-## Candidate capability evidence — PR #1160 (not yet production)
+## Current governed candidate: PR #1106 — R663
 
-| R474 lineage / feature | Actual executor | Candidate UI / output | Test gate | Current acceptance |
-| --- | --- | --- | --- | --- |
-| TRAVERSAL / FORECAST_LAE source model | R533 `inspectSourceInstrumentR533` plus R627 bounded successor trace | OMEGA7 Atlas → read-only source execution; 1–12 real corpus transitions with decision, continuity, scar, contradiction and successor | R552 via `npm run test:r525`; R525 desktop/mobile browser | SOURCE IMPLEMENTED; exact-head CI and live promotion pending |
-| R618 source-bound historical band traversal | R618 signed address traversal | Existing bounded traversal receipts | R618 adversarial mutation tests | R626 source repair; production pending |
-| SPHERE / ATLAS visualization | R525 / R533 source model | OMEGA7 Atlas and Full Sphere | Existing R525 browser | Previously live-tested subset; full historical renderer parity unverified |
-| HYBRID native executor | Device-gated R237/R238 | OMEGA7 Hybrid status and proof refusal | Existing live R237/R238 | DEVICE PROOF REQUIRED |
-| WORKBOOK original private source | R621 exact original-byte command | Existing fail-closed CLI / source intake | R621 negative-path tests | Positive original-byte command execution unverified (issue #1152) |
+- [PR #1106](https://github.com/medicinalElJefe/OMEGAv6/pull/1106) remains draft and unmerged; exact candidate SHA must be read afresh before promotion.
+- R663 compares caller-supplied JSON rows against executable R602 address and R604 clock/formula replay, with 256-row bounded pagination, discrepancy detail, malformed/untestable refusal and immutable local receipts.
+- OMEGA 7 Historical Time Mandala exposes source selection, paste-based comparison, bounded local **JSON file import**, discrepancy output and continuation. Imported bytes are read in the browser session only; they are not uploaded, persisted or authenticated as historical originals.
+- `tests/r663-omega7-source-reconciliation.mts` passed on earlier candidate `d79c493a`. That candidate failed the `omega7-user-parity` job at R606: the browser could not find the R663 panel after opening the R605 instrument. All eight required workflow families therefore **did not pass**.
+- Follow-up source/test commits instrumented the missing-panel diagnosis and added desktop/mobile local-file import, stale-receipt invalidation and oversized-file refusal. **No new CI success, merge, production deploy, Worker version, rollback proof or live R663 behavior is asserted until observed on the final exact head.**
+- R663's `LOCAL_SOURCE_REPLAY_COMPARISON` truth class does **not** authenticate caller-declared source IDs or original workbook bytes. The `12^4 = 20,736` addresses are representational coordinates, not measured physical dimensions.
 
-## R627 source-model developmental derivatives (candidate only)
+## Remaining capability acceptance
 
-- The bounded R533 successor executor now computes first and second finite differences of **continuity**, **future plasticity**, and **scar** from adjacent actual corpus-model samples. The first frame has no first difference; the first two frames have no second difference. Missing samples are represented by `null`, never invented zeroes.
-- The OMEGA 7 trace UI shows continuity and scar changes and labels the quantities as *per source-model successor*, not physical time derivatives. Typed receipts retain all six computed values for inspection.
-- R552 regression compares every derived value against its adjacent source samples and checks nested receipt immutability. This is source arithmetic and browser-display implementation; exact-head CI, merge, and live proof remain required.
-- The previous candidate `e07f531d759e601173bdb47e408e6b2f5a6f324f` failed six of eight workflows after the inherited R552 assertion demanded an obsolete direct R534 call. The current UI correctly delegates through R553, which invokes R534 and stores bounded local execution history. The assertion was repaired to verify that actual delegation and receipt propagation. **This repair has not yet passed final-head CI.**
+| R474 lineage | Actual evidence | Remaining gate |
+| --- | --- | --- |
+| Canonical state, R125/R142 authority | Production source and R237/R238/R223 live controls | Preserve single admission and receipt authorities through each merge |
+| Developmental continuity / R627 | Source executor, CI and exact-production desktop/mobile proof | Full strongest-historical mathematical and application parity remains unproved |
+| Historical R602/R604/R605 | Formula replay, source tests, production R606 subset | Original private workbook command positive proof, issue [#1152](https://github.com/medicinalElJefe/OMEGAv6/issues/1152) |
+| R663 source reconciliation | Candidate source and earlier passing unit test; browser failure observed | Final-head eight workflows, governed merge, exact-SHA Worker, live desktop/mobile comparison and rollback |
+| Renderer / traversals / atlases | Partial R525/R623/R627 production-proven operations | Original-source renderer fidelity, complete traversal and scientific-source binding |
+| Intelligence / memory / applications | Partial recovered models, state and workspaces | End-to-end historical executor parity, durable recovery and complete application journeys |
+| Hybrid native host | Protocol and live refusal proof | Authenticated returned device and actual native execution; current public devices: zero |
+| Year-corpus conservation | R474/R620/R650 gates and partial evidence | Independent strongest-lineage execution and proof for all agreed capability families |
 
-### R627 admission rules
+## Governance and constraints
 
-- **PRUNE:** reject invalid steps, invalid address, unsupported executor, missing source successor, and any claimed native/physical/empirical proof from a model trace.
-- **TRANSLATE:** map actual source-model successor states into a human-readable, bounded OMEGA7 trajectory; preserve scar/contradiction and typed source identity.
-- **PROVE:** R552 source regression + R525 desktop/mobile browser execution, all eight exact-head workflow families, governed merge, exact-SHA Worker deployment, R237/R238/R223 live authority, and rollback eligibility.
-- Representation: 20,736 addresses are a 12^4 indexing instrument; no assertion of 20,736 physical dimensions or empirical time travel.
-- R2 migration is canceled. Do not activate billing, upload to R2, or delete any original/backup.
-
-## Outstanding acceptance
-
-1. Eight required workflows must pass on **the final** PR #1160 head. Earlier green commits do not transfer.
-2. Governed merge and exact deployed SHA/Worker version must be independently observed.
-3. The R525 live desktop/mobile run must exercise the **new R627** trace, not merely previous R525 functions.
-4. Positive R621 original-private-workbook execution, authenticated native-host execution, full historical application executors, original-source renderer fidelity, and complete R474 family conservation remain separate unfinished gates.
-
-No source/test/PR artifact by itself upgrades these entries to production or complete restoration.
+- **Mode 188 / PRUNE → TRANSLATE → PROVE:** reject unsupported inputs and authority inflation; translate only source-backed operations into usable UI; accept only exact-head CI, governed merge, exact production SHA/Worker, desktop/mobile behavior and rollback proof.
+- Preserve scar, contradiction and observer-relative interpretation as typed model data; Heightened derivatives are discrete source-state differences, not physical rates. Woven continuity and 20,736-address instruments do not create additional physical dimensions or compute resources.
+- No competing candidate, no bypass of the eight required workflow families, no direct production mutation outside the canonical `ci.yml` release path.
+- **R2 migration canceled:** no paid activation, R2 uploads, or deletion of original files/backups.
+- Full historical OMEGA restoration is **not complete** until every agreed acceptance criterion has independently observed proof.
