@@ -4,6 +4,7 @@ import canonicalRecoveryR650 from '../canon/year-corpus-capability-conservation-
 import {evaluateWovenExchangeR621} from '../src/wovenBoundaryExchangeR621.mjs';
 import {traverseDevelopmentalContinuityR622} from '../src/developmentalTraversalR622.mjs';
 import {runContinuityFrameR653} from '../src/continuity/frameRuntimeR653.js';
+import {replayInheritedDevelopmentR623} from '../src/inheritedDevelopmentReplayR623.mjs';
 import {OMEGA_ARCHITECTURE_R474,YEAR_CORPUS_CAPABILITY_GRAPH_R474,auditYearCorpusCapabilityGraphR474,type OmegaArchitecturePillarR474} from '../src/yearCorpusCapabilityGraphR474';
 
 // R705: a source-lineage view and real OMEGA7 route launcher, not a live-execution attestation.
@@ -15,6 +16,7 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
  const [exchangeResult,setExchangeResult]=useState<string>('Not executed');
  const [developmentResult,setDevelopmentResult]=useState<string>('Not executed');
  const [canonicalFrameResult,setCanonicalFrameResult]=useState<string>('Not executed');
+ const [inheritedReplayResult,setInheritedReplayResult]=useState<string>('Not executed');
  const audit=useMemo(()=>auditYearCorpusCapabilityGraphR474(),[]);
  const availableRoutes=useMemo(()=>new Set(OMEGA7_CAPABILITIES.map(c=>c.legacyRoute)),[]);
  const families=canonicalRecoveryR650.families;
@@ -38,6 +40,12 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
    <p>Execute the existing bounded canonical transport and mode projection, preserving scar and contradiction state. A local calculation does not prove production parity.</p>
    <button type='button' data-r653-run-canonical-frame onClick={()=>{try{const r=runContinuityFrameR653({nodes:[{id:'A',continuity:0.8,scar:0.2,contradiction:0.1},{id:'B',continuity:0.2}],edges:[{from:'A',to:'B',kind:'INGRESS',weight:0.5},{from:'B',to:'A',kind:'RETURN',weight:0.5}],step:0.25,mode:'STABILIZE'});setCanonicalFrameResult(JSON.stringify({canonicalState:r.canonicalState,projection:r.projection,receipt:r.receipt}));}catch(e){setCanonicalFrameResult(String(e));}}}>Execute inherited canonical frame</button>
    <pre data-r653-canonical-frame-result style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{canonicalFrameResult}</pre>
+  </section>
+  <section aria-label='Inherited developmental continuity replay' data-r623-inherited-replay='local'>
+   <h3>Inherited canonical developmental replay — R623</h3>
+   <p>Derive Heightened Mode velocity, acceleration and jerk from actual R651/R653 canonical frame outputs. This does not certify production or full historical parity.</p>
+   <button type='button' data-r623-run-inherited-replay onClick={()=>{try{const edges=[{from:'A',to:'B',kind:'INGRESS',weight:0.5},{from:'B',to:'A',kind:'RETURN',weight:0.3}];const result=replayInheritedDevelopmentR623({nodes:[{id:'A',continuity:0.8,scar:0.15,contradiction:0.1},{id:'B',continuity:0.2}],edgeFrames:[edges,edges,edges],step:0.2,mode:'STABILIZE'});setInheritedReplayResult(JSON.stringify({frames:result.history,developmental:result.developmental,proof:result.proof}));}catch(e){setInheritedReplayResult(String(e));}}}>Execute inherited developmental replay</button>
+   <pre data-r623-inherited-result style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{inheritedReplayResult}</pre>
   </section>
   <section aria-label='Experimental developmental traversal' data-r622-developmental-traversal='experimental'>
    <h3>Heightened Mode — developmental derivative instrument</h3>
