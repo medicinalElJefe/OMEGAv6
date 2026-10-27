@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {replayWorkbookFrameR604,workbookClockR604} from './timeMandalaFormulaReplayR604';
 import {historicalNamedStateR603,HISTORICAL_SEVEN_STAR_OPERATORS,SEVEN_STAR_HISTORICAL_SOURCES} from './sevenStarHistoricalAuthorityR602';
 import {reconcileHistoricalBatchR663} from './historicalSourceReconciliationR663';
@@ -11,6 +11,25 @@ export default function HistoricalTimeMandalaR605({address,onAddress}:Props){
  const[reconInput,setReconInput]=useState('');
  const[reconReceipt,setReconReceipt]=useState<ReturnType<typeof reconcileHistoricalBatchR663>|null>(null);
  const[reconError,setReconError]=useState('');
+ const[reconImporting,setReconImporting]=useState(false);
+ const reconImportGeneration=useRef(0);
+ const importLocalEvidence=async(file:File|undefined)=>{
+  if(!file)return;
+  const generation=++reconImportGeneration.current;
+  setReconReceipt(null);setReconError('');setReconInput('');setReconImporting(true);
+  try{
+   if(file.size>262144)throw Error('INPUT_TOO_LARGE_256K');
+   const text=await file.text();
+   if(generation!==reconImportGeneration.current)return;
+   if(text.length>262144)throw Error('INPUT_TOO_LARGE_256K');
+   setReconInput(text);
+  }catch(error){
+   if(generation===reconImportGeneration.current)setReconError(error instanceof Error?error.message:String(error));
+  }finally{
+   if(generation===reconImportGeneration.current)setReconImporting(false);
+  }
+ };
+
  useEffect(()=>{setReconReceipt(null);setReconError('')},[address,seconds]);
  const compareRows=(offset:number)=>{
   try{
@@ -50,10 +69,14 @@ export default function HistoricalTimeMandalaR605({address,onAddress}:Props){
    <h4>Historical source reconciliation · R663</h4>
    <p>Compare supplied JSON evidence rows against the executable R602/R604 formula replay at the selected clock. This does not authenticate original bytes, prove source provenance, change canonical state, or establish historical application parity. Pasted rows stay in this page session.</p>
    <label>Declared source <select aria-label='Reconciliation source' value={reconSource} onChange={e=>{setReconSource(e.target.value);setReconReceipt(null);setReconError('')}}>{SEVEN_STAR_HISTORICAL_SOURCES.map(s=><option key={s.id} value={s.id}>{s.id}</option>)}</select></label>
-   <label style={{display:'block'}}>Evidence rows (JSON array; sourceId, row, address and at least one of digits/baseStar/activeStar/mode188Gate)
-    <textarea aria-label='Reconciliation evidence JSON' rows={5} value={reconInput} onChange={e=>{setReconInput(e.target.value);setReconReceipt(null);setReconError('')}} placeholder='[{"sourceId":"STATE_COORDINATES","row":0,"address":0,"baseStar":1}]' style={{display:'block',width:'100%',maxWidth:'100%',boxSizing:'border-box'}}/>
+   <label style={{display:'block'}}>Import local reconciliation JSON file (read in this browser only; not uploaded)
+    <input aria-label='Import local reconciliation JSON file' type='file' accept='.json,application/json' onChange={e=>{const file=e.currentTarget.files?.[0];e.currentTarget.value='';void importLocalEvidence(file)}}/>
    </label>
-   <button type='button' data-r663-compare onClick={()=>compareRows(0)}>Compare first 256 rows</button>
+   <label style={{display:'block'}}>Evidence rows (JSON array; sourceId, row, address and at least one of digits/baseStar/activeStar/mode188Gate)
+    <textarea aria-label='Reconciliation evidence JSON' rows={5} value={reconInput} onChange={e=>{reconImportGeneration.current++;setReconImporting(false);setReconInput(e.target.value);setReconReceipt(null);setReconError('')}} placeholder='[{"sourceId":"STATE_COORDINATES","row":0,"address":0,"baseStar":1}]' style={{display:'block',width:'100%',maxWidth:'100%',boxSizing:'border-box'}}/>
+   </label>
+   <button type='button' data-r663-compare disabled={reconImporting} onClick={()=>compareRows(0)}>Compare first 256 rows</button>
+   {reconImporting&&<p role='status' data-r663-importing='true'>Reading local evidence file…</p>}
    {reconError&&<p role='alert' data-r663-error='true'>Comparison held: {reconError}</p>}
    {reconReceipt&&<div role='status' data-r663-receipt='true'>
     <p>Compared {reconReceipt.processed} rows · {reconReceipt.accepted} matching rows · {reconReceipt.checkedFields} checked fields · {reconReceipt.discrepancies.length} field discrepancies · offset {reconReceipt.offset}</p>
