@@ -21,6 +21,17 @@ try{
    const audit=page.locator('[data-r705-capability-audit="source-resolution"]');
    await audit.waitFor({state:'visible',timeout:30000});
    if(!(await audit.innerText()).includes('not a live production-health certificate'))throw Error(device+': source/runtime truth boundary missing');
+   // R624: test real browser interaction rather than just checking that source text contains a control.
+   const inherited=audit.locator('[data-r624-inherited-development="local-only"]');
+   await inherited.getByRole('button',{name:'Execute inherited replay'}).click();
+   const replayOutput=inherited.locator('[data-r624-output]');
+   await page.waitForFunction(()=>{const e=document.querySelector('[data-r624-output]');return e&&e.textContent&&!e.textContent.includes('Not executed')},{timeout:10000});
+   let replay;
+   try{replay=JSON.parse(await replayOutput.innerText())}catch(e){throw Error(device+': inherited replay did not yield parseable result: '+String(e))}
+   if(!Array.isArray(replay.canonicalHistory)||replay.canonicalHistory.length!==4)throw Error(device+': canonical frame history missing');
+   if(replay.developmental?.velocity?.length!==3||replay.developmental?.acceleration?.length!==2||replay.developmental?.jerk?.length!==1)throw Error(device+': heightened derivatives absent');
+   if(replay.proof?.liveRuntimeVerified!==false||replay.proof?.historicalParityVerified!==false)throw Error(device+': local execution was promoted into unverifiable production or parity evidence');
+   if(replay.canonicalHistory[0]?.[0]?.scar!==0.15)throw Error(device+': historical scar field was lost');
    const pillar=audit.getByLabel('Filter capability pillar');
    const state=audit.getByLabel('Filter capability evidence state');
    if(await pillar.locator('option').count()!==13)throw Error(device+': architecture pillars not conserved');
