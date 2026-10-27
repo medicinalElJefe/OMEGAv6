@@ -48,7 +48,16 @@ try{
   await assertFrame(0);
   // R663: exercise real browser-side historical evidence comparison, discrepancy and refusal.
   const recon=instrument.locator('[data-r663-reconciliation="true"]');
-  await recon.waitFor({state:'visible',timeout:5000});
+  // The reconciliation tool is below the historical frame inside a scrollable
+  // OMEGA7 workspace. Verify it exists before scrolling it into the painted
+  // viewport, and report actual rendered content if an older bundle is served.
+  const reconCount=await recon.count();
+  if(reconCount!==1){
+   const rendered=(await instrument.innerText()).slice(-1800);
+   throw Error(label+': expected exactly one R663 reconciliation tool; found '+reconCount+'; historical instrument tail: '+rendered);
+  }
+  await recon.scrollIntoViewIfNeeded({timeout:10000});
+  await recon.waitFor({state:'visible',timeout:15000});
   const evidence=recon.getByLabel('Reconciliation evidence JSON');
   const addressForCompare=Number(await workspace.getAttribute('data-address'));
   const digitsForCompare=[Math.floor(addressForCompare/1728),Math.floor(addressForCompare/144)%12,Math.floor(addressForCompare/12)%12,addressForCompare%12];
