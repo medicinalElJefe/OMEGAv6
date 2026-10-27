@@ -20,6 +20,27 @@ for(const address of [0,1,BAND_WIDTH_R623-1,BAND_WIDTH_R623,ADDRESS_CAPACITY_R62
 for(const value of [Number.NaN,Infinity,-1,.5,Number.MAX_SAFE_INTEGER+1])assert.throws(()=>portable({address:value,offset:0}));
 for(const value of [Number.NaN,Infinity,.5,Number.MAX_SAFE_INTEGER+1])assert.throws(()=>portable({address:0,offset:value}));
 assert.throws(()=>portable({address:0,offset:0,wrap:'yes'}),/boolean/);
+// R624: the receipt is an immutable evidence snapshot, not merely a shallow-frozen wrapper.
+for(const {address,offset,wrap} of [
+ {address:0,offset:0,wrap:false},
+ {address:BAND_WIDTH_R623-1,offset:1,wrap:false},
+ {address:0,offset:-1,wrap:true},
+ {address:ADDRESS_CAPACITY_R623-1,offset:ADDRESS_CAPACITY_R623*2+1,wrap:true}
+]){
+ const receipt=portable({address,offset,wrap});
+ assert.equal(Object.isFrozen(receipt),true,'receipt object frozen');
+ assert.equal(Object.isFrozen(receipt.fromDigits),true,'origin digits frozen');
+ assert.equal(Object.isFrozen(receipt.toDigits),true,'target digits frozen');
+ const originalFrom=[...receipt.fromDigits],originalTo=[...receipt.toDigits];
+ assert.throws(()=>{receipt.fromDigits[0]=(receipt.fromDigits[0]+1)%12},TypeError,'origin cannot be forged');
+ assert.throws(()=>{receipt.toDigits[9]=(receipt.toDigits[9]+1)%12},TypeError,'target cannot be forged');
+ assert.deepEqual(receipt.fromDigits,originalFrom);
+ assert.deepEqual(receipt.toDigits,originalTo);
+ assert.deepEqual(receipt.fromDigits,decodeAddressR623(receipt.fromAddress));
+ assert.deepEqual(receipt.toDigits,decodeAddressR623(receipt.toAddress));
+ assert.equal(receipt.sourceBytesVerified,false);
+ assert.equal(receipt.canonicalMutation,false);
+}
 const root=readFileSync('src7/Omega7Root.tsx','utf8'),ui=readFileSync('src7/CorpusTraversalR623.tsx','utf8');
 assert.match(root,/CorpusTraversalR623=lazy/);
 assert.match(root,/state.domain==='SYSTEM'&&<Suspense[^\n]*CorpusTraversalR623/);
