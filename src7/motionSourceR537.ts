@@ -52,3 +52,17 @@ export function importMotionSnapshotR537(raw:string):MotionSnapshotR537{
     !Number.isInteger(x.steps)||Number(x.steps)<1||Number(x.steps)>48)throw new Error('INVALID_SNAPSHOT_SCHEMA');
  return{version:1,packet:validateMotionPacketR537(x.packet),steps:x.steps as number,truthClass:'BOUNDED_SOURCE_RECONSTRUCTION',canonicalMutation:false};
 }
+
+/** Return detection is a property of the declared finite state machine, not observed temporal recurrence. */
+export function motionTraceR537(input:MotionPacketR537,steps:number){
+ const sequence=motionSequenceR537(input,steps);
+ const states=[validateMotionPacketR537(input),...sequence.map(s=>s.after)];
+ const seen=new Map<string,number>();
+ let cycleStart:number|null=null,cyclePeriod:number|null=null;
+ for(let i=0;i<states.length;i++){
+  const key=JSON.stringify(states[i]),previous=seen.get(key);
+  if(previous!==undefined){cycleStart=previous;cyclePeriod=i-previous;break;}
+  seen.set(key,i);
+ }
+ return{sequence,terminal:states[states.length-1],cycleStart,cyclePeriod,truthClass:'BOUNDED_SOURCE_RECONSTRUCTION' as const,canonicalMutation:false as const};
+}
