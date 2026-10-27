@@ -11,16 +11,18 @@ This ledger follows the R474 year-corpus capability graph: **identity → lineag
 - R237/R238 live authority passed, while reporting **zero authenticated public Hybrid devices**. R223 exact-SHA closure succeeded in [workflow #40483723934](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/40483723934).
 - **Scope:** source-model traversal and finite differences are verified operational representations, not physical time travel, original-workbook parity or full native-host execution.
 
-## Current governed candidate: PR #1106 — R663
+## Verified production R663 — PR #1106
 
-- [PR #1106](https://github.com/medicinalElJefe/OMEGAv6/pull/1106) remains draft and unmerged; exact candidate SHA must be read afresh before promotion.
-- R663 compares caller-supplied JSON rows against executable R602 address and R604 clock/formula replay, with 256-row bounded pagination, discrepancy detail, malformed/untestable refusal and immutable local receipts.
-- OMEGA 7 Historical Time Mandala exposes source selection, paste-based comparison, bounded local **JSON file import**, discrepancy output and continuation. Imported bytes are read in the browser session only; they are not uploaded, persisted or authenticated as historical originals.
-- `tests/r663-omega7-source-reconciliation.mts` passed on earlier candidate `d79c493a`. That candidate failed the `omega7-user-parity` job at R606: the browser could not find the R663 panel after opening the R605 instrument. All eight required workflow families therefore **did not pass**.
-- Follow-up source/test commits instrumented the missing-panel diagnosis and added desktop/mobile local-file import, stale-receipt invalidation and oversized-file refusal.
-- On 2026-10-27 candidate `e36f04df82179f6b7ff210c024559cfafd99fc7d`, seven of eight required families passed; `OMEGA Cloud Bridge CI` failed solely in `omega7-user-parity` at R606. Investigation established the concrete test-routing defect: the R606 PR job omitted `OMEGA_E2E_URL`, so its script selected the job-level `OMEGA_PUBLIC_URL` (the **previous production Worker**) instead of the locally built exact-head preview. The rendered R605 instrument was the prior release and correctly lacked R663. This was not evidence that the candidate's JSX was missing.
-- Repair commits `22e984d9` and `170306e1` bind the R606 PR test to `http://127.0.0.1:4173` and refuse nonlocal/omitted candidate URLs during GitHub pull-request acceptance. The production push deployment path retains its explicit production URL and exact promoted SHA check. **All eight workflow families must rerun on the final head; no new CI success, merge, production deploy, Worker version, rollback proof or live R663 behavior is asserted until observed.**
-- R663's `LOCAL_SOURCE_REPLAY_COMPARISON` truth class does **not** authenticate caller-declared source IDs or original workbook bytes. The `12^4 = 20,736` addresses are representational coordinates, not measured physical dimensions.
+- [PR #1106](https://github.com/medicinalElJefe/OMEGAv6/pull/1106) merged at SHA `1a4048d048aa2d074c13d0892f4d8880959369a1` after eight exact-head workflow families passed.
+- [Production workflow #40511702601](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/40511702601) succeeded on attempt 2 after Cloudflare asset-upload error 10013 on attempt 1. Exact Worker `507771c0-0314-478f-a1f4-34ddc5c8f7f2` was staged at 0%, proved, then promoted to 100%. Previous Worker `2bfeb280-a62b-43fe-9a0d-bc0c3fa40f2b` remains rollback eligible; rollback was not needed.
+- Exact-SHA R606/R663 desktop/mobile browser proof passed with local JSON import, discrepancies, bounded pagination, refusals, historical formula replay and address traversal. R237/R238 and R223 production closure passed. Authenticated public Hybrid devices: **zero**.
+- Truth class remains `LOCAL_SOURCE_REPLAY_COMPARISON`; supplied evidence is not authenticated original private workbook bytes. 20,736 addresses are representational coordinates, not physical dimensions.
+
+## Current governed candidate: PR #1094 — R649 machine-bound federation
+
+- Existing [PR #1094](https://github.com/medicinalElJefe/OMEGAv6/pull/1094) is reconciled with verified R663 main. R114 strict Genesis PROPOSE and Optical SCREEN now use configured Cloudflare machine bindings ahead of legacy/HTTPS fallback, preserving observed packets and fail-closed admission gates.
+- An executable R114 transport regression tests actual function dispatch, binding precedence, packet/job propagation, 403 refusal without external fallback, invalid packets and legacy/HTTPS paths. It is wired into `npm run check` for candidate CI.
+- R649 remains **unmerged and unproved on production** until all eight exact-head workflow families, governed merge, exact Worker identity, live strict-ceremony execution and rollback gates pass. Even a successful service-bound PROPOSE/SCREEN is not authenticated Sovereign solve or FULL_FEDERATION_PROVED.
 
 ## Remaining capability acceptance
 
@@ -29,10 +31,10 @@ This ledger follows the R474 year-corpus capability graph: **identity → lineag
 | Canonical state, R125/R142 authority | Production source and R237/R238/R223 live controls | Preserve single admission and receipt authorities through each merge |
 | Developmental continuity / R627 | Source executor, CI and exact-production desktop/mobile proof | Full strongest-historical mathematical and application parity remains unproved |
 | Historical R602/R604/R605 | Formula replay, source tests, production R606 subset | Original private workbook command positive proof, issue [#1152](https://github.com/medicinalElJefe/OMEGAv6/issues/1152) |
-| R663 source reconciliation | Candidate source and earlier passing unit test; browser failure observed | Final-head eight workflows, governed merge, exact-SHA Worker, live desktop/mobile comparison and rollback |
+| R663 source reconciliation | Exact merged SHA, production Worker, desktop/mobile comparison and rollback eligibility verified | Original private-workbook authentication and complete historical parity remain unproved |
 | Renderer / traversals / atlases | Partial R525/R623/R627 production-proven operations | Original-source renderer fidelity, complete traversal and scientific-source binding |
 | Intelligence / memory / applications | Partial recovered models, state and workspaces | End-to-end historical executor parity, durable recovery and complete application journeys |
-| Hybrid native host | Protocol and live refusal proof | Authenticated returned device and actual native execution; current public devices: zero |
+| R649 strict federation | Machine-bound candidate and executable transport regression | Eight exact-head workflows, governed merge, service-observed live receipts, authenticated solve, production proof |\n| Hybrid native host | Protocol and live refusal proof | Authenticated returned device and actual native execution; current public devices: zero |
 | Year-corpus conservation | R474/R620/R650 gates and partial evidence | Independent strongest-lineage execution and proof for all agreed capability families |
 
 ## Governance and constraints
