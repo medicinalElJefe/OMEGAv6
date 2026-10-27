@@ -6,11 +6,14 @@ import {heightenedSequence} from './continuity/wovenFieldR651.js';
  */
 export function replayInheritedDevelopmentR623({nodes,edgeFrames,step=0.1,mode='TRANSPORT',alpha=0.5}={}){
  if(!Array.isArray(nodes)||!nodes.length||!Array.isArray(edgeFrames)||edgeFrames.length<3)throw Error('at least three transport frames are required for jerk');
- const history=[nodes],receipts=[],projections=[];
+ const history=[nodes.map(n=>({...n}))],receipts=[],projections=[];
+ const expectedIds=nodes.map(n=>n.id);
+ if(new Set(expectedIds).size!==expectedIds.length)throw Error('duplicate inherited identity');
  let current=nodes;
  for(const [index,edges] of edgeFrames.entries()){
   const frame=runContinuityFrameR653({nodes:current,edges,step,mode,alpha});
   if(frame.receipt.truthClass!=='LOCAL_EXECUTION_ONLY')throw Error('unexpected receipt authority');
+  if(frame.canonicalState.length!==expectedIds.length||frame.canonicalState.some((n,i)=>n.id!==expectedIds[i]))throw Error('inherited canonical identity drift');
   current=frame.canonicalState;
   history.push(current);
   receipts.push({...frame.receipt,index});
