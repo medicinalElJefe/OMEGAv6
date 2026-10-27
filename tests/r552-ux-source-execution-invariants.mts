@@ -50,7 +50,7 @@ for(const bad of [0,13,1.5,NaN,Infinity]){
 assert.equal(traceSourceInstrumentR533('SAI_HYBRID',0,3).status,'HELD');
 assert.equal(traceSourceInstrumentR533('TRAVERSAL',20736,3).status,'HELD');
 const workspace=fs.readFileSync('src7/SourceExecutionWorkspaceR531.tsx','utf8');
-for(const marker of ['traceSourceInstrumentR533(executor,address,traceSteps)','data-r627-trace-run','data-r627-trace-json','setTraceReceipt(null)'])assert.ok(workspace.includes(marker),marker);
+for(const marker of ['traceSourceInstrumentR533(executor,address,traceSteps)','data-r627-trace-run','data-r627-trace-json','setTraceReceipt(null)','onAddress(frame.nextAddress)'])assert.ok(workspace.includes(marker),marker);
 console.log('R627 bounded source trajectory and fail-closed UI integration PASS');
 
 console.log('R552 source execution action, typed holds and authority boundaries PASS');
