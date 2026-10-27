@@ -278,6 +278,10 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r623-corpus-traversal-browser-e2e.mjs
+      - name: Prove R625 inherited R651 R653 Heightened development on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r625-inherited-development-browser-e2e.mjs
       - name: Prove R705 12-pillar capability audit, filters and real route launch on desktop/mobile
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
@@ -733,6 +737,11 @@ jobs:
         id: browser_r623
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r623-corpus-traversal-browser-e2e.mjs
+      - name: Verify deployed R625 inherited developmental replay on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r625
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r625-inherited-development-browser-e2e.mjs
       - name: Verify deployed R705 capability audit and actual route launch on exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r705
