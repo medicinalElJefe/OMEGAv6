@@ -6,14 +6,14 @@ export function CorpusTraversalR623(){
  const [address,setAddress]=useState('0'),[offset,setOffset]=useState('1'),[wrap,setWrap]=useState(false);
  const [receipt,setReceipt]=useState<ReturnType<typeof traverseAddressR623>|null>(null),[error,setError]=useState('');
  const execute=()=>{try{setReceipt(traverseAddressR623({address:safe(address),offset:safe(offset),wrap}));setError('')}catch(e){setReceipt(null);setError(e instanceof Error?e.message:'Traversal refused')}};
- const continueAtTarget=()=>{if(receipt){setAddress(String(receipt.toAddress));setReceipt(null)}};
+ const continueAtTarget=()=>{if(receipt){setAddress(String(receipt.toAddress));setReceipt(null);setError('')}};
  return <section data-r623-traversal='read-only' aria-label='Historical address traversal' style={{border:'1px solid #56718a',borderRadius:12,padding:18,margin:'18px 0'}}>
   <h2>Historical address traversal</h2>
   <p>Execute bounded arithmetic in the 12^10 address representation ({ADDRESS_CAPACITY_R623.toLocaleString()} addressable positions; {BAND_WIDTH_R623.toLocaleString()} positions per domain-phase band). No workbook bytes, historical module execution, or Canon mutation.</p>
   <div style={{display:'flex',flexWrap:'wrap',gap:12,alignItems:'end'}}>
-   <label>Address <input aria-label='Historical ten-axis address' inputMode='numeric' value={address} onChange={e=>{setAddress(e.target.value);setReceipt(null)}} /></label>
-   <label>Signed offset <input aria-label='Historical traversal offset' inputMode='numeric' value={offset} onChange={e=>{setOffset(e.target.value);setReceipt(null)}} /></label>
-   <label><input aria-label='Authorize address wrap' type='checkbox' checked={wrap} onChange={e=>{setWrap(e.target.checked);setReceipt(null)}} /> Permit wrap</label>
+   <label>Address <input aria-label='Historical ten-axis address' inputMode='numeric' value={address} onChange={e=>{setAddress(e.target.value);setReceipt(null);setError('')}} /></label>
+   <label>Signed offset <input aria-label='Historical traversal offset' inputMode='numeric' value={offset} onChange={e=>{setOffset(e.target.value);setReceipt(null);setError('')}} /></label>
+   <label><input aria-label='Authorize address wrap' type='checkbox' checked={wrap} onChange={e=>{setWrap(e.target.checked);setReceipt(null);setError('')}} /> Permit wrap</label>
    <button type='button' data-r623-execute='true' onClick={execute}>Traverse address</button>
   </div>
   {error&&<p role='alert' data-r623-refusal='true'>Traversal refused: {error}</p>}
