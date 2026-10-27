@@ -11,7 +11,7 @@ export function CorpusTraversalR623(){
   <h2>Historical address traversal</h2>
   <p>Execute bounded arithmetic in the 12^10 address representation ({ADDRESS_CAPACITY_R623.toLocaleString()} addressable positions; {BAND_WIDTH_R623.toLocaleString()} positions per domain-phase band). No workbook bytes, historical module execution, or Canon mutation.</p>
   <div style={{display:'flex',flexWrap:'wrap',gap:12,alignItems:'end'}}>
-   <label>Address <input aria-label='Historical 12-axis address' inputMode='numeric' value={address} onChange={e=>{setAddress(e.target.value);setReceipt(null)}} /></label>
+   <label>Address <input aria-label='Historical ten-axis address' inputMode='numeric' value={address} onChange={e=>{setAddress(e.target.value);setReceipt(null)}} /></label>
    <label>Signed offset <input aria-label='Historical traversal offset' inputMode='numeric' value={offset} onChange={e=>{setOffset(e.target.value);setReceipt(null)}} /></label>
    <label><input aria-label='Authorize address wrap' type='checkbox' checked={wrap} onChange={e=>{setWrap(e.target.checked);setReceipt(null)}} /> Permit wrap</label>
    <button type='button' data-r623-execute='true' onClick={execute}>Traverse address</button>
