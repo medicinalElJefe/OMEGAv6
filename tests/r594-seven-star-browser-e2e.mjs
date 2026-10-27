@@ -17,14 +17,28 @@ try{
   const svg=star.locator('svg');const before=await svg.innerHTML();
   await star.getByRole('slider',{name:'Seven-Star rotation'}).fill('95');
   const after=await svg.innerHTML();if(before===after)throw Error(label+': rotation did not change rendered geometry');
+  await star.getByRole('slider',{name:'Seven-Star motion speed'}).fill('30');
+  await star.getByRole('button',{name:'Play Seven-Star motion'}).click();
+  if(await star.getByLabel('Seven-Star motion state').textContent()!=='Running')throw Error(label+': running state not exposed');
+  const movingBefore=await svg.innerHTML();
+  await page.waitForFunction(before=>document.querySelector('[data-r594-seven-star="true"] svg')?.innerHTML!==before,movingBefore,{timeout:5000});
+  await star.getByRole('button',{name:'Pause Seven-Star motion'}).click();
+  if(await star.getByLabel('Seven-Star motion state').textContent()!=='Paused')throw Error(label+': pause state not exposed');
+  await page.waitForTimeout(150);
+  const paused=await svg.innerHTML();
+  await page.waitForTimeout(300);
+  if(paused!==await svg.innerHTML())throw Error(label+': paused geometry continued advancing');
+  if(await star.getByRole('slider',{name:'Seven-Star motion speed'}).inputValue()!=='30')throw Error(label+': speed control did not update');
   await star.getByRole('slider',{name:'Seven-Star asymmetry'}).fill('0.8');
   const addressBefore=await page.locator('[data-omega7-native="forecast.visual"]').getAttribute('data-address');
   await star.getByRole('button',{name:'Traverse node 1'}).click();
   await page.waitForFunction(old=>document.querySelector('[data-omega7-native="forecast.visual"]')?.getAttribute('data-address')!==old,addressBefore,{timeout:10000});
   await star.getByRole('button',{name:'Reset'}).click();
   if(await star.getByRole('slider',{name:'Seven-Star rotation'}).inputValue()!=='0')throw Error(label+': reset failed');
+  if(await star.getByRole('slider',{name:'Seven-Star motion speed'}).inputValue()!=='18')throw Error(label+': reset did not restore motion speed');
+  if(await star.getByRole('button',{name:'Play Seven-Star motion'}).count()!==1)throw Error(label+': reset left animation running');
   if(errors.length)throw Error(label+': '+errors.join(' | '));
   await page.close();
  }
- console.log('R594 SEVEN STAR BROWSER PASS · desktop/mobile · rotation, asymmetry, address traversal, reset · no page errors');
+ console.log('R594 SEVEN STAR BROWSER PASS · desktop/mobile · rotation, live motion, pause, speed, asymmetry, address traversal, reset · no page errors');
 }finally{await browser.close()}
