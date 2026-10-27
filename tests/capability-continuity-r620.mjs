@@ -1,3 +1,10 @@
+import './woven-boundary-exchange-r621.mjs';
+import './developmental-traversal-r622.mjs';
+import './inherited-development-replay-r623.mjs';
+import './r621-woven-ui-invariants.mjs';
+import './r622-developmental-ui-invariants.mjs';
+import './r622-inherited-continuity-ui-invariants.mjs';
+import './r623-inherited-development-ui.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {auditCapabilityContinuityR620 as audit} from '../src/capabilityContinuityAuditR620.mjs';
