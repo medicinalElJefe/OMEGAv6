@@ -39,8 +39,9 @@ export function traverseCorpusBandR618({address, offset, wrap = false} = {}) {
     toBand,
     crossedBand: raw < BigInt(fromBand * width) || raw >= BigInt((fromBand + 1) * width),
     endpointBandChanged: fromBand !== toBand,
-    fromDigits: decodeCorpusAddressR610(address),
-    toDigits: decodeCorpusAddressR610(target),
+    // Freeze nested coordinates before hashing: a shallow-frozen receipt is not an immutable snapshot.
+    fromDigits: Object.freeze(decodeCorpusAddressR610(address)),
+    toDigits: Object.freeze(decodeCorpusAddressR610(target)),
   };
   return Object.freeze({...record, receiptSha256: digest(record)});
 }
