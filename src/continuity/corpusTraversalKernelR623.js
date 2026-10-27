@@ -22,7 +22,7 @@ export function traverseAddressR623({address,offset,wrap=false}={}){
   fromAddress:address,toAddress:target,offset,wrapAuthorized:wrap,wrapped:crossedBoundary,
   fromBand,toBand,crossedBand:raw<BigInt(fromBand*BAND_WIDTH_R623)||raw>=BigInt((fromBand+1)*BAND_WIDTH_R623),
   endpointBandChanged:fromBand!==toBand,
-  fromDigits:decodeAddressR623(address),toDigits:decodeAddressR623(target),
+  fromDigits:Object.freeze(decodeAddressR623(address)),toDigits:Object.freeze(decodeAddressR623(target)),
   truthClass:'READ_ONLY_REPRESENTATIONAL_ADDRESS_EXECUTION_NOT_HISTORICAL_EXECUTOR',
   sourceBytesVerified:false,canonicalMutation:false
  });
