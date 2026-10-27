@@ -216,7 +216,7 @@
     "test:r525:browser": "node tests/r525-full-sphere-browser-e2e.mjs",
     "test:r542": "node tests/r542-successor-source-bytes-invariants.mjs",
     "test:r554:browser": "node tests/r554-omega7-ux-atlas-browser-e2e.mjs",
-    "test:private-archive": "node tests/private-cloud-archive.mjs && node tests/private-archive-provisioning.mjs"
+    "test:private-archive": "python3 tests/archive-restore.py && node tests/private-cloud-archive.mjs && node tests/private-archive-provisioning.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.2",

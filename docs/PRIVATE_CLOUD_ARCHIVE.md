@@ -26,6 +26,20 @@ The inventory page has `items`, with each original listing row carrying `kind`, 
 
 A file record's `CHUNK_SHA256_VERIFIED` state is weaker than full client roundtrip proof. Do not report completion until every source is matched to a successful readback receipt. Keep missing, failed and inaccessible sources explicitly unresolved.
 
+## Restore existing recovery archives into OMEGA 7
+
+The provider backup is a recovery source; it does not make files available in OMEGA's R2 viewer. The intended destination remains the two private R2 buckets shared by OMEGA 7 and the OMEGA 6 fallback.
+
+Use the connected provider to download the latest verified recovery index, original inventory and one proof's transport files. Resolve files by the index's exact `cloudFileId`, or each `segments[].fileId` in recorded order, rather than a filename search. Retain these materials privately outside this repository. Download references and bearer credentials must never enter GitHub or deployment artifacts.
+
+Run `python3 scripts/archive-restore.py --base <canonical-https-origin> --token-file <private-owner-key> --index <private-index.json> --inventory <private-inventory.json> --proof-index <zero-based-proof-number> --part <local-first-part> --part <local-next-part> --receipts <private-r2-receipts.jsonl>`. For a whole ZIP, pass exactly one `--part`. Process subsequent proofs the same way. The importer consumes local transport bytes supplied by the provider plugin; it does not itself implement a Cloudflare ChatGPT plugin or provider OAuth connection.
+
+The command validates index totals and unique source identities, segment order/hashes, reconstructed ZIP hash, exact internal manifest, and every original size/SHA-256 before any cloud mutation. It uses private temporary files with generated names, never archive-controlled extraction paths, and never executes archived code. Older proofs missing original paths require the original inventory; conflicting source identities are rejected. Duplicate filenames retain distinct source IDs. Actual original bytes are imported, not ZIP containers or catalog-only entries.
+
+An authenticated R2 readiness check must succeed before upload. An account activation hold produces no upload or success receipt. The existing transfer client handles resumable content-addressed chunks and immutable records, then reads back each complete primary and backup file. Only a matching two-replica receipt is appended and flushed durably. Repeating a proof repairs/rechecks its records rather than trusting an earlier local receipt as evidence of current cloud availability. The originals and provider backup remain untouched. Successful storage does not grant archived code execution or admit historical capabilities as restored.
+
+Owner action remains necessary when live health says `ACCOUNT_ACTIVATION_REQUIRED`: activate the Cloudflare R2 subscription in the account dashboard, then run the existing governed exact-main deployment so it verifies and binds both private buckets. No alternate deployment authority or billing bypass is supplied by the importer. A successful code test is not a production import.
+
 ## Coverage baseline
 
 The first complete native file listing for this task contained **6,647 files totaling 35,200,912,543 bytes**, plus six folder entries. It did not recursively list the mounted Google Drive provider and does not establish coverage of conversation transcripts or attachments absent from that source listing. Those require their own source inventories/exports. This count is a source snapshot, not an upload count.
