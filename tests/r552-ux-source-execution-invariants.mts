@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {traceSourceInstrumentR533,inspectSourceInstrumentR533} from '../src7/sourceInstrumentR533.ts';
 import {executeAccumulatedCapabilityR534,R534_EXECUTABLE_BINDING_IDS} from '../src/accumulativeCapabilityExecutionR534.ts';
+import {initCorpusPack,isCorpusReady} from '../src/corpusRuntime.ts';
 const surface=fs.readFileSync('src/CapabilitySurfaceR478.tsx','utf8');
 // R553 owns execution plus bounded local history; the R478 UI delegates to it.
 // Preserve the R552 executor proof without requiring the obsolete direct-call shape.
@@ -14,6 +15,10 @@ assert.match(surface,/data-r552-execution-result/);
 assert.match(surface,/Source-model execution address/);
 assert.match(surface,/runReceipt\.status/);
 assert.match(surface,/runReceipt\.executionClaimed/);
+// The R534/R533 executor reads the embedded 20,736-state corpus. Initialize the
+// real source pack before positive execution; do not replace it with a stub.
+await initCorpusPack();
+assert.equal(isCorpusReady(),true,'embedded source pack must be ready for R552/R627 execution');
 assert.ok(R534_EXECUTABLE_BINDING_IDS.includes('ATLAS'));
 const executed=executeAccumulatedCapabilityR534('ATLAS',0);
 assert.equal(executed.status,'SOURCE_MODEL_EXECUTED');
