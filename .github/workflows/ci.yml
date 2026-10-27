@@ -256,6 +256,8 @@ jobs:
           OMEGA_E2E_URL: http://127.0.0.1:4173
           OMEGA_R519_USE_FIXTURES: '1'
         run: node tests/r519-visual-navigation-browser-e2e.mjs
+      - name: R663 bounded historical evidence reconciliation and refusal
+        run: node --experimental-strip-types tests/r663-omega7-source-reconciliation.mts
       - name: Prove R605 historical Time Mandala instrument data
         run: npm run test:r605
       - name: Prove R604 original Time Mandala formula replay

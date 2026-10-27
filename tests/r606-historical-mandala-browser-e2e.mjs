@@ -46,6 +46,30 @@ try{
   };
   await instrument.getByRole('button',{name:'Reset clock to sector 1'}).click();
   await assertFrame(0);
+  // R663: exercise real browser-side historical evidence comparison, discrepancy and refusal.
+  const recon=instrument.locator('[data-r663-reconciliation="true"]');
+  await recon.waitFor({state:'visible',timeout:5000});
+  const evidence=recon.getByLabel('Reconciliation evidence JSON');
+  const addressForCompare=Number(await workspace.getAttribute('data-address'));
+  const digitsForCompare=[Math.floor(addressForCompare/1728),Math.floor(addressForCompare/144)%12,Math.floor(addressForCompare/12)%12,addressForCompare%12];
+  const baseForCompare=(digitsForCompare.reduce((a,b)=>a+b,0)%7)+1;
+  const good={sourceId:'STATE_COORDINATES',row:0,address:addressForCompare,digits:digitsForCompare,baseStar:baseForCompare,activeStar:baseForCompare};
+  await evidence.fill(JSON.stringify([good,{...good,row:1,activeStar:99}]));
+  await recon.locator('[data-r663-compare]').click();
+  const comparison=recon.locator('[data-r663-receipt="true"]');
+  await comparison.waitFor({state:'visible',timeout:5000});
+  if(!(await comparison.innerText()).includes('1 matching rows')||!(await comparison.innerText()).includes('1 field discrepancies'))throw Error(label+': R663 mismatch comparison not executed');
+  if(!(await comparison.innerText()).includes('Original source authenticated: no'))throw Error(label+': R663 source provenance inflated');
+  await evidence.fill(JSON.stringify(Array.from({length:257},(_,i)=>({...good,row:i}))));
+  if(await comparison.count())throw Error(label+': R663 stale receipt survived evidence change');
+  await recon.locator('[data-r663-compare]').click();
+  if(!(await comparison.innerText()).includes('Compared 256 rows'))throw Error(label+': R663 bounded batch failed');
+  await recon.locator('[data-r663-next]').click();
+  if(!(await comparison.innerText()).includes('Compared 1 rows'))throw Error(label+': R663 next batch failed');
+  await evidence.fill(JSON.stringify([{sourceId:'STATE_COORDINATES',row:0,address:addressForCompare}]));
+  await recon.locator('[data-r663-compare]').click();
+  await recon.locator('[data-r663-error="true"]').waitFor({state:'visible',timeout:5000});
+  if(!(await recon.locator('[data-r663-error]').innerText()).includes('UNTESTABLE_SOURCE_ROW'))throw Error(label+': R663 untestable evidence was accepted');
   const initialAddress=await workspace.getAttribute('data-address');
   const before=await instrument.locator('[data-r605-frame]').innerText();
   if(!before.includes('20,736'))throw Error(label+': historical state table missing');
@@ -87,5 +111,5 @@ try{
   if(errors.length)throw Error(label+': '+errors.join(' | '));
   await page.close();
  }
- console.log('R606 HISTORICAL MANDALA BROWSER PASS · desktop/mobile · original formulas, canonical traversal, 7 clock sectors, live/manual control, legacy access');
+ console.log('R606/R663 HISTORICAL MANDALA BROWSER PASS · desktop/mobile · original formulas, canonical traversal, 7 clock sectors, live/manual control, legacy access');
 }finally{await browser.close()}
