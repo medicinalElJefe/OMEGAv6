@@ -20,6 +20,13 @@ This ledger separates source presence, candidate execution, exact-head CI, merge
 | HYBRID native executor | Device-gated R237/R238 | OMEGA7 Hybrid status and proof refusal | Existing live R237/R238 | DEVICE PROOF REQUIRED |
 | WORKBOOK original private source | R621 exact original-byte command | Existing fail-closed CLI / source intake | R621 negative-path tests | Positive original-byte command execution unverified (issue #1152) |
 
+## R627 source-model developmental derivatives (candidate only)
+
+- The bounded R533 successor executor now computes first and second finite differences of **continuity**, **future plasticity**, and **scar** from adjacent actual corpus-model samples. The first frame has no first difference; the first two frames have no second difference. Missing samples are represented by `null`, never invented zeroes.
+- The OMEGA 7 trace UI shows continuity and scar changes and labels the quantities as *per source-model successor*, not physical time derivatives. Typed receipts retain all six computed values for inspection.
+- R552 regression compares every derived value against its adjacent source samples and checks nested receipt immutability. This is source arithmetic and browser-display implementation; exact-head CI, merge, and live proof remain required.
+- The previous candidate `e07f531d759e601173bdb47e408e6b2f5a6f324f` failed six of eight workflows after the inherited R552 assertion demanded an obsolete direct R534 call. The current UI correctly delegates through R553, which invokes R534 and stores bounded local execution history. The assertion was repaired to verify that actual delegation and receipt propagation. **This repair has not yet passed final-head CI.**
+
 ### R627 admission rules
 
 - **PRUNE:** reject invalid steps, invalid address, unsupported executor, missing source successor, and any claimed native/physical/empirical proof from a model trace.
