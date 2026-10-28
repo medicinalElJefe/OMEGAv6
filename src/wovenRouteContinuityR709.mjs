@@ -12,14 +12,18 @@ export function traceWovenRouteR709(scenario,origin,target,mirrored=false){
  for(let index=0;index<initial.frames;index++){
   const projection=index===0?initial:projectWovenTopologyR707(scenario,index,mirrored);
   const witness=inspectWovenRouteR708(projection,origin,target);
-  const signature=witness.pathEdges.map(e=>e.id+':'+e.kind+':'+e.from+'>'+e.to).join('|');
+  const signature=witness.pathEdges.map(e=>e.from+'>'+e.to+':'+e.kind).join('|');
   let event='INITIAL';
   if(previous){
    if(previous.reachable&&!witness.reachable){event='PATH_LOST';if(firstLossFrame===null)firstLossFrame=index;}
    else if(!previous.reachable&&witness.reachable){event='PATH_RECOVERED';if(firstRecoveryFrame===null)firstRecoveryFrame=index;}
-   else if(witness.reachable&&previous.reachable&&previous.signature!==signature){event='PATH_CHANGED';routeChanges++;}
-   else if(witness.reachable&&previous.reachable&&previous.bottleneck!==witness.bottleneckDeclaredWeight){event='DECLARED_WEIGHT_CHANGED';weightChanges++;}
-   else event='UNCHANGED';
+   else if(witness.reachable&&previous.reachable){
+    const rewired=previous.signature!==signature;
+    const changedWeight=previous.bottleneck!==witness.bottleneckDeclaredWeight;
+    if(rewired)routeChanges++;
+    if(changedWeight)weightChanges++;
+    event=rewired?'PATH_CHANGED':changedWeight?'DECLARED_WEIGHT_CHANGED':'UNCHANGED';
+   }else event='UNCHANGED';
   }
   frames.push({frameIndex:index,reachable:witness.reachable,event,pathNodes:witness.pathNodes,
    pathEdgeIds:witness.pathEdges.map(e=>e.id),hops:witness.hops,bottleneckDeclaredWeight:witness.bottleneckDeclaredWeight,
