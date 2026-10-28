@@ -45,6 +45,21 @@ async function prove(browser,label,viewport){
   await portal.locator('button[data-r519-node="Atlas"]').click();
   await portal.locator('.o7-r519-inspector[data-r519-focus="Atlas"]').waitFor({state:'visible',timeout:10000});
   await portal.locator('button[data-r519-launch="Atlas"]').click();
+  // R536: real route continuity, pin persistence and resume in the OMEGA7 shell.
+  let journey=page.locator('[data-r536-journey="true"]');
+  await journey.waitFor({state:'visible',timeout:10000});
+  await journey.locator('[data-r536-pin-current]').click();
+  await journey.getByRole('button',{name:'Recent work'}).click();
+  await journey.locator('[data-r536-resume="Atlas"]').waitFor({state:'visible',timeout:5000});
+  if(!(await journey.innerText()).includes('Pinned'))throw new Error(label+': R536 current route not pinned');
+  await page.reload({waitUntil:'domcontentloaded'});
+  journey=page.locator('[data-r536-journey="true"]');
+  await journey.waitFor({state:'visible',timeout:30000});
+  await journey.getByRole('button',{name:'Recent work'}).click();
+  await journey.locator('[data-r536-resume="Atlas"]').waitFor({state:'visible',timeout:5000});
+  await journey.locator('[data-r536-resume="Atlas"]').click();
+  await page.locator('.o7-science-workspace[data-route="Atlas"]').waitFor({state:'visible',timeout:30000});
+  if(!(await journey.innerText()).includes('Pinned'))throw new Error(label+': R536 pin lost after reload/resume');
   const native=page.locator('.o7-science-workspace[data-route="Atlas"]');
   await native.waitFor({state:'visible',timeout:28000});
   const open=native.locator('.o7-open-instrument');
