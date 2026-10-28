@@ -39,6 +39,8 @@ try{
    await root.locator('[data-r707-export]').click();
    const svg=await root.locator('[data-r707-portable]').inputValue();
    if(!svg.includes('<svg ')||!svg.includes('MODEL ONLY')||/<script|onload=|onclick=/i.test(svg))throw Error(device+': unsafe or absent static vector export');
+   await root.locator('[data-r708-origin]').selectOption('A');
+   await root.locator('[data-r708-target]').selectOption('B');
    const temporal=JSON.parse(await input.inputValue());
    temporal.edgeFrames[1][0].kind='BLOCKED';
    temporal.edgeFrames[2][0].kind='RESIDUE';
