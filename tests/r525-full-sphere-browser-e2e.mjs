@@ -98,6 +98,8 @@ async function prove(browser,label,viewport){
   if(await sphere.locator('[data-r525-shell]').count()!==3||await sphere.locator('line[data-r525-edge]').count()!==90)throw new Error(label+': 3 genuine nested 20-vertex/30-edge shells not rendered');
   const execution=native.locator('[data-r531-source-execution="true"]');
   await execution.waitFor({state:'visible',timeout:10000});
+  const liveMetrics=execution.locator('[data-r535-live-metrics="true"]');
+  if(await liveMetrics.locator('strong').count()!==4)throw new Error(label+': R535 continuity/plasticity/scar/contradiction metrics missing');
   const executeBound=execution.locator('[data-r534-execute]');
   await executeBound.click();
   let bound=execution.locator('[data-r534-capability-receipt="SOURCE_MODEL_EXECUTED"]');
@@ -127,6 +129,18 @@ async function prove(browser,label,viewport){
    model=execution.locator('[data-r533-model-receipt="'+(mode==='SAI_HYBRID'?'EXTERNAL_HOST_PROOF_REQUIRED':'SOURCE_MODEL_EXECUTED')+'"]');
    await model.waitFor({state:'visible',timeout:5000});
    if(mode==='TRAVERSAL'&&!(await model.innerText()).includes('nextAddress'))throw new Error(label+': traversal model did not execute');
+   if(mode==='TRAVERSAL'){
+    const next=JSON.parse((await model.innerText()).replace(/^SOURCE_MODEL_EXECUTED/,'' )||'{}').nextAddress;
+    const direct=execution.locator('[data-r535-live-result="TRAVERSAL"] [data-r535-apply-next]');
+    await direct.waitFor({state:'visible',timeout:5000});
+    await direct.click();
+    await page.waitForFunction(expected=>Number(document.querySelector('.o7-science-workspace[data-route="Atlas"]')?.getAttribute('data-address'))===expected,next,{timeout:5000});
+    if(Number(await page.evaluate(()=>localStorage.getItem('omega.v6.address')))!==next)throw new Error(label+': R535 explicit successor did not persist shared Atlas address');
+    await executeBound.click();
+    await inspect.click();
+    model=execution.locator('[data-r533-model-receipt="SOURCE_MODEL_EXECUTED"]');
+    await model.waitFor({state:'visible',timeout:5000});
+   }
    if(mode==='FORECAST'&&!(await model.innerText()).includes('modelNextAddress'))throw new Error(label+': forecast model did not execute');
    if(mode==='TRAVERSAL'||mode==='FORECAST'){
     const stepInput=execution.getByLabel('Source trace steps');
