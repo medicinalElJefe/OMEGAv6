@@ -69,7 +69,7 @@ test('R708 computes shortest-hop typed route witnesses from executed R707 frames
  const self=inspectWovenRouteR708(p,'A','A');
  assert.equal(self.reachable,true);assert.equal(self.hops,0);assert.equal(self.bottleneckDeclaredWeight,null);
 });
-test('R708 rejects blocked, residue and zero-weight conductance, retaining explicit refusal evidence',()=>{
+test('R708 preserves typed residue carry while rejecting blocked and zero-weight conductance',()=>{
  const s=clone();s.nodes.push({id:'C',continuity:0.5,scar:0,contradiction:0,plasticity:1});
  s.edgeFrames=s.edgeFrames.map(()=>[
   {from:'A',to:'B',kind:'INGRESS',weight:0.8},
@@ -81,10 +81,13 @@ test('R708 rejects blocked, residue and zero-weight conductance, retaining expli
  const p=projectWovenTopologyR707(s,0);
  const w=inspectWovenRouteR708(p,'A','C');
  assert.deepEqual(w.pathNodes,['A','B','C']);assert.equal(w.bottleneckDeclaredWeight,0.3);
- assert.deepEqual(w.excludedEdges.map(e=>e.reason),['BLOCKED','RESIDUE_IS_EVIDENCE_ONLY','ZERO_DECLARED_WEIGHT']);
+ assert.deepEqual(w.excludedEdges.map(e=>e.reason),['BLOCKED','ZERO_DECLARED_WEIGHT']);
  const reverse=inspectWovenRouteR708(p,'C','A');
- assert.equal(reverse.reachable,false);assert.deepEqual(reverse.reachableNodeIds,['C']);
- assert.equal(reverse.excludedFrontier.length,1);
+ assert.equal(reverse.reachable,true);assert.deepEqual(reverse.pathNodes,['C','A']);
+ assert.equal(reverse.pathEdges[0].kind,'RESIDUE');
+ const zero=structuredClone(s);zero.edgeFrames=zero.edgeFrames.map(es=>es.map(e=>e.kind==='RESIDUE'?{...e,weight:0}:e));
+ const refused=inspectWovenRouteR708(projectWovenTopologyR707(zero,0),'C','A');
+ assert.equal(refused.reachable,false);assert.equal(refused.excludedFrontier.length,1);
  const blocked=clone();blocked.edgeFrames=blocked.edgeFrames.map(es=>es.map(e=>({...e,kind:'BLOCKED'})));
  assert.equal(inspectWovenRouteR708(projectWovenTopologyR707(blocked,0),'A','B').reachable,false);
 });
