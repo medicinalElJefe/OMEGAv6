@@ -1,0 +1,146 @@
+import assert from 'node:assert/strict';
+import {YEAR_CORPUS_CAPABILITY_GRAPH_R474,OMEGA_ARCHITECTURE_R474} from '../src/yearCorpusCapabilityGraphR474';
+import {auditCapabilityContinuityR620} from '../src/capabilityContinuityAuditR620.mjs';
+
+// Bind the conservation gate to the actual recovered year-corpus graph, not only synthetic fixtures.
+const previous=[...YEAR_CORPUS_CAPABILITY_GRAPH_R474];
+assert.ok(previous.length>0,'R474 source graph must contain capabilities');
+assert.equal(OMEGA_ARCHITECTURE_R474.pillars.length,12,'all architectural pillars remain declared');
+const baseline=auditCapabilityContinuityR620({previous,candidate:previous});
+assert.equal(baseline.structurePass,true,'unchanged R474 graph must pass structural conservation');
+assert.equal(baseline.proofReferencesComplete,false,'graph membership cannot manufacture production references');
+assert.equal(baseline.productionProven,false,'source graph is not live Worker evidence');
+assert.deepEqual(baseline.missing,[]);
+
+const lost=previous[0],replacement=previous.find(x=>x.identity.id!==lost.identity.id);
+assert.ok(replacement,'at least two independent capabilities required');
+const missing=auditCapabilityContinuityR620({
+ previous,candidate:previous.filter(x=>x.identity.id!==lost.identity.id),
+ dispositions:{[lost.identity.id]:{status:'SUPERSEDED',replacementId:replacement.identity.id,evidenceId:'caller-only',approver:'caller-only'}},
+});
+assert.deepEqual(missing.missing,[lost.identity.id]);
+assert.deepEqual(missing.declaredResolutions,[lost.identity.id]);
+assert.equal(missing.structurePass,false,'unverified declared supersession cannot erase source lineage');
+
+const routeLost=structuredClone(previous);
+routeLost[0].presentationSurface.route='  ';
+const brokenRoute=auditCapabilityContinuityR620({previous,candidate:routeLost});
+assert.deepEqual(brokenRoute.invalidCurrent,[lost.identity.id]);
+assert.equal(brokenRoute.structurePass,false,'empty visible OMEGA7 route is not conservation');
+
+const bindingChanged=structuredClone(previous);
+bindingChanged[0].lineage.sourceBindingId='UNRELATED_DONOR';
+const brokenBinding=auditCapabilityContinuityR620({previous,candidate:bindingChanged});
+assert.deepEqual(brokenBinding.sourceBindingChanged,[lost.identity.id]);
+assert.equal(brokenBinding.structurePass,false,'unreviewed source binding substitution cannot pass');
+
+const direct=previous.find(x=>x.strongestImplementation.state==='EXECUTES_NOW'&&x.currentExecutor.routable);
+assert.ok(direct,'real R474 graph must expose a direct executor for downgrade testing');
+const downgraded=structuredClone(previous);
+downgraded.find(x=>x.identity.id===direct.identity.id)!.strongestImplementation.state='EXECUTES_AS_ADAPTER';
+const downgradeAudit=auditCapabilityContinuityR620({previous,candidate:downgraded});
+assert.deepEqual(downgradeAudit.executionDowngraded,[direct.identity.id]);
+assert.equal(downgradeAudit.structurePass,false,'actual direct-executor downgrade cannot pass');
+console.log('R620/R474 real year-corpus graph conservation and negative tamper tests PASS; no production proof asserted');
+
+const gated=previous.find(x=>x.strongestImplementation.state==='TRUTH_GATED');
+assert.ok(gated,'real R474 graph must preserve at least one truth-gated capability');
+const falselyPromoted=structuredClone(previous);
+falselyPromoted.find(x=>x.identity.id===gated.identity.id)!.strongestImplementation.state='EXECUTES_NOW';
+const promotionAudit=auditCapabilityContinuityR620({previous,candidate:falselyPromoted});
+assert.deepEqual(promotionAudit.executionStateChanged,[gated.identity.id]);
+assert.equal(promotionAudit.structurePass,false,'source graph truth-gated executor cannot be promoted by a field edit');
+
+const evidenceWeakened=structuredClone(previous);
+evidenceWeakened[0].evidence.requirements=[];
+const evidenceAudit=auditCapabilityContinuityR620({previous,candidate:evidenceWeakened});
+assert.deepEqual(evidenceAudit.evidenceRequirementsChanged,[lost.identity.id]);
+assert.equal(evidenceAudit.structurePass,false,'R474 source proof obligations cannot silently disappear');
+
+const scarsDiscarded=structuredClone(previous);
+scarsDiscarded[0].supersession.scarPolicy='DISCARD_SCARS' as never;
+const scarAudit=auditCapabilityContinuityR620({previous,candidate:scarsDiscarded});
+assert.deepEqual(scarAudit.scarPolicyChanged,[lost.identity.id]);
+assert.equal(scarAudit.structurePass,false,'historical contradiction/scar policy must be conserved');
+
+const definitionTampered=structuredClone(previous);
+definitionTampered[0].pillar='APPLICATIONS' as never;
+const definitionAudit=auditCapabilityContinuityR620({previous,candidate:definitionTampered});
+assert.deepEqual(definitionAudit.capabilityDefinitionChanged,[lost.identity.id]);
+assert.equal(definitionAudit.structurePass,false,'R474 architectural pillar cannot be rewritten without review');
+
+const ancestryTampered=structuredClone(previous);
+ancestryTampered[0].lineage.predecessors=['UNRELATED_DONOR'];
+const ancestryAudit=auditCapabilityContinuityR620({previous,candidate:ancestryTampered});
+assert.deepEqual(ancestryAudit.lineageStructureChanged,[lost.identity.id]);
+assert.equal(ancestryAudit.structurePass,false,'R474 historical ancestry cannot silently change');
+
+const selectionTampered=structuredClone(previous);
+selectionTampered[0].strongestImplementation.selectionRule='NEWEST_WINS' as never;
+const selectionAudit=auditCapabilityContinuityR620({previous,candidate:selectionTampered});
+assert.deepEqual(selectionAudit.implementationSelectionChanged,[lost.identity.id]);
+assert.equal(selectionAudit.structurePass,false,'R474 strongest-valid selection cannot be replaced by newest-wins');
+
+const routabilityTampered=structuredClone(previous);
+routabilityTampered.find(x=>x.identity.id===direct.identity.id)!.currentExecutor.routable=false;
+const routabilityAudit=auditCapabilityContinuityR620({previous,candidate:routabilityTampered});
+assert.deepEqual(routabilityAudit.executorRoutabilityChanged,[direct.identity.id]);
+assert.equal(routabilityAudit.structurePass,false,'real R474 executor routability is part of conserved execution authority');
+
+const generationTampered=structuredClone(previous);
+generationTampered[0].presentationSurface.generatedFromCapability=(!lost.presentationSurface.generatedFromCapability) as never;
+const generationAudit=auditCapabilityContinuityR620({previous,candidate:generationTampered});
+assert.deepEqual(generationAudit.presentationGenerationChanged,[lost.identity.id]);
+assert.equal(generationAudit.structurePass,false,'R474 presentation generation authority cannot silently change');
+
+
+// The R474 source graph also carries names/aliases, current evidence text, supersession status and schema.
+const identityTampered=structuredClone(previous);
+identityTampered[0].identity.name='Unrelated Replacement';
+const identityAudit=auditCapabilityContinuityR620({previous,candidate:identityTampered});
+assert.deepEqual(identityAudit.identityMetadataChanged,[lost.identity.id]);
+assert.equal(identityAudit.structurePass,false,'historical capability display identity must not silently change');
+
+const evidenceTampered=structuredClone(previous);
+evidenceTampered[0].evidence.currentEvidence='UNVERIFIED_CLAIM_OF_LIVE_EXECUTION';
+const evidenceProvenanceAudit=auditCapabilityContinuityR620({previous,candidate:evidenceTampered});
+assert.deepEqual(evidenceProvenanceAudit.evidenceProvenanceChanged,[lost.identity.id]);
+assert.equal(evidenceProvenanceAudit.structurePass,false,'historical source evidence must not be replaced by prose');
+
+const dispositionTampered=structuredClone(previous);
+dispositionTampered[0].supersession.status='INTENTIONALLY_DEPRECATED' as never;
+const dispositionAudit=auditCapabilityContinuityR620({previous,candidate:dispositionTampered});
+assert.deepEqual(dispositionAudit.supersessionStatusChanged,[lost.identity.id]);
+assert.equal(dispositionAudit.structurePass,false,'historical disposition status cannot be self-authorized');
+
+const schemaTampered=structuredClone(previous);
+schemaTampered[0].schema='UNRELATED_SCHEMA' as never;
+const schemaAudit=auditCapabilityContinuityR620({previous,candidate:schemaTampered});
+assert.deepEqual(schemaAudit.nodeSchemaChanged,[lost.identity.id]);
+assert.equal(schemaAudit.structurePass,false,'capability schema substitutions require review');
+
+
+// Reject malformed *typed* R474 records even when unchanged routes and IDs make
+// the candidate appear conserved. This guards against poisoned baseline snapshots.
+for(const [label,mutate] of [
+ ['malformed dependency membership',(n:any)=>{n.dependencies=['R125','   '];}],
+ ['non-array evidence requirements',(n:any)=>{n.evidence.requirements='R125';}],
+ ['blank historical alias',(n:any)=>{n.identity.aliases=['  '];}],
+ ['missing source operation',(n:any)=>{n.currentExecutor.operation='';}],
+ ['unsupported source schema',(n:any)=>{n.schema='UNSUPPORTED_NODE_SCHEMA';}],
+ ['fabricated canonical mutation flag',(n:any)=>{n.canonicalMutation='false';}],
+ ['non-string remaining gap',(n:any)=>{n.remainingGap=42;}],
+] as const){
+ const malformed=structuredClone(previous);
+ mutate(malformed[0]);
+ const report=auditCapabilityContinuityR620({previous,candidate:malformed});
+ assert.deepEqual(report.invalidCurrent,[lost.identity.id],label+' must fail typed source validation');
+ assert.equal(report.structurePass,false,label+' cannot be accepted as conservation');
+ assert.equal(report.productionProven,false);
+}
+const poisonedBaseline=structuredClone(previous);
+(poisonedBaseline[0] as any).dependencies=['R125',null];
+const poisoned=auditCapabilityContinuityR620({previous:poisonedBaseline,candidate:poisonedBaseline});
+assert.deepEqual(poisoned.invalidHistorical,[lost.identity.id]);
+assert.deepEqual(poisoned.invalidCurrent,[lost.identity.id]);
+assert.equal(poisoned.structurePass,false,'identical malformed R474 snapshots cannot self-certify conservation');

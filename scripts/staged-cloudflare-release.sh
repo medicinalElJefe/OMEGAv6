@@ -10,6 +10,7 @@ WRANGLER_NDJSON="$TMP_DIR/wrangler-output.ndjson"
 PREVIOUS_VERSION_ID=''
 CANDIDATE_VERSION_ID=''
 LOCAL_PREVIEW_PID=''
+ARCHIVE_RUNTIME_CONFIG="$PWD/wrangler.archive-runtime.generated.json"
 
 assert_current_main_owner(){
   if [[ "${GITHUB_REF:-}" != "refs/heads/main" ]]; then return 0; fi
@@ -59,6 +60,7 @@ cleanup(){
     wait "$LOCAL_PREVIEW_PID" >/dev/null 2>&1 || true
     LOCAL_PREVIEW_PID=''
   fi
+  rm -f "$ARCHIVE_RUNTIME_CONFIG"
   rm -rf "$TMP_DIR"
 }
 restore_previous_on_error(){
@@ -193,7 +195,11 @@ wait "$LOCAL_PREVIEW_PID" >/dev/null 2>&1 || true
 LOCAL_PREVIEW_PID=''
 echo "R496 exact packaged browser proof passed before candidate upload."
 
-WRANGLER_OUTPUT_FILE_PATH="$WRANGLER_NDJSON" npx wrangler versions upload --name "$WORKER_NAME" --message "OMEGA staged candidate $GITHUB_SHA"
+# Private archive provisioning remains under existing exact-main release ownership.
+assert_current_main_owner
+node scripts/provision-private-archive.mjs
+
+WRANGLER_OUTPUT_FILE_PATH="$WRANGLER_NDJSON" npx wrangler versions upload --name "$WORKER_NAME" --config "$ARCHIVE_RUNTIME_CONFIG" --message "OMEGA staged candidate $GITHUB_SHA"
 CANDIDATE_VERSION_ID="$(node - "$WRANGLER_NDJSON" <<'NODE'
 const fs=require('fs');
 const lines=fs.readFileSync(process.argv[2],'utf8').split(/\r?\n/).filter(Boolean);
@@ -221,7 +227,34 @@ echo "Candidate uploaded without production traffic: $CANDIDATE_VERSION_ID"
 STAGING_MODE="ZERO_PERCENT_OVERRIDE"
 SPLIT_LOG="$TMP_DIR/split-deployment.log"
 echo "Admitting exact candidate to the current deployment at 0% traffic while $PREVIOUS_VERSION_ID remains at 100%."
-if npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%" --name "$WORKER_NAME" --message "OMEGA off-traffic staged candidate $GITHUB_SHA" -y > >(tee "$SPLIT_LOG") 2>&1; then
+# R695: Wrangler upload acknowledgement can precede Cloudflare version lookup
+# propagation. Retry *only* the exact documented not-yet-visible version code
+# 100146, with bounded attempts. All other errors remain immediate failures;
+# R322 export-set recovery remains separate and unchanged.
+stage_candidate_with_visibility_retry(){
+  local attempt rc
+  for attempt in 1 2 3 4; do
+    assert_current_main_owner || return $?
+    : > "$SPLIT_LOG"
+    if npx wrangler versions deploy "${PREVIOUS_VERSION_ID}@100%" "${CANDIDATE_VERSION_ID}@0%" --name "$WORKER_NAME" --message "OMEGA off-traffic staged candidate $GITHUB_SHA" -y > "$SPLIT_LOG" 2>&1; then
+      cat "$SPLIT_LOG"
+      return 0
+    else
+      rc=$?
+    fi
+    cat "$SPLIT_LOG"
+    if ! grep -Fq '[code: 100146]' "$SPLIT_LOG" || ! grep -Fq 'The requested Worker version could not be found' "$SPLIT_LOG"; then
+      return "$rc"
+    fi
+    if [[ "$attempt" == "4" ]]; then
+      echo "::error title=VERSION VISIBILITY EXHAUSTED::Exact uploaded Worker $CANDIDATE_VERSION_ID was not visible to Cloudflare staging after four attempts."
+      return "$rc"
+    fi
+    echo "::warning title=VERSION VISIBILITY PENDING::Uploaded Worker $CANDIDATE_VERSION_ID not yet queryable (100146); bounded retry $attempt/3. Previous traffic remains at 100%."
+    sleep $((attempt * 3))
+  done
+}
+if stage_candidate_with_visibility_retry; then
   STAGED_DEPLOYMENT_READY=0
   for attempt in $(seq 1 12); do
     npx wrangler deployments status --name "$WORKER_NAME" --json > "$STATUS_JSON"

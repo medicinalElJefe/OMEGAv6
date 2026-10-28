@@ -14,9 +14,13 @@ import type {R512RecoveredSystemResolution} from '../src/recoveredSoftwareExecut
 import OperationalTruthR495 from './OperationalTruthR495';
 import {R519VisualNavigation} from './visualNavigationR519';
 import './omega7.css';
+import {WorkflowSurfaceR538} from './WorkflowSurfaceR538';
 
 const CapabilitySurfaceR478=lazy(()=>import('../src/CapabilitySurfaceR478'));
 const OmegaHomeR71=lazy(()=>import('../src/OmegaHomeR71'));
+const CapabilityRecoveryAuditR705=lazy(()=>import('./CapabilityRecoveryAuditR705').then(m=>({default:m.CapabilityRecoveryAuditR705})));
+const CorpusTraversalR623=lazy(()=>import('./CorpusTraversalR623').then(m=>({default:m.CorpusTraversalR623})));
+const HistoricalConvergenceWorkbenchR667=lazy(()=>import('./workspaces/HistoricalConvergenceWorkbenchR667').then(m=>({default:m.HistoricalConvergenceWorkbenchR667})));
 const R520CapabilityLibrary=lazy(()=>import('./capabilityLibraryR520').then(m=>({default:m.R520CapabilityLibrary})));
 
 type Props={onOpenLegacyRoute:(route:string)=>void;onExitToV6:()=>void};
@@ -113,6 +117,7 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
   </aside>
 
   <main className='o7-main' data-native-route={state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?state.selectedRoute:''}>
+   <WorkflowSurfaceR538 onNavigate={open}/>
    {state.selectedRoute&&isOmega7NativeRoute(state.selectedRoute)?
     <section className='o7-native-host' data-native-host-route={state.selectedRoute}>
      <div className='o7-native-toolbar'><button onClick={()=>dispatch({type:'SELECT_ROUTE',route:null})}>← Back to {DOMAIN_LABEL[state.domain]}</button><span>OMEGA7 native · OMEGAv6 engine preserved</span></div>
@@ -160,6 +165,9 @@ function Omega7Shell({onOpenLegacyRoute,onExitToV6}:Props){
       </>}
      </section>}
 
+     {state.domain==='SYSTEM'&&<Suspense fallback={<p role='status'>Loading recovered state workbench…</p>}><HistoricalConvergenceWorkbenchR667/></Suspense>}
+     {state.domain==='SYSTEM'&&<Suspense fallback={<p role='status'>Loading historical address traversal…</p>}><CorpusTraversalR623/></Suspense>}
+     {state.domain==='SYSTEM'&&<Suspense fallback={<p role='status'>Loading capability recovery audit…</p>}><CapabilityRecoveryAuditR705 onNavigate={open}/></Suspense>}
      {state.domain==='SYSTEM'&&<section className='o7-r554-ux-entry' data-r554-ux-entry='true' style={{margin:'16px 0',padding:'16px',border:'1px solid rgba(180,205,240,.25)',borderRadius:12}}>
       <header style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}><div><b>20,736D Capability Experience</b><p>Inspect lineage, navigate conserved operations, run bounded source models and review device-local results.</p></div><button type='button' aria-expanded={uxAtlasOpen} onClick={()=>setUxAtlasOpen(x=>!x)}>{uxAtlasOpen?'Close capability workbench':'Open capability workbench'}</button></header>
       {uxAtlasOpen&&<Suspense fallback={<p role='status'>Loading capability workbench…</p>}><CapabilitySurfaceR478 currentRoute='System Atlas' onNavigate={open}/></Suspense>}

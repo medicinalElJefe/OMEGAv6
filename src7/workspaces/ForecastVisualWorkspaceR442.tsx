@@ -2,6 +2,8 @@ import {useEffect,useMemo,useState} from 'react';
 import ForecastSovereignPanel from '../../src/ForecastSovereignPanel';
 import SevenStarProjectionR594 from './SevenStarProjectionR594';
 import WovenMatterLabR598 from './WovenMatterLabR598';
+import HistoricalTimeMandalaR605 from './HistoricalTimeMandalaR605';
+import HistoricalRHGraphR621 from './HistoricalRHGraphR621';
 import CorpusAdapterWorkbenchR473 from '../../src/CorpusAdapterWorkbenchR473';
 import type {CorpusExecutionIntentR473} from '../../src/CorpusExecutionIntentR473';
 import {VisualInstrumentR36} from '../../src/OmegaR36LivingSurfaces';
@@ -20,7 +22,7 @@ const readAddress=()=>{try{return clamp(Number(localStorage.getItem('omega.v6.ad
 const writeAddress=(n:number)=>{const next=clamp(n);try{localStorage.setItem('omega.v6.address',String(next));window.dispatchEvent(new CustomEvent('omega7-address-changed',{detail:{address:next}}))}catch{}return next};
 
 export default function ForecastVisualWorkspaceR442({route,onNavigate,depth}:Props){
- const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'),[sevenStarOpen,setSevenStarOpen]=useState(false),[wovenLabOpen,setWovenLabOpen]=useState(false),[horoscopeOpen,setHoroscopeOpen]=useState(false);
+ const[ready,setReady]=useState(false),[error,setError]=useState(''),[address,setAddress]=useState(readAddress),[instrumentOpen,setInstrumentOpen]=useState(depth!=='STANDARD'),[sevenStarOpen,setSevenStarOpen]=useState(false),[rhGraphOpen,setRhGraphOpen]=useState(false),[wovenLabOpen,setWovenLabOpen]=useState(false),[horoscopeOpen,setHoroscopeOpen]=useState(false);
  useEffect(()=>{setInstrumentOpen(depth!=='STANDARD')},[depth,route]);
  useEffect(()=>{let live=true;initCorpusPack().then(()=>{if(live){setReady(true);setError('')}}).catch(e=>{if(live)setError(e instanceof Error?e.message:String(e))});return()=>{live=false}},[]);
  useEffect(()=>{const sync=()=>setAddress(current=>{const next=readAddress();return current===next?current:next});const id=window.setInterval(sync,850);window.addEventListener('storage',sync);window.addEventListener('omega7-address-changed',sync as EventListener);return()=>{window.clearInterval(id);window.removeEventListener('storage',sync);window.removeEventListener('omega7-address-changed',sync as EventListener)}},[]);
@@ -59,8 +61,9 @@ export default function ForecastVisualWorkspaceR442({route,onNavigate,depth}:Pro
    <button className='o7-open-instrument' onClick={()=>setInstrumentOpen(true)}>Open full {route} instrument</button>
   </section>}
 
-  {route==='Visual Instrument'&&<section data-r594-seven-star-entry='true'><button type='button' aria-expanded={sevenStarOpen} onClick={()=>setSevenStarOpen(v=>!v)}>{sevenStarOpen?'Close Seven-Star Color Traversal':'Open Seven-Star Color Traversal'}</button>{sevenStarOpen&&<SevenStarProjectionR594 address={address} onAddress={commit}/>}</section>}
-  {route==='Visual Instrument'&&<section data-r598-lab-entry='true'><button type='button' aria-expanded={wovenLabOpen} onClick={()=>setWovenLabOpen(v=>!v)}>{wovenLabOpen?'Close Woven Matter Lab':'Open Woven Matter Formation Lab'}</button>{wovenLabOpen&&<WovenMatterLabR598/>}</section>}
+  {route==='Visual Instrument'&&<section data-r594-seven-star-entry='true'><button type='button' aria-expanded={sevenStarOpen} onClick={()=>setSevenStarOpen(v=>!v)}>{sevenStarOpen?'Close Seven-Star Color Traversal':'Open Seven-Star Color Traversal'}</button>{sevenStarOpen&&<><HistoricalTimeMandalaR605 address={address} onAddress={commit}/><details><summary>R594 experimental successor projection (not historical source)</summary><SevenStarProjectionR594 address={address} onAddress={commit}/></details></>}</section>}
+  {route==='Visual Instrument'&&<section data-r621-historical-rh-entry='true'><button type='button' aria-expanded={rhGraphOpen} onClick={()=>setRhGraphOpen(v=>!v)}>{rhGraphOpen?'Close Historical RH Graph':'Open Historical RH Graph'}</button>{rhGraphOpen&&<HistoricalRHGraphR621 address={address} onAddress={commit}/>}</section>}
+  {route==='Visual Instrument'&&<section data-r598-woven-lab-entry='true'><button type='button' aria-expanded={wovenLabOpen} onClick={()=>setWovenLabOpen(v=>!v)}>{wovenLabOpen?'Close Seven-System Formation Lab':'Open Seven-System Formation Lab'}</button>{wovenLabOpen&&<WovenMatterLabR598/>}</section>}
   {instrumentOpen&&<div className='o7-native-surface'>
    {route==='Forecast'?<ForecastSovereignPanel address={address}/>:
     route==='Visual Instrument'?<VisualInstrumentR36 address={address} onAddress={commit} onNavigate={onNavigate}/>:

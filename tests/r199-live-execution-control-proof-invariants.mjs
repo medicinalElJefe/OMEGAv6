@@ -6,6 +6,7 @@ const worker=fs.readFileSync('src/workerR116.js','utf8');
 const r147Source=fs.readFileSync('src/execution/unifiedExecutorFabricR147.js','utf8');
 const r197Source=fs.readFileSync('src/execution/adaptivePartitionBackpressureR197.js','utf8');
 const ci=fs.readFileSync('.github/workflows/ci.yml','utf8');
+const lineage=fs.readFileSync('scripts/r619-release-lineage.mjs','utf8');
 const postDeploy=fs.readFileSync('scripts/verify_federation_live_r1681.mjs','utf8');
 const probe=fs.readFileSync('scripts/verify_live_execution_control_r199.mjs','utf8');
 
@@ -45,7 +46,8 @@ assert.equal(manifest.canonicalAdmissionAuthority,'R125');
 assert.equal(fs.existsSync('.github/workflows/r199-live-execution-control-proof.yml'),false,'R199 must not create a second workflow authority or workflow_run fanout');
 assert.ok(ci.includes("if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')"),'R199 proof must remain inside the sole canonical main deployment authority for either merge-push or exact R240 dispatch');
 assert.ok(ci.includes('workflow_dispatch:'),'R240 exact deployment may enter only through the existing canonical ci.yml authority');
-assert.ok(ci.includes('Promoted main commit must be an exact two-parent merge commit'),'R199 must preserve exact governed merge lineage for both canonical deployment triggers');
+assert.ok(ci.includes('node scripts/r619-release-lineage.mjs'),'R199 canonical deploy must preserve exact release lineage binding');
+assert.ok(lineage.includes("lineageMode: 'EXACT_TWO_PARENT_MERGE'")&&lineage.includes("lineageMode: 'EXACT_SQUASH_PR_AND_TREE'"),'R199 must reject unproven release ancestry while preserving two-parent self-build');
 assert.ok(ci.includes('Deploy canonical OMEGA Worker'),'R199 must remain in the one canonical Worker deployment workflow');
 assert.ok(ci.includes('node scripts/verify_federation_live_r1681.mjs'),'canonical deploy job must retain the propagation-safe live verifier');
 assert.ok(!ci.includes('workflow_run:'),'canonical CI must not reintroduce workflow_run fanout');

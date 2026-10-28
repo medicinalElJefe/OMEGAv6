@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {ingestHistoricalCoordinatesR611,verifyHistoricalCoordinatesR611} from '../src/continuity/historicalCoordinateIntakeR611.js';
+const sourceBytes=new TextEncoder().encode('fixture only; not a historical workbook');
+const claimedSha256=createHash('sha256').update(sourceBytes).digest('hex');
+const input={sourceBytes,claimedSha256,sourceName:'synthetic fixture',sheet:'Rows',rows:[{familyId:'atlas-state',digits:[0,1,2,3,4,5,6,7,8,9]},{familyId:'relational-continuity',digits:[1,1,2,3,4,5,6,7,8,9]}]};
+const original=structuredClone(input),record=ingestHistoricalCoordinatesR611(input);
+assert.deepEqual(input,original);
+assert.equal(record.coordinates.length,2);
+assert.equal(record.admission,'NO_EXECUTION_NO_CANON_MUTATION');
+assert.equal(record.truthClass,'BYTE_VERIFIED_SOURCE_AND_UNVERIFIED_ROW_MAPPING');
+assert.equal(verifyHistoricalCoordinatesR611(input,record),true);
+const fake=structuredClone(record);fake.coordinates[0].familyId='forged';assert.equal(verifyHistoricalCoordinatesR611(input,fake),false);
+assert.throws(()=>ingestHistoricalCoordinatesR611({...input,claimedSha256:'0'.repeat(64)}),/fingerprint/);
+assert.throws(()=>ingestHistoricalCoordinatesR611({...input,rows:[input.rows[0],input.rows[0]]}),/duplicate/);
+assert.throws(()=>ingestHistoricalCoordinatesR611({...input,rows:[{familyId:'atlas-state',digits:[12,...Array(9).fill(0)]}]}),/digits/);
+console.log('R611 source-byte-bound sparse historical coordinate intake PASS');

@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {buildWovenCapabilityJourneyR608,verifyWovenCapabilityJourneyR608} from '../src/continuity/wovenCapabilityJourneyR608.js';
+const input={capability:{id:'relational-continuity',sourceBinding:'R473:WOVEN',truthClass:'FORMAL_MODEL',executionState:'EXECUTES_AS_ADAPTER',claimsExecution:false},frame:{nodes:[{id:'A',continuity:0.8,contradiction:0.1,scar:0.2},{id:'B',continuity:0.4},{id:'C',continuity:0.1}],edges:[{from:'A',to:'B',kind:'INGRESS',weight:0.5},{from:'B',to:'C',kind:'EGRESS',weight:0.3},{from:'C',to:'A',kind:'RETURN',weight:0.7},{from:'A',to:'C',kind:'BLOCKED',weight:1}],mode:'HEIGHTENED'},journey:{startId:'A',steps:[{to:'B',kind:'INGRESS'},{to:'C',kind:'EGRESS'},{to:'A',kind:'RETURN'}],width:240,height:120,columns:3}};
+const original=structuredClone(input);
+const bundle=buildWovenCapabilityJourneyR608(input);
+assert.deepEqual(input,original,'R608 must not mutate supplied Canon frame');
+assert.equal(bundle.record.admission,'NO_CANON_MUTATION_NO_PRODUCTION_PROOF');
+assert.deepEqual(bundle.record.route.map(x=>x.id),['A','B','C','A']);
+assert.equal(bundle.record.blocked.length,1);
+assert.equal(bundle.record.carried.find(x=>x.kind==='BLOCKED').carried,0);
+assert.ok(bundle.record.conservedEvidence.scarTotal>=0.2);
+assert.deepEqual(bundle,buildWovenCapabilityJourneyR608(input));
+assert.equal(verifyWovenCapabilityJourneyR608(bundle).valid,true);
+const corrupted=structuredClone(bundle);corrupted.record.route[1].id='FORGED';assert.equal(verifyWovenCapabilityJourneyR608(corrupted).valid,false);
+const fakeScene=structuredClone(bundle);fakeScene.scene.svg+='<fake/>';assert.equal(verifyWovenCapabilityJourneyR608(fakeScene).valid,false);
+assert.throws(()=>buildWovenCapabilityJourneyR608({...input,capability:{...input.capability,executionState:'TRUTH_GATED',claimsExecution:true}}));
+assert.throws(()=>buildWovenCapabilityJourneyR608({...input,journey:{...input.journey,steps:[{to:'C',kind:'BLOCKED'}]}}));
+console.log('R608 woven capability journey source→frame→scene→route→proof PASS');

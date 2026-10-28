@@ -1,5 +1,17 @@
 const base=(process.env.OMEGA_PUBLIC_URL||'https://omegav6.jeffdeweyeljefe.workers.dev').replace(/\/$/,'');
-async function text(path){const r=await fetch(base+path,{headers:{'cache-control':'no-cache'},cache:'no-store'}),body=await r.text();if(!r.ok)throw new Error(`R300 ${path} HTTP ${r.status}: ${body.slice(0,240)}`);return body}
+// R690: fail closed on any HTTP status, while retaining non-secret Cloudflare
+// request metadata to diagnose intermittent staged Hybrid 500s without guessing.
+async function text(path){
+ const r=await fetch(base+path,{headers:{'cache-control':'no-cache'},cache:'no-store'});
+ const body=await r.text();
+ if(!r.ok){
+  const ray=r.headers.get('cf-ray')||'UNAVAILABLE';
+  const type=r.headers.get('content-type')||'UNAVAILABLE';
+  const stage=process.env.OMEGA_STAGED_READ_ONLY==='1'?'STAGED_READ_ONLY':'LIVE';
+  throw new Error(`R300 ${path} HTTP ${r.status} stage=${stage} cf-ray=${ray} content-type=${type} body=${body.slice(0,240)}`);
+ }
+ return body
+}
 const [html,client,contractRaw,statusRaw]=await Promise.all([text('/omega-pc-proof-r205.html'),text('/omega-pc-proof-r205.js'),text('/omega-r205-pc-proof-contract.json'),text('/api/hybrid/status')]);
 const contract=JSON.parse(contractRaw),status=JSON.parse(statusRaw);const must=(ok,msg)=>{if(!ok)throw new Error(`R300 live handoff failed: ${msg}`)};
 must(html.includes('data-r300-handoff="ARMED_EXPLICIT_CONFIRMATION"'),'served proof surface lacks R300 handoff identity');

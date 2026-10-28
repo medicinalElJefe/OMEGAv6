@@ -28,4 +28,10 @@ for(let t=0;t<40;t++){
 assert.notDeepEqual([...legacy.free],[...graph.free],'topology must affect formation');
 assert.notDeepEqual([...ring.free],[...graph.free],'multi-parent graph must differ from simple ring');
 assert.ok(wovenChannelLedger(graph).channels[3].incoming>0,'convergence receiver must admit flows');
+const zero={...params,exchange:0};let noFlow=wovenInitial(zero),zeroGraph=wovenInitial(zero);
+for(let t=0;t<20;t++){noFlow=wovenAdvance(noFlow);zeroGraph=wovenAdvance(zeroGraph,convergence)}
+assert.deepEqual([...noFlow.free],[...zeroGraph.free],'zero exchange must disable governed transfers');
+const disabledGraph:ExchangeGraph={edges:convergence.edges.map(edge=>({...edge,enabled:false}))};
+let off=wovenInitial(params);for(let t=0;t<40;t++)off=wovenAdvance(off,disabledGraph);
+assert.notDeepEqual([...off.free],[...graph.free],'disabling edges must change the spatial executor');
 console.log('R601 COUPLED FORMATION PASS · 40-step conservative graph-driven spatial formation · deterministic trajectories · blocked transfers · topology-sensitive morphology');

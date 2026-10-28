@@ -1,0 +1,51 @@
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {zipSync,strToU8} from 'fflate';
+import {parseHistoricalWorkbookR612} from '../src/continuity/ooxmlCorpusParserR612.js';
+import {CORPUS_AXES_R610} from '../src/continuity/corpusAddressR610.js';
+const columns='ABCDEFGHIJ'.split('');
+const row=(index,values)=>'<row r="'+index+'">'+values.map((value,i)=>'<c r="'+columns[i]+index+'" t="inlineStr"><is><t>'+value+'</t></is></c>').join('')+'</row>';
+const xml='<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+row(1,CORPUS_AXES_R610)+row(2,[0,1,2,3,4,5,6,7,8,9])+row(3,[1,2,3,4,5,6,7,8,9,10])+'</sheetData></worksheet>';
+const bytes=zipSync({'xl/workbook.xml':strToU8('<workbook><sheets><sheet name="619D_Addressing" r:id="rId1"/></sheets></workbook>'),'xl/_rels/workbook.xml.rels':strToU8('<Relationships><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'),'xl/worksheets/sheet1.xml':strToU8(xml)});
+const claimedSha256=createHash('sha256').update(bytes).digest('hex');
+const input={sourceBytes:bytes,claimedSha256,sheet:'619D_Addressing',familyId:'atlas-state'};
+const record=parseHistoricalWorkbookR612(input);
+assert.equal(record.coordinates.length,2);
+assert.equal(record.rowMappingProof,'SOURCE_WORKSHEET_CELLS');
+assert.equal(record.admission,'NO_EXECUTION_NO_CANON_MUTATION');
+assert.equal(record.coordinates[0].address,encode([0,1,2,3,4,5,6,7,8,9]));
+function encode(xs){return xs.reduce((n,x)=>n*12+x,0)}
+assert.deepEqual(record,parseHistoricalWorkbookR612(input));
+assert.throws(()=>parseHistoricalWorkbookR612({...input,claimedSha256:'f'.repeat(64)}),/fingerprint/);
+assert.throws(()=>parseHistoricalWorkbookR612({...input,sheet:'not real'}),/named sheet/);
+
+const prefixedXml=xml.replace(/<(\/?)(worksheet|sheetData|row|c|is|t)(\b)/g,'<$1x:$2$3');
+const prefixed=zipSync({'xl/workbook.xml':strToU8('<x:workbook xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><x:sheets><x:sheet name="619D_Addressing" r:id="rId1"/></x:sheets></x:workbook>'),'xl/_rels/workbook.xml.rels':strToU8('<Relationships><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="/xl/worksheets/sheet1.xml"/></Relationships>'),'xl/worksheets/sheet1.xml':strToU8(prefixedXml)});
+const prefixedRecord=parseHistoricalWorkbookR612({...input,sourceBytes:prefixed,claimedSha256:createHash('sha256').update(prefixed).digest('hex')});
+assert.equal(prefixedRecord.coordinates.length,2,'namespace-prefixed OOXML must parse like historic workbook');
+assert.deepEqual(prefixedRecord.coordinates.map(x=>x.address),record.coordinates.map(x=>x.address));
+
+
+const extras=['Address','Decoded Check','Band Start','Band End','Band Size','Build Interpretation','Module','Gate','Notes'];
+const metadataHead=extras.map((v,i)=>'<c r="'+String.fromCharCode(75+i)+'1" t="inlineStr"><is><t>'+v+'</t></is></c>').join('');
+const metadataRow=[encode([0,1,2,3,4,5,6,7,8,9]),'0|1|2|3|4|5|6|7|8|9',0,429981695,429981696,'Real source interpretation','Substrate','PASS','Representative band row'].map((v,i)=>'<c r="'+String.fromCharCode(75+i)+'2" t="inlineStr"><is><t>'+v+'</t></is></c>').join('');
+const metadataXml=xml.replace(/(<row r="1">[\s\S]*?)(<\/row>)/,(_,body,end)=>body+metadataHead+end).replace(/(<row r="2">[\s\S]*?)(<\/row>)/,(_,body,end)=>body+metadataRow+end).replace(/<row r="3">[\s\S]*?<\/row>/,'');
+const rich=zipSync({'xl/workbook.xml':strToU8('<workbook><sheets><sheet name="619D_Addressing" r:id="rId1"/></sheets></workbook>'),'xl/_rels/workbook.xml.rels':strToU8('<Relationships><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'),'xl/worksheets/sheet1.xml':strToU8(metadataXml)});
+const richInput={...input,sourceBytes:rich,claimedSha256:createHash('sha256').update(rich).digest('hex')};
+const richRecord=parseHistoricalWorkbookR612(richInput);
+assert.equal(richRecord.engineeringRecords.length,1);
+assert.equal(richRecord.engineeringRecords[0].metadata.Module,'Substrate');
+assert.equal(richRecord.engineeringRecords[0].metadata.Gate,'PASS');
+assert.equal(richRecord.engineeringRecords[0].metadata['Decoded Check'],'0|1|2|3|4|5|6|7|8|9');
+assert.equal(richRecord.engineeringRecords[0].truthClass,'VERIFIED_WORKSHEET_CELL_CONTENT_NOT_EXECUTOR');
+
+const badAddressXml=metadataXml.replace('<c r="K2" t="inlineStr"><is><t>'+encode([0,1,2,3,4,5,6,7,8,9])+'</t>','<c r="K2" t="inlineStr"><is><t>'+String(encode([0,1,2,3,4,5,6,7,8,9])+1)+'</t>');
+const badAddressZip=zipSync({'xl/workbook.xml':strToU8('<workbook><sheets><sheet name="619D_Addressing" r:id="rId1"/></sheets></workbook>'),'xl/_rels/workbook.xml.rels':strToU8('<Relationships><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'),'xl/worksheets/sheet1.xml':strToU8(badAddressXml)});
+assert.notEqual(badAddressXml,metadataXml,'fixture must alter declared address');
+assert.throws(()=>parseHistoricalWorkbookR612({...input,sourceBytes:badAddressZip,claimedSha256:createHash('sha256').update(badAddressZip).digest('hex')}),/source address differs/);
+
+const corruptXml=metadataXml.replace('Representative band row','Representative band row').replace('0|1|2|3|4|5|6|7|8|9','1|1|2|3|4|5|6|7|8|9');
+const corruptZip=zipSync({'xl/workbook.xml':strToU8('<workbook><sheets><sheet name="619D_Addressing" r:id="rId1"/></sheets></workbook>'),'xl/_rels/workbook.xml.rels':strToU8('<Relationships><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'),'xl/worksheets/sheet1.xml':strToU8(corruptXml)});
+assert.throws(()=>parseHistoricalWorkbookR612({...input,sourceBytes:corruptZip,claimedSha256:createHash('sha256').update(corruptZip).digest('hex')}),/decoded-check mismatch/);
+
+console.log('R612 OOXML byte-bound worksheet axis extraction PASS');

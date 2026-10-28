@@ -16,6 +16,29 @@ async function prove(browser,label,viewport){
   await prepare(page);
   await page.goto(base+'/?omega7=1&r525='+Date.now()+'-'+label,{waitUntil:'domcontentloaded',timeout:45000});
   await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:30000});
+  // R538: real user-workspace persistence and portable local recovery, no canonical mutation.
+  let workflow=page.locator('[data-r538-workflow="true"]');
+  await workflow.waitFor({state:'visible',timeout:10000});
+  await workflow.locator('[data-r538-bookmark]').click();
+  await workflow.getByRole('button',{name:'History & saved states'}).click();
+  if(!(await workflow.innerText()).includes('Saved states')||!(await workflow.innerText()).includes('State '))throw new Error(label+': R538 bookmark not visible');
+  await workflow.getByRole('button',{name:'Portable snapshot'}).click();
+  await workflow.getByRole('button',{name:'Prepare snapshot'}).click();
+  const snapshotField=workflow.getByRole('textbox',{name:'Workspace snapshot JSON'});
+  const portable=await snapshotField.inputValue();
+  const parsed=JSON.parse(portable);
+  if(parsed.version!==1||!parsed.bookmarks?.length||!Number.isInteger(parsed.address))throw new Error(label+': R538 portable user snapshot malformed');
+  await snapshotField.fill('{"version":1,"address":20736,"history":[],"bookmarks":[]}');
+  await workflow.getByRole('button',{name:'Import snapshot'}).click();
+  if(!(await workflow.locator('[data-r538-snapshot-status]').innerText()).includes('REFUSED'))throw new Error(label+': R538 invalid snapshot not refused');
+  await snapshotField.fill(portable);
+  await workflow.getByRole('button',{name:'Import snapshot'}).click();
+  if(!(await workflow.locator('[data-r538-snapshot-status]').innerText()).includes('imported locally'))throw new Error(label+': R538 valid snapshot import failed');
+  await page.reload({waitUntil:'domcontentloaded'});
+  workflow=page.locator('[data-r538-workflow="true"]');
+  await workflow.waitFor({state:'visible',timeout:30000});
+  await workflow.getByRole('button',{name:'History & saved states'}).click();
+  if(!(await workflow.innerText()).includes('Saved states')||!(await workflow.innerText()).includes('State '))throw new Error(label+': R538 bookmark lost on reload');
   await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
   const portal=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"]');
   await portal.waitFor({state:'visible',timeout:18000});
@@ -28,6 +51,25 @@ async function prove(browser,label,viewport){
   if(await open.count())await open.click();
   const sphere=native.locator('[data-r525-sphere="OMEGA_FULL_SPHERE_ARCHIVE_GRAMMAR_R525"]');
   await sphere.waitFor({state:'visible',timeout:20000});
+  const motion=native.locator('[data-r537-motion="source-model"]');
+  await motion.waitFor({state:'visible',timeout:15000});
+  await motion.getByLabel('Motion stability').fill('90');
+  await motion.getByLabel('Motion harmony').fill('90');
+  await motion.getByRole('spinbutton',{name:'Motion tier',exact:true}).fill('1');
+  await motion.getByLabel('Motion steps').fill('4');
+  const motionRules=await motion.locator('[data-r537-step-rule]').evaluateAll(xs=>xs.map(x=>x.getAttribute('data-r537-step-rule')));
+  if(motionRules.join(',')!=='R1,R1,R6,R6')throw new Error(label+': R537 actual model transition rules incorrect '+motionRules);
+  await motion.getByRole('button',{name:'Export motion snapshot'}).click();
+  const motionText=motion.getByRole('textbox',{name:'Motion snapshot JSON'});
+  const motionSnapshot=await motionText.inputValue();
+  if(JSON.parse(motionSnapshot).canonicalMutation!==false)throw new Error(label+': R537 source model inflated canonical authority');
+  await motionText.fill('{"version":1,"steps":4,"packet":{"face":99}}');
+  await motion.getByRole('button',{name:'Import motion snapshot'}).click();
+  if(!(await motion.locator('[data-r537-snapshot-status]').innerText()).includes('REFUSED'))throw new Error(label+': R537 malformed snapshot accepted');
+  await motionText.fill(motionSnapshot);
+  await motion.getByRole('button',{name:'Import motion snapshot'}).click();
+  if(!(await motion.locator('[data-r537-snapshot-status]').innerText()).includes('LOCAL_MODEL_IMPORTED'))throw new Error(label+': R537 valid snapshot import failed');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('omega7.r537.motion.v1')||'{}').steps===4);
   if(await sphere.locator('[data-r525-shell]').count()!==3||await sphere.locator('line[data-r525-edge]').count()!==90)throw new Error(label+': 3 genuine nested 20-vertex/30-edge shells not rendered');
   const execution=native.locator('[data-r531-source-execution="true"]');
   await execution.waitFor({state:'visible',timeout:10000});
@@ -61,6 +103,39 @@ async function prove(browser,label,viewport){
    await model.waitFor({state:'visible',timeout:5000});
    if(mode==='TRAVERSAL'&&!(await model.innerText()).includes('nextAddress'))throw new Error(label+': traversal model did not execute');
    if(mode==='FORECAST'&&!(await model.innerText()).includes('modelNextAddress'))throw new Error(label+': forecast model did not execute');
+   if(mode==='TRAVERSAL'||mode==='FORECAST'){
+    const stepInput=execution.getByLabel('Source trace steps');
+    await stepInput.fill('4');
+    await execution.locator('[data-r627-trace-run]').click();
+    const trace=execution.locator('[data-r627-trace-status="SOURCE_MODEL_EXECUTED"]');
+    await trace.waitFor({state:'visible',timeout:5000});
+    const parsed=JSON.parse(await trace.locator('[data-r627-trace-json]').textContent());
+    if(parsed.executor!==mode||parsed.frames.length<1||parsed.frames.length>4||parsed.productionAdmissionClaimed!==false||parsed.historicalCapabilityRestored!==false||parsed.canonicalMutation!==false)throw new Error(label+': '+mode+' bounded source trace or proof boundary failed');
+    for(const [index,frame] of parsed.frames.entries()){
+     if(!Number.isInteger(frame.address)||!Number.isInteger(frame.nextAddress)||frame.stateId!==frame.address+1)throw new Error(label+': source trace coordinate sequence malformed');
+     const previous=parsed.frames[index-1],earlier=parsed.frames[index-2];
+     for(const [metric,velocityKey,accelerationKey] of [['continuity','continuityVelocity','continuityAcceleration'],['plasticity','plasticityVelocity','plasticityAcceleration'],['scar','scarVelocity','scarAcceleration']]){
+      const velocity=previous?frame[metric]-previous[metric]:null;
+      const acceleration=previous&&earlier?velocity-(previous[metric]-earlier[metric]):null;
+      if(frame.developmental?.[velocityKey]!==velocity||frame.developmental?.[accelerationKey]!==acceleration)throw new Error(label+': '+mode+' source developmental derivative mismatch');
+     }
+    }
+    const traceText=await trace.innerText();
+    if(!traceText.includes('Δcontinuity')||!traceText.includes('Δscar')||!traceText.includes('per model successor'))throw new Error(label+': bounded source derivatives not displayed with nonphysical truth label');
+    const nextAddress=parsed.frames[0].nextAddress;
+    await trace.locator('button[data-r627-continue-address]').first().click();
+    await page.waitForFunction(expected=>Number(document.querySelector('.o7-science-workspace[data-route="Atlas"]')?.getAttribute('data-address'))===expected,nextAddress,{timeout:5000});
+    const savedAddress=await page.evaluate(()=>Number(localStorage.getItem('omega.v6.address')));
+    if(savedAddress!==nextAddress)throw new Error(label+': source continuation did not persist in shared Atlas state');
+    await trace.waitFor({state:'detached',timeout:5000});
+    await stepInput.fill('13');
+    await execution.locator('[data-r627-trace-run]').click();
+    const held=execution.locator('[data-r627-trace-status="HELD"]');
+    await held.waitFor({state:'visible',timeout:5000});
+    if(!(await held.innerText()).includes('STEPS_MUST_BE_INTEGER_1_TO_12'))throw new Error(label+': out-of-range trace steps did not fail closed');
+   }else if(await execution.locator('[data-r627-trace-run]').count()||await execution.locator('[data-r627-trace-status]').count()){
+    throw new Error(label+': stale trace or unsupported native trace action survived executor switch');
+   }
    await evaluate.click();
    receipt=execution.locator('[data-r531-receipt="HELD"]');
    await receipt.waitFor({state:'visible',timeout:5000});
@@ -140,6 +215,20 @@ async function prove(browser,label,viewport){
   await sphere.locator('button[data-r525-motion="playing"]').waitFor({state:'visible',timeout:3000});
   await sphere.locator('button[data-r525-motion="playing"]').click();
   if(!(await sphere.locator('button[data-r525-motion="paused"]').count()))throw new Error(label+': source projection did not resume after pause');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
+  const resumedPortal=page.locator('.o7-r519-portal[data-r519-visual-navigation="EXPLORE"]');
+  await resumedPortal.waitFor({state:'visible',timeout:18000});
+  await resumedPortal.locator('button[data-r519-node="Atlas"]').click();
+  await resumedPortal.locator('button[data-r519-launch="Atlas"]').click();
+  const resumedNative=page.locator('.o7-science-workspace[data-route="Atlas"]');
+  await resumedNative.waitFor({state:'visible',timeout:28000});
+  const resumedOpen=resumedNative.locator('.o7-open-instrument');
+  if(await resumedOpen.count())await resumedOpen.click();
+  const restoredMotion=resumedNative.locator('[data-r537-motion="source-model"]');
+  await restoredMotion.waitFor({state:'visible',timeout:15000});
+  if(await restoredMotion.getByLabel('Motion steps').inputValue()!=='4'||await restoredMotion.getByLabel('Motion stability').inputValue()!=='90')
+   throw new Error(label+': R537 local motion state lost on browser reload');
   if(errors.length)throw new Error(label+': uncaught R525 browser errors '+errors.join(' | ').slice(0,700));
   console.log('R525 '+label+' FULL SPHERE OPERATION PASS · 3 nested 30-edge true meshes · rotation motion · exact antipode twice · history/forecast boundaries · prior Atlas preserved');
  }finally{await context.close()}

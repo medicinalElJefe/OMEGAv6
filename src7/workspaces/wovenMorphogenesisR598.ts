@@ -4,7 +4,7 @@
  * Each site holds seven free channels, seven bound channels and retained scar.
  * All internal exchanges are paired transfers; the total scalar budget is conserved.
  */
-import {applyExchangeGraph,type ExchangeGraph} from './governedExchangeGraphR600';
+import {applyExchangeGraph,validateExchangeGraph,type ExchangeGraph} from './governedExchangeGraphR600';
 export type WovenParams={width:number;height:number;seed:number;diffusion:number;exchange:number;binding:number;unbinding:number;anisotropy:number};
 export type WovenState={params:WovenParams;free:Float64Array;bound:Float64Array;scar:Float64Array;step:number;initialMass:number;lastExchange:Float64Array;lastBinding:Float64Array;lastUnbinding:Float64Array};
 const N=7;
@@ -35,10 +35,14 @@ export function wovenAdvance(s:WovenState,graph?:ExchangeGraph):WovenState{
  // Optional governed graph is applied to each spatial cell using synchronous
  // seven-channel snapshots. No cross-cell graph flow is invented.
  if(graph){
+  validateExchangeGraph(graph);
+  // Exchange slider scales governed rates; anisotropy shapes the local directional conductance.
+  // Graph mode remains opt-in; the no-graph path preserves the R598 baseline exactly.
+  const effective:ExchangeGraph={edges:graph.edges.map(edge=>({...edge,rate:Math.min(1,edge.rate*(e/.1)*(1+.25*a*Math.sin((edge.from+1)*2*Math.PI/N+s.step*.07)))}))};
   const local=new Float64Array(N);
   for(let site=0;site<w*h;site++){
    for(let k=0;k<N;k++)local[k]=free[idx(site,k)];
-   const result=applyExchangeGraph(local,graph);
+   const result=applyExchangeGraph(local,effective);
    for(let k=0;k<N;k++)free[idx(site,k)]=result.next[k];
    for(const receipt of result.receipts)lastExchange[receipt.from*N+receipt.to]+=receipt.admitted;
   }

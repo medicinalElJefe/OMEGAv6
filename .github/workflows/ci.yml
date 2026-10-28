@@ -23,6 +23,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - name: R606 archive capability intake focused invariants
+        run: node --test tests/archive-capability-intake.test.mjs
       - run: npm install
       - name: Audit locked application dependency tree
         run: npm audit --audit-level=high
@@ -47,6 +49,97 @@ jobs:
           node tests/r256-private-sai-doorway-invariants.mjs
           node tests/r256-private-sai-doorway-protocol-e2e.mjs
           npx wrangler deploy --config wrangler.sai-door-r256.jsonc --dry-run --outdir .wrangler-r256-doorway
+      - name: R619 exact merge/squash lineage and production CLI refusal controls
+        run: |
+          node tests/r619-release-lineage-proof.mjs
+          node tests/r619-release-lineage-cli-e2e.mjs
+      - name: R617S historical 12^10 original source band partition negative controls
+        run: node tests/r617s-original-workbook-band-proof.mjs
+      - name: R618 deterministic bounded historical band traversal and refusal controls
+        run: node tests/r618-source-bound-band-traversal.mjs
+      - name: R623 runnable historical address traversal in OMEGA7
+        run: node tests/r623-interactive-corpus-traversal.mjs
+      - name: R621 original-byte private workbook traversal CLI fail-closed controls
+        run: node tests/r621-original-byte-traversal-cli.mjs
+      - name: R620 historical capability continuity and evidence boundary regression
+        run: node --test tests/capability-continuity-r620.mjs
+      - name: R620 real R474 year-corpus capability conservation and tamper regression
+        run: npx --yes tsx tests/r620-r474-corpus-integration.mts
+      - name: R620 canonical R650 family claim and unresolved-count refusal
+        run: node --test tests/canonical-family-recovery-r620.mjs
+      - name: R620 OMEGA7 source-claim display truth invariants
+        run: node --test tests/r620-capability-screen-invariants.mjs
+      - name: R620 authenticated R241 private PR head preflight regression
+        run: node tests/r620-r241-private-head-preflight.mjs
+      - name: R705 historical capability recovery System UI audit
+        run: node tests/r705-capability-recovery-audit.mjs
+      - name: R616 original private workbook proof command fail-closed tests
+        run: node tests/r616-local-original-workbook-import.mjs
+      - name: R613 real historical workbook fingerprint and coordinate manifest
+        run: node tests/r613-original-workbook-parity.mjs
+      - name: R612 source-byte-verified OOXML historical worksheet parser
+        run: node tests/r612-ooxml-corpus-parser.mjs
+      - name: R611 sparse source-byte coordinate intake provenance
+        run: node tests/r611-historical-coordinate-intake.mjs
+      - name: R610 ten-axis historical addressing roundtrip and evidence boundary
+        run: node tests/r610-corpus-addressing.mjs
+      - name: R609 historical corpus lineage integrity and held-evidence proof
+        run: node tests/r609-corpus-lineage-bridge.mjs
+      - name: R608 source-bound woven capability journey replay and fail-closed proof
+        run: node tests/r608-woven-capability-journey.mjs
+      - name: R653 unified canonical frame and deterministic replay
+        run: node tests/r653-unified-continuity-frame.mjs
+      - name: R652 symmetric/asymmetric mode invariants
+        run: node tests/r652-symmetry-asymmetry-modes.mjs
+      - name: R651 executable woven continuity and Heightened Mode proof
+        run: node tests/r651-woven-field-execution.mjs
+      - name: R662 graph snapshot provenance
+        run: node tests/r662-graph-snapshot-provenance.mjs
+      - name: R661 explicit relation kind
+        run: node tests/r661-explicit-relation-kind.mjs
+      - name: R660 zero-conductance edge veto
+        run: node tests/r660-zero-conductance-veto.mjs
+      - name: R659 source-bound relational scene
+        run: node tests/r659-proven-relational-scene.mjs
+      - name: R658 typed relational traversal
+        run: node tests/r658-typed-relational-traversal.mjs
+      - name: R657 proven address traversal
+        run: node tests/r657-proven-address-traversal.mjs
+      - name: R656 intrinsic SVG renderer provenance
+        run: node tests/r656-intrinsic-svg-renderer.mjs
+      - name: R655 state-derived intrinsic projection and R654 replay
+        run: |
+          node tests/r654-proven-continuity-replay.mjs
+          node tests/r655-intrinsic-field-projection.mjs
+      - name: R650 year-corpus capability conservation truth gate
+        run: node tests/r650-year-corpus-conservation-gate.mjs
+      - name: Prove R665-R684 accumulated models, session continuity and portable source snapshots
+        run: |
+          npx --yes tsx tests/r665-historical-convergence.mts
+          npx --yes tsx tests/r666-historical-observer.mts
+          node tests/r671-operational-modes-execution.mjs
+          npx --yes tsx tests/r673-local-governance.mts
+          node tests/r674-all-modes-portability.mjs
+          node tests/r675-historical-decision-contradiction.mjs
+          node tests/r676-exact-operator-graph.mjs
+          node tests/r678-original-donor-full-vector-parity.mjs
+          node tests/r679-source-session-replay.mjs
+          npx --yes tsx tests/r681-native-source-contract.mts
+          node tests/r684-portable-session-bundle.mjs
+      - name: Prove R680 original source archive library restoration
+        run: python3 tests/r680-native-archive-reconciliation.py
+      - name: Prove R682 recovered NOAA catalogue with bounded source-only retries
+        run: npx --yes tsx tests/r682-noaa-catalogue-recovery.mts
+      - name: Prove R685 staged GET transport remains bounded and fail-closed
+        run: node tests/r685-staged-read-transport.mjs
+      - name: Prove R681 native decision discrimination and preserved negative evidence
+        run: python3 tests/r681-native-decision-truth-audit.py
+      - name: R598-R600 conservative spatial and governed exchange proofs
+        run: |
+          npm run test:r598
+          npm run test:r599
+          npm run test:r600
+          npm run test:r601
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
@@ -54,11 +147,54 @@ jobs:
       - run: npx wrangler deploy --dry-run --outdir .wrangler-dry-run
 
 
+  r684-portable-browser-smoke:
+    if: github.event_name == 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact portable candidate
+        uses: actions/checkout@v7
+      - name: Use Node 22 for portable proof
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install and build exact candidate
+        run: |
+          npm install
+          npm run build
+      - name: Install pinned Chromium proof harness
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Start isolated portable evidence preview
+        shell: bash
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4175 > /tmp/omega-r684-preview.log 2>&1 &
+          echo $! > /tmp/omega-r684-preview.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4175/?omega7=1 >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/omega-r684-preview.log
+          exit 1
+      - name: Independently prove R679/R684 record, download, tamper refusal and source restore
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4175
+        run: node tests/r679-canonical-session-browser-e2e.mjs
+      - name: Stop isolated portable evidence preview
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/omega-r684-preview.pid ]; then kill "$(cat /tmp/omega-r684-preview.pid)" || true; fi
+
   omega7-user-parity:
     if: github.event_name == 'pull_request'
     needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # The 25-minute budget cancelled exact-head #40411937799 after R705 passed,
+    # during R520, leaving later browser gates unexecuted. Keep the full gate.
+    timeout-minutes: 45
     steps:
       - name: Checkout exact candidate
         uses: actions/checkout@v7
@@ -87,6 +223,10 @@ jobs:
           done
           cat /tmp/omega7-r446-vite.log
           exit 1
+      - name: Prove R599/R601 spatial laboratory execution on desktop and mobile candidate
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: npm run test:r599:browser
       - name: Prove 44-route desktop and mobile OMEGA7 parity
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
@@ -126,24 +266,50 @@ jobs:
           OMEGA_E2E_URL: http://127.0.0.1:4173
           OMEGA_R519_USE_FIXTURES: '1'
         run: node tests/r519-visual-navigation-browser-e2e.mjs
-      - name: Prove R601 graph-coupled spatial formation
-        run: npm run test:r601
-      - name: Prove R600 governed multi-parent exchange graph
-        run: npm run test:r600
-      - name: Prove R599 typed seven-system exchange ledger
-        run: npm run test:r599
-      - name: Prove R598 conservative seven-system formation invariants
-        run: npm run test:r598
-      - name: Prove R597 deterministic Seven-Star geometry invariants
-        run: npm run test:r597
-      - name: Prove R599 seven-system formation and exchange ledger in desktop/mobile browser
+      - name: R663 bounded historical evidence reconciliation and refusal
+        run: node --experimental-strip-types tests/r663-omega7-source-reconciliation.mts
+      - name: Prove R605 historical Time Mandala instrument data
+        run: npm run test:r605
+      - name: Prove R604 original Time Mandala formula replay
+        run: npm run test:r604
+      - name: Prove R603 historical workbook axis and source identity
+        run: npm run test:r603
+      - name: Prove R602 historical Seven-Star authority and address contract
+        run: npm run test:r602
+      - name: Prove R606 original Time Mandala desktop/mobile browser execution
+        # Candidate browser proof must exercise the just-built local preview, not
+        # OMEGA_PUBLIC_URL (the already-deployed Worker on the previous main).
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
-        run: node tests/r599-lab-browser-e2e.mjs
+        run: node tests/r606-historical-mandala-browser-e2e.mjs
+      - name: Prove R622 original RH graph desktop/mobile traversal and canonical persistence
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r622-historical-rh-graph-browser-e2e.mjs
+      - name: Prove R598 conserved seven-system spatial evolution
+        run: npm run test:r598
+      - name: Prove R599 typed exchange receipts and conservation
+        run: npm run test:r599
+      - name: Prove R600 governed multi-parent and returning topology
+        run: npm run test:r600
+      - name: Prove R597 deterministic Seven-Star geometry invariants
+        run: npm run test:r597
       - name: Prove R594 Seven-Star visual controls and address traversal on desktop/mobile candidate
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r594-seven-star-browser-e2e.mjs
+      - name: Prove R623 exact 12^10 traversal, refusal and wrap on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r623-corpus-traversal-browser-e2e.mjs
+      - name: Prove R625 inherited R651 R653 Heightened development on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r625-inherited-development-browser-e2e.mjs
+      - name: Prove R705 12-pillar capability audit, filters and real route launch on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r705-capability-recovery-browser-e2e.mjs
       - name: Prove R520 full 44/72/100 function library on actual desktop and mobile browser
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
@@ -162,11 +328,47 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r554-omega7-ux-atlas-browser-e2e.mjs
+      - name: Prove R671 actual operational modes execution on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r671-operational-modes-browser-e2e.mjs
+      - name: Prove R676 exact historical operator graph and desktop/mobile execution
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r676-exact-operator-browser-e2e.mjs
+      - name: Prove R679/R684 sessions, portable source bundles and tamper rejection on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r679-canonical-session-browser-e2e.mjs
+      - name: Prove R682 transient source outage, no synthetic pixels and real catalogue recovery on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r682-noaa-recovery-browser-e2e.mjs
+      - name: Prove R681 original B053 native decision census and proof veto on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r681-native-decision-browser-e2e.mjs
       - name: Stop OMEGA7 parity preview
         if: always()
         shell: bash
         run: |
           if [ -f /tmp/omega7-r446-vite.pid ]; then kill "$(cat /tmp/omega7-r446-vite.pid)" || true; fi
+
+  r680-native-repair-windows:
+    if: github.event_name == 'pull_request'
+    needs: verify
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify R680 original B053 donor repair on Windows Python
+        shell: pwsh
+        run: |
+          python -m py_compile scripts/recover_b053_native_archive_r680.py
+          python tests/r680-native-archive-reconciliation.py
+          python tests/r681-native-decision-truth-audit.py
 
   cloudflare-auth-probe:
     if: github.event_name == 'pull_request'
@@ -198,6 +400,12 @@ jobs:
         run: npx wrangler whoami
 
   deploy-main:
+    # R619: squash lineage needs the GitHub commit-associated PR endpoint.
+    # Explicit job permissions preserve contents/actions grants and add PR read.
+    permissions:
+      contents: read
+      actions: write
+      pull-requests: read
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: verify
     runs-on: ubuntu-latest
@@ -242,24 +450,11 @@ jobs:
           fi
           echo "current=true" >> "$GITHUB_OUTPUT"
           echo "Exact current-main ownership confirmed for $GITHUB_SHA."
-      - name: Bind promoted merge lineage
+      - name: Bind promoted merge or exact-squash PR lineage
         if: steps.ownership.outputs.current == 'true'
-        shell: bash
-        run: |
-          if git rev-parse --is-shallow-repository | grep -qx true; then
-            echo "::error title=SHALLOW LINEAGE UNSAFE::Deployment checkout became shallow before merge-parent binding."
-            exit 1
-          fi
-          parents="$(git cat-file -p "$GITHUB_SHA" | awk '/^parent /{print $2}')"
-          set -- $parents
-          if [ "$#" -ne 2 ]; then
-            echo "::error title=LINEAGE REQUIRED::Promoted main commit must be an exact two-parent merge commit before release lineage can be bound."
-            exit 1
-          fi
-          echo "OMEGA_ROLLBACK_SHA=$1" >> "$GITHUB_ENV"
-          echo "OMEGA_CANDIDATE_SHA=$2" >> "$GITHUB_ENV"
-          echo "OMEGA_PROMOTED_SHA=$GITHUB_SHA" >> "$GITHUB_ENV"
-          echo "Bound governed release lineage without exposing credentials."
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/r619-release-lineage.mjs
       - run: npm install
         if: steps.ownership.outputs.current == 'true'
       - name: Install pinned browser proof runtime
@@ -500,6 +695,26 @@ jobs:
           path: artifacts/omega-production-observability-r471.json
           if-no-files-found: error
           retention-days: 30
+      - name: R637 capture Genesis historical browser proof on promoted production SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: genesis_browser_r637
+        shell: bash
+        run: |
+          test -n "${OMEGA_PROMOTED_SHA:-}" || { echo "::error::Promoted SHA unavailable"; exit 1; }
+          OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_PUBLIC_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node scripts/run-genesis-browser-proof-r636.mjs historical-rh-traversal
+      - name: R639 validate Genesis browser evidence before retention
+        id: genesis_evidence_verify_r639
+        if: steps.genesis_browser_r637.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node scripts/verify-genesis-browser-artifact-r639.mjs artifacts/genesis-browser/historical-rh-traversal.json
+      - name: R637 retain Genesis production browser execution artifact
+        if: steps.genesis_evidence_verify_r639.outcome == 'success' && steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: omega-genesis-browser-${{ github.sha }}
+          path: artifacts/genesis-browser/historical-rh-traversal.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Verify deployed R200 total-experience browser on exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r200
@@ -520,11 +735,42 @@ jobs:
         id: browser_r519
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r519-visual-navigation-browser-e2e.mjs
+      - name: Verify deployed R606 original Time Mandala on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r606
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r606-historical-mandala-browser-e2e.mjs
+      - name: Verify deployed R622 historical RH graph desktop/mobile traversal on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r622
+        shell: bash
+        run: |
+          # R644: the R637 Genesis runner already executes this exact R622 Playwright proof.
+          # Its R639 validation is mandatory; do not run the same live browser test twice.
+          test "${{ steps.genesis_browser_r637.outcome }}" = "success" || { echo "::error::Genesis R622 browser execution did not pass"; exit 1; }
+          test "${{ steps.genesis_evidence_verify_r639.outcome }}" = "success" || { echo "::error::Genesis R622 artifact integrity did not pass"; exit 1; }
+          test -s artifacts/genesis-browser/historical-rh-traversal.json || { echo "::error::Genesis R622 evidence missing"; exit 1; }
+          echo "R622 historical desktop/mobile browser proof inherited from validated Genesis production execution"
       - name: Verify deployed R594 Seven-Star interactive traversal on desktop/mobile
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r594
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r594-seven-star-browser-e2e.mjs
+      - name: Verify deployed R623 address traversal on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r623
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r623-corpus-traversal-browser-e2e.mjs
+      - name: Verify deployed R625 inherited developmental replay on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r625
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r625-inherited-development-browser-e2e.mjs
+      - name: Verify deployed R705 capability audit and actual route launch on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r705
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r705-capability-recovery-browser-e2e.mjs
       - name: Verify deployed R520 complete function library on exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r520
@@ -535,11 +781,34 @@ jobs:
         id: browser_r525
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r525-full-sphere-browser-e2e.mjs
+      - name: Verify live R598/R601 conservative formation and governed topology on desktop/mobile exact SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: live_spatial_r601
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r599-lab-browser-e2e.mjs
       - name: Verify live R556 20736D workbench against exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r556
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r554-omega7-ux-atlas-browser-e2e.mjs
+      - name: Verify R676/R678 historical graph and original full-vector replay against exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: live_original_operator_r678
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r676-exact-operator-browser-e2e.mjs
+      - name: Verify R679/R684 portable source replay, export/import and tamper refusal on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: live_canonical_session_r679
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r679-canonical-session-browser-e2e.mjs
+      - name: Verify R682 source-only NOAA coverage recovery and exact promoted real image source on desktop/mobile
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r682-noaa-recovery-browser-e2e.mjs
+      - name: Verify R681 native decision census and proof veto on exact promoted SHA
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r681-native-decision-browser-e2e.mjs
       - name: Verify live R560 weather source, persisted view and satellite switch on exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         shell: bash
@@ -646,6 +915,7 @@ jobs:
             echo "- Workers AI route-before-generation + synthesis: ${{ steps.live_ai.outcome }}"
             echo "- R200.1 exact promoted-SHA desktop/mobile browser proof: ${{ steps.browser_r200.outcome }}"
             echo "- R519 actual visual navigation and native executor desktop/mobile proof: ${{ steps.browser_r519.outcome }}"
+            echo "- R606 original historical Time Mandala live desktop/mobile proof: ${{ steps.browser_r606.outcome }}"
             echo "- R520 full 44/72/100 source inventory and current executor browser proof: ${{ steps.browser_r520.outcome }}"
             echo "- R202 operational source-authority live proof: ${{ steps.live_r202.outcome }}"
             echo "- R237 authenticated Hybrid command authority live proof: ${{ steps.live_r237.outcome }}"

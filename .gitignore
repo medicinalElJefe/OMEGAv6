@@ -12,3 +12,6 @@ dist/
 .wrangler-r170-selfbuild/
 .wrangler-r170-selfbuild-optical/
 .wrangler-r240-exact-candidate/
+
+# Generated optional archive readiness binding projection; never source.
+wrangler.archive-runtime.generated.json

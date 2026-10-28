@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const ci=readFileSync('.github/workflows/ci.yml','utf8');
+const step=ci.indexOf('R637 capture Genesis historical browser proof on promoted production SHA');
+const upload=ci.indexOf('R637 retain Genesis production browser execution artifact');
+const legacy=ci.indexOf('Verify deployed R200 total-experience browser on exact promoted SHA');
+assert(step>0&&upload>step&&legacy>upload,'R637 must be integrated before existing live browser checks');
+const excerpt=ci.slice(step,legacy);
+assert.match(excerpt,/steps\.ownership\.outputs\.current == 'true'/);
+assert.match(excerpt,/steps\.deploy_worker\.outputs\.superseded != 'true'/);
+assert.match(excerpt,/OMEGA_EXPECTED_SHA="\$OMEGA_PROMOTED_SHA"/);
+assert.match(excerpt,/run-genesis-browser-proof-r636\.mjs historical-rh-traversal/);
+assert.match(excerpt,/actions\/upload-artifact@v4/);
+assert.match(excerpt,/if-no-files-found: error/);
+assert.match(excerpt,/id: genesis_evidence_verify_r639/);
+assert.match(excerpt,/steps\.genesis_evidence_verify_r639\.outcome == 'success'/);
+assert.doesNotMatch(excerpt,/if: always\(\)/);
+console.log('R637 existing production workflow browser evidence integration: PASS');

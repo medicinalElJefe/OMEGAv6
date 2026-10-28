@@ -7,8 +7,9 @@ export function sevenStarFrame(address:number,degrees:number,asymmetry:number):S
  const a=normalizeSevenStarAddress(address),rotation=normalizeSevenStarAngle(degrees);
  const skew=Math.max(0,Math.min(1,Number.isFinite(asymmetry)?asymmetry:0));
  // 20,736 addresses are representation indices, not physical spatial dimensions.
- // The 144-cell address band modulates a bounded radial envelope while preserving 7-node topology.
- const band=(a%144)/143,theta=rotation*Math.PI/180;
+ // The full 20,736-address lattice modulates a bounded radial envelope while preserving 7-node topology.
+ // Unlike a modulo-144-only band, stepping by 144 now visibly changes the projected geometry.
+ const band=a/20735,theta=rotation*Math.PI/180;
  const nodes=Array.from({length:7},(_,i)=>{
   const angle=i*TAU/7-Math.PI/2+theta;
   const radial=135+skew*(18*Math.sin(i*TAU/7+theta)+12*(band-.5)*Math.cos(2*i*TAU/7-theta));
@@ -19,6 +20,7 @@ export function sevenStarFrame(address:number,degrees:number,asymmetry:number):S
  return{nodes,edgeLengths,perimeter:edgeLengths.reduce((s,x)=>s+x,0),centroid,rotation,address:a,asymmetry:skew};
 }
 export function sevenStarAddressStep(address:number,node:number){
- const a=normalizeSevenStarAddress(address),step=(Math.max(1,Math.min(7,Math.floor(node)))*144);
+ if(!Number.isInteger(node)||node<1||node>7)throw new RangeError('Seven-Star node must be an integer from 1 through 7');
+ const a=normalizeSevenStarAddress(address),step=node*144;
  return(a+step)%20736;
 }

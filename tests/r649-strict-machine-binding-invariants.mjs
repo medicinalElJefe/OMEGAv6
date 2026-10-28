@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+const source=readFileSync('src/workerR114.js','utf8'),config=readFileSync('wrangler.jsonc','utf8');
+for(const name of ['OMEGA_GENESIS_MACHINE','OMEGA_OPTICAL_MACHINE']){
+ assert.ok(config.includes('"binding":"'+name+'"'),'configured '+name);
+ assert.ok(source.includes('env.'+name+'?.fetch'),'executed '+name);
+}
+for(const guard of ['genesis.ok||!genesis.valid','optical.ok||!optical.valid','GENESIS_PROPOSAL_ENDPOINT_REQUIRED','OPTICAL_SCREEN_ENDPOINT_REQUIRED'])assert.ok(source.includes(guard),'preserved '+guard);
+const start=source.indexOf('const OPTICAL_PRIMARY_R114='),end=source.indexOf('\nconst LAW_R114=',start);
+assert.ok(start>=0&&end>start,'actual R114 transport must be isolatable');
+let external=0;const sandbox={Request,Response,Headers,AbortSignal,TextEncoder,URL,crypto:globalThis.crypto,fetch:async()=>{external++;return new Response('{}',{status:503,headers:{'content-type':'application/json'}})}};
+vm.runInNewContext(source.slice(start,end)+'\nglobalThis.r649={genesisProposalR114,opticalScreenR114}',sandbox,{timeout:5000});
+const {genesisProposalR114,opticalScreenR114}=sandbox.r649,run={ceremonyId:'cer_r649',intent:'bounded proposal'};
+const proposal={schema:'OMEGA_PACKET_v1',source_node:'omega-genesis',packet_id:'g649',state_id:'s649',geometry:{pitch_nm:300},wavelength_nm:532,lineage:[]};
+const screen={schema:'OMEGA_PACKET_v1',source_node:'omega-optical',packet_id:'o649',geometry:proposal.geometry,wavelength_nm:532,scalar_metrics:{t:0.8},proof:{gate:'STAY'},lineage:[]};
+const calls=[];const bound=(name,data)=>({fetch:async req=>{calls.push({name,path:new URL(req.url).pathname,body:await req.json()});return new Response(JSON.stringify(data),{status:200,headers:{'content-type':'application/json'}})}});
+const env={OMEGA_GENESIS_MACHINE:bound('machine-genesis',{packet:proposal}),OMEGA_GENESIS:bound('legacy-genesis',{packet:proposal}),OMEGA_OPTICAL_MACHINE:bound('machine-optical',{packet:screen,tier2_job:{schema:'OMEGA_FULLWAVE_QUEUE_v1',job_id:'j649'}})};
+const g=await genesisProposalR114(env,run);
+assert.equal(g.ok,true);assert.equal(g.valid,true);assert.equal(g.transport,'CLOUDFLARE_SERVICE_BINDING');
+assert.equal(calls[0].name,'machine-genesis');assert.equal(calls[0].path,'/api/federation/propose');assert.equal(calls[0].body.ceremony_id,run.ceremonyId);
+const o=await opticalScreenR114(env,run,g.packet);
+assert.equal(o.ok,true);assert.equal(o.valid,true);assert.equal(o.transport,'CLOUDFLARE_SERVICE_BINDING');assert.equal(o.job.schema,'OMEGA_FULLWAVE_QUEUE_v1');
+assert.equal(calls[1].name,'machine-optical');assert.equal(calls[1].path,'/api/federation/screen');assert.equal(calls[1].body.proposal.packet_id,proposal.packet_id);assert.equal(external,0);
+const gated=await opticalScreenR114({...env,OMEGA_OPTICAL_MACHINE:{fetch:async()=>new Response('<html>Forbidden</html>',{status:403,headers:{'content-type':'text/html'}})}},run,proposal);
+assert.equal(gated.ok,false);assert.equal(gated.valid,false);assert.equal(gated.state,'ACCESS_GATED');assert.equal(gated.job,null);assert.equal(external,0,'403 must not silently fall back to HTTPS');
+const forged=await opticalScreenR114({...env,OMEGA_OPTICAL_MACHINE:bound('forged',{packet:proposal})},run,proposal);
+assert.equal(forged.ok,true);assert.equal(forged.valid,false);assert.equal(forged.job,null);
+const legacy=await genesisProposalR114({OMEGA_GENESIS:bound('legacy-only',{packet:proposal})},run);
+assert.equal(legacy.ok,true);assert.equal(legacy.transport,'CLOUDFLARE_SERVICE_BINDING');assert.equal(calls.at(-1).name,'legacy-only');
+const missing=await opticalScreenR114({},run,proposal);
+assert.equal(missing.ok,false);assert.equal(missing.transport,'HTTPS_SERVER_TO_SERVER');assert.equal(external,1);
+console.log('R649 actual machine-binding dispatch, strict packet validation, 403 refusal and fallback PASS');

@@ -180,8 +180,30 @@ try{
   await contained(page,`${label} Weather returned-or-provider-unavailable truth`);
 
   const satTab=tabs.filter({hasText:'Satellite'}).first();await satTab.click();
-  const satImg=page.locator('.earth-r279-sat-main figure img').first();await satImg.waitFor({state:'visible',timeout:20000});
-  await page.waitForFunction(()=>{const img=document.querySelector('.earth-r279-sat-main figure img');return img?.complete&&img.naturalWidth>100&&img.naturalHeight>100},{timeout:30000});
+  const satSection=page.locator('.earth-r279-satellite'),satImg=page.locator('.earth-r279-sat-main figure img').first();
+  let satellitePixelsProved=false,lastSatelliteTruth=null;
+  for(let attempt=1;attempt<=3;attempt++){
+   await satSection.waitFor({state:'visible',timeout:15000});
+   try{
+    await satImg.waitFor({state:'visible',timeout:12000});
+    await page.waitForFunction(()=>{const img=document.querySelector('.earth-r279-sat-main figure img');return img?.complete&&img.naturalWidth>100&&img.naturalHeight>100},null,{timeout:16000});
+    satellitePixelsProved=true;break;
+   }catch(error){
+    lastSatelliteTruth=await satSection.evaluate(el=>({
+     state:el.getAttribute('data-noaa-state'),attempts:el.getAttribute('data-noaa-attempts'),
+     alert:el.querySelector('[role=alert]')?.textContent||null,
+     selectedImage:el.querySelector('.earth-r279-sat-main img')?.getAttribute('src')||null,
+     coverageCount:el.querySelectorAll('nav[aria-label="Satellite coverage menu"] button').length
+    }));
+    if(attempt===3)break;
+    const retry=page.getByRole('button',{name:'Retry satellite catalogue'});
+    await retry.waitFor({state:'visible',timeout:10000});
+    if(await retry.isDisabled())await page.waitForFunction(()=>document.querySelector('.earth-r279-satellite')?.getAttribute('data-noaa-state')!=='LOADING',null,{timeout:15000});
+    await retry.click();
+    await page.waitForFunction(()=>['RETURNED','ERROR'].includes(document.querySelector('.earth-r279-satellite')?.getAttribute('data-noaa-state')||''),null,{timeout:20000});
+   }
+  }
+  if(!satellitePixelsProved)throw new Error(`${label}: real NOAA satellite pixels not proven after bounded source retries: ${JSON.stringify(lastSatelliteTruth)}`);
   if(!new URL(await satImg.getAttribute('src'),base).pathname.startsWith('/api/earth/noaa/image'))throw new Error(`${label}: satellite source path changed`);
 
   const motionTab=tabs.filter({hasText:'Global motion'}).first();await motionTab.click();
@@ -248,7 +270,25 @@ try{
   await groundRefresh.click();const groundResponse=await groundReturn;
   if(!groundResponse.ok())throw new Error(`${label}: ground refresh HTTP ${groundResponse.status()}`);
   const ground=await groundResponse.json();verifyTarget(ground,32.2226,-110.9747,'Ground');
-  await page.waitForFunction(({hash,before,target})=>{const el=document.querySelector('.earth-ground-r9');return el?.getAttribute('data-ground-evidence-hash')===hash&&Number(el.getAttribute('data-ground-refresh-generation')||0)>before&&el.getAttribute('data-ground-target')===target},{hash:ground.evidenceHash,before:beforeGroundGeneration,target:'32.222600,-110.974700'},{timeout:30000});
+  // Source replies may race a newer same-target React commit. Retry at most once,
+  // while still requiring exact response hash, generation increment and target.
+  const waitExactGround=(hash,before)=>page.waitForFunction(({hash,before,target})=>{
+   const el=document.querySelector('.earth-ground-r9');
+   return el?.getAttribute('data-ground-evidence-hash')===hash&&Number(el.getAttribute('data-ground-refresh-generation')||0)>before&&el.getAttribute('data-ground-target')===target;
+  },{hash,before,target:'32.222600,-110.974700'},{timeout:30000});
+  try{await waitExactGround(ground.evidenceHash,beforeGroundGeneration)}
+  catch(firstError){
+   const observed=await groundReceipt.evaluate(el=>({hash:el.getAttribute('data-ground-evidence-hash'),generation:Number(el.getAttribute('data-ground-refresh-generation')||0),target:el.getAttribute('data-ground-target')}));
+   if(observed.generation<=beforeGroundGeneration||observed.target!=='32.222600,-110.974700'||!/^[0-9a-f]{64}$/i.test(observed.hash||''))throw firstError;
+   await groundRefresh.waitFor({state:'visible',timeout:20000});
+   const pending=page.waitForResponse(r=>targetResponse(r,'/api/earth/ground/evidence',32.2226,-110.9747),{timeout:30000});
+   await groundRefresh.click();
+   const freshResponse=await pending;
+   if(!freshResponse.ok())throw new Error(`${label}: repeat ground refresh HTTP ${freshResponse.status()}`);
+   const latest=await freshResponse.json();verifyTarget(latest,32.2226,-110.9747,'Ground');
+   await waitExactGround(latest.evidenceHash,observed.generation);
+   ground.evidenceHash=latest.evidenceHash;
+  }
   if(await groundReceipt.locator('footer code').textContent()!==ground.evidenceHash)throw new Error(`${label}: rendered ground hash differs from correlated refresh receipt`);
   await groundRefresh.waitFor({state:'visible',timeout:20000});
   await contained(page,`${label} refreshed ground`);

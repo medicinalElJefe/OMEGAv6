@@ -83,7 +83,7 @@ assert.ok(r286Bounded.includes("['desktop'")&&r286Bounded.includes("['mobile'"),
 assert.ok(r286Bounded.includes("pointerEvents==='none'")&&r286Bounded.includes("aria-controls target missing"),'R471 bounded R286 must retain structural liveness checks');
 const workflow=fs.readFileSync('.github/workflows/r241-archive-convergence.yml','utf8');
 assert.ok(workflow.includes('stale-head-preflight'),'R460 R241 must preflight current PR head before expensive proof');
-assert.ok(workflow.includes('git ls-remote')&&workflow.includes('refs/pull/${PR_NUMBER}/head'),'R460 preflight must resolve the live PR head rather than trust stale event payload');
+assert.ok(workflow.includes('gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq')&&workflow.includes('GH_TOKEN: ${{ github.token }}')&&workflow.includes('pull-requests: read'),'R460 preflight must resolve live private PR head through authenticated GitHub API');
 assert.ok(workflow.includes('EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}'),'R460 must distinguish PR head identity from synthetic GITHUB_SHA');
 assert.ok(workflow.includes('if [ "$observed" = "$EVENT_HEAD_SHA" ]'),'R460 current-head decision must compare live PR ref to event head SHA');
 assert.ok((workflow.match(/ref: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/g)||[]).length===2,'R460 both heavy R241 jobs must checkout exact candidate head, not PR merge ref');

@@ -37,6 +37,8 @@ const api=fs.readFileSync('src/swarm/swarmApiR121.js','utf8');
 const cell=fs.readFileSync('src/swarm/swarmCellR121.js','utf8');
 const wrangler=fs.readFileSync('wrangler.jsonc','utf8');
 const ui=fs.readFileSync('src/OmegaOrganismR123.tsx','utf8');
+for(const gate of ['OBJECTIVE_NOT_RETURNED','SYNTHESIS_FAILURE','NO_SYNTHESIS_RETURNED','OBJECTIVE NOT PROVEN','data-r625-mission-satisfied'])assert.ok(ui.includes(gate),`R625 organism UI missing fail-closed truth gate: ${gate}`);
+
 const convergence=fs.readFileSync('src/OmegaConvergenceSurfaceR416.tsx','utf8');
 
 for(const klass of ['OmegaSwarmBranch','OmegaSwarmOrgan','OmegaSwarmOrganismCoordinator'])assert.ok(worker.includes(klass),`worker export missing ${klass}`);
