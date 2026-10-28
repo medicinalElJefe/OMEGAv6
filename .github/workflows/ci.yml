@@ -134,6 +134,11 @@ jobs:
         run: node tests/r685-staged-read-transport.mjs
       - name: Prove R681 native decision discrimination and preserved negative evidence
         run: python3 tests/r681-native-decision-truth-audit.py
+      - name: R598-R600 conservative spatial and governed exchange proofs
+        run: |
+          npm run test:r598
+          npm run test:r599
+          npm run test:r600
       - run: npm run check
       - run: node tests/r581-radar-tile-registration-invariants.mjs
       - name: R577 verified chronological satellite and radar observation admission
