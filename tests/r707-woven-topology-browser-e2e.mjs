@@ -24,6 +24,11 @@ try{
    await root.waitFor({state:'visible',timeout:10000});
    if(await root.locator('[data-r707-node]').count()!==2)throw Error(device+': computed node count mismatch');
    if(await root.locator('[data-r707-edge-kind]').count()!==2)throw Error(device+': computed edge count mismatch');
+   if(!(await root.locator('[data-r708-path-status]').innerText()).includes('ADMISSIBLE GRAPH PATH: A → B'))throw Error(device+': source-bound R708 witness missing');
+   if(await root.locator('[data-r708-on-path="true"]').count()!==1)throw Error(device+': route highlight must bind one source edge');
+   await root.locator('[data-r708-origin]').selectOption('B');
+   await root.locator('[data-r708-target]').selectOption('A');
+   if(!(await root.locator('[data-r708-path-status]').innerText()).includes('ADMISSIBLE GRAPH PATH: B → A'))throw Error(device+': reverse RETURN witness missing');
    const before=Number(await root.locator('[data-r707-node="A"] circle').getAttribute('cx'));
    await root.locator('[data-r707-mirror]').click();
    const after=Number(await root.locator('[data-r707-node="A"] circle').getAttribute('cx'));
@@ -42,6 +47,8 @@ try{
    await page.locator('[data-r624-execute]').click();
    await page.locator('[data-r707-svg]').waitFor({state:'visible',timeout:10000});
    if(await page.locator('[data-r707-edge-kind="BLOCKED"]').count()!==1)throw Error(device+': typed blocked edge not projected');
+   if(!(await page.locator('[data-r708-path-status]').innerText()).includes('NO ADMISSIBLE GRAPH PATH: A → B'))throw Error(device+': blocked source edge incorrectly admitted as transport');
+   if(!(await page.locator('[data-r708-exclusions]').innerText()).includes('BLOCKED'))throw Error(device+': blocked edge refusal evidence absent');
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('.o7-nav-r519').getByRole('button',{name:'System'}).click();
    await page.locator('[data-r706-scenario-input]').waitFor({state:'visible',timeout:30000});
@@ -49,6 +56,7 @@ try{
    if(restored.nodes[0].continuity!==0.6||restored.edgeFrames[0][0].kind!=='BLOCKED')throw Error(device+': source input persistence failed');
    await page.locator('[data-r624-execute]').click();
    await page.locator('[data-r707-edge-kind="BLOCKED"]').waitFor({state:'attached',timeout:10000});
+   if(!(await page.locator('[data-r708-path-status]').innerText()).includes('NO ADMISSIBLE GRAPH PATH'))throw Error(device+': persisted input must recompute R708 refusal');
    await page.locator('[data-r706-scenario-input]').fill(JSON.stringify({...restored,proof:{liveRuntimeVerified:true}}));
    await page.locator('[data-r624-execute]').click();
    await page.waitForFunction(()=>document.querySelector('[data-r624-output]')?.textContent?.includes('REFUSED_NO_EXECUTION'),null,{timeout:10000});
@@ -56,7 +64,7 @@ try{
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(device+': viewport overflow '+overflow);
-   console.log('R707 '+device+' PASS: real R706/R623 vector execution, typed edges, mirror/frame controls, safe SVG, persisted recompute, forged authority refusal, no overflow');
+   console.log('R707/R708 '+device+' PASS: source-computed topology and route witnesses, typed refusal, mirror/frame controls, safe SVG, persisted recompute, forged authority refusal, no overflow');
   }finally{await context.close()}
  }
 }finally{await browser.close()}
