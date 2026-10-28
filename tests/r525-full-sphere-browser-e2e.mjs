@@ -60,6 +60,16 @@ async function prove(browser,label,viewport){
   await journey.locator('[data-r536-resume="Atlas"]').click();
   await page.locator('.o7-science-workspace[data-route="Atlas"]').waitFor({state:'visible',timeout:30000});
   if(!(await journey.innerText()).includes('Pinned'))throw new Error(label+': R536 pin lost after reload/resume');
+  // R536 negative gate: unknown persisted routes must not become executable navigation.
+  await page.evaluate(()=>localStorage.setItem('omega7.userJourney.r536',JSON.stringify({recent:['Atlas','UNREGISTERED_ROUTE'],pinned:['Atlas','UNREGISTERED_ROUTE']})));
+  await page.reload({waitUntil:'domcontentloaded'});
+  journey=page.locator('[data-r536-journey="true"]');
+  await journey.waitFor({state:'visible',timeout:30000});
+  await journey.getByRole('button',{name:'Recent work'}).click();
+  if((await journey.innerText()).includes('UNREGISTERED_ROUTE'))throw new Error(label+': R536 admitted an unknown persisted route');
+  await journey.locator('[data-r536-resume="Atlas"]').click();
+  await page.locator('.o7-science-workspace[data-route="Atlas"]').waitFor({state:'visible',timeout:30000});
+
   const native=page.locator('.o7-science-workspace[data-route="Atlas"]');
   await native.waitFor({state:'visible',timeout:28000});
   const open=native.locator('.o7-open-instrument');
