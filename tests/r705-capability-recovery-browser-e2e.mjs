@@ -32,6 +32,33 @@ try{
    if(replay.developmental?.velocity?.length!==3||replay.developmental?.acceleration?.length!==2||replay.developmental?.jerk?.length!==1)throw Error(device+': heightened derivatives absent');
    if(replay.proof?.liveRuntimeVerified!==false||replay.proof?.historicalParityVerified!==false)throw Error(device+': local execution was promoted into unverifiable production or parity evidence');
    if(replay.canonicalHistory[0]?.[0]?.scar!==0.15)throw Error(device+': historical scar field was lost');
+
+   // R706: edit real directed transport inputs, recompute, export only source inputs,
+   // recover them after reload, and reject forged authority without admitting output.
+   const scenarioInput=inherited.locator('[data-r706-scenario-input]');
+   const scenario=JSON.parse(await scenarioInput.inputValue());
+   scenario.nodes[0].continuity=0.6;
+   scenario.edgeFrames[0][0].kind='BLOCKED';
+   await scenarioInput.fill(JSON.stringify(scenario));
+   await inherited.getByRole('button',{name:'Execute inherited replay'}).click();
+   await page.waitForFunction(()=>document.querySelector('[data-r624-output]')?.textContent?.includes('"continuityBefore":0.6'),null,{timeout:10000});
+   const edited=JSON.parse(await replayOutput.innerText());
+   if(edited.canonicalHistory[0][0].continuity!==0.6||edited.summary?.changes?.[0]?.continuityBefore!==0.6)throw Error(device+': edited scenario was not executed');
+   if(edited.proof?.liveRuntimeVerified!==false)throw Error(device+': edited scenario inflated proof');
+   await inherited.locator('[data-r706-export]').click();
+   const portable=JSON.parse(await inherited.locator('[data-r706-portable]').inputValue());
+   if(portable.nodes[0].continuity!==0.6||portable.proof||portable.canonicalHistory)throw Error(device+': portable inputs carried output or authority');
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.locator('.o7-nav-r519').getByRole('button',{name:'System'}).click();
+   await page.waitForFunction(()=>document.querySelector('[data-r706-scenario-input]')?.value?.includes('"continuity": 0.6'),null,{timeout:10000});
+   const restoredInput=page.locator('[data-r706-scenario-input]');
+   const restored=JSON.parse(await restoredInput.inputValue());
+   if(restored.nodes[0].continuity!==0.6||restored.edgeFrames[0][0].kind!=='BLOCKED')throw Error(device+': local scenario inputs did not recover');
+   await restoredInput.fill(JSON.stringify({...restored,proof:{liveRuntimeVerified:true}}));
+   await page.locator('[data-r624-execute]').click();
+   await page.waitForFunction(()=>document.querySelector('[data-r624-output]')?.textContent?.includes('REFUSED_NO_EXECUTION'),null,{timeout:10000});
+   if(await page.locator('[data-r706-summary-table]').count())throw Error(device+': forged authority retained computed summary');
+
    const pillar=audit.getByLabel('Filter capability pillar');
    const state=audit.getByLabel('Filter capability evidence state');
    if(await pillar.locator('option').count()!==13)throw Error(device+': architecture pillars not conserved');
