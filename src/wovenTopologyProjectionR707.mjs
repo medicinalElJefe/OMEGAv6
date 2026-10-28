@@ -50,15 +50,16 @@ export function projectWovenTopologyR707(input,frameIndex=0,mirrored=false){
   const a=byId.get(e.from),b=byId.get(e.to),style=styles[e.kind];
   let start,end,control,path;
   if(e.from===e.to){
-   start=point(a.x+10,a.y-20);end=point(a.x-10,a.y-20);
-   const c1=point(a.x+65,a.y-86),c2=point(a.x-65,a.y-86);
+   const sign=mirrored?-1:1;
+   start=point(a.x+10*sign,a.y-20);end=point(a.x-10*sign,a.y-20);
+   const c1=point(a.x+65*sign,a.y-86),c2=point(a.x-65*sign,a.y-86);
    control=[c1,c2];
    path='M '+start.x+' '+start.y+' C '+c1.x+' '+c1.y+' '+c2.x+' '+c2.y+' '+end.x+' '+end.y;
   }else{
    const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;
    start=point(a.x+ux*27,a.y+uy*27);end=point(b.x-ux*27,b.y-uy*27);
    const parallel=scenario.edgeFrames[frameIndex].slice(0,i).filter(x=>x.from===e.from&&x.to===e.to).length;
-   const bend=18+parallel*12;
+   const bend=(mirrored?-1:1)*(18+parallel*12);
    const c=point((start.x+end.x)/2-uy*bend,(start.y+end.y)/2+ux*bend);
    control=[c];
    path='M '+start.x+' '+start.y+' Q '+c.x+' '+c.y+' '+end.x+' '+end.y;
