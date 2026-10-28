@@ -4,6 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:r598": "npx --yes tsx tests/r598-woven-morphogenesis.mts",
+    "test:r599": "npx --yes tsx tests/r599-exchange-ledger.mts",
+    "test:r600": "npx --yes tsx tests/r600-governed-exchange-graph.mts",
+    "test:r599:browser": "node tests/r599-lab-browser-e2e.mjs",
     "test:r605": "npx --yes tsx tests/r605-historical-instrument-data.mts",
     "test:r604": "npx --yes tsx tests/r604-time-mandala-formula-replay.mts",
     "test:r603": "npx --yes tsx tests/r603-time-mandala-axes.mts",
