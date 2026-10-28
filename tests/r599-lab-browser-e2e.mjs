@@ -39,6 +39,7 @@ try{
   await lab.getByRole('button',{name:'Step formation'}).click();
   const incoming=Number(await lab.locator('details tbody tr').nth(3).locator('td').nth(2).innerText());
   if(!(incoming>0))throw Error(label+': multi-parent topology did not reach spatial system four');
+  await lab.locator('[data-r601-topology-edges] summary').click();
   await lab.getByRole('checkbox',{name:'Formation edge s1-s4'}).uncheck();
   if(!(await lab.locator('[data-r598-conservation]').innerText()).includes('Step 0'))throw Error(label+': topology toggle did not reset seeded experiment');
   await lab.getByRole('button',{name:'Step formation'}).click();
