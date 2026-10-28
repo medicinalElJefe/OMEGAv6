@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
+import {WovenTopologyR707} from './WovenTopologyR707';
 import {OMEGA7_CAPABILITIES} from './capabilityRegistry';
 import canonicalRecoveryR650 from '../canon/year-corpus-capability-conservation-r650.json';
 import {DEFAULT_SCENARIO_R706,parseScenarioR706,exportScenarioR706,replayScenarioR706} from '../src/relationalScenarioWorkbenchR706.mjs';
@@ -14,6 +15,7 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
  const [scenarioText,setScenarioText]=useState(()=>exportScenarioR706(DEFAULT_SCENARIO_R706));
  const [scenarioStatus,setScenarioStatus]=useState('Sample input ready. Edit nodes and directional frames, then execute.');
  const [portableScenario,setPortableScenario]=useState('');
+ const [vectorScenario,setVectorScenario]=useState<any|null>(null);
  const [summaryChanges,setSummaryChanges]=useState<Array<{id:string;continuityBefore:number;continuityAfter:number;continuityDelta:number;scarBefore:number;scarAfter:number;contradictionBefore:number;contradictionAfter:number}>>([]);
  useEffect(()=>{try{const saved=window.localStorage.getItem('omega7.r706.scenario.v1');if(saved){setScenarioText(exportScenarioR706(parseScenarioR706(saved)));setScenarioStatus('Restored bounded local input. Execute to recompute; saved output is never trusted.');}}catch{setScenarioStatus('Saved input unavailable or rejected; sample remains.');}},[]);
  const audit=useMemo(()=>auditYearCorpusCapabilityGraphR474(),[]);
@@ -32,20 +34,21 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
    <h3>Inherited woven continuity and developmental replay</h3>
    <p>Run the established R651/R653 canonical frame engine through R623 finite-difference Heightened Mode. This is not live production or historical parity proof. R706 accepts typed ingress, egress, blocked, residue and return edges, including cycles and multiple parents, with bounded local scenario input.</p>
    <label htmlFor='r706-scenario-input'>Relational scenario (JSON: 1–12 nodes, 3–12 transport frames)</label>
-   <textarea id='r706-scenario-input' aria-label='Relational scenario JSON' data-r706-scenario-input value={scenarioText} onChange={e=>setScenarioText(e.target.value)} rows={10} spellCheck={false} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}} />
+   <textarea id='r706-scenario-input' aria-label='Relational scenario JSON' data-r706-scenario-input value={scenarioText} onChange={e=>{setScenarioText(e.target.value);setVectorScenario(null);}} rows={10} spellCheck={false} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}} />
    <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'8px 0'}}>
     <button type='button' data-r624-execute onClick={()=>{
      try{const scenario=parseScenarioR706(scenarioText);const result=replayScenarioR706(scenario);
       setReplayOutput(JSON.stringify({canonicalHistory:result.canonicalHistory,developmental:result.developmental,proof:result.proof,summary:result.summary}));
-      setSummaryChanges(result.summary.changes);setScenarioStatus('Executed '+result.summary.frames+' frames for '+result.summary.nodes+' nodes. Local model only; no canonical admission.');
+      setSummaryChanges(result.summary.changes);setVectorScenario(scenario);setScenarioStatus('Executed '+result.summary.frames+' frames for '+result.summary.nodes+' nodes. Local model only; no canonical admission.');
       try{window.localStorage.setItem('omega7.r706.scenario.v1',exportScenarioR706(scenario));}catch{setScenarioStatus('Execution passed; browser input persistence unavailable.');}
-     }catch(error){setReplayOutput(JSON.stringify({truthClass:'REFUSED_NO_EXECUTION',error:String(error)}));setSummaryChanges([]);setScenarioStatus('Refused invalid or unsupported scenario; no state was admitted.');}
+     }catch(error){setReplayOutput(JSON.stringify({truthClass:'REFUSED_NO_EXECUTION',error:String(error)}));setSummaryChanges([]);setVectorScenario(null);setScenarioStatus('Refused invalid or unsupported scenario; no state was admitted.');}
     }}>Execute inherited replay</button>
     <button type='button' data-r706-export onClick={()=>{try{setPortableScenario(exportScenarioR706(parseScenarioR706(scenarioText)));setScenarioStatus('Portable inputs prepared. No output, authority or proof is exported.');}catch(error){setScenarioStatus('Export refused: '+String(error));}}}>Prepare portable input</button>
-    <button type='button' data-r706-reset onClick={()=>{setScenarioText(exportScenarioR706(DEFAULT_SCENARIO_R706));setScenarioStatus('Sample restored in editor; execute to replace saved input.');setPortableScenario('');}}>Reset sample</button>
+    <button type='button' data-r706-reset onClick={()=>{setScenarioText(exportScenarioR706(DEFAULT_SCENARIO_R706));setVectorScenario(null);setSummaryChanges([]);setScenarioStatus('Sample restored in editor; execute to replace saved input.');setPortableScenario('');}}>Reset sample</button>
    </div>
    <p role='status' data-r706-status>{scenarioStatus}</p>
    {summaryChanges.length>0&&<div style={{overflowX:'auto'}} data-r706-summary-table><table><thead><tr><th scope='col'>Node</th><th scope='col'>Continuity before</th><th scope='col'>After</th><th scope='col'>Δ continuity</th><th scope='col'>Scar after</th><th scope='col'>Contradiction after</th></tr></thead><tbody>{summaryChanges.map(x=><tr key={x.id}><td>{x.id}</td><td>{x.continuityBefore.toFixed(4)}</td><td>{x.continuityAfter.toFixed(4)}</td><td>{x.continuityDelta.toFixed(4)}</td><td>{x.scarAfter.toFixed(4)}</td><td>{x.contradictionAfter.toFixed(4)}</td></tr>)}</tbody></table></div>}
+   {vectorScenario&&<WovenTopologyR707 scenario={vectorScenario}/>}
    {portableScenario&&<><label htmlFor='r706-portable'>Portable scenario inputs (copy and paste back into the editor to replay)</label><textarea id='r706-portable' aria-label='Portable scenario JSON' data-r706-portable readOnly value={portableScenario} rows={6} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}} /></>}
    <pre data-r624-output style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{replayOutput}</pre>
   </section>
