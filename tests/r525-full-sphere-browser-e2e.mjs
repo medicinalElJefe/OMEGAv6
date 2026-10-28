@@ -254,6 +254,23 @@ async function prove(browser,label,viewport){
   await restoredMotion.waitFor({state:'visible',timeout:15000});
   if(await restoredMotion.getByLabel('Motion steps').inputValue()!=='4'||await restoredMotion.getByLabel('Motion stability').inputValue()!=='90')
    throw new Error(label+': R537 local motion state lost on browser reload');
+  // R539: prove the actual OMEGA7 Development route exposes the recovered source-state instrument.
+  // This is a build-time historical snapshot, NOT live autonomous code execution.
+  await page.locator('.o7-search-trigger').click();
+  await page.locator('.o7-command input').fill('Development');
+  await page.locator('button[data-command-route="Development"]').waitFor({state:'visible',timeout:12000});
+  await page.locator('button[data-command-route="Development"]').click();
+  const development=page.locator('.o7-development-workspace[data-route="Development"]');
+  await development.waitFor({state:'visible',timeout:30000});
+  const developmentOpen=development.locator('.o7-open-instrument');
+  if(await developmentOpen.count())await developmentOpen.click();
+  const selfbuild=development.locator('[data-r539-selfbuild="ROADMAP_EXHAUSTED"]');
+  await selfbuild.waitFor({state:'visible',timeout:15000});
+  const truth=await selfbuild.innerText();
+  if(!truth.includes('5 / 5')||!truth.includes('Admitted source capsules')||!truth.includes('Not running')||!truth.includes('Build-time source snapshot'))
+   throw new Error(label+': R539 self-build source-truth UI is missing or inflates execution claims');
+  if(!truth.includes('Requires R535 admission'))throw new Error(label+': R539 exhausted successor admission not disclosed');
+  console.log('R539 '+label+' DEVELOPMENT UI PASS · real route navigation · source-state 5/5 · no autonomous mutation claim');
   if(errors.length)throw new Error(label+': uncaught R525 browser errors '+errors.join(' | ').slice(0,700));
   console.log('R525 '+label+' FULL SPHERE OPERATION PASS · 3 nested 30-edge true meshes · rotation motion · exact antipode twice · history/forecast boundaries · prior Atlas preserved');
  }finally{await context.close()}
