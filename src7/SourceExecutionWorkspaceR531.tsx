@@ -3,6 +3,7 @@ import {corpusState} from '../src/corpusRuntime';
 import {executeSourceBoundR530} from './sourceBoundExecutionR530';
 import {inspectSourceInstrumentR533,traceSourceInstrumentR533} from './sourceInstrumentR533';
 import {exportSourceTraceSnapshotR628,importSourceTraceSnapshotR628} from './sourceTraceRecoveryR628';
+import {compareSourceTracesR629,exportSourceComparisonR629,importSourceComparisonR629,type SourceComparisonR629} from './sourceTraceComparisonR629';
 import {executeAccumulatedCapabilityR534} from '../src/accumulativeCapabilityExecutionR534';
 import type {R529Executor,R529Proposal} from './developmentalExecutionFabricR529';
 
@@ -21,9 +22,17 @@ export default function SourceExecutionWorkspaceR531({address,onAddress}:Props){
  const[traceReceipt,setTraceReceipt]=useState<ReturnType<typeof traceSourceInstrumentR533>|null>(null);
  const[traceSnapshotText,setTraceSnapshotText]=useState('');
  const[traceSnapshotStatus,setTraceSnapshotStatus]=useState('');
- useEffect(()=>{setReceipt(null);setModelReceipt(null);setCapabilityReceipt(null);setTraceReceipt(null)},[address]);
+ const[comparisonAddress,setComparisonAddress]=useState((address+1)%20736);
+ const[comparisonReceipt,setComparisonReceipt]=useState<SourceComparisonR629|null>(null);
+ const[comparisonSnapshot,setComparisonSnapshot]=useState('');
+ const[comparisonStatus,setComparisonStatus]=useState('');
+ useEffect(()=>{setReceipt(null);setModelReceipt(null);setCapabilityReceipt(null);setTraceReceipt(null);setComparisonReceipt(null);setComparisonAddress((address+1)%20736);setComparisonStatus('')},[address]);
  const exportTrace=()=>{try{if(!traceReceipt)throw new Error('R628_EXECUTED_SOURCE_TRACE_REQUIRED');setTraceSnapshotText(exportSourceTraceSnapshotR628(traceReceipt));setTraceSnapshotStatus('EXPORTED: local read-only model trace; no authority or upload');}catch(e){setTraceSnapshotStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}};
- const importTrace=()=>{try{const replay=importSourceTraceSnapshotR628(traceSnapshotText);setExecutor(replay.executor);setTraceSteps(replay.requestedSteps);setTraceReceipt(replay);setTraceSnapshotStatus('REPLAY_VERIFIED: recomputed source trace; current Atlas address unchanged');}catch(e){setTraceSnapshotStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}};
+ const importTrace=()=>{try{const replay=importSourceTraceSnapshotR628(traceSnapshotText);setExecutor(replay.executor);setTraceSteps(replay.requestedSteps);setTraceReceipt(replay);setComparisonReceipt(null);setTraceSnapshotStatus('REPLAY_VERIFIED: recomputed source trace; current Atlas address unchanged');}catch(e){setTraceSnapshotStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}};
+ const compareForks=()=>{try{if(!traceReceipt)throw new Error('R629_EXECUTED_BASELINE_REQUIRED');const result=compareSourceTracesR629(traceReceipt,comparisonAddress);setComparisonReceipt(result);setComparisonStatus('COMPUTED: two independent corpus traces; no Atlas mutation');}catch(e){setComparisonReceipt(null);setComparisonStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}};
+ const exportComparison=()=>{try{if(!comparisonReceipt)throw new Error('R629_COMPARISON_REQUIRED');setComparisonSnapshot(exportSourceComparisonR629(comparisonReceipt));setComparisonStatus('EXPORTED: portable recomputable source comparison');}catch(e){setComparisonStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}};
+ const importComparison=()=>{try{const result=importSourceComparisonR629(comparisonSnapshot);setExecutor(result.executor);setTraceSteps(result.requestedSteps);setTraceReceipt(result.left);setComparisonAddress(result.comparisonAddress);setComparisonReceipt(result);setComparisonStatus('REPLAY_VERIFIED: both traces independently recomputed; Atlas address unchanged');}catch(e){setComparisonStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}};
+ const fmtDelta=(value:number|null)=>value===null?'not defined':value.toFixed(3);
  const run=()=>{
   const m=packet.metrics;
   const parent={continuity:m.continuity,futurePlasticity:m.plasticity,contradiction:m.contradiction,burden:m.burden,recoverability:.8,proofCoverage:.9,capabilityCoverage:1,humanComprehension:.6,futureTopologyRetention:1,scarPressure:m.scar};
@@ -38,12 +47,12 @@ export default function SourceExecutionWorkspaceR531({address,onAddress}:Props){
    <b>Read-only source execution · promotion independently governed</b>
    <small>Run existing local source models without modifying canonical state. Production promotion and host/device execution remain separately evidence-gated.</small>
    <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:10}}>
-    {EXECUTORS.map(x=><button type='button' key={x} data-r531-executor={x} aria-pressed={executor===x} onClick={()=>{setExecutor(x);setReceipt(null);setModelReceipt(null);setCapabilityReceipt(null);setTraceReceipt(null)}}>{x.replace('_',' / ')}</button>)}
+    {EXECUTORS.map(x=><button type='button' key={x} data-r531-executor={x} aria-pressed={executor===x} onClick={()=>{setExecutor(x);setReceipt(null);setModelReceipt(null);setCapabilityReceipt(null);setTraceReceipt(null);setComparisonReceipt(null)}}>{x.replace('_',' / ')}</button>)}
     <button type='button' data-r534-execute onClick={()=>setCapabilityReceipt(executeAccumulatedCapabilityR534(CAPABILITY_IDS[executor],address))}>Execute bound capability</button>
     <button type='button' data-r533-inspect onClick={()=>setModelReceipt(inspectSourceInstrumentR533(executor,address))}>Run read-only model</button>
     <button type='button' data-r531-evaluate onClick={run}>Evaluate promotion admission</button>
-    {(executor==='TRAVERSAL'||executor==='FORECAST')&&<label>Source trace steps <input type='number' aria-label='Source trace steps' min={1} max={12} step={1} value={traceSteps} onChange={e=>{setTraceSteps(Number(e.target.value));setTraceReceipt(null)}} /></label>}
-    {(executor==='TRAVERSAL'||executor==='FORECAST')&&<button type='button' data-r627-trace-run onClick={()=>setTraceReceipt(traceSourceInstrumentR533(executor,address,traceSteps))}>Trace model successors</button>}
+    {(executor==='TRAVERSAL'||executor==='FORECAST')&&<label>Source trace steps <input type='number' aria-label='Source trace steps' min={1} max={12} step={1} value={traceSteps} onChange={e=>{setTraceSteps(Number(e.target.value));setTraceReceipt(null);setComparisonReceipt(null)}} /></label>}
+    {(executor==='TRAVERSAL'||executor==='FORECAST')&&<button type='button' data-r627-trace-run onClick={()=>{setTraceReceipt(traceSourceInstrumentR533(executor,address,traceSteps));setComparisonReceipt(null);setComparisonStatus('')}}>Trace model successors</button>}
    </div>
    {capabilityReceipt&&<div data-r534-capability-receipt={capabilityReceipt.status} data-r534-capability-id={capabilityReceipt.capabilityId} role='status' style={{marginTop:10}}>
     <b>{capabilityReceipt.capabilityId} · {capabilityReceipt.status}</b>
@@ -65,6 +74,27 @@ export default function SourceExecutionWorkspaceR531({address,onAddress}:Props){
     </div>
     <textarea aria-label='Source trace snapshot JSON' data-r628-snapshot value={traceSnapshotText} onChange={e=>{setTraceSnapshotText(e.target.value);setTraceSnapshotStatus('')}} rows={4} maxLength={32769} spellCheck={false} style={{display:'block',boxSizing:'border-box',width:'100%',maxWidth:'100%',marginTop:8}}/>
     <output role='status' data-r628-snapshot-status={traceSnapshotStatus.startsWith('REPLAY_VERIFIED')?'VERIFIED':traceSnapshotStatus.startsWith('REFUSED')?'REFUSED':'INFO'}>{traceSnapshotStatus}</output>
+   </div>}
+   {(executor==='TRAVERSAL'||executor==='FORECAST')&&<div data-r629-comparison='true' style={{marginTop:14,maxWidth:'100%',minWidth:0}}>
+    <b>Independent source-trajectory comparison</b>
+    <p>Compare two bounded successor paths at equal model-step indices. Each path executes against the current 20,736-address corpus; differences are source-model deltas, not physical time, observed motion, a prediction, or canonical authority.</p>
+    <div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8}}>
+     <label>Comparison start address <input aria-label='Comparison start address' type='number' min={0} max={20735} step={1} value={comparisonAddress} onChange={e=>{setComparisonAddress(Number(e.target.value));setComparisonReceipt(null);setComparisonStatus('')}} /></label>
+     <button type='button' data-r629-run disabled={!traceReceipt||traceReceipt.status!=='SOURCE_MODEL_EXECUTED'} onClick={compareForks}>Execute and compare forks</button>
+     <button type='button' data-r629-export disabled={!comparisonReceipt} onClick={exportComparison}>Export comparison</button>
+     <button type='button' data-r629-import onClick={importComparison}>Import and recompute both</button>
+    </div>
+    {comparisonReceipt&&<div data-r629-result='SOURCE_MODEL_EXECUTED' data-r629-first-divergence={comparisonReceipt.firstDivergenceIndex===null?'NONE':String(comparisonReceipt.firstDivergenceIndex)}>
+     <p>{comparisonReceipt.identical?'Identical source transitions':'Source transitions diverge'} · shared prefix {comparisonReceipt.commonPrefix} · first divergence {comparisonReceipt.firstDivergenceIndex===null?'none':comparisonReceipt.firstDivergenceIndex+1} · {comparisonReceipt.leftTermination} / {comparisonReceipt.rightTermination}</p>
+     <ol>{comparisonReceipt.rows.map(row=><li key={row.index} data-r629-row={row.index}>
+      Model step {row.index+1}: {row.leftAddress??'ended'} → {row.leftNextAddress??'ended'} versus {row.rightAddress??'ended'} → {row.rightNextAddress??'ended'} · {row.sameSourceTransition?'same transition':'different transition'} · Δcontinuity {fmtDelta(row.continuityDelta)} · Δplasticity {fmtDelta(row.plasticityDelta)} · Δscar {fmtDelta(row.scarDelta)} · Δcontradiction {fmtDelta(row.contradictionDelta)} · Δvelocity {fmtDelta(row.continuityVelocityDelta)} · Δacceleration {fmtDelta(row.continuityAccelerationDelta)}
+      {row.leftNextAddress!==null&&<button type='button' data-r629-continue-left={row.leftNextAddress} onClick={()=>onAddress(row.leftNextAddress!)}>Continue baseline</button>}
+      {row.rightNextAddress!==null&&<button type='button' data-r629-continue-right={row.rightNextAddress} onClick={()=>onAddress(row.rightNextAddress!)}>Continue comparison</button>}
+     </li>)}</ol>
+     <details><summary>Recomputed fork receipt</summary><pre data-r629-json style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',maxWidth:'100%',overflowX:'auto'}}>{JSON.stringify(comparisonReceipt,null,2)}</pre></details>
+    </div>}
+    <textarea aria-label='Source comparison snapshot JSON' data-r629-snapshot value={comparisonSnapshot} onChange={e=>{setComparisonSnapshot(e.target.value);setComparisonStatus('')}} rows={4} maxLength={65537} spellCheck={false} style={{display:'block',boxSizing:'border-box',width:'100%',maxWidth:'100%',marginTop:8}}/>
+    <output role='status' data-r629-status={comparisonStatus.startsWith('REPLAY_VERIFIED')?'VERIFIED':comparisonStatus.startsWith('REFUSED')?'REFUSED':'INFO'}>{comparisonStatus}</output>
    </div>}
    {modelReceipt&&<div data-r533-model-receipt={modelReceipt.status} role='status' style={{marginTop:10}}>
     <b>{modelReceipt.status}</b>
