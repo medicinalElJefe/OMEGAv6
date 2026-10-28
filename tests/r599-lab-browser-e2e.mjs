@@ -10,7 +10,7 @@ try{
   await page.locator('.o7-nav-r519').getByRole('button',{name:'Create'}).click();
   await page.locator('.o7-r519-portal[data-r519-visual-navigation="CREATE"] button[data-r519-direct="Visual Instrument"]').click();
   await page.locator('[data-omega7-native="forecast.visual"][data-route="Visual Instrument"]').waitFor({state:'visible',timeout:30000});
-  await page.locator('[data-r598-lab-entry] button').first().click();
+  await page.locator('[data-r598-woven-lab-entry] button').first().click();
   const lab=page.locator('[data-r598-morphogenesis="true"]');await lab.waitFor({state:'visible',timeout:20000});
   const rows=lab.locator('details tbody tr');if(await rows.count()!==7)throw Error(label+': seven-system ledger missing');
   const initial=await lab.locator('[data-r598-conservation]').innerText();
