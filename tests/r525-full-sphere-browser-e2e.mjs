@@ -147,6 +147,32 @@ async function prove(browser,label,viewport){
     }
     const traceText=await trace.innerText();
     if(!traceText.includes('Δcontinuity')||!traceText.includes('Δscar')||!traceText.includes('per model successor'))throw new Error(label+': bounded source derivatives not displayed with nonphysical truth label');
+    // R628: real desktop/mobile source execution snapshot, deterministic replay,
+    // forged successor refusal, and no implicit Atlas address mutation.
+    const recovery=execution.locator('[data-r628-recovery="true"]');
+    await recovery.locator('[data-r628-export]').click();
+    const snapshotBox=recovery.locator('[data-r628-snapshot]');
+    const snapshot=await snapshotBox.inputValue();
+    const stored=JSON.parse(snapshot);
+    if(stored.schema!=='OMEGA7_REPLAY_VERIFIED_SOURCE_TRACE_R628'||stored.trace.executor!==mode||stored.trace.canonicalMutation!==false)
+     throw new Error(label+': '+mode+' exported trace snapshot missing source truth boundary');
+    const addressBeforeReplay=await native.getAttribute('data-address');
+    const forged=JSON.parse(snapshot);
+    forged.trace.frames[0].nextAddress=(forged.trace.frames[0].nextAddress+1)%20736;
+    await snapshotBox.fill(JSON.stringify(forged));
+    await recovery.locator('[data-r628-import]').click();
+    await recovery.locator('[data-r628-snapshot-status="REFUSED"]').waitFor({state:'visible',timeout:5000});
+    if(!(await recovery.innerText()).includes('R628_SOURCE_REPLAY_MISMATCH'))
+     throw new Error(label+': '+mode+' forged trace was not explicitly refused');
+    if(await native.getAttribute('data-address')!==addressBeforeReplay)
+     throw new Error(label+': forged trace changed Atlas address');
+    await snapshotBox.fill(snapshot);
+    await recovery.locator('[data-r628-import]').click();
+    await recovery.locator('[data-r628-snapshot-status="VERIFIED"]').waitFor({state:'visible',timeout:5000});
+    const replayed=JSON.parse(await trace.locator('[data-r627-trace-json]').textContent());
+    if(JSON.stringify(replayed)!==JSON.stringify(parsed)||await native.getAttribute('data-address')!==addressBeforeReplay)
+     throw new Error(label+': '+mode+' imported trace failed deterministic replay or mutated Atlas');
+    console.log('R628 '+label+' '+mode+' TRACE REPLAY PASS · exported, tamper refused, replayed; Atlas unchanged');
     const nextAddress=parsed.frames[0].nextAddress;
     await trace.locator('button[data-r627-continue-address]').first().click();
     await page.waitForFunction(expected=>Number(document.querySelector('.o7-science-workspace[data-route="Atlas"]')?.getAttribute('data-address'))===expected,nextAddress,{timeout:5000});

@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {corpusState} from '../src/corpusRuntime';
 import {executeSourceBoundR530} from './sourceBoundExecutionR530';
 import {inspectSourceInstrumentR533,traceSourceInstrumentR533} from './sourceInstrumentR533';
+import {exportSourceTraceSnapshotR628,importSourceTraceSnapshotR628} from './sourceTraceRecoveryR628';
 import {executeAccumulatedCapabilityR534} from '../src/accumulativeCapabilityExecutionR534';
 import type {R529Executor,R529Proposal} from './developmentalExecutionFabricR529';
 
@@ -18,7 +19,11 @@ export default function SourceExecutionWorkspaceR531({address,onAddress}:Props){
  const[modelReceipt,setModelReceipt]=useState<ReturnType<typeof inspectSourceInstrumentR533>|null>(null);
  const[traceSteps,setTraceSteps]=useState(4);
  const[traceReceipt,setTraceReceipt]=useState<ReturnType<typeof traceSourceInstrumentR533>|null>(null);
+ const[traceSnapshotText,setTraceSnapshotText]=useState('');
+ const[traceSnapshotStatus,setTraceSnapshotStatus]=useState('');
  useEffect(()=>{setReceipt(null);setModelReceipt(null);setCapabilityReceipt(null);setTraceReceipt(null)},[address]);
+ const exportTrace=()=>{try{if(!traceReceipt)throw new Error('R628_EXECUTED_SOURCE_TRACE_REQUIRED');setTraceSnapshotText(exportSourceTraceSnapshotR628(traceReceipt));setTraceSnapshotStatus('EXPORTED: local read-only model trace; no authority or upload');}catch(e){setTraceSnapshotStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}};
+ const importTrace=()=>{try{const replay=importSourceTraceSnapshotR628(traceSnapshotText);setExecutor(replay.executor);setTraceSteps(replay.requestedSteps);setTraceReceipt(replay);setTraceSnapshotStatus('REPLAY_VERIFIED: recomputed source trace; current Atlas address unchanged');}catch(e){setTraceSnapshotStatus('REFUSED: '+(e instanceof Error?e.message:String(e)));}};
  const run=()=>{
   const m=packet.metrics;
   const parent={continuity:m.continuity,futurePlasticity:m.plasticity,contradiction:m.contradiction,burden:m.burden,recoverability:.8,proofCoverage:.9,capabilityCoverage:1,humanComprehension:.6,futureTopologyRetention:1,scarPressure:m.scar};
@@ -50,6 +55,16 @@ export default function SourceExecutionWorkspaceR531({address,onAddress}:Props){
     <small>Corpus addresses only. Finite differences are per model successor, not physical velocities or observed time. No historical parity, canonical mutation or production proof.</small>
     {traceReceipt.status==='HELD'?<p>{traceReceipt.reasons.join(' · ')}</p>:<><p>{traceReceipt.frames.length} model transitions · {traceReceipt.termination}</p><ol>{traceReceipt.frames.map(frame=><li key={frame.index}>Address {frame.address} → {frame.nextAddress} · {frame.decision} · continuity {frame.continuity.toFixed(3)} · scar {frame.scar.toFixed(3)} · contradiction {frame.contradiction.toFixed(3)} · Δcontinuity {frame.developmental.continuityVelocity===null?'not yet defined':frame.developmental.continuityVelocity.toFixed(3)} · Δ²continuity {frame.developmental.continuityAcceleration===null?'not yet defined':frame.developmental.continuityAcceleration.toFixed(3)} · Δscar {frame.developmental.scarVelocity===null?'not yet defined':frame.developmental.scarVelocity.toFixed(3)} <button type='button' data-r627-continue-address={frame.nextAddress} onClick={()=>onAddress(frame.nextAddress)}>Continue at {frame.nextAddress}</button></li>)}</ol></>}
     <details><summary>Source trace receipt</summary><pre data-r627-trace-json style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',maxWidth:'100%'}}>{JSON.stringify(traceReceipt,null,2)}</pre></details>
+   </div>}
+   {(executor==='TRAVERSAL'||executor==='FORECAST')&&<div data-r628-recovery='true' style={{marginTop:12,maxWidth:'100%',minWidth:0}}>
+    <b>Portable source-trace replay</b>
+    <p>Export the executed address/derivative trace, or import and independently recompute it against this build's corpus. Mismatched or forged frames are refused. Import never changes the Atlas address, CanonState, or host execution.</p>
+    <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+     <button type='button' data-r628-export onClick={exportTrace} disabled={!traceReceipt||traceReceipt.status!=='SOURCE_MODEL_EXECUTED'}>Export executed trace</button>
+     <button type='button' data-r628-import onClick={importTrace}>Import and verify replay</button>
+    </div>
+    <textarea aria-label='Source trace snapshot JSON' data-r628-snapshot value={traceSnapshotText} onChange={e=>{setTraceSnapshotText(e.target.value);setTraceSnapshotStatus('')}} rows={4} maxLength={32769} spellCheck={false} style={{display:'block',boxSizing:'border-box',width:'100%',maxWidth:'100%',marginTop:8}}/>
+    <output role='status' data-r628-snapshot-status={traceSnapshotStatus.startsWith('REPLAY_VERIFIED')?'VERIFIED':traceSnapshotStatus.startsWith('REFUSED')?'REFUSED':'INFO'}>{traceSnapshotStatus}</output>
    </div>}
    {modelReceipt&&<div data-r533-model-receipt={modelReceipt.status} role='status' style={{marginTop:10}}>
     <b>{modelReceipt.status}</b>
