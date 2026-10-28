@@ -17,6 +17,10 @@ on:
       - 'src7/userJourneyR536.css'
       - 'src7/Omega7Root.tsx'
       - 'tests/r525-full-sphere-browser-e2e.mjs'
+      - 'src7/SelfBuildTruthR539.tsx'
+      - 'src7/selfBuildTruthR539.ts'
+      - 'src7/selfBuildTruthR539.css'
+      - 'src7/workspaces/DevelopmentComputeWorkspaceR444.tsx'
   pull_request:
     branches: [main]
     paths:
@@ -31,6 +35,10 @@ on:
       - 'src7/userJourneyR536.css'
       - 'src7/Omega7Root.tsx'
       - 'tests/r525-full-sphere-browser-e2e.mjs'
+      - 'src7/SelfBuildTruthR539.tsx'
+      - 'src7/selfBuildTruthR539.ts'
+      - 'src7/selfBuildTruthR539.css'
+      - 'src7/workspaces/DevelopmentComputeWorkspaceR444.tsx'
 
 permissions:
   contents: read
