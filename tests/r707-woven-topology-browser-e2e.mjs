@@ -48,6 +48,7 @@ try{
    await page.locator('[data-r707-svg]').waitFor({state:'visible',timeout:10000});
    if(await page.locator('[data-r707-edge-kind="BLOCKED"]').count()!==1)throw Error(device+': typed blocked edge not projected');
    if(!(await page.locator('[data-r708-path-status]').innerText()).includes('NO ADMISSIBLE GRAPH PATH: A → B'))throw Error(device+': blocked source edge incorrectly admitted as transport');
+   await page.locator('[data-r708-exclusions] summary').click();
    if(!(await page.locator('[data-r708-exclusions]').innerText()).includes('BLOCKED'))throw Error(device+': blocked edge refusal evidence absent');
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('.o7-nav-r519').getByRole('button',{name:'System'}).click();
