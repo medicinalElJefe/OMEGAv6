@@ -173,6 +173,45 @@ async function prove(browser,label,viewport){
     if(JSON.stringify(replayed)!==JSON.stringify(parsed)||await native.getAttribute('data-address')!==addressBeforeReplay)
      throw new Error(label+': '+mode+' imported trace failed deterministic replay or mutated Atlas');
     console.log('R628 '+label+' '+mode+' TRACE REPLAY PASS · exported, tamper refused, replayed; Atlas unchanged');
+    // R629: compare two independently executed model paths, prove actual
+    // developmental deltas and portable replay on desktop/mobile.
+    const comparison=execution.locator('[data-r629-comparison="true"]');
+    const compareAddress=(parsed.startAddress+1)%20736;
+    await comparison.getByLabel('Comparison start address').fill(String(compareAddress));
+    await comparison.locator('[data-r629-run]').click();
+    const result=comparison.locator('[data-r629-result="SOURCE_MODEL_EXECUTED"]');
+    await result.waitFor({state:'visible',timeout:5000});
+    const fork=JSON.parse(await result.locator('[data-r629-json]').textContent());
+    if(fork.executor!==mode||fork.startAddress!==parsed.startAddress||fork.comparisonAddress!==compareAddress||fork.firstDivergenceIndex!==0||
+       fork.canonicalMutation!==false||fork.productionAdmissionClaimed!==false||fork.physicalTimeClaimed!==false)
+     throw new Error(label+': '+mode+' source fork execution or truth boundary failed');
+    if(fork.rows.length<1||fork.rows.length>4||fork.rows[0].continuityDelta!==fork.right.frames[0].continuity-fork.left.frames[0].continuity)
+     throw new Error(label+': '+mode+' source fork alignment or developmental delta invalid');
+    const forkBefore=await native.getAttribute('data-address');
+    await comparison.locator('[data-r629-export]').click();
+    const comparisonBox=comparison.locator('[data-r629-snapshot]');
+    const comparisonSnapshot=await comparisonBox.inputValue();
+    if(JSON.parse(comparisonSnapshot).schema!=='OMEGA7_RECOMPUTED_SOURCE_FORK_COMPARISON_R629')
+     throw new Error(label+': '+mode+' fork export did not serialize computed source comparison');
+    const forgedFork=JSON.parse(comparisonSnapshot);forgedFork.rows[0].scarDelta=99;
+    await comparisonBox.fill(JSON.stringify(forgedFork));
+    await comparison.locator('[data-r629-import]').click();
+    await comparison.locator('[data-r629-status="REFUSED"]').waitFor({state:'visible',timeout:5000});
+    if(!(await comparison.innerText()).includes('R629_COMPARISON_REPLAY_MISMATCH'))
+     throw new Error(label+': '+mode+' forged fork was not rejected');
+    await comparisonBox.fill(comparisonSnapshot);
+    await comparison.locator('[data-r629-import]').click();
+    await comparison.locator('[data-r629-status="VERIFIED"]').waitFor({state:'visible',timeout:5000});
+    if(JSON.stringify(JSON.parse(await result.locator('[data-r629-json]').textContent()))!==JSON.stringify(fork)||
+       await native.getAttribute('data-address')!==forkBefore)
+     throw new Error(label+': '+mode+' fork import failed replay or changed Atlas');
+    await comparison.getByLabel('Comparison start address').fill('-1');
+    await comparison.locator('[data-r629-run]').click();
+    await comparison.locator('[data-r629-status="REFUSED"]').waitFor({state:'visible',timeout:5000});
+    if(!(await comparison.innerText()).includes('R629_COMPARISON_ADDRESS_REFUSED'))
+     throw new Error(label+': '+mode+' invalid fork address was not refused');
+    await comparison.getByLabel('Comparison start address').fill(String(compareAddress));
+    console.log('R629 '+label+' '+mode+' FORK COMPARE PASS · independent corpus paths, tamper refusal, replay and Atlas unchanged');
     const nextAddress=parsed.frames[0].nextAddress;
     await trace.locator('button[data-r627-continue-address]').first().click();
     await page.waitForFunction(expected=>Number(document.querySelector('.o7-science-workspace[data-route="Atlas"]')?.getAttribute('data-address'))===expected,nextAddress,{timeout:5000});
