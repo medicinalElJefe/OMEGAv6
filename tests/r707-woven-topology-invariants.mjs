@@ -69,7 +69,7 @@ test('R708 computes shortest-hop typed route witnesses from executed R707 frames
  const self=inspectWovenRouteR708(p,'A','A');
  assert.equal(self.reachable,true);assert.equal(self.hops,0);assert.equal(self.bottleneckDeclaredWeight,null);
 });
-test('R708 preserves typed residue carry while rejecting blocked and zero-weight conductance',()=>{
+test('R708 preserves positive-weight residue topology while rejecting blocked and zero-weight conductance',()=>{
  const s=clone();s.nodes.push({id:'C',continuity:0.5,scar:0,contradiction:0,plasticity:1});
  s.edgeFrames=s.edgeFrames.map(()=>[
   {from:'A',to:'B',kind:'INGRESS',weight:0.8},
