@@ -1,6 +1,7 @@
 import {useMemo,useState} from 'react';
 import {exportWovenTopologySvgR707,projectWovenTopologyR707} from '../src/wovenTopologyProjectionR707.mjs';
 import {inspectWovenRouteR708} from '../src/wovenRouteInspectorR708.mjs';
+import {traceWovenRouteR709} from '../src/wovenRouteContinuityR709.mjs';
 
 // Source-bound R706/R623/R651/R653 visualization; not an independent state or proof writer.
 export function WovenTopologyR707({scenario}:{scenario:any}){
@@ -10,6 +11,7 @@ export function WovenTopologyR707({scenario}:{scenario:any}){
  const origin=projection.nodes.some(n=>n.id===routeFrom)?routeFrom:projection.nodes[0].id;
  const target=projection.nodes.some(n=>n.id===routeTo)?routeTo:projection.nodes.at(-1)!.id;
  const witness=useMemo(()=>inspectWovenRouteR708(projection,origin,target),[projection,origin,target]);
+ const timeline=useMemo(()=>traceWovenRouteR709(scenario,origin,target,mirrored),[scenario,origin,target,mirrored]);
  const pathEdgeIds=new Set(witness.pathEdges.map(e=>e.id));
  return <section aria-label='Executable woven topology vector instrument' data-r707-vector-instrument='source-model-only'
   style={{border:'1px solid var(--o7-border, #65727d)',borderRadius:8,padding:12,margin:'12px 0',maxWidth:'100%',boxSizing:'border-box'}}>
@@ -28,6 +30,11 @@ export function WovenTopologyR707({scenario}:{scenario:any}){
    <label>Route target <select data-r708-target value={target} onChange={e=>setRouteTo(e.target.value)}>{projection.nodes.map(n=><option key={n.id} value={n.id}>{n.id}</option>)}</select></label>
   </div>
   <div role='status' data-r708-path-status style={{marginBottom:8,fontSize:13}}>{witness.reachable?`ADMISSIBLE GRAPH PATH: ${witness.pathNodes.join(' → ')} · ${witness.hops} hops · minimum declared edge weight ${witness.bottleneckDeclaredWeight===null?'n/a':witness.bottleneckDeclaredWeight.toFixed(3)}`:`NO ADMISSIBLE GRAPH PATH: ${origin} → ${target}`} · ${witness.reachableNodeIds.length} reachable nodes · ${witness.excludedEdges.length} excluded edges</div>
+  <section data-r709-timeline aria-label='Computed temporal route continuity' style={{marginBottom:10,padding:'8px 0',borderTop:'1px solid #596a74'}}>
+   <div role='status' data-r709-summary style={{fontSize:13,marginBottom:6}}>R709 recomputed route continuity · {timeline.reachableFrames}/{timeline.frameCount} frames reachable · first loss {timeline.firstLossFrame===null?'none':timeline.firstLossFrame+1} · first recovery {timeline.firstRecoveryFrame===null?'none':timeline.firstRecoveryFrame+1} · {timeline.routeChanges} route changes · {timeline.weightChanges} declared-weight changes</div>
+   <div style={{display:'flex',flexWrap:'wrap',gap:6}}>{timeline.frames.map(f=><button type='button' key={f.frameIndex} data-r709-frame-choice={f.frameIndex} aria-pressed={frame===f.frameIndex} onClick={()=>{setFrame(f.frameIndex);setPortable('');}} style={{fontSize:12,padding:'5px 8px'}}>{'Frame '+(f.frameIndex+1)+' · '+f.event+' · '+(f.reachable?f.hops+' hops':'no path')}</button>)}</div>
+   <small data-r709-boundary>{timeline.boundary}</small>
+  </section>
   <details data-r708-exclusions style={{marginBottom:8,fontSize:12}}><summary>Excluded edge evidence and refusal reasons</summary><ul>{witness.excludedEdges.map(e=><li key={e.id}>{e.from} → {e.to} · {e.kind} · {e.reason}</li>)}</ul></details>
   <svg data-r707-svg viewBox='0 0 640 440' role='img' aria-label='Computed relational continuity vector topology' style={{display:'block',width:'100%',maxWidth:720,height:'auto',background:'#0d1821',borderRadius:6}}>
    <defs><marker id='r707-arrow-ui' markerWidth='8' markerHeight='8' refX='6' refY='3' orient='auto'><path d='M0 0 L6 3 L0 6 Z' fill='#e9eef1'/></marker></defs>

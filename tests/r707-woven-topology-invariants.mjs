@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {DEFAULT_SCENARIO_R706,exportScenarioR706} from '../src/relationalScenarioWorkbenchR706.mjs';
 import {projectWovenTopologyR707,exportWovenTopologySvgR707} from '../src/wovenTopologyProjectionR707.mjs';
 import {inspectWovenRouteR708} from '../src/wovenRouteInspectorR708.mjs';
+import {traceWovenRouteR709} from '../src/wovenRouteContinuityR709.mjs';
 const clone=()=>JSON.parse(exportScenarioR706(DEFAULT_SCENARIO_R706));
 test('R707 uses actual inherited source frame state, typed edges and deterministic export',()=>{
  const scenario=clone(),p=projectWovenTopologyR707(scenario,0);
@@ -98,6 +99,42 @@ test('R708 refuses forged projection authority and malformed graph identities',(
  assert.throws(()=>inspectWovenRouteR708({...p,edges:[{...p.edges[0],to:'MISSING'}]},'A','B'),/invalid computed edge/);
  assert.throws(()=>inspectWovenRouteR708({...p,edges:[{...p.edges[0],weight:Infinity}]},'A','B'),/invalid computed edge/);
 });
+test('R709 recomputes each frame and detects loss and recovery without changing source state',()=>{
+ const s=clone(),original=JSON.stringify(s);
+ s.edgeFrames[1][0]={...s.edgeFrames[1][0],kind:'BLOCKED'};
+ s.edgeFrames[2][0]={...s.edgeFrames[2][0],kind:'RESIDUE',weight:0.4};
+ const before=JSON.stringify(s);
+ const timeline=traceWovenRouteR709(s,'A','B');
+ assert.equal(timeline.truthClass,'LOCAL_RECOMPUTED_GRAPH_TIMELINE_ONLY');
+ assert.equal(timeline.frameCount,3);assert.equal(timeline.reachableFrames,2);
+ assert.deepEqual(timeline.frames.map(f=>f.event),['INITIAL','PATH_LOST','PATH_RECOVERED']);
+ assert.deepEqual(timeline.frames.map(f=>f.reachable),[true,false,true]);
+ assert.equal(timeline.firstLossFrame,1);assert.equal(timeline.firstRecoveryFrame,2);
+ assert.equal(timeline.frames[1].excludedFrontier[0].reason,'BLOCKED');
+ assert.equal(timeline.frames[2].bottleneckDeclaredWeight,0.4);
+ assert.deepEqual(traceWovenRouteR709(s,'A','B',true),timeline);
+ assert.equal(JSON.stringify(s),before);assert.notEqual(original,before);
+});
+test('R709 distinguishes path rewiring from declared-weight changes and retains multi-parent routes',()=>{
+ const s=clone();s.nodes.push({id:'C',continuity:0.5,scar:0,contradiction:0,plasticity:1});
+ s.edgeFrames=[
+  [{from:'A',to:'B',kind:'INGRESS',weight:0.8}],
+  [{from:'A',to:'C',kind:'EGRESS',weight:0.7},{from:'C',to:'B',kind:'RETURN',weight:0.6}],
+  [{from:'A',to:'C',kind:'EGRESS',weight:0.7},{from:'C',to:'B',kind:'RETURN',weight:0.2}]
+ ];
+ const t=traceWovenRouteR709(s,'A','B');
+ assert.deepEqual(t.frames.map(f=>f.event),['INITIAL','PATH_CHANGED','DECLARED_WEIGHT_CHANGED']);
+ assert.equal(t.routeChanges,1);assert.equal(t.weightChanges,2);
+ assert.deepEqual(t.frames[1].pathNodes,['A','C','B']);
+ assert.equal(t.frames[2].bottleneckDeclaredWeight,0.2);
+ assert.equal(t.firstLossFrame,null);assert.equal(t.firstRecoveryFrame,null);
+});
+test('R709 refuses forged authority, unknown endpoints and non-boolean observer frame',()=>{
+ const s=clone();
+ assert.throws(()=>traceWovenRouteR709({...s,productionVerified:true},'A','B'),/invalid scenario fields/);
+ assert.throws(()=>traceWovenRouteR709(s,'A','UNKNOWN'),/endpoints/);
+ assert.throws(()=>traceWovenRouteR709(s,'A','B','yes'),/reflection must be boolean/);
+});
 test('R707 OMEGA7 integration retains execution, portable source and fail-closed UI boundaries',()=>{
  const ui=readFileSync(new URL('../src7/CapabilityRecoveryAuditR705.tsx',import.meta.url),'utf8');
  const vector=readFileSync(new URL('../src7/WovenTopologyR707.tsx',import.meta.url),'utf8');
@@ -105,4 +142,5 @@ test('R707 OMEGA7 integration retains execution, portable source and fail-closed
  for(const x of ['data-r707-svg','data-r707-frame','data-r707-mirror','data-r707-export','data-r707-truth-boundary','projectWovenTopologyR707'])assert.ok(vector.includes(x),x);
  assert.ok(vector.includes('Historical AG-009 SVG parity is not yet proved'));
  for(const x of ['inspectWovenRouteR708','data-r708-origin','data-r708-target','data-r708-path-status','data-r708-exclusions','data-r708-on-path','data-r708-boundary'])assert.ok(vector.includes(x),x);
+ for(const x of ['traceWovenRouteR709','data-r709-timeline','data-r709-summary','data-r709-frame-choice','data-r709-boundary'])assert.ok(vector.includes(x),x);
 });
