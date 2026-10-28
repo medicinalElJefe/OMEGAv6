@@ -26,8 +26,15 @@ try{
   if(animated===after)throw Error(label+': animation did not evolve');
   await lab.getByRole('button',{name:'Reset formation'}).click();
   if(!(await lab.locator('[data-r598-conservation]').innerText()).includes('Step 0'))throw Error(label+': reset did not restore initial state');
+  const graph=lab.locator('[data-r600-governed-graph="true"]');await graph.waitFor({state:'visible',timeout:20000});
+  await graph.getByRole('button',{name:'Advance exchange'}).click();
+  if(!(await graph.locator('[data-r600-budget]').innerText()).includes('Step 1'))throw Error(label+': governed graph did not advance');
+  await graph.locator('input[type="checkbox"]').nth(5).uncheck();
+  if(!(await graph.locator('[data-r600-budget]').innerText()).includes('blocked request 0.00000'))throw Error(label+': disabled blocked edge still requested transfer');
+  await graph.getByRole('button',{name:'Reset exchange'}).click();
+  if(!(await graph.locator('[data-r600-budget]').innerText()).includes('Step 0'))throw Error(label+': governed graph reset failed');
   if(errors.length)throw Error(label+': '+errors.join(' | '));
   await page.close();
  }
- console.log('R599 LAB BROWSER PASS · desktop/mobile · 7-system ledger · step · animation · reset · no page errors');
+ console.log('R599 LAB BROWSER PASS · desktop/mobile · 7-system ledger · step · animation · reset · R600 graph advance/blocked-toggle/reset · no page errors');
 }finally{await browser.close()}
