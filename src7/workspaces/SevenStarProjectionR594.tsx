@@ -21,7 +21,7 @@ export default function SevenStarProjectionR594({address,onAddress}:Props){
  {connections&&nodes.map((p,i)=>nodes.slice(i+1).map((q,j)=><line key={i+'-'+j} x1={p.x} y1={p.y} x2={q.x} y2={q.y} stroke={colors[i]} strokeOpacity='.3'/>))}
  {nodes.map((p,i)=><g key={i}><line x1='210' y1='210' x2={p.x} y2={p.y} stroke={colors[i]}/><circle cx={p.x} cy={p.y} r='15' fill={colors[i]} stroke='#fff'/><text x={p.x} y={p.y+4} textAnchor='middle' fontSize='12' fill='#101925'>{i+1}</text></g>)}
  <circle cx='210' cy='210' r='8' fill='#fff'/></svg>
- <p data-r597-geometry-metrics='true'>Address {frame.address+1} / 20,736 · perimeter {frame.perimeter.toFixed(2)} projection units · centroid ({frame.centroid.x.toFixed(2)}, {frame.centroid.y.toFixed(2)}) · model geometry only, not physical measurements or canonical mutation.</p>
+ <p data-r597-geometry-metrics='true'>Address {frame.address+1} / 20,736 · ring perimeter {frame.perimeter.toFixed(2)} projection units · centroid ({frame.centroid.x.toFixed(2)}, {frame.centroid.y.toFixed(2)}) · model geometry only, not physical measurements or canonical mutation.</p>
  <div style={{display:'flex',flexWrap:'wrap',gap:8}}>{colors.map((color,i)=><button key={i} style={{borderBottom:'4px solid '+color}} onClick={()=>onAddress(sevenStarAddressStep(address,i+1))}>Traverse node {i+1}</button>)}</div>
  </section>;
 }
