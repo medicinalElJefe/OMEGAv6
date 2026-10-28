@@ -42,7 +42,8 @@ for(const executor of ['TRAVERSAL','FORECAST'] as const){
  const extra=JSON.parse(snapshot);extra.verifiedByProduction=true;
  assert.throws(()=>importSourceComparisonR629(JSON.stringify(extra)),/R629_COMPARISON_REPLAY_MISMATCH/);
  assert.throws(()=>exportSourceComparisonR629({...different,commonPrefix:9}),/R629_COMPARISON_REPLAY_MISMATCH/);
- assert.throws(()=>compareSourceTracesR629({...baseline,productionAdmissionClaimed:true},11499),/R629_BASELINE_REPLAY_MISMATCH/);
+ const forgedBaseline=JSON.parse(JSON.stringify(baseline));forgedBaseline.productionAdmissionClaimed=true;
+ assert.throws(()=>compareSourceTracesR629(forgedBaseline,11499),/R629_BASELINE_REPLAY_MISMATCH/);
 }
 assert.throws(()=>importSourceComparisonR629('{'),/R629_SNAPSHOT_JSON_INVALID/);
 assert.throws(()=>importSourceComparisonR629('x'.repeat(65537)),/R629_SNAPSHOT_SIZE_REFUSED/);
