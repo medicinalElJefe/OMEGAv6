@@ -26,6 +26,10 @@ on:
       - 'src7/selfBuildTruthR539.ts'
       - 'src7/selfBuildTruthR539.css'
       - 'src7/workspaces/DevelopmentComputeWorkspaceR444.tsx'
+      - 'src/wovenRouteInspectorR708.mjs'
+      - 'src7/WovenTopologyR707.tsx'
+      - 'tests/r707-woven-topology-browser-e2e.mjs'
+      - 'tests/r707-woven-topology-invariants.mjs'
   pull_request:
     branches: [main]
     paths:
@@ -49,6 +53,10 @@ on:
       - 'src7/selfBuildTruthR539.ts'
       - 'src7/selfBuildTruthR539.css'
       - 'src7/workspaces/DevelopmentComputeWorkspaceR444.tsx'
+      - 'src/wovenRouteInspectorR708.mjs'
+      - 'src7/WovenTopologyR707.tsx'
+      - 'tests/r707-woven-topology-browser-e2e.mjs'
+      - 'tests/r707-woven-topology-invariants.mjs'
 
 permissions:
   contents: read
