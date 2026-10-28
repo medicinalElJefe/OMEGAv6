@@ -28,7 +28,8 @@ try{
    await root.locator('[data-r707-mirror]').click();
    const after=Number(await root.locator('[data-r707-node="A"] circle').getAttribute('cx'));
    if(Math.abs(before+after-640)>0.02)throw Error(device+': observer reflection invariant broken');
-   await root.locator('[data-r707-frame]').fill('1');
+   await root.locator('[data-r707-frame]').focus();
+   await root.locator('[data-r707-frame]').press('ArrowRight');
    if(!(await root.locator('[data-r707-topology-summary]').innerText()).includes('directional edges'))throw Error(device+': frame controls not active');
    await root.locator('[data-r707-export]').click();
    const svg=await root.locator('[data-r707-portable]').inputValue();
