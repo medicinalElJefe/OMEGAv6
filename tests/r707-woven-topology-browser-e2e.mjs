@@ -39,6 +39,22 @@ try{
    await root.locator('[data-r707-export]').click();
    const svg=await root.locator('[data-r707-portable]').inputValue();
    if(!svg.includes('<svg ')||!svg.includes('MODEL ONLY')||/<script|onload=|onclick=/i.test(svg))throw Error(device+': unsafe or absent static vector export');
+   const temporal=JSON.parse(await input.inputValue());
+   temporal.edgeFrames[1][0].kind='BLOCKED';
+   temporal.edgeFrames[2][0].kind='RESIDUE';
+   temporal.edgeFrames[2][0].weight=0.4;
+   await input.fill(JSON.stringify(temporal));
+   await page.locator('[data-r624-execute]').click();
+   const timeRoot=page.locator('[data-r707-vector-instrument="source-model-only"]');
+   await timeRoot.waitFor({state:'visible',timeout:10000});
+   if(!(await timeRoot.locator('[data-r709-summary]').innerText()).includes('2/3 frames reachable'))throw Error(device+': R709 recomputed frame reachability missing');
+   if(!(await timeRoot.locator('[data-r709-frame-choice="1"]').innerText()).includes('PATH_LOST'))throw Error(device+': R709 first loss not surfaced');
+   if(!(await timeRoot.locator('[data-r709-frame-choice="2"]').innerText()).includes('PATH_RECOVERED'))throw Error(device+': R709 recovery not surfaced');
+   await timeRoot.locator('[data-r709-frame-choice="1"]').click();
+   if(!(await timeRoot.locator('[data-r708-path-status]').innerText()).includes('NO ADMISSIBLE GRAPH PATH'))throw Error(device+': R709 loss frame not navigable');
+   await timeRoot.locator('[data-r709-frame-choice="2"]').click();
+   if(!(await timeRoot.locator('[data-r708-path-status]').innerText()).includes('ADMISSIBLE GRAPH PATH'))throw Error(device+': R709 recovery frame not navigable');
+   await timeRoot.locator('[data-r709-frame-choice="0"]').click();
    const scenario=JSON.parse(await input.inputValue());
    scenario.nodes[0].continuity=0.6;
    scenario.edgeFrames[0][0].kind='BLOCKED';
@@ -65,7 +81,7 @@ try{
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(device+': viewport overflow '+overflow);
-   console.log('R707/R708 '+device+' PASS: source-computed topology and route witnesses, typed refusal, mirror/frame controls, safe SVG, persisted recompute, forged authority refusal, no overflow');
+   console.log('R707/R708/R709 '+device+' PASS: source-computed topology and route witnesses, typed refusal, mirror/frame controls, safe SVG, persisted recompute, forged authority refusal, no overflow');
   }finally{await context.close()}
  }
 }finally{await browser.close()}
