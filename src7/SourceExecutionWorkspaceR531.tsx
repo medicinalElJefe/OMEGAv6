@@ -18,6 +18,7 @@ export default function SourceExecutionWorkspaceR531({address,onAddress}:Props){
  const packet=useMemo(()=>corpusState(address),[address]);
  const[capabilityReceipt,setCapabilityReceipt]=useState<ReturnType<typeof executeAccumulatedCapabilityR534>|null>(null);
  const[modelReceipt,setModelReceipt]=useState<ReturnType<typeof inspectSourceInstrumentR533>|null>(null);
+ const computedNext=modelReceipt?.status==='SOURCE_MODEL_EXECUTED'?(modelReceipt.executor==='TRAVERSAL'?modelReceipt.nextAddress:modelReceipt.executor==='FORECAST'?modelReceipt.modelNextAddress:null):null;
  const[traceSteps,setTraceSteps]=useState(4);
  const[traceReceipt,setTraceReceipt]=useState<ReturnType<typeof traceSourceInstrumentR533>|null>(null);
  const[traceSnapshotText,setTraceSnapshotText]=useState('');
@@ -43,6 +44,8 @@ export default function SourceExecutionWorkspaceR531({address,onAddress}:Props){
  };
  return <section className='o7-science-status' data-r531-source-execution='true' aria-label='Developmental source execution'>
   <article style={{flex:'1 1 100%'}}>
+   <div className='o7-r535-live-head'><div><span>LIVE DEVELOPMENTAL WORKSPACE</span><h2>Explore · Execute · Compare</h2><p>Operate source-backed models against the shared Atlas address. Outputs are representational model results, not empirical measurements.</p></div><div className='o7-r535-address'>ADDRESS <strong>{address.toLocaleString()}</strong><small>of 20,736 states</small></div></div>
+   <div className='o7-r535-metric-grid' data-r535-live-metrics='true'><div><span>Continuity</span><strong>{packet.metrics.continuity.toFixed(3)}</strong></div><div><span>Plasticity</span><strong>{packet.metrics.plasticity.toFixed(3)}</strong></div><div><span>Scar</span><strong>{packet.metrics.scar.toFixed(3)}</strong></div><div><span>Contradiction</span><strong>{packet.metrics.contradiction.toFixed(3)}</strong></div></div>
    <span>Developmental execution · evidence-gated</span>
    <b>Read-only source execution · promotion independently governed</b>
    <small>Run existing local source models without modifying canonical state. Production promotion and host/device execution remain separately evidence-gated.</small>
@@ -96,6 +99,7 @@ export default function SourceExecutionWorkspaceR531({address,onAddress}:Props){
     <textarea aria-label='Source comparison snapshot JSON' data-r629-snapshot value={comparisonSnapshot} onChange={e=>{setComparisonSnapshot(e.target.value);setComparisonStatus('')}} rows={4} maxLength={65537} spellCheck={false} style={{display:'block',boxSizing:'border-box',width:'100%',maxWidth:'100%',marginTop:8}}/>
     <output role='status' data-r629-status={comparisonStatus.startsWith('REPLAY_VERIFIED')?'VERIFIED':comparisonStatus.startsWith('REFUSED')?'REFUSED':'INFO'}>{comparisonStatus}</output>
    </div>}
+   {modelReceipt?.status==='SOURCE_MODEL_EXECUTED'&&<div className='o7-r535-result' data-r535-live-result={modelReceipt.executor}><b>{modelReceipt.executor==='VISUALIZATION'?'Geometry computed':modelReceipt.executor==='TRAVERSAL'?'Traversal successor computed':'Forecast successor computed'}</b><p>{modelReceipt.executor==='VISUALIZATION'?`${modelReceipt.geometry.shellCount} shells · ${modelReceipt.geometry.edgeCount} rendered edges`: `Model address ${computedNext?.toLocaleString()} · current address ${address.toLocaleString()}`}</p>{computedNext!==null&&Number.isSafeInteger(computedNext)&&<button type='button' data-r535-apply-next onClick={()=>{onAddress(computedNext);setModelReceipt(null);setCapabilityReceipt(null);setReceipt(null);setTraceReceipt(null);setComparisonReceipt(null)}}>Open computed address</button>}<small>Read-only calculation · shared address changes only when you explicitly open it</small></div>}
    {modelReceipt&&<div data-r533-model-receipt={modelReceipt.status} role='status' style={{marginTop:10}}>
     <b>{modelReceipt.status}</b>
     <small>{modelReceipt.status==='SOURCE_MODEL_EXECUTED'?JSON.stringify(modelReceipt):modelReceipt.reasons.join(' · ')}</small>
