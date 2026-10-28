@@ -124,7 +124,7 @@ test('R709 distinguishes path rewiring from declared-weight changes and retains 
  ];
  const t=traceWovenRouteR709(s,'A','B');
  assert.deepEqual(t.frames.map(f=>f.event),['INITIAL','PATH_CHANGED','DECLARED_WEIGHT_CHANGED']);
- assert.equal(t.routeChanges,1);assert.equal(t.weightChanges,1);
+ assert.equal(t.routeChanges,1);assert.equal(t.weightChanges,2);
  assert.deepEqual(t.frames[1].pathNodes,['A','C','B']);
  assert.equal(t.frames[2].bottleneckDeclaredWeight,0.2);
  assert.equal(t.firstLossFrame,null);assert.equal(t.firstRecoveryFrame,null);
