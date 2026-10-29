@@ -22,4 +22,10 @@ assert.throws(()=>executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:
 assert.throws(()=>restoreComputationalSessionR711('{}'),/session envelope/);
 const ui=readFileSync(new URL('../src7/WovenTopologyR707.tsx',import.meta.url),'utf8');
 for(const token of ['executeComputationalSessionR711','data-r711-session','data-r711-summary','data-r711-export'])assert.ok(ui.includes(token),token);
-console.log('R711 integrated source session invariants PASS');
+const auditUi=readFileSync(new URL('../src7/CapabilityRecoveryAuditR705.tsx',import.meta.url),'utf8');
+for(const token of ['restoreComputationalSessionR711','data-r712-import-input','data-r712-import','omega7.r711.session.v1','independently recomputed'])assert.ok(auditUi.includes(token),token);
+for(const token of ['data-r712-save','data-r712-save-status','initialOrigin','initialTarget','initialMirrored'])assert.ok(ui.includes(token),token);
+const other=executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'B',target:'A',mirrored:true});
+assert.deepEqual(restoreComputationalSessionR711(other.sessionJson).continuity,other.continuity);
+assert.throws(()=>restoreComputationalSessionR711(JSON.stringify({...JSON.parse(other.sessionJson),proof:{production:true}})),/session envelope/);
+console.log('R711/R712 integrated source session and recovery invariants PASS');
