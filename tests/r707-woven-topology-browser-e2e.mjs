@@ -86,11 +86,21 @@ try{
    if(await joint.locator('[data-r716-next]').isEnabled())throw Error(device+': R716 falsely reports additional pairs');
    await root.locator('[data-r718-first-frame]').selectOption('0');
    await root.locator('[data-r718-first-edge]').selectOption('0');
+   // Exercise a genuine second-frame transition. Selecting '1' while the
+   // initial controlled value is already '1' is not a change event in a
+   // browser, so it cannot establish that React accepted a new selection.
+   await root.locator('[data-r718-second-frame]').selectOption('2');
+   if(await root.locator('[data-r718-second-frame]').inputValue()!=='2'){
+    const opts=await root.locator('[data-r718-second-frame] option').evaluateAll(nodes=>nodes.map(n=>n.value));
+    throw Error(device+': R718 second-frame transition to 2 reverted; available '+JSON.stringify(opts));
+   }
    await root.locator('[data-r718-second-frame]').selectOption('1');
-   // A frame change must survive React's controlled-select update before the
-   // dependent edge select is changed. Diagnose each transition separately.
-   if(await root.locator('[data-r718-second-frame]').inputValue()!=='1')
-    throw Error(device+': R718 second-frame selection reverted immediately');
+   // A genuine frame change must survive React's controlled-select update
+   // before the dependent edge select is changed.
+   if(await root.locator('[data-r718-second-frame]').inputValue()!=='1'){
+    const opts=await root.locator('[data-r718-second-frame] option').evaluateAll(nodes=>nodes.map(n=>n.value));
+    throw Error(device+': R718 second-frame transition to 1 reverted; available '+JSON.stringify(opts));
+   }
    await root.locator('[data-r718-second-edge]').selectOption('0');
    await page.waitForTimeout(50);
    const visibleFrames=[
