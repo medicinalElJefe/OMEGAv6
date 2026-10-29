@@ -4,6 +4,7 @@ import {inspectWovenRouteR708} from '../src/wovenRouteInspectorR708.mjs';
 import {traceWovenRouteR709} from '../src/wovenRouteContinuityR709.mjs';
 import {inspectWovenEdgeResilienceR710} from '../src/wovenEdgeResilienceR710.mjs';
 import {executeComputationalSessionR711} from '../src/computationalSessionR711.mjs';
+import {SessionCounterfactualR713} from './SessionCounterfactualR713';
 
 // Source-bound R706/R623/R651/R653 visualization; not an independent state or proof writer.
 export function WovenTopologyR707({scenario,initialOrigin,initialTarget,initialMirrored=false}:{scenario:any;initialOrigin?:string;initialTarget?:string;initialMirrored?:boolean}){
@@ -77,6 +78,7 @@ export function WovenTopologyR707({scenario,initialOrigin,initialTarget,initialM
   </div>
   {portable&&<><label htmlFor='r707-static-svg'>Static SVG (copy to a .svg file; no scripts or executable authority)</label>
    <textarea id='r707-static-svg' data-r707-portable aria-label='Portable computed SVG' value={portable} readOnly rows={5} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}}/></>}
+  <SessionCounterfactualR713 baselineSession={session} frameIndex={frame} projection={projection}/>
   <small data-r708-boundary>{witness.boundary}</small>
   <small data-r707-truth-boundary>LOCAL_COMPUTED_VECTOR_MODEL_ONLY · {projection.boundary} Browser input persistence is supplied by R706; importing inputs recomputes every geometry frame.</small>
  </section>;
