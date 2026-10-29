@@ -41,7 +41,7 @@ export function normalizeScenarioR706(input){
  return {schema:'OMEGA_RELATIONAL_SCENARIO_R706',nodes,edgeFrames,step,mode,alpha};
 }
 export function parseScenarioR706(text){
- if(typeof text!=='string'||text.length>24000)throw Error('R706 scenario text exceeds bounded input');
+ if(typeof text!=='string'||text.length>131072)throw Error('R706 scenario text exceeds bounded input');
  return normalizeScenarioR706(JSON.parse(text));
 }
 export function exportScenarioR706(input){return JSON.stringify(normalizeScenarioR706(input),null,2);}
