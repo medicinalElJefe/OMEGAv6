@@ -45,6 +45,27 @@ for(const bad of [{frameIndex:-1},{frameIndex:3},{frameIndex:1.2},{offset:-1},{o
  assert.throws(()=>enumerateInterventionFrontierR715(input,bad),/R715/);
 assert.throws(()=>enumerateInterventionFrontierR715(JSON.stringify({...JSON.parse(input),authority:'PRODUCTION'})),/session envelope/);
 assert.equal(baseline.sourceScenario.edgeFrames[1][0].kind,'INGRESS','frontier must not mutate baseline');
+const alternate=structuredClone(DEFAULT_SCENARIO_R706);
+alternate.nodes.push({id:'C',continuity:0.3,scar:0,contradiction:0,plasticity:1});
+alternate.edgeFrames=Array.from({length:3},()=>[
+ {from:'A',to:'B',kind:'INGRESS',weight:0.5},
+ {from:'A',to:'C',kind:'INGRESS',weight:0.5},
+ {from:'C',to:'B',kind:'INGRESS',weight:0.5}
+]);
+const alternateSession=executeComputationalSessionR711(alternate,{origin:'A',target:'B'});
+const rerouted=enumerateInterventionFrontierR715(alternateSession.sessionJson,{frameIndex:0});
+assert.equal(rerouted.candidates[0].routeLossFrames,0);
+assert.ok(rerouted.candidates[0].changedRouteFrames>0);
+assert.equal(rerouted.candidates[0].gate,'MODEL_ROUTE_CHANGE');
+const many=structuredClone(DEFAULT_SCENARIO_R706);
+many.edgeFrames=Array.from({length:3},()=>Array.from({length:9},()=>({from:'A',to:'B',kind:'INGRESS',weight:0.1})));
+const manySession=executeComputationalSessionR711(many);
+const pageA=enumerateInterventionFrontierR715(manySession.sessionJson,{frameIndex:0,limit:8});
+const pageB=enumerateInterventionFrontierR715(manySession.sessionJson,{frameIndex:0,offset:8,limit:8});
+assert.equal(pageA.coverage,'PARTIAL_DECLARED_FRAME');
+assert.equal(pageA.hasMore,true);
+assert.equal(pageB.hasMore,false);
+assert.deepEqual([...pageA.candidates,...pageB.candidates].map(x=>x.edgeIndex),Array.from({length:9},(_,i)=>i));
 const ui=readFileSync(new URL('../src7/SessionCounterfactualR713.tsx',import.meta.url),'utf8');
 for(const token of ['enumerateInterventionFrontierR715','data-r715-run','data-r715-coverage','data-r715-edge-row','data-r715-boundary','data-r715-error'])
  assert.ok(ui.includes(token),token);
