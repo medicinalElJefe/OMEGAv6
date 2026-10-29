@@ -44,6 +44,14 @@ try{
    await root.locator('[data-r711-export]').click();
    const portableSession=JSON.parse(await root.locator('[data-r711-portable]').inputValue());
    if(portableSession.schema!=='OMEGA_COMPUTATIONAL_SESSION_INPUT_R711'||portableSession.origin!=='B'||portableSession.target!=='A'||portableSession.mirrored!==true||portableSession.scenario.edgeFrames.length!==3)throw Error(device+': R711 portable session lost source/route/observer');
+   await root.locator('[data-r713-edge]').selectOption('edge-1');
+   await root.locator('[data-r713-intervene]').click();
+   const counterfactual=await root.locator('[data-r713-summary]').innerText();
+   if(!counterfactual.includes('1 changed source frames')||!counterfactual.includes('1 changed route frames'))throw Error(device+': R713 developmental route intervention was not recomputed');
+   if(!(await root.locator('[data-r708-path-status]').innerText()).includes('ADMISSIBLE GRAPH PATH: B → A'))throw Error(device+': R713 intervention mutated baseline route');
+   await root.locator('[data-r713-candidate]').fill(JSON.stringify({...portableSession,authority:'FORGED'}));
+   await root.locator('[data-r713-compare]').click();
+   if(!(await root.locator('[data-r713-error]').innerText()).includes('REFUSED'))throw Error(device+': R713 forged candidate was not refused');
    await root.locator('[data-r712-save]').click();
    if(!(await root.locator('[data-r712-save-status]').innerText()).includes('Saved portable'))throw Error(device+': R712 save acknowledgement absent');
    await page.reload({waitUntil:'domcontentloaded'});
