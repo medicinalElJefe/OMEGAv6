@@ -49,6 +49,13 @@ try{
    const counterfactual=await root.locator('[data-r713-summary]').innerText();
    if(!counterfactual.includes('1 changed source frames')||!counterfactual.includes('1 changed route frames'))throw Error(device+': R713 developmental route intervention was not recomputed');
    if(!(await root.locator('[data-r708-path-status]').innerText()).includes('ADMISSIBLE GRAPH PATH: B → A'))throw Error(device+': R713 intervention mutated baseline route');
+   const derivative=root.locator('[data-r714-derivatives]');
+   if(await derivative.locator('[data-r714-order]').count()!==3)throw Error(device+': R714 derivative orders missing');
+   const jerkChanges=Number(await derivative.locator('[data-r714-order="jerk"] td').nth(1).innerText());
+   if(!(jerkChanges>0))throw Error(device+': R714 jerk did not recompute from intervention');
+   await derivative.locator('[data-r714-witnesses] summary').click();
+   if(!(await derivative.locator('[data-r714-witnesses]').innerText()).includes('Sample 0'))throw Error(device+': R714 finite-difference witness missing');
+   if(!(await derivative.locator('[data-r714-boundary]').innerText()).includes('not measured time'))throw Error(device+': R714 scientific truth boundary missing');
    await root.locator('[data-r713-candidate]').fill(JSON.stringify({...portableSession,authority:'FORGED'}));
    await root.locator('[data-r713-compare]').click();
    if(!(await root.locator('[data-r713-error]').innerText()).includes('REFUSED'))throw Error(device+': R713 forged candidate was not refused');
