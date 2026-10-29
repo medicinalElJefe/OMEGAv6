@@ -13,6 +13,8 @@ assert.equal(first.evaluatedPairs,0,'single-cut proof prunes unnecessary pairs')
 assert.equal(first.frames[1].minimumCutSize,1);
 assert.deepEqual(first.frames[1].witnesses.map(w=>w.edgeIndices),[[1]]);
 assert.equal(first.frames[1].status,'MINIMUM_CUT_PROVED');
+assert.equal(first.frames[0].status,'OUTSIDE_SELECTED_SOURCE_FRAME');
+assert.equal(first.frames[2].status,'OUTSIDE_SELECTED_SOURCE_FRAME');
 assert.deepEqual(analyzeMinimalRouteCutsR717(original.sessionJson,{frameIndex:1}),first);
 assert.equal(original.sourceScenario.edgeFrames[1][1].kind,'RETURN');
 
