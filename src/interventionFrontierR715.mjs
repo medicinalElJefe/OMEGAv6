@@ -28,7 +28,7 @@ export function enumerateInterventionFrontierR715(sessionJson,{frameIndex=0,offs
    changedNodeStates:comparison.changedNodeStates,changedRouteFrames:comparison.changedRouteFrames,
    routeLossFrames,firstStateDivergence:comparison.firstStateDivergence,
    firstRouteDivergence:comparison.firstRouteDivergence,peakByOrder,
-   gate:routeLossFrames>0?'MODEL_ROUTE_LOSS':comparison.changedNodeStates>0?'MODEL_STATE_SENSITIVITY':'NO_OBSERVED_MODEL_STATE_CHANGE'};
+   gate:routeLossFrames>0?'MODEL_ROUTE_LOSS':comparison.changedRouteFrames>0?'MODEL_ROUTE_CHANGE':comparison.changedNodeStates>0?'MODEL_STATE_SENSITIVITY':'NO_OBSERVED_MODEL_CHANGE'};
  });
  const ranking=[...candidates].sort((a,b)=>b.routeLossFrames-a.routeLossFrames||
   b.changedRouteFrames-a.changedRouteFrames||b.changedNodeStates-a.changedNodeStates||
