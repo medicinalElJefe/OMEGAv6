@@ -49,6 +49,24 @@ try{
    const counterfactual=await root.locator('[data-r713-summary]').innerText();
    if(!counterfactual.includes('1 changed source frames')||!counterfactual.includes('1 changed route frames'))throw Error(device+': R713 developmental route intervention was not recomputed');
    if(!(await root.locator('[data-r708-path-status]').innerText()).includes('ADMISSIBLE GRAPH PATH: B → A'))throw Error(device+': R713 intervention mutated baseline route');
+   const derivative=root.locator('[data-r714-derivatives]');
+   if(await derivative.locator('[data-r714-order]').count()!==3)throw Error(device+': R714 derivative orders missing');
+   const jerkRow=derivative.locator('[data-r714-order="jerk"]');
+   const jerkChanges=Number(await jerkRow.locator('td').nth(1).innerText());
+   const jerkPeak=await jerkRow.locator('td').nth(3).innerText();
+   if(!Number.isSafeInteger(jerkChanges)||jerkChanges<0||((jerkChanges===0)!==(jerkPeak==='none')))
+    throw Error(device+': R714 derivative count/peak contradicts its computed witness');
+   await derivative.locator('[data-r714-witnesses] summary').click();
+   if(!(await derivative.locator('[data-r714-witnesses]').innerText()).includes('Sample 0'))throw Error(device+': R714 finite-difference witness missing');
+   // The first intervention blocks a RETURN edge and may alter graph reachability
+   // without altering the state kernel. Require a positive third derivative only
+   // for the independently regression-proved state-changing frame-2 INGRESS cut.
+   await root.locator('[data-r709-frame-choice="1"]').click();
+   await root.locator('[data-r713-edge]').selectOption('edge-0');
+   await root.locator('[data-r713-intervene]').click();
+   const positiveJerk=Number(await root.locator('[data-r714-order="jerk"] td').nth(1).innerText());
+   if(!(positiveJerk>0))throw Error(device+': R714 frame-2 INGRESS intervention failed to propagate into recomputed jerk');
+   if(!(await derivative.locator('[data-r714-boundary]').innerText()).includes('not measured time'))throw Error(device+': R714 scientific truth boundary missing');
    await root.locator('[data-r713-candidate]').fill(JSON.stringify({...portableSession,authority:'FORGED'}));
    await root.locator('[data-r713-compare]').click();
    if(!(await root.locator('[data-r713-error]').innerText()).includes('REFUSED'))throw Error(device+': R713 forged candidate was not refused');
