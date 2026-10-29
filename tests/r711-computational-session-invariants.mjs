@@ -11,13 +11,15 @@ for(const f of a.frames){
  assert.equal(f.resilience.sourceFrame,f.frameIndex);
  assert.ok(f.svg.includes('<svg'));
 }
-const b=restoreComputationalSessionR711(a.sourceJson,{origin:'A',target:'B'});
+const b=restoreComputationalSessionR711(a.sessionJson);
 assert.deepEqual(b,a);
+assert.throws(()=>restoreComputationalSessionR711(JSON.stringify({...JSON.parse(a.sessionJson),origin:'FORGED'})),/endpoints/);
+assert.throws(()=>restoreComputationalSessionR711(JSON.stringify({...JSON.parse(a.sessionJson),authority:'PRODUCTION'})),/session envelope/);
 const mirrored=executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'A',target:'B',mirrored:true});
 assert.notDeepEqual(mirrored.frames[0].projection.nodes.map(n=>n.x),a.frames[0].projection.nodes.map(n=>n.x));
 assert.deepEqual(mirrored.replay.canonicalHistory,a.replay.canonicalHistory);
 assert.throws(()=>executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'FORGED'}),/endpoints/);
-assert.throws(()=>restoreComputationalSessionR711('{}'),/R706/);
+assert.throws(()=>restoreComputationalSessionR711('{}'),/session envelope/);
 const ui=readFileSync(new URL('../src7/WovenTopologyR707.tsx',import.meta.url),'utf8');
 for(const token of ['executeComputationalSessionR711','data-r711-session','data-r711-summary','data-r711-export'])assert.ok(ui.includes(token),token);
 console.log('R711 integrated source session invariants PASS');
