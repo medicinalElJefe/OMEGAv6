@@ -48,8 +48,8 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
    {frontierError&&<p role='alert' data-r715-error>REFUSED: {frontierError}</p>}
    {frontier&&<div data-r715-result>
     <p role='status' data-r715-coverage>{frontier.evaluated} of {frontier.totalEligible} eligible source edges evaluated on this page · offset {frontier.offset} · {frontier.coverage==='COMPLETE_DECLARED_FRAME'?'complete declared-frame coverage':'partial declared-frame coverage; other edges not yet evaluated'}</p>
-    <div style={{maxWidth:'100%',overflowX:'auto'}}><table><thead><tr><th>Source edge</th><th>Model gate</th><th>Lost route frames</th><th>Changed node states</th><th>Peak jerk delta</th></tr></thead><tbody>
-     {frontier.ranking.map((item:any)=><tr key={item.edgeIndex} data-r715-edge-row={item.edgeIndex}><td>{item.from} → {item.to} ({item.kind}, #{item.edgeIndex})</td><td data-r715-impact>{item.gate}</td><td>{item.routeLossFrames}</td><td>{item.changedNodeStates}</td><td>{item.peakByOrder.jerk.toFixed(5)}</td></tr>)}
+    <div style={{maxWidth:'100%',overflowX:'auto'}}><table><thead><tr><th>Source edge</th><th>Model gate</th><th>Lost route frames</th><th>Changed route frames</th><th>Changed node states</th><th>Peak jerk delta</th></tr></thead><tbody>
+     {frontier.ranking.map((item:any)=><tr key={item.edgeIndex} data-r715-edge-row={item.edgeIndex}><td>{item.from} → {item.to} ({item.kind}, #{item.edgeIndex})</td><td data-r715-impact>{item.gate}</td><td>{item.routeLossFrames}</td><td>{item.changedRouteFrames}</td><td>{item.changedNodeStates}</td><td>{item.peakByOrder.jerk.toFixed(5)}</td></tr>)}
     </tbody></table></div>
     <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
      <button type='button' data-r715-prev disabled={frontier.offset===0} onClick={()=>evaluateFrontier(Math.max(0,frontier.offset-8))}>Previous eligible edges</button>
