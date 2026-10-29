@@ -140,11 +140,11 @@ try{
    if(!svg.includes('<svg ')||!svg.includes('MODEL ONLY')||/<script|onload=|onclick=/i.test(svg))throw Error(device+': unsafe or absent static vector export');
    await root.locator('[data-r708-origin]').selectOption('A');
    await root.locator('[data-r708-target]').selectOption('B');
-   const temporal=JSON.parse(await input.inputValue());
-   temporal.edgeFrames[1][0].kind='BLOCKED';
-   temporal.edgeFrames[2][0].kind='RESIDUE';
-   temporal.edgeFrames[2][0].weight=0.4;
-   await input.fill(JSON.stringify(temporal));
+   const editedTimeline=JSON.parse(await input.inputValue());
+   editedTimeline.edgeFrames[1][0].kind='BLOCKED';
+   editedTimeline.edgeFrames[2][0].kind='RESIDUE';
+   editedTimeline.edgeFrames[2][0].weight=0.4;
+   await input.fill(JSON.stringify(editedTimeline));
    await page.locator('[data-r624-execute]').click();
    const timeRoot=page.locator('[data-r707-vector-instrument="source-model-only"]');
    await timeRoot.waitFor({state:'visible',timeout:10000});
