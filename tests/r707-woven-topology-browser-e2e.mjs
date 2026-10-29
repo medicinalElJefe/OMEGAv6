@@ -90,7 +90,12 @@ try{
    await root.locator('[data-r718-second-edge]').selectOption('0');
    await root.locator('[data-r718-run]').click();
    const temporal=root.locator('[data-r718-result]');
-   await temporal.waitFor({state:'visible',timeout:30000});
+   // Wait for either a computed result or an explicit model refusal; report the
+   // refusal immediately instead of disguising it as a 30-second selector timeout.
+   await page.waitForFunction(()=>!!document.querySelector('[data-r718-result], [data-r718-error]'),null,{timeout:30000});
+   const temporalRefusal=await root.locator('[data-r718-error]').allInnerTexts();
+   if(temporalRefusal.length)throw Error(device+': R718 model refused valid cross-frame selection: '+temporalRefusal.join(' | '));
+   await temporal.waitFor({state:'visible',timeout:10000});
    if(await temporal.locator('[data-r718-timeline]').count()!==4)throw Error(device+': R718 did not recompute full longitudinal state timeline');
    if(!(await temporal.locator('[data-r718-summary]').innerText()).includes('joint-changed node states'))throw Error(device+': R718 source-model carry missing');
    if(!(await temporal.locator('[data-r718-boundary]').innerText()).includes('not exhaustive cross-frame search'))throw Error(device+': R718 source-model boundary missing');
