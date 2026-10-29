@@ -88,6 +88,16 @@ try{
    await root.locator('[data-r718-first-edge]').selectOption('0');
    await root.locator('[data-r718-second-frame]').selectOption('1');
    await root.locator('[data-r718-second-edge]').selectOption('0');
+   const visibleFrames=[
+    await root.locator('[data-r718-first-frame]').inputValue(),
+    await root.locator('[data-r718-second-frame]').inputValue()
+   ];
+   const visibleEdges=[
+    await root.locator('[data-r718-first-edge]').inputValue(),
+    await root.locator('[data-r718-second-edge]').inputValue()
+   ];
+   if(visibleFrames.join('/')!=='0/1'||visibleEdges.join('/')!=='0/0')
+    throw Error(device+': R718 visible cross-frame selection drift: '+visibleFrames.join('/')+' edges '+visibleEdges.join('/'));
    await root.locator('[data-r718-run]').click();
    const temporal=root.locator('[data-r718-result]');
    // Wait for either a computed result or an explicit model refusal; report the
