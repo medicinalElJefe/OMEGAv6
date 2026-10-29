@@ -44,3 +44,15 @@ This ledger follows the R474 year-corpus capability graph: **identity → lineag
 - No competing candidate, no bypass of the eight required workflow families, no direct production mutation outside the canonical `ci.yml` release path.
 - **R2 migration canceled:** no paid activation, R2 uploads, or deletion of original files/backups.
 - Full historical OMEGA restoration is **not complete** until every agreed acceptance criterion has independently observed proof.
+
+
+## Latest observed checkpoint — R711 production and R712 governed candidate (2026-10-28 Arizona / 2026-10-29 UTC)
+
+This section supersedes earlier *current candidate* labels above; those are retained as historical evidence, not as current PR status.
+
+- R711 PR [#1171](https://github.com/medicinalElJefe/OMEGAv6/pull/1171) merged from exact green candidate `fab3d05b667b2fb9523699632b208f10c67a3459` to `439e4c48186299bafedaaab05b05fa23421ccdc6`.
+- [Production workflow #40808991229](https://github.com/medicinalElJefe/OMEGAv6/actions/runs/40808991229) completed successfully: verify, deploy-main, post-deploy-authority-closure, and governed continuation. Live R707/R708/R709/R710/**R711** desktop and mobile browser proofs passed against exact promoted SHA, including source-computed topology, typed refusal, observer mirror, frame controls, portable JSON and recomputation.
+- Exact production Worker version **`7b03b055-4a2e-4e17-b927-f997bcf73098`**; previous Worker **`0d819ea3-bd1e-45e6-91ae-ec67cdd0d0e5`**. Rollback baseline SHA `aa24429fb5eb258c9be1e9805d510235a957c31a` was eligible; automatic rollback was not needed. Production Hybrid proof still returned **zero authenticated public devices**.
+- **R711 accepted scope:** bounded R706/R623 developmental source replay, R707 frame projections, R709 route history and R710 single-edge resilience composed into one deterministic source session with portable input envelope. Not original AG-009 mathematics, empirical prediction, CanonState admission, authenticated native GPU or complete historical restoration.
+- **R712 active candidate:** [PR #1173](https://github.com/medicinalElJefe/OMEGAv6/pull/1173), session import, saved-source recovery, parent/child workspace rebind, strict refusal, browser tests. Competing [PR #1172](https://github.com/medicinalElJefe/OMEGAv6/pull/1172) closed without merge after R210 duplicate-revision detection; branch retained for provenance. Candidate must pass all eight exact-head workflows, updated desktop/mobile browser tests, governed merge, exact production Worker identity, live behavior and rollback proof before R712 acceptance.
+- **Unresolved:** authenticated original AG-009/HSV-07 semantics and renderer parity; exhaustive year-corpus strongest-lineage conservation; complete intelligence and memory/application integration; native Windows GPU execution and host identity; original historical asset provenance. No R2 migration, paid activation or destructive backup changes.
