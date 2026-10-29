@@ -20,10 +20,15 @@ export function executeComputationalSessionR711(input,{origin,target,mirrored=fa
  });
  return {schema:'OMEGA_COMPUTATIONAL_SESSION_R711',truthClass:'LOCAL_SOURCE_EXECUTION_ONLY',
   sourceScenario:scenario,sourceJson:exportScenarioR706(scenario),origin:from,target:to,mirrored,
+  sessionJson:JSON.stringify({schema:'OMEGA_COMPUTATIONAL_SESSION_INPUT_R711',scenario,origin:from,target:to,mirrored}),
   replay,continuity,frames,
   boundary:'Composed deterministic R706/R707/R709/R710 source execution. No historical AG-009 equation parity, CanonState admission, native GPU, empirical prediction or production acceptance is implied.'};
 }
-export function restoreComputationalSessionR711(serialized,options={}){
- if(typeof serialized!=='string'||serialized.length>24000)throw Error('R711 serialized source exceeds limit');
- return executeComputationalSessionR711(JSON.parse(serialized),options);
+export function restoreComputationalSessionR711(serialized){
+ if(typeof serialized!=='string'||serialized.length>24000)throw Error('R711 serialized session exceeds limit');
+ const envelope=JSON.parse(serialized);
+ if(envelope===null||typeof envelope!=='object'||Array.isArray(envelope)||
+  envelope.schema!=='OMEGA_COMPUTATIONAL_SESSION_INPUT_R711'||
+  Object.keys(envelope).some(k=>!['schema','scenario','origin','target','mirrored'].includes(k)))throw Error('R711 unsupported session envelope');
+ return executeComputationalSessionR711(envelope.scenario,{origin:envelope.origin,target:envelope.target,mirrored:envelope.mirrored});
 }
