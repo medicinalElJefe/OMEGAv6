@@ -3,6 +3,7 @@ import {exportWovenTopologySvgR707,projectWovenTopologyR707} from '../src/wovenT
 import {inspectWovenRouteR708} from '../src/wovenRouteInspectorR708.mjs';
 import {traceWovenRouteR709} from '../src/wovenRouteContinuityR709.mjs';
 import {inspectWovenEdgeResilienceR710} from '../src/wovenEdgeResilienceR710.mjs';
+import {executeComputationalSessionR711} from '../src/computationalSessionR711.mjs';
 
 // Source-bound R706/R623/R651/R653 visualization; not an independent state or proof writer.
 export function WovenTopologyR707({scenario}:{scenario:any}){
@@ -14,6 +15,7 @@ export function WovenTopologyR707({scenario}:{scenario:any}){
  const witness=useMemo(()=>inspectWovenRouteR708(projection,origin,target),[projection,origin,target]);
  const timeline=useMemo(()=>traceWovenRouteR709(scenario,origin,target,mirrored),[scenario,origin,target,mirrored]);
  const resilience=useMemo(()=>inspectWovenEdgeResilienceR710(projection,origin,target),[projection,origin,target]);
+ const session=useMemo(()=>executeComputationalSessionR711(scenario,{origin,target,mirrored}),[scenario,origin,target,mirrored]);
  const selectedFailure=resilience.trials.find(t=>t.edgeId===failedEdgeId);
  const pathEdgeIds=new Set(selectedFailure?selectedFailure.pathEdgeIds:witness.pathEdges.map(e=>e.id));
  return <section aria-label='Executable woven topology vector instrument' data-r707-vector-instrument='source-model-only'
@@ -25,6 +27,11 @@ export function WovenTopologyR707({scenario}:{scenario:any}){
    <button type='button' data-r707-mirror aria-pressed={mirrored} onClick={()=>{setMirrored(v=>!v);setPortable('');}}>Reflect observer frame: {mirrored?'ON':'OFF'}</button>
    <button type='button' data-r707-export onClick={()=>setPortable(exportWovenTopologySvgR707(scenario,frame,mirrored))}>Prepare static SVG</button>
   </div>
+  <section data-r711-session aria-label='Integrated computational session' style={{padding:'8px 0',borderTop:'1px solid #596a74'}}>
+   <div role='status' data-r711-summary>R711 integrated execution · {session.frames.length} recomputed frames · {session.replay.summary.nodes} canonical source nodes · {session.continuity.reachableFrames} reachable route frames · {session.frames.reduce((sum,f)=>sum+f.resilience.criticalEdgeCount,0)} frame-specific critical-edge witnesses</div>
+   <button type='button' data-r711-export onClick={()=>setPortable(session.sourceJson)}>Prepare reproducible session source JSON</button>
+   <small data-r711-boundary>{session.boundary}</small>
+  </section>
   <div role='status' data-r707-topology-summary style={{marginBottom:8,fontSize:13}}>
    {projection.topology.nodes} nodes · {projection.topology.edges} directional edges · {projection.topology.blocked} blocked · {projection.topology.returns} return · {projection.topology.multiParentNodes} multi-parent nodes · {projection.topology.directedCycles} detected directed cycles
   </div>
