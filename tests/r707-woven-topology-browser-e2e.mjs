@@ -76,6 +76,14 @@ try{
    if(!(await frontier.locator('[data-r715-edge-row="0"] [data-r715-impact]').innerText()).includes('MODEL_STATE_SENSITIVITY'))throw Error(device+': R715 A → B INGRESS cut must change modeled state without losing B → A route');
    if(!(await frontier.locator('[data-r715-boundary]').innerText()).includes('No empirical prediction'))throw Error(device+': R715 model-only truth boundary missing');
    if(await frontier.locator('[data-r715-next]').isEnabled())throw Error(device+': R715 falsely reports additional edges');
+   await root.locator('[data-r716-run]').click();
+   const joint=root.locator('[data-r716-result]');
+   await joint.waitFor({state:'visible',timeout:30000});
+   if(!(await joint.locator('[data-r716-coverage]').innerText()).includes('1 of 1 eligible edge pairs evaluated'))throw Error(device+': R716 pair coverage incorrect');
+   if(await joint.locator('[data-r716-row]').count()!==1)throw Error(device+': R716 pair not independently evaluated');
+   if(!(await joint.locator('[data-r716-row="0-1"] [data-r716-gate]').innerText()).includes('MODEL_ROUTE_LOSS'))throw Error(device+': R716 joint cut did not lose reverse RETURN route');
+   if(!(await joint.locator('[data-r716-boundary]').innerText()).includes('not empirical causation'))throw Error(device+': R716 scientific truth boundary missing');
+   if(await joint.locator('[data-r716-next]').isEnabled())throw Error(device+': R716 falsely reports additional pairs');
    await root.locator('[data-r713-candidate]').fill(JSON.stringify({...portableSession,authority:'FORGED'}));
    await root.locator('[data-r713-compare]').click();
    if(!(await root.locator('[data-r713-error]').innerText()).includes('REFUSED'))throw Error(device+': R713 forged candidate was not refused');

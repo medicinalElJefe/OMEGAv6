@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react';
 import {executeComputationalSessionR711} from '../src/computationalSessionR711.mjs';
 import {compareComputationalSessionsR713} from '../src/computationalSessionComparisonR713.mjs';
 import {enumerateInterventionFrontierR715} from '../src/interventionFrontierR715.mjs';
+import {enumerateJointInterventionsR716} from '../src/jointInterventionCompositionR716.mjs';
 
 // Local source-model intervention only; never an edit to CanonState.
 export function SessionCounterfactualR713({baselineSession,frameIndex,projection}:{baselineSession:any;frameIndex:number;projection:any}){
@@ -11,7 +12,9 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  const [error,setError]=useState('');
  const [frontier,setFrontier]=useState<any|null>(null);
  const [frontierError,setFrontierError]=useState('');
- useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');},[baselineSession.sessionJson,frameIndex]);
+ const [joint,setJoint]=useState<any|null>(null);
+ const [jointError,setJointError]=useState('');
+ useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');setJoint(null);setJointError('');},[baselineSession.sessionJson,frameIndex]);
  const eligible=projection.edges.filter((e:any)=>e.kind!=='BLOCKED'&&e.weight>0);
  const chosen=eligible.find((e:any)=>e.id===edgeId)??eligible[0];
  function compare(text:string){
@@ -21,6 +24,10 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  function evaluateFrontier(offset=0){
   try{const result=enumerateInterventionFrontierR715(baselineSession.sessionJson,{frameIndex,offset,limit:8});setFrontier(result);setFrontierError('');}
   catch(e){setFrontier(null);setFrontierError(e instanceof Error?e.message:'Frontier refused');}
+ }
+ function evaluateJoint(offset=0){
+  try{const result=enumerateJointInterventionsR716(baselineSession.sessionJson,{frameIndex,offset,limit:6});setJoint(result);setJointError('');}
+  catch(e){setJoint(null);setJointError(e instanceof Error?e.message:'Joint intervention refused');}
  }
  function intervene(){
   if(!chosen){setError('No eligible source edge in this frame');return;}
@@ -56,6 +63,28 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
      <button type='button' data-r715-next disabled={!frontier.hasMore} onClick={()=>evaluateFrontier(frontier.offset+frontier.evaluated)}>Next eligible edges</button>
     </div>
     <small data-r715-boundary>{frontier.boundary}</small>
+   </div>}
+  </section>
+  <section data-r716-composition aria-label='Joint source-edge intervention composition' style={{margin:'12px 0',paddingTop:8,borderTop:'1px solid #65727d'}}>
+   <h6>R716 · Joint intervention and nonadditive model response</h6>
+   <p>Block each eligible source-edge pair together, recompute both single cuts and the joint cut, and inspect route redundancy and the finite state interaction residual. This is local graph and mathematical model behavior, not a causal forecast.</p>
+   <button type='button' data-r716-run onClick={()=>evaluateJoint(0)}>Evaluate joint edge interventions</button>
+   {jointError&&<p role='alert' data-r716-error>REFUSED: {jointError}</p>}
+   {joint&&<div data-r716-result>
+    <p role='status' data-r716-coverage>{joint.evaluated} of {joint.totalEligiblePairs} eligible edge pairs evaluated on this page · {joint.coverage==='COMPLETE_DECLARED_FRAME_PAIRS'?'complete declared-frame pair coverage':'partial declared-frame pair coverage'} · offset {joint.offset}</p>
+    <div style={{maxWidth:'100%',overflowX:'auto'}}><table><thead><tr><th>Source pair</th><th>Model gate</th><th>Joint-only route losses</th><th>Total lost route frames</th><th>Changed node states</th><th>Peak state interaction residual</th><th>Peak jerk delta</th></tr></thead><tbody>
+     {joint.candidates.map((item:any)=><tr key={item.edgeIndices.join('-')} data-r716-row={item.edgeIndices.join('-')}>
+      <td>{item.edges.map((e:any)=>e.from+' → '+e.to+' ('+e.kind+', #'+e.index+')').join(' + ')}</td>
+      <td data-r716-gate>{item.gate}</td><td>{item.jointOnlyLossFrames.length}</td><td>{item.routeLossFrames}</td><td>{item.changedNodeStates}</td>
+      <td>{item.peakStateInteraction?item.peakStateInteraction.absoluteResidual.toFixed(6)+' ('+item.peakStateInteraction.nodeId+' '+item.peakStateInteraction.field+', state '+item.peakStateInteraction.stateIndex+')':'none'}</td>
+      <td>{item.peakJerk.toFixed(6)}</td>
+     </tr>)}
+    </tbody></table></div>
+    <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+     <button type='button' data-r716-prev disabled={joint.offset===0} onClick={()=>evaluateJoint(Math.max(0,joint.offset-6))}>Previous pairs</button>
+     <button type='button' data-r716-next disabled={!joint.hasMore} onClick={()=>evaluateJoint(joint.offset+joint.evaluated)}>Next pairs</button>
+    </div>
+    <small data-r716-boundary>{joint.boundary}</small>
    </div>}
   </section>
   {error&&<p role='alert' data-r713-error>REFUSED: {error}</p>}
