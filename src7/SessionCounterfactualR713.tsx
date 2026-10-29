@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {executeComputationalSessionR711} from '../src/computationalSessionR711.mjs';
 import {compareComputationalSessionsR713} from '../src/computationalSessionComparisonR713.mjs';
 import {enumerateInterventionFrontierR715} from '../src/interventionFrontierR715.mjs';
@@ -24,6 +24,8 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  const [secondFrame,setSecondFrame]=useState(1);
  const [firstEdge,setFirstEdge]=useState(0);
  const [secondEdge,setSecondEdge]=useState(0);
+ const firstFrameSelect=useRef<HTMLSelectElement>(null),secondFrameSelect=useRef<HTMLSelectElement>(null);
+ const firstEdgeSelect=useRef<HTMLSelectElement>(null),secondEdgeSelect=useRef<HTMLSelectElement>(null);
  useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');setTemporal(null);setTemporalError('');setFirstFrame(0);setSecondFrame(1);setFirstEdge(0);setSecondEdge(0);},[baselineSession.sessionJson,frameIndex]);
  const eligible=projection.edges.filter((e:any)=>e.kind!=='BLOCKED'&&e.weight>0);
  const chosen=eligible.find((e:any)=>e.id===edgeId)??eligible[0];
@@ -45,8 +47,14 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  }
  function evaluateTemporal(){
   try{
+   // Execute the exact values visibly selected by the user. React state may be
+   // awaiting an update after rapid successive native select changes.
+   const frameA=Number(firstFrameSelect.current?.value??firstFrame);
+   const frameB=Number(secondFrameSelect.current?.value??secondFrame);
+   const edgeA=Number(firstEdgeSelect.current?.value??selectedFirstEdge);
+   const edgeB=Number(secondEdgeSelect.current?.value??selectedSecondEdge);
    const result=compareCrossFrameInterventionsR718(baselineSession.sessionJson,{
-    firstFrameIndex:firstFrame,firstEdgeIndex:selectedFirstEdge,secondFrameIndex:secondFrame,secondEdgeIndex:selectedSecondEdge
+    firstFrameIndex:frameA,firstEdgeIndex:edgeA,secondFrameIndex:frameB,secondEdgeIndex:edgeB
    });
    setTemporal(result);setTemporalError('');
   }catch(e){setTemporal(null);setTemporalError(e instanceof Error?e.message:'Temporal comparison refused');}
@@ -121,10 +129,10 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
    <h6>R718 · Temporal carry and cross-frame interaction</h6>
    <p>Choose two source edges in different frames. Recompute the baseline, both individual interventions and their composition, then inspect longitudinal continuity, scar and other state residuals. This is a mathematical source model, not an empirical forecast.</p>
    <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-    <label>First frame <select data-r718-first-frame value={firstFrame} onChange={e=>{setFirstFrame(Number(e.target.value));setFirstEdge(eligibleAt(Number(e.target.value))[0]?.index??-1);setTemporal(null);}}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
-    <label>First source edge <select data-r718-first-edge value={selectedFirstEdge} onChange={e=>{setFirstEdge(Number(e.target.value));setTemporal(null);}}>{eligibleAt(firstFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
-    <label>Second frame <select data-r718-second-frame value={secondFrame} onChange={e=>{setSecondFrame(Number(e.target.value));setSecondEdge(eligibleAt(Number(e.target.value))[0]?.index??-1);setTemporal(null);}}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
-    <label>Second source edge <select data-r718-second-edge value={selectedSecondEdge} onChange={e=>{setSecondEdge(Number(e.target.value));setTemporal(null);}}>{eligibleAt(secondFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
+    <label>First frame <select data-r718-first-frame ref={firstFrameSelect} value={firstFrame} onChange={e=>{setFirstFrame(Number(e.target.value));setFirstEdge(eligibleAt(Number(e.target.value))[0]?.index??-1);setTemporal(null);}}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
+    <label>First source edge <select data-r718-first-edge ref={firstEdgeSelect} value={selectedFirstEdge} onChange={e=>{setFirstEdge(Number(e.target.value));setTemporal(null);}}>{eligibleAt(firstFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
+    <label>Second frame <select data-r718-second-frame ref={secondFrameSelect} value={secondFrame} onChange={e=>{setSecondFrame(Number(e.target.value));setSecondEdge(eligibleAt(Number(e.target.value))[0]?.index??-1);setTemporal(null);}}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
+    <label>Second source edge <select data-r718-second-edge ref={secondEdgeSelect} value={selectedSecondEdge} onChange={e=>{setSecondEdge(Number(e.target.value));setTemporal(null);}}>{eligibleAt(secondFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
    </div>
    <button type='button' data-r718-run onClick={evaluateTemporal}>Recompute cross-frame temporal interaction</button>
    {temporalError&&<p role='alert' data-r718-error>REFUSED: {temporalError}</p>}
