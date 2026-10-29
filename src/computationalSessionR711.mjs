@@ -25,7 +25,7 @@ export function executeComputationalSessionR711(input,{origin,target,mirrored=fa
   boundary:'Composed deterministic R706/R707/R709/R710 source execution. No historical AG-009 equation parity, CanonState admission, native GPU, empirical prediction or production acceptance is implied.'};
 }
 export function restoreComputationalSessionR711(serialized){
- if(typeof serialized!=='string'||serialized.length>24000)throw Error('R711 serialized session exceeds limit');
+ if(typeof serialized!=='string'||serialized.length>65536)throw Error('R711 serialized session exceeds limit');
  const envelope=JSON.parse(serialized);
  if(envelope===null||typeof envelope!=='object'||Array.isArray(envelope)||
   envelope.schema!=='OMEGA_COMPUTATIONAL_SESSION_INPUT_R711'||
