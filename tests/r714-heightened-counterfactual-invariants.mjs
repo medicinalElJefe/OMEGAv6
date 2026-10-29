@@ -19,13 +19,21 @@ assert.ok(result.orders.velocity.changedSamples>0,'source intervention must chan
 assert.ok(result.orders.jerk.changedSamples>0,'source intervention must propagate into actual jerk');
 const step=baseline.sourceScenario.step;
 const left=baseline.replay.canonicalHistory,right=intervention.replay.canonicalHistory;
-const stateDelta=(index,nodeIndex,metric)=>right[index][nodeIndex][metric]-left[index][nodeIndex][metric];
-for(const [sampleIndex,sample] of result.orders.velocity.samples.entries()){
- for(const node of sample.changedNodes){
-  const nodeIndex=left[0].findIndex(n=>n.id===node.id);
-  for(const metric of ['continuity','burden','scar','contradiction','plasticity']){
-   const expected=(stateDelta(sampleIndex+1,nodeIndex,metric)-stateDelta(sampleIndex,nodeIndex,metric))/step;
-   assert.ok(Math.abs(node.delta[metric]-expected)<1e-9,'velocity must derive from canonical states: '+metric);
+const metrics=['continuity','burden','scar','contradiction','plasticity'];
+const initialDeltas=left.map((frame,index)=>frame.map((node,nodeIndex)=>({id:node.id,...Object.fromEntries(metrics.map(metric=>[metric,right[index][nodeIndex][metric]-node[metric]]))})));
+const differentiate=frames=>frames.slice(1).map((frame,index)=>frame.map((node,nodeIndex)=>({id:node.id,...Object.fromEntries(metrics.map(metric=>[metric,(node[metric]-frames[index][nodeIndex][metric])/step]))})));
+let reference=initialDeltas;
+for(const order of ['velocity','acceleration','jerk']){
+ reference=differentiate(reference);
+ assert.equal(reference.length,result.orders[order].sampleCount,'derivative order length '+order);
+ for(const sample of result.orders[order].samples){
+  const expected=reference[sample.sampleIndex];
+  const actual=new Map(sample.changedNodes.map(node=>[node.id,node.delta]));
+  for(const node of expected){
+   for(const metric of metrics){
+    const observed=actual.get(node.id)?.[metric]??0;
+    assert.ok(Math.abs(observed-node[metric])<1e-9,order+' must derive from canonical state: '+node.id+'/'+metric);
+   }
   }
  }
 }
