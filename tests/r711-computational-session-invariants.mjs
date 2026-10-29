@@ -16,7 +16,7 @@ assert.deepEqual(b,a);
 assert.throws(()=>restoreComputationalSessionR711(JSON.stringify({...JSON.parse(a.sessionJson),origin:'FORGED'})),/endpoints/);
 assert.throws(()=>restoreComputationalSessionR711(JSON.stringify({...JSON.parse(a.sessionJson),authority:'PRODUCTION'})),/session envelope/);
 const mirrored=executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'A',target:'B',mirrored:true});
-assert.notDeepEqual(mirrored.frames[0].projection.nodes.map(n=>n.x),a.frames[0].projection.nodes.map(n=>n.x));
+for(let i=0;i<a.frames[0].projection.nodes.length;i++)assert.ok(Math.abs(mirrored.frames[0].projection.nodes[i].x+a.frames[0].projection.nodes[i].x-640)<0.02);
 assert.deepEqual(mirrored.replay.canonicalHistory,a.replay.canonicalHistory);
 assert.throws(()=>executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'FORGED'}),/endpoints/);
 assert.throws(()=>restoreComputationalSessionR711('{}'),/session envelope/);
