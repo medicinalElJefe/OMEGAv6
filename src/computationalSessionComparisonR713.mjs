@@ -1,4 +1,5 @@
 import {restoreComputationalSessionR711} from './computationalSessionR711.mjs';
+import {compareDevelopmentalDerivativesR714} from './developmentalSensitivityR714.mjs';
 
 // Compare two independently recomputed R711 source sessions. No imported outputs
 // or external authority claims are trusted, and the initial state is held fixed.
@@ -32,6 +33,7 @@ export function compareComputationalSessionsR713(baselineJson,interventionJson){
  return {schema:'OMEGA_COMPUTATIONAL_SESSION_COMPARISON_R713',truthClass:'LOCAL_RECOMPUTED_COUNTERFACTUAL_ONLY',
   origin:baseline.origin,target:baseline.target,mirrored:baseline.mirrored,
   sourceFrameCount:a.edgeFrames.length,changedSourceFrames,states,routes,
+  developmentalSensitivity:compareDevelopmentalDerivativesR714(baseline.replay.developmental,intervention.replay.developmental),
   changedNodeStates:states.reduce((sum,row)=>sum+row.changedNodes.length,0),
   changedRouteFrames:routes.filter(row=>row.reachabilityChanged||row.pathChanged).length,
   firstStateDivergence:states.find(row=>row.changedNodes.length)?.stateIndex??null,
