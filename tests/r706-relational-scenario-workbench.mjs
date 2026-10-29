@@ -28,7 +28,7 @@ test('R706 rejects forged authority, unknown endpoints, nonfinite states, and ex
  const c=clone();c.nodes[0].continuity=Infinity;assert.throws(()=>normalizeScenarioR706(c),/invalid continuity/);
  const d=clone();d.nodes.push({...d.nodes[0]});assert.throws(()=>normalizeScenarioR706(d),/duplicate/);
  const e=clone();e.edgeFrames=[e.edgeFrames[0]];assert.throws(()=>normalizeScenarioR706(e),/3..12/);
- assert.throws(()=>parseScenarioR706(' '.repeat(24001)),/bounded/);
+ assert.throws(()=>parseScenarioR706(' '.repeat(131073)),/bounded/);
 });
 test('R706 blocked conductance and mode lenses preserve state authority',()=>{
  const a=clone();a.edgeFrames=a.edgeFrames.map(edges=>edges.map(e=>({...e,kind:'BLOCKED'})));
