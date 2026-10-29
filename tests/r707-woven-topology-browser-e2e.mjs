@@ -90,11 +90,13 @@ try{
    // initial controlled value is already '1' is not a change event in a
    // browser, so it cannot establish that React accepted a new selection.
    await root.locator('[data-r718-second-frame]').selectOption('2');
+   await root.locator('[data-r718-second-frame][data-r718-second-frame-state="2"]').waitFor({state:'attached',timeout:10000});
    if(await root.locator('[data-r718-second-frame]').inputValue()!=='2'){
     const opts=await root.locator('[data-r718-second-frame] option').evaluateAll(nodes=>nodes.map(n=>n.value));
     throw Error(device+': R718 second-frame transition to 2 reverted; available '+JSON.stringify(opts));
    }
    await root.locator('[data-r718-second-frame]').selectOption('1');
+   await root.locator('[data-r718-second-frame][data-r718-second-frame-state="1"]').waitFor({state:'attached',timeout:10000});
    // A genuine frame change must survive React's controlled-select update
    // before the dependent edge select is changed.
    if(await root.locator('[data-r718-second-frame]').inputValue()!=='1'){
@@ -130,6 +132,7 @@ try{
    await root.locator('[data-r718-run]').click();
    if(!(await root.locator('[data-r718-error]').innerText()).includes('REFUSED'))throw Error(device+': R718 did not refuse same-frame pair');
    await root.locator('[data-r718-second-frame]').selectOption('1');
+   await root.locator('[data-r718-second-frame][data-r718-second-frame-state="1"]').waitFor({state:'attached',timeout:10000});
    await root.locator('[data-r718-run]').click();
    await temporal.waitFor({state:'visible',timeout:30000});
    await root.locator('[data-r717-run]').click();
