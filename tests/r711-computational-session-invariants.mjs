@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {DEFAULT_SCENARIO_R706} from '../src/relationalScenarioWorkbenchR706.mjs';
 import {executeComputationalSessionR711,restoreComputationalSessionR711} from '../src/computationalSessionR711.mjs';
 const a=executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'A',target:'B'});
@@ -17,4 +18,6 @@ assert.notDeepEqual(mirrored.frames[0].projection.nodes.map(n=>n.x),a.frames[0].
 assert.deepEqual(mirrored.replay.canonicalHistory,a.replay.canonicalHistory);
 assert.throws(()=>executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'FORGED'}),/endpoints/);
 assert.throws(()=>restoreComputationalSessionR711('{}'),/R706/);
+const ui=readFileSync(new URL('../src7/WovenTopologyR707.tsx',import.meta.url),'utf8');
+for(const token of ['executeComputationalSessionR711','data-r711-session','data-r711-summary','data-r711-export'])assert.ok(ui.includes(token),token);
 console.log('R711 integrated source session invariants PASS');
