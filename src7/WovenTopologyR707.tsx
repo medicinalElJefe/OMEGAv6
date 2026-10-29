@@ -6,9 +6,9 @@ import {inspectWovenEdgeResilienceR710} from '../src/wovenEdgeResilienceR710.mjs
 import {executeComputationalSessionR711} from '../src/computationalSessionR711.mjs';
 
 // Source-bound R706/R623/R651/R653 visualization; not an independent state or proof writer.
-export function WovenTopologyR707({scenario}:{scenario:any}){
- const [frame,setFrame]=useState(0),[mirrored,setMirrored]=useState(false),[portable,setPortable]=useState(''),[sessionPortable,setSessionPortable]=useState('');
- const [routeFrom,setRouteFrom]=useState(''),[routeTo,setRouteTo]=useState(''),[failedEdgeId,setFailedEdgeId]=useState('');
+export function WovenTopologyR707({scenario,initialOrigin,initialTarget,initialMirrored=false}:{scenario:any;initialOrigin?:string;initialTarget?:string;initialMirrored?:boolean}){
+ const [frame,setFrame]=useState(0),[mirrored,setMirrored]=useState(initialMirrored),[portable,setPortable]=useState(''),[sessionPortable,setSessionPortable]=useState(''),[sessionStatus,setSessionStatus]=useState('Not saved in this session.');
+ const [routeFrom,setRouteFrom]=useState(initialOrigin??''),[routeTo,setRouteTo]=useState(initialTarget??''),[failedEdgeId,setFailedEdgeId]=useState('');
  const projection=useMemo(()=>projectWovenTopologyR707(scenario,frame,mirrored),[scenario,frame,mirrored]);
  const origin=projection.nodes.some(n=>n.id===routeFrom)?routeFrom:projection.nodes[0].id;
  const target=projection.nodes.some(n=>n.id===routeTo)?routeTo:projection.nodes.at(-1)!.id;
@@ -30,6 +30,8 @@ export function WovenTopologyR707({scenario}:{scenario:any}){
   <section data-r711-session aria-label='Integrated computational session' style={{padding:'8px 0',borderTop:'1px solid #596a74'}}>
    <div role='status' data-r711-summary>R711 integrated execution · {session.frames.length} recomputed frames · {session.replay.summary.nodes} canonical source nodes · {session.continuity.reachableFrames} reachable route frames · {session.frames.reduce((sum,f)=>sum+f.resilience.criticalEdgeCount,0)} frame-specific critical-edge witnesses</div>
    <button type='button' data-r711-export onClick={()=>setSessionPortable(session.sessionJson)}>Prepare reproducible session JSON</button>
+   <button type='button' data-r712-save onClick={()=>{try{window.localStorage.setItem('omega7.r711.session.v1',session.sessionJson);setSessionStatus('Saved portable source session locally; restore recomputes every frame.');}catch{setSessionStatus('Local persistence unavailable; export session JSON instead.');}}}>Save current session for reload</button>
+   <span role='status' data-r712-save-status>{sessionStatus}</span>
    <small data-r711-boundary>{session.boundary}</small>
   </section>
   {sessionPortable&&<><label htmlFor='r711-session-json'>Portable computational session (source, endpoints and observer frame)</label><textarea id='r711-session-json' data-r711-portable aria-label='Portable computational session JSON' value={sessionPortable} readOnly rows={4} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}}/></>}
