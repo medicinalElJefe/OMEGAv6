@@ -51,8 +51,13 @@ for(const args of [
 const blocked=structuredClone(DEFAULT_SCENARIO_R706);
 blocked.edgeFrames[0][0].kind='BLOCKED';
 assert.throws(()=>compareCrossFrameInterventionsR718(executeComputationalSessionR711(blocked).sessionJson),/eligible/);
+// Source indices are not eligible-list ordinals: blocked #0 must not cause
+// the UI to submit #0 while visually displaying the eligible #1 option.
+const alternate=compareCrossFrameInterventionsR718(executeComputationalSessionR711(blocked).sessionJson,{firstFrameIndex:0,firstEdgeIndex:1,secondFrameIndex:1,secondEdgeIndex:0});
+assert.equal(alternate.selected[0].edgeIndex,1);
+assert.equal(alternate.selected[0].kind,'RETURN');
 assert.throws(()=>compareCrossFrameInterventionsR718(JSON.stringify({...JSON.parse(before),productionProof:true})),/session envelope/);
 const ui=readFileSync(new URL('../src7/SessionCounterfactualR713.tsx',import.meta.url),'utf8');
-for(const token of ['compareCrossFrameInterventionsR718','data-r718-run','data-r718-result','data-r718-timeline','data-r718-boundary'])
+for(const token of ['compareCrossFrameInterventionsR718','selectedFirstEdge','selectedSecondEdge','data-r718-run','data-r718-result','data-r718-timeline','data-r718-boundary'])
  assert.ok(ui.includes(token),'R718 UI missing '+token);
 console.log('R718 independent cross-frame temporal carry and nonadditive model interaction PASS');
