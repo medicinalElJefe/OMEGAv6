@@ -17,11 +17,14 @@ export function analyzeMinimalRouteCutsR717(sessionJson,{frameIndex=0}={}){
  const executeCuts=indices=>{
   const altered=JSON.parse(JSON.stringify(scenario));
   for(const index of indices)altered.edgeFrames[frameIndex][index].kind='BLOCKED';
-  return executeComputationalSessionR711(altered,{origin:baseline.origin,target:baseline.target,mirrored:baseline.mirrored});
+  const session=executeComputationalSessionR711(altered,{origin:baseline.origin,target:baseline.target,mirrored:baseline.mirrored});
+  for(let t=0;t<original.length;t++)if(t!==frameIndex&&session.continuity.frames[t].reachable!==original[t])
+   throw Error('R717 nonselected frame route changed; cut proof refused');
+  return session;
  };
  for(const {index} of eligible)singles.set(index,executeCuts([index]));
- const needsPairs=original.some((reachable,t)=>reachable&&
-  ![...singles.values()].some(session=>!session.continuity.frames[t].reachable));
+ const needsPairs=original[frameIndex]&&
+  ![...singles.values()].some(session=>!session.continuity.frames[frameIndex].reachable);
  if(needsPairs)for(let i=0;i<eligible.length;i++)for(let j=i+1;j<eligible.length;j++){
   const indices=[eligible[i].index,eligible[j].index];
   pairs.set(indices.join(','),executeCuts(indices));
