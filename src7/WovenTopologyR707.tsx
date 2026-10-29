@@ -3,11 +3,12 @@ import {exportWovenTopologySvgR707,projectWovenTopologyR707} from '../src/wovenT
 import {inspectWovenRouteR708} from '../src/wovenRouteInspectorR708.mjs';
 import {traceWovenRouteR709} from '../src/wovenRouteContinuityR709.mjs';
 import {inspectWovenEdgeResilienceR710} from '../src/wovenEdgeResilienceR710.mjs';
-import {executeComputationalSessionR711} from '../src/computationalSessionR711.mjs';
+import {executeComputationalSessionR711,restoreComputationalSessionR711} from '../src/computationalSessionR711.mjs';
 
 // Source-bound R706/R623/R651/R653 visualization; not an independent state or proof writer.
 export function WovenTopologyR707({scenario}:{scenario:any}){
  const [frame,setFrame]=useState(0),[mirrored,setMirrored]=useState(false),[portable,setPortable]=useState(''),[sessionPortable,setSessionPortable]=useState('');
+ const [importText,setImportText]=useState(''),[importError,setImportError]=useState(''),[importedSession,setImportedSession]=useState<any>(null);
  const [routeFrom,setRouteFrom]=useState(''),[routeTo,setRouteTo]=useState(''),[failedEdgeId,setFailedEdgeId]=useState('');
  const projection=useMemo(()=>projectWovenTopologyR707(scenario,frame,mirrored),[scenario,frame,mirrored]);
  const origin=projection.nodes.some(n=>n.id===routeFrom)?routeFrom:projection.nodes[0].id;
@@ -15,7 +16,7 @@ export function WovenTopologyR707({scenario}:{scenario:any}){
  const witness=useMemo(()=>inspectWovenRouteR708(projection,origin,target),[projection,origin,target]);
  const timeline=useMemo(()=>traceWovenRouteR709(scenario,origin,target,mirrored),[scenario,origin,target,mirrored]);
  const resilience=useMemo(()=>inspectWovenEdgeResilienceR710(projection,origin,target),[projection,origin,target]);
- const session=useMemo(()=>executeComputationalSessionR711(scenario,{origin,target,mirrored}),[scenario,origin,target,mirrored]);
+ const session=useMemo(()=>executeComputationalSessionR711(importedSession?.sourceScenario??scenario,{origin:importedSession?.origin??origin,target:importedSession?.target??target,mirrored:importedSession?.mirrored??mirrored}),[scenario,origin,target,mirrored,importedSession]);
  const selectedFailure=resilience.trials.find(t=>t.edgeId===failedEdgeId);
  const pathEdgeIds=new Set(selectedFailure?selectedFailure.pathEdgeIds:witness.pathEdges.map(e=>e.id));
  return <section aria-label='Executable woven topology vector instrument' data-r707-vector-instrument='source-model-only'
@@ -32,6 +33,7 @@ export function WovenTopologyR707({scenario}:{scenario:any}){
    <button type='button' data-r711-export onClick={()=>setSessionPortable(session.sessionJson)}>Prepare reproducible session JSON</button>
    <small data-r711-boundary>{session.boundary}</small>
   </section>
+  <div data-r712-import style={{margin:'8px 0'}}><label htmlFor='r712-import-json'>Restore portable session JSON</label><textarea id='r712-import-json' data-r712-import-input value={importText} onChange={e=>setImportText(e.target.value)} rows={3} style={{display:'block',width:'100%',boxSizing:'border-box'}}/><button type='button' data-r712-restore onClick={()=>{try{const recovered=restoreComputationalSessionR711(importText);setImportedSession(recovered);setImportError('');}catch(e){setImportError(e instanceof Error?e.message:'Invalid session');}}}>Validate and restore session</button><button type='button' data-r712-clear onClick={()=>{setImportedSession(null);setImportError('');}}>Clear restored session</button>{importError&&<div role='alert' data-r712-error>{importError}</div>}{importedSession&&<div role='status' data-r712-restored>Restored {importedSession.frames.length} computed frames · {importedSession.origin} → {importedSession.target} · observer reflection {importedSession.mirrored?'on':'off'} (isolated from source editor)</div>}</div>
   {sessionPortable&&<><label htmlFor='r711-session-json'>Portable computational session (source, endpoints and observer frame)</label><textarea id='r711-session-json' data-r711-portable aria-label='Portable computational session JSON' value={sessionPortable} readOnly rows={4} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}}/></>}
   <div role='status' data-r707-topology-summary style={{marginBottom:8,fontSize:13}}>
    {projection.topology.nodes} nodes · {projection.topology.edges} directional edges · {projection.topology.blocked} blocked · {projection.topology.returns} return · {projection.topology.multiParentNodes} multi-parent nodes · {projection.topology.directedCycles} detected directed cycles
