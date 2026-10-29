@@ -10,13 +10,16 @@ export function WovenTopologyR707({scenario}:{scenario:any}){
  const [frame,setFrame]=useState(0),[mirrored,setMirrored]=useState(false),[portable,setPortable]=useState(''),[sessionPortable,setSessionPortable]=useState('');
  const [importText,setImportText]=useState(''),[importError,setImportError]=useState(''),[importedSession,setImportedSession]=useState<any>(null);
  const [routeFrom,setRouteFrom]=useState(''),[routeTo,setRouteTo]=useState(''),[failedEdgeId,setFailedEdgeId]=useState('');
- const projection=useMemo(()=>projectWovenTopologyR707(scenario,frame,mirrored),[scenario,frame,mirrored]);
+ const activeScenario=importedSession?.sourceScenario??scenario;
+ const activeMirror=importedSession?.mirrored??mirrored;
+ const activeFrame=Math.min(frame,activeScenario.edgeFrames.length-1);
+ const projection=useMemo(()=>projectWovenTopologyR707(activeScenario,activeFrame,activeMirror),[activeScenario,activeFrame,activeMirror]);
  const origin=projection.nodes.some(n=>n.id===routeFrom)?routeFrom:projection.nodes[0].id;
  const target=projection.nodes.some(n=>n.id===routeTo)?routeTo:projection.nodes.at(-1)!.id;
  const witness=useMemo(()=>inspectWovenRouteR708(projection,origin,target),[projection,origin,target]);
- const timeline=useMemo(()=>traceWovenRouteR709(scenario,origin,target,mirrored),[scenario,origin,target,mirrored]);
+ const timeline=useMemo(()=>traceWovenRouteR709(activeScenario,origin,target,activeMirror),[activeScenario,origin,target,activeMirror]);
  const resilience=useMemo(()=>inspectWovenEdgeResilienceR710(projection,origin,target),[projection,origin,target]);
- const session=useMemo(()=>executeComputationalSessionR711(importedSession?.sourceScenario??scenario,{origin:importedSession?.origin??origin,target:importedSession?.target??target,mirrored:importedSession?.mirrored??mirrored}),[scenario,origin,target,mirrored,importedSession]);
+ const session=useMemo(()=>executeComputationalSessionR711(activeScenario,{origin,target,mirrored:activeMirror}),[activeScenario,origin,target,activeMirror]);
  const selectedFailure=resilience.trials.find(t=>t.edgeId===failedEdgeId);
  const pathEdgeIds=new Set(selectedFailure?selectedFailure.pathEdgeIds:witness.pathEdges.map(e=>e.id));
  return <section aria-label='Executable woven topology vector instrument' data-r707-vector-instrument='source-model-only'
@@ -24,16 +27,16 @@ export function WovenTopologyR707({scenario}:{scenario:any}){
   <h4>R707 · Woven topology and directional continuity</h4>
   <p>Each edge and node is projected from the executed R706 scenario and recomputed R623/R651/R653 frame. Multi-parent, return, blocked and cyclic relations remain explicit. Historical AG-009 SVG parity is not yet proved.</p>
   <div style={{display:'flex',gap:12,flexWrap:'wrap',alignItems:'center',marginBottom:8}}>
-   <label>Frame <input data-r707-frame aria-label='Woven frame' type='range' min={0} max={projection.frames-1} value={frame} onChange={e=>{setFrame(Number(e.target.value));setPortable('');setFailedEdgeId('');}}/> {frame+1}/{projection.frames}</label>
-   <button type='button' data-r707-mirror aria-pressed={mirrored} onClick={()=>{setMirrored(v=>!v);setPortable('');}}>Reflect observer frame: {mirrored?'ON':'OFF'}</button>
-   <button type='button' data-r707-export onClick={()=>setPortable(exportWovenTopologySvgR707(scenario,frame,mirrored))}>Prepare static SVG</button>
+   <label>Frame <input data-r707-frame aria-label='Woven frame' type='range' min={0} max={projection.frames-1} value={activeFrame} onChange={e=>{setFrame(Number(e.target.value));setPortable('');setFailedEdgeId('');}}/> {activeFrame+1}/{projection.frames}</label>
+   <button type='button' data-r707-mirror aria-pressed={activeMirror} onClick={()=>{setImportedSession(null);setMirrored(v=>!v);setPortable('');}}>Reflect observer frame: {activeMirror?'ON':'OFF'}</button>
+   <button type='button' data-r707-export onClick={()=>setPortable(exportWovenTopologySvgR707(activeScenario,activeFrame,activeMirror))}>Prepare static SVG</button>
   </div>
   <section data-r711-session aria-label='Integrated computational session' style={{padding:'8px 0',borderTop:'1px solid #596a74'}}>
    <div role='status' data-r711-summary>R711 integrated execution · {session.frames.length} recomputed frames · {session.replay.summary.nodes} canonical source nodes · {session.continuity.reachableFrames} reachable route frames · {session.frames.reduce((sum,f)=>sum+f.resilience.criticalEdgeCount,0)} frame-specific critical-edge witnesses</div>
    <button type='button' data-r711-export onClick={()=>setSessionPortable(session.sessionJson)}>Prepare reproducible session JSON</button>
    <small data-r711-boundary>{session.boundary}</small>
   </section>
-  <div data-r712-import style={{margin:'8px 0'}}><label htmlFor='r712-import-json'>Restore portable session JSON</label><textarea id='r712-import-json' data-r712-import-input value={importText} onChange={e=>setImportText(e.target.value)} rows={3} style={{display:'block',width:'100%',boxSizing:'border-box'}}/><button type='button' data-r712-restore onClick={()=>{try{const recovered=restoreComputationalSessionR711(importText);setImportedSession(recovered);setImportError('');}catch(e){setImportError(e instanceof Error?e.message:'Invalid session');}}}>Validate and restore session</button><button type='button' data-r712-clear onClick={()=>{setImportedSession(null);setImportError('');}}>Clear restored session</button>{importError&&<div role='alert' data-r712-error>{importError}</div>}{importedSession&&<div role='status' data-r712-restored>Restored {importedSession.frames.length} computed frames · {importedSession.origin} → {importedSession.target} · observer reflection {importedSession.mirrored?'on':'off'} (isolated from source editor)</div>}</div>
+  <div data-r712-import style={{margin:'8px 0'}}><label htmlFor='r712-import-json'>Restore portable session JSON</label><textarea id='r712-import-json' data-r712-import-input value={importText} onChange={e=>setImportText(e.target.value)} rows={3} style={{display:'block',width:'100%',boxSizing:'border-box'}}/><button type='button' data-r712-restore onClick={()=>{try{const recovered=restoreComputationalSessionR711(importText);setImportedSession(recovered);setFrame(0);setRouteFrom(recovered.origin);setRouteTo(recovered.target);setFailedEdgeId('');setImportError('');}catch(e){setImportError(e instanceof Error?e.message:'Invalid session');}}}>Validate and restore session</button><button type='button' data-r712-clear onClick={()=>{setImportedSession(null);setImportError('');}}>Clear restored session</button>{importError&&<div role='alert' data-r712-error>{importError}</div>}{importedSession&&<div role='status' data-r712-restored>Restored {importedSession.frames.length} computed frames · {importedSession.origin} → {importedSession.target} · observer reflection {importedSession.mirrored?'on':'off'} (computed in the active workspace)</div>}</div>
   {sessionPortable&&<><label htmlFor='r711-session-json'>Portable computational session (source, endpoints and observer frame)</label><textarea id='r711-session-json' data-r711-portable aria-label='Portable computational session JSON' value={sessionPortable} readOnly rows={4} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}}/></>}
   <div role='status' data-r707-topology-summary style={{marginBottom:8,fontSize:13}}>
    {projection.topology.nodes} nodes · {projection.topology.edges} directional edges · {projection.topology.blocked} blocked · {projection.topology.returns} return · {projection.topology.multiParentNodes} multi-parent nodes · {projection.topology.directedCycles} detected directed cycles
