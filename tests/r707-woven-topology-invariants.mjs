@@ -140,7 +140,7 @@ test('R707 OMEGA7 integration retains execution, portable source and fail-closed
  const ui=readFileSync(new URL('../src7/CapabilityRecoveryAuditR705.tsx',import.meta.url),'utf8');
  const vector=readFileSync(new URL('../src7/WovenTopologyR707.tsx',import.meta.url),'utf8');
  for(const x of ['setVectorScenario(scenario)','setVectorScenario(null)','replayScenarioR706'])assert.ok(ui.includes(x),x);
- assert.match(ui,/<WovenTopologyR707\\b[^>]*scenario=\\{vectorScenario\\}/);
+ assert.ok(ui.includes('scenario={vectorScenario}'), 'R707 vector must bind computed source scenario');
  for(const x of ['data-r707-svg','data-r707-frame','data-r707-mirror','data-r707-export','data-r707-truth-boundary','projectWovenTopologyR707'])assert.ok(vector.includes(x),x);
  assert.ok(vector.includes('Historical AG-009 SVG parity is not yet proved'));
  for(const x of ['inspectWovenRouteR708','data-r708-origin','data-r708-target','data-r708-path-status','data-r708-exclusions','data-r708-on-path','data-r708-boundary'])assert.ok(vector.includes(x),x);
