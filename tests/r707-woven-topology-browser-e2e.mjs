@@ -84,6 +84,14 @@ try{
    if(!(await joint.locator('[data-r716-row="0-1"] [data-r716-gate]').innerText()).includes('MODEL_ROUTE_LOSS'))throw Error(device+': R716 joint cut did not lose reverse RETURN route');
    if(!(await joint.locator('[data-r716-boundary]').innerText()).includes('not empirical causation'))throw Error(device+': R716 scientific truth boundary missing');
    if(await joint.locator('[data-r716-next]').isEnabled())throw Error(device+': R716 falsely reports additional pairs');
+   await root.locator('[data-r717-run]').click();
+   const minimalCuts=root.locator('[data-r717-result]');
+   await minimalCuts.waitFor({state:'visible',timeout:30000});
+   if(!(await minimalCuts.locator('[data-r717-coverage]').innerText()).includes('2 single-edge cuts'))throw Error(device+': R717 failed to enumerate source-frame single cuts');
+   if((await minimalCuts.locator('[data-r717-row="1"] [data-r717-minimum]').innerText()).trim()!=='1')throw Error(device+': R717 failed to prove the minimum B to A RETURN cut');
+   if(!(await minimalCuts.locator('[data-r717-row="1"]').innerText()).includes('B → A'))throw Error(device+': R717 missing exact source-edge cut witness');
+   if(!(await minimalCuts.locator('[data-r717-boundary]').innerText()).includes('no cut up to two'))throw Error(device+': R717 failed to distinguish bounded proof from global resilience');
+   if(!(await root.locator('[data-r708-path-status]').innerText()).includes('ADMISSIBLE GRAPH PATH: B → A'))throw Error(device+': R717 proof mutated baseline route');
    await root.locator('[data-r713-candidate]').fill(JSON.stringify({...portableSession,authority:'FORGED'}));
    await root.locator('[data-r713-compare]').click();
    if(!(await root.locator('[data-r713-error]').innerText()).includes('REFUSED'))throw Error(device+': R713 forged candidate was not refused');

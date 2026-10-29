@@ -3,6 +3,7 @@ import {executeComputationalSessionR711} from '../src/computationalSessionR711.m
 import {compareComputationalSessionsR713} from '../src/computationalSessionComparisonR713.mjs';
 import {enumerateInterventionFrontierR715} from '../src/interventionFrontierR715.mjs';
 import {enumerateJointInterventionsR716} from '../src/jointInterventionCompositionR716.mjs';
+import {analyzeMinimalRouteCutsR717} from '../src/minimalRouteCutsR717.mjs';
 
 // Local source-model intervention only; never an edit to CanonState.
 export function SessionCounterfactualR713({baselineSession,frameIndex,projection}:{baselineSession:any;frameIndex:number;projection:any}){
@@ -14,7 +15,9 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  const [frontierError,setFrontierError]=useState('');
  const [joint,setJoint]=useState<any|null>(null);
  const [jointError,setJointError]=useState('');
- useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');setJoint(null);setJointError('');},[baselineSession.sessionJson,frameIndex]);
+ const [minimalCuts,setMinimalCuts]=useState<any|null>(null);
+ const [minimalCutsError,setMinimalCutsError]=useState('');
+ useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');},[baselineSession.sessionJson,frameIndex]);
  const eligible=projection.edges.filter((e:any)=>e.kind!=='BLOCKED'&&e.weight>0);
  const chosen=eligible.find((e:any)=>e.id===edgeId)??eligible[0];
  function compare(text:string){
@@ -28,6 +31,10 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  function evaluateJoint(offset=0){
   try{const result=enumerateJointInterventionsR716(baselineSession.sessionJson,{frameIndex,offset,limit:6});setJoint(result);setJointError('');}
   catch(e){setJoint(null);setJointError(e instanceof Error?e.message:'Joint intervention refused');}
+ }
+ function evaluateMinimalCuts(){
+  try{const result=analyzeMinimalRouteCutsR717(baselineSession.sessionJson,{frameIndex});setMinimalCuts(result);setMinimalCutsError('');}
+  catch(e){setMinimalCuts(null);setMinimalCutsError(e instanceof Error?e.message:'Minimal route-cut proof refused');}
  }
  function intervene(){
   if(!chosen){setError('No eligible source edge in this frame');return;}
@@ -85,6 +92,24 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
      <button type='button' data-r716-next disabled={!joint.hasMore} onClick={()=>evaluateJoint(joint.offset+joint.evaluated)}>Next pairs</button>
     </div>
     <small data-r716-boundary>{joint.boundary}</small>
+   </div>}
+  </section>
+  <section data-r717-minimal-cuts aria-label='Bounded exact minimum route-cut analysis' style={{margin:'12px 0',paddingTop:8,borderTop:'1px solid #65727d'}}>
+   <h6>R717 · Minimum source-route cut witnesses</h6>
+   <p>Prove the smallest one- or two-edge source cut that destroys the selected route. Exhaustive only for at most eight eligible edges in the chosen frame; other frames and larger cuts are not silently promoted to proof.</p>
+   <button type='button' data-r717-run onClick={evaluateMinimalCuts}>Prove bounded minimum route cuts</button>
+   {minimalCutsError&&<p role='alert' data-r717-error>REFUSED: {minimalCutsError}</p>}
+   {minimalCuts&&<div data-r717-result>
+    <p role='status' data-r717-coverage>{minimalCuts.evaluatedSingletons} single-edge cuts and {minimalCuts.evaluatedPairs} paired cuts recomputed · {minimalCuts.eligibleEdges.length} eligible source edges · exact minimum up to size two</p>
+    <div style={{maxWidth:'100%',overflowX:'auto'}}><table><thead><tr><th>Frame</th><th>Baseline route</th><th>Minimum cut</th><th>Source-edge witnesses</th><th>Peak model jerk delta</th></tr></thead><tbody>
+     {minimalCuts.frames.map((item:any)=><tr key={item.frameIndex} data-r717-row={item.frameIndex}>
+      <td>{item.frameIndex+1}</td><td>{item.baselineReachable?'reachable':'unreachable'}</td>
+      <td data-r717-minimum>{item.minimumCutSize===null?item.status:item.minimumCutSize}</td>
+      <td>{item.witnesses.length?item.witnesses.map((w:any)=>w.edges.map((e:any)=>e.from+' → '+e.to+' ('+e.kind+', #'+e.index+')').join(' + ')).join('; '):'none'}</td>
+      <td>{item.witnesses.length?Math.max(...item.witnesses.map((w:any)=>w.peakJerkDelta)).toFixed(6):'none'}</td>
+     </tr>)}
+    </tbody></table></div>
+    <small data-r717-boundary>{minimalCuts.boundary}</small>
    </div>}
   </section>
   {error&&<p role='alert' data-r713-error>REFUSED: {error}</p>}
