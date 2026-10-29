@@ -40,6 +40,10 @@ try{
    await root.locator('[data-r707-mirror]').click();
    const after=Number(await root.locator('[data-r707-node="A"] circle').getAttribute('cx'));
    if(Math.abs(before+after-640)>0.02)throw Error(device+': observer reflection invariant broken');
+   if(!(await root.locator('[data-r711-summary]').innerText()).includes('3 recomputed frames'))throw Error(device+': R711 integrated source frames missing');
+   await root.locator('[data-r711-export]').click();
+   const portableSession=JSON.parse(await root.locator('[data-r711-portable]').inputValue());
+   if(portableSession.schema!=='OMEGA_COMPUTATIONAL_SESSION_INPUT_R711'||portableSession.origin!=='B'||portableSession.target!=='A'||portableSession.mirrored!==true||portableSession.scenario.edgeFrames.length!==3)throw Error(device+': R711 portable session lost source/route/observer');
    await root.locator('[data-r707-frame]').focus();
    await root.locator('[data-r707-frame]').press('ArrowRight');
    if(!(await root.locator('[data-r707-topology-summary]').innerText()).includes('directional edges'))throw Error(device+': frame controls not active');
@@ -90,7 +94,7 @@ try{
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(device+': viewport overflow '+overflow);
-   console.log('R707/R708/R709/R710 '+device+' PASS: source-computed topology and route witnesses, typed refusal, mirror/frame controls, safe SVG, persisted recompute, forged authority refusal, no overflow');
+   console.log('R707/R708/R709/R710/R711 '+device+' PASS: source-computed topology and route witnesses, typed refusal, mirror/frame controls, safe SVG, persisted recompute, forged authority refusal, no overflow');
   }finally{await context.close()}
  }
 }finally{await browser.close()}
