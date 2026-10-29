@@ -28,6 +28,13 @@ for(const candidate of full.candidates){
  assert.equal(candidate.routeLossFrames,manual.routes.filter(x=>x.baselineReachable&&!x.interventionReachable).length);
  assert.equal(candidate.peakByOrder.jerk,manual.developmentalSensitivity.orders.jerk.peak?.absoluteDelta??0);
 }
+const reverseSession=executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'B',target:'A',mirrored:true});
+const reverse=enumerateInterventionFrontierR715(reverseSession.sessionJson,{frameIndex:1});
+assert.equal(reverse.candidates[0].routeLossFrames,0,'A to B INGRESS cut cannot sever reverse B to A path');
+assert.ok(reverse.candidates[0].changedNodeStates>0,'forward ingress cut still affects modeled development');
+assert.equal(reverse.candidates[0].gate,'MODEL_STATE_SENSITIVITY');
+assert.ok(reverse.candidates[1].routeLossFrames>0,'B to A RETURN cut severs reverse path');
+assert.equal(reverse.candidates[1].gate,'MODEL_ROUTE_LOSS');
 const first=enumerateInterventionFrontierR715(input,{frameIndex:1,limit:1,offset:0});
 const second=enumerateInterventionFrontierR715(input,{frameIndex:1,limit:1,offset:1});
 assert.equal(first.coverage,'PARTIAL_DECLARED_FRAME');
