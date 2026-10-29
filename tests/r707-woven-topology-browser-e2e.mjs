@@ -87,7 +87,12 @@ try{
    await root.locator('[data-r718-first-frame]').selectOption('0');
    await root.locator('[data-r718-first-edge]').selectOption('0');
    await root.locator('[data-r718-second-frame]').selectOption('1');
+   // A frame change must survive React's controlled-select update before the
+   // dependent edge select is changed. Diagnose each transition separately.
+   if(await root.locator('[data-r718-second-frame]').inputValue()!=='1')
+    throw Error(device+': R718 second-frame selection reverted immediately');
    await root.locator('[data-r718-second-edge]').selectOption('0');
+   await page.waitForTimeout(50);
    const visibleFrames=[
     await root.locator('[data-r718-first-frame]').inputValue(),
     await root.locator('[data-r718-second-frame]').inputValue()
@@ -96,8 +101,10 @@ try{
     await root.locator('[data-r718-first-edge]').inputValue(),
     await root.locator('[data-r718-second-edge]').inputValue()
    ];
-   if(visibleFrames.join('/')!=='0/1'||visibleEdges.join('/')!=='0/0')
-    throw Error(device+': R718 visible cross-frame selection drift: '+visibleFrames.join('/')+' edges '+visibleEdges.join('/'));
+   if(visibleFrames.join('/')!=='0/1'||visibleEdges.join('/')!=='0/0'){
+    const options=await root.locator('[data-r718-second-frame] option').evaluateAll(nodes=>nodes.map(n=>({value:n.value,label:n.textContent})));
+    throw Error(device+': R718 visible cross-frame selection drift: '+visibleFrames.join('/')+' edges '+visibleEdges.join('/')+' available frames '+JSON.stringify(options));
+   }
    await root.locator('[data-r718-run]').click();
    const temporal=root.locator('[data-r718-result]');
    // Wait for either a computed result or an explicit model refusal; report the
