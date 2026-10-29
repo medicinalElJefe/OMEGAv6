@@ -44,6 +44,27 @@ try{
    await root.locator('[data-r711-export]').click();
    const portableSession=JSON.parse(await root.locator('[data-r711-portable]').inputValue());
    if(portableSession.schema!=='OMEGA_COMPUTATIONAL_SESSION_INPUT_R711'||portableSession.origin!=='B'||portableSession.target!=='A'||portableSession.mirrored!==true||portableSession.scenario.edgeFrames.length!==3)throw Error(device+': R711 portable session lost source/route/observer');
+   await root.locator('[data-r712-save]').click();
+   if(!(await root.locator('[data-r712-save-status]').innerText()).includes('Saved portable'))throw Error(device+': R712 save acknowledgement absent');
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.locator('.o7-nav-r519').getByRole('button',{name:'System'}).click();
+   await root.waitFor({state:'visible',timeout:30000});
+   if(await root.locator('[data-r708-origin]').inputValue()!=='B'||await root.locator('[data-r708-target]').inputValue()!=='A')throw Error(device+': R712 reload lost route endpoints');
+   if(await root.locator('[data-r707-mirror]').getAttribute('aria-pressed')!=='true')throw Error(device+': R712 reload lost observer reflection');
+   if(!(await root.locator('[data-r711-summary]').innerText()).includes('3 recomputed frames'))throw Error(device+': R712 reload did not recompute');
+   const importInput=page.locator('[data-r712-import-input]');
+   await importInput.fill(JSON.stringify({...portableSession,authority:'FORGED_PRODUCTION'}));
+   await page.locator('[data-r712-import]').click();
+   if(!(await page.locator('[data-r706-status]').innerText()).includes('REFUSED'))throw Error(device+': R712 forged authority was not refused');
+   if(await root.locator('[data-r708-origin]').inputValue()!=='B')throw Error(device+': R712 forged import changed current session');
+   await importInput.fill(JSON.stringify({...portableSession,origin:'A',target:'B',mirrored:false}));
+   await page.locator('[data-r712-import]').click();
+   if(!(await page.locator('[data-r706-status]').innerText()).includes('independently recomputed'))throw Error(device+': R712 valid import did not recompute');
+   if(await root.locator('[data-r708-origin]').inputValue()!=='A'||await root.locator('[data-r708-target]').inputValue()!=='B')throw Error(device+': R712 valid import failed to restore route');
+   if(await root.locator('[data-r707-mirror]').getAttribute('aria-pressed')!=='false')throw Error(device+': R712 valid import failed to restore observer');
+   await importInput.fill(JSON.stringify(portableSession));
+   await page.locator('[data-r712-import]').click();
+   if(await root.locator('[data-r708-origin]').inputValue()!=='B'||await root.locator('[data-r707-mirror]').getAttribute('aria-pressed')!=='true')throw Error(device+': R712 repeated import did not reset child state');
    await root.locator('[data-r707-frame]').focus();
    await root.locator('[data-r707-frame]').press('ArrowRight');
    if(!(await root.locator('[data-r707-topology-summary]').innerText()).includes('directional edges'))throw Error(device+': frame controls not active');
@@ -94,7 +115,7 @@ try{
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(device+': viewport overflow '+overflow);
-   console.log('R707/R708/R709/R710/R711 '+device+' PASS: source-computed topology and route witnesses, typed refusal, mirror/frame controls, safe SVG, persisted recompute, forged authority refusal, no overflow');
+   console.log('R707/R708/R709/R710/R711/R712 '+device+' PASS: source-computed topology and route witnesses, typed refusal, mirror/frame controls, safe SVG, persisted recompute, forged authority refusal, no overflow');
   }finally{await context.close()}
  }
 }finally{await browser.close()}
