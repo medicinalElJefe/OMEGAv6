@@ -52,7 +52,7 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
    <h3>Inherited woven continuity and developmental replay</h3>
    <p>Run the established R651/R653 canonical frame engine through R623 finite-difference Heightened Mode. This is not live production or historical parity proof. R706 accepts typed ingress, egress, blocked, residue and return edges, including cycles and multiple parents, with bounded local scenario input.</p>
    <label htmlFor='r706-scenario-input'>Relational scenario (JSON: 1–12 nodes, 3–12 transport frames)</label>
-   <textarea id='r706-scenario-input' aria-label='Relational scenario JSON' data-r706-scenario-input value={scenarioText} onChange={e=>{setScenarioText(e.target.value);setVectorScenario(null);setSessionPreset(null);try{window.localStorage.removeItem('omega7.r711.session.v1');}catch{}}} rows={10} spellCheck={false} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}} />
+   <textarea id='r706-scenario-input' aria-label='Relational scenario JSON' data-r706-scenario-input value={scenarioText} onChange={e=>{setScenarioText(e.target.value);setVectorScenario(null);setSummaryChanges([]);setReplayOutput('Input edited; execute to recompute.');setSessionPreset(null);setPortableScenario('');try{window.localStorage.removeItem('omega7.r711.session.v1');}catch{}}} rows={10} spellCheck={false} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}} />
    <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'8px 0'}}>
     <button type='button' data-r624-execute onClick={()=>{
      try{const scenario=parseScenarioR706(scenarioText);const result=replayScenarioR706(scenario);
@@ -62,7 +62,7 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
      }catch(error){setReplayOutput(JSON.stringify({truthClass:'REFUSED_NO_EXECUTION',error:String(error)}));setSummaryChanges([]);setVectorScenario(null);setScenarioStatus('Refused invalid or unsupported scenario; no state was admitted.');}
     }}>Execute inherited replay</button>
     <button type='button' data-r706-export onClick={()=>{try{setPortableScenario(exportScenarioR706(parseScenarioR706(scenarioText)));setScenarioStatus('Portable inputs prepared. No output, authority or proof is exported.');}catch(error){setScenarioStatus('Export refused: '+String(error));}}}>Prepare portable input</button>
-    <button type='button' data-r706-reset onClick={()=>{setScenarioText(exportScenarioR706(DEFAULT_SCENARIO_R706));setVectorScenario(null);setSessionPreset(null);try{window.localStorage.removeItem('omega7.r711.session.v1');}catch{}setSummaryChanges([]);setScenarioStatus('Sample restored in editor; execute to replace saved input.');setPortableScenario('');}}>Reset sample</button>
+    <button type='button' data-r706-reset onClick={()=>{setScenarioText(exportScenarioR706(DEFAULT_SCENARIO_R706));setVectorScenario(null);setSessionPreset(null);try{window.localStorage.removeItem('omega7.r711.session.v1');}catch{}setSummaryChanges([]);setReplayOutput('Sample restored; execute to recompute.');setScenarioStatus('Sample restored in editor; execute to replace saved input.');setPortableScenario('');}}>Reset sample</button>
    </div>
    <div data-r712-import-panel style={{margin:'10px 0',padding:8,border:'1px solid var(--o7-border, #606a80)',borderRadius:6}}>
     <label htmlFor='r712-session-import'>Restore portable computational session (source, route endpoints and observer reflection)</label>
