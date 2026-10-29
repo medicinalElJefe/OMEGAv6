@@ -46,13 +46,19 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  function evaluateTemporal(){
   try{
    const result=compareCrossFrameInterventionsR718(baselineSession.sessionJson,{
-    firstFrameIndex:firstFrame,firstEdgeIndex:firstEdge,secondFrameIndex:secondFrame,secondEdgeIndex:secondEdge
+    firstFrameIndex:firstFrame,firstEdgeIndex:selectedFirstEdge,secondFrameIndex:secondFrame,secondEdgeIndex:selectedSecondEdge
    });
    setTemporal(result);setTemporalError('');
   }catch(e){setTemporal(null);setTemporalError(e instanceof Error?e.message:'Temporal comparison refused');}
  }
  const frameChoices=baselineSession.sourceScenario.edgeFrames as any[][];
  const eligibleAt=(frame:number)=>frameChoices[frame]?.map((edge:any,index:number)=>({edge,index})).filter(({edge}:any)=>edge.kind!=='BLOCKED'&&edge.weight>0)??[];
+ // A filtered option's value is the ORIGINAL source-edge index, not its ordinal
+ // position in the eligible list. When index zero is blocked, never silently
+ // submit that blocked edge while the select visually displays index one.
+ const firstEligible=eligibleAt(firstFrame),secondEligible=eligibleAt(secondFrame);
+ const selectedFirstEdge=firstEligible.some(({index}:any)=>index===firstEdge)?firstEdge:(firstEligible[0]?.index??-1);
+ const selectedSecondEdge=secondEligible.some(({index}:any)=>index===secondEdge)?secondEdge:(secondEligible[0]?.index??-1);
  function intervene(){
   if(!chosen){setError('No eligible source edge in this frame');return;}
   const index=Number(chosen.id.replace('edge-',''));
@@ -115,10 +121,10 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
    <h6>R718 · Temporal carry and cross-frame interaction</h6>
    <p>Choose two source edges in different frames. Recompute the baseline, both individual interventions and their composition, then inspect longitudinal continuity, scar and other state residuals. This is a mathematical source model, not an empirical forecast.</p>
    <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-    <label>First frame <select data-r718-first-frame value={firstFrame} onChange={e=>{setFirstFrame(Number(e.target.value));setFirstEdge(0);setTemporal(null);}}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
-    <label>First source edge <select data-r718-first-edge value={firstEdge} onChange={e=>{setFirstEdge(Number(e.target.value));setTemporal(null);}}>{eligibleAt(firstFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
-    <label>Second frame <select data-r718-second-frame value={secondFrame} onChange={e=>{setSecondFrame(Number(e.target.value));setSecondEdge(0);setTemporal(null);}}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
-    <label>Second source edge <select data-r718-second-edge value={secondEdge} onChange={e=>{setSecondEdge(Number(e.target.value));setTemporal(null);}}>{eligibleAt(secondFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
+    <label>First frame <select data-r718-first-frame value={firstFrame} onChange={e=>{setFirstFrame(Number(e.target.value));setFirstEdge(eligibleAt(Number(e.target.value))[0]?.index??-1);setTemporal(null);}}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
+    <label>First source edge <select data-r718-first-edge value={selectedFirstEdge} onChange={e=>{setFirstEdge(Number(e.target.value));setTemporal(null);}}>{eligibleAt(firstFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
+    <label>Second frame <select data-r718-second-frame value={secondFrame} onChange={e=>{setSecondFrame(Number(e.target.value));setSecondEdge(eligibleAt(Number(e.target.value))[0]?.index??-1);setTemporal(null);}}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
+    <label>Second source edge <select data-r718-second-edge value={selectedSecondEdge} onChange={e=>{setSecondEdge(Number(e.target.value));setTemporal(null);}}>{eligibleAt(secondFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
    </div>
    <button type='button' data-r718-run onClick={evaluateTemporal}>Recompute cross-frame temporal interaction</button>
    {temporalError&&<p role='alert' data-r718-error>REFUSED: {temporalError}</p>}
