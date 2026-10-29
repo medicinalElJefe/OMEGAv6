@@ -26,6 +26,13 @@ try{
    if(await root.locator('[data-r707-edge-kind]').count()!==2)throw Error(device+': computed edge count mismatch');
    if(!(await root.locator('[data-r708-path-status]').innerText()).includes('ADMISSIBLE GRAPH PATH: A → B'))throw Error(device+': source-bound R708 witness missing');
    if(await root.locator('[data-r708-on-path="true"]').count()!==1)throw Error(device+': route highlight must bind one source edge');
+   if(!(await root.locator('[data-r710-summary]').innerText()).includes('1 critical'))throw Error(device+': R710 single-edge cut not computed');
+   await root.locator('[data-r710-failure]').selectOption('edge-0');
+   if(!(await root.locator('[data-r710-status]').innerText()).includes('COUNTERFACTUAL PATH_LOST'))throw Error(device+': R710 failed edge must disconnect A to B');
+   if(await root.locator('[data-r708-on-path="true"]').count()!==0)throw Error(device+': R710 failed path still highlighted');
+   if(await root.locator('[data-r710-failed-edge="true"]').count()!==1)throw Error(device+': R710 removed edge not marked');
+   await root.locator('[data-r710-failure]').selectOption('');
+   if(await root.locator('[data-r708-on-path="true"]').count()!==1)throw Error(device+': R710 baseline path not restored');
    await root.locator('[data-r708-origin]').selectOption('B');
    await root.locator('[data-r708-target]').selectOption('A');
    if(!(await root.locator('[data-r708-path-status]').innerText()).includes('ADMISSIBLE GRAPH PATH: B → A'))throw Error(device+': reverse RETURN witness missing');
@@ -83,7 +90,7 @@ try{
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(device+': viewport overflow '+overflow);
-   console.log('R707/R708/R709 '+device+' PASS: source-computed topology and route witnesses, typed refusal, mirror/frame controls, safe SVG, persisted recompute, forged authority refusal, no overflow');
+   console.log('R707/R708/R709/R710 '+device+' PASS: source-computed topology and route witnesses, typed refusal, mirror/frame controls, safe SVG, persisted recompute, forged authority refusal, no overflow');
   }finally{await context.close()}
  }
 }finally{await browser.close()}

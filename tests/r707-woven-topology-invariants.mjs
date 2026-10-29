@@ -5,6 +5,7 @@ import {DEFAULT_SCENARIO_R706,exportScenarioR706} from '../src/relationalScenari
 import {projectWovenTopologyR707,exportWovenTopologySvgR707} from '../src/wovenTopologyProjectionR707.mjs';
 import {inspectWovenRouteR708} from '../src/wovenRouteInspectorR708.mjs';
 import {traceWovenRouteR709} from '../src/wovenRouteContinuityR709.mjs';
+import {inspectWovenEdgeResilienceR710} from '../src/wovenEdgeResilienceR710.mjs';
 const clone=()=>JSON.parse(exportScenarioR706(DEFAULT_SCENARIO_R706));
 test('R707 uses actual inherited source frame state, typed edges and deterministic export',()=>{
  const scenario=clone(),p=projectWovenTopologyR707(scenario,0);
@@ -143,4 +144,42 @@ test('R707 OMEGA7 integration retains execution, portable source and fail-closed
  assert.ok(vector.includes('Historical AG-009 SVG parity is not yet proved'));
  for(const x of ['inspectWovenRouteR708','data-r708-origin','data-r708-target','data-r708-path-status','data-r708-exclusions','data-r708-on-path','data-r708-boundary'])assert.ok(vector.includes(x),x);
  for(const x of ['traceWovenRouteR709','data-r709-timeline','data-r709-summary','data-r709-frame-choice','data-r709-boundary'])assert.ok(vector.includes(x),x);
+ for(const x of ['inspectWovenEdgeResilienceR710','data-r710-resilience','data-r710-summary','data-r710-failure','data-r710-status','data-r710-trials','data-r710-boundary'])assert.ok(vector.includes(x),x);
+});
+
+test('R710 computes critical directed single-edge cuts without mutating source or claiming empirical resilience',()=>{
+ const s=clone(),before=JSON.stringify(s),p=projectWovenTopologyR707(s,0);
+ const r=inspectWovenEdgeResilienceR710(p,'A','B');
+ assert.equal(r.truthClass,'LOCAL_SINGLE_EDGE_COUNTERFACTUAL_ONLY');
+ assert.equal(r.eligibleEdges,2);assert.deepEqual(r.criticalEdgeIds,['edge-0']);
+ assert.equal(r.singleEdgeTolerant,false);
+ assert.equal(r.trials[0].outcome,'PATH_LOST');assert.equal(r.trials[0].reachable,false);
+ assert.equal(r.trials[1].outcome,'PATH_PRESERVED');
+ assert.deepEqual(r,inspectWovenEdgeResilienceR710(projectWovenTopologyR707(s,0,true),'A','B'));
+ assert.equal(JSON.stringify(s),before);
+ assert.equal(inspectWovenEdgeResilienceR710(p,'A','A').criticalEdgeCount,0);
+});
+test('R710 reroutes through alternate multi-parent paths, respects RESIDUE and refuses zero/BLOCKED',()=>{
+ const s=clone();s.nodes.push({id:'C',continuity:0.5,scar:0,contradiction:0,plasticity:1});
+ s.edgeFrames=s.edgeFrames.map(()=>[
+  {from:'A',to:'B',kind:'INGRESS',weight:0.8},
+  {from:'A',to:'C',kind:'RESIDUE',weight:0.7},
+  {from:'C',to:'B',kind:'RETURN',weight:0.4},
+  {from:'B',to:'A',kind:'BLOCKED',weight:1},
+  {from:'C',to:'A',kind:'EGRESS',weight:0}
+ ]);
+ const p=projectWovenTopologyR707(s,0),r=inspectWovenEdgeResilienceR710(p,'A','B');
+ assert.equal(r.eligibleEdges,3);assert.equal(r.criticalEdgeCount,0);assert.equal(r.singleEdgeTolerant,true);
+ assert.equal(r.trials[0].outcome,'REROUTED');assert.deepEqual(r.trials[0].pathNodes,['A','C','B']);
+ assert.deepEqual(r.trials[0].pathEdgeIds,['edge-1','edge-2']);
+ assert.equal(r.trials[1].outcome,'PATH_PRESERVED');
+ const blocked=clone();blocked.edgeFrames=blocked.edgeFrames.map(es=>es.map(e=>({...e,kind:'BLOCKED'})));
+ const noRoute=inspectWovenEdgeResilienceR710(projectWovenTopologyR707(blocked,0),'A','B');
+ assert.equal(noRoute.baselineReachable,false);assert.equal(noRoute.singleEdgeTolerant,null);
+ assert.equal(noRoute.eligibleEdges,0);assert.deepEqual(noRoute.criticalEdgeIds,[]);
+});
+test('R710 rejects forged projections and invalid endpoints',()=>{
+ const p=projectWovenTopologyR707(clone(),0);
+ assert.throws(()=>inspectWovenEdgeResilienceR710({...p,truthClass:'PRODUCTION_VERIFIED'},'A','B'),/computed R707 frame/);
+ assert.throws(()=>inspectWovenEdgeResilienceR710(p,'A','MISSING'),/endpoints/);
 });
