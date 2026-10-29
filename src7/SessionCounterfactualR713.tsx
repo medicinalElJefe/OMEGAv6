@@ -26,7 +26,11 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  const [secondEdge,setSecondEdge]=useState(0);
  const firstFrameSelect=useRef<HTMLSelectElement>(null),secondFrameSelect=useRef<HTMLSelectElement>(null);
  const firstEdgeSelect=useRef<HTMLSelectElement>(null),secondEdgeSelect=useRef<HTMLSelectElement>(null);
- useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');setTemporal(null);setTemporalError('');setFirstFrame(0);setSecondFrame(1);setFirstEdge(0);setSecondEdge(0);},[baselineSession.sessionJson,frameIndex]);
+ // A selected display frame is not a new source session. Keep independent
+ // cross-frame choices stable while users traverse the single-frame views.
+ // Only a new source session invalidates those choices.
+ useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');setTemporal(null);setTemporalError('');setFirstFrame(0);setSecondFrame(1);setFirstEdge(0);setSecondEdge(0);},[baselineSession.sessionJson]);
+ useEffect(()=>{setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');},[frameIndex]);
  const eligible=projection.edges.filter((e:any)=>e.kind!=='BLOCKED'&&e.weight>0);
  const chosen=eligible.find((e:any)=>e.id===edgeId)??eligible[0];
  function compare(text:string){
