@@ -28,4 +28,13 @@ for(const token of ['data-r712-save','data-r712-save-status','initialOrigin','in
 const other=executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'B',target:'A',mirrored:true});
 assert.deepEqual(restoreComputationalSessionR711(other.sessionJson).continuity,other.continuity);
 assert.throws(()=>restoreComputationalSessionR711(JSON.stringify({...JSON.parse(other.sessionJson),proof:{production:true}})),/session envelope/);
+const ids=Array.from({length:12},(_,i)=>('Node'+String(i).padStart(2,'0')).padEnd(32,'X'));
+const largeScenario={schema:'OMEGA_RELATIONAL_SCENARIO_R706',
+ nodes:ids.map(id=>({id,continuity:0.5,scar:0,contradiction:0,plasticity:1})),
+ edgeFrames:Array.from({length:12},(_,f)=>Array.from({length:48},(_,e)=>({from:ids[e%12],to:ids[(e+f+1)%12],kind:'BLOCKED',weight:0.5}))),
+ step:0.2,mode:'STABILIZE',alpha:0.5};
+const large=executeComputationalSessionR711(largeScenario);
+assert.ok(large.sessionJson.length>24000,'large valid source exceeds former import limit');
+assert.deepEqual(restoreComputationalSessionR711(large.sessionJson).sourceScenario,large.sourceScenario);
+assert.throws(()=>restoreComputationalSessionR711(' '.repeat(131073)),/limit/);
 console.log('R711/R712 integrated source session and recovery invariants PASS');
