@@ -7,7 +7,7 @@ import {executeComputationalSessionR711} from '../src/computationalSessionR711.m
 
 // Source-bound R706/R623/R651/R653 visualization; not an independent state or proof writer.
 export function WovenTopologyR707({scenario}:{scenario:any}){
- const [frame,setFrame]=useState(0),[mirrored,setMirrored]=useState(false),[portable,setPortable]=useState('');
+ const [frame,setFrame]=useState(0),[mirrored,setMirrored]=useState(false),[portable,setPortable]=useState(''),[sessionPortable,setSessionPortable]=useState('');
  const [routeFrom,setRouteFrom]=useState(''),[routeTo,setRouteTo]=useState(''),[failedEdgeId,setFailedEdgeId]=useState('');
  const projection=useMemo(()=>projectWovenTopologyR707(scenario,frame,mirrored),[scenario,frame,mirrored]);
  const origin=projection.nodes.some(n=>n.id===routeFrom)?routeFrom:projection.nodes[0].id;
@@ -29,9 +29,10 @@ export function WovenTopologyR707({scenario}:{scenario:any}){
   </div>
   <section data-r711-session aria-label='Integrated computational session' style={{padding:'8px 0',borderTop:'1px solid #596a74'}}>
    <div role='status' data-r711-summary>R711 integrated execution · {session.frames.length} recomputed frames · {session.replay.summary.nodes} canonical source nodes · {session.continuity.reachableFrames} reachable route frames · {session.frames.reduce((sum,f)=>sum+f.resilience.criticalEdgeCount,0)} frame-specific critical-edge witnesses</div>
-   <button type='button' data-r711-export onClick={()=>setPortable(session.sourceJson)}>Prepare reproducible session source JSON</button>
+   <button type='button' data-r711-export onClick={()=>setSessionPortable(session.sessionJson)}>Prepare reproducible session JSON</button>
    <small data-r711-boundary>{session.boundary}</small>
   </section>
+  {sessionPortable&&<><label htmlFor='r711-session-json'>Portable computational session (source, endpoints and observer frame)</label><textarea id='r711-session-json' data-r711-portable aria-label='Portable computational session JSON' value={sessionPortable} readOnly rows={4} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}}/></>}
   <div role='status' data-r707-topology-summary style={{marginBottom:8,fontSize:13}}>
    {projection.topology.nodes} nodes · {projection.topology.edges} directional edges · {projection.topology.blocked} blocked · {projection.topology.returns} return · {projection.topology.multiParentNodes} multi-parent nodes · {projection.topology.directedCycles} detected directed cycles
   </div>
