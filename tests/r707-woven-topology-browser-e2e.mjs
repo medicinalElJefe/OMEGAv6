@@ -67,6 +67,15 @@ try{
    const positiveJerk=Number(await root.locator('[data-r714-order="jerk"] td').nth(1).innerText());
    if(!(positiveJerk>0))throw Error(device+': R714 frame-2 INGRESS intervention failed to propagate into recomputed jerk');
    if(!(await derivative.locator('[data-r714-boundary]').innerText()).includes('not measured time'))throw Error(device+': R714 scientific truth boundary missing');
+   await root.locator('[data-r715-run]').click();
+   const frontier=root.locator('[data-r715-result]');
+   await frontier.waitFor({state:'visible',timeout:30000});
+   if(!(await frontier.locator('[data-r715-coverage]').innerText()).includes('2 of 2 eligible source edges evaluated'))throw Error(device+': R715 declared-frame intervention coverage incomplete');
+   if(await frontier.locator('[data-r715-edge-row]').count()!==2)throw Error(device+': R715 did not enumerate both eligible source edges');
+   if(!(await frontier.locator('[data-r715-edge-row="1"] [data-r715-impact]').innerText()).includes('MODEL_ROUTE_LOSS'))throw Error(device+': R715 B → A RETURN cut must lose the selected reverse route');
+   if(!(await frontier.locator('[data-r715-edge-row="0"] [data-r715-impact]').innerText()).includes('MODEL_STATE_SENSITIVITY'))throw Error(device+': R715 A → B INGRESS cut must change modeled state without losing B → A route');
+   if(!(await frontier.locator('[data-r715-boundary]').innerText()).includes('No empirical prediction'))throw Error(device+': R715 model-only truth boundary missing');
+   if(await frontier.locator('[data-r715-next]').isEnabled())throw Error(device+': R715 falsely reports additional edges');
    await root.locator('[data-r713-candidate]').fill(JSON.stringify({...portableSession,authority:'FORGED'}));
    await root.locator('[data-r713-compare]').click();
    if(!(await root.locator('[data-r713-error]').innerText()).includes('REFUSED'))throw Error(device+': R713 forged candidate was not refused');

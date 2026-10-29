@@ -1,6 +1,7 @@
 import {useEffect,useState} from 'react';
 import {executeComputationalSessionR711} from '../src/computationalSessionR711.mjs';
 import {compareComputationalSessionsR713} from '../src/computationalSessionComparisonR713.mjs';
+import {enumerateInterventionFrontierR715} from '../src/interventionFrontierR715.mjs';
 
 // Local source-model intervention only; never an edit to CanonState.
 export function SessionCounterfactualR713({baselineSession,frameIndex,projection}:{baselineSession:any;frameIndex:number;projection:any}){
@@ -8,12 +9,18 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  const [candidateText,setCandidateText]=useState('');
  const [comparison,setComparison]=useState<any|null>(null);
  const [error,setError]=useState('');
- useEffect(()=>{setComparison(null);setCandidateText('');setError('');},[baselineSession.sessionJson,frameIndex]);
+ const [frontier,setFrontier]=useState<any|null>(null);
+ const [frontierError,setFrontierError]=useState('');
+ useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');},[baselineSession.sessionJson,frameIndex]);
  const eligible=projection.edges.filter((e:any)=>e.kind!=='BLOCKED'&&e.weight>0);
  const chosen=eligible.find((e:any)=>e.id===edgeId)??eligible[0];
  function compare(text:string){
   try{const result=compareComputationalSessionsR713(baselineSession.sessionJson,text);setComparison(result);setError('');}
   catch(e){setComparison(null);setError(e instanceof Error?e.message:'Comparison refused');}
+ }
+ function evaluateFrontier(offset=0){
+  try{const result=enumerateInterventionFrontierR715(baselineSession.sessionJson,{frameIndex,offset,limit:8});setFrontier(result);setFrontierError('');}
+  catch(e){setFrontier(null);setFrontierError(e instanceof Error?e.message:'Frontier refused');}
  }
  function intervene(){
   if(!chosen){setError('No eligible source edge in this frame');return;}
@@ -34,6 +41,23 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
   <label htmlFor='r713-candidate'>Or compare against another portable R711 session with the same initial state and route</label>
   <textarea id='r713-candidate' data-r713-candidate value={candidateText} onChange={e=>{setCandidateText(e.target.value);setComparison(null);setError('');}} rows={3} style={{display:'block',width:'100%',boxSizing:'border-box'}} />
   <button type='button' data-r713-compare onClick={()=>compare(candidateText)}>Recompute and compare candidate</button>
+  <section data-r715-frontier aria-label='Enumerated source intervention frontier' style={{margin:'12px 0',paddingTop:8,borderTop:'1px solid #65727d'}}>
+   <h6>R715 · Source-edge intervention frontier</h6>
+   <p>Recompute one blocked edge at a time for this declared frame. The ranked results show modeled route vulnerability and Heightened sensitivity, not empirical forecasts. At most eight eligible edges are evaluated per page; incomplete coverage is explicitly reported.</p>
+   <button type='button' data-r715-run onClick={()=>evaluateFrontier(0)}>Evaluate eligible edge interventions</button>
+   {frontierError&&<p role='alert' data-r715-error>REFUSED: {frontierError}</p>}
+   {frontier&&<div data-r715-result>
+    <p role='status' data-r715-coverage>{frontier.evaluated} of {frontier.totalEligible} eligible source edges evaluated on this page · offset {frontier.offset} · {frontier.coverage==='COMPLETE_DECLARED_FRAME'?'complete declared-frame coverage':'partial declared-frame coverage; other edges not yet evaluated'}</p>
+    <div style={{maxWidth:'100%',overflowX:'auto'}}><table><thead><tr><th>Source edge</th><th>Model gate</th><th>Lost route frames</th><th>Changed route frames</th><th>Changed node states</th><th>Peak jerk delta</th></tr></thead><tbody>
+     {frontier.ranking.map((item:any)=><tr key={item.edgeIndex} data-r715-edge-row={item.edgeIndex}><td>{item.from} → {item.to} ({item.kind}, #{item.edgeIndex})</td><td data-r715-impact>{item.gate}</td><td>{item.routeLossFrames}</td><td>{item.changedRouteFrames}</td><td>{item.changedNodeStates}</td><td>{item.peakByOrder.jerk.toFixed(5)}</td></tr>)}
+    </tbody></table></div>
+    <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+     <button type='button' data-r715-prev disabled={frontier.offset===0} onClick={()=>evaluateFrontier(Math.max(0,frontier.offset-8))}>Previous eligible edges</button>
+     <button type='button' data-r715-next disabled={!frontier.hasMore} onClick={()=>evaluateFrontier(frontier.offset+frontier.evaluated)}>Next eligible edges</button>
+    </div>
+    <small data-r715-boundary>{frontier.boundary}</small>
+   </div>}
+  </section>
   {error&&<p role='alert' data-r713-error>REFUSED: {error}</p>}
   {comparison&&<div data-r713-result>
    <p role='status' data-r713-summary>{comparison.changedSourceFrames.length} changed source frames · {comparison.changedNodeStates} changed node states · {comparison.changedRouteFrames} changed route frames · first state divergence {comparison.firstStateDivergence===null?'none':comparison.firstStateDivergence}</p>
