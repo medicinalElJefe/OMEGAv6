@@ -3,6 +3,7 @@ import {WovenTopologyR707} from './WovenTopologyR707';
 import {OMEGA7_CAPABILITIES} from './capabilityRegistry';
 import canonicalRecoveryR650 from '../canon/year-corpus-capability-conservation-r650.json';
 import {DEFAULT_SCENARIO_R706,parseScenarioR706,exportScenarioR706,replayScenarioR706} from '../src/relationalScenarioWorkbenchR706.mjs';
+import {restoreComputationalSessionR711} from '../src/computationalSessionR711.mjs';
 import {OMEGA_ARCHITECTURE_R474,YEAR_CORPUS_CAPABILITY_GRAPH_R474,auditYearCorpusCapabilityGraphR474,type OmegaArchitecturePillarR474} from '../src/yearCorpusCapabilityGraphR474';
 
 // R705: a source-lineage view and real OMEGA7 route launcher, not a live-execution attestation.
@@ -15,9 +16,26 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
  const [scenarioText,setScenarioText]=useState(()=>exportScenarioR706(DEFAULT_SCENARIO_R706));
  const [scenarioStatus,setScenarioStatus]=useState('Sample input ready. Edit nodes and directional frames, then execute.');
  const [portableScenario,setPortableScenario]=useState('');
+ const [sessionImportText,setSessionImportText]=useState('');
+ const [sessionPreset,setSessionPreset]=useState<{origin:string;target:string;mirrored:boolean;revision:number}|null>(null);
  const [vectorScenario,setVectorScenario]=useState<any|null>(null);
  const [summaryChanges,setSummaryChanges]=useState<Array<{id:string;continuityBefore:number;continuityAfter:number;continuityDelta:number;scarBefore:number;scarAfter:number;contradictionBefore:number;contradictionAfter:number}>>([]);
- useEffect(()=>{try{const saved=window.localStorage.getItem('omega7.r706.scenario.v1');if(saved){setScenarioText(exportScenarioR706(parseScenarioR706(saved)));setScenarioStatus('Restored bounded local input. Execute to recompute; saved output is never trusted.');}}catch{setScenarioStatus('Saved input unavailable or rejected; sample remains.');}},[]);
+ useEffect(()=>{
+  try{
+   const savedSession=window.localStorage.getItem('omega7.r711.session.v1');
+   if(savedSession){
+    const restored=restoreComputationalSessionR711(savedSession);
+    setScenarioText(restored.sourceJson);setVectorScenario(restored.sourceScenario);
+    setSummaryChanges(restored.replay.summary.changes);
+    setReplayOutput(JSON.stringify({canonicalHistory:restored.replay.canonicalHistory,developmental:restored.replay.developmental,proof:restored.replay.proof,summary:restored.replay.summary}));
+    setSessionPreset({origin:restored.origin,target:restored.target,mirrored:restored.mirrored,revision:1});
+    setScenarioStatus('R712 saved session restored and independently recomputed. Local model only.');
+    return;
+   }
+   const saved=window.localStorage.getItem('omega7.r706.scenario.v1');
+   if(saved){setScenarioText(exportScenarioR706(parseScenarioR706(saved)));setScenarioStatus('Restored bounded local input. Execute to recompute; saved output is never trusted.');}
+  }catch{setScenarioStatus('Saved session/input unavailable or rejected; sample remains.');}
+ },[]);
  const audit=useMemo(()=>auditYearCorpusCapabilityGraphR474(),[]);
  const availableRoutes=useMemo(()=>new Set(OMEGA7_CAPABILITIES.map(c=>c.legacyRoute)),[]);
  const families=canonicalRecoveryR650.families;
@@ -34,21 +52,35 @@ export function CapabilityRecoveryAuditR705({onNavigate}:{onNavigate:(route:stri
    <h3>Inherited woven continuity and developmental replay</h3>
    <p>Run the established R651/R653 canonical frame engine through R623 finite-difference Heightened Mode. This is not live production or historical parity proof. R706 accepts typed ingress, egress, blocked, residue and return edges, including cycles and multiple parents, with bounded local scenario input.</p>
    <label htmlFor='r706-scenario-input'>Relational scenario (JSON: 1–12 nodes, 3–12 transport frames)</label>
-   <textarea id='r706-scenario-input' aria-label='Relational scenario JSON' data-r706-scenario-input value={scenarioText} onChange={e=>{setScenarioText(e.target.value);setVectorScenario(null);}} rows={10} spellCheck={false} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}} />
+   <textarea id='r706-scenario-input' aria-label='Relational scenario JSON' data-r706-scenario-input value={scenarioText} onChange={e=>{setScenarioText(e.target.value);setVectorScenario(null);setSessionPreset(null);try{window.localStorage.removeItem('omega7.r711.session.v1');}catch{}}} rows={10} spellCheck={false} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}} />
    <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'8px 0'}}>
     <button type='button' data-r624-execute onClick={()=>{
      try{const scenario=parseScenarioR706(scenarioText);const result=replayScenarioR706(scenario);
       setReplayOutput(JSON.stringify({canonicalHistory:result.canonicalHistory,developmental:result.developmental,proof:result.proof,summary:result.summary}));
-      setSummaryChanges(result.summary.changes);setVectorScenario(scenario);setScenarioStatus('Executed '+result.summary.frames+' frames for '+result.summary.nodes+' nodes. Local model only; no canonical admission.');
+      setSummaryChanges(result.summary.changes);setVectorScenario(scenario);setSessionPreset(null);try{window.localStorage.removeItem('omega7.r711.session.v1');}catch{}setScenarioStatus('Executed '+result.summary.frames+' frames for '+result.summary.nodes+' nodes. Local model only; no canonical admission.');
       try{window.localStorage.setItem('omega7.r706.scenario.v1',exportScenarioR706(scenario));}catch{setScenarioStatus('Execution passed; browser input persistence unavailable.');}
      }catch(error){setReplayOutput(JSON.stringify({truthClass:'REFUSED_NO_EXECUTION',error:String(error)}));setSummaryChanges([]);setVectorScenario(null);setScenarioStatus('Refused invalid or unsupported scenario; no state was admitted.');}
     }}>Execute inherited replay</button>
     <button type='button' data-r706-export onClick={()=>{try{setPortableScenario(exportScenarioR706(parseScenarioR706(scenarioText)));setScenarioStatus('Portable inputs prepared. No output, authority or proof is exported.');}catch(error){setScenarioStatus('Export refused: '+String(error));}}}>Prepare portable input</button>
-    <button type='button' data-r706-reset onClick={()=>{setScenarioText(exportScenarioR706(DEFAULT_SCENARIO_R706));setVectorScenario(null);setSummaryChanges([]);setScenarioStatus('Sample restored in editor; execute to replace saved input.');setPortableScenario('');}}>Reset sample</button>
+    <button type='button' data-r706-reset onClick={()=>{setScenarioText(exportScenarioR706(DEFAULT_SCENARIO_R706));setVectorScenario(null);setSessionPreset(null);try{window.localStorage.removeItem('omega7.r711.session.v1');}catch{}setSummaryChanges([]);setScenarioStatus('Sample restored in editor; execute to replace saved input.');setPortableScenario('');}}>Reset sample</button>
+   </div>
+   <div data-r712-import-panel style={{margin:'10px 0',padding:8,border:'1px solid var(--o7-border, #606a80)',borderRadius:6}}>
+    <label htmlFor='r712-session-import'>Restore portable computational session (source, route endpoints and observer reflection)</label>
+    <textarea id='r712-session-import' data-r712-import-input aria-label='Import computational session JSON' value={sessionImportText} onChange={e=>setSessionImportText(e.target.value)} rows={4} spellCheck={false} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}} />
+    <button type='button' data-r712-import onClick={()=>{
+     try{
+      const restored=restoreComputationalSessionR711(sessionImportText);
+      setScenarioText(restored.sourceJson);setVectorScenario(restored.sourceScenario);setSummaryChanges(restored.replay.summary.changes);
+      setReplayOutput(JSON.stringify({canonicalHistory:restored.replay.canonicalHistory,developmental:restored.replay.developmental,proof:restored.replay.proof,summary:restored.replay.summary}));
+      setSessionPreset(previous=>({origin:restored.origin,target:restored.target,mirrored:restored.mirrored,revision:(previous?.revision??0)+1}));
+      setPortableScenario('');setScenarioStatus('R712 session restored and independently recomputed; source-model only.');
+      try{window.localStorage.setItem('omega7.r706.scenario.v1',restored.sourceJson);window.localStorage.setItem('omega7.r711.session.v1',restored.sessionJson);}catch{setScenarioStatus('R712 session recomputed; browser persistence unavailable.');}
+     }catch(error){setScenarioStatus('R712 session import REFUSED; current computed session preserved: '+String(error));}
+    }}>Validate and restore session</button>
    </div>
    <p role='status' data-r706-status>{scenarioStatus}</p>
    {summaryChanges.length>0&&<div style={{overflowX:'auto'}} data-r706-summary-table><table><thead><tr><th scope='col'>Node</th><th scope='col'>Continuity before</th><th scope='col'>After</th><th scope='col'>Δ continuity</th><th scope='col'>Scar after</th><th scope='col'>Contradiction after</th></tr></thead><tbody>{summaryChanges.map(x=><tr key={x.id}><td>{x.id}</td><td>{x.continuityBefore.toFixed(4)}</td><td>{x.continuityAfter.toFixed(4)}</td><td>{x.continuityDelta.toFixed(4)}</td><td>{x.scarAfter.toFixed(4)}</td><td>{x.contradictionAfter.toFixed(4)}</td></tr>)}</tbody></table></div>}
-   {vectorScenario&&<WovenTopologyR707 scenario={vectorScenario}/>}
+   {vectorScenario&&<WovenTopologyR707 key={sessionPreset?.revision??'source'} scenario={vectorScenario} initialOrigin={sessionPreset?.origin} initialTarget={sessionPreset?.target} initialMirrored={sessionPreset?.mirrored}/>}
    {portableScenario&&<><label htmlFor='r706-portable'>Portable scenario inputs (copy and paste back into the editor to replay)</label><textarea id='r706-portable' aria-label='Portable scenario JSON' data-r706-portable readOnly value={portableScenario} rows={6} style={{display:'block',width:'100%',boxSizing:'border-box',fontFamily:'monospace',fontSize:12}} /></>}
    <pre data-r624-output style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{replayOutput}</pre>
   </section>
