@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {DEFAULT_SCENARIO_R706} from '../src/relationalScenarioWorkbenchR706.mjs';
+import {executeComputationalSessionR711,restoreComputationalSessionR711} from '../src/computationalSessionR711.mjs';
+const original=executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'B',target:'A',mirrored:true});
+const recovered=restoreComputationalSessionR711(original.sessionJson);
+assert.deepEqual(recovered.frames,original.frames);
+assert.deepEqual(recovered.continuity,original.continuity);
+assert.equal(recovered.origin,'B');
+assert.equal(recovered.mirrored,true);
+assert.throws(()=>restoreComputationalSessionR711(JSON.stringify({...JSON.parse(original.sessionJson),authority:'PRODUCTION'})),/session envelope/);
+const ui=readFileSync(new URL('../src7/WovenTopologyR707.tsx',import.meta.url),'utf8');
+for(const marker of ['data-r712-import','data-r712-restore','data-r712-error','data-r712-restored','activeScenario','activeMirror','restoreComputationalSessionR711'])assert.ok(ui.includes(marker),marker);
+assert.ok(ui.includes('projectWovenTopologyR707(activeScenario,activeFrame,activeMirror)'));
+assert.ok(ui.includes('traceWovenRouteR709(activeScenario,origin,target,activeMirror)'));
+console.log('R712 recovery invariants PASS');
