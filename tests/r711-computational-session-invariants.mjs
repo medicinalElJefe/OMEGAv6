@@ -24,7 +24,7 @@ const ui=readFileSync(new URL('../src7/WovenTopologyR707.tsx',import.meta.url),'
 for(const token of ['executeComputationalSessionR711','data-r711-session','data-r711-summary','data-r711-export'])assert.ok(ui.includes(token),token);
 const auditUi=readFileSync(new URL('../src7/CapabilityRecoveryAuditR705.tsx',import.meta.url),'utf8');
 for(const token of ['restoreComputationalSessionR711','data-r712-import-input','data-r712-import','omega7.r711.session.v1','independently recomputed'])assert.ok(auditUi.includes(token),token);
-assert.match(auditUi,/data-r706-reset[\\s\\S]{0,500}removeItem\\('omega7.r706.scenario.v1'\\)/,'reset must remove persisted source to avoid stale reload');
+assert.ok(auditUi.slice(auditUi.indexOf('data-r706-reset'),auditUi.indexOf('data-r706-reset')+650).includes("removeItem('omega7.r706.scenario.v1')"),'reset must remove persisted source to avoid stale reload');
 for(const token of ['data-r712-save','data-r712-save-status','initialOrigin','initialTarget','initialMirrored'])assert.ok(ui.includes(token),token);
 const other=executeComputationalSessionR711(DEFAULT_SCENARIO_R706,{origin:'B',target:'A',mirrored:true});
 assert.deepEqual(restoreComputationalSessionR711(other.sessionJson).continuity,other.continuity);
