@@ -40,6 +40,8 @@ export function analyzeMinimalRouteCutsR717(sessionJson,{frameIndex=0}={}){
    peakJerkDelta:comparison.developmentalSensitivity.orders.jerk.peak?.absoluteDelta??0};
  };
  const frames=original.map((reachable,t)=>{
+  if(t!==frameIndex)return {frameIndex:t,baselineReachable:reachable,minimumCutSize:null,
+   status:'OUTSIDE_SELECTED_SOURCE_FRAME',witnesses:[]};
   if(!reachable)return {frameIndex:t,baselineReachable:false,minimumCutSize:null,
    status:'BASELINE_UNREACHABLE',witnesses:[]};
   const singleCuts=[...singles].filter(([,session])=>!session.continuity.frames[t].reachable);
@@ -57,5 +59,5 @@ export function analyzeMinimalRouteCutsR717(sessionJson,{frameIndex=0}={}){
   evaluatedSingletons:singles.size,evaluatedPairs:pairs.size,
   totalPossiblePairs:eligible.length*(eligible.length-1)/2,
   coverage:'EXACT_MINIMUM_UP_TO_TWO_WITH_PROVEN_SINGLETON_PRUNING',
-  frames,boundary:'Only source-frame cuts of size one or two are considered. A minimum is proven for each reachable baseline frame when found; no cut up to two does not prove resilience against larger cuts. All routes and developmental witnesses are independently recomputed from R711/R713/R714. No empirical causal claim, original historical equation parity, native execution, physical dimensionality or CanonState admission.'};
+  frames,boundary:'Only source-frame cuts of size one or two are considered; other frames are reported out of scope. A minimum is proven for each reachable baseline frame when found; no cut up to two does not prove resilience against larger cuts. All routes and developmental witnesses are independently recomputed from R711/R713/R714. No empirical causal claim, original historical equation parity, native execution, physical dimensionality or CanonState admission.'};
 }
