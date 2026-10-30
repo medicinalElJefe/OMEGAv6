@@ -84,21 +84,25 @@ try{
    if(!(await joint.locator('[data-r716-row="0-1"] [data-r716-gate]').innerText()).includes('MODEL_ROUTE_LOSS'))throw Error(device+': R716 joint cut did not lose reverse RETURN route');
    if(!(await joint.locator('[data-r716-boundary]').innerText()).includes('not empirical causation'))throw Error(device+': R716 scientific truth boundary missing');
    if(await joint.locator('[data-r716-next]').isEnabled())throw Error(device+': R716 falsely reports additional pairs');
-   await root.locator('[data-r718-first-frame]').selectOption('0');
+   if(await root.locator('[data-r718-first-frame]').getAttribute('data-r718-first-frame-value')!=='0')throw Error(device+': R718 initial first-frame state invalid');
+   await root.locator('[data-r718-first-next]').click();
+   if(await root.locator('[data-r718-first-frame]').getAttribute('data-r718-first-frame-value')!=='1')throw Error(device+': R718 first-frame navigation failed');
+   await root.locator('[data-r718-first-previous]').click();
+   if(await root.locator('[data-r718-first-frame]').getAttribute('data-r718-first-frame-value')!=='0')throw Error(device+': R718 first-frame return failed');
    await root.locator('[data-r718-first-edge]').selectOption('0');
-   // Drive frame changes through explicit state actions, then verify that the
-   // dependent native selector and React state witness agree on every step.
+   // Drive both frames through bounded state actions, then verify the displayed
+   // state witness, eligible edge selector and executor remain synchronized.
    await root.locator('[data-r718-second-next]').click();
    await root.locator('[data-r718-second-frame][data-r718-second-frame-state="2"]').waitFor({state:'attached',timeout:10000});
-   if(await root.locator('[data-r718-second-frame]').inputValue()!=='2')throw Error(device+': R718 next-frame action did not update visible selection');
+   if(await root.locator('[data-r718-second-frame]').getAttribute('data-r718-second-frame-value')!=='2')throw Error(device+': R718 next-frame action did not update visible selection');
    await root.locator('[data-r718-second-previous]').click();
    await root.locator('[data-r718-second-frame][data-r718-second-frame-state="1"]').waitFor({state:'attached',timeout:10000});
-   if(await root.locator('[data-r718-second-frame]').inputValue()!=='1')throw Error(device+': R718 previous-frame action did not restore visible selection');
+   if(await root.locator('[data-r718-second-frame]').getAttribute('data-r718-second-frame-value')!=='1')throw Error(device+': R718 previous-frame action did not restore visible selection');
    await root.locator('[data-r718-second-edge]').selectOption('0');
    await page.waitForTimeout(50);
    const visibleFrames=[
-    await root.locator('[data-r718-first-frame]').inputValue(),
-    await root.locator('[data-r718-second-frame]').inputValue()
+    await root.locator('[data-r718-first-frame]').getAttribute('data-r718-first-frame-value'),
+    await root.locator('[data-r718-second-frame]').getAttribute('data-r718-second-frame-value')
    ];
    const visibleEdges=[
     await root.locator('[data-r718-first-edge]').inputValue(),
