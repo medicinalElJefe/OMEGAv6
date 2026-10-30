@@ -142,6 +142,10 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
     <label>Second frame <select data-r718-second-frame data-r718-second-frame-state={secondFrame} ref={secondFrameSelect} value={secondFrame} onChange={e=>chooseSecondFrame(Number(e.currentTarget.value))}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
     <label>Second source edge <select data-r718-second-edge ref={secondEdgeSelect} value={selectedSecondEdge} onChange={e=>{setSecondEdge(Number(e.target.value));setTemporal(null);setTemporalError('');}}>{eligibleAt(secondFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
    </div>
+   <div aria-label='Cross-frame navigation' style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+    <button type='button' data-r718-second-previous disabled={secondFrame<=0} onClick={()=>chooseSecondFrame(Math.max(0,secondFrame-1))}>Previous second frame</button>
+    <button type='button' data-r718-second-next disabled={secondFrame>=frameChoices.length-1} onClick={()=>chooseSecondFrame(Math.min(frameChoices.length-1,secondFrame+1))}>Next second frame</button>
+   </div>
    <button type='button' data-r718-run onClick={evaluateTemporal}>Recompute cross-frame temporal interaction</button>
    {temporalError&&<p role='alert' data-r718-error>REFUSED: {temporalError}</p>}
    {temporal&&<div data-r718-result>
