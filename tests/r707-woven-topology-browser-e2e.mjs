@@ -89,8 +89,18 @@ try{
    // Exercise a genuine second-frame transition. Selecting '1' while the
    // initial controlled value is already '1' is not a change event in a
    // browser, so it cannot establish that React accepted a new selection.
+   // Native capture proves whether Playwright delivered the input/change event;
+   // report the DOM and React witness separately before changing application code.
+   await root.locator('[data-r718-second-frame]').evaluate(el=>{
+    window.__r718SelectionProbe={before:el.value,events:[]};
+    for(const type of ['input','change'])el.addEventListener(type,e=>window.__r718SelectionProbe.events.push({type,value:e.target.value,reactState:el.getAttribute('data-r718-second-frame-state')}),{capture:true});
+   });
    await root.locator('[data-r718-second-frame]').selectOption('2');
-   await root.locator('[data-r718-second-frame]').evaluate(el=>{if(el.value!=='2')throw Error('Second frame not selected');});
+   const r718SelectionProbe=await root.locator('[data-r718-second-frame]').evaluate(el=>({
+    ...window.__r718SelectionProbe,after:el.value,reactState:el.getAttribute('data-r718-second-frame-state'),
+    options:[...el.options].map(o=>({value:o.value,selected:o.selected})),pageErrors:[]
+   }));
+   if(r718SelectionProbe.after!=='2')throw Error(device+': R718 frame selection reverted; '+JSON.stringify(r718SelectionProbe));
    await root.locator('[data-r718-second-frame][data-r718-second-frame-state="2"]').waitFor({state:'attached',timeout:10000});
    if(await root.locator('[data-r718-second-frame]').inputValue()!=='2'){
     const opts=await root.locator('[data-r718-second-frame] option').evaluateAll(nodes=>nodes.map(n=>n.value));
