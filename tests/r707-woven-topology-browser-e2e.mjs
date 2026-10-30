@@ -296,9 +296,14 @@ try{
    await page.locator('.o7-nav-r519').getByRole('button',{name:'Work'}).click();
    await page.locator('[data-capability-route="Memory"] footer button').click();
    await page.locator('[data-native-host-route="Memory"]').waitFor({state:'visible',timeout:30000});
-   const openMemory=page.locator('.o7-open-instrument');
-   if(await openMemory.count())await openMemory.click();
-   const memory=page.locator('.r28-memory');
+   // The native route shell can appear before its lazy workspace has mounted.
+   // Wait for the real Memory instrument/intro rather than checking count during loading.
+   const memoryHost=page.locator('.o7-native-workspace[data-route="Memory"]');
+   await memoryHost.waitFor({state:'visible',timeout:30000});
+   const openMemory=memoryHost.locator('.o7-open-instrument');
+   await memoryHost.locator('.o7-open-instrument, .r28-memory').first().waitFor({state:'visible',timeout:30000});
+   if(await openMemory.isVisible())await openMemory.click();
+   const memory=memoryHost.locator('.r28-memory');
    await memory.waitFor({state:'visible',timeout:30000});
    await memory.locator('textarea').fill('R722 independently recoverable packet observation');
    await memory.getByRole('button',{name:'Snapshot current packet'}).click();
@@ -342,8 +347,12 @@ try{
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('.o7-nav-r519').getByRole('button',{name:'Work'}).click();
    await page.locator('[data-capability-route="Memory"] footer button').click();
-   if(await page.locator('.o7-open-instrument').count())await page.locator('.o7-open-instrument').click();
-   await page.locator('[data-r722-memory-recovery]').waitFor({state:'visible',timeout:30000});
+   const reloadedMemoryHost=page.locator('.o7-native-workspace[data-route="Memory"]');
+   await reloadedMemoryHost.waitFor({state:'visible',timeout:30000});
+   await reloadedMemoryHost.locator('.o7-open-instrument, .r28-memory').first().waitFor({state:'visible',timeout:30000});
+   const reopenMemory=reloadedMemoryHost.locator('.o7-open-instrument');
+   if(await reopenMemory.isVisible())await reopenMemory.click();
+   await reloadedMemoryHost.locator('[data-r722-memory-recovery]').waitFor({state:'visible',timeout:30000});
    if(!(await page.locator('[data-r722-count]').innerText()).includes('1 browser-local snapshots'))
     throw Error(device+': R722 imported memory not persistent after reload');
    console.log('R722 '+device+' PASS: real R28 snapshot, SHA-256 portable export, tamper refusal, local restore and reload persistence');
