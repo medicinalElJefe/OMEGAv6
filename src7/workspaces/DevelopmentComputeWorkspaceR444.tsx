@@ -73,7 +73,7 @@ export default function DevelopmentComputeWorkspaceR444({route,onNavigate,depth}
     route==='Build Out'?<WovenBuildOutPanel address={address} onNavigate={onNavigate}/>:
     route==='Development'?<section className='o7-development-combined'><SelfBuildTruthR539/><WovenBuildOutPanel address={address} onNavigate={onNavigate}/><OmegaIntentWorkbenchR85 record={record} address={address} currentPanel='Development' onAddress={commit} onNavigate={onNavigate}/></section>:
     route==='Kernel Intelligence'?<SAISovereignControl record={record} modeCount={modeSummary.appliedCount} onNavigate={onNavigate}/>:
-    <section className='o7-sai-combined'><IntelligenceFabricPanel address={address}/><SAISovereignControl record={record} modeCount={modeSummary.appliedCount} onNavigate={onNavigate}/></section>}
+    <section className='o7-sai-combined'><IntelligenceFabricPanel address={address} onAddress={commit}/><SAISovereignControl record={record} modeCount={modeSummary.appliedCount} onNavigate={onNavigate}/></section>}
   </div>}
  </section>;
 }
