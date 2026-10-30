@@ -478,31 +478,31 @@ try{
     window.dispatchEvent(new Event('omega-r722-memory-updated'));
     return {start:firstId,end:third.id};
    },pair.earlier);
-   const trajectory=saiHost.locator('[data-r726-trajectory]');
-   await trajectory.waitFor({state:'visible',timeout:10000});
+   const memoryTrajectory=saiHost.locator('[data-r726-memoryTrajectory]');
+   await memoryTrajectory.waitFor({state:'visible',timeout:10000});
    await page.waitForFunction(()=>document.querySelectorAll('[data-r726-end] option').length===4);
-   await trajectory.locator('[data-r726-start]').selectOption(trajectoryIds.start);
-   await trajectory.locator('[data-r726-end]').selectOption(trajectoryIds.end);
-   await trajectory.locator('[data-r726-run]').click();
-   await trajectory.locator('[data-r726-result]').waitFor({state:'visible',timeout:10000});
-   if(await trajectory.locator('[data-r726-source]').count()!==3)
+   await memoryTrajectory.locator('[data-r726-start]').selectOption(trajectoryIds.start);
+   await memoryTrajectory.locator('[data-r726-end]').selectOption(trajectoryIds.end);
+   await memoryTrajectory.locator('[data-r726-run]').click();
+   await memoryTrajectory.locator('[data-r726-result]').waitFor({state:'visible',timeout:10000});
+   if(await memoryTrajectory.locator('[data-r726-source]').count()!==3)
     throw Error(device+': R726 did not execute all three verified observations');
-   await trajectory.locator('[data-r726-export]').click();
-   const traced=JSON.parse(await trajectory.locator('[data-r726-json]').inputValue());
+   await memoryTrajectory.locator('[data-r726-export]').click();
+   const traced=JSON.parse(await memoryTrajectory.locator('[data-r726-json]').inputValue());
    if(traced.schema!=='OMEGA_VERIFIED_MEMORY_TRAJECTORY_R726_V1'||
       traced.sourceCount!==3||traced.edges.length!==2||traced.elapsedRecordedMs!==10000||
       traced.causalInference!==false||traced.sources[2].id!==trajectoryIds.end)
-    throw Error(device+': R726 trajectory packet lost chronology or source identity');
-   await trajectory.locator('[data-r726-replay]').last().click();
-   if(!(await trajectory.locator('[data-r726-status]').innerText()).includes('Verified trajectory address'))
+    throw Error(device+': R726 memoryTrajectory packet lost chronology or source identity');
+   await memoryTrajectory.locator('[data-r726-replay]').last().click();
+   if(!(await memoryTrajectory.locator('[data-r726-status]').innerText()).includes('Verified memoryTrajectory address'))
     throw Error(device+': R726 verified address replay failed');
    await page.evaluate(()=>{
     const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
     rows[2].note+=' forged';localStorage.setItem(key,JSON.stringify(rows));
    });
-   await trajectory.locator('[data-r726-export]').click();
-   if(!(await trajectory.locator('[data-r726-error]').innerText()).includes('digest mismatch'))
-    throw Error(device+': R726 trajectory export accepted tampered source');
+   await memoryTrajectory.locator('[data-r726-export]').click();
+   if(!(await memoryTrajectory.locator('[data-r726-error]').innerText()).includes('digest mismatch'))
+    throw Error(device+': R726 memoryTrajectory export accepted tampered source');
    console.log('R726 verified memory trajectory '+device+' PASS: 3 snapshots, 2 real edges, export, replay, tamper refusal');
    console.log('R725 verified memory continuity '+device+' PASS: two verified snapshots, metric deltas, export, replay, tamper refusal');
    console.log('R724 grounded intelligence '+device+' PASS: verified SAI Lab evidence, source packet, replay, tamper refusal');
