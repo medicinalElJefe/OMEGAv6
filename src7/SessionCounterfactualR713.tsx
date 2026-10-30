@@ -5,6 +5,7 @@ import {enumerateInterventionFrontierR715} from '../src/interventionFrontierR715
 import {enumerateJointInterventionsR716} from '../src/jointInterventionCompositionR716.mjs';
 import {analyzeMinimalRouteCutsR717} from '../src/minimalRouteCutsR717.mjs';
 import {compareCrossFrameInterventionsR718} from '../src/crossFrameDevelopmentalInteractionR718.mjs';
+import {enumerateCrossFrameFrontierR719} from '../src/crossFrameFrontierR719.mjs';
 
 // Local source-model intervention only; never an edit to CanonState.
 export function SessionCounterfactualR713({baselineSession,frameIndex,projection}:{baselineSession:any;frameIndex:number;projection:any}){
@@ -20,6 +21,8 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  const [minimalCutsError,setMinimalCutsError]=useState('');
  const [temporal,setTemporal]=useState<any|null>(null);
  const [temporalError,setTemporalError]=useState('');
+ const [crossFrontier,setCrossFrontier]=useState<any|null>(null);
+ const [crossFrontierError,setCrossFrontierError]=useState('');
  const [firstFrame,setFirstFrame]=useState(0);
  const [secondFrame,setSecondFrame]=useState(1);
  const [firstEdge,setFirstEdge]=useState(0);
@@ -30,7 +33,7 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  // A selected display frame is not a new source session. Keep independent
  // cross-frame choices stable while users traverse the single-frame views.
  // Only a new source session invalidates those choices.
- useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');setTemporal(null);setTemporalError('');setFirstFrame(0);setSecondFrame(1);setFirstEdge(0);setSecondEdge(0);},[baselineSession.sessionJson]);
+ useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');setTemporal(null);setTemporalError('');setCrossFrontier(null);setCrossFrontierError('');setFirstFrame(0);setSecondFrame(1);setFirstEdge(0);setSecondEdge(0);},[baselineSession.sessionJson]);
  useEffect(()=>{setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');},[frameIndex]);
  const eligible=projection.edges.filter((e:any)=>e.kind!=='BLOCKED'&&e.weight>0);
  const chosen=eligible.find((e:any)=>e.id===edgeId)??eligible[0];
@@ -49,6 +52,20 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  function evaluateMinimalCuts(){
   try{const result=analyzeMinimalRouteCutsR717(baselineSession.sessionJson,{frameIndex});setMinimalCuts(result);setMinimalCutsError('');}
   catch(e){setMinimalCuts(null);setMinimalCutsError(e instanceof Error?e.message:'Minimal route-cut proof refused');}
+ }
+ function evaluateCrossFrontier(offset=0){
+  try{
+   const result=enumerateCrossFrameFrontierR719(baselineSession.sessionJson,{offset,limit:4});
+   setCrossFrontier(result);setCrossFrontierError('');
+  }catch(e){setCrossFrontier(null);setCrossFrontierError(e instanceof Error?e.message:'Cross-frame frontier refused');}
+ }
+ function inspectCrossFrontierCandidate(selection:any){
+  try{
+   const result=compareCrossFrameInterventionsR718(baselineSession.sessionJson,selection);
+   setFirstFrame(selection.firstFrameIndex);setFirstEdge(selection.firstEdgeIndex);
+   setSecondFrame(selection.secondFrameIndex);setSecondEdge(selection.secondEdgeIndex);
+   setTemporal(result);setTemporalError('');
+  }catch(e){setTemporal(null);setTemporalError(e instanceof Error?e.message:'Cross-frame inspection refused');}
  }
  function evaluateTemporal(){
   try{
@@ -155,6 +172,28 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
     </tbody></table></div>
     <p data-r718-peak>{temporal.peakInteraction?'Peak interaction: '+temporal.peakInteraction.nodeId+' '+temporal.peakInteraction.field+' at state '+temporal.peakInteraction.stateIndex+' = '+temporal.peakInteraction.residual.toFixed(6):'No nonadditive model-state residual observed'} · peak joint jerk delta {temporal.peakJointJerkDelta.toFixed(6)}</p>
     <small data-r718-boundary>{temporal.boundary}</small>
+   </div>}
+  </section>
+  <section data-r719-frontier aria-label='Bounded cross-frame source interaction frontier' style={{margin:'12px 0',paddingTop:8,borderTop:'1px solid #65727d'}}>
+   <h6>R719 · Cross-frame interaction frontier</h6>
+   <p>Enumerate actual ascending-frame source-edge pairs in deterministic pages of four. Every visible row runs the four independent R718 histories. Inspect a row to load its exact pair into the temporal instrument above.</p>
+   <button type='button' data-r719-run onClick={()=>evaluateCrossFrontier(0)}>Compute cross-frame frontier</button>
+   {crossFrontierError&&<p role='alert' data-r719-error>REFUSED: {crossFrontierError}</p>}
+   {crossFrontier&&<div data-r719-result>
+    <p role='status' data-r719-coverage>{crossFrontier.evaluated} of {crossFrontier.totalEligiblePairs} eligible source-frame pairs evaluated on this page · {crossFrontier.coverage} · offset {crossFrontier.offset}</p>
+    <div style={{maxWidth:'100%',overflowX:'auto'}}><table><thead><tr><th>Pair</th><th>Source edges</th><th>Model outcome</th><th>Joint state changes</th><th>Nonadditive samples</th><th>Tail carry</th><th>Inspect</th></tr></thead><tbody>
+     {crossFrontier.candidates.map((item:any)=><tr key={item.ordinal} data-r719-row={item.ordinal}>
+      <td>{item.ordinal+1}</td>
+      <td>{item.edges.map((edge:any)=>'F'+(edge.frameIndex+1)+' #'+edge.edgeIndex+' '+edge.from+' → '+edge.to).join(' / ')}</td>
+      <td data-r719-gate>{item.gate}</td><td>{item.changedNodeStates}</td><td>{item.interactionSamples}</td><td>{item.tailChangedStates}</td>
+      <td><button type='button' data-r719-inspect onClick={()=>inspectCrossFrontierCandidate(item.selection)}>Inspect pair</button></td>
+     </tr>)}
+    </tbody></table></div>
+    <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+     <button type='button' data-r719-previous disabled={crossFrontier.offset===0} onClick={()=>evaluateCrossFrontier(Math.max(0,crossFrontier.offset-crossFrontier.limit))}>Previous page</button>
+     <button type='button' data-r719-next disabled={!crossFrontier.hasMore} onClick={()=>evaluateCrossFrontier(crossFrontier.offset+crossFrontier.evaluated)}>Next page</button>
+    </div>
+    <small data-r719-boundary>{crossFrontier.boundary}</small>
    </div>}
   </section>
   <section data-r717-minimal-cuts aria-label='Bounded exact minimum route-cut analysis' style={{margin:'12px 0',paddingTop:8,borderTop:'1px solid #65727d'}}>
