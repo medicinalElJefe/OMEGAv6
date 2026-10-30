@@ -156,6 +156,26 @@ try{
     throw Error(device+': R719 selected pair did not load into R718 frame controls');
    if(await root.locator('[data-r718-timeline]').count()!==4)
     throw Error(device+': R719 inspection did not execute R718 four-way timeline');
+   // R720 plots four independently recomputed source histories, not a static illustration.
+   const trajectory=root.locator('[data-r720-trajectory]');
+   await trajectory.locator('[data-r720-metric]').selectOption('scar');
+   await trajectory.locator('[data-r720-run]').click();
+   await trajectory.locator('[data-r720-result]').waitFor({state:'visible',timeout:30000});
+   if(await trajectory.locator('[data-r720-state]').count()!==4||
+      await trajectory.locator('[data-r720-curve]').count()!==4||
+      await trajectory.locator('[data-r720-residual-curve]').count()!==1)
+    throw Error(device+': R720 did not render four source histories and residual');
+   for(const row of await trajectory.locator('[data-r720-state]').all()){
+    const values=(await row.locator('td').allInnerTexts()).slice(1).map(Number);
+    if(values.length!==5||values.some(x=>!Number.isFinite(x))||
+       Math.abs(values[4]-(values[3]-values[1]-values[2]+values[0]))>0.000003)
+     throw Error(device+': R720 visible residual does not match independently computed histories');
+   }
+   if(!(await trajectory.locator('[data-r720-boundary]').innerText()).includes('not measured time'))
+    throw Error(device+': R720 scientific boundary absent');
+   await trajectory.locator('[data-r720-save]').click();
+   if(!(await trajectory.locator('[data-r720-status]').innerText()).includes('Saved reproducible'))
+    throw Error(device+': R720 local selection save failed');
    await root.locator('[data-r717-run]').click();
    const minimalCuts=root.locator('[data-r717-result]');
    await minimalCuts.waitFor({state:'visible',timeout:30000});
@@ -175,6 +195,11 @@ try{
    if(await root.locator('[data-r708-origin]').inputValue()!=='B'||await root.locator('[data-r708-target]').inputValue()!=='A')throw Error(device+': R712 reload lost route endpoints');
    if(await root.locator('[data-r707-mirror]').getAttribute('aria-pressed')!=='true')throw Error(device+': R712 reload lost observer reflection');
    if(!(await root.locator('[data-r711-summary]').innerText()).includes('3 recomputed frames'))throw Error(device+': R712 reload did not recompute');
+   await root.locator('[data-r720-restore]').click();
+   if(!(await root.locator('[data-r720-status]').innerText()).includes('independently recomputed')||
+      await root.locator('[data-r720-metric]').inputValue()!=='scar'||
+      await root.locator('[data-r720-state]').count()!==4)
+    throw Error(device+': R720 local recovery failed to independently recompute source trajectory');
    const importInput=page.locator('[data-r712-import-input]');
    await importInput.fill(JSON.stringify({...portableSession,authority:'FORGED_PRODUCTION'}));
    await page.locator('[data-r712-import]').click();
@@ -185,6 +210,9 @@ try{
    if(!(await page.locator('[data-r706-status]').innerText()).includes('independently recomputed'))throw Error(device+': R712 valid import did not recompute');
    if(await root.locator('[data-r708-origin]').inputValue()!=='A'||await root.locator('[data-r708-target]').inputValue()!=='B')throw Error(device+': R712 valid import failed to restore route');
    if(await root.locator('[data-r707-mirror]').getAttribute('aria-pressed')!=='false')throw Error(device+': R712 valid import failed to restore observer');
+   await root.locator('[data-r720-restore]').click();
+   if(!(await root.locator('[data-r720-error]').innerText()).includes('different source session'))
+    throw Error(device+': R720 stale saved selection was accepted for a different session');
    await importInput.fill(JSON.stringify(portableSession));
    await page.locator('[data-r712-import]').click();
    if(await root.locator('[data-r708-origin]').inputValue()!=='B'||await root.locator('[data-r707-mirror]').getAttribute('aria-pressed')!=='true')throw Error(device+': R712 repeated import did not reset child state');
