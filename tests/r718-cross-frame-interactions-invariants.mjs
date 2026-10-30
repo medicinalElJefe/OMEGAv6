@@ -63,7 +63,7 @@ for(const token of ['compareCrossFrameInterventionsR718','selectedFirstEdge','se
 // Frame selection must have one controlled React change path. A second native
 // onInput handler can race the same selection and cause state/DOM divergence.
 for(const selector of ['first','second']){
- const tag=ui.match(new RegExp('<select[^>]*data-r718-'+selector+'-frame[^>]*>'))?.[0];
+ const tag=ui.split('data-r718-'+selector+'-frame ')[1]?.split('</select>')[0];
  assert.ok(tag,'R718 '+selector+' frame selector missing');
  assert.ok(tag.includes('value={'+selector+'Frame}'),'R718 '+selector+' frame must reflect React state');
  assert.ok(tag.includes('onChange={e=>choose'+(selector==='first'?'First':'Second')+'Frame'),'R718 frame change handler missing');
