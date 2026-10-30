@@ -387,6 +387,40 @@ try{
    await reloadedRecall.locator('[data-r723-search]').click();
    if(!(await reloadedRecall.locator('[data-r723-summary]').innerText()).includes('1 matching sources'))
     throw Error(device+': R723 recovered source recall did not survive reload');
+   // R724 grounded intelligence: real saved R28 evidence is verified and carried into SAI Lab.
+   await page.locator('.o7-nav-r519').getByRole('button',{name:'Develop'}).click();
+   await page.locator('[data-capability-route="SAI Lab"] footer button').click();
+   const saiHost=page.locator('.o7-native-workspace[data-route="SAI Lab"]');
+   await saiHost.waitFor({state:'visible',timeout:30000});
+   await saiHost.locator('.o7-open-instrument, [data-r724-intelligence]').first().waitFor({state:'visible',timeout:30000});
+   const saiOpen=saiHost.locator('.o7-open-instrument');
+   if(await saiOpen.isVisible())await saiOpen.click();
+   const grounded=saiHost.locator('[data-r724-intelligence]');
+   await grounded.waitFor({state:'visible',timeout:30000});
+   await grounded.locator('[data-r724-question]').fill('What did I record about independently recoverable packet observation?');
+   await grounded.locator('[data-r724-run]').click();
+   await grounded.locator('[data-r724-source]').first().waitFor({state:'visible',timeout:10000});
+   if(!(await grounded.locator('[data-r724-source]').first().innerText()).includes('R722 independently recoverable packet observation'))
+    throw Error(device+': R724 SAI Lab did not return the verified R28 source');
+   await grounded.locator('[data-r724-export]').click();
+   const evidence=JSON.parse(await grounded.locator('[data-r724-json]').inputValue());
+   if(evidence.schema!=='OMEGA_LOCAL_GROUNDED_INTELLIGENCE_R724_V1'||evidence.sources.length!==1||
+      evidence.statements[0].text!=='R722 independently recoverable packet observation'||evidence.providerInference!==false)
+    throw Error(device+': R724 exported ungrounded or incorrect source packet');
+   await grounded.locator('[data-r724-replay]').click();
+   if(!(await grounded.locator('[data-r724-status]').innerText()).includes('Verified local address'))
+    throw Error(device+': R724 source-bound address replay failed');
+   await page.evaluate(()=>{
+    const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
+    rows[0].note+=' forged';localStorage.setItem(key,JSON.stringify(rows));
+   });
+   await grounded.locator('[data-r724-export]').click();
+   if(!(await grounded.locator('[data-r724-error]').innerText()).includes('digest mismatch'))
+    throw Error(device+': R724 revalidated export did not refuse tampered memory');
+   await grounded.locator('[data-r724-run]').click();
+   if(!(await grounded.locator('[data-r724-error]').innerText()).includes('digest mismatch'))
+    throw Error(device+': R724 grounded query accepted corrupted local memory');
+   console.log('R724 grounded intelligence '+device+' PASS: verified SAI Lab evidence, source packet, replay, tamper refusal');
    console.log('R723 verified recall '+device+' PASS: source-bound query, inspection, replay, tamper refusal, persisted recovery');
    console.log('R722 '+device+' PASS: real R28 snapshot, SHA-256 portable export, tamper refusal, local restore and reload persistence');
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
