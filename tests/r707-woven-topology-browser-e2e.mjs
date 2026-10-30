@@ -420,6 +420,49 @@ try{
    await grounded.locator('[data-r724-run]').click();
    if(!(await grounded.locator('[data-r724-error]').innerText()).includes('digest mismatch'))
     throw Error(device+': R724 grounded query accepted corrupted local memory');
+   // R725 source-bound longitudinal comparison: independently valid local snapshots,
+   // real metric arithmetic, replay, export and refusal after source tampering.
+   const pair=await page.evaluate(async valid=>{
+    const first=valid[0],metrics={...first.metrics};
+    const numeric=Object.keys(metrics).find(key=>typeof metrics[key]==='number'&&Number.isFinite(metrics[key]));
+    if(numeric)metrics[numeric]+=0.125;
+    const core={address:first.address===20735?20734:first.address+1,stateId:first.stateId+1,
+     note:'R725 second verified chronological observation',metrics,decision:'R725_NEXT',
+     routeNext:first.routeNext,authority:'BROWSER_LOCAL_PACKET_SNAPSHOT'};
+    const bytes=new TextEncoder().encode(JSON.stringify(core));
+    const hash=await crypto.subtle.digest('SHA-256',bytes);
+    const sha256=[...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    const second={id:'r725-browser-second-0002',at:first.at+5000,...core,sha256};
+    localStorage.setItem('omega.v6.memory.r28',JSON.stringify([first,second]));
+    window.dispatchEvent(new Event('omega-r722-memory-updated'));
+    return {earlier:first.id,later:second.id};
+   },bundle.rows);
+   const continuity=saiHost.locator('[data-r725-continuity]');
+   await continuity.waitFor({state:'visible',timeout:10000});
+   await page.waitForFunction(()=>document.querySelectorAll('[data-r725-later] option').length===3);
+   await continuity.locator('[data-r725-earlier]').selectOption(pair.earlier);
+   await continuity.locator('[data-r725-later]').selectOption(pair.later);
+   await continuity.locator('[data-r725-compare]').click();
+   await continuity.locator('[data-r725-result]').waitFor({state:'visible',timeout:10000});
+   if(!(await continuity.locator('[data-r725-result]').innerText()).includes('R725 second verified chronological observation'))
+    throw Error(device+': R725 comparison omitted verified later source');
+   await continuity.locator('[data-r725-export]').click();
+   const compared=JSON.parse(await continuity.locator('[data-r725-json]').inputValue());
+   if(compared.schema!=='OMEGA_VERIFIED_MEMORY_CONTINUITY_R725_V1'||
+      compared.elapsedRecordedMs!==5000||compared.causalInference!==false||
+      compared.earlier.id!==pair.earlier||compared.later.id!==pair.later)
+    throw Error(device+': R725 source-bound comparison packet or temporal boundary incorrect');
+   await continuity.locator('[data-r725-replay-later]').click();
+   if(!(await continuity.locator('[data-r725-status]').innerText()).includes('Verified later source address'))
+    throw Error(device+': R725 verified later address selection failed');
+   await page.evaluate(()=>{
+    const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
+    rows[1].note+=' forged';localStorage.setItem(key,JSON.stringify(rows));
+   });
+   await continuity.locator('[data-r725-export]').click();
+   if(!(await continuity.locator('[data-r725-error]').innerText()).includes('digest mismatch'))
+    throw Error(device+': R725 comparison export accepted tampered source');
+   console.log('R725 verified memory continuity '+device+' PASS: two verified snapshots, metric deltas, export, replay, tamper refusal');
    console.log('R724 grounded intelligence '+device+' PASS: verified SAI Lab evidence, source packet, replay, tamper refusal');
    console.log('R723 verified recall '+device+' PASS: source-bound query, inspection, replay, tamper refusal, persisted recovery');
    console.log('R722 '+device+' PASS: real R28 snapshot, SHA-256 portable export, tamper refusal, local restore and reload persistence');
