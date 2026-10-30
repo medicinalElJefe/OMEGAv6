@@ -331,12 +331,29 @@ try{
     throw Error(device+': R722 verified import did not restore memory');
    if(!(await memory.innerText()).includes('R722 independently recoverable packet observation'))
     throw Error(device+': R28 Memory UI did not refresh from verified import');
+   // R723 verified recall: real recovered note -> ranked source -> independent digest inspection -> replay.
+   const recall=page.locator('[data-r723-recall]');
+   await recall.waitFor({state:'visible',timeout:10000});
+   await recall.locator('[data-r723-query]').fill('independently recoverable');
+   await recall.locator('[data-r723-search]').click();
+   await recall.locator('[data-r723-result]').first().waitFor({state:'visible',timeout:10000});
+   if(!(await recall.locator('[data-r723-summary]').innerText()).includes('1 matching sources'))
+    throw Error(device+': R723 verified source retrieval did not find recovered memory');
+   await recall.locator('[data-r723-select]').click();
+   if(!(await recall.locator('[data-r723-selected]').innerText()).includes('R722 independently recoverable packet observation'))
+    throw Error(device+': R723 selected source does not match verified memory');
+   await recall.locator('[data-r723-replay]').click();
+   if(!(await recall.locator('[data-r723-status]').innerText()).includes('Verified local source address'))
+    throw Error(device+': R723 verified address replay did not execute');
    // Existing R28 replay must refuse a locally altered row, not only imports.
    await page.evaluate(()=>{
     const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
     rows[0].note+=' forged';localStorage.setItem(key,JSON.stringify(rows));
     window.dispatchEvent(new Event('omega-r722-memory-updated'));
    });
+   await recall.locator('[data-r723-search]').click();
+   if(!(await recall.locator('[data-r723-error]').innerText()).includes('digest mismatch'))
+    throw Error(device+': R723 returned recalled evidence despite corrupted stored memory');
    await memory.locator('button[title="Replay snapshot state (verified)"]').click();
    if(!(await memory.locator('[data-r722-replay-error]').innerText()).includes('digest mismatch'))
     throw Error(device+': R28 unverified snapshot replay was not blocked');
@@ -365,6 +382,12 @@ try{
    await reloadedMemoryHost.locator('[data-r722-memory-recovery]').waitFor({state:'visible',timeout:30000});
    if(!(await page.locator('[data-r722-count]').innerText()).includes('1 browser-local snapshots'))
     throw Error(device+': R722 imported memory not persistent after reload');
+   const reloadedRecall=reloadedMemoryHost.locator('[data-r723-recall]');
+   await reloadedRecall.locator('[data-r723-query]').fill('independently recoverable');
+   await reloadedRecall.locator('[data-r723-search]').click();
+   if(!(await reloadedRecall.locator('[data-r723-summary]').innerText()).includes('1 matching sources'))
+    throw Error(device+': R723 recovered source recall did not survive reload');
+   console.log('R723 verified recall '+device+' PASS: source-bound query, inspection, replay, tamper refusal, persisted recovery');
    console.log('R722 '+device+' PASS: real R28 snapshot, SHA-256 portable export, tamper refusal, local restore and reload persistence');
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
