@@ -332,7 +332,7 @@ try{
     rows[0].note+=' forged';localStorage.setItem(key,JSON.stringify(rows));
     window.dispatchEvent(new Event('omega-r722-memory-updated'));
    });
-   await memory.locator('button[title="Verify and replay snapshot state"]').click();
+   await memory.locator('button[title="Replay snapshot state (verified)"]').click();
    if(!(await memory.locator('[data-r722-replay-error]').innerText()).includes('digest mismatch'))
     throw Error(device+': R28 unverified snapshot replay was not blocked');
    await page.evaluate(valid=>{
