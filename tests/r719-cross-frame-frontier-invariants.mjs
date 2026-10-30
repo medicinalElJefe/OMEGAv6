@@ -36,9 +36,10 @@ for(const page of all)for(const candidate of page.candidates){
  assert.equal(candidate.interactionSamples,exact.interactionSamples);
  assert.deepEqual(candidate.peakInteraction,exact.peakInteraction);
  assert.equal(candidate.tailChangedStates,exact.tailChangedStates);
+ assert.deepEqual(candidate.routeLossFrames,exact.routeFrames.filter(r=>r.baselineReachable&&!r.jointReachable).map(r=>r.frameIndex));
  assert.deepEqual(candidate.jointOnlyRouteLossFrames,exact.jointOnlyRouteLossFrames);
  assert.equal(candidate.peakJointJerkDelta,exact.peakJointJerkDelta);
- assert.ok(['JOINT_ONLY_ROUTE_LOSS','MODEL_ROUTE_CHANGE','NONADDITIVE_MODEL_STATE','MODEL_STATE_CHANGE','NO_OBSERVED_MODEL_CHANGE'].includes(candidate.gate));
+ assert.ok(['JOINT_ONLY_ROUTE_LOSS','MODEL_ROUTE_LOSS','MODEL_ROUTE_CHANGE','NONADDITIVE_MODEL_STATE','MODEL_STATE_CHANGE','NO_OBSERVED_MODEL_CHANGE'].includes(candidate.gate));
 }
 assert.deepEqual(enumerateCrossFrameFrontierR719(input),first);
 assert.equal(original.sessionJson,input,'frontier must not mutate source session');
