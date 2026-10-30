@@ -292,6 +292,48 @@ try{
    await page.locator('[data-r624-execute]').click();
    await page.waitForFunction(()=>document.querySelector('[data-r624-output]')?.textContent?.includes('REFUSED_NO_EXECUTION'),null,{timeout:10000});
    if(await page.locator('[data-r707-svg]').count())throw Error(device+': forged authority left a live vector');
+   // R722: actual R28 snapshot -> verified portable export -> tamper refusal -> non-destructive recovery.
+   await page.locator('.o7-nav-r519').getByRole('button',{name:'Work'}).click();
+   await page.locator('[data-capability-route="Memory"] footer button').click();
+   await page.locator('[data-native-host-route="Memory"]').waitFor({state:'visible',timeout:30000});
+   const openMemory=page.locator('.o7-open-instrument');
+   if(await openMemory.count())await openMemory.click();
+   const memory=page.locator('.r28-memory');
+   await memory.waitFor({state:'visible',timeout:30000});
+   await memory.locator('textarea').fill('R722 independently recoverable packet observation');
+   await memory.getByRole('button',{name:'Snapshot current packet'}).click();
+   const recovery=page.locator('[data-r722-memory-recovery]');
+   await recovery.waitFor({state:'visible',timeout:10000});
+   await page.waitForFunction(()=>document.querySelector('[data-r722-count]')?.textContent?.includes('1 browser-local snapshots'));
+   await recovery.locator('[data-r722-verify]').click();
+   if(!(await recovery.locator('[data-r722-status]').innerText()).includes('1 local snapshot digests verified'))
+    throw Error(device+': R722 existing R28 snapshot did not verify');
+   await recovery.locator('[data-r722-export]').click();
+   const portable=await recovery.locator('[data-r722-export-json]').inputValue();
+   const bundle=JSON.parse(portable);
+   if(bundle.schema!=='OMEGA_PORTABLE_MEMORY_R722_V1'||bundle.rows.length!==1)
+    throw Error(device+': R722 portable bundle missing source snapshot');
+   const altered=structuredClone(bundle);altered.rows[0].note+=' tampered';
+   await recovery.locator('[data-r722-import-json]').fill(JSON.stringify(altered));
+   await recovery.locator('[data-r722-import]').click();
+   if(!(await recovery.locator('[data-r722-error]').innerText()).includes('digest mismatch'))
+    throw Error(device+': R722 forged memory was not refused');
+   await page.evaluate(()=>{localStorage.removeItem('omega.v6.memory.r28');window.dispatchEvent(new Event('omega-r722-memory-updated'))});
+   await page.waitForFunction(()=>document.querySelector('[data-r722-count]')?.textContent?.includes('0 browser-local snapshots'));
+   await recovery.locator('[data-r722-import-json]').fill(portable);
+   await recovery.locator('[data-r722-import]').click();
+   if(!(await recovery.locator('[data-r722-status]').innerText()).includes('1 new, 0 already present'))
+    throw Error(device+': R722 verified import did not restore memory');
+   if(!(await memory.innerText()).includes('R722 independently recoverable packet observation'))
+    throw Error(device+': R28 Memory UI did not refresh from verified import');
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.locator('.o7-nav-r519').getByRole('button',{name:'Work'}).click();
+   await page.locator('[data-capability-route="Memory"] footer button').click();
+   if(await page.locator('.o7-open-instrument').count())await page.locator('.o7-open-instrument').click();
+   await page.locator('[data-r722-memory-recovery]').waitFor({state:'visible',timeout:30000});
+   if(!(await page.locator('[data-r722-count]').innerText()).includes('1 browser-local snapshots'))
+    throw Error(device+': R722 imported memory not persistent after reload');
+   console.log('R722 '+device+' PASS: real R28 snapshot, SHA-256 portable export, tamper refusal, local restore and reload persistence');
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(device+': viewport overflow '+overflow);
