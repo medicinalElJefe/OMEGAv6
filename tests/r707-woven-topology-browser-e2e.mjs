@@ -130,6 +130,32 @@ try{
    await root.locator('[data-r718-second-frame][data-r718-second-frame-state="1"]').waitFor({state:'attached',timeout:10000});
    await root.locator('[data-r718-run]').click();
    await temporal.waitFor({state:'visible',timeout:30000});
+   // R719 discovers real R718 pairs across all ascending source frames,
+   // pages without inventing global coverage, and loads a selected witness.
+   await root.locator('[data-r719-run]').click();
+   const crossFrontier=root.locator('[data-r719-result]');
+   await crossFrontier.waitFor({state:'visible',timeout:30000});
+   if(!(await crossFrontier.locator('[data-r719-coverage]').innerText()).includes('4 of 12 eligible source-frame pairs evaluated'))
+    throw Error(device+': R719 source-bound cross-frame denominator incorrect');
+   if(await crossFrontier.locator('[data-r719-row]').count()!==4)
+    throw Error(device+': R719 first page must execute exactly four pairs');
+   if(!(await crossFrontier.locator('[data-r719-boundary]').innerText()).includes('not exhaustive proof'))
+    throw Error(device+': R719 scientific pagination boundary missing');
+   await crossFrontier.locator('[data-r719-next]').click();
+   if(await crossFrontier.locator('[data-r719-row="4"]').count()!==1)
+    throw Error(device+': R719 second page did not advance deterministic ordinal');
+   await crossFrontier.locator('[data-r719-next]').click();
+   if(await crossFrontier.locator('[data-r719-row="8"]').count()!==1||
+      await crossFrontier.locator('[data-r719-next]').isEnabled())
+    throw Error(device+': R719 final page coverage or bound incorrect');
+   await crossFrontier.locator('[data-r719-previous]').click();
+   await crossFrontier.locator('[data-r719-previous]').click();
+   await crossFrontier.locator('[data-r719-row="0"] [data-r719-inspect]').click();
+   if(await root.locator('[data-r718-first-frame]').getAttribute('data-r718-first-frame-value')!=='0'||
+      await root.locator('[data-r718-second-frame]').getAttribute('data-r718-second-frame-value')!=='1')
+    throw Error(device+': R719 selected pair did not load into R718 frame controls');
+   if(await root.locator('[data-r718-timeline]').count()!==4)
+    throw Error(device+': R719 inspection did not execute R718 four-way timeline');
    await root.locator('[data-r717-run]').click();
    const minimalCuts=root.locator('[data-r717-result]');
    await minimalCuts.waitFor({state:'visible',timeout:30000});
