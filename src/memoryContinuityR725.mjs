@@ -18,9 +18,11 @@ export async function compareVerifiedMemoryContinuityR725(rows,earlierId,laterId
  if(first.at>=second.at)throw Error('R725 sources must have strictly increasing recorded timestamps');
  const a=new Map(numeric(first.metrics)),b=new Map(numeric(second.metrics));
  const common=[...a.keys()].filter(key=>b.has(key)).sort((x,y)=>x.localeCompare(y));
- const metricDeltas=common.slice(0,MAX_METRICS).map(key=>({
-  key,earlier:a.get(key),later:b.get(key),delta:b.get(key)-a.get(key)
- }));
+ const metricDeltas=common.slice(0,MAX_METRICS).map(key=>{
+  const delta=b.get(key)-a.get(key);
+  if(!Number.isFinite(delta))throw Error('R725 nonfinite metric delta refused');
+  return {key,earlier:a.get(key),later:b.get(key),delta};
+ });
  const packet={
   schema:MEMORY_CONTINUITY_SCHEMA_R725,
   earlier:source(first),later:source(second),
