@@ -326,6 +326,19 @@ try{
     throw Error(device+': R722 verified import did not restore memory');
    if(!(await memory.innerText()).includes('R722 independently recoverable packet observation'))
     throw Error(device+': R28 Memory UI did not refresh from verified import');
+   // Existing R28 replay must refuse a locally altered row, not only imports.
+   await page.evaluate(()=>{
+    const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
+    rows[0].note+=' forged';localStorage.setItem(key,JSON.stringify(rows));
+    window.dispatchEvent(new Event('omega-r722-memory-updated'));
+   });
+   await memory.locator('button[title="Verify and replay snapshot state"]').click();
+   if(!(await memory.locator('[data-r722-replay-error]').innerText()).includes('digest mismatch'))
+    throw Error(device+': R28 unverified snapshot replay was not blocked');
+   await page.evaluate(valid=>{
+    localStorage.setItem('omega.v6.memory.r28',JSON.stringify(valid));
+    window.dispatchEvent(new Event('omega-r722-memory-updated'));
+   },bundle.rows);
    await page.reload({waitUntil:'domcontentloaded'});
    await page.locator('.o7-nav-r519').getByRole('button',{name:'Work'}).click();
    await page.locator('[data-capability-route="Memory"] footer button').click();

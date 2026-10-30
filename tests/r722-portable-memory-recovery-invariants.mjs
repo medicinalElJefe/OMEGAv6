@@ -43,5 +43,6 @@ for(const token of ['data-r722-verify','data-r722-export','data-r722-import','da
  assert.ok(ui.includes(token),'R722 UI missing '+token);
 assert.ok(host.includes('<MemoryRecoveryR722/>'),'R722 not mounted on native Memory route');
 assert.ok(memory.includes('omega-r722-memory-updated'),'R28 snapshots do not refresh after verified import');
+assert.ok(memory.includes('verifyMemoryRowsR722([x])')&&memory.includes('data-r722-replay-error'),'R28 replay bypasses source digest verification');
 assert.ok(browser.includes('data-r722-memory-recovery'),'R722 desktop/mobile production browser proof not wired');
 console.log('R722 portable R28 memory export, independent digests, non-destructive merge, tamper refusals and OMEGA 7 wiring PASS');
