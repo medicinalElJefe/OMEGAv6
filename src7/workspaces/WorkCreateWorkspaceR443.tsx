@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import OmegaWorkspaceCockpitR18 from '../../src/OmegaWorkspaceCockpitR18';
 import OmegaSpecialistSuite from '../../src/OmegaSpecialistSuite';
 import {MemoryRecoveryR722} from './MemoryRecoveryR722';
+import {MemoryRecallR723} from './MemoryRecallR723';
 import OmegaIntentWorkbenchR85 from '../../src/OmegaIntentWorkbenchR85';
 import {api} from '../../src/platformAdapter';
 import {corpusState,decodeAddress,evaluateCorpusModes,initCorpusPack} from '../../src/corpusRuntime';
@@ -62,6 +63,7 @@ export default function WorkCreateWorkspaceR443({route,onNavigate,depth,autoOpen
    {route==='Workspace'?<OmegaWorkspaceCockpitR18 variant='Workspace' record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} modeCount={modeCount}/>:
     route==='Create'?<OmegaIntentWorkbenchR85 record={record} address={address} currentPanel='Create' onAddress={commit} onNavigate={onNavigate}/>:
     <OmegaSpecialistSuite panel={route} record={record} state={state} address={address} onAddress={commit} onNavigate={onNavigate} status={status} restore={restore} uiMode={uiMode} onUiMode={setUiMode}/>}
+   {route==='Memory'&&<MemoryRecallR723 onAddress={commit}/>}
    {route==='Memory'&&<MemoryRecoveryR722/>}
   </div>}
  </section>;
