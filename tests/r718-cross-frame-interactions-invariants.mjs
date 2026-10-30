@@ -60,14 +60,17 @@ assert.throws(()=>compareCrossFrameInterventionsR718(JSON.stringify({...JSON.par
 const ui=readFileSync(new URL('../src7/SessionCounterfactualR713.tsx',import.meta.url),'utf8');
 for(const token of ['compareCrossFrameInterventionsR718','selectedFirstEdge','selectedSecondEdge','data-r718-run','data-r718-result','data-r718-timeline','data-r718-boundary'])
  assert.ok(ui.includes(token),'R718 UI missing '+token);
-// Frame selection must have one controlled React change path. A second native
-// onInput handler can race the same selection and cause state/DOM divergence.
+// Native frame selection must remain DOM-authoritative, while the React state
+// witness and dependent edge options update from a single change handler.
+// A new source session remounts the native select to its defined initial value.
 for(const selector of ['first','second']){
  const tag=ui.split('data-r718-'+selector+'-frame ')[1]?.split('</select>')[0];
  assert.ok(tag,'R718 '+selector+' frame selector missing');
- assert.ok(tag.includes('value={'+selector+'Frame}'),'R718 '+selector+' frame must reflect React state');
+ assert.ok(tag.includes('key={baselineSession.sessionJson}'),'R718 '+selector+' must reset for a new source session');
+ assert.ok(tag.includes('defaultValue={'+(selector==='first'?0:1)+'}'),'R718 '+selector+' must use a native default selection');
+ assert.ok(!tag.includes(' value={'+selector+'Frame}'),'R718 '+selector+' must not be React-controlled');
  assert.ok(tag.includes('onChange={e=>choose'+(selector==='first'?'First':'Second')+'Frame'),'R718 frame change handler missing');
- assert.ok(tag.includes('onInput={e=>choose'+(selector==='first'?'First':'Second')+'Frame'),'R718 must handle native input as well as change');
+ assert.ok(!tag.includes('onInput='),'R718 must not double-handle native frame changes');
  assert.ok(tag.includes('data-r718-'+selector+'-frame-state'),'R718 '+selector+' frame state witness missing');
 }
 console.log('R718 independent cross-frame temporal carry and nonadditive model interaction PASS');
