@@ -494,7 +494,7 @@ try{
       traced.causalInference!==false||traced.sources[2].id!==trajectoryIds.end)
     throw Error(device+': R726 memoryTrajectory packet lost chronology or source identity');
    await memoryTrajectory.locator('[data-r726-replay]').last().click();
-   if(!(await memoryTrajectory.locator('[data-r726-status]').innerText()).includes('Verified memoryTrajectory address'))
+   if(!(await memoryTrajectory.locator('[data-r726-status]').innerText()).includes('Verified trajectory address'))
     throw Error(device+': R726 verified address replay failed');
    await page.evaluate(()=>{
     const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
