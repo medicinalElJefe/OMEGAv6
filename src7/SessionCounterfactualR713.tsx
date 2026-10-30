@@ -7,6 +7,7 @@ import {analyzeMinimalRouteCutsR717} from '../src/minimalRouteCutsR717.mjs';
 import {compareCrossFrameInterventionsR718} from '../src/crossFrameDevelopmentalInteractionR718.mjs';
 import {enumerateCrossFrameFrontierR719} from '../src/crossFrameFrontierR719.mjs';
 import {CrossFrameTrajectoryR720} from './CrossFrameTrajectoryR720';
+import {CrossFrameFieldAtlasR721} from './CrossFrameFieldAtlasR721';
 
 // Local source-model intervention only; never an edit to CanonState.
 export function SessionCounterfactualR713({baselineSession,frameIndex,projection}:{baselineSession:any;frameIndex:number;projection:any}){
@@ -198,6 +199,7 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
    </div>}
   </section>
   <CrossFrameTrajectoryR720 baselineSession={baselineSession} selection={{firstFrameIndex:firstFrame,firstEdgeIndex:selectedFirstEdge,secondFrameIndex:secondFrame,secondEdgeIndex:selectedSecondEdge}} />
+  <CrossFrameFieldAtlasR721 baselineSession={baselineSession} selection={{firstFrameIndex:firstFrame,firstEdgeIndex:selectedFirstEdge,secondFrameIndex:secondFrame,secondEdgeIndex:selectedSecondEdge}} />
   <section data-r717-minimal-cuts aria-label='Bounded exact minimum route-cut analysis' style={{margin:'12px 0',paddingTop:8,borderTop:'1px solid #65727d'}}>
    <h6>R717 · Minimum source-route cut witnesses</h6>
    <p>Prove the smallest one- or two-edge source cut that destroys the selected route. Exhaustive only for at most eight eligible edges in the chosen frame; other frames and larger cuts are not silently promoted to proof.</p>
