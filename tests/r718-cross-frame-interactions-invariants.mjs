@@ -60,11 +60,14 @@ assert.throws(()=>compareCrossFrameInterventionsR718(JSON.stringify({...JSON.par
 const ui=readFileSync(new URL('../src7/SessionCounterfactualR713.tsx',import.meta.url),'utf8');
 for(const token of ['compareCrossFrameInterventionsR718','selectedFirstEdge','selectedSecondEdge','data-r718-run','data-r718-result','data-r718-timeline','data-r718-boundary'])
  assert.ok(ui.includes(token),'R718 UI missing '+token);
-// Native frame selection must remain DOM-authoritative. Controlled React
-// values previously rewrote the visible choice before the state witness could
-// converge; source-session keys still force a reset for a new source scenario.
+// Frame selection must have one controlled React change path. A second native
+// onInput handler can race the same selection and cause state/DOM divergence.
 for(const selector of ['first','second']){
- assert.match(ui,new RegExp('key=\\{baselineSession\\.sessionJson\\} data-r718-'+selector+'-frame[^>]+defaultValue=\\{[01]\\}'),'R718 '+selector+' frame must be DOM-authoritative and session-keyed');
- assert.ok(ui.includes('data-r718-'+selector+'-frame-state'),'R718 '+selector+' frame state witness missing');
+ const tag=ui.match(new RegExp('<select[^>]*data-r718-'+selector+'-frame[^>]*>'))?.[0];
+ assert.ok(tag,'R718 '+selector+' frame selector missing');
+ assert.match(tag,new RegExp('value=\\\\{'+selector+'Frame\\\\}'),'R718 '+selector+' frame must reflect React state');
+ assert.match(tag,/onChange=\\{e=>choose(?:First|Second)Frame/,'R718 frame change handler missing');
+ assert.doesNotMatch(tag,/onInput=/,'R718 must not double-handle native frame changes');
+ assert.ok(tag.includes('data-r718-'+selector+'-frame-state'),'R718 '+selector+' frame state witness missing');
 }
 console.log('R718 independent cross-frame temporal carry and nonadditive model interaction PASS');
