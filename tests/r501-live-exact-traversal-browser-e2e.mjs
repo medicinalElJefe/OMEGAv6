@@ -36,7 +36,14 @@ try{
 
   await page.goto(`${base}/?r501=${Date.now()}-${label}`,{waitUntil:'domcontentloaded',timeout:45000});
   await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:15000});
-  if(await page.locator('main.r71-home').count())throw new Error(`R501 ${label}: plain canonical URL fell back to OMEGA6`);
+  // R510 lawfully embeds the historical R71 home inside OMEGA7. Only a standalone
+  // R71 outside the successor shell indicates an OMEGA6 fallback.
+  const homes=await page.locator('main.r71-home').evaluateAll(nodes=>({
+   standalone:nodes.filter(node=>!node.closest('.o7-app[data-omega7="true"]')).length,
+   malformedEmbedded:nodes.filter(node=>node.closest('.o7-app[data-omega7="true"]')&&node.getAttribute('data-r510-embedded')!=='true').length
+  }));
+  if(homes.standalone)throw new Error(`R501 ${label}: plain canonical URL mounted ${homes.standalone} standalone OMEGA6 home(s)`);
+  if(homes.malformedEmbedded)throw new Error(`R501 ${label}: ${homes.malformedEmbedded} R71 home(s) inside OMEGA7 lack R510 embedded lineage`);
 
   await page.locator('.o7-search-trigger').click();
   const input=page.locator('.o7-command input');
