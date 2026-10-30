@@ -67,7 +67,7 @@ for(const selector of ['first','second']){
  assert.ok(tag,'R718 '+selector+' frame selector missing');
  assert.ok(tag.includes('value={'+selector+'Frame}'),'R718 '+selector+' frame must reflect React state');
  assert.ok(tag.includes('onChange={e=>choose'+(selector==='first'?'First':'Second')+'Frame'),'R718 frame change handler missing');
- assert.doesNotMatch(tag,/onInput=/,'R718 must not double-handle native frame changes');
+ assert.ok(tag.includes('onInput={e=>choose'+(selector==='first'?'First':'Second')+'Frame'),'R718 must handle native input as well as change');
  assert.ok(tag.includes('data-r718-'+selector+'-frame-state'),'R718 '+selector+' frame state witness missing');
 }
 console.log('R718 independent cross-frame temporal carry and nonadditive model interaction PASS');
