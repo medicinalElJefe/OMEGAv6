@@ -26,7 +26,9 @@ export function enumerateCrossFrameFrontierR719(sessionJson,{offset=0,limit=4}={
  if(offset>pairs.length)throw Error('R719 offset exceeds eligible cross-frame pair count');
  const candidates=pairs.slice(offset,offset+limit).map((selection,i)=>{
   const proof=compareCrossFrameInterventionsR718(baseline.sessionJson,selection);
+  const routeLossFrames=proof.routeFrames.filter(r=>r.baselineReachable&&!r.jointReachable).map(r=>r.frameIndex);
   const gate=proof.jointOnlyRouteLossFrames.length?'JOINT_ONLY_ROUTE_LOSS':
+   routeLossFrames.length?'MODEL_ROUTE_LOSS':
    proof.jointChangedRouteFrames?'MODEL_ROUTE_CHANGE':
    proof.interactionSamples?'NONADDITIVE_MODEL_STATE':
    proof.jointChangedNodeStates?'MODEL_STATE_CHANGE':'NO_OBSERVED_MODEL_CHANGE';
@@ -37,7 +39,7 @@ export function enumerateCrossFrameFrontierR719(sessionJson,{offset=0,limit=4}={
    interactionSamples:proof.interactionSamples,
    peakInteraction:proof.peakInteraction,
    tailChangedStates:proof.tailChangedStates,
-   jointOnlyRouteLossFrames:proof.jointOnlyRouteLossFrames,
+   routeLossFrames,jointOnlyRouteLossFrames:proof.jointOnlyRouteLossFrames,
    peakJointJerkDelta:proof.peakJointJerkDelta};
  });
  return {schema:'OMEGA_BOUNDED_CROSS_FRAME_FRONTIER_R719',
