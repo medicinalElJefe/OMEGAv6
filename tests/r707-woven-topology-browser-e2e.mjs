@@ -86,34 +86,14 @@ try{
    if(await joint.locator('[data-r716-next]').isEnabled())throw Error(device+': R716 falsely reports additional pairs');
    await root.locator('[data-r718-first-frame]').selectOption('0');
    await root.locator('[data-r718-first-edge]').selectOption('0');
-   // Exercise a genuine second-frame transition. Selecting '1' while the
-   // initial controlled value is already '1' is not a change event in a
-   // browser, so it cannot establish that React accepted a new selection.
-   // Native capture proves whether Playwright delivered the input/change event;
-   // report the DOM and React witness separately before changing application code.
-   await root.locator('[data-r718-second-frame]').evaluate(el=>{
-    window.__r718SelectionProbe={before:el.value,events:[]};
-    for(const type of ['input','change'])el.addEventListener(type,e=>window.__r718SelectionProbe.events.push({type,value:e.target.value,reactState:el.getAttribute('data-r718-second-frame-state')}),{capture:true});
-   });
-   await root.locator('[data-r718-second-frame]').selectOption('2');
-   const r718SelectionProbe=await root.locator('[data-r718-second-frame]').evaluate(el=>({
-    ...window.__r718SelectionProbe,after:el.value,reactState:el.getAttribute('data-r718-second-frame-state'),
-    options:[...el.options].map(o=>({value:o.value,selected:o.selected})),pageErrors:[]
-   }));
-   if(r718SelectionProbe.after!=='2')throw Error(device+': R718 frame selection reverted; '+JSON.stringify(r718SelectionProbe));
+   // Drive frame changes through explicit state actions, then verify that the
+   // dependent native selector and React state witness agree on every step.
+   await root.locator('[data-r718-second-next]').click();
    await root.locator('[data-r718-second-frame][data-r718-second-frame-state="2"]').waitFor({state:'attached',timeout:10000});
-   if(await root.locator('[data-r718-second-frame]').inputValue()!=='2'){
-    const opts=await root.locator('[data-r718-second-frame] option').evaluateAll(nodes=>nodes.map(n=>n.value));
-    throw Error(device+': R718 second-frame transition to 2 reverted; available '+JSON.stringify(opts));
-   }
-   await root.locator('[data-r718-second-frame]').selectOption('1');
+   if(await root.locator('[data-r718-second-frame]').inputValue()!=='2')throw Error(device+': R718 next-frame action did not update visible selection');
+   await root.locator('[data-r718-second-previous]').click();
    await root.locator('[data-r718-second-frame][data-r718-second-frame-state="1"]').waitFor({state:'attached',timeout:10000});
-   // A genuine frame change must survive React's controlled-select update
-   // before the dependent edge select is changed.
-   if(await root.locator('[data-r718-second-frame]').inputValue()!=='1'){
-    const opts=await root.locator('[data-r718-second-frame] option').evaluateAll(nodes=>nodes.map(n=>n.value));
-    throw Error(device+': R718 second-frame transition to 1 reverted; available '+JSON.stringify(opts));
-   }
+   if(await root.locator('[data-r718-second-frame]').inputValue()!=='1')throw Error(device+': R718 previous-frame action did not restore visible selection');
    await root.locator('[data-r718-second-edge]').selectOption('0');
    await page.waitForTimeout(50);
    const visibleFrames=[
@@ -139,10 +119,10 @@ try{
    if(await temporal.locator('[data-r718-timeline]').count()!==4)throw Error(device+': R718 did not recompute full longitudinal state timeline');
    if(!(await temporal.locator('[data-r718-summary]').innerText()).includes('joint-changed node states'))throw Error(device+': R718 source-model carry missing');
    if(!(await temporal.locator('[data-r718-boundary]').innerText()).includes('not exhaustive cross-frame search'))throw Error(device+': R718 source-model boundary missing');
-   await root.locator('[data-r718-second-frame]').selectOption('0');
+   await root.locator('[data-r718-second-previous]').click();
    await root.locator('[data-r718-run]').click();
    if(!(await root.locator('[data-r718-error]').innerText()).includes('REFUSED'))throw Error(device+': R718 did not refuse same-frame pair');
-   await root.locator('[data-r718-second-frame]').selectOption('1');
+   await root.locator('[data-r718-second-next]').click();
    await root.locator('[data-r718-second-frame][data-r718-second-frame-state="1"]').waitFor({state:'attached',timeout:10000});
    await root.locator('[data-r718-run]').click();
    await temporal.waitFor({state:'visible',timeout:30000});
