@@ -340,6 +340,16 @@ try{
    await memory.locator('button[title="Replay snapshot state (verified)"]').click();
    if(!(await memory.locator('[data-r722-replay-error]').innerText()).includes('digest mismatch'))
     throw Error(device+': R28 unverified snapshot replay was not blocked');
+   // The legacy capture path must not overwrite existing corrupted local data.
+   await memory.locator('textarea').fill('must not overwrite forged snapshot');
+   await memory.getByRole('button',{name:'Snapshot current packet'}).click();
+   if(!(await memory.locator('[data-r722-replay-error]').innerText()).includes('digest mismatch'))
+    throw Error(device+': R28 capture did not refuse corrupt persisted memory');
+   const refusedCapture=await page.evaluate(()=>{
+    const rows=JSON.parse(localStorage.getItem('omega.v6.memory.r28')||'[]');
+    return rows.length===1&&rows[0].note.endsWith(' forged');
+   });
+   if(!refusedCapture)throw Error(device+': R28 capture overwrote corrupted local memory');
    await page.evaluate(valid=>{
     localStorage.setItem('omega.v6.memory.r28',JSON.stringify(valid));
     window.dispatchEvent(new Event('omega-r722-memory-updated'));
