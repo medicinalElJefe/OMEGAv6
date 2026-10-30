@@ -1,9 +1,10 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {executeComputationalSessionR711} from '../src/computationalSessionR711.mjs';
 import {compareComputationalSessionsR713} from '../src/computationalSessionComparisonR713.mjs';
 import {enumerateInterventionFrontierR715} from '../src/interventionFrontierR715.mjs';
 import {enumerateJointInterventionsR716} from '../src/jointInterventionCompositionR716.mjs';
 import {analyzeMinimalRouteCutsR717} from '../src/minimalRouteCutsR717.mjs';
+import {compareCrossFrameInterventionsR718} from '../src/crossFrameDevelopmentalInteractionR718.mjs';
 
 // Local source-model intervention only; never an edit to CanonState.
 export function SessionCounterfactualR713({baselineSession,frameIndex,projection}:{baselineSession:any;frameIndex:number;projection:any}){
@@ -17,7 +18,20 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  const [jointError,setJointError]=useState('');
  const [minimalCuts,setMinimalCuts]=useState<any|null>(null);
  const [minimalCutsError,setMinimalCutsError]=useState('');
- useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');},[baselineSession.sessionJson,frameIndex]);
+ const [temporal,setTemporal]=useState<any|null>(null);
+ const [temporalError,setTemporalError]=useState('');
+ const [firstFrame,setFirstFrame]=useState(0);
+ const [secondFrame,setSecondFrame]=useState(1);
+ const [firstEdge,setFirstEdge]=useState(0);
+ const [secondEdge,setSecondEdge]=useState(0);
+// Keep both frame selectors controlled by React state. The DOM refs are
+ // retained to verify exact visible selection at execution time.
+ const firstEdgeSelect=useRef<HTMLSelectElement>(null),secondEdgeSelect=useRef<HTMLSelectElement>(null);
+ // A selected display frame is not a new source session. Keep independent
+ // cross-frame choices stable while users traverse the single-frame views.
+ // Only a new source session invalidates those choices.
+ useEffect(()=>{setComparison(null);setCandidateText('');setError('');setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');setTemporal(null);setTemporalError('');setFirstFrame(0);setSecondFrame(1);setFirstEdge(0);setSecondEdge(0);},[baselineSession.sessionJson]);
+ useEffect(()=>{setFrontier(null);setFrontierError('');setJoint(null);setJointError('');setMinimalCuts(null);setMinimalCutsError('');},[frameIndex]);
  const eligible=projection.edges.filter((e:any)=>e.kind!=='BLOCKED'&&e.weight>0);
  const chosen=eligible.find((e:any)=>e.id===edgeId)??eligible[0];
  function compare(text:string){
@@ -36,6 +50,29 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
   try{const result=analyzeMinimalRouteCutsR717(baselineSession.sessionJson,{frameIndex});setMinimalCuts(result);setMinimalCutsError('');}
   catch(e){setMinimalCuts(null);setMinimalCutsError(e instanceof Error?e.message:'Minimal route-cut proof refused');}
  }
+ function evaluateTemporal(){
+  try{
+   // The displayed frame outputs and executor share the same state values.
+   const frameA=firstFrame;
+   const frameB=secondFrame;
+   const edgeA=Number(firstEdgeSelect.current?.value??selectedFirstEdge);
+   const edgeB=Number(secondEdgeSelect.current?.value??selectedSecondEdge);
+   const result=compareCrossFrameInterventionsR718(baselineSession.sessionJson,{
+    firstFrameIndex:frameA,firstEdgeIndex:edgeA,secondFrameIndex:frameB,secondEdgeIndex:edgeB
+   });
+   setTemporal(result);setTemporalError('');
+  }catch(e){setTemporal(null);setTemporalError(e instanceof Error?e.message:'Temporal comparison refused');}
+ }
+ const frameChoices=baselineSession.sourceScenario.edgeFrames as any[][];
+ const eligibleAt=(frame:number)=>frameChoices[frame]?.map((edge:any,index:number)=>({edge,index})).filter(({edge}:any)=>edge.kind!=='BLOCKED'&&edge.weight>0)??[];
+ // A filtered option's value is the ORIGINAL source-edge index, not its ordinal
+ // position in the eligible list. When index zero is blocked, never silently
+ // submit that blocked edge while the select visually displays index one.
+ const firstEligible=eligibleAt(firstFrame),secondEligible=eligibleAt(secondFrame);
+ const selectedFirstEdge=firstEligible.some(({index}:any)=>index===firstEdge)?firstEdge:(firstEligible[0]?.index??-1);
+ const selectedSecondEdge=secondEligible.some(({index}:any)=>index===secondEdge)?secondEdge:(secondEligible[0]?.index??-1);
+ const chooseFirstFrame=(value:number)=>{setFirstFrame(value);setFirstEdge(eligibleAt(value)[0]?.index??-1);setTemporal(null);setTemporalError('');};
+ const chooseSecondFrame=(value:number)=>{setSecondFrame(value);setSecondEdge(eligibleAt(value)[0]?.index??-1);setTemporal(null);setTemporalError('');};
  function intervene(){
   if(!chosen){setError('No eligible source edge in this frame');return;}
   const index=Number(chosen.id.replace('edge-',''));
@@ -92,6 +129,32 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
      <button type='button' data-r716-next disabled={!joint.hasMore} onClick={()=>evaluateJoint(joint.offset+joint.evaluated)}>Next pairs</button>
     </div>
     <small data-r716-boundary>{joint.boundary}</small>
+   </div>}
+  </section>
+  <section data-r718-temporal aria-label='Cross-frame developmental interaction' style={{margin:'12px 0',paddingTop:8,borderTop:'1px solid #65727d'}}>
+   <h6>R718 · Temporal carry and cross-frame interaction</h6>
+   <p>Choose two source edges in different frames. Recompute the baseline, both individual interventions and their composition, then inspect longitudinal continuity, scar and other state residuals. This is a mathematical source model, not an empirical forecast.</p>
+   <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+    <span>First frame <output data-r718-first-frame data-r718-first-frame-state={firstFrame} data-r718-first-frame-value={firstFrame} aria-live='polite'>{firstFrame+1} of {frameChoices.length}</output></span>
+    <label>First source edge <select data-r718-first-edge ref={firstEdgeSelect} value={selectedFirstEdge} onChange={e=>{setFirstEdge(Number(e.target.value));setTemporal(null);setTemporalError('');}}>{eligibleAt(firstFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
+    <span>Second frame <output data-r718-second-frame data-r718-second-frame-state={secondFrame} data-r718-second-frame-value={secondFrame} aria-live='polite'>{secondFrame+1} of {frameChoices.length}</output></span>
+    <label>Second source edge <select data-r718-second-edge ref={secondEdgeSelect} value={selectedSecondEdge} onChange={e=>{setSecondEdge(Number(e.target.value));setTemporal(null);setTemporalError('');}}>{eligibleAt(secondFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
+   </div>
+   <div aria-label='Cross-frame navigation' style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+    <button type='button' data-r718-first-previous disabled={firstFrame<=0} onClick={()=>chooseFirstFrame(Math.max(0,firstFrame-1))}>Previous first frame</button>
+    <button type='button' data-r718-first-next disabled={firstFrame>=frameChoices.length-1} onClick={()=>chooseFirstFrame(Math.min(frameChoices.length-1,firstFrame+1))}>Next first frame</button>
+    <button type='button' data-r718-second-previous disabled={secondFrame<=0} onClick={()=>chooseSecondFrame(Math.max(0,secondFrame-1))}>Previous second frame</button>
+    <button type='button' data-r718-second-next disabled={secondFrame>=frameChoices.length-1} onClick={()=>chooseSecondFrame(Math.min(frameChoices.length-1,secondFrame+1))}>Next second frame</button>
+   </div>
+   <button type='button' data-r718-run onClick={evaluateTemporal}>Recompute cross-frame temporal interaction</button>
+   {temporalError&&<p role='alert' data-r718-error>REFUSED: {temporalError}</p>}
+   {temporal&&<div data-r718-result>
+    <p role='status' data-r718-summary>{temporal.jointChangedNodeStates} joint-changed node states · {temporal.interactionSamples} nonadditive state samples · {temporal.tailChangedStates} changed states after the second intervention frame · {temporal.jointOnlyRouteLossFrames.length} joint-only route losses</p>
+    <div style={{maxWidth:'100%',overflowX:'auto'}}><table><thead><tr><th>State</th><th>Joint-changed nodes</th><th>Nonadditive nodes</th><th>Sum absolute interaction</th></tr></thead><tbody>
+     {temporal.timeline.map((item:any)=><tr key={item.stateIndex} data-r718-timeline={item.stateIndex}><td>{item.stateIndex}</td><td>{item.jointChangedNodes}</td><td>{item.changedNodes}</td><td>{item.absoluteInteraction.toFixed(6)}</td></tr>)}
+    </tbody></table></div>
+    <p data-r718-peak>{temporal.peakInteraction?'Peak interaction: '+temporal.peakInteraction.nodeId+' '+temporal.peakInteraction.field+' at state '+temporal.peakInteraction.stateIndex+' = '+temporal.peakInteraction.residual.toFixed(6):'No nonadditive model-state residual observed'} · peak joint jerk delta {temporal.peakJointJerkDelta.toFixed(6)}</p>
+    <small data-r718-boundary>{temporal.boundary}</small>
    </div>}
   </section>
   <section data-r717-minimal-cuts aria-label='Bounded exact minimum route-cut analysis' style={{margin:'12px 0',paddingTop:8,borderTop:'1px solid #65727d'}}>

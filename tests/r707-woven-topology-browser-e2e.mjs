@@ -84,6 +84,52 @@ try{
    if(!(await joint.locator('[data-r716-row="0-1"] [data-r716-gate]').innerText()).includes('MODEL_ROUTE_LOSS'))throw Error(device+': R716 joint cut did not lose reverse RETURN route');
    if(!(await joint.locator('[data-r716-boundary]').innerText()).includes('not empirical causation'))throw Error(device+': R716 scientific truth boundary missing');
    if(await joint.locator('[data-r716-next]').isEnabled())throw Error(device+': R716 falsely reports additional pairs');
+   if(await root.locator('[data-r718-first-frame]').getAttribute('data-r718-first-frame-value')!=='0')throw Error(device+': R718 initial first-frame state invalid');
+   await root.locator('[data-r718-first-next]').click();
+   if(await root.locator('[data-r718-first-frame]').getAttribute('data-r718-first-frame-value')!=='1')throw Error(device+': R718 first-frame navigation failed');
+   await root.locator('[data-r718-first-previous]').click();
+   if(await root.locator('[data-r718-first-frame]').getAttribute('data-r718-first-frame-value')!=='0')throw Error(device+': R718 first-frame return failed');
+   await root.locator('[data-r718-first-edge]').selectOption('0');
+   // Drive both frames through bounded state actions, then verify the displayed
+   // state witness, eligible edge selector and executor remain synchronized.
+   await root.locator('[data-r718-second-next]').click();
+   await root.locator('[data-r718-second-frame][data-r718-second-frame-state="2"]').waitFor({state:'attached',timeout:10000});
+   if(await root.locator('[data-r718-second-frame]').getAttribute('data-r718-second-frame-value')!=='2')throw Error(device+': R718 next-frame action did not update visible selection');
+   await root.locator('[data-r718-second-previous]').click();
+   await root.locator('[data-r718-second-frame][data-r718-second-frame-state="1"]').waitFor({state:'attached',timeout:10000});
+   if(await root.locator('[data-r718-second-frame]').getAttribute('data-r718-second-frame-value')!=='1')throw Error(device+': R718 previous-frame action did not restore visible selection');
+   await root.locator('[data-r718-second-edge]').selectOption('0');
+   await page.waitForTimeout(50);
+   const visibleFrames=[
+    await root.locator('[data-r718-first-frame]').getAttribute('data-r718-first-frame-value'),
+    await root.locator('[data-r718-second-frame]').getAttribute('data-r718-second-frame-value')
+   ];
+   const visibleEdges=[
+    await root.locator('[data-r718-first-edge]').inputValue(),
+    await root.locator('[data-r718-second-edge]').inputValue()
+   ];
+   if(visibleFrames.join('/')!=='0/1'||visibleEdges.join('/')!=='0/0'){
+    const options=await root.locator('[data-r718-second-frame] option').evaluateAll(nodes=>nodes.map(n=>({value:n.value,label:n.textContent})));
+    throw Error(device+': R718 visible cross-frame selection drift: '+visibleFrames.join('/')+' edges '+visibleEdges.join('/')+' available frames '+JSON.stringify(options));
+   }
+   await root.locator('[data-r718-run]').click();
+   const temporal=root.locator('[data-r718-result]');
+   // Wait for either a computed result or an explicit model refusal; report the
+   // refusal immediately instead of disguising it as a 30-second selector timeout.
+   await page.waitForFunction(()=>!!document.querySelector('[data-r718-result], [data-r718-error]'),null,{timeout:30000});
+   const temporalRefusal=await root.locator('[data-r718-error]').allInnerTexts();
+   if(temporalRefusal.length)throw Error(device+': R718 model refused valid cross-frame selection: '+temporalRefusal.join(' | '));
+   await temporal.waitFor({state:'visible',timeout:10000});
+   if(await temporal.locator('[data-r718-timeline]').count()!==4)throw Error(device+': R718 did not recompute full longitudinal state timeline');
+   if(!(await temporal.locator('[data-r718-summary]').innerText()).includes('joint-changed node states'))throw Error(device+': R718 source-model carry missing');
+   if(!(await temporal.locator('[data-r718-boundary]').innerText()).includes('not exhaustive cross-frame search'))throw Error(device+': R718 source-model boundary missing');
+   await root.locator('[data-r718-second-previous]').click();
+   await root.locator('[data-r718-run]').click();
+   if(!(await root.locator('[data-r718-error]').innerText()).includes('REFUSED'))throw Error(device+': R718 did not refuse same-frame pair');
+   await root.locator('[data-r718-second-next]').click();
+   await root.locator('[data-r718-second-frame][data-r718-second-frame-state="1"]').waitFor({state:'attached',timeout:10000});
+   await root.locator('[data-r718-run]').click();
+   await temporal.waitFor({state:'visible',timeout:30000});
    await root.locator('[data-r717-run]').click();
    const minimalCuts=root.locator('[data-r717-result]');
    await minimalCuts.waitFor({state:'visible',timeout:30000});
@@ -124,11 +170,11 @@ try{
    if(!svg.includes('<svg ')||!svg.includes('MODEL ONLY')||/<script|onload=|onclick=/i.test(svg))throw Error(device+': unsafe or absent static vector export');
    await root.locator('[data-r708-origin]').selectOption('A');
    await root.locator('[data-r708-target]').selectOption('B');
-   const temporal=JSON.parse(await input.inputValue());
-   temporal.edgeFrames[1][0].kind='BLOCKED';
-   temporal.edgeFrames[2][0].kind='RESIDUE';
-   temporal.edgeFrames[2][0].weight=0.4;
-   await input.fill(JSON.stringify(temporal));
+   const editedTimeline=JSON.parse(await input.inputValue());
+   editedTimeline.edgeFrames[1][0].kind='BLOCKED';
+   editedTimeline.edgeFrames[2][0].kind='RESIDUE';
+   editedTimeline.edgeFrames[2][0].weight=0.4;
+   await input.fill(JSON.stringify(editedTimeline));
    await page.locator('[data-r624-execute]').click();
    const timeRoot=page.locator('[data-r707-vector-instrument="source-model-only"]');
    await timeRoot.waitFor({state:'visible',timeout:10000});
