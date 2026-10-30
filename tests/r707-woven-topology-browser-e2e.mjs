@@ -90,6 +90,7 @@ try{
    // initial controlled value is already '1' is not a change event in a
    // browser, so it cannot establish that React accepted a new selection.
    await root.locator('[data-r718-second-frame]').selectOption('2');
+   await root.locator('[data-r718-second-frame]').evaluate(el=>{if(el.value!=='2')throw Error('Second frame not selected');});
    await root.locator('[data-r718-second-frame][data-r718-second-frame-state="2"]').waitFor({state:'attached',timeout:10000});
    if(await root.locator('[data-r718-second-frame]').inputValue()!=='2'){
     const opts=await root.locator('[data-r718-second-frame] option').evaluateAll(nodes=>nodes.map(n=>n.value));
