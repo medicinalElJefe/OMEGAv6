@@ -61,6 +61,17 @@ for(const token of[
  'canonical mutation NO · production authority changed NO · observation from model claimed NO'
 ])assert.ok(ui.includes(token),`R501 visible Convergence binding missing ${token}`);
 
+// R510 historical home is intentionally embedded in OMEGA7. R501 must reject only
+// a standalone OMEGA6 root; counting all R71 descendants broke R723 production.
+const browser=fs.readFileSync('tests/r501-live-exact-traversal-browser-e2e.mjs','utf8');
+for(const token of[
+ "standalone:nodes.filter(node=>!node.closest('.o7-app[data-omega7=\"true\"]')).length",
+ "malformedEmbedded:nodes.filter(node=>node.closest('.o7-app[data-omega7=\"true\"]')&&node.getAttribute('data-r510-embedded')!=='true').length",
+ 'if(homes.standalone)throw new Error',
+ 'if(homes.malformedEmbedded)throw new Error',
+])assert.ok(browser.includes(token),`R501 production selector must preserve R510 embedded lineage and reject standalone legacy: ${token}`);
+assert.ok(!browser.includes("if(await page.locator('main.r71-home').count())"),'R501 must not classify the lawful embedded R71 visual as a legacy fallback');
+
 const r202=fs.readFileSync('scripts/verify_live_operational_source_authority_r202.mjs','utf8');
 assert.ok(r202.includes('r501-live-exact-traversal-browser-e2e.mjs'),'R501 live browser proof must remain inside post-promotion R202 authority');
 
