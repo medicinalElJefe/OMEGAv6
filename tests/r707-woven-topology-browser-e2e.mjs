@@ -176,6 +176,27 @@ try{
    await trajectory.locator('[data-r720-save]').click();
    if(!(await trajectory.locator('[data-r720-status]').innerText()).includes('Saved reproducible'))
     throw Error(device+': R720 local selection save failed');
+   // R721 recomputes every source node and five model fields at every state.
+   const atlas=root.locator('[data-r721-atlas]');
+   await atlas.locator('[data-r721-run]').click();
+   await atlas.locator('[data-r721-result]').waitFor({state:'visible',timeout:30000});
+   if(await atlas.locator('[data-r721-cell]').count()!==10||
+      !(await atlas.locator('[data-r721-coverage]').innerText()).includes('40 source cells'))
+    throw Error(device+': R721 did not execute full 2-node x 5-field x 4-state source atlas');
+   await atlas.locator('[data-r721-next]').click();
+   await atlas.locator('[data-r721-next]').click();
+   if(!(await atlas.locator('[data-r721-state-index]').innerText()).includes('State 2 of 3'))
+    throw Error(device+': R721 model-state navigation failed');
+   await atlas.locator('[data-r721-cell="A:scar"]').click();
+   const atlasValues=(await atlas.locator('[data-r721-values] tbody td').allInnerTexts()).map(Number);
+   if(atlasValues.length!==5||atlasValues.some(x=>!Number.isFinite(x))||
+      Math.abs(atlasValues[4]-(atlasValues[3]-atlasValues[1]-atlasValues[2]+atlasValues[0]))>0.000003)
+    throw Error(device+': R721 displayed matrix detail is not the four-way source residual');
+   if(!(await atlas.locator('[data-r721-boundary]').innerText()).includes('No empirical causality'))
+    throw Error(device+': R721 scientific boundary missing');
+   await atlas.locator('[data-r721-save]').click();
+   if(!(await atlas.locator('[data-r721-status]').innerText()).includes('Saved source field'))
+    throw Error(device+': R721 local selection save failed');
    await root.locator('[data-r717-run]').click();
    const minimalCuts=root.locator('[data-r717-result]');
    await minimalCuts.waitFor({state:'visible',timeout:30000});
@@ -200,6 +221,11 @@ try{
       await root.locator('[data-r720-metric]').inputValue()!=='scar'||
       await root.locator('[data-r720-state]').count()!==4)
     throw Error(device+': R720 local recovery failed to independently recompute source trajectory');
+   await root.locator('[data-r721-restore]').click();
+   if(!(await root.locator('[data-r721-status]').innerText()).includes('independently recomputed')||
+      !(await root.locator('[data-r721-state-index]').innerText()).includes('State 2 of 3')||
+      await root.locator('[data-r721-cell="A:scar"]').getAttribute('aria-pressed')!=='true')
+    throw Error(device+': R721 local field selection recovery failed');
    const importInput=page.locator('[data-r712-import-input]');
    await importInput.fill(JSON.stringify({...portableSession,authority:'FORGED_PRODUCTION'}));
    await page.locator('[data-r712-import]').click();
@@ -213,6 +239,9 @@ try{
    await root.locator('[data-r720-restore]').click();
    if(!(await root.locator('[data-r720-error]').innerText()).includes('different source session'))
     throw Error(device+': R720 stale saved selection was accepted for a different session');
+   await root.locator('[data-r721-restore]').click();
+   if(!(await root.locator('[data-r721-error]').innerText()).includes('different source session'))
+    throw Error(device+': R721 stale saved source selection was accepted');
    await importInput.fill(JSON.stringify(portableSession));
    await page.locator('[data-r712-import]').click();
    if(await root.locator('[data-r708-origin]').inputValue()!=='B'||await root.locator('[data-r707-mirror]').getAttribute('aria-pressed')!=='true')throw Error(device+': R712 repeated import did not reset child state');
