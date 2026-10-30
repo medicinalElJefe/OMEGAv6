@@ -26,7 +26,6 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  const [secondEdge,setSecondEdge]=useState(0);
 // Keep both frame selectors controlled by React state. The DOM refs are
  // retained to verify exact visible selection at execution time.
- const firstFrameSelect=useRef<HTMLSelectElement>(null),secondFrameSelect=useRef<HTMLSelectElement>(null);
  const firstEdgeSelect=useRef<HTMLSelectElement>(null),secondEdgeSelect=useRef<HTMLSelectElement>(null);
  // A selected display frame is not a new source session. Keep independent
  // cross-frame choices stable while users traverse the single-frame views.
@@ -53,10 +52,9 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
  }
  function evaluateTemporal(){
   try{
-   // Execute the exact values visibly selected by the user. React state may be
-   // awaiting an update after rapid successive native select changes.
-   const frameA=Number(firstFrameSelect.current?.value??firstFrame);
-   const frameB=Number(secondFrameSelect.current?.value??secondFrame);
+   // The displayed frame outputs and executor share the same state values.
+   const frameA=firstFrame;
+   const frameB=secondFrame;
    const edgeA=Number(firstEdgeSelect.current?.value??selectedFirstEdge);
    const edgeB=Number(secondEdgeSelect.current?.value??selectedSecondEdge);
    const result=compareCrossFrameInterventionsR718(baselineSession.sessionJson,{
@@ -137,12 +135,14 @@ export function SessionCounterfactualR713({baselineSession,frameIndex,projection
    <h6>R718 · Temporal carry and cross-frame interaction</h6>
    <p>Choose two source edges in different frames. Recompute the baseline, both individual interventions and their composition, then inspect longitudinal continuity, scar and other state residuals. This is a mathematical source model, not an empirical forecast.</p>
    <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-    <label>First frame <select data-r718-first-frame data-r718-first-frame-state={firstFrame} ref={firstFrameSelect} value={firstFrame} onChange={e=>chooseFirstFrame(Number(e.currentTarget.value))}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
+    <span>First frame <output data-r718-first-frame data-r718-first-frame-state={firstFrame} data-r718-first-frame-value={firstFrame} aria-live='polite'>{firstFrame+1} of {frameChoices.length}</output></span>
     <label>First source edge <select data-r718-first-edge ref={firstEdgeSelect} value={selectedFirstEdge} onChange={e=>{setFirstEdge(Number(e.target.value));setTemporal(null);setTemporalError('');}}>{eligibleAt(firstFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
-    <label>Second frame <select data-r718-second-frame data-r718-second-frame-state={secondFrame} ref={secondFrameSelect} value={secondFrame} onChange={e=>chooseSecondFrame(Number(e.currentTarget.value))}>{frameChoices.map((_:any,i:number)=><option key={i} value={i}>{i+1}</option>)}</select></label>
+    <span>Second frame <output data-r718-second-frame data-r718-second-frame-state={secondFrame} data-r718-second-frame-value={secondFrame} aria-live='polite'>{secondFrame+1} of {frameChoices.length}</output></span>
     <label>Second source edge <select data-r718-second-edge ref={secondEdgeSelect} value={selectedSecondEdge} onChange={e=>{setSecondEdge(Number(e.target.value));setTemporal(null);setTemporalError('');}}>{eligibleAt(secondFrame).map(({edge,index}:any)=><option key={index} value={index}>{edge.from} → {edge.to} ({edge.kind}, #{index})</option>)}</select></label>
    </div>
    <div aria-label='Cross-frame navigation' style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+    <button type='button' data-r718-first-previous disabled={firstFrame<=0} onClick={()=>chooseFirstFrame(Math.max(0,firstFrame-1))}>Previous first frame</button>
+    <button type='button' data-r718-first-next disabled={firstFrame>=frameChoices.length-1} onClick={()=>chooseFirstFrame(Math.min(frameChoices.length-1,firstFrame+1))}>Next first frame</button>
     <button type='button' data-r718-second-previous disabled={secondFrame<=0} onClick={()=>chooseSecondFrame(Math.max(0,secondFrame-1))}>Previous second frame</button>
     <button type='button' data-r718-second-next disabled={secondFrame>=frameChoices.length-1} onClick={()=>chooseSecondFrame(Math.min(frameChoices.length-1,secondFrame+1))}>Next second frame</button>
    </div>
