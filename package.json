@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:r723": "node tests/r723-verified-memory-recall-invariants.mjs && node tests/r724-grounded-intelligence-invariants.mjs && node tests/r725-verified-memory-continuity-invariants.mjs",
+    "test:r723": "node tests/r723-verified-memory-recall-invariants.mjs && node tests/r724-grounded-intelligence-invariants.mjs && node tests/r725-verified-memory-continuity-invariants.mjs && node tests/r726-verified-memory-trajectory-invariants.mjs",
     "test:r721": "node tests/r721-cross-frame-field-atlas-invariants.mjs",
     "test:r720": "node tests/r720-cross-frame-trajectory-invariants.mjs",
     "test:r719": "node tests/r719-cross-frame-frontier-invariants.mjs",

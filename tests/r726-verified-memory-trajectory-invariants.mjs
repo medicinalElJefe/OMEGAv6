@@ -1,0 +1,48 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {digestMemoryR722} from '../src/portableMemoryRecoveryR722.mjs';
+import {traceVerifiedMemoryTrajectoryR726,revalidateMemoryTrajectoryR726,MEMORY_TRAJECTORY_SCHEMA_R726} from '../src/memoryTrajectoryR726.mjs';
+async function snapshot(id,at,address,decision,note,metrics){
+ const core={address,stateId:address+1,note,metrics,decision,routeNext:null,authority:'BROWSER_LOCAL_PACKET_SNAPSHOT'};
+ return {id,at,...core,sha256:await digestMemoryR722(JSON.stringify(core))};
+}
+const a=await snapshot('r726-early-0001',1793347200000,41,'STAY','Early',{continuity:0.2});
+const b=await snapshot('r726-mid---0002',1793347201000,43,'TURN','Middle',{continuity:0.5});
+const c=await snapshot('r726-late--0003',1793347203000,46,'STAY','Late',{continuity:0.9});
+const rows=[c,a,b];
+const packet=await traceVerifiedMemoryTrajectoryR726(rows,a.id,c.id);
+assert.equal(packet.schema,MEMORY_TRAJECTORY_SCHEMA_R726);
+assert.equal(packet.sourceCount,3);
+assert.equal(packet.edges.length,2);
+assert.deepEqual(packet.addressPath,[41,43,46]);
+assert.equal(packet.elapsedRecordedMs,3000);
+assert.equal(packet.decisionChanges,2);
+assert.deepEqual(packet.edges.map(e=>e.elapsedRecordedMs),[1000,2000]);
+assert.deepEqual(packet.edges.map(e=>e.metricDeltas[0].delta),[0.3,0.4]);
+assert.equal(packet.causalInference,false);
+assert.equal(packet.physicalTimeMeasurement,false);
+assert.equal((await revalidateMemoryTrajectoryR726(rows,packet)).packetSha256,packet.packetSha256);
+await assert.rejects(traceVerifiedMemoryTrajectoryR726(rows,a.id,b.id),/at least three/);
+await assert.rejects(traceVerifiedMemoryTrajectoryR726(rows,c.id,a.id),/increasing recorded order/);
+await assert.rejects(traceVerifiedMemoryTrajectoryR726(rows,a.id,'missing-id'),/unavailable/);
+const corrupted=structuredClone(rows);corrupted[1].note='tampered';
+await assert.rejects(traceVerifiedMemoryTrajectoryR726(corrupted,a.id,c.id),/digest mismatch/);
+await assert.rejects(revalidateMemoryTrajectoryR726(corrupted,packet),/digest mismatch/);
+await assert.rejects(revalidateMemoryTrajectoryR726(rows,{...packet,addressPath:[1,2,3]}),/packet digest mismatch/);
+const changed=[...rows,await snapshot(b.id,b.at,b.address,'STAY','New valid observation',{continuity:0.5})];
+await assert.rejects(traceVerifiedMemoryTrajectoryR726(changed,a.id,c.id),/duplicate/);
+const other=await snapshot('r726-other-0004',1793347204000,47,'TURN','Outside',{continuity:1});
+assert.equal((await revalidateMemoryTrajectoryR726([...rows,other],packet)).packetSha256,packet.packetSha256);
+const sameTime=await snapshot('r726-tie---0005',b.at,44,'STAY','Tie',{continuity:0.1});
+await assert.rejects(traceVerifiedMemoryTrajectoryR726([...rows,sameTime],a.id,c.id),/duplicate recorded timestamp/);
+const long=[];
+for(let i=0;i<13;i++)long.push(await snapshot('r726-bound-'+String(i).padStart(4,'0'),1793347200000+i*1000,i+50,'STAY','Bound',{n:i}));
+await assert.rejects(traceVerifiedMemoryTrajectoryR726(long,long[0].id,long[12].id),/12-snapshot bound/);
+const ui=readFileSync(new URL('../src7/workspaces/MemoryTrajectoryR726.tsx',import.meta.url),'utf8');
+const fabric=readFileSync(new URL('../src/IntelligenceFabricPanel.tsx',import.meta.url),'utf8');
+const browser=readFileSync(new URL('./r707-woven-topology-browser-e2e.mjs',import.meta.url),'utf8');
+for(const token of ['data-r726-start','data-r726-end','data-r726-run','data-r726-result','data-r726-source','data-r726-export','data-r726-json','data-r726-replay','data-r726-error','data-r726-boundary'])
+ assert.ok(ui.includes(token),'R726 functional UI missing '+token);
+assert.ok(fabric.includes('<MemoryTrajectoryR726 onAddress={onAddress}/>'));
+assert.ok(browser.includes('R726 verified memory trajectory'));
+console.log('R726 verified 3–12 snapshot trajectory, chronology, source-bound edges, tamper refusal and UI wiring PASS');
