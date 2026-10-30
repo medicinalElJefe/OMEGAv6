@@ -478,7 +478,7 @@ try{
     window.dispatchEvent(new Event('omega-r722-memory-updated'));
     return {start:firstId,end:third.id};
    },pair.earlier);
-   const memoryTrajectory=saiHost.locator('[data-r726-memoryTrajectory]');
+   const memoryTrajectory=saiHost.locator('[data-r726-trajectory]');
    await memoryTrajectory.waitFor({state:'visible',timeout:10000});
    await page.waitForFunction(()=>document.querySelectorAll('[data-r726-end] option').length===4);
    await memoryTrajectory.locator('[data-r726-start]').selectOption(trajectoryIds.start);
