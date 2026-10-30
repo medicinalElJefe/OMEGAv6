@@ -65,8 +65,8 @@ for(const token of ['compareCrossFrameInterventionsR718','selectedFirstEdge','se
 for(const selector of ['first','second']){
  const tag=ui.match(new RegExp('<select[^>]*data-r718-'+selector+'-frame[^>]*>'))?.[0];
  assert.ok(tag,'R718 '+selector+' frame selector missing');
- assert.match(tag,new RegExp('value=\\\\{'+selector+'Frame\\\\}'),'R718 '+selector+' frame must reflect React state');
- assert.match(tag,/onChange=\\{e=>choose(?:First|Second)Frame/,'R718 frame change handler missing');
+ assert.ok(tag.includes('value={'+selector+'Frame}'),'R718 '+selector+' frame must reflect React state');
+ assert.ok(tag.includes('onChange={e=>choose'+(selector==='first'?'First':'Second')+'Frame'),'R718 frame change handler missing');
  assert.doesNotMatch(tag,/onInput=/,'R718 must not double-handle native frame changes');
  assert.ok(tag.includes('data-r718-'+selector+'-frame-state'),'R718 '+selector+' frame state witness missing');
 }
