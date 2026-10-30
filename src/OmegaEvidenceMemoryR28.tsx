@@ -11,7 +11,6 @@ import './omegaEvidenceMemoryR28.css';
 type Props={variant:'Evidence & Proof'|'Memory';record:any;address:number;onAddress:(n:number)=>void;status:any;restore:any};
 const fmt=(v:any,d=4)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'—';
 const load=<T,>(k:string,f:T)=>localState.read(k,f) as T;
-const save=<T,>(k:string,v:T)=>{localState.write(k,v);return v};
 const stable=(v:any)=>JSON.stringify(v,Object.keys(v||{}).sort());
 async function sha256(v:any){const bytes=new TextEncoder().encode(typeof v==='string'?v:JSON.stringify(v)),hash=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function download(name:string,data:any){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
