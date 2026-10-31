@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {buildVerifiedTrajectoryExplorerR727} from '../../src/verifiedTrajectoryExplorerR727.mjs';
+import {TRAJECTORY_CHECKPOINT_KEY_R729,saveTrajectoryCheckpointR729,restoreTrajectoryCheckpointR729} from '../../src/trajectoryCheckpointR729.mjs';
 import {MEMORY_KEY_R722,verifyMemoryRowsR722} from '../../src/portableMemoryRecoveryR722.mjs';
 import {traceVerifiedMemoryTrajectoryR726,revalidateMemoryTrajectoryR726} from '../../src/memoryTrajectoryR726.mjs';
 
@@ -68,6 +69,34 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
    setExportText(JSON.stringify(fresh,null,2));setError('');
   }catch(e){if(epoch.current===token)fail(e)}
  };
+ const saveCheckpoint=async()=>{
+  if(!packet)return;
+  const token=epoch.current;
+  try{
+   const serialized=await saveTrajectoryCheckpointR729(readRows(),packet,packet.sources[cursor].id,metricKey);
+   if(epoch.current!==token)return;
+   localStorage.setItem(TRAJECTORY_CHECKPOINT_KEY_R729,serialized);
+   setStatus('R729 checkpoint saved locally. Restoring requires all original verified source snapshots.');
+   setError('');
+  }catch(e){if(epoch.current===token)setError(e instanceof Error?e.message:'R729 checkpoint save refused')}
+ };
+ const restoreCheckpoint=async()=>{
+  const token=++epoch.current;
+  setPacket(null);setExportText('');setError('');setStatus('');
+  try{
+   const raw=localStorage.getItem(TRAJECTORY_CHECKPOINT_KEY_R729);
+   if(raw===null)throw Error('R729 no browser-local checkpoint is saved');
+   const restored=await restoreTrajectoryCheckpointR729(readRows(),raw);
+   if(epoch.current!==token)return;
+   setStart(restored.packet.sources[0].id);setEnd(restored.packet.sources.at(-1).id);
+   setMetricKey(restored.metricKey);setCursor(restored.cursor);setPacket(restored.packet);
+   setStatus('R729 restored '+restored.packet.sourceCount+' reverified source observations; no external or canonical memory claimed.');
+  }catch(e){if(epoch.current===token)setError(e instanceof Error?e.message:'R729 checkpoint restore refused')}
+ };
+ const clearCheckpoint=()=>{
+  try{localStorage.removeItem(TRAJECTORY_CHECKPOINT_KEY_R729);setStatus('R729 browser-local checkpoint cleared; original memory snapshots remain unchanged.');setError('')}
+  catch(e){setError(e instanceof Error?e.message:'R729 checkpoint clear refused')}
+ };
  const replay=async(source:Source)=>{
   if(!packet)return;
   const token=epoch.current;
@@ -91,6 +120,12 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
    </select></label>
    <button type='button' data-r726-run onClick={()=>void trace()}>Compute verified trajectory</button>
   </div>
+  <div data-r729-checkpoint style={{display:'flex',gap:8,flexWrap:'wrap',margin:'10px 0'}}>
+   <button type='button' data-r729-save disabled={!packet} onClick={()=>void saveCheckpoint()}>Save verified local trajectory checkpoint</button>
+   <button type='button' data-r729-restore onClick={()=>void restoreCheckpoint()}>Restore and reverify checkpoint</button>
+   <button type='button' data-r729-clear onClick={clearCheckpoint}>Clear checkpoint only</button>
+  </div>
+  <small data-r729-boundary>R729 saves only endpoint identities, selected observation, metric and a digest-bound trajectory fingerprint in this browser. Restore recomputes every source and transition; changed, missing or tampered source memory is refused. Use R722 portable memory export/import to move original snapshots between browsers. This is not cloud sync or authenticated authorship.</small>
   {error&&<p data-r726-error role='alert'>REFUSED: {error}</p>}
   {status&&<p data-r726-status role='status'>{status}</p>}
   {packet&&<div data-r726-result>

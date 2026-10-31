@@ -516,6 +516,22 @@ try{
    if(!(await memoryTrajectory.locator('[data-r726-status]').innerText()).includes('Verified trajectory address '+traced.sources[1].address))
     throw Error(device+': R727 verified source replay failed');
    console.log('R727 verified trajectory explorer '+device+' PASS: 3 discrete address observations, source scrub, reverified replay');
+   // R729: save a real selected trajectory and recover after workspace source-state invalidation.
+   await memoryTrajectory.locator('[data-r729-save]').click();
+   await page.waitForFunction(()=>Boolean(localStorage.getItem('omega.v6.memory.trajectory.r729')));
+   const checkpoint=await page.evaluate(()=>JSON.parse(localStorage.getItem('omega.v6.memory.trajectory.r729')||'null'));
+   if(checkpoint?.schema!=='OMEGA_LOCAL_TRAJECTORY_CHECKPOINT_R729_V1'||
+      checkpoint.cursorId!==traced.sources[1].id||checkpoint.packetSha256!==traced.packetSha256)
+    throw Error(device+': R729 did not persist the selected source-bound checkpoint');
+   await page.evaluate(()=>window.dispatchEvent(new Event('omega-r722-memory-updated')));
+   await memoryTrajectory.locator('[data-r726-result]').waitFor({state:'hidden',timeout:10000});
+   await memoryTrajectory.locator('[data-r729-restore]').click();
+   await memoryTrajectory.locator('[data-r726-result]').waitFor({state:'visible',timeout:10000});
+   if(!(await memoryTrajectory.locator('[data-r726-status]').innerText()).includes('restored 3 reverified')||
+      !(await memoryTrajectory.locator('[data-r727-selected]').innerText()).includes('address '+traced.sources[1].address))
+    throw Error(device+': R729 did not reverify and recover selected trajectory observation');
+   console.log('R729 local trajectory checkpoint '+device+' PASS: saved source fingerprint, state reset, reverified restore and cursor');
+
    await page.evaluate(()=>{
     const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
     rows[2].note+=' forged';localStorage.setItem(key,JSON.stringify(rows));
@@ -523,6 +539,9 @@ try{
    await memoryTrajectory.locator('[data-r726-export]').click();
    if(!(await memoryTrajectory.locator('[data-r726-error]').innerText()).includes('digest mismatch'))
     throw Error(device+': R726 memoryTrajectory export accepted tampered source');
+   await memoryTrajectory.locator('[data-r729-restore]').click();
+   if(!(await memoryTrajectory.locator('[data-r726-error]').innerText()).includes('digest mismatch'))
+    throw Error(device+': R729 checkpoint restore accepted tampered original memory');
    console.log('R726 verified memory trajectory '+device+' PASS: 3 snapshots, 2 real edges, export, replay, tamper refusal');
    console.log('R725 verified memory continuity '+device+' PASS: two verified snapshots, metric deltas, export, replay, tamper refusal');
    console.log('R724 grounded intelligence '+device+' PASS: verified SAI Lab evidence, source packet, replay, tamper refusal');
