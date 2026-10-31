@@ -4,6 +4,7 @@ import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasin
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
 import {renderAtlasFieldRasterR734,ATLAS_FIELD_CHANNELS_R734} from '../../src/atlasFieldRasterR734.mjs';
 import {computeSourceRouteProfileR735} from '../../src/sourceRouteProfileR735.mjs';
+import {computeSourcePhasePortraitR736} from '../../src/sourcePhasePortraitR736.mjs';
 
 type Props={address:number;onAddress:(address:number)=>void};
 type RouteField=Awaited<ReturnType<typeof getMandala20736Field>>;
@@ -14,6 +15,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [rasterMode,setRasterMode]=useState<'basin'|'depth'>('basin');
  const [fieldChannel,setFieldChannel]=useState('C');
  const [routeLimit,setRouteLimit]=useState(32);
+ const [phaseX,setPhaseX]=useState('C'),[phaseY,setPhaseY]=useState('q');
  const [jump,setJump]=useState('0');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
  const fieldRasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -42,6 +44,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
   }
  },[fieldRaster,address]);
  const routeProfile=useMemo(()=>field&&Number.isSafeInteger(address)&&address>=0&&address<20736?computeSourceRouteProfileR735(field,address,fieldChannel,routeLimit):null,[field,address,fieldChannel,routeLimit]);
+ const phasePortrait=useMemo(()=>field&&Number.isSafeInteger(address)&&address>=0&&address<20736?computeSourcePhasePortraitR736(field,address,phaseX,phaseY,routeLimit):null,[field,address,phaseX,phaseY,routeLimit]);
  const selected=useMemo(()=>analysis&&field?inspectRouteBasinR732(analysis,field.routeNext,address):null,[analysis,field,address]);
  const compute=async()=>{
   if(busy)return;
@@ -94,6 +97,24 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
     <p data-r735-summary role='status'>{routeProfile.steps.length} computed steps · {routeProfile.cycleStart===null?'bounded continuation at '+routeProfile.continuationAddress:'cycle starts at step '+routeProfile.cycleStart+' · period '+routeProfile.cyclePeriod} · range {routeProfile.minimum.toFixed(5)} to {routeProfile.maximum.toFixed(5)}</p>
     <div style={{maxHeight:240,overflow:'auto'}}><table data-r735-table style={{width:'100%',fontVariantNumeric:'tabular-nums'}}><thead><tr><th>Step</th><th>Address</th><th>Value</th><th>Δ successor</th></tr></thead><tbody>{routeProfile.steps.map(step=><tr key={step.index}><td>{step.index}</td><td><button type='button' onClick={()=>onAddress(step.address)}>{step.address}</button></td><td>{step.value.toFixed(5)}</td><td>{step.successorDifference.toFixed(5)}</td></tr>)}</tbody></table></div>
     <small>R735 follows the declared source graph only. No historical renderer equivalence, empirical measurements, or CanonState mutation.</small>
+   </div>}
+   {phasePortrait&&<div data-r736-phase-portrait style={{margin:'16px 0',maxWidth:'100%'}}>
+    <h3>R736 · Two-metric source phase portrait</h3>
+    <p>Plot the exact successor sequence against two independently computed source channels. Each point is one source address; the highlighted path closes only if a real cycle is encountered.</p>
+    <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+     <label>Horizontal metric <select data-r736-x value={phaseX} onChange={e=>{const v=e.target.value;setPhaseX(v);if(v===phaseY)setPhaseY(phaseX);}}>{Object.entries(ATLAS_FIELD_CHANNELS_R734).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
+     <label>Vertical metric <select data-r736-y value={phaseY} onChange={e=>{const v=e.target.value;setPhaseY(v);if(v===phaseX)setPhaseX(phaseY);}}>{Object.entries(ATLAS_FIELD_CHANNELS_R734).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>
+    </div>
+    <p data-r736-summary role='status'>{phasePortrait.points.length} source points · {phasePortrait.edges.length} exact successor edges · {phasePortrait.cycleStart===null?'bounded continuation; no inferred cycle':'cycle length '+phasePortrait.cyclePeriod} · horizontal {phasePortrait.xMinimum.toFixed(5)} to {phasePortrait.xMaximum.toFixed(5)} · vertical {phasePortrait.yMinimum.toFixed(5)} to {phasePortrait.yMaximum.toFixed(5)}</p>
+    <svg data-r736-plot viewBox='0 0 360 280' role='img' aria-label={'Exact source successor phase portrait: '+phasePortrait.xLabel+' versus '+phasePortrait.yLabel} style={{display:'block',width:'min(100%,480px)',height:'auto',background:'#101c29',border:'1px solid #6d8795',borderRadius:5}}>
+     <line x1={28} y1={240} x2={332} y2={240} stroke='#a5b9c4' strokeWidth={1}/>
+     <line x1={28} y1={240} x2={28} y2={30} stroke='#a5b9c4' strokeWidth={1}/>
+     {phasePortrait.edges.map((edge,i)=>{const a=phasePortrait.points[edge.from],b=phasePortrait.points[edge.to];return <line key={i} x1={28+a.xNormalized*300} y1={240-a.yNormalized*200} x2={28+b.xNormalized*300} y2={240-b.yNormalized*200} stroke={edge.cycleEdge?'#f5c76b':'#75b7c8'} strokeWidth={1.8} opacity={0.9}/>;})}
+     {phasePortrait.points.map(point=><circle key={point.index} data-r736-point={point.index} cx={28+point.xNormalized*300} cy={240-point.yNormalized*200} r={point.index===0?5:3} fill={point.cycleMember?'#f5c76b':'#a3e1f1'} stroke='#122332' strokeWidth={1} onClick={()=>onAddress(point.address)} style={{cursor:'pointer'}}><title>{'Step '+point.index+' address '+point.address+' · '+phasePortrait.xLabel+' '+point.xValue.toFixed(5)+' · '+phasePortrait.yLabel+' '+point.yValue.toFixed(5)}</title></circle>)}
+     <text x={180} y={266} textAnchor='middle' fontSize={11} fill='#e1ebef'>{phasePortrait.xLabel}</text>
+     <text x={14} y={16} fontSize={11} fill='#e1ebef'>{phasePortrait.yLabel}</text>
+    </svg>
+    <small data-r736-boundary>Each axis is independently normalized to its actual bounded source-route range. Colors distinguish source-cycle edges, not empirical phases. No physical dynamics, new dimensions, historical donor equivalence or CanonState admission.</small>
    </div>}
    <h3>Selected address {address.toLocaleString()}</h3>
    <p data-r732-selected>Successor {selected.nextAddress} · basin {selected.basinId+1} · basin size {selected.basinSize} · {selected.distanceToCycle} steps to cycle · period {selected.cycleLength} · cycle entry {selected.cycleEntry}</p>
