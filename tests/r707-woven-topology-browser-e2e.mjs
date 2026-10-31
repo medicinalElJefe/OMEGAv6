@@ -615,6 +615,28 @@ try{
    console.log('R724 grounded intelligence '+device+' PASS: verified SAI Lab evidence, source packet, replay, tamper refusal');
    console.log('R723 verified recall '+device+' PASS: source-bound query, inspection, replay, tamper refusal, persisted recovery');
    console.log('R722 '+device+' PASS: real R28 snapshot, SHA-256 portable export, tamper refusal, local restore and reload persistence');
+   // R732: real 20,736-state route graph, sourced from the existing Mandala field.
+   await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
+   await page.locator('[data-r519-visual-navigation="EXPLORE"] button[data-r519-node="Atlas"]').click();
+   await page.locator('[data-r519-visual-navigation="EXPLORE"] button[data-r519-launch="Atlas"]').click();
+   const scienceAtlas=page.locator('[data-omega7-native="science"][data-route="Atlas"]');
+   await scienceAtlas.waitFor({state:'visible',timeout:30000});
+   const openAtlas=scienceAtlas.locator('.o7-open-instrument');
+   if(await openAtlas.count())await openAtlas.click();
+   const basin=scienceAtlas.locator('[data-r732-basin-instrument="source-model"]');
+   await basin.locator('[data-r732-run]').click();
+   await basin.locator('[data-r732-result]').waitFor({state:'visible',timeout:90000});
+   const basinSummary=await basin.locator('[data-r732-summary]').innerText();
+   if(!basinSummary.includes('20,736')||!basinSummary.includes('route cycles'))
+    throw Error(device+': R732 full-source route census missing '+basinSummary);
+   if(await basin.locator('[data-r732-ranked] li').count()<1)
+    throw Error(device+': R732 ranked cycle basin list empty');
+   await basin.locator('[data-r732-ranked] li').first().locator('button').click();
+   await basin.locator('[data-r732-entry]').click();
+   await basin.locator('[data-r732-selected]').filter({hasText:'0 steps to cycle'}).waitFor({state:'visible',timeout:10000});
+   if(!(await basin.locator('[data-r732-boundary]').innerText()).includes('not empirical attractors'))
+    throw Error(device+': R732 model/physical boundary missing');
+   console.log('R732 source-route basin '+device+' PASS: all 20,736 addresses, exact cycle/entry, ranked basin and source-only proof boundary');
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(device+': viewport overflow '+overflow);
