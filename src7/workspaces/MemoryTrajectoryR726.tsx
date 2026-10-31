@@ -39,7 +39,7 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
   let live=true;
   const refresh=()=>{
    const token=++epoch.current;
-   setPacket(null);setExportText('');setStart('');setEnd('');setOptions([]);setStatus('');setError('');setMetricKey('address');setCursor(0);setPortableRows(null);setCapsuleText('');setVerifiedCapsule('');setVerifiedCapsule('');setVerifiedCapsule('');
+   setPacket(null);setExportText('');setStart('');setEnd('');setOptions([]);setStatus('');setError('');setMetricKey('address');setCursor(0);setPortableRows(null);setCapsuleText('');setVerifiedCapsule('');
    void (async()=>{
     try{
      const rows=readRows();
@@ -60,7 +60,7 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
  const fail=(e:unknown)=>{setPacket(null);setExportText('');setStatus('');setError(e instanceof Error?e.message:'R726 trajectory refused')};
  const trace=async()=>{
   const token=++epoch.current;
-  setPacket(null);setExportText('');setStatus('');setError('');setMetricKey('address');setCursor(0);setPortableRows(null);setCapsuleText('');
+  setPacket(null);setExportText('');setStatus('');setError('');setMetricKey('address');setCursor(0);setPortableRows(null);setCapsuleText('');setVerifiedCapsule('');
   try{
    const result=await traceVerifiedMemoryTrajectoryR726(readRows(),start,end);
    if(epoch.current!==token)return;
