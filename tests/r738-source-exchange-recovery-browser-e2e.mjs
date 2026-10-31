@@ -61,12 +61,12 @@ try{
    if(exported.cycleStart!==null&&exported.cycleClosureResidual>1e-8)throw Error(device+': source-cycle closure imbalance');
    const importer=instrument.locator('[data-r738-import]');
    await importer.setInputFiles({name:'exchange.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exported))});
-   await instrument.locator('[data-r738-status]').getByText(/VERIFIED/).waitFor({timeout:15000});
+   await instrument.locator('[data-r738-status]:text-matches("VERIFIED")').waitFor({timeout:15000});
    const recovered=await instrument.locator('[data-r738-status]').innerText();
    if(!recovered.includes('exact source exchanges'))throw Error(device+': recovery did not execute');
    const tampered={...exported,edges:exported.edges.map((edge,i)=>i===0?{...edge,length:999}:edge)};
    await importer.setInputFiles({name:'tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(tampered))});
-   await instrument.locator('[data-r738-status]').getByText(/REFUSED/).waitFor({timeout:15000});
+   await instrument.locator('[data-r738-status]:text-matches("REFUSED")').waitFor({timeout:15000});
    if(!(await instrument.locator('[data-r738-status]').innerText()).includes('differs'))throw Error(device+': tampered witness not refused');
    const summary=await profile.locator('[data-r735-summary]').innerText();
    if(!/computed steps/.test(summary)||!/cycle|bounded continuation/.test(summary))throw Error(device+': route witness missing');
