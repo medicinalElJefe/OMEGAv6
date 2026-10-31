@@ -51,7 +51,7 @@ try{
    const downloadPromise=page.waitForEvent('download',{timeout:15000});
    await exchange.locator('[data-r737-export]').click();
    const download=await downloadPromise;
-   if(!/^omega-r737-source-exchange-\\d+\\.json$/.test(download.suggestedFilename()))throw Error(device+': wrong exchange export filename');
+   if(!/^omega-r737-source-exchange-\d+\.json$/.test(download.suggestedFilename()))throw Error(device+': wrong exchange export filename');
    const chunks=[];
    for await(const chunk of await download.createReadStream())chunks.push(chunk);
    const exported=JSON.parse(Buffer.concat(chunks).toString('utf8'));
