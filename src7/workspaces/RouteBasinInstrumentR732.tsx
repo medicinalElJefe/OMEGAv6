@@ -7,6 +7,7 @@ import {computeSourceRouteProfileR735} from '../../src/sourceRouteProfileR735.mj
 import {computeSourcePhasePortraitR736} from '../../src/sourcePhasePortraitR736.mjs';
 import {computeSourcePhaseExchangeR737,serializeSourcePhaseExchangeR737} from '../../src/sourcePhaseExchangeR737.mjs';
 import {verifySourceExchangeRecoveryR738} from '../../src/sourceExchangeRecoveryR738.mjs';
+import {buildSourcePreimageIndexR739,inspectSourcePreimagesR739} from '../../src/sourcePreimageR739.mjs';
 
 type Props={address:number;onAddress:(address:number)=>void};
 type RouteField=Awaited<ReturnType<typeof getMandala20736Field>>;
@@ -17,6 +18,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [rasterMode,setRasterMode]=useState<'basin'|'depth'>('basin');
  const [fieldChannel,setFieldChannel]=useState('C');
  const [routeLimit,setRouteLimit]=useState(32);
+ const [inverseDepth,setInverseDepth]=useState(4),[inverseNodes,setInverseNodes]=useState(96);
  const [phaseX,setPhaseX]=useState('C'),[phaseY,setPhaseY]=useState('q');
  const [jump,setJump]=useState('0');
  const [recoveryStatus,setRecoveryStatus]=useState('');
@@ -49,6 +51,8 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const routeProfile=useMemo(()=>field&&Number.isSafeInteger(address)&&address>=0&&address<20736?computeSourceRouteProfileR735(field,address,fieldChannel,routeLimit):null,[field,address,fieldChannel,routeLimit]);
  const phasePortrait=useMemo(()=>field&&Number.isSafeInteger(address)&&address>=0&&address<20736?computeSourcePhasePortraitR736(field,address,phaseX,phaseY,routeLimit):null,[field,address,phaseX,phaseY,routeLimit]);
  const phaseExchange=useMemo(()=>phasePortrait?computeSourcePhaseExchangeR737(phasePortrait):null,[phasePortrait]);
+ const inverseIndex=useMemo(()=>field&&analysis?buildSourcePreimageIndexR739(field.routeNext,analysis):null,[field,analysis]);
+ const inverse=useMemo(()=>inverseIndex&&analysis&&Number.isSafeInteger(address)&&address>=0&&address<20736?inspectSourcePreimagesR739(inverseIndex,analysis,address,inverseDepth,inverseNodes):null,[inverseIndex,analysis,address,inverseDepth,inverseNodes]);
  const exportPhaseExchange=()=>{
   if(!phaseExchange)return;
   const blob=new Blob([serializeSourcePhaseExchangeR737(phaseExchange)],{type:'application/json'});
@@ -159,6 +163,28 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
    <p data-r732-selected>Successor {selected.nextAddress} · basin {selected.basinId+1} · basin size {selected.basinSize} · {selected.distanceToCycle} steps to cycle · period {selected.cycleLength} · cycle entry {selected.cycleEntry}</p>
    <button type='button' data-r732-entry onClick={()=>onAddress(selected.cycleEntry)}>Select exact cycle-entry address {selected.cycleEntry}</button>
    <p data-r732-trace>Bounded successor witness: {selected.trace.join(' → ')}{selected.truncated?' → … (remaining path omitted)':''}</p>
+   {inverse&&<section data-r739-inverse aria-label='Exact source predecessor explorer' style={{margin:'16px 0',maxWidth:'100%',minWidth:0}}>
+    <h3>R739 · Inverse source-route branching</h3>
+    <p>Follow the real incoming edges of the computed successor graph. Reverse traversal exposes predecessor branching, the cycle return and bounded ancestral layers of this mathematical model. The direction is the inverse of the declared source route, not a claim of physical causation.</p>
+    <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center'}}>
+     <label>Reverse depth <select data-r739-depth value={inverseDepth} onChange={e=>setInverseDepth(Number(e.target.value))}>{[1,2,4,8,16].map(n=><option key={n} value={n}>{n} layers</option>)}</select></label>
+     <label>Maximum nodes <select data-r739-nodes value={inverseNodes} onChange={e=>setInverseNodes(Number(e.target.value))}>{[32,96,256].map(n=><option key={n} value={n}>{n} nodes</option>)}</select></label>
+     <button type='button' data-r739-hub onClick={()=>onAddress(inverse.hubAddress)}>Select strongest incoming branch · {inverse.hubAddress}</button>
+    </div>
+    <p data-r739-summary role='status'>Address {inverse.root} · {inverse.directPredecessors} direct source predecessors · {inverse.visitedCount} unique reverse nodes · {inverse.edges.length} exact source edges · {inverse.cycleClosureEdges} cycle return edges · layers {inverse.layerCounts.join(' / ')} · {inverse.truncated?inverse.omittedEdges+' bounded incoming edges omitted':'all incoming edges within the selected depth explored'}</p>
+    <div style={{maxHeight:260,overflow:'auto',maxWidth:'100%'}}>
+     <table data-r739-table style={{width:'100%',fontVariantNumeric:'tabular-nums',fontSize:12}}>
+      <thead><tr><th>Layer</th><th>Predecessor</th><th>Successor</th><th>Incoming edges</th><th>Cycle state</th></tr></thead>
+      <tbody>{inverse.nodes.slice(1).map(node=><tr key={node.address}>
+       <td>{node.layer}</td>
+       <td><button type='button' data-r739-parent={node.address} onClick={()=>onAddress(node.address)}>{node.address}</button></td>
+       <td>{node.successor}</td><td>{node.indegree}</td><td>{node.cycleMember?'yes':'no'}</td>
+      </tr>)}</tbody>
+     </table>
+    </div>
+    <p data-r739-closure>{inverse.cycleClosureEdges} already-visited source edges close a witnessed cycle; they are not duplicated as new predecessor states. {inverse.truncated?'Increase the depth/node budget to inspect omitted incoming edges.':'No additional incoming edges were omitted within the chosen depth.'}</p>
+    <small data-r739-boundary>{inverse.boundary} The 20,736 addresses are model states, not spatial or physical dimensions.</small>
+   </section>}
    <h3>Largest source-route basins</h3>
    <ol data-r732-ranked>{analysis.ranked.slice(0,8).map((cycle:any)=><li key={cycle.id} style={{padding:'4px 0'}}>
     <button type='button' data-r732-basin={cycle.id} onClick={()=>onAddress(cycle.representative)}>Select address {cycle.representative}</button>
