@@ -1,4 +1,5 @@
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
+import {buildVerifiedTrajectoryExplorerR727} from '../../src/verifiedTrajectoryExplorerR727.mjs';
 import {MEMORY_KEY_R722,verifyMemoryRowsR722} from '../../src/portableMemoryRecoveryR722.mjs';
 import {traceVerifiedMemoryTrajectoryR726,revalidateMemoryTrajectoryR726} from '../../src/memoryTrajectoryR726.mjs';
 
@@ -23,12 +24,14 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
  const [start,setStart]=useState(''),[end,setEnd]=useState('');
  const [packet,setPacket]=useState<Packet|null>(null),[exportText,setExportText]=useState('');
  const [status,setStatus]=useState(''),[error,setError]=useState('');
+ const [metricKey,setMetricKey]=useState('address'),[cursor,setCursor]=useState(0);
+ const explorer=useMemo(()=>packet?buildVerifiedTrajectoryExplorerR727(packet,metricKey):null,[packet,metricKey]);
  const epoch=useRef(0);
  useEffect(()=>{
   let live=true;
   const refresh=()=>{
    const token=++epoch.current;
-   setPacket(null);setExportText('');setStart('');setEnd('');setOptions([]);setStatus('');setError('');
+   setPacket(null);setExportText('');setStart('');setEnd('');setOptions([]);setStatus('');setError('');setMetricKey('address');setCursor(0);
    void (async()=>{
     try{
      const rows=readRows();
@@ -49,7 +52,7 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
  const fail=(e:unknown)=>{setPacket(null);setExportText('');setStatus('');setError(e instanceof Error?e.message:'R726 trajectory refused')};
  const trace=async()=>{
   const token=++epoch.current;
-  setPacket(null);setExportText('');setStatus('');setError('');
+  setPacket(null);setExportText('');setStatus('');setError('');setMetricKey('address');setCursor(0);
   try{
    const result=await traceVerifiedMemoryTrajectoryR726(readRows(),start,end);
    if(epoch.current!==token)return;
@@ -92,6 +95,24 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
   {status&&<p data-r726-status role='status'>{status}</p>}
   {packet&&<div data-r726-result>
    <p>{packet.sourceCount} verified observations · {packet.elapsedRecordedMs} ms recorded interval · {packet.decisionChanges} decision changes</p>
+   {explorer&&<div data-r727-explorer style={{padding:10,margin:'12px 0',border:'1px solid #526b75',borderRadius:8}}>
+    <h3>R727 · Recorded trajectory explorer</h3>
+    <p>Discrete source observations only. Lines connect adjacent recorded observations with values; missing metric values are never interpolated.</p>
+    <label>Observed channel <select data-r727-metric aria-label='Observed trajectory channel' value={metricKey} onChange={e=>setMetricKey(e.target.value)}>
+     {explorer.metricKeys.map(key=><option key={key} value={key}>{key==='address'?'20736-address path':key}</option>)}
+    </select></label>
+    <svg data-r727-chart role='img' aria-label={'Recorded '+metricKey+' trajectory, '+explorer.observedCount+' observed of '+explorer.points.length+' snapshots'} viewBox='0 0 640 220' style={{display:'block',width:'100%',maxWidth:700,height:'auto',margin:'10px 0',background:'#10212c',borderRadius:6}}>
+     <path d='M32 30V190H608' fill='none' stroke='#8da0ac' strokeWidth='1.5'/>
+     {explorer.segments.map(segment=><path key={segment.from+'-'+segment.to} d={'M'+segment.x1+' '+segment.y1+'L'+segment.x2+' '+segment.y2} fill='none' stroke='#72d6b1' strokeWidth='2.5'/>)}
+     {explorer.points.filter(p=>p.y!==null).map(p=><circle key={p.id} cx={p.x} cy={p.y!} r={p.index===cursor?7:4} fill={p.index===cursor?'#ffe09b':'#b1ebd9'} stroke='#10212c' strokeWidth='1.5'/>)}
+    </svg>
+    <p data-r727-coverage>{explorer.observedCount} observed · {explorer.missingCount} missing · no interpolation · {metricKey} range {explorer.minimum} to {explorer.maximum}</p>
+    <label>Recorded observation {cursor+1} of {packet.sources.length}
+     <input data-r727-cursor aria-label='Recorded trajectory observation' type='range' min={0} max={packet.sources.length-1} step={1} value={cursor} onChange={e=>setCursor(Number(e.target.value))} style={{display:'block',width:'100%'}}/>
+    </label>
+    <output data-r727-selected style={{display:'block',overflowWrap:'anywhere'}}>STATE {packet.sources[cursor].stateId} · address {packet.sources[cursor].address} · {packet.sources[cursor].decision} · {new Date(packet.sources[cursor].at).toLocaleString()} · {packet.sources[cursor].note}</output>
+    <button type='button' data-r727-replay onClick={()=>void replay(packet.sources[cursor])}>Reverify and select this recorded address</button>
+   </div>}
    <ol style={{paddingLeft:22}}>
     {packet.sources.map((source,i)=><li key={source.id} data-r726-source style={{padding:'8px 0',overflowWrap:'anywhere'}}>
      <b>STATE {source.stateId} · {source.decision}</b> · address {source.address}

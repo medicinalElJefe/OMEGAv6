@@ -496,6 +496,26 @@ try{
    await memoryTrajectory.locator('[data-r726-replay]').last().click();
    if(!(await memoryTrajectory.locator('[data-r726-status]').innerText()).includes('Verified trajectory address'))
     throw Error(device+': R726 verified address replay failed');
+   // R727 real discrete source projection and scrub-to-verified-address replay.
+   const explorer=memoryTrajectory.locator('[data-r727-explorer]');
+   await explorer.waitFor({state:'visible',timeout:10000});
+   if(await explorer.locator('[data-r727-chart] circle').count()!==3||
+      await explorer.locator('[data-r727-chart] path').count()!==3)
+    throw Error(device+': R727 address chart omitted real discrete sources or edges');
+   const metricOptions=await explorer.locator('[data-r727-metric] option').allTextContents();
+   if(!metricOptions.length||!metricOptions[0].includes('20736-address path'))
+    throw Error(device+': R727 address projection unavailable');
+   if(!(await explorer.locator('[data-r727-coverage]').innerText()).includes('0 missing'))
+    throw Error(device+': R727 address projection fabricated missing data');
+   const cursor=explorer.locator('[data-r727-cursor]');
+   await cursor.focus();
+   await cursor.press('ArrowRight');
+   if(!(await explorer.locator('[data-r727-selected]').innerText()).includes('address '+traced.sources[1].address))
+    throw Error(device+': R727 recorded observation scrub did not select middle source');
+   await explorer.locator('[data-r727-replay]').click();
+   if(!(await memoryTrajectory.locator('[data-r726-status]').innerText()).includes('Verified trajectory address '+traced.sources[1].address))
+    throw Error(device+': R727 verified source replay failed');
+   console.log('R727 verified trajectory explorer '+device+' PASS: 3 discrete address observations, source scrub, reverified replay');
    await page.evaluate(()=>{
     const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
     rows[2].note+=' forged';localStorage.setItem(key,JSON.stringify(rows));
