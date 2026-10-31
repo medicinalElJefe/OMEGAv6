@@ -1,4 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
+import {localState} from '../../src/platformAdapter';
+import {prepareCapsulePersistenceR731} from '../../src/capsulePersistenceR731.mjs';
 import {buildVerifiedTrajectoryExplorerR727} from '../../src/verifiedTrajectoryExplorerR727.mjs';
 import {TRAJECTORY_CHECKPOINT_KEY_R729,saveTrajectoryCheckpointR729,restoreTrajectoryCheckpointR729} from '../../src/trajectoryCheckpointR729.mjs';
 import {exportTrajectoryCapsuleR730,importTrajectoryCapsuleR730} from '../../src/trajectoryCapsuleR730.mjs';
@@ -29,6 +31,7 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
  const [metricKey,setMetricKey]=useState('address'),[cursor,setCursor]=useState(0);
  const [capsuleText,setCapsuleText]=useState('');
  const [portableRows,setPortableRows]=useState<unknown[]|null>(null);
+ const [verifiedCapsule,setVerifiedCapsule]=useState('');
  const currentRows=()=>portableRows??readRows();
  const explorer=useMemo(()=>packet?buildVerifiedTrajectoryExplorerR727(packet,metricKey):null,[packet,metricKey]);
  const epoch=useRef(0);
@@ -36,7 +39,7 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
   let live=true;
   const refresh=()=>{
    const token=++epoch.current;
-   setPacket(null);setExportText('');setStart('');setEnd('');setOptions([]);setStatus('');setError('');setMetricKey('address');setCursor(0);setPortableRows(null);setCapsuleText('');
+   setPacket(null);setExportText('');setStart('');setEnd('');setOptions([]);setStatus('');setError('');setMetricKey('address');setCursor(0);setPortableRows(null);setCapsuleText('');setVerifiedCapsule('');
    void (async()=>{
     try{
      const rows=readRows();
@@ -57,7 +60,7 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
  const fail=(e:unknown)=>{setPacket(null);setExportText('');setStatus('');setError(e instanceof Error?e.message:'R726 trajectory refused')};
  const trace=async()=>{
   const token=++epoch.current;
-  setPacket(null);setExportText('');setStatus('');setError('');setMetricKey('address');setCursor(0);setPortableRows(null);setCapsuleText('');
+  setPacket(null);setExportText('');setStatus('');setError('');setMetricKey('address');setCursor(0);setPortableRows(null);setCapsuleText('');setVerifiedCapsule('');
   try{
    const result=await traceVerifiedMemoryTrajectoryR726(readRows(),start,end);
    if(epoch.current!==token)return;
@@ -113,14 +116,31 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
  };
  const importCapsule=async()=>{
   const token=++epoch.current;
-  setError('');setStatus('');setPacket(null);setExportText('');setPortableRows(null);
+  setError('');setStatus('');setPacket(null);setExportText('');setPortableRows(null);setVerifiedCapsule('');
   try{
    const restored=await importTrajectoryCapsuleR730(capsuleText);
    if(epoch.current!==token)return;
-   setPortableRows(restored.rows);setStart(restored.packet.sources[0].id);setEnd(restored.packet.sources.at(-1).id);
+   setPortableRows(restored.rows);setVerifiedCapsule(capsuleText);setStart(restored.packet.sources[0].id);setEnd(restored.packet.sources.at(-1).id);
    setMetricKey(restored.metricKey);setCursor(restored.cursor);setPacket(restored.packet);
    setStatus('R730 imported '+restored.packet.sourceCount+' independently reverified snapshots for read-only traversal. Nothing was written to browser memory.');
   }catch(e){if(epoch.current===token)setError(e instanceof Error?e.message:'R730 capsule import refused')}
+ };
+ const persistCapsule=async()=>{
+  if(!portableRows||!verifiedCapsule)return;
+  const token=epoch.current;
+  setError('');
+  try{
+   const originalRaw=localStorage.getItem(MEMORY_KEY_R722);
+   const result=await prepareCapsulePersistenceR731(readRows(),verifiedCapsule);
+   if(epoch.current!==token)return;
+   if(localStorage.getItem(MEMORY_KEY_R722)!==originalRaw)
+    throw Error('R731 local memory changed during verification; retry without overwriting');
+   if(!localState.write(MEMORY_KEY_R722,result.rows))
+    throw Error('R731 browser storage write failed; persistence not claimed');
+   window.dispatchEvent(new Event('omega-r722-memory-updated'));
+   setStatus('R731 persisted '+result.added+' new and '+result.existing+' existing verified snapshots; '+result.rows.length+' total browser-local. No CanonState change.');
+   setError('');
+  }catch(e){if(epoch.current===token)setError(e instanceof Error?e.message:'R731 capsule persistence refused')}
  };
  const replay=async(source:Source)=>{
   if(!packet)return;
@@ -153,9 +173,11 @@ export default function MemoryTrajectoryR726({onAddress}:{onAddress:(address:num
   <div data-r730-exchange style={{margin:'12px 0',display:'grid',gap:8,maxWidth:700}}>
    <button type='button' data-r730-export disabled={!packet} onClick={()=>void exportCapsule()}>Prepare portable trajectory capsule with verified snapshots</button>
    <label>Portable trajectory capsule JSON (contains original local snapshot data)
-    <textarea data-r730-json aria-label='Portable trajectory capsule JSON' rows={5} value={capsuleText} onChange={e=>setCapsuleText(e.target.value)} style={{width:'100%',boxSizing:'border-box'}}/>
+    <textarea data-r730-json aria-label='Portable trajectory capsule JSON' rows={5} value={capsuleText} onChange={e=>{setCapsuleText(e.target.value);setVerifiedCapsule('')}} style={{width:'100%',boxSizing:'border-box'}}/>
    </label>
    <button type='button' data-r730-import disabled={!capsuleText.trim()} onClick={()=>void importCapsule()}>Import and independently verify capsule for read-only traversal</button>
+   <button type='button' data-r731-persist disabled={!portableRows||!verifiedCapsule} onClick={()=>void persistCapsule()}>Verify again and save imported snapshots in this browser (opt in)</button>
+   <small data-r731-boundary>R731 saves only after a separate explicit action. It revalidates the capsule, refuses conflicting snapshot IDs, checks for concurrent local-memory changes and never overwrites existing rows or CanonState. Browser storage may fail or be cleared; export backups separately. No authenticated identity or cloud sync.</small>
    <small data-r730-boundary>Portable exchange includes the original selected snapshots and may contain personal notes. Share only intentionally. Import verifies every source and transition, does not write localStorage, authenticate authorship, synchronize devices, or change CanonState. Use R722 memory import separately for persistent recovery.</small>
   </div>
   <small data-r729-boundary>R729 saves only endpoint identities, selected observation, metric and a digest-bound trajectory fingerprint in this browser. Restore recomputes every source and transition; changed, missing or tampered source memory is refused. Use R722 portable memory export/import to move original snapshots between browsers. This is not cloud sync or authenticated authorship.</small>

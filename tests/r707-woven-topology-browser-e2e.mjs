@@ -554,6 +554,37 @@ try{
     throw Error(device+': R730 imported source address replay failed');
    if(!(await page.evaluate(()=>localStorage.getItem('omega.v6.memory.r28')||'')).includes(' forged'))
     throw Error(device+': R730 unexpectedly mutated original local memory');
+   // R731: persistence is a separate opt-in, refuses collisions, then saves verified imported rows.
+   if(!(await memoryTrajectory.locator('[data-r731-persist]').isEnabled()))
+    throw Error(device+': R731 persistence action unavailable after capsule verification');
+   await memoryTrajectory.locator('[data-r731-persist]').click();
+   if(!(await memoryTrajectory.locator('[data-r726-error]').innerText()).includes('snapshot digest mismatch'))
+    throw Error(device+': R731 did not refuse damaged existing local memory');
+   const r731ForgedOriginal=await page.evaluate(()=>localStorage.getItem('omega.v6.memory.r28'));
+   // Test a valid but conflicting identity separately from a damaged digest.
+   await page.evaluate(async()=>{
+    const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
+    const row=rows[2];
+    row.note=row.note.replace(/ forged$/,' valid-conflict');
+    const core={address:row.address,stateId:row.stateId,note:row.note,metrics:row.metrics,
+     decision:row.decision,routeNext:row.routeNext,authority:row.authority};
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(core)));
+    row.sha256=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+    localStorage.setItem(key,JSON.stringify(rows));
+   });
+   await memoryTrajectory.locator('[data-r731-persist]').click();
+   if(!(await memoryTrajectory.locator('[data-r726-error]').innerText()).includes('conflicting memory identity refused'))
+    throw Error(device+': R731 accepted a digest-valid conflicting existing identity');
+   await page.evaluate(()=>localStorage.removeItem('omega.v6.memory.r28'));
+   await memoryTrajectory.locator('[data-r731-persist]').click();
+   await page.waitForFunction(()=>{
+    try{return JSON.parse(localStorage.getItem('omega.v6.memory.r28')||'[]').length===3}catch{return false}
+   });
+   const r731Persisted=await page.evaluate(()=>JSON.parse(localStorage.getItem('omega.v6.memory.r28')||'[]'));
+   if(r731Persisted[1].id!==traced.sources[1].id||r731Persisted.some(row=>row.note.includes(' forged')))
+    throw Error(device+': R731 persisted source rows differ from independently verified capsule');
+   await page.evaluate(raw=>localStorage.setItem('omega.v6.memory.r28',raw),r731ForgedOriginal);
+   console.log('R731 opt-in capsule persistence '+device+' PASS: collision refusal, explicit write, original source recovery');
    await memoryTrajectory.locator('[data-r730-json]').fill(JSON.stringify({...trajectoryCapsuleR730,sha256:'0'.repeat(64)}));
    await memoryTrajectory.locator('[data-r730-import]').click();
    if(!(await memoryTrajectory.locator('[data-r726-error]').innerText()).includes('digest mismatch'))
