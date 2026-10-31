@@ -316,7 +316,7 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r707-woven-topology-browser-e2e.mjs
-      - name: Prove R520 full 44/72/100 function library on actual desktop and mobile browser
+      - name: Prove R735 source-metric successor traversal on candidate desktop/mobile\n        env:\n          OMEGA_E2E_URL: http://127.0.0.1:4173\n        run: node tests/r735-source-route-browser-e2e.mjs\n      - name: Prove R520 full 44/72/100 function library on actual desktop and mobile browser
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
           OMEGA_R520_USE_FIXTURES: '1'
@@ -782,7 +782,7 @@ jobs:
         id: browser_r707
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r707-woven-topology-browser-e2e.mjs
-      - name: Verify deployed R520 complete function library on exact promoted SHA
+      - name: Verify deployed R735 source-metric traversal on exact promoted SHA\n        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'\n        id: browser_r735\n        shell: bash\n        run: OMEGA_E2E_URL=\"$OMEGA_PUBLIC_URL\" OMEGA_EXPECTED_SHA=\"$OMEGA_PROMOTED_SHA\" node tests/r735-source-route-browser-e2e.mjs\n      - name: Verify deployed R520 complete function library on exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r520
         shell: bash
