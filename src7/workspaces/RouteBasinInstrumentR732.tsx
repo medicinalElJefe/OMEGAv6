@@ -5,6 +5,7 @@ import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/rou
 import {renderAtlasFieldRasterR734,ATLAS_FIELD_CHANNELS_R734} from '../../src/atlasFieldRasterR734.mjs';
 import {computeSourceRouteProfileR735} from '../../src/sourceRouteProfileR735.mjs';
 import {computeSourcePhasePortraitR736} from '../../src/sourcePhasePortraitR736.mjs';
+import {computeSourcePhaseExchangeR737,serializeSourcePhaseExchangeR737} from '../../src/sourcePhaseExchangeR737.mjs';
 
 type Props={address:number;onAddress:(address:number)=>void};
 type RouteField=Awaited<ReturnType<typeof getMandala20736Field>>;
@@ -45,6 +46,15 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  },[fieldRaster,address]);
  const routeProfile=useMemo(()=>field&&Number.isSafeInteger(address)&&address>=0&&address<20736?computeSourceRouteProfileR735(field,address,fieldChannel,routeLimit):null,[field,address,fieldChannel,routeLimit]);
  const phasePortrait=useMemo(()=>field&&Number.isSafeInteger(address)&&address>=0&&address<20736?computeSourcePhasePortraitR736(field,address,phaseX,phaseY,routeLimit):null,[field,address,phaseX,phaseY,routeLimit]);
+ const phaseExchange=useMemo(()=>phasePortrait?computeSourcePhaseExchangeR737(phasePortrait):null,[phasePortrait]);
+ const exportPhaseExchange=()=>{
+  if(!phaseExchange)return;
+  const blob=new Blob([serializeSourcePhaseExchangeR737(phaseExchange)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download='omega-r737-source-exchange-'+phaseExchange.start+'.json';
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),0);
+ };
  const selected=useMemo(()=>analysis&&field?inspectRouteBasinR732(analysis,field.routeNext,address):null,[analysis,field,address]);
  const compute=async()=>{
   if(busy)return;
@@ -115,6 +125,15 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
      <text x={14} y={16} fontSize={11} fill='#e1ebef'>{phasePortrait.yLabel}</text>
     </svg>
     <small data-r736-boundary>Each axis is independently normalized to its actual bounded source-route range. Colors distinguish source-cycle edges, not empirical phases. No physical dynamics, new dimensions, historical donor equivalence or CanonState admission.</small>
+    {phaseExchange&&<section data-r737-exchange aria-label='Woven source phase exchange geometry' style={{maxWidth:'100%',minWidth:0,overflowWrap:'anywhere',padding:'10px 0'}}>
+     <h4>R737 · Woven successor exchange geometry</h4>
+     <p>Compute exact metric exchange on every displayed successor edge, the total normalized path length, and the signed enclosed area only when the source actually closes a cycle. Mirror mismatch measures the average nearest-point reflection residual of the cycle; it is not a physical symmetry measurement.</p>
+     <p data-r737-summary role='status'>{phaseExchange.edgeCount} exact source exchanges · transient length {phaseExchange.transientLength.toFixed(5)} · cycle length {phaseExchange.cycleLength.toFixed(5)} · orientation {phaseExchange.orientation} · {phaseExchange.signedCycleArea===null?'no enclosed cycle area': 'signed cycle area '+phaseExchange.signedCycleArea.toFixed(6)} · {phaseExchange.cycleClosureResidual===null?'cycle closure unobserved in bounded route':'cycle exchange closure residual '+phaseExchange.cycleClosureResidual.toFixed(8)}</p>
+     <p data-r737-symmetry>Source-cycle reflection mismatch · vertical {phaseExchange.verticalReflectionMismatch===null?'not available':phaseExchange.verticalReflectionMismatch.toFixed(6)} · horizontal {phaseExchange.horizontalReflectionMismatch===null?'not available':phaseExchange.horizontalReflectionMismatch.toFixed(6)}</p>
+     <div style={{maxWidth:'100%',overflowX:'auto',maxHeight:230,overflowY:'auto'}}><table data-r737-table style={{width:'100%',fontVariantNumeric:'tabular-nums',fontSize:12}}><thead><tr><th>From</th><th>To</th><th>Phase</th><th>ΔX</th><th>ΔY</th><th>Length</th></tr></thead><tbody>{phaseExchange.edges.slice(0,32).map(edge=><tr key={edge.index}><td>{edge.fromAddress}</td><td>{edge.toAddress}</td><td>{edge.phase}</td><td>{edge.dx.toFixed(4)}</td><td>{edge.dy.toFixed(4)}</td><td>{edge.length.toFixed(4)}</td></tr>)}</tbody></table></div>
+     <p><button type='button' data-r737-export onClick={exportPhaseExchange}>Download exact source exchange JSON</button> <small>{phaseExchange.edgeCount>32?'First 32 edges shown; export includes all '+phaseExchange.edgeCount+' edges.':'All source edges shown.'}</small></p>
+     <small data-r737-boundary>{phaseExchange.boundary} No CanonState mutation or empirical evidence is introduced by this derivative.</small>
+    </section>}
    </div>}
    <h3>Selected address {address.toLocaleString()}</h3>
    <p data-r732-selected>Successor {selected.nextAddress} · basin {selected.basinId+1} · basin size {selected.basinSize} · {selected.distanceToCycle} steps to cycle · period {selected.cycleLength} · cycle entry {selected.cycleEntry}</p>
