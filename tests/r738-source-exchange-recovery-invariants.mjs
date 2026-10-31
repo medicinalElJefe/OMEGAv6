@@ -15,6 +15,7 @@ test('R738 exact local recomputation restores source witness without mutation',(
  const r=recover(exported(),field());
  assert.equal(r.verified,true);assert.equal(r.edgeCount,4);assert.equal(r.cyclePeriod,3);
  assert.equal(r.canonicalMutation,false);assert.equal(r.physicalMeasurement,false);
+ assert.equal(r.normalizedExchangeWitnessVerified,true);assert.equal(r.rawSourceIdentityVerified,false);
 });
 test('R738 bounded open source exchange recovery',()=>{
  const r=recover(exported(field(),2),field());
