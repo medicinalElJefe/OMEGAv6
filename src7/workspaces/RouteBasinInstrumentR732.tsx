@@ -3,6 +3,7 @@ import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
 import {renderAtlasFieldRasterR734,ATLAS_FIELD_CHANNELS_R734} from '../../src/atlasFieldRasterR734.mjs';
+import {computeSourceRouteProfileR735} from '../../src/sourceRouteProfileR735.mjs';
 
 type Props={address:number;onAddress:(address:number)=>void};
 type RouteField=Awaited<ReturnType<typeof getMandala20736Field>>;
@@ -12,6 +13,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [busy,setBusy]=useState(false),[error,setError]=useState('');
  const [rasterMode,setRasterMode]=useState<'basin'|'depth'>('basin');
  const [fieldChannel,setFieldChannel]=useState('C');
+ const [routeLimit,setRouteLimit]=useState(32);
  const [jump,setJump]=useState('0');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
  const fieldRasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -39,6 +41,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
    ctx.strokeRect(address%144+0.1,Math.floor(address/144)+0.1,0.8,0.8);
   }
  },[fieldRaster,address]);
+ const routeProfile=useMemo(()=>field&&Number.isSafeInteger(address)&&address>=0&&address<20736?computeSourceRouteProfileR735(field,address,fieldChannel,routeLimit):null,[field,address,fieldChannel,routeLimit]);
  const selected=useMemo(()=>analysis&&field?inspectRouteBasinR732(analysis,field.routeNext,address):null,[analysis,field,address]);
  const compute=async()=>{
   if(busy)return;
@@ -83,6 +86,14 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
     }} style={{display:'block',width:'min(100%,432px)',height:'auto',aspectRatio:'1 / 1',imageRendering:'pixelated',cursor:'crosshair',margin:'10px 0',border:'1px solid #6d8795'}}/>
     <p data-r734-selected>Address {address}: {fieldRaster.label} = {fieldRaster.values[address]?.toFixed(6)??'unavailable'}</p>
     <small data-r734-boundary>Colors normalize within the computed source channel; signed channels center on zero. These values are deterministic model projections, not measured physical fields, historical donor parity, empirical forecasts or CanonState changes.</small>
+   </div>}
+   {routeProfile&&<div data-r735-route-profile>
+    <h3>R735 · Computed successor metric traversal</h3>
+    <p>Exact discrete successor steps from the selected address. This is not physical time or an observed field.</p>
+    <label>Maximum steps <select data-r735-limit value={routeLimit} onChange={e=>setRouteLimit(Number(e.target.value))}><option value={16}>16</option><option value={32}>32</option><option value={128}>128</option><option value={256}>256</option></select></label>
+    <p data-r735-summary role='status'>{routeProfile.steps.length} computed steps · {routeProfile.cycleStart===null?'bounded continuation at '+routeProfile.continuationAddress:'cycle starts at step '+routeProfile.cycleStart+' · period '+routeProfile.cyclePeriod} · range {routeProfile.minimum.toFixed(5)} to {routeProfile.maximum.toFixed(5)}</p>
+    <div style={{maxHeight:240,overflow:'auto'}}><table data-r735-table style={{width:'100%',fontVariantNumeric:'tabular-nums'}}><thead><tr><th>Step</th><th>Address</th><th>Value</th><th>Δ successor</th></tr></thead><tbody>{routeProfile.steps.map(step=><tr key={step.index}><td>{step.index}</td><td><button type='button' onClick={()=>onAddress(step.address)}>{step.address}</button></td><td>{step.value.toFixed(5)}</td><td>{step.successorDifference.toFixed(5)}</td></tr>)}</tbody></table></div>
+    <small>R735 follows the declared source graph only. No historical renderer equivalence, empirical measurements, or CanonState mutation.</small>
    </div>}
    <h3>Selected address {address.toLocaleString()}</h3>
    <p data-r732-selected>Successor {selected.nextAddress} · basin {selected.basinId+1} · basin size {selected.basinSize} · {selected.distanceToCycle} steps to cycle · period {selected.cycleLength} · cycle entry {selected.cycleEntry}</p>
