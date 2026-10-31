@@ -55,9 +55,23 @@ try{
    const resultText=await entry.locator('[data-r552-execution-result="true"]').innerText();
    if(!/SOURCE_MODEL_EXECUTED|EXTERNAL_HOST_PROOF_REQUIRED|HELD/.test(resultText))throw Error(name+': source-model run returned no typed result');
    await page.reload({waitUntil:'domcontentloaded'});
-   await page.locator('.o7-nav-r519').getByRole('button',{name:'System'}).click();
-   await page.locator('[data-r554-ux-entry="true"]').getByRole('button',{name:'Open capability workbench'}).click();
-   await page.locator('[data-r478-capability-surface="true"]').getByRole('button',{name:/20,736D UX atlas/}).click();
+   // R736 production regression: the domain may be restored across reload, so the
+   // System navigation button is not an unconditional requirement for reaching R554.
+   // Wait for the real shell, then select System only if the entry is not restored.
+   await page.locator('.o7-app[data-omega7="true"]').waitFor({state:'visible',timeout:30000});
+   const restoredEntry=page.locator('[data-r554-ux-entry="true"]');
+   if(!(await restoredEntry.isVisible())){
+    const systemNav=page.locator('.o7-nav-r519').getByRole('button',{name:'System'});
+    await systemNav.click({timeout:15000});
+    await restoredEntry.waitFor({state:'visible',timeout:15000});
+   }
+   const restoredWorkbench=restoredEntry.locator('[data-r478-capability-surface="true"]');
+   if(!(await restoredWorkbench.isVisible())){
+    const restoredToggle=restoredEntry.getByRole('button',{name:/^(Open|Close) capability workbench$/});
+    if((await restoredToggle.getAttribute('aria-expanded'))!=='true')await restoredToggle.click();
+    await restoredWorkbench.waitFor({state:'visible',timeout:20000});
+   }
+   await restoredEntry.getByRole('button',{name:/20,736D UX atlas/}).click();
    if(!(await page.locator('[data-r553-history="true"]').innerText()).includes('address 0'))throw Error(name+': history lost on reload');
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(name+': horizontal overflow '+overflow);
