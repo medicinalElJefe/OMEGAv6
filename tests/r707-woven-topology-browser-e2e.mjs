@@ -518,6 +518,7 @@ try{
    console.log('R727 verified trajectory explorer '+device+' PASS: 3 discrete address observations, source scrub, reverified replay');
    // R729: save a real selected trajectory and recover after workspace source-state invalidation.
    await memoryTrajectory.locator('[data-r729-save]').click();
+   await page.waitForFunction(()=>Boolean(localStorage.getItem('omega.v6.memory.trajectory.r729')));
    const checkpoint=await page.evaluate(()=>JSON.parse(localStorage.getItem('omega.v6.memory.trajectory.r729')||'null'));
    if(checkpoint?.schema!=='OMEGA_LOCAL_TRAJECTORY_CHECKPOINT_R729_V1'||
       checkpoint.cursorId!==traced.sources[1].id||checkpoint.packetSha256!==traced.packetSha256)
