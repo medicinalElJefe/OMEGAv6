@@ -554,6 +554,23 @@ try{
     throw Error(device+': R730 imported source address replay failed');
    if(!(await page.evaluate(()=>localStorage.getItem('omega.v6.memory.r28')||'')).includes(' forged'))
     throw Error(device+': R730 unexpectedly mutated original local memory');
+   // R731: persistence is a separate opt-in, refuses collisions, then saves verified imported rows.
+   if(!(await memoryTrajectory.locator('[data-r731-persist]').isEnabled()))
+    throw Error(device+': R731 persistence action unavailable after capsule verification');
+   await memoryTrajectory.locator('[data-r731-persist]').click();
+   if(!(await memoryTrajectory.locator('[data-r726-error]').innerText()).includes('conflicting memory identity refused'))
+    throw Error(device+': R731 overwrote conflicting existing local memory');
+   const r731ForgedOriginal=await page.evaluate(()=>localStorage.getItem('omega.v6.memory.r28'));
+   await page.evaluate(()=>localStorage.removeItem('omega.v6.memory.r28'));
+   await memoryTrajectory.locator('[data-r731-persist]').click();
+   await page.waitForFunction(()=>{
+    try{return JSON.parse(localStorage.getItem('omega.v6.memory.r28')||'[]').length===3}catch{return false}
+   });
+   const r731Persisted=await page.evaluate(()=>JSON.parse(localStorage.getItem('omega.v6.memory.r28')||'[]'));
+   if(r731Persisted[1].id!==traced.sources[1].id||r731Persisted.some(row=>row.note.includes(' forged')))
+    throw Error(device+': R731 persisted source rows differ from independently verified capsule');
+   await page.evaluate(raw=>localStorage.setItem('omega.v6.memory.r28',raw),r731ForgedOriginal);
+   console.log('R731 opt-in capsule persistence '+device+' PASS: collision refusal, explicit write, original source recovery');
    await memoryTrajectory.locator('[data-r730-json]').fill(JSON.stringify({...trajectoryCapsuleR730,sha256:'0'.repeat(64)}));
    await memoryTrajectory.locator('[data-r730-import]').click();
    if(!(await memoryTrajectory.locator('[data-r726-error]').innerText()).includes('digest mismatch'))
