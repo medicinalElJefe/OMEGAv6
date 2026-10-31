@@ -64,6 +64,7 @@ try{
    await instrument.locator('[data-r738-status]:text-matches("VERIFIED")').waitFor({timeout:15000});
    const recovered=await instrument.locator('[data-r738-status]').innerText();
    if(!recovered.includes('exact source exchanges'))throw Error(device+': recovery did not execute');
+   if(Number(await instrument.locator('[data-r735-limit]').inputValue())!==exported.pointCount)throw Error(device+': recovered route bound not restored in visible selector');
    const tampered={...exported,edges:exported.edges.map((edge,i)=>i===0?{...edge,length:999}:edge)};
    await importer.setInputFiles({name:'tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(tampered))});
    await instrument.locator('[data-r738-status]:text-matches("REFUSED")').waitFor({timeout:15000});
