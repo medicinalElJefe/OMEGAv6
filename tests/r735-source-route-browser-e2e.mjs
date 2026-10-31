@@ -39,9 +39,7 @@ try{
    if(!(await instrument.locator('[data-r735-route-profile]').innerText()).includes('Δ successor'))throw Error(device+': gradient column unavailable');
    await instrument.locator('[data-r733-address]').fill('0');
    await instrument.locator('[data-r733-jump]').click();
-   await workspace.locator('[data-address="0"]').first().waitFor({state:'attached',timeout:10000}).catch(async()=>{
-    if(await workspace.getAttribute('data-address')!=='0')throw Error(device+': address selection not committed');
-   });
+   await page.locator('.o7-science-workspace[data-route="Atlas"][data-address="0"]').waitFor({state:'visible',timeout:10000});
    const rows=await profile.locator('[data-r735-table] tbody tr').count();
    if(rows<1||rows>16)throw Error(device+': source route rows out of bounds');
    if(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)>8)throw Error(device+': horizontal overflow');
