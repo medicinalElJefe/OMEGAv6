@@ -617,7 +617,8 @@ try{
    console.log('R722 '+device+' PASS: real R28 snapshot, SHA-256 portable export, tamper refusal, local restore and reload persistence');
    // R732: real 20,736-state route graph, sourced from the existing Mandala field.
    await page.locator('.o7-nav-r519').getByRole('button',{name:'Explore'}).click();
-   await page.locator('[data-capability-route="Atlas"] footer button').click();
+   await page.locator('[data-r519-visual-navigation="EXPLORE"] button[data-r519-node="Atlas"]').click();
+   await page.locator('[data-r519-visual-navigation="EXPLORE"] button[data-r519-launch="Atlas"]').click();
    const scienceAtlas=page.locator('[data-omega7-native="science"][data-route="Atlas"]');
    await scienceAtlas.waitFor({state:'visible',timeout:30000});
    const openAtlas=scienceAtlas.locator('.o7-open-instrument');
