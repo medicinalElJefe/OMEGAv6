@@ -637,6 +637,26 @@ try{
    if(!(await basin.locator('[data-r732-boundary]').innerText()).includes('not empirical attractors'))
     throw Error(device+': R732 model/physical boundary missing');
    console.log('R732 source-route basin '+device+' PASS: all 20,736 addresses, exact cycle/entry, ranked basin and source-only proof boundary');
+   // R733: actual 144x144 pixel renderer of all 20,736 source-bound states.
+   const basinRaster=basin.locator('[data-r733-raster]');
+   await basinRaster.waitFor({state:'visible',timeout:10000});
+   const rasterPixels=await basinRaster.evaluate(canvas=>{
+    const ctx=canvas.getContext('2d'),a=ctx.getImageData(0,0,1,1).data,b=ctx.getImageData(143,143,1,1).data;
+    return {width:canvas.width,height:canvas.height,firstAlpha:a[3],lastAlpha:b[3]};
+   });
+   if(rasterPixels.width!==144||rasterPixels.height!==144||rasterPixels.firstAlpha!==255||rasterPixels.lastAlpha!==255)
+    throw Error(device+': R733 source-address raster not materially rendered '+JSON.stringify(rasterPixels));
+   await basin.locator('[data-r733-mode]').selectOption('depth');
+   await basin.locator('[data-r733-summary]').filter({hasText:'Relative source-route steps to cycle determine grayscale'}).waitFor({state:'visible',timeout:10000});
+   await basin.locator('[data-r733-address]').fill('20735');
+   await basin.locator('[data-r733-jump]').click();
+   await basin.getByRole('heading',{name:'Selected address 20,735'}).waitFor({state:'visible',timeout:10000});
+   await basinRaster.click({position:{x:1,y:1}});
+   await basin.getByRole('heading',{name:'Selected address 0'}).waitFor({state:'visible',timeout:10000});
+   if(!(await basin.locator('[data-r733-boundary]').innerText()).includes('not observed physical fields'))
+    throw Error(device+': R733 source-model raster authority boundary missing');
+   console.log('R733 source basin raster '+device+' PASS: full 144x144 pixel atlas, depth mode, exact address jump, pointer selection and source-only truth');
+
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(device+': viewport overflow '+overflow);
