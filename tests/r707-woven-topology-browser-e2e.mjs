@@ -532,6 +532,43 @@ try{
     throw Error(device+': R729 did not reverify and recover selected trajectory observation');
    console.log('R729 local trajectory checkpoint '+device+' PASS: saved source fingerprint, state reset, reverified restore and cursor');
 
+   // R730: export a complete portable capsule, then import while local source memory is corrupted.
+   await memoryTrajectory.locator('[data-r730-export]').click();
+   const portableJSON=await memoryTrajectory.locator('[data-r730-json]').inputValue();
+   const trajectoryCapsuleR730=JSON.parse(portableJSON);
+   if(trajectoryCapsuleR730.schema!=='OMEGA_PORTABLE_TRAJECTORY_CAPSULE_R730_V1'||
+      trajectoryCapsuleR730.memory.rows.length!==3||trajectoryCapsuleR730.memory.rows[1].id!==traced.sources[1].id)
+    throw Error(device+': R730 capsule omitted independently verified original source snapshots');
+   await page.evaluate(()=>{
+    const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
+    rows[2].note+=' forged';localStorage.setItem(key,JSON.stringify(rows));
+   });
+   await memoryTrajectory.locator('[data-r730-import]').click();
+   await memoryTrajectory.locator('[data-r726-result]').waitFor({state:'visible',timeout:10000});
+   if(!(await memoryTrajectory.locator('[data-r726-status]').innerText()).includes('read-only traversal')||
+      !(await memoryTrajectory.locator('[data-r727-selected]').innerText()).includes('address '+traced.sources[1].address)||
+      await memoryTrajectory.locator('[data-r729-save]').isEnabled())
+    throw Error(device+': R730 did not reverify isolated portable sources and preserve cursor');
+   await memoryTrajectory.locator('[data-r727-replay]').click();
+   if(!(await memoryTrajectory.locator('[data-r726-status]').innerText()).includes('Verified trajectory address'))
+    throw Error(device+': R730 imported source address replay failed');
+   if(!(await page.evaluate(()=>localStorage.getItem('omega.v6.memory.r28')||'')).includes(' forged'))
+    throw Error(device+': R730 unexpectedly mutated original local memory');
+   await memoryTrajectory.locator('[data-r730-json]').fill(JSON.stringify({...trajectoryCapsuleR730,sha256:'0'.repeat(64)}));
+   await memoryTrajectory.locator('[data-r730-import]').click();
+   if(!(await memoryTrajectory.locator('[data-r726-error]').innerText()).includes('digest mismatch'))
+    throw Error(device+': R730 accepted tampered capsule');
+   await page.evaluate(()=>{
+    const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
+    rows[2].note=rows[2].note.replace(/ forged$/,'');
+    localStorage.setItem(key,JSON.stringify(rows));
+    window.dispatchEvent(new Event('omega-r722-memory-updated'));
+   });
+   await memoryTrajectory.locator('[data-r729-restore]').click();
+   await memoryTrajectory.locator('[data-r726-result]').waitFor({state:'visible',timeout:10000});
+   console.log('R730 portable trajectory capsule '+device+' PASS: export original sources, import despite damaged local store, verified replay, zero source mutation, tamper refusal');
+
+
    await page.evaluate(()=>{
     const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
     rows[2].note+=' forged';localStorage.setItem(key,JSON.stringify(rows));
