@@ -535,9 +535,9 @@ try{
    // R730: export a complete portable capsule, then import while local source memory is corrupted.
    await memoryTrajectory.locator('[data-r730-export]').click();
    const portableJSON=await memoryTrajectory.locator('[data-r730-json]').inputValue();
-   const portable=JSON.parse(portableJSON);
-   if(portable.schema!=='OMEGA_PORTABLE_TRAJECTORY_CAPSULE_R730_V1'||
-      portable.memory.rows.length!==3||portable.memory.rows[1].id!==traced.sources[1].id)
+   const trajectoryCapsuleR730=JSON.parse(portableJSON);
+   if(trajectoryCapsuleR730.schema!=='OMEGA_PORTABLE_TRAJECTORY_CAPSULE_R730_V1'||
+      trajectoryCapsuleR730.memory.rows.length!==3||trajectoryCapsuleR730.memory.rows[1].id!==traced.sources[1].id)
     throw Error(device+': R730 capsule omitted independently verified original source snapshots');
    await page.evaluate(()=>{
     const key='omega.v6.memory.r28',rows=JSON.parse(localStorage.getItem(key)||'[]');
@@ -554,7 +554,7 @@ try{
     throw Error(device+': R730 imported source address replay failed');
    if(!(await page.evaluate(()=>localStorage.getItem('omega.v6.memory.r28')||'')).includes(' forged'))
     throw Error(device+': R730 unexpectedly mutated original local memory');
-   await memoryTrajectory.locator('[data-r730-json]').fill(JSON.stringify({...portable,sha256:'0'.repeat(64)}));
+   await memoryTrajectory.locator('[data-r730-json]').fill(JSON.stringify({...trajectoryCapsuleR730,sha256:'0'.repeat(64)}));
    await memoryTrajectory.locator('[data-r730-import]').click();
    if(!(await memoryTrajectory.locator('[data-r726-error]').innerText()).includes('digest mismatch'))
     throw Error(device+': R730 accepted tampered capsule');
