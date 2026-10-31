@@ -73,5 +73,5 @@ export function serializeSourcePhaseExchangeR737(exchange){
  if(!exchange||exchange.schema!==SOURCE_PHASE_EXCHANGE_SCHEMA_R737||!exchange.sourceBound||
     exchange.canonicalMutation!==false||exchange.physicalMeasurement!==false)
   throw Error('R737 export requires validated source exchange');
- return JSON.stringify(exchange,null,2)+'\\n';
+ return JSON.stringify(exchange,null,2)+'\n';
 }
