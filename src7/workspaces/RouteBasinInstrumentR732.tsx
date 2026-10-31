@@ -6,6 +6,7 @@ import {renderAtlasFieldRasterR734,ATLAS_FIELD_CHANNELS_R734} from '../../src/at
 import {computeSourceRouteProfileR735} from '../../src/sourceRouteProfileR735.mjs';
 import {computeSourcePhasePortraitR736} from '../../src/sourcePhasePortraitR736.mjs';
 import {computeSourcePhaseExchangeR737,serializeSourcePhaseExchangeR737} from '../../src/sourcePhaseExchangeR737.mjs';
+import {verifySourceExchangeRecoveryR738} from '../../src/sourceExchangeRecoveryR738.mjs';
 
 type Props={address:number;onAddress:(address:number)=>void};
 type RouteField=Awaited<ReturnType<typeof getMandala20736Field>>;
@@ -18,6 +19,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [routeLimit,setRouteLimit]=useState(32);
  const [phaseX,setPhaseX]=useState('C'),[phaseY,setPhaseY]=useState('q');
  const [jump,setJump]=useState('0');
+ const [recoveryStatus,setRecoveryStatus]=useState('');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
  const fieldRasterCanvas=useRef<HTMLCanvasElement|null>(null);
  const raster=useMemo(()=>analysis?renderRouteBasinRasterR733(analysis,rasterMode):null,[analysis,rasterMode]);
@@ -132,6 +134,24 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
      <p data-r737-symmetry>Source-cycle reflection mismatch · vertical {phaseExchange.verticalReflectionMismatch===null?'not available':phaseExchange.verticalReflectionMismatch.toFixed(6)} · horizontal {phaseExchange.horizontalReflectionMismatch===null?'not available':phaseExchange.horizontalReflectionMismatch.toFixed(6)}</p>
      <div style={{maxWidth:'100%',overflowX:'auto',maxHeight:230,overflowY:'auto'}}><table data-r737-table style={{width:'100%',fontVariantNumeric:'tabular-nums',fontSize:12}}><thead><tr><th>From</th><th>To</th><th>Phase</th><th>ΔX</th><th>ΔY</th><th>Length</th></tr></thead><tbody>{phaseExchange.edges.slice(0,32).map(edge=><tr key={edge.index}><td>{edge.fromAddress}</td><td>{edge.toAddress}</td><td>{edge.phase}</td><td>{edge.dx.toFixed(4)}</td><td>{edge.dy.toFixed(4)}</td><td>{edge.length.toFixed(4)}</td></tr>)}</tbody></table></div>
      <p><button type='button' data-r737-export onClick={exportPhaseExchange}>Download exact source exchange JSON</button> <small>{phaseExchange.edgeCount>32?'First 32 edges shown; export includes all '+phaseExchange.edgeCount+' edges.':'All source edges shown.'}</small></p>
+     <div data-r738-recovery style={{margin:'8px 0'}}>
+      <label>Verify a previously exported source exchange JSON against the currently computed 20,736-address model
+       <input type='file' accept='.json,application/json' data-r738-import onChange={async e=>{
+        setRecoveryStatus('');
+        const file=e.currentTarget.files?.[0];
+        if(!file||!field)return;
+        try{
+         if(file.size>262144)throw Error('R738 export size refused');
+         const result=verifySourceExchangeRecoveryR738(await file.text(),field);
+         setRecoveryStatus('VERIFIED · '+result.edgeCount+' exact source exchanges · start '+result.start+' · '+result.xChannel+'/'+result.yChannel);
+         onAddress(result.start);
+         setPhaseX(result.xChannel);setPhaseY(result.yChannel);
+         setRouteLimit(Math.max(1,result.edgeCount===0?1:result.cyclePeriod===null?result.edgeCount+1:result.edgeCount));
+        }catch(error){setRecoveryStatus('REFUSED · '+(error instanceof Error?error.message:'invalid source export'))}
+       }}/>
+      </label>
+      <p data-r738-status role='status'>{recoveryStatus||'No imported witness verified. Files remain local to this browser.'}</p>
+     </div>
      <small data-r737-boundary>{phaseExchange.boundary} No CanonState mutation or empirical evidence is introduced by this derivative.</small>
     </section>}
    </div>}
