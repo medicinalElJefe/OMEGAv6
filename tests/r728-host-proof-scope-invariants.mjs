@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {classifyHostReturnR728} from '../src/hybridHostProofScopeR728.mjs';
+const job=(status,ops)=>({status,returnPacket:{stepProofs:ops.map(([op,ok])=>({op,ok}))}});
+assert.equal(classifyHostReturnR728(job('COMPLETE',[['DESKTOP_HEALTH',true]])).scope,'HOST_HEALTH_RETURNED');
+assert.equal(classifyHostReturnR728(job('COMPLETE',[['BUILD',true],['TEST',true]])).scope,'BUILD_TEST_RETURNED');
+assert.equal(classifyHostReturnR728(job('COMPLETE',[['BUILD',true],['TEST',true],['PACKAGE',true]])).fullBuild,true);
+assert.equal(classifyHostReturnR728(job('RUNNING',[['BUILD',true],['TEST',true],['PACKAGE',true]])).fullBuild,false);
+assert.equal(classifyHostReturnR728(job('COMPLETE',[['BUILD',true],['TEST',false],['PACKAGE',true]])).fullBuild,false);
+assert.equal(classifyHostReturnR728(job('COMPLETE',[['WRITE_TEXT',true]])).sourceMutationProved,true);
+assert.equal(classifyHostReturnR728(job('COMPLETE',[])).projectVerified,false);
+console.log('R728 host proof scope invariants PASS');
