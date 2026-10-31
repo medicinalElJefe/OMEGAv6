@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {renderAtlasFieldRasterR734,ATLAS_FIELD_RASTER_SCHEMA_R734,ATLAS_FIELD_CHANNELS_R734} from '../src/atlasFieldRasterR734.mjs';
+const n=20736,field={count:n,routeNext:new Uint32Array(n),C:new Float32Array(n)};
+for(let i=0;i<n;i++){field.routeNext[i]=i===n-1?0:i+1;field.C[i]=i<n/2?0.25:0.75;}
+const originalC=field.C.slice(),originalRoutes=field.routeNext.slice();
+const continuity=renderAtlasFieldRasterR734(field,'C');
+assert.equal(continuity.schema,ATLAS_FIELD_RASTER_SCHEMA_R734);
+assert.equal(continuity.width,144);assert.equal(continuity.height,144);
+assert.equal(continuity.rgba.length,n*4);assert.equal(continuity.values.length,n);
+assert.equal(continuity.minimum,0.25);assert.equal(continuity.maximum,0.75);
+assert.notDeepEqual(Array.from(continuity.rgba.slice(0,3)),Array.from(continuity.rgba.slice((n-1)*4,(n-1)*4+3)));
+assert.equal(continuity.rgba[3],255);assert.equal(continuity.rgba[n*4-1],255);
+const delta=renderAtlasFieldRasterR734(field,'successorDeltaC');
+assert.equal(delta.signed,true);assert.equal(delta.values[0],0);
+assert.equal(delta.values[n/2-1],0.5);assert.equal(delta.values[n-1],-0.5);
+assert.equal(delta.minimum,-0.5);assert.equal(delta.maximum,0.5);
+assert.notDeepEqual(Array.from(delta.rgba.slice((n/2-1)*4,(n/2-1)*4+3)),Array.from(delta.rgba.slice((n-1)*4,(n-1)*4+3)));
+assert.deepEqual(field.C,originalC);assert.deepEqual(field.routeNext,originalRoutes);
+assert.equal(continuity.canonicalMutation,false);assert.equal(continuity.physicalMeasurement,false);
+assert.equal(Object.keys(ATLAS_FIELD_CHANNELS_R734).length,16);
+assert.throws(()=>renderAtlasFieldRasterR734(field,'unmeasuredGravity'),/refused/);
+assert.throws(()=>renderAtlasFieldRasterR734({...field,count:143}),/refused/);
+assert.throws(()=>renderAtlasFieldRasterR734(field,'Phi'),/missing or incomplete/);
+const badValue={...field,C:field.C.slice()};badValue.C[100]=NaN;
+assert.throws(()=>renderAtlasFieldRasterR734(badValue),/nonfinite/);
+const badRoute={...field,routeNext:field.routeNext.slice()};badRoute.routeNext[11]=n;
+assert.throws(()=>renderAtlasFieldRasterR734(badRoute),/invalid source successor/);
+const flat={...field,C:new Float32Array(n).fill(0.5)};
+const constant=renderAtlasFieldRasterR734(flat);
+assert.equal(constant.minimum,constant.maximum);
+assert.deepEqual(Array.from(constant.rgba.slice(0,4)),Array.from(constant.rgba.slice((n-1)*4,(n-1)*4+4)));
+const ui=readFileSync(new URL('../src7/workspaces/RouteBasinInstrumentR732.tsx',import.meta.url),'utf8');
+for(const token of ['renderAtlasFieldRasterR734','data-r734-channel','data-r734-raster','data-r734-range','data-r734-selected','data-r734-boundary'])
+ assert.ok(ui.includes(token),'R734 OMEGA7 integration missing '+token);
+console.log('R734 source-metric 144x144 raster, signed successor differences, full coverage, mutation and refusal invariants PASS');
