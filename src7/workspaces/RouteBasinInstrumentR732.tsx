@@ -1,6 +1,7 @@
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
+import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
 
 type Props={address:number;onAddress:(address:number)=>void};
 type RouteField={count:number;routeNext:Uint32Array};
@@ -8,6 +9,21 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [analysis,setAnalysis]=useState<any>(null);
  const [field,setField]=useState<RouteField|null>(null);
  const [busy,setBusy]=useState(false),[error,setError]=useState('');
+ const [rasterMode,setRasterMode]=useState<'basin'|'depth'>('basin');
+ const [jump,setJump]=useState('0');
+ const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
+ const raster=useMemo(()=>analysis?renderRouteBasinRasterR733(analysis,rasterMode):null,[analysis,rasterMode]);
+ useEffect(()=>{
+  const canvas=rasterCanvas.current;
+  if(!canvas||!raster)return;
+  const ctx=canvas.getContext('2d');if(!ctx)return;
+  const pixels=ctx.createImageData(144,144);
+  pixels.data.set(raster.rgba);ctx.putImageData(pixels,0,0);
+  if(Number.isSafeInteger(address)&&address>=0&&address<20736){
+   ctx.strokeStyle='#ffffff';ctx.lineWidth=1;
+   ctx.strokeRect(address%144+0.1,Math.floor(address/144)+0.1,0.8,0.8);
+  }
+ },[raster,address]);
  const selected=useMemo(()=>analysis&&field?inspectRouteBasinR732(analysis,field.routeNext,address):null,[analysis,field,address]);
  const compute=async()=>{
   if(busy)return;
@@ -27,6 +43,18 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
   {error&&<p role='alert' data-r732-error>REFUSED: {error}</p>}
   {analysis&&selected&&<div data-r732-result>
    <p data-r732-summary role='status'>{analysis.nodeCount.toLocaleString()} verified model addresses assigned · {analysis.basinCount.toLocaleString()} route cycles · {analysis.cyclicNodes.toLocaleString()} cycle states · {analysis.transientNodes.toLocaleString()} transient states · maximum route depth {analysis.maxDepth}</p>
+   <h3>R733 · Complete source-address raster</h3>
+   <p data-r733-summary>Every one of the 20,736 model addresses occupies exactly one pixel in a 144 × 144 grid, ordered by address. {raster?.colorMeaning}. White outline marks the selected address. Click a pixel or enter an address to inspect its actual source route.</p>
+   <label>Display channel <select data-r733-mode value={rasterMode} onChange={e=>setRasterMode(e.target.value as 'basin'|'depth')}><option value='basin'>Cycle basin identity</option><option value='depth'>Distance to source cycle</option></select></label>
+   <canvas ref={rasterCanvas} data-r733-raster width={144} height={144} role='img' aria-label={'144 by 144 source-route atlas, '+rasterMode+' channel'} onClick={e=>{
+    const bounds=e.currentTarget.getBoundingClientRect();
+    onAddress(addressAtRasterPointR733(e.clientX-bounds.left,e.clientY-bounds.top,bounds.width,bounds.height));
+   }} style={{display:'block',width:'min(100%,432px)',height:'auto',aspectRatio:'1 / 1',imageRendering:'pixelated',cursor:'crosshair',margin:'10px 0',border:'1px solid #6d8795'}}/>
+   <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+    <label>Address <input data-r733-address type='number' min={0} max={20735} step={1} value={jump} onChange={e=>setJump(e.target.value)} style={{maxWidth:110}}/></label>
+    <button type='button' data-r733-jump onClick={()=>{const n=Number(jump);if(Number.isSafeInteger(n)&&n>=0&&n<20736)onAddress(n);else setError('R733 address must be an integer from 0 through 20735');}}>Select exact source address</button>
+   </div>
+   <small data-r733-boundary>Colors are deterministic visualization encodings of R732 source-model topology, not observed physical fields, empirical basins, historical renderer fidelity or canonical authority. No route is modified by viewing or selecting a pixel.</small>
    <h3>Selected address {address.toLocaleString()}</h3>
    <p data-r732-selected>Successor {selected.nextAddress} · basin {selected.basinId+1} · basin size {selected.basinSize} · {selected.distanceToCycle} steps to cycle · period {selected.cycleLength} · cycle entry {selected.cycleEntry}</p>
    <button type='button' data-r732-entry onClick={()=>onAddress(selected.cycleEntry)}>Select exact cycle-entry address {selected.cycleEntry}</button>
