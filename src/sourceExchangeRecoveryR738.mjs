@@ -21,6 +21,6 @@ export function verifySourceExchangeRecoveryR738(text,field){
   throw Error('R738 imported exchange differs from current computed source');
  return {schema:SOURCE_EXCHANGE_RECOVERY_SCHEMA_R738,verified:true,start,xChannel,yChannel,
   edgeCount:expected.edgeCount,cyclePeriod:expected.cyclePeriod,
-  sourceBound:true,canonicalMutation:false,physicalMeasurement:false,
-  boundary:'Recovered export matched a fresh local source-model execution; not external provenance, historical donor parity or physical observation.'};
+  sourceBound:true,normalizedExchangeWitnessVerified:true,rawSourceIdentityVerified:false,canonicalMutation:false,physicalMeasurement:false,
+  boundary:'Recovered normalized exchange matched fresh source-model execution; raw source-byte identity is not proven by this export, nor are external provenance, historical donor parity or physical observation.'};
 }
