@@ -24,7 +24,7 @@ test('R738 refuses tampering, changed source, malformed JSON and oversized paylo
  const f=field(),json=JSON.parse(exported(f));
  json.edges[0].dx=99;
  assert.throws(()=>recover(JSON.stringify(json),f),/differs/);
- const altered=field();altered.C[2]=2;
+ const altered=field();altered.C[1]=0.5;
  assert.throws(()=>recover(exported(f),altered),/differs/);
  assert.throws(()=>recover('{',f),/invalid JSON/);
  assert.throws(()=>recover('x'.repeat(262145),f),/size refused/);
