@@ -657,6 +657,32 @@ try{
     throw Error(device+': R733 source-model raster authority boundary missing');
    console.log('R733 source basin raster '+device+' PASS: full 144x144 pixel atlas, depth mode, exact address jump, pointer selection and source-only truth');
 
+   // R734: source-computed metric and successor gradient raster must execute on desktop and mobile.
+   const metricRaster=basin.locator('[data-r734-raster]');
+   await metricRaster.waitFor({state:'visible',timeout:10000});
+   const metricPixels=await metricRaster.evaluate(canvas=>{
+    const ctx=canvas.getContext('2d');
+    return {width:canvas.width,height:canvas.height,
+     firstAlpha:ctx.getImageData(0,0,1,1).data[3],
+     lastAlpha:ctx.getImageData(143,143,1,1).data[3]};
+   });
+   if(metricPixels.width!==144||metricPixels.height!==144||metricPixels.firstAlpha!==255||metricPixels.lastAlpha!==255)
+    throw Error(device+': R734 source metric raster missing pixels '+JSON.stringify(metricPixels));
+   if(!(await basin.locator('[data-r734-range]').innerText()).includes('20,736 source addresses'))
+    throw Error(device+': R734 complete source metric coverage missing');
+   await basin.locator('[data-r734-channel]').selectOption('successorDeltaC');
+   await basin.locator('[data-r734-range]').filter({hasText:'ZERO_CENTERED_MAX_ABSOLUTE'}).waitFor({state:'visible',timeout:10000});
+   if(!(await basin.locator('[data-r734-selected]').innerText()).includes('ΔC'))
+    throw Error(device+': R734 source successor gradient value missing');
+   await basin.locator('[data-r734-channel]').selectOption('scar');
+   await basin.locator('[data-r734-range]').filter({hasText:'Scar'}).waitFor({state:'visible',timeout:10000});
+   await metricRaster.click({position:{x:1,y:1}});
+   await basin.locator('[data-r734-selected]').filter({hasText:'Address 0:'}).waitFor({state:'visible',timeout:10000});
+   if(!(await basin.locator('[data-r734-boundary]').innerText()).includes('not measured physical fields'))
+    throw Error(device+': R734 empirical truth boundary missing');
+   console.log('R734 source metric field '+device+' PASS: all source pixels, signed successor gradient, channel switching and exact address selection');
+
+
    if(errors.length)throw Error(device+': page errors '+errors.join(' | '));
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    if(overflow>8)throw Error(device+': viewport overflow '+overflow);
