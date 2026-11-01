@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {chooseExactR751,firstDominanceMR751,fixedGapPairsR751,completeFixedValueFiberR751,SINGMASTER_FIXED_GAP_BOUNDARY_R751} from '../src/proof/singmasterFixedGapR751.js';
 
 assert.equal(chooseExactR751(16,2),120n);
+assert.equal(chooseExactR751(1000000000000n,2),499999999999500000000000n);
 assert.equal(chooseExactR751(104,39).toString(),'61218182743304701891431482520');
 for(const [k,d] of [[2,1],[2,6],[2,11],[2,34],[2,63],[2,64],[5,1],[39,1],[50,100],[100,100]]){
  const T=firstDominanceMR751(k,d),minimum=2*(k+1);
