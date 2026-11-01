@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
+import {decodePiAddressR742,piAxisNeighborsR742,piAxisWitnessR742,verifyPiAxisWitnessR742} from '../../src/piAtlasTraversalR742.mjs';
 import {getMandala20736Field} from '../../src/mandala20736Runtime';
 import {computeRouteBasinsR732,inspectRouteBasinR732} from '../../src/routeBasinR732.mjs';
 import {renderRouteBasinRasterR733,addressAtRasterPointR733} from '../../src/routeBasinRasterR733.mjs';
@@ -24,6 +25,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [phaseX,setPhaseX]=useState('C'),[phaseY,setPhaseY]=useState('q');
  const [jump,setJump]=useState('0');
  const [routeTarget,setRouteTarget]=useState('0');
+ const [piTarget,setPiTarget]=useState('0'),[piRecovery,setPiRecovery]=useState('');
  const [routeRecoveryStatus,setRouteRecoveryStatus]=useState('');
  const [recoveryStatus,setRecoveryStatus]=useState('');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -58,6 +60,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const inverseIndex=useMemo(()=>field&&analysis?buildSourcePreimageIndexR739(field.routeNext,analysis):null,[field,analysis]);
  const continuity=useMemo(()=>inverseIndex&&analysis?proveSourceContinuityR740(inverseIndex,analysis):null,[inverseIndex,analysis]);
  const inverse=useMemo(()=>inverseIndex&&analysis&&Number.isSafeInteger(address)&&address>=0&&address<20736?inspectSourcePreimagesR739(inverseIndex,analysis,address,inverseDepth,inverseNodes):null,[inverseIndex,analysis,address,inverseDepth,inverseNodes]);
+ const piWitness=useMemo(()=>Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(piTarget)&&Number(piTarget)<20736?piAxisWitnessR742(address,Number(piTarget)):null,[address,piTarget]);
  const directedRoute=useMemo(()=>inverseIndex&&analysis&&continuity&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(routeTarget)&&Number(routeTarget)<20736?findDirectedSourceRouteR741(inverseIndex,analysis,continuity,address,Number(routeTarget)):null,[inverseIndex,analysis,continuity,address,routeTarget]);
  const exportPhaseExchange=()=>{
   if(!phaseExchange)return;
@@ -254,6 +257,34 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
     <p data-r741-recovery role='status'>{routeRecoveryStatus||'No imported route verified. The file stays in this browser.'}</p>
     <small data-r741-boundary>{directedRoute?.boundary||'Finite source-model directed reachability only; not physical travel, original donor parity or CanonState admission.'} Exported paths are bounded for display; step counts and endpoint checks are computed against the complete successor chain.</small>
    </section>}
+   <section data-r742-atlas aria-label='Four-axis donor-derived traversal' style={{margin:'16px 0',maxWidth:'100%',minWidth:0}}>
+    <h3>R742 · Four-axis π Atlas traversal</h3>
+    <p>Navigate the recovered four-axis base-12 address topology. This computes an exact axis-neighbor witness, not the historical donor's weighted A* path or physical motion.</p>
+    <p>Selected digits: {decodePiAddressR742(address).join(' · ')} · eight neighbors: {piAxisNeighborsR742(address).join(', ')}</p>
+    <label>Destination address <input data-r742-target type='number' min={0} max={20735} step={1} value={piTarget} onChange={e=>setPiTarget(e.target.value)}/></label>
+    <p data-r742-summary role='status'>{piWitness?piWitness.steps+' verified axis moves':'Enter a valid address from 0 to 20735.'}</p>
+    {piWitness&&<><p data-r742-path style={{overflowWrap:'anywhere'}}>{piWitness.path.join(' → ')}</p>
+     <button type='button' data-r742-export onClick={()=>{
+      const blob=new Blob([JSON.stringify(piWitness,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob),link=document.createElement('a');
+      link.href=url;link.download='omega-r742-axis-witness.json';document.body.appendChild(link);link.click();link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),0);
+     }}>Export axis witness JSON</button></>}
+    <label style={{display:'block',marginTop:8}}>Recover and verify an exported axis witness
+     <input data-r742-import type='file' accept='.json,application/json' onChange={async e=>{
+      const file=e.currentTarget.files?.[0];e.currentTarget.value='';
+      if(!file)return;
+      try{
+       if(file.size>16384)throw Error('R742 witness size refused');
+       const recovered=verifyPiAxisWitnessR742(await file.text());
+       setPiTarget(String(recovered.to));onAddress(recovered.from);
+       setPiRecovery('VERIFIED · '+recovered.steps+' recomputed axis moves');
+      }catch(err){setPiRecovery('REFUSED · '+(err instanceof Error?err.message:'invalid witness'))}
+     }}/>
+    </label>
+    <p data-r742-recovery role='status'>{piRecovery||'No imported witness verified. Local file only.'}</p>
+    <small>Model-address topology and donor-derived geometry only. No donor metric buffers, weighted A* equivalence, empirical dimensionality or original-source identity claimed.</small>
+   </section>
    <h3>Largest source-route basins</h3>
    <ol data-r732-ranked>{analysis.ranked.slice(0,8).map((cycle:any)=><li key={cycle.id} style={{padding:'4px 0'}}>
     <button type='button' data-r732-basin={cycle.id} onClick={()=>onAddress(cycle.representative)}>Select address {cycle.representative}</button>
