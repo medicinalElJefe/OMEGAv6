@@ -2,6 +2,7 @@ import {Cpu,FlaskConical,Layers3,ShieldCheck,Waves} from 'lucide-react';
 import {buildResearchAdvancementR316} from './system/researchAdvancementR316';
 import {buildResearchContinuityR317} from './system/researchContinuityR317';
 import './omegaResearchAdvancementR316.css';
+import DeweyTemporalWorkbenchV9 from './DeweyTemporalWorkbenchV9';
 
 const stateLabel=(state:string)=>state.replaceAll('_',' ');
 
@@ -42,6 +43,7 @@ export default function OmegaResearchAdvancementR316(){
    </div>
    <p className='r316-boundary'>{continuity.truthBoundary}</p>
   </details>
+  <DeweyTemporalWorkbenchV9/>
   <div className='r316-woven'><strong>Woven Continuity</strong><span>{advancement.wovenContinuity.join(' → ')}</span></div>
   <p className='r316-boundary'>{advancement.truthBoundary}</p>
  </section>;
