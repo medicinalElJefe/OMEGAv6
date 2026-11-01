@@ -336,6 +336,10 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r739-source-preimage-browser-e2e.mjs
+      - name: Prove R740 conservation ledger on candidate desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/r740-source-continuity-browser-e2e.mjs
       - name: Prove R520 full 44/72/100 function library on actual desktop and mobile browser
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
@@ -827,6 +831,11 @@ jobs:
         id: browser_r739
         shell: bash
         run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r739-source-preimage-browser-e2e.mjs
+      - name: Verify deployed R740 conservation ledger on desktop/mobile
+        if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
+        id: browser_r740
+        shell: bash
+        run: OMEGA_E2E_URL="$OMEGA_PUBLIC_URL" OMEGA_EXPECTED_SHA="$OMEGA_PROMOTED_SHA" node tests/r740-source-continuity-browser-e2e.mjs
       - name: Verify deployed R520 complete function library on exact promoted SHA
         if: steps.ownership.outputs.current == 'true' && steps.deploy_worker.outputs.superseded != 'true'
         id: browser_r520
