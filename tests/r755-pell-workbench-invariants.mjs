@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import {fibonacciAdjacentPairR752} from '../src/proof/singmasterPellClassificationR752.js';
 import {computePellWorkbenchR755,verifyPellWorkbenchR755,R755_WORKBENCH_BOUNDARY} from '../src/proof/singmasterResearchWorkbenchR755.js';
 for(const t of [2,3,4,5]){
- const packet=computePellWorkbenchR755(String(t),undefined,undefined,undefined);
+ const pair=fibonacciAdjacentPairR752(t),l=Number(pair.k)+2;
+ const packet=computePellWorkbenchR755(String(t),String(l),String(2*l),'5');
  assert.equal(packet.schema,'OMEGA_R755_EXACT_PELL_WORKBENCH_V1');
  assert.equal(packet.classification.status,'CLASSIFIED_EXACT_ADJACENT_PAIR');
  assert.equal(packet.classification.steps,t);
