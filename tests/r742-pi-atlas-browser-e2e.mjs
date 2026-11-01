@@ -165,6 +165,38 @@ try{
    await tradeoff.locator('[data-r747-secondary-step="0"]').click();
    assert.equal(Number(await workspace.getAttribute('data-address')),detourBaseline.from);
    console.log('R747 '+device+' two-channel source-metric optima, cost table, export, recomputed recovery, tamper refusal and navigation PASS');
+   // R748: optimize a new convex source-cost objective over the same constraints.
+   const blended=journey.locator('[data-r748-blend]');
+   assert.equal(await blended.locator('[data-r748-alpha]').inputValue(),'0.5');
+   await blended.locator('[data-r748-alpha]').focus();
+   await blended.locator('[data-r748-alpha]').press('ArrowRight');
+   assert.equal(await blended.locator('[data-r748-alpha]').inputValue(),'0.55');
+   await blended.locator('[data-r748-run]').click();
+   await blended.locator('[data-r748-summary]').filter({hasText:'blended cost'}).waitFor({state:'visible',timeout:20000});
+   const blendDownloadPromise=page.waitForEvent('download',{timeout:20000});
+   await blended.locator('[data-r748-export]').click();
+   const blendDownload=await blendDownloadPromise;
+   assert.equal(blendDownload.suggestedFilename(),'omega-r748-blended-atlas.json');
+   const blendWitness=JSON.parse(await readFile(await blendDownload.path(),'utf8'));
+   assert.equal(blendWitness.alpha,0.55);
+   assert.deepEqual(blendWitness.tradeoff.primary,detourBaseline);
+   assert.deepEqual(blendWitness.waypoints,detourBaseline.waypoints);
+   assert.deepEqual(blendWitness.blocked,detourBaseline.blocked);
+   assert.ok(blendWitness.blendedCost<=blendWitness.bestEndpointBlendCost+1e-7);
+   assert.equal(blendWitness.addresses.at(-1),detourBaseline.to);
+   assert.equal(blendWitness.steps,blendWitness.addresses.length-1);
+   const blendImport=blended.locator('[data-r748-import]');
+   await blendImport.setInputFiles({name:'blend.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(blendWitness))});
+   await blended.locator('[data-r748-recovery]').filter({hasText:'VERIFIED · blended optimum freshly recomputed'}).waitFor({state:'visible',timeout:20000});
+   await blendImport.setInputFiles({name:'tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...blendWitness,blendedCost:blendWitness.blendedCost+1}))});
+   await blended.locator('[data-r748-recovery]').filter({hasText:'REFUSED · R748 journey differs'}).waitFor({state:'visible',timeout:20000});
+   await blended.locator('[data-r748-run]').click();
+   await blended.locator('[data-r748-step="1"]').click();
+   assert.equal(Number(await workspace.getAttribute('data-address')),blendWitness.addresses[1]);
+   assert.equal(await blended.locator('[data-r748-path] [data-r748-step]').count(),blendWitness.addresses.length);
+   await blended.locator('[data-r748-step="0"]').click();
+   assert.equal(Number(await workspace.getAttribute('data-address')),blendWitness.from);
+   console.log('R748 '+device+' blended constrained source-metric A* optimum, cost bounds, export, recomputed recovery, tamper refusal and navigation PASS');
    await journey.locator('[data-r744-target]').fill(String(journeyWitness.to));
    await page.waitForFunction(target=>{
     const steps=document.querySelectorAll('[data-r744-journey] [data-r744-path] [data-r744-step]');
