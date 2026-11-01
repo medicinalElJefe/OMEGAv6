@@ -197,6 +197,33 @@ try{
    await blended.locator('[data-r748-step="0"]').click();
    assert.equal(Number(await workspace.getAttribute('data-address')),blendWitness.from);
    console.log('R748 '+device+' blended constrained source-metric A* optimum, cost bounds, export, recomputed recovery, tamper refusal and navigation PASS');
+   // R749: real five-weight supported tradeoff candidates and fresh source recovery.
+   const frontier=journey.locator('[data-r749-frontier]');
+   await frontier.locator('[data-r749-run]').click();
+   await frontier.locator('[data-r749-summary]').filter({hasText:'Five weights'}).waitFor({state:'visible',timeout:30000});
+   assert.equal(await frontier.locator('[data-r749-table] tbody tr').count(),5);
+   const frontierDownloadPromise=page.waitForEvent('download',{timeout:20000});
+   await frontier.locator('[data-r749-export]').click();
+   const frontierDownload=await frontierDownloadPromise;
+   assert.equal(frontierDownload.suggestedFilename(),'omega-r749-supported-candidates.json');
+   const frontierWitness=JSON.parse(await readFile(await frontierDownload.path(),'utf8'));
+   assert.deepEqual(frontierWitness.weights,[0,0.25,0.5,0.75,1]);
+   assert.equal(frontierWitness.samples.length,5);
+   assert.equal(frontierWitness.exhaustivePareto,false);
+   assert.deepEqual(frontierWitness.tradeoff.primary,detourBaseline);
+   assert.ok(frontierWitness.supportedCount>0);
+   const frontierImport=frontier.locator('[data-r749-import]');
+   await frontierImport.setInputFiles({name:'frontier.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(frontierWitness))});
+   await frontier.locator('[data-r749-recovery]').filter({hasText:'VERIFIED · five optimizations recomputed'}).waitFor({state:'visible',timeout:30000});
+   await frontierImport.setInputFiles({name:'tampered.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...frontierWitness,supportedCount:999}))});
+   await frontier.locator('[data-r749-recovery]').filter({hasText:'REFUSED · R749 sweep differs'}).waitFor({state:'visible',timeout:30000});
+   await frontier.locator('[data-r749-run]').click();
+   const firstFrontierPath=frontierWitness.candidates[0].addresses;
+   await frontier.locator('[data-r749-candidate="0"] [data-r749-step="1"]').click();
+   assert.equal(Number(await workspace.getAttribute('data-address')),firstFrontierPath[1]);
+   await frontier.locator('[data-r749-candidate="0"] [data-r749-step="0"]').click();
+   assert.equal(Number(await workspace.getAttribute('data-address')),firstFrontierPath[0]);
+   console.log('R749 '+device+' five source-weighted A* samples, supported candidates, export, recovery, tamper refusal and navigation PASS');
    await journey.locator('[data-r744-target]').fill(String(journeyWitness.to));
    await page.waitForFunction(target=>{
     const steps=document.querySelectorAll('[data-r744-journey] [data-r744-path] [data-r744-step]');
