@@ -168,6 +168,9 @@ try{
    // R748: optimize a new convex source-cost objective over the same constraints.
    const blended=journey.locator('[data-r748-blend]');
    assert.equal(await blended.locator('[data-r748-alpha]').inputValue(),'0.5');
+   await blended.locator('[data-r748-alpha]').focus();
+   await blended.locator('[data-r748-alpha]').press('ArrowRight');
+   assert.equal(await blended.locator('[data-r748-alpha]').inputValue(),'0.55');
    await blended.locator('[data-r748-run]').click();
    await blended.locator('[data-r748-summary]').filter({hasText:'blended cost'}).waitFor({state:'visible',timeout:20000});
    const blendDownloadPromise=page.waitForEvent('download',{timeout:20000});
@@ -175,7 +178,7 @@ try{
    const blendDownload=await blendDownloadPromise;
    assert.equal(blendDownload.suggestedFilename(),'omega-r748-blended-atlas.json');
    const blendWitness=JSON.parse(await readFile(await blendDownload.path(),'utf8'));
-   assert.equal(blendWitness.alpha,0.5);
+   assert.equal(blendWitness.alpha,0.55);
    assert.deepEqual(blendWitness.tradeoff.primary,detourBaseline);
    assert.deepEqual(blendWitness.waypoints,detourBaseline.waypoints);
    assert.deepEqual(blendWitness.blocked,detourBaseline.blocked);
