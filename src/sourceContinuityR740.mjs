@@ -39,8 +39,18 @@ export function proveSourceContinuityR740(index,graph){
   if(edgeCount!==nodeCount)throw Error('R740 basin edge conservation mismatch');
   return {basinId,nodeCount,edgeCount};
  });
- if(cycleNodes<1||cycleNodes+transientNodes!==n||basins.reduce((sum,b)=>sum+b.nodeCount,0)!==n)
+ if(cycleNodes<1||cycleNodes+transientNodes!==n||basins.reduce((sum,b)=>sum+b.nodeCount,0)!==n||
+    graph.cyclicNodes!==cycleNodes||graph.transientNodes!==transientNodes||
+    graph.basinCount!==basins.length||graph.cycles?.length!==basins.length)
   throw Error('R740 global source conservation mismatch');
+ for(const basin of basins){
+  const cycle=graph.cycles[basin.basinId];
+  if(!cycle||cycle.id!==basin.basinId||cycle.size!==basin.nodeCount||
+     !Number.isSafeInteger(cycle.period)||cycle.period<1||
+     !Array.isArray(cycle.nodes)||cycle.nodes.length!==cycle.period||
+     cycle.nodes.some(node=>graph.basinOf[node]!==basin.basinId||graph.depth[node]!==0))
+   throw Error('R740 source cycle and basin ledger mismatch');
+ }
  return {schema:SOURCE_CONTINUITY_SCHEMA_R740,nodeCount:n,edgeCount:n,
   cycleNodes,transientNodes,branchNodes,zeroPreimageNodes,maxIndegree,basinCount:basins.length,
   basins,forwardInverseBijection:true,edgeConservation:true,basinConservation:true,
