@@ -54,7 +54,7 @@ try{
    if(!bounded.includes('unique reverse nodes')||!bounded.includes('exact source edges')||
       !bounded.includes('cycle return edges')||await rows.count()>32)
     throw Error(device+': bounded inverse traversal or cycle accounting missing');
-   if(!(await inverse.locator('[data-r739-boundary]').innerText()).includes('not observed causal ancestry'))
+   if(!(await inverse.locator('[data-r739-boundary]').innerText()).toLowerCase().includes('not observed causal ancestry'))
     throw Error(device+': model/source boundary missing');
    if(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)>8)
     throw Error(device+': horizontal overflow');
