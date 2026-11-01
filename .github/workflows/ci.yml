@@ -348,6 +348,10 @@ jobs:
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
         run: node tests/r742-pi-atlas-browser-e2e.mjs
+      - name: Prove R750 exact temporal workbench execution and recovery on desktop/mobile
+        env:
+          OMEGA_E2E_URL: http://127.0.0.1:4173
+        run: node tests/dewey-temporal-workbench-v9-browser-e2e.mjs
       - name: Prove R520 full 44/72/100 function library on actual desktop and mobile browser
         env:
           OMEGA_E2E_URL: http://127.0.0.1:4173
