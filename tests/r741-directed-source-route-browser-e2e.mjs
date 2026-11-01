@@ -64,10 +64,10 @@ try{
    assert.equal(witness.canonicalMutation,false);assert.equal(witness.physicalMeasurement,false);
    const imported=explorer.locator('[data-r741-import]');
    await imported.setInputFiles({name:'source-route.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(witness))});
-   assert.match(await explorer.locator('[data-r741-recovery]').innerText(),/VERIFIED · restored source/);
+   await explorer.locator('[data-r741-recovery]').filter({hasText:'VERIFIED · restored source'}).waitFor({state:'visible',timeout:10000});
    assert.equal(await explorer.locator('[data-r741-target]').inputValue(),String(next));
    await imported.setInputFiles({name:'tampered-route.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...witness,steps:steps+1}))});
-   assert.match(await explorer.locator('[data-r741-recovery]').innerText(),/REFUSED · R741 imported route differs/);
+   await explorer.locator('[data-r741-recovery]').filter({hasText:'REFUSED · R741 imported route differs'}).waitFor({state:'visible',timeout:10000});
    assert.equal(await explorer.locator('[data-r741-target]').inputValue(),String(next));
    if(await rows.count()>1){
     const second=rows.nth(1).locator('button[data-r740-select]');
