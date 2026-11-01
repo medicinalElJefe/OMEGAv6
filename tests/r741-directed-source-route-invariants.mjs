@@ -1,0 +1,58 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {computeRouteBasinsR732} from '../src/routeBasinR732.mjs';
+import {buildSourcePreimageIndexR739} from '../src/sourcePreimageR739.mjs';
+import {proveSourceContinuityR740} from '../src/sourceContinuityR740.mjs';
+import {findDirectedSourceRouteR741,verifyDirectedSourceRouteRecoveryR741,SOURCE_DIRECTED_ROUTE_SCHEMA_R741} from '../src/sourceDirectedRouteR741.mjs';
+function fixture(route){
+ const graph=computeRouteBasinsR732(route),index=buildSourcePreimageIndexR739(route,graph);
+ return {graph,index,proof:proveSourceContinuityR740(index,graph)};
+}
+const {graph,index,proof}=fixture([1,2,1,4,5,4,3,7,7]);
+function inspect(from,to,limit){return findDirectedSourceRouteR741(index,graph,proof,from,to,limit)}
+const direct=inspect(0,2);
+assert.equal(direct.schema,SOURCE_DIRECTED_ROUTE_SCHEMA_R741);
+assert.equal(direct.reachable,true);assert.equal(direct.steps,2);
+assert.deepEqual(direct.addresses,[0,1,2]);
+assert.equal(direct.omittedAddresses,0);
+assert.equal(inspect(2,1).steps,1);
+assert.deepEqual(inspect(6,5).addresses,[6,3,4,5]);
+assert.equal(inspect(6,6).steps,0);
+assert.deepEqual(inspect(6,6).addresses,[6]);
+assert.equal(inspect(3,6).reachable,false);
+assert.match(inspect(3,6).reason,/upstream/);
+assert.equal(inspect(0,6).reachable,false);
+assert.match(inspect(0,6).reason,/different source basins/);
+assert.equal(inspect(7,8).reachable,false);
+assert.equal(inspect(8,7).steps,1);
+const branch=fixture([2,2,2]);
+const separate=findDirectedSourceRouteR741(branch.index,branch.graph,branch.proof,0,1);
+assert.equal(separate.reachable,false);assert.match(separate.reason,/separate predecessor branches/);
+const n=20736,chain=new Uint32Array(n);
+for(let i=0;i<n-1;i++)chain[i]=i+1;
+chain[n-1]=n-1;
+const full=fixture(chain);
+const long=findDirectedSourceRouteR741(full.index,full.graph,full.proof,0,n-1,8);
+assert.equal(long.reachable,true);assert.equal(long.steps,n-1);
+assert.deepEqual(long.addresses,[0,1,2,3,4,5,6,7]);
+assert.equal(long.omittedAddresses,n-8);
+assert.equal(findDirectedSourceRouteR741(full.index,full.graph,full.proof,n-1,0).reachable,false);
+assert.throws(()=>inspect(-1,2),/bounded addresses/);
+assert.throws(()=>inspect(0,9),/bounded addresses/);
+assert.throws(()=>inspect(0,2,1),/bounded addresses/);
+assert.throws(()=>findDirectedSourceRouteR741(index,graph,{...proof,forwardInverseBijection:false},0,1),/complete verified/);
+const brokenEntry={...graph,entry:graph.entry.slice()};
+brokenEntry.entry[0]=-1;
+assert.throws(()=>findDirectedSourceRouteR741(index,brokenEntry,proof,0,1),/entry witness refused/);
+const recovered=verifyDirectedSourceRouteRecoveryR741(JSON.stringify(direct),index,graph,proof);
+assert.equal(recovered.verified,true);assert.equal(recovered.from,0);assert.equal(recovered.to,2);
+assert.equal(recovered.rawSourceIdentityVerified,false);
+const tampered={...direct,steps:3};
+assert.throws(()=>verifyDirectedSourceRouteRecoveryR741(JSON.stringify(tampered),index,graph,proof),/differs/);
+assert.throws(()=>verifyDirectedSourceRouteRecoveryR741(JSON.stringify({...direct,extra:true}),index,graph,proof),/differs/);
+assert.throws(()=>verifyDirectedSourceRouteRecoveryR741('{',index,graph,proof),/invalid source route JSON/);
+assert.throws(()=>verifyDirectedSourceRouteRecoveryR741('x'.repeat(262145),index,graph,proof),/size refused/);
+const ui=readFileSync(new URL('../src7/workspaces/RouteBasinInstrumentR732.tsx',import.meta.url),'utf8');
+for(const token of ['findDirectedSourceRouteR741','data-r741-route','data-r741-target','data-r741-summary','data-r741-path','data-r741-export','data-r741-import','data-r741-recovery','data-r741-boundary'])
+ assert.ok(ui.includes(token),'R741 UI binding missing '+token);
+console.log('R741 exact directed reachability, branch refusal, cycle wrap, 20,736-address witness and UI bindings PASS');

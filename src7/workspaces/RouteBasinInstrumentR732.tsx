@@ -9,6 +9,7 @@ import {computeSourcePhaseExchangeR737,serializeSourcePhaseExchangeR737} from '.
 import {verifySourceExchangeRecoveryR738} from '../../src/sourceExchangeRecoveryR738.mjs';
 import {buildSourcePreimageIndexR739,inspectSourcePreimagesR739} from '../../src/sourcePreimageR739.mjs';
 import {proveSourceContinuityR740} from '../../src/sourceContinuityR740.mjs';
+import {findDirectedSourceRouteR741,verifyDirectedSourceRouteRecoveryR741} from '../../src/sourceDirectedRouteR741.mjs';
 
 type Props={address:number;onAddress:(address:number)=>void};
 type RouteField=Awaited<ReturnType<typeof getMandala20736Field>>;
@@ -22,6 +23,8 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const [inverseDepth,setInverseDepth]=useState(4),[inverseNodes,setInverseNodes]=useState(96);
  const [phaseX,setPhaseX]=useState('C'),[phaseY,setPhaseY]=useState('q');
  const [jump,setJump]=useState('0');
+ const [routeTarget,setRouteTarget]=useState('0');
+ const [routeRecoveryStatus,setRouteRecoveryStatus]=useState('');
  const [recoveryStatus,setRecoveryStatus]=useState('');
  const rasterCanvas=useRef<HTMLCanvasElement|null>(null);
  const fieldRasterCanvas=useRef<HTMLCanvasElement|null>(null);
@@ -55,6 +58,7 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const inverseIndex=useMemo(()=>field&&analysis?buildSourcePreimageIndexR739(field.routeNext,analysis):null,[field,analysis]);
  const continuity=useMemo(()=>inverseIndex&&analysis?proveSourceContinuityR740(inverseIndex,analysis):null,[inverseIndex,analysis]);
  const inverse=useMemo(()=>inverseIndex&&analysis&&Number.isSafeInteger(address)&&address>=0&&address<20736?inspectSourcePreimagesR739(inverseIndex,analysis,address,inverseDepth,inverseNodes):null,[inverseIndex,analysis,address,inverseDepth,inverseNodes]);
+ const directedRoute=useMemo(()=>inverseIndex&&analysis&&continuity&&Number.isSafeInteger(address)&&address>=0&&address<20736&&/^(0|[1-9]\d*)$/.test(routeTarget)&&Number(routeTarget)<20736?findDirectedSourceRouteR741(inverseIndex,analysis,continuity,address,Number(routeTarget)):null,[inverseIndex,analysis,continuity,address,routeTarget]);
  const exportPhaseExchange=()=>{
   if(!phaseExchange)return;
   const blob=new Blob([serializeSourcePhaseExchangeR737(phaseExchange)],{type:'application/json'});
@@ -70,6 +74,23 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
   link.href=url;link.download='omega-r740-source-continuity.json';
   document.body.appendChild(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),0);
+ };
+ const exportDirectedRoute=()=>{
+  if(!directedRoute)return;
+  const blob=new Blob([JSON.stringify(directedRoute,null,2)+'\n'],{type:'application/json'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download='omega-r741-directed-source-route.json';
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),0);
+ };
+ const importDirectedRoute=async(file:File|undefined)=>{
+  if(!file||!inverseIndex||!analysis||!continuity)return;
+  try{
+   if(file.size>262144)throw Error('R741 source route export size refused');
+   const recovered=verifyDirectedSourceRouteRecoveryR741(await file.text(),inverseIndex,analysis,continuity);
+   setRouteTarget(String(recovered.to));onAddress(recovered.from);
+   setRouteRecoveryStatus('VERIFIED · restored source '+recovered.from+' and destination '+recovered.to+' against fresh finite source execution');
+  }catch(e){setRouteRecoveryStatus('REFUSED · '+(e instanceof Error?e.message:'invalid route export'))}
  };
  const selected=useMemo(()=>analysis&&field?inspectRouteBasinR732(analysis,field.routeNext,address):null,[analysis,field,address]);
  const compute=async()=>{
@@ -212,6 +233,26 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
      </table>
     </div>
     <small data-r740-boundary>{continuity.boundary} Download is a reproducible computed model witness, not a signed historical artifact.</small>
+   </section>}
+   {continuity&&<section data-r741-route aria-label='Exact directed source route explorer' style={{margin:'16px 0',maxWidth:'100%',minWidth:0}}>
+    <h3>R741 · Directed source-route explorer</h3>
+    <p>Choose a destination state and calculate whether the selected address reaches it by following actual successor edges. This distinguishes reachable cycle motion from unreachable branches and other basins; no reverse movement is invented.</p>
+    <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+     <label>Target source address <input data-r741-target type='number' min={0} max={20735} step={1} value={routeTarget} onChange={e=>setRouteTarget(e.target.value)} style={{width:112,maxWidth:'100%'}}/></label>
+     <button type='button' data-r741-next onClick={()=>setRouteTarget(String(selected.nextAddress))}>Target next successor · {selected.nextAddress}</button>
+     <button type='button' data-r741-self onClick={()=>setRouteTarget(String(address))}>Target selected address</button>
+    </div>
+    <p data-r741-summary role='status'>{directedRoute?(directedRoute.reachable?'Reachable · '+directedRoute.steps+' exact forward steps':'Unreachable · '+directedRoute.reason):'Enter an integer target address from 0 through 20,735.'}</p>
+    {directedRoute&&<><p data-r741-path style={{overflowWrap:'anywhere'}}>{directedRoute.reachable?'Source path: '+directedRoute.addresses.join(' → ')+(directedRoute.omittedAddresses?' → … → '+directedRoute.to+' ('+directedRoute.omittedAddresses+' intermediate states omitted from display)':''):'No directed successor path from '+directedRoute.from+' to '+directedRoute.to+'.'}</p>
+     <button type='button' data-r741-export onClick={exportDirectedRoute}>Download computed directed-route witness JSON</button></>}
+    <label style={{display:'block',marginTop:8}}>Recover a previously exported route (local JSON)
+     <input type='file' data-r741-import accept='.json,application/json' onChange={async e=>{
+      const file=e.currentTarget.files?.[0];e.currentTarget.value='';
+      await importDirectedRoute(file);
+     }}/>
+    </label>
+    <p data-r741-recovery role='status'>{routeRecoveryStatus||'No imported route verified. The file stays in this browser.'}</p>
+    <small data-r741-boundary>{directedRoute?.boundary||'Finite source-model directed reachability only; not physical travel, original donor parity or CanonState admission.'} Exported paths are bounded for display; step counts and endpoint checks are computed against the complete successor chain.</small>
    </section>}
    <h3>Largest source-route basins</h3>
    <ol data-r732-ranked>{analysis.ranked.slice(0,8).map((cycle:any)=><li key={cycle.id} style={{padding:'4px 0'}}>
