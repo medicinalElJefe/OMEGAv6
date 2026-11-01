@@ -8,6 +8,7 @@ import {computeSourcePhasePortraitR736} from '../../src/sourcePhasePortraitR736.
 import {computeSourcePhaseExchangeR737,serializeSourcePhaseExchangeR737} from '../../src/sourcePhaseExchangeR737.mjs';
 import {verifySourceExchangeRecoveryR738} from '../../src/sourceExchangeRecoveryR738.mjs';
 import {buildSourcePreimageIndexR739,inspectSourcePreimagesR739} from '../../src/sourcePreimageR739.mjs';
+import {proveSourceContinuityR740} from '../../src/sourceContinuityR740.mjs';
 
 type Props={address:number;onAddress:(address:number)=>void};
 type RouteField=Awaited<ReturnType<typeof getMandala20736Field>>;
@@ -52,12 +53,21 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
  const phasePortrait=useMemo(()=>field&&Number.isSafeInteger(address)&&address>=0&&address<20736?computeSourcePhasePortraitR736(field,address,phaseX,phaseY,routeLimit):null,[field,address,phaseX,phaseY,routeLimit]);
  const phaseExchange=useMemo(()=>phasePortrait?computeSourcePhaseExchangeR737(phasePortrait):null,[phasePortrait]);
  const inverseIndex=useMemo(()=>field&&analysis?buildSourcePreimageIndexR739(field.routeNext,analysis):null,[field,analysis]);
+ const continuity=useMemo(()=>inverseIndex&&analysis?proveSourceContinuityR740(inverseIndex,analysis):null,[inverseIndex,analysis]);
  const inverse=useMemo(()=>inverseIndex&&analysis&&Number.isSafeInteger(address)&&address>=0&&address<20736?inspectSourcePreimagesR739(inverseIndex,analysis,address,inverseDepth,inverseNodes):null,[inverseIndex,analysis,address,inverseDepth,inverseNodes]);
  const exportPhaseExchange=()=>{
   if(!phaseExchange)return;
   const blob=new Blob([serializeSourcePhaseExchangeR737(phaseExchange)],{type:'application/json'});
   const url=URL.createObjectURL(blob),link=document.createElement('a');
   link.href=url;link.download='omega-r737-source-exchange-'+phaseExchange.start+'.json';
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),0);
+ };
+ const exportContinuity=()=>{
+  if(!continuity)return;
+  const blob=new Blob([JSON.stringify(continuity,null,2)+'\n'],{type:'application/json'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download='omega-r740-source-continuity.json';
   document.body.appendChild(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),0);
  };
@@ -184,6 +194,24 @@ export default function RouteBasinInstrumentR732({address,onAddress}:Props){
     </div>
     <p data-r739-closure>{inverse.cycleClosureEdges} already-visited source edges close a witnessed cycle; they are not duplicated as new predecessor states. {inverse.truncated?'Increase the depth/node budget to inspect omitted incoming edges.':'No additional incoming edges were omitted within the chosen depth.'}</p>
     <small data-r739-boundary>{inverse.boundary} The 20,736 addresses are model states, not spatial or physical dimensions.</small>
+   </section>}
+   {continuity&&<section data-r740-continuity aria-label='Exact source graph continuity ledger' style={{margin:'16px 0',maxWidth:'100%',minWidth:0}}>
+    <h3>R740 · Source continuity and conservation ledger</h3>
+    <p>Audit every declared forward successor against its inverse predecessor index, then account for all model states and edges within their source-route basins. This is an executed, complete finite-graph audit, not a claim about physical conservation.</p>
+    <p data-r740-summary role='status'>{continuity.nodeCount.toLocaleString()} verified source addresses · {continuity.edgeCount.toLocaleString()} conserved source edges · {continuity.basinCount.toLocaleString()} conserved basins · {continuity.cycleNodes.toLocaleString()} cycle states · {continuity.transientNodes.toLocaleString()} transient states</p>
+    <p data-r740-branches>{continuity.branchNodes.toLocaleString()} branching addresses · {continuity.zeroPreimageNodes.toLocaleString()} addresses without incoming edges · maximum incoming degree {continuity.maxIndegree}</p>
+    <p data-r740-selected>Selected address {address} belongs to basin {selected.basinId+1}; that basin has {continuity.basins[selected.basinId]?.nodeCount.toLocaleString()} states and {continuity.basins[selected.basinId]?.edgeCount.toLocaleString()} conserved edges.</p>
+    <button type='button' data-r740-export onClick={exportContinuity}>Download computed conservation ledger JSON</button>
+    <div style={{maxHeight:220,overflow:'auto',maxWidth:'100%',marginTop:10}}>
+     <table data-r740-table style={{width:'100%',fontVariantNumeric:'tabular-nums',fontSize:12}}>
+      <thead><tr><th>Basin</th><th>Addresses</th><th>Source edges</th><th>Cycle period</th><th>Inspect</th></tr></thead>
+      <tbody>{analysis.ranked.slice(0,12).map((cycle:any)=>{
+       const basin=continuity.basins[cycle.id];
+       return <tr key={cycle.id} data-r740-basin={cycle.id}><td>{cycle.id+1}</td><td>{basin.nodeCount}</td><td>{basin.edgeCount}</td><td>{cycle.period}</td><td><button type='button' data-r740-select={cycle.id} onClick={()=>onAddress(cycle.representative)}>Select {cycle.representative}</button></td></tr>;
+      })}</tbody>
+     </table>
+    </div>
+    <small data-r740-boundary>{continuity.boundary} Download is a reproducible computed model witness, not a signed historical artifact.</small>
    </section>}
    <h3>Largest source-route basins</h3>
    <ol data-r732-ranked>{analysis.ranked.slice(0,8).map((cycle:any)=><li key={cycle.id} style={{padding:'4px 0'}}>
