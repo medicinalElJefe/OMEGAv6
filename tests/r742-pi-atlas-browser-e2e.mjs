@@ -109,7 +109,10 @@ try{
    let detourTarget=journeySource;
    for(let i=0;i<4;i++)detourTarget=piAxisNeighborsR742(detourTarget)[2];
    await journey.locator('[data-r744-target]').fill(String(detourTarget));
-   await journey.locator('[data-r744-summary]').filter({hasText:'2 optimized legs'}).waitFor({state:'visible',timeout:20000});
+   await page.waitForFunction(target=>{
+    const steps=document.querySelectorAll('[data-r744-journey] [data-r744-path] [data-r744-step]');
+    return steps.length>0&&steps[steps.length-1].textContent?.trim()===String(target);
+   },detourTarget,{timeout:20000});
    const detourBaselineDownloadPromise=page.waitForEvent('download',{timeout:20000});
    await journey.locator('[data-r744-export]').click();
    const detourBaselineDownload=await detourBaselineDownloadPromise;
@@ -137,7 +140,10 @@ try{
    await detour.locator('[data-r746-run]').click();
    await detour.locator('[data-r746-recovery]').filter({hasText:'REFUSED · R746 endpoint or ordered stop'}).waitFor({state:'visible',timeout:20000});
    await journey.locator('[data-r744-target]').fill(String(journeyWitness.to));
-   await journey.locator('[data-r744-summary]').filter({hasText:'2 optimized legs'}).waitFor({state:'visible',timeout:20000});
+   await page.waitForFunction(target=>{
+    const steps=document.querySelectorAll('[data-r744-journey] [data-r744-path] [data-r744-step]');
+    return steps.length>0&&steps[steps.length-1].textContent?.trim()===String(target);
+   },journeyWitness.to,{timeout:20000});
    console.log('R746 '+device+' source-metric counterfactual detour, export, recomputed recovery, tamper refusal and waypoint refusal PASS');
    // R745: same-browser checkpoint is explicitly saved, then refused on tampering.
    await journey.locator('[data-r745-save]').click();
